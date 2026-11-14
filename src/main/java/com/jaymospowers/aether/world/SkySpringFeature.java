@@ -65,6 +65,11 @@ public record SkySpringFeature(SpringFeature spring) implements Feature {
 		});
 	}
 
+	/** Whether a player online has reached Dread (read from any thread). */
+	public static boolean dread() {
+		return dreadReached;
+	}
+
 	private static boolean dreadReached(MinecraftServer server) {
 		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			// no world tiers to wait for

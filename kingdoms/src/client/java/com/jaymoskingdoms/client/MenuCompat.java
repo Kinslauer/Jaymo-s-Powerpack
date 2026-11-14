@@ -46,7 +46,7 @@ public final class MenuCompat {
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
-	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
+	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -71,6 +71,14 @@ public final class MenuCompat {
 				Component.translatable("menu.jaymoskingdoms.tab.class"), (Runnable)() -> Minecraft.getInstance().gui.setScreen(new ClassScreen(false, true)),
 				(Predicate<Screen>)s -> s instanceof ClassScreen, (Function<Screen, int[]>)s -> ((ClassScreen)s).corner(),
 				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative());
+			// the belt menu: shown once you know a form
+			register.invoke(null, "forms", ORDER_FORMS, (Supplier<ItemStack>)() -> new ItemStack(Items.IRON_SWORD),
+				Component.translatable("menu.jaymoskingdoms.tab.forms"),
+				(Runnable)() -> Minecraft.getInstance().gui.setScreen(new com.jaymoskingdoms.client.forms.BeltScreen()),
+				(Predicate<Screen>)s -> s instanceof com.jaymoskingdoms.client.forms.BeltScreen,
+				(Function<Screen, int[]>)s -> ((com.jaymoskingdoms.client.forms.BeltScreen)s).corner(),
+				(BooleanSupplier)() -> Minecraft.getInstance().player != null
+					&& !com.jaymoskingdoms.forms.Forms.book(Minecraft.getInstance().player).practice().isEmpty());
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",

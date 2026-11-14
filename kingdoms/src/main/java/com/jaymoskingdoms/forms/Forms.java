@@ -62,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * unlocks both.
  *
  * <ul>
- * <li>The Five-Art Belt: {@value #BELT_SLOTS} slots in {@link Book}. Slots are changed only within {@link #TRAIN_RANGE} of a
+ * <li>The Five-Art Belt: {@value #BELT_SLOTS} slots in {@link Book}. Slots are changed in the belt menu (the character menu's Forms tab), or at a
  * training post, a sparring dummy or any mannequin, by sneaking and using one with an empty hand (the belt screen opens).
  * <li>Battle Stance: hold the Combat Art key with a known form's weapon out to take it ({@link #stance}); hold again, put the
  * weapon away or switch to something that doesn't match to leave. In stance a tap fires the selected slot's form
@@ -529,8 +529,8 @@ public final class Forms {
 	private static final boolean SKILL_BAR = FabricLoader.getInstance().isModLoaded("spell_engine");
 
 	/**
-	 * (0.7.550) The forms {@code player} has on the skill bar with what's in their hand: the known forms that fit it, in belt
-	 * order, then the rest in list order. A bare hand's fist forms only while locked on (Andy: "give it to fists but only
+	 * (0.7.550) The forms {@code player} has on the skill bar with what's in their hand: the belt's forms that fit it, in belt
+	 * order (with none of them fitting, the first {@value #BELT_SLOTS} known that do). A bare hand's fist forms only while locked on (Andy: "give it to fists but only
 	 * when locked on"), so right-click stays free for doors and villagers the rest of the time. Empty with no form weapon.
 	 */
 	public static List<String> barForms(Player player) {
@@ -546,8 +546,13 @@ public final class Forms {
 				out.add(id);
 			}
 		}
+		if (!out.isEmpty()) {
+			// (Andy: "the icons are too numerous now") only the belt shows; the rest wait in the belt menu
+			return out;
+		}
+		// nothing on the belt fits this weapon: the first few forms known for it, so a new weapon is never left bare
 		for (String id : book.known()) {
-			if (FORMS.get(id).family().holds(main) && !out.contains(id)) {
+			if (out.size() < BELT_SLOTS && FORMS.get(id).family().holds(main) && !out.contains(id)) {
 				out.add(id);
 			}
 		}
@@ -691,10 +696,7 @@ public final class Forms {
 		if (slot < 0 || slot >= BELT_SLOTS || !(formId.isEmpty() || book.knows(formId)) || book.stance() || player.isSpectator()) {
 			return;
 		}
-		if (!trainingSpot(player)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.belt_away").withStyle(ChatFormatting.GRAY));
-			return;
-		}
+		// (Andy: "stances should be set through a menu": the belt menu works anywhere, not only beside a post or a dummy)
 		List<String> belt = new ArrayList<>(book.belt());
 		if (!formId.isEmpty()) {
 			// (a form sits in one slot only: it moves)

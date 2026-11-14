@@ -94,6 +94,11 @@ public final class AetherVeil {
 		return mapBottom;
 	}
 
+	/** Whether height y is inside the Cloud Sea band (false in a world without one). */
+	public static boolean inCloudSea(double y) {
+		return sea != NONE && y >= sea && y < floor;
+	}
+
 	/** Whether a box with this bottom is hidden. */
 	public static boolean hides(double bottom) {
 		return bottom >= ceiling;
