@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-24g5gw
 with: 
-pr: 
+pr: 1519
 mods: powers
 versions: 
 started: 2026-11-14
@@ -24,3 +24,4 @@ owns:
 - Lore.md: "(new) The blades that wait" waits on Andy's approval.
 
 ## Done
+- 2026-11-14 08:25 PR #1516 is merged into master; moved to Agents/Done.

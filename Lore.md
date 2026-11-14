@@ -626,6 +626,17 @@ fields, a few carrying the hoe or shovel they were buried with. The older the wo
 they come up where the ground is dark and drift toward the living, groaning once as they find their feet. A blood
 moon wakes whole graveyards. By day they shelter, and the crowd comes apart into stragglers until the next dark. In
 the ruined future a Chrono can reach, nothing keeps them down any more, and the crowds there are the largest of all.
+Some crowds have someone at their head: a **grave-captain**, a big old corpse the others follow, who was somebody
+once. By the sea the drowned walk with **the pirates' dead**, still in their bandanas and sea coats, still carrying the
+powder kegs they went down with, and they throw them. Not every crowd is the dead: once someone has made enough of a
+name, **the illagers put a hit squad together** to deal with the threat, and it doesn't lose the trail. Below, in the
+Nether, the demons' country sends its own. **The bells keep them off.** The Truth's priests learned long ago that the
+dead won't rise within sound of a bell rung from a square of metal (iron near, gold further, diamond further still, a
+netherite heart furthest), and every great temple's bell stands on iron; villagers repeat it to anyone near a bell. Some
+days the sky never clears: a low grey lid from dawn to dusk with no sun to speak of, and the dead walk all day under it
+(always the day after a blood moon). The dead can smell their own: whoever kills enough of them comes away with **the
+grave scent**, and those who want the fight bind rotten flesh, a bone and grave dirt into a **grave lure** and tear it
+open in the dark.
 
 **The draugr are Warrior-born.** Every draugr is an undead Warrior-born ancestor, one of the raiders who lived on the
 Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
@@ -1572,6 +1583,15 @@ it) or dragged home by rope.
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
+
+(new) **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
+gear, Claude's placement for Andy to approve). A smith makes armour the way he makes tools: each piece is a plating cast
+in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the
+Part Builder, good for nothing but pouring gold over. Hung on a leather cuirass instead of maille, the same plating
+makes travelers' gear (goggles, vest, pants and boots), lighter and quicker worn out, which carters, hunters and anyone
+long on the roads wear. Every metal guards in its own way, and smiths say so plainly: silver against the dead, iron
+against arrows, cobalt against the blade, manyullyn against spells, copper the deeper you go, hepatizon once you've
+been hurt; the slime metals mend themselves.
 
 (new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
 belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
