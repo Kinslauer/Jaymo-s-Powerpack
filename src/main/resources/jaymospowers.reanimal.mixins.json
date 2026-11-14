@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.reanimal",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"RedPandaLeavesMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
