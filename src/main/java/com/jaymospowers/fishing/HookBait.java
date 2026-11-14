@@ -81,7 +81,7 @@ public final class HookBait {
 
     /** A fishing rod: vanilla's or the metal rod (or any other mod's rod that is a FishingRodItem). */
     public static boolean isRod(ItemStack stack) {
-        return stack.getItem() instanceof FishingRodItem || FishingReal.isMetalRodItem(stack);
+        return stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof MetalFishingRodItem;
     }
 
     /** The rod {@code player} fishes with (main hand first), or empty. */

@@ -165,6 +165,7 @@ public final class Tinkering {
 				case BOW -> new com.jaymospowers.tinkering.ranged.TinkerBowItem(p, type);
 				case CROSSBOW -> new com.jaymospowers.tinkering.ranged.TinkerCrossbowItem(p, type);
 				case ARROW -> new com.jaymospowers.tinkering.ranged.TinkerArrowItem(p, type);
+				case ROD -> new com.jaymospowers.tinkering.ranged.TinkerRodItem(p, type);
 				default -> new TinkerToolItem(p, type);
 			}, p -> {
 				// (0.15.x) arrows and thrown blades stack, so they have no durability

@@ -151,6 +151,7 @@ RANGED = [
     ("arrow", "Arrow", None, ["arrows"], []),
     ("throwing_axe", "Throwing Axe", None, [], ["tools/ranged_weapon"]),
     ("shuriken", "Shuriken", None, [], ["tools/ranged_weapon"]),
+    ("fishing_rod", "Fishing Rod", None, ["enchantable/fishing"], ["tools/fishing_rod"]),
 ]
 C_DATA = os.path.join(RES, "data", "c")
 
@@ -473,6 +474,22 @@ def tools(tcon):
             "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.6, 1.13], "scale": [0.68 * big, 0.68 * big, 0.68]},
             "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.6, 1.13], "scale": [0.68 * big, 0.68 * big, 0.68]},
         }})
+
+
+def fishing_rod(tcon):
+    """The fishing rod: the rod (a limb), the line (a bowstring) and the hook (an arrow head). With the hook out the line and
+    hook show cast; broken, the line hangs and the hook is bent. Tinkers draws the hook in few materials: the rest are its grey
+    template in the material's colours."""
+    done = set()
+    rod = "minecraft:item/handheld_rod"
+
+    def look(state):
+        return composite(
+            layer(tcon, "fishing_rod", "rod", "fishing_rod/rod", 0, "limb", rod, done),
+            layer(tcon, "fishing_rod", "string" + state, "fishing_rod/string" + state, 1, "bowstring", rod, done),
+            layer(tcon, "fishing_rod", "hook" + state, "fishing_rod/hook" + state, 2, "arrow_head", rod, done))
+    cast = {"type": "minecraft:condition", "property": "minecraft:fishing_rod/cast", "on_true": look("_cast"), "on_false": look("")}
+    write(os.path.join(ASSETS, "items", "tinker_fishing_rod.json"), {"model": broken_or(look("_broken"), cast)})
 
 
 def shifted(src, offset):
@@ -967,6 +984,7 @@ def main():
         shutil.rmtree(old, ignore_errors=True)
     tools(tcon)
     ranged_tools(tcon)
+    fishing_rod(tcon)
     parts(tcon)
     stations(tcon)
     smeltery(tcon)

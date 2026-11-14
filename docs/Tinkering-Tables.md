@@ -48,4 +48,5 @@ items on top (the Forge's five along its top, the grid in 3x3). `StationEntity.b
 
 ## Not done / notes
 - Tool Forge has no facing (its top runs north-south); JEI isn't told the Forge also makes tools.
-- No recipe-book or JEI transfer for the Crafting Station.
+- JEI: the Crafting Station is a crafting catalyst and takes a recipe's "+" (`TinkeringJei.registerRecipeTransferHandlers`; the
+  grid is filled from the player's inventory, not the side inventory). No vanilla recipe book.
