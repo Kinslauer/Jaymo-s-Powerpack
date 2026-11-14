@@ -99,6 +99,11 @@ public final class DownedHud {
 		return line != null && black >= SCENE_DARK;
 	}
 
+	/** How black the screen is now (0-1): out cold, a death turned away, a life waiting for the new character. */
+	static float darkness() {
+		return black;
+	}
+
 	/**
 	 * An action-bar line arriving: while a line is on the black only the "hold sneak to come to" bar shows over it; anything
 	 * else is held back (true) and the last of it shown once the black has lifted.
