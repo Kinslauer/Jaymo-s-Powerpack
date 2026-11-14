@@ -13565,3 +13565,8 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - Captured plans of a site keep its own stone and sand walls: only what it set into the ground below the land about it, and the bed of land it was laid on, are left out; spawners, vaults, structure and jigsaw blocks never go in a design.
 - Classes: SitePlans (new), ArenaPosts (generated), Designs (keepCaptured, captured limits), IllagerSites (arena plans, Illager Arena's mobs cleared, allay posts, vault loot), IllagerTongue, Camps (hook in chiefSlain).
 - Built; dev-server checked with Illager Arena loaded: its arena's own mobs are gone on load (item frames and armour stands kept), 57 of ours move in, and its warlord's fall gives plans of 61 x 64, 40 high, 15097 blocks. Our arena generates in deserts, its illagers, evokers, ravager and two caged allays move in, and killing its warlord drops plans of 45 x 45, 13 high, 8337 blocks that read back as a design builders can put up. Reading the plans in hand and a plain camp's capture not tried with a player; not played.
+
+## 0.8.99 (2026-11-14): Loading hint: swings follow the lock-on region
+
+- Loading-screen hint 174 (`lang/parts/lock-on-regions.json`): your swing follows the region you aim at when locked on, and work tools swing like weapons only when locked on (Powers' region swings).
+- Built; not played.
