@@ -51,7 +51,11 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Doubles {
 	/** A dungeon captive is a stolen life this often. */
-	static final float STOLEN_CHANCE = 0.5F;
+	static final float STOLEN_CHANCE = 0.15F;
+	/** A settlement loses no more than one of its own to a shapeshifter in this long (ticks: ten days). */
+	static final long TAKEN_GAP = 240000L;
+	/** One copy in this many is a Sylvan changeling under the face, not a shapeshifter (fixed by whose face it is). */
+	static final int CHANGELING_IN = 3;
 	/** The copy appears when a player is this close (blocks) to the settlement's seat; it stands this far (blocks) from it. */
 	static final double SEAT_RANGE = 72.0, SEAT_SPREAD = 14.0;
 	/** The real one near their copy (blocks) unmasks it. */
@@ -87,6 +91,10 @@ public final class Doubles {
 	static final AttachmentType<List<Pending>> PENDING = AttachmentRegistry.create(JaymosKingdoms.id("stolen_pending"),
 		b -> b.persistent(Pending.CODEC.listOf()));
 
+	/** On the overworld: when each settlement (by id) last had a life stolen. */
+	static final AttachmentType<Map<String, Long>> TAKEN = AttachmentRegistry.create(JaymosKingdoms.id("stolen_taken"),
+		b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+
 	/** Copies that have slipped, and who heard (copy uuid, then players), and when each last slipped. */
 	private static final Map<UUID, Set<UUID>> HEARD = new HashMap<>();
 	private static final Map<UUID, Long> SLIPPED = new HashMap<>();
@@ -97,6 +105,7 @@ public final class Doubles {
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Doubles::tick);
 		ShapeshifterAlarm.register();
+		BorrowedFaces.register();
 		// struck hard enough (or struck down), the face slips: the pain shows what it is
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof Villager copy && copy.hasAttached(COPY) && copy.isAlive() && copy.level() instanceof ServerLevel level
@@ -166,21 +175,42 @@ public final class Doubles {
 		}
 	}
 
-	/** {@code v}, held captive, is a stolen life: a copy of them is set aside to take their place in their village. */
+	/** Whose life a shapeshifter can wear: an MCA villager's, never a plain one's (the copy is always one of MCA's people). */
+	public static boolean stealable(Villager v) {
+		return McaCompat.isMca(v);
+	}
+
+	/** Whether a life can be stolen from {@code home} now: it has one, and none was taken from it in the last {@link #TAKEN_GAP}. */
+	public static boolean mayTake(ServerLevel level, @Nullable Faction home) {
+		if (home == null) {
+			return false;
+		}
+		ServerLevel over = level.getServer().overworld();
+		Long last = over.getAttachedOrElse(TAKEN, Map.of()).get(Integer.toString(home.id()));
+		return last == null || over.getGameTime() - last >= TAKEN_GAP;
+	}
+
+	/**
+	 * {@code v}, held captive, is a stolen life: a copy of them is set aside to take their place in their village. Only an
+	 * MCA villager ({@link #stealable}), and only if their settlement has lost nobody lately ({@link #mayTake}).
+	 */
 	public static void steal(ServerLevel level, Villager v) {
-		if (v.hasAttached(STOLEN)) {
+		if (v.hasAttached(STOLEN) || !stealable(v)) {
+			return;
+		}
+		Captives.Captive c = v.getAttached(Captives.CAPTIVE);
+		if (c == null || !mayTake(level, Factions.get(level.getServer(), c.home()))) {
 			return;
 		}
 		v.setAttached(STOLEN, true);
-		Captives.Captive c = v.getAttached(Captives.CAPTIVE);
-		if (c == null || c.home() < 0) {
-			return;
-		}
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 		if (!v.saveAsPassenger(out)) {
 			return;
 		}
 		ServerLevel home = level.getServer().overworld();
+		Map<String, Long> taken = new HashMap<>(home.getAttachedOrElse(TAKEN, Map.of()));
+		taken.put(Integer.toString(c.home()), home.getGameTime());
+		home.setAttached(TAKEN, taken);
 		List<Pending> list = new ArrayList<>(home.getAttachedOrElse(PENDING, List.of()));
 		list.add(new Pending(v.getUUID(), c.home(), out.buildResult()));
 		home.setAttached(PENDING, list);
@@ -250,11 +280,11 @@ public final class Doubles {
 
 	/** Villagers buried in a ruin or dungeon (found shut in under the ground) are the ones whose lives were stolen. */
 	public static void markBuried(ServerLevel level, Villager v) {
-		if (v.hasAttached(STOLEN) || v.hasAttached(Captives.CAPTIVE)) {
+		if (v.hasAttached(STOLEN) || v.hasAttached(Captives.CAPTIVE) || !stealable(v)) {
 			return;
 		}
 		Faction home = Captives.nearestSettlement(level.getServer(), v.blockPosition());
-		if (home == null) {
+		if (!mayTake(level, home)) {
 			return;
 		}
 		Captives.hold(level, v, home);
@@ -313,6 +343,11 @@ public final class Doubles {
 				pending = place(level, player, pending);
 			}
 			for (Villager copy : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(48.0), c -> c.hasAttached(COPY))) {
+				if (!stealable(copy)) {
+					// (a copy of a plain villager, from before copies were only ever MCA's people)
+					copy.discard();
+					continue;
+				}
 				UUID real = copy.getAttached(COPY);
 				if (!level.getEntitiesOfClass(Villager.class, copy.getBoundingBox().inflate(MEET), r -> r.getUUID().equals(real) && r.isAlive()).isEmpty()) {
 					// (it turns on the player there, who most likely brought the real one)
@@ -334,9 +369,11 @@ public final class Doubles {
 	private static List<Pending> place(ServerLevel level, ServerPlayer player, List<Pending> pending) {
 		List<Pending> left = new ArrayList<>();
 		List<Pending> done = new ArrayList<>();
+		Set<Integer> homes = new HashSet<>();
 		for (Pending p : pending) {
 			Faction home = Factions.get(level.getServer(), p.home());
-			if (home == null || home.fallen()) {
+			// (one copy a settlement: any more waiting for the same one are let go)
+			if (home == null || home.fallen() || !homes.add(p.home())) {
 				done.add(p);
 				continue;
 			}
@@ -371,8 +408,9 @@ public final class Doubles {
 				e.snapTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5, e.getYRot(), e.getXRot());
 				return e;
 			});
-		if (!(loaded instanceof Villager copy)) {
-			return false;
+		if (!(loaded instanceof Villager copy) || !stealable(copy)) {
+			// (nothing to wear: it is let go)
+			return true;
 		}
 		copy.removeAttached(Captives.CAPTIVE);
 		copy.removeAttached(Captives.BOUND);
@@ -416,6 +454,10 @@ public final class Doubles {
 		if (copy.isRemoved() || !copy.hasAttached(COPY)) {
 			return;
 		}
+		if (Math.floorMod((int) (copy.getAttached(COPY).getMostSignificantBits() >>> 13), CHANGELING_IN) == 0 && stealable(copy)) {
+			changeling(level, copy, by);
+			return;
+		}
 		Shapeshifter s = Creatures.SHAPESHIFTER.create(level, EntitySpawnReason.EVENT);
 		if (s == null) {
 			return;
@@ -440,6 +482,31 @@ public final class Doubles {
 		}
 		s.unmasked(level, by);
 		ShapeshifterAlarm.seen(level, s, wore, by, real);
+	}
+
+	/**
+	 * The copy was a Sylvan changeling: the stolen face comes off and it stands there as itself, one of the wood's folk with a
+	 * face, hair and name of its own. It is a person, not a monster: it never fights, it runs from whoever found it out, and
+	 * the villagers who saw cry out.
+	 */
+	private static void changeling(ServerLevel level, Villager copy, @Nullable LivingEntity by) {
+		Component wore = copy.getName();
+		HEARD.remove(copy.getUUID());
+		SLIPPED.remove(copy.getUUID());
+		copy.removeAttached(COPY);
+		copy.setHealth(Math.max(copy.getHealth(), copy.getMaxHealth() * PAIN_LEAST));
+		McaCompat.ownFace(copy);
+		VillagerHeritage.born(copy, Heritage.Kind.SYLVAN, null);
+		HeritageVariants.set(copy, HeritageVariants.Variant.CHANGELING);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, copy.getX(), copy.getY() + 1.0, copy.getZ(), 24, 0.3, 0.6, 0.3, 0.02);
+		level.playSound(null, copy.getX(), copy.getY(), copy.getZ(), SoundEvents.HUSK_CONVERTED_TO_ZOMBIE, SoundSource.NEUTRAL, 1.0F, 1.3F);
+		Frights.scare(level, copy, by != null ? by.position() : copy.position());
+		for (Villager w : level.getEntitiesOfClass(Villager.class, copy.getBoundingBox().inflate(UNMASK_SEEN),
+			w -> w != copy && w.isAlive() && !w.isBaby() && !w.isSleeping() && !isCopy(w) && w.hasLineOfSight(copy))) {
+			Speech.say(level, w, Component.translatable("talk.jaymoskingdoms.shapeshifter.guards.2"), Speech.RED, UNMASK_SEEN);
+			break;
+		}
+		Speech.say(level, copy, Component.translatable("talk.jaymoskingdoms.changeling.found." + level.getRandom().nextInt(3), wore), Speech.WHITE, UNMASK_SEEN);
 	}
 
 	/** Where a villager lives (their bed), or null: MCA's home, else the vanilla villager's. */

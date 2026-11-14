@@ -13153,3 +13153,34 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 
 - With Jaymo's Powers' character menu now a strip of tabs across the top of the screen, Kingdoms' pages (Skills, Class, Story, Growth, Journal, Faction, Party, Weapon Forms) sit under it instead of reaching the top edge on a short screen, and the skill web's title bar sits under it too. Without Powers nothing moves.
 - Compiled; not played.
+
+## 0.8.74 (2026-11-14): Films: no screen filters, and a level field wherever they play (#1530)
+
+- While a film plays (the lore films, a boss's entrance, the farm waking), no screen filter is drawn over it: a Hollow's
+  or Nightborn's darkvision grey, blood sight, and the powers' own filters all wait until the film ends.
+- The Long Defence no longer breaks on rough land (the fight sank into ponds and went behind hillsides, and the camera
+  with it). The film now levels its own field for as long as it plays, on your screen only: hills are cut, ponds filled
+  and trees cleared over the stage, easing back into the land at its edges, and everything is put back when it ends.
+  Buildings and a kingdom's seat are left standing.
+- Lore films use your plain FOV setting (no sprint or speed widening), as the other films do.
+
+## 0.8.75 (2026-11-14): changelings take faces; shapeshifters far rarer and always MCA villagers (#1539)
+
+- **Far fewer stolen lives** (Andy: "they should be far less common", three in one clip). A settlement now loses at most
+  one of its own to a shapeshifter every ten days (`Doubles.TAKEN_GAP`, kept on the overworld as `stolen_taken`), whatever
+  the source. Before, every chunk in the ring 50 to 140 blocks round a seat could get its own cellar, and every villager
+  found underground in a village counted. A dungeon captive is a stolen life 15% of the time (was 50%), a cellar roll comes
+  up 0.02 (was 0.05), and copies already waiting for the same settlement are cut to one.
+- **Always an MCA villager** (Andy: "always copy an mca skin not the regular minecraft skin or anything else"). Only an MCA
+  villager can be stolen (`Doubles.stealable`), a copy that would not be one is never made, and copies of plain villagers
+  left in a world from before are removed when a player comes near. Without MCA there are no stolen lives.
+- **Changeling impostors**: one copy in three (`CHANGELING_IN`, fixed by whose face it is) is a Sylvan changeling under the
+  face, not the grey shapeshifter. Found out the same ways, it stays a villager: it gets a face, hair and name of its
+  own, the Sylvan blood and the Changeling look, says its piece and runs. It never fights.
+- **Changeling players**: Mirror Shift on an MCA villager within 16 blocks puts that villager's look on you (skin, face,
+  hair, clothes, build), shown to everyone and kept through a relog (`BorrowedFaces`, `McaBridge.wearLook`). It comes off
+  when you use Mirror Shift with nobody in sight, when you are hurt to half health, or when you die. On any other
+  creature Mirror Shift still trades places.
+- Not done: villagers do not treat a player wearing a face as that villager, and the borrowed name is not shown.
+- Built (compileJava); not played. The fresh logs could not be read from the cloud session, so the cause of the
+  vanilla-skinned copy was taken from the code (plain villagers under villages could be stolen), not seen in a log.
