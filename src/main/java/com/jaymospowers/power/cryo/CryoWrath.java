@@ -24,8 +24,8 @@ import net.minecraft.world.phys.Vec3;
  * (Jung) Cryokinesis' part in Elemental Corruption: the cold's answer. The reckoning is a flash freeze: every block
  * within {@link #FREEZE_RADIUS} blocks of the killer turns to ice (but what holds something, and what can't be broken),
  * and {@link #SPIKES} spikes of packed ice {@link #SPIKE_HEIGHT} blocks tall burst up round them. Through the wrath, the
- * passive creatures and villagers near them freeze solid, held still and taking the powder snow's freezing damage just
- * from standing too close.
+ * passive creatures, villagers and other players near them freeze solid, held still and taking the powder snow's
+ * freezing damage just from standing too close.
  */
 final class CryoWrath implements ElementalCorruption.Wrath {
 	// ---- tuning ----
@@ -95,7 +95,7 @@ final class CryoWrath implements ElementalCorruption.Wrath {
 			return;
 		}
 		for (LivingEntity living : ElementalCorruption.near(player, CHILL_RADIUS)) {
-			if (!passive(living)) {
+			if (!passive(living) && !(living instanceof net.minecraft.world.entity.player.Player)) {
 				continue;
 			}
 			// frozen through and kept so: the game's own powder-snow freezing hurts them while it lasts

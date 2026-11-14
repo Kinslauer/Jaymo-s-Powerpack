@@ -13,8 +13,9 @@ goblins, orcs); and Cryo got a simple corruption of its own (below), since it ha
 ## The killings (`ElementalCorruption.died`)
 A killing counts when the killer's power is one of the four, it is corrupted (`Fate.isCorrupted`), they aren't in the
 wrath or reclaimed, and the victim is an innocent. The count is saved (`elemental_killed`, kept through death).
-1. "You are angering things you cannot defend yourself from."
-2. "We will not stand for injustice in our name."
+1. "You are angering things you cannot defend yourself from.", or one of four other wordings (Jung: "add variation";
+   `WARNING_WORDINGS` 5 each, picked at random, in `lang/parts/elemental_corruption.json`).
+2. "We will not stand for injustice in our name.", or one of four others.
 3. "You have enraged the Gods of your power and they now reclaim it": the reckoning, then the wrath. The count resets.
 
 ## The reckoning (once, `Wrath.erupt`)
@@ -36,17 +37,17 @@ wrath or reclaimed, and the victim is an innocent. The count is saved (`elementa
   (Wind: storm sparks; Smoke: smog miasma; Gravity: violet motes; Cryo: frost motes).
 - **Everything runs**: every 20 ticks each mob within 16 blocks drops them as a target and paths away (16 blocks off,
   speed 1.35), but bosses (`Mortality.boss`, Kingdoms' boss bars) and orcs (`KingdomsCompat.orc`) stand.
-- **The element works on the world** (mobs only, never players):
+- **The element works on the world**, on other players too (Jung), never the holder, a creative or a spectating player:
   - Wind: the storm is kept up; every `STRIKE_EVERY` 140 ticks (7 s) lightning (the look of it) strikes a random living
-    mob within 16 blocks for `STRIKE` 2 (a heart).
-  - Smoke: every `SMOTHER_EVERY` 60 ticks (3 s; Jung named no pace) every mob within 8 blocks chokes for 1 (half a heart,
+    creature (other players included) within 16 blocks for `STRIKE` 2 (a heart).
+  - Smoke: every `SMOTHER_EVERY` 60 ticks (3 s; Jung named no pace) every creature and other player within 8 blocks chokes for 1 (half a heart,
     Smoke's own choke damage); the fog is topped up (6 puffs every 2 s).
   - Gravity: every 10 ticks a loose block (sand, red sand, gravel, dirt, coarse dirt, grass, cobblestone, mossy
     cobblestone) on the surface within 10 blocks cracks (particles and sound), drops loose as a falling block, or rises
     about 4-5 blocks and slams back down; a slammed one knocks out the block it lands on and the open loose blocks
-    round it (a small crater). Every 5 ticks each mob within 14 blocks (bosses aside) is pulled toward the holder
+    round it (a small crater). Every 5 ticks each creature and other player within 14 blocks (bosses aside) is pulled toward the holder
     (0.08 b/t).
-  - Cryo: every 10 ticks each passive creature (animals, bats, other non-hostile ageable mobs) and villager within 8
+  - Cryo: every 10 ticks each passive creature (animals, bats, other non-hostile ageable mobs), villager and other player within 8
     blocks is frozen through (powder snow's `ticksFrozen`, kept 60 past full, so the game's own freezing damage hurts
     them) and held still (Slowness X, 1.5 s, refreshed).
 

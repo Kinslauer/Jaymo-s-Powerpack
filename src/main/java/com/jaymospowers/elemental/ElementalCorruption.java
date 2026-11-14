@@ -52,6 +52,8 @@ public final class ElementalCorruption {
 	// ---- tuning ----
 	/** Killings before the gods take the power back. */
 	public static final int KILLS = 3;
+	/** How many wordings each of the two warnings has (lang: message.jaymospowers.elemental.warning_N_V, V from 1); one is picked at random. */
+	public static final int WARNING_WORDINGS = 5;
 	/** The wrath lasts this long (ticks): five minutes. */
 	public static final int WRATH_TICKS = 20 * 60 * 5;
 	/** The power taken away after it, this long (ticks): three in-game days. */
@@ -162,7 +164,9 @@ public final class ElementalCorruption {
 		int killed = killer.getAttachedOrElse(KILLED, 0) + 1;
 		if (killed < KILLS) {
 			killer.setAttached(KILLED, killed);
-			warn(killer, Component.translatable("message.jaymospowers.elemental.warning_" + killed));
+			// (Jung: "add variation to the first two lines") one of several wordings of each warning
+			int wording = 1 + level.getRandom().nextInt(WARNING_WORDINGS);
+			warn(killer, Component.translatable("message.jaymospowers.elemental.warning_" + killed + "_" + wording));
 			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.PLAYERS, 1.0F, killed == 1 ? 0.8F : 0.6F);
 			return;
 		}
@@ -264,11 +268,15 @@ public final class ElementalCorruption {
 		}
 	}
 
-	/** The creatures near {@code player} an element works on: living mobs, never a player (the gods' quarrel is with the killer). */
+	/**
+	 * The creatures near {@code player} an element works on: every living thing but the holder, other players too (Jung:
+	 * "it can effect other players as well"), though not one in creative or spectating.
+	 */
 	public static java.util.List<LivingEntity> near(ServerPlayer player, double radius) {
 		Vec3 at = player.position();
 		return player.level().getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
-			e -> !(e instanceof Player) && e.isAlive() && e.distanceToSqr(player) <= radius * radius);
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof Player other && other.isCreative())
+				&& e.distanceToSqr(player) <= radius * radius);
 	}
 
 	/**
