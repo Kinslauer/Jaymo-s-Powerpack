@@ -107,6 +107,10 @@ public class CorpseEntity extends Entity {
 	/** (0.4.37) Parts the body lost before it died (see {@link Corpses#missingParts}): not drawn. */
 	private static final EntityDataAccessor<Integer> MISSING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
+	/** How far it's been dressed on the hook, for clients to draw ({@link #DRESSED_SKINNED}, {@link #DRESSED_GUTTED}). */
+	private static final EntityDataAccessor<Integer> DRESSED = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	public static final int DRESSED_SKINNED = 1, DRESSED_GUTTED = 2;
 	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
 	private static final EntityDataAccessor<Long> BORN = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.LONG);
@@ -258,6 +262,15 @@ public class CorpseEntity extends Entity {
 	 */
 	private @Nullable BlockPos hook;
 	private int butcherStage, bleedTotal, bleedLeft, bloodPoured, spilt;
+	/** Knife strokes into taking its skin off ({@link Hanging#SKIN_STROKES}). */
+	private int skinStrokes;
+	/** Its guts are out (the step after skinning, {@link Hanging}). */
+	private boolean gutted;
+	/** How it died, if that cost it hide or meat ({@link CleanKill}), and whether whoever's working it has been told. */
+	private String death = CleanKill.CLEAN;
+	private boolean deathTold;
+	/** What dying that way cost it, for a practised butcher to save ({@link Hanging#SKILL_SAVES}). */
+	private List<ItemStack> spoiled = new ArrayList<>();
 	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
 	private int firesLit;
 	private int age;
@@ -890,6 +903,7 @@ public class CorpseEntity extends Entity {
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
 		builder.define(MISSING, 0);
+		builder.define(DRESSED, 0);
 		builder.define(BORN, 0L);
 		builder.define(SLUNG, -1);
 		builder.define(SLUNG_SLOT, 0);
@@ -989,6 +1003,33 @@ public class CorpseEntity extends Entity {
 
 	void setButcherStage(int stage) {
 		this.butcherStage = stage;
+	}
+
+	boolean gutted() {
+		return gutted;
+	}
+
+	void setGutted() {
+		this.gutted = true;
+		addDressed(DRESSED_GUTTED);
+	}
+
+	public int dressed() {
+		return this.entityData.get(DRESSED);
+	}
+
+	void addDressed(int how) {
+		this.entityData.set(DRESSED, dressed() | how);
+	}
+
+	/** One more knife stroke at its skin; how many that makes. */
+	int addSkinStroke() {
+		return ++skinStrokes;
+	}
+
+	void setDeath(String death, List<ItemStack> spoiled) {
+		this.death = death;
+		this.spoiled = new ArrayList<>(spoiled);
 	}
 
 	void startBleeding(int ticks) {
@@ -1792,6 +1833,23 @@ public class CorpseEntity extends Entity {
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
 		// (0.5.51) on a meat hook, or started on (bled, or being bled): its next step
+		if (!death.isEmpty() && (held.is(Corpses.BUTCHERING_TOOLS) || held.is(Corpses.CRACKING_ROCKS)
+			|| held.is(com.jaymoskitchen.butchery.Butchery.CLEAVERS) || held.is(com.jaymoskitchen.butchery.Butchery.SKINNING_KNIVES))) {
+			if (!spoiled.isEmpty() && !death.equals(CleanKill.BURNT) && Hanging.skill(player) >= Hanging.SKILL_SAVES) {
+				// a practised butcher trims round the damage: nothing's lost
+				addLoot(spoiled);
+				spoiled = new ArrayList<>();
+				death = CleanKill.CLEAN;
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death.saved"));
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			if (!deathTold) {
+				// looked over before the first cut: what dying that way did to it
+				deathTold = true;
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death." + death));
+				return InteractionResult.SUCCESS_SERVER;
+			}
+		}
 		InteractionResult step = Hanging.use(this, level, player, held);
 		if (step != null) {
 			return step;
@@ -2253,8 +2311,8 @@ public class CorpseEntity extends Entity {
 
 	/** Chopped up on the butcher block: out comes the loot, plus a bit extra for doing it properly. */
 	/**
-	 * Chopped up. On a butcher block: everything it would have dropped, extra meat, and the block-only extras (see
-	 * {@link ButcheringBonus}). On the ground: a rough job, about half the usual.
+	 * Chopped up. On a butcher block: everything it would have dropped. On the ground: a rough job, about half the usual.
+	 * The extras (more meat, {@link ButcheringBonus}) come only off a meat hook ({@link Hanging}) or from a village butcher.
 	 */
 	private void butcher(ServerLevel level, boolean onBlock) {
 		if (isMachine()) {
@@ -2263,14 +2321,8 @@ public class CorpseEntity extends Entity {
 		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
 		boolean unbled = butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG);
 		long day = level.getOverworldClockTime() / 24000L;
-		if (onBlock) {
-			for (ItemStack extra : blockExtras()) {
-				if (unbled) {
-					com.jaymoskitchen.butchery.Spoilage.mark(extra, day);
-				}
-				spawnAtLocation(level, extra, 0.4F);
-			}
-		} else {
+		// on a block it's all there, and no more: the extras ({@link #blockExtras}) are the hook's now (Hanging), and a village butcher's
+		if (!onBlock) {
 			List<ItemStack> rough = new ArrayList<>();
 			for (ItemStack stack : loot) {
 				int count = stack.getCount() / 2;
@@ -3509,6 +3561,11 @@ public class CorpseEntity extends Entity {
 		this.bleedLeft = input.getIntOr("BleedLeft", 0);
 		this.bloodPoured = input.getIntOr("BloodPoured", 0);
 		this.spilt = input.getIntOr("Spilt", 0);
+		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
+		this.gutted = input.getBooleanOr("Gutted", false);
+		this.entityData.set(DRESSED, input.getIntOr("Dressed", 0));
+		this.death = input.getStringOr("Death", CleanKill.CLEAN);
+		this.spoiled = new ArrayList<>(input.read("Spoiled", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
@@ -3535,6 +3592,10 @@ public class CorpseEntity extends Entity {
 		output.putInt("Selected", selected);
 		output.putString("Killer", killer);
 		output.putBoolean("KilledByPlayer", killedByPlayer);
+		if (!death.isEmpty()) {
+			output.putString("Death", death);
+			output.store("Spoiled", ItemStack.CODEC.listOf(), spoiled);
+		}
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
 		output.putInt("Missing", missing());
@@ -3566,6 +3627,9 @@ public class CorpseEntity extends Entity {
 			output.putInt("BleedLeft", bleedLeft);
 			output.putInt("BloodPoured", bloodPoured);
 			output.putInt("Spilt", spilt);
+			output.putInt("SkinStrokes", skinStrokes);
+			output.putBoolean("Gutted", gutted);
+			output.putInt("Dressed", dressed());
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

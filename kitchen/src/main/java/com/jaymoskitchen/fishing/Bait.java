@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 /**
- * Fishing bait (after Better With Mods' baited rods, but never required). Fish Bait held in the other hand from the
+ * Fishing bait (after Better With Mods' baited rods, but never required). Fish Bait (or Offal) held in the other hand from the
  * rod makes the fish come sooner (like Lure) and the catch a little luckier (like Luck of the Sea); one bait goes per
  * fish landed. With or without bait, water that's shallow under the bobber or roofed over (no sky above it) bites
  * slower.
@@ -45,7 +45,8 @@ public final class Bait {
 	static ItemStack bait(Player player) {
 		ItemStack main = player.getMainHandItem(), off = player.getOffhandItem();
 		ItemStack other = main.getItem() instanceof FishingRodItem ? off : off.getItem() instanceof FishingRodItem ? main : ItemStack.EMPTY;
-		return other.is(FISH_BAIT) ? other : ItemStack.EMPTY;
+		// offal goes on the hook as it is
+		return other.is(FISH_BAIT) || other.is(com.jaymoskitchen.butchery.Butchery.OFFAL) ? other : ItemStack.EMPTY;
 	}
 
 	/** A fresh wait of {@code ticks} for a fish to come to the hook at {@code pos}: slower in shallow or roofed water, faster baited. */

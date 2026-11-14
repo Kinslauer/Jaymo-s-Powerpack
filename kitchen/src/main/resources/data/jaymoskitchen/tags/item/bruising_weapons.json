@@ -1,0 +1,78 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:mace",
+    {
+      "id": "jaymospowers:anvil_fathers_hammer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arkenium_hammer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gravitite_hammer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:holystone_hammer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ogre_kings_maul",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:skyroot_hammer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_cudgel",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:telescoping_staff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_cudgel",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:zanite_hammer",
+      "required": false
+    }
+  ]
+}

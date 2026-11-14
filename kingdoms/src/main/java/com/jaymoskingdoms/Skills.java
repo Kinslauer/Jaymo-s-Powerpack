@@ -356,7 +356,10 @@ public final class Skills {
 		BODY_COUNT(Pillar.STEALTH, 2, 1, 10, 19, 2, THE_STARE),
 		LIFT_WEAPON(Pillar.STEALTH, 1, 1, 6, 7, 1, QUICK_HANDS),
 		DRY_REMARK(Pillar.STEALTH, 1, 1, 5, 11, 1, ASSASSINATE),
-		DISARM_RUSH(Pillar.STEALTH, 1, 2, 9, 15, 0, MUTILATE);
+		DISARM_RUSH(Pillar.STEALTH, 1, 2, 9, 15, 0, MUTILATE),
+		// a practised butcher (Kitchen's Hanging and CleanKill, through {@link KitchenCompat}): the first rank is the meat hook's
+		// work at all, each after it a skinning pull fewer, and the last saves what a rough death spoiled; last, so no ordinal moves
+		BUTCHERS_HAND(Pillar.SURVIVAL, 3, 1, 0, 3, 0, FORAGER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

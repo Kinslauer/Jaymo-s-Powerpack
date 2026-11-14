@@ -33,6 +33,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Take the head</b> (a cleaver), if it has one: the body's drawn without it ({@link #setOnHead}: Powers throws
  * it down as a severed head you can carry off).</li>
  * <li><b>Skin it</b> (a skinning knife), if it has anything to skin or pluck: its hide, wool or feathers.</li>
+ * <li><b>Gut it</b> (a skinning knife): its offal, before any cut is made.</li>
  * <li><b>Three cuts</b> (a cleaver): meat, fat, bones and the rest, a third at a time, with a proper job's extras
  * (as a butcher table's); gone after the last.</li>
  * </ol>
@@ -55,12 +56,37 @@ public final class Hanging {
 	static final int BONES_MORE = 2;
 	/** Skinned on the hook: this many more of each skin (a clean, whole one), and leather scraps (at least one, up to this many more). */
 	static final int PRIME_EXTRA = 1, SCRAPS_MORE = 1;
+	/** Knife strokes to take a skin off: a small body (a chicken, a rabbit) one fewer, a big carcass this many more, a poor knife (flint, bone) this many more. */
+	static final int SKIN_STROKES = 3, SKIN_STROKES_BIG = 2, SKIN_STROKES_POOR = 2;
+	/** Knives that skin slowly: flint and bone. */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> POOR_KNIVES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ITEM, com.jaymoskitchen.JaymosKitchen.id("poor_knives"));
+	/** Offal from gutting it: a small body, most, and a big carcass. */
+	static final int OFFAL_SMALL = 1, OFFAL = 2, OFFAL_BIG = 4;
 	/** Animal fat from anything bigger than a chicken after the last cut (at least one, up to this many more). */
 	static final int FAT_MORE = 1;
 
 	/** (Kitchen 0.5.57) Other mods' hooks: extra butcher-table extras for whoever cuts, and a word when a carcass is finished. Kitchen knows nothing of who adds them. */
 	private static final List<ToIntFunction<Player>> EXTRA_CUTS = new ArrayList<>();
 	private static final List<BiConsumer<Player, Entity>> ON_DONE = new ArrayList<>();
+
+	/**
+	 * How practised a butcher someone is: Jaymo's Kingdoms' Butcher's Hand ranks. Andy: "only the skilled can do it at
+	 * all everyone else uses the butcher table". With none, a carcass on a hook can't be worked; with nobody to say
+	 * (Kitchen alone), everyone can.
+	 */
+	private static ToIntFunction<Player> skill = player -> 1;
+	/** A skinning pull fewer per point of skill past the first (never under one pull); at this much, what a rough death spoiled is saved ({@link CleanKill}). */
+	static final int SKILL_SAVES = 3;
+
+	/** For other mods (by reflection): {@code ranks} says how practised a butcher a player is. */
+	public static void setButcherSkill(ToIntFunction<Player> ranks) {
+		skill = ranks;
+	}
+
+	static int skill(Player player) {
+		return skill.applyAsInt(player);
+	}
 
 	/** (Kitchen 0.5.57) {@code extra} says how many more times the butcher-table extras are added for this player's hung carcass. */
 	public static void addExtraCuts(ToIntFunction<Player> extra) {
@@ -233,6 +259,14 @@ public final class Hanging {
 		boolean hung = corpse.hook() != null;
 		int stage = corpse.butcherStage();
 		boolean cleaver = held.is(Butchery.CLEAVERS), knife = held.is(Butchery.SKINNING_KNIVES);
+		if (skill(player) < 1) {
+			// never learned the hook's work: it's the butcher block (or a rough job where it lies) for them
+			if (hung && (cleaver || knife)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.unskilled"));
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			return null;
+		}
 		if (!hung) {
 			if (stage == BLEEDING) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
@@ -290,6 +324,14 @@ public final class Hanging {
 				return use(corpse, level, player, held);
 			}
 			default -> {
+				if (stage == SKINNED && !corpse.gutted()) {
+					if (!knife) {
+						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_knife_gut"));
+						return InteractionResult.SUCCESS_SERVER;
+					}
+					gut(corpse, level, player, held);
+					return InteractionResult.SUCCESS_SERVER;
+				}
 				if (!cleaver) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_cleaver_cut"));
 					return InteractionResult.SUCCESS_SERVER;
@@ -342,7 +384,18 @@ public final class Hanging {
 	}
 
 	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
+		int strokes = Math.max(1, SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
+			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - (skill(player) - 1));
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		int made = corpse.addSkinStroke();
+		if (made < strokes) {
+			// the skin comes away a pull at a time
+			corpse.jolt(false);
+			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.6F, 1.0F + made * 0.1F);
+			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 2, 0.3, 0.3, 0.3, 0.05);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinning", made, strokes));
+			return;
+		}
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
 		boolean prime = corpse.hook() != null;
 		for (ItemStack skin : skins) {
@@ -355,10 +408,21 @@ public final class Hanging {
 		// and the trimmings, for mending leather
 		corpse.spawnAtLocation(level, new ItemStack(Butchery.LEATHER_SCRAPS, 1 + level.getRandom().nextInt(SCRAPS_MORE + 1)), 0.3F);
 		corpse.setButcherStage(SKINNED);
+		corpse.addDressed(CorpseEntity.DRESSED_SKINNED);
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.8F, 0.8F);
 		level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinned"));
+	}
+
+	/** Opened and emptied before the cuts: its offal. */
+	private static void gut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
+		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		corpse.spawnAtLocation(level, new ItemStack(Butchery.OFFAL, corpse.oneHanded() ? OFFAL_SMALL : corpse.tooBigToLift() ? OFFAL_BIG : OFFAL), 0.3F);
+		corpse.setGutted();
+		corpse.jolt(false);
+		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 0.8F, 0.7F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.gutted"));
 	}
 
 	private static void cut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
