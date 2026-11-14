@@ -547,6 +547,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1528 (/kingdom reaper toll) merged.
 - 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".
+
+- 2026-11-14 (Andy, films thread): the Long Defence must play whole on any land ("the cutscene broke near the end, and alot of the quiet one's shot wasnt there"); the film levels its own field client-side while it plays (my fix, his call to keep).
 - 2026-11-14 (Andy, undead illagers thread): "i like undead illagers, waging war for the reaper" (Immersive Pillagers link), then links to Mebahel's Draugr and Moog's Ocean Structures ("i like the boats from this", "if a list is easier then you alr know"). Built the reaped (undead illagers as a horde kind that wars on settlements and living illagers); what they do and every number are my picks. Lore.md paragraph "The reaped" is (new), waiting for his approval. Pick-list for the three mods to follow.
 - 2026-11-14 (Andy, Reaper thread): asked for the Grue and the five spirits to be raised to the Reaper's level; chose "Grue only for now". Note for later: Varro and Grimsby get Shadow of War style combat, capstone a Celebrimbor-like mode.
 - 2026-11-14 (Andy, chain axe thread): "the chain axe and lasso should operate similar to the lasso and flail, therefore they need blockbench models"; picked "Lasso, like the whip" on the card (chain axe swings like the flail, lasso gets a 3D coil and a physics rope).
@@ -564,3 +566,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 ## 2026-11-14 (Rig style thread)
 - Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
+
+## 2026-11-14 (Shapeshifters and changelings thread)
+- Andy: "shapeshifters are awesome and that should also be how sylvan changelings function. but the shapeshifters and changelings should always copy an mca skin not the regular minecraft skin or anything else, and they should be far less common." Asked which he meant for changelings, he picked "Both": changeling players take an MCA villager's face, and some village impostors are changelings underneath.

@@ -1864,6 +1864,13 @@ them; the real ones are kept tied up underground, under Grim ruins and in cellar
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
 
+(new) **Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
+same dark woods: a changeling can put on the face of anyone it has looked at closely, skin, hair and clothes together.
+Some of the lives stolen from the villages are worn by a changeling and not by a grey shapeshifter, and it keeps the
+real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
+fights or bolts; a changeling is a person who wanted the hearth, and it only runs. Hurt badly enough, either one loses
+the face. Both are rare: a village loses one of its own to them once in a long while, never three at once.
+
 (new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
 to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
 it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
