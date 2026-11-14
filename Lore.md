@@ -1062,7 +1062,11 @@ placement approved by Andy 2026-11-14). The draugr kept the ranks of the raid th
 warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
 binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
 ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
-own, two swords and a crest, and steps aside from a blow as it did alive. None of them leaves the tomb. The
+own, two swords and a crest, and steps aside from a blow as it did alive. (new, Andy 2026-11-14: the archers, the
+unarmed and a low-armour swordsman wear different gear and move faster) Not all of them died in mail: the archers wear
+leather and a cap, the **skirmishers** carry one sword and no shield under the horned helm, and the **brawlers**, who
+fought the Warrior-born way with their hands, are stripped to the waist. Out of the iron, all three are quicker than
+the shield-wall. None of them leaves the tomb. The
 **laughing bones** are not draugr and not Warrior-born: they are villagers' dead in barrows whose knights are gone,
 with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
 back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
