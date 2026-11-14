@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
  * (0.5.14) How rich a realm is: its treasury, its people and the fiefdoms that serve it. A <b>prosperous</b> kingdom
  * puts some of its guards on horses; a <b>wealthy</b> one also keeps mounted archers, and its king rides out on his
  * rounds in a carriage ({@link Carriages}, {@link Cavalry}). Horses and carriages are bought from the treasury.
+ * Its tier also says which gun its gunners carry ({@link EarlyGuns#issue}): handgonnes, arquebuses, muskets.
  */
 final class Wealth {
 	enum Tier {
@@ -19,8 +20,8 @@ final class Wealth {
 
 	/** Its worth: its emeralds, and this much for every villager and every fiefdom beneath it. */
 	static final int PER_VILLAGER = 4, PER_FIEF = 60;
-	/** The worth a realm needs to be prosperous, and wealthy. */
-	static final int PROSPEROUS = 120, WEALTHY = 260;
+	/** The worth a realm needs to be prosperous, and wealthy (Andy: "now the richest would be considered 1000 gold"). */
+	static final int PROSPEROUS = 120, WEALTHY = 1000;
 
 	private Wealth() {
 	}

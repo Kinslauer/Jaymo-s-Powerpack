@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/hood",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -11905688
+      }
+    ]
+  }
+}

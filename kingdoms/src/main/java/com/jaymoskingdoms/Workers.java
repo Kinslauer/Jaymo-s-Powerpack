@@ -191,6 +191,8 @@ public final class Workers {
 			return WallArchers.step(level, w);
 		}
 		if (w.role() == Folk.GUARD && w instanceof Enlisted e) {
+			// (the gun his realm's purse runs to, handed out or taken back)
+			EarlyGuns.garrison(level, mob, w.factionId());
 			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
 			return Rulers.guardStep(level, e);
 		}

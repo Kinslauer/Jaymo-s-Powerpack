@@ -181,7 +181,7 @@ public final class Notice {
 		// (monsters, and anyone else after them: a bandit band's archers in the brush are heard from farther off)
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(ARCHER), m -> m.isAlive() && m.getTarget() == player)) {
 			if (mob.distanceToSqr(player) > HUNTER * HUNTER && !(mob.getMainHandItem().getItem() instanceof ProjectileWeaponItem)
-				&& !(mob instanceof Folk folk && Muskets.armed(folk))) {
+				&& !(mob instanceof Folk folk && Muskets.armed(folk)) && !EarlyGuns.gunner(mob)) {
 				continue;
 			}
 			Vec3 to = mob.getEyePosition().subtract(eye).normalize();

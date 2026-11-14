@@ -61,6 +61,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		// a war party's mangonel and its stone
 		EntityRenderers.register(com.jaymoskingdoms.Mangonel.TYPE, MangonelRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.FieldMortar.TYPE, FieldMortarRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.SiegeStone.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.6F, false));
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
@@ -74,6 +75,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the Family farmhand's wake-up talk, letterboxed (FarmhandWake)
 		com.jaymoskingdoms.client.films.FarmWakeFilmClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		// a handgonne's or an arquebus's ball (EarlyGuns)
+		EntityRenderers.register(com.jaymoskingdoms.GunBall.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.5F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// (0.7.279) a spirit's floating hand (far hand, catch)
@@ -113,6 +116,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PickpocketPose.register();
 		// (0.7.184) handshakes: the arms, and your own as a film
 		HandshakePose.register();
+		// a caster's hands at their work
+		CastPose.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
 		ShackleTether.register();
@@ -250,6 +255,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		UnderArmourLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
+		// the late-medieval harness: its layer, its screen and tab, the visor key and the view through a lowered visor
+		HeraldryLayer.register();
+		HeraldryClient.register();
 		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
 		TinkererOutfit.register();
 		// 0.7.23: Verdants' antennae

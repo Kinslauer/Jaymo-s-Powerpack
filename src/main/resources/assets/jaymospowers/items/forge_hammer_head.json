@@ -1,0 +1,115 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_stone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_stone",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
+      }
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_stone"
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_copper"
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_iron"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_steel"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/weapon_part/forge_hammer_head_stone"
+      }
+    }
+  }
+}

@@ -57,6 +57,9 @@ ACCENTS = {
     "flash": [(15, 0, 0), (11, 0, 0), (15, 4, 0), (10, 4, 0)],
     "drill": [(15, 1, 0), (14, 0, 1), (13, 3, 0), (15, 3, 1)],
     "boomerang": [(10, 2, 1), (9, 3, 1), (10, 4, 2), (11, 5, 2)],
+    "bodkin": [(15, 1, 1), (14, 0, 1), (11, 4, 2), (10, 5, 3)],
+    "swallowtail": [(10, 1, 1), (9, 0, 2), (15, 4, 1), (15, 5, 2), (10, 2, 0), (14, 4, 0)],
+    "cloth": [(10, 4, 0), (9, 5, 1), (10, 5, 0), (11, 5, 1), (9, 4, 1), (11, 4, 0)],
 }
 HEADS = {  # id: (colour, display name, tooltip)
     "bola": ("9A7A4A", "Bola", "Wraps and trips whoever it hits, through the bolas' own cord."),
@@ -73,6 +76,9 @@ HEADS = {  # id: (colour, display name, tooltip)
     "flash": ("FFFFF0", "Flash", "A blinding flash where it lands."),
     "drill": ("5A6C7E", "Drill", "Pierces a second target, and goes through a raised shield."),
     "boomerang": ("B07A30", "Boomerang", "Comes back to your hand if it misses."),
+    "bodkin": ("6E7682", "Bodkin", "A narrow hardened point: bites through mail and plate, glances a little on bare flesh, and leaves a wound that doesn't bleed."),
+    "swallowtail": ("C4CAD4", "Swallowtail", "A broad forked head: tears bare and padded flesh open into a bleeding cut, but mail and plate turn it."),
+    "cloth": ("D8C8A0", "Cloth", "A pitch-soaked rag. Loosed beside a fire or a torch, or with a torch or flint and steel in your other hand, it flies alight and sets fire to what it hits."),
 }
 
 
@@ -336,6 +342,14 @@ BLANKS = {
         "................", "................", "................", "............##..", "...........#oo#.", "..........#oxx#.", ".........#oxx#..",
         "........#oxx#...", ".......#oxx#....", "......#oxx#.....", ".....#oxx#......", "....#oxx#.......", "...#oxx#........", "...###..........", "................",
         "................"]),
+    "bodkin_head_blank": ("Bodkin Head Blank", [
+        "................", "...........##...", "..........#oo#..", ".........#oxx#..", "........#oxx#...", ".......#oxx#....", "......#oxx#.....",
+        ".....#oxx#......", "....#oxxx#......", "...#oxxxx#......", "..#xxxxxx#......", "..#xxxxx#.......", "..#xxx##........", "...###..........", "................",
+        "................"]),
+    "swallowtail_head_blank": ("Swallowtail Head Blank", [
+        "................", ".......##.......", "......#oo#......", "......#ox#......", ".....#oxxx#.....", ".....#oxxx#.....", "....#oxxxxx#....",
+        "....#oxxxxx#....", "...#oxx#xxxx#...", "...#ox#.#xxx#...", "..#ox#.#x#xxx#..", "..#x#..#x#.#x#..", ".#x#...#x#..#x#.", ".##....#x#...##.", ".......###......",
+        "................"]),
     "trap_jaws_blank": ("Trap Jaws Blank", [
         "................", "................", "................", "................", "..#.#.#.#.#.#...", ".#x#x#x#x#x#x#..", ".#x.x.x.x.x.x#..",
         "#oxxxxxxxxxxxo#.", "#xooooooooooox#.", "#xx#########xx#.", ".#xxxxxxxxxxx#..", "..###########...", "................", "................", "................",
@@ -345,6 +359,7 @@ BLANK_TO_ITEM = {
     "barbed_head_blank": "head_barbed", "harpoon_arrowhead_blank": "head_harpoon", "grapple_head_blank": "head_grapple",
     "drill_head_blank": "head_drill", "broadhead_blank": "head_broadhead", "caltrop_head_blank": "head_caltrop",
     "caltrops_blank": "caltrops", "dart_tip_blank": "bleeding_dart", "trap_jaws_blank": "bear_trap",
+    "bodkin_head_blank": "head_bodkin", "swallowtail_head_blank": "head_swallowtail",
 }
 IRON = {"#": (60, 60, 64, 255), "x": (160, 162, 166, 255), "o": (226, 228, 230, 255)}
 STONE = {"#": (58, 54, 50, 255), "x": (122, 118, 112, 255), "o": (176, 172, 164, 255)}
@@ -431,8 +446,8 @@ def recipes():
             "type": "minecraft:crafting_shaped", "category": "equipment", "pattern": pattern, "key": key,
             "result": {"id": "jaymospowers:" + result}})
 
-    # the iron heads and throwables (barbed, harpoon, grapple, drill, broadhead, caltrop heads, caltrops, darts, the bear trap)
-    # have no grid recipe: they are forged at the Tool Station (tinkering/WeaponParts)
+    # the iron heads and throwables (barbed, harpoon, grapple, drill, broadhead, bodkin, swallowtail, caltrop heads, caltrops,
+    # darts, the bear trap) have no grid recipe: they are forged at the Tool Station (tinkering/WeaponParts)
     shapeless("head_bola", ["minecraft:string", "minecraft:string", "minecraft:string", "minecraft:flint"], "head_bola", 2)
     shapeless("head_net", ["minecraft:string", "minecraft:string", "minecraft:string", "minecraft:string", "minecraft:vine"], "head_net", 2)
     shapeless("head_smoke", ["minecraft:clay_ball", "minecraft:charcoal", "minecraft:string"], "head_smoke", 2)
@@ -441,6 +456,7 @@ def recipes():
     shapeless("head_fire", ["minecraft:blaze_powder", "minecraft:charcoal", "minecraft:string"], "head_fire", 2)
     shapeless("head_flash", ["minecraft:glowstone_dust", "minecraft:blaze_powder", "minecraft:paper"], "head_flash", 2)
     shapeless("head_boomerang", ["minecraft:stick", "minecraft:stick", "minecraft:string"], "head_boomerang", 2)
+    shapeless("head_cloth", ["#minecraft:wool", "minecraft:string", "minecraft:charcoal"], "head_cloth", 2)
     shapeless("smoke_pot", ["minecraft:clay_ball", "minecraft:charcoal", "minecraft:spider_eye"], "smoke_pot", 2)
     shapeless("flash_powder", ["minecraft:glowstone_dust", "minecraft:bone_meal", "minecraft:blaze_powder"], "flash_powder", 4)
     shapeless("sneezing_powder", ["minecraft:bone_meal", "minecraft:fern", "minecraft:sugar"], "sneezing_powder", 4)

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "#minecraft:wool",
+    "minecraft:string",
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "id": "jaymospowers:head_cloth",
+    "count": 2
+  }
+}

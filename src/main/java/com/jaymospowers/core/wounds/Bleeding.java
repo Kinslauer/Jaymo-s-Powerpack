@@ -90,6 +90,12 @@ public final class Bleeding {
 	static final int DRESS_STEP = 20;
 	/** (0.14.4) Put on a body by Kingdoms' tending villagers: its bleeding stops, with a bandage's heal. */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
+	/**
+	 * Scoreboard tags on a shot for the kind of wound it leaves ({@code gear/arrow/HeadFx}): one that tears (a swallowtail
+	 * arrowhead) opens a cut on any part it hurts that mail or plate doesn't cover, however little it took; a narrow one
+	 * (a bodkin) never opens one.
+	 */
+	public static final String TEARS = "jaymospowers.tears", NARROW = "jaymospowers.narrow_wound";
 	public static final ResourceKey<DamageType> BLEEDING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("bleeding"));
 
 	/**
@@ -218,17 +224,38 @@ public final class Bleeding {
 		int sharpness = weapon == null || !(victim.level() instanceof ServerLevel level) ? 0
 			: EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS), weapon);
 		float bleedFrom = sharpness > 0 ? Math.max(SHARP_BLEED_FROM_MIN, BLEED_FROM - SHARPNESS_BLEED_FROM * sharpness) : BLEED_FROM;
+		if (index >= 0 && was[index] > now[index] && source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(TEARS)
+			&& !turnsPoints(victim, landed)) {
+			// a tearing head opens whatever bare or padded flesh it hurts at all
+			open(victim, landed, false);
+			return;
+		}
 		if (index < 0 || was[index] - now[index] < bleedFrom) {
 			return;
 		}
 		Entity direct = source.getDirectEntity();
 		Entity by = source.getEntity();
+		if (direct != null && direct.entityTags().contains(NARROW)) {
+			return;
+		}
 		boolean blade = weapon != null && (Dismember.blade(weapon) || sharpness > 0);
 		boolean claws = by instanceof Zombie && direct == by;
 		if (!blade && !claws && !(direct instanceof Projectile)) {
 			return;
 		}
 		open(victim, landed, by instanceof Zombie);
+	}
+
+	/** Whether mail or plate lies over {@code part} of {@code victim} (points that tear slide off it). */
+	private static boolean turnsPoints(LivingEntity victim, BodyPart part) {
+		net.minecraft.world.entity.EquipmentSlot slot = switch (part) {
+			case HEAD -> net.minecraft.world.entity.EquipmentSlot.HEAD;
+			case LEFT_LEG, RIGHT_LEG, FRONT_LEGS, HIND_LEGS, LEGS -> net.minecraft.world.entity.EquipmentSlot.LEGS;
+			case LEFT_FOOT, RIGHT_FOOT -> net.minecraft.world.entity.EquipmentSlot.FEET;
+			default -> net.minecraft.world.entity.EquipmentSlot.CHEST;
+		};
+		com.jaymospowers.core.ArmourKind armour = com.jaymospowers.core.ArmourKind.worn(victim, slot);
+		return armour == com.jaymospowers.core.ArmourKind.MAIL || armour == com.jaymospowers.core.ArmourKind.PLATE;
 	}
 
 	/** (0.14.4) Opens a cut on {@code part} ({@code dirty}: it may fester). A severed part bleeds as a stump ({@link #stump}) instead. */

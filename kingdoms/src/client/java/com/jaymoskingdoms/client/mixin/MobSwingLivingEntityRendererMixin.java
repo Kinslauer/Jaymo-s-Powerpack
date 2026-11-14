@@ -35,6 +35,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.BloodGrabPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.RubberEngulf.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.HandshakePose.extract(entity, state, partialTicks);
+		com.jaymoskingdoms.client.CastPose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
@@ -59,6 +60,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		// (0.7.486) the sea-blooded Tideborn's fins, tentacles, shells and spines
 		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
+		// what they wear in the harness (HeraldryLayer, UnderArmourLayer)
+		com.jaymoskingdoms.client.HeraldryLayer.extract(entity, state);
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}
 
@@ -74,6 +77,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.RubberEngulf.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.HandshakePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.CastPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		// (0.7.641) a staked vampire struggling with the stake
 		com.jaymoskingdoms.client.StakeStruggle.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);

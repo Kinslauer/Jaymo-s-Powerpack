@@ -229,7 +229,7 @@ public final class Hemomancy {
 			// (a scroll's or a staff's cast is counted where it's read or cast, Spellcraft.afterCast)
 			ForbiddenArts.cast(player, level, true, 0);
 			player.getCooldowns().addCooldown(key, Spellcraft.BOLT_COOLDOWN);
-			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			Casting.gesture(player, target != null ? Casting.Gesture.DRAW : Casting.Gesture.SWEEP, Casting.BLOOD);
 		}
 		return true;
 	}

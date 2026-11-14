@@ -22,6 +22,7 @@
     { "id": "weaponmod:halberd.iron", "required": false },
     { "id": "weaponmod:halberd.gold", "required": false },
     { "id": "weaponmod:halberd.diamond", "required": false },
-    { "id": "weaponmod:halberd.netherite", "required": false }
+    { "id": "weaponmod:halberd.netherite", "required": false },
+    { "id": "jaymospowers:bec_de_corbin", "required": false }
   ]
 }

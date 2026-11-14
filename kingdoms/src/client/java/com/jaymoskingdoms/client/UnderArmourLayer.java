@@ -37,11 +37,19 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.484) On a body MCA draws it goes on MCA's armour body, past MCA's clothes ({@link McaUnderArmour}), and under a
  * costume or the symbiote's suit it isn't drawn at all ({@link PowersCover}).
+ * <p>
+ * The under-armour is a real slot now ({@link com.jaymoskingdoms.Harness}): an arming doublet worn as padding is drawn in
+ * its own dye, and a mail haubergeon over it, whatever is on the chest (their sleeves show past a cuirass). Leggings
+ * alone still bring their suit's look as before, when neither is worn.
  */
 public final class UnderArmourLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 	/** How far the suit sits out from the skin (model pixels): over it, under a chestplate's 1.0. */
 	static final float SIT = 0.3F;
+	/** How far a haubergeon sits out: over the doublet. */
+	static final float MAIL_SIT = 0.5F;
 	static final ModelLayerLocation LAYER = new ModelLayerLocation(JaymosKingdoms.id("under_armour"), "main");
+	static final ModelLayerLocation MAIL_LAYER = new ModelLayerLocation(JaymosKingdoms.id("under_armour_mail"), "main");
+	private static final Identifier HAUBERGEON = JaymosKingdoms.id("textures/entity/under_armour/haubergeon.png");
 	private static final Identifier DOUBLET = JaymosKingdoms.id("textures/entity/under_armour/doublet.png");
 	private static final Identifier MAIL = JaymosKingdoms.id("textures/entity/under_armour/gambeson_mail.png");
 	private static final Identifier IRON = JaymosKingdoms.id("textures/entity/under_armour/gambeson_iron.png");
@@ -49,14 +57,17 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 	static final int UNDYED = 0xA06540;
 
 	private final Suit suit;
+	private final Suit mail;
 
 	private UnderArmourLayer(RenderLayerParent<S, HumanoidModel<S>> renderer, EntityRendererProvider.Context context) {
 		super(renderer);
 		this.suit = new Suit(context.bakeLayer(LAYER), this::getParentModel);
+		this.mail = new Suit(context.bakeLayer(MAIL_LAYER), this::getParentModel);
 	}
 
 	public static void register() {
 		ModelLayerRegistry.registerModelLayer(LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(SIT), 0.0F), 64, 32));
+		ModelLayerRegistry.registerModelLayer(MAIL_LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(MAIL_SIT), 0.0F), 64, 32));
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer, context));
@@ -72,6 +83,9 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 		if (state.isBaby || state.isInvisible || PowersCover.body(state)) {
+			return;
+		}
+		if (harness(poseStack, collector, lightCoords, state)) {
 			return;
 		}
 		ItemStack chest = state.chestEquipment;
@@ -94,6 +108,30 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 		}
 		collector.submitModel(model, state, poseStack, RenderTypes.armorCutoutNoCull(texture), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
 			state.outlineColor);
+	}
+
+	/** The padding and mail worn in the harness, if any: the doublet in its dye, the haubergeon over it. False when neither is worn. */
+	private boolean harness(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state) {
+		java.util.List<ItemStack> worn = state.getData(HeraldryLayer.HARNESS);
+		if (worn == null) {
+			return false;
+		}
+		ItemStack padding = worn.get(com.jaymoskingdoms.Harness.Slot.PADDING.ordinal());
+		ItemStack mail = worn.get(com.jaymoskingdoms.Harness.Slot.MAIL.ordinal());
+		if (padding.isEmpty() && mail.isEmpty()) {
+			return false;
+		}
+		// (MCA's body has the one armour model: the outer shirt alone goes on it)
+		HumanoidModel<HumanoidRenderState> mca = McaCompat.LOADED ? McaUnderArmour.model(state) : null;
+		if (!padding.isEmpty() && (mca == null || mail.isEmpty())) {
+			collector.submitModel(mca != null ? mca : this.suit, state, poseStack, RenderTypes.armorCutoutNoCull(DOUBLET), lightCoords, OverlayTexture.NO_OVERLAY,
+				ARGB.opaque(DyedItemColor.getOrDefault(padding, UNDYED)), null, state.outlineColor);
+		}
+		if (!mail.isEmpty()) {
+			collector.submitModel(mca != null ? mca : this.mail, state, poseStack, RenderTypes.armorCutoutNoCull(HAUBERGEON), lightCoords, OverlayTexture.NO_OVERLAY,
+				-1, null, state.outlineColor);
+		}
+		return true;
 	}
 
 	/** The suit that comes with {@code legs}, or null for none (no leggings, or a kind without one). */

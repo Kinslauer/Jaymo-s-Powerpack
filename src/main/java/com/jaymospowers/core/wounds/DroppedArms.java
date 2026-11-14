@@ -14,6 +14,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.18.118, Motion patch 8) Andy: "When players or enemy mobs go down or die outright, they drop their weapons to the
@@ -22,6 +23,9 @@ import net.minecraft.world.phys.Vec3;
  * few that hang on ({@link #KEEP_DOWN}); one that hung on dies still holding them. A mob killed outright (never down)
  * drops them too, but for the {@link #KEEP_DYING} that die clutching theirs. Players dying outright drop everything as
  * the game has them do anyway.
+ * <p>
+ * And one that has run out of breath ({@code stamina/Exertion}) has the weapon knocked clean out of its hand by the next
+ * blow ({@link #knock}): it flies further, away from whoever struck.
  */
 public final class DroppedArms {
 	/** The chance someone going down keeps hold of their weapons, and a mob dying outright dies clutching them. */
@@ -29,6 +33,8 @@ public final class DroppedArms {
 	/** How hard a dropped weapon is flung, and how long before it can be picked up (ticks). */
 	static final double FLING = 0.18;
 	static final int PICKUP_DELAY = 30;
+	/** How hard a weapon knocked from the hand flies (blocks a tick, along the ground and up). */
+	static final double KNOCK_FLING = 0.4, KNOCK_UP = 0.3;
 
 	private DroppedArms() {
 	}
@@ -62,6 +68,30 @@ public final class DroppedArms {
 			entity.setItemInHand(hand, ItemStack.EMPTY);
 			fling(level, entity, held);
 		}
+	}
+
+	/**
+	 * Knocks the weapon out of {@code entity}'s hand (the main hand's, else the other's) and sends it flying away from
+	 * {@code from} (null: the way they face). The weapon lands as an item, whole. Returns it, or an empty stack if they held none.
+	 */
+	public static ItemStack knock(ServerLevel level, LivingEntity entity, @Nullable Vec3 from) {
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack held = entity.getItemInHand(hand);
+			if (!weapon(held)) {
+				continue;
+			}
+			entity.setItemInHand(hand, ItemStack.EMPTY);
+			Vec3 away = from == null ? entity.getLookAngle() : entity.position().subtract(from);
+			away = away.multiply(1.0, 0.0, 1.0);
+			away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
+			RandomSource random = level.getRandom();
+			ItemEntity item = new ItemEntity(level, entity.getX(), entity.getY(0.6), entity.getZ(), held,
+				away.x * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15, KNOCK_UP, away.z * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15);
+			item.setPickUpDelay(PICKUP_DELAY);
+			level.addFreshEntity(item);
+			return held;
+		}
+		return ItemStack.EMPTY;
 	}
 
 	private static void fling(ServerLevel level, LivingEntity entity, ItemStack stack) {

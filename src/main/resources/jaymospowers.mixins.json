@@ -9,6 +9,8 @@
 		"CollideMoveMixin",
 		"ElementalWrathDamageMixin",
 		"ArmourWearLivingMixin",
+		"BlowsLivingMixin",
+		"BlowsPlayerMixin",
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",
 		"ArmourWearRepairMixin",

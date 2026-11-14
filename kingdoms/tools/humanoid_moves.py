@@ -349,6 +349,45 @@ def moves(leg=12.0, cape=True):
 				"ls": -40, "rl": -24, "rs": -10, "pos": (0, -1.4, -1.0)}),
 		(1.2, {"la": (8, 0, -40), "lf": 32, "ra": (76, 0, -34), "rf": 10, "b": (-14, -34, 0), "w": (-4, -12, 0), "h": (8, 28, 0), "ll": 34,
 			   "ls": -40, "rl": -24, "rs": -10, "pos": (0, -1.4, -1.0)})]))
+	# ---- the seven gestures every caster uses (Casting.Gesture; the game's casters make the same with CastPose) ----
+	# push: both hands gathered at the chest, then the open palm pushed out at what it is for, the other hand come up behind
+	# its wrist, held a breath, and down
+	push = [(0, REST), (0.18, {"ra": (52, 0, -22), "rf": 112, "la": (50, 0, 22), "lf": 112, "b": (-4, 0, 0), "h": (-6, 0, 0)}),
+			(0.3, {"ra": (92, 0, -4), "rf": 4, "la": (74, 0, 26), "lf": 44, "b": (-10, -8, 0), "w": (-2, -4, 0), "h": (4, 6, 0),
+				   "ll": 22, "ls": -26, "rl": -12, "rs": -8, "pos": (0, -0.6, -0.4)}),
+			(0.62, {"ra": (90, 0, -4), "rf": 6, "la": (70, 0, 24), "lf": 46, "b": (-9, -8, 0), "w": (-2, -4, 0), "h": (4, 6, 0),
+					"ll": 22, "ls": -26, "rl": -12, "rs": -8, "pos": (0, -0.6, -0.4)}),
+			(0.95, REST)]
+	out.append(m("cast_push", "once", push))
+	out.append(m("cast_push_left", "once", [(t, flip(p)) for t, p in push]))
+	# raise: one hand lifted to the sky, the head back after it, the other low and out (calling something down)
+	out.append(m("cast_raise", "hold", [
+		(0, REST), (0.3, {"ra": (100, 0, 14), "rf": 60, "la": (12, 0, -24), "lf": 20, "b": (4, 0, 0), "h": (6, 0, 0)}),
+		(0.6, {"ra": (172, 0, 10), "rf": 6, "la": (20, 0, -34), "lf": 14, "b": (10, 0, 0), "w": (4, 0, 0), "h": (26, 0, 0)}),
+		(1.2, {"ra": (176, 0, 10), "rf": 4, "la": (22, 0, -36), "lf": 12, "b": (11, 0, 0), "w": (4, 0, 0), "h": (28, 0, 0)})]))
+	# ground: down on one knee, bowed, the palm driven down at the earth before the feet, the other arm back
+	ground = {"ra": (36, 0, -6), "rf": 4, "la": (-34, 0, -22), "lf": 20, "b": (-34, 0, 0), "w": (-8, 0, 0), "h": (-12, 0, 0),
+			  "rl": 70, "rs": -90, "ll": -10, "ls": -100, "pos": (0, -4.0, 0)}
+	out.append(m("cast_ground", "hold", [
+		(0, REST), (0.25, {"ra": (120, 0, 6), "rf": 30, "la": (10, 0, -20), "lf": 20, "b": (-6, 0, 0), "h": (4, 0, 0)}),
+		(0.45, ground), (1.1, dict(ground, b=(-32, 0, 0)))]))
+	# give: a hand held out low, palm up, the head bowed to whom it is for
+	out.append(m("cast_give", "hold", [
+		(0, REST), (0.4, {"ra": (56, -14, -10), "rf": 22, "la": (10, 0, -10), "lf": 18, "b": (-6, 0, 0), "h": (-14, 0, 0)}),
+		(1.2, {"ra": (58, -14, -10), "rf": 20, "la": (10, 0, -10), "lf": 18, "b": (-7, 0, 0), "h": (-15, 0, 0)})]))
+	# draw: the hand flung out at what is taken, then clawed back in to the chest, leaning away from it
+	draw = {"ra": (60, 0, -30), "rf": 120, "la": (20, 0, -18), "lf": 30, "b": (8, 10, 0), "w": (2, 4, 0), "h": (-4, -6, 0), "rl": 10, "rs": -12}
+	out.append(m("cast_draw", "once", [
+		(0, REST), (0.15, {"ra": (94, 0, 2), "rf": 4, "la": (10, 0, -16), "lf": 20, "b": (-10, -8, 0), "h": (4, 6, 0)}),
+		(0.3, {"ra": (90, 0, 0), "rf": 10, "la": (10, 0, -16), "lf": 20, "b": (-10, -8, 0), "h": (4, 6, 0)}),
+		(0.55, draw), (0.8, draw), (1.1, REST)]))
+	# sweep: the arm swept across the body, from the far shoulder out to its own side, the body turning with it
+	out.append(m("cast_sweep", "once", [
+		(0, REST), (0.18, {"ra": (84, 0, -48), "rf": 30, "la": (20, 0, -14), "lf": 20, "b": (0, 26, 0), "w": (0, 8, 0), "h": (0, -16, 0)}),
+		(0.42, {"ra": (88, 0, 52), "rf": 6, "la": (14, 0, -20), "lf": 18, "b": (-4, -24, 0), "w": (0, -8, 0), "h": (2, 14, 0),
+				"ll": 18, "ls": -20, "rl": -10, "rs": -8, "pos": (0, -0.4, 0)}),
+		(0.65, {"ra": (84, 0, 50), "rf": 8, "la": (14, 0, -20), "lf": 18, "b": (-4, -22, 0), "w": (0, -8, 0), "h": (2, 12, 0)}),
+		(0.95, REST)]))
 	# an arm out, pointing: go
 	out.append(m("point", "hold", [
 		(0, REST), (0.2, {"ra": (96, 0, 4), "rf": 4, "b": (-4, -14, 0), "h": (2, 10, 0), "la": (-8, 0, -10), "lf": 14}),

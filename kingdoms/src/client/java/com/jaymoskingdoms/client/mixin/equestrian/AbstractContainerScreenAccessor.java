@@ -12,4 +12,11 @@ public interface AbstractContainerScreenAccessor {
 
 	@Accessor("imageHeight")
 	int jaymoskingdoms$imageHeight();
+
+	/** Where the screen's panel is, to hang the harness tab on the inventory's edge. */
+	@Accessor("leftPos")
+	int jaymoskingdoms$leftPos();
+
+	@Accessor("topPos")
+	int jaymoskingdoms$topPos();
 }

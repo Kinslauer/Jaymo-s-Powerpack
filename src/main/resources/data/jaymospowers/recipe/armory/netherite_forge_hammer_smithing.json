@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#minecraft:netherite_tool_materials",
+  "base": "jaymospowers:steel_forge_hammer",
+  "result": {
+    "id": "jaymospowers:netherite_forge_hammer"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

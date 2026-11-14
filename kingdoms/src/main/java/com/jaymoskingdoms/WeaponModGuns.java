@@ -70,11 +70,16 @@ public final class WeaponModGuns {
 	 * use duration) as a Marksman's gun reads them, so it reloads and winds up {@link ClassPerks#MARKSMAN_RELOAD} faster.
 	 */
 	public static int quicker(RangedComponent component, ItemStack gun, Entity user, int count) {
-		if (!(user instanceof ServerPlayer sp) || !Classes.is(sp, PlayerClass.MARKSMAN) || !gun.is(ClassPerks.GUNS)) {
+		if (!(user instanceof ServerPlayer sp) || !gun.is(ClassPerks.GUNS)) {
+			return count;
+		}
+		// (and anyone in the Ranger's harness, on top of it: FrontierPerks)
+		double faster = (Classes.is(sp, PlayerClass.MARKSMAN) ? ClassPerks.MARKSMAN_RELOAD : 0.0) + FrontierPerks.reload(sp);
+		if (faster <= 0.0) {
 			return count;
 		}
 		int use = component.getUseDuration(gun);
 		int elapsed = use - count;
-		return use - (int) (elapsed / (1.0 - ClassPerks.MARKSMAN_RELOAD));
+		return use - (int) (elapsed / (1.0 - faster));
 	}
 }

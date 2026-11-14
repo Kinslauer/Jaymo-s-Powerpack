@@ -87,7 +87,8 @@ final class Javelins {
 	/** Its role throws: guards, barbarians (with their chiefs), and orc grunts. */
 	static boolean thrower(Folk folk) {
 		int role = folk.role();
-		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk);
+		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk)
+			&& !EarlyGuns.holds(folk);
 	}
 
 	/** (0.7.184) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */

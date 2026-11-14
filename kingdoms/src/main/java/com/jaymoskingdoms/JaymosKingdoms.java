@@ -49,6 +49,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		McaCompat.register();
 		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
+		// and the harness: what a blow meets in its layers, a shut visor's glance, who may have plate gilded
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareHarness());
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// (0.7.251) spoken lines: the narrator and the spirits
@@ -127,6 +129,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		Commissions.register();
 		PlanSites.register();
 		Armory.register();
+		FrontierArmour.register();
+		FrontierWear.register();
+		FrontierPerks.register();
+		// the late-medieval harness: its pieces, the slots they go in, visors, and who wears and sells it
+		HeraldryArmour.register();
+		Harness.register();
+		Visors.register();
+		HeraldryWear.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it
@@ -287,6 +297,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		Casting.register();
 		RogueGambits.register();
 		ChestNoise.register();
 		// footsteps wolves and guards hear: louder running, on gravel or metal, in plate; quieter sneaking, crouched or crawling
@@ -528,9 +539,20 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)
 		GolemLairs.register();
 		Cannonball.register();
+		// the caravan guards' hand gun, firing the same ball
+		Musketoon.register();
+		// the guns before the musket (handgonne, arquebus) and the realms' gunners, by their purse
+		GunBall.register();
+		EarlyGuns.register();
+		// worn old armour under the ruins' sand, and the old battlefields
+		WornRelics.register();
 		// the siege engines a war party brings (SiegeTrain): the mangonel and its stone
 		Mangonel.register();
 		SiegeStone.register();
+		// the field mortar a gun-keeping realm's war party brings beside its gun, and a player's own
+		FieldMortar.register();
+		// the Flame Avatars' Tinkerers' gun (nether/AvatarClasses)
+		FireCannon.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
 		Cannons.register();

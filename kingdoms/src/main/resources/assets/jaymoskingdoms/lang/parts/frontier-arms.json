@@ -1,0 +1,13 @@
+{
+  "item.jaymoskingdoms.fire_cannon": "Fire Cannon",
+  "item.jaymoskingdoms.fire_cannon.tip": "Hold use to load a blaze rod or blaze powder. A rod is one shot through armour; powder is a blast of fire close in.",
+  "item.jaymoskingdoms.field_mortar": "Field Mortar",
+  "item.jaymoskingdoms.field_mortar.tip": "Set it on the ground. Use it with a Mortar Shell to load, then use it to fire the way you face. Look up to drop the shell nearer.",
+  "item.jaymoskingdoms.mortar_shell": "Mortar Shell",
+  "entity.jaymoskingdoms.field_mortar": "Field Mortar",
+  "message.jaymoskingdoms.avatar.cannon": "You tinker too? Then carry what we made down here. A rod to pierce, powder to burn.",
+  "death.attack.jaymoskingdoms.fire_lance": "%1$s was run through by a burning rod",
+  "death.attack.jaymoskingdoms.fire_lance.player": "%1$s was run through by %2$s's burning rod",
+  "death.attack.jaymoskingdoms.fire_blast": "%1$s was burned down",
+  "death.attack.jaymoskingdoms.fire_blast.player": "%1$s was burned down by %2$s"
+}

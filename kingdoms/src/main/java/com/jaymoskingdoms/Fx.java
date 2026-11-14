@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Fx {
 	private static boolean looked;
-	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst, pool;
+	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst, pool, shape;
 
 	private Fx() {
 	}
@@ -57,6 +57,12 @@ public final class Fx {
 			pool = lookup.findStatic(fx, "pool", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class, int.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = pool = null;
+		}
+		try {
+			shape = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.fx.MagicFx"), "shape",
+				MethodType.methodType(void.class, ServerLevel.class, int.class, Vec3.class, Vec3.class, float.class, int.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			shape = null;
 		}
 	}
 
@@ -210,6 +216,21 @@ public final class Fx {
 		if (sigil != null) {
 			try {
 				sigil.invoke(level, at, radius, color, ticks);
+			} catch (Throwable e) {
+				// nothing without Powers
+			}
+		}
+	}
+
+	/**
+	 * Any shape by Powers' number for it (0 beam, 1 blast, 2 ring, 3 orb, 4 sigil, 5 wave, 6 stroke, 7 pool): {@code d} is
+	 * a beam's reach, or the way a ring or a sigil faces (zero: flat on the ground).
+	 */
+	public static void shape(ServerLevel level, int kind, Vec3 at, Vec3 d, float size, int color, int ticks) {
+		look();
+		if (shape != null) {
+			try {
+				shape.invoke(level, kind, at, d, size, color, ticks);
 			} catch (Throwable e) {
 				// nothing without Powers
 			}

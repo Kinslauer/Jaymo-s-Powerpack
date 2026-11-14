@@ -1,0 +1,12 @@
+{
+  "item.jaymoskingdoms.handgonne": "Handgonne",
+  "item.jaymoskingdoms.handgonne.hint": "Hold use to load (gunpowder and a ball). Loaded, hold use to put the match to it. No good in the rain.",
+  "item.jaymoskingdoms.arquebus": "Arquebus",
+  "item.jaymoskingdoms.arquebus.hint": "Hold use to load (gunpowder and a ball). Loaded, use it to fire. The match won't burn in the rain.",
+  "entity.jaymoskingdoms.gun_ball": "Lead Ball",
+  "message.jaymoskingdoms.early_gun.wet": "The match is wet. It won't fire.",
+  "message.jaymoskingdoms.early_gun.tier.handgonne": "A handgonne's barrel is past you yet. (World tier: Borderlands)",
+  "message.jaymoskingdoms.early_gun.tier.arquebus": "An arquebus's barrel is past you yet. (World tier: Wildlands)",
+  "message.jaymoskingdoms.knowledge.locked.pattern": "You can't read an old piece's making yet. (Knowledge 2: an Ogre King)",
+  "item.jaymoskingdoms.worn_relic.lore": "Dug out of old ground, worn through. Mend it with iron at an anvil, or take it apart at a Drafting Table."
+}

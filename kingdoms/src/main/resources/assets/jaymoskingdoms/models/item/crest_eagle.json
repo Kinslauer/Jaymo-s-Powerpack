@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/torse",
+    "layer1": "jaymoskingdoms:item/crest_eagle"
+  }
+}

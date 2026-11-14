@@ -638,6 +638,7 @@ final class TradeRoutes {
 			if (f.type() == FactionType.VILLAGE) {
 				Worker w = McaCompat.escort(level, f, at, yaw, Caravans.TASK, 64);
 				if (w != null) {
+					Musketoon.arm(level, w.mob());
 					return w.mob();
 				}
 			}

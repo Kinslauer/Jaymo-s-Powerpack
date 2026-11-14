@@ -1,0 +1,66 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:iron_helmet",
+		"minecraft:iron_chestplate",
+		"minecraft:iron_leggings",
+		"minecraft:iron_boots",
+		"minecraft:golden_helmet",
+		"minecraft:golden_chestplate",
+		"minecraft:golden_leggings",
+		"minecraft:golden_boots",
+		"minecraft:diamond_helmet",
+		"minecraft:diamond_chestplate",
+		"minecraft:diamond_leggings",
+		"minecraft:diamond_boots",
+		"minecraft:netherite_helmet",
+		"minecraft:netherite_chestplate",
+		"minecraft:netherite_leggings",
+		"minecraft:netherite_boots",
+		{
+			"id": "minecraft:copper_helmet",
+			"required": false
+		},
+		{
+			"id": "minecraft:copper_chestplate",
+			"required": false
+		},
+		{
+			"id": "minecraft:copper_leggings",
+			"required": false
+		},
+		{
+			"id": "minecraft:copper_boots",
+			"required": false
+		},
+		"minecraft:turtle_helmet",
+		"jaymospowers:bog_iron_helmet",
+		"jaymospowers:bog_iron_chestplate",
+		"jaymospowers:bog_iron_leggings",
+		"jaymospowers:bog_iron_boots",
+		"jaymospowers:burrukai_plate_helmet",
+		"jaymospowers:burrukai_plate_chestplate",
+		"jaymospowers:burrukai_plate_leggings",
+		"jaymospowers:burrukai_plate_boots",
+		"jaymospowers:zanite_helmet",
+		"jaymospowers:zanite_chestplate",
+		"jaymospowers:zanite_leggings",
+		"jaymospowers:zanite_boots",
+		"jaymospowers:arkenium_helmet",
+		"jaymospowers:arkenium_chestplate",
+		"jaymospowers:arkenium_leggings",
+		"jaymospowers:arkenium_boots",
+		"jaymospowers:gravitite_helmet",
+		"jaymospowers:gravitite_chestplate",
+		"jaymospowers:gravitite_leggings",
+		"jaymospowers:gravitite_boots",
+		"jaymospowers:neptune_helmet",
+		"jaymospowers:neptune_chestplate",
+		"jaymospowers:neptune_leggings",
+		"jaymospowers:neptune_boots",
+		"jaymospowers:tinker_helmet",
+		"jaymospowers:tinker_chestplate",
+		"jaymospowers:tinker_leggings",
+		"jaymospowers:tinker_boots"
+	]
+}
