@@ -318,6 +318,24 @@ public final class Carry {
 	public static final List<BiConsumer<ServerPlayer, Entity>> PICKED_UP_LISTENERS = new ArrayList<>(), SET_DOWN_LISTENERS = new ArrayList<>(),
 		THROWN_LISTENERS = new ArrayList<>();
 
+	/**
+	 * Andy: "when you get to the target you can hogtie them if they are humanoid, and pick them up if you are strong enough".
+	 * Asked of every body: whether it is tied hand and foot (Jaymo's Kingdoms' lasso adds one, by reflection). A bound body is
+	 * lifted as someone downed is (armour and brawn decide if you're strong enough, {@link #overloaded}), and a bound player
+	 * can't jump out of your arms: they fight the ropes instead.
+	 */
+	public static final List<java.util.function.Predicate<Entity>> BOUND_CHECKS = new ArrayList<>();
+
+	/** Whether {@code entity} is tied hand and foot ({@link #BOUND_CHECKS}). */
+	public static boolean bound(Entity entity) {
+		for (java.util.function.Predicate<Entity> check : BOUND_CHECKS) {
+			if (check.test(entity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** (0.17.7) A lift being held: on whom, since when, and when use last came. */
 	private static final class Lift {
 		final Entity target;
@@ -476,7 +494,7 @@ public final class Carry {
 			|| CarryTemper.liftable(entity)) {
 			return true;
 		}
-		return Downed.isDowned(entity) && !(entity instanceof Animal);
+		return Downed.isDowned(entity) && !(entity instanceof Animal) || bound(entity);
 	}
 
 	/** (0.17.7) Too big for anyone's arms: wider or taller standing than {@link #MAX_LIFT_WIDTH} by {@link #MAX_LIFT_HEIGHT}. */
@@ -532,7 +550,7 @@ public final class Carry {
 	 */
 	public static boolean canStruggle(ServerPlayer player) {
 		// (0.15.8) lying limp from a crash is as helpless as being stunned
-		if (!player.isAlive() || player.isSleeping() || Downed.isDowned(player) || KitchenCompat.isLimp(player)) {
+		if (!player.isAlive() || player.isSleeping() || Downed.isDowned(player) || KitchenCompat.isLimp(player) || bound(player)) {
 			return false;
 		}
 		long now = player.level().getGameTime();
@@ -743,7 +761,7 @@ public final class Carry {
 
 	/**
 	 * (0.18.84) Too heavy to lift: {@code carrier} pulls the heaviest piece of armour off the body instead, and it drops
-	 * beside them (a downed body only; someone standing is just too heavy). Lift again for the next piece, or the body.
+	 * beside them (a downed body, or one tied hand and foot ({@link #bound}); someone standing free is just too heavy). Lift again for the next piece, or the body.
 	 */
 	static void shed(ServerPlayer carrier, LivingEntity body) {
 		EquipmentSlot heaviest = null;
@@ -755,7 +773,7 @@ public final class Carry {
 				heaviest = slot;
 			}
 		}
-		if (heaviest == null || !Downed.isDowned(body)) {
+		if (heaviest == null || !Downed.isDowned(body) && !bound(body)) {
 			carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.too_heavy", body.getDisplayName()).withStyle(ChatFormatting.RED));
 			return;
 		}

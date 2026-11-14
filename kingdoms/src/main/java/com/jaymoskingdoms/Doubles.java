@@ -41,8 +41,10 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Stolen lives. A shapeshifter takes a villager's place: the real one is carried off and kept tied up (in a dungeon, a cellar
- * dug near a settlement, or buried in a ruin), and a copy of them walks about the village in their place. The copy is good,
+ * Stolen lives. A shapeshifter takes a villager's place: the real one is carried off and kept tied up (buried alive in a
+ * shallow grave near the settlement, Andy: "so much so you can hear (see) their text through the ground and find them that
+ * way", {@link #grave}; or in a cellar dug near it, a dungeon, or shut in under a ruin), and a copy of them walks about the
+ * village in their place. The copy is good,
  * but it slips on small things: it names the wrong spouse and the wrong dog. The real one, freed, tells you the right ones
  * ({@link #plead}) and leads you home ({@link #leads}); you can catch the copy out (sneak and speak to it, once it has slipped
  * in your hearing), or let the two meet, and it drops its face for a {@link Shapeshifter}.
@@ -216,6 +218,66 @@ public final class Doubles {
 		home.setAttached(PENDING, list);
 	}
 
+
+	/** On a stolen life buried in a shallow grave ({@link #grave}): freed, they climb out of it ({@link #unearth}). Saved. */
+	static final AttachmentType<Boolean> BURIED = AttachmentRegistry.create(JaymosKingdoms.id("stolen_grave"), b -> b.persistent(Codec.BOOL));
+
+	/**
+	 * A shallow grave near a settlement: a strip of turned earth two long in the turf, and under one end of it a stolen life
+	 * stood tied up in the dark, a block of earth over their head. Their pleas come up through the ground (speech shows
+	 * through blocks), and that is how they're found: dig the one block and talk to them. True if it was dug.
+	 */
+	public static boolean grave(ServerLevel level, BlockPos near) {
+		BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, near).below();
+		var random = level.getRandom();
+		net.minecraft.core.Direction along = random.nextBoolean() ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.SOUTH;
+		BlockPos foot = top.relative(along);
+		// (soft ground only, level, dry and open: earth a shapeshifter could dig with its hands)
+		for (BlockPos p : List.of(top, foot)) {
+			var ground = level.getBlockState(p);
+			if (!(ground.is(net.minecraft.tags.BlockTags.DIRT) || ground.is(net.minecraft.tags.BlockTags.SAND)) || !level.getBlockState(p.above()).isAir()
+				|| !level.getFluidState(p.above()).isEmpty()) {
+				return false;
+			}
+		}
+		for (int dy = 1; dy <= 3; dy++) {
+			if (!level.getFluidState(top.below(dy)).isEmpty()) {
+				return false;
+			}
+		}
+		// the turned earth over them
+		level.setBlock(top, net.minecraft.world.level.block.Blocks.COARSE_DIRT.defaultBlockState(), 3);
+		level.setBlock(foot, net.minecraft.world.level.block.Blocks.COARSE_DIRT.defaultBlockState(), 3);
+		// the hole they stand in, on firm ground
+		BlockPos in = top.below(2);
+		level.setBlock(top.below(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+		level.setBlock(in, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+		if (!level.getBlockState(in.below()).isSolid()) {
+			level.setBlock(in.below(), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 3);
+		}
+		Villager captive = Captives.take(level, in);
+		if (captive == null) {
+			return true;
+		}
+		captive.setAttached(BURIED, true);
+		steal(level, captive);
+		return true;
+	}
+
+	/** {@code v}, freed from a shallow grave, climbs out of it onto the ground above. */
+	static void unearth(ServerLevel level, Villager v) {
+		if (v.getAttached(BURIED) == null) {
+			return;
+		}
+		v.removeAttached(BURIED);
+		BlockPos up = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, v.blockPosition());
+		if (up.getY() > v.getBlockY()) {
+			v.snapTo(up.getX() + 0.5, up.getY(), up.getZ() + 0.5, v.getYRot(), v.getXRot());
+		}
+		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.NEUTRAL, 1.0F, 0.8F);
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+			net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState()), v.getX(), v.getY() + 0.2, v.getZ(), 16, 0.3, 0.2, 0.3, 0.1);
+	}
 
 	/** How deep a cellar's floor lies, and half its width (blocks). */
 	static final int CELLAR_DEPTH = 8, CELLAR_HALF = 2;
@@ -415,6 +477,7 @@ public final class Doubles {
 		copy.removeAttached(Captives.CAPTIVE);
 		copy.removeAttached(Captives.BOUND);
 		copy.removeAttached(STOLEN);
+		copy.removeAttached(BURIED);
 		copy.setNoAi(false);
 		copy.setPermanentlyInvulnerable(false);
 		copy.setAttached(COPY, p.real());
