@@ -594,3 +594,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - Andy approved the lore paragraph "A town in doubt" ("Approved, merge"); PR #1548.
 - 2026-11-14 (Andy, captured site plans thread): taking over a bandit/illager site lets you add it to a schematic your kingdom can build (PR to follow); Illager Arena is ARR so our own desert arena is drawn.
 - 2026-11-14 (Andy, correcting the gender card): "no, gender should be before you can select skip the story". Skip is hidden until gender is picked on the story's first page; no gender card on the Life tab (PR #1553).
+- 2026-11-14 (Andy, life story skip vs MCA's creator): "you need to be able to toggle the selections in the box and also you should be able to go back to the MCA menu with the on second thought button. think of it as a more streamlined way for players to create their charcter. if they want to skip the story's determination. they run alongside one another not separate". PR #1567.
