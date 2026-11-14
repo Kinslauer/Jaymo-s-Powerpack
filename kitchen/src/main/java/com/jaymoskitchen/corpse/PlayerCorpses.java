@@ -142,7 +142,7 @@ public final class PlayerCorpses {
 	}
 
 	/** Left too long: the body gets up as a zombie wearing their face, with what was left on it. */
-	static void reanimate(CorpseEntity corpse, ServerLevel level, List<ItemStack> hotbar, int selected) {
+	static ZombiePlayer reanimate(CorpseEntity corpse, ServerLevel level, List<ItemStack> hotbar, int selected) {
 		ZombiePlayer zombie = new ZombiePlayer(ZOMBIE_PLAYER, level);
 		zombie.snapTo(corpse.getX(), corpse.getY(), corpse.getZ(), corpse.getYRot(), 0.0F);
 		corpse.owner().ifPresent(owner -> zombie.setOwner(owner, corpse.ownerName()));
@@ -155,5 +155,6 @@ public final class PlayerCorpses {
 		Reanimation.start(level, zombie);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F,
 			0.8F * (corpse.slim() ? SLIM_PITCH : 1.0F));
+		return zombie;
 	}
 }
