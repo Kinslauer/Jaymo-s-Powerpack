@@ -44,4 +44,8 @@ listener, a mechanics skill + cheatsheet, a SOUL rule, then tests. Mod side is P
   `E:/hermes/mcbot/PAUSED` (`mcbot.py off`/`on`). Don't delete `OFF`.
 
 ## Done
+Hermes side built and tested off-server; chat paused. A security review (separate agent) found no way for chat or model
+text to become a console command; its kill-switch, rate-limit and robustness gaps are fixed and retested (bad ask
+files skipped, `off` refuses after a wait too). Players see nothing yet: needs #1467 merged + pbdr, then `mcbot.py on`
+and an in-game test with Andy (not done). Answers take 10-150 s depending on NVIDIA's queue.
 - 2026-11-13 19:17 PR #1467 is merged into master; moved to Agents/Done.
