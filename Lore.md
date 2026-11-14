@@ -219,10 +219,11 @@ only "the gods of the power". They let a holder corrupt the gift and say nothing
 used to murder the innocent in their name: a villager of any people but the camps (the barbarians follow the
 Unseeing and are nothing to them). The first such killing, a voice in the holder's head; the second, a warning; the
 third, they take the gift back. The element turns on the land around the killer (a storm and its lightning, a fog,
-the ground thrown into the air, a flash freeze), and for a while the power runs wild in them: twice as strong, it
-wounds them with every blow they strike and burns them where they stand, and every creature that can flees them.
-Then it is gone for three days. The gods give it back still spoiled, unless the holder has made penance meanwhile:
-a Purifying Draught drunk while the gift is gone cleanses it. Jung counted Wind among the elements for this, beside
+the ground thrown into the air, a flash freeze), and for a while the power runs wild in them and in everyone near:
+twice as strong, it wounds them with every blow they strike and burns them where they stand, the element falls on
+whoever stands too close, and every creature that can flees them.
+Then it is gone for three days, and comes back still spoiled, unless the holder makes penance meanwhile: a Purifying
+Draught drunk while the gift is gone cleanses it, and the gods give it back at once. Jung counted Wind among the elements for this, beside
 the three that Andy named.
 (new) **The cold that kills** (Cryokinesis' corruption, 2026-11-13, Claude's placement for Andy to approve). A
 Cryokinesis holder who lets the cold do their killing, creature after creature frozen to death, finds it hungry: the
