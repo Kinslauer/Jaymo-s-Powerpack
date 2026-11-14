@@ -483,7 +483,7 @@ public final class IllagerTongue {
 		}
 		Identifier id = key.get().identifier();
 		return id.getNamespace().equals(JaymosKingdoms.MOD_ID) ? id.getPath().startsWith(IllagerSites.PREFIX)
-			: id.getNamespace().equals("minecraft") && (id.getPath().equals("pillager_outpost") || id.getPath().equals("mansion"));
+			: id.equals(IllagerSites.ILLAGER_ARENA_ID) || id.getNamespace().equals("minecraft") && (id.getPath().equals("pillager_outpost") || id.getPath().equals("mansion"));
 	}
 
 	/** The structure of theirs {@code player} stands in, or null. */
