@@ -38,3 +38,4 @@
 - One guard in three of every realm carries the gun its purse runs to: handgonnes in fiefdoms and poor kingdoms, arquebuses in prosperous ones, WeaponMod's musket in the wealthy, and a kingdom now counts as wealthy at 1000 (it was 260). Everything else that waits on a wealthy kingdom (war saddles and plate barding, mounted archers and elephants, the ruler's carriage, a second court wizard, the queen's diamond, the tavern) now waits for 1000 too.
 - **Worn relics**: brushing desert wells and pyramids, trail ruins and ocean ruins can turn up a worn, broken piece of old armour (iron, Templar, sometimes Juggernaut plate) to mend or take apart. Old battlefields lie here and there on dry land, scuffed patches of coarse dirt and gravel with more of it under the brush. Reading an old piece's pattern needs the Ogre King's knowledge.
 - Built; not played.
+- Eleven new loading-screen hints for the Frontier and Heraldry features.

@@ -26,10 +26,10 @@ Andy's notes are binding as written:
    Scoundrel, Sanguine, Despot, Foxshade; set perks; steel (dark-metal) grades.
 3. **Frontier gear** (built) (Powers + Kingdoms): Forge Hammer (fights, mines, smiths), field mortar, the Flame Avatars' fire-shot hand
    cannon and their classes.
-4. **Heraldry armour** (Kingdoms): layered harness, shoulder and elbow plates, late-medieval helms, visor key,
+4. **Heraldry armour** (built) (Kingdoms): layered harness, shoulder and elbow plates, late-medieval helms, visor key,
    finishes, arm and leg harness, crests, giornea, hoods and torn cloaks.
 5. **Heraldry fighting** (built) (Kingdoms): stamina, weapon sweet spot, cut/thrust/blunt against armour.
-6. **Heraldry smithing and arms** (Kingdoms): handgonne and arquebus by realm wealth, arrowheads, war weapons, pattern
+6. **Heraldry smithing and arms** (built) (Kingdoms): handgonne and arquebus by realm wealth, arrowheads, war weapons, pattern
    scrolls, forging failure, relic armour in old sand.
 
 Each patch: build both mods, add its lines to the change notes, place it in Lore.md as a `(new)` paragraph. At the end
