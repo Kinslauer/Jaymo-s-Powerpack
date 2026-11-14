@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472, #1474 (merged)"
+pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472, #1474, #1483 (merged)"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -76,6 +76,10 @@ let the owed village start run, close the game when needed. Long loading screens
   Histograms: growth is loaded-chunk data (sections, palettes, saved ticks, NBT) and StructureTemplate$StructureBlockInfo;
   live heap ~2 GB at 7:16 PM growing ~40 MB/min at ~17 cps. Watching (monitor alerts above 6.5 GB used).
 - Deck start lock: a crashed server's Konsole start.sh keeps .start.lock; kill that pid (fuser .start.lock) to restart.
+- 8:17 PM crash: ArrayIndexOutOfBounds in Felled's CutLogs LongLinkedOpenHashSet, called from worldgen (WorldGenRegion.setBlock
+  -> ServerLevel.updatePOIOnBlockStateChange hook) on several C2ME threads at once. Same root cause as the 6:22 / 7:03 PM
+  OOMs (autosave copying the corrupted linked set). #1483: FelledCutLogsMixin (@Pseudo) only notes on the server thread.
+  Merged ~8:50 PM, redeploying; Chunky paused by hand until then (ChunkyCompat resumes it when the server is empty).
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
