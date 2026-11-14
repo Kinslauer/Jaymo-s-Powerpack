@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * fight goes to a body it killed (or one nobody's player killed) and tears into it: lunging in, worrying it from side to
  * side and dragging it back, blood flying, until it's torn open. The meat spills on the ground with the rest of what it
  * carried, and the scavengers nearby eat the meat off the ground, one piece at a time, until they're full. Tame animals
- * don't, and players' kills are left for the player.
+ * don't. (Andy: "everything should be able to be eaten": players' bodies and kills, monsters' and the rotten dead's
+ * bodies too, {@link CorpseEntity#isCarrionFor}; what a player's body had on it is left on the ground for good.)
  * <p>
  * (0.5.5) Zombies go for villagers' bodies first, and a zombie in a village doesn't leave a meal to chase the next
  * villager: only a player (or anything else) it's fighting pulls it off. A villager that's been eaten (by anything)
@@ -201,30 +202,14 @@ public final class Scavengers {
 		}
 
 		private void bite(ServerLevel level, Vec3 in) {
-			int bites = body.bite();
 			// yank back, dragging the body a little after it
 			mob.setDeltaMovement(mob.getDeltaMovement().add(in.scale(-YANK)).add(0.0, 0.05, 0.0));
 			mob.syncVelocity = true;
-			Vec3 drag = in.scale(-DRAG);
-			if (level.noCollision(body, body.getBoundingBox().move(drag))) {
-				body.setPos(body.getX() + drag.x, body.getY(), body.getZ() + drag.z);
-			}
-			com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
-			level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
-			float pitch = 0.6F + mob.getRandom().nextFloat() * 0.3F;
-			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 1.0F, pitch);
-			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 0.8F, pitch);
 			if (mob.getRandom().nextInt(3) == 0) {
 				// growling over it
 				mob.playAmbientSound();
 			}
-			if (bites >= BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH)) {
-				com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.3, body.getZ(), 40, 0.35, 0.15, 0.35, 0.25);
-				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.5F);
-				java.util.Optional<java.util.UUID> villager = body.isVillager() ? body.deadId() : java.util.Optional.empty();
-				CARRION.addAll(body.tearApart(level));
-				// (0.5.5) nothing left of them to bury
-				villager.ifPresent(dead -> McaGraves.unbury(level, dead));
+			if (tear(level, mob, body, in, BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH))) {
 				body = null;
 			}
 		}
@@ -234,6 +219,56 @@ public final class Scavengers {
 			body = null;
 			mob.getNavigation().stop();
 		}
+	}
+
+	/**
+	 * One bite into {@code body} by {@code eater}, its jaws coming in along {@code in}: the body is dragged a little after
+	 * them, blood flies, and once it's taken {@code needed} bites it's torn open (its meat spilled for the scavengers, a
+	 * villager's grave emptied). True when it was torn open.
+	 */
+	private static boolean tear(ServerLevel level, net.minecraft.world.entity.Entity eater, CorpseEntity body, Vec3 in, int needed) {
+		int bites = body.bite();
+		Vec3 drag = in.scale(-DRAG);
+		if (level.noCollision(body, body.getBoundingBox().move(drag))) {
+			body.setPos(body.getX() + drag.x, body.getY(), body.getZ() + drag.z);
+		}
+		com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
+		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
+		float pitch = 0.6F + eater.getRandom().nextFloat() * 0.3F;
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 1.0F, pitch);
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 0.8F, pitch);
+		if (bites < needed) {
+			return false;
+		}
+		com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.3, body.getZ(), 40, 0.35, 0.15, 0.35, 0.25);
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.5F);
+		java.util.Optional<java.util.UUID> villager = body.isVillager() ? body.deadId() : java.util.Optional.empty();
+		CARRION.addAll(body.tearApart(level));
+		// (0.5.5) nothing left of them to bury
+		villager.ifPresent(dead -> McaGraves.unbury(level, dead));
+		return true;
+	}
+
+	/**
+	 * Andy: "werewolves can also eat the corpses and parts." For Jaymo's Kingdoms (by name, it doesn't compile against
+	 * Kitchen): whether {@code corpse} is a body a werewolf may eat ({@link CorpseEntity#isFleshForDevourer}).
+	 */
+	public static boolean devourable(net.minecraft.world.entity.Entity corpse) {
+		return corpse instanceof CorpseEntity body && body.isFleshForDevourer();
+	}
+
+	/**
+	 * A werewolf ({@code eater}, a beast or a player wearing one) bites into {@code corpse}: torn at as a scavenger tears
+	 * it, but it takes only {@code needed} bites. True when it's been torn open (the body's gone); false for a bite, or
+	 * for something that isn't a body it may eat.
+	 */
+	public static boolean devourBite(ServerLevel level, net.minecraft.world.entity.Entity eater, net.minecraft.world.entity.Entity corpse, int needed) {
+		if (!(corpse instanceof CorpseEntity body) || !body.isFleshForDevourer()) {
+			return false;
+		}
+		Vec3 in = body.position().subtract(eater.position()).multiply(1.0, 0.0, 1.0);
+		in = in.lengthSqr() < 1.0E-4 ? Vec3.ZERO : in.normalize();
+		return tear(level, eater, body, in, needed);
 	}
 
 	/**

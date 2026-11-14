@@ -432,6 +432,34 @@ public final class KitchenCompat {
 		});
 	}
 
+	/** How much of a whole body is lost with its head, and with each arm or leg; the least that's left of one. */
+	static final float HEAD_SHARE = 0.2F, LIMB_SHARE = 0.15F, LEAST_WHOLE = 0.2F;
+	private static @Nullable Method missingParts;
+	private static boolean lookedForMissing;
+
+	/**
+	 * Andy: "headless bodies with no limbs or legs still count, it just requires more if the body isnt complete." How
+	 * much of a whole body this corpse still is: 1 with everything on, less a share for its head and each arm and leg
+	 * lost before it died (Kitchen's {@code CorpseEntity.missing()}), at least {@link #LEAST_WHOLE}.
+	 */
+	public static float wholeness(Entity corpse) {
+		if (!lookedForMissing) {
+			lookedForMissing = true;
+			if (CORPSE != null) {
+				try {
+					missingParts = CORPSE.getMethod("missing");
+				} catch (ReflectiveOperationException e) {
+					missingParts = null;
+				}
+			}
+		}
+		if (!(call(missingParts, corpse) instanceof Integer mask)) {
+			return 1.0F;
+		}
+		float whole = 1.0F - ((mask & 1) != 0 ? HEAD_SHARE : 0.0F) - Integer.bitCount(mask & 30) * LIMB_SHARE;
+		return Math.max(LEAST_WHOLE, whole);
+	}
+
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */
 	static boolean burials() {
 		return ROB_BY != null;
