@@ -1226,12 +1226,13 @@ public final class Finishers {
 			// (0.15.114) a crippled one is held where it is too
 			root(body, true);
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
-			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
 		if (kind.strike == Strike.POWER) {
+			// (Andy: "nothing labels them": a power's own has no name, on screen or off)
 			PowerFinishers.begin(level, player, body, kind);
 			return;
 		}
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
+			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
 		if (kind.strike == Strike.KI) {
 			// (0.18.46) a Z Fighter's: the ki paid, and his own opening
 			com.jaymospowers.power.zfighter.ZFighterExecutions.begin(level, player, body, kind);

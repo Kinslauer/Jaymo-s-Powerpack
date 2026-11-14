@@ -105,6 +105,11 @@ public final class Lash {
 	 * flying out to where you looked as the whirl was let go ({@code shape.x}: the ticks its flight takes).
 	 */
 	public static final byte EMBED = 9, THROW = 10;
+	/**
+	 * The chain axe's left click: an overhead chop ({@link #hew}), the head swung up over you and brought down through
+	 * where you aim.
+	 */
+	public static final byte HEW = 11;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/**
@@ -217,6 +222,22 @@ public final class Lash {
 	static final double ITEM_GRAB = 1.2, ITEM_AIM = 0.7, ITEM_FLING = 0.1, ITEM_LOFT = 0.08;
 	/** The head flies back to the hand in this many ticks. */
 	public static final int RETURN_TICKS = 5;
+
+	// ---- the chain axe's chop ---------------------------------------------------------------------------------------
+	/**
+	 * Andy: "it should deal damage when the axe head makes impact. so it should only do overhead strikes to maximize that
+	 * chance." A left click (at least {@link #SWEEP_MIN_CHARGE} charged) swings the head up and over your head and brings
+	 * it down through the spot you aim at ({@link #chopAim}): the locked foe's picked region, else the one you struck at,
+	 * else {@code CHOP_REACH} ahead. That spot is at least {@code CHOP_NEAR} from the chest and at most {@code CHOP_FAR}.
+	 * The arc runs from {@code CHOP_START} (radians, up and back from the spot) to {@code CHOP_END} past it, over
+	 * {@code CHOP_TICKS}, speeding up as it falls. Only what the head itself meets is hurt ({@code CHOP_HIT}: how close
+	 * it must pass), {@code CHOP_SHARE} of the axe's blow times the swing's charge; the first creature it meets, or the
+	 * ground, stops it there. The haft's own blow does nothing.
+	 */
+	public static final double CHOP_REACH = 3.0, CHOP_NEAR = 1.6, CHOP_FAR = 4.0, CHOP_START = 2.6, CHOP_END = 0.7;
+	public static final int CHOP_TICKS = 7;
+	static final float CHOP_SHARE = 1.0F;
+	static final double CHOP_HIT = 0.35;
 
 	// ---- the burning chain (a Smoke user's) -------------------------------------------------------------------------
 	/**
@@ -344,6 +365,11 @@ public final class Lash {
 		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (player instanceof ServerPlayer server && hand == InteractionHand.MAIN_HAND) {
 				swipe(server, entity);
+				if (entity instanceof LivingEntity && isChainAxe(server.getMainHandItem())) {
+					// the chain axe's haft strikes no one: only its head hurts, where the chop lands; the swing is spent all the same
+					server.resetAttackStrengthTicker();
+					return InteractionResult.FAIL;
+				}
 			}
 			return InteractionResult.PASS;
 		});
@@ -474,6 +500,10 @@ public final class Lash {
 				yield target == null ? state.aim() : buriedAt(target, feet, partialTick);
 			}
 			case THROW -> state.from().lerp(state.aim(), Math.min(1.0, t / Math.max(1.0, state.shape().x)));
+			case HEW -> {
+				Vec3 arc = chopPoint(player, state, t, partialTick);
+				yield t < SWEEP_LEAD ? state.from().lerp(arc, smooth(t / SWEEP_LEAD)) : arc;
+			}
 			case SNAG, HEAVE, YANK -> {
 				Entity target = player.level().getEntity(state.target());
 				yield target == null ? state.aim() : target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.55, 0.0);
@@ -503,6 +533,24 @@ public final class Lash {
 		// a level sweep is a little low at the ends, highest across the front
 		double droop = 0.25 * Math.abs(state.shape().x) * Math.abs(Math.sin(a));
 		return chest.add(plane[0].scale(Math.cos(a) * state.aim().z)).add(plane[1].scale(Math.sin(a) * state.aim().z)).add(0.0, -droop, 0.0);
+	}
+
+	/**
+	 * The chop's arc, {@code t} ticks in: in the upright plane through your chest and the spot it was aimed at
+	 * ({@code aim}: yaw and pitch from the chest, in radians, then how far), from up behind your head ({@code shape.z})
+	 * over the top and down through the spot, speeding up as it falls.
+	 */
+	public static Vec3 chopPoint(Player player, State state, double t, float partialTick) {
+		double a = chopAngle(state, t);
+		Vec3[] plane = sweepPlane(state.aim().x, state.aim().y, 0.0, -1.0);
+		Vec3 chest = player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0);
+		return chest.add(plane[0].scale(Math.cos(a) * state.aim().z)).add(plane[1].scale(Math.sin(a) * state.aim().z));
+	}
+
+	/** How far round the chop is, {@code t} ticks in (radians: negative is above the spot, 0 is the spot). */
+	static double chopAngle(State state, double t) {
+		double s = Mth.clamp(t / CHOP_TICKS, 0.0, 1.0);
+		return Mth.lerp(s * s, state.shape().z, CHOP_END);
 	}
 
 	/** (0.19.73) A swipe's plane: ahead along yaw and pitch (radians), and the way it travels (across and up as you see it). */
@@ -646,6 +694,9 @@ public final class Lash {
 				float s = (float)Math.min(1.0, (t - STRIKE_OVER) / (STRIKE_TICKS - 1 - STRIKE_OVER));
 				yield Mth.lerp(s * s, OVERHEAD_RAISE, DROP_RAISE);
 			}
+			// the chop: the arm goes up with the head, then comes down with it
+			case HEW -> t < SWEEP_LEAD ? Mth.lerp((float)smooth(t / SWEEP_LEAD), REST_RAISE, OVERHEAD_RAISE)
+				: Mth.lerp((float)Mth.clamp((chopAngle(state, t) - state.shape().z) / (CHOP_END - state.shape().z), 0.0, 1.0), OVERHEAD_RAISE, DROP_RAISE);
 			default -> Mth.lerp((float)smooth(Math.min(1.0, t / RETURN_TICKS)), DROP_RAISE, REST_RAISE);
 		};
 	}
@@ -854,6 +905,12 @@ public final class Lash {
 			case SWEEP -> {
 				sweep(run, state, t);
 				if (t >= SWEEP_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == SWEEP) {
+					back(player, state, now);
+				}
+			}
+			case HEW -> {
+				chopStep(run, state, t);
+				if (t >= CHOP_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == HEW) {
 					back(player, state, now);
 				}
 			}
@@ -1371,6 +1428,10 @@ public final class Lash {
 		byte kind = flail ? FLAIL : WHIP;
 		Aim press = press(player, kind);
 		Vec3 head = following ? head(player, was, now, 1.0F) : player.position().add(press.head());
+		if (isChainAxe(held)) {
+			hew(player, attacked, head);
+			return;
+		}
 		Run run = new Run(player);
 		run.held = false;
 		run.swipe = true;
@@ -1429,6 +1490,85 @@ public final class Lash {
 				back(player, state, now);
 				return;
 			}
+		}
+	}
+
+	/**
+	 * The chain axe's left click ({@link #HEW}): from where the head is ({@code head}), up over your head and down through
+	 * {@link #chopAim}. What {@code attacked} (struck at, or null) is hit by only if the head meets it.
+	 */
+	private static void hew(ServerPlayer player, @Nullable Entity attacked, Vec3 head) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Run run = new Run(player);
+		run.held = false;
+		run.swipe = true;
+		run.spin = player.getAttackStrengthScale(0.5F);
+		RUNS.put(player.getUUID(), run);
+		Vec3 chest = player.getEyePosition().add(0.0, -0.4 * player.getScale(), 0.0);
+		Vec3 to = chopAim(player, attacked).subtract(chest);
+		double far = Mth.clamp(to.length(), CHOP_NEAR, CHOP_FAR);
+		Vec3 dir = to.lengthSqr() < 1.0E-4 ? player.getLookAngle() : to.normalize();
+		Vec3 aim = new Vec3(Math.atan2(-dir.x, dir.z), -Math.asin(Mth.clamp(dir.y, -1.0, 1.0)), far);
+		player.setAttached(STATE, new State(FLAIL, HEW, now, -1, head, aim, new Vec3(0.0, -1.0, -CHOP_START)));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F, 0.7F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.4F, 1.1F);
+	}
+
+	/**
+	 * Where the chop comes down: the picked region of the foe you're locked on to, else the middle of the one you struck
+	 * at, else {@link #CHOP_REACH} ahead of your eyes.
+	 */
+	private static Vec3 chopAim(ServerPlayer player, @Nullable Entity attacked) {
+		Vec3 eye = player.getEyePosition();
+		LivingEntity locked = com.jaymospowers.core.LockOn.target(player);
+		if (locked != null) {
+			return eye.add(com.jaymospowers.core.LockOn.aim(player).scale(eye.distanceTo(locked.getBoundingBox().getCenter())));
+		}
+		if (attacked != null) {
+			return attacked.getBoundingBox().getCenter();
+		}
+		return eye.add(player.getLookAngle().scale(CHOP_REACH));
+	}
+
+	/**
+	 * One tick of a chop: the first creature the head passed through is struck (round its guard: a chop comes over the
+	 * top), with a point of wear on the axe, and the head stops in it; failing that, ground it came down into stops it.
+	 */
+	private static void chopStep(Run run, State state, long t) {
+		if (t < 1) {
+			return;
+		}
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 head = head(player, state, now, 1.0F), last = head(player, state, now - 1, 1.0F);
+		LivingEntity hit = null;
+		double nearest = Double.MAX_VALUE;
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, new AABB(last, head).inflate(CHOP_HIT), e -> struck(player, e))) {
+			AABB box = other.getBoundingBox().inflate(CHOP_HIT);
+			java.util.Optional<Vec3> at = box.contains(last) ? java.util.Optional.of(last) : box.clip(last, head);
+			if (at.isPresent() && at.get().distanceToSqr(last) < nearest) {
+				nearest = at.get().distanceToSqr(last);
+				hit = other;
+			}
+		}
+		if (hit != null) {
+			if (strike(player, hit, flailDamage(player) * CHOP_SHARE * run.spin, guarding(hit, player))) {
+				player.getMainHandItem().hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+				Vec3 at = hit.getBoundingBox().getCenter();
+				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 6, 0.2, 0.2, 0.2, 0.1);
+			}
+			level.playSound(null, hit.getX(), hit.getY(), hit.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.8F);
+			level.playSound(null, hit.getX(), hit.getY(), hit.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.6F, 0.9F);
+			back(player, state, now);
+			return;
+		}
+		if (chopAngle(state, t) > -0.5 && solid(level, BlockPos.containing(head))) {
+			// it came down into the ground short of anyone
+			level.playSound(null, head.x, head.y, head.z, SoundEvents.AXE_STRIP, SoundSource.PLAYERS, 0.8F, 0.7F);
+			level.sendParticles(ParticleTypes.CRIT, head.x, head.y, head.z, 4, 0.1, 0.05, 0.1, 0.05);
+			back(player, state, now);
 		}
 	}
 
