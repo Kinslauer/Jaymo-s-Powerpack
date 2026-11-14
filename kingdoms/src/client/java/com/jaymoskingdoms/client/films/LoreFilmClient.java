@@ -60,7 +60,9 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -910,6 +912,7 @@ public final class LoreFilmClient {
 		double[] heights = new double[wide * deep];
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		BlockState earth = Blocks.DIRT.defaultBlockState(), turf = Blocks.GRASS_BLOCK.defaultBlockState();
+		int base = Mth.floor(f.real(f.origin.x, f.origin.z));
 		for (int z = z0; z <= z1; z++) {
 			for (int x = x0; x <= x1; x++) {
 				int i = (z - z0) * wide + (x - x0);
@@ -918,7 +921,8 @@ public final class LoreFilmClient {
 				if (fw < LAND_BACK || fw > LAND_FRONT || Math.abs(s) > LAND_HALF || !f.level.hasChunkAt(pos.set(x, 0, z))) {
 					continue;
 				}
-				int ground = Mth.floor(f.real(x + 0.5, z + 0.5)), up = (int)Math.round(hill(fw, s) * (f.onSeat ? seatClear(fw, s) : 1.0));
+				double own = f.onSeat ? seatClear(fw, s) : 1.0;
+				int up = (int)Math.round(hill(fw, s) * own), ground = level(f, x, z, base, own * levelled(fw, s), up > 0);
 				// (one column's own number, the same every time the film is laid here)
 				int roll = Math.floorMod((int)Math.round(fw * 7.0) * 73_856_093 ^ (int)Math.round(s * 7.0) * 19_349_663, 1_000);
 				boolean track = fw > TRACK_FROM && fw < TRACK_TO && Math.abs(s + Math.sin(fw * 0.21) * 0.8) < TRACK_HALF - (roll % 3) * 0.3;
@@ -950,6 +954,69 @@ public final class LoreFilmClient {
 		f.landX = x0;
 		f.landZ = z0;
 		f.landWide = wide;
+	}
+
+	/**
+	 * The level field. Andy, of the film played out in the wilds: "the cutscene broke near the end, and alot of the quiet
+	 * one's shot wasnt there" (the fight had gone down into a pond and behind a hillside, and the camera after it). The
+	 * film was shot on a flat field, so it makes one of the land it is played on, on this screen only: over the stage the
+	 * world's own ground is cut down or filled up to the height you stand at, its ponds filled and its trees cleared, easing
+	 * back to the land as it lies over the last LEVEL_EDGE blocks of the stage (and toward a kingdom's seat, which is left
+	 * standing). Only wild ground is touched: a column with somebody's building on it is left alone. A drop deeper than
+	 * LEVEL_DEEP below you is bridged, not filled.
+	 */
+	static final double LEVEL_EDGE = 22.0;
+	static final int LEVEL_DEEP = 24, LEVEL_SOIL = 3;
+
+	/** How much of the levelling is done at the stage's {@code (fw, s)}: all of it inside, none at the stage's edge. */
+	static double levelled(double fw, double s) {
+		return smooth((float)(Math.min(Math.min(fw - LAND_BACK, LAND_FRONT - fw), LAND_HALF - Math.abs(s)) / LEVEL_EDGE));
+	}
+
+	/** Whether {@code state} is somebody's work (a house's boards, steps, walls and windows), not the land's. */
+	private static boolean built(BlockState state) {
+		return state.is(BlockTags.PLANKS) || state.is(BlockTags.STAIRS) || state.is(BlockTags.SLABS) || state.is(BlockTags.WALLS) || state.is(BlockTags.FENCES)
+			|| state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.WOOL) || state.is(BlockTags.STONE_BRICKS) || state.is(BlockTags.BEDS)
+			|| state.is(BlockTags.IMPERMEABLE) || state.is(Blocks.COBBLESTONE) || state.is(Blocks.BRICKS);
+	}
+
+	/**
+	 * Levels the column at {@code x, z} toward {@code base} by {@code by} (0: left as it lies; 1: brought right to it) and
+	 * gives the height its ground is at then. {@code raised}: a hill is about to be laid on it, so it wants no turf of its own.
+	 */
+	private static int level(Film f, int x, int z, int base, double by, boolean raised) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, 0, z);
+		int top = f.level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z), low = base - LEVEL_DEEP, ground = low;
+		boolean wild = true;
+		for (int y = top - 1; y >= low; y--) {
+			BlockState state = f.level.getBlockState(pos.setY(y));
+			if (built(state)) {
+				wild = false;
+				break;
+			}
+			if (state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS) || state.getCollisionShape(f.level, pos).isEmpty()) {
+				// (air, water, plants and trees: not ground)
+				continue;
+			}
+			ground = y + 1;
+			break;
+		}
+		if (by <= 0.0 || !wild) {
+			// (somebody's building, or beyond the film's field: the floor near the height you stand at, as it is)
+			return Mth.floor(f.real(x + 0.5, z + 0.5));
+		}
+		int to = (int)Math.round(Mth.lerp(by, ground, base));
+		for (int y = top - 1; y >= to; y--) {
+			BlockState state = f.level.getBlockState(pos.setY(y));
+			if (!state.isAir() && state.getFluidState().isEmpty()) {
+				// (water over the field's height is left lying: it only ever is at the field's edges)
+				put(f, pos, Blocks.AIR.defaultBlockState());
+			}
+		}
+		for (int y = to == ground ? to : Math.min(ground, to - LEVEL_SOIL); y < to; y++) {
+			put(f, pos.setY(y), !raised && y == to - 1 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.DIRT.defaultBlockState());
+		}
+		return to;
 	}
 
 	private static void put(Film f, BlockPos pos, BlockState state) {
