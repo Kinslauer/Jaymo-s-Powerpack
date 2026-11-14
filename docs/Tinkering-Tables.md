@@ -46,6 +46,19 @@ Both live in `TableExtras`, held by every table menu (`TinkerTableMenu`).
 items on top (the Forge's five along its top, the grid in 3x3). `StationEntity.busyFor` recognises the new menus.
 `StationEntity.open/changed/close` are public now.
 
+## Smeltery extras (melter, tank, channel)
+
+After Tinkers' Construct 3 (MIT; its models and textures). All in `tinkering/smeltery/`, registered by `SmelteryExtras`.
+Anything that gives or takes metal is a `MoltenHolder` (smeltery, melter, tank, channel, casting table and basin); a faucet
+pours from the holder it hangs on into the holder under it. `MoltenEntity` is the shared block entity (its `Tank`, saving,
+sync every 5 ticks); `MoltenRenderer` draws the metal.
+
+| Block | What it does | Recipe (b seared brick, g glass) |
+| --- | --- | --- |
+| `seared_melter` | A one-block smeltery. Set it over heat (what the kiln counts: campfire, fire, lava, magma, a lit forge hearth; `kiln.Heat`). Right-click with up to 3 things that melt; empty hand takes back what hasn't melted, then reads the pool. Holds 12 ingots, does not alloy. A faucet on its side pours it. | `bgb` / `bbb` |
+| `seared_tank` | Holds 4 blocks of one metal. A faucet or channel over it fills it, a faucet on its side empties it; empty hand reads it. Breaking it loses the metal. | `bbb` / `bgb` / `bbb` |
+| `seared_channel` | A trough: joins to channels beside it, opens downward over a casting table, basin, tank or channel. A faucet above pours in; each stretch fills what is under it first, then passes metal on. Dregs under a nugget that can't move cool away after 10 s. | `b b` / `bbb` (3) |
+
 ## Not done / notes
 - Tool Forge has no facing (its top runs north-south); JEI isn't told the Forge also makes tools.
 - JEI: the Crafting Station is a crafting catalyst and takes a recipe's "+" (`TinkeringJei.registerRecipeTransferHandlers`; the

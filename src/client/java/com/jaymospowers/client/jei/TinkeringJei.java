@@ -84,6 +84,7 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addCraftingStation(CASTING, Tinkering.CASTING_TABLE);
 		registration.addCraftingStation(CASTING_BASIN, Tinkering.CASTING_BASIN);
 		registration.addCraftingStation(MELTING, Tinkering.SMELTERY);
+		registration.addCraftingStation(MELTING, com.jaymospowers.tinkering.smeltery.SmelteryExtras.MELTER);
 		registration.addCraftingStation(ALLOYING, Tinkering.SMELTERY);
 		registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION);
 	}

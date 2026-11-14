@@ -17,8 +17,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A faucet on a smeltery drain: opened (right-click or a redstone pulse), it pours the smeltery's bottom liquid into
- * the casting table or basin under it until that's full or the liquid runs out.
+ * A faucet on a smeltery drain (or on a melter or tank): opened (right-click or a redstone pulse), it pours the bottom
+ * liquid into the casting table, basin, tank or channel under it until that's full or the liquid runs out.
  */
 public class FaucetEntity extends BlockEntity {
 	/** mB a tick it pours. */
@@ -45,34 +45,36 @@ public class FaucetEntity extends BlockEntity {
 		}
 	}
 
-	private @Nullable SmelteryEntity source() {
+	/** What it pours from: the smeltery behind a drain, or a melter, tank or channel it hangs on. */
+	private @Nullable MoltenHolder source() {
 		if (level == null) {
 			return null;
 		}
 		BlockPos behind = worldPosition.relative(getBlockState().getValue(HorizontalDirectionalBlock.FACING).getOpposite());
-		return level.getBlockEntity(behind) instanceof DrainEntity drain ? drain.smeltery() : null;
+		BlockEntity entity = level.getBlockEntity(behind);
+		return entity instanceof DrainEntity drain ? drain.smeltery() : entity instanceof MoltenEntity molten ? molten : null;
 	}
 
-	private @Nullable CastingEntity target() {
-		return level != null && level.getBlockEntity(worldPosition.below()) instanceof CastingEntity casting ? casting : null;
+	/** What it pours into: a casting table or basin, a tank or a channel under it. */
+	private @Nullable MoltenHolder target() {
+		return level != null && level.getBlockEntity(worldPosition.below()) instanceof MoltenHolder holder ? holder : null;
 	}
 
 	/** The liquid it would pour now: the smeltery's bottom one, if the cast below takes it. */
 	private @Nullable Molten next() {
-		SmelteryEntity smeltery = source();
-		CastingEntity casting = target();
-		Tank.Layer bottom = smeltery == null ? null : smeltery.tank().bottom();
-		return bottom != null && casting != null && casting.wants(bottom.molten) > 0 ? bottom.molten : null;
+		MoltenHolder from = source();
+		MoltenHolder into = target();
+		Molten bottom = from == null ? null : from.offers();
+		return bottom != null && into != null && into.wants(bottom) > 0 ? bottom : null;
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, FaucetEntity faucet) {
 		if (faucet.pouring == null) {
 			return;
 		}
-		SmelteryEntity smeltery = faucet.source();
-		CastingEntity casting = faucet.target();
-		Tank.Layer bottom = smeltery == null ? null : smeltery.tank().bottom();
-		if (casting == null || bottom == null || bottom.molten != faucet.pouring) {
+		MoltenHolder smeltery = faucet.source();
+		MoltenHolder casting = faucet.target();
+		if (casting == null || smeltery == null || smeltery.offers() != faucet.pouring) {
 			faucet.set(null);
 			return;
 		}

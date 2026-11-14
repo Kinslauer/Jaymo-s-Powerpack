@@ -193,6 +193,7 @@ public final class Tinkering {
 			new MenuType<>(ToolStationMenu::new, FeatureFlags.VANILLA_SET));
 
 		registerSmeltery();
+		com.jaymospowers.tinkering.smeltery.SmelteryExtras.register();
 		registerKnifeMetals();
 		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
 		com.jaymospowers.tinkering.kiln.Kiln.register();
@@ -213,6 +214,9 @@ public final class Tinkering {
 			output.accept(com.jaymospowers.tinkering.table.Tables.PART_CHEST);
 			output.accept(PATTERN);
 			for (Block block : List.of(GROUT, SEARED_BRICKS, SEARED_GLASS, SMELTERY, DRAIN, FAUCET, CASTING_TABLE, CASTING_BASIN)) {
+				output.accept(block);
+			}
+			for (Block block : com.jaymospowers.tinkering.smeltery.SmelteryExtras.blocks()) {
 				output.accept(block);
 			}
 			output.accept(SEARED_BRICK);

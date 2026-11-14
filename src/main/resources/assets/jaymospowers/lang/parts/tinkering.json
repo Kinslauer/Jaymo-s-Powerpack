@@ -299,7 +299,6 @@
   "trait.jaymospowers.timber.desc": "Fells a whole tree when you cut a log of it (sneak to cut just one).",
   "trait.jaymospowers.vein": "Vein Mining",
   "trait.jaymospowers.vein.desc": "Mines the whole vein of ore when you break a piece of it.",
-  "gui.jaymospowers.tool_station.embed": "Setting diamonds along its edge",
   "item.jaymospowers.broad_axe_head_cast": "Broad Axe Head Cast",
   "item.jaymospowers.tough_binding_cast": "Tough Binding Cast",
   "material.jaymospowers.feather": "Feather",
@@ -342,5 +341,11 @@
   "jei.jaymospowers.kiln.heat.3": "a hearth or soul fire with the bellows pumping (heat 3)",
   "jei.jaymospowers.kiln.heat.more": "heat %s",
   "jei.jaymospowers.kiln.bonus": "%s%% chance of one more each",
-  "jei.jaymospowers.kiln.how": "Right-click the thing into a brick-walled space over the fire"
+  "jei.jaymospowers.kiln.how": "Right-click the thing into a brick-walled space over the fire",
+  "block.jaymospowers.seared_tank": "Seared Tank",
+  "block.jaymospowers.seared_melter": "Seared Melter",
+  "block.jaymospowers.seared_channel": "Seared Channel",
+  "message.jaymospowers.molten.holds": "%s: %s",
+  "message.jaymospowers.molten.empty": "Empty",
+  "message.jaymospowers.melter.full": "The melter is full."
 }

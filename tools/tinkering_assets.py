@@ -243,6 +243,12 @@ SMELTERY_LANG = {
     "block.jaymospowers.seared_faucet": "Seared Faucet",
     "block.jaymospowers.casting_table": "Casting Table",
     "block.jaymospowers.casting_basin": "Casting Basin",
+    "block.jaymospowers.seared_tank": "Seared Tank",
+    "block.jaymospowers.seared_melter": "Seared Melter",
+    "block.jaymospowers.seared_channel": "Seared Channel",
+    "message.jaymospowers.molten.holds": "%s: %s",
+    "message.jaymospowers.molten.empty": "Empty",
+    "message.jaymospowers.melter.full": "The melter is full.",
     "item.jaymospowers.seared_brick": "Seared Brick",
     "container.jaymospowers.smeltery": "Smeltery",
     "message.jaymospowers.smeltery.unformed": "The smeltery isn't complete yet.",
@@ -773,6 +779,50 @@ def smeltery(tcon):
     copy_png(os.path.join(tex, "gui", "heating_structure.png"), "gui/tinkering/smeltery")
 
 
+def smeltery_extras(tcon):
+    """The seared tank, melter and channel: Tinkers' own models (its loader keys dropped; our renderer draws the metal)."""
+    tex = os.path.join(tcon, "assets", "tconstruct", "textures", "block", "smeltery")
+    models_dir = os.path.join(tcon, "assets", "tconstruct", "models", "block", "template")
+    t = NS + ":block/tinkering/"
+    for name, rel in (("tank_top", "tank/tank_top"), ("tank_side", "tank/fuel_tank"), ("gauge_top", "tank/gauge_top"),
+                      ("melter_side", "controller/melter_side"), ("melter_inactive", "controller/melter_inactive"),
+                      ("melter_active", "controller/melter_active")):
+        copy_png(os.path.join(tex, rel + ".png"), "block/tinkering/" + name)
+
+    def template(rel, name, textures, particle):
+        tpl = json.load(open(os.path.join(models_dir, rel + ".json")))
+        out = {"parent": "minecraft:block/block", "textures": dict(textures, particle=t + particle), "elements": tpl["elements"]}
+        for element in out["elements"]:
+            element.pop("name", None)
+        write(os.path.join(ASSETS, "models", "block", "tinkering", name + ".json"), out)
+
+    rotations = {"north": 0, "east": 90, "south": 180, "west": 270}
+    template("tank_knob", "seared_tank", {"top": t + "tank_top", "side": t + "tank_side"}, "tank_side")
+    write(os.path.join(ASSETS, "blockstates", "seared_tank.json"), {"variants": {"": {"model": t + "seared_tank"}}})
+    write(os.path.join(ASSETS, "items", "seared_tank.json"), {"model": ref("block/tinkering/seared_tank")})
+    for lit in ("inactive", "active"):
+        template("half_tank", "seared_melter_" + lit, {"top": t + "gauge_top", "side": t + "melter_side", "bottom": t + "seared_bricks",
+                                                       "inside": t + "seared_bricks", "front": t + "melter_" + lit}, "melter_side")
+    write(os.path.join(ASSETS, "blockstates", "seared_melter.json"), {"variants": {
+        "facing=%s,lit=%s" % (f, str(lit).lower()): {"model": t + ("seared_melter_active" if lit else "seared_melter_inactive"), "y": r}
+        for f, r in rotations.items() for lit in (False, True)}})
+    write(os.path.join(ASSETS, "items", "seared_melter.json"), {"model": ref("block/tinkering/seared_melter_inactive")})
+    # the channel: a centre (open underneath over a cast), and on each side an arm or a wall
+    stone = {"texture": t + "seared_stone", "top": t + "seared_stone"}
+    for rel in ("center", "center_out", "side", "side_wall"):
+        template("channel/" + rel, "seared_channel_" + rel, stone if rel == "side" else {"texture": t + "seared_stone"}, "seared_stone")
+    parts = [{"when": {"down": "false"}, "apply": {"model": t + "seared_channel_center"}},
+             {"when": {"down": "true"}, "apply": {"model": t + "seared_channel_center_out"}}]
+    for f, r in rotations.items():
+        for joined, rel in (("false", "side_wall"), ("true", "side")):
+            apply = {"model": t + "seared_channel_" + rel, "uvlock": True}
+            if r:
+                apply["y"] = r
+            parts.append({"when": {f: joined}, "apply": apply})
+    write(os.path.join(ASSETS, "blockstates", "seared_channel.json"), {"multipart": parts})
+    write(os.path.join(ASSETS, "items", "seared_channel.json"), {"model": ref("block/tinkering/seared_channel_center")})
+
+
 def shaped(name, pattern, key, result, count=1):
     write(os.path.join(DATA, "recipe", "tinkering", name + ".json"), {
         "type": "minecraft:crafting_shaped", "category": "building", "key": key, "pattern": pattern,
@@ -794,8 +844,11 @@ def smeltery_data():
     shaped("seared_faucet", ["b b", " b "], b, NS + ":seared_faucet", 2)
     shaped("casting_table", ["bbb", "b b", "b b"], b, NS + ":casting_table")
     shaped("casting_basin", ["b b", "b b", "bbb"], b, NS + ":casting_basin")
+    shaped("seared_tank", ["bbb", "bgb", "bbb"], dict(b, g="minecraft:glass"), NS + ":seared_tank")
+    shaped("seared_melter", ["bgb", "bbb"], dict(b, g="minecraft:glass"), NS + ":seared_melter")
+    shaped("seared_channel", ["b b", "bbb"], b, NS + ":seared_channel", 3)
     blocks = ["grout", "seared_bricks", "seared_glass", "smeltery_controller", "seared_drain", "seared_faucet",
-              "casting_table", "casting_basin"]
+              "casting_table", "casting_basin", "seared_tank", "seared_melter", "seared_channel"]
     for block in blocks:
         write(os.path.join(DATA, "loot_table", "blocks", block + ".json"), {
             "type": "minecraft:block", "random_sequence": NS + ":blocks/" + block,
@@ -988,6 +1041,7 @@ def main():
     parts(tcon)
     stations(tcon)
     smeltery(tcon)
+    smeltery_extras(tcon)
     data()
     smeltery_data()
     trades_data()

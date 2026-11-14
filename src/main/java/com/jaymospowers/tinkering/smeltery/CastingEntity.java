@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * A casting table or basin: a faucet fills it, the metal cools, and the result sits on top until taken. A table needs a
  * cast (or an item to make a gold cast from); a basin makes blocks.
  */
-public class CastingEntity extends BlockEntity {
+public class CastingEntity extends BlockEntity implements MoltenHolder {
 	private ItemStack cast = ItemStack.EMPTY;
 	private ItemStack output = ItemStack.EMPTY;
 	private @Nullable Molten molten;
@@ -65,6 +65,7 @@ public class CastingEntity extends BlockEntity {
 	}
 
 	/** How much of this liquid it would still take (0: none). */
+	@Override
 	public int wants(Molten liquid) {
 		if (!output.isEmpty() || cooling > 0 || molten != null && molten != liquid) {
 			return 0;
@@ -82,6 +83,7 @@ public class CastingEntity extends BlockEntity {
 	}
 
 	/** A faucet pours some in. */
+	@Override
 	public void fill(Molten liquid, int poured) {
 		if (poured <= 0) {
 			return;

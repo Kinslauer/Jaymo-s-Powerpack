@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * block of space up to {@link #MAX_SLOTS}), burns lava for heat, alloys what it can, and holds the molten pool for the
  * drains' faucets. Things that fall in get melted too: items go into free slots, creatures cook into blood.
  */
-public class SmelteryEntity extends BlockEntity implements Container {
+public class SmelteryEntity extends BlockEntity implements Container, MoltenHolder {
 	/** Interior size across (each way) and up. */
 	public static final int MAX_SIZE = 7, MAX_HEIGHT = 8;
 	/** Item slots at most (one for each block of space inside). */
@@ -359,7 +359,14 @@ public class SmelteryEntity extends BlockEntity implements Container {
 		dirty = true;
 	}
 
+	@Override
+	public @Nullable Molten offers() {
+		Tank.Layer bottom = tank.bottom();
+		return bottom == null ? null : bottom.molten;
+	}
+
 	/** A faucet takes some of the bottom liquid. */
+	@Override
 	public int drain(Molten molten, int amount) {
 		int taken = tank.drain(molten, amount, false);
 		if (taken > 0) {

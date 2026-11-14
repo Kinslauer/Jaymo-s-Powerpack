@@ -1,0 +1,98 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_center"
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_center_out"
+      }
+    },
+    {
+      "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side_wall",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side_wall",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side_wall",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side_wall",
+        "uvlock": true,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tinkering/seared_channel_side",
+        "uvlock": true,
+        "y": 270
+      }
+    }
+  ]
+}
