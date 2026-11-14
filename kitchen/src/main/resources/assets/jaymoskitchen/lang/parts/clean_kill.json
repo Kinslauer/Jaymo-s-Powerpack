@@ -7,6 +7,7 @@
 	"message.jaymoskitchen.hook.need_knife_gut": "Gut it with a knife before the cuts",
 	"message.jaymoskitchen.hook.gutted": "Gutted. Three cleaver cuts left",
 	"item.jaymoskitchen.offal": "Offal",
+	"block.jaymoskitchen.offal_pile": "Gut Pile",
 	"item.jaymoskitchen.cooked_offal": "Cooked Offal",
 	"message.jaymoskitchen.hook.skinning": "Skinning: pull %s of %s"
 }

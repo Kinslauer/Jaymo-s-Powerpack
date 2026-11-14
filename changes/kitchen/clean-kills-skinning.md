@@ -38,5 +38,10 @@
   as food, raw or cooked (`minecraft:wolf_food`), and eat it off the ground; Raw Blood Sausage now needs one as its
   casing; and offal lying on the ground is a gut pile that wild scavengers (wolves, foxes, bears, zombies) smell
   from 16 blocks and come to eat (`corpse/Scavengers`), whoever dropped it.
+- **Gut piles** (Andy: "The offal should place on the ground in piles like stones"): Offal is set down on the ground
+  as a pile of 1-4 in one block (`butchery/OffalPileBlock`, as Powers' loose stones are): walk-through, a punch drops
+  a piece each, a right click takes one back, more offal in hand adds to it. Wild scavengers smell a pile from 16
+  blocks and eat it a piece at a time (`Scavengers.EatPileGoal`); left alone it rots away, about a piece every 9
+  minutes. Offal is still eaten by using it at the air, as sweet berries are.
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.

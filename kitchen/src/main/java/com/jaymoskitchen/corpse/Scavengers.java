@@ -70,8 +70,17 @@ public final class Scavengers {
 				// (0.5.5) a zombie stops to feed even mid-chase (ahead of its attack), as long as it's only villagers it's after
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(mob instanceof Zombie ? 1 : 6, new GnawGoal(mob, hunger));
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatMeatGoal(mob, hunger));
+				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatPileGoal(mob, hunger));
 			}
 		});
+	}
+
+	/** Gut piles (OffalPileBlock) scavengers may know of, by level: told as one is set down, and again as it lies there. */
+	private static final java.util.Map<net.minecraft.server.level.ServerLevel, Set<net.minecraft.core.BlockPos>> PILES = new WeakHashMap<>();
+
+	/** A gut pile lies at {@code pos}: scavengers within {@link #SMELL} of it come to eat. */
+	public static void smellPile(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
+		PILES.computeIfAbsent(level, l -> new java.util.HashSet<>()).add(pos.immutable());
 	}
 
 	private static boolean busy(Mob mob) {
@@ -385,6 +394,104 @@ public final class Scavengers {
 		@Override
 		public void stop() {
 			meat = null;
+			mob.getNavigation().stop();
+		}
+	}
+
+	/** Goes to a gut pile set down on the ground and eats it, a piece at a time. Pets don't. */
+	private static final class EatPileGoal extends Goal {
+		private static final double REACH_SQ = 1.8 * 1.8;
+		private final Mob mob;
+		private final Hunger hunger;
+		private net.minecraft.core.@Nullable BlockPos pile;
+		private int giveUp, chew;
+
+		EatPileGoal(Mob mob, Hunger hunger) {
+			this.mob = mob;
+			this.hunger = hunger;
+			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+		}
+
+		private boolean isPile(net.minecraft.core.BlockPos pos) {
+			return mob.level().isLoaded(pos) && mob.level().getBlockState(pos).getBlock() instanceof com.jaymoskitchen.butchery.OffalPileBlock;
+		}
+
+		@Override
+		public boolean canUse() {
+			if ((mob.tickCount + mob.getId()) % GUTS_SNIFF_EVERY != 0 || busy(mob) || hunger.full(mob)) {
+				return false;
+			}
+			Set<net.minecraft.core.BlockPos> piles = PILES.get(mob.level());
+			if (piles == null || piles.isEmpty()) {
+				return false;
+			}
+			pile = null;
+			double best = SMELL * SMELL;
+			for (java.util.Iterator<net.minecraft.core.BlockPos> it = piles.iterator(); it.hasNext();) {
+				net.minecraft.core.BlockPos pos = it.next();
+				double distance = pos.distToCenterSqr(mob.position());
+				if (distance >= best) {
+					continue;
+				}
+				if (!isPile(pos)) {
+					it.remove();
+					continue;
+				}
+				best = distance;
+				pile = pos;
+			}
+			return pile != null;
+		}
+
+		@Override
+		public void start() {
+			giveUp = GIVE_UP;
+			chew = 0;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return pile != null && giveUp > 0 && !busy(mob) && !hunger.full(mob) && isPile(pile);
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			giveUp--;
+			if (pile == null) {
+				return;
+			}
+			mob.getLookControl().setLookAt(pile.getX() + 0.5, pile.getY() + 0.1, pile.getZ() + 0.5, 60.0F, 60.0F);
+			if (pile.distToCenterSqr(mob.position()) > REACH_SQ) {
+				chew = 0;
+				if (mob.getNavigation().isDone()) {
+					mob.getNavigation().moveTo(pile.getX() + 0.5, pile.getY(), pile.getZ() + 0.5, 1.1);
+				}
+				return;
+			}
+			mob.getNavigation().stop();
+			if (++chew < 20) {
+				if (chew % 5 == 0 && mob.level() instanceof ServerLevel level) {
+					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, com.jaymoskitchen.butchery.Butchery.OFFAL),
+						pile.getX() + 0.5, pile.getY() + 0.15, pile.getZ() + 0.5, 4, 0.1, 0.05, 0.1, 0.06);
+					com.jaymoskitchen.sound.KitchenSounds.chew(mob, 0.7F, 0.85F);
+				}
+				return;
+			}
+			chew = 0;
+			giveUp = GIVE_UP;
+			com.jaymoskitchen.butchery.OffalPileBlock.takeOne(mob.level(), pile, mob.level().getBlockState(pile));
+			mob.heal(HEAL);
+			hunger.ate(mob);
+		}
+
+		@Override
+		public void stop() {
+			pile = null;
 			mob.getNavigation().stop();
 		}
 	}
