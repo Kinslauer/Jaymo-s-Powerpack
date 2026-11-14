@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -42,8 +43,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -116,7 +119,12 @@ final class IllagerSites {
 	/** The most people a place takes on (its posts beyond this stay empty), and at least this many in a hold. */
 	static final int MOST_CREW = 40, LEAST_CREW = 2;
 	/** Places that take on more than {@link #MOST_CREW} (Andy: the citadel "back to 60"). */
-	static final Map<String, Integer> MOST_CREW_AT = Map.of("ocean_citadel", 60);
+	static final Map<String, Integer> MOST_CREW_AT = Map.of("ocean_citadel", 60, "illager_arena", 60);
+	/** Illager Arena's own desert arena (in the pack beside ours): its plan path, and its structure. */
+	static final String ILLAGER_ARENA = "illager_arena";
+	static final Identifier ILLAGER_ARENA_ID = Identifier.fromNamespaceAndPath("illager_arena", "illager_arena");
+	/** An allay we caged (a site's own; the others found in Illager Arena's are its mod's and go). */
+	static final String CAGED_TAG = "jaymoskingdoms_caged";
 	/** Captives where a pick says so but the template penned nobody: this many at most. */
 	static final int CAPTIVES_MOST = 3;
 	/** A leader missing (the place loaded, him nowhere) this long (ticks) is replaced. */
@@ -163,6 +171,8 @@ final class IllagerSites {
 		Map.entry("illager_fort", new Plan("illagers", WorldTiers.Tier.BORDERLANDS, Mode.CAMP, true, 8)),
 		// our own desert arena (tools/arena_site.py): a fighting pit, villagers penned to fight in it, allays caged in its box
 		Map.entry("arena", new Plan("illagers", WorldTiers.Tier.WILDLANDS, Mode.CAMP, true, 10)),
+		// Illager Arena's (Andy 2026-11-14, "Both"): its people are ours, standing where its own mobs stood
+		Map.entry(ILLAGER_ARENA, new Plan("illagers", WorldTiers.Tier.WILDLANDS, Mode.CAMP, true, 12)),
 		Map.entry("illager_tower", new Plan("garrison|bandits", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
 		Map.entry("illager_tower2", new Plan("garrison|bandits", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
 		Map.entry("illager_tower3", new Plan("illagers", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
@@ -253,6 +263,8 @@ final class IllagerSites {
 	private static final Map<String, Long> GREETED = new HashMap<>();
 	/** A fence → the day his stock was last laid out. */
 	private static final Map<UUID, Long> STOCKED = new HashMap<>();
+	/** Raiders, allays and villagers loaded this tick, looked at the next (Illager Arena's own mobs go). */
+	private static final List<Entity> ARRIVED = new ArrayList<>();
 
 	private IllagerSites() {
 	}
@@ -264,12 +276,31 @@ final class IllagerSites {
 		}
 		SeaSites.register();
 		ServerTickEvents.END_SERVER_TICK.register(IllagerSites::tick);
+		// Illager Arena's own mobs (and its spawners' pillagers) go: the arena is moved into by ours, when its tier opens
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Raider || entity instanceof Allay || entity.getType() == EntityTypes.VILLAGER) {
+				ARRIVED.add(entity);
+			}
+		});
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (ARRIVED.isEmpty()) {
+				return;
+			}
+			List<Entity> arrived = List.copyOf(ARRIVED);
+			ARRIVED.clear();
+			for (Entity e : arrived) {
+				if (e.isAlive() && e.level() instanceof ServerLevel level && theArenaMods(e) && inIllagerArena(level, e.blockPosition())) {
+					e.discard();
+				}
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			byCamp = null;
 			PROVOKED.clear();
 			MISSING.clear();
 			GREETED.clear();
 			STOCKED.clear();
+			ARRIVED.clear();
 		});
 		// a smuggler struck: the striker is a foe of the whole crew for a day
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
@@ -433,6 +464,9 @@ final class IllagerSites {
 	private static @Nullable String path(Identifier id) {
 		if (id.getNamespace().equals(JaymosKingdoms.MOD_ID) && id.getPath().startsWith(PREFIX)) {
 			return id.getPath().substring(PREFIX.length());
+		}
+		if (id.equals(ILLAGER_ARENA_ID)) {
+			return ILLAGER_ARENA;
 		}
 		return SeaSites.path(id);
 	}
@@ -819,6 +853,22 @@ final class IllagerSites {
 	}
 
 	/** An allay kept in a cage (the arena's box): it stays where it is until someone breaks it out. */
+	/** Not one of ours: an illager or ravager of no camp, an allay we didn't cage and nobody keeps, a villager nobody took. */
+	private static boolean theArenaMods(Entity e) {
+		if (e instanceof Raider) {
+			return Illagers.tag(e) == null;
+		}
+		if (e instanceof Allay allay) {
+			return !allay.entityTags().contains(CAGED_TAG) && !allay.getBrain().hasMemoryValue(MemoryModuleType.LIKED_PLAYER);
+		}
+		return e instanceof Villager v && !v.hasAttached(Captives.CAPTIVE) && !v.isPersistenceRequired();
+	}
+
+	/** Whether {@code pos} is inside one of Illager Arena's arenas. */
+	static boolean inIllagerArena(ServerLevel level, BlockPos pos) {
+		return level.structureManager().getStructureWithPieceAt(pos, holder -> holder.is(ILLAGER_ARENA_ID)).isValid();
+	}
+
 	private static void caged(ServerLevel level, BlockPos at) {
 		Allay allay = EntityTypes.ALLAY.create(level, EntitySpawnReason.STRUCTURE);
 		if (allay == null) {
@@ -826,6 +876,7 @@ final class IllagerSites {
 		}
 		allay.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		allay.setPersistenceRequired();
+		allay.addTag(CAGED_TAG);
 		level.addFreshEntity(allay);
 	}
 

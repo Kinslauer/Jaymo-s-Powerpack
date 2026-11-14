@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -83,6 +85,8 @@ public final class SitePlans {
 	static final String TAG = "jaymoskingdoms_site_plans";
 	/** The folder (inside the designs' own) the drawings wait in. */
 	static final String FOLDER = "captured";
+	/** Where a site's ground is read: this many points on a ring this many blocks outside its box. */
+	static final int GROUND_SAMPLES = 16, GROUND_RING = 3;
 
 	public static Item PLANS;
 
@@ -252,6 +256,16 @@ public final class SitePlans {
 		}
 		BlockPos min = new BlockPos(x0, y0, z0), max = new BlockPos(x1, y1, z1);
 		Set<BlockPos> trees = only != null ? Set.of() : trees(level, min, max);
+		// (a site's own build keeps its stone and sand walls; what it set into the ground, and the bed of land it was
+		// laid on, are left to the ground)
+		int ground = Integer.MAX_VALUE;
+		if (only != null) {
+			int bed = Integer.MAX_VALUE;
+			for (BlockPos at : only) {
+				bed = Math.min(bed, at.getY());
+			}
+			ground = Math.max(ground(level, box), bed);
+		}
 		StructureTemplate template = new StructureTemplate();
 		template.fillFromWorld(level, min, new Vec3i(x1 - x0 + 1, y1 - y0 + 1, z1 - z0 + 1), false, List.of());
 		CompoundTag tag = template.save(new CompoundTag());
@@ -261,7 +275,9 @@ public final class SitePlans {
 			CompoundTag b = blocks.getCompoundOrEmpty(i);
 			ListTag pos = b.getListOrEmpty("pos");
 			BlockPos at = min.offset(pos.getIntOr(0, 0), pos.getIntOr(1, 0), pos.getIntOr(2, 0));
-			if (only != null && !only.contains(at) || trees.contains(at) || natural(level.getBlockState(at))) {
+			BlockState state = level.getBlockState(at);
+			if (only != null && !only.contains(at) || trees.contains(at) || unbuildable(state)
+				|| (only == null || at.getY() <= ground) && natural(state)) {
 				continue;
 			}
 			// (only the blocks: chests come empty, as every design's do)
@@ -273,6 +289,30 @@ public final class SitePlans {
 		}
 		tag.put("blocks", kept);
 		return tag;
+	}
+
+	/** The ground about {@code box}: the middle height of the land on a ring just outside it (the site's own walls left out). */
+	private static int ground(ServerLevel level, BoundingBox box) {
+		List<Integer> heights = new ArrayList<>();
+		for (int i = 0; i < GROUND_SAMPLES; i++) {
+			double a = Math.PI * 2 * i / GROUND_SAMPLES;
+			int x = box.getCenter().getX() + (int) Math.round(Math.cos(a) * (box.getXSpan() / 2.0 + GROUND_RING));
+			int z = box.getCenter().getZ() + (int) Math.round(Math.sin(a) * (box.getZSpan() / 2.0 + GROUND_RING));
+			if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
+				heights.add(level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z) - 1);
+			}
+		}
+		if (heights.isEmpty()) {
+			return box.minY();
+		}
+		heights.sort(null);
+		return heights.get(heights.size() / 2);
+	}
+
+	/** What no crew lays: spawners, vaults, structure and jigsaw blocks. */
+	private static boolean unbuildable(BlockState state) {
+		return state.is(Blocks.SPAWNER) || state.is(Blocks.TRIAL_SPAWNER) || state.is(Blocks.VAULT) || state.is(Blocks.STRUCTURE_BLOCK)
+			|| state.is(Blocks.JIGSAW) || state.is(Blocks.STRUCTURE_VOID) || state.is(Blocks.BARRIER);
 	}
 
 	/** The logs of the trees growing in the box: every log joined (through logs) to leaves nobody placed. */
