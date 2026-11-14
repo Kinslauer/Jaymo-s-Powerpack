@@ -1,4 +1,9 @@
 {
   "item.jaymoskingdoms.glide_harness": "Glide Harness",
-  "item.jaymoskingdoms.horse_medkit": "Horse Medkit"
+  "item.jaymoskingdoms.horse_medkit": "Horse Medkit",
+  "dialogue.main.jaymoskingdoms_enchanted_tack": "Enchanted tack",
+  "talk.jaymoskingdoms.enchanted_tack.offer": "Wings for a horse, or a bag that opens onto your own ender chest. Neither is made by any saddler. What will it be?",
+  "talk.jaymoskingdoms.enchanted_tack.buy": "%s (%s)",
+  "talk.jaymoskingdoms.enchanted_tack.leave": "Nothing today",
+  "message.jaymoskingdoms.enchanted_tack.poor": "You can't pay for that."
 }
