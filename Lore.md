@@ -1364,7 +1364,7 @@ Claude's placement, for Andy to approve). A realm that marches on another's seat
 built by its own carpenters and smiths and pushed along behind the march by two of its soldiers: a **mangonel**, a
 timber frame on four wheels whose arm throws stones over a wall. The realms rich enough to keep guns on their walls
 take a **field gun** down off them instead, and in a great war they bring both. The engines stop short of the walls
-and are worked through the siege, then pushed home. They are ordinary craft, no magic in them; an engine whose crew is
+and are worked through the siege, breaking wall and roof alike, then pushed home. They are ordinary craft, no magic in them; an engine whose crew is
 dead stands silent in the field.
 
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
