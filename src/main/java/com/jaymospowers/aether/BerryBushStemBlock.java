@@ -14,11 +14,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/** What a picked berry bush leaves: bare stems. In light, a random tick now and then grows the bush back. */
+/** What a picked berry bush leaves: bare stems. In light, a random tick now and then grows the bush back, sooner with a leaf pile beside it. */
 public class BerryBushStemBlock extends Block {
 	// ---- tuning ----
 	/** A random tick regrows the bush with 1 chance in this many (the notes: 1 in 60), and needs this much light above. */
 	public static final int REGROW_CHANCE = 60, REGROW_LIGHT = 9;
+	/** With a leaf pile beside it the chance is 1 in this many, and the pile is used up. */
+	public static final int MULCHED_REGROW_CHANCE = 6;
 
 	private static final VoxelShape SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 9.0, 13.0);
 
@@ -44,7 +46,14 @@ public class BerryBushStemBlock extends Block {
 
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		if (random.nextInt(REGROW_CHANCE) == 0 && level.getMaxLocalRawBrightness(pos.above()) >= REGROW_LIGHT) {
+		if (level.getMaxLocalRawBrightness(pos.above()) < REGROW_LIGHT) {
+			return;
+		}
+		BlockPos pile = ForestFloor.pileBeside(level, pos);
+		if (random.nextInt(pile != null ? MULCHED_REGROW_CHANCE : REGROW_CHANCE) == 0) {
+			if (pile != null) {
+				ForestFloor.spend(level, pile);
+			}
 			level.setBlockAndUpdate(pos, AetherBlocks.BERRY_BUSH.defaultBlockState());
 		}
 	}

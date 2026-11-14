@@ -8,6 +8,7 @@
   "entity.jaymospowers.shroudwing": "Shroudwing",
   "entity.jaymospowers.aerwhale": "Aerwhale",
   "entity.jaymospowers.prismallard_egg": "Prismallard Egg",
+  "entity.jaymospowers.cloud_skiff": "Cloud Skiff",
   "item.jaymospowers.raw_taegore_meat": "Raw Taegore Meat",
   "item.jaymospowers.cooked_taegore_meat": "Cooked Taegore Meat",
   "item.jaymospowers.burrukai_rib_cut": "Burrukai Rib Cut",
@@ -23,6 +24,8 @@
   "item.jaymospowers.moa_feather": "Moa Feather",
   "item.jaymospowers.kirrid_plate": "Kirrid Plate",
   "item.jaymospowers.prismallard_egg": "Prismallard Egg",
+  "item.jaymospowers.moa_saddlebag": "Moa Saddlebag",
+  "item.jaymospowers.cloud_skiff": "Cloud Skiff",
   "item.jaymospowers.kirrid_spawn_egg": "Kirrid Spawn Egg",
   "item.jaymospowers.burrukai_spawn_egg": "Burrukai Spawn Egg",
   "item.jaymospowers.taegore_spawn_egg": "Taegore Spawn Egg",
@@ -31,5 +34,6 @@
   "item.jaymospowers.glitterwing_spawn_egg": "Glitterwing Spawn Egg",
   "item.jaymospowers.shroudwing_spawn_egg": "Shroudwing Spawn Egg",
   "item.jaymospowers.aerwhale_spawn_egg": "Aerwhale Spawn Egg",
-  "block.jaymospowers.moa_egg": "Moa Egg"
+  "block.jaymospowers.moa_egg": "Moa Egg",
+  "entity.jaymospowers.cloud_skiff.sinks": "You sink through the cloud."
 }

@@ -78,11 +78,12 @@ public final class AetherAnimals {
 	public static EntityType<Prismallard> PRISMALLARD;
 	public static EntityType<Insect> GLITTERWING, SHROUDWING;
 	public static EntityType<Aerwhale> AERWHALE;
+	public static EntityType<CloudSkiff> CLOUD_SKIFF;
 	public static EntityType<ThrownPrismallardEgg> PRISMALLARD_EGG_ENTITY;
 
 	/** What they drop and what they are made into. */
 	public static Item RAW_TAEGORE_MEAT, COOKED_TAEGORE_MEAT, BURRUKAI_RIB_CUT, COOKED_BURRUKAI_RIB_CUT, KIRRID_LOIN, KIRRID_CUTLET, PRISMALLARD_LEG,
-		PRISMALLARD_ROAST, BEAST_PELT, BURRUKAI_PLATE, PRISMALLARD_FEATHER, MOA_FEATHER, KIRRID_PLATE, SKYROOT_LIZARD_ON_A_STICK, PRISMALLARD_EGG;
+		PRISMALLARD_ROAST, BEAST_PELT, BURRUKAI_PLATE, PRISMALLARD_FEATHER, MOA_FEATHER, KIRRID_PLATE, SKYROOT_LIZARD_ON_A_STICK, PRISMALLARD_EGG, MOA_SADDLEBAG, CLOUD_SKIFF_ITEM;
 	public static Item KIRRID_SPAWN_EGG, BURRUKAI_SPAWN_EGG, TAEGORE_SPAWN_EGG, SKYROOT_LIZARD_SPAWN_EGG, PRISMALLARD_SPAWN_EGG, GLITTERWING_SPAWN_EGG,
 		SHROUDWING_SPAWN_EGG, AERWHALE_SPAWN_EGG;
 
@@ -140,6 +141,8 @@ public final class AetherAnimals {
 		BURRUKAI_PLATE = item("burrukai_plate", Item::new, new Item.Properties());
 		PRISMALLARD_FEATHER = item("prismallard_feather", Item::new, new Item.Properties());
 		MOA_FEATHER = item("moa_feather", Item::new, new Item.Properties());
+		CLOUD_SKIFF_ITEM = item("cloud_skiff", CloudSkiffItem::new, new Item.Properties().stacksTo(1));
+		MOA_SADDLEBAG = item("moa_saddlebag", Item::new, new Item.Properties().stacksTo(1));
 		KIRRID_PLATE = item("kirrid_plate", Item::new, new Item.Properties());
 		PRISMALLARD_EGG = item("prismallard_egg", PrismallardEggItem::new, new Item.Properties().stacksTo(16));
 	}
@@ -153,6 +156,7 @@ public final class AetherAnimals {
 		GLITTERWING = type("glitterwing", EntityType.Builder.of(Insect::glitterwing, MobCategory.AMBIENT).sized(0.75F, 0.75F).eyeHeight(0.25F).clientTrackingRange(8));
 		SHROUDWING = type("shroudwing", EntityType.Builder.of(Insect::shroudwing, MobCategory.AMBIENT).sized(0.5F, 0.5F).eyeHeight(0.25F).clientTrackingRange(8));
 		AERWHALE = type("aerwhale", EntityType.Builder.of(Aerwhale::new, MobCategory.CREATURE).sized(Aerwhale.WIDTH, Aerwhale.HEIGHT).fireImmune().clientTrackingRange(16));
+		CLOUD_SKIFF = type("cloud_skiff", EntityType.Builder.of(CloudSkiff::new, MobCategory.MISC).noLootTable().sized(1.4F, 0.55F).passengerAttachments(0.4F).clientTrackingRange(10));
 		ResourceKey<EntityType<?>> eggKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("prismallard_egg"));
 		PRISMALLARD_EGG_ENTITY = Registry.register(BuiltInRegistries.ENTITY_TYPE, eggKey, EntityType.Builder.<ThrownPrismallardEgg>of(ThrownPrismallardEgg::new, MobCategory.MISC)
 			.noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build(eggKey));
@@ -165,6 +169,7 @@ public final class AetherAnimals {
 		FabricDefaultAttributeRegistry.register(GLITTERWING, Insect.createAttributes());
 		FabricDefaultAttributeRegistry.register(SHROUDWING, Insect.createAttributes());
 		FabricDefaultAttributeRegistry.register(AERWHALE, Aerwhale.createAttributes());
+		FabricDefaultAttributeRegistry.register(CLOUD_SKIFF, CloudSkiff.createAttributes());
 
 		KIRRID_SPAWN_EGG = egg("kirrid_spawn_egg", KIRRID);
 		BURRUKAI_SPAWN_EGG = egg("burrukai_spawn_egg", BURRUKAI);
@@ -255,7 +260,7 @@ public final class AetherAnimals {
 		CreativeModeTabEvents.modifyOutputEvent(tab).register(output -> {
 			for (Item item : List.of(RAW_TAEGORE_MEAT, COOKED_TAEGORE_MEAT, BURRUKAI_RIB_CUT, COOKED_BURRUKAI_RIB_CUT, KIRRID_LOIN, KIRRID_CUTLET,
 				PRISMALLARD_LEG, PRISMALLARD_ROAST, SKYROOT_LIZARD_ON_A_STICK, BEAST_PELT, BURRUKAI_PLATE, PRISMALLARD_FEATHER, MOA_FEATHER, KIRRID_PLATE,
-				PRISMALLARD_EGG, KIRRID_SPAWN_EGG, BURRUKAI_SPAWN_EGG, TAEGORE_SPAWN_EGG, SKYROOT_LIZARD_SPAWN_EGG, PRISMALLARD_SPAWN_EGG,
+				MOA_SADDLEBAG, CLOUD_SKIFF_ITEM, PRISMALLARD_EGG, KIRRID_SPAWN_EGG, BURRUKAI_SPAWN_EGG, TAEGORE_SPAWN_EGG, SKYROOT_LIZARD_SPAWN_EGG, PRISMALLARD_SPAWN_EGG,
 				GLITTERWING_SPAWN_EGG, SHROUDWING_SPAWN_EGG, AERWHALE_SPAWN_EGG)) {
 				output.accept(item);
 			}

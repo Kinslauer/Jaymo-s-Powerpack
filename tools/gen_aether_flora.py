@@ -534,6 +534,34 @@ def shroom_plant(name, cap, stem, spots):
     return im
 
 
+def shroom_cluster(name, cap, stem):
+    """A fruiting rotshroom: three caps, the tall one in the middle."""
+    rng = seeded(name)
+    im = new()
+    px = im.load()
+    for cx, top, rx in ((4, 9, 2.6), (12, 10, 2.4), (8, 4, 4.2)):
+        for y in range(top + 1, 16):
+            px[cx, y] = stem[0] + (255,)
+            if rx > 3:
+                px[cx - 1, y] = stem[1] + (255,)
+        G.paint_mask(im, G.ellipse(cx, top, rx, rx * 0.6), [cap[0], cap[1], cap[2], cap[3]], rng)
+    put(px, [(7, 3), (10, 4), (4, 8), (12, 9)], cap[3])
+    return im
+
+
+def item_roasted_rotshroom():
+    rng = seeded("roasted_rotshroom")
+    im = new()
+    px = im.load()
+    for y in range(9, 15):
+        px[7, y] = hx("c9a070") + (255,)
+        px[8, y] = hx("a57c4c") + (255,)
+    G.paint_mask(im, G.ellipse(8, 7, 5.5, 3.6), [hx("3a2414"), hx("5c3a1e"), hx("7a4f28"), hx("a06a34")], rng)
+    put(px, [(5, 6), (9, 5), (11, 7)], hx("1e120a"))
+    put(px, [(6, 5), (7, 4)], hx("c88a48"))
+    return im
+
+
 def shroom_block(name, colors, spots, spot_color):
     rng = seeded(name)
     im = G.speckle(rng, colors, [4, 3, 3, 1])
@@ -684,7 +712,9 @@ CROSS_PLANTS = ["blade_poa", "satival_shoot", "valkyrie_sprout", "brettl_plant",
 MOSSES = [("bryalinn", MOSS_GREEN, True), ("shayelinn", ramp("2a9a9a", "36b3b0", "228282", "66d6d0"), True),
           ("ambrelinn", ramp("c8b030", "dcc844", "b09a22", "f2e270"), False)]
 POTTED = SAPLINGS + SMALL_FLOWERS + ["bush_fern", "magnetic_shroom", "rotshroom"]
-ITEMS = ["orange", "wyndberry", "arilum_bulb", "valkyrie_wings", "brettl_grass", "satival_bulb"]
+ITEMS = ["orange", "wyndberry", "arilum_bulb", "valkyrie_wings", "brettl_grass", "satival_bulb", "roasted_rotshroom"]
+# the pile each kind of leaves sheds (skyroot's is older and listed with the misc blocks)
+LEAF_PILES = [l.replace("_leaves", "_leaf_pile") for l in LEAVES]
 
 # every block id with an item, in registration order of AetherFlora (the creative tab)
 WOOD_LOGS = {}   # wood -> its log-like block ids
@@ -715,7 +745,7 @@ ITEM_BLOCKS += SMALL_FLOWERS + ["blade_poa", "satival_shoot", "valkyrie_sprout",
 for m, _, vines in MOSSES:
     ITEM_BLOCKS += [m + "_moss_block", m + "_moss_carpet"] + ([m + "_vines"] if vines else [])
 ITEM_BLOCKS += ["magnetic_shroom", "magnetic_shroom_block", "magnetic_shroom_stem", "rotshroom", "rotshroom_block",
-                "woven_skyroot_sticks", "skyroot_leaf_pile"]
+                "woven_skyroot_sticks", "skyroot_leaf_pile"] + LEAF_PILES
 POTTED_BLOCKS = ["potted_" + p for p in POTTED]
 ALL_BLOCKS = ITEM_BLOCKS + POTTED_BLOCKS
 
@@ -796,6 +826,8 @@ def make_textures():
     items["valkyrie_wings"] = item_valkyrie_wings()
     items["brettl_grass"] = item_brettl_grass()
     items["satival_bulb"] = item_satival_bulb()
+    items["roasted_rotshroom"] = item_roasted_rotshroom()
+    t["rotshroom_cluster"] = shroom_cluster("rotshroom_cluster", brown, ramp("d8c8a8", "b8a888"))
     return t, items
 
 
@@ -1105,9 +1137,14 @@ def assets():
     bs("woven_skyroot_sticks", {"variants": {"": state("woven_skyroot_sticks")}})
     idef("woven_skyroot_sticks", bmodel("woven_skyroot_sticks"))
     # the leaf pile: a carpet of skyroot leaves (Aether I's texture, painted by gen_aether.py)
-    bm("skyroot_leaf_pile", {"parent": mc("block/carpet"), "textures": {"wool": tex("skyroot_leaves")}})
-    bs("skyroot_leaf_pile", {"variants": {"": state("skyroot_leaf_pile")}})
-    idef("skyroot_leaf_pile", bmodel("skyroot_leaf_pile"))
+    for pile in ["skyroot_leaf_pile"] + LEAF_PILES:
+        bm(pile, {"parent": mc("block/carpet"), "textures": {"wool": tex(pile.replace("_leaf_pile", "_leaves"))}})
+        bs(pile, {"variants": {"": state(pile)}})
+        idef(pile, bmodel(pile))
+    # the rotshroom: a cluster once it has eaten its fill (RotshroomBlock.FED)
+    bm("rotshroom_cluster", {"parent": mc("block/cross"), "textures": {"cross": tex("rotshroom_cluster")}})
+    bs("rotshroom", {"variants": {"fed=0": state("rotshroom"), "fed=1": state("rotshroom"), "fed=2": state("rotshroom"),
+                                  "fed=3": state("rotshroom_cluster")}})
     # potted plants (no item)
     for p in POTTED:
         parent = "tinted_flower_pot_cross" if p == "bush_fern" else "flower_pot_cross"
@@ -1228,6 +1265,9 @@ def recipes():
             "type": "minecraft:crafting_shapeless", "category": "misc", "group": "suspicious_stew",
             "ingredients": [mc("bowl"), "#minecraft:mushrooms", "#minecraft:mushrooms", jp(flower)],
             "result": {"id": mc("suspicious_stew"), "components": {"minecraft:suspicious_stew_effects": [{"duration": ticks, "id": effect}]}}}
+    for kind, time in (("smelting", 200), ("smoking", 100), ("campfire_cooking", 600)):
+        r["roasted_rotshroom_from_" + kind] = {"type": "minecraft:" + kind, "category": "food", "ingredient": jp("rotshroom"),
+                                               "result": {"id": jp("roasted_rotshroom")}, "experience": 0.35, "cookingtime": time}
     for name, data in r.items():
         write(os.path.join(out, name + ".json"), data)
 
@@ -1272,7 +1312,7 @@ def tags():
                                                    "bryalinn_vines", "shayelinn_vines"])
     merge_tag(os.path.join(b, "mineable", "axe.json"), axe + ids([w + "_button" for w in WOODS] + [w + "_pressure_plate" for w in WOODS]))
     hoe = ids(LEAVES + [m + "_moss_block" for m, _, _ in MOSSES] + [m + "_moss_carpet" for m, _, _ in MOSSES]
-              + ["skyroot_leaf_pile", "aether_bush", "brettl_grass_bundle"])
+              + ["skyroot_leaf_pile", "aether_bush", "brettl_grass_bundle"] + LEAF_PILES)
     merge_tag(os.path.join(b, "mineable", "hoe.json"), hoe)
 
 

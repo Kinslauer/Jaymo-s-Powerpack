@@ -61,7 +61,8 @@ for i in sorted(items):
 for e in sorted(entities):
     if "entity.jaymospowers." + e not in lang:
         errs.append("no lang entity " + e)
-for m in sorted(mobs):
+# (the cloud skiff is a thing you place and fold up: no drops, no spawn egg)
+for m in sorted(mobs - {"cloud_skiff"}):
     have(os.path.join(D, "loot_table/entities/%s.json" % m))
     if m + "_spawn_egg" not in items:
         errs.append("no spawn egg for " + m)
@@ -79,6 +80,10 @@ for arr, prefix in (("GLITTERWING", "glitterwing_"), ("SHROUDWING", "shroudwing_
     body = re.search(arr + r' = \{([^}]*)\}', ins).group(1)
     skins += [prefix + v for v in re.findall(r'"(\w+)"', body)]
 skins += ["prismallard", "aerwhale", "phyg", "flying_cow", "aerbunny", "moa_blue", "moa_white", "moa_black"]
+# the young with a model of their own, the insects' glows, the overlays and the skiff
+skins += [s + "_baby" for s in skins if s.startswith(("kirrid_", "burrukai_", "taegore_", "moa_"))]
+skins += [s + "_glow" for s in skins if s.startswith(("glitterwing_", "shroudwing_"))]
+skins += ["moa_keratin_%d" % i for i in range(4)] + ["moa_baby_keratin_%d" % i for i in range(4)] + ["aerbunny_collar", "cloud_skiff"]
 for s in skins:
     have(os.path.join(A, "textures/entity/aether/%s.png" % s))
 wool_java = open(os.path.join(JAVA, "Wool.java"), encoding="utf-8").read()

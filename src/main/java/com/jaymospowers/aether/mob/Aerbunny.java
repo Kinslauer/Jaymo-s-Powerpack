@@ -56,6 +56,9 @@ public class Aerbunny extends TamableAnimal {
 	/** Taming: one orange in this many works; brettl grass heals this much. */
 	public static final int TAME_ODDS = 3;
 	public static final float GRASS_HEAL = 2.0F;
+	/** A wild one looks for a berry bush this far off, about once in this many ticks (and as many again), unless this many aerbunnies are within that range. */
+	public static final int GRAZE_RANGE = 8, GRAZE_EVERY = 600, GRAZE_CROWD = 6;
+	public static final double GRAZE_CROWD_RANGE = 16.0;
 
 	private static final EntityDataAccessor<Integer> PUFF = SynchedEntityData.defineId(Aerbunny.class, EntityDataSerializers.INT);
 
@@ -76,6 +79,7 @@ public class Aerbunny extends TamableAnimal {
 		this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(2, new PanicGoal(this, 1.3));
 		this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
+		this.goalSelector.addGoal(4, new GrazeGoal());
 		this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, stack -> stack.is(AetherFlora.BRETTL_GRASS), false));
 		this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1, 10.0F, 2.0F));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
@@ -249,5 +253,51 @@ public class Aerbunny extends TamableAnimal {
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
 		this.playSound(SoundEvents.RABBIT_JUMP, 0.15F, 1.0F);
+	}
+
+	/**
+	 * A wild, grown aerbunny that could breed goes to a berry bush close by and eats it down to its stems, which puts it in
+	 * the mood: more bushes, more bunnies, fewer bushes. Not with {@link #GRAZE_CROWD} aerbunnies already about.
+	 */
+	private final class GrazeGoal extends net.minecraft.world.entity.ai.goal.MoveToBlockGoal {
+		GrazeGoal() {
+			super(Aerbunny.this, 1.0, GRAZE_RANGE, 2);
+		}
+
+		@Override
+		public boolean canUse() {
+			return !isTame() && !isBaby() && canFallInLove() && super.canUse()
+				&& level().getEntitiesOfClass(Aerbunny.class, getBoundingBox().inflate(GRAZE_CROWD_RANGE)).size() < GRAZE_CROWD;
+		}
+
+		@Override
+		protected int nextStartTick(net.minecraft.world.entity.PathfinderMob mob) {
+			return reducedTickDelay(GRAZE_EVERY + mob.getRandom().nextInt(GRAZE_EVERY));
+		}
+
+		@Override
+		public double acceptedDistance() {
+			return 1.6;
+		}
+
+		@Override
+		protected net.minecraft.core.BlockPos getMoveToTarget() {
+			return this.blockPos;
+		}
+
+		@Override
+		protected boolean isValidTarget(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos) {
+			return level.getBlockState(pos).is(com.jaymospowers.aether.AetherBlocks.BERRY_BUSH);
+		}
+
+		@Override
+		public void tick() {
+			super.tick();
+			if (this.isReachedTarget() && this.isValidTarget(level(), this.blockPos)) {
+				level().setBlockAndUpdate(this.blockPos, com.jaymospowers.aether.AetherBlocks.BERRY_BUSH_STEM.defaultBlockState());
+				playSound(SoundEvents.GENERIC_EAT.value(), 0.6F, 1.4F);
+				setInLove(null);
+			}
+		}
 	}
 }

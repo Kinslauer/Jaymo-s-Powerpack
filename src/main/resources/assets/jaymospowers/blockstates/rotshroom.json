@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "fed=0": {
       "model": "jaymospowers:block/aether/rotshroom"
+    },
+    "fed=1": {
+      "model": "jaymospowers:block/aether/rotshroom"
+    },
+    "fed=2": {
+      "model": "jaymospowers:block/aether/rotshroom"
+    },
+    "fed=3": {
+      "model": "jaymospowers:block/aether/rotshroom_cluster"
     }
   }
 }

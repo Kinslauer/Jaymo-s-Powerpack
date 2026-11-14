@@ -35,7 +35,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -49,9 +48,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
@@ -85,6 +82,9 @@ public final class AetherFlora {
 	public static final float LOG_HARDNESS = 2.0F, PLANKS_BLAST = 3.0F, DOOR_HARDNESS = 3.0F;
 	/** Food: orange 4, wyndberry 2, satival bulb 2 (hunger, saturation). */
 	public static final int ORANGE_FOOD = 4, WYNDBERRY_FOOD = 2, SATIVAL_BULB_FOOD = 2;
+	/** A roasted rotshroom. */
+	public static final int ROASTED_ROTSHROOM_FOOD = 3;
+	public static final float ROASTED_ROTSHROOM_SATURATION = 0.4F;
 	public static final float ORANGE_SATURATION = 0.5F, WYNDBERRY_SATURATION = 0.3F, SATIVAL_BULB_SATURATION = 0.3F;
 
 	/** One wood set: every shaped block of it (skyroot's first five are AetherBlocks' own). */
@@ -108,13 +108,16 @@ public final class AetherFlora {
 		AMBRELINN_MOSS_BLOCK, AMBRELINN_MOSS_CARPET;
 	public static Block MAGNETIC_SHROOM, MAGNETIC_SHROOM_BLOCK, MAGNETIC_SHROOM_STEM, ROTSHROOM, ROTSHROOM_BLOCK;
 	public static Block WOVEN_SKYROOT_STICKS, SKYROOT_LEAF_PILE;
-	public static Item ORANGE, WYNDBERRY, ARILUM_BULB, VALKYRIE_WINGS, BRETTL_GRASS, SATIVAL_BULB;
+	public static Item ORANGE, WYNDBERRY, ARILUM_BULB, VALKYRIE_WINGS, BRETTL_GRASS, SATIVAL_BULB, ROASTED_ROTSHROOM;
 
 	/** The trees the saplings grow (configured features written by the dimension's worldgen; until then a sapling just does not grow). */
 	public static final Map<String, ResourceKey<Feature>> TREES = new LinkedHashMap<>();
 	/** The potted version of each pot-able plant, by the plant's id. */
 	public static final Map<String, Block> POTTED = new LinkedHashMap<>();
 
+	/** The leaf piles of the leaves above, in their order (registered after everything else, so the creative tab keeps its order). */
+	private static final List<String> LEAF_PILES = new ArrayList<>();
+	private static final List<MapColor> PILE_COLORS = new ArrayList<>();
 	private static final Map<Block, Block> STRIPPED = new HashMap<>();
 	private static final List<ItemLike> TAB = new ArrayList<>();
 
@@ -147,7 +150,7 @@ public final class AetherFlora {
 
 	private static BlockBehaviour.Properties mossProps(MapColor color, boolean carpet) {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(MOSS_HARDNESS).sound(carpet ? SoundType.MOSS_CARPET : SoundType.MOSS)
-			.pushReaction(PushReaction.POPPED);
+			.pushReaction(PushReaction.POPPED).randomTicks();
 	}
 
 	// ---- registration ----
@@ -185,9 +188,14 @@ public final class AetherFlora {
 		return block(tree + "_sapling", p -> new AetherSaplingBlock(feature, p), saplingProps().mapColor(color));
 	}
 
+	/** Leaves that shed their own leaf pile ({@link SheddingLeavesBlock}), and the pile. */
 	private static Block leaves(String id, MapColor color, float particleChance, int particleColor) {
-		return block(id, p -> new UntintedParticleLeavesBlock(particleChance, particleChance > 0.0F ? new DustParticleOptions(particleColor, 1.0F)
-			: ParticleTypes.SMOKE, AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leavesProps(color));
+		String pile = id.replace("_leaves", "_leaf_pile");
+		Block leaves = block(id, p -> new SheddingLeavesBlock(pile, particleChance, particleChance > 0.0F ? new DustParticleOptions(particleColor, 1.0F)
+			: ParticleTypes.SMOKE, p), leavesProps(color));
+		LEAF_PILES.add(pile);
+		PILE_COLORS.add(color);
+		return leaves;
 	}
 
 	/** Pots a plant: the block shows in the world as the potted plant and drops the pot and the plant. */
@@ -316,27 +324,30 @@ public final class AetherFlora {
 
 		// ---- mosses ----
 		BRYALINN_MOSS_BLOCK = block("bryalinn_moss_block", Block::new, mossProps(MapColor.COLOR_GREEN, false));
-		BRYALINN_MOSS_CARPET = block("bryalinn_moss_carpet", CarpetBlock::new, mossProps(MapColor.COLOR_GREEN, true));
+		BRYALINN_MOSS_CARPET = block("bryalinn_moss_carpet", CreepingMossBlock::new, mossProps(MapColor.COLOR_GREEN, true));
 		BRYALINN_VINES = block("bryalinn_vines", VineBlock::new, vineProps(MapColor.COLOR_GREEN));
 		SHAYELINN_MOSS_BLOCK = block("shayelinn_moss_block", Block::new, mossProps(MapColor.COLOR_CYAN, false));
-		SHAYELINN_MOSS_CARPET = block("shayelinn_moss_carpet", CarpetBlock::new, mossProps(MapColor.COLOR_CYAN, true));
+		SHAYELINN_MOSS_CARPET = block("shayelinn_moss_carpet", CreepingMossBlock::new, mossProps(MapColor.COLOR_CYAN, true));
 		SHAYELINN_VINES = block("shayelinn_vines", VineBlock::new, vineProps(MapColor.COLOR_CYAN));
 		AMBRELINN_MOSS_BLOCK = block("ambrelinn_moss_block", Block::new, mossProps(MapColor.COLOR_YELLOW, false));
-		AMBRELINN_MOSS_CARPET = block("ambrelinn_moss_carpet", CarpetBlock::new, mossProps(MapColor.COLOR_YELLOW, true));
+		AMBRELINN_MOSS_CARPET = block("ambrelinn_moss_carpet", CreepingMossBlock::new, mossProps(MapColor.COLOR_YELLOW, true));
 
 		// ---- mushrooms ----
 		MAGNETIC_SHROOM = flora("magnetic_shroom", box(5, 0, 5, 11, 7, 11), true, plant(SoundType.FUNGUS).mapColor(MapColor.COLOR_LIGHT_BLUE)
 			.lightLevel(state -> MAGNETIC_SHROOM_LIGHT));
 		MAGNETIC_SHROOM_BLOCK = block("magnetic_shroom_block", HugeMushroomBlock::new, shroomProps(MapColor.COLOR_LIGHT_BLUE));
 		MAGNETIC_SHROOM_STEM = block("magnetic_shroom_stem", HugeMushroomBlock::new, shroomProps(MapColor.COLOR_LIGHT_GRAY));
-		ROTSHROOM = flora("rotshroom", box(5, 0, 5, 11, 7, 11), true, plant(SoundType.FUNGUS).mapColor(MapColor.COLOR_BROWN));
+		ROTSHROOM = block("rotshroom", p -> new RotshroomBlock(box(5, 0, 5, 11, 7, 11), p), plant(SoundType.FUNGUS).mapColor(MapColor.COLOR_BROWN).randomTicks());
 		ROTSHROOM_BLOCK = block("rotshroom_block", HugeMushroomBlock::new, shroomProps(MapColor.COLOR_BROWN));
 
 		// ---- misc ----
 		WOVEN_SKYROOT_STICKS = block("woven_skyroot_sticks", WovenSticksBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 			.strength(STICKS_HARDNESS).sound(SoundType.WOOD).noOcclusion());
-		SKYROOT_LEAF_PILE = block("skyroot_leaf_pile", CarpetBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GRASS)
-			.strength(LEAF_PILE_HARDNESS).sound(SoundType.GRASS).noOcclusion().pushReaction(PushReaction.POPPED));
+		SKYROOT_LEAF_PILE = block("skyroot_leaf_pile", LeafPileBlock::new, leafPileProps(MapColor.GRASS));
+		for (int i = 0; i < LEAF_PILES.size(); i++) {
+			block(LEAF_PILES.get(i), LeafPileBlock::new, leafPileProps(PILE_COLORS.get(i)));
+		}
+		ROASTED_ROTSHROOM = food("roasted_rotshroom", ROASTED_ROTSHROOM_FOOD, ROASTED_ROTSHROOM_SATURATION);
 
 		// ---- flower pots ----
 		pot("skyplane_sapling", SKYPLANE_SAPLING);
@@ -376,6 +387,11 @@ public final class AetherFlora {
 			}
 			return InteractionResult.SUCCESS;
 		});
+	}
+
+	private static BlockBehaviour.Properties leafPileProps(MapColor color) {
+		return BlockBehaviour.Properties.of().mapColor(color).strength(LEAF_PILE_HARDNESS).sound(SoundType.GRASS).noOcclusion()
+			.pushReaction(PushReaction.POPPED);
 	}
 
 	private static BlockBehaviour.Properties vineProps(MapColor color) {

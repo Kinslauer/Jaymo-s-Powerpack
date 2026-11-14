@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "PSP",
+    "PCP",
+    " P "
+  ],
+  "key": {
+    "P": "jaymospowers:beast_pelt",
+    "S": "minecraft:string",
+    "C": "minecraft:chest"
+  },
+  "result": {
+    "id": "jaymospowers:moa_saddlebag"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "A A",
+    "SSS"
+  ],
+  "key": {
+    "A": "jaymospowers:cold_aercloud",
+    "S": "jaymospowers:skyroot_planks"
+  },
+  "result": {
+    "id": "jaymospowers:cloud_skiff"
+  }
+}

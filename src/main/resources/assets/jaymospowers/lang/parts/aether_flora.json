@@ -101,6 +101,16 @@
   "block.jaymospowers.rotshroom_block": "Rotshroom Block",
   "block.jaymospowers.woven_skyroot_sticks": "Woven Skyroot Sticks",
   "block.jaymospowers.skyroot_leaf_pile": "Skyroot Leaf Pile",
+  "block.jaymospowers.skyplane_leaf_pile": "Skyplane Leaf Pile",
+  "block.jaymospowers.skybirch_leaf_pile": "Skybirch Leaf Pile",
+  "block.jaymospowers.skypine_leaf_pile": "Skypine Leaf Pile",
+  "block.jaymospowers.wisproot_leaf_pile": "Wisproot Leaf Pile",
+  "block.jaymospowers.wisptop_leaf_pile": "Wisptop Leaf Pile",
+  "block.jaymospowers.greatroot_leaf_pile": "Greatroot Leaf Pile",
+  "block.jaymospowers.greatoak_leaf_pile": "Greatoak Leaf Pile",
+  "block.jaymospowers.greatboa_leaf_pile": "Greatboa Leaf Pile",
+  "block.jaymospowers.amberoot_leaf_pile": "Amberoot Leaf Pile",
+  "block.jaymospowers.irradiated_leaf_pile": "Irradiated Leaf Pile",
   "block.jaymospowers.potted_skyplane_sapling": "Potted Skyplane Sapling",
   "block.jaymospowers.potted_skybirch_sapling": "Potted Skybirch Sapling",
   "block.jaymospowers.potted_skypine_sapling": "Potted Skypine Sapling",
@@ -122,5 +132,6 @@
   "item.jaymospowers.arilum_bulb": "Arilum Bulb",
   "item.jaymospowers.valkyrie_wings": "Valkyrie Wings",
   "item.jaymospowers.brettl_grass": "Brettl Grass",
-  "item.jaymospowers.satival_bulb": "Satival Bulb"
+  "item.jaymospowers.satival_bulb": "Satival Bulb",
+  "item.jaymospowers.roasted_rotshroom": "Roasted Rotshroom"
 }

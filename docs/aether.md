@@ -385,7 +385,30 @@ Clean room: behaviour from the notes, every line and pixel ours. The shaped bloc
   vines for the first two (vanilla vine rules, climbable).
 - **Mushrooms**: Magnetic Shroom (light 6; the huge ones are Magnetic Shroom Block and Stem), Rotshroom and Rotshroom Block
   (huge-mushroom blocks; no huge growing yet, the worldgen places them).
-- **Misc**: Woven Skyroot Sticks (8 pixels tall, a moa nest stands on it) and Skyroot Leaf Pile (a carpet).
+- **Misc**: Woven Skyroot Sticks (8 pixels tall, a moa nest stands on it) and the leaf piles (carpets; see "The forest floor").
+
+### The forest floor
+
+The living-things rules (sympathy, feedback loops, stewardship) applied to what Aether II's plants were missing here. `ForestFloor`
+holds what the blocks share.
+
+- **Leaf piles** [`LeafPileBlock`]: one for every kind of leaves (`<tree>_leaf_pile`, `irradiated_leaf_pile`, and skyroot's).
+  Leaves on a tree (`SheddingLeavesBlock`; not ones a player set) drop their own pile on the ground straight below, 1 random
+  tick in 60 [SHED_CHANCE], up to 12 blocks down. A shed pile (`persistent=false`) rots 1 tick in 25 [ROT_CHANCE]: it goes,
+  bare aether dirt under it turns to aether grass, and 1 time in 8 in the dark a rotshroom is left (not with 2 within 4). A pile
+  a player or the world sets down is `persistent` and never rots by itself.
+- **Mulch**: a sapling with any leaf pile beside it (the 8 spots round it) grows a step 1 tick in 2 in light, not 1 in 7
+  [`AetherSaplingBlock.MULCHED_GROW_CHANCE`]; a picked berry bush grows back 1 tick in 6, not 1 in 60
+  [`BerryBushStemBlock.MULCHED_REGROW_CHANCE`]. Either uses the pile up.
+- **Rotshroom** [`RotshroomBlock`, state `fed` 0 to 3]: 1 tick in 4 it eats a leaf pile beside it. After 3 piles it shows as a
+  cluster: use it to pick 2 rotshrooms (it starts again), or leave it and, 1 tick in 6, it seeds one rotshroom within 2 blocks
+  in the dark (not with 4 within 4) and starts again. With no litter it only waits. **Roasted Rotshroom** (food 3) from a
+  furnace, smoker or campfire.
+- **Creeping moss** [`CreepingMossBlock`, the three moss carpets]: on plain holystone, with water within 3 blocks and out of
+  the full sun (or in rain), 1 tick in 6 it turns the stone under it to mossy holystone and lays a carpet on plain holystone
+  beside it. On mossy stone or anything else it does nothing, so a bed stops when it runs out of bare stone.
+- **Aerbunnies graze** [`Aerbunny.GrazeGoal`]: a wild grown one that could breed walks to a berry bush within 8 blocks, eats
+  it to its stems and goes into love mode. Not with 6 aerbunnies within 16 blocks.
 
 Not done, for later: signs, bookshelves, beds and the decorative planks (shingles, beams) of the building notes; fire and
 compost values (no precedent in the repo); a leaf pile for every leaf type; mossy wisproot wood; huge-mushroom and orange-tree
@@ -644,7 +667,24 @@ branch `26.1.2-alpha.5`; the cockatrice, zephyr and tempest animations are the J
 - **What drives them** is still our render states (`AetherAnimalRenderer.State`, `AetherMonsterRenderer.State`,
   `DungeonRenderer.State`). One-shot animations run on `actionTime` (ticks since the mob's `action` changed, kept per mob
   in the renderer) or are scrubbed by a 0 to 1 `progress`. Kirrid and burrukai have a model per zone (the renderer picks
-  by `state.zone`). A swet is its solid core plus a see-through gel pass (`Look.gel()`). Babies are scaled by our
-  renderer; the mod's baby models and baby animations are not used.
-- Not ported: their renderers, entities, AI, layers and the mimic's billboard eye; our own saddles are added to the phyg
-  and flying cow, and the moa's saddle is their saddle model set into the body.
+  by `state.zone`). A swet is its solid core plus a see-through gel pass (`Look.gel()`).
+- **Young.** The moa, kirrid (one per zone), burrukai and taegore young use the mod's baby models and baby animations
+  (`AetherAnimalRenderer.babies(...)`, skins `<adult skin>_baby`); every other young animal is the adult at half size.
+- **Passes over the skin** (the idea of their layer classes, written on our renderers; no layer class was copied).
+  `AetherAnimalRenderer.Look.overlay` draws a second cut-out skin: a tamed aerbunny's collar, and each moa's own beak and
+  leg colour (`moa_keratin_<0-3>`, picked from its UUID; one moa in five keeps its kind's own). `Look.glow` (and
+  `DungeonRenderer.Look.glow`) draws a skin that is lit in the dark: the insects' marks, the Slider's eye when awake,
+  the detonation sentry's eyes, the sentry golem's eyes and core. The painter makes each from the skin it lies over
+  (`glow_of`, `moa_keratin`), so they always line up.
+- **Moa saddlebag** (their saddlebag model set into the body like the saddle; item `moa_saddlebag`, pelts round a chest).
+  Put on a saddled moa it gives two rows of storage, opened by sneak-clicking; it and its load drop when the moa dies.
+- **Sentry golem**: left standing, it looks around or checks itself for six seconds every 15 to 25 seconds (their
+  `look_around` and `check_self`; the beat is worked out on the client from the golem's id, nothing is sent).
+- **Cloud skiff** (`aether/mob/CloudSkiff`, item `cloud_skiff`: two cold aerclouds over three skyroot planks). Their model
+  and unfold animation; the entity is ours. It hangs where it is left, flies where its rider looks (jump climbs), seats
+  two, and a player's blow folds it back into the item. **Only the just may ride** (`Karma.just`; Andy: "Only the purest
+  souls can ride these, like the nimbus cloud"): anyone else sinks through, and a rider who stops being just is dropped.
+- **From their behaviour code** (read mob by mob; ours already matched their notes, these two were missing): a zephyr
+  keeps away from a lit ambrosium campfire (`Zephyr.FIRE_RANGE`), and the Slider goes for whoever has hurt it most.
+- Not ported: their renderers, entities, the mimic's billboard eye, the skiff's fold animation and boat physics; our own
+  saddles are added to the phyg and flying cow, and the moa's saddle is their saddle model set into the body.

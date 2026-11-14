@@ -5,14 +5,20 @@ import com.jaymospowers.aether.dungeon.DetonationSentry;
 import com.jaymospowers.aether.dungeon.Mimic;
 import com.jaymospowers.aether.dungeon.SentryGolem;
 import com.jaymospowers.aether.dungeon.Slider;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import org.jspecify.annotations.Nullable;
 
 /** Draws the Sentry Ruins' mobs: one renderer, four looks (which skin, and what the model is told). */
 final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRenderer.State, DungeonModel> {
@@ -27,6 +33,9 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 		boolean still;
 		/** Ticks since {@link #progress} last fell back to nothing (a golem's throw follows its windup). */
 		float actionTime;
+		/** A golem left alone fidgets: 0 not now, 1 looking around, 2 checking itself; and the ticks into it. */
+		int fidget;
+		float fidgetTime;
 	}
 
 	/** What one mob adds to the state. */
@@ -35,6 +44,11 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 
 		/** The skin's name (a png under textures/entity/aether/). */
 		String skin(State state);
+
+		/** The name of a skin drawn over the first that glows in the dark (lit eyes, a core), or null. */
+		default @Nullable String glow(State state) {
+			return null;
+		}
 
 		/** A cube does not tip over when it dies (it bursts instead). */
 		default boolean lies() {
@@ -52,6 +66,16 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 	DungeonRenderer(EntityRendererProvider.Context context, DungeonModel model, float shadow, Look<T> look) {
 		super(context, model, shadow);
 		this.look = look;
+		this.addLayer(new RenderLayer<>(this) {
+			@Override
+			public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, State state, float yRot, float xRot) {
+				String glow = state.isInvisible ? null : look.glow(state);
+				if (glow != null) {
+					collector.order(1).submitModel(this.getParentModel(), state, poseStack,
+						RenderTypes.eyes(JaymosPowers.id("textures/entity/aether/" + glow + ".png")), lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -126,6 +150,9 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 			}
 		};
 	}
+
+	/** A standing golem looks around or checks itself for {@link #FIDGET_TICKS}, once every this many ticks (plus up to the spread). */
+	private static final int FIDGET_EVERY = 300, FIDGET_SPREAD = 200, FIDGET_TICKS = 120;
 
 	static Look<SentryGolem> sentryGolem() {
 		return new Look<>() {

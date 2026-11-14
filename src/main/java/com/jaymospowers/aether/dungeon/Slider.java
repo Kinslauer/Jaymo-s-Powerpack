@@ -3,7 +3,10 @@ package com.jaymospowers.aether.dungeon;
 import com.jaymospowers.core.Shakes;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -117,6 +120,9 @@ public class Slider extends Monster {
 
 	// ---- being hurt ----
 
+	/** What each player has dealt it this fight (it goes for whoever hurt it most). */
+	private final Map<UUID, Float> blows = new HashMap<>();
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
@@ -138,10 +144,15 @@ public class Slider extends Monster {
 		if (!this.awake()) {
 			this.wake(level);
 		}
-		return super.hurtServer(level, source, amount);
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt) {
+			this.blows.merge(player.getUUID(), amount, Float::sum);
+		}
+		return hurt;
 	}
 
 	private void wake(ServerLevel level) {
+		this.blows.clear();
 		this.entityData.set(AWAKE, true);
 		this.setHealth(this.getMaxHealth());
 		this.quiet = 0;
@@ -322,10 +333,14 @@ public class Slider extends Monster {
 		}
 	}
 
-	/** Picks the axis that is furthest from the nearest player (so it closes that gap), skipping a way that is walled with something unbreakable. */
+	/**
+	 * Goes for whoever in the room has hurt it most this fight (the nearest of them, or of everyone until someone has), and picks
+	 * the axis furthest from that player (so it closes that gap), skipping a way that is walled with something unbreakable.
+	 */
 	private void choose(ServerLevel level, List<ServerPlayer> inside) {
 		Vec3 center = this.position().add(0.0, this.getBbHeight() / 2.0, 0.0);
-		ServerPlayer target = inside.stream().min(Comparator.comparingDouble(p -> p.distanceToSqr(this))).orElse(null);
+		ServerPlayer target = inside.stream().min(Comparator.<ServerPlayer>comparingDouble(p -> -this.blows.getOrDefault(p.getUUID(), 0.0F))
+			.thenComparingDouble(p -> p.distanceToSqr(this))).orElse(null);
 		if (target == null) {
 			return;
 		}
