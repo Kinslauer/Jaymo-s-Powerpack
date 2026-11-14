@@ -28,4 +28,4 @@ owns:
 
 ## Done
 War parties push a mangonel (or field cannon) to the siege and work it. Compiled, not played.
-- 2026-11-14 08:36 PR #1513 is merged into master; moved to Agents/Done.
+- 2026-11-14 08:41 PR #1513 is merged into master; moved to Agents/Done.
