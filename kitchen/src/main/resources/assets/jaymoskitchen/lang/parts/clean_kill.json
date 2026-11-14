@@ -8,6 +8,7 @@
 	"message.jaymoskitchen.hook.gutted": "Gutted. Three cleaver cuts left",
 	"item.jaymoskitchen.offal": "Offal",
 	"block.jaymoskitchen.offal_pile": "Gut Pile",
+	"block.jaymoskitchen.salt_lick": "Salt Lick",
 	"item.jaymoskitchen.cooked_offal": "Cooked Offal",
 	"message.jaymoskitchen.hook.skinning": "Skinning: pull %s of %s"
 }

@@ -4,7 +4,6 @@ import com.jaymoskitchen.corpse.Scavengers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
@@ -84,7 +83,7 @@ public class OffalPileBlock extends Block {
 			if (!player.getAbilities().instabuild) {
 				player.getInventory().placeItemBackInInventory(new ItemStack(this.asItem()), Prediction.SERVER_ONLY);
 			}
-			level.playSound(null, pos, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.4F, 0.8F + level.getRandom().nextFloat() * 0.4F);
+			level.playSound(null, pos, this.soundType.getPlaceSound(), SoundSource.PLAYERS, 0.4F, 0.8F + level.getRandom().nextFloat() * 0.4F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		}
 		return InteractionResult.SUCCESS;

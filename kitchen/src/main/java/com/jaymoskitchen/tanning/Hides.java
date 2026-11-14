@@ -65,6 +65,7 @@ public final class Hides {
 	public static Item DRIED_HIDE;
 	public static Item WET_TANNED_HIDE;
 	public static Item SALT;
+	public static Block SALT_LICK;
 	public static Item RESIN;
 	public static DryingRackBlock DRYING_RACK;
 	public static BlockEntityType<DryingRackEntity> DRYING_RACK_ENTITY;
@@ -78,7 +79,12 @@ public final class Hides {
 		SALTED_HIDE = item("salted_hide", new Item.Properties());
 		DRIED_HIDE = item("dried_hide", new Item.Properties());
 		WET_TANNED_HIDE = item("wet_tanned_hide", new Item.Properties());
-		SALT = item("salt", new Item.Properties());
+		// salt is set down on the ground as a salt lick (SaltLickBlock), which draws game; it keeps its item name
+		ResourceKey<Block> lickKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("salt_lick"));
+		SALT_LICK = Registry.register(BuiltInRegistries.BLOCK, lickKey, new com.jaymoskitchen.butchery.SaltLickBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.QUARTZ).instabreak().sound(SoundType.SAND).noCollision().noOcclusion().randomTicks().setId(lickKey)));
+		ResourceKey<Item> saltKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("salt"));
+		SALT = Registry.register(BuiltInRegistries.ITEM, saltKey, new BlockItem(SALT_LICK, new Item.Properties().setId(saltKey)));
 		RESIN = item("resin", new Item.Properties());
 
 		ResourceKey<Block> rackKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("drying_rack"));

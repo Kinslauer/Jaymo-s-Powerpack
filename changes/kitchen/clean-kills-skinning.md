@@ -43,5 +43,11 @@
   a piece each, a right click takes one back, more offal in hand adds to it. Wild scavengers smell a pile from 16
   blocks and eat it a piece at a time (`Scavengers.EatPileGoal`); left alone it rots away, about a piece every 9
   minutes. Offal is still eaten by using it at the air, as sweet berries are.
+- **Salt licks** (Andy: "Can we do something similar to attract game animals?"): Salt is set down on the ground the
+  same way, as a lick of 1-4 pieces (`butchery/SaltLickBlock`). Deer, boar, moose, bison, cattle, sheep, pigs, horses
+  and rabbits (new entity tag `jaymoskitchen:salt_lickers`) come to it from 24 blocks, lick, and heal a little; after
+  three visits one has had its fill for 4 minutes. They won't come while a player who isn't sneaking stands within 10
+  blocks of the lick. About one visit in 4 uses a piece up; it never rots, but rain washes it away. Salting food
+  (salt in the main hand, food in the other, used at the air) is as before.
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.

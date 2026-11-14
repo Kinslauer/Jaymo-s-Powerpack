@@ -70,12 +70,23 @@ public final class Scavengers {
 				// (0.5.5) a zombie stops to feed even mid-chase (ahead of its attack), as long as it's only villagers it's after
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(mob instanceof Zombie ? 1 : 6, new GnawGoal(mob, hunger));
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatMeatGoal(mob, hunger));
-				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatPileGoal(mob, hunger));
+				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatPileGoal(mob, hunger, false));
+			} else if (entity instanceof Mob mob && mob.is(SALT_LICKERS)) {
+				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatPileGoal(mob, new Hunger(), true));
 			}
 		});
 	}
 
-	/** Gut piles (OffalPileBlock) scavengers may know of, by level: told as one is set down, and again as it lies there. */
+	/** Grazers and browsers that come to a salt lick (SaltLickBlock): deer, boar, cattle, horses. */
+	public static final TagKey<EntityType<?>> SALT_LICKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("salt_lickers"));
+	/** How far off a salt lick draws game. */
+	private static final double LICK_DRAW = 24.0;
+	/** Game won't come to a lick while a player who isn't sneaking stands this near it. */
+	private static final double LICK_WARY = 10.0;
+	/** A visit to the lick in this many uses a piece of it up. */
+	private static final int LICK_USES_ONE_IN = 4;
+
+	/** Gut piles and salt licks animals may know of, by level: told as one is set down, and again as it lies there. */
 	private static final java.util.Map<net.minecraft.server.level.ServerLevel, Set<net.minecraft.core.BlockPos>> PILES = new WeakHashMap<>();
 
 	/** A gut pile lies at {@code pos}: scavengers within {@link #SMELL} of it come to eat. */
@@ -398,7 +409,11 @@ public final class Scavengers {
 		}
 	}
 
-	/** Goes to a gut pile set down on the ground and eats it, a piece at a time. Pets don't. */
+	/**
+	 * Goes to a gut pile set down on the ground and eats it, a piece at a time. Pets don't. With {@code salt}, it is game
+	 * coming to a salt lick instead: from farther off, never while a player stands in plain sight by it, and a lick lasts
+	 * several visits.
+	 */
 	private static final class EatPileGoal extends Goal {
 		private static final double REACH_SQ = 1.8 * 1.8;
 		private final Mob mob;
@@ -406,14 +421,32 @@ public final class Scavengers {
 		private net.minecraft.core.@Nullable BlockPos pile;
 		private int giveUp, chew;
 
-		EatPileGoal(Mob mob, Hunger hunger) {
+		private final boolean salt;
+
+		EatPileGoal(Mob mob, Hunger hunger, boolean salt) {
 			this.mob = mob;
 			this.hunger = hunger;
+			this.salt = salt;
 			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 		}
 
-		private boolean isPile(net.minecraft.core.BlockPos pos) {
+		private boolean anyPile(net.minecraft.core.BlockPos pos) {
 			return mob.level().isLoaded(pos) && mob.level().getBlockState(pos).getBlock() instanceof com.jaymoskitchen.butchery.OffalPileBlock;
+		}
+
+		/** A pile of this animal's kind (salt for game, guts for scavengers), with nobody standing over it if it's a lick. */
+		private boolean isPile(net.minecraft.core.BlockPos pos) {
+			return anyPile(pos) && mob.level().getBlockState(pos).getBlock() instanceof com.jaymoskitchen.butchery.SaltLickBlock == salt
+				&& !(salt && watched(pos));
+		}
+
+		private boolean watched(net.minecraft.core.BlockPos pos) {
+			for (net.minecraft.world.entity.player.Player player : mob.level().players()) {
+				if (!player.isSpectator() && !player.isCrouching() && pos.distToCenterSqr(player.position()) < LICK_WARY * LICK_WARY) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		@Override
@@ -426,15 +459,18 @@ public final class Scavengers {
 				return false;
 			}
 			pile = null;
-			double best = SMELL * SMELL;
+			double best = salt ? LICK_DRAW * LICK_DRAW : SMELL * SMELL;
 			for (java.util.Iterator<net.minecraft.core.BlockPos> it = piles.iterator(); it.hasNext();) {
 				net.minecraft.core.BlockPos pos = it.next();
 				double distance = pos.distToCenterSqr(mob.position());
 				if (distance >= best) {
 					continue;
 				}
-				if (!isPile(pos)) {
+				if (!anyPile(pos)) {
 					it.remove();
+					continue;
+				}
+				if (!isPile(pos)) {
 					continue;
 				}
 				best = distance;
@@ -476,7 +512,7 @@ public final class Scavengers {
 			mob.getNavigation().stop();
 			if (++chew < 20) {
 				if (chew % 5 == 0 && mob.level() instanceof ServerLevel level) {
-					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, com.jaymoskitchen.butchery.Butchery.OFFAL),
+					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, mob.level().getBlockState(pile).getBlock().asItem()),
 						pile.getX() + 0.5, pile.getY() + 0.15, pile.getZ() + 0.5, 4, 0.1, 0.05, 0.1, 0.06);
 					com.jaymoskitchen.sound.KitchenSounds.chew(mob, 0.7F, 0.85F);
 				}
@@ -484,7 +520,9 @@ public final class Scavengers {
 			}
 			chew = 0;
 			giveUp = GIVE_UP;
-			com.jaymoskitchen.butchery.OffalPileBlock.takeOne(mob.level(), pile, mob.level().getBlockState(pile));
+			if (!salt || mob.getRandom().nextInt(LICK_USES_ONE_IN) == 0) {
+				com.jaymoskitchen.butchery.OffalPileBlock.takeOne(mob.level(), pile, mob.level().getBlockState(pile));
+			}
 			mob.heal(HEAL);
 			hunger.ate(mob);
 		}
