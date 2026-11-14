@@ -252,7 +252,7 @@ public final class IllagerTongue {
 
 	/** Whether {@code e} speaks the illager tongue: a living illager (pillager, vindicator, evoker, illusioner), not the undead Night Bleeder. */
 	public static boolean speaker(@Nullable Entity e) {
-		return e instanceof AbstractIllager && !(e instanceof NightBleeder) && e.isAlive();
+		return e instanceof AbstractIllager && !(e instanceof NightBleeder) && !(e instanceof com.jaymoskingdoms.reaped.Reaped) && e.isAlive();
 	}
 
 	/** What kind of speaker {@code e} is, for its lines: warlord, evoker (and illusioner), pillager, vindicator. */
