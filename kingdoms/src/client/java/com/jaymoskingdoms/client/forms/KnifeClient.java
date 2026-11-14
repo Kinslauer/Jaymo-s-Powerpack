@@ -28,7 +28,8 @@ public final class KnifeClient {
 
 	public static void register() {
 		EntityRenderers.register(Bolas.TYPE, context -> new ThrownItemRenderer<>(context, 0.8F, false));
-		EntityRenderers.register(com.jaymoskingdoms.forms.Lasso.TYPE, context -> new ThrownItemRenderer<>(context, 0.8F, false));
+		// the loop in flight is drawn with its rope (LassoRope)
+		EntityRenderers.register(com.jaymoskingdoms.forms.Lasso.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		LassoRope.register();
 		ClientPlayNetworking.registerGlobalReceiver(KnifeForms.Mark.TYPE, (payload, context) -> {
 			Minecraft minecraft = context.client();

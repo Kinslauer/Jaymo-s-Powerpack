@@ -1,76 +1,70 @@
 package com.jaymospowers.mortal;
 
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import com.jaymospowers.armory.Lash;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 /**
- * The axe on a chain: an iron axe in the hand, and on right click it is thrown out to the end of its chain
- * ({@link #REACH} blocks, stopped by walls) and hauled straight back. Whoever it meets first takes {@link #SHARE} of
- * the axe's blow and is dragged a step toward you; sneaking, the haul is the point and they are pulled all the way in
- * ({@link #HAUL}). {@link #WAIT} ticks between throws; each throw that bites wears the axe.
+ * The axe on a chain: a haft in the hand with the axe head hanging off it on a length of chain. Andy: "the chain axe
+ * and lasso should operate similar to the [whip] and flail", so it is whirled as the flail is ({@link Lash}: hold use
+ * and the head goes round on its chain; a charged left click swipes it round in front), the chain and head drawn
+ * physically by client/armory/LashRenderer. What is its own, Andy: "a throw embeds the axe, and you have to remove it,
+ * either by closing the distance, or ripping it out ... after letting go of the right click hold the axe flies toward
+ * the cursor, up to 9 blocks":
+ * <ul>
+ * <li>let go of the whirl and the head flies at what you look at ({@code Lash.THROW}, as far as {@link #CHAIN}, at
+ * {@link #THROW_SPEED}), harder the faster it was whirling;</li>
+ * <li>it stays buried in whoever it hits ({@code Lash.EMBED}, and {@code Mortal.BURIED_IN} on the axe), and the haft
+ * does nothing until it is out. Use the axe again from beside them ({@link #FREE_RANGE}) to work it free, or from
+ * further off to rip it out by the chain: a second wound ({@link #RIP_SHARE} of the axe's blow) and a longer wait
+ * ({@link #RIP_WAIT}). Past the chain's length it tears out by itself;</li>
+ * <li>Andy: "swapping with the head still embedded should drop the haft on the ground, still attached and rendered in
+ * world. you would have to pick it up and remove it to continue": put the axe away and the haft falls where you stand,
+ * the chain still running to the head. It lies there until someone takes it up (in hand it is buried as before), and
+ * is dragged along ({@link #DRAG}) when what the head is in walks off past the chain's length.</li>
+ * </ul>
  * Forged at the Tool Station from a Chain Axe Head, a Tool Handle and a length of chain ({@code WeaponParts}).
  */
 public final class ChainAxeItem extends Item {
-	static final double REACH = 9.0, TUG = 0.35, HAUL = 1.1;
-	static final float SHARE = 0.8F;
-	static final int WAIT = 30;
+	/** Blocks: within this the buried head is worked free; past the chain's length it tears out by itself. */
+	public static final double FREE_RANGE = 3.0, CHAIN = 9.0;
+	/** The throw: blocks a tick, and how near where it was thrown (blocks) its target must still be to be hit. */
+	public static final double THROW_SPEED = 1.5, THROW_HIT = 1.5;
+	/** A dropped haft: ticks before it can be picked up; how hard the chain drags it per block past its length, and the most. */
+	public static final int DROP_PICKUP = 40;
+	public static final double DRAG = 0.3, DRAG_MOST = 0.6;
+	/** Ripping it out: this share of the axe's blow again, and this many ticks before the next swing. */
+	public static final float RIP_SHARE = 0.6F;
+	public static final int RIP_WAIT = 40;
 
 	public ChainAxeItem(Properties properties) {
 		super(properties);
 	}
 
 	@Override
-	public InteractionResult use(Level world, Player player, InteractionHand hand) {
-		ItemStack stack = player.getItemInHand(hand);
-		if (!(world instanceof ServerLevel level)) {
-			return InteractionResult.SUCCESS;
-		}
-		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
-		HitResult wall = level.clip(new ClipContext(eye, eye.add(look.scale(REACH)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-		double reach = wall.getType() == HitResult.Type.MISS ? REACH : wall.getLocation().distanceTo(eye);
-		LivingEntity target = MortalKit.aimed(player, reach);
-		Vec3 end = target != null ? target.getBoundingBox().getCenter() : eye.add(look.scale(reach));
-		ItemParticleOption links = new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(new ItemStack(Items.IRON_CHAIN)));
-		Vec3 from = eye.add(0.0, -0.3, 0.0);
-		int steps = Math.max(2, (int) (end.distanceTo(from) * 3.0));
-		for (int i = 1; i <= steps; i++) {
-			Vec3 at = from.lerp(end, i / (double) steps);
-			level.sendParticles(links, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.2F, 0.8F);
-		if (target != null) {
-			float damage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) * SHARE;
-			if (target.hurtServer(level, player.damageSources().playerAttack(player), damage)) {
-				Vec3 back = player.position().subtract(target.position());
-				double far = Math.max(0.5, back.length());
-				double pull = player.isShiftKeyDown() ? Math.min(HAUL, 0.25 + far * 0.12) : TUG;
-				if (target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) < 1.0) {
-					target.setDeltaMovement(back.scale(pull / far).add(0.0, 0.22, 0.0));
-					target.needsSync = true;
-					target.syncVelocity = true;
-				}
-				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.8F);
-				stack.hurtAndBreak(1, player, hand.asEquipmentSlot());
-			}
-		}
-		player.getCooldowns().addCooldown(stack, WAIT);
-		player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		return InteractionResult.SUCCESS_SERVER;
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		return Lash.use(level, player, hand, Lash.FLAIL);
+	}
+
+	@Override
+	public int getUseDuration(ItemStack stack, LivingEntity user) {
+		return Lash.useDuration();
+	}
+
+	@Override
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return Lash.useAnimation(Lash.FLAIL);
+	}
+
+	@Override
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remainingTime) {
+		Lash.release(level, entity);
+		return false;
 	}
 }

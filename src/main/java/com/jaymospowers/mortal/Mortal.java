@@ -20,6 +20,8 @@ public final class Mortal {
 	static final float CHAIN_AXE_DAMAGE = 6.0F, CHAIN_AXE_SPEED = -3.2F;
 
 	public static Item CHAIN_AXE;
+	/** On a chain axe: the creature its head is buried in, so the axe stays stuck while its haft lies dropped. */
+	public static net.minecraft.core.component.DataComponentType<java.util.UUID> BURIED_IN;
 
 	private Mortal() {
 	}
@@ -28,6 +30,9 @@ public final class Mortal {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id("chain_axe"));
 		CHAIN_AXE = Registry.register(BuiltInRegistries.ITEM, key, new ChainAxeItem(new Item.Properties().setId(key)
 			.axe(ToolMaterial.IRON, CHAIN_AXE_DAMAGE, CHAIN_AXE_SPEED)));
+		BURIED_IN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("buried_in"),
+			net.minecraft.core.component.DataComponentType.<java.util.UUID>builder().persistent(net.minecraft.core.UUIDUtil.CODEC)
+				.networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC).build());
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.accept(CHAIN_AXE));
 		MortalKit.init();
 		FallingAttacks.init();
