@@ -36,6 +36,11 @@ public final class OutOfBodyClient {
 		ClientTickEvents.END_CLIENT_TICK.register(OutOfBodyClient::tick);
 	}
 
+	/** The ghost this client's player looks out of (their view, where it drifts), or null if they're in their body. */
+	public static @Nullable PlayerGhost camera() {
+		return ghost;
+	}
+
 	/** Whether this client's player is out of their body, looking out of their ghost. */
 	public static boolean drifting() {
 		return ghost != null;

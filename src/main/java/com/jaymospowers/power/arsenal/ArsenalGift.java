@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * ultimate is the Hundred Blades; out of a fight they turn a summoned blade in the hand a moment and mend their tools a
  * little.
  */
-final class ArsenalGift implements GiftKit {
+public final class ArsenalGift implements GiftKit {
 	/** The thrown blade: reach, damage and cooldown (ticks). */
 	static final double THROW_RANGE = 16.0;
 	static final float THROW_DAMAGE = 4.0F;
@@ -49,8 +49,70 @@ final class ArsenalGift implements GiftKit {
 	/** Everyday: a tool in hand loses this much wear. */
 	static final int MEND_AMOUNT = 6;
 
+	/** In a fight, two blades hang at their shoulders: how often one strikes, how far, how hard, and how often one meets a blow. */
+	static final int WING_STRIKE_GAP = 60, WING_WARD_GAP = 100;
+	static final double WING_RANGE = 12.0;
+	static final float WING_DAMAGE = 3.0F;
+
+	/** Set (to everyone) while a gifted villager's two blades are out; {@code ArsenalWingRenderer} draws them. */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> BLADES = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		com.jaymospowers.JaymosPowers.id("arsenal_gift_blades"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
+	/** When each villager's blades may next meet a blow. */
+	private static final java.util.Map<java.util.UUID, Long> WARD_READY = new java.util.HashMap<>();
+
 	static void init() {
 		Gifted.register(new ArsenalGift());
+		// Ward: a blow or shot from someone meets a blade instead
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (!entity.hasAttached(BLADES) || source.getEntity() == null || source.getEntity() == entity || !(entity.level() instanceof ServerLevel level)) {
+				return true;
+			}
+			long now = level.getGameTime();
+			if (now < WARD_READY.getOrDefault(entity.getUUID(), 0L)) {
+				return true;
+			}
+			WARD_READY.put(entity.getUUID(), now + WING_WARD_GAP);
+			Vec3 toward = source.getEntity().position().subtract(entity.position());
+			Vec3 at = entity.getEyePosition().add(toward.lengthSqr() < 1.0E-4 ? entity.getLookAngle() : toward.normalize().scale(0.8));
+			streak(level, shoulder(entity, 1), at);
+			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.1);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK.value(), SoundSource.NEUTRAL, 0.9F, 1.5F);
+			return false;
+		});
+	}
+
+	/** Where blade {@code side} (-1 left, 1 right) hangs over a villager's shoulder (both sides; the renderer uses it too). */
+	public static Vec3 shoulder(LivingEntity mob, int side) {
+		float yaw = mob.yBodyRot * net.minecraft.util.Mth.DEG_TO_RAD;
+		Vec3 forward = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
+		return mob.position().add(right.scale(side * (mob.getBbWidth() * 0.5 + 0.35))).add(forward.scale(-0.3)).add(0.0, mob.getBbHeight() + 0.45, 0.0);
+	}
+
+	/** In a fight two blades come out to their shoulders, and one strikes what they fight every {@link #WING_STRIKE_GAP}. */
+	@Override
+	public void tick(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
+		LivingEntity foe = mob.getTarget();
+		boolean fighting = mob.isAlive() && foe != null && foe.isAlive();
+		if (fighting != mob.hasAttached(BLADES)) {
+			if (fighting) {
+				mob.setAttached(BLADES, true);
+			} else {
+				mob.removeAttached(BLADES);
+				WARD_READY.remove(mob.getUUID());
+			}
+			rift(level, shoulder(mob, -1));
+			rift(level, shoulder(mob, 1));
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 0.4F, 1.3F);
+		}
+		if (fighting && (level.getGameTime() + mob.getId()) % WING_STRIKE_GAP == 0 && mob.distanceToSqr(foe) <= WING_RANGE * WING_RANGE && mob.hasLineOfSight(foe)) {
+			Vec3 to = foe.getBoundingBox().getCenter();
+			streak(level, shoulder(mob, (level.getGameTime() / WING_STRIKE_GAP) % 2 == 0 ? -1 : 1), to);
+			level.sendParticles(ParticleTypes.CRIT, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.3);
+			level.playSound(null, to.x, to.y, to.z, SoundEvents.TRIDENT_HIT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+			foe.hurtServer(level, level.damageSources().mobAttack(mob), WING_DAMAGE);
+		}
 	}
 
 	@Override

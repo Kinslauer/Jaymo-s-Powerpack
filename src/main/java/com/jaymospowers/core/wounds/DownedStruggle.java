@@ -304,7 +304,7 @@ public final class DownedStruggle {
 		}
 		if (now % REST_HINT_TICKS == 0) {
 			BodyPart worst = Downed.blocksRise(player);
-			player.sendOverlayMessage((worst == null ? Component.translatable("message.jaymospowers.downed.bed_ready")
+			player.sendOverlayMessage((worst == null ? Component.translatable(Downed.feet(player, "message.jaymospowers.downed.bed_ready"))
 				: Component.translatable("message.jaymospowers.downed.bed_resting", worst.displayName())).withStyle(ChatFormatting.GRAY));
 		}
 		return true;

@@ -12979,3 +12979,56 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   the cup, thrown against a padded stop, winched back down.
 - Compiled (Gradle `compileClientJava`); not played. Untested in game: how well crews keep up over rough ground, and the
   look of the model in the world.
+
+## 0.8.63 (2026-11-14): moose herds - Cube Animals' moose are our bull's cows and the young bulls (#1518)
+
+- **Bulls and cows** (Andy: "keep our bull and the cube moose are cows"): a Kingdoms moose that spawns on its own in the
+  swamps and taiga now brings 1 or 2 Cube Animals moose with it, drawn without antlers (their antler scale set to
+  nothing). The bull keeps by them: every few seconds, if its nearest cow has got more than 10 blocks off, it walks back
+  to her (never while it is after someone). It still charges any player within 15 blocks, so a herd is guarded.
+- **Young bulls** (Andy: "the cube moose with horns can be a juvenile moose that you can find fighting each other they
+  should be a bit smaller"): a Cube moose with antlers is a young bull, 0.85 the size with antlers about half the usual.
+  They spawn in twos and threes in the same biomes. Every 1 to 3 minutes two of them within 24 blocks walk up to each
+  other and knock antlers for 8 to 16 seconds (a clack and a shove back on each knock, no damage), then leave off.
+- **The herd**: the big bull runs any young bull off that comes within 8 blocks of him while he has a cow within 16: he
+  charges, shoves it (no damage) and it runs. Whatever hurts a cow within 24 blocks of a bull (a player not in creative,
+  a wolf) has the bull after it. Cows and young bulls are Cube's own animal otherwise: neutral, tamed and bred with
+  spruce saplings, ridden with a saddle; a calf takes a parent's antlers (or between), so a herd can raise its own
+  young bulls. Tamed or ridden young bulls still spar; one on a lead or with a rider doesn't.
+- Cube moose already in a world, and ones from a spawn egg, have antlers, so they become young bulls when next loaded.
+  Without Cube Animals the bull spawns alone as before.
+- `wild/Moose` (`finalizeSpawn`, `bringCow`, `KeepByCows`, `DriveOff`), new `wild/MooseHerds` (`SparGoal`, the young
+  bulls' spawns, the cows' defence). Cube's antler scale is reached by reflection, its size by the vanilla scale
+  attribute. Compiled; not played.
+
+## 0.8.64 (2026-11-14): Survival level overflow on the skill meter (#1523)
+
+- **Fixed "Survival LV. -35791396"**: a downed player's finishing blow (endless damage) gave Survival experience for the damage taken, which overflowed and saved the pillar's experience far below nothing; the meter then crawled up from there one level a frame. Damage experience now counts only up to your max health, grants add in longs and fill the pillar at most, and a save already below nothing is mended on load (the wrapped amount is added back, so the experience you had is restored).
+- Classes: Skills (Progress mend, grant), SurvivalSkill.
+- Built; not played.
+
+## 0.8.65 (2026-11-14): zombie hordes - more of the dead, walking together, growing with the world and biggest under blood moons (#1512)
+
+- **Zombie hordes** (`ZombieHordes`, ideas from Harder Hordes (MIT) and Undead Nights (ARR); our own code): every 10 s each player in the Overworld may draw a horde of 3-12 zombies (husks in deserts and badlands) that comes up out of sight, 40-56 blocks behind them, groans once (sound only, no text) and shambles their way.
+- **Hidden danger** (0-1): world age (no hordes for the first 3 days, then full after 60 more), the player's world tier, their armour and the local difficulty. It sets how often (night: 2% to 8% per roll, a per-player 2 min wait after each), how big, and how many nearby monsters a new horde may bring the count to (12 to 32 within 64 blocks).
+- **Night and rain**: hordes come at night; by day only under rain, 10x rarer. At sunrise (or after half a day) a horde breaks up into ordinary zombies, which then run for shade as before.
+- **Blood moons**: 20% a roll (super blood moon 30%), 15 s wait, twice as big (super: three times), cap x1.5 (x2); the zombies claw up out of the ground like the moon's own.
+- **Keeping together**: members are led to where the player is (quietly, through mob senses' lure, so louder noise, light or blood still draws them off); once the player is 96+ blocks away the horde wanders on. Idle wild zombies within 12 blocks fall in (up to 24, 40 under a blood moon; never thralls, buds, risen orcs, drowned or piglins). When one attacks, the rest are called to the fight.
+- **Fight or run**: only 15%-50% of a horde is armed: a dead villager's old tools at Hearth, weapons of the world tier's grades above it (`MonsterGear.weaponFor`). Lit ground keeps them from coming up there.
+- Operators: `/kingdom horde` sends one at once (testing only; no player command).
+- **Andy's 16 picks from the two mods** (pick list 2026-11-14; End hordes not picked):
+  - **Horde kinds**: skeleton hordes (strays in the snow; never creepers), drowned hordes by the water, the dead with skeleton archers behind (danger 0.5+, and a quarter of blood-moon hordes), Nether hordes from Wildlands up (piglins, hoglins, wither skeletons, magma cubes; never blazes), and illager hit squads (3-6 vindicators and pillagers, an evoker leading from Dread) put together against a player who's become a threat (danger 0.6+ or Wildlands): they never lose the trail and attack on sight.
+  - **Grave-captains**: from danger 0.35, a big zombie leading the horde (x1.3 size, x3 health, +75% harm, knockback resistant) with a boss bar; it counts as a great foe for world tiers.
+  - **Undead pirate lobbers**: bandana, sea coat, 3 real powder kegs (TNT, smaller blast) lobbed at a foe 5-16 blocks off; more often in drowned hordes.
+  - **Loot carrier**: a third of hordes have one member with a better, enchanted (glinting) weapon or bow it always drops, never worn out.
+  - **Danger buffs**: every member gets up to +60% health and +40% harm at full danger.
+  - **Climbing over each other** (`HordeMoves`): one pressed to a wall with 2+ of its horde round it climbs as high as the crowd can lift it (0.9 block a body).
+  - **Crossing water**: horde members keep their heads up and path over water; the dead in a horde never turn into drowned (`HordeZombieWaterMixin`).
+  - **Breaking through**: a stuck zombie, vindicator or hoglin beats at the block in its way until it breaks (crack overlay, sounds); hardest block by danger: dirt and glass, wood and stone, ores, iron blocks, obsidian. Doors are left to door pounding; chests and other block entities are never broken; needs mob griefing.
+  - **Doors**: a horde goes through doors easily. Every blow any of it lands counts: a wooden door gives after 3 hits, an iron or copper door after 60; locked, a wooden door takes 120 hits and an iron or copper one 220. Its skeletons and illagers pound doors too, and it pounds a door in the way of where it's marching, not only of someone it's already after.
+  - **Underground hordes**: a player underground draws hordes in the dark tunnels round them (20-36 blocks, out of sight), any hour (a third as often by day).
+  - **Overcast horde days** (`HordeDays`): grey sky, fog and clouds, the Sun hidden, dim light; nothing burns (`MONSTERS_BURN`) so the dead walk all day and hordes come as at night. Always the day after a blood moon; otherwise 4%-12% a day from day 10.
+  - **Bell wards** (`HordeWards`): no horde comes up near a bell on a 3x3 metal platform (iron 40, gold 56, diamond 80, netherite 112 blocks; mixed counts as the weakest, a netherite heart in diamond counts as netherite). The Truth's great temples' bells now stand on iron (new builds). Villagers near a bell sometimes talk of it (speech bubbles, 5 lines).
+  - **Grave scent and grave lure** (`HordeLure`): killing a horde member sometimes (4%) leaves the Grave Scent effect for 5 min (hordes 3x as often, a third the wait). The Grave Lure (rotten flesh x2, bone, coarse dirt, string) calls a horde at once in the dark (fails with a dull thud in the Sun, not used up).
+  - **Rung Journal**: the current tier's page gets a line on how bold the dead have grown (5 lines by danger), never a number.
+- Built; not played.

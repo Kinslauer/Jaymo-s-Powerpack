@@ -180,6 +180,9 @@ public final class HundredBlades {
 			level.addFreshEntity(blade);
 		}
 
+		// the Attendant Blades go in with it
+		ArsenalWingMoves.join(player, point);
+
 		double sy = point.y + height;
 		level.playSound(null, point.x, sy, point.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.playSound(null, point.x, sy, point.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.5F, 0.5F);

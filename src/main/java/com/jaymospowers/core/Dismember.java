@@ -524,6 +524,23 @@ public final class Dismember {
 		return right || left;
 	}
 
+	/**
+	 * Andy (2026-11-14): "I should be able to drag myself along without legs ... even for a little after the torso is
+	 * severed". A player cut in two by a killing blow ({@link #halve}) has gone down instead of dying ({@code Downed}): they
+	 * drag the upper half by the arms till {@link #HALVE_BLEED_OUT_TICKS} is up, then die of it, credited to the striker.
+	 */
+	public static void halvedDown(LivingEntity target, DamageSource source) {
+		HALVED.put(target, new Object[] {target.level().getGameTime() + HALVE_BLEED_OUT_TICKS, source.getEntity()});
+		if (target instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.halved").withStyle(ChatFormatting.DARK_RED));
+		}
+	}
+
+	/** Whether {@code target} is cut in two and bleeding out of it ({@link #halvedDown}). Server side. */
+	public static boolean halved(LivingEntity target) {
+		return HALVED.containsKey(target);
+	}
+
 	/** (0.20.61) Whether {@code target} is Rubber-folk (Kingdoms' heritage tag). */
 	public static boolean rubber(LivingEntity target) {
 		return target.entityTags().contains(RUBBER_TAG);

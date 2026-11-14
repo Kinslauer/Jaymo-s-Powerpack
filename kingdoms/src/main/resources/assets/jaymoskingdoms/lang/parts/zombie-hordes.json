@@ -1,0 +1,16 @@
+{
+  "entity.jaymoskingdoms.grave_captain": "Grave-Captain",
+  "effect.jaymoskingdoms.grave_scent": "Grave Scent",
+  "item.jaymoskingdoms.grave_lure": "Grave Lure",
+  "item.jaymoskingdoms.grave_lure.tooltip": "Tear it open in the dark and the dead will come.",
+  "journal.jaymoskingdoms.hordes.0": "The dead keep to their graves, mostly.",
+  "journal.jaymoskingdoms.hordes.1": "Some nights they walk in twos and threes.",
+  "journal.jaymoskingdoms.hordes.2": "They gather in the dark now, and walk together.",
+  "journal.jaymoskingdoms.hordes.3": "Whole crowds of them on the road after dark. They know my scent.",
+  "journal.jaymoskingdoms.hordes.4": "The nights belong to them. Even the ground by my door has been turned.",
+  "talk.jaymoskingdoms.ward_bell.0": "The dead won't come up within sound of a bell, so long as it stands on iron. The old priests knew.",
+  "talk.jaymoskingdoms.ward_bell.1": "Our temple bell rings from a square of iron, three by three. That's why the dead walk round us.",
+  "talk.jaymoskingdoms.ward_bell.2": "Gold under a bell carries further than iron. Diamond further still, they say.",
+  "talk.jaymoskingdoms.ward_bell.3": "My grandmother swore by a netherite heart under the bell. Nothing rose for a hundred paces.",
+  "talk.jaymoskingdoms.ward_bell.4": "Half a square of iron does nothing. Every block, or the dead don't listen."
+}

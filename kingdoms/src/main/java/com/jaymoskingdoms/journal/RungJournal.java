@@ -122,6 +122,9 @@ public final class RungJournal extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
+	/** The lines on how bold the dead have grown (ZombieHordes' danger). */
+	static final int HORDE_LINES = 5;
+
 	/** One page for each tier, ticked for {@code player}'s progress. */
 	public static List<Filterable<Component>> pages(ServerPlayer player) {
 		WorldTiers.Progress progress = WorldTiers.progress(player);
@@ -138,6 +141,11 @@ public final class RungJournal extends Item {
 					page.append(Component.literal(done ? DONE : TO_DO).withStyle(done ? ChatFormatting.DARK_GREEN : ChatFormatting.DARK_GRAY));
 				}
 				page.append(Component.translatable("journal.jaymoskingdoms." + tiers[t].key() + "." + n).withStyle(ChatFormatting.BLACK));
+			}
+			// the hordes, on the page of the tier they're on: how bold the dead have grown (a hint, never a number)
+			if (t == WorldTiers.of(player).ordinal() && com.jaymoskingdoms.ZombieHordes.begun(player.level().getServer())) {
+				int bold = Math.min(HORDE_LINES - 1, (int) (com.jaymoskingdoms.ZombieHordes.danger(player) * HORDE_LINES));
+				page.append("\n\n").append(Component.translatable("journal.jaymoskingdoms.hordes." + bold).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			}
 			pages.add(Filterable.passThrough(page));
 		}

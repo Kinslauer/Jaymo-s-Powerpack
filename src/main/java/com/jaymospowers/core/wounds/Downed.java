@@ -367,6 +367,13 @@ public final class Downed {
 			}
 			// (0.20.61) cut in half at the waist: nothing left to get up, as with a beheading
 			if (Dismember.halve(entity, source, amount, null)) {
+				if (entity instanceof ServerPlayer && !Dismember.rubber(entity)) {
+					// (Andy, 2026-11-14: "drag myself along ... even for a little after the torso is severed") a player cut in
+					// two lies on the upper half and may drag it by the arms, till the bleed-out ends them (Dismember#halvedDown)
+					goDown(level, entity, source, false);
+					Dismember.halvedDown(entity, source);
+					return false;
+				}
 				if (!Dismember.rubber(entity)) {
 					return true;
 				}
@@ -627,6 +634,21 @@ public final class Downed {
 	}
 
 	/**
+	 * Andy (2026-11-14): "it still said i could get to my feet, and animated a struggle. the struggles should make sense
+	 * dependent on the context". Nothing to stand on: a leg gone with no cane, crutch or fitted leg, both gone, or both
+	 * broken off adrenaline ({@link Breaks#crawlOnly}). Coming round is then pulling themselves together where they lie
+	 * (a push up onto the arms, never onto the feet), and they crawl on after it. Both sides (all of it is synced).
+	 */
+	public static boolean standless(Entity entity) {
+		return Breaks.crawlOnly(entity);
+	}
+
+	/** {@code key}, or its {@code _crawl} form (no feet in it) for one with nothing to stand on ({@link #standless}). */
+	public static String feet(Entity entity, String key) {
+		return standless(entity) ? key + "_crawl" : key;
+	}
+
+	/**
 	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), (0.15.41) any
 	 * humanoid ({@link BodyPlan#HUMANOID}: villagers, folk, illagers, witches, piglins, zombies, skeletons...), one of
 	 * Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
@@ -776,6 +798,10 @@ public final class Downed {
 		if (battered && Dismember.pulledApart(entity)) {
 			return;
 		}
+		// (Andy, 2026-11-14) and nobody gets up from being cut in two: they drag themselves till they bleed out
+		if (battered && Dismember.halved(entity)) {
+			return;
+		}
 		if (Carry.carrierOf(entity) instanceof ServerPlayer carrier) {
 			// (out of the arms that held them)
 			Carry.slip(carrier);
@@ -786,7 +812,7 @@ public final class Downed {
 		Wounds.reconcile(entity);
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
 		if (entity instanceof ServerPlayer player) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.up").withStyle(ChatFormatting.GREEN));
+			player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.up")).withStyle(ChatFormatting.GREEN));
 		}
 		if (battered) {
 			Battered.gotUp(entity);
@@ -1226,7 +1252,7 @@ public final class Downed {
 		MASH_HELD.remove(player.getUUID());
 		MASH_LENGTH.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
-		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
+		if (!out && !tooHurt(player) && !Dismember.halved(player) && !Carry.isCarried(player) && !adrift(player)) {
 			rise(level, player, now);
 			return;
 		}
@@ -1246,7 +1272,9 @@ public final class Downed {
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
-				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
+				// (Andy, 2026-11-14) cut in two, nothing will get them up: only the drag and the bleed-out
+				: Dismember.halved(player) ? Component.translatable("message.jaymospowers.downed.give_up_halved", bar)
+				: blocking != null ? Component.translatable(feet(player, "message.jaymospowers.downed.give_up_hurt"), blocking.displayName(), bar)
 				: Component.translatable("message.jaymospowers.downed.give_up", bar);
 			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
@@ -1269,7 +1297,7 @@ public final class Downed {
 			landing(level, player, now);
 			stopRising(player);
 			if (now % HINT_TICKS == 0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_hint").withStyle(ChatFormatting.GRAY));
+				player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.rise_hint")).withStyle(ChatFormatting.GRAY));
 			}
 			return;
 		}
@@ -1302,7 +1330,7 @@ public final class Downed {
 		if (r.ticks < RISE_TICKS) {
 			if (r.ticks % 2 == 0) {
 				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) RISE_TICKS);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rising", "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
+				player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.rising"), "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
 					.withStyle(ChatFormatting.YELLOW));
 			}
 			return;
@@ -1310,12 +1338,14 @@ public final class Downed {
 		RISES.remove(player.getUUID());
 		// (0.21.49) what a rest in bed mended, they rise with
 		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
+		// (asked before the getting up: a cane picked up after doesn't change what they did)
+		String risen = feet(player, "message.jaymospowers.downed.risen");
 		getUp(level, player);
 		if (!isDowned(player)) {
 			// (on their own legs, not a friend's arm: less in them than a revive leaves)
 			player.setHealth(Math.max(rested, Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH))));
 			Wounds.reconcile(player);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.risen").withStyle(ChatFormatting.GREEN));
+			player.sendOverlayMessage(Component.translatable(risen).withStyle(ChatFormatting.GREEN));
 		}
 	}
 
@@ -1569,13 +1599,14 @@ public final class Downed {
 					stack.consume(1, player);
 					player.getInventory().setChanged();
 				}
+				String revived = feet(body, "message.jaymospowers.downed.revived");
 				getUp(level, body);
 				MedicineSkill.broughtRound(player, body);
 				Karma.broughtRound(player, body);
 				MedicineSkill.treated(player);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
+				player.sendOverlayMessage(Component.translatable(revived, body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
 				for (BiConsumer<ServerPlayer, LivingEntity> listener : BROUGHT_ROUND_LISTENERS) {
 					listener.accept(player, body);
 				}

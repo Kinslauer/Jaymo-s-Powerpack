@@ -148,9 +148,11 @@ public final class Crutches {
 		}
 		// the pace: arms haul a crawl, a crutch carries a walk
 		double base = 1.0 + (bare == 2 ? Dismember.LEGS_SPEED : Dismember.LEG_SPEED);
-		if (bare == 0 || downed) {
+		if (bare == 0) {
 			gait(player, 0.0);
-		} else if (crawling) {
+		} else if (crawling || downed) {
+			// (Andy, 2026-11-14: "I should be able to drag myself along without legs") downed too, the arms drag them: the
+			// missing legs' slowness is lifted as for any crawl, and the downed pace is taken on top as for anyone down
 			gait(player, (bare == 2 ? CRAWL_NONE : CRAWL_ONE) / base - 1.0);
 		} else if (bare == 1 && crutch(player)) {
 			gait(player, CRUTCH_PACE / base - 1.0);

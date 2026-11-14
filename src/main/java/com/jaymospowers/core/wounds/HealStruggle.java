@@ -87,7 +87,8 @@ public final class HealStruggle {
 
 	/** Whether {@code player} is down, awake and too hurt to rise: the struggle is theirs to make. Both sides. */
 	public static boolean stuck(Player player) {
-		return Downed.isDowned(player) && Downed.awake(player) && Downed.tooHurt(player);
+		// (Andy, 2026-11-14) never one cut in two: nothing gets them up (server side; the client lets use through for it)
+		return Downed.isDowned(player) && Downed.awake(player) && Downed.tooHurt(player) && !com.jaymospowers.core.Dismember.halved(player);
 	}
 
 	/** Whether {@code player} could struggle up now, with what's in either hand. Both sides (the downed keys). */
@@ -154,7 +155,7 @@ public final class HealStruggle {
 			if (s.ticks < STRUGGLE_TICKS) {
 				if (s.ticks % 2 == 0) {
 					int filled = Math.round(BAR * s.ticks / (float) STRUGGLE_TICKS);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.heal_struggling", "|".repeat(filled) + ".".repeat(BAR - filled))
+					player.sendOverlayMessage(Component.translatable(Downed.feet(player, "message.jaymospowers.downed.heal_struggling"), "|".repeat(filled) + ".".repeat(BAR - filled))
 						.withStyle(ChatFormatting.YELLOW));
 				}
 				continue;
@@ -162,6 +163,7 @@ public final class HealStruggle {
 			it.remove();
 			HoldProgress.forget(player.getUUID(), job(player));
 			ItemStack used = stack.copyWithCount(1);
+			String struggled = Downed.feet(player, "message.jaymospowers.downed.heal_struggled");
 			Downed.getUp(level, player);
 			if (Downed.isDowned(player)) {
 				// (held down: a Will's No Getting Up, or legs still growing back; the item is kept)
@@ -171,7 +173,7 @@ public final class HealStruggle {
 			player.setHealth(Math.max(player.getHealth(), Math.min(player.getMaxHealth(), RISE_HEALTH)));
 			Wounds.reconcile(player);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4F, 0.6F);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.heal_struggled", used.getHoverName()).withStyle(ChatFormatting.GREEN));
+			player.sendOverlayMessage(Component.translatable(struggled, used.getHoverName()).withStyle(ChatFormatting.GREEN));
 		}
 	}
 }

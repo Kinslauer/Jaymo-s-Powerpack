@@ -69,6 +69,7 @@ public final class Encounters {
 	 * (0.7.526) Cube Animals: its kinds that Naturalist or Kingdoms already have, kept out of natural spawning (komodo dragon,
 	 * moose, piranha, snail, tiger). Its rattlesnake, shark and elephant, and (0.7.527) its red and roe deer, crocodile and
 	 * black bear, spawn as other breeds beside Naturalist's and Kingdoms' (Andy).
+	 * Its moose come only as the cows a Kingdoms bull brings ({@code wild/Moose}).
 	 */
 	static final String CUBE = "cubeanimals";
 	static final List<String> CUBE_DUPLICATES = List.of("komododragon", "moose", "piranha", "snail", "tiger");

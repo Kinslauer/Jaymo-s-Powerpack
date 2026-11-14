@@ -51,6 +51,7 @@
 		"DownedMobMixin",
 		"DownedHealMixin",
 		"DownedLimboMixin",
+		"GhostUnseenMixin",
 		"RevivalRespawnMixin",
 		"FistGuardInventoryMixin",
 		"SunShelterSkeletonMixin",

@@ -47,10 +47,19 @@ import org.jspecify.annotations.Nullable;
  * player ({@link Locks#BREAK_FACTOR}). Each other zombie pounding the same door adds {@link #GROUP_SHARE} of a blow,
  * up to {@link #MAX_GROUP} of them. A broken door drops nothing, as vanilla's. Villagers within {@link #HEAR} hear it
  * and run from the door ({@link Frights#scare}). The mob_griefing game rule turns it all off, as it does vanilla's.
+ * <p>
+ * A horde ({@link ZombieHordes}) goes through doors easily (Andy): every blow any of it lands counts, a wooden door gives
+ * after {@link #HORDE_WOOD_HITS} and an iron or copper one after {@link #HORDE_STURDY_HITS}; locked, after
+ * {@link #HORDE_LOCKED_WOOD_HITS} and {@link #HORDE_LOCKED_STURDY_HITS}. Its skeletons and illagers pound too, and it beats on a door in the way of where it's
+ * marching, not only of someone it's already after.
  */
 final class DoorPounding {
 	/** Ticks one zombie takes to beat down a wooden door; an iron or copper one. */
 	static final float WOOD_TICKS = 100.0F, STURDY_TICKS = 900.0F;
+	/** Blows a horde needs, between all of it, to beat down a wooden door; an iron or copper one. */
+	static final int HORDE_WOOD_HITS = 3, HORDE_STURDY_HITS = 60;
+	/** The same with a lock fitted and locked, whatever the lock (Andy). */
+	static final int HORDE_LOCKED_WOOD_HITS = 120, HORDE_LOCKED_STURDY_HITS = 220;
 	/** Each zombie past the first adds this share of a blow a tick, and no more than this many count. */
 	static final float GROUP_SHARE = 0.6F;
 	static final int MAX_GROUP = 6;
@@ -94,6 +103,9 @@ final class DoorPounding {
 	}
 
 	private static void loaded(Entity entity) {
+		if (entity instanceof Mob mob && ZombieHordes.inHorde(mob)) {
+			enlist(mob);
+		}
 		if (!(entity instanceof Zombie zombie) || zombie instanceof ZombifiedPiglin || zombie instanceof BioBud) {
 			return;
 		}
@@ -102,6 +114,19 @@ final class DoorPounding {
 			goals.addGoal(1, new Pound(zombie));
 		}
 		paths(zombie);
+	}
+
+	/** One of a horde that isn't a zombie (its skeletons, illagers) pounds doors too while it's in the horde. */
+	static void enlist(Mob mob) {
+		if (mob instanceof Zombie || !(mob instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton
+			|| mob instanceof net.minecraft.world.entity.monster.illager.AbstractIllager)) {
+			return;
+		}
+		var goals = ((MobAccessor)mob).jaymoskingdoms$goals();
+		if (goals.getAvailableGoals().stream().noneMatch(w -> w.getGoal() instanceof Pound)) {
+			goals.addGoal(1, new Pound(mob));
+		}
+		paths(mob);
 	}
 
 	/** It plans its paths through doors (to the door, where it pounds), as vanilla's door-breakers do. */
@@ -153,13 +178,13 @@ final class DoorPounding {
 	 * The shut door beside mob that stands between it and target (its lower half), nearest first; null if none, or if
 	 * mob isn't held up (it bumps into something, or its path ends short of its prey).
 	 */
-	private static @Nullable BlockPos doorBetween(Mob mob, LivingEntity target) {
+	private static @Nullable BlockPos doorBetween(Mob mob, Vec3 target) {
 		Path path = mob.getNavigation().getPath();
 		if (!mob.horizontalCollision && path != null && !path.isDone() && path.canReach()) {
 			return null;
 		}
 		Level level = mob.level();
-		Vec3 toTarget = target.position().subtract(mob.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 toTarget = target.subtract(mob.position()).multiply(1.0, 0.0, 1.0);
 		BlockPos at = mob.blockPosition();
 		BlockPos best = null;
 		double bestD = REACH * REACH;
@@ -188,13 +213,20 @@ final class DoorPounding {
 			d.tick = now;
 			d.pounders = 0;
 		}
-		if (d.pounders < MAX_GROUP) {
+		boolean horde = ZombieHordes.inHorde(mob);
+		if (!horde && d.pounders < MAX_GROUP) {
 			d.progress += d.pounders == 0 ? 1.0F : GROUP_SHARE;
 		}
 		d.pounders++;
 		boolean sturdy = sturdy(state);
+		float need = breakTicks(level, lower, state);
 		Locks.Fitted lock = Locks.entry(level, lower);
 		boolean locked = lock != null && lock.locked();
+		if (horde && blow) {
+			// a horde's every blow counts: so many hits and it gives
+			int hits = locked ? (sturdy ? HORDE_LOCKED_STURDY_HITS : HORDE_LOCKED_WOOD_HITS) : (sturdy ? HORDE_STURDY_HITS : HORDE_WOOD_HITS);
+			d.progress += need / hits;
+		}
 		if (blow) {
 			mob.swingForAttack(mob.getUsedItemHand());
 			level.levelEvent(sturdy ? 1020 : 1019, lower, 0);
@@ -212,8 +244,7 @@ final class DoorPounding {
 				}
 			}
 		}
-		float need = breakTicks(level, lower, state);
-		if (d.progress >= need) {
+		if (d.progress >= need - 1.0E-3F) {
 			breakDown(level, lower, state, d);
 			DOORS.remove(key);
 			return;
@@ -280,6 +311,15 @@ final class DoorPounding {
 	}
 
 	/** A zombie's goal: beat down the shut door between it and its prey. */
+	/** Where mob is bound: who it's after, or (one of a horde) where the horde marches; null if neither. */
+	private static @Nullable Vec3 bound(Mob mob) {
+		LivingEntity target = mob.getTarget();
+		if (target != null && target.isAlive()) {
+			return target.position();
+		}
+		return ZombieHordes.goalOf(mob);
+	}
+
 	static final class Pound extends Goal {
 		private final Mob mob;
 		private @Nullable BlockPos door;
@@ -300,18 +340,20 @@ final class DoorPounding {
 				zombie.setCanBreakDoors(false);
 				paths(zombie);
 			}
-			LivingEntity target = mob.getTarget();
-			if (target == null || !target.isAlive()) {
+			if (!(mob instanceof Zombie) && !ZombieHordes.inHorde(mob)) {
 				return false;
 			}
-			door = doorBetween(mob, target);
+			Vec3 to = bound(mob);
+			if (to == null) {
+				return false;
+			}
+			door = doorBetween(mob, to);
 			return door != null;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			LivingEntity target = mob.getTarget();
-			return door != null && target != null && target.isAlive() && allowed(mob) && shut(mob.level(), door)
+			return door != null && bound(mob) != null && allowed(mob) && shut(mob.level(), door)
 				&& Vec3.atBottomCenterOf(door).subtract(mob.position()).horizontalDistanceSqr() <= REACH * REACH;
 		}
 

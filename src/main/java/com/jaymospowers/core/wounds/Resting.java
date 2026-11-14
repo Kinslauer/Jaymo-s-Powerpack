@@ -180,7 +180,7 @@ public final class Resting {
 		if (now % DOWNED_HINT_TICKS == 0) {
 			BodyPart worst = Downed.blocksRise(player);
 			player.sendOverlayMessage((worst == null
-				? net.minecraft.network.chat.Component.translatable("message.jaymospowers.downed.fire_rise")
+				? net.minecraft.network.chat.Component.translatable(Downed.feet(player, "message.jaymospowers.downed.fire_rise"))
 				: net.minecraft.network.chat.Component.translatable("message.jaymospowers.downed.fire_rest", worst.displayName()))
 				.withStyle(net.minecraft.ChatFormatting.GOLD));
 		}

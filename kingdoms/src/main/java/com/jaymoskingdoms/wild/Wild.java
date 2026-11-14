@@ -68,6 +68,7 @@ public final class Wild {
 		BiomeModifications.addSpawn(BiomeSelectors.tag(Muskox.HAS_MUSKOX), MobCategory.CREATURE, MUSKOX, Muskox.SPAWN_WEIGHT, Muskox.SPAWN_LEAST,
 			Muskox.SPAWN_MOST);
 		HerdPull.register();
+		MooseHerds.register();
 		FedPredators.register();
 	}
 
