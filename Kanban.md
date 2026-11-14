@@ -13,12 +13,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
+- [ ] [[Agents/claude-cloud-arsenal-flying-blades|claude-cloud-arsenal-flying-blades]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Agents/claude-cloud-arsenal-flying-blades|claude-cloud-arsenal-flying-blades]] · 💻 Odysseus · #1522 · in-review
 
 
 ## Needs Andy
