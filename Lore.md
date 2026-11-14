@@ -195,6 +195,15 @@ kit.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
 
+(new) **How a power ends a fight** (power finishers, 2026-11-14, for Andy to approve). A holder standing empty-handed
+over a fallen foe finishes them with the power itself, and each power has one way folk know it by. The Arsenal's holder
+opens the rift over them and whatever answers falls through. A Chrono draws their remaining hours off them. Cryo
+freezes them through and breaks them like ice. Darktide opens the pool beneath them and writes one stroke across.
+Gravity piles their own weight on them. Resonance finds their pitch and sings it through them. Smoke goes in at the
+mouth and comes out all at once. The web winds them in silk and hauls the lines apart. Wind pulls the air out of them
+and brings the sky down. The Xenoform band puts its light through them. None of it is quick or sure: the power has to
+be held on them to the end, and a holder whose hold slips is thrown clear while the foe gets back up.
+
 **The elemental powers** (Andy, 2026-11-11). Smoke, Gravity and Cryokinesis come from ki attuning to an element the
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
 itself they cannot see mana abilities or spirits. They can still develop valor.
@@ -1012,6 +1021,15 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
+**The Reaper's risen** (Andy, 2026-11-14: "they should always reanimate as the corpse that died", "players can be
+reanimated too, and the shamans should still be undead"; approved by Andy 2026-11-14). What the Reaper raises for its keeper
+does not come back as some nameless corpse. The body gets up as itself: the shaman with his paint and his staff, the wolf
+as a wolf, a fallen traveller with their own face, each with the same name. But it is dead, and it is one of the undead
+from then on. Nothing of who it was comes back with it, and its old side means nothing to it; it fights for the one who
+carries the Reaper and for no one else. Black smoke comes off it for as long as it stands, and when its time is up there
+is only ash. The old dead that a Death Sorcerer calls are another matter: those come out of the ground, and the ground
+gives back whatever it has.
+
 **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement,
 approved by Andy 2026-11-14). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
 ground that still holds the sorcerer's mana. The Reaper takes those dead and sends them back: pillagers, vindicators and
@@ -1023,7 +1041,7 @@ not burn at sunrise; when its war is done the Reaper takes it back, and nothing 
 **reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
 them, and the Reaper is paid for what they kill near its keeper.
 
-(new) **The host at war** (Reaper's host thread, 2026-11-14; Claude's placement for Andy to approve). A host does not
+**The host at war** (Reaper's host thread, 2026-11-14; Claude's placement, approved by Andy 2026-11-14). A host does not
 always go back. When one of the reaped cuts down a camp's warlord, the camp does not fall: every illager left in it dies
 where it stands and gets up, a reaped warlord takes the seat, and the palisade is the Reaper's from then on. Such a
 hold raids the towns round it as the living camp did, grows by every illager its people kill, and stands until someone
@@ -1035,8 +1053,8 @@ there in the morning, and nobody will take her. The dead evokers no longer call 
 lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
 few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
 
-(new) **The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
-for Andy to approve). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
+**The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
 a poster, and from then on their hit squads do not wait for dark. A squad's leader carries the poster of the one it
 has come for. The mark fades if you leave them alone, an illager who likes you will sell it back, and a poster with
 another name on it, pinned where illagers will see it, does what you would expect. Squads come by whatever the country
@@ -1048,18 +1066,22 @@ Totem of Undying again, which they could once and cannot now: their camps raise 
 a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
 totem that holds death off once and leaves you weak, or a faceful of smoke.
 
-(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
-placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+**The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement approved by Andy 2026-11-14). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
 warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
 binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
 ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
-own, two swords and a crest, and steps aside from a blow as it did alive. None of them leaves the tomb. The
+own, two swords and a crest, and steps aside from a blow as it did alive. (new, Andy 2026-11-14: the archers, the
+unarmed and a low-armour swordsman wear different gear and move faster) Not all of them died in mail: the archers wear
+leather and a cap, the **skirmishers** carry one sword and no shield under the horned helm, and the **brawlers**, who
+fought the Warrior-born way with their hands, are stripped to the waist. Out of the iron, all three are quicker than
+the shield-wall. None of them leaves the tomb. The
 **laughing bones** are not draugr and not Warrior-born: they are villagers' dead in barrows whose knights are gone,
 with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
 back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
 
-(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
-for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+**The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
 it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
 over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
 hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
@@ -1248,6 +1270,18 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   margins of your aura.
 - **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order. He commanded an army of orcs he had
   dominated, marked with his ki, and he can still show you how to put one on his back and make it yours.
+  **Two as One** (Andy, 2026-11-14, approved: "more of the shadow of war combat inspiration for varro, and grimsby, the
+  capstone being a mode in which you play as if you had celebrimbor's power", then "okay start on the other spirits";
+  the names and the rest Claude's placement). A spirit fights from behind its keeper's shoulder because that is all a
+  new bond can carry. A deep one carries more: for a short while the spirit can step into the keeper and work with the
+  keeper's own hands, the way it worked when it had hands of its own. Grimsby moves them as a Sylvan swordsman moves:
+  over a foe's shoulder, across a field in a step, a pale glaive swept the whole way round. Varro fights as he
+  commanded: his hand hauls one foe out of its line, his voice sends the lesser ones running, and a beaten foe's will
+  breaks to him as the orcs' did, though without his mark it holds only a minute. Ambrose wards everyone who stands
+  with you and talks the rest down. Thessaly binds the field in script and sends back whatever is thrown at you. The
+  Quiet One takes you along his threads and is never quite where the blow lands. None of them can stay long. It is
+  their mana in a living body, and the body tires first.
+
 - **The Quiet One**: the fifth, of almost no words, who looks like none of the others and changes size each time he is
   called. He is the fifth figure in *The Long Defence*, though it is never said. He remembers the Grue ("I remember
   him." "He's here."), warns you off it ("No." "Don't." "Stop."), and thanks you when it is beaten. He speaks fully
