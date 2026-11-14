@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472, #1474, #1483 (merged)"
+pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472, #1474, #1483, #1485, #1492 (merged); #1494 open"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -79,7 +79,20 @@ let the owed village start run, close the game when needed. Long loading screens
 - 8:17 PM crash: ArrayIndexOutOfBounds in Felled's CutLogs LongLinkedOpenHashSet, called from worldgen (WorldGenRegion.setBlock
   -> ServerLevel.updatePOIOnBlockStateChange hook) on several C2ME threads at once. Same root cause as the 6:22 / 7:03 PM
   OOMs (autosave copying the corrupted linked set). #1483: FelledCutLogsMixin (@Pseudo) only notes on the server thread.
-  Merged ~8:50 PM, redeploying; Chunky paused by hand until then (ChunkyCompat resumes it when the server is empty).
+  Merged ~8:50 PM, deployed 8:52 PM: no Index -1 errors after, with Chunky at ~18 cps.
+- Andy's client crashed twice on dying (8:34, 8:44 PM): SkitterCeiling.eased called getId on the new body before ID
+  assignment. #1485 (client only); Andy's CurseForge profile updated (update-game.ps1), Deck redeployed to match.
+- 9:48 PM: NEW WORLD + pregen 2500 on latest master (Powers 0.23.43, Kingdoms 0.8.46). The old world's renamed copy
+  (world-old-20261113-214850) deleted on Andy's word. Chunky had kept the old world's task (73%) in config/chunky/tasks:
+  cancelled and started fresh by hand; deck/deploy.ps1 (local, untracked) now sends chunky cancel + confirm before start.
+- 10:06 PM crash: Re:Animal RedPandaEntity.isInLeaves read an unloaded neighbour while loading. #1492 RedPandaLeavesMixin.
+- 10:15 PM: all 10 old world copies deleted on Andy's word (only `world` left).
+- 10:32 PM crash: MCA SpawnQueue spawned a swapped villager into an unloaded chunk (getCurrentDifficultyAt). #1494
+  McaSpawnQueueMixin (rotate not-ready heads, wait) - PR open, not merged/deployed yet.
+- Watchdog crashes lose Chunky's in-memory task (not saved): after one, start a fresh task (chunks already made are skipped).
+- 10:41 PM crash (Andy just joined): no chunk wait; 3,007 tropical fish loaded round spawn (3,363 entities) plus the first
+  capital's founding on the join tick. Fish source unknown: Kingdoms' water caps (#1100) only cover natural spawning.
+  Server restarted ~10:45 PM, no Chunky task. NEXT: find what spawns tropical fish in bulk on a new world and cap it.
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
