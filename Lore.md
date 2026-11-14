@@ -1392,7 +1392,7 @@ with ranks and wages at dusk; caravans of masters, captains and merchants walk t
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
 take tribute, and hold festivals.
 
-**The town books (new).** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
+**The town books.** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
 lack, how many hands it has, what troubles it bears, what it is building and with whom it holds treaties. In a realm the
 ruler keeps it and lets a friend copy it; in a village it sits on a shelf and anyone grown will fetch it down. A town
 that hates you keeps its books shut.
@@ -1584,8 +1584,8 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
-(new) **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
-gear, Claude's placement for Andy to approve). A smith makes armour the way he makes tools: each piece is a plating cast
+**Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
+gear; approved 2026-11-14). A smith makes armour the way he makes tools: each piece is a plating cast
 in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the
 Part Builder, good for nothing but pouring gold over. Hung on a leather cuirass instead of maille, the same plating
 makes travelers' gear (goggles, vest, pants and boots), lighter and quicker worn out, which carters, hunters and anyone
