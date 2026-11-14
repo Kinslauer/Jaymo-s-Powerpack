@@ -24,7 +24,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
@@ -87,7 +86,6 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.451) The Locked / Open starts button's width, in the road's header. */
 	static final int LOCKED_W = 96;
 	/** The character creator's Randomize button's width, in its header. */
-	static final int REROLL_W = 76;
 	/** How long a skipped story waits with no screen up for MCA's creator before this screen's own creator page takes over (ms). */
 	static final long TAB_WAIT_MS = 8000L;
 	static final float TEXT_SHARE = 0.44F;
@@ -139,8 +137,8 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
 	/** The character creator's: every row drawn again, and its presets (a name to save under, save, delete, load the next). */
-	private @Nullable Button reroll, presetSave, presetDelete, presetLoad;
-	private @Nullable EditBox presetName;
+	/** Whether the creator's cards ({@link CreatorTab}) are on this screen now: the story skipped, with no creator of MCA's to hold them. */
+	private boolean cards;
 	/**
 	 * (0.7.451) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
 	 * Whether the carousel shows the locked starts instead of the open ones.
@@ -678,22 +676,12 @@ final class LifeStoryScreen extends Screen {
 		// (0.7.451) the locked starts, in a menu of their own
 		this.lockedButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> flipLocked())
 			.bounds(left() + panelW() - 8 - LOCKED_W - 64, top() + 4, LOCKED_W, 14).build());
-		// the character creator: every row drawn again, and its presets where the story page keeps its heritage, class and look buttons
-		this.reroll = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.random"), b -> randomize(true))
-			.bounds(left() + panelW() - 8 - REROLL_W, top() + 4, REROLL_W, 14).build());
-		this.presetName = addRenderableWidget(new EditBox(this.font, left() + 6, y - 40, TELL_W - 12, 16, Component.translatable("gui.jaymoskingdoms.creator.preset.name")));
-		this.presetName.setMaxLength(CharacterPresets.MAX_NAME);
-		this.presetName.setHint(Component.translatable("gui.jaymoskingdoms.creator.preset.name"));
-		this.presetName.setValue(presetTyped);
-		this.presetName.setResponder(typed -> presetTyped = typed);
-		int half = (TELL_W - 12 - 4) / 2;
-		this.presetSave = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.preset.save"), b -> savePreset())
-			.bounds(left() + 6, y - 20, half, 16).build());
-		this.presetDelete = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.preset.delete"), b -> {
-			CharacterPresets.delete(presetTyped);
-			presetAt = -1;
-		}).bounds(left() + 6 + half + 4, y - 20, half, 16).build());
-		this.presetLoad = addRenderableWidget(FlatButton.builder(Component.empty(), b -> loadPreset(1)).bounds(left() + 6, y, TELL_W - 12, 16).build());
+		// Andy: "you need to be able to toggle the selections in the box": the story skipped with no creator of MCA's to come,
+		// its cards are here, the same ones as on the creator's Life tab (this screen's own Back is the way to the story)
+		this.cards = step().summary() && draft.explicit;
+		if (this.cards) {
+			CreatorTab.build(this.width, this.height, this.font, this::addRenderableWidget, this::rebuildWidgets, null);
+		}
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
 		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
 			draft.explicit = true;
@@ -702,6 +690,7 @@ final class LifeStoryScreen extends Screen {
 				Arrays.fill(draft.sparks, 1);
 			}
 			this.asking = false;
+			callCreator();
 			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
 			if (tabbed()) {
 				hush();
@@ -896,6 +885,34 @@ final class LifeStoryScreen extends Screen {
 			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6);
 	}
 
+	/**
+	 * Andy: "you should be able to go back to the MCA menu with the on second thought button... they run alongside one
+	 * another not separate". MCA's creator is asked for, for one whose story is untold: it opens once of its own accord,
+	 * so after a turn back to the story (or a rejoin partway through it) the server sends it again. Should it not come,
+	 * the creator's page here takes over as ever ({@link #TAB_WAIT_MS}).
+	 */
+	private static void callCreator() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (McaCompat.LOADED && minecraft.player != null && LifeStory.of(minecraft.player) == null && !roadOnly()
+			&& ClientPlayNetworking.canSend(LifeStory.Creator.TYPE)) {
+			ClientPlayNetworking.send(new LifeStory.Creator());
+			creatorAhead = true;
+		}
+	}
+
+	/**
+	 * From the tab in MCA's creator: the story told after all. The creator steps aside for this screen at the story's first
+	 * page (the gender stays as picked), and is asked for again so it follows the story, as for one who never skipped.
+	 */
+	static void tellInstead() {
+		if (tabbed()) {
+			draft.explicit = false;
+			draft.step = 0;
+			callCreator();
+			Minecraft.getInstance().gui.setScreen(new LifeStoryScreen(true));
+		}
+	}
+
 	/** From the tab in MCA's creator, as the creator is finished: the skipped story is sealed, as the gender the creator made. */
 	static void sealFromTab(int gender) {
 		if (tabbed()) {
@@ -915,20 +932,13 @@ final class LifeStoryScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		// (0.7.282) Andy: "right clicking should take you back on any of these options": the heritage, class and look
 		// buttons step back, and the element or spell chips too
-		// the character creator's rows: a click steps a row on, a right click back
+		// (the character creator's page is all widgets, the cards of CreatorTab)
 		if (s.summary() && draft.explicit) {
-			int field = fieldAt(mx, my);
-			if (field >= 0) {
-				cycle(Field.values()[field], event.button() == InputConstants.MOUSE_BUTTON_RIGHT ? -1 : 1);
-				click();
-				return true;
-			}
+			return super.mouseClicked(event, doubleClick);
 		}
 		if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 			Runnable back = null;
-			if (over(this.presetLoad, mx, my)) {
-				back = () -> loadPreset(-1);
-			} else if (over(this.heritageButton, mx, my)) {
+			if (over(this.heritageButton, mx, my)) {
 				back = () -> cycleHeritage(-1);
 			} else if (over(this.classButton, mx, my)) {
 				back = () -> cycleClass(-1);
@@ -1088,6 +1098,9 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		Step s = step();
+		if (this.cards != (s.summary() && draft.explicit)) {
+			rebuildWidgets();
+		}
 		narrate(s, this.asking);
 		int x = left(), y = top(), w = panelW(), h = panelH();
 		Ui.panel(graphics, x, y, w, h, ACCENT);
@@ -1132,22 +1145,6 @@ final class LifeStoryScreen extends Screen {
 		}
 		if (this.back != null) {
 			this.back.active = draft.step > 0 || draft.explicit;
-		}
-		boolean making = s.summary() && draft.explicit && !this.asking;
-		for (net.minecraft.client.gui.components.AbstractWidget b : new net.minecraft.client.gui.components.AbstractWidget[] {this.reroll, this.presetName,
-			this.presetSave, this.presetDelete, this.presetLoad}) {
-			if (b != null) {
-				b.visible = making;
-			}
-		}
-		if (making && this.presetSave != null && this.presetDelete != null && this.presetLoad != null) {
-			List<CharacterPresets.Preset> saved = CharacterPresets.all();
-			this.presetSave.active = !presetTyped.isBlank() && (saved.size() < CharacterPresets.MAX || CharacterPresets.named(presetTyped) != null);
-			this.presetDelete.active = CharacterPresets.named(presetTyped) != null;
-			this.presetLoad.active = !saved.isEmpty();
-			this.presetLoad.setMessage(saved.isEmpty() ? Component.translatable("gui.jaymoskingdoms.creator.preset.none")
-				: presetAt >= 0 && presetAt < saved.size() ? Component.translatable("gui.jaymoskingdoms.creator.preset.loaded", saved.get(presetAt).name, presetAt + 1, saved.size())
-				: Component.translatable("gui.jaymoskingdoms.creator.preset.load", saved.size()));
 		}
 		if (this.look != null) {
 			Heritage.Kind kind = heritage();
@@ -1215,7 +1212,8 @@ final class LifeStoryScreen extends Screen {
 		if (!s.summary()) {
 			rows(graphics, s, mouseX, mouseY);
 		} else if (draft.explicit) {
-			creator(graphics, mouseX, mouseY);
+			// (the cards are widgets, drawn with the buttons)
+			this.contentH = 0;
 		} else {
 			summary(graphics, mouseX, mouseY);
 		}
@@ -1653,9 +1651,6 @@ final class LifeStoryScreen extends Screen {
 		}
 	}
 
-	/** The creator's rows as last laid out: {unscrolled y, height, field ordinal}. */
-	private final List<int[]> fieldRows = new ArrayList<>();
-
 	/** Whether the creator has a row for {@code f} now: a realm only for an answer that names one, an option only for a class that has them. */
 	static boolean shown(Field f) {
 		Answer raised = picked(Question.RAISED);
@@ -1700,24 +1695,6 @@ final class LifeStoryScreen extends Screen {
 				: Component.translatable("class.jaymoskingdoms.option." + cls.options.get(draft.option));
 			case AFFINITY -> answerName(Question.TURN);
 		};
-	}
-
-	/** What a row's pick gives, a line each (the affinity's: only that the power is still to come). */
-	static List<Component> fieldEffects(Field f) {
-		Heritage.Kind kind = heritage();
-		Question q = switch (f) {
-			case RAISED -> Question.RAISED;
-			case CHILDHOOD -> Question.CHILDHOOD;
-			default -> null;
-		};
-		Answer a = q == null ? null : picked(q);
-		if (a != null) {
-			return gives(q, a, true);
-		}
-		if (f == Field.LOOK && kind != null) {
-			return List.of(Component.translatable(HeritageVariants.langKey(kind, lookIndex()) + ".trait"));
-		}
-		return f == Field.AFFINITY ? List.of(Component.translatable("gui.jaymoskingdoms.creator.affinity.fx")) : List.of();
 	}
 
 	/** The picture of a row's pick, for its card in MCA's creator. */
@@ -1803,56 +1780,6 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		return out;
-	}
-
-	/** The creator's page: a row for each thing the story would have decided, then the harder life and the sparks as the story page has them. */
-	private void creator(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int px = paneX(), pw = paneW(), textW = pw - 22;
-		int y = top() + HEADER + 4 - this.scroll;
-		int startY = y;
-		this.fieldRows.clear();
-		this.chipsTop = -1;
-		int n = 0;
-		for (Field f : Field.values()) {
-			if (!shown(f)) {
-				continue;
-			}
-			List<FormattedCharSequence> fx = new ArrayList<>();
-			for (Component line : fieldEffects(f)) {
-				fx.addAll(this.font.split(line, textW - 14));
-			}
-			int rh = (1 + fx.size()) * Ui.LINE + 5;
-			boolean hover = Ui.over(mouseX, mouseY, px + 6, y, pw - 14, rh - 1) && mouseY >= top() + HEADER && mouseY < top() + panelH() - FOOTER;
-			this.fieldRows.add(new int[] {y + this.scroll, rh, f.ordinal()});
-			Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, n++, hover);
-			Component label = fieldLabel(f);
-			int lw = Math.min(this.font.width(label), (pw - 44) / 2);
-			Ui.line(graphics, this.font, label, px + 12, y + 2, lw, Ui.DIM);
-			boolean unset = f == Field.GENDER && draft.gender < 0;
-			Ui.line(graphics, this.font, fieldValue(f), px + 18 + lw, y + 2, pw - 50 - lw, unset || hover ? ACCENT : Ui.TEXT);
-			Ui.lineRight(graphics, this.font, Component.literal("< >"), px + pw - 12, y + 2, 16, hover ? ACCENT : Ui.HINT);
-			for (int l = 0; l < fx.size(); l++) {
-				graphics.text(this.font, fx.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, f == Field.AFFINITY ? Ui.DIM : Ui.GOOD);
-			}
-			y += rh;
-		}
-		y = choices(graphics, mouseX, mouseY, y, px, pw, textW);
-		this.contentH = y + this.scroll - startY + 4;
-		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
-	}
-
-	/** The creator's row at the mouse (a {@link Field} ordinal), or -1. */
-	private int fieldAt(int mouseX, int mouseY) {
-		if (mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER || mouseX < paneX() + 6 || mouseX >= paneX() + paneW() - 8) {
-			return -1;
-		}
-		for (int[] row : this.fieldRows) {
-			int ry = row[0] - this.scroll;
-			if (mouseY >= ry && mouseY < ry + row[1] - 1) {
-				return row[2];
-			}
-		}
-		return -1;
 	}
 
 	/** Steps row {@code f} on ({@code dir} 1) or back (-1) through what's open to this character, wrapping. */
@@ -2053,15 +1980,6 @@ final class LifeStoryScreen extends Screen {
 		if (CharacterPresets.save(p)) {
 			presetAt = CharacterPresets.all().indexOf(p);
 		}
-	}
-
-	/** Loads the next preset ({@code dir} 1) or the one before (-1) into the creator's rows. */
-	private void loadPreset(int dir) {
-		loadNextPreset(dir);
-		if (this.presetName != null) {
-			this.presetName.setValue(presetTyped);
-		}
-		this.scroll = 0;
 	}
 
 	static void loadNextPreset(int dir) {
