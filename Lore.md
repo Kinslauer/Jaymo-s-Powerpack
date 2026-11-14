@@ -1270,7 +1270,7 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   margins of your aura.
 - **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order. He commanded an army of orcs he had
   dominated, marked with his ki, and he can still show you how to put one on his back and make it yours.
-  **Two as One** (new) (Andy, 2026-11-14: "more of the shadow of war combat inspiration for varro, and grimsby, the
+  **Two as One** (Andy, 2026-11-14, approved: "more of the shadow of war combat inspiration for varro, and grimsby, the
   capstone being a mode in which you play as if you had celebrimbor's power", then "okay start on the other spirits";
   the names and the rest Claude's placement). A spirit fights from behind its keeper's shoulder because that is all a
   new bond can carry. A deep one carries more: for a short while the spirit can step into the keeper and work with the

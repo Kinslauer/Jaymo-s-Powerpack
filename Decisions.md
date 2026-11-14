@@ -588,3 +588,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - Andy (2026-11-14, character creator thread): "Merge": PR #1544 merged.
 - Same thread: Ambrose, Thessaly and the Quiet One got four later arts each (levels 9-15) and Two as One for all five, on PR #1546. Lore "Two as One" rewritten to cover all five, still (new).
 - Andy (2026-11-14, elf776 thread): "Approved merge": PR #1546 merged (all five spirits' later arts + Two as One).
+- Andy (2026-11-14): "Merge" after #1546 had merged; taken as approval of the full "Two as One" lore paragraph.
