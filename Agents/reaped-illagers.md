@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-xt5jx3
 with: 
-pr: 
+pr: 1532
 mods: kingdoms
 versions: 
 started: 2026-11-14
