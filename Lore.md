@@ -1744,11 +1744,16 @@ and breaks under enough blows, and a fighter who loses one fetches another from 
 approve). Most of what goes wrong in a village is small and somebody's own: a fold found empty, a debt, a bell rung in
 the night, a brother who never came home. Folk carry such a trouble until someone outside it will listen, and it is
 never one errand. It runs over days and weeks, the one who asked sends word when there is more (a **runner**, a
-villager paid a coin to find you on the road by daylight with a sealed letter, never a pigeon), and it ends the way
+villager paid a coin to find you with a sealed letter, by day or by lantern-light, at your door if need be; or, to
+one who keeps a roost, a pigeon), and it ends the way
 the one who took it up chose: who was named, who was let walk. Nobody is told which way was right. The spared remember
-it and so do the dead's kin; some come back with thanks, some asking to follow, some with friends and knives. Not every
-trouble is offered. Some are only a drunk's story, a ledger left in a camp, a diary in a ruin, and whoever goes to look
-has taken it up. Paid work on a town's board is rated the way carters rate roads: the poster chalks **one to five
+it and so do the dead's kin, and how you treated them along the way decides how they come back: with thanks, a
+warning, asking to follow, or with friends and knives. Those who walk with you have their own lights to steer by, as
+their natures run: the kindhearted and the Truth's devout hold to mercy, the dutiful to the law, the brave to standing
+fast, the proud to a kept word, the greedy to fair pay, the hot and the spiteful to wrongs answered. Cut down one who
+yielded, or throw in with smugglers, and a companion who holds to it walks away from you and does not come back. Not every
+trouble is offered. Some are only a drunk's story, a ledger left in a camp, a diary in a ruin, a ship's log in a drowned
+man's coat, a witch's reckoning, a pilgrim's journal on one of the risen, and whoever reads it has taken it up. Paid work on a town's board is rated the way carters rate roads: the poster chalks **one to five
 stars** on the notice for how many come back from it. A board whose work gets done gets a name, and harder work is
 brought to it: packs gone to ground, a nest or a camp or a soured pit dug in too near, lamps for the dark corners
 before nightfall, a fence to raise, a cave-in that wants powder, a chest to fill for a hermit, a shrine or someone who
