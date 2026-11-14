@@ -185,6 +185,7 @@ public final class Spirits {
 		FolkSpirits.register();
 		// (0.7.465) the Grue, who takes the spirits of those who dabble in the dark
 		Grue.register();
+		com.jaymoskingdoms.Reaper.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
 			IDLE_AT.clear();
@@ -378,6 +379,11 @@ public final class Spirits {
 			return;
 		}
 		if (state == null) {
+			if (key.action() == SUMMON && com.jaymoskingdoms.Reaper.has(player)) {
+				// (the Reaper has no moves to pick from: the key is its hand)
+				com.jaymoskingdoms.Reaper.key(player, key.sneak());
+				return;
+			}
 			if (key.action() == SUMMON) {
 				player.sendOverlayMessage(Component.translatable(SpiritSickness.sick(player) ? "message.jaymoskingdoms.spirit.asleep"
 					: "message.jaymoskingdoms.spirit.none").withStyle(ChatFormatting.BLUE));
