@@ -97,6 +97,8 @@ public final class ElementalCorruption {
 	}
 
 	private static final Map<Power, Wrath> WRATHS = new LinkedHashMap<>();
+	/** True while an element's own wrath is working on the world ({@link Wrath#tick}): what it does there is the gods', not doubled and never recoiling. */
+	private static boolean working;
 
 	private ElementalCorruption() {
 	}
@@ -136,12 +138,12 @@ public final class ElementalCorruption {
 	 * (never one they deal themselves).
 	 */
 	public static float empower(LivingEntity target, DamageSource source, float amount) {
-		return source.getEntity() != target && inWrath(source.getEntity()) ? amount * POWER : amount;
+		return !working && source.getEntity() != target && inWrath(source.getEntity()) ? amount * POWER : amount;
 	}
 
 	/** A blow landed: {@link #RECOIL} of what a player in the wrath dealt comes back on them. */
 	private static void recoil(LivingEntity target, DamageSource source, float dealt) {
-		if (dealt <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || player == target || !inWrath(player)) {
+		if (working || dealt <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || player == target || !inWrath(player)) {
 			return;
 		}
 		// (a source with no attacker, so it never comes round again)
@@ -246,7 +248,13 @@ public final class ElementalCorruption {
 			if (age % FLEE_EVERY == 0) {
 				scatter(player, level);
 			}
-			wrath.tick(player, level, age);
+			// (the element's own work, Smoke's choke say, is the gods' doing: as strong as written, and nothing comes back)
+			working = true;
+			try {
+				wrath.tick(player, level, age);
+			} finally {
+				working = false;
+			}
 		}
 	}
 

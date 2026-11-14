@@ -3,7 +3,7 @@
 Jung (2026-11-13): when a corrupted Elemental power user (Wind, Smoke, Gravity or Cryo) kills a human who isn't a
 barbarian, the gods of their power warn them twice, then take it back. Core: `elemental/ElementalCorruption`; each
 element's part in its own power's package (`WindWrath`, `SmokeWrath`, `GravityWrath`, `CryoWrath`), registered from
-its power's `init`. Lore: *The gods of the elements* in Lore.md (for Andy to approve).
+its power's `init`. No Lore.md entry yet.
 
 Jung's answers to the open points: any corrupted elemental user counts, whatever mode they're in; "humans" are
 villagers only (vanilla's, MCA's, a Kingdoms settlement's folk: `Carry.isVillager`), never a camp's
@@ -32,7 +32,7 @@ wrath or reclaimed, and the victim is an innocent. The count is saved (`elementa
 ## The wrath (`WRATH_TICKS` 6000, five minutes; `elemental_wrath`, saved)
 - **Double power**: every blow the holder deals (arrows and other things they own included) is `POWER` x2 (a mixin on
   `LivingEntity.hurtServer`, `ElementalWrathDamageMixin`), and `RECOIL` 25% of what it dealt comes back on them as magic
-  damage (`AFTER_DAMAGE`).
+  damage (`AFTER_DAMAGE`). The element's own work round them (below) is the gods' and is neither doubled nor recoils.
 - **It burns them**: `BURN` 1 (half a heart) every `BURN_EVERY` 100 ticks; the corrupted element pours off them
   (Wind: storm sparks; Smoke: smog miasma; Gravity: violet motes; Cryo: frost motes).
 - **Everything runs**: every 20 ticks each mob within 16 blocks drops them as a target and paths away (16 blocks off,
