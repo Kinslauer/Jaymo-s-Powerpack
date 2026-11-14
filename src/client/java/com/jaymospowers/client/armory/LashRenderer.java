@@ -134,6 +134,9 @@ public final class LashRenderer {
 			if (Lash.isFlail(stack)) {
 				lines.add(Component.translatable(Lash.isChainAxe(stack) ? "item.jaymospowers.chain_axe.whirl" : "item.jaymospowers.flail.whirl")
 					.withStyle(ChatFormatting.GRAY));
+				if (Lash.isChainAxe(stack)) {
+					lines.add(Component.translatable("item.jaymospowers.chain_axe.buried").withStyle(ChatFormatting.GRAY));
+				}
 			}
 		});
 	}

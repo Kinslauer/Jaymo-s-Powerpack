@@ -100,6 +100,8 @@ public final class Lash {
 	public static final byte FLAIL = 0, WHIP = 1;
 	/** What the head is doing: whirling, coming down, flying back; (whip) cracking out, wrapped round, hauling. */
 	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6, HOOK = 7, SWEEP = 8;
+	/** The chain axe's head buried in what its slam struck ({@code ChainAxeItem}), until it is worked free or ripped out. */
+	public static final byte EMBED = 9;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/**
@@ -298,6 +300,8 @@ public final class Lash {
 
 	/** Server: the players with a lash out, and what each has been doing that the clients needn't know. */
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
+	/** Set while a buried chain axe is being ripped out: that wound is not one of the bare haft's blows. */
+	private static boolean ripping;
 
 	private static final class Run {
 		final ServerPlayer player;
@@ -311,6 +315,8 @@ public final class Lash {
 		boolean held = true;
 		/** (0.16.24) A left-click swipe: no cooldown after it. */
 		boolean swipe;
+		/** The chain axe was ripped out of what it was buried in: a longer wait before it can be swung again. */
+		boolean ripped;
 
 		Run(ServerPlayer player) {
 			this.player = player;
@@ -335,6 +341,11 @@ public final class Lash {
 				swipe(server, entity);
 			}
 			return InteractionResult.PASS;
+		});
+		// a chain axe whose head is buried in something is a bare haft: its blows do nothing until the head is out
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			State state = !ripping && source.getDirectEntity() instanceof ServerPlayer player ? player.getAttached(STATE) : null;
+			return state == null || state.phase() != EMBED || !source.is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK);
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			AIMS.remove(handler.player.getUUID());
@@ -376,7 +387,15 @@ public final class Lash {
 	/** Use pressed with a flail or whip: held for as long as use is (the release is what swings it). */
 	public static InteractionResult use(Level level, Player player, InteractionHand hand, byte kind) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (hand != InteractionHand.MAIN_HAND || player.getCooldowns().isOnCooldown(stack) || player.getAttached(STATE) != null) {
+		State now = player.getAttached(STATE);
+		if (hand == InteractionHand.MAIN_HAND && now != null && now.phase() == EMBED) {
+			// the chain axe's head is buried in something: this takes it out
+			if (player instanceof ServerPlayer server) {
+				pullOut(server, now);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (hand != InteractionHand.MAIN_HAND || player.getCooldowns().isOnCooldown(stack) || now != null) {
 			return InteractionResult.FAIL;
 		}
 		player.startUsingItem(hand);
@@ -445,6 +464,16 @@ public final class Lash {
 				yield t < SWEEP_LEAD ? state.from().lerp(arc, smooth(t / SWEEP_LEAD)) : arc;
 			}
 			case HOOK -> state.aim();
+			case EMBED -> {
+				// in the side of it that faces you
+				Entity target = player.level().getEntity(state.target());
+				if (target == null) {
+					yield state.aim();
+				}
+				Vec3 middle = target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.6, 0.0);
+				Vec3 out = feet.subtract(target.getPosition(partialTick)).multiply(1.0, 0.0, 1.0);
+				yield out.lengthSqr() < 1.0E-4 ? middle : middle.add(out.normalize().scale(target.getBbWidth() * 0.5));
+			}
 			case SNAG, HEAVE, YANK -> {
 				Entity target = player.level().getEntity(state.target());
 				yield target == null ? state.aim() : target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.55, 0.0);
@@ -786,6 +815,15 @@ public final class Lash {
 					back(player, state, now);
 				}
 			}
+			case EMBED -> {
+				if (!(level.getEntity(state.target()) instanceof LivingEntity target) || !target.isAlive()) {
+					// what it was in is gone: it drops free
+					back(player, state, now);
+				} else if (target.distanceTo(player) > com.jaymospowers.mortal.ChainAxeItem.CHAIN) {
+					// the chain ran out: it tears out by itself
+					rip(run, state, target);
+				}
+			}
 			case SWEEP -> {
 				sweep(run, state, t);
 				if (t >= SWEEP_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == SWEEP) {
@@ -974,9 +1012,10 @@ public final class Lash {
 		if (struck != null) {
 			struck.setInvulnerableTime(0);
 			// (0.19.73) it comes down over the top of a guard
-			if (strike(player, struck, damage, guarding(struck, player)) && isChainAxe(player.getMainHandItem())) {
-				// the axe's beard hooks what it bites
-				com.jaymospowers.mortal.ChainAxeItem.haul(player, struck);
+			if (strike(player, struck, damage, guarding(struck, player)) && struck.isAlive() && isChainAxe(player.getMainHandItem())) {
+				// the axe stays in what it bites
+				player.setAttached(STATE, state.to(EMBED, level.getGameTime(), struck.getId(), at, at));
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 1.0F, 0.7F);
 			}
 			if (struck instanceof ServerPlayer other) {
 				Shakes.send(other, TARGET_SHAKE * (0.5F + run.spin), other.position());
@@ -1130,6 +1169,45 @@ public final class Lash {
 		shove(target, target.getDeltaMovement().multiply(-0.8, 0.0, -0.8).add(0.0, 0.3 - target.getDeltaMovement().y, 0.0));
 	}
 
+	/**
+	 * Use pressed with the chain axe's head buried in something: from beside it ({@code ChainAxeItem.FREE_RANGE}) the head
+	 * is worked free and no more; from further off it is ripped out by the chain.
+	 */
+	private static void pullOut(ServerPlayer player, State state) {
+		Run run = RUNS.get(player.getUUID());
+		if (run == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (level.getEntity(state.target()) instanceof LivingEntity target && target.isAlive()
+			&& target.distanceTo(player) > com.jaymospowers.mortal.ChainAxeItem.FREE_RANGE) {
+			rip(run, state, target);
+			return;
+		}
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+		back(player, state, level.getGameTime());
+	}
+
+	/** The buried head is torn out of {@code target} by the chain: a second wound, and a longer wait for the axe. */
+	private static void rip(Run run, State state, LivingEntity target) {
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		Vec3 at = head(player, state, level.getGameTime(), 1.0F);
+		ripping = true;
+		try {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, level.damageSources().playerAttack(player), flailDamage(player) * com.jaymospowers.mortal.ChainAxeItem.RIP_SHARE);
+		} finally {
+			ripping = false;
+		}
+		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.3);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.7F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 1.0F, 0.8F);
+		player.getMainHandItem().hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		run.ripped = true;
+		back(player, state, level.getGameTime());
+	}
+
 	/** The head flies back to the hand (a whip's catch, if any, is let go). */
 	private static void back(ServerPlayer player, State state, long now) {
 		Vec3 head = head(player, state, now, 1.0F);
@@ -1154,7 +1232,7 @@ public final class Lash {
 		}
 		ItemStack held = player.getMainHandItem();
 		if (!run.swipe && (state.kind() == FLAIL ? isFlail(held) : isWhip(held))) {
-			player.getCooldowns().addCooldown(held, state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN);
+			player.getCooldowns().addCooldown(held, run.ripped ? com.jaymospowers.mortal.ChainAxeItem.RIP_WAIT : state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN);
 		}
 	}
 
