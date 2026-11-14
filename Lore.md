@@ -536,6 +536,15 @@ islands. The **guardian trees** grow from their own wood, some of it infected, s
 old camps a traveller can remember; you wake beside one if you die with no bed. Holystone, Veradexian and Brexallen
 vases hold what the Aether's people left.
 
+(new) **Pages the dead and the monsters carry** (portable-mods thread, 2026-11-14; Andy picked RPG Lore's dropped books). Eight more
+loose pages turn up on what a player kills, and the Lore Codex keeps them. None states anything outright. A surveyor's
+notes on a Giant (its tracks begin at the old stone, the dust on it is from no quarry). A market list on a zombie or husk,
+for a king and a hall nobody remembers. A physician's case on the Skeleton Lord (a struck man who laughs in his sleep, and
+gold leaf that burns). A Hornkin reckoner's count of towns that paid or burned ("we do not open the doors, we wait by
+them"). A grandmother's rules against the Night Bleeder. A rubbing from a sentry golem's plate: "Keep the door. Admit the
+builders. Admit no other", with a tally of the days **the builders** did not come (a new name for the Aether's people, used
+only here). "Halfway", by a hermit of the floating rocks who followed the water the wrong way. An unsent letter on a werewolf.
+
 **The wind dragons.** The four winds are dragons: **Notus** the south wind (fire, the badlands and basalt
 spires), **Boreas** the north (frost, the frozen peaks), **Zephyrus** the west (acid, half sunk in the swamps) and
 **Eurus** the east (lightning, the fastest, disguised as a villager anywhere). **Aeolus** keeps the winds: a dragon
