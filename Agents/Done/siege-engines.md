@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-beb6sd
 with: 
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 War parties push a mangonel (or field cannon) to the siege and work it. Compiled, not played.
+- 2026-11-14 08:36 PR #1513 is merged into master; moved to Agents/Done.
