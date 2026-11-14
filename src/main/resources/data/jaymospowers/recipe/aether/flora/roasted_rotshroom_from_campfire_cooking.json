@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "ingredient": "jaymospowers:rotshroom",
+  "result": {
+    "id": "jaymospowers:roasted_rotshroom"
+  },
+  "experience": 0.35,
+  "cookingtime": 600
+}

@@ -192,7 +192,7 @@ public final class AetherBlocks {
 		STRIPPED_SKYROOT_LOG = block("stripped_skyroot_log", RotatedPillarBlock::new, wood(MapColor.COLOR_LIGHT_GREEN));
 		STRIPPED_SKYROOT_WOOD = block("stripped_skyroot_wood", RotatedPillarBlock::new, wood(MapColor.COLOR_LIGHT_GREEN));
 		SKYROOT_PLANKS = block("skyroot_planks", Block::new, wood(MapColor.COLOR_LIGHT_GREEN).strength(2.0F, 3.0F));
-		SKYROOT_LEAVES = block("skyroot_leaves", p -> new UntintedParticleLeavesBlock(0.0F, ParticleTypes.SMOKE, AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leaves(MapColor.GRASS));
+		SKYROOT_LEAVES = block("skyroot_leaves", p -> new SheddingLeavesBlock("skyroot_leaf_pile", 0.0F, ParticleTypes.SMOKE, p), leaves(MapColor.GRASS));
 		SKYROOT_SAPLING = block("skyroot_sapling", p -> new AetherSaplingBlock(SKYROOT_TREE, p), sapling());
 
 		GOLDEN_OAK_LOG = block("golden_oak_log", RotatedPillarBlock::new, wood(MapColor.GOLD));

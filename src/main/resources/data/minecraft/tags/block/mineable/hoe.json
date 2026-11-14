@@ -50,6 +50,16 @@
     "jaymospowers:volvox_block_dense",
     "jaymospowers:yellow_moss",
     "jaymospowers:yellow_moss_carpet",
-    "jaymospowers:yellow_moss_layer"
+    "jaymospowers:yellow_moss_layer",
+    "jaymospowers:skyplane_leaf_pile",
+    "jaymospowers:skybirch_leaf_pile",
+    "jaymospowers:skypine_leaf_pile",
+    "jaymospowers:wisproot_leaf_pile",
+    "jaymospowers:wisptop_leaf_pile",
+    "jaymospowers:greatroot_leaf_pile",
+    "jaymospowers:greatoak_leaf_pile",
+    "jaymospowers:greatboa_leaf_pile",
+    "jaymospowers:amberoot_leaf_pile",
+    "jaymospowers:irradiated_leaf_pile"
   ]
 }

@@ -18,6 +18,10 @@ import net.minecraft.world.level.levelgen.feature.Feature;
  * light, random growth and bone meal are all the vanilla sapling's; only the tree is ours.
  */
 public class AetherSaplingBlock extends SaplingBlock {
+	// ---- tuning ----
+	/** Vanilla saplings grow a step 1 tick in 7. */
+	public static final int MULCHED_GROW_CHANCE = 2;
+
 	private final ResourceKey<Feature> tree;
 
 	public AetherSaplingBlock(ResourceKey<Feature> tree, BlockBehaviour.Properties properties) {
@@ -38,5 +42,19 @@ public class AetherSaplingBlock extends SaplingBlock {
 				level.setBlock(pos, state, Block.UPDATE_CLIENTS);
 			}
 		});
+	}
+
+	/** A leaf pile beside the sapling feeds it: in light it grows a step 1 tick in {@link #MULCHED_GROW_CHANCE}, and the pile is used up. */
+	@Override
+	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		BlockPos pile = ForestFloor.pileBeside(level, pos);
+		if (pile != null && level.getMaxLocalRawBrightness(pos.above()) >= 9) {
+			if (random.nextInt(MULCHED_GROW_CHANCE) == 0) {
+				ForestFloor.spend(level, pile);
+				this.advanceTree(level, pos, state, random);
+			}
+			return;
+		}
+		super.randomTick(state, level, pos, random);
 	}
 }
