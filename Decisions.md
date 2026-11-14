@@ -498,3 +498,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 6:25 PM (Andy, Deck admin session): Deck server heap 6 GB -> 8 GB (start.sh -Xmx8G), and Chunky pauses while any player is on (ChunkyCompat).
 - 2026-11-13 7:00 PM ET (Add Karpathy coding guidelines everywhere thread): Andy: "Yeah add it to every claude session too why not". The Karpathy coding guidelines (github.com/multica-ai/andrej-karpathy-skills) go in the cloud project instructions, the repo CLAUDE.md (PR #1477, merge on his word), PC Claude's ~/.claude/CLAUDE.md and every Hermes bot's SOUL rules (handoff section).
 - 2026-11-13 7:04 PM ET (project chat): Andy said "merge" for PR #1477 (Karpathy coding guidelines in CLAUDE.md). Squash-merged.
+- 2026-11-13 7:40 PM ET (YOUTH in game, PC session): Andy turned Youth on in game chat (`mcbot.py on`); the wood-wisp answers players who name it.
