@@ -62,6 +62,7 @@
 		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" },
 		"jaymospowers.ember.mixins.json",
 		"jaymospowers.carryon.mixins.json",
+		"jaymospowers.felled.mixins.json",
 		"jaymospowers.toolbelt.mixins.json",
 		"jaymospowers.lithostitched.mixins.json",
 		"jaymospowers.tundraworld.mixins.json",

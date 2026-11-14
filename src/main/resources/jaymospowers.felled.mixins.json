@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.felled",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"FelledCutLogsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
