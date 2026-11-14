@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-elf776
 with: Claude (cloud thread "Add the Reaper spirit for death magic")
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 Built with Gradle; not played. Not built: NPC necromancers carrying one, a clash film against a mana spirit, smoke threads from each corpse.
+- 2026-11-14 09:12 PR #1526 is merged into master; moved to Agents/Done.
