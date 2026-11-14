@@ -2046,3 +2046,23 @@ short, bound in brass and set on a walnut stock. It throws the same iron ball th
 feed as a man can stand still, so a guard fires it once at whatever comes down the road and fights on with the butt
 while he loads. It is a road gun: the garrisons keep their muskets, and no shop sells one. The flared long gun folk
 call the blunderbuss is older and commoner, a fowler's piece grown mean.
+
+(new) **The Templars and the frontier's wear** (Claude's placement for Andy's Frontier Armaments picks, 2026-11-14, for Andy to approve). The
+Truth takes no idol, but its knights took a sign: a plain cross with flared arms, first painted on the surcoats of the
+Templars who guard its realms, now cut over its shrines and borne on every shield and banner of a realm that holds to
+it. The Crowned Sun's warrior orders wear the same plate from the same armourers, and neither side will say who wore
+it first; a smith of either faith sells it only to their own. The Grim keeps black theirs in steel. Out on the
+frontier the wear is plainer: a village's guards go under a kettle helm with a wide hat over it, and the farm folk and
+carters keep the hat and leave the helm. The realms' gunners took a harness of plate over dark leather with a lamp on
+the chest to load by, and the caravan guards copied it. Court wizards dress as the hedge mages they once were, in wine
+red now. The raiders of the dry country wrap themselves against the sun; the horned visage the Nether's warlords wear
+is the same wrapping grown teeth. The heavy horned plate a camp chief wears is older than his camp and nobody forges
+it now. The back rooms have their own blue hoods, the tailors sell the long coat the Mad Tinkerer made his name in,
+and an orc warchief's tusked gold plate is hammered to an orc's frame and sits on no one else.
+
+(new) **Measure, edge and breath** (Claude's placement for Andy's Knights & Heraldry picks, 2026-11-14, for Andy to approve). Every drillmaster in the
+realms teaches three things before any form. The first is your weapon's measure: the Skyward Reach keeps a spear's
+length, the Low Lantern steps inside it. The second is what your edge is good for: mail turns a cut, a point finds the
+gaps between the rings, and only a mace argues with plate, which is why the Anvil-Father's smiths sell maces to the
+same knights they armour. The third is breath: a knight who runs to the fight in full harness arrives with his hand
+already loose on the hilt, and the camps say the first blow of any battle is struck by the hill.
