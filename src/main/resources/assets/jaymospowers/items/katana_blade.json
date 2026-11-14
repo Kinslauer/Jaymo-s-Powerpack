@@ -59,6 +59,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/katana_blade_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -103,6 +116,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/weapon_part/katana_blade_copper"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/katana_blade_steel"
           }
         }
       ],

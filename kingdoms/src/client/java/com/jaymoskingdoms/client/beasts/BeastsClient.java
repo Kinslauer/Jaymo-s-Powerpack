@@ -20,6 +20,11 @@ public final class BeastsClient {
 	/** The goblin scout stands a little over a block tall (as the village's goblins do); the ghost is a person's height. */
 	static final float SCOUT_SCALE = 1.05F, COLOSSUS_SCALE = 1.4F, BEETLE_SCALE = 0.8F, KNIGHT_SCALE = 0.9F, REVENANT_SCALE = 0.62F, GHOST_SCALE = 0.9375F;
 
+	/** The sand worm stands about nine blocks out of the sand; the thing under the wreck is three across with arms of seven. */
+	static final float WORM_SCALE = 1.6F, THING_SCALE = 2.0F;
+	/** The worm's whole height with its jaws (model pixels), and the server's timings for coming up and going under (ticks). */
+	static final float WORM_TALL = 125.0F, WORM_RISE_TICKS = 10.0F, WORM_SINK_TICKS = 20.0F;
+
 	private BeastsClient() {
 	}
 
@@ -41,8 +46,17 @@ public final class BeastsClient {
 		});
 		look(Beasts.WILD_BOAR, new BbMobRenderer.Look("wild_boar", 0.9F, 0.6F, "idle", "walk", "run", "death", 0.4F, 0.6F, "h_head"));
 		// (0.7.339) the third batch: the haunted stand has no walk (it glides) and no idle (it stands dead still)
-		net.minecraft.client.renderer.entity.EntityRenderers.register(Beasts.SAND_WORM, SandWormRenderer::new);
-		net.minecraft.client.renderer.entity.EntityRenderers.register(Beasts.WRECK_THING, WreckThingRenderer::new);
+		// the sand worm and the thing under the wreck: our own models and animations (kingdoms/tools/gen_lair_beasts.py)
+		look(Beasts.SAND_WORM, new BbMobRenderer.Look("sand_worm", WORM_SCALE, 0.0F, "idle", "idle", null, "death", 1.0F, 1.0F, null)
+			.withExtra(BeastsClient::wormDepth));
+		// (its arms stand far over its body: drawn while any of them could be in view)
+		EntityRenderers.register(Beasts.WRECK_THING, context -> new BbMobRenderer<com.jaymoskingdoms.beasts.WreckThing>(context,
+			new BbMobRenderer.Look("wreck_thing", THING_SCALE, 0.0F, "idle", "swim", null, "death", 0.5F, 1.0F, null)) {
+			@Override
+			protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(com.jaymoskingdoms.beasts.WreckThing thing, float partialTicks) {
+				return thing.getBoundingBox().inflate(5.0, 0.0, 5.0).expandTowards(0.0, 9.0, 0.0);
+			}
+		});
 		look(Beasts.GORGON, new BbMobRenderer.Look("gorgon", 0.8F, 0.6F, "rest", "running", null, null, 0.45F, 1.0F, "head"));
 		look(Beasts.WAR_BARREL, new BbMobRenderer.Look("war_barrel", 0.9F, 1.4F, "idle", "walk", null, null, 0.5F, 1.0F, null));
 		look(Beasts.HAUNTED_STAND, new BbMobRenderer.Look("haunted_stand", 1.0F, 0.4F, "none", "none", null, null, 0.5F, 1.0F, "head"));
@@ -71,6 +85,18 @@ public final class BeastsClient {
 	private static <T extends net.minecraft.world.entity.Mob & com.jaymoskingdoms.beasts.Acting> void look(
 		net.minecraft.world.entity.EntityType<T> type, BbMobRenderer.Look look) {
 		EntityRenderers.register(type, context -> new BbMobRenderer<>(context, look));
+	}
+
+	/**
+	 * How much of the sand worm is out of the ground: none while it burrows or the sand boils over it, pushed up through
+	 * its rise, drawn back down through its sink (its animations only shape the body).
+	 */
+	private static void wormDepth(BbModel bb, BbMobRenderer.State state) {
+		String action = state.action;
+		float out = action == null || "warn".equals(action) ? 0.0F
+			: "rise".equals(action) ? Mth.clamp(state.actionAge / WORM_RISE_TICKS, 0.0F, 1.0F)
+			: "sink".equals(action) ? 1.0F - Mth.clamp(state.actionAge / WORM_SINK_TICKS, 0.0F, 1.0F) : 1.0F;
+		bb.part("root").y += (1.0F - out) * WORM_TALL;
 	}
 
 	/** The Piglin King's walk (legs and arms swinging opposite) and idle (a slow breath in the arms), when not mid-move. */

@@ -4597,3 +4597,42 @@ Built, not played.
   longer reaches the top edge. Third person, the ground and the inventory icon are unchanged.
 - `tools/armory_assets.py` keeps the new poses (`FIRST_PERSON`) when the models are regenerated.
 - Built; checked in a projection of the first-person view, not played.
+
+## 0.23.52 (2026-11-14): JMB's 3D models for the longsword, glaive, quarterstaff, cudgel and battleaxe; blood on 3D weapons (#1500)
+
+- Andy picked five of JMB's Better Weapons' 3D models (MIT, jmb19905; licence kept in the pack and `docs/licenses`). In the hand they are now solid: the **longsword**, the **glaive** (every tier), the **quarterstaff** as JMB's battlestaff (wood and iron, swinging across into JMB's blocking hold while raised), the **cudgel** as JMB's club (wood, and a stone one in cobblestone), and WeaponMod's **battleaxe** as JMB's long axe (every metal). The inventory icons stay as they were.
+- Stone and copper versions are JMB's iron palette recoloured along vanilla's stone and copper sword heads.
+- They live in the built-in "3D items and plants" pack (`tools/gen_held_3d.py`, sources in `tools/jmb_weapons/`), so switching that pack off brings the flat look back.
+- **Blood on 3D weapons**: a bloody modelled weapon (these, and the dagger) now shows its blood in the hand, on the ground and in frames, painted onto each texture it's drawn from (`BloodItemOverlay`, `ArmourGrimeTextures.sprite`). Before, only flat weapons did.
+- Compiles; not played.
+
+## 0.23.53 (2026-11-14): katanas and ninjatos are folded steel only (#1503)
+
+- Andy: "the katana should only be craftable with iron sand, giving it a reason to go to mohknee."
+- **Folded Steel Ingot** (new): what Kingdoms' blossom smiths teach you to make from Mohknee's iron sand. It heats, hammers and
+  melts as steel, and a Hot Ingot of it stays folded (it cools or quenches back to a Folded Steel Ingot, and won't pile with plain steel).
+- **Katana Blade**: hammered only from 2 hot Folded Steel Ingots on an iron Smithing Anvil with a steel hammer; plain steel never
+  offers it. With a Crossguard and a Tool Handle it makes WeaponMod's iron katana. Stone (Part Builder), iron, gold and copper
+  katana blades are no longer made, and old iron, gold or copper blades no longer assemble. Finished katanas, the katana blueprint
+  and Darktide's blade of dark water are untouched.
+- **Ninjato Blade** (Andy: "yes ninjato too"): the same rule; 2 hot Folded Steel Ingots, makes the iron ninjato. Stone, iron and gold
+  ninjato blades are no longer made and old ones no longer assemble.
+- Idea from Nihon Blacksmithing (All Rights Reserved, so no code or art of theirs): iron sand from rivers as the only way to their blades.
+- `smithing/FoldedSteel` (item, `folded_steel` component, the anvil check), `WeaponParts.Scheme.FOLDED`, `HotMetal`, `Quenching`,
+  `SmithingAnvilEntity.put`. Art: our steel ingot with a fold line; the steel blade is the redrawn iron one recoloured.
+- Compiled; not played.
+
+## 0.23.54 (2026-11-14): Limbo ghosts with no body left roam free (#1506)
+
+- Waiting in Limbo, once your body is gone (eaten, blown apart, burned) the tether comes off after a few seconds: you roam anywhere as your ghost and can haunt your friends, until you hold Backspace to give it up and reincarnate.
+- The black frame draws back and the line under it changes while you are free. Staying free is kept through logging out.
+- A buried body still holds its ghost by the grave (other mods say where a body rests through `Limbo.RESTING`).
+- Compiled; not played.
+
+## 0.23.55 (2026-11-14): Out of your body without crashing (#1510)
+
+- **Fix (client crash)**: knocked out of your body (`OutOfBody`), the ghost you look out of is made on your own
+  game and had no entity number. Cube Animals asks every drawn entity's number to see if it glows, and the game
+  crashed (Andy, after a creeper, 2026-11-14 2:43 AM). The ghost now gets a number of its own, below any the
+  server gives out.
+- Built.

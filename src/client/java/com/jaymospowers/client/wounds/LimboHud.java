@@ -25,6 +25,8 @@ public final class LimboHud {
 	/** The frame's bands, how far in it reaches (share of the shorter side), how dark at the very edge (0-255) and at its inner edge. */
 	static final int BANDS = 20;
 	static final float REACH = 0.34F;
+	/** How far in it reaches once the ghost is free to roam (no body left). */
+	static final float FREE_REACH = 0.16F;
 	static final int EDGE_ALPHA = 255, INNER_ALPHA = 40;
 	/** The bar's length (characters) is drawn as a strip this wide (pixels). */
 	static final int BAR_WIDTH = 120, BAR_HEIGHT = 4;
@@ -76,7 +78,8 @@ public final class LimboHud {
 			return;
 		}
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
-		int reach = Math.round(Math.min(w, h) * REACH);
+		boolean free = minecraft.player.hasAttached(Limbo.FREE);
+		int reach = Math.round(Math.min(w, h) * (free ? FREE_REACH : REACH));
 		// the black box: bands from the edge in, each thinner in dark
 		for (int i = 0; i < BANDS; i++) {
 			float t = i / (float) (BANDS - 1);
@@ -91,7 +94,7 @@ public final class LimboHud {
 		graphics.fill(0, 0, w, reach / BANDS, 0xFF000000);
 		var font = minecraft.font;
 		graphics.centeredText(font, Component.translatable("limbo.jaymospowers.title"), w / 2, h - 58, 0xFFB8B8B8);
-		graphics.centeredText(font, Component.translatable("limbo.jaymospowers.line"), w / 2, h - 46, 0xFF8A8A8A);
+		graphics.centeredText(font, Component.translatable(free ? "limbo.jaymospowers.line_free" : "limbo.jaymospowers.line"), w / 2, h - 46, 0xFF8A8A8A);
 		graphics.centeredText(font, Component.translatable("limbo.jaymospowers.leave", keyName()), w / 2, h - 34, 0xFF6E6E6E);
 		if (held > 0) {
 			int x = (w - BAR_WIDTH) / 2, y = h - 20;

@@ -44,6 +44,8 @@ public final class Tackroom {
 	public static final int BLANKET_COLOR = 0x8E2A2A;
 
 	public static Item WAR_SADDLE, RACING_SADDLE, BRIDLE, HORSE_BLANKET, CHAIN_BARDING, PLATE_BARDING, HORSESHOES, HOOF_PICK, OATS, HANDBOOK;
+	/** Icy's Better Horses' leftovers ({@link HorseKit}): the glide harness (a saddle) and the horse medkit. */
+	public static Item GLIDE_HARNESS, HORSE_MEDKIT;
 	/** (0.7.305) Opens the Horsekeeper's Handbook (set by the client). */
 	public static Runnable openHandbook = () -> {
 	};
@@ -61,6 +63,7 @@ public final class Tackroom {
 		List<Item> all = new ArrayList<>();
 		WAR_SADDLE = item("war_saddle", Item::new, saddle(), all);
 		RACING_SADDLE = item("racing_saddle", Item::new, saddle(), all);
+		GLIDE_HARNESS = item("glide_harness", Item::new, saddle(), all);
 		BRIDLE = item("bridle", Item::new, new Item.Properties().stacksTo(1), all);
 		HORSE_BLANKET = item("horse_blanket", Item::new, new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(BLANKET_COLOR)), all);
 		CHAIN_BARDING = item("chain_barding", Item::new, new Item.Properties().stacksTo(1).horseArmor(CHAIN), all);
@@ -68,6 +71,7 @@ public final class Tackroom {
 		HORSESHOES = item("horseshoes", Item::new, new Item.Properties().stacksTo(16), all);
 		HOOF_PICK = item("hoof_pick", Item::new, new Item.Properties().durability(HOOF_PICK_USES), all);
 		OATS = item("oats", Item::new, new Item.Properties(), all);
+		HORSE_MEDKIT = item("horse_medkit", Item::new, new Item.Properties().durability(HorseKit.MEDKIT_USES), all);
 		// (0.7.305) the Horsekeeper's Handbook: everything about horses, read in hand
 		HANDBOOK = item("horse_handbook", Handbook::new, new Item.Properties().stacksTo(1), all);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
@@ -120,8 +124,8 @@ public final class Tackroom {
 		}
 	}
 
-	/** One of the saddles a rider can steer with (vanilla's, the war saddle, the racing saddle). */
+	/** One of the saddles a rider can steer with (vanilla's, the war saddle, the racing saddle, the glide harness). */
 	public static boolean saddle(ItemStack stack) {
-		return stack.is(Items.SADDLE) || stack.is(WAR_SADDLE) || stack.is(RACING_SADDLE);
+		return stack.is(Items.SADDLE) || stack.is(WAR_SADDLE) || stack.is(RACING_SADDLE) || stack.is(GLIDE_HARNESS);
 	}
 }

@@ -35,5 +35,8 @@
   "message.jaymospowers.smithing.went_cold": "The metal on the anvil has gone cold.",
   "message.jaymospowers.smithing.busy": "Someone else is working this anvil.",
   "message.jaymospowers.smithing.nothing": "There's nothing you can forge from this much metal.",
-  "message.jaymospowers.smithing.done": "%s: %s"
+  "message.jaymospowers.smithing.done": "%s: %s",
+  "item.jaymospowers.folded_steel_ingot": "Folded Steel Ingot",
+  "item.jaymospowers.hot_ingot.folded": "Hot Folded Steel Ingot",
+  "message.jaymospowers.smithing.needs_folded": "This steel won't take that edge."
 }

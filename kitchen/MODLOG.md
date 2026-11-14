@@ -2151,3 +2151,8 @@ trader seeds, and the dishes). This adds what was missing (MIT, by vectorwing; L
 - **Never knocked limp**: bosses (`c:bosses`), anything over 4 blocks either way, mobs in water or lava, NoAI mobs, mobs carrying a rider, and bodies Jaymo's Powers has downed or is finishing (Powers draws them lying its own way). A limp mob that gets downed, lands in water or is picked up is let go of the ragdoll.
 - **Drawing**: limp mobs are drawn from their ragdoll's points like corpses, with limbs following the physics and loose parts hanging (`client/ragdoll/LimpMobs`, `client/mixin/LimpMobRotationsMixin`). A GeckoLib mob is laid down on the ragdoll as a whole, and its bones keep their own animation (`client/mixin/GeoLimpMobMixin`).
 - Built against 26.3 (Kitchen `gradlew build` passes); the mixins weren't loaded in a dev run, and none of it has been played.
+
+## 0.6.15 (2026-11-14): Ender saddlebags (#1500)
+
+- **Ender saddlebags**, not crafted: a court wizard sells them (Kingdoms). Worn in a horse's armour slot like saddlebags: the horse's owner opens their own ender chest from them, by sneak-clicking the horse or opening its inventory while riding. Anyone else gets the horse's own screen. Shears take them off. `horse/Saddlebags`, `mixin/AbstractHorseMixin`, client `SaddlebagLayer`.
+- Our own art (the saddlebags recoloured). Compiles against 26.3; not played.

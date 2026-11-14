@@ -212,6 +212,7 @@ public final class Bonding {
 
 	public static void register() {
 		Tackroom.register();
+		HorseKit.register();
 		FEED.put(Items.WHEAT, 8.0F);
 		FEED.put(Items.SUGAR, 3.0F);
 		FEED.put(Items.HAY_BLOCK, 40.0F);

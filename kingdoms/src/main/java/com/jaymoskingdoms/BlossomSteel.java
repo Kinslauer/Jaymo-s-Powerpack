@@ -39,8 +39,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <li><b>Iron sand</b> lies in Mohknee's riverbeds: sand or gravel dug from under a river's water there gives a handful
  * now and then ({@link #SAND_CHANCE}).</li>
  * <li>Burnt hard in a blast furnace it sinters into a <b>steel bloom</b>.</li>
- * <li>The bloom is <b>folded</b> on an anvil: struck with the bloom in hand, {@link #FOLDS} times, it becomes the pack's
- * steel (Powers' steel ingot; an iron ingot without Powers).</li>
+ * <li>The bloom is <b>folded</b> on an anvil: struck with the bloom in hand, {@link #FOLDS} times, it becomes folded
+ * steel (Powers' Folded Steel Ingot, the only metal a katana's or ninjato's blade is hammered from; an iron ingot without Powers).</li>
  * </ol>
  * None of it is written anywhere. A smith of a Blossom settlement tells it a step at a time ("Ask About Steel" on the
  * Interact page): the first for the asking, the second to someone holding iron sand, the third to someone holding a
@@ -109,7 +109,7 @@ public final class BlossomSteel {
 			held.setDamageValue(held.getDamageValue() + 1);
 			return InteractionResult.SUCCESS;
 		}
-		Item steel = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "steel_ingot")).orElse(Items.IRON_INGOT);
+		Item steel = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "folded_steel_ingot")).orElse(Items.IRON_INGOT);
 		player.setItemInHand(hand, new ItemStack(steel));
 		return InteractionResult.SUCCESS;
 	}

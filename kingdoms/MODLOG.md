@@ -12853,3 +12853,48 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - With Jaymo's Kitchen, hemp fibre makes rope as string does (three in a column, 2 rope), and hemp cloth makes ship sails
   as wool does. Tags `jaymoskingdoms:rope_fibre` and `jaymoskingdoms:sail_cloth` (Kitchen's items are optional entries, so
   Kingdoms alone still works).
+
+## 0.8.52 (2026-11-14): Darkvision no longer washes out daylight (#1505)
+
+- Bloods that see in the dark (Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves, beast folk) had the
+  ground, their hand and everything within 16 blocks turned a milky grey in broad daylight: the sight's post effect
+  took any darkish pixel (sunlit grass included) for darkness and lifted it to grey.
+- The sight is now off while the light at your eyes is 12 or more (lamps, or sky light by how high the Sun stands), and
+  the shader only lifts pixels that are really dark (`DarkvisionClient.LIT`, `shaders/post/darkvision.fsh`).
+- Compiled; not seen in game.
+
+## 0.8.53 (2026-11-14): the sand worm and the thing under the wreck remodelled (#1502)
+
+- **Sand worm**: its own body in place of the plain tower of boxes. Eight armoured rings that narrow toward the head, a
+  plate band, a back spine and side bristles on each, a pale belly, and a head that opens like a flower: four plated
+  jaws round a toothed gullet with four hooks between them. It bursts out of the sand with its jaws spread, sways
+  while it stands, rears back and comes down along its strike with the jaws snapping shut, turns as it goes back
+  under, and falls along its length when it dies.
+- **The thing under the wreck**: a spotted body with two lamp eyes under heavy brows, a mantle with two fins rising
+  out behind it, a beak that opens in the ring of its eight arms (pale and suckered inside), and two long feeders with
+  hooked clubs. Its arms wave at rest, clap together to swim, open and shut for the lash, stay curled and tighten on
+  what it holds, trail while it darts behind its ink, and fall slack when it dies.
+- Moves, timings, sizes and hitboxes are unchanged. Both are made by `kingdoms/tools/gen_lair_beasts.py`
+  (`kingdoms/art/sand_worm.bbmodel`, `wreck_thing.bbmodel`) and drawn by `BbMobRenderer`; spec
+  `docs/Lair-Beasts-Model-Spec.md`. `SandWormModel`/`Renderer` and `WreckThingModel`/`Renderer` are gone.
+- Compiled; poses checked in renders only, not played.
+
+## 0.8.54 (2026-11-14): Horse medkit and glide harness (Icy's Better Horses leftovers) (#1500)
+
+- **Horse medkit** (leather, string, paper, a honey bottle): use it on any hurt horse to heal 4 hearts at once, then Regeneration II for 5 s, and to draw out poison. 4 uses. `equestrian/HorseKit`.
+- **Glide harness**, sold only by a court wizard ("Enchanted tack" on the talk menu, 16): a saddle with membrane wings. Ridden off a drop, the horse sinks slowly instead of falling, and neither horse nor rider takes the fall. `equestrian/HorseKit`, client `GlideHarnessClient`.
+- The court wizard's "Enchanted tack" also sells Kitchen's ender saddlebags (20) when Kitchen is loaded.
+- The Horse Handbook's Tack page names both.
+- Our own art. Compiles against 26.3; not played.
+
+## 0.8.55 (2026-11-14): blossom steel is folded steel (#1503)
+
+- A folded bloom now gives Powers' **Folded Steel Ingot** instead of a plain steel ingot (an iron ingot without Powers): the only
+  metal a katana's or ninjato's blade is hammered from, so Mohknee's iron sand is the way to either.
+- The smith's last lesson says so in passing ("Our long blades are drawn from nothing else").
+- `BlossomSteel`. Compiled; not played.
+
+## 0.8.56 (2026-11-14): Graves hold their Limbo ghosts (#1506)
+
+- Jaymo's Powers now frees a Limbo ghost whose body is gone. A buried body is a body still: `Graves` tells Powers where it lies (`DeathCompat.addResting`), so the one waiting stays by their grave.
+- Compiled; not played.

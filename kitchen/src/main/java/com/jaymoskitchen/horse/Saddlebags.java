@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Saddlebags {
 	public static Item SADDLEBAG;
+	/** Saddlebags lined with ender pearls: the horse's owner opens their own ender chest from them, anywhere. */
+	public static Item ENDER_SADDLEBAG;
 	public static Item WHEEL;
 	public static Item WAGON_ITEM;
 	public static EntityType<CartEntity> WAGON;
@@ -54,6 +56,15 @@ public final class Saddlebags {
 		SADDLEBAG = item("saddlebag", SaddlebagItem::new, new Item.Properties()
 			.stacksTo(1)
 			.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+			.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY)
+				.setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+				.setAllowedEntities(entityTypes.getOrThrow(EntityTypeTags.CAN_WEAR_HORSE_ARMOR))
+				.setDamageOnHurt(false)
+				.setCanBeSheared(true)
+				.setShearingSound(SoundEvents.HORSE_ARMOR_UNEQUIP)
+				.build()));
+		ENDER_SADDLEBAG = item("ender_saddlebag", Item::new, new Item.Properties()
+			.stacksTo(1)
 			.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY)
 				.setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
 				.setAllowedEntities(entityTypes.getOrThrow(EntityTypeTags.CAN_WEAR_HORSE_ARMOR))
@@ -87,7 +98,7 @@ public final class Saddlebags {
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			// (stacks are made here: items can't be stacked at registration, before components are bound)
-			List<Item> items = new ArrayList<>(List.of(SADDLEBAG, WHEEL));
+			List<Item> items = new ArrayList<>(List.of(SADDLEBAG, ENDER_SADDLEBAG, WHEEL));
 			for (Map<String, Item> byWood : CART_ITEMS.values()) {
 				items.addAll(byWood.values());
 			}
@@ -125,6 +136,11 @@ public final class Saddlebags {
 				.sized(width, height)
 				.clientTrackingRange(10)
 				.build(key));
+	}
+
+	/** Whether this horse wears ender saddlebags. */
+	public static boolean enderBags(AbstractHorse horse) {
+		return horse.getItemBySlot(EquipmentSlot.BODY).is(ENDER_SADDLEBAG);
 	}
 
 	/** The saddlebags this horse is wearing, or null. */

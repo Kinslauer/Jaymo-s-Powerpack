@@ -45,6 +45,10 @@ import org.jspecify.annotations.Nullable;
  * Reincarnate. Pressing it respawns them as a spectator tethered to their body: a free camera that may drift no further than
  * {@link #RADIUS} blocks from where the body lies (the body is followed if it is carried), under a black frame on their
  * screen. They see everything done to the body, and can go no further.
+ * <p>Andy: "i was eaten, therefore i had no way of respawning from that body. after that happens your limbo ghost should be freed
+ * to freecam or spectator roam. and haunt your friends until you backspace to give up". Once no body of theirs has been found
+ * for {@link #GONE_LOOKS} looks (eaten, blown apart, burned), the tether is off ({@link #FREE}): they roam where they like,
+ * seen as their ghost ({@link OutOfBody}). A buried body is a body still ({@link #RESTING}): its ghost stays by the grave.
  * <ul>
  * <li>They leave Limbo by being reborn in another body ({@link #reborn}: the druid's rite, Kingdoms' {@code Rebirths}), or by
  * holding the Leave Limbo key (Backspace) for {@link #LEAVE_TICKS}: then the full wipe goes ahead as if they had pressed
@@ -61,6 +65,8 @@ public final class Limbo {
 	/** How often the body is looked for, if it has been moved (ticks), and how far from the last place it is looked for. */
 	static final int FIND_EVERY = 40;
 	static final double FIND_RANGE = 96.0;
+	/** How many looks in a row must find no body before the ghost is let go. */
+	static final int GONE_LOOKS = 3;
 	/** The sure wakes already used in a body born again by the rite (of {@link Mortality#SURE_WAKES}). */
 	static final int REBORN_WOKEN = 1;
 	/** The share of their health a reborn body wakes with, and how long it lies out cold (ticks). */
@@ -73,6 +79,10 @@ public final class Limbo {
 	 */
 	public static final AttachmentType<String> STATE = AttachmentRegistry.create(JaymosPowers.id("limbo"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+
+	/** Set while no body is left to wait beside: the tether is off. Saved, and told to its player (the frame and its lines read it). */
+	public static final AttachmentType<Boolean> FREE = AttachmentRegistry.create(JaymosPowers.id("limbo_free"),
+		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL.cast(), AttachmentSyncPredicate.targetOnly()));
 
 	/** Client to server: the Limbo button was pressed on the death screen (the respawn follows it). */
 	public record Enter() implements CustomPacketPayload {
@@ -96,9 +106,17 @@ public final class Limbo {
 		}
 	}
 
+	/**
+	 * Where else a body may lie than as a corpse (Kingdoms' graves): given the world and whose body, the place or null. Asked
+	 * when no corpse of theirs is found; a body found here keeps its ghost tethered.
+	 */
+	public static final java.util.List<java.util.function.BiFunction<ServerLevel, UUID, @Nullable Vec3>> RESTING = new java.util.ArrayList<>();
+
 	/** The place of each one's body, as last found; and those already put in spectator mode this session. */
 	private static final Map<UUID, Vec3> CENTRE = new HashMap<>();
 	private static final Set<UUID> APPLIED = new HashSet<>();
+	/** How many looks in a row found no body of theirs. */
+	private static final Map<UUID, Integer> MISSING = new HashMap<>();
 	private static @Nullable Method owner;
 	private static boolean ownerLooked;
 
@@ -115,10 +133,12 @@ public final class Limbo {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			APPLIED.remove(handler.player.getUUID());
 			CENTRE.remove(handler.player.getUUID());
+			MISSING.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			APPLIED.clear();
 			CENTRE.clear();
+			MISSING.clear();
 		});
 	}
 
@@ -197,22 +217,46 @@ public final class Limbo {
 				continue;
 			}
 			Vec3 centre = body(player);
+			UUID id = player.getUUID();
+			if (player.hasAttached(FREE) && !MISSING.containsKey(id)) {
+				// (free when they logged out: free still)
+				MISSING.put(id, GONE_LOOKS);
+			}
 			if (server.getTickCount() % FIND_EVERY == player.getId() % FIND_EVERY) {
 				Vec3 moved = findBody(home, player, centre);
+				for (int i = 0; moved == null && i < RESTING.size(); i++) {
+					moved = RESTING.get(i).apply(home, id);
+				}
 				if (moved != null) {
-					CENTRE.put(player.getUUID(), moved);
+					CENTRE.put(id, moved);
 					centre = moved;
+					MISSING.remove(id);
+				} else if (owner != null) {
+					MISSING.merge(id, 1, Integer::sum);
 				}
 			}
-			if (!APPLIED.contains(player.getUUID()) || player.gameMode() != GameType.SPECTATOR) {
-				APPLIED.add(player.getUUID());
+			boolean free = MISSING.getOrDefault(id, 0) >= GONE_LOOKS;
+			if (free != player.hasAttached(FREE)) {
+				if (free) {
+					player.setAttached(FREE, true);
+					JaymosPowers.LOGGER.info("{} has no body left: their ghost is free", player.getScoreboardName());
+				} else {
+					player.removeAttached(FREE);
+				}
+			}
+			if (!APPLIED.contains(id) || player.gameMode() != GameType.SPECTATOR) {
+				APPLIED.add(id);
 				player.setGameMode(GameType.SPECTATOR);
-				player.teleportTo(home, centre.x, centre.y + 1.0, centre.z, Set.of(), player.getYRot(), 20.0F, true);
+				if (!free) {
+					player.teleportTo(home, centre.x, centre.y + 1.0, centre.z, Set.of(), player.getYRot(), 20.0F, true);
+				}
 			}
 			if (player.getCamera() != player) {
 				player.setCamera(player);
 			}
-			tether(player, home, centre);
+			if (!free) {
+				tether(player, home, centre);
+			}
 		}
 	}
 
@@ -285,8 +329,10 @@ public final class Limbo {
 			player.setGameMode(was);
 		}
 		player.removeAttached(STATE);
+		player.removeAttached(FREE);
 		APPLIED.remove(player.getUUID());
 		CENTRE.remove(player.getUUID());
+		MISSING.remove(player.getUUID());
 	}
 
 	/**

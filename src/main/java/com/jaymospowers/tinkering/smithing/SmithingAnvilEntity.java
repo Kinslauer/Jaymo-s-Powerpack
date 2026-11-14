@@ -101,7 +101,8 @@ public class SmithingAnvilEntity extends BlockEntity {
 		}
 		if (work.isEmpty()) {
 			work = stack.split(Math.min(stack.getCount(), Forging.MAX_INGOTS));
-		} else if (work.is(Smithing.HOT_INGOT) && HotMetal.metal(work) == HotMetal.metal(stack) && work.getCount() < Forging.MAX_INGOTS) {
+		} else if (work.is(Smithing.HOT_INGOT) && HotMetal.metal(work) == HotMetal.metal(stack)
+			&& FoldedSteel.folded(work) == FoldedSteel.folded(stack) && work.getCount() < Forging.MAX_INGOTS) {
 			int moved = Math.min(stack.getCount(), Forging.MAX_INGOTS - work.getCount());
 			// the pile is as hot as its coolest ingot
 			long at = Math.min(work.getOrDefault(Smithing.HEATED_AT, now()), stack.getOrDefault(Smithing.HEATED_AT, now()));
