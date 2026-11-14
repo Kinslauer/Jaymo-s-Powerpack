@@ -23,10 +23,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -47,6 +49,9 @@ import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -58,7 +63,8 @@ import org.jspecify.annotations.Nullable;
  * long after anyone told him to. One to a fortress, ever: the first time a player walks its halls he rises somewhere
  * in them, out of reach, and that fortress never has another ({@link #HELD}).
  * <p>
- * He is a wither skeleton grown to a champion's size in blackened plate, with the Long Vigil in his hands (Powers'
+ * He is a wither skeleton grown to a champion's size in blackened plate of his own ({@link #PLATE}: netherite drawn as
+ * a horned helm, ribbed cuirass and torn cape), with the Long Vigil in his hands (Powers'
  * relic greatsword; netherite without Powers). Being a humanoid with a weapon he fights the way everyone armed does
  * ({@link MobCombat}: the greatsword's whole string, sidesteps, lunges), can be parried and has his posture broken
  * like any boss ({@link com.jaymoskingdoms.BossPosture}), and turns at half health ({@link com.jaymoskingdoms.BossTurns}).
@@ -81,6 +87,9 @@ public final class FortressKnight {
 	static final int CALL_EVERY = 20 * 14, CALLS_MOST = 3, CALL_OUT = 4;
 	/** Souls rise off him this often (ticks). */
 	static final int SOULS_EVERY = 8;
+	private static final EquipmentSlot[] WORN = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	/** The look his armour is drawn in: his own blackened plate (kingdoms/tools/gen_fortress_knight.py). */
+	public static final ResourceKey<EquipmentAsset> PLATE = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosKingdoms.id("vigil_plate"));
 	private static final Identifier SWORD = Identifier.fromNamespaceAndPath("jaymospowers", "long_vigil");
 
 	/** On the knight (saved). */
@@ -102,6 +111,7 @@ public final class FortressKnight {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && is(mob)) {
 				LOADED.add(mob);
+				dress(mob);
 			}
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
@@ -122,6 +132,21 @@ public final class FortressKnight {
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
 			.then(Commands.literal("knight").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(FortressKnight::riseHere))));
+	}
+
+	/**
+	 * Marks his armour as his own plate: each piece keeps what it is and does, but is drawn as {@link #PLATE} (the
+	 * client's ReverentLayer hangs our vigil plate on whoever wears that look; the game's own armour layer draws nothing
+	 * for it). Also done to a knight who rose before he had it.
+	 */
+	private static void dress(Mob knight) {
+		for (EquipmentSlot slot : WORN) {
+			ItemStack piece = knight.getItemBySlot(slot);
+			Equippable worn = piece.get(DataComponents.EQUIPPABLE);
+			if (!piece.isEmpty() && (worn == null || !worn.assetId().filter(PLATE::equals).isPresent())) {
+				piece.set(DataComponents.EQUIPPABLE, Equippable.builder(slot).setEquipSound(SoundEvents.ARMOR_EQUIP_NETHERITE).setAsset(PLATE).build());
+			}
+		}
 	}
 
 	/** The fortress knight. */
@@ -237,9 +262,10 @@ public final class FortressKnight {
 		knight.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
 		knight.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
 		knight.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
-		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+		for (EquipmentSlot slot : WORN) {
 			knight.setDropChance(slot, 0.0F);
 		}
+		dress(knight);
 		knight.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, MobEffectInstance.INFINITE_DURATION, 0, false, false, false));
 		knight.setCustomName(Component.translatable("entity.jaymoskingdoms.fortress_knight"));
 		knight.setPersistenceRequired();

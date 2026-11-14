@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -37,10 +38,26 @@ import net.minecraft.world.item.equipment.ArmorType;
  * (0.7.351) The Kintsugi Armour and the Primal Visage ({@link Armory#KINTSUGI_PIECES}, {@link Armory#PRIMAL_PIECES}), both
  * eanncrod's, the same way. The Primal Visage keeps its skirt ({@code armorWaist}) straight under the body, with no
  * {@code bipedWaist} above it, so a bone the model doesn't have is skipped and the skirt is hung by its own name.
+ * <p>
+ * The fortress knight's vigil plate (our own, kingdoms/tools/gen_fortress_knight.py) the same way, but known by the
+ * look its pieces carry ({@link com.jaymoskingdoms.nether.FortressKnight#PLATE}), not by their items.
  */
 public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 	/** A set drawn this way: its model (and texture) name and its pieces by {@link ArmorType}. */
-	record Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces) {
+	record Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces,
+		@org.jspecify.annotations.Nullable ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> look) {
+		Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces) {
+			this(model, pieces, null);
+		}
+
+		/** Whether {@code stack}, worn as {@code type}, is this set's piece: by its look if the set goes by one, else by the item. */
+		boolean has(ItemStack stack, ArmorType type) {
+			if (this.look == null) {
+				return stack.getItem() == this.pieces.get(type);
+			}
+			net.minecraft.world.item.equipment.Equippable worn = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			return worn != null && worn.assetId().filter(this.look::equals).isPresent();
+		}
 	}
 
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -107,6 +124,8 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 				helper.register(create(renderer, new Set("heavenly_mantle", Armory.HEAVENLY_PIECES)));
 				helper.register(create(renderer, new Set("kintsugi_armour", Armory.KINTSUGI_PIECES)));
 				helper.register(create(renderer, new Set("primal_visage", Armory.PRIMAL_PIECES)));
+				// the fortress knight's plate goes by its look, on whatever netherite carries it
+				helper.register(create(renderer, new Set("vigil_plate", Map.of(), com.jaymoskingdoms.nether.FortressKnight.PLATE)));
 			}
 		});
 	}
@@ -131,7 +150,7 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 				case LEGS -> ArmorType.LEGGINGS;
 				default -> ArmorType.BOOTS;
 			};
-			if (stack.isEmpty() || stack.getItem() != this.set.pieces().get(type)) {
+			if (stack.isEmpty() || !this.set.has(stack, type)) {
 				continue;
 			}
 			collector.submitModel(this.worn.get(slot), state, poseStack, RenderTypes.armorCutoutNoCull(this.texture), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
