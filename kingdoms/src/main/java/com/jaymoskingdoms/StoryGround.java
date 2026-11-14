@@ -82,6 +82,8 @@ public final class StoryGround {
 	static final int MONOLITH_MIN = 160, MONOLITH_MAX = 320, MONOLITH_TRIES = 24;
 	/** The sea searched for a coastal capital; a coastal realm's seat is within a harbour's reach of it. */
 	static final int OCEAN_SEARCH = 4800, OCEAN_STEP = 32, OCEAN_VERTICAL_STEP = 64;
+	/** A kingdom raised from nothing at sea or on an island is moved to the nearest mainland within this (blocks), looked for at this step. */
+	static final int MAINLAND_SEARCH = 2400, MAINLAND_STEP = 96;
 	/** A new coastal capital: walked in from the sea in steps to the shore, then this far inland. */
 	static final int SHORE_STEP = 8, SHORE_WALK = 1200, SHORE_INLAND = 40;
 	/** New chunks the walk in from the sea may make (several steps share a chunk); out of them, the shore is given up on. */
@@ -400,9 +402,36 @@ public final class StoryGround {
 		if (!realmless(level.getServer())) {
 			return null;
 		}
+		// never out at sea or on an island: from the mainland nearest it
+		near = mainland(level, near);
 		BlockPos ground = LifeStory.ground(level, near, 0, LifeStory.STRUCTURE_NEAR * 4, level.getRandom());
 		BlockPos at = ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
 		return KingdomEvents.foundTown(level, at);
+	}
+
+	/**
+	 * {@code near} if it is dry ground on the mainland, else the nearest such column within {@link #MAINLAND_SEARCH}
+	 * blocks (or {@code near} if there is none): read from the ground's shape, so nothing is loaded.
+	 */
+	private static BlockPos mainland(ServerLevel level, BlockPos near) {
+		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
+		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
+		int dry = generator.getSeaLevel() + 2;
+		for (int r = 0; r <= MAINLAND_SEARCH; r += MAINLAND_STEP) {
+			int points = r == 0 ? 1 : Math.max(8, (int)(Math.PI * 2.0 * r / (MAINLAND_STEP * 2)));
+			for (int i = 0; i < points; i++) {
+				double a = Math.PI * 2.0 * i / points;
+				int x = near.getX() + (int)Math.round(Math.cos(a) * r), z = near.getZ() + (int)Math.round(Math.sin(a) * r);
+				if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= dry
+					&& !com.jaymoskingdoms.seas.Offshore.island(generator, level, state, x, z)) {
+					if (r > 0) {
+						JaymosKingdoms.LOGGER.info("{} is at sea or on an island: the new kingdom goes to the mainland at {}, {}", near, x, z);
+					}
+					return new BlockPos(x, near.getY(), z);
+				}
+			}
+		}
+		return near;
 	}
 
 	// ---- camps and monoliths (made at once) --------------------------------------------------------------------------
@@ -686,8 +715,8 @@ public final class StoryGround {
 				return null;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-			if (level.getFluidState(top.below()).isEmpty()) {
-				// on land: a little further in, for the castle
+			if (level.getFluidState(top.below()).isEmpty() && !com.jaymoskingdoms.seas.Offshore.island(level, column.getX(), column.getZ())) {
+				// on land (the mainland's, not an island on the way): a little further in, for the castle
 				BlockPos inland = water.offset(Mth.floor(dx / len * (d + SHORE_INLAND)), 0, Mth.floor(dz / len * (d + SHORE_INLAND)));
 				if (!LifeStory.reach(level, inland.getX(), inland.getZ(), made)) {
 					return top;
