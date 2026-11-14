@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin.tweaks",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["DeathNamesMixin", "DeerHerdMixin", "DeerSpawnMixin", "EndermanThunderMixin", "MonsterCapMixin", "NoStartGuideMixin", "PigeonQuietMixin", "WaterClusterMixin", "PoiTypeAccessor", "PoiTypesInvoker", "TansuNameMixin"],
+	"mixins": ["DeathNamesMixin", "DeerHerdMixin", "DeerSpawnMixin", "EndermanThunderMixin", "MonsterCapMixin", "NoStartGuideMixin", "PigeonQuietMixin", "WaterClusterMixin", "WorldgenFishMixin", "PoiTypeAccessor", "PoiTypesInvoker", "TansuNameMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
