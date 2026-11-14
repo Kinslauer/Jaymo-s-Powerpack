@@ -3,7 +3,7 @@ status: in-review
 task: 
 branch: claude/project-thread-beb6sd
 with: 
-pr: 
+pr: 1513
 mods: kingdoms
 versions: 
 started: 2026-11-14
