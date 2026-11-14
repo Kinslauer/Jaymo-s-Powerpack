@@ -9,7 +9,7 @@ Start here. Agents: read this note, then [[How agents use this vault]], then [[B
 
 | Mod | Version | File |
 |---|---|---|
-| Jaymo's Powers (and the pack) | **0.23.40** | `gradle.properties` |
+| Jaymo's Powers (and the pack) | **0.23.41** | `gradle.properties` |
 | Jaymo's Kingdoms | **0.8.44** | `kingdoms/gradle.properties` |
 | Jaymo's Kitchen | **0.6.9** | `kitchen/gradle.properties` |
 
