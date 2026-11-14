@@ -11,5 +11,9 @@
 - **Skinning in strokes** (`corpse/Hanging`): the skin comes off in 3 knife pulls instead of one click, each wearing
   the knife ("Skinning: pull 1 of 3"). A chicken or rabbit takes 2, a big carcass 5, and a flint or bone knife
   (new tag `jaymoskitchen:poor_knives`) 2 more. The skins and scraps still come on the last pull.
+- **A skill** (Andy: "This should be a skill in the survivalist tree"): `Hanging.setButcherSkill` lets another mod say
+  how practised a butcher a player is. Each point is a skinning pull fewer (never under one); at 3, the first click on
+  a mauled or battered body puts back what was lost ("You trim round the damage: nothing is lost"). A burnt hide stays
+  lost. What was lost is saved with the body (`Spoiled`). Jaymo's Kingdoms' Butcher's Hand perk feeds it.
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.

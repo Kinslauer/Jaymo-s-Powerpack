@@ -263,6 +263,8 @@ public class CorpseEntity extends Entity {
 	/** How it died, if that cost it hide or meat ({@link CleanKill}), and whether whoever's working it has been told. */
 	private String death = CleanKill.CLEAN;
 	private boolean deathTold;
+	/** What dying that way cost it, for a practised butcher to save ({@link Hanging#SKILL_SAVES}). */
+	private List<ItemStack> spoiled = new ArrayList<>();
 	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
 	private int firesLit;
 	private int age;
@@ -1001,8 +1003,9 @@ public class CorpseEntity extends Entity {
 		return ++skinStrokes;
 	}
 
-	void setDeath(String death) {
+	void setDeath(String death, List<ItemStack> spoiled) {
 		this.death = death;
+		this.spoiled = new ArrayList<>(spoiled);
 	}
 
 	void startBleeding(int ticks) {
@@ -1806,12 +1809,22 @@ public class CorpseEntity extends Entity {
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
 		// (0.5.51) on a meat hook, or started on (bled, or being bled): its next step
-		if (!death.isEmpty() && !deathTold && (held.is(Corpses.BUTCHERING_TOOLS) || held.is(Corpses.CRACKING_ROCKS)
+		if (!death.isEmpty() && (held.is(Corpses.BUTCHERING_TOOLS) || held.is(Corpses.CRACKING_ROCKS)
 			|| held.is(com.jaymoskitchen.butchery.Butchery.CLEAVERS) || held.is(com.jaymoskitchen.butchery.Butchery.SKINNING_KNIVES))) {
-			// looked over before the first cut: what dying that way did to it
-			deathTold = true;
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death." + death));
-			return InteractionResult.SUCCESS_SERVER;
+			if (!spoiled.isEmpty() && !death.equals(CleanKill.BURNT) && Hanging.skill(player) >= Hanging.SKILL_SAVES) {
+				// a practised butcher trims round the damage: nothing's lost
+				addLoot(spoiled);
+				spoiled = new ArrayList<>();
+				death = CleanKill.CLEAN;
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death.saved"));
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			if (!deathTold) {
+				// looked over before the first cut: what dying that way did to it
+				deathTold = true;
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death." + death));
+				return InteractionResult.SUCCESS_SERVER;
+			}
 		}
 		InteractionResult step = Hanging.use(this, level, player, held);
 		if (step != null) {
@@ -3532,6 +3545,7 @@ public class CorpseEntity extends Entity {
 		this.spilt = input.getIntOr("Spilt", 0);
 		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
 		this.death = input.getStringOr("Death", CleanKill.CLEAN);
+		this.spoiled = new ArrayList<>(input.read("Spoiled", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
@@ -3560,6 +3574,7 @@ public class CorpseEntity extends Entity {
 		output.putBoolean("KilledByPlayer", killedByPlayer);
 		if (!death.isEmpty()) {
 			output.putString("Death", death);
+			output.store("Spoiled", ItemStack.CODEC.listOf(), spoiled);
 		}
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);

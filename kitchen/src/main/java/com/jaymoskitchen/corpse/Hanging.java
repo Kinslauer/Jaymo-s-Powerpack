@@ -67,6 +67,20 @@ public final class Hanging {
 	private static final List<ToIntFunction<Player>> EXTRA_CUTS = new ArrayList<>();
 	private static final List<BiConsumer<Player, Entity>> ON_DONE = new ArrayList<>();
 
+	/** How practised a butcher someone is (0 up): Jaymo's Kingdoms' Butcher's Hand ranks. */
+	private static ToIntFunction<Player> skill = player -> 0;
+	/** A skinning pull fewer per point of skill (never under one pull); at this much, what a rough death spoiled is saved ({@link CleanKill}). */
+	static final int SKILL_SAVES = 3;
+
+	/** For other mods (by reflection): {@code ranks} says how practised a butcher a player is. */
+	public static void setButcherSkill(ToIntFunction<Player> ranks) {
+		skill = ranks;
+	}
+
+	static int skill(Player player) {
+		return skill.applyAsInt(player);
+	}
+
 	/** (Kitchen 0.5.57) {@code extra} says how many more times the butcher-table extras are added for this player's hung carcass. */
 	public static void addExtraCuts(ToIntFunction<Player> extra) {
 		EXTRA_CUTS.add(extra);
@@ -347,8 +361,8 @@ public final class Hanging {
 	}
 
 	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
-		int strokes = SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
-			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0);
+		int strokes = Math.max(1, SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
+			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - skill(player));
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		int made = corpse.addSkinStroke();
 		if (made < strokes) {

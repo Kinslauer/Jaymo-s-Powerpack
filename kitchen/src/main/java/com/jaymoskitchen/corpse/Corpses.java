@@ -330,9 +330,9 @@ public final class Corpses {
 		}
 		String death = kind == CorpseKind.ANIMAL ? CleanKill.of(mob) : CleanKill.CLEAN;
 		// how it died costs it hide or meat (a wolf's kill, a burnt one, one beaten to death)
-		CleanKill.spoil(death, kept);
+		List<ItemStack> spoiled = CleanKill.spoil(death, kept);
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
-		corpse.setDeath(death);
+		corpse.setDeath(death, spoiled);
 		corpse.setMissing(missingParts(mob));
 		// (0.5.23) the arrows it died with stay in it
 		corpse.setArrows(com.jaymoskitchen.archery.StuckArrows.of(mob));

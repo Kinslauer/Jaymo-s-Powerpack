@@ -2,6 +2,7 @@ package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.butchery.Butchery;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -19,7 +20,9 @@ import net.minecraft.world.item.ItemStack;
  * Andy: "Yeah 1 and 3" (clean kills). How an animal died decides what its carcass gives, as a hunter's kill does: a
  * blade or an arrow leaves it whole; teeth and claws tear the hide ({@link #MAULED}); fire ruins it ({@link #BURNT});
  * a fall, a blast, a club or bare fists bruise the meat ({@link #BATTERED}). The loss is taken from the body's loot as
- * it's made, so every way of butchering it (ground, block, hook, a butcher villager) sees the same carcass.
+ * it's made, so every way of butchering it (ground, block, hook, a butcher villager) sees the same carcass. What was
+ * lost is kept with the body: a practised butcher ({@link Hanging#SKILL_SAVES}) trims round the damage and has it back,
+ * all but a burnt hide.
  */
 public final class CleanKill {
 	/** Weapons that bruise the meat: maces, hammers, clubs, staves. */
@@ -54,16 +57,24 @@ public final class CleanKill {
 		return direct instanceof Mob biter && biter.getMainHandItem().isEmpty() ? MAULED : CLEAN;
 	}
 
-	/** Takes from {@code loot} what dying that way cost. */
-	static void spoil(String death, List<ItemStack> loot) {
-		switch (death) {
-			case BURNT -> loot.removeIf(stack -> stack.is(Butchery.SKINS));
-			case MAULED -> loot.replaceAll(stack -> stack.is(Butchery.SKINS) ? stack.copyWithCount(stack.getCount() / TORN_KEEPS_ONE_IN) : stack);
-			case BATTERED -> loot.replaceAll(stack -> stack.has(DataComponents.FOOD)
-				? stack.copyWithCount(Math.max(1, stack.getCount() - (stack.getCount() + BRUISED_ONE_IN - 1) / BRUISED_ONE_IN)) : stack);
-			default -> {
+	/** Takes from {@code loot} what dying that way cost; what was taken. */
+	static List<ItemStack> spoil(String death, List<ItemStack> loot) {
+		List<ItemStack> lost = new ArrayList<>();
+		for (int i = 0; i < loot.size(); i++) {
+			ItemStack stack = loot.get(i);
+			int count = stack.getCount();
+			int keep = switch (death) {
+				case BURNT -> stack.is(Butchery.SKINS) ? 0 : count;
+				case MAULED -> stack.is(Butchery.SKINS) ? count / TORN_KEEPS_ONE_IN : count;
+				case BATTERED -> stack.has(DataComponents.FOOD) ? Math.max(1, count - (count + BRUISED_ONE_IN - 1) / BRUISED_ONE_IN) : count;
+				default -> count;
+			};
+			if (keep < count) {
+				lost.add(stack.copyWithCount(count - keep));
+				loot.set(i, stack.copyWithCount(keep));
 			}
 		}
 		loot.removeIf(ItemStack::isEmpty);
+		return lost;
 	}
 }
