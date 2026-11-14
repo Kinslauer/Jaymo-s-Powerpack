@@ -46,6 +46,12 @@ import org.jspecify.annotations.Nullable;
 public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** It vanishes after this long with no question (ticks). */
 	static final int IDLE_TIMEOUT = 2 * 60 * 20;
+	/** Ticks between two right-click hints from the same wisp. */
+	static final int HINT_COOLDOWN = 5 * 20;
+	/** A chat line that calls Youth: its name first (any case), then the question ("youth, how does Crush work?"). */
+	static final java.util.regex.Pattern CALL = java.util.regex.Pattern.compile("^[!*]?\\s*youth\\b[\\s,:!.?-]*(.*)$",
+		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+
 	/** How many "be right back" lines it has (message.jaymoskingdoms.youth_wisp.hold.0 ...). */
 	static final int HOLD_LINES = 6;
 	/** ...or when its asker is further than this (blocks) or in another dimension. */
@@ -81,6 +87,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private @Nullable UUID asker;
 	private Vec3 spot = Vec3.ZERO;
 	private int lastAsked;
+	private int lastHint = -HINT_COOLDOWN - 1;
 	/** Summoned for a question whose answer hasn't come yet. */
 	private boolean pending;
 	private int vanishing = -1;
@@ -151,6 +158,20 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			wisp.pending = true;
 		}
 		return wisp;
+	}
+
+	/**
+	 * A chat line someone said: if it calls Youth, it goes in the server log as
+	 * {@code [youth-ask] <account name> <question>} (an empty question when they only said its name). Chat here is
+	 * proximity chat, which never reaches the log in vanilla's form, and shows nicknames ("Stranger"), so this fixed line
+	 * is what Hermes's listener reads. The account name is what {@code /youth summon} and {@code /youth say} take.
+	 */
+	public static void heard(ServerPlayer player, String text) {
+		java.util.regex.Matcher m = CALL.matcher(text);
+		if (m.matches()) {
+			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(),
+				m.group(1).replaceAll("\\s+", " ").strip());
+		}
 	}
 
 	/** Sends {@code player}'s wisp home; false if they had none. */
@@ -332,7 +353,10 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-		if (player instanceof ServerPlayer serverPlayer) {
+		// one hint per click (not one per hand), and not again within a few seconds
+		if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer
+			&& this.tickCount - this.lastHint > HINT_COOLDOWN) {
+			this.lastHint = this.tickCount;
 			serverPlayer.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.how")));
 		}
 		return InteractionResult.SUCCESS;
