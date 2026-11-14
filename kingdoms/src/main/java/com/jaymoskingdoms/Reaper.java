@@ -111,6 +111,8 @@ public final class Reaper {
 	static final int SHROUD_TICKS = 80;
 	/** What a body the sweep kills rises for (ticks), and the most Death's Company raises at once. */
 	static final int RISEN_LIFE = 20 * 60, COMPANY_MOST = 8;
+	/** The Call: the Toll it costs (and must be held above the Shroud's own), and its cooldown (ticks). */
+	static final int HOST_TOLL = 10, HOST_COOLDOWN = 20 * 600;
 	/** The grave-captain: twice a thrall's health, and it does not crumble with time. */
 	static final String CAPTAIN_TAG = "jaymoskingdoms.reaper_captain";
 	static final int CAPTAIN_LIFE = Integer.MAX_VALUE / 2;
@@ -726,13 +728,11 @@ public final class Reaper {
 
 	/** Death's Company: every body within reach gets up at once; the first, if its keeper has none, as their grave-captain. */
 	private static void company(ServerPlayer player, ServerLevel level, State state) {
-		if (!KitchenCompat.loaded()) {
-			return;
-		}
-		List<Entity> bodies = level.getEntities((Entity)null, player.getBoundingBox().inflate(DEAD_RANGE),
+		List<Entity> bodies = !KitchenCompat.loaded() ? List.of() : level.getEntities((Entity)null, player.getBoundingBox().inflate(DEAD_RANGE),
 			e -> KitchenCompat.isRaisableCorpse(e) && e.distanceToSqr(player) <= DEAD_RANGE * DEAD_RANGE);
 		if (bodies.isEmpty()) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.reaper.no_dead").withStyle(s -> s.withColor(RED)));
+			// nobody here to raise: it calls its host instead
+			host(player, state);
 			return;
 		}
 		if (cooling(player, "company", COMPANY_COOLDOWN)) {
@@ -771,6 +771,23 @@ public final class Reaper {
 			feed(player, TOLL_RAISE);
 			ForbiddenArts.cast(player, level, false, 0);
 		}
+	}
+
+	/** The Call: with no body near to raise, the Shroud calls a host of the reaped to its keeper for one fight ({@link ZombieHordes#call}); it costs Toll. */
+	private static void host(ServerPlayer player, State state) {
+		if (state.toll() < STAGE_AT[SHROUD_STAGE - 1] + HOST_TOLL) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.reaper.no_dead").withStyle(s -> s.withColor(RED)));
+			return;
+		}
+		if (cooling(player, "host", HOST_COOLDOWN) || ZombieHordes.call(player) == 0) {
+			return;
+		}
+		strike(player, state);
+		State now = player.getAttached(REAPER);
+		if (now != null) {
+			player.setAttached(REAPER, now.withToll(now.toll() - HOST_TOLL, Production.day(player.level().getServer())));
+		}
+		ForbiddenArts.cast(player, (ServerLevel) player.level(), false, 0);
 	}
 
 	/** What {@code player} looks at within {@code reach} that passes {@code test}: the nearest such near the line of their eyes. */

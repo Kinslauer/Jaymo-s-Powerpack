@@ -67,6 +67,8 @@ import org.jspecify.annotations.Nullable;
 public interface Reaped {
 	/** Health and speed: the pillager, the vindicator, the evoker. */
 	double PILLAGER_HEALTH = 30.0, PILLAGER_SPEED = 0.3, VINDICATOR_HEALTH = 32.0, VINDICATOR_SPEED = 0.31, EVOKER_HEALTH = 30.0, EVOKER_SPEED = 0.42;
+	/** Villagers keep this far from them (blocks), as from a living pillager. */
+	double FRIGHT_RANGE = 14.0;
 	/** How low their voices are. */
 	float VOICE_PITCH = 0.55F;
 	/** A living illager they kill gets up this long after (ticks). */

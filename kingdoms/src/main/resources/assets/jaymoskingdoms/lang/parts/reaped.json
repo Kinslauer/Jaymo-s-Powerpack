@@ -5,5 +5,13 @@
   "entity.jaymoskingdoms.reaped_warlord": "Reaped Warlord",
   "item.jaymoskingdoms.reaped_pillager_spawn_egg": "Reaped Pillager Spawn Egg",
   "item.jaymoskingdoms.reaped_vindicator_spawn_egg": "Reaped Vindicator Spawn Egg",
-  "item.jaymoskingdoms.reaped_evoker_spawn_egg": "Reaped Evoker Spawn Egg"
+  "item.jaymoskingdoms.reaped_evoker_spawn_egg": "Reaped Evoker Spawn Egg",
+  "talk.jaymoskingdoms.gossip.reaped.0": "A horn went in the night, out past the fields. Low, like it came up out of the ground. Nobody here owns a horn.",
+  "talk.jaymoskingdoms.gossip.reaped.1": "The pillagers have gone quiet this side of the hills. You'd think that was good news. The carter says they're burying their own, and then burying them again.",
+  "talk.jaymoskingdoms.gossip.reaped.2": "My cousin saw grey coats on the road at dusk, marching in step. Said their arms just hung. He didn't stop to see the faces.",
+  "talk.jaymoskingdoms.gossip.reaped.3": "Something went over the palisade at the old camp. Not through the gate. Over. On too many legs, with a rider.",
+  "illager_talk.jaymoskingdoms.line.chat.reaped.0": "Krel fell at the ford. I saw it. Three nights on he walked into camp with his arms hanging. We do not say his name now.",
+  "illager_talk.jaymoskingdoms.line.chat.reaped.1": "We burn our dead this season. Before, we did not. Ask no more.",
+  "illager_talk.jaymoskingdoms.line.chat.reaped.2": "A horn in the dark that is not ours. When you hear it, you are already late.",
+  "message.jaymoskingdoms.reaper.move.host": "The Call"
 }
