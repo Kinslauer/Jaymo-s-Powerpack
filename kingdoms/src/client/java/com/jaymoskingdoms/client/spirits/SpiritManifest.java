@@ -264,6 +264,12 @@ public final class SpiritManifest {
 			if (spirit == null || spirit.kind() < 0 || spirit.kind() > Spirits.QUIET) {
 				continue;
 			}
+			int grueStage = com.jaymoskingdoms.spirits.GrueDark.stage(com.jaymoskingdoms.spirits.Grue.hold(entity));
+			if (grueStage >= 2 && !entity.isInvisible() && !(entity == cameraEntity && firstPerson) && duelBoss(entity) == null
+				&& (SpiritArms.visibleToAttuned(entity)
+					|| level.getMaxLocalRawBrightness(entity.blockPosition().above()) <= com.jaymoskingdoms.spirits.GrueDark.SEEN_LIGHT)) {
+				drawGrueLoom(context, entity, grueStage, partial, camera, now);
+			}
 			if (spirit.kind() == Spirits.QUIET) {
 				// (the Quiet One: no body, ever; in the trial its arms alone fight the Grue)
 				LivingEntity boss = duelBoss(entity);
@@ -748,6 +754,40 @@ public final class SpiritManifest {
 	}
 
 	/** The boss (or a shade) drawn as the Grue: hovering on its wings, striking at the keeper when they're close, glitching now and then. */
+	/** The Grue's body by stage (2 the shadow, 3 the shape, 4 the wing-arms, 5 all of it): its size, glow, how solid it is, and its wingbeat (0 none). */
+	static final float[] LOOM_SCALE = {0.0F, 0.0F, 0.7F, 0.9F, 1.05F, 1.2F}, LOOM_LIGHT = {0.0F, 0.0F, 0.3F, 0.7F, 1.0F, GRUE_LIGHT},
+		LOOM_CORE = {0.0F, 0.0F, 0.18F, 0.38F, 0.5F, GRUE_CORE_ALPHA}, LOOM_FLAP = {0.0F, 0.0F, 0.0F, 0.0F, 0.6F, 1.0F};
+	/** Where it stands: behind its keeper's back, and off the ground (blocks; more as it grows). */
+	static final double LOOM_BACK = 0.75, LOOM_UP = 0.35;
+
+	/**
+	 * The Grue at its keeper's back, grown as far as its hold has ({@code GrueDark.stage}): a small dim shadow, then the hooded
+	 * shape, then its wings out, then the whole of it over a host or one who wears its form. Seen by whoever sees mana, and by
+	 * anyone at all where it is dark.
+	 */
+	private static void drawGrueLoom(LevelRenderContext context, LivingEntity entity, int stage, float partial, Vec3 camera, double now) {
+		Vec3 at = entity.getPosition(partial);
+		float bodyRot = Mth.rotLerp(partial, entity.yBodyRotO, entity.yBodyRot);
+		float yaw = bodyRot * Mth.DEG_TO_RAD;
+		float scale = LOOM_SCALE[stage] * entity.getScale();
+		long step = (long)Math.floor(now / GLITCH_STEP);
+		float glitch = noise(step, entity.getId(), 9) < BLIP_CHANCE * (6 - stage) ? 0.6F : 0.0F;
+		SpiritFigure.Frame frame = new SpiritFigure.Frame(SpiritFigure.GRUE, true, SpiritFigure.GRUE, 1.0F, 1.0F, 0.0F, -1.0F,
+			Mth.wrapDegrees(Mth.rotLerp(partial, entity.yHeadRotO, entity.yHeadRot) - bodyRot) * Mth.DEG_TO_RAD, 0.25F, false,
+			0.0F, 0.0F, LOOM_FLAP[stage], false, 0.5F);
+		PoseStack pose = context.poseStack();
+		pose.pushPose();
+		pose.translate(at.x + Mth.sin(yaw) * LOOM_BACK - camera.x, at.y + LOOM_UP * (stage - 1) * 0.5 - camera.y, at.z - Mth.cos(yaw) * LOOM_BACK - camera.z);
+		pose.scale(scale, scale, scale);
+		pose.rotateDegrees(Axis.YP, 180.0F - bodyRot);
+		pose.translate((noise(step, entity.getId(), 6) - 0.5F) * 2.0F * JOLT * glitch, 0.0F, 0.0F);
+		pose.scale(-1.0F, -1.0F, 1.0F);
+		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
+		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
+		submit(context.submitNodeCollector(), pose, entity, frame, SpiritFigure.GRUE, LOOM_LIGHT[stage], LOOM_CORE[stage], now, glitch, GRUE_EDGE, GRUE_CORE);
+		pose.popPose();
+	}
+
 	private static void drawGrueBody(LevelRenderContext context, LivingEntity entity, float scale, float partial, Vec3 camera, double now) {
 		Minecraft minecraft = Minecraft.getInstance();
 		var viewer = minecraft.player;

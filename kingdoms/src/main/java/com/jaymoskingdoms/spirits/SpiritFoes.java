@@ -106,7 +106,7 @@ final class SpiritFoes {
 
 	/** One blow of {@code damage} from {@code caster}'s spirit (magic, so the keeper has the kill). */
 	static boolean strike(ServerLevel level, LivingEntity caster, LivingEntity target, float damage) {
-		return target.hurtServer(level, level.damageSources().indirectMagic(caster, caster), damage);
+		return target.hurtServer(level, level.damageSources().indirectMagic(caster, caster), damage * GrueDark.formTimes(caster));
 	}
 
 	/** Knocks {@code target} away from {@code from}, harder the lighter it is. */
