@@ -13522,3 +13522,9 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   hostiles) made the game throw (Deck crash 2026-11-14 8:42 AM). Only mobs that keep that memory are asked now.
   The other 16 direct memory reads in the three mods were checked: all guarded or villager-only.
 - Built.
+
+## 0.8.94 (2026-11-14): Chain axe: no skill bar until locked on
+
+- Andy: "the chain axe shouldnt have the toolbar attack until you lock on, that way your right click still throws the chain". Spell Engine gives the use key to the skill bar's first skill when the held item has no use pose of its own, so with the chain axe in hand right click cast Cleave (its RPG Series weapon skill) and the whirl and throw never started.
+- With Powers' Chain Axe in hand and no lock-on, the skill bar is empty: no Cleave, no Weapon Forms, no other bar moves (`Forms.lockOnly`, `Forms.barOff`, `SpellContainerSourceMixin`, `FormSkills.spells`), so right click whirls and throws the chain. Lock on and the bar comes back, its first skill on right click as before; the bar's dirty check now counts the lock, so it updates as soon as you lock or let go.
+- Compiled; not played.
