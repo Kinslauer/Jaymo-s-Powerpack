@@ -1,0 +1,50 @@
+{
+  "variants": {
+    "facing=north,powered=false": {
+      "model": "jaymoskitchen:block/gearbox"
+    },
+    "facing=north,powered=true": {
+      "model": "jaymoskitchen:block/gearbox"
+    },
+    "facing=south,powered=false": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 180
+    },
+    "facing=south,powered=true": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 180
+    },
+    "facing=east,powered=false": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 90
+    },
+    "facing=east,powered=true": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 90
+    },
+    "facing=west,powered=false": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 270
+    },
+    "facing=west,powered=true": {
+      "model": "jaymoskitchen:block/gearbox",
+      "y": 270
+    },
+    "facing=up,powered=false": {
+      "model": "jaymoskitchen:block/gearbox",
+      "x": 270
+    },
+    "facing=up,powered=true": {
+      "model": "jaymoskitchen:block/gearbox",
+      "x": 270
+    },
+    "facing=down,powered=false": {
+      "model": "jaymoskitchen:block/gearbox",
+      "x": 90
+    },
+    "facing=down,powered=true": {
+      "model": "jaymoskitchen:block/gearbox",
+      "x": 90
+    }
+  }
+}

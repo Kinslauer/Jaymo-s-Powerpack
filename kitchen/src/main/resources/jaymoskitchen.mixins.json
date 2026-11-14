@@ -8,6 +8,7 @@
 		"AbstractHorseMixin",
 		"BackstabMixin",
 		"BaseKitchenBlockMixin",
+		"BedSpawnMixin",
 		"BiomeSeasonMixin",
 		"BlockMixin",
 		"ChickenMixin",

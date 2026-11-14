@@ -99,6 +99,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.Familiarity.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.hardcore.Hardcore.register();
 		com.jaymoskitchen.fresh.Freshness.register();
 		com.jaymoskitchen.fresh.Curing.register();
 		com.jaymoskitchen.fresh.Cheese.register();
