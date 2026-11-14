@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Character creator for players who skip the life story, with presets
 branch: claude/project-thread-byu4io
 with: Andy
