@@ -10,11 +10,14 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -26,6 +29,8 @@ import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Weapon;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -75,6 +80,9 @@ public final class ToolStats {
 	}
 
 	public static Stats compute(ToolType type, List<TinkerMaterial> materials) {
+		if (type.style == ToolType.Style.ARMOR) {
+			return armourStats(type, materials);
+		}
 		float headWeight = 0, durability = 0, speed = 0, attack = 0;
 		// (0.15.x) bow limbs share the durability average with the heads; grips add a share and melee damage
 		float limbWeight = 0, limbDurability = 0, gripWeight = 0, gripDurability = 0, gripAttack = 0;
@@ -159,6 +167,47 @@ public final class ToolStats {
 		float finalAttack = (type.attack + attack + gripAttack) * (1 + handleAttack) * type.attackMultiplier;
 		float finalAttackSpeed = type.attackSpeed * (1 + handleAttackSpeed) * (traits.getOrDefault(Trait.STARLIT, 0) > 0 ? 1 + STARLIT_SPEED : 1.0F);
 		return new Stats(finalDurability, finalSpeed, finalAttack, finalAttackSpeed, tier, traits);
+	}
+
+	/** Travelers' gear (a leather maille): its plating counts for this share (Tinkers' 0.75), its durability that again. */
+	static final float TRAVELERS_SCALE = 0.75F;
+
+	/** A piece of armour's worn numbers: armour points, toughness and knockback resistance, and whether it's travelers' gear. */
+	public record Armour(float armour, float toughness, float knockback, boolean travelers) {
+	}
+
+	/** Whether these materials make the travelers' piece: a leather maille. */
+	public static boolean travelers(List<TinkerMaterial> materials) {
+		return materials.size() > 1 && materials.get(1) == TinkerMaterial.LEATHER;
+	}
+
+	public static Armour armour(ToolType type, List<TinkerMaterial> materials) {
+		TinkerMaterial.Plating plating = materials.isEmpty() ? null : materials.getFirst().plating();
+		boolean travelers = travelers(materials);
+		if (plating == null || type.piece() < 0) {
+			return new Armour(0.0F, 0.0F, 0.0F, travelers);
+		}
+		float scale = travelers ? TRAVELERS_SCALE : 1.0F;
+		return new Armour(plating.armour(type.piece()) * scale, plating.toughness() * scale, plating.knockback() * scale, travelers);
+	}
+
+	/** Armour's durability (its plating's for that piece) and traits (each part's metal's armour trait). */
+	private static Stats armourStats(ToolType type, List<TinkerMaterial> materials) {
+		Map<Trait, Integer> traits = new EnumMap<>(Trait.class);
+		for (int i = 0; i < type.parts.size(); i++) {
+			Trait trait = (i < materials.size() ? materials.get(i) : defaultMaterial(type, i)).armourTrait();
+			if (trait != null) {
+				traits.merge(trait, 1, Integer::sum);
+			}
+		}
+		TinkerMaterial.Plating plating = materials.isEmpty() ? null : materials.getFirst().plating();
+		float durability = plating == null || type.piece() < 0 ? 1 : plating.durability(type.piece());
+		if (travelers(materials)) {
+			durability *= TRAVELERS_SCALE * TRAVELERS_SCALE;
+		}
+		// worn armour lasts as long as any other armour does here (com.jaymospowers.core.ArmourWear)
+		durability *= com.jaymospowers.core.ArmourWear.DURABILITY;
+		return new Stats(Math.max(1, Math.round(durability)), 1.0F, 0.0F, 4.0F, TinkerMaterial.Tier.WOOD, traits);
 	}
 
 	/** (0.15.x) A ranged tool's numbers: draw speed, arrow velocity and accuracy as multipliers of a plain bow's, and thrown damage. */
@@ -263,6 +312,7 @@ public final class ToolStats {
 			case BINDING, BOWSTRING -> TinkerMaterial.STRING;
 			case ARROW_HEAD -> TinkerMaterial.FLINT;
 			case FLETCHING -> TinkerMaterial.FEATHER;
+			case PLATING, MAILLE -> TinkerMaterial.IRON;
 		};
 	}
 
@@ -312,6 +362,10 @@ public final class ToolStats {
 		stack.set(DataComponents.MAX_DAMAGE, durability);
 		stack.set(DataComponents.DAMAGE, Mth.clamp(stack.getDamageValue(), 0, durability));
 		boolean broken = isBroken(stack);
+		if (type.style == ToolType.Style.ARMOR) {
+			applyArmour(stack, type, materials, broken);
+			return;
+		}
 		stack.set(DataComponents.TOOL, broken ? new Tool(List.of(), 1.0F, 1, type.style == ToolType.Style.TOOL)
 			: tool(type, stats, Modifier.tier(stack, stats.tier())));
 		float worn = worn(stack);
@@ -343,8 +397,45 @@ public final class ToolStats {
 	private static void applyLook(ItemStack stack, ToolType type, List<TinkerMaterial> materials, boolean broken) {
 		stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(broken),
 			materials.stream().map(m -> m.id).toList(), List.of()));
+		String name = "item.jaymospowers." + type.itemId() + (type.style == ToolType.Style.ARMOR && travelers(materials) ? ".travelers" : "");
 		stack.set(DataComponents.ITEM_NAME, Component.translatable("jaymospowers.tinkering.named", materials.getFirst().displayName(),
-			Component.translatable("item.jaymospowers." + type.itemId())));
+			Component.translatable(name)));
+	}
+
+	/** The slot each armour piece goes in, by {@link ToolType#piece}. */
+	private static final EquipmentSlot[] ARMOUR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+
+	public static EquipmentSlot armourSlot(ToolType type) {
+		return ARMOUR_SLOTS[Math.max(0, type.piece())];
+	}
+
+	/**
+	 * A piece of armour: its armour, toughness and knockback resistance while worn (none once broken), and its worn look,
+	 * one per plating and maille ({@code tinker_plate/<plating>__<maille>}) or per plating for travelers' gear
+	 * ({@code tinker_travelers/<plating>}).
+	 */
+	private static void applyArmour(ItemStack stack, ToolType type, List<TinkerMaterial> materials, boolean broken) {
+		EquipmentSlot slot = armourSlot(type);
+		EquipmentSlotGroup group = EquipmentSlotGroup.bySlot(slot);
+		Armour armour = armour(type, materials);
+		ItemAttributeModifiers.Builder attributes = ItemAttributeModifiers.builder();
+		if (!broken) {
+			net.minecraft.resources.Identifier id = com.jaymospowers.JaymosPowers.id("tinker_armor." + slot.getName());
+			attributes.add(Attributes.ARMOR, new AttributeModifier(id, armour.armour(), AttributeModifier.Operation.ADD_VALUE), group);
+			if (armour.toughness() > 0) {
+				attributes.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id, armour.toughness(), AttributeModifier.Operation.ADD_VALUE), group);
+			}
+			if (armour.knockback() > 0) {
+				attributes.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(id, armour.knockback(), AttributeModifier.Operation.ADD_VALUE),
+					group);
+			}
+		}
+		stack.set(DataComponents.ATTRIBUTE_MODIFIERS, attributes.build());
+		String look = armour.travelers() ? "tinker_travelers/" + materials.getFirst().id
+			: "tinker_plate/" + materials.getFirst().id + "__" + materials.get(1).id;
+		stack.set(DataComponents.EQUIPPABLE, Equippable.builder(slot).setEquipSound(armour.travelers() ? SoundEvents.ARMOR_EQUIP_LEATHER
+			: SoundEvents.ARMOR_EQUIP_IRON).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, com.jaymospowers.JaymosPowers.id(look))).build());
+		applyLook(stack, type, materials, broken);
 	}
 
 	private static Tool tool(ToolType type, Stats stats, TinkerMaterial.Tier tier) {

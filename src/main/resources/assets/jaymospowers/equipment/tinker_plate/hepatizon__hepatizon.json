@@ -1,0 +1,20 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:tinker_plate/maille_hepatizon"
+      },
+      {
+        "texture": "jaymospowers:tinker_plate/plating_hepatizon"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:tinker_plate/maille_hepatizon"
+      },
+      {
+        "texture": "jaymospowers:tinker_plate/plating_hepatizon"
+      }
+    ]
+  }
+}

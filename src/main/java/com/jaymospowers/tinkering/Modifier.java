@@ -147,13 +147,17 @@ public enum Modifier {
 
 	// --- adding one ---
 
-	/** (0.8.76) What the Tool Station gives modifiers: tinker tools and Armory weapons. */
+	/** (0.8.76) What the Tool Station gives modifiers: tinker tools (not armour) and Armory weapons. */
 	public static boolean takes(ItemStack stack) {
-		return stack.getItem() instanceof TinkerTool tool ? tool.type().style.durable() : Armory.isWeapon(stack);
+		return stack.getItem() instanceof TinkerTool tool ? tool.type().style.durable() && tool.type().style != ToolType.Style.ARMOR
+			: Armory.isWeapon(stack);
 	}
 
 	/** Why this modifier can't go on this tool now, or null if it can. */
 	public static @Nullable Component cannotAdd(ItemStack tool, Modifier modifier) {
+		if (tool.getItem() instanceof TinkerArmourItem) {
+			return Component.translatable("gui.jaymospowers.tool_station.armour");
+		}
 		if (!(tool.getItem() instanceof TinkerTool) && !WEAPON_MODIFIERS.contains(modifier)) {
 			return Component.translatable("gui.jaymospowers.tool_station.weapon", modifier.name(1));
 		}
