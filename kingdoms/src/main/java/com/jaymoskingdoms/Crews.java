@@ -455,7 +455,9 @@ public final class Crews {
 
 	/** The Poisoner throws a cloud at his foe's feet. */
 	private static boolean cloud(ServerLevel level, PathfinderMob mob, LivingEntity foe, double d, long now) {
-		if (d < CLOUD_MIN || d > CLOUD_MAX || !mob.hasLineOfSight(foe)) {
+		if (d < CLOUD_MIN || d > CLOUD_MAX || !mob.hasLineOfSight(foe) || Downed.isDowned(foe)) {
+			// (Andy, 2026-11-14, "why was i constantly getting poisoned": a cloud every ten seconds on someone already down
+			// drained the health a downed body has, the limbs followed it into the red, and they couldn't get up)
 			return false;
 		}
 		CLOUDS.add(new Cloud(level.dimension().identifier(), foe.position(), now + CLOUD_LIFE));
@@ -478,7 +480,7 @@ public final class Crews {
 				}
 				level.sendParticles(Fx.miasma(GREEN, 1.4F), c.at().x, c.at().y + 0.4, c.at().z, 10, CLOUD_RADIUS * 0.5, 0.3, CLOUD_RADIUS * 0.5, 0.0);
 				for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c.at(), c.at()).inflate(CLOUD_RADIUS, 1.5, CLOUD_RADIUS),
-					x -> x.isAlive() && !x.isCreative() && !x.isSpectator() && x.position().distanceTo(c.at()) <= CLOUD_RADIUS)) {
+					x -> x.isAlive() && !x.isCreative() && !x.isSpectator() && !Downed.isDowned(x) && x.position().distanceTo(c.at()) <= CLOUD_RADIUS)) {
 					p.addEffect(new MobEffectInstance(MobEffects.POISON, CLOUD_POISON, 0));
 				}
 			}
@@ -494,7 +496,7 @@ public final class Crews {
 		if (style == Style.KNIFE) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HAMSTRING_TICKS, 0));
 			by.addEffect(new MobEffectInstance(MobEffects.SPEED, KNIFE_HIT_TICKS, KNIFE_LUNGE_LEVEL, false, false, false));
-		} else if (style == Style.POISONER) {
+		} else if (style == Style.POISONER && !Downed.isDowned(player)) {
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, BLOW_POISON, 0));
 		}
 	}

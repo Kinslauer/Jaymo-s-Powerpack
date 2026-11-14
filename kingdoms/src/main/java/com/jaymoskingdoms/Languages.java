@@ -544,7 +544,7 @@ public final class Languages {
 		}
 		REMARKED.put(player.getUUID(), now);
 		// (said slowly and simply, to you: you follow it even before you speak the tongue)
-		Speech.sayTo(level, speaker, player, line, Speech.WHITE);
+		Speech.sayPlainly(level, speaker, player, line, Speech.WHITE);
 		speaker.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
 	}
