@@ -152,6 +152,24 @@ STAFF_DISPLAY = {
 }
 
 
+# (Andy 2026-11-14) AoW's longsword and claymore filled too much of the first-person view: both drawn at 0.7x their AoW
+# size, shrunk toward the cross-guard so the grip stays where the hand is (the claymore still reads bigger)
+FIRST_PERSON = {
+    "longsword": {"rotation": [0, -87, 52], "translation": [3.5, 5.2, 0.1], "scale": [0.7, 0.7, 0.42]},
+    "claymore": {"rotation": [0, -89, 52], "translation": [3.5, 5.9, 0.15], "scale": [0.56, 0.56, 0.42]},
+}
+
+
+def first_person(display, weapon):
+    """`display` with its first-person poses swapped for FIRST_PERSON[weapon] (the left hand mirrored), if listed."""
+    pose = FIRST_PERSON.get(weapon)
+    if pose is None:
+        return display
+    rx, ry, rz = pose["rotation"]
+    return dict(display, firstperson_righthand=pose,
+                firstperson_lefthand=dict(pose, rotation=[rx, -ry, -rz]))
+
+
 def handheld(aow, item, aow_model, parent="minecraft:item/handheld"):
     """A handheld model using the copied texture, keeping AoW's hand poses (its big two-handers are drawn 2x)."""
     if item in BLOCKBENCH_MODELS:
@@ -162,6 +180,8 @@ def handheld(aow, item, aow_model, parent="minecraft:item/handheld"):
         model["display"] = src["display"]
     if item.endswith("quarterstaff"):
         model["display"] = STAFF_DISPLAY
+    if "display" in model:
+        model["display"] = first_person(model["display"], item.split("_", 1)[-1])
     write(os.path.join(ASSETS, "models", "item", "armory", item + ".json"), model)
     write(os.path.join(ASSETS, "items", item + ".json"),
           {"model": {"type": "minecraft:model", "model": f"{NS}:item/armory/{item}"}})
