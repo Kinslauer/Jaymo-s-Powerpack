@@ -1048,6 +1048,16 @@ Totem of Undying again, which they could once and cannot now: their camps raise 
 a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
 totem that holds death off once and leaves you weak, or a faceful of smoke.
 
+(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
+binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
+ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
+own, two swords and a crest, and steps aside from a blow as it did alive. None of them leaves the tomb. The
+**laughing bones** are not draugr and not Warrior-born: they are villagers' dead in barrows whose knights are gone,
+with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
+back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
