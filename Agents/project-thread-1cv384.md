@@ -1,10 +1,10 @@
 ---
-status: running
+status: in-review
 task: The Awakening's style on the Rig (30 picks from the pick list)
 branch: claude/project-thread-1cv384
 with: 
-pr: 
-mods: powers
+pr: 1542
+mods: powers, kingdoms, kitchen
 versions: 
 started: 2026-11-14
 owns:
@@ -22,6 +22,8 @@ owns:
 - docs/RigStyle-Plan.md, five patches on one PR.
 
 ## Notes
-- 
+- Kingdoms and Kitchen only get the HudZones offsets (copies kept identical).
+- Compiled for all three mods; not played.
 
 ## Done
+- 2026-11-14: all 30 picks built, PR #1542 open.
