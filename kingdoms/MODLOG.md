@@ -12893,3 +12893,8 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   metal a katana's or ninjato's blade is hammered from, so Mohknee's iron sand is the way to either.
 - The smith's last lesson says so in passing ("Our long blades are drawn from nothing else").
 - `BlossomSteel`. Compiled; not played.
+
+## 0.8.56 (2026-11-14): Graves hold their Limbo ghosts (#1506)
+
+- Jaymo's Powers now frees a Limbo ghost whose body is gone. A buried body is a body still: `Graves` tells Powers where it lies (`DeathCompat.addResting`), so the one waiting stays by their grave.
+- Compiled; not played.
