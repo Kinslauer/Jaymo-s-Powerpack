@@ -1793,3 +1793,5 @@ water and not beside it. The blossom folk did not sink it and do not claim it. T
 which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
+
+(new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
