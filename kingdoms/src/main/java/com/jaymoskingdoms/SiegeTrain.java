@@ -26,8 +26,9 @@ import org.jspecify.annotations.Nullable;
  * {@link Cannon}; a great war's party from such a realm brings both. Each engine takes {@link #CREW} of the party's
  * soldiers, who push it behind the march ({@link Haul}), set it down short of the enemy's seat (a mangonel
  * {@link #MANGONEL_STANDOFF} off, to throw over the walls; a gun {@link #CANNON_STANDOFF} off, where it can see) and
- * work it through the siege, then push it home. Kill its crew and it stands silent where it was left; break it and it's
- * gone. Engines aren't saved, as parties aren't.
+ * work it through the siege, then push it home. Their shots break what they land on, the besieged's buildings
+ * included (Andy: "nothing should be 'safe'"), and a mangonel with no foe in reach batters the seat itself. Kill its
+ * crew and it stands silent where it was left; break it and it's gone. Engines aren't saved, as parties aren't.
  */
 final class SiegeTrain {
 	/** Soldiers pushing each engine, and how many the party keeps marching beside them. */
@@ -139,12 +140,18 @@ final class SiegeTrain {
 			double far = Math.sqrt(dx * dx + dz * dz);
 			if (far <= standoff) {
 				haul.to = null;
+				if (engine instanceof Mangonel m) {
+					m.seat = home ? null : goal;
+				}
 				if (!home) {
 					work(engine, crew);
 				}
 				continue;
 			}
 			haul.to = new Vec3(goal.getX() + 0.5, engine.getY(), goal.getZ() + 0.5);
+			if (engine instanceof Mangonel m) {
+				m.seat = null;
+			}
 			engine.ejectPassengers();
 			for (int i = 0; i < crew.size(); i++) {
 				PathfinderMob hand = crew.get(i);

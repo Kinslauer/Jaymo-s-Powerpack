@@ -121,10 +121,9 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			// (0.7.490) it scuffs the soil where it lands (a field gun's ball is no shell: loose ground and growth only),
 			// but never on its own side's land or in a standing faction's buildings: a wall gun keeps its streets whole
 			net.minecraft.core.BlockPos struck = ((BlockHitResult) hit).getBlockPos();
-			if (!ownGround(level, (Worker) gunner, struck)) {
-				// (a siege train's field gun only tears up loose ground: the besieged keep what they built)
-				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck),
-					SiegeTrain.crew(gunner) ? SiegeStone.DENT : com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
+			// (Andy: "nothing should be safe": a siege train's field gun spares only its own realm's land, the besieged's buildings break)
+			if (SiegeTrain.crew(gunner) ? !ownLand(level, (Worker) gunner, struck) : !ownGround(level, (Worker) gunner, struck)) {
+				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck), com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
 			}
 			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
 			return;
@@ -135,12 +134,14 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	}
 
 	/** (0.7.490) {@code pos} lies on land the gunner's own faction claims, or in a building some standing faction holds. */
-	static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
+	private static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
+		return ownLand(level, gunner, pos) || Holds.guarded(level.getServer(), pos);
+	}
+
+	/** {@code pos} lies on land the gunner's own faction claims. */
+	static boolean ownLand(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
 		Faction own = Factions.get(level.getServer(), gunner.factionId());
-		if (own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos))) {
-			return true;
-		}
-		return Holds.guarded(level.getServer(), pos);
+		return own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos));
 	}
 
 	private void burst(ServerLevel level, PathfinderMob gunner, Vec3 at, @Nullable Entity direct) {

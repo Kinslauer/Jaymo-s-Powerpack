@@ -10,8 +10,11 @@
 - **At the siege**: the mangonel is set down 34 blocks short of the enemy's seat and throws a stone every 10-13 s, high
   over the walls, at enemy guards, archers and hostile players 12-46 blocks off (`Mangonel`, `SiegeStone`: 12 damage,
   2.5 block burst, knockback). The field cannon is set down 20 blocks off and its first crewman sits to it; it picks its
-  own mark when he has none. Their shots never hurt their own realm's people or a town's ordinary villagers and golems,
-  and only tear up loose soil and plants where they land (never the besieged's buildings).
+  own mark when he has none. Their shots never hurt their own realm's people or a town's ordinary villagers and golems.
+- **Nothing is safe** (Andy): a stone or ball breaks what it lands on, the besieged's walls, roofs and players' builds
+  included (a stone takes a hole about 2 blocks across, through cobble and stone brick at its middle; a ball a little
+  more). With no foe in reach the mangonel batters the enemy's seat itself, its stones falling up to 7 blocks wide.
+  Spared: the attackers' own land, chests and other containers, obsidian; and nothing breaks while mob griefing is off.
 - **Stopping them**: kill the crew and the engine stands silent where it was left; break it (50 blows' worth for a
   mangonel, 40 for a cannon) and its crew go back to the fight. After the siege the crew push it home. Engines aren't
   saved, like the parties.

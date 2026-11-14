@@ -37,9 +37,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Mangonel}'s stone: lobbed high, it comes down on whatever is under it, hurting the thrower's foes within
- * {@link #BURST_RADIUS} ({@link SiegeTrain#harms}) and knocking them back. It is a stone and not a shell: where it lands
- * it only tears up loose ground and growth, never on its own side's land or in a standing faction's buildings. Drawn as
- * a cobblestone. Never saved.
+ * {@link #BURST_RADIUS} ({@link SiegeTrain#harms}) and knocking them back. Andy: "nothing should be safe": where it lands
+ * it smashes a {@link #BREACH} out of whatever is there, the besieged's walls, roofs and players' builds included (cobble
+ * and stone brick give at its middle); only its own realm's land is spared, and what no shot breaks
+ * ({@link Bombardment}: chests, obsidian; nothing while mob griefing is off). Drawn as a cobblestone. Never saved.
  */
 public final class SiegeStone extends Projectile implements ItemSupplier {
 	/** How fast it leaves the cup and how fast it falls (blocks per tick, per tick). */
@@ -50,8 +51,8 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 	/** Its blow on a direct hit; the burst falls off to {@link #BURST_SHARE} of it at this radius. */
 	static final float DAMAGE = 12.0F, BURST_SHARE = 0.3F;
 	static final double BURST_RADIUS = 2.5, KNOCKBACK = 0.8;
-	/** What it does to the ground: soil, sand, plants and leaves in a small dent. */
-	static final Bombardment.Crater DENT = new Bombardment.Crater(1.6, 1, 1, 3.0F, Bombardment.Strip.SOFT, 16, false);
+	/** What it does where it lands: a hole a little smaller than a field gun's ball makes, through stone at its middle. */
+	static final Bombardment.Crater BREACH = new Bombardment.Crater(2.2, 1, 2, 7.0F, Bombardment.Strip.STRUCTURES, 16, false);
 
 	public static EntityType<SiegeStone> TYPE;
 
@@ -117,8 +118,8 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
 			BlockPos struck = ((BlockHitResult) hit).getBlockPos();
-			if (!Cannonball.ownGround(level, (Worker) thrower, struck)) {
-				Bombardment.crater(level, Vec3.atCenterOf(struck), DENT, thrower);
+			if (!Cannonball.ownLand(level, (Worker) thrower, struck)) {
+				Bombardment.crater(level, Vec3.atCenterOf(struck), BREACH, thrower);
 			}
 			this.burst(level, thrower, hit.getLocation(), null);
 			return;
