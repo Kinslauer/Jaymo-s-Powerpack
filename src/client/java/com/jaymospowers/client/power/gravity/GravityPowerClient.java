@@ -53,6 +53,9 @@ public final class GravityPowerClient implements PowerClient {
 		LensClient.init();
 		// (0.21.10) the rock ball and the orbiting rocks, on every client
 		GravityRocksLayer.init();
+		// the rocks away on an order (steered, ringing something, storming)
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(GravityRockOrdersRenderer::render);
+		ClientTickEvents.START_CLIENT_TICK.register(GravityPowerClient::rocksWheel);
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -114,6 +117,27 @@ public final class GravityPowerClient implements PowerClient {
 		}
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityReel(y > 0.0 ? 1 : -1));
 		return true;
+	}
+
+	private static int rocksHeld = -1;
+
+	/** G held with B and the rocks out: their order wheel opens once it has been down {@code GravityRockOrders.HOLD_TICKS}. */
+	private static void rocksWheel(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		net.minecraft.client.KeyMapping g = JaymosPowersClient.keyMapping(PowerKey.ABILITY_2);
+		if (player == null || minecraft.gui.screen() != null || !g.isDown() || player.getAttached(com.jaymospowers.power.gravity.GravityRocks.ROCKS) == null
+			|| !com.jaymospowers.core.Powers.has(player, GravityPower.INSTANCE)) {
+			rocksHeld = -1;
+			return;
+		}
+		if (rocksHeld < 0) {
+			// only a press that began with B held is the rocks'
+			rocksHeld = JaymosPowersClient.keyMapping(PowerKey.ABILITY_4).isDown() ? 0 : Integer.MIN_VALUE;
+		}
+		if (rocksHeld >= 0 && ++rocksHeld >= com.jaymospowers.power.gravity.GravityRockOrders.HOLD_TICKS) {
+			rocksHeld = Integer.MIN_VALUE;
+			minecraft.gui.setScreen(new GravityRocksScreen(g));
+		}
 	}
 
 	@Override

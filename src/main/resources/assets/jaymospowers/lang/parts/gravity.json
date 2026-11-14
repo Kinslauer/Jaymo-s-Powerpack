@@ -43,5 +43,20 @@
 	"message.jaymospowers.gravity.field_starved": "Too hungry to hold the Immense Field.",
 	"message.jaymospowers.gravity_ram.wait": "Comet Ram: %ss",
 	"message.jaymospowers.gravity_ram.hungry": "Too hungry to ram.",
-	"message.jaymospowers.gravity_rocks_few": "Carry more than %s rocks to harness them."
+	"message.jaymospowers.gravity_rocks_few": "Carry more than %s rocks to harness them.",
+	"message.jaymospowers.gravity_rocks.harry": "The rocks are set on %s",
+	"message.jaymospowers.gravity_rocks.called_off": "The rocks are called off",
+	"message.jaymospowers.gravity_rocks.no_target": "Nothing there for the rocks",
+	"message.jaymospowers.gravity_rocks.ring": "The rocks close round %s",
+	"message.jaymospowers.gravity_rocks.recharging": "The rocks aren't ready: %ss",
+	"screen.jaymospowers.gravity_rocks": "Harnessed rocks",
+	"gui.jaymospowers.gravity_rocks.hint": "Let go over an order. The middle cancels",
+	"gui.jaymospowers.gravity_rocks.0": "Harry",
+	"gui.jaymospowers.gravity_rocks.0.hint": "Set the rocks on what you look at. Again calls them off",
+	"gui.jaymospowers.gravity_rocks.1": "Steer",
+	"gui.jaymospowers.gravity_rocks.1.hint": "The rocks fly where you look for 5 s. Again calls them back",
+	"gui.jaymospowers.gravity_rocks.2": "Stone storm",
+	"gui.jaymospowers.gravity_rocks.2.hint": "Rocks loop through what you aim at for 4 s. You are slowed",
+	"gui.jaymospowers.gravity_rocks.3": "Closing ring",
+	"gui.jaymospowers.gravity_rocks.3.hint": "The rocks ring what you look at, hold it, then crash in"
 }

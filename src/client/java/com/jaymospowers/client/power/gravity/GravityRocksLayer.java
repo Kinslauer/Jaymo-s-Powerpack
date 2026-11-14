@@ -77,7 +77,9 @@ public final class GravityRocksLayer {
 	public static void extract(LivingEntity entity, EntityRenderState state, float partial) {
 		extractThrown(entity, state, partial);
 		GravityRocks.Rocks rocks = entity instanceof Player ? entity.getAttached(GravityRocks.ROCKS) : null;
-		if (rocks == null || rocks.count() <= 0 || !(state instanceof LivingEntityRenderState living)) {
+		// (away on an order, they are drawn out in the world: GravityRockOrdersRenderer)
+		if (rocks == null || rocks.count() <= 0 || !(state instanceof LivingEntityRenderState living)
+			|| entity.getAttached(com.jaymospowers.power.gravity.GravityRockOrders.ORDER) != null) {
 			state.setData(KEY, null);
 			return;
 		}

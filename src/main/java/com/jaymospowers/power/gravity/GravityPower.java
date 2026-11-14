@@ -695,9 +695,12 @@ public final class GravityPower implements Power {
 					// (0.21.10) B+G (B held, G tapped): the rocks you carry, gathered into a ball, split to orbit you, or put away;
 					// the B held for it never lands its Crush or Wave
 					state.crushFrom = -1;
-					GravityRocks.cycle(player);
+					GravityRockOrders.key(player, true);
 				} else if (down) {
 					well(player);
+				} else {
+					// G let go: a tap with the rocks out changes their formation (held, their order wheel opened)
+					GravityRockOrders.key(player, false);
 				}
 			}
 			case ABILITY_3 -> {
@@ -2425,7 +2428,7 @@ public final class GravityPower implements Power {
 		return block.getType() == HitResult.Type.MISS ? end : block.getLocation();
 	}
 
-	private static @Nullable Entity entityInSight(ServerPlayer player, double range) {
+	static @Nullable Entity entityInSight(ServerPlayer player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = eye.add(look.scale(range));

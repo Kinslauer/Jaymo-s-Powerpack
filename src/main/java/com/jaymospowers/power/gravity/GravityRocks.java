@@ -53,7 +53,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link #GRAZE_REACH}) is clipped by the ring for the same, every {@link #GRAZE_EVERY} ticks.</li>
  * </ul>
  * One follow-up at a time: a new hit while the ball or the volley is still out doesn't send another. Drop below
- * {@link #MIN_ROCKS} and the rocks fall back into the pack. Drawn for everyone by GravityRocksLayer.
+ * {@link #MIN_ROCKS} and the rocks fall back into the pack. With the rocks out, holding G (with B) opens their order
+ * wheel: {@link GravityRockOrders}. Drawn for everyone by GravityRocksLayer.
  */
 public final class GravityRocks {
 	// ===== the knobs ================================================================================================
@@ -163,6 +164,7 @@ public final class GravityRocks {
 
 	static void init() {
 		JaymosPowers.LOGGER.debug("gravity rocks attachments: {} {}", ROCKS, THROWN);
+		GravityRockOrders.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityRocks::tick);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(GravityRocks::afterDamage);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
@@ -237,6 +239,7 @@ public final class GravityRocks {
 	static void dismiss(ServerPlayer player, boolean sound) {
 		PENDING.remove(player.getUUID());
 		GRAZED.remove(player.getUUID());
+		GravityRockOrders.forget(player);
 		if (player.getAttached(ROCKS) == null) {
 			return;
 		}
@@ -258,7 +261,7 @@ public final class GravityRocks {
 			return;
 		}
 		Rocks rocks = player.getAttached(ROCKS);
-		if (rocks == null || player.level() != victim.level()) {
+		if (rocks == null || player.level() != victim.level() || GravityRockOrders.busy(player)) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -510,6 +513,12 @@ public final class GravityRocks {
 					player.setAttached(ROCKS, rocks);
 				}
 			}
+			// the orders the rocks are under (the wheel): away on one, their own follow-ups wait
+			GravityRockOrders.tick(player, rocks);
+			if (GravityRockOrders.busy(player)) {
+				continue;
+			}
+			rocks = player.getAttached(ROCKS);
 			if (rocks.form() == BALL) {
 				tickBall(player, level, rocks, now);
 			} else {
@@ -597,7 +606,7 @@ public final class GravityRocks {
 	}
 
 	/** A rock (or the ball) lands: its damage, and with a bleed tick when it's one of the small ones. */
-	private static void hit(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, boolean bleed) {
+	static void hit(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, boolean bleed) {
 		GravityPower.touch(target, player);
 		striking = true;
 		try {
