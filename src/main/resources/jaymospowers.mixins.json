@@ -46,6 +46,7 @@
 		"ProneBowMixin",
 		"StanceDimensionsMixin",
 		"DismemberMobMixin",
+		"DismemberGameEventMixin",
 		"ExplosionLogMixin",
 		"DownedMobMixin",
 		"DownedHealMixin",

@@ -34,6 +34,9 @@ abstract class TendModelFeatureRendererMixin {
 		com.jaymospowers.client.MeditatePose.bendKnees(submit.model(), submit.state());
 		// (0.21.38) and a climber's elbows and knees
 		com.jaymospowers.client.power.web.WebParkourPose.bendLimbs(submit.model(), submit.state());
+		// and a wall runner's knees and elbows, along the wall and up it
+		com.jaymospowers.client.power.web.WebWallRunPose.bendLimbs(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.UpRunPose.bendLimbs(submit.model(), submit.state());
 		// and a boxer's elbows
 		com.jaymospowers.client.boxing.BoxingPoses.bendLimbs(submit.model(), submit.state());
 	}

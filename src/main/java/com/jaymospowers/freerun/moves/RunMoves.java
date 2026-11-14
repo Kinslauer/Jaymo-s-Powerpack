@@ -2,6 +2,7 @@ package com.jaymospowers.freerun.moves;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.freerun.LandingRoll;
+import com.jaymospowers.freerun.Slide;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -27,7 +28,12 @@ import org.jspecify.annotations.Nullable;
  * that soaks up part of the fall without the roll.</li>
  * <li>{@link SkyDive}: in a long fall, Jump spreads you out: a slower fall, faster steering; Jump again ends it.</li>
  * <li>{@link FastSwim}: swimming flat out for a while breaks into a faster butterfly stroke.</li>
+ * <li>{@link SwimBurst}: tap Sprint while swimming for a short surge forward.</li>
+ * <li>{@link Breach}: swimming flat out at the surface, Jump throws you out of the water head first.</li>
  * <li>{@link Hiding}: sneak into a leaves block or a hay bale to hide inside it.</li>
+ * <li>{@link Leap}: just after a sprint jump, the Crawl key dives you forward onto your belly and you land prone.</li>
+ * <li>{@link AirRoll}: just after a sprint jump, a fresh Sprint press rolls you forward through the air (a Freerun perk).</li>
+ * <li>Water skip ({@link Slide#waterSkip}): a slide that reaches water bounces off it.</li>
  * </ul>
  * Like the other freerun moves they are the client's ({@code client/freerun/moves/RunMovesClient} moves the body), and it
  * tells the server each one ({@link Ask}), which checks it, charges the feathers and shows it to everyone
@@ -35,11 +41,13 @@ import org.jspecify.annotations.Nullable;
  */
 public final class RunMoves {
 	/** What an {@link Ask} is for. */
-	public static final int LONG_JUMP = 1, CHARGE_JUMP = 2, TRICK_JUMP = 3, SAFETY_TAP = 4, SKY_DIVE = 5, SKY_DIVE_END = 6, HIDE = 7, UNHIDE = 8;
+	public static final int LONG_JUMP = 1, CHARGE_JUMP = 2, TRICK_JUMP = 3, SAFETY_TAP = 4, SKY_DIVE = 5, SKY_DIVE_END = 6, HIDE = 7, UNHIDE = 8,
+		/** The swim burst, the breach leap and a skip off the water after it; the leap into prone, the air roll, a slide's water skip. */
+		SWIM_BURST = 9, BREACH = 10, BREACH_SKIP = 11, LEAP = 12, AIR_ROLL = 13, WATER_SKIP = 14;
 
 	/**
-	 * A short whole-body move everyone draws ({@code RunMovesPose}): the kind ({@link #LONG_JUMP} or {@link #SAFETY_TAP})
-	 * in the top byte, the game time it began below. Missing: none.
+	 * A short whole-body move everyone draws ({@code RunMovesPose}): the kind ({@link #LONG_JUMP}, {@link #SAFETY_TAP},
+	 * {@link #BREACH} or {@link #LEAP}) in the top byte, the game time it began below. Missing: none.
 	 */
 	public static final AttachmentType<Long> POSE = AttachmentRegistry.create(JaymosPowers.id("run_move_pose"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
@@ -78,6 +86,12 @@ public final class RunMoves {
 			case SKY_DIVE_END -> SkyDive.stop(player);
 			case HIDE -> Hiding.hide(player, ask.arg());
 			case UNHIDE -> Hiding.leave(player);
+			case SWIM_BURST -> SwimBurst.burst(player);
+			case BREACH -> Breach.leap(player);
+			case BREACH_SKIP -> Breach.skipped(player);
+			case LEAP -> Leap.jumped(player);
+			case AIR_ROLL -> AirRoll.rolled(player);
+			case WATER_SKIP -> Slide.waterSkip(player);
 			default -> {
 			}
 		}

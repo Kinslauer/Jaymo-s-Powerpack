@@ -262,7 +262,7 @@ public final class LedgePose {
 	}
 
 	/** The inverse of vanilla's first-person arm placement (FirstPersonHandsAndItemsRenderer#renderPlayerArm, no swing). */
-	private static void undoVanillaArm(PoseStack poseStack, float side, float equip) {
+	public static void undoVanillaArm(PoseStack poseStack, float side, float equip) {
 		poseStack.translate(-side * 5.6F, 0.0F, 0.0F);
 		poseStack.rotateDegrees(Axis.YP, side * 135.0F);
 		poseStack.rotateDegrees(Axis.XP, -200.0F);

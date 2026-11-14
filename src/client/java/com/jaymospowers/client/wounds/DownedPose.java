@@ -53,6 +53,8 @@ import net.minecraft.world.entity.player.Player;
  * strangle ({@link ExecutionReact}), in place of its sit-ups.
  */
 public final class DownedPose {
+	/** A legless mob's crawl counts as down this long (ticks): long enough that the fall is over and it's flat. */
+	static final float LEGLESS_DOWN = 100.0F;
 	/** How long the fall to the ground takes (ticks): the knees giving way first (this share of it), then the drop. */
 	static final float FALL_TICKS = 9.0F, BUCKLE_SHARE = 0.3F, BUCKLE_AMOUNT = 0.12F;
 	/** The bounce as it hits: how far past flat (share of the fall), how fast it rings (per tick), how fast it dies (per tick). */
@@ -132,11 +134,18 @@ public final class DownedPose {
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (entity instanceof Player || !Downed.isDowned(entity) || Carry.isCarried(entity)) {
+		boolean legless = legless(entity);
+		if (entity instanceof Player || !Downed.isDowned(entity) && !legless || Carry.isCarried(entity)) {
 			return;
 		}
 		if (com.jaymospowers.compat.KingdomsCompat.grabbed(entity)) {
 			// (0.21.33) held up by the throat in a vampire's hand (Kingdoms' BloodGrab): it hangs there, posed by Kingdoms, not laid down
+			return;
+		}
+		if (legless && !Downed.isDowned(entity)) {
+			// (Andy: legless mobs crawl) still up, but with no legs: it hauls itself along on its arms, as a downed crawler does
+			state.setData(KEY, new Down(1.0F, true, true, Wounds.brokenLimbs(entity), LEGLESS_DOWN, entity.getId(), false, Kind.PERSON,
+				Style.CRAWL, null));
 			return;
 		}
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);
@@ -165,6 +174,21 @@ public final class DownedPose {
 				state.walkAnimationSpeed = Math.max(state.walkAnimationSpeed, PADDLE_SWING * paddle);
 			}
 		}
+	}
+
+	/**
+	 * (Andy: "legless mobs crawl") Whether {@code entity} is a living humanoid mob (a Dismember-able person) with both legs
+	 * gone, and no prosthetic on either: it drags itself along on its arms (a downed crawler's pose, held while it stays up).
+	 */
+	static boolean legless(LivingEntity entity) {
+		if (entity instanceof Player || entity.isDeadOrDying() || entity.isPassenger()) {
+			return false;
+		}
+		int legs = Dismember.RIGHT_LEG | Dismember.LEFT_LEG;
+		if ((Dismember.missing(entity) & ~com.jaymospowers.core.Prosthetics.fitted(entity) & legs) != legs) {
+			return false;
+		}
+		return Dismember.canLoseParts(entity) && BodyPlan.of(entity) == BodyPlan.HUMANOID;
 	}
 
 	/** The kind of body: a machine, a person, a bug, a bird, anything that lives in water, a slime, a beast, or a lump. */

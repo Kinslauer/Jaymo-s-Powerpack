@@ -68,6 +68,7 @@ final class SkillIcons {
 		put(Skills.Perk.LEAP_OF_FAITH, Items.ELYTRA);
 		put(Skills.Perk.BAR_SWING, Items.IRON_BARS);
 		put(Skills.Perk.WALL_RUNNER, Items.STONE_BRICK_WALL);
+		put(Skills.Perk.AIR_ROLL, Items.RABBIT_FOOT);
 		put(Skills.Perk.SHADOWED, Items.INK_SAC);
 		put(Skills.Perk.QUIET_STEP, Items.FEATHER);
 		put(Skills.Perk.SLIP_THE_NET, Items.COBWEB);
