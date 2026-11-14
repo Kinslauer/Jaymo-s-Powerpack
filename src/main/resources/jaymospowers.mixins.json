@@ -6,6 +6,7 @@
 		"AetherEdgeMixin",
 		"ArmourWearStackMixin",
 		"CollideMoveMixin",
+		"ElementalWrathDamageMixin",
 		"ArmourWearLivingMixin",
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",

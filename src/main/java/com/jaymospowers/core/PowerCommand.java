@@ -131,6 +131,8 @@ public final class PowerCommand {
 						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.resetfate", players.size()), true);
 						return players.size();
 					})))
+			// /power wrath: Elemental Corruption's reckoning, wrath and reclaiming, for testing
+			.then(com.jaymospowers.elemental.ElementalCorruption.command())
 			.then(com.jaymospowers.power.ember.FlameAvatar.command())
 			.then(com.jaymospowers.core.gifted.GiftedCommand.command())
 			.then(Commands.literal("get")

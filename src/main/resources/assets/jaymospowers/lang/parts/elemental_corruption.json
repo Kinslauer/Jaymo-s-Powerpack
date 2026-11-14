@@ -1,0 +1,10 @@
+{
+	"message.jaymospowers.elemental.warning_1": "You are angering things you cannot defend yourself from.",
+	"message.jaymospowers.elemental.warning_2": "We will not stand for injustice in our name.",
+	"message.jaymospowers.elemental.reclaim": "You have enraged the Gods of your power and they now reclaim it",
+	"message.jaymospowers.elemental.taken": "The wrath passes. Your power is gone from you.",
+	"message.jaymospowers.elemental.returned_corrupted": "Your power stirs in you again. It is still not clean.",
+	"message.jaymospowers.elemental.returned_clean": "Your power stirs in you again, clean.",
+	"message.jaymospowers.elemental.penance": "The draught burns going down. Somewhere, something old accepts it.",
+	"commands.jaymospowers.wrath": "Done for %s player(s)"
+}

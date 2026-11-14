@@ -85,6 +85,63 @@ public final class KingdomsCompat {
 		}
 	}
 
+	private static boolean campLooked;
+	private static @Nullable Class<?> folkClass;
+	private static @Nullable Method isBarbarian, isCampVillager, isOrc;
+
+	private static void lookCamp() {
+		if (campLooked) {
+			return;
+		}
+		campLooked = true;
+		try {
+			Class<?> barbarians = Class.forName("com.jaymoskingdoms.Barbarians");
+			folkClass = Class.forName("com.jaymoskingdoms.Folk");
+			isBarbarian = barbarians.getMethod("isBarbarian", folkClass);
+			isCampVillager = barbarians.getMethod("isCampVillager", Entity.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			folkClass = null;
+			isBarbarian = isCampVillager = null;
+		}
+		try {
+			isOrc = Class.forName("com.jaymoskingdoms.Orcs").getMethod("isOrc", net.minecraft.world.entity.LivingEntity.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			isOrc = null;
+		}
+	}
+
+	/**
+	 * (Elemental Corruption) Whether {@code entity} is one of a camp's own: a barbarian raider, chief or builder, or any
+	 * camp's crew that is an MCA villager (a pirate cove's, a goblin village's, an orc camp's). False without Kingdoms.
+	 */
+	public static boolean barbarian(Entity entity) {
+		if (!LOADED) {
+			return false;
+		}
+		lookCamp();
+		try {
+			if (folkClass != null && isBarbarian != null && folkClass.isInstance(entity) && Boolean.TRUE.equals(isBarbarian.invoke(null, entity))) {
+				return true;
+			}
+			return isCampVillager != null && Boolean.TRUE.equals(isCampVillager.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** (Elemental Corruption) Whether {@code entity} is one of an orc camp's orcs. False without Kingdoms. */
+	public static boolean orc(Entity entity) {
+		if (!LOADED || !(entity instanceof net.minecraft.world.entity.LivingEntity)) {
+			return false;
+		}
+		lookCamp();
+		try {
+			return isOrc != null && Boolean.TRUE.equals(isOrc.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	private static boolean shrugLooked;
 	private static Method shrugs;
 

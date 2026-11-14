@@ -68,6 +68,8 @@ public final class SmokePower implements Power {
 	public static void init() {
 		com.jaymospowers.core.Powers.register(INSTANCE);
 		SmokeNet.register();
+		// its part in Elemental Corruption (the gods' wrath at a corrupted holder's murders)
+		com.jaymospowers.elemental.ElementalCorruption.register(INSTANCE, new SmokeWrath());
 		// (0.17.3) what a gifted villager does with Smoke
 		SmokeGift.init();
 		SmokeField.init();

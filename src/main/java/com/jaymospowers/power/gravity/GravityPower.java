@@ -481,6 +481,8 @@ public final class GravityPower implements Power {
 
 	public static void init() {
 		Powers.register(INSTANCE);
+		// its part in Elemental Corruption (the gods' wrath at a corrupted holder's murders)
+		com.jaymospowers.elemental.ElementalCorruption.register(INSTANCE, new GravityWrath());
 		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP, SLAM_POSE, KNEEL);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityGrip.TYPE, GravityGrip.CODEC);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(GravityMeteorBurst.TYPE, GravityMeteorBurst.CODEC);

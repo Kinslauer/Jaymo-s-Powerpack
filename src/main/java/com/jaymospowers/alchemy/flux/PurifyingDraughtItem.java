@@ -11,7 +11,9 @@ import net.minecraft.world.level.Level;
 
 /**
  * Purifying Draught: drunk like a potion, it takes {@link #CURE} lingering corruption out of the drinker (and all the
- * fleeting kind). It does nothing for the deep kind. The glass bottle is handed back.
+ * fleeting kind). It does nothing for the deep kind. The glass bottle is handed back. Drunk while the gods of the
+ * elements have the drinker's power, it purifies it (ElementalCorruption#penance); drunk by a corrupted Cryokinesis user
+ * at a lit campfire, it thaws their corruption (CryoCorruption#thaw).
  */
 public class PurifyingDraughtItem extends Item {
 	/** Lingering corruption removed per bottle. */
@@ -29,6 +31,10 @@ public class PurifyingDraughtItem extends Item {
 			Corruption.add(player, Corruption.Kind.LINGERING, -CURE);
 			Corruption.add(player, Corruption.Kind.FLEETING, -state.fleeting());
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.draught.drunk"), true);
+			// drunk while the gods of the elements have the power: penance (Elemental Corruption)
+			com.jaymospowers.elemental.ElementalCorruption.penance(player);
+			// a corrupted Cryokinesis user warmed by a campfire is thawed of it
+			com.jaymospowers.power.cryo.CryoCorruption.thaw(player);
 		}
 		return left;
 	}
