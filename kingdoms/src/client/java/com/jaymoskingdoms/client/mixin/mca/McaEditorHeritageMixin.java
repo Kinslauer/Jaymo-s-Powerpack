@@ -80,6 +80,11 @@ abstract class McaEditorHeritageMixin {
 			return;
 		}
 		String heritage = player.getAttached(Heritage.HERITAGE), variant = player.getAttached(HeritageVariants.VARIANT);
+		// (a skipped story's heritage and look are still being picked, on the creator's Life tab: the figure wears them as they stand)
+		if ((Object)this instanceof DestinyScreen && com.jaymoskingdoms.client.CreatorTab.on()) {
+			heritage = com.jaymoskingdoms.client.CreatorTab.heritage();
+			variant = com.jaymoskingdoms.client.CreatorTab.variant();
+		}
 		if (!Objects.equals(heritage, this.villager.getAttached(Heritage.HERITAGE))) {
 			this.villager.setAttached(Heritage.HERITAGE, heritage);
 		}
