@@ -1,0 +1,13 @@
+{
+  "entity.jaymoskingdoms.cyclops": "Cyclops",
+  "entity.jaymoskingdoms.satyr": "Satyr",
+  "item.jaymoskingdoms.cyclops_spawn_egg": "Cyclops Spawn Egg",
+  "item.jaymoskingdoms.satyr_spawn_egg": "Satyr Spawn Egg",
+  "subtitles.jaymoskingdoms.satyr_pipes": "Satyr pipes play",
+  "message.jaymoskingdoms.encounter.cyclops": "A smell of woodsmoke and sheep on the wind, and footsteps that shake the scree. Something big keeps a fire up on the rocks.",
+  "talk.jaymoskingdoms.gossip.beast.cyclops.0": "There's a giant with one eye %1$s blocks %2$s of here. Keeps sheep in a cave and a fire burning day and night.",
+  "talk.jaymoskingdoms.gossip.beast.cyclops.1": "Saw smoke going up off the rocks %1$s blocks %2$s. That's no shepherd's fire. That's the cyclops.",
+  "talk.jaymoskingdoms.gossip.beast.cyclops.2": "If you have to face the cyclops %1$s blocks %2$s, put an arrow in its eye. Blind, it can only follow your footsteps, so creep.",
+  "gui.jaymoskingdoms.story.hint.170": "A cyclops sleeps by its fire at night. Creep and it may not wake. Strike it while it sleeps, or put an arrow in its eye, and it goes blind for a while and hunts by sound.",
+  "gui.jaymoskingdoms.story.hint.171": "Satyrs dance round a fire at dusk while the eldest pipes. Bring them honey, berries or wine and they'll let you sit in, and a night by their fire heals you."
+}
