@@ -13641,3 +13641,35 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Long defence film**: the mages use the same gestures (new GeckoLib moves cast_push, cast_push_left, cast_draw, cast_sweep, cast_raise, cast_ground, cast_give) and the typed magic effects: standing and ground sigils, beams, blasts, rings, a wave of light, rune and stroke cuts, motes instead of dust. The relay bolt is a thin beam, the paired spell ends in a sky beam over a ground sigil. Tape re-recorded (new SHAPE op).
 - Fx gains `shape(...)` (any MagicFx shape by reflection).
 - Film recorded and watched in a dev client. Villager casters seen casting sigils in a dev-client camp fight, but the arm gestures there were not seen up close; player casts compile-checked only.
+
+## 0.9.4 (2026-11-14): Tales: story quests over days and weeks, starred board work, a fuller journal
+
+- **Tales.** Some villagers with work have more than an errand. A tale starts as a talk, runs in steps (go, search,
+  ask, face someone, bring, build, escort, wait) over days and weeks, and ends by what you chose. Waits end with the
+  asker's gold ! coming back or a runner or a pigeon bringing a sealed letter. 17 tales ship, each with 5 to 10
+  endings; three decide who did it when they start, so they aren't the same twice.
+- **Spare or strike.** A tale's named foe yields when beaten: finish them or let them walk. It's remembered (new
+  memories for mercy and for cutting down one who yielded), it changes later tales, and some of the spared come back:
+  with thanks, a warning, asking to join, or for revenge with friends.
+- **What companions believe.** A companion holds to what their temperament does: mercy, faith, the law, courage,
+  honour, gain or vengeance. Go against it in a tale (cut down one who yielded, side with smugglers, run) and every
+  companion near you who believes it leaves you. A companion whose own tale you betray leaves you wherever they are,
+  and so does one whose tale ends so badly their bond falls below what it took to ask you.
+- **Who comes back, by choice.** The choices you make in a tale decide who comes back and how, not only the ending.
+  One you let go with nothing said comes back as their nature takes them: thanks, a warning, asking to join, or revenge.
+- **Finding them.** Also from a rumour (a passer-by, or a night's drinking), a book in a ruin chest or on a body (four
+  tales start this way), a letter (a sequel; by runner, day or night and indoors too, or by pigeon if you keep a
+  roost), or a close companion asking about their own past (it moves their bond).
+- **Board work.** Town boards post paid work rated one to five stars: a pack to hunt, a named elite, a night to hold
+  the town, a traveller to walk to another town, an incursion (nest, camp or pit) to clear, lamps to set before
+  nightfall, something to build, a cave-in to blast, goods to leave in a chest. More stars: more and tougher foes, a
+  leader, iron, potions, more pay. Each town's board levels up as its work gets done.
+- **Journal.** Two new tabs: Stories (each tale so far, with what you chose) and Past (finished, failed and given-up
+  quests). A pin box on each quest tracks only that one on screen, with a rough direction.
+- **Village life.** Two villagers near you sometimes stop and talk to each other (40 scenes, in their own tongue).
+  A town brings up how your tale there ended, once each, over the next days.
+- **For writers.** Tales and scenes are data files (`data/jaymoskingdoms/tales`, `scenes`); the format is in
+  `docs/StoryQuests-Plan.md`, and `tools/tale_check.py` checks them in the PR checks.
+- Classes: `Tale`, `Tales`, `TaleCast`, `Convictions`, `QuestJobs`, `BoardWork`, `Overheard`, `QuestPast`; `Journal`, `QuestNet`,
+  `JournalScreen`, `QuestClient`, `TownNotices`, `Bounties`, `Quests`.
+- Built and checked by the tale checker. Not played.
