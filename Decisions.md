@@ -547,3 +547,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1528 (/kingdom reaper toll) merged.
 - 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".
+
+- 2026-11-14 (Andy, films thread): the Long Defence must play whole on any land ("the cutscene broke near the end, and alot of the quiet one's shot wasnt there"); the film levels its own field client-side while it plays (my fix, his call to keep).
