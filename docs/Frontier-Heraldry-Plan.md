@@ -20,15 +20,15 @@ Andy's notes are binding as written:
 
 ## Patches
 
-1. **Guns** (Powers + Kingdoms): the long gun becomes the blunderbuss; the Firecannon becomes the musketoon
+1. **Guns** (built) (Powers + Kingdoms): the long gun becomes the blunderbuss; the Firecannon becomes the musketoon
    (`Musketoon`, `Cannonball.shot`, `MobAmmo.Kind.BALLS`), carried by caravan guards.
-2. **Frontier armour** (Kingdoms): Templar, Hedge Mage, Primalist, Mercenary-Ranger, settler's gear, Juggernaut,
+2. **Frontier armour** (built) (Kingdoms): Templar, Hedge Mage, Primalist, Mercenary-Ranger, settler's gear, Juggernaut,
    Scoundrel, Sanguine, Despot, Foxshade; set perks; steel (dark-metal) grades.
-3. **Frontier gear** (Kingdoms): Forge Hammer (fights, mines, smiths), field mortar, the Flame Avatars' fire-shot hand
+3. **Frontier gear** (built) (Powers + Kingdoms): Forge Hammer (fights, mines, smiths), field mortar, the Flame Avatars' fire-shot hand
    cannon and their classes.
 4. **Heraldry armour** (Kingdoms): layered harness, shoulder and elbow plates, late-medieval helms, visor key,
    finishes, arm and leg harness, crests, giornea, hoods and torn cloaks.
-5. **Heraldry fighting** (Kingdoms): stamina, weapon sweet spot, cut/thrust/blunt against armour.
+5. **Heraldry fighting** (built) (Kingdoms): stamina, weapon sweet spot, cut/thrust/blunt against armour.
 6. **Heraldry smithing and arms** (Kingdoms): handgonne and arquebus by realm wealth, arrowheads, war weapons, pattern
    scrolls, forging failure, relic armour in old sand.
 
