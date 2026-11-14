@@ -49,6 +49,12 @@ public final class Corpses {
 	public static final TagKey<EntityType<?>> NO_CORPSE = tag("no_corpse");
 	public static final TagKey<EntityType<?>> ZOMBIE_CORPSES = tag("zombie_corpses");
 	public static final TagKey<EntityType<?>> SKELETON_CORPSES = tag("skeleton_corpses");
+	/**
+	 * Other long-dead things built like a person (another mod's draugr, its undead raiders) whose bodies come apart as a
+	 * zombie's does, without being a zombie's body in any other way (they don't get back up or burn in the sun). Not the
+	 * newly turned: a villager who became a zombie yesterday is still whole.
+	 */
+	public static final TagKey<EntityType<?>> COMES_APART = tag("comes_apart");
 	/** Animals too big for one butcher block: they need a 2x2 table, and are heavier to carry. */
 	public static final TagKey<EntityType<?>> BIG_CARCASSES = tag("big_carcasses");
 	/**

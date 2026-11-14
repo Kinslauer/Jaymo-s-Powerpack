@@ -77,15 +77,16 @@ public final class Dismembered {
 	/**
 	 * The model parts that make up {@code part}, by name (a part and what's layered over it). After the game's own names
 	 * come our creatures' ones: Kingdoms' shape-file creatures (a Digger's "armR", "legL"), Blockbench mobs (a goblin
-	 * scout's "arm_right", "leg_left") and the loot goblin ("thigh", "thigh2").
+	 * scout's "arm_right", "leg_left"; the zombie knight's "hi_head"; the revenant's "neck", "armR0", "legL0") and the loot
+	 * goblin ("thigh", "thigh2").
 	 */
 	public static String[] names(int part) {
 		return switch (part) {
-			case Dismember.HEAD -> new String[] {"head", "hat", "nose"};
-			case Dismember.RIGHT_ARM -> new String[] {"right_arm", "right_sleeve", "armR", "arm_right"};
-			case Dismember.LEFT_ARM -> new String[] {"left_arm", "left_sleeve", "armL", "arm_left"};
-			case Dismember.RIGHT_LEG -> new String[] {"right_leg", "right_pants", "legR", "leg_right", "thigh"};
-			default -> new String[] {"left_leg", "left_pants", "legL", "leg_left", "thigh2"};
+			case Dismember.HEAD -> new String[] {"head", "hat", "nose", "hi_head", "neck"};
+			case Dismember.RIGHT_ARM -> new String[] {"right_arm", "right_sleeve", "armR", "arm_right", "armR0"};
+			case Dismember.LEFT_ARM -> new String[] {"left_arm", "left_sleeve", "armL", "arm_left", "armL0"};
+			case Dismember.RIGHT_LEG -> new String[] {"right_leg", "right_pants", "legR", "leg_right", "thigh", "legR0"};
+			default -> new String[] {"left_leg", "left_pants", "legL", "leg_left", "thigh2", "legL0"};
 		};
 	}
 

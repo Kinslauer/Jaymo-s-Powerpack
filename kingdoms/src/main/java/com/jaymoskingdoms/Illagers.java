@@ -144,6 +144,14 @@ public final class Illagers {
 		};
 	}
 
+	private static EntityType<? extends Mob> reapedType(int role) {
+		return switch (role) {
+			case EVOKER -> com.jaymoskingdoms.reaped.Reaped.evoker();
+			case PILLAGER -> com.jaymoskingdoms.reaped.Reaped.pillager();
+			default -> com.jaymoskingdoms.reaped.Reaped.vindicator();
+		};
+	}
+
 	// ---- spawning ----------------------------------------------------------------------------------------------------
 
 	/**
@@ -151,7 +159,9 @@ public final class Illagers {
 	 * despawning, never joining a vanilla raid. Counted on the camp's roster unless it's the warlord or on a raid.
 	 */
 	static @Nullable Mob spawn(ServerLevel level, Faction camp, int role, BlockPos at, BlockPos home, int radius, boolean raid) {
-		Mob mob = type(role).create(level, EntitySpawnReason.EVENT);
+		// (a camp the Reaper's host has taken sends the reaped where it sent illagers: ReapedHolds)
+		boolean reaped = ReapedHolds.is(level.getServer(), camp.id());
+		Mob mob = (reaped ? reapedType(role) : type(role)).create(level, EntitySpawnReason.EVENT);
 		if (mob == null) {
 			return null;
 		}
@@ -167,6 +177,9 @@ public final class Illagers {
 		mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(SIGHT + 4.0);
 		if (role == WARLORD) {
 			outfitWarlord(level, mob, camp);
+			if (reaped) {
+				mob.setCustomName(Component.translatable("entity.jaymoskingdoms.reaped_warlord_of", camp.name()));
+			}
 		}
 		mob.setAttached(TAG, new Tag(camp.id(), role, raid, false));
 		level.addFreshEntity(mob);
@@ -257,7 +270,9 @@ public final class Illagers {
 			bar.removeAllPlayers();
 		}
 		if (tag.role() == WARLORD) {
-			Camps.chiefSlain(level, entity, tag.camp(), source);
+			if (!ReapedHolds.take(level, entity, tag.camp(), source)) {
+				Camps.chiefSlain(level, entity, tag.camp(), source);
+			}
 		} else if (tag.raid()) {
 			Raids.raiderDied(level, entity, tag.camp(), source, false);
 		} else {

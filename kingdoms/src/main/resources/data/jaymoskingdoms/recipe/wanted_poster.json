@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:ink_sac",
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:wanted_poster"
+  }
+}

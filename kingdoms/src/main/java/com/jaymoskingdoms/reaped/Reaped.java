@@ -67,6 +67,8 @@ import org.jspecify.annotations.Nullable;
 public interface Reaped {
 	/** Health and speed: the pillager, the vindicator, the evoker. */
 	double PILLAGER_HEALTH = 30.0, PILLAGER_SPEED = 0.3, VINDICATOR_HEALTH = 32.0, VINDICATOR_SPEED = 0.31, EVOKER_HEALTH = 30.0, EVOKER_SPEED = 0.42;
+	/** Villagers keep this far from them (blocks), as from a living pillager. */
+	double FRIGHT_RANGE = 14.0;
 	/** How low their voices are. */
 	float VOICE_PITCH = 0.55F;
 	/** A living illager they kill gets up this long after (ticks). */
@@ -203,8 +205,8 @@ public interface Reaped {
 				corpse.discard();
 			}
 			level.addFreshEntity(mob);
-			if (r.killer().isAlive()) {
-				ZombieHordes.enlist(r.killer(), mob);
+			if (r.killer().isAlive() && !ZombieHordes.enlist(r.killer(), mob)) {
+				com.jaymoskingdoms.ReapedHolds.enrol(r.killer(), mob);
 			}
 			Fx.burst(level, r.at().x, r.at().y + 1.0, r.at().z, Reaper.RED, 1.0F, 10, 0.3, 0.5, 0.3);
 			level.playSound(null, r.at().x, r.at().y, r.at().z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.0F, 0.6F);

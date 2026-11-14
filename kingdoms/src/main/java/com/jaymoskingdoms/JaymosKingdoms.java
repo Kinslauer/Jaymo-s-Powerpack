@@ -414,6 +414,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		NoBuildDungeons.register();
 		// the Stormborn Tomb (MIT port): a barrow over a tomb, laid out by its own structure type
 		StormbornTomb.register();
+		com.jaymoskingdoms.dungeon.TombHall.register();
+		com.jaymoskingdoms.traps.Runes.register();
 		// (0.7.573) or taken in by a village that thinks well enough of them
 		Shelter.register();
 		Hollows.register();
@@ -487,6 +489,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		GrimSites.register();
 		// Illager Structures' places (GPL v3, carried in this mod) and Andy's picks of who lives in them
 		IllagerSites.register();
+		ReapedHolds.register();
+		RaiderGear.register();
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		// (0.7.225) players on the throne: usurpers, heirs by marriage, conquerors, founders (and their attachment)

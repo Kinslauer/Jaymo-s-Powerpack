@@ -459,6 +459,10 @@ def packModsNoCf = [
 	// harvest and replant it; needs JamLib; 4.6.2). CurseForge's pages for them show no 26.3 file yet (checked 2026-11-05).
 	[dep: "maven.modrinth:mmr-moogs-mineshafts-reimagined:JJc7pNHb", cf: null],
 	[dep: "maven.modrinth:rightclickharvest:MTui9kST", cf: null],
+	// Moog's Ocean Structures (LGPL-3.0, by FinnDog; shipped unchanged; needs Moog's Structure Lib, above): long ships,
+	// hauling and travel ships, wanderer rafts, wrecks, Atlantis ruins, sea temples and sea dragon bones, all from vanilla
+	// blocks. Server-side worldgen. 1.1.1. No CurseForge file id found for 26.3 (checked 2026-11-14).
+	[dep: "maven.modrinth:mos-moogs-ocean-structures:QfMITqh9", cf: null],
 	// Better Ping (MIT, UltimateGamerMC): exact ping in ms, color-coded, in the tab list. Client-only, works on any server.
 	// Fabric 26.3-native; CurseForge [project id, file id] to look up from the home PC (cloud can't reach CurseForge).
 	[dep: "maven.modrinth:betterping:ss1Ygqnx", cf: null],

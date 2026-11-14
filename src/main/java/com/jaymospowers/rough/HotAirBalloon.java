@@ -190,7 +190,8 @@ public class HotAirBalloon extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return passenger instanceof Player && getPassengers().size() < 2;
+		// (players, and the illagers Jaymo's Kingdoms drops from the sky in one)
+		return (passenger instanceof Player || passenger instanceof net.minecraft.world.entity.monster.illager.AbstractIllager) && getPassengers().size() < 2;
 	}
 
 	@Override

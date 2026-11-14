@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:pointed_dripstone",
+  "essences": {
+    "earth": 4,
+    "crystal": 3,
+    "arcana": 2
+  },
+  "result": {
+    "item": "jaymoskingdoms:spike_rune",
+    "count": 1
+  },
+  "research": "principles"
+}

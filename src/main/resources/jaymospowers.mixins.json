@@ -20,6 +20,7 @@
 		"StackedHeightMixin",
 		"DroppedArmsDeathMixin",
 		"YoungLivingMixin",
+		"KnockApartMixin",
 		"YoungSpawnMixin",
 		"BlightSpawnMixin",
 		"MobPersistenceAccess",

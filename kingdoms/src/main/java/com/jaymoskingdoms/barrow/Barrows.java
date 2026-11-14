@@ -29,7 +29,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
  * The old barrows: the Overworld's buried cobblestone rooms (a spawner on a cobblestone floor, in no structure) are the
  * graves the lantern-keepers tend. When a player first comes near one, {@link #BARROW_CHANCE} of them have a few of the
  * old dead standing in them ({@link ZombieKnight}), and {@link #LORD_SHARE} of those their lord as well
- * ({@link Revenant}). Each is seen to once, and its dead keep to it.
+ * ({@link Revenant}). Of the rest, {@link #LAUGHING_CHANCE} have lost their knights and hold one or two
+ * {@link LaughingBones} instead. Each is seen to once, and its dead keep to it.
  */
 public final class Barrows {
 	/** How often the ground round the players is looked over (ticks), and how many chunks out. */
@@ -40,6 +41,9 @@ public final class Barrows {
 	static final float BARROW_CHANCE = 0.5F, LORD_SHARE = 0.3F;
 	/** How many knights keep a barrow, and how far from its middle they stand (blocks). */
 	static final int KNIGHTS_MIN = 2, KNIGHTS_MAX = 3, SPREAD = 3;
+	/** Of the rooms whose knights are gone, how many hold laughing bones ({@link LaughingBones}), and how many at most. */
+	static final float LAUGHING_CHANCE = 0.4F;
+	static final int LAUGHING_MAX = 2;
 	/** How far a knight keeps to its barrow (blocks). */
 	static final int KNIGHT_HOME = 10;
 
@@ -99,7 +103,8 @@ public final class Barrows {
 		}
 		// which rooms are barrows is fixed by where they are
 		RandomSource random = RandomSource.create(level.getSeed() ^ pos.asLong() * 0x9E3779B97F4A7C15L);
-		if (random.nextFloat() >= BARROW_CHANCE) {
+		boolean kept = random.nextFloat() < BARROW_CHANCE;
+		if (!kept && (Beasts.LAUGHING_BONES == null || random.nextFloat() >= LAUGHING_CHANCE)) {
 			return;
 		}
 		List<BlockPos> free = new ArrayList<>();
@@ -110,6 +115,13 @@ public final class Barrows {
 					free.add(at);
 				}
 			}
+		}
+		if (!kept) {
+			// its knights are gone, and something else laughs in it
+			for (int i = 1 + random.nextInt(LAUGHING_MAX); i > 0; i--) {
+				stand(level, Beasts.LAUGHING_BONES, free, random, pos, KNIGHT_HOME);
+			}
+			return;
 		}
 		if (random.nextFloat() < LORD_SHARE) {
 			stand(level, Beasts.REVENANT, free, random, pos, Revenant.HOME_RADIUS);

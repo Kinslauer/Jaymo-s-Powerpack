@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -278,6 +279,50 @@ final class IllagerBuildings {
 	/** Where the camp's loot is brought: in front of the loot pile (offset in {@link #lootPile}). */
 	static final BlockPos LOOT_DEPOT = new BlockPos(3, 0, 1);
 
+	/**
+	 * An evoker's lab (5 x 4): a dark oak lean-to like the loot pile's, with a brewing stand on a bench, a lectern, a
+	 * cauldron and shelves, and one chest: a cache of the evokers' notes ({@link RaiderGear}), locked ({@link #stockLab}).
+	 */
+	static Blueprint lab() {
+		CampBuildings.Draft t = new CampBuildings.Draft();
+		for (int x = 0; x <= 4; x++) {
+			for (int y = 0; y <= 2; y++) {
+				t.set(x, y, 3, x == 0 || x == 4 ? log() : y == 1 ? Blocks.BOOKSHELF.defaultBlockState() : planks());
+			}
+			for (int z = 0; z <= 2; z++) {
+				t.set(x, 3, z, slab());
+			}
+			t.set(x, 3, 3, slab());
+		}
+		for (int x : new int[] {0, 4}) {
+			for (int y = 0; y <= 2; y++) {
+				t.set(x, y, 0, log());
+			}
+		}
+		t.set(1, 0, 2, planks());
+		t.set(1, 1, 2, Blocks.BREWING_STAND.defaultBlockState());
+		t.set(2, 0, 2, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.NORTH));
+		t.set(3, 0, 2, Blocks.CAULDRON.defaultBlockState());
+		t.set(3, 0, 1, Blocks.LECTERN.defaultBlockState());
+		return t.done(LAB);
+	}
+
+	static final String LAB = "illager_lab";
+	static final ResourceKey<net.minecraft.world.level.storage.loot.LootTable> LAB_LOOT = ResourceKey.create(Registries.LOOT_TABLE, JaymosKingdoms.id("chests/evoker_lab"));
+
+	/** A lab's chest gets its cache and its lock (a simple one: a rusty key turns it). */
+	private static void stockLab(ServerLevel level, Blueprint blueprint, CampBuildings.Placer placer) {
+		for (Blueprint.Placement p : blueprint.blocks()) {
+			BlockPos at = placer.at(p.offset());
+			if (level.getBlockEntity(at) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest) {
+				long seed = level.getRandom().nextLong();
+				chest.setLootTable(LAB_LOOT, seed);
+				chest.setAttached(Lockpicking.LOCK, new Lockpicking.Lock(true, Lockpicking.Kind.PIN.ordinal(), RaiderGear.KEY_LEVEL, seed));
+				chest.setChanged();
+			}
+		}
+	}
+
 	/** A banner pole (1 x 1): a cobblestone foot, a dark oak fence pole, the ominous banner on top. */
 	static Blueprint bannerPole() {
 		CampBuildings.Draft t = new CampBuildings.Draft();
@@ -336,7 +381,8 @@ final class IllagerBuildings {
 		new Spot("illager_watchtower", IllagerBuildings::watchtower, 0, 15, 0, 5),
 		new Spot("illager_banner_pole", IllagerBuildings::bannerPole, -15, -5, 0, 1),
 		new Spot("illager_banner_pole", IllagerBuildings::bannerPole, 15, -5, 0, 1),
-		new Spot("illager_tent", IllagerBuildings::tent, -3, -9, 1, 5));
+		new Spot("illager_tent", IllagerBuildings::tent, -3, -9, 1, 5),
+		new Spot(LAB, IllagerBuildings::lab, -15, 5, 1, 5));
 
 	/** (0.7.490) Outlying buildings stand outside the palisade: the first this far from the fire, a ring further every few, no further than the most. */
 	static final int OUT_START = RING_RADIUS + 6, OUT_STEP = 7, OUT_PER_RING = 8, OUT_MOST = RING_RADIUS + 40;
@@ -552,6 +598,9 @@ final class IllagerBuildings {
 		CampBuildings.Placer placer = spot.placer(fire, gate);
 		List<BlockPos> containers = CampBuildings.place(level, spot.design().get(), placer);
 		finish(level, spot.design().get(), placer);
+		if (spot.id().equals(LAB)) {
+			stockLab(level, spot.design().get(), placer);
+		}
 		return containers;
 	}
 

@@ -52,6 +52,7 @@ public final class InhabitantsClient {
 	static final String[] DRAUGR_TAIL = {"tail_0", "tail_1", "tail_2", "tail_3", "tail_4"};
 
 	static final DataTicket<Boolean> DRAUGR_AXE = DataTicket.create("jaymoskingdoms_draugr_axe", Boolean.class);
+	static final DataTicket<Integer> DRAUGR_RANK = DataTicket.create("jaymoskingdoms_draugr_rank", Integer.class);
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
 	static final DataTicket<Integer> DRAUGR_MAIMED = DataTicket.create("jaymoskingdoms_draugr_maimed", Integer.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
@@ -68,6 +69,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.BARROW_BEETLE,
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
+		EntityRenderers.register(Inhabitants.RAID_KING, RaidKingRenderer::new);
 		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
 		EntityRenderers.register(Inhabitants.IMPALER, ImpalerRenderer::new);
 		EntityRenderers.register(Inhabitants.WARPED_CLAM, ClamRenderer::new);
@@ -88,6 +90,8 @@ public final class InhabitantsClient {
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
 		/** Its three looks (tools/gen_tomb_undead.py DRAUGR_LOOKS), dead and alive, picked by its id. */
 		static final int LOOKS = 3;
+		/** Jaymo's Kitchen's missing-part bits, lowest first. */
+		static final String[] CORPSE_PARTS = {"head", "right_arm", "left_arm", "right_leg", "left_leg"};
 		static final Identifier[] DEAD = new Identifier[LOOKS], LIVING = new Identifier[LOOKS];
 
 		static {
@@ -111,6 +115,7 @@ public final class InhabitantsClient {
 		public void addRenderData(Draugr draugr, Void related, LivingEntityRenderState state, float partialTick) {
 			super.addRenderData(draugr, related, state, partialTick);
 			state.addGeckolibData(DRAUGR_AXE, draugr.axe());
+			state.addGeckolibData(DRAUGR_RANK, draugr.rank().ordinal());
 			state.addGeckolibData(DRAUGR_TAIL_ROLL, draugr.getUUID().hashCode());
 			state.addGeckolibData(DRAUGR_LIVING, draugr.living());
 			state.addGeckolibData(DRAUGR_MAIMED, draugr.maimed());
@@ -120,11 +125,43 @@ public final class InhabitantsClient {
 		public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 			super.adjustModelBonesForRender(info, snapshots);
 			boolean axe = info.getOrDefaultGeckolibData(DRAUGR_AXE, false);
-			snapshots.ifPresent("axe", bone -> bone.skipRender(!axe));
-			snapshots.ifPresent("sword", bone -> bone.skipRender(axe));
-			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
-			// the bronze chieftain's left horn broken off
-			snapshots.ifPresent("left_horn", bone -> bone.skipRender(look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
+			// each rank's own arms and dress: the archer's bow, the wight's cloak, the scourge's staff and hood (no horns
+			// through it), the hall-guard's second sword and crest
+			Draugr.Rank rank = Draugr.Rank.values()[info.getOrDefaultGeckolibData(DRAUGR_RANK, 0)];
+			boolean warrior = rank == Draugr.Rank.WARRIOR, scourge = rank == Draugr.Rank.SCOURGE;
+			snapshots.ifPresent("axe", bone -> bone.skipRender(!warrior || !axe));
+			snapshots.ifPresent("sword", bone -> bone.skipRender(warrior ? axe
+				: rank != Draugr.Rank.WIGHT && rank != Draugr.Rank.HALL_GUARD && rank != Draugr.Rank.SKIRMISHER));
+			snapshots.ifPresent("shield", bone -> bone.skipRender(!warrior || axe));
+			snapshots.ifPresent("bow", bone -> bone.skipRender(rank != Draugr.Rank.ARCHER));
+			snapshots.ifPresent("staff", bone -> bone.skipRender(!scourge));
+			snapshots.ifPresent("hood", bone -> bone.skipRender(!scourge));
+			snapshots.ifPresent("cloak", bone -> bone.skipRender(!scourge && rank != Draugr.Rank.WIGHT));
+			snapshots.ifPresent("sword_left", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
+			snapshots.ifPresent("crest", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
+			// the light ranks go without the mail and pauldrons, in a leather kilt: the archer in a cap and jerkin with a
+			// quiver, the skirmisher in the jerkin under the horned helm, the brawler bare-headed and stripped to the waist
+			boolean archer = rank == Draugr.Rank.ARCHER, brawler = rank == Draugr.Rank.BRAWLER, light = rank.light();
+			snapshots.ifPresent("helm", bone -> bone.skipRender(archer || brawler));
+			for (String heavy : new String[] {"right_pauldron", "left_pauldron", "mail", "mail_skirt"}) {
+				snapshots.ifPresent(heavy, bone -> bone.skipRender(light));
+			}
+			snapshots.ifPresent("torso", bone -> bone.skipRender(!light));
+			snapshots.ifPresent("kilt", bone -> bone.skipRender(!light));
+			snapshots.ifPresent("jerkin", bone -> bone.skipRender(!light || brawler));
+			snapshots.ifPresent("cap", bone -> bone.skipRender(!archer));
+			snapshots.ifPresent("quiver", bone -> bone.skipRender(!archer));
+			boolean hornless = scourge || archer || brawler;
+			snapshots.ifPresent("right_horn", bone -> bone.skipRender(hornless));
+			// (and the bronze chieftain's left horn is broken off)
+			snapshots.ifPresent("left_horn", bone -> bone.skipRender(hornless || look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
+			// a body lying dead that has had a limb pulled off it (Jaymo's Kitchen)
+			int lost = com.jaymoskingdoms.client.KitchenParts.missing(info.renderState());
+			for (int i = 0; i < CORPSE_PARTS.length; i++) {
+				if ((lost & 1 << i) != 0) {
+					snapshots.ifPresent(CORPSE_PARTS[i], bone -> bone.skipRender(true).skipChildrenRender(true));
+				}
+			}
 			// a lore film's finisher took its head or its weapon arm
 			int maimed = info.getOrDefaultGeckolibData(DRAUGR_MAIMED, 0);
 			if ((maimed & Draugr.MAIM_HEAD) != 0) {
@@ -156,6 +193,18 @@ public final class InhabitantsClient {
 		/** The tail ends before this segment. */
 		private static void cut(BoneSnapshots snapshots, int segment) {
 			snapshots.ifPresent(DRAUGR_TAIL[segment], bone -> bone.skipRender(true).skipChildrenRender(true));
+		}
+	}
+
+	/** The Raid-King at his model's size (about 3.3 blocks); he falls by his own death animation. */
+	static final class RaidKingRenderer extends InhabitantRenderer<com.jaymoskingdoms.inhabitants.RaidKing> {
+		RaidKingRenderer(EntityRendererProvider.Context context) {
+			super(context, "raid_king", 1.0F, 0.9F, "head");
+		}
+
+		@Override
+		protected float getDeathMaxRotation(GeoRenderState state) {
+			return 0.0F;
 		}
 	}
 

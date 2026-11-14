@@ -65,6 +65,8 @@ public final class BeastsClient {
 			new BbMobRenderer.Look("rune_bound_colossus", COLOSSUS_SCALE, 1.0F, "idle", "walk", "run", "death", 0.75F, 1.5F, "head"));
 		look(Beasts.CRYSTAL_BEETLE, new BbMobRenderer.Look("crystal_beetle", BEETLE_SCALE, 0.4F, "idle", "walk", null, null, 0.9F, 1.0F, "head"));
 		// the knight's sword is a real item in his fist: drawn on the model's empty sword bone, down its chain of bones
+		EntityRenderers.register(Beasts.LAUGHING_BONES, net.minecraft.client.renderer.entity.SkeletonRenderer::new);
+		EntityRenderers.register(Beasts.RUNNING_SKULL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.0F, false));
 		EntityRenderers.register(Beasts.ZOMBIE_KNIGHT, context -> new BbMobRenderer<com.jaymoskingdoms.barrow.ZombieKnight>(context,
 			new BbMobRenderer.Look("zombie_knight", KNIGHT_SCALE, 0.5F, "idle", "walk", null, null, 0.5F, 1.0F, "hi_head"))
 			.holding("root", "waist", "body", "arm_right", "sword"));

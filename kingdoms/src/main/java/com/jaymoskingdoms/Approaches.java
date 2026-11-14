@@ -1001,6 +1001,10 @@ public final class Approaches {
 					// (0.7.66) old wives' talk of the night's gifts
 					said = NightGifts.gossip(level, player);
 				}
+				if (said == null) {
+					// the horn nobody was blowing (the Reaper's host), never more than a hint
+					said = ReapedHost.gossip(level);
+				}
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
 					said = Sightings.gossip(level, a.mob);
 				}

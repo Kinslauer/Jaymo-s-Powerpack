@@ -5,6 +5,12 @@
 		"jaymoskingdoms:goblin_scout",
 		"jaymoskingdoms:loot_goblin",
 		"jaymoskingdoms:imp",
-		"jaymoskingdoms:zombified_imp"
+		"jaymoskingdoms:zombified_imp",
+		"jaymoskingdoms:draugr",
+		"jaymoskingdoms:reaped_pillager",
+		"jaymoskingdoms:reaped_vindicator",
+		"jaymoskingdoms:reaped_evoker",
+		"jaymoskingdoms:zombie_knight",
+		"jaymoskingdoms:revenant"
 	]
 }

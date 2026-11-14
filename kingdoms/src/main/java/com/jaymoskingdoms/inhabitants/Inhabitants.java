@@ -34,6 +34,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public final class Inhabitants {
 	public static EntityType<BarrowBeetle> BARROW_BEETLE;
 	public static EntityType<Draugr> DRAUGR;
+	/** The draugr's chieftain, woken in the Stormborn Tomb's great hall ({@code dungeon/TombHall}); never spawns by himself. */
+	public static EntityType<RaidKing> RAID_KING;
 	public static EntityType<Bogre> BOGRE;
 	public static EntityType<Impaler> IMPALER;
 	public static EntityType<WarpedClam> WARPED_CLAM;
@@ -64,6 +66,8 @@ public final class Inhabitants {
 			.clientTrackingRange(8), BarrowBeetle.createAttributes());
 		DRAUGR = Beasts.type("draugr", EntityType.Builder.of(Draugr::new, MobCategory.MONSTER).sized(0.7F, 2.2F).clientTrackingRange(8),
 			Draugr.createAttributes());
+		RAID_KING = Beasts.type("raid_king", EntityType.Builder.of(RaidKing::new, MobCategory.MONSTER).sized(1.3F, 3.3F).clientTrackingRange(10),
+			RaidKing.createAttributes());
 		BOGRE = Beasts.type("bogre", EntityType.Builder.of(Bogre::new, MobCategory.MONSTER).sized(1.75F, 3.5F).clientTrackingRange(10),
 			Bogre.createAttributes());
 		IMPALER = Beasts.type("impaler", EntityType.Builder.of(Impaler::new, MobCategory.MONSTER).sized(1.2F, 2.2F).clientTrackingRange(10),

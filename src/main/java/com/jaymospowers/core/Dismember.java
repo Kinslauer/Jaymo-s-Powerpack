@@ -634,6 +634,46 @@ public final class Dismember {
 
 	// ---- severing --------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Andy: "knockback has a chance to blow off zombie and other undead limbs instead of the usual effect. highest chance on
+	 * weakened zombies and husks". The chance a knock takes an arm or a leg off one of the undead in place of throwing it
+	 * back: any of them, a zombie, and a husk or a weakened zombie (under {@link #KNOCK_WEAK_HEALTH} of its health, or
+	 * under Weakness); and the least push that can do it.
+	 */
+	public static final float KNOCK_UNDEAD_CHANCE = 0.06F, KNOCK_ZOMBIE_CHANCE = 0.12F, KNOCK_WEAK_CHANCE = 0.35F, KNOCK_WEAK_HEALTH = 0.5F;
+	public static final double KNOCK_MIN_POWER = 0.3;
+	private static final int LIMBS = RIGHT_ARM | LEFT_ARM | RIGHT_LEG | LEFT_LEG;
+
+	/**
+	 * A knock of {@code power} on {@code target} from the side ({@code xd}, {@code zd}) (as {@code LivingEntity.knockback}
+	 * has them). True when it took a limb off instead, so the body isn't thrown back. Only the undead that can lose parts,
+	 * and never the newly turned (MCA's villager zombies: they are still whole).
+	 */
+	public static boolean knockedApart(LivingEntity target, double power, double xd, double zd, @Nullable DamageSource source) {
+		if (!(target.level() instanceof ServerLevel) || power < KNOCK_MIN_POWER || target instanceof Player || !target.isAlive()
+			|| !target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) || !canLoseParts(target)
+			|| "mca".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getNamespace())) {
+			return false;
+		}
+		int left = LIMBS & ~missing(target);
+		if (left == 0) {
+			return false;
+		}
+		boolean weak = target.getHealth() <= target.getMaxHealth() * KNOCK_WEAK_HEALTH || target.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS);
+		float chance = target.getType() == net.minecraft.world.entity.EntityTypes.HUSK || zombie(target) && weak ? KNOCK_WEAK_CHANCE
+			: zombie(target) ? KNOCK_ZOMBIE_CHANCE : KNOCK_UNDEAD_CHANCE;
+		if (target.getRandom().nextFloat() >= chance) {
+			return false;
+		}
+		int part = Integer.lowestOneBit(left);
+		for (int skip = target.getRandom().nextInt(Integer.bitCount(left)); skip > 0; skip--) {
+			left &= ~part;
+			part = Integer.lowestOneBit(left);
+		}
+		LivingEntity by = source != null && source.getEntity() instanceof LivingEntity living ? living : null;
+		return blastOff(target, part, by, target.position().add(xd, 0.0, zd), false);
+	}
+
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
 		return lose(target, part, by, false, null, false);

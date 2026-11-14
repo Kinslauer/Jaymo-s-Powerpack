@@ -15,14 +15,16 @@ import org.jspecify.annotations.Nullable;
  * (0.4.37) A body that lost parts before it died (a head, an arm, a leg: see {@code CorpseEntity#missing}) is drawn
  * without them. Set on the body's render state by {@code CorpseRenderer}; the parts are hidden by name right after the
  * model animates and shown again once it's drawn (see {@code ModelFeatureRendererMixin}), so a model shared by many
- * bodies is never left missing anything.
+ * bodies is never left missing anything. After the game's own names come Jaymo's Kingdoms' Blockbench mobs' (a zombie
+ * knight's "hi_head", "arm_right"; a revenant's "neck", "armR0").
  */
 public final class Severed {
 	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:missing_parts");
 	/** By bit (head, right arm, left arm, right leg, left leg): the model parts that make it up. */
 	private static final String[][] NAMES = {
-		{"head", "hat", "nose"}, {"right_arm", "right_sleeve"}, {"left_arm", "left_sleeve"}, {"right_leg", "right_pants"},
-		{"left_leg", "left_pants"}};
+		{"head", "hat", "nose", "hi_head", "neck"}, {"right_arm", "right_sleeve", "arm_right", "armR0"},
+		{"left_arm", "left_sleeve", "arm_left", "armL0"}, {"right_leg", "right_pants", "leg_right", "legR0"},
+		{"left_leg", "left_pants", "leg_left", "legL0"}};
 	private static final Map<ModelPart, Function<String, ModelPart>> LOOKUPS = new WeakHashMap<>();
 	private static final List<ModelPart> HIDDEN = new ArrayList<>();
 

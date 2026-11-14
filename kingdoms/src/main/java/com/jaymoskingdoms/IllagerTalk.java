@@ -124,6 +124,8 @@ public final class IllagerTalk {
 	static final String[] NAME_END = {"ik", "ath", "osk", "un", "eth", "ar", "ix", "ulm", "esh", "or", "ak", "ev", "ugh", "ard"};
 	/** Lines per kind of line (lang {@code illager_talk.jaymoskingdoms.line.<kind>.<n>}). */
 	static final int LINES = 3;
+	/** How often a friendly chat turns to their dead walking. */
+	static final float REAPED_TALK = 0.2F;
 
 	/** One illager's self: name, nature, mood, what it wants and since when, and per player (UUID string): hearts, truce till, last chat day, lied. */
 	record Self(String name, String nature, int mood, String want, long wantDay, Map<String, Integer> hearts, Map<String, Long> truce,
@@ -460,6 +462,16 @@ public final class IllagerTalk {
 		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.trade"), p -> trade(p, illager)));
 		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.hold"), p -> hold(p, illager)));
 		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.round"), p -> round(p, illager)));
+		if (RaiderGear.mark(player) > 0) {
+			// wanted by the illagers: he'll see the posters come down, for a price
+			long price = RaiderGear.price(player);
+			choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.buy_off", Money.text(player, price)), Money.canPay(player, price), p -> {
+				if (RaiderGear.buyOff(p)) {
+					say(level, illager, p, line("bought_off", random), Speech.WHITE);
+				}
+				back(p, illager);
+			}));
+		}
 		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.leave"), p -> leave(p, illager)));
 		Menus.ask(player, illager, head(illager, s, player, attitude), IllagerTongue.heard(player, illager, line("greet." + attitude.key(), random)), choices);
 	}
@@ -667,7 +679,8 @@ public final class IllagerTalk {
 		boolean good = random.nextFloat() < c;
 		s = s.withChatted(player.getUUID(), day).withHearts(player.getUUID(), good ? CHAT_HEARTS : CHAT_LOST).withMood(good ? 1 : 0);
 		put(illager, s);
-		say(level, illager, player, line("chat." + (good ? s.nature() : "sour"), random), Speech.WHITE);
+		// now and then, in a good mood, their own dead come up (the Reaper's host)
+		say(level, illager, player, line("chat." + (!good ? "sour" : random.nextFloat() < REAPED_TALK ? "reaped" : s.nature()), random), Speech.WHITE);
 		back(player, illager);
 	}
 
