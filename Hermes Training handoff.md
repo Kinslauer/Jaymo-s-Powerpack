@@ -500,7 +500,7 @@ about the coding guidelines in [multica-ai/andrej-karpathy-skills](https://githu
 (Andrej Karpathy's notes on coding-agent mistakes). Already done: the cloud project instructions (new cloud threads get
 them) and the repo's `CLAUDE.md` in **PR #1477** (merge only on Andy's word). Your part is the PC side:
 
-- [ ] **Your user-level `~/.claude/CLAUDE.md`** (`C:\Users\toopo\.claude\CLAUDE.md`; create it if missing, keep what's
+- [x] **Your user-level `~/.claude/CLAUDE.md`** (`C:\Users\toopo\.claude\CLAUDE.md`; create it if missing, keep what's
   there). Add this block, so every Claude Code session on the PC gets it, in any folder:
 
   ```
@@ -515,7 +515,7 @@ them) and the repo's `CLAUDE.md` in **PR #1477** (merge only on Andy's word). Yo
      calling the work done.
   ```
 
-- [ ] **Bot SOUL rules.** Back up each file first, then add the short form below to the rules of YOUTH
+- [x] **Bot SOUL rules.** Back up each file first, then add the short form below to the rules of YOUTH
   (`E:/hermes/SOUL.md`) and of every bot profile's SOUL (`E:/hermes/profiles/<name>/SOUL.md`: Apollo, Bacchus,
   Hephaestus, Prometheus, Quill and any other profile there). Hephaestus and the builders gain most: bloated and
   off-task diffs are what it targets. For Quill, keep the wording (it writes text, not code; rule 3 still applies to
@@ -527,13 +527,26 @@ them) and the repo's `CLAUDE.md` in **PR #1477** (merge only on Andy's word). Yo
   only what the task needs; don't tidy, refactor or restyle anything else. 4) Prove it: decide how you'll check the
   work (build, test, rerun) and check it before saying it's done.
   ```
+  - Done Nov 14 (PC Claude): `C:/Users/toopo/.claude/CLAUDE.md` created with the block. "Working rules (Karpathy)"
+    section appended to YOUTH's SOUL and all 6 profiles (claude-writer, hermes-a, hermes-b, hermes-fixer,
+    hermes-modeller, quill; those are the folder names). Backups in `E:/hermes/backups/karpathy-2026-11-14/`.
+    `refresh-prompts` run for every profile.
 
-- [ ] Optional for Andy: claude.ai > Settings > Profile > personal preferences can hold the same 4 lines, so chats on
+- [x] Optional for Andy: claude.ai > Settings > Profile > personal preferences can hold the same 4 lines, so chats on
   claude.ai get them too. Remind him once.
-- [ ] Tick these boxes, run `python tools/vault_sync.py`, and tell Andy in one line.
+- [x] Tick these boxes, run `python tools/vault_sync.py`, and tell Andy in one line.
 
 ## Youth wisp change for the listener (Nov 14, PR #1568, waits on Andy's merge)
-- [ ] Update mcbot.py's listener for this.
+- [x] Update mcbot.py's listener for this.
+  - Done Nov 14 (PC Claude, #1568 merged): the prompt now says the line may be chatter; YOUTH answers questions,
+    gives chatter one friendly line, and writes `<quiet/>` when players are only talking about it to each other
+    (or for abuse). The listener then dismisses the wisp, since `/youth summon` marks it pending and it would
+    otherwise fade with a false "be right back". A spoken `[chat]` "youth, help me" is skipped (it is logged before
+    the mod's `heard()`, so it would have been answered after the mod flew them home); with no wisp in sight the
+    mod's `[youth-ask] help me` line is answered as before. `/ooc` help is still answered (the mod doesn't see it).
+    SOUL's Minecraft section has the same, refresh-prompts run. Tested: 7 log-line routing cases offline, and 6 live
+    YOUTH answers ("youth is cute" got a thank-you, "go ask youth" and abuse got quiet, "how does crush work" answered).
+    Backups `backups/mcbot.py.2026-11-14-wisp.bak`, `backups/SOUL.md.2026-11-14-wisp.bak`.
 Once #1568 is merged, the mod summons the wisp itself whenever a chat line has the word "youth" anywhere in it, and logs
 `[youth-ask] <account> <text>` for every such line (the words after "youth" when the line starts with it, else the
 whole line). So the listener will now also see chatter that only mentions youth ("youth is cute"), not just questions:

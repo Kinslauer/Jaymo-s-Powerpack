@@ -604,3 +604,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14: Andy approved the Lore paragraph "The pits and the hold plans" (captured plans, both desert arenas; PR #1552).
 
 - 2026-11-14 (Andy, Youth wisp, PR #1568): remake the wisp Peter Pan style, less Navi, with quick animations; it appears whenever anyone says "youth" in chat; villagers tell you to just say it, or hint. "HELP"/"HELP ME" with the wisp on screen teleports you to your bed with a green flash and layered particles, once per day per player; asking again the same day gets jokes.
+- 2026-11-14 12:00 AM ET (cloud thread "Add Karpathy coding guidelines everywhere"): Andy: "Yeah add it to every claude session too why not" (Karpathy coding guidelines). PC side done Nov 14: user-level ~/.claude/CLAUDE.md, and a "Working rules (Karpathy)" section in YOUTH's SOUL and every bot profile's SOUL.
