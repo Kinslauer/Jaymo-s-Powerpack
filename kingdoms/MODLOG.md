@@ -12918,3 +12918,14 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   emeralds' worth). It is a map of Mohknee's western shore (2048 blocks across, a red mark where his ship lies to). On the home
   continent your marker sits on the map's edge toward that shore, so it gives the bearing to sail. Not sold off Mohknee itself.
 - `BlossomTraders.chart`. Compiled; not played. Not checked in game: that the far shore draws on the map before anyone has been there.
+
+## 0.8.59 (2026-11-14): Town ledger (#1511)
+
+- Town business on a villager's talk screen has a new answer, "Let me see the town ledger". It hands you a written book of the town as it stands that day:
+  - who rules, the ruler's temper and creed, wealth, stores, hands and peace, and the town's members (what `/kingdom info` says);
+  - its troubles;
+  - its town works, with how far along each is;
+  - its treaties, with the days each has left.
+- A realm's ruler keeps the ledger. In a village any grown villager will fetch it.
+- A town that hates you won't show you its books.
+- Asking again swaps your old copy of that town's ledger for the new one.
