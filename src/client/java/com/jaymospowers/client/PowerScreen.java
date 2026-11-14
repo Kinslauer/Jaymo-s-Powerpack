@@ -160,8 +160,8 @@ public class PowerScreen extends Screen {
 	}
 
 	private int top() {
-		// room above for the tabs
-		return Math.max(TAB_OUT, (this.height - H + TAB_OUT) / 2);
+		// room above for the tabs, and for the character menu's strip above them
+		return Math.max(TAB_OUT + com.jaymospowers.client.menu.MenuTabs.ROOM, (this.height - H + TAB_OUT) / 2);
 	}
 
 	private int cx() {

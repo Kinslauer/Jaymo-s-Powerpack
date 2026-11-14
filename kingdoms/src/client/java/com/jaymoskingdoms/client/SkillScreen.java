@@ -58,8 +58,11 @@ final class SkillScreen extends Screen {
 	static final int TRAINED = 0xFFC0503A;
 
 	private static KeyMapping key;
-	/** The web's top and bottom bars, its zoom range, how much a scroll notch zooms and a node's half size at zoom 1. */
-	static final int WEB_HEADER = 22, WEB_FOOTER = 22;
+	/**
+	 * The web's top bar (under the character menu's strip of tabs, when Powers is there) and bottom bar, its zoom range, how
+	 * much a scroll notch zooms and a node's half size at zoom 1.
+	 */
+	static final int WEB_BAR = 22, WEB_HEADER = MenuCompat.STRIP + WEB_BAR, WEB_FOOTER = 22;
 	static final double ZOOM_MIN = 0.1, ZOOM_MAX = 2.4, ZOOM_STEP = 1.15, NODE = 9.0;
 	/** The zoom the web opens at and goes to for a picked perk; a perk picked below {@link #FOCUS_ZOOM} is brought up to it. */
 	static final double OPEN_ZOOM = 1.0, FOCUS_ZOOM = 0.8;
@@ -142,11 +145,11 @@ final class SkillScreen extends Screen {
 	}
 
 	private int panelH() {
-		return Math.min(PANEL_H, this.height - 8);
+		return Math.min(PANEL_H, this.height - 8 - MenuCompat.STRIP);
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - panelH()) / 2);
+		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
 	}
 
 	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
@@ -212,7 +215,7 @@ final class SkillScreen extends Screen {
 		}
 		// the web: the tabs at the header's right, the buttons along the foot
 		int tabW = Math.min(TAB_W, Math.max(40, (this.width - 12) / 8));
-		tabs(this.width - 6 - tabW * 3 - 8, 3, tabW);
+		tabs(this.width - 6 - tabW * 3 - 8, WEB_HEADER - WEB_BAR + 3, tabW);
 		int fy = this.height - WEB_FOOTER + 3, right = this.width - 6;
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
@@ -703,13 +706,14 @@ final class SkillScreen extends Screen {
 
 	/** The bar across the top: the screen's name over the web, between two gold rules; the tabs sit at its right. */
 	private void topBar(GuiGraphicsExtractor graphics) {
-		frame(graphics, 0, 0, this.width, WEB_HEADER);
+		int y = WEB_HEADER - WEB_BAR;
+		frame(graphics, 0, y, this.width, WEB_BAR);
 		int cx = (int)areaX(), tw = this.font.width(this.title);
-		graphics.text(this.font, this.title, cx - tw / 2, 7, Ui.GOLD);
+		graphics.text(this.font, this.title, cx - tw / 2, y + 7, Ui.GOLD);
 		for (int side = -1; side <= 1; side += 2) {
 			int x0 = cx + side * (tw / 2 + 8), x1 = cx + side * (tw / 2 + 8 + TITLE_RULE);
-			graphics.fill(Math.min(x0, x1), 10, Math.max(x0, x1), 11, COLOR_FRAME_LINE);
-			graphics.fill(x1 - 1, 9, x1 + 2, 12, Ui.GOLD);
+			graphics.fill(Math.min(x0, x1), y + 10, Math.max(x0, x1), y + 11, COLOR_FRAME_LINE);
+			graphics.fill(x1 - 1, y + 9, x1 + 2, y + 12, Ui.GOLD);
 		}
 	}
 

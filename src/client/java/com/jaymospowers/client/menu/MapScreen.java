@@ -64,7 +64,7 @@ public class MapScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - H) / 2);
+		return Math.max(MenuTabs.ROOM, (this.height - H) / 2);
 	}
 
 	int[] corner() {

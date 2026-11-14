@@ -74,7 +74,7 @@ final class JournalScreen extends Screen {
 	}
 
 	private int panelH() {
-		return Math.min(PANEL_H, this.height - 8);
+		return Math.min(PANEL_H, this.height - 8 - MenuCompat.STRIP);
 	}
 
 	private int left() {
@@ -82,7 +82,7 @@ final class JournalScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - panelH()) / 2);
+		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
 	}
 
 	private int mapSize() {
