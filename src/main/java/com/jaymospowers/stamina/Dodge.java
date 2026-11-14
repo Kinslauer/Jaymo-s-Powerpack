@@ -43,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * ({@link #canDodge}, the cooldown, the feathers), spends, opens the evasion window, plays the whoosh for everyone and
  * tells the powers ({@link #onDodge}: Darktide's evasions, the Corrupted blink).
  * <p>(0.15.74) The roll: {@link #ROLLING} is synced to everyone so they see the body tumble the way you went
- * ({@code DodgeRollPose}); your own client draws it at once.
+ * ({@code DodgeRollPose}); your own client draws it at once. While it rolls the body is a block high at most
+ * ({@link #rollingLow}), so a roll goes under a low gap.
  */
 public final class Dodge {
 	// ===== the knobs ================================================================================================
@@ -118,6 +119,27 @@ public final class Dodge {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	static final int STRETCHY_EVERY = 40;
 	private static final List<String> STRETCHY_TAGS = List.of("jaymoskingdoms_heritage_rubberfolk", "jaymoskingdoms_heritage_verdant");
+
+	/**
+	 * Client only: the local player's entity id and the game time their own roll began, so the low body shows the moment
+	 * they hop (before the server's copy comes back).
+	 */
+	public static volatile int localRollId = -1;
+	public static volatile long localRollStart = Long.MIN_VALUE / 2;
+
+	/**
+	 * Whether {@code player} is in a dodge's roll on the ground (not the flip in the air), rolled up small: for those
+	 * {@link #ROLL_TICKS} ticks the body is the crawl's low one ({@code CrawlPlayerMixin}), so a roll goes under a gap a block
+	 * and a half high. Standing up afterwards is vanilla's: a crouch or crawl is kept until there's room. Either side.
+	 */
+	public static boolean rollingLow(Player player) {
+		long now = player.level().getGameTime();
+		if (player.level().isClientSide() && player.getId() == localRollId && now - localRollStart < ROLL_TICKS) {
+			return true;
+		}
+		Rolling rolling = player.getAttached(ROLLING);
+		return rolling != null && !rolling.flip() && now - rolling.start() < ROLL_TICKS;
+	}
 
 	/** Told of every dodge the server lets through. */
 	@FunctionalInterface

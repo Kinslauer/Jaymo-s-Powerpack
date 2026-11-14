@@ -1,0 +1,10 @@
+# freerun picks: slide tackle, slopes, water skips, leap, roll under gaps, air roll, step-up, safe fall
+- **Slide tackle**: a slide into a mob ahead knocks it away and you lose your speed. Anything built like a person is swept onto its back (the bolas' trip pose, nothing broken); a giant (tag `jaymospowers:giants`) stops you dead and stays on its feet. Checked on the server (`Slide#tackle`).
+- **Slide down slopes**: a slide that leaves the ground over ground (or water) a block or so below restarts its timer, and gains a little speed while it drops, so a hillside can be ridden down. A real drop still ends it.
+- **Water skipping**: a slide that reaches water bounces off the surface and keeps sliding, twice at most, with a splash and a skip sound each time (`Slide#waterSkip`).
+- **Leap into prone**: just after a sprint jump (12 ticks), hold Sneak and scroll down in the air (or press the Crawl key) to dive forward onto your belly with a burst, low and flat enough for a gap 1.5 blocks high; you land prone. 3 Feathers. The body shows a belly dive with the arms reaching ahead (`Leap`, `RunMovesClient#leap`, `RunMovesPose`). The Crawl key is unbound by default (the Down arrow is Kingdoms' Come order), so Sneak + scroll down works with no binding.
+- **Roll under low gaps**: a dodge roll on the ground is a crawl-height body for its 10 ticks (`Dodge#rollingLow`, `CrawlPlayerMixin`), so you roll under a 1.5-high gap; you stand only where there's room (vanilla keeps you crouched or crawling until there is).
+- **Air roll**: with Kingdoms' new Air Roll perk, a fresh Sprint press just after a sprint jump rolls you forward through the air with a real push along the way you face. 3 Feathers (`AirRoll`). The Sneak-tap air flip stays for show.
+- **Step-up in a fast run**: a fast run steps straight up a full block without jumping (a step-height modifier, taken off when the run ends).
+- **Safe fall**: each Freerunner rank lets you fall a block further before fall damage starts (the `SAFE_FALL_DISTANCE` attribute; 4 and 5 blocks safe instead of 3). This changes the old "fall damage always applies" rule, as Andy chose.
+- Built; not played.

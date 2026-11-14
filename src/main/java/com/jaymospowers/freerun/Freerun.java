@@ -45,6 +45,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -183,6 +184,9 @@ public final class Freerun {
 	static final double SERVER_REACH = 0.8;
 	/** After a held move ends, the server goes easy on the player's movement this long (ticks). */
 	static final int RELEASE_GRACE_TICKS = 20;
+	/** Freerunner's safe fall: each rank lets you drop this many blocks further before fall damage starts (the {@code SAFE_FALL_DISTANCE} attribute, a modifier kept up as ranks change). */
+	public static final double SAFE_FALL_PER_RANK = 1.0;
+	private static final Identifier SAFE_FALL_ID = JaymosPowers.id("freerun_safe_fall");
 	/** How often (ticks) each player's ranks are read from Kingdoms again and synced. */
 	static final int PERKS_REFRESH_TICKS = 20;
 	// ================================================================================================================
@@ -195,7 +199,9 @@ public final class Freerun {
 
 	/** The perks, in the order they're packed into {@link #PERKS} (4 bits each), with their Kingdoms keys. */
 	public enum Perk {
-		CLIMBER, FREERUNNER, LEAP_OF_FAITH, BAR_SWING, WALL_RUNNER;
+		CLIMBER, FREERUNNER, LEAP_OF_FAITH, BAR_SWING, WALL_RUNNER,
+		/** The air roll ({@link com.jaymospowers.freerun.moves.AirRoll}); last, so no packed rank moves. */
+		AIR_ROLL;
 
 		public String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
@@ -818,6 +824,8 @@ public final class Freerun {
 		for (Perk perk : Perk.values()) {
 			packed |= rank(player, perk) << (perk.ordinal() * 4);
 		}
+		set(player, Attributes.SAFE_FALL_DISTANCE, SAFE_FALL_ID, (packed >> (Perk.FREERUNNER.ordinal() * 4) & 0xF) * SAFE_FALL_PER_RANK,
+			AttributeModifier.Operation.ADD_VALUE);
 		Integer was = player.getAttached(PERKS);
 		if (packed == 0 && was != null) {
 			player.removeAttached(PERKS);

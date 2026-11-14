@@ -1,6 +1,7 @@
 package com.jaymospowers.client.freerun.moves;
 
 import com.jaymospowers.freerun.moves.Breach;
+import com.jaymospowers.freerun.moves.Leap;
 import com.jaymospowers.freerun.moves.LongJump;
 import com.jaymospowers.freerun.moves.RunMoves;
 import com.jaymospowers.freerun.moves.SkyDive;
@@ -24,6 +25,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Safety tap: a deep crouch on landing, knees taking it, arms out in front for balance.</li>
  * <li>Breach leap: out of the water head first, the water's clean dive ({@code DivePose}) tipped along the leap.</li>
  * <li>Sky dive: laid out flat, belly to the ground, arms and legs spread wide, head up to see where it's going.</li>
+ * <li>Leap into prone: the body is already lying flat (the crawl's pose, set the moment of the dive); the arms reach out ahead, the legs trail together.</li>
  * </ul>
  * Laid over the model after the fall's own flailing ({@code FreefallPose}) and before any power's pose, which wins.
  */
@@ -72,9 +74,15 @@ public final class RunMovesPose {
 		}
 		float age = (float)(player.level().getGameTime() - pose[1]) + partialTicks;
 		int kind = (int)pose[0];
-		int length = kind == RunMoves.LONG_JUMP ? LongJump.POSE_TICKS : kind == RunMoves.SAFETY_TAP ? SAFETY_TICKS : kind == RunMoves.BREACH ? Breach.POSE_TICKS : 0;
-		if (age < 0.0F || age >= length) {
+		int length = kind == RunMoves.LONG_JUMP ? LongJump.POSE_TICKS : kind == RunMoves.SAFETY_TAP ? SAFETY_TICKS : kind == RunMoves.BREACH ? Breach.POSE_TICKS
+			: kind == RunMoves.LEAP ? Leap.POSE_TICKS : 0;
+		if (age < 0.0F || age >= length || kind == RunMoves.LEAP && player.onGround() && age > 2.0F) {
 			return null;
+		}
+		if (kind == RunMoves.LEAP) {
+			// held through the whole dive, in over two ticks, until the landing
+			float in = Math.min(1.0F, age / 2.0F);
+			return new Move(kind, age, time, in * in * (3.0F - 2.0F * in));
 		}
 		// in over two ticks, out over the last three
 		float e = Math.min(1.0F, Math.min(age / 2.0F, (length - age) / 3.0F));
@@ -148,6 +156,13 @@ public final class RunMovesPose {
 				set(h.rightLeg, -1.1F, 0.0F, 0.15F, e);
 				set(h.leftLeg, -1.1F, 0.0F, -0.15F, e);
 				h.head.xRot = Mth.lerp(e, h.head.xRot, -0.2F);
+			}
+			case RunMoves.LEAP -> {
+				// superman: the arms reach out ahead along the lying body, the legs trail together
+				set(h.rightArm, -3.0F, 0.0F, 0.12F, e);
+				set(h.leftArm, -3.0F, 0.0F, -0.12F, e);
+				set(h.rightLeg, 0.1F, 0.0F, 0.03F, e);
+				set(h.leftLeg, 0.1F, 0.0F, -0.03F, e);
 			}
 			case RunMoves.LONG_JUMP -> {
 				// the arms wheel up and over and back down; the legs come up together to reach for the far side

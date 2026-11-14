@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.Nullable;
@@ -56,7 +57,15 @@ public final class DodgeRollPose {
 
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
-		state.setData(KEY, roll(entity, partialTicks));
+		Roll roll = roll(entity, partialTicks);
+		state.setData(KEY, roll);
+		if (roll != null && !roll.flip() && !roll.stretch()) {
+			// the body is the low one for a roll (so it goes under a gap); the tumble draws it standing, not laid flat as a crawl is
+			state.pose = Pose.STANDING;
+			state.isVisuallySwimming = false;
+			state.swimAmount = 0.0F;
+			state.isCrouching = false;
+		}
 	}
 
 	private static @Nullable Roll roll(Entity entity, float partialTicks) {

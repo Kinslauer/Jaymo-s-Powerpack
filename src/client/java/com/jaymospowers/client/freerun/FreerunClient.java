@@ -76,6 +76,8 @@ public final class FreerunClient {
 	private static boolean upSliding;
 	/** (0.15.12) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
 	private static int sneakTicks, edgeTicks, slideWait;
+	/** Skips off water this slide has made, and ticks it has been in water in a row ({@link Slide#MAX_SKIPS}, {@link Slide#WET_GRACE_TICKS}). */
+	private static int slideSkips, slideWet;
 	/** (0.15.12) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
 	private static Vec3 runDir = Vec3.ZERO, slideDir = Vec3.ZERO;
 	private static double runSpeed, slideSpeed;
@@ -161,7 +163,9 @@ public final class FreerunClient {
 			}
 		}
 		// (0.14.5) a broken arm or a sprained foot mid-climb or mid-hang lets go (Wounds)
-		boolean free = !player.isSpectator() && Freerun.canMove(player, kind) && !LedgeClient.active()
+		// a slide reaching water skips off it: the water doesn't end it for the skip's own few ticks (canMove rules water out)
+		slideWet = kind == Freerun.SLIDE && player.isInWater() && !player.isInLava() ? slideWet + 1 : 0;
+		boolean free = !player.isSpectator() && (Freerun.canMove(player, kind) || slideWet > 0 && slideWet <= Slide.WET_GRACE_TICKS) && !LedgeClient.active()
 			&& !com.jaymospowers.client.power.web.WebPowerClient.parkourBusy();
 		if (!free) {
 			if (active()) {
@@ -514,6 +518,7 @@ public final class FreerunClient {
 		slideDir = runDir.lengthSqr() > 0.5 ? runDir : Vec3.directionFromRotation(0.0F, player.getYRot());
 		slideSpeed = Mth.clamp(runSpeed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
 		slideWait = 0;
+		slideSkips = 0;
 		keepProne = false;
 		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
 		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
@@ -572,6 +577,30 @@ public final class FreerunClient {
 		}
 		ticks++;
 		slideSpeed *= Slide.FRICTION;
+		if (player.isInWater() && !player.isInLava()) {
+			// reached water: skip off the surface and slide on, twice at most (the timer restarts); then the water has you
+			if (slideSkips >= Slide.MAX_SKIPS || slideSpeed < Slide.SKIP_MIN_SPEED) {
+				endSlide(player);
+				return;
+			}
+			slideSkips++;
+			slideSpeed *= Slide.SKIP_KEEP;
+			slideWet = 0;
+			ticks = 0;
+			player.setDeltaMovement(slideDir.x * slideSpeed, Slide.SKIP_UP, slideDir.z * slideSpeed);
+			if (ClientPlayNetworking.canSend(com.jaymospowers.freerun.moves.RunMoves.Ask.TYPE)) {
+				ClientPlayNetworking.send(new com.jaymospowers.freerun.moves.RunMoves.Ask(com.jaymospowers.freerun.moves.RunMoves.WATER_SKIP, 0L));
+			}
+			return;
+		}
+		boolean aloft = !player.onGround() && airTicks > 0 && slideNear(player);
+		if (aloft) {
+			// left the ground over ground (or water) close below: a slope. The timer restarts, and a downhill ride gains a little speed
+			ticks = 0;
+			if (!player.level().containsAnyLiquid(player.getBoundingBox().expandTowards(0.0, -Slide.SLOPE_DROP, 0.0))) {
+				slideSpeed = Math.min(Slide.MAX_SPEED, slideSpeed + Slide.SLOPE_GAIN);
+			}
+		}
 		if (jumpPressed) {
 			// a jump out of it keeps the speed
 			double out = Math.min(Slide.MAX_SPEED + 0.2, slideSpeed * Slide.JUMP_KEEP + 0.1);
@@ -579,7 +608,7 @@ public final class FreerunClient {
 			endSlide(player);
 			return;
 		}
-		if (ticks > Slide.TICKS || !player.onGround() && airTicks > 2 || slideSpeed < Slide.STOP_SPEED || ticks > 2 && player.horizontalCollision) {
+		if (ticks > Slide.TICKS || !player.onGround() && airTicks > 2 && !aloft || slideSpeed < Slide.STOP_SPEED || ticks > 2 && player.horizontalCollision) {
 			if (player.onGround() && (player.input.keyPresses.shift() || keepProne)) {
 				// (0.15.108) Sneak still held: stay down, prone, till it's let go (no running on out of it). (0.18.85) Or the
 				// wheel turned down mid-slide: prone till you get up. Lying the way you slid: a dive on the belly, else the back.
@@ -604,6 +633,12 @@ public final class FreerunClient {
 		if (ticks % 2 == 0) {
 			player.level().addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, 0.01, 0.0);
 		}
+	}
+
+	/** Whether ground or water lies within {@link Slide#SLOPE_DROP} blocks under the sliding body (a slope's next step rather than a drop). */
+	private static boolean slideNear(LocalPlayer player) {
+		AABB below = player.getBoundingBox().expandTowards(0.0, -Slide.SLOPE_DROP, 0.0);
+		return !player.level().noCollision(player, below) || player.level().containsAnyLiquid(below);
 	}
 
 	/**

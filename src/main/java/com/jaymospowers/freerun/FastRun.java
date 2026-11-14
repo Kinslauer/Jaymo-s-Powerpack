@@ -33,7 +33,8 @@ import net.minecraft.world.phys.Vec3;
  * {@code client/freerun/RunPose}) and dust at the feet. It ends on: no longer sprinting, a turn sharper than
  * {@link #TURN_DEGREES} within a few ticks, taking a hit, hunger at {@link #MIN_FOOD} or below, or entering water.
  * Attacking out of it does not end it. Freerunner rank 1 makes the bonus {@link #BONUS_RANK1}; rank 2 shortens the delay
- * to {@link #DELAY_RANK2}. A little extra hunger every tick; no stamina. Behaviour inspired by ParCool (alRex-U); no code taken.
+ * to {@link #DELAY_RANK2}. While it lasts you also step straight up a full block without jumping ({@link #STEP_BONUS}, a step-height
+ * modifier taken off when the run ends). A little extra hunger every tick; no stamina. Behaviour inspired by ParCool (alRex-U); no code taken.
  */
 public final class FastRun {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
@@ -52,6 +53,8 @@ public final class FastRun {
 	public static final int AIR_GRACE_TICKS = 14;
 	/** Not sprinting is tolerated this long while Sneak is held or a slide has just ended (the sneak that starts a slide stops the sprint). */
 	public static final int SNEAK_GRACE_TICKS = 10;
+	/** Step height added in a fast run (blocks; the base is 0.6): a full block is stepped straight up, no jump. */
+	public static final double STEP_BONUS = 0.5;
 	/** Dust at the feet every this many ticks. */
 	public static final int DUST_EVERY = 3;
 	// ================================================================================================================
@@ -61,6 +64,7 @@ public final class FastRun {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	private static final Identifier SPEED_ID = JaymosPowers.id("freerun_fast_run");
+	private static final Identifier STEP_ID = JaymosPowers.id("freerun_fast_step");
 
 	private static final class State {
 		int sprinting, airborne, notSprinting;
@@ -95,6 +99,7 @@ public final class FastRun {
 		}
 		player.removeAttached(ACTIVE);
 		Freerun.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		Freerun.set(player, Attributes.STEP_HEIGHT, STEP_ID, 0.0, AttributeModifier.Operation.ADD_VALUE);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -142,6 +147,7 @@ public final class FastRun {
 			}
 			Freerun.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 1 ? BONUS_RANK1 : BONUS,
 				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			Freerun.set(player, Attributes.STEP_HEIGHT, STEP_ID, STEP_BONUS, AttributeModifier.Operation.ADD_VALUE);
 			player.causeFoodExhaustion(EXHAUSTION);
 			if (player.onGround() && server.getTickCount() % DUST_EVERY == 0) {
 				dust(player);

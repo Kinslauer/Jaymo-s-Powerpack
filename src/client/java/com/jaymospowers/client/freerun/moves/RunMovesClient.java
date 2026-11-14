@@ -4,18 +4,21 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.freerun.AirFlipClient;
 import com.jaymospowers.client.freerun.FreerunClient;
 import com.jaymospowers.freerun.FastRun;
-import com.jaymospowers.freerun.LandingRoll;
 import com.jaymospowers.freerun.Freerun;
+import com.jaymospowers.freerun.LandingRoll;
+import com.jaymospowers.freerun.moves.AirRoll;
 import com.jaymospowers.freerun.moves.Breach;
 import com.jaymospowers.freerun.moves.ChargeJump;
 import com.jaymospowers.freerun.moves.FastSwim;
 import com.jaymospowers.freerun.moves.Hiding;
+import com.jaymospowers.freerun.moves.Leap;
 import com.jaymospowers.freerun.moves.LongJump;
 import com.jaymospowers.freerun.gear.TraceurBoots;
 import com.jaymospowers.freerun.moves.RunMoves;
 import com.jaymospowers.freerun.moves.SkyDive;
 import com.jaymospowers.freerun.moves.SwimBurst;
 import com.jaymospowers.freerun.moves.TrickJump;
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.stamina.Feathers;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -43,6 +46,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>Swim burst: a fresh press of Sprint while swimming surges you along your look ({@link SwimBurst}).</li>
  * <li>Breach: a fresh Jump while sprint-swimming at the surface throws you out of the water along your look ({@link Breach}); you
  * come down into a slide on the ground, or skip off the water if you land on it shallow and fast.</li>
+ * <li>Leap into prone: the Crawl key, or Sneak + a scroll down, in the air within {@link Leap#WINDOW_TICKS} of a sprint jump ({@code CrawlTaps} and {@code StanceScroll} ask {@link #leap} first).</li>
+ * <li>Air roll: a fresh Sprint press within {@link AirRoll#WINDOW_TICKS} of a sprint jump, with the Air Roll perk.</li>
  * </ul>
  */
 public final class RunMovesClient {
@@ -53,7 +58,10 @@ public final class RunMovesClient {
 	/** The charge bar over the Feathers row: its colour (ARGB). */
 	static final int CHARGE_COLOUR = 0x70FFFFFF;
 
-	private static boolean sneakWas, jumpWas, wasOnGround, sprintWas;
+	private static boolean sneakWas, jumpWas, sprintWas, wasOnGround;
+	/** Client tick of the last jump out of a sprint, and whether this run of air's leap and air roll are spent. */
+	private static long sprintJumpAt = Long.MIN_VALUE / 2;
+	private static boolean leapt, airRolled;
 	/** Ticks the current Sneak press has been held; client tick of the last press and of the last release. */
 	private static int sneakHeld;
 	private static long pressedAt = Long.MIN_VALUE / 2, releasedAt = Long.MIN_VALUE / 2;
@@ -128,7 +136,12 @@ public final class RunMovesClient {
 			if (jumped) {
 				jumpedAt = now;
 				longJumped = false;
+				sprintJumpAt = player.isSprinting() || FastRun.active(player) ? now : Long.MIN_VALUE / 2;
+				leapt = airRolled = false;
 				tickJumped(player, now);
+			}
+			if (sprintPressed && !onGround && !airRolled && now - sprintJumpAt <= AirRoll.WINDOW_TICKS) {
+				airRoll(player);
 			}
 			if (!onGround && !longJumped && sneakPressed && now - jumpedAt <= LongJump.TAP_AFTER) {
 				longJump(player);
@@ -196,6 +209,47 @@ public final class RunMovesClient {
 			trickKind = player.getRandom().nextFloat() < TrickJump.BACK_SHARE ? WebPose.BACK_FLIP : WebPose.FRONT_FLIP;
 			trickAt = now + Math.max(TrickJump.DELAY_TICKS, LongJump.TAP_AFTER + 1);
 		}
+	}
+
+	/** A fresh Sprint press just after a sprint jump, perk learnt, feathers to spare: a roll forward through the air with a real push the way you face. */
+	private static void airRoll(LocalPlayer player) {
+		if (!AirRoll.allowed(player) || !Feathers.canSpend(player, AirRoll.COST) || FreerunClient.active() || !Freerun.canMove(player)
+			|| player.isSpectator() || player.isInWater()) {
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double speed = Mth.clamp(v.horizontalDistance() * AirRoll.BOOST + AirRoll.ADD, AirRoll.MIN_SPEED, AirRoll.MAX_SPEED);
+		player.setDeltaMovement(-Mth.sin(yaw) * speed, v.y + AirRoll.LIFT, Mth.cos(yaw) * speed);
+		airRolled = true;
+		keepSprint = 10;
+		AirFlipClient.cancelTap();
+		send(RunMoves.AIR_ROLL, 0L);
+	}
+
+	/**
+	 * From {@code CrawlTaps}, before the Crawl key toggles prone, and {@code StanceScroll} (Sneak + a scroll down): pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint
+	 * jump, it dives you forward onto your belly with a burst, flat enough for a gap a block and a half high, and you land
+	 * prone. True if it was (the press is spent).
+	 */
+	public static boolean leap(LocalPlayer player) {
+		long now = player.tickCount;
+		if (player.onGround() || leapt || now - sprintJumpAt > Leap.WINDOW_TICKS || FreerunClient.active() || !Freerun.canMove(player)
+			|| !Crawl.canCrawl(player) || !Feathers.canSpend(player, Leap.COST)) {
+			return false;
+		}
+		Vec3 v = player.getDeltaMovement();
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double speed = Mth.clamp(v.horizontalDistance() * Leap.BOOST, Leap.MIN_SPEED, Leap.MAX_SPEED);
+		player.setDeltaMovement(-Mth.sin(yaw) * speed, Math.min(v.y, Leap.UP_CAP), Mth.cos(yaw) * speed);
+		leapt = true;
+		longJumped = true;
+		trickAt = -1L;
+		Leap.localId = player.getId();
+		Leap.localAt = player.level().getGameTime();
+		com.jaymospowers.client.CrawlTaps.goProne(player, false);
+		send(RunMoves.LEAP, 0L);
+		return true;
 	}
 
 	/** Out of a fast run: sail out long and flat the way you face. */
@@ -423,7 +477,8 @@ public final class RunMovesClient {
 	}
 
 	private static void reset() {
-		sneakWas = jumpWas = wasOnGround = sprintWas = breaching = false;
+		sneakWas = jumpWas = sprintWas = wasOnGround = breaching = leapt = airRolled = false;
+		sprintJumpAt = Long.MIN_VALUE / 2;
 		sneakHeld = charge = skyCheck = hideTicks = keepSprint = 0;
 		skyDiving = longJumped = doubleTap = false;
 		trickAt = -1L;

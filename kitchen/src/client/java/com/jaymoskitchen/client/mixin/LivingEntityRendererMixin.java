@@ -28,6 +28,10 @@ abstract class LivingEntityRendererMixin {
 		com.jaymoskitchen.client.corpse.SnowMeltPose.extract(entity, state);
 		// (0.5.84) the risen dead getting up from where they lay
 		com.jaymoskitchen.client.corpse.ReanimatePose.extract(entity, state, partialTicks);
+		// knocked limp by a heavy blow: drawn as its ragdoll (players have their own, RagdollAvatarRendererMixin)
+		if (!(entity instanceof net.minecraft.world.entity.player.Player)) {
+			com.jaymoskitchen.client.ragdoll.LimpMobs.extract(entity, state, partialTicks);
+		}
 	}
 
 	@Inject(method = "setupRotations", at = @At("TAIL"))
