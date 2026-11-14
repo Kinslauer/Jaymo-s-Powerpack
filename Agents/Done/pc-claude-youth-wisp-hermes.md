@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: minecraft-server-bot-experiment
 branch: claude/project-thread-f24uld (one small commit: display names in /youth status)
 with: 
@@ -39,7 +39,9 @@ listener, a mechanics skill + cheatsheet, a SOUL rule, then tests. Mod side is P
 - PR #1467: added `display` to `/youth status` (chat shows display names, e.g. "Sora Stormbour'ne"), commit 492267aec.
 - Gateway trouble seen tonight (not from this work): 6:26 PM a 326 s idle GC ("mem_trim") froze the gateway, Discord
   dropped; 6:49 PM its liveness watchdog exited (code 75) and it stayed down until `schtasks /run` at 6:54 PM.
-- Old listener pid 13320 (first version) is still alive in session 0 (couldn't kill it from the desktop). It's idle
-  while the kill switch is off. Kill it before turning chat on: `taskkill /PID 13320 /F` (or reboot).
+- Old listener pid 13320 (first version) is still alive in session 0 (couldn't kill it from the desktop). It obeys
+  only `E:/hermes/mcbot/OFF`, which stays in place, so it's deaf until the next reboot. The real kill switch is now
+  `E:/hermes/mcbot/PAUSED` (`mcbot.py off`/`on`). Don't delete `OFF`.
 
 ## Done
+- 2026-11-13 19:17 PR #1467 is merged into master; moved to Agents/Done.
