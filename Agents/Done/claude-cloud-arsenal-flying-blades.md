@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-24g5gw
 with: 
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 - 2026-11-14 08:25 PR #1516 is merged into master; moved to Agents/Done.
+- 2026-11-14 09:02 PR #1519 is merged into master; moved to Agents/Done.
