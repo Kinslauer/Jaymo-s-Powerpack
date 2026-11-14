@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-xt5jx3
 with: 
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-14 09:57 PR #1532 is merged into master; moved to Agents/Done.
