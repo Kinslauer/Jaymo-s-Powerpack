@@ -195,7 +195,7 @@ public final class Finishers {
 	static final float BEHIND_DEGREES = 110.0F;
 
 	/** How a blow lands: what it sounds and looks like. */
-	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI,
+	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI, POWER,
 		/** (0.18.97) No blow at all: they're held where they lie and questioned ({@link Kind#questioning}). */
 		HOLD }
 
@@ -303,7 +303,30 @@ public final class Finishers {
 		/** Stamped Out: stood over the head, the foot lifted and brought down on it twice, then raised high and stamped through. */
 		STOMP(38, new int[] {13, 23, 33}, Strike.CRUSH),
 		/** Head on the Stone: down on a knee, the head taken in both hands, lifted and beaten on the ground three times. */
-		HEAD_SMASH(46, new int[] {18, 30, 40}, Strike.CRUSH);
+		HEAD_SMASH(46, new int[] {18, 30, 40}, Strike.CRUSH),
+		// ---- a power holder's empty hands (PowerFinishers; Andy: "a qte finisher per power per enemy type"): two blows each, a
+		// key asked before both (Prompts). Three shapes: a hand held out at them, a hand raised and brought down, both hands
+		// out and hauled apart ---------------------------------------------------------------------------------------------
+		/** Whatever Answers (Pocket Arsenal): a hand held out, the rift open over them; a blade drops to pin them, then a greater one through them. */
+		P_ARSENAL(42, new int[] {16, 32}, Strike.POWER),
+		/** Borrowed Hour (Chronokinesis): a hand held out, their time drawn off them in a pull, then all the rest of it. */
+		P_CHRONO(42, new int[] {16, 32}, Strike.POWER),
+		/** Deep Frost (Cryokinesis): a hand held out, frost up over them till they're frozen through, then broken like ice. */
+		P_CRYO(42, new int[] {16, 32}, Strike.POWER),
+		/** Breaking Pitch (Resonance): a hand held out, the note closing on their pitch, then sung through them. */
+		P_RESONANCE(42, new int[] {16, 32}, Strike.POWER),
+		/** Last Breath (Smoke): a hand held out, smoke run into their mouth, and out of them all at once. */
+		P_SMOKE(42, new int[] {16, 32}, Strike.POWER),
+		/** Star-Metal (Xenoform): the band hand held out, its light through them as a thread, then the whole of it. */
+		P_XENOFORM(42, new int[] {16, 32}, Strike.POWER),
+		/** Dead Weight (Gravity): a hand raised and brought down, their own weight piled on them, twice. */
+		P_GRAVITY(44, new int[] {18, 34}, Strike.POWER),
+		/** Emptied Sky (Wind Control): a hand raised, the air pulled up out of them; brought down, all of it on them. */
+		P_WIND(44, new int[] {18, 34}, Strike.POWER),
+		/** Cocoon (Web Slinger, no suit showing): both hands out, wound in silk, and the lines hauled apart. */
+		P_WEB(40, new int[] {14, 30}, Strike.POWER),
+		/** Undertow (Darktide): both hands out, the pool open under them, and one stroke of the tide across them. */
+		P_DARKTIDE(40, new int[] {14, 30}, Strike.POWER);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -976,7 +999,9 @@ public final class Finishers {
 			boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
 			// (0.18.46) and a Z Fighter's are his own: no neck snap, one of ZFighterExecutions' moves, from anywhere round them
 			boolean fighter = stack.isEmpty() && !suit && com.jaymospowers.power.zfighter.ZFighterExecutions.applies(player);
-			boolean bare = stack.isEmpty() && !suit && !fighter;
+			// and a power holder's are the power's: no neck snap, the power's own move (PowerFinishers), from anywhere round them
+			boolean powered = stack.isEmpty() && !suit && !fighter && PowerFinishers.kind(player) != null;
+			boolean bare = stack.isEmpty() && !suit && !fighter && !powered;
 			if (!suit && move(player, stack) == null) {
 				// (0.15.110) a torch or a loaf finishes nobody
 				if (hold.rushed) {
@@ -1049,6 +1074,10 @@ public final class Finishers {
 		}
 		if (stack.isEmpty() && com.jaymospowers.power.zfighter.ZFighterExecutions.applies(player)) {
 			begin(level, player, body, com.jaymospowers.power.zfighter.ZFighterExecutions.pick(player));
+			return;
+		}
+		if (stack.isEmpty() && PowerFinishers.kind(player) != null) {
+			begin(level, player, body, PowerFinishers.kind(player));
 			return;
 		}
 		if (stack.isEmpty() && com.jaymospowers.core.wounds.UndeadFortitude.zombie(body)) {
@@ -1185,7 +1214,7 @@ public final class Finishers {
 		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());
-		Prompts.begin(player, body);
+		Prompts.begin(player, body, kind);
 		player.stopUsingItem();
 		player.setSprinting(false);
 		if (kind == Kind.FLAIL) {
@@ -1199,6 +1228,10 @@ public final class Finishers {
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
 			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+		if (kind.strike == Strike.POWER) {
+			PowerFinishers.begin(level, player, body, kind);
+			return;
+		}
 		if (kind.strike == Strike.KI) {
 			// (0.18.46) a Z Fighter's: the ki paid, and his own opening
 			com.jaymospowers.power.zfighter.ZFighterExecutions.begin(level, player, body, kind);
@@ -1268,6 +1301,9 @@ public final class Finishers {
 				// (0.15.148) the lash cracks round the neck
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.9F, 1.9F);
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.1F);
+			}
+			if (kind.strike == Strike.POWER) {
+				PowerFinishers.tick(level, player, body, kind, t, present);
 			}
 			if (kind.strike == Strike.KI) {
 				// (0.18.46) the ki gathering, the film, the beam held on them
@@ -1394,6 +1430,7 @@ public final class Finishers {
 			}
 			// (0.18.46) a Z Fighter's: his ki, his fists
 			case KI -> com.jaymospowers.power.zfighter.ZFighterExecutions.blow(level, player, body, kind, kill);
+			case POWER -> PowerFinishers.blow(level, player, body, kind, kill);
 			case SNAP -> {
 				if (kill) {
 					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.0F, 0.5F);
