@@ -2021,5 +2021,11 @@
 			}
 		],
 		"subtitle": "subtitles.jaymoskingdoms.satyr_pipes"
+	},
+	"film.whale_breach": {
+		"subtitle": "subtitles.jaymoskingdoms.film.whale_breach",
+		"sounds": [
+			"jaymoskingdoms:film/whale_breach"
+		]
 	}
 }
