@@ -257,7 +257,7 @@ public final class Stats {
 
 	/** Why another point can't go into {@code stat} (a translation key), or null if it can. */
 	public static @Nullable String blocked(Player player, Skills.Progress p, Stat stat) {
-		if (stat == Stat.ARCANA && !Mana.attuned(player)) {
+		if (stat == Stat.ARCANA && !Mana.hasMana(player)) {
 			return "gui.jaymoskingdoms.stats.blocked.unattuned";
 		}
 		if (total(player, p, stat) >= cap(player)) {
@@ -269,9 +269,9 @@ public final class Stats {
 		return null;
 	}
 
-	/** (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they're attuned. */
+	/** (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they have mana. */
 	public static boolean shown(Player player, Stat stat) {
-		return stat != Stat.ARCANA || Mana.attuned(player);
+		return stat != Stat.ARCANA || Mana.hasMana(player);
 	}
 
 	/** What {@code value} points of {@code stat} do (the K screen's line for it). */

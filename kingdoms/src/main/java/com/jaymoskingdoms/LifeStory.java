@@ -2008,7 +2008,15 @@ public final class LifeStory {
 			if (wanted != null && wanted.waitFor(false)) {
 				return null;
 			}
+			// (Andy 2026-11-14: "yes i want that") given up on: the land made for this start while they waited, rather
+			// than wherever stasis let them down (the world's spawn, where the last life may just have ended)
+			to = wanted != null ? madeGround(level, wanted) : null;
+		}
+		if (to == null) {
 			if (!aloft(player.level(), player.blockPosition())) {
+				// (Andy 2026-11-14 clip: woke already downed) left where they were let down, at the world's spawn: the
+				// arrival's grace all the same, or what roams there has them before the loading screen is even down
+				landSafely(player);
 				return landed;
 			}
 			// (Andy 2026-11-13) nowhere found, and where they stand is the Aether: the world's spawn, on the Overworld's ground
@@ -2381,6 +2389,32 @@ public final class LifeStory {
 			|| floor.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || floor.is(net.minecraft.world.level.block.Blocks.GRAVEL)
 			|| floor.is(net.minecraft.world.level.block.Blocks.DIRT_PATH) || floor.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK)
 			|| floor.is(net.minecraft.world.level.block.Blocks.CLAY) || floor.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK);
+	}
+
+	/**
+	 * Somewhere to stand on the land a start had made for it while they waited ({@link Wanted#primed}, still loaded), open
+	 * ground first, then any floor; or the top of its {@link Wanted#origin} if that's loaded. Null if none of it will do.
+	 */
+	private static @Nullable BlockPos madeGround(ServerLevel level, Wanted wanted) {
+		List<BlockPos> columns = new ArrayList<>(wanted.primed);
+		columns.add(wanted.origin);
+		BlockPos any = null;
+		for (BlockPos column : columns) {
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null || !freeSpot(level, column)) {
+				continue;
+			}
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+			if (aloft(level, top) || !standable(level, top)) {
+				continue;
+			}
+			if (openGround(level.getBlockState(top.below()))) {
+				return top;
+			}
+			if (any == null) {
+				any = top;
+			}
+		}
+		return any;
 	}
 
 	/** Room to stand at {@code feet}: two clear blocks on a sturdy floor, no water or lava. */
