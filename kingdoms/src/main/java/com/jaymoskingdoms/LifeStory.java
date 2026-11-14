@@ -638,6 +638,13 @@ public final class LifeStory {
 	public static final AttachmentType<String> CALLING = AttachmentRegistry.create(JaymosKingdoms.id("story_calling"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath());
 	/**
+	 * Andy: "if they hit skip the story, their start is randomized and ALL creation options are moved to a tab within the
+	 * MCA creator". Set when a skipped story is sealed from that tab ({@link Skipped}): once the creator is done no road is
+	 * asked, fate picks it ({@link #askRoad}). Saved, kept through death.
+	 */
+	public static final AttachmentType<Boolean> SKIPPED = AttachmentRegistry.create(JaymosKingdoms.id("story_skipped"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+	/**
 	 * Where a player's start put them: the world, the place it chose ({@link #PLACE_APART}: a settlement's or camp's seat, a
 	 * wreck, a farmhouse; else where they woke) and where they woke. Packed positions.
 	 */
@@ -783,6 +790,21 @@ public final class LifeStory {
 	}
 
 	/**
+	 * Player → server: {@link Live} for a story that was skipped, sent from the tab in MCA's creator as the creator is
+	 * finished. It is lived as any other, and the road is then fate's.
+	 */
+	public record Skipped(Live live) implements CustomPacketPayload {
+		public static final Type<Skipped> TYPE = new Type<>(JaymosKingdoms.id("story_skipped"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Skipped> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> Live.CODEC.encode(buf, p.live), buf -> new Skipped(Live.CODEC.decode(buf)));
+
+		@Override
+		public Type<Skipped> type() {
+			return TYPE;
+		}
+	}
+
+	/**
 	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
 	 * road makes you (the afterlife's); {@code tone}: (0.7.474) a half-orc's skin on the greenskin road's slider
@@ -833,6 +855,15 @@ public final class LifeStory {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
+		PayloadTypeRegistry.serverboundPlay().register(Skipped.TYPE, Skipped.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Skipped.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			boolean untold = untold(player);
+			live(player, payload.live());
+			if (untold && roadOwed(player)) {
+				player.setAttached(SKIPPED, true);
+			}
+		});
 		PayloadTypeRegistry.serverboundPlay().register(Road.TYPE, Road.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Road.TYPE, (payload, context) -> road(context.player(), payload));
 	}
@@ -928,6 +959,18 @@ public final class LifeStory {
 	/** (0.7.356) Once MCA's creator is done, the road is asked (once; again on a new body or a rejoin). From {@link StoryStasis}. */
 	static void askRoad(ServerPlayer player) {
 		if (roadOwed(player) && !McaCompat.destinyPending(player) && !ROAD_ASKED.contains(player.getUUID())) {
+			// a skipped story's start is fate's: the "let fate decide" road, taken for them (asked as ever if that can't be)
+			if (player.hasAttached(SKIPPED)) {
+				player.removeAttached(SKIPPED);
+				for (int i = 0; i < Question.ROAD.answers.size(); i++) {
+					if (Question.ROAD.answers.get(i).start == Start.FATE) {
+						road(player, new Road(i, -1, 0, GreenskinLife.TONE_DEFAULT));
+					}
+				}
+				if (!roadOwed(player)) {
+					return;
+				}
+			}
 			ask(player, true);
 		}
 	}
@@ -2978,6 +3021,7 @@ public final class LifeStory {
 		p.removeAttached(GENDER);
 		p.removeAttached(CALLING);
 		p.removeAttached(STRANDED);
+		p.removeAttached(SKIPPED);
 		StoryHomes.clear(p);
 		StoryHard.clear(p);
 		StoryKit.clear(p);

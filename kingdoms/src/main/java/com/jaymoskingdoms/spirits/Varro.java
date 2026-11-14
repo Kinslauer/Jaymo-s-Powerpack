@@ -83,6 +83,8 @@ public final class Varro extends Spirit {
 		MOVES.add(new SpearWallMove());
 		MOVES.add(new InBalm(Spirits.VARRO));
 		MOVES.add(SpiritExecutions.move("execute_varro", Spirits.VARRO));
+		MOVES.addAll(VarroArts.MOVES);
+		MOVES.add(AsOne.MOVE);
 	}
 
 	public Varro() {
@@ -97,6 +99,7 @@ public final class Varro extends Spirit {
 	/** Adds its moves to {@link Moves}, registers the javelin entity and hooks the game events its moves need. */
 	public static void register() {
 		SpiritJavelin.register();
+		VarroArts.register();
 		for (Move move : MOVES) {
 			Moves.register(move);
 		}

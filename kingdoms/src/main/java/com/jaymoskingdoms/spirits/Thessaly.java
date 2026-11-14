@@ -103,6 +103,8 @@ public final class Thessaly extends Spirit {
 		MOVES.add(new Ambrose.Def("wings", ThessalyWings.SPREAD_COST, ThessalyWings.SPREAD_COOLDOWN, 1, Poses.IDLE, Mana.WILL, ThessalyWings::cast));
 		MOVES.add(SpiritExecutions.move("execute_thessaly", Spirits.THESSALY));
 		MOVES.add(new InBalm(Spirits.THESSALY));
+		MOVES.addAll(ThessalyArts.MOVES);
+		MOVES.add(AsOne.MOVE);
 	}
 
 	Thessaly() {

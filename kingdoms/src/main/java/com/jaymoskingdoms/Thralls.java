@@ -235,8 +235,27 @@ public final class Thralls {
 		return entity.entityTags().contains(RISEN_TAG);
 	}
 
+	/** A living foe whose will was broken (Varro's): it fights for the one who broke it, and is itself again after. */
+	public static final String BROKEN_TAG = "jaymoskingdoms.will_broken";
+
+	/** {@code mob}'s will is broken to the player {@code master} for {@code life} ticks; then it is let go, alive. */
+	public static void sway(ServerLevel level, Mob mob, UUID master, int life) {
+		mob.addTag(BROKEN_TAG);
+		mob.setTarget(null);
+		mob.setAttached(TAG, new Tag(-1, master, true, level.getGameTime() + life));
+		LOADED.add(mob);
+	}
+
 	/** Falls back to dust: a puff of souls and bone meal, and it's gone. */
 	static void crumble(ServerLevel level, Mob mob) {
+		if (mob.entityTags().contains(BROKEN_TAG)) {
+			// only its will was taken: it is let go, not unmade
+			mob.removeTag(BROKEN_TAG);
+			mob.removeAttached(TAG);
+			mob.setTarget(null);
+			LOADED.remove(mob);
+			return;
+		}
 		if (risenDead(mob) && EntityType.getKey(mob.getType()).getNamespace().equals("jaymoskitchen")) {
 			// a risen player: put down properly, so what it carried of theirs is dropped, not lost
 			LOADED.remove(mob);

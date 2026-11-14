@@ -24,6 +24,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
@@ -85,6 +86,10 @@ final class LifeStoryScreen extends Screen {
 	static final int ARROW_W = 16, STRIP_H = 24, CELL_W = 22, ICON_WELL = 64, ICON_SCALE = 3;
 	/** (0.7.451) The Locked / Open starts button's width, in the road's header. */
 	static final int LOCKED_W = 96;
+	/** The character creator's Randomize button's width, in its header. */
+	static final int REROLL_W = 76;
+	/** How long a skipped story waits with no screen up for MCA's creator before this screen's own creator page takes over (ms). */
+	static final long TAB_WAIT_MS = 8000L;
 	static final float TEXT_SHARE = 0.44F;
 	static final long SLIDE_MS = 220L;
 	static final int SLIDE_PX = 36;
@@ -116,6 +121,13 @@ final class LifeStoryScreen extends Screen {
 		boolean sparksTouched;
 		/** (0.7.474) A half-orc's skin on the greenskin road's slider (0 to 1, {@link GreenskinLife#TONE}). */
 		float tone = GreenskinLife.TONE_DEFAULT;
+		/**
+		 * Andy: "people who skip the story go to a new character creator that they can choose everything explicitly except
+		 * their power (only affinity)". Whether the story was skipped for the creator: a row for each thing the story would
+		 * have decided ({@link Field}), on a tab of MCA's creator when that is still to come ({@link #tabbed}), else on one
+		 * page here.
+		 */
+		boolean explicit;
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -126,6 +138,9 @@ final class LifeStoryScreen extends Screen {
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
 	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
+	/** The character creator's: every row drawn again, and its presets (a name to save under, save, delete, load the next). */
+	private @Nullable Button reroll, presetSave, presetDelete, presetLoad;
+	private @Nullable EditBox presetName;
 	/**
 	 * (0.7.451) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
 	 * Whether the carousel shows the locked starts instead of the open ones.
@@ -151,6 +166,11 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.419) The locked roads the server said this player can take whatever their past (a deed, ops, a road they took), and those ops shut (keys). */
 	private static List<String> unlockedRoads = List.of(), shutRoads = List.of();
 	private static Draft draft = new Draft();
+	/** The creator's preset name as typed, and the preset last loaded (-1: none). */
+	static String presetTyped = "";
+	static int presetAt = -1;
+	/** Since when (ms) a skipped story has waited with no screen up for MCA's creator to show its tab (0: it isn't waiting). */
+	private static long tabIdleSince;
 	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
 	/** (0.7.352) The page under the skip-the-story ask, so shutting the ask doesn't read that page again. */
@@ -183,6 +203,10 @@ final class LifeStoryScreen extends Screen {
 			if (payload.forced() && StoryCurtain.isCreator(context.client().gui.screen())) {
 				return;
 			}
+			// (a skipped story is made in MCA's creator, coming up)
+			if (tabbed()) {
+				return;
+			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -192,6 +216,18 @@ final class LifeStoryScreen extends Screen {
 			if (done()) {
 				owed = false;
 				draft = new Draft();
+			} else if (tabbed()) {
+				// a skipped story waits for MCA's creator and its tab. Should the creator never come (or shut without the
+				// story sealed), the creator's page here takes over, so nobody is left on a black screen
+				long now = System.currentTimeMillis();
+				if (minecraft.gui.screen() != null) {
+					tabIdleSince = 0L;
+				} else if (tabIdleSince == 0L) {
+					tabIdleSince = now;
+				} else if (now - tabIdleSince > TAB_WAIT_MS) {
+					tabIdleSince = 0L;
+					creatorAhead = false;
+				}
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
 				minecraft.gui.setScreen(new LifeStoryScreen(true));
 			}
@@ -203,6 +239,7 @@ final class LifeStoryScreen extends Screen {
 			unlockedRoads = List.of();
 			shutRoads = List.of();
 			draft = new Draft();
+			presetAt = -1;
 			narrated = null;
 			toRead.clear();
 		});
@@ -226,6 +263,17 @@ final class LifeStoryScreen extends Screen {
 		Minecraft minecraft = Minecraft.getInstance();
 		List<String> story = minecraft.player == null ? null : LifeStory.of(minecraft.player);
 		return story != null && (creatorAhead || !LifeStory.roadOwed(story));
+	}
+
+	/**
+	 * Andy: "if they hit skip the story, their start is randomized and ALL creation options are moved to a tab within the
+	 * MCA creator". Whether the story was skipped with MCA's creator still to come: nothing is told here, the creator opens
+	 * with the story untold ({@code McaDestinyWaitMixin}) and its Life tab ({@link CreatorTab}) holds the rows, sealed as
+	 * the creator is finished.
+	 */
+	static boolean tabbed() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return draft.explicit && creatorAhead && minecraft.player != null && LifeStory.of(minecraft.player) == null;
 	}
 
 	/** (0.7.356) Whether only the road is left to tell (the rest was told before MCA's creator). */
@@ -277,6 +325,11 @@ final class LifeStoryScreen extends Screen {
 			if (a != null && a.realm()) {
 				out.add(new Step(Question.ROAD, true, false));
 			}
+			return out;
+		}
+		// the story skipped: the character creator's one page
+		if (draft.explicit) {
+			out.add(Step.SUMMARY);
 			return out;
 		}
 		// (0.7.304) who you are comes first: MCA's body is a man's or a woman's
@@ -387,6 +440,10 @@ final class LifeStoryScreen extends Screen {
 			// (0.7.349) a road that's no longer open (the birthplace changed under it) has to be picked again
 			Answer road = picked(Question.ROAD);
 			if (road != null && !open(road)) {
+				return false;
+			}
+			// the creator's one row with nothing picked for you
+			if (draft.explicit && McaCompat.LOADED && draft.gender < 0) {
 				return false;
 			}
 			Classes.PlayerClass cls = youthClass();
@@ -586,7 +643,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	protected void init() {
-		if (done()) {
+		if (done() || tabbed()) {
 			onClose();
 			return;
 		}
@@ -594,6 +651,8 @@ final class LifeStoryScreen extends Screen {
 		int right = paneX() + paneW() - 6;
 		this.next = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.next"), b -> forward()).bounds(right - 110, y, 110, 16).build());
 		this.back = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.back"), b -> {
+			// (from the character creator: back to the story's first page, to tell it after all)
+			draft.explicit = false;
 			draft.step = Math.max(0, draft.step - 1);
 			this.scroll = 0;
 		}).bounds(paneX() + 6, y, 60, 16).build());
@@ -619,10 +678,36 @@ final class LifeStoryScreen extends Screen {
 		// (0.7.451) the locked starts, in a menu of their own
 		this.lockedButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> flipLocked())
 			.bounds(left() + panelW() - 8 - LOCKED_W - 64, top() + 4, LOCKED_W, 14).build());
+		// the character creator: every row drawn again, and its presets where the story page keeps its heritage, class and look buttons
+		this.reroll = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.random"), b -> randomize(true))
+			.bounds(left() + panelW() - 8 - REROLL_W, top() + 4, REROLL_W, 14).build());
+		this.presetName = addRenderableWidget(new EditBox(this.font, left() + 6, y - 40, TELL_W - 12, 16, Component.translatable("gui.jaymoskingdoms.creator.preset.name")));
+		this.presetName.setMaxLength(CharacterPresets.MAX_NAME);
+		this.presetName.setHint(Component.translatable("gui.jaymoskingdoms.creator.preset.name"));
+		this.presetName.setValue(presetTyped);
+		this.presetName.setResponder(typed -> presetTyped = typed);
+		int half = (TELL_W - 12 - 4) / 2;
+		this.presetSave = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.preset.save"), b -> savePreset())
+			.bounds(left() + 6, y - 20, half, 16).build());
+		this.presetDelete = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.creator.preset.delete"), b -> {
+			CharacterPresets.delete(presetTyped);
+			presetAt = -1;
+		}).bounds(left() + 6 + half + 4, y - 20, half, 16).build());
+		this.presetLoad = addRenderableWidget(FlatButton.builder(Component.empty(), b -> loadPreset(1)).bounds(left() + 6, y, TELL_W - 12, 16).build());
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
 		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
-			randomize();
+			draft.explicit = true;
+			randomize(false);
+			if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
+				Arrays.fill(draft.sparks, 1);
+			}
 			this.asking = false;
+			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
+			if (tabbed()) {
+				hush();
+				onClose();
+				return;
+			}
 			this.scroll = 0;
 		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.skipNo = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
@@ -631,12 +716,38 @@ final class LifeStoryScreen extends Screen {
 
 	/**
 	 * (0.7.275) Skip the story: every question answered at random (only answers open here, a realm drawn for one that
-	 * names one), a Mage's spell or a Sorcerer's element drawn too, nothing picked over the story, then the story page,
-	 * where Back and the heritage and class buttons can still change any of it.
+	 * names one), a Mage's spell or a Sorcerer's element drawn too, nothing picked over the story. It fills the character
+	 * creator's rows, where every one of them can be set outright: with {@code all} every row is drawn again (its
+	 * Randomize button), without it only what the story hadn't got to yet.
 	 */
-	private static void randomize() {
+	static void randomize(boolean all) {
 		java.util.Random random = new java.util.Random();
+		if (!all) {
+			// what the story had made so far stays; the look is the one it leant to, a row of its own from here on
+			fill(random, false);
+			draft.look = lookIndex();
+			settle();
+			draft.step = 0;
+			return;
+		}
+		fill(random, true);
+		draft.heritage = -1;
+		draft.cls = -1;
+		Heritage.Kind kind = heritage();
+		draft.look = kind == null ? -1 : random.nextInt(HeritageVariants.of(kind).size() + 1);
+		Classes.PlayerClass cls = youthClass();
+		draft.option = cls == null || cls.options.isEmpty() ? -1 : random.nextInt(cls.options.size());
+		settle();
+		draft.step = steps().size() - 1;
+	}
+
+	/** Answers the questions at random, in order (a birthplace decides who could have raised you): all of them, or only those with no open answer yet. */
+	private static void fill(java.util.Random random, boolean all) {
 		for (Question q : Question.values()) {
+			Answer had = picked(q);
+			if (!all && had != null && open(had)) {
+				continue;
+			}
 			List<Integer> open = new ArrayList<>();
 			for (int i = 0; i < q.answers().size(); i++) {
 				if (open(q.answers().get(i))) {
@@ -649,12 +760,6 @@ final class LifeStoryScreen extends Screen {
 				setRealm(q, realms.get(random.nextInt(realms.size())).id());
 			}
 		}
-		draft.heritage = -1;
-		draft.cls = -1;
-		draft.look = -1;
-		Classes.PlayerClass cls = youthClass();
-		draft.option = cls == null || cls.options.isEmpty() ? -1 : random.nextInt(cls.options.size());
-		draft.step = steps().size() - 1;
 	}
 
 	/**
@@ -667,7 +772,8 @@ final class LifeStoryScreen extends Screen {
 	private static void narrate(Step s, boolean asking) {
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
-		String page = s.summary() ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
+		// (the character creator is made in silence: there's no tale to read, and every row changed would start one over)
+		String page = s.summary() ? draft.explicit ? "creator" : "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
 		if (asking) {
 			if (!"skip".equals(narrated)) {
 				underAsk = narrated;
@@ -688,7 +794,8 @@ final class LifeStoryScreen extends Screen {
 			// (0.7.360) whatever was still being read stops: this page's lines only, never two at once
 			hush();
 			StoryHoldScreen.hush(minecraft);
-			toRead.addAll(asking ? List.of("gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc") : lines(s));
+			// (the ask's line underneath is the creator's now, and not recorded)
+			toRead.addAll(asking ? List.of("gui.jaymoskingdoms.story.skip.ask") : lines(s));
 			readNext = 0L;
 		}
 		if (reading != null) {
@@ -727,6 +834,9 @@ final class LifeStoryScreen extends Screen {
 		}
 		if (s.question == null) {
 			List<String> out = new ArrayList<>();
+			if (draft.explicit) {
+				return out;
+			}
 			for (Question q : Question.values()) {
 				Answer a = q.asked() ? picked(q) : null;
 				if (a != null) {
@@ -769,16 +879,30 @@ final class LifeStoryScreen extends Screen {
 			this.scroll = 0;
 			return;
 		}
+		ClientPlayNetworking.send(life(draft.gender));
+		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		onClose();
+	}
+
+	/** The answers so far as the packet that lives them, as {@code gender} (0 male, 1 female, -1 not picked here). */
+	private static LifeStory.Live life(int gender) {
 		List<Integer> answers = new ArrayList<>();
 		for (Question q : Question.values()) {
 			answers.add(q.asked() ? draft.answers[q.ordinal()] : -1);
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
-		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
-			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender,
-			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6));
-		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
-		onClose();
+		return new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
+			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, gender,
+			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6);
+	}
+
+	/** From the tab in MCA's creator, as the creator is finished: the skipped story is sealed, as the gender the creator made. */
+	static void sealFromTab(int gender) {
+		if (tabbed()) {
+			settle();
+			ClientPlayNetworking.send(new LifeStory.Skipped(life(gender)));
+			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		}
 	}
 
 	@Override
@@ -791,9 +915,20 @@ final class LifeStoryScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		// (0.7.282) Andy: "right clicking should take you back on any of these options": the heritage, class and look
 		// buttons step back, and the element or spell chips too
+		// the character creator's rows: a click steps a row on, a right click back
+		if (s.summary() && draft.explicit) {
+			int field = fieldAt(mx, my);
+			if (field >= 0) {
+				cycle(Field.values()[field], event.button() == InputConstants.MOUSE_BUTTON_RIGHT ? -1 : 1);
+				click();
+				return true;
+			}
+		}
 		if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 			Runnable back = null;
-			if (over(this.heritageButton, mx, my)) {
+			if (over(this.presetLoad, mx, my)) {
+				back = () -> loadPreset(-1);
+			} else if (over(this.heritageButton, mx, my)) {
 				back = () -> cycleHeritage(-1);
 			} else if (over(this.classButton, mx, my)) {
 				back = () -> cycleClass(-1);
@@ -948,7 +1083,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (done()) {
+		if (done() || tabbed()) {
 			onClose();
 			return;
 		}
@@ -996,11 +1131,27 @@ final class LifeStoryScreen extends Screen {
 			this.next.active = answered(s);
 		}
 		if (this.back != null) {
-			this.back.active = draft.step > 0;
+			this.back.active = draft.step > 0 || draft.explicit;
+		}
+		boolean making = s.summary() && draft.explicit && !this.asking;
+		for (net.minecraft.client.gui.components.AbstractWidget b : new net.minecraft.client.gui.components.AbstractWidget[] {this.reroll, this.presetName,
+			this.presetSave, this.presetDelete, this.presetLoad}) {
+			if (b != null) {
+				b.visible = making;
+			}
+		}
+		if (making && this.presetSave != null && this.presetDelete != null && this.presetLoad != null) {
+			List<CharacterPresets.Preset> saved = CharacterPresets.all();
+			this.presetSave.active = !presetTyped.isBlank() && (saved.size() < CharacterPresets.MAX || CharacterPresets.named(presetTyped) != null);
+			this.presetDelete.active = CharacterPresets.named(presetTyped) != null;
+			this.presetLoad.active = !saved.isEmpty();
+			this.presetLoad.setMessage(saved.isEmpty() ? Component.translatable("gui.jaymoskingdoms.creator.preset.none")
+				: presetAt >= 0 && presetAt < saved.size() ? Component.translatable("gui.jaymoskingdoms.creator.preset.loaded", saved.get(presetAt).name, presetAt + 1, saved.size())
+				: Component.translatable("gui.jaymoskingdoms.creator.preset.load", saved.size()));
 		}
 		if (this.look != null) {
 			Heritage.Kind kind = heritage();
-			this.look.visible = s.summary() && kind != null;
+			this.look.visible = s.summary() && !draft.explicit && kind != null;
 			if (kind != null) {
 				this.look.setMessage(Component.translatable("gui.jaymoskingdoms.heritage.variant", HeritageVariants.title(kind, lookIndex()),
 					lookIndex() + 1, HeritageVariants.of(kind).size() + 1));
@@ -1009,21 +1160,21 @@ final class LifeStoryScreen extends Screen {
 		Heritage.Kind kind = heritage();
 		Classes.PlayerClass cls = youthClass();
 		if (this.heritageButton != null) {
-			this.heritageButton.visible = s.summary() && kind != null;
+			this.heritageButton.visible = s.summary() && !draft.explicit && kind != null;
 			if (kind != null) {
 				this.heritageButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.heritage", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
 					.withColor(draft.heritage >= 0 ? ACCENT : Ui.TEXT));
 			}
 		}
 		if (this.classButton != null) {
-			this.classButton.visible = s.summary() && cls != null;
+			this.classButton.visible = s.summary() && !draft.explicit && cls != null;
 			if (cls != null) {
 				this.classButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.class", Component.translatable("class.jaymoskingdoms." + cls.key()))
 					.withColor(draft.cls >= 0 ? ACCENT : Ui.TEXT));
 			}
 		}
 		if (this.skip != null) {
-			this.skip.visible = s.question != null && !roadOnly();
+			this.skip.visible = (s.question != null || s.gender) && !roadOnly();
 		}
 		if (this.asking) {
 			ask(graphics);
@@ -1062,6 +1213,8 @@ final class LifeStoryScreen extends Screen {
 		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
 		if (!s.summary()) {
 			rows(graphics, s, mouseX, mouseY);
+		} else if (draft.explicit) {
+			creator(graphics, mouseX, mouseY);
 		} else {
 			summary(graphics, mouseX, mouseY);
 		}
@@ -1373,7 +1526,7 @@ final class LifeStoryScreen extends Screen {
 		Ui.panel(graphics, x, y, ASK_W, ASK_H, ACCENT);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.story.skip.ask"), x + 10, y + 8, ASK_W - 20, ACCENT);
 		int ty = y + 24;
-		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.skip.desc"), ASK_W - 20)) {
+		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.creator.skip.desc"), ASK_W - 20)) {
 			if (ty + Ui.LINE > y + ASK_H - 26) {
 				break;
 			}
@@ -1387,7 +1540,7 @@ final class LifeStoryScreen extends Screen {
 			return Component.translatable("story.jaymoskingdoms.gender.title");
 		}
 		if (s.question == null) {
-			return Component.translatable("gui.jaymoskingdoms.story.summary");
+			return Component.translatable(draft.explicit ? "gui.jaymoskingdoms.creator.title" : "gui.jaymoskingdoms.story.summary");
 		}
 		return s.realm ? Component.translatable("story.jaymoskingdoms.realm.title") : Component.translatable(story(s.question.key() + ".title"));
 	}
@@ -1484,6 +1637,430 @@ final class LifeStoryScreen extends Screen {
 		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
 	}
 
+	// ---- the character creator (the story skipped) --------------------------------------------------------------------
+
+	/**
+	 * What the character creator sets, a row each, in order: all the story would have decided. The power is not among
+	 * them: {@link #AFFINITY} is the story's "then one day" answer, what leans it, and what wakes stays a surprise. Nor is
+	 * the start: a skipped story's is fate's ({@link #settle}, and the server's {@code LifeStory.SKIPPED}).
+	 */
+	enum Field {
+		GENDER, HERITAGE, LOOK, RAISED, RAISED_REALM, CHILDHOOD, CLASS, OPTION, AFFINITY;
+
+		String key() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+	}
+
+	/** The creator's rows as last laid out: {unscrolled y, height, field ordinal}. */
+	private final List<int[]> fieldRows = new ArrayList<>();
+
+	/** Whether the creator has a row for {@code f} now: a realm only for an answer that names one, an option only for a class that has them. */
+	static boolean shown(Field f) {
+		Answer raised = picked(Question.RAISED);
+		Classes.PlayerClass cls = youthClass();
+		return switch (f) {
+			// (in MCA's creator the body is a man's or a woman's by its own buttons)
+			case GENDER -> McaCompat.LOADED && !tabbed();
+			case HERITAGE, LOOK -> heritage() != null;
+			case RAISED_REALM -> raised != null && raised.realm();
+			case OPTION -> cls != null && !cls.options.isEmpty();
+			case AFFINITY -> Question.TURN.asked();
+			default -> true;
+		};
+	}
+
+	static Component fieldLabel(Field f) {
+		if (f == Field.OPTION) {
+			Classes.PlayerClass cls = youthClass();
+			String key = "gui.jaymoskingdoms.creator.option." + (cls == null ? "" : cls.key());
+			return Component.translatable(Language.getInstance().has(key) ? key : "gui.jaymoskingdoms.creator.option");
+		}
+		return Component.translatable("gui.jaymoskingdoms.creator." + f.key());
+	}
+
+	private static Component answerName(Question q) {
+		Answer a = picked(q);
+		return a == null ? Component.translatable("gui.jaymoskingdoms.creator.pick") : Component.translatable(story(q.key() + "." + a.key()));
+	}
+
+	static Component fieldValue(Field f) {
+		Heritage.Kind kind = heritage();
+		Classes.PlayerClass cls = youthClass();
+		return switch (f) {
+			case GENDER -> Component.translatable(draft.gender < 0 ? "gui.jaymoskingdoms.creator.pick" : "story.jaymoskingdoms.gender." + GENDERS[draft.gender]);
+			case HERITAGE -> kind == null ? Component.empty() : Component.translatable("heritage.jaymoskingdoms." + kind.key());
+			case LOOK -> kind == null ? Component.empty() : HeritageVariants.title(kind, lookIndex());
+			case RAISED -> answerName(Question.RAISED);
+			case RAISED_REALM -> Component.literal(realmNameOf(draft.raisedRealm));
+			case CHILDHOOD -> answerName(Question.CHILDHOOD);
+			case CLASS -> cls == null ? Component.empty() : Component.translatable("class.jaymoskingdoms." + cls.key());
+			case OPTION -> cls == null || draft.option < 0 || draft.option >= cls.options.size() ? Component.translatable("gui.jaymoskingdoms.creator.pick")
+				: Component.translatable("class.jaymoskingdoms.option." + cls.options.get(draft.option));
+			case AFFINITY -> answerName(Question.TURN);
+		};
+	}
+
+	/** What a row's pick gives, a line each (the affinity's: only that the power is still to come). */
+	static List<Component> fieldEffects(Field f) {
+		Heritage.Kind kind = heritage();
+		Question q = switch (f) {
+			case RAISED -> Question.RAISED;
+			case CHILDHOOD -> Question.CHILDHOOD;
+			default -> null;
+		};
+		Answer a = q == null ? null : picked(q);
+		if (a != null) {
+			return gives(q, a, true);
+		}
+		if (f == Field.LOOK && kind != null) {
+			return List.of(Component.translatable(HeritageVariants.langKey(kind, lookIndex()) + ".trait"));
+		}
+		return f == Field.AFFINITY ? List.of(Component.translatable("gui.jaymoskingdoms.creator.affinity.fx")) : List.of();
+	}
+
+	/** The creator's page: a row for each thing the story would have decided, then the harder life and the sparks as the story page has them. */
+	private void creator(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int px = paneX(), pw = paneW(), textW = pw - 22;
+		int y = top() + HEADER + 4 - this.scroll;
+		int startY = y;
+		this.fieldRows.clear();
+		this.chipsTop = -1;
+		int n = 0;
+		for (Field f : Field.values()) {
+			if (!shown(f)) {
+				continue;
+			}
+			List<FormattedCharSequence> fx = new ArrayList<>();
+			for (Component line : fieldEffects(f)) {
+				fx.addAll(this.font.split(line, textW - 14));
+			}
+			int rh = (1 + fx.size()) * Ui.LINE + 5;
+			boolean hover = Ui.over(mouseX, mouseY, px + 6, y, pw - 14, rh - 1) && mouseY >= top() + HEADER && mouseY < top() + panelH() - FOOTER;
+			this.fieldRows.add(new int[] {y + this.scroll, rh, f.ordinal()});
+			Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, n++, hover);
+			Component label = fieldLabel(f);
+			int lw = Math.min(this.font.width(label), (pw - 44) / 2);
+			Ui.line(graphics, this.font, label, px + 12, y + 2, lw, Ui.DIM);
+			boolean unset = f == Field.GENDER && draft.gender < 0;
+			Ui.line(graphics, this.font, fieldValue(f), px + 18 + lw, y + 2, pw - 50 - lw, unset || hover ? ACCENT : Ui.TEXT);
+			Ui.lineRight(graphics, this.font, Component.literal("< >"), px + pw - 12, y + 2, 16, hover ? ACCENT : Ui.HINT);
+			for (int l = 0; l < fx.size(); l++) {
+				graphics.text(this.font, fx.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, f == Field.AFFINITY ? Ui.DIM : Ui.GOOD);
+			}
+			y += rh;
+		}
+		y = choices(graphics, mouseX, mouseY, y, px, pw, textW);
+		this.contentH = y + this.scroll - startY + 4;
+		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
+	}
+
+	/** The creator's row at the mouse (a {@link Field} ordinal), or -1. */
+	private int fieldAt(int mouseX, int mouseY) {
+		if (mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER || mouseX < paneX() + 6 || mouseX >= paneX() + paneW() - 8) {
+			return -1;
+		}
+		for (int[] row : this.fieldRows) {
+			int ry = row[0] - this.scroll;
+			if (mouseY >= ry && mouseY < ry + row[1] - 1) {
+				return row[2];
+			}
+		}
+		return -1;
+	}
+
+	/** Steps row {@code f} on ({@code dir} 1) or back (-1) through what's open to this character, wrapping. */
+	static void cycle(Field f, int dir) {
+		Classes.PlayerClass cls = youthClass();
+		switch (f) {
+			case GENDER -> draft.gender = draft.gender < 0 ? dir > 0 ? 0 : 1 : 1 - draft.gender;
+			case HERITAGE -> cycleBlood(dir);
+			case LOOK -> cycleLook(dir);
+			case RAISED -> cycleAnswer(Question.RAISED, dir);
+			case RAISED_REALM -> draft.raisedRealm = cycleRealm(draft.raisedRealm, dir);
+			case CHILDHOOD -> cycleAnswer(Question.CHILDHOOD, dir);
+			case CLASS -> cycleCalling(dir);
+			case OPTION -> draft.option = cls == null || cls.options.isEmpty() ? -1 : Math.floorMod(Math.max(draft.option, 0) + dir, cls.options.size());
+			case AFFINITY -> cycleAnswer(Question.TURN, dir);
+		}
+		settle();
+	}
+
+	private static List<Integer> openOf(Question q) {
+		List<Integer> out = new ArrayList<>();
+		for (int i : listed(q)) {
+			if (open(q.answers().get(i))) {
+				out.add(i);
+			}
+		}
+		return out;
+	}
+
+	private static void cycleAnswer(Question q, int dir) {
+		List<Integer> open = openOf(q);
+		if (open.isEmpty()) {
+			return;
+		}
+		int at = open.indexOf(draft.answers[q.ordinal()]);
+		draft.answers[q.ordinal()] = open.get(Math.floorMod(at < 0 ? dir > 0 ? 0 : -1 : at + dir, open.size()));
+	}
+
+	private static int cycleRealm(int id, int dir) {
+		if (realms.isEmpty()) {
+			return -1;
+		}
+		int at = -1;
+		for (int i = 0; i < realms.size(); i++) {
+			if (realms.get(i).id() == id) {
+				at = i;
+			}
+		}
+		return realms.get(Math.floorMod(at < 0 ? 0 : at + dir, realms.size())).id();
+	}
+
+	/** The birthplace that makes {@code kind} and is open here (an index into the first question's answers), or -1: an earned blood has none. */
+	private static int bornOf(Heritage.Kind kind) {
+		List<Answer> born = Question.BORN.answers();
+		for (int i = 0; i < born.size(); i++) {
+			if (born.get(i).heritage() == kind && open(born.get(i))) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/** The creator's heritage: {@code kind} by its birthplace, or (an earned blood, which has none) picked over the birthplace as the story page does. */
+	private static void setBlood(Heritage.Kind kind) {
+		int born = bornOf(kind);
+		if (born >= 0) {
+			draft.answers[Question.BORN.ordinal()] = born;
+			draft.heritage = -1;
+		} else {
+			draft.heritage = kind.ordinal();
+		}
+	}
+
+	/** The next heritage open to them (every blood they may be born to, and the earned ones they have woken). */
+	private static void cycleBlood(int dir) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Heritage.Kind now = heritage();
+		if (minecraft.player == null || roadFixesHeritage()) {
+			return;
+		}
+		Heritage.Kind[] kinds = Heritage.Kind.values();
+		for (int i = 1; i <= kinds.length; i++) {
+			Heritage.Kind next = kinds[Math.floorMod((now == null ? 0 : now.ordinal()) + i * dir, kinds.length)];
+			if (Heritage.unlocked(minecraft.player, next)) {
+				setBlood(next);
+				draft.look = 0;
+				return;
+			}
+		}
+	}
+
+	/** The creator's class: {@code cls} by a youth that makes it, or (most have none) picked over the youth as the story page does. */
+	private static void setCalling(Classes.PlayerClass cls) {
+		draft.cls = cls.ordinal();
+		for (int i : openOf(Question.YOUTH)) {
+			if (Question.YOUTH.answers().get(i).cls() == cls) {
+				draft.answers[Question.YOUTH.ordinal()] = i;
+				draft.cls = -1;
+				return;
+			}
+		}
+	}
+
+	private static void cycleCalling(int dir) {
+		Classes.PlayerClass now = youthClass();
+		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
+		setCalling(classes[Math.floorMod((now == null ? 0 : now.ordinal()) + dir, classes.length)]);
+		draft.option = 0;
+	}
+
+	/**
+	 * After a row changes: every other row is still one this character can have. An answer the new birthplace was never
+	 * asked gives way to the first that is; a realm is named for an answer that names one; the look and the class's
+	 * option stay within what the heritage and the class have.
+	 */
+	private static void settle() {
+		for (Question q : Question.values()) {
+			if (!q.asked() || q == Question.ROAD && creatorAhead) {
+				continue;
+			}
+			// a skipped story's start is fate's: the "let fate decide" road
+			if (q == Question.ROAD) {
+				for (int i = 0; i < q.answers().size(); i++) {
+					if (q.answers().get(i).start() == LifeStory.Start.FATE) {
+						draft.answers[q.ordinal()] = i;
+					}
+				}
+				continue;
+			}
+			Answer had = picked(q);
+			if (had == null || !open(had)) {
+				List<Integer> open = openOf(q);
+				draft.answers[q.ordinal()] = open.isEmpty() ? -1 : open.get(0);
+			}
+			Answer a = picked(q);
+			if (a != null && a.realm() && realmNameOf(realmOf(q)).isEmpty() && !realms.isEmpty()) {
+				setRealm(q, realms.get(0).id());
+			}
+		}
+		Heritage.Kind kind = heritage();
+		if (kind != null) {
+			draft.look = Math.clamp(draft.look, 0, HeritageVariants.of(kind).size());
+		}
+		Classes.PlayerClass cls = youthClass();
+		draft.option = cls == null || cls.options.isEmpty() ? -1 : Math.clamp(draft.option, 0, cls.options.size() - 1);
+	}
+
+	// ---- the creator's presets ----------------------------------------------------------------------------------------
+
+	/** The name of realm {@code id}, "" for none. */
+	private static String realmNameOf(int id) {
+		for (LifeStory.Realm r : realms) {
+			if (r.id() == id) {
+				return r.name();
+			}
+		}
+		return "";
+	}
+
+	/** The realm called {@code name} in this world (its id), or -1. */
+	private static int realmNamed(String name) {
+		for (LifeStory.Realm r : realms) {
+			if (!name.isEmpty() && r.name().equals(name)) {
+				return r.id();
+			}
+		}
+		return -1;
+	}
+
+	private static String key(Question q) {
+		Answer a = picked(q);
+		return a == null ? "" : a.key();
+	}
+
+	/** Saves the creator's rows under the name typed, over a preset of that name. */
+	static void savePreset() {
+		CharacterPresets.Preset p = new CharacterPresets.Preset();
+		p.name = presetTyped.strip();
+		if (p.name.isEmpty()) {
+			return;
+		}
+		Heritage.Kind kind = heritage();
+		Classes.PlayerClass cls = youthClass();
+		p.gender = draft.gender;
+		p.heritage = kind == null ? "" : kind.key();
+		p.born = key(Question.BORN);
+		p.raised = key(Question.RAISED);
+		p.childhood = key(Question.CHILDHOOD);
+		p.youth = key(Question.YOUTH);
+		p.turn = key(Question.TURN);
+		p.cls = cls == null ? "" : cls.key();
+		p.option = cls == null || draft.option < 0 || draft.option >= cls.options.size() ? "" : cls.options.get(draft.option);
+		p.raisedRealm = realmNameOf(draft.raisedRealm);
+		p.look = lookIndex();
+		p.flaws = draft.flaws;
+		p.switches = draft.switches;
+		p.sparks = draft.sparks.clone();
+		if (CharacterPresets.save(p)) {
+			presetAt = CharacterPresets.all().indexOf(p);
+		}
+	}
+
+	/** Loads the next preset ({@code dir} 1) or the one before (-1) into the creator's rows. */
+	private void loadPreset(int dir) {
+		loadNextPreset(dir);
+		if (this.presetName != null) {
+			this.presetName.setValue(presetTyped);
+		}
+		this.scroll = 0;
+	}
+
+	static void loadNextPreset(int dir) {
+		List<CharacterPresets.Preset> saved = CharacterPresets.all();
+		if (saved.isEmpty()) {
+			return;
+		}
+		presetAt = Math.floorMod(presetAt < 0 ? dir > 0 ? 0 : -1 : presetAt + dir, saved.size());
+		CharacterPresets.Preset p = saved.get(presetAt);
+		apply(p);
+		presetTyped = p.name;
+	}
+
+	/** The spark picked of {@code kind} (0 ideal, 1 bond, 2 flaw): a position 1-3 in the offered list, 0 for none. */
+	static int spark(int kind) {
+		return draft.sparks[kind];
+	}
+
+	static void cycleSpark(int kind, int dir) {
+		draft.sparks[kind] = Math.floorMod(draft.sparks[kind] + dir, com.jaymoskingdoms.Sparks.options(null, kind).size() + 1);
+		draft.sparksTouched = true;
+	}
+
+	/** The heritage and its look the creator's rows make now, for the figure in MCA's creator: the heritage's key and the variant's (null: its first look). */
+	static @Nullable String heritageKey() {
+		Heritage.Kind kind = heritage();
+		return kind == null ? null : kind.key();
+	}
+
+	static @Nullable String variantKey() {
+		Heritage.Kind kind = heritage();
+		HeritageVariants.Variant variant = kind == null ? null : HeritageVariants.at(kind, lookIndex());
+		return variant == null ? null : variant.key();
+	}
+
+	private static void setAnswer(Question q, @Nullable String key) {
+		for (int i : listed(q)) {
+			Answer a = q.answers().get(i);
+			if (a.key().equals(key) && open(a)) {
+				draft.answers[q.ordinal()] = i;
+			}
+		}
+	}
+
+	/**
+	 * A preset onto the creator's rows, birthplace first (it decides which of the rest can be). What this world or this
+	 * player can't have (a blood not woken, a realm of another world) is left as it was, and {@link #settle} mends the rest.
+	 */
+	private static void apply(CharacterPresets.Preset p) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (p.gender == 0 || p.gender == 1) {
+			draft.gender = p.gender;
+		}
+		draft.heritage = -1;
+		setAnswer(Question.BORN, p.born);
+		for (Heritage.Kind kind : Heritage.Kind.values()) {
+			if (kind.key().equals(p.heritage) && minecraft.player != null && Heritage.unlocked(minecraft.player, kind) && kind != heritage()) {
+				setBlood(kind);
+			}
+		}
+		setAnswer(Question.RAISED, p.raised);
+		setAnswer(Question.CHILDHOOD, p.childhood);
+		setAnswer(Question.YOUTH, p.youth);
+		setAnswer(Question.TURN, p.turn);
+		draft.cls = -1;
+		for (Classes.PlayerClass cls : Classes.PlayerClass.values()) {
+			if (cls.key().equals(p.cls) && cls != youthClass()) {
+				setCalling(cls);
+			}
+		}
+		Classes.PlayerClass cls = youthClass();
+		draft.option = cls == null || p.option == null ? -1 : cls.options.indexOf(p.option);
+		draft.look = p.look;
+		if (Flaws.valid(p.flaws, p.switches)) {
+			draft.flaws = p.flaws;
+			draft.switches = p.switches;
+		}
+		for (int i = 0; i < draft.sparks.length; i++) {
+			draft.sparks[i] = p.sparks != null && i < p.sparks.length ? Math.clamp(p.sparks[i], 0, 3) : 0;
+		}
+		draft.sparksTouched = true;
+		draft.raisedRealm = realmNamed(p.raisedRealm == null ? "" : p.raisedRealm);
+		settle();
+	}
+
 	// ---- a harder life (0.7.420) --------------------------------------------------------------------------------------
 
 	/** The switches shown under the flaws, as {bit, key}. */
@@ -1493,7 +2070,7 @@ final class LifeStoryScreen extends Screen {
 	private final List<int[]> choiceRows = new ArrayList<>();
 
 	/** The effect line of choice {@code i}, with its numbers. */
-	private static Component effect(int i) {
+	static Component effect(int i) {
 		return switch (i) {
 			case 0 -> Component.translatable("gui.jaymoskingdoms.story.flaw.light_sleeper.fx", (int)Flaws.SLEEPER_RANGE);
 			case 1 -> Component.translatable("gui.jaymoskingdoms.story.flaw.glass_jaw.fx", Math.round((Flaws.JAW_TAKEN - 1.0F) * 100.0F));
@@ -1506,16 +2083,16 @@ final class LifeStoryScreen extends Screen {
 		};
 	}
 
-	private static boolean chosen(int i) {
+	static boolean chosen(int i) {
 		return i < 4 ? (draft.flaws & Flaws.Flaw.values()[i].bit()) != 0 : (draft.switches & SWITCH_BITS[i - 4]) != 0;
 	}
 
 	/** Whether choice {@code i} can be switched on or off now (a third flaw can't be taken). */
-	private static boolean choosable(int i) {
+	static boolean choosable(int i) {
 		return i >= 4 || chosen(i) || Integer.bitCount(draft.flaws) < Flaws.MAX;
 	}
 
-	private static Component choiceName(int i) {
+	static Component choiceName(int i) {
 		return Component.translatable(i < 4 ? "gui.jaymoskingdoms.story.flaw." + Flaws.Flaw.values()[i].key() : "gui.jaymoskingdoms.story.switch." + SWITCH_KEYS[i - 4]);
 	}
 
@@ -1622,7 +2199,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/** Flips choice {@code i}: a flaw (never a third), or a switch. */
-	private static void flip(int i) {
+	static void flip(int i) {
 		if (i >= SPARK_BASE) {
 			int kind = (i - SPARK_BASE) / 3, pos = (i - SPARK_BASE) % 3 + 1;
 			draft.sparks[kind] = draft.sparks[kind] == pos ? 0 : pos;
