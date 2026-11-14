@@ -51,7 +51,10 @@ import org.jspecify.annotations.Nullable;
  * {@link #learn} enforces it. Each style has its own level, 1 to {@link #MAX_LEVEL}.</li>
  * <li><b>The punch</b>: a left click on a living thing. The server throws it in place of the game's own attack, so
  * it does {@link #PUNCH_DAMAGE} whatever the level (a cestus adds its own): levels never add damage. Which punch it is comes from the style's
- * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again.</li>
+ * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again. One click, one punch,
+ * like a combo fighter: a click at the air or a block throws one too ({@link AirPunch}); holding the button throws no
+ * more (the client swallows the held attack); a click up to {@link #BUFFER} ticks before the next is due waits its
+ * turn, one at a time, and an earlier one is lost.</li>
  * <li><b>The windup</b>: a punch lands {@link #windupAt} ticks after it is thrown ({@link #WINDUP_SLOWEST} at level
  * 1, down to {@link #WINDUP_FASTEST} at level {@link #MAX_LEVEL}; its stamina is spent as it starts), on the one it was
  * aimed at if they are still in reach then; the next can't start until it has.</li>
@@ -93,6 +96,12 @@ public final class Boxing {
 	public static final float GASSED_CUT = 0.45F, GASSED_CAP = 2.0F;
 	/** This long (ticks) without a punch and the string starts again. */
 	static final int STRING_RESET = 30;
+	/**
+	 * (Jung: "handles click-spam cleanly") A click this many ticks or less before the next punch is due waits its turn
+	 * (one at a time); a click earlier than that is ignored, so mashing doesn't stack punches up or run them on by
+	 * itself once you stop.
+	 */
+	static final int BUFFER = 8;
 	/** A boxer's block, per blow stopped (half-feathers; one icon), and the Arrow Slit's tight guard (an icon and a half). */
 	public static final float BLOCK_COST = 2.0F, ARROW_SLIT_BLOCK_COST = 3.0F;
 	/** The breath of a tiring and of a gassed boxer: a puff every this many ticks, and how many wisps a gassed one is. */
@@ -429,6 +438,10 @@ public final class Boxing {
 		}
 		State state = STATES.computeIfAbsent(boxer.getUUID(), id -> new State());
 		long now = level.getGameTime();
+		if (!queued && now < state.readyAt - BUFFER) {
+			// far too soon: the click is lost (a combo fighter's click, not a held trigger)
+			return;
+		}
 		if (state.winding != -1 || now < state.readyAt - EARLY_SLACK) {
 			// too soon (or the last punch is still winding up): one punch waits its turn ({@link #tick}); nothing is spent yet.
 			// A click at the air never takes the place of one waiting for a foe.
