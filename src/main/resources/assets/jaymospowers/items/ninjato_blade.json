@@ -46,6 +46,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/ninjato_blade_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -83,6 +96,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/weapon_part/ninjato_blade_gold"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/ninjato_blade_steel"
           }
         }
       ],

@@ -57,6 +57,9 @@ public final class Quenching {
 	/** This hot stack dipped: a Hot Ingot back to its ingot, anything else without its heat and grade untouched. */
 	public static ItemStack quenched(ItemStack stack) {
 		if (stack.is(Smithing.HOT_INGOT)) {
+			if (FoldedSteel.folded(stack)) {
+				return new ItemStack(FoldedSteel.INGOT, stack.getCount());
+			}
 			Molten molten = HotMetal.metal(stack);
 			if (molten != null) {
 				ItemStack ingot = HotMetal.ingot(molten, stack.getCount());
