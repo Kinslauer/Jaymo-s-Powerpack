@@ -28,6 +28,7 @@ of 36 rows on the pick page (https://claude.ai/artifact/FdTQFbbhv8615nRy6t3QnC).
 | Order wheel (formations, Whirl, spare, take a blade, send home) | short hold of the same key with the blades out | same |
 | Harry / steer | Sneak + B tap / hold, with the blades out | same |
 | Hand the wing what you hold | G with the blades out | same |
+| Closing Ring, Step to a blade | on the order wheel | same |
 | Blade Storm | hold V (a tap is still Barrage, on letting go); also on the wheel | on the wheel |
 | Blade riding (step on, and step off and send it) | double tap Jump | same |
 
@@ -50,8 +51,10 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
    orders. Double tap Jump again steps off and sends the blade on as one heavy hit. Broken legs wobble it (`LimbMotion`).
    Until every ability is unlocked it can go home early, after a short warning shake. The stance is the earthboard's
    (`GravityBoardPose`) with the arms left free.
-5. **Big moves**: Closing Ring, step to a blade, wing combos (Kingdoms' Weapon Forms engine through `PowersCompat`), the
-   wing joining Hundred Blades and the Sword of Damocles.
+5. **Big moves** (built, `ArsenalWingMoves`): Closing Ring and Step to a blade are two more slices of the order wheel;
+   wing combos are a five-hit chain counted in Powers by itself (Weapon Forms has no combo counter to share, so nothing
+   here needs Kingdoms): the Fan's chain is thrust, thrust, cross, cross, every blade; the Halo's and Flank's is thrust,
+   sweep, cross, sweep, every blade. The wing joins Hundred Blades and the Sword of Damocles (`ArsenalWingMoves.join`).
 6. **Look and who else**: the Void wing (corruption per strike, Endermen notice), guns on the wing, relic gifts carry
    over, working hands (tools dig), gifted villagers get two.
 7. **Gravity's rocks**: the same orders for `GravityRocks` (formation, strike, harry, steer, whirl, ward, storm, ring),
@@ -65,4 +68,4 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
 
 ## Open questions
 
-- Wing combos need Kingdoms; without Kingdoms loaded they are simply absent. Fine?
+- (Settled in patch 5: wing combos do not need Kingdoms.)

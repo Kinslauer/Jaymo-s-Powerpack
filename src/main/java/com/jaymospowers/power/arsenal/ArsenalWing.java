@@ -72,7 +72,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link #STEER}), cutting what they pass through, and go for whatever is nearest that spot when you let go. Holding the
  * wing's key with the blades out opens the order wheel on the client ({@link Order}): the formations, Whirl (the whole
  * wing spinning close round you for {@link #WHIRL_TICKS}), a mark that spares what you look at, taking a blade into your
- * hand, and sending them home. With a guard raised, a blade meets each blow or shot meant for you and goes home for it.
+ * hand, sending them home, and the big moves ({@link ArsenalWingMoves}: Closing Ring, stepping to a blade). With a guard raised, a blade meets each blow or shot meant for you and goes home for it.
  *
  * <p>G with the blades out and a place free hands the wing what you hold: a summoned weapon (it keeps its timer), a
  * weapon or tool of your own, or one loose rock off the stack. Your own things never go home by themselves and are
@@ -123,10 +123,10 @@ public final class ArsenalWing {
 	public static final float ROCK_DAMAGE = 3.0F;
 
 	public static final int FAN = 0, HALO = 1, FLANK = 2, SHAPES = 3;
-	/** What the whole wing is doing: hanging in its places, flying where its holder looks, or whirling round them. */
-	public static final int DOCKED = 0, STEER = 1, WHIRL = 2;
+	/** What the whole wing is doing: hanging in its places, flying where its holder looks, whirling round them, or ringing something ({@link ArsenalWingMoves}). */
+	public static final int DOCKED = 0, STEER = 1, WHIRL = 2, RING = 3;
 	/** The order wheel's slices after the three formations. */
-	public static final int ORDER_WHIRL = 3, ORDER_SPARE = 4, ORDER_TAKE = 5, ORDER_HOME = 6, ORDER_STORM = 7, ORDERS = 8;
+	public static final int ORDER_WHIRL = 3, ORDER_SPARE = 4, ORDER_TAKE = 5, ORDER_HOME = 6, ORDER_STORM = 7, ORDER_RING = 8, ORDER_STEP = 9, ORDERS = 10;
 
 	/**
 	 * One blade: what it is, when it goes home, when it is back in its place ({@code 0}: it never left), and whether it
@@ -339,6 +339,7 @@ public final class ArsenalWing {
 		}
 		Wing wing = player.getAttached(WING);
 		if (wing == null || !player.isAlive()) {
+			ArsenalWingMoves.clear(player);
 			return;
 		}
 		List<Blade> kept = new ArrayList<>();
@@ -376,6 +377,10 @@ public final class ArsenalWing {
 			}
 			return;
 		}
+		if (wing.mode() == RING) {
+			ArsenalWingMoves.tickRing(player, wing);
+			return;
+		}
 		if (wing.mode() == WHIRL) {
 			if (now - wing.modeStart() >= WHIRL_TICKS) {
 				player.setAttached(WING, wing.doing(DOCKED, now));
@@ -394,7 +399,7 @@ public final class ArsenalWing {
 		if (struck != null && player.tickCount - swing <= 1 && ANSWERED.getOrDefault(id, -1) != swing) {
 			ANSWERED.put(id, swing);
 			LivingEntity locked = LockOn.target(player);
-			strike(player, wing, locked != null ? locked : struck, STRIKE_DAMAGE);
+			ArsenalWingMoves.swing(player, wing, locked != null ? locked : struck);
 			return;
 		}
 		Integer harried = HARRIED.get(id);
@@ -448,9 +453,15 @@ public final class ArsenalWing {
 			&& !SPARED.getOrDefault(player.getUUID(), Set.of()).contains(target.getUUID());
 	}
 
+	/** What the wing is set on (Sneak + B), if it is still there. */
+	static @Nullable LivingEntity harried(ServerPlayer player) {
+		Integer harried = HARRIED.get(player.getUUID());
+		return harried != null && player.level().getEntity(harried) instanceof LivingEntity living && fair(player, living) ? living : null;
+	}
+
 	/** The first blade hanging in its place flies at {@code target}. False when none is ready or the target isn't fair. */
-	private static boolean strike(ServerPlayer player, Wing wing, LivingEntity target, float damage) {
-		if (!fair(player, target)) {
+	static boolean strike(ServerPlayer player, @Nullable Wing wing, LivingEntity target, float damage) {
+		if (wing == null || !fair(player, target)) {
 			return false;
 		}
 		ServerLevel level = player.level();
@@ -584,7 +595,7 @@ public final class ArsenalWing {
 	}
 
 	/** Something the blades go for unasked while whirling: a monster, or whatever is after their holder. */
-	private static boolean foe(ServerPlayer player, LivingEntity living) {
+	static boolean foe(ServerPlayer player, LivingEntity living) {
 		return living instanceof Enemy || living instanceof Mob mob && mob.getTarget() == player || living == player.getLastHurtByMob()
 			|| living == LockOn.target(player);
 	}
@@ -632,6 +643,8 @@ public final class ArsenalWing {
 			case ORDER_TAKE -> take(player, wing);
 			case ORDER_HOME -> dismiss(player, wing);
 			case ORDER_STORM -> ArsenalStorm.start(player, now + ArsenalStorm.WHEEL_TICKS);
+			case ORDER_RING -> ArsenalWingMoves.ring(player, wing);
+			case ORDER_STEP -> ArsenalWingMoves.step(player, wing);
 			default -> {
 			}
 		}
@@ -737,7 +750,7 @@ public final class ArsenalWing {
 	}
 
 	/** What the holder is looking at within {@code range} (their lock-on target first). */
-	private static @Nullable LivingEntity looked(ServerPlayer player, double range) {
+	static @Nullable LivingEntity looked(ServerPlayer player, double range) {
 		LivingEntity locked = LockOn.target(player);
 		if (locked != null) {
 			return locked;
@@ -771,6 +784,12 @@ public final class ArsenalWing {
 		if (wing.mode() == WHIRL) {
 			double angle = (now - wing.modeStart()) * 0.6 + i * Mth.TWO_PI / n;
 			return player.getPosition(partialTick).add(Math.cos(angle) * WHIRL_RADIUS, 1.0 + Math.sin(angle * 0.5 + i) * 0.35, Math.sin(angle) * WHIRL_RADIUS);
+		}
+		if (wing.mode() == RING) {
+			Vec3 ringed = ArsenalWingMoves.ringSlot(player, wing, i, now, partialTick);
+			if (ringed != null) {
+				return ringed;
+			}
 		}
 		if (wing.mode() == STEER) {
 			// a small ring round the spot I look at, flown out to from their places
@@ -838,6 +857,7 @@ public final class ArsenalWing {
 		WHIRL_READY.remove(id);
 		SPARED.remove(id);
 		CUT.remove(id);
+		ArsenalWingMoves.onLost(player);
 		Wing wing = player.getAttached(WING);
 		if (wing != null) {
 			wing.blades().forEach(blade -> home(player, blade));
