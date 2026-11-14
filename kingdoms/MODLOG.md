@@ -13547,3 +13547,10 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - Clicking the one on your rope with the lasso works the rope (no villager talk screen by accident). Hogtied or grabbed mobs can't target anyone. Blood Sorcerer rites take hogtied or grabbed captives as before. New loading-screen hint 173.
 - `forms/Lasso` (Hold, Tie, TIED/HOLDING attachments), client `forms/LassoPose` (whirl/tying/tied poses, cord layer), `LassoRope` (the whirling ring), mixins `LassoLyingMixin`, `LassoCameraMixin`, first-person hand raise in `LassoSocketFirstPersonMixin`; `PowersCompat.boundCheck/dropFromArms`; lang part `lasso.json`.
 - Built; not played.
+
+## 0.8.97 (2026-11-14): Weapon Forms menu: a Spells tab (#1563)
+
+- Andy: "is there a spell engine screen in the h menu? ... can it go on the same weapon forms screen?" The H menu's Weapon Forms page (now "Forms and Spells") has a last tab, Spells, beside the weapon families: every Spell Engine spell your spell book, weapon and gear give you right now, passives dim. Point at one for Spell Engine's own text (what it does, cast time, cost, cooldown).
+- The page is on the H menu once you know a form or have any spell, so a caster who knows no form gets it too (it opens on Spells).
+- It is a list to read: spells are still bound at the Spell Binding Table and cast from the skill bar. Without Spell Engine nothing changes.
+- Classes: `BeltScreen`, new `SpellList`. Compiled; not played.
