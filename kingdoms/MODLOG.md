@@ -13126,3 +13126,9 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 - The reaped can't be talked with in the illager tongue.
 - Operators: `/kingdom horde reaped` sends a host at once.
 - Compiled (compileJava, compileClientJava); not played. Villagers don't yet flee the reaped the way they flee living illagers, and a reaped evoker's vexes won't go for living illagers.
+
+## 0.8.71 (2026-11-14): Townsfolk react to one risen Hollow (#1531)
+
+- **Seen risen Hollow**: a player who died and rose one of the Hollow is met with it by every townsperson the first time they see them (12 blocks, in sight): one who knew them (10+ MCA hearts) cries out their name and grieves (-15 hearts), a stranger screams that the dead are walking (-5 hearts), a child shrieks. Those who mind the Hollow, and every child, run. Each remembers it for good (`Recollections.Kind.SAW_TURNED`), brings it up later and tells others. A full mask hides it; those born Hollow aren't met this way (`HollowSighting`, attachment `hollow_risen`, lang part `hollow_sighting.json`).
+- **Not taken in**: a village no longer carries a Hollow player home to tend after a death (`Shelter.take`). Andy's risen Hollow was carried into Caelreach and hit again there.
+- Built; not played.

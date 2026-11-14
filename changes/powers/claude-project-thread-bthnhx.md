@@ -1,5 +1,0 @@
-# One death, one wake: no screens piled on the black
-- **One wake per death**: Andy died mid-turn, rose a Hollow, and two seconds later the sun killed his out-cold body again (then once more after a village took him in): four wake lines in a row. For 10 seconds after being put down where you wake (the 5 s out cold and a little on your feet), a death is turned away; mobs don't execute you in that time either (`Mortality.WOKE_GRACE`, `justWoke`). Losing your head, the void, lava and executions by players still end it.
-- **The turning's green vignette** belongs to that black only: a later death clears it (it stayed through every wake after).
-- **Nothing over the black's line**: the line is no longer repeated small on the action bar; while a line is on the black, other action-bar lines (tongue notices, town names) wait and the last one shows once it lifts; chat and our HUD pieces stay hidden until it lifts. The "hold sneak to come to" bar still shows (`DownedHud.holdOverlay`, `SceneBlackOverlayMixin`).
-- Built; not played.
