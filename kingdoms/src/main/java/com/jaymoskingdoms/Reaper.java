@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Classes.PlayerClass;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.SpiritVoice;
 import com.jaymoskingdoms.spirits.Spirits;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
@@ -17,10 +18,12 @@ import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -193,6 +196,20 @@ public final class Reaper {
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Reaper::tick);
+		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
+			.then(Commands.literal("reaper").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.literal("toll").then(Commands.argument("n", IntegerArgumentType.integer(0, MAX_TOLL)).executes(c -> {
+					ServerPlayer player = c.getSource().getPlayerOrException();
+					State state = player.getAttached(REAPER);
+					if (state == null) {
+						c.getSource().sendFailure(Component.literal("No Reaper: be a Warlock sworn to it (/kingdom class set @s warlock reaper)"));
+						return 0;
+					}
+					int toll = IntegerArgumentType.getInteger(c, "n");
+					player.setAttached(REAPER, new State(toll, state.fed(), state.refused(), state.dead(), state.harvestAt(), state.harvestId(), state.actAt()));
+					c.getSource().sendSuccess(() -> Component.literal("Toll " + toll + ", stage " + stage(toll)), true);
+					return 1;
+				}))))));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			DEATHS.clear();
 			RISING.clear();
