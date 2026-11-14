@@ -1864,7 +1864,7 @@ them; the real ones are kept tied up underground, under Grim ruins and in cellar
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
 
-(new) **Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
+**Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
 same dark woods: a changeling can put on the face of anyone it has looked at closely, skin, hair and clothes together.
 Some of the lives stolen from the villages are worn by a changeling and not by a grey shapeshifter, and it keeps the
 real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
