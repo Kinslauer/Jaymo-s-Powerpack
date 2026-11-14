@@ -60,6 +60,7 @@ import org.jspecify.annotations.Nullable;
  * Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
  * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
+ * <li>Sneak + V (the Void Arsenal: Sneak + X) - Attendant Blades ({@link ArsenalWing}): weapons that stay out and hang round you, striking with you.</li>
  * </ul>
  */
 public final class ArsenalPower implements Power {
@@ -207,6 +208,11 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		boolean voided = com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Mastery.starterOnly(player);
+		if (key == PowerKey.ABILITY_3 && !voided && ArsenalWing.key(player, down)) {
+			// Sneak + V: Attendant Blades (a short hold calls them or sends them home, a tap changes their formation);
+			// the Void Arsenal, whose Sneak + V is its gates, has them on Sneak + X (ArsenalCannons)
+			return;
+		}
 		if (key == PowerKey.ABILITY_3 && voided) {
 			// the Void Arsenal's V: gates instead of Barrage (held: a gate cast out ahead)
 			ArsenalGates.key(player, down);
@@ -317,6 +323,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.onLost(player);
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
+		ArsenalWing.onLost(player);
 		ArsenalChains.onLost(player);
 		ArsenalStanding.closeAll(player, false);
 		ArsenalPlaces.forget(player);
@@ -340,6 +347,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);
 		ArsenalCannons.tick(player);
+		ArsenalWing.tick(player);
 		ServerPlayer grabbed = ArsenalAnywhere.tickGrab(player);
 		if (grabbed != null) {
 			reach(player, grabbed);

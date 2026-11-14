@@ -54,6 +54,9 @@ public final class OutOfBodyClient {
 		}
 		if (ghost == null || ghost.level() != minecraft.level) {
 			ghost = new PlayerGhost(OutOfBody.GHOST, minecraft.level);
+			// a number of its own, below the server's (which are all above 0): other mods ask the camera's, and an entity
+			// with none throws (Andy's game crashed drifting out of his body after a creeper, 2026-11-14 2:43 AM)
+			ghost.setId(-1 - player.getId());
 			ghost.looksWith = player;
 			ghost.snapTo(player.getX(), player.getY() + OutOfBody.RISE, player.getZ(), player.getYRot(), player.getXRot());
 			speed = Vec3.ZERO;

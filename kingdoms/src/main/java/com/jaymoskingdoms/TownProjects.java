@@ -250,6 +250,23 @@ public final class TownProjects {
 		Factions.level(server).setAttached(PROJECTS, Map.copyOf(all));
 	}
 
+	/** (Andy, 2026-11-14) {@code f}'s works, each with how far along it is, the open ones first (its ledger, {@link TownLedger}). */
+	static List<Component> ledger(MinecraftServer server, Faction f) {
+		TownWorks w = works(server, f.id());
+		List<Component> open = new ArrayList<>(), built = new ArrayList<>();
+		for (Project p : listed(server, f)) {
+			Progress pr = w.of(p.id());
+			Component name = Component.translatable("project.jaymoskingdoms." + p.id() + ".title");
+			if (pr.done() >= 0) {
+				built.add(Component.translatable("ledger.jaymoskingdoms.built", name));
+			} else {
+				open.add(Component.translatable("project.jaymoskingdoms.title", name, Mth.floor(fraction(p, pr) * 100.0F)));
+			}
+		}
+		open.addAll(built);
+		return open;
+	}
+
 	static @Nullable Project project(String id) {
 		for (Project p : PROJECTS_LIST) {
 			if (p.id().equals(id)) {

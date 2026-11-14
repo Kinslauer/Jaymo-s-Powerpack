@@ -59,6 +59,12 @@ public final class BlossomVillages {
 	static final int RADIUS = 24, CLEAR_HEIGHT = 18, MAX_SPREAD = 8;
 	/** Tries for a site each time. */
 	static final int SITE_TRIES = 6;
+	/**
+	 * A site is by the water (Andy: "these should always spawn near water, but they need to be on a large landmass"):
+	 * sea, river or lake at one of these distances from its middle, at one of this many points round.
+	 */
+	static final int[] WATER_RINGS = {48, 80, 112, 144};
+	static final int WATER_POINTS = 12;
 	/** Who moves in: villagers in each minka, in each job hall, and its iron golems. */
 	static final int PER_HOUSE = 2, PER_HALL = 1, GOLEMS = 1;
 	/** How often (ticks) the Blossom land's MCA guards are seen to, and how far from the seat. */
@@ -239,7 +245,28 @@ public final class BlossomVillages {
 		if (Raids.playerNear(level, at, HIDE_RANGE)) {
 			return false;
 		}
+		// by the water, on the mainland: never an island off the shore
+		if (!waterNear(level, at) || com.jaymoskingdoms.seas.Offshore.island(level, at.getX(), at.getZ())) {
+			return false;
+		}
 		return level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), at, BELL_CLEARANCE, PoiManager.Occupancy.ANY).isEmpty();
+	}
+
+	/** Water within {@link #WATER_RINGS} of {@code at}, by the ground's shape (its bed under the sea's level): nothing is loaded. */
+	private static boolean waterNear(ServerLevel level, BlockPos at) {
+		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
+		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
+		int sea = generator.getSeaLevel();
+		for (int r : WATER_RINGS) {
+			for (int i = 0; i < WATER_POINTS; i++) {
+				double a = Math.PI * 2.0 * i / WATER_POINTS;
+				int x = at.getX() + (int)Math.round(Math.cos(a) * r), z = at.getZ() + (int)Math.round(Math.sin(a) * r);
+				if (generator.getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, level, state) < sea) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** {@code at} (already {@link #open}) could hold a town: its whole ground loaded, and no kingdom's seat within {@link #TOWN_REALM_SPACING}. */

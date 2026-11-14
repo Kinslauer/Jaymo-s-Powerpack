@@ -12898,3 +12898,58 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 
 - Jaymo's Powers now frees a Limbo ghost whose body is gone. A buried body is a body still: `Graves` tells Powers where it lies (`DeathCompat.addResting`), so the one waiting stays by their grave.
 - Compiled; not played.
+
+## 0.8.57 (2026-11-14): the fortress knight's own plate (#1509)
+
+- **Fortress knight**: he no longer wears plain netherite. His armour is drawn as his own blackened plate: a horned
+  great helm with one slit lit from inside, a ribbed cuirass under a gorget, a gilt-lined belt with tassets, a torn
+  cape the red of Nether brick, stacked pauldrons with a spike each, vambraces, gauntlets, knee cops and sabatons.
+- He keeps his body, his size and the way he fights (the greatsword's whole string, parries, posture): the plate hangs
+  on his own limbs and takes every pose they do. A knight who rose before this patch is dressed in it when he loads.
+- How: his four netherite pieces carry the look `jaymoskingdoms:vigil_plate` (`FortressKnight.PLATE`), and
+  `ReverentLayer` hangs `vigil_plate` (made by `kingdoms/tools/gen_fortress_knight.py`, spec
+  `docs/Fortress-Knight-Model-Spec.md`) on whoever wears that look. The pieces still never drop.
+- Compiled; seen in renders only, not played.
+
+## 0.8.58 (2026-11-14): a chart to Mohknee (#1507)
+
+- Andy: "someone should sell a map to mohknee."
+- A blossom trader's captain, lying off a home harbour, now has a third answer beside passage: **Buy a copy of his chart** (15
+  emeralds' worth). It is a map of Mohknee's western shore (2048 blocks across, a red mark where his ship lies to). On the home
+  continent your marker sits on the map's edge toward that shore, so it gives the bearing to sail. Not sold off Mohknee itself.
+- `BlossomTraders.chart`. Compiled; not played. Not checked in game: that the far shore draws on the map before anyone has been there.
+
+## 0.8.59 (2026-11-14): Town ledger (#1511)
+
+- Town business on a villager's talk screen has a new answer, "Let me see the town ledger". It hands you a written book of the town as it stands that day:
+  - who rules, the ruler's temper and creed, wealth, stores, hands and peace, and the town's members (what `/kingdom info` says);
+  - its troubles;
+  - its town works, with how far along each is;
+  - its treaties, with the days each has left.
+- A realm's ruler keeps the ledger. In a village any grown villager will fetch it.
+- A town that hates you won't show you its books.
+- Asking again swaps your old copy of that town's ledger for the new one.
+
+## 0.8.60 (2026-11-14): Blossom only on Mohknee; no kingdom raised out at sea (#1508)
+
+- **Blossom only on Mohknee** (Andy, of a Blossom-style castle at his farmhand start: "these bloosom castles should
+  only spawn on mohknee no more blossom anywhere else"). A cherry grove on the home continent is plain country now
+  (`Palette.of`): a kingdom or village founded there gets no Blossom castle (the grand seats' temple and dojo), no
+  minka, no ronin harness and no Blossom tongue. Everything on Mohknee is Blossom as before (`Palette.at`).
+  Home-continent settlements already standing in a cherry grove keep their buildings but count as plain country from
+  the next start.
+- **No kingdom raised at sea or on an island.** The kingdom a life story raises when the world has none
+  (`StoryGround.citadel`) is moved to the nearest mainland within 2,400 blocks when the place asked for is under the
+  sea or on an island (`StoryGround.mainland`, `Offshore.island`), and the coastal capital's walk in from the sea
+  passes over islands (`StoryGround.shore`).
+- **On Mohknee, by the water, on the mainland.** A Blossom village or town rises only with water (sea, river or lake)
+  within about 150 blocks and never on an island off the shore (`BlossomVillages.open` / `waterNear`). Andy: "these
+  should always spawn near water, but they need to be on a large landmass."
+- All read from the ground's shape, so no chunks are loaded. `/kingdom found blossom` and `blossomtown` still build
+  where the operator stands. Compile-checked; not seen in game.
+
+## 0.8.61 (2026-11-14): Air Roll perk, Freerunner safe fall (#1504)
+
+- **Air Roll** (Stealth, Freerun page, tier 5 under Freerunner, 1 rank, Stealth level 8): unlocks Powers' air roll, a fresh Sprint press just after a sprint jump rolls you forward through the air. Its own perk, so the flip on Freerunner rank 1 stays as it was. `Skills.Perk.AIR_ROLL`, lang part `air-roll.json`.
+- Freerunner's text now says each rank lets you fall a block further before fall damage starts (Powers sets the attribute).
+- Built; not played.

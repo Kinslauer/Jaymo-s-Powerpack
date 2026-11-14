@@ -101,15 +101,7 @@ public final class DivePose {
                 h.head.xRot = Mth.lerp(e * 1.5F, h.head.xRot, 0.3F);
                 h.hat.xRot = h.head.xRot;
             }
-            case 2 -> {
-                // clean dive: arms forward over the head, body straight, head first
-                set(h.rightArm, -1.1F, 0.0F, 0.15F, e);
-                set(h.leftArm, -1.1F, 0.0F, -0.15F, e);
-                set(h.rightLeg, 0.02F, 0.0F, 0.02F, e);
-                set(h.leftLeg, 0.02F, 0.0F, -0.02F, e);
-                h.head.xRot = Mth.lerp(e, h.head.xRot, -0.5F);
-                h.hat.xRot = h.head.xRot;
-            }
+            case 2 -> cleanDive(h, e);
             case 3 -> {
                 // cannonball: knees hugged to the chest, tucked into a ball
                 set(h.rightArm, -0.9F, 0.0F, 0.15F, e);
@@ -120,6 +112,19 @@ public final class DivePose {
             default -> {
             }
         }
+        h.hat.xRot = h.head.xRot;
+    }
+
+    /**
+     * The clean dive's limbs, {@code e} of the way in (0-1): arms forward over the head, body straight, head first. The
+     * breach leap ({@code RunMovesPose}) takes the same pose as it leaves the water.
+     */
+    public static void cleanDive(HumanoidModel<?> h, float e) {
+        set(h.rightArm, -1.1F, 0.0F, 0.15F, e);
+        set(h.leftArm, -1.1F, 0.0F, -0.15F, e);
+        set(h.rightLeg, 0.02F, 0.0F, 0.02F, e);
+        set(h.leftLeg, 0.02F, 0.0F, -0.02F, e);
+        h.head.xRot = Mth.lerp(e, h.head.xRot, -0.5F);
         h.hat.xRot = h.head.xRot;
     }
 

@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymospowers.client.freerun.moves.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["HidingNameMixin", "HidingOverlayMixin", "HidingPushMixin"],
+	"client": ["HidingNameMixin", "HidingOverlayMixin", "HidingPushMixin", "LadderClimbMixin", "ShallowSprintMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

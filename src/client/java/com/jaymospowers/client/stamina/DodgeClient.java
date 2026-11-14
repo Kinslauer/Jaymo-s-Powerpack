@@ -218,6 +218,9 @@ public final class DodgeClient {
 		rollX = (float)dir.x;
 		rollZ = (float)dir.z;
 		rollFlip = false;
+		// the body is the low one for the roll (Dodge#rollingLow), at once
+		Dodge.localRollId = player.getId();
+		Dodge.localRollStart = player.level().getGameTime();
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z));
 		}

@@ -54,6 +54,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		// Cannon Battery: the rifts and their cannons, and X held and let go
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalCannonRenderer::render);
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalPortalRenderer::render);
+		// Attendant Blades: the weapons hanging round their holder
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalWingRenderer::render);
 		// Rift Chains: the rifts around whatever is bound, and their chains
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalChainsRenderer::render);
 		ArsenalPortalRenderer.init();
@@ -128,7 +130,7 @@ public final class ArsenalPowerClient implements PowerClient {
 	@Override
 	public int hudHeight(LocalPlayer player) {
 		// (HUD rework) the text rows' block in the right dock
-		return 70;
+		return player.getAttached(com.jaymospowers.power.arsenal.ArsenalWing.WING) == null ? 70 : 92;
 	}
 
 	@Override
@@ -187,12 +189,36 @@ public final class ArsenalPowerClient implements PowerClient {
 			}
 		}
 
+		wingPips(graphics, player, x, top - (Fate.isAscended(player) ? 45 : 22), now);
+
 		Component summons = batches.isEmpty()
 			? Component.translatable("hud.jaymospowers.arsenal.none", ArsenalPower.MAX_HELD)
 			: Component.translatable("hud.jaymospowers.arsenal.held", batches.size(), ArsenalPower.MAX_HELD, seconds(Math.max(0, soonest)));
 		int color = !batches.isEmpty() && soonest < 200 ? 0xFFFF7070 : 0xFFD8C8FF;
 		graphics.fill(x - 2, y + 21, x + font.width(summons) + 2, y + 31, 0x60000000);
 		graphics.text(font, summons, x, y + 22, color, true);
+	}
+
+	/** Attendant Blades: one icon a blade, dimmed while it is away striking, with a bar for the time before it goes home. */
+	private static void wingPips(GuiGraphicsExtractor graphics, LocalPlayer player, int x, int y, long now) {
+		com.jaymospowers.power.arsenal.ArsenalWing.Wing wing = player.getAttached(com.jaymospowers.power.arsenal.ArsenalWing.WING);
+		if (wing == null) {
+			return;
+		}
+		int count = wing.blades().size();
+		graphics.fill(x - 2, y - 1, x + count * 17 + 1, y + 20, 0x60000000);
+		for (int i = 0; i < count; i++) {
+			com.jaymospowers.power.arsenal.ArsenalWing.Blade blade = wing.blades().get(i);
+			int px = x + i * 17;
+			graphics.item(blade.item(), px, y);
+			if (wing.out(i, now) < 1.0F) {
+				graphics.fill(px, y, px + 16, y + 16, 0xA0000000);
+			}
+			long left = blade.expires() - now;
+			int w = (int) (16 * Math.clamp((double) left / com.jaymospowers.power.arsenal.ArsenalWing.BLADE_TICKS, 0.0, 1.0));
+			graphics.fill(px, y + 17, px + 16, y + 19, 0xFF2A2140);
+			graphics.fill(px, y + 17, px + w, y + 19, left < 200 ? 0xFFFF7070 : ACCENT);
+		}
 	}
 
 	private static void ultimateRow(GuiGraphicsExtractor graphics, Font font, int x, int y, long left) {

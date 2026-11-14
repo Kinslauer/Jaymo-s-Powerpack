@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -171,58 +172,67 @@ final class KingdomCommands {
 
 	private static int info(CommandContext<CommandSourceStack> c, @Nullable String name) {
 		MinecraftServer server = c.getSource().getServer();
-		ServerLevel level = Factions.level(server);
 		Faction found = find(c, name);
 		if (found == null) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
 		Faction f = found;
-		c.getSource().sendSuccess(() -> line(server, f), false);
+		for (Component line : ledger(server, f)) {
+			c.getSource().sendSuccess(() -> line, false);
+		}
+		return 1;
+	}
+
+	/** What {@code /kingdom info} says of {@code f}, line by line; (Andy, 2026-11-14) also the pages of its ledger ({@link TownLedger}). */
+	static List<Component> ledger(MinecraftServer server, Faction f) {
+		ServerLevel level = Factions.level(server);
+		List<Component> lines = new ArrayList<>();
+		lines.add(line(server, f));
 		// (0.7.225) a player on its throne, the villager there their steward
 		java.util.UUID sovereign = Crowns.sovereign(server, f);
 		if (sovereign != null) {
 			ServerPlayer p = server.getPlayerList().getPlayer(sovereign);
 			Component who = p != null ? p.getDisplayName() : Component.translatable("message.jaymoskingdoms.crown.away");
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.sovereign", who).withStyle(ChatFormatting.GOLD), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.sovereign", who).withStyle(ChatFormatting.GOLD));
 		}
 		// (0.5.12) its ruler's temper
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper != null) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY));
 		}
 		// (0.7.224) its creed
 		if (f.type().isRealm() && !f.fallen()) {
 			GreatWars.Creed creed = GreatWars.creed(server, f);
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.creed", creed.named(),
-				Component.translatable("creed.jaymoskingdoms." + creed.key() + ".about")).withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.creed", creed.named(),
+				Component.translatable("creed.jaymoskingdoms." + creed.key() + ".about")).withStyle(ChatFormatting.GRAY));
 		}
 		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);
 		if (focus != null) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.focus", Focus.describe(focus)).withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.focus", Focus.describe(focus)).withStyle(ChatFormatting.GRAY));
 		}
 		if (f.type() == FactionType.KINGDOM) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.wealth", Wealth.describe(Wealth.of(server, f), f),
-				Wealth.worth(server, f)).withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.wealth", Wealth.describe(Wealth.of(server, f), f),
+				Wealth.worth(server, f)).withStyle(ChatFormatting.GRAY));
 		}
 		long caravans = Caravans.all(server).stream().filter(x -> x.home() == f.id() || x.lord() == f.id()).count();
 		if (caravans > 0) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.caravans", caravans).withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.caravans", caravans).withStyle(ChatFormatting.GRAY));
 		}
 		// relations
 		List<String> relations = f.relations().entrySet().stream()
 			.map(e -> nameOf(server, Integer.parseInt(e.getKey())) + " (" + e.getValue().id() + ")").toList();
 		if (!relations.isEmpty() || f.overlord() >= 0) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.relations", String.join(", ", relations))
-				.withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.relations", String.join(", ", relations))
+				.withStyle(ChatFormatting.GRAY));
 		}
 		// the economy
 		boolean loaded = Storage.loaded(level, f);
 		if (f.holdings().storage().isEmpty()) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.no_storage").withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.no_storage").withStyle(ChatFormatting.GRAY));
 		} else if (!loaded) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.storage_unloaded").withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.translatable("message.jaymoskingdoms.info.storage_unloaded").withStyle(ChatFormatting.GRAY));
 		} else {
 			Map<Item, Integer> needs = Economy.nextNeeds.apply(level, f);
 			Map<Item, Integer> missing = Storage.missing(level, f, needs);
@@ -230,25 +240,25 @@ final class KingdomCommands {
 			boolean healthy = missing.isEmpty() && food >= Economy.FOOD_RESERVE;
 			String short_ = missing.isEmpty() ? "-" : missing.entrySet().stream()
 				.map(e -> e.getValue() + " " + new ItemStack(e.getKey()).getHoverName().getString()).collect(Collectors.joining(", "));
-			c.getSource().sendSuccess(() -> mark(healthy).append(Component.translatable("message.jaymoskingdoms.info.economy",
-				food, Economy.FOOD_RESERVE, short_, Storage.freeSlots(level, f))), false);
+			lines.add(mark(healthy).append(Component.translatable("message.jaymoskingdoms.info.economy",
+				food, Economy.FOOD_RESERVE, short_, Storage.freeSlots(level, f))));
 		}
 		boolean adequate = Economy.adequatePersonnel(f);
-		c.getSource().sendSuccess(() -> mark(adequate).append(Component.translatable("message.jaymoskingdoms.info.personnel", Economy.staff(f),
-			Economy.needed(f), f.holdings().vacant(), f.holdings().population(), Builders.crewCount(f))), false);
+		lines.add(mark(adequate).append(Component.translatable("message.jaymoskingdoms.info.personnel", Economy.staff(f),
+			Economy.needed(f), f.holdings().vacant(), f.holdings().population(), Builders.crewCount(f))));
 		boolean peace = Economy.atPeace(server, f);
 		Component why = Economy.underAttack(server, f) ? Component.translatable("message.jaymoskingdoms.info.attacked")
 			: Economy.atWar(server, f) ? Component.translatable("message.jaymoskingdoms.info.war",
 				Relations.enemies(server, f).stream().map(Faction::name).collect(Collectors.joining(", ")))
 			: Component.translatable("message.jaymoskingdoms.info.calm");
-		c.getSource().sendSuccess(() -> mark(peace).append(Component.translatable("message.jaymoskingdoms.info.peace", why)), false);
+		lines.add(mark(peace).append(Component.translatable("message.jaymoskingdoms.info.peace", why)));
 		for (var entry : f.members().entrySet()) {
 			ServerPlayer member = server.getPlayerList().getPlayer(entry.getKey());
 			String who = member != null ? Identities.trueName(member).getString() : entry.getKey().toString().substring(0, 8);
-			c.getSource().sendSuccess(() -> Component.literal("  " + who + ": ").append(Component.translatable(Rank.forStanding(entry.getValue().standing()).key()))
-				.append(" (" + entry.getValue().standing() + ")").withStyle(ChatFormatting.GRAY), false);
+			lines.add(Component.literal("  " + who + ": ").append(Component.translatable(Rank.forStanding(entry.getValue().standing()).key()))
+				.append(" (" + entry.getValue().standing() + ")").withStyle(ChatFormatting.GRAY));
 		}
-		return 1;
+		return lines;
 	}
 
 	private static MutableComponent mark(boolean good) {
