@@ -501,3 +501,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 7:04 PM ET (project chat): Andy said "merge" for PR #1477 (Karpathy coding guidelines in CLAUDE.md). Squash-merged.
 - 2026-11-13 7:40 PM ET (YOUTH in game, PC session): Andy turned Youth on in game chat (`mcbot.py on`); the wood-wisp answers players who name it.
 - 2026-11-13 9:00 PM ET (Improve butchering from Carcass Craft thread): Andy picked "1 and 3" from the Carcass Craft zip review: clean kills (how it died changes the yield and hide) and skinning in strokes. Not size-based yield, no lancet/bone saw. Nothing is ported from the zip.
+- 2026-11-13 9:08 PM ET (Improve butchering from Carcass Craft thread): Andy: "This should be a skill in the survivalist tree". Built as the Survival perk Butcher's Hand (3 ranks) in PR #1486; the unskilled baseline keeps 3 skinning pulls and the rough-death losses (Claude's reading).
