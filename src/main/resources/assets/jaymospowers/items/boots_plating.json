@@ -1,0 +1,355 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_silver",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rose_gold",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_amethyst_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_pig_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_slimesteel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "cobalt",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_cobalt",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "manyullyn",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_manyullyn",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "queen_slime",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_queen_slime",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "hepatizon",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_hepatizon",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_stone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_granite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_granite",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_diorite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_diorite",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_blackstone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_blackstone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinker_armour/part/boots_plating_iron",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
+      }
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_copper"
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_iron"
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_silver"
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rose_gold"
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_amethyst_bronze"
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_pig_iron"
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_slimesteel"
+          }
+        },
+        {
+          "when": "cobalt",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_cobalt"
+          }
+        },
+        {
+          "when": "manyullyn",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_manyullyn"
+          }
+        },
+        {
+          "when": "queen_slime",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_queen_slime"
+          }
+        },
+        {
+          "when": "hepatizon",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_hepatizon"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_steel"
+          }
+        },
+        {
+          "when": "rock_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_stone"
+          }
+        },
+        {
+          "when": "rock_granite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_granite"
+          }
+        },
+        {
+          "when": "rock_diorite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_diorite"
+          }
+        },
+        {
+          "when": "rock_blackstone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/boots_plating_rock_blackstone"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinker_armour/part/boots_plating_iron"
+      }
+    }
+  }
+}

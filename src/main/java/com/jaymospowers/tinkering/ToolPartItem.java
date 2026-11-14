@@ -86,6 +86,37 @@ public class ToolPartItem extends Item {
 		TinkerMaterial.Stats s = material.stats;
 		TinkerMaterial.Limb limb = material.limb();
 		TinkerMaterial.Grip grip = material.grip();
+		TinkerMaterial.Plating plating = material.plating();
+		int piece = switch (part) {
+			case HELMET_PLATING -> 0;
+			case CHESTPLATE_PLATING -> 1;
+			case LEGGINGS_PLATING -> 2;
+			case BOOTS_PLATING -> 3;
+			default -> -1;
+		};
+		if (part.kind == PartType.Kind.PLATING || part.kind == PartType.Kind.MAILLE) {
+			// a plating's armour; a maille (or a stone plating, only good for its cast) brings just its armour trait
+			if (plating != null && piece >= 0) {
+				out.add(durability(plating.durability(piece)));
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.armor", String.format("%.1f", plating.armour(piece)))
+					.withStyle(ChatFormatting.GRAY));
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.toughness", String.format("%.1f", plating.toughness()))
+					.withStyle(ChatFormatting.GRAY));
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.knockback_resistance", Math.round(plating.knockback() * 100) + "%")
+					.withStyle(ChatFormatting.GRAY));
+			} else if (part.kind == PartType.Kind.PLATING) {
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.dummy_plating").withStyle(ChatFormatting.GRAY));
+				return out;
+			} else if (material == TinkerMaterial.LEATHER) {
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.cuirass").withStyle(ChatFormatting.GRAY));
+			}
+			Trait trait = material.armourTrait();
+			if (trait != null) {
+				out.add(Component.translatable("tooltip.jaymospowers.tinkering.trait", trait.name(1),
+					trait.description().copy().withStyle(ChatFormatting.DARK_GRAY)).withStyle(trait.colour));
+			}
+			return out;
+		}
 		if (part.kind == PartType.Kind.LIMB && limb != null) {
 			out.add(durability(limb.durability()));
 			out.add(percent("draw_speed", limb.drawSpeed()));

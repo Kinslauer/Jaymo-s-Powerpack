@@ -60,6 +60,7 @@ import org.jspecify.annotations.Nullable;
  * Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
  * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
+ * <li>Double tap Jump - Blade riding ({@link ArsenalRide}): a great blade under your feet carries you; again to step off and send it on.</li>
  * <li>Sneak + V (the Void Arsenal: Sneak + X) - Attendant Blades ({@link ArsenalWing}): weapons that stay out and hang round you, striking with you.</li>
  * </ul>
  */
@@ -168,6 +169,7 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
 		ArsenalWing.init();
+		ArsenalRide.init();
 		ArsenalChains.init();
 		ArsenalStanding.init();
 		ArsenalVoid.init();
@@ -322,6 +324,13 @@ public final class ArsenalPower implements Power {
 		ArsenalGates.close(player);
 		ArsenalChains.onLost(player);
 		ArsenalDamocles.cancelAim(player);
+		ArsenalRide.home(player);
+	}
+
+	/** Riding a blade ({@link ArsenalRide}): not kicked for floating. */
+	@Override
+	public boolean allowsFloating(ServerPlayer player) {
+		return ArsenalRide.riding(player);
 	}
 
 	@Override
@@ -335,6 +344,7 @@ public final class ArsenalPower implements Power {
 		ArsenalCannons.onLost(player);
 		ArsenalWing.onLost(player);
 		ArsenalStorm.onLost(player);
+		ArsenalRide.onLost(player);
 		ArsenalChains.onLost(player);
 		ArsenalStanding.closeAll(player, false);
 		ArsenalPlaces.forget(player);
@@ -360,6 +370,7 @@ public final class ArsenalPower implements Power {
 		ArsenalCannons.tick(player);
 		ArsenalWing.tick(player);
 		ArsenalStorm.tick(player);
+		ArsenalRide.tick(player);
 		ServerPlayer grabbed = ArsenalAnywhere.tickGrab(player);
 		if (grabbed != null) {
 			reach(player, grabbed);

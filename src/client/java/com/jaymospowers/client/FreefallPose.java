@@ -266,6 +266,7 @@ public final class FreefallPose {
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.LINE) != null
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.LINE_OFF) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT) != null
+			|| player.getAttached(com.jaymospowers.power.arsenal.ArsenalRide.RIDE) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.WEIGHTLESS_ON) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityForward.FALLING) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityWalk.SURFACE) != null

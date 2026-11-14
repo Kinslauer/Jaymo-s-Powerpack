@@ -31,6 +31,9 @@ public class CastItem extends Item {
 		TOOL_BINDING(PartType.TOOL_BINDING), CROSSGUARD(PartType.CROSSGUARD),
 		/** (0.15.x) The bow limb and grip (bowstrings and arrow parts have no cast: Part Builder only). */
 		BOW_LIMB(PartType.BOW_LIMB), BOW_GRIP(PartType.BOW_GRIP),
+		/** Armour platings and maille (the first made over a stone plating or a leather maille). */
+		HELMET_PLATING(PartType.HELMET_PLATING), CHESTPLATE_PLATING(PartType.CHESTPLATE_PLATING), LEGGINGS_PLATING(PartType.LEGGINGS_PLATING),
+		BOOTS_PLATING(PartType.BOOTS_PLATING), MAILLE(PartType.MAILLE),
 		/** (0.11.77) A weapon head of the kind it was made from ({@link WeaponParts}). */
 		WEAPON("weapon", null);
 

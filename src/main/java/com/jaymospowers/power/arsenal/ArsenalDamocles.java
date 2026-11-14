@@ -465,6 +465,8 @@ public final class ArsenalDamocles {
 	private static void impact(ServerPlayer player, ServerLevel level, Fall fall, Live live) {
 		double surface = fall.tipEnd() + EMBED_DEPTH;
 		Vec3 at = new Vec3(fall.x(), surface, fall.z());
+		// the Attendant Blades go in after it
+		ArsenalWingMoves.join(player, at.add(0.0, 1.0, 0.0));
 		// the ground around the point splits open (soft ground only)
 		int r = Mth.ceil(CRATER_RADIUS);
 		BlockPos center = BlockPos.containing(at);

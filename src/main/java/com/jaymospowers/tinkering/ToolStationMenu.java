@@ -180,7 +180,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			ItemStack stack = inputs.getItem(i);
 			if (!stack.isEmpty()) {
 				filled++;
-				if (Modifier.takes(stack)) {
+				if (Modifier.takes(stack) || stack.getItem() instanceof TinkerArmourItem) {
 					toolSlot = toolSlot == -1 ? i : -2;
 				}
 			}
@@ -281,6 +281,11 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				materials.add(ToolPartItem.material(inputs.getItem(match)));
 			}
 			if (materials.size() == type.parts.size()) {
+				// a stone plating is only for making its cast from
+				if (type.style == ToolType.Style.ARMOR && materials.getFirst().plating() == null) {
+					status = Component.translatable("gui.jaymospowers.tool_station.dummy_plating");
+					return ItemStack.EMPTY;
+				}
 				Component forge = forgeOnly(type.parts.size());
 				if (forge != null) {
 					status = forge;
@@ -430,7 +435,8 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 		List<TinkerMaterial> materials = ToolStats.materials(tool);
 		List<TinkerMaterial> heads = new ArrayList<>();
 		for (int i = 0; i < item.type().parts.size(); i++) {
-			if (item.type().parts.get(i).part().kind == PartType.Kind.HEAD || item.type().parts.get(i).part().kind == PartType.Kind.LIMB) {
+			PartType.Kind kind = item.type().parts.get(i).part().kind;
+			if (kind == PartType.Kind.HEAD || kind == PartType.Kind.LIMB || kind == PartType.Kind.PLATING) {
 				heads.add(materials.get(i));
 			}
 		}

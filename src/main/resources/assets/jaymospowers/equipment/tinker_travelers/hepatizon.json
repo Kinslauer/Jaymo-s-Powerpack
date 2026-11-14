@@ -1,0 +1,23 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:tinker_travelers/cuirass"
+      },
+      {
+        "texture": "jaymospowers:tinker_travelers/metal_hepatizon"
+      },
+      {
+        "texture": "jaymospowers:tinker_travelers/goggles"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:tinker_travelers/cuirass"
+      },
+      {
+        "texture": "jaymospowers:tinker_travelers/metal_hepatizon"
+      }
+    ]
+  }
+}

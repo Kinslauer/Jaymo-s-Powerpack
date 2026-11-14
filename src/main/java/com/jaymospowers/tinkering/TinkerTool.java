@@ -60,6 +60,21 @@ public interface TinkerTool {
 			builder.accept((details ? Component.translatable("tooltip.jaymospowers.tinkering.trait", name,
 				trait.getKey().description().copy().withStyle(ChatFormatting.DARK_GRAY)) : name.copy()).withStyle(trait.getKey().colour));
 		}
+		if (type.style == ToolType.Style.ARMOR) {
+			ToolStats.Armour armour = ToolStats.armour(type, materials);
+			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.durability", stack.getMaxDamage() - stack.getDamageValue(),
+				stack.getMaxDamage()).withStyle(ChatFormatting.GRAY));
+			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.armor", String.format("%.1f", armour.armour()))
+				.withStyle(ChatFormatting.GRAY));
+			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.toughness", String.format("%.1f", armour.toughness()))
+				.withStyle(ChatFormatting.GRAY));
+			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.knockback_resistance", Math.round(armour.knockback() * 100) + "%")
+				.withStyle(ChatFormatting.GRAY));
+			if (!details) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.shift").withStyle(ChatFormatting.DARK_GRAY));
+			}
+			return;
+		}
 		if (!type.style.durable()) {
 			rangedLines(type, materials, builder);
 			if (!details) {

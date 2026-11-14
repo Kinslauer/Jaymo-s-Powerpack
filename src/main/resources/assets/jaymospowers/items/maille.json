@@ -1,0 +1,295 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_silver",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_rose_gold",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_amethyst_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_pig_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_slimesteel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "cobalt",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_cobalt",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "manyullyn",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_manyullyn",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "queen_slime",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_queen_slime",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "hepatizon",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_hepatizon",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "leather",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_leather",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinker_armour/part/maille_iron",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
+      }
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_copper"
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_iron"
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_silver"
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_rose_gold"
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_amethyst_bronze"
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_pig_iron"
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_slimesteel"
+          }
+        },
+        {
+          "when": "cobalt",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_cobalt"
+          }
+        },
+        {
+          "when": "manyullyn",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_manyullyn"
+          }
+        },
+        {
+          "when": "queen_slime",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_queen_slime"
+          }
+        },
+        {
+          "when": "hepatizon",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_hepatizon"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_steel"
+          }
+        },
+        {
+          "when": "leather",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_leather"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinker_armour/part/maille_iron"
+      }
+    }
+  }
+}
