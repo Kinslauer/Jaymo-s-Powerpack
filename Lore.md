@@ -620,6 +620,13 @@ are: villagers who died a long time ago, in ages this world has already forgotte
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
 
+(new) **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement for Andy to approve). The old dead
+were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
+fields, a few carrying the hoe or shovel they were buried with. The older the world grows, the more of them wake, and
+they come up where the ground is dark and drift toward the living, groaning once as they find their feet. A blood
+moon wakes whole graveyards. By day they shelter, and the crowd comes apart into stragglers until the next dark. In
+the ruined future a Chrono can reach, nothing keeps them down any more, and the crowds there are the largest of all.
+
 **The draugr are Warrior-born.** Every draugr is an undead Warrior-born ancestor, one of the raiders who lived on the
 Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb

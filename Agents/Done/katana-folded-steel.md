@@ -26,3 +26,4 @@ owns:
 Folding a bloom gives a Folded Steel Ingot; the katana blade is hammered only from it. Powers compiled; not played, no server boot check.
 - 2026-11-14 07:49 PR #1503 is merged into master; moved to Agents/Done.
 PR #1503 merged 2026-11-14. Follow-up PR #1507: a blossom trader captain sells a chart of Mohknee's western shore (Kingdoms `BlossomTraders.chart`); compiled, not played.
+PR #1507 merged 2026-11-14.
