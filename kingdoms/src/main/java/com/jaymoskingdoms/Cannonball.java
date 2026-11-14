@@ -36,6 +36,9 @@ import org.jspecify.annotations.Nullable;
  * everything within {@link #BURST_RADIUS} and throwing it back, but never its gunner's own side (nor, from a defender,
  * the villagers and golems about them: {@link Javelins#harms}). Blocks are left whole, so a kingdom doesn't knock down
  * its own walls. Drawn as Balkon's WeaponMod cannonball when that's loaded, a fire charge otherwise. Never saved.
+ * <p>
+ * A {@link Musketoon}'s ball is the same thing out of a hand gun ({@link #shot}): anyone may fire it, a player too, with
+ * its own blow and its own pit.
  */
 public final class Cannonball extends Projectile implements ItemSupplier {
 	/** How fast it leaves the barrel and how fast it falls (blocks per tick, per tick). */
@@ -51,6 +54,11 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 
 	private static @Nullable Item look;
 	private int life;
+	/** Its blow on a direct hit, and the pit it leaves ({@code null}: a field gun's). */
+	private float damage = DAMAGE;
+	private com.jaymoskingdoms.sailing.Bombardment.@Nullable Crater pit;
+	/** Out of a hand gun: its owner needn't be a gunner at a cannon. */
+	private boolean hand;
 
 	public Cannonball(EntityType<? extends Cannonball> type, Level level) {
 		super(type, level);
@@ -72,6 +80,18 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	static void fire(ServerLevel level, PathfinderMob gunner, Vec3 muzzle, Vec3 dir) {
 		Cannonball ball = new Cannonball(TYPE, level);
 		ball.setOwner(gunner);
+		ball.setPos(muzzle);
+		ball.setDeltaMovement(dir.scale(SPEED));
+		level.addFreshEntity(ball);
+	}
+
+	/** A hand gun's ball, fired by {@code shooter} (a guard or a player) from {@code muzzle} along {@code dir}. */
+	static void shot(ServerLevel level, LivingEntity shooter, Vec3 muzzle, Vec3 dir, float damage, com.jaymoskingdoms.sailing.Bombardment.Crater pit) {
+		Cannonball ball = new Cannonball(TYPE, level);
+		ball.setOwner(shooter);
+		ball.hand = true;
+		ball.damage = damage;
+		ball.pit = pit;
 		ball.setPos(muzzle);
 		ball.setDeltaMovement(dir.scale(SPEED));
 		level.addFreshEntity(ball);
@@ -101,12 +121,13 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		}
 		Entity owner = this.getOwner();
 		// ((0.7.295) a folk gunner or an MCA archer)
-		if (!(owner instanceof PathfinderMob gunner) || !(owner instanceof Worker) || ++this.life > MAX_LIFE) {
+		if (!(owner instanceof LivingEntity gunner) || !(this.hand || owner instanceof PathfinderMob && owner instanceof Worker)
+			|| ++this.life > MAX_LIFE) {
 			this.discard();
 			return;
 		}
 		Vec3 next = pos.add(move);
-		HitResult hit = this.life <= GRACE_TICKS ? net.minecraft.world.phys.BlockHitResult.miss(next, net.minecraft.core.Direction.UP, net.minecraft.core.BlockPos.containing(next))
+		HitResult hit = this.life <= GRACE_TICKS && !this.hand ? net.minecraft.world.phys.BlockHitResult.miss(next, net.minecraft.core.Direction.UP, net.minecraft.core.BlockPos.containing(next))
 			: level.clip(new ClipContext(pos, next, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
 		if (hit.getType() != HitResult.Type.MISS) {
 			next = hit.getLocation();
@@ -122,8 +143,10 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			// but never on its own side's land or in a standing faction's buildings: a wall gun keeps its streets whole
 			net.minecraft.core.BlockPos struck = ((BlockHitResult) hit).getBlockPos();
 			// (Andy: "nothing should be safe": a siege train's field gun spares only its own realm's land, the besieged's buildings break)
-			if (SiegeTrain.crew(gunner) ? !ownLand(level, (Worker) gunner, struck) : !ownGround(level, (Worker) gunner, struck)) {
-				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck), com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
+			// (a player's hand gun spares nothing; a guard's spares what a wall gun does)
+			if (!(gunner instanceof Worker w) || (SiegeTrain.crew(gunner) ? !ownLand(level, w, struck) : !ownGround(level, w, struck))) {
+				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck),
+					this.pit == null ? com.jaymoskingdoms.sailing.Bombardment.FIELD : this.pit, gunner);
 			}
 			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
 			return;
@@ -144,18 +167,22 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		return own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos));
 	}
 
-	private void burst(ServerLevel level, PathfinderMob gunner, Vec3 at, @Nullable Entity direct) {
+	private void burst(ServerLevel level, LivingEntity gunner, Vec3 at, @Nullable Entity direct) {
 		Deafened.blast(level, at, Deafened.BLAST);
 		DamageSource source = this.damageSources().explosion(this, gunner);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e != gunner && e.isAlive() && !e.isSpectator())) {
 			double d = victim == direct ? 0.0 : victim.getBoundingBox().getCenter().distanceTo(at);
 			// (a field gun at a siege hurts the besieged realm's fighters too: SiegeTrain)
-			if (d > BURST_RADIUS || !(Javelins.harms(gunner, victim) || SiegeTrain.crew(gunner) && SiegeTrain.harms(gunner, victim))) {
+			// (a player's ball spares nobody but those in creative)
+			boolean harms = gunner instanceof net.minecraft.world.entity.player.Player
+				? !(victim instanceof net.minecraft.world.entity.player.Player p && p.isCreative())
+				: Javelins.harms(gunner, victim) || gunner instanceof PathfinderMob crew && SiegeTrain.crew(crew) && SiegeTrain.harms(crew, victim);
+			if (d > BURST_RADIUS || !harms) {
 				continue;
 			}
 			float share = (float) (1.0 - d / BURST_RADIUS);
-			victim.hurtServer(level, source, DAMAGE * (BURST_SHARE + (1.0F - BURST_SHARE) * share));
+			victim.hurtServer(level, source, this.damage * (BURST_SHARE + (1.0F - BURST_SHARE) * share));
 			double resist = 1.0 - victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 			Vec3 away = victim.position().subtract(at);
 			if (resist > 0.0 && away.lengthSqr() > 1.0E-4) {

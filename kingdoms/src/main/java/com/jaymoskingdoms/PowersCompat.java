@@ -67,6 +67,37 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code GunBlast.weaponModFired(LivingEntity, ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle gunFired;
+	private static boolean lookedForGunFired;
+
+	/**
+	 * A gun of ours (the {@link Musketoon}) went off in {@code shooter}'s hands: Jaymo's Powers pours its fire and smoke
+	 * out of the muzzle and plays the gun's fire animation. False without Powers, and the caller makes its own smoke.
+	 */
+	public static boolean gunFired(LivingEntity shooter, net.minecraft.world.item.ItemStack gun) {
+		if (!lookedForGunFired) {
+			lookedForGunFired = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					gunFired = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.armory.GunBlast"), "weaponModFired",
+						java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, net.minecraft.world.item.ItemStack.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' gun blast", e);
+				}
+			}
+		}
+		if (gunFired == null) {
+			return false;
+		}
+		try {
+			gunFired.invoke(shooter, gun);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
 	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
 	private static boolean lookedForClash;

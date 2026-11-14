@@ -8,8 +8,12 @@ hammer, ramrod and muzzle flash move: drawn, held, aimed, fired, reloaded, spent
   its own reload kept (sped up to WeaponMod's reload). Fire, draw, aim and spent are ours.
 - flintlock: the "Dueling Pistol" (Blockbench Workshop, CC BY 4.0), cut into body, hammer and ramrod. The Void Flintlock
   draws the same pistol in void colours.
-- blunderbuss: the Firecannon from cleannrooster's Frontier Armaments (MIT; tools/bbmodels/frontier-armaments/), a
-  brass-banded barrel with a bell mouth, its hammer cut into its own bone, its breech gem painted steel, a ramrod added.
+- blunderbuss: the Flintlock (a bell-mouthed long gun) from cleannrooster's Frontier Armaments (MIT;
+  tools/bbmodels/frontier-armaments/), its cock cut into its own bone, a ramrod added (Andy: "this should be the
+  blunderbuss").
+- musketoon: Frontier Armaments' Firecannon, a brass-banded barrel with a bell mouth, for Kingdoms' Musketoon (the
+  caravan guards' gun, which fires cannonballs): its hammer cut into its own bone, its breech gem painted steel, a
+  ramrod added.
 
 Each gun gets a muzzle flash bone (our flash picture, drawn full-bright by a glow layer) that only shows while it fires.
 
@@ -18,7 +22,8 @@ Writes for each gun:
   assets/jaymospowers/geckolib/models/entity/gun_<gun>.geo.json, .../animations/entity/gun_<gun>.animation.json
   assets/jaymospowers/textures/entity/gun_<gun>.png (+ _glow.png, and the variants: musket bayonet tiers, void pistol)
   the held_guns item definitions that draw them (animated_gun, with the matrix that lays the model where the old static
-  model lay, so the hand-held placements tuned for it still fit), and the blunderbuss's static model (its base).
+  model lay, so the hand-held placements tuned for it still fit), and the blunderbuss's static model (its base);
+  the musketoon's static model, texture and plain item definition in Kingdoms' assets (its animated one in held_guns).
 
 Keyframes are the game's way (degrees as ModelPart angles), as a "free" project stores them; tools/bbmodel_geckolib.py
 turns them round for GeckoLib. Check poses with tools/bbmodel_bake.py and tools/bbmodel_preview.py.
@@ -28,6 +33,7 @@ Run from the project root: python3 -I tools/gen_guns_geckolib.py
 import base64
 import copy
 import io
+import colorsys
 import json
 import math
 import os
@@ -46,10 +52,11 @@ BBMODELS = os.path.join(ROOT, "tools", "bbmodels")
 ART = os.path.join(ROOT, "art", "guns")
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jaymospowers")
 HELD = os.path.join(ROOT, "src", "main", "resources", "resourcepacks", "held_guns", "assets")
+KINGDOMS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
 R2 = 1 / math.sqrt(2)
 
 # WeaponMod's reload times (its config's defaults, seconds): each reload animation is this long, so it ends as the gun does
-RELOAD = {"musket": 1.5, "blunderbuss": 1.0, "flintlock": 0.75}
+RELOAD = {"musket": 1.5, "blunderbuss": 1.0, "flintlock": 0.75, "musketoon": 5.0}  # (the musketoon: Kingdoms' Musketoon.RELOAD)
 BAYONET_TIERS = {
 	# blade light, mid, dark
 	"wood": ((176, 132, 80), (139, 100, 56), (96, 66, 34)),
@@ -202,6 +209,10 @@ def flash_bone(centre, axis, size, texture):
 		disc = cube("flash_disc", (cx - s, cy - s, cz), (cx + s, cy + s, cz), {"north": (0, 0), "south": (0, 0)}, texture)
 		fin_v = cube("flash_fin_v", (cx, cy - s, cz - along), (cx, cy + s, cz), {"east": (0, 0), "west": (0, 0)}, texture)
 		fin_h = cube("flash_fin_h", (cx - s, cy, cz - along), (cx + s, cy, cz), {"up": (0, 0), "down": (0, 0)}, texture)
+	elif axis == "-x":  # muzzle toward -x
+		disc = cube("flash_disc", (cx, cy - s, cz - s), (cx, cy + s, cz + s), {"east": (0, 0), "west": (0, 0)}, texture)
+		fin_v = cube("flash_fin_v", (cx - along, cy - s, cz), (cx, cy + s, cz), {"north": (0, 0), "south": (0, 0)}, texture)
+		fin_h = cube("flash_fin_h", (cx - along, cy, cz - s), (cx, cy, cz + s), {"up": (0, 0), "down": (0, 0)}, texture)
 	else:  # muzzle toward +x
 		disc = cube("flash_disc", (cx, cy - s, cz - s), (cx, cy + s, cz + s), {"east": (0, 0), "west": (0, 0)}, texture)
 		fin_v = cube("flash_fin_v", (cx, cy - s, cz), (cx + along, cy + s, cz), {"north": (0, 0), "south": (0, 0)}, texture)
@@ -271,8 +282,9 @@ def standard_anims(gun, body, hammer, cocked, fallen, lift_axis, kick_axis, heav
 	`lift_axis` (+ is up) and kicks back along `kick_axis` (a unit vector, pixels per unit of kick). `heavy` scales how
 	hard and how long: the pistol 1, the musket heavier and slower, the blunderbuss most."""
 	def axis_vec(a, v):
-		# a long gun's muzzle (-z) rises with a negative x turn, the pistol's (+x) with a positive z turn
-		return tuple((-v if a == "x" else v) if c == a else 0.0 for c in "xyz")
+		# a long gun's muzzle (-z) rises with a negative x turn, the pistol's (+x) with a positive z turn, a muzzle
+		# toward -x ("-z") with a negative z turn
+		return tuple((-v if a in ("x", "-z") else v) if c == a[-1] else 0.0 for c in "xyz")
 
 	lift = lambda d: axis_vec(lift_axis, d)
 	kick = lambda d: tuple(c * d for c in kick_axis)
@@ -451,12 +463,20 @@ def frontier_cube(c, src, dst, k):
 	lo, hi = [min(lo[i], hi[i]) for i in range(3)], [max(lo[i], hi[i]) for i in range(3)]
 	at = lambda p: tuple(dst[i] + k * (p[i] - src[i]) for i in range(3))
 	faces = {}
-	for f, fc in c["uv"].items():
-		(u, v), (du, dv) = fc["uv"], fc["uv_size"]
-		uv = [u + du, v + dv, u, v] if f in ("up", "down") else [u, v, u + du, v + dv]
-		faces[f] = {"uv": uv, "texture": 0}
-		if fc.get("uv_rotation"):
-			faces[f]["rotation"] = fc["uv_rotation"]
+	if isinstance(c["uv"], list):
+		# box uv, as Blockbench unfolds it (whole pixels: a size is rounded down)
+		(u, v), (w, h, d) = c["uv"], (math.floor(n + 1e-7) for n in s)
+		for f, uv in {"east": [u, v + d, u + d, v + d + h], "north": [u + d, v + d, u + d + w, v + d + h],
+				"west": [u + d + w, v + d, u + 2 * d + w, v + d + h], "south": [u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h],
+				"up": [u + d + w, v + d, u + d, v], "down": [u + d + 2 * w, v, u + d + w, v + d]}.items():
+			faces[f] = {"uv": uv, "texture": 0}
+	else:
+		for f, fc in c["uv"].items():
+			(u, v), (du, dv) = fc["uv"], fc["uv_size"]
+			uv = [u + du, v + dv, u, v] if f in ("up", "down") else [u, v, u + du, v + dv]
+			faces[f] = {"uv": uv, "texture": 0}
+			if fc.get("uv_rotation"):
+				faces[f]["rotation"] = fc["uv_rotation"]
 	e = cube("cube", at(lo), at(hi), {}, rotation=None)
 	e["faces"] = faces
 	if c.get("inflate"):
@@ -468,9 +488,9 @@ def frontier_cube(c, src, dst, k):
 	return e
 
 
-def blunderbuss():
-	"""The Firecannon of cleannrooster's Frontier Armaments (MIT, tools/bbmodels/frontier-armaments/): a brass-banded
-	barrel with a bell mouth on a short stock. Its bone's display tilt dropped, then laid as our old blunderbuss lay:
+def musketoon():
+	"""Kingdoms' Musketoon: the Firecannon of cleannrooster's Frontier Armaments (MIT, tools/bbmodels/frontier-armaments/),
+	a brass-banded barrel with a bell mouth on a short stock. Its bone's display tilt dropped, then laid as a long gun lies:
 	muzzle toward -z, top up, about 29 pixels long. Its hammer (the slanted cock behind the barrel) gets its own bone.
 	Ours on top: the red gem on the breech plate painted over in the plate's steel (Andy), a steel ramrod with a brass tip
 	under the barrel, the muzzle flash and the animations."""
@@ -489,7 +509,7 @@ def blunderbuss():
 		for y in range(23, 27):
 			if px[x, y][0] > 150 and px[x, y][1] < 80:
 				px[x, y] = steel
-	textures = [texture_entry("blunderbuss", sheet), texture_entry("flash", flash_picture()),
+	textures = [texture_entry("musketoon", sheet), texture_entry("flash", flash_picture()),
 		texture_entry("ramrod", ramrod_picture())]
 	hammer_at = parts[13]["origin"]
 	hammer = group("hammer", hammer_at, [parts[13]])
@@ -500,13 +520,65 @@ def blunderbuss():
 	])
 	flash = flash_bone((0, dst[1], dst[2] - 0.1), "z", 9.0, 1)
 	gun = group("gun", (0, 9.5, 5.0), parts[:13] + [hammer, ramrod, flash])
-	data = project("blunderbuss", [group("root", (0, 0, 0), [gun])], textures, (128, 128))
+	data = project("musketoon", [group("root", (0, 0, 0), [gun])], textures, (128, 128))
 	data["textures"][1]["uv_width"], data["textures"][1]["uv_height"] = 32, 16
 	data["textures"][2]["uv_width"], data["textures"][2]["uv_height"] = 16, 8
 	uuids = {g["name"]: g["uuid"] for g in data["groups"]}
 	# reload: drawn out forward and up to the bore's line (2.5 up, 12.5 out puts it just past the muzzle), rammed, put back
-	anims = standard_anims("blunderbuss", "gun", "hammer", (0, 0, 0), (-40, 0, 0), "x", (0, 0, 1), 2.1, 2.3,
+	anims = standard_anims("musketoon", "gun", "hammer", (0, 0, 0), (-40, 0, 0), "x", (0, 0, 1), 2.4, 2.6,
 		ramrod="ramrod", ramrod_out=(0, 2.5, -12.5), reload_tilt=48.0)
+	data["animations"] = [a.blockbench("musketoon", uuids) for a in anims]
+	return data
+
+
+def paint_unpainted(im):
+	"""Frontier's long gun leaves the faces nobody painted in Blockbench's template colours (pale blue, green, pink, sky
+	blue, yellow): each such pixel takes the nearest painted pixel's colour, a little darker."""
+	px = im.load()
+	def template(p):
+		h, s, v = colorsys.rgb_to_hsv(p[0] / 255, p[1] / 255, p[2] / 255)
+		return p[3] and ((0.34 < h < 0.46 and s > 0.4) or ((h < 0.04 or h > 0.96) and s > 0.25 and v > 0.9)
+			or (0.48 < h < 0.62 and v > 0.75) or (0.12 < h < 0.2 and s > 0.45 and v > 0.9))
+	bad = [(x, y) for y in range(im.height) for x in range(im.width) if template(px[x, y])]
+	good = [(x, y) for y in range(im.height) for x in range(im.width) if px[x, y][3] and not template(px[x, y])]
+	for x, y in bad:
+		gx, gy = min(good, key=lambda g: (g[0] - x) ** 2 + (g[1] - y) ** 2)
+		r, g, b, a = px[gx, gy]
+		px[x, y] = (int(r * 0.88), int(g * 0.88), int(b * 0.88), a)
+	return im
+
+
+def blunderbuss():
+	"""The blunderbuss: the Flintlock of cleannrooster's Frontier Armaments (MIT, tools/bbmodels/frontier-armaments/), a
+	long barrel with a flared mouth on a curved stock. Its bone's display tilt dropped and left as it was modelled: along
+	x, muzzle toward -x, top up, about 45 pixels long (BLUNDERBUSS_FRAME lays and sizes it). Its cock (the rear of the two
+	slanted pieces over the lock, and its foot) gets its own bone. Ours on top: a steel ramrod with a brass tip under the
+	barrel, the muzzle flash and the animations."""
+	src_dir = os.path.join(BBMODELS, "frontier-armaments")
+	geo = json.load(open(os.path.join(src_dir, "flintlock.geo.json"), encoding="utf-8"))["minecraft:geometry"][0]
+	parts = [frontier_cube(c, (0, 0, 0), (0, 0, 0), 1.0) for c in geo["bones"][0]["cubes"]]
+	textures = [texture_entry("blunderbuss", paint_unpainted(Image.open(os.path.join(src_dir, "flintlock.png")).convert("RGBA"))),
+		texture_entry("flash", flash_picture()), texture_entry("ramrod", ramrod_picture())]
+	hammer = group("hammer", (9.5, 1.5, -1.5), [parts[6], parts[7]])
+	# the ramrod under the barrel, through the band and into the forestock; its tip toward the muzzle
+	ramrod = group("ramrod", (-16.0, -1.6, 0.5), [
+		cube("ramrod", (-15.4, -2.0, 0.1), (2.0, -1.2, 0.9), {"all": (0, 0)}, 2),
+		cube("ramrod_tip", (-16.2, -2.15, -0.05), (-15.4, -1.05, 1.05), {"all": (0, 4)}, 2),
+	])
+	flash = flash_bone((-18.9, 1.5, 0.5), "-x", 12.0, 1)
+	for f, uv in (("south", [32, 0, 16, 16]), ("down", [32, 0, 16, 16])):
+		# (so the flame's root is at the muzzle on both sides of each fin)
+		for fin in flash["children"][1:]:
+			if f in fin["faces"]:
+				fin["faces"][f]["uv"] = uv
+	gun = group("gun", (9.0, -1.0, 0.5), [p for i, p in enumerate(parts) if i not in (6, 7)] + [hammer, ramrod, flash])
+	data = project("blunderbuss", [group("root", (0, 0, 0), [gun])], textures, (128, 128))
+	data["textures"][1]["uv_width"], data["textures"][1]["uv_height"] = 32, 16
+	data["textures"][2]["uv_width"], data["textures"][2]["uv_height"] = 16, 8
+	uuids = {g["name"]: g["uuid"] for g in data["groups"]}
+	# reload: the ramrod drawn out past the muzzle and up to the bore's line, rammed, put back
+	anims = standard_anims("blunderbuss", "gun", "hammer", (0, 0, 0), (0, 0, 35), "-z", (1, 0, 0), 2.1, 2.3,
+		ramrod="ramrod", ramrod_out=(-19.5, 3.1, 0), reload_tilt=48.0)
 	data["animations"] = [a.blockbench("blunderbuss", uuids) for a in anims]
 	return data
 
@@ -531,9 +603,13 @@ _EZ, _EY = (R2, -R2, 0.0), (R2, R2, 0.0)
 _EX = (_EY[1] * _EZ[2] - _EY[2] * _EZ[1], _EY[2] * _EZ[0] - _EY[0] * _EZ[2], _EY[0] * _EZ[1] - _EY[1] * _EZ[0])
 LONG_GUN = tuple((_EX[i], _EY[i], _EZ[i]) for i in range(3))
 MUSKET_FRAME = frame_matrix(LONG_GUN, (0.0, 14.0, -13.75), (7.5, 9.5, 8.0), 0.6)
-# the blunderbuss a touch shorter on the same diagonal; its middle (barrel line) at the sprite's middle
-BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE = (0.0, 11.0, -3.5), (7.8, 8.6, 8.0), 0.56
-BLUNDERBUSS_FRAME = frame_matrix(LONG_GUN, BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE)
+# the musketoon a touch shorter on the same diagonal; its middle (barrel line) at the sprite's middle
+MUSKETOON_PIVOT, MUSKETOON_CENTRE, MUSKETOON_SCALE = (0.0, 11.0, -3.5), (7.8, 8.6, 8.0), 0.56
+MUSKETOON_FRAME = frame_matrix(LONG_GUN, MUSKETOON_PIVOT, MUSKETOON_CENTRE, MUSKETOON_SCALE)
+# the blunderbuss (modelled along x, muzzle toward -x) on that diagonal: muzzle up-left, top up-right, 45 pixels made 18
+X_GUN = ((R2, R2, 0.0), (-R2, R2, 0.0), (0.0, 0.0, 1.0))
+BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE = (3.8, 1.0, 0.5), (7.8, 8.6, 8.0), 0.41
+BLUNDERBUSS_FRAME = frame_matrix(X_GUN, BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE)
 # the pistol as tools/blockbench/dueling_pistol.py lays it (flintlock_3d)
 PISTOL = ((-R2, R2, 0), (R2, R2, 0), (0, 0, -1))
 FLINTLOCK_FRAME = frame_matrix(PISTOL, (7.3, 2.8, 8.16), (7.6, 8.4, 8.0), 0.85)
@@ -627,7 +703,7 @@ def main():
 	# the blunderbuss, and its static model (the base whose hand-held placements the animated one keeps)
 	data = blunderbuss()
 	geckolib(data, "blunderbuss")
-	elements, atlas = freeform_convert(data, LONG_GUN, BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE, drop=("flash",))
+	elements, atlas = freeform_convert(data, X_GUN, BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE, drop=("flash",))
 	atlas.save(os.path.join(HELD, "jaymospowers", "textures", "item", "gun", "blunderbuss.png"))
 	for name in ("blunderbuss", "blunderbuss_reload"):
 		path = os.path.join(HELD, "jaymospowers", "models", "item", "gun", name + ".json")
@@ -650,6 +726,30 @@ def main():
 			texture=f"jaymospowers:textures/entity/gun_musket_bayonet_{tier}.png"), 2)
 	write(os.path.join(items, "blunderbuss.json"), weaponmod_item("blunderbuss", "jaymospowers:item/gun/blunderbuss",
 		BLUNDERBUSS_FRAME, "weaponmod:item/blunderbuss", "weaponmod:item/blunderbuss_reload"), 2)
+	# Kingdoms' Musketoon: its static model and plain item definition in Kingdoms' own assets (what it is without Powers);
+	# in held_guns the animated one: loaded while a ball is charged in it (as a crossbow's bolt is), reloading while it
+	# is used unloaded, spent otherwise
+	data = musketoon()
+	geckolib(data, "musketoon")
+	elements, atlas = freeform_convert(data, LONG_GUN, MUSKETOON_PIVOT, MUSKETOON_CENTRE, MUSKETOON_SCALE, drop=("flash",))
+	atlas.save(os.path.join(KINGDOMS, "textures", "item", "musketoon.png"))
+	hand = lambda side: {"rotation": [10, -90 * side, 55 * side], "translation": [0, 2.0, 0.5], "scale": [0.85, 0.85, 0.85]}
+	eye = lambda side: {"rotation": [0, -90 * side, 25 * side], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]}
+	write(os.path.join(KINGDOMS, "models", "item", "musketoon.json"), {
+		"credit": "Firecannon, Frontier Armaments by cleannrooster (MIT)", "gui_light": "front",
+		"textures": {"0": "jaymoskingdoms:item/musketoon", "particle": "jaymoskingdoms:item/musketoon"}, "elements": elements,
+		"display": {"thirdperson_righthand": hand(1), "thirdperson_lefthand": hand(-1), "firstperson_righthand": eye(1),
+			"firstperson_lefthand": eye(-1), "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+			"gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]}, "fixed": {"rotation": [0, 180, 0], "scale": [1, 1, 1]}}})
+	still = {"type": "minecraft:model", "model": "jaymoskingdoms:item/musketoon"}
+	write(os.path.join(KINGDOMS, "items", "musketoon.json"), {"model": still}, 2)
+	gun = lambda pose: animated("musketoon", "jaymoskingdoms:item/musketoon", MUSKETOON_FRAME, pose=pose)
+	write(os.path.join(HELD, "jaymoskingdoms", "items", "musketoon.json"), {"model": {"type": "minecraft:select",
+		"property": "minecraft:display_context", "cases": [{"when": ["gui", "ground", "fixed"], "model": still}],
+		"fallback": {"type": "minecraft:select", "property": "minecraft:charge_type",
+			"cases": [{"when": ["arrow", "rocket"], "model": gun("loaded")}],
+			"fallback": {"type": "minecraft:condition", "property": "minecraft:using_item", "on_true": gun("reload"),
+				"on_false": gun("spent")}}}}, 2)
 	flint = weaponmod_item("flintlock", "jaymospowers:item/flintlock_3d", FLINTLOCK_FRAME, "weaponmod:item/flintlock",
 		"weaponmod:item/flintlock_reload")
 	write(os.path.join(items, "flintlock.json"), flint, 2)

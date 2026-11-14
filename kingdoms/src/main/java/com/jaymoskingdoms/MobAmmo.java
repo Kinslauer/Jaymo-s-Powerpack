@@ -72,7 +72,7 @@ import org.jspecify.annotations.Nullable;
 public final class MobAmmo {
 	/** What a mob shoots or throws. */
 	public enum Kind {
-		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives");
+		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives"), BALLS("balls");
 
 		final String key;
 
@@ -88,6 +88,8 @@ public final class MobAmmo {
 		OTHER_ARROWS = {8, 14};
 	/** A guard's javelins (or tridents, or rocks), and a gunman's shot. */
 	static final int[] JAVELINS = {2, 3}, SHOT = {6, 10};
+	/** A caravan guard's balls for his musketoon ({@link Musketoon}): heavy, so few. */
+	static final int[] BALLS = {3, 5};
 	/** A witch's splash potions, a Hornkin hurler's magma, a rock-throwing captain's rocks. */
 	static final int[] POTIONS = {4, 7}, BOMBS = {5, 8}, ROCKS = {3, 5};
 	/** The Cinder-Shade's throwing knives (her Ember Knives throw five at a time). */
@@ -193,6 +195,7 @@ public final class MobAmmo {
 			case POTIONS -> POTIONS;
 			case BOMBS -> BOMBS;
 			case ROCKS -> ROCKS;
+			case BALLS -> BALLS;
 			case KNIVES -> mob instanceof PatronChampion ? KNIVES : ROGUE_KNIVES;
 			case ARROWS -> {
 				if (mob instanceof AbstractSkeleton) {
@@ -225,7 +228,7 @@ public final class MobAmmo {
 			case POTIONS -> stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION);
 			case ROCKS -> stack.is(Items.COBBLESTONE) || stack.is(Items.MOSSY_COBBLESTONE) || stack.is(Items.COBBLED_DEEPSLATE);
 			case KNIVES -> knife(stack);
-			case SHOT, BOMBS -> false;
+			case SHOT, BOMBS, BALLS -> false;
 		};
 	}
 
@@ -370,7 +373,7 @@ public final class MobAmmo {
 			Integer left = ammo.get(kind.key);
 			if (left != null && left < fullOf(mob, kind)) {
 				wants = true;
-				dry |= left == 0 && kind != Kind.SHOT && kind != Kind.BOMBS;
+				dry |= left == 0 && kind != Kind.SHOT && kind != Kind.BOMBS && kind != Kind.BALLS;
 			}
 		}
 		if (!wants) {

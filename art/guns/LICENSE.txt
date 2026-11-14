@@ -1,5 +1,5 @@
 musket.bbmodel and flintlock.bbmodel are adapted from Blockbench Workshop models licensed under
 Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
-See CREDITS.md for the makers and the changes made. blunderbuss.bbmodel is adapted from Frontier Armaments by cleannrooster,
+See CREDITS.md for the makers and the changes made. blunderbuss.bbmodel and musketoon.bbmodel are adapted from Frontier Armaments by cleannrooster,
 MIT licence (Copyright (c) 2026 cleannrooster; full text in tools/bbmodels/frontier-armaments/LICENSE). The flash picture is
 original project art.
