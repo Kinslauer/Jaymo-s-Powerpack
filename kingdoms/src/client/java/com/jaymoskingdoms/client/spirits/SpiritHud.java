@@ -100,6 +100,7 @@ public final class SpiritHud {
 			case ARMOUR -> state.toggled(SpiritState.ARMOUR);
 			case STEADY -> state.toggled(SpiritState.STEADY);
 			case ECHO -> state.toggled(SpiritState.ECHO);
+			case "as_one" -> state.toggled(SpiritState.AS_ONE);
 			default -> false;
 		};
 	}

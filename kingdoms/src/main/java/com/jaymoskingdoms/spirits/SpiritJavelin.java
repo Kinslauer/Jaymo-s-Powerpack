@@ -59,6 +59,8 @@ public final class SpiritJavelin extends Projectile {
 	private float damage = 8.0F;
 	private int pierce = 3;
 	private boolean orb;
+	/** What its head is made of ({@link VarroArts#PLAIN} and the rest): what it leaves in what it hits. */
+	int head;
 	private @Nullable UUID aim;
 	private int life;
 	private final List<UUID> struck = new ArrayList<>();
@@ -90,6 +92,7 @@ public final class SpiritJavelin extends Projectile {
 		javelin.damage = damage;
 		javelin.pierce = pierce;
 		javelin.aim = aim == null ? null : aim.getUUID();
+		javelin.head = VarroArts.headOf(owner);
 		javelin.setPos(from);
 		javelin.setDeltaMovement(dir.normalize().scale(SPEED));
 		level.addFreshEntity(javelin);
@@ -101,6 +104,7 @@ public final class SpiritJavelin extends Projectile {
 		SpiritJavelin orb = new SpiritJavelin(TYPE, level);
 		orb.setOwner(owner);
 		orb.damage = damage;
+		orb.head = VarroArts.headOf(owner);
 		orb.orb = true;
 		orb.setPos(from);
 		orb.setDeltaMovement(dir.normalize().scale(ORB_SPEED));
@@ -141,7 +145,8 @@ public final class SpiritJavelin extends Projectile {
 			}
 			this.struck.add(victim.getUUID());
 			victim.setInvulnerableTime(0);
-			victim.hurtServer(level, this.damageSource(level, caster), this.damage);
+			victim.hurtServer(level, this.damageSource(level, caster), this.damage * VarroArts.headTimes(this.head, victim));
+			VarroArts.headHit(level, caster, victim, this.head);
 			Vec3 at = hit.getLocation();
 			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.3);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 1.3F);
@@ -196,6 +201,7 @@ public final class SpiritJavelin extends Projectile {
 			float share = (float)(1.0 - d / BURST_RADIUS);
 			victim.setInvulnerableTime(0);
 			victim.hurtServer(level, source, this.damage * (BURST_EDGE + (1.0F - BURST_EDGE) * share));
+			VarroArts.headHit(level, caster, victim, this.head);
 			double resist = 1.0 - victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 			Vec3 away = victim.position().subtract(at);
 			if (resist > 0.0 && away.lengthSqr() > 1.0E-4) {

@@ -174,6 +174,8 @@ public final class Ambrose extends Spirit {
 		MOVES.add(SpiritCharms.guardian());
 		MOVES.add(SpiritExecutions.move("execute_ambrose", Spirits.AMBROSE));
 		MOVES.add(new InBalm(Spirits.AMBROSE));
+		MOVES.addAll(AmbroseArts.MOVES);
+		MOVES.add(AsOne.MOVE);
 	}
 
 	Ambrose() {

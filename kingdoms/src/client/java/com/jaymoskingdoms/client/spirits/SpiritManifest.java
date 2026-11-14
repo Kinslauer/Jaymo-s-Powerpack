@@ -289,9 +289,11 @@ public final class SpiritManifest {
 			}
 			float m = stage.placed ? manifest(stage, now) : 0.0F;
 			float age = (float)(now - spirit.shownAt());
-			float flare = spirit.show() != 0L && spirit.pose() > Poses.IDLE && spirit.pose() != Poses.SPEAK ? SpiritFigure.strength(age) : 0.0F;
+			// (Two as One: it stands full over its keeper the whole time)
+			boolean asOne = spirit.toggled(SpiritState.AS_ONE);
+			float flare = asOne ? 1.0F : spirit.show() != 0L && spirit.pose() > Poses.IDLE && spirit.pose() != Poses.SPEAK ? SpiritFigure.strength(age) : 0.0F;
 			// it shows with its arms, and goes with them (Andy: "the arms stay attached as long as they are visible")
-			float shown = SpiritArms.presence(spirit, now, entity);
+			float shown = asOne ? 1.0F : SpiritArms.presence(spirit, now, entity);
 			float faint = (FAINT + (1.0F - FAINT) * flare) * (1.0F - m) * shown;
 			if (faint > 0.01F && !(entity == cameraEntity && firstPerson)) {
 				drawFaint(context, entity, spirit, partial, camera, faint, now);

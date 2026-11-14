@@ -98,6 +98,8 @@ public final class Grimsby extends Spirit {
 		MOVES.add(new GuardBreakMove());
 		MOVES.add(SpiritExecutions.move("finish", Spirits.GRIMSBY));
 		MOVES.add(new InBalm(Spirits.GRIMSBY));
+		MOVES.addAll(GrimsbyArts.MOVES);
+		MOVES.add(AsOne.MOVE);
 	}
 
 	public Grimsby() {
@@ -115,6 +117,7 @@ public final class Grimsby extends Spirit {
 			Moves.register(move);
 		}
 		GrimsbyBlades.register();
+		GrimsbyArts.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> tickAll());
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !riposte(entity, source, amount));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -410,6 +413,8 @@ public final class Grimsby extends Spirit {
 				mob.setTarget(null);
 				STUNS.put(mob.getUUID(), new Stunned(mob, level.getGameTime() + STUN_TICKS));
 			}
+			// (open to Take the Rest while it lasts)
+			Staggered.stagger(player, foe, STUN_TICKS);
 			Vec3 at = foe.position();
 			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.6, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			Mana.sendSeen(level, GrimsbyBlades.EDGE, at.x, at.y + 1.0, at.z, 20, 0.5, 0.6, 0.5, 0.05);

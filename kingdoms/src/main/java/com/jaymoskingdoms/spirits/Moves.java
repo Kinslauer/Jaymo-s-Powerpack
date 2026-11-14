@@ -29,7 +29,9 @@ public final class Moves {
 
 	/** Adds {@code move} to the list of all moves (a second with the same id is a mistake and is ignored). */
 	public static void register(Move move) {
-		if (ALL.putIfAbsent(move.id(), move) != null) {
+		Move old = ALL.putIfAbsent(move.id(), move);
+		// (a move two spirits share, Two as One, is given twice: that is not a mistake)
+		if (old != null && old != move) {
 			JaymosKingdoms.LOGGER.warn("two spirit moves called {}", move.id());
 		}
 	}
@@ -55,7 +57,7 @@ public final class Moves {
 
 	/** Starts {@code move}'s cooldown for {@code player}. */
 	public static void start(ServerPlayer player, Move move, long now) {
-		READY.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(move.id(), now + move.cooldown(player));
+		READY.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(move.id(), now + (long)(move.cooldown(player) * AsOne.cooldownTimes(player, move)));
 	}
 
 	private static long readyAt(ServerPlayer player, Move move) {
