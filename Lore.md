@@ -1656,7 +1656,8 @@ allow you to add it to a schematic, so your kingdom can build it"; the rest Clau
 the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
 are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
 under them its prep, armory, beds and smithy, and a caster keeps the arena's best take and its caged allays in a box over
-the gate. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
+the gate. The greatest of these pits, the round arena of the far sands with its four towers and its crane, stands empty
+until a camp comes up from the Wildlands to take it. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
 tier they were drawn in can copy the place out and build it again. This is the Retaking done with stone as well as
 blades: the realms raise the raiders' own forts, towers and pits as their own.
 
