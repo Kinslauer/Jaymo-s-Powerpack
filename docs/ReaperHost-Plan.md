@@ -10,9 +10,9 @@ One PR per patch, in this order. Each fits `Lore.md` first and adds its placemen
 |---|-------|------|-------|
 | 1 | Moog's Ocean Structures in the pack; the drowned courts | mos_ship, mos_deep | `build.gradle`, `Lore.md` |
 | 2 | People aboard: barbarian long ships, traders, fishers, passengers, a drifter on each raft; Tideborn hints | mos_crews, mos_raft, mos_deep (talk) | new `SeaSites` beside `IllagerSites`; `Crewmen`, `Drifters`, `ShipTalk` |
-| 3 | Host II: riders on skeleton horses, the reaped evoker raises the fallen, folk flee and gossip, a keeper calls the host | rh_riders, rh_evoker, rh_fear, rh_keeper | `reaped/`, `ZombieHordes`, `Reaper`, `WorkTalk`, `IllagerTalk` |
+| 3 | Host II: riders on skeleton horses and on spiders that take them over walls (Andy: "only the undead illagers should ride spiders"), the reaped evoker raises the fallen, folk flee and gossip, a keeper calls the host | rh_riders, ip_spider, rh_evoker, rh_fear, rh_keeper | `reaped/`, `ZombieHordes`, `Reaper`, `WorkTalk`, `IllagerTalk` |
 | 4 | The host at war: a standing Reaper side seated in a fallen illager camp, a mangonel with a dead crew, a black long ship | rh_war, rh_siege, rh_sea | `Camps`, `WarParties`, `SiegeTrain`, `Fleet` |
-| 5 | Living raiders by land: horse, camel, boat, spider, balloon | ip_horse, ip_camel, ip_boat, ip_spider, ip_air | `ZombieHordes` SQUAD kind |
+| 5 | Living raiders: horse, camel, boat, balloon (no spiders: those are the reaped's) | ip_horse, ip_camel, ip_boat, ip_air | `ZombieHordes` SQUAD kind |
 | 6 | Wanted: the mark, posters, the raider's horn, rusty keys and caches, lost labs and the crude totem | ip_wanted, ip_poster, ip_horn, ip_keys, ip_labs | `IllagerSites`, `IllagerTalk`, `HordeLure`, Alchemy |
 | 7 | Draugr ranks: archer, wight, scourge, the one that dodges, reading the fight; the skull that runs | dr_archer, dr_wight, dr_scourge, dr_dodge, dr_smart, dr_head | `Draugr`, Stormborn Tomb, chapels and barrows |
 | 8 | The lord of the Stormborn Tomb (Andy: "use blockbench and fable, go all out for this"): own model, intro film, the seal in pieces, the hall's waves, rune traps | dr_overlord, dr_claw, dr_waves, dr_traps | Stormborn Tomb, `UltimateFilm`, Alchemy |
