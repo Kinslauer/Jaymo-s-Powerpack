@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.smithing.Smithing;
 import com.jaymospowers.tinkering.smithing.Wear;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
@@ -84,9 +85,12 @@ public final class ArmourWear {
 		return equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
 	}
 
-	/** An armour piece that breaks our way here (forged ones break by {@link Wear}'s rule instead). */
+	/**
+	 * An armour piece that breaks our way here (forged ones break by {@link Wear}'s rule instead, Tool Station armour by
+	 * its tools' own).
+	 */
 	public static boolean applies(ItemStack stack) {
-		return armour(stack) && !stack.has(Smithing.GRADE);
+		return armour(stack) && !stack.has(Smithing.GRADE) && !(stack.getItem() instanceof TinkerTool);
 	}
 
 	/** Worn out and doing nothing until repaired. */

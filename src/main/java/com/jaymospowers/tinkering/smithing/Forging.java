@@ -94,7 +94,7 @@ public final class Forging {
 				}
 			}
 			for (PartType part : PartType.values()) {
-				if (part.kind != PartType.Kind.HEAD) {
+				if (part.kind != PartType.Kind.HEAD && part.kind != PartType.Kind.PLATING) {
 					continue;
 				}
 				for (TinkerMaterial material : TinkerMaterial.values()) {

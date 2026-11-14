@@ -166,6 +166,7 @@ public final class Tinkering {
 				case CROSSBOW -> new com.jaymospowers.tinkering.ranged.TinkerCrossbowItem(p, type);
 				case ARROW -> new com.jaymospowers.tinkering.ranged.TinkerArrowItem(p, type);
 				case ROD -> new com.jaymospowers.tinkering.ranged.TinkerRodItem(p, type);
+				case ARMOR -> new TinkerArmourItem(p, type);
 				default -> new TinkerToolItem(p, type);
 			}, p -> {
 				// (0.15.x) arrows and thrown blades stack, so they have no durability
@@ -176,6 +177,10 @@ public final class Tinkering {
 					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.SHOVEL));
 				} else if (type == ToolType.MATTOCK || type == ToolType.KAMA || type == ToolType.SCYTHE) {
 					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.HOE));
+				} else if (type.style == ToolType.Style.ARMOR) {
+					// worn in its slot (each one's look is set by its materials, ToolStats.apply)
+					p = p.component(DataComponents.EQUIPPABLE, net.minecraft.world.item.equipment.Equippable.builder(ToolStats.armourSlot(type))
+						.setEquipSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_IRON).build());
 				}
 				return p;
 			}));
@@ -249,6 +254,17 @@ public final class Tinkering {
 				WeaponParts.heads(kind).forEach(output::accept);
 			}
 			for (ToolType type : ToolType.values()) {
+				if (type.style == ToolType.Style.ARMOR) {
+					// each metal's plate piece (iron maille), then its travelers' one (leather)
+					for (TinkerMaterial maille : List.of(TinkerMaterial.IRON, TinkerMaterial.LEATHER)) {
+						for (TinkerMaterial plating : TinkerMaterial.values()) {
+							if (plating.plating() != null) {
+								output.accept(ToolStats.build(type, List.of(plating, maille)));
+							}
+						}
+					}
+					continue;
+				}
 				PartType.Kind first = type.parts.getFirst().part().kind;
 				for (TinkerMaterial head : TinkerMaterial.values()) {
 					if (!head.makes(first) || head.id.contains("_") && !head.id.startsWith("rock_stone")) {

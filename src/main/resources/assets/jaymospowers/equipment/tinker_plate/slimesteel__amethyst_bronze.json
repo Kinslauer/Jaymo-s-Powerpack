@@ -1,0 +1,20 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:tinker_plate/maille_amethyst_bronze"
+      },
+      {
+        "texture": "jaymospowers:tinker_plate/plating_slimesteel"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:tinker_plate/maille_amethyst_bronze"
+      },
+      {
+        "texture": "jaymospowers:tinker_plate/plating_slimesteel"
+      }
+    ]
+  }
+}

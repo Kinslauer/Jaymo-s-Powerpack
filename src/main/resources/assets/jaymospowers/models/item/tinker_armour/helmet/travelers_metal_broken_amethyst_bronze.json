@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_amethyst_bronze"
+  }
+}

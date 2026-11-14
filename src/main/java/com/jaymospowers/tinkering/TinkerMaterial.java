@@ -172,6 +172,43 @@ public enum TinkerMaterial {
 		GRIPS.put(family, grip);
 	}
 
+	/**
+	 * A metal's armour plating (Tinkers' 1.20.1 plating stats): durability and armour for the helmet, chestplate, leggings
+	 * and boots plating in that order, and the toughness and knockback resistance each plating adds.
+	 */
+	public record Plating(int[] durability, float[] armour, float toughness, float knockback) {
+		public int durability(int piece) {
+			return durability[piece];
+		}
+
+		public float armour(int piece) {
+			return armour[piece];
+		}
+	}
+
+	private static final java.util.IdentityHashMap<Stats, Plating> PLATINGS = new java.util.IdentityHashMap<>();
+
+	static {
+		plating(Stats.COPPER, 143, 208, 195, 169, 1, 3, 2, 1, 0.0F, 0.0F);
+		plating(Stats.IRON, 165, 240, 225, 195, 2, 5, 4, 2, 0.0F, 0.0F);
+		plating(Stats.SILVER, 198, 288, 270, 234, 2, 5, 4, 1, 0.0F, 0.05F);
+		plating(Stats.ROSE_GOLD, 99, 144, 135, 117, 2, 5, 3, 1, 0.0F, 0.0F);
+		plating(Stats.AMETHYST_BRONZE, 308, 448, 420, 364, 2, 6, 5, 2, 2.0F, 0.0F);
+		plating(Stats.PIG_IRON, 253, 368, 345, 299, 1, 4, 3, 1, 1.0F, 0.1F);
+		plating(Stats.SLIMESTEEL, 440, 640, 600, 520, 2, 6, 5, 2, 0.0F, 0.0F);
+		plating(Stats.COBALT, 330, 480, 450, 390, 2, 7, 5, 2, 1.0F, 0.05F);
+		plating(Stats.MANYULLYN, 385, 560, 525, 455, 2, 7, 5, 2, 3.0F, 0.05F);
+		plating(Stats.QUEEN_SLIME, 550, 800, 750, 650, 2, 7, 5, 2, 1.0F, 0.0F);
+		plating(Stats.HEPATIZON, 352, 512, 480, 416, 2, 7, 5, 2, 2.0F, 0.1F);
+		plating(Stats.STEEL, 319, 464, 435, 377, 2, 7, 5, 2, 2.0F, 0.0F);
+	}
+
+	private static void plating(Stats family, int helmet, int chest, int legs, int boots, float helmetArmour, float chestArmour,
+		float legsArmour, float bootsArmour, float toughness, float knockback) {
+		PLATINGS.put(family, new Plating(new int[] {helmet, chest, legs, boots},
+			new float[] {helmetArmour, chestArmour, legsArmour, bootsArmour}, toughness, knockback));
+	}
+
 	/** Material units per item: a plank or ingot is 1, a log 4, a block of metal 9. */
 	private static final Map<Item, TinkerMaterial> ITEMS = new LinkedHashMap<>();
 	private static final Map<Item, Integer> UNITS = new LinkedHashMap<>();
@@ -237,6 +274,29 @@ public enum TinkerMaterial {
 		return stats == null ? null : GRIPS.get(stats);
 	}
 
+	/** Its armour plating stats, or null when it makes no wearable plating (only the metals Tinkers plates with). */
+	public @Nullable Plating plating() {
+		return stats == null ? null : PLATINGS.get(stats);
+	}
+
+	/**
+	 * What it brings to armour instead of its tool trait (Tinkers' armour traits), or null for nothing: the slimy metals
+	 * mend themselves as their tools do, steel wears slowly, leather wears a point at a time.
+	 */
+	public @Nullable Trait armourTrait() {
+		return switch (this) {
+			case COPPER -> Trait.DEPTH_PROTECTION;
+			case IRON -> Trait.PROJECTILE_PROTECTION;
+			case SILVER -> Trait.CONSECRATED;
+			case COBALT -> Trait.MELEE_PROTECTION;
+			case MANYULLYN -> Trait.WARDED;
+			case HEPATIZON -> Trait.RECURRENT_PROTECTION;
+			case SLIMESTEEL, QUEEN_SLIME -> Trait.OVERSLIME;
+			case STEEL, LEATHER -> trait;
+			default -> null;
+		};
+	}
+
 	/** (0.15.x) Arrow velocity a shaft of this adds (a share: 0.05 = +5%). */
 	public float shaftVelocity() {
 		return this == BONE ? 0.05F : this == BLAZE_ROD ? 0.1F : 0.0F;
@@ -262,6 +322,9 @@ public enum TinkerMaterial {
 			case BOWSTRING -> this == STRING || this == VINE || this == LEATHER;
 			case ARROW_SHAFT -> this == WOOD || this == WOOD_CRIMSON || this == WOOD_WARPED || this == BONE || this == BLAZE_ROD;
 			case FLETCHING -> this == FEATHER || this == LEAVES;
+			// (stone platings are shaped only to make their casts from, like Tinkers' dummy platings)
+			case PLATING -> plating() != null || stats == Stats.ROCK;
+			case MAILLE -> plating() != null || this == LEATHER;
 		};
 	}
 

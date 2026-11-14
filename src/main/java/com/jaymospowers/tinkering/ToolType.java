@@ -83,7 +83,14 @@ public enum ToolType {
 	// Tinkers' fishing rod (its definition: a limb for the rod, a bowstring for the line, an arrow head for the hook; durability
 	// half again). It fishes as our rods do (com.jaymospowers.fishing); a metal hook makes it a sea rod (TinkerRodItem)
 	FISHING_ROD("fishing_rod", parts(PartType.BOW_LIMB, 1, PartType.BOWSTRING, 1, PartType.ARROW_HEAD, 0.5F),
-		0.0F, 2.0F, 1.0F, 1.5F, 1.0F, Map.of(), Style.ROD, Ranged.NONE);
+		0.0F, 2.0F, 1.0F, 1.5F, 1.0F, Map.of(), Style.ROD, Ranged.NONE),
+
+	// Tinkers' plate armour: a metal plating and a metal maille. With a leather maille (a cuirass) the piece is the travelers'
+	// one of its slot instead: goggles, vest, pants or boots, lighter and wearing out sooner (ToolStats.armour)
+	HELMET("helmet", parts(PartType.HELMET_PLATING, 1, PartType.MAILLE, 1)),
+	CHESTPLATE("chestplate", parts(PartType.CHESTPLATE_PLATING, 1, PartType.MAILLE, 1)),
+	LEGGINGS("leggings", parts(PartType.LEGGINGS_PLATING, 1, PartType.MAILLE, 1)),
+	BOOTS("boots", parts(PartType.BOOTS_PLATING, 1, PartType.MAILLE, 1));
 
 	/** A slot on the tool: the part it takes and its share of that part kind's stats. */
 	public record Slot(PartType part, float scale) {
@@ -98,9 +105,11 @@ public enum ToolType {
 		/** (0.15.x) Ranged: a bow, a crossbow, a thrown spear (also strikes), a stack of arrows and a stack of thrown blades. */
 		BOW, CROSSBOW, JAVELIN, ARROW, THROWN,
 		/** A fishing rod: casts a hook, digs nothing. */
-		ROD;
+		ROD,
+		/** A piece of armour: worn, worn down and mended, takes no modifiers. */
+		ARMOR;
 
-		/** A tool you wear down and mend, with modifiers (the arrows and thrown blades are plain stacks). */
+		/** A tool you wear down and mend (the arrows and thrown blades are plain stacks). */
 		public boolean durable() {
 			return this != ARROW && this != THROWN;
 		}
@@ -173,6 +182,11 @@ public enum ToolType {
 	/** (0.15.x) The ranged weapons' own numbers ({@link Ranged#NONE} for the rest). */
 	public final Ranged ranged;
 
+	/** A piece of armour: its numbers all come from its plating ({@link ToolStats#armour}). */
+	ToolType(String id, List<Slot> parts) {
+		this(id, parts, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.ARMOR, Ranged.NONE);
+	}
+
 	/** A ranged tool: nothing to mine, no traits of its own. */
 	ToolType(String id, List<Slot> parts, float attack, float attackSpeed, float attackMultiplier, float durabilityMultiplier,
 		float speedMultiplier, Map<Trait, Integer> traits, Style style, Ranged ranged) {
@@ -222,5 +236,16 @@ public enum ToolType {
 
 	public String itemId() {
 		return "tinker_" + id;
+	}
+
+	/** Which armour piece it is: 0 helmet, 1 chestplate, 2 leggings, 3 boots (the order of the plating stats), or -1. */
+	public int piece() {
+		return switch (parts.getFirst().part()) {
+			case HELMET_PLATING -> 0;
+			case CHESTPLATE_PLATING -> 1;
+			case LEGGINGS_PLATING -> 2;
+			case BOOTS_PLATING -> 3;
+			default -> -1;
+		};
 	}
 }
