@@ -179,12 +179,21 @@ public final class CreatorTab {
 			return true;
 		}
 
+		/**
+		 * Only the picture and the box are the card's. A screen gives a click to the first widget under the mouse and no
+		 * other, so a card that took its whole column took the clicks meant for the arrows beside its picture (Andy: "the
+		 * circled buttons need to work").
+		 */
+		@Override
+		public boolean isMouseOver(double mouseX, double mouseY) {
+			int mx = (int)Math.floor(mouseX), my = (int)Math.floor(mouseY), wx = getX() + (W - WELL) / 2, wy = getY() + wellTop();
+			return this.visible && (Ui.over(mx, my, wx, wy, WELL, WELL) || Ui.over(mx, my, getX(), boxTop(), W, getY() + getHeight() - boxTop()));
+		}
+
 		/** Andy: "you need to be able to toggle the selections in the box": a click on the picture or in the box steps the pick on, a right click back. */
 		@Override
 		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-			int mx = (int)event.x(), my = (int)event.y(), wx = getX() + (W - WELL) / 2, wy = getY() + wellTop();
-			boolean picture = Ui.over(mx, my, wx, wy, WELL, WELL), box = Ui.over(mx, my, getX(), boxTop(), W, getY() + getHeight() - boxTop());
-			if (!this.visible || !picture && !box) {
+			if (!isMouseOver(event.x(), event.y())) {
 				return false;
 			}
 			playDownSound(Minecraft.getInstance().getSoundManager());
@@ -207,13 +216,14 @@ public final class CreatorTab {
 			ItemStack icon, Component name, List<Component> text, Consumer<Integer> step, Consumer<Integer> go, @Nullable Runnable before) {
 		int navY = bottom - ROW_H, half = (W - 2) / 2;
 		Component header = Component.empty().append(label).append(" " + (at + 1) + "/" + count);
+		// (the arrows first, so nothing laid over them takes their clicks)
+		int ay = y + Card.wellTop() + (WELL - ROW_H) / 2, ax = x + (W - WELL) / 2;
+		add.accept(button(Component.literal("<"), ax - ARROW - 6, ay, ARROW, () -> step.accept(-1), rebuild));
+		add.accept(button(Component.literal(">"), ax + WELL + 6, ay, ARROW, () -> step.accept(1), rebuild));
 		add.accept(new Card(font, x, y, navY - 3 - y, header, icon, name, text, dir -> {
 			step.accept(dir);
 			rebuild.run();
 		}));
-		int ay = y + Card.wellTop() + (WELL - ROW_H) / 2, ax = x + (W - WELL) / 2;
-		add.accept(button(Component.literal("<"), ax - ARROW - 6, ay, ARROW, () -> step.accept(-1), rebuild));
-		add.accept(button(Component.literal(">"), ax + WELL + 6, ay, ARROW, () -> step.accept(1), rebuild));
 		if (at == 0 && before != null) {
 			// (Andy: "they run alongside one another not separate") back from the first thing: the story, told after all
 			Button tell = Button.builder(Component.translatable("gui.jaymoskingdoms.creator.tell"), b -> before.run()).bounds(x, navY, half, ROW_H).build();
