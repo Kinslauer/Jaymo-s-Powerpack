@@ -2517,6 +2517,10 @@ public final class LifeStory {
 				give(player, stack);
 			}
 			Careers.storyJob(player, job);
+			// the farm's own wear: the settler's wide hat (no helm under it), coat and trousers
+			equip(player, new ItemStack(FrontierArmour.SETTLER_HAT));
+			equip(player, FrontierArmour.stack("settler", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
+			equip(player, FrontierArmour.stack("settler", net.minecraft.world.item.equipment.ArmorType.LEGGINGS));
 			// (0.7.381) the easiest start: more to eat, a little to spend (0.7.605: and a bed under the family's roof, not in your pack)
 			give(player, new ItemStack(Items.BREAD, VILLAGE_BREAD));
 			give(player, purse(player, VILLAGE_SILVER));

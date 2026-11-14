@@ -67,6 +67,86 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code GunBlast.weaponModFired(LivingEntity, ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle gunFired;
+	private static boolean lookedForGunFired;
+
+	/**
+	 * A gun of ours (the {@link Musketoon}) went off in {@code shooter}'s hands: Jaymo's Powers pours its fire and smoke
+	 * out of the muzzle and plays the gun's fire animation. False without Powers, and the caller makes its own smoke.
+	 */
+	public static boolean gunFired(LivingEntity shooter, net.minecraft.world.item.ItemStack gun) {
+		if (!lookedForGunFired) {
+			lookedForGunFired = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					gunFired = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.armory.GunBlast"), "weaponModFired",
+						java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, net.minecraft.world.item.ItemStack.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' gun blast", e);
+				}
+			}
+		}
+		if (gunFired == null) {
+			return false;
+		}
+		try {
+			gunFired.invoke(shooter, gun);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code Blueprints.stack(String, int)} and {@code Blueprints.shapeOf(ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle blueprintStack, blueprintShape;
+	private static boolean lookedForBlueprints;
+
+	private static void lookForBlueprints() {
+		if (lookedForBlueprints) {
+			return;
+		}
+		lookedForBlueprints = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> blueprints = Class.forName("com.jaymospowers.tinkering.smithing.Blueprints");
+			blueprintStack = java.lang.invoke.MethodHandles.publicLookup().findStatic(blueprints, "stack",
+				java.lang.invoke.MethodType.methodType(net.minecraft.world.item.ItemStack.class, String.class, int.class));
+			blueprintShape = java.lang.invoke.MethodHandles.publicLookup().findStatic(blueprints, "shapeOf",
+				java.lang.invoke.MethodType.methodType(String.class, net.minecraft.world.item.ItemStack.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blueprints", e);
+		}
+	}
+
+	/** A fresh smith's blueprint (Jaymo's Powers) for {@code shape} ("frontier/templar"), or empty without Powers. */
+	public static net.minecraft.world.item.ItemStack blueprint(String shape) {
+		lookForBlueprints();
+		if (blueprintStack == null) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		try {
+			return (net.minecraft.world.item.ItemStack) blueprintStack.invoke(shape, 0);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** The shape {@code stack} is a blueprint of, or "" (not one, or no Powers). */
+	public static String blueprintShape(net.minecraft.world.item.ItemStack stack) {
+		lookForBlueprints();
+		if (blueprintShape == null) {
+			return "";
+		}
+		try {
+			return (String) blueprintShape.invoke(stack);
+		} catch (Throwable e) {
+			return "";
+		}
+	}
+
 	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
 	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
 	private static boolean lookedForClash;

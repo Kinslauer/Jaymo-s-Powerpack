@@ -40,6 +40,9 @@ import net.minecraft.world.level.biome.Biome;
  * {@link #RECOVER_SHARE} full again.</li>
  * <li><b>Heat</b>: in the Nether (without Fire Resistance) {@link #NETHER_PENALTY} feathers are held back.</li>
  * <li><b>Bonus</b>: powers can add golden feathers on top ({@link #addBonus}); they're spent first and regrow last.</li>
+ * <li><b>Wear and tear</b> ({@link #drain}): what tires a body a little at a time (fighting and running in armour,
+ * {@link Exertion}) comes off the same way a spend does, in parts of a feather and without the pause a spend brings.
+ * Run dry by either road and the grip goes too ({@link #spent}): the next blow taken knocks the weapon from the hand.</li>
  * </ul>
  * The server keeps the numbers and syncs them to the owner only ({@link #STATE}, packed by {@link #pack}); both sides
  * read them through {@link #canSpend} and friends.
@@ -88,11 +91,13 @@ public final class Feathers {
 		/** Regrowth paused until this game time; the last spend's time and how many in a row. */
 		long pausedUntil, lastSpend = Long.MIN_VALUE / 2;
 		int streak;
-		/** Part of a feather regrown so far. */
+		/** Part of a feather regrown so far; below zero, part of one worn away ({@link #drain}). */
 		float growth;
 		/** The last cap and bonus cap worked out (for clamping between ticks). */
 		int cap = MAX, bonusCap, weight;
 		boolean cold;
+		/** Exhausted, and the weapon not yet knocked from the hand for it ({@link #spent}). */
+		boolean loose;
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
@@ -172,6 +177,18 @@ public final class Feathers {
 		if (s.exhausted || s.bonus + s.feathers + Math.max(0, STRAIN_MAX - s.strain) <= 0) {
 			return false;
 		}
+		take(s, cost);
+		long now = player.level().getGameTime();
+		s.streak = now - s.lastSpend <= STREAK_TICKS ? s.streak + 1 : 0;
+		s.lastSpend = now;
+		s.pausedUntil = now + Math.min(REGEN_DELAY_MAX, REGEN_DELAY + s.streak * REGEN_DELAY_STEP);
+		s.growth = 0.0F;
+		sync(player, s);
+		return true;
+	}
+
+	/** Takes {@code cost} from {@code s}: golden first, then the row, then strain; past the strain, exhausted (and the grip loose). */
+	private static void take(State s, int cost) {
 		int left = cost;
 		int fromBonus = Math.min(left, s.bonus);
 		s.bonus -= fromBonus;
@@ -183,14 +200,46 @@ public final class Feathers {
 		if (s.strain >= STRAIN_MAX) {
 			s.strain = STRAIN_MAX;
 			s.exhausted = true;
+			s.loose = true;
 		}
-		long now = player.level().getGameTime();
-		s.streak = now - s.lastSpend <= STREAK_TICKS ? s.streak + 1 : 0;
-		s.lastSpend = now;
-		s.pausedUntil = now + Math.min(REGEN_DELAY_MAX, REGEN_DELAY + s.streak * REGEN_DELAY_STEP);
-		s.growth = 0.0F;
+	}
+
+	/**
+	 * Wears {@code amount} (half-feathers, any part of one) off {@code player}'s row. It is set against the regrowth, so
+	 * the row only moves by what is left between them; each whole one lost comes off as a spend's would (golden, the row,
+	 * strain, then exhausted), but with no pause in the regrowth and no say in whether it may: tiring isn't a move.
+	 * Nothing more wears off the exhausted.
+	 */
+	public static void drain(ServerPlayer player, float amount) {
+		if (player.isCreative() || player.isSpectator() || amount <= 0.0F) {
+			return;
+		}
+		State s = state(player);
+		if (s.exhausted) {
+			return;
+		}
+		s.growth -= amount;
+		if (s.growth > -1.0F) {
+			return;
+		}
+		int whole = (int)-s.growth;
+		s.growth += whole;
+		take(s, whole);
 		sync(player, s);
-		return true;
+	}
+
+	/**
+	 * Whether {@code player} has run dry and still has a grip to lose: exhausted, and nothing knocked from their hand for
+	 * it yet ({@link #gripLost}). True once for each time they run dry.
+	 */
+	public static boolean spent(ServerPlayer player) {
+		State s = STATES.get(player.getUUID());
+		return s != null && s.exhausted && s.loose && !player.isCreative() && !player.isSpectator();
+	}
+
+	/** {@code player}'s weapon has been knocked away for running dry: not again until they have recovered and run dry anew. */
+	public static void gripLost(ServerPlayer player) {
+		state(player).loose = false;
 	}
 
 	/** Gives {@code amount} back (a landed move refunding its cost): strain first, then the row, then golden. */
@@ -214,6 +263,7 @@ public final class Feathers {
 		}
 		if (s.exhausted && s.strain == 0 && s.feathers >= Math.ceil(s.cap * RECOVER_SHARE)) {
 			s.exhausted = false;
+			s.loose = false;
 		}
 	}
 
@@ -257,6 +307,7 @@ public final class Feathers {
 			s.feathers = s.cap;
 			s.bonus = s.bonusCap;
 			s.exhausted = false;
+			s.loose = false;
 			return;
 		}
 		BlockPos feet = player.blockPosition();

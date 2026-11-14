@@ -1,0 +1,62 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:warlord_helmet",
+		"jaymoskingdoms:warlord_chestplate",
+		"jaymoskingdoms:warlord_leggings",
+		"jaymoskingdoms:warlord_boots",
+		"jaymoskingdoms:wool_cap",
+		"jaymoskingdoms:wool_shirt",
+		"jaymoskingdoms:wool_pants",
+		"jaymoskingdoms:wool_socks",
+		"jaymoskingdoms:qiviut_cap",
+		"jaymoskingdoms:qiviut_shirt",
+		"jaymoskingdoms:qiviut_pants",
+		"jaymoskingdoms:qiviut_socks",
+		{
+			"id": "magistuarmory:gambeson_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:gambeson_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:pantyhose",
+			"required": false
+		},
+		"jaymoskingdoms:hedge_helmet",
+		"jaymoskingdoms:hedge_chestplate",
+		"jaymoskingdoms:hedge_leggings",
+		"jaymoskingdoms:hedge_boots",
+		"jaymoskingdoms:hedge_elite_helmet",
+		"jaymoskingdoms:hedge_elite_chestplate",
+		"jaymoskingdoms:hedge_elite_leggings",
+		"jaymoskingdoms:hedge_elite_boots",
+		"jaymoskingdoms:primalist_helmet",
+		"jaymoskingdoms:primalist_chestplate",
+		"jaymoskingdoms:primalist_leggings",
+		"jaymoskingdoms:primalist_boots",
+		"jaymoskingdoms:scoundrel_helmet",
+		"jaymoskingdoms:scoundrel_chestplate",
+		"jaymoskingdoms:scoundrel_leggings",
+		"jaymoskingdoms:scoundrel_boots",
+		"jaymoskingdoms:sanguine_helmet",
+		"jaymoskingdoms:sanguine_chestplate",
+		"jaymoskingdoms:sanguine_leggings",
+		"jaymoskingdoms:sanguine_boots",
+		"jaymoskingdoms:sanguine_blue_helmet",
+		"jaymoskingdoms:sanguine_blue_chestplate",
+		"jaymoskingdoms:sanguine_blue_leggings",
+		"jaymoskingdoms:sanguine_blue_boots",
+		"jaymoskingdoms:sanguine_purple_helmet",
+		"jaymoskingdoms:sanguine_purple_chestplate",
+		"jaymoskingdoms:sanguine_purple_leggings",
+		"jaymoskingdoms:sanguine_purple_boots",
+		"jaymoskingdoms:foxshade_chestplate",
+		"jaymoskingdoms:settler_hat_helmet",
+		"jaymoskingdoms:settler_chestplate",
+		"jaymoskingdoms:settler_leggings",
+		"jaymoskingdoms:settler_boots"
+	]
+}

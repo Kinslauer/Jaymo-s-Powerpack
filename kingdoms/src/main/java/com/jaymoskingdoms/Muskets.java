@@ -92,7 +92,8 @@ final class Muskets {
 
 	/** From {@link Folk#customServerAiStep}: his musket handed out (or taken back), and fired when it's loaded and his foe in sight. */
 	static void tick(ServerLevel level, Folk folk) {
-		if (folk.role() != Folk.GUARD) {
+		// (a caravan's guard keeps his musketoon)
+		if (folk.role() != Folk.GUARD || Musketoon.holds(folk)) {
 			return;
 		}
 		boolean armed = armed(folk);
@@ -122,7 +123,7 @@ final class Muskets {
 		if (d < NEAREST || d > FURTHEST || !folk.hasLineOfSight(foe) || !MobCombat.aimed(level, folk, foe)) {
 			return;
 		}
-		NEXT.put(folk, now + RELOAD + level.getRandom().nextInt(JITTER));
+		NEXT.put(folk, now + FrontierPerks.reload(folk, RELOAD) + level.getRandom().nextInt(JITTER));
 		fire(level, folk, foe);
 	}
 

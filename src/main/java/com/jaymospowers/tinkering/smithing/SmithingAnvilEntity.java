@@ -188,7 +188,8 @@ public class SmithingAnvilEntity extends BlockEntity {
 			Component why = refuse(player, option);
 			if (why == null) {
 				choices.add(new SmithingNet.Choice(option.id(), option.result(), option.ingots()));
-			} else if (refusal == null) {
+			} else if (refusal == null && !FrontierForging.is(option)) {
+				// (a set whose schematic the smith hasn't got is simply not on offer)
 				refusal = why;
 			}
 		}

@@ -126,6 +126,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Commissions.register();
 		PlanSites.register();
 		Armory.register();
+		FrontierArmour.register();
+		FrontierWear.register();
+		FrontierPerks.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it
@@ -527,6 +530,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)
 		GolemLairs.register();
 		Cannonball.register();
+		// the caravan guards' hand gun, firing the same ball
+		Musketoon.register();
 		// the siege engines a war party brings (SiegeTrain): the mangonel and its stone
 		Mangonel.register();
 		SiegeStone.register();

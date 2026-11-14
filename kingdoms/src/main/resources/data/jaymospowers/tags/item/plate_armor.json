@@ -1,0 +1,154 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:paladin_helmet",
+		"jaymoskingdoms:paladin_chestplate",
+		"jaymoskingdoms:paladin_leggings",
+		"jaymoskingdoms:paladin_boots",
+		"jaymoskingdoms:gladiator_helmet",
+		"jaymoskingdoms:gladiator_chestplate",
+		"jaymoskingdoms:gladiator_leggings",
+		"jaymoskingdoms:gladiator_boots",
+		"jaymoskingdoms:steel_plate_helmet",
+		"jaymoskingdoms:steel_plate_chestplate",
+		"jaymoskingdoms:steel_plate_leggings",
+		"jaymoskingdoms:steel_plate_boots",
+		"jaymoskingdoms:reverent_helmet",
+		"jaymoskingdoms:reverent_chestplate",
+		"jaymoskingdoms:reverent_leggings",
+		"jaymoskingdoms:reverent_boots",
+		"jaymoskingdoms:heavenly_helmet",
+		"jaymoskingdoms:heavenly_chestplate",
+		"jaymoskingdoms:heavenly_leggings",
+		"jaymoskingdoms:heavenly_boots",
+		"jaymoskingdoms:kintsugi_helmet",
+		"jaymoskingdoms:kintsugi_chestplate",
+		"jaymoskingdoms:kintsugi_leggings",
+		"jaymoskingdoms:kintsugi_boots",
+		{
+			"id": "magistuarmory:platemail_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:platemail_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:platemail_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:knight_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:knight_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:knight_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:gothic_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:gothic_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:gothic_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:maximilian_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:maximilian_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:maximilian_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedhalfarmor_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:armet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:bascinet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:grand_bascinet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:sallet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:barbute",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedbarbute",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:greathelm",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedgreathelm",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:kettlehat",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedkettlehat",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:norman_helmet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustednorman_helmet",
+			"required": false
+		},
+		"jaymoskingdoms:templar_helmet",
+		"jaymoskingdoms:templar_chestplate",
+		"jaymoskingdoms:templar_leggings",
+		"jaymoskingdoms:templar_boots",
+		"jaymoskingdoms:templar_steel_helmet",
+		"jaymoskingdoms:templar_steel_chestplate",
+		"jaymoskingdoms:templar_steel_leggings",
+		"jaymoskingdoms:templar_steel_boots",
+		"jaymoskingdoms:ranger_helmet",
+		"jaymoskingdoms:ranger_chestplate",
+		"jaymoskingdoms:ranger_leggings",
+		"jaymoskingdoms:ranger_boots",
+		"jaymoskingdoms:ranger_steel_helmet",
+		"jaymoskingdoms:ranger_steel_chestplate",
+		"jaymoskingdoms:ranger_steel_leggings",
+		"jaymoskingdoms:ranger_steel_boots",
+		"jaymoskingdoms:juggernaut_helmet",
+		"jaymoskingdoms:juggernaut_chestplate",
+		"jaymoskingdoms:juggernaut_leggings",
+		"jaymoskingdoms:juggernaut_boots",
+		"jaymoskingdoms:despot_helmet",
+		"jaymoskingdoms:despot_chestplate",
+		"jaymoskingdoms:despot_leggings",
+		"jaymoskingdoms:despot_boots",
+		"jaymoskingdoms:settler_helmet"
+	]
+}

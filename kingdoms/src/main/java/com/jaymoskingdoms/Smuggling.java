@@ -306,7 +306,7 @@ final class Smuggling {
 	// ---- on the road --------------------------------------------------------------------------------------------------
 
 	/** The smuggler caravan {@code e} drives (by the caravan's stamp on him), or null. */
-	private static Caravans.@Nullable Caravan runOf(MinecraftServer server, Entity e) {
+	static Caravans.@Nullable Caravan runOf(MinecraftServer server, Entity e) {
 		for (String tag : e.entityTags()) {
 			if (tag.startsWith(Caravans.TAG_OF)) {
 				String rest = tag.substring(Caravans.TAG_OF.length());

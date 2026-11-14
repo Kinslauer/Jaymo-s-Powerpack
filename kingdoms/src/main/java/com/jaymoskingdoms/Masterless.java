@@ -480,6 +480,9 @@ public final class Masterless {
 			v.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Bandits.MASK));
 			v.setDropChance(EquipmentSlot.HEAD, 1.0F);
 		}
+		// and the Foxshade mantle on his shoulders, his killer's to take
+		v.setItemSlot(EquipmentSlot.CHEST, FrontierArmour.stack("foxshade", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
+		v.setDropChance(EquipmentSlot.CHEST, 1.0F);
 		int men = MEN_MIN + v.getRandom().nextInt(MEN_MAX - MEN_MIN + 1);
 		Map<String, Integer> stars = v.getAttachedOrElse(FoeLore.STARS, Map.of());
 		int wins = v.getAttachedOrElse(Learners.WINS, 0);

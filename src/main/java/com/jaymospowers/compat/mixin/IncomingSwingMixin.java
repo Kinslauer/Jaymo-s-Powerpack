@@ -1,6 +1,7 @@
 package com.jaymospowers.compat.mixin;
 
 import com.jaymospowers.combat.IncomingBlows;
+import com.jaymospowers.stamina.Exertion;
 import net.bettercombat.network.Packets;
 import net.bettercombat.network.ServerNetwork;
 import net.minecraft.server.MinecraftServer;
@@ -12,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * A player's Better Combat swing starts (its attack animation, sent by the swinger's client before the upswing): the one
- * it's aimed at is warned ({@link IncomingBlows#swing}). Its stop signal (a cancelled swing) warns nobody.
+ * it's aimed at is warned ({@link IncomingBlows#swing}), and the swing tires the swinger in armour whether it lands or
+ * not ({@link Exertion#swung}). Its stop signal (a cancelled swing) warns nobody.
  */
 @Mixin(value = ServerNetwork.class, remap = false)
 abstract class IncomingSwingMixin {
@@ -23,6 +25,9 @@ abstract class IncomingSwingMixin {
 		}
 		int upswing = packet.upswingTicks();
 		double range = packet.weaponRange();
-		server.execute(() -> IncomingBlows.swing(player, upswing, range));
+		server.execute(() -> {
+			IncomingBlows.swing(player, upswing, range);
+			Exertion.swung(player, true);
+		});
 	}
 }

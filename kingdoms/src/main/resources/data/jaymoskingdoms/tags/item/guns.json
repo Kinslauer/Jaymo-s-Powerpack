@@ -32,6 +32,7 @@
     {
       "id": "weaponmod:musketbayonet.diamond",
       "required": false
-    }
+    },
+    "jaymoskingdoms:musketoon"
   ]
 }

@@ -1,0 +1,73 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:ronin_helmet",
+		"jaymoskingdoms:ronin_chestplate",
+		"jaymoskingdoms:ronin_leggings",
+		"jaymoskingdoms:ronin_boots",
+		"jaymoskingdoms:primal_helmet",
+		"jaymoskingdoms:primal_chestplate",
+		"jaymoskingdoms:primal_leggings",
+		"jaymoskingdoms:primal_boots",
+		{
+			"id": "magistuarmory:chainmail_helmet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:chainmail_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:chainmail_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:chainmail_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedchainmail_helmet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedchainmail_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedchainmail_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:rustedchainmail_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:coif",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:lamellar_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:lamellar_boots",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:crusader_chestplate",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:crusader_leggings",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:crusader_boots",
+			"required": false
+		},
+		"jaymoskingdoms:hedge_ashen_helmet",
+		"jaymoskingdoms:hedge_ashen_chestplate",
+		"jaymoskingdoms:hedge_ashen_leggings",
+		"jaymoskingdoms:hedge_ashen_boots"
+	]
+}

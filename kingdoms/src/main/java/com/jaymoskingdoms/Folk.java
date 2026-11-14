@@ -423,6 +423,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// the faction's arms, its rank's and its land's gear (vanilla), then Epic Knights' (and Slavic Armory's) when loaded
 		Outfits.dress(this, faction, climate);
 		KnightsCompat.dress(this, faction, climate);
+		// and the sets its faith, its trade or its camp's country puts on it (FrontierWear)
+		FrontierWear.folk(this, faction, climate);
 		this.outfit = Outfits.VERSION;
 		// townsfolk are born to a heritage (VillagerHeritage)
 		VillagerHeritage.folkSetup(this);
@@ -430,6 +432,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
 		}
+		FrontierWear.raider(this, faction, climate);
 	}
 
 	@Override
@@ -738,12 +741,14 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		ItemStack hand = this.getMainHandItem().copy();
 		Outfits.dress(this, faction, climate);
 		KnightsCompat.dress(this, faction, climate);
+		FrontierWear.folk(this, faction, climate);
 		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF || Orcs.isOrc(this)) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
 		}
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
 		}
+		FrontierWear.raider(this, faction, climate);
 	}
 
 	@Override

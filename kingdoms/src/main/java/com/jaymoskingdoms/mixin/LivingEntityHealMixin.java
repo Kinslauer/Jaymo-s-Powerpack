@@ -19,6 +19,13 @@ abstract class LivingEntityHealMixin {
 		return (Object)this instanceof Player p && !p.level().isClientSide() ? amount * (1.0F - Turning.healing(p)) : amount;
 	}
 
+	/** The Sanguine coat, worn whole: healing counts for more (FrontierPerks). */
+	@ModifyVariable(method = "heal", at = @At("HEAD"), argsOnly = true)
+	private float jaymoskingdoms$sanguineHeal(float amount) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		return self.level().isClientSide() ? amount : com.jaymoskingdoms.FrontierPerks.healing(self, amount);
+	}
+
 	@Inject(method = "heal", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$blighted(float amount, CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;

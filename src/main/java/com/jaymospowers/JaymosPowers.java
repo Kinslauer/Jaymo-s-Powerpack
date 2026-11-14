@@ -80,6 +80,9 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.ArmourWear.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.wounds.Wounds.init();
+		// fighting and running in armour wear the feathers down; run dry and the next blow knocks the weapon away
+		// (after the wounds: the blow that starts adrenaline finds the hand already closed)
+		com.jaymospowers.stamina.Exertion.init();
 		com.jaymospowers.core.mobs.BlightMobs.init();
 		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
