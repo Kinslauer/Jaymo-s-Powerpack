@@ -1,0 +1,18 @@
+{
+  "title": "A Count in Knots",
+  "author": "a warlord's reckoner",
+  "pages": [
+    "Set down from the knot-cord, as near as it can be said in words.\n\nRiver town: paid. Did not burn.\nHill town: paid short. Burned a little.",
+    "Mill town: gate shut. Burned.\n\nThe ring-nosed one says the soft folk always pay the second time.",
+    "The door stood open nine days and then it did not. We do not open the doors. We wait by them. Somebody up there always lights one."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:hornkin",
+      "jaymoskingdoms:hornkin_brute",
+      "jaymoskingdoms:hornkin_hurler",
+      "jaymoskingdoms:hornkin_warlord"
+    ],
+    "chance": 0.04
+  }
+}

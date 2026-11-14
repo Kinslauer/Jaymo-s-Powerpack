@@ -1,0 +1,18 @@
+{
+  "title": "Halfway",
+  "author": "one who went up",
+  "pages": [
+    "They called me a hermit when I lived on the floating rock. I was not hiding. I was halfway, and resting.",
+    "The stream by my door ran the wrong way in spring. I followed the water the wrong way, as the riddle says to, and the wind did the rest.",
+    "The rain here has never touched mud. The geese arrive in winter looking pleased with themselves.",
+    "I mean to go down and tell them. Tomorrow, or when the wind turns. It is hard to want to."
+  ],
+  "drop": {
+    "entities": [
+      "jaymospowers:cockatrice",
+      "jaymospowers:zephyr",
+      "jaymospowers:tempest"
+    ],
+    "chance": 0.03
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "A Letter, Unsent",
+  "author": "unsigned",
+  "pages": [
+    "Father,\n\nI have kept the shop well and wronged nobody by daylight. I want that written somewhere.",
+    "I do not go to the chapel now. The priest looks at each of us a moment too long, and I have seen what happens to the ones he is right about.",
+    "The neighbours bolt their sheep in at the full moon and wish me good evening over the fence while they do it. I wish them the same.",
+    "If this reaches you, it is because I could not stop one night. Do not come looking."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:werewolf"
+    ],
+    "chance": 0.2
+  }
+}
