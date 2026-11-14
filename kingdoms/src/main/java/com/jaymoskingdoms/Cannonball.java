@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  * its own walls. Drawn as Balkon's WeaponMod cannonball when that's loaded, a fire charge otherwise. Never saved.
  * <p>
  * A {@link Musketoon}'s ball is the same thing out of a hand gun ({@link #shot}): anyone may fire it, a player too, with
- * its own blow and its own pit.
+ * its own blow and its own pit. A {@link FieldMortar}'s shell is the same again, lobbed ({@link #shell}).
  */
 public final class Cannonball extends Projectile implements ItemSupplier {
 	/** How fast it leaves the barrel and how fast it falls (blocks per tick, per tick). */
@@ -59,6 +59,8 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	private com.jaymoskingdoms.sailing.Bombardment.@Nullable Crater pit;
 	/** Out of a hand gun: its owner needn't be a gunner at a cannon. */
 	private boolean hand;
+	/** How long it may fly (ticks). */
+	private int lifespan = MAX_LIFE;
 
 	public Cannonball(EntityType<? extends Cannonball> type, Level level) {
 		super(type, level);
@@ -97,6 +99,23 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		level.addFreshEntity(ball);
 	}
 
+	/**
+	 * A mortar's shell ({@link FieldMortar}): thrown from {@code muzzle} at {@code velocity}, so it can be lobbed high, by
+	 * a siege crewman or a player; it may fly for {@code lifespan} ticks.
+	 */
+	static void shell(ServerLevel level, LivingEntity shooter, Vec3 muzzle, Vec3 velocity, float damage, com.jaymoskingdoms.sailing.Bombardment.Crater pit,
+		int lifespan) {
+		Cannonball ball = new Cannonball(TYPE, level);
+		ball.setOwner(shooter);
+		ball.hand = true;
+		ball.damage = damage;
+		ball.pit = pit;
+		ball.lifespan = lifespan;
+		ball.setPos(muzzle);
+		ball.setDeltaMovement(velocity);
+		level.addFreshEntity(ball);
+	}
+
 	@Override
 	protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
 	}
@@ -122,7 +141,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		Entity owner = this.getOwner();
 		// ((0.7.295) a folk gunner or an MCA archer)
 		if (!(owner instanceof LivingEntity gunner) || !(this.hand || owner instanceof PathfinderMob && owner instanceof Worker)
-			|| ++this.life > MAX_LIFE) {
+			|| ++this.life > this.lifespan) {
 			this.discard();
 			return;
 		}

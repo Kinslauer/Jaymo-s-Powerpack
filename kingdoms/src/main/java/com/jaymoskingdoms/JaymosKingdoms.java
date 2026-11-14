@@ -535,6 +535,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the siege engines a war party brings (SiegeTrain): the mangonel and its stone
 		Mangonel.register();
 		SiegeStone.register();
+		// the field mortar a gun-keeping realm's war party brings beside its gun, and a player's own
+		FieldMortar.register();
+		// the Flame Avatars' Tinkerers' gun (nether/AvatarClasses)
+		FireCannon.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
 		Cannons.register();

@@ -19,7 +19,7 @@
   "message.jaymospowers.smithing.honed": "%s honed (maximum durability down %s%%).",
   "message.jaymospowers.smithing.too_worn": "%s can't take another honing.",
   "message.jaymospowers.smithing.needs_iron_anvil": "%s is too hard for this anvil. It needs an iron Smithing Anvil.",
-  "message.jaymospowers.smithing.needs_steel_hammer": "%s is too hard for this hammer. It needs a steel Smithing Hammer.",
+  "message.jaymospowers.smithing.needs_steel_hammer": "%s is too hard for this hammer. It needs a steel Smithing Hammer or a steel Forge Hammer.",
   "message.jaymospowers.smithing.stone_anvil_worn": "The stone anvil is cracking apart.",
   "message.jaymospowers.smithing.blueprint_level": "%s is now %s.",
   "message.jaymospowers.smithing.drafting_no_paper": "You need paper in your inventory to copy a blueprint.",

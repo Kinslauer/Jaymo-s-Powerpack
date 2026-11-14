@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The flintlock guns going off: WeaponMod's musket (bayonet ones too), blunderbuss and flintlock pistol, the Void
- * Armory's flintlock, and Kingdoms' musketoon (which calls {@link #weaponModFired} itself). Each shot pours fire and smoke out of the muzzle for everyone nearby, and leaves smoke hanging
+ * Armory's flintlock, and Kingdoms' musketoon and fire cannon (which call {@link #weaponModFired} themselves). Each shot pours fire and smoke out of the muzzle for everyone nearby, and leaves smoke hanging
  * there after it (Tiv: "they need alotta smoke and fire to accompany the blast"). The shot is also marked on the shooter
  * ({@link #SHOT}, synced to every client), so the gun in their hand plays its fire animation
  * ({@code client/armory/guns/AnimatedGunModel}). Nothing about the shot itself changes: damage, range and reload are
@@ -44,7 +44,9 @@ public final class GunBlast {
 		MUSKET(22, 24, 30, 5, 2, 30, 1.6, 0.6),
 		BLUNDERBUSS(34, 36, 40, 8, 3, 40, 1.25, 0.8),
 		/** Kingdoms' musketoon, the caravan guards' hand gun: a cannonball's worth of powder. */
-		MUSKETOON(40, 44, 48, 10, 3, 50, 1.1, 0.7);
+		MUSKETOON(40, 44, 48, 10, 3, 50, 1.1, 0.7),
+		/** Kingdoms' fire cannon, the Flame Avatars' gun: blaze fire, so far more flame than smoke. */
+		FIRE_CANNON(60, 12, 18, 16, 1, 20, 1.1, 0.5);
 
 		final int flame, thickSmoke, smoke, sparks, lingerPuffs, linger;
 		/** How far ahead of the eye the muzzle is (blocks), and how wide the flame's cone (its spread per block out). */
@@ -69,6 +71,9 @@ public final class GunBlast {
 			String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 			if (path.equals("musketoon")) {
 				return MUSKETOON;
+			}
+			if (path.equals("fire_cannon")) {
+				return FIRE_CANNON;
 			}
 			if (path.startsWith("musket")) {
 				return MUSKET;

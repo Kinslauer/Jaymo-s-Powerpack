@@ -18,3 +18,7 @@ Changes: the cubes turned into item-model JSON laid along WeaponMod's blunderbus
 template colours painted like their neighbours (tools/gen_guns_geckolib.py). The musketoon's animated model
 (geckolib/models/entity/gun_musketoon.geo.json, textures/entity/gun_musketoon.png) is the same mod's Firecannon, scaled
 1.6x, its red gem painted steel.
+The fire cannon's sheet (textures/entity/gun_fire_cannon.png) is that Firecannon's red one (ruby_gun_texture).
+The Forge Hammers (models/item/tinkering/smithing/*_forge_hammer.json, textures/item/tinkering/smithing/*_forge_hammer.png)
+are the same mod's Forge Mace: its model laid on the item's diagonal, its iron and netherite sheets, and the iron sheet
+recoloured for copper and steel (tools/gen_frontier_arms.py).

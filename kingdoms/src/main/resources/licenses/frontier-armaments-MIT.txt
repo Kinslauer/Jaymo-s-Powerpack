@@ -12,6 +12,12 @@ Used in Jaymo's Kingdoms:
   harness), Peasant (our settler's gear), Juggernaut, Thief (our Scoundrel's wrappings), Sanguine, Despot and Foxshade
   models and textures, baked for our worn-model layer. Faces its maker left unpainted are painted like their
   neighbours; the Despot's helm and greaves and the blue and purple Sanguine hat and boots are our own additions.
+- The Fire Cannon's item model and texture (assets/jaymoskingdoms/models/item/fire_cannon.json, textures/item/fire_cannon.png):
+  the same Firecannon in the mod's red sheet (ruby_gun_texture), laid as the musketoon is, without the ramrod.
+  Built by tools/gen_frontier_arms.py.
+- The Field Mortar's texture (assets/jaymoskingdoms/textures/entity/field_mortar.png) and its model, rebuilt box for box in
+  client/FieldMortarRenderer: the mod's Mortar (mortar model, mortartexture). Faces its maker left unpainted are painted
+  like their neighbours.
   Built by kingdoms/tools/gen_frontier_armour.py from tools/bbmodels/frontier-armaments/armour/.
 - The item-use speed mixin (client ItemUseSpeedMixin) follows the mod's own LocalPlayerMixin.
 

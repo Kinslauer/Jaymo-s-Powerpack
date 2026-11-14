@@ -23,9 +23,10 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-14): "can we have warring kingdoms bring siege engines?" (after Siegeworks, whose art is all rights
  * reserved: our own engines, code and models). A realm's war party ({@link WarParties}) with soldiers enough brings a
  * siege train: a {@link Mangonel}, or from a realm rich enough to keep guns ({@link Muskets#ARM_TREASURY}) a field
- * {@link Cannon}; a great war's party from such a realm brings both. Each engine takes {@link #CREW} of the party's
+ * {@link Cannon} and a {@link FieldMortar} beside it; a great war's party from such a realm brings all three. Each engine takes {@link #CREW} of the party's
  * soldiers, who push it behind the march ({@link Haul}), set it down short of the enemy's seat (a mangonel
- * {@link #MANGONEL_STANDOFF} off, to throw over the walls; a gun {@link #CANNON_STANDOFF} off, where it can see) and
+ * {@link #MANGONEL_STANDOFF} off, to throw over the walls; a mortar {@link #MORTAR_STANDOFF} off, for the same; a gun
+ * {@link #CANNON_STANDOFF} off, where it can see) and
  * work it through the siege, then push it home. Their shots break what they land on, the besieged's buildings
  * included (Andy: "nothing should be 'safe'"), and a mangonel with no foe in reach batters the seat itself. Kill its
  * crew and it stands silent where it was left; break it and it's gone. Engines aren't saved, as parties aren't.
@@ -34,7 +35,7 @@ final class SiegeTrain {
 	/** Soldiers pushing each engine, and how many the party keeps marching beside them. */
 	static final int CREW = 2, MARCHERS_KEPT = 3;
 	/** How far short of the enemy's seat each engine is set down (blocks). */
-	static final double MANGONEL_STANDOFF = 34.0, CANNON_STANDOFF = 20.0;
+	static final double MANGONEL_STANDOFF = 34.0, CANNON_STANDOFF = 20.0, MORTAR_STANDOFF = 28.0;
 	/** Where engines muster: this far behind the soldiers, this far apart. */
 	static final double MUSTER_BEHIND = 4.0, MUSTER_APART = 4.0;
 	/** Its crew push from this far behind its middle, this far to either side (blocks); set down, they keep within this of it. */
@@ -55,7 +56,7 @@ final class SiegeTrain {
 	}
 
 	static @Nullable Haul haul(@Nullable Entity engine) {
-		return engine instanceof Mangonel m ? m.haul : engine instanceof Cannon c ? c.haul : null;
+		return engine instanceof Mangonel m ? m.haul : engine instanceof Cannon c ? c.haul : engine instanceof FieldMortar f ? f.haul : null;
 	}
 
 	// ---- mustering ---------------------------------------------------------------------------------------------------
@@ -72,25 +73,32 @@ final class SiegeTrain {
 			}
 		}
 		boolean guns = Muskets.afford(from, Muskets.ARM_TREASURY);
-		boolean[] cannon = guns && great ? new boolean[] {true, false} : new boolean[] {guns};
+		// 'c' a field gun, 'm' a mangonel, 'o' a mortar: guns bring a mortar beside them
+		char[] train = guns && great ? new char[] {'c', 'm', 'o'} : guns ? new char[] {'c', 'o'} : new char[] {'m'};
 		double dx = muster.getX() - target.seat().getX(), dz = muster.getZ() - target.seat().getZ();
 		double len = Math.max(1.0, Math.sqrt(dx * dx + dz * dz));
 		float yaw = (float) (Mth.atan2(dx, -dz) * Mth.RAD_TO_DEG);
-		for (int i = 0; i < cannon.length; i++) {
+		for (int i = 0; i < train.length; i++) {
 			if (hands.size() < CREW || party.soldiers.size() - party.crew.size() - CREW < MARCHERS_KEPT) {
 				return;
 			}
-			double side = (i == 0 ? 1.0 : -1.0) * MUSTER_APART;
+			// (the third behind the first two)
+			double side = i == 2 ? 0.0 : (i == 0 ? 1.0 : -1.0) * MUSTER_APART, behind = i == 2 ? MUSTER_BEHIND * 2.0 : MUSTER_BEHIND;
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(
-				muster.getX() + dx / len * MUSTER_BEHIND - dz / len * side, muster.getY(), muster.getZ() + dz / len * MUSTER_BEHIND + dx / len * side));
+				muster.getX() + dx / len * behind - dz / len * side, muster.getY(), muster.getZ() + dz / len * behind + dx / len * side));
 			if (!level.getFluidState(at).isEmpty() || !level.getFluidState(at.below()).isEmpty()) {
 				continue;
 			}
 			Entity engine;
-			if (cannon[i]) {
+			if (train[i] == 'c') {
 				Cannon c = Cannon.place(level, from, at, yaw);
 				c.haul = new Haul();
 				engine = c;
+			} else if (train[i] == 'o') {
+				FieldMortar f = new FieldMortar(FieldMortar.TYPE, level);
+				f.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+				level.addFreshEntity(f);
+				engine = f;
 			} else {
 				Mangonel m = new Mangonel(Mangonel.TYPE, level);
 				m.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
@@ -135,13 +143,16 @@ final class SiegeTrain {
 				haul.to = null;
 				continue;
 			}
-			double standoff = home ? WarParties.HOME_REACH : engine instanceof Cannon ? CANNON_STANDOFF : MANGONEL_STANDOFF;
+			double standoff = home ? WarParties.HOME_REACH : engine instanceof Cannon ? CANNON_STANDOFF
+				: engine instanceof FieldMortar ? MORTAR_STANDOFF : MANGONEL_STANDOFF;
 			double dx = goal.getX() + 0.5 - engine.getX(), dz = goal.getZ() + 0.5 - engine.getZ();
 			double far = Math.sqrt(dx * dx + dz * dz);
 			if (far <= standoff) {
 				haul.to = null;
 				if (engine instanceof Mangonel m) {
 					m.seat = home ? null : goal;
+				} else if (engine instanceof FieldMortar f) {
+					f.seat = home ? null : goal;
 				}
 				if (!home) {
 					work(engine, crew);
@@ -151,6 +162,8 @@ final class SiegeTrain {
 			haul.to = new Vec3(goal.getX() + 0.5, engine.getY(), goal.getZ() + 0.5);
 			if (engine instanceof Mangonel m) {
 				m.seat = null;
+			} else if (engine instanceof FieldMortar f) {
+				f.seat = null;
 			}
 			engine.ejectPassengers();
 			for (int i = 0; i < crew.size(); i++) {

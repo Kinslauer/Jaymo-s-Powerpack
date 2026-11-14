@@ -204,11 +204,12 @@ public final class FrontierWear {
 	/**
 	 * From {@code McaEquipmentMixin}: MCA is about to change what {@code villager} has in {@code slot} (putting a sword
 	 * in a guard's hand, taking the armour off someone off duty). True if what's there stays: a {@link Musketoon} and the
-	 * hand beside it, and any piece of ours on a villager who isn't a guard by trade (a carter's hat, a fence's hood).
+	 * hand beside it, a Flame Avatar's hands as its class armed them (a Tinkerer's fire cannon, a Brute's bare fists), and
+	 * any piece of ours on a villager who isn't a guard by trade (a carter's hat, a fence's hood).
 	 */
 	public static boolean keeps(LivingEntity villager, EquipmentSlot slot, boolean guard) {
 		if (slot.getType() == EquipmentSlot.Type.HAND) {
-			return Musketoon.holds(villager);
+			return Musketoon.holds(villager) || com.jaymoskingdoms.nether.AvatarClasses.of(villager) != null;
 		}
 		return !guard && FrontierArmour.setOf(villager.getItemBySlot(slot)) != null;
 	}

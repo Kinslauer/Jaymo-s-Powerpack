@@ -61,6 +61,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		// a war party's mangonel and its stone
 		EntityRenderers.register(com.jaymoskingdoms.Mangonel.TYPE, MangonelRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.FieldMortar.TYPE, FieldMortarRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.SiegeStone.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.6F, false));
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);

@@ -4,6 +4,10 @@
     "jaymospowers:holystone_hammer",
     "jaymospowers:zanite_hammer",
     "jaymospowers:arkenium_hammer",
-    "jaymospowers:gravitite_hammer"
+    "jaymospowers:gravitite_hammer",
+    "jaymospowers:copper_forge_hammer",
+    "jaymospowers:iron_forge_hammer",
+    "jaymospowers:steel_forge_hammer",
+    "jaymospowers:netherite_forge_hammer"
   ]
 }

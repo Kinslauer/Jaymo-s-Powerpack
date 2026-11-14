@@ -1,0 +1,119 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": [
+          "gui",
+          "ground",
+          "fixed"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/fire_cannon"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:select",
+      "property": "minecraft:charge_type",
+      "cases": [
+        {
+          "when": [
+            "arrow",
+            "rocket"
+          ],
+          "model": {
+            "type": "jaymospowers:animated_gun",
+            "gun": "musketoon",
+            "base": "jaymoskingdoms:item/fire_cannon",
+            "transformation": [
+              0.0,
+              0.39598,
+              0.39598,
+              0.301884,
+              0.0,
+              0.39598,
+              -0.39598,
+              0.178643,
+              -0.56,
+              0.0,
+              0.0,
+              0.5,
+              0,
+              0,
+              0,
+              1
+            ],
+            "texture": "jaymospowers:textures/entity/gun_fire_cannon.png",
+            "hide": [
+              "ramrod"
+            ],
+            "pose": "loaded"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:condition",
+        "property": "minecraft:using_item",
+        "on_true": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "musketoon",
+          "base": "jaymoskingdoms:item/fire_cannon",
+          "transformation": [
+            0.0,
+            0.39598,
+            0.39598,
+            0.301884,
+            0.0,
+            0.39598,
+            -0.39598,
+            0.178643,
+            -0.56,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "texture": "jaymospowers:textures/entity/gun_fire_cannon.png",
+          "hide": [
+            "ramrod"
+          ],
+          "pose": "reload"
+        },
+        "on_false": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "musketoon",
+          "base": "jaymoskingdoms:item/fire_cannon",
+          "transformation": [
+            0.0,
+            0.39598,
+            0.39598,
+            0.301884,
+            0.0,
+            0.39598,
+            -0.39598,
+            0.178643,
+            -0.56,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "texture": "jaymospowers:textures/entity/gun_fire_cannon.png",
+          "hide": [
+            "ramrod"
+          ],
+          "pose": "spent"
+        }
+      }
+    }
+  }
+}

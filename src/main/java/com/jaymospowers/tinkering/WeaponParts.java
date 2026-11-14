@@ -254,6 +254,8 @@ public final class WeaponParts {
 			Assembly.ROD_BINDING, 1));
 		add(new Kind("steel_smithing_hammer_head", "jaymospowers:steel_smithing_hammer", Scheme.SINGLE_STEEL, 3 * INGOT,
 			Assembly.ROD_BINDING, 1));
+		// the Forge Hammer (smithing/ForgeHammers), the smith's sidearm: a heavier head on a Tough Handle, in copper, iron and steel
+		add(new Kind("forge_hammer_head", "jaymospowers:forge_hammer", Scheme.PREFIX, 4 * INGOT, Assembly.TOUGH_BINDING, 1));
 		// (0.18.49) the space pod's metal parts are forged too (power/zfighter/pod/PodParts): no grid recipes, assembled alone
 		add(new Kind("pod_fin_blank", "jaymospowers:pod_fin", Scheme.SINGLE_STEEL, 3 * INGOT, Assembly.ALONE, 1));
 		add(new Kind("pod_plate_blank", "jaymospowers:pod_plate", Scheme.SINGLE, 4 * INGOT, Assembly.ALONE, 1));
