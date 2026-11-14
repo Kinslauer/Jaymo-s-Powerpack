@@ -1,0 +1,16 @@
+{
+  "title": "A Physician's Case",
+  "author": "a physician",
+  "pages": [
+    "The carter was struck once, across the ribs, and walked home. No fever. He says he feels light, as if he had set something down.",
+    "Second day. He laughs in his sleep, quietly, and not like himself. His wife has moved to the other room.",
+    "I have no remedy in the books for this. The old women say gold, taken as leaf. I had him swallow a wedding ring's worth and he screamed that it burned.",
+    "Fourth day. He is heavy again and bad-tempered, and I have never been so glad of it."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:skeleton_lord"
+    ],
+    "chance": 0.35
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "A Plate Rubbing",
+  "author": "unsigned",
+  "pages": [
+    "Charcoal on cloth, taken from the breastplate of one of the square ones after it stopped. The marks are cut, not cast.",
+    "Read by a scholar of old hands, who was not sure:\n\nKEEP THE DOOR.\nADMIT THE BUILDERS.\nADMIT NO OTHER.",
+    "There is a tally under it, scratched later and by something with no hands to speak of. A stroke for each day the builders did not come. It runs off the edge of the plate."
+  ],
+  "drop": {
+    "entities": [
+      "jaymospowers:sentry_golem",
+      "jaymospowers:detonation_sentry"
+    ],
+    "chance": 0.05
+  }
+}

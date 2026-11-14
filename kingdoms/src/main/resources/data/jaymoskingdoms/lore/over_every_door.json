@@ -1,0 +1,17 @@
+{
+  "title": "Over Every Door",
+  "author": "a grandmother",
+  "pages": [
+    "Garlic over every door, and the back door too, which your father forgets.\n\nNo washing left out after dusk. It likes a cloak.",
+    "If the fog comes in pale and low, bring the goats in and stop the chimney.",
+    "If one of you is bitten, send to the fen for leeches the same night. They take the bad blood and are none the worse.",
+    "If you bring the cloaked one down, do not stand over it. It gets up again smaller, and it flies."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:night_bleeder",
+      "jaymoskingdoms:blightwing"
+    ],
+    "chance": 0.12
+  }
+}

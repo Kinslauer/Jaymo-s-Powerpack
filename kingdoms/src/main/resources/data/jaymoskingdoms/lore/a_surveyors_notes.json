@@ -1,0 +1,19 @@
+{
+  "title": "A Surveyor's Notes",
+  "author": "a surveyor",
+  "pages": [
+    "Paced the old stone again for the baron. Nine strides round, and warm on the north face, where the sun never gets to it.",
+    "The big one's tracks are a yard long and easy to follow. I followed them backwards to see where it came from. They begin beside the stone. There are none leading up to it.",
+    "The dust on its shoulders is pale and very fine. It is not from any quarry I have worked, and I have worked them all.",
+    "I am told to write down which hills it walked out of. I have written the truth instead: I looked up, and then I stopped looking up."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:highfield_giant",
+      "jaymoskingdoms:magnetic_giant",
+      "jaymoskingdoms:arctic_giant",
+      "jaymoskingdoms:irradiated_giant"
+    ],
+    "chance": 0.5
+  }
+}

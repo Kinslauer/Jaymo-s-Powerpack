@@ -1,0 +1,19 @@
+{
+  "title": "A Market List",
+  "author": "unsigned",
+  "pages": [
+    "For the feast, by the steward's word:\n\nsix geese\na firkin of the dark honey\nsalt, the grey kind\ncandles, forty",
+    "Bring it to the hall before the bell. The king likes his table laid the old way.",
+    "The paper is soft as cloth. No town near here has a king by that name, or a hall, or a bell."
+  ],
+  "drop": {
+    "entities": [
+      "minecraft:zombie",
+      "minecraft:husk"
+    ],
+    "dimensions": [
+      "minecraft:overworld"
+    ],
+    "chance": 0.004
+  }
+}
