@@ -13,3 +13,6 @@
 - Frontier Armaments' four metals were iron, gold, diamond and netherite; gold and diamond gear is off in this pack, so ours are copper, iron, steel and netherite.
 - The Fire Cannon (Jaymo's Kingdoms) is drawn animated in the hand like the musketoon, in red, and its shot pours out more flame than smoke (`GunBlast.Gun.FIRE_CANNON`).
 - Forge Hammer model and textures from cleannrooster's Frontier Armaments' Forge Mace (MIT); `tools/gen_frontier_arms.py` builds them. Built; not played. How it sits in the hand is laid by eye from a render.
+- **Heraldry harness**: with Jaymo's Kingdoms' harness, a blow meets every layer: padding soaks a blunt blow, mail a cut, and plate on an arm or leg takes blows there. Every harness piece adds weight, so heavy kit tires you faster. A head shot glances off a lowered visor more often than off an open face.
+- The Smithing Anvil forges the harness pieces, each plate piece bright, blackened or gilded; gilding is done only for royals and lords and takes two gold ingots.
+- Built; not played.
