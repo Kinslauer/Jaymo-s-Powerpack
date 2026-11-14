@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-14 09:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-14 09:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,6 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Agents/chain-axe-lasso-models|chain-axe-lasso-models]] · 💻 Odysseus · #1534 · in-review
 - [ ] [[Agents/reaped-illagers|reaped-illagers]] · 💻 Odysseus · #1532 · in-review
 
 
