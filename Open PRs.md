@@ -1,27 +1,22 @@
 ---
-updated: 2026-11-10 01:12
+updated: 2026-11-14 02:06
 ---
 # Open PRs
 
-4 open, as of 2026-11-10 01:12. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-14 02:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-## [#1193](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1193) Kingdoms: a real night sky -- HYG star catalog and constellations
-- **Branch:** `claude/astronomy-sky` · **Updated:** 2026-11-10 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** [[astronomy-sky]]
-
-## [#1203](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1203) Kingdoms: family farmhand start is kind to every blood
-- **Branch:** `claude/farmhand-kind-family` · **Updated:** 2026-11-10 (today)
-- **Checks:** ❌ failing: Build Kingdoms
-- **Agent:** no agent note
-
-## [#1204](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1204) Powers: knives carry their metal's effect on hit
-- **Branch:** `claude/knife-metal-effects` · **Updated:** 2026-11-10 (today)
+## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
+- **Branch:** `claude/armor-pngs-vanilla-style` · **Updated:** 2026-11-11 (2 days ago)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1205](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1205) Reincarnation: villagers really forget the old life, wipe before MCA's creator
-- **Branch:** `claude/reincarnation-wipe-fixes` · **Updated:** 2026-11-10 (today)
+## [#1480](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1480) Wind: airflow sense rework (64-block reach, edge ripples with crowds, silent focus with a breeze)
+- **Branch:** `jung/wind-sense-rework` · **Updated:** 2026-11-14 (today)
 - **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1486](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1486) Kitchen: clean kills and skinning in strokes
+- **Branch:** `claude/project-thread-tjqmp0` · **Updated:** 2026-11-14 (today)
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** no agent note
