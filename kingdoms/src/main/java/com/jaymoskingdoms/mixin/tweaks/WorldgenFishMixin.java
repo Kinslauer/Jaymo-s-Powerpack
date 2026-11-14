@@ -21,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * The first time such a fish (a vanilla one, kept, not from a bucket, not named) is checked for despawning, it stops
  * being kept: it leaves when no one is near, as fish do, and natural spawning brings fish back within its caps
  * ({@link MonsterCapMixin}, {@link WaterClusterMixin}). If its chunk already has {@link #CHUNK_FISH} fish it goes at
- * once, so a crowded school thins to a few. Fish from a bucket or with a name tag are kept as before.
+ * once, so a crowded school thins to a few. Fish from a bucket (Powers' catch-and-release marks its vanilla fish so),
+ * with a name tag, or with no mind of their own (a Druid's fish form, `Druids.stand`) are kept as before.
  */
 @Mixin(Mob.class)
 abstract class WorldgenFishMixin {
@@ -33,7 +34,7 @@ abstract class WorldgenFishMixin {
 
 	@Inject(method = "checkDespawn", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$worldgenFishSwimOff(CallbackInfo ci) {
-		if (!this.persistenceRequired || !((Object) this instanceof AbstractFish fish) || fish.fromBucket() || fish.hasCustomName()
+		if (!this.persistenceRequired || !((Object) this instanceof AbstractFish fish) || fish.fromBucket() || fish.hasCustomName() || fish.isNoAi()
 			|| !"minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(fish.getType()).getNamespace())) {
 			return;
 		}

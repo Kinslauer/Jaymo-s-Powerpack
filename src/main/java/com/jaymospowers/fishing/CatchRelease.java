@@ -103,6 +103,10 @@ public final class CatchRelease {
 			critter.setPersistenceRequired();
 		} else if (e instanceof Mob mob) {
 			mob.setPersistenceRequired();
+			if (mob instanceof net.minecraft.world.entity.animal.fish.AbstractFish fish) {
+				// let go by a player, as from a bucket: Kingdoms thins kept vanilla fish that aren't (its WorldgenFishMixin)
+				fish.setFromBucket(true);
+			}
 		}
 		level.addFreshEntity(e);
 		level.sendParticles(ParticleTypes.BUBBLE, e.getX(), e.getY(), e.getZ(), 10, 0.2, 0.1, 0.2, 0.05);
