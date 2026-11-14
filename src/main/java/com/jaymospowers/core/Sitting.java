@@ -1,11 +1,15 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.ToDoubleFunction;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -17,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -51,6 +56,11 @@ import org.jspecify.annotations.Nullable;
  * blocks of room above, and holds one sitter.</li>
  * <li><b>The Sit key</b> (] by default): sits you on the seat under you or the one you look at, else on the ground, at
  * once. Pressed again while sat, it goes round the ways of sitting ({@link Meditate#POSES}).</li>
+ * <li><b>In midair</b> (Andy: "the sit key in midair should swap the falling pose and it should remember the last you
+ * chose next fall"): the Sit key goes round the falling poses instead ({@link #FALL_POSES} of them: FreefallPose's
+ * styles, all but the brace for the ground, which still comes before landing). The one you land on is kept
+ * ({@link #FALL_POSE}, saved with the player and seen by everyone) and every fall after uses it in place of the random
+ * pick, until you choose another. After the last pose the key goes back to random falls, then round again.</li>
  * <li><b>Getting up:</b> press Sneak, move, jump, or get hurt; breaking the seat drops you off it.</li>
  * <li><b>By the fire:</b> sitting within {@link #FIRE_RANGE} of a lit campfire heals {@link #FIRE_HEAL} every
  * {@link #FIRE_HEAL_EVERY} ticks and (with Jaymo's Kitchen) warms you by {@link #FIRE_WARMTH} more.</li>
@@ -72,6 +82,23 @@ public final class Sitting {
 	static final int FIRE_HEAL_EVERY = 100;
 	static final double FIRE_WARMTH = 10.0;
 
+	/** How many falling poses the Sit key goes round in midair: FreefallPose.Style's first ones (all but the brace, last). */
+	public static final int FALL_POSES = 12;
+	/** (Andy, 2026-11-13) The falling pose this player chose with the Sit key in midair (0 to {@link #FALL_POSES} - 1); none: each fall picks at random. */
+	public static final AttachmentType<Integer> FALL_POSE = AttachmentRegistry.create(JaymosPowers.id("fall_pose"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	/** Client → server: the Sit key was pressed in midair, while falling pose {@code shown} (-1: none known) was on. */
+	public record FallKey(int shown) implements CustomPacketPayload {
+		public static final Type<FallKey> TYPE = new Type<>(JaymosPowers.id("fall_pose_key"));
+		public static final StreamCodec<ByteBuf, FallKey> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, FallKey::shown, FallKey::new);
+
+		@Override
+		public Type<FallKey> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: the Sit key was pressed. */
 	public record Key() implements CustomPacketPayload {
 		public static final Type<Key> TYPE = new Type<>(JaymosPowers.id("sit_key"));
@@ -92,6 +119,8 @@ public final class Sitting {
 	public static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Key.TYPE, Key.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, ctx) -> key(ctx.player()));
+		PayloadTypeRegistry.serverboundPlay().register(FallKey.TYPE, FallKey.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(FallKey.TYPE, (payload, ctx) -> fallKey(ctx.player(), payload.shown()));
 		UseBlockCallback.EVENT.register(Sitting::use);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BY_FIRE.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> BY_FIRE.clear());
@@ -194,6 +223,29 @@ public final class Sitting {
 			return;
 		}
 		Meditate.sitDown(player, null);
+	}
+
+	/**
+	 * The Sit key in midair: the falling pose after the one chosen before (none chosen: after the one showing,
+	 * {@code shown}, as the player's own screen draws it), kept for this fall and the ones after. After the last pose
+	 * comes random again (nothing chosen: each fall picks its own), then round to the first.
+	 */
+	private static void fallKey(ServerPlayer player, int shown) {
+		if (player.onGround() || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isInWater()
+			|| player.getAbilities().flying || player.isFallFlying()) {
+			return;
+		}
+		Integer chosen = player.getAttached(FALL_POSE);
+		if (chosen != null && chosen >= FALL_POSES - 1) {
+			// after the last pose comes random again (Andy: "please", to a way back to random falls)
+			player.removeAttached(FALL_POSE);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.fall_pose.random").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		int from = chosen != null ? chosen : shown >= 0 && shown < FALL_POSES ? shown : -1;
+		int next = Math.floorMod(from + 1, FALL_POSES);
+		player.setAttached(FALL_POSE, next);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.fall_pose." + next).withStyle(ChatFormatting.GRAY));
 	}
 
 	/** Each tick a player has sat settled ({@code ticks} since): the fire's warmth and a slow heal beside it. */
