@@ -1012,8 +1012,8 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
-(new) **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement
-for Andy to approve). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
+**The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement,
+approved by Andy 2026-11-14). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
 ground that still holds the sorcerer's mana. The Reaper takes those dead and sends them back: pillagers, vindicators and
 evokers, grey and half bone, a red point far back in each socket, still carrying the crossbow or the axe they went down
 with. Folk call them **the reaped**. They are not the old dead and do not walk with them. They come as a host, behind a
