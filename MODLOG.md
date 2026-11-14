@@ -4797,3 +4797,14 @@ Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost
 - **Gifted villagers**: an Arsenal-gifted villager in a fight has two blades at their shoulders. One strikes their foe every 3 seconds (3 damage, within 12 blocks) and one meets a blow or shot for them every 5 seconds.
 - Classes: `power/arsenal/ArsenalWingKit` (new), `ArsenalWing`, `RelicWeapons.flyingCut`, `RiftBlade`, `ArsenalGift`, `ArsenalWingRenderer`.
 - Not done: the Sword in the Stone's gift on the wing. Compiled; not played.
+
+## 0.23.70 (2026-11-14): Gravity: the rocks take orders (#1525)
+
+- Gravity's harnessed rocks now take the orders the Arsenal's Attendant Blades do (never riding: that is the earthboard's).
+  With the rocks out, hold B+G to open their wheel; a B+G tap still changes their formation.
+- **Harrier**: the rocks go at whoever you are looking at, one after another, until you call them off or run out.
+- **Steer**: for a few seconds the rocks follow your eye and batter whatever they meet.
+- **Stone storm**: the rocks loop through the point you aim at and hit everything in the loops; you are slowed while it lasts.
+- **Closing ring**: the rocks ring a foe, hold it, then crash in together.
+- With a guard raised, a harnessed rock throws itself in front of a hit and is spent.
+- Compiled, not played.
