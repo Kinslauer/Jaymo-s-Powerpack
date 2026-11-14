@@ -568,6 +568,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ## 2026-11-14 (Rig style thread)
 - Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
 
+## 2026-11-14 (Long defence film thread)
+- Andy: "The magic casters need to cast sigils and all the other new effects, and they shouldnt just punch to cast, use whatever makes sense in terms of hand motioning. What we have in game for casters should match." Casters (players, villagers, film mages) share hand-gesture casts with sigils and the typed magic effects.
 ## 2026-11-14 (Shapeshifters and changelings thread)
 - Andy: "shapeshifters are awesome and that should also be how sylvan changelings function. but the shapeshifters and changelings should always copy an mca skin not the regular minecraft skin or anything else, and they should be far less common." Asked which he meant for changelings, he picked "Both": changeling players take an MCA villager's face, and some village impostors are changelings underneath.
 
@@ -594,7 +596,9 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - Andy approved the lore paragraph "A town in doubt" ("Approved, merge"); PR #1548.
 - 2026-11-14 (Andy, captured site plans thread): taking over a bandit/illager site lets you add it to a schematic your kingdom can build (PR to follow); Illager Arena is ARR so our own desert arena is drawn.
 - 2026-11-14 (Andy, correcting the gender card): "no, gender should be before you can select skip the story". Skip is hidden until gender is picked on the story's first page; no gender card on the Life tab (PR #1553).
+- 2026-11-14 (Andy, life story skip vs MCA's creator): "you need to be able to toggle the selections in the box and also you should be able to go back to the MCA menu with the on second thought button. think of it as a more streamlined way for players to create their charcter. if they want to skip the story's determination. they run alongside one another not separate". PR #1567.
 
 - 2026-11-14 8:45 AM ET (QTE finishers thread), on the lore paragraph "How a power ends a fight" that listed each power's finishing move as something folk know: "they shouldnt know any of this, not even the users. they figure it out right then and there, they just did wahtever felt natural." Paragraph rewritten: no one knows or names the moves; found in the moment.
 - 2026-11-14 8:52 AM ET (QTE finishers thread), asked whether the action-bar move names on power finishers should go: "nothing labels them." Names removed (PR #1562).
 - 2026-11-14 8:54 AM ET (QTE finishers thread), on the rewritten "How a power ends a fight" paragraph: "lore looks good, merge". Paragraph approved, (new) mark removed; PR #1562 to merge.
+- 2026-11-14: Andy approved the Lore paragraph "The pits and the hold plans" (captured plans, both desert arenas; PR #1552).
