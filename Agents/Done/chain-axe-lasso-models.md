@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Chain axe swings like the flail, lasso gets a physics rope like the whip, both with Blockbench models
 branch: claude/project-thread-qm96fm
 with: Andy
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 Compiled both mods; not played.
+- 2026-11-14 10:51 PR #1534 is merged into master; moved to Agents/Done.
