@@ -4,7 +4,10 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"LimbSwingMixin",
-		"TwoHandedSweepMixin"
+		"TwoHandedSweepMixin",
+		"ToolSwingGateMixin"
 	],
-	"injectors": { "defaultRequire": 0 }
+	"injectors": {
+		"defaultRequire": 0
+	}
 }

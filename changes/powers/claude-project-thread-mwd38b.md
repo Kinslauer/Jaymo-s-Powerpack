@@ -1,0 +1,10 @@
+# Swings match the lock-on region; work tools swing plainly unless locked on
+- **Work tools** (Andy: "tools like axes, should only do the better combat swinging when locked on"): an axe, pick, shovel or hoe made for work swings Better Combat's way only while you're locked on; otherwise it's the plain vanilla swing and hit. Tools made for war (new tag `jaymospowers:war_tools`: the Armory's hatchets and war axes, Tinkers' broad axe, minotaur axe, war pick, kama and scythe) always swing as weapons. Client `compat/mixin/ToolSwingGateMixin` (Better Combat's `AttackInteractor` sees no weapon when you click).
+- **Region swings** (`combat/RegionSwings`, `compat/mixin/RegionSwingMixin` on Better Combat's attack pick, both sides): while locked on, your weapon swings only the attacks that suit the region the scroll wheel picked. Each attack is a motion read from its animation (side cut, vertical, thrust, sweep). Mapping, per weapon family:
+  - Swords and every other edge (blades, daggers, staves, glaives, halberds, scythes): head = side cuts and thrusts; torso = thrusts, side cuts and our sweeping flourishes, never a vertical; arms = vertical and side cuts; legs = side cuts and thrusts; the Great Ape's tail = side cuts and verticals.
+  - Axes and picks: as swords, but they never thrust and chop down onto legs (legs = side cuts and verticals).
+  - Blunt (maces, hammers, anchors): the head also takes the overhead smash (head = side swing and overhead smash); legs = side swings and smashes down.
+  - Spears, lances, tridents: head and torso = thrusts only; arms, legs and tail = thrusts and haft sweeps.
+  - Daggers have no overhead cut, so at the arms they cut across.
+  A fitting motion your weapon can make but has no attack for is added with a stock Better Combat animation (same damage, wind-up and sound as its first attack), so a sword at the arms gets a downward cut too. With nothing fitting it swings as it always did. Weapon Forms still cuts it to the basic two for those who haven't learnt them. Bows, fists and wands are left alone; the chain axe keeps its own overhead chop.
+- Built; not played.

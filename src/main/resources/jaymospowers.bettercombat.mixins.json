@@ -2,6 +2,12 @@
 	"required": false,
 	"package": "com.jaymospowers.compat.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["TwoHandedReachMixin", "IncomingSwingMixin"],
-	"injectors": { "defaultRequire": 0 }
+	"mixins": [
+		"TwoHandedReachMixin",
+		"IncomingSwingMixin",
+		"RegionSwingMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
 }
