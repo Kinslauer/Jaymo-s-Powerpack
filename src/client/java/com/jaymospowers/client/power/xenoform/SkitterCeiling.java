@@ -96,8 +96,21 @@ public final class SkitterCeiling {
 	}
 
 	private static float eased(Map<Integer, float[]> amounts, @Nullable Entity entity, float partialTicks) {
-		float[] a = entity == null ? null : amounts.get(entity.getId());
+		float[] a = entity == null ? null : amounts.get(id(entity));
 		return a == null ? 0.0F : XenoformFlightPose.smooth(Mth.lerp(partialTicks, a[1], a[0]));
+	}
+
+	/**
+	 * {@code entity}'s id, or null while it has none yet: the camera asks of the new body a death gives, for a frame or
+	 * two before the game numbers it, and {@code getId} throws then (Andy's game crashed on dying, 2026-11-13 20:34 and
+	 * 20:44). A body with no number isn't turned over.
+	 */
+	private static @Nullable Integer id(Entity entity) {
+		try {
+			return entity.getId();
+		} catch (IllegalStateException e) {
+			return null;
+		}
 	}
 
 	/**
