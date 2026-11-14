@@ -40,7 +40,8 @@ public class RunningSkull extends Monster implements ItemSupplier {
 	/** What a smashed skull spills: bones, arrows, experience, and now and then the skull itself. */
 	static final int BONES_MAX = 2, ARROWS_MAX = 2, XP = 7;
 	static final float SKULL_DROP = 0.08F;
-	private static final ItemStack LOOK = new ItemStack(Items.SKELETON_SKULL);
+	/** Its look, made when first drawn: an item made as the class loads (at registration) is made before items are ready. */
+	private static @org.jspecify.annotations.Nullable ItemStack look;
 
 	private int ran;
 
@@ -128,7 +129,10 @@ public class RunningSkull extends Monster implements ItemSupplier {
 
 	@Override
 	public ItemStack getItem() {
-		return LOOK;
+		if (look == null) {
+			look = new ItemStack(Items.SKELETON_SKULL);
+		}
+		return look;
 	}
 
 	@Override
