@@ -94,3 +94,6 @@ ends the body for good. Compiled, not played.
 - **Draugr and the reaped come apart.** With Jaymo's Kitchen, the bodies of draugr and of reaped pillagers, vindicators
   and evokers come apart as a zombie's does: lift one and a limb comes away in your hand, strike it and parts are
   knocked off. A draugr's body is drawn without the parts it has lost.
+- **More of the dead come apart.** The zombie knight's and the revenant's bodies come apart like the draugr's. Alive,
+  the draugr, the reaped, the zombie knight and the revenant can lose limbs as zombies can (to blades, and to a knock
+  with Jaymo's Powers). The draugr now counts as undead (Smite bites, healing harms).
