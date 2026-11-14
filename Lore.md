@@ -122,7 +122,7 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-**The twelve powers known in the world**, as folk would describe them:
+**The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
@@ -132,16 +132,59 @@ kit.
   the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
   not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
   off. the bridge is the line now. if you find this don't come".
-- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
-  choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
-  within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+- **Blindness** is not a power (Andy, 2026-11-11: "blindness should stay as is, just no longer considered a power,
+  meaning you can go blind from battle, or malicious intent ... you can awaken resonance while blind with the fork").
+  It is a thing that happens to people: an eye lost to a blow, both taken by an enemy's blade or by one's own hand. For
+  the blind, sound paints the world a moment at a time. **The especially devout choose it**: they don a blindfold or
+  carve out their own eyes. The new kind of sight within the dark, and the bird's-eye view at its height, belong to
+  those among them whom Resonance has answered.
+  (new) **The fork in the dark** (Claude's placement, for Andy to approve). A struck tuning fork is how the blind find
+  out whether sound will answer them: one clear note held in the dark, and for some the note comes back as a world.
+  That is why the Unseeing keep forks and why a service ends with one struck over the newly bound. Most hear only the
+  note. The few who hear more are what the cult calls the Shown, and what everyone else calls a Resonance holder who
+  happens to be blind. A fighter who lost an eye in battle is owed nothing by the dark; it is the whole dark, both eyes,
+  that the fork answers.
+  (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
+  plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
+  rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
+  their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
+  when they heal (Andy, 2026-11-11).
+  **The Unseeing** (Andy, 2026-11-11: "add the unseeing as a feral cult, that believes in nonsense as an 8th belief")
+  are a feral cult with a belief of their own, beside the faiths: that the eye lies, that the sun is a great eye lying
+  to everyone, that the seven are painted faces and the Truth a book with no letters, and that when all are blind no
+  one can be watched. They keep two rites: the blindfold, tied on and never taken off, and the gouging, the eyes
+  carved out and the sockets bound in linen. The gouged lose their minds in time; the zealous among them hunt by ear
+  anyone who still has their eyes, and leave alone those who have taken the dark on themselves. Villagers who have
+  done it are shunned by their own, so the Unseeing live apart, in enclaves in caves and other dark places in the
+  wild, where they are safe to keep their belief. A traveller may come on one of their services at night out in the
+  wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
+  blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
+  ("you should be able to stumble on a service of the members performing this on one of their followers").
+  **It is the faith the barbarians follow** (Andy, 2026-11-11: "these can be the faith barbarians follow"): the camps
+  hold none of the eight; the Unseeing in their caves are its most zealous, the ones who went all the way. It isn't a
+  faith a player can swear to. What they are given is not their eyes back: living things burn
+  through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
 - **Darktide**: water and darkness, a guard and a blade, and a Flow that rises in the deep and the dark. Its holders
   harvest shadows; ascended, it is the Abyssal Tide.
+  (new) **The tide in them** (Darktide overhaul, 2026-11-11, for Andy to approve). The Flow keeps a tide of its own: at
+  high tide the holder's reach lengthens, and at spring tide, a full measure, the next thing they call is the great one.
+  A holder with empty hands is never unarmed: the water in them takes the shape of a blade when they raise a guard, and
+  runs back to water when it is not needed. In water or rain they are at home, quicker, and can go under anywhere the
+  rain is falling. The Abyssal Tide's height is the **Maelstrom**: the deep brought up as a standing dome of dark water,
+  which its caller swims through while everyone else in it drowns. Tideborn say the Deep Mother lends it and wants it back.
+  (new) **Ink and water** (Darktide looks, 2026-11-12, for Andy to approve). What a holder does is seen as ink on water:
+  a cut hangs in the air for a breath as a single brush stroke, the tide they call is a true wave with a pale crest, and
+  where they go under the ground lies open as a dark pool. Tideborn calligraphers say the Deep Mother writes with her
+  holders, and read a fight's strokes afterward the way others read tea leaves. A holder near full Flow can be told at
+  a glance: water gathers at their feet and their eyes go pale.
 - **Gravity**: weight taken out of things or piled on; at its height, a meteor called down.
 - **Resonance**: sound and the Deep Dark's sculk. The holder hears through walls and breaks things by their pitch.
+  (new) **What Resonance took from the blind** (2026-11-12, for Andy to approve). A holder can go wholly quiet, steps
+  and breath and all, and what their shout strikes they go on hearing through walls. In the dark, blind or blindfolded,
+  they hear the living as shapes; at their height the hearing lifts off the ground and looks down like a bird.
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
@@ -156,6 +199,37 @@ kit.
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
 itself they cannot see mana abilities or spirits. They can still develop valor.
 
+(new) **A hermit's letter** (Retaking, the Hermit's Road, 2026-11-11). A hermit wizard who meets a Smoke, Gravity or Cryo
+user for the first time writes them a short letter: "You looked straight through her. She stood at my shoulder the
+whole time"; their ki "went to the cold, or the smoke, or the weight of things, whichever found you first. It does not
+go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
+when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
+
+**What an elemental user sees** (Andy approved, 2026-11-11). A Smoke, Gravity or Cryo user's ki
+went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
+body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
+sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
+mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
+any other power user.
+
+(new) **The gods of the elements** (Jung's Elemental Corruption, 2026-11-13; the gods are Claude's placement, for Andy
+to approve). The wind, the smoke, the weight of things and the cold are older than the eight faiths, and something
+old answers for each: not patrons, they keep no shrines and take no offerings, and folk who speak of them at all say
+only "the gods of the power". They let a holder corrupt the gift and say nothing. What they will not stand is the gift
+used to murder the innocent in their name: a villager of any people but the camps (the barbarians follow the
+Unseeing and are nothing to them). The first such killing, a voice in the holder's head; the second, a warning; the
+third, they take the gift back. The element turns on the land around the killer (a storm and its lightning, a fog,
+the ground thrown into the air, a flash freeze), and for a while the power runs wild in them and in everyone near:
+twice as strong, it wounds them with every blow they strike and burns them where they stand, the element falls on
+whoever stands too close, and every creature that can flees them.
+Then it is gone for three days, and comes back still spoiled, unless the holder makes penance meanwhile: a Purifying
+Draught drunk while the gift is gone cleanses it, and the gods give it back at once. Jung counted Wind among the elements for this, beside
+the three that Andy named.
+(new) **The cold that kills** (Cryokinesis' corruption, 2026-11-13, Claude's placement for Andy to approve). A
+Cryokinesis holder who lets the cold do their killing, creature after creature frozen to death, finds it hungry: the
+power corrupts, and frost sheds off them. Warmth is the cure: a Purifying Draught drunk beside a lit campfire thaws it
+for good.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -164,12 +238,54 @@ vigilantes work on the legend of the old heroes, but each has their own methods,
 widely disliked. Costumed power users turn up in the world, some wreaking havoc, some trying to help their people. A
 masked hero goes by the costume's name while masked.
 
+(new) **The costumed gifted, and the everyday ones** (Claude's placement, for Andy to approve). The costumed power users
+in the world are gifted villagers, the one in eighty whose power woke. Only those who hide their gift put on a costume:
+the ones who don't care who sees have no need of a mask, and use the power plainly about the house. A costume is sewn by
+the village tailor, the same who sews them for players, and worn only after dark; by day its wearer is a baker or a
+farmhand like anyone else, and the street doesn't know whose face is under it.
+- **Vigilantes** are the brave, the kindhearted, the dutiful and the devout: at night, masked, they go out after the
+  monsters that come at their own people, by the legend of the old heroes, each in their own way.
+- **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
+  or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
+- **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
+  villain; neither is thanked.
+- **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
+  dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
+  house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
+
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
 wizards (who teach the making of a staff), the **Archer** from the Green Huntsman's hunters, the **Survivalist** from
 the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' gunners and the guards of the realms,
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
+
+(new) **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
+those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
+**Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
+thrown sword is a sword given away, and mean it: it lies where it lands. Only those whose gift can fetch it (the
+Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
+teaching.
+
+(new) **The Twinblade** (Andy, 2026-11-11: "an ancient warrior born design, not often wielded by many, and the schematic
+is found in the stormborn dungeon"). Two swords of one make joined at the hilt on a long grip, a weapon of the old
+Warrior-born that few ever carried. Nobody forges it as such: the joining is a knack, and the only drawing of it left
+lies in the Stormborn Tomb among the draugr, who were Warrior-born once. Whoever studies the sheet can join two blades
+and part them again.
+
+(new) **The Mill Charge** (SWGC swordplay picks, 2026-11-12). The Skyward Reach teaches its staff and glaive students
+to go through a press of foes with the shaft turning before them, the way a mill's sails take the wind.
+
+(new) **The schools' styles** (SWGC swordplay picks, 2026-11-12). Each school fights its own way, and its students
+carry it into every fight with the school's weapon in hand. The Quiet Tide's **Still Water** waits and turns blows; the
+Skyward Reach's **Long Measure** keeps its distance and thrusts; the Stone Root's **Deep Root** is slow and never out of
+breath; the Low Lantern's **Low Flame** is quick hands and little guard; the Ashen Fang's **Red Ember** comes on fastest
+and burns out first. A school's guards and its duellists fight the same way, which is how the knowing tell them apart.
 
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
@@ -181,6 +297,21 @@ traits, never as a system.
 **The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
+
+**The skull under the fire.** When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
+
+**The burning chain.** A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
+
+**Judgement.** An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
+the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
+
+**The burning steeds.** The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
+crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
+kin to the fire; anyone else is burned and thrown.
 
 ## The Z Fighters
 
@@ -223,6 +354,13 @@ player does, by messing about with time, but he **conquered his echo, and conque
 through time ever since, wreaking havoc on events and warping the timeline, and he seems to get away with all of it.
 If he is ever killed he cheats death the same way: his **echoes** reappear and act in his place, which is why he seems
 to be in several places at once.
+
+(new) **How his echoes cheat death** (tinkerer thread, 2026-11-11). He can be hurt and killed, unlike the other
+masters you meet. The body falls like anyone's. A breath later one of his echoes steps out of the air where he fell, in
+the same violet burst and pale shards a Chrono's own echo arrives in, and carries on at his bench as if nothing
+happened ("Hm? Oh, him. One of me."), mid-operation included. Wherever else he is standing just then, he flinches and
+mutters that somebody, somewhere, has just killed him. Ask him about Los Perrito's androids and he blames shoddy
+copies, the city's orders, or "a bug, every machine has one", and changes the subject.
 
 **His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
@@ -285,6 +423,34 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+**The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
+nimbus cloud"). Besides the balloon skiff at the mast, the sky folk ride small skiffs of their own: a slab of the
+Aether's cold cloud packed onto a skyroot keel, with a cloudwool sail on a mast at the stern. She hangs in the air
+where she is left and goes where her rider looks. The cloud is the afterlife's own, and it reads the same ledger the
+Judge weighs: it holds the just and nobody else. Anyone whose page would not weigh just sinks through it as through any
+cloud, and a rider who stops being just is let fall. The Divine-born think nothing of this, since it has never dropped
+one of them. A visitor from below who finds she carries them has been told something about themselves.
+
+(new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
+one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
+carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
+tall houses and terraced plots, all in the island's own stone and wood, with a mooring mast at the far edge. A town
+that size takes a king as any great town below does, so there are kingdoms in the sky. They are Divine-born realms
+with the halfway folk among them. A sky kingdom holds its own islands and nothing under them, and the ground below a
+sky town is still whoever's it was. It and the realms below cannot go to war, raid or send caravans to one another:
+there is no road, and nobody below has the ships. Sky kingdoms deal with each other as kingdoms do.
+
+(new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
+village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
+the head of the road the lord's castle. A blossom town is a kingdom like any other great town, and keeps its own style
+of name.
+
+(new) **The blossom castle.** The blossom lords build their seat the same way wherever they rule: a moat and a stone
+bridge, a footing of rough stone that leans in as it climbs, and on it a white keep of four storeys under grey tiled
+roofs whose corners turn up, with a pair of pale horns on the top ridge and a gatehouse against one side. The lord
+sits in a niche at the far end of the great room, between two raised matted floors where his people kneel. The grey
+tile is the castle's alone; the town below roofs in dark tile.
+
 ## The shape of the world
 
 The world is graded in tiers, and the tiers are its history as much as its difficulty:
@@ -320,10 +486,25 @@ trees on top, clouds you can walk into. Wind is the way in; there is no portal. 
 **Highfields** (green and windy), the **Magnetic** lands (floating lodestone pillars), the **Arctic** (frozen peaks)
 and the **Irradiated** (Ambrosium-sick forests that glow).
 
+**The Cloud Sea.** Between the world's own clouds and the Aether's islands lies a great
+depth of empty sky, and near the top of it one bank of cloud from horizon to horizon: the **overcast**. Nobody made it.
+It is the Aether's own weather, the same soft cloud its islands trail, gathered under them. It is why nobody below has
+ever seen the islands, and why the things that fall come out of a clear sky "from nowhere". The cloud is soft to walk
+into and too deep to push up through. Here and there a **well** stands open in it, a shaft of blue: the geese go up by
+the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
+whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
+
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces are the **monoliths** and
 their **Giants**: a broken pillar with a heart floating in it, and one Giant for each highland's element (Highfield,
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
 heart goes out for good, and the first one to fall raises the world tier.
+
+(new) **The pillar's stone** (models thread; Andy, 2026-11-12: the colossi "can spawn among the high field giant as
+fodder"; the rest is Claude's placement for him to approve). A monolith is more than its Giant. When the Highfield Giant
+has someone to fight, broken blocks of its pillar get up out of the ground round it: **rune-bound colossi**, half again
+a man's height and more, grey holystone banded in moss-green, cut with gold runes that are the same hum folk say the
+old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
+it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
 
 What folk believe about the sky (village talk, not proven):
 
@@ -335,6 +516,13 @@ What folk believe about the sky (village talk, not proven):
 waterfall with no top ("follow the water the wrong way"), whales that swim through clouds, geese that go up in winter,
 stones tired of the ground, gold that grows on trees "higher", wizards on the floating rocks who "aren't hermits,
 they're halfway". A humming stone in your pack is best kept from the priests. Some villagers quietly build towers.
+
+**The floor of the sky woods** (portable-mods thread, 2026-11-14; Andy picked "Living things" from The Aether II's
+world pieces). Nothing in the Aether is tended by the gods any more, so the woods keep themselves. The sky trees shed, and
+their leaves lie in piles under them until they rot back into the soil. The **rotshroom** is the Aether's undertaker: it
+grows only where something is rotting, eats the litter and fruits. Moss takes damp, shaded holystone and leaves it mossy.
+Aerbunnies strip the berry bushes and breed on them. Skyfolk gardeners rake leaves round a sapling or a picked bush to
+bring it on, and roast rotshrooms over the fire.
 
 **What lives up there.** Phygs, flying cows, sheepuffs, aerbunnies, moas, kirrids, burrukai, taegores, skyroot
 lizards, prismallards, glitterwings and shroudwings. **Aerwhales** swim the open sky, as big as the great whales of
@@ -348,6 +536,15 @@ islands. The **guardian trees** grow from their own wood, some of it infected, s
 old camps a traveller can remember; you wake beside one if you die with no bed. Holystone, Veradexian and Brexallen
 vases hold what the Aether's people left.
 
+(new) **Pages the dead and the monsters carry** (portable-mods thread, 2026-11-14; Andy picked RPG Lore's dropped books). Eight more
+loose pages turn up on what a player kills, and the Lore Codex keeps them. None states anything outright. A surveyor's
+notes on a Giant (its tracks begin at the old stone, the dust on it is from no quarry). A market list on a zombie or husk,
+for a king and a hall nobody remembers. A physician's case on the Skeleton Lord (a struck man who laughs in his sleep, and
+gold leaf that burns). A Hornkin reckoner's count of towns that paid or burned ("we do not open the doors, we wait by
+them"). A grandmother's rules against the Night Bleeder. A rubbing from a sentry golem's plate: "Keep the door. Admit the
+builders. Admit no other", with a tally of the days **the builders** did not come (a new name for the Aether's people, used
+only here). "Halfway", by a hermit of the floating rocks who followed the water the wrong way. An unsent letter on a werewolf.
+
 **The wind dragons.** The four winds are dragons: **Notus** the south wind (fire, the badlands and basalt
 spires), **Boreas** the north (frost, the frozen peaks), **Zephyrus** the west (acid, half sunk in the swamps) and
 **Eurus** the east (lightning, the fastest, disguised as a villager anywhere). **Aeolus** keeps the winds: a dragon
@@ -355,6 +552,15 @@ three times their size who walks among folk disguised as a villager, and who lea
 takes most kindly to the blood that shares its weather (Notus to the Emberborn, Boreas to the Frostborn, Zephyrus to the
 Verdant and Tideborn, Eurus to the Stormborn). Over the Aether flies **Aetherion**, the star dragon, with a breath of
 starlight and a cataclysm of falling stars.
+
+(new) **First sight of the great ones** (Andy, 2026-11-11: "can bosses get intro cutscenes? ... even passive boss mobs
+can get them. just to further illustrate the majesty of the encounter"). The first time anyone lays eyes on each kind of
+great creature, the moment is shown as a short wordless film: a low look up at it, its roar, then the two of them in one
+frame. It happens once for each kind: every dragon (Ignivorus over the Nether first among them), the Giants, the
+patrons' champions, the Ogre King, chiefs and warlords, the Piglin King, the grizzly, the minotaur and gorgon, the
+Slider and the Visage of War, the Ender Dragon, Wither, Warden and Elder Guardian, and the gentle great ones, the great
+whales and the Aerwhales. Kings and lords get none; they are met in their halls by talking. Nothing is named or
+explained on screen.
 
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
@@ -365,10 +571,47 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
+**What the great ones leave** (Andy approved, 2026-11-12). A dragon's breath is in its marrow, and the bone keeps it after the dragon is dead:
+ember bone from the fire dragons (Notus, Ignivorus), rime bone from the frost ones (Boreas, Atroxiia), venom bone from the
+acid ones (Zephyrus, Varasuchus), storm bone from the rest (Eurus, Aeolus, Aetherion, Stegonaut). Smiths shape it like any
+bone and the tool keeps the breath. Dragon hide does not burn, which is why the old dragon hunters carried it as a
+shield. The teeth of the thing under the wreck are hooked and hold in the water. Whoever fells a great one takes its
+likeness for a trophy: a dragon's skull, the knight's helm, the worm's maw; nothing is written on them.
+
+**The chain axe** (Andy approved, 2026-11-12). A boarding weapon of the corsairs: an axe on a ship's chain, thrown across the gap between two
+decks to bite a rail or a man and haul him over. Any smith with iron can forge one; it has no magic in it.
+
+**Four more great ones** (Andy approved, 2026-11-12). The **thing under
+the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
+hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
+under the desert's ruins, the Stoneborn talk of it the way people talk of a thing their grandfathers saw, and a
+Stoneborn who is there when it comes up faints at the sight. The **snow giant** of the cold plains lives in the Arctic
+stone's country; the Frostborn count it a neighbour, and it leaves alone whoever leaves it alone. The **fortress
+knight** is one of the old war's dead, a champion of the demons' country still holding a Nether fortress long after
+anyone told him to; his sword lies with him and nowhere else.
+
+**The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
+Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
+
+**The roosts, the ring and the den** (BossRise patch 3; Andy approved, 2026-11-12). The **roosts** are the demons' country's own
+watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
+where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
+its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
+
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
-witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
-the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
+no longer held in the Aether's Sentry Ruins either: those are the Slider's alone again (see the labyrinths, next).
+
+(new) **The labyrinths, the snow houses and the jungle temples** (Epic Structures thread, 2026-11-11; Andy: the Epic
+dungeons "should spawn the minotaur instead of the slider dungeon"). Under the plains, the deserts and the snow lie
+great dungeons older than any kingdom standing, halls and stairs cut by nobody the songs name. Each of the great ones
+is a labyrinth with a **minotaur** in its biggest hall, and about one in three of the middling ones has one too; the
+small ones hold only the usual dead. It does not leave its hall. In the cold lands stand snow houses, small ones and
+large ones with a cellar dug under them, the winter camps of hunters who are mostly not at home. In the jungles stand
+stepped stone temples and their ruins, raised by the same forgotten hands as the labyrinths and long since emptied of
+priests. (Claude's placement, for Andy to approve: who built them is left unnamed on purpose.)
 
 ## The dead
 
@@ -376,6 +619,24 @@ the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
 are: villagers who died a long time ago, in ages this world has already forgotten. They are not the fresh dead. The MCA
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
+
+(new) **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement for Andy to approve). The old dead
+were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
+fields, a few carrying the hoe or shovel they were buried with. The older the world grows, the more of them wake, and
+they come up where the ground is dark and drift toward the living, groaning once as they find their feet. A blood
+moon wakes whole graveyards. By day they shelter, and the crowd comes apart into stragglers until the next dark. In
+the ruined future a Chrono can reach, nothing keeps them down any more, and the crowds there are the largest of all.
+Some crowds have someone at their head: a **grave-captain**, a big old corpse the others follow, who was somebody
+once. By the sea the drowned walk with **the pirates' dead**, still in their bandanas and sea coats, still carrying the
+powder kegs they went down with, and they throw them. Not every crowd is the dead: once someone has made enough of a
+name, **the illagers put a hit squad together** to deal with the threat, and it doesn't lose the trail. Below, in the
+Nether, the demons' country sends its own. **The bells keep them off.** The Truth's priests learned long ago that the
+dead won't rise within sound of a bell rung from a square of metal (iron near, gold further, diamond further still, a
+netherite heart furthest), and every great temple's bell stands on iron; villagers repeat it to anyone near a bell. Some
+days the sky never clears: a low grey lid from dawn to dusk with no sun to speak of, and the dead walk all day under it
+(always the day after a blood moon). The dead can smell their own: whoever kills enough of them comes away with **the
+grave scent**, and those who want the fight bind rotten flesh, a bone and grave dirt into a **grave lure** and tear it
+open in the dark.
 
 **The draugr are Warrior-born.** Every draugr is an undead Warrior-born ancestor, one of the raiders who lived on the
 Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
@@ -399,6 +660,33 @@ with the demons' country beneath them and every horned thing aware of them: "tho
 always the demons' to keep. Somewhere down there a way up stands lit, and a cold draught runs from it. Walk out through
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
+
+**The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
+not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
+dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
+A flower or a candle given to one is enough: it thanks whoever came and goes to the Judge that night. Left alone it goes
+after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
+to be called."
+
+**(new) Limbo's ghosts** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
+while in limbo, so you can kind of haunt your friends"). The buried are not the only ones who stand outside themselves.
+Someone whose life has ended and who waits in Limbo rather than be born again is seen by the living the same way: pale
+blue and see-through, a hand off the ground, never far from the body. They touch nothing and nothing touches them. Their
+voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
+standing over the body they are burying. (To be built once Limbo itself has merged.)
+
+**The unbodied** (limbo thread; approved by Andy 2026-11-14: "i was eaten, therefore i had no way of respawning from that
+body. after that happens your limbo ghost should be freed to freecam or spectator roam. and haunt your friends until you
+backspace to give up"). It is the body that holds a waiting ghost in place. When nothing is left of it (eaten by beasts,
+burned, blown apart) nothing holds the ghost either: it wanders wherever it likes, seen and heard as before, touching
+nothing, for as long as it refuses to be born again. A body in a grave is a body still, and its ghost keeps to the mound.
+
+**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghosts you implemented can stay, as long as they can
+still enter limbo if they don't come to"). Someone left for dead, not yet dead and not yet back, comes loose from the
+body the same way: pale blue and see-through, able to drift a little way from where they lie and no further, through no
+wall. Beasts and monsters don't see them. The living do, and hear them. Carry the body and the ghost comes after it. The
+moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
+dead choose, Limbo among it.
 
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
@@ -449,6 +737,57 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+(new) **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
+world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
+the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
+branched, and hang glowing spore lanterns that the Verdant dye and carry home for light. In the warm wet country is the
+**pulse forest**: thin blue stems with flat caps that brighten and dim together, the whole wood on one slow beat.
+Verdant elders say the wood is breathing; nobody has shown otherwise. In the dry cold uplands is the **stone garden**:
+wind-worn pillars and banded boulders with moss on their heads, and little else. And over all of it, in the same place
+day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
+the ring lies and do not think the sight remarkable.
+
+(new) **Storm, sand and wind** (four-mods thread, 2026-11-11, Eden Ring part 2). Three more countries of the Verdant
+World. The **brainstorm** is cold grey upland where the ground is rich in metal and so are the trees: a brain tree
+carries copper, iron or gold through its flesh, builds up charge and lets it go into anything living that comes near.
+The Verdant who gather there wear metal, which takes the charge to ground; they say the trees are thinking, and that
+it is rude to interrupt. The **lakeside desert** is hot dry country where every pond stands in a ring of sand, because
+of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
+**wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
+swings slowly round, and carries off anything thrown or let fall.
+
+(new) **Gravilite** (four-mods thread, 2026-11-11, Eden Ring part 3). All over the Verdant World, in every country,
+small blue crystals stand out of the ground and glow. The Verdant call it gravilite and say it fell from the ring of
+the giant overhead, the same stuff that holds the ring up. On its own it only shines, so they light their halls with
+it, in lamps and lanterns. Bound in iron over a core of redstone it does what the ring does: the **Gravity
+Compressor** turns weight upside down in the air above it, higher the harder it is driven. The Verdant use them as
+lifts and to keep stores off the ground. It is a craft of theirs, not a power, and it has nothing to do with the
+Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
+balloon mushroom, pulse tree and brain tree each give a full joiner's set.
+
+(new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
+its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
+its bloom glows; **lonlix** is the common tuft of the warm lands; **parignum** lies in mats with small lit flowers;
+grey **Eden moss** covers the stone garden. **Eden vines** hang in strings under caps and ledges, and the **symbiotic
+moulds** grow on the undersides of the mushrooms and brain trees that feed them, one kind glowing. **Limphium** is the
+one the Verdant farm: its leaves are poor eating fresh and good eating dried, and a traveller in the far country is
+offered them before anything else.
+
+(new) **Diskwings** (four-mods thread, 2026-11-11, Eden Ring part 4). The far country's sky has one beast of its
+own: the diskwing, a flat slow glider with two crescent wings and a finned tail, lit along its back in its country's
+colour (purple over the mushroom forests, red over storm and sand, green over stone and grass, blue over the pulse
+forest). They harm nothing and nothing there hunts them. The Verdant read weather by them and count it bad manners to
+shoot one.
+
+(new) **What the Aether kept of it** (four-mods thread, 2026-11-11, Eden Ring part 5; Andy: Golden Forest, hollow
+islands and Sky Colony go in the Aether). Three things of the far country's kind are found in the Aether and not on
+the Verdant World, and the sky folk hold that they were always the Aether's and the Verdant World only has their
+cousins. On the wetter side of the Gilded Ridge stands the **Sunroot Grove**: tall straight trees under broad golden
+crowns, over yellow moss. Sunroot is the sky towns' best joinery wood. High above the islands drift **volvox
+colonies**, hollow balls of living jelly round a dense glowing heart; nobody has seen one start or die. And among them
+drift **hollow islands**, shells of holystone turfed on top, with a chamber inside lit by gravilite, which is the
+only place in the Aether it grows. Divine-born children are told the hollow islands are eggs.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -487,15 +826,53 @@ scanning creatures and reading tablets. Bands corrupt and glitch. There is also 
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
 darkened aliens; mechs hunt band wearers at night too.
 
+(new) **What the blood and the gifts do under strain** (picks, 2026-11-12). The Verdant are fed by the sun and flag a
+little at night; the Warrior-born are quickened by the open night sky, most under the full moon that wakes the ape,
+and either can stand still, look up and drink it in. Every fighter of ki holds fast at the brink. When two great
+blows meet, ape against brute against the black suit, they lock until one gives. The Emberborn run hot when they
+fight, hot enough to ruin armour and in the end to burst; the cold kill with a look held long enough. The storm can
+be thrown and the sky turned, weight can bind many at once or trade one place for another, the dark water answers
+with shoal and drowned, and a voice can lift its owner or break the air. None of these are new gifts, only what the
+old ones do when pushed.
+
+(new) **What the bodies remember** (alien picks, 2026-11-12). A body in the band is not only a shape: it keeps the
+habits of the creature it was read from, and a wearer who stays in one long enough finds them. Bulwark's temper
+rises with every blow, Tusk runs through the wood rather than round it, Gorger bowls, Prowl clings and bleeds its
+prey, Howl follows one scent, Lurk takes the colour of the wall, Talon stoops. Ooze stretches, Lumen makes brief
+shapes of its own light, Mirage wears a face it has seen, Wisp reaches through, Cortex gets into heads. Fuse lies down
+on the blast and keeps the hurt, Rivet quiets machines and opens what iron keeps shut, Hive's flyers move as one body,
+and the sea bodies are answered by the sea. None of it is taught; the band only held it.
+
 **Who made the bands** (Andy, 2026-11-11). An **elder alien** on the **Pale Moon** developed the band, and the band's
 upgrades are done there, at the elder's forge. The elder's people have an extremely advanced society, a kingdom of
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
+(new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
+eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
+in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
+monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
+**Gremlin** is the Ocellan's own shape, bare of the robe: the makers put themselves in the band.
+
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
-it home, do not come home". Andy to confirm: this hints that the elder meant the band to be given away.
+it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
+
+(new) **Undersky, the city under the dust** (Andy, 2026-11-11: "hidden"; names Claude's, Andy said "surprise me"). The Ocellan live hidden
+beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
+moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
+believes the pod crews' rumour. Inside, tall white towers curve up to a false sky the Ocellan made themselves, blue with pale clouds,
+with gardens on their tops and rails sweeping round them (Andy: like the cities of Viltrum). The moon's Endermen and the Ocellan fight all the time: the Endermen steal
+the city's blocks, lamps and panels and bits of the false sky, with no idea what any of it does, for the mischief of it
+(Andy, 2026-11-11). The elder, **Ammet Thrum** (the Old Maker), keeps the Star Forge there; the ruler, **Sovereign Vorrel**, keeps
+his court there, and a sealed
+workshop where the rival band was made. A band wearer who hands the band to the ruler sees what he wanted it for: he
+puts it on and turns on them in his own court (Andy, 2026-11-11).
+Before Vorrel the Ocellan "had it figured out" (Andy, 2026-11-11): from Undersky they traded and made war between
+the worlds. Whoever kills the ruler while he wears the band may take his seat and open the city to the worlds again.
 
 ## The future: Los Perrito
 
@@ -528,6 +905,13 @@ Some still fight in the hope of someday taking back what was.
 **The three-sided war** (Andy, 2026-11-11). Frostborn troopers in rigs fight in the future too, so the streets are a
 three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
 
+(new) **The troopers** (future-three-sided-war, 2026-11-11). The Frostborn come in squads, each trooper in a whole Rig,
+firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
+Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
+the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
+hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
+and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
+
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
 the city, corrupted by the Tinkerer's bug.
@@ -559,6 +943,18 @@ none.
 **The Lantern Warden**: the night and the dead. He wants a lantern, a candle, a bone, the glow of the deep squid: light
 given back to the one who keeps the dark at bay. The dead that walk are his to put down, and the blood-drinkers hate
 his light.
+
+(new) **The barrow's oath** (models thread, 2026-11-13; Andy asked for lore for yair's Cryptbound Revenant and Zombie
+Knight and fixed two points: the knight "needs a different head and should wield a sword from our pack, and
+correctly"; the rest is Claude's placement for him to approve). Before the kingdoms there were lords on the moor who were
+buried with their household, and the greatest of them swore to the Lantern Warden to keep the light over their own
+dead. They are keeping it still. The old barrows are the buried cobblestone rooms under the Overworld. In about half
+of them two or three **barrow knights** stand: dead villagers' faces under rusted kettle helms, each with a real forged
+sword in his fist. In the deepest, their lord stands with them, the **cryptbound revenant**, in rusted plate with the
+Warden's blue light in his helm, his breast and along his blade. They let pass whoever comes carrying a lantern, as the
+lantern-keepers of the barrows do, and they fight anyone else, and anyone who strikes one of them. Hard pressed, the
+revenant raises his sword, the blue light rings out, and more of his knights climb out of the floor. He leaves a soul
+lantern behind. They are not a Bane's barrow-host: a Bane's dead hunt one person, these only keep a grave.
 
 **The Crowned Sun**: kings, law and war. He takes tribute as a king does: gold in small coin, the sunflower, glowstone,
 the golden root. He is warm to those who serve a crown and march under a banner. Thieves, and the smoke they hide in,
@@ -602,6 +998,14 @@ when the Grue is beaten says *"…Thank you."* Sickness silences him down to dot
 **The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
 the Shade of the Grue is one of them.
 
+**The Reaper** (Andy, 2026-11-14). The sorcerer's mana went into the ground with him, and it is still there. A Death Sorcerer's
+magic is an element like the other six and never touches it. But whoever takes up the forbidden death arts from outside
+that element draws on it, and a piece of it comes up and stands behind them. A warlock may swear to it in place of a patron
+god: it keeps no shrine and gives no favour, and it is paid in blood and in deaths. It is not a sixth spirit and it was
+never a person. It has no name and no voice, and the five will not speak of it. Anyone at death's door can see it, whoever
+they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
+scythe. The Grue does not reach for those who carry it. He has no need to.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
@@ -613,6 +1017,19 @@ every court forbids Death and Blood and none remembers why (the old master "look
 then he did not answer"); that the crucible does not talk when the flux runs high, "it listens, which is worse"; and "if
 you hear your own name in it, put the lid on and go outside. Do not answer. Somebody answered, once, a long time ago."
 It hints at the sorcerer who became the Grue without naming him.
+
+(new) **The other side, and what it does to the unready** (Claude's placement for Andy's living nightmares, 2026-11-13,
+for Andy to approve). Most folk live their whole lives without looking straight at anything from the other side, and
+the first time is the worst: the heart hammers, the edges of the world go cold, and plenty simply drop where they stand.
+The world's people call it being overcome, and there is no shame in it, though nobody likes to be told. Priests and
+guards have seen more than most and stand it better; the brave do not feel it at all. Each sight that is lived through
+leaves a little knowledge behind, and the folk say that a woman who has seen enough starts to hear what she cannot see,
+then to see what walks unseen, and at the last to see through the faces of the hidden cursed. The other side notices
+those who look back at it, though: its wounds can follow you into sleep as a **living nightmare**, and you wake with
+phantoms coming at your face, gone the instant before they strike. They are not the phantoms that hunt the sleepless
+from the night sky, which are flesh enough to kill and skin; these are the nightmare's own, and nobody else sees them
+but those attuned to ki, who can watch another's nightmare circle them and know it for what it is. A priest's or a
+cleric's restoration lifts the curse, as it lifts any.
 
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
@@ -642,6 +1059,14 @@ builds them, and clockwork hornets, on purpose. He rebuilds fighters into androi
 reaped, a body raised as a thrall) and **Blood** (paid in blood rather than mana). Practising them is a crime and
 brings corruption. The **blood witch** is their face in the world.
 
+**Volcanic glass and the black flame** (BossRise patch 11; Andy approved, 2026-11-12). The black glass comes from the demons'
+country in the Nether, where the fire rivers cool: the same glass the gauntlet is made of. Working it is a craft and no
+bloodline, so a Sorcerer of any element can learn it from a scroll: splinters, spires out of the ground, a skin of it,
+a pool poured molten. The court wizards and the camps' shamans carry those scrolls. The **black flame** is the demons'
+own fire and a third forbidden art beside Death and Blood: water does not put it out, it leaps from one body to the
+next, and only healing magic ends it. The camps' necromancers carry its scroll. Fire's own Sorcerers have the ring, the
+pillars and the lance; lightning's have the storm cloak.
+
 **Banes.** Something you bury may not stay down. A foe you killed, or one that killed you, can come back with a
 name and a mark on its brow that flares and does not go out when it dies, and it comes for you alone ("You put me in
 the ground. The ground gave me back. It always will."; "Not by your hand. Tell them I'll be waiting."). A Bane learns
@@ -662,6 +1087,60 @@ what the Abyss would give". Promised: the light, the fields, the warm houses and
 mostly. They fly." The last page: the Master says they do not go up again until they are called. "We have not been
 called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
 ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
+
+(new) **Tools, draughts and trained hands** (picks, 2026-11-12). The Frostborn rig carries more than its wearer
+has asked of it: small flyers that leave and return to the suit, a table of light at the wrist, false images of the
+wearer, a field that keeps a parried blow, and an eye for the angle of a shot. Chrono holders who dodge well enough
+begin to see where a blow will land before it is thrown, and leave copies of themselves standing where they were. The
+devout blind are not blinded twice: no flash reaches them, and they feel what stands behind them. Hunters and the
+Tinkers' smiths fit arrowheads for every kind of work (bola, net, harpoon, flare, whistle) and bandits and
+vigilantes alike carry a belt of powders, vials and darts. Guards throw a round shield and catch it again. The
+alchemists have three late draughts: one that lends the drinker the skin of whatever they next touch, one that shuts
+a power away for a while, and one, rare and dear, by which a power can be given up for good and left sealed in a
+phial for another; the blood-borne arts of the Z Fighters cannot be poured out this way. People who sew their
+costumes to one design stand a little firmer together, though the towns like them no better for it. The boxing
+teachers know where a limb goes numb.
+
+(new) **The two pacts** (Andy, 2026-11-12: "you improvise the lore on that yourself"). A corrupted power can be
+bent once more, and not back. The demon masters below still keep the bargain they once kept with the sorcerer: to a
+holder whose power is already corrupted, one of them will offer **the Cinder Pact**. Whoever takes it is slower and
+far harder to kill, and what they touch catches light, for the rest of their life. The other bargain has no one
+behind it. A holder who carries a void shard out of the Maw long enough begins to hear the space between worlds the
+Frostborn crossed, and can let it in: **the Hollow Pact**. Nothing can stun or hold them after, and their blows shove
+like a door slamming, but every hurt lands harder, because there is less of them to take it. A person can hold one
+pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
+speaks for the second.
+
+**The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
+their master, the demon master can come up from the nether and speak to them there"; the rest is Claude's placement for
+him to approve). In the birch woods and the dark forest stand a few chapels of the Lantern Warden whose parishes stopped
+keeping the light: the **darkened chapels**. The lamp is out, the parish dead walk the nave and the cellars, and the
+keepers' votive panels still hang on the walls (the lantern, the candle, the bone, the deep glow). The last keeper's
+journal is still on a shelf there, and it only hints at what the parish knelt to instead. A holder whose power has
+turned feels such a place from far off on a dark night, as a direction and nothing more. When one of them stands before
+the altar, the floor opens like an ember and the **Master of the Gloam** comes up through it, teaches and bargains as he
+does below (the lesson in blood, the Cinder Pact), and goes down again when they leave. For anyone else he never comes.
+It is a tear, like the imps', not a gate: nothing stands open after him. (The building is Tada_no_ahiru's Church of
+Sin, MIT; its icons and its two books were replaced with the pack's own.)
+
+**The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
+The graveyards, crypts and burnt-out villages are ground the Lantern Warden's keepers lost: graves nobody lights a
+candle on any more, so the dead in them walk. They are not the barrow knights, who keep their own oath. The mod's own
+book, the Chronicle, tells its own tale of a champion and a lich; in the pack that is one parish's telling, not canon.
+
+**The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
+placement). The Arsenal's reach pulls from anywhere, and now and then it comes back with a pale bow nobody here
+strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
+it is from; like everything the rift gives, it goes back.
+
+**The blades that wait** (Andy, 2026-11-14: "arsenal should be able to do something like this", of two
+flying-sword mods; approved 2026-11-14). A holder who has learned the rift a little can ask it not to
+hand a weapon over but to hold it: the blade hangs in the air from a small tear of its own, at the holder's shoulder,
+and goes where their attention goes. Two answer at first, then four, then six. They are still on loan and go back
+when their time is up. Until the power is mastered the blades are not truly commanded: they pick fights of their own,
+and one that carries its holder through the air may go home mid-flight. Folk who see it take the holder for a sorcerer
+with a cloud of knives; soldiers call it "the wing". Gravity's holders do the like with stones, for the same reason a
+juggler can: the thing is already in the air and already theirs.
 
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
@@ -728,6 +1207,14 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
   was left of him went out into the world, fine as dust. Some of it found you." It never names him.
 
+  (new) **Its temper** (big suit picks, 2026-11-12). The black symbiote kept what the anti gave up: its hunger and
+  its temper. Blows given and taken heat it until a roar lets the heat out, and a host who keeps the big suit shut away
+  finds it angrier when it is finally let up. It remembers who hurt its host and wants them paid back, it answers when
+  its host speaks to it, and the first time the two are wholly bonded the host sees it face to face, standing where
+  they stand with the world gone dark around them. That meeting is not a place; nothing is travelled to. With its
+  tendrils drawn in the big suit does not run and cannot be shoved. It melts flat, spits and walls with its own body,
+  and the black strain smells blood. It still never feeds on the living.
+
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
   beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
@@ -762,6 +1249,11 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   other tech found in the otherwise medieval Overworld, and people talk about it: everyone loves having Frostborn tech.
   They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
   they were born and raised on the Overworld, far removed from Hail.
+
+  **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
+  hail"). Not every Frostborn on the Overworld was born in the snowfields. Some come down from Hail alone, on one of
+  their people's ships, grown and with nobody here who knows their name. They wear their people's glass and carry
+  themselves like it. In the life story this is the Frostborn whom nobody raised here, and that line names Hail.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -803,8 +1295,20 @@ slingers, send loot goblins running with what they stole, and roll **war barrels
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
 
+**Goblin scouts** (models thread; Andy, 2026-11-12: "the lore is good"). A goblin village keeps two or
+three scouts ranging outside its ring: small even for goblins, hooded, a pack on the back, a dagger and a buckler. They
+see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
+traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
+
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
+
+(new) **The wood-wisps** (Andy, 2026-11-13). The Sylvan elders live so long that they forget nothing, and they send what
+they know out on the wind. A wood-wisp is a little of an elder's memory given wings: a small, half-there Sylvan shape that
+comes when someone says its name aloud and asks a question in earnest. It knows the workings of the world (the powers,
+the kingdoms, the kitchen) because the elders watched them made. It cannot fight, cannot be hurt, and goes back to the
+trees when nobody is asking. Folk call the one that answers them **Youth**, because it always looks young. (In game:
+the Youth wisp, Kingdoms PR #1467, which Hermes's YOUTH answers players through.)
 
 ## Why the peoples don't like each other
 
@@ -874,6 +1378,14 @@ elders and foremen, its court wizard and sometimes a court necromancer, and its 
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
 names, families and tempers.
 
+**The siege train** (siege engines thread, 2026-11-14; Andy: "can we have warring kingdoms bring siege engines?";
+approved by Andy 2026-11-14). A realm that marches on another's seat with soldiers enough brings an engine,
+built by its own carpenters and smiths and pushed along behind the march by two of its soldiers: a **mangonel**, a
+timber frame on four wheels whose arm throws stones over a wall. The realms rich enough to keep guns on their walls
+take a **field gun** down off them instead, and in a great war they bring both. The engines stop short of the walls
+and are worked through the siege, breaking wall and roof alike, then pushed home. They are ordinary craft, no magic in them; an engine whose crew is
+dead stands silent in the field.
+
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
 
@@ -887,6 +1399,11 @@ itself into the ruler's throne, its turrets and battlements the throne's back.
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
 take tribute, and hold festivals.
+
+**The town books.** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
+lack, how many hands it has, what troubles it bears, what it is building and with whom it holds treaties. In a realm the
+ruler keeps it and lets a friend copy it; in a village it sits on a shelf and anyone grown will fetch it down. A town
+that hates you keeps its books shut.
 
 **What goes on in the shadows.** A den is found by a hatch in the grass and a whisper ("Tell 'em nobody sent
 you"): dice, bookies, fight pits, and goods the watch would rather not see. Assassins take contracts; a black candle in
@@ -928,6 +1445,82 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
+(new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
+banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
+are her drinking, and she takes boats and swimmers with the draught. Waterspouts are the land's tornadoes come down on
+her, or small ones she puts up herself on still warm days. At night a glowing tide lights where anything moves through
+the water, and in a thunderstorm blue St. Elmo's fire crackles on the mastheads: sailors take both as her watching, and
+neither does harm. Flotsam from ships she took drifts by, and old shipwrecks can be raised, pumped dry and sailed again:
+she gives back a little of what she keeps. Rivet, the Xenoform's machine form, can flow into a ship's cannon as he does a
+golem and fire it himself, though even he needs powder and shot.
+
+(new) **The risen sea and the far islands.** In the newest age the Deep Mother has drawn her water up over the low
+shores: the flats and river mouths of the old maps lie under her, headlands stand off as islands, and the long swell
+rolls across her face, higher when she is angry. Her children have gone out with the water: fish, squid and the rest
+keep to the open sea now, and the shallows are bare, so the fisherfolk sail their smacks out to the far grounds and
+the deepest water grows the heaviest fish. The **Tideborn** keep island villages, havens on land only a boat reaches.
+**Sea hermits** live alone in towers on far islands, scholars and exiles who wanted the sea between them and the kings.
+Wrecks she threw up lie on island beaches, the ones she keeps lie on her floor far out of sight of land, and on islands
+no chart shows there are caches someone buried and never came back for. The **white whale**, old and scarred, is born
+only far out. Merchantmen and smacks heave to for a horn blown at sea and trade over the rail, and a merchant may sell
+the charted plans of a ship drawn in some far yard.
+
+(new) **Mohknee, the land east over the water** (Sengoku picks thread, 2026-11-12; named by Andy: "it is called
+Mohknee and you can encounter tideborn islands on the way"; Andy: "i would like all this to be on a
+seperate continent spoken about by villagers, and reached by LONG sailing"). The blossom folk have a country of their
+own, a whole continent two days and nights' sail east across deep water. The only land on the way is the Tideborn's: a few of their island villages stand far out along
+the crossing, where a ship can water, trade and ask the way. It is in the
+Overworld like everything else under this sky; only the sea is between. Nobody on the home continent has a map of it.
+Harbour folk, sailors and old soldiers speak of it sideways: the ships of strange build that come in now and then with
+tea, rice wine, lacquer, paper and a steel no smith here can make, the men who sailed east after them, the ones who
+came back. There the cherry groves, the villages and towns of red gates and lantern roads, the lords' castles and the
+rival houses are at home; the groves on the home continent are wild ones, and any blossom village standing among them
+was raised by settlers from over the sea. No road, coach or milestone reaches it. The blossom folk keep the same eight
+faiths as everyone, at their own shrines and pagodas, and tell the old stories their own way: what the home
+continent calls the demons' country they tell of as a pale grove by a slow river. Its people call it **Mohknee**.
+
+(new) **The ones who came back** (Blossom lands thread, 2026-11-13; Andy asked for a captain or companion who can sail
+the crossing for you; the rest is Claude's placement for him to approve). There is still no chart of the crossing, but
+a few sailors about the home harbours have made it once, in the wake of a blossom trader, and can raise that shore
+again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
+harbour will sail any course you name and has only stories about the east.
+
+**The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; approved by Andy
+2026-11-14). The home continent still draws no chart of the east. The blossom captains have
+their own, drawn by their own hands, and one lying off a home harbour will sell a copy for coin: his landfall on
+Mohknee's western shore and nothing of the sea between, which is enough for a helmsman to keep a heading by.
+
+(new) **What the blossom folk build with** (Blossom lands thread, 2026-11-13; Andy picked the blocks, the placement is
+Claude's for him to approve). Paper screens in wooden lattice, rush mats, lime plaster, planks under red or black
+lacquer, paper and stone lanterns: these are Mohknee's crafts, and what little of them the home continent has came
+over in a trader's hold or was copied from one. Thatch is everyone's. The ward rope is theirs too: straw twisted
+sunwise and hung with folded paper across a gate or round a shrine, asking the eight to keep the dark out. It is a
+prayer that is answered: nothing comes out of the night close to one.
+
+(new) **Inside a blossom house** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). The
+house is lived in on the floor: a hearth sunk in the middle of the mats with its coals banked under ash, bedding that
+is rolled out at night, a chest of drawers bound in iron, doors that slide along the wall. The lacquer on that chest
+is the blossom tree's own sap, scored from the bark of a living tree into a bowl. A log gives once and is left bare, so
+a grove is tapped a little each year and planted behind, and lacquer is dear on the home continent for that reason.
+
+**How a blossom village lives** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). A
+village thatches and a walled town tiles: tile is what a lord's walls pay for. Rice stands in flooded paddies behind a
+bund of packed mud, and beside it a row of ramie, the nettle whose bark is their thread, cut and left to come again.
+Farmsteads stand a little way out, each with a wayside shrine kept to whichever of the eight that family holds to.
+High villages gather round their shrine and low ones round a market. A town has a tea house where the home continent
+has a tavern, a dojo, a bath of still water, and in time a pagoda. The dead lie under narrow posts of grey stone.
+
+**The blossom smiths' steel** (Blossom lands thread, 2026-11-13; Andy: "their smiths will teach you about the
+process"; the steps are Claude's for him to approve). Mohknee has little ore. Its iron is washed out of the rivers as
+black sand, burnt to a rough bloom, and folded on the anvil until the slag is gone. It is the same steel the home
+continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
+each step to someone who has done the one before.
+
+**The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
+a reason to go to mohknee"; approved by Andy 2026-11-14). Folded steel does everything smeltery
+steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
+under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -936,9 +1529,49 @@ flowers of a quiet forest on the darkest nights; folk say a fairy keeps death of
 would kill for one. Frostbites, frozen dead, walk the powder snow. Rats get into stores. Pets are named, and folk say a
 name shapes a beast ("Call a beast Midas and it'll shine like coin").
 
+(new) **Crystal beetles** (models thread; Andy, 2026-11-12: "these should spawn in amethyst geodes"; the rest is Claude's
+placement for him to approve). The barrow beetle has a cousin that lives only inside amethyst geodes. It grazes the
+crystal buds, and what it eats grows out of its shell. A few of them keep a geode alive: where they have fed, plain
+amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
+crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
+
+**The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
+placement, approved by Andy). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
+towers and lookouts, balloon towers, tipi camps, stables, and on the cold seas citadels, galleons, icebound yards and
+small iron boats that go under the water. They also dug: the copper works (the lava extractor and the smeltery) and the
+moles, great boring engines for copper and iron. As the world is retaken the pillagers have pulled back to their best
+holds, and the rest stand empty until other people find them. **Greenskins** took the works: orcs run the smeltery and
+the extractor, and goblins crew the moles, still digging copper and iron from under the hills (the deep mole most of
+all). **Bandits**, masked outlaws of the common folk, hold the camps, the empty carts and the towers no realm has
+reached; where a realm is near, its own soldiers hold those towers for the road. **Pirates** took the galleon, the
+citadel, the lookout balloon and the icebound outposts, and keep captives there. **Smugglers**, the underworld's
+runners, keep to the stable, the floating outpost, the shipyard and the small boats: they let a stranger be until he
+touches their goods, and every den of theirs has a fence. **Barbarians** pitched in the tipis. The monastery, its tower
+and the herbalist's house belong to a quiet **order of brothers**, common folk who took the walls for prayer, with a
+prior and an herbalist who mends whoever comes in hurt; they hold to no patron of the seven by name, only the hours.
+A lone house far out is home to one **recluse** with a past (an old soldier, a widow, an exile, a deserter). The wells,
+the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
+lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
+
+**The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
+books, their paintings and time in their holds; the rest Claude's placement, approved by Andy 2026-11-13). The pillagers kept
+their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
+ominous banner are its oldest letters, and still answer when spoken right. Nobody grows up speaking it and no village
+teacher knows it. It is learned the hard way: from the pages, ledgers and evokers' grimoires left in their holds and on
+their dead, from the banners and the paintings they hung in every fort, tower and mine they built (the raid, the warlord,
+the rite, the march, and lessons in their letters), and from time spent within those walls listening. Knowing their words
+doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
+lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
+
+(new) **Everyday weather.** The heart of a storm is a downpour: rain so thick a traveller is soaked through at once,
+chilled, and slowed until they find a roof. Mist lies on low ground and water from before dawn until mid-morning,
+thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
+lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
+breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
 
 ## Daily life
 
@@ -958,6 +1591,28 @@ it) or dragged home by rope.
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
+
+**Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
+gear; approved 2026-11-14). A smith makes armour the way he makes tools: each piece is a plating cast
+in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the
+Part Builder, good for nothing but pouring gold over. Hung on a leather cuirass instead of maille, the same plating
+makes travelers' gear (goggles, vest, pants and boots), lighter and quicker worn out, which carters, hunters and anyone
+long on the roads wear. Every metal guards in its own way, and smiths say so plainly: silver against the dead, iron
+against arrows, cobalt against the blade, manyullyn against spells, copper the deeper you go, hepatizon once you've
+been hurt; the slime metals mend themselves.
+
+(new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
+belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
+scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
+a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
+answer, and no stick helps the one who has lost both.
+
+(new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
+rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
+potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
+opens. The watch knows the smell of a den that runs too hot. It comes down the ladder in force, takes the fence and his
+people up to the ruler's judgement, and nails the hatch shut under iron for a few days, until the trade creeps back.
+Townsfolk speak of raids and smugglers the way they speak of weather: something that happens to other streets.
 
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
@@ -996,8 +1651,246 @@ Elements found in the mods that can't be placed without inventing something big.
 
 - **The elder alien's people.** Their species, their kingdom's name and look, and the ruler's name wait on the models
   Andy is finding inspiration for.
-- **Hail's name in the game.** Whether any line names Hail, or only Frostborn talk of "home", is open.
+- **Hail's name in the game.** The life story's traveller line names Hail (2026-11-12). Whether villagers' talk names it, or only says "home", is still open.
 
 The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,
 costumes, the classes, valor and temperaments. The Excalibur look and the other art toggles stay out of the lore.
+
+(new) **What the wild and the outlaw keep** (Claude's placement for the Kingdoms and world picks, 2026-11-12, for Andy to
+approve). Round the Irradiated Giant's monolith the remnant leaks. Wolves that den there too long **change**: greener,
+tougher, hunting at any hour, and their bite carries the same slow **sickness** a traveller gets by lingering on that
+ground. It is cured as the other afflictions are. Tinkers make a small **ticking charm** that clicks faster the nearer
+the source; nobody who sells one can say why it works. In the snowy woods of the north the hearthlanders tell of **the
+Gaunt**, a starved, antlered thing that comes to fires lit in the snow at night and leaves at dawn. It is a monster of
+legend, not a remnant. Its bite, its heart, or carrion eaten in the snow at night can pass on **the curse of the
+hungry**: the cursed run on all fours after dark, feed on what they have killed, and for a short while grow huge. Death
+ends it. It cannot share a body with the night folk or the wolf-cursed. The **night folk** (vampires) learn older
+shapes with age: the bat, the colony, the mist, a stare that draws the weak-willed, and a way of not being where a
+blow lands. They do not take a wolf's shape; that belongs to the wolf-cursed. Among the forbidden blood arts there is
+one rite written on **stitched pages** that blood witches keep: it unmakes a bound captive into a **brute** that obeys
+for a moment and then knows no one. Realms punish it above every other forbidden art, and the captive's kin remember.
+Trades have their own lore: **hunters** keep a pack and mark a quarry with a bone, **farmhands** re-sow as they reap,
+**smiths** can raise a field forge on any campfire, and a **lord** can sound a horn for their guards. Barbarian bands
+have a pecking order: plain raiders, one or two strong ones, a heavy, and a chief known by a byname (the Knife, the
+Hammer, the Archer, the Poisoner) that the courts post a bounty under. Sorcerers of earth, water and air each have
+one more working: a **bulwark** dome, a **tide pearl** that drags a foe to the caster's feet, and a **harrying gale**.
+Kingdoms' assassins and thieves have a few more tricks (watching unseen, slipping a blow, lifting a weapon, a dry
+remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
+before it is seen.
+
+(new) **Fighting together** (Claude's placement for the pawn picks, patch 1, 2026-11-12, for Andy to approve). Nobody
+in the realms fights alone if they can help it, and nobody fights the same way. Everyone who takes up arms has a
+**leaning**, a first habit and a second: going for the biggest foe, for the archers, for the wounded, guarding a
+friend, minding the fallen, striking first, going for the loot, or hanging back. A companion sworn to you has one as
+surely as a goblin raider does, and it shows: it calls out what it is doing, in its own tongue and in the voice its
+temper gives it (the bold shout, the warm reassure, the steady report, the quiet often say nothing). A band's
+**leader** (a camp chief, a warchief, a captain, a warlord, a raid's captain) gives the same four orders a traveller
+gives their own: press on, come to me, hold, get the fallen up. Those who mind the fallen kneel beside a downed friend
+in the thick of it and get them up, on either side, so a fight against a band is won by putting down its healers first,
+and a leader who goes down leaves his band to fight each by its own habit. They drag their fallen clear of the press by the shoulder before kneeling to
+them, hold a foe from behind for a friend to strike, pin a lone traveller between two of them, and give each other a
+leg up a wall. A band that sees you first goes to ground and waits; and the greedy grab what falls, goblins most of all,
+who run off with it. Fighters learn their foes: a companion who has put down enough of a kind knows
+it and says so, and names whoever taught them; camps, villages and realms remember each traveller who has fought them,
+and from the third meeting come ready for their bow, blade, spell or fire. (patch 4) Out of a fight they talk: of the
+land, the ruins, a trap, a town's mood, of you; one who has done a kind of errand before knows the way. Sitting down at
+a fire or a table is the old custom of the road: you share your food and they ask how you would have them be, and the
+bond between a traveller and those who walk with them grows with every such evening and every time they're got back on
+their feet, and cools if they're left lying. Bands keep the same custom: at dusk they eat in a ring at their camp's
+fire, which is when the careful strike, or poison the pot. Every trade has a knack it writes down for those it
+trusts: the scholar's tongues, the cleric's field medicine, the farmer's foraging, the trader's haggling, the
+leatherworker's packing, the fletcher's quiet; the bands have their own trackers, healers and tongue-speakers. (patch 5) A companion is still their own: while you're away they may take a day's hire from another traveller, the old tavern custom of the road, and come home with coin, a gift and the word that was said of them; they'll gather for you while you're gone. The bands take what's left lying: a companion found downed and alone is carried off and made to fight for their camp until bought back, beaten down and carried home, or until they break free; the camp sends them to you with its price, in coin or in a job of work. A companion can be left a want and a purse, and whoever hires them can finish it for the purse. Not every drifter is down and out: old soldiers and knights without a lord sell their swords on the roads, and the ones nobody takes on sell them to the camps. Companions remember the way to places they've been, and bands know their own ground. Free companies of sellswords roam the roads, clearing camps for the spoils, taking bounties off the town boards and carrying the wanted in to the court, and hiring out by the day; a company keeps its friends (food shared, help in a fight) and its grudges, and one beaten comes back down the road harder for it. A camp's tongue-speaker will sell a traveller passage before blood is drawn, a day's peace for a toll, the bands' oldest bargain; and a sellsword turned away may bring a camp's raid down on whoever turned them down. Patch 6 proposes a name for the sickness
+that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
+
+(new) **The dark mirror** (Claude's placement for the pawn picks, patch 6, 2026-11-12, for Andy to approve). What binds
+a companion to a traveller can be taken from them. The Grue's sorcerers, the camps' necromancers and blood witches,
+reach into a fighter at their foe's side and turn them for a while: the eyes go the Grue's red, and they come at the
+one they walked with. A vampire's bite does it to a thrall's measure. A hard blow or a carry breaks it, and a bond that
+runs deep holds out. The same dark is a forbidden art of the death school, **Dominion**, and a traveller who uses it
+on a foe pays as for any forbidden art: the Grue comes a step nearer. **The Murmur** is caught where the dark is
+thick, the deep places and the soul valleys, and passes between companions who rest together; it is never named by
+the sick, only seen in them, the eyes that flicker red, the hand to the head, the strength that isn't theirs. Left, it
+looses them on a town at night. A cleric or a priest of any creed can draw it out (the healing is older than the
+quarrels between faiths), a fall and a waking can shake it, and so can the rare golden fruit. **The masterless**: when
+a traveller is born again into a new life, those who walked with the old one are not born again with them. They walk
+the roads looking for someone, ask any traveller to take them on, and are not right: the Grue's red is in them, and it
+comes out once, at the one who took them in; put down, they wake free of it. Others take the mask and lead bandits,
+and they fight their old master with everything that master taught them.
+
+(new) **Powderheads** (Claude's placement for Andy's powderhead ask, 2026-11-12, for Andy to approve). The realms'
+smiths keep the black powder trade: charcoal from the kiln and the saltpetre of the bone heap, ground fine. A smith
+who trusts a traveller may write it down for them, and whoever learns it walks beside a marksman rolling his
+cartridges and lobs the sticks; the camps have their own, fewer and wilder. The one rule of the trade is the first
+line of every primer: never where a friend is standing.
+
+
+(new) **Sulphur and saltpetre** (Claude's placement for Andy's ask, 2026-11-12, for Andy to approve). Brimstone is the
+breath of the deep fires: it crusts yellow where lava runs near, round the hot springs of the cold north, and all over
+the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that dry ground sweats: the deserts, the
+badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
+powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
+measures where the bone heap made one.
+
+(new) **The old rules of the fight** (Claude's placement for the fifth edition picks, patch 1, 2026-11-12, for Andy to
+approve). Every drillmaster in the realms teaches the same few things, and the camps learn them the hard way. Turn
+your back on a blade and it takes you as you go: back off behind your shield, or don't go at all. A halberd keeps a
+doorway, which is why the guards of every gate carry one. Strike from above, or at a foe who is down or blind, and
+the blow tells; fight up to your waist in a river, on ice or poisoned, and it glances. A body has seven strengths
+(the K screen's attributes), and each keeps out something: the quick are not where the blast lands, the hardy shake
+off poison, the steady hold through fear and keep a spell through a blow, the sharp see through a charm, the
+learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
+until it drops where it stands. The walking dead (the old villagers, worn to almost nothing) are stubborn, and the first blow that drops one seldom
+keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
+
+(new) **Hedge poisons and weighted nets** (Claude's placement for the fifth edition picks, patch 2, 2026-11-12, for
+Andy to approve). The poisons are hedge-witch and apothecary work, brewed from what grows round the witches' huts
+(poppy, wither rose, spider eye, pufferfish): the sleep draught and the truth draught are what slavers and spies have
+always bought, and the midnight poison is a witch's own. The clerics keep the antidote, and give it to anyone. The
+realms' weaponsmiths knot and weight the nets their guards throw at a fleeing crook; the orc camps' keepers carry
+cruder ones for runaway goblins. The gas bottle is a glassblower's trick sold under the counter. Dragons, wraiths, the
+Warden and a witch's curse put a fear in anyone that their legs won't walk into.
+
+(new) **Eyes for the dark, and the road's habits** (Claude's placement for the fifth edition picks, patch 3,
+2026-11-12, for Andy to approve). Some bloods see in the dark, in grey and without colour, as far as a stone's long
+throw: the Nightborn, whom daylight dulls; the Deepborn, who hear the world through the stone; the Stoneborn, raised
+under the mountains; the Hollow, who carry the grave's cold; goblins and orcs; the moon elves; and of the beast folk
+the lizard, feline and spider kin. The five human bloods need a lantern. Folk of the road learn to crouch behind a
+wall, to take a watch by the fire, to walk softly in the dark and to catch their breath where they can; the camps
+learn it the hard way. Wolves, bandits and the pack thieves who rob sleepers come to any camp nobody watches.
+
+(new) **Great lairs and Halvard the Hollow** (Claude's placement for the fifth edition picks, patch 4, 2026-11-12,
+for Andy to approve). A great beast or a great sorcerer poisons the land it holds: round a wild dragon's den, the
+minotaur's labyrinth or a necromancer's crypt the springs go foul, the herds thin, the birds stop singing, sleep
+brings bad dreams and the crops wither, and all of it lifts when the master dies. The worst of the death school's
+sorcerers is **Halvard the Hollow**, who cut out his own heart and hid it in a soul urn so that he could not die. He
+sleeps in a crypt under a mossy hatch, far from any village, and gets up again days after anyone kills him, until
+someone finds the urn under its cairn and breaks it. The sexton who buried him kept a tally of where; the villages
+for miles around still talk.
+
+(new) **The Low Lantern's quiet trade, and the taverns** (Claude's placement for the fifth edition picks, patch 5,
+2026-11-12, for Andy to approve). The Underworld keeps a hushed trade: its fences and its shadiest patrons sell forged
+travel passes and pardons to those they trust, and its people chalk small signs on walls for each other (a safe
+house, a guard who takes coin, a dog inside, a mark rich and careless, danger) that look like scribbles to anyone
+else. A drink at a speakeasy table is how you're let in. Every tavern keeps dice and cards that every tongue knows,
+and a hard night out is the Low Lantern's old toll on the careless: you wake with a friend, a rumour, a debt or a
+black eye. Sages (court wizards, elders, librarians) and libraries keep what each foe fears and old sextons' ledgers;
+village teachers pass on tongues, trades and fighting styles; and the Lantern Warden's priests feed those living rough.
+
+(new) **The hand that shapes the well** (Claude's placement for the fifth edition picks, patch 6, 2026-11-12, for
+Andy to approve; under "Ki and mana are the same thing"). A spell is the same well shaped by hand, and it asks three
+things of the one who shapes it: a voice (a gag or a bubble of silence stills a caster), a free hand, and for the
+great ones a costly thing burned up, diamond dust, a pearl, a bone. A staff, a tome or a holy sign stands in for the
+small ones. The slow rites, ten still seconds over an open book, need no mana at all. Anyone may try a scroll beyond
+their learning, and it may fizzle or bite back. A caster's raised staff and turning sigil give the spell away a
+heartbeat before it lands, which is how court wizards and camp shamans snuff each other's work.
+
+(new) **Creatures of the dark corners** (Claude's placement for the fifth edition picks, patch 9, 2026-11-13, for
+Andy to approve). Each keeps to the ground that suits it. **Trolls** of the swamps and mangroves are kin to the Bogre:
+they heal from anything but fire and acid, a cut limb crawls back to them, and they stay dead only once burned. The
+iron-eating **rust beast** of the caves is why old miners worked in bone, stone and gold. The **basilisk**, the great
+lizard, lairs in old ruins among the stone shapes of those who met its eye (the snake-haired gorgon is its cousin of
+legend), and a glass held up turns its gaze back. **Clear cubes** keep the halls of old mines and strongholds;
+**piercers** and the lamp-snuffing **cloak fliers** hang in cave roofs; **blood bats** are what the vampire bats are
+in the wild. **Diggers**, small kobold-kin, ring their warrens in the hills with hidden pits and fight in packs, as
+goblins and wolves do. **Bog lights** lead the lost into quicksand and feed on their fear. **Harpies** sing from the sea
+cliffs, which is why sailors stop their ears with wax. **Shadows** are the ruins' own dark: they drain a fighter's
+might, and one drained to nothing loses their own shadow to them. **Shapeshifters** steal villagers' lives and wear
+them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
+the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
+water crossed unaided, and a stake in the coffin by day ends them.
+
+(new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
+to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
+it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
+sworn word that burns the one who breaks it, laid on captives and on captains who swear to a lord. A lock of hair is
+a handle on its owner, and hedge-witches and court wizards alike will pay for one; thrown bones answer only in light
+or smoke. A familiar is a small spirit given a body, owl, raven, cat, rat or frog, bound to one caster and born
+again from its ash. Moonlight called down by a caster shows a shapechanger for what it is. Some Sorcerers' blood is
+wild, and so is the well in a great lair's blighted land: there a spell can come out as something else entirely.
+
+(new) **Relics, wands and the Deck of Fates** (Claude's placement for the fifth edition picks, patch 8, 2026-11-13, for Andy to approve). Old things found in deep places keep their own minds. A relic, a ring or an old pair of boots is made by someone long gone, and it takes to one carrier at a time: it must be borne through a night's rest to bond, and no one can bond more than three. Until it is known it shows no face; use wears the veil off, and a court wizard will read one for a fee. Some carry a curse laid by their makers (clinging, thirst, whispers, misfortune); a cleric at a shrine can lift it. A few blades wake with a will and a want (the dead, the weak, gold) and take the arm of one who ignores them. Wands and staffs are cut from a dead tree's heartwood and fill again at dawn. The wondrous gadgets (rod, rope, jug, lantern, stone hound, horn, bottle of smoke) are the work of smiths of the ages this world has forgotten, found in its ruins and deep places. The Deck of Fates is a fortune-teller's gift to a king who wished to be told his end; whoever draws from it draws from the old gods, and it is not kind. Potions drunk close together clash, for the brewer's craft was never meant to be mixed in the belly.
+
+(new) **The body kept and the body given** (Claude's placement for the fifth edition picks, patch 10, 2026-11-13, for
+Andy to approve; under "The dead"). A cleric can call the freshly fallen back before the Judge opens the book, a
+minute at most, for the price of a diamond, and rests three days after. The settlements' priests keep their dead
+in salt and herbs so they wait whole for the burying and no necromancer can lift them. One who has died for good may
+wait in the dark beside their own body, watching their friends bury it. The old druids of the forest groves, hermits
+no village names, can give such a one a new body within ten days, laid at their feet, in a blood the wood chooses:
+they keep their name and memory and lose what the old blood gave them. In the caves the damp grows its own moulds:
+a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
+and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
+
+(new) **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, for Andy to
+approve). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
+Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
+the Druid and the Ranger to the wild the villages keep out of (the Ranger is what the realms now call their archers
+and survivalists alike), the Monk to the discipline the boxers teach, and the Tinkerer to the smiths' benches.
+Priests teach the symbol, farmers the sprig, librarians the seal and smiths the gadgets. The Warrior-born have none
+of them.
+
+(new) **Second callings, marks and paths** (Claude's placement for the fifth edition picks, patch 11b, 2026-11-13, for
+Andy to approve). A calling can be joined by a second, but only late and only from a master: a villager at the top of
+a trade teaches the calling that trade feeds (the fletcher the Marksman and the Ranger, the priest the Cleric and the
+Paladin, the smiths the Warlord and the Tinkerer), and a second calling never grows as tall as the first. A Sorcerer's
+element is not taught but woken, and the master librarians keep the rite. Each great foe that falls leaves a mark on
+whoever was there (the feats), and each calling narrows in time into a path: the thief into assassin, burglar or
+swashbuckler, the mage into a school.
+
+(new) **Forged seals and deeds; the gorgon's gaze** (Claude's placement, the row-check fixes, 2026-11-13, for Andy to
+approve). The Underworld's forgers also turn out a writ under a lord's seal and a deed to a house, and only the fences
+and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
+as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
+The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
+
+**What grows on Mohknee** (Claude's placement for the Blossom Lands plan, patch 10, 2026-11-13, for Andy to
+approve). Beside the cherry the far land grows the maple and the ginkgo, green all summer and red and gold from the
+first cold; the blossom folk count their year by them as much as by the blossom. Bamboo stands in thickets at the
+groves' edges. The red lily is the flower of their dead: it is planted on every grave, it comes up without leaves, and
+it is poison, which is why nothing digs where it grows. Wisteria is trained over the arbours of their gardens, and in
+a walled town's garden there is a pond of koi, which come to the hand that feeds them and are kept for generations.
+
+**The animals of the blossom lands** (Claude's placement for the Blossom Lands plan, patches 11 and 12,
+2026-11-13, for Andy to approve). The cherry hills have their own animals, and the blossom folk have a use or a
+saying for each. Snow monkeys go in troops, rob the fields when they are hungry and sit in the bath house water in
+winter; a village that feeds its troop loses no rice to it and is warned by it. Cranes pair for life, dance in
+spring and pick the paddies clean, so nobody runs at a crane. The small spotted deer belong to the shrines and are
+not hunted there, which is why they bow to a stranger for bread and run from him in the hills. The raccoon dog
+cleans up after a village by night and sleeps the winter. The serow keeps one hillside all its life and stares at
+whoever passes. Paper hornets nest under the maples and ginkgos, and the paper for screens and lanterns is cut from
+their nests under smoke. In the cold rivers lies the giant salamander, which is only ever found where the water is
+clean, and a river that has one is counted a good river.
+
+**What the blossom folk do not name** (Claude's placement for the Blossom Lands plan, patches 13 and 14,
+2026-11-13, for Andy to approve). Mohknee has its own things of the night, and its people speak of them only by what
+to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
+which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
+the Snow Widow, and the cold walks with her; she is gone by morning. Where many dead are left lying together they get
+up as one, the Unburied, a giant heaped together out of the dead themselves, their bodies its legs and arms and
+trunk, which is the reason the blossom folk bury friend and enemy alike and at once. It cannot bear the day: at first
+light it comes apart where it stands and lets its dead fall, and those left lying there will rise again with the next
+dark (amended 2026-11-13, the Unburied made of its bodies; merged with PR #1460). On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
+of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
+full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
+does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
+
+**The pale grove** (Claude's placement for the Blossom Lands plan, patch 15, 2026-11-13, for Andy to approve).
+There is a wood in the demons' country. Pale moss lies over the netherrack there, pale oaks stand in it, and from
+their boughs and from every roof of rock hangs wisteria with the colour gone out of it, giving a little light of its
+own. The air is white with ash and the horned things' ogres walk it as their own ground. The blossom folk have never
+seen it and describe it exactly: a white wood under the world where the wisteria has no colour, where the wicked go.
+It is the same Nether the home continent's wicked wake in; the blossom folk only know a different part of it, and
+nobody has asked how.
+
+**The sunken palace** (Blossom lands thread, 2026-11-13; Andy: "the palace is of tideborn origin"; the rest is
+Claude's placement for him to approve). In the deep water off Mohknee, on three headings from the land, a palace
+stands whole on the seabed: green sea stone, a pillared hall under a double roof with its corners turned up, lamps
+burning in it that nobody tends. The Tideborn built it, before the island villages, when they held court under the
+water and not beside it. The blossom folk did not sink it and do not claim it. Their roofs are copied from its roofs,
+which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
+it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
+Tideborn of the crossing's islands do not speak of it to strangers.
+
+(new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
+
+(new) **The stable's last tricks** (Claude's placement for the Portable Mods picks, patch 6, Icy's Better Horses leftovers, 2026-11-14, for Andy to approve). Riders in the Chivalry realms' tilt-yards carry a horse medkit, a satchel of bandage and honey salve; any groom will use one on any hurt horse, whoever owns it. The glide harness and ender saddlebags are no saddler's work: only a court wizard makes them, and sells them dear. The harness is a racing saddle with phantom membrane worked into wings; spread on a drop, they let horse and rider down slowly. The saddlebags are lined like an ender chest and open onto their owner's own chest, so only the one who owns the horse can reach in; anyone else finds only the horse's own pack.

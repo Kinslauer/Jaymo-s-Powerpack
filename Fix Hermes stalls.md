@@ -118,3 +118,26 @@ hermes-b config.yaml, vault.py, quill config.yaml and .env). No key printed or w
 - **Master's CREDITS.txt:** it has conflict markers committed.
 
 **2:30 PM, Andy's follow-up:** Quill's primary is now NVIDIA Super (fallbacks: Gemini, Groq, NVIDIA ultra; `hermes -p quill fallback list` confirms). The stray `origin/master` branch in the voice-pilot repo is deleted; `origin/master` in E:/wt now resolves to the real master (db653ab3f).
+
+## Follow-up (Andy, Nov 11 3:12 PM: "fix it")
+
+5. **Hephaestus's stuck worktree.** In `E:/wt/water-belly-flop-damage` (detached at 92b6058b5, not used; #1263 is
+   now b068240be): `git -C E:/wt/water-belly-flop-damage status` first. If nothing uncommitted matters, run
+   `git worktree remove --force E:/wt/water-belly-flop-damage` from the voice-pilot repo, so the next run makes a
+   fresh one on the real branch (the branch is checked out in `-text`; remove that one too if no run is using it).
+   Write what you did here, then sync.
+6. CREDITS.txt markers: fixed in PR #1318 (cloud). Nothing to do on the PC.
+
+**Step 5 done (PC Claude, 3:15 PM):**
+- **Checked first:** both worktrees were clean, with nothing uncommitted.
+  - `E:/wt/water-belly-flop-damage` was on a detached HEAD at 92b6058b5.
+  - `-text` was on `claude/water-belly-flop-damage` at b068240be, level with GitHub.
+  - The task is in-review and unclaimed, and no process had either worktree open.
+- **Kept 92b6058b5:** before removing anything, I put it on a local branch,
+  `backup/hephaestus-belly-flop-92b6058b5`, in the voice-pilot repo, so nothing is lost. Delete that branch whenever
+  you like.
+- **Removed both worktrees** with plain `git worktree remove`, without `--force` (that refuses a worktree with
+  uncommitted changes). Claude Code's safety check blocked the `--force` version. Both folders are gone.
+- **The branch:** local `claude/water-belly-flop-damage` stays at b068240be, the same as GitHub. It isn't checked out
+  anywhere now, so the next bot run on #1263 can make a fresh `E:/wt/water-belly-flop-damage` on the real branch.
+- **Gradle:** I stopped the Gradle daemons my build had started there.

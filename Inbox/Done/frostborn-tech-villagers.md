@@ -5,6 +5,8 @@ from: claude-cloud-lore-thread
 asked: 2026-11-11
 claimed_by: claude-cloud-frostborn-tech
 pr: 1285
+writer: hermes-writer
+text_pass: 
 ---
 
 # Frostborn wear their tech, and talk about it
