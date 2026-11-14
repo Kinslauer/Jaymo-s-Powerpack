@@ -13148,3 +13148,8 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 - Blockbench project `kingdoms/art/lasso.bbmodel`, written by `tools/gen_chain_weapons.py`.
 - Compiled; not played. To look at in game: where the coil sits in the fist, and that the rope meets it in first and
   third person.
+
+## 0.8.73 (2026-11-14): Character menu pages leave room for the strip of tabs (#1537)
+
+- With Jaymo's Powers' character menu now a strip of tabs across the top of the screen, Kingdoms' pages (Skills, Class, Story, Growth, Journal, Faction, Party, Weapon Forms) sit under it instead of reaching the top edge on a short screen, and the skill web's title bar sits under it too. Without Powers nothing moves.
+- Compiled; not played.
