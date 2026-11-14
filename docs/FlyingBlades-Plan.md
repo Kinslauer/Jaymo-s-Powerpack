@@ -16,17 +16,18 @@ of 36 rows on the pick page (https://claude.ai/artifact/FdTQFbbhv8615nRy6t3QnC).
 - Not picked: the relic that storms by itself.
 - "Anything the user can do with swords should be doable with the rocks as well. Except flying." Read as: a Gravity
   user's harnessed rocks (`GravityRocks`) take the same orders, and riding is left out because Gravity already has the
-  earthboard. Asked Andy to confirm before patch 7.
+  earthboard. Andy chose "Both" (2026-11-14): Gravity's rocks get the orders, and an Arsenal user can also put loose
+  rocks on the wing (patch 2) and storm with them (patch 3).
 
 ## Keys
 
 | Move | Arsenal | Void Arsenal |
 | --- | --- | --- |
-| Call / dismiss the blades | short hold Sneak + V | short hold Sneak + X |
+| Call the blades | short hold Sneak + V | short hold Sneak + X |
 | Change formation | tap Sneak + V | tap Sneak + X |
-| Order wheel (patch 2) | keep holding the same key | same |
-| Harry / steer (patch 2) | Sneak + B tap / hold | same |
-| Whirl (patch 2) | on the wheel | on the wheel |
+| Order wheel (formations, Whirl, spare, take a blade, send home) | short hold of the same key with the blades out | same |
+| Harry / steer | Sneak + B tap / hold, with the blades out | same |
+| Hand the wing what you hold | G with the blades out | same |
 | Blade Storm (patch 3) | hold V (a tap is still Barrage) | on the wheel |
 | Blade riding (patch 4) | double tap Jump | same |
 
@@ -37,8 +38,9 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
 1. **Attendant Blades** (`power/arsenal/ArsenalWing`, client `ArsenalWingRenderer`): the wing, 2/4/6 blades by
    mastery, three formations, strike with my swing, stand guard, unmastered blades picking their own fights, HUD pips,
    rift tethers. Picks: wing, count, shapes, sortie, sentry, hud, trails (the tether half).
-2. **Orders**: harry, steer by sight, whirl, ward (through `Guard`), spare mark, order wheel, hand a weapon to the wing,
-   your own weapons can fly (never lost, like the Divine-born's `FlyingSword`).
+2. **Orders** (built): harry, steer by sight, whirl, ward (a guard raised, `Guard.raised`), spare mark, order wheel
+   (`ArsenalWingScreen`), hand a weapon to the wing, your own weapons and loose rocks can fly (the wing is saved with the
+   player, so they are never lost).
 3. **Blade Storm**: hold V, looping flight on `RiftBlade` (used by wing strikes too), each blade finds its own foe, the
    wing feeds the storm, echo blades, trail ribbon and slash flash. The holder is slowed while it runs.
 4. **Blade riding**: double tap Jump, fight from the blade, step off and send it, riding with broken legs (`LimbUse`
@@ -48,7 +50,7 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
 6. **Look and who else**: the Void wing (corruption per strike, Endermen notice), guns on the wing, relic gifts carry
    over, working hands (tools dig), gifted villagers get two.
 7. **Gravity's rocks**: the same orders for `GravityRocks` (formation, strike, harry, steer, whirl, ward, storm, ring),
-   no riding. Waits on Andy confirming the reading above.
+   no riding.
 
 ## Checks for each patch
 
@@ -58,5 +60,4 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
 
 ## Open questions
 
-- Which "rocks" Andy means (see above).
 - Wing combos need Kingdoms; without Kingdoms loaded they are simply absent. Fine?
