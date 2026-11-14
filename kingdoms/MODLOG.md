@@ -13115,3 +13115,14 @@ half (he chose "Grue only for now"); the five spirits are not touched.
 - `/kingdom grue master <player>` and `/kingdom grue starve <player>` (operators) for testing, beside `hold` and `free`.
 - Lore.md has the paragraph "The Grue in the dark" under The dark (Andy: "looks good").
 - Built with Gradle. Not played: where the body stands behind its keeper and its size at each stage are set by eye.
+
+## 0.8.70 (2026-11-14): The reaped - undead illagers at war for the Reaper (#1532)
+
+Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pillagers, GPL-3.0: the idea only, our own code and art).
+- **Three new mobs**: the Reaped Pillager, Reaped Vindicator and Reaped Evoker (`reaped/`): each still in its illager's outfit, now rags, on our own model (the client's `ReapedModel`, painted by `tools/gen_reaped.py`): an illager's skull with the heavy brow, a ribcage under the torn coat, thin bone arms that hang instead of crossing, the vindicator's axe always in its hand, undead (smite, healing and harm turned round), a little tougher and slower, low voices. Spawn eggs for each.
+- **The Reaper's host**: a new kind of horde (`ZombieHordes.Kind.REAPED`). From danger 0.3 one horde in ten is a host (more under a blood moon): it comes up behind a horn, marches on the seat of the nearest settlement or camp within 128 blocks, and turns on the player once it stands there. Some hosts have a Reaped Warlord (boss bar). They don't burn; after ten minutes the host breaks up and the Reaper takes them back in smoke.
+- **War on their own kin**: the reaped attack living illagers on sight and living illagers attack them. A living illager one of them kills gets up three seconds later as the same kind of reaped (its Kitchen corpse taken up) and joins the host, up to 24.
+- **The Reaper's keepers**: the reaped never attack a player who carries the Reaper unless that player struck them, and each kill a reaped makes within 24 blocks of a keeper pays 1 Toll.
+- The reaped can't be talked with in the illager tongue.
+- Operators: `/kingdom horde reaped` sends a host at once.
+- Compiled (compileJava, compileClientJava); not played. Villagers don't yet flee the reaped the way they flee living illagers, and a reaped evoker's vexes won't go for living illagers.
