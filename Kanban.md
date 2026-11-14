@@ -18,6 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Agents/claude-cloud-arsenal-flying-blades|claude-cloud-arsenal-flying-blades]] · 💻 Odysseus · #1519 · in-review
 - [ ] [[Agents/moose-cows|moose-cows]] · 💻 Odysseus · #1518 · in-review
 - [ ] [[Agents/siege-engines|siege-engines]] · 💻 Odysseus · #1513 · in-review
 
