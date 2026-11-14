@@ -1749,7 +1749,7 @@ one who keeps a roost, a pigeon), and it ends the way
 the one who took it up chose: who was named, who was let walk. Nobody is told which way was right. The spared remember
 it and so do the dead's kin, and how you treated them along the way decides how they come back: with thanks, a
 warning, asking to follow, or with friends and knives. Those who walk with you have their own lights to steer by, as
-their natures run: the kindhearted and the Truth's devout hold to mercy, the dutiful to the law, the brave to standing
+their natures run: the kindhearted and the devout hold to mercy (and the devout to their gods), the dutiful to the law, the brave to standing
 fast, the proud to a kept word, the greedy to fair pay, the hot and the spiteful to wrongs answered. Cut down one who
 yielded, or throw in with smugglers, and a companion who holds to it walks away from you and does not come back. Not every
 trouble is offered. Some are only a drunk's story, a ledger left in a camp, a diary in a ruin, a ship's log in a drowned
