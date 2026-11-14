@@ -539,6 +539,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cannonball.register();
 		// the caravan guards' hand gun, firing the same ball
 		Musketoon.register();
+		// the guns before the musket (handgonne, arquebus) and the realms' gunners, by their purse
+		GunBall.register();
+		EarlyGuns.register();
+		// worn old armour under the ruins' sand, and the old battlefields
+		WornRelics.register();
 		// the siege engines a war party brings (SiegeTrain): the mangonel and its stone
 		Mangonel.register();
 		SiegeStone.register();

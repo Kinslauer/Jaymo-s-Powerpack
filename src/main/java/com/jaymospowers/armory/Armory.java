@@ -66,6 +66,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>The recurve bow shoots harder than a plain bow ({@link RecurveBowItem#POWER}).</li>
  * <li>(0.15.2) The rapier lunges on right-click and runs through the first foe ahead ({@link RapierItem}).</li>
  * <li>(0.15.148) The leather whip cracks, wraps and hauls; Balkon's flail whirls and comes down overhead ({@link Lash}).</li>
+ * <li>The bec de corbin, the war dart and the crank-wound heavy crossbow are {@link WarArms}.</li>
  * </ul>
  */
 public final class Armory {
@@ -206,6 +207,8 @@ public final class Armory {
 		// the pitchfork: a farm tool (hay, leaves and undergrowth go fast), forged at the Tool Station, and held back and thrown like a
 		// trident; the thrown fork is the item itself (spent from the hand, lying where it lands to be picked up), never a free shot
 		throwing("pitchfork", p -> p.sword(ToolMaterial.IRON, 3.0F, -2.7F).component(DataComponents.TOOL, pitchforkTool()), PITCHFORK_THROWN, false);
+		// the armoured wars' bec de corbin, war dart and heavy crossbow
+		WarArms.init();
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
 		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
 		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only
@@ -348,7 +351,7 @@ public final class Armory {
 		return item(id, p -> new ThrowingWeaponItem(p, thrown, spins, true), props);
 	}
 
-	private static Item item(String id, Function<Item.Properties, Item> factory, Function<Item.Properties, Item.Properties> props) {
+	static Item item(String id, Function<Item.Properties, Item> factory, Function<Item.Properties, Item.Properties> props) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(props.apply(new Item.Properties().setId(key))));
 		ITEMS.put(id, item);

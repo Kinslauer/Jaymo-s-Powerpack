@@ -107,7 +107,7 @@ public final class FrontierWear {
 
 	/** The look {@code mob} (a guard or archer of {@code f}) is in: the Ranger's harness with a gun in hand, else its settlement's. */
 	private static @Nullable String lookOf(LivingEntity mob, @Nullable Faction f) {
-		if (Musketoon.holds(mob) || mob instanceof Folk folk && Muskets.armed(folk)) {
+		if (Musketoon.holds(mob) || EarlyGuns.gunner(mob) || mob instanceof Folk folk && Muskets.armed(folk)) {
 			return "ranger";
 		}
 		MinecraftServer server = mob.level().getServer();
@@ -203,13 +203,14 @@ public final class FrontierWear {
 
 	/**
 	 * From {@code McaEquipmentMixin}: MCA is about to change what {@code villager} has in {@code slot} (putting a sword
-	 * in a guard's hand, taking the armour off someone off duty). True if what's there stays: a {@link Musketoon} and the
-	 * hand beside it, a Flame Avatar's hands as its class armed them (a Tinkerer's fire cannon, a Brute's bare fists), and
-	 * any piece of ours on a villager who isn't a guard by trade (a carter's hat, a fence's hood).
+	 * in a guard's hand, taking the armour off someone off duty). True if what's there stays: a {@link Musketoon} or a
+	 * realm gunner's gun ({@link EarlyGuns}) and the hand beside it, a Flame Avatar's hands as its class armed them (a
+	 * Tinkerer's fire cannon, a Brute's bare fists), and any piece of ours on a villager who isn't a guard by trade (a
+	 * carter's hat, a fence's hood).
 	 */
 	public static boolean keeps(LivingEntity villager, EquipmentSlot slot, boolean guard) {
 		if (slot.getType() == EquipmentSlot.Type.HAND) {
-			return Musketoon.holds(villager) || com.jaymoskingdoms.nether.AvatarClasses.of(villager) != null;
+			return Musketoon.holds(villager) || EarlyGuns.gunner(villager) || com.jaymoskingdoms.nether.AvatarClasses.of(villager) != null;
 		}
 		return !guard && FrontierArmour.setOf(villager.getItemBySlot(slot)) != null;
 	}

@@ -1,5 +1,6 @@
 package com.jaymospowers.combat;
 
+import com.jaymospowers.armory.WarArms;
 import com.jaymospowers.compat.BetterCombatWeapons;
 import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.core.LockOnRegions;
@@ -7,6 +8,7 @@ import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.BodyPlan;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymospowers.gear.arrow.HeadFx;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.component.DataComponents;
@@ -24,6 +26,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.AttackRange;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +52,8 @@ import org.jspecify.annotations.Nullable;
  * chest piece, then the mail and padding under it; one to an arm meets the arm's own plate (else the chest piece) and
  * the sleeves under it; one to a leg the cuisses or greaves over the leggings. The outermost layer sets the share, and
  * each layer under it that is better against this kind of blow pulls the share {@link #UNDER_SOAK} of the way down to
- * its own: padding soaks the blunt blow that crushes plate, mail the cut.</li>
+ * its own: padding soaks the blunt blow that crushes plate, mail the cut. An arrow or a thrown weapon answers to
+ * the outer piece by its head ({@link #missile}).</li>
  * </ul>
  * Both multiply the blow's damage before armour and the wounds see it, so class perks, ripostes, Weapon Forms and the
  * lock-on's own head bonus stack with them as they stack with each other. Nothing is said: a ring in the striker's ear
@@ -166,6 +171,10 @@ public final class Blows {
 	public static float meetArmour(LivingEntity victim, DamageSource source, float damage) {
 		Measured swing = measured;
 		measured = null;
+		if (source.getDirectEntity() instanceof AbstractArrow missile) {
+			return damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ARMOR) ? damage
+				: damage * missile(missile, ArmourKind.worn(victim, struck(victim, source)));
+		}
 		if (damage <= 0.0F || !(victim.level() instanceof ServerLevel level) || !(source.getDirectEntity() instanceof LivingEntity attacker)
 			|| source.getEntity() != attacker || attacker == victim) {
 			return damage;
@@ -210,6 +219,23 @@ public final class Blows {
 			tellArmour(level, victim, attacker, armour, factor >= BITES);
 		}
 		return damage * factor;
+	}
+
+	/**
+	 * The share of its damage an arrow or a thrown weapon does against {@code armour}: an arrowhead's own way with it (a
+	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, and 1 for the rest.
+	 */
+	private static float missile(AbstractArrow missile, ArmourKind armour) {
+		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
+			return WeaponKind.Blow.THRUST.against(armour);
+		}
+		return HeadFx.againstArmour(missile, armour);
+	}
+
+	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */
+	static EquipmentSlot struck(LivingEntity victim, DamageSource source) {
+		BodyPlan plan = BodyPlan.of(victim);
+		return slot(plan == null ? null : LockOnRegions.aimedPart(victim, plan, source));
 	}
 
 	/** The armour slot over {@code part} (where the lock-on says a blow lands; null: unaimed, the chest). */

@@ -1,4 +1,13 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    {
+      "id": "jaymoskingdoms:arquebus",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arquebus_barrel",
+      "required": false
+    }
+  ]
 }

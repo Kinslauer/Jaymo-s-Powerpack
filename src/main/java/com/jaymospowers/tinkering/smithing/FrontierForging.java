@@ -14,7 +14,8 @@ import net.minecraft.world.item.ItemStack;
  * (its pieces are found by id; without it there is nothing to forge). A set is forged from its <b>schematic</b>: a
  * blueprint of the whole set ({@code frontier/templar}), which its people's armourers sell. Without the schematic on
  * you the anvil won't start the piece; with it, it grades and levels like any blueprint. The iron sets are iron; their
- * blackened twins, and the ashen Hedge garb, are steel (Andy: "these can be made from steel").
+ * blackened twins, and the ashen Hedge garb, are steel (Andy: "these can be made from steel"). Nobody sells the
+ * Juggernaut plate's schematic: a smith gets it only by taking an old piece apart ({@link Patterns}).
  */
 public final class FrontierForging {
 	/** A forged look: the set whose schematic it needs, its item ids' stem, its metal, and the ingots its helmet, chestplate, leggings and boots take. */
@@ -23,13 +24,16 @@ public final class FrontierForging {
 
 	/** The settler's cheap gear takes less iron than a knight's. */
 	private static final int[] LIGHT = {3, 5, 4, 2};
+	/** The Juggernaut's thick plate takes more: as much as one anvil holds for its breastplate. */
+	private static final int[] HEAVY = {6, 9, 8, 5};
 	private static final List<Look> LOOKS = List.of(
 		new Look("templar", "templar", Molten.IRON, ArmourForging.INGOTS),
 		new Look("templar", "templar_steel", Molten.STEEL, ArmourForging.INGOTS),
 		new Look("ranger", "ranger", Molten.IRON, ArmourForging.INGOTS),
 		new Look("ranger", "ranger_steel", Molten.STEEL, ArmourForging.INGOTS),
 		new Look("settler", "settler", Molten.IRON, LIGHT),
-		new Look("hedge", "hedge_ashen", Molten.STEEL, LIGHT));
+		new Look("hedge", "hedge_ashen", Molten.STEEL, LIGHT),
+		new Look("juggernaut", "juggernaut", Molten.IRON, HEAVY));
 	private static final String[] PIECES = {"helmet", "chestplate", "leggings", "boots"};
 	private static final String PREFIX = "frontier/";
 

@@ -34,7 +34,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * What each {@link ArrowHead} does. {@link #arm} marks a fresh arrow with its head (and sets what a head changes about the
  * flight); the mixin on {@code AbstractArrow} calls {@link #hitEntity} and {@link #hitBlock} when it lands. The bola trips
- * through the bolas' own code ({@link Tripped#bind}), the barbed head opens a cut ({@link Bleeding#open}).
+ * through the bolas' own code ({@link Tripped#bind}), the barbed head opens a cut ({@link Bleeding#open}). The war heads
+ * answer to what they strike: a bodkin and a swallowtail each do their own share through padding, mail and plate
+ * ({@link #againstArmour}, asked by {@code combat/Blows}) and leave their own kind of wound ({@link Bleeding#TEARS},
+ * {@link Bleeding#NARROW}); a cloth arrow carries fire only if its archer had a flame to light it from ({@link #flame}).
  */
 public final class HeadFx {
 	// ---- tuning ----
@@ -63,6 +66,13 @@ public final class HeadFx {
 	/** Boomerang: speed it flies home (blocks/tick), how near the archer it is caught (blocks), and how long it tries (ticks). */
 	public static final double BOOMERANG_SPEED = 1.5, BOOMERANG_CATCH = 1.8;
 	public static final int BOOMERANG_TICKS = 120;
+	/** Bodkin: the share of its damage it does on a bare body, and through padding, mail and plate. */
+	public static final float BODKIN_BARE = 0.85F, BODKIN_CLOTH = 1.0F, BODKIN_MAIL = 1.35F, BODKIN_PLATE = 1.25F;
+	/** Swallowtail: the same four. */
+	public static final float SWALLOWTAIL_BARE = 1.3F, SWALLOWTAIL_CLOTH = 1.1F, SWALLOWTAIL_MAIL = 0.55F, SWALLOWTAIL_PLATE = 0.5F;
+	/** Cloth: how near (blocks) a fire, torch, lit campfire or lava must be to light it, and how long (seconds) what it hits burns. */
+	public static final int CLOTH_FLAME_REACH = 3;
+	public static final float CLOTH_BURN = 8.0F;
 
 	private static final String SLOWED = "jaymospowers.head_slowed", HOMING = "jaymospowers.head_homing";
 	private static final List<Homing> HOMEWARD = new ArrayList<>();
@@ -94,10 +104,76 @@ public final class HeadFx {
 			case BROADHEAD -> arrow.setBaseDamage(ARROW_BASE * BROADHEAD_DAMAGE);
 			case FIRE -> arrow.igniteForSeconds(100.0F);
 			case DRILL -> ((ArrowPierceInvoker) arrow).jaymospowers$setPierceLevel((byte) 1);
+			case BODKIN -> arrow.addTag(Bleeding.NARROW);
+			case SWALLOWTAIL -> arrow.addTag(Bleeding.TEARS);
+			case CLOTH -> {
+				if (arrow.getOwner() instanceof LivingEntity archer && flame(archer)) {
+					arrow.igniteForSeconds(100.0F);
+					arrow.level().playSound(null, archer.getX(), archer.getY(), archer.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5F, 1.3F);
+				}
+			}
 			default -> {
 			}
 		}
 		return arrow;
+	}
+
+	/**
+	 * Whether {@code archer} has a flame to light a cloth arrow from: alight himself, a torch, lantern or flint and steel in
+	 * a hand (the flint and steel wears by one), or a fire, torch, lit campfire or lava within {@link #CLOTH_FLAME_REACH}.
+	 */
+	static boolean flame(LivingEntity archer) {
+		if (archer.isInWaterOrRain()) {
+			return false;
+		}
+		if (archer.isOnFire()) {
+			return true;
+		}
+		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
+			ItemStack held = archer.getItemInHand(hand);
+			if (held.is(net.minecraft.world.item.Items.FLINT_AND_STEEL)) {
+				held.hurtAndBreak(1, archer, hand);
+				return true;
+			}
+			if (held.is(net.minecraft.world.item.Items.TORCH) || held.is(net.minecraft.world.item.Items.SOUL_TORCH)
+				|| held.is(net.minecraft.world.item.Items.LANTERN) || held.is(net.minecraft.world.item.Items.SOUL_LANTERN)) {
+				return true;
+			}
+		}
+		net.minecraft.core.BlockPos at = archer.blockPosition();
+		for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(at.offset(-CLOTH_FLAME_REACH, -1, -CLOTH_FLAME_REACH),
+			at.offset(CLOTH_FLAME_REACH, 2, CLOTH_FLAME_REACH))) {
+			net.minecraft.world.level.block.state.BlockState state = archer.level().getBlockState(pos);
+			if (state.is(net.minecraft.tags.BlockTags.FIRE) || net.minecraft.world.level.block.CampfireBlock.isLitCampfire(state)
+				|| state.is(net.minecraft.world.level.block.Blocks.TORCH) || state.is(net.minecraft.world.level.block.Blocks.WALL_TORCH)
+				|| state.is(net.minecraft.world.level.block.Blocks.SOUL_TORCH) || state.is(net.minecraft.world.level.block.Blocks.SOUL_WALL_TORCH)
+				|| state.getFluidState().is(net.minecraft.tags.FluidTags.LAVA)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The share of its damage {@code arrow}'s head does against {@code armour} where it lands (1: a head that doesn't care). */
+	public static float againstArmour(Entity arrow, com.jaymospowers.core.ArmourKind armour) {
+		ArrowHead head = headOf(arrow);
+		if (head == ArrowHead.BODKIN) {
+			return switch (armour) {
+				case NONE -> BODKIN_BARE;
+				case CLOTH -> BODKIN_CLOTH;
+				case MAIL -> BODKIN_MAIL;
+				case PLATE -> BODKIN_PLATE;
+			};
+		}
+		if (head == ArrowHead.SWALLOWTAIL) {
+			return switch (armour) {
+				case NONE -> SWALLOWTAIL_BARE;
+				case CLOTH -> SWALLOWTAIL_CLOTH;
+				case MAIL -> SWALLOWTAIL_MAIL;
+				case PLATE -> SWALLOWTAIL_PLATE;
+			};
+		}
+		return 1.0F;
 	}
 
 	public static @Nullable ArrowHead headOf(Entity arrow) {
@@ -149,6 +225,12 @@ public final class HeadFx {
 				}
 			}
 			case FLASH -> flash(level, at, owner);
+			case CLOTH -> {
+				// (a lit one: the burning rag stays on what it struck)
+				if (arrow.isOnFire() && living != null) {
+					living.igniteForSeconds(CLOTH_BURN);
+				}
+			}
 			default -> {
 			}
 		}
@@ -182,6 +264,18 @@ public final class HeadFx {
 					return true;
 				}
 				return arrow.entityTags().contains(HOMING);
+			}
+			case CLOTH -> {
+				// a lit one sets fire where it sticks, and burns up with it
+				if (arrow.isOnFire()) {
+					net.minecraft.core.BlockPos beside = hit.getBlockPos().relative(hit.getDirection());
+					if (level.getBlockState(beside).isAir() && net.minecraft.world.level.block.BaseFireBlock.canBePlacedAt(level, beside, hit.getDirection())) {
+						level.setBlockAndUpdate(beside, net.minecraft.world.level.block.BaseFireBlock.getState(level, beside));
+						level.playSound(null, beside, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.7F, 1.0F);
+						arrow.discard();
+						return true;
+					}
+				}
 			}
 			default -> {
 			}

@@ -8,6 +8,14 @@
     {
       "id": "jaymospowers:large_plate_cast",
       "required": false
+    },
+    {
+      "id": "jaymoskingdoms:handgonne",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:handgonne_barrel",
+      "required": false
     }
   ]
 }

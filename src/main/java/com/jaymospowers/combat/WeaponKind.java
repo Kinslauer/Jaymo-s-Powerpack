@@ -39,6 +39,8 @@ public enum WeaponKind {
 	HAMMER(0.4F, 0.88F, Blow.BLUNT),
 	STAFF(0.5F, 0.92F, Blow.BLUNT),
 	POLEARM(0.55F, 0.95F, Blow.CUT, Blow.THRUST),
+	/** A hammer face and a beak on a pole (the bec de corbin): it crushes and it finds the gaps. */
+	POLEHAMMER(0.55F, 0.95F, Blow.BLUNT, Blow.THRUST),
 	SPEAR(0.6F, 0.97F, Blow.THRUST);
 	// ================================================================================================================
 
@@ -80,7 +82,8 @@ public enum WeaponKind {
 		GREAT_WORDS = {"claymore", "greatsword", "great_sword", "zweihander", "longsword", "bastardsword"},
 		SPEAR_WORDS = {"spear", "lance", "javelin", "trident", "harpoon"},
 		HAMMER_WORDS = {"hammer", "maul", "sledge", "anchor"},
-		AXE_WORDS = {"axe", "hatchet", "cleaver"};
+		AXE_WORDS = {"axe", "hatchet", "cleaver"},
+		POLEHAMMER_WORDS = {"bec_de_corbin", "polehammer", "pole_hammer", "lucerne"};
 
 	/** The band it hits hardest in: from this share of its reach to this one. */
 	public final float near, far;
@@ -114,6 +117,9 @@ public enum WeaponKind {
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
 		if (path.contains("pickaxe")) {
 			return null;
+		}
+		if (has(path, POLEHAMMER_WORDS)) {
+			return POLEHAMMER;
 		}
 		String category = BetterCombatWeapons.category(stack);
 		if (category != null) {

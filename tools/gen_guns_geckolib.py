@@ -14,6 +14,9 @@ hammer, ramrod and muzzle flash move: drawn, held, aimed, fired, reloaded, spent
 - musketoon: Frontier Armaments' Firecannon, a brass-banded barrel with a bell mouth, for Kingdoms' Musketoon (the
   caravan guards' gun, which fires cannonballs): its hammer cut into its own bone, its breech gem painted steel, a
   ramrod added.
+- handgonne, arquebus: Kingdoms' early guns (EarlyGuns), ours from the first cube: a pot of a barrel socketed on a pole,
+  touched off with a match on a stick, and a long matchlock with a fishtail butt and a serpentine holding the match.
+  Their sheet is painted here (early_gun_sheet).
 
 Each gun gets a muzzle flash bone (our flash picture, drawn full-bright by a glow layer) that only shows while it fires.
 
@@ -23,7 +26,8 @@ Writes for each gun:
   assets/jaymospowers/textures/entity/gun_<gun>.png (+ _glow.png, and the variants: musket bayonet tiers, void pistol)
   the held_guns item definitions that draw them (animated_gun, with the matrix that lays the model where the old static
   model lay, so the hand-held placements tuned for it still fit), and the blunderbuss's static model (its base);
-  the musketoon's static model, texture and plain item definition in Kingdoms' assets (its animated one in held_guns).
+  the musketoon's, the handgonne's and the arquebus's static model, texture and plain item definition in Kingdoms'
+  assets (their animated ones in held_guns).
 
 Keyframes are the game's way (degrees as ModelPart angles), as a "free" project stores them; tools/bbmodel_geckolib.py
 turns them round for GeckoLib. Check poses with tools/bbmodel_bake.py and tools/bbmodel_preview.py.
@@ -56,7 +60,8 @@ KINGDOMS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", 
 R2 = 1 / math.sqrt(2)
 
 # WeaponMod's reload times (its config's defaults, seconds): each reload animation is this long, so it ends as the gun does
-RELOAD = {"musket": 1.5, "blunderbuss": 1.0, "flintlock": 0.75, "musketoon": 5.0}  # (the musketoon: Kingdoms' Musketoon.RELOAD)
+RELOAD = {"musket": 1.5, "blunderbuss": 1.0, "flintlock": 0.75, "musketoon": 5.0,  # (the musketoon: Kingdoms' Musketoon.RELOAD)
+	"handgonne": 6.0, "arquebus": 4.0}  # (Kingdoms' EarlyGuns.Rung.load, in seconds)
 BAYONET_TIERS = {
 	# blade light, mid, dark
 	"wood": ((176, 132, 80), (139, 100, 56), (96, 66, 34)),
@@ -531,6 +536,121 @@ def musketoon():
 	return data
 
 
+# ---- the early guns: our own cubes and paint ---------------------------------------------------------------------------
+
+WOOD, DARK_WOOD, FORGED, BORE, BRASS, CORD, EMBER, BRIGHT = (0, 0), (16, 0), (32, 0), (48, 0), (0, 16), (16, 16), (32, 16), (48, 16)
+
+
+def early_gun_sheet():
+	"""The early guns' sheet, 64 by 64 in 16-pixel tiles: pole wood, dark stock wood, forged iron, the bore's black,
+	brass, match cord, the match's ember, bright filed iron. Plain shaded tiles with a little grain, as the pack's
+	other hand-painted gear is."""
+	img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+	rnd = random.Random(23)
+
+	def tile(corner, base, grain, streak):
+		for y in range(16):
+			row = rnd.uniform(-streak, streak)
+			for x in range(16):
+				f = 1.0 + row + rnd.uniform(-grain, grain) + (0.08 if y in (0, 1) else -0.1 if y >= 14 else 0.0)
+				img.putpixel((corner[0] + x, corner[1] + y), shade(base, f))
+
+	tile(WOOD, (150, 108, 62), 0.04, 0.07)
+	tile(DARK_WOOD, (104, 68, 40), 0.04, 0.08)
+	tile(FORGED, (86, 88, 96), 0.07, 0.03)
+	tile(BORE, (26, 24, 26), 0.1, 0.0)
+	tile(BRASS, (196, 150, 62), 0.05, 0.03)
+	tile(CORD, (188, 170, 126), 0.03, 0.12)
+	tile(BRIGHT, (150, 154, 164), 0.05, 0.03)
+	for y in range(16):
+		for x in range(16):
+			img.putpixel((EMBER[0] + x, EMBER[1] + y), flame_colour(min(1.0, 0.25 + 0.7 * rnd.random())))
+	return img
+
+
+def early_gun(name, body, hammer_at, hammer, ramrod_at, ramrod, muzzle, flash_size, cocked, fallen, ramrod_out, heavy, flash_peak):
+	"""An early gun as a project: muzzle toward -z, top up, like the long guns; its body's cubes, the match's holder as
+	the "hammer" bone, a ramrod, the muzzle flash and the standard animations."""
+	textures = [texture_entry(name, early_gun_sheet()), texture_entry("flash", flash_picture())]
+	gun = group("gun", (0, 9.5, 5.0), body + [group("hammer", hammer_at, hammer), group("ramrod", ramrod_at, ramrod),
+		flash_bone(muzzle, "z", flash_size, 1)])
+	data = project(name, [group("root", (0, 0, 0), [gun])], textures, (64, 64))
+	data["textures"][1]["uv_width"], data["textures"][1]["uv_height"] = 32, 16
+	uuids = {g["name"]: g["uuid"] for g in data["groups"]}
+	anims = standard_anims(name, "gun", "hammer", cocked, fallen, "x", (0, 0, 1), heavy, flash_peak,
+		ramrod="ramrod", ramrod_out=ramrod_out, reload_tilt=48.0)
+	data["animations"] = [a.blockbench(name, uuids) for a in anims]
+	return data
+
+
+def handgonne():
+	"""Kingdoms' handgonne: a short thick barrel, ringed at the muzzle, the middle and the breech, with a wall hook
+	under it and a touch hole on top, its socket driven onto a plain pole. No lock: the "hammer" is the match on its
+	stick, held up off the touch hole and brought down on it to fire."""
+	body = [
+		cube("barrel", (-1.6, 9.9, -18.0), (1.6, 13.1, -8.0), {"all": FORGED}),
+		cube("muzzle_ring", (-2.0, 9.5, -18.4), (2.0, 13.5, -17.2), {"all": BRIGHT}),
+		cube("bore", (-1.0, 10.5, -18.45), (1.0, 12.5, -18.4), {"north": BORE}),
+		cube("mid_ring", (-1.9, 9.6, -13.6), (1.9, 13.4, -12.8), {"all": BRIGHT}),
+		cube("breech_ring", (-2.0, 9.5, -9.2), (2.0, 13.5, -8.0), {"all": BRIGHT}),
+		cube("touch_hole", (-0.5, 13.1, -10.6), (0.5, 13.35, -9.6), {"all": BORE}),
+		cube("hook", (-0.5, 7.7, -13.5), (0.5, 9.9, -12.9), {"all": FORGED}),
+		cube("hook_toe", (-0.5, 7.7, -12.9), (0.5, 8.3, -11.9), {"all": FORGED}),
+		cube("socket", (-1.3, 10.2, -8.0), (1.3, 12.8, -5.0), {"all": FORGED}),
+		cube("pole", (-0.9, 10.6, -5.0), (0.9, 12.4, 10.6), {"all": WOOD}),
+		cube("pole_cap", (-1.1, 10.4, 10.6), (1.1, 12.6, 11.4), {"all": FORGED}),
+	]
+	hammer = [
+		cube("match_stick", (-0.3, 12.7, -8.6), (0.3, 13.3, 3.0), {"all": DARK_WOOD}),
+		cube("match_cord", (-0.4, 12.6, -9.6), (0.4, 13.4, -8.6), {"all": CORD}),
+		cube("match_ember", (-0.3, 12.7, -10.1), (0.3, 13.3, -9.6), {"all": EMBER}),
+	]
+	ramrod = [
+		cube("ramrod", (-0.3, 9.9, -4.6), (0.3, 10.5, 9.0), {"all": DARK_WOOD}),
+		cube("ramrod_tip", (-0.4, 9.8, -5.4), (0.4, 10.6, -4.6), {"all": BRIGHT}),
+	]
+	# (the match held 24 degrees up off the touch hole; the ramrod drawn out past the muzzle and up to the bore's line)
+	return early_gun("handgonne", body, (0, 13.0, 3.0), hammer, (0, 10.2, -5.0), ramrod, (0, 11.5, -18.5), 8.0,
+		(-24, 0, 0), (0, 0, 0), (0, 1.3, -14.0), 2.2, 2.2)
+
+
+def arquebus():
+	"""Kingdoms' arquebus: a long slim barrel in a wooden forestock, two brass bands, a lock plate with its pan on the
+	right, a fishtail butt and a long trigger bar under the wrist. The "hammer" is the serpentine: the curved arm that
+	holds the lit match and tips it forward into the pan."""
+	body = [
+		cube("barrel", (-1.1, 10.6, -19.0), (1.1, 12.8, -3.0), {"all": FORGED}),
+		cube("muzzle_ring", (-1.4, 10.3, -19.3), (1.4, 13.1, -18.5), {"all": BRIGHT}),
+		cube("bore", (-0.7, 11.0, -19.35), (0.7, 12.4, -19.3), {"north": BORE}),
+		cube("front_sight", (-0.2, 12.8, -18.0), (0.2, 13.3, -17.4), {"all": BRIGHT}),
+		cube("breech", (-1.4, 10.3, -3.0), (1.4, 13.1, -1.0), {"all": FORGED}),
+		cube("forestock", (-1.2, 9.2, -13.0), (1.2, 10.6, -1.0), {"all": DARK_WOOD}),
+		cube("band_front", (-1.5, 9.0, -12.4), (1.5, 13.0, -11.6), {"all": BRASS}),
+		cube("band_rear", (-1.5, 9.0, -6.4), (1.5, 13.0, -5.6), {"all": BRASS}),
+		cube("lock_plate", (1.2, 9.6, -4.4), (1.6, 11.4, 1.4), {"all": BRIGHT}),
+		cube("pan", (1.2, 11.4, -3.6), (2.3, 11.8, -2.2), {"all": FORGED}),
+		cube("pan_powder", (1.4, 11.8, -3.4), (2.1, 11.85, -2.4), {"up": BORE}),
+		cube("wrist", (-1.2, 8.6, -1.0), (1.2, 11.8, 4.0), {"all": DARK_WOOD}),
+		cube("butt_neck", (-1.2, 7.4, 4.0), (1.2, 11.2, 8.0), {"all": DARK_WOOD}),
+		cube("butt", (-1.2, 5.8, 8.0), (1.2, 10.8, 11.5), {"all": DARK_WOOD}),
+		cube("butt_plate", (-1.25, 5.6, 11.5), (1.25, 11.0, 12.0), {"all": BRASS}),
+		cube("trigger_bar", (-0.3, 7.9, -0.6), (0.3, 8.4, 4.6), {"all": FORGED}),
+	]
+	hammer = [
+		cube("serpentine", (1.6, 10.8, 0.2), (2.0, 13.8, 0.9), {"all": FORGED}),
+		cube("serpentine_jaw", (1.5, 13.6, -0.5), (2.1, 14.3, 0.9), {"all": FORGED}),
+		cube("match_cord", (1.6, 13.7, -1.1), (2.0, 14.2, -0.5), {"all": CORD}),
+		cube("match_ember", (1.65, 13.75, -1.5), (1.95, 14.15, -1.1), {"all": EMBER}),
+	]
+	ramrod = [
+		cube("ramrod", (-0.3, 8.5, -16.4), (0.3, 9.1, -2.0), {"all": WOOD}),
+		cube("ramrod_tip", (-0.4, 8.4, -17.0), (0.4, 9.2, -16.4), {"all": BRASS}),
+	]
+	# (the serpentine tips 62 degrees forward to lay the match in the pan; the ramrod out past the muzzle, up to the bore)
+	return early_gun("arquebus", body, (1.8, 10.8, 0.5), hammer, (0, 8.8, -16.4), ramrod, (0, 11.7, -19.4), 7.0,
+		(0, 0, 0), (62, 0, 0), (0, 2.9, -15.5), 1.9, 2.0)
+
+
 def paint_unpainted(im):
 	"""Frontier's long gun leaves the faces nobody painted in Blockbench's template colours (pale blue, green, pink, sky
 	blue, yellow): each such pixel takes the nearest painted pixel's colour, a little darker."""
@@ -607,6 +727,8 @@ MUSKET_FRAME = frame_matrix(LONG_GUN, (0.0, 14.0, -13.75), (7.5, 9.5, 8.0), 0.6)
 MUSKETOON_PIVOT, MUSKETOON_CENTRE, MUSKETOON_SCALE = (0.0, 11.0, -3.5), (7.8, 8.6, 8.0), 0.56
 MUSKETOON_FRAME = frame_matrix(LONG_GUN, MUSKETOON_PIVOT, MUSKETOON_CENTRE, MUSKETOON_SCALE)
 # the blunderbuss (modelled along x, muzzle toward -x) on that diagonal: muzzle up-left, top up-right, 45 pixels made 18
+# the early guns on the same diagonal, a little smaller (they are about 31 pixels long)
+EARLY_GUNS = {"handgonne": ((0.0, 11.5, -3.5), (7.8, 8.6, 8.0), 0.54), "arquebus": ((0.0, 11.0, -3.6), (7.8, 8.4, 8.0), 0.52)}
 X_GUN = ((R2, R2, 0.0), (-R2, R2, 0.0), (0.0, 0.0, 1.0))
 BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE = (3.8, 1.0, 0.5), (7.8, 8.6, 8.0), 0.41
 BLUNDERBUSS_FRAME = frame_matrix(X_GUN, BLUNDERBUSS_PIVOT, BLUNDERBUSS_CENTRE, BLUNDERBUSS_SCALE)
@@ -750,6 +872,28 @@ def main():
 			"cases": [{"when": ["arrow", "rocket"], "model": gun("loaded")}],
 			"fallback": {"type": "minecraft:condition", "property": "minecraft:using_item", "on_true": gun("reload"),
 				"on_false": gun("spent")}}}}, 2)
+	# Kingdoms' handgonne and arquebus, the same way: ours from the first cube
+	for name, build in (("handgonne", handgonne), ("arquebus", arquebus)):
+		pivot, centre, scale = EARLY_GUNS[name]
+		data = build()
+		geckolib(data, name)
+		elements, atlas = freeform_convert(data, LONG_GUN, pivot, centre, scale, drop=("flash",))
+		atlas.save(os.path.join(KINGDOMS, "textures", "item", name + ".png"))
+		write(os.path.join(KINGDOMS, "models", "item", name + ".json"), {
+			"gui_light": "front", "textures": {"0": "jaymoskingdoms:item/" + name, "particle": "jaymoskingdoms:item/" + name},
+			"elements": elements,
+			"display": {"thirdperson_righthand": hand(1), "thirdperson_lefthand": hand(-1), "firstperson_righthand": eye(1),
+				"firstperson_lefthand": eye(-1), "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+				"gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]}, "fixed": {"rotation": [0, 180, 0], "scale": [1, 1, 1]}}})
+		still = {"type": "minecraft:model", "model": "jaymoskingdoms:item/" + name}
+		write(os.path.join(KINGDOMS, "items", name + ".json"), {"model": still}, 2)
+		gun = lambda pose, name=name: animated(name, "jaymoskingdoms:item/" + name, frame_matrix(LONG_GUN, *EARLY_GUNS[name]), pose=pose)
+		write(os.path.join(HELD, "jaymoskingdoms", "items", name + ".json"), {"model": {"type": "minecraft:select",
+			"property": "minecraft:display_context", "cases": [{"when": ["gui", "ground", "fixed"], "model": still}],
+			"fallback": {"type": "minecraft:select", "property": "minecraft:charge_type",
+				"cases": [{"when": ["arrow", "rocket"], "model": gun("loaded")}],
+				"fallback": {"type": "minecraft:condition", "property": "minecraft:using_item", "on_true": gun("reload"),
+					"on_false": gun("spent")}}}}, 2)
 	flint = weaponmod_item("flintlock", "jaymospowers:item/flintlock_3d", FLINTLOCK_FRAME, "weaponmod:item/flintlock",
 		"weaponmod:item/flintlock_reload")
 	write(os.path.join(items, "flintlock.json"), flint, 2)

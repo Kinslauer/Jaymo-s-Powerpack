@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A plain arrow with an {@link ArrowHead} fitted. One item for all fourteen heads (the head is the stack's custom model data
+ * A plain arrow with an {@link ArrowHead} fitted. One item for every head (the head is the stack's custom model data
  * string, which also picks its icon), in the {@code minecraft:arrows} tag, so the Kitchen quiver holds it and feeds it to a bow
  * like any arrow. The arrow it shoots carries the head as an entity tag ({@link ArrowHead#tag}) for {@link HeadFx}.
  */

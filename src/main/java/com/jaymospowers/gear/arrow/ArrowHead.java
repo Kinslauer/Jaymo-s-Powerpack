@@ -36,7 +36,13 @@ public enum ArrowHead {
 	/** Pierces a second target, and goes through a raised shield. */
 	DRILL("drill", 0x5A6C7E, false),
 	/** Comes back to the archer if it misses. */
-	BOOMERANG("boomerang", 0xB07A30, false);
+	BOOMERANG("boomerang", 0xB07A30, false),
+	/** A narrow hardened point: through mail and plate, and a small wound that doesn't bleed. */
+	BODKIN("bodkin", 0x6E7682, false),
+	/** A broad forked head: tears bare flesh open, and mail and plate turn it. */
+	SWALLOWTAIL("swallowtail", 0xC4CAD4, false),
+	/** A pitch-soaked rag: lit from a flame as it's loosed, it carries the fire to what it hits. */
+	CLOTH("cloth", 0xD8C8A0, false);
 
 	public final String id;
 	/** The head's colour on its icon and in its effects. */

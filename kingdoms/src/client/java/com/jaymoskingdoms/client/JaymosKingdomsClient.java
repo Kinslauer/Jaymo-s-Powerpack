@@ -75,6 +75,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the Family farmhand's wake-up talk, letterboxed (FarmhandWake)
 		com.jaymoskingdoms.client.films.FarmWakeFilmClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		// a handgonne's or an arquebus's ball (EarlyGuns)
+		EntityRenderers.register(com.jaymoskingdoms.GunBall.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.5F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// (0.7.279) a spirit's floating hand (far hand, catch)

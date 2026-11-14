@@ -285,6 +285,10 @@ public class SmithingAnvilEntity extends BlockEntity {
 				grade = Grade.min(grade, most);
 			}
 		}
+		if (Botching.botched(option, progress, grade, new Random(progress.seed() * 31 + level.getGameTime()))) {
+			botch(player, option);
+			return;
+		}
 		ItemStack made = option.result().copy();
 		Grades.set(made, grade);
 		made.set(Smithing.HEATED_AT, now());
@@ -303,6 +307,22 @@ public class SmithingAnvilEntity extends BlockEntity {
 				30, 0.3, 0.3, 0.3, 0.3);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.smithing.done", made.getHoverName(), grade.displayName()));
+		ServerPlayNetworking.send(player, SmithingNet.Session.off(worldPosition));
+	}
+
+	/** The metal cracked under the last blow ({@link Botching}): nothing is made of it and it is gone. */
+	private void botch(ServerPlayer player, Forging.Option option) {
+		work = ItemStack.EMPTY;
+		endSession();
+		changed();
+		ServerLevel server = (ServerLevel) level;
+		double x = worldPosition.getX() + 0.5, y = worldPosition.getY() + 1.05, z = worldPosition.getZ() + 0.5;
+		server.playSound(null, worldPosition, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 1.0F, 0.6F);
+		server.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 0.8F);
+		server.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, option.result().getItem()), x, y, z, 14,
+			0.2, 0.05, 0.2, 0.08);
+		server.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 6, 0.2, 0.05, 0.2, 0.01);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.smithing.botched", option.result().getHoverName()));
 		ServerPlayNetworking.send(player, SmithingNet.Session.off(worldPosition));
 	}
 

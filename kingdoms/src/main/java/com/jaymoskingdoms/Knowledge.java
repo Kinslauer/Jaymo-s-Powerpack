@@ -30,7 +30,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <ol>
  * <li><b>The Goblin King</b>: anvils (vanilla's and the iron Smithing Anvil; the Stone Anvil is open from the start) and
  * bog iron ({@link BogIron}).</li>
- * <li><b>The Ogre King</b>: the smithing table, and the heavy arms on the Smithing Anvil ({@link #HEAVY_ARMS}).</li>
+ * <li><b>The Ogre King</b>: the smithing table, the heavy arms on the Smithing Anvil ({@link #HEAVY_ARMS}), and taking an
+ * old piece apart at the Drafting Table to learn its pattern ({@link #patterns}).</li>
  * <li><b>The Skeleton Lord</b>: the enchanting table.</li>
  * <li><b>The Piglin King</b>: the higher spells and techniques: a staff caster learning a spell from a scroll
  * ({@link Spellcraft#learn}; reading one once still works for anyone), the Storm Arts, and skill-tree perks that want
@@ -52,7 +53,7 @@ public final class Knowledge {
 	public static final int TECHNIQUE_LEVEL = 15;
 	/** The Smithing Anvil forgings (shape ids, without the metal) that are heavy arms (level 2). */
 	static final Set<String> HEAVY_ARMS = Set.of("weapon/claymore_blade", "weapon/war_scythe_blade", "weapon/glaive_blade",
-		"weapon/halberd_head", "part/broad_blade");
+		"weapon/halberd_head", "part/broad_blade", "weapon/bec_de_corbin_head", "weapon/heavy_crossbow_prod", "frontier/juggernaut");
 	/** Per level 1 to 5, the level it opens (for the gates below). */
 	public static final int ANVILS = 1, SMITHING = 2, ENCHANTING = 3, HIGHER_ARTS = 4, END_PORTAL = 5;
 	/** Per world tier (Hearth to Legend), the knowledge a player already on it is granted once ({@link #grandfather}). */
@@ -90,6 +91,7 @@ public final class Knowledge {
 		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> grandfather(handler.player));
 		heavyArms();
+		patterns();
 	}
 
 	/** The knowledge {@code state} wants (0: none). */
@@ -223,6 +225,21 @@ public final class Knowledge {
 			checks.add(proxy);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Knowledge: couldn't reach Jaymo's Tinkering's forging checks; heavy arms stay open", e);
+		}
+	}
+
+	/** Jaymo's Tinkering's Drafting Table won't read an old piece's pattern for a smith without the Ogre King's knowledge. */
+	private static void patterns() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			@SuppressWarnings("unchecked")
+			List<java.util.function.Function<ServerPlayer, Component>> gates = (List<java.util.function.Function<ServerPlayer, Component>>)
+				Class.forName("com.jaymospowers.tinkering.smithing.Patterns").getField("GATES").get(null);
+			gates.add(smith -> has(smith, SMITHING) ? null : Component.translatable("message.jaymoskingdoms.knowledge.locked.pattern"));
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Knowledge: couldn't reach Jaymo's Tinkering's patterns; anyone may read an old piece", e);
 		}
 	}
 

@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -26,6 +27,10 @@ import org.jspecify.annotations.Nullable;
  * foe in sight from {@link #NEAREST} to {@link #FURTHEST} blocks, then reloads slowly, closing in with the bayonet
  * meanwhile; he throws no javelins. The shot spares his own side as a javelin does ({@link Javelins#harms}). Should the
  * treasury fall below {@link #KEEP_TREASURY}, the muskets are sold and the guards take up their swords again.
+ * <p>
+ * The musket is the top rung of the realms' gun ladder now ({@link EarlyGuns}): who carries one is {@link EarlyGuns#issue}'s
+ * to say (a wealthy kingdom's picked guards, by {@link Wealth}), and a realm short of that hands its picked guards an
+ * arquebus or a handgonne instead. {@link #ARM_TREASURY} and {@link #KEEP_TREASURY} still say who can afford cannon.
  */
 final class Muskets {
 	/** A kingdom with this many emeralds arms its musketeers; they keep their muskets till it has fewer than {@link #KEEP_TREASURY}. */
@@ -80,11 +85,6 @@ final class Muskets {
 		return folk.role() == Folk.GUARD && held.is(musket());
 	}
 
-	/** One of the guards who'd carry a musket in a rich enough kingdom. */
-	static boolean picked(Folk folk) {
-		return folk.role() == Folk.GUARD && Math.floorMod(folk.getUUID().hashCode(), SHARE) == 0;
-	}
-
 	/** Whether {@code f} can afford guns: a standing realm with {@code treasury} emeralds or more. */
 	static boolean afford(@Nullable Faction f, long treasury) {
 		return f != null && f.type().isRealm() && !f.fallen() && f.treasury() >= treasury;
@@ -99,7 +99,8 @@ final class Muskets {
 		boolean armed = armed(folk);
 		if ((folk.tickCount + folk.getId()) % CHECK == 0) {
 			Faction f = Factions.get(level.getServer(), folk.factionId());
-			boolean should = picked(folk) && afford(f, armed ? KEEP_TREASURY : ARM_TREASURY);
+			EarlyGuns.Issue issue = EarlyGuns.issue(level.getServer(), f, folk);
+			boolean should = issue == EarlyGuns.Issue.MUSKET;
 			if (should && !armed) {
 				folk.setItemSlot(EquipmentSlot.MAINHAND, musketStack());
 				folk.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
@@ -109,6 +110,9 @@ final class Muskets {
 			} else if (!should && armed) {
 				folk.rearm(level);
 				return;
+			} else if (!should) {
+				// (a realm short of muskets: an arquebus or a handgonne, or its gun given back)
+				EarlyGuns.hand(level, folk, issue);
 			}
 		}
 		LivingEntity foe = folk.getTarget();
@@ -127,7 +131,8 @@ final class Muskets {
 		fire(level, folk, foe);
 	}
 
-	private static void fire(ServerLevel level, Folk folk, LivingEntity foe) {
+	/** One shot at {@code foe} (a folk musketeer's; a realm's MCA musketeer's, from {@link EarlyGuns}). */
+	static void fire(ServerLevel level, PathfinderMob folk, LivingEntity foe) {
 		// a ball from his pouch: none left, no shot till he restocks (MobAmmo)
 		if (!MobAmmo.spend(folk, MobAmmo.Kind.SHOT)) {
 			return;

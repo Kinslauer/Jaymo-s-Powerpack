@@ -61,6 +61,10 @@
     {
       "id": "jaymospowers:tinker_glaive",
       "required": false
+    },
+    {
+      "id": "jaymospowers:bec_de_corbin",
+      "required": false
     }
   ]
 }

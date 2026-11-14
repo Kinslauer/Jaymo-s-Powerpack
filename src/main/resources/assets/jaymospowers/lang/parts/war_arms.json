@@ -1,0 +1,19 @@
+{
+  "item.jaymospowers.bec_de_corbin": "Bec de Corbin",
+  "item.jaymospowers.bec_de_corbin.hint": "A hammer and a crow's beak on a pole. Knocks a raised shield aside.",
+  "item.jaymospowers.war_dart": "War Dart",
+  "item.jaymospowers.war_dart.hint": "Hold to draw back, release to throw. Pick it up where it lands.",
+  "item.jaymospowers.heavy_crossbow": "Heavy Crossbow",
+  "item.jaymospowers.heavy_crossbow.hint": "Wound back with its crank: slow to span, and its bolt goes through the first body it strikes.",
+  "weapon_kind.jaymospowers.polehammer": "Crushes and thrusts. Wants room.",
+  "blueprint.jaymospowers.frontier.juggernaut": "Juggernaut Plate",
+  "message.jaymospowers.smithing.botched": "The metal cracked: the %s is lost.",
+  "message.jaymospowers.smithing.pattern_ask": "Use the table again to take the %s apart for its design. The piece will be destroyed.",
+  "message.jaymospowers.smithing.pattern_done": "Drawn up: %s",
+  "message.jaymospowers.smithing.pattern_no_paper": "You need paper in your inventory to draw up a design.",
+  "item.jaymospowers.bec_de_corbin_head": "Bec de Corbin Head",
+  "item.jaymospowers.war_dart_heads": "War Dart Heads",
+  "item.jaymospowers.heavy_crossbow_prod": "Heavy Crossbow Prod",
+  "item.jaymospowers.handgonne_barrel": "Handgonne Barrel",
+  "item.jaymospowers.arquebus_barrel": "Arquebus Barrel"
+}

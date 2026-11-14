@@ -45,7 +45,9 @@ public final class WeaponParts {
 		/** (0.18.50) The Sealed Helm: its seal and a plain glass block, nothing else. */
 		GLASS(Items.GLASS),
 		/** The chain axe: a Tool Handle and a length of chain. */
-		ROD_CHAIN(Items.IRON_CHAIN, PartType.TOOL_HANDLE);
+		ROD_CHAIN(Items.IRON_CHAIN, PartType.TOOL_HANDLE),
+		/** The heavy crossbow: a Tough Handle for its tiller and a string for its prod. */
+		TOUGH_STRING(Items.STRING, PartType.TOUGH_HANDLE);
 
 		public final List<PartType> parts;
 		/** (0.18.50) A plain item that goes in beside the head and the parts (a glass block), or null. */
@@ -295,6 +297,18 @@ public final class WeaponParts {
 		add(new Kind("caltrops_blank", "jaymospowers:caltrops", Scheme.SINGLE, 4 * Molten.NUGGET, Assembly.ALONE, 4));
 		add(new Kind("dart_tip_blank", "jaymospowers:bleeding_dart", Scheme.SINGLE, 3 * Molten.NUGGET, Assembly.ALONE, 4));
 		add(new Kind("trap_jaws_blank", "jaymospowers:bear_trap", Scheme.SINGLE, 3 * INGOT, Assembly.ALONE, 1));
+		// the war heads (gear/arrow/ArrowHead): a bodkin's hardened point and a swallowtail's broad fork, four arrows' worth to the ingot
+		add(new Kind("bodkin_head_blank", "jaymospowers:head_bodkin", Scheme.SINGLE, INGOT, Assembly.ALONE, 4));
+		add(new Kind("swallowtail_head_blank", "jaymospowers:head_swallowtail", Scheme.SINGLE, INGOT, Assembly.ALONE, 4));
+		// the armoured wars' weapons (armory/WarArms): the bec de corbin's head on a tough haft, war darts four to the ingot,
+		// the heavy crossbow's prod, strung, on its tiller
+		add(new Kind("bec_de_corbin_head", "jaymospowers:bec_de_corbin", Scheme.SINGLE, 3 * INGOT, Assembly.TOUGH_BINDING, 1));
+		add(new Kind("war_dart_heads", "jaymospowers:war_dart", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 4));
+		add(new Kind("heavy_crossbow_prod", "jaymospowers:heavy_crossbow", Scheme.SINGLE, 4 * INGOT, Assembly.TOUGH_STRING, 1));
+		// the early guns (Jaymo's Kingdoms' EarlyGuns; nothing to forge without it): the handgonne's barrel on its pole, the
+		// arquebus's on its stock
+		add(new Kind("handgonne_barrel", "jaymoskingdoms:handgonne", Scheme.SINGLE, 3 * INGOT, Assembly.TOUGH_BINDING, 1));
+		add(new Kind("arquebus_barrel", "jaymoskingdoms:arquebus", Scheme.SINGLE, 4 * INGOT, Assembly.TOUGH_BINDING, 1));
 		// the axe on a chain (mortal/ChainAxeItem)
 		add(new Kind("chain_axe_head", "jaymospowers:chain_axe", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_CHAIN, 1));
 		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
