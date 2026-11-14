@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-14 02:06
+updated: 2026-11-14 01:27
 ---
 # Open PRs
 
-3 open, as of 2026-11-14 02:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-14 01:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
@@ -11,12 +11,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1480](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1480) Wind: airflow sense rework (64-block reach, edge ripples with crowds, silent focus with a breeze)
-- **Branch:** `jung/wind-sense-rework` · **Updated:** 2026-11-14 (today)
+## [#1493](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1493) Tinkering: a part-built fishing rod, smeltery extras (melter, tank, channels, alloyer, foundry), JEI fills the Crafting Station
+- **Branch:** `claude/project-thread-vb3yg2` · **Updated:** 2026-11-14 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1486](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1486) Kitchen: clean kills and skinning in strokes
-- **Branch:** `claude/project-thread-tjqmp0` · **Updated:** 2026-11-14 (today)
-- **Checks:** ⏳ 1 of 4 running
+## [#1494](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1494) Kingdoms: MCA's village swap waits for its land (Deck crash 22:32)
+- **Branch:** `mca-spawn-queue-loaded` · **Updated:** 2026-11-14 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
