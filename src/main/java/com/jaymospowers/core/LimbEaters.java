@@ -35,6 +35,17 @@ import org.jspecify.annotations.Nullable;
  * ({@code jaymospowers:limb_carriers}: Naturalist's vulture) don't eat where it lies: one spots a part from far off,
  * swoops down, takes it up in its talons and flies off with it to somewhere well away from anyone ({@link CarryOffGoal}),
  * lands, and eats it there. Struck on the way, it lets go.
+ *
+ * <p>Andy: "they should circle dead bodies in midair". Before it comes down to any of the dead (a body lying anywhere,
+ * or a part), a carrion bird circles high over it a while ({@link CircleGoal}), round and round, then drops down
+ * beside it: to snatch a part, or to tear at a body as a scavenger. Only then will it take a part. Any others about
+ * spot it too, so a kill draws a ring of them.
+ *
+ * <p>Andy: "everything should be able to be eaten, the animals should start with your limbs, so that if you are revived
+ * you now need a new one." The downed (players too, once they're down and nobody's standing over them) are eaten alive
+ * ({@link TearGoal}): an arm or a leg at a time, worried at until it comes off ({@link Dismember#sever}, lost as any
+ * severed part is, to grow back or be replaced), then eaten. With no limbs left it's the body, bite by bite, until
+ * they die. A player on their feet within {@link #GUARD} blocks keeps them off; carried, they're safe.
  */
 public final class LimbEaters {
 	/** Animals that eat severed parts (data/jaymospowers/tags/entity_type/limb_eaters.json). */
@@ -46,6 +57,17 @@ public final class LimbEaters {
 	/** It keeps this far from anyone when it chooses where to eat; it gives up flying there after this long (ticks). */
 	static final double QUIET = 16.0;
 	static final int CARRY_GIVE_UP = 600;
+	/** Circling: how far it spots the dead from (sideways, and down), how wide and how high it circles over them (blocks, least and spread), how fast it goes round (blocks a tick). */
+	static final double CIRCLE_SPOT = 48.0, CIRCLE_SPOT_DOWN = 48.0, CIRCLE_RADIUS = 6.0, CIRCLE_RADIUS_SPREAD = 5.0,
+		CIRCLE_HEIGHT = 10.0, CIRCLE_HEIGHT_SPREAD = 8.0, CIRCLE_SPEED = 0.35;
+	/** How long it circles (ticks, least and spread); then how long it has to come down and eat before it would circle again. */
+	static final int CIRCLE_TICKS = 400, CIRCLE_SPREAD = 400, DESCEND_TICKS = 1200;
+	/** The downed: kept safe by a player standing within this (blocks); bites to tear a limb off; hurt done by a bite on a limb, and on the body once the limbs are gone. */
+	static final double GUARD = 6.0;
+	static final int LIMB_BITES = 5;
+	static final float LIMB_BITE_HURT = 0.5F, BODY_BITE_HURT = 2.0F;
+	/** One look in this many ticks for the dead to circle. */
+	static final int CIRCLE_LOOK_ODDS = 20;
 	/** How far it smells a part (blocks), and how far above or below it it'll go for one. */
 	static final double SMELL = 16.0, SMELL_UP = 6.0;
 	/** One look in this many ticks (while idle) for something to eat. */
@@ -64,6 +86,8 @@ public final class LimbEaters {
 
 	/** Mobs already given the goal (goals aren't saved, so a reload gives it again to the new mob). */
 	private static final Map<Mob, Boolean> GIVEN = new WeakHashMap<>();
+	/** A carrion bird that has circled the dead may come down to them until this game time. */
+	private static final Map<Mob, Long> CIRCLED = new WeakHashMap<>();
 
 	private LimbEaters() {
 	}
@@ -75,8 +99,12 @@ public final class LimbEaters {
 				if (mob.getType().builtInRegistryHolder().is(CARRIERS)) {
 					// level with its fleeing, so a player coming near doesn't make it drop what it's carrying
 					((MobGoalsAccessor) mob).jaymospowers$goals().addGoal(1, new CarryOffGoal(mob));
+					// beside its own search for food and perching (2), above its high wandering (3)
+					((MobGoalsAccessor) mob).jaymospowers$goals().addGoal(2, new CircleGoal(mob));
+					((MobGoalsAccessor) mob).jaymospowers$goals().addGoal(2, new TearGoal(mob, true));
 				} else {
 					((MobGoalsAccessor) mob).jaymospowers$goals().addGoal(6, new EatLimbGoal(mob));
+					((MobGoalsAccessor) mob).jaymospowers$goals().addGoal(6, new TearGoal(mob, false));
 				}
 			}
 		});
@@ -214,6 +242,260 @@ public final class LimbEaters {
 		}
 	}
 
+	/** Whether {@code bird} has circled the dead lately and may come down to them. */
+	static boolean circled(Mob bird) {
+		Long until = CIRCLED.get(bird);
+		return until != null && bird.level().getGameTime() < until;
+	}
+
+	/** The dead a carrion bird circles: a body lying still (Jaymo's Kitchen's), or a part it could eat. */
+	static boolean dead(net.minecraft.world.entity.Entity entity) {
+		if (entity.isRemoved() || entity.isPassenger()) {
+			return false;
+		}
+		if (entity instanceof SeveredPart part) {
+			return part.edible();
+		}
+		// the dying too: the downed, whoever's near them
+		return com.jaymospowers.power.gravity.GravityPower.isCorpse(entity)
+			|| entity instanceof net.minecraft.world.entity.LivingEntity living && living.isAlive() && com.jaymospowers.core.wounds.Downed.isDowned(living);
+	}
+
+	/** Whether {@code entity} is downed and nobody's keeping the animals off it: a body to eat alive. */
+	static boolean prey(net.minecraft.world.entity.Entity entity) {
+		if (!(entity instanceof net.minecraft.world.entity.LivingEntity body) || !body.isAlive() || !com.jaymospowers.core.wounds.Downed.isDowned(body)
+			|| body.isPassenger() || Carry.isCarried(body)
+			|| body instanceof net.minecraft.world.entity.player.Player player && (player.isCreative() || player.isSpectator())) {
+			return false;
+		}
+		for (net.minecraft.world.entity.player.Player guard : body.level().players()) {
+			if (guard != body && guard.isAlive() && !guard.isSpectator() && !com.jaymospowers.core.wounds.Downed.isDowned(guard)
+				&& guard.distanceToSqr(body) < GUARD * GUARD) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** The limbs {@code body} still has that can be torn off (none for what can't lose parts). */
+	static java.util.List<Integer> limbs(net.minecraft.world.entity.LivingEntity body) {
+		java.util.List<Integer> left = new java.util.ArrayList<>();
+		if (Dismember.canLoseParts(body)) {
+			int missing = Dismember.missing(body);
+			for (int part : new int[] {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG}) {
+				if ((missing & part) == 0) {
+					left.add(part);
+				}
+			}
+		}
+		return left;
+	}
+
+	/** Eats the downed alive: their limbs first, one at a time, then the rest of them. */
+	private static final class TearGoal extends Goal {
+		private final Mob mob;
+		/** A carrion bird: only once it's circled them. */
+		private final boolean circles;
+		private net.minecraft.world.entity.@Nullable LivingEntity body;
+		private int ticks, giveUp, bites, limb;
+
+		TearGoal(Mob mob, boolean circles) {
+			this.mob = mob;
+			this.circles = circles;
+			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK, Goal.Flag.JUMP));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (busy(mob) && !(mob.getTarget() != null && prey(mob.getTarget())) || circles && !circled(mob)
+				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+				return false;
+			}
+			body = null;
+			double best = Double.MAX_VALUE;
+			for (net.minecraft.world.entity.LivingEntity near : mob.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+				mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL), e -> e != mob && prey(e))) {
+				double distance = near.distanceToSqr(mob);
+				if (distance < best) {
+					best = distance;
+					body = near;
+				}
+			}
+			return body != null;
+		}
+
+		@Override
+		public void start() {
+			ticks = 0;
+			bites = 0;
+			limb = 0;
+			giveUp = GIVE_UP;
+			if (body != null) {
+				mob.getNavigation().moveTo(body, 1.15);
+			}
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return body != null && prey(body) && giveUp > 0 && mob.getPassengers().isEmpty();
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			if (body == null || !(mob.level() instanceof ServerLevel level)) {
+				return;
+			}
+			double r = mob.getBbWidth() / 2.0 + body.getBbWidth() / 2.0 + 0.9;
+			if (mob.distanceToSqr(body) > r * r) {
+				giveUp--;
+				ticks = 0;
+				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
+				if (mob.getNavigation().isDone()) {
+					mob.getNavigation().moveTo(body, 1.15);
+				}
+				return;
+			}
+			mob.getNavigation().stop();
+			ticks++;
+			Vec3 to = body.position().subtract(mob.position()).multiply(1.0, 0.0, 1.0);
+			Vec3 side = to.lengthSqr() < 1.0E-4 ? Vec3.ZERO : new Vec3(-to.z, 0.0, to.x).normalize();
+			double shake = Mth.sin(ticks * 1.3F) * 0.6;
+			mob.getLookControl().setLookAt(body.getX() + side.x * shake, body.getY() + 0.2, body.getZ() + side.z * shake, 90.0F, 90.0F);
+			int phase = ticks % BITE_EVERY;
+			if (phase == 1 && to.lengthSqr() > 1.0E-4) {
+				mob.setDeltaMovement(mob.getDeltaMovement().add(to.normalize().scale(LUNGE)));
+				mob.needsSync = true;
+			} else if (phase == 5) {
+				bite(level);
+			}
+		}
+
+		private void bite(ServerLevel level) {
+			java.util.List<Integer> left = limbs(body);
+			if (limb == 0 || !left.contains(limb)) {
+				// the limbs first, whichever it gets its jaws round
+				limb = left.isEmpty() ? -1 : left.get(mob.getRandom().nextInt(left.size()));
+				bites = 0;
+			}
+			float pitch = 0.6F + mob.getRandom().nextFloat() * 0.3F;
+			level.playSound(null, body.getX(), body.getY(), body.getZ(), net.minecraft.sounds.SoundEvents.GENERIC_EAT.value(),
+				net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, pitch);
+			level.playSound(null, body.getX(), body.getY(), body.getZ(), net.minecraft.sounds.SoundEvents.SLIME_SQUISH,
+				net.minecraft.sounds.SoundSource.HOSTILE, 0.7F, pitch);
+			if (BladeBlood.bleeds(body)) {
+				Vec3 at = limb > 0 ? Dismember.stump(body, limb) : body.position().add(0.0, 0.3, 0.0);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(body), 1.0F), at.x, at.y, at.z, 8, 0.15, 0.1, 0.15, 0.08);
+			}
+			if (mob.getRandom().nextInt(3) == 0) {
+				mob.playAmbientSound();
+			}
+			body.hurtServer(level, level.damageSources().mobAttack(mob), limb > 0 ? LIMB_BITE_HURT : BODY_BITE_HURT);
+			if (limb > 0 && ++bites >= LIMB_BITES && body.isAlive()) {
+				// torn off: it lies there to be eaten (by this one, or whoever's quicker)
+				Dismember.sever(body, limb, mob);
+				limb = 0;
+				body = null;
+			}
+		}
+
+		@Override
+		public void stop() {
+			body = null;
+			mob.getNavigation().stop();
+		}
+	}
+
+	/** High over the dead, round and round, a while; then it may come down to them. */
+	private static final class CircleGoal extends Goal {
+		private final Mob bird;
+		private net.minecraft.world.entity.@Nullable Entity over;
+		private double radius, height, angle;
+		private int ticks, length;
+		private boolean clockwise;
+
+		CircleGoal(Mob bird) {
+			this.bird = bird;
+			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (bird.getTarget() != null || bird.isLeashed() || bird.isBaby() || bird.isNoAi() || bird.isPassenger() || circled(bird)
+				|| !bird.getPassengers().isEmpty() || bird.getRandom().nextInt(CIRCLE_LOOK_ODDS) != 0) {
+				return false;
+			}
+			over = null;
+			double best = Double.MAX_VALUE;
+			for (net.minecraft.world.entity.Entity e : bird.level().getEntities(bird, new net.minecraft.world.phys.AABB(
+				bird.getX() - CIRCLE_SPOT, bird.getY() - CIRCLE_SPOT_DOWN, bird.getZ() - CIRCLE_SPOT,
+				bird.getX() + CIRCLE_SPOT, bird.getY() + 8.0, bird.getZ() + CIRCLE_SPOT), LimbEaters::dead)) {
+				double distance = e.distanceToSqr(bird);
+				if (distance < best) {
+					best = distance;
+					over = e;
+				}
+			}
+			return over != null;
+		}
+
+		@Override
+		public void start() {
+			ticks = 0;
+			length = CIRCLE_TICKS + bird.getRandom().nextInt(CIRCLE_SPREAD);
+			radius = CIRCLE_RADIUS + bird.getRandom().nextDouble() * CIRCLE_RADIUS_SPREAD;
+			height = CIRCLE_HEIGHT + bird.getRandom().nextDouble() * CIRCLE_HEIGHT_SPREAD;
+			clockwise = bird.getRandom().nextBoolean();
+			angle = over == null ? 0.0 : Math.atan2(bird.getZ() - over.getZ(), bird.getX() - over.getX());
+			bird.getNavigation().stop();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return over != null && dead(over) && ticks < length && bird.getTarget() == null && bird.getPassengers().isEmpty();
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			if (over == null) {
+				return;
+			}
+			ticks++;
+			angle += (clockwise ? -1.0 : 1.0) * CIRCLE_SPEED / radius;
+			double x = over.getX() + Math.cos(angle) * radius, z = over.getZ() + Math.sin(angle) * radius;
+			// a little rise and fall as it rides the air
+			double y = over.getY() + height + Math.sin(ticks * 0.05) * 1.5;
+			bird.getMoveControl().setWantedPosition(x, y, z, 1.0);
+			double ahead = angle + (clockwise ? -0.4 : 0.4);
+			bird.getLookControl().setLookAt(over.getX() + Math.cos(ahead) * radius, y, over.getZ() + Math.sin(ahead) * radius, 10.0F, 10.0F);
+			if (ticks % 160 == 0 && bird.getRandom().nextInt(2) == 0) {
+				bird.playAmbientSound();
+			}
+		}
+
+		@Override
+		public void stop() {
+			if (over != null && ticks >= length) {
+				// circled long enough: now it may come down to them
+				CIRCLED.put(bird, bird.level().getGameTime() + DESCEND_TICKS);
+				if (!(over instanceof SeveredPart)) {
+					// a body: down beside it, to tear at it as the scavengers do
+					bird.getNavigation().moveTo(over.getX(), over.getY(), over.getZ(), 1.2);
+				}
+			}
+			over = null;
+		}
+	}
+
 	/** A carrion bird: down to a part, up with it in its talons, off somewhere quiet, and it eats it there. */
 	private static final class CarryOffGoal extends Goal {
 		private final Mob bird;
@@ -246,7 +528,7 @@ public final class LimbEaters {
 				return true;
 			}
 			if (bird.getTarget() != null || bird.isLeashed() || bird.isBaby() || bird.isNoAi() || bird.isPassenger()
-				|| bird.level().getGameTime() < fullUntil || bird.getRandom().nextInt(LOOK_ODDS) != 0) {
+				|| bird.level().getGameTime() < fullUntil || !circled(bird) || bird.getRandom().nextInt(LOOK_ODDS) != 0) {
 				return false;
 			}
 			double best = Double.MAX_VALUE;

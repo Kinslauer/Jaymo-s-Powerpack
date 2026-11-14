@@ -182,12 +182,14 @@ public final class NightThings {
 	/** Where enough dead have been left lying together, they get up as one. */
 	private static void unburied(ServerLevel level, ServerPlayer player) {
 		List<Entity> near = KitchenCompat.fallenNear(level, player.position(), DEAD_RANGE * 2.0);
-		if (near.size() < DEAD_NEEDED || !level.getEntitiesOfClass(Unburied.class, player.getBoundingBox().inflate(ONE_WITHIN), LivingEntity::isAlive).isEmpty()) {
+		// a body that lost its head or limbs still counts, for less (Andy: "it just requires more if the body isnt complete"),
+		// and one that's been eaten is gone and counts for nothing
+		if (bodies(near) < DEAD_NEEDED || !level.getEntitiesOfClass(Unburied.class, player.getBoundingBox().inflate(ONE_WITHIN), LivingEntity::isAlive).isEmpty()) {
 			return;
 		}
 		for (Entity heart : near) {
 			List<Entity> heap = near.stream().filter(e -> e.distanceToSqr(heart) <= DEAD_RANGE * DEAD_RANGE).toList();
-			if (heap.size() < DEAD_NEEDED) {
+			if (bodies(heap) < DEAD_NEEDED) {
 				continue;
 			}
 			Unburied giant = UNBURIED.create(level, EntitySpawnReason.EVENT);
@@ -208,6 +210,15 @@ public final class NightThings {
 			level.playSound(null, giant.blockPosition(), SoundEvents.SKELETON_HORSE_DEATH, SoundSource.HOSTILE, 3.0F, 0.4F);
 			return;
 		}
+	}
+
+	/** How many whole bodies {@code dead} add up to (each as much as is left of it, {@link KitchenCompat#wholeness}). */
+	static float bodies(List<Entity> dead) {
+		float whole = 0.0F;
+		for (Entity body : dead) {
+			whole += KitchenCompat.wholeness(body);
+		}
+		return whole;
 	}
 
 	/** It rises ahead of a sailor in a fog bank at night, on the sea round Mohknee. */

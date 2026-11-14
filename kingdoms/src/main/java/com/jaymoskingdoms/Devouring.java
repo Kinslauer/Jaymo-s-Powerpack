@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Andy: "werewolves can also eat the corpses and parts." The beast eats the dead whole: any body with flesh on it
- * (Jaymo's Kitchen's corpses, whoever they were and whoever killed them, but not the risen dead's rot or bones, iron, or
- * a player's own body) and any severed head or limb (Jaymo's Powers' parts). A werewolf's beast with nothing to hunt
+ * (Jaymo's Kitchen's corpses, whoever they were and whoever killed them, players' too, rotten or fresh; not bones or
+ * iron) and any severed head or limb (Jaymo's Powers' parts). A werewolf's beast with nothing to hunt
  * smells one out and tears into it where it lies ({@link DevourGoal}); a player wearing the beast, great or lean, does
  * it themselves: right-click the body or the part (sneak + right-click still carries it), a bite each time, each
  * filling their belly and closing their wounds. A body eaten is gone, and no longer one of the dead left lying for the

@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * fight goes to a body it killed (or one nobody's player killed) and tears into it: lunging in, worrying it from side to
  * side and dragging it back, blood flying, until it's torn open. The meat spills on the ground with the rest of what it
  * carried, and the scavengers nearby eat the meat off the ground, one piece at a time, until they're full. Tame animals
- * don't, and players' kills are left for the player.
+ * don't. (Andy: "everything should be able to be eaten": players' bodies and kills, monsters' and the rotten dead's
+ * bodies too, {@link CorpseEntity#isCarrionFor}; what a player's body had on it is left on the ground for good.)
  * <p>
  * (0.5.5) Zombies go for villagers' bodies first, and a zombie in a village doesn't leave a meal to chase the next
  * villager: only a player (or anything else) it's fighting pulls it off. A villager that's been eaten (by anything)

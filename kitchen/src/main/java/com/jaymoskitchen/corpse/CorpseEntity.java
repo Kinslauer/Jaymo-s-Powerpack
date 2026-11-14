@@ -2337,27 +2337,24 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * (0.4.35) Whether a scavenger may eat this body: an animal, a fish, or a person, lying still on the ground. Monsters'
-	 * bodies, the risen dead, iron, players' bodies and anything burning, carried, or carted are left alone, and so are
-	 * players' kills unless the scavenger killed it first itself.
+	 * (0.4.35) Whether a scavenger may eat this body, lying still on the ground. Andy: "everything should be able to be
+	 * eaten": anyone's body (a player's too), monsters', the rotten risen dead's (not to a zombie), whoever killed it. Only
+	 * what has no flesh is left (bones, iron), and anything burning, carried or carted.
 	 */
 	public boolean isCarrionFor(Entity mob) {
-		if (isRemoved() || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER
-			|| isPlayerCorpse() || isHostile() || isMachine() || isOnFire() || carrier() != null || isPassenger()
-			|| isTumbling() || isNoGravity() || this.entityData.get(CRUMBLING)) {
+		if (!isFleshForDevourer()) {
 			return false;
 		}
-		return killedBy(mob) || !killedByPlayer;
+		return !(kind == CorpseKind.ZOMBIE && mob instanceof net.minecraft.world.entity.monster.zombie.Zombie);
 	}
 
 	/**
-	 * Whether a werewolf may eat this body (Andy: "werewolves can also eat the corpses and parts"): any body with flesh
-	 * on it, lying still on the ground, whoever it was and whoever killed it. Not the risen dead's rot or bones, not
-	 * iron, not players' own bodies (their things stay theirs), and nothing burning, carried or carted.
+	 * Whether a werewolf (or any scavenger) may eat this body (Andy: "werewolves can also eat the corpses and parts",
+	 * then "everything should be able to be eaten"): any body with flesh on it, lying still on the ground, whoever it
+	 * was and whoever killed it. Not a skeleton's bones, not iron, and nothing burning, carried or carted.
 	 */
 	public boolean isFleshForDevourer() {
-		return !(isRemoved() || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER
-			|| isPlayerCorpse() || isMachine() || isOnFire() || carrier() != null || isPassenger()
+		return !(isRemoved() || kind == CorpseKind.SKELETON || isMachine() || isOnFire() || carrier() != null || isPassenger()
 			|| isTumbling() || isNoGravity() || this.entityData.get(CRUMBLING));
 	}
 
@@ -2369,7 +2366,7 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
-	 * like for whoever comes by), with a bone or two, and the body is gone. Returns the dropped meat.
+	 * like for whoever comes by), with a bone or two, what it wore and held, and the body is gone. Returns the dropped meat.
 	 */
 	List<net.minecraft.world.entity.item.ItemEntity> tearApart(ServerLevel level) {
 		List<net.minecraft.world.entity.item.ItemEntity> meat = new ArrayList<>();
@@ -2382,10 +2379,29 @@ public class CorpseEntity extends Entity {
 		if (kind != CorpseKind.FISH) {
 			spill.add(new ItemStack(Items.BONE, 1 + random.nextInt(2)));
 		}
+		// what it wore and held, and a player's hotbar, are left lying where it was eaten (a player's for good, never
+		// despawning, so nothing of theirs is lost to it)
+		List<ItemStack> kept = new ArrayList<>();
+		for (ItemStack piece = takeGearPiece(); !piece.isEmpty(); piece = takeGearPiece()) {
+			kept.add(piece);
+		}
+		boolean player = isPlayerCorpse() || kind == CorpseKind.PLAYER;
+		if (player) {
+			kept.addAll(takeHotbar());
+		}
 		for (ItemStack stack : spill) {
 			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack.copy(), 0.3F);
+			if (dropped != null && player) {
+				dropped.setUnlimitedLifetime();
+			}
 			if (dropped != null && stack.has(DataComponents.FOOD)) {
 				meat.add(dropped);
+			}
+		}
+		for (ItemStack stack : kept) {
+			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack, 0.3F);
+			if (dropped != null && player) {
+				dropped.setUnlimitedLifetime();
 			}
 		}
 		discard();

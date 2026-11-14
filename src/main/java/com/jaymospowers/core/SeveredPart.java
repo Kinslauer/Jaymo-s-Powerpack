@@ -355,17 +355,13 @@ public class SeveredPart extends Entity {
 	}
 
 	/**
-	 * Whether something may eat it: lying loose (not carried, not nailed up, not a kept trophy, not burning), with flesh
-	 * on it (not a skeleton's bones, not a machine's, not the rotten undead's), and not a dead player's head they're
-	 * still looking out of.
+	 * Whether something may eat it (Andy: "everything should be able to be eaten"): lying loose (not carried, not nailed
+	 * up, not a kept trophy, not burning), with flesh on it, rotten or not (not a skeleton's bones, not a machine's), and
+	 * not a dead player's head they're still looking out of (once they're back, it's food like any other).
 	 */
 	public boolean edible() {
 		if (this.isRemoved() || pinned() || this.trophy || this.isOnFire() || this.isPassenger() || Carry.carrierOf(this) != null
 			|| this.blood == BladeBlood.NO_BLOOD) {
-			return false;
-		}
-		EntityType<?> type = bodyType();
-		if (type != null && type.builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD)) {
 			return false;
 		}
 		if (part() == Dismember.HEAD && this.level().getServer() != null) {
