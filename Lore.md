@@ -1651,6 +1651,15 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
+(new) **The pits and the hold plans** (Andy, 2026-11-14: "taking over an area like this from bandits or illagers should
+allow you to add it to a schematic, so your kingdom can build it"; the rest Claude's placement, for Andy to approve). In
+the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
+are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
+under them its prep, armory, beds and smithy, and a caster keeps the arena's best take and its caged allays in a box over
+the gate. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
+tier they were drawn in can copy the place out and build it again. This is the Retaking done with stone as well as
+blades: the realms raise the raiders' own forts, towers and pits as their own.
+
 **The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
 books, their paintings and time in their holds; the rest Claude's placement, approved by Andy 2026-11-13). The pillagers kept
 their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
