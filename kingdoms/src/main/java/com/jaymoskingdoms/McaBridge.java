@@ -2240,6 +2240,20 @@ final class McaBridge {
 	}
 
 	/**
+	 * MCA's creator sent again to one still making their character (the life story's skip, {@code LifeStory.Creator}):
+	 * MCA opens it once and counts the body made partway through, so it's owed again and sent, with what they had made of
+	 * their look kept. False if MCA's creator is off.
+	 */
+	static boolean destinyAgain(ServerPlayer player) {
+		if (!Config.getInstance().launchIntoDestiny) {
+			return false;
+		}
+		PlayerSaveData.get(player).setEntityDataSet(false);
+		net.conczin.mca.server.ServerInteractionManager.launchDestiny(player);
+		return true;
+	}
+
+	/**
 	 * (0.7.573) A new life (Jaymo's Powers' third death, {@link LifeStory#reincarnateAnew}): MCA's own player reset (single
 	 * again, as its admin command does), their look unset, and its creator sent anew, as on a first join. False if MCA's
 	 * creator is off.

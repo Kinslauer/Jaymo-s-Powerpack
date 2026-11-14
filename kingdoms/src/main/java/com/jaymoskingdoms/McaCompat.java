@@ -857,6 +857,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.destinyPending(player);
 	}
 
+	/** MCA's creator sent to {@code player} again, their look so far kept ({@link McaBridge#destinyAgain}). */
+	static boolean destinyAgain(ServerPlayer player) {
+		return LOADED && McaBridge.destinyAgain(player);
+	}
+
 	/** (0.7.573) MCA's creator anew for {@code player}: a new look, a new name ({@link McaBridge#newDestiny}). */
 	static boolean newDestiny(ServerPlayer player) {
 		return LOADED && McaBridge.newDestiny(player);

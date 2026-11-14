@@ -2,7 +2,7 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["LassoSocketFirstPersonMixin", "LassoSocketItemInHandLayerMixin", "LassoSocketItemLayerMixin", "LassoSocketLevelRendererMixin", "ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "OldDeadSkinMixin", "OldDeadHuskSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin", "GoblinHandMixin", "ConcussionMouseMixin", "ConcussionSoundMixin",
+	"client": ["LassoSocketFirstPersonMixin", "LassoLyingMixin", "LassoCameraMixin", "LassoSocketItemInHandLayerMixin", "LassoSocketItemLayerMixin", "LassoSocketLevelRendererMixin", "ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "OldDeadSkinMixin", "OldDeadHuskSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin", "GoblinHandMixin", "ConcussionMouseMixin", "ConcussionSoundMixin",
 		"blade.HiddenBladeUseMixin", "blade.HiddenBladeAvatarRendererMixin", "blade.HiddenBladeFirstPersonMixin",
 		"bb.BbBodyLivingEntityRendererMixin", "forms.FormsScrollMixin", "ValorHandMixin", "StakeScrollMixin", "spirits.SpiritReelScrollMixin", "spirits.GrueSkyFogMixin", "spirits.GrueSkySunMixin"],
 	"injectors": { "defaultRequire": 1 }

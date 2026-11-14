@@ -73,14 +73,15 @@ public final class MenuCompat {
 				Component.translatable("menu.jaymoskingdoms.tab.class"), (Runnable)() -> Minecraft.getInstance().gui.setScreen(new ClassScreen(false, true)),
 				(Predicate<Screen>)s -> s instanceof ClassScreen, (Function<Screen, int[]>)s -> ((ClassScreen)s).corner(),
 				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative());
-			// the belt menu: shown once you know a form
+			// the belt menu: shown once you know a form or have a Spell Engine spell (its Spells tab)
 			register.invoke(null, "forms", ORDER_FORMS, (Supplier<ItemStack>)() -> new ItemStack(Items.IRON_SWORD),
 				Component.translatable("menu.jaymoskingdoms.tab.forms"),
 				(Runnable)() -> Minecraft.getInstance().gui.setScreen(new com.jaymoskingdoms.client.forms.BeltScreen()),
 				(Predicate<Screen>)s -> s instanceof com.jaymoskingdoms.client.forms.BeltScreen,
 				(Function<Screen, int[]>)s -> ((com.jaymoskingdoms.client.forms.BeltScreen)s).corner(),
 				(BooleanSupplier)() -> Minecraft.getInstance().player != null
-					&& !com.jaymoskingdoms.forms.Forms.book(Minecraft.getInstance().player).practice().isEmpty());
+					&& (!com.jaymoskingdoms.forms.Forms.book(Minecraft.getInstance().player).practice().isEmpty()
+						|| com.jaymoskingdoms.client.forms.BeltScreen.hasSpells(Minecraft.getInstance().player)));
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",

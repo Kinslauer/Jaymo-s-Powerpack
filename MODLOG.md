@@ -4953,3 +4953,30 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   (weapon finishers still show theirs), and the ten names are gone from the lang files. Nobody in the world knows or
   names these: a holder finds out what the power does as it happens.
 - Compiled; not played.
+
+## 0.23.83 (2026-11-14): Sound fades with the screen as you go down
+
+- Andy: "When everything goes dark as you go down your audio should quiet down and blank out too". The game's sound now
+  follows the screen: a little quieter while down and greyed, quieter still once passed out, and silent while the screen
+  is black (out cold, a death turned away, a life waiting for the new character, a fainting's letterbox shut, the death
+  screen). It comes back as the view does (`BlackoutHush`, `BlackoutHushSoundMixin`).
+- Kept over the black at full volume: menu clicks (the death screen's buttons), the heartbeat while down or swooning, the
+  breath as you wake, and a turning's groan.
+- Sound Physics Remastered and our own footstep/soundscape sounds fade with it (only each sound's gain is scaled).
+
+## 0.23.84 (2026-11-14): carry: lift bodies tied hand and foot
+
+- `Carry.BOUND_CHECKS` (Jaymo's Kingdoms' lasso hogtie adds one): a body tied hand and foot can be lifted like someone downed (sneak + hold use, armour against brawn decides if you're strong enough, a piece of armour comes off when it's too heavy), and a tied player can't jump out of your arms (they struggle out of the knots instead, and are dropped when they're free).
+- Built; not played.
+
+## 0.23.85 (2026-11-14): Swings match the lock-on region; work tools swing plainly unless locked on
+
+- **Work tools** (Andy: "tools like axes, should only do the better combat swinging when locked on"): an axe, pick, shovel or hoe made for work swings Better Combat's way only while you're locked on; otherwise it's the plain vanilla swing and hit. Tools made for war (new tag `jaymospowers:war_tools`: the Armory's hatchets and war axes, Tinkers' broad axe, minotaur axe, war pick, kama and scythe) always swing as weapons. Client `compat/mixin/ToolSwingGateMixin` (Better Combat's `AttackInteractor` sees no weapon when you click).
+- **Region swings** (`combat/RegionSwings`, `compat/mixin/RegionSwingMixin` on Better Combat's attack pick, both sides): while locked on, your weapon swings only the attacks that suit the region the scroll wheel picked. Each attack is a motion read from its animation (side cut, vertical, thrust, sweep). Mapping, per weapon family:
+  - Swords and every other edge (blades, daggers, staves, glaives, halberds, scythes): head = side cuts and thrusts; torso = thrusts, side cuts and our sweeping flourishes, never a vertical; arms = vertical and side cuts; legs = side cuts and thrusts; the Great Ape's tail = side cuts and verticals.
+  - Axes and picks: as swords, but they never thrust and chop down onto legs (legs = side cuts and verticals).
+  - Blunt (maces, hammers, anchors): the head also takes the overhead smash (head = side swing and overhead smash); legs = side swings and smashes down.
+  - Spears, lances, tridents: head and torso = thrusts only; arms, legs and tail = thrusts and haft sweeps.
+  - Daggers have no overhead cut, so at the arms they cut across.
+  A fitting motion your weapon can make but has no attack for is added with a stock Better Combat animation (same damage, wind-up and sound as its first attack), so a sword at the arms gets a downward cut too. With nothing fitting it swings as it always did. Weapon Forms still cuts it to the basic two for those who haven't learnt them. Bows, fists and wands are left alone; the chain axe keeps its own overhead chop.
+- Built; not played.

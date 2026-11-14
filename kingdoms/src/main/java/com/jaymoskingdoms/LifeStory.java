@@ -793,6 +793,16 @@ public final class LifeStory {
 	 * Player → server: {@link Live} for a story that was skipped, sent from the tab in MCA's creator as the creator is
 	 * finished. It is lived as any other, and the road is then fate's.
 	 */
+	public record Creator() implements CustomPacketPayload {
+		public static final Type<Creator> TYPE = new Type<>(JaymosKingdoms.id("story_creator"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Creator> CODEC = StreamCodec.unit(new Creator());
+
+		@Override
+		public Type<Creator> type() {
+			return TYPE;
+		}
+	}
+
 	public record Skipped(Live live) implements CustomPacketPayload {
 		public static final Type<Skipped> TYPE = new Type<>(JaymosKingdoms.id("story_skipped"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Skipped> CODEC = CustomPacketPayload.codec(
@@ -862,6 +872,16 @@ public final class LifeStory {
 			live(player, payload.live());
 			if (untold && roadOwed(player)) {
 				player.setAttached(SKIPPED, true);
+			}
+		});
+		// Andy: "you should be able to go back to the MCA menu with the on second thought button... they run alongside one
+		// another not separate": one whose story is still untold asks for MCA's creator, and it comes whether or not MCA
+		// still owed it (it opens once, and counts the body made partway through)
+		PayloadTypeRegistry.serverboundPlay().register(Creator.TYPE, Creator.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Creator.TYPE, (payload, context) -> {
+			// (with no creator to send, the story screen is told so at once: its own page of rows takes over)
+			if (untold(context.player()) && !McaCompat.destinyAgain(context.player())) {
+				ask(context.player(), true);
 			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Road.TYPE, Road.CODEC);
