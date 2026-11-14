@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Free limbo ghosts after being eaten
 branch: claude/project-thread-c686cq
 with: cloud thread
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 - 
+- Merged as PR #1506 (2026-11-14). A Limbo ghost whose body is gone roams free until Backspace; a buried body keeps its ghost. Compiled, not played.
