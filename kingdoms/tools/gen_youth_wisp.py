@@ -1,7 +1,7 @@
 """
-The Blockbench project for Youth, the wood-wisp (kingdoms/art/youth_wisp.bbmodel): a small, half-there Sylvan with two
-pairs of fae wings and a trail of light where its legs would be, and its animations (8 idles it wanders between, plus
-appear, vanish and talk). Our own model, cubes and texture made here. Then run tools/bbmodel_geckolib.py on it.
+The Blockbench project for Youth, the wood-wisp (kingdoms/art/youth_wisp.bbmodel): a small, half-there Sylvan boy with two
+pairs of fae wings, who flies like a cocky lost boy rather than drifts like a fairy light (Andy: "think peter pan, less
+navi"; quick moves, he's so small), and his animations (8 idles he wanders between, plus appear, vanish and talk). Our own model, cubes and texture made here. Then run tools/bbmodel_geckolib.py on it.
 
 Blockbench space: y up, the front at -z, the model's right at +x. Rotations as Blockbench shows them: +x swings a hanging
 limb forward and up (and tips an upright part back), +z lifts the right arm (at +x) out to the side.
@@ -23,7 +23,7 @@ ART = gtu.ART
 COLOURS = {
 	"skin": (222, 236, 214, 235), "robe": (120, 186, 120, 225), "robe_hi": (170, 222, 150, 225), "hair": (88, 150, 82, 240),
 	"sprig": (150, 214, 96, 255), "wing": (196, 244, 228, 96), "vein": (236, 255, 244, 190), "trail": (186, 240, 214, 150),
-	"trail_tip": (226, 255, 240, 90), "eye": (255, 250, 200, 255), "orb": (255, 246, 196, 230),
+	"trail_tip": (226, 255, 240, 90), "boot": (96, 132, 70, 245), "belt": (110, 84, 52, 245), "eye": (255, 250, 200, 255), "orb": (255, 246, 196, 230),
 }
 
 
@@ -67,15 +67,14 @@ def eyes():
 def model():
 	b = Builder(64, 64, 11)
 	b.bone("root", None, (0, 0, 0))
+	# everything hangs off the hips, so a flip turns the whole boy about his middle
 	b.bone("body", "root", (0, 6, 0))
 	b.cube("body", (-2, 6, -1.2), (2, 10.5, 1.2), "robe")
-	# the trail of light where the legs would be: three tapering pieces, the lower two on their own bones so it swishes
-	b.bone("trail", "body", (0, 6, 0))
-	b.cube("trail", (-1.6, 3.6, -1), (1.6, 6, 1), "trail")
-	b.bone("trail_mid", "trail", (0, 3.6, 0))
-	b.cube("trail_mid", (-1, 1.6, -0.6), (1, 3.6, 0.6), "trail")
-	b.bone("trail_tip", "trail_mid", (0, 1.6, 0))
-	b.cube("trail_tip", (-0.5, 0, -0.3), (0.5, 1.6, 0.3), "trail_tip")
+	b.cube("body", (-2.1, 6.4, -1.3), (2.1, 7.0, 1.3), "belt")
+	# a tunic of leaves cut ragged at the hem, over two thin legs and soft leaf boots
+	b.cube("body", (-2.2, 5.0, -1.4), (2.2, 6.4, 1.4), "robe")
+	mirror(b, "leg", "body", (1, 6, 0), [((0.2, 1.4, -0.6), (1.7, 6.0, 0.6), "skin"),
+										  ((0.1, 0, -1.2), (1.8, 1.6, 0.7), "boot")])
 	b.bone("head", "body", (0, 10.5, 0))
 	b.cube("head", (-2, 10.5, -2), (2, 14.5, 2), "skin", faces_paint={"north": eyes()})
 	b.cube("head", (-2.2, 13.4, -2.2), (2.2, 15, 2.2), "hair")
@@ -88,15 +87,13 @@ def model():
 	b.bone("wings", "body", (0, 9, 1.2))
 	mirror(b, "upper_wing", "wings", (0.4, 9.4, 1.3), [((0.4, 9.2, 1.2), (6.0, 15.8, 1.5), "wing")], (0, -25, -10))
 	mirror(b, "lower_wing", "wings", (0.4, 8.6, 1.3), [((0.4, 5.0, 1.2), (4.4, 8.8, 1.5), "wing")], (0, -20, 15))
-	# the light the wisp cups in its hands (idle.cup); every other animation keeps it at scale 0
-	b.bone("orb", "body", (0, 8, -3))
-	b.cube("orb", (-0.8, 7.2, -3.8), (0.8, 8.8, -2.2), "orb")
 	return b
 
 
 # ---------------------------------------------------------------- animations
+# Quick: he's small, so everything is short and snappy, and the wings never stop (a hummingbird's blur).
 
-def beat(period, length, rest_y, rest_z, amp_y=18.0, amp_z=6.0, side=1):
+def beat(period, length, amp_y=18.0, amp_z=6.0, side=1):
 	"""A wing beat: frames for one wing swinging about its resting angle, `period` seconds a beat, over `length`."""
 	frames, t, up = [], 0.0, True
 	while t <= length + 1e-6:
@@ -108,24 +105,13 @@ def beat(period, length, rest_y, rest_z, amp_y=18.0, amp_z=6.0, side=1):
 	return frames
 
 
-def wings(period, length, amp=18.0):
+def wings(length, period=0.12, amp=22.0):
 	return {
-		"right_upper_wing": {"rotation": beat(period, length, 0, 0, amp, amp / 3, 1)},
-		"left_upper_wing": {"rotation": beat(period, length, 0, 0, amp, amp / 3, -1)},
-		"right_lower_wing": {"rotation": beat(period, length, 0, 0, amp * 0.7, amp / 4, 1)},
-		"left_lower_wing": {"rotation": beat(period, length, 0, 0, amp * 0.7, amp / 4, -1)},
+		"right_upper_wing": {"rotation": beat(period, length, amp, amp / 3, 1)},
+		"left_upper_wing": {"rotation": beat(period, length, amp, amp / 3, -1)},
+		"right_lower_wing": {"rotation": beat(period, length, amp * 0.7, amp / 4, 1)},
+		"left_lower_wing": {"rotation": beat(period, length, amp * 0.7, amp / 4, -1)},
 	}
-
-
-def swish(length, amp=8.0):
-	q = length / 4
-	return {
-		"trail_mid": {"rotation": [(0, (0, 0, amp)), (q, Z), (2 * q, (0, 0, -amp)), (3 * q, Z), (length, (0, 0, amp))]},
-		"trail_tip": {"rotation": [(0, (0, 0, -amp)), (q, (0, 0, amp)), (2 * q, (0, 0, amp)), (3 * q, (0, 0, -amp)), (length, (0, 0, -amp))]},
-	}
-
-
-ORB_OFF = {"orb": {"scale": [(0, Z)]}}
 
 
 def tracks(*parts):
@@ -136,72 +122,96 @@ def tracks(*parts):
 	return out
 
 
-def bob(length, height=0.6):
-	return {"body": {"position": [(0, Z), (length / 2, (0, height, 0)), (length, Z)]}}
+def hold(bone, length, pose, inn=0.12, out=0.12, channel="rotation"):
+	"""Snap into `pose`, hold it, snap back: quick in and out."""
+	return {bone: {channel: [(0, Z), (inn, pose), (length - out, pose), (length, Z)]}}
+
+
+def kick(length, amp=14.0, period=0.4):
+	"""Legs paddling the air, one against the other."""
+	f_r, f_l, t, up = [], [], 0.0, True
+	while t <= length + 1e-6:
+		k = amp if up else -amp
+		f_r.append((round(t, 3), (k, 0, 0)))
+		f_l.append((round(t, 3), (-k, 0, 0)))
+		t += period / 2
+		up = not up
+	f_r[-1] = (length, f_r[0][1])
+	f_l[-1] = (length, f_l[0][1])
+	return {"right_leg": {"rotation": f_r}, "left_leg": {"rotation": f_l}}
 
 
 def animations():
 	return [
-		# 1. the default: a gentle bob, a slow wing beat
-		anim("idle.hover", 2.4, "loop", tracks(wings(0.8, 2.4), swish(2.4), bob(2.4), ORB_OFF)),
-		# 2. a quick burst of wingbeats lifts it half a block, then it settles
-		anim("idle.flutter", 1.6, "once", tracks(wings(0.16, 1.6, 26), swish(1.6, 12), ORB_OFF, {
-			"body": {"position": [(0, Z), (0.5, (0, 7, 0)), (0.9, (0, 6, 0)), (1.6, Z)]}})),
-		# 3. a little loop-the-loop about its middle
-		anim("idle.loop", 2.0, "once", tracks(wings(0.25, 2.0, 22), swish(2.0, 14), ORB_OFF, {
-			"root": {"rotation": [(0, Z), (0.5, (-90, 0, 0)), (1.0, (-180, 0, 0)), (1.5, (-270, 0, 0)), (2.0, (-360, 0, 0))],
-					 "position": [(0, Z), (0.5, (0, 5, -3)), (1.0, (0, 10, 0)), (1.5, (0, 5, 3)), (2.0, Z)]}})),
-		# 4. sits cross-legged on the air, wings folded, chin on its hand
-		anim("idle.sit", 3.2, "once", tracks(swish(3.2, 3), ORB_OFF, {
-			"trail": {"rotation": [(0, Z), (0.4, (-70, 0, 0)), (2.8, (-70, 0, 0)), (3.2, Z)]},
-			"trail_mid": {"rotation": [(0, Z), (0.4, (-40, 0, 0)), (2.8, (-40, 0, 0)), (3.2, Z)]},
-			"right_arm": {"rotation": [(0, Z), (0.4, (100, -20, 0)), (2.8, (100, -20, 0)), (3.2, Z)]},
-			"head": {"rotation": [(0, Z), (0.4, (-8, 0, 10)), (1.6, (-8, 0, 14)), (2.8, (-8, 0, 10)), (3.2, Z)]},
-			"right_upper_wing": {"rotation": [(0, Z), (0.4, (0, 35, 0)), (2.8, (0, 35, 0)), (3.2, Z)]},
-			"left_upper_wing": {"rotation": [(0, Z), (0.4, (0, -35, 0)), (2.8, (0, -35, 0)), (3.2, Z)]},
-			"right_lower_wing": {"rotation": [(0, Z), (0.4, (0, 30, 0)), (2.8, (0, 30, 0)), (3.2, Z)]},
-			"left_lower_wing": {"rotation": [(0, Z), (0.4, (0, -30, 0)), (2.8, (0, -30, 0)), (3.2, Z)]},
-			"body": {"position": [(0, Z), (0.4, (0, -1, 0)), (2.8, (0, -1, 0)), (3.2, Z)]}})),
-		# 5. a big stretch and a yawn: arms and wings wide, head back
-		anim("idle.stretch", 2.4, "once", tracks(swish(2.4, 6), ORB_OFF, {
-			"right_arm": {"rotation": [(0, Z), (0.8, (0, 0, 150)), (1.6, (0, 0, 150)), (2.4, Z)]},
-			"left_arm": {"rotation": [(0, Z), (0.8, (0, 0, -150)), (1.6, (0, 0, -150)), (2.4, Z)]},
-			"head": {"rotation": [(0, Z), (0.8, (18, 0, 0)), (1.6, (18, 0, 0)), (2.4, Z)]},
-			"right_upper_wing": {"rotation": [(0, Z), (0.8, (0, -30, -20)), (1.6, (0, -30, -20)), (2.4, Z)]},
-			"left_upper_wing": {"rotation": [(0, Z), (0.8, (0, 30, 20)), (1.6, (0, 30, 20)), (2.4, Z)]},
-			"right_lower_wing": {"rotation": [(0, Z), (0.8, (0, -25, 15)), (1.6, (0, -25, 15)), (2.4, Z)]},
-			"left_lower_wing": {"rotation": [(0, Z), (0.8, (0, 25, -15)), (1.6, (0, 25, -15)), (2.4, Z)]}})),
-		# 6. leans in toward whoever is nearest, head tilted, curious
-		anim("idle.peer", 2.6, "once", tracks(wings(0.9, 2.6, 10), swish(2.6, 5), ORB_OFF, {
-			"body": {"rotation": [(0, Z), (0.6, (-22, 0, 0)), (2.0, (-22, 0, 0)), (2.6, Z)],
-					 "position": [(0, Z), (0.6, (0, 0, -2)), (2.0, (0, 0, -2)), (2.6, Z)]},
-			"head": {"rotation": [(0, Z), (0.6, (12, 0, 22)), (1.3, (12, 0, -16)), (2.0, (12, 0, 22)), (2.6, Z)]}})),
-		# 7. a slow pirouette, arms out, the trail flaring
-		anim("idle.twirl", 2.4, "once", tracks(wings(0.4, 2.4, 14), ORB_OFF, {
-			"root": {"rotation": [(0, Z), (0.6, (0, 90, 0)), (1.2, (0, 180, 0)), (1.8, (0, 270, 0)), (2.4, (0, 360, 0))]},
-			"right_arm": {"rotation": [(0, Z), (0.4, (0, 0, 80)), (2.0, (0, 0, 80)), (2.4, Z)]},
-			"left_arm": {"rotation": [(0, Z), (0.4, (0, 0, -80)), (2.0, (0, 0, -80)), (2.4, Z)]},
-			"trail": {"rotation": [(0, Z), (1.2, (0, 0, 14)), (2.4, Z)]},
-			"trail_mid": {"rotation": [(0, Z), (1.2, (0, 0, 20)), (2.4, Z)]}})),
-		# 8. cups its hands; a little light grows in them and floats up and away
-		anim("idle.cup", 3.0, "once", tracks(wings(0.8, 3.0, 10), swish(3.0, 4), {
-			"right_arm": {"rotation": [(0, Z), (0.5, (60, 25, 0)), (2.4, (60, 25, 0)), (3.0, Z)]},
-			"left_arm": {"rotation": [(0, Z), (0.5, (60, -25, 0)), (2.4, (60, -25, 0)), (3.0, Z)]},
-			"head": {"rotation": [(0, Z), (0.5, (-20, 0, 0)), (1.8, (-20, 0, 0)), (2.4, (10, 0, 0)), (3.0, Z)]},
-			"orb": {"scale": [(0, Z), (0.6, Z), (1.2, (1, 1, 1)), (2.2, (1.2, 1.2, 1.2)), (2.8, Z), (3.0, Z)],
-					"position": [(0, Z), (1.2, Z), (2.8, (0, 10, 0)), (3.0, (0, 10, 0))]}})),
-		# coming and going: unfolds out of a swirl, folds back into it
-		anim("appear", 1.0, "once", tracks(ORB_OFF, {
-			"root": {"scale": [(0, Z), (0.6, (1.2, 1.2, 1.2)), (1.0, (1, 1, 1))],
-					 "rotation": [(0, (0, -360, 0)), (1.0, Z)]}})),
-		anim("vanish", 1.0, "hold", tracks(ORB_OFF, {
-			"root": {"scale": [(0, (1, 1, 1)), (0.4, (1.2, 1.2, 1.2)), (1.0, Z)],
-					 "rotation": [(0, Z), (1.0, (0, 360, 0))]}})),
-		# talking: a gesture and a nod while an answer goes out
-		anim("talk", 1.4, "once", tracks(ORB_OFF, {
-			"right_arm": {"rotation": [(0, Z), (0.3, (50, 0, 20)), (0.7, (30, 0, 35)), (1.1, (50, 0, 20)), (1.4, Z)]},
-			"left_arm": {"rotation": [(0, Z), (0.5, (20, 0, -15)), (1.4, Z)]},
-			"head": {"rotation": [(0, Z), (0.35, (-8, 0, 0)), (0.7, (4, 0, 0)), (1.05, (-8, 0, 0)), (1.4, Z)]}})),
+		# 1. the default: hovering with his legs paddling, a little bob
+		anim("idle.hover", 1.2, "loop", tracks(wings(1.2), kick(1.2, 12, 0.6), {
+			"body": {"position": [(0, Z), (0.3, (0, 0.5, 0)), (0.6, Z), (0.9, (0, 0.5, 0)), (1.2, Z)]},
+			"right_arm": {"rotation": [(0, (0, 0, 6)), (0.6, (0, 0, 14)), (1.2, (0, 0, 6))]},
+			"left_arm": {"rotation": [(0, (0, 0, -6)), (0.6, (0, 0, -14)), (1.2, (0, 0, -6))]}})),
+		# 2. fists on hips, chest out, head back: he crows
+		anim("idle.crow", 1.3, "once", tracks(wings(1.3, 0.1, 26), {
+			"right_arm": {"rotation": [(0, Z), (0.12, (-25, 0, 45)), (1.15, (-25, 0, 45)), (1.3, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.12, (-25, 0, -45)), (1.15, (-25, 0, -45)), (1.3, Z)]},
+			"head": {"rotation": [(0, Z), (0.2, (-5, 0, 0)), (0.4, (28, 0, 0)), (0.6, (22, 0, 0)), (0.8, (28, 0, 0)), (1.0, (22, 0, 0)), (1.3, Z)]},
+			"body": {"rotation": [(0, Z), (0.2, (8, 0, 0)), (1.1, (8, 0, 0)), (1.3, Z)],
+					 "position": [(0, Z), (0.2, (0, 1.5, 0)), (1.1, (0, 1.5, 0)), (1.3, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.15, (0, 0, 8)), (1.15, (0, 0, 8)), (1.3, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.15, (0, 0, -8)), (1.15, (0, 0, -8)), (1.3, Z)]}})),
+		# 3. a quick back somersault, tucked
+		anim("idle.flip", 0.7, "once", tracks(wings(0.7, 0.1), {
+			"body": {"rotation": [(0, Z), (0.175, (90, 0, 0)), (0.35, (180, 0, 0)), (0.525, (270, 0, 0)), (0.7, (360, 0, 0))],
+					 "position": [(0, Z), (0.175, (0, 4, 0)), (0.35, (0, 6, 0)), (0.525, (0, 4, 0)), (0.7, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.15, (80, 0, 0)), (0.55, (80, 0, 0)), (0.7, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.15, (80, 0, 0)), (0.55, (80, 0, 0)), (0.7, Z)]},
+			"right_arm": {"rotation": [(0, Z), (0.15, (70, 0, 10)), (0.55, (70, 0, 10)), (0.7, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.15, (70, 0, -10)), (0.55, (70, 0, -10)), (0.7, Z)]}})),
+		# 4. sits cross-legged on nothing, hands behind his head, cocky
+		anim("idle.sit", 1.8, "once", tracks(wings(1.8, 0.16, 14),
+			hold("right_leg", 1.8, (80, 25, -30)), hold("left_leg", 1.8, (80, -25, 30)),
+			hold("right_arm", 1.8, (-160, 0, 40)), hold("left_arm", 1.8, (-160, 0, -40)),
+			hold("body", 1.8, (12, 0, 0)), hold("body", 1.8, (0, -1.5, 0), channel="position"),
+			{"head": {"rotation": [(0, Z), (0.15, (10, 0, 0)), (0.9, (10, 0, 8)), (1.65, (10, 0, 0)), (1.8, Z)]}})),
+		# 5. darts off to one side and back, leaning into it
+		anim("idle.swoop", 0.8, "once", tracks(wings(0.8, 0.08, 28), {
+			"root": {"position": [(0, Z), (0.25, (-9, 2, -2)), (0.5, (-5, 3, 3)), (0.8, Z)],
+					 "rotation": [(0, Z), (0.25, (0, 0, 35)), (0.5, (0, 0, -20)), (0.8, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.25, (-30, 0, 0)), (0.8, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.25, (-20, 0, 0)), (0.8, Z)]}})),
+		# 6. lies back on the air, one ankle on the other knee
+		anim("idle.lounge", 1.8, "once", tracks(wings(1.8, 0.16, 12),
+			hold("body", 1.8, (70, 0, 0), 0.18, 0.18), hold("body", 1.8, (0, 1, 0), 0.18, 0.18, "position"),
+			hold("right_leg", 1.8, (30, 0, 0), 0.18, 0.18), hold("left_leg", 1.8, (80, 0, 35), 0.18, 0.18),
+			hold("right_arm", 1.8, (-150, 0, 30), 0.18, 0.18), hold("left_arm", 1.8, (-150, 0, -30), 0.18, 0.18),
+			hold("head", 1.8, (-30, 0, 0), 0.18, 0.18))),
+		# 7. a fast spin on the spot, arms flung out
+		anim("idle.spin", 0.6, "once", tracks(wings(0.6, 0.08), {
+			"root": {"rotation": [(0, Z), (0.15, (0, 90, 0)), (0.3, (0, 180, 0)), (0.45, (0, 270, 0)), (0.6, (0, 360, 0))]},
+			"right_arm": {"rotation": [(0, Z), (0.1, (0, 0, 85)), (0.5, (0, 0, 85)), (0.6, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.1, (0, 0, -85)), (0.5, (0, 0, -85)), (0.6, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.1, (0, 0, 20)), (0.5, (0, 0, 20)), (0.6, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.1, (0, 0, -20)), (0.5, (0, 0, -20)), (0.6, Z)]}})),
+		# 8. laughs at something: doubled up, shaking, kicking his heels
+		anim("idle.laugh", 1.2, "once", tracks(wings(1.2, 0.12, 18), kick(1.2, 22, 0.2), {
+			"body": {"rotation": [(0, Z), (0.15, (-25, 0, 0)), (0.3, (-18, 0, 0)), (0.45, (-25, 0, 0)), (0.6, (-18, 0, 0)),
+								  (0.75, (-25, 0, 0)), (0.9, (-18, 0, 0)), (1.2, Z)]},
+			"head": {"rotation": [(0, Z), (0.15, (20, 0, 0)), (0.3, (8, 0, 0)), (0.45, (20, 0, 0)), (0.6, (8, 0, 0)),
+								  (0.75, (20, 0, 0)), (0.9, (8, 0, 0)), (1.2, Z)]},
+			"right_arm": {"rotation": [(0, Z), (0.12, (40, -30, 0)), (1.05, (40, -30, 0)), (1.2, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.12, (40, 30, 0)), (1.05, (40, 30, 0)), (1.2, Z)]}})),
+		# coming and going: zips in out of nothing, zips off upward
+		anim("appear", 0.5, "once", {
+			"root": {"scale": [(0, Z), (0.3, (1.25, 1.25, 1.25)), (0.5, (1, 1, 1))],
+					 "rotation": [(0, (0, -540, 0)), (0.5, Z)],
+					 "position": [(0, (0, 10, 0)), (0.5, Z)]}}),
+		anim("vanish", 0.5, "hold", {
+			"root": {"scale": [(0, (1, 1, 1)), (0.15, (1.2, 1.2, 1.2)), (0.5, Z)],
+					 "rotation": [(0, Z), (0.5, (0, 540, 0))],
+					 "position": [(0, Z), (0.5, (0, 14, 0))]}}),
+		# talking: a quick point, a nod, hands going
+		anim("talk", 0.8, "once", {
+			"right_arm": {"rotation": [(0, Z), (0.15, (80, 0, 10)), (0.4, (60, 0, 25)), (0.6, (80, 0, 10)), (0.8, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.25, (25, 0, -20)), (0.8, Z)]},
+			"head": {"rotation": [(0, Z), (0.2, (-8, 0, 0)), (0.4, (4, 0, 0)), (0.6, (-8, 0, 0)), (0.8, Z)]}}),
 	]
 
 
