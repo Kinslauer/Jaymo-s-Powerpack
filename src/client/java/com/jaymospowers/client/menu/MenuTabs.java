@@ -27,7 +27,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.21.60) The character menu (Andy, after Kageborne's one-screen menu): one menu on H, a tab for each part of your
- * character down the left edge of whichever page is open. Each tab is its own screen (the H screen, the K skill tree, the
+ * character in one strip across the top of the screen, whichever page is open (Andy: "too cluttered with menus ... maybe
+ * a single scroll up top"): every page an icon, the open one with its name, an arrow at each end, and the wheel over the
+ * strip turns to the next page. When they don't all fit, the strip shows the ones round the open page. Each tab is its own screen (the H screen, the K skill tree, the
  * journal...), so nothing is rewritten: this only draws the tabs over the page and switches between them. A page's own
  * key (K, M) opens it as before, and the tabs are on it, so the old keys open their tab.
  *
@@ -36,14 +38,19 @@ import org.jspecify.annotations.Nullable;
  * Java or Minecraft type, so Kingdoms never compiles against Powers.
  */
 public final class MenuTabs {
-	/** A tab: its size, how far it sticks out of the page's left edge, the gap between tabs, and where the first starts. */
-	public static final int TAB_W = 28, TAB_H = 24, TAB_STEP = 26, TAB_TOP = 6, TAB_OUT = 26;
+	/**
+	 * The strip: where it sits at the top of the screen and how tall it is, a tab's width, the room round the open page's
+	 * name, an arrow's width and its gap from the tabs.
+	 */
+	public static final int STRIP_Y = 2, STRIP_H = 22, TAB_W = 24, NAME_PAD = 6, ARROW_W = 14, STRIP_GAP = 2;
+	/** The room every page leaves at the top of the screen for the strip. */
+	public static final int ROOM = STRIP_Y + STRIP_H + 4;
 	/** The order the tabs come in (Kingdoms' fall between these). */
 	public static final int ORDER_CHARACTER = 0, ORDER_POWERS = 10, ORDER_MAP = 50;
 
 	/**
 	 * One tab. {@code owns}: whether a screen is this tab's page (it gets the tabs drawn on it); {@code anchor}: the page's
-	 * top-left corner on screen ({@code {x, y}}), the tabs hang off its left edge; {@code shown}: whether it's there now.
+	 * top-left corner on screen ({@code {x, y}}), no longer used (the strip sits at the top of the screen); {@code shown}: whether it's there now.
 	 */
 	public record Tab(String id, int order, Supplier<ItemStack> icon, Component label, Runnable open, Predicate<Screen> owns,
 		Function<Screen, int[]> anchor, BooleanSupplier shown) {
@@ -168,21 +175,53 @@ public final class MenuTabs {
 			// drawn after the page (so over it) and clicked before it: the page's own rebuilds never clear them
 			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> draw(s, graphics, mouseX, mouseY));
 			ScreenMouseEvents.allowMouseClick(screen).register((s, event) -> !click(s, (int)event.x(), (int)event.y()));
+			ScreenMouseEvents.allowMouseScroll(screen).register((s, mouseX, mouseY, horizontal, vertical) -> !scroll(s, (int)mouseX, (int)mouseY, vertical));
 		});
 	}
 
-	/** The tabs' top-left corner on {@code screen}: off the page's left edge, kept on screen. */
-	private static int[] origin(Screen screen, Tab page) {
-		int[] at;
-		try {
-			at = page.anchor().apply(screen);
-		} catch (RuntimeException | LinkageError e) {
-			at = null;
+	/** A tab on the strip: where it is drawn and how wide. */
+	private record Slot(Tab tab, int x, int w) {
+	}
+
+	/**
+	 * The strip's tabs on {@code screen}, left to right: every tab an icon, the open page's wider with its name. If they
+	 * don't all fit between the arrows, only the ones round the open page are there (the arrows and the wheel reach the rest).
+	 */
+	private static List<Slot> slots(Screen screen, Tab page) {
+		List<Tab> tabs = shown();
+		int n = tabs.size(), at = Math.max(0, tabs.indexOf(page));
+		int name = Minecraft.getInstance().font.width(page.label()) + NAME_PAD;
+		int room = screen.width - 2 * (ARROW_W + STRIP_GAP + 4);
+		int fit = Math.clamp((room - name) / TAB_W, 1, Math.max(1, n));
+		int first = Math.clamp(at - fit / 2, 0, Math.max(0, n - fit));
+		int width = Math.min(n, fit) * TAB_W + name, x = (screen.width - width) / 2;
+		List<Slot> out = new ArrayList<>();
+		for (int i = first; i < Math.min(n, first + fit); i++) {
+			int w = TAB_W + (tabs.get(i) == page ? name : 0);
+			out.add(new Slot(tabs.get(i), x, w));
+			x += w;
 		}
-		if (at == null || at.length < 2) {
-			at = new int[] {screen.width / 2 - 100, screen.height / 2 - 90};
+		return out;
+	}
+
+	/** The tab {@code step} along from {@code page} (round the ends). */
+	private static Tab along(Tab page, int step) {
+		List<Tab> tabs = shown();
+		return tabs.isEmpty() ? page : tabs.get(Math.floorMod(Math.max(0, tabs.indexOf(page)) + step, tabs.size()));
+	}
+
+	private static void go(Tab page, Tab to) {
+		if (to != page) {
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			to.open().run();
 		}
-		return new int[] {Math.max(0, at[0] - TAB_OUT), at[1]};
+	}
+
+	private static void plate(GuiGraphicsExtractor graphics, int x, int w, boolean picked, boolean hover) {
+		graphics.fill(x, STRIP_Y, x + w, STRIP_Y + STRIP_H, PowerScreen.COLOR_EDGE);
+		graphics.fill(x + 1, STRIP_Y + 1, x + w - 1, STRIP_Y + STRIP_H - 1, picked ? PowerScreen.COLOR_LIGHT : PowerScreen.COLOR_SHADE);
+		graphics.fill(x + 2, STRIP_Y + 2, x + w - 2, STRIP_Y + STRIP_H - 2,
+			picked ? PowerScreen.COLOR_BODY : hover ? PowerScreen.COLOR_WELL_LIGHT : PowerScreen.COLOR_TAB);
 	}
 
 	private static void draw(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -190,54 +229,83 @@ public final class MenuTabs {
 		if (page == null) {
 			return;
 		}
-		int[] at = origin(screen, page);
-		List<Tab> tabs = shown();
+		List<Slot> slots = slots(screen, page);
+		if (slots.isEmpty()) {
+			return;
+		}
+		var font = Minecraft.getInstance().font;
 		Tab hovered = null;
-		for (int i = 0; i < tabs.size(); i++) {
-			Tab t = tabs.get(i);
-			int x = at[0], y = at[1] + TAB_TOP + i * TAB_STEP;
-			boolean picked = t == page;
-			boolean hover = PowerScreen.over(mouseX, mouseY, x, y, TAB_OUT, TAB_H);
-			graphics.fill(x, y, x + TAB_W, y + TAB_H, PowerScreen.COLOR_EDGE);
-			graphics.fill(x + 1, y + 1, x + TAB_W, y + TAB_H - 1, picked ? PowerScreen.COLOR_LIGHT : PowerScreen.COLOR_SHADE);
-			graphics.fill(x + 3, y + 3, x + TAB_W, y + TAB_H - 3, picked ? PowerScreen.COLOR_BODY : hover ? PowerScreen.COLOR_WELL_LIGHT : PowerScreen.COLOR_TAB);
+		for (Slot slot : slots) {
+			boolean picked = slot.tab() == page, hover = PowerScreen.over(mouseX, mouseY, slot.x(), STRIP_Y, slot.w(), STRIP_H);
+			plate(graphics, slot.x(), slot.w(), picked, hover);
 			ItemStack icon;
 			try {
-				icon = t.icon().get();
+				icon = slot.tab().icon().get();
 			} catch (RuntimeException | LinkageError e) {
 				icon = ItemStack.EMPTY;
 			}
 			if (icon != null && !icon.isEmpty()) {
-				graphics.item(icon, x + 6, y + 4);
+				graphics.item(icon, slot.x() + (TAB_W - 16) / 2, STRIP_Y + (STRIP_H - 16) / 2);
 			}
+			if (picked) {
+				graphics.text(font, page.label(), slot.x() + TAB_W, STRIP_Y + (STRIP_H - 8) / 2, PowerScreen.COLOR_GOLD, false);
+			} else if (hover) {
+				hovered = slot.tab();
+			}
+		}
+		// an arrow at each end: the page before, the page after
+		int left = slots.getFirst().x() - STRIP_GAP - ARROW_W, right = slots.getLast().x() + slots.getLast().w() + STRIP_GAP;
+		for (int side = 0; side < 2; side++) {
+			int x = side == 0 ? left : right;
+			boolean hover = PowerScreen.over(mouseX, mouseY, x, STRIP_Y, ARROW_W, STRIP_H);
+			plate(graphics, x, ARROW_W, false, hover);
+			graphics.text(font, side == 0 ? "<" : ">", x + (ARROW_W - 5) / 2, STRIP_Y + (STRIP_H - 8) / 2, hover ? PowerScreen.COLOR_GOLD : PowerScreen.COLOR_TEXT, false);
 			if (hover) {
-				hovered = t;
+				hovered = along(page, side == 0 ? -1 : 1);
 			}
 		}
 		if (hovered != null) {
-			UiStyle.tip(graphics, Minecraft.getInstance().font, hovered.label(), mouseX, mouseY);
+			UiStyle.tip(graphics, font, hovered.label(), mouseX, mouseY);
 		}
 	}
 
-	/** A click on a tab opens its page; true if the click was on one. */
+	/** Whether the mouse is on the strip (its tabs or its arrows). */
+	private static boolean onStrip(List<Slot> slots, int mouseX, int mouseY) {
+		return !slots.isEmpty() && mouseY >= STRIP_Y && mouseY < STRIP_Y + STRIP_H && mouseX >= slots.getFirst().x() - STRIP_GAP - ARROW_W
+			&& mouseX < slots.getLast().x() + slots.getLast().w() + STRIP_GAP + ARROW_W;
+	}
+
+	/** A click on a tab opens its page, one on an arrow the page before or after; true if the click was on the strip. */
 	private static boolean click(Screen screen, int mouseX, int mouseY) {
 		Tab page = of(screen);
 		if (page == null) {
 			return false;
 		}
-		int[] at = origin(screen, page);
-		List<Tab> tabs = shown();
-		for (int i = 0; i < tabs.size(); i++) {
-			if (PowerScreen.over(mouseX, mouseY, at[0], at[1] + TAB_TOP + i * TAB_STEP, TAB_OUT, TAB_H)) {
-				Tab t = tabs.get(i);
-				if (t != page) {
-					Minecraft minecraft = Minecraft.getInstance();
-					minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-					t.open().run();
-				}
+		List<Slot> slots = slots(screen, page);
+		if (!onStrip(slots, mouseX, mouseY)) {
+			return false;
+		}
+		for (Slot slot : slots) {
+			if (mouseX >= slot.x() && mouseX < slot.x() + slot.w()) {
+				go(page, slot.tab());
 				return true;
 			}
 		}
-		return false;
+		if (mouseX < slots.getFirst().x() - STRIP_GAP) {
+			go(page, along(page, -1));
+		} else if (mouseX >= slots.getLast().x() + slots.getLast().w() + STRIP_GAP) {
+			go(page, along(page, 1));
+		}
+		return true;
+	}
+
+	/** The wheel over the strip turns to the page before (up) or after (down); true if the mouse was on the strip. */
+	private static boolean scroll(Screen screen, int mouseX, int mouseY, double amount) {
+		Tab page = of(screen);
+		if (page == null || amount == 0.0 || !onStrip(slots(screen, page), mouseX, mouseY)) {
+			return false;
+		}
+		go(page, along(page, amount > 0 ? -1 : 1));
+		return true;
 	}
 }

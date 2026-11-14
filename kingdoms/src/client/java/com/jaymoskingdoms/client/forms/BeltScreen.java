@@ -44,7 +44,7 @@ public final class BeltScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - HEIGHT) / 2);
+		return Math.max(4 + com.jaymoskingdoms.client.MenuCompat.STRIP, (this.height - HEIGHT) / 2);
 	}
 
 	/** Where the character menu hangs its tabs. */

@@ -47,7 +47,7 @@ public class CharacterScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - H) / 2);
+		return Math.max(MenuTabs.ROOM, (this.height - H) / 2);
 	}
 
 	/** The window's top-left corner, where the menu's tabs hang. */
