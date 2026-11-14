@@ -30,10 +30,10 @@ final class CharacterPresets {
 		String name = "";
 		/** 0 male, 1 female, -1 not picked. */
 		int gender = -1;
-		/** The heritage's key, and the answers' keys: born, raised, childhood, youth, turn (the affinity) and road ("" for none). */
-		String heritage = "", born = "", raised = "", childhood = "", youth = "", turn = "", road = "";
-		/** The class's key and its option (a first spell, an element, a patron), and the realms named, by name. */
-		String cls = "", option = "", raisedRealm = "", roadRealm = "";
+		/** The heritage's key, and the answers' keys: born, raised, childhood, youth and turn (the affinity). */
+		String heritage = "", born = "", raised = "", childhood = "", youth = "", turn = "";
+		/** The class's key and its option (a first spell, an element, a patron), and the realm named for a noble house, by name. */
+		String cls = "", option = "", raisedRealm = "";
 		int look, flaws, switches;
 		int[] sparks = new int[3];
 	}

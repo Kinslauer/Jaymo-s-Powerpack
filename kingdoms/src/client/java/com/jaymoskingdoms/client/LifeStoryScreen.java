@@ -88,6 +88,8 @@ final class LifeStoryScreen extends Screen {
 	static final int LOCKED_W = 96;
 	/** The character creator's Randomize button's width, in its header. */
 	static final int REROLL_W = 76;
+	/** How long a skipped story waits with no screen up for MCA's creator before this screen's own creator page takes over (ms). */
+	static final long TAB_WAIT_MS = 8000L;
 	static final float TEXT_SHARE = 0.44F;
 	static final long SLIDE_MS = 220L;
 	static final int SLIDE_PX = 36;
@@ -121,8 +123,9 @@ final class LifeStoryScreen extends Screen {
 		float tone = GreenskinLife.TONE_DEFAULT;
 		/**
 		 * Andy: "people who skip the story go to a new character creator that they can choose everything explicitly except
-		 * their power (only affinity)". Whether the story was skipped for the creator: one page, a row for each thing the
-		 * story would have decided ({@link Field}).
+		 * their power (only affinity)". Whether the story was skipped for the creator: a row for each thing the story would
+		 * have decided ({@link Field}), on a tab of MCA's creator when that is still to come ({@link #tabbed}), else on one
+		 * page here.
 		 */
 		boolean explicit;
 
@@ -163,13 +166,11 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.419) The locked roads the server said this player can take whatever their past (a deed, ops, a road they took), and those ops shut (keys). */
 	private static List<String> unlockedRoads = List.of(), shutRoads = List.of();
 	private static Draft draft = new Draft();
-	/** The creator's preset name as typed, the preset last loaded (-1: none), and the one last saved or loaded (its road is added once told). */
-	private static String presetTyped = "";
-	private static int presetAt = -1;
-	private static @Nullable String activePreset;
-	/** A loaded preset's road and the realm it named, kept for the road's page after MCA's creator. */
-	private static @Nullable String wantedRoad;
-	private static String wantedRoadRealm = "";
+	/** The creator's preset name as typed, and the preset last loaded (-1: none). */
+	static String presetTyped = "";
+	static int presetAt = -1;
+	/** Since when (ms) a skipped story has waited with no screen up for MCA's creator to show its tab (0: it isn't waiting). */
+	private static long tabIdleSince;
 	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
 	/** (0.7.352) The page under the skip-the-story ask, so shutting the ask doesn't read that page again. */
@@ -202,6 +203,10 @@ final class LifeStoryScreen extends Screen {
 			if (payload.forced() && StoryCurtain.isCreator(context.client().gui.screen())) {
 				return;
 			}
+			// (a skipped story is made in MCA's creator, coming up)
+			if (tabbed()) {
+				return;
+			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -211,6 +216,18 @@ final class LifeStoryScreen extends Screen {
 			if (done()) {
 				owed = false;
 				draft = new Draft();
+			} else if (tabbed()) {
+				// a skipped story waits for MCA's creator and its tab. Should the creator never come (or shut without the
+				// story sealed), the creator's page here takes over, so nobody is left on a black screen
+				long now = System.currentTimeMillis();
+				if (minecraft.gui.screen() != null) {
+					tabIdleSince = 0L;
+				} else if (tabIdleSince == 0L) {
+					tabIdleSince = now;
+				} else if (now - tabIdleSince > TAB_WAIT_MS) {
+					tabIdleSince = 0L;
+					creatorAhead = false;
+				}
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
 				minecraft.gui.setScreen(new LifeStoryScreen(true));
 			}
@@ -222,8 +239,6 @@ final class LifeStoryScreen extends Screen {
 			unlockedRoads = List.of();
 			shutRoads = List.of();
 			draft = new Draft();
-			activePreset = null;
-			wantedRoad = null;
 			presetAt = -1;
 			narrated = null;
 			toRead.clear();
@@ -248,6 +263,17 @@ final class LifeStoryScreen extends Screen {
 		Minecraft minecraft = Minecraft.getInstance();
 		List<String> story = minecraft.player == null ? null : LifeStory.of(minecraft.player);
 		return story != null && (creatorAhead || !LifeStory.roadOwed(story));
+	}
+
+	/**
+	 * Andy: "if they hit skip the story, their start is randomized and ALL creation options are moved to a tab within the
+	 * MCA creator". Whether the story was skipped with MCA's creator still to come: nothing is told here, the creator opens
+	 * with the story untold ({@code McaDestinyWaitMixin}) and its Life tab ({@link CreatorTab}) holds the rows, sealed as
+	 * the creator is finished.
+	 */
+	static boolean tabbed() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return draft.explicit && creatorAhead && minecraft.player != null && LifeStory.of(minecraft.player) == null;
 	}
 
 	/** (0.7.356) Whether only the road is left to tell (the rest was told before MCA's creator). */
@@ -617,7 +643,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	protected void init() {
-		if (done()) {
+		if (done() || tabbed()) {
 			onClose();
 			return;
 		}
@@ -672,7 +698,16 @@ final class LifeStoryScreen extends Screen {
 		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
 			draft.explicit = true;
 			randomize(false);
+			if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
+				Arrays.fill(draft.sparks, 1);
+			}
 			this.asking = false;
+			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
+			if (tabbed()) {
+				hush();
+				onClose();
+				return;
+			}
 			this.scroll = 0;
 		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.skipNo = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
@@ -685,7 +720,7 @@ final class LifeStoryScreen extends Screen {
 	 * creator's rows, where every one of them can be set outright: with {@code all} every row is drawn again (its
 	 * Randomize button), without it only what the story hadn't got to yet.
 	 */
-	private static void randomize(boolean all) {
+	static void randomize(boolean all) {
 		java.util.Random random = new java.util.Random();
 		if (!all) {
 			// what the story had made so far stays; the look is the one it leant to, a row of its own from here on
@@ -833,14 +868,6 @@ final class LifeStoryScreen extends Screen {
 				return;
 			}
 			Answer road = picked(Question.ROAD);
-			// the preset this character was saved as (or loaded from) keeps the road they took too
-			CharacterPresets.Preset preset = activePreset == null ? null : CharacterPresets.named(activePreset);
-			if (preset != null && road != null) {
-				preset.road = road.key();
-				preset.roadRealm = road.realm() ? realmNameOf(draft.roadRealm) : "";
-				CharacterPresets.save(preset);
-			}
-			activePreset = null;
 			ClientPlayNetworking.send(new LifeStory.Road(draft.answers[Question.ROAD.ordinal()], road != null && road.realm() ? draft.roadRealm : -1, lookIndex(),
 				draft.tone));
 			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
@@ -852,16 +879,30 @@ final class LifeStoryScreen extends Screen {
 			this.scroll = 0;
 			return;
 		}
+		ClientPlayNetworking.send(life(draft.gender));
+		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		onClose();
+	}
+
+	/** The answers so far as the packet that lives them, as {@code gender} (0 male, 1 female, -1 not picked here). */
+	private static LifeStory.Live life(int gender) {
 		List<Integer> answers = new ArrayList<>();
 		for (Question q : Question.values()) {
 			answers.add(q.asked() ? draft.answers[q.ordinal()] : -1);
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
-		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
-			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender,
-			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6));
-		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
-		onClose();
+		return new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
+			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, gender,
+			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6);
+	}
+
+	/** From the tab in MCA's creator, as the creator is finished: the skipped story is sealed, as the gender the creator made. */
+	static void sealFromTab(int gender) {
+		if (tabbed()) {
+			settle();
+			ClientPlayNetworking.send(new LifeStory.Skipped(life(gender)));
+			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		}
 	}
 
 	@Override
@@ -1042,13 +1083,9 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (done()) {
+		if (done() || tabbed()) {
 			onClose();
 			return;
-		}
-		// a loaded preset's road, once the road is asked (after MCA's creator)
-		if (wantedRoad != null && roadOnly()) {
-			pickWantedRoad();
 		}
 		Step s = step();
 		narrate(s, this.asking);
@@ -1604,10 +1641,11 @@ final class LifeStoryScreen extends Screen {
 
 	/**
 	 * What the character creator sets, a row each, in order: all the story would have decided. The power is not among
-	 * them: {@link #AFFINITY} is the story's "then one day" answer, what leans it, and what wakes stays a surprise.
+	 * them: {@link #AFFINITY} is the story's "then one day" answer, what leans it, and what wakes stays a surprise. Nor is
+	 * the start: a skipped story's is fate's ({@link #settle}, and the server's {@code LifeStory.SKIPPED}).
 	 */
-	private enum Field {
-		GENDER, HERITAGE, LOOK, RAISED, RAISED_REALM, CHILDHOOD, CLASS, OPTION, AFFINITY, ROAD, ROAD_REALM;
+	enum Field {
+		GENDER, HERITAGE, LOOK, RAISED, RAISED_REALM, CHILDHOOD, CLASS, OPTION, AFFINITY;
 
 		String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -1617,23 +1655,22 @@ final class LifeStoryScreen extends Screen {
 	/** The creator's rows as last laid out: {unscrolled y, height, field ordinal}. */
 	private final List<int[]> fieldRows = new ArrayList<>();
 
-	/** Whether the creator has a row for {@code f} now: a realm only for an answer that names one, the road only with no MCA creator to come. */
-	private static boolean shown(Field f) {
-		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
+	/** Whether the creator has a row for {@code f} now: a realm only for an answer that names one, an option only for a class that has them. */
+	static boolean shown(Field f) {
+		Answer raised = picked(Question.RAISED);
 		Classes.PlayerClass cls = youthClass();
 		return switch (f) {
-			case GENDER -> McaCompat.LOADED;
+			// (in MCA's creator the body is a man's or a woman's by its own buttons)
+			case GENDER -> McaCompat.LOADED && !tabbed();
 			case HERITAGE, LOOK -> heritage() != null;
 			case RAISED_REALM -> raised != null && raised.realm();
 			case OPTION -> cls != null && !cls.options.isEmpty();
 			case AFFINITY -> Question.TURN.asked();
-			case ROAD -> !creatorAhead;
-			case ROAD_REALM -> !creatorAhead && road != null && road.realm();
 			default -> true;
 		};
 	}
 
-	private static Component fieldLabel(Field f) {
+	static Component fieldLabel(Field f) {
 		if (f == Field.OPTION) {
 			Classes.PlayerClass cls = youthClass();
 			String key = "gui.jaymoskingdoms.creator.option." + (cls == null ? "" : cls.key());
@@ -1647,7 +1684,7 @@ final class LifeStoryScreen extends Screen {
 		return a == null ? Component.translatable("gui.jaymoskingdoms.creator.pick") : Component.translatable(story(q.key() + "." + a.key()));
 	}
 
-	private static Component fieldValue(Field f) {
+	static Component fieldValue(Field f) {
 		Heritage.Kind kind = heritage();
 		Classes.PlayerClass cls = youthClass();
 		return switch (f) {
@@ -1661,18 +1698,15 @@ final class LifeStoryScreen extends Screen {
 			case OPTION -> cls == null || draft.option < 0 || draft.option >= cls.options.size() ? Component.translatable("gui.jaymoskingdoms.creator.pick")
 				: Component.translatable("class.jaymoskingdoms.option." + cls.options.get(draft.option));
 			case AFFINITY -> answerName(Question.TURN);
-			case ROAD -> answerName(Question.ROAD);
-			case ROAD_REALM -> Component.literal(realmNameOf(draft.roadRealm));
 		};
 	}
 
 	/** What a row's pick gives, a line each (the affinity's: only that the power is still to come). */
-	private static List<Component> fieldEffects(Field f) {
+	static List<Component> fieldEffects(Field f) {
 		Heritage.Kind kind = heritage();
 		Question q = switch (f) {
 			case RAISED -> Question.RAISED;
 			case CHILDHOOD -> Question.CHILDHOOD;
-			case ROAD -> Question.ROAD;
 			default -> null;
 		};
 		Answer a = q == null ? null : picked(q);
@@ -1736,7 +1770,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/** Steps row {@code f} on ({@code dir} 1) or back (-1) through what's open to this character, wrapping. */
-	private static void cycle(Field f, int dir) {
+	static void cycle(Field f, int dir) {
 		Classes.PlayerClass cls = youthClass();
 		switch (f) {
 			case GENDER -> draft.gender = draft.gender < 0 ? dir > 0 ? 0 : 1 : 1 - draft.gender;
@@ -1748,15 +1782,6 @@ final class LifeStoryScreen extends Screen {
 			case CLASS -> cycleCalling(dir);
 			case OPTION -> draft.option = cls == null || cls.options.isEmpty() ? -1 : Math.floorMod(Math.max(draft.option, 0) + dir, cls.options.size());
 			case AFFINITY -> cycleAnswer(Question.TURN, dir);
-			case ROAD -> {
-				cycleAnswer(Question.ROAD, dir);
-				Answer road = picked(Question.ROAD);
-				// a road that fixes the heritage drops one picked over the birthplace's
-				if (road != null && (road.makes() != null || !road.onlyFor().isEmpty())) {
-					draft.heritage = -1;
-				}
-			}
-			case ROAD_REALM -> draft.roadRealm = cycleRealm(draft.roadRealm, dir);
 		}
 		settle();
 	}
@@ -1862,6 +1887,15 @@ final class LifeStoryScreen extends Screen {
 			if (!q.asked() || q == Question.ROAD && creatorAhead) {
 				continue;
 			}
+			// a skipped story's start is fate's: the "let fate decide" road
+			if (q == Question.ROAD) {
+				for (int i = 0; i < q.answers().size(); i++) {
+					if (q.answers().get(i).start() == LifeStory.Start.FATE) {
+						draft.answers[q.ordinal()] = i;
+					}
+				}
+				continue;
+			}
 			Answer had = picked(q);
 			if (had == null || !open(had)) {
 				List<Integer> open = openOf(q);
@@ -1908,7 +1942,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/** Saves the creator's rows under the name typed, over a preset of that name. */
-	private static void savePreset() {
+	static void savePreset() {
 		CharacterPresets.Preset p = new CharacterPresets.Preset();
 		p.name = presetTyped.strip();
 		if (p.name.isEmpty()) {
@@ -1930,23 +1964,21 @@ final class LifeStoryScreen extends Screen {
 		p.flaws = draft.flaws;
 		p.switches = draft.switches;
 		p.sparks = draft.sparks.clone();
-		CharacterPresets.Preset old = CharacterPresets.named(p.name);
-		if (!creatorAhead) {
-			p.road = key(Question.ROAD);
-			p.roadRealm = realmNameOf(draft.roadRealm);
-		} else if (old != null) {
-			// (the road is told after MCA's creator: till then the preset keeps the one it had)
-			p.road = old.road;
-			p.roadRealm = old.roadRealm;
-		}
 		if (CharacterPresets.save(p)) {
-			activePreset = p.name;
 			presetAt = CharacterPresets.all().indexOf(p);
 		}
 	}
 
 	/** Loads the next preset ({@code dir} 1) or the one before (-1) into the creator's rows. */
 	private void loadPreset(int dir) {
+		loadNextPreset(dir);
+		if (this.presetName != null) {
+			this.presetName.setValue(presetTyped);
+		}
+		this.scroll = 0;
+	}
+
+	static void loadNextPreset(int dir) {
 		List<CharacterPresets.Preset> saved = CharacterPresets.all();
 		if (saved.isEmpty()) {
 			return;
@@ -1954,12 +1986,29 @@ final class LifeStoryScreen extends Screen {
 		presetAt = Math.floorMod(presetAt < 0 ? dir > 0 ? 0 : -1 : presetAt + dir, saved.size());
 		CharacterPresets.Preset p = saved.get(presetAt);
 		apply(p);
-		activePreset = p.name;
 		presetTyped = p.name;
-		if (this.presetName != null) {
-			this.presetName.setValue(p.name);
-		}
-		this.scroll = 0;
+	}
+
+	/** The spark picked of {@code kind} (0 ideal, 1 bond, 2 flaw): a position 1-3 in the offered list, 0 for none. */
+	static int spark(int kind) {
+		return draft.sparks[kind];
+	}
+
+	static void cycleSpark(int kind, int dir) {
+		draft.sparks[kind] = Math.floorMod(draft.sparks[kind] + dir, com.jaymoskingdoms.Sparks.options(null, kind).size() + 1);
+		draft.sparksTouched = true;
+	}
+
+	/** The heritage and its look the creator's rows make now, for the figure in MCA's creator: the heritage's key and the variant's (null: its first look). */
+	static @Nullable String heritageKey() {
+		Heritage.Kind kind = heritage();
+		return kind == null ? null : kind.key();
+	}
+
+	static @Nullable String variantKey() {
+		Heritage.Kind kind = heritage();
+		HeritageVariants.Variant variant = kind == null ? null : HeritageVariants.at(kind, lookIndex());
+		return variant == null ? null : variant.key();
 	}
 
 	private static void setAnswer(Question q, @Nullable String key) {
@@ -2009,25 +2058,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		draft.sparksTouched = true;
 		draft.raisedRealm = realmNamed(p.raisedRealm == null ? "" : p.raisedRealm);
-		wantedRoad = p.road == null || p.road.isEmpty() ? null : p.road;
-		wantedRoadRealm = p.roadRealm == null ? "" : p.roadRealm;
-		if (!creatorAhead) {
-			pickWantedRoad();
-		}
 		settle();
-	}
-
-	/** A loaded preset's road, picked on the road's page if it's open to this character here; asked once. */
-	private static void pickWantedRoad() {
-		String key = wantedRoad;
-		wantedRoad = null;
-		List<Answer> roads = Question.ROAD.answers();
-		for (int i = 0; i < roads.size(); i++) {
-			if (roads.get(i).key().equals(key) && open(roads.get(i))) {
-				draft.answers[Question.ROAD.ordinal()] = i;
-				draft.roadRealm = realmNamed(wantedRoadRealm);
-			}
-		}
 	}
 
 	// ---- a harder life (0.7.420) --------------------------------------------------------------------------------------
@@ -2039,7 +2070,7 @@ final class LifeStoryScreen extends Screen {
 	private final List<int[]> choiceRows = new ArrayList<>();
 
 	/** The effect line of choice {@code i}, with its numbers. */
-	private static Component effect(int i) {
+	static Component effect(int i) {
 		return switch (i) {
 			case 0 -> Component.translatable("gui.jaymoskingdoms.story.flaw.light_sleeper.fx", (int)Flaws.SLEEPER_RANGE);
 			case 1 -> Component.translatable("gui.jaymoskingdoms.story.flaw.glass_jaw.fx", Math.round((Flaws.JAW_TAKEN - 1.0F) * 100.0F));
@@ -2052,16 +2083,16 @@ final class LifeStoryScreen extends Screen {
 		};
 	}
 
-	private static boolean chosen(int i) {
+	static boolean chosen(int i) {
 		return i < 4 ? (draft.flaws & Flaws.Flaw.values()[i].bit()) != 0 : (draft.switches & SWITCH_BITS[i - 4]) != 0;
 	}
 
 	/** Whether choice {@code i} can be switched on or off now (a third flaw can't be taken). */
-	private static boolean choosable(int i) {
+	static boolean choosable(int i) {
 		return i >= 4 || chosen(i) || Integer.bitCount(draft.flaws) < Flaws.MAX;
 	}
 
-	private static Component choiceName(int i) {
+	static Component choiceName(int i) {
 		return Component.translatable(i < 4 ? "gui.jaymoskingdoms.story.flaw." + Flaws.Flaw.values()[i].key() : "gui.jaymoskingdoms.story.switch." + SWITCH_KEYS[i - 4]);
 	}
 
@@ -2168,7 +2199,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/** Flips choice {@code i}: a flaw (never a third), or a switch. */
-	private static void flip(int i) {
+	static void flip(int i) {
 		if (i >= SPARK_BASE) {
 			int kind = (i - SPARK_BASE) / 3, pos = (i - SPARK_BASE) % 3 + 1;
 			draft.sparks[kind] = draft.sparks[kind] == pos ? 0 : pos;

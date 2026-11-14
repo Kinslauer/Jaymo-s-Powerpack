@@ -21,7 +21,9 @@ abstract class McaDestinyWaitMixin {
 	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$storyFirst(Minecraft minecraft, CallbackInfo ci) {
 		if (minecraft.player != null && LifeStory.of(minecraft.player) == null && Heritage.of(minecraft.player) == null
-			&& Classes.classOf(minecraft.player) == null && ClientPlayNetworking.canSend(LifeStory.Live.TYPE)) {
+			&& Classes.classOf(minecraft.player) == null && ClientPlayNetworking.canSend(LifeStory.Live.TYPE)
+			// (a skipped story is made in the creator itself, on its Life tab: the creator opens with it untold)
+			&& !com.jaymoskingdoms.client.CreatorTab.on()) {
 			ci.cancel();
 		}
 	}
