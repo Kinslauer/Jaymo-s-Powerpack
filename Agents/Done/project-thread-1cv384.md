@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: The Awakening's style on the Rig (30 picks from the pick list)
 branch: claude/project-thread-1cv384
 with: 
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 - 2026-11-14: all 30 picks built, PR #1542 open.
+- 2026-11-14 12:18 PR #1542 is merged into master; moved to Agents/Done.
