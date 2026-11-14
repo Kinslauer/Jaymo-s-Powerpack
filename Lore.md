@@ -998,6 +998,12 @@ when the Grue is beaten says *"…Thank you."* Sickness silences him down to dot
 **The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
 the Shade of the Grue is one of them.
 
+**The Grue in the dark** (Andy, 2026-11-14). The Grue is strongest where there is no light and weakest under the sun. As
+its hold on a keeper grows it stands nearer behind them: first a shadow, then a hooded shape, then the wings. Those who see
+mana can see it there at any hour; in the dark anyone can. One who has beaten it holds a leash, not a corpse: it must be fed,
+with a kill made in its form or with a forbidden working, and if it goes three days hungry it gets up again. Its master can
+put out every light near them and call its shades.
+
 **The Reaper** (Andy, 2026-11-14). The sorcerer's mana went into the ground with him, and it is still there. A Death Sorcerer's
 magic is an element like the other six and never touches it. But whoever takes up the forbidden death arts from outside
 that element draws on it, and a piece of it comes up and stands behind them. A warlock may swear to it in place of a patron
