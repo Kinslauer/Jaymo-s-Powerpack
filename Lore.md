@@ -620,6 +620,13 @@ are: villagers who died a long time ago, in ages this world has already forgotte
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
 
+(new) **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement for Andy to approve). The old dead
+were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
+fields, a few carrying the hoe or shovel they were buried with. The older the world grows, the more of them wake, and
+they come up where the ground is dark and drift toward the living, groaning once as they find their feet. A blood
+moon wakes whole graveyards. By day they shelter, and the crowd comes apart into stragglers until the next dark. In
+the ruined future a Chrono can reach, nothing keeps them down any more, and the crowds there are the largest of all.
+
 **The draugr are Warrior-born.** Every draugr is an undead Warrior-born ancestor, one of the raiders who lived on the
 Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
@@ -1352,6 +1359,14 @@ elders and foremen, its court wizard and sometimes a court necromancer, and its 
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
 names, families and tempers.
 
+(new) **The siege train** (siege engines thread, 2026-11-14; Andy: "can we have warring kingdoms bring siege engines?";
+Claude's placement, for Andy to approve). A realm that marches on another's seat with soldiers enough brings an engine,
+built by its own carpenters and smiths and pushed along behind the march by two of its soldiers: a **mangonel**, a
+timber frame on four wheels whose arm throws stones over a wall. The realms rich enough to keep guns on their walls
+take a **field gun** down off them instead, and in a great war they bring both. The engines stop short of the walls
+and are worked through the siege, then pushed home. They are ordinary craft, no magic in them; an engine whose crew is
+dead stands silent in the field.
+
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
 
@@ -1365,6 +1380,11 @@ itself into the ruler's throne, its turrets and battlements the throne's back.
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
 take tribute, and hold festivals.
+
+**The town books (new).** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
+lack, how many hands it has, what troubles it bears, what it is building and with whom it holds treaties. In a realm the
+ruler keeps it and lets a friend copy it; in a village it sits on a shelf and anyone grown will fetch it down. A town
+that hates you keeps its books shut.
 
 **What goes on in the shadows.** A den is found by a hatch in the grass and a whisper ("Tell 'em nobody sent
 you"): dice, bookies, fight pits, and goods the watch would rather not see. Assassins take contracts; a black candle in
@@ -1446,8 +1466,8 @@ a few sailors about the home harbours have made it once, in the wake of a blosso
 again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
 harbour will sail any course you name and has only stories about the east.
 
-(new) **The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; who sells it is
-Claude's placement for him to approve). The home continent still draws no chart of the east. The blossom captains have
+**The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; approved by Andy
+2026-11-14). The home continent still draws no chart of the east. The blossom captains have
 their own, drawn by their own hands, and one lying off a home harbour will sell a copy for coin: his landfall on
 Mohknee's western shore and nothing of the sea between, which is enough for a helmsman to keep a heading by.
 
@@ -1477,8 +1497,8 @@ black sand, burnt to a rough bloom, and folded on the anvil until the slag is go
 continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
 each step to someone who has done the one before.
 
-(new) **The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
-a reason to go to mohknee"; the reason given here is Claude's for him to approve). Folded steel does everything smeltery
+**The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
+a reason to go to mohknee"; approved by Andy 2026-11-14). Folded steel does everything smeltery
 steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
 under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
 
