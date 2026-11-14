@@ -3098,6 +3098,8 @@ public final class LifeStory {
 		}
 		Parties.reborn(player);
 		Captains.forgetPlayer(player.level().getServer(), player);
+		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
+		Recollections.bornAnew(player);
 		McaCompat.newDestiny(player);
 		return reincarnate(player);
 	}
