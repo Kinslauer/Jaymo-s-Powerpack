@@ -244,8 +244,10 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
   lanterns. Late is failed.
 - **D1** Counts blocks of the asked kind standing within 6 blocks of the mark, over what stood there before.
 - **D2** The pick list said the town's no-build rules would let this blast through: only tagged no-build dungeons block
-  blasts, and work is never set in one, so no exception was needed. Rubble dug by hand comes down again until it's blasted.
+  blasts, and work is never set in one, so no exception was needed. Rubble dug by hand comes down once more; after that only a blast clears it.
 - **D3** Any item of the asked kind counts, not only one handed to you by the tale.
+- **Board work, all kinds:** a party sharing a tale's job shares its count. A build or lamps job is looked at again when
+  you bring it back: if it's come undone it isn't taken.
 - **E1** One ending has someone join outright; three more have someone come back and ask.
 - **E2** Asked by a companion whose bond is close. Seen through, the bond rises by 20; ended badly or given up, it
   falls by 12. No ending has the companion leave you.
