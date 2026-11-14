@@ -124,10 +124,10 @@ public final class Prompts {
 
 	// ---- the server's side -----------------------------------------------------------------------------------------------
 
-	/** A finisher begins on {@code body}: prompted if they are open to one. */
-	static void begin(ServerPlayer player, LivingEntity body) {
+	/** A finisher begins on {@code body}: prompted if they are open to one, or it is a power's own ({@link PowerFinishers}). */
+	static void begin(ServerPlayer player, LivingEntity body, Finishers.Kind kind) {
 		PASSED.remove(player.getUUID());
-		if (open(body)) {
+		if (open(body) || kind.strike == Finishers.Strike.POWER) {
 			player.setAttached(PROMPTED, true);
 		}
 	}
@@ -175,9 +175,15 @@ public final class Prompts {
 		return false;
 	}
 
-	/** Thrown off: {@code player} flung back from {@code body} and hurt by it, and it is no longer open (it gets up). */
+	/**
+	 * Thrown off: {@code player} flung back from {@code body} and hurt by it, and it gets up: a kneeling boss is no longer
+	 * open, a downed mob is back on its feet (a downed player stays down).
+	 */
 	static void miss(ServerLevel level, ServerPlayer player, LivingEntity body) {
 		body.removeAttached(OPEN);
+		if (!(body instanceof net.minecraft.world.entity.player.Player) && com.jaymospowers.core.wounds.Downed.isDowned(body)) {
+			com.jaymospowers.core.wounds.Downed.getUp(level, body);
+		}
 		Vec3 away = player.position().subtract(body.position()).multiply(1.0, 0.0, 1.0);
 		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().multiply(-1.0, 0.0, -1.0) : away;
 		away = away.normalize().scale(THROWN);

@@ -74,7 +74,7 @@ final class ExecutionReact {
 				Blow blow = switch (kind.strike) {
 					case CUT -> Blow.CUT;
 					case STAB, PIERCE -> Blow.STAB;
-					case CRUSH, KI -> Blow.CRUSH;
+					case CRUSH, KI, POWER -> Blow.CRUSH;
 					case SHOT, BOLT, BLAST -> Blow.SHOT;
 					case SNAP -> Blow.CHOKE;
 					case HOLD -> null;

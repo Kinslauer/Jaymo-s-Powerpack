@@ -1,11 +1,16 @@
-# timed key prompts on finishers, first on kneeling bosses
-- **Prompted finishers** (the QTE Finishers mod's idea only; our own code): a finisher can now ask for keys. Before each
-  blow one of your four ability keys (R, G, V, B by default) shows under the crosshair with a bar running out. Press it
-  in time and the blow lands. Press the wrong key, or none, and you are thrown off: flung back, hurt for 2 hearts, and
-  they live. The ability keys do nothing else while it plays.
-- **Great foes**: a boss brought to a knee with a fifth of its health or less (Kingdoms' boss posture) can be finished
-  where it kneels with the usual sneak + hold (or sneak + double click and hold), with whatever is in hand. That
-  finisher is prompted. Finishers on downed foes are unchanged and ask for nothing.
-- Classes: `core/finisher/Prompts` (attachments `finish_open`, `finish_prompted`), `client/finisher/PromptClient`.
-  Tuning at the top of `Prompts` (`WINDOW`, `LEAD`, `GAP`, `MISS_HURT`).
-- Compiled; not played. The finisher poses were made for a body lying down, so on a kneeling boss the blows aim low.
+# a prompted finisher for each power
+- **Power finishers** (Andy: "a qte finisher per power per enemy type"): a power holder with empty hands finishes a
+  downed foe with the power itself, by the usual sneak + hold (or sneak + double click and hold), from anywhere round
+  them. It replaces the neck snap for them. Each is two blows, and each blow asks for one of your ability keys first; a
+  wrong key or none throws you off and a downed mob gets back up (a downed player stays down).
+  Pocket Arsenal **Whatever Answers**, Chronokinesis **Borrowed Hour**, Cryokinesis **Deep Frost**, Darktide
+  **Undertow**, Gravity **Dead Weight**, Resonance **Breaking Pitch**, Smoke **Last Breath**, Web Slinger **Cocoon**
+  (no suit showing; the suit keeps its executions), Wind Control **Emptied Sky**, Xenoform **Star-Metal**. The Z Fighter
+  keeps his own executions, unprompted.
+- **Per body kind**: the effect is sized and aimed by the body's own box, and the kill breaks each of the eight kinds
+  its own way: people and beasts bleed, machines spark, bugs are crushed flat under Dead Weight and Emptied Sky, winged
+  things shed feathers, fish thrash water, slimes burst, lumps raise dust.
+- Classes: `core/finisher/PowerFinishers` (kinds `Finishers.Kind.P_*`, `Strike.POWER`), three shared poses in
+  `FinisherPose.powers`, lang part `power_finishers.json`. Lore: "How a power ends a fight" in Lore.md, for Andy to approve.
+- Compiled; not played. The player's own pose is the same for every body kind, and three poses are shared between the
+  ten powers; the looks were set by eye.

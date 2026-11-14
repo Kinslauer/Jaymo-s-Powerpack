@@ -289,12 +289,54 @@ public final class FinisherPose {
 			at(beat, 42),
 			rest(46, 0)});
 		zfighter();
+		powers();
 	}
 
 	/**
 	 * (0.18.46) A Z Fighter's bare hands ({@code ZFighterExecutions}): the ki in them is the server's (particles, beams,
 	 * the film); these are the bodies under it.
 	 */
+	/** The powers' own (PowerFinishers): three shapes, shared by the powers whose beats match. */
+	private static void powers() {
+		// a hand held out at them, the off hand bracing it; a kick as each blow goes
+		Key[] cast = {
+			rest(0, 0),
+			k(6, 0.1F, 18, -10, -1.0F, 0.1F, 0.1F, -0.3F, 0, -0.15F, -0.35F, 0.3F, 0.55F, 0),
+			k(15, 0.12F, 20, -12, -1.05F, 0.15F, 0.12F, -0.45F, 0.25F, -0.1F, -0.4F, 0.35F, 0.58F, 0),
+			k(16, 0.08F, 14, -8, -1.3F, 0.1F, 0.15F, -0.5F, 0.3F, -0.1F, -0.35F, 0.3F, 0.5F, 0),
+			k(22, 0.12F, 20, -12, -1.05F, 0.15F, 0.12F, -0.5F, 0.3F, -0.1F, -0.4F, 0.35F, 0.58F, 0),
+			k(31, 0.15F, 24, -14, -1.05F, 0.15F, 0.12F, -0.55F, 0.35F, -0.1F, -0.4F, 0.35F, 0.6F, 0),
+			k(32, 0.05F, 10, -8, -1.35F, 0.1F, 0.15F, -0.6F, 0.3F, -0.1F, -0.3F, 0.3F, 0.45F, 0),
+			k(36, 0.08F, 14, -6, -1.2F, 0.1F, 0.1F, -0.4F, 0.2F, -0.1F, -0.3F, 0.3F, 0.5F, 0),
+			rest(42, 0)};
+		for (Finishers.Kind kind : new Finishers.Kind[] {Finishers.Kind.P_ARSENAL, Finishers.Kind.P_CHRONO, Finishers.Kind.P_CRYO,
+			Finishers.Kind.P_RESONANCE, Finishers.Kind.P_SMOKE, Finishers.Kind.P_XENOFORM}) {
+			KEYS.put(kind, cast);
+		}
+		// the right hand raised high over them and brought down, up again, and down with the whole body
+		Key raised = k(0, -0.04F, -10, 0, -3.0F, -0.25F, 0, -0.35F, 0, -0.1F, -0.3F, 0.3F, 0.25F, 0);
+		Key down = k(0, 0.25F, 34, 0, -0.6F, -0.3F, 0, -0.4F, 0.1F, -0.1F, -0.8F, 0.65F, 0.6F, 0);
+		Key[] slam = {
+			rest(0, 0),
+			at(raised, 8), at(raised, 17), at(down, 18), at(down, 22), at(raised, 30),
+			k(34, 0.42F, 50, 0, -0.45F, -0.35F, 0, -0.45F, 0.2F, -0.1F, -1.0F, 0.85F, 0.7F, 0),
+			k(38, 0.42F, 49, 0, -0.47F, -0.35F, 0, -0.47F, 0.2F, -0.1F, -1.0F, 0.85F, 0.68F, 0),
+			rest(44, 0)};
+		KEYS.put(Finishers.Kind.P_GRAVITY, slam);
+		KEYS.put(Finishers.Kind.P_WIND, slam);
+		// both hands out at them, hauled half back, out again, and flung wide apart
+		Key out = k(0, 0.14F, 22, 0, -1.2F, -0.2F, 0, -1.2F, 0.2F, 0, -0.5F, 0.5F, 0.55F, 0);
+		Key wide = k(0, 0.1F, -8, 0, -0.2F, 0, 1.35F, -0.2F, 0, -1.35F, -0.35F, 0.35F, 0.2F, 0);
+		Key[] pull = {
+			rest(0, 0),
+			at(out, 6), at(out, 13),
+			k(14, 0.1F, 4, 0, -0.6F, 0, 0.6F, -0.6F, 0, -0.6F, -0.4F, 0.4F, 0.4F, 0),
+			at(out, 20), at(out, 29), at(wide, 30), at(wide, 34),
+			rest(40, 0)};
+		KEYS.put(Finishers.Kind.P_WEB, pull);
+		KEYS.put(Finishers.Kind.P_DARKTIDE, pull);
+	}
+
 	private static void zfighter() {
 		// Point-Blank: stood over them, the palm thrust down at the chest, the off hand bracing the wrist as it fills, the kick
 		KEYS.put(Finishers.Kind.Z_PALM, new Key[] {
