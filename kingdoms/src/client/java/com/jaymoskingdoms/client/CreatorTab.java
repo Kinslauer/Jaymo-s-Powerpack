@@ -70,6 +70,11 @@ public final class CreatorTab {
 		LifeStoryScreen.sealFromTab(female ? 1 : 0);
 	}
 
+	/** From MCA's creator: back to the life story, to tell it after all. */
+	public static void toStory() {
+		LifeStoryScreen.tellInstead();
+	}
+
 	private static Button button(Component label, int x, int y, int w, Runnable press, Runnable rebuild) {
 		return Button.builder(label, b -> {
 			press.run();
@@ -226,9 +231,10 @@ public final class CreatorTab {
 
 	/**
 	 * Puts the tab's widgets on MCA's creator, in its data column. {@code add}: the screen's addRenderableWidget;
-	 * {@code rebuild}: the page set again, after any press (the cards follow the picks).
+	 * {@code rebuild}: the page set again, after any press (the cards follow the picks). {@code toStory}: where Back goes
+	 * from the Life page's first card (in MCA's creator: the story, told after all), or null.
 	 */
-	public static void build(int width, int height, Font font, Consumer<AbstractWidget> add, Runnable rebuild) {
+	public static void build(int width, int height, Font font, Consumer<AbstractWidget> add, Runnable rebuild, @Nullable Runnable toStory) {
 		int x = width / 2, y = height / 2 + TOP, bottom = height / 2 + BOTTOM;
 		int subW = W / SUBS.length;
 		for (int i = 0; i < SUBS.length; i++) {
@@ -249,7 +255,7 @@ public final class CreatorTab {
 				lifeAt = Math.clamp(lifeAt, 0, fields.size() - 1);
 				LifeStoryScreen.Field f = fields.get(lifeAt);
 				card(add, rebuild, font, x, y, bottom, LifeStoryScreen.fieldLabel(f), lifeAt, fields.size(), LifeStoryScreen.fieldIcon(f), LifeStoryScreen.fieldValue(f),
-					LifeStoryScreen.fieldText(f), dir -> LifeStoryScreen.cycle(f, dir), to -> lifeAt = to, LifeStoryScreen::tellInstead);
+					LifeStoryScreen.fieldText(f), dir -> LifeStoryScreen.cycle(f, dir), to -> lifeAt = to, toStory);
 			}
 			case 1 -> {
 				for (int i = 0; i < 8; i++) {
