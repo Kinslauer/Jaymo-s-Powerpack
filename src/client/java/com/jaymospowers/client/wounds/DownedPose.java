@@ -53,9 +53,9 @@ import net.minecraft.world.entity.player.Player;
  * strangle ({@link ExecutionReact}), in place of its sit-ups.
  */
 public final class DownedPose {
-	/** How long the fall to the ground takes (ticks): the knees giving way first (this share of it), then the drop. */
 	/** A legless mob's crawl counts as down this long (ticks): long enough that the fall is over and it's flat. */
 	static final float LEGLESS_DOWN = 100.0F;
+	/** How long the fall to the ground takes (ticks): the knees giving way first (this share of it), then the drop. */
 	static final float FALL_TICKS = 9.0F, BUCKLE_SHARE = 0.3F, BUCKLE_AMOUNT = 0.12F;
 	/** The bounce as it hits: how far past flat (share of the fall), how fast it rings (per tick), how fast it dies (per tick). */
 	static final float BOUNCE = 0.05F, BOUNCE_RING = 1.1F, BOUNCE_DECAY = 0.35F;

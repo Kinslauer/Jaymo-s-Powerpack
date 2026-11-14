@@ -577,8 +577,8 @@ public final class FreerunClient {
 		}
 		ticks++;
 		slideSpeed *= Slide.FRICTION;
-		if (player.isInWater() && !player.isInLava()) {
-			// reached water: skip off the surface and slide on, twice at most (the timer restarts); then the water has you
+		if (player.isInWater() && !player.isInLava() && (slideSkips == 0 || ticks > Slide.SKIP_GAP_TICKS)) {
+			// reached water (and not still rising off the last skip): skip off the surface and slide on, twice at most (the timer restarts); then the water has you
 			if (slideSkips >= Slide.MAX_SKIPS || slideSpeed < Slide.SKIP_MIN_SPEED) {
 				endSlide(player);
 				return;

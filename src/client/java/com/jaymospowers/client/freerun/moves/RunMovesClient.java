@@ -181,12 +181,12 @@ public final class RunMovesClient {
 
 	/** Whether a swim burst is ready now ({@link SwimBurst#COOLDOWN} since the last), for the move hints. */
 	public static boolean burstReady(LocalPlayer player) {
-		return player.tickCount - burstAt >= SwimBurst.COOLDOWN;
+		return player.tickCount - burstAt >= SwimBurst.COOLDOWN && SwimBurst.hasAir(player) && Feathers.canSpend(player, SwimBurst.COST);
 	}
 
 	/** Whether a breach is ready now ({@link Breach#COOLDOWN} since the last), for the move hints. */
 	public static boolean breachReady(LocalPlayer player) {
-		return player.tickCount - breachAt >= Breach.COOLDOWN;
+		return player.tickCount - breachAt >= Breach.COOLDOWN && !player.onGround() && Feathers.canSpend(player, Breach.COST);
 	}
 
 	/** Just left the ground on a jump: a charged leap, a long jump (tap just before), or a chance at a trick flip. */
@@ -234,7 +234,7 @@ public final class RunMovesClient {
 	 */
 	public static boolean leap(LocalPlayer player) {
 		long now = player.tickCount;
-		if (player.onGround() || leapt || now - sprintJumpAt > Leap.WINDOW_TICKS || FreerunClient.active() || !Freerun.canMove(player)
+		if (player.onGround() || leapt || longJumped || now - sprintJumpAt > Leap.WINDOW_TICKS || FreerunClient.active() || !Freerun.canMove(player)
 			|| !Crawl.canCrawl(player) || !Feathers.canSpend(player, Leap.COST)) {
 			return false;
 		}
@@ -355,7 +355,7 @@ public final class RunMovesClient {
 			player.setDeltaMovement(speed > SwimBurst.MAX_SPEED ? v.scale(SwimBurst.MAX_SPEED / speed) : v);
 			burstAt = now;
 			send(RunMoves.SWIM_BURST, 0L);
-		} else if (jumpPressed && !player.isUnderWater() && now - breachAt >= Breach.COOLDOWN && Feathers.canSpend(player, Breach.COST)) {
+		} else if (jumpPressed && !player.onGround() && !player.isUnderWater() && now - breachAt >= Breach.COOLDOWN && Feathers.canSpend(player, Breach.COST)) {
 			// out of the water the way you look, at least a little up so a level look still clears it
 			Vec3 look = player.getLookAngle();
 			Vec3 flat = new Vec3(look.x, 0.0, look.z);

@@ -137,7 +137,7 @@ public final class BlindHead {
 		LivingEntity bumped = null;
 		double best = Double.MAX_VALUE;
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(BUMP_MARGIN),
-			e -> e != mob && e.isAlive() && !e.isSpectator() && !e.getType().builtInRegistryHolder().is(Dismember.HEADLESS_UNDEAD)
+			e -> e != mob && e != mob.getVehicle() && !mob.hasPassenger(e) && e.isAlive() && !e.isSpectator() && !e.getType().builtInRegistryHolder().is(Dismember.HEADLESS_UNDEAD)
 				&& !(e instanceof Player p && p.isCreative()))) {
 			double d = other.distanceToSqr(mob);
 			if (d < best) {

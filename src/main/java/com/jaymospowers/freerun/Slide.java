@@ -81,6 +81,8 @@ public final class Slide {
 	/** Water skip: skips a slide gets, the speed (blocks/tick) it needs to skip at all, what share of speed a skip keeps, and the hop up (blocks/tick). */
 	public static final int MAX_SKIPS = 2;
 	public static final double SKIP_MIN_SPEED = 0.25, SKIP_KEEP = 0.85, SKIP_UP = 0.3;
+	/** Ticks after a skip before the water can take another: the hop clears the surface first. */
+	public static final int SKIP_GAP_TICKS = 2;
 	/** A slide may be in water this many ticks (the skip's own) before the water takes it. */
 	public static final int WET_GRACE_TICKS = 3;
 	// ================================================================================================================
