@@ -352,7 +352,7 @@ public final class ClosedEyes {
 	}
 
 	/** A copy of the texture's pixels, read from the resources or from a texture made in game. */
-	private static @Nullable NativeImage pixels(Identifier texture) {
+	static @Nullable NativeImage pixels(Identifier texture) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Optional<Resource> resource = minecraft.getResourceManager().getResource(texture);
 		if (resource.isPresent()) {

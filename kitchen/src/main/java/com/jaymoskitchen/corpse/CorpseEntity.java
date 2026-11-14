@@ -107,6 +107,10 @@ public class CorpseEntity extends Entity {
 	/** (0.4.37) Parts the body lost before it died (see {@link Corpses#missingParts}): not drawn. */
 	private static final EntityDataAccessor<Integer> MISSING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
+	/** How far it's been dressed on the hook, for clients to draw ({@link #DRESSED_SKINNED}, {@link #DRESSED_GUTTED}). */
+	private static final EntityDataAccessor<Integer> DRESSED = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	public static final int DRESSED_SKINNED = 1, DRESSED_GUTTED = 2;
 	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
 	private static final EntityDataAccessor<Long> BORN = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.LONG);
@@ -899,6 +903,7 @@ public class CorpseEntity extends Entity {
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
 		builder.define(MISSING, 0);
+		builder.define(DRESSED, 0);
 		builder.define(BORN, 0L);
 		builder.define(SLUNG, -1);
 		builder.define(SLUNG_SLOT, 0);
@@ -1006,6 +1011,15 @@ public class CorpseEntity extends Entity {
 
 	void setGutted() {
 		this.gutted = true;
+		addDressed(DRESSED_GUTTED);
+	}
+
+	public int dressed() {
+		return this.entityData.get(DRESSED);
+	}
+
+	void addDressed(int how) {
+		this.entityData.set(DRESSED, dressed() | how);
 	}
 
 	/** One more knife stroke at its skin; how many that makes. */
@@ -3549,6 +3563,7 @@ public class CorpseEntity extends Entity {
 		this.spilt = input.getIntOr("Spilt", 0);
 		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
 		this.gutted = input.getBooleanOr("Gutted", false);
+		this.entityData.set(DRESSED, input.getIntOr("Dressed", 0));
 		this.death = input.getStringOr("Death", CleanKill.CLEAN);
 		this.spoiled = new ArrayList<>(input.read("Spoiled", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
@@ -3614,6 +3629,7 @@ public class CorpseEntity extends Entity {
 			output.putInt("Spilt", spilt);
 			output.putInt("SkinStrokes", skinStrokes);
 			output.putBoolean("Gutted", gutted);
+			output.putInt("Dressed", dressed());
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

@@ -408,6 +408,7 @@ public final class Hanging {
 		// and the trimmings, for mending leather
 		corpse.spawnAtLocation(level, new ItemStack(Butchery.LEATHER_SCRAPS, 1 + level.getRandom().nextInt(SCRAPS_MORE + 1)), 0.3F);
 		corpse.setButcherStage(SKINNED);
+		corpse.addDressed(CorpseEntity.DRESSED_SKINNED);
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.8F, 0.8F);
 		level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 6, 0.3, 0.3, 0.3, 0.05);

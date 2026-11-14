@@ -28,5 +28,15 @@
   with a knife before the cuts"). Out comes **Offal** (new item: 1 from a small body, 2, or 4 from a big carcass), a
   raw meat (it can make you sick raw) that cooks into **Cooked Offal** on a campfire, in a furnace or a smoker. Icons
   painted in the manner of vanilla rotten flesh (a liver lobe on the slant, a loop of gut under it). Carcasses already past skinning skip it.
+- **The work shows** (Andy: "Start work on 1 and 2"): a carcass skinned on the hook is drawn as bare red flesh with
+  streaks of fat, and once gutted its trunk is a dark hollow crossed by ribs. `client/corpse/Dressed` paints a copy of
+  the animal's own texture (per model, texture and state), so it works for any animal's model; the body's renderer
+  draws with it through `LivingEntityRendererMixin`, after `ClosedEyes`. The trunk is the part named body, torso,
+  tulow or chest; a model with none shows no ribs. Synced as `CorpseEntity.dressed()`, saved as `Dressed`. A carcass
+  with no skin to take (or a burnt one) is never drawn skinned.
+- **Offal has uses**: held in the other hand it baits a fishing rod like Fish Bait (`fishing/Bait`); dogs take it
+  as food, raw or cooked (`minecraft:wolf_food`), and eat it off the ground; Raw Blood Sausage now needs one as its
+  casing; and offal lying on the ground is a gut pile that wild scavengers (wolves, foxes, bears, zombies) smell
+  from 16 blocks and come to eat (`corpse/Scavengers`), whoever dropped it.
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.

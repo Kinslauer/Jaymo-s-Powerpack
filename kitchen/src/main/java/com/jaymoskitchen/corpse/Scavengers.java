@@ -52,6 +52,8 @@ public final class Scavengers {
 	private static final int FULL_AFTER = 3, FULL_TICKS = 4800;
 	/** Health back per piece eaten. */
 	private static final float HEAL = 3.0F;
+	/** How often a scavenger with nothing else to do sniffs for a gut pile (ticks). */
+	private static final int GUTS_SNIFF_EVERY = 20;
 	/** Ticks before it gives up on a body or meat it can't reach. */
 	private static final int GIVE_UP = 300;
 
@@ -307,6 +309,19 @@ public final class Scavengers {
 			Iterable<ItemEntity> near = tame(mob)
 				? mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(MEAT_SIGHT), item -> petFood(mob, item))
 				: CARRION;
+			if (!tame(mob) && (mob.tickCount + mob.getId()) % GUTS_SNIFF_EVERY == 0) {
+				// a gut pile (offal left lying, whoever dropped it) is smelt as far off as a body
+				for (ItemEntity guts : mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(SMELL),
+					item -> item.getItem().is(com.jaymoskitchen.butchery.Butchery.OFFAL))) {
+					double distance = guts.distanceToSqr(mob);
+					if (meat == null || distance < meat.distanceToSqr(mob)) {
+						meat = guts;
+					}
+				}
+				if (meat != null) {
+					return true;
+				}
+			}
 			for (ItemEntity item : near) {
 				if (item.isAlive() && item.level() == mob.level()) {
 					double distance = item.distanceToSqr(mob);
