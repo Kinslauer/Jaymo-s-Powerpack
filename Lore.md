@@ -1908,6 +1908,18 @@ which is the wrong way round for a people who say they have always built so, and
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
 
+(new) **The drowned courts** (Reaper's host thread, Moog's Ocean Structures, 2026-11-14; Claude's placement for Andy to
+approve). The sunken palace is the one court that still stands. The rest of what the Tideborn built under the water
+lies broken across the sea floors of the home continent: pale colonnades and tiered seats, small temples, shrines with
+a lamp of sea stone still lit, gardens gone wild. The Tideborn left them when they came up to the coves, and none of
+them will say why. The sea's guardians keep some. The Deep Mother's faithful row out over them on calm days and drop a
+shell. The castles, churches and houses down there are a different matter: those were land folk's, built on shores the
+sea has since taken, and sailors read them as the Deep Mother collecting what she is owed. The great bones on the
+bottom belong to sea dragons, which nobody living has seen swim. On the surface the long ships are the barbarians',
+who raid by water where the coast lets them; the broad hauling ships and the small boats are honest traders and
+fishers; the painted travel ship carries those who can pay to cross in comfort; and the rafts belong to drifters who
+have given up on the land altogether.
+
 (new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
 
 (new) **The stable's last tricks** (Claude's placement for the Portable Mods picks, patch 6, Icy's Better Horses leftovers, 2026-11-14, for Andy to approve). Riders in the Chivalry realms' tilt-yards carry a horse medkit, a satchel of bandage and honey salve; any groom will use one on any hurt horse, whoever owns it. The glide harness and ender saddlebags are no saddler's work: only a court wizard makes them, and sells them dear. The harness is a racing saddle with phantom membrane worked into wings; spread on a drop, they let horse and rider down slowly. The saddlebags are lined like an ender chest and open onto their owner's own chest, so only the one who owns the horse can reach in; anyone else finds only the horse's own pack.
