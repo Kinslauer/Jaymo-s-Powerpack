@@ -384,8 +384,14 @@ public final class BossIntros {
 		}
 	}
 
-	/** Its voice: a dragon, a Giant or the grizzly roars deep; anything else gives its own call. */
+	/** Creatures whose call in the film is a whale's breach, played on the watcher's own game ({@code BossIntroClient.BREACHERS}). */
+	static final java.util.Set<String> BREACHERS = java.util.Set.of("jaymospowers:aerwhale");
+
+	/** Its voice: a dragon, a Giant or the grizzly roars deep; a breacher's is its breach, on the watcher's game; anything else gives its own call. */
 	private static void roar(ServerLevel level, LivingEntity boss) {
+		if (BREACHERS.contains(BuiltInRegistries.ENTITY_TYPE.getKey(boss.getType()).toString())) {
+			return;
+		}
 		if (boss instanceof WindDragon || boss instanceof Grizzly || Monoliths.giant(boss)) {
 			level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, ROAR_VOLUME, ROAR_PITCH);
 		} else if (boss instanceof Mob mob) {

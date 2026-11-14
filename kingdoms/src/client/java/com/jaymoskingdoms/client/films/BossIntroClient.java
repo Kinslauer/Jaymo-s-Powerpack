@@ -4,6 +4,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.client.music.SceneMusic;
 import java.util.Map;
+import java.util.Set;
 import com.jaymoskingdoms.films.BossIntros;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -16,8 +17,11 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -85,6 +89,15 @@ public final class BossIntroClient {
 	private static @Nullable Identifier music;
 	/** Great creatures with a track of their own (by entity id): the aerwhale rises to Featherfall. */
 	static final Map<String, Identifier> OWN_MUSIC = Map.of("jaymospowers:aerwhale", JaymosKingdoms.id("scene_music.aerwhale"));
+	/** Andy: "What if we played a loud whale breech". Great creatures whose call in the film is a breach instead (by entity id;
+	 * the server leaves their own call out: {@code BossIntros.BREACHERS}). It plays at full loudness wherever the camera is,
+	 * from where the creature is, starting {@link #BREACH_LEAD} ticks before the call so the crash lands on it. */
+	static final Set<String> BREACHERS = Set.of("jaymospowers:aerwhale");
+	static final int BREACH_LEAD = 12;
+	static final float BREACH_VOLUME = 1.0F;
+	private static final Identifier BREACH = JaymosKingdoms.id("film.whale_breach");
+	/** Whether this film's creature breaches. */
+	private static boolean breaches;
 
 	private BossIntroClient() {
 	}
@@ -139,7 +152,9 @@ public final class BossIntroClient {
 		hurtBefore = self.hurtTime;
 		viewBefore = minecraft.options.getCameraType();
 		side = self.getRandom().nextBoolean() ? 1.0F : -1.0F;
-		music = OWN_MUSIC.get(BuiltInRegistries.ENTITY_TYPE.getKey(it.getType()).toString());
+		String kind = BuiltInRegistries.ENTITY_TYPE.getKey(it.getType()).toString();
+		music = OWN_MUSIC.get(kind);
+		breaches = BREACHERS.contains(kind) && play.roarAt() >= 0 && mode == BossIntros.Play.INTRO;
 		seen(it);
 		ClientPlayNetworking.send(new BossIntros.State(boss, BossIntros.State.BEGAN));
 	}
@@ -168,6 +183,11 @@ public final class BossIntroClient {
 			} else {
 				hurtBefore = self.hurtTime;
 				seen(it);
+				if (breaches && tick == Math.max(1, roarAt - BREACH_LEAD)) {
+					Vec3 at = it.getBoundingBox().getCenter();
+					minecraft.getSoundManager().play(new SimpleSoundInstance(BREACH, SoundSource.NEUTRAL, BREACH_VOLUME, 1.0F,
+						SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, at.x, at.y, at.z, false));
+				}
 				if (minecraft.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
 					minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 				}
