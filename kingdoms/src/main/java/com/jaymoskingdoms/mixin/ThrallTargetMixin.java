@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link com.jaymoskingdoms.Parleys#spares}). Nor a masterless bandit's men their leader, or each other
  * ({@link com.jaymoskingdoms.Masterless#sameBand}). Nor an illager at someone it is hearing out or keeping a truce with
  * ({@link com.jaymoskingdoms.IllagerTalk#spares}). Nor the dead at one who wears the Reaper's shroud ({@link com.jaymoskingdoms.Reaper#spares}).
+ * Nor anyone hogtied or grabbed on a lasso ({@link com.jaymoskingdoms.forms.Lasso#pinned}) at anybody.
  */
 @Mixin(LivingEntity.class)
 public abstract class ThrallTargetMixin {
@@ -38,7 +39,8 @@ public abstract class ThrallTargetMixin {
 			|| com.jaymoskingdoms.Parleys.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Masterless.sameBand((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.IllagerTalk.spares((LivingEntity)(Object)this, target)
-			|| com.jaymoskingdoms.Reaper.spares((LivingEntity)(Object)this, target)) {
+			|| com.jaymoskingdoms.Reaper.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.forms.Lasso.pinned((LivingEntity)(Object)this)) {
 			cir.setReturnValue(false);
 		}
 	}

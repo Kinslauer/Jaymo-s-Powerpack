@@ -1,0 +1,11 @@
+{
+  "message.jaymoskingdoms.lasso.grabbed": "You have %s on a short rope.",
+  "message.jaymoskingdoms.lasso.tying": "Tying %s %s",
+  "message.jaymoskingdoms.lasso.hogtied": "%s is hogtied.",
+  "message.jaymoskingdoms.lasso.you_hogtied": "You're hogtied. Mash sneak to work the knots loose.",
+  "message.jaymoskingdoms.lasso.stalled": "The blow knocks the fight out of you.",
+  "message.jaymoskingdoms.lasso.struggle": "Struggling %s (mash sneak)",
+  "message.jaymoskingdoms.lasso.struggle_stalled": "Dazed %s",
+  "message.jaymoskingdoms.lasso.free": "You work free of the rope.",
+  "gui.jaymoskingdoms.story.hint.172": "Hold use to whirl a lasso over your head, and let go once it's up to speed. Back away to drag what you caught, walk in to wind the rope, and hold use at a person's side to hogtie them."
+}

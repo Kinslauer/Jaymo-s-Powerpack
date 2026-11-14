@@ -32,6 +32,7 @@ public final class ModelPoses {
 			MobAnimations.apply(model, state);
 		}
 		HiddenBladeClient.pose(model, state);
+		com.jaymoskingdoms.client.forms.LassoPose.apply(model, state);
 		GoblinBody.apply(model, state);
 		OcellanBody.apply(model, state);
 	}
