@@ -26,3 +26,4 @@ owns:
 - PR #1486 (Kitchen). Mauled: half the skins lost; burnt: no hide; battered (fall, blast, fists, bruising_weapons tag): a third of the meat lost. First tool click on such a body only says what happened. Skin comes off in 3 pulls (small 2, big 5, flint/bone knife +2).
 - Gradle compile clean; not played.
 - Added on Andy's ask: Kingdoms perk Butcher's Hand (Survival, after Forager, 3 ranks): a pull fewer per rank, rank 3 saves what a mauled/battered death spoiled. Kitchen hook Hanging.setButcherSkill.
+- Andy's correction: hook work needs Butcher's Hand rank 1 (Kitchen alone: everyone can). Butcher block = plain loot, extras only off the hook or a butcher villager. Cube Animals death loot (LivingEntity.drop) now caught by LivingEntityMixin.
