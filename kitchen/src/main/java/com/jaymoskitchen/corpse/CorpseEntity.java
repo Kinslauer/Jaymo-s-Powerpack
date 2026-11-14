@@ -258,6 +258,11 @@ public class CorpseEntity extends Entity {
 	 */
 	private @Nullable BlockPos hook;
 	private int butcherStage, bleedTotal, bleedLeft, bloodPoured, spilt;
+	/** Knife strokes into taking its skin off ({@link Hanging#SKIN_STROKES}). */
+	private int skinStrokes;
+	/** How it died, if that cost it hide or meat ({@link CleanKill}), and whether whoever's working it has been told. */
+	private String death = CleanKill.CLEAN;
+	private boolean deathTold;
 	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
 	private int firesLit;
 	private int age;
@@ -989,6 +994,15 @@ public class CorpseEntity extends Entity {
 
 	void setButcherStage(int stage) {
 		this.butcherStage = stage;
+	}
+
+	/** One more knife stroke at its skin; how many that makes. */
+	int addSkinStroke() {
+		return ++skinStrokes;
+	}
+
+	void setDeath(String death) {
+		this.death = death;
 	}
 
 	void startBleeding(int ticks) {
@@ -1792,6 +1806,13 @@ public class CorpseEntity extends Entity {
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
 		// (0.5.51) on a meat hook, or started on (bled, or being bled): its next step
+		if (!death.isEmpty() && !deathTold && (held.is(Corpses.BUTCHERING_TOOLS) || held.is(Corpses.CRACKING_ROCKS)
+			|| held.is(com.jaymoskitchen.butchery.Butchery.CLEAVERS) || held.is(com.jaymoskitchen.butchery.Butchery.SKINNING_KNIVES))) {
+			// looked over before the first cut: what dying that way did to it
+			deathTold = true;
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death." + death));
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		InteractionResult step = Hanging.use(this, level, player, held);
 		if (step != null) {
 			return step;
@@ -3509,6 +3530,8 @@ public class CorpseEntity extends Entity {
 		this.bleedLeft = input.getIntOr("BleedLeft", 0);
 		this.bloodPoured = input.getIntOr("BloodPoured", 0);
 		this.spilt = input.getIntOr("Spilt", 0);
+		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
+		this.death = input.getStringOr("Death", CleanKill.CLEAN);
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
@@ -3535,6 +3558,9 @@ public class CorpseEntity extends Entity {
 		output.putInt("Selected", selected);
 		output.putString("Killer", killer);
 		output.putBoolean("KilledByPlayer", killedByPlayer);
+		if (!death.isEmpty()) {
+			output.putString("Death", death);
+		}
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
 		output.putInt("Missing", missing());
@@ -3566,6 +3592,7 @@ public class CorpseEntity extends Entity {
 			output.putInt("BleedLeft", bleedLeft);
 			output.putInt("BloodPoured", bloodPoured);
 			output.putInt("Spilt", spilt);
+			output.putInt("SkinStrokes", skinStrokes);
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

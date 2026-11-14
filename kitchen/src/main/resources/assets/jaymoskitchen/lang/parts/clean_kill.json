@@ -1,0 +1,6 @@
+{
+	"message.jaymoskitchen.corpse.death.mauled": "Mauled: the hide is torn",
+	"message.jaymoskitchen.corpse.death.burnt": "Burnt: the hide is ruined",
+	"message.jaymoskitchen.corpse.death.battered": "Battered: some of the meat is bruised",
+	"message.jaymoskitchen.hook.skinning": "Skinning: pull %s of %s"
+}

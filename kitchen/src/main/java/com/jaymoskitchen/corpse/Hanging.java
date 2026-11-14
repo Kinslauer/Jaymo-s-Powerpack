@@ -55,6 +55,11 @@ public final class Hanging {
 	static final int BONES_MORE = 2;
 	/** Skinned on the hook: this many more of each skin (a clean, whole one), and leather scraps (at least one, up to this many more). */
 	static final int PRIME_EXTRA = 1, SCRAPS_MORE = 1;
+	/** Knife strokes to take a skin off: a small body (a chicken, a rabbit) one fewer, a big carcass this many more, a poor knife (flint, bone) this many more. */
+	static final int SKIN_STROKES = 3, SKIN_STROKES_BIG = 2, SKIN_STROKES_POOR = 2;
+	/** Knives that skin slowly: flint and bone. */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> POOR_KNIVES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ITEM, com.jaymoskitchen.JaymosKitchen.id("poor_knives"));
 	/** Animal fat from anything bigger than a chicken after the last cut (at least one, up to this many more). */
 	static final int FAT_MORE = 1;
 
@@ -342,7 +347,18 @@ public final class Hanging {
 	}
 
 	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
+		int strokes = SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
+			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0);
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		int made = corpse.addSkinStroke();
+		if (made < strokes) {
+			// the skin comes away a pull at a time
+			corpse.jolt(false);
+			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.6F, 1.0F + made * 0.1F);
+			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 2, 0.3, 0.3, 0.3, 0.05);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinning", made, strokes));
+			return;
+		}
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
 		boolean prime = corpse.hook() != null;
 		for (ItemStack skin : skins) {
