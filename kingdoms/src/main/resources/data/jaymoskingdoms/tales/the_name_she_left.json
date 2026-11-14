@@ -85,7 +85,7 @@
       "do": "talk", "who": "chief", "goal": "Speak with whoever holds him",
       "say": "That's near enough. You'll be from the miller.\nWe found the old man shouting a girl's name in the hills. Now, a miller forgave that family a debt out of pity, and a miller who'll do that will pay to get the father back. That's only reasoning.\nSo. What did he send?",
       "replies": [
-        { "say": "Twenty, and you forget his name.", "then": "freed", "needs_coins": 20, "journal": "I bought {father_held} back from the outlaws at the quarry cut." },
+        { "say": "Twenty, and you forget his name.", "then": "freed", "needs_coins": 20, "journal": "I bought {father_held} back from the outlaws at the quarry cut.", "returns": { "who": "chief", "days": [8, 14], "as": "revenge", "say": "Twenty, you paid, for an old man who wasn't worth the porridge. I've turned that over all winter. A purse that opens once opens twice. I've brought friends to help you find it." } },
         { "say": "The miller sent nothing. Nobody is paying for him. You have fed an old man for a week for no reason.", "then": "parley_truth" },
         { "say": "He sent me.", "then": "fight" }
       ]
@@ -104,7 +104,8 @@
       "plea": "Hold! Hold. He's yours. He was never worth the porridge. Take him and let me keep my head.",
       "mercy": "Go. If I hear of you on these hills again, I'll finish it.",
       "thanks": "You'll not. On my mother.",
-      "slain": "freed", "spared": "freed"
+      "slain": "freed", "spared": "freed",
+      "spared_returns": { "as": "warning", "days": [7, 12], "say": "I said on my mother, and I'm off your hills. I came to say one thing and go. Men from the old man's valley were at the burners' camp, asking who brought him down, and whether there was a girl with you. I said I never saw a girl. You'd best say the same." }
     },
     "freed": {
       "do": "talk", "who": "father_held", "goal": "Speak with {father_held}",

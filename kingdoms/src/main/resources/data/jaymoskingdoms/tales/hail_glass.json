@@ -185,7 +185,8 @@
       "plea": "Hold! Hold. It's a week's wages, not a cause. I don't even know what the thing does.",
       "mercy": "Then stand aside, and tell her the glass is leaving.",
       "thanks": "Standing aside. Gladly. Give it over, mistress. I'm not dying for an eyeglass.",
-      "slain": "fence_cold", "spared": "fence_tells"
+      "slain": "fence_cold", "spared": "fence_tells",
+      "spared_returns": { "as": "recruit", "days": [6, 11], "say": "She turned me off the ladder the night you went. Said a man who yields once yields twice. Maybe. But I yielded to somebody who let me keep my arm, and I'd sooner stand behind that than behind her. I've a sword and no week's wages. Take me on and I'll not ask what anything does." }
     },
     "fence_tells": {
       "do": "talk", "who": "fence", "goal": "Take the glass from the fence",
@@ -247,7 +248,7 @@
       ],
       "replies": [
         { "say": "He must be told. And {giver}.", "then": "return_named", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to tell {traveller} and {giver} all of it." },
-        { "say": "The fence's man stole it. That is all anyone need hear.", "then": "return_covered", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to say the den's man stole it and leave the boy out." }
+        { "say": "The fence's man stole it. That is all anyone need hear.", "then": "return_covered", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to say the den's man stole it and leave the boy out.", "against": ["law", "honour"], "returns": { "who": "clerk", "days": [9, 15], "as": "thanks", "say": "I copied this for you, slowly, by the window, with my nose on the page. It is the north road out of {town}, and every well on it. It took me nine days. Once it would have taken me one. I'll not rule many more sheets, so I wanted this one to be good.", "gift": ["minecraft:map*1", "minecraft:paper*8"] } }
       ]
     },
     "ember_truth": {
@@ -258,8 +259,8 @@
       ],
       "replies": [
         { "say": "He must be told. And the watch.", "then": "return_named", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to tell {traveller} and the watch all of it." },
-        { "say": "The fence's man stole it. Burn the drawings tonight.", "then": "return_covered", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. I told her to burn the drawings." },
-        { "say": "The fence's man stole it. Hide the drawings well.", "then": "return_covered", "mark": "hail_drawings", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. She keeps her drawings." }
+        { "say": "The fence's man stole it. Burn the drawings tonight.", "then": "return_covered", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. I told her to burn the drawings.", "against": ["law", "honour"] },
+        { "say": "The fence's man stole it. Hide the drawings well.", "then": "return_covered", "mark": "hail_drawings", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. She keeps her drawings.", "against": ["law", "honour"] }
       ]
     },
     "owner_truth": {

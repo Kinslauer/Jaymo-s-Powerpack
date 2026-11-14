@@ -1,0 +1,412 @@
+{
+  "title": "The Wrong Light",
+  "start": {
+    "by": "book", "weight": 1,
+    "book": {
+      "title": "Log of the Grey Hind",
+      "author": "Tobin Pell, mate",
+      "pages": [
+        "Grey Hind, coaster, out of the north harbours. Tobin Pell, mate, keeps this log since the captain's eyes went.\n\nLaded: nine pigs of bell-metal in tarred sail, for the Truth's house at the harbour town. Paid for by the town's own subscription, every family a coin. The priest wants it rung before the dark of the year, so the dead keep down in the burying ground.\n\nAlso salt, lamp oil, and the captain's temper.",
+        "Third day. Wind backing. Captain Haskett says we make the harbour by the light on the Gannet's Head, as always: keep it on the right hand and come in round it.\n\nI took this berth late. Jory Fenn broke his arm on the quay and I had his place, and his share. Orla says the money will see us to spring. She did not want me to go. She said it twice, which she never does.",
+        "Night. A light on the right hand, as it should be. Captain brought her round it.\n\nIt was not the Head. The Head has a tower. This light was low, on the rocks, and it moved when the swell lifted us. We struck on the Teeth an hour after.\n\nBoats came out from under the cliff. Lanterns in them. Not looking for us in the water. Looking for the crates. A woman with a hook said the captain's name as if she knew him.",
+        "On a spar. Cold. The pigs went into their boats. I heard her say: the buyer wants it whole, do not cut it.\n\nIf the sea gives this back to anybody: the Hind did not run, and the captain did not steal the town's bell. Tell the priest. Tell Orla at the net lofts I am sorry about the money.\n\nThe light on the Gannet's Head was dark. Somebody put it out."
+      ],
+      "found": ["mob:minecraft:drowned"],
+      "chance": 0.04
+    }
+  },
+  "roll": { "told": ["keeper", "chandler", "orla"] },
+  "cast": {
+    "priest": { "name": ["Osric Tamm", "Aldred Fenwick", "Simeon Hale"], "body": "villager", "job": "cleric", "female": false, "at": "temple" },
+    "orla": { "name": "Orla Pell", "body": "villager", "job": "fisherman", "female": true, "at": "lofts" },
+    "keeper": { "name": ["Amos Kettle", "Hew Tregar", "Silas Brane"], "body": "villager", "job": "none", "female": false, "at": "head" },
+    "chandler": { "name": ["Gideon Marsh", "Lowell Fitch", "Peder Sallow"], "body": "villager", "job": "none", "female": false, "at": "shop", "if": "told=chandler" },
+    "wrecker": { "name": ["Wenna Crane", "Bett Crane", "Tamsin Crane"], "body": "fighter", "female": true, "at": "scrape", "health": 60, "damage": 6, "armor": 5, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "seat": { "at": "town", "name": "the town" },
+    "temple": { "at": "near", "from": "seat", "dist": [20, 50], "name": "the Truth's house" },
+    "yard": { "at": "near", "from": "temple", "dist": [10, 30], "name": "the burying ground" },
+    "lofts": { "at": "near", "from": "seat", "dist": [30, 60], "name": "the net lofts" },
+    "shop": { "at": "near", "from": "seat", "dist": [20, 50], "name": "the chandlery on the quay" },
+    "teeth": { "at": "wild", "from": "seat", "dist": [150, 300], "name": "the Teeth below the cliff" },
+    "head": { "at": "near", "from": "teeth", "dist": [40, 80], "name": "the light on the Gannet's Head" },
+    "scrape": { "at": "wild", "from": "teeth", "dist": [200, 350], "name": "the Scrape, a hamlet on the shingle" }
+  },
+  "first": "to_teeth",
+  "steps": {
+    "to_teeth": {
+      "do": "go", "to": "teeth", "goal": "Find the wreck of the Grey Hind on {place:teeth}",
+      "journal": "A log came off a drowned man. It was the Grey Hind's, a coaster lost on rocks called the Teeth with bell-metal for the Truth's house in the town. Her mate, Tobin Pell, wrote that a false light drew her in, and that the true light on the Gannet's Head was dark.",
+      "then": "search_wreck"
+    },
+    "search_wreck": {
+      "do": "search", "at": "teeth", "goal": "Search what is left of the Grey Hind",
+      "clues": [
+        { "name": "The Hind's nameboard", "item": "minecraft:oak_planks", "lore": ["Grey Hind, cut deep and painted once.", "Split along the grain where the rocks took her."], "journal": "The Hind lay broken on the Teeth, her nameboard split along the grain." },
+        { "name": "Cut lashings", "item": "minecraft:string", "lore": ["Tarred cord from the hold, cut clean. Not frayed. Cut.", "Something heavy was lashed here, and somebody wanted it off her quickly."], "journal": "The lashings in her hold were cut with a knife. The bell-metal was taken off her, not lost with her." },
+        { "name": "A snapped boat hook", "item": "minecraft:tripwire_hook", "lore": ["The iron head of a wrecker's hook, broken off its pole.", "There is wool caught in it, and the wool is dark and stiff."], "journal": "A wrecker's hook lay broken among the rocks, with something dark dried on it." },
+        { "name": "Lamp glass on the low rocks", "item": "minecraft:glass_pane", "lore": ["Pieces of a lantern, smashed on the rocks under the cliff, well below where any tower stands.", "Somebody held a light down here, and broke it after."], "journal": "Broken lantern glass lay on the low rocks under the cliff, where no light should ever have been." }
+      ],
+      "then": "priest"
+    },
+    "priest": {
+      "do": "talk", "who": "priest", "goal": "Take the log to {priest} at {place:temple}",
+      "say": [
+        "That is Tobin Pell's hand. I married him to Orla at this table. Give it here. No, I will read it standing.",
+        "The whole town put a coin to that bell. Families who had one coin. When the Hind did not come in, the reeve said Haskett had run north with the metal and sold it, and the town believed him, because it was easier to believe than the sea. He said it at the well and I did not stop him.",
+        "Since the dark of the year came on there has been no bell over the burying ground, and the dead have been getting up out of it. Twice now. We hold the lych gate with hay forks."
+      ],
+      "replies": [
+        { "say": "The log says the Hind did not run. The metal was cut out of her.", "then": "priest_more" },
+        { "say": "Who would want a bell lost?", "then": "priest_more" },
+        { "say": "I have brought you his book. The rest is the town's business.", "then": "end:turned_away" }
+      ]
+    },
+    "priest_more": {
+      "do": "talk", "who": "priest",
+      "say": [
+        "Want it lost? Nobody. Want nine pigs of good bronze on a dark night? Every wrecker on this coast. The Scrape is two days up the shingle, and they have been eating weed since the sea came up over their shallows. I say that with no pleasure. The Scrape gave us Orla.",
+        "Orla Pell, Tobin's wife. Scrape-born. Since the Hind was lost they have spat on her step, because a Scrape woman's man was on the ship the Scrape's trade sank, and that is how a town reckons. She is at {place:lofts}, mending nets nobody pays her for.",
+        "And there is {keeper}, who keeps the light on the Gannet's Head. He swears it burned all that night. Find me the metal and I will pour the bell myself if I must. There is {coins:15} in the poor box that the families say is mine to give."
+      ],
+      "replies": [
+        { "say": "I'll start with his wife.", "then": "orla", "journal": "{priest} of the Truth's house said the town believed the Hind's captain ran off with its bell-metal. Tobin's widow, Orla, was Scrape-born, and the town had turned on her. The keeper of the Gannet's Head swore his light burned that night." },
+        { "say": "I'll find your metal.", "then": "orla", "journal": "{priest} of the Truth's house said the town believed the Hind's captain ran off with its bell-metal, and the dead had been rising without a bell to keep them down. Tobin's widow, Orla, was Scrape-born, and the town had turned on her." }
+      ]
+    },
+    "orla": {
+      "do": "talk", "who": "orla", "goal": "Speak with Orla Pell at {place:lofts}",
+      "say": [
+        "If you have come to spit, the step is there. Everybody else has had a turn.",
+        "That is his book. His knots on the cover. Give it me. 'Tell Orla I am sorry about the money.' The money. He took Jory Fenn's berth the night before she sailed, for the share, and I begged him not to go, and he thought it was because I would miss him."
+      ],
+      "replies": [
+        { "say": "Why did you beg him not to go?", "then": "orla_more" },
+        { "say": "Your people at the Scrape took the metal off her.", "then": "orla_more" }
+      ]
+    },
+    "orla_more": {
+      "do": "talk", "who": "orla",
+      "say": {
+        "?told=orla": [
+          "Because it was the dark of the moon, and a coaster with bronze in her hold. Any Scrape child can tell you what that means. I am Scrape. I know what my sister does on the dark nights. Knowing is not doing.",
+          "{wrecker} is my sister. She has kept the Scrape alive since the shallows went bare. And she did not know he was aboard. Nobody knew. He only took the berth the night before. Go up to the Head and ask {keeper} why his light was out."
+        ],
+        "?": [
+          "Because it was the dark of the moon, and a coaster with bronze in her hold. Any Scrape child can tell you what that means. I am Scrape. I know what my sister does on the dark nights. Knowing is not doing.",
+          "{wrecker} is my sister. She has kept the Scrape alive since the shallows went bare, and she would not drown a man for metal. She would not. Go up to the Head and ask {keeper} why his light was out, and then go and tell her what she did, because I cannot."
+        ]
+      },
+      "journal": "Orla Pell said her sister, {wrecker}, led the wreckers of the Scrape. She had begged Tobin not to sail and would not say why, except that it was the dark of the moon.",
+      "then": "to_head"
+    },
+    "to_head": { "do": "go", "to": "head", "goal": "Go up to {place:head}", "then": "search_head" },
+    "search_head": {
+      "do": "search", "at": "head", "goal": "Look over the light on the Gannet's Head",
+      "clues": [
+        { "name": "The great lamp", "item": "minecraft:lantern", "lore": ["Cold. The wick is trimmed short and pinched, not burnt down.", "Somebody put this out with their fingers, and the oil is still in it."], "journal": "The lamp on the Gannet's Head had been pinched out by hand. It did not burn dry." },
+        { "name": "The keeper's oil book", "item": "minecraft:paper", "lore": ["A mark for every night, and the cask the oil came from.", "On the night the Hind was lost the mark is there, in a steadier hand than all the rest."], "journal": "The keeper's oil book marked the lamp lit that night, in a steadier hand than the rest, as if written later." },
+        { "name": "A purse behind the casks", "item": "minecraft:gold_nugget", "lore": ["Pushed in behind the oil casks. Good coin, and not this coast's.", "It is wrapped in tarred sailcloth, the same as the Hind's lashings."], "journal": "A purse of coin was hidden in the oil store, wrapped in the Hind's own tarred sailcloth.", "if": "told=keeper" },
+        { "name": "A cask with a quay mark", "item": "minecraft:barrel", "lore": ["A small cask of lamp oil, burned with the mark of the chandlery on the quay.", "It smells of oil, and under the oil of something sweet that makes the head swim."], "journal": "One oil cask came from the chandlery on the quay, and something besides oil had been put in it.", "if": "told=chandler" },
+        { "name": "A shawl pin", "item": "minecraft:iron_nugget", "lore": ["A bent pin of the kind net women wear, with a little fish cut on the head.", "Trodden into the turf by the tower door. Every woman on the Scrape wears one."], "journal": "A Scrape woman's shawl pin, with a fish cut on its head, had been trodden into the turf at the tower door.", "if": "told=orla" }
+      ],
+      "then": "keeper"
+    },
+    "keeper": {
+      "do": "talk", "who": "keeper", "goal": "Speak with {keeper}",
+      "say": {
+        "?told=keeper": [
+          "It burned. It burned all night. It is in the book, look at the book.",
+          "What have you got there? That is nothing. That is my wages. The light is paid in odd coin, it is a far town that pays the light."
+        ],
+        "?told=chandler": [
+          "It burned until it did not. I trimmed it at dusk and sat down with my supper, and the next thing it was grey morning and cold, and my head like a split log. I wrote it lit in the book after. I was afraid.",
+          "The oil? From the chandlery, as always. {chandler} sent a cask up himself that week, a gift, he said, for a long winter. He has never in his life given anybody anything."
+        ],
+        "?": [
+          "It burned until it did not. A woman came up the path at dusk with a jug, a Scrape woman, with a pin in her shawl. Said she was walking to the town and wanted a fire. I have not had company since my wife died.",
+          "I woke at grey morning with the jug empty and the lamp cold. I wrote it lit in the book after. I was afraid. I am still afraid."
+        ]
+      },
+      "replies": [
+        { "say": "There was a purse behind your casks.", "if": "told=keeper", "then": "keeper_more" },
+        { "say": "Nine men drowned on the Teeth that night.", "then": "keeper_more" },
+        { "say": "Tell me the rest of it.", "then": "keeper_more" }
+      ]
+    },
+    "keeper_more": {
+      "do": "talk", "who": "keeper",
+      "say": {
+        "?told=keeper": [
+          "Men drown on the Teeth every winter. A Scrape woman came up the path with a purse, the third night after the quarter, and she said: only be tired tonight, keeper. So I was tired. It is a long winter and the town pays its light last.",
+          "They are at the Scrape, {way:scrape}. They take what the sea brings in at the dark of the moon, and after a taking they lie quiet until the next. I will not go there. Do what you like with me after, but I will not go there."
+        ],
+        "?": [
+          "I know it. I watched the sea all the next day for them. Nothing came up but planks.",
+          "They are at the Scrape, {way:scrape}. After a taking they lie quiet until the next dark of the moon. Whatever you mean to do, do not go there on a dark night."
+        ]
+      },
+      "journal": {
+        "?told=keeper": "{keeper} owned that he took a purse from a Scrape woman to let his light go dark the night the Hind was lost. The wreckers were at the Scrape, up the shingle.",
+        "?told=chandler": "{keeper} was put to sleep by something in a cask of oil sent up by {chandler}, the chandler on the quay. He wrote the lamp lit afterwards, out of fear. The wreckers were at the Scrape, up the shingle.",
+        "?": "A Scrape woman with a fish pin brought {keeper} a jug at dusk the night the Hind was lost. He woke at dawn with the lamp cold, and wrote it lit out of fear. The wreckers were at the Scrape, up the shingle."
+      },
+      "then": "wait_dark"
+    },
+    "wait_dark": {
+      "do": "wait", "days": [2, 4], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": [
+        "The dead came up out of the burying ground again last night, more of them than before. Jory Fenn held the lych gate one-armed with a hay fork until the cock crowed. He says he owes Tobin that much.",
+        "The dark of the moon is tomorrow. The Scrape will be out on the water, and our dead will be out of the ground. I would not ask a stranger to stand at our gate, but I have nobody left to ask.",
+        "If you will, come to the burying ground at dusk."
+      ] },
+      "then": "defend_yard"
+    },
+    "defend_yard": {
+      "do": "defend", "at": "yard", "waves": 3, "foes": "minecraft:zombie", "stars": 2, "goal": "Hold {place:yard} through the dark of the moon",
+      "journal": "The dead came up out of the burying ground at the dark of the moon, and were put back before dawn. Without a bell they would come again.",
+      "then": "to_scrape"
+    },
+    "to_scrape": { "do": "go", "to": "scrape", "goal": "Find {wrecker} at {place:scrape}", "then": "wrecker" },
+    "wrecker": {
+      "do": "talk", "who": "wrecker", "goal": "Speak with {wrecker}",
+      "say": [
+        "You walked up the shingle by day, in plain sight, so you are not the watch and you are not a fool. Stand there. My boys have hooks.",
+        "That is the Hind's log. Where did you come by it? From the sea. Of course. She gives back what she likes."
+      ],
+      "replies": [
+        { "say": "Where is the bell-metal?", "then": "wrecker_more" },
+        { "say": "Tobin Pell was your sister's husband.", "then": "wrecker_more" }
+      ]
+    },
+    "wrecker_more": {
+      "do": "talk", "who": "wrecker",
+      "say": {
+        "?told=keeper": [
+          "In the net shed, under a sail, nine pigs, whole. The buyer wants it whole. Do you know what the shallows were before the sea came up? Cockles by the bucket. Now my boats row out a day for half a basket, and there are thirty mouths on this shingle and four of them not a year old.",
+          "The keeper sold us his dark for a purse. I took it up to him myself. I did not know Tobin was aboard. Nobody told me. When I saw him in the water I put my hook out to him, and the swell took him off it. Believe that or not."
+        ],
+        "?told=chandler": [
+          "In the net shed, under a sail, nine pigs, whole. The buyer wants it whole. Do you know what the shallows were before the sea came up? Cockles by the bucket. Now my boats row out a day for half a basket, and there are thirty mouths on this shingle and four of them not a year old.",
+          "{chandler} on the quay sold us the night, and sent the keeper his sleeping oil, and he is the buyer. Nine pigs for the price of four, and he sells them up the coast for twelve. I did not know Tobin was aboard. When I saw him in the water I put my hook out to him, and the swell took him off it. Believe that or not."
+        ],
+        "?": [
+          "In the net shed, under a sail, nine pigs, whole. The buyer wants it whole. Do you know what the shallows were before the sea came up? Cockles by the bucket. Now my boats row out a day for half a basket, and there are thirty mouths on this shingle and four of them not a year old.",
+          "Who told me the night? Ask who knew the Hind's sailing and had a sister on the shingle. She did it for the babies. She did not know Tobin had Jory Fenn's berth until he kissed her at the door. When I saw him in the water I put my hook out to him, and the swell took him off it. Believe that or not."
+        ]
+      },
+      "journal": {
+        "?told=keeper": "{wrecker} of the Scrape had the nine pigs of bell-metal in her net shed, kept whole for a buyer. She said the keeper sold her his dark for a purse, and that she tried to pull Tobin out of the water.",
+        "?told=chandler": "{wrecker} of the Scrape had the nine pigs of bell-metal in her net shed, kept whole for a buyer. The buyer was {chandler}, the chandler on the quay, who sold her the night and drugged the keeper.",
+        "?": "{wrecker} of the Scrape had the nine pigs of bell-metal in her net shed, kept whole for a buyer. It was her sister Orla who told her the night the Hind would sail, before Tobin ever took the berth."
+      },
+      "replies": [
+        { "say": "The metal goes back to the town. Stand aside.", "then": "fight_wrecker" },
+        { "say": "Give it up, and I'll not name the Scrape to anybody.", "then": "wrecker_gives", "mark": "wl_promised", "journal": "{wrecker} was promised that the Scrape would not be named, if the metal went back." },
+        { "say": "Here is {coins:20}. It is not the buyer's price, but it is a winter.", "needs_coins": 20, "then": "wrecker_gives", "mark": "wl_paid", "journal": "The bell-metal was bought back from {wrecker} for {coins:20}, a winter's bread for the Scrape." },
+        { "say": "Keep it. Feed your thirty mouths.", "then": "end:scrape_keeps", "against": ["law"], "journal": "The bell-metal was left with the wreckers of the Scrape." }
+      ]
+    },
+    "fight_wrecker": {
+      "do": "foe", "who": "wrecker", "goal": "Deal with {wrecker}",
+      "taunt": "Hooks, boys! This one has come for the babies' winter.",
+      "plea": "Enough! Enough. Take the metal. Take all of it. Leave us the boats, we have nothing else.",
+      "mercy": "The metal. Nothing else.",
+      "thanks": "Nothing else. You hear that, boys? Put the hooks down. Put them down.",
+      "slain": "search_scrape", "spared": "wrecker_gives",
+      "spared_returns": { "as": "recruit", "days": [8, 14], "say": "The Scrape rows for the far grounds now, honest, and they do not need me to show them how to pull an oar. I find I cannot sit on the shingle and watch the Teeth. You had me down and let me up. Nobody ever did that for me on this coast. I can handle a boat and a hook, and I know every cove from here to the north harbours." }
+    },
+    "wrecker_gives": {
+      "do": "talk", "who": "wrecker",
+      "say": {
+        "?mark:wl_paid": [
+          "Twenty. That is a winter, near enough, and nobody hangs for it. You are a strange one.",
+          "Take the pigs. Boys, the sail off them. And tell Orla. No. Do not tell Orla anything. She knows where I am."
+        ],
+        "?mark:wl_promised": [
+          "Your word, then. I have had worse from better dressed. If the watch comes up this shingle I will know whose word it was.",
+          "Take the pigs. Boys, the sail off them. The babies will eat weed again this winter. Remember that, when they ring it."
+        ],
+        "?": [
+          "You could have finished it and you did not. I do not know what to do with that.",
+          "Take the pigs. Boys, the sail off them. Ring it loud, then. Ring it loud enough that they hear it out here."
+        ]
+      },
+      "journal": "{wrecker} gave up the nine pigs of bell-metal from under the sail in her net shed.",
+      "then": "bring_metal"
+    },
+    "search_scrape": {
+      "do": "search", "at": "scrape", "goal": "Search the Scrape's net shed",
+      "clues": [
+        { "name": "Nine pigs of bell-metal", "item": "minecraft:copper_ingot", "lore": ["Under a sail in the net shed, whole, still in the Hind's tarred wrapping.", "Nobody had cut so much as a sliver off them."], "journal": "The nine pigs of bell-metal were under a sail in {wrecker}'s net shed, whole." },
+        { "name": "A rattle of cockle shells", "item": "minecraft:nautilus_shell", "lore": ["Shells strung on a cord, for a baby to shake.", "The cockles in it are old. There have been none on this shore since the sea came up."], "journal": "There was a baby's rattle of cockle shells in the shed, made from shells nobody had found on that shore in years." },
+        { "name": "The share stick", "item": "minecraft:stick", "lore": ["A tally stick notched for every share of the Hind's taking.", "One notch is cut apart from the rest, and beside it a little lantern is scratched: one share to the light."], "journal": "The Scrape's share stick set one share aside for the light: the keeper was paid.", "if": "told=keeper" },
+        { "name": "A buyer's note", "item": "minecraft:paper", "lore": ["'Nine pigs, whole, at the old slip, the second night after. Four now, the rest on delivery.'", "It is signed with the chandlery's mark from the quay."], "journal": "A note in the shed promised payment for the nine pigs, signed with the mark of {chandler}'s chandlery.", "if": "told=chandler" },
+        { "name": "The share stick", "item": "minecraft:stick", "lore": ["A tally stick notched for every share of the Hind's taking.", "One notch is cut apart, and beside it a letter: O. for the babies. The notch has never been crossed through. Nobody came for it."], "journal": "The Scrape's share stick held a share for O., set aside for the babies and never collected.", "if": "told=orla" }
+      ],
+      "then": "bring_metal"
+    },
+    "bring_metal": {
+      "do": "bring", "who": "priest", "item": "minecraft:copper_ingot", "count": 9, "goal": "Bring the nine pigs of bell-metal to {priest}",
+      "give": [{ "item": "minecraft:copper_ingot", "count": 9, "name": "A pig of bell-metal", "lore": ["Bronze, cold and heavy, still smelling of tar.", "Every family in the town put a coin to it."] }],
+      "journal": "The nine pigs of bell-metal came back to the Truth's house.",
+      "then": "priest_after"
+    },
+    "priest_after": {
+      "do": "talk", "who": "priest",
+      "say": [
+        "Nine. All nine. I have counted them three times like a miser. We pour on the next fair day, and the bell will hang by the dark of the moon after.",
+        "Now. The reeve will ask me, and the families will ask me, and I will not lie in this house. Who sold the Hind? Give me the plain word, or give me nothing, but do not give me a tale."
+      ],
+      "replies": [
+        { "say": "{keeper} let his light die for a purse.", "if": "told=keeper", "then": "wait_named", "mark": "wl_named", "journal": "{keeper}'s name went to {priest}: he let the Gannet's Head light die for a wrecker's purse." },
+        { "say": "{chandler} sold the night, drugged the keeper, and was buying the metal.", "if": "told=chandler", "then": "wait_named", "mark": "wl_named", "journal": "{chandler}'s name went to {priest}: he sold the Hind's night to the wreckers, drugged the keeper and bought the metal." },
+        { "say": "Orla Pell told her sister the night the Hind would sail.", "if": "told=orla", "then": "wait_named", "mark": "wl_named", "against": ["mercy"], "journal": "Orla Pell's name went to {priest}: she told her sister the night the Hind would sail.",
+          "returns": { "who": "wrecker", "as": "revenge", "days": [8, 14], "say": "My sister walked into the Truth's house on her own feet when she heard her name was said, and they hanged her for it with the whole town watching. She gave me a night for the babies. You gave them her. The Scrape has a long memory, and so do I." } },
+        { "say": "Before I say a name, I'll speak to them myself.", "then": "confront" },
+        { "say": "The sea took it and the sea gave it back. Leave it there.", "then": "wait_quiet", "mark": "wl_quiet", "against": ["honour"], "journal": "{priest} was told only that the sea gave the metal back. No name was given." }
+      ]
+    },
+    "confront": {
+      "do": "talk", "who": { "?told=keeper": "keeper", "?told=chandler": "chandler", "?": "orla" }, "goal": "Speak with {told}",
+      "mark": "wl_spoke",
+      "say": {
+        "?told=keeper": [
+          "You have been to the Scrape. I can see the shingle on your boots. Well. I am old, and the town pays its light last, and I sold the dark for a purse, and nine men are on the Teeth. There. It is said. I have been saying it to the lamp every night since.",
+          "What will you do?"
+        ],
+        "?told=chandler": [
+          "Shut the door. You have been to the Scrape, and the Scrape talks, and you have come to me instead of to the reeve, which tells me you are somebody who can be spoken to.",
+          "Nine pigs of bronze, for a bell that keeps a few old bones in the ground. Do you know what that metal fetches up the coast? Here is {coins:20}. The priest has his bell. Nobody else need be the poorer."
+        ],
+        "?": [
+          "She told you. Of course she told you. She thinks it is a weight off her, telling.",
+          "I gave her the night for the babies. Then Tobin came home with Jory's berth and the share, so pleased with himself, and I could not unsay it without saying it. I begged him. I have been mending nets for a town that spits on my step, and I thought: that is right. That is about right."
+        ]
+      },
+      "replies": [
+        { "say": "Go to the priest and say it yourself.", "then": "wait_confessed", "mark": "wl_confessed", "journal": "{told} was told to go to {priest} and say it in their own words." },
+        { "say": "Leave this coast tonight, and I'll say nothing.", "then": "wait_gone", "mark": "wl_exiled", "against": ["vengeance"], "journal": "{told} was let leave the coast by night, and nothing was said to {priest}." },
+        { "say": "{coins:20}, and your name stays out of it.", "if": "told=chandler", "then": "wait_quiet", "mark": "wl_bought", "against": ["law"], "journal": "{chandler} paid {coins:20} to keep his name out of it, and his name was kept out of it." },
+        { "say": "Nobody will hear it from me. Mend your nets.", "if": "told=orla", "then": "wait_quiet", "journal": "Orla's part was kept from {priest} and from the town.",
+          "returns": { "who": "orla", "as": "thanks", "days": [6, 10], "say": "They have stopped spitting on my step. The bell did that, not you, but I know who brought the bell. I told my sister to row for the far grounds or I would row out and sink her myself, and she laughed, and she is rowing. This was Tobin's rod. He would want somebody to use it.", "gift": ["minecraft:cod*6", "minecraft:fishing_rod*1"] } },
+        { "say": "Keep the light. Every night, as long as you live.", "if": "told=keeper", "then": "wait_quiet", "against": ["vengeance"], "journal": "{keeper} was left to keep his light, and his part was kept from {priest}.",
+          "returns": { "who": "keeper", "as": "thanks", "days": [5, 9], "say": "A coaster came in round the Head last night in a full gale, and I stood up there with the lamp in my two hands for fear the glass would go. Nine men on her. I counted them off the quay this morning. I do not know what it is worth, nine for nine. Take this. It has never once gone out.", "gift": ["minecraft:lantern*1"] } }
+      ]
+    },
+    "wait_named": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": {
+        "?told=keeper": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "{keeper} went before the ruler. He said it all in the plain word, and the ruler gave him the rope, as the law gives a man who sells a ship. He asked me to see that his lamp was lit the night they did it. I lit it myself.",
+          "The families are calling the Hind's crew honest men again, at the well where they called them thieves. Nobody has said sorry to Orla. I have."
+        ],
+        "?told=chandler": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "{chandler} went before the ruler, and the chandlery is shut under the watch's seal. They found a second buyer's note in his strongbox, for another ship, another winter. The ruler gave him the rope.",
+          "The families are calling the Hind's crew honest men again, at the well where they called them thieves. Nobody has said sorry to Orla. I have."
+        ],
+        "?": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "Orla Pell did not wait for the watch. She walked into the Truth's house of her own accord when she heard her name was said, and sat at the table where I married her, and told it all. The ruler gave her the rope. The town came to watch. I did not see you there.",
+          "Jory Fenn would not go to see it. He sat in the lych gate all day with his arm in its sling, and would not say why."
+        ]
+      } },
+      "then": "end:named"
+    },
+    "wait_confessed": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": {
+        "?told=keeper": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "{keeper} came to me on his own two feet and said it at my table. I took it to the ruler myself, and asked for mercy in the Truth's name, for a man who came in of his own will. He has lost the light and gone to the stocks and the road. A younger man keeps the Head now. It burns.",
+          "The families are calling the Hind's crew honest men again. That is something."
+        ],
+        "?told=chandler": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "{chandler} did not come. He took a boat north the same night with his strongbox, and the watch found the chandlery bare. So much for his own words. The reeve has his name now, and every harbour on the coast will have it by spring.",
+          "The families are calling the Hind's crew honest men again. That is something."
+        ],
+        "?": [
+          "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+          "Orla came to me and said it at my table, and I took it to the ruler myself, and asked for mercy in the Truth's name. She is to be set out of the town, not hanged. She asked to hear the bell once before she went. She stood at the lych gate and heard it, and then she walked north up the shingle.",
+          "The families are calling the Hind's crew honest men again. They do not know what it cost."
+        ]
+      } },
+      "then": "end:confessed"
+    },
+    "wait_gone": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": [
+        "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+        "{told} is gone. The house is empty and the door left open, and nobody can say where. The reeve asks me if it means anything. I tell him I do not deal in guesses.",
+        "You never did give me a name. I think you gave me something instead, and I have not decided what."
+      ] },
+      "then": "end:gone"
+    },
+    "wait_quiet": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": [
+        "The bell is poured and hung, and it rang over the burying ground at dusk. Nothing got up.",
+        "The families are calling the Hind's crew honest men again. The reeve wants a name for the rest of it, and I have told him the sea has none. I said it in the Truth's house. I hope you know what you have made me say.",
+        "There is {coins:15} from the poor box. The families would have it so."
+      ] },
+      "then": { "?mark:wl_bought": "end:bought", "?": "end:quiet" }
+    }
+  },
+  "endings": {
+    "turned_away": { "text": "The Grey Hind's log went to {priest}, and the rest was left to the town.", "failed": true },
+    "scrape_keeps": {
+      "text": "The bell-metal was left with the wreckers of the Scrape to feed their thirty mouths. The town still has no bell, and its dead still walk.",
+      "reward": { "items": ["minecraft:cod*6"] },
+      "marks": ["wl_left_metal"],
+      "town": ["Still no bell. They say the Scrape has a buyer up the coast. They say a lot of things.", "My mother got up out of the burying ground last week. I put her back myself. You try doing that."],
+      "returns": { "who": "wrecker", "as": "warning", "days": [6, 10], "say": "The buyer took the pigs and paid in full, and the Scrape will eat this winter. I came to tell you a thing, since you let us. The town reeve has been asking at the quay who walked up our shingle and walked back down. Keep off that coast a while. We have a long memory for kindness too.", "gift": ["minecraft:cod*8"] }
+    },
+    "named": {
+      "text": {
+        "?told=keeper": "The bell rang over the burying ground. {keeper} was named, and hanged for the light he let die.",
+        "?told=chandler": "The bell rang over the burying ground. {chandler} was named, and hanged for the ship he sold.",
+        "?": "The bell rang over the burying ground. Orla Pell was named, and hanged for the night she told her sister."
+      },
+      "reward": { "coins": 15, "hearts": 4, "reputation": 12 },
+      "marks": ["wl_bell_rung"],
+      "town": ["You hear that bell? Every family's coin is in it. Mine too.", "They hanged one for the Hind. Most of the town went to watch. I stayed home."]
+    },
+    "confessed": {
+      "text": {
+        "?told=chandler": "The bell rang over the burying ground. {chandler} was given the chance to say it himself, and ran north with his strongbox instead. Every harbour on the coast has his name.",
+        "?told=keeper": "The bell rang over the burying ground. {keeper} said it himself at the priest's table, and lost the light, but not his neck.",
+        "?": "The bell rang over the burying ground. Orla Pell said it herself at the priest's table, and was set out of the town instead of hanged. She heard the bell once before she went."
+      },
+      "reward": { "coins": 15, "hearts": 8, "reputation": 10 },
+      "marks": ["wl_bell_rung"],
+      "town": ["You hear that bell? Every family's coin is in it. Mine too.", "Somebody owned up about the Hind. Walked in on their own feet, the priest says. Takes something, that."],
+      "returns": { "who": "priest", "as": "thanks", "days": [8, 12], "say": "I have walked a long way to say a short thing. Nothing has got up out of the burying ground since the bell was hung. I ring it myself at dusk. Every time I ring it I think of whoever could have hanged a soul for it and let them walk in and say it instead. The Truth has no saints. If it had, I would be tempted. Here: the families made these for you.", "gift": ["minecraft:candle*4", "minecraft:bread*4"] }
+    },
+    "gone": {
+      "text": "The bell rang over the burying ground. {told} left the coast by night, and the town never learned who sold the Hind.",
+      "reward": { "coins": 10, "hearts": 4, "reputation": 6 },
+      "marks": ["wl_bell_rung"],
+      "town": ["You hear that bell? Every family's coin is in it. Mine too.", "Empty house by the quay, door open, fire out. Somebody left in a hurry, the night after the bell came."]
+    },
+    "quiet": {
+      "text": {
+        "?mark:wl_spoke & told=orla": "The bell rang over the burying ground. Orla Pell's part in it was kept, and the town stopped spitting on her step.",
+        "?mark:wl_spoke & told=keeper": "The bell rang over the burying ground. {keeper} keeps his light every night, and nobody but the two of us knows why he will not sleep.",
+        "?": "The bell rang over the burying ground. Nobody was named for the Hind, and the priest said in his own house that the sea had no name to give."
+      },
+      "reward": { "coins": 15, "hearts": 2, "reputation": 8 },
+      "marks": ["wl_bell_rung"],
+      "town": ["You hear that bell? Every family's coin is in it. Mine too.", "The Hind's men were honest after all. Who'd have thought. Somebody owes Orla Pell an apology, and it isn't me."]
+    },
+    "bought": {
+      "text": "The bell rang over the burying ground. {chandler} paid to keep his name out of it, and the chandlery on the quay is open for trade as before.",
+      "reward": { "coins": 20, "reputation": 2 },
+      "marks": ["wl_bell_rung", "wl_took_chandler_coin"],
+      "town": ["You hear that bell? Every family's coin is in it. Mine too.", "The chandler's bought a new cart. Trade's good, he says. Trade's always good for some."]
+    }
+  }
+}

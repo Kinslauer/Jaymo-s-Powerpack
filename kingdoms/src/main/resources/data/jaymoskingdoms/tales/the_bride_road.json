@@ -79,7 +79,8 @@
       "mercy": "Get off this road.",
       "thanks": "Gone. We are gone. You'll not see us this side of the hills.",
       "journal": "Three men were waiting at the ninth milestone. They were not after my purse. They knew her hood.",
-      "slain": "search_raider", "spared": "fire"
+      "slain": "search_raider", "spared": "fire",
+      "spared_returns": { "as": "warning", "days": [7, 12], "say": { "?hand=bride": "Easy. I'm not here for work. There's a man going round the hill camps asking who took coin at the ninth milestone, and what became of the girl in the grey hood. Her father's money, I'd guess, or the miller's. I told him the road took her. If you're asked, tell it the same.", "?": "Easy. I'm not here for work. The one who paid us on the bride road came round the hill camps again, wanting hands who don't ask why. I said no. Somebody won't. I thought you'd want to know the wanting hasn't stopped." } }
     },
     "search_raider": {
       "do": "search", "at": "milestone", "goal": "Search the dead man",
@@ -126,7 +127,7 @@
       },
       "replies": [
         { "say": "We go on. Speak for yourself at the mill door.", "then": "escort_far", "journal": "I told {bride} we go on to the mill, and that she can speak for herself when we get there." },
-        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} take the coast road at first light. She did not look back. I turned for home to tell them something." }
+        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} take the coast road at first light. She did not look back. I turned for home to tell them something.", "against": ["honour"] }
       ]
     },
     "escort_far": { "do": "escort", "who": "bride", "to": "mill", "goal": "Walk {bride} on to {place:mill}", "then": "groom_talk" },
@@ -138,7 +139,7 @@
       ],
       "replies": [
         { "say": "She is here. Ask her yourself.", "then": "wait_wed", "journal": "{groom} asked me whether {bride} was willing. I told him to ask her. I do not know what she said. The wedding went ahead." },
-        { "say": "Willing enough.", "then": "wait_wed", "mark": "bride_road_vouched", "journal": "{groom} asked me whether {bride} was willing. I said she was. The wedding went ahead." },
+        { "say": "Willing enough.", "then": "wait_wed", "mark": "bride_road_vouched", "journal": "{groom} asked me whether {bride} was willing. I said she was. The wedding went ahead.", "against": ["honour"] },
         { "say": "She is not willing. She never was.", "then": "groom_unwilling" },
         { "say": "Your son paid men to kill her on the road.", "if": "hand=kin", "then": "groom_son" }
       ]
@@ -212,7 +213,7 @@
       "do": "talk", "who": "giver", "goal": "Go back to {giver} without her",
       "say": "You are back, and alone, and two days early. Sit down. No. Stand. Tell me where {bride} is, and tell it carefully, because whatever you say I shall have to say again to her father and to the miller, and I shall need to get it right.",
       "replies": [
-        { "say": "Men took her at the ninth milestone. I could not hold them.", "then": "wait_gone_lie", "mark": "bride_road_lie", "journal": "I told {giver} that raiders carried {bride} off at the ninth milestone." },
+        { "say": "Men took her at the ninth milestone. I could not hold them.", "then": "wait_gone_lie", "mark": "bride_road_lie", "journal": "I told {giver} that raiders carried {bride} off at the ninth milestone.", "against": ["honour"] },
         { "say": "She chose her own road. I let her take it.", "then": "wait_gone_truth", "journal": "I told {giver} the truth: {bride} chose her own road, and I let her take it." }
       ]
     },

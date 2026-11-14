@@ -681,6 +681,17 @@ public final class SwornCaptains {
 	}
 
 	/** He turns back on his lord: off to his tribe again (a king keeps the seat for himself), and sworn to have their head. */
+	/** ({@link Convictions}) A sworn captain at {@code body} walks out on his lord: back to his tribe, as one who betrayed. False if he isn't one. */
+	static boolean forsake(ServerLevel level, Entity body) {
+		Captain c = Captains.of(body);
+		Bond b = c == null ? null : bond(level.getServer(), c.id());
+		if (b == null) {
+			return false;
+		}
+		betray(level, c, b);
+		return true;
+	}
+
 	private static void betray(ServerLevel level, Captain c, Bond b) {
 		MinecraftServer server = level.getServer();
 		put(server, c.id(), null);

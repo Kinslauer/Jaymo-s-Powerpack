@@ -220,8 +220,8 @@
         ]
       },
       "replies": [
-        { "say": "He's under the hill. The fall took him before the powder went in.", "then": "lie" },
-        { "say": "He's at the face. He'll come down if you call.", "then": "wait_handed", "journal": "I heard {hunter}'s side of it, and told him where {quiet} was." },
+        { "say": "He's under the hill. The fall took him before the powder went in.", "then": "lie", "against": ["law"] },
+        { "say": "He's at the face. He'll come down if you call.", "then": "wait_handed", "journal": "I heard {hunter}'s side of it, and told him where {quiet} was.", "against": ["mercy", "honour"] },
         { "say": "You'll not have him.", "then": "fight", "journal": "I heard {hunter}'s side of it, and told him he would not have {quiet}." }
       ]
     },
@@ -236,7 +236,7 @@
         { "say": "Here is his tag. The rest of him is under forty tons of stone.", "if": "past=deserter", "needs_item": { "item": "minecraft:iron_nugget", "count": 1 }, "then": "wait_lie", "journal": "I told the provost that {quiet} died in the fall, and gave him the levy tag to prove it. He closed the line in his book." },
         { "say": "Come and look at the fall, then.", "if": "past=outlaw", "then": "wait_lie", "journal": "I told the thief-taker that {quiet} died in the fall, and showed him the heading. He chose to believe a hill." },
         { "say": "Then you go through me.", "then": "fight", "journal": "I told {hunter} the hill had taken {quiet}. He did not believe it, and I stood in the road." },
-        { "say": "He's at the face. Take him.", "then": "wait_handed", "journal": "I told {hunter} the hill had taken {quiet}. He did not believe it, and I gave way." }
+        { "say": "He's at the face. Take him.", "then": "wait_handed", "journal": "I told {hunter} the hill had taken {quiet}. He did not believe it, and I gave way.", "against": ["mercy", "honour"] }
       ]
     },
     "fight": {
@@ -265,7 +265,7 @@
         "So I'm dead under the Number Two, by the word of the one who came for me. I can be a dead man here, shifting spoil. Or I can be a dead man on the road behind you, and of some use. Say which."
       ],
       "replies": [
-        { "say": "On the road. Fetch your pick.", "then": "end:joined", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} asked to walk with me, and I said yes." },
+        { "say": "On the road. Fetch your pick.", "then": "end:joined", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} asked to walk with me, and I said yes.", "returns": { "who": "hunter", "days": [8, 14], "as": "warning", "say": "Easy. I'm not here for him. I said the hill took him, and I'll go on saying it, for my own sake now. But I've seen a pick-man walking behind you on the north road, and I'm not the only one who keeps a list. The next one won't stop to talk at a ford." } },
         { "say": "Stay dead here. It suits you.", "then": "end:stayed_spared", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} stays at the mine, a dead man on the tally." }
       ]
     },

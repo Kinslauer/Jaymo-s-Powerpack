@@ -40,6 +40,7 @@ each class.
 | `Tale.java` | A tale as read from `data/<ns>/tales/*.json`: its start, cast, places, steps, endings; conditions and text. |
 | `Tales.java` | The engine: starting tales (asker, rumour, book, letter, companion), each player's runs, steps, talks, waits, endings, marks, party sharing, the Stories page. |
 | `TaleCast.java` | The people and foes of a tale in the world: set out when you come near, kept in place, yielding, sparing, coming back, joining. |
+| `Convictions.java` | What a companion truly believes (from their temperament), and their leaving you when a tale's choice goes against it or their bond falls too low. |
 | `QuestJobs.java` | The new kinds of work, for the board and for tale steps: pack, elite, defend, trek, incursion, lamps, build, blast, stash. |
 | `BoardWork.java` | Star-rated work on the town board, and each board's level. |
 | `Overheard.java` | Villagers' scenes with each other (`data/<ns>/scenes/*.json`) and a town's talk about your tales. |
@@ -120,10 +121,10 @@ Every step has `do`, and may have:
 
 | `do` | Fields | What happens |
 |---|---|---|
-| `talk` | `who`, `say`, `replies` | The player speaks with `who` (use them). `say` is a text or a list of texts (shown one after another). Each reply: `{ "say", "then", "if", "needs_item": {"item","count"}, "needs_coins": 11, "mark", "journal" }` (a reply that needs an item or coins is greyed out without them, and takes them when picked). No replies: the talk just continues to `then`. A reply whose `then` is another `talk` with the same `who` goes straight on. |
+| `talk` | `who`, `say`, `replies` | The player speaks with `who` (use them). `say` is a text or a list of texts (shown one after another). Each reply: `{ "say", "then", "if", "needs_item": {"item","count"}, "needs_coins": 11, "mark", "journal", "against", "returns" }` (a reply that needs an item or coins is greyed out without them, and takes them when picked). No replies: the talk just continues to `then`. A reply whose `then` is another `talk` with the same `who` goes straight on. |
 | `go` | `to`, `radius` | Reach the place (default radius 16). |
 | `search` | `at`, `clues`, `need` | Clues lie at the place: `[{ "name", "item", "lore": [..], "journal", "if" }]`. Pick up `need` of them (default: all). The clue's lore is what the player reads; its `journal` line goes on the Stories page. |
-| `foe` | `who`, `slain`, `spared`, `taunt`, `plea`, `mercy`, `thanks`, `yield_at` | Fight `who`. Dead: `slain`. A fighter yields at `yield_at` of their health (default 0.3) or when downed, says `plea`, and can be spared by talking to them and picking `mercy`, or by walking away: `spared`. Without `spared` there is no yielding. |
+| `foe` | `who`, `slain`, `spared`, `taunt`, `plea`, `mercy`, `thanks`, `yield_at`, `spared_returns` | Fight `who`. Dead: `slain`. A fighter yields at `yield_at` of their health (default 0.3) or when downed, says `plea`, and can be spared by talking to them and picking `mercy`, or by walking away: `spared`. Without `spared` there is no yielding. `spared_returns`: how they come back if spared (a returns object; `who` left out is this foe). |
 | `bring` | `who`, `item`, `count` | Bring so many of an item to `who`. |
 | `slay` | `target`, `count` | Kill so many (`minecraft:zombie`, `#tag`, `*monster`). |
 | `wait` | `days`, `wake`, `letter` | The tale rests `[least, most]` days. `wake`: `giver` (their **!** returns; talking to them goes on), `letter` (a runner brings `letter`: `{ "from", "lines" }`; opening it goes on), `none` (it just goes on). |
@@ -152,6 +153,15 @@ Every step has `do`, and may have:
 - `returns.as`: `thanks` (they find you, say their piece, leave a gift), `warning` (the same, with news), `recruit`
   (they ask to join you; `joins` is implied on yes), `revenge` (they come back armed, with friends).
 - `joins`: that role becomes a companion of the player.
+- `against` (also on a reply): a list of beliefs this goes against: `mercy`, `faith`, `law`, `courage`, `honour`,
+  `gain`, `vengeance`, and `self` (only in a companion's own tale: it betrays them). Any companion near the player
+  who truly holds one of them (by temperament, `Convictions.java`) leaves them; `self` sends the tale's companion off
+  wherever they are. Cutting down a foe who yielded is always against `mercy`, untagged.
+- Who comes back is decided by the choices first: a reply's `returns`, or a foe's `spared_returns`, kept till the end
+  (a later choice about the same person replaces an earlier one). The ending's `returns` counts only for someone no
+  choice spoke for. A foe let go with nothing said comes back by their temperament (spiteful or hotheaded: revenge;
+  proud or suspicious: a warning; brave or dutiful: asking to join; the rest: thanks). Nobody comes back from the
+  dead, and only a fighter comes back armed or to join (otherwise revenge becomes a warning, joining becomes thanks).
 - `failed`: true writes it in the journal's Past page as failed.
 
 ### conditions and switches
@@ -197,7 +207,7 @@ lines. The speakers stop, face each other and say them in turn.
 All 29 picked rows are built, in one PR. Built and compiled; `tools/tale_check.py` passes on every file and runs in
 `tools/pr_checks.py`. **Nothing has been played.**
 
-**What ships:** 14 tales (`data/jaymoskingdoms/tales/`), 21 to 34 steps and 5 to 10 endings each, every one resting
+**What ships:** 17 tales (`data/jaymoskingdoms/tales/`), 20 to 34 steps and 5 to 10 endings each, every one resting
 for days between its parts (three to five waits in each, 1 to 10 days long), and 40 overheard scenes
 (`data/jaymoskingdoms/scenes/`).
 
@@ -217,20 +227,27 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
 | What Was Owed | a close companion | Their past: a grave, a widow, a carter's son. |
 | The Brother Who Stayed | a close companion | Buried, bitter or outlawed. |
 | The Name She Left | a letter, only if you let the bride go | The sequel: her father went into the hills to look for her. |
+| The Wrong Light | a ship's log on a drowned body | A wreck by a false light, the temple's bell-metal, wreckers who are starving; who sold the ship changes each time. |
+| The Fourth Measure | a ledger on a dead witch | Someone buys slow poison for an old man, a measure each new moon; who it is changes each time. |
+| The Cold Hearth | a pilgrim's journal on a risen villager | A burned village's hearth-coal and its 22 names, carried to the Hearthkeeper's hall; the daughter's fate changes each time. |
 
 **How each row was built, and where it differs from the pick list**
 
 - **A1-A3, H1, H2** as planned. A tale is done once per player (any ending, or giving it up); one turned down before it
   began can be offered again. A tale begun again starts with its own marks cleared.
-- **A4** The spared come back with thanks (19 endings), a warning (3), asking to join (3) or for revenge with two
-  friends (1). Who comes back is fixed per ending, not per choice inside it.
+- **A4** The spared come back with thanks, a warning, asking to join, or for revenge with two friends. Andy
+  (2026-11-14) asked for it by each choice: replies carry `returns` and foes `spared_returns` in all 17 tales, and
+  a choice outranks the ending. A foe let go with nothing said comes back as their temperament takes them.
 - **A5** New memories `CUT_DOWN` and `MERCY` in Recollections and Bearings, spread by gossip like other deeds.
 - **A6** Clues are items lying at the scene with the finding written on them. Accusations at the priest and blood or
   chalk marks as clues were not used: naming is done in talk with the asker.
 - **B1** Rumours from passers-by (`Rumours.tell`) and from a night's drinking (`Carousing`).
-- **B2** Books are found in ruin chests and on bodies (`start.book.found`). One tale starts this way so far.
-- **B3** A runner (a villager) walks up by day under open sky, never a pigeon. If you're indoors or it's night they
-  wait for another day. A letter that starts a tale has no placeholders (the tale hasn't begun).
+- **B2** Books are found in ruin chests and on bodies (`start.book.found`). Four tales start this way: a carter's
+  tally (ruins, raiders), a ship's log (the drowned), a witch's ledger (witches), a pilgrim's journal (risen villagers).
+- **B3** A runner (a villager) comes to find you by day or by night (carrying a lantern after dark), out on the road
+  or indoors, so long as you're on your feet, not asleep or riding. If you keep a pigeon roost the birds can find, a
+  letter comes by pigeon three times in five instead. One lost on the way is sent again. A letter that starts a tale
+  has no placeholders (the tale hasn't begun). Andy asked for both (2026-11-14).
 - **C1, C2** Stars are on the notice and the quest title. A board levels every 3 jobs finished from it (by anyone),
   to level 5: one more notice from level 3, more often, harder kinds from levels 2 and 3, a little more pay.
 - **C3, C7** Humanoid foes go down before they die, as everywhere: a downed raider has to be finished to count.
@@ -250,7 +267,11 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
   you bring it back: if it's come undone it isn't taken.
 - **E1** One ending has someone join outright; three more have someone come back and ask.
 - **E2** Asked by a companion whose bond is close. Seen through, the bond rises by 20; ended badly or given up, it
-  falls by 12. No ending has the companion leave you.
+  falls by 12, and if that takes it below close (the least they'd ask you at), they leave you. Andy (2026-11-14): they
+  also leave if you go against anything they truly believe: see `against` under endings, and `Convictions.java`. This
+  holds for every companion near you in any tale, not only the one whose tale it is. A sworn greenskin captain who
+  leaves goes back to his tribe as one who betrayed you; captains have no temperament, so only their bond and their
+  own tale can part them from you.
 - **F1** A tracker already existed (three quests). This adds the pin: only that quest, with "far to the north-east"
   instead of numbers. A pinned tale keeps its pin while it rests.
 - **F2, F3** Fourth and fifth journal tabs. The two new tabs use item icons (book and quill, clock) until
@@ -261,5 +282,4 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
   from everyone near for the first if it went well, a shake of the head if badly. A town held through the night
   thanks you the same way. A toast at the tavern or a tended grave happens only where a tale's own words say so.
 
-**Left for later (not in the picks):** time-of-day or moon conditions on a step; `returns` that depend on a choice;
-a cast member whose body changes with the roll; a tale-only item for `stash` and `build`.
+**Left for later (not in the picks):** time-of-day or moon conditions on a step; a cast member whose body changes with the roll; a tale-only item for `stash` and `build`.

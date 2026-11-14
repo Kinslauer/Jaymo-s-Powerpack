@@ -99,6 +99,8 @@ public final class Tales {
 	static final double COMPANION_RANGE = 16.0;
 	/** A companion's own tale seen through adds this to their bond; ended badly or given up, it takes this much away. */
 	static final int COMPANION_BOND_DONE = 20, COMPANION_BOND_FAILED = 12;
+	/** A foe let go with no word on how they'll come back comes back this many days after the tale (least, most). */
+	static final int[] SPARED_BACK_DAYS = {4, 12};
 	/** A tale's book lies in a ruin's chest this often (each chest opened), when one is written to be found there. */
 	static final float BOOK_CHEST_CHANCE = 0.04F;
 	/** A letter lost or never opened is sent again after this many days. */
@@ -115,6 +117,8 @@ public final class Tales {
 	static final String KEY_BOOK = "jaymoskingdoms_tale_book", KEY_LETTER = "jaymoskingdoms_tale_letter", KEY_CLUE = "jaymoskingdoms_tale_clue";
 	/** A tale's quest in the log: this, then the run's instance. */
 	static final String QUEST = "tale:";
+	/** Run vars: who a choice said comes back ({@code ~back:<role>}, its returns object), and who was killed ({@code ~dead:<role>}). */
+	static final String BACK = "~back:", DEAD = "~dead:";
 
 	// ================================================================================================================
 	// What's kept
@@ -1507,7 +1511,40 @@ public final class Tales {
 				state(p).marks.add(mark);
 			}
 		}
+		// (who comes back is the choice's to say; and a companion who can't stand by it goes)
+		backFor(player, run, reply.get("returns"), "");
+		affront(player, run, Tale.strings(reply.get("against")));
 		go(player, run, reply.has("then") ? reply.get("then") : step.get("then"), who);
+	}
+
+	/** Everyone sharing {@code run} with {@code player} did something {@code against} what their companions believe ({@link Convictions}). */
+	private static void affront(ServerPlayer player, Run run, List<String> against) {
+		if (against.isEmpty() || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		Tale tale = Tale.get(run.tale);
+		Mob own = tale != null && tale.by().equals("companion") && entity(level, run.giverId()) instanceof Mob m ? m : null;
+		for (ServerPlayer p : sharers(player, run)) {
+			Convictions.affronted(p, against, p == player ? own : null);
+		}
+	}
+
+	/**
+	 * A choice (or a foe spared) says who comes back once {@code run} is over: {@code back} is a tale's returns object
+	 * ({@code who} defaults to {@code who}). Kept on the run till its end; a later choice about the same one replaces it.
+	 */
+	private static void backFor(ServerPlayer player, Run run, @Nullable JsonElement back, String who) {
+		if (back == null || !back.isJsonObject()) {
+			return;
+		}
+		JsonObject b = back.getAsJsonObject().deepCopy();
+		String role = Tale.string(b, "who", who);
+		if (role.isEmpty()) {
+			return;
+		}
+		b.addProperty("who", role);
+		String kept = b.toString();
+		each(player, run, r -> r.vars.put(BACK + role, kept));
 	}
 
 	private static void bring(ServerLevel level, ServerPlayer player, Run run, JsonObject step, LivingEntity who) {
@@ -1563,6 +1600,8 @@ public final class Tales {
 			}
 			Recollections.remember(foe, player, Recollections.Kind.SPARED, Component.empty());
 			each(player, run, r -> r.vars.put("~spared", name));
+			// (who they come back as: the step says, or else it's in their nature)
+			backFor(player, run, step.has("spared_returns") ? step.get("spared_returns") : sparedBack(foe), role);
 		} else if (slain && yielded && foe != null) {
 			// (cut down after they'd yielded: whoever saw it won't forget)
 			for (LivingEntity seen : level.getEntitiesOfClass(LivingEntity.class, foe.getBoundingBox().inflate(TaleCast.WITNESS_RANGE),
@@ -1570,9 +1609,32 @@ public final class Tales {
 				Recollections.remember(seen, player, Recollections.Kind.CUT_DOWN, Component.literal(name));
 			}
 			each(player, run, r -> r.vars.put("~cut_down", name));
+			affront(player, run, List.of(Convictions.Belief.MERCY.key));
+		}
+		if (slain) {
+			each(player, run, r -> r.vars.put(DEAD + role, "1"));
 		}
 		JsonElement then = slain || !step.has("spared") ? step.get("slain") : step.get("spared");
 		go(player, run, then, null);
+	}
+
+	/** How a foe let go comes back when no step says: the spiteful and hotheaded for revenge, the proud with a warning, the brave and dutiful asking to join, the rest with thanks. */
+	private static JsonObject sparedBack(LivingEntity foe) {
+		Temperaments.Temperament t = Temperaments.of(foe);
+		String as = t == null ? "thanks" : switch (t) {
+			case SPITEFUL, HOTHEADED -> "revenge";
+			case PROUD, SUSPICIOUS -> "warning";
+			case BRAVE, DUTIFUL -> "recruit";
+			default -> "thanks";
+		};
+		JsonObject b = new JsonObject();
+		b.addProperty("as", as);
+		com.google.gson.JsonArray days = new com.google.gson.JsonArray();
+		days.add(SPARED_BACK_DAYS[0]);
+		days.add(SPARED_BACK_DAYS[1]);
+		b.add("days", days);
+		b.addProperty("default", true);
+		return b;
 	}
 
 	private static void howGoes(ServerPlayer player, Run run, LivingEntity giver) {
@@ -1603,6 +1665,7 @@ public final class Tales {
 		Tale tale = Tale.get(run.tale);
 		if (tale != null && tale.by().equals("companion") && entity(level, run.giverId()) instanceof Mob companion) {
 			Bonds.add(companion, player.getUUID(), -COMPANION_BOND_FAILED);
+			Convictions.belowMinimum(companion, player);
 		}
 		close(player, run, "given_up", Component.translatable("tale.jaymoskingdoms.gave_up").getString(), true, QuestPast.GIVEN_UP);
 	}
@@ -1693,7 +1756,7 @@ public final class Tales {
 			boolean lost = sent >= 0 && today >= sent + LETTER_RESEND_DAYS && !holdsLetter(player, run.instance);
 			if ((sent < 0 || lost) && TaleCast.canVisit(level, player)) {
 				ItemStack letter = letter(player, run, Tale.object(step, "letter"), run.instance);
-				TaleCast.runner(level, player, letter, () -> each(player, run, r -> r.scratch.put("sent", Long.toString(day(level)))));
+				TaleCast.sendLetter(level, player, letter, () -> each(player, run, r -> r.scratch.put("sent", Long.toString(day(level)))));
 			}
 		}
 	}
@@ -1853,7 +1916,7 @@ public final class Tales {
 				Run blank = new Run("", tale.id, tale.first(), "", "", "", factionAt(level, player.blockPosition()), player.blockPosition().asLong(), -1L, false,
 					Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of());
 				ItemStack letter = letter(player, blank, Tale.object(tale.start(), "letter"), "start:" + tale.id);
-				TaleCast.runner(level, player, letter, () -> state(player).due.put(tale.id, -Math.max(1L, day(level))));
+				TaleCast.sendLetter(level, player, letter, () -> state(player).due.put(tale.id, -Math.max(1L, day(level))));
 				return;
 			}
 		}
@@ -1920,6 +1983,10 @@ public final class Tales {
 			if (tale.by().equals("companion") && giver instanceof Mob companion) {
 				// (a companion's own trouble: seeing it through brings them closer, leaving it badly costs)
 				Bonds.add(companion, player.getUUID(), failed ? -COMPANION_BOND_FAILED : COMPANION_BOND_DONE);
+				if (failed) {
+					// (fallen below what they asked you as: they go)
+					Convictions.belowMinimum(companion, player);
+				}
 			}
 			// (how it ended is the asker's to tell: who was let go)
 			String spared = run.vars.get("~spared");
@@ -1937,14 +2004,39 @@ public final class Tales {
 		}
 		// who comes back, and who stays
 		String joins = Tale.string(ending, "joins", "");
-		JsonObject returns = Tale.object(ending, "returns");
-		String back = Tale.string(returns, "who", "");
-		JsonObject body = back.isEmpty() ? null : tale.role(back);
-		if (body != null) {
-			MutableComponent say = words(player, run, returns, "say");
-			s.returns.add(new Return(run.names.getOrDefault(back, back), body.toString(), day(level) + Tale.between(returns.get("days"), 5, level.getRandom()),
-				Tale.string(returns, "as", "thanks"), say == null ? "" : say.getString(), Tale.strings(returns.get("gift")), run.faction));
+		// (the choices made say who comes back and how; the ending says it where they didn't; nobody comes back from the dead)
+		Map<String, JsonObject> backs = new java.util.LinkedHashMap<>();
+		for (Map.Entry<String, String> e : run.vars.entrySet()) {
+			if (e.getKey().startsWith(BACK)) {
+				try {
+					backs.put(e.getKey().substring(BACK.length()), com.google.gson.JsonParser.parseString(e.getValue()).getAsJsonObject());
+				} catch (RuntimeException ignored) {
+					// (not a returns object)
+				}
+			}
 		}
+		JsonObject returns = Tale.object(ending, "returns");
+		String endBack = Tale.string(returns, "who", "");
+		if (!endBack.isEmpty() && (!backs.containsKey(endBack) || Tale.flag(backs.get(endBack), "default"))) {
+			backs.put(endBack, returns);
+		}
+		for (Map.Entry<String, JsonObject> e : backs.entrySet()) {
+			String back = e.getKey();
+			JsonObject b = e.getValue();
+			JsonObject body = tale.role(back);
+			if (body == null || run.vars.containsKey(DEAD + back)) {
+				continue;
+			}
+			String as = Tale.string(b, "as", "thanks");
+			if (!Tale.string(body, "body", "villager").equals("fighter")) {
+				// (only a fighter comes back with a blade, or to take up one)
+				as = as.equals("revenge") ? "warning" : as.equals("recruit") ? "thanks" : as;
+			}
+			MutableComponent say = words(player, run, b, "say");
+			s.returns.add(new Return(run.names.getOrDefault(back, back), body.toString(), day(level) + Tale.between(b.get("days"), 5, level.getRandom()),
+				as, say == null ? "" : say.getString(), Tale.strings(b.get("gift")), run.faction));
+		}
+		affront(player, run, Tale.strings(ending.get("against")));
 		if (!joins.isEmpty()) {
 			TaleCast.join(level, player, run, joins);
 		}

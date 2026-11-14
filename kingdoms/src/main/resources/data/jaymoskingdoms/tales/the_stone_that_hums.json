@@ -152,7 +152,7 @@
       "replies": [
         { "say": "{hermit} says no. So do I.", "then": "fight_picker" },
         { "say": "What became of the last man who carried a piece off?", "then": "picker_more" },
-        { "say": "An hour, then. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks." }
+        { "say": "An hour, then. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks.", "against": ["honour", "law"] }
       ]
     },
     "picker_more": {
@@ -160,7 +160,7 @@
       "say": "Old Jem? Found in a ditch, so I heard, with his hands to his head. He drank. Men who drink are found in ditches. I wear wax in my ears and I do not listen to rocks, and I have had eleven years in this trade. Last time of asking. Aside, or not?",
       "replies": [
         { "say": "Not.", "then": "fight_picker" },
-        { "say": "Aside. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks." }
+        { "say": "Aside. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks.", "against": ["honour", "law"] }
       ]
     },
     "fight_picker": {
@@ -170,7 +170,8 @@
       "mercy": "Go. And tell your gentleman it is not for sale.",
       "thanks": "I'll tell him. He will only send somebody worse. That is no threat. It is how he is.",
       "journal": "The stone-pickers came on the third night, as {hermit} said they would. They did not reach the stone.",
-      "slain": "dawn", "spared": "dawn"
+      "slain": "dawn", "spared": "dawn",
+      "spared_returns": { "as": "warning", "days": [7, 12], "say": "I told the gentleman it was not for sale. He laughed and paid me off. Now there are two men on the drove road with a cart lined in fleece, asking the way to the hum. They wear no wax. They did not need to ask me twice. That is all I came to say." }
     },
     "dawn": {
       "do": "talk", "who": "hermit", "goal": "Speak with {hermit} before the masons come",

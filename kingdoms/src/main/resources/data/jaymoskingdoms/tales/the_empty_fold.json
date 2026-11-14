@@ -85,8 +85,8 @@
       ],
       "replies": [
         { "say": "Give them back tonight and I'll deal with your collector.", "then": "wait_collector", "journal": "{neighbour} took the sheep to pay a debt to a man named {collector}. I said I'd meet the collector myself if the flock went home." },
-        { "say": "That's for {giver} to hear, not me.", "then": "report_theft", "journal": "{neighbour} took the sheep to pay a debt. I'm taking it to {giver}." },
-        { "say": "Here. {coins:11}. Pay him and take the sheep home.", "needs_coins": 11, "then": "wait_paid", "mark": "paid_marrec_debt", "journal": "{neighbour} took the sheep to pay a debt. I paid it. The sheep go home tonight and nobody need know." }
+        { "say": "That's for {giver} to hear, not me.", "then": "report_theft", "journal": "{neighbour} took the sheep to pay a debt. I'm taking it to {giver}.", "returns": { "who": "neighbour", "days": [7, 12], "as": "warning", "say": "You'll know they named me at the elders' table. I'll not say you were wrong. But hear this. {collector} came to the crossing and found no sheep and no silver, and he asked after whoever had been at my door. I told him nothing. He'll ask others. He doesn't take next season." } },
+        { "say": "Here. {coins:11}. Pay him and take the sheep home.", "needs_coins": 11, "then": "wait_paid", "mark": "paid_marrec_debt", "journal": "{neighbour} took the sheep to pay a debt. I paid it. The sheep go home tonight and nobody need know.", "against": ["gain"] }
       ]
     },
     "report_theft": {
@@ -101,7 +101,7 @@
       "do": "talk", "who": "collector", "goal": "Speak with {collector}",
       "say": "You're not {neighbour}, and you've no sheep with you. So you're here to tell me a story or to pay me. I like the second better.",
       "replies": [
-        { "say": "{coins:11}. Count it.", "needs_coins": 11, "then": "end:paid", "mark": "paid_marrec_debt" },
+        { "say": "{coins:11}. Count it.", "needs_coins": 11, "then": "end:paid", "mark": "paid_marrec_debt", "against": ["gain"] },
         { "say": "The debt's void. Walk away.", "then": "fight_collector" },
         { "say": "What was the loan, truly?", "then": "parley_truth" }
       ]
@@ -141,8 +141,8 @@
         "Five are alive. Two we ate. I have four little ones and the town shut its gate on us at first frost, so tell me what you'd have done. I tell the children to take the old ewes, the ones that won't see spring. They take lambs because lambs are soft to carry. They're children."
       ],
       "replies": [
-        { "say": "Keep two ewes. Send the rest home, and take no more.", "then": "wait_den", "journal": "The thieves are den-folk, a mother and four young, turned from the town at first frost. I left them two ewes on her word that it stops.", "mark": "spared_denfolk" },
-        { "say": "{giver} will want all of them, and you gone.", "then": "report_den", "journal": "The thieves are den-folk living in the hollow. I'm taking it to {giver}." },
+        { "say": "Keep two ewes. Send the rest home, and take no more.", "then": "wait_den", "journal": "The thieves are den-folk, a mother and four young, turned from the town at first frost. I left them two ewes on her word that it stops.", "mark": "spared_denfolk", "returns": { "who": "denmother", "days": [10, 16], "as": "thanks", "say": "You left us two ewes and your silence. It was enough to winter on, nearly. The little ones wanted you to have this. It is only a hare skin, and badly scraped. They were proud of it.", "gift": ["minecraft:rabbit_hide*2"] } },
+        { "say": "{giver} will want all of them, and you gone.", "then": "report_den", "journal": "The thieves are den-folk living in the hollow. I'm taking it to {giver}.", "against": ["mercy"] },
         { "say": "Take this. It'll see you to spring.", "needs_item": { "item": "minecraft:bread", "count": 8 }, "then": "wait_den", "mark": "fed_denfolk", "journal": "The thieves are den-folk, a mother and four young. I gave them bread enough to stop the stealing and sent the flock home." }
       ]
     },

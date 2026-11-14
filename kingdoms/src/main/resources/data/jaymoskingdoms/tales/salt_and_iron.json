@@ -214,7 +214,7 @@
       ],
       "replies": [
         { "say": "{netwife} must hear it. It is her house and her fleet.", "then": "wait_moot", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I am taking it to {netwife}." },
-        { "say": "I'll name a stranger off a trading ship. The boy's sailing is not yours to decide.", "then": "wait_kept", "mark": "salt_kept_menders_secret", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I told {giver} it was a sailor off a trader, long gone." }
+        { "say": "I'll name a stranger off a trading ship. The boy's sailing is not yours to decide.", "then": "wait_kept", "mark": "salt_kept_menders_secret", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I told {giver} it was a sailor off a trader, long gone.", "against": ["law", "honour"] }
       ]
     },
     "confront_chandler": {
@@ -225,9 +225,9 @@
         "Now. {coins:20} says you found nothing, and I will be gentle with both houses. Or cry it in the square, and see who gives them credit in spring."
       ],
       "replies": [
-        { "say": "Keep your purse. The town hears it today.", "then": "wait_moot", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. He offered me {coins:20}. I am crying it in the square." },
-        { "say": "Burn both notes, here, now. Then I saw nothing.", "then": "wait_notes", "mark": "salt_burned_notes", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. I made him burn both notes for my silence, and told {giver} I had no name after all." },
-        { "say": "{coins:20}. And I found nothing.", "then": "end:bought", "journal": "{chandler} cut the nets and quenched the forge with his own hands. He paid me {coins:20} to have found nothing." }
+        { "say": "Keep your purse. The town hears it today.", "then": "wait_moot", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. He offered me {coins:20}. I am crying it in the square.", "returns": { "who": "chandler", "days": [8, 14], "as": "warning", "say": "Do not reach for anything. I am ashore for one tide, and I came to tell you a thing for nothing, which is not my habit. My cousin holds both notes now. He called in the Skerry boat on the first of the month, and the Holt forge is next. You put me on a ship. You did not put the debts on one. Good day." } },
+        { "say": "Burn both notes, here, now. Then I saw nothing.", "then": "wait_notes", "mark": "salt_burned_notes", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. I made him burn both notes for my silence, and told {giver} I had no name after all.", "against": ["law"] },
+        { "say": "{coins:20}. And I found nothing.", "then": "end:bought", "journal": "{chandler} cut the nets and quenched the forge with his own hands. He paid me {coins:20} to have found nothing.", "against": ["law", "vengeance"] }
       ]
     },
     "wait_moot": { "do": "wait", "days": [3, 6], "wake": "giver", "then": "moot_after" },

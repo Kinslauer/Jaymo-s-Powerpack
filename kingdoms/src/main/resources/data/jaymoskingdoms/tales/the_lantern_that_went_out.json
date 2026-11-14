@@ -125,9 +125,9 @@
         "?": "{robber} says the keeper sold her the grave gold himself, cup by cup, and ran south when she pressed him for more."
       },
       "replies": [
-        { "say": "The gold goes back. Here is {coins:14} for your eleven mouths.", "needs_coins": 14, "then": "lay_goods", "mark": "lantern_bought_gold" },
+        { "say": "The gold goes back. Here is {coins:14} for your eleven mouths.", "needs_coins": 14, "then": "lay_goods", "mark": "lantern_bought_gold", "returns": { "who": "robber", "days": [8, 14], "as": "thanks", "say": "Eleven mouths came through the frost on your coin, and not one of them on grave gold. I'll not stop. This is from our own burn, the first we ever sold honest, and I owe you the first of it.", "gift": ["minecraft:charcoal*12"] } },
         { "say": "The gold goes back, or you go into the ground with it.", "then": "fight_robber" },
-        { "say": "Keep it. Put your fires out and be gone by morning.", "then": "tell_ward", "mark": "lantern_let_thieves_go", "journal": "I let {robber} keep the grave gold, on her word that the hollow is empty by morning." }
+        { "say": "Keep it. Put your fires out and be gone by morning.", "then": "tell_ward", "mark": "lantern_let_thieves_go", "journal": "I let {robber} keep the grave gold, on her word that the hollow is empty by morning.", "against": ["faith", "law"] }
       ]
     },
     "fight_robber": {
@@ -136,7 +136,8 @@
       "plea": "Hold! Hold. It is in the cart, under the sacks. Take it. There are children in this hollow who will watch whatever you do next.",
       "mercy": "Take your people off this moor. Tonight.",
       "thanks": "We will be gone by moonrise. I'll remember which of us had the blade and did not use it.",
-      "slain": "lay_goods", "spared": "robber_yields"
+      "slain": "lay_goods", "spared": "robber_yields",
+      "spared_returns": { "as": "warning", "days": [8, 14], "say": "I said we would be gone by moonrise, and we were. I came back for one thing. There is a crew working the south mounds now, with a cart, and no children to feed, and no keeper in their way. They asked my lads where the soft barrows lie. We told them nothing. They will find them anyway." }
     },
     "robber_yields": {
       "do": "talk", "who": "robber",
@@ -163,7 +164,7 @@
       "replies": [
         { "say": "I'll tell you what {robber} told me, word for word.", "then": "ward_truth" },
         { "say": "Sit down first.", "then": "ward_truth" },
-        { "say": "He died at the mound door, keeping them out.", "if": "!fate=slain", "then": "ward_oath", "mark": "lantern_lied", "journal": "I told {ward} the keeper died at the mound door, keeping the robbers out. It is not what happened." }
+        { "say": "He died at the mound door, keeping them out.", "if": "!fate=slain", "then": "ward_oath", "mark": "lantern_lied", "journal": "I told {ward} the keeper died at the mound door, keeping the robbers out. It is not what happened.", "against": ["honour"] }
       ]
     },
     "ward_truth": {
@@ -234,8 +235,8 @@
       "replies": [
         { "say": "It is {ward}'s. She has waited long enough.", "then": "wait_ward", "journal": "I told {giver} the lantern should go to {ward}." },
         { "say": "I'll carry it myself, while I am in these parts.", "then": "wait_self", "journal": "I told {giver} I would carry the lantern myself." },
-        { "say": "Wall the mound. Let the lantern go out.", "then": "wall", "journal": "I told {giver} the mound should be walled and the lantern let go out." },
-        { "say": "There is a thief by the ford who owes that hill a debt.", "if": "mark:lantern_spared_thief", "then": "wait_thief", "journal": "I told {giver} to send to the ford for {robber}. A thief will keep the light over the graves she robbed." }
+        { "say": "Wall the mound. Let the lantern go out.", "then": "wall", "journal": "I told {giver} the mound should be walled and the lantern let go out.", "against": ["faith"] },
+        { "say": "There is a thief by the ford who owes that hill a debt.", "if": "mark:lantern_spared_thief", "then": "wait_thief", "journal": "I told {giver} to send to the ford for {robber}. A thief will keep the light over the graves she robbed.", "returns": { "who": "robber", "days": [9, 14], "as": "thanks", "say": "I came down off the hill for one day. The girl is minding it. Yes, her. She put the stone down and held out the other hand, and I put the lantern in it, and tomorrow I take it back. We have an arrangement. This is from the hollow.", "gift": ["minecraft:charcoal*16", "minecraft:lantern*1"] } }
       ]
     },
     "wall": {

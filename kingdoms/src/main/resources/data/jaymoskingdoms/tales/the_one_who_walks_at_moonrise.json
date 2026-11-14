@@ -215,7 +215,7 @@
         { "say": "There's a priest who keeps a rite. We try that first.", "then": "to_chapel", "journal": "{sleeper} knows now what he is. I mean to try the old priest's rite before anything else." },
         { "say": "Not in a cellar. At the next moon, by the pond, under the sky. I'll be quick.", "then": "wait_last", "journal": "{sleeper} knows now what he is, and asked what I would do. I told him I would meet him at the pond at the next moon and be quick. He thanked me." },
         { "say": "The south road, tonight. Run far, and learn to hold it.", "if": "!mark:moon_stood_before_book", "then": "wait_ran", "journal": "{sleeper} knows now what he is. I unbarred the door and sent him down the south road before {lampbearer} came for him." },
-        { "say": "The south road, tonight. Here is {coins:10} for the watchman's blind eye.", "if": "mark:moon_stood_before_book", "needs_coins": 10, "then": "wait_ran", "journal": "{sleeper} knows now what he is, and so does the whole street. I paid the watchman {coins:10} to look away and sent him down the south road." }
+        { "say": "The south road, tonight. Here is {coins:10} for the watchman's blind eye.", "if": "mark:moon_stood_before_book", "needs_coins": 10, "then": "wait_ran", "journal": "{sleeper} knows now what he is, and so does the whole street. I paid the watchman {coins:10} to look away and sent him down the south road.", "against": ["law"] }
       ]
     },
     "to_chapel": { "do": "go", "to": "chapel", "goal": "Go to {priest}'s chapel", "then": "see_priest" },
@@ -302,7 +302,7 @@
       "say": "No. I made that the week before. There. There's {coins:25} in the house, and it's yours. A beast did it. The street already believes a beast did it. You've only to say you found nothing. The lamp-bearer goes home, the fletcher's boy is cleared by the cellar anyway, and who is hurt? One old man who'd have died in a year or two, shouting at somebody.",
       "replies": [
         { "say": "The elders will hear it.", "then": "report_murder", "journal": "{heir} made a false paw a week before he killed his uncle. It was planned. He offered me {coins:25} to say a beast did it. I'm taking it to {giver}." },
-        { "say": "Give me the purse. A beast did it.", "then": "end:bought", "mark": "moon_took_purse", "journal": "{heir} made a false paw a week before he killed his uncle. It was planned. He offered me {coins:25} to say a beast did it, and I took it." }
+        { "say": "Give me the purse. A beast did it.", "then": "end:bought", "mark": "moon_took_purse", "journal": "{heir} made a false paw a week before he killed his uncle. It was planned. He offered me {coins:25} to say a beast did it, and I took it.", "against": ["law", "vengeance"], "returns": { "who": "heir", "days": [7, 12], "as": "warning", "say": "I hear you've been asking the road to {town} again. I'd not. The farm is mine, the street has its beast, and a body who sold one tale can always be said to have sold another. I paid you once, in coin. Don't make me sorry I paid in coin." } }
       ]
     },
     "report_murder": {

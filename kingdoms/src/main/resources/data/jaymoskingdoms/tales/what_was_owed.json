@@ -35,7 +35,7 @@
       ],
       "replies": [
         { "say": "Then we go to the grave.", "then": "to_grave", "journal": "{giver} was once hired to guard a salt carter, {carter}, who died at a ford six winters ago. {giver} lived, kept the advance, and never faced the family. The carter's son is now hunting a guard of that name. We are going to the grave first." },
-        { "say": "This is yours to carry. Not mine.", "then": "end:refused" }
+        { "say": "This is yours to carry. Not mine.", "then": "end:refused", "against": ["self"] }
       ]
     },
     "to_grave": { "do": "go", "to": "grave", "goal": "Go with {giver} to {place:grave}", "then": "search_grave" },
@@ -203,8 +203,8 @@
       ],
       "replies": [
         { "say": "Go in. Say all of it.", "then": "wait_told", "journal": "{son} went home alive. I told {giver} to go in to the widow's table and say all of it." },
-        { "say": "Pay the half hire. Leave the rest unsaid.", "then": "wait_paid", "journal": "{son} went home alive. I told {giver} to pay the widow the half hire and leave the rest unsaid." },
-        { "say": "The boy is home. That is enough. We go.", "then": "wait_left", "journal": "{son} went home alive. I told {giver} that was enough, and we left the steading." }
+        { "say": "Pay the half hire. Leave the rest unsaid.", "then": "wait_paid", "journal": "{son} went home alive. I told {giver} to pay the widow the half hire and leave the rest unsaid.", "returns": { "who": "son", "days": [10, 16], "as": "warning", "say": "I've not brought the sword. I sold it back for seed. Mother put the guard's coin in the seed chest, where the sword money was. Then she sat up three nights at the table, with a chair pulled out. Nobody came to sit in it. Tell the guard that. It is all I came to say." } },
+        { "say": "The boy is home. That is enough. We go.", "then": "wait_left", "journal": "{son} went home alive. I told {giver} that was enough, and we left the steading.", "against": ["honour"], "returns": { "who": "son", "days": [10, 16], "as": "warning", "say": "I've not brought the sword. I came to say this once. The guard stood at our wall a quarter of an hour and went down the path, and Mother watched it. If the guard comes up that path again, let it be to come in. If not, keep off the ford road. I'll not have been practising on a post." } }
       ]
     },
     "wait_told": { "do": "wait", "days": [5, 9], "wake": "giver", "then": "told_after" },
@@ -277,7 +277,8 @@
       "text": "{son} lies beside his father. {giver} came to settle one debt, and I made it two.",
       "failed": true,
       "marks": ["slew_the_carters_son"],
-      "town": ["Two Arkles on the hill now. The widow works the steading alone and speaks to nobody.", "A hired sword and a friend came up that path, they say. I'd not care to meet either on a dark road."]
+      "town": ["Two Arkles on the hill now. The widow works the steading alone and speaks to nobody.", "A hired sword and a friend came up that path, they say. I'd not care to meet either on a dark road."],
+      "against": ["self"]
     }
   }
 }

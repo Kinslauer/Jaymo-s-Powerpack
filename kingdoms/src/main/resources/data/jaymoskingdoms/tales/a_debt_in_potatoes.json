@@ -71,9 +71,9 @@
         "I'll not tell you which. I told Hob which for nine years, and here we are."
       ],
       "replies": [
-        { "say": "I'll finish his run. The kiln.", "then": "drop", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I said I would finish his run and make the drop." },
+        { "say": "I'll finish his run. The kiln.", "then": "drop", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I said I would finish his run and make the drop.", "against": ["law"] },
         { "say": "This goes to the watch.", "then": "see_captain", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I am taking the load to the watch." },
-        { "say": "Here is {coins:24}. Pay her, and be free of it.", "needs_coins": 24, "then": "wait_paid", "mark": "potato_paid_debt", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I paid it out of my own purse." },
+        { "say": "Here is {coins:24}. Pay her, and be free of it.", "needs_coins": 24, "then": "wait_paid", "mark": "potato_paid_debt", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I paid it out of my own purse.", "against": ["gain"], "returns": { "who": "sister", "days": [8, 12], "as": "thanks", "say": "I'll not stop. Wilf is at the gate, and he'll be off after a goose if I'm long. The Room has not looked at my door since your money went down the ladder, and I have not looked at the Room. Wilf finished the horse. It has four legs now and one is short. He wants it said that this is for the kind boots.", "gift": ["minecraft:leather*4", "minecraft:baked_potato*6"] } },
         { "say": "This is none of mine. Here is his book.", "then": "end:left" }
       ]
     },
@@ -179,8 +179,8 @@
       "journal": "{sergeant} does not deny it. He says he feeds the raider camp smugglers so that it leaves the farms alone, and that no farmer has been buried in six years.",
       "replies": [
         { "say": "No more carters. Draw.", "then": "fight_sergeant" },
-        { "say": "Leave the gate tonight. Tell the camp nothing more.", "then": "wait_spared", "journal": "I let {sergeant} go without a blow, on his word that he leaves the gate and tells the camp nothing more." },
-        { "say": "{coins:15}, and I saw nothing.", "then": "end:cut_in", "journal": "I took {coins:15} from {sergeant} to have seen nothing." }
+        { "say": "Leave the gate tonight. Tell the camp nothing more.", "then": "wait_spared", "journal": "I let {sergeant} go without a blow, on his word that he leaves the gate and tells the camp nothing more.", "against": ["vengeance"] },
+        { "say": "{coins:15}, and I saw nothing.", "then": "end:cut_in", "journal": "I took {coins:15} from {sergeant} to have seen nothing.", "against": ["law", "vengeance"], "returns": { "who": "sergeant", "days": [6, 10], "as": "thanks", "say": "Your second share. The arrangement holds, and a man who keeps to an arrangement is paid twice. The camp took a wool cart at the ford on the dark night. Nobody counts wool carts. Nobody counts you either, now. Remember that.", "gift": ["minecraft:gold_ingot*2"] } }
       ]
     },
     "fight_sergeant": {

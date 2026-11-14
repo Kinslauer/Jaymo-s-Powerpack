@@ -39,7 +39,7 @@
       ],
       "replies": [
         { "say": "We go. Tomorrow.", "then": "to_village", "journal": "{giver} left a brother, Corin, on the family farm twelve years ago: went out of a window the night before they were to draw straws for who stayed, and took the calf money. A carter has told {giver} to go home. I said we'd go together." },
-        { "say": "Some windows are best left shut.", "then": "end:refused" }
+        { "say": "Some windows are best left shut.", "then": "end:refused", "against": ["self"] }
       ]
     },
     "to_village": { "do": "go", "to": "village", "goal": "Travel with {giver} to the village they left", "journal": "We came to the village {giver} left twelve years ago.", "then": "ask_neighbour" },
@@ -232,7 +232,7 @@
         "Here's what is left for us. You walk back down that path, and you were never here. Or we settle it the way father would have had us settle it at ten years old, behind the barn. Only I've an axe now."
       ],
       "replies": [
-        { "say": "We were never here.", "then": "carry_walked", "journal": "Corin leads outlaws in the birch wood and would not be taken out of it. He told us to walk away as if we had never come. We did." },
+        { "say": "We were never here.", "then": "carry_walked", "journal": "Corin leads outlaws in the birch wood and would not be taken out of it. He told us to walk away as if we had never come. We did.", "against": ["self"], "returns": { "who": "brother_armed", "days": [6, 12], "as": "warning", "say": "Don't get up. I'm not stopping. The steward's men are beating the birch wood, and they'll have the camp by the month's end. I'm telling you so you keep off that road, and for no other reason. I took the coin off the stump, since you'll be wondering. Tell that one it's the first thing of ours I've had back." } },
         { "say": "Behind the barn, then.", "then": "fight", "journal": "Corin leads outlaws in the birch wood and would not be taken out of it. It came to blows, as it would have when they were ten." }
       ]
     },
@@ -301,7 +301,8 @@
       "text": "Corin had turned outlaw, and it came to blows, and he is dead. {giver} buried him by their mother, as he had buried the other two. We do not speak of it.",
       "reward": { "coins": 8, "hearts": 4, "reputation": 4 },
       "marks": ["brother_outlaw", "brother_slain"],
-      "town": ["There's a new grave in a village east of here, and they say a brother dug it for a brother. I didn't ask more.", "The carts go by the birch wood again. Somebody cleared it. Nobody's proud."]
+      "town": ["There's a new grave in a village east of here, and they say a brother dug it for a brother. I didn't ask more.", "The carts go by the birch wood again. Somebody cleared it. Nobody's proud."],
+      "against": ["self"]
     },
     "brother_spared": {
       "text": "Corin had turned outlaw, and it came to blows, and nobody finished it. He took {giver}'s hand to get up. He asked which roads we walk.",

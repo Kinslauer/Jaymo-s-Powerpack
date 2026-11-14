@@ -275,9 +275,9 @@
         "I put my mark on it. The horse had died, and {master} had the paper there, and he said a warm hall, seven years, and home again with a trade. I told myself a hall has walls and no torches. Then I saw how the steward looked the child over. The way you'd look at a footstool. I'd have liked to be the one who ran."
       ],
       "replies": [
-        { "say": "Here is {coins:30}. The bond is bought. Burn it.", "needs_coins": 30, "then": "wait_bought", "mark": "fair_bought_bond", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I paid the {coins:30} myself and told her to burn it." },
-        { "say": "Then I never found the fair. {child} comes back with me.", "then": "mother_hid2" },
-        { "say": "The paper stands. {master} has forty mouths to feed.", "then": "end:sold", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I said the paper stood. {child} did not do the patter when I left." }
+        { "say": "Here is {coins:30}. The bond is bought. Burn it.", "needs_coins": 30, "then": "wait_bought", "mark": "fair_bought_bond", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I paid the {coins:30} myself and told her to burn it.", "against": ["gain"], "returns": { "who": "mother", "days": [10, 16], "as": "thanks", "say": "Seven wagons went by on the north road, and the third one stopped. I'll not be long. {child} does the Wonder twice a day, and no baron's guests have it. That's yours. It isn't thirty, but it's what a rope walker has.", "gift": ["minecraft:cake*1", "minecraft:honey_bottle*2"] } },
+        { "say": "Then I never found the fair. {child} comes back with me.", "then": "mother_hid2", "against": ["law"] },
+        { "say": "The paper stands. {master} has forty mouths to feed.", "then": "end:sold", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I said the paper stood. {child} did not do the patter when I left.", "against": ["mercy"] }
       ]
     },
     "mother_hid2": {

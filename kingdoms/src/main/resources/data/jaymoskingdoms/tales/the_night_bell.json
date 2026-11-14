@@ -272,7 +272,7 @@
       ],
       "replies": [
         { "say": "The elders must hear it from you.", "then": "wait_judged", "journal": "{widow} lifted the bar. The fort sent a strip of her son's shirt, and she believed he would be let go. I left her to the elders." },
-        { "say": "Be gone before {giver} knocks. Take the south road.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{widow} lifted the bar. The fort sent a strip of her son's shirt, and she believed he would be let go. I told her to be gone before {giver} came." }
+        { "say": "Be gone before {giver} knocks. Take the south road.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{widow} lifted the bar. The fort sent a strip of her son's shirt, and she believed he would be let go. I told her to be gone before {giver} came.", "against": ["law"], "returns": { "who": "widow", "days": [9, 15], "as": "warning", "say": "Don't say my name. I'm on the ridge road now, near enough to see the fort's smoke. They're counting {town} again: the new lamps, the fence, which door has a cart behind it. Tell {giver} the dark of the moon after next. I owed that town one door. That's it paid." } }
       ]
     },
     "confess_warden": {
@@ -284,7 +284,7 @@
       ],
       "replies": [
         { "say": "The elders must hear it from you.", "then": "wait_judged", "journal": "{warden} let the raiders in himself. He thought six would come, enough to frighten the elders into paying for a wall. I left him to the elders." },
-        { "say": "Leave the key on the hook and go tonight.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{warden} let the raiders in himself. He thought six would come, enough to frighten the elders into paying for a wall. I told him to leave his key and go." }
+        { "say": "Leave the key on the hook and go tonight.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{warden} let the raiders in himself. He thought six would come, enough to frighten the elders into paying for a wall. I told him to leave his key and go.", "against": ["law"], "returns": { "who": "warden", "days": [9, 15], "as": "warning", "say": "I'll not come in. I've no right to that gate now. I watch the fort road from a shepherd's hut, from habit. They've a new captain up there, and he's been asking pedlars about a river door that opened once. Tell them to keep it barred, and bar it twice." } }
       ]
     },
     "confess_carter": {
@@ -295,8 +295,8 @@
         "I was going to be two towns off before anyone counted. I've {coins:9} and a daughter. Take it, all of it."
       ],
       "replies": [
-        { "say": "Keep your money. The elders must hear it.", "then": "wait_judged", "journal": "{carter} opened the postern to clear a dicing debt that had been sold on to the fort's friends. He offered me his purse. I left him to the elders." },
-        { "say": "Take the girl and go. Now, while the lane is empty.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{carter} opened the postern to clear a dicing debt that had been sold on to the fort's friends. For his daughter's sake I let him take the road." }
+        { "say": "Keep your money. The elders must hear it.", "then": "wait_judged", "journal": "{carter} opened the postern to clear a dicing debt that had been sold on to the fort's friends. He offered me his purse. I left him to the elders.", "against": ["mercy"] },
+        { "say": "Take the girl and go. Now, while the lane is empty.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{carter} opened the postern to clear a dicing debt that had been sold on to the fort's friends. For his daughter's sake I let him take the road.", "against": ["law"], "returns": { "who": "carter", "days": [10, 16], "as": "thanks", "say": "I'm not stopping. My girl's minding the horse. We're three towns off, and nobody there has heard of a river door. I sold oats honest this season and kept what I made. This is the first of it. Give it to the cooper, or keep it. Only don't tell him whose.", "gift": ["minecraft:wheat*16", "minecraft:bread*4"] } }
       ]
     },
     "wait_judged": { "do": "wait", "days": [3, 5], "wake": "giver", "then": "judged" },

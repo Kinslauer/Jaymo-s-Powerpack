@@ -48,6 +48,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -79,6 +80,8 @@ final class TaleCast {
 	static final int LEAVE_TICKS = 20 * 120;
 	/** A visitor (runner, or one come back) starts this far from the player, has this long to reach them, and this long to walk off after. */
 	static final int VISIT_NEAR = 18, VISIT_FAR = 26, VISIT_TICKS = 20 * 120, DEPART_TICKS = 20 * 20;
+	/** A letter comes by pigeon this often to one who keeps a roost (the rest by runner). */
+	static final float PIGEON_SHARE = 0.6F;
 	/** How near a visitor comes before speaking. */
 	static final double VISIT_REACH = 3.5;
 	/** One come back for revenge brings this many, and gives up after this long (ticks). */
@@ -593,10 +596,22 @@ final class TaleCast {
 		return false;
 	}
 
-	/** Whether someone could walk up to {@code player} now: by day, under the sky, on their feet, and nobody else already coming. */
+	/** Whether someone could come to find {@code player} now: day or night, out or indoors, so long as they're on their feet and nobody else is already coming. */
 	static boolean canVisit(ServerLevel level, ServerPlayer player) {
 		return player.level() == level && level == Factions.level(level.getServer()) && player.isAlive() && !player.isSpectator() && !Downed.isDowned(player)
-			&& !player.isSleeping() && player.getVehicle() == null && level.isBrightOutside() && level.canSeeSky(player.blockPosition()) && !visiting(player);
+			&& !player.isSleeping() && player.getVehicle() == null && !visiting(player);
+	}
+
+	/**
+	 * A letter for {@code player}: by pigeon, if they keep a roost the birds can find (often, not always), or else a runner
+	 * on foot. {@code delivered} is run once it's on its way to their hand (a bird's, as it sets down; a runner's, handed over).
+	 */
+	static void sendLetter(ServerLevel level, ServerPlayer player, ItemStack letter, Runnable delivered) {
+		if (Roost.has(level.getServer(), player.getUUID()) && level.getRandom().nextFloat() < PIGEON_SHARE && PigeonPost.wild(player, letter)) {
+			delivered.run();
+			return;
+		}
+		runner(level, player, letter, delivered);
 	}
 
 	/** Open ground between {@code least} and {@code most} blocks from {@code player}, under the sky; null if there's none just now. */
@@ -624,6 +639,10 @@ final class TaleCast {
 		JsonObject body = new JsonObject();
 		body.addProperty("body", "villager");
 		Mob mob = at == null ? null : spawn(level, "visit:" + player.getUUID(), "runner", body, "", at, false);
+		if (mob != null && level.isDarkOutside()) {
+			// (one sent out by night carries a light)
+			mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.LANTERN));
+		}
 		if (mob != null) {
 			VISITS.add(new Visit(mob, player.getUUID(), LETTER, letter, delivered, null, level.getServer().getTickCount() + VISIT_TICKS));
 		}
@@ -714,7 +733,7 @@ final class TaleCast {
 		if (back != null) {
 			Tales.state(player).returns.remove(back);
 		}
-		Component say = back == null || back.say().isEmpty() ? Component.translatable("tale.jaymoskingdoms.back." + (v.kind == RECRUIT ? "recruit" : "thanks"))
+		Component say = back == null || back.say().isEmpty() ? Component.translatable("tale.jaymoskingdoms.back." + (v.kind == RECRUIT ? "recruit" : back != null && back.as().equals("warning") ? "warning" : "thanks"))
 			: Component.literal(back.say());
 		if (v.kind == RECRUIT) {
 			v.state = ASKING;

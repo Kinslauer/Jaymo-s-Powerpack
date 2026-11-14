@@ -20,7 +20,7 @@ STEP_FIELDS = {
     "talk": {"who", "say", "replies"},
     "go": {"to", "radius"},
     "search": {"at", "clues", "need"},
-    "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at"},
+    "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at", "spared_returns"},
     "bring": {"who", "item", "count", "say"},
     "slay": {"target", "count"},
     "wait": {"days", "wake", "letter"},
@@ -39,12 +39,39 @@ REQUIRED = {
     "escort": {"who", "to"}, "pack": {"at", "foes", "count"}, "build": {"at", "blocks", "count"}, "blast": {"at"},
     "stash": {"at", "item", "count"}, "lamps": {"at", "count"},
 }
-ENDING_FIELDS = {"text", "reward", "marks", "failed", "town", "returns", "joins"}
+ENDING_FIELDS = {"text", "reward", "marks", "failed", "town", "returns", "joins", "against"}
 REWARD_FIELDS = {"coins", "items", "relic", "book", "hearts", "reputation"}
 RETURNS = {"thanks", "warning", "recruit", "revenge"}
+# What a companion can truly believe in (Convictions.java); "self" is the companion whose own tale it is.
+CONVICTIONS = {"mercy", "faith", "law", "courage", "honour", "gain", "vengeance", "self"}
 PLACEHOLDER = re.compile(r"\{([^{}]+)\}")
 ITEM = re.compile(r"^[a-z0-9_.-]+:[a-z0-9_./-]+$")
 BANNED = ("—", "–")
+
+
+def check_against(c, where, value, tale):
+    if not isinstance(value, list) or not value or any(v not in CONVICTIONS for v in value):
+        c.err(where, f"against is a list of {sorted(CONVICTIONS)}")
+    elif "self" in value and tale.get("start", {}).get("by") != "companion":
+        c.err(where, "'self' is only for a companion's own tale")
+
+
+def check_returns(c, where, back, tale, who):
+    """Who comes back, and how: { who, days, as, say, gift } (who may be left out where it's the foe spared)."""
+    if not isinstance(back, dict):
+        c.err(where, "returns is one object: { who, days, as, say, gift }")
+        return
+    who = back.get("who", who)
+    check_role(c, where, who, tale)
+    if back.get("as") not in RETURNS:
+        c.err(where, f"as must be one of {sorted(RETURNS)}")
+    check_days(c, where + ".days", back.get("days"))
+    if "say" not in back:
+        c.err(where, "needs 'say'")
+    else:
+        check_text(c, where + ".say", back["say"], tale)
+    if tale.get("cast", {}).get(who, {}).get("body") != "fighter" and back.get("as") in ("revenge", "recruit"):
+        c.err(where, "only a fighter comes back for revenge or to join")
 
 
 class Check:
@@ -313,13 +340,17 @@ def check_tale(path):
                 if "say" not in r or "then" not in r:
                     c.err(rw, "a reply needs 'say' and 'then'")
                     continue
-                unknown = set(r) - {"say", "then", "if", "needs_item", "needs_coins", "mark", "journal"}
+                unknown = set(r) - {"say", "then", "if", "needs_item", "needs_coins", "mark", "journal", "against", "returns"}
                 if unknown:
                     c.err(rw, f"unknown fields {sorted(unknown)}")
                 check_text(c, rw + ".say", r["say"], tale)
                 if "journal" in r:
                     check_text(c, rw + ".journal", r["journal"], tale)
                 check_then(c, rw, r["then"], tale, edges)
+                if "against" in r:
+                    check_against(c, rw + ".against", r["against"], tale)
+                if "returns" in r:
+                    check_returns(c, rw + ".returns", r["returns"], tale, None)
                 if "if" in r:
                     check_condition(c, rw, r["if"], tale)
                 if "needs_item" in r:
@@ -356,6 +387,8 @@ def check_tale(path):
                 c.err(where, "'need' is more than the clues that are always there")
         elif do == "foe":
             check_role(c, where, step["who"], tale)
+            if "spared_returns" in step:
+                check_returns(c, where + ".spared_returns", step["spared_returns"], tale, step["who"] if isinstance(step["who"], str) else None)
             for w in branches(step["who"]):
                 body = tale.get("cast", {}).get(w, {}).get("body", "villager")
                 if body == "villager":
@@ -451,20 +484,10 @@ def check_tale(path):
             check_item(c, where + ".reward", spec.split("*")[0])
         if "town" in ending:
             check_text(c, where + ".town", ending["town"], tale)
-        back = ending.get("returns")
-        if back and not isinstance(back, dict):
-            c.err(where, "returns is one object: { who, days, as, say, gift }")
-        elif back:
-            check_role(c, where + ".returns", back.get("who"), tale)
-            if back.get("as") not in RETURNS:
-                c.err(where, f"returns.as must be one of {sorted(RETURNS)}")
-            check_days(c, where + ".returns.days", back.get("days"))
-            if "say" not in back:
-                c.err(where, "returns needs 'say'")
-            else:
-                check_text(c, where + ".returns.say", back["say"], tale)
-            if tale.get("cast", {}).get(back.get("who"), {}).get("body") != "fighter" and back.get("as") in ("revenge", "recruit"):
-                c.err(where, "only a fighter comes back for revenge or to join")
+        if ending.get("returns"):
+            check_returns(c, where + ".returns", ending["returns"], tale, None)
+        if "against" in ending:
+            check_against(c, where + ".against", ending["against"], tale)
         if "joins" in ending:
             check_role(c, where + ".joins", ending["joins"], tale)
     if len(tale["endings"]) < 2:
