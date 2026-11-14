@@ -15,8 +15,9 @@ ROOT = "src/main/resources/assets/jaymospowers/textures/grime/"
 # The side faces of the humanoid armour sheet (x0, y0, x1, y1): where "low" on the body is the bottom of the face.
 # Head sides, hat sides, body sides, arm sides, leg sides; the top/bottom caps get only a little.
 SIDES = [(0, 8, 32, 16), (32, 8, 64, 16), (16, 20, 40, 32), (40, 20, 56, 32), (0, 20, 16, 32)]
-# How dirty each part gets for its height: legs most, head least.
-PART_WEIGHT = [0.25, 0.2, 0.6, 0.45, 1.0]
+# How dirty each part gets for its height: legs most, head least (but the head still gets its share: a long, dusty walk
+# cakes the whole set).
+PART_WEIGHT = [0.5, 0.45, 0.8, 0.7, 1.0]
 
 
 def lowness(x, y):
@@ -24,7 +25,7 @@ def lowness(x, y):
     for (x0, y0, x1, y1), w in zip(SIDES, PART_WEIGHT):
         if x0 <= x < x1 and y0 <= y < y1:
             return w * (y - y0 + 0.5) / (y1 - y0)
-    return 0.15
+    return 0.3
 
 
 def blobs(rnd, w, h, count, rmin, rmax, stretch=1.0):
@@ -48,12 +49,12 @@ def mask(seed, w, h, kind, low_of):
     rnd = random.Random(seed)
     if kind == "dust":
         # a fine film of specks and small, pale patches
-        field = blobs(rnd, w, h, int(w * h / 9), 0.8, 2.2)
-        speck = 0.45
+        field = blobs(rnd, w, h, int(w * h / 6), 0.8, 2.4)
+        speck = 0.7
     else:
         # fewer, chunkier clots, a little taller than wide, with drips running down
-        field = blobs(rnd, w, h, int(w * h / 22), 1.3, 3.4, 1.25)
-        speck = 0.2
+        field = blobs(rnd, w, h, int(w * h / 14), 1.3, 3.6, 1.25)
+        speck = 0.4
         for _ in range(int(w * h / 60)):
             x, y = rnd.randrange(w), rnd.randrange(h)
             for i in range(rnd.randint(2, 4)):
@@ -74,7 +75,7 @@ def mask(seed, w, h, kind, low_of):
                 continue
             a = int(round(20 + order * 235))
             # thicker clots are darker; mud darker at its heart than dust
-            dark = (0.35 if kind == "mud" else 0.2) * f + rnd.uniform(0, 0.12)
+            dark = (0.4 if kind == "mud" else 0.3) * f + rnd.uniform(0, 0.2)
             g = int(round(255 * (1 - dark)))
             im.putpixel((x, y), (g, a))
     return im

@@ -59,6 +59,9 @@ import org.jspecify.annotations.Nullable;
  * armour (a level of water each scrub), sneak + use a wet sponge anywhere, or use a dirty piece on a water cauldron.</li>
  * </ul>
  * Everyone wearing armour near a player is kept, not only players, so guards and villagers come back muddy too.
+ * <p>Dust takes the colour of the ground it comes off ({@link Grime#tint}): red off badlands sand, dark brown off a forest
+ * floor, grey off gravel, soot off the Nether's rock, pale off end stone. Bare earth throws a little dust anywhere when it's
+ * dry, not only in dry country, so a walk through the woods leaves its mark too.
  * <p>(0.20.41) The washes by hand take blood off too ({@code Bloodied}): a scrub or a sponge washes your own coat as well,
  * and dunking any bloody item (a blade too) in a cauldron rinses it.
  */
@@ -72,10 +75,16 @@ public final class ArmourGrime {
 	static final double MOVED = 1.5;
 	/** Dirt gained per check while moving: on dusty ground, on mud, and on wet ground (dirt, grass in the rain or a swamp). */
 	static final float DUST_GAIN = 2.0F, MUD_GAIN = 5.0F, WET_GROUND_GAIN = 2.5F;
+	/** Dry bare earth outside dry country (a forest floor, a path, a field) and the Nether's and the End's dusty rock. */
+	static final float EARTH_DUST_GAIN = 1.0F, ROCK_DUST_GAIN = 1.5F;
+	/** How far dust's colour goes from the plain dust tan toward the ground's own colour. */
+	static final float GROUND_TINT = 0.5F;
+	/** The plain dust tan, for blending the ground's colour into. */
+	static final int DUST_TAN = 0xB59E78;
 	/** Running doubles it; lying or crawling on the ground gets this many times as much, all over. */
 	static final float SPRINT = 2.0F, LYING = 2.5F;
 	/** How much of a check's dirt reaches each piece, feet to head. */
-	static final float[] REACH = {1.0F, 0.6F, 0.25F, 0.08F};
+	static final float[] REACH = {1.0F, 0.7F, 0.4F, 0.2F};
 	/** Washed off per check: under water, wading (boots and greaves), in the rain, and one scrub by hand. */
 	static final int UNDER_WATER_WASH = 30, WADING_WASH = 15, RAIN_WASH = 3, SCRUB = 35;
 	/**
@@ -90,13 +99,21 @@ public final class ArmourGrime {
 	/** The armour slots, feet to head (matching {@link #REACH}). */
 	static final EquipmentSlot[] SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
-	/** How dirty a piece is ({@code 0..MAX}) and how much of it is mud rather than dust ({@code 0..MAX}). */
-	public record Grime(int amount, int mud) {
+	/**
+	 * How dirty a piece is ({@code 0..MAX}), how much of it is mud rather than dust ({@code 0..MAX}), and the dust's colour
+	 * (RGB, from the ground it came off; 0 for the plain dust tan).
+	 */
+	public record Grime(int amount, int mud, int tint) {
 		public static final Codec<Grime> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("amount").forGetter(Grime::amount),
-			Codec.INT.optionalFieldOf("mud", 0).forGetter(Grime::mud)).apply(i, Grime::new));
+			Codec.INT.optionalFieldOf("mud", 0).forGetter(Grime::mud),
+			Codec.INT.optionalFieldOf("tint", 0).forGetter(Grime::tint)).apply(i, Grime::new));
 		public static final StreamCodec<io.netty.buffer.ByteBuf, Grime> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Grime::amount,
-			ByteBufCodecs.VAR_INT, Grime::mud, Grime::new);
+			ByteBufCodecs.VAR_INT, Grime::mud, ByteBufCodecs.INT, Grime::tint, Grime::new);
+
+		public Grime(int amount, int mud) {
+			this(amount, mud, 0);
+		}
 
 		/** 0 (clean) to 1 (filthy). */
 		public float level() {
@@ -183,6 +200,7 @@ public final class ArmourGrime {
 		boolean rained = body.isInWaterOrRain();
 		float gain = 0.0F;
 		boolean mud = false;
+		int tint = 0;
 		boolean lying = body.getPose() == Pose.SWIMMING || body.getPose() == Pose.SLEEPING || body.getPose() == Pose.DYING
 			|| body.entityTags().contains("jaymospowers_downed");
 		if (body.onGround() && (moved >= MOVED || lying)) {
@@ -199,6 +217,15 @@ public final class ArmourGrime {
 				|| ground.is(Blocks.RED_SANDSTONE) || ground.is(Blocks.SANDSTONE) || isEarth(ground) && (biome.is(ConventionalBiomeTags.IS_DESERT)
 					|| biome.is(ConventionalBiomeTags.IS_BADLANDS) || biome.is(ConventionalBiomeTags.IS_SANDY) || biome.is(ConventionalBiomeTags.IS_DRY)))) {
 				gain = DUST_GAIN;
+			} else if (!rained && isRockDust(ground)) {
+				gain = ROCK_DUST_GAIN;
+			} else if (!rained && isEarth(ground) && !ground.is(Blocks.GRASS_BLOCK) && !ground.is(Blocks.MYCELIUM)
+				&& !ground.is(Blocks.MOSS_BLOCK)) {
+				// a dry forest floor, a path or a field, anywhere: a little dust
+				gain = EARTH_DUST_GAIN;
+			}
+			if (gain > 0.0F && !mud) {
+				tint = groundTint(level, under, ground);
 			}
 			if (body.isSprinting()) {
 				gain *= SPRINT;
@@ -210,9 +237,30 @@ public final class ArmourGrime {
 				// the rain washes what the ground isn't splashing faster than it washes
 				wash(body, SLOTS[i], RAIN_WASH);
 			} else {
-				soil(body, SLOTS[i], dirt, mud);
+				soil(body, SLOTS[i], dirt, mud, tint);
 			}
 		}
+	}
+
+	/** Dusty rock that walking scuffs up: the Nether's (soot and ash) and the End's. */
+	private static boolean isRockDust(BlockState state) {
+		return state.is(Blocks.NETHERRACK) || state.is(Blocks.BASALT) || state.is(Blocks.SMOOTH_BASALT) || state.is(Blocks.BLACKSTONE)
+			|| state.is(Blocks.SOUL_SAND) || state.is(Blocks.END_STONE) || state.is(BlockTags.NYLIUM);
+	}
+
+	/** The colour dust off {@code ground} takes: its map colour, part way from the plain dust tan. */
+	static int groundTint(Level level, BlockPos pos, BlockState ground) {
+		int rgb = ground.getMapColor(level, pos).col;
+		if (rgb == 0) {
+			return 0;
+		}
+		int r = mixChannel(DUST_TAN >> 16 & 0xFF, rgb >> 16 & 0xFF), g = mixChannel(DUST_TAN >> 8 & 0xFF, rgb >> 8 & 0xFF),
+			b = mixChannel(DUST_TAN & 0xFF, rgb & 0xFF);
+		return r << 16 | g << 8 | b;
+	}
+
+	private static int mixChannel(int from, int to) {
+		return Mth.clamp(Math.round(from + (to - from) * GROUND_TINT), 0, 255);
 	}
 
 	/**
@@ -230,12 +278,12 @@ public final class ArmourGrime {
 			return;
 		}
 		for (int i = 0; i < SLOTS.length; i++) {
-			soil(body, SLOTS[i], dirt.gain() * DRAG_DIRT * DRAG_REACH[i], dirt.mud());
+			soil(body, SLOTS[i], dirt.gain() * DRAG_DIRT * DRAG_REACH[i], dirt.mud(), dirt.tint());
 		}
 	}
 
-	/** (0.21.28) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty. */
-	public record Dirt(float gain, boolean mud) {
+	/** (0.21.28) What a body dragged over the ground here is scraped with: so much dirt a step, muddy or dusty, and the dust's colour. */
+	public record Dirt(float gain, boolean mud, int tint) {
 	}
 
 	/** (0.21.28) The dirt a body dragged a step over the ground under {@code body} picks up (walking's, before {@link #DRAG_DIRT}), or null. */
@@ -248,14 +296,14 @@ public final class ArmourGrime {
 		boolean rained = body.isInWaterOrRain();
 		Holder<Biome> biome = level.getBiome(under);
 		if (isMud(ground)) {
-			return new Dirt(MUD_GAIN, true);
+			return new Dirt(MUD_GAIN, true, 0);
 		}
 		if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
-			return new Dirt(WET_GROUND_GAIN, true);
+			return new Dirt(WET_GROUND_GAIN, true, 0);
 		}
-		if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)) {
+		if (isEarth(ground) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL) || isRockDust(ground)) {
 			// dragged, even dry earth grinds in
-			return new Dirt(DUST_GAIN, false);
+			return new Dirt(DUST_GAIN, false, groundTint(level, under, ground));
 		}
 		return null;
 	}
@@ -265,7 +313,7 @@ public final class ArmourGrime {
 	 * {@code steps} steps over {@code dirt}: scraped dirty as a living body's would be.
 	 */
 	public static void dragArmour(ItemStack stack, int index, Dirt dirt, int steps, net.minecraft.util.RandomSource random) {
-		soilStack(stack, dirt.gain() * DRAG_DIRT * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)] * steps, dirt.mud(), random);
+		soilStack(stack, dirt.gain() * DRAG_DIRT * DRAG_REACH[Mth.clamp(index, 0, DRAG_REACH.length - 1)] * steps, dirt.mud(), dirt.tint(), random);
 	}
 
 	/** (0.21.28) The same, through water: {@code steps} steps' washing. */
@@ -288,12 +336,12 @@ public final class ArmourGrime {
 	}
 
 	/** Dirties the piece in {@code slot} by {@code gain} (fractions carry over by chance). */
-	private static void soil(LivingEntity body, EquipmentSlot slot, float gain, boolean mud) {
-		soilStack(body.getItemBySlot(slot), gain, mud, body.getRandom());
+	private static void soil(LivingEntity body, EquipmentSlot slot, float gain, boolean mud, int tint) {
+		soilStack(body.getItemBySlot(slot), gain, mud, tint, body.getRandom());
 	}
 
-	/** Dirties {@code stack} by {@code gain} (fractions carry over by chance). */
-	static void soilStack(ItemStack stack, float gain, boolean mud, net.minecraft.util.RandomSource random) {
+	/** Dirties {@code stack} by {@code gain} (fractions carry over by chance); dust takes on {@code tint} (0: plain tan). */
+	static void soilStack(ItemStack stack, float gain, boolean mud, int tint, net.minecraft.util.RandomSource random) {
 		if (stack.isEmpty() || gain <= 0.0F) {
 			return;
 		}
@@ -304,13 +352,28 @@ public final class ArmourGrime {
 		Grime was = grime(stack);
 		int amount = was == null ? 0 : was.amount();
 		int muddy = was == null ? 0 : was.mud();
-		if (amount >= MAX && (muddy >= MAX) == mud) {
+		int wasTint = was == null ? 0 : was.tint();
+		if (amount >= MAX && (muddy >= MAX) == mud && (mud || wasTint == tint)) {
 			return;
 		}
 		int next = Math.min(MAX, amount + add);
-		// the new dirt's share of the whole decides how muddy it now is
+		// the new dirt's share of the whole decides how muddy it now is, and the dust's colour
+		float share = add / (float) (amount + add);
 		int mudPart = Math.round((muddy * (float) amount + (mud ? MAX : 0) * (float) add) / (amount + add));
-		stack.set(GRIME, new Grime(next, Mth.clamp(mudPart, 0, MAX)));
+		int nextTint = mud ? wasTint : blendTint(wasTint, tint, amount == 0 ? 1.0F : Math.max(share, 0.15F));
+		Grime now = new Grime(next, Mth.clamp(mudPart, 0, MAX), nextTint);
+		if (!now.equals(was)) {
+			stack.set(GRIME, now);
+		}
+	}
+
+	/** {@code from} toward {@code to} by {@code t} (0 is the plain tan). */
+	private static int blendTint(int from, int to, float t) {
+		int a = from == 0 ? DUST_TAN : from, b = to == 0 ? DUST_TAN : to;
+		int r = Math.round((a >> 16 & 0xFF) + ((b >> 16 & 0xFF) - (a >> 16 & 0xFF)) * t);
+		int g = Math.round((a >> 8 & 0xFF) + ((b >> 8 & 0xFF) - (a >> 8 & 0xFF)) * t);
+		int bl = Math.round((a & 0xFF) + ((b & 0xFF) - (a & 0xFF)) * t);
+		return from == 0 && to == 0 ? 0 : Math.max(1, r << 16 | g << 8 | bl);
 	}
 
 	/** Washes {@code amount} off the piece in {@code slot}; true if it had any on it. */
@@ -337,7 +400,7 @@ public final class ArmourGrime {
 		if (left <= 0) {
 			stack.remove(GRIME);
 		} else {
-			stack.set(GRIME, new Grime(left, was.mud()));
+			stack.set(GRIME, new Grime(left, was.mud(), was.tint()));
 		}
 		return true;
 	}

@@ -1,0 +1,6 @@
+# armour grime - ground colours, more dirt before washing
+- **Dust takes the ground's colour** (Andy: "stretch it to different materials"): red off badlands sand, dark brown off a forest floor, grey off gravel, rusty soot off netherrack, near black off basalt and blackstone, pale off end stone. Mixed walks blend the colours by how much each added. Mud stays mud brown. Kept on the grime component as `tint` (old dirty armour keeps the plain tan).
+- **More places dirty you**: dry bare earth (dirt, coarse dirt, podzol, rooted dirt, paths, farmland) throws a little dust anywhere, not only in dry country (grass, mycelium and moss don't); the Nether's rock and soul sand, nylium and end stone do too. Dragged bodies pick these up as well.
+- **More grime shows before washing** (Andy: "increase the amount visible"): the masks cover about 90% of each sheet (was about 70%) with more variation in shade, cover grows faster at low dirt (a 20-dirt piece already shows splotches), a filthy piece is caked over 90% of its mask, and each splotch is stronger. Helmets and chestplates get more of each step's dirt (reach 1.0/0.7/0.4/0.2, was 1.0/0.6/0.25/0.08).
+- Classes: `ArmourGrime`, `ArmourGrimeTextures`; masks redrawn by `tools/grime_textures.py`. Previews in project files `art-overhaul/armour-grime/`.
+- Built; not played.

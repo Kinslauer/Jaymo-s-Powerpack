@@ -36,6 +36,9 @@ import org.jspecify.annotations.Nullable;
  * whatever resource pack is drawing it, so the grime always sits on the armour's pixels and nowhere else. Its dark
  * outline pixels are left clean so the shape still reads.
  * <p>
+ * Dust takes the colour of the ground it came off ({@link ArmourGrime.Grime#tint}). Grime shows early: a lightly dirty
+ * piece already has splotches on every part, and a filthy one is caked nearly all over, so a wash has a lot to take away.
+ * <p>
  * The colours suit the normal textures. With the optional Excalibur pack switched on, the grime takes Excalibur's grade
  * (darker, less saturated; {@code tools/excalibur_style/grade.py} on the default colours).
  * <p>
@@ -50,9 +53,11 @@ public final class ArmourGrimeTextures {
 	/** How many steps of dirtiness, and of muddiness, get their own picture. */
 	static final int STAGES = 10, MUD_STEPS = 3;
 	/** Even filthy, this share of the mask's order is never reached, so some armour always shows through. */
-	static final float MOST_COVER = 0.8F;
+	static final float MOST_COVER = 0.9F;
+	/** How quickly the cover grows with dirtiness: below 1, a little dirt already shows a lot (cover = level to this power). */
+	static final float COVER_CURVE = 0.6F;
 	/** How far a grimy pixel goes toward the grime colour: at its edge, and at its heart. */
-	static final float EDGE_STRENGTH = 0.45F, HEART_STRENGTH = 0.85F;
+	static final float EDGE_STRENGTH = 0.55F, HEART_STRENGTH = 0.9F;
 	/** Pixels darker than this (0..255 luminance) are outlines and stay clean. */
 	static final int OUTLINE = 40;
 	/** Painted pictures kept before all are thrown away and painted again as needed. */
@@ -263,7 +268,9 @@ public final class ArmourGrimeTextures {
 		}
 		int stage = grime == null ? 0 : Mth.clamp(Mth.ceil(grime.level() * STAGES), 1, STAGES);
 		int mudStep = grime == null ? 0 : Math.round(grime.muddiness() * MUD_STEPS);
-		String key = base + "|" + stage + "|" + mudStep + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
+		// rounded to steps, so a slowly changing colour doesn't paint a new picture every time
+		int tint = grime == null || grime.tint() == 0 ? 0 : grime.tint() & 0xF0F0F0 | 0x080808;
+		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
@@ -287,9 +294,9 @@ public final class ArmourGrimeTextures {
 		if (MADE.size() >= MOST_KEPT) {
 			reset();
 		}
-		float level = stage / (float) STAGES;
+		float level = (float) Math.pow(stage / (float) STAGES, COVER_CURVE);
 		float muddy = mudStep / (float) MUD_STEPS;
-		int colour = lerpRgb(muddy, excalibur ? EXCALIBUR_DUST : DUST, excalibur ? EXCALIBUR_MUD : MUD);
+		int colour = lerpRgb(muddy, dust(tint), excalibur ? EXCALIBUR_MUD : MUD);
 		float threshold = 1.0F - MOST_COVER * level;
 		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
 		int w = image.getWidth(), h = image.getHeight();
@@ -373,6 +380,20 @@ public final class ArmourGrimeTextures {
 			dx = -16;
 		}
 		return (y + dy * u) * w + x + dx * u;
+	}
+
+	/** The dust colour for a grime's {@code tint} (0: plain tan), graded like the plain tan when Excalibur is on. */
+	private static int dust(int tint) {
+		if (tint == 0) {
+			return excalibur ? EXCALIBUR_DUST : DUST;
+		}
+		if (!excalibur) {
+			return tint;
+		}
+		int r = (tint >> 16 & 0xFF) * (EXCALIBUR_DUST >> 16 & 0xFF) / (DUST >> 16 & 0xFF);
+		int g = (tint >> 8 & 0xFF) * (EXCALIBUR_DUST >> 8 & 0xFF) / (DUST >> 8 & 0xFF);
+		int b = (tint & 0xFF) * (EXCALIBUR_DUST & 0xFF) / (DUST & 0xFF);
+		return Math.min(255, r) << 16 | Math.min(255, g) << 8 | Math.min(255, b);
 	}
 
 	private static int mix(int from, int to, float t) {
