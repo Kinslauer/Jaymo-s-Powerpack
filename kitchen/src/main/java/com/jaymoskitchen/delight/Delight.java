@@ -1,6 +1,7 @@
 package com.jaymoskitchen.delight;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.cooking.Dish;
 import com.jaymoskitchen.cooking.Quality;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
@@ -67,6 +69,11 @@ public final class Delight {
 	public static final TagKey<net.minecraft.world.level.block.Block> HEAT_SOURCES = TagKey.create(Registries.BLOCK, JaymosKitchen.id("heat_sources"));
 	/** What cuts on the cutting board (and harvests straw from wheat). */
 	public static final TagKey<Item> KNIVES = TagKey.create(Registries.ITEM, JaymosKitchen.id("knives"));
+	/** A knife's attack damage over its material's, and its swing speed (the iron knife's). */
+	static final float KNIFE_DAMAGE = 0.5F, KNIFE_SPEED = -1.8F;
+	/** A flint knife: a wooden tool's reach into blocks, a stone tool's wear; mended with flint. */
+	static final ToolMaterial FLINT = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL, 131, 4.0F, 1.0F, 5,
+		TagKey.create(Registries.ITEM, JaymosKitchen.id("flint_tool_materials")));
 
 	public static CookwareBlock COOKING_POT_BLOCK;
 	public static CookwareBlock FRYING_PAN_BLOCK;
@@ -83,6 +90,8 @@ public final class Delight {
 		COD_SLICE, COOKED_COD_SLICE, SALMON_SLICE, COOKED_SALMON_SLICE;
 	public static Item HONEY_GLAZED_HAM, STUFFED_PUMPKIN;
 	public static Item IRON_KNIFE;
+	/** Farmer's Delight's other knives; each does everything the iron one does (the {@link #KNIVES} tag). */
+	public static Item FLINT_KNIFE, COPPER_KNIFE, GOLDEN_KNIFE, DIAMOND_KNIFE, NETHERITE_KNIFE;
 
 	public static Holder<MobEffect> COMFORT;
 	public static Holder<MobEffect> NOURISHMENT;
@@ -168,6 +177,11 @@ public final class Delight {
 		STUFFED_PUMPKIN = food("stuffed_pumpkin", 11, 0.8F, Items.BOWL);
 
 		IRON_KNIFE = item("iron_knife", new Item.Properties().sword(ToolMaterial.IRON, 0.5F, -1.8F).repairable(Items.IRON_INGOT));
+		FLINT_KNIFE = item("flint_knife", new Item.Properties().sword(FLINT, KNIFE_DAMAGE, KNIFE_SPEED));
+		COPPER_KNIFE = item("copper_knife", new Item.Properties().sword(ToolMaterial.COPPER, KNIFE_DAMAGE, KNIFE_SPEED));
+		GOLDEN_KNIFE = item("golden_knife", new Item.Properties().sword(ToolMaterial.GOLD, KNIFE_DAMAGE, KNIFE_SPEED));
+		DIAMOND_KNIFE = item("diamond_knife", new Item.Properties().sword(ToolMaterial.DIAMOND, KNIFE_DAMAGE, KNIFE_SPEED));
+		NETHERITE_KNIFE = item("netherite_knife", new Item.Properties().sword(ToolMaterial.NETHERITE, KNIFE_DAMAGE, KNIFE_SPEED).fireResistant());
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			for (Item item : FOOD_TAB) {
@@ -188,7 +202,12 @@ public final class Delight {
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(new ItemStack(CUTTING_BOARD));
+			output.accept(new ItemStack(FLINT_KNIFE));
+			output.accept(new ItemStack(COPPER_KNIFE));
 			output.accept(new ItemStack(IRON_KNIFE));
+			output.accept(new ItemStack(GOLDEN_KNIFE));
+			output.accept(new ItemStack(DIAMOND_KNIFE));
+			output.accept(new ItemStack(NETHERITE_KNIFE));
 		});
 
 		// a grown wheat cut with a knife gives straw too
@@ -207,7 +226,7 @@ public final class Delight {
 			net.minecraft.world.level.biome.Biomes.MANGROVE_SWAMP), GenerationStep.Decoration.VEGETAL_DECORATION, placed("wild_rice"));
 	}
 
-	/** Comfort from a hot bowl, Nourishment from a rich meal (from Stomach, as it's eaten; the stack is still whole). */
+	/** Comfort from a hot bowl (or a mug of hot cocoa), Nourishment from a rich meal (from Stomach, as it's eaten; the stack is still whole). */
 	public static void onEat(ServerPlayer player, ItemStack stack) {
 		FoodProperties food = stack.get(DataComponents.FOOD);
 		if (food == null) {
@@ -219,7 +238,7 @@ public final class Delight {
 		}
 		int times = quality == Quality.PERFECT ? 2 : 1;
 		UseRemainder remainder = stack.get(DataComponents.USE_REMAINDER);
-		if (remainder != null && remainder.convertInto().item().value() == Items.BOWL) {
+		if (remainder != null && remainder.convertInto().item().value() == Items.BOWL || stack.is(ModItems.dish(Dish.HOT_COCOA))) {
 			player.addEffect(new MobEffectInstance(COMFORT, COMFORT_TICKS * times));
 		}
 		if (food.nutrition() >= NOURISHING_FROM) {

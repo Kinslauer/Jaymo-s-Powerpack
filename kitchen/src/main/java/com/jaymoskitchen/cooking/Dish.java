@@ -286,7 +286,10 @@ public enum Dish {
 	CLAM_CHOWDER(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CLAM_MEAT, POTATO, ONION, MILK_BOTTLE), 10, 0.75F, true,
 		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.NIGHT_VISION, 60 * 20, 0))),
 	GRILLED_ANGLERFISH(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(ANGLERFISH, LEMON, FLIP, FLIP), 9, 0.8F, false,
-		List.of(new Buff(MobEffects.NIGHT_VISION, 180 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0)));
+		List.of(new Buff(MobEffects.NIGHT_VISION, 180 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0))),
+	// Farmer's Delight's hot cocoa: a hot mug gives Comfort like a hot bowl (delight/Delight#onEat)
+	HOT_COCOA(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, MILK_BOTTLE, COCOA_BEANS, COCOA_BEANS, SUGAR), 4, 0.4F, false,
+		List.of(new Buff(MobEffects.REGENERATION, 10 * 20, 0)));
 	/** Which minigame cooks the dish. */
 	public enum Method {
 		/** Press the recipe steps in order (furnace / smoker). */
@@ -492,7 +495,7 @@ public enum Dish {
 	/** What eating it leaves behind: the bowl of a stew, the bottle of a drink; null for none. */
 	public @Nullable Item remainder() {
 		return switch (this) {
-			case MELON_JUICE, GLOW_BERRY_CUSTARD -> Items.GLASS_BOTTLE;
+			case MELON_JUICE, GLOW_BERRY_CUSTARD, HOT_COCOA -> Items.GLASS_BOTTLE;
 			default -> bowlFood ? Items.BOWL : null;
 		};
 	}

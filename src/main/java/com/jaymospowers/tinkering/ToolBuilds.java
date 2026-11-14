@@ -123,6 +123,12 @@ public final class ToolBuilds {
 		b.add(new Build("jaymoskitchen:oak_plow", List.of(part(plate, Family.METAL), part(tough, Family.WOOD)),
 			List.of(new Bit("jaymoskitchen:wheel"), new Bit("#minecraft:planks")), ToolBuilds::plough));
 		b.add(build("jaymoskitchen:cooking_pot", List.of(part(plate, Family.METAL), part(plate, Family.METAL)), "minecraft:bowl"));
+		// Kitchen's other metal knives, before the iron one (any metal): a copper or rose gold blade makes its own knife,
+		// a diamond set into any metal blade the diamond one (the netherite knife is a smithing table upgrade of that)
+		b.add(build("jaymoskitchen:copper_knife", List.of(part(PartType.SMALL_BLADE, Family.COPPER), part(handle, Family.WOOD)), "minecraft:string"));
+		b.add(build("jaymoskitchen:golden_knife", List.of(part(PartType.SMALL_BLADE, Family.ROSE_GOLD), part(handle, Family.WOOD)), "minecraft:string"));
+		b.add(build("jaymoskitchen:diamond_knife", List.of(part(PartType.SMALL_BLADE, Family.METAL), part(handle, Family.WOOD)), "minecraft:string",
+			"minecraft:diamond"));
 		b.add(build("jaymoskitchen:iron_knife", List.of(part(PartType.SMALL_BLADE, Family.METAL), part(handle, Family.WOOD)), "minecraft:string"));
 		// ---- Pantry for Blockheads' cookware (before Kitchen's pans: its pan has a copper handle) ----
 		b.add(build("pantryforblockheads:frying_pan", List.of(part(plate, Family.METAL), part(handle, Family.COPPER))));
