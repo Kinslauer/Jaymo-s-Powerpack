@@ -472,6 +472,27 @@ Andy approved the wood-wisp lore (in Lore.md since Nov 13) and his decisions are
 Ask Andy before the first in-game test with friends online. No account,
 no offline mode, no key handling needed. Estimated 2-4 hours for step 1, 3-6 for step 2.
 
+**Done Nov 13, 7:20 PM (PC Claude):**
+- [x] PC reaches the Deck: `ssh -i ~/.ssh/jaymos_deck deck@10.0.0.164`, `./rcon.py list` answers, RCON on.
+- [x] 1. `E:/hermes/scripts/mcbot.py` (who, where, status, summon, say, dismiss, off/on, listen, ensure-listener,
+  stop-listener, ask, answer). Fixed verbs, names checked, one RCON command each, rate limits in a shared state file.
+  Falls back to `list`/`tellraw` until #1467 is on the server. State and logs: `E:/hermes/mcbot/`.
+- [x] 2. Skill `skills/minecraft/minecraft-mechanics` + `references/mechanics-cheatsheet.md` (83 sections, every claim
+  checked against the code by a second reader); SOUL section "Minecraft server: Youth" (backup
+  `backups/SOUL.md.2026-11-13-minecraft.bak`); `hermes sessions refresh-prompts` run.
+- [x] 3. Listener: Hermes cron `mcbot-listener` (every minute, no agent) keeps `mcbot.py listen` alive inside the
+  gateway's Windows session, the only place `hermes chat --oneshot` works. In game, YOUTH gets the matching cheatsheet
+  sections in its prompt and NO tools (a player's words can't make it change files); the script sends its `<say>`.
+  The listener exits by itself when `mcbot.py` changes, and the cron restarts it with the new code.
+- [x] 4. 10 test questions (2 per power slice, Kingdoms, Kitchen, one injection try), each checked by a separate
+  reader against the code; 4 cheatsheet lines fixed; re-asked, now right. 10-45 s per answer.
+- [ ] 5. In-game test with Andy: chat is **paused** until he says so (`mcbot.py on`). Before that: merge #1467 (his
+  word), pbdr. Chat shows display names, so #1467 now also puts `display` in `/youth status` (commit 492267aec).
+- Note: the first listener copy (pid 13320) couldn't be killed from the desktop; it obeys only `mcbot/OFF`, which
+  stays, so it's deaf until the next reboot. The real kill switch is `mcbot/PAUSED`.
+- Gateway trouble tonight (not from this): 6:26 PM a 326 s idle GC froze it and Discord dropped; 6:49 PM its liveness
+  watchdog exited and it stayed down until `schtasks /run /tn Hermes_Gateway` at 6:54 PM.
+
 ## New (Nov 14): Karpathy coding guidelines for every Claude and every bot (cloud thread "Add Karpathy coding guidelines everywhere")
 
 **Andy's choice (Nov 14, 12:00 AM ET, append to `Decisions.md`):** "Yeah add it to every claude session too why not",
