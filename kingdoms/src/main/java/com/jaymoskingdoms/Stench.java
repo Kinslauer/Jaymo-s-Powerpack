@@ -100,7 +100,7 @@ public final class Stench {
 			}
 			ServerLevel level = player.level();
 			List<Villager> near = level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(REMARK_RANGE),
-				v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && v.hasLineOfSight(player));
+				v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && v.hasLineOfSight(player) && calm(v, player));
 			if (near.isEmpty()) {
 				continue;
 			}
@@ -123,7 +123,7 @@ public final class Stench {
 		UUID who = player.getUUID();
 		List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(REMARK_RANGE),
 			m -> (m instanceof Villager || m instanceof Npc) && m.isAlive() && !m.isBaby() && !m.isSleeping() && m.hasLineOfSight(player)
-				&& now - SAID_BLOOD.getOrDefault(pair(m.getUUID(), who), Long.MIN_VALUE / 2) >= BLOOD_COOLDOWN);
+				&& calm(m, player) && now - SAID_BLOOD.getOrDefault(pair(m.getUUID(), who), Long.MIN_VALUE / 2) >= BLOOD_COOLDOWN);
 		if (near.isEmpty()) {
 			return false;
 		}
@@ -138,6 +138,15 @@ public final class Stench {
 			: "." + player.getRandom().nextInt(BLOOD_LINES));
 		Speech.sayTo(level, speaker, player, Component.translatable(key), Speech.WHITE);
 		return true;
+	}
+
+	/**
+	 * Whether {@code m} is in a state to remark on {@code player}'s blood or smell: not fighting them, not down, and not one
+	 * of a camp's raiders or another outlaw (Andy, 2026-11-14: a raider who had just put him down asked "Gods, you're covered
+	 * in blood. What happened?").
+	 */
+	private static boolean calm(Mob m, ServerPlayer player) {
+		return m.getTarget() != player && !Downed.isDowned(m) && !Outlaws.is(m);
 	}
 
 	private static String pair(UUID speaker, UUID player) {

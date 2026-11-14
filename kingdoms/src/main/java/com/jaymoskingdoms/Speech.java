@@ -61,8 +61,31 @@ public final class Speech {
 		}
 	}
 
-	/** (0.7.20) {@code speaker} says {@code words} to {@code player} alone, slowly enough to follow in any tongue. */
+	/**
+	 * (0.7.20) {@code speaker} says {@code words} to {@code player} alone; everyone near sees it too ({@link #overheard}).
+	 * (Andy, 2026-11-14: a villager whose tongue he didn't speak said one line in plain English, then went back to her own.)
+	 * In the speaker's tongue, as {@link #tell} is: a player who doesn't speak it gets words they don't know. Only what is
+	 * meant to be followed by anyone goes through {@link #sayPlainly}.
+	 */
 	public static void sayTo(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
+		if (speaker instanceof IronGolem) {
+			return;
+		}
+		Component heard = Languages.heard(player, speaker, words);
+		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), heard, color));
+		} else {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), heard).withColor(color));
+		}
+		overheard(level, speaker, player, words, color);
+	}
+
+	/**
+	 * {@code speaker} says {@code words} to {@code player} alone, slowly and simply enough to follow in any tongue: a
+	 * local remarking on a learner's accent ({@link Languages}), the family that takes a farmhand in ({@link FarmhandWake}).
+	 * Everyone near sees it in the speaker's tongue ({@link #overheard}).
+	 */
+	public static void sayPlainly(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
 		if (speaker instanceof IronGolem) {
 			return;
 		}
