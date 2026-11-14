@@ -81,6 +81,25 @@ public final class BoxingClient {
 				save(state);
 			}
 		});
+		// (Jung) A boxer punches once a click, like a combo fighter: each press throws the string's next punch (the
+		// server keeps the string, its reset and a one-click buffer: Boxing.punch). A click at the air or a block is a
+		// punch too (Boxing.AirPunch), so shadowboxing runs the string; a click on a living thing goes the usual way
+		// (Boxing's attack event). Holding the button throws nothing more: the held attack is swallowed, except on a
+		// block, where it digs as ever.
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (player.isUsingItem() || !Boxing.boxing(player)) {
+				return false;
+			}
+			boolean block = minecraft.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit
+				&& hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
+			if (clicks <= 0) {
+				return !block;
+			}
+			if (!(minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult) && ClientPlayNetworking.canSend(Boxing.AirPunch.TYPE)) {
+				ClientPlayNetworking.send(new Boxing.AirPunch());
+			}
+			return false;
+		});
 		HudElementRegistry.addFirst(JaymosPowers.id("boxing_blur"), BoxingClient::draw);
 		HudElementRegistry.addLast(JaymosPowers.id("boxing_style"), BoxingClient::drawStyle);
 	}

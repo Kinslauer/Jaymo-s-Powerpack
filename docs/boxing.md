@@ -17,6 +17,19 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
 - **The punch**: left click on a living thing, with fist gear in the main hand and a style. The server throws it in
   place of the game's own attack. `PUNCH_DAMAGE` 1.5 at every level, reach `RANGE` 2 blocks (a click from further
   out is a punch at the air and still costs), `PUNCH_KNOCKBACK` 25% of the usual shove.
+- **One click, one punch** (Jung: "work like a standard combo-chain fighter"): each press of the attack button
+  throws the string's next punch, and after its last punch the string starts again; `STRING_RESET` 30 ticks (1.5 s)
+  without a punch also starts it again. Holding the button throws nothing more (`BoxingClient` swallows the held
+  attack, except on a block, which still digs). A click up to `BUFFER` 8 ticks before the next punch is due waits
+  its turn, one at a time; a click earlier than that is lost, so mashing never stacks punches up. The pose shows
+  only the punch the server threw (no stand-in), one at a time: a punch told while the last one is still coming home
+  waits until it is `HOME_FIRST` half way back, and winds up quicker (never under `LEAST_WINDUP` 2 ticks) to land on time.
+- **Shadowboxing** (Jung: "left clicks still don't do jabs and crosses"): a left click at the air or at a block is a
+  punch too. The client asks (`Boxing.AirPunch`, from `BoxingClient`'s pre-attack hook; the click itself goes on as
+  usual, so a block still breaks), and the server throws the string's next punch at nobody: same rhythm, windup,
+  stamina and string as a punch at a foe, everyone sees it, and it ends in a swish (`Boxing.whiff`). A click at the
+  air never takes the place of a punch waiting its turn for a foe. Before this only a click on a living thing ran the
+  string, so swinging at the air showed the same jab every time.
 - **Strings**: Arrow Slit throws jab, lead hook, cross, round and round (Jung's order; it was a one-two then alternating hooks); Long Guard jab, jab, cross; Bastion the right jab
   only. A pause of `STRING_RESET` 30 ticks starts the string again. So far the punches differ only in sound.
 - **Windup** (Jung's idea; Andy made it shorten with level): every punch lands a moment after it is thrown,
@@ -255,3 +268,11 @@ Nothing from the plan. See the open points below.
 31. A second player sees all of it.
 32. Long Guard: pull just before a zombie's swing lands, then let it swing again at once: about two swings in five
     miss for the next half second or so, with a whiff. Bastion's shoulder roll: about three in ten.
+33. Shadowboxing: with Hand Wraps and a style, left click at the sky, then at a wall, at the rhythm, third person (F5)
+    and first person. Arrow Slit throws jab, lead hook, cross, and round again; Long Guard jab, jab, cross; Bastion jabs.
+    Each ends in a soft swish and costs its stamina. A second player sees the same punches. Clicking at a block still
+    starts breaking it. Click a zombie, then click the air before it lands: the punch at the zombie still comes first.
+34. One click, one punch: hold the attack button at the sky: one punch, then nothing until you let go and click again.
+    Hold it on a block: it digs as before. Click once a second: the string runs and loops (Arrow Slit jab, hook,
+    cross, jab...). Wait two seconds between clicks: every punch is the string's first. Mash as fast as you can:
+    punches come at the rhythm, each one finishes before the next starts, and they stop within one punch of letting go.

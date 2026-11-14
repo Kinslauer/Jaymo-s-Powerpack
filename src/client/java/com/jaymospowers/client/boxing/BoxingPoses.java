@@ -107,8 +107,16 @@ public final class BoxingPoses {
 	 * a hook's tilt over the leg on its side.
 	 */
 	static final float JAB_LEAN = 0.12F, JAB_DUCK = 0.08F, CROSS_DUCK = 0.12F, HOOK_DUCK = 0.1F, HOOK_TILT = 0.07F, UPPERCUT_DUCK = 0.2F;
-	/** The game's own arm swing lasts this long (ticks): how far into a click a swing is. A local windup gives way to the server's word of the punch if that comes within the second number of ticks. */
-	static final float SWING_TICKS = 6.0F, LOCAL_GRACE = 8.0F;
+	/**
+	 * (Jung: "animations don't awkwardly cancel mid-frame") A punch told while the last one is still coming home waits for
+	 * it to come most of the way home, and winds up quicker to land on time; its windup is never shown shorter than this (ticks).
+	 */
+	static final float LEAST_WINDUP = 2.0F;
+	/**
+	 * How far home a punch comes before the next may take over (a share of its way back), so a quick flurry neither
+	 * cuts a punch off at full reach nor falls behind the blows.
+	 */
+	static final float HOME_FIRST = 0.5F;
 	/** A jab: the lead arm straight out at chin height, its shoulder up to the chin (pixels) and turned in behind it (radians). The rear glove stays home. */
 	static final float JAB_PITCH = -1.62F, JAB_SHOULDER = 0.8F, JAB_TURN = 0.3F;
 	/**
@@ -172,10 +180,20 @@ public final class BoxingPoses {
 	}
 
 	/**
-	 * The last punch each player was told to have thrown ({@link Boxing#LOOK}, less its tiredness bits), and when its
-	 * pose began (game ticks). {@code local}: nobody told of it; it is the click's own swing, shown as a jab.
+	 * The last punch each player was told to have thrown ({@link Boxing#LOOK}, less its tiredness bits): when its pose
+	 * began (game ticks) and how long its windup is shown for. Only the server's word starts a punch's pose (every click
+	 * of a boxer's asks for one, at a foe or at the air), so the pose is always the punch the string chose.
 	 */
-	private record Thrown(int look, float at, boolean local) {
+	private record Thrown(int look, Boxing.@Nullable Punch punch, float at, float windup, @Nullable Thrown before) {
+		/** When its pose is over: the windup, then the punch. */
+		float end() {
+			return at + windup + PUNCH_TICKS;
+		}
+
+		/** When the next punch may take over: once this one has reached and is {@link #HOME_FIRST} of the way home. */
+		float handover() {
+			return at + windup + PUNCH_TICKS * (SNAP + (1.0F - SNAP) * HOME_FIRST);
+		}
 	}
 
 	private static final java.util.Map<Integer, Thrown> THROWN = new java.util.HashMap<>();
@@ -276,34 +294,37 @@ public final class BoxingPoses {
 			}
 		}
 		// The punch's pose (a windup, then the punch) runs on its own clock, from when the server says a punch was thrown
-		// (so a queued punch, thrown a moment after the click, shows too). The click's own swing starts it at once, as a
-		// jab; if word of the real punch comes soon after, the pose carries on as that punch from where it is.
+		// (so a queued punch, thrown a moment after the click, shows too, and each is the string's own: jab, cross...).
+		// One punch is shown at a time: a punch told while the last is still on its way home starts once it is home,
+		// with its windup cut short so the blow still lands when the server lands it.
 		Integer told = player.getAttached(Boxing.LOOK);
 		int seen = told == null ? 0 : told >> 2;
 		float now = player.level().getGameTime() + partialTicks;
-		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
 		// (the pose's windup ends a little before the server's, so the punch is at full reach as the blow lands)
-		float windup = Boxing.windup(player) - SNAP * PUNCH_TICKS, whole = windup + PUNCH_TICKS;
+		float windup = Boxing.windup(player) - SNAP * PUNCH_TICKS;
 		if (THROWN.size() > 512) {
 			THROWN.clear();
 		}
 		Thrown thrown = THROWN.get(player.getId());
 		if (thrown == null) {
-			thrown = new Thrown(seen, now - whole, false);
+			// first seen: whatever it last threw is long over
+			thrown = new Thrown(seen, null, now - 1000.0F, windup, null);
 			THROWN.put(player.getId(), thrown);
 		} else if (thrown.look() != seen) {
-			boolean carried = thrown.local() && now - thrown.at() < LOCAL_GRACE;
-			thrown = new Thrown(seen, carried ? thrown.at() : now, false);
-			THROWN.put(player.getId(), thrown);
-		} else if (swinging && state.swingAnimation < 0.34F && now - thrown.at() >= whole) {
-			thrown = new Thrown(seen, now - state.swingAnimation * SWING_TICKS, true);
+			float start = Math.max(now, thrown.handover());
+			// (the one before is kept only while it still has to finish)
+			thrown = new Thrown(seen, Boxing.shownPunch(player), start, Math.max(LEAST_WINDUP, now + windup - start), start > now ? thrown : null);
 			THROWN.put(player.getId(), thrown);
 		}
-		Boxing.Punch punch = thrown.local() ? Boxing.Punch.JAB : Boxing.shownPunch(player);
+		if (now < thrown.at() && thrown.before() != null) {
+			// the last punch is still coming home: it plays out first
+			thrown = thrown.before();
+		}
+		Boxing.Punch punch = thrown.punch();
 		float since = now - thrown.at(), wind = 0.0F, punchAt = 0.0F;
-		if (punch != null && since >= 0.0F && since < whole) {
-			wind = Math.min(1.0F, since / windup);
-			punchAt = Math.max(0.0F, (since - windup) / PUNCH_TICKS);
+		if (punch != null && since >= 0.0F && now < thrown.end()) {
+			wind = Math.min(1.0F, since / thrown.windup());
+			punchAt = Math.max(0.0F, (since - thrown.windup()) / PUNCH_TICKS);
 		} else {
 			punch = null;
 		}

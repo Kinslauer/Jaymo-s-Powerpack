@@ -13,7 +13,11 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
@@ -47,7 +51,10 @@ import org.jspecify.annotations.Nullable;
  * {@link #learn} enforces it. Each style has its own level, 1 to {@link #MAX_LEVEL}.</li>
  * <li><b>The punch</b>: a left click on a living thing. The server throws it in place of the game's own attack, so
  * it does {@link #PUNCH_DAMAGE} whatever the level (a cestus adds its own): levels never add damage. Which punch it is comes from the style's
- * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again.</li>
+ * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again. One click, one punch,
+ * like a combo fighter: a click at the air or a block throws one too ({@link AirPunch}); holding the button throws no
+ * more (the client swallows the held attack); a click up to {@link #BUFFER} ticks before the next is due waits its
+ * turn, one at a time, and an earlier one is lost.</li>
  * <li><b>The windup</b>: a punch lands {@link #windupAt} ticks after it is thrown ({@link #WINDUP_SLOWEST} at level
  * 1, down to {@link #WINDUP_FASTEST} at level {@link #MAX_LEVEL}; its stamina is spent as it starts), on the one it was
  * aimed at if they are still in reach then; the next can't start until it has.</li>
@@ -89,6 +96,12 @@ public final class Boxing {
 	public static final float GASSED_CUT = 0.45F, GASSED_CAP = 2.0F;
 	/** This long (ticks) without a punch and the string starts again. */
 	static final int STRING_RESET = 30;
+	/**
+	 * (Jung: "handles click-spam cleanly") A click this many ticks or less before the next punch is due waits its turn
+	 * (one at a time); a click earlier than that is ignored, so mashing doesn't stack punches up or run them on by
+	 * itself once you stop.
+	 */
+	static final int BUFFER = 8;
 	/** A boxer's block, per blow stopped (half-feathers; one icon), and the Arrow Slit's tight guard (an icon and a half). */
 	public static final float BLOCK_COST = 2.0F, ARROW_SLIT_BLOCK_COST = 3.0F;
 	/** The breath of a tiring and of a gassed boxer: a puff every this many ticks, and how many wisps a gassed one is. */
@@ -181,9 +194,9 @@ public final class Boxing {
 		int shown;
 		/** What the attack-speed modifier was last set for (0: taken off). */
 		int applied;
-		/** A click that came too early: the one it was aimed at (entity id), thrown as soon as the rhythm allows; -1 for none. */
+		/** A click that came too early: the one it was aimed at (entity id, or {@link Boxing#AIR}), thrown as soon as the rhythm allows; -1 for none. */
 		int queued = -1;
-		/** A punch winding up: the one it is aimed at (entity id; -1 for none), when it lands, its strong attack if it is one, and whether it was thrown gassed. */
+		/** A punch winding up: the one it is aimed at (entity id, or {@link Boxing#AIR}; -1 for none), when it lands, its strong attack if it is one, and whether it was thrown gassed. */
 		int winding = -1;
 		long landAt;
 		BoxingEvades.@Nullable Strong strong;
@@ -191,6 +204,24 @@ public final class Boxing {
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
+
+	/** In {@link State#queued} and {@link State#winding}: a punch thrown at the air, at nobody. */
+	private static final int AIR = -2;
+
+	/**
+	 * (Jung: "left clicks still don't do jabs and crosses") A boxer's left click at the air (or at a block): the client
+	 * asks, and the server throws the string's next punch at nobody ({@link #punchAir}), so shadowboxing runs the
+	 * string (jab, cross...) and everyone sees it, the way a click on a foe does.
+	 */
+	public record AirPunch() implements CustomPacketPayload {
+		public static final Type<AirPunch> TYPE = new Type<>(JaymosPowers.id("boxing_air_punch"));
+		public static final StreamCodec<io.netty.buffer.ByteBuf, AirPunch> CODEC = StreamCodec.unit(new AirPunch());
+
+		@Override
+		public Type<AirPunch> type() {
+			return TYPE;
+		}
+	}
 
 	private Boxing() {
 	}
@@ -207,9 +238,11 @@ public final class Boxing {
 				// (the client's own swing and attack indicator run as usual; the server decides the punch)
 				return InteractionResult.PASS;
 			}
-			punch(boxer, target, false);
+			punch(boxer, target.getId(), false);
 			return InteractionResult.SUCCESS;
 		});
+		PayloadTypeRegistry.serverboundPlay().register(AirPunch.TYPE, AirPunch.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(AirPunch.TYPE, (payload, ctx) -> punchAir(ctx.player()));
 		ServerTickEvents.END_SERVER_TICK.register(Boxing::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> STATES.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
@@ -389,8 +422,15 @@ public final class Boxing {
 		return true;
 	}
 
-	/** {@code queued}: a click that came early, thrown now that the rhythm allows. */
-	private static void punch(ServerPlayer boxer, LivingEntity target, boolean queued) {
+	/** A left click at the air ({@link AirPunch}): the string's next punch, at nobody, if this player is boxing and able. */
+	private static void punchAir(ServerPlayer boxer) {
+		if (boxing(boxer) && boxer.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(boxer)) {
+			punch(boxer, AIR, false);
+		}
+	}
+
+	/** {@code target}: the one it is aimed at (entity id), or {@link #AIR}. {@code queued}: a click that came early, thrown now that the rhythm allows. */
+	private static void punch(ServerPlayer boxer, int target, boolean queued) {
 		ServerLevel level = boxer.level();
 		Style style = style(boxer);
 		if (style == null) {
@@ -398,9 +438,16 @@ public final class Boxing {
 		}
 		State state = STATES.computeIfAbsent(boxer.getUUID(), id -> new State());
 		long now = level.getGameTime();
-		if (state.winding >= 0 || now < state.readyAt - EARLY_SLACK) {
-			// too soon (or the last punch is still winding up): one punch waits its turn ({@link #tick}); nothing is spent yet
-			state.queued = target.getId();
+		if (!queued && now < state.readyAt - BUFFER) {
+			// far too soon: the click is lost (a combo fighter's click, not a held trigger)
+			return;
+		}
+		if (state.winding != -1 || now < state.readyAt - EARLY_SLACK) {
+			// too soon (or the last punch is still winding up): one punch waits its turn ({@link #tick}); nothing is spent yet.
+			// A click at the air never takes the place of one waiting for a foe.
+			if (target != AIR || state.queued == -1) {
+				state.queued = target;
+			}
 			return;
 		}
 		state.queued = -1;
@@ -428,10 +475,19 @@ public final class Boxing {
 			spend(boxer, costAt(level(boxer, style)));
 		}
 		// the windup: the blow lands in a moment ({@link #tick}, {@link #land}), if the foe is still there to hit
-		state.winding = target.getId();
+		state.winding = target;
 		state.landAt = now + windup;
 		state.strong = strong;
 		state.windGassed = gassed;
+	}
+
+	/** A punch thrown at the air comes to its end: the swish, and a strong attack it carried is spent. */
+	private static void whiff(ServerPlayer boxer, State state) {
+		Punch punch = state.last;
+		boolean heavy = state.strong != null && state.strong.heavy();
+		state.strong = null;
+		float pitch = punch == Punch.JAB ? 1.3F : punch == Punch.CROSS ? 0.9F : heavy ? 0.7F : 1.05F;
+		boxer.level().playSound(null, boxer.getX(), boxer.getEyeY(), boxer.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.25F, pitch + 0.4F);
 	}
 
 	/** The punch {@code boxer} wound up lands on {@code target}, if it is still in reach. */
@@ -519,24 +575,28 @@ public final class Boxing {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			boolean boxing = boxing(player);
 			State state = STATES.get(player.getUUID());
-			if (state != null && state.winding >= 0 && (!boxing || player.level().getGameTime() >= state.landAt)) {
+			if (state != null && state.winding != -1 && (!boxing || player.level().getGameTime() >= state.landAt)) {
 				// the windup is over: the blow lands (a boxer who put the gear away meanwhile throws nothing)
 				int id = state.winding;
 				state.winding = -1;
 				// (nor does one knocked down or killed while it wound up)
-				if (boxing && player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player) && player.level().getEntity(id) instanceof LivingEntity target) {
-					land(player, target, state);
+				if (boxing && player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player)) {
+					if (id == AIR) {
+						whiff(player, state);
+					} else if (player.level().getEntity(id) instanceof LivingEntity target) {
+						land(player, target, state);
+					}
 				}
 			}
-			if (state != null && state.queued >= 0) {
+			if (state != null && state.queued != -1) {
 				if (!boxing) {
 					state.queued = -1;
 				} else if (player.level().getGameTime() >= state.readyAt) {
 					// the click that came early, in its turn
 					int id = state.queued;
 					state.queued = -1;
-					if (player.level().getEntity(id) instanceof LivingEntity target) {
-						punch(player, target, true);
+					if (id == AIR || player.level().getEntity(id) instanceof LivingEntity) {
+						punch(player, id, true);
 					}
 				}
 			}
