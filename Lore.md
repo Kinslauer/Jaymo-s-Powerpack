@@ -998,8 +998,9 @@ when the Grue is beaten says *"…Thank you."* Sickness silences him down to dot
 **The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
 the Shade of the Grue is one of them.
 
-**The Reaper** (Andy, 2026-11-14). The sorcerer's mana went into the ground with him, and it is still there. Whoever works
-death magic draws on it, and a piece of it comes up and stands behind them. A warlock may swear to it in place of a patron
+**The Reaper** (Andy, 2026-11-14). The sorcerer's mana went into the ground with him, and it is still there. A Death Sorcerer's
+magic is an element like the other six and never touches it. But whoever takes up the forbidden death arts from outside
+that element draws on it, and a piece of it comes up and stands behind them. A warlock may swear to it in place of a patron
 god: it keeps no shrine and gives no favour, and it is paid in blood and in deaths. It is not a sixth spirit and it was
 never a person. It has no name and no voice, and the five will not speak of it. Anyone at death's door can see it, whoever
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
