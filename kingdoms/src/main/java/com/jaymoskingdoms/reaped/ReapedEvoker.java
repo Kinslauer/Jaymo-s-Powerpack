@@ -31,6 +31,13 @@ public class ReapedEvoker extends Evoker implements Reaped {
 		return !Reaped.spares(this, target) && super.canAttack(target);
 	}
 
+	/** Its arms hang: they never cross as a living illager's do. */
+	@Override
+	public IllagerArmPose getArmPose() {
+		IllagerArmPose pose = super.getArmPose();
+		return pose == IllagerArmPose.CROSSED ? IllagerArmPose.NEUTRAL : pose;
+	}
+
 	@Override
 	public boolean canJoinRaid() {
 		return false;
