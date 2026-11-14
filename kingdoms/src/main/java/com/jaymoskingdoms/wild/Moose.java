@@ -1,10 +1,14 @@
 package com.jaymoskingdoms.wild;
 
 import java.util.EnumSet;
+import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
@@ -26,6 +30,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>With Cube Animals in the pack, ours is the bull and Cube's moose are the cows (Andy): a bull that spawns on its own
  * brings {@link #COWS_MIN} to {@link #COWS_MAX} of them, their antlers scaled away, and keeps by them ({@link KeepByCows}).
+ * A Cube moose with antlers is a young bull ({@link MooseHerds}), which he runs off his cows ({@link DriveOff}).
  */
 public class Moose extends WildBeast {
 	static final double HEALTH = 52.0, SPEED = 0.3, DAMAGE = 7.0, KNOCKBACK_RESISTANCE = 0.7, ATTACK_KNOCKBACK = 1.5;
@@ -39,6 +44,13 @@ public class Moose extends WildBeast {
 	/** How often the bull looks for its cows (ticks), how far it sees them, and how far off it lets them get before it walks back to within the near distance (blocks). */
 	static final int COW_CHECK_TICKS = 100;
 	static final double COW_SIGHT = 32.0, COW_FAR = 10.0, COW_NEAR = 5.0;
+	/**
+	 * Running a young bull off: how often the bull looks (ticks), how near him the young one is with a cow how near
+	 * (blocks), where the shove lands, how long he keeps at it (ticks), how hard the shove is, and how far and fast the
+	 * young one runs.
+	 */
+	static final int DRIVE_CHECK_TICKS = 40, DRIVE_TICKS = 200, DRIVE_FLEE = 16;
+	static final double DRIVE_RANGE = 8.0, DRIVE_COWS = 16.0, DRIVE_REACH = 3.5, DRIVE_PUSH = 0.8, DRIVE_FLEE_SPEED = 1.6;
 
 	public Moose(EntityType<? extends Moose> type, Level level) {
 		super(type, level);
@@ -57,6 +69,7 @@ public class Moose extends WildBeast {
 	@Override
 	protected void registerGoals() {
 		super.registerGoals();
+		this.goalSelector.addGoal(4, new DriveOff(this));
 		this.goalSelector.addGoal(5, new KeepByCows(this));
 	}
 
@@ -80,12 +93,82 @@ public class Moose extends WildBeast {
 		}
 		cow.snapTo(this.getX(), this.getY(), this.getZ(), this.random.nextFloat() * 360.0F, 0.0F);
 		cow.finalizeSpawn(level, difficulty, reason, null);
-		try {
-			cow.getClass().getMethod("setAntlersScale", float.class).invoke(cow, COW_ANTLERS);
-		} catch (ReflectiveOperationException changed) {
-			// a Cube Animals without that setter: the cow keeps the antlers it rolled
-		}
+		MooseHerds.antlers(cow, COW_ANTLERS);
 		level.addFreshEntityWithPassengers(cow);
+	}
+
+	/**
+	 * The bull runs a young bull off his cows: one within {@link #DRIVE_RANGE} blocks of him while a cow is within
+	 * {@link #DRIVE_COWS} is charged, shoved and sent running. It isn't hurt.
+	 */
+	private static final class DriveOff extends Goal {
+		private final Moose bull;
+		private @Nullable PathfinderMob young;
+		private int ticks;
+
+		DriveOff(Moose bull) {
+			this.bull = bull;
+			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (this.bull.getTarget() != null || this.bull.getRandom().nextInt(reducedTickDelay(DRIVE_CHECK_TICKS)) != 0) {
+				return false;
+			}
+			List<PathfinderMob> near = this.bull.level().getEntitiesOfClass(PathfinderMob.class, this.bull.getBoundingBox().inflate(DRIVE_COWS),
+				e -> e.isAlive() && e.getType() == cowType());
+			if (near.stream().noneMatch(MooseHerds::cow)) {
+				return false;
+			}
+			this.young = near.stream().filter(e -> MooseHerds.youngBull(e) && e.distanceToSqr(this.bull) < DRIVE_RANGE * DRIVE_RANGE).findFirst().orElse(null);
+			return this.young != null;
+		}
+
+		@Override
+		public void start() {
+			this.ticks = 0;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.young != null && this.young.isAlive() && this.bull.getTarget() == null && this.ticks < DRIVE_TICKS;
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			PathfinderMob young = this.young;
+			if (young == null) {
+				return;
+			}
+			this.ticks++;
+			this.bull.getLookControl().setLookAt(young, 30.0F, 30.0F);
+			if (this.bull.distanceToSqr(young) > DRIVE_REACH * DRIVE_REACH) {
+				this.bull.getNavigation().moveTo(young, this.bull.chaseSpeed());
+				return;
+			}
+			Vec3 away = young.position().subtract(this.bull.position()).multiply(1.0, 0.0, 1.0);
+			away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+			this.bull.playSound(SoundEvents.GOAT_RAM_IMPACT, 1.0F, 0.6F);
+			young.push(away.x * DRIVE_PUSH, 0.2, away.z * DRIVE_PUSH);
+			MooseHerds.breakOff(young);
+			Vec3 to = DefaultRandomPos.getPosAway(young, DRIVE_FLEE, 7, this.bull.position());
+			if (to != null) {
+				young.getNavigation().moveTo(to.x, to.y, to.z, DRIVE_FLEE_SPEED);
+			}
+			this.young = null;
+		}
+
+		@Override
+		public void stop() {
+			this.young = null;
+			this.bull.getNavigation().stop();
+		}
 	}
 
 	/** The bull walks back to its nearest cow when she has got more than {@link #COW_FAR} blocks off, unless it is after someone. */
@@ -103,12 +186,8 @@ public class Moose extends WildBeast {
 			if (this.bull.getTarget() != null || this.bull.getRandom().nextInt(reducedTickDelay(COW_CHECK_TICKS)) != 0) {
 				return false;
 			}
-			EntityType<?> type = cowType();
-			if (type == null) {
-				return false;
-			}
 			Entity nearest = null;
-			for (Entity e : this.bull.level().getEntities(this.bull, this.bull.getBoundingBox().inflate(COW_SIGHT), e -> e.getType() == type && e.isAlive())) {
+			for (Entity e : this.bull.level().getEntities(this.bull, this.bull.getBoundingBox().inflate(COW_SIGHT), e -> e.isAlive() && MooseHerds.cow(e))) {
 				if (nearest == null || e.distanceToSqr(this.bull) < nearest.distanceToSqr(this.bull)) {
 					nearest = e;
 				}
