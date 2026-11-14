@@ -226,13 +226,13 @@ final class BoardWork {
 				questKind = Quest.TREK;
 				Faction to = Tales.nearest(level.getServer(), seat, f, false);
 				if (to == null) {
-					return true;
+					return false;
 				}
 				// (the traveller is waiting by whoever posted it)
 				BlockPos by = Construction.standable(level, giver.blockPosition().offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2), 2);
 				Villager charge = McaCompat.talePerson(level, Vec3.atBottomCenterOf(by), null, null, "", false);
 				if (charge == null) {
-					return true;
+					return false;
 				}
 				charge.setPersistenceRequired();
 				TaleCast.adopt(charge, "work:" + id, "charge");

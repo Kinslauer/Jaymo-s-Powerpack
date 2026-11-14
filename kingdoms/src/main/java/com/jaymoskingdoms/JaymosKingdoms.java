@@ -579,6 +579,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Faiths.register();
 		// (before Quests: using one of a tale's people is the tale's talk first)
 		Tales.register();
+		// (the journal's Past page and the town boards' finished work keep attachments of their own)
+		LOGGER.debug("quest past and board work attachments: {} {}", QuestPast.PAST, BoardWork.DONE);
 		QuestJobs.register();
 		Overheard.register();
 		Quests.register();

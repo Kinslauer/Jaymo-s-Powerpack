@@ -543,7 +543,7 @@ public final class Quests {
 
 	private static void turnIn(ServerLevel level, ServerPlayer player, LivingEntity giver, Faction f, String id) {
 		Quest q = quest(player, id);
-		if (q == null || !q.giver().uuid().equals(giver.getUUID()) || !ready(player, q)) {
+		if (q == null || !q.giver().uuid().equals(giver.getUUID()) || !ready(player, q) || QuestJobs.undone(level, player, q)) {
 			return;
 		}
 		if (q.kind() == Quest.GATHER) {
@@ -617,6 +617,11 @@ public final class Quests {
 		if (q == null || !q.giver().uuid().equals(giver.getUUID())) {
 			return;
 		}
+		Tales.Run run = Tales.runOf(player, q);
+		if (run != null) {
+			Tales.giveUp(level, player, run);
+			return;
+		}
 		remove(player, id);
 		if (q.kind() >= Quest.PACK) {
 			QuestJobs.over(level, player, q);
@@ -678,6 +683,12 @@ public final class Quests {
 		Quest q = quest(player, id);
 		if (q == null) {
 			return false;
+		}
+		Tales.Run run = Tales.runOf(player, q);
+		if (run != null && player.level() instanceof ServerLevel tl) {
+			// (a tale's step: giving it up gives up the tale, so it's written down and its people go)
+			Tales.giveUp(tl, player, run);
+			return true;
 		}
 		remove(player, id);
 		if (q.kind() >= Quest.PACK && player.level() instanceof ServerLevel level) {

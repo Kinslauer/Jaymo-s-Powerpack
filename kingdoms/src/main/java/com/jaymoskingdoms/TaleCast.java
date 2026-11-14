@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -122,6 +124,8 @@ final class TaleCast {
 	static final AttachmentType<List<String>> ENDED = AttachmentRegistry.create(JaymosKingdoms.id("tales_ended"),
 		builder -> builder.persistent(Codec.STRING.listOf()));
 
+	/** Tale people who've joined someone (instance/role), so a party's ending takes them only once. */
+	private static final Set<String> JOINED = new HashSet<>();
 	/** The tale's people loaded now. */
 	private static final Set<Mob> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
 	/** Who's standing still for a player's talk (them → the player, until when). */
@@ -185,6 +189,7 @@ final class TaleCast {
 			LOADED.clear();
 			HELD.clear();
 			VISITS.clear();
+			JOINED.clear();
 		});
 	}
 
@@ -281,6 +286,10 @@ final class TaleCast {
 			mob = m;
 			mob.snapTo(pos.x, pos.y, pos.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
 			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
+			if (mob instanceof Enemy) {
+				// (a monster stands until it comes to a fight, like the vindicator above)
+				mob.setNoAi(true);
+			}
 			if (!man && !name.isEmpty()) {
 				mob.setCustomName(Component.literal(name));
 			}
@@ -473,9 +482,19 @@ final class TaleCast {
 			return;
 		}
 		// yielded: left behind, or left alone long enough, they've been let go
-		if (foe.distanceToSqr(player) > WALK_AWAY * WALK_AWAY || now - c.since() > MERCY_TICKS) {
+		if (now - c.since() > MERCY_TICKS || nobodyNear(player, run, foe)) {
 			Tales.foeDone(player, run, foe, false);
 		}
+	}
+
+	/** Whether everyone sharing {@code run} with {@code player} has walked away from {@code foe}. */
+	private static boolean nobodyNear(ServerPlayer player, Tales.Run run, Mob foe) {
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			if (p.level() == foe.level() && p.distanceToSqr(foe) <= WALK_AWAY * WALK_AWAY) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static void died(LivingEntity entity, DamageSource source) {
@@ -537,6 +556,10 @@ final class TaleCast {
 
 	/** An ending has {@code run}'s {@code role} join {@code player}: theirs from now on, and no longer the tale's. */
 	static void join(ServerLevel level, ServerPlayer player, Tales.Run run, String role) {
+		// (once, though the tale ended for a whole party: they join whoever it ended for first)
+		if (!JOINED.add(run.instance + "/" + role)) {
+			return;
+		}
 		Mob mob = find(level, run.cast.get(role));
 		Tale tale = Tale.get(run.tale);
 		JsonObject body = tale == null ? null : tale.role(role);
@@ -616,6 +639,7 @@ final class TaleCast {
 		try {
 			body = JsonParser.parseString(back.body()).getAsJsonObject();
 		} catch (RuntimeException e) {
+			Tales.state(player).returns.remove(back);
 			return true;
 		}
 		boolean revenge = back.as().equals("revenge");
@@ -625,6 +649,8 @@ final class TaleCast {
 		}
 		int tick = level.getServer().getTickCount();
 		if (revenge) {
+			// (revenge comes once: it's off the list as soon as they're on their way)
+			Tales.state(player).returns.remove(back);
 			Cast c = mob.getAttached(CAST);
 			rouse(mob, c, player);
 			for (int i = 0; i < REVENGE_MEN; i++) {
@@ -685,6 +711,9 @@ final class TaleCast {
 			return;
 		}
 		Tales.Return back = v.back;
+		if (back != null) {
+			Tales.state(player).returns.remove(back);
+		}
 		Component say = back == null || back.say().isEmpty() ? Component.translatable("tale.jaymoskingdoms.back." + (v.kind == RECRUIT ? "recruit" : "thanks"))
 			: Component.literal(back.say());
 		if (v.kind == RECRUIT) {
@@ -765,6 +794,7 @@ final class TaleCast {
 				// (never reached them: a letter is sent again another day; one come back tries again tomorrow)
 				if (player != null && v.back != null && v.kind != REVENGE) {
 					Tales.Return b = v.back;
+					Tales.state(player).returns.remove(b);
 					Tales.state(player).returns.add(new Tales.Return(b.name(), b.body(), Tales.day(level) + 1, b.as(), b.say(), b.gift(), b.faction()));
 				}
 				depart(level, v, tick);

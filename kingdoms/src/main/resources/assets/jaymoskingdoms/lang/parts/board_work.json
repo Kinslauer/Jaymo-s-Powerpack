@@ -68,5 +68,6 @@
   "work.jaymoskingdoms.tag.logs": "logs",
   "work.jaymoskingdoms.tag.stone_bricks": "stone bricks",
   "work.jaymoskingdoms.tag.wool": "wool",
-  "work.jaymoskingdoms.tag.any": "blocks"
+  "work.jaymoskingdoms.tag.any": "blocks",
+  "work.jaymoskingdoms.undone": "It's come undone since you left it. Go and set it right."
 }

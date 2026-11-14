@@ -13,6 +13,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
@@ -116,6 +117,10 @@ public final class QuestJobs {
 	}
 
 	static final AttachmentType<Mark> JOB = AttachmentRegistry.create(JaymosKingdoms.id("quest_job"), builder -> builder.persistent(Mark.CODEC));
+	/** On the overworld: jobs that are over, whose foes still out of sight are gone when next loaded. */
+	static final AttachmentType<List<String>> ENDED = AttachmentRegistry.create(JaymosKingdoms.id("quest_jobs_ended"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
+	static final int ENDED_MAX = 256;
 
 	/** Defending: each quest's wave under way (the tick it came), or the tick the last one ended (negative). */
 	private static final Map<String, Integer> WAVES = new HashMap<>();
@@ -128,6 +133,12 @@ public final class QuestJobs {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(QuestJobs::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(QuestJobs::died);
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			Mark mark = entity.getAttached(JOB);
+			if (mark != null && stale(level, mark)) {
+				entity.discard();
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAVES.clear();
 			SPOKEN.clear();
@@ -271,10 +282,36 @@ public final class QuestJobs {
 		});
 	}
 
+	/** Whether a foe marked {@code mark} belongs to a job that's over (or no longer its owner's). */
+	private static boolean stale(ServerLevel level, Mark mark) {
+		if (Factions.level(level.getServer()).getAttachedOrElse(ENDED, List.of()).contains(mark.quest())) {
+			return true;
+		}
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(mark.owner());
+		Quest q = owner == null ? null : Quests.quest(owner, mark.quest());
+		return owner != null && (q == null || q.kind() < Quest.PACK || q.counted());
+	}
+
+	private static void ended(ServerLevel level, String quest, boolean over) {
+		ServerLevel world = Factions.level(level.getServer());
+		List<String> ended = new ArrayList<>(world.getAttachedOrElse(ENDED, List.of()));
+		if (!ended.remove(quest) && !over) {
+			return;
+		}
+		if (over) {
+			ended.add(quest);
+			while (ended.size() > ENDED_MAX) {
+				ended.remove(0);
+			}
+		}
+		world.setAttached(ENDED, List.copyOf(ended));
+	}
+
 	/** {@code q} is off {@code player}'s log (done, failed or dropped): what it put in the world is cleared away. */
 	static void over(ServerLevel level, ServerPlayer player, Quest q) {
 		WAVES.remove(q.id());
 		SPOKEN.remove(q.id());
+		ended(level, q.id(), true);
 		BlockPos at = q.objective().pos().orElse(player.blockPosition());
 		for (Mob mob : foes(level, at, q.id())) {
 			mob.discard();
@@ -345,6 +382,8 @@ public final class QuestJobs {
 			mob.setCustomNameVisible(true);
 		}
 		mob.setAttached(JOB, new Mark(owner.getUUID(), q.id(), leader));
+		// (a tale's later job can use the same quest id as an earlier one)
+		ended(level, q.id(), false);
 		level.addFreshEntity(mob);
 		return mob;
 	}
@@ -355,17 +394,23 @@ public final class QuestJobs {
 		}
 		MinecraftServer server = level.getServer();
 		Mark mark = entity.getAttached(JOB);
-		if (mark != null) {
-			ServerPlayer owner = server.getPlayerList().getPlayer(mark.owner());
-			Quest q = owner == null ? null : Quests.quest(owner, mark.quest());
-			if (q != null && !q.counted() && q.kind() != Quest.DEFEND) {
+		// (one the sun burnt, or that fell, isn't a kill: another comes in its place)
+		if (mark != null && (source.getEntity() != null || entity.getKillCredit() != null)) {
+			// (everyone with the job counts it: a tale shared in a party, so its count stays the same for all)
+			boolean finished = false;
+			for (ServerPlayer holder : server.getPlayerList().getPlayers()) {
+				Quest q = Quests.quest(holder, mark.quest());
+				if (q == null || q.counted() || q.kind() == Quest.DEFEND || q.kind() < Quest.PACK) {
+					continue;
+				}
 				// (a nest's last count is its burning, not a kill)
 				int most = q.kind() == Quest.INCURSION && variant(q).equals("nest") ? q.objective().count() - 1 : q.objective().count();
 				Quest next = progress(q, q.kind() == Quest.ELITE ? most : Math.min(most, q.objective().progress() + 1));
-				save(owner, next);
-				owner.sendOverlayMessage(Quests.objective(level, owner, next).copy().withStyle(next.counted() ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
-				if (next.counted()) {
-					done(level, owner, next);
+				save(holder, next);
+				holder.sendOverlayMessage(Quests.objective(level, holder, next).copy().withStyle(next.counted() ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
+				if (next.counted() && !finished) {
+					finished = true;
+					done(level, holder, next);
 				}
 			}
 		}
@@ -403,14 +448,25 @@ public final class QuestJobs {
 			return;
 		}
 		ServerLevel level = Factions.level(server);
+		// (a job a party shares is watched once, for whichever of them is nearest it)
+		Map<String, ServerPlayer> nearest = new HashMap<>();
 		for (ServerPlayer player : new ArrayList<>(level.players())) {
 			if (player.isSpectator() || !player.isAlive()) {
 				continue;
 			}
 			for (Quest q : new ArrayList<>(Quests.log(player))) {
 				if (q.kind() >= Quest.PACK && q.kind() <= Quest.STASH && !q.counted() && q.objective().pos().isPresent()) {
-					watch(level, player, q, tick);
+					ServerPlayer best = nearest.get(q.id());
+					if (best == null || flat(player, q.objective().pos().get()) < flat(best, q.objective().pos().get())) {
+						nearest.put(q.id(), player);
+					}
 				}
+			}
+		}
+		for (Map.Entry<String, ServerPlayer> e : nearest.entrySet()) {
+			Quest q = Quests.quest(e.getValue(), e.getKey());
+			if (q != null && !q.counted()) {
+				watch(level, e.getValue(), q, tick);
 			}
 		}
 	}
@@ -753,13 +809,7 @@ public final class QuestJobs {
 					site.getZ() + 0.5 + (i < 2 ? -BUILD_RADIUS : BUILD_RADIUS), 4, 0.1, 0.6, 0.1, 0.0);
 			}
 		}
-		int base = 0;
-		try {
-			base = Integer.parseInt(o.otherName());
-		} catch (NumberFormatException ignored) {
-			// (nothing stood there)
-		}
-		int built = Math.max(0, there - base);
+		int built = Math.max(0, there - base(o));
 		if (built != o.progress()) {
 			Quest next = progress(q, built);
 			save(player, next);
@@ -767,6 +817,52 @@ public final class QuestJobs {
 				done(level, player, next);
 			}
 		}
+	}
+
+	/** How many of a build's blocks stood there before it was begun. */
+	private static int base(Quest.Objective o) {
+		try {
+			return Integer.parseInt(o.otherName());
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * ({@link Quests}) Whether board work brought back has come undone since it was counted: lamps gone out, a build pulled
+	 * down. Its count is put back to what stands, and it isn't taken. Only what can be looked at just now is checked.
+	 */
+	static boolean undone(ServerLevel level, ServerPlayer player, Quest q) {
+		Quest.Objective o = q.objective();
+		if (Tales.ofTale(q) || !o.spawned() || o.pos().isEmpty() || player.level() != level) {
+			return false;
+		}
+		int now = 0;
+		if (q.kind() == Quest.BUILD) {
+			BlockPos site = o.pos().get();
+			if (!level.isLoaded(site)) {
+				return false;
+			}
+			for (BlockPos p : BlockPos.betweenClosed(site.offset(-BUILD_RADIUS, -BUILD_HEIGHT, -BUILD_RADIUS), site.offset(BUILD_RADIUS, BUILD_HEIGHT, BUILD_RADIUS))) {
+				now += matches(level.getBlockState(p), o.target()) ? 1 : 0;
+			}
+			now = Math.max(0, now - base(o));
+		} else if (q.kind() == Quest.LAMPS) {
+			for (BlockPos spot : spots(o.otherName())) {
+				if (!level.isLoaded(spot)) {
+					return false;
+				}
+				now += lit(level, spot) ? 1 : 0;
+			}
+		} else {
+			return false;
+		}
+		if (now >= o.count()) {
+			return false;
+		}
+		save(player, progress(q, now));
+		player.sendOverlayMessage(Component.translatable("work.jaymoskingdoms.undone").withStyle(ChatFormatting.RED));
+		return true;
 	}
 
 	/** A cave-in's rubble, the same heap for the same spot: three wide, three long, piled toward the middle. */
@@ -794,7 +890,7 @@ public final class QuestJobs {
 		}
 		for (ServerPlayer p : level.players()) {
 			for (Quest q : new ArrayList<>(Quests.log(p))) {
-				if (q.kind() == Quest.BLAST && q.objective().spawned() && q.objective().otherName().isEmpty()
+				if (q.kind() == Quest.BLAST && q.objective().spawned() && !q.objective().otherName().equals("blasted")
 					&& q.objective().pos().map(at -> at.distSqr(centre) <= BLAST_RANGE * BLAST_RANGE).orElse(false)) {
 					Quests.put(p, noted(q, "blasted", true));
 				}
@@ -821,8 +917,10 @@ public final class QuestJobs {
 			Quest next = progress(q, o.count());
 			save(player, next);
 			done(level, player, next);
-		} else if (!blasted && left == 0) {
+		} else if (!blasted && left == 0 && o.otherName().isEmpty()) {
+			// (more comes down once, if it's dug out by hand; after that only a blast will do)
 			lay(level, heap);
+			save(player, noted(q, "fallen", true));
 			player.sendOverlayMessage(Component.translatable("work.jaymoskingdoms.blast.more").withStyle(ChatFormatting.YELLOW));
 		}
 	}
@@ -841,10 +939,11 @@ public final class QuestJobs {
 		Quest.Objective o = q.objective();
 		BlockPos site = o.spawned() ? at : ground(level, at, 0);
 		if (!(level.getBlockEntity(site) instanceof Container)) {
-			if (level.getBlockState(site).canBeReplaced()) {
-				level.setBlockAndUpdate(site, Blocks.CHEST.defaultBlockState());
-			}
+			// (set there once: one taken away isn't put back, though any chest set in its place will do)
 			if (!o.spawned()) {
+				if (level.getBlockState(site).canBeReplaced()) {
+					level.setBlockAndUpdate(site, Blocks.CHEST.defaultBlockState());
+				}
 				save(player, with(q, 0, o.otherName(), true, Optional.of(site), o.other()));
 			}
 			return;

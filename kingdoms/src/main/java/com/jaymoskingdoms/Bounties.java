@@ -1449,7 +1449,7 @@ public final class Bounties {
 		MinecraftServer server = level.getServer();
 		List<Villager> folk = level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(POST_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && v.getMainHandItem().isEmpty() && !Downed.isDowned(v)
-				&& !ERRANDS.containsKey(v.getUUID()) && bountyOn(server, v) == null);
+				&& !ERRANDS.containsKey(v.getUUID()) && bountyOn(server, v) == null && TaleCast.cast(v) == null);
 		return folk.isEmpty() ? null : folk.get(level.getRandom().nextInt(folk.size()));
 	}
 

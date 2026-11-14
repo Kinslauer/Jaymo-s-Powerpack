@@ -109,6 +109,8 @@ public final class Tales {
 	static final int TOLD_MAX = 40, NOTES_MAX = 60;
 	/** How often (ticks) each player's tales are looked over, clues re-laid and shown. */
 	static final int WATCH_TICKS = 20, CLUE_TICKS = 100;
+	/** A clue that keeps going missing from where it lies is laid again this many times at most. */
+	static final int CLUE_LAYS = 3;
 	/** The custom-data keys on a tale's book, a tale's letter, and a clue. */
 	static final String KEY_BOOK = "jaymoskingdoms_tale_book", KEY_LETTER = "jaymoskingdoms_tale_letter", KEY_CLUE = "jaymoskingdoms_tale_clue";
 	/** A tale's quest in the log: this, then the run's instance. */
@@ -254,6 +256,13 @@ public final class Tales {
 	static final AttachmentType<State> STATE = AttachmentRegistry.create(JaymosKingdoms.id("tales"),
 		builder -> builder.persistent(State.CODEC).copyOnDeath());
 
+	/** On the overworld: askers of tales who have died (their UUIDs, the latest {@link #GONE_MAX}), for the players who were away when they did. */
+	static final AttachmentType<List<String>> GONE = AttachmentRegistry.create(JaymosKingdoms.id("tale_givers_gone"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
+	static final int GONE_MAX = 200;
+	/** On someone who has asked a tale of a player (an entity tag). */
+	static final String GIVER_TAG = "jaymoskingdoms_tale_giver";
+
 	/** The day each player's tales were last looked over for the day's business. */
 	private static final Map<UUID, Long> DAY = new HashMap<>();
 	/** Players who asked their tale's giver about other work: the next talk goes to the ordinary quests. */
@@ -294,7 +303,6 @@ public final class Tales {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			DAY.remove(handler.player.getUUID());
 			OTHER_WORK.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -364,6 +372,11 @@ public final class Tales {
 			return;
 		}
 		if (player.level() instanceof ServerLevel level) {
+			for (Quest q : new ArrayList<>(Quests.log(player))) {
+				if (q.kind() >= Quest.PACK) {
+					QuestJobs.over(level, player, q);
+				}
+			}
 			for (Run run : s.runs) {
 				Quests.drop(player, run.quest());
 				TaleCast.over(level, run, null);
@@ -633,6 +646,26 @@ public final class Tales {
 		return stand;
 	}
 
+	/** What the others sharing {@code run} have settled of its places (the exact ground, someone walked elsewhere) is {@code player}'s too. */
+	private static void places(ServerPlayer player, Run run) {
+		for (ServerPlayer p : sharers(player, run)) {
+			Run theirs = p == player ? null : run(p, run.instance);
+			if (theirs == null) {
+				continue;
+			}
+			for (Map.Entry<String, Long> e : theirs.places.entrySet()) {
+				String key = e.getKey();
+				if (key.startsWith("~") && !run.places.containsKey(key) && theirs.places.containsKey(key.substring(1))) {
+					run.places.put(key.substring(1), theirs.places.get(key.substring(1)));
+					run.places.put(key, e.getValue());
+				} else if (key.startsWith("@") && !run.places.containsKey(key)) {
+					run.places.put(key, e.getValue());
+				}
+			}
+			run.cast.putAll(theirs.cast);
+		}
+	}
+
 	private static double flat(ServerPlayer player, BlockPos at) {
 		double dx = at.getX() + 0.5 - player.getX(), dz = at.getZ() + 0.5 - player.getZ();
 		return Math.sqrt(dx * dx + dz * dz);
@@ -703,7 +736,7 @@ public final class Tales {
 	 * giver until someone hears them out. Null when the lot says an errand, or no tale suits their trade.
 	 */
 	static @Nullable Quest offer(ServerLevel level, LivingEntity giver, Faction f) {
-		if (!(giver instanceof Villager) || level.getRandom().nextFloat() >= TALE_SHARE) {
+		if (!(giver instanceof Villager) || TaleCast.cast(giver) != null || level.getRandom().nextFloat() >= TALE_SHARE) {
 			return null;
 		}
 		String job = job(giver);
@@ -851,13 +884,24 @@ public final class Tales {
 		}
 		// (the one who asked is dead: what they asked dies with them)
 		String id = entity.getUUID().toString();
+		if (entity.entityTags().contains(GIVER_TAG) && TaleCast.cast(entity) == null) {
+			ServerLevel world = Factions.level(level.getServer());
+			List<String> gone = new ArrayList<>(world.getAttachedOrElse(GONE, List.of()));
+			gone.add(id);
+			while (gone.size() > GONE_MAX) {
+				gone.remove(0);
+			}
+			world.setAttached(GONE, List.copyOf(gone));
+		}
 		for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
 			State s = stateOrNull(p);
 			if (s == null) {
 				continue;
 			}
 			for (Run run : new ArrayList<>(s.runs)) {
-				if (run.giver.equals(id) && TaleCast.cast(entity) == null) {
+				Tale told = Tale.get(run.tale);
+				// (whoever passed on a rumour has no part in what it leads to)
+				if (run.giver.equals(id) && TaleCast.cast(entity) == null && (told == null || !told.by().equals("rumour"))) {
 					close(p, run, "", Component.translatable("tale.jaymoskingdoms.giver_died", run.giverName).getString(), true, QuestPast.FAILED);
 				}
 			}
@@ -891,7 +935,7 @@ public final class Tales {
 	/** {@code player} breaks the seal on a letter ({@link Letters}): a tale's letter starts it, or wakes the tale that was resting on it. */
 	static void opened(ServerPlayer player, ItemStack stack) {
 		String key = tagged(stack, KEY_LETTER);
-		if (key.isEmpty() || !(player.level() instanceof ServerLevel level)) {
+		if (key.isEmpty() || !(player.level() instanceof ServerLevel level) || level != Factions.level(level.getServer())) {
 			return;
 		}
 		State s = state(player);
@@ -913,7 +957,7 @@ public final class Tales {
 	// ---- steps -----------------------------------------------------------------------------------------------------------------
 
 	/** Everyone who's in {@code run} with {@code player} and at the same step: them, and their party's members online. */
-	private static List<ServerPlayer> sharers(ServerPlayer player, Run run) {
+	static List<ServerPlayer> sharers(ServerPlayer player, Run run) {
 		List<ServerPlayer> out = new ArrayList<>();
 		out.add(player);
 		for (ServerPlayer p : Parties.members(player)) {
@@ -983,6 +1027,16 @@ public final class Tales {
 			if (q != null && q.kind() >= Quest.PACK) {
 				QuestJobs.over(level, player, q);
 			}
+			if (Tale.string(step, "do", "").equals("search")) {
+				// (the clues nobody picked up don't lie there for good)
+				BlockPos site = place(level, run, tale, Tale.pickString(step, "at", facts(player, run), ""));
+				String prefix = run.instance + "/" + run.step + "#";
+				if (level.isLoaded(site)) {
+					for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(site).inflate(CLUE_RANGE), e -> tagged(e.getItem(), KEY_CLUE).startsWith(prefix))) {
+						e.discard();
+					}
+				}
+			}
 		}
 		Quests.drop(player, run.quest());
 		run.scratch.clear();
@@ -1024,6 +1078,13 @@ public final class Tales {
 		LivingEntity giver = entity(level, run.giverId());
 		if (giver != null && tale.by().equals("giver")) {
 			Quests.withdraw(giver, QUEST);
+		}
+		if (giver != null && !tale.by().equals("rumour")) {
+			giver.addTag(GIVER_TAG);
+		}
+		// (where everything is, is settled before anyone else is in it, so the party agrees)
+		for (String key : Tale.object(tale.json, "places").keySet()) {
+			place(level, run, tale, key);
 		}
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.accepted", Component.literal(tale.title())).withStyle(ChatFormatting.YELLOW));
 		level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -1377,26 +1438,35 @@ public final class Tales {
 		return key == null ? null : BuiltInRegistries.ITEM.getOptional(key).orElse(null);
 	}
 
-	private static int count(ServerPlayer player, Item item) {
+	/** Whether {@code s} can be handed over in {@code run}: not another quest's thing, and no clue but one of this tale's own. */
+	private static boolean spare(ItemStack s, Run run, boolean clue) {
+		String tag = tagged(s, KEY_CLUE);
+		return Quests.questOf(s) == null && (clue ? tag.startsWith(run.instance + "/") : tag.isEmpty());
+	}
+
+	private static int count(ServerPlayer player, Run run, Item item) {
 		Inventory inv = player.getInventory();
 		int n = 0;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(item) && tagged(s, KEY_CLUE).isEmpty() && Quests.questOf(s) == null) {
+			if (s.is(item) && (spare(s, run, false) || spare(s, run, true))) {
 				n += s.getCount();
 			}
 		}
 		return n;
 	}
 
-	private static void take(ServerPlayer player, Item item, int n) {
+	/** Takes {@code n} of {@code item}: this tale's own clues first (the thing found is the thing shown), then any other. */
+	private static void take(ServerPlayer player, Run run, Item item, int n) {
 		Inventory inv = player.getInventory();
-		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
-			ItemStack s = inv.getItem(i);
-			if (s.is(item) && tagged(s, KEY_CLUE).isEmpty() && Quests.questOf(s) == null) {
-				int m = Math.min(n, s.getCount());
-				s.shrink(m);
-				n -= m;
+		for (int pass = 0; pass < 2; pass++) {
+			for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
+				ItemStack s = inv.getItem(i);
+				if (s.is(item) && spare(s, run, pass == 0)) {
+					int m = Math.min(n, s.getCount());
+					s.shrink(m);
+					n -= m;
+				}
 			}
 		}
 	}
@@ -1405,7 +1475,7 @@ public final class Tales {
 	private static boolean affords(ServerPlayer player, Run run, JsonObject reply) {
 		JsonObject needs = Tale.object(reply, "needs_item");
 		Item item = needs.has("item") ? item(Tale.string(needs, "item", "")) : null;
-		if (item != null && count(player, item) < Math.max(1, Tale.number(needs, "count", 1))) {
+		if (item != null && count(player, run, item) < Math.max(1, Tale.number(needs, "count", 1))) {
 			return false;
 		}
 		int coins = Tale.number(reply, "needs_coins", 0);
@@ -1419,7 +1489,7 @@ public final class Tales {
 		JsonObject needs = Tale.object(reply, "needs_item");
 		Item item = needs.has("item") ? item(Tale.string(needs, "item", "")) : null;
 		if (item != null) {
-			take(player, item, Math.max(1, Tale.number(needs, "count", 1)));
+			take(player, run, item, Math.max(1, Tale.number(needs, "count", 1)));
 		}
 		int coins = Tale.number(reply, "needs_coins", 0);
 		if (coins > 0) {
@@ -1444,12 +1514,12 @@ public final class Tales {
 		Predicate<String> facts = facts(player, run);
 		Item item = item(Tale.pickString(step, "item", facts, ""));
 		int count = Math.max(1, Tale.pickNumber(step, "count", facts, 1));
-		if (item == null || count(player, item) < count) {
+		if (item == null || count(player, run, item) < count) {
 			Speech.tell(level, who, player, Component.translatable("tale.jaymoskingdoms.bring.short", count,
 				item == null ? Component.empty() : new ItemStack(item).getHoverName()), Speech.WHITE);
 			return;
 		}
-		take(player, item, count);
+		take(player, run, item, count);
 		MutableComponent thanks = words(player, run, step, "say");
 		if (thanks != null) {
 			Speech.tell(level, who, player, thanks, Speech.GOLD);
@@ -1594,16 +1664,18 @@ public final class Tales {
 			default -> {
 			}
 		}
-		if (s.runs.contains(run) && run.step.equals(before)) {
+		if (s.runs.contains(run) && run.step.equals(before) && run.taken) {
+			places(player, run);
 			TaleCast.tend(level, player, run, tale, step, kind);
 			// (an escort's charge is known once they've been set out)
+			// (the one the step is about is known once they've been set out, and again if someone new had to stand in for them)
 			Quest q = Quests.quest(player, run.quest());
-			if (q != null && q.kind() == Quest.TREK && q.objective().other().isEmpty()) {
-				UUID charge = uuid(run.cast.get(Tale.pickString(step, "who", facts(player, run), "")));
-				if (charge != null) {
-					Quest.Objective o = q.objective();
-					Quests.put(player, q.withObjective(new Quest.Objective(o.target(), o.count(), o.progress(), o.pos(), Optional.of(charge), o.otherName(), o.place(), o.spawned())));
-				}
+			String who = Tale.pickString(step, "who", facts(player, run), "");
+			UUID about = who.isEmpty() || who.equals("giver") ? null : uuid(run.cast.get(who));
+			if (q != null && about != null && !q.objective().other().map(about::equals).orElse(false)) {
+				Quest.Objective o = q.objective();
+				Quests.put(player, q.withObjective(new Quest.Objective(o.target(), o.count(), o.progress(), o.pos(), Optional.of(about), o.otherName(), o.place(), o.spawned())));
+				Quests.sync(player, true);
 			}
 		}
 	}
@@ -1696,6 +1768,16 @@ public final class Tales {
 				}
 			}
 			if (lies == null) {
+				// (something keeps taking it: after a few it's counted as seen, so nothing is farmed and nobody is stuck)
+				int laid = parse(run.scratch.getOrDefault("laid" + i, "0"), 0);
+				if (laid >= CLUE_LAYS) {
+					String n = Integer.toString(i);
+					each(player, run, r -> r.scratch.merge("found", n, (was, add) -> was.isEmpty() ? add : was + "," + add));
+					continue;
+				}
+				String count = Integer.toString(laid + 1);
+				String slot = "laid" + i;
+				each(player, run, r -> r.scratch.put(slot, count));
 				ItemStack stack = thing(player, run, clue);
 				stack.setCount(1);
 				CompoundTag data = new CompoundTag();
@@ -1725,6 +1807,10 @@ public final class Tales {
 				long born = parse(run.vars.getOrDefault("~day", "0"), 0);
 				if (!run.taken && today > born + (tale != null && tale.by().equals("rumour") ? RUMOUR_DAYS : UNTAKEN_DAYS)) {
 					s.runs.remove(run);
+					TaleCast.over(level, run, null);
+				} else if (run.taken && !run.giver.isEmpty() && Factions.level(level.getServer()).getAttachedOrElse(GONE, List.of()).contains(run.giver)) {
+					// (the one who asked died while this player was away)
+					close(player, run, "", Component.translatable("tale.jaymoskingdoms.giver_died", run.giverName).getString(), true, QuestPast.FAILED);
 				}
 			}
 			if (!s.ask.isEmpty() && today > parse(s.ask.split("\\|")[2], 0) + 2) {
@@ -1773,7 +1859,7 @@ public final class Tales {
 		}
 		for (Return back : new ArrayList<>(s.returns)) {
 			if (today >= back.day() && TaleCast.comeBack(level, player, back)) {
-				s.returns.remove(back);
+				// (still owed until they've reached the player: TaleCast takes it off then)
 				return;
 			}
 		}
@@ -1800,6 +1886,7 @@ public final class Tales {
 		if (!run.taken) {
 			// (turned down before it began: nothing's kept, and the asker has no more to say of it)
 			state(player).runs.remove(run);
+			TaleCast.over(level, run, null);
 			LivingEntity giver = entity(level, run.giverId());
 			if (giver != null) {
 				Quests.withdraw(giver, QUEST);
@@ -1917,7 +2004,8 @@ public final class Tales {
 				continue;
 			}
 			Quest q = Quests.quest(player, run.quest());
-			Component now = q != null ? Quests.objective(level, player, q) : Component.translatable("tale.jaymoskingdoms.resting");
+			MutableComponent waiting = q != null ? null : words(player, run, step, "goal");
+			Component now = q != null ? Quests.objective(level, player, q) : waiting != null ? waiting : Component.translatable("tale.jaymoskingdoms.resting");
 			List<Component> lines = new ArrayList<>();
 			for (String note : run.notes) {
 				lines.add(Component.literal(note));
