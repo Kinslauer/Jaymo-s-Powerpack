@@ -37,7 +37,9 @@ final class FilmTape {
 	static final byte ACT = 0, REST = 1, ITEM = 2, MAIM = 3, HURT = 4, HIDE = 5, SOUND = 6, PARTICLE = 7, BOLT = 8, FLASH = 9, GIB = 10, UNGIB = 11,
 		TETHER = 12, GAIT = 13, PLACE = 14, IGNITE = 15, FLAME = 16, QUENCH = 17, CLOAK = 18, CHARGE = 19, DRESS = 20, AURA = 21,
 		/** A shower of Jaymo's Powers' clash sparks (ClashFx): a is how many, b the size in tenths, v the place. */
-		CLASH = 22;
+		CLASH = 22,
+		/** One of Jaymo's Powers' magic shapes (MagicFx): a its kind, b its colour, v {f, s, up, its reach or facing ahead, aside, up, size, ticks}. */
+		SHAPE = 23;
 
 	/**
 	 * How finely a tape keeps things (steps to a block, or to a degree): where actors stand, which way they face, where a

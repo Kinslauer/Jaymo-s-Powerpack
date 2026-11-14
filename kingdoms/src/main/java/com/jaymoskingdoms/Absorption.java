@@ -412,7 +412,7 @@ public final class Absorption {
 			(random.nextDouble() - 0.5) * SPREAD * 2).normalize();
 		BLASTS.add(new Blast(level, player.getUUID(), element, palm(player, look, left), aim.scale(BLAST_SPEED), BLAST_DAMAGE));
 		h.fired++;
-		player.swing(left ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.PUSH, colour(element), left);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), Spellcraft.sound(element), SoundSource.PLAYERS, 0.35F,
 			1.5F + random.nextFloat() * 0.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.3F, 0.9F);

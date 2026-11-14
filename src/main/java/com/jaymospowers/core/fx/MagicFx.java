@@ -244,6 +244,20 @@ public final class MagicFx {
 		send(level, at, new Shape(SIGIL, at.x, at.y, at.z, 0.0F, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(1, ticks)));
 	}
 
+	/** A circle of marks standing in the air at {@code at}, its face turned along {@code facing} (null: flat on the ground): a working drawn before the hand. */
+	public static void sigil(ServerLevel level, Vec3 at, @Nullable Vec3 facing, float radius, int color, int ticks) {
+		Vec3 n = facing == null || facing.lengthSqr() < 1.0E-6 ? Vec3.ZERO : facing.normalize();
+		send(level, at, new Shape(SIGIL, at.x, at.y, at.z, (float)n.x, (float)n.y, (float)n.z, radius, color & 0xFFFFFF, Math.max(1, ticks)));
+	}
+
+	/**
+	 * Any shape by its number ({@link #BEAM} and the rest), for callers that keep shapes as data (Kingdoms' films and
+	 * casters): {@code d} is a beam's or a stroke's reach, the way a ring or a sigil faces, or how far a wave rolls.
+	 */
+	public static void shape(ServerLevel level, int kind, Vec3 at, Vec3 d, float size, int color, int ticks) {
+		send(level, at, new Shape(kind, at.x, at.y, at.z, (float)d.x, (float)d.y, (float)d.z, size, color & 0xFFFFFF, Math.max(1, ticks)));
+	}
+
 	/**
 	 * A wave rising at {@code from} and rolling {@code distance} blocks along {@code direction} over {@code ticks},
 	 * {@code width} across. It stands about half as high as it is wide (never under one block or over four).

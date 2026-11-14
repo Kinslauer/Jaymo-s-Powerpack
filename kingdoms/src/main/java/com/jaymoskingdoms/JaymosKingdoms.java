@@ -287,6 +287,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		Casting.register();
 		RogueGambits.register();
 		ChestNoise.register();
 		// footsteps wolves and guards hear: louder running, on gravel or metal, in plate; quieter sneaking, crouched or crawling

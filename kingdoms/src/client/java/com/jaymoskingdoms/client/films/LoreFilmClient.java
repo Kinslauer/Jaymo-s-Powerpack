@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.films;
 
 import com.geckolib.animatable.GeoEntity;
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.films.FilmActor;
@@ -149,8 +150,10 @@ public final class LoreFilmClient {
 		static final int[] WHO = {1, 3};
 		static final double[][] PREY = {{21.5, -5.0, 4.6}, {22.5, 5.5, 5.2}};
 		static final double[] NEAR = {2.6, 4.4};
-		static final String[] MOVES = {"cast_both", "cast_left"};
+		static final String[] MOVES = {"cast_push", "cast_push_left"};
 		static final double SHORT = 3.2, ASIDE = 0.55, EYE = 1.45, FACE = 1.35, BOB = 0.3;
+		/** The bolt's beam and its burst (blocks): kept small, as the camera goes with the bolt to the burst. */
+		static final float BEAM = 0.05F, BURST = 1.0F;
 
 		private Relay() {
 		}
@@ -181,6 +184,8 @@ public final class LoreFilmClient {
 	/** Fading in and out (ticks), and how long sneak is held to skip. */
 	static final int FADE = 20, SKIP_HOLD = 20;
 	/** The staging, in blocks ahead of where you stood ({@code f}) and to the side ({@code s}). */
+	/** How far Thessaly's wall of light rolls out (blocks). */
+	static final double WARD_ROLL = 7.0;
 	static final double MAGES_F = 13.5, SORCERER_F = 52.0, FIELD_NEAR = 8.5, FIELD_FAR = 31.0, FIELD_HALF = 25.0;
 	static final double[] STRANGER_AT = {3.5, -4.5}, VARRO_AT = {14.0, 9.0}, MARKED_AT = {27.0, 10.0};
 	/**
@@ -351,7 +356,7 @@ public final class LoreFilmClient {
 	/** How long getting up off its knees takes it (the "rise" move, ticks). */
 	static final int RISE_TICKS = 16;
 	/** Each mage's working (Varro, Thessaly, Grimsby, Ambrose), a held move of the library. */
-	static final String[] CASTS = {"cast_both", "cast_ward", "cast_blade", "cast_high"};
+	static final String[] CASTS = {"cast_push", "cast_ward", "cast_blade", "cast_raise"};
 	/** How often Grimsby throws a bolt (ticks). */
 
 	// ---- the fifth ----
@@ -400,6 +405,8 @@ public final class LoreFilmClient {
 	static final String QUIET_RAGS = "stranger_rags", QUIET_HALF = "stranger_half", QUIET_SUIT = "stranger";
 	static final int DON_CLIMB = 24, DON_HALF = 10, DON_WHOLE = 20, DON_SET = 30;
 	static final int WHITE = 0xF2F0E6;
+	/** The sorcerer's mana bolts. */
+	static final int MANA_BOLT = 0xA050FF, SUMMON_SIGIL = 0x4A1A6A;
 	static final String QUIET_BLADE = "jaymospowers:iron_rapier|minecraft:iron_sword";
 	/** The turns of his run he flips off the tree at, and the ones he rolls through. */
 	static final int[] QUIET_FLIPS = {2, 5}, QUIET_ROLLS = {3};
@@ -1793,8 +1800,56 @@ public final class LoreFilmClient {
 		f.level.addParticle(type, true, true, p.x, p.y, p.z, vx, vy, vz);
 	}
 
-	/** A particle as a tape names it: its id, or a block's, or dust's colour and size. */
+	/** Powers' magic shapes by number (MagicFx.BEAM and the rest). */
+	static final int FX_BEAM = 0, FX_BLAST = 1, FX_RING = 2, FX_ORB = 3, FX_SIGIL = 4, FX_WAVE = 5, FX_STROKE = 6;
+	/** Powers' {@code MagicFxClient.shape}, looked up once (null: Jaymo's Powers isn't here). */
+	private static java.lang.invoke.@Nullable MethodHandle fxShape;
+	private static boolean lookedForShape;
+
+	/**
+	 * One of the magic system's shapes (docs/MagicFx.md), taped: {@code d} is a beam's or stroke's reach, the way a ring or
+	 * a sigil faces (zero: flat on the ground), or how far a wave rolls. Nothing is drawn without Jaymo's Powers.
+	 */
+	private static void shape(Film f, int kind, Vec3 at, Vec3 d, float size, int color, int ticks) {
+		if (f.rec != null) {
+			float[] p = f.staged(at), way = f.stagedWay(d);
+			tape(f, FilmTape.SHAPE, kind, color, new float[] {p[0], p[1], p[2], way[0], way[1], way[2], size, ticks}, "");
+		}
+		if (!lookedForShape) {
+			lookedForShape = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					fxShape = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.client.fx.MagicFxClient"), "shape",
+						java.lang.invoke.MethodType.methodType(void.class, int.class, Vec3.class, Vec3.class, float.class, int.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' magic shapes for the films", e);
+				}
+			}
+		}
+		if (fxShape != null) {
+			try {
+				fxShape.invoke(kind, at, d, size, color, ticks);
+			} catch (Throwable e) {
+				// (nothing drawn)
+			}
+		}
+	}
+
+	/** A spell's mark standing in the air at {@code at}, facing {@code way}. */
+	private static void sigil(Film f, Vec3 at, Vec3 way, float size, int color, int ticks) {
+		shape(f, FX_SIGIL, at, way, size, color, ticks);
+	}
+
+	/** A particle as a tape names it: its id, or a block's, or dust's colour and size, or one of the magic system's ("fx kind colour size"). */
 	private static String name(ParticleOptions type) {
+		if (type instanceof Record r && type.getClass().getSimpleName().equals("Wisp")) {
+			try {
+				Class<?> c = r.getClass();
+				return "fx " + c.getMethod("kind").invoke(r) + " " + c.getMethod("color").invoke(r) + " " + c.getMethod("size").invoke(r);
+			} catch (ReflectiveOperationException e) {
+				// (falls through to its id)
+			}
+		}
 		if (type instanceof BlockParticleOption block) {
 			return "block " + BuiltInRegistries.BLOCK.getKey(block.getState().getBlock());
 		}
@@ -1814,6 +1869,16 @@ public final class LoreFilmClient {
 			}
 			if (parts.length == 3 && parts[0].equals("dust")) {
 				return new DustParticleOptions(Integer.parseInt(parts[1]), Float.parseFloat(parts[2]));
+			}
+			if (parts.length == 4 && parts[0].equals("fx")) {
+				int color = Integer.parseInt(parts[2]);
+				float size = Float.parseFloat(parts[3]);
+				return switch (Integer.parseInt(parts[1])) {
+					case 1 -> Fx.miasma(color, size);
+					case 2 -> Fx.spark(color, size);
+					case 3 -> Fx.rune(color, size);
+					default -> Fx.mote(color, size);
+				};
 			}
 			Identifier id = Identifier.tryParse(name);
 			if (id != null && BuiltInRegistries.PARTICLE_TYPE.getOptional(id).orElse(null) instanceof ParticleOptions simple) {
@@ -2092,6 +2157,11 @@ public final class LoreFilmClient {
 				if (e.a() >= 0 && e.a() < f.palette.length && v.length >= 6) {
 					Vec3 way = f.way(v[3], v[4], v[5]);
 					particle(f, f.palette[e.a()], f.at(v[0], v[1], v[2]), way.x, way.y, way.z);
+				}
+			}
+			case FilmTape.SHAPE -> {
+				if (v.length >= 8) {
+					shape(f, e.a(), f.at(v[0], v[1], v[2]), f.way(v[3], v[4], v[5]), v[6], e.b(), Math.round(v[7]));
 				}
 			}
 			case FilmTape.CLASH -> {
@@ -2485,6 +2555,8 @@ public final class LoreFilmClient {
 		}
 		if (t == SUMMON + 4) {
 			act(f, grue, "summon");
+			// his circle on the ground under him, dark, turning until the dead are up
+			sigil(f, grue.e.position(), Vec3.ZERO, 3.2F, SUMMON_SIGIL, RISING + 20 - SUMMON - 4);
 			sound(f, SoundEvents.EVOKER_PREPARE_SUMMON, 0.6F, 0.9F);
 		}
 		if (t >= SUMMON && t < RISING + 20) {
@@ -2622,7 +2694,7 @@ public final class LoreFilmClient {
 			flash(f, 0.14F);
 			for (int i = 0; i < 24; i++) {
 				double turn = i * Math.PI / 12.0;
-				particle(f, i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.END_ROD, brow.add(f.right.scale(Math.cos(turn) * 0.35)).add(0.0, Math.sin(turn) * 0.35, 0.0),
+				particle(f, i % 2 == 0 ? ParticleTypes.FLAME : Fx.LIGHT, brow.add(f.right.scale(Math.cos(turn) * 0.35)).add(0.0, Math.sin(turn) * 0.35, 0.0),
 					0.0, 0.01, 0.0);
 			}
 		}
@@ -2665,26 +2737,25 @@ public final class LoreFilmClient {
 		}
 	}
 
-	/** Grimsby's bolt: off his free hand, a streak of light into {@code at}, which falls. */
+	/** A mage's bolt: the off hand's palm pushed out at {@code at}, its sigil standing before it, a beam of light into {@code at}, which falls. */
 	private static void bolt(Film f, Actor mage, Actor at) {
-		int whose = mage == f.thessaly ? 1 : mage == f.ambrose ? 2 : 0;
-		act(f, mage, "cast_left");
+		int whose = mage == f.thessaly ? 1 : mage == f.ambrose ? 2 : 0, hue = whose == 1 ? VIOLET : whose == 2 ? GOLD : PALE;
+		act(f, mage, "cast_push_left");
 		sound(f, SoundEvents.EVOKER_CAST_SPELL, 1.3F - whose * 0.15F, 0.5F);
 		Vec3 from = mage.e.position().add(0.0, 1.4, 0.0).add(f.right.scale(-0.4)), to = at.e.position().add(0.0, at.role == Role.IMP ? 0.5 : 1.1, 0.0);
-		int steps = Math.max(8, (int)(from.distanceTo(to) * 2.0));
-		for (int i = 0; i <= steps; i++) {
-			Vec3 p = from.lerp(to, i / (double)steps);
-			// Grimsby's white, Thessaly's violet, Ambrose's gold
-			particle(f, whose == 1 ? (i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(0xB98CFF, 0.9F))
-				: whose == 2 ? (i % 3 == 0 ? ParticleTypes.SMALL_FLAME : new DustParticleOptions(0xFFD35A, 0.9F))
-				: i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.0, 0.0);
-		}
+		Vec3 way = to.subtract(from).normalize();
+		sigil(f, from.add(way.scale(0.7)), way, BOLT_SIGIL, hue, 10);
+		shape(f, FX_BEAM, from.add(way.scale(0.7)), to.subtract(from.add(way.scale(0.7))), BOLT_BEAM, hue, 6);
+		shape(f, FX_BLAST, to, Vec3.ZERO, BOLT_BLAST, hue, 10);
 		if (at.role == Role.IMP) {
 			hurt(f, at);
 			return;
 		}
 		at.fallAt = f.tick + 2;
 	}
+
+	/** A bolt's sigil, beam and the burst where it lands (blocks). */
+	static final float BOLT_SIGIL = 0.4F, BOLT_BEAM = 0.07F, BOLT_BLAST = 0.8F;
 
 	private static void spell(Film f, int which, Actor mage, int into) {
 		// the working itself: called up, let go about as the camera cuts to where it lands, then held a moment
@@ -2696,6 +2767,18 @@ public final class LoreFilmClient {
 			mage.toS = mage.s;
 			mage.facing = null;
 			mage.foe = null;
+			// its sigil, where the hands are working: before Varro's palm and Thessaly's, over Ambrose's raised hand, at Grimsby's feet
+			int hue = hue(which == 0 ? 0 : which == 1 ? 1 : which == 2 ? 2 : 3);
+			Vec3 chest = mage.e.position().add(0.0, 1.35, 0.0);
+			switch (which) {
+				case 0 -> sigil(f, chest.add(f.fwd.scale(0.9)), f.fwd, 0.55F, hue, 16);
+				case 1 -> sigil(f, chest.add(f.fwd.scale(1.0)), f.fwd, 1.1F, hue, 30);
+				case 2 -> sigil(f, mage.e.position(), Vec3.ZERO, 1.4F, hue, 26);
+				default -> {
+					sigil(f, mage.e.position().add(0.0, 2.7, 0.0), new Vec3(0.0, 1.0, 0.0), 0.7F, hue, 22);
+					sigil(f, mage.e.position(), Vec3.ZERO, 1.6F, hue, 26);
+				}
+			}
 		}
 		if (into == CAST_TICKS - 6) {
 			rest(f, mage);
@@ -2707,9 +2790,9 @@ public final class LoreFilmClient {
 			}
 			for (int i = 0; i < 6; i++) {
 				double turn = (into * 0.5 + i * Math.PI / 3.0);
-				Vec3 p = mage.e.position().add(Math.cos(turn) * 1.3, 0.3 + into * 0.12, Math.sin(turn) * 1.3);
-				particle(f, ParticleTypes.ENCHANT, p, 0.0, 0.0, 0.0);
-				particle(f, ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.02, 0.0);
+				Vec3 p = mage.e.position().add(Math.cos(turn) * 0.4, 0.3 + into * 0.12, Math.sin(turn) * 0.4);
+				// (a mark sent with a way is drawn in from that far off to its point)
+				particle(f, Fx.rune(PALE, 1.0F), p, Math.cos(turn) * 0.9, 0.2, Math.sin(turn) * 0.9);
 			}
 		}
 		if (into < 12) {
@@ -2722,7 +2805,11 @@ public final class LoreFilmClient {
 				if (into == 12) {
 					sound(f, SoundEvents.BLAZE_SHOOT, 0.8F, 0.9F);
 					sound(f, SoundEvents.GENERIC_EXPLODE.value(), 1.1F, 0.6F);
-					for (int i = 0; i < 70; i++) {
+					Vec3 hand = mage.e.position().add(0.0, 1.35, 0.0).add(f.fwd.scale(0.9));
+					shape(f, FX_BEAM, hand, aim.add(0.0, 0.6, 0.0).subtract(hand), 0.18F, FIRE, 8);
+					shape(f, FX_BLAST, aim.add(0.0, 0.8, 0.0), Vec3.ZERO, 3.2F, FIRE, 14);
+					shape(f, FX_RING, aim.add(0.0, 0.1, 0.0), Vec3.ZERO, 4.5F, FIRE, 16);
+					for (int i = 0; i < 36; i++) {
 						particle(f, i % 6 == 0 ? ParticleTypes.LAVA : ParticleTypes.FLAME, aim.add(spread(f, 2.5), f.rnd.nextDouble(), spread(f, 2.5)), spread(f, 0.25),
 							f.rnd.nextDouble() * 0.25, spread(f, 0.25));
 					}
@@ -2744,10 +2831,14 @@ public final class LoreFilmClient {
 						}
 					}
 				}
-				if (into < 30) {
-					for (int i = 0; i < 22; i++) {
-						Vec3 p = f.at(mage.f + 3.0, (f.rnd.nextDouble() * 2.0 - 1.0) * FIELD_HALF, f.rnd.nextDouble() * 3.0);
-						particle(f, i % 3 == 0 ? ParticleTypes.ENCHANT : ParticleTypes.END_ROD, p, 0.0, 0.04, 0.0);
+				if (into == 12) {
+					// her wall of light, rolled out across the whole front
+					shape(f, FX_WAVE, f.at(mage.f + 2.0, mage.s, 0.0), f.way(WARD_ROLL, 0.0, 0.0), (float)(FIELD_HALF * 2.0), VIOLET, 20);
+				}
+				if (into < 30 && into % 2 == 0) {
+					for (int i = 0; i < 6; i++) {
+						Vec3 p = f.at(mage.f + 3.0 + (into - 12) * 0.4, (f.rnd.nextDouble() * 2.0 - 1.0) * FIELD_HALF, f.rnd.nextDouble() * 3.0);
+						particle(f, i % 3 == 0 ? Fx.GLYPH : Fx.mote(VIOLET, 1.1F), p, 0.0, 0.04, 0.0);
 					}
 				}
 			}
@@ -2761,10 +2852,11 @@ public final class LoreFilmClient {
 				if (run < 14) {
 					double along = mage.f + 3.0 + run * (SORCERER_F - 6.0 - mage.f - 3.0) / 14.0;
 					Vec3 p = f.at(along, mage.s, 1.2);
-					particle(f, ParticleTypes.SWEEP_ATTACK, p, 0.0, 0.0, 0.0);
-					for (int i = 0; i < 4; i++) {
-						particle(f, ParticleTypes.CRIT, p.add(spread(f, 1.0), spread(f, 0.5), spread(f, 1.0)), 0.0, 0.05, 0.0);
-						particle(f, ParticleTypes.ENCHANTED_HIT, p.add(spread(f, 1.2), spread(f, 0.8), spread(f, 1.2)), 0.0, 0.03, 0.0);
+					// one long brush stroke of light, a length of it laid down each tick
+					double next = mage.f + 3.0 + (run + 1) * (SORCERER_F - 6.0 - mage.f - 3.0) / 14.0;
+					shape(f, FX_STROKE, p, f.at(next, mage.s, 1.2).subtract(p), 1.3F, PALE, 18);
+					for (int i = 0; i < 2; i++) {
+						particle(f, Fx.mote(PALE, 1.0F), p.add(spread(f, 1.0), spread(f, 0.5), spread(f, 1.0)), 0.0, 0.04, 0.0);
 					}
 					for (Actor a : f.legion) {
 						if (a.up() && f.tick >= a.busyUntil && Math.abs(a.f - along) < 1.6 && Math.abs(a.s - mage.s) < 2.6) {
@@ -2780,10 +2872,15 @@ public final class LoreFilmClient {
 					sound(f, SoundEvents.BEACON_ACTIVATE, 2.0F, 1.0F);
 					flash(f, 0.75F);
 					fell(f, aim, 7.0, 6);
+					// a column of day out of the sky onto them, and the ground lit round it
+					shape(f, FX_BEAM, aim.add(0.0, 26.0, 0.0), new Vec3(0.0, -26.0, 0.0), 1.6F, GOLD, 14);
+					shape(f, FX_BLAST, aim.add(0.0, 1.0, 0.0), Vec3.ZERO, 4.0F, GOLD, 14);
+					shape(f, FX_RING, aim.add(0.0, 0.1, 0.0), Vec3.ZERO, 7.0F, GOLD, 18);
+					sigil(f, aim, Vec3.ZERO, 3.5F, GOLD, 24);
 				}
 				if (into < 24) {
-					for (int i = 0; i < 20; i++) {
-						particle(f, ParticleTypes.END_ROD, aim.add(spread(f, 2.0), f.rnd.nextDouble() * 14.0, spread(f, 2.0)), 0.0, -0.3, 0.0);
+					for (int i = 0; i < 6; i++) {
+						particle(f, Fx.LIGHT, aim.add(spread(f, 2.0), f.rnd.nextDouble() * 14.0, spread(f, 2.0)), 0.0, -0.3, 0.0);
 					}
 				}
 			}
@@ -2826,7 +2923,7 @@ public final class LoreFilmClient {
 			for (int i = 0; i < 12; i++) {
 				double turn = t * 0.3 + i * Math.PI / 6.0, wide = GATE_SIZE * 0.55 * smooth(open), high = tall * 0.55 * smooth(open);
 				Vec3 p = middle.add(f.right.scale(Math.cos(turn) * wide)).add(0.0, Math.sin(turn) * high, 0.0);
-				particle(f, i % 3 == 0 ? ParticleTypes.PORTAL : new DustParticleOptions(RIFT_RIM, 1.0F), p, 0.0, 0.0, 0.0);
+				particle(f, i % 3 == 0 ? Fx.VOID : Fx.mote(RIFT_RIM, 1.0F), p, 0.0, 0.0, 0.0);
 			}
 			if (g == GATE_OPENS) {
 				// through it
@@ -2837,7 +2934,7 @@ public final class LoreFilmClient {
 				sound(f, SoundEvents.ENDERMAN_TELEPORT, 0.7F, 0.5F);
 				sound(f, SoundEvents.PHANTOM_FLAP, 1.2F, 0.5F);
 				for (int i = 0; i < 14; i++) {
-					particle(f, ParticleTypes.PORTAL, middle.add(spread(f, 0.6), spread(f, 0.8), spread(f, 0.3)), 0.0, 0.0, 0.0);
+					particle(f, Fx.VOID, middle.add(spread(f, 0.6), spread(f, 0.8), spread(f, 0.3)), 0.0, 0.0, 0.0);
 				}
 			}
 		}
@@ -2873,11 +2970,24 @@ public final class LoreFilmClient {
 	}
 
 	/** What {@code who} (as {@link #caster} numbers them) works in: her violet, his gold, Grimsby's white, Varro's fire. */
+	/** The colour of what {@code who} (as {@link #caster} numbers them) works in. */
+	static int hue(int who) {
+		return switch (who) {
+			case 1 -> VIOLET;
+			case 3 -> GOLD;
+			case 2 -> PALE;
+			default -> FIRE;
+		};
+	}
+
+	/** Varro's fire. */
+	static final int FIRE = 0xFF7A1A;
+
 	private static ParticleOptions glow(int who, int i) {
 		return switch (who) {
-			case 1 -> i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(VIOLET, 1.2F);
-			case 3 -> i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(GOLD, 1.3F);
-			case 2 -> i % 3 == 0 ? ParticleTypes.ENCHANTED_HIT : new DustParticleOptions(PALE, 1.1F);
+			case 1 -> i % 3 == 0 ? Fx.LIGHT : Fx.mote(VIOLET, 1.2F);
+			case 3 -> i % 3 == 0 ? Fx.LIGHT : Fx.mote(GOLD, 1.3F);
+			case 2 -> i % 3 == 0 ? Fx.GLYPH : Fx.mote(PALE, 1.1F);
 			default -> i % 5 == 0 ? ParticleTypes.LAVA : i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME;
 		};
 	}
@@ -2914,20 +3024,29 @@ public final class LoreFilmClient {
 		}
 		if (u == Relay.CAST) {
 			act(f, hero, Relay.MOVES[leg]);
+			// its sigil before the palm, and the light gathered in the hand
+			Vec3 dir = way.normalize();
+			sigil(f, hand.add(dir.scale(0.7)), dir, 0.45F, hue(who), Relay.HOLD - Relay.CAST + Relay.FLY);
+			shape(f, FX_ORB, hand.add(dir.scale(0.5)), Vec3.ZERO, 0.22F, hue(who), Relay.HOLD - Relay.CAST);
 			sound(f, who == 0 ? SoundEvents.BLAZE_SHOOT : SoundEvents.EVOKER_CAST_SPELL, 1.3F - leg * 0.12F, 0.7F);
 		}
 		if (u >= Relay.CAST && u < Relay.HOLD) {
 			// it gathers in their hand
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 2; i++) {
 				particle(f, glow(who, i), hand.add(way.normalize().scale(0.5)).add(spread(f, 0.2), spread(f, 0.2), spread(f, 0.2)), 0.0, 0.01, 0.0);
 			}
 		}
 		int fly = u - Relay.HOLD;
 		if (fly >= 0 && fly < Relay.FLY) {
-			// the bolt, a length of it each tick
-			for (int i = 0; i < 14; i++) {
-				Vec3 p = hand.add(way.scale((fly + i / 14.0) / Relay.FLY));
-				particle(f, glow(who, i), p.add(spread(f, 0.08), spread(f, 0.08), spread(f, 0.08)), 0.0, 0.0, 0.0);
+			// the bolt: its light carried along a beam from the hand
+			if (fly == 0) {
+				Vec3 dir = way.normalize();
+				shape(f, FX_BEAM, hand.add(dir.scale(0.7)), at.subtract(hand.add(dir.scale(0.7))), Relay.BEAM, hue(who), Relay.FLY + 2);
+			}
+			// (the camera rides with it: its head is a few motes, not a ball that would fill the frame)
+			for (int i = 0; i < 3; i++) {
+				Vec3 p = hand.add(way.scale((fly + i / 3.0) / Relay.FLY));
+				particle(f, glow(who, i + 1), p.add(spread(f, 0.06), spread(f, 0.06), spread(f, 0.06)), 0.0, 0.0, 0.0);
 			}
 		}
 		int next = Relay.WHO[Math.min(leg + 1, Relay.WHO.length - 1)];
@@ -2936,7 +3055,8 @@ public final class LoreFilmClient {
 			flash(f, 0.22F);
 			sound(f, SoundEvents.GENERIC_EXPLODE.value(), 1.3F, 0.7F);
 			sound(f, SoundEvents.FIREWORK_ROCKET_BLAST, 0.9F, 0.8F);
-			for (int i = 0; i < 44; i++) {
+			shape(f, FX_BLAST, at, Vec3.ZERO, Relay.BURST, hue(who), 14);
+			for (int i = 0; i < 16; i++) {
 				particle(f, i % 4 == 3 ? ParticleTypes.LARGE_SMOKE : glow(who, i), at.add(spread(f, 0.4), spread(f, 0.4), spread(f, 0.4)), spread(f, 0.35), spread(f, 0.3), spread(f, 0.35));
 			}
 			if (prey != null && prey.role == Role.IMP) {
@@ -3115,7 +3235,12 @@ public final class LoreFilmClient {
 				mage.busyUntil = t + COMBO_REST;
 			}
 			act(f, thessaly, "cast_ward");
-			act(f, ambrose, "cast_high");
+			act(f, ambrose, "cast_raise");
+			// her circle under the two of them, and his light let down into it out of the dark
+			sigil(f, feet, Vec3.ZERO, 2.6F, VIOLET, COMBO_BURST + COMBO_RUN);
+			sigil(f, thessaly.e.position().add(0.0, 1.35, 0.0).add(f.fwd.scale(1.0)), f.fwd, 0.9F, VIOLET, COMBO_BURST);
+			sigil(f, ambrose.e.position().add(0.0, 2.7, 0.0), new Vec3(0.0, 1.0, 0.0), 0.6F, GOLD, COMBO_BURST);
+			shape(f, FX_BEAM, feet.add(0.0, 18.0, 0.0), new Vec3(0.0, -18.0, 0.0), 0.35F, GOLD, COMBO_BURST);
 			sound(f, SoundEvents.AMETHYST_BLOCK_CHIME, 0.7F, 1.0F);
 			sound(f, SoundEvents.EVOKER_PREPARE_ATTACK, 0.9F, 0.9F);
 			sound(f, SoundEvents.BEACON_ACTIVATE, 1.4F, 0.7F);
@@ -3123,15 +3248,15 @@ public final class LoreFilmClient {
 		if (combo < COMBO_BURST) {
 			// her ward, a ring of it turning about the two of them and climbing as it draws in...
 			double wide = 2.6 - 1.3 * combo / COMBO_BURST, high = 0.2 + combo * 0.12;
-			for (int i = 0; i < 12; i++) {
-				double turn = combo * 0.45 + i * Math.PI / 6.0;
+			for (int i = 0; i < 6; i++) {
+				double turn = combo * 0.45 + i * Math.PI / 3.0;
 				Vec3 p = feet.add(f.fwd.scale(Math.cos(turn) * wide)).add(f.right.scale(Math.sin(turn) * wide)).add(0.0, high * (0.5 + 0.5 * (i % 2)), 0.0);
-				particle(f, i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(VIOLET, 1.1F), p, 0.0, 0.02, 0.0);
+				particle(f, i % 3 == 0 ? Fx.GLYPH : Fx.mote(VIOLET, 1.1F), p, 0.0, 0.02, 0.0);
 			}
 			// ...and his light, come down out of the dark into it
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < 3; i++) {
 				Vec3 p = feet.add(spread(f, 0.5), 2.5 + f.rnd.nextDouble() * 9.0, spread(f, 0.5));
-				particle(f, i % 2 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(GOLD, 1.3F), p, 0.0, -0.45, 0.0);
+				particle(f, i % 2 == 0 ? Fx.LIGHT : Fx.mote(GOLD, 1.3F), p, 0.0, -0.45, 0.0);
 			}
 		}
 		if (combo == COMBO_BURST) {
@@ -3139,6 +3264,10 @@ public final class LoreFilmClient {
 			sound(f, SoundEvents.TRIDENT_THUNDER.value(), 1.2F, 0.5F);
 			sound(f, SoundEvents.BEACON_POWER_SELECT, 0.7F, 1.0F);
 			sound(f, SoundEvents.GENERIC_EXPLODE.value(), 1.5F, 0.4F);
+			// one working of the two: her ward let go as a ring, his light the edge of it
+			shape(f, FX_BLAST, feet.add(0.0, 1.0, 0.0), Vec3.ZERO, 2.4F, GOLD, 12);
+			shape(f, FX_RING, feet.add(0.0, 0.15, 0.0), Vec3.ZERO, (float)(1.5 + COMBO_REACH), VIOLET, COMBO_RUN + 4);
+			shape(f, FX_RING, feet.add(0.0, 0.9, 0.0), Vec3.ZERO, (float)(1.5 + COMBO_REACH), GOLD, COMBO_RUN + 6);
 		}
 		int run = combo - COMBO_BURST;
 		if (run >= 0 && run < COMBO_RUN) {
@@ -3147,9 +3276,8 @@ public final class LoreFilmClient {
 			for (int i = 0; i < RING_POINTS; i++) {
 				double turn = i * Math.PI * 2.0 / RING_POINTS + run * 0.05, cos = Math.cos(turn), sin = Math.sin(turn);
 				Vec3 out = f.fwd.scale(cos).add(f.right.scale(sin)), p = feet.add(out.scale(wide)).add(0.0, 0.3 + (i % 3) * 0.7, 0.0);
-				particle(f, i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(i % 3 == 1 ? VIOLET : GOLD, 1.8F), p, out.x * 0.12, 0.02, out.z * 0.12);
 				if (i % 4 == 0) {
-					particle(f, ParticleTypes.ENCHANTED_HIT, p.add(0.0, 0.6, 0.0), out.x * 0.2, 0.05, out.z * 0.2);
+					particle(f, i % 8 == 0 ? Fx.mote(VIOLET, 1.4F) : Fx.mote(GOLD, 1.4F), p, out.x * 0.12, 0.02, out.z * 0.12);
 				}
 			}
 			for (Actor o : f.legion) {
@@ -3275,7 +3403,7 @@ public final class LoreFilmClient {
 				double high = 2.0 * Math.min(1.0, (don + 2) / (double)DON_WHOLE);
 				for (int i = 0; i < 10; i++) {
 					double turn = don * 0.7 + i * Math.PI / 5.0, up = f.rnd.nextDouble() * high;
-					particle(f, i % 5 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(WHITE, 0.8F),
+					particle(f, i % 5 == 0 ? Fx.LIGHT : Fx.mote(WHITE, 0.8F),
 						feet.add(Math.cos(turn) * 0.45, up, Math.sin(turn) * 0.45), 0.0, 0.03, 0.0);
 				}
 				particle(f, ParticleTypes.SNOWFLAKE, feet.add(spread(f, 0.6), 0.05, spread(f, 0.6)), 0.0, 0.05, 0.0);
@@ -4308,19 +4436,22 @@ public final class LoreFilmClient {
 			Mana m = it.next();
 			for (int i = 0; i < 4; i++) {
 				Vec3 p = m.at.add(m.step.scale(i / 4.0));
-				particle(f, new DustParticleOptions(0xA050FF, 1.5F), p, 0.0, 0.0, 0.0);
-				particle(f, i % 2 == 0 ? ParticleTypes.WITCH : ParticleTypes.END_ROD, p, 0.0, 0.0, 0.0);
+				if (i % 2 == 0) {
+					particle(f, Fx.HEX, p, 0.0, 0.0, 0.0);
+				}
 			}
+			shape(f, FX_ORB, m.at, Vec3.ZERO, 0.35F, MANA_BOLT, 2);
 			m.at = m.at.add(m.step);
 			if (--m.left <= 0) {
 				it.remove();
 				sound(f, m.tree ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.FIRECHARGE_USE, m.tree ? 1.4F : 0.6F, 0.45F);
+				shape(f, FX_BLAST, m.at, Vec3.ZERO, 1.0F, MANA_BOLT, 10);
 				if (m.tree) {
 					float[] hit = f.staged(m.at);
 					igniteNear(f, hit[0], hit[1], 1.5);
 				}
 				for (int i = 0; i < 16; i++) {
-					particle(f, ParticleTypes.WITCH, m.at.add(spread(f, 0.4), spread(f, 0.4), spread(f, 0.4)), spread(f, 0.15), f.rnd.nextDouble() * 0.2, spread(f, 0.15));
+					particle(f, Fx.HEX, m.at.add(spread(f, 0.4), spread(f, 0.4), spread(f, 0.4)), spread(f, 0.15), f.rnd.nextDouble() * 0.2, spread(f, 0.15));
 					if (m.tree) {
 						particle(f, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SPRUCE_LOG.defaultBlockState()), m.at, spread(f, 0.2), 0.15, spread(f, 0.2));
 					} else if (i % 2 == 0) {
@@ -4412,7 +4543,7 @@ public final class LoreFilmClient {
 		a.yaw = Mth.rotLerp(0.35F, a.yaw, want);
 		place(f, a);
 		if (a.role == Role.SORCERER && !a.fled && f.tick % 3 == 0) {
-			particle(f, ParticleTypes.WITCH, a.e.position().add(spread(f, 0.6), 1.2 + f.rnd.nextDouble(), spread(f, 0.6)), 0.0, 0.02, 0.0);
+			particle(f, Fx.HEX, a.e.position().add(spread(f, 0.6), 1.2 + f.rnd.nextDouble(), spread(f, 0.6)), 0.0, 0.02, 0.0);
 		}
 	}
 
