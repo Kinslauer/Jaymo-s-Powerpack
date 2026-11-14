@@ -3,7 +3,7 @@ status: in-review
 task: 
 branch: claude/project-thread-elf776
 with: Claude (cloud thread "Add the Reaper spirit for death magic")
-pr: 
+pr: 1526
 mods: kingdoms
 versions: 
 started: 2026-11-14
