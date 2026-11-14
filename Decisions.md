@@ -593,3 +593,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - Andy: "If you are found out and you lied or hurt the person you changrd into the villagers will attack, and be suspicious as anyone could be a changeling or shifter now. They will try and ask questions only they would know."
 - Andy approved the lore paragraph "A town in doubt" ("Approved, merge"); PR #1548.
 - 2026-11-14 (Andy, captured site plans thread): taking over a bandit/illager site lets you add it to a schematic your kingdom can build (PR to follow); Illager Arena is ARR so our own desert arena is drawn.
+- 2026-11-14 (Andy, correcting the gender card): "no, gender should be before you can select skip the story". Skip is hidden until gender is picked on the story's first page; no gender card on the Life tab (PR #1553).
