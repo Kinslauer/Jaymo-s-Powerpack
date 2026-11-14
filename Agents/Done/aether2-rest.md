@@ -36,4 +36,4 @@ layers, saddlebags, cloud skiff, mob behaviour, sentry golem idles, world pieces
 ## Done
 - PR #1491 up 2026-11-14: young, glows/keratin/collar, saddlebag, golem fidgets, cloud skiff, zephyr campfire fear, slider grudge. Compiles, 38 models bake; not played.
 - World pieces not built: ~420 Aether II block ids we lack; Andy asked which groups.
-- Merged 2026-11-13 (PR #1491). Lore paragraphs approved by Andy.
+- 2026-11-14 03:18 PR #1491 is merged into master; moved to Agents/Done.
