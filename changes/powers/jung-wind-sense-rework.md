@@ -7,3 +7,5 @@
   lines; far ones a short, faint one. Several in the same direction make one bigger ripple that runs faster: a crowd.
 - The focus is deep: every game sound, music included, sinks almost to silence (menu clicks stay), and a soft, steady
   breeze plays instead. It all comes back when you let go of V.
+- The focus now really drains the colour: the world turns grey and white (each colour to its grey, washed a little
+  toward white), fading in as you focus, with the soft white frame round the edge. No tunnel: the middle stays clear.

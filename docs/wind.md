@@ -674,7 +674,11 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
   (`WindSenseSoundMixin` for sounds as they start and as they update; `WindAirSense.refresh` sets the sound categories
   again as the hush moves, so music already playing follows it). In its place a soft, steady breeze plays (the
   flight's wind at `BREEZE_PITCH` 0.55, up to `BREEZE_VOLUME` 0.18, on the master category, which the hush leaves
-  alone). The view fades toward an even grey (`GREY` at up to `GREY_ALPHA` 0x5A) under a soft white frame
+  alone). The world's colour drains to grey and white (Jung: "make the screen go grey and white colour wise"): the
+  `wind_sense_grey` post effect (`shaders/post/wind_sense_grey.fsh`, asked for each frame by
+  `WindSenseGameRendererMixin`) turns each pixel to its grey, washed 18% toward white, in four steps as the focus comes
+  in (`wind_sense_grey_1` to `_4`: a quarter to all the way; none in low-end mode). Over it, a light grey veil (`GREY`
+  at up to `GREY_ALPHA` 0x28) and a soft white frame
   (`FRAME_ALPHA` 0x6E at the edge, gone `FRAME_DEPTH` 0.2 of the way in). No tunnel: the middle is as clear as the
   edges, only greyer, and the ripples are drawn over it. Letting go brings it back over `FOCUS_OUT` 6 ticks.
 - **Client side only**, from what the client already knows of the things round it (so never beyond the server's entity
@@ -682,7 +686,8 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
 
 ### Testing (airflow sense)
-0. Stand still, crouch and hold V: the screen greys under a white edge, the game goes almost silent and a soft breeze
+0. Stand still, crouch and hold V: the world's colour drains to grey and white (grass, sky and mobs all grey) under a
+   white edge, the game goes almost silent and a soft breeze
    plays; V's ability doesn't charge. Let go of V: sound and colour come back. Hold V without crouching: V's ability
    charges as before. Crouch + hold V, then stand up still holding V: the focus ends and V still doesn't charge until
    you let go and press again.

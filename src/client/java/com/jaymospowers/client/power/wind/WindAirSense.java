@@ -39,8 +39,8 @@ import net.minecraft.world.phys.Vec3;
  *
  * <p>(Jung) Listening is a deep focus: over {@link #FOCUS_IN} ticks every game sound, music too, sinks to {@link #HUSH}
  * of its volume (menu clicks keep theirs; {@code WindSenseSoundMixin}, and {@link #refresh} for what is already
- * playing), and only a soft, steady breeze is heard ({@link Breeze}). The screen fades toward grey under a soft white
- * frame. There is no tunnel: the middle of the view stays as clear as the edges, only greyer. Letting go brings it all
+ * playing), and only a soft, steady breeze is heard ({@link Breeze}). The world drains to grey and white
+ * ({@link #greyEffect}, a post effect), under a light grey veil and a soft white frame. There is no tunnel: the middle of the view stays as clear as the edges, only greyer. Letting go brings it all
  * back over {@link #FOCUS_OUT} ticks.
  */
 public final class WindAirSense {
@@ -80,13 +80,13 @@ public final class WindAirSense {
 	static final float STORM_WOBBLE = 20.0F, STORM_WOBBLE_RATE = 0.35F;
 	/** The lines' colour, and their opacity (0-255) for the nearest and the furthest; under each, a dark edge this share as opaque, so they show on a pale sky. */
 	static final int COLOR = 0xE8FBFF, ALPHA_NEAR = 235, ALPHA_FAR = 110;
-	static final float EDGE = 0.4F;
+	static final float EDGE = 0.6F;
 	/** The focus: ticks to come on and to go off, and the world's sounds at full focus (a share of their volume). */
 	static final float FOCUS_IN = 8.0F, FOCUS_OUT = 6.0F, HUSH = 0.05F;
 	/** The breeze heard in the focus: its volume at full focus and its pitch (the flight's wind, low and soft). */
 	static final float BREEZE_VOLUME = 0.18F, BREEZE_PITCH = 0.55F;
-	/** The grey laid over the whole view (0xRRGGBB, and its most opaque, 0-255): enough to drain the colour, not the light. */
-	static final int GREY = 0x8C9096, GREY_ALPHA = 0x5A;
+	/** A light grey veil over the whole view, HUD too (0xRRGGBB, and its most opaque, 0-255); the world's own colour goes with {@link #greyEffect}. */
+	static final int GREY = 0x8C9096, GREY_ALPHA = 0x28;
 	/** The white frame: its most opaque at the very edge (0-255), its depth (a share of the smaller screen side), and its soft steps. */
 	static final int FRAME_ALPHA = 0x6E, FRAME_STEPS = 12;
 	static final float FRAME_DEPTH = 0.2F;
@@ -131,6 +131,21 @@ public final class WindAirSense {
 	/** (WindSenseSoundMixin) What the game's sounds are multiplied by just now: 1, down to {@link #HUSH} in full focus. */
 	public static float hush() {
 		return 1.0F - (1.0F - HUSH) * focus;
+	}
+
+	/** The grey-and-white post effects, a quarter, a half, three quarters and all the way (assets/jaymospowers/post_effect/wind_sense_grey_N.json). */
+	private static final net.minecraft.resources.Identifier[] GREY_EFFECTS = {
+		com.jaymospowers.JaymosPowers.id("wind_sense_grey_1"), com.jaymospowers.JaymosPowers.id("wind_sense_grey_2"),
+		com.jaymospowers.JaymosPowers.id("wind_sense_grey_3"), com.jaymospowers.JaymosPowers.id("wind_sense_grey_4")};
+
+	/**
+	 * (WindSenseGameRendererMixin; Jung: "make the screen go grey and white colour wise") The post effect the world
+	 * wears this frame: drained toward grey and white as far as the focus has come in, in quarters; null out of it, and
+	 * in low-end mode (the grey veil over the HUD is still drawn).
+	 */
+	public static net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier greyEffect() {
+		int step = Math.round(focus * GREY_EFFECTS.length);
+		return step <= 0 || com.jaymospowers.client.LowEndMode.on() ? null : GREY_EFFECTS[Math.min(step, GREY_EFFECTS.length) - 1];
 	}
 
 	/** (WindSenseSoundMixin) Whether {@code sound} is the focus's own breeze (never hushed). */
