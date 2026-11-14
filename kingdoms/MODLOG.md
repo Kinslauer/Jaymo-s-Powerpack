@@ -12804,3 +12804,15 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - The left panel also lists the weapon arts on your belt, slot by slot with their rank, the ones that fit the weapon in your hand bright; press them to open the belt menu. On a short screen the wheel scrolls the panel.
 - Make Do and Read the Ground no longer sit on top of each other.
 - Classes: `SkillScreen`, `SkillWeb`, new `SkillIcons`. Compiled; not played. Perk keys, costs, requirements and saved ranks are unchanged.
+
+## 0.8.47 (2026-11-14): Butcher's Hand - the Survival perk that opens the meat hook (#1486)
+
+- Andy: "This should be a skill in the survivalist tree" (Kitchen's clean kills and skinning in strokes).
+- **Butcher's Hand** (`Skills.Perk.BUTCHERS_HAND`): Survival, Foraging branch, after Forager, 3 ranks, 1 point each, no
+  level needed. Andy: "only the skilled can do it at all". Rank 1: you can work a carcass on a meat hook (bleed, head,
+  skin, cuts), which gives more than a butcher block. Without it the hook can't be worked. Rank 2 and 3: one skinning
+  pull fewer each (3, 2, 1). Rank 3: a mauled or battered kill loses nothing (a burnt hide stays lost).
+- `KitchenCompat.skills` hands the ranks to Kitchen's `Hanging.setButcherSkill` by reflection; with an older Kitchen it
+  logs a warning and the perk does nothing.
+- Last in the enum, so no saved perk moves. The skill web places it by itself (page 0, grows from Forager).
+- Compiled with Gradle; not played.
