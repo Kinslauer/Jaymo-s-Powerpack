@@ -83,6 +83,9 @@ public final class CryoPower implements Power {
 		CryoPicks.init();
 		// (0.17.3) what a gifted villager does with Cryokinesis
 		CryoGift.init();
+		// its corruption (the cold that kills), and its part in Elemental Corruption
+		CryoCorruption.init();
+		com.jaymospowers.elemental.ElementalCorruption.register(INSTANCE, new CryoWrath());
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			// a Frost-born Cryokinesis user: freezing never hurts them
 			!(entity instanceof ServerPlayer player && source.is(DamageTypes.FREEZE) && Powers.has(player, INSTANCE) && frostBorn(player)));
@@ -116,6 +119,11 @@ public final class CryoPower implements Power {
 	@Override
 	public ItemStack icon() {
 		return new ItemStack(Items.BLUE_ICE);
+	}
+
+	@Override
+	public void onCorrupted(ServerPlayer player) {
+		CryoCorruption.corrupted(player);
 	}
 
 	/** R (Ice Slide) first, then G (Frost Breath), V (Ice Shards), B (Flash Freeze). */

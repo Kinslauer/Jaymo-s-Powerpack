@@ -114,6 +114,8 @@ public final class WindPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		WindNet.register();
+		// its part in Elemental Corruption (the gods' wrath at a corrupted holder's murders)
+		com.jaymospowers.elemental.ElementalCorruption.register(INSTANCE, new WindWrath());
 		WindModes.register();
 		WindBolts.init();
 		WindTempest.init();
