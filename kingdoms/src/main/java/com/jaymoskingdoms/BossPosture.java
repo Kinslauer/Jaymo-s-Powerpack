@@ -63,6 +63,9 @@ public final class BossPosture {
 	static final int IMMUNE_TICKS = 160;
 	/** What an armoured foe ({@link #armoured}) takes of a blow while it is on its feet. */
 	static final float ARMOURED_SHARE = 0.5F;
+	/** Brought to a knee with this share of its health or less, it may be finished there (Powers' prompted finisher), and kneels this long. */
+	static final float FINISH_SHARE = 0.2F;
+	static final int FINISH_KNEEL = 120;
 	/** How the head bows while it kneels (degrees). */
 	static final float BOW_PITCH = 55.0F;
 
@@ -72,6 +75,8 @@ public final class BossPosture {
 		long kneelFrom;
 		long kneelUntil;
 		long immuneUntil;
+		/** Kneeling with little health left: open to a finisher. */
+		boolean offered;
 		final ServerBossEvent bar;
 
 		Posture(LivingEntity boss) {
@@ -203,10 +208,12 @@ public final class BossPosture {
 		// the blow that broke it isn't the riposte: the next one is
 		p.kneelFrom = now + 1;
 		BossBars.show(level, boss, p.bar);
-		p.kneelUntil = now + KNEEL_TICKS;
+		p.offered = boss.getHealth() <= boss.getMaxHealth() * FINISH_SHARE && PowersCompat.finishOffer(boss, true);
+		int ticks = p.offered ? FINISH_KNEEL : KNEEL_TICKS;
+		p.kneelUntil = now + ticks;
 		p.bar.setColor(BossEvent.BossBarColor.YELLOW);
-		boss.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, KNEEL_TICKS, 9, false, false));
-		boss.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, KNEEL_TICKS, 9, false, false));
+		boss.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 9, false, false));
+		boss.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 9, false, false));
 		hold(boss);
 		Vec3 chest = boss.position().add(0.0, boss.getBbHeight() * 0.6, 0.0);
 		double spread = boss.getBbWidth() * 0.4;
@@ -228,6 +235,10 @@ public final class BossPosture {
 
 	/** Back on its feet, posture full, unwearable for a while. */
 	private static void rise(LivingEntity boss, Posture p, long now) {
+		if (p.offered) {
+			p.offered = false;
+			PowersCompat.finishOffer(boss, false);
+		}
 		p.kneelUntil = 0L;
 		p.immuneUntil = now + IMMUNE_TICKS;
 		p.left = max(boss);
@@ -258,7 +269,14 @@ public final class BossPosture {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (p.kneelUntil > 0 && now >= p.kneelUntil) {
+			if (p.offered && p.kneeling(now) && PowersCompat.beingFinished(boss)) {
+				// a finisher is playing on it: it stays down till that is over
+				p.kneelUntil = Math.max(p.kneelUntil, now + 2);
+			}
+			if (p.offered && p.kneeling(now) && !PowersCompat.finishOpen(boss)) {
+				// a player was thrown off its finisher: up at once
+				rise(boss, p, now);
+			} else if (p.kneelUntil > 0 && now >= p.kneelUntil) {
 				// up again without a riposte
 				rise(boss, p, now);
 			} else if (p.kneeling(now)) {

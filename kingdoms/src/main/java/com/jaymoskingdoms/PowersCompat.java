@@ -1199,6 +1199,69 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Prompts.offer(LivingEntity, boolean)}, {@code Prompts.open(Entity)} and {@code Finishers.targeted(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle finishOffer, finishOpen, finishTargeted;
+	private static boolean lookedForFinish;
+
+	private static void lookForFinish() {
+		if (lookedForFinish) {
+			return;
+		}
+		lookedForFinish = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				var lookup = java.lang.invoke.MethodHandles.publicLookup();
+				Class<?> prompts = Class.forName("com.jaymospowers.core.finisher.Prompts");
+				java.lang.invoke.MethodHandle offer = lookup.findStatic(prompts, "offer", java.lang.invoke.MethodType.methodType(void.class,
+					net.minecraft.world.entity.LivingEntity.class, boolean.class));
+				java.lang.invoke.MethodHandle open = lookup.findStatic(prompts, "open", java.lang.invoke.MethodType.methodType(boolean.class,
+					net.minecraft.world.entity.Entity.class));
+				finishTargeted = lookup.findStatic(Class.forName("com.jaymospowers.core.finisher.Finishers"), "targeted",
+					java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				finishOffer = offer;
+				finishOpen = open;
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no prompted finishers (older Powers?)", e);
+			}
+		}
+	}
+
+	/**
+	 * A boss on its knee with little health left may be finished there by Powers' prompted finisher ({@code on}), or is up
+	 * again. False without a Powers that has them.
+	 */
+	public static boolean finishOffer(net.minecraft.world.entity.LivingEntity boss, boolean on) {
+		lookForFinish();
+		try {
+			if (finishOffer != null) {
+				finishOffer.invoke(boss, on);
+				return true;
+			}
+		} catch (Throwable ignored) {
+		}
+		return false;
+	}
+
+	/** Whether {@code boss} is still offered so (a player thrown off its finisher takes the offer away). */
+	public static boolean finishOpen(net.minecraft.world.entity.LivingEntity boss) {
+		lookForFinish();
+		try {
+			return finishOpen != null && (boolean) finishOpen.invoke((net.minecraft.world.entity.Entity) boss);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Whether a player's finisher is playing on {@code boss} just now. */
+	public static boolean beingFinished(net.minecraft.world.entity.LivingEntity boss) {
+		lookForFinish();
+		try {
+			return finishTargeted != null && (boolean) finishTargeted.invoke((net.minecraft.world.entity.Entity) boss);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle impactFrame;
 	private static boolean lookedForImpact;
 

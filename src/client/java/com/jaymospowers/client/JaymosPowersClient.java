@@ -404,6 +404,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// inside someone else's Hush every power key goes dead (counts as released); the symbiote acts on its own regardless
 		boolean hushed = power != null && com.jaymospowers.client.power.resonance.ResonanceHushClient.silenced(player);
 		seized |= hushed;
+		// a prompted finisher's keys are its answers, not abilities
+		seized |= com.jaymospowers.client.finisher.PromptClient.seizes(player);
 		// report ability key changes (a key held while a screen opens counts as released)
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed

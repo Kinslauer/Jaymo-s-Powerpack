@@ -513,6 +513,8 @@ public final class Finishers {
 		com.jaymospowers.power.web.WebExecutions.register();
 		// (0.18.46) and a Z Fighter's bare hands
 		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
+		// the timed keys of a prompted finisher
+		Prompts.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> {
@@ -861,7 +863,7 @@ public final class Finishers {
 
 	/** Whether {@code player} may finish {@code body}: downed, not themselves, not someone's tamed animal, and not already being finished. */
 	static boolean finishable(Player player, Entity entity) {
-		return entity instanceof LivingEntity body && body != player && body.isAlive() && helpless(body) && !Carry.isCarried(body)
+		return entity instanceof LivingEntity body && body != player && body.isAlive() && (helpless(body) || Prompts.open(body)) && !Carry.isCarried(body)
 			&& !(body instanceof TamableAnimal tame && tame.isTame()) && !(body instanceof AbstractHorse horse && horse.isTamed())
 			&& !targeted(body);
 	}
@@ -1183,6 +1185,7 @@ public final class Finishers {
 		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());
+		Prompts.begin(player, body);
 		player.stopUsingItem();
 		player.setSprinting(false);
 		if (kind == Kind.FLAIL) {
@@ -1244,6 +1247,13 @@ public final class Finishers {
 					questionEnded(player, body, true);
 				}
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				continue;
+			}
+			if (present && Prompts.missed(player, kind, t)) {
+				// a prompted finisher's key missed: thrown off, and they live
+				it.remove();
+				end(player, body);
+				Prompts.miss(level, player, body);
 				continue;
 			}
 			// rooted where they stand, facing the body
@@ -1535,6 +1545,7 @@ public final class Finishers {
 			com.jaymospowers.power.zfighter.ZFighterExecutions.end(body);
 		}
 		player.removeAttached(FINISHING);
+		Prompts.end(player);
 		root(player, false);
 		TARGETED.remove(body.getUUID());
 		// (unrooting one that never was is nothing)
