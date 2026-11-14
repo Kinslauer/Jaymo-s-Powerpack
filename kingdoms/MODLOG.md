@@ -13446,3 +13446,10 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
     they attack; in your own face you are taken for a thing wearing one. Walking away costs nothing.
 - Creative and spectator players are never asked or attacked.
 - Built (compileJava); not played.
+
+## 0.8.86 (2026-11-14): The server starts again (running skull's look) (#1550)
+
+- **Fix (server would not start)**: the Laughing Bones' running skull made its skeleton-skull look as its class
+  loaded, during registration, before items are ready, so Kingdoms failed to start (Deck, 2026-11-14 7:41 AM). The
+  look is now made the first time it is drawn.
+- Built; tested on the Deck server.
