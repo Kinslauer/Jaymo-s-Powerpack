@@ -225,6 +225,36 @@ public final class RelicWeapons {
 		level.sendParticles(ParticleTypes.SNOWFLAKE, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
 	}
 
+	/**
+	 * A relic flying on its own (an Attendant Blade, {@code RiftBlade}) cut {@code entity} for {@code damage}: the gift it
+	 * has in the hand goes with it. (The Long Vigil's stance answer stays in the hand.)
+	 */
+	public static void flyingCut(ServerLevel level, ItemStack relic, LivingEntity entity, LivingEntity owner, float damage) {
+		Kind kind = kind(relic);
+		if (kind == null) {
+			return;
+		}
+		switch (kind) {
+			case SOUL_SABER -> {
+				owner.heal(damage * LIFE_STEAL);
+				level.sendParticles(ParticleTypes.SOUL, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 4, 0.2, 0.3, 0.2, 0.02);
+			}
+			case VOIDREAVER -> entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, REAVER_BLIND_TICKS, 0), owner);
+			case TIDEBREAKER -> {
+				if (entity.isInWaterOrRain() && entity.isAlive()) {
+					entity.setInvulnerableTime(0);
+					entity.hurtServer(level, level.damageSources().magic(), TIDE_BONUS);
+					level.sendParticles(ParticleTypes.SPLASH, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 20, 0.3, 0.3, 0.3, 0.1);
+				}
+			}
+			case SUNFANG -> Flames.touch(level, entity, SUN_FIRE_SECONDS, owner);
+			case RIMECLAW -> chill(level, entity, owner);
+			case LONG_VIGIL -> entity.addEffect(new MobEffectInstance(MobEffects.WITHER, VIGIL_WITHER_TICKS, 0), owner);
+			default -> {
+			}
+		}
+	}
+
 	/** Which relic weapon this is, if any. */
 	static @Nullable Kind kind(ItemStack stack) {
 		if (stack.getItem() instanceof Relic relic) {

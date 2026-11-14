@@ -25,6 +25,7 @@ final class ArsenalWingRenderer {
 	private static final double RIFT_ABOVE = 0.5;
 	private static final float BLADE_SCALE = 0.8F;
 	private static final ItemStackRenderState ITEM = new ItemStackRenderState();
+	private static final net.minecraft.world.item.ItemStack GIFT_BLADE = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
 
 	private ArsenalWingRenderer() {
 	}
@@ -72,6 +73,27 @@ final class ArsenalWingRenderer {
 				poseStack.scale(scale, scale, scale);
 				minecraft.getItemModelResolver().updateForTopItem(ITEM, wing.blades().get(i).item(), ItemDisplayContext.FIXED, level, null, player.getId() + i);
 				ITEM.submit(poseStack, context.submitNodeCollector(), voidRift ? RiftPortals.VOID_LIGHT : RiftPortals.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+				poseStack.popPose();
+			}
+		}
+		// gifted villagers in a fight: two blades at their shoulders
+		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+			if (!(entity instanceof net.minecraft.world.entity.LivingEntity mob) || !mob.hasAttached(com.jaymospowers.power.arsenal.ArsenalGift.BLADES)
+				|| mob.isInvisible() || mob.position().distanceToSqr(camera) > VIEW_DISTANCE * VIEW_DISTANCE) {
+				continue;
+			}
+			for (int side = -1; side <= 1; side += 2) {
+				Vec3 at = com.jaymospowers.power.arsenal.ArsenalGift.shoulder(mob, side).add(mob.getPosition(partialTick).subtract(mob.position())).subtract(camera)
+					.add(0.0, Math.sin(now * 0.08 + side) * 0.06, 0.0);
+				RiftPortals.disc(context.submitNodeCollector(), poseStack, at.add(0.0, RIFT_ABOVE, 0.0), new Vec3(1.0, 0.0, 0.0), new Vec3(0.0, 0.0, 1.0),
+					new Vec3(0.0, -1.0, 0.0), RIFT_RADIUS, RIFT_RADIUS, now * 0.15 + side, false);
+				poseStack.pushPose();
+				poseStack.translate(at.x, at.y, at.z);
+				poseStack.rotateDegrees(Axis.YP, -mob.yBodyRot);
+				poseStack.rotateDegrees(Axis.ZP, -135.0F);
+				poseStack.scale(BLADE_SCALE, BLADE_SCALE, BLADE_SCALE);
+				minecraft.getItemModelResolver().updateForTopItem(ITEM, GIFT_BLADE, ItemDisplayContext.FIXED, level, null, mob.getId() + side);
+				ITEM.submit(poseStack, context.submitNodeCollector(), RiftPortals.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 				poseStack.popPose();
 			}
 		}
