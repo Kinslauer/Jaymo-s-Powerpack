@@ -267,6 +267,27 @@ public final class ArmourGrime {
 		}
 	}
 
+	/** Grime this dirty (0 to 1) is noticed by people who see it; this dirty, they call it filthy. */
+	static final float NOTICE = 0.35F, FILTHY = 0.8F;
+
+	/**
+	 * The grime others would notice on {@code body} (Jaymo's Kingdoms' remarks and MCA hearts): -1 for none worth a word,
+	 * 0 dusty, 1 muddy, 2 filthy (caked), from the dirtiest of its armour and its own clothes.
+	 */
+	public static int noticed(LivingEntity body) {
+		Grime worst = body(body);
+		for (EquipmentSlot slot : SLOTS) {
+			Grime g = grime(body.getItemBySlot(slot));
+			if (g != null && (worst == null || g.amount() > worst.amount())) {
+				worst = g;
+			}
+		}
+		if (worst == null || worst.level() < NOTICE) {
+			return -1;
+		}
+		return worst.level() >= FILTHY ? 2 : worst.muddiness() >= 0.5F ? 1 : 0;
+	}
+
 	/** How dirty {@code body}'s own clothes and skin are, or null if they're clean. */
 	public static @Nullable Grime body(LivingEntity body) {
 		return body.getAttached(BODY);

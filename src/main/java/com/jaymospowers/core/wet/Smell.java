@@ -58,11 +58,13 @@ public final class Smell {
 	}
 
 	/**
-	 * How bad {@code player} smells, 0 (clean) to {@link #MAX}: their stink, the worst grime on their armour, and old blood
+	 * How bad {@code player} smells, 0 (clean) to {@link #MAX}: their stink, the worst grime on their armour or clothes, and old blood
 	 * on them (rotten blood stinks the worst).
 	 */
 	public static float smell(Player player) {
-		float grime = 0.0F;
+		// the worst grime on their armour or their own clothes
+		ArmourGrime.Grime body = ArmourGrime.body(player);
+		float grime = body == null ? 0.0F : body.level();
 		for (net.minecraft.world.entity.EquipmentSlot slot : ArmourGrime.SLOTS) {
 			ArmourGrime.Grime g = ArmourGrime.grime(player.getItemBySlot(slot));
 			if (g != null) {
