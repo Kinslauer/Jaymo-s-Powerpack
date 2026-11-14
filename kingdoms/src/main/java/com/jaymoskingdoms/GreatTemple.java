@@ -177,6 +177,12 @@ final class GreatTemple {
 			s.set(4, y, 16, air);
 			s.set(8, y, 16, air);
 		}
+		// the bell rings from a square of iron: a ward against the hordes (HordeWards)
+		for (int x = 5; x <= 7; x++) {
+			for (int z = 15; z <= 17; z++) {
+				s.set(x, 13, z, Blocks.IRON_BLOCK.defaultBlockState());
+			}
+		}
 		s.set(6, 14, 16, Blocks.BELL.defaultBlockState().setValue(BlockStateProperties.BELL_ATTACHMENT,
 			net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR));
 		for (int x = 4; x <= 8; x++) {

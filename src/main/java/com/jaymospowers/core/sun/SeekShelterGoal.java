@@ -80,7 +80,9 @@ public class SeekShelterGoal extends Goal {
         this.cooldown = CHECK_EVERY;
         boolean fighting = this.mob.getTarget() != null;
         if ((fighting && !this.fleeMidFight) || !this.level.isBrightOutside()
-            || !this.mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || this.mob.isInWaterOrRain()) {
+            || !this.mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || this.mob.isInWaterOrRain()
+            // nothing burns here now (the game's MONSTERS_BURN off, as on Kingdoms' overcast horde days): no need for shade
+            || !this.level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.MONSTERS_BURN, this.mob.position())) {
             return false;
         }
         if (!SunExposure.bodyExposed(this.level, this.mob)) {
