@@ -16,3 +16,9 @@
 - **Heraldry harness**: with Jaymo's Kingdoms' harness, a blow meets every layer: padding soaks a blunt blow, mail a cut, and plate on an arm or leg takes blows there. Every harness piece adds weight, so heavy kit tires you faster. A head shot glances off a lowered visor more often than off an open face.
 - The Smithing Anvil forges the harness pieces, each plate piece bright, blackened or gilded; gilding is done only for royals and lords and takes two gold ingots.
 - Built; not played.
+- **Arrowheads**: bodkins bite through mail and plate but leave no bleeding wound; swallowtails tear bare flesh open but glance off armour; cloth arrows (wool, string and charcoal) fly alight when you loose them from a flame, with a torch or flint and steel in hand, or beside a fire, and set what they hit burning. Bodkin and swallowtail heads are forged at the Smithing Anvil.
+- **War weapons**: the bec de corbin (a hammer and beak on a pole that breaks bones and knocks a raised shield aside), the war dart (thrown from a stack of eight, picked up again where it lands) and the heavy crossbow, wound back with a slow, clicking crank and hitting much harder. Their heads and the crossbow's prod are forged at the Smithing Anvil and put together at the Tool Station.
+- **Botched forging**: big, hard pieces pushed to the higher grades can now fail on the anvil, and the metal is lost. Well-grade work never fails; Master-grade work on a big piece in a hard metal often does, and missed strikes make it worse.
+- **Patterns**: take an old piece of armour or a weapon apart at the Drafting Table (with paper in your pack; use it twice) to learn its blueprint, one grade below the piece. That is how Juggernaut plate can be forged again: nobody sells its schematic.
+- The handgonne and arquebus barrels (Jaymo's Kingdoms) are forged at the anvil too, and their shots get their own muzzle blasts.
+- Built; not played.
