@@ -2,6 +2,10 @@
   "values": [
     "jaymospowers:copper_smithing_hammer",
     "jaymospowers:steel_smithing_hammer",
+    "jaymospowers:copper_forge_hammer",
+    "jaymospowers:iron_forge_hammer",
+    "jaymospowers:steel_forge_hammer",
+    "jaymospowers:netherite_forge_hammer",
     "jaymospowers:tinker_sledge_hammer",
     "jaymospowers:tinker_vein_hammer",
     "minecraft:mace",

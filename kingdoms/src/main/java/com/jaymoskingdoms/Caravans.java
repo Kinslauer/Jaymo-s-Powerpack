@@ -1283,6 +1283,7 @@ final class Caravans {
 		if (f.type().isRealm()) {
 			Worker w = McaCompat.escort(level, f, at, yaw, TASK, 64);
 			if (w != null) {
+				Musketoon.arm(level, w.mob());
 				return w;
 			}
 		}
@@ -1294,6 +1295,8 @@ final class Caravans {
 		guard.setup(Folk.GUARD, f, at, 64);
 		guard.setTask(TASK);
 		level.addFreshEntity(guard);
+		// (the caravans' guards carry musketoons)
+		Musketoon.arm(level, guard);
 		return guard;
 	}
 

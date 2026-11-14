@@ -1,0 +1,17 @@
+{
+	"weapon_kind.jaymospowers.dagger": "Thrusts. Best close in.",
+	"weapon_kind.jaymospowers.claw": "Cuts. Best close in.",
+	"weapon_kind.jaymospowers.fist": "Blunt. Best close in.",
+	"weapon_kind.jaymospowers.sword": "Cuts. Best at a sword's length.",
+	"weapon_kind.jaymospowers.rapier": "Thrusts. Best at a sword's length.",
+	"weapon_kind.jaymospowers.greatsword": "Cuts. Best at a long sword's length.",
+	"weapon_kind.jaymospowers.axe": "Cuts and crushes. Best at arm's length.",
+	"weapon_kind.jaymospowers.mace": "Blunt. Best at arm's length.",
+	"weapon_kind.jaymospowers.hammer": "Blunt. Best at a long arm's length.",
+	"weapon_kind.jaymospowers.staff": "Blunt. Wants room.",
+	"weapon_kind.jaymospowers.polearm": "Cuts and thrusts. Wants room.",
+	"weapon_kind.jaymospowers.spear": "Thrusts. Wants room.",
+	"armour.jaymospowers.cloth": "Padding: soaks up blunt blows, parts for a cut.",
+	"armour.jaymospowers.mail": "Mail: turns cuts, thrusts find its gaps.",
+	"armour.jaymospowers.plate": "Plate: turns cuts, blunt blows crush it."
+}

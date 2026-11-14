@@ -101,6 +101,27 @@
           "type": "minecraft:model",
           "model": "jaymospowers:item/gear/arrow_boomerang"
         }
+      },
+      {
+        "when": "bodkin",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_bodkin"
+        }
+      },
+      {
+        "when": "swallowtail",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_swallowtail"
+        }
+      },
+      {
+        "when": "cloth",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_cloth"
+        }
       }
     ],
     "fallback": {

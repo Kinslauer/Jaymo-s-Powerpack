@@ -130,6 +130,10 @@ public final class Blueprints {
 		if (parts.length == 2 && parts[0].equals("armour")) {
 			return Component.translatable("blueprint.jaymospowers.armour." + parts[1]);
 		}
+		if (parts.length == 2 && parts[0].equals("frontier")) {
+			// a whole armour set's schematic (FrontierForging)
+			return Component.translatable("blueprint.jaymospowers.frontier." + parts[1]);
+		}
 		return parts.length >= 2 ? Component.translatable("item.jaymospowers." + parts[1]) : Component.literal(shape);
 	}
 
@@ -138,6 +142,12 @@ public final class Blueprints {
 		stack.set(BLUEPRINT, new Blueprint(shape, xp));
 		stack.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymospowers.blueprint.named", shapeName(shape)));
 		return stack;
+	}
+
+	/** The shape {@code stack} is a blueprint of, or "" if it isn't one (Kingdoms reads this by reflection). */
+	public static String shapeOf(ItemStack stack) {
+		Blueprint data = stack.is(BLUEPRINT_ITEM) ? stack.get(BLUEPRINT) : null;
+		return data == null ? "" : data.shape();
 	}
 
 	/** A copy a Drafting Table makes: the same shape, one level lower (Well is as low as it goes). */

@@ -1,0 +1,21 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:leather_helmet",
+		"minecraft:leather_chestplate",
+		"minecraft:leather_leggings",
+		"minecraft:leather_boots",
+		"jaymospowers:caveman_helmet",
+		"jaymospowers:caveman_chestplate",
+		"jaymospowers:caveman_leggings",
+		"jaymospowers:caveman_boots",
+		"jaymospowers:beast_pelt_helmet",
+		"jaymospowers:beast_pelt_chestplate",
+		"jaymospowers:beast_pelt_leggings",
+		"jaymospowers:beast_pelt_boots",
+		"jaymospowers:ichorcloth_hood",
+		"jaymospowers:ichorcloth_robe",
+		"jaymospowers:ichorcloth_leggings",
+		"jaymospowers:ichorcloth_boots"
+	]
+}

@@ -41,6 +41,15 @@
   "item.jaymospowers.head_boomerang": "Boomerang Arrowhead",
   "item.jaymospowers.headed_arrow.boomerang": "Boomerang Arrow",
   "tooltip.jaymospowers.head.boomerang": "Comes back to your hand if it misses.",
+  "item.jaymospowers.head_bodkin": "Bodkin Arrowhead",
+  "item.jaymospowers.headed_arrow.bodkin": "Bodkin Arrow",
+  "tooltip.jaymospowers.head.bodkin": "A narrow hardened point: bites through mail and plate, glances a little on bare flesh, and leaves a wound that doesn't bleed.",
+  "item.jaymospowers.head_swallowtail": "Swallowtail Arrowhead",
+  "item.jaymospowers.headed_arrow.swallowtail": "Swallowtail Arrow",
+  "tooltip.jaymospowers.head.swallowtail": "A broad forked head: tears bare and padded flesh open into a bleeding cut, but mail and plate turn it.",
+  "item.jaymospowers.head_cloth": "Cloth Arrowhead",
+  "item.jaymospowers.headed_arrow.cloth": "Cloth Arrow",
+  "tooltip.jaymospowers.head.cloth": "A pitch-soaked rag. Loosed beside a fire or a torch, or with a torch or flint and steel in your other hand, it flies alight and sets fire to what it hits.",
   "item.jaymospowers.headed_arrow": "Fitted Arrow",
   "item.jaymospowers.smoke_pot": "Smoke Pot",
   "tooltip.jaymospowers.throwable.smoke_pot": "A clay pot of stinging smoke. It breaks where it lands and chokes and blinds whoever stands in the cloud.",
@@ -69,6 +78,8 @@
   "item.jaymospowers.caltrop_head_blank": "Caltrop Head Blank",
   "item.jaymospowers.caltrops_blank": "Caltrops Blank",
   "item.jaymospowers.dart_tip_blank": "Dart Tip Blank",
+  "item.jaymospowers.bodkin_head_blank": "Bodkin Head Blank",
+  "item.jaymospowers.swallowtail_head_blank": "Swallowtail Head Blank",
   "item.jaymospowers.trap_jaws_blank": "Trap Jaws Blank",
   "tooltip.jaymospowers.head.fit": "Fit to %s plain arrows at the Fletching Station.",
   "tooltip.jaymospowers.head.spent": "Used up where it lands.",
@@ -88,6 +99,5 @@
   "message.jaymospowers.shield.braced": "Braced ==========",
   "jei.jaymospowers.arrowhead_fitting": "Fitting an Arrowhead",
   "jei.jaymospowers.arrowhead_fitting.how": "At the Fletching Station: arrows in the first slot, the head in the second.",
-  "jei.jaymospowers.thrower_belt": "Worn in the belt slot. Click throwables onto it to load it. Throw the picked kind with the belt key (a mouse side button unless changed in Controls); sneak and press it to pick the next kind.",
-  "entity.jaymospowers.thrown_gear": "Thrown Gear"
+  "jei.jaymospowers.thrower_belt": "Worn in the belt slot. Click throwables onto it to load it. Cycle the picked kind with one key and throw it with another (set both in Controls)."
 }

@@ -40,7 +40,7 @@ public final class Armed {
 	static final double HIGH_ABOVE = 1.15, LOW_BELOW = 0.5;
 	/** Words in an item's id that make it a polearm. */
 	static final Set<String> POLE_WORDS = Set.of("spear", "halberd", "glaive", "twinblade", "pike", "lance", "staff", "quarterstaff", "javelin",
-		"trident", "naginata", "scythe", "poleaxe", "partisan", "bardiche");
+		"trident", "naginata", "scythe", "poleaxe", "partisan", "bardiche", "corbin", "polehammer");
 	// ================================================================================================================
 
 	/**

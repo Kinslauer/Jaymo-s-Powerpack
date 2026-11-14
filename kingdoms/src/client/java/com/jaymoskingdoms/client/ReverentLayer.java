@@ -41,13 +41,20 @@ import net.minecraft.world.item.equipment.ArmorType;
  * <p>
  * The fortress knight's vigil plate (our own, kingdoms/tools/gen_fortress_knight.py) the same way, but known by the
  * look its pieces carry ({@link com.jaymoskingdoms.nether.FortressKnight#PLATE}), not by their items.
+ * <p>
+ * The Frontier sets ({@link com.jaymoskingdoms.FrontierArmour}) the same way: one model a set, one texture a colouring.
  */
 public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 	/** A set drawn this way: its model (and texture) name and its pieces by {@link ArmorType}. */
-	record Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces,
+	record Set(String model, String texture, Map<ArmorType, net.minecraft.world.item.Item> pieces,
 		@org.jspecify.annotations.Nullable ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> look) {
 		Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces) {
-			this(model, pieces, null);
+			this(model, model, pieces, null);
+		}
+
+		Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces,
+			@org.jspecify.annotations.Nullable ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> look) {
+			this(model, model, pieces, look);
 		}
 
 		/** Whether {@code stack}, worn as {@code type}, is this set's piece: by its look if the set goes by one, else by the item. */
@@ -85,7 +92,7 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 	private ReverentLayer(RenderLayerParent<S, HumanoidModel<S>> renderer, Set set) {
 		super(renderer);
 		this.set = set;
-		this.texture = JaymosKingdoms.id("textures/entity/bb/" + set.model() + ".png");
+		this.texture = JaymosKingdoms.id("textures/entity/bb/" + set.texture() + ".png");
 		BbModel model = MODELS.computeIfAbsent(set.model(), name -> BbModel.load(JaymosKingdoms.MOD_ID, name));
 		PIECES.forEach((slot, pieces) -> this.worn.put(slot, new WornModel(skeleton(model, pieces), this::getParentModel)));
 	}
@@ -126,6 +133,12 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 				helper.register(create(renderer, new Set("primal_visage", Armory.PRIMAL_PIECES)));
 				// the fortress knight's plate goes by its look, on whatever netherite carries it
 				helper.register(create(renderer, new Set("vigil_plate", Map.of(), com.jaymoskingdoms.nether.FortressKnight.PLATE)));
+				// the Frontier sets: a model each, a texture a colouring
+				for (com.jaymoskingdoms.FrontierArmour.Look look : com.jaymoskingdoms.FrontierArmour.LOOKS.values()) {
+					helper.register(create(renderer, new Set(look.model(), "frontier_" + look.name(), look.pieces(), null)));
+				}
+				helper.register(create(renderer, new Set("frontier_settler_hat", "frontier_settler",
+					Map.of(ArmorType.HELMET, com.jaymoskingdoms.FrontierArmour.SETTLER_HAT), null)));
 			}
 		});
 	}

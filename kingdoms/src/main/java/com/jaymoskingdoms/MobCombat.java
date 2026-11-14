@@ -103,6 +103,8 @@ public final class MobCombat {
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** The tag Jaymo's Powers reads while a weapon's own swing lands: the blow answers to the weapon's distance, as a player's does. */
+	public static final String WEAPON_SWING_TAG = "jaymospowers.weapon_swing";
 	/** (0.7.622) Powers' Crowds: a foe waiting its turn in a crowd. */
 	static final String WAITING_TAG = "jaymospowers.waiting_turn";
 	/** (0.7.267) A gun's red glint comes this long (ticks) before the shot; an aim not fired this long after goes stale. */
@@ -595,11 +597,13 @@ public final class MobCombat {
 		if (heavy) {
 			mob.addTag(UNPARRYABLE_TAG);
 		}
+		mob.addTag(WEAPON_SWING_TAG);
 		try {
 			for (LivingEntity victim : hits) {
 				mob.doHurtTarget(level, victim);
 			}
 		} finally {
+			mob.removeTag(WEAPON_SWING_TAG);
 			if (damage != null) {
 				damage.removeModifier(COMBO_DAMAGE);
 			}

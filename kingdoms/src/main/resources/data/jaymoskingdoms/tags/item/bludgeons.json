@@ -130,6 +130,10 @@
     {
       "id": "weaponmod:battleaxe.diamond",
       "required": false
+    },
+    {
+      "id": "jaymospowers:bec_de_corbin",
+      "required": false
     }
   ]
 }

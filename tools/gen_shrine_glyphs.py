@@ -96,11 +96,14 @@ put(i, [(8, 10), (7, 11), (8, 11), (9, 11), (8, 12)], (0xE0, 0x60, 0x2A, 255))
 put(i, [(7, 12), (9, 12)], (0xFF, 0xA0, 0x40, 255))
 save('ash_whisperer', i, c)
 
-# truth: an open eye in a plain square
+# truth: the Templars' cross, its arms flaring to their ends (Andy 2026-11-14: "the truth should get that templar cross
+# sigil for everything"; it was an open eye in a plain square)
 c = (0xF2, 0xF2, 0xF2, 255)
 i = canvas()
-for k in range(3, 13):
-    put(i, [(k, 3), (k, 12), (3, k), (12, k)], shade(c, 0.7))
-put(i, [(5, 8), (6, 7), (7, 6), (8, 6), (9, 7), (10, 8), (9, 9), (8, 9), (7, 9), (6, 9)], c)
-rect(i, 7, 7, 8, 8, shade(c, 0.35))
+rect(i, 7, 3, 8, 12, c)
+rect(i, 3, 7, 12, 8, c)
+for a, b in ((3, 4), (12, 11)):
+    rect(i, 6, a, 9, a, c)
+    rect(i, a, 6, a, 9, c)
+    put(i, [(6, b), (9, b), (b, 6), (b, 9)], shade(c, 0.7))
 save('truth', i, c)

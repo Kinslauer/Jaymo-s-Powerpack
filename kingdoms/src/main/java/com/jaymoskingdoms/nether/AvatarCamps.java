@@ -39,7 +39,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -50,7 +49,6 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -82,6 +80,9 @@ import org.jspecify.annotations.Nullable;
  * sticks, plant string, food) comes the first time they speak to one of the camp's avatars ({@link #gift}). At the camp's hearth they rest and heal
  * ({@link #HEARTH_REGEN_TICKS}), and avatars near an Emberborn go for whatever is after them ({@link #prey}). Camps rise
  * near an Emberborn in the Nether more readily ({@link #EMBERBORN_FOUND_CHANCE}).
+ *
+ * <p>Andy: "they should all be different classes". Each avatar follows one of our classes and is armed for it
+ * ({@link AvatarClasses}); a camp's Tinkerer carries the fire cannon its kind made down here.
  */
 public final class AvatarCamps {
 	// ---- tuning ----
@@ -165,6 +166,7 @@ public final class AvatarCamps {
 	}
 
 	static void register() {
+		AvatarClasses.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && avatar(mob)) {
 				LOADED.add(mob);
@@ -229,6 +231,7 @@ public final class AvatarCamps {
 		if (Heritage.is(player, Heritage.Kind.EMBERBORN)) {
 			if (player instanceof ServerPlayer sp && entity instanceof Mob avatar && sp.level() instanceof ServerLevel level) {
 				gift(level, sp, avatar);
+				AvatarClasses.spoken(level, sp, avatar);
 			}
 			// MCA's menu opens as ever
 			return InteractionResult.PASS;
@@ -271,6 +274,10 @@ public final class AvatarCamps {
 		if (now % 40 == 0) {
 			for (Mob mob : List.copyOf(LOADED)) {
 				if (mob.isAlive() && mob.level() == nether) {
+					Integer id = mob.getAttached(AVATAR);
+					List<Mob> mates = id == null ? List.of() : members(id);
+					AvatarClasses.settle(nether, mob, mates);
+					AvatarClasses.act(nether, mob, mates);
 					keep(nether, mob);
 				}
 			}
@@ -437,7 +444,7 @@ public final class AvatarCamps {
 		}
 	}
 
-	private static List<Mob> members(int camp) {
+	static List<Mob> members(int camp) {
 		List<Mob> out = new ArrayList<>();
 		for (Mob m : LOADED) {
 			Integer id = m.getAttached(AVATAR);
@@ -521,7 +528,7 @@ public final class AvatarCamps {
 		PowersCompat.burningSteed(nether, Vec3.atBottomCenterOf(at));
 	}
 
-	/** One avatar at {@code at}: an MCA guard of Emberborn blood, marked, tougher, armed (null without MCA). */
+	/** One avatar at {@code at}: an MCA guard of Emberborn blood, marked, tougher, of a class and armed for it (null without MCA). */
 	static @Nullable Mob spawnAvatar(ServerLevel nether, Camp camp, BlockPos at) {
 		Villager villager = McaCompat.spawnGuard(nether, Vec3.atBottomCenterOf(at));
 		if (villager == null) {
@@ -534,12 +541,8 @@ public final class AvatarCamps {
 			health.addOrReplacePermanentModifier(new AttributeModifier(TOUGH, HEALTH - health.getBaseValue(), AttributeModifier.Operation.ADD_VALUE));
 			villager.setHealth(villager.getMaxHealth());
 		}
-		RandomSource random = nether.getRandom();
-		Item[] weapons = {Items.GOLDEN_AXE, Items.IRON_AXE, Items.IRON_SWORD, Items.GOLDEN_SWORD};
-		ItemStack weapon = new ItemStack(weapons[random.nextInt(weapons.length)]);
-		villager.setItemSlot(EquipmentSlot.MAINHAND, weapon.copy());
-		villager.getInventory().addItem(weapon);
-		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		// (its class, and that class's arms: no two of a camp alike)
+		AvatarClasses.settle(nether, villager, members(camp.id()));
 		villager.setHomeTo(camp.center(), HOME_RADIUS);
 		villager.setPersistenceRequired();
 		LOADED.add(villager);

@@ -380,6 +380,7 @@ public final class Rulers {
 		}
 		boolean robed = McaCompat.redress(mob);
 		Regalia.dress(mob, role, faction, McaCompat.female(mob), robed);
+		HeraldryWear.ruler(mob, faction);
 		dropBar(mob.getUUID());
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
@@ -407,6 +408,7 @@ public final class Rulers {
 	static void unfit(PathfinderMob mob) {
 		RoyalDress.reset(mob);
 		Regalia.undress(mob);
+		HeraldryWear.unfit(mob);
 		McaCompat.redress(mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) != null) {

@@ -147,6 +147,8 @@ public final class Crowns {
 		Wardens.dismiss(server, f.id(), player);
 		put(server, f.id(), player);
 		CLAIMS.remove(f.id());
+		// the realm's crest comes with its crown
+		HeraldryWear.crowned(server, f, player);
 		ServerPlayer p = server.getPlayerList().getPlayer(player);
 		if (p != null) {
 			Theft.clearWanted(p, f.id());

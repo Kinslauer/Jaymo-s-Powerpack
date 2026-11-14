@@ -18,7 +18,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * (Smithing) The Drafting Table: hold a blueprint and use the table with paper in your inventory to copy it. The copy
- * is one level lower ({@link Blueprints#copyOf}); the original stays with you.
+ * is one level lower ({@link Blueprints#copyOf}); the original stays with you. Use it holding a forged piece instead
+ * to take the piece apart for its design ({@link Patterns}).
  */
 public class DraftingTableBlock extends Block {
 	public DraftingTableBlock(Block.Properties properties) {
@@ -29,7 +30,14 @@ public class DraftingTableBlock extends Block {
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
 		if (!stack.is(Blueprints.BLUEPRINT_ITEM) || !stack.has(Blueprints.BLUEPRINT)) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
+			String shape = Patterns.shapeOf(stack);
+			if (shape == null) {
+				return InteractionResult.TRY_WITH_EMPTY_HAND;
+			}
+			if (level instanceof net.minecraft.server.level.ServerLevel server && player instanceof net.minecraft.server.level.ServerPlayer smith) {
+				Patterns.breakDown(smith, stack, shape, server, pos);
+			}
+			return InteractionResult.SUCCESS;
 		}
 		if (level.isClientSide()) {
 			return InteractionResult.SUCCESS;

@@ -83,6 +83,7 @@ public final class Smithing {
 		STEEL_TONGS = item("steel_tongs", TongsItem::new, p -> p.durability(STEEL_TONGS_USES));
 		COPPER_SMITHING_HAMMER = item("copper_smithing_hammer", SmithingHammerItem::new, p -> p.durability(COPPER_HAMMER_USES));
 		STEEL_SMITHING_HAMMER = item("steel_smithing_hammer", SmithingHammerItem::new, p -> p.durability(STEEL_HAMMER_USES));
+		ForgeHammers.register();
 
 		SMITHING_ANVIL = Kiln.blockWithTooltip("smithing_anvil", SmithingAnvilBlock::new, BlockBehaviour.Properties.of()
 			.mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL)
