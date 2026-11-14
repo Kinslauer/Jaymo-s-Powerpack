@@ -13686,3 +13686,7 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **MCA folk warm slower to the muddy**: a chat, joke, story or flirt with a muddy player loses a quarter of the hearts it won, a filthy one half (at least one); dust costs nothing, and goblins and orcs don't mind (`Stench.hearts`, from `McaDialogueMixin`). Being clean is never punished.
 - Classes: `Stench`, `PowersCompat.grimeSeen`, `McaDialogueMixin`. Needs Powers with `ArmourGrime.noticed` (does nothing without it).
 - Built; not played.
+
+## 0.9.7 (2026-11-14): Life tab arrows work (#1574)
+
+- The < and > arrows beside the picture on the Life tab's cards (and on the Nature page's) now change the pick. The card's text box was laid over them and took their clicks.
