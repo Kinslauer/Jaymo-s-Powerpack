@@ -181,6 +181,7 @@ public final class GrueTrial {
 	static {
 		MOVES.add(new Ambrose.Def("grue_form", 15.0F, 40, 1, Poses.REACH, Mana.HARM, GrueTrial::form));
 		MOVES.add(new Ambrose.Def("grue_grasp", 25.0F, 120, 1, Poses.PULL, Mana.HARM, GrueTrial::grasp));
+		MOVES.addAll(GrueDark.MOVES);
 	}
 
 	private GrueTrial() {
@@ -589,6 +590,7 @@ public final class GrueTrial {
 			return;
 		}
 		player.removeAttached(Grue.GRUE);
+		player.setAttached(GrueDark.FED, com.jaymoskingdoms.Production.day(player.level().getServer()));
 		player.setAttached(Spirits.SPIRIT, spirit.withToggle(SpiritState.MASTERED, true));
 		Grue.speakTo(player, "beaten");
 		SpiritVoice.sayNow(player, spirit.kind(), "grue.won");

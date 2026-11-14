@@ -120,7 +120,7 @@ public final class Thralls {
 	 * Raises a thrall of {@code type} at {@code at} for {@code faction} (or for the player {@code master} if {@code player}),
 	 * for {@code life} ticks, set on {@code foe} if there is one. It climbs out of the ground in a burst of souls.
 	 */
-	static @Nullable Mob raise(ServerLevel level, EntityType<? extends Mob> type, Vec3 at, int faction, UUID master, boolean player, int life,
+	public static @Nullable Mob raise(ServerLevel level, EntityType<? extends Mob> type, Vec3 at, int faction, UUID master, boolean player, int life,
 		@Nullable LivingEntity foe) {
 		Mob mob = type.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (mob == null) {
