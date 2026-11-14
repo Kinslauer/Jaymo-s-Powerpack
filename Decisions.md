@@ -517,3 +517,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 (Andy, portable-mods thread): approved the Lore.md paragraphs "The cloud skiffs" and "The floor of the sky woods"; merge PR #1491 and continue through the remaining patches.
 - 2026-11-14 (port thread): Continuum pieces to port first = Smeltery extras (Andy).
 - 2026-11-14 (port thread): Better With Mods hardcore tweaks = all three (tougher wood, harsher hunger, beds do not set spawn) (Andy).
+- 2026-11-14 (Andy, Port picked pieces thread): JMB 3D models for longsword, glaive, battlestaff (quarterstaff), club (cudgel) and long axe (WeaponMod battleaxe); not dagger, mace, spear, halberd. Glide harness and ender saddlebags come only from court wizards.
