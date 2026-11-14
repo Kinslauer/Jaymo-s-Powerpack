@@ -27,7 +27,8 @@ void main() {
     float gap = Near / max(1.0 - depth, 0.000001);
 
     float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    float dim = 1.0 - smoothstep(0.10, 0.45, luma);
+    // (only what is really dark: sunlit grass is about 0.35 and must keep its colour)
+    float dim = 1.0 - smoothstep(0.05, 0.20, luma);
     float within = 1.0 - smoothstep(Reach - 3.0, Reach, gap);
     float amount = dim * within;
 
