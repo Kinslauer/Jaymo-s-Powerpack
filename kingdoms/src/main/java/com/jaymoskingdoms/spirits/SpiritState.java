@@ -50,7 +50,7 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 	public static final int GRUE_FORM = 8, MASTERED = 256;
 	/** (Andy, 2026-11-01) Thessaly's mana wings spread ({@link ThessalyWings}): the keeper can hover. */
 	public static final int WINGS = 16;
-	/** Grimsby's or Varro's Two as One is on ({@link AsOne}): the spirit fights through its keeper, and its figure stands full over them. */
+	/** Two as One is on ({@link AsOne}): the spirit fights through its keeper, and its figure stands full over them. */
 	public static final int AS_ONE = 32;
 
 	/** A fresh spirit of {@code kind}: level 1, {@code bond} to start. */

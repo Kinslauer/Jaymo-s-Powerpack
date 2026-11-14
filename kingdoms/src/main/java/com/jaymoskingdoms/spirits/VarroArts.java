@@ -62,10 +62,10 @@ public final class VarroArts {
 	static final float BREAK_HEALTH = 0.35F, BREAK_MOST = 100.0F;
 	static final int BREAK_TICKS = 20 * 60, BREAK_AT_ONCE = 3;
 
-	static final Move HAUL = new Art("hauling_hand", 14.0F, 140, HAUL_LEVEL, Poses.PULL, Mana.WILL, VarroArts::haul);
-	static final Move HEAD = new Art("javelin_head", 0.0F, 10, HEAD_LEVEL, Poses.MARK, Mana.WILL, VarroArts::nextHead);
-	static final Move DREAD = new Art("marshals_voice", 22.0F, 20 * 30, DREAD_LEVEL, Poses.WARD, Mana.WILL, VarroArts::dread);
-	static final Move BREAK = new Art("break_will", 30.0F, 20 * 45, BREAK_LEVEL, Poses.GRAB, Mana.WILL, VarroArts::breakWill);
+	static final Move HAUL = new Ambrose.Def("hauling_hand", 14.0F, 140, HAUL_LEVEL, Poses.PULL, Mana.WILL, VarroArts::haul);
+	static final Move HEAD = new Ambrose.Def("javelin_head", 0.0F, 10, HEAD_LEVEL, Poses.MARK, Mana.WILL, VarroArts::nextHead);
+	static final Move DREAD = new Ambrose.Def("marshals_voice", 22.0F, 20 * 30, DREAD_LEVEL, Poses.WARD, Mana.WILL, VarroArts::dread);
+	static final Move BREAK = new Ambrose.Def("break_will", 30.0F, 20 * 45, BREAK_LEVEL, Poses.GRAB, Mana.WILL, VarroArts::breakWill);
 	static final List<Move> MOVES = List.of(HAUL, HEAD, DREAD, BREAK);
 
 	private static final Map<UUID, Integer> CHOSEN = new HashMap<>();
@@ -107,7 +107,7 @@ public final class VarroArts {
 
 	// ---- hauling hand --------------------------------------------------------------------------------------------------
 
-	private static boolean haul(ServerPlayer player, SpiritState state) {
+	private static boolean haul(ServerPlayer player, SpiritState state, int charge) {
 		for (LivingEntity foe : SpiritFoes.cone(player, HAUL_REACH, 8.0, true)) {
 			if (player.hasLineOfSight(foe) && haulIn(player, foe, Spirits.damageScale(state))) {
 				CastHints.setReach(player, 2.0);
@@ -149,7 +149,7 @@ public final class VarroArts {
 		return CHOSEN.getOrDefault(owner.getUUID(), PLAIN);
 	}
 
-	private static boolean nextHead(ServerPlayer player, SpiritState state) {
+	private static boolean nextHead(ServerPlayer player, SpiritState state, int charge) {
 		int head = (headOf(player) + 1) % HEADS;
 		CHOSEN.put(player.getUUID(), head);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.javelin_head",
@@ -182,7 +182,7 @@ public final class VarroArts {
 
 	// ---- the marshal's voice -------------------------------------------------------------------------------------------
 
-	private static boolean dread(ServerPlayer player, SpiritState state) {
+	private static boolean dread(ServerPlayer player, SpiritState state, int charge) {
 		return shout(player);
 	}
 
@@ -213,7 +213,7 @@ public final class VarroArts {
 
 	// ---- break ---------------------------------------------------------------------------------------------------------
 
-	private static boolean breakWill(ServerPlayer player, SpiritState state) {
+	private static boolean breakWill(ServerPlayer player, SpiritState state, int charge) {
 		ServerLevel level = (ServerLevel)player.level();
 		int held = 0;
 		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(64.0), m -> m.entityTags().contains(Thralls.BROKEN_TAG))) {

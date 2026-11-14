@@ -18,3 +18,19 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   it aside and cuts back, Varro throws the striker down); each kill adds 3 s (to a minute) and takes you to the next foe
   (Short Road) or brings it to you (Hauling Hand); you run and leap, and no fall hurts. 40 mana, four minutes between.
 - Built with Gradle. Not played: every number is a first guess, and the arts reuse poses the arms already had.
+- **Ambrose** (`spirits/AmbroseArts`): **Shared Ward** (9: you and every friend within 8 blocks get 4 hearts of absorption and
+  Resistance for 15 s), **Lay Low** (11: the foe you look at within 14 blocks has no fight in it for 10 s; over 100 health it
+  is only weakened), **Hearthlight** (13: a pool 5 blocks across for 12 s; friends in it mend, the undead in it burn),
+  **Stand Again** (15: you and every friend within 8 blocks are mended 4 hearts and rid of every harmful effect and fire).
+- **Thessaly** (`spirits/ThessalyArts`): **Binding Script** (9: the foe you look at and every foe within 5 of it cannot move
+  for 4 s), **Return to Sender** (11: every arrow and thrown thing near you turns back on whoever sent it), **Marginalia**
+  (13: every foe within 16 glows through walls for 20 s and your next blow on each lands half again), **Transposition** (15:
+  you and the creature you look at, up to 24 blocks off, change places; whatever hunted you loses you).
+- **The Quiet One** (`spirits/QuietArts`): **Thread** (9: drawn along a line to a wall or ledge, or onto a foe with a cut),
+  **Shroud** (11: the foe you look at is wrapped where it stands for 5 s), **Hidden Blade** (13: a thrust that lands 2.5
+  times as hard from behind or into a wrapped, floored or downed foe), **Many Hands** (15: tendrils lash every foe within 6,
+  three times).
+- **Two as One** is every spirit's at level 18 now. Its free art every fifth blow, its answer to a blow at you and what a kill
+  leads to are each spirit's own (Ambrose: Shared Ward, he soaks the blow and talks the striker down, a kill mends everyone
+  near; Thessaly: Binding Script, the striker is held, a kill reads and binds the next; the Quiet One: Many Hands, the hidden
+  blade answers, a thread takes you onto the next).

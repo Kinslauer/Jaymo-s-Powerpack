@@ -175,6 +175,9 @@ public final class Spirits {
 		Grimsby.register();
 		Varro.register();
 		Staggered.register();
+		AmbroseArts.register();
+		ThessalyArts.register();
+		QuietArts.register();
 		AsOne.register();
 		Ambrose.register();
 		SpiritCharms.register();

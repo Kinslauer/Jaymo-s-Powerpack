@@ -41,6 +41,17 @@ final class Staggered {
 	/** {@code foe} is off its feet for {@code ticks} (by {@code by}). */
 	static void stagger(LivingEntity by, LivingEntity foe, int ticks) {
 		foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 4), by);
+		hold(foe, ticks);
+	}
+
+	/** {@code foe} is held where it stands for {@code ticks}: it cannot take a step. */
+	static void root(LivingEntity by, LivingEntity foe, int ticks) {
+		foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 9), by);
+		hold(foe, ticks);
+	}
+
+	/** {@code foe} has no fight in it for {@code ticks} (it can still walk off). */
+	static void hold(LivingEntity foe, int ticks) {
 		Entry old = ALL.get(foe.getUUID());
 		long until = foe.level().getGameTime() + ticks;
 		if (old == null || old.until() < until) {

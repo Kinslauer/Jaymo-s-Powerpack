@@ -52,10 +52,10 @@ public final class GrimsbyArts {
 	static final double DRAIN_REACH = 4.0;
 	static final float DRAIN_DAMAGE = 6.0F, DRAIN_MANA = 25.0F, DRAIN_HEALTH = 4.0F;
 
-	static final Move VAULT = new Art("vault", 12.0F, 80, VAULT_LEVEL, Poses.SWORD, Mana.HARM, GrimsbyArts::vault);
-	static final Move STEP = new Art("short_road", 14.0F, 120, STEP_LEVEL, Poses.SWORD, Mana.HARM, GrimsbyArts::step);
-	static final Move GLAIVE = new Art("pale_glaive", 20.0F, 200, GLAIVE_LEVEL, Poses.GREATSWORD, Mana.HARM, GrimsbyArts::glaive);
-	static final Move DRAIN = new Art("take_the_rest", 0.0F, 160, DRAIN_LEVEL, Poses.GRAB, Mana.WILL, GrimsbyArts::drain);
+	static final Move VAULT = new Ambrose.Def("vault", 12.0F, 80, VAULT_LEVEL, Poses.SWORD, Mana.HARM, GrimsbyArts::vault);
+	static final Move STEP = new Ambrose.Def("short_road", 14.0F, 120, STEP_LEVEL, Poses.SWORD, Mana.HARM, GrimsbyArts::step);
+	static final Move GLAIVE = new Ambrose.Def("pale_glaive", 20.0F, 200, GLAIVE_LEVEL, Poses.GREATSWORD, Mana.HARM, GrimsbyArts::glaive);
+	static final Move DRAIN = new Ambrose.Def("take_the_rest", 0.0F, 160, DRAIN_LEVEL, Poses.GRAB, Mana.WILL, GrimsbyArts::drain);
 	static final List<Move> MOVES = List.of(VAULT, STEP, GLAIVE, DRAIN);
 
 	/** Sweeps still to come: whose, how many, when the next, how hard. */
@@ -99,7 +99,7 @@ public final class GrimsbyArts {
 
 	// ---- over the shoulder ---------------------------------------------------------------------------------------------
 
-	private static boolean vault(ServerPlayer player, SpiritState state) {
+	private static boolean vault(ServerPlayer player, SpiritState state, int charge) {
 		List<LivingEntity> foes = SpiritFoes.cone(player, VAULT_REACH, 40.0, true);
 		return !foes.isEmpty() && vaultOver(player, foes.get(0), Spirits.damageScale(state));
 	}
@@ -146,7 +146,7 @@ public final class GrimsbyArts {
 
 	// ---- short road ----------------------------------------------------------------------------------------------------
 
-	private static boolean step(ServerPlayer player, SpiritState state) {
+	private static boolean step(ServerPlayer player, SpiritState state, int charge) {
 		List<LivingEntity> foes = SpiritFoes.cone(player, STEP_REACH, 10.0, true);
 		LivingEntity foe = null;
 		for (LivingEntity e : foes) {
@@ -182,7 +182,7 @@ public final class GrimsbyArts {
 
 	// ---- pale glaive ---------------------------------------------------------------------------------------------------
 
-	private static boolean glaive(ServerPlayer player, SpiritState state) {
+	private static boolean glaive(ServerPlayer player, SpiritState state, int charge) {
 		return glaiveNow(player, state, Spirits.damageScale(state));
 	}
 
@@ -213,7 +213,7 @@ public final class GrimsbyArts {
 
 	// ---- take the rest -------------------------------------------------------------------------------------------------
 
-	private static boolean drain(ServerPlayer player, SpiritState state) {
+	private static boolean drain(ServerPlayer player, SpiritState state, int charge) {
 		LivingEntity foe = helpless(player);
 		return foe != null && drainFrom(player, foe, Spirits.damageScale(state));
 	}

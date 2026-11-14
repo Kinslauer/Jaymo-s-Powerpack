@@ -180,6 +180,8 @@ public final class QuietOne extends Spirit {
 		MOVES.add(SpiritCharms.petrify());
 		MOVES.add(SpiritExecutions.move("execute_quiet", Spirits.QUIET));
 		MOVES.add(new InBalm(Spirits.QUIET));
+		MOVES.addAll(QuietArts.MOVES);
+		MOVES.add(AsOne.MOVE);
 	}
 
 	QuietOne() {
