@@ -1,5 +1,6 @@
 package com.jaymospowers.client.rig;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigFrame;
 import com.jaymospowers.rig.RigHelm;
@@ -51,6 +52,8 @@ final class RigHelmView {
 	static final int CELL = 4, FIGURE_EDGE = 44;
 	/** The target’s health bar: width in pixels. */
 	static final int HEALTH_WIDTH = 34;
+	/** The target's card: its gap from the bracket, a line's height, the widest its text runs (pixels) and its backing. */
+	static final int CARD_GAP = 6, CARD_LINE = 9, CARD_MAX = 90, CARD_BACK = 0x70081018;
 	/** The overcharge frame’s colour. */
 	static final int OVER = 0xFFFFE88A;
 
@@ -202,6 +205,47 @@ final class RigHelmView {
 			String hp = Math.round(entity.getHealth()) + "/" + Math.round(entity.getMaxHealth());
 			g.text(font, name, cx - font.width(name) / 2, t - 10, 0xFFE0F4FF);
 			g.text(font, hp, cx - font.width(hp) / 2, by + 5, 0xFFB0C8D0);
+			dossier(g, minecraft, entity, font, r + CARD_GAP, t);
+		}
+	}
+
+	/**
+	 * The target's card, beside its bracket: how far it is, its armour, what it holds, whether it means harm (a creature
+	 * with a target, or one of a hostile kind), and whether a scan has it tagged.
+	 */
+	private static void dossier(GuiGraphicsExtractor g, Minecraft minecraft, LivingEntity entity, Font font, int x, int y) {
+		LocalPlayer player = minecraft.player;
+		if (player == null) {
+			return;
+		}
+		List<Component> lines = new java.util.ArrayList<>();
+		lines.add(Component.translatable("rig.jaymospowers.view.range", Math.round(entity.distanceTo(player))));
+		if (entity.getArmorValue() > 0) {
+			lines.add(Component.translatable("rig.jaymospowers.view.armor", entity.getArmorValue()));
+		}
+		ItemStack held = entity.getMainHandItem();
+		if (!held.isEmpty()) {
+			lines.add(held.getHoverName());
+		}
+		boolean hostile = entity instanceof Enemy || entity instanceof Mob mob && mob.getTarget() != null;
+		lines.add(Component.translatable(hostile ? "rig.jaymospowers.view.hostile" : "rig.jaymospowers.view.calm"));
+		boolean tagged = RigScanClient.color(entity) != 0;
+		if (tagged) {
+			lines.add(Component.translatable("rig.jaymospowers.view.tagged"));
+		}
+		int wide = 0;
+		for (Component line : lines) {
+			wide = Math.max(wide, font.width(line));
+		}
+		wide = Math.min(wide, CARD_MAX) + 6;
+		int tall = lines.size() * CARD_LINE + 4;
+		x = Math.min(x, g.guiWidth() - wide - 2);
+		g.fill(x, y, x + wide, y + tall, CARD_BACK);
+		g.fill(x, y, x + 1, y + tall, LINE);
+		for (int i = 0; i < lines.size(); i++) {
+			boolean last = i == lines.size() - 1, state = i >= lines.size() - (tagged ? 2 : 1);
+			int color = tagged && last ? OVER : state ? (hostile ? RUINED : SOUND) : 0xFFB0C8D0;
+			UiStyle.line(g, font, lines.get(i), x + 4, y + 2 + i * CARD_LINE, wide - 6, color);
 		}
 	}
 

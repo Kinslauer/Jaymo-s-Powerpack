@@ -23,6 +23,8 @@ public final class RigPicks {
 	public static final int DRONES = 20, MARK = 21, TABLE = 22, DECOY = 23, FIELD = 24, BANK = 25;
 	/** The thruster dash and the artillery barrage ({@link RigStrikes}). */
 	public static final int DASH = 26, BARRAGE = 27;
+	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
+	public static final int FAILSAFE = 28;
 
 	private RigPicks() {
 	}
@@ -47,12 +49,16 @@ public final class RigPicks {
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= BARRAGE;
+		return action >= FIRST && action <= FAILSAFE;
 	}
 
 	/** A Rig menu entry from the client. */
 	public static void use(ServerPlayer player, int action) {
 		if (player.isSpectator()) {
+			return;
+		}
+		if (action == FAILSAFE) {
+			RigCall.toggleFailsafe(player);
 			return;
 		}
 		if (!Rig.wearsAny(player)) {

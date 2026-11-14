@@ -3,6 +3,7 @@ package com.jaymospowers.client.rig;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigForgeBlock;
+import com.jaymospowers.rig.RigFinish;
 import com.jaymospowers.rig.RigForgeEntity;
 import com.jaymospowers.rig.RigFrame;
 import com.jaymospowers.rig.RigNet;
@@ -45,6 +46,9 @@ public class RigForgeScreen extends Screen {
 	private static final int MIDDLE_W = 140;
 	private static final int SWATCH_W = 14, SWATCH_H = 10, SWATCHES_PER_ROW = 8;
 	private static final int OK = 0xFF7CD67C, SHORT = 0xFFE06060;
+	/** The finish chips: their height, and each one's colour (plain first). */
+	private static final int FINISH_H = 14;
+	private static final int[] FINISH_CHIPS = {0xFF8A8F98, 0xFF29DFEB, 0xFFB4D6F6, 0xFF3A302B};
 	/** A paint pick that is bare metal. */
 	private static final int BARE = -1;
 
@@ -54,6 +58,8 @@ public class RigForgeScreen extends Screen {
 	private RigFrame frame = RigFrame.STANDARD;
 	/** The paints picked here: a dye's id or {@link #BARE}. */
 	private int plates = BARE, trim = BARE;
+	/** The finish shown on the preview: the one worn, until another is picked. */
+	private int finish = -1;
 	private boolean turning;
 	private Button pieceButton, frameButton, build, paint;
 
@@ -205,6 +211,14 @@ public class RigForgeScreen extends Screen {
 			this.turning = true;
 			return true;
 		}
+		int chip = finishAt(mouseX, mouseY);
+		if (chip >= 0) {
+			if (RigFinish.has(this.minecraft.player, chip)) {
+				this.finish = chip;
+				ClientPlayNetworking.send(new RigNet.Finish(this.pos, chip));
+			}
+			return true;
+		}
 		for (int row = 0; row < 2; row++) {
 			int picked = swatchAt(mouseX, mouseY, row == 1);
 			if (picked != Integer.MIN_VALUE) {
@@ -261,6 +275,7 @@ public class RigForgeScreen extends Screen {
 		preview(graphics, player);
 		stats(graphics);
 		paints(graphics, mouseX, mouseY);
+		finishes(graphics, player, mouseX, mouseY);
 		cost(graphics, player);
 		RigForgeEntity forge = forge();
 		this.paint.active = forge != null && (rgbOf(this.plates) != forge.plates() || rgbOf(this.trim) != forge.trim());
@@ -275,7 +290,7 @@ public class RigForgeScreen extends Screen {
 			py + PREVIEW_H - 10, PREVIEW_W - 4, UiStyle.HINT);
 		EntityRenderer<? super LivingEntity, ?> renderer = this.minecraft.getEntityRenderDispatcher().getRenderer((LivingEntity)player);
 		EntityRenderState[] state = new EntityRenderState[1];
-		RigSuit.withPreview(this.frame, rgbOf(this.plates), rgbOf(this.trim), () -> state[0] = renderer.createRenderState(player, 1.0F));
+		RigSuit.withPreview(this.frame, rgbOf(this.plates), rgbOf(this.trim), finish(player), () -> state[0] = renderer.createRenderState(player, 1.0F));
 		EntityRenderState renderState = state[0];
 		renderState.shadowPieces.clear();
 		renderState.outlineColor = 0;
@@ -355,6 +370,55 @@ public class RigForgeScreen extends Screen {
 		}
 		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.dye_cost"), x, swatchY(true) + 3 * SWATCH_H + 8, wide,
 			UiStyle.HINT);
+	}
+
+	/** The finish the preview wears: the one picked here, else the one on the Core (or any piece) worn. */
+	private int finish(LocalPlayer player) {
+		if (this.finish >= 0) {
+			return this.finish;
+		}
+		int worn = RigFinish.NONE;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			ItemStack stack = player.getItemBySlot(piece.slot);
+			if (piece.item() != null && stack.is(piece.item()) && (worn == RigFinish.NONE || piece == Rig.Piece.CORE)) {
+				worn = Math.max(worn, RigFinish.of(stack));
+			}
+		}
+		return worn;
+	}
+
+	private int finishY() {
+		return swatchY(true) + 3 * SWATCH_H + 30;
+	}
+
+	/** The finish chip under the mouse, or -1. */
+	private int finishAt(int mouseX, int mouseY) {
+		int x = mouseX - paintX(), y = mouseY - finishY();
+		int wide = SWATCHES_PER_ROW * SWATCH_W / RigFinish.COUNT;
+		return x >= 0 && y >= 0 && y < FINISH_H && x < wide * RigFinish.COUNT ? x / wide : -1;
+	}
+
+	/** The finishes: a chip each (plain first), the unearned ones dark; their deed under the mouse. */
+	private void finishes(GuiGraphicsExtractor graphics, LocalPlayer player, int mouseX, int mouseY) {
+		int x = paintX(), y = finishY(), wide = SWATCHES_PER_ROW * SWATCH_W / RigFinish.COUNT;
+		int worn = finish(player);
+		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.finish",
+			Component.translatable("gui.jaymospowers.rig_finish." + RigFinish.NAMES[worn])), x, y - 10, wide * RigFinish.COUNT, UiStyle.DIM);
+		for (int i = 0; i < RigFinish.COUNT; i++) {
+			boolean has = RigFinish.has(player, i);
+			int cx = x + i * wide;
+			graphics.fill(cx, y, cx + wide - 1, y + FINISH_H, has ? FINISH_CHIPS[i] : UiStyle.ROW);
+			if (!has) {
+				UiStyle.lineCentred(graphics, this.font, Component.literal("?"), cx + wide / 2, y + 3, wide - 2, UiStyle.HINT);
+			}
+			if (i == worn) {
+				graphics.outline(cx - 1, y - 1, wide + 1, FINISH_H + 2, UiStyle.TEXT);
+			}
+		}
+		int hovered = finishAt(mouseX, mouseY);
+		if (hovered >= 0) {
+			UiStyle.tip(graphics, this.font, Component.translatable("gui.jaymospowers.rig_finish." + RigFinish.NAMES[hovered] + ".deed"), mouseX, mouseY);
+		}
 	}
 
 	/** What the build takes, each against what you carry (salvage points count what is fed into the Forge); free in creative. */

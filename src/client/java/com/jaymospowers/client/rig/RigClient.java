@@ -155,7 +155,8 @@ public final class RigClient {
 			RigImpact.toggleSlowBeat();
 			return;
 		}
-		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY && action != com.jaymospowers.rig.RigPicks.TABLE) {
+		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY && action != com.jaymospowers.rig.RigPicks.TABLE
+			&& action != com.jaymospowers.rig.RigPicks.FAILSAFE) {
 			selected = action;
 		}
 		send(action);

@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 import com.jaymospowers.rig.RigUnibeam;
 import com.jaymospowers.rig.RigMoves;
 import com.jaymospowers.rig.RigCall;
+import com.jaymospowers.rig.RigFinish;
 import com.jaymospowers.rig.RigFrame;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public final class RigSuit {
 	/** The frame this suit was built as ({@link RigFrame} ordinal), its trim paint (rgb, -1 for none), and whether its plates are flying in (a suit call). */
 	static final RenderStateDataKey<Integer> FRAME = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_frame");
 	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
+	static final RenderStateDataKey<Integer> FINISH = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_finish");
 	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
 	/** A called suit: how far (pixels) each plate starts from its place, how high above, and how much it tumbles on the way. */
 	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
@@ -130,6 +132,10 @@ public final class RigSuit {
 		JaymosPowers.id("textures/entity/rig/suit_shade.png"), JaymosPowers.id("textures/entity/rig/suit_siege.png")};
 	static final Identifier[] GLOW_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_glow.png"), JaymosPowers.id("textures/entity/rig/suit_glow_scrap.png"),
 		JaymosPowers.id("textures/entity/rig/suit_glow_shade.png"), JaymosPowers.id("textures/entity/rig/suit_glow_siege.png")};
+	/** A finish's painted layer ({@link RigFinish}'s order; none for the first), and which of them are drawn lit. */
+	static final Identifier[] FINISH_TEXTURES = {null, JaymosPowers.id("textures/entity/rig/finish_deepwalker.png"),
+		JaymosPowers.id("textures/entity/rig/finish_skybreaker.png"), JaymosPowers.id("textures/entity/rig/finish_last_stand.png")};
+	static final boolean[] FINISH_LIT = {false, true, false, false};
 	static final Identifier TRIM_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_trim.png");
 	static final Identifier TEXTURE = TEXTURES[0];
 	static final Identifier GLOW_TEXTURE = GLOW_TEXTURES[0];
@@ -266,7 +272,8 @@ public final class RigSuit {
 	 * the state: the Rig's pieces still on it come off it (the vanilla armour layer would draw them) and onto the suit.
 	 */
 	/** The Forge screen's preview: while {@code run} extracts the local player's render state, they wear the whole suit in this frame and paint (-1: bare). */
-	static void withPreview(RigFrame frame, int plates, int trim, Runnable run) {
+	static void withPreview(RigFrame frame, int plates, int trim, int finish, Runnable run) {
+		previewFinish = finish;
 		previewFrame = frame;
 		previewPlates = plates;
 		previewTrim = trim;
@@ -278,7 +285,7 @@ public final class RigSuit {
 	}
 
 	private static @org.jspecify.annotations.Nullable RigFrame previewFrame;
-	private static int previewPlates, previewTrim;
+	private static int previewPlates, previewTrim, previewFinish;
 	/** A piece this old (ticks) is fully on. */
 	private static final float PREVIEW_AGE = 10000.0F;
 
@@ -286,6 +293,7 @@ public final class RigSuit {
 		state.setData(AGES, null);
 		state.setData(FRAME, null);
 		state.setData(TRIM, null);
+		state.setData(FINISH, null);
 		state.setData(FLY, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
@@ -298,7 +306,7 @@ public final class RigSuit {
 		float[] ages = null;
 		int[] colors = null;
 		RigFrame frame = null;
-		int trim = -1;
+		int trim = -1, finish = RigFinish.NONE;
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
@@ -306,6 +314,9 @@ public final class RigSuit {
 				ItemStack stack = equipment(state, piece);
 				if (frame == null || piece == Rig.Piece.CORE) {
 					frame = RigFrame.of(stack);
+				}
+				if (finish == RigFinish.NONE || piece == Rig.Piece.CORE) {
+					finish = Math.max(finish, RigFinish.of(stack));
 				}
 				Integer painted = stack.get(Rig.TRIM);
 				if (painted != null && (trim < 0 || piece == Rig.Piece.CORE)) {
@@ -350,6 +361,7 @@ public final class RigSuit {
 			ages = new float[] {PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE};
 			frame = previewFrame;
 			trim = previewTrim;
+			finish = previewFinish;
 			colors = previewPlates < 0 ? null : new int[] {previewPlates, previewPlates, previewPlates, previewPlates};
 			state.headEquipment = ItemStack.EMPTY;
 			state.headItem.clear();
@@ -360,6 +372,7 @@ public final class RigSuit {
 		state.setData(AGES, ages);
 		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());
 		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
+		state.setData(FINISH, ages == null || finish == RigFinish.NONE ? null : finish);
 		state.setData(FLY, ages == null || !player.getAttachedOrElse(RigCall.FLYING_IN, false) ? null : Boolean.TRUE);
 		state.setData(COLORS, ages == null ? null : colors);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
@@ -548,6 +561,11 @@ public final class RigSuit {
 		DyedItemColor dye = stack.get(DataComponents.DYED_COLOR);
 		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null,
 			tint(dye == null ? -1 : dye.rgb() & 0xFFFFFF));
+		int finish = RigFinish.of(stack);
+		if (finish != RigFinish.NONE) {
+			collector.submitModelPart(sleeve, poseStack, FINISH_LIT[finish] ? RenderTypes.eyes(FINISH_TEXTURES[finish])
+				: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
+		}
 		collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
 		float time = player.level().getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		float[] charge = charge(player, time);
@@ -597,6 +615,12 @@ public final class RigSuit {
 				for (int i = 0; i < parts.length; i++) {
 					renderColoredCutoutModel(parts[i], TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors[i]), 1);
 				}
+			}
+			Integer finish = state.getData(FINISH);
+			if (finish != null) {
+				// the finish: its paint over the plates (lit for the ones that shine)
+				collector.order(2).submitModel(suit, state, poseStack, FINISH_LIT[finish] ? RenderTypes.eyes(FINISH_TEXTURES[finish])
+					: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), lightCoords, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, null, 0);
 			}
 			Integer glow = state.getData(GLOW);
 			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,

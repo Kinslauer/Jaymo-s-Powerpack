@@ -494,6 +494,9 @@ public final class RigActives {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.7F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
 			com.jaymospowers.core.Shakes.around(level, at, 24.0, CRACK_SHAKE);
+			if (player.getY() >= RigFinish.SKY_HEIGHT) {
+				RigFinish.earn(player, RigFinish.SKYBREAKER);
+			}
 		}
 		state.lastPos = pos;
 		state.lastSpeed = speed;
