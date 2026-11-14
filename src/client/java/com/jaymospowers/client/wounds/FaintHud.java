@@ -142,22 +142,28 @@ public final class FaintHud {
 		if (player == null) {
 			return;
 		}
-		float t = Fainting.since(player) + delta.getGameTimeDeltaPartialTick(false);
-		if (t < 0.0F) {
+		float shut = shut(player, delta.getGameTimeDeltaPartialTick(false));
+		if (shut < 0.0F) {
 			return;
 		}
-		float shut;
+		AdrenalineHud.letterbox(graphics, 0.5F * shut);
+	}
+
+	/** How far the letterbox is shut (0-1; 1 is black), or -1 when they aren't fainting. Also what the game's sound follows (BlackoutHush). */
+	static float shut(LocalPlayer player, float partial) {
+		float t = Fainting.since(player) + partial;
+		if (t < 0.0F) {
+			return -1.0F;
+		}
 		if (t < Fainting.SWOON) {
 			float p = t / Fainting.SWOON;
 			// slow to start, then closing fast at the end
-			shut = p * p;
+			return p * p;
 		} else if (t < Fainting.SWOON + Fainting.OUT) {
-			shut = 1.0F;
-		} else {
-			float p = Mth.clamp((t - Fainting.SWOON - Fainting.OUT) / Fainting.WAKE, 0.0F, 1.0F);
-			shut = 1.0F - p * p * (3.0F - 2.0F * p);
+			return 1.0F;
 		}
-		AdrenalineHud.letterbox(graphics, 0.5F * shut);
+		float p = Mth.clamp((t - Fainting.SWOON - Fainting.OUT) / Fainting.WAKE, 0.0F, 1.0F);
+		return 1.0F - p * p * (3.0F - 2.0F * p);
 	}
 
 	/** Black from the edges in, {@code reach} of the shorter side, {@code edge} thick (0-255) at the edge, thinning inward. */
