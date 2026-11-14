@@ -74,6 +74,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.delight.Delight.register();
 		// (0.5.33) Farmer's Delight's skillet, stove, cabinets, crates, baskets, canvas, tatami, safety net and canvas signs
 		com.jaymoskitchen.delight.DelightHome.register();
+		com.jaymoskitchen.delight.HomeComfort.register();
 		// (0.5.33) the rest of Farmer's Delight's food: slices, milk bottle, ham, dog food and horse feed, and its pies
 		com.jaymoskitchen.delight.DelightDishes.register();
 		// (0.5.33) Farmer's Delight's tomatoes, onions, rope, wild crops, rich soil, compost, mushroom colonies, villages

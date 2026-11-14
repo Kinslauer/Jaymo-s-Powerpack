@@ -283,6 +283,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
 		// (0.20.52) the stacked Aether hidden from under the clouds
 		com.jaymospowers.client.aether.AetherVeil.init();
+		com.jaymospowers.client.aether.CloudSeaWind.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		com.jaymospowers.client.power.blindness.BlindnessPowerClient.init();

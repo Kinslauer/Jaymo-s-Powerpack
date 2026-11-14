@@ -14,9 +14,11 @@ import java.util.Map;
  */
 final class SkillWeb {
 	/** The first ring, the gap between rings, how far out the pillar crests and the branch gates sit (web units). */
-	static final double R0 = 80.0, STEP = 28.0, CREST_R = 30.0, GATE_R = 56.0;
+	static final double R0 = 240.0, STEP = 48.0, CREST_R = 80.0, GATE_R = 150.0;
 	/** How far round the branch's wedge each column of three is set (a share of the wedge), and Meditation's. */
-	static final double COLUMN_SPREAD = 0.30, MEDITATION_SPREAD = -0.42;
+	static final double COLUMN_SPREAD = 0.34, MEDITATION_SPREAD = -0.42;
+	/** How far out or in a branch's side columns sit from their ring, so three perks abreast never share a line for their names. */
+	static final double STAGGER = 14.0;
 	/** Will's second page (Killing Intent) starts this many rings out, past Will's own label. */
 	static final int KILLING_INTENT_RING = 5;
 	/** (0.7.516) The class-skill and Weapon Forms branches start this many rings out, where their narrow wedges have room. */
@@ -177,6 +179,7 @@ final class SkillWeb {
 				double mid = from(pillar) + wedge * (i + 0.5);
 				GATES.put(b, polar(mid, GATE_R));
 				int deepest = 0, deepestWill = 0;
+				Map<Integer, Integer> taken = new java.util.HashMap<>();
 				for (Skills.Perk perk : Skills.Perk.values()) {
 					if (perk.bridge() || !perk.pillar.web() || branch(perk) != b) {
 						continue;
@@ -188,7 +191,10 @@ final class SkillWeb {
 						deepestWill = Math.max(deepestWill, d);
 					}
 					double off = perk == Skills.Perk.MEDITATION ? wedge * MEDITATION_SPREAD : (perk.column - 1) * wedge * COLUMN_SPREAD;
-					SPOTS.put(perk, polar(mid + off, R0 + d * STEP));
+					// a second perk on the same ring and column of a branch sits half a ring out and half a column over, not on top of the first
+					int shared = perk == Skills.Perk.MEDITATION ? 0 : taken.merge(d * 3 + perk.column, 1, Integer::sum) - 1;
+					SPOTS.put(perk, polar(mid + off + shared * wedge * COLUMN_SPREAD * 0.5,
+						R0 + (d + shared * 0.5) * STEP + (perk == Skills.Perk.MEDITATION ? 0.0 : (perk.column - 1) * STAGGER)));
 				}
 				if (b == Branch.WILL) {
 					LABELS.add(new Label(Branch.WILL.key(), pillar, polar(mid, R0 + (deepestWill + LABEL_RING) * STEP)));
@@ -208,6 +214,11 @@ final class SkillWeb {
 			int n = onBorder.merge(angle, 1, Integer::sum) - 1;
 			SPOTS.put(perk, polar(angle, R0 + (BRIDGE_RING + BRIDGE_RING_STEP * n) * STEP));
 		}
+	}
+
+	/** The point to look at for a pillar: the middle of its wedge, between its first rings. */
+	static Spot focus(Skills.Pillar pillar) {
+		return polar((from(pillar) + to(pillar)) / 2.0, R0 + STEP);
 	}
 
 	/** The web's bounds (web units): its perks and branch names, {min x, min y, max x, max y}. */

@@ -34,7 +34,7 @@
   "gui.jaymoskingdoms.skills.hint.stealth": "Pick pockets, steal unseen, and sneak past monsters without being spotted. Each level makes the hold shorter.",
   "gui.jaymoskingdoms.skills.class": "Your class: %s",
   "gui.jaymoskingdoms.skills.class.none": "No class yet.",
-  "gui.jaymoskingdoms.skills.learn": "Press to learn it.",
+  "gui.jaymoskingdoms.skills.learn": "Click it again, press Enter or use the button below to learn it.",
   "gui.jaymoskingdoms.skills.hover": "Point at a perk to read it in full; press one to learn it.",
   "gui.jaymoskingdoms.skills.page.strength.2": "Will >",
   "gui.jaymoskingdoms.skills.page.strength.2.title": "Will",
@@ -59,8 +59,8 @@
   "gui.jaymoskingdoms.skills.needs_any": "Needs one of: %s",
   "gui.jaymoskingdoms.skills.leads": "Leads to: %s",
   "gui.jaymoskingdoms.skills.web.tab": "Skills",
-  "gui.jaymoskingdoms.skills.web.help": "Drag to move round the web, scroll to zoom. Point at a perk to read it; click one to learn it. The gold diamonds on the borders are bridges into the next pillar.",
-  "gui.jaymoskingdoms.skills.web.center": "Recentre",
+  "gui.jaymoskingdoms.skills.web.help": "Scroll to zoom in and out, drag to move round the web. Click a skill to pick it and read it here; click it again to learn it. Click a pillar on the left, or its crest, to go to its part of the web. The gold diamonds on the borders are bridges into the next pillar.",
+  "gui.jaymoskingdoms.skills.web.center": "Whole web",
   "gui.jaymoskingdoms.skills.branch.might": "Might",
   "gui.jaymoskingdoms.skills.branch.combat_arts": "Combat Arts",
   "gui.jaymoskingdoms.skills.branch.will": "Will",
@@ -71,5 +71,12 @@
   "gui.jaymoskingdoms.skills.branch.freerunning": "Freerunning",
   "gui.jaymoskingdoms.skills.branch.shadows": "Shadows",
   "gui.jaymoskingdoms.skills.panel.expand": "Expand panel",
-  "gui.jaymoskingdoms.skills.panel.collapse": "Collapse panel"
+  "gui.jaymoskingdoms.skills.panel.collapse": "Collapse panel",
+  "gui.jaymoskingdoms.skills.web.keys": "Scroll: zoom   Drag: move   Click: pick   Click again or Enter: learn",
+  "gui.jaymoskingdoms.skills.web.pick": "Pick a skill",
+  "gui.jaymoskingdoms.skills.web.learn": "Learn",
+  "gui.jaymoskingdoms.skills.web.raise": "Raise to rank %s of %s",
+  "gui.jaymoskingdoms.skills.web.learnt": "Learnt in full",
+  "gui.jaymoskingdoms.skills.web.arts": "Weapon arts",
+  "gui.jaymoskingdoms.skills.web.arts.bare": "bare"
 }

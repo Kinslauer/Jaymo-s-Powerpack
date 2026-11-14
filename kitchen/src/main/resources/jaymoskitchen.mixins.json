@@ -6,6 +6,7 @@
 		"AbstractArrowMixin",
 		"AbstractCraftingMenuAccessor",
 		"AbstractHorseMixin",
+		"BackstabMixin",
 		"BaseKitchenBlockMixin",
 		"BiomeSeasonMixin",
 		"BlockMixin",

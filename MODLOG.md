@@ -4454,3 +4454,39 @@ enter limbo if they don't come to."
   assignment" closed Andy's game twice on dying (2026-11-13 20:34 and 20:44). A body with no number yet counts as not
   turned over.
 - Built; tested by dying on the Deck server.
+
+## 0.23.43 (2026-11-14): a change of wind in the Cloud Sea, and skyfalls stop there until Dread
+
+Andy: "Does the game tell you that you're in the cloud sea?" ... "A change of wind works". Still no words: crossing into
+the Cloud Sea (up out of the Overworld's sky or down out of the Aether) brings a gust, and while you're in the band a
+steady high wind blows on the ambient channel, dying away as you leave (`client/aether/CloudSeaWind`, from the band
+heights `AetherVeil` already reads). Only in a world with a Cloud Sea band. 
+- **Skyfalls stop in the Cloud Sea until Dread** (Andy: "The skyfalls seem to still be falling, what if they stopped in
+  the cloud sea until later?"). In a One Dimension world water can no longer flow down out of the floor of the lowest sky
+  band (the Cloud Sea's; the Aether's in a world made without one) until someone online has reached the Dread tier
+  (`mixin/SkyfallStopMixin` on `FlowingFluid.spreadTo`, rule in `aether/world/SkyfallCleanup.blocks`). A fall ends in
+  open air there, without spreading into a sheet. Falls already pouring into the Overworld's sky are cut just under that
+  floor when their chunk loads and every 10 s within 10 chunks of each player, so the water below drains. This replaces
+  sealing the Aether's springs, so after Dread the heavenfalls can pour again. `logs/latest.log` says "Skyfall stop on"
+  with the floor's height at start, and logs each cut.
+Built, not played.
+
+## 0.23.44 (2026-11-14): Kitchen's copper, golden and diamond knives are forged (#1490)
+
+- Tool Station builds (`tinkering/ToolBuilds`) for Jaymo's Kitchen's new knives, so they have no grid recipe (Andy's rule:
+  metal tools come through Tinkers): a copper Small Blade, a wooden Tool Handle and string make a Copper Knife; a rose gold
+  blade makes a Golden Knife; any metal blade with a diamond as well makes a Diamond Knife. Any other metal blade still
+  makes the Iron Knife. The Netherite Knife is a smithing table upgrade of the diamond one.
+- Compiled; not played.
+
+## 0.23.45 (2026-11-14): Wind: the airflow sense reworked (64-block reach, ripples at the screen's edge, a silent focus with a breeze) (#1480)
+
+- (Jung) The airflow sense (crouch and hold V) reaches 64 blocks (four chunks) under a clear day sky, less at night, in
+  the rain, in a storm, under a roof or where there is no weather. It no longer grows with mastery.
+- What you feel now shows at the edge of the screen, not round the crosshair: a ripple of wavy lines on the side each
+  moving thing is on (ahead at the top, behind at the bottom). Near things make a long, tall, bright ripple of three
+  lines; far ones a short, faint one. Several in the same direction make one bigger ripple that runs faster: a crowd.
+- The focus is deep: every game sound, music included, sinks almost to silence (menu clicks stay), and a soft, steady
+  breeze plays instead. It all comes back when you let go of V.
+- The focus now really drains the colour: the world turns grey and white (each colour to its grey, washed a little
+  toward white), fading in as you focus, with the soft white frame round the edge. No tunnel: the middle stays clear.

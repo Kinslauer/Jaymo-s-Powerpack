@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
-    "jaymoskitchen:iron_knife"
+    "jaymoskitchen:iron_knife",
+    "jaymoskitchen:flint_knife",
+    "jaymoskitchen:copper_knife",
+    "jaymoskitchen:golden_knife",
+    "jaymoskitchen:diamond_knife",
+    "jaymoskitchen:netherite_knife"
   ]
 }

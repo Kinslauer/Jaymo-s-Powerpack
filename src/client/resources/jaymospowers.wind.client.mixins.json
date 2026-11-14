@@ -9,6 +9,7 @@
 		"LivingEntityRendererMixin",
 		"LocalPlayerMixin",
 		"ModelFeatureRendererMixin",
+		"WindSenseGameRendererMixin",
 		"WindSenseSoundMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

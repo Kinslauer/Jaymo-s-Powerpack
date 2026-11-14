@@ -1,0 +1,11 @@
+{
+	"item.jaymoskitchen.flint_knife": "Flint Knife",
+	"item.jaymoskitchen.copper_knife": "Copper Knife",
+	"item.jaymoskitchen.golden_knife": "Golden Knife",
+	"item.jaymoskitchen.diamond_knife": "Diamond Knife",
+	"item.jaymoskitchen.netherite_knife": "Netherite Knife",
+	"enchantment.jaymoskitchen.backstabbing": "Backstabbing",
+	"enchantment.jaymoskitchen.backstabbing.desc": "A blow struck from behind hits harder",
+	"item.jaymoskitchen.hot_cocoa": "Hot Cocoa",
+	"message.jaymoskitchen.home_comfort": "You wake warm and rested. This room feels like home."
+}
