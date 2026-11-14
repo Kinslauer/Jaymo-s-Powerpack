@@ -15,13 +15,19 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,6 +40,10 @@ import org.jspecify.annotations.Nullable;
  * <b>Passage.</b> Aboard her while she lies there, her captain has "Buy Passage" on the Interact page: for
  * {@link #PASSAGE_COST} she sails at once and carries you the whole crossing, to lie off Mohknee's shore. She waits
  * there a day and will carry you home again for the same.
+ * <p>
+ * <b>The chart.</b> (Andy: "someone should sell a map to mohknee".) At a home harbour the same captain sells a copy of
+ * his own chart for {@link #CHART_COST}: a map of Mohknee's western shore. Held this side of the sea it shows only which
+ * way that shore lies, which is enough to steer by.
  * <p>
  * She is a merchantman of {@link Corsairs} like any other ({@link Crew#flag} marks her), under the colours of the
  * realm whose harbour she calls at, so its navy and its foes treat her as that realm's guest. Her crew wear the
@@ -50,6 +60,9 @@ public final class BlossomTraders {
 	static final double SEEN = 128.0;
 	/** What the crossing costs a passenger (emeralds' worth). */
 	static final int PASSAGE_COST = 20;
+	/** What a copy of the captain's chart costs (emeralds' worth), and the map's scale (4: 2048 blocks across). */
+	static final int CHART_COST = 15;
+	static final byte CHART_SCALE = 4;
 	/** Her captain talks passage from this near. */
 	static final double NEAR = 10.0;
 	public static final String ACTION = "passage";
@@ -240,9 +253,14 @@ public final class BlossomTraders {
 			return;
 		}
 		ASKED.put(player.getUUID(), v.getId());
-		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words,
-			List.of(Component.translatable("talk.jaymoskingdoms.blossom_trader.option.pay", PASSAGE_COST), Component.translatable("talk.jaymoskingdoms.work.close")),
-			List.of(Money.canPay(player, Money.worth(PASSAGE_COST)), true)));
+		Component pay = Component.translatable("talk.jaymoskingdoms.blossom_trader.option.pay", PASSAGE_COST);
+		Component close = Component.translatable("talk.jaymoskingdoms.work.close");
+		boolean canPay = Money.canPay(player, Money.worth(PASSAGE_COST));
+		// off Mohknee itself nobody needs the chart
+		ServerPlayNetworking.send(player, home ? new TalkNet.Ask(v.getId(), v.getDisplayName(), words, List.of(pay, close), List.of(canPay, true))
+			: new TalkNet.Ask(v.getId(), v.getDisplayName(), words,
+				List.of(pay, Component.translatable("talk.jaymoskingdoms.blossom_trader.option.chart", CHART_COST), close),
+				List.of(canPay, Money.canPay(player, Money.worth(CHART_COST)), true)));
 	}
 
 	/** An answer to a blossom captain's price; false when it wasn't one. */
@@ -253,15 +271,38 @@ public final class BlossomTraders {
 		}
 		ASKED.remove(player.getUUID());
 		ServerLevel level = player.level();
-		if (answer.option() != 0 || !(level.getEntity(answer.entityId()) instanceof LivingEntity v) || !offers(player, v)
-			|| !(v.getVehicle() instanceof Ship ship) || !Money.charge(player, Money.worth(PASSAGE_COST))) {
+		if (!(level.getEntity(answer.entityId()) instanceof LivingEntity v) || !offers(player, v) || !(v.getVehicle() instanceof Ship ship)) {
 			return true;
 		}
 		boolean home = ship.crew.bound != null && ship.crew.bound.equals(ship.crew.home);
+		if (!home && answer.option() == 1) {
+			if (Money.charge(player, Money.worth(CHART_COST))) {
+				chart(level, player, v);
+			}
+			return true;
+		}
+		if (answer.option() != 0 || !Money.charge(player, Money.worth(PASSAGE_COST))) {
+			return true;
+		}
 		ship.crew.flag = PASSAGE;
 		SeaTrade.sail(ship);
 		Introductions.learn(player, v);
 		Speech.tell(level, v, player, Component.translatable(home ? "talk.jaymoskingdoms.blossom_trader.paid.home" : "talk.jaymoskingdoms.blossom_trader.paid"), Speech.WHITE);
 		return true;
+	}
+
+	/** A copy of the captain's chart: a map of Mohknee's western shore, where his ship makes for. */
+	private static void chart(ServerLevel level, ServerPlayer player, LivingEntity captain) {
+		BlockPos shore = far().at(level.getSeaLevel());
+		ItemStack map = MapItem.create(level, shore.getX(), shore.getZ(), CHART_SCALE, true, true);
+		MapItem.renderBiomePreviewMap(level, map);
+		MapItemSavedData.addTargetDecoration(map, shore, "+", MapDecorationTypes.RED_X);
+		map.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.mohknee_chart"));
+		map.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymoskingdoms.mohknee_chart.lore", captain.getDisplayName()))));
+		if (!player.getInventory().add(map)) {
+			player.spawnAtLocation(level, map);
+		}
+		Introductions.learn(player, captain);
+		Speech.tell(level, captain, player, Component.translatable("talk.jaymoskingdoms.blossom_trader.chart"), Speech.WHITE);
 	}
 }

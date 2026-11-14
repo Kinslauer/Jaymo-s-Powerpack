@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * by villagers"). Nobody here has a map of it (Lore): folk speak of it sideways, as gossip ({@link Approaches}), the
  * more the nearer they live to the sea, and sailors most of all. What comes from it, the ships of strange build, who
  * sailed east after them. Never a place on a map, never a bearing: a sailor who has made the crossing is the way
- * there ({@link Helmsmen}).
+ * there ({@link Helmsmen}), or a blossom captain's own chart ({@link BlossomTraders}).
  */
 final class MohkneeTalk {
 	/** How often someone's gossip is of the land in the east: inland, by the shore, and one of a ship's crew. */
