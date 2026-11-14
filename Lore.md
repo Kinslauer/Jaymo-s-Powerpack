@@ -1359,8 +1359,8 @@ elders and foremen, its court wizard and sometimes a court necromancer, and its 
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
 names, families and tempers.
 
-(new) **The siege train** (siege engines thread, 2026-11-14; Andy: "can we have warring kingdoms bring siege engines?";
-Claude's placement, for Andy to approve). A realm that marches on another's seat with soldiers enough brings an engine,
+**The siege train** (siege engines thread, 2026-11-14; Andy: "can we have warring kingdoms bring siege engines?";
+approved by Andy 2026-11-14). A realm that marches on another's seat with soldiers enough brings an engine,
 built by its own carpenters and smiths and pushed along behind the march by two of its soldiers: a **mangonel**, a
 timber frame on four wheels whose arm throws stones over a wall. The realms rich enough to keep guns on their walls
 take a **field gun** down off them instead, and in a great war they bring both. The engines stop short of the walls
