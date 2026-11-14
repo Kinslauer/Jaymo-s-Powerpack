@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472 (merged)"
+pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472, #1474 (merged)"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -70,6 +70,12 @@ let the owed village start run, close the game when needed. Long loading screens
   Merged ~6:05 PM, redeploying.
 - Andy's client crashed on /screenlook grey: full resource reload ran out of memory at 5 GB. Andy chose more memory:
   the CurseForge profile is now 8192 MB (set in Profile Options).
+- 6:14 PM: NEW WORLD + Chunky pregen 2500 (Andy). 6:22 PM and 7:03 PM: server OutOfMemoryError (heap), both ~5 min after
+  a start (first autosave) while Chunky generated; Felled's CutLogs save is only where it failed (capped at 65536).
+  Heap 6 -> 8 GB (Deck start.sh and repo deck/start.sh), #1474 ChunkyCompat pauses Chunky while players are on.
+  Histograms: growth is loaded-chunk data (sections, palettes, saved ticks, NBT) and StructureTemplate$StructureBlockInfo;
+  live heap ~2 GB at 7:16 PM growing ~40 MB/min at ~17 cps. Watching (monitor alerts above 6.5 GB used).
+- Deck start lock: a crashed server's Konsole start.sh keeps .start.lock; kill that pid (fuser .start.lock) to restart.
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
