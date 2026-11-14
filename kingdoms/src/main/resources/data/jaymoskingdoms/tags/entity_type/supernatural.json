@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskingdoms:raid_king", "jaymoskingdoms:laughing_bones", "jaymoskingdoms:running_skull",
     "minecraft:phantom",
     "minecraft:vex",
     "minecraft:evoker", "jaymoskingdoms:reaped_pillager", "jaymoskingdoms:reaped_vindicator", "jaymoskingdoms:reaped_evoker",

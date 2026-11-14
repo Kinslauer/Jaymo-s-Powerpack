@@ -34,7 +34,7 @@ public final class TwinbladeSmiths {
 	static final int EVERY = 20, SMITH_LEVEL = 3, GAP = 80;
 	static final double SEEN = 8.0;
 	/** How many amazed lines and origin lines there are in the language file. */
-	static final int AMAZED_LINES = 3, ORIGIN_LINES = 3;
+	static final int AMAZED_LINES = 3, ORIGIN_LINES = 4;
 	static final Identifier TWINBLADE = Identifier.fromNamespaceAndPath("jaymospowers", "twinblade");
 
 	/** On a smith: the players (UUIDs) they have told all they know. */

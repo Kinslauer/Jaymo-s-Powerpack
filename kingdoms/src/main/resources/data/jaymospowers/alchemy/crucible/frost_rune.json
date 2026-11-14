@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:smooth_stone_slab",
+  "essences": {
+    "frost": 4,
+    "crystal": 2,
+    "arcana": 2
+  },
+  "result": {
+    "item": "jaymoskingdoms:frost_rune",
+    "count": 1
+  },
+  "research": "principles"
+}

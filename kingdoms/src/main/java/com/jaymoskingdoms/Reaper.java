@@ -773,6 +773,16 @@ public final class Reaper {
 		}
 	}
 
+	/** Takes {@code toll} of a bearer's Toll for something made with it (a rune laid); false if they bear none or too little. */
+	public static boolean spendToll(ServerPlayer player, int toll) {
+		State state = player.getAttached(REAPER);
+		if (state == null || state.toll() < toll) {
+			return false;
+		}
+		player.setAttached(REAPER, state.withToll(state.toll() - toll, Production.day(player.level().getServer())));
+		return true;
+	}
+
 	/** The Call: with no body near to raise, the Shroud calls a host of the reaped to its keeper for one fight ({@link ZombieHordes#call}); it costs Toll. */
 	private static void host(ServerPlayer player, State state) {
 		if (state.toll() < STAGE_AT[SHROUD_STAGE - 1] + HOST_TOLL) {

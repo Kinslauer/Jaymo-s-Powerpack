@@ -9,6 +9,7 @@ import com.geckolib.animation.object.PlayState;
 import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.dungeon.TombHall;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -532,6 +533,16 @@ public class Draugr extends Monster implements GeoEntity {
 			}
 		}
 		return hit;
+	}
+
+	/** A wight, a scourge or a hall-guard carries a shard of the jailer's seal (never one the hall itself raised). */
+	@Override
+	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		Rank rank = this.rank();
+		if ((rank == Rank.WIGHT || rank == Rank.SCOURGE || rank == Rank.HALL_GUARD) && !this.entityTags().contains(TombHall.WAVE_TAG)) {
+			this.spawnAtLocation(level, new ItemStack(TombHall.SEAL_SHARD));
+		}
 	}
 
 	@Override

@@ -414,6 +414,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		NoBuildDungeons.register();
 		// the Stormborn Tomb (MIT port): a barrow over a tomb, laid out by its own structure type
 		StormbornTomb.register();
+		com.jaymoskingdoms.dungeon.TombHall.register();
+		com.jaymoskingdoms.traps.Runes.register();
 		// (0.7.573) or taken in by a village that thinks well enough of them
 		Shelter.register();
 		Hollows.register();

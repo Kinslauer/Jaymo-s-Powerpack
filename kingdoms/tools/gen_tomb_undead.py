@@ -83,7 +83,7 @@ PALETTE = {
 	"cloth": (58, 82, 104), "leather": (88, 62, 40), "wood": (104, 72, 42), "gold": (184, 145, 58), "horn": (205, 191, 156),
 	"rust": (122, 74, 44), "shell": (36, 50, 44), "shell_hi": (64, 88, 76), "leg": (22, 26, 24), "eye": (160, 232, 255),
 	"steel": (168, 176, 184), "rime": (178, 196, 206), "hair": (38, 34, 36), "tail": (150, 112, 74),
-	"shroud": (46, 52, 62),
+	"shroud": (46, 52, 62), "hoar": (206, 210, 214),
 }
 
 
@@ -423,6 +423,281 @@ def draugr():
 	return model
 
 
+# ---------------------------------------------------------------- the Raid-King (the lord of the Stormborn Tomb)
+
+# The draugr's chieftain (Andy, 2026-11-14: "use blockbench and fable, go all out for this"): the same dead Warrior-born
+# in horned helm, mail and fur, a head and a half taller than his host (about 3.3 blocks to the helm), a king's gold on
+# him: a crown round the helm, gold trim on the pauldrons and bracers, rings in a hoar-white beard braided to the belt.
+# The Frostborn jailer's chain still crosses his chest with a piece of the seal hanging on it. A torn grave-shroud for a
+# cape (cape_0..3, so it takes the move library's cloak), a great two-bearded axe, and his tail not wrapped as a
+# fighter keeps it but loose and lashing, rimed at the tip.
+
+def king_face(img, r):
+	"""A skull's face under the helm: deep sockets with the pale lights in them, the nose a hole, bared teeth."""
+	x0, y0, x1, y1 = r
+	dark = shade(PALETTE["skin"], 0.38) + (255,)
+	for sx in (x0 + 1, x1 - 4):
+		for dx in range(3):
+			for dy in range(3):
+				img.putpixel((sx + dx, y0 + 4 + dy), dark)
+		img.putpixel((sx + 1, y0 + 5), PALETTE["eye"] + (255,))
+		img.putpixel((sx + (1 if sx == x0 + 1 else 1), y0 + 4), shade(PALETTE["eye"], 0.7) + (255,))
+	for dy in range(2):
+		img.putpixel((x0 + (x1 - x0) // 2 - 1, y0 + 7 + dy), dark)
+		img.putpixel((x0 + (x1 - x0) // 2, y0 + 7 + dy), dark)
+	for x in range(x0 + 2, x1 - 2):
+		img.putpixel((x, y0 + 9), shade(PALETTE["bone"], 1.0 if (x - x0) % 2 else 0.7) + (255,))
+		img.putpixel((x, y1 - 1), shade(PALETTE["skin"], 0.5) + (255,))
+
+
+def seal_piece(img, r):
+	"""The piece of the jailer's seal on his chain: rimed stone, a cut rune still lit."""
+	x0, y0, x1, y1 = r
+	for y in range(y0, y1):
+		for x in range(x0, x1):
+			img.putpixel((x, y), shade((178, 196, 206), 0.8 + ((x + y) % 2) * 0.15) + (255,))
+	img.putpixel((x0 + 1, y0 + 1), PALETTE["eye"] + (255,))
+	img.putpixel((x0 + 1, y0 + 2), PALETTE["eye"] + (255,))
+
+
+def raid_king():
+	b = Builder(256, 208, 23)
+	b.bone("root", None, (0, 0, 0))
+	mirror(b, "leg", "root", (3.2, 21, 0), [((0.6, 10.5, -2.6), (5.8, 21, 2.6), "skin"), ((0.5, 13, -2.8), (5.9, 21, 2.8), "leather")])
+	mirror(b, "shin", ("leg",), (3.2, 10.5, 0), [((0.7, 0, -2.5), (5.7, 10.5, 2.5), "skin"), ((0.5, 2, -3.1), (5.9, 9, -2.5), "iron"),
+		((0.3, 0, -3.2), (6.1, 5.5, 2.9), "fur", 0.25), ((1.7, 8.5, -3.5), (4.7, 10.5, -2.7), "gold")])
+	b.bone("waist", "root", (0, 21, 0))
+	b.cube("waist", (-6.2, 20, -3.4), (6.2, 24, 3.4), "leather", 0.1)
+	b.cube("waist", (-2, 20.3, -4.0), (2, 23.7, -3.5), "gold")
+	b.cube("waist", (-1, 21, -4.4), (1, 23, -4.0), "bone")
+	b.cube("waist", (-6.4, 13, -3.3), (6.4, 20, 3.3), "mail", 0.05)
+	b.cube("waist", (-5.6, 14, -3.9), (-2.3, 20, -3.4), "iron")
+	b.cube("waist", (2.3, 14, -3.9), (5.6, 20, -3.4), "iron")
+	b.cube("waist", (-2, 9.5, -3.8), (2, 20, -3.4), "shroud")
+	b.cube("waist", (-2, 8, -3.8), (2, 9.5, -3.4), "rime")
+	b.bone("body", "waist", (0, 24, 0))
+	b.cube("body", (-6, 24, -3.4), (6, 31, 3.4), "mail")
+	b.cube("body", (-8, 31, -4.2), (8, 40, 4.2), "mail")
+	b.bone("ribs", "body", (0, 29, -3.5))
+	b.cube("ribs", (-4, 26, -3.7), (0, 31, -3.4), "skin", faces_paint={"north": ribs})
+	# the jailer's chain, shoulder to hip, and the piece of the seal on it
+	b.cube("body", (-9, 34.2, -4.8), (9, 35.8, -4.2), "iron", 0.0, (0, 0, 28), (0, 35, -4.5))
+	b.cube("body", (-1.5, 32, -5.4), (1.5, 36, -4.8), "rime", faces_paint={"north": seal_piece})
+	b.cube("body", (-10, 37, -5.2), (10, 42, 5.2), "fur", 0.25)
+	b.bone("head", "body", (0, 40, 0))
+	b.cube("head", (-5, 40, -5), (5, 50, 5), "skin", faces_paint={"north": king_face})
+	b.cube("head", (-5.5, 45.5, -5.5), (5.5, 51.5, 5.5), "iron", 0.1)
+	b.cube("head", (-0.6, 42.5, -6.2), (0.6, 47, -5.6), "iron")
+	b.cube("head", (4.6, 41.5, -5.4), (5.6, 45.5, -1.5), "iron")
+	b.cube("head", (-5.6, 41.5, -5.4), (-4.6, 45.5, -1.5), "iron")
+	b.cube("head", (-5.8, 49.5, -5.8), (5.8, 51, 5.8), "gold")
+	for x0, x1, z0, z1, top in ((-5.8, -4.4, -5.8, -4.4, 54), (4.4, 5.8, -5.8, -4.4, 54), (-0.8, 0.8, -5.8, -4.6, 55.5), (-5.8, -4.4, 4.4, 5.8, 53.5),
+							   (4.4, 5.8, 4.4, 5.8, 53.5), (-0.8, 0.8, 4.6, 5.8, 54)):
+		b.cube("head", (x0, 51, z0), (x1, top, z1), "gold")
+	b.cube("head", (-4, 38, 5), (4, 48, 6.8), "hoar")
+	# the beard, in three braids, a gold ring on the middle one
+	b.bone("beard", "head", (0, 41, -5))
+	b.cube("beard", (-3.2, 34, -6.6), (-1.3, 41.5, -5.5), "hoar")
+	b.cube("beard", (1.3, 34, -6.6), (3.2, 41.5, -5.5), "hoar")
+	b.cube("beard", (-1.1, 31, -6.5), (1.1, 41.5, -5.4), "hoar")
+	b.cube("beard", (-1.3, 33, -6.7), (1.3, 34.2, -5.2), "gold")
+	mirror(b, "horn", "head", (5.5, 49, 0), [((5.5, 47.5, -1.5), (9.5, 50.5, 1.5), "horn"), ((8.5, 50.5, -1.2), (11, 56, 1.2), "horn"),
+		((9, 55.5, -4.5), (10.5, 57.5, 1.0), "bone")], (0, 0, -12))
+	mirror(b, "arm", "body", (10.5, 38, 0), [((8.2, 29, -2.6), (13, 39.5, 2.6), "skin"), ((7.5, 36, -3.8), (14.5, 42.5, 3.8), "iron", 0.1),
+		((7.3, 36, -4.0), (14.7, 37.2, 4.0), "gold"), ((12, 42.5, -1), (14, 45.5, 1), "horn")])
+	mirror(b, "forearm", ("arm",), (10.6, 29, 0), [((8.3, 19, -2.5), (12.9, 29, 2.5), "skin"), ((8.1, 20.5, -2.9), (13.1, 26.5, 2.9), "iron", 0.1),
+		((8.0, 25.5, -3.1), (13.2, 26.7, 3.1), "gold")])
+	b.bone("axe", "right_forearm", (10.6, 20.5, 0))
+	b.cube("axe", (10.0, 19.6, -26), (11.2, 20.8, 10), "wood")
+	b.cube("axe", (9.7, 19.3, 10), (11.5, 21.1, 11.5), "gold")
+	b.cube("axe", (9.9, 20.8, -25), (11.3, 29, -17), "steel")
+	b.cube("axe", (9.9, 12.5, -25), (11.3, 19.6, -19.5), "steel")
+	b.cube("axe", (10.1, 12.5, -26), (11.1, 29, -25), "rime")
+	b.cube("axe", (10.1, 19.6, -29.5), (11.1, 20.8, -26), "steel")
+	b.bone("cape_0", "body", (0, 41, 5.2))
+	b.cube("cape_0", (-9, 31, 5.2), (9, 41, 6), "shroud")
+	b.bone("cape_1", "cape_0", (0, 31, 5.4))
+	b.cube("cape_1", (-9.5, 21, 5.4), (9.5, 31, 6.2), "shroud")
+	b.bone("cape_2", "cape_1", (0, 21, 5.6))
+	b.cube("cape_2", (-10, 11, 5.6), (10, 21, 6.4), "shroud")
+	b.bone("cape_3", "cape_2", (0, 11, 5.8))
+	b.cube("cape_3", (-10, 4.5, 5.8), (-3, 11, 6.6), "shroud")
+	b.cube("cape_3", (-1, 6, 5.8), (5, 11, 6.6), "shroud")
+	b.cube("cape_3", (6.5, 3, 5.8), (10, 11, 6.6), "shroud")
+	b.cube("cape_3", (-10, 3, 5.8), (-3, 4.5, 6.6), "rime")
+	b.cube("cape_3", (6.5, 1.5, 5.8), (10, 3, 6.6), "rime")
+	# the tail, loose: out from the right hip, drooping, the tip curled up
+	b.bone("tail_0", "waist", (6, 22, 3.1), (0, 0, -40))
+	b.cube("tail_0", (6, 20.9, 2), (13, 23.1, 4.2), "tail")
+	b.bone("tail_1", "tail_0", (13, 22, 3.1), (0, 0, -25))
+	b.cube("tail_1", (13, 21, 2.1), (19.5, 23, 4.1), "tail")
+	b.bone("tail_2", "tail_1", (19.5, 22, 3.1), (0, 0, 20))
+	b.cube("tail_2", (19.5, 21.1, 2.2), (25.5, 22.9, 4), "tail")
+	b.bone("tail_3", "tail_2", (25.5, 22, 3.1), (0, 0, 30))
+	b.cube("tail_3", (25.5, 21.2, 2.3), (30.5, 22.8, 3.9), "rime")
+	model = b.project("raid_king")
+	R = "root"
+	RA, LA = (20, 0, 8), (15, 0, -8)
+	hunched = {
+		"body": (40, 0, 0), "head": (30, 0, 0), "right_arm": (10, 0, 4), "left_arm": (10, 0, -4), "right_leg": (40, 0, 0),
+		"left_leg": (40, 0, 0), "right_shin": (-80, 0, 0), "left_shin": (-80, 0, 0),
+	}
+	spent = {
+		"body": (55, 0, 0), "head": (25, 0, 0), "right_arm": (15, 0, 0), "left_arm": (20, 0, -20), "right_leg": (-20, 0, 0),
+		"left_leg": (30, 0, 0), "left_shin": (-50, 0, 0),
+	}
+
+	def held(pose, into, hold, out, drop):
+		"""Into {@code pose} by {@code into}, held to {@code hold}, back out by {@code out} (seconds)."""
+		tracks = {bone: {"rotation": [(0, Z), (into, rot), (hold, rot), (out, Z)]} for bone, rot in pose.items()}
+		tracks[R] = {"position": [(0, Z), (into, (0, drop, 0)), (hold, (0, drop, 0)), (out, Z)]}
+		return tracks
+
+	anims = [
+		anim("idle", 4.0, "loop", {
+			"body": {"rotation": [(0, (-2, 0, 0)), (2.0, (-5, 0, 0)), (4.0, (-2, 0, 0))]},
+			"head": {"rotation": [(0, (4, -6, 0)), (2.0, (7, 6, 1)), (4.0, (4, -6, 0))]},
+			"right_arm": {"rotation": [(0, RA), (2.0, (23, 0, 10)), (4.0, RA)]},
+			"left_arm": {"rotation": [(0, LA), (2.0, (18, 0, -10)), (4.0, LA)]},
+			"cape_1": {"rotation": [(0, (-2, 0, 0)), (2.0, (-5, 0, 0)), (4.0, (-2, 0, 0))]},
+			"cape_3": {"rotation": [(0, (-3, 0, 0)), (2.0, (-8, 0, 0)), (4.0, (-3, 0, 0))]},
+			"tail_0": {"rotation": [(0, (0, -12, 0)), (2.0, (0, 14, 6)), (4.0, (0, -12, 0))]},
+			"tail_2": {"rotation": [(0, (0, 10, -8)), (2.0, (0, -14, 10)), (4.0, (0, 10, -8))]},
+			"tail_3": {"rotation": [(0, (0, 0, 10)), (1.0, (0, 0, -14)), (2.0, (0, 0, 12)), (3.0, (0, 0, -10)), (4.0, (0, 0, 10))]},
+		}),
+		anim("walk", 1.4, "loop", {
+			"right_leg": {"rotation": [(0, (28, 0, 0)), (0.7, (-28, 0, 0)), (1.4, (28, 0, 0))]},
+			"left_leg": {"rotation": [(0, (-28, 0, 0)), (0.7, (28, 0, 0)), (1.4, (-28, 0, 0))]},
+			"right_shin": {"rotation": [(0, Z), (0.35, (-30, 0, 0)), (0.7, Z), (1.4, Z)]},
+			"left_shin": {"rotation": [(0, Z), (0.7, Z), (1.05, (-30, 0, 0)), (1.4, Z)]},
+			"right_arm": {"rotation": [(0, (10, 0, 8)), (0.7, (26, 0, 8)), (1.4, (10, 0, 8))]},
+			"left_arm": {"rotation": [(0, (26, 0, -8)), (0.7, (4, 0, -8)), (1.4, (26, 0, -8))]},
+			"waist": {"rotation": [(0, (0, 7, 0)), (0.7, (0, -7, 0)), (1.4, (0, 7, 0))]},
+			"body": {"rotation": [(0, (6, -5, 0)), (0.7, (6, 5, 0)), (1.4, (6, -5, 0))]},
+			"cape_0": {"rotation": [(0, (-10, 0, 0)), (0.7, (-14, 0, 0)), (1.4, (-10, 0, 0))]},
+			"cape_2": {"rotation": [(0, (-8, 0, 0)), (0.35, (-14, 0, 0)), (0.7, (-8, 0, 0)), (1.05, (-14, 0, 0)), (1.4, (-8, 0, 0))]},
+			"tail_0": {"rotation": [(0, (0, -16, 0)), (0.7, (0, 16, 0)), (1.4, (0, -16, 0))]},
+			"tail_2": {"rotation": [(0, (0, 14, 0)), (0.7, (0, -14, 0)), (1.4, (0, 14, 0))]},
+			R: {"position": [(0, Z), (0.35, (0, 0.9, 0)), (0.7, Z), (1.05, (0, 0.9, 0)), (1.4, Z)]},
+		}),
+		# woken: hunched under the seal, he straightens, throws his arms wide and roars
+		anim("wake", 3.0, "once", dict(
+			{bone: {"rotation": [(0, rot), (1.2, rot), (2.0, Z), (3.0, Z)]} for bone, rot in hunched.items() if "arm" not in bone
+				and bone not in ("body", "head")},
+			**{
+				"body": {"rotation": [(0, (40, 0, 0)), (0.5, (42, 2, 0)), (1.2, (40, -2, 0)), (2.0, (0, 0, 0)), (2.3, (-14, 0, 0)), (2.8, (-14, 0, 0)), (3.0, Z)]},
+				"head": {"rotation": [(0, (30, 0, 0)), (1.2, (30, 0, 0)), (2.0, (0, 0, 0)), (2.3, (-28, 0, 0)), (2.5, (-26, 6, 0)), (2.7, (-28, -6, 0)), (3.0, Z)]},
+				"right_arm": {"rotation": [(0, (10, 0, 4)), (1.2, (10, 0, 4)), (2.0, RA), (2.3, (50, 0, 75)), (2.8, (50, 0, 75)), (3.0, RA)]},
+				"left_arm": {"rotation": [(0, (10, 0, -4)), (1.2, (10, 0, -4)), (2.0, LA), (2.3, (50, 0, -75)), (2.8, (50, 0, -75)), (3.0, LA)]},
+				"cape_1": {"rotation": [(0, Z), (2.0, Z), (2.3, (-25, 0, 0)), (2.8, (-20, 0, 0)), (3.0, Z)]},
+				"tail_0": {"rotation": [(0, Z), (2.0, Z), (2.3, (0, 0, 35)), (2.8, (0, 0, 30)), (3.0, Z)]},
+				R: {"position": [(0, (0, -5, 0)), (1.2, (0, -5, 0)), (2.0, Z), (3.0, Z)]},
+			})),
+		# the cleave: both hands, up and over (lands at 0.65)
+		anim("cleave", 1.2, "once", {
+			"body": {"rotation": [(0, Z), (0.45, (14, 0, 0)), (0.65, (-32, 0, 0)), (0.9, (-30, 0, 0)), (1.2, Z)]},
+			"head": {"rotation": [(0, Z), (0.45, (-10, 0, 0)), (0.65, (18, 0, 0)), (1.2, Z)]},
+			"right_arm": {"rotation": [(0, RA), (0.45, (178, 0, 10)), (0.65, (42, 0, -6)), (0.9, (42, 0, -6)), (1.2, RA)]},
+			"left_arm": {"rotation": [(0, LA), (0.45, (172, 0, -14)), (0.65, (48, 0, 16)), (0.9, (48, 0, 16)), (1.2, LA)]},
+			"cape_1": {"rotation": [(0, Z), (0.65, (-30, 0, 0)), (1.2, Z)]},
+			R: {"position": [(0, Z), (0.45, (0, 1, 0)), (0.65, (0, -2.5, 0)), (0.9, (0, -2.5, 0)), (1.2, Z)]},
+		}),
+		# the sweep: wound back to his right, through the whole front (lands at 0.5)
+		anim("sweep", 1.0, "once", {
+			"waist": {"rotation": [(0, Z), (0.3, (0, 18, 0)), (0.5, (0, -20, 0)), (1.0, Z)]},
+			"body": {"rotation": [(0, Z), (0.3, (0, 50, 0)), (0.5, (-6, -60, 0)), (0.7, (-6, -55, 0)), (1.0, Z)]},
+			"right_arm": {"rotation": [(0, RA), (0.3, (70, 0, 60)), (0.5, (72, 0, -30)), (0.7, (70, 0, -30)), (1.0, RA)]},
+			"left_arm": {"rotation": [(0, LA), (0.3, (55, 0, -6)), (0.5, (62, 0, -40)), (1.0, LA)]},
+			"tail_0": {"rotation": [(0, Z), (0.5, (0, 40, 0)), (1.0, Z)]},
+		}),
+		# three in a row: across, back across, then over (lands at 0.45, 1.05, 1.7)
+		anim("combo", 2.3, "once", {
+			"waist": {"rotation": [(0, Z), (0.25, (0, 18, 0)), (0.45, (0, -20, 0)), (0.85, (0, -22, 0)), (1.05, (0, 20, 0)), (1.4, Z), (2.3, Z)]},
+			"body": {"rotation": [(0, Z), (0.25, (0, 50, 0)), (0.45, (-6, -60, 0)), (0.85, (-4, -62, 0)), (1.05, (-6, 55, 0)), (1.45, (14, 0, 0)), (1.7, (-32, 0, 0)),
+				(2.0, (-30, 0, 0)), (2.3, Z)]},
+			"right_arm": {"rotation": [(0, RA), (0.25, (70, 0, 60)), (0.45, (72, 0, -30)), (0.85, (74, 0, -34)), (1.05, (70, 0, 62)), (1.45, (178, 0, 10)),
+				(1.7, (42, 0, -6)), (2.0, (42, 0, -6)), (2.3, RA)]},
+			"left_arm": {"rotation": [(0, LA), (0.25, (55, 0, -6)), (0.45, (62, 0, -40)), (1.05, (50, 0, -10)), (1.45, (172, 0, -14)), (1.7, (48, 0, 16)),
+				(2.0, (48, 0, 16)), (2.3, LA)]},
+			"right_leg": {"rotation": [(0, Z), (0.45, (25, 0, 0)), (0.85, Z), (1.05, (-20, 0, 0)), (1.7, (25, 0, 0)), (2.3, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.45, (-15, 0, 0)), (1.05, (25, 0, 0)), (1.7, (-15, 0, 0)), (2.3, Z)]},
+			R: {"position": [(0, Z), (1.45, (0, 1, 0)), (1.7, (0, -2.5, 0)), (2.0, (0, -2.5, 0)), (2.3, Z)]},
+		}),
+		# set to rush: low, the shoulder forward, the axe trailing
+		anim("rush_ready", 0.8, "hold", {
+			"body": {"rotation": [(0, Z), (0.5, (32, -14, 0)), (0.8, (32, -14, 0))]},
+			"head": {"rotation": [(0, Z), (0.5, (-24, 10, 0)), (0.8, (-24, 10, 0))]},
+			"right_arm": {"rotation": [(0, RA), (0.5, (-35, 0, 22)), (0.8, (-35, 0, 22))]},
+			"left_arm": {"rotation": [(0, LA), (0.5, (65, 0, 20)), (0.8, (65, 0, 20))]},
+			"right_leg": {"rotation": [(0, Z), (0.5, (-25, 0, 0)), (0.8, (-25, 0, 0))]},
+			"left_leg": {"rotation": [(0, Z), (0.5, (40, 0, 0)), (0.8, (40, 0, 0))]},
+			"left_shin": {"rotation": [(0, Z), (0.5, (-50, 0, 0)), (0.8, (-50, 0, 0))]},
+			R: {"position": [(0, Z), (0.5, (0, -3, 0)), (0.8, (0, -3, 0))]},
+		}),
+		anim("rush", 0.5, "loop", {
+			"body": {"rotation": [(0, (34, -14, 0)), (0.5, (34, -14, 0))]},
+			"head": {"rotation": [(0, (-24, 10, 0)), (0.5, (-24, 10, 0))]},
+			"right_arm": {"rotation": [(0, (-35, 0, 22)), (0.5, (-35, 0, 22))]},
+			"left_arm": {"rotation": [(0, (65, 0, 20)), (0.5, (65, 0, 20))]},
+			"right_leg": {"rotation": [(0, (45, 0, 0)), (0.25, (-40, 0, 0)), (0.5, (45, 0, 0))]},
+			"left_leg": {"rotation": [(0, (-40, 0, 0)), (0.25, (45, 0, 0)), (0.5, (-40, 0, 0))]},
+			"right_shin": {"rotation": [(0, (-20, 0, 0)), (0.25, (-55, 0, 0)), (0.5, (-20, 0, 0))]},
+			"left_shin": {"rotation": [(0, (-55, 0, 0)), (0.25, (-20, 0, 0)), (0.5, (-55, 0, 0))]},
+			"cape_0": {"rotation": [(0, (-45, 0, 0)), (0.5, (-45, 0, 0))]},
+			"cape_2": {"rotation": [(0, (-10, 0, 0)), (0.25, (-22, 0, 0)), (0.5, (-10, 0, 0))]},
+			"tail_0": {"rotation": [(0, (0, -50, 30)), (0.5, (0, -50, 30))]},
+			R: {"position": [(0, (0, -2.5, 0)), (0.12, (0, -1.5, 0)), (0.25, (0, -2.5, 0)), (0.37, (0, -1.5, 0)), (0.5, (0, -2.5, 0))]},
+		}),
+		anim("roar", 1.6, "once", {
+			"body": {"rotation": [(0, Z), (0.3, (10, 0, 0)), (0.6, (-16, 0, 0)), (1.3, (-14, 0, 0)), (1.6, Z)]},
+			"head": {"rotation": [(0, Z), (0.3, (14, 0, 0)), (0.6, (-30, 0, 0)), (0.8, (-28, 7, 0)), (1.0, (-30, -7, 0)), (1.3, (-28, 0, 0)), (1.6, Z)]},
+			"right_arm": {"rotation": [(0, RA), (0.3, (30, 0, 0)), (0.6, (55, 0, 78)), (1.3, (55, 0, 75)), (1.6, RA)]},
+			"left_arm": {"rotation": [(0, LA), (0.3, (30, 0, 0)), (0.6, (55, 0, -78)), (1.3, (55, 0, -75)), (1.6, LA)]},
+			"beard": {"rotation": [(0, Z), (0.6, (-12, 0, 0)), (0.8, (-6, 0, 0)), (1.0, (-12, 0, 0)), (1.3, (-8, 0, 0)), (1.6, Z)]},
+			"cape_1": {"rotation": [(0, Z), (0.6, (-28, 0, 0)), (1.3, (-22, 0, 0)), (1.6, Z)]},
+			"tail_0": {"rotation": [(0, Z), (0.6, (0, 0, 38)), (1.3, (0, 0, 34)), (1.6, Z)]},
+			"tail_2": {"rotation": [(0, Z), (0.6, (0, 0, -24)), (1.6, Z)]},
+		}),
+		# the windows: the axe buried after a rush, and spent after three blows
+		anim("buried", 2.5, "once", held(spent, 0.25, 2.0, 2.5, -3)),
+		anim("spent", 1.5, "once", held(spent, 0.25, 1.1, 1.5, -3)),
+		# the tail's lash: a full turn, the tail straight out (lands at 0.4)
+		anim("tail_lash", 0.8, "once", {
+			R: {"rotation": [(0, Z), (0.15, (0, -50, 0)), (0.5, (0, 300, 0)), (0.8, (0, 360, 0))]},
+			"body": {"rotation": [(0, Z), (0.15, (10, 0, 0)), (0.5, (14, 0, 0)), (0.8, Z)]},
+			"tail_0": {"rotation": [(0, Z), (0.15, (0, 0, 40)), (0.5, (0, 0, 40)), (0.8, Z)]},
+			"tail_1": {"rotation": [(0, Z), (0.15, (0, 0, 25)), (0.5, (0, 0, 25)), (0.8, Z)]},
+			"tail_2": {"rotation": [(0, Z), (0.15, (0, 0, -20)), (0.5, (0, 0, -20)), (0.8, Z)]},
+			"tail_3": {"rotation": [(0, Z), (0.15, (0, 0, -30)), (0.5, (0, 0, -30)), (0.8, Z)]},
+			"right_arm": {"rotation": [(0, RA), (0.3, (30, 0, 40)), (0.8, RA)]},
+			"left_arm": {"rotation": [(0, LA), (0.3, (30, 0, -40)), (0.8, LA)]},
+		}),
+		# down on his knees, then on his face
+		anim("death", 2.6, "hold", {
+			"body": {"rotation": [(0, Z), (0.9, (28, 0, 0)), (1.6, (34, 4, 0)), (2.3, (10, 0, 0)), (2.6, (10, 0, 0))]},
+			"head": {"rotation": [(0, Z), (0.4, (-20, 0, 0)), (0.9, (30, 0, 0)), (2.6, (20, 0, 14))]},
+			"right_arm": {"rotation": [(0, RA), (0.9, (8, 0, 6)), (2.3, (60, 0, 30)), (2.6, (60, 0, 30))]},
+			"left_arm": {"rotation": [(0, LA), (0.9, (8, 0, -6)), (2.3, (70, 0, -30)), (2.6, (70, 0, -30))]},
+			"right_leg": {"rotation": [(0, Z), (0.9, (38, 0, 0)), (1.6, (38, 0, 0)), (2.3, (4, 0, 0)), (2.6, (4, 0, 0))]},
+			"left_leg": {"rotation": [(0, Z), (0.9, (38, 0, 0)), (1.6, (38, 0, 0)), (2.3, (4, 0, 0)), (2.6, (4, 0, 0))]},
+			"right_shin": {"rotation": [(0, Z), (0.9, (-100, 0, 0)), (1.6, (-100, 0, 0)), (2.3, (-10, 0, 0)), (2.6, (-10, 0, 0))]},
+			"left_shin": {"rotation": [(0, Z), (0.9, (-100, 0, 0)), (1.6, (-100, 0, 0)), (2.3, (-10, 0, 0)), (2.6, (-10, 0, 0))]},
+			"cape_0": {"rotation": [(0, Z), (2.3, (-70, 0, 0)), (2.6, (-80, 0, 0))]},
+			"tail_0": {"rotation": [(0, Z), (0.9, (0, 0, -20)), (2.6, (0, 0, 30))]},
+			R: {"position": [(0, Z), (0.9, (0, -9, 0)), (1.6, (0, -9, 0)), (2.3, (0, 3, 0)), (2.6, (0, 3, 0))],
+				"rotation": [(0, Z), (1.6, Z), (2.3, (-86, 0, 0)), (2.6, (-86, 0, 0))]},
+		}),
+	]
+	import humanoid_moves
+	own = {a["name"] for a in anims}
+	anims += [a for a in humanoid_moves.moves(leg=21.0, cape=True) if a["name"] not in own]
+	# (the library's cloak has ribbons his shroud doesn't)
+	for a in anims:
+		a["tracks"] = {bone: t for bone, t in a["tracks"].items() if bone in b.bones}
+	add_animations(model, anims, bone_uuids_of(model))
+	return model
+
+
 # ---------------------------------------------------------------- the barrow beetle (the example mob)
 
 def beetle():
@@ -516,7 +791,7 @@ def skeleton_lord():
 
 EGGS = {"draugr": ((84, 94, 104), (160, 232, 255)), "barrow_beetle": ((36, 50, 44), (120, 160, 140)),
 		"bogre": ((92, 110, 70), (150, 112, 74)), "laughing_bones": ((200, 196, 180), (180, 140, 255)),
-		"running_skull": ((224, 220, 204), (60, 40, 90))}
+		"running_skull": ((224, 220, 204), (60, 40, 90)), "raid_king": ((70, 78, 90), (200, 160, 60))}
 
 
 def eggs():
@@ -547,7 +822,7 @@ def main(only=()):
 	if not only:
 		eggs()
 	os.makedirs(ART, exist_ok=True)
-	for name, make in (("draugr", draugr), ("barrow_beetle", beetle), ("silver_skeleton", silver_skeleton), ("skeleton_lord", skeleton_lord)):
+	for name, make in (("draugr", draugr), ("raid_king", raid_king), ("barrow_beetle", beetle), ("silver_skeleton", silver_skeleton), ("skeleton_lord", skeleton_lord)):
 		if only and name not in only:
 			continue
 		with open(os.path.join(ART, name + ".bbmodel"), "w", encoding="utf-8", newline="\n") as f:

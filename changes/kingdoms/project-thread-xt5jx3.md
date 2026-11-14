@@ -60,3 +60,21 @@ now 128 x 176); `kingdoms/tools/bbmodel_render.py` draws a textured picture of a
 skeleton whose skull rolls away laughing when it falls and grows the body back after 12 seconds unless you smash it.
 The body drops nothing; the smashed skull spills bones, arrows and experience (and rarely the skull). A golden weapon
 ends the body for good. Compiled, not played.
+- **The Raid-King, lord of the Stormborn Tomb** (`inhabitants/RaidKing`, `dungeon/TombHall`). Our own Blockbench model
+  (`kingdoms/art/raid_king.bbmodel`, made by `tools/gen_tomb_undead.py`: 81 cubes, 3.3 blocks tall, crown, braided
+  beard, the jailer's chain, a torn shroud for a cape, a loose tail, a great axe) with 12 animations of his own. Every
+  wight, scourge and hall-guard in the tomb drops a **Seal Shard**; three make a **Mended Seal** (crafting grid). Use
+  the seal on the floor of the tomb's great hall: three waves of draugr come up out of the floor, each when the last is
+  down, then the Raid-King rises where the seal lies. 360 health. His moves each have a tell: a cleave, a sweep, a
+  straight rush at anyone standing off (step aside and he buries his axe for 2.5 s; he takes half again as much harm
+  then), a tail lash at anyone behind him, three blows in a row under 60% health (and a short opening after), a roar at
+  60% and 30% that raises more dead (he shrugs off most harm while roaring), and under 30% less rest and a cleave that
+  leaves slowing cold on the floor. He gets a boss bar and the first-sight intro film. He drops bones, silver and one
+  of each rune, and falls once per tomb; a seal used anywhere else, or there again, only breathes cold. If everyone
+  leaves during the waves the seal is left on the floor. A fight under way is lost on a server restart. Smiths who
+  know the twinblade have a fourth line that hints at the seal. Compiled, not played.
+- **Rune traps** (`traps/Runes`): Frost, Spike and Ember Runes, made in Powers' alchemy crucible (smooth stone slab,
+  pointed dripstone or magma block as the catalyst; research "principles"). Use one on the top of a block to lay it:
+  it costs 12 mana if you are attuned, else 2 of the Reaper's Toll, and won't take with neither. A laid rune shows its
+  sigil, goes off under monsters only (3 charges), and its layer takes it back by sneak-using an empty hand on it. At
+  most 8 laid per player.

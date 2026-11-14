@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:magma_block",
+  "essences": {
+    "fire": 4,
+    "sulphur": 2,
+    "arcana": 2
+  },
+  "result": {
+    "item": "jaymoskingdoms:ember_rune",
+    "count": 1
+  },
+  "research": "principles"
+}

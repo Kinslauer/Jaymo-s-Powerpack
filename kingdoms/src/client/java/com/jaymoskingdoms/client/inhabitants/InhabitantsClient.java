@@ -69,6 +69,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.BARROW_BEETLE,
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
+		EntityRenderers.register(Inhabitants.RAID_KING, RaidKingRenderer::new);
 		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
 		EntityRenderers.register(Inhabitants.IMPALER, ImpalerRenderer::new);
 		EntityRenderers.register(Inhabitants.WARPED_CLAM, ClamRenderer::new);
@@ -172,6 +173,18 @@ public final class InhabitantsClient {
 		/** The tail ends before this segment. */
 		private static void cut(BoneSnapshots snapshots, int segment) {
 			snapshots.ifPresent(DRAUGR_TAIL[segment], bone -> bone.skipRender(true).skipChildrenRender(true));
+		}
+	}
+
+	/** The Raid-King at his model's size (about 3.3 blocks); he falls by his own death animation. */
+	static final class RaidKingRenderer extends InhabitantRenderer<com.jaymoskingdoms.inhabitants.RaidKing> {
+		RaidKingRenderer(EntityRendererProvider.Context context) {
+			super(context, "raid_king", 1.0F, 0.9F, "head");
+		}
+
+		@Override
+		protected float getDeathMaxRotation(GeoRenderState state) {
+			return 0.0F;
 		}
 	}
 
