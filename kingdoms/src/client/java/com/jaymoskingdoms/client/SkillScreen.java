@@ -7,6 +7,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.Stats;
+import com.jaymoskingdoms.forms.Forms;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,9 @@ final class SkillScreen extends Screen {
 	/** How fast the view glides to where it is headed (a share per second, eased). */
 	static final double GLIDE = 10.0;
 	/** The left panel's rows, the title's rules and the room the foot's buttons take. */
-	static final int PILLAR_ROW = 26, RAIL_STAT_ROW = 12, TITLE_RULE = 34, FOOT_BUTTONS = 346;
+	static final int PILLAR_ROW = 26, RAIL_STAT_ROW = 12, ARTS_HEAD = 11, ARTS_ROW = 10, TITLE_RULE = 34, FOOT_BUTTONS = 346;
+	/** How far the left panel's rows are scrolled (pixels), when the screen is too short for them all. */
+	private static int railScroll;
 	static final int COLOR_LOCKED_RIM = 0xFF4A4A56, COLOR_LOCKED_FILL = 0xFF16161C, COLOR_OPEN_FILL = 0xFF24202C, COLOR_PATH = 0xFFFFFFFF,
 		COLOR_RING = 0x22FFFFFF, COLOR_BORDER = 0x40FFFFFF, COLOR_BACK = 0xF00A0A12, COLOR_FRAME = 0xF00E0E16, COLOR_FRAME_LINE = 0xFF8C752A,
 		COLOR_OVER = 0x30FFFFFF, COLOR_DIMMED = 0xB0101016;
@@ -721,21 +724,40 @@ final class SkillScreen extends Screen {
 
 	/** Where pillar {@code i}'s block starts in the left panel, and where its attribute rows start. */
 	private static int railPillarY(int i) {
-		return WEB_HEADER + 31 + i * PILLAR_ROW;
+		return WEB_HEADER - railScroll + 31 + i * PILLAR_ROW;
 	}
 
-	private static int railStatsY() {
+	/** Where the weapon arts on your belt start in the left panel (under your class and alignment). */
+	private static int railArtsY() {
 		return railPillarY(ORDER.length) + 32;
+	}
+
+	/** Your forms' book, once you know a form (nobody has a belt before that). */
+	private Forms.@Nullable Book arts() {
+		Forms.Book book = this.minecraft.player == null ? null : Forms.book(this.minecraft.player);
+		return book == null || book.known().isEmpty() ? null : book;
+	}
+
+	private int railStatsY() {
+		return railArtsY() + (arts() == null ? 0 : ARTS_HEAD + Forms.BELT_SLOTS * ARTS_ROW + 6);
+	}
+
+	/** How far the left panel's rows can scroll: what doesn't fit above the foot. */
+	private int railMaxScroll() {
+		return Math.max(0, railStatsY() + railScroll + shownStats().size() * RAIL_STAT_ROW + 4 - (this.height - WEB_FOOTER));
 	}
 
 	/**
 	 * The left panel: your character level and attribute points, each pillar's level, experience and points (press one to
-	 * go to its part of the web), your class and alignment, and your attributes (press them to open their tab).
+	 * go to its part of the web), your class and alignment, the weapon arts on your belt (press them for the belt menu)
+	 * and your attributes (press them to open their tab). The wheel scrolls it where the screen is too short.
 	 */
 	private void leftRail(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
-		int w = railL(), y = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, tx = 8, tw = w - 16;
-		frame(graphics, 0, y, w, h);
-		graphics.enableScissor(3, y + 3, w - 3, y + h - 3);
+		int w = railL(), top = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, tx = 8, tw = w - 16;
+		frame(graphics, 0, top, w, h);
+		graphics.enableScissor(3, top + 3, w - 3, top + h - 3);
+		railScroll = Math.clamp(railScroll, 0, railMaxScroll());
+		int y = top - railScroll;
 		var player = this.minecraft.player;
 		int points = player == null ? 0 : Stats.points(player, shown);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", Stats.characterLevel(shown)), tx, y + 8, tw, Ui.GOLD);
@@ -766,8 +788,28 @@ final class SkillScreen extends Screen {
 			: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
 				+ (shown.level(aligned) >= aligned.maxLevel ? ".master" : ""))), tx, cy + 16, tw, aligned == null ? Ui.DIM : accent(aligned));
 		graphics.fill(6, cy + 28, w - 6, cy + 29, COLOR_FRAME_LINE);
+		Forms.Book book = arts();
+		if (book != null) {
+			// the weapon arts on your belt, the ones that fit what is in your hand bright (those are on the skill bar now)
+			int ay = railArtsY();
+			boolean overArts = mouseX < w && mouseY >= ay && mouseY < railStatsY() - 4;
+			if (overArts) {
+				graphics.fill(4, ay - 1, w - 4, railStatsY() - 5, COLOR_OVER);
+			}
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.arts"), tx, ay, tw, Ui.GOLD);
+			List<String> ready = Forms.barForms(player);
+			for (int i = 0; i < Forms.BELT_SLOTS; i++) {
+				Forms.Form form = Forms.get(book.belt().get(i));
+				int ry = ay + ARTS_HEAD + i * ARTS_ROW;
+				graphics.text(this.font, String.valueOf(i + 1), tx, ry, form == null ? Ui.HINT : Ui.GOLD);
+				Ui.line(graphics, this.font, form == null ? Component.translatable("gui.jaymoskingdoms.skills.web.arts.bare")
+					: Component.empty().append(form.name()).append("  " + book.rank(form.id())), tx + 9, ry, tw - 9,
+					form == null ? Ui.HINT : ready.contains(form.id()) ? Ui.TEXT : Ui.DIM);
+			}
+			graphics.fill(6, railStatsY() - 4, w - 6, railStatsY() - 3, COLOR_FRAME_LINE);
+		}
 		int sy = railStatsY(), cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player);
-		boolean overStats = mouseX < w && mouseY >= sy && mouseY < y + h;
+		boolean overStats = mouseX < w && mouseY >= sy && mouseY < top + h;
 		for (Stats.Stat stat : shownStats()) {
 			int value = player == null ? 0 : Stats.value(player, shown, stat);
 			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), tx, sy, tw - 22, overStats ? Ui.TEXT : Ui.DIM);
@@ -776,6 +818,7 @@ final class SkillScreen extends Screen {
 			sy += RAIL_STAT_ROW;
 		}
 		graphics.disableScissor();
+		Ui.scrollbar(graphics, w - 6, top + 4, h - 8, h - 8, h - 8 + railMaxScroll(), railScroll);
 	}
 
 	/** Where the right panel's Learn button sits: x, y, width, height. */
@@ -1178,13 +1221,19 @@ final class SkillScreen extends Screen {
 			}
 			// the left panel: a pillar's block goes to its part of the web, the attributes open their tab
 			for (int i = 0; i < ORDER.length; i++) {
-				if (Ui.over(mx, my, 4, railPillarY(i), railL() - 8, PILLAR_ROW - 2)) {
+				if (my >= WEB_HEADER && Ui.over(mx, my, 4, railPillarY(i), railL() - 8, PILLAR_ROW - 2)) {
 					look(SkillWeb.focus(ORDER[i]), Math.max(targetZoom, OPEN_ZOOM));
 					this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 					return true;
 				}
 			}
-			if (mx < railL() && my >= railStatsY() && my < this.height - WEB_FOOTER) {
+			if (arts() != null && mx < railL() && my >= Math.max(WEB_HEADER, railArtsY()) && my < Math.min(railStatsY() - 4, this.height - WEB_FOOTER)) {
+				// the weapon arts: their belt menu
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				this.minecraft.gui.setScreen(new com.jaymoskingdoms.client.forms.BeltScreen());
+				return true;
+			}
+			if (mx < railL() && my >= Math.max(WEB_HEADER, railStatsY()) && my < this.height - WEB_FOOTER) {
 				listScroll = 0;
 				stats = true;
 				rebuildWidgets();
@@ -1252,6 +1301,11 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (onWeb() && scrollY != 0.0 && mouseX < railL() && mouseY >= WEB_HEADER && mouseY < this.height - WEB_FOOTER) {
+			// the left panel's rows, when they don't all fit
+			railScroll = Math.clamp(railScroll - (int)Math.signum(scrollY) * RAIL_STAT_ROW, 0, railMaxScroll());
+			return true;
+		}
 		if (webOnScreen() && scrollY != 0.0) {
 			// zoom about the mouse: the point under it stays put
 			double before = targetZoom;

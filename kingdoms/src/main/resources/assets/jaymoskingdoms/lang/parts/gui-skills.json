@@ -76,5 +76,7 @@
   "gui.jaymoskingdoms.skills.web.pick": "Pick a skill",
   "gui.jaymoskingdoms.skills.web.learn": "Learn",
   "gui.jaymoskingdoms.skills.web.raise": "Raise to rank %s of %s",
-  "gui.jaymoskingdoms.skills.web.learnt": "Learnt in full"
+  "gui.jaymoskingdoms.skills.web.learnt": "Learnt in full",
+  "gui.jaymoskingdoms.skills.web.arts": "Weapon arts",
+  "gui.jaymoskingdoms.skills.web.arts.bare": "bare"
 }
