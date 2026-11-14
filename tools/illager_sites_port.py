@@ -31,6 +31,8 @@ LEFT_OUT = {"mohai_illager"}
 TEMPLATE = {"tipi": "tipi"}
 # which of the mod's chest tables each structure's containers used (for the junk they hold before anyone holds it)
 JUNK = {"soldier_chest": "unheld_camp", "pirate_chest": "unheld_sea", "monk_chest": "unheld_retreat"}
+# our own sites under illager_sites/ (not the mod's), kept in the structure tag: the arena (tools/arena_site.py)
+OURS = {"arena"}
 SALT_SHIFT = 7  # our sets' salts, so a world with the mod as well doesn't stack them
 
 # ---- NBT ---------------------------------------------------------------------------------------------------------------
@@ -327,7 +329,7 @@ def main(src):
         if f.endswith(".json"):
             write_json(os.path.join(DATA, "tags", "worldgen", "biome", "illager_sites", f), json.load(open(os.path.join(mod, "tags", "worldgen", "biome", f))))
     write_json(os.path.join(DATA, "tags", "worldgen", "structure", "illager_sites.json"),
-               {"values": ["%s:illager_sites/%s" % (NS, n) for n in sorted(all_posts)]})
+               {"values": ["%s:illager_sites/%s" % (NS, n) for n in sorted(set(all_posts) | OURS)]})
     write_java(all_posts, sizes)
     print("\n".join(report))
     print("junk tables used:", sorted(junk_tables))

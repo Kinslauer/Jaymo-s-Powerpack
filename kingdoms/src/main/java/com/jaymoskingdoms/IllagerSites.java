@@ -37,10 +37,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -159,6 +161,8 @@ final class IllagerSites {
 	/** Andy's picks (2026-11-13), and Claude's suggestions for those he left (he chose to use them). The Mohai Illager is left out. */
 	static final Map<String, Plan> PLANS = Map.ofEntries(
 		Map.entry("illager_fort", new Plan("illagers", WorldTiers.Tier.BORDERLANDS, Mode.CAMP, true, 8)),
+		// our own desert arena (tools/arena_site.py): a fighting pit, villagers penned to fight in it, allays caged in its box
+		Map.entry("arena", new Plan("illagers", WorldTiers.Tier.WILDLANDS, Mode.CAMP, true, 10)),
 		Map.entry("illager_tower", new Plan("garrison|bandits", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
 		Map.entry("illager_tower2", new Plan("garrison|bandits", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
 		Map.entry("illager_tower3", new Plan("illagers", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 3)),
@@ -206,6 +210,8 @@ final class IllagerSites {
 
 	/** The junk tables a place's chests hold until it's held. */
 	static final String JUNK = "jaymoskingdoms:chests/illager_sites/unheld_";
+	/** A vault's junk (the arena's box), and what it holds once the place is held, whoever holds it. */
+	static final String VAULT_JUNK = JUNK + "vault", VAULT = "jaymoskingdoms:chests/illager_sites/arena_vault";
 
 	/**
 	 * A place whose people have moved in: its structure's path, its leader's post (its seat), its bounds, who lives
@@ -480,7 +486,7 @@ final class IllagerSites {
 		List<BlockPos> posts = new ArrayList<>();
 		StringBuilder kinds = new StringBuilder();
 		StructurePiece first = start.getPieces().isEmpty() ? null : start.getPieces().get(0);
-		SitePosts.Post[] template = SitePosts.POSTS.getOrDefault(path, new SitePosts.Post[0]);
+		SitePosts.Post[] template = SitePosts.POSTS.getOrDefault(path, ArenaPosts.POSTS.getOrDefault(path, new SitePosts.Post[0]));
 		if (first instanceof PoolElementStructurePiece piece) {
 			Rotation rotation = piece.getRotation();
 			for (SitePosts.Post p : template) {
@@ -610,7 +616,8 @@ final class IllagerSites {
 				for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
 					if (be instanceof RandomizableContainerBlockEntity chest && box.isInside(be.getBlockPos()) && chest.getLootTable() != null
 						&& chest.getLootTable().identifier().toString().startsWith(JUNK)) {
-						chest.setLootTable(key, random.nextLong());
+						boolean vault = chest.getLootTable().identifier().toString().equals(VAULT_JUNK);
+						chest.setLootTable(vault ? ResourceKey.create(Registries.LOOT_TABLE, Identifier.parse(VAULT)) : key, random.nextLong());
 						be.setChanged();
 					}
 				}
@@ -683,7 +690,7 @@ final class IllagerSites {
 		int hands = 0, most = MOST_CREW_AT.getOrDefault(path, MOST_CREW);
 		for (int i = 0; i < posts.size() && hands < most; i++) {
 			char k = kinds.charAt(i);
-			if (k == 'P' || k == 'W' || posts.get(i).equals(seat) && k != 'R') {
+			if (k == 'P' || k == 'W' || k == 'A' || posts.get(i).equals(seat) && k != 'R') {
 				continue;
 			}
 			if (hand(level, camp, dweller, path, k, posts.get(i), hands) != null) {
@@ -801,6 +808,8 @@ final class IllagerSites {
 				if (Captives.take(level, posts.get(i)) != null) {
 					taken++;
 				}
+			} else if (kinds.charAt(i) == 'A') {
+				caged(level, posts.get(i));
 			}
 		}
 		int more = taken > 0 ? 0 : 1 + random.nextInt(CAPTIVES_MOST);
@@ -809,12 +818,23 @@ final class IllagerSites {
 		}
 	}
 
+	/** An allay kept in a cage (the arena's box): it stays where it is until someone breaks it out. */
+	private static void caged(ServerLevel level, BlockPos at) {
+		Allay allay = EntityTypes.ALLAY.create(level, EntitySpawnReason.STRUCTURE);
+		if (allay == null) {
+			return;
+		}
+		allay.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		allay.setPersistenceRequired();
+		level.addFreshEntity(allay);
+	}
+
 	/** A realm's soldiers in the tower: archers where pillagers stood, guards elsewhere. Returns how many. */
 	private static int garrison(ServerLevel level, Faction realm, List<BlockPos> posts, CharSequence kinds, BlockPos seat, Plan plan, RandomSource random) {
 		int n = 0;
 		for (int i = 0; i < posts.size() && n < MOST_CREW; i++) {
 			char k = kinds.charAt(i);
-			if (k != 'P' && k != 'W' && soldier(level, realm, k == 'R' ? Folk.ARCHER : Folk.GUARD, posts.get(i)) != null) {
+			if (k != 'P' && k != 'W' && k != 'A' && soldier(level, realm, k == 'R' ? Folk.ARCHER : Folk.GUARD, posts.get(i)) != null) {
 				n++;
 			}
 		}

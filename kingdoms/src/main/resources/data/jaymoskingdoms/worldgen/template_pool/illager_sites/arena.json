@@ -1,0 +1,15 @@
+{
+  "name": "jaymoskingdoms:illager_sites/arena",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "processors": "minecraft:empty",
+        "projection": "rigid",
+        "location": "jaymoskingdoms:illager_sites/arena"
+      },
+      "weight": 1
+    }
+  ]
+}
