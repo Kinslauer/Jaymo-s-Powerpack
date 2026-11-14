@@ -225,6 +225,7 @@ public final class Grue {
 	}
 
 	static void register() {
+		GrueDark.register();
 		JaymosKingdoms.LOGGER.debug("grue attachments: {} {} {}", GRUE, ROUTINE, HEARD);
 		PayloadTypeRegistry.clientboundPlay().register(Drive.TYPE, Drive.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Lash.TYPE, Lash.CODEC);
@@ -253,6 +254,10 @@ public final class Grue {
 			.then(Commands.literal("grue").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("free").then(Commands.argument("player", EntityArgument.player())
 					.executes(c -> freeCommand(c.getSource(), EntityArgument.getPlayer(c, "player")))))
+				.then(Commands.literal("master").then(Commands.argument("player", EntityArgument.player())
+					.executes(c -> GrueDark.masterCommand(c.getSource(), EntityArgument.getPlayer(c, "player")))))
+				.then(Commands.literal("starve").then(Commands.argument("player", EntityArgument.player())
+					.executes(c -> GrueDark.starveCommand(c.getSource(), EntityArgument.getPlayer(c, "player")))))
 				.then(Commands.literal("hold").then(Commands.argument("player", EntityArgument.player())
 					.then(Commands.argument("n", IntegerArgumentType.integer(0, TAKEN))
 						.executes(c -> holdCommand(c.getSource(), EntityArgument.getPlayer(c, "player"), IntegerArgumentType.getInteger(c, "n")))))))));
@@ -323,6 +328,7 @@ public final class Grue {
 		if (GrueTrial.mastered(spirit)) {
 			if ((now + player.getId()) % 20L == 0L) {
 				GrueTrial.formSecond(player, spirit);
+				GrueDark.second(player, spirit, now);
 			}
 			return;
 		}
@@ -366,6 +372,10 @@ public final class Grue {
 		if (change < 0.0F && hold <= 0.0F) {
 			return;
 		}
+		if (change > 0.0F) {
+			// it creeps faster in the dark, slower in the light
+			change *= GrueDark.creepTimes(player);
+		}
 		setHold(player, hold + change);
 	}
 
@@ -394,6 +404,11 @@ public final class Grue {
 		}
 	}
 
+	/** The hold of a master's unfed Grue set to {@code hold} ({@link GrueDark#second}). */
+	static void creepTo(ServerPlayer player, float hold) {
+		setHold(player, hold);
+	}
+
 	/** The spirit warns of the dark ({@code event}: grue.warn, grue.flux), at most once a {@link #WARN_GAP}. */
 	private static void warn(ServerPlayer player, String event, long now) {
 		if (now < NEXT_WARN.getOrDefault(player.getUUID(), 0L)) {
@@ -409,6 +424,11 @@ public final class Grue {
 
 	/** A forbidden cast was made by {@code player} ({@code ForbiddenArts}): the spirit warns, and the Grue gains. */
 	public static void darkAct(ServerPlayer player) {
+		if (GrueTrial.mastered(Spirits.state(player))) {
+			// a master's Grue is fed by it
+			GrueDark.feed(player);
+			return;
+		}
 		if (Spirits.state(player) == null || taken(player) || player.isCreative() || GrueTrial.mastered(Spirits.state(player))
 			|| GrueTrial.active(player)) {
 			return;
@@ -649,7 +669,7 @@ public final class Grue {
 	/** The Grue's blows: a crushing strike up close, and a grasp that drags a foe in from afar. */
 	private static void fight(ServerPlayer player, ServerLevel level, LivingEntity foe, @Nullable SpiritState spirit, long now) {
 		UUID id = player.getUUID();
-		float scale = spirit == null ? 1.0F : Spirits.damageScale(spirit);
+		float scale = (spirit == null ? 1.0F : Spirits.damageScale(spirit)) * GrueDark.hurtTimes(player);
 		double d = foe.distanceTo(player);
 		if (d <= STRIKE_REACH && now >= NEXT_STRIKE.getOrDefault(id, 0L)) {
 			NEXT_STRIKE.put(id, now + STRIKE_EVERY);

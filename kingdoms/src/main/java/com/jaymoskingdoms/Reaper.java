@@ -371,7 +371,7 @@ public final class Reaper {
 	// ---- the toll ------------------------------------------------------------------------------------------------------
 
 	/** The dead have paid {@code toll} to {@code player}'s Reaper: it grows, and it is fed. */
-	static void feed(ServerPlayer player, int toll) {
+	public static void feed(ServerPlayer player, int toll) {
 		State state = player.getAttached(REAPER);
 		if (state == null) {
 			return;

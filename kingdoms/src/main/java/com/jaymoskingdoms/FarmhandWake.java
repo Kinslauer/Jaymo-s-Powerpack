@@ -472,7 +472,7 @@ public final class FarmhandWake {
 			if (w.film) {
 				ServerPlayNetworking.send(player, new Shot(Shot.SPEAK, speaker.getId(), Vec3.ZERO, 0));
 			}
-			Speech.sayTo(level, speaker, player, words, Speech.WHITE);
+			Speech.sayPlainly(level, speaker, player, words, Speech.WHITE);
 			if (ServerPlayNetworking.canSend(player, Speech.Said.TYPE)) {
 				// (and in chat, for whoever looked away)
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words)

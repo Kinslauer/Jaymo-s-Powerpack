@@ -13081,3 +13081,48 @@ Andy: "what commands can i test with?"
 - `/kingdom reaper toll <0-100>` (operators) sets your own Toll, so each of the Reaper's five stages can be looked at without
   the kills: 0, 20, 40, 60 and 80 are the Pall, the Mantle, the Reach, the Wing-arms and the Shroud. It needs a Reaper
   already: `/kingdom class set @s warlock reaper` brings one within five seconds.
+
+## 0.8.68 (2026-11-14): Lines said to you in the speaker's tongue, calm blood remarks, no gassing the downed (#1529)
+
+- **Tongues**: everything a villager or folk says to you alone (blood and smell remarks, shop hellos, spar calls, sermons, directions and ~30 more) now comes out in their tongue if you don't speak it, as their other speech always did. Only a local's comment on your accent and the farm family's wake-up lines stay plain for anyone (`Speech.sayTo` through `Languages.heard`; `Speech.sayPlainly` for those two).
+- **Blood and smell remarks** come only from folk who are calm: not fighting you, not down, and not a camp raider or other outlaw (`Stench.calm`).
+- **Poisoner chiefs** no longer throw clouds at someone already down, and neither their clouds nor their blows poison the downed. The drain pulled a downed player's limbs into the red so they couldn't get up (`Crews`).
+- Built; not played.
+
+## 0.8.69 (2026-11-14): the Grue grows, and the dark feeds it (#1535)
+
+Andy, after the Reaper: "can the rest of the spirits get an upgrade to this caliber? especially the grue." This is the Grue's
+half (he chose "Grue only for now"); the five spirits are not touched.
+- **A body in five stages** (`GrueDark.stage`, drawn by `SpiritManifest`): as its hold on a keeper grows, the Grue stands
+  behind them. Under 25 it is only the red flicker in the spirit's arms, as before; from 25 a small dim shadow at their back;
+  from 55 the hooded shape; from 80 its wings are out; and over a host, or a master wearing Grue Form, the whole of it.
+- **The dark feeds it**: its hold creeps 1.4 times as fast in full dark and 0.6 times in full light. A host's blows, and a
+  master's in Grue Form, hit from 0.75 times (full light) to 1.25 times (full dark).
+- **Seen in the dark**: whoever can see mana sees it as before; where the light is 4 or less, anyone at all sees it.
+- **A master must feed it**: a kill in Grue Form or a forbidden cast feeds it. After three days unfed the Grue speaks, the
+  arms redden again, and its hold climbs (about a day to the top); a feeding clears it. At the top the mastery is lost and the
+  trial is fought again.
+- **Three more moves for a master**, with Grue Form and Grue's Grasp:
+  - **Snuff**: torches and lanterns within 10 blocks drop, fires die, candles and campfires go out, and foes there are left in
+    darkness for 5 s.
+  - **Call Shades**: three of its shades fight for you for 30 s.
+  - **The Long Dark** (only in Grue Form, every 5 minutes): for a minute the lights within 24 blocks are out, foes there are
+    blind and weak, other players within 48 are in darkness, and the dark counts as full for you. The sky itself goes black
+    for everyone within 48 blocks, you included (Andy: "why not?"): the fog turns black and swallows the sky and clouds, the
+    Sun goes out, and the land is seen to 64 blocks. It comes over 2 s and lifts over 4. Drawn through vanilla's fog and
+    sky, so a shader pack may draw its own sky over it.
+  - In Grue Form, sneaking in a fall lets you down on its wings.
+- `/kingdom grue master <player>` and `/kingdom grue starve <player>` (operators) for testing, beside `hold` and `free`.
+- Lore.md has the paragraph "The Grue in the dark" under The dark (Andy: "looks good").
+- Built with Gradle. Not played: where the body stands behind its keeper and its size at each stage are set by eye.
+
+## 0.8.70 (2026-11-14): The reaped - undead illagers at war for the Reaper (#1532)
+
+Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pillagers, GPL-3.0: the idea only, our own code and art).
+- **Three new mobs**: the Reaped Pillager, Reaped Vindicator and Reaped Evoker (`reaped/`): each still in its illager's outfit, now rags, on our own model (the client's `ReapedModel`, painted by `tools/gen_reaped.py`): an illager's skull with the heavy brow, a ribcage under the torn coat, thin bone arms that hang instead of crossing, the vindicator's axe always in its hand, undead (smite, healing and harm turned round), a little tougher and slower, low voices. Spawn eggs for each.
+- **The Reaper's host**: a new kind of horde (`ZombieHordes.Kind.REAPED`). From danger 0.3 one horde in ten is a host (more under a blood moon): it comes up behind a horn, marches on the seat of the nearest settlement or camp within 128 blocks, and turns on the player once it stands there. Some hosts have a Reaped Warlord (boss bar). They don't burn; after ten minutes the host breaks up and the Reaper takes them back in smoke.
+- **War on their own kin**: the reaped attack living illagers on sight and living illagers attack them. A living illager one of them kills gets up three seconds later as the same kind of reaped (its Kitchen corpse taken up) and joins the host, up to 24.
+- **The Reaper's keepers**: the reaped never attack a player who carries the Reaper unless that player struck them, and each kill a reaped makes within 24 blocks of a keeper pays 1 Toll.
+- The reaped can't be talked with in the illager tongue.
+- Operators: `/kingdom horde reaped` sends a host at once.
+- Compiled (compileJava, compileClientJava); not played. Villagers don't yet flee the reaped the way they flee living illagers, and a reaped evoker's vexes won't go for living illagers.

@@ -38,8 +38,27 @@ public final class McaLooks {
 		return MCA ? Mca.infected(villager, draw) : draw.get();
 	}
 
+	/**
+	 * The clothes texture MCA draws {@code body} in (a villager, or a player's stand-in from {@link #of}); null if it isn't
+	 * one of MCA's or wears none. The texture is laid out as a player's skin is.
+	 */
+	public static net.minecraft.resources.@Nullable Identifier clothes(@Nullable Entity body) {
+		return MCA && body != null ? Mca.clothes(body) : null;
+	}
+
 	/** Kept apart so MCA's classes load only when it's there. */
 	private static final class Mca {
+		static net.minecraft.resources.@Nullable Identifier clothes(Entity body) {
+			if (!(body instanceof net.conczin.mca.entity.VillagerLike<?> villager)) {
+				return null;
+			}
+			String clothes = villager.getClothes();
+			net.minecraft.resources.Identifier texture = clothes == null || clothes.isEmpty() ? null
+				: net.minecraft.resources.Identifier.tryParse(clothes);
+			// only a texture in the pack: an outfit from MCA's online library has no file of its own to cut from
+			return texture != null && Minecraft.getInstance().getResourceManager().getResource(texture).isPresent() ? texture : null;
+		}
+
 		static @Nullable Entity villager(UUID owner) {
 			// only for someone the game knows (on the server, or already sent): asking MCA for an id makes the server look
 			// that player up, and the future's zombie players carry made-up ids
