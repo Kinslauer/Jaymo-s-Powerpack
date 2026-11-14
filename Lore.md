@@ -212,6 +212,24 @@ sink deep enough into corruption to read magic: no glow on a wizard, no mana win
 mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
 any other power user.
 
+(new) **The gods of the elements** (Jung's Elemental Corruption, 2026-11-13; the gods are Claude's placement, for Andy
+to approve). The wind, the smoke, the weight of things and the cold are older than the eight faiths, and something
+old answers for each: not patrons, they keep no shrines and take no offerings, and folk who speak of them at all say
+only "the gods of the power". They let a holder corrupt the gift and say nothing. What they will not stand is the gift
+used to murder the innocent in their name: a villager of any people but the camps (the barbarians follow the
+Unseeing and are nothing to them). The first such killing, a voice in the holder's head; the second, a warning; the
+third, they take the gift back. The element turns on the land around the killer (a storm and its lightning, a fog,
+the ground thrown into the air, a flash freeze), and for a while the power runs wild in them and in everyone near:
+twice as strong, it wounds them with every blow they strike and burns them where they stand, the element falls on
+whoever stands too close, and every creature that can flees them.
+Then it is gone for three days, and comes back still spoiled, unless the holder makes penance meanwhile: a Purifying
+Draught drunk while the gift is gone cleanses it, and the gods give it back at once. Jung counted Wind among the elements for this, beside
+the three that Andy named.
+(new) **The cold that kills** (Cryokinesis' corruption, 2026-11-13, Claude's placement for Andy to approve). A
+Cryokinesis holder who lets the cold do their killing, creature after creature frozen to death, finds it hungry: the
+power corrupts, and frost sheds off them. Warmth is the cure: a Purifying Draught drunk beside a lit campfire thaws it
+for good.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -405,6 +423,14 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+**The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
+nimbus cloud"). Besides the balloon skiff at the mast, the sky folk ride small skiffs of their own: a slab of the
+Aether's cold cloud packed onto a skyroot keel, with a cloudwool sail on a mast at the stern. She hangs in the air
+where she is left and goes where her rider looks. The cloud is the afterlife's own, and it reads the same ledger the
+Judge weighs: it holds the just and nobody else. Anyone whose page would not weigh just sinks through it as through any
+cloud, and a rider who stops being just is let fall. The Divine-born think nothing of this, since it has never dropped
+one of them. A visitor from below who finds she carries them has been told something about themselves.
+
 (new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
 one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
 carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
@@ -490,6 +516,13 @@ What folk believe about the sky (village talk, not proven):
 waterfall with no top ("follow the water the wrong way"), whales that swim through clouds, geese that go up in winter,
 stones tired of the ground, gold that grows on trees "higher", wizards on the floating rocks who "aren't hermits,
 they're halfway". A humming stone in your pack is best kept from the priests. Some villagers quietly build towers.
+
+**The floor of the sky woods** (portable-mods thread, 2026-11-14; Andy picked "Living things" from The Aether II's
+world pieces). Nothing in the Aether is tended by the gods any more, so the woods keep themselves. The sky trees shed, and
+their leaves lie in piles under them until they rot back into the soil. The **rotshroom** is the Aether's undertaker: it
+grows only where something is rotting, eats the litter and fruits. Moss takes damp, shaded holystone and leaves it mossy.
+Aerbunnies strip the berry bushes and breed on them. Skyfolk gardeners rake leaves round a sapling or a picked bush to
+bring it on, and roast rotshrooms over the fire.
 
 **What lives up there.** Phygs, flying cows, sheepuffs, aerbunnies, moas, kirrids, burrukai, taegores, skyroot
 lizards, prismallards, glitterwings and shroudwings. **Aerwhales** swim the open sky, as big as the great whales of
@@ -1775,3 +1808,5 @@ water and not beside it. The blossom folk did not sink it and do not claim it. T
 which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
+
+(new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.

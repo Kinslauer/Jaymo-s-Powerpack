@@ -9,7 +9,7 @@ Andy merges only on "merge", one at a time.
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
 - **Branch:** `claude/armor-pngs-vanilla-style` · **Updated:** 2026-11-11 (2 days ago)
 - **Checks:** ✅ 4 passed
-- **Agent:** [[armor-pngs-vanilla-style]]
+- **Agent:** no agent note
 
 ## [#1493](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1493) Tinkering: a part-built fishing rod, smeltery extras (melter, tank, channels, alloyer, foundry), JEI fills the Crafting Station
 - **Branch:** `claude/project-thread-vb3yg2` · **Updated:** 2026-11-14 (today)
