@@ -18,6 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Agents/character-creator-presets|character-creator-presets]] · 💻 Odysseus · #1544 · in-review
 
 
 ## Needs Andy
