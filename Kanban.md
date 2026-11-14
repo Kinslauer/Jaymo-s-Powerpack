@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-14 07:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-14 07:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,12 +13,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/katana-folded-steel|katana-folded-steel]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Agents/katana-folded-steel|katana-folded-steel]] · 💻 Odysseus · #1503 · in-review
 
 
 ## Needs Andy
