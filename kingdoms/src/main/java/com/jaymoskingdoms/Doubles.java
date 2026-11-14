@@ -454,6 +454,7 @@ public final class Doubles {
 		if (copy.isRemoved() || !copy.hasAttached(COPY)) {
 			return;
 		}
+		Doubts.raise(level, copy.blockPosition());
 		if (Math.floorMod((int) (copy.getAttached(COPY).getMostSignificantBits() >>> 13), CHANGELING_IN) == 0 && stealable(copy)) {
 			changeling(level, copy, by);
 			return;

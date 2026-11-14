@@ -79,7 +79,7 @@ public final class ShapeshifterAlarm {
 	}
 
 	/** {@code e} is going for {@code shapeshifter} just now. */
-	public static boolean defending(LivingEntity e, Shapeshifter shapeshifter) {
+	public static boolean defending(LivingEntity e, LivingEntity shapeshifter) {
 		Defense d = e instanceof Mob m ? DEFENDERS.get(m) : null;
 		return d != null && d.foe.equals(shapeshifter.getUUID());
 	}
@@ -88,7 +88,7 @@ public final class ShapeshifterAlarm {
 	 * {@code s} has just dropped the face of {@code wore} ({@code by}: whoever found it out, if anyone; {@code real}: the one
 	 * whose life it stole, if it's them it met): whoever sees it reacts.
 	 */
-	static void seen(ServerLevel level, Shapeshifter s, Component wore, @Nullable LivingEntity by, @Nullable UUID real) {
+	static void seen(ServerLevel level, LivingEntity s, Component wore, @Nullable LivingEntity by, @Nullable UUID real) {
 		long now = level.getGameTime();
 		boolean cried = false, called = false, shouted = false;
 		for (LivingEntity w : level.getEntitiesOfClass(LivingEntity.class, s.getBoundingBox().inflate(WITNESS_RANGE),
@@ -144,7 +144,7 @@ public final class ShapeshifterAlarm {
 	}
 
 	/** {@code m} goes for {@code s}. */
-	private static void defend(ServerLevel level, Mob m, Shapeshifter s, long now, boolean shout) {
+	private static void defend(ServerLevel level, Mob m, LivingEntity s, long now, boolean shout) {
 		Defense d = DEFENDERS.get(m);
 		if (d != null && d.foe.equals(s.getUUID())) {
 			d.until = now + DEFEND_TICKS;

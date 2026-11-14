@@ -3,5 +3,17 @@
   "message.jaymoskingdoms.face.dropped": "The borrowed face slips off",
   "talk.jaymoskingdoms.changeling.found.0": "I only wanted a hearth. %s had one.",
   "talk.jaymoskingdoms.changeling.found.1": "Don't! I never hurt %s. I only borrowed the face.",
-  "talk.jaymoskingdoms.changeling.found.2": "It was a good life, %s's. I'd have kept it kindly."
+  "talk.jaymoskingdoms.changeling.found.2": "It was a good life, %s's. I'd have kept it kindly.",
+  "talk.jaymoskingdoms.doubt.ask.place.0": "Hold there. After what we saw, I ask everyone. What is this place called?",
+  "talk.jaymoskingdoms.doubt.ask.place.1": "A moment. Anyone could be wearing a face now. Name the ground you stand on.",
+  "talk.jaymoskingdoms.doubt.ask.place.2": "Not a step closer. If you are who you look like, you know where you are. Say it.",
+  "talk.jaymoskingdoms.doubt.ask.wife": "Wait. If it is really you, tell me who you go home to.",
+  "talk.jaymoskingdoms.doubt.ask.dog": "Stop there. You would know this. What is your dog called?",
+  "talk.jaymoskingdoms.doubt.ask.colour": "One thing, and then I'll let you be. What colour is %s?",
+  "talk.jaymoskingdoms.doubt.right.0": "Good. Forgive me. Nobody trusts a face this week.",
+  "talk.jaymoskingdoms.doubt.right.1": "That's right. Go on, then. I had to ask.",
+  "talk.jaymoskingdoms.doubt.right.2": "Aye, it's you. I'll tell the others.",
+  "talk.jaymoskingdoms.doubt.wrong.0": "That's wrong. That's WRONG! It's another one!",
+  "talk.jaymoskingdoms.doubt.wrong.1": "No. No, it isn't. Get back from me!",
+  "talk.jaymoskingdoms.doubt.wrong.2": "Liar! Whatever you are, you are not who you look like!"
 }
