@@ -1012,6 +1012,13 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
+**The Reaper's risen** (new) (Andy, 2026-11-14: "they should always reanimate as the corpse that died"; the rest Claude's
+placement). What the Reaper raises for its keeper is not a zombie. The body gets up as itself: the shaman with his paint
+and his staff, the wolf as a wolf, the same face and the same name. Nothing of who it was comes back with it, and its old
+side means nothing to it; it fights for the one who carries the Reaper and for no one else. Black smoke comes off it for
+as long as it stands, and when its time is up there is only ash. The old dead that a Death Sorcerer calls are another
+matter: those come out of the ground, and the ground gives back whatever it has.
+
 **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement,
 approved by Andy 2026-11-14). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
 ground that still holds the sorcerer's mana. The Reaper takes those dead and sends them back: pillagers, vindicators and
@@ -1023,7 +1030,7 @@ not burn at sunrise; when its war is done the Reaper takes it back, and nothing 
 **reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
 them, and the Reaper is paid for what they kill near its keeper.
 
-(new) **The host at war** (Reaper's host thread, 2026-11-14; Claude's placement for Andy to approve). A host does not
+**The host at war** (Reaper's host thread, 2026-11-14; Claude's placement, approved by Andy 2026-11-14). A host does not
 always go back. When one of the reaped cuts down a camp's warlord, the camp does not fall: every illager left in it dies
 where it stands and gets up, a reaped warlord takes the seat, and the palisade is the Reaper's from then on. Such a
 hold raids the towns round it as the living camp did, grows by every illager its people kill, and stands until someone
@@ -1035,8 +1042,8 @@ there in the morning, and nobody will take her. The dead evokers no longer call 
 lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
 few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
 
-(new) **The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
-for Andy to approve). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
+**The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
 a poster, and from then on their hit squads do not wait for dark. A squad's leader carries the poster of the one it
 has come for. The mark fades if you leave them alone, an illager who likes you will sell it back, and a poster with
 another name on it, pinned where illagers will see it, does what you would expect. Squads come by whatever the country
@@ -1048,8 +1055,8 @@ Totem of Undying again, which they could once and cannot now: their camps raise 
 a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
 totem that holds death off once and leaves you weak, or a faceful of smoke.
 
-(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
-placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+**The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement approved by Andy 2026-11-14). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
 warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
 binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
 ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
@@ -1058,8 +1065,8 @@ own, two swords and a crest, and steps aside from a blow as it did alive. None o
 with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
 back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
 
-(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
-for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+**The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
 it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
 over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
 hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
@@ -1864,7 +1871,7 @@ them; the real ones are kept tied up underground, under Grim ruins and in cellar
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
 
-(new) **Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
+**Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
 same dark woods: a changeling can put on the face of anyone it has looked at closely, skin, hair and clothes together.
 Some of the lives stolen from the villages are worn by a changeling and not by a grey shapeshifter, and it keeps the
 real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
