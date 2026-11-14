@@ -9,6 +9,7 @@ versions:
 started: 2026-11-14
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/wild/Moose.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/wild/MooseHerds.java
   - changes/kingdoms/moose-cows.md
 ---
 # Moose cows

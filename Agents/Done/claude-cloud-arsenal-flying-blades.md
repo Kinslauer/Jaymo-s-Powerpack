@@ -3,7 +3,7 @@ status: done
 task: 
 branch: claude/project-thread-24g5gw
 with: 
-pr: 1519
+pr: 1525
 mods: powers
 versions: 
 started: 2026-11-14
@@ -21,6 +21,7 @@ owns:
 - Patches 2-7: orders, Blade Storm, riding, big moves, look, Gravity's rocks.
 
 ## Notes
+- Patch 3 (Blade Storm) merged as PR #1519. Patch 4 = blade riding (ArsenalRide, ArsenalRideClient, ArsenalRideRenderer; small edits to GravityBoardPose, LimbMotion, FreefallPose).
 - Lore.md: "(new) The blades that wait" waits on Andy's approval.
 
 ## Done
