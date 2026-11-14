@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-o2rfe0
 with: Claude (cloud thread "Port Farmer's Delight picks into Kitchen")
-pr: 
+pr: 1490
 mods: kitchen, powers
 versions: 
 started: 2026-11-14
@@ -25,3 +25,4 @@ owns:
 - Small edits to shared files: `delight/Delight.java`, `cooking/Dish.java` (one appended dish), `JaymosKitchen.java` (one line), `tinkering/ToolBuilds.java` (three builds).
 
 ## Done
+Flint, copper, golden, diamond and netherite knives that do everything the iron knife does; Backstabbing on knives; Comfort on waking in a homely room; Hot Cocoa. Built with Gradle (Kitchen build, Powers compileJava); not played.
