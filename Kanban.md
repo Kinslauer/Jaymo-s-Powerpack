@@ -18,7 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Agents/chain-axe-lasso-models|chain-axe-lasso-models]] · 💻 Odysseus · in-review
+- [ ] [[Agents/chain-axe-lasso-models|chain-axe-lasso-models]] · 💻 Odysseus · #1534 · in-review
 - [ ] [[Agents/reaped-illagers|reaped-illagers]] · 💻 Odysseus · #1532 · in-review
 
 
