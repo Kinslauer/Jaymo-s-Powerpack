@@ -604,3 +604,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14: Andy approved the Lore paragraph "The pits and the hold plans" (captured plans, both desert arenas; PR #1552).
 
 - 2026-11-14 (Andy, Youth wisp, PR #1568): remake the wisp Peter Pan style, less Navi, with quick animations; it appears whenever anyone says "youth" in chat; villagers tell you to just say it, or hint. "HELP"/"HELP ME" with the wisp on screen teleports you to your bed with a green flash and layered particles, once per day per player; asking again the same day gets jokes.
+
+- 2026-11-14 (Andy, story quests PR #1569): companions leave for good if a tale choice goes against what they truly believe, or if a failed quest drops their bond below the minimum; who comes back is decided by choices inside a tale; more tales start from found books; runners come by night and indoors, and letters by pigeon to those with a roost. Andy approved the Lore paragraph "Troubles, runners and starred work".

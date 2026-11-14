@@ -1740,8 +1740,7 @@ realm's guard bears his realm's arms painted on the face. A barbarian's is bare 
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
 and breaks under enough blows, and a fighter who loses one fetches another from camp; steel on steel throws sparks.
 
-(new) **Troubles, runners and starred work** (Claude's placement for the story quest picks, 2026-11-14, for Andy to
-approve). Most of what goes wrong in a village is small and somebody's own: a fold found empty, a debt, a bell rung in
+**Troubles, runners and starred work** (approved by Andy 2026-11-14). Most of what goes wrong in a village is small and somebody's own: a fold found empty, a debt, a bell rung in
 the night, a brother who never came home. Folk carry such a trouble until someone outside it will listen, and it is
 never one errand. It runs over days and weeks, the one who asked sends word when there is more (a **runner**, a
 villager paid a coin to find you with a sealed letter, by day or by lantern-light, at your door if need be; or, to
