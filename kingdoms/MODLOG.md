@@ -12847,3 +12847,9 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   despawning it stops being kept, so it leaves when no one is near and natural spawning brings fish back within its
   caps; one in a chunk that already has 6 fish goes at once. Fish from a bucket or with a name tag, and a Druid's fish form, are kept.
 - Built; tested on the Deck server.
+
+## 0.8.51 (2026-11-14): Hemp makes rope and ship sails (#1497)
+
+- With Jaymo's Kitchen, hemp fibre makes rope as string does (three in a column, 2 rope), and hemp cloth makes ship sails
+  as wool does. Tags `jaymoskingdoms:rope_fibre` and `jaymoskingdoms:sail_cloth` (Kitchen's items are optional entries, so
+  Kingdoms alone still works).
