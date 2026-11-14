@@ -4963,3 +4963,8 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - Kept over the black at full volume: menu clicks (the death screen's buttons), the heartbeat while down or swooning, the
   breath as you wake, and a turning's groan.
 - Sound Physics Remastered and our own footstep/soundscape sounds fade with it (only each sound's gain is scaled).
+
+## 0.23.84 (2026-11-14): carry: lift bodies tied hand and foot
+
+- `Carry.BOUND_CHECKS` (Jaymo's Kingdoms' lasso hogtie adds one): a body tied hand and foot can be lifted like someone downed (sneak + hold use, armour against brawn decides if you're strong enough, a piece of armour comes off when it's too heavy), and a tied player can't jump out of your arms (they struggle out of the knots instead, and are dropped when they're free).
+- Built; not played.
