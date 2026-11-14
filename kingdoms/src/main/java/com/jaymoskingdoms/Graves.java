@@ -75,6 +75,10 @@ public final class Graves {
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("grave_mound"));
 		GRAVE_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(GRAVE, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.accept(GRAVE_ITEM));
+		DeathCompat.addResting((level, owner) -> {
+			BlockPos grave = graveOf(level, owner, Vec3.ZERO, 1.0e8);
+			return grave == null ? null : Vec3.atCenterOf(grave);
+		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (!(level instanceof ServerLevel server) || !player.getItemInHand(hand).is(ItemTags.SHOVELS) || !DeadBodies.isPlayerBody(entity)) {
 				return InteractionResult.PASS;
