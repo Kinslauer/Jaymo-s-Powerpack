@@ -167,6 +167,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.init();
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
+		ArsenalWing.init();
 		ArsenalChains.init();
 		ArsenalStanding.init();
 		ArsenalVoid.init();
@@ -209,13 +210,17 @@ public final class ArsenalPower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		boolean voided = com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Mastery.starterOnly(player);
 		if (key == PowerKey.ABILITY_3 && !voided && ArsenalWing.key(player, down)) {
-			// Sneak + V: Attendant Blades (a short hold calls them or sends them home, a tap changes their formation);
+			// Sneak + V: Attendant Blades (a short hold calls them, or opens their order wheel; a tap changes their formation);
 			// the Void Arsenal, whose Sneak + V is its gates, has them on Sneak + X (ArsenalCannons)
 			return;
 		}
 		if (key == PowerKey.ABILITY_3 && voided) {
 			// the Void Arsenal's V: gates instead of Barrage (held: a gate cast out ahead)
 			ArsenalGates.key(player, down);
+			return;
+		}
+		if (key == PowerKey.ABILITY_4 && ArsenalWing.orderKey(player, down)) {
+			// Sneak + B with the blades out: a tap sets them on what you look at, a hold flies them where you look
 			return;
 		}
 		if (key == PowerKey.ABILITY_4 && voided) {
@@ -256,8 +261,8 @@ public final class ArsenalPower implements Power {
 				if (ArsenalPlaces.sneakKey(player)) {
 					return;
 				}
-				// a standing Sword of Damocles is called back first
-				if (!ArsenalDamocles.recall(player)) {
+				// a standing Sword of Damocles is called back first; with the blades out, what's in hand joins them
+				if (!ArsenalDamocles.recall(player) && !ArsenalWing.give(player)) {
 					sendBack(player);
 				}
 			}
@@ -796,6 +801,7 @@ public final class ArsenalPower implements Power {
 
 	/** Called by {@code PlayerMixin} before a dying player's inventory drops: summoned weapons never become loot. */
 	public static void stripOnDeath(ServerPlayer player) {
+		ArsenalWing.onDeath(player);
 		dissolveWhere(player, s -> true, true);
 	}
 }

@@ -61,6 +61,7 @@ public final class ArsenalPowerClient implements PowerClient {
 		ArsenalPortalRenderer.init();
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_CANNONBALL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::cannonInput);
+		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::wingInput);
 		// the Void Arsenal's aura, on every corrupted arsenal user in view
 		ClientTickEvents.END_CLIENT_TICK.register(ArsenalAura::tick);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
@@ -120,6 +121,34 @@ public final class ArsenalPowerClient implements PowerClient {
 			if (net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.canSend(com.jaymospowers.power.arsenal.ArsenalCannons.Hold.TYPE)) {
 				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.arsenal.ArsenalCannons.Hold(down));
 			}
+		}
+	}
+
+	private static int wingHeld = -1;
+
+	/**
+	 * The wing's key (Sneak + V; the Void Arsenal's Sneak + X) held with the blades out: the order wheel opens once it
+	 * has been down {@link com.jaymospowers.power.arsenal.ArsenalWing#HOLD_TICKS}. (With no blades out the server calls them.)
+	 */
+	private static void wingInput(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null || minecraft.gui.screen() != null || player.getAttached(com.jaymospowers.power.arsenal.ArsenalWing.WING) == null
+			|| !com.jaymospowers.core.Powers.has(player, ArsenalPower.INSTANCE)) {
+			wingHeld = -1;
+			return;
+		}
+		net.minecraft.client.KeyMapping key = Fate.isCorrupted(player) ? skillKey : JaymosPowersClient.keyMapping(PowerKey.ABILITY_3);
+		if (key == null || !key.isDown()) {
+			wingHeld = -1;
+			return;
+		}
+		if (wingHeld < 0) {
+			// only a press that began with Sneak held is the wing's
+			wingHeld = player.isShiftKeyDown() ? 0 : Integer.MIN_VALUE;
+		}
+		if (wingHeld >= 0 && ++wingHeld >= com.jaymospowers.power.arsenal.ArsenalWing.HOLD_TICKS) {
+			wingHeld = Integer.MIN_VALUE;
+			minecraft.gui.setScreen(new ArsenalWingScreen(key));
 		}
 	}
 
