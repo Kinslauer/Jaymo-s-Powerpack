@@ -80,15 +80,14 @@ def render(path, hide=(), anim=None, t=0.0, yaw=35.0, scale=8.0, tex=None, backg
 	tracks = {}
 	if anim:
 		a = next(x for x in d["animations"] if x["name"].split(".")[-1] == anim)
-		old = [int(x) for x in str(d["meta"].get("format_version", "5.0")).split(".")[:2]] < [5, 0]
 		for bu, an in a["animators"].items():
 			for k in an["keyframes"]:
 				p = k["data_points"][0]
 				v = [float(p["x"]), float(p["y"]), float(p["z"])]
-				if old and k["channel"] in ("rotation", "position"):
-					v[0] = -v[0]
-					if k["channel"] == "rotation":
-						v[1] = -v[1]
+				# our generators' keyframes (humanoid_moves.py's signs): +x swings a hanging limb forward (to -z), +y turns
+				# to the model's right (+x), +z lifts the right arm out
+				if k["channel"] == "rotation":
+					v[1] = -v[1]
 				tracks.setdefault((bu, k["channel"]), []).append((float(k["time"]), v))
 
 	def world(bu):
