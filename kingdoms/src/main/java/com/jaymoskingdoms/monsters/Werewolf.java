@@ -119,6 +119,8 @@ public class Werewolf extends LegendMonster {
 		});
 		this.goalSelector.addGoal(2, new LeapAtTargetGoal(this, 0.45F));
 		this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2, true));
+		// Andy: "werewolves can also eat the corpses and parts": the beast with nothing to hunt eats the dead
+		this.goalSelector.addGoal(4, new com.jaymoskingdoms.Devouring.DevourGoal(this));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));

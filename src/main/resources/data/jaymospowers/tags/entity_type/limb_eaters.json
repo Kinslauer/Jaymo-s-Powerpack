@@ -1,0 +1,97 @@
+{
+	"values": [
+		"minecraft:wolf",
+		"minecraft:fox",
+		"minecraft:polar_bear",
+		"minecraft:cat",
+		"minecraft:ocelot",
+		{
+			"id": "#jaymoskitchen:scavengers",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:feral_wolf",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:coyote",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:grizzly",
+			"required": false
+		},
+		{
+			"id": "naturalist:bear",
+			"required": false
+		},
+		{
+			"id": "naturalist:black_bear",
+			"required": false
+		},
+		{
+			"id": "naturalist:lion",
+			"required": false
+		},
+		{
+			"id": "naturalist:tiger",
+			"required": false
+		},
+		{
+			"id": "naturalist:hyena",
+			"required": false
+		},
+		{
+			"id": "naturalist:alligator",
+			"required": false
+		},
+		{
+			"id": "naturalist:komodo_dragon",
+			"required": false
+		},
+		{
+			"id": "naturalist:vulture",
+			"required": false
+		},
+		{
+			"id": "naturalist:coyote",
+			"required": false
+		},
+		{
+			"id": "bearminimum:brown_bear",
+			"required": false
+		},
+		{
+			"id": "bearminimum:black_bear",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:snowleopard",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:tiger",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:lynx",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:caracal",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:blackbear",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:crocodile",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:komododragon",
+			"required": false
+		}
+	]
+}

@@ -86,6 +86,15 @@ public class SeveredPart extends Entity {
 	private int kickCooldown;
 	/** (0.21.50) The blood of whoever lost it (RGB), or {@code BladeBlood.NO_BLOOD}: a skeleton's head never drips. */
 	private int blood = 0x7A0000;
+	/** Bites taken out of it so far, and what it came off (looked up from {@link #look()} once). */
+	private int bitten;
+	private @org.jspecify.annotations.Nullable EntityType<?> was;
+	private boolean wasLooked;
+
+	/** Bites until a limb, or a head, is eaten; the chance a bone is left of it, and how hard each bite tugs it. */
+	static final int BITES_LIMB = 3, BITES_HEAD = 4;
+	static final float BONE_LEFT = 0.5F;
+	static final double TUG = 0.12;
 
 	public SeveredPart(EntityType<? extends SeveredPart> type, Level level) {
 		super(type, level);
@@ -246,6 +255,16 @@ public class SeveredPart extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (this.getVehicle() != null) {
+			// in a carrion bird's talons (LimbEaters): it hangs under the bird, swaying as it flies
+			this.setDeltaMovement(Vec3.ZERO);
+			this.resetFallDistance();
+			if (this.level().isClientSide()) {
+				this.spinO = this.spin;
+				this.spin = Mth.sin(this.tickCount * 0.25F) * CARRY_SWAY;
+			}
+			return;
+		}
 		Player carrier = Carry.carrierOf(this);
 		if (carrier != null) {
 			if (pinned()) {
@@ -320,6 +339,84 @@ public class SeveredPart extends Entity {
 		}
 	}
 
+	/** What it came off (the body's kind, from its look), or null if that can't be told. */
+	public EntityType<?> bodyType() {
+		if (!this.wasLooked) {
+			this.wasLooked = true;
+			try {
+				CompoundTag tag = net.minecraft.nbt.TagParser.parseCompoundFully(look());
+				net.minecraft.resources.Identifier id = net.minecraft.resources.Identifier.tryParse(tag.getStringOr("id", ""));
+				this.was = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
+			} catch (Exception e) {
+				this.was = null;
+			}
+		}
+		return this.was;
+	}
+
+	/**
+	 * Whether something may eat it: lying loose (not carried, not nailed up, not a kept trophy, not burning), with flesh
+	 * on it (not a skeleton's bones, not a machine's, not the rotten undead's), and not a dead player's head they're
+	 * still looking out of.
+	 */
+	public boolean edible() {
+		if (this.isRemoved() || pinned() || this.trophy || this.isOnFire() || this.isPassenger() || Carry.carrierOf(this) != null
+			|| this.blood == BladeBlood.NO_BLOOD) {
+			return false;
+		}
+		EntityType<?> type = bodyType();
+		if (type != null && type.builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD)) {
+			return false;
+		}
+		if (part() == Dismember.HEAD && this.level().getServer() != null) {
+			Optional<UUID> owner = owner();
+			if (owner.isPresent() && this.level().getServer().getPlayerList().getPlayer(owner.get()) instanceof ServerPlayer player && !player.isAlive()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * {@code eater} bites into it: it's tugged toward the jaws, blood flies, and it's chewed. True when that was the last
+	 * of it: it's gone, and sometimes a bone is left on the ground.
+	 */
+	public boolean bite(ServerLevel level, Entity eater) {
+		Vec3 toEater = eater.position().subtract(this.position()).multiply(1.0, 0.0, 1.0);
+		if (toEater.lengthSqr() > 1.0E-4) {
+			Vec3 tug = toEater.normalize().scale(TUG);
+			this.setDeltaMovement(this.getDeltaMovement().add(tug.x, 0.08, tug.z));
+			this.needsSync = true;
+		}
+		this.age = Math.max(this.age, LEAK_TICKS);
+		float pitch = 0.7F + this.random.nextFloat() * 0.3F;
+		if (this.blood != BladeBlood.NO_BLOOD) {
+			level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY() + 0.15, this.getZ(), 6, 0.12, 0.08, 0.12, 0.05);
+		}
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), net.minecraft.sounds.SoundEvents.GENERIC_EAT.value(),
+			net.minecraft.sounds.SoundSource.NEUTRAL, 0.9F, pitch);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL,
+			net.minecraft.sounds.SoundSource.NEUTRAL, 0.6F, pitch);
+		if (++this.bitten < (part() == Dismember.HEAD ? BITES_HEAD : BITES_LIMB)) {
+			return false;
+		}
+		// the last of it, bone and all: a crack, and sometimes the bone's left
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), net.minecraft.sounds.SoundEvents.BONE_BLOCK_BREAK,
+			net.minecraft.sounds.SoundSource.NEUTRAL, 0.8F, 1.2F);
+		if (this.blood != BladeBlood.NO_BLOOD) {
+			level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 12, 0.2, 0.08, 0.2, 0.08);
+			com.jaymospowers.core.blood.BloodTrail.bleed(level, this, this.blood, 1, 0.15, LEAK_STAIN, 4);
+		}
+		if (this.random.nextFloat() < BONE_LEFT) {
+			net.minecraft.world.entity.item.ItemEntity bone = new net.minecraft.world.entity.item.ItemEntity(level, this.getX(), this.getY() + 0.1, this.getZ(),
+				new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE));
+			bone.setDefaultPickUpDelay();
+			level.addFreshEntity(bone);
+		}
+		this.discard();
+		return true;
+	}
+
 	/** (0.10.47) Someone walking into it on the ground kicks it along ahead of them, rolling and bouncing. */
 	private void kickedBy(ServerLevel level) {
 		for (Entity walker : level.getEntities(this, this.getBoundingBox().inflate(0.1),
@@ -353,6 +450,24 @@ public class SeveredPart extends Entity {
 			this.spinO = this.spin;
 			this.spin = Mth.sin(stride * 0.6662F) * CARRY_SWAY * Math.min(1.0F, carrier.walkAnimation.speed() * 2.0F + 0.15F);
 		}
+	}
+
+	/** Carried off in a bird's talons: it hangs this far below the bird's feet (blocks). */
+	static final double TALON_HANG = 0.25;
+
+	@Override
+	public Vec3 getVehicleAttachmentPoint(Entity vehicle) {
+		// the bird's riding point is on its back: hang below its feet instead
+		return new Vec3(0.0, vehicle.getPassengerRidingPosition(this).y - vehicle.getY() + TALON_HANG + MIDDLE, 0.0);
+	}
+
+	/** Grabbed up by {@code bird} to be carried off and eaten somewhere quiet. */
+	public boolean snatchedBy(Entity bird) {
+		if (!edible() || this.isPassenger()) {
+			return false;
+		}
+		this.setNoGravity(false);
+		return this.startRiding(bird, true, true);
 	}
 
 	@Override

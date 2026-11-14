@@ -2350,6 +2350,17 @@ public class CorpseEntity extends Entity {
 		return killedBy(mob) || !killedByPlayer;
 	}
 
+	/**
+	 * Whether a werewolf may eat this body (Andy: "werewolves can also eat the corpses and parts"): any body with flesh
+	 * on it, lying still on the ground, whoever it was and whoever killed it. Not the risen dead's rot or bones, not
+	 * iron, not players' own bodies (their things stay theirs), and nothing burning, carried or carted.
+	 */
+	public boolean isFleshForDevourer() {
+		return !(isRemoved() || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER
+			|| isPlayerCorpse() || isMachine() || isOnFire() || carrier() != null || isPassenger()
+			|| isTumbling() || isNoGravity() || this.entityData.get(CRUMBLING));
+	}
+
 	/** (0.4.35) A scavenger's bite: the body jerks hard, torn at. Returns the bites taken so far. */
 	int bite() {
 		jolt(true);

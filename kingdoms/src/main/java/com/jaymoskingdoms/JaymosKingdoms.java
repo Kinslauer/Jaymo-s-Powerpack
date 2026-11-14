@@ -778,6 +778,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
 		WerewolfPlayers.register();
+		Devouring.register();
 		// 0.7.66: the night's gifts for vampire and werewolf players (dash, groundpound, leap, howl, kin-sense, wings...;
 		// their attachments)
 		LOGGER.debug("night gift attachments: {} {}", NightGifts.GIFT, VampirePlayers.HALF_TURN);
