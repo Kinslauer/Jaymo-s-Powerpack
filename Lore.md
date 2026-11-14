@@ -1905,6 +1905,13 @@ real one tied up the same way. The difference shows when the face comes off. A s
 fights or bolts; a changeling is a person who wanted the hearth, and it only runs. Hurt badly enough, either one loses
 the face. Both are rare: a village loses one of its own to them once in a long while, never three at once.
 
+(new) **A town in doubt** (Andy, 2026-11-14). A face seen coming off is not forgotten quickly. For some days after, the
+town trusts nobody's face, since anyone could be a changeling or a shifter now, and its people stop whoever comes close
+and ask the small things only the real one would know: who they go home to, what the dog is called, what the place they
+are standing in is named. A right answer is passed along and they are left alone. A wrong one is taken for a face
+slipping, and the watch is called. A changeling who never harmed the one it wore and told no lies is only shouted at;
+one who struck them, or lied in their name, is attacked on sight of its own face.
+
 (new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
 to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
 it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
