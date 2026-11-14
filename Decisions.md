@@ -590,3 +590,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - Andy (2026-11-14, elf776 thread): "Approved merge": PR #1546 merged (all five spirits' later arts + Two as One).
 - Andy (2026-11-14): "Merge" after #1546 had merged; taken as approval of the full "Two as One" lore paragraph.
 - Andy: "If you are found out and you lied or hurt the person you changrd into the villagers will attack, and be suspicious as anyone could be a changeling or shifter now. They will try and ask questions only they would know."
+- Andy approved the lore paragraph "A town in doubt" ("Approved, merge"); PR #1548.
