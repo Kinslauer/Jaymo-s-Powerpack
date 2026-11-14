@@ -260,6 +260,11 @@ public final class CrawlPose {
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
 		Long rising = downed ? player.getAttached(Downed.RISING) : null;
 		float rise = rising == null ? -1.0F : Mth.clamp((time - rising + partialTicks) / Downed.RISE_TICKS, 0.0F, 1.0F);
+		if (rise >= 0.0F && Downed.standless(player)) {
+			// (Andy, 2026-11-14: "the struggles should make sense dependent on the context") nothing to stand on: the rise is
+			// only its push up onto the arms, held there as they pull themselves together; never the knees or the feet
+			rise *= PUSH_SHARE;
+		}
 		if (rise >= 0.9F) {
 			RISEN.put(player.getId(), time);
 		} else if (downed) {

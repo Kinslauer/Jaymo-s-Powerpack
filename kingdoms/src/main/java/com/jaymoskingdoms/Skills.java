@@ -428,6 +428,28 @@ public final class Skills {
 	/** A player's experience in each pillar and ranks in each perk (by their keys). */
 	public record Progress(Map<String, Integer> xp, Map<String, Integer> ranks) {
 		public static final Progress EMPTY = new Progress(Map.of(), Map.of());
+
+		public Progress {
+			// (Andy, 2026-11-14: "Survival LV. -35791396") a finishing blow's endless damage once overflowed a grant and saved
+			// a pillar's experience far below nothing; read back, such a value is mended ({@link #mend})
+			if (xp.values().stream().anyMatch(v -> v != null && v < 0)) {
+				Map<String, Integer> mended = new HashMap<>();
+				xp.forEach((k, v) -> mended.put(k, mend(v)));
+				xp = Map.copyOf(mended);
+			}
+		}
+
+		/**
+		 * Experience saved below nothing: a grant of {@link Integer#MAX_VALUE} wrapped round (2^31 + 1 under what was there),
+		 * so that much back is what the player had, plus anything earned since; anything else below nothing is nothing.
+		 */
+		static int mend(int value) {
+			if (value >= 0) {
+				return value;
+			}
+			long back = (long)value + Integer.MAX_VALUE + 2L;
+			return back >= 0L && back <= Integer.MAX_VALUE ? (int)back : 0;
+		}
 		static final Codec<Progress> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("xp", Map.of()).forGetter(Progress::xp),
 			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("ranks", Map.of()).forGetter(Progress::ranks)
@@ -823,7 +845,8 @@ public final class Skills {
 		}
 		Progress p = of(player);
 		int before = p.xp(pillar);
-		int after = Math.min(total(pillar.maxLevel), before + amount);
+		// (in longs: an endless blow's experience must fill the pillar, not wrap round below nothing)
+		int after = (int)Math.min(total(pillar.maxLevel), (long)before + amount);
 		if (after == before) {
 			return;
 		}

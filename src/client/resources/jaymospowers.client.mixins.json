@@ -72,6 +72,8 @@
 		"DownedLivingEntityRendererMixin",
 		"DownedModelFeatureRendererMixin",
 		"DownedKeysMixin",
+		"DownedLookMixin",
+		"LimboSelfHiddenMixin",
 		"LimbKeysMixin",
 		"CarryCameraMixin",
 		"ProneCameraMixin",

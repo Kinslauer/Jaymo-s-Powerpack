@@ -148,7 +148,8 @@ public final class SurvivalSkill {
 				return;
 			}
 			NEXT_DAMAGE_XP.put(sp.getUUID(), now + XP_DAMAGE_TICKS);
-			Skills.grant(sp, Skills.Pillar.SURVIVAL, Math.max(1, (int) (damageTaken / XP_DAMAGE_PER)));
+			// (only what a body can take counts: a finishing blow's endless damage is no lesson)
+			Skills.grant(sp, Skills.Pillar.SURVIVAL, Math.max(1, (int) (Math.min(damageTaken, sp.getMaxHealth()) / XP_DAMAGE_PER)));
 		});
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
 			if (!(entity instanceof ServerPlayer sp) || Skills.rank(sp, Skills.Perk.LAST_STAND) == 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
