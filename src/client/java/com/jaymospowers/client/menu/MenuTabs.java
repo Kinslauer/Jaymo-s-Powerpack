@@ -2,6 +2,7 @@ package com.jaymospowers.client.menu;
 
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.PowerScreen;
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,9 +15,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -28,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.21.60) The character menu (Andy, after Kageborne's one-screen menu): one menu on H, a tab for each part of your
  * character in one strip across the top of the screen, whichever page is open (Andy: "too cluttered with menus ... maybe
- * a single scroll up top"): every page an icon, the open one with its name, an arrow at each end, and the wheel over the
+ * a single scroll up top"): every page an icon, the open one with its name, a Q and an E plate at each end (those keys, or a click on them, turn pages), and the wheel over the
  * strip turns to the next page. When they don't all fit, the strip shows the ones round the open page. Each tab is its own screen (the H screen, the K skill tree, the
  * journal...), so nothing is rewritten: this only draws the tabs over the page and switches between them. A page's own
  * key (K, M) opens it as before, and the tabs are on it, so the old keys open their tab.
@@ -176,6 +179,7 @@ public final class MenuTabs {
 			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> draw(s, graphics, mouseX, mouseY));
 			ScreenMouseEvents.allowMouseClick(screen).register((s, event) -> !click(s, (int)event.x(), (int)event.y()));
 			ScreenMouseEvents.allowMouseScroll(screen).register((s, mouseX, mouseY, horizontal, vertical) -> !scroll(s, (int)mouseX, (int)mouseY, vertical));
+			ScreenKeyboardEvents.allowKeyPress(screen).register((s, event) -> !key(s, event.key()));
 		});
 	}
 
@@ -259,7 +263,7 @@ public final class MenuTabs {
 			int x = side == 0 ? left : right;
 			boolean hover = PowerScreen.over(mouseX, mouseY, x, STRIP_Y, ARROW_W, STRIP_H);
 			plate(graphics, x, ARROW_W, false, hover);
-			graphics.text(font, side == 0 ? "<" : ">", x + (ARROW_W - 5) / 2, STRIP_Y + (STRIP_H - 8) / 2, hover ? PowerScreen.COLOR_GOLD : PowerScreen.COLOR_TEXT, false);
+			graphics.text(font, side == 0 ? "Q" : "E", x + (ARROW_W - 5) / 2, STRIP_Y + (STRIP_H - 8) / 2, hover ? PowerScreen.COLOR_GOLD : PowerScreen.COLOR_TEXT, false);
 			if (hover) {
 				hovered = along(page, side == 0 ? -1 : 1);
 			}
@@ -296,6 +300,16 @@ public final class MenuTabs {
 		} else if (mouseX >= slots.getLast().x() + slots.getLast().w() + STRIP_GAP) {
 			go(page, along(page, 1));
 		}
+		return true;
+	}
+
+	/** Q turns to the page before, E to the page after (not while a text box is being typed in); true if the key was one of them. */
+	private static boolean key(Screen screen, int key) {
+		Tab page = of(screen);
+		if (page == null || key != InputConstants.KEY_Q && key != InputConstants.KEY_E || screen.getFocused() instanceof EditBox) {
+			return false;
+		}
+		go(page, along(page, key == InputConstants.KEY_Q ? -1 : 1));
 		return true;
 	}
 

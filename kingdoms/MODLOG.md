@@ -13460,3 +13460,50 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Satyrs** (`beasts/Satyr`, `Satyrs`): goat-legged groves of 3-5 in forests, birch woods and meadows (creature spawn, weight 3), under a grey-coated eldest. At dusk they lay a campfire (or use one near home), the eldest plays one of three pipe tunes of our own (`kingdoms/tools/gen_satyr_pipes.py`) while the rest dance in a ring or sit; at dawn the fire they laid goes out. Strike one and the whole grove fights (head-butt charge, kicks) for 2 minutes. Give one honey, sweet or glow berries or wine (`jaymoskingdoms:satyr_gifts`) and the grove counts you a friend: by their fire while they play you get Regeneration and Luck. Goes down, dismemberable; drops leather and sometimes a goat horn.
 - Models, textures and animations from our own generators (`kingdoms/tools/gen_cyclops.py`, `gen_satyr.py`); two new loading-screen hints.
 - Built; not played.
+
+## 0.8.88 (2026-11-14): villager talk buttons legible
+
+- **MCA's villager screen, right-hand buttons**: every button in the column is now as wide as its longest label needs
+  (it still grows leftwards from the right edge, up to 150 or a third of the screen), so Ask about Money, Talk Them
+  Round, Where Were You and the rest read in full instead of scrolling cut off. A label still too long keeps its
+  scroll and shows its full text as a tooltip. The shown buttons stack with no gaps where hidden ones sat, the back
+  arrow moves out beside the wider column, and a dark panel in the purple of the info tags sits behind the column so
+  it reads over a busy world. Every page (main, Interact, Ask the Way, Professions, Work, Locations, a stranger's
+  page) gets it; every button keeps its own action, so all options and chat interactions work as before.
+- `client/mixin/mca/McaButtonColumnMixin` (after the other page mixins, priority 1100).
+- Built; not played.
+
+## 0.8.89 (2026-11-14): Captives and cleansers: no beating the downed, free captives walk free, a new life is a stranger
+
+- **Nobody cleanses the downed**: Truth followers sworn to cleanse a player (`CastOut`) stopped only for the dead, so they kept punching a downed player, and blows on a downed player are real harm: they beat Andy to death where he lay. Now they leave a downed player alone (back at it if they rise), and a downed cleanser doesn't hit either.
+- **Chained captives can't hit anyone**: a captive in chains has no AI, but `CastOut`'s blows were dealt by hand, so a chained captive who'd sworn to cleanse you punched you when you came to talk. Now a bound captive never hunts.
+- **Free captives aren't captives** (Andy: "if they are captive and find themselves able to walk free like this, they are no longer captive"): a captive nobody is leading home who is out of their chains, or has their legs back under them, drops captive status (`Captives.walkFree`): no more pleading to be freed while wandering about, and they're an ordinary villager again.
+- **A new life is a stranger** (Andy: "EVERYTHING resets"): what villagers and folk remembered, suspected or swore against a player was kept under their account, so a reincarnated player was still "unclean" to whoever cast out an old life. Each new life (`LifeStory.reincarnateAnew`) now gets its own id (`Recollections.life`, counted on the overworld in `Recollections.LIVES`): memories, bearings, suspicions and cast-outs of the old life stay with it.
+- Built; not played.
+
+## 0.8.90 (2026-11-14): falling trees crash through to the ground
+
+- Andy: "the trees in this clip keep falling, they should crash through what they hit, one time and straight to the ground. dealing damage the whole way." A felled tree now knocks over every standing tree its wood reaches, trunk or branch, however slowly it is turning and however big that tree is, so it goes on to the ground instead of stopping propped against it. The knocked tree goes over already turning as fast as the one that hit it, and knocks on in turn. A falling tree now only stops early against something that isn't a tree (a wall, a rise of ground). (`FallingTree.knock`, `Trees.knock` with a speed and a branch-to-trunk lookup `Trees.trunkOf`; the old size limit `KNOCK_SIZE` and the four-knock limit `KNOCKS_MOST` are gone.)
+- Why it kept falling: a propped tree checked every second whether it could turn one more degree, but its real next step was a different size, so it fell on, struck the same thing at once, and landed again with a crash, every second, forever (a tree lying raised over the ground did the same). It now checks the exact step it would take, from where it would start (`FallingTree.firstStep`, `FallingTree.free`). A tree already propped on a tree in an old save knocks that tree over at its next check.
+- Andy's guess was right about the speed: knocking used to need the wood to be moving at least 0.12 blocks a tick where it struck, so a tree that leaned into its neighbour early (the low trunk, or close dark-oak canopies) was too slow to knock it and stopped there.
+- Felled's trees (`FelledCompat.knockOn`): no speed or size limit either; one that stopped short still leaning (top 2.5+ blocks over its stump, within its first 30 s) knocks over the tree it rests on; it also looks one block lower ahead of each log.
+- Built; not played.
+
+## 0.8.91 (2026-11-14): no harm behind the loading screen; Death Sorcerers unattuned, raise one weak body
+
+- **Woke already downed** (Andy's clip, 2026-11-14): a new life on "Alone in the wild" found no wild spot and was left where
+  stasis let them down (the world's spawn, a village at night) with no arrival grace, while the loading screen was still up,
+  so whatever roamed there downed them before they could see. Now nothing harms a player who can't see the world yet
+  (loading screen up, land settling, or the 2 s after it lifts; `StoryGround.unseen`) and mobs going for them are called
+  off (`StoryStasis`), and the stay-where-you-are fallback gives the arrival grace too (`LifeStory.arrive`).
+- **A start that gives up lands on its own land** (Andy: "yes i want that"): when the start and then the wild both find
+  nowhere (the land budget ran out in a new, lagging world), the player is put on the land made for that start while they
+  waited (`LifeStory.madeGround`: open ground first, then any floor, then its origin), not left at the world's spawn.
+- **Death Sorcerers are never attuned** (Andy: "death magic is not ki, but it does draw on mana"): they hold and spend mana
+  as a natural caster (`Mana.hasMana`), with no attuning flare or line, no glow the attuned can read, no sight of others'
+  mana or spirits, and an amethyst seam doesn't take. One already attuned loses it and keeps the mana; a fresh one starts
+  full. Arcana shows and rune feeding works for them.
+- **No blade imbue for death** (Andy: "a weak reanimation of a single corpse, and they shouldnt get a blade imbuement"): a
+  tap of J raises the body you look at (`Necromancy.tapKey`), one risen at a time, at half health and half its blow.
+  Sneak and J is unchanged (Reap, death bolt, raise). The Reaper's sweep keeps its own cap of 3.
+- Built; not played.

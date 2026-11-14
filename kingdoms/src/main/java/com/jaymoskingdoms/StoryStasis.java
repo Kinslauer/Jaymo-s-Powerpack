@@ -6,12 +6,14 @@ import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Abilities;
@@ -55,6 +57,11 @@ public final class StoryStasis {
 		});
 		// a new body after a death: held afresh from where it woke (the old one's abilities went with it)
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> HELD.remove(newPlayer.getUUID()));
+		// (Andy 2026-11-14: "why did i spawn downed?") let down at their start while the loading screen was still up, a new
+		// life was set on by what roamed there and woke already down. Nothing harms one who can't see the world yet: the
+		// loading screen up, the land settling, or only just come out from behind it (StoryGround.unseen)
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
+			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !player.isCreative() && StoryGround.unseen(player)));
 	}
 
 	/** Whether {@code player} is still making their character, and so should be held. */
@@ -84,6 +91,10 @@ public final class StoryStasis {
 				if (held != null) {
 					release(player);
 				}
+				// (and nothing goes for them till they can see it coming)
+				if (shoo && StoryGround.unseen(player)) {
+					shoo(player);
+				}
 				continue;
 			}
 			if (held == null) {
@@ -91,10 +102,15 @@ public final class StoryStasis {
 			}
 			keep(player, held);
 			if (shoo) {
-				for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SHOO_RANGE), m -> m.getTarget() == player)) {
-					mob.setTarget(null);
-				}
+				shoo(player);
 			}
+		}
+	}
+
+	/** Calls off every mob near {@code player} that's going for them. */
+	private static void shoo(ServerPlayer player) {
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SHOO_RANGE), m -> m.getTarget() == player)) {
+			mob.setTarget(null);
 		}
 	}
 

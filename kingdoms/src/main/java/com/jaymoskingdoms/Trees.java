@@ -725,9 +725,24 @@ public final class Trees {
 	 * natural tree or has more than {@code mostLogs} logs. Returns how many logs came down.
 	 */
 	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs) {
+		return knock(level, struck, heading, by, mostLogs, 0.0F);
+	}
+
+	/**
+	 * As {@link #knock(ServerLevel, BlockPos, float, Entity, int)}, the knocked tree going over already turning
+	 * {@code speed} degrees a tick (the tree that struck it carries it along); a branch struck takes its whole tree over.
+	 */
+	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs, float speed) {
 		BlockState state = level.getBlockState(struck);
 		if (!state.is(BlockTags.LOGS) || fallen(level, struck, state)) {
 			return 0;
+		}
+		if (state.hasProperty(BlockStateProperties.AXIS) && state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+			// a branch: the upright trunk it grows from
+			struck = trunkOf(level, struck);
+			if (struck == null) {
+				return 0;
+			}
 		}
 		BlockPos foot = foot(level, struck);
 		List<BlockPos> logs = trunk(level, foot);
@@ -737,8 +752,32 @@ public final class Trees {
 		List<BlockPos> leaves = leavesOf(level, logs);
 		logs.sort(Comparator.comparingInt(BlockPos::getY));
 		leaves.addAll(FallingTree.hives(level, logs, by));
-		FallingTree.topple(level, foot, logs, leaves, heading, by, ItemStack.EMPTY, null);
+		FallingTree tree = FallingTree.topple(level, foot, logs, leaves, heading, by, ItemStack.EMPTY, null);
+		if (tree != null) {
+			tree.carried(speed);
+		}
 		return logs.size();
+	}
+
+	/** How far (blocks) round and below a branch to look for the upright trunk it grows from. */
+	static final int BRANCH_REACH = 2, BRANCH_DROP = 4;
+
+	/** The nearest upright log a branch at {@code branch} grows from (beside or below it), or null if none is near. */
+	private static @Nullable BlockPos trunkOf(ServerLevel level, BlockPos branch) {
+		BlockPos best = null;
+		int bestD = Integer.MAX_VALUE;
+		for (BlockPos q : BlockPos.betweenClosed(branch.offset(-BRANCH_REACH, -BRANCH_DROP, -BRANCH_REACH), branch.offset(BRANCH_REACH, 0, BRANCH_REACH))) {
+			BlockState there = level.getBlockState(q);
+			if (!there.is(BlockTags.LOGS) || !there.hasProperty(BlockStateProperties.AXIS) || there.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+				continue;
+			}
+			int d = q.distManhattan(branch);
+			if (d < bestD) {
+				bestD = d;
+				best = q.immutable();
+			}
+		}
+		return best;
 	}
 
 	/** The lowest log of the upright run {@code log} is in. */
