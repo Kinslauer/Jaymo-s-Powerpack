@@ -6,9 +6,7 @@ import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,7 +68,9 @@ public final class CryoCorruption {
 		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-HEARTH, -HEARTH, -HEARTH), at.offset(HEARTH, HEARTH, HEARTH))) {
 			if (CampfireBlock.isLitCampfire(player.level().getBlockState(pos))) {
 				if (Fate.purify(player)) {
-					player.sendSystemMessage(Component.translatable("message.jaymospowers.cryo_thawed").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
+					// (no chat: the fire's warmth reaches all the way in)
+					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.FIRECHARGE_USE,
+						net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 0.6F);
 				}
 				return;
 			}
@@ -79,6 +79,8 @@ public final class CryoCorruption {
 
 	/** (CryoPower#onCorrupted) The cold has their heart now. */
 	static void corrupted(ServerPlayer player) {
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.cryo_corrupted").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+		// (no chat: the cold finds their heart, heard and seen; the frost off them goes on after)
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.PLAYER_HURT_FREEZE,
+			net.minecraft.sounds.SoundSource.PLAYERS, 1.2F, 0.5F);
 	}
 }

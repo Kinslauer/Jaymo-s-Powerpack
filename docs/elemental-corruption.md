@@ -13,10 +13,14 @@ goblins, orcs); and Cryo got a simple corruption of its own (below), since it ha
 ## The killings (`ElementalCorruption.died`)
 A killing counts when the killer's power is one of the four, it is corrupted (`Fate.isCorrupted`), they aren't in the
 wrath or reclaimed, and the victim is an innocent. The count is saved (`elemental_killed`, kept through death).
-1. "You are angering things you cannot defend yourself from.", or one of four other wordings (Jung: "add variation";
-   `WARNING_WORDINGS` 5 each, picked at random, in `lang/parts/elemental_corruption.json`).
-2. "We will not stand for injustice in our name.", or one of four others.
-3. "You have enraged the Gods of your power and they now reclaim it": the reckoning, then the wrath. The count resets.
+The gods never speak in chat (Andy, 2026-11-14: "Remove the chat, add a cacophony of thunder and lightning over the
+user's general location"). Each killing brings their **outcry** (`ElementalCorruption.outcry`): for `OUTCRY_TICKS`
+the look of lightning (no fire, no harm) falls round the killer, about one bolt every `OUTCRY_BOLT_EVERY` 4 ticks,
+`OUTCRY_NEAR` 6 to `OUTCRY_FAR` 28 blocks out, under thunder rolling from every side (a clap about every
+`OUTCRY_THUNDER_EVERY` 3 ticks). Not saved: a storm, not a state.
+1. The first: 60 ticks (3 s) of it.
+2. The second: 100 ticks (5 s).
+3. The third: 160 ticks (8 s), over the reckoning, then the wrath. The count resets.
 
 ## The reckoning (once, `Wrath.erupt`)
 - **Wind**: the overworld turns to a thunderstorm (`STORM_TICKS` 6000) and `BOLTS` 8 real bolts fall 4-10 blocks round
@@ -58,27 +62,27 @@ wrath or reclaimed, and the victim is an innocent. The count is saved (`elementa
   nothing and its passive tick stops (a Powers silencer and pauser, as a Dampening Draught does).
 - Purified meanwhile (the power's own cure, or **a Purifying Draught drunk while the power is gone**: penance,
   `ElementalCorruption.penance`), the corruption is cleansed for good and the power comes back **at once** (Jung).
-  Not purified, it comes back after the three days, still corrupted. A line in chat says which.
+  Not purified, it comes back after the three days, still corrupted. No chat: a far roll of thunder if it comes back still corrupted, a chime if clean. The penance draught rings (amethyst), the taking is one last low roll of thunder.
 
 ## Cryokinesis' corruption (`CryoCorruption`)
 - **Meter**: each creature that dies frozen (`ticksFrozen` > 0) by a Cryo user's hand adds `MOB` 4, a villager or
   player `PERSON` 15 (`Fate.addCorruption`; 100 corrupts).
-- **Corrupted**: a chat line ("The cold has found your heart, and it is hungry."), frost motes off them every half
+- **Corrupted**: a low freezing gasp (no chat), frost motes off them every half
   second, and the gods of the elements watching (above). Nothing else changes in the kit.
 - **The cure**: a Purifying Draught drunk within 3 blocks of a lit campfire (`CryoCorruption.thaw`) purifies it for good.
 
 ## Testing
 `/power wrath <targets> start|end|lift|clear`: the reckoning and wrath now, the wrath over now (power taken), the power
 back now, everything forgotten (count too). `/power corrupt @s` corrupts the power.
-1. `/power set @s wind`, `/power corrupt @s`. Kill a villager: chat line 1 (dark red). Kill a second: line 2. Kill a
-   Kingdoms barbarian, a pirate or a zombie: nothing. Kill a third villager: line 3, a thunderstorm and 8 bolts round
+1. `/power set @s wind`, `/power corrupt @s`. Kill a villager: 3 s of thunder and harmless lightning round you, no chat. Kill a second: 5 s of it. Kill a
+   Kingdoms barbarian, a pirate or a zombie: nothing. Kill a third villager: 8 s of it, a thunderstorm and 8 bolts round
    you.
 2. In the wrath: punch a zombie: about double damage, and you lose a quarter of what it took. Every 5 s you take half
    a heart. Sparks pour off you. Mobs round you run (a Kingdoms orc or a boss doesn't). Every 7 s lightning hits a mob
    near you for a heart.
-3. `/power wrath @s end`: the storm clears, chat says your power is gone; R G V B, Z and C do nothing; Wind's passive
-   tick stops. Drink a Purifying Draught: purified, and at once "Your power stirs in you again, clean."; the keys
-   work. Without the draught, `/power wrath @s lift`: "...It is still not clean."
+3. `/power wrath @s end`: the storm clears with a last low roll of thunder, your power is gone; R G V B, Z and C do nothing; Wind's passive
+   tick stops. Drink a Purifying Draught: purified (an amethyst ring, then a chime), and the keys
+   work at once. Without the draught, `/power wrath @s lift`: a far roll of thunder. No chat anywhere.
 4. Smoke (`/power set @s smoke`, corrupt, `/power wrath @s start`): a thin fog round you; mobs within 8 choke for half a
    heart every 3 s; smog pours off you. End it: the fog thins away.
 5. Gravity: on start, mobs and dropped items round you float up about 10 blocks and six blasts go off 10 blocks out.
@@ -87,7 +91,7 @@ back now, everything forgotten (count too). `/power corrupt @s` corrupts the pow
    round you. Cows and villagers near you freeze stiff and take freezing damage; a zombie doesn't.
 7. Cryo's corruption: `/power set @s cryo`, freeze a cow with Frost Breath and hit it to death while frozen: the
    corruption meter goes up 4 (a villager 15). `/power corrupt @s 90`, then one more frozen kill of a villager:
-   corrupted, the chat line, frost off you. Drink a Purifying Draught away from a fire: nothing; beside a lit
+   corrupted, a freezing gasp, frost off you. Drink a Purifying Draught away from a fire: nothing; beside a lit
    campfire: purified.
 8. Log out mid-wrath and back in: the wrath goes on where it was (it's counted in game time); log out reclaimed: still
    reclaimed.

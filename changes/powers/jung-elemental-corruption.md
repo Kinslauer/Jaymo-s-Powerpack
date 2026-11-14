@@ -1,8 +1,8 @@
 # Elemental Corruption: the gods of the elements take back a power used to murder
 
 - (Jung) A corrupted Wind, Smoke, Gravity or Cryokinesis user who kills a villager (never a barbarian or other camp
-  folk) is warned twice, each time in one of five wordings ("You are angering things you cannot defend yourself
-  from.", then "We will not stand for injustice in our name.", among others). The third killing: "You have enraged the Gods of your power and they now reclaim it".
+  folk) is warned twice, never in chat: thunder rolls and harmless lightning falls all round them, for 3 seconds the
+  first time and 5 the second. The third killing brings 8 seconds of it, and the gods take the power back.
 - The reckoning, once: Wind brings a thunderstorm and eight bolts round the killer; Smoke a thin fog; Gravity lifts
   everything round them about ten blocks and blasts the ground in a ring ten blocks out; Cryo turns every block within
   twelve to ice, with ice spikes seven tall.

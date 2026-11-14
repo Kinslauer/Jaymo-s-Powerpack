@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -52,8 +51,15 @@ public final class ElementalCorruption {
 	// ---- tuning ----
 	/** Killings before the gods take the power back. */
 	public static final int KILLS = 3;
-	/** How many wordings each of the two warnings has (lang: message.jaymospowers.elemental.warning_N_V, V from 1); one is picked at random. */
-	public static final int WARNING_WORDINGS = 5;
+	/**
+	 * (Andy: "Remove the chat, add a cacophony of thunder and lightning over the user's general location") The gods
+	 * speak in storms, never in chat: after each killing, bolts (the look of lightning: no fire, no harm) fall round the
+	 * killer under a roll of thunder for this many ticks, the first warning, the second and the third (the reckoning).
+	 */
+	public static final int[] OUTCRY_TICKS = {60, 100, 160};
+	/** A bolt every this many ticks of it (on average), landing this near to this far (blocks) round them, with this many thunderclaps besides. */
+	public static final int OUTCRY_BOLT_EVERY = 4, OUTCRY_THUNDER_EVERY = 3;
+	public static final double OUTCRY_NEAR = 6.0, OUTCRY_FAR = 28.0;
 	/** The wrath lasts this long (ticks): five minutes. */
 	public static final int WRATH_TICKS = 20 * 60 * 5;
 	/** The power taken away after it, this long (ticks): three in-game days. */
@@ -97,6 +103,8 @@ public final class ElementalCorruption {
 	}
 
 	private static final Map<Power, Wrath> WRATHS = new LinkedHashMap<>();
+	/** Players under the gods' outcry just now → its ticks left (not saved: a storm, not a state). */
+	private static final Map<java.util.UUID, Integer> OUTCRIES = new java.util.HashMap<>();
 	/** True while an element's own wrath is working on the world ({@link Wrath#tick}): what it does there is the gods', not doubled and never recoiling. */
 	private static boolean working;
 
@@ -153,7 +161,8 @@ public final class ElementalCorruption {
 	/** A Purifying Draught drunk while the gods have the power: penance, and the corruption is cleansed. */
 	public static void penance(ServerPlayer player) {
 		if ((reclaimed(player) || inWrath(player)) && Fate.isCorrupted(player) && Fate.purify(player)) {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.elemental.penance").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
+			// (no chat: somewhere, something old accepts it)
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5F, 0.5F);
 		}
 	}
 
@@ -166,14 +175,11 @@ public final class ElementalCorruption {
 		int killed = killer.getAttachedOrElse(KILLED, 0) + 1;
 		if (killed < KILLS) {
 			killer.setAttached(KILLED, killed);
-			// (Jung: "add variation to the first two lines") one of several wordings of each warning
-			int wording = 1 + level.getRandom().nextInt(WARNING_WORDINGS);
-			warn(killer, Component.translatable("message.jaymospowers.elemental.warning_" + killed + "_" + wording));
-			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.PLAYERS, 1.0F, killed == 1 ? 0.8F : 0.6F);
+			// the warning: thunder and lightning over them, longer the second time
+			outcry(killer, OUTCRY_TICKS[killed - 1]);
 			return;
 		}
 		killer.removeAttached(KILLED);
-		warn(killer, Component.translatable("message.jaymospowers.elemental.reclaim"));
 		begin(killer, level);
 	}
 
@@ -182,8 +188,44 @@ public final class ElementalCorruption {
 		return !(victim instanceof Player) && Carry.isVillager(victim) && !KingdomsCompat.barbarian(victim);
 	}
 
-	private static void warn(ServerPlayer player, Component line) {
-		player.sendSystemMessage(line.copy().withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+	/** The gods' outcry over {@code player} for {@code ticks}: a cacophony of thunder and lightning round them. */
+	public static void outcry(ServerPlayer player, int ticks) {
+		OUTCRIES.merge(player.getUUID(), ticks, Math::max);
+		player.level().playSound(null, player.getX(), player.getY() + 12.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 6.0F, 0.5F);
+	}
+
+	/** One tick of an outcry: now and then a bolt (the look of one) round them, and thunder rolling from all sides. */
+	private static void outcryTick(ServerPlayer player, ServerLevel level) {
+		Integer left = OUTCRIES.get(player.getUUID());
+		if (left == null) {
+			return;
+		}
+		if (left <= 1) {
+			OUTCRIES.remove(player.getUUID());
+		} else {
+			OUTCRIES.put(player.getUUID(), left - 1);
+		}
+		net.minecraft.util.RandomSource random = level.getRandom();
+		if (random.nextInt(OUTCRY_BOLT_EVERY) == 0) {
+			double angle = random.nextDouble() * net.minecraft.util.Mth.TWO_PI;
+			double far = net.minecraft.util.Mth.lerp(random.nextDouble(), OUTCRY_NEAR, OUTCRY_FAR);
+			int x = net.minecraft.util.Mth.floor(player.getX() + Math.cos(angle) * far), z = net.minecraft.util.Mth.floor(player.getZ() + Math.sin(angle) * far);
+			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
+			net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(level,
+				net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+			if (bolt != null) {
+				bolt.snapTo(x + 0.5, y, z + 0.5);
+				// (the look of it: the gods are shouting, not striking yet)
+				bolt.setVisualOnly(true);
+				level.addFreshEntity(bolt);
+			}
+		}
+		if (random.nextInt(OUTCRY_THUNDER_EVERY) == 0) {
+			double angle = random.nextDouble() * net.minecraft.util.Mth.TWO_PI;
+			level.playSound(null, player.getX() + Math.cos(angle) * 16.0, player.getY() + 10.0 + random.nextDouble() * 10.0,
+				player.getZ() + Math.sin(angle) * 16.0, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F + random.nextFloat() * 4.0F,
+				0.5F + random.nextFloat() * 0.5F);
+		}
 	}
 
 	/** The third killing: the reckoning, then the wrath. Also from the test command. */
@@ -193,6 +235,8 @@ public final class ElementalCorruption {
 			return;
 		}
 		player.setAttached(WRATH, level.getGameTime());
+		// the gods' loudest outcry, over the reckoning
+		outcry(player, OUTCRY_TICKS[KILLS - 1]);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 1.5F, 0.6F);
 		wrath.erupt(player, level);
 	}
@@ -209,7 +253,8 @@ public final class ElementalCorruption {
 		}
 		player.setAttached(RECLAIMED, level.getGameTime() + RECLAIM_TICKS);
 		Powers.releaseKeys(player);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.elemental.taken").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		// (no chat: one last roll of thunder as the gods take it)
+		level.playSound(null, player.getX(), player.getY() + 12.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F, 0.4F);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -222,8 +267,12 @@ public final class ElementalCorruption {
 			// (Jung: "it comes back immediately if you purify") purified by any means, the gods give it back at once
 			if (until != null && (now >= until || !Fate.isCorrupted(player))) {
 				player.removeAttached(RECLAIMED);
-				player.sendSystemMessage(Component.translatable(Fate.isCorrupted(player) ? "message.jaymospowers.elemental.returned_corrupted"
-					: "message.jaymospowers.elemental.returned_clean").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+				// (no chat: the power stirring again is heard, a far roll if it is still corrupted, a chime if clean)
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), Fate.isCorrupted(player) ? SoundEvents.LIGHTNING_BOLT_THUNDER
+					: SoundEvents.AMETHYST_BLOCK_CHIME, Fate.isCorrupted(player) ? SoundSource.WEATHER : SoundSource.PLAYERS, 1.0F, 0.6F);
+			}
+			if (player.isAlive()) {
+				outcryTick(player, level);
 			}
 			Long since = player.getAttached(WRATH);
 			if (since == null) {

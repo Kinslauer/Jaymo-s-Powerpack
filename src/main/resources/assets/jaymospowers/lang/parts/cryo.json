@@ -29,7 +29,5 @@
 	"message.jaymospowers.cryo_blizzard_wait": "Blizzard: %s s",
 	"hud.jaymospowers.cryo.breath": "Frost Breath",
 	"hud.jaymospowers.cryo.blizzard": "Blizzard",
-	"hud.jaymospowers.cryo.slide": "Ice Slide",
-	"message.jaymospowers.cryo_corrupted": "The cold has found your heart, and it is hungry.",
-	"message.jaymospowers.cryo_thawed": "The fire's warmth reaches all the way in. The hunger in the cold is gone."
+	"hud.jaymospowers.cryo.slide": "Ice Slide"
 }
