@@ -423,7 +423,7 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
-(new) **The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
+**The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
 nimbus cloud"). Besides the balloon skiff at the mast, the sky folk ride small skiffs of their own: a slab of the
 Aether's cold cloud packed onto a skyroot keel, with a cloudwool sail on a mast at the stern. She hangs in the air
 where she is left and goes where her rider looks. The cloud is the afterlife's own, and it reads the same ledger the
@@ -517,7 +517,7 @@ waterfall with no top ("follow the water the wrong way"), whales that swim throu
 stones tired of the ground, gold that grows on trees "higher", wizards on the floating rocks who "aren't hermits,
 they're halfway". A humming stone in your pack is best kept from the priests. Some villagers quietly build towers.
 
-(new) **The floor of the sky woods** (portable-mods thread, 2026-11-14; Andy picked "Living things" from The Aether II's
+**The floor of the sky woods** (portable-mods thread, 2026-11-14; Andy picked "Living things" from The Aether II's
 world pieces). Nothing in the Aether is tended by the gods any more, so the woods keep themselves. The sky trees shed, and
 their leaves lie in piles under them until they rot back into the soil. The **rotshroom** is the Aether's undertaker: it
 grows only where something is rotting, eats the litter and fruits. Moss takes damp, shaded holystone and leaves it mossy.
