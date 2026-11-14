@@ -419,6 +419,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Hollows.register();
 		// (0.7.643) and the blight that turns one slowly, and the death mid-turn that finishes it
 		HollowBlight.register();
+		// (2026-11-14) and townsfolk who see one risen Hollow react to it, once each (and its attachment)
+		LOGGER.debug("hollow sighting attachment: {}", HollowSighting.RISEN);
+		HollowSighting.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();

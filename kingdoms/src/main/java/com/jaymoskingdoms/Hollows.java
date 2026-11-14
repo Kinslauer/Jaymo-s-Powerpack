@@ -94,6 +94,8 @@ public final class Hollows {
 		Heritage.RISEN.remove(player.getUUID());
 		Heritage.set(player, Heritage.Kind.HOLLOW, true);
 		HeritageVariants.set(player, turn.look());
+		// (folk who see them now see the dead walking: HollowSighting)
+		HollowSighting.rose(player);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow.turned." + turn.line()).withStyle(ChatFormatting.DARK_GRAY,
 			ChatFormatting.ITALIC));
 		JaymosKingdoms.LOGGER.info("{} rose a Hollow ({})", player.getScoreboardName(), turn.look() == null ? "pallid" : turn.look().key());

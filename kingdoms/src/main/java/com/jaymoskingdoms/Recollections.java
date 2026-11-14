@@ -114,7 +114,10 @@ public final class Recollections {
 		// (0.7.523) {@link Promises}: made (for the chat AI only), kept, broken
 		PROMISED(0, 30, false, false, "%1$s promised you they would %2$s.", ""),
 		KEPT_WORD(4, 120, true, true, "%1$s kept their promise to you (to %2$s).", "%1$s kept their promise to %3$s (to %2$s)."),
-		BROKE_WORD(-6, 180, true, true, "%1$s broke their promise to you (to %2$s).", "%1$s broke their promise to %3$s (to %2$s).");
+		BROKE_WORD(-6, 180, true, true, "%1$s broke their promise to you (to %2$s).", "%1$s broke their promise to %3$s (to %2$s)."),
+		/** {@link HollowSighting}: saw them walking after death, one of the Hollow. */
+		SAW_TURNED(-3, 0, true, true, "You saw that %1$s had died and got up again, one of the Hollow: the walking dead.",
+			"%3$s saw that %1$s had died and got up again, one of the Hollow.");
 
 		final int weight, days;
 		final boolean remark, tellable;
