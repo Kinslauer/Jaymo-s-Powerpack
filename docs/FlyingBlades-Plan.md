@@ -28,7 +28,7 @@ of 36 rows on the pick page (https://claude.ai/artifact/FdTQFbbhv8615nRy6t3QnC).
 | Order wheel (formations, Whirl, spare, take a blade, send home) | short hold of the same key with the blades out | same |
 | Harry / steer | Sneak + B tap / hold, with the blades out | same |
 | Hand the wing what you hold | G with the blades out | same |
-| Blade Storm (patch 3) | hold V (a tap is still Barrage) | on the wheel |
+| Blade Storm | hold V (a tap is still Barrage, on letting go); also on the wheel | on the wheel |
 | Blade riding (patch 4) | double tap Jump | same |
 
 The Void Arsenal differs because its Sneak + V already steps through gates.
@@ -41,8 +41,10 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
 2. **Orders** (built): harry, steer by sight, whirl, ward (a guard raised, `Guard.raised`), spare mark, order wheel
    (`ArsenalWingScreen`), hand a weapon to the wing, your own weapons and loose rocks can fly (the wing is saved with the
    player, so they are never lost).
-3. **Blade Storm**: hold V, looping flight on `RiftBlade` (used by wing strikes too), each blade finds its own foe, the
-   wing feeds the storm, echo blades, trail ribbon and slash flash. The holder is slowed while it runs.
+3. **Blade Storm** (built, `ArsenalStorm` + `ArsenalStormRenderer`): hold V. The loops are a shared formula
+   (`ArsenalStorm.place`), not entities, so they follow the holder's aim. Each loop is spread to one side so a storm
+   covers a crowd; the wing feeds the storm; own weapons and rocks on the wing take turns in it; echo blades ignore walls;
+   ribbon and flash through `MagicFx`. The holder is slowed. Not done here: wing strikes still fly straight (`RiftBlade`).
 4. **Blade riding**: double tap Jump, fight from the blade, step off and send it, riding with broken legs (`LimbUse`
    wobble). Until mastered the ridden blade can go home at random (with a short warning shake).
 5. **Big moves**: Closing Ring, step to a blade, wing combos (Kingdoms' Weapon Forms engine through `PowersCompat`), the

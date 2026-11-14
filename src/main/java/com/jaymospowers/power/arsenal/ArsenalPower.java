@@ -55,7 +55,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>R - Reach Through: open a rift, pull a random weapon (+ ammo) into your hand.</li>
  * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown. A standing Sword of Damocles is called back first.</li>
- * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
+ * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at. Held: Blade Storm ({@link ArsenalStorm}).</li>
  * <li>B - Rift Chains ({@link ArsenalChains}): chains out of rifts hold what you aim at; B again yanks it to you.
  * Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
@@ -229,6 +229,10 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		if (!down) {
+			if (key == PowerKey.ABILITY_3 && ArsenalStorm.key(player, false)) {
+				// V let go: a tap was a Barrage, a hold ends its Blade Storm
+				return;
+			}
 			// let go of R before a held grab finished: an ordinary Reach after all
 			if (key == PowerKey.ABILITY_1 && ArsenalAnywhere.release(player)) {
 				reach(player, null);
@@ -266,7 +270,8 @@ public final class ArsenalPower implements Power {
 					sendBack(player);
 				}
 			}
-			case ABILITY_3 -> barrage(player);
+			// V: a tap is Barrage (on letting go), held it is Blade Storm
+			case ABILITY_3 -> ArsenalStorm.key(player, true);
 			// B: Rift Chains; the Void Arsenal's drops the Sword of Damocles instead (the pocket lives on Z)
 			case ABILITY_4 -> ArsenalChains.key(player);
 		}
@@ -329,6 +334,7 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
 		ArsenalWing.onLost(player);
+		ArsenalStorm.onLost(player);
 		ArsenalChains.onLost(player);
 		ArsenalStanding.closeAll(player, false);
 		ArsenalPlaces.forget(player);
@@ -353,6 +359,7 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.tick(player);
 		ArsenalCannons.tick(player);
 		ArsenalWing.tick(player);
+		ArsenalStorm.tick(player);
 		ServerPlayer grabbed = ArsenalAnywhere.tickGrab(player);
 		if (grabbed != null) {
 			reach(player, grabbed);
@@ -644,7 +651,7 @@ public final class ArsenalPower implements Power {
 
 	// ---------------------------------------------------------------- V: Barrage
 
-	private static void barrage(ServerPlayer player) {
+	static void barrage(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Cooldowns cd = cooldowns(player);

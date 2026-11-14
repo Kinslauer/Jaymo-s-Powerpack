@@ -126,7 +126,7 @@ public final class ArsenalWing {
 	/** What the whole wing is doing: hanging in its places, flying where its holder looks, or whirling round them. */
 	public static final int DOCKED = 0, STEER = 1, WHIRL = 2;
 	/** The order wheel's slices after the three formations. */
-	public static final int ORDER_WHIRL = 3, ORDER_SPARE = 4, ORDER_TAKE = 5, ORDER_HOME = 6, ORDERS = 7;
+	public static final int ORDER_WHIRL = 3, ORDER_SPARE = 4, ORDER_TAKE = 5, ORDER_HOME = 6, ORDER_STORM = 7, ORDERS = 8;
 
 	/**
 	 * One blade: what it is, when it goes home, when it is back in its place ({@code 0}: it never left), and whether it
@@ -442,7 +442,7 @@ public final class ArsenalWing {
 	}
 
 	/** A thing the blades may strike: alive, in this world, not their holder and not the holder's own animal. */
-	private static boolean fair(ServerPlayer player, LivingEntity target) {
+	static boolean fair(ServerPlayer player, LivingEntity target) {
 		return target != player && target.isAlive() && target.level() == player.level()
 			&& !(target instanceof OwnableEntity owned && owned.getOwner() == player)
 			&& !SPARED.getOrDefault(player.getUUID(), Set.of()).contains(target.getUUID());
@@ -631,6 +631,7 @@ public final class ArsenalWing {
 			}
 			case ORDER_TAKE -> take(player, wing);
 			case ORDER_HOME -> dismiss(player, wing);
+			case ORDER_STORM -> ArsenalStorm.start(player, now + ArsenalStorm.WHEEL_TICKS);
 			default -> {
 			}
 		}

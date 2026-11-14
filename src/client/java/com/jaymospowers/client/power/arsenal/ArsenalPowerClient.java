@@ -56,6 +56,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalPortalRenderer::render);
 		// Attendant Blades: the weapons hanging round their holder
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalWingRenderer::render);
+		// Blade Storm: the shoulder rift and the blades on their loops
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalStormRenderer::render);
 		// Rift Chains: the rifts around whatever is bound, and their chains
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalChainsRenderer::render);
 		ArsenalPortalRenderer.init();
