@@ -2208,3 +2208,8 @@ corpse' model that it came from".
 
 - `HudZones` reads the shifts set by Powers' `/hudmove` screen, so this mod's HUD pieces can be dragged to a new spot too.
 - Compiled; not played.
+
+## 0.6.20 (2026-11-14): a player's body can be made to rise (#1543)
+
+- `CorpseEntity.riseNow`: a player's body gets up at once as the zombie wearing their face, with what was left on it, as if it
+  had lain too long (Kingdoms' Reaper raises it). A headless body still never rises. Nothing changes without Kingdoms.
