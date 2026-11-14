@@ -2,5 +2,9 @@
 	"entity.jaymoskingdoms.zombie_knight": "Barrow Knight",
 	"item.jaymoskingdoms.zombie_knight_spawn_egg": "Barrow Knight Spawn Egg",
 	"entity.jaymoskingdoms.revenant": "Cryptbound Revenant",
-	"item.jaymoskingdoms.revenant_spawn_egg": "Cryptbound Revenant Spawn Egg"
+	"item.jaymoskingdoms.revenant_spawn_egg": "Cryptbound Revenant Spawn Egg",
+	"entity.jaymoskingdoms.laughing_bones": "Laughing Bones",
+	"item.jaymoskingdoms.laughing_bones_spawn_egg": "Laughing Bones Spawn Egg",
+	"entity.jaymoskingdoms.running_skull": "Running Skull",
+	"item.jaymoskingdoms.running_skull_spawn_egg": "Running Skull Spawn Egg"
 }

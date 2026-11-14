@@ -83,6 +83,7 @@ PALETTE = {
 	"cloth": (58, 82, 104), "leather": (88, 62, 40), "wood": (104, 72, 42), "gold": (184, 145, 58), "horn": (205, 191, 156),
 	"rust": (122, 74, 44), "shell": (36, 50, 44), "shell_hi": (64, 88, 76), "leg": (22, 26, 24), "eye": (160, 232, 255),
 	"steel": (168, 176, 184), "rime": (178, 196, 206), "hair": (38, 34, 36), "tail": (150, 112, 74),
+	"shroud": (46, 52, 62),
 }
 
 
@@ -270,7 +271,8 @@ def draugr_looks():
 
 
 def draugr():
-	b = Builder(128, 128, 11)
+	# (the sheet was 128 x 128 before the other ranks' arms were added below the older cubes)
+	b = Builder(128, 176, 11)
 	b.bone("root", None, (0, 0, 0))
 	# long legs gone to sinew, fur-wrapped boots, leather breeches
 	# (each limb in two, hinged at the knee and the elbow, so it can take humanoid_moves.py's animations)
@@ -323,6 +325,34 @@ def draugr():
 		y0 = TAIL_Y - w / 2 - (0.6 if i == len(TAIL) - 1 else 0.0)
 		b.cube(f"tail_{i}", (min(ax, bx), y0, min(az, bz)), (max(ax, bx), y0 + w, max(az, bz)), "tail" if i < 3 else "rime")
 		parent = f"tail_{i}"
+	# the other ranks' arms and dress, each its own bone so the renderer shows only its rank's (added after everything else,
+	# so the older cubes keep their places on the sheet): the archer's bow (its stave along the forearm's side, so it stands
+	# upright when the arm is held out), the scourge's staff and hood, the wight's rimed cloak, the hall-guard's second
+	# sword and the crest on its helm
+	b.bone("bow", "left_forearm", (-6.8, 14.5, 0))
+	b.cube("bow", (-7.2, 13, -8), (-6.4, 13.8, 8), "wood")
+	b.cube("bow", (-7.2, 13.8, -10), (-6.4, 14.6, -8), "wood")
+	b.cube("bow", (-7.2, 13.8, 8), (-6.4, 14.6, 10), "wood")
+	b.cube("bow", (-6.9, 14.6, -10), (-6.7, 14.8, 10), "bone")
+	b.bone("staff", "right_forearm", (6.8, 14.5, 0))
+	b.cube("staff", (6.3, 2, -2.6), (7.3, 34, -1.6), "wood")
+	b.cube("staff", (5.8, 34, -3.1), (7.8, 36.5, -1.1), "bone")
+	b.cube("staff", (6.3, 36.5, -2.6), (7.3, 38.5, -1.6), "eye")
+	b.bone("sword_left", "left_forearm", (-6.8, 14.5, 0))
+	b.cube("sword_left", (-7.3, 13, -1.5), (-6.3, 14.25, 1.5), "leather")
+	b.cube("sword_left", (-8.8, 13, -2.5), (-4.8, 14.5, -1.5), "gold")
+	b.cube("sword_left", (-7.55, 13.25, -16), (-6.05, 14.25, -2.5), "steel")
+	b.bone("cloak", "body", (0, 28, 3.3))
+	b.cube("cloak", (-5.5, 12, 3.3), (5.5, 28, 4.1), "shroud")
+	b.cube("cloak", (-5.5, 9, 3.3), (-1.5, 12, 4.1), "rime")
+	b.cube("cloak", (1, 10, 3.3), (5.5, 12, 4.1), "rime")
+	b.bone("hood", "head", (0, 28, 0))
+	b.cube("hood", (-5.2, 37.2, -5.2), (5.2, 38.2, 5.2), "shroud")
+	b.cube("hood", (-5.2, 27.5, 4.7), (5.2, 37.2, 5.5), "shroud")
+	b.cube("hood", (4.7, 27.5, -5.0), (5.5, 37.2, 4.7), "shroud")
+	b.cube("hood", (-5.5, 27.5, -5.0), (-4.7, 37.2, 4.7), "shroud")
+	b.bone("crest", "head", (0, 37, 0))
+	b.cube("crest", (-0.6, 37, -4.5), (0.6, 40, 4.5), "gold")
 	model = b.project("draugr")
 	R = "root"
 	walk = {
@@ -364,6 +394,25 @@ def draugr():
 			"shield": {"rotation": [(0, (0, 0, 90)), (0.2, (0, 40, 0)), (1.0, (0, 40, 0))]},
 			"body": {"rotation": [(0, Z), (0.2, (12, -15, 0)), (1.0, Z)]},
 			"head": {"rotation": [(0, Z), (0.2, (15, 0, 0)), (1.0, Z)]},
+		}),
+		anim("shoot", 1.0, "once", {
+			"left_arm": {"rotation": [(0, (35, 0, -8)), (0.3, (90, 0, 0)), (0.85, (90, 0, 0)), (1.0, (35, 0, -8))]},
+			"right_arm": {"rotation": [(0, (25, 0, 6)), (0.3, (90, 0, -18)), (0.75, (90, 0, -18)), (1.0, (25, 0, 6))]},
+			"right_forearm": {"rotation": [(0, Z), (0.3, (20, 0, 0)), (0.7, (110, 0, 0)), (0.8, (30, 0, 0)), (1.0, Z)]},
+			"body": {"rotation": [(0, Z), (0.3, (-4, 0, 0)), (0.75, (-8, 0, 0)), (0.85, (2, 0, 0)), (1.0, Z)]},
+			"head": {"rotation": [(0, Z), (0.3, (0, 0, -6)), (0.8, (0, 0, -6)), (1.0, Z)]},
+		}),
+		anim("sidestep", 0.5, "once", {
+			"body": {"rotation": [(0, Z), (0.15, (-10, 0, 18)), (0.5, Z)]},
+			"head": {"rotation": [(0, Z), (0.15, (0, 0, -14)), (0.5, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.15, (0, 0, 22)), (0.5, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.15, (20, 0, 8)), (0.5, Z)]},
+			R: {"position": [(0, Z), (0.15, (0, -1.5, 0)), (0.5, Z)]},
+		}),
+		anim("attack_twin", 0.7, "once", {
+			"body": {"rotation": [(0, Z), (0.2, (4, 25, 0)), (0.4, (-10, -25, 0)), (0.55, (-10, 20, 0)), (0.7, Z)]},
+			"right_arm": {"rotation": [(0, (25, 0, 6)), (0.2, (140, 0, 30)), (0.4, (30, 0, -25)), (0.7, (25, 0, 6))]},
+			"left_arm": {"rotation": [(0, (35, 0, -8)), (0.3, (140, 0, -30)), (0.55, (30, 0, 25)), (0.7, (35, 0, -8))]},
 		}),
 	]
 	# and every move of the humanoid library it has no move of its own for (the lore films' Warrior-born use them)
@@ -466,7 +515,8 @@ def skeleton_lord():
 
 
 EGGS = {"draugr": ((84, 94, 104), (160, 232, 255)), "barrow_beetle": ((36, 50, 44), (120, 160, 140)),
-		"bogre": ((92, 110, 70), (150, 112, 74))}
+		"bogre": ((92, 110, 70), (150, 112, 74)), "laughing_bones": ((200, 196, 180), (180, 140, 255)),
+		"running_skull": ((224, 220, 204), (60, 40, 90))}
 
 
 def eggs():

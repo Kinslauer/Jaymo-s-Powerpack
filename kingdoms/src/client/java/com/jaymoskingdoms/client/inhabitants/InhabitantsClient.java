@@ -52,6 +52,7 @@ public final class InhabitantsClient {
 	static final String[] DRAUGR_TAIL = {"tail_0", "tail_1", "tail_2", "tail_3", "tail_4"};
 
 	static final DataTicket<Boolean> DRAUGR_AXE = DataTicket.create("jaymoskingdoms_draugr_axe", Boolean.class);
+	static final DataTicket<Integer> DRAUGR_RANK = DataTicket.create("jaymoskingdoms_draugr_rank", Integer.class);
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
 	static final DataTicket<Integer> DRAUGR_MAIMED = DataTicket.create("jaymoskingdoms_draugr_maimed", Integer.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
@@ -111,6 +112,7 @@ public final class InhabitantsClient {
 		public void addRenderData(Draugr draugr, Void related, LivingEntityRenderState state, float partialTick) {
 			super.addRenderData(draugr, related, state, partialTick);
 			state.addGeckolibData(DRAUGR_AXE, draugr.axe());
+			state.addGeckolibData(DRAUGR_RANK, draugr.rank().ordinal());
 			state.addGeckolibData(DRAUGR_TAIL_ROLL, draugr.getUUID().hashCode());
 			state.addGeckolibData(DRAUGR_LIVING, draugr.living());
 			state.addGeckolibData(DRAUGR_MAIMED, draugr.maimed());
@@ -120,9 +122,23 @@ public final class InhabitantsClient {
 		public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 			super.adjustModelBonesForRender(info, snapshots);
 			boolean axe = info.getOrDefaultGeckolibData(DRAUGR_AXE, false);
-			snapshots.ifPresent("axe", bone -> bone.skipRender(!axe));
-			snapshots.ifPresent("sword", bone -> bone.skipRender(axe));
-			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
+			// each rank's own arms and dress: the archer's bow, the wight's cloak, the scourge's staff and hood (no horns
+			// through it), the hall-guard's second sword and crest
+			Draugr.Rank rank = Draugr.Rank.values()[info.getOrDefaultGeckolibData(DRAUGR_RANK, 0)];
+			boolean warrior = rank == Draugr.Rank.WARRIOR, scourge = rank == Draugr.Rank.SCOURGE;
+			snapshots.ifPresent("axe", bone -> bone.skipRender(!warrior || !axe));
+			snapshots.ifPresent("sword", bone -> bone.skipRender(warrior ? axe : rank != Draugr.Rank.WIGHT && rank != Draugr.Rank.HALL_GUARD));
+			snapshots.ifPresent("shield", bone -> bone.skipRender(!warrior || axe));
+			snapshots.ifPresent("bow", bone -> bone.skipRender(rank != Draugr.Rank.ARCHER));
+			snapshots.ifPresent("staff", bone -> bone.skipRender(!scourge));
+			snapshots.ifPresent("hood", bone -> bone.skipRender(!scourge));
+			snapshots.ifPresent("cloak", bone -> bone.skipRender(!scourge && rank != Draugr.Rank.WIGHT));
+			snapshots.ifPresent("sword_left", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
+			snapshots.ifPresent("crest", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
+			if (scourge) {
+				snapshots.ifPresent("right_horn", bone -> bone.skipRender(true));
+				snapshots.ifPresent("left_horn", bone -> bone.skipRender(true));
+			}
 			// the bronze chieftain's left horn broken off
 			snapshots.ifPresent("left_horn", bone -> bone.skipRender(look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
 			// a lore film's finisher took its head or its weapon arm

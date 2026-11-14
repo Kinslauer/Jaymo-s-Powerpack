@@ -45,3 +45,18 @@ Andy's picks from Immersive Pillagers, Mebahel's Draugr and Moog's Ocean Structu
   block in the other hand make a Crude Totem six times in ten (it saves you from death once, with Regeneration I for 15
   s and Weakness for 30 s); otherwise smoke and Weakness.
 - Lore: `Lore.md`, "The illagers keep accounts" (new, for Andy).
+
+- **The tomb's ranks.** The Stormborn Tomb's draugr are no longer all sword-and-shield or axe: about half still are, and
+the rest rise as an **archer** (stands off and shoots, weak with its hands), a **wight** (rimed cloak; a frost bolt from
+far off that slows and chills, its blade up close), a **scourge** (hooded, with a staff; a slow ki blast that bursts
+where it lands, no blade, backs away, and a blow breaks its casting) or a **hall-guard** (two swords and a crest, more
+health, steps aside from blows and most arrows). Bolts fly at where you stood a moment before, so keep moving. They
+read the fight too: a shield goes up (and takes everything from in front) while you draw a bow or ready a throw, a
+warrior or wight nearly dead backs off for a breath, and all of them press faster when you are nearly down. Draugr
+already in a world stay warriors. Each rank's gear is on the draugr's own model (`kingdoms/art/draugr.bbmodel`, sheet
+now 128 x 176); `kingdoms/tools/bbmodel_render.py` draws a textured picture of any of our Blockbench projects.
+
+- **Laughing bones.** Of the buried rooms that are not kept barrows, four in ten hold one or two laughing bones: a
+skeleton whose skull rolls away laughing when it falls and grows the body back after 12 seconds unless you smash it.
+The body drops nothing; the smashed skull spills bones, arrows and experience (and rarely the skull). A golden weapon
+ends the body for good. Compiled, not played.
