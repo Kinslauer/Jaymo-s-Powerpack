@@ -93,6 +93,16 @@ public final class RigActives {
 	static final float LAUNCH_RING = 2.2F, LAUNCH_SHAKE = 0.9F;
 	/** The same as full flight opens up in the air: a smaller ring, a lighter shake. */
 	static final float FLIGHT_RING = 1.4F, FLIGHT_SHAKE = 0.6F;
+	/** The flames drawn under the boots: length hovering, how much each block a tick of speed adds in flight, the flicker, and the width. */
+	static final double FLAME_LENGTH = 0.45, FLAME_STRETCH = 2.2, FLAME_FLICKER = 0.15;
+	static final float FLAME_WIDTH = 0.07F;
+	/** The crack as full flight breaks into sprint speed: the horizontal speed it comes at (b/t, times the frame's air speed), its ring, its shake, and the least ticks between two. */
+	static final double SONIC_SPEED = 0.95;
+	static final float CRACK_RING = 2.6F, CRACK_SHAKE = 1.1F;
+	static final int CRACK_GAP = 60;
+	/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
+	static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
+	static final double SPUTTER_KICK = 0.12;
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
 	private static final List<Missile> MISSILES_IN_FLIGHT = new ArrayList<>();
@@ -122,6 +132,8 @@ public final class RigActives {
 		int unibeamCooldown;
 		/** Game time the Core's overcharge (a lightning strike's) ends; 0 or past: none. */
 		long overUntil;
+		/** Game time the next sonic crack may come. */
+		long crackAt;
 		/** The jets' last position and facing, for flames that swing with the steering. */
 		@Nullable Vec3 jetPos;
 		float jetYaw;
@@ -377,8 +389,12 @@ public final class RigActives {
 			int cost = Rig.augment(player) == Rig.Augment.WIND ? Math.max(1, Math.round(base * WIND_HOVER_SHARE)) : base;
 			cost = Math.max(1, Math.round(cost * Rig.frame(player).hoverDrain));
 			if (!Rig.spend(player, cost)) {
+				boolean airborne = !player.onGround();
 				stopHover(player, state);
 				RigMind.empty(player);
+				if (airborne) {
+					sputter(player);
+				}
 				return;
 			}
 		}
@@ -390,6 +406,28 @@ public final class RigActives {
 		player.resetFallDistance();
 		if (state.hoverTicks % 2 == 0 && player.level() instanceof ServerLevel level) {
 			jets(level, player, state);
+		}
+	}
+
+	/**
+	 * The Core ran dry in the air: the thrusters cough what is left in them, and the wearer sinks slowly for
+	 * {@link #SPUTTER_TICKS} instead of dropping.
+	 */
+	private static void sputter(ServerPlayer player) {
+		player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SPUTTER_TICKS, 0, false, false, false));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.power_low"));
+		for (int i = 0; i < SPUTTERS; i++) {
+			later(player, 4 + i * SPUTTER_EVERY + player.getRandom().nextInt(4), () -> {
+				if (player.onGround() || !(player.level() instanceof ServerLevel level)) {
+					return;
+				}
+				Vec3 feet = player.position();
+				MagicFx.blast(level, feet.add(0.0, -0.1, 0.0), 0.35F, FLAME_COLOR);
+				level.sendParticles(MagicFx.miasma(0x303236, 1.0F), feet.x, feet.y - 0.2, feet.z, 4, 0.15, 0.05, 0.15, 0.01);
+				level.playSound(null, feet.x, feet.y, feet.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 0.6F + player.getRandom().nextFloat() * 0.3F);
+				player.push(0.0, SPUTTER_KICK, 0.0);
+				player.syncVelocity = true;
+			});
 		}
 	}
 
@@ -419,6 +457,15 @@ public final class RigActives {
 			level.sendParticles(MagicFx.mote(RigForgeBlock.FX_COLOR, 0.6F), palm.x, palm.y, palm.z, 0, wash.x, wash.y, wash.z, 1.0);
 		}
 		level.sendParticles(MagicFx.miasma(0x303236, 0.8F), feet.x, feet.y - 0.3, feet.z, 1, 0.1, 0.05, 0.1, 0.01);
+		// the flames themselves: a short tongue under each boot hovering, stretched out behind with the throttle in flight
+		double speed = heading.length() / 2.0;
+		double length = FLAME_LENGTH + (flying ? speed * FLAME_STRETCH : 0.0) + player.getRandom().nextDouble() * FLAME_FLICKER;
+		Vec3 along = kick.normalize();
+		for (int side = -1; side <= 1; side += 2) {
+			Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
+			MagicFx.beam(level, boot, boot.add(along.scale(length)), FLAME_WIDTH, FLAME_COLOR, 3);
+			MagicFx.beam(level, boot, boot.add(along.scale(length * 0.45)), FLAME_WIDTH * 0.5F, FLAME_HOT, 3);
+		}
 	}
 
 	/** Full flight's own costs: hunger, and a crash when a wall stops you short. */
@@ -434,6 +481,17 @@ public final class RigActives {
 			player.hurtServer(level, level.damageSources().flyIntoWall(), (float)(lost * lost * CRASH_DAMAGE));
 			com.jaymospowers.core.Shakes.send(player, (float)(lost * 6.0));
 			state.flying = false;
+		}
+		// breaking into sprint speed cracks the air, for everyone near
+		double sonic = SONIC_SPEED * Rig.frame(player).airSpeed;
+		if (state.lastPos != null && speed >= sonic && state.lastSpeed < sonic && player.level().getGameTime() >= state.crackAt) {
+			state.crackAt = player.level().getGameTime() + CRACK_GAP;
+			ServerLevel level = player.level();
+			Vec3 at = player.position().add(0.0, 0.9, 0.0);
+			MagicFx.ring(level, at, player.getLookAngle(), CRACK_RING, 0xF2F6FF, 8);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.7F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
+			com.jaymospowers.core.Shakes.around(level, at, 24.0, CRACK_SHAKE);
 		}
 		state.lastPos = pos;
 		state.lastSpeed = speed;

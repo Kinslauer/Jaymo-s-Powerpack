@@ -60,6 +60,9 @@ public final class RigClient {
 	static final int TAKEOVER_SCREEN = 30, TAKEOVER_TURN = 8, TAKEOVER_HANDS_OFF = 14;
 	static final float TAKEOVER_TURN_SHARE = 0.4F;
 
+	/** A Rig menu switch kept on this side only (never sent): whether a take-off goes straight on into full flight. */
+	static final int JET_START = -2;
+
 	private static KeyMapping rigKey;
 	private static final boolean[] powerKeysDown = new boolean[PowerKey.values().length];
 	/** The active J uses (one of {@link RigNet#CYCLE}). */
@@ -142,6 +145,10 @@ public final class RigClient {
 
 	/** (0.11.110) The radial menu's pick: an active becomes J's and is used now; a switch just flips. */
 	static void pick(int action) {
+		if (action == JET_START) {
+			RigFlightFeel.toggleJetStart();
+			return;
+		}
 		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY && action != com.jaymospowers.rig.RigPicks.TABLE) {
 			selected = action;
 		}
@@ -243,6 +250,7 @@ public final class RigClient {
 			}
 		}
 		RigScanClient.tick(minecraft, player);
+		RigFlightFeel.tick(minecraft, player);
 	}
 
 	/** The Rig key: a tap uses the active (Sneak: picks the next), a hold locks on. With nothing worn, it calls a parked suit. */
@@ -404,6 +412,10 @@ public final class RigClient {
 		} else if (launching && hoverTicks <= crouch + LAUNCH_TICKS) {
 			// off the ground in a burst, dying away into the hover
 			vy = LAUNCH_SPEED * (1.0 - (hoverTicks - crouch - 1) / (double)LAUNCH_TICKS);
+			if (hoverTicks == crouch + LAUNCH_TICKS && RigFlightFeel.jetStart() && Rig.level(player) >= Rig.FLIGHT_LEVEL) {
+				// the take-off switch: straight on into full flight
+				send(RigNet.FLIGHT);
+			}
 		} else if (minecraft.options.keyJump.isDown()) {
 			vy = HOVER_RISE;
 		} else if (minecraft.options.keyShift.isDown()) {

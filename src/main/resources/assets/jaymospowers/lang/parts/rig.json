@@ -227,6 +227,8 @@
  "message.jaymospowers.rig.night_needs": "Night vision needs the Helm's visor and the Core's charge",
  "screen.jaymospowers.rig_menu": "Rig",
  "gui.jaymospowers.rig_menu.hover": "Hover",
+ "gui.jaymospowers.rig_menu.jet_start": "Take Off Into Flight",
+ "message.jaymospowers.rig.power_low": "Power low. Gliding down.",
  "gui.jaymospowers.rig_menu.palm": "Palm Blast",
  "gui.jaymospowers.rig_menu.launcher": "Launcher",
  "gui.jaymospowers.rig_menu.unibeam": "Unibeam",

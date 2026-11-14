@@ -41,12 +41,12 @@ final class RigMenuScreen extends Screen {
 
 	/** The entries, clockwise from the top. */
 	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
-		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK};
-	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank"};
-	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1};
+		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START};
+	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	private static final int SLICE = 360 / ACTIONS.length;
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -71,6 +71,7 @@ final class RigMenuScreen extends Screen {
 			case 12 -> Items.PLAYER_HEAD;
 			case 13 -> Items.GOLD_INGOT;
 			case 14 -> Items.ARROW;
+			case 15 -> Items.ELYTRA;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -167,6 +168,7 @@ final class RigMenuScreen extends Screen {
 			case RigNet.HOVER -> RigClient.status.hovering();
 			case RigNet.FACEPLATE -> RigHelm.faceUp(player);
 			case RigNet.NIGHT -> RigHelm.night(player);
+			case RigClient.JET_START -> RigFlightFeel.jetStart();
 			default -> false;
 		};
 	}
@@ -257,7 +259,7 @@ final class RigMenuScreen extends Screen {
 		if (left > 0) {
 			return Component.translatable("gui.jaymospowers.rig_menu.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
 		}
-		if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER) {
+		if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START) {
 			return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
 		}
 		return Component.translatable("gui.jaymospowers.rig_menu.ready");
