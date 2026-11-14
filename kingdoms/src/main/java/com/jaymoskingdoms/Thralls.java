@@ -162,6 +162,8 @@ public final class Thralls {
 	public static final String RISEN_TAG = "jaymoskingdoms.reaper_risen";
 	/** Nothing with more health than this gets up as itself (no giants, no bosses). */
 	static final float RISEN_MOST_HEALTH = 150.0F;
+	/** What a risen body has at least, as a risen player does: how far it sees, its armour, its blow. */
+	static final double RISEN_SIGHT = 64.0, RISEN_ARMOUR = 2.0, RISEN_BLOW = 3.0;
 
 	/**
 	 * The dead get up as who they were, for the player {@code master}: a mob of {@code type} with the body's own saved
@@ -195,24 +197,52 @@ public final class Thralls {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			mob.setDropChance(slot, 0.0F);
 		}
-		mob.setCanPickUpLoot(false);
-		mob.setPersistenceRequired();
-		var sight = mob.getAttribute(Attributes.FOLLOW_RANGE);
-		if (sight != null) {
-			sight.setBaseValue(SIGHT + 8.0);
-		}
-		mob.addTag(RISEN_TAG);
-		mob.setAttached(TAG, new Tag(-1, master, true, level.getGameTime() + life));
 		level.addFreshEntity(mob);
-		LOADED.add(mob);
+		bind(level, mob, master, life);
 		level.sendParticles(ParticleTypes.SOUL, at.x, at.y + 0.3, at.z, 14, 0.35, 0.2, 0.35, 0.03);
 		level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.6F), at.x, at.y + 0.6, at.z, 24, 0.35, 0.5, 0.35, 0.01);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F, 0.7F);
 		return mob;
 	}
 
+	/**
+	 * {@code mob}, already in the world, is the Reaper's risen from now on, for the player {@code master}: a thrall for
+	 * {@code life} ticks, and one of the undead ({@link #risenDead}) with a risen player's sharpness: it sees as far, and
+	 * what was no fighter in life hits and shrugs off blows as a zombie does.
+	 */
+	public static void bind(ServerLevel level, Mob mob, UUID master, int life) {
+		mob.setCanPickUpLoot(false);
+		mob.setPersistenceRequired();
+		var sight = mob.getAttribute(Attributes.FOLLOW_RANGE);
+		if (sight != null) {
+			sight.setBaseValue(Math.max(sight.getBaseValue(), RISEN_SIGHT));
+		}
+		var armour = mob.getAttribute(Attributes.ARMOR);
+		if (armour != null) {
+			armour.setBaseValue(Math.max(armour.getBaseValue(), RISEN_ARMOUR));
+		}
+		var blow = mob.getAttribute(Attributes.ATTACK_DAMAGE);
+		if (blow != null) {
+			blow.setBaseValue(Math.max(blow.getBaseValue(), RISEN_BLOW));
+		}
+		mob.addTag(RISEN_TAG);
+		mob.setAttached(TAG, new Tag(-1, master, true, level.getGameTime() + life));
+		LOADED.add(mob);
+	}
+
+	/** One of the Reaper's risen: whatever it was in life, it is one of the undead now. */
+	public static boolean risenDead(Entity entity) {
+		return entity.entityTags().contains(RISEN_TAG);
+	}
+
 	/** Falls back to dust: a puff of souls and bone meal, and it's gone. */
 	static void crumble(ServerLevel level, Mob mob) {
+		if (risenDead(mob) && EntityType.getKey(mob.getType()).getNamespace().equals("jaymoskitchen")) {
+			// a risen player: put down properly, so what it carried of theirs is dropped, not lost
+			LOADED.remove(mob);
+			mob.kill(level);
+			return;
+		}
 		level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 1.0, mob.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
 		level.sendParticles(ParticleTypes.ASH, mob.getX(), mob.getY() + 0.8, mob.getZ(), 30, 0.3, 0.6, 0.3, 0.02);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SKELETON_DEATH, SoundSource.HOSTILE, 0.6F, 0.6F);

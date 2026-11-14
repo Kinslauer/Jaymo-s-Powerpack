@@ -754,6 +754,14 @@ public final class Reaper {
 		if (was == null) {
 			was = type;
 		}
+		if (body != null && KitchenCompat.isPlayerCorpse(body)) {
+			// a player: the zombie wearing their face, carrying what was left on them
+			Mob zombie = KitchenCompat.riseNow(body, level);
+			if (zombie != null) {
+				Thralls.bind(level, zombie, master, life);
+			}
+			return zombie;
+		}
 		if (was == null || was == net.minecraft.world.entity.EntityTypes.PLAYER) {
 			return null;
 		}
@@ -809,7 +817,7 @@ public final class Reaper {
 			return;
 		}
 		List<Entity> bodies = level.getEntities((Entity)null, player.getBoundingBox().inflate(DEAD_RANGE),
-			e -> KitchenCompat.isRaisableCorpse(e) && e.distanceToSqr(player) <= DEAD_RANGE * DEAD_RANGE);
+			e -> KitchenCompat.isReapableCorpse(e) && e.distanceToSqr(player) <= DEAD_RANGE * DEAD_RANGE);
 		if (bodies.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.reaper.no_dead").withStyle(s -> s.withColor(RED)));
 			return;

@@ -1708,6 +1708,20 @@ public class CorpseEntity extends Entity {
 		return kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER;
 	}
 
+	/**
+	 * A player's body is made to get up now (Kingdoms' Reaper raises it): the zombie wearing their face, with what was
+	 * left on the body, as if it had lain too long. The body is gone. Null for any other body, or a headless one.
+	 */
+	public @Nullable Mob riseNow(ServerLevel level) {
+		if (kind != CorpseKind.PLAYER || isRemoved() || (missing() & 1) != 0) {
+			return null;
+		}
+		Mob zombie = PlayerCorpses.reanimate(this, level, hotbar, selected);
+		level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+		discard();
+		return zombie;
+	}
+
 	/** An unburned zombie or skeleton gets back up, empty-handed (its gear was left in the corpse); a player, as a zombie. */
 	private void reanimate(ServerLevel level) {
 		if (kind == CorpseKind.PLAYER) {

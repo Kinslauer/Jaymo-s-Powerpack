@@ -483,6 +483,25 @@ public final class KitchenCompat {
 		return Boolean.TRUE.equals(call(PLAYER_CORPSE, corpse));
 	}
 
+	/** A player's body gets up now as the zombie wearing their face, with what was left on it (the body is gone); null if it can't. */
+	static net.minecraft.world.entity.@Nullable Mob riseNow(Entity corpse, net.minecraft.server.level.ServerLevel level) {
+		if (CORPSE == null || !CORPSE.isInstance(corpse)) {
+			return null;
+		}
+		try {
+			return CORPSE.getMethod("riseNow", net.minecraft.server.level.ServerLevel.class).invoke(corpse, level) instanceof net.minecraft.world.entity.Mob m ? m : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen riseNow failed: {}", e.toString());
+			return null;
+		}
+	}
+
+	/** A body the Reaper can raise: any a necromancer can ({@link #isRaisableCorpse}), and a player's too. */
+	static boolean isReapableCorpse(Entity entity) {
+		return isRaisableCorpse(entity) || CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
+			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity);
+	}
+
 	/** (0.7.132) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
 	static boolean hasValuables(Entity corpse) {
 		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));

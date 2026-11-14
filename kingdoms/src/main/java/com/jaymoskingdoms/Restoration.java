@@ -195,7 +195,7 @@ public final class Restoration {
 	}
 
 	static boolean undead(LivingEntity e) {
-		return e.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD);
+		return e.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) || Thralls.risenDead(e);
 	}
 
 	/** Someone a healer's magic is for: not a monster, not one going for {@code healer}, not undead. */
