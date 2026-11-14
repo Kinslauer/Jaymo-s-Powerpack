@@ -56,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * with a scythe", looking like Minecraft Comes Alive's Grim Reaper, and "Warlocks make pacts with the patrons, and the reaper
  * is now one you can pact with instead".
  * <ul>
- * <li><b>Who:</b> a Death Sorcerer, anyone who has learned a forbidden death spell, and a Warlock whose pact is with the
+ * <li><b>Who:</b> anyone but a Death Sorcerer who has learned a forbidden death spell, and a Warlock whose pact is with the
  * Reaper ({@link #called}); never a keeper of one of the five, and its keeper is never answered by one.</li>
  * <li><b>The Toll</b> (0 to {@link #MAX_TOLL}) is paid by the dead: kills, bodies raised, the downed reaped, corpses and
  * ghosts harvested. It grows through five stages ({@link #stage}): the Pall, the Mantle, the Reach (the hooded figure, and
@@ -257,13 +257,14 @@ public final class Reaper {
 		return state == null ? 0 : stage(state);
 	}
 
-	/** Whether the Reaper stands behind {@code player}: death magic is theirs, or their pact is with it, and none of the five keeps them. */
+	/** Whether the Reaper stands behind {@code player}: they learned death magic outside the Death Sorcerer's element, or their pact is with it, and none of the five keeps them. */
 	static boolean called(Player player) {
 		if (Spirits.state(player) != null) {
 			return false;
 		}
 		if (Necromancy.necromancer(player)) {
-			return true;
+			// (a Death Sorcerer's magic is their own element, not the Reaper's)
+			return false;
 		}
 		if (Classes.is(player, PlayerClass.WARLOCK)) {
 			// (a Warlock's magic is their patron's: only the pact with the Reaper itself brings it)

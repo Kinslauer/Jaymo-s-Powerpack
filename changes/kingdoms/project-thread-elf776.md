@@ -4,9 +4,9 @@ spirit like entity called the reaper. it grows in stages ... death magicians get
 same for them all, unlike the 5 spirits, and is immune to the grue's corruption as they are one in the same", then "it should
 be visible for ANYONE who is near death ... its death itself", "whenever a ghost is nearby ... animated harvesting it with a
 scythe", and "the reaper is now one you can pact with".
-- **Who has it** (`Reaper`): a Death Sorcerer, anyone who has learned a forbidden death spell (not the old raising and
-  draining scrolls), and a Warlock whose pact is with the Reaper. Never Blood Sorcerers, never a keeper of one of the five
-  spirits, and none of the five ever answers its keeper.
+- **Who has it** (`Reaper`): a Warlock whose pact is with the Reaper, and anyone of another class who has learned a
+  forbidden death spell (not the old raising and draining scrolls). Never Death Sorcerers (Andy: "death sorcerers should NOT
+  be attuned"), never Blood Sorcerers, never a keeper of one of the five spirits, and none of the five ever answers its keeper.
 - **The Reaper as a Warlock's pact**: a ninth choice beside the eight patrons. It has no shrine and no favour; its debts are
   blood or "a death by your hand" (paid by your next kill). It starts you with Blight and lets you learn every death spell.
 - **The Toll** (0-100) is paid by the dead: 1 a kill, 2 a body raised or one of the downed reaped, 1 a corpse harvested, 3 a
