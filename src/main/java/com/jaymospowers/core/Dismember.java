@@ -64,7 +64,8 @@ import org.jspecify.annotations.Nullable;
  * <li>The part flies off as a {@link SeveredPart} and the body is drawn without it, to the corpse (Jaymo's Kitchen reads
  * the {@code jaymoskitchen.missing.<part>} tags).</li>
  * <li><b>Head</b>: a player dies on the spot and sees through their fallen head until they respawn. Zombies and
- * skeletons ({@link #HEADLESS_UNDEAD}) fight on without one; a headless skeleton's arrows go wild. Any other mob either
+ * skeletons ({@link #HEADLESS_UNDEAD}) fight on without one, blind: they go by sound alone ({@link BlindHead}), and a
+ * headless skeleton's arrows go wild, loosed at the noise. Any other mob either
  * drops dead or staggers about blind for a few seconds first ({@link #STAGGER_CHANCE}).</li>
  * <li><b>Arm</b>: whatever that hand held falls, and it holds nothing more.</li>
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
@@ -113,6 +114,13 @@ public final class Dismember {
 	public static final float SPURT_SIZE = 0.45F, SPURT_SIZE_FALLEN = 0.8F;
 	/** (0.14.2) Overkill: a blow past this share of a part's health (on a broken limb, or past the head's zero) can sever it. */
 	public static final float SEVER_OVERKILL = 0.5F;
+	/**
+	 * (Andy: "armour on a part lowers the chance that part comes off") Each armour point on the slots over a part cuts the
+	 * chance to sever it by this share (of the bare chance), at most {@link #ARMOUR_GUARD_MAX} in all. The slots: head =
+	 * helmet, arms = chestplate, legs = leggings and boots. Diamond or netherite chestplate (8 points): 24% off; a full set
+	 * of diamond over a leg (leggings 6 + boots 3): 27% off; iron helmet (2): 6% off. Armour toughness doesn't count.
+	 */
+	public static final float ARMOUR_GUARD = 0.03F, ARMOUR_GUARD_MAX = 0.6F;
 	/** (0.14.2) Overkill's chance to sever, times the blade's scale ({@link #scale}). */
 	public static final float SEVER_BASE = 0.6F;
 	/**
@@ -213,6 +221,9 @@ public final class Dismember {
 			if (entity instanceof LivingEntity living && missing(living) != 0) {
 				// back from a reload: the leg modifiers are saved, the rest is ticking state
 				track(living);
+				if (living instanceof Mob mob) {
+					BlindHead.track(mob);
+				}
 			}
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
@@ -431,6 +442,8 @@ public final class Dismember {
 		scale *= com.jaymospowers.core.wounds.WillSkill.severScale(attacker, target);
 		// small bodies come apart easier
 		scale *= smallScale(target);
+		// (Andy) armour over the part guards it
+		scale *= armourGuard(target, part);
 		if (target.getRandom().nextFloat() >= Math.min(1.0F, SEVER_BASE * scale)) {
 			return false;
 		}
@@ -493,6 +506,8 @@ public final class Dismember {
 		float extra = target.entityTags().contains(RUBBER_TAG) ? RUBBER_SEVER_SCALE : 1.0F;
 		extra *= com.jaymospowers.core.wounds.WillSkill.severScale(striker, target);
 		extra *= smallScale(target);
+		// the chestplate guards the waist too
+		extra *= armourGuard(target, RIGHT_ARM);
 		float chance = zombie(target) ? ZOMBIE_HALVE_CHANCE : HALVE_CHANCE;
 		if (target.getRandom().nextFloat() >= Math.min(1.0F, chance * extra)) {
 			return false;
@@ -756,7 +771,15 @@ public final class Dismember {
 				com.jaymospowers.core.wounds.WillSkill.beheaded(by, target);
 			}
 			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
-			default -> legs(target, mask);
+			default -> {
+				legs(target, mask);
+				// (Andy: leg armour falls with the leg) boots are one item for both feet: they go with the first leg; the
+				// leggings go with the second.
+				dropArmour(level, target, EquipmentSlot.FEET);
+				if ((mask & (RIGHT_LEG | LEFT_LEG)) == (RIGHT_LEG | LEFT_LEG)) {
+					dropArmour(level, target, EquipmentSlot.LEGS);
+				}
+			}
 		}
 		return true;
 	}
@@ -818,7 +841,10 @@ public final class Dismember {
 			return;
 		}
 		if (target.getType().builtInRegistryHolder().is(HEADLESS_UNDEAD)) {
-			// it never needed it
+			// it never needed it, but it can't see without it (BlindHead)
+			if (target instanceof Mob mob) {
+				BlindHead.track(mob);
+			}
 			return;
 		}
 		if (target.getRandom().nextFloat() < STAGGER_CHANCE && target instanceof Mob) {
@@ -853,6 +879,47 @@ public final class Dismember {
 	public static InteractionHand hand(LivingEntity target, int part) {
 		HumanoidArm side = part == RIGHT_ARM ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+	}
+
+	/** What {@code target} wears in {@code slot} comes off and drops (the way a severed head's helmet does). */
+	private static void dropArmour(ServerLevel level, LivingEntity target, EquipmentSlot slot) {
+		ItemStack worn = target.getItemBySlot(slot);
+		if (!worn.isEmpty()) {
+			target.setItemSlot(slot, ItemStack.EMPTY);
+			drop(level, target, worn);
+		}
+	}
+
+	/**
+	 * (Andy: armour guards against severing) The armour points worn on the slots that cover {@code part}: a helmet for the
+	 * head, the chestplate for an arm, leggings and boots for a leg.
+	 */
+	static double armourOn(LivingEntity target, int part) {
+		double points = 0.0;
+		EquipmentSlot[] slots = switch (part) {
+			case HEAD -> new EquipmentSlot[] {EquipmentSlot.HEAD};
+			case RIGHT_ARM, LEFT_ARM -> new EquipmentSlot[] {EquipmentSlot.CHEST};
+			default -> new EquipmentSlot[] {EquipmentSlot.LEGS, EquipmentSlot.FEET};
+		};
+		for (EquipmentSlot slot : slots) {
+			ItemStack worn = target.getItemBySlot(slot);
+			if (worn.isEmpty()) {
+				continue;
+			}
+			double[] sum = {0.0};
+			worn.forEachModifier(slot, (attribute, modifier) -> {
+				if (attribute.is(Attributes.ARMOR) && modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+					sum[0] += modifier.amount();
+				}
+			});
+			points += sum[0];
+		}
+		return points;
+	}
+
+	/** (Andy: armour guards against severing) What's left of the chance to sever {@code part} after the armour over it: 1 bare. */
+	public static float armourGuard(LivingEntity target, int part) {
+		return 1.0F - (float) Math.min(ARMOUR_GUARD_MAX, armourOn(target, part) * ARMOUR_GUARD);
 	}
 
 	private static void drop(ServerLevel level, LivingEntity target, ItemStack stack) {
@@ -1031,7 +1098,8 @@ public final class Dismember {
 	public static boolean stagger(Mob mob) {
 		long[] state = STAGGERING.get(mob);
 		if (state == null) {
-			return false;
+			// (Andy: headless undead go blind) a zombie or skeleton that fights on has no sight: it goes by what it hears
+			return BlindHead.step(mob);
 		}
 		mob.setTarget(null);
 		mob.getNavigation().stop();
@@ -1055,6 +1123,11 @@ public final class Dismember {
 		Vec3 v = projectile.getDeltaMovement();
 		if (v.lengthSqr() < 1.0E-4) {
 			return;
+		}
+		// (Andy: headless undead go blind) a blind archer's arrow flies at the spot the noise came from, not at the player
+		Vec3 toNoise = BlindHead.aim(projectile, v);
+		if (toNoise != null) {
+			v = toNoise;
 		}
 		var random = shooter.getRandom();
 		float yaw = (random.nextFloat() * 2.0F - 1.0F) * BLIND_SPREAD;
