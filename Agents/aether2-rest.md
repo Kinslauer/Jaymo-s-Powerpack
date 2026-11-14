@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Portable Mods picks, patch 1: the rest of The Aether II
 branch: claude/project-thread-vb3yg2
 with: Claude (cloud thread "Port picked pieces from other mods")
-pr: 
+pr: 1491
 mods: powers
 versions: 
 started: 2026-11-13
@@ -34,3 +34,5 @@ layers, saddlebags, cloud skiff, mob behaviour, sentry golem idles, world pieces
 - Cloud skiff placed in Lore.md as a (new) paragraph after "The skiffs".
 
 ## Done
+- PR #1491 up 2026-11-14: young, glows/keratin/collar, saddlebag, golem fidgets, cloud skiff, zephyr campfire fear, slider grudge. Compiles, 38 models bake; not played.
+- World pieces not built: ~420 Aether II block ids we lack; Andy asked which groups.
