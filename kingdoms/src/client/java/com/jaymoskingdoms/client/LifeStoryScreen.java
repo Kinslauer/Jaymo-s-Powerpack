@@ -1174,7 +1174,8 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		if (this.skip != null) {
-			this.skip.visible = (s.question != null || s.gender) && !roadOnly();
+			// (Andy: "gender should be before you can select skip the story")
+			this.skip.visible = (s.question != null || s.gender) && !roadOnly() && (!McaCompat.LOADED || draft.gender >= 0);
 		}
 		if (this.asking) {
 			ask(graphics);
@@ -1660,7 +1661,8 @@ final class LifeStoryScreen extends Screen {
 		Answer raised = picked(Question.RAISED);
 		Classes.PlayerClass cls = youthClass();
 		return switch (f) {
-			case GENDER -> McaCompat.LOADED;
+			// (in MCA's creator the body is the one picked on the story's first page, before the skip)
+			case GENDER -> McaCompat.LOADED && !tabbed();
 			case HERITAGE, LOOK -> heritage() != null;
 			case RAISED_REALM -> raised != null && raised.realm();
 			case OPTION -> cls != null && !cls.options.isEmpty();
@@ -1754,7 +1756,7 @@ final class LifeStoryScreen extends Screen {
 		List<Component> out = new ArrayList<>();
 		net.minecraft.ChatFormatting plain = net.minecraft.ChatFormatting.WHITE, good = net.minecraft.ChatFormatting.GREEN;
 		switch (f) {
-			case GENDER -> say(out, "gui.jaymoskingdoms.creator.gender.desc", plain);
+			case GENDER -> say(out, "story.jaymoskingdoms.gender.desc", plain);
 			case HERITAGE -> {
 				if (kind != null) {
 					say(out, "heritage.jaymoskingdoms." + kind.key() + ".desc", plain);
@@ -1801,11 +1803,6 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		return out;
-	}
-
-	/** In MCA's creator the body is a man's or a woman's by its own buttons: the Life tab's first card shows it and sets it there. */
-	static void genderFromCreator(int gender) {
-		draft.gender = gender;
 	}
 
 	/** The creator's page: a row for each thing the story would have decided, then the harder life and the sparks as the story page has them. */

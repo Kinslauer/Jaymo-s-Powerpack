@@ -21,8 +21,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Andy: "if they hit skip the story, their start is randomized and ALL creation options are moved to a tab within the MCA
  * creator". The Life tab of MCA's start-up creator ({@code McaCreatorTabMixin}), there only for one who skipped the life
- * story: everything the story would have decided, set outright. Four small pages: your life (man or woman first, then
- * heritage, look, who raised you, childhood, class and its option, the power's affinity) and your nature (ideal, bond,
+ * story: everything the story would have decided, set outright. Four small pages: your life (heritage, look, who raised you, childhood, class and its option, the power's affinity) and your nature (ideal, bond,
  * flaw), one thing at a time as a card; a harder life (flaws and switches) and the presets
  * ({@link CharacterPresets}) in MCA's own buttons. The picks themselves are {@link LifeStoryScreen}'s;
  * nothing is sent till the creator is finished ({@link #seal}), so the story is lived once.
@@ -46,6 +45,12 @@ public final class CreatorTab {
 	/** Whether the story was skipped for this tab: MCA's creator opens with the story untold, and shows it. */
 	public static boolean on() {
 		return LifeStoryScreen.tabbed();
+	}
+
+	/** Man or woman, as picked on the story's first page before it was skipped ({@code LifeStory.MALE} or {@code FEMALE}; null: not picked). */
+	public static @Nullable String gender() {
+		int gender = LifeStoryScreen.gender();
+		return gender < 0 ? null : LifeStoryScreen.GENDERS[gender];
 	}
 
 	/** The heritage the rows make now (its key), for the creator's figure. */
@@ -198,11 +203,9 @@ public final class CreatorTab {
 
 	/**
 	 * Puts the tab's widgets on MCA's creator, in its data column. {@code add}: the screen's addRenderableWidget;
-	 * {@code rebuild}: the page set again, after any press (the cards follow the picks). {@code female} and
-	 * {@code setFemale}: the body the creator has made, and its own switch for it (the Life page's first card).
+	 * {@code rebuild}: the page set again, after any press (the cards follow the picks).
 	 */
-	public static void build(int width, int height, Font font, Consumer<AbstractWidget> add, Runnable rebuild, boolean female, Consumer<Boolean> setFemale) {
-		LifeStoryScreen.genderFromCreator(female ? 1 : 0);
+	public static void build(int width, int height, Font font, Consumer<AbstractWidget> add, Runnable rebuild) {
 		int x = width / 2, y = height / 2 + TOP, bottom = height / 2 + BOTTOM;
 		int subW = W / SUBS.length;
 		for (int i = 0; i < SUBS.length; i++) {
@@ -223,13 +226,7 @@ public final class CreatorTab {
 				lifeAt = Math.clamp(lifeAt, 0, fields.size() - 1);
 				LifeStoryScreen.Field f = fields.get(lifeAt);
 				card(add, rebuild, font, x, y, bottom, LifeStoryScreen.fieldLabel(f), lifeAt, fields.size(), LifeStoryScreen.fieldIcon(f), LifeStoryScreen.fieldValue(f),
-					LifeStoryScreen.fieldText(f), dir -> {
-						if (f == LifeStoryScreen.Field.GENDER) {
-							setFemale.accept(!female);
-						} else {
-							LifeStoryScreen.cycle(f, dir);
-						}
-					}, to -> lifeAt = to);
+					LifeStoryScreen.fieldText(f), dir -> LifeStoryScreen.cycle(f, dir), to -> lifeAt = to);
 			}
 			case 1 -> {
 				for (int i = 0; i < 8; i++) {

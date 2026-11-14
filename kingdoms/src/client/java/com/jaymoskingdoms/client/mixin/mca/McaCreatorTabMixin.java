@@ -51,10 +51,7 @@ abstract class McaCreatorTabMixin extends Screen {
 	@Inject(method = "setPage", at = @At("TAIL"))
 	private void jaymoskingdoms$lifePage(String page, CallbackInfo ci) {
 		if (CreatorTab.PAGE.equals(page) && CreatorTab.on()) {
-			VillagerEditorScreen editor = (VillagerEditorScreen)(Object)this;
-			CreatorTab.build(this.width, this.height, this.font, this::addRenderableWidget, () -> setPage(CreatorTab.PAGE),
-				editor.getVillager() != null && editor.getVillager().getGenetics().getGender() == Gender.FEMALE,
-				female -> ((McaEditorGenderInvoker)editor).jaymoskingdoms$updateGender(female ? Gender.FEMALE : Gender.MALE));
+			CreatorTab.build(this.width, this.height, this.font, this::addRenderableWidget, () -> setPage(CreatorTab.PAGE));
 		}
 	}
 }
