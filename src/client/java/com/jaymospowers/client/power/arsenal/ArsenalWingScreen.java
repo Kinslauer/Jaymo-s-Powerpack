@@ -22,7 +22,8 @@ import net.minecraft.world.item.Items;
 
 /**
  * The Attendant Blades' order wheel (the wing's key held with the blades out, like the places menu): the three
- * formations, Whirl, the mark that spares what you look at, taking a blade into your hand, and sending them home. Let
+ * formations, Whirl, the mark that spares what you look at, taking a blade into your hand, sending them home, Blade
+ * Storm, Closing Ring and stepping to a blade. Let
  * go of the key over a slice (or click) and the order goes ({@link ArsenalWing.Order}); the middle cancels. It doesn't
  * pause.
  */
@@ -33,7 +34,7 @@ final class ArsenalWingScreen extends Screen {
 	private static final int ACCENT = 0xFFB38CFF;
 	private static final int INFO_W = 230;
 	private static final int INFO_H = 30;
-	private static final Item[] ICONS = {Items.FEATHER, Items.ENDER_EYE, Items.SHIELD, Items.WIND_CHARGE, Items.POPPY, Items.IRON_SWORD, Items.BARRIER, Items.TRIDENT};
+	private static final Item[] ICONS = {Items.FEATHER, Items.ENDER_EYE, Items.SHIELD, Items.WIND_CHARGE, Items.POPPY, Items.IRON_SWORD, Items.BARRIER, Items.TRIDENT, Items.IRON_BARS, Items.ENDER_PEARL};
 
 	private final KeyMapping key;
 	private int selected = -1;
