@@ -553,3 +553,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, chain axe thread): "no hooking, a throw embeds the axe, and you have to remove it, either by closing the distance, or ripping it out." Built on PR #1534.
 - 2026-11-14 (Andy, Reaper thread): Lore paragraph "The Grue in the dark" approved ("looks good"). He also asked why the Long Dark does not darken the sky; building that.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1535 (the Grue grows, the dark feeds it) merged.
+- 2026-11-14 (Andy, undead illagers thread): the first reaped skins "just look like zombies": "the reaped need to keep the vindicator and pillager/ evoker bodies with hanging arms and undead skulls matching theirs"; own model built; then "these look good" and "merge". PR #1532 (the reaped) merged. Lore.md paragraph "The reaped" still (new).
