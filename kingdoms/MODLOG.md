@@ -13528,3 +13528,11 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - Andy: "the chain axe shouldnt have the toolbar attack until you lock on, that way your right click still throws the chain". Spell Engine gives the use key to the skill bar's first skill when the held item has no use pose of its own, so with the chain axe in hand right click cast Cleave (its RPG Series weapon skill) and the whirl and throw never started.
 - With Powers' Chain Axe in hand and no lock-on, the skill bar is empty: no Cleave, no Weapon Forms, no other bar moves (`Forms.lockOnly`, `Forms.barOff`, `SpellContainerSourceMixin`, `FormSkills.spells`), so right click whirls and throws the chain. Lock on and the bar comes back, its first skill on right click as before; the bar's dirty check now counts the lock, so it updates as soon as you lock or let go.
 - Compiled; not played.
+
+## 0.8.95 (2026-11-14): Stolen lives buried in shallow graves, never held in water
+
+- **Shallow graves** (Andy: "the shapeshifters should bury their stolen lives, in shallow graves, so much so you can hear (see) their text through the ground and find them that way"): 50-140 blocks from their settlement, a shapeshifter may now bury the real villager alive, tied up, in a shallow grave: two blocks of turned earth (coarse dirt) in soft ground, the villager standing in the dark under one end with one block of earth over their head (`Doubles.grave`). Their pleas show up through the ground (speech already shows through blocks), so you follow the words, dig the one block, and crouch and talk to them as with any captive. Once freed, they climb out onto the ground (`Doubles.unearth`, attachment `jaymoskingdoms:stolen_grave`).
+- Cellars stay (Andy: "it can use the cellars too"): each roll near a settlement is a grave or a cellar, half and half, at the cellar's old rate. Dungeon captives can still be stolen lives.
+- **Never held in water** (Andy: "anything but being spawned out in the water like last time"): a villager counted as "shut in under a ruin or village" (`Haunts.buried`) was judged by `WORLD_SURFACE`, which counts water, so a villager four blocks down in a village lake was bound as a stolen life where it swam. Now one in water is never taken, and the depth is measured to solid ground (`OCEAN_FLOOR`).
+- Loading hint 172.
+- Built; not played.
