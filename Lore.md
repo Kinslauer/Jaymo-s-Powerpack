@@ -1048,6 +1048,28 @@ Totem of Undying again, which they could once and cannot now: their camps raise 
 a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
 totem that holds death off once and leaves you weak, or a faceful of smoke.
 
+(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
+binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
+ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
+own, two swords and a crest, and steps aside from a blow as it did alive. None of them leaves the tomb. The
+**laughing bones** are not draugr and not Warrior-born: they are villagers' dead in barrows whose knights are gone,
+with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
+back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
+
+(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
+over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
+hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
+the one thing that wakes him. Whoever does it meets the hall's dead in waves first, and him last: a head and a half
+taller than his host, crowned over the horned helm, his beard hoar-white, his tail loose and not wrapped as a fighter
+keeps it. He falls once in each tomb. The Skeleton Lord's arena lies beyond the hall and is no part of this: the
+laughing king came to the tomb later and the draugr do not serve him. **Runes** cut for traps are the alchemists'
+answer to the jailer's craft: a stone from the crucible, laid on the ground and fed with mana or with the Reaper's
+Toll, that goes off under a monster's foot.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
@@ -1841,6 +1863,13 @@ might, and one drained to nothing loses their own shadow to them. **Shapeshifter
 them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
+
+(new) **Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
+same dark woods: a changeling can put on the face of anyone it has looked at closely, skin, hair and clothes together.
+Some of the lives stolen from the villages are worn by a changeling and not by a grey shapeshifter, and it keeps the
+real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
+fights or bolts; a changeling is a person who wanted the hearth, and it only runs. Hurt badly enough, either one loses
+the face. Both are rare: a village loses one of its own to them once in a long while, never three at once.
 
 (new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
 to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
