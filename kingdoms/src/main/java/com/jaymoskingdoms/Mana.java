@@ -218,18 +218,28 @@ public final class Mana {
 		return (attuned(viewer) || ManaAlchemy.readsMagic(viewer)) && !blindToMana(viewer);
 	}
 
-	/** A natural: an attuned Mage or Sorcerer. */
+	/**
+	 * Andy (2026-11-14): "death sorcerers are NOT attuned. death magic is not ki, but it does draw on mana". A Death
+	 * Sorcerer holds mana and casts from it as any Sorcerer does, but is never attuned: no flare, no glow for others to
+	 * read, no sight of anyone else's mana or spirits, and an amethyst seam doesn't take. Whether {@code player} has mana
+	 * of their own to spend: the attuned, and the Death Sorcerer.
+	 */
+	public static boolean hasMana(Player player) {
+		return attuned(player) || Necromancy.necromancer(player);
+	}
+
+	/** A natural: a Mage or Sorcerer with mana (attuned, or a Death Sorcerer's). */
 	public static boolean natural(Player player) {
-		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player));
+		return hasMana(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player));
 	}
 
 	public static float current(Player player) {
 		return player.getAttachedOrElse(MANA, 0.0F);
 	}
 
-	/** The most mana {@code player} holds (0 unattuned). */
+	/** The most mana {@code player} holds (0 without any, {@link #hasMana}). */
 	public static float max(Player player) {
-		if (!attuned(player)) {
+		if (!hasMana(player)) {
 			return 0.0F;
 		}
 		int points = Stats.value(player, Stats.Stat.ARCANA);
@@ -250,7 +260,7 @@ public final class Mana {
 
 	/** Mana back per second. */
 	public static float regen(Player player) {
-		if (!attuned(player)) {
+		if (!hasMana(player)) {
 			return 0.0F;
 		}
 		return (natural(player) ? NATURAL_REGEN : FOUND_REGEN) + REGEN_PER_POINT * Stats.value(player, Stats.Stat.ARCANA);
@@ -302,14 +312,14 @@ public final class Mana {
 
 	/** (0.7.245) Takes {@code amount} from {@code player}'s mana with no ripple and no strain (a spirit's upkeep, a release). */
 	public static void drain(ServerPlayer player, float amount) {
-		if (!player.isCreative() && attuned(player)) {
+		if (!player.isCreative() && hasMana(player)) {
 			set(player, current(player) - amount);
 		}
 	}
 
 	/** (0.7.245) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
 	public static boolean canPay(ServerPlayer player, float cost) {
-		return player.isCreative() || attuned(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
+		return player.isCreative() || hasMana(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
 	}
 
 	/** (0.7.244) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
@@ -322,7 +332,7 @@ public final class Mana {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (!attuned(player)) {
+		if (!hasMana(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.unattuned").withStyle(ChatFormatting.BLUE));
 			return false;
 		}
@@ -480,7 +490,17 @@ public final class Mana {
 	/** Every tick, for each player: a caster attuned, mana coming back (or bleeding off an overload), the amethyst felt. */
 	static void tick(ServerPlayer player) {
 		long now = player.level().getGameTime();
-		if (!attuned(player)) {
+		// (Andy 2026-11-14) a Death Sorcerer is never attuned: one who was (taken before this, or at a seam) is no longer,
+		// but keeps the mana; a fresh one starts full
+		boolean deathBound = Necromancy.necromancer(player);
+		if (deathBound && attuned(player)) {
+			player.removeAttached(ATTUNED);
+			player.removeAttached(OVERLOADED);
+		}
+		if (deathBound && !player.hasAttached(MANA)) {
+			set(player, max(player));
+		}
+		if (!attuned(player) && !deathBound) {
 			// (0.7.247) never while a newcomer can't see it: the flare waits till they're out from the story's screens
 			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player)) {
 				if (!StoryGround.unseen(player)) {

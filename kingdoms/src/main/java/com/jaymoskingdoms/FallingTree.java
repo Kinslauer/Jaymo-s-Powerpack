@@ -92,7 +92,7 @@ import org.jspecify.annotations.Nullable;
  * and a tree broken through comes apart in two, the part no longer held falling free ({@link #skipAttackInteraction}).
  * Its leaves drop off as it lies. It's kept with the world.
  * <p>
- * (0.7.586) It knocks over standing trees it strikes hard enough ({@link #knock}) and smashes through blocks weaker than
+ * (0.7.586) It knocks over standing trees it strikes ({@link #knock}) and smashes through blocks weaker than
  * its wood ({@link #smash}).
  */
 public final class FallingTree extends Entity {
@@ -144,12 +144,12 @@ public final class FallingTree extends Entity {
 	/** (0.7.456) Under this lean (degrees) it isn't lying yet. */
 	static final float LYING = 45.0F;
 	/**
-	 * (0.7.586) Andy: "the trees that fall should knock each other over". Its wood moving at all ({@link #HIT_SLOWEST})
-	 * where it strikes a standing tree knocks that tree over its way, if that tree has no more than {@link #KNOCK_SIZE}
-	 * times its own logs; it knocks over at most {@link #KNOCKS_MOST} (each of those can knock on).
+	 * (0.7.586) Andy: "the trees that fall should knock each other over". Andy: "they should crash through what they hit,
+	 * one time and straight to the ground. dealing damage the whole way". Any standing tree its wood reaches (trunk or
+	 * branch) goes over its way, however slowly it's turning and however big that tree is, already turning as fast as it
+	 * is ({@link #carried}); each of those knocks on in turn. A falling tree only comes to rest leaning on what isn't a
+	 * tree (a wall, a rise of ground), and stays there ({@link #rest}).
 	 */
-	static final float KNOCK_SIZE = 2.0F;
-	static final int KNOCKS_MOST = 4;
 	/** (0.7.586) The most blocks weaker than its wood ({@link #weaker}) it smashes through in a tick. */
 	static final int SMASH_MOST = 12;
 
@@ -195,8 +195,6 @@ public final class FallingTree extends Entity {
 	private boolean propped;
 	/** How far (blocks) it was raised as it came to lie, so its wood rests on the ground; taken back off if it falls on. */
 	private float lift;
-	/** (0.7.586) How many standing trees it has knocked over. */
-	private int knocks;
 	/** (0.7.588) Held in a giant's hand (and when it was last held there), and who threw it (never struck by it). */
 	private boolean held;
 	private int heldAt;
@@ -227,13 +225,13 @@ public final class FallingTree extends Entity {
 	 * The tree whose {@code logs} and {@code leaves} stood on {@code cut} comes down toward {@code heading}: they leave
 	 * the world now, and fall as one. What it gives goes to {@code sink} (null: where each block comes to rest).
 	 */
-	static void topple(ServerLevel level, BlockPos cut, List<BlockPos> logs, List<BlockPos> leaves, float heading, @Nullable Entity cutter,
+	static @Nullable FallingTree topple(ServerLevel level, BlockPos cut, List<BlockPos> logs, List<BlockPos> leaves, float heading, @Nullable Entity cutter,
 		ItemStack tool, @Nullable Consumer<ItemStack> sink) {
 		FallingTree tree = new FallingTree(TYPE, level);
 		tree.setPos(cut.getX() + 0.5, cut.getY(), cut.getZ() + 0.5);
 		int top = take(level, tree, cut, logs, leaves);
 		if (top <= 0) {
-			return;
+			return null;
 		}
 		tree.setAttached(HEADING, heading);
 		tree.reach = Math.max(2.0F, top * 0.55F);
@@ -242,6 +240,17 @@ public final class FallingTree extends Entity {
 		tree.sink = sink;
 		level.addFreshEntity(tree);
 		level.playSound(null, cut, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		return tree;
+	}
+
+	/** Knocked over by a tree turning {@code speed} degrees a tick: it goes over at least that fast. */
+	void carried(float speed) {
+		this.speed = Math.max(this.speed, speed);
+	}
+
+	/** How far (degrees) it turns on its next tick falling from where it leans now, starting from rest. */
+	private float firstStep() {
+		return START_SPEED + NUDGE + WEIGHT * Mth.sin(this.lean() * Mth.DEG_TO_RAD) / this.reach;
 	}
 
 	/**
@@ -484,11 +493,33 @@ public final class FallingTree extends Entity {
 			return;
 		}
 		float lean = this.lean();
-		if (lean >= 0.0F && lean < FLAT && !this.strikes(level, pieces, Math.min(FLAT, lean + 1.0F), 2)) {
+		// it looks as far as it would really turn next tick: looking only a degree on found room its first tick didn't
+		// have, so a propped tree fell on, landed again where it was with a crash, and did so every second for ever
+		float next = Math.min(FLAT, lean + this.firstStep());
+		if (lean >= 0.0F && lean < LYING) {
+			// propped on a tree (one left standing before trees always went over): that tree goes over now
+			this.knock(level, pieces, next);
+		}
+		if (lean >= 0.0F && lean < FLAT && this.free(level, pieces, next)) {
 			this.fallOn();
 		} else if (!this.rests(level, pieces)) {
 			hurl(this, Vec3.ZERO, lean >= 0.0F && lean < FLAT ? SPLIT_TUMBLE : 0.0F, null);
 		}
+	}
+
+	/**
+	 * Whether it could turn on to {@code next} from where it would start falling: lowered back onto its foot if it was
+	 * raised to lie ({@link #fallOn}), as its next tick sees it, or it'd fall on and land again where it lay.
+	 */
+	private boolean free(ServerLevel level, List<Piece> pieces, float next) {
+		if (this.lift == 0.0F) {
+			return !this.strikes(level, pieces, next, 2);
+		}
+		double y = this.getY();
+		this.setPos(this.getX(), y - this.lift, this.getZ());
+		boolean free = !this.strikes(level, pieces, next, 2);
+		this.setPos(this.getX(), y, this.getZ());
+		return free;
 	}
 
 	/** Whether any of its wood rests on something: a block under a log, or one it lies sunk in. Leaves hold nothing up. */
@@ -602,35 +633,22 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.7.586) Its wood, leaning {@code lean}, strikes a standing tree while moving ({@link #HIT_SLOWEST}): that tree is
-	 * knocked over the same way ({@link Trees#knock}), unless it's much bigger than this one.
+	 * (0.7.586) Its wood, leaning {@code lean}, strikes standing trees: every one it reaches is knocked over the same way
+	 * ({@link Trees#knock}), as fast as this one is turning, so nothing natural holds it up and it goes on to the ground.
 	 */
 	private void knock(ServerLevel level, List<Piece> pieces, float lean) {
-		if (this.knocks >= KNOCKS_MOST) {
-			return;
-		}
 		Quaternionf turn = turn(lean, this.heading());
-		float turning = this.speed * Mth.DEG_TO_RAD;
-		int logs = 0;
 		for (Piece p : pieces) {
-			if (p.blockState().is(BlockTags.LOGS)) {
-				logs++;
-			}
-		}
-		for (Piece p : pieces) {
-			if (p.y() < 1 || !p.blockState().is(BlockTags.LOGS) || turning * Math.abs(p.y() + 0.5F) < HIT_SLOWEST) {
+			if (p.y() < 1 || !p.blockState().is(BlockTags.LOGS)) {
 				continue;
 			}
 			BlockPos at = this.cell(this.where(p, turn));
-			BlockState there = level.getBlockState(at);
-			if (!there.is(BlockTags.LOGS) || !there.hasProperty(BlockStateProperties.AXIS) || there.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
+			if (!level.getBlockState(at).is(BlockTags.LOGS)) {
 				continue;
 			}
-			if (Trees.knock(level, at, this.heading(), this, Math.max(1, Math.round(logs * KNOCK_SIZE))) > 0) {
-				this.knocks++;
+			if (Trees.knock(level, at, this.heading(), this, Trees.FELL_MOST, this.speed) > 0) {
 				level.playSound(null, at, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
 				level.playSound(null, at, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
-				return;
 			}
 		}
 	}

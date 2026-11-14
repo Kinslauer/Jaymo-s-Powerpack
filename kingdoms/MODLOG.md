@@ -13480,3 +13480,37 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Free captives aren't captives** (Andy: "if they are captive and find themselves able to walk free like this, they are no longer captive"): a captive nobody is leading home who is out of their chains, or has their legs back under them, drops captive status (`Captives.walkFree`): no more pleading to be freed while wandering about, and they're an ordinary villager again.
 - **A new life is a stranger** (Andy: "EVERYTHING resets"): what villagers and folk remembered, suspected or swore against a player was kept under their account, so a reincarnated player was still "unclean" to whoever cast out an old life. Each new life (`LifeStory.reincarnateAnew`) now gets its own id (`Recollections.life`, counted on the overworld in `Recollections.LIVES`): memories, bearings, suspicions and cast-outs of the old life stay with it.
 - Built; not played.
+
+## 0.8.90 (2026-11-14): falling trees crash through to the ground
+
+- Andy: "the trees in this clip keep falling, they should crash through what they hit, one time and straight to the ground. dealing damage the whole way." A felled tree now knocks over every standing tree its wood reaches, trunk or branch, however slowly it is turning and however big that tree is, so it goes on to the ground instead of stopping propped against it. The knocked tree goes over already turning as fast as the one that hit it, and knocks on in turn. A falling tree now only stops early against something that isn't a tree (a wall, a rise of ground). (`FallingTree.knock`, `Trees.knock` with a speed and a branch-to-trunk lookup `Trees.trunkOf`; the old size limit `KNOCK_SIZE` and the four-knock limit `KNOCKS_MOST` are gone.)
+- Why it kept falling: a propped tree checked every second whether it could turn one more degree, but its real next step was a different size, so it fell on, struck the same thing at once, and landed again with a crash, every second, forever (a tree lying raised over the ground did the same). It now checks the exact step it would take, from where it would start (`FallingTree.firstStep`, `FallingTree.free`). A tree already propped on a tree in an old save knocks that tree over at its next check.
+- Andy's guess was right about the speed: knocking used to need the wood to be moving at least 0.12 blocks a tick where it struck, so a tree that leaned into its neighbour early (the low trunk, or close dark-oak canopies) was too slow to knock it and stopped there.
+- Felled's trees (`FelledCompat.knockOn`): no speed or size limit either; one that stopped short still leaning (top 2.5+ blocks over its stump, within its first 30 s) knocks over the tree it rests on; it also looks one block lower ahead of each log.
+- Built; not played.
+
+## 0.8.91 (2026-11-14): no harm behind the loading screen; Death Sorcerers unattuned, raise one weak body
+
+- **Woke already downed** (Andy's clip, 2026-11-14): a new life on "Alone in the wild" found no wild spot and was left where
+  stasis let them down (the world's spawn, a village at night) with no arrival grace, while the loading screen was still up,
+  so whatever roamed there downed them before they could see. Now nothing harms a player who can't see the world yet
+  (loading screen up, land settling, or the 2 s after it lifts; `StoryGround.unseen`) and mobs going for them are called
+  off (`StoryStasis`), and the stay-where-you-are fallback gives the arrival grace too (`LifeStory.arrive`).
+- **A start that gives up lands on its own land** (Andy: "yes i want that"): when the start and then the wild both find
+  nowhere (the land budget ran out in a new, lagging world), the player is put on the land made for that start while they
+  waited (`LifeStory.madeGround`: open ground first, then any floor, then its origin), not left at the world's spawn.
+- **Death Sorcerers are never attuned** (Andy: "death magic is not ki, but it does draw on mana"): they hold and spend mana
+  as a natural caster (`Mana.hasMana`), with no attuning flare or line, no glow the attuned can read, no sight of others'
+  mana or spirits, and an amethyst seam doesn't take. One already attuned loses it and keeps the mana; a fresh one starts
+  full. Arcana shows and rune feeding works for them.
+- **No blade imbue for death** (Andy: "a weak reanimation of a single corpse, and they shouldnt get a blade imbuement"): a
+  tap of J raises the body you look at (`Necromancy.tapKey`), one risen at a time, at half health and half its blow.
+  Sneak and J is unchanged (Reap, death bolt, raise). The Reaper's sweep keeps its own cap of 3.
+- Built; not played.
+
+## 0.8.92 (2026-11-14): Life tab: one thing at a time, with a picture and a box to read (#1553)
+
+- The Life tab in MCA's creator (for those who skip the life story) shows one thing to set at a time instead of a list of sliding buttons: its picture in a square like the life story's, arrows either side to change the pick, the pick's name, and under it a box with everything there is to read about it (a heritage's description, gift and flaw, a class's description, your upbringing's line and what it gives). The box wraps the text and scrolls with the mouse wheel when it runs long (Rubber-folk).
+- Back and Next at the bottom move to the thing before and the next.
+- "Skip the story" only shows once you have picked man or woman on the first page. MCA's creator then starts on that body, without its own man/woman buttons, as it does after a told story.
+- The Nature page (ideal, bond, flaw) has the same cards.
