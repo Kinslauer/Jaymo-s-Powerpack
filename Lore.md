@@ -195,7 +195,7 @@ kit.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
 
-(new) **How a power ends a fight** (power finishers; rewritten on Andy's ruling of 2026-11-14, for him to approve).
+**How a power ends a fight** (Andy, 2026-11-14).
 Nobody is taught how a power finishes a fallen foe, and nobody knows it ahead of time, the holder least of all. There
 is no name for it and no known way. Standing empty-handed over someone who is down, a holder does whatever feels
 natural in that moment, and the power answers in its own nature; they find out what it does as it happens. Because it
