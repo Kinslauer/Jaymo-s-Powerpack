@@ -49,3 +49,17 @@ text to become a console command; its kill-switch, rate-limit and robustness gap
 files skipped, `off` refuses after a wait too). Players see nothing yet: needs #1467 merged + pbdr, then `mcbot.py on`
 and an in-game test with Andy (not done). Answers take 10-150 s depending on NVIDIA's queue.
 - 2026-11-13 19:17 PR #1467 is merged into master; moved to Agents/Done.
+
+## Nov 13, 8:30 PM: proximity chat + abuse filter (Andy's ask)
+- Why the first test got no answers: Kingdoms' proximity chat cancels vanilla chat, so the log only has
+  `[chat] <display> (<account>) talk|whisper|shout|act: <text>` and `[ooc] <display> (<account>): <text>`.
+- The listener now reads those AND `[youth-ask] <account> <question>` (PR #1481, merged; not on the Deck yet: it runs
+  Kingdoms 0.8.42). The account in brackets goes straight to `/youth summon|say`. One message = one question (10 s
+  per account), so the `[chat]` and `[youth-ask]` lines of the same message don't double up.
+- Abuse filter (`abusive()` in mcbot.py): slurs, abuse, threats and insults at Youth are dropped silently, before
+  anything is logged, summoned or answered; the log says only "dropped a line from <account> (abuse filter)". YOUTH's
+  answers go through the same filter and are never said if they hit it. Offline test: 0/25 clean game questions
+  blocked, 0/22 abusive lines (leetspeak, spaced-out letters, repeats) let through.
+- Checked: listener pid 20000 running the new code, mcbot ON. Not tested live: the server crashed at 8:17 PM
+  (ArrayIndexOutOfBoundsException in the tick loop, heap 6.8/8 GB, nothing from Youth in it) and is down; needs pbdr,
+  which would also put #1481 on it.
