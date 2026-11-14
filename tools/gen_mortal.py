@@ -73,12 +73,13 @@ def main():
     write(os.path.join(ASSETS, "lang", "parts", "mortal.json"), {
         "item.jaymospowers.chain_axe": "Chain Axe",
         "item.jaymospowers.chain_axe_head": "Chain Axe Head",
-        "item.jaymospowers.chain_axe.whirl": "Hold right-click to whirl the axe head on its chain; let go to bring it down where you look",
+        "item.jaymospowers.chain_axe.whirl": "Hold right-click to whirl the axe head on its chain; let go to throw it where you look, up to 9 blocks",
         "item.jaymospowers.chain_axe.buried": "It stays buried in what it hits: right-click beside them to work it free, or from afar to rip it out",
-        "jei.jaymospowers.chain_axe": ("An axe head on a length of chain. Hold right click to whirl it round you, and let go to bring it down "
-                                       "where you look. The head stays buried in whoever it hits and the haft is useless until it is out: right "
-                                       "click beside them to work it free, or from further off to rip it out by the chain for a second wound. "
-                                       "Forged at the Tool Station from a Chain Axe Head, a Tool Handle and an iron chain."),
+        "jei.jaymospowers.chain_axe": ("An axe head on a length of chain. Hold right click to whirl it round you, and let go to throw it at "
+                                       "what you look at, up to nine blocks. The head stays buried in whoever it hits and the haft is useless "
+                                       "until it is out: right click beside them to work it free, or from further off to rip it out by the "
+                                       "chain for a second wound. Put the axe away while it is buried and the haft falls to the ground, still "
+                                       "chained to the head. Forged at the Tool Station from a Chain Axe Head, a Tool Handle and an iron chain."),
         "message.jaymospowers.mortal.power_strike": "Power Strike",
         "message.jaymospowers.mortal.sweep_kick": "Sweep Kick",
         "message.jaymospowers.mortal.second_wind": "Second Wind",

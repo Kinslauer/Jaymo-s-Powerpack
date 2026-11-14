@@ -73,6 +73,8 @@ public final class LashRenderer {
 	/** The chain axe's head: the item model drawn on the chain's end, and its size (1: a block a model's 16 px). */
 	private static final Identifier AXE_HEAD_MODEL = com.jaymospowers.JaymosPowers.id("chain_axe_swung");
 	private static final float AXE_HEAD_SCALE = 0.8F;
+	/** A dropped haft's chain: how far over the item's feet it leaves the haft, and its sag as a share of its length. */
+	private static final double DROPPED_HAFT_UP = 0.3, DROPPED_SAG = 0.12;
 	/** (0.15.148) Garrotte: how wide the lash's turn round the neck is. */
 	private static final double NECK_LOOP = 0.13;
 	/** (0.16.2) Ball and Chain: the arm straight up (raise, out) while it whirls, and the ball's circle round that hand. */
@@ -465,6 +467,7 @@ public final class LashRenderer {
 		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		double time = level.getGameTime() + partialTick;
 		Vec3 camera = context.levelState().cameraRenderState.pos;
+		droppedHafts(context, level, camera, partialTick);
 		for (Player player : level.players()) {
 			Rope rope = ROPES.get(player);
 			if (rope == null || player.isRemoved() || player.position().distanceToSqr(camera) > RANGE * RANGE) {
@@ -494,6 +497,35 @@ public final class LashRenderer {
 					neckLoop(context, handle, pull.neck(), camera, light[line.length - 1]);
 				}
 			}
+		}
+	}
+
+	/**
+	 * A chain axe's haft lying dropped with its head still in something ({@code Mortal.BURIED_IN}): the chain sags from
+	 * the haft to the head where it is buried.
+	 */
+	private static void droppedHafts(LevelRenderContext context, ClientLevel level, Vec3 camera, float partialTick) {
+		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+			if (!(entity instanceof net.minecraft.world.entity.item.ItemEntity haft) || !Lash.isChainAxe(haft.getItem())
+				|| haft.position().distanceToSqr(camera) > RANGE * RANGE) {
+				continue;
+			}
+			java.util.UUID in = haft.getItem().get(com.jaymospowers.mortal.Mortal.BURIED_IN);
+			if (in == null || !(level.getEntity(in) instanceof LivingEntity target)) {
+				continue;
+			}
+			Vec3 from = haft.getPosition(partialTick).add(0.0, DROPPED_HAFT_UP, 0.0), to = Lash.buriedAt(target, from, partialTick);
+			double sag = from.distanceTo(to) * DROPPED_SAG;
+			Vec3[] line = new Vec3[CHAIN_POINTS];
+			int[] light = new int[CHAIN_POINTS];
+			for (int i = 0; i < CHAIN_POINTS; i++) {
+				double along = i / (double)(CHAIN_POINTS - 1);
+				Vec3 at = from.lerp(to, along).add(0.0, -Math.sin(along * Math.PI) * sag, 0.0);
+				light[i] = lightAt(level, at);
+				line[i] = at.subtract(camera);
+			}
+			chain(context, line, light);
+			axeHead(context, level, line[CHAIN_POINTS - 1], to.subtract(from), light[CHAIN_POINTS - 1]);
 		}
 	}
 

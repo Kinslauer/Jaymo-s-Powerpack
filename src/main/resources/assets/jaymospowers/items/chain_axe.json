@@ -1,31 +1,65 @@
 {
   "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:display_context",
-    "cases": [
-      {
-        "when": [
-          "firstperson_righthand",
-          "firstperson_lefthand",
-          "thirdperson_righthand",
-          "thirdperson_lefthand"
-        ],
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/chain_axe_handle"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:buried_in",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "firstperson_righthand",
+            "firstperson_lefthand",
+            "thirdperson_righthand",
+            "thirdperson_lefthand"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/chain_axe_handle"
+          }
+        },
+        {
+          "when": "gui",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/chain_axe"
+          }
         }
-      },
-      {
-        "when": "gui",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/chain_axe"
-        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/chain_axe_handle"
       }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "jaymospowers:item/chain_axe_whole"
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "firstperson_righthand",
+            "firstperson_lefthand",
+            "thirdperson_righthand",
+            "thirdperson_lefthand"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/chain_axe_handle"
+          }
+        },
+        {
+          "when": "gui",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/chain_axe"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/chain_axe_whole"
+      }
     }
   }
 }

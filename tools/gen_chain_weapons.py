@@ -103,14 +103,20 @@ def write_bbmodel(path, name, img, elements, shown):
         "display": shown})
 
 
-def item_definition(assets, namespace, name, hand, whole, icon):
-    """In the fist: the bare handle. In a slot: the painted icon. Anywhere else (dropped, framed): the whole thing."""
+def item_definition(assets, namespace, name, hand, whole, icon, apart=None):
+    """In the fist: the bare handle. In a slot: the painted icon. Anywhere else (dropped, framed): the whole thing.
+    apart: a component that means the end is off somewhere else (the axe head buried in something), so the handle is
+    drawn alone wherever the item is but a slot."""
     model = lambda m: {"type": "minecraft:model", "model": namespace + ":item/" + m}
-    write_json(os.path.join(assets, "items", name + ".json"), {"model": {
+    by_place = lambda elsewhere: {
         "type": "minecraft:select", "property": "minecraft:display_context",
         "cases": [{"when": ["firstperson_righthand", "firstperson_lefthand", "thirdperson_righthand", "thirdperson_lefthand"], "model": model(hand)},
                   {"when": "gui", "model": model(icon)}],
-        "fallback": model(whole)}})
+        "fallback": model(elsewhere)}
+    node = by_place(whole)
+    if apart:
+        node = {"type": "minecraft:condition", "property": "minecraft:has_component", "component": apart, "on_true": by_place(hand), "on_false": node}
+    write_json(os.path.join(assets, "items", name + ".json"), {"model": node})
 
 
 # ---- the chain axe (Powers) ---------------------------------------------------------------------------------------------
@@ -180,7 +186,7 @@ def chain_axe():
     write_model(AXE_ASSETS, "jaymospowers", "chain_axe_whole", "chain_axe_model", whole, dict(held, **plain))
     # the swung head is its own item model, worn by a chain axe stack the renderer makes (the item_model component)
     write_json(os.path.join(AXE_ASSETS, "items", "chain_axe_swung.json"), {"model": {"type": "minecraft:model", "model": "jaymospowers:item/chain_axe_swung"}})
-    item_definition(AXE_ASSETS, "jaymospowers", "chain_axe", "chain_axe_handle", "chain_axe_whole", "chain_axe")
+    item_definition(AXE_ASSETS, "jaymospowers", "chain_axe", "chain_axe_handle", "chain_axe_whole", "chain_axe", apart="jaymospowers:buried_in")
     write_bbmodel("art/chain_axe.bbmodel", "chain_axe", img, whole, dict(held, **plain))
     return img, {"handle": handle, "head": head, "whole": whole}
 
