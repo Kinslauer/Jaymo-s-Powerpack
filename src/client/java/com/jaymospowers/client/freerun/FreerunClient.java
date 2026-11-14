@@ -117,6 +117,11 @@ public final class FreerunClient {
 		return kind == Freerun.CLING;
 	}
 
+	/** The held or running move the local player is in ({@link Freerun#CLING}, {@link Freerun#SLIDE} and the rest; {@link Freerun#NONE} if none): the move hints read it. */
+	public static int move() {
+		return kind;
+	}
+
 	/** Hanging from a bar: {@link #travel} moves the body instead of the vanilla travel. */
 	public static boolean hanging() {
 		return kind == Freerun.BAR;
@@ -508,6 +513,25 @@ public final class FreerunClient {
 		sneakTicks = 0;
 		slideDir = runDir.lengthSqr() > 0.5 ? runDir : Vec3.directionFromRotation(0.0F, player.getYRot());
 		slideSpeed = Mth.clamp(runSpeed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
+		slideWait = 0;
+		keepProne = false;
+		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
+		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
+		return true;
+	}
+
+	/**
+	 * A slide out of something else's landing (the breach leap out of the water, {@code RunMovesClient}): along {@code dir} at
+	 * {@code speed} (blocks a tick), as if the Sneak hold had run its course. False if the body isn't free for one.
+	 */
+	public static boolean slideOutOf(LocalPlayer player, Vec3 dir, double speed) {
+		if (kind != Freerun.NONE || cooldown > 0 || !player.onGround() || player.isSpectator() || !Freerun.canMove(player, Freerun.SLIDE)
+			|| LedgeClient.active() || com.jaymospowers.client.power.web.WebPowerClient.parkourBusy() || dir.lengthSqr() < 1.0E-4) {
+			return false;
+		}
+		sneakTicks = 0;
+		slideDir = dir.normalize();
+		slideSpeed = Mth.clamp(speed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
 		slideWait = 0;
 		keepProne = false;
 		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);

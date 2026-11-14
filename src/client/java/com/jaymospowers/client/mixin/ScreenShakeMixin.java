@@ -19,6 +19,8 @@ abstract class ScreenShakeMixin {
 		com.jaymospowers.client.FlightRolls.applyCamera(poseStack, partialTicks);
 		// (0.15.74) the dodge's roll turns the first-person view over too
 		com.jaymospowers.client.stamina.DodgeRollPose.applyCamera(poseStack, partialTicks);
+		// a wall run rolls the view a little away from the wall
+		com.jaymospowers.client.freerun.CameraFollow.applyCamera(poseStack, partialTicks);
 		// (Motion patch 1) a jumpy player looks back over the shoulder while fleeing
 		com.jaymospowers.client.PanicCam.applyCamera(poseStack, partialTicks);
 		// spun too long: the view rolls as the world keeps turning

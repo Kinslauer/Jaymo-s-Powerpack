@@ -1,5 +1,6 @@
 package com.jaymospowers.client.freerun.moves;
 
+import com.jaymospowers.freerun.moves.Breach;
 import com.jaymospowers.freerun.moves.LongJump;
 import com.jaymospowers.freerun.moves.RunMoves;
 import com.jaymospowers.freerun.moves.SkyDive;
@@ -21,6 +22,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Long jump: the arms swing up and over, the legs reach out ahead together, the body leaning into the leap.</li>
  * <li>Safety tap: a deep crouch on landing, knees taking it, arms out in front for balance.</li>
+ * <li>Breach leap: out of the water head first, the water's clean dive ({@code DivePose}) tipped along the leap.</li>
  * <li>Sky dive: laid out flat, belly to the ground, arms and legs spread wide, head up to see where it's going.</li>
  * </ul>
  * Laid over the model after the fall's own flailing ({@code FreefallPose}) and before any power's pose, which wins.
@@ -33,6 +35,8 @@ public final class RunMovesPose {
 	static final float SAFETY_DROP = 0.3F, SAFETY_LEAN = 25.0F;
 	/** The long jump's lean into the leap (degrees). */
 	static final float LONG_LEAN = 15.0F;
+	/** The breach leap's tip forward from upright (degrees): 90 plus the look's pitch (negative looking up), kept between these. */
+	static final float BREACH_TIP_MIN = 25.0F, BREACH_TIP_MAX = 80.0F;
 	/** The sky dive's tilt (degrees: 90 is flat) and how fast it eases in (share a tick). */
 	static final float SKY_TILT = 82.0F, SKY_EASE = 0.15F;
 	// ================================================================================================================
@@ -68,7 +72,7 @@ public final class RunMovesPose {
 		}
 		float age = (float)(player.level().getGameTime() - pose[1]) + partialTicks;
 		int kind = (int)pose[0];
-		int length = kind == RunMoves.LONG_JUMP ? LongJump.POSE_TICKS : kind == RunMoves.SAFETY_TAP ? SAFETY_TICKS : 0;
+		int length = kind == RunMoves.LONG_JUMP ? LongJump.POSE_TICKS : kind == RunMoves.SAFETY_TAP ? SAFETY_TICKS : kind == RunMoves.BREACH ? Breach.POSE_TICKS : 0;
 		if (age < 0.0F || age >= length) {
 			return null;
 		}
@@ -99,6 +103,12 @@ public final class RunMovesPose {
 			case RunMoves.SAFETY_TAP -> {
 				poseStack.translate(0.0F, -SAFETY_DROP * m.e(), 0.0F);
 				poseStack.rotateDegrees(Axis.XP, -SAFETY_LEAN * m.e());
+			}
+			case RunMoves.BREACH -> {
+				// the body along the leap: upright is 90 degrees up, so looking up 30 degrees past level is a 60 degree tip
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -Mth.clamp(90.0F + state.xRot, BREACH_TIP_MIN, BREACH_TIP_MAX) * m.e());
+				poseStack.translate(0.0F, -middle, 0.0F);
 			}
 			case RunMoves.LONG_JUMP -> {
 				poseStack.translate(0.0F, middle, 0.0F);
@@ -131,6 +141,7 @@ public final class RunMovesPose {
 				// laid flat: looking up from the body is looking ahead
 				h.head.xRot = Mth.lerp(e, h.head.xRot, -1.2F);
 			}
+			case RunMoves.BREACH -> com.jaymospowers.client.water.DivePose.cleanDive(h, e);
 			case RunMoves.SAFETY_TAP -> {
 				set(h.rightArm, -1.0F, 0.0F, 0.3F, e);
 				set(h.leftArm, -1.0F, 0.0F, -0.3F, e);

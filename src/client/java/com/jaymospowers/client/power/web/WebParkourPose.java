@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebParkour;
+import com.jaymospowers.power.xenoform.XenoformState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -11,6 +12,9 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The parkour moves as everyone sees them ({@link WebParkour#MOVE}):
@@ -44,6 +48,10 @@ import net.minecraft.world.entity.LivingEntity;
  * V; the top hand reaches as high as an arm can. The body tips a little back off the wall to give the arms room, the
  * knees turn out and the feet step against the wall instead of into it. Shimmying across the wall, the hands reach the
  * way you're going and the body passes under them, instead of climbing on the spot ({@link #SHIMMY_REACH}).
+ * <p>Ladders, vines and ropes (anything {@code onClimbable}) use the same climb for every player climbing them
+ * ({@link #ladderClimbing}), so it's hands and feet taking turns, keyed to how far you've climbed, instead of the
+ * vanilla arm wave: hand over hand up, backward on the way down, and the claw of the slide once you drop fast
+ * ({@link #LADDER_SLIDE}, the look-down drop of {@code LadderMoves}). A ladder turns the body to face the wall it's on.
  * <p>Your own moves don't show in first person. (0.14.3) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
  * are drawn the same way.
  */
@@ -95,13 +103,20 @@ public final class WebParkourPose {
 	static final float TENDRIL_HANG = 8.0F;
 	/** Crawling on the wall: how fast the limbs cycle (radians a tick), and the speed (blocks/tick) that's a full crawl. */
 	static final float CRAWL_RATE = 0.55F, CRAWL_FULL = 0.06F;
+	/**
+	 * A ladder, vine or rope climb: falling faster than this (blocks/tick) on one is the claw slide. Vanilla's own slide
+	 * is 0.15, a slow hand-over-hand down; the look-down drop of {@code LadderMoves} is faster.
+	 */
+	static final float LADDER_SLIDE = 0.25F;
+	/** A ladder turns the body to its wall, by at most this many degrees. */
+	static final float LADDER_TURN_MAX = 100.0F;
 	/** Ticks a held move (cling, slide) takes to settle in. */
 	static final float EASE_IN = 3.0F;
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebParkour} move; {@code p}: how far through it (0-1, timed moves); {@code in}: settled into it (0-1). */
 	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height, float travel,
-		float slip, float across) {
+		float slip, float across, float turn) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_parkour");
@@ -117,6 +132,7 @@ public final class WebParkourPose {
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		Integer move = entity.getAttached(WebParkour.MOVE);
 		boolean web = move != null;
+		boolean ladder = false;
 		if (move == null) {
 			// (0.14.3) a freerunner's vault, cling or wall kick (Freerun) looks the same
 			move = entity.getAttached(com.jaymospowers.freerun.Freerun.MOVE);
@@ -124,6 +140,11 @@ public final class WebParkourPose {
 			if (move != null && move / 8 == com.jaymospowers.freerun.Freerun.UP_RUN) {
 				move = null;
 			}
+		}
+		if (move == null && ladderClimbing(entity, state)) {
+			// a ladder, vine or rope: the same climb
+			move = WebParkour.CLING * 8;
+			ladder = true;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
@@ -153,7 +174,7 @@ public final class WebParkourPose {
 		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
 		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
 		// (0.21.40) a freerunner's grip gone: sliding down the wall (the only way a cling moves down), eased in
-		boolean sliding = !web && kind == WebParkour.CLING && entity.getY() - entity.yo < -SLIP_DETECT;
+		boolean sliding = !web && kind == WebParkour.CLING && entity.getY() - entity.yo < -(ladder ? LADDER_SLIDE : SLIP_DETECT);
 		started[3] = Mth.lerp(SLIP_EASE, started[3], sliding ? 1.0F : 0.0F);
 		// (0.21.38) the climb's limbs follow the distance climbed: up and down, plus across the wall
 		double x = Mth.lerp(partialTicks, entity.xo, entity.getX()), z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
@@ -180,8 +201,32 @@ public final class WebParkourPose {
 		if (sliding && fall < 0.0 && fall > -0.5) {
 			across[4] += fall;
 		}
+		float turn = ladder ? ladderTurn(entity, partialTicks) : 0.0F;
 		state.setData(KEY, new Pose(kind, WebParkour.variant(move), p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2],
-			(float) y, (float) ((y - across[4] + across[2]) % 4096.0), smooth(Mth.clamp(started[3], 0.0F, 1.0F)), (float) across[5]));
+			(float) y, (float) ((y - across[4] + across[2]) % 4096.0), smooth(Mth.clamp(started[3], 0.0F, 1.0F)), (float) across[5], turn));
+	}
+
+	/**
+	 * Whether this is a player on a ladder, vine, rope or scaffolding (anything {@code onClimbable}) hanging off the
+	 * ground: not in the symbiote's own wall crawl, not a Skitter, not swimming or lying down.
+	 */
+	private static boolean ladderClimbing(LivingEntity entity, LivingEntityRenderState state) {
+		return entity instanceof Player player && !player.onGround() && player.onClimbable() && !player.isPassenger() && !player.isFallFlying()
+			&& !player.isSwimming() && !player.getAbilities().flying && state.deathTime <= 0.0F && state.getData(WebClimbPose.KEY) == null
+			&& (state.pose == net.minecraft.world.entity.Pose.STANDING || state.pose == net.minecraft.world.entity.Pose.CROUCHING) && !"skitter".equals(player.getAttached(XenoformState.FORM));
+	}
+
+	/**
+	 * On a ladder block: how far (degrees) the body has to turn to face the wall the ladder is on, whatever way it
+	 * looks (the head still turns to the look). Vines and ropes have no one wall: 0.
+	 */
+	private static float ladderTurn(LivingEntity entity, float partialTicks) {
+		BlockState block = entity.getInBlockState();
+		if (!(block.getBlock() instanceof LadderBlock)) {
+			return 0.0F;
+		}
+		float bodyYaw = Mth.rotLerp(partialTicks, entity.yBodyRotO, entity.yBodyRot);
+		return Mth.clamp(Mth.wrapDegrees(bodyYaw - block.getValue(LadderBlock.FACING).getOpposite().toYRot()), -LADDER_TURN_MAX, LADDER_TURN_MAX);
 	}
 
 	/** After the body faces its way: tip over in a vault, lie back in a slide, lean into the wall in a cling. */
@@ -189,6 +234,9 @@ public final class WebParkourPose {
 		Pose pose = state.getData(KEY);
 		if (pose == null || state.deathTime > 0.0F) {
 			return;
+		}
+		if (pose.turn() != 0.0F) {
+			poseStack.rotateDegrees(Axis.YP, pose.turn() * pose.in());
 		}
 		// (here +X is the body's right, +Y up, +Z behind it)
 		switch (pose.kind()) {
@@ -319,7 +367,7 @@ public final class WebParkourPose {
 				h.body.yRot = Mth.lerp(e, h.body.yRot, CLIMB_TWIST * s);
 				h.body.zRot = Mth.lerp(e, h.body.zRot, CLIMB_ROLL * s);
 				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, CLIMB_LOOK_UP));
-				h.head.yRot = Mth.lerp(e, h.head.yRot, h.head.yRot + CLIMB_LOOK_TURN * s);
+				h.head.yRot = Mth.lerp(e, h.head.yRot, h.head.yRot + CLIMB_LOOK_TURN * s + pose.turn() * Mth.DEG_TO_RAD);
 				// (0.21.40) the grip gone: blended over into the slide, so it flows out of wherever the climb was
 				float sl = pose.slip() * e;
 				if (sl > 0.0F) {

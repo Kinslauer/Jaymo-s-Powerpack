@@ -52,16 +52,18 @@ abstract class LedgeFirstPersonMixin {
 		ci.cancel();
 	}
 
-	/** Climbing a wall, in first person: both bare hands on it, going hand over hand (see ClimbFirstPerson). */
+	/** Climbing a wall, or a ladder, vine or rope with empty hands, in first person: both bare hands on it, going hand over hand (see ClimbFirstPerson). */
 	@Inject(method = "submitHandsWithItems", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$climbHands(float partialTicks, PoseStack poseStack, SubmitNodeCollector collector, PlayerRenderState player,
 		FirstPersonHandsAndItemsRenderState hands, CallbackInfo ci) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!com.jaymospowers.client.freerun.FreerunClient.clinging() || LedgeClient.active() || minecraft.player == null) {
+		boolean cling = com.jaymospowers.client.freerun.FreerunClient.clinging();
+		if (LedgeClient.active() || minecraft.player == null
+			|| !cling && !com.jaymospowers.client.freerun.ClimbFirstPerson.onLadder(minecraft.player)) {
 			com.jaymospowers.client.freerun.ClimbFirstPerson.stop();
 			return;
 		}
-		com.jaymospowers.client.freerun.ClimbFirstPerson.track(minecraft.player, partialTicks);
+		com.jaymospowers.client.freerun.ClimbFirstPerson.track(minecraft.player, partialTicks, !cling);
 		if (player.avatarRenderState == null || hands.isScoping) {
 			return;
 		}

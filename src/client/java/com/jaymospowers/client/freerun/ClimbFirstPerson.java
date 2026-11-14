@@ -13,6 +13,8 @@ import net.minecraft.util.Mth;
  * next hold at the top, the two hands half a cycle apart. Hanging still, they stay where they are; slipping down once
  * the grip is gone, both hands are up at the top clawing at the wall. Drawn from {@code LedgeFirstPersonMixin}, placed
  * straight in the view as the ledge's hands are ({@code LedgePose#firstPersonArm}). Render thread only.
+ * <p>The same hands climb a ladder, vine or rope ({@link #onLadder}) while both of yours are empty; there the claw is the
+ * look-down drop ({@code LadderMoves}), not vanilla's own slow slide, so it takes a faster fall ({@link #LADDER_SLIP_FALL}).
  */
 public final class ClimbFirstPerson {
 	// ---- tuning: view space (blocks, x toward the arm's side) and degrees ---------------------------------------------
@@ -27,21 +29,36 @@ public final class ClimbFirstPerson {
 	static final float TIP_GRIP = 14.0F, TIP_REACH = 4.0F, OUT = 10.0F;
 	/** Slipping: falling faster than this (blocks/tick) is the slide; the hands' claw at the top (blocks, radians a tick). */
 	static final float SLIP_FALL = 0.03F, CLAW = 0.04F, CLAW_RATE = 0.9F;
+	/** On a ladder, vine or rope: falling faster than this (blocks/tick) is the claw slide (as WebParkourPose.LADDER_SLIDE). */
+	static final float LADDER_SLIP_FALL = 0.25F;
 	// ----------------------------------------------------------------------------------------------------------------------
 
+	/** How fast a fall is the slide in this climb (a ladder's, or a freerun cling's). */
+	private static float slipFall = SLIP_FALL;
 	private static double lastX, lastY, lastZ, travel;
 	private static boolean tracking;
 
 	private ClimbFirstPerson() {
 	}
 
-	/** Each frame on the wall, before the hands: how far the body has climbed (up, down and across). */
-	public static void track(LocalPlayer player, float partialTicks) {
+	/**
+	 * Whether the local player is climbing a ladder, vine or rope bare-handed (anything {@code onClimbable} off the ground,
+	 * nothing in either hand): the climb's hands are drawn for it.
+	 */
+	public static boolean onLadder(LocalPlayer player) {
+		return !player.onGround() && player.onClimbable() && !player.isPassenger() && !player.isSwimming() && !player.isFallFlying()
+			&& !player.getAbilities().flying && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()
+			&& !"skitter".equals(player.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM));
+	}
+
+	/** Each frame on the wall, before the hands: how far the body has climbed (up, down and across). {@code ladder}: a ladder's climb, not a cling's. */
+	public static void track(LocalPlayer player, float partialTicks, boolean ladder) {
+		slipFall = ladder ? LADDER_SLIP_FALL : SLIP_FALL;
 		double x = Mth.lerp(partialTicks, player.xo, player.getX()), y = Mth.lerp(partialTicks, player.yo, player.getY());
 		double z = Mth.lerp(partialTicks, player.zo, player.getZ());
 		if (tracking) {
 			double step = Math.sqrt(Mth.square(x - lastX) + Mth.square(y - lastY) + Mth.square(z - lastZ));
-			if (step < 0.5 && y - lastY > -SLIP_FALL) {
+			if (step < 0.5 && y - lastY > -slipFall) {
 				travel = (travel + step) % 4096.0;
 			}
 		}
@@ -60,7 +77,7 @@ public final class ClimbFirstPerson {
 	public static void firstPersonArm(PoseStack poseStack, LocalPlayer player, float time, boolean right, float equip) {
 		float side = right ? 1.0F : -1.0F;
 		float x = TOP[0], y, z = TOP[2], tip;
-		if (player.getDeltaMovement().y < -SLIP_FALL) {
+		if (player.getDeltaMovement().y < -slipFall) {
 			// the grip gone: both hands up at the top, clawing
 			y = TOP[1] - Math.abs(Mth.sin(time * CLAW_RATE + (right ? 0.0F : Mth.PI))) * CLAW * 3.0F;
 			tip = TIP_GRIP;

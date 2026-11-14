@@ -110,7 +110,8 @@ public final class Slide {
 	static boolean valid(ServerPlayer player) {
 		Long sprinted = SPRINTED.get(player.getUUID());
 		boolean running = FastRun.active(player) || player.isSprinting()
-			|| sprinted != null && player.level().getGameTime() - sprinted <= SPRINT_GRACE_TICKS;
+			|| sprinted != null && player.level().getGameTime() - sprinted <= SPRINT_GRACE_TICKS
+			|| com.jaymospowers.freerun.moves.Breach.recent(player, com.jaymospowers.freerun.moves.Breach.SLIDE_WINDOW);
 		// (0.21.36) no Sneak check: the client keeps the Sneak bit off through the 1.5 s hold so the run goes on
 		return running && player.onGround() && Freerun.canMove(player) && !sliding(player)
 			&& !justEnded(player, COOLDOWN - 1);
@@ -118,7 +119,7 @@ public final class Slide {
 
 	static void start(ServerPlayer player) {
 		TICKS_SO_FAR.put(player.getUUID(), 0);
-		if (FastRun.active(player)) {
+		if (FastRun.active(player) || com.jaymospowers.freerun.moves.Breach.recent(player, com.jaymospowers.freerun.moves.Breach.SLIDE_WINDOW)) {
 			player.setAttached(BELLY, true);
 		} else {
 			player.removeAttached(BELLY);

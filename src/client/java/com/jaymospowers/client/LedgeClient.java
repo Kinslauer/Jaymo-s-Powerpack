@@ -87,7 +87,7 @@ public final class LedgeClient {
 	}
 
 	/** (0.15.108) The local player is hanging (caught and not yet climbing). */
-	static boolean hanging() {
+	public static boolean hanging() {
 		return phase == Phase.HANG;
 	}
 

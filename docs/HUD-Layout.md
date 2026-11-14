@@ -28,7 +28,7 @@ curtains, film bars) is placed by one of seven zones. Previews: project files `a
 | `ABOVE` | centred, bottom at cy-12, stacks up | 10 awareness eye · 20 the power's charge bar · 21 a second power bar · 25 Chrono combo · 30 Ember heat · 31 Heritage charge |
 | `BELOW` | centred, top at cy+10 (cy+20 while vanilla's attack indicator shows there), stacks down | 10 guard · 20 finisher bars · 30 Chrono roll pips · 40 horse tag / wild stats · 50 smithing · gem cutting · mortar / stir bar (only one shows at a time) |
 | `INSPECT` | left edge cx+48, top cy-4, stacks down | 10 forms chain · 20 alchemy lens · 30 Z Fighter scouter |
-| `RAIL` | top-left x 4, top 112 under Xaero's minimap (4 without it), stacks down | 10 power badge · 20 kin sense · 30 party |
+| `RAIL` | top-left x 4, top 112 under Xaero's minimap (4 without it), stacks down | 10 power badge · 20 kin sense · 30 party · 40 move hints (Powers `MoveHints`: what Jump, Sneak and Sprint do in the move you're in, fades when it ends) |
 
 On a narrow screen (less than 150 gui px right of the hotbar) both docks move over the hotbar (bottom at H-76) and the
 focus band goes over them.
