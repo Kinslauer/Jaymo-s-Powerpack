@@ -24,3 +24,4 @@ owns:
 - Lore.md: "(new) The blades that wait" waits on Andy's approval.
 
 ## Done
+- 2026-11-14 08:24 PR #1516 is merged into master; moved to Agents/Done.
