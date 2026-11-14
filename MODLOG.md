@@ -4621,3 +4621,10 @@ Built, not played.
 - `smithing/FoldedSteel` (item, `folded_steel` component, the anvil check), `WeaponParts.Scheme.FOLDED`, `HotMetal`, `Quenching`,
   `SmithingAnvilEntity.put`. Art: our steel ingot with a fold line; the steel blade is the redrawn iron one recoloured.
 - Compiled; not played.
+
+## 0.23.54 (2026-11-14): Limbo ghosts with no body left roam free (#1506)
+
+- Waiting in Limbo, once your body is gone (eaten, blown apart, burned) the tether comes off after a few seconds: you roam anywhere as your ghost and can haunt your friends, until you hold Backspace to give it up and reincarnate.
+- The black frame draws back and the line under it changes while you are free. Staying free is kept through logging out.
+- A buried body still holds its ghost by the grave (other mods say where a body rests through `Limbo.RESTING`).
+- Compiled; not played.

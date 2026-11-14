@@ -63,6 +63,19 @@ public final class DeathCompat {
 		}
 	}
 
+	/** Tells Powers where a body lies that is no corpse (a grave), so the one waiting in Limbo for it stays beside it. */
+	@SuppressWarnings("unchecked")
+	static void addResting(java.util.function.BiFunction<ServerLevel, java.util.UUID, @Nullable Vec3> resting) {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			((List<java.util.function.BiFunction<ServerLevel, java.util.UUID, @Nullable Vec3>>) Class.forName(LIMBO).getField("RESTING").get(null)).add(resting);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Limbo resting places (older Powers?)", e);
+		}
+	}
+
 	/** Players whose final death is being held for a reviver, near {@code at}. */
 	@SuppressWarnings("unchecked")
 	static List<ServerPlayer> dyingNear(ServerLevel level, Vec3 at, double range) {
