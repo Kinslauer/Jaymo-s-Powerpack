@@ -46,6 +46,8 @@ public final class Warlocks {
 	/** What a collection takes: favour, and how long the curse lasts (ticks). */
 	static final int COLLECT_FAVOUR = 25, CURSE_TICKS = 20 * 60 * 4;
 	static final String[] KINDS = {"favour", "errand", "blood", "coin"};
+	/** What the Reaper asks of those whose pact is with it (it has no favour to spend and no shrine): blood, or a death by their hand. */
+	static final String[] REAPER_KINDS = {"blood", "death"};
 
 	/** Casts since the last debt (or the open one's), the open debt's kind ("" for none) and the day it is due. */
 	record Pact(int casts, String kind, long due) {
@@ -82,6 +84,7 @@ public final class Warlocks {
 			case "crowned_sun" -> "draining";
 			case "ash_whisperer" -> "silence";
 			case "truth" -> "command";
+			case "reaper" -> "blight";
 			default -> "charm";
 		};
 	}
@@ -139,7 +142,8 @@ public final class Warlocks {
 			return;
 		}
 		long today = Patrons.today(player.level().getServer());
-		String kind = KINDS[(int) Math.floorMod(today + player.getRandom().nextInt(KINDS.length), KINDS.length)];
+		String[] kinds = Reaper.pact(player) ? REAPER_KINDS : KINDS;
+		String kind = kinds[(int) Math.floorMod(today + player.getRandom().nextInt(kinds.length), kinds.length)];
 		int days = Paths.debtDays(player, DEBT_DAYS);
 		player.setAttached(PACT, new Pact(0, kind, today + days));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
@@ -181,6 +185,10 @@ public final class Warlocks {
 				}
 				yield com.jaymoskingdoms.money.Money.charge(player, com.jaymoskingdoms.money.Money.worth(COIN_SILVER));
 			}
+			case "death" -> {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.death"));
+				yield false;
+			}
 			default -> {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.errand"));
 				yield false;
@@ -207,6 +215,14 @@ public final class Warlocks {
 		}
 		Pact pact = pact(player);
 		if (pact.owing() && pact.kind().equals("errand") && shrine == Patrons.of(player)) {
+			settled(player);
+		}
+	}
+
+	/** {@code player} has killed: a death owed to the Reaper is paid ({@link Reaper}). */
+	static void killed(ServerPlayer player) {
+		Pact pact = pact(player);
+		if (pact.owing() && pact.kind().equals("death") && Classes.is(player, PlayerClass.WARLOCK)) {
 			settled(player);
 		}
 	}

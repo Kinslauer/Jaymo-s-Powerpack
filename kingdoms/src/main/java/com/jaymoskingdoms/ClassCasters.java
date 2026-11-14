@@ -100,6 +100,10 @@ public final class ClassCasters {
 		if (held.isEmpty()) {
 			return true;
 		}
+		// (a pact with the Reaper opens all of death magic)
+		if (Reaper.pact(player) && ForbiddenArts.death(spell)) {
+			return true;
+		}
 		for (PlayerClass cls : held) {
 			if (!ALLOWED.containsKey(cls) || ALLOWED.get(cls).contains(spell)) {
 				return true;

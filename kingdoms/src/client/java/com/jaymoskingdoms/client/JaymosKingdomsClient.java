@@ -264,6 +264,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.SpiritKey.register();
 		com.jaymoskingdoms.client.spirits.SpiritArms.register();
 		com.jaymoskingdoms.client.spirits.SpiritManifest.register();
+		com.jaymoskingdoms.client.spirits.ReaperClient.register();
 		com.jaymoskingdoms.client.spirits.ManaWings.register();
 		com.jaymoskingdoms.client.spirits.SpiritHud.register();
 		com.jaymoskingdoms.client.spirits.SpiritVoiceSound.register();

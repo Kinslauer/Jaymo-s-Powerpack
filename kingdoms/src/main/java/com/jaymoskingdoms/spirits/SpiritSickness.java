@@ -110,7 +110,9 @@ public final class SpiritSickness {
 
 	/** {@code player} has taken a blow: if it left them at death's door, the spirit may answer (or stir). */
 	private static void brush(ServerPlayer player) {
-		if (!Mana.attuned(player) || player.hasAttached(Spirits.SPIRIT) || player.getAttachedOrElse(Spirits.RELEASED, false) || player.isCreative()) {
+		// (none of the five answers one the Reaper stands behind)
+		if (!Mana.attuned(player) || player.hasAttached(Spirits.SPIRIT) || player.getAttachedOrElse(Spirits.RELEASED, false) || player.isCreative()
+			|| com.jaymoskingdoms.Reaper.has(player)) {
 			return;
 		}
 		boolean low = player.getHealth() <= player.getMaxHealth() * BRUSH_HEALTH || Downed.isDowned(player);

@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link Downed#holdsFire}). Nor a band at someone who paid its tongue-speaker's toll, or is hearing it out
  * ({@link com.jaymoskingdoms.Parleys#spares}). Nor a masterless bandit's men their leader, or each other
  * ({@link com.jaymoskingdoms.Masterless#sameBand}). Nor an illager at someone it is hearing out or keeping a truce with
- * ({@link com.jaymoskingdoms.IllagerTalk#spares}).
+ * ({@link com.jaymoskingdoms.IllagerTalk#spares}). Nor the dead at one who wears the Reaper's shroud ({@link com.jaymoskingdoms.Reaper#spares}).
  */
 @Mixin(LivingEntity.class)
 public abstract class ThrallTargetMixin {
@@ -37,7 +37,8 @@ public abstract class ThrallTargetMixin {
 			|| com.jaymoskingdoms.Loans.sameBand((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Parleys.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Masterless.sameBand((LivingEntity)(Object)this, target)
-			|| com.jaymoskingdoms.IllagerTalk.spares((LivingEntity)(Object)this, target)) {
+			|| com.jaymoskingdoms.IllagerTalk.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Reaper.spares((LivingEntity)(Object)this, target)) {
 			cir.setReturnValue(false);
 		}
 	}

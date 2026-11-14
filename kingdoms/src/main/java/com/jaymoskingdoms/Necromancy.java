@@ -152,7 +152,7 @@ public final class Necromancy {
 		if (!entity.isAlive() || Restoration.undead(entity)) {
 			return;
 		}
-		long until = entity.level().getGameTime() + ticks;
+		long until = entity.level().getGameTime() + Reaper.warded(entity, ticks);
 		BLIGHTED.merge(entity, until, Math::max);
 	}
 
@@ -212,6 +212,7 @@ public final class Necromancy {
 		Mana.set(player, Math.min(Mana.max(player), Mana.current(player) + REAP_MANA));
 		level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY(0.5), target.getZ(), 16, 0.3, 0.4, 0.3, 0.04);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.2F, 0.8F);
+		Reaper.feed(player, Reaper.TOLL_REAP);
 		ForbiddenArts.cast(player, level, false, 0);
 	}
 
@@ -286,6 +287,7 @@ public final class Necromancy {
 		RAISE_READY.put(player.getUUID(), now + RAISE_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1.0F, 0.7F);
+		Reaper.feed(player, Reaper.TOLL_RAISE);
 		ForbiddenArts.cast(player, level, false, ForbiddenArts.RAISING_CORRUPTION);
 	}
 

@@ -48,6 +48,7 @@ abstract class LivingEntityHurtMixin {
 		// (0.7.492) last, a kneeling boss takes a riposte (BossPosture)
 		// (and Watched, the gaze built from hiding, spends itself on the blow: RogueGambits)
 		// (pawn picks) a companion who knows the kind hits it harder (FoeLore); (last of all, a feat's say and a path's)
-		return com.jaymoskingdoms.Paths.dealt(self, source, com.jaymoskingdoms.Feats.dealt(self, source, com.jaymoskingdoms.CampSuppers.dealt(self, source, com.jaymoskingdoms.FoeLore.dealt(self, source, com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))))))))));
+		// (and the Reaper: the dead near by, its wings, its shroud)
+		return com.jaymoskingdoms.Reaper.dealt(self, source, com.jaymoskingdoms.Paths.dealt(self, source, com.jaymoskingdoms.Feats.dealt(self, source, com.jaymoskingdoms.CampSuppers.dealt(self, source, com.jaymoskingdoms.FoeLore.dealt(self, source, com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))))))))))))));
 	}
 }
