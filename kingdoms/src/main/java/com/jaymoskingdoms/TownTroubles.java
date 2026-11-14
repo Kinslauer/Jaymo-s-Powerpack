@@ -148,6 +148,12 @@ public final class TownTroubles {
 		return all(Factions.level(server)).containsKey(key(faction, kind));
 	}
 
+	/** (Andy, 2026-11-14) The troubles {@code faction} has just now, worst first (its ledger, {@link TownLedger}). */
+	static List<String> of(MinecraftServer server, int faction) {
+		Map<String, Trouble> map = all(Factions.level(server));
+		return ORDER.stream().filter(kind -> map.containsKey(key(faction, kind))).toList();
+	}
+
 	private static int count(Map<String, Trouble> map, int faction) {
 		String prefix = faction + "|";
 		return (int)map.keySet().stream().filter(k -> k.startsWith(prefix)).count();

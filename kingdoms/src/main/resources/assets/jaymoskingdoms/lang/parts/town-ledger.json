@@ -1,0 +1,14 @@
+{
+  "talk.jaymoskingdoms.errands.ledger": "Let me see the town ledger",
+  "talk.jaymoskingdoms.ledger.given": "Here, the ledger of %s, as it stands today. Mind the ink.",
+  "talk.jaymoskingdoms.ledger.refused": "Our books are no business of yours.",
+  "item.jaymoskingdoms.town_ledger": "Ledger of %s",
+  "ledger.jaymoskingdoms.troubles": "Troubles",
+  "ledger.jaymoskingdoms.troubles.none": "No trouble to set down.",
+  "ledger.jaymoskingdoms.works": "Works",
+  "ledger.jaymoskingdoms.works.none": "Nothing is being built together.",
+  "ledger.jaymoskingdoms.built": "%s (built)",
+  "ledger.jaymoskingdoms.treaties": "Treaties",
+  "ledger.jaymoskingdoms.treaties.none": "No treaty is held.",
+  "ledger.jaymoskingdoms.treaty": "%s with %s, %s days left"
+}
