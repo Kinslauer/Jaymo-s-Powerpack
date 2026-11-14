@@ -154,6 +154,10 @@ public final class ZombieHordes {
 	/** A horde breaks up after this long (ticks), if the dawn hasn't come first. */
 	static final int MAX_AGE = 12000;
 	/** A host its keeper called: how many rise, how long they stay (ticks), and how lately the keeper must have struck someone for them to go after it. */
+	/** A host of the Reaper's this big, with a seat to march on, brings a mangonel. */
+	static final int SIEGE_HOST = 10;
+	/** By the water, how often a host of the Reaper's comes by long ship. */
+	static final float LONGSHIP_CHANCE = 0.5F;
 	static final int CALL_SIZE = 6, CALL_AGE = 20 * 120, CALL_FIGHT_TICKS = 200;
 	/** How far its groan carries (volume: 16 blocks per). */
 	static final float GROAN_VOLUME = 4.0F;
@@ -231,6 +235,8 @@ public final class ZombieHordes {
 		Vec3 goal;
 		/** The seat the Reaper's host marches on, if one was in reach. */
 		@Nullable Vec3 war;
+		/** The mangonel a big host of the Reaper's pushes to its war ({@link ReapedHost#engine}). */
+		@Nullable Mangonel engine;
 		/** A host its keeper called ({@link #call}): it keeps to them, fights what they fight, and is soon taken back. */
 		boolean called;
 
@@ -512,7 +518,17 @@ public final class ZombieHordes {
 			}
 			Horde horde = new Horde(level, player.getUUID(), kind, blood, cave, danger, player.position());
 			float armed = ARMED + ARMED_DANGER * danger;
-			for (int tries = 0; horde.members.size() < want && tries < want * 4; tries++) {
+			boolean shipped = false;
+			if (kind == Kind.REAPED && !cave && byWater(level, centre) && random.nextFloat() < LONGSHIP_CHANCE) {
+				// by the water the host comes in a black long ship, moored off the shore, and wades in from her deck
+				for (BlockPos at : ReapedHost.longship(level, centre, random)) {
+					if (horde.members.size() < want) {
+						place(level, horde, at, tier, random);
+						shipped = true;
+					}
+				}
+			}
+			for (int tries = 0; !shipped && horde.members.size() < want && tries < want * 4; tries++) {
 				Mob mob = rise(level, player, horde, centre, horde.members.size(), random.nextFloat() < armed, tier, random);
 				if (mob != null) {
 					horde.members.add(mob);
@@ -525,6 +541,9 @@ public final class ZombieHordes {
 			if (kind == Kind.REAPED) {
 				horde.war = warSeat(level, centre);
 				ReapedHost.mount(level, horde.members, random);
+				if (horde.war != null && horde.members.size() >= SIEGE_HOST) {
+					horde.engine = ReapedHost.engine(level, horde.members, horde.war);
+				}
 			}
 			HORDES.add(horde);
 			level.playSound(null, centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5, groan(kind), SoundSource.HOSTILE, GROAN_VOLUME, 0.55F);
@@ -543,7 +562,7 @@ public final class ZombieHordes {
 		double bestD = WAR_REACH * WAR_REACH;
 		for (Faction f : Factions.all(level.getServer())) {
 			double d = f.seat().distSqr(centre);
-			if (!f.fallen() && d <= bestD) {
+			if (!f.fallen() && d <= bestD && !ReapedHolds.is(level.getServer(), f.id())) {
 				best = f;
 				bestD = d;
 			}
@@ -854,6 +873,7 @@ public final class ZombieHordes {
 				horde.members.forEach(m -> m.removeTag(TAG));
 				if (horde.kind == Kind.REAPED) {
 					horde.members.forEach(m -> takeBack(level, m));
+					ReapedHost.scrap(level, horde.engine);
 				}
 				it.remove();
 				continue;
@@ -914,8 +934,11 @@ public final class ZombieHordes {
 					horde.members.add(stray);
 				}
 			}
+			if (horde.engine != null && horde.war != null) {
+				ReapedHost.drive(level, horde.engine, horde.war);
+			}
 			for (Mob m : horde.members) {
-				if (m.getTarget() == null) {
+				if (m.getTarget() == null && !ReapedHost.crews(horde.engine, m)) {
 					// each keeps its own place in the crowd
 					int h = m.getUUID().hashCode();
 					Vec3 spot = horde.goal.add(((h & 7) - 3.5) * 0.8, 0.0, (((h >> 3) & 7) - 3.5) * 0.8);
@@ -940,20 +963,10 @@ public final class ZombieHordes {
 			if (Math.abs(at.getY() - keeper.getY()) > 6 || !level.getFluidState(at).isEmpty()) {
 				continue;
 			}
-			Mob mob = member(Kind.REAPED, level, at, horde.members.size(), tier, random).create(level, EntitySpawnReason.EVENT);
-			if (mob == null) {
-				continue;
+			Mob mob = place(level, horde, at, tier, random);
+			if (mob != null) {
+				level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.4F), mob.getX(), mob.getY() + 1.0, mob.getZ(), 12, 0.3, 0.6, 0.3, 0.01);
 			}
-			mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			if (!level.noCollision(mob)) {
-				mob.discard();
-				continue;
-			}
-			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
-			join(mob, horde.danger);
-			level.addFreshEntity(mob);
-			level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.4F), mob.getX(), mob.getY() + 1.0, mob.getZ(), 12, 0.3, 0.6, 0.3, 0.01);
-			horde.members.add(mob);
 		}
 		if (horde.members.isEmpty()) {
 			return 0;
@@ -961,6 +974,24 @@ public final class ZombieHordes {
 		HORDES.add(horde);
 		level.playSound(null, keeper.getX(), keeper.getY(), keeper.getZ(), groan(Kind.REAPED), SoundSource.PLAYERS, GROAN_VOLUME, 0.55F);
 		return horde.members.size();
+	}
+
+	/** One more of {@code horde} stood at {@code at} whatever the light there (a called host, a long ship's deck); null if there's no room. */
+	private static @Nullable Mob place(ServerLevel level, Horde horde, BlockPos at, int tier, RandomSource random) {
+		Mob mob = member(horde.kind, level, at, horde.members.size(), tier, random).create(level, EntitySpawnReason.EVENT);
+		if (mob == null) {
+			return null;
+		}
+		mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+		if (!level.noCollision(mob)) {
+			mob.discard();
+			return null;
+		}
+		mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
+		join(mob, horde.danger);
+		level.addFreshEntity(mob);
+		horde.members.add(mob);
+		return mob;
 	}
 
 	/** A called host's march: after whoever its keeper last struck or was struck by, else at their heels. Without its keeper it is taken back. */

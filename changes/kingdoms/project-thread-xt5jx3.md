@@ -16,3 +16,13 @@ Andy's picks from Immersive Pillagers, Mebahel's Draugr and Moog's Ocean Structu
 - **The Call** (`Reaper.host`, `ZombieHordes.call`): a Reaper keeper at the Shroud, sneaking with the Reaper key and no
   body near to raise, calls six of the reaped. They keep to the keeper and go for whoever the keeper last struck or was
   struck by, for two minutes, then are taken back. 10 Toll (held above the Shroud's own), ten minutes' cooldown.
+- **The Reaper's holds** (`ReapedHolds`): when one of the reaped kills an illager camp's warlord the camp changes hands
+  instead of falling. Every illager left in it gets up as the same kind of reaped, a Reaped Warlord takes the seat, and
+  the camp goes on as a camp: it raids the towns round it with the reaped, grows by the living illagers its people kill
+  (to 30), and courts within 600 blocks post its warlord on the bounty board (40). Kill the warlord to break it. Hosts
+  never march on a hold.
+- **A mangonel** (`ReapedHost.engine`): a host of ten or more with a seat to march on pushes a mangonel there with two of
+  its own as crew, sets it down 34 blocks short and batters the seat and whoever defends it.
+- **A black long ship** (`ReapedHost.longship`): by the water, half the hosts come in a dark oak drakkar moored within 40
+  blocks, out of sight, and wade in from her deck. She is left where she moored.
+- Lore: `Lore.md`, "The host at war" (new, for Andy).

@@ -13,5 +13,6 @@
   "illager_talk.jaymoskingdoms.line.chat.reaped.0": "Krel fell at the ford. I saw it. Three nights on he walked into camp with his arms hanging. We do not say his name now.",
   "illager_talk.jaymoskingdoms.line.chat.reaped.1": "We burn our dead this season. Before, we did not. Ask no more.",
   "illager_talk.jaymoskingdoms.line.chat.reaped.2": "A horn in the dark that is not ours. When you hear it, you are already late.",
-  "message.jaymoskingdoms.reaper.move.host": "The Call"
+  "message.jaymoskingdoms.reaper.move.host": "The Call",
+  "entity.jaymoskingdoms.reaped_warlord_of": "Reaped Warlord of %s"
 }

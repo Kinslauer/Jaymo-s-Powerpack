@@ -240,7 +240,8 @@ final class SiegeTrain {
 		double bestD = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, from).inflate(far, MARK_HEIGHT, far),
 			e -> e.isAlive() && !e.isSpectator() && inBand(from, e, near, far))) {
-			boolean fighter = e instanceof Player ? McaCompat.foe(operator, e) : e instanceof Worker w && (w.role() == Folk.GUARD || w.role() == Folk.ARCHER);
+			boolean fighter = operator instanceof com.jaymoskingdoms.reaped.Reaped ? e instanceof Player || e instanceof Worker
+				: e instanceof Player ? McaCompat.foe(operator, e) : e instanceof Worker w && (w.role() == Folk.GUARD || w.role() == Folk.ARCHER);
 			double d = e.distanceToSqr(from);
 			if (fighter && d < bestD && harms(operator, e)) {
 				best = e;
@@ -262,6 +263,11 @@ final class SiegeTrain {
 	 * ordinary villagers and golems.
 	 */
 	static boolean harms(PathfinderMob thrower, LivingEntity victim) {
+		if (thrower instanceof com.jaymoskingdoms.reaped.Reaped) {
+			// the Reaper's host's engine (ReapedHost): everyone but the host and the Reaper's keepers
+			return victim != thrower && !(victim instanceof com.jaymoskingdoms.reaped.Reaped)
+				&& !(victim instanceof Player p && (p.isCreative() || p.isSpectator() || Reaper.has(p)));
+		}
 		if (victim == thrower || !(thrower instanceof Worker w) || !(thrower.level() instanceof ServerLevel level)) {
 			return false;
 		}

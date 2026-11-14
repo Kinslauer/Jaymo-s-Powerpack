@@ -100,7 +100,7 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
-		if (!(this.getOwner() instanceof PathfinderMob thrower) || !(thrower instanceof Worker) || ++this.life > MAX_LIFE) {
+		if (!(this.getOwner() instanceof PathfinderMob thrower) || !(thrower instanceof Worker || thrower instanceof com.jaymoskingdoms.reaped.Reaped) || ++this.life > MAX_LIFE) {
 			this.discard();
 			return;
 		}
@@ -118,7 +118,7 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
 			BlockPos struck = ((BlockHitResult) hit).getBlockPos();
-			if (!Cannonball.ownLand(level, (Worker) thrower, struck)) {
+			if (!(thrower instanceof Worker own) || !Cannonball.ownLand(level, own, struck)) {
 				Bombardment.crater(level, Vec3.atCenterOf(struck), BREACH, thrower);
 			}
 			this.burst(level, thrower, hit.getLocation(), null);

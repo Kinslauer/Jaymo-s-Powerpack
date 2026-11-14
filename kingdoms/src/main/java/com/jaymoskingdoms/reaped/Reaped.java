@@ -205,8 +205,8 @@ public interface Reaped {
 				corpse.discard();
 			}
 			level.addFreshEntity(mob);
-			if (r.killer().isAlive()) {
-				ZombieHordes.enlist(r.killer(), mob);
+			if (r.killer().isAlive() && !ZombieHordes.enlist(r.killer(), mob)) {
+				com.jaymoskingdoms.ReapedHolds.enrol(r.killer(), mob);
 			}
 			Fx.burst(level, r.at().x, r.at().y + 1.0, r.at().z, Reaper.RED, 1.0F, 10, 0.3, 0.5, 0.3);
 			level.playSound(null, r.at().x, r.at().y, r.at().z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.0F, 0.6F);

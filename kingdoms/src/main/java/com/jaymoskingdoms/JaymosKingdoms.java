@@ -484,6 +484,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		GrimSites.register();
 		// Illager Structures' places (GPL v3, carried in this mod) and Andy's picks of who lives in them
 		IllagerSites.register();
+		ReapedHolds.register();
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		// (0.7.225) players on the throne: usurpers, heirs by marriage, conquerors, founders (and their attachment)
