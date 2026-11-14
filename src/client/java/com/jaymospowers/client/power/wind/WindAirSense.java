@@ -154,8 +154,10 @@ public final class WindAirSense {
 	}
 
 	/**
-	 * Sets every sound category again (the menus' and the master's aside), so what is already playing, music too,
-	 * follows the hush: a sound only takes it as it starts, else ({@code WindSenseSoundMixin}).
+	 * Has every sound category work its playing sounds' volumes out again (the menus' and the master's aside), so what
+	 * is already playing, music too, follows the hush ({@code WindSenseSoundMixin} applies it as each volume is worked
+	 * out). Only a refresh: the categories' own gains are left alone, as they are the music's fade between tracks and
+	 * would otherwise square every volume below 100% once the focus ends.
 	 */
 	private static void refresh(Minecraft minecraft) {
 		float hush = hush();
@@ -165,7 +167,7 @@ public final class WindAirSense {
 		refreshed = hush;
 		for (net.minecraft.sounds.SoundSource source : net.minecraft.sounds.SoundSource.values()) {
 			if (source != net.minecraft.sounds.SoundSource.MASTER && source != net.minecraft.sounds.SoundSource.UI) {
-				minecraft.getSoundManager().updateCategoryVolume(source, minecraft.options.getFinalSoundSourceVolume(source) * hush);
+				minecraft.getSoundManager().refreshCategoryVolume(source);
 			}
 		}
 	}
@@ -248,11 +250,8 @@ public final class WindAirSense {
 			breeze = new Breeze();
 			minecraft.getSoundManager().play(breeze);
 		}
-		// (eased in steps: every so often as it moves, and exactly at its ends)
-		float hush = hush();
-		if (Math.abs(hush - refreshed) >= 0.05F || (hush == 1.0F || hush == HUSH) && hush != refreshed) {
-			refresh(minecraft);
-		}
+		// (each tick it moves: the focus takes only a few ticks to come and go)
+		refresh(minecraft);
 		ClientLevel level = minecraft.level;
 		if (level == null || !feels(player)) {
 			SIGNALS.clear();
