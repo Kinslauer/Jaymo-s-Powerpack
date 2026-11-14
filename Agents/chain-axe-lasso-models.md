@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Chain axe swings like the flail, lasso gets a physics rope like the whip, both with Blockbench models
 branch: claude/project-thread-qm96fm
 with: Andy
