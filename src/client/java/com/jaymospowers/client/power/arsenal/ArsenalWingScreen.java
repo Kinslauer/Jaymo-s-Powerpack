@@ -33,7 +33,7 @@ final class ArsenalWingScreen extends Screen {
 	private static final int ACCENT = 0xFFB38CFF;
 	private static final int INFO_W = 230;
 	private static final int INFO_H = 30;
-	private static final Item[] ICONS = {Items.FEATHER, Items.ENDER_EYE, Items.SHIELD, Items.WIND_CHARGE, Items.POPPY, Items.IRON_SWORD, Items.BARRIER};
+	private static final Item[] ICONS = {Items.FEATHER, Items.ENDER_EYE, Items.SHIELD, Items.WIND_CHARGE, Items.POPPY, Items.IRON_SWORD, Items.BARRIER, Items.TRIDENT};
 
 	private final KeyMapping key;
 	private int selected = -1;
