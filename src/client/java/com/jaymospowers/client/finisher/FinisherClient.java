@@ -79,6 +79,7 @@ public final class FinisherClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosPowers.id("finisher_bars"), FinisherClient::bars);
 		// (0.18.97) a player held down for questioning, and the one asking: their screens
 		QuestionScreen.register();
+		PromptClient.register();
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -203,7 +204,7 @@ public final class FinisherClient {
 		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning; (0.21.22) or a full hit
 		// streak's quick kill on one still standing)
 		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
-			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
+			&& (Finishers.helpless(body) || com.jaymospowers.core.finisher.Prompts.open(body) || Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
 	}
 
 	/**

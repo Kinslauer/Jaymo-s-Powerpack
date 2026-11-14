@@ -2,6 +2,7 @@
 	"message.jaymospowers.finisher.holding": "Finishing %s... [%s] keep holding",
 	"message.jaymospowers.finisher.stopped": "%s slipped from your finisher.",
 	"message.jaymospowers.finisher.called_off": "You let go. %s is spared.",
+	"message.jaymospowers.finisher.thrown_off": "%s throws you off.",
 	"message.jaymospowers.finisher.sword": "Run through: %s",
 	"message.jaymospowers.finisher.greatsword": "Headsman's stroke: %s",
 	"message.jaymospowers.finisher.dagger": "Mercy stroke: %s",
