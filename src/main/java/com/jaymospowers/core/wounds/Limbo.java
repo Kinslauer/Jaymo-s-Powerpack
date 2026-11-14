@@ -353,8 +353,8 @@ public final class Limbo {
 		player.getFoodData().setFoodLevel(14);
 		player.clearFire();
 		String line = "message.jaymospowers.limbo.reborn";
-		Downed.knockOut(level, player, REBORN_COLD, false, line);
 		player.setAttached(Mortality.WAKE_LINE, line);
+		Downed.knockOut(level, player, REBORN_COLD, false, line);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		JaymosPowers.LOGGER.info("{} was born again in another body", player.getScoreboardName());
 		return true;

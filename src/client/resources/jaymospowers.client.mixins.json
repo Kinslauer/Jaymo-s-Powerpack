@@ -41,6 +41,7 @@
 		"BombGliderAttackMixin",
 		"HeldInputMixin",
 		"HeldInputOverlayMixin",
+		"SceneBlackOverlayMixin",
 		"BombGliderAvatarRendererMixin",
 		"BombGliderInputMixin",
 		"BodyCoverAvatarRendererMixin",

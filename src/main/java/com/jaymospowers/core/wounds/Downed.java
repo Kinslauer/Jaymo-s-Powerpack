@@ -907,7 +907,10 @@ public final class Downed {
 			// (sneak already down as they drop isn't a press: it counts once let go and pressed again)
 			MASH_HELD.add(player.getUUID());
 			MASH_LENGTH.put(player.getUUID(), Math.max(1, ticks));
-			player.sendOverlayMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE));
+			// (a scene's black, a death turned away and the like, draws its line large itself: not again on the action bar)
+			if (!player.hasAttached(Mortality.WAKE_LINE)) {
+				player.sendOverlayMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE));
+			}
 		}
 		return true;
 	}

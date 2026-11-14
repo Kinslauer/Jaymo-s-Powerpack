@@ -451,8 +451,8 @@ public final class Karma {
 		CompletableFuture<?> wakeLoad = nether.getChunkSource().addTicketAndLoadWithRadius(DESCENT, ChunkPos.containing(wake), WAKE_RADIUS);
 		DESCENTS.put(player.getUUID(), new Descent(exit, standing.isEmpty(), wake, exitLoad, wakeLoad, server.getTickCount()));
 		String line = "message.jaymospowers.mortality.wake.sinking";
-		Downed.knockOut(player.level(), player, SINK_TICKS, false, line, false);
 		player.setAttached(Mortality.WAKE_LINE, line);
+		Downed.knockOut(player.level(), player, SINK_TICKS, false, line, false);
 	}
 
 	private static void descents(MinecraftServer server) {
@@ -529,8 +529,8 @@ public final class Karma {
 			Downed.forgetQuietly(player);
 		}
 		String line = "message.jaymospowers.mortality.wake.below";
-		Downed.knockOut(nether, player, Mortality.OUT_AFTER, false, line, false);
 		player.setAttached(Mortality.WAKE_LINE, line);
+		Downed.knockOut(nether, player, Mortality.OUT_AFTER, false, line, false);
 		nether.playSound(null, at, SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 		JaymosPowers.LOGGER.info("{} wakes below at {}; the way up is at {}", player.getScoreboardName(), at.toShortString(), exit.toShortString());
 	}

@@ -106,6 +106,12 @@ public final class Mortality {
 	static final int OUT_BEFORE = 60, OUT_AFTER = 100;
 	/** The share of their health a survivor wakes with. */
 	static final float WAKE_HEALTH = 0.3F;
+	/**
+	 * How long after being put down where they wake (ticks) a death is still turned away: the out-cold spell
+	 * ({@link #OUT_AFTER}) and a little while on their feet. Andy's risen Hollow lay in the sun and died again two seconds
+	 * after the turning was done, and then once more after being taken in: four wake screens for one death.
+	 */
+	static final int WOKE_GRACE = OUT_AFTER + 20 * 5;
 	/** A boss spares you when your strength ({@link #strength}) is less than this share of its own. */
 	static final float MERCY_SHARE = 0.25F;
 	/** How long after respawning (ticks) one whose life ended is told the story anew (past the loading screen). */
@@ -239,10 +245,11 @@ public final class Mortality {
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
+		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.turning_out");
 		if (!Downed.knockOut(player.level(), player, ticks, false, "message.jaymospowers.mortality.turning_out", false)) {
+			player.removeAttached(WAKE_LINE);
 			return false;
 		}
-		player.setAttached(WAKE_LINE, "message.jaymospowers.mortality.turning_out");
 		player.setAttached(TURN_TINT, tint);
 		JaymosPowers.LOGGER.info("{} passed out turning", player.getScoreboardName());
 		return true;
@@ -300,6 +307,8 @@ public final class Mortality {
 	}
 
 	private static final Map<UUID, Wake> WAKES = new HashMap<>();
+	/** Those just put down where they wake, and the server tick their {@link #WOKE_GRACE} runs out. */
+	private static final Map<UUID, Long> WOKE = new HashMap<>();
 	/** Those whose life ended and the tick to tell their story anew. */
 	private static final Map<UUID, Long> REBIRTHS = new HashMap<>();
 
@@ -324,9 +333,10 @@ public final class Mortality {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> unheld(handler.player));
 		// (0.21.7) a body left for dead is dead as far as mobs can tell: none finishes it off. Nor one rising turned: a
 		// skeleton kept executing a body in the black of a mid-turn death, and each death began that black again
-		MobExecutions.SPARE.add((mob, victim) -> victim instanceof Player player && waking(player));
+		MobExecutions.SPARE.add((mob, victim) -> victim instanceof Player player && (waking(player) || justWoke(player)));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAKES.clear();
+			WOKE.clear();
 			REBIRTHS.clear();
 			FELLED.clear();
 			EXECUTED.clear();
@@ -368,6 +378,12 @@ public final class Mortality {
 	/** (0.20.50) Whether {@code player} lies left for dead, waiting to wake somewhere. */
 	public static boolean waking(Player player) {
 		return WAKES.containsKey(player.getUUID());
+	}
+
+	/** Whether {@code player} was put down where they wake only moments ago ({@link #WOKE_GRACE}). */
+	public static boolean justWoke(Player player) {
+		Long until = WOKE.get(player.getUUID());
+		return until != null && player.level().getServer() != null && player.level().getServer().getTickCount() < until;
 	}
 
 	/**
@@ -513,8 +529,17 @@ public final class Mortality {
 		Wounds.settle(player);
 		long left = Math.max(0L, Math.max(wake.moveAt, wake.moveAtChosen) - level.getServer().getTickCount());
 		String line = player.getAttachedOrElse(WAKE_LINE, "message.jaymospowers.mortality.fading");
-		Downed.knockOut(level, player, wake.chosen ? (int) Math.min(Integer.MAX_VALUE, left) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, line, false);
 		player.setAttached(WAKE_LINE, line);
+		Downed.knockOut(level, player, wake.chosen ? (int) Math.min(Integer.MAX_VALUE, left) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, line, false);
+	}
+
+	/** Struck dead again just after waking ({@link #WOKE_GRACE}): the death is turned away, the out-cold spell and its line go on. */
+	private static void wokenStill(ServerPlayer player) {
+		player.setHealth(Math.max(1.0F, player.getMaxHealth() * WAKE_HEALTH));
+		player.clearFire();
+		player.setAirSupply(player.getMaxAirSupply());
+		player.resetFallDistance();
+		Wounds.settle(player);
 	}
 
 	/** (0.21.7) Mobs near a lying body lose interest in it: as far as they can tell, it's dead. */
@@ -663,6 +688,12 @@ public final class Mortality {
 		if (waking != null && !unturnable) {
 			JaymosPowers.LOGGER.info("{} fell to {} ({}) while waking: the wake goes on", player.getScoreboardName(), cause.key(), source.getMsgId());
 			stillWaking(player, waking);
+			return false;
+		}
+		// just woken (risen turned, taken in, put down somewhere): one death gets one wake, not a second straight after it
+		if (!unturnable && justWoke(player)) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}) just after waking: turned away", player.getScoreboardName(), cause.key(), source.getMsgId());
+			wokenStill(player);
 			return false;
 		}
 		// (0.21.42) already turning: they rise the rest of the way, whatever killed them
@@ -875,12 +906,17 @@ public final class Mortality {
 		}
 		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round)
 		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
-		Downed.knockOut(level, player, turn != null ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
+		// (the line first: the black draws it, so the knock-out doesn't repeat it on the action bar)
 		player.setAttached(WAKE_LINE, fading);
+		Downed.knockOut(level, player, turn != null ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
 		if (midTurn) {
 			player.setAttached(TURN_TINT, tint);
 			level.playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.7F, 0.5F);
+		} else {
+			// (a turning's vignette belongs to that black alone: it stayed green through every wake after it)
+			player.removeAttached(TURN_TINT);
 		}
+		WOKE.remove(player.getUUID());
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
@@ -938,6 +974,8 @@ public final class Mortality {
 			}
 		}
 		if (server.getTickCount() % 20 == 0) {
+			long now = server.getTickCount();
+			WOKE.values().removeIf(until -> until <= now);
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				if (player.hasAttached(SURVIVOR) && player.isAlive()) {
 					mending(player);
@@ -1220,8 +1258,9 @@ public final class Mortality {
 			Downed.forgetQuietly(player);
 		}
 		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
-		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		player.setAttached(WAKE_LINE, woke);
+		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
+		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {
