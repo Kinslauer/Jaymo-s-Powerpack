@@ -86,3 +86,5 @@ ends the body for good. Compiled, not played.
   not played: whether each of Moog's hulls floats and steers well as built is untested.
 - **Elbows and knees.** The draugr and the Raid-King bend at the elbow and the knee in every one of their own moves
   (standing, walking, each blow, the shot, the roar, the rush), where before only the shoulders and hips turned.
+- **The draugr archer's own kit.** Archers no longer wear the shield warriors' gear: no horned helm or pauldrons, a
+  fur-banded leather cap, a leather jerkin and kilt over the mail, and a quiver across the back.

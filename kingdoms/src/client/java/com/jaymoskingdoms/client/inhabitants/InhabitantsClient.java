@@ -136,12 +136,18 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("cloak", bone -> bone.skipRender(!scourge && rank != Draugr.Rank.WIGHT));
 			snapshots.ifPresent("sword_left", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
 			snapshots.ifPresent("crest", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
-			if (scourge) {
-				snapshots.ifPresent("right_horn", bone -> bone.skipRender(true));
-				snapshots.ifPresent("left_horn", bone -> bone.skipRender(true));
+			// the archer goes light: a leather cap for the horned helm, no pauldrons, a jerkin and kilt over the mail, a quiver
+			boolean archer = rank == Draugr.Rank.ARCHER;
+			snapshots.ifPresent("helm", bone -> bone.skipRender(archer));
+			snapshots.ifPresent("right_pauldron", bone -> bone.skipRender(archer));
+			snapshots.ifPresent("left_pauldron", bone -> bone.skipRender(archer));
+			for (String kit : new String[] {"cap", "jerkin", "kilt", "quiver"}) {
+				snapshots.ifPresent(kit, bone -> bone.skipRender(!archer));
 			}
-			// the bronze chieftain's left horn broken off
-			snapshots.ifPresent("left_horn", bone -> bone.skipRender(look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
+			boolean hornless = scourge || archer;
+			snapshots.ifPresent("right_horn", bone -> bone.skipRender(hornless));
+			// (and the bronze chieftain's left horn is broken off)
+			snapshots.ifPresent("left_horn", bone -> bone.skipRender(hornless || look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
 			// a lore film's finisher took its head or its weapon arm
 			int maimed = info.getOrDefaultGeckolibData(DRAUGR_MAIMED, 0);
 			if ((maimed & Draugr.MAIM_HEAD) != 0) {

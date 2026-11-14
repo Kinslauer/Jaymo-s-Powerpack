@@ -301,7 +301,7 @@ def draugr_looks():
 
 def draugr():
 	# (the sheet was 128 x 128 before the other ranks' arms were added below the older cubes)
-	b = Builder(128, 176, 11)
+	b = Builder(128, 208, 11)
 	b.bone("root", None, (0, 0, 0))
 	# long legs gone to sinew, fur-wrapped boots, leather breeches
 	# (each limb in two, hinged at the knee and the elbow, so it can take humanoid_moves.py's animations)
@@ -321,8 +321,10 @@ def draugr():
 	b.cube("body", (-6.5, 25.5, -4), (6.5, 29, 4), "fur", 0.2)
 	b.bone("head", "body", (0, 28, 0))
 	b.cube("head", (-4, 28, -4), (4, 36, 4), "skin", faces_paint={"north": gaunt_face})
-	b.cube("head", (-4.5, 32, -4.5), (4.5, 37, 4.5), "iron", 0.1)
-	b.cube("head", (-0.5, 29.5, -5.2), (0.5, 33, -4.6), "iron")
+	# (the helm and the pauldrons are bones of their own, so the archer can go without: DraugrRenderer)
+	b.bone("helm", "head", (0, 28, 0))
+	b.cube("helm", (-4.5, 32, -4.5), (4.5, 37, 4.5), "iron", 0.1)
+	b.cube("helm", (-0.5, 29.5, -5.2), (0.5, 33, -4.6), "iron")
 	# wild hair out from under the helm, at the back and over the ears
 	for x0, x1, top, back in ((-3.2, -1.2, 33.5, 6.2), (-0.9, 0.9, 33.0, 6.8), (1.2, 3.2, 33.5, 6.2)):
 		b.cube("head", (x0, 30, 4.2), (x1, top, back), "hair")
@@ -330,7 +332,11 @@ def draugr():
 	mirror(b, "horn", "head", (4.5, 35, 0), [((4.5, 34, -1), (7, 36, 1), "horn"), ((6, 36, -0.75), (7.5, 40, 0.75), "horn")],
 		   (0, 0, -15))
 	# long arms, iron pauldrons, a fighter's wristbands
-	mirror(b, "arm", "body", (6.5, 26, 0), [((5, 20, -1.8), (8.6, 27, 1.8), "skin"), ((4.6, 24, -2.6), (9.4, 29.5, 2.6), "iron", 0.1)])
+	for side, sx in (("right", 1), ("left", -1)):
+		b.bone(f"{side}_arm", "body", (6.5 * sx, 26, 0))
+		b.cube(f"{side}_arm", (min(5 * sx, 8.6 * sx), 20, -1.8), (max(5 * sx, 8.6 * sx), 27, 1.8), "skin")
+		b.bone(f"{side}_pauldron", f"{side}_arm", (6.5 * sx, 26, 0))
+		b.cube(f"{side}_pauldron", (min(4.6 * sx, 9.4 * sx), 24, -2.6), (max(4.6 * sx, 9.4 * sx), 29.5, 2.6), "iron", 0.1)
 	mirror(b, "forearm", ("arm",), (6.8, 20, 0), [((5, 13.5, -1.8), (8.6, 20, 1.8), "skin"), ((5, 13.5, -2.1), (8.6, 17.5, 2.1), "leather", 0.15)])
 	b.bone("sword", "right_forearm", (6.8, 14.5, 0))
 	b.cube("sword", (6.3, 13, -1.5), (7.3, 14.25, 1.5), "leather")
@@ -382,6 +388,23 @@ def draugr():
 	b.cube("hood", (-5.5, 27.5, -5.0), (-4.7, 37.2, 4.7), "shroud")
 	b.bone("crest", "head", (0, 37, 0))
 	b.cube("crest", (-0.6, 37, -4.5), (0.6, 40, 4.5), "gold")
+	# the archer's kit: no helm, horns or pauldrons, a fur-banded leather cap, a leather jerkin and kilt over the mail,
+	# a quiver across the back
+	b.bone("cap", "head", (0, 28, 0))
+	b.cube("cap", (-4.3, 33.5, -4.3), (4.3, 36.6, 4.3), "leather", 0.1)
+	b.cube("cap", (-4.6, 32, -4.6), (4.6, 33.8, 4.6), "fur", 0.1)
+	b.bone("jerkin", "body", (0, 17, 0))
+	b.cube("jerkin", (-4.7, 17, -3.0), (4.7, 22, 3.0), "leather", 0.05)
+	b.cube("jerkin", (-5.7, 22, -3.4), (5.7, 25.5, 3.4), "leather", 0.05)
+	b.cube("jerkin", (-5.0, 19.5, -3.3), (5.0, 20.5, 3.3), "fur")
+	b.bone("kilt", "waist", (0, 15, 0))
+	b.cube("kilt", (-4.7, 9, -2.8), (4.7, 14, 2.8), "leather", 0.05)
+	b.bone("quiver", "body", (2.5, 22, 4.5), (0, 0, -22))
+	b.cube("quiver", (1, 17, 3.3), (4, 27, 5.8), "leather")
+	b.cube("quiver", (0.8, 25.5, 3.1), (4.2, 26.5, 6.0), "fur")
+	b.cube("quiver", (1.4, 27, 3.6), (2.2, 30, 4.4), "bone")
+	b.cube("quiver", (2.6, 27, 4.4), (3.4, 29.5, 5.2), "bone")
+	b.cube("quiver", (1.6, 27, 4.8), (2.4, 29, 5.6), "bone")
 	model = b.project("draugr")
 	R = "root"
 	walk = {
