@@ -366,6 +366,11 @@ public final class Corpses {
 	 * does one marked as lying where it died ({@link #LYING_TAG}).
 	 */
 	public static RagdollBody deathBody(LivingEntity mob) {
+		// a mob that dies lying limp (knocked down by a heavy blow) leaves exactly that body
+		RagdollBody limp = com.jaymoskitchen.ragdoll.MobRagdolls.body(mob);
+		if (limp != null) {
+			return limp;
+		}
 		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
 		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
 		net.minecraft.util.RandomSource random = mob.getRandom();

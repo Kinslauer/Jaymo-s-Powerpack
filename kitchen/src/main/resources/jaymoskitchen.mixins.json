@@ -27,6 +27,8 @@
 		"IceMeltMixin",
 		"ItemAccessor",
 		"KitchenMenuMixin",
+		"LimpMobAiMixin",
+		"LimpMobTravelMixin",
 		"LimpPlayerMixin",
 		"LivingEntityMixin",
 		"MappedRegistryMixin",
