@@ -1012,12 +1012,14 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
-**The Reaper's risen** (new) (Andy, 2026-11-14: "they should always reanimate as the corpse that died"; the rest Claude's
-placement). What the Reaper raises for its keeper is not a zombie. The body gets up as itself: the shaman with his paint
-and his staff, the wolf as a wolf, the same face and the same name. Nothing of who it was comes back with it, and its old
-side means nothing to it; it fights for the one who carries the Reaper and for no one else. Black smoke comes off it for
-as long as it stands, and when its time is up there is only ash. The old dead that a Death Sorcerer calls are another
-matter: those come out of the ground, and the ground gives back whatever it has.
+**The Reaper's risen** (Andy, 2026-11-14: "they should always reanimate as the corpse that died", "players can be
+reanimated too, and the shamans should still be undead"; approved by Andy 2026-11-14). What the Reaper raises for its keeper
+does not come back as some nameless corpse. The body gets up as itself: the shaman with his paint and his staff, the wolf
+as a wolf, a fallen traveller with their own face, each with the same name. But it is dead, and it is one of the undead
+from then on. Nothing of who it was comes back with it, and its old side means nothing to it; it fights for the one who
+carries the Reaper and for no one else. Black smoke comes off it for as long as it stands, and when its time is up there
+is only ash. The old dead that a Death Sorcerer calls are another matter: those come out of the ground, and the ground
+gives back whatever it has.
 
 **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement,
 approved by Andy 2026-11-14). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
