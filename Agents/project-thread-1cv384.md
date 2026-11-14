@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: The Awakening's style on the Rig (30 picks from the pick list)
 branch: claude/project-thread-1cv384
 with: 
@@ -25,3 +25,4 @@ owns:
 - 
 
 ## Done
+- 2026-11-14 15:55 No sign of work for 30 min: marked stalled (whoever ran it stopped).

@@ -566,3 +566,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 ## 2026-11-14 (Rig style thread)
 - Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
+
+## 2026-11-14 (Long defence film thread)
+- Andy: "The magic casters need to cast sigils and all the other new effects, and they shouldnt just punch to cast, use whatever makes sense in terms of hand motioning. What we have in game for casters should match." Casters (players, villagers, film mages) share hand-gesture casts with sigils and the typed magic effects.
