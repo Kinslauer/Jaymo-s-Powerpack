@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import org.joml.Matrix4f;
 import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +21,9 @@ public interface ItemLayerRenderStateAccessor {
 
 	@Accessor("extents")
 	Supplier<Vector3fc[]> jaymospowers$extents();
+
+	@Accessor("quads")
+	ItemQuads jaymospowers$quads();
 
 	@Accessor("specialRenderer")
 	SpecialModelRenderer<Object> jaymospowers$specialRenderer();

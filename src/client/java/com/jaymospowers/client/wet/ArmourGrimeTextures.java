@@ -147,6 +147,22 @@ public final class ArmourGrimeTextures {
 	}
 
 	/**
+	 * Just the blood to lay over one texture of a modelled (3D) item ({@code BloodItemOverlay}): splotches where the
+	 * texture {@code sprite} (a sprite name, like {@code minecraft:block/oak_log}) has pixels. Null for none.
+	 */
+	public static @Nullable Identifier sprite(Identifier sprite, Bloodied.@Nullable Blood blood) {
+		Smear smear = smear(blood);
+		if (smear == null) {
+			return null;
+		}
+		readMasks();
+		if (itemBlood == null) {
+			return null;
+		}
+		return paint(sprite.withPath("textures/" + sprite.getPath() + ".png"), null, null, null, smear, itemBlood, true, false);
+	}
+
+	/**
 	 * (0.20.41) Just the blood to lay over a body drawn from the skin {@code base} ({@code BloodCoatLayer}): splotches where
 	 * the skin has pixels, or, for a skin that can't be read (a player's, downloaded), where the mask says, as if the
 	 * skin were whole. Null for none.

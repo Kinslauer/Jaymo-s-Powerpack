@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:item/held_3d/jmb/longsword_template",
+  "textures": {
+    "0": "jaymospowers:item/held_3d/jmb/wooden",
+    "particle": "jaymospowers:item/held_3d/jmb/wooden"
+  }
+}

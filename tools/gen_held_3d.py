@@ -291,6 +291,99 @@ def wrap(node, rule):
     return {k: wrap(v, rule) for k, v in node.items()}
 
 
+
+# ----- JMB's Better Weapons (MIT, jmb19905; tools/jmb_weapons/LICENSE) ---------------------------------------------------
+# Andy (2026-11-14) picked its 3D models for the longsword, glaive, battlestaff (our quarterstaff), club (our cudgel) and
+# long axe (WeaponMod's battleaxe). Its templates and material palettes are copied into the pack as they are; stone and
+# copper palettes are made from its iron one, recoloured along vanilla's stone and copper sword heads. Flat in the
+# inventory as before; the quarterstaff swings across into JMB's blocking hold while raised.
+JMB = os.path.join(ROOT, "tools", "jmb_weapons")
+JMB_TEX = f"{NS}:item/held_3d/jmb/"
+# our tiers -> JMB's palettes
+JMB_PALETTE = {"wooden": "wooden", "wood": "wooden", "stone": "stone", "copper": "copper", "iron": "iron", "golden": "gold",
+               "gold": "gold", "diamond": "diamond", "netherite": "netherite"}
+# the quarterstaff's caps (JMB's battlestaff takes a block for them)
+STAFF_CAPS = {"wooden": "minecraft:block/oak_planks", "iron": "minecraft:block/iron_block"}
+CLUB_WOOD = {"wooden": "minecraft:block/oak_log", "stone": "minecraft:block/cobblestone"}
+
+
+def ramp_palette(name, sword):
+    """JMB's iron palette with its metal recoloured along a vanilla sword head's shades (dark to light)."""
+    iron = Image.open(os.path.join(JMB, "textures", "iron_weapon.png")).convert("RGBA")
+    head = sprite(f"minecraft:item/{sword}")
+    pixels = lambda img: [img.getpixel((x, y)) for y in range(img.height) for x in range(img.width)]
+    shades = sorted({px[:3] for px in pixels(head) if opaque(px) and px[:3] not in STICK}, key=lambda c: sum(c))
+    out = iron.copy()
+    lum = lambda c: c[0] * 0.3 + c[1] * 0.59 + c[2] * 0.11
+    metal = [px for px in pixels(iron) if opaque(px) and not (px[0] > px[2] + 30)]
+    lo, hi = min(lum(p) for p in metal), max(lum(p) for p in metal)
+    for y in range(iron.height):
+        for x in range(iron.width):
+            px = iron.getpixel((x, y))
+            if not opaque(px) or px[0] > px[2] + 30:  # handle (brown) stays
+                continue
+            t = 0.0 if hi == lo else (lum(px) - lo) / (hi - lo)
+            c = shades[min(len(shades) - 1, int(t * (len(shades) - 1) + 0.5))]
+            out.putpixel((x, y), (*c, px[3]))
+    out.save(os.path.join(PACK, "assets", NS, "textures", "item", "held_3d", "jmb", name + ".png"))
+
+
+def jmb_model(template, item_id, textures, display=None):
+    model = {"parent": f"{NS}:item/held_3d/jmb/{template}", "textures": textures}
+    if display:
+        model["display"] = display
+    write(os.path.join(PACK, "assets", NS, "models", "item", "held_3d", "jmb", item_id + ".json"), model, compact=False)
+    return f"{NS}:item/held_3d/jmb/{item_id}"
+
+
+def jmb_item(ns, item, flat_model, held):
+    write(os.path.join(PACK, "assets", ns, "items", item + ".json"),
+          {"model": {"type": "minecraft:select", "property": "minecraft:display_context",
+                     "cases": [{"when": FLAT, "model": {"type": "minecraft:model", "model": flat_model}}], "fallback": held}},
+          compact=False)
+
+
+def jmb_weapons():
+    tex_dir = os.path.join(PACK, "assets", NS, "textures", "item", "held_3d", "jmb")
+    os.makedirs(tex_dir, exist_ok=True)
+    shutil.copy(os.path.join(JMB, "LICENSE"), os.path.join(PACK, "JMB-BetterWeapons-LICENSE.txt"))
+    for f in os.listdir(os.path.join(JMB, "textures")):
+        shutil.copy(os.path.join(JMB, "textures", f), os.path.join(tex_dir, f[:-len("_weapon.png")] + ".png"))
+    ramp_palette("stone", "stone_sword")
+    ramp_palette("copper", "copper_sword")
+    for f in os.listdir(os.path.join(JMB, "models")):
+        model = json.load(open(os.path.join(JMB, "models", f), encoding="utf-8"))
+        model.pop("parent", None)
+        model.pop("textures", None)  # each weapon names its own
+        write(os.path.join(PACK, "assets", NS, "models", "item", "held_3d", "jmb", f), model, compact=False)
+    blocking = json.load(open(os.path.join(JMB, "models", "battlestaff_blocking.json"), encoding="utf-8"))["display"]
+    count = 0
+    for tier in ("wooden", "stone", "iron", "golden", "diamond", "netherite"):
+        pal = JMB_TEX + JMB_PALETTE[tier]
+        for kind, template in (("longsword", "longsword_template"), ("glaive", "glaive_template")):
+            held = jmb_model(template, f"{tier}_{kind}", {"0": pal, "particle": pal})
+            jmb_item(NS, f"{tier}_{kind}", f"{NS}:item/armory/{tier}_{kind}", {"type": "minecraft:model", "model": held})
+            count += 1
+    for tier, caps in STAFF_CAPS.items():
+        textures = {"0": "minecraft:block/oak_log", "1": caps, "particle": "minecraft:block/oak_log"}
+        held = jmb_model("battlestaff_template", f"{tier}_quarterstaff", textures)
+        raised = jmb_model("battlestaff_template", f"{tier}_quarterstaff_blocking", textures, blocking)
+        jmb_item(NS, f"{tier}_quarterstaff", f"{NS}:item/armory/{tier}_quarterstaff",
+                 {"type": "minecraft:condition", "property": "minecraft:using_item",
+                  "on_true": {"type": "minecraft:model", "model": raised}, "on_false": {"type": "minecraft:model", "model": held}})
+        count += 1
+    for tier, wood in CLUB_WOOD.items():
+        held = jmb_model("club", f"{tier}_cudgel", {"0": wood, "particle": wood})
+        jmb_item(NS, f"{tier}_cudgel", f"{NS}:item/armory/{tier}_cudgel", {"type": "minecraft:model", "model": held})
+        count += 1
+    # WeaponMod's battleaxes, as JMB's long axe
+    for metal in ("wood", "stone", "copper", "iron", "gold", "diamond", "netherite"):
+        pal = JMB_TEX + JMB_PALETTE[metal]
+        held = jmb_model("longaxe_template", f"battleaxe_{metal}", {"0": pal, "particle": "minecraft:block/stripped_spruce_log"})
+        jmb_item("weaponmod", f"battleaxe.{metal}", f"weaponmod:item/battleaxe.{metal}", {"type": "minecraft:model", "model": held})
+        count += 1
+    return count
+
 # ----- blocks --------------------------------------------------------------------------------------------------------
 def box(x0, y0, z0, x1, y1, z1, faces):
     return {"from": [x0, y0, z0], "to": [x1, y1, z1], "faces": faces}
@@ -381,7 +474,8 @@ def main():
                   compact=False)
     write(os.path.join(blocks, "smooth_stone_slab_double.json"),
           {"parent": "minecraft:block/cube_all", "textures": {"all": "minecraft:block/smooth_stone"}}, compact=False)
-    print(len(RULES), "items,", sum(1 for v in made.values() if v), "held models")
+    jmb = jmb_weapons()
+    print(len(RULES), "items,", sum(1 for v in made.values() if v), "held models,", jmb, "JMB weapons")
 
 
 if __name__ == "__main__":

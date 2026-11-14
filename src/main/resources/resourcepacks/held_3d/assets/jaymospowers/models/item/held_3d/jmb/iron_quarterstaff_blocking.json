@@ -1,0 +1,89 @@
+{
+  "parent": "jaymospowers:item/held_3d/jmb/battlestaff_template",
+  "textures": {
+    "0": "minecraft:block/oak_log",
+    "1": "minecraft:block/iron_block",
+    "particle": "minecraft:block/oak_log"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        0,
+        35
+      ],
+      "translation": [
+        -1,
+        0,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        0,
+        35
+      ],
+      "translation": [
+        -1,
+        0,
+        0
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        0,
+        35
+      ],
+      "translation": [
+        0,
+        4,
+        0
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        0,
+        35
+      ],
+      "translation": [
+        0,
+        4,
+        0
+      ]
+    },
+    "ground": {
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        -2.5,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        45,
+        45,
+        -45
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.51,
+        0.51,
+        0.51
+      ]
+    }
+  }
+}
