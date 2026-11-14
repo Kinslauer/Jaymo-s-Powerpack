@@ -551,3 +551,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Reaper thread): asked for the Grue and the five spirits to be raised to the Reaper's level; chose "Grue only for now". Note for later: Varro and Grimsby get Shadow of War style combat, capstone a Celebrimbor-like mode.
 - 2026-11-14 (Andy, chain axe thread): "the chain axe and lasso should operate similar to the lasso and flail, therefore they need blockbench models"; picked "Lasso, like the whip" on the card (chain axe swings like the flail, lasso gets a 3D coil and a physics rope).
 - 2026-11-14 (Andy, Reaper thread): Lore paragraph "The Grue in the dark" approved ("looks good"). He also asked why the Long Dark does not darken the sky; building that.
+- 2026-11-14 (Andy, Reaper thread): "merge". PR #1535 (the Grue grows, the dark feeds it) merged.
