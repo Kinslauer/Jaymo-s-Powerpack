@@ -18,3 +18,4 @@ owns:
 ## Done
 - PR #1493: part-built fishing rod (metal hook = sea rod), Crafting Station JEI catalyst and "+" transfer. Compiles; not played.
 - Continuum is a full Tinkers 3 port; Andy asked which part first (card in the thread).
+- 2026-11-14: Andy picked "Smeltery extras" for the Continuum pieces; melter, tank, channel, alloyer and foundry added to PR #1493.
