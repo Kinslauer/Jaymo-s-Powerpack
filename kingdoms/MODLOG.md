@@ -13203,3 +13203,8 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 - Hint 113 says so. Classes: `CaptiveConduct` (beaten, haul, strikes, doomed, executed), `Downed.heldCaptive`, `Captors.take`, `StoryHard.release`; lang part `captive-conduct.json`.
 - **Kneel first** (Andy, 2026-11-14: "to lockpick and break out of chains you must first be kneeling"): picking any lock (a locked chest, a fitted door lock, the shackle, a cell door) and beating at a chain or sawing a rope are done from a kneel (Powers' low crouch held still; a crouch without Powers). Standing, a locked chest or door only rattles and says to kneel; a rock or blade in hand does what it otherwise would. Kneeling at a locked chest picks it whatever you hold (a held sneak used to skip it). `KneelFirst`; lang part `kneel-first.json`; hint 169, hint 11 and the chained wake text say so.
 - Built; not played.
+
+## 0.8.78 (2026-11-14): HUD pieces can be moved (#1542)
+
+- `HudZones` reads the shifts set by Powers' `/hudmove` screen, so this mod's HUD pieces can be dragged to a new spot too.
+- Compiled; not played.

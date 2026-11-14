@@ -2203,3 +2203,8 @@ corpse' model that it came from".
   creature gives a face of one box of its own model (a humanoid's trunk or limbs, never its head). Only a body the
   client can't rebuild leaves the plain cloth swatch. An outfit from MCA's online library falls back to the skin.
 - Compiled; not played.
+
+## 0.6.19 (2026-11-14): HUD pieces can be moved (#1542)
+
+- `HudZones` reads the shifts set by Powers' `/hudmove` screen, so this mod's HUD pieces can be dragged to a new spot too.
+- Compiled; not played.
