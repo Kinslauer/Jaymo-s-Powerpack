@@ -51,7 +51,8 @@ PARTS = [
     ("halberd_head", "Halberd Head", "balkon:halberd", ["iron", "gold", "copper"]),
     ("battleaxe_head", "Battleaxe Head", "balkon:battleaxe", ["iron", "gold", "copper"]),
     ("warhammer_head", "Warhammer Head", "balkon:warhammer", ["iron", "gold", "copper"]),
-    ("katana_blade", "Katana Blade", "balkon:katana", ["iron", "gold", "copper"]),
+    # folded steel only (smithing/FoldedSteel); the older metals stay drawn for blades already in worlds
+    ("katana_blade", "Katana Blade", "balkon:katana", ["iron", "gold", "copper", "steel"]),
     ("flail_head", "Flail Head", "balkon:flail", ["iron", "gold", "copper"]),
     ("boomerang_edge", "Boomerang Edge", "balkon:boomerang", ["iron", "gold", "copper"]),
     # (0.15.36) tools forged the same way, drawn here (DRAWN) rather than cut from vanilla's or Pantry's art
@@ -502,7 +503,8 @@ DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
 REDRAWN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "redrawn_heads")
 # dark to light, for recolouring a redrawn iron head
 RAMPS = {"gold": ((92, 46, 6), (182, 111, 24), (237, 200, 52), (255, 250, 170)),
-         "copper": ((80, 34, 20), (156, 78, 46), (210, 120, 82), (246, 182, 140))}
+         "copper": ((80, 34, 20), (156, 78, 46), (210, 120, 82), (246, 182, 140)),
+         "steel": ((34, 38, 46), (84, 92, 106), (150, 160, 176), (214, 222, 234))}
 METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper", "steel": "Steel"}
 ARMORY_TIER = {"stone": "stone", "iron": "iron", "gold": "golden"}
 

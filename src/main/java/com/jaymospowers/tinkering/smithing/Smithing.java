@@ -92,6 +92,7 @@ public final class Smithing {
 		HEARTH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("forge_hearth"),
 			new BlockEntityType<>(HearthEntity::new, Set.of(Forge.FORGE_HEARTH)));
 
+		FoldedSteel.register();
 		SmithingNet.register();
 		Grades.register();
 		SmithingWider.register();
@@ -108,6 +109,7 @@ public final class Smithing {
 			output.accept(STEEL_TONGS);
 			output.accept(COPPER_SMITHING_HAMMER);
 			output.accept(STEEL_SMITHING_HAMMER);
+			output.accept(FoldedSteel.INGOT);
 		});
 	}
 

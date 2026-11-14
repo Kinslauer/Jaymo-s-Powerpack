@@ -59,6 +59,9 @@ public final class HotMetal {
 		if (item == Items.COPPER_INGOT) {
 			return Molten.COPPER;
 		}
+		if (item == FoldedSteel.INGOT) {
+			return Molten.STEEL;
+		}
 		for (var entry : Tinkering.ALLOY_INGOTS.entrySet()) {
 			if (entry.getValue() == item) {
 				return entry.getKey();
@@ -126,7 +129,12 @@ public final class HotMetal {
 	public static ItemStack heated(ItemStack stack, long now) {
 		Molten molten = ingotMetal(stack);
 		if (molten != null) {
-			return hotIngot(molten, stack.getCount(), now);
+			ItemStack hot = hotIngot(molten, stack.getCount(), now);
+			if (stack.is(FoldedSteel.INGOT)) {
+				hot.set(FoldedSteel.FOLDED, true);
+				hot.set(net.minecraft.core.component.DataComponents.ITEM_NAME, Component.translatable("item.jaymospowers.hot_ingot.folded"));
+			}
+			return hot;
 		}
 		ItemStack out = stack.copy();
 		out.set(Smithing.HEATED_AT, now);
@@ -136,6 +144,9 @@ public final class HotMetal {
 	/** This stack gone cold: a Hot Ingot back to its ingot, anything else without its heat. */
 	public static ItemStack cooled(ItemStack stack, ServerLevel level) {
 		if (stack.is(Smithing.HOT_INGOT)) {
+			if (FoldedSteel.folded(stack)) {
+				return new ItemStack(FoldedSteel.INGOT, stack.getCount());
+			}
 			Molten molten = metal(stack);
 			return molten == null ? ItemStack.EMPTY : ingot(molten, stack.getCount());
 		}

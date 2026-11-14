@@ -28,9 +28,10 @@ import org.jspecify.annotations.Nullable;
 public final class WeaponParts {
 	/**
 	 * How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only
-	 * (or, {@code SINGLE_COPPER}, copper only).
+	 * (or, {@code SINGLE_COPPER}, copper only). {@code FOLDED}: a Balkon weapon whose head is hammered only from folded
+	 * steel ({@code smithing/FoldedSteel}) and makes its iron one; no stone, gold or copper.
 	 */
-	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER, SINGLE_STEEL }
+	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER, SINGLE_STEEL, FOLDED }
 
 	/**
 	 * What else the Tool Station needs besides the head, any material. (0.11.77) Andy: the big weapons take a Tough
@@ -132,6 +133,7 @@ public final class WeaponParts {
 				case SINGLE -> metal == Metal.IRON ? base() : null;
 				case SINGLE_COPPER -> metal == Metal.COPPER ? base() : null;
 				case SINGLE_STEEL -> metal == Metal.STEEL ? base() : null;
+				case FOLDED -> metal == Metal.STEEL ? base() + ".iron" : null;
 			};
 			return path == null ? null : BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath(namespace(), path)).orElse(null);
 		}
@@ -219,7 +221,8 @@ public final class WeaponParts {
 		balkon("halberd_head", "halberd", 3, Assembly.TOUGH_BINDING);
 		balkon("battleaxe_head", "battleaxe", 5, Assembly.TOUGH_BINDING);
 		balkon("warhammer_head", "warhammer", 4, Assembly.TOUGH_BINDING);
-		balkon("katana_blade", "katana", 2, Assembly.GUARD_ROD);
+		// the katana is folded steel only, so its iron sand is a reason to sail to Mohknee
+		add(new Kind("katana_blade", "weaponmod:katana", Scheme.FOLDED, 2 * INGOT, Assembly.GUARD_ROD, 1));
 		balkon("flail_head", "flail", 1, Assembly.ROD_BINDING);
 		balkon("boomerang_edge", "boomerang", 1, Assembly.ROD_BINDING);
 		// (0.15.36) Andy: "All tools need crafting routes through jaymos": the tools Tinkering doesn't make are forged too
@@ -333,9 +336,9 @@ public final class WeaponParts {
 		return KINDS.values().stream().filter(Kind::loaded).toList();
 	}
 
-	/** The kinds the Part Builder shapes, in its order: loaded, and not {@link #FOUND}. */
+	/** The kinds the Part Builder shapes, in its order: loaded, not {@link #FOUND}, and not folded steel only. */
 	public static List<Kind> shaped() {
-		return loaded().stream().filter(kind -> !FOUND.contains(kind.part())).toList();
+		return loaded().stream().filter(kind -> !FOUND.contains(kind.part()) && kind.scheme() != Scheme.FOLDED).toList();
 	}
 
 	// --- casts ---
