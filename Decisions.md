@@ -546,3 +546,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1528 (/kingdom reaper toll) merged.
 - 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".
+- 2026-11-14 (Andy, undead illagers thread): "i like undead illagers, waging war for the reaper" (Immersive Pillagers link), then links to Mebahel's Draugr and Moog's Ocean Structures ("i like the boats from this", "if a list is easier then you alr know"). Built the reaped (undead illagers as a horde kind that wars on settlements and living illagers); what they do and every number are my picks. Lore.md paragraph "The reaped" is (new), waiting for his approval. Pick-list for the three mods to follow.

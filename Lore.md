@@ -1006,6 +1006,17 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
+(new) **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement
+for Andy to approve). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
+ground that still holds the sorcerer's mana. The Reaper takes those dead and sends them back: pillagers, vindicators and
+evokers, grey and half bone, a red point far back in each socket, still carrying the crossbow or the axe they went down
+with. Folk call them **the reaped**. They are not the old dead and do not walk with them. They come as a host, behind a
+horn that nobody is blowing, and they go to war: on the nearest town or camp, and on their own living kin before anyone,
+because every illager they kill gets up and joins them. The living illagers know it and fight them on sight. A host does
+not burn at sunrise; when its war is done the Reaper takes it back, and nothing is left on the field. Some hosts have a
+**reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
+them, and the Reaper is paid for what they kill near its keeper.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
