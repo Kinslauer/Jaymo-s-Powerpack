@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Portable Mods picks, patch 1: the rest of The Aether II
 branch: claude/project-thread-vb3yg2
 with: Claude (cloud thread "Port picked pieces from other mods")
@@ -36,3 +36,4 @@ layers, saddlebags, cloud skiff, mob behaviour, sentry golem idles, world pieces
 ## Done
 - PR #1491 up 2026-11-14: young, glows/keratin/collar, saddlebag, golem fidgets, cloud skiff, zephyr campfire fear, slider grudge. Compiles, 38 models bake; not played.
 - World pieces not built: ~420 Aether II block ids we lack; Andy asked which groups.
+- 2026-11-14 03:18 PR #1491 is merged into master; moved to Agents/Done.

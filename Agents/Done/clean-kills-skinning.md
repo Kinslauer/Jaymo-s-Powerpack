@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Clean kills and skinning in strokes
 branch: claude/project-thread-tjqmp0
 with: cloud thread "Improve butchering from Carcass Craft"
@@ -27,3 +27,6 @@ owns:
 - Gradle compile clean; not played.
 - Added on Andy's ask: Kingdoms perk Butcher's Hand (Survival, after Forager, 3 ranks): a pull fewer per rank, rank 3 saves what a mauled/battered death spoiled. Kitchen hook Hanging.setButcherSkill.
 - Andy's correction: hook work needs Butcher's Hand rank 1 (Kitchen alone: everyone can). Butcher block = plain loot, extras only off the hook or a butcher villager. Cube Animals death loot (LivingEntity.drop) now caught by LivingEntityMixin.
+
+- 2026-11-13 10:20 PM ET: Andy said "Merge"; PR #1486 merged (squash). Done.
+- 2026-11-14 03:18 PR #1486 is merged into master; moved to Agents/Done.
