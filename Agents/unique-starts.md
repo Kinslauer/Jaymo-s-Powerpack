@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: unique-starts
 branch: claude/unique-starts
 with:

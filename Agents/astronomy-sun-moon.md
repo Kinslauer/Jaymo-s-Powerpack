@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: astronomy-sun-moon
 branch: claude/astronomy-sun-moon
 with: 

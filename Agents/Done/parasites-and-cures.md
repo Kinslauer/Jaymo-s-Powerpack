@@ -33,4 +33,4 @@ owns:
 
 ## Done
 Dirty water applies a slow, survivable parasite instead of nausea; hot chocolate cures it. PR #1165 opened; buildKitchen and pr_checks pass; not tested in game.
-- 2026-11-09 01:52 PR #1165 is merged into master; moved to Agents/Done.
+- 2026-11-10 16:18 PR #1165 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: farmhand-kind-family
 branch: claude/farmhand-kind-family
 with: 

@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 1239
 suggested_owns:
   - kingdoms/art/varasuchus.bbmodel (+ the script that writes it)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/**/varasuchus.*
@@ -13,6 +13,8 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/VarasuchusDragonModel.java (removed) and its new renderer
   - DragonsClient.java (its register line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Varasuchus: a Blockbench model and animations, on GeckoLib (modelling bot)
 
@@ -43,3 +45,9 @@ suggested_owns:
 - Hides, glowing markings, looks, sizes, seats and the hatchling's size must not change. Riders must still sit where they sit now.
 - The five dragon tasks run as separate tracks. Each touches only its own dragon's files and its own line in `DragonsClient.java`. Don't edit `WindDragon.java` or `WindDragonRenderer.java`; if you need a shared change there, ask under this task's Notes.
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
+
+- 2026-11-10 (prometheus): PR #1239. Separate finding, outside this track: gen_atroxiia_geo.py leaves out the +24 in its Blockbench y (it writes (-x,-y,z), not (-x,24-y,z)), so Atroxiia is likely drawn about 1.5 blocks underground. Needs its own fix.
+- 2026-11-10 00:18 Cloud agent session sesn_0165Np5QFFty3nV9WywnemtY ended without a PR; see its transcript.
+- 2026-11-10 05:16 Cloud agent session sesn_01Y8aSJ1r7givv7YS15R7rby: PR #1239.
+- 2026-11-10 05:32 Text pass: reviewed entity.json ('Varasuchus'), item.json ('Varasuchus Spawn Egg'), and changes/kingdoms/varasuchus-geckolib.md — all clear, in voice, no rewrites needed.
+- 2026-11-10 16:22 Already in master (merged from Andy's PC, Nov 10 morning); the GitHub PR was left open. Marked done by the cloud vault check.

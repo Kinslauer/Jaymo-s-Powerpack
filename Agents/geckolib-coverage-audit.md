@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: geckolib-coverage-audit (Kanban t_68218287; parent omen-geckolib)
 branch: claude/geckolib-coverage-audit
 with: 

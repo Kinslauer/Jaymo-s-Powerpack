@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: startup-crash - the rat goal that killed the server
 branch: claude/startup-crash
 with:

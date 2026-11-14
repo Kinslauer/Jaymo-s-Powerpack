@@ -1,17 +1,19 @@
 ---
-status: open
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 1221
 suggested_owns:
   - kingdoms/art/skulk_golem.bbmodel (+ credits, licence)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/**/skulk_golem.*
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/SkulkGolem.java
   - BeastsClient.java (its line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Skulk golem: full animations, on GeckoLib (modelling bot)
 
@@ -40,3 +42,7 @@ suggested_owns:
 ## Notes
 - Follow the minotaur (PR #1188).
 - The redstone golem is a separate task. Each task edits only its own line in `BeastsClient.java`.
+- 2026-11-09 23:49 Cloud agent session sesn_01AthTH4jh3CQic5hWuiVc6k opened PR #1221.
+- 2026-11-10 04:28 Text pass: rewrote change note (cloud-skulk-golem-geckolib.md) — player-voice title and description, kept all facts, removed code-class list
+- 2026-11-10 05:15 Cloud agent session sesn_01GhKJbeqFFt2csNtJHWfLFB: PR #1221.
+- 2026-11-10 16:24 Already in master (0cae55eb8, released in Kingdoms 0.7.699); the GitHub PR #1221 was left open. Marked done by the cloud vault check.

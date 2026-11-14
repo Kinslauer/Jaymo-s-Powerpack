@@ -39,4 +39,4 @@ Player sees rare blighted elites with custom names (e.g. "Blighted Zombie the Ta
 Not tested in game: spawn rates and balance at different difficulties, particle visibility and performance with many blighted mobs, drop table modifications (not yet implemented), multiplayer sync of custom names and particles, interaction with other mods' custom mobs.
 
 Compiles; not tested in game yet. PR #1166 open for review.
-- 2026-11-09 01:49 PR #1166 is merged into master; moved to Agents/Done.
+- 2026-11-10 16:18 PR #1166 is merged into master; moved to Agents/Done.

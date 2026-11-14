@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: geckolib-asset-audit (Kanban t_b4c7a3b0)
 branch: claude/geckolib-asset-audit
 with: 

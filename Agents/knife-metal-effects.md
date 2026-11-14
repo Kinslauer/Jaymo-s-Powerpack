@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: knife-metal-effects
 branch: claude/knife-metal-effects
 with: 
