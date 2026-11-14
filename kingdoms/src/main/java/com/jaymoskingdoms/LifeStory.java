@@ -2009,6 +2009,9 @@ public final class LifeStory {
 				return null;
 			}
 			if (!aloft(player.level(), player.blockPosition())) {
+				// (Andy 2026-11-14 clip: woke already downed) left where they were let down, at the world's spawn: the
+				// arrival's grace all the same, or what roams there has them before the loading screen is even down
+				landSafely(player);
 				return landed;
 			}
 			// (Andy 2026-11-13) nowhere found, and where they stand is the Aether: the world's spawn, on the Overworld's ground
