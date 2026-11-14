@@ -13,13 +13,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/farmers-delight-picks|farmers-delight-picks]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Agents/clean-kills-skinning|clean-kills-skinning]] · 💻 Odysseus · #1486 · in-review
+- [ ] [[Agents/farmers-delight-picks|farmers-delight-picks]] · 💻 Odysseus · #1490 · in-review
 
 
 ## Needs Andy
