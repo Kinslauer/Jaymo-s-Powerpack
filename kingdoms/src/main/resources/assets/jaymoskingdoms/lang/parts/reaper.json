@@ -1,7 +1,7 @@
 {
   "class.jaymoskingdoms.option.reaper": "The Reaper",
   "class.jaymoskingdoms.option.reaper.desc": "Swear to no god. Something older answers, and it has no shrine and no favour to give: it is paid in blood and in deaths, and all of death magic opens to you.",
-  "entity.jaymoskingdoms.grave_captain": "Grave-captain",
+  "entity.jaymoskingdoms.reaper_captain": "Grave-captain",
   "gui.jaymoskingdoms.reaper.line": "%s  Toll %s  Dead %s",
   "gui.jaymoskingdoms.reaper.stage.1": "The Pall",
   "gui.jaymoskingdoms.reaper.stage.2": "The Mantle",

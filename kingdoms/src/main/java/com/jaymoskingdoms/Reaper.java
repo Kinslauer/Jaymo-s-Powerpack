@@ -109,7 +109,7 @@ public final class Reaper {
 	/** What a body the sweep kills rises for (ticks), and the most Death's Company raises at once. */
 	static final int RISEN_LIFE = 20 * 60, COMPANY_MOST = 8;
 	/** The grave-captain: twice a thrall's health, and it does not crumble with time. */
-	static final String CAPTAIN_TAG = "jaymoskingdoms.grave_captain";
+	static final String CAPTAIN_TAG = "jaymoskingdoms.reaper_captain";
 	static final int CAPTAIN_LIFE = Integer.MAX_VALUE / 2;
 	/** The five's remark on a Reaper near by: how far, and how seldom (ticks). */
 	static final double REMARK_RANGE = 16.0;
@@ -743,7 +743,7 @@ public final class Reaper {
 					health.setBaseValue(health.getBaseValue() * 2.0);
 					mob.setHealth(mob.getMaxHealth());
 				}
-				mob.setCustomName(Component.translatable("entity.jaymoskingdoms.grave_captain"));
+				mob.setCustomName(Component.translatable("entity.jaymoskingdoms.reaper_captain"));
 			}
 			body.discard();
 			raised++;
