@@ -1437,6 +1437,11 @@ a few sailors about the home harbours have made it once, in the wake of a blosso
 again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
 harbour will sail any course you name and has only stories about the east.
 
+(new) **The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; who sells it is
+Claude's placement for him to approve). The home continent still draws no chart of the east. The blossom captains have
+their own, drawn by their own hands, and one lying off a home harbour will sell a copy for coin: his landfall on
+Mohknee's western shore and nothing of the sea between, which is enough for a helmsman to keep a heading by.
+
 (new) **What the blossom folk build with** (Blossom lands thread, 2026-11-13; Andy picked the blocks, the placement is
 Claude's for him to approve). Paper screens in wooden lattice, rush mats, lime plaster, planks under red or black
 lacquer, paper and stone lanterns: these are Mohknee's crafts, and what little of them the home continent has came
