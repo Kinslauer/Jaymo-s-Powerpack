@@ -1465,8 +1465,8 @@ each step to someone who has done the one before.
 
 (new) **The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
 a reason to go to mohknee"; the reason given here is Claude's for him to approve). Folded steel does everything smeltery
-steel does, and one thing it cannot: it takes the long curved edge of Mohknee's sword. Dug iron and poured steel crack
-on that curve, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
+steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
+under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
 
 ## The wild
 
