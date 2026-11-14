@@ -1261,6 +1261,17 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   margins of your aura.
 - **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order. He commanded an army of orcs he had
   dominated, marked with his ki, and he can still show you how to put one on his back and make it yours.
+  **Two as One** (new) (Andy, 2026-11-14: "more of the shadow of war combat inspiration for varro, and grimsby, the
+  capstone being a mode in which you play as if you had celebrimbor's power"; the names and the rest Claude's placement).
+  A spirit fights from behind its keeper's shoulder because that is all a new bond can carry. A deep one carries more.
+  Grimsby and Varro, the two who held the line with steel at the long defence, can step into the keeper for a short
+  while and fight with the keeper's own hands, the way they fought when they had hands of their own. Grimsby moves
+  them as a Sylvan swordsman moves: over a foe's shoulder, across a field in a step, a pale glaive swept the whole way
+  round, and what a fallen foe has left taken for the next one. Varro fights as he commanded: his hand hauls one foe
+  out of its line, his voice sends the lesser ones running, and a beaten foe's will breaks to him as the orcs' did,
+  though without his mark it holds only a minute. Neither can stay long. It is their mana in a living body, and the
+  body tires first.
+
 - **The Quiet One**: the fifth, of almost no words, who looks like none of the others and changes size each time he is
   called. He is the fifth figure in *The Long Defence*, though it is never said. He remembers the Grue ("I remember
   him." "He's here."), warns you off it ("No." "Don't." "Stop."), and thanks you when it is beaten. He speaks fully
