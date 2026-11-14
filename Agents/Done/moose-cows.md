@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Cube Animals moose as cows beside our bull
 branch: claude/project-thread-dhegwo
 with: Claude (cloud thread "Add Cube moose as cows")
@@ -24,3 +24,4 @@ owns:
 - Lore: moose are already in Lore.md's Beasts paragraph; no new placement.
 
 ## Done
+- 2026-11-14 08:48 PR #1518 is merged into master; moved to Agents/Done.
