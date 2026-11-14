@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 branch: claude/project-thread-vb3yg2
 pr: 1497
 ---
@@ -12,3 +12,6 @@ pr: 1497
 
 ## Next
 - Gearbox, and the hardcore trio Andy chose 2026-11-14: tougher wood, harsher hunger, beds don't set spawn.
+
+## Notes
+- 2026-11-14 07:16 PR #1497 is merged into master; moved to Agents/Done.
