@@ -17,6 +17,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -35,6 +38,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import org.joml.Quaternionf;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -66,6 +70,9 @@ public final class LashRenderer {
 	private static final int SIDES = 6;
 	/** The ball: half its width, and its spikes' length. */
 	private static final double BALL = 0.075, SPIKE = 0.06;
+	/** The chain axe's head: the item model drawn on the chain's end, and its size (1: a block a model's 16 px). */
+	private static final Identifier AXE_HEAD_MODEL = com.jaymospowers.JaymosPowers.id("chain_axe_swung");
+	private static final float AXE_HEAD_SCALE = 0.8F;
 	/** (0.15.148) Garrotte: how wide the lash's turn round the neck is. */
 	private static final double NECK_LOOP = 0.13;
 	/** (0.16.2) Ball and Chain: the arm straight up (raise, out) while it whirls, and the ball's circle round that hand. */
@@ -125,7 +132,8 @@ public final class LashRenderer {
 		});
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (Lash.isFlail(stack)) {
-				lines.add(Component.translatable("item.jaymospowers.flail.whirl").withStyle(ChatFormatting.GRAY));
+				lines.add(Component.translatable(Lash.isChainAxe(stack) ? "item.jaymospowers.chain_axe.whirl" : "item.jaymospowers.flail.whirl")
+					.withStyle(ChatFormatting.GRAY));
 			}
 		});
 	}
@@ -472,7 +480,11 @@ public final class LashRenderer {
 				Vec3 last = line[line.length - 1], before = line[line.length - 2];
 				Lash.State state = shown(player, level.getGameTime());
 				double turn = state != null && state.phase() == Lash.WHIRL ? Lash.spinAngle(time - state.since()) : 0.0;
-				ball(context, last, last.subtract(before), turn, material(player), light[line.length - 1]);
+				if (Lash.isChainAxe(player.getMainHandItem())) {
+					axeHead(context, level, last, last.subtract(before), light[line.length - 1]);
+				} else {
+					ball(context, last, last.subtract(before), turn, material(player), light[line.length - 1]);
+				}
 			} else {
 				lash(context, line, light);
 				if (pull.neck() != null) {
@@ -746,6 +758,28 @@ public final class LashRenderer {
 				}
 			}
 		});
+	}
+
+	/**
+	 * The chain axe's head: its own model (item model chain_axe_swung, which hangs from the top middle of its box),
+	 * hung along the last link ({@code along}).
+	 */
+	private static void axeHead(LevelRenderContext context, ClientLevel level, Vec3 at, Vec3 along, int light) {
+		Vec3 down = along.lengthSqr() < 1.0E-8 ? new Vec3(0.0, -1.0, 0.0) : along.normalize();
+		ItemStack head = new ItemStack(com.jaymospowers.mortal.Mortal.CHAIN_AXE);
+		head.set(net.minecraft.core.component.DataComponents.ITEM_MODEL, AXE_HEAD_MODEL);
+		// its own state each time: the frame keeps what it is handed until it is drawn
+		ItemStackRenderState shown = new ItemStackRenderState();
+		Minecraft.getInstance().getItemModelResolver().updateForTopItem(shown, head, ItemDisplayContext.NONE, level, null, 0);
+		PoseStack poseStack = context.poseStack();
+		poseStack.pushPose();
+		poseStack.translate(at.x, at.y, at.z);
+		poseStack.rotate(new Quaternionf().rotationTo(0.0F, -1.0F, 0.0F, (float)down.x, (float)down.y, (float)down.z));
+		poseStack.scale(AXE_HEAD_SCALE, AXE_HEAD_SCALE, AXE_HEAD_SCALE);
+		// an item model is drawn about the middle of its box: bring the top of it to the chain's end
+		poseStack.translate(0.0F, -0.5F, 0.0F);
+		shown.submit(poseStack, context.submitNodeCollector(), light, OverlayTexture.NO_OVERLAY, 0);
+		poseStack.popPose();
 	}
 
 	/** The ball's material, by the flail's tier (Balkon's ids: flail.wood, flail.iron, ...): that block's texture. */

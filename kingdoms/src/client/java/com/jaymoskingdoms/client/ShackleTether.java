@@ -127,7 +127,12 @@ public final class ShackleTether {
 		for (int i = 0; i <= PIECES; i++) {
 			centre[i] = along(from, to, i / (double)PIECES);
 		}
-		for (int i = 0; i < PIECES; i++) {
+		rope(buffer, pose, centre, light);
+	}
+
+	/** A twisted rope through {@code centre}'s points. */
+	public static void rope(VertexConsumer buffer, PoseStack.Pose pose, Vec3[] centre, int light) {
+		for (int i = 0; i < centre.length - 1; i++) {
 			Vec3 dir = centre[i + 1].subtract(centre[i]);
 			if (dir.lengthSqr() < 1.0E-8) {
 				continue;
@@ -152,7 +157,7 @@ public final class ShackleTether {
 	}
 
 	/** A ring flat round the neck. */
-	private static void collar(VertexConsumer buffer, PoseStack.Pose pose, Vec3 neck, double radius, double thick, int light) {
+	public static void collar(VertexConsumer buffer, PoseStack.Pose pose, Vec3 neck, double radius, double thick, int light) {
 		for (int i = 0; i < RING; i++) {
 			double t0 = i * Math.PI * 2.0 / RING, t1 = (i + 1) * Math.PI * 2.0 / RING;
 			Vec3 p0 = neck.add(Math.cos(t0) * radius, 0.0, Math.sin(t0) * radius);

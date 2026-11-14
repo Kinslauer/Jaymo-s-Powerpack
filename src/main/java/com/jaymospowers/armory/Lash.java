@@ -347,10 +347,20 @@ public final class Lash {
 
 	// ---- which items (both sides) -----------------------------------------------------------------------------------
 
-	/** Whether {@code item} is one of Balkon's flails (by id, so there's no compile dependency on WeaponMod). */
+	/**
+	 * Whether {@code item} is swung as a flail: one of Balkon's flails (by id, so there's no compile dependency on
+	 * WeaponMod), or our axe on a chain.
+	 */
 	public static boolean isFlail(Item item) {
+		if (item instanceof com.jaymospowers.mortal.ChainAxeItem) {
+			return true;
+		}
 		Identifier id = BuiltInRegistries.ITEM.getKey(item);
 		return id.getNamespace().equals("weaponmod") && id.getPath().startsWith("flail");
+	}
+
+	public static boolean isChainAxe(ItemStack stack) {
+		return stack.getItem() instanceof com.jaymospowers.mortal.ChainAxeItem;
 	}
 
 	public static boolean isFlail(ItemStack stack) {
@@ -964,7 +974,10 @@ public final class Lash {
 		if (struck != null) {
 			struck.setInvulnerableTime(0);
 			// (0.19.73) it comes down over the top of a guard
-			strike(player, struck, damage, guarding(struck, player));
+			if (strike(player, struck, damage, guarding(struck, player)) && isChainAxe(player.getMainHandItem())) {
+				// the axe's beard hooks what it bites
+				com.jaymospowers.mortal.ChainAxeItem.haul(player, struck);
+			}
 			if (struck instanceof ServerPlayer other) {
 				Shakes.send(other, TARGET_SHAKE * (0.5F + run.spin), other.position());
 			}

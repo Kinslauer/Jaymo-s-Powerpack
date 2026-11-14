@@ -68,14 +68,15 @@ def main():
     write(os.path.join(ASSETS, "items", "chain_axe_head.json"), {"model": hot(node)})
     paint(ICON, AXE, "item/chain_axe")
     write(os.path.join(ASSETS, "models", "item", "chain_axe.json"), {"parent": "minecraft:item/handheld", "textures": {"layer0": "jaymospowers:item/chain_axe"}})
-    write(os.path.join(ASSETS, "items", "chain_axe.json"), {"model": {"type": "minecraft:model", "model": "jaymospowers:item/chain_axe"}})
+    # items/chain_axe.json (the haft in the hand, this icon in a slot) is tools/gen_chain_weapons.py's
     write(os.path.join(DATA, "weapon_attributes", "chain_axe.json"), {"parent": "jaymospowers:combo_axe"})
     write(os.path.join(ASSETS, "lang", "parts", "mortal.json"), {
         "item.jaymospowers.chain_axe": "Chain Axe",
         "item.jaymospowers.chain_axe_head": "Chain Axe Head",
-        "jei.jaymospowers.chain_axe": ("An axe on a length of chain. Right click throws it out nine blocks and hauls it back: whoever it meets is cut "
-                                       "and tugged toward you. Sneak as you throw to drag them all the way in. Forged at the Tool Station from a "
-                                       "Chain Axe Head, a Tool Handle and an iron chain."),
+        "item.jaymospowers.chain_axe.whirl": "Hold right-click to whirl the axe head on its chain; let go to bring it down where you look",
+        "jei.jaymospowers.chain_axe": ("An axe head on a length of chain. Hold right click to whirl it round you, and let go to bring it down "
+                                       "where you look: whoever it bites is hooked and tugged toward you. Sneak as it lands to drag them all "
+                                       "the way in. Forged at the Tool Station from a Chain Axe Head, a Tool Handle and an iron chain."),
         "message.jaymospowers.mortal.power_strike": "Power Strike",
         "message.jaymospowers.mortal.sweep_kick": "Sweep Kick",
         "message.jaymospowers.mortal.second_wind": "Second Wind",
