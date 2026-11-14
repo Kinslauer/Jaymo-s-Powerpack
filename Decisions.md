@@ -602,3 +602,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 8:52 AM ET (QTE finishers thread), asked whether the action-bar move names on power finishers should go: "nothing labels them." Names removed (PR #1562).
 - 2026-11-14 8:54 AM ET (QTE finishers thread), on the rewritten "How a power ends a fight" paragraph: "lore looks good, merge". Paragraph approved, (new) mark removed; PR #1562 to merge.
 - 2026-11-14: Andy approved the Lore paragraph "The pits and the hold plans" (captured plans, both desert arenas; PR #1552).
+
+- 2026-11-14 (Andy, Youth wisp, PR #1568): remake the wisp Peter Pan style, less Navi, with quick animations; it appears whenever anyone says "youth" in chat; villagers tell you to just say it, or hint. "HELP"/"HELP ME" with the wisp on screen teleports you to your bed with a green flash and layered particles, once per day per player; asking again the same day gets jokes.
