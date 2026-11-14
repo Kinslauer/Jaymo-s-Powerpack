@@ -13514,3 +13514,11 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - Back and Next at the bottom move to the thing before and the next.
 - "Skip the story" only shows once you have picked man or woman on the first page. MCA's creator then starts on that body, without its own man/woman buttons, as it does after a told story.
 - The Nature page (ideal, bond, flaw) has the same cards.
+
+## 0.8.93 (2026-11-14): A werewolf tearing out no longer crashes the server (#1561)
+
+- **Fix (server crash)**: when the beast tears out of its host, everyone who was fighting the host turns on the
+  beast. Finding them read each nearby mob's attack-target memory, and a mob whose brain doesn't keep one (most
+  hostiles) made the game throw (Deck crash 2026-11-14 8:42 AM). Only mobs that keep that memory are asked now.
+  The other 16 direct memory reads in the three mods were checked: all guarded or villager-only.
+- Built.
