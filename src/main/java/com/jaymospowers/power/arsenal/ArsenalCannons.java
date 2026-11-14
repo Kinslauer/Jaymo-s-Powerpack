@@ -121,6 +121,10 @@ public final class ArsenalCannons {
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			if (Powers.has(player, ArsenalPower.INSTANCE) && player.isAlive() && !player.isSpectator()) {
+				if (Fate.isCorrupted(player) && ArsenalWing.key(player, payload.down())) {
+					// the Void Arsenal's Sneak + X: Attendant Blades (its Sneak + V is the gates)
+					return;
+				}
 				key(player, payload.down());
 			}
 		});
