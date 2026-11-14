@@ -547,10 +547,26 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1528 (/kingdom reaper toll) merged.
 - 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".
+
+- 2026-11-14 (Andy, films thread): the Long Defence must play whole on any land ("the cutscene broke near the end, and alot of the quiet one's shot wasnt there"); the film levels its own field client-side while it plays (my fix, his call to keep).
 - 2026-11-14 (Andy, undead illagers thread): "i like undead illagers, waging war for the reaper" (Immersive Pillagers link), then links to Mebahel's Draugr and Moog's Ocean Structures ("i like the boats from this", "if a list is easier then you alr know"). Built the reaped (undead illagers as a horde kind that wars on settlements and living illagers); what they do and every number are my picks. Lore.md paragraph "The reaped" is (new), waiting for his approval. Pick-list for the three mods to follow.
 - 2026-11-14 (Andy, Reaper thread): asked for the Grue and the five spirits to be raised to the Reaper's level; chose "Grue only for now". Note for later: Varro and Grimsby get Shadow of War style combat, capstone a Celebrimbor-like mode.
 - 2026-11-14 (Andy, chain axe thread): "the chain axe and lasso should operate similar to the lasso and flail, therefore they need blockbench models"; picked "Lasso, like the whip" on the card (chain axe swings like the flail, lasso gets a 3D coil and a physics rope).
 - 2026-11-14 (Andy, chain axe thread): "no hooking, a throw embeds the axe, and you have to remove it, either by closing the distance, or ripping it out." Built on PR #1534.
 - 2026-11-14 (Andy, Reaper thread): Lore paragraph "The Grue in the dark" approved ("looks good"). He also asked why the Long Dark does not darken the sky; building that.
+- 2026-11-14 (Andy, chain axe thread): "swapping with the head still embedded should drop the haft on the ground, still attached and rendered in world. you would have to pick it up and remove it to continue. and yes it should have a ranged attack that embeds the head as well, maybe after letting go of the right click hold the axe flies toward the cursor, up to 9 blocks". Built on PR #1534.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1535 (the Grue grows, the dark feeds it) merged.
 - 2026-11-14 (Andy, Reaper thread): "the reaper model from MCA needs to come out and do the execution with a random weapon but usually his scythe, same for when he kills ghosts". Built in PR #1541.
+- 2026-11-14 (Andy, undead illagers thread): the first reaped skins "just look like zombies": "the reaped need to keep the vindicator and pillager/ evoker bodies with hanging arms and undead skulls matching theirs"; own model built; then "these look good" and "merge". PR #1532 (the reaped) merged. Lore.md paragraph "The reaped" still (new).
+- 2026-11-14 (Andy, chain axe thread): "merge". PR #1534 (chain axe throw and buried head, lasso physics rope, models) merged.
+- 2026-11-14 (Andy, undead illagers thread): "i made the picks, and the lore looks good". Lore.md paragraph "The reaped" approved ((new) mark removed). Picks: 32 of 35 on the Reaper Host pick-list (not draugr structures in the world, not surface draugr raids, not charts to Moog's wrecks); note on the draugr lord: "use blockbench and fable, go all out for this".
+
+## 2026-11-14 (Reaper host thread)
+- Andy: "only the undead illagers should ride spiders". Spider riders are reaped only; living illager squads never ride them.
+- Andy approved the lore paragraph "The drowned courts" ("good"); he will merge PR #1536 only when every patch is built ("ill merge when everything is done, build every patch").
+
+## 2026-11-14 (Rig style thread)
+- Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
+
+## 2026-11-14 (Shapeshifters and changelings thread)
+- Andy: "shapeshifters are awesome and that should also be how sylvan changelings function. but the shapeshifters and changelings should always copy an mca skin not the regular minecraft skin or anything else, and they should be far less common." Asked which he meant for changelings, he picked "Both": changeling players take an MCA villager's face, and some village impostors are changelings underneath.

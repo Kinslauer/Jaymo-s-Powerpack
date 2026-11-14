@@ -1012,8 +1012,8 @@ never a person. It has no name and no voice, and the five will not speak of it. 
 they are, because what they are seeing is not mana but death; and where a ghost lingers it steps out to take it with the
 scythe. The Grue does not reach for those who carry it. He has no need to.
 
-(new) **The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement
-for Andy to approve). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
+**The reaped** (Andy, 2026-11-14: "i like undead illagers, waging war for the reaper"; the rest Claude's placement,
+approved by Andy 2026-11-14). The pillagers spent the long raiding years killing, and they buried their own where they fell, in
 ground that still holds the sorcerer's mana. The Reaper takes those dead and sends them back: pillagers, vindicators and
 evokers, grey and half bone, a red point far back in each socket, still carrying the crossbow or the axe they went down
 with. Folk call them **the reaped**. They are not the old dead and do not walk with them. They come as a host, behind a
@@ -1022,6 +1022,53 @@ because every illager they kill gets up and joins them. The living illagers know
 not burn at sunrise; when its war is done the Reaper takes it back, and nothing is left on the field. Some hosts have a
 **reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
 them, and the Reaper is paid for what they kill near its keeper.
+
+(new) **The host at war** (Reaper's host thread, 2026-11-14; Claude's placement for Andy to approve). A host does not
+always go back. When one of the reaped cuts down a camp's warlord, the camp does not fall: every illager left in it dies
+where it stands and gets up, a reaped warlord takes the seat, and the palisade is the Reaper's from then on. Such a
+hold raids the towns round it as the living camp did, grows by every illager its people kill, and stands until someone
+kills its warlord; the courts near it post his head. Part of a host rides: the pillagers' dead on skeleton horses, and
+some on spiders, which will carry the dead and nothing living, and take a wall as if it were a road. No living illager
+has ever sat one. A big host pushes a mangonel of bone-grey timber to the walls it means to break, crewed by two of its
+own. By the sea a host comes in a black long ship with no flag, moors off the shore and wades in; the ship is still
+there in the morning, and nobody will take her. The dead evokers no longer call their vexes. They lift whoever is
+lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
+few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
+
+(new) **The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
+for Andy to approve). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
+a poster, and from then on their hit squads do not wait for dark. A squad's leader carries the poster of the one it
+has come for. The mark fades if you leave them alone, an illager who likes you will sell it back, and a poster with
+another name on it, pinned where illagers will see it, does what you would expect. Squads come by whatever the country
+gives them: two to a camel in the sands, on horses over open grass, by boat where there is water, and now and then
+down out of the sky in a balloon, since the pillagers built their towers for those long ago. A warlord's horn calls
+them. Blow one yourself and they come at once; if none go home, the camps write that ground off for a few days. Their
+dead sometimes carry a rusty key that fits the plain locks they use. And the evokers have been trying to make the
+Totem of Undying again, which they could once and cannot now: their camps raise a lean-to with a still, a lectern and
+a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
+totem that holds death off once and leaves you weak, or a faceful of smoke.
+
+(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
+binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
+ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
+own, two swords and a crest, and steps aside from a blow as it did alive. None of them leaves the tomb. The
+**laughing bones** are not draugr and not Warrior-born: they are villagers' dead in barrows whose knights are gone,
+with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
+back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
+
+(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
+over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
+hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
+the one thing that wakes him. Whoever does it meets the hall's dead in waves first, and him last: a head and a half
+taller than his host, crowned over the horned helm, his beard hoar-white, his tail loose and not wrapped as a fighter
+keeps it. He falls once in each tomb. The Skeleton Lord's arena lies beyond the hall and is no part of this: the
+laughing king came to the tomb later and the draugr do not serve him. **Runes** cut for traps are the alchemists'
+answer to the jailer's craft: a stone from the crucible, laid on the ground and fed with mana or with the Reaper's
+Toll, that goes off under a monster's foot.
 
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
@@ -1817,6 +1864,13 @@ them; the real ones are kept tied up underground, under Grim ruins and in cellar
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
 
+(new) **Changelings** (Andy, 2026-11-14). The Sylvan's changelings do what the shapeshifters do, and learned it in the
+same dark woods: a changeling can put on the face of anyone it has looked at closely, skin, hair and clothes together.
+Some of the lives stolen from the villages are worn by a changeling and not by a grey shapeshifter, and it keeps the
+real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
+fights or bolts; a changeling is a person who wanted the hearth, and it only runs. Hurt badly enough, either one loses
+the face. Both are rare: a village loses one of its own to them once in a long while, never three at once.
+
 (new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
 to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
 it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
@@ -1907,6 +1961,17 @@ water and not beside it. The blossom folk did not sink it and do not claim it. T
 which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
+
+**The drowned courts** (Reaper's host thread, Moog's Ocean Structures; Andy approved, 2026-11-14). The sunken palace is the one court that still stands. The rest of what the Tideborn built under the water
+lies broken across the sea floors of the home continent: pale colonnades and tiered seats, small temples, shrines with
+a lamp of sea stone still lit, gardens gone wild. The Tideborn left them when they came up to the coves, and none of
+them will say why. The sea's guardians keep some. The Deep Mother's faithful row out over them on calm days and drop a
+shell. The castles, churches and houses down there are a different matter: those were land folk's, built on shores the
+sea has since taken, and sailors read them as the Deep Mother collecting what she is owed. The great bones on the
+bottom belong to sea dragons, which nobody living has seen swim. On the surface the long ships are the barbarians',
+who raid by water where the coast lets them; the broad hauling ships and the small boats are honest traders and
+fishers; the painted travel ship carries those who can pay to cross in comfort; and the rafts belong to drifters who
+have given up on the land altogether.
 
 (new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
 
