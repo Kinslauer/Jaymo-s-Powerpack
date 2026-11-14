@@ -427,6 +427,10 @@ public final class PatronChampions {
 				Patrons.deed(sp, sworn, Patrons.DEED_MID, "rival_champion");
 			}
 			roll(level, c, sp, p, solo);
+			if (WorldTiers.of(sp).ordinal() >= WorldTiers.Tier.DREAD.ordinal()) {
+				// from Dread on a champion wears Juggernaut plate under its glory, and leaves a piece of it
+				FrontierWear.drop(level, c, FrontierWear.juggernautPiece(level));
+			}
 		}
 		if (c.templeId() >= 0) {
 			Temples.slain(server, c.templeId(), Patrons.today(server));

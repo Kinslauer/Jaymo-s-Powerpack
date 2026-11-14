@@ -126,6 +126,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Commissions.register();
 		PlanSites.register();
 		Armory.register();
+		FrontierArmour.register();
+		FrontierWear.register();
+		FrontierPerks.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it

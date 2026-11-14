@@ -22,6 +22,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.Faiths.prices((Villager)(Object)this, player);
 		// (0.7.439) a haven's own wares, or a human town buying them
 		com.jaymoskingdoms.HavenWares.offers((Villager)(Object)this, player);
+		// what the settlement's people wear, on its armourer's and tailor's counters (and a fence's)
+		com.jaymoskingdoms.FrontierWear.offers((Villager)(Object)this, player);
 		// (0.7.519) and a trade charter partner's people pay less
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more

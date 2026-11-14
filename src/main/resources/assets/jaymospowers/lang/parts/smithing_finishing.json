@@ -28,5 +28,10 @@
   "blueprint.jaymospowers.armour.helmet": "Helmet",
   "blueprint.jaymospowers.armour.chestplate": "Chestplate",
   "blueprint.jaymospowers.armour.leggings": "Leggings",
-  "blueprint.jaymospowers.armour.boots": "Boots"
+  "blueprint.jaymospowers.armour.boots": "Boots",
+  "message.jaymospowers.smithing.needs_schematic": "You need the %s schematic on you to forge this.",
+  "blueprint.jaymospowers.frontier.templar": "Templar Plate",
+  "blueprint.jaymospowers.frontier.ranger": "Ranger's Harness",
+  "blueprint.jaymospowers.frontier.settler": "Settler's Gear",
+  "blueprint.jaymospowers.frontier.hedge": "Ashen Hedge Garb"
 }

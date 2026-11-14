@@ -149,7 +149,7 @@ public final class Musketoon {
 				|| !MobAmmo.spend(guard, MobAmmo.Kind.BALLS)) {
 				continue;
 			}
-			e.setValue(now + GUARD_RELOAD + level.getRandom().nextInt(JITTER));
+			e.setValue(now + FrontierPerks.reload(guard, GUARD_RELOAD) + level.getRandom().nextInt(JITTER));
 			guard.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 			// (the ball drops as it flies: aimed a little over him, more the further he is)
 			Vec3 from = guard.getEyePosition();
@@ -229,17 +229,19 @@ public final class Musketoon {
 		@Override
 		public void onUseTick(Level level, LivingEntity user, ItemStack stack, int remaining) {
 			int held = this.getUseDuration(stack, user) - remaining;
-			if (level instanceof ServerLevel && (held == RELOAD / 3 || held == RELOAD * 2 / 3)) {
+			// (quicker in the Ranger's harness: FrontierPerks)
+			int load = FrontierPerks.reload(user, RELOAD);
+			if (level instanceof ServerLevel && (held == load / 3 || held == load * 2 / 3)) {
 				// the ramrod going home
 				level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.PLAYERS, 0.7F, 0.6F);
-			} else if (level instanceof ServerLevel && held == RELOAD) {
+			} else if (level instanceof ServerLevel && held == load) {
 				level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 			}
 		}
 
 		@Override
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
-			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < RELOAD) {
+			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < FrontierPerks.reload(user, RELOAD)) {
 				return false;
 			}
 			ItemStack ball = ball(player);

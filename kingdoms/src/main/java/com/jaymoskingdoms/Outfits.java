@@ -81,6 +81,8 @@ public final class Outfits {
 	static final int PLATE = 0, TABARD = 1, HALF_PLATE = 2, HARNESS_STYLES = 3;
 
 	/** One charge on a realm's arms: a pattern laid in the contrasting tincture. */
+	/** The Truth's sign among the {@link #ORDINARIES}: the straight cross. */
+	static final int TRUTH_CROSS = 0;
 	private static final List<List<ResourceKey<BannerPattern>>> ORDINARIES = List.of(
 		List.of(BannerPatterns.STRAIGHT_CROSS),
 		List.of(BannerPatterns.CROSS),
@@ -168,6 +170,10 @@ public final class Outfits {
 				return new Heraldry(h.field(), h.charge(), ORDINARIES.size() + i, vassal, arms.pattern(), Outfits.material(h.field()), arms.harness(),
 					arms.armoury());
 			}
+		}
+		if (server != null && RealmFaiths.patron(server, faction) == Patron.TRUTH) {
+			// The Truth's realms bear its cross on shield, surcoat and banner (Andy: "the truth should get that templar cross sigil for everything")
+			return new Heraldry(arms.field(), arms.charge(), TRUTH_CROSS, vassal, arms.pattern(), arms.material(), arms.harness(), arms.armoury());
 		}
 		return arms;
 	}

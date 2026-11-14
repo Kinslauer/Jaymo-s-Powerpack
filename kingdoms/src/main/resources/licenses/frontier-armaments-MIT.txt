@@ -7,6 +7,13 @@ Used in Jaymo's Kingdoms:
 - The musketoon's item model and texture (assets/jaymoskingdoms/models/item/musketoon.json, textures/item/musketoon.png):
   the mod's Firecannon (rifle_dwarven model, gun_texture), its display tilt dropped, scaled and laid along our long-gun
   hold, its red breech gem painted steel, a ramrod of our own added. Built by tools/gen_guns_geckolib.py.
+- The ten armour sets of FrontierArmour (assets/jaymoskingdoms/bbmodels/frontier_*.json, textures/entity/bb/frontier_*.png,
+  textures/item/<look>_<piece>.png): the mod's Templar, Battlemage (our Hedge garb), Primalist, Artillerist (our Ranger's
+  harness), Peasant (our settler's gear), Juggernaut, Thief (our Scoundrel's wrappings), Sanguine, Despot and Foxshade
+  models and textures, baked for our worn-model layer. Faces its maker left unpainted are painted like their
+  neighbours; the Despot's helm and greaves and the blue and purple Sanguine hat and boots are our own additions.
+  Built by kingdoms/tools/gen_frontier_armour.py from tools/bbmodels/frontier-armaments/armour/.
+- The item-use speed mixin (client ItemUseSpeedMixin) follows the mod's own LocalPlayerMixin.
 
 MIT License
 

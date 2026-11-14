@@ -98,6 +98,55 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Blueprints.stack(String, int)} and {@code Blueprints.shapeOf(ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle blueprintStack, blueprintShape;
+	private static boolean lookedForBlueprints;
+
+	private static void lookForBlueprints() {
+		if (lookedForBlueprints) {
+			return;
+		}
+		lookedForBlueprints = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> blueprints = Class.forName("com.jaymospowers.tinkering.smithing.Blueprints");
+			blueprintStack = java.lang.invoke.MethodHandles.publicLookup().findStatic(blueprints, "stack",
+				java.lang.invoke.MethodType.methodType(net.minecraft.world.item.ItemStack.class, String.class, int.class));
+			blueprintShape = java.lang.invoke.MethodHandles.publicLookup().findStatic(blueprints, "shapeOf",
+				java.lang.invoke.MethodType.methodType(String.class, net.minecraft.world.item.ItemStack.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blueprints", e);
+		}
+	}
+
+	/** A fresh smith's blueprint (Jaymo's Powers) for {@code shape} ("frontier/templar"), or empty without Powers. */
+	public static net.minecraft.world.item.ItemStack blueprint(String shape) {
+		lookForBlueprints();
+		if (blueprintStack == null) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		try {
+			return (net.minecraft.world.item.ItemStack) blueprintStack.invoke(shape, 0);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** The shape {@code stack} is a blueprint of, or "" (not one, or no Powers). */
+	public static String blueprintShape(net.minecraft.world.item.ItemStack stack) {
+		lookForBlueprints();
+		if (blueprintShape == null) {
+			return "";
+		}
+		try {
+			return (String) blueprintShape.invoke(stack);
+		} catch (Throwable e) {
+			return "";
+		}
+	}
+
 	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
 	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
 	private static boolean lookedForClash;
