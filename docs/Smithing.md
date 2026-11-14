@@ -66,10 +66,10 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
   can no longer be cast: no cast is made from them and nothing pours into their casts (`Melting.tableResult` runs through
   `CastRules.adjust`). Tooltip: "Too long to cast; hammer it on a Smithing Anvil". Stone ones are still shaped at the Part Builder.
   Every other metal head can be cast or hammered.
-- The katana blade is hammered only from **folded steel** (`FoldedSteel`, `WeaponParts.Scheme.FOLDED`): Folded Steel Ingots come
+- The katana and ninjato blades are hammered only from **folded steel** (`FoldedSteel`, `WeaponParts.Kind.folded()`): Folded Steel Ingots come
   from Kingdoms' `BlossomSteel` (Mohknee's iron sand, bloom, six folds). They heat, hammer and melt as steel (steel hammer, iron
-  anvil); a pile of them on the anvil also offers the Katana Blade (2 ingots), which makes WeaponMod's iron katana. No stone,
-  iron, gold or copper katana blades are made any more, and such blades already in a world no longer assemble.
+  anvil); a pile of them on the anvil also offers the Katana Blade and the Ninjato Blade (2 ingots each), which make WeaponMod's iron katana and the iron ninjato. No stone,
+  iron, gold or copper blades of either are made any more, and such blades already in a world no longer assemble.
 - A head from a casting table is Well Forged. A cast made from a graded head remembers that grade (`CAST_GRADE`); heads poured from
   it are one grade lower (a cast of a Well head pours Poor heads). Graded heads don't stack with ungraded ones.
 

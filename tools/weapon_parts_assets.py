@@ -37,7 +37,7 @@ PARTS = [
     ("broadsword_blade", "Broadsword Blade", "armory:broadsword", ["iron", "gold"]),
     ("claymore_blade", "Claymore Blade", "armory:claymore", ["iron", "gold"]),
     ("cleaver_blade", "Cleaver Blade", "armory:cleaver", ["iron", "gold"]),
-    ("ninjato_blade", "Ninjato Blade", "armory:ninjato", ["iron", "gold"]),
+    ("ninjato_blade", "Ninjato Blade", "armory:ninjato", ["iron", "gold", "steel"]),
     ("saber_blade", "Saber Blade", "armory:saber", ["iron", "gold"]),
     ("machete_blade", "Machete Blade", "armory:machete", ["iron", "gold"]),
     ("rapier_blade", "Rapier Blade", "armory:rapier", ["iron", "gold"]),

@@ -28,10 +28,11 @@ import org.jspecify.annotations.Nullable;
 public final class WeaponParts {
 	/**
 	 * How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only
-	 * (or, {@code SINGLE_COPPER}, copper only). {@code FOLDED}: a Balkon weapon whose head is hammered only from folded
-	 * steel ({@code smithing/FoldedSteel}) and makes its iron one; no stone, gold or copper.
+	 * (or, {@code SINGLE_COPPER}, copper only). {@code FOLDED} (Balkon naming) and {@code FOLDED_PREFIX}
+	 * (Armory naming): a weapon whose head is hammered only from folded steel ({@code smithing/FoldedSteel}) and makes its
+	 * iron one; no stone, gold or copper.
 	 */
-	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER, SINGLE_STEEL, FOLDED }
+	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER, SINGLE_STEEL, FOLDED, FOLDED_PREFIX }
 
 	/**
 	 * What else the Tool Station needs besides the head, any material. (0.11.77) Andy: the big weapons take a Tough
@@ -120,6 +121,11 @@ public final class WeaponParts {
 			return key.substring(key.indexOf(':') + 1);
 		}
 
+		/** Whether its head is hammered only from folded steel. */
+		public boolean folded() {
+			return scheme == Scheme.FOLDED || scheme == Scheme.FOLDED_PREFIX;
+		}
+
 		/** Stone it takes at the Part Builder. */
 		public int stoneCost() {
 			return Math.max(1, mb / Molten.INGOT);
@@ -134,6 +140,7 @@ public final class WeaponParts {
 				case SINGLE_COPPER -> metal == Metal.COPPER ? base() : null;
 				case SINGLE_STEEL -> metal == Metal.STEEL ? base() : null;
 				case FOLDED -> metal == Metal.STEEL ? base() + ".iron" : null;
+				case FOLDED_PREFIX -> metal == Metal.STEEL ? "iron_" + base() : null;
 			};
 			return path == null ? null : BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath(namespace(), path)).orElse(null);
 		}
@@ -195,7 +202,8 @@ public final class WeaponParts {
 		armory("broadsword_blade", "broadsword", 4, Assembly.GUARD_ROD);
 		armory("claymore_blade", "claymore", 5, Assembly.GUARD_TOUGH);
 		armory("cleaver_blade", "cleaver", 4, Assembly.ROD_BINDING);
-		armory("ninjato_blade", "ninjato", 2, Assembly.GUARD_ROD);
+		// Andy: "yes ninjato too": folded steel only, like the katana below
+		add(new Kind("ninjato_blade", "jaymospowers:ninjato", Scheme.FOLDED_PREFIX, 2 * INGOT, Assembly.GUARD_ROD, 1));
 		armory("saber_blade", "saber", 2, Assembly.GUARD_ROD);
 		armory("machete_blade", "machete", 2, Assembly.ROD_BINDING);
 		armory("rapier_blade", "rapier", 1, Assembly.GUARD_ROD);
@@ -338,7 +346,7 @@ public final class WeaponParts {
 
 	/** The kinds the Part Builder shapes, in its order: loaded, not {@link #FOUND}, and not folded steel only. */
 	public static List<Kind> shaped() {
-		return loaded().stream().filter(kind -> !FOUND.contains(kind.part()) && kind.scheme() != Scheme.FOLDED).toList();
+		return loaded().stream().filter(kind -> !FOUND.contains(kind.part()) && !kind.folded()).toList();
 	}
 
 	// --- casts ---

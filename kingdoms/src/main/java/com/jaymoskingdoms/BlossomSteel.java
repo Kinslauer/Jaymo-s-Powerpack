@@ -40,7 +40,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * now and then ({@link #SAND_CHANCE}).</li>
  * <li>Burnt hard in a blast furnace it sinters into a <b>steel bloom</b>.</li>
  * <li>The bloom is <b>folded</b> on an anvil: struck with the bloom in hand, {@link #FOLDS} times, it becomes folded
- * steel (Powers' Folded Steel Ingot, the only metal a katana's blade is hammered from; an iron ingot without Powers).</li>
+ * steel (Powers' Folded Steel Ingot, the only metal a katana's or ninjato's blade is hammered from; an iron ingot without Powers).</li>
  * </ol>
  * None of it is written anywhere. A smith of a Blossom settlement tells it a step at a time ("Ask About Steel" on the
  * Interact page): the first for the asking, the second to someone holding iron sand, the third to someone holding a
