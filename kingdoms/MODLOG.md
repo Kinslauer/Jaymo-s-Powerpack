@@ -12947,3 +12947,9 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   should always spawn near water, but they need to be on a large landmass."
 - All read from the ground's shape, so no chunks are loaded. `/kingdom found blossom` and `blossomtown` still build
   where the operator stands. Compile-checked; not seen in game.
+
+## 0.8.61 (2026-11-14): Air Roll perk, Freerunner safe fall (#1504)
+
+- **Air Roll** (Stealth, Freerun page, tier 5 under Freerunner, 1 rank, Stealth level 8): unlocks Powers' air roll, a fresh Sprint press just after a sprint jump rolls you forward through the air. Its own perk, so the flip on Freerunner rank 1 stays as it was. `Skills.Perk.AIR_ROLL`, lang part `air-roll.json`.
+- Freerunner's text now says each rank lets you fall a block further before fall damage starts (Powers sets the attribute).
+- Built; not played.
