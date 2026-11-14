@@ -1,7 +1,8 @@
 """Paints the armour grime masks (dust and mud) that ArmourGrimeTextures paints into dirty armour.
 Run from the repository root: python -I tools/grime_textures.py
 
-Each mask is a 64x32 armour sheet (the humanoid and humanoid_leggings layout) or a 16x16 item icon.
+Each mask is a 64x32 armour sheet (the humanoid and humanoid_leggings layout), a 16x16 item icon, or a 64x64 skin
+(a body's own clothes and skin).
   alpha = how early that pixel gets dirty (255 = the first speck, low = only when filthy, 0 = never)
   grey  = how dark the grime is there (white = the grime colour as is, darker = a thicker, darker clot)
 Dirt gathers low on every face (feet, shins, the hem of the chest), as it does when you walk through it.
@@ -81,6 +82,40 @@ def mask(seed, w, h, kind, low_of):
     return im
 
 
+# A 64x64 skin (the player's layout, which most humanoid mobs share): the side faces of each body part, and how dirty
+# that part gets for its height. Clothes and skin get it legs first; the outer layer (hat, jacket, sleeves, trousers) is
+# left blank, as the client paints each outer pixel from the body pixel under it.
+BODY_SIDES = [
+    ((0, 8, 32, 16), 0.15),    # head
+    ((16, 20, 40, 32), 0.6),   # body
+    ((40, 20, 56, 32), 0.5),   # right arm
+    ((32, 52, 48, 64), 0.5),   # left arm
+    ((0, 20, 16, 32), 1.0),    # right leg
+    ((16, 52, 32, 64), 1.0),   # left leg
+]
+BODY_CAPS = [(8, 0, 24, 8), (20, 16, 36, 20), (44, 16, 52, 20), (36, 48, 44, 52), (4, 16, 12, 20), (20, 48, 28, 52)]
+
+
+def body_low(x, y):
+    for (x0, y0, x1, y1), w in BODY_SIDES:
+        if x0 <= x < x1 and y0 <= y < y1:
+            return w * (0.2 + 0.8 * (y - y0 + 0.5) / (y1 - y0))
+    for x0, y0, x1, y1 in BODY_CAPS:
+        if x0 <= x < x1 and y0 <= y < y1:
+            return 0.2
+    return None
+
+
+def body_mask(seed, kind):
+    """The body mask: as mask(), but blank off the body parts' own faces."""
+    im = mask(seed, 64, 64, kind, lambda x, y: body_low(x, y) or 0.0)
+    for y in range(64):
+        for x in range(64):
+            if body_low(x, y) is None:
+                im.putpixel((x, y), (0, 0))
+    return im
+
+
 def item_low(x, y):
     return 0.2 + 0.8 * (y + 0.5) / 16
 
@@ -89,6 +124,7 @@ def main():
     for kind, seed in (("dust", 11), ("mud", 23)):
         mask(seed, 64, 32, kind, lowness).convert("RGBA").save(ROOT + "armour_" + kind + ".png")
         mask(seed + 100, 16, 16, kind, item_low).convert("RGBA").save(ROOT + "item_" + kind + ".png")
+        body_mask(seed + 200, kind).convert("RGBA").save(ROOT + "body_" + kind + ".png")
 
 
 if __name__ == "__main__":

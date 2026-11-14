@@ -3,6 +3,7 @@ package com.jaymospowers.client.blood;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.wet.ArmourGrimeTextures;
 import com.jaymospowers.core.blood.Bloodied;
+import com.jaymospowers.core.wet.ArmourGrime;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -36,11 +37,16 @@ import net.minecraft.world.entity.LivingEntity;
  * (0.20.55) A corpse keeps the blood it died in ({@link Bloodied#CORPSE_BLOOD}), drying darker: Jaymo's Kitchen hands
  * each body's state to {@link #corpseBody} as it's drawn (its {@code CorpseDressing.BODY} hook, by name), and a dead
  * player drawn in their plain skin gets it through {@code EXTRACT} and {@code SUBMIT}.
+ * <p>
+ * The dirt on a body's own clothes and skin ({@link ArmourGrime#BODY}) is drawn here too, under its blood
+ * ({@link ArmourGrimeTextures#body}).
  */
 public final class BloodCoatLayer {
 	static final RenderStateDataKey<Bloodied.Coat> KEY = RenderStateDataKey.create(() -> "jaymospowers:blood_coat");
 	/** (0.20.55) A corpse's blood, drawn in place of a coat. */
 	static final RenderStateDataKey<Bloodied.Blood> CORPSE = RenderStateDataKey.create(() -> "jaymospowers:corpse_blood");
+	/** The grime on the body's own clothes and skin. */
+	static final RenderStateDataKey<ArmourGrime.Grime> GRIME = RenderStateDataKey.create(() -> "jaymospowers:body_grime");
 	private static final String DRESSING = "com.jaymoskitchen.client.corpse.CorpseDressing";
 
 	private BloodCoatLayer() {
@@ -71,6 +77,7 @@ public final class BloodCoatLayer {
 	/** (0.20.55) The body {@code corpse} is drawn as: its own blood, not whatever coat the stand-in body has. */
 	private static void corpseBody(Entity corpse, EntityRenderState state) {
 		state.setData(KEY, null);
+		state.setData(GRIME, null);
 		state.setData(CORPSE, BloodSettings.off() ? null : Bloodied.corpseBlood(corpse));
 	}
 
@@ -97,6 +104,7 @@ public final class BloodCoatLayer {
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(KEY, BloodSettings.off() ? null : Bloodied.coat(entity));
 		state.setData(CORPSE, null);
+		state.setData(GRIME, ArmourGrime.body(entity));
 	}
 
 	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
@@ -111,7 +119,8 @@ public final class BloodCoatLayer {
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Bloodied.Coat coat = state.getData(KEY);
 			Bloodied.Blood dead = state.getData(CORPSE);
-			if (coat == null && dead == null || state.isInvisible) {
+			ArmourGrime.Grime grime = state.getData(GRIME);
+			if (coat == null && dead == null && grime == null || state.isInvisible) {
 				return;
 			}
 			Identifier skin;
@@ -122,6 +131,13 @@ public final class BloodCoatLayer {
 			}
 			// (0.20.66) a body in the player's layout wears the blood over its outer layer too
 			boolean layered = this.getParentModel() instanceof PlayerModel;
+			Identifier dirty = skin == null ? null : ArmourGrimeTextures.body(skin, grime, layered);
+			if (dirty != null) {
+				renderColoredCutoutModel(this.getParentModel(), dirty, poseStack, collector, lightCoords, state, -1, 1);
+			}
+			if (coat == null && dead == null) {
+				return;
+			}
 			Identifier painted = skin == null ? null
 				: dead != null ? ArmourGrimeTextures.skin(skin, dead, layered) : ArmourGrimeTextures.skin(skin, coat, layered);
 			if (painted != null) {

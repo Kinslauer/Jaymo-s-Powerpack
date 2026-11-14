@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -32,6 +35,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -62,6 +66,9 @@ import org.jspecify.annotations.Nullable;
  * <p>Dust takes the colour of the ground it comes off ({@link Grime#tint}): red off badlands sand, dark brown off a forest
  * floor, grey off gravel, soot off the Nether's rock, pale off end stone. Bare earth throws a little dust anywhere when it's
  * dry, not only in dry country, so a walk through the woods leaves its mark too.
+ * <p>Bare clothes and skin get dirty too (Andy: "bare clothes should get dirty too"): every player and villager carries a
+ * {@link #BODY} grime of its own, kicked up as its armour's is (less, as the armour takes the worst of it) and washed by
+ * the same water, rain and scrubs. The client paints it over the skin, legs first, under any armour worn.
  * <p>(0.20.41) The washes by hand take blood off too ({@code Bloodied}): a scrub or a sponge washes your own coat as well,
  * and dunking any bloody item (a blade too) in a cauldron rinses it.
  */
@@ -127,6 +134,11 @@ public final class ArmourGrime {
 	}
 
 	public static DataComponentType<Grime> GRIME;
+	/** The grime on a body's own clothes and skin: synced to everyone near it, and saved, so it stays until washed. */
+	public static final AttachmentType<Grime> BODY = AttachmentRegistry.create(JaymosPowers.id("body_grime"),
+		builder -> builder.persistent(Grime.CODEC).syncWith(Grime.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** How much of a check's dirt reaches the body's own clothes (the feet and legs get it; armour takes the worst). */
+	static final float BODY_REACH = 0.6F;
 
 	/** Where each body was at the last check, and when each player last scrubbed with a sponge. */
 	private static final Map<LivingEntity, Vec3> LAST = new WeakHashMap<>();
@@ -174,6 +186,10 @@ public final class ArmourGrime {
 		if (!body.isAlive()) {
 			return false;
 		}
+		if (body instanceof Player || body instanceof Npc) {
+			// bare clothes get dirty too
+			return true;
+		}
 		for (EquipmentSlot slot : SLOTS) {
 			if (!body.getItemBySlot(slot).isEmpty()) {
 				return true;
@@ -192,9 +208,10 @@ public final class ArmourGrime {
 			return;
 		}
 		if (body.isInWater()) {
-			// wading: the water washes boots and greaves, and kicks nothing up
+			// wading: the water washes boots and greaves (and the legs under them), and kicks nothing up
 			wash(body, EquipmentSlot.FEET, WADING_WASH);
 			wash(body, EquipmentSlot.LEGS, WADING_WASH);
+			washBody(body, WADING_WASH);
 			return;
 		}
 		boolean rained = body.isInWaterOrRain();
@@ -240,6 +257,46 @@ public final class ArmourGrime {
 				soil(body, SLOTS[i], dirt, mud, tint);
 			}
 		}
+		if (body instanceof Player || body instanceof Npc) {
+			float dirt = gain * (lying ? LYING : BODY_REACH);
+			if (rained && dirt < 1.0F) {
+				washBody(body, RAIN_WASH);
+			} else {
+				soilBody(body, dirt, mud, tint);
+			}
+		}
+	}
+
+	/** How dirty {@code body}'s own clothes and skin are, or null if they're clean. */
+	public static @Nullable Grime body(LivingEntity body) {
+		return body.getAttached(BODY);
+	}
+
+	/** Dirties {@code body}'s own clothes by {@code gain} (fractions carry over by chance). */
+	static void soilBody(LivingEntity body, float gain, boolean mud, int tint) {
+		if (gain <= 0.0F) {
+			return;
+		}
+		Grime was = body(body);
+		Grime now = soiled(was, gain, mud, tint, body.getRandom());
+		if (now != null && !now.equals(was)) {
+			body.setAttached(BODY, now);
+		}
+	}
+
+	/** Washes {@code amount} off {@code body}'s own clothes; true if they had any on them. */
+	static boolean washBody(LivingEntity body, int amount) {
+		Grime was = body(body);
+		if (was == null) {
+			return false;
+		}
+		int left = was.amount() - amount;
+		if (left <= 0) {
+			body.removeAttached(BODY);
+		} else {
+			body.setAttached(BODY, new Grime(left, was.mud(), was.tint()));
+		}
+		return true;
 	}
 
 	/** Dusty rock that walking scuffs up: the Nether's (soot and ash) and the End's. */
@@ -279,6 +336,9 @@ public final class ArmourGrime {
 		}
 		for (int i = 0; i < SLOTS.length; i++) {
 			soil(body, SLOTS[i], dirt.gain() * DRAG_DIRT * DRAG_REACH[i], dirt.mud(), dirt.tint());
+		}
+		if (body instanceof Player || body instanceof Npc) {
+			soilBody(body, dirt.gain() * DRAG_DIRT, dirt.mud(), dirt.tint());
 		}
 	}
 
@@ -345,26 +405,31 @@ public final class ArmourGrime {
 		if (stack.isEmpty() || gain <= 0.0F) {
 			return;
 		}
+		Grime was = grime(stack);
+		Grime now = soiled(was, gain, mud, tint, random);
+		if (now != null && !now.equals(was)) {
+			stack.set(GRIME, now);
+		}
+	}
+
+	/** {@code was} dirtied by {@code gain} (fractions carry over by chance), or null for no change. */
+	private static @Nullable Grime soiled(@Nullable Grime was, float gain, boolean mud, int tint, net.minecraft.util.RandomSource random) {
 		int add = Mth.floor(gain) + (random.nextFloat() < gain - Mth.floor(gain) ? 1 : 0);
 		if (add <= 0) {
-			return;
+			return null;
 		}
-		Grime was = grime(stack);
 		int amount = was == null ? 0 : was.amount();
 		int muddy = was == null ? 0 : was.mud();
 		int wasTint = was == null ? 0 : was.tint();
 		if (amount >= MAX && (muddy >= MAX) == mud && (mud || wasTint == tint)) {
-			return;
+			return null;
 		}
 		int next = Math.min(MAX, amount + add);
 		// the new dirt's share of the whole decides how muddy it now is, and the dust's colour
 		float share = add / (float) (amount + add);
 		int mudPart = Math.round((muddy * (float) amount + (mud ? MAX : 0) * (float) add) / (amount + add));
 		int nextTint = mud ? wasTint : blendTint(wasTint, tint, amount == 0 ? 1.0F : Math.max(share, 0.15F));
-		Grime now = new Grime(next, Mth.clamp(mudPart, 0, MAX), nextTint);
-		if (!now.equals(was)) {
-			stack.set(GRIME, now);
-		}
+		return new Grime(next, Mth.clamp(mudPart, 0, MAX), nextTint);
 	}
 
 	/** {@code from} toward {@code to} by {@code t} (0 is the plain tan). */
@@ -383,6 +448,7 @@ public final class ArmourGrime {
 
 	static boolean washAll(LivingEntity body, int amount) {
 		boolean any = com.jaymospowers.core.blood.Bloodied.cleanCoat(body, amount);
+		any |= washBody(body, amount);
 		for (EquipmentSlot slot : SLOTS) {
 			any |= wash(body, slot, amount);
 		}
@@ -406,7 +472,7 @@ public final class ArmourGrime {
 	}
 
 	static boolean anyDirt(LivingEntity body) {
-		if (com.jaymospowers.core.blood.Bloodied.coat(body) != null) {
+		if (com.jaymospowers.core.blood.Bloodied.coat(body) != null || body(body) != null) {
 			return true;
 		}
 		for (EquipmentSlot slot : SLOTS) {
