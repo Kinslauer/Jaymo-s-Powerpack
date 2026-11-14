@@ -57,8 +57,8 @@ wrath or reclaimed, and the victim is an innocent. The count is saved (`elementa
 - The power is reclaimed for `RECLAIM_TICKS` 72000 (three in-game days; `elemental_reclaimed`, saved): its keys do
   nothing and its passive tick stops (a Powers silencer and pauser, as a Dampening Draught does).
 - Purified meanwhile (the power's own cure, or **a Purifying Draught drunk while the power is gone**: penance,
-  `ElementalCorruption.penance`), the corruption is cleansed for good; the power still comes back when the three days
-  are up. Not purified, it comes back still corrupted. A line in chat says which.
+  `ElementalCorruption.penance`), the corruption is cleansed for good and the power comes back **at once** (Jung).
+  Not purified, it comes back after the three days, still corrupted. A line in chat says which.
 
 ## Cryokinesis' corruption (`CryoCorruption`)
 - **Meter**: each creature that dies frozen (`ticksFrozen` > 0) by a Cryo user's hand adds `MOB` 4, a villager or
@@ -77,8 +77,8 @@ back now, everything forgotten (count too). `/power corrupt @s` corrupts the pow
    a heart. Sparks pour off you. Mobs round you run (a Kingdoms orc or a boss doesn't). Every 7 s lightning hits a mob
    near you for a heart.
 3. `/power wrath @s end`: the storm clears, chat says your power is gone; R G V B, Z and C do nothing; Wind's passive
-   tick stops. Drink a Purifying Draught: purified. `/power wrath @s lift`: "Your power stirs in you again, clean."
-   Without the draught: "...It is still not clean."
+   tick stops. Drink a Purifying Draught: purified, and at once "Your power stirs in you again, clean."; the keys
+   work. Without the draught, `/power wrath @s lift`: "...It is still not clean."
 4. Smoke (`/power set @s smoke`, corrupt, `/power wrath @s start`): a thin fog round you; mobs within 8 choke for half a
    heart every 3 s; smog pours off you. End it: the fog thins away.
 5. Gravity: on start, mobs and dropped items round you float up about 10 blocks and six blasts go off 10 blocks out.

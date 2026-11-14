@@ -11,7 +11,7 @@
   lightning strikes nearby creatures and other players for a heart every seven seconds; Smoke chokes them; Gravity's
   loose ground cracks, drops, rises and slams into small craters and drags them in; Cryo freezes passive creatures,
   villagers and other players solid.
-- When it ends, everything disperses and the power is gone for three in-game days. A Purifying Draught drunk meanwhile
-  cleanses the corruption; otherwise the power comes back still corrupted. `/power wrath` tests it.
+- When it ends, everything disperses and the power is gone for three in-game days. Purify it meanwhile (a Purifying
+  Draught, or the power's own cure) and it comes back at once, clean; otherwise it comes back still corrupted. `/power wrath` tests it.
 - Cryokinesis can now be corrupted: creatures killed while frozen fill its meter (people more), and a Purifying Draught
   drunk beside a lit campfire thaws it for good.

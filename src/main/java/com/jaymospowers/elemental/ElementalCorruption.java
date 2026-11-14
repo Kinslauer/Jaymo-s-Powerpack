@@ -43,8 +43,8 @@ import org.jspecify.annotations.Nullable;
  * them but a boss or an orc runs from them; and the element works on the world round them ({@link Wrath#tick}).</li>
  * <li><b>Reclaimed</b>: when the wrath ends everything it raised disperses ({@link Wrath#disperse}) and the power is
  * taken for {@link #RECLAIM_TICKS} (three days): its keys do nothing and its passive tick stops ({@link Powers#silenced},
- * {@link Powers#paused}). It comes back still corrupted, unless it was purified meanwhile (its own cure, or a
- * Purifying Draught drunk in penance: {@link #penance}).</li>
+ * {@link Powers#paused}). Purified meanwhile (its own cure, or a Purifying Draught drunk in penance: {@link #penance}),
+ * it comes back at once, clean; otherwise it comes back after the three days, still corrupted.</li>
  * </ul>
  * Each element's part is its own power's ({@link #register}): WindWrath, SmokeWrath, GravityWrath, CryoWrath.
  */
@@ -217,7 +217,8 @@ public final class ElementalCorruption {
 			}
 			long now = level.getGameTime();
 			Long until = player.getAttached(RECLAIMED);
-			if (until != null && now >= until) {
+			// (Jung: "it comes back immediately if you purify") purified by any means, the gods give it back at once
+			if (until != null && (now >= until || !Fate.isCorrupted(player))) {
 				player.removeAttached(RECLAIMED);
 				player.sendSystemMessage(Component.translatable(Fate.isCorrupted(player) ? "message.jaymospowers.elemental.returned_corrupted"
 					: "message.jaymospowers.elemental.returned_clean").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
