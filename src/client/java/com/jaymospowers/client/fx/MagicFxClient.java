@@ -154,6 +154,11 @@ public final class MagicFxClient {
 		add(new MagicFx.Shape(MagicFx.SIGIL, at.x, at.y, at.z, 0.0F, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(1, ticks)));
 	}
 
+	/** Any shape by its number, made here: see {@link MagicFx#shape}. */
+	public static void shape(int kind, Vec3 at, Vec3 d, float size, int color, int ticks) {
+		add(new MagicFx.Shape(kind, at.x, at.y, at.z, (float)d.x, (float)d.y, (float)d.z, size, color & 0xFFFFFF, Math.max(1, ticks)));
+	}
+
 	/** A pool on the ground at {@code at} for {@code ticks}, made here: see {@link MagicFx#pool}. */
 	public static void pool(Vec3 at, float radius, int color, int ticks) {
 		add(new MagicFx.Shape(MagicFx.POOL, at.x, at.y, at.z, MagicFx.POOL_OPEN_TICKS, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(2, ticks)));
@@ -238,7 +243,8 @@ public final class MagicFxClient {
 				case MagicFx.BLAST -> drawBlast(collector, poseStack, at, s.size(), s.color(), time, life);
 				case MagicFx.RING -> drawRing(collector, poseStack, at, new Vec3(s.dx(), s.dy(), s.dz()), s.size(), s.color(), time, life);
 				case MagicFx.ORB -> drawOrb(collector, poseStack, at, s.size(), s.color(), time, fade(live.age + partial, s.ticks(), 3.0F));
-				case MagicFx.SIGIL -> drawSigil(collector, poseStack, at, s.size(), s.color(), time, fade(live.age + partial, s.ticks(), SIGIL_FADE));
+				case MagicFx.SIGIL -> drawSigil(collector, poseStack, at, new Vec3(s.dx(), s.dy(), s.dz()), s.size(), s.color(), time,
+					fade(live.age + partial, s.ticks(), SIGIL_FADE));
 				case MagicFx.WAVE -> drawWave(collector, poseStack, at, new Vec3(s.dx(), 0.0, s.dz()), s.size(), s.color(), time, life);
 				case MagicFx.STROKE -> drawStroke(collector, poseStack, at, at.add(s.dx(), s.dy(), s.dz()), new Vec3(s.bx(), s.by(), s.bz()), s.size(),
 					s.color(), life);
@@ -518,27 +524,46 @@ public final class MagicFxClient {
 
 	/** One sigil: the circle of marks flat on the ground, turning, and a smaller one inside it turning the other way. */
 	public static void drawSigil(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float radius, int color, float time, float fade) {
+		drawSigil(collector, poseStack, at, Vec3.ZERO, radius, color, time, fade);
+	}
+
+	/** One sigil facing {@code normal} (zero: flat on the ground, lifted a hair off it): stood in the air it shows from both sides. */
+	public static void drawSigil(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, Vec3 normal, float radius, int color, float time, float fade) {
 		if (radius <= 0.02F || fade <= 0.01F) {
 			return;
 		}
 		int rgb = MagicFx.dark(color) ? color & 0xFFFFFF : mix(color, 0xFFFFFF, 0.25F);
 		int tint = (int)(SIGIL_ALPHA * fade) << 24 | rgb;
-		Vec3 c = at.add(0.0, SIGIL_LIFT, 0.0);
+		boolean ground = normal.lengthSqr() < 1.0E-6;
+		Vec3 n = ground ? new Vec3(0.0, 1.0, 0.0) : normal.normalize();
+		Vec3 u = (Math.abs(n.y) < 0.95 ? n.cross(new Vec3(0.0, 1.0, 0.0)) : new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 w = u.cross(n).normalize();
+		Vec3 c = ground ? at.add(0.0, SIGIL_LIFT, 0.0) : at;
 		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(SIGIL_TEXTURE, true), (pose, buffer) -> {
-			flat(buffer, pose, c, radius, time * SIGIL_SPIN, tint);
-			flat(buffer, pose, c.add(0.0, 0.01, 0.0), radius * 0.55F, -time * SIGIL_SPIN * 1.6F, tint);
+			flat(buffer, pose, c, u, w, radius, time * SIGIL_SPIN, tint);
+			flat(buffer, pose, c.add(n.scale(0.01)), u, w, radius * 0.55F, -time * SIGIL_SPIN * 1.6F, tint);
+			if (!ground) {
+				// (its back, for whoever stands behind it)
+				flat(buffer, pose, c, w, u, radius, -time * SIGIL_SPIN, tint);
+				flat(buffer, pose, c.subtract(n.scale(0.01)), w, u, radius * 0.55F, time * SIGIL_SPIN * 1.6F, tint);
+			}
 		});
 	}
 
 	/** The whole texture on a square lying flat, {@code radius} to each side's middle, turned {@code angle}. */
 	private static void flat(VertexConsumer buffer, PoseStack.Pose pose, Vec3 c, float radius, float angle, int color) {
+		flat(buffer, pose, c, new Vec3(1.0, 0.0, 0.0), new Vec3(0.0, 0.0, 1.0), radius, angle, color);
+	}
+
+	/** The whole texture on a square in the plane of {@code u} and {@code w}, {@code radius} to each side's middle, turned {@code angle}. */
+	private static void flat(VertexConsumer buffer, PoseStack.Pose pose, Vec3 c, Vec3 u, Vec3 w, float radius, float angle, int color) {
 		float cos = Mth.cos(angle) * radius;
 		float sin = Mth.sin(angle) * radius;
 		// the corners: (-1,-1), (-1,1), (1,1), (1,-1), turned
-		Vec3 p0 = c.add(-cos + sin, 0.0, -sin - cos);
-		Vec3 p1 = c.add(-cos - sin, 0.0, -sin + cos);
-		Vec3 p2 = c.add(cos - sin, 0.0, sin + cos);
-		Vec3 p3 = c.add(cos + sin, 0.0, sin - cos);
+		Vec3 p0 = c.add(u.scale(-cos + sin)).add(w.scale(-sin - cos));
+		Vec3 p1 = c.add(u.scale(-cos - sin)).add(w.scale(-sin + cos));
+		Vec3 p2 = c.add(u.scale(cos - sin)).add(w.scale(sin + cos));
+		Vec3 p3 = c.add(u.scale(cos + sin)).add(w.scale(sin - cos));
 		quad(buffer, pose, p0, color, 0.0F, 0.0F, p1, color, 0.0F, 1.0F, p2, color, 1.0F, 1.0F, p3, color, 1.0F, 0.0F);
 	}
 

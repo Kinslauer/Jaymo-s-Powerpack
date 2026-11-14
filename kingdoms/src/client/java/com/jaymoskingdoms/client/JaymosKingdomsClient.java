@@ -116,6 +116,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PickpocketPose.register();
 		// (0.7.184) handshakes: the arms, and your own as a film
 		HandshakePose.register();
+		// a caster's hands at their work
+		CastPose.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
 		ShackleTether.register();

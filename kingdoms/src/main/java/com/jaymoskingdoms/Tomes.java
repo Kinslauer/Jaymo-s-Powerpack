@@ -592,7 +592,7 @@ public final class Tomes {
 			Mana.take(player, cost);
 			Mana.ripple(player, Mana.intent(spell));
 		}
-		player.swing(hand(off), SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.of(spell), Casting.colour(spell), off);
 		rise(player, off);
 		String element = ((Tome) tome.getItem()).element;
 		shed(level, book(player, off), element, glyphs(element) * (CAST_MIN + tier * CAST_PER_TIER));
@@ -691,7 +691,7 @@ public final class Tomes {
 		Vec3 heading = aim.subtract(start);
 		Vec3 dir = heading.lengthSqr() > 1.0 ? heading.normalize() : look;
 		BOLTS.add(new Bolt(level, player.getUUID(), element, start, dir.scale(SPEED), f, strength(player), Math.round(QUICK_LIFE + f * (FULL_LIFE - QUICK_LIFE))));
-		player.swing(hand(off), SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.PUSH, element.equals("blood") ? Casting.BLOOD : Absorption.colour(element), off);
 		shed(level, book(player, off), element, glyphs(element) * (SHOT_MIN + f * SHOT_GROWTH));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), Spellcraft.sound(element), SoundSource.PLAYERS, 0.8F, 1.5F - 0.4F * f);
 		Spellcraft.afterCast(player, level, element);

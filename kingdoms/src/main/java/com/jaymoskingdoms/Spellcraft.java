@@ -300,7 +300,7 @@ public final class Spellcraft {
 		} else {
 			Mana.take(player, cost);
 		}
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.of(spell), Casting.colour(spell));
 		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (!mage && "wind".equals(PowersCompat.power(player))) {
 			// (0.7.477) a Wind Controller's magic only ever goes out through the wind: a gust carries the spell off the staff
@@ -473,7 +473,7 @@ public final class Spellcraft {
 			stripIfDead(inv.getItem(i), now);
 		}
 		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), Paths.imbueCooldown(player, IMBUE_COOLDOWN));
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.SWEEP, Absorption.colour(element));
 		level.sendParticles(particle(element), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 0.8F, 1.1F);
 		boolean moved = !sameBlade && before != null && before.until() > now;
@@ -496,7 +496,7 @@ public final class Spellcraft {
 			return;
 		}
 		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.PUSH, Absorption.colour(element));
 		Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
 		// what the foe crouches behind may take the bolt instead
 		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, player, target);

@@ -266,7 +266,7 @@ public final class Restoration {
 			return;
 		}
 		MEND_READY.put(player.getUUID(), now + MEND_COOLDOWN);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.GIVE, GOLD);
 		if (target != player) {
 			beam(level, player, target, GOLD);
 		}
@@ -296,7 +296,7 @@ public final class Restoration {
 		}
 		RENEWAL_READY.put(player.getUUID(), now + RENEWAL_COOLDOWN);
 		starve(player, RENEWAL_HUNGER);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.RAISE, GOLD);
 		ring(level, player.position().add(0.0, 0.2, 0.0), RENEWAL_RANGE, GOLD);
 		ring(level, player.position().add(0.0, 0.6, 0.0), RENEWAL_RANGE * 0.6, GREEN);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 1.2F);
@@ -332,7 +332,7 @@ public final class Restoration {
 		}
 		REKINDLE_READY.put(player.getUUID(), now + REKINDLE_COOLDOWN);
 		starve(player, REKINDLE_HUNGER);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.GROUND, GOLD);
 		beam(level, player, body, GOLD);
 		RISING.add(new Rising(body, player, now + REKINDLE_DELAY));
 		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.7F);

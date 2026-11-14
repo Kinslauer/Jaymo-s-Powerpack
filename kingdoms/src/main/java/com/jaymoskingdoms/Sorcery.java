@@ -485,33 +485,44 @@ public final class Sorcery {
 		}
 		int[] timers = caster.timers();
 		double d = mob.distanceTo(target);
-		mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		switch (caster.role()) {
 			case NECROMANCER -> {
 				if (d <= CLOSE && timers[T_SPIKES] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.GROUND, Necromancy.VIOLET);
 					spikes(level, caster, target);
 				} else if (timers[T_RAISE] <= 0 && Thralls.count(mob.getUUID()) < MAX_THRALLS) {
+					Casting.gesture(mob, Casting.Gesture.GROUND, Necromancy.VIOLET);
 					raiseDead(level, caster, target);
 				} else {
+					Casting.gesture(mob, Casting.Gesture.DRAW, DRAIN_COLOUR);
 					drain(level, mob, target, DRAIN_DAMAGE, DRAIN_HEAL);
 				}
 			}
-			case BLOOD_WITCH -> Hemomancy.witchCast(level, caster, target, timers);
+			case BLOOD_WITCH -> {
+				Casting.gesture(mob, Casting.Gesture.PUSH, Casting.BLOOD);
+				Hemomancy.witchCast(level, caster, target, timers);
+			}
 			case SHAMAN, Orcs.SHAMAN -> {
 				if (d <= CLOSE && timers[T_RING] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.GROUND, HEX_COLOUR);
 					ring(level, caster);
 				} else if (target instanceof ServerPlayer && timers[T_HEX] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.PUSH, HEX_COLOUR);
 					hex(level, caster, target);
 				} else {
+					Casting.gesture(mob, Casting.Gesture.PUSH, Absorption.colour("fire"));
 					fireBolt(level, mob, target);
 				}
 			}
 			case WIZARD -> {
 				if (d <= CLOSE && timers[T_REPULSE] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.WARD, BOLT_COLOUR);
 					repulse(level, mob, timers, caster::foe);
 				} else if (Thralls.isThrall(target) && timers[T_BANISH] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.SWEEP, BOLT_COLOUR);
 					banish(level, mob, timers);
 				} else {
+					Casting.gesture(mob, Casting.Gesture.PUSH, BOLT_COLOUR);
 					arcaneBolt(level, mob, target);
 				}
 			}
@@ -534,6 +545,7 @@ public final class Sorcery {
 			case BLOOD_WITCH -> Hemomancy.witchTick(level, caster);
 			case SHAMAN, Orcs.SHAMAN -> {
 				if (timers[T_CHANT] <= 0 && caster.fightingAllies(level).size() >= CHANT_ALLIES) {
+					Casting.gesture(caster.mob(), Casting.Gesture.RAISE, HEX_COLOUR);
 					chant(level, caster);
 				} else if (timers[T_MEND] <= 0) {
 					mend(level, caster.mob(), timers, caster.side(level));
@@ -779,6 +791,7 @@ public final class Sorcery {
 			return;
 		}
 		timers[T_MEND] = MEND_COOLDOWN;
+		Casting.gesture(caster, Casting.Gesture.GIVE, Restoration.GOLD);
 		Mana.ripple(caster, Mana.HEAL);
 		worst.heal(MEND_HEAL);
 		if (worst != caster) {

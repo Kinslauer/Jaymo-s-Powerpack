@@ -108,7 +108,7 @@ public final class StormArts {
 		flash(level, end);
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8F, 1.9F);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.SWEEP, Absorption.colour("lightning"));
 		Spellcraft.afterCast(player, level, "lightning");
 		return true;
 	}
@@ -168,7 +168,7 @@ public final class StormArts {
 		}
 		level.sendParticles(Fx.CRACKLE, centre.x, centre.y + 1.0, centre.z, 30, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.2F);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.GROUND, Absorption.colour("lightning"));
 		Spellcraft.afterCast(player, level, "lightning");
 		return true;
 	}

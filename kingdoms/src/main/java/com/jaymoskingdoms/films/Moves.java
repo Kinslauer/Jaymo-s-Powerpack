@@ -16,11 +16,11 @@ public final class Moves {
 	public static final String IDLE = "idle", GUARD = "guard", WALK = "walk", RUN = "run", SPRINT = "sprint", SHAMBLE = "shamble", FLEE = "flee",
 		CLAW_UP = "claw_up", HANG = "hang";
 	/** One-off moves, over when they're done. */
-	public static final String[] ONCE = {"swing_across", "swing_down", "swing_back", "block", "stagger", "rise", "cast_right", "cast_left",
+	public static final String[] ONCE = {"swing_across", "swing_down", "swing_back", "block", "stagger", "rise", "cast_right", "cast_left", "cast_push", "cast_push_left", "cast_draw", "cast_sweep",
 		"tree_flip", "dodge_roll"};
 	/** Moves that end held. */
 	public static final String[] HOLD = {"overhead", "chop", "wind_side", "behead", "wind_high", "hew", "thrust", "kneel", "kneel_up", "kneel_bow", "maimed", "impaled", "death_back",
-		"death_front", "death_drop", "death_headless", "summon", "cast_both", "cast_ward", "cast_high", "cast_blade", "point", "disarm",
+		"death_front", "death_drop", "death_headless", "summon", "cast_both", "cast_ward", "cast_high", "cast_blade", "cast_raise", "cast_ground", "cast_give", "point", "disarm",
 		"disarmed", "lunge", "look_about", "sling", "glide"};
 	/** How fast each moving loop carries a body of ordinary size at its own pace (blocks a second). */
 	private static final Map<String, Double> PACE = Map.of(WALK, 1.4, RUN, 3.5, SPRINT, 5.6, SHAMBLE, 1.6, FLEE, 4.0);

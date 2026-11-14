@@ -225,7 +225,7 @@ public final class Necromancy {
 			return;
 		}
 		player.getCooldowns().addCooldown(key, Spellcraft.BOLT_COOLDOWN);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.DRAW, VIOLET);
 		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), VIOLET);
 		if (!execute(level, target, player)) {
 			target.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
@@ -309,7 +309,7 @@ public final class Necromancy {
 		Sorcery.beam(level, player, corpse.position().add(0.0, 0.3, 0.0), VIOLET);
 		corpse.discard();
 		RAISE_READY.put(player.getUUID(), now + RAISE_COOLDOWN);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Casting.gesture(player, Casting.Gesture.GROUND, VIOLET);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1.0F, 0.7F);
 		Reaper.feed(player, Reaper.TOLL_RAISE);
 		ForbiddenArts.cast(player, level, false, ForbiddenArts.RAISING_CORRUPTION);
