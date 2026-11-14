@@ -34,12 +34,9 @@
   "message.jaymoskingdoms.remark.2": "Is that sharp end meant to face me?",
   "message.jaymoskingdoms.remark.3": "I have seen braver scarecrows.",
   "message.jaymoskingdoms.lasso.held": "The rope holds %s.",
-  "message.jaymoskingdoms.lasso.roped": "A rope has you. Struggle to break free.",
+  "message.jaymoskingdoms.lasso.roped": "A rope has you. Mash sneak to struggle free.",
   "message.jaymoskingdoms.lasso.shrugged": "%s shrugs the rope off.",
   "message.jaymoskingdoms.lasso.let_go": "You let %s go.",
-  "message.jaymoskingdoms.lasso.already": "%s is already bound.",
-  "message.jaymoskingdoms.lasso.player_up": "Only someone who is down can be bound.",
-  "message.jaymoskingdoms.lasso.wrapped": "%s is bound.",
   "message.jaymoskingdoms.lasso.lost": "The rope goes slack.",
   "message.jaymoskingdoms.lasso.snapped": "The rope snaps.",
   "message.jaymoskingdoms.lasso.broke_out": "%s breaks out of the rope."

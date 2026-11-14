@@ -31,6 +31,7 @@ public final class KnifeClient {
 		// the loop in flight is drawn with its rope (LassoRope)
 		EntityRenderers.register(com.jaymoskingdoms.forms.Lasso.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		LassoRope.register();
+		LassoPose.register();
 		ClientPlayNetworking.registerGlobalReceiver(KnifeForms.Mark.TYPE, (payload, context) -> {
 			Minecraft minecraft = context.client();
 			if (minecraft.level == null) {
