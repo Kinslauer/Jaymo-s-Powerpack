@@ -607,6 +607,7 @@ public final class ZombieHordes {
 	private static void join(Mob mob, float danger) {
 		mob.addTag(TAG);
 		mob.getNavigation().setCanFloat(true);
+		DoorPounding.enlist(mob);
 		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, DANGER_HEALTH * danger);
 		modify(mob, Attributes.ATTACK_DAMAGE, DAMAGE_ID, DANGER_DAMAGE * danger);
 		mob.setHealth(mob.getMaxHealth());
@@ -870,6 +871,19 @@ public final class ZombieHordes {
 	}
 
 	/** Whether {@code entity} walks in a horde (the lure's scent, {@link HordeLure}). */
+	/** Where the horde {@code mob} marches with is headed; null if it's in none. */
+	static @Nullable Vec3 goalOf(Mob mob) {
+		if (!inHorde(mob)) {
+			return null;
+		}
+		for (Horde horde : HORDES) {
+			if (horde.members.contains(mob)) {
+				return horde.goal;
+			}
+		}
+		return null;
+	}
+
 	public static boolean inHorde(Entity entity) {
 		return entity.entityTags().contains(TAG);
 	}
