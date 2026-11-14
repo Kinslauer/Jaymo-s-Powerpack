@@ -657,6 +657,12 @@ blue and see-through, a hand off the ground, never far from the body. They touch
 voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
 standing over the body they are burying. (To be built once Limbo itself has merged.)
 
+**(new) The unbodied** (limbo thread; Andy, 2026-11-14: "i was eaten, therefore i had no way of respawning from that
+body. after that happens your limbo ghost should be freed to freecam or spectator roam. and haunt your friends until you
+backspace to give up"). It is the body that holds a waiting ghost in place. When nothing is left of it (eaten by beasts,
+burned, blown apart) nothing holds the ghost either: it wanders wherever it likes, seen and heard as before, touching
+nothing, for as long as it refuses to be born again. A body in a grave is a body still, and its ghost keeps to the mound.
+
 **(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghosts you implemented can stay, as long as they can
 still enter limbo if they don't come to"). Someone left for dead, not yet dead and not yet back, comes loose from the
 body the same way: pale blue and see-through, able to drift a little way from where they lie and no further, through no
