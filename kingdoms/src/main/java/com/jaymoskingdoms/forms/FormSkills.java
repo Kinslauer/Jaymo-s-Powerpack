@@ -35,6 +35,9 @@ import org.jspecify.annotations.Nullable;
  * and Blood Gaze (the eye laser) are bar spells too ({@code jaymoskingdoms:night_<move>}, {@link NightGifts#move}), with
  * anything or nothing in hand. (0.7.634) And Feed ({@code night_feed}, {@link com.jaymoskingdoms.BloodGrab#feed}), the bite and
  * the grab off right-click.
+ * <p>
+ * The Chain Axe ({@link Forms#lockOnly}) has no bar until you lock on, so right click stays its whirl and throw; the
+ * bar's dirty check counts the lock too, so its own weapon skill comes and goes with it.
  */
 public final class FormSkills {
 	private static final String MOD_ID = "spell_engine";
@@ -113,6 +116,10 @@ public final class FormSkills {
 	/** The form spells on {@code player}'s bar now, (0.7.625) its Powers takedowns first. */
 	public static List<String> spells(Player player) {
 		List<String> out = new ArrayList<>();
+		if (Forms.barOff(player)) {
+			// the chain axe out and no lock: no bar at all, so right click stays its whirl and throw
+			return out;
+		}
 		// (0.7.632) a vampire's (or dhampir's) Blood Dash, Groundpound and eye laser, whatever's in hand
 		NightGifts.Gift gift = NightGifts.gift(player);
 		if (gift != null && gift.blood()) {
@@ -142,7 +149,7 @@ public final class FormSkills {
 					return spells.isEmpty() ? List.of() : List.of(new net.spell_engine.internals.container.SpellContainerSource.SourcedContainer(name, null,
 						new net.spell_engine.api.spell.container.SpellContainer(net.spell_engine.api.spell.container.SpellContainer.ContentType.NONE, "", "", "", 0,
 							spells, 0)));
-				}, FormSkills::spells), net.spell_engine.internals.container.SpellContainerSource.MAIN_HAND.name());
+				}, player -> List.of(spells(player), Forms.barOff(player))), net.spell_engine.internals.container.SpellContainerSource.MAIN_HAND.name());
 			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(HANDLER, (level, spell, caster, targets, context, position) -> {
 				String form = formOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
 				return form != null && caster instanceof ServerPlayer player && Forms.cast(player, form);

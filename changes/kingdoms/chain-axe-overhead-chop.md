@@ -1,0 +1,4 @@
+# Chain axe: no skill bar until locked on
+- Andy: "the chain axe shouldnt have the toolbar attack until you lock on, that way your right click still throws the chain". Spell Engine gives the use key to the skill bar's first skill when the held item has no use pose of its own, so with the chain axe in hand right click cast Cleave (its RPG Series weapon skill) and the whirl and throw never started.
+- With Powers' Chain Axe in hand and no lock-on, the skill bar is empty: no Cleave, no Weapon Forms, no other bar moves (`Forms.lockOnly`, `Forms.barOff`, `SpellContainerSourceMixin`, `FormSkills.spells`), so right click whirls and throws the chain. Lock on and the bar comes back, its first skill on right click as before; the bar's dirty check now counts the lock, so it updates as soon as you lock or let go.
+- Compiled; not played.
