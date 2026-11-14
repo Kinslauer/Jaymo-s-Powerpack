@@ -96,7 +96,8 @@ import org.jspecify.annotations.Nullable;
  * sooner, or look away, and nothing happens. Only a severed part and a Wind user's grab in the air stay a click. Holding
  * plain right-click on someone downed is the revive ({@link Downed}), and holding left-click executes them
  * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
- * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can).
+ * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can). (Andy, 2026-11-14) Someone
+ * downed is lifted from a kneel at their side instead, with a tap of use ({@link #liftDowned}), and revived with a hold from it.
  * <p>
  * (0.19.55) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
  * Engine's drag as the idea, rebuilt). Sneak + held use on someone downed ({@link #draggable}) now takes them by the
@@ -599,6 +600,11 @@ public final class Carry {
 			// (0.17.18) too far off to lift: step in close first
 			return InteractionResult.PASS;
 		}
+		if (target instanceof LivingEntity body && Downed.isDowned(body) && !windCarries(player, target)) {
+			// (Andy, 2026-11-14) someone downed is lifted from a kneel at their side, with a tap of use ({@link #liftDowned});
+			// a sneak and a hold standing over them no longer does it
+			return InteractionResult.PASS;
+		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
 			Long ready = REGRAB.get(target.getUUID());
 			if (ready != null && server.getGameTime() < ready) {
@@ -649,18 +655,7 @@ public final class Carry {
 			if (held >= LIFT_TICKS) {
 				it.remove();
 				HoldProgress.forget(player.getUUID(), liftJob(target));
-				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
-					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
-					// (0.19.55) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too
-					// heavy in their armour has a piece come off instead, and the next lift tries again
-					if (draggable(target) && !GravityWeight.lightens(player) && !flying(player)) {
-						drag(player, target);
-					} else if (overloaded(player, target) > 0) {
-						shed(player, (LivingEntity) target);
-					} else {
-						pickUp(player, target);
-					}
-				}
+				lift(player, target);
 				continue;
 			}
 			if (held >= 2) {
@@ -669,6 +664,40 @@ public final class Carry {
 					"|".repeat(filled) + ".".repeat(LIFT_BAR - filled)).withStyle(ChatFormatting.GRAY));
 			}
 		}
+	}
+
+	/** The lift done: {@code player} takes {@code target} up, if both are still free to. */
+	private static boolean lift(ServerPlayer player, Entity target) {
+		if (isCarrying(player) || isCarried(player) || Downed.isDowned(player) || KitchenCompat.isCarryingCorpse(player)
+			|| isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle() || !canBeCarriedBy(player, target)) {
+			return false;
+		}
+		// (0.19.55) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too
+		// heavy in their armour has a piece come off instead, and the next lift tries again
+		if (draggable(target) && !GravityWeight.lightens(player) && !flying(player)) {
+			drag(player, target);
+		} else if (overloaded(player, target) > 0) {
+			shed(player, (LivingEntity) target);
+		} else {
+			pickUp(player, target);
+		}
+		return true;
+	}
+
+	/**
+	 * (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking, reviving,
+	 * lifting": a tap of use from a kneel at a downed body's side ({@link Downed}'s revive watch tells it) takes them up at
+	 * once, as a full lift's hold did. True if they were.
+	 */
+	public static boolean liftDowned(ServerPlayer player, LivingEntity body) {
+		if (player.isSpectator() || liftGap(player, body) > LIFT_GAP + LIFT_SLACK) {
+			return false;
+		}
+		Long ready = REGRAB.get(body.getUUID());
+		if (ready != null && player.level().getGameTime() < ready) {
+			return false;
+		}
+		return lift(player, body);
 	}
 
 	/**

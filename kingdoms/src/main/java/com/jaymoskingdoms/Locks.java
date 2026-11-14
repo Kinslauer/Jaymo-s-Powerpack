@@ -629,6 +629,10 @@ public final class Locks {
 			// (the off hand's go at it is refused too, without a second game)
 			return InteractionResult.FAIL;
 		}
+		if (sp.getInventory().countItem(Lockpicking.LOCKPICK) > 0 && !KneelFirst.ready(sp, "lock")) {
+			// (Andy, 2026-11-14) a lock is picked from a kneel ({@link KneelFirst})
+			return InteractionResult.FAIL;
+		}
 		Lockpicking.Kind[] kinds = Lockpicking.Kind.values();
 		Lockpicking.Kind kind = kinds[Math.floorMod(f.kind(), kinds.length)];
 		if (!Lockpicking.pickLock(sp, anchor, kind, f.level(), f.seed(anchor), () -> picked(sp, anchor))) {

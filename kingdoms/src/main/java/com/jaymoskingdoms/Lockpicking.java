@@ -188,7 +188,9 @@ public final class Lockpicking {
 
 	/** A player went to open a container: a locked one (read now if it never was) opens the lockpicking game instead. */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
-		if (player.isSpectator() || player.isSecondaryUseActive() && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
+		// ((Andy, 2026-11-14) a kneel is a held sneak: one kneeling at a locked chest picks it, whatever is in hand)
+		if (player.isSpectator() || player.isSecondaryUseActive() && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())
+			&& !(player instanceof ServerPlayer kneeler && KneelFirst.kneeling(kneeler))) {
 			return InteractionResult.PASS;
 		}
 		BlockPos pos = hit.getBlockPos();
@@ -213,6 +215,10 @@ public final class Lockpicking {
 		if (picks == 0) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.no_pick." + (lock.kind() == Kind.ROTARY.ordinal() ? "rotary" : "pin"),
 				Component.translatable("message.jaymoskingdoms.lock.level." + lock.level())).withStyle(ChatFormatting.GRAY));
+			return InteractionResult.FAIL;
+		}
+		if (!KneelFirst.ready(sp, "lock")) {
+			// (Andy, 2026-11-14) a lock is picked from a kneel ({@link KneelFirst})
 			return InteractionResult.FAIL;
 		}
 		if (!ServerPlayNetworking.canSend(sp, Open.TYPE)) {
