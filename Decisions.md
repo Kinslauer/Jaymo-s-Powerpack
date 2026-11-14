@@ -569,3 +569,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 ## 2026-11-14 (Shapeshifters and changelings thread)
 - Andy: "shapeshifters are awesome and that should also be how sylvan changelings function. but the shapeshifters and changelings should always copy an mca skin not the regular minecraft skin or anything else, and they should be far less common." Asked which he meant for changelings, he picked "Both": changeling players take an MCA villager's face, and some village impostors are changelings underneath.
+
+## 2026-11-14 (Reaper's host thread)
+- Andy picked 32 of 35 rows (not draugr in the world, not draugr raids, not charts to Moog's wrecks). "only the undead illagers should ride spiders". "ill merge when everything is done, build every patch": all nine patches are on PR #1536. On the lord of the Stormborn Tomb: "use blockbench and fable, go all out for this". He approved the lore paragraphs "The reaped" and "The drowned courts".
