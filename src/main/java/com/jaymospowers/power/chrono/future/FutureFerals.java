@@ -43,11 +43,14 @@ public final class FutureFerals {
 	static final float CORPSE_SHARE = 0.12F, HUSK_SHARE = 0.4F;
 	/** Gunners look for a shot this often. */
 	static final int GUN_EVERY = 2;
-	/** At most this many ferals within {@link #COUNT_RADIUS} of a player, by day and by night. */
-	static final int CAP_DAY = 10, CAP_NIGHT = 20;
+	/**
+	 * At most this many ferals within {@link #COUNT_RADIUS} of a player, by day and by night: the most anywhere outside a
+	 * blood moon (Andy: "the largest numbers in the future and during blood moons"; Kingdoms' zombie hordes stay below it).
+	 */
+	static final int CAP_DAY = 18, CAP_NIGHT = 36;
 	static final double COUNT_RADIUS = 64.0;
 	/** A pack: this many at once, this far from the player. */
-	static final int PACK_MIN = 3, PACK_MAX = 6;
+	static final int PACK_MIN = 5, PACK_MAX = 10;
 	static final int SPAWN_MIN = 24, SPAWN_MAX = 44;
 	/**
 	 * Ferals shamble slower than a zombie (x0.75) while you're looking at them, and sprint (x1.5 a zombie) the moment

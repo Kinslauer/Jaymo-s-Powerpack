@@ -16,5 +16,7 @@ abstract class EnvironmentAttributeSystemBuilderMixin {
 	private void jaymoskingdoms$moonLayers(Level level, CallbackInfoReturnable<EnvironmentAttributeSystem.Builder> cir) {
 		Moons.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
 		com.jaymoskingdoms.astronomy.SunMoon.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
+		// a horde day's grey sky (and no burning under it)
+		com.jaymoskingdoms.HordeDays.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
 	}
 }

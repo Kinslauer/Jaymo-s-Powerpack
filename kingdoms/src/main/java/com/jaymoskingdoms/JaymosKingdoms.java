@@ -765,6 +765,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.6.6: lunar events (blood, harvest, blue moons) and Bad Omen grudges (their attachments)
 		LOGGER.debug("moon and grudge attachments: {} {}", Moons.ROLL, Omens.GRUDGES);
 		Moons.register();
+		// zombie hordes: growing with the world's age and danger, biggest under a blood moon
+		LOGGER.debug("horde day attachment: {}", HordeDays.ROLL);
+		HordeDays.register();
+		HordeLure.register();
+		ZombieHordes.register();
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();

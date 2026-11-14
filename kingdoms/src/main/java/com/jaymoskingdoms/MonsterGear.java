@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
@@ -103,6 +104,12 @@ public final class MonsterGear {
 			int grade = grade(random, tier);
 			mob.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(item(SHIELDS[grade]).orElse(Items.SHIELD)));
 		}
+	}
+
+	/** A weapon from world tier {@code tier}'s grades (a zombie horde's armed few, {@link ZombieHordes}). */
+	static ItemStack weaponFor(ServerLevel level, RandomSource random, int tier) {
+		int grade = grade(random, Mth.clamp(tier, 0, GRADE_WEIGHTS.length - 1));
+		return finish(level, random, weapon(random, grade), grade);
 	}
 
 	/** A grade, 0 (worn) to 4 (legendary), by the world tier's weights. */

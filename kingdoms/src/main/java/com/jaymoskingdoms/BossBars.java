@@ -67,7 +67,9 @@ public final class BossBars {
 			// the great necromancer
 			|| entity instanceof GreatNecromancer
 			// the blossom lands' great night things
-			|| entity instanceof com.jaymoskingdoms.blossomland.SnowWidow || entity instanceof com.jaymoskingdoms.blossomland.Unburied;
+			|| entity instanceof com.jaymoskingdoms.blossomland.SnowWidow || entity instanceof com.jaymoskingdoms.blossomland.Unburied
+			// a horde's grave-captain
+			|| ZombieHordes.captain(entity);
 	}
 
 	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */
