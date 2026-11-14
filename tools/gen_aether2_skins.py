@@ -8,7 +8,9 @@ read here: every pixel is painted by this script onto the boxes the Java models 
 Needs Pillow. Each skin is seeded from its own name, so a rerun changes nothing.
 """
 import os
+import random
 import sys
+import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "aether2"))
@@ -456,6 +458,298 @@ def aerwhale(m, seed):
         plume(p, b, back, taper_from=0.1, blunt=0.35)
     side_eyes(p, box(m, "Head"), 22, 8, 2, 2, white=(20, 24, 40), pupil=(20, 24, 40))
     return p
+
+
+# ---------------------------------------------------------------- monsters: tempest, swets, plants, skephid, talutons, hunter
+
+def keep_bright(p, test):
+    """Blanks every pixel a glow layer should not light."""
+    for y in range(p.im.height):
+        for x in range(p.im.width):
+            c = p.px[x, y]
+            if c[3] and not test(c):
+                p.px[x, y] = (0, 0, 0, 0)
+
+
+def glow_eyes(p, b, face, spots, c, w=2, h=2):
+    for ex, ey in spots:
+        p.rect(b, face, ex, ey, w, h, c)
+        p.rect(b, face, ex, ey, 1, 1, mix(c, (255, 255, 255), 0.6))
+
+
+def tempest(glow):
+    def paint(m, seed):
+        cloud = ramp_from("56607c", dark=0.6, light=1.25, cool=(24, 28, 60)); inner = ramp_from("2c3048", dark=0.6, light=1.3)
+        shell = ramp_from("1e2236", dark=0.6, light=1.4); bolt = ramp_from("8fe6ff", dark=0.6, light=1.2, warm=(255, 255, 255))
+        p = a2paint.paint(m, seed, [("claw", bolt, "horn"), ("wingcase", shell, "smooth"), ("cloud_shell|fin_\\w+_r1|jaw", cloud, "wool", 0.8),
+                                    ("", inner, "plain", 0.7)])
+        plumes(p, m, "emissive|tail_1|tail_2|legs_", bolt, taper_from=0.2, blunt=0.2)
+        for b in m["parts"]["cloud_shell"]["boxes"]:
+            # lightning veins over the cloud
+            for face, (u, v, fw, fh) in a2parse.faces(b).items():
+                for j in range(fh):
+                    for i in range(fw):
+                        if p.n(u + i + j, v + j * 3, 1) > 0.93 or (face in ("west", "east") and (i + j * 2) % 13 == 0 and p.n(u + i, v + j, 3) > 0.2):
+                            p.put(u + i, v + j, bolt[3])
+            glow_eyes(p, b, "north", [(3, 3), (10, 3)], (255, 236, 120), 2, 2)
+        if glow:
+            keep_bright(p, lambda c: (c[2] > 200 and c[1] > 170) or (c[0] > 230 and c[1] > 200))
+        return p
+    return paint
+
+
+skin("tempest", "monster/TempestModel.java")(tempest(False))
+skin("tempest_glow", "monster/TempestModel.java")(tempest(True))
+
+GEL_ALPHA = 118
+
+
+def swet(core_c, gel_c):
+    def paint(m, seed):
+        core = ramp_from(core_c, dark=0.6, light=1.25); gel = ramp_from(gel_c, dark=0.75, light=1.12)
+        p = a2paint.Painter(m, seed)
+        hb = m["parts"]["head"]["boxes"]
+        p.box(hb[0], core, "smooth", 0.8)
+        p.box(hb[1], ramp_from(mix(hx(core_c), (255, 255, 255), 0.35)), "smooth", 0.6)
+        front_eyes(p, hb[0], 1, 3, 2, 3, white=(250, 250, 255), pupil=(18, 22, 40))
+        u, v, fw, fh = a2parse.faces(hb[0])["north"]
+        for i in range(3, 6):
+            p.put(u + i, v + 7, core[0])                    # a small mouth
+        plumes(p, m, "wisp", core, gel, acc_from=0.5, taper_from=0.2, blunt=0.2)
+        gb = m["parts"]["gel"]["boxes"]
+        p.box(gb[0], gel, "smooth", 0.5, a=GEL_ALPHA)
+        p.box(gb[1], gel, "smooth", 0.4, a=GEL_ALPHA - 40)
+        p.box(m["parts"]["squish"]["boxes"][0], gel, "smooth", 0.5, a=GEL_ALPHA)
+        # a brighter rim and a few bubbles in the gel
+        for b in (gb[0], m["parts"]["squish"]["boxes"][0]):
+            for face, (u, v, fw, fh) in a2parse.faces(b).items():
+                for j in range(fh):
+                    for i in range(fw):
+                        if i in (0, fw - 1) or j in (0, fh - 1):
+                            p.put(u + i, v + j, gel[4], GEL_ALPHA + 50)
+                        elif p.n(u + i, v + j, 1) > 0.9:
+                            p.put(u + i, v + j, (255, 255, 255), GEL_ALPHA + 20)
+        return p
+    return paint
+
+
+skin("blue_swet", "monster/SwetModel.java")(swet("2f66c8", "8fc4f4"))
+skin("golden_swet", "monster/SwetModel.java")(swet("d89a1e", "f8e08a"))
+
+
+@skin("aechor_plant", "monster/AechorPlantModel.java")
+def aechor_plant(m, seed):
+    bulb = ramp_from("8e3fa8", dark=0.55, light=1.25); petal = ramp_from("c86ad0", dark=0.6, light=1.2); vein = ramp_from("f2d06a")
+    leaf = ramp_from("4f8a3c", dark=0.55, light=1.2); thorn = ramp_from("efe6c8", dark=0.6, light=1.05)
+    p = a2paint.paint(m, seed, [("body", bulb, "smooth"), ("stem|main", leaf, "plain"), ("", bulb, "plain")])
+    plumes(p, m, "petal", petal, vein, acc_from=0.72, taper_from=0.35, blunt=0.25)
+    plumes(p, m, "under_petal", leaf, taper_from=0.3, blunt=0.2)
+    plumes(p, m, "dart", thorn, ramp_from("7a2a8a"), acc_from=0.75, taper_from=0.0, blunt=0.1)
+    plumes(p, m, "stem_r", leaf, taper_from=0.6, blunt=0.6)
+    b = box(m, "body")
+    for face in ("west", "east", "north", "south"):
+        u, v, fw, fh = a2parse.faces(b)[face]
+        for i in range(1, fw, 2):
+            p.put(u + i, v, vein[2])
+    return p
+
+
+@skin("carrion_sprout", "monster/CarrionSproutModel.java")
+def carrion_sprout(m, seed):
+    stem = ramp_from("5d8a3a", dark=0.55, light=1.2); flesh = ramp_from("a8323e", dark=0.55, light=1.2); inside = ramp_from("5a1626", dark=0.6, light=1.3)
+    tooth = ramp_from("f0e8cc", dark=0.65, light=1.05); pollen = ramp_from("e8c040")
+    p = a2paint.paint(m, seed, [("flowerRoot", inside, "smooth"), ("flower\\d*$", flesh, "smooth"), ("stemLeefRoot", stem, "smooth"), ("", stem, "plain")])
+    plumes(p, m, "stemLeef", stem, taper_from=0.25, blunt=0.15)
+    for n in m["order"]:
+        if n.startswith("stemLeefRoot"):
+            continue
+        if n.startswith("flower_part"):
+            b = m["parts"][n]["boxes"][0]
+            if b["w"] == 10:
+                fan(p, b, flesh, tooth, scallop=2) if False else plume(p, b, flesh, tooth, acc_from=0.6, taper_from=0.0, blunt=0.55)
+            else:
+                plume(p, b, tooth, taper_from=0.0, blunt=0.1)
+        elif n in ("flower5", "flower6"):
+            plume(p, m["parts"][n]["boxes"][0], pollen, taper_from=0.6, blunt=0.5)
+        elif n in ("flower", "flower2", "flower3", "flower4"):
+            b = m["parts"][n]["boxes"][0]
+            # the inner side of each jaw is dark, with a row of teeth along the top
+            p.face(a2parse.faces(b)["north"], "north", inside, "smooth")
+            u, v, fw, fh = a2parse.faces(b)["north"]
+            for i in range(fw):
+                for j in range(2 if i % 2 == 0 else 1):
+                    p.put(u + i, v + j, tooth[3 - j])
+            u, v, fw, fh = a2parse.faces(b)["south"]
+            for i in range(1, fw, 3):
+                for j in range(2, fh):
+                    p.put(u + i, v + j, flesh[1])
+    return p
+
+
+def skephid(glow):
+    def paint(m, seed):
+        shell = ramp_from("3a4a52", dark=0.5, light=1.3); belly = ramp_from("6a7a70"); mark = ramp_from("9cf05a", dark=0.6, light=1.2)
+        fang = ramp_from("e8e0c8", dark=0.6, light=1.05)
+        p = a2paint.paint(m, seed, [("mouth", fang, "horn"), ("abdomen", shell, "scale"), ("_3", shell, "horn"), ("", shell, "smooth", 0.8)])
+        ab = box(m, "abdomen")
+        for face in ("top", "south", "west", "east"):
+            u, v, fw, fh = a2parse.faces(ab)[face]
+            for j in range(1, fh - 1):
+                for i in range(1, fw - 1):
+                    if (abs(i - (fw - 1) / 2.0) < 1.0 and j % 2 == 0) or ((i + j) % 4 == 0 and j % 3 == 1):
+                        p.put(u + i, v + j, mark[2 + (i + j) % 2])
+        hb = box(m, "head_r1")
+        # the head is a cube turned corner-forward: eyes on the two faces that meet at the front
+        glow_eyes(p, hb, "north", [(3, 1), (1, 3)], (160, 255, 90), 1, 1)
+        glow_eyes(p, hb, "west", [(2, 1), (4, 3)], (160, 255, 90), 1, 1)
+        for b in boxes(m, "_3_r1"):
+            tip(p, b, "top", fang, "y", "lo", 1)
+        if glow:
+            keep_bright(p, lambda c: c[1] > 190 and c[1] > c[0] + 40 and c[1] > c[2] + 60)
+        return p
+    return paint
+
+
+skin("skephid", "monster/SkephidModel.java")(skephid(False))
+skin("skephid_glow", "monster/SkephidModel.java")(skephid(True))
+
+
+def arkenium_taluton(glow):
+    def paint(m, seed):
+        metal = ramp_from("4c5a66", dark=0.5, light=1.35, cool=(18, 22, 40)); plate = ramp_from("7d8c96", dark=0.55, light=1.25)
+        spike = ramp_from("b8c8cc", dark=0.6, light=1.12); joint = ramp_from("2a3038", dark=0.6, light=1.3); eye = (255, 150, 50)
+        p = a2paint.paint(m, seed, [("spike", spike, "horn"), ("arm_\\w+_[23]|leg_\\w+_2", plate, "stone"), ("leg_", joint, "smooth"), ("", metal, "stone")])
+        bb = m["parts"]["body"]["boxes"]
+        # riveted seams along the big chest plate, and the eyes under its brow
+        u, v, fw, fh = a2parse.faces(bb[0])["north"]
+        for i in range(fw):
+            p.put(u + i, v + fh - 1, joint[1])
+            if i % 4 == 1:
+                p.put(u + i, v + 1, spike[3])
+        glow_eyes(p, bb[0], "north", [(4, 4), (12, 4)], eye, 2, 2)
+        for b in bb[1:]:
+            u, v, fw, fh = a2parse.faces(b)["north"]
+            for j in range(0, fh, 3):
+                for i in range(1, fw - 1):
+                    p.put(u + i, v + j, joint[2])
+        if glow:
+            keep_bright(p, lambda c: c[0] > 240 and 120 < c[1] < 235 and c[2] < 200 and c[0] > c[2] + 60)
+        return p
+    return paint
+
+
+skin("arkenium_taluton", "monster/ArkeniumTalutonModel.java")(arkenium_taluton(False))
+skin("arkenium_taluton_glow", "monster/ArkeniumTalutonModel.java")(arkenium_taluton(True))
+
+
+def gravitite_taluton(glow):
+    def paint(m, seed):
+        stone = ramp_from("6a6474", dark=0.55, light=1.25); ore = ramp_from("d45ad0", dark=0.55, light=1.3, warm=(255, 230, 255))
+        leg = ramp_from("4a4654", dark=0.55, light=1.3); lit = (255, 150, 250)
+        p = a2paint.paint(m, seed, [("rock", stone, "stone"), ("leg", leg, "stone"), ("body_3", ore, "stone"), ("", stone, "stone")])
+        for b in m["parts"]["body_3_r1"]["boxes"]:
+            for face, (u, v, fw, fh) in a2parse.faces(b).items():
+                for j in range(fh):
+                    for i in range(fw):
+                        if p.n(u + i + j // 2, v + j, 1) > 0.78:
+                            p.put(u + i, v + j, lit)
+        glow_eyes(p, m["parts"]["body_3_r1"]["boxes"][1], "north", [(1, 1), (4, 1)], (255, 240, 255), 2, 2)
+        for b in boxes(m, "leg_"):
+            for face in ("west", "east", "north", "south"):
+                tip(p, b, face, ore, "y", "hi", 1)
+
+        # the debris ring: a see-through box with stones scattered round its sides
+        def debris(pt, lo, size, x, y):
+            if abs(pt[1] - (lo[1] + size[1] / 2.0)) > size[1] / 2.0 - 1:
+                return None
+            cx, cy = x // 5, y // 5
+            r = random.Random(cx * 7919 + cy * 104729 + zlib.crc32(seed.encode()))
+            if r.random() > 0.3:
+                return None
+            ox, oy, rad = r.uniform(1.2, 3.8), r.uniform(1.2, 3.8), r.uniform(1.0, 2.2)
+            dx, dy = x % 5 + 0.5 - ox, y % 5 + 0.5 - oy
+            if dx * dx + dy * dy > rad * rad:
+                return None
+            rmp = ore if r.random() < 0.3 else stone
+            return rmp[max(0, min(4, int(2.5 - dy - dx * 0.5)))]
+
+        for name in ("debris_1", "debris_2_r1"):
+            b = m["parts"][name]["boxes"][0]
+            shape(p, b, debris)
+            for f in ("top", "bottom"):
+                u, v, fw, fh = a2parse.faces(b)[f]
+                for j in range(fh):
+                    for i in range(fw):
+                        p.put(u + i, v + j, (0, 0, 0), 0)
+        if glow:
+            keep_bright(p, lambda c: c[0] > 240 and c[2] > 235 and c[1] > 130)
+        return p
+    return paint
+
+
+skin("gravitite_taluton", "monster/GravititeTalutonModel.java")(gravitite_taluton(False))
+skin("gravitite_taluton_glow", "monster/GravititeTalutonModel.java")(gravitite_taluton(True))
+
+
+def bladeshroom_hunter(glow):
+    def paint(m, seed):
+        hide_ = ramp_from("5a4a3e", dark=0.55, light=1.25); under = ramp_from("8a7a62"); cap = ramp_from("3f8f96", dark=0.5, light=1.3)
+        edge = ramp_from("9ff4e6", dark=0.7, light=1.1, warm=(255, 255, 255)); bark = ramp_from("4a3a2c", dark=0.6, light=1.25)
+        leafc = ramp_from("4f8a6a", dark=0.55, light=1.2); claw = ramp_from("d8d0b8", dark=0.6, light=1.05)
+        p = a2paint.paint(m, seed, [("neck|head", hide_, "fur"), ("joint|_2_r1|__r1", hide_, "fur"), ("", hide_, "fur")])
+        sg = m["parts"]["shrink_group"]["boxes"]
+        for b in sg:
+            p.face(a2parse.faces(b)["bottom"], "bottom", under, "fur")
+
+        # the blade: a mushroom cap grown into a crescent, sharp along its outer rim
+        def blade(pt, lo, size, x, y):
+            a = (pt[1] - lo[1]) / size[1] * 2 - 1; c = (pt[2] - lo[2]) / size[2] * 2 - 1
+            r = (a * a + c * c) ** 0.5
+            if r > 1.0 or ((a + 0.45) ** 2 + (c - 0.45) ** 2) ** 0.5 < 0.62:
+                return None
+            if r > 0.86:
+                return edge[3 + (x + y) % 2]
+            return cap[max(0, min(4, int(2 + p.n(x, y, 2) * 1.2 + (0.5 - r) * 2)))] if (int(r * 9) % 3) else cap[1]
+
+        for b in m["parts"]["blade_left_r1"]["boxes"]:
+            shape(p, b, blade)
+        for n in ("chest_shroom_right_r1", "chest_shroom_left_r1"):
+            fan(p, m["parts"][n]["boxes"][0], cap, edge, scallop=3)
+        # the branches: bark with a ragged outline, leaves hanging from them
+        for n in ("branch_left", "branch_right"):
+            for b in m["parts"][n]["boxes"]:
+                def branch(pt, lo, size, x, y, b=b):
+                    t = (pt[1] - lo[1]) / size[1]                       # 0 at the top, 1 at the root
+                    wide = b["w"] if b["w"] else b["d"]
+                    c = ((pt[0] - lo[0]) if b["w"] else (pt[2] - lo[2])) / wide
+                    trunk = abs(c - (0.15 + 0.5 * (1 - t) if b["w"] else 0.5)) < 0.12 + 0.1 * t
+                    twig = t < 0.75 and (int(c * wide) + int(t * size[1] * 0.7)) % 5 == 0 and p.n(x, y, 2) > -0.4
+                    capc = t < 0.3 and p.n(x, y, 3) > 0.0
+                    if trunk or twig:
+                        return bark[max(0, min(4, int(2 + p.n(x, y, 1) * 1.5)))]
+                    if capc:
+                        return cap[max(0, min(4, int(2.5 + p.n(x, y, 2) * 1.5 - t * 3)))]
+                    return None
+                shape(p, b, branch)
+        for n in ("leaves_left_r1", "leaves_right_r1"):
+            plume(p, m["parts"][n]["boxes"][0], leafc, taper_from=0.1, blunt=0.2)
+        for n in m["order"]:
+            if "foot" in n or n.endswith("__r1") or n.endswith("left_2_r1") and "back" in n:
+                for b in m["parts"][n]["boxes"]:
+                    if 0 in (b["w"], b["d"]):
+                        plume(p, b, claw, taper_from=0.0, blunt=0.3)
+            if n.endswith("_joint") or n.endswith("_joint2"):
+                for b in m["parts"][n]["boxes"]:
+                    plume(p, b, hide_, claw, acc_from=0.8, taper_from=0.2, blunt=0.3)
+        side_eyes(p, box(m, "head"), 1, 2, 1, 2, white=(160, 255, 235), pupil=(160, 255, 235))
+        if glow:
+            keep_bright(p, lambda c: c[1] > 225 and c[2] > 200 and c[0] < 200)
+        return p
+    return paint
+
+
+skin("bladeshroom_hunter", "monster/BladeshroomHunterModel.java")(bladeshroom_hunter(False))
+skin("bladeshroom_hunter_glow", "monster/BladeshroomHunterModel.java")(bladeshroom_hunter(True))
 
 
 # ---------------------------------------------------------------- run

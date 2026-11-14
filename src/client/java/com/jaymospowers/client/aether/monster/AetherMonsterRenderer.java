@@ -15,9 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -40,8 +43,6 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 		boolean ceiling, armed, glowing, charging;
 		/** The swing of a bite or blow, 0 to 1, and the ticks into a strike (-1 for none). */
 		float attack, strike = -1.0F;
-		/** A swet's squash: 0 sitting, positive in the air (stretch). */
-		float stretch;
 	}
 
 	/** What one mob adds to the state, and how it is drawn. */
@@ -51,7 +52,7 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 		/** The skin's name (a png under textures/entity/aether/). */
 		String skin(State state);
 
-		/** How far it sinks into the ground (blocks). */
+		/** How far it sinks into the ground (blocks; negative lifts it). */
 		default float sink(State state) {
 			return 0.0F;
 		}
@@ -61,8 +62,9 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			return 1.0F;
 		}
 
-		default boolean translucent() {
-			return false;
+		/** A see-through second pass drawn over the body with the same skin (a swet's gel), or null. */
+		default @Nullable AetherMonsterModel gel() {
+			return null;
 		}
 
 		/** The name of a glowing overlay under textures/entity/aether/, or null. */
@@ -81,6 +83,19 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 	AetherMonsterRenderer(EntityRendererProvider.Context context, AetherMonsterModel model, float shadow, Look<T> look) {
 		super(context, model, shadow);
 		this.look = look;
+		AetherMonsterModel gel = look.gel();
+		if (gel != null) {
+			this.addLayer(new RenderLayer<>(this) {
+				@Override
+				public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, State state, float yRot, float xRot) {
+					if (!state.isInvisible) {
+						gel.setupAnim(state);
+						collector.order(1).submitModel(gel, state, poseStack, RenderTypes.entityTranslucent(getTextureLocation(state)), lightCoords,
+							OverlayTexture.NO_OVERLAY, state.outlineColor);
+					}
+				}
+			});
+		}
 		String glow = look.glow();
 		if (glow != null) {
 			RenderType eyes = RenderTypes.eyes(texture(glow));
@@ -106,7 +121,6 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 	public void extractRenderState(T mob, State state, float partialTicks) {
 		super.extractRenderState(mob, state, partialTicks);
 		state.attack = mob.getSwingAnimation(partialTicks);
-		state.stretch = mob.onGround() ? 0.0F : Mth.clamp((float)mob.getDeltaMovement().y * 2.5F, -0.4F, 0.6F);
 		this.look.extract(mob, state, partialTicks);
 		float now = mob.tickCount + partialTicks;
 		if (this.actions.size() > ACTIONS_KEPT) {
@@ -133,21 +147,9 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 	@Override
 	protected void scale(State state, PoseStack poseStack) {
 		float scale = this.look.scale(state);
-		if (this.look.translucent()) {
-			// a swet stretches in the air and squashes when it lands
-			float sy = 1.0F + state.stretch * 0.5F;
-			poseStack.scale(scale / Mth.sqrt(sy), scale * sy, scale / Mth.sqrt(sy));
-		} else if (scale != 1.0F) {
+		if (scale != 1.0F) {
 			poseStack.scale(scale, scale, scale);
 		}
-	}
-
-	@Override
-	protected RenderType getRenderType(State state, boolean bodyVisible, boolean translucent, boolean glowing) {
-		if (this.look.translucent() && bodyVisible) {
-			return RenderTypes.entityTranslucent(this.getTextureLocation(state));
-		}
-		return super.getRenderType(state, bodyVisible, translucent, glowing);
 	}
 
 	@Override
@@ -179,11 +181,14 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 		};
 	}
 
+	/** The tempest's model hangs this far above its feet (blocks). */
+	private static final float TEMPEST_LIFT = 0.17F;
+
 	static Look<Tempest> tempest() {
 		return new Look<>() {
 			@Override
 			public void extract(Tempest mob, State state, float partialTicks) {
-				state.charging = mob.charging();
+				state.action = mob.charging() ? 1 : 0;
 				state.progress = mob.hideProgress();
 			}
 
@@ -193,9 +198,8 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			}
 
 			@Override
-			public float scale(State state) {
-				// hiding from the sun, it shrinks away
-				return 1.0F - 0.85F * state.progress;
+			public float sink(State state) {
+				return -TEMPEST_LIFT + Mth.sin(state.ageInTicks / 10.0F) / 15.0F;
 			}
 
 			@Override
@@ -235,6 +239,7 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			@Override
 			public void extract(Swet mob, State state, float partialTicks) {
 				state.progress = Mth.clamp(mob.saturation() / Swet.FULL_SATURATION, 0.0F, 1.0F);
+				state.action = mob.onGround() ? 0 : 1;
 			}
 
 			@Override
@@ -243,8 +248,8 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			}
 
 			@Override
-			public boolean translucent() {
-				return true;
+			public AetherMonsterModel gel() {
+				return SwetModel.gel();
 			}
 		};
 	}
@@ -316,16 +321,25 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 		};
 	}
 
+	/** The gravitite taluton's model is drawn this much lower (blocks). */
+	private static final float GRAVITITE_SINK = 0.3F;
+
 	static Look<GravititeTaluton> gravititeTaluton() {
 		return new Look<>() {
 			@Override
 			public void extract(GravititeTaluton mob, State state, float partialTicks) {
 				state.glowing = mob.glowing();
+				state.action = state.glowing ? 1 : 0;
 			}
 
 			@Override
 			public String skin(State state) {
 				return "gravitite_taluton";
+			}
+
+			@Override
+			public float sink(State state) {
+				return GRAVITITE_SINK;
 			}
 
 			@Override
@@ -346,12 +360,6 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			@Override
 			public String skin(State state) {
 				return "bladeshroom_hunter";
-			}
-
-			@Override
-			public float sink(State state) {
-				// only the caps show when it is buried
-				return state.progress * 0.62F;
 			}
 
 			@Override

@@ -1,66 +1,169 @@
+/*
+ * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
+ * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/CarrionSproutModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
+ * Changed for Jaymo's Powers (2026-11): moved to this package, posed from our own render state.
+ * This file stays under the LGPL v3.0.
+ */
 package com.jaymospowers.client.aether.monster;
 
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
 
-/** The carrion sprout: a pale stalk with a bud and six curved leaves. By day the leaves hang loose; at night they spread flat, and they snap shut on what touches it. */
+import com.jaymospowers.client.aether.anim.CarrionSproutAnimations;
+import net.minecraft.client.animation.KeyframeAnimation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+
 final class CarrionSproutModel extends AetherMonsterModel {
-	private final ModelPart bud;
-	private final ModelPart[] leaves = new ModelPart[6];
-	private final ModelPart[] tips = new ModelPart[6];
+	private final KeyframeAnimation trapActivateAnimation;
+	private final ModelPart stem;
+	private final ModelPart stemLeefRoot;
+	private final ModelPart stemLeef;
+	private final ModelPart stemLeef2;
+	private final ModelPart stemLeef3;
+	private final ModelPart stemLeef4;
+	private final ModelPart stemLeef5;
+	private final ModelPart stemLeef6;
+	private final ModelPart stemLeef7;
+	private final ModelPart stemLeef8;
+	private final ModelPart flowerRoot;
+	private final ModelPart flower;
+	private final ModelPart flower_part;
+	private final ModelPart flower_part2;
+	private final ModelPart flower_part3;
+	private final ModelPart flower2;
+	private final ModelPart flower_part4;
+	private final ModelPart flower_part5;
+	private final ModelPart flower_part6;
+	private final ModelPart flower3;
+	private final ModelPart flower_part7;
+	private final ModelPart flower_part8;
+	private final ModelPart flower_part9;
+	private final ModelPart flower4;
+	private final ModelPart flower_part10;
+	private final ModelPart flower_part11;
+	private final ModelPart flower_part12;
+	private final ModelPart flower5;
+	private final ModelPart flower6;
 
 	private CarrionSproutModel(ModelPart root) {
 		super(root);
-		this.bud = root.getChild("bud");
-		for (int i = 0; i < 6; i++) {
-			this.leaves[i] = root.getChild("leaf_" + i);
-			this.tips[i] = this.leaves[i].getChild("tip_" + i);
-		}
+		this.trapActivateAnimation = CarrionSproutAnimations.TRAP_ACTIVATE.bake(root);
+		this.stem = root.getChild("stem");
+		this.stemLeefRoot = this.stem.getChild("stemLeefRoot");
+		this.stemLeef = this.stemLeefRoot.getChild("stemLeef");
+		this.stemLeef2 = this.stemLeefRoot.getChild("stemLeef2");
+		this.stemLeef3 = this.stemLeefRoot.getChild("stemLeef3");
+		this.stemLeef4 = this.stemLeefRoot.getChild("stemLeef4");
+		this.stemLeef5 = this.stemLeefRoot.getChild("stemLeef5");
+		this.stemLeef6 = this.stemLeefRoot.getChild("stemLeef6");
+		this.stemLeef7 = this.stemLeefRoot.getChild("stemLeef7");
+		this.stemLeef8 = this.stemLeefRoot.getChild("stemLeef8");
+		this.flowerRoot = this.stem.getChild("flowerRoot");
+		this.flower = this.flowerRoot.getChild("flower");
+		this.flower_part = this.flower.getChild("flower_part");
+		this.flower_part2 = this.flower.getChild("flower_part2");
+		this.flower_part3 = this.flower.getChild("flower_part3");
+		this.flower2 = this.flowerRoot.getChild("flower2");
+		this.flower_part4 = this.flower2.getChild("flower_part4");
+		this.flower_part5 = this.flower2.getChild("flower_part5");
+		this.flower_part6 = this.flower2.getChild("flower_part6");
+		this.flower3 = this.flowerRoot.getChild("flower3");
+		this.flower_part7 = this.flower3.getChild("flower_part7");
+		this.flower_part8 = this.flower3.getChild("flower_part8");
+		this.flower_part9 = this.flower3.getChild("flower_part9");
+		this.flower4 = this.flowerRoot.getChild("flower4");
+		this.flower_part10 = this.flower4.getChild("flower_part10");
+		this.flower_part11 = this.flower4.getChild("flower_part11");
+		this.flower_part12 = this.flower4.getChild("flower_part12");
+		this.flower5 = this.flowerRoot.getChild("flower5");
+		this.flower6 = this.flowerRoot.getChild("flower6");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition stem = partdefinition.addOrReplaceChild("stem", CubeListBuilder.create().texOffs(24, 45).addBox(-1.5F, 2.0F, -1.5F, 3.0F, 8.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 18.0F, 0.0F));
+
+		PartDefinition stemLeefRoot = stem.addOrReplaceChild("stemLeefRoot", CubeListBuilder.create().texOffs(18, 37).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 4.0F, 0.0F, 0.0F, -0.7854F, 0.0F));
+
+		PartDefinition stemLeef = stemLeefRoot.addOrReplaceChild("stemLeef", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.0F, 0.5F, -2.0F, 1.3963F, 0.7854F, 0.0F));
+
+		PartDefinition stemLeef2 = stemLeefRoot.addOrReplaceChild("stemLeef2", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.0F, 0.5F, -2.0F, 1.3963F, -7.0686F, 0.0F));
+
+		PartDefinition stemLeef3 = stemLeefRoot.addOrReplaceChild("stemLeef3", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.0F, 0.5F, 2.0F, 1.3963F, -8.6394F, 0.0F));
+
+		PartDefinition stemLeef4 = stemLeefRoot.addOrReplaceChild("stemLeef4", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.0F, 0.5F, 2.0F, 1.3963F, -3.927F, 0.0F));
+
+		PartDefinition stemLeef5 = stemLeefRoot.addOrReplaceChild("stemLeef5", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.0F, 1.5F, 0.0F, 1.3963F, -4.7124F, 0.0F));
+
+		PartDefinition stemLeef6 = stemLeefRoot.addOrReplaceChild("stemLeef6", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.0F, 1.5F, 0.0F, 1.3963F, -7.854F, 0.0F));
+
+		PartDefinition stemLeef7 = stemLeefRoot.addOrReplaceChild("stemLeef7", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 1.5F, 2.0F, 1.3963F, -9.4248F, 0.0F));
+
+		PartDefinition stemLeef8 = stemLeefRoot.addOrReplaceChild("stemLeef8", CubeListBuilder.create().texOffs(6, 37).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 1.5F, -2.0F, 1.3963F, -6.2832F, 0.0F));
+
+		PartDefinition flowerRoot = stem.addOrReplaceChild("flowerRoot", CubeListBuilder.create().texOffs(10, 25).addBox(-5.0F, -1.0F, -5.0F, 10.0F, 2.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.0F, 0.0F));
+
+		PartDefinition flower = flowerRoot.addOrReplaceChild("flower", CubeListBuilder.create().texOffs(19, 6).addBox(-5.0F, -9.0F, -1.0F, 10.0F, 9.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, 5.0F, 0.1F, -9.4248F, 0.0F));
+
+		PartDefinition flower_part = flower.addOrReplaceChild("flower_part", CubeListBuilder.create().texOffs(20, 0).addBox(-5.0F, -6.0F, 0.0F, 10.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.0F, -0.5F, -0.6981F, 0.0F, 0.0F));
+
+		PartDefinition flower_part2 = flower.addOrReplaceChild("flower_part2", CubeListBuilder.create().texOffs(15, 6).addBox(3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower_part3 = flower.addOrReplaceChild("flower_part3", CubeListBuilder.create().texOffs(15, 6).addBox(-3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower2 = flowerRoot.addOrReplaceChild("flower2", CubeListBuilder.create().texOffs(19, 6).addBox(-5.0F, -9.0F, -1.0F, 10.0F, 9.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-5.0F, -1.0F, 0.0F, 0.1F, -4.7124F, 0.0F));
+
+		PartDefinition flower_part4 = flower2.addOrReplaceChild("flower_part4", CubeListBuilder.create().texOffs(20, 0).addBox(-5.0F, -6.0F, 0.0F, 10.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.0F, -0.5F, -0.6981F, 0.0F, 0.0F));
+
+		PartDefinition flower_part5 = flower2.addOrReplaceChild("flower_part5", CubeListBuilder.create().texOffs(15, 6).addBox(3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower_part6 = flower2.addOrReplaceChild("flower_part6", CubeListBuilder.create().texOffs(15, 6).addBox(-3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower3 = flowerRoot.addOrReplaceChild("flower3", CubeListBuilder.create().texOffs(19, 6).addBox(-5.0F, -9.0F, -1.0F, 10.0F, 9.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.0F, -1.0F, 0.0F, 0.1F, -7.854F, 0.0F));
+
+		PartDefinition flower_part7 = flower3.addOrReplaceChild("flower_part7", CubeListBuilder.create().texOffs(20, 0).addBox(-5.0F, -6.0F, 0.0F, 10.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.0F, -0.5F, -0.6981F, 0.0F, 0.0F));
+
+		PartDefinition flower_part8 = flower3.addOrReplaceChild("flower_part8", CubeListBuilder.create().texOffs(15, 6).addBox(3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower_part9 = flower3.addOrReplaceChild("flower_part9", CubeListBuilder.create().texOffs(15, 6).addBox(-3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower4 = flowerRoot.addOrReplaceChild("flower4", CubeListBuilder.create().texOffs(19, 6).addBox(-5.0F, -9.0F, -1.0F, 10.0F, 9.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, -5.0F, 0.1F, -6.2832F, 0.0F));
+
+		PartDefinition flower_part10 = flower4.addOrReplaceChild("flower_part10", CubeListBuilder.create().texOffs(20, 0).addBox(-5.0F, -6.0F, 0.0F, 10.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.0F, -0.5F, -0.6981F, 0.0F, 0.0F));
+
+		PartDefinition flower_part11 = flower4.addOrReplaceChild("flower_part11", CubeListBuilder.create().texOffs(15, 6).addBox(3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower_part12 = flower4.addOrReplaceChild("flower_part12", CubeListBuilder.create().texOffs(15, 6).addBox(-3.0F, -8.0F, 0.0F, 0.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition flower5 = flowerRoot.addOrReplaceChild("flower5", CubeListBuilder.create().texOffs(20, 6).addBox(0.0F, -3.0F, -5.0F, 0.0F, 2.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.7854F, 0.0F));
+
+		PartDefinition flower6 = flowerRoot.addOrReplaceChild("flower6", CubeListBuilder.create().texOffs(20, 6).addBox(0.0F, -3.0F, -5.0F, 0.0F, 2.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -0.7854F, 0.0F));
+
+		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
 
 	static CarrionSproutModel create() {
-		return new CarrionSproutModel(layer().bakeRoot());
+		return new CarrionSproutModel(createBodyLayer().bakeRoot());
 	}
 
-	private static LayerDefinition layer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition r = mesh.getRoot();
-		part(r, "stem", 0, 0, -1.5F, -8.0F, -1.5F, 3, 8, 3, 0.0F, 24.0F, 0.0F);
-		part(r, "bud", 12, 0, -2.0F, -3.0F, -2.0F, 4, 3, 4, 0.0F, 16.0F, 0.0F);
-		PartDefinition leaf_0 = part(r, "leaf_0", 28, 0, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_0, "tip_0", 46, 0, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		PartDefinition leaf_1 = part(r, "leaf_1", 0, 11, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_1, "tip_1", 18, 11, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		PartDefinition leaf_2 = part(r, "leaf_2", 0, 11, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_2, "tip_2", 18, 11, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		PartDefinition leaf_3 = part(r, "leaf_3", 0, 11, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_3, "tip_3", 18, 11, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		PartDefinition leaf_4 = part(r, "leaf_4", 0, 11, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_4, "tip_4", 18, 11, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		PartDefinition leaf_5 = part(r, "leaf_5", 0, 11, 0.0F, -0.5F, -1.5F, 6, 1, 3, 0.0F, 17.0F, 0.0F);
-		part(leaf_5, "tip_5", 18, 11, 0.0F, -0.5F, -1.0F, 4, 1, 2, 6.0F, 0.0F, 0.0F);
-		return LayerDefinition.create(mesh, 64, 32);
-	}
+
+	/** The trap's closing animation is scrubbed over this long (ms); the sway of the stem (radians). */
+	private static final float SNAP_MS = 250.0F, SWAY = 0.03F, TREMBLE = 0.04F;
 
 	@Override
 	public void setupAnim(AetherMonsterRenderer.State state) {
 		super.setupAnim(state);
 		float t = state.ageInTicks;
-		// asleep: leaves droop; armed: spread nearly flat and trembling; snapping: whipped shut
-		float spread = state.armed ? 0.1F + Mth.sin(t * 0.3F) * 0.04F : 0.9F;
-		float tip = state.armed ? 0.25F : 0.5F;
-		float snap = smooth(state.progress);
-		spread = Mth.lerp(snap, spread, -1.2F);
-		tip = Mth.lerp(snap, tip, -0.9F);
-		for (int i = 0; i < 6; i++) {
-			this.leaves[i].yRot = i * Mth.PI / 3.0F;
-			this.leaves[i].zRot = spread;
-			this.tips[i].zRot = tip;
+		this.stem.zRot = Mth.sin(t * 0.05F) * SWAY;
+		// armed, the flower trembles; snapping, the trap whips shut
+		if (state.armed) {
+			this.flowerRoot.yRot = Mth.sin(t * 0.3F) * TREMBLE;
 		}
-		this.bud.yRot = t * 0.02F;
-		this.root.zRot = Mth.sin(t * 0.05F) * 0.03F;
+		if (state.progress > 0.0F) {
+			this.trapActivateAnimation.apply((long)(state.progress * SNAP_MS), 1.0F);
+		}
 	}
 }
