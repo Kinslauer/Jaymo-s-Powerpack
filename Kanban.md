@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-14 02:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-14 03:07). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,6 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Agents/aether2-rest|aether2-rest]] · 💻 Odysseus · #1491 · in-review
 - [ ] [[Agents/clean-kills-skinning|clean-kills-skinning]] · 💻 Odysseus · #1486 · in-review
 - [ ] [[Agents/farmers-delight-picks|farmers-delight-picks]] · 💻 Odysseus · #1490 · in-review
 
