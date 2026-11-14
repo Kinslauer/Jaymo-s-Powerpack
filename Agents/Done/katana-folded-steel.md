@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Katana only from Mohknee's iron sand
 branch: claude/project-thread-3uhctt
 with: Andy
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 Folding a bloom gives a Folded Steel Ingot; the katana blade is hammered only from it. Powers compiled; not played, no server boot check.
+- 2026-11-14 07:49 PR #1503 is merged into master; moved to Agents/Done.
