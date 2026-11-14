@@ -114,6 +114,9 @@ public final class SpiritKey {
 			if (sneak) {
 				if (out) {
 					send(Spirits.NEXT, 0, true);
+				} else if (com.jaymoskingdoms.Reaper.has(player)) {
+					// (the Reaper's sneak moves: Harvest, Death's Company)
+					send(Spirits.SUMMON, 0, true);
 				}
 			} else if (!out) {
 				send(Spirits.SUMMON, 0, false);

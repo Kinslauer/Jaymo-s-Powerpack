@@ -101,7 +101,7 @@ public final class Classes {
 		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood", "wild"), RIDER,
 		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
 		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
-		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
+		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "reaper"),
 		TINKERER;
 
 		public final List<String> options;

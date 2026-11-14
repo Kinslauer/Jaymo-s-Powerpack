@@ -101,7 +101,7 @@ public final class BloodItemOverlay {
 
 	/** After {@code item}'s own layers are laid into {@code output}: its blood as one more, if it has any. */
 	public static void append(ItemStackRenderState output, ItemStack item, ItemDisplayContext context) {
-		if (context == ItemDisplayContext.GUI || Bloodied.blood(item) == null) {
+		if (context == ItemDisplayContext.GUI || BloodSettings.off() || Bloodied.blood(item) == null) {
 			return;
 		}
 		ItemStackRenderStateAccessor state = (ItemStackRenderStateAccessor) output;

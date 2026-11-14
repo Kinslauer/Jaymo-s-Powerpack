@@ -12,16 +12,21 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 
 /**
- * How much blood this player sees (a pick from Cruor's ideas): Light, Normal or Heavy, a button in Video Settings
+ * How much blood this player sees (a pick from Cruor's ideas): Off, Light, Normal or Heavy, a button in Video Settings
  * ({@code BloodVideoSettingsMixin}). It scales what the client draws: the drops a spray throws, how long pools and
  * lasting stains are drawn, and how many stains are drawn at once (the oldest go first). The server keeps its lasting
  * stains (tracking, blood magic) the same for everyone; only how this player sees them changes. The F3 screen
  * shows the setting and how much blood is out ({@code BloodDebugLineMixin}). Saved in {@code config/jaymospowers-blood.properties}.
+ * <p>
+ * Andy: "we can make a setting to turn all blood off". Off ({@link #off}) draws none of it for this player: no drops,
+ * pools, stains, prints or wall marks, no blood on bodies, corpses or what's held, no drips or flies, and none of
+ * Jaymo's Kitchen's chunks and insides of a body blown apart or eaten (it asks {@link #off} by name). The bodies
+ * themselves, and everything the server does with blood, stay as they are.
  */
 public final class BloodSettings {
 	/** The choices: the share of drops drawn, and of how long a passing pool lies. */
 	public enum Amount {
-		LIGHT(0.5F, 0.5F, 1500), NORMAL(1.0F, 1.0F, 3000), HEAVY(1.6F, 1.5F, 6000);
+		OFF(0.0F, 0.0F, 0), LIGHT(0.5F, 0.5F, 1500), NORMAL(1.0F, 1.0F, 3000), HEAVY(1.6F, 1.5F, 6000);
 
 		/** The share of drops drawn, the share of how long pools and stains are drawn, and the most stains drawn at once. */
 		public final float drops, life;
@@ -53,13 +58,18 @@ public final class BloodSettings {
 		return amount;
 	}
 
+	/** Whether this player has blood (and gore) turned off altogether. */
+	public static boolean off() {
+		return amount() == Amount.OFF;
+	}
+
 	public static void set(Amount to) {
 		amount = to;
 		loaded = true;
 		Properties props = new Properties();
 		props.setProperty(KEY, to.name());
 		try (OutputStream out = Files.newOutputStream(file())) {
-			props.store(out, "Jaymo's Powers: how much blood you see (LIGHT, NORMAL, HEAVY)");
+			props.store(out, "Jaymo's Powers: how much blood you see (OFF, LIGHT, NORMAL, HEAVY)");
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Couldn't save the blood setting", e);
 		}

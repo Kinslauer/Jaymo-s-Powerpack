@@ -169,6 +169,17 @@ public class GraveGhost extends PathfinderMob implements Acting {
 		return false;
 	}
 
+	/** The Reaper harvested it ({@link Reaper}): gone for good, with no thanks and nothing earned. */
+	void reaped(ServerLevel level) {
+		if (this.hasGrave) {
+			ServerLevel home = Factions.level(level.getServer());
+			List<Long> rested = new ArrayList<>(home.getAttachedOrElse(RESTED, List.of()));
+			rested.add(this.grave);
+			home.setAttached(RESTED, List.copyOf(rested));
+		}
+		this.fade(level);
+	}
+
 	/** It thins out and is gone (until tomorrow night, unless it was laid to rest). */
 	private void fade(ServerLevel level) {
 		level.sendParticles(Fx.mote(COLOR, 1.0F), this.getX(), this.getY() + 1.0, this.getZ(), 16, 0.25, 0.7, 0.25, 0.02);

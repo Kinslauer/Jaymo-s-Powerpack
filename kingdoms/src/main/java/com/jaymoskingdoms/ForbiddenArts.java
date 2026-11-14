@@ -60,7 +60,10 @@ public final class ForbiddenArts {
 
 	/** A forbidden cast by {@code player}: its corruption ({@code extra} on top), and the crime if a realm's people see it. */
 	static void cast(ServerPlayer player, ServerLevel level, boolean blood, int extra) {
-		PowersCompat.corrupt(player, (blood ? BLOOD_CORRUPTION : DEATH_CORRUPTION) + extra);
+		// (the Reaper's keeper is the Grue's already: his magic leaves no mark on them)
+		if (!Reaper.has(player)) {
+			PowersCompat.corrupt(player, (blood ? BLOOD_CORRUPTION : DEATH_CORRUPTION) + extra);
+		}
 		Theft.forbidden(player, level, player.blockPosition(), blood);
 		// (0.7.581) The Truth's followers who saw it turn on them
 		CastOut.forbiddenSeen(player, level);
