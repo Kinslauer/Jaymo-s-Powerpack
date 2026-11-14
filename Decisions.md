@@ -516,3 +516,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Improve butchering from Carcass Craft thread): Andy: "Can we do something similar to attract game animals?" Built as salt licks: Kitchen salt places as a 1-4 pile (SaltLickBlock) that deer, boar, cattle and horses come to; wary of standing players; rain washes it away. Salt was my pick of bait. PR #1486.
 - 2026-11-13 (Andy, portable-mods thread): approved the Lore.md paragraphs "The cloud skiffs" and "The floor of the sky woods"; merge PR #1491 and continue through the remaining patches.
 - 2026-11-14 (port thread): Continuum pieces to port first = Smeltery extras (Andy).
+- 2026-11-14 (port thread): Better With Mods hardcore tweaks = all three (tougher wood, harsher hunger, beds do not set spawn) (Andy).
