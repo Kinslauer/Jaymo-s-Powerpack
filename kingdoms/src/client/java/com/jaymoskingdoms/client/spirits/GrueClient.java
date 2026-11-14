@@ -45,6 +45,22 @@ public final class GrueClient {
 	private static float lash, lastLash;
 	/** (0.7.468) The trial's fog: now, last tick, where it's going and how much it moves a tick ({@link GrueTrial.Fog}). */
 	private static float fog, lastFog, fogTo, fogStep;
+	/** The Long Dark over this player: the game time it began and ends, and the ticks it takes to come and to go. */
+	private static long skyFrom, skyUntil;
+	static final float SKY_IN = 40.0F, SKY_OUT = 80.0F;
+
+	/** How far the Long Dark has the sky (0 none, 1 black): it comes in quickly and lifts slowly. */
+	public static float sky() {
+		net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+		if (level == null || skyUntil <= skyFrom) {
+			return 0.0F;
+		}
+		long now = level.getGameTime();
+		if (now >= skyUntil || now < skyFrom) {
+			return 0.0F;
+		}
+		return Mth.clamp(Math.min((now - skyFrom) / SKY_IN, (skyUntil - now) / SKY_OUT), 0.0F, 1.0F);
+	}
 
 	private GrueClient() {
 	}
@@ -70,12 +86,19 @@ public final class GrueClient {
 				player.setXRot(Mth.clamp(player.getXRot() + (player.getRandom().nextFloat() - 0.5F) * LASH_JOLT * payload.strength(), -90.0F, 90.0F));
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.spirits.GrueDark.Sky.TYPE, (payload, context) -> {
+			if (context.client().level != null) {
+				skyFrom = context.client().level.getGameTime();
+				skyUntil = skyFrom + payload.ticks();
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(GrueTrial.Fog.TYPE, (payload, context) -> {
 			fogTo = payload.to();
 			fogStep = Math.abs(fogTo - fog) / Math.max(1, payload.ticks());
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			fog = lastFog = fogTo = 0.0F;
+			skyFrom = skyUntil = 0L;
 			ticks = 0;
 			lash = lastLash = 0.0F;
 		});

@@ -71,6 +71,18 @@ public final class GrueDark {
 	public static final AttachmentType<Long> FED = AttachmentRegistry.create(JaymosKingdoms.id("grue_fed"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
+	/** Server → player: the Long Dark is over them for {@code ticks}: the sky goes black and the sun out. */
+	public record Sky(int ticks) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<Sky> TYPE = new Type<>(JaymosKingdoms.id("grue_sky"));
+		public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, Sky> CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Sky::ticks, Sky::new);
+
+		@Override
+		public Type<Sky> type() {
+			return TYPE;
+		}
+	}
+
 	/** Game time each keeper's Long Dark ends. */
 	private static final Map<UUID, Long> LONG_DARK = new HashMap<>();
 
@@ -84,6 +96,7 @@ public final class GrueDark {
 
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("grue fed attachment: {}", FED);
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(Sky.TYPE, Sky.CODEC);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LONG_DARK.clear());
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer killer && killer != entity) {
@@ -276,7 +289,12 @@ public final class GrueDark {
 		douse(level, player.blockPosition(), (int)LONG_DARK_REACH);
 		blind(level, player, LONG_DARK_REACH, LONG_DARK_TICKS, true);
 		for (ServerPlayer other : level.players()) {
-			if (other != player && other.distanceToSqr(player) <= LONG_DARK_REACH * LONG_DARK_REACH * 4.0) {
+			if (other.distanceToSqr(player) > LONG_DARK_REACH * LONG_DARK_REACH * 4.0) {
+				continue;
+			}
+			// the sky goes black over everyone there, the keeper too; only the others are left groping
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(other, new Sky(LONG_DARK_TICKS));
+			if (other != player) {
 				other.addEffect(new MobEffectInstance(MobEffects.DARKNESS, LONG_DARK_TICKS, 0, true, false, true));
 			}
 		}

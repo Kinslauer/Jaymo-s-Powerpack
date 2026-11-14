@@ -15,8 +15,11 @@ half (he chose "Grue only for now"); the five spirits are not touched.
     darkness for 5 s.
   - **Call Shades**: three of its shades fight for you for 30 s.
   - **The Long Dark** (only in Grue Form, every 5 minutes): for a minute the lights within 24 blocks are out, foes there are
-    blind and weak, other players within 48 are in darkness, and the dark counts as full for you.
+    blind and weak, other players within 48 are in darkness, and the dark counts as full for you. The sky itself goes black
+    for everyone within 48 blocks, you included (Andy: "why not?"): the fog turns black and swallows the sky and clouds, the
+    Sun goes out, and the land is seen to 64 blocks. It comes over 2 s and lifts over 4. Drawn through vanilla's fog and
+    sky, so a shader pack may draw its own sky over it.
   - In Grue Form, sneaking in a fall lets you down on its wings.
 - `/kingdom grue master <player>` and `/kingdom grue starve <player>` (operators) for testing, beside `hold` and `free`.
-- Lore.md has the paragraph "The Grue in the dark" under The dark, for Andy to approve.
+- Lore.md has the paragraph "The Grue in the dark" under The dark (Andy: "looks good").
 - Built with Gradle. Not played: where the body stands behind its keeper and its size at each stage are set by eye.
