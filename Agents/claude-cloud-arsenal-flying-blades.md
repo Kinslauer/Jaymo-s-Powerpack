@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-24g5gw
 with: 
-pr: 
+pr: 1520
 mods: powers
 versions: 
 started: 2026-11-14
