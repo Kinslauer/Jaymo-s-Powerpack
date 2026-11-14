@@ -1908,8 +1908,7 @@ which is the wrong way round for a people who say they have always built so, and
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
 
-(new) **The drowned courts** (Reaper's host thread, Moog's Ocean Structures, 2026-11-14; Claude's placement for Andy to
-approve). The sunken palace is the one court that still stands. The rest of what the Tideborn built under the water
+**The drowned courts** (Reaper's host thread, Moog's Ocean Structures; Andy approved, 2026-11-14). The sunken palace is the one court that still stands. The rest of what the Tideborn built under the water
 lies broken across the sea floors of the home continent: pale colonnades and tiered seats, small temples, shrines with
 a lamp of sea stone still lit, gardens gone wild. The Tideborn left them when they came up to the coves, and none of
 them will say why. The sea's guardians keep some. The Deep Mother's faithful row out over them on calm days and drop a
