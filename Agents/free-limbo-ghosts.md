@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Free limbo ghosts after being eaten
 branch: claude/project-thread-c686cq
 with: cloud thread
-pr: 
+pr: 1506
 mods: powers, kingdoms
 versions: 
 started: 2026-11-14

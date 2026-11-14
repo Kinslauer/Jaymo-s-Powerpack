@@ -657,7 +657,7 @@ blue and see-through, a hand off the ground, never far from the body. They touch
 voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
 standing over the body they are burying. (To be built once Limbo itself has merged.)
 
-**(new) The unbodied** (limbo thread; Andy, 2026-11-14: "i was eaten, therefore i had no way of respawning from that
+**The unbodied** (limbo thread; approved by Andy 2026-11-14: "i was eaten, therefore i had no way of respawning from that
 body. after that happens your limbo ghost should be freed to freecam or spectator roam. and haunt your friends until you
 backspace to give up"). It is the body that holds a waiting ghost in place. When nothing is left of it (eaten by beasts,
 burned, blown apart) nothing holds the ghost either: it wanders wherever it likes, seen and heard as before, touching
