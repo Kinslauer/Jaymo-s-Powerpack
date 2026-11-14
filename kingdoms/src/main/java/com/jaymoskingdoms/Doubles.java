@@ -41,9 +41,10 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Stolen lives. A shapeshifter takes a villager's place: the real one is carried off and buried alive, tied up, in a shallow
- * grave near the settlement (Andy: "so much so you can hear (see) their text through the ground and find them that way",
- * {@link #grave}), or shut in under a ruin, and a copy of them walks about the village in their place. The copy is good,
+ * Stolen lives. A shapeshifter takes a villager's place: the real one is carried off and kept tied up (buried alive in a
+ * shallow grave near the settlement, Andy: "so much so you can hear (see) their text through the ground and find them that
+ * way", {@link #grave}; or in a cellar dug near it, a dungeon, or shut in under a ruin), and a copy of them walks about the
+ * village in their place. The copy is good,
  * but it slips on small things: it names the wrong spouse and the wrong dog. The real one, freed, tells you the right ones
  * ({@link #plead}) and leads you home ({@link #leads}); you can catch the copy out (sneak and speak to it, once it has slipped
  * in your hearing), or let the two meet, and it drops its face for a {@link Shapeshifter}.
@@ -51,6 +52,8 @@ import org.jspecify.annotations.Nullable;
  * <p>The real one is a {@link Captives} captive, so freeing them, getting them home and the reward are that system's.
  */
 public final class Doubles {
+	/** A dungeon captive is a stolen life this often. */
+	static final float STOLEN_CHANCE = 0.15F;
 	/** A settlement loses no more than one of its own to a shapeshifter in this long (ticks: ten days). */
 	static final long TAKEN_GAP = 240000L;
 	/** One copy in this many is a Sylvan changeling under the face, not a shapeshifter (fixed by whose face it is). */
@@ -167,6 +170,13 @@ public final class Doubles {
 
 	// ---- stealing -----------------------------------------------------------------------------------------------
 
+	/** A fresh dungeon captive may be a stolen life. */
+	public static void maybeStolen(ServerLevel level, @Nullable Villager v) {
+		if (v != null && level.getRandom().nextFloat() < STOLEN_CHANCE) {
+			steal(level, v);
+		}
+	}
+
 	/** Whose life a shapeshifter can wear: an MCA villager's, never a plain one's (the copy is always one of MCA's people). */
 	public static boolean stealable(Villager v) {
 		return McaCompat.isMca(v);
@@ -267,6 +277,67 @@ public final class Doubles {
 		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
 			net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState()), v.getX(), v.getY() + 0.2, v.getZ(), 16, 0.3, 0.2, 0.3, 0.1);
+	}
+
+	/** How deep a cellar's floor lies, and half its width (blocks). */
+	static final int CELLAR_DEPTH = 8, CELLAR_HALF = 2;
+
+	/**
+	 * A cellar dug under the ground near a settlement, with a trapdoor in the turf and a ladder down: a stolen life is kept tied
+	 * up in it. True if it was dug.
+	 */
+	public static boolean cellar(ServerLevel level, BlockPos near) {
+		BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, near).below();
+		if (!level.getBlockState(top).isSolid() || !level.getFluidState(top.above()).isEmpty() || !level.getBlockState(top.above()).isAir()) {
+			return false;
+		}
+		BlockPos floor = top.below(CELLAR_DEPTH);
+		int h = CELLAR_HALF;
+		for (int dx = -h - 1; dx <= h + 1; dx++) {
+			for (int dz = -h - 1; dz <= h + 3 + 1; dz++) {
+				for (int dy = -1; dy <= 3; dy++) {
+					if (!level.getFluidState(floor.offset(dx, dy, dz)).isEmpty()) {
+						return false;
+					}
+				}
+			}
+		}
+		for (int dx = -h - 1; dx <= h + 1; dx++) {
+			for (int dz = -h - 1; dz <= h + 1; dz++) {
+				for (int dy = -1; dy <= 3; dy++) {
+					boolean wall = dx == -h - 1 || dx == h + 1 || dz == -h - 1 || dz == h + 1 || dy == -1 || dy == 3;
+					level.setBlock(floor.offset(dx, dy, dz), (wall ? (dy == -1 ? net.minecraft.world.level.block.Blocks.COBBLESTONE
+						: net.minecraft.world.level.block.Blocks.MOSSY_COBBLESTONE) : net.minecraft.world.level.block.Blocks.AIR).defaultBlockState(), 3);
+				}
+			}
+		}
+		// the shaft: up the south side, a ladder on its north-facing wall, to a trapdoor in the turf
+		int sx = floor.getX(), sz = floor.getZ() + h + 2;
+		for (int y = floor.getY(); y <= top.getY(); y++) {
+			level.setBlock(new BlockPos(sx, y, sz), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+		}
+		level.setBlock(new BlockPos(sx, floor.getY() + 1, floor.getZ() + h + 1), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+		level.setBlock(new BlockPos(sx, floor.getY(), floor.getZ() + h + 1), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+		for (int y = floor.getY(); y < top.getY(); y++) {
+			BlockPos behind = new BlockPos(sx, y, sz + 1);
+			if (!level.getBlockState(behind).isSolid()) {
+				level.setBlock(behind, net.minecraft.world.level.block.Blocks.COBBLESTONE.defaultBlockState(), 3);
+			}
+			level.setBlock(new BlockPos(sx, y, sz), net.minecraft.world.level.block.Blocks.LADDER.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.LadderBlock.FACING, net.minecraft.core.Direction.NORTH), 3);
+		}
+		level.setBlock(new BlockPos(sx, top.getY(), sz), net.minecraft.world.level.block.Blocks.OAK_TRAPDOOR.defaultBlockState(), 3);
+		BlockPos in = floor.above();
+		level.setBlock(in.offset(-h, 0, -h), net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState(), 3);
+		level.setBlock(in.offset(h, 0, -h), net.minecraft.world.level.block.Blocks.HAY_BLOCK.defaultBlockState(), 3);
+		level.setBlock(in.offset(0, 2, 0), net.minecraft.world.level.block.Blocks.LANTERN.defaultBlockState()
+			.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 3);
+		Villager captive = Captives.take(level, in.offset(0, 0, 1));
+		if (captive == null) {
+			return true;
+		}
+		steal(level, captive);
+		return true;
 	}
 
 	/** Villagers buried in a ruin or dungeon (found shut in under the ground) are the ones whose lives were stolen. */

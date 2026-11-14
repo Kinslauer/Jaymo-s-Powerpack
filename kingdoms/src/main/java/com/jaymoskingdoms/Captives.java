@@ -373,7 +373,7 @@ public final class Captives {
 			}
 			BlockPos spot = roomSpot(level, pos, random);
 			if (spot != null) {
-				take(level, spot);
+				Doubles.maybeStolen(level, take(level, spot));
 			}
 		}
 	}
