@@ -564,3 +564,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 ## 2026-11-14 (Rig style thread)
 - Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
+
+## 2026-11-14 (Shapeshifters and changelings thread)
+- Andy: "shapeshifters are awesome and that should also be how sylvan changelings function. but the shapeshifters and changelings should always copy an mca skin not the regular minecraft skin or anything else, and they should be far less common." Asked which he meant for changelings, he picked "Both": changeling players take an MCA villager's face, and some village impostors are changelings underneath.
