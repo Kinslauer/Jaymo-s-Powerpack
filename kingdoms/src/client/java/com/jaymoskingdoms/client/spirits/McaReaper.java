@@ -16,15 +16,23 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import com.mojang.math.Axis;
 
 /**
  * The Reaper's body: Minecraft Comes Alive's own Grim Reaper (Andy: "is MCA's reaper in? if so it should look like that"),
  * its model and its texture used where they are, in MCA's jar. Only {@link ReaperClient} touches this, and only when MCA is
  * loaded.
  * <p>
- * Its weapon (Andy: "do the execution with a random weapon but usually his scythe, same for when he kills ghosts"): MCA's
- * scythe, or one of ours in its place ({@link Reaper#GREATSWORD} and the rest), built of boxes on the same hand so MCA's own
- * poses swing it, and drawn with our own texture.
+ * Its weapon (Andy: "do the execution with a random weapon but usually his scythe, same for when he kills ghosts", then
+ * "use the real models please"): MCA's scythe, or one of the pack's own weapons in its place ({@link #ITEMS}: the real
+ * item, drawn in the same hand so MCA's own poses swing it). Where that item isn't in the game (Balkon's WeaponMod left
+ * out), a plain one built of boxes stands in.
  */
 final class McaReaper {
 	static final Identifier TEXTURE = Identifier.fromNamespaceAndPath("mca", "textures/entity/grimreaper.png");
@@ -34,6 +42,15 @@ final class McaReaper {
 	static final int REST = 0, DRAWN = 1, DOWN = 2;
 	/** The part of MCA's model the scythe is, on its left arm. */
 	private static final String SCYTHE = "scythe_handle";
+
+	/** The real weapons, by {@link Reaper#GREATSWORD} and the rest (the scythe is MCA's own). */
+	private static final String[] ITEMS = {null, "jaymospowers:iron_claymore", "weaponmod:battleaxe.iron", "weaponmod:warhammer.iron", "weaponmod:halberd.iron"};
+	/** How big each is drawn, and how far up from its grip end the hand holds it (in the item's own width). */
+	private static final float[] ITEM_SIZE = {0.0F, 1.7F, 1.6F, 1.6F, 2.1F}, ITEM_GRIP = {0.0F, 0.30F, 0.26F, 0.26F, 0.16F};
+	/** The weapon is drawn only once the figure is at least this solid (an item can't be drawn faint). */
+	private static final int ITEM_FROM_ALPHA = 110;
+	private static final ItemStack[] STACKS = new ItemStack[Reaper.WEAPONS];
+	private static final ItemStackRenderState ITEM = new ItemStackRenderState();
 
 	private static GrimReaperEntityModel model, bare;
 	private static final GrimReaperEntityModel[] ARMED = new GrimReaperEntityModel[Reaper.WEAPONS];
@@ -95,8 +112,36 @@ final class McaReaper {
 		state.attackState = scythe == DRAWN ? ReaperAttackState.PRE : scythe == DOWN ? ReaperAttackState.POST : ReaperAttackState.IDLE;
 		boolean own = weapon > Reaper.SCYTHE && weapon < Reaper.WEAPONS;
 		collector.order(order).submitModel(own ? bare : model, state, pose, RenderTypes.entityTranslucent(TEXTURE), 0xF000F0, OverlayTexture.NO_OVERLAY, argb, null, 0);
-		if (own) {
-			collector.order(order).submitModel(ARMED[weapon], state, pose, RenderTypes.entityTranslucent(WEAPONS), 0xF000F0, OverlayTexture.NO_OVERLAY, argb, null, 0);
+		if (!own) {
+			return;
 		}
+		ItemStack stack = stack(weapon);
+		if (stack.isEmpty()) {
+			collector.order(order).submitModel(ARMED[weapon], state, pose, RenderTypes.entityTranslucent(WEAPONS), 0xF000F0, OverlayTexture.NO_OVERLAY, argb, null, 0);
+		} else if (ARGB.alpha(argb) >= ITEM_FROM_ALPHA) {
+			// the hand's own place: the model posed as it will be drawn, then down its left arm to where the scythe sits
+			Minecraft minecraft = Minecraft.getInstance();
+			minecraft.getItemModelResolver().updateForTopItem(ITEM, stack, ItemDisplayContext.NONE, minecraft.level, null, weapon);
+			bare.setupAnim(state);
+			pose.pushPose();
+			bare.root().translateAndRotate(pose);
+			bare.leftArm.translateAndRotate(pose);
+			bare.leftArm.getChild(SCYTHE).translateAndRotate(pose);
+			pose.translate(0.5F / 16.0F, 0.0F, 0.5F / 16.0F);
+			// (a held item's picture runs grip to tip from its lower left to its upper right; the scythe's runs toward -y)
+			pose.rotateDegrees(Axis.ZP, 225.0F);
+			pose.scale(ITEM_SIZE[weapon], ITEM_SIZE[weapon], ITEM_SIZE[weapon]);
+			pose.translate(0.5F - ITEM_GRIP[weapon], 0.5F - ITEM_GRIP[weapon], 0.0F);
+			ITEM.submit(pose, collector, 0xF000F0, OverlayTexture.NO_OVERLAY, 0);
+			pose.popPose();
+		}
+	}
+
+	/** The real item for {@code weapon}, or an empty stack if it isn't in this game. */
+	private static ItemStack stack(int weapon) {
+		if (STACKS[weapon] == null) {
+			STACKS[weapon] = BuiltInRegistries.ITEM.getOptional(Identifier.parse(ITEMS[weapon])).map(ItemStack::new).orElse(ItemStack.EMPTY);
+		}
+		return STACKS[weapon];
 	}
 }
