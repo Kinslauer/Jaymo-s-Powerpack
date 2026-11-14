@@ -27,6 +27,6 @@
 - **Gutting** (Andy: "Yes i do"): after the skin and before the cuts, a hung carcass is gutted with a knife ("Gut it
   with a knife before the cuts"). Out comes **Offal** (new item: 1 from a small body, 2, or 4 from a big carcass), a
   raw meat (it can make you sick raw) that cooks into **Cooked Offal** on a campfire, in a furnace or a smoker. Icons
-  painted by `offal.py` in the thread's scratch (liver over a coil of gut). Carcasses already past skinning skip it.
+  painted in the manner of vanilla rotten flesh (a liver lobe on the slant, a loop of gut under it). Carcasses already past skinning skip it.
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.
