@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Katana only from Mohknee's iron sand
 branch: claude/project-thread-3uhctt
 with: Andy
-pr: 
+pr: 1503
 mods: powers, kingdoms
 versions: 
 started: 2026-11-14
@@ -23,3 +23,4 @@ owns:
 - Lore.md: "(new) The long blade", for Andy to approve.
 
 ## Done
+Folding a bloom gives a Folded Steel Ingot; the katana blade is hammered only from it. Powers compiled; not played, no server boot check.
