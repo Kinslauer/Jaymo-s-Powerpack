@@ -499,6 +499,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ArmourGrime.noticed(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle grimeSeenOf;
+	private static boolean lookedForGrimeSeen;
+
+	/**
+	 * The dirt others would notice on {@code body} by Jaymo's Powers (its armour and its own clothes): -1 none, 0 dusty,
+	 * 1 muddy, 2 filthy; -1 without Powers (or an older one).
+	 */
+	public static int grimeSeen(net.minecraft.world.entity.LivingEntity body) {
+		if (!lookedForGrimeSeen) {
+			lookedForGrimeSeen = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					grimeSeenOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wet.ArmourGrime"),
+						"noticed", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' grime on bodies (older Powers?)", e);
+				}
+			}
+		}
+		if (grimeSeenOf == null) {
+			return -1;
+		}
+		try {
+			return (int)grimeSeenOf.invoke(body);
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
 	/** Powers' {@code Bloodied.noticed(LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle bloodSeenOf;
 	private static boolean lookedForBloodSeen;

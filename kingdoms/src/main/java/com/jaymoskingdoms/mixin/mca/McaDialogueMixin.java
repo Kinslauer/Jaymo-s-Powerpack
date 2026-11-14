@@ -563,6 +563,8 @@ abstract class McaDialogueMixin {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
 			// (0.7.221) one who looks down on your blood warms to you slower
 			int taken = Prejudice.hearts(villager, player, gained) + com.jaymoskingdoms.Faiths.hearts(villager, player, gained);
+			// and one who sees mud on you warms to you slower
+			taken = Math.min(gained, taken + com.jaymoskingdoms.Stench.hearts(villager, player, gained));
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);
 				gained -= taken;

@@ -26,6 +26,12 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * their own coat, or bloodied armour or weapons) is remarked on before any smell, by everyone who sees it, one after
  * another, each once a while ({@link #BLOOD_COOLDOWN}): fresh blood alarms people, dried blood is
  * frowned at, rotten blood disgusts them. Goblins and orcs have their own lines.
+ * <p>
+ * Andy: "MCA should take note of their cleanliness and so will others". Dirt a player wears where people can see it
+ * (Powers' {@code ArmourGrime.noticed}: on their armour or their own clothes) is remarked on the same way, after blood
+ * and before smell: dust gets a word, mud a frown, a filthy, caked player a recoil; goblins and orcs approve. And the MCA
+ * folk warm to a muddy or filthy player slower ({@link #hearts}): a share of the hearts a chat, joke, story or flirt wins is lost.
+ * Keeping clean costs nothing and is never punished; only the dirt is.
  */
 public final class Stench {
 	/** How much further a keen nose and a person's notice you at the worst smell. */
@@ -43,10 +49,18 @@ public final class Stench {
 	static final int BLOOD_COOLDOWN = 6000, SAID_BLOOD_MAX = 2000;
 	static final String[] BLOOD_STAGES = {"fresh", "dried", "rotten"};
 	static final int BLOOD_LINES = 6, GREEN_BLOOD_LINES = 3;
+	/** Dirt on a player: remarked on like blood (each person once in this many ticks), lines per stage. */
+	static final int DIRT_COOLDOWN = 9600;
+	static final String[] DIRT_STAGES = {"dusty", "muddy", "filthy"};
+	static final int DIRT_LINES = 5, GREEN_DIRT_LINES = 3;
+	/** The share of hearts won that a muddy, and a filthy, player loses (people, not goblins or orcs). */
+	static final float MUDDY_HEARTS = 0.25F, FILTHY_HEARTS = 0.5F;
 
 	private static final Map<UUID, Long> LAST_REMARK = new HashMap<>();
 	/** When each person last remarked on each player's blood (key: speaker|player). */
 	private static final Map<String, Long> SAID_BLOOD = new HashMap<>();
+	/** And on their dirt. */
+	private static final Map<String, Long> SAID_DIRT = new HashMap<>();
 
 	private Stench() {
 	}
@@ -56,6 +70,7 @@ public final class Stench {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LAST_REMARK.clear();
 			SAID_BLOOD.clear();
+			SAID_DIRT.clear();
 		});
 	}
 
@@ -95,6 +110,12 @@ public final class Stench {
 				}
 				continue;
 			}
+			int dirt = PowersCompat.grimeSeen(player);
+			if (dirt >= 0 && remark(player, SAID_DIRT, DIRT_COOLDOWN, "speech.jaymoskingdoms.dirt." + DIRT_STAGES[Math.min(dirt, DIRT_STAGES.length - 1)],
+				DIRT_LINES, GREEN_DIRT_LINES, now)) {
+				LAST_REMARK.put(player.getUUID(), now);
+				continue;
+			}
 			if (since < REMARK_COOLDOWN || PowersCompat.smell(player) < REMARK || player.getRandom().nextFloat() >= REMARK_CHANCE) {
 				continue;
 			}
@@ -119,25 +140,49 @@ public final class Stench {
 	 * dried, 2 rotten): the nearest of them, so over a few checks everyone in sight has had their say.
 	 */
 	private static boolean remarkBlood(ServerPlayer player, int stage, long now) {
+		return remark(player, SAID_BLOOD, BLOOD_COOLDOWN, "speech.jaymoskingdoms.blood." + BLOOD_STAGES[stage], BLOOD_LINES, GREEN_BLOOD_LINES, now);
+	}
+
+	/**
+	 * The nearest person who can see {@code player} and hasn't said so within {@code cooldown} ticks ({@code said}) says one
+	 * of the lines {@code prefix}.0.. ({@code lines} of them; goblins and orcs {@code prefix}.green.0.., {@code green} of
+	 * them). False if nobody did.
+	 */
+	private static boolean remark(ServerPlayer player, Map<String, Long> said, int cooldown, String prefix, int lines, int green, long now) {
 		ServerLevel level = player.level();
 		UUID who = player.getUUID();
 		List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(REMARK_RANGE),
 			m -> (m instanceof Villager || m instanceof Npc) && m.isAlive() && !m.isBaby() && !m.isSleeping() && m.hasLineOfSight(player)
-				&& calm(m, player) && now - SAID_BLOOD.getOrDefault(pair(m.getUUID(), who), Long.MIN_VALUE / 2) >= BLOOD_COOLDOWN);
+				&& calm(m, player) && now - said.getOrDefault(pair(m.getUUID(), who), Long.MIN_VALUE / 2) >= cooldown);
 		if (near.isEmpty()) {
 			return false;
 		}
 		Mob speaker = near.stream().min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(player))).orElseThrow();
-		SAID_BLOOD.put(pair(speaker.getUUID(), who), now);
-		if (SAID_BLOOD.size() > SAID_BLOOD_MAX) {
-			SAID_BLOOD.values().removeIf(at -> now - at >= BLOOD_COOLDOWN);
+		said.put(pair(speaker.getUUID(), who), now);
+		if (said.size() > SAID_BLOOD_MAX) {
+			said.values().removeIf(at -> now - at >= cooldown);
 		}
-		Heritage.Kind kind = VillagerHeritage.of(speaker);
-		boolean green = kind == Heritage.Kind.GOBLIN || kind == Heritage.Kind.ORC;
-		String key = "speech.jaymoskingdoms.blood." + BLOOD_STAGES[stage] + (green ? ".green." + player.getRandom().nextInt(GREEN_BLOOD_LINES)
-			: "." + player.getRandom().nextInt(BLOOD_LINES));
+		String key = prefix + (green(speaker) ? ".green." + player.getRandom().nextInt(green) : "." + player.getRandom().nextInt(lines));
 		Speech.sayTo(level, speaker, player, Component.translatable(key), Speech.WHITE);
 		return true;
+	}
+
+	private static boolean green(Mob mob) {
+		Heritage.Kind kind = VillagerHeritage.of(mob);
+		return kind == Heritage.Kind.GOBLIN || kind == Heritage.Kind.ORC;
+	}
+
+	/**
+	 * Of {@code gained} hearts, how many {@code villager} takes back for the dirt they see on {@code player}: a share when
+	 * they're muddy ({@link #MUDDY_HEARTS}) or filthy ({@link #FILTHY_HEARTS}); none for dust, and none from goblins or orcs.
+	 */
+	public static int hearts(Mob villager, ServerPlayer player, int gained) {
+		if (gained <= 0 || green(villager)) {
+			return 0;
+		}
+		int dirt = PowersCompat.grimeSeen(player);
+		float share = dirt >= 2 ? FILTHY_HEARTS : dirt == 1 ? MUDDY_HEARTS : 0.0F;
+		return share <= 0.0F ? 0 : Math.max(1, Math.round(gained * share));
 	}
 
 	/**
