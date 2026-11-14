@@ -1,0 +1,25 @@
+---
+status: running
+task: Katana only from Mohknee's iron sand
+branch: claude/project-thread-3uhctt
+with: Andy
+pr: 
+mods: powers, kingdoms
+versions: 
+started: 2026-11-14
+owns:
+  - src/main/java/com/jaymospowers/tinkering/smithing/FoldedSteel.java
+---
+# Katana from folded steel
+
+**Task:** Andy: "the katana should only be craftable with iron sand, giving it a reason to go to mohknee."
+
+## Plan
+- Folding a bloom (Kingdoms `BlossomSteel`) gives a Folded Steel Ingot (Powers).
+- The katana blade is hammered only from hot folded steel (`WeaponParts.Scheme.FOLDED`, `FoldedSteel` check).
+
+## Notes
+- Nihon Blacksmithing: All Rights Reserved (Fabric 26.2, Forge 1.20.1). Idea only.
+- Lore.md: "(new) The long blade", for Andy to approve.
+
+## Done
