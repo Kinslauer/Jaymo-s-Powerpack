@@ -4749,3 +4749,14 @@ Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost
 - Armour wears to broken and stays (no protection until repaired); repair at the Tool Station with the plating's metal; swap parts there too. Armour takes no modifiers.
 - `ToolType` HELMET to BOOTS, `PartType` platings and MAILLE, `TinkerMaterial.Plating`, `ToolStats.armour`, `TinkerArmourItem`, `ArmourTraits`, `TinkerArmourTraitsMixin`; art from `tools/tinkering_armour_assets.py`.
 - Built and compile-checked; not played.
+
+## 0.23.65 (2026-11-14): Arsenal: blade riding (flying blades, patch 4) (#1520)
+
+- **Blade riding** (Arsenal, from the second ability on): tap Jump twice and a great blade comes up out of a rift under your feet and carries you. W flies it the way you look (up and down too), S brakes, A and D slide, Jump lifts, and with nothing pressed it hangs where it is. It carries you up to 40 blocks over the ground for 30 seconds, then needs 15 seconds before it comes again.
+- **Fight from it**: your hands stay free, so you swing, shoot and guard as on the ground, and the Attendant Blades come along and take their orders.
+- **Step off and send it**: tap Jump twice again. The blade flies on the way you look (at your lock-on target, if you have one) as one heavy hit, 10 damage, and you are let down gently (slow falling for a few seconds). The same gentle set-down when its time is up.
+- **Until mastered** (not every ability unlocked) the blade is not yours to keep: now and then it shudders for a second and a half, your view shakes, "The blade is slipping away", and it goes home early.
+- **Broken legs**: riding still works, but the blade wobbles, drags and sags with how bad the legs are.
+- Riders stand side-on like the earthboard's rider, with their arms left free. Under water the blade goes home.
+- Classes: `power/arsenal/ArsenalRide`, client `ArsenalRideClient`, `ArsenalRideRenderer`; small hooks in `GravityBoardPose`, `LimbMotion`, `FreefallPose`.
+- Compiled; not played.
