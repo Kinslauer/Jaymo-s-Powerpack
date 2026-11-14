@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * push you up, the feet come in under you, and you rise out of the crouch. In first person the view goes down (or up)
  * with the head instead of dropping in a few ticks.
  * <p>
- * Not for the downed (they fall, {@link CrawlPose}'s jolt), a slide ending prone (already low), a ledge climb, or water.
+ * Not for the downed (they fall, {@link CrawlPose}'s jolt), a slide ending prone (already low), a leap's dive (flat at once), a ledge climb, or water.
  */
 public final class ProneTransition {
 	/** Going down and getting up (ticks); both outlast vanilla's swim tilt easing (0.09 a tick), so it never shows. */
@@ -88,7 +88,7 @@ public final class ProneTransition {
 			boolean lying = lying(player);
 			boolean was = LYING.contains(id);
 			Float progress = progress(id, now);
-			if (lying && !was && ON_FEET.contains(id)) {
+			if (lying && !was && ON_FEET.contains(id) && !com.jaymospowers.freerun.moves.Leap.diving(player)) {
 				// down from the feet: a crawl that cuts a getting-up short goes on from how far up it got
 				float from = progress == null ? 0.0F : progress;
 				MOVES.put(id, new Move(now - from * DOWN_TICKS, true, LAST_EYE.getOrDefault(id, player.getEyeHeight(Pose.STANDING))));
@@ -111,7 +111,8 @@ public final class ProneTransition {
 			}
 			// on the feet: standing or crouched on dry land, not sliding (a slide that ends prone is low already)
 			Pose pose = player.getPose();
-			if ((pose == Pose.STANDING || pose == Pose.CROUCHING) && !player.hasAttached(Slide.SLIDING) && !player.isInWater()) {
+			if ((pose == Pose.STANDING || pose == Pose.CROUCHING) && !player.hasAttached(Slide.SLIDING) && !player.isInWater()
+				&& !com.jaymospowers.freerun.moves.Leap.diving(player)) {
 				ON_FEET.add(id);
 			} else {
 				ON_FEET.remove(id);

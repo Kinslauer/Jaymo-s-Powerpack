@@ -359,7 +359,11 @@ public final class Skills {
 		DISARM_RUSH(Pillar.STEALTH, 1, 2, 9, 15, 0, MUTILATE),
 		// a practised butcher (Kitchen's Hanging and CleanKill, through {@link KitchenCompat}): the first rank is the meat hook's
 		// work at all, each after it a skinning pull fewer, and the last saves what a rough death spoiled; last, so no ordinal moves
-		BUTCHERS_HAND(Pillar.SURVIVAL, 3, 1, 0, 3, 0, FORAGER);
+		BUTCHERS_HAND(Pillar.SURVIVAL, 3, 1, 0, 3, 0, FORAGER),
+		// the air roll (Jaymo's Powers' AirRoll): a Sprint press just after a sprint jump rolls you forward through the air. Its own perk
+		// beside Leap of Faith, on the empty middle column under Freerunner (a rank of Freerunner would put a distance move on the
+		// flip's perk); last, so no ordinal moves
+		AIR_ROLL(Pillar.STEALTH, 1, 1, 8, 5, 1, FREERUNNER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

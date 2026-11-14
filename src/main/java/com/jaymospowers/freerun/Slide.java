@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import com.jaymospowers.core.wounds.Giants;
+import com.jaymospowers.core.wounds.Tripped;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,10 +19,16 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.15.12) The slide, for everyone: in a fast run ({@link FastRun}), HOLD Sneak for {@link #HOLD_TICKS} ticks and you
@@ -36,6 +44,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * way it slid ({@code Crawl.SUPINE}).
  * <p>(0.21.36) Andy: "sprint slide should be activated after 1.5s of holding, it still activates too easy". The hold is
  * {@link #HOLD_TICKS} = 30 ticks, and through it you keep running at full pace ({@code FreerunClient.slideWindup}).
+ * <p>Slide tackle: a slide that runs into a mob ahead of you ({@link #tackle}, checked here on the server) knocks it away,
+ * over onto its back for anything built like a person ({@link Tripped#sweep}), and you lose your speed; a giant
+ * ({@link Giants#giant}) stops you dead and stays on its feet. Slopes: a slide that leaves the ground restarts its timer, so
+ * a hillside can be ridden down, gaining {@link #SLOPE_GAIN} a tick in the air. Water: a slide that reaches water skips off
+ * it and slides on, {@link #MAX_SKIPS} times at most ({@link #waterSkip}).
  */
 public final class Slide {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
@@ -57,6 +70,19 @@ public final class Slide {
 	public static final int SPRINT_GRACE_TICKS = 8;
 	/** Server: a slide not reported over ends this long past its length (ticks). */
 	static final int SLACK_TICKS = 10;
+	/** Slide tackle: the speed (blocks/tick) the slide must still have to knock anything over, how far ahead of the body a mob counts as hit (blocks), and how hard it is shoved. */
+	public static final double TACKLE_MIN_SPEED = 0.2, TACKLE_REACH = 0.7, TACKLE_SHOVE = 0.9;
+	/** How long (ticks) a mob that is swept off its feet by a tackle lies there. */
+	public static final int TACKLE_TRIP_TICKS = 50;
+	/** Slope: speed (blocks/tick) a slide gains for each tick it is in the air above ground below; how far below the feet (blocks) ground still counts as a slope rather than a drop. */
+	public static final double SLOPE_GAIN = 0.04, SLOPE_DROP = 1.25;
+	/** Server: a slide may be airborne this many ticks in a row (a slope's hops) before it ends. */
+	static final int MAX_AIR_TICKS = 20;
+	/** Water skip: skips a slide gets, the speed (blocks/tick) it needs to skip at all, what share of speed a skip keeps, and the hop up (blocks/tick). */
+	public static final int MAX_SKIPS = 2;
+	public static final double SKIP_MIN_SPEED = 0.25, SKIP_KEEP = 0.85, SKIP_UP = 0.3;
+	/** A slide may be in water this many ticks (the skip's own) before the water takes it. */
+	public static final int WET_GRACE_TICKS = 3;
 	// ================================================================================================================
 
 	/** On a sliding player (synced to everyone): the 1-block pose. */
@@ -72,6 +98,8 @@ public final class Slide {
 	/** (0.18.85) When each player last sprinted on the ground (game time). */
 	private static final Map<UUID, Long> SPRINTED = new HashMap<>();
 	private static final Map<UUID, Long> ENDED = new HashMap<>();
+	/** Server: skips made, ticks in the air in a row and ticks in water in a row, in the slide under way. */
+	private static final Map<UUID, Integer> SKIPS = new HashMap<>(), AIR = new HashMap<>(), WET = new HashMap<>();
 
 	private Slide() {
 	}
@@ -82,11 +110,15 @@ public final class Slide {
 			TICKS_SO_FAR.remove(handler.player.getUUID());
 			ENDED.remove(handler.player.getUUID());
 			SPRINTED.remove(handler.player.getUUID());
+			forgetSlide(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			TICKS_SO_FAR.clear();
 			ENDED.clear();
 			SPRINTED.clear();
+			SKIPS.clear();
+			AIR.clear();
+			WET.clear();
 		});
 	}
 
@@ -116,7 +148,20 @@ public final class Slide {
 			&& !justEnded(player, COOLDOWN - 1);
 	}
 
+	private static void forgetSlide(UUID id) {
+		SKIPS.remove(id);
+		AIR.remove(id);
+		WET.remove(id);
+	}
+
+	/** Server: whether {@code player}, sprinting on the ground within the last {@code ticks} ticks, may still be counted as running. */
+	public static boolean sprintedWithin(ServerPlayer player, int ticks) {
+		Long at = SPRINTED.get(player.getUUID());
+		return at != null && player.level().getGameTime() - at <= ticks;
+	}
+
 	static void start(ServerPlayer player) {
+		forgetSlide(player.getUUID());
 		TICKS_SO_FAR.put(player.getUUID(), 0);
 		if (FastRun.active(player)) {
 			player.setAttached(BELLY, true);
@@ -133,8 +178,75 @@ public final class Slide {
 		if (TICKS_SO_FAR.remove(player.getUUID()) != null) {
 			ENDED.put(player.getUUID(), player.level().getGameTime());
 		}
+		forgetSlide(player.getUUID());
 		player.removeAttached(SLIDING);
 		player.removeAttached(BELLY);
+	}
+
+	/**
+	 * Server: a mob ahead of the slide (within {@link #TACKLE_REACH} of the body along the way it moves), the slide still fast
+	 * enough ({@link #TACKLE_MIN_SPEED}): a giant stops the slide dead and shrugs; anything else is shoved away and, if built like a
+	 * person, swept onto its back ({@link Tripped#sweep}); the slide ends and the speed with it. Players, pets of the slider
+	 * and the downed are left alone.
+	 */
+	private static void tackle(ServerPlayer player) {
+		Vec3 motion = player.getKnownMovement();
+		double speed = Math.sqrt(motion.x * motion.x + motion.z * motion.z);
+		if (speed < TACKLE_MIN_SPEED || !player.onGround()) {
+			return;
+		}
+		Vec3 dir = new Vec3(motion.x / speed, 0.0, motion.z / speed);
+		AABB reach = player.getBoundingBox().expandTowards(dir.x * TACKLE_REACH, 0.0, dir.z * TACKLE_REACH).inflate(0.1, 0.0, 0.1);
+		LivingEntity hit = null;
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, reach)) {
+			if (!mob.isAlive() || com.jaymospowers.core.wounds.Downed.isDowned(mob) || mob.isPassenger() || mob.isVehicle() || mob instanceof OwnableEntity owned && owned.getOwner() == player) {
+				continue;
+			}
+			Vec3 to = mob.position().subtract(player.position());
+			if (to.x * dir.x + to.z * dir.z > -0.1) {
+				hit = mob;
+				break;
+			}
+		}
+		if (hit == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (Giants.giant(hit)) {
+			level.playSound(null, hit.getX(), hit.getY(), hit.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 1.0F, 0.6F);
+		} else {
+			hit.knockback(TACKLE_SHOVE, -dir.x, -dir.z, player.damageSources().playerAttack(player), 0.0F);
+			Tripped.sweep(hit, TACKLE_TRIP_TICKS);
+			level.playSound(null, hit.getX(), hit.getY(), hit.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.9F);
+		}
+		level.sendParticles(ParticleTypes.POOF, hit.getX(), hit.getY() + 0.3, hit.getZ(), 6, 0.3, 0.1, 0.3, 0.03);
+		// the speed is gone: the client's slide stops moving the body once the flag is off, and its motion is zeroed
+		player.connection.send(new ClientboundSetEntityMotionPacket(player.getId(), new Vec3(0.0, player.getKnownMovement().y, 0.0)));
+		player.addTag(Freerun.XP_TAG);
+		end(player);
+	}
+
+	/**
+	 * Server, from the client's {@code RunMoves.WATER_SKIP}: a slide that reached water bounces off the surface and slides on
+	 * ({@link #MAX_SKIPS} at most, each restarting the timer), with a splash and a skipping sound. False if it can't (not
+	 * sliding, no water at the feet, or out of skips).
+	 */
+	public static boolean waterSkip(ServerPlayer player) {
+		if (!sliding(player) || !TICKS_SO_FAR.containsKey(player.getUUID()) || SKIPS.getOrDefault(player.getUUID(), 0) >= MAX_SKIPS) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		if (!level.containsAnyLiquid(player.getBoundingBox().inflate(0.0, 0.3, 0.0))) {
+			return false;
+		}
+		SKIPS.merge(player.getUUID(), 1, Integer::sum);
+		TICKS_SO_FAR.put(player.getUUID(), 0);
+		WET.remove(player.getUUID());
+		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 16, 0.3, 0.05, 0.3, 0.2);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SPLASH, SoundSource.PLAYERS, 0.7F, 1.2F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.PLAYERS, 0.6F, 1.5F);
+		player.addTag(Freerun.XP_TAG);
+		return true;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -150,11 +262,26 @@ public final class Slide {
 				}
 				continue;
 			}
-			if (!player.isAlive() || ticks > TICKS + SLACK_TICKS || !Freerun.canMove(player)) {
+			// water only holds a slide for the skip's own few ticks (canMove rules water out)
+			int wet = player.isInWater() && !player.isInLava() ? WET.merge(player.getUUID(), 1, Integer::sum) : 0;
+			if (wet == 0) {
+				WET.remove(player.getUUID());
+			}
+			boolean skimming = wet > 0 && wet <= WET_GRACE_TICKS;
+			// a slide in the air (a slope's hops, a skip) goes on; the client ends it when the ground is too far below
+			int air = player.onGround() ? 0 : AIR.merge(player.getUUID(), 1, Integer::sum);
+			if (air == 0) {
+				AIR.remove(player.getUUID());
+			}
+			if (!player.isAlive() || ticks > TICKS + SLACK_TICKS || air > MAX_AIR_TICKS || !Freerun.canMove(player) && !skimming) {
 				end(player);
 				continue;
 			}
-			TICKS_SO_FAR.put(player.getUUID(), ticks + 1);
+			TICKS_SO_FAR.put(player.getUUID(), air > 0 ? 0 : ticks + 1);
+			tackle(player);
+			if (!TICKS_SO_FAR.containsKey(player.getUUID())) {
+				continue;
+			}
 			if (ticks % 2 == 0 && player.onGround()) {
 				ServerLevel level = player.level();
 				BlockState state = level.getBlockState(BlockPos.containing(player.getX(), player.getY() - 0.05, player.getZ()));

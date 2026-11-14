@@ -4,15 +4,19 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.freerun.AirFlipClient;
 import com.jaymospowers.client.freerun.FreerunClient;
 import com.jaymospowers.freerun.FastRun;
+import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.freerun.LandingRoll;
+import com.jaymospowers.freerun.moves.AirRoll;
 import com.jaymospowers.freerun.moves.ChargeJump;
 import com.jaymospowers.freerun.moves.FastSwim;
 import com.jaymospowers.freerun.moves.Hiding;
+import com.jaymospowers.freerun.moves.Leap;
 import com.jaymospowers.freerun.moves.LongJump;
 import com.jaymospowers.freerun.gear.TraceurBoots;
 import com.jaymospowers.freerun.moves.RunMoves;
 import com.jaymospowers.freerun.moves.SkyDive;
 import com.jaymospowers.freerun.moves.TrickJump;
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.stamina.Feathers;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -37,6 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * came right after a tap (the zoom's double tap); Web keeps its own.</li>
  * <li>Sky dive: Jump in a long fall, and only if a moment later you're still plainly falling (nothing else took it).</li>
  * <li>Safety tap: {@code DodgeClient} asks {@link #safetyTap} before rolling.</li>
+ * <li>Leap into prone: the Crawl key pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint jump ({@code CrawlTaps} asks {@link #leap} first).</li>
+ * <li>Air roll: a fresh Sprint press within {@link AirRoll#WINDOW_TICKS} of a sprint jump, with the Air Roll perk.</li>
  * </ul>
  */
 public final class RunMovesClient {
@@ -47,7 +53,10 @@ public final class RunMovesClient {
 	/** The charge bar over the Feathers row: its colour (ARGB). */
 	static final int CHARGE_COLOUR = 0x70FFFFFF;
 
-	private static boolean sneakWas, jumpWas, wasOnGround;
+	private static boolean sneakWas, jumpWas, sprintWas, wasOnGround;
+	/** Client tick of the last jump out of a sprint, and whether this run of air's leap and air roll are spent. */
+	private static long sprintJumpAt = Long.MIN_VALUE / 2;
+	private static boolean leapt, airRolled;
 	/** Ticks the current Sneak press has been held; client tick of the last press and of the last release. */
 	private static int sneakHeld;
 	private static long pressedAt = Long.MIN_VALUE / 2, releasedAt = Long.MIN_VALUE / 2;
@@ -97,7 +106,8 @@ public final class RunMovesClient {
 		boolean screen = minecraft.gui.screen() != null;
 		boolean sneak = !screen && minecraft.options.keyShift.isDown();
 		boolean jump = !screen && minecraft.options.keyJump.isDown();
-		boolean sneakPressed = sneak && !sneakWas, jumpPressed = jump && !jumpWas;
+		boolean sprint = !screen && minecraft.options.keySprint.isDown();
+		boolean sneakPressed = sneak && !sneakWas, jumpPressed = jump && !jumpWas, sprintPressed = sprint && !sprintWas;
 		if (sneakPressed) {
 			doubleTap = now - releasedAt <= DOUBLE_TAP_TICKS && releasedAt - pressedAt <= TAP_HOLD_TICKS;
 			pressedAt = now;
@@ -116,7 +126,12 @@ public final class RunMovesClient {
 			if (jumped) {
 				jumpedAt = now;
 				longJumped = false;
+				sprintJumpAt = player.isSprinting() || FastRun.active(player) ? now : Long.MIN_VALUE / 2;
+				leapt = airRolled = false;
 				tickJumped(player, now);
+			}
+			if (sprintPressed && !onGround && !airRolled && now - sprintJumpAt <= AirRoll.WINDOW_TICKS) {
+				airRoll(player);
 			}
 			if (!onGround && !longJumped && sneakPressed && now - jumpedAt <= LongJump.TAP_AFTER) {
 				longJump(player);
@@ -149,6 +164,7 @@ public final class RunMovesClient {
 		}
 		sneakWas = sneak;
 		jumpWas = jump;
+		sprintWas = sprint;
 		wasOnGround = onGround;
 	}
 
@@ -172,6 +188,47 @@ public final class RunMovesClient {
 			trickKind = player.getRandom().nextFloat() < TrickJump.BACK_SHARE ? WebPose.BACK_FLIP : WebPose.FRONT_FLIP;
 			trickAt = now + Math.max(TrickJump.DELAY_TICKS, LongJump.TAP_AFTER + 1);
 		}
+	}
+
+	/** A fresh Sprint press just after a sprint jump, perk learnt, feathers to spare: a roll forward through the air with a real push the way you face. */
+	private static void airRoll(LocalPlayer player) {
+		if (!AirRoll.allowed(player) || !Feathers.canSpend(player, AirRoll.COST) || FreerunClient.active() || !Freerun.canMove(player)
+			|| player.isSpectator() || player.isInWater()) {
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double speed = Mth.clamp(v.horizontalDistance() * AirRoll.BOOST + AirRoll.ADD, AirRoll.MIN_SPEED, AirRoll.MAX_SPEED);
+		player.setDeltaMovement(-Mth.sin(yaw) * speed, v.y + AirRoll.LIFT, Mth.cos(yaw) * speed);
+		airRolled = true;
+		keepSprint = 10;
+		AirFlipClient.cancelTap();
+		send(RunMoves.AIR_ROLL, 0L);
+	}
+
+	/**
+	 * From {@code CrawlTaps}, before the Crawl key toggles prone: pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint
+	 * jump, it dives you forward onto your belly with a burst, flat enough for a gap a block and a half high, and you land
+	 * prone. True if it was (the press is spent).
+	 */
+	public static boolean leap(LocalPlayer player) {
+		long now = player.tickCount;
+		if (player.onGround() || leapt || now - sprintJumpAt > Leap.WINDOW_TICKS || FreerunClient.active() || !Freerun.canMove(player)
+			|| !Crawl.canCrawl(player) || !Feathers.canSpend(player, Leap.COST)) {
+			return false;
+		}
+		Vec3 v = player.getDeltaMovement();
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double speed = Mth.clamp(v.horizontalDistance() * Leap.BOOST, Leap.MIN_SPEED, Leap.MAX_SPEED);
+		player.setDeltaMovement(-Mth.sin(yaw) * speed, Math.min(v.y, Leap.UP_CAP), Mth.cos(yaw) * speed);
+		leapt = true;
+		longJumped = true;
+		trickAt = -1L;
+		Leap.localId = player.getId();
+		Leap.localAt = player.level().getGameTime();
+		com.jaymospowers.client.CrawlTaps.goProne(player, false);
+		send(RunMoves.LEAP, 0L);
+		return true;
 	}
 
 	/** Out of a fast run: sail out long and flat the way you face. */
@@ -339,7 +396,8 @@ public final class RunMovesClient {
 	}
 
 	private static void reset() {
-		sneakWas = jumpWas = wasOnGround = false;
+		sneakWas = jumpWas = sprintWas = wasOnGround = leapt = airRolled = false;
+		sprintJumpAt = Long.MIN_VALUE / 2;
 		sneakHeld = charge = skyCheck = hideTicks = keepSprint = 0;
 		skyDiving = longJumped = doubleTap = false;
 		trickAt = -1L;

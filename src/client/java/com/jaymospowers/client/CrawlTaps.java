@@ -95,6 +95,10 @@ public final class CrawlTaps {
 		while (crawlKey.consumeClick()) {
 			keyPressed = free;
 		}
+		if (keyPressed && !crawling && com.jaymospowers.client.freerun.moves.RunMovesClient.leap(player)) {
+			// just after a sprint jump, in the air: the press is the leap into prone's, not the crawl's toggle
+			keyPressed = false;
+		}
 		if (ProneHaulClient.active()) {
 			// hauling up a block (ProneHaul): no getting up, turning over or rolling till it's done
 			jumpWasDown = jump;
