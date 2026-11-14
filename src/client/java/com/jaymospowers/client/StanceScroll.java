@@ -59,6 +59,12 @@ public final class StanceScroll {
 			scrolledThisPress = true;
 			return true;
 		}
+		// a notch down in the air just after a sprint jump is the leap into prone (RunMovesClient#leap), as the Crawl key is
+		if (amount < 0.0 && !player.onGround() && com.jaymospowers.client.freerun.moves.RunMovesClient.leap(player)) {
+			scrolledThisPress = true;
+			wheel = 0.0;
+			return true;
+		}
 		if (!able(player)) {
 			return false;
 		}

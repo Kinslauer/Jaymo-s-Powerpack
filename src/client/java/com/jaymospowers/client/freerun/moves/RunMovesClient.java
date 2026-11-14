@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
  * came right after a tap (the zoom's double tap); Web keeps its own.</li>
  * <li>Sky dive: Jump in a long fall, and only if a moment later you're still plainly falling (nothing else took it).</li>
  * <li>Safety tap: {@code DodgeClient} asks {@link #safetyTap} before rolling.</li>
- * <li>Leap into prone: the Crawl key pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint jump ({@code CrawlTaps} asks {@link #leap} first).</li>
+ * <li>Leap into prone: the Crawl key, or Sneak + a scroll down, in the air within {@link Leap#WINDOW_TICKS} of a sprint jump ({@code CrawlTaps} and {@code StanceScroll} ask {@link #leap} first).</li>
  * <li>Air roll: a fresh Sprint press within {@link AirRoll#WINDOW_TICKS} of a sprint jump, with the Air Roll perk.</li>
  * </ul>
  */
@@ -207,7 +207,7 @@ public final class RunMovesClient {
 	}
 
 	/**
-	 * From {@code CrawlTaps}, before the Crawl key toggles prone: pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint
+	 * From {@code CrawlTaps}, before the Crawl key toggles prone, and {@code StanceScroll} (Sneak + a scroll down): pressed in the air within {@link Leap#WINDOW_TICKS} of a sprint
 	 * jump, it dives you forward onto your belly with a burst, flat enough for a gap a block and a half high, and you land
 	 * prone. True if it was (the press is spent).
 	 */
