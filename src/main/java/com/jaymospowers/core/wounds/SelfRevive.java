@@ -79,7 +79,9 @@ public final class SelfRevive {
 
 	/** Whether {@code player} could rise by eating now: down, awake, knows Second Wind, and a day since the last time. Both sides. */
 	public static boolean ready(Player player) {
-		if (!Downed.isDowned(player) || Downed.passedOut(player) || player.hasAttached(Downed.KNOCKED) || MedicineSkill.rank(player, PERK) <= 0) {
+		if (!Downed.isDowned(player) || Downed.passedOut(player) || player.hasAttached(Downed.KNOCKED) || MedicineSkill.rank(player, PERK) <= 0
+			// (Andy, 2026-11-14) cut in two: no food gets them up (server side)
+			|| com.jaymospowers.core.Dismember.halved(player)) {
 			return false;
 		}
 		Long last = player.getAttached(LAST);
@@ -169,10 +171,11 @@ public final class SelfRevive {
 			HoldProgress.forget(player.getUUID(), job(player));
 			stack.consume(1, player);
 			player.setAttached(LAST, now);
+			String revived = Downed.feet(player, "message.jaymospowers.downed.self_revived");
 			Downed.getUp(level, player);
 			MedicineSkill.broughtRound(player, player);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.6F, 1.0F);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.self_revived").withStyle(ChatFormatting.GREEN));
+			player.sendOverlayMessage(Component.translatable(revived).withStyle(ChatFormatting.GREEN));
 		}
 	}
 }

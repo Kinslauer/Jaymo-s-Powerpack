@@ -1,0 +1,14 @@
+{
+  "message.jaymospowers.downed.give_up_halved": "Cut in two. Drag yourself while you can, or hold sneak to give up [%s]",
+  "message.jaymospowers.downed.give_up_hurt_crawl": "%s too hurt to pull yourself together, and nothing to stand on. Hold sneak to give up [%s]",
+  "message.jaymospowers.downed.rise_hint_crawl": "You're down, with nothing to stand on. Hold sneak to pull yourself together",
+  "message.jaymospowers.downed.rising_crawl": "Hauling yourself up on your arms... [%s]",
+  "message.jaymospowers.downed.risen_crawl": "You pull yourself together. With nothing to stand on, you crawl on.",
+  "message.jaymospowers.downed.up_crawl": "You've come round. With nothing to stand on, you crawl on.",
+  "message.jaymospowers.downed.revived_crawl": "%s has come round, though they've nothing to stand on (your %s went to them).",
+  "message.jaymospowers.downed.heal_struggling_crawl": "Pulling yourself together... [%s]",
+  "message.jaymospowers.downed.heal_struggled_crawl": "With the %s, you pull yourself together. With nothing to stand on, you crawl on.",
+  "message.jaymospowers.downed.self_revived_crawl": "Second Wind! You find the strength to carry on, crawling.",
+  "message.jaymospowers.downed.bed_ready_crawl": "Rested enough: hold sneak to pull yourself together, or lie on and keep mending.",
+  "message.jaymospowers.downed.fire_rise_crawl": "Warmed through by the fire. Hold sneak to pull yourself together"
+}
