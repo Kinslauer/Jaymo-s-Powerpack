@@ -98,7 +98,9 @@ import org.jspecify.annotations.Nullable;
  * Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming a bullet". A speedster's
  * rock ({@code ChronoRapid#quickens}) is a {@link #quicken quickened} one: it flies flat and fast, hits for what the
  * speedster says, shrugged off by nobody, leaves a streak behind it, and always shatters ({@link #QUICK_SPECKS} specks,
- * a crack {@link #QUICK_CRACK} deep).
+ * a crack {@link #QUICK_CRACK} deep). Andy: "only chrono has to charge, and it lessens w/ mastery": in Velox's Velocity
+ * the rock goes at once ({@link #instant}); an overclocked Chrono's charge is shorter with every ability learned and
+ * every Mastery rank ({@link #charge(Player, int)}).
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -271,6 +273,16 @@ public final class ThrownRocks {
 		return CHARGE - MOMENTUM_STEP * Math.clamp(momentum, 0, MOMENTUM_MAX);
 	}
 
+	/** As {@link #charge(int)} for {@code player}: an overclocked Chrono's is shorter the more it has mastered ({@code ChronoRapid#rockCharge}). */
+	public static int charge(Player player, int momentum) {
+		return ChronoRapid.rockCharge(player, charge(momentum));
+	}
+
+	/** Whether {@code player}'s rock goes the moment use is pressed, with no charge: a gravity user's, and one thrown in Velox's Velocity. */
+	public static boolean instant(Player player) {
+		return gravity(player) || ChronoRapid.instantRock(player);
+	}
+
 	/**
 	 * (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1; (0.20.103) the momentum it
 	 * began with, how long its charge takes, and when its client last spoke.
@@ -290,7 +302,7 @@ public final class ThrownRocks {
 			this.heard = now;
 			this.id = id;
 			this.momentum = momentum;
-			this.charge = ThrownRocks.charge(momentum);
+			this.charge = ThrownRocks.charge(player, momentum);
 		}
 	}
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
@@ -361,8 +373,8 @@ public final class ThrownRocks {
 			int left = momentum == null ? 0 : momentum(Math.toIntExact(momentum[0]), momentum[1], now);
 			hold = new Hold(player, now, holds, left);
 			WINDING.put(player.getUUID(), hold);
-			if (gravity(player)) {
-				// (0.21.8) a gravity user's rock goes at once, and flies harder
+			if (instant(player)) {
+				// (0.21.8) a gravity user's rock goes at once, and flies harder (in Velocity: at once, quickened)
 				hold.thrown = now;
 				player.setAttached(THROW, value(hold.id, hold.charge, THROWING));
 				player.getCooldowns().addCooldown(stack, COOLDOWN);

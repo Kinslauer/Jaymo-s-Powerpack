@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.ground.ThrownRocks;
 import io.netty.buffer.ByteBuf;
@@ -68,6 +69,11 @@ public final class ChronoRapid {
 	public static final int ROCK_LIFE = 40;
 	static final int ROCK_COLOR = 0xFFD070, ROCK_STREAK_TICKS = 8;
 	static final float ROCK_STREAK = 0.05F;
+	/**
+	 * An overclocked Chrono's rock charge: this many ticks shorter for each ability learned and each Mastery rank (0 to
+	 * 9 in all: 1.5 s with nothing learned, 0.15 s at Paragon), never under {@link #ROCK_CHARGE_MIN}. Velox never charges.
+	 */
+	static final int ROCK_CHARGE_STEP = 3, ROCK_CHARGE_MIN = 3;
 	/** A held shot is let go after this many ticks, and if you stop being a speedster. */
 	static final int HOLD_TICKS = 100;
 	/** Weapon snatch: reach, the speed you need (blocks a tick), the wait between snatches. */
@@ -230,6 +236,23 @@ public final class ChronoRapid {
 	/** Whether a rock {@code player} throws goes quickened: any speedster, overclocked. */
 	public static boolean quickens(Player player) {
 		return ChronoSpeed.overclocked(player);
+	}
+
+	/** A rock thrown in Velox's Velocity goes at once, with no charge (Andy: "only chrono has to charge"). On either side. */
+	public static boolean instantRock(Player player) {
+		return ChronoSpeed.velocity(player);
+	}
+
+	/**
+	 * The charge (ticks) of {@code player}'s rock, {@code charge} for anyone else: an overclocked Chrono's "lessens w/
+	 * mastery" (Andy), by {@link #ROCK_CHARGE_STEP} for each ability learned and each Mastery rank. On either side.
+	 */
+	public static int rockCharge(Player player, int charge) {
+		if (!quickens(player) || ChronoSpeed.velocity(player)) {
+			return charge;
+		}
+		int mastery = Mastery.unlocked(player) + Mastery.rank(player);
+		return Math.max(Math.min(charge, ROCK_CHARGE_MIN), charge - ROCK_CHARGE_STEP * mastery);
 	}
 
 	/** {@code player}'s rock has just left the hand at {@link #ROCK_SPEED}: it is quickened from here ({@link ThrownRocks#quicken}). */
