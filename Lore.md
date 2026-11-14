@@ -423,6 +423,14 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+(new) **The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
+nimbus cloud"). Besides the balloon skiff at the mast, the sky folk ride small skiffs of their own: a slab of the
+Aether's cold cloud packed onto a skyroot keel, with a cloudwool sail on a mast at the stern. She hangs in the air
+where she is left and goes where her rider looks. The cloud is the afterlife's own, and it reads the same ledger the
+Judge weighs: it holds the just and nobody else. Anyone whose page would not weigh just sinks through it as through any
+cloud, and a rider who stops being just is let fall. The Divine-born think nothing of this, since it has never dropped
+one of them. A visitor from below who finds she carries them has been told something about themselves.
+
 (new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
 one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
 carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
@@ -1793,3 +1801,5 @@ water and not beside it. The blossom folk did not sink it and do not claim it. T
 which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
 it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
 Tideborn of the crossing's islands do not speak of it to strangers.
+
+(new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
