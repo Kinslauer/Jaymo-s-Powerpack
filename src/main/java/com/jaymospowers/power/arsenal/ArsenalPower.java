@@ -55,11 +55,12 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>R - Reach Through: open a rift, pull a random weapon (+ ammo) into your hand.</li>
  * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown. A standing Sword of Damocles is called back first.</li>
- * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
+ * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at. Held: Blade Storm ({@link ArsenalStorm}).</li>
  * <li>B - Rift Chains ({@link ArsenalChains}): chains out of rifts hold what you aim at; B again yanks it to you.
  * Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
  * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
+ * <li>Double tap Jump - Blade riding ({@link ArsenalRide}): a great blade under your feet carries you; again to step off and send it on.</li>
  * <li>Sneak + V (the Void Arsenal: Sneak + X) - Attendant Blades ({@link ArsenalWing}): weapons that stay out and hang round you, striking with you.</li>
  * </ul>
  */
@@ -167,6 +168,8 @@ public final class ArsenalPower implements Power {
 		HundredBlades.init();
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
+		ArsenalWing.init();
+		ArsenalRide.init();
 		ArsenalChains.init();
 		ArsenalStanding.init();
 		ArsenalVoid.init();
@@ -209,7 +212,7 @@ public final class ArsenalPower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		boolean voided = com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Mastery.starterOnly(player);
 		if (key == PowerKey.ABILITY_3 && !voided && ArsenalWing.key(player, down)) {
-			// Sneak + V: Attendant Blades (a short hold calls them or sends them home, a tap changes their formation);
+			// Sneak + V: Attendant Blades (a short hold calls them, or opens their order wheel; a tap changes their formation);
 			// the Void Arsenal, whose Sneak + V is its gates, has them on Sneak + X (ArsenalCannons)
 			return;
 		}
@@ -218,12 +221,20 @@ public final class ArsenalPower implements Power {
 			ArsenalGates.key(player, down);
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && ArsenalWing.orderKey(player, down)) {
+			// Sneak + B with the blades out: a tap sets them on what you look at, a hold flies them where you look
+			return;
+		}
 		if (key == PowerKey.ABILITY_4 && voided) {
 			// the Sword of Damocles: held, you aim it; let go, it comes (like the Gravity Meteor)
 			ArsenalDamocles.key(player, down);
 			return;
 		}
 		if (!down) {
+			if (key == PowerKey.ABILITY_3 && ArsenalStorm.key(player, false)) {
+				// V let go: a tap was a Barrage, a hold ends its Blade Storm
+				return;
+			}
 			// let go of R before a held grab finished: an ordinary Reach after all
 			if (key == PowerKey.ABILITY_1 && ArsenalAnywhere.release(player)) {
 				reach(player, null);
@@ -256,12 +267,13 @@ public final class ArsenalPower implements Power {
 				if (ArsenalPlaces.sneakKey(player)) {
 					return;
 				}
-				// a standing Sword of Damocles is called back first
-				if (!ArsenalDamocles.recall(player)) {
+				// a standing Sword of Damocles is called back first; with the blades out, what's in hand joins them
+				if (!ArsenalDamocles.recall(player) && !ArsenalWing.give(player)) {
 					sendBack(player);
 				}
 			}
-			case ABILITY_3 -> barrage(player);
+			// V: a tap is Barrage (on letting go), held it is Blade Storm
+			case ABILITY_3 -> ArsenalStorm.key(player, true);
 			// B: Rift Chains; the Void Arsenal's drops the Sword of Damocles instead (the pocket lives on Z)
 			case ABILITY_4 -> ArsenalChains.key(player);
 		}
@@ -312,6 +324,13 @@ public final class ArsenalPower implements Power {
 		ArsenalGates.close(player);
 		ArsenalChains.onLost(player);
 		ArsenalDamocles.cancelAim(player);
+		ArsenalRide.home(player);
+	}
+
+	/** Riding a blade ({@link ArsenalRide}): not kicked for floating. */
+	@Override
+	public boolean allowsFloating(ServerPlayer player) {
+		return ArsenalRide.riding(player);
 	}
 
 	@Override
@@ -324,6 +343,8 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
 		ArsenalWing.onLost(player);
+		ArsenalStorm.onLost(player);
+		ArsenalRide.onLost(player);
 		ArsenalChains.onLost(player);
 		ArsenalStanding.closeAll(player, false);
 		ArsenalPlaces.forget(player);
@@ -348,6 +369,8 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.tick(player);
 		ArsenalCannons.tick(player);
 		ArsenalWing.tick(player);
+		ArsenalStorm.tick(player);
+		ArsenalRide.tick(player);
 		ServerPlayer grabbed = ArsenalAnywhere.tickGrab(player);
 		if (grabbed != null) {
 			reach(player, grabbed);
@@ -639,7 +662,7 @@ public final class ArsenalPower implements Power {
 
 	// ---------------------------------------------------------------- V: Barrage
 
-	private static void barrage(ServerPlayer player) {
+	static void barrage(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Cooldowns cd = cooldowns(player);
@@ -796,6 +819,7 @@ public final class ArsenalPower implements Power {
 
 	/** Called by {@code PlayerMixin} before a dying player's inventory drops: summoned weapons never become loot. */
 	public static void stripOnDeath(ServerPlayer player) {
+		ArsenalWing.onDeath(player);
 		dissolveWhere(player, s -> true, true);
 	}
 }

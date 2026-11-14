@@ -5,6 +5,7 @@ import com.jaymospowers.client.FlightRolls;
 import com.jaymospowers.client.power.smoke.SmokeFlightClient;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.LimbUse;
+import com.jaymospowers.power.arsenal.ArsenalRide;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import net.minecraft.client.player.LocalPlayer;
@@ -21,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
  * body is its own and doesn't either.</li>
  * <li><b>Gliding</b> (web wings, an aercloud glider): both arms ({@link LimbUse#BOTH_ARMS}): the same, harder, and it
  * sinks faster ({@link #GLIDE_SINK}). With an arm gone it never opens (WebSwing, WebPower, the glider).</li>
+ * <li><b>Riding a blade</b> (Arsenal): the legs, as flying.</li>
  * </ul>
  * Every amount is at no strength left; a broken limb gives {@code 1 - strength} of it.
  */
@@ -37,6 +39,11 @@ public final class LimbMotion {
 
 	public static void tick(LocalPlayer player) {
 		if (player.onGround() || player.isPassenger() || player.isSpectator() || player.getAbilities().flying || player.isInWater()) {
+			return;
+		}
+		if (ArsenalRide.riding(player)) {
+			// a ridden blade is stood on: the legs
+			push(player, LimbUse.strength(player, LimbUse.LEGS), side(player, true), FLIGHT_WOBBLE, FLIGHT_PULL, FLIGHT_SAG, FLIGHT_DRAG);
 			return;
 		}
 		if (gliding(player)) {

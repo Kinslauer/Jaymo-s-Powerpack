@@ -46,6 +46,8 @@ public final class CannonRenderer extends EntityRenderer<Cannon, CannonRenderer.
 		float pitch;
 		/** How far through the kick: 0 at rest, 1 at the worst of it. */
 		float kick;
+		/** How far a field gun has been pushed along (blocks). */
+		float rolled;
 	}
 
 	private static Model model;
@@ -70,6 +72,7 @@ public final class CannonRenderer extends EntityRenderer<Cannon, CannonRenderer.
 		super.extractRenderState(entity, state, partialTicks);
 		state.yaw = entity.getYRot(partialTicks);
 		state.pitch = Mth.lerp(partialTicks, entity.pitchO, entity.barrelPitch());
+		state.rolled = Mth.lerp(partialTicks, entity.rolledO, entity.rolled);
 		float t = (entity.sinceFired + partialTicks) / Cannon.RECOIL_TICKS;
 		if (t >= 1.0F) {
 			state.kick = 0.0F;
@@ -187,8 +190,8 @@ public final class CannonRenderer extends EntityRenderer<Cannon, CannonRenderer.
 			float slide = state.kick * SLIDE * 16.0F;
 			// the whole carriage runs back along the ground; the wheels turn the way that rolls them
 			this.carriage.z = -roll;
-			this.wheelL.xRot = roll / WHEEL;
-			this.wheelR.xRot = roll / WHEEL;
+			this.wheelL.xRot = (roll - state.rolled * 16.0F) / WHEEL;
+			this.wheelR.xRot = (roll - state.rolled * 16.0F) / WHEEL;
 			// and the barrel slides back along its own line in the cheeks
 			float raise = state.pitch * Mth.DEG_TO_RAD;
 			this.barrel.z = -slide * Mth.cos(raise);

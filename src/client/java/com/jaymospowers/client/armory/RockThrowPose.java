@@ -118,10 +118,10 @@ public final class RockThrowPose {
 			ownThrown = -1;
 			ownReady = false;
 			ownMomentum = ThrownRocks.momentum(ownStreak, ownLastThrow, now);
-			ownCharge = ThrownRocks.charge(ownMomentum);
-			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.WINDING_UP));
 			LocalPlayer self = Minecraft.getInstance().player;
-			if (self != null && ThrownRocks.gravity(self)) {
+			ownCharge = self == null ? ThrownRocks.charge(ownMomentum) : ThrownRocks.charge(self, ownMomentum);
+			ClientPlayNetworking.send(new ThrownRocks.Charge(ThrownRocks.WINDING_UP));
+			if (self != null && ThrownRocks.instant(self)) {
 				// (0.21.8) a gravity user's rock goes at once (the server throws it on the wind-up's word)
 				ownThrown = now;
 				ownLastThrow = now;

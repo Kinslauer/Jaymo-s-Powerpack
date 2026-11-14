@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Attendant Blades, seen by everyone: each blade in its place round its holder ({@link ArsenalWing#slot}), hanging point
- * down from a small rift laid flat over it. A blade slides down out of its rift as it arrives, and is not drawn while it
+ * down from a small rift laid flat over it (no rift while the wing is steered or whirling: the blades are loose then). A blade slides down out of its rift as it arrives, and is not drawn while it
  * is away striking (that one is a {@code RiftBlade}).
  */
 final class ArsenalWingRenderer {
@@ -54,12 +54,18 @@ final class ArsenalWingRenderer {
 				float eased = 1.0F - (1.0F - out) * (1.0F - out);
 				Vec3 at = ArsenalWing.slot(player, wing, i, now, partialTick).subtract(camera);
 				double r = RIFT_RADIUS * Math.min(1.0F, out * 3.0F);
-				RiftPortals.disc(context.submitNodeCollector(), poseStack, at.add(0.0, RIFT_ABOVE, 0.0), new Vec3(1.0, 0.0, 0.0), new Vec3(0.0, 0.0, 1.0),
-					new Vec3(0.0, -1.0, 0.0), r, r, now * 0.15 + i, voidRift);
+				if (wing.mode() == ArsenalWing.DOCKED) {
+					RiftPortals.disc(context.submitNodeCollector(), poseStack, at.add(0.0, RIFT_ABOVE, 0.0), new Vec3(1.0, 0.0, 0.0), new Vec3(0.0, 0.0, 1.0),
+						new Vec3(0.0, -1.0, 0.0), r, r, now * 0.15 + i, voidRift);
+				}
 				poseStack.pushPose();
 				// down out of the rift, growing as it comes into this world
 				poseStack.translate(at.x, at.y + RIFT_ABOVE * (1.0F - eased), at.z);
 				poseStack.rotateDegrees(Axis.YP, -yaw);
+				if (wing.mode() == ArsenalWing.STEER) {
+					// flying where its holder looks: point first
+					poseStack.rotateDegrees(Axis.XP, player.getViewXRot(partialTick) - 90.0F);
+				}
 				// item sprites have their tip in the top-right corner: turned so it points at the ground
 				poseStack.rotateDegrees(Axis.ZP, -135.0F);
 				float scale = BLADE_SCALE * (0.3F + 0.7F * eased);

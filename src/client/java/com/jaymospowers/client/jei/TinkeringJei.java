@@ -208,7 +208,8 @@ public final class TinkeringJei implements IModPlugin {
 		for (ToolType type : ToolType.values()) {
 			PartType.Kind first = type.parts.getFirst().part().kind;
 			for (TinkerMaterial material : TinkerMaterial.values()) {
-				if (!material.makes(first)) {
+				// (armour: no stone platings, they're only moulds for casts)
+				if (!material.makes(first) || type.style == ToolType.Style.ARMOR && material.plating() == null) {
 					continue;
 				}
 				List<List<ItemStack>> inputs = new ArrayList<>();
@@ -222,6 +223,11 @@ public final class TinkeringJei implements IModPlugin {
 				ItemStack built = ToolStats.build(type, used);
 				built.setCount(type.ranged.yield());
 				recipes.add(new SimpleCategory.Recipe(inputs, List.of(built), List.of()));
+				if (type.style == ToolType.Style.ARMOR) {
+					// the travelers' piece: the plating on a leather maille
+					recipes.add(new SimpleCategory.Recipe(List.of(inputs.getFirst(), List.of(ToolPartItem.of(PartType.MAILLE, TinkerMaterial.LEATHER, 1))),
+						List.of(ToolStats.build(type, List.of(material, TinkerMaterial.LEATHER))), List.of()));
+				}
 			}
 		}
 		return recipes;

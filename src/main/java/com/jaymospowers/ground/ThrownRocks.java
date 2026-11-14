@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.power.chrono.ChronoRapid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -93,6 +94,13 @@ import org.jspecify.annotations.Nullable;
  * long as use is held, and the rock goes when you let go. Let go before the charge is full and nothing is thrown. Each
  * throw builds momentum ({@link #MOMENTUM_STEP} ticks off the next charge, up to {@link #MOMENTUM_MAX} throws: 1.5 s down
  * to 0.5 s), and it fades a throw's worth for every {@link #MOMENTUM_FADE} ticks between one throw and the next wind-up.
+ * <p>
+ * Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming a bullet". A speedster's
+ * rock ({@code ChronoRapid#quickens}) is a {@link #quicken quickened} one: it flies flat and fast, hits for what the
+ * speedster says, shrugged off by nobody, leaves a streak behind it, and always shatters ({@link #QUICK_SPECKS} specks,
+ * a crack {@link #QUICK_CRACK} deep). Andy: "only chrono has to charge, and it lessens w/ mastery": in Velox's Velocity
+ * the rock goes at once ({@link #instant}); an overclocked Chrono's charge is shorter with every ability learned and
+ * every Mastery rank ({@link #charge(Player, int)}).
  */
 public final class ThrownRocks {
 	/** A rock hits for this much. */
@@ -138,6 +146,8 @@ public final class ThrownRocks {
 	static final double SPECK_OUT = 0.14, SPECK_SPREAD = 0.12, SPECK_UP = 0.08;
 	/** (0.18.84) The crack a broken rock leaves on the block: how deep (0-9, the block-breaking stages), and how long each stage lasts as it fades (ticks). */
 	static final int CRACK_STAGE = 3, CRACK_STEP = 12;
+	/** A quickened rock shatters harder: its specks, and how deep its crack. */
+	static final int QUICK_SPECKS = 28, QUICK_CRACK = 7;
 
 	/** (0.18.84) A crack fading off a block: the id it's drawn under, where, and its stage now. */
 	private static final class Crack {
@@ -160,6 +170,10 @@ public final class ThrownRocks {
 		final ItemStack stone;
 		final boolean creative;
 		int age;
+		/** Quickened by a speedster: what it hits for, and where it was a tick ago (the streak runs from there). */
+		boolean quick;
+		float damage;
+		Vec3 last;
 
 		Rock(Snowball ball, ItemStack stone, boolean creative) {
 			this.ball = ball;
@@ -259,6 +273,16 @@ public final class ThrownRocks {
 		return CHARGE - MOMENTUM_STEP * Math.clamp(momentum, 0, MOMENTUM_MAX);
 	}
 
+	/** As {@link #charge(int)} for {@code player}: an overclocked Chrono's is shorter the more it has mastered ({@code ChronoRapid#rockCharge}). */
+	public static int charge(Player player, int momentum) {
+		return ChronoRapid.rockCharge(player, charge(momentum));
+	}
+
+	/** Whether {@code player}'s rock goes the moment use is pressed, with no charge: a gravity user's, and one thrown in Velox's Velocity. */
+	public static boolean instant(Player player) {
+		return gravity(player) || ChronoRapid.instantRock(player);
+	}
+
 	/**
 	 * (0.20.90) A hold winding up: when it began (game ticks), and when its rock went, or -1; (0.20.103) the momentum it
 	 * began with, how long its charge takes, and when its client last spoke.
@@ -278,7 +302,7 @@ public final class ThrownRocks {
 			this.heard = now;
 			this.id = id;
 			this.momentum = momentum;
-			this.charge = ThrownRocks.charge(momentum);
+			this.charge = ThrownRocks.charge(player, momentum);
 		}
 	}
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
@@ -349,8 +373,8 @@ public final class ThrownRocks {
 			int left = momentum == null ? 0 : momentum(Math.toIntExact(momentum[0]), momentum[1], now);
 			hold = new Hold(player, now, holds, left);
 			WINDING.put(player.getUUID(), hold);
-			if (gravity(player)) {
-				// (0.21.8) a gravity user's rock goes at once, and flies harder
+			if (instant(player)) {
+				// (0.21.8) a gravity user's rock goes at once, and flies harder (in Velocity: at once, quickened)
 				hold.thrown = now;
 				player.setAttached(THROW, value(hold.id, hold.charge, THROWING));
 				player.getCooldowns().addCooldown(stack, COOLDOWN);
@@ -402,13 +426,43 @@ public final class ThrownRocks {
 		return com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE);
 	}
 
+	/**
+	 * A speedster quickens {@code ball}, if it is a rock (one of ours in flight, or Kingdoms' cobblestone): from now it
+	 * hits for {@code damage}, streaks, lives {@code ChronoRapid#ROCK_LIFE} ticks more and shatters where it lands. The
+	 * speedster gives it its speed. False for anything else.
+	 */
+	public static boolean quicken(Snowball ball, float damage) {
+		ItemStack stone = ball.getItem();
+		if (!(FirstTools.rock(stone) || stone.is(Items.COBBLESTONE))) {
+			return false;
+		}
+		Rock rock = rock(ball);
+		if (rock == null) {
+			rock = new Rock(ball, stone.copyWithCount(1), true);
+			FLYING.add(rock);
+		}
+		rock.quick = true;
+		rock.damage = damage;
+		rock.age = 0;
+		rock.last = ball.position();
+		return true;
+	}
+
 	/** The rock leaves the hand where you look. */
 	private static void release(ServerPlayer player, ItemStack stack, float speed, float spread) {
 		ServerLevel server = (ServerLevel) player.level();
 		ItemStack stone = stack.copyWithCount(1);
+		boolean quick = ChronoRapid.quickens(player);
+		if (quick) {
+			speed = ChronoRapid.ROCK_SPEED;
+			spread = 0.0F;
+		}
 		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, speed,
 			spread);
 		FLYING.add(new Rock(ball, stone, player.getAbilities().instabuild));
+		if (quick) {
+			ChronoRapid.quickened(player, ball);
+		}
 		server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F,
 			0.5F + server.getRandom().nextFloat() * 0.2F);
 		stack.consume(1, player);
@@ -440,14 +494,13 @@ public final class ThrownRocks {
 		return null;
 	}
 
-	private static boolean thrown(Entity entity) {
-		return rock(entity) != null;
-	}
-
 	/** A snowball does no harm: a rock's blow is dealt again with its weight. */
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
-		if (redealing || amount >= DAMAGE || !(source.getDirectEntity() instanceof Snowball ball) || !thrown(ball)
-			|| !(victim.level() instanceof ServerLevel level)) {
+		if (redealing || amount >= DAMAGE || !(source.getDirectEntity() instanceof Snowball ball) || !(victim.level() instanceof ServerLevel level)) {
+			return true;
+		}
+		Rock rock = rock(ball);
+		if (rock == null) {
 			return true;
 		}
 		// (0.18.84) whether they saw it coming, before the blow makes them wary
@@ -457,7 +510,7 @@ public final class ThrownRocks {
 		boolean hurt;
 		redealing = true;
 		try {
-			hurt = victim.hurtServer(level, source, shrugs ? SHRUGGED_DAMAGE : DAMAGE);
+			hurt = victim.hurtServer(level, source, rock.quick ? rock.damage : shrugs ? SHRUGGED_DAMAGE : DAMAGE);
 		} finally {
 			redealing = false;
 		}
@@ -515,12 +568,16 @@ public final class ThrownRocks {
 		if (rock != null) {
 			FLYING.remove(rock);
 		}
-		boolean keep = rock != null && !rock.creative && level.getRandom().nextFloat() < KEEP_CHANCE;
+		boolean quick = rock != null && rock.quick;
+		boolean keep = rock != null && !rock.creative && !quick && level.getRandom().nextFloat() < KEEP_CHANCE;
 		Vec3 at = ball.position();
+		if (quick) {
+			ChronoRapid.rockStruck(level, rock.last, at);
+		}
 		// the face it struck (straight back along its flight off a body)
 		Vec3 normal = hit instanceof BlockHitResult block ? Vec3.atLowerCornerOf(block.getDirection().getUnitVec3i())
 			: ball.getDeltaMovement().lengthSqr() > 1.0E-6 ? ball.getDeltaMovement().normalize().scale(-1.0) : new Vec3(0.0, 1.0, 0.0);
-		specks(level, stone, at, normal, keep ? KEPT_SPECKS : SPECKS);
+		specks(level, stone, at, normal, keep ? KEPT_SPECKS : quick ? QUICK_SPECKS : SPECKS);
 		if (keep) {
 			ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, rock.stone.copy());
 			item.setDefaultPickUpDelay();
@@ -531,6 +588,9 @@ public final class ThrownRocks {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_BREAK, SoundSource.NEUTRAL, 0.55F, 1.3F + level.getRandom().nextFloat() * 0.3F);
 		if (hit instanceof BlockHitResult block && hit.getType() == HitResult.Type.BLOCK && !level.getBlockState(block.getBlockPos()).isAir()) {
 			Crack crack = new Crack(level, ball.getId(), block.getBlockPos());
+			if (quick) {
+				crack.stage = QUICK_CRACK;
+			}
 			level.destroyBlockProgress(crack.id, crack.pos, crack.stage);
 			CRACKS.add(crack);
 		}
@@ -556,7 +616,22 @@ public final class ThrownRocks {
 		// (0.20.90) the wind-up's pose, let go of or thrown
 		WINDING.values().removeIf(ThrownRocks::holdOver);
 		// (0.18.84) where it landed is seen to in landed; gone some other way (unloaded), it's forgotten
-		FLYING.removeIf(rock -> rock.ball.isRemoved() || ++rock.age > LIFE);
+		FLYING.removeIf(rock -> {
+			if (rock.ball.isRemoved() || ++rock.age > LIFE) {
+				return true;
+			}
+			if (rock.quick && rock.ball.level() instanceof ServerLevel level) {
+				// a quickened rock streaks, and is gone when it has flown long enough
+				Vec3 now = rock.ball.position();
+				ChronoRapid.rockStreak(level, rock.last, now);
+				rock.last = now;
+				if (rock.age > ChronoRapid.ROCK_LIFE) {
+					rock.ball.discard();
+					return true;
+				}
+			}
+			return false;
+		});
 		// (0.18.84) cracks fade a stage at a time, then go
 		CRACKS.removeIf(crack -> {
 			if (++crack.age % CRACK_STEP != 0) {

@@ -58,7 +58,14 @@ public enum Trait {
 	RIME_MARROW("rime_marrow", ChatFormatting.AQUA),
 	VENOM_MARROW("venom_marrow", ChatFormatting.GREEN),
 	STORM_MARROW("storm_marrow", ChatFormatting.YELLOW),
-	HOOKED("hooked", ChatFormatting.DARK_AQUA);
+	HOOKED("hooked", ChatFormatting.DARK_AQUA),
+	// Tinkers' armour traits, from a plating's or maille's metal (ArmourTraits): each turns aside a share of one kind of harm
+	DEPTH_PROTECTION("depth_protection", ChatFormatting.GOLD),
+	PROJECTILE_PROTECTION("projectile_protection", ChatFormatting.GRAY),
+	CONSECRATED("consecrated", ChatFormatting.YELLOW),
+	MELEE_PROTECTION("melee_protection", ChatFormatting.BLUE),
+	WARDED("warded", ChatFormatting.DARK_PURPLE),
+	RECURRENT_PROTECTION("recurrent_protection", ChatFormatting.DARK_AQUA);
 
 	public final String id;
 	public final ChatFormatting colour;

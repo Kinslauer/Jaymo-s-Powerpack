@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinker_armour/chestplate/travelers_metal_steel"
+  }
+}

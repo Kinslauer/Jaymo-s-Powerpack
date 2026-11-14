@@ -24,10 +24,17 @@ public enum PartType {
 	BOWSTRING("bowstring", Kind.BOWSTRING, 1, true),
 	ARROW_HEAD("arrow_head", Kind.ARROW_HEAD, 1, true),
 	ARROW_SHAFT("arrow_shaft", Kind.ARROW_SHAFT, 1, true),
-	FLETCHING("fletching", Kind.FLETCHING, 1, true);
+	FLETCHING("fletching", Kind.FLETCHING, 1, true),
+	// Tinkers' armour (Andy's Portable Mods picks): a plating per piece, cast of a metal (shaped of stone only to make its
+	// cast, as Tinkers' dummy platings are), and maille, cast of a metal or shaped of leather (a leather cuirass)
+	HELMET_PLATING("helmet_plating", Kind.PLATING, 3),
+	CHESTPLATE_PLATING("chestplate_plating", Kind.PLATING, 6),
+	LEGGINGS_PLATING("leggings_plating", Kind.PLATING, 5),
+	BOOTS_PLATING("boots_plating", Kind.PLATING, 2),
+	MAILLE("maille", Kind.MAILLE, 2);
 
 	/** Which of a material's stats a part uses. */
-	public enum Kind { HEAD, HANDLE, BINDING, LIMB, GRIP, BOWSTRING, ARROW_HEAD, ARROW_SHAFT, FLETCHING }
+	public enum Kind { HEAD, HANDLE, BINDING, LIMB, GRIP, BOWSTRING, ARROW_HEAD, ARROW_SHAFT, FLETCHING, PLATING, MAILLE }
 
 	public final String id;
 	public final Kind kind;

@@ -1,0 +1,633 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 1,
+      "cases": [
+        {
+          "when": "leather",
+          "model": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinker_armour/helmet/goggles_broken"
+              },
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinker_armour/helmet/cuirass_broken"
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "cobalt",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_cobalt"
+                    }
+                  },
+                  {
+                    "when": "manyullyn",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_manyullyn"
+                    }
+                  },
+                  {
+                    "when": "queen_slime",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_queen_slime"
+                    }
+                  },
+                  {
+                    "when": "hepatizon",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_hepatizon"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_iron"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:composite",
+        "models": [
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_slimesteel"
+                }
+              },
+              {
+                "when": "cobalt",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_cobalt"
+                }
+              },
+              {
+                "when": "manyullyn",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_manyullyn"
+                }
+              },
+              {
+                "when": "queen_slime",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_queen_slime"
+                }
+              },
+              {
+                "when": "hepatizon",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_hepatizon"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_iron"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 1,
+            "cases": [
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_slimesteel"
+                }
+              },
+              {
+                "when": "cobalt",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_cobalt"
+                }
+              },
+              {
+                "when": "manyullyn",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_manyullyn"
+                }
+              },
+              {
+                "when": "queen_slime",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_queen_slime"
+                }
+              },
+              {
+                "when": "hepatizon",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_hepatizon"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_iron"
+            }
+          }
+        ]
+      }
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 1,
+      "cases": [
+        {
+          "when": "leather",
+          "model": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinker_armour/helmet/goggles"
+              },
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinker_armour/helmet/cuirass"
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "cobalt",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_cobalt"
+                    }
+                  },
+                  {
+                    "when": "manyullyn",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_manyullyn"
+                    }
+                  },
+                  {
+                    "when": "queen_slime",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_queen_slime"
+                    }
+                  },
+                  {
+                    "when": "hepatizon",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_hepatizon"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_iron"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:composite",
+        "models": [
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_slimesteel"
+                }
+              },
+              {
+                "when": "cobalt",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_cobalt"
+                }
+              },
+              {
+                "when": "manyullyn",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_manyullyn"
+                }
+              },
+              {
+                "when": "queen_slime",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_queen_slime"
+                }
+              },
+              {
+                "when": "hepatizon",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_hepatizon"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinker_armour/helmet/plating_iron"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 1,
+            "cases": [
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_slimesteel"
+                }
+              },
+              {
+                "when": "cobalt",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_cobalt"
+                }
+              },
+              {
+                "when": "manyullyn",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_manyullyn"
+                }
+              },
+              {
+                "when": "queen_slime",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_queen_slime"
+                }
+              },
+              {
+                "when": "hepatizon",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_hepatizon"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinker_armour/helmet/maille_iron"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -4690,3 +4690,83 @@ Built, not played.
 - **HUD**: a row of icons, one a blade, dimmed while it is away, each with a bar for its time left.
 - Classes: `power/arsenal/ArsenalWing` (attachment `arsenal_wing`), client `ArsenalWingRenderer`; strikes are `RiftBlade`s.
 - From Andy's picks on Yujian Craft (MIT; our own code) and The Zenith (ideas only). Compiled; not played.
+
+## 0.23.61 (2026-11-14): Arsenal: orders for the Attendant Blades (flying blades, patch 2) (#1516)
+
+- **Harry**: with the blades out, tap Sneak + B at something (your lock-on target first) and every blade keeps striking it,
+  one every 0.4 s for 3 damage, until it falls, gets 32 blocks away or you tap again.
+- **Steer by sight**: hold Sneak + B and the blades leave their places and fly where you look (up to 24 blocks, 5 s at
+  most), cutting what they pass through. Let go and they go for whatever is nearest that spot.
+- **Order wheel**: hold the wing's key (Sneak + V; the Void Arsenal's Sneak + X) with the blades out. Fan, Halo, Flank,
+  Whirl (the whole wing spins close round you for 4 s, cutting and pushing back foes; 15 s between), Spare (the blades
+  leave what you look at alone), Take a blade (one comes down into your hand) and Send home. A short hold no longer
+  sends them home by itself.
+- **Ward**: with a guard raised, a ready blade meets each blow or shot from someone and goes home for it.
+- **Hand it over**: G with the blades out and a place free sends what you hold up to join them: a summoned weapon (it
+  keeps its timer), a weapon or tool of your own, or one loose rock off the stack. Your own things stay until the wing
+  goes home, then come back to your pack; the wing is saved with you, and on death only the rift's blades leave.
+- Classes: `power/arsenal/ArsenalWing` (orders, `Order` packet, the wing attachment is now saved), client
+  `ArsenalWingScreen`, `ArsenalWingRenderer`.
+- Compiled; not played.
+
+## 0.23.62 (2026-11-14): Chrono: quickened rocks - a thrown rock goes like a bullet (#1515)
+
+Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming a bullet."
+- **Quickened rocks**: a loose rock thrown from the off hand while Overclocked (Velocity too, as with the rest of the
+  speedster's hands) leaves at 6 blocks a tick (120 blocks a second, four times a normal throw), dead flat with no drop
+  and no stray, and hits for 12 (a plain rock is 3). Zombies and Hornkin don't shrug it off. Cooldown, momentum
+  and knock-outs are as before.
+- **The charge** (Andy: "only chrono has to charge, and it lessens w/ mastery"): in Velocity the rock goes the moment
+  use is pressed. An overclocked Chrono still winds up, 3 ticks less for each ability learned and each Mastery rank:
+  1.5 s with only the starter, 0.9 s with all four abilities, 0.15 s at Paragon (momentum still shortens it further).
+- A rock caught out of the air (use, at speed) and hurled back goes quickened too, a guard's or barbarian's included.
+- **Look and sound**: a gold ring across its path and a sharp crack as it goes, a thin gold streak behind it the whole
+  way, a gold burst where it strikes. It always shatters (never lies there to pick up), with more specks and a deeper
+  crack in the block. One that hits nothing is gone after 2 seconds (about 240 blocks).
+- Tuning: `ChronoRapid.ROCK_SPEED`, `ROCK_DAMAGE`, `ROCK_LIFE`, `ROCK_CHARGE_STEP`, `ROCK_CHARGE_MIN`; `ThrownRocks.QUICK_SPECKS`, `QUICK_CRACK`.
+- Classes: `ChronoRapid` (quickens, quickened, rockStreak, rockStruck), `ThrownRocks.quicken`. Compiled; not played.
+
+## 0.23.63 (2026-11-14): Arsenal: Blade Storm (flying blades, patch 3) (#1519)
+
+- **Blade Storm**: hold V and weapons whip out of a rift behind your shoulder one after another, each swinging out in a
+  wide loop through what you aim at (your lock-on target first) and back in, for as long as you hold, up to 6 s. A blade
+  cuts everything along its loop (3 damage, 4.5 with a relic in hand; one thing is cut at most every 0.4 s). You are
+  slowed while it runs. A tap of V is still Barrage, now on letting go.
+- Each Attendant Blade out quickens the storm (one blade every 5 ticks, down to every 2 with six out). Your own weapons
+  and loose rocks on the wing take their turns in it. Every third blade is an echo whose loop ignores walls.
+- Barrage's cooldown pays for it: 10 s plus 3 ticks for each tick the storm ran.
+- The Void Arsenal (whose V is its gates) starts a 4 s storm from the Attendant Blades' order wheel; the wheel has it for
+  everyone.
+- Classes: `power/arsenal/ArsenalStorm` (attachment `arsenal_storm`), client `ArsenalStormRenderer`.
+- Compiled; not played. Echo blades are drawn smaller and unlit, not see-through (item models have no alpha here).
+
+## 0.23.64 (2026-11-14): Tinkers armour - plate armour and travelers' gear from the Tool Station (#1517)
+
+- **Plate armour** (Andy's Portable Mods picks: Tinkers' Construct's armour, its 1.20.1 stats and art, MIT): a helmet, chestplate, leggings and boots, each put together at the Tool Station from a **plating** (helmet, chestplate, leggings or boots) and a **maille**. Twelve metals plate: copper, iron, silver, rose gold, amethyst bronze, pig iron, slimesteel, cobalt, manyullyn, queen's slime, hepatizon and steel. Each piece's armour, toughness, knockback resistance and durability are its plating's (Tinkers' numbers; durability cut to the pack's armour share like every other armour). The worn look shows the plating's and the maille's metals.
+- **Travelers' gear**: the same plating on a leather maille (a cuirass) makes Travelers' Goggles, Vest, Pants or Boots: three quarters of the plate's armour, toughness and knockback resistance, and less durable.
+- **Parts**: platings and maille are cast in the smeltery (gold over a part makes its cast). The first plating casts come from stone platings shaped at the Part Builder (they can't be built into armour), the first maille cast from a leather maille. Platings can also be hammered at the Smithing Anvil.
+- **Armour traits** (per metal of each plating and maille, after vanilla armour): Depth Protection (copper, more the deeper you are), Projectile Protection (iron), Consecrated (silver, vs the undead), Melee Protection (cobalt), Warded (manyullyn, magic), Recurrent Protection (hepatizon, for 5 s after you're hurt); 4% a level, 60% at most. Slimesteel and queen's slime mend themselves (Overslime), steel wears slower (Tempered), leather a point at a time (Tanned).
+- Armour wears to broken and stays (no protection until repaired); repair at the Tool Station with the plating's metal; swap parts there too. Armour takes no modifiers.
+- `ToolType` HELMET to BOOTS, `PartType` platings and MAILLE, `TinkerMaterial.Plating`, `ToolStats.armour`, `TinkerArmourItem`, `ArmourTraits`, `TinkerArmourTraitsMixin`; art from `tools/tinkering_armour_assets.py`.
+- Built and compile-checked; not played.
+
+## 0.23.65 (2026-11-14): Arsenal: blade riding (flying blades, patch 4) (#1520)
+
+- **Blade riding** (Arsenal, from the second ability on): tap Jump twice and a great blade comes up out of a rift under your feet and carries you. W flies it the way you look (up and down too), S brakes, A and D slide, Jump lifts, and with nothing pressed it hangs where it is. It carries you up to 40 blocks over the ground for 30 seconds, then needs 15 seconds before it comes again.
+- **Fight from it**: your hands stay free, so you swing, shoot and guard as on the ground, and the Attendant Blades come along and take their orders.
+- **Step off and send it**: tap Jump twice again. The blade flies on the way you look (at your lock-on target, if you have one) as one heavy hit, 10 damage, and you are let down gently (slow falling for a few seconds). The same gentle set-down when its time is up.
+- **Until mastered** (not every ability unlocked) the blade is not yours to keep: now and then it shudders for a second and a half, your view shakes, "The blade is slipping away", and it goes home early.
+- **Broken legs**: riding still works, but the blade wobbles, drags and sags with how bad the legs are.
+- Riders stand side-on like the earthboard's rider, with their arms left free. Under water the blade goes home.
+- Classes: `power/arsenal/ArsenalRide`, client `ArsenalRideClient`, `ArsenalRideRenderer`; small hooks in `GravityBoardPose`, `LimbMotion`, `FreefallPose`.
+- Compiled; not played.
+
+## 0.23.66 (2026-11-14): Arsenal: the wing's big moves (flying blades, patch 5) (#1522)
+
+- **Closing Ring** (order wheel, every blade in its place): the Attendant Blades fly out and ring what you look at (up to 24 blocks), hold it where it stands for 3 seconds (5 if Rift Chains already bind it), then all drive in at once, 4 damage a blade. 20 second wait.
+- **Step to a blade** (order wheel): you step through a rift to where the wing is at work: just short of what it is ringing or set on (Sneak + B), or the spot you are steering it to. 5 second wait; it won't put you inside a wall.
+- **Wing combos**: hits you land one after another (no more than a second and a half apart) walk the wing through a chain of five. Fan: thrust, thrust, crossing pair, crossing pair, every blade. Halo and Flank: thrust, sweep (cuts foes within 2.5 blocks of the target), crossing pair, sweep, every blade. The chain waits when no blade is ready.
+- **The great casts**: with the blades out, Hundred Blades and the Sword of Damocles take the wing with them: each blade in its place rises, then flies at something within 6 blocks of where the cast lands.
+- Classes: `power/arsenal/ArsenalWingMoves` (new), hooks in `ArsenalWing`, `HundredBlades`, `ArsenalDamocles`, `ArsenalWingScreen` (10 slices).
+- The combo count is the wing's own; Kingdoms is not needed.
+- Compiled; not played.
