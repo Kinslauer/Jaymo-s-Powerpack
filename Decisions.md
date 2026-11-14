@@ -544,3 +544,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Reaper, PR #1526): Andy: "death sorcerers should NOT be attuned". Death Sorcerers never carry the Reaper. Built as: Reaper-pact Warlocks and other classes with a forbidden death spell carry it (Andy confirmed both on a decision card).
 - 2026-11-14 (Andy, flying blades thread): the rocks' "Harry" order is named "Harrier" on the wheel.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
+- 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".
