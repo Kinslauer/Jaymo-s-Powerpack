@@ -1649,7 +1649,7 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
-(new) **The pits and the hold plans** (Andy, 2026-11-14: "taking over an area like this from bandits or illagers should
+**The pits and the hold plans** (approved by Andy 2026-11-14; Andy, 2026-11-14: "taking over an area like this from bandits or illagers should
 allow you to add it to a schematic, so your kingdom can build it"; the rest Claude's placement, for Andy to approve). In
 the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
 are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
