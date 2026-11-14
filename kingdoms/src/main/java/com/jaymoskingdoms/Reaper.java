@@ -127,6 +127,16 @@ public final class Reaper {
 	 * {@code dead} near by now; when its harvest began ({@code harvestAt}, game time, 0 for none) and of what ({@code harvestId},
 	 * an entity id); when it last struck ({@code actAt}: the wings open).
 	 */
+	/** What it strikes with: its scythe most often ({@link #SCYTHE_IN_TEN} times in ten), else one of the others. */
+	public static final int SCYTHE = 0, GREATSWORD = 1, GREATAXE = 2, WARHAMMER = 3, HALBERD = 4, WEAPONS = 5;
+	static final int SCYTHE_IN_TEN = 6;
+
+	/** The weapon of the kill {@code state} is making now: the same for every viewer, picked by when it began and of what. */
+	public static int weapon(State state) {
+		int roll = Math.floorMod(Long.hashCode(state.harvestAt() * 31L + state.harvestId()) * 0x9E3779B9, 100);
+		return roll < SCYTHE_IN_TEN * 10 ? SCYTHE : 1 + roll % (WEAPONS - 1);
+	}
+
 	public record State(int toll, long fed, long refused, int dead, long harvestAt, int harvestId, long actAt) {
 		public static final Codec<State> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("toll", 0).forGetter(State::toll),
@@ -581,6 +591,12 @@ public final class Reaper {
 			grave.reaped(level);
 			Mana.give(player, HARVEST_MANA);
 			feed(player, TOLL_GHOST);
+		} else if (ghost instanceof LivingEntity living && Downed.isDowned(living)) {
+			// the Reaping
+			if (!Necromancy.execute(level, living, player)) {
+				living.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
+			}
+			feed(player, TOLL_REAP);
 		} else if (ghost instanceof LivingEntity living) {
 			living.hurtServer(level, level.damageSources().indirectMagic(player, player), GHOST_DAMAGE);
 			if (!living.isAlive()) {
@@ -626,17 +642,18 @@ public final class Reaper {
 		Entity seen = inSight(player, level, REACH, e -> e instanceof LivingEntity l && l.isAlive() && !Thralls.isThrall(l) && !(e instanceof GraveGhost));
 		if (seen instanceof LivingEntity target) {
 			if (Downed.isDowned(target) && player.distanceTo(target) <= REAPING_REACH) {
+				if (state.harvestAt() != 0L) {
+					// (it is already at a kill)
+					return;
+				}
 				if (cooling(player, "reaping", REAPING_COOLDOWN)) {
 					return;
 				}
-				// the Reaping: its execution
+				// the Reaping: it steps out over them and does it itself (harvested() lands the blow)
 				strike(player, state);
-				level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY(0.5), target.getZ(), 16, 0.3, 0.4, 0.3, 0.04);
-				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.5F);
-				if (!Necromancy.execute(level, target, player)) {
-					target.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
-				}
-				feed(player, TOLL_REAP);
+				State struck = player.getAttached(REAPER);
+				player.setAttached(REAPER, (struck == null ? state : struck).harvesting(level.getGameTime(), target.getId()));
+				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 				return;
 			}
 			if (cooling(player, "hand", HAND_COOLDOWN)) {
