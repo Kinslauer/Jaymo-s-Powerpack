@@ -1270,7 +1270,7 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   margins of your aura.
 - **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order. He commanded an army of orcs he had
   dominated, marked with his ki, and he can still show you how to put one on his back and make it yours.
-  **Two as One** (new) (Andy, 2026-11-14: "more of the shadow of war combat inspiration for varro, and grimsby, the
+  **Two as One** (Andy, 2026-11-14, approved: "more of the shadow of war combat inspiration for varro, and grimsby, the
   capstone being a mode in which you play as if you had celebrimbor's power", then "okay start on the other spirits";
   the names and the rest Claude's placement). A spirit fights from behind its keeper's shoulder because that is all a
   new bond can carry. A deep one carries more: for a short while the spirit can step into the keeper and work with the
@@ -1651,6 +1651,15 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
+(new) **The pits and the hold plans** (Andy, 2026-11-14: "taking over an area like this from bandits or illagers should
+allow you to add it to a schematic, so your kingdom can build it"; the rest Claude's placement, for Andy to approve). In
+the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
+are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
+under them its prep, armory, beds and smithy, and a caster keeps the arena's best take and its caged allays in a box over
+the gate. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
+tier they were drawn in can copy the place out and build it again. This is the Retaking done with stone as well as
+blades: the realms raise the raiders' own forts, towers and pits as their own.
+
 **The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
 books, their paintings and time in their holds; the rest Claude's placement, approved by Andy 2026-11-13). The pillagers kept
 their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
@@ -1670,6 +1679,19 @@ chilled, and slowed until they find a roof. Mist lies on low ground and water fr
 thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
 lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
 breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
+
+(new) **Cyclopes and satyrs** (Andy's Mythika ask, 2026-11-14; our own make, Claude's placement for him to approve). The
+**cyclops** is a monster of legend: a one-eyed giant twice a man's height, the last of a herding people of the high
+rock who were old when the first keeps were raised. Each lives alone on the peaks or a stony shore, in a hall it cuts
+into the mountainside, with a fire burning on a bale under a smoke hole, a fold of sheep it counts every day, a shelf of
+its dinners' bones and a great stone beside the door. It comes out only once the borderlands are opened; shepherds
+below know it by the smoke. It sleeps by its fire at night. Its eye is its weakness: an arrow in the eye, or a blow
+struck while it sleeps, blinds it for a while, and blind it hunts by the sound of feet, so the wise creep. Steal its
+sheep and it follows them. The **satyrs** are the Green Huntsman's own revellers, goat-legged folk of the birch woods,
+forests and high meadows, who live in groves of three to five under their eldest, a grey-coated piper. At dusk they lay
+a fire and the eldest plays the old tunes while the rest dance or sit and listen; at dawn they put it out. They are
+nobody's enemy, but strike one and the whole grove comes at you with horns and hooves. Bring them honey, berries or wine
+and you are welcome at the fire, and a night there mends you and brings you luck.
 
 ## Daily life
 
@@ -1904,6 +1926,13 @@ Some of the lives stolen from the villages are worn by a changeling and not by a
 real one tied up the same way. The difference shows when the face comes off. A shapeshifter is a hungry thing, and it
 fights or bolts; a changeling is a person who wanted the hearth, and it only runs. Hurt badly enough, either one loses
 the face. Both are rare: a village loses one of its own to them once in a long while, never three at once.
+
+**A town in doubt** (Andy, 2026-11-14). A face seen coming off is not forgotten quickly. For some days after, the
+town trusts nobody's face, since anyone could be a changeling or a shifter now, and its people stop whoever comes close
+and ask the small things only the real one would know: who they go home to, what the dog is called, what the place they
+are standing in is named. A right answer is passed along and they are left alone. A wrong one is taken for a face
+slipping, and the watch is called. A changeling who never harmed the one it wore and told no lies is only shouted at;
+one who struck them, or lied in their name, is attacked on sight of its own face.
 
 (new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
 to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
