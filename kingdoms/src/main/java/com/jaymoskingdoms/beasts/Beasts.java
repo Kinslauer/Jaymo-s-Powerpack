@@ -133,6 +133,8 @@ public final class Beasts {
 		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, REDSTONE_GOLEM, REDSTONE_GOLEM_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DEEP_DARK), MobCategory.MONSTER, SKULK_GOLEM, SKULK_GOLEM_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_WILD_BOAR), MobCategory.CREATURE, WILD_BOAR, WILD_BOAR_WEIGHT, BOAR_MIN, BOAR_MAX);
+		// the cyclops of the peaks and the satyrs of the woods (Mythika's, our own make)
+		Satyrs.register();
 	}
 
 	/** No other {@code kind} within {@code range} blocks of {@code pos}. */
