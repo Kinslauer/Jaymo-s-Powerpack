@@ -12898,3 +12898,15 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 
 - Jaymo's Powers now frees a Limbo ghost whose body is gone. A buried body is a body still: `Graves` tells Powers where it lies (`DeathCompat.addResting`), so the one waiting stays by their grave.
 - Compiled; not played.
+
+## 0.8.57 (2026-11-14): the fortress knight's own plate (#1509)
+
+- **Fortress knight**: he no longer wears plain netherite. His armour is drawn as his own blackened plate: a horned
+  great helm with one slit lit from inside, a ribbed cuirass under a gorget, a gilt-lined belt with tassets, a torn
+  cape the red of Nether brick, stacked pauldrons with a spike each, vambraces, gauntlets, knee cops and sabatons.
+- He keeps his body, his size and the way he fights (the greatsword's whole string, parries, posture): the plate hangs
+  on his own limbs and takes every pose they do. A knight who rose before this patch is dressed in it when he loads.
+- How: his four netherite pieces carry the look `jaymoskingdoms:vigil_plate` (`FortressKnight.PLATE`), and
+  `ReverentLayer` hangs `vigil_plate` (made by `kingdoms/tools/gen_fortress_knight.py`, spec
+  `docs/Fortress-Knight-Model-Spec.md`) on whoever wears that look. The pieces still never drop.
+- Compiled; seen in renders only, not played.
