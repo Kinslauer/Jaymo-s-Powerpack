@@ -26,4 +26,4 @@ owns:
 - PR #1322: Wisp ghost tail + held Phase, compiled, not played.
 
 ## Done
-- 2026-11-12 01:54 PR #1322 is merged into master; moved to Agents/Done.
+- 2026-11-12 19:07 PR #1322 is merged into master; moved to Agents/Done.

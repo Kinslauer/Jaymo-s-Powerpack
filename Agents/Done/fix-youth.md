@@ -31,5 +31,9 @@ owns:
 - 0.22.0 was already done in the cloud as PR #1264. My duplicate #1267 is closed.
 
 ## Done
-- 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-12 03:26 PR #1266 is merged into master; moved to Agents/Done.
+- **#1266** (Kitchen): a waterskin from before the tier update turns into a Leather Waterskin with its water (up to
+  3 sips) instead of disappearing. Not tested in game: load a pre-0.5.98 world.
+- **#1265**: Andy's 4 pick-lists in `docs/checklists/`.
+- Hermes: SOUL.md hard rules; model back to Super; Quill the only writer; Prometheus counts toward the cap;
+  leftover worktrees and the duplicate skill cleaned up. Details in `Fix YOUTH.md`.
+- 2026-11-12 05:20 PR #1266 is merged into master; moved to Agents/Done.
