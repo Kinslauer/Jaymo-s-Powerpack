@@ -13153,3 +13153,43 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 
 - With Jaymo's Powers' character menu now a strip of tabs across the top of the screen, Kingdoms' pages (Skills, Class, Story, Growth, Journal, Faction, Party, Weapon Forms) sit under it instead of reaching the top edge on a short screen, and the skill web's title bar sits under it too. Without Powers nothing moves.
 - Compiled; not played.
+
+## 0.8.74 (2026-11-14): Films: no screen filters, and a level field wherever they play (#1530)
+
+- While a film plays (the lore films, a boss's entrance, the farm waking), no screen filter is drawn over it: a Hollow's
+  or Nightborn's darkvision grey, blood sight, and the powers' own filters all wait until the film ends.
+- The Long Defence no longer breaks on rough land (the fight sank into ponds and went behind hillsides, and the camera
+  with it). The film now levels its own field for as long as it plays, on your screen only: hills are cut, ponds filled
+  and trees cleared over the stage, easing back into the land at its edges, and everything is put back when it ends.
+  Buildings and a kingdom's seat are left standing.
+- Lore films use your plain FOV setting (no sprint or speed widening), as the other films do.
+
+## 0.8.75 (2026-11-14): changelings take faces; shapeshifters far rarer and always MCA villagers (#1539)
+
+- **Far fewer stolen lives** (Andy: "they should be far less common", three in one clip). A settlement now loses at most
+  one of its own to a shapeshifter every ten days (`Doubles.TAKEN_GAP`, kept on the overworld as `stolen_taken`), whatever
+  the source. Before, every chunk in the ring 50 to 140 blocks round a seat could get its own cellar, and every villager
+  found underground in a village counted. A dungeon captive is a stolen life 15% of the time (was 50%), a cellar roll comes
+  up 0.02 (was 0.05), and copies already waiting for the same settlement are cut to one.
+- **Always an MCA villager** (Andy: "always copy an mca skin not the regular minecraft skin or anything else"). Only an MCA
+  villager can be stolen (`Doubles.stealable`), a copy that would not be one is never made, and copies of plain villagers
+  left in a world from before are removed when a player comes near. Without MCA there are no stolen lives.
+- **Changeling impostors**: one copy in three (`CHANGELING_IN`, fixed by whose face it is) is a Sylvan changeling under the
+  face, not the grey shapeshifter. Found out the same ways, it stays a villager: it gets a face, hair and name of its
+  own, the Sylvan blood and the Changeling look, says its piece and runs. It never fights.
+- **Changeling players**: Mirror Shift on an MCA villager within 16 blocks puts that villager's look on you (skin, face,
+  hair, clothes, build), shown to everyone and kept through a relog (`BorrowedFaces`, `McaBridge.wearLook`). It comes off
+  when you use Mirror Shift with nobody in sight, when you are hurt to half health, or when you die. On any other
+  creature Mirror Shift still trades places.
+- Not done: villagers do not treat a player wearing a face as that villager, and the borrowed name is not shown.
+- Built (compileJava); not played. The fresh logs could not be read from the cloud session, so the cause of the
+  vanilla-skinned copy was taken from the code (plain villagers under villages could be stolen), not seen in a log.
+
+## 0.8.76 (2026-11-14): random start spot for every new life
+
+- Andy, reincarnated into the very same area: "is it possible to put the player in a random spawn every time? i dont want it to be searching for the same spawn scenario when theyre are 12+ people online". Every setting out (a first start, a reincarnation, a story told again) is now worked out from its own random point up to 1500 blocks from the world's spawn (even over the area) instead of from the spawn itself, so the nearest village, farm, camp, wreck, realm, monolith, milestone, harbour or wild ring is a different one each life, and players setting out at once search different land instead of queueing past each other's taken places.
+- The point is drawn off the open sea when one of 8 tries is (biome noise only, nothing is made or loaded to pick it) and never within 480 blocks of where that player last woke. The same point is kept through the start's retries, so the land made in the background between them is still used.
+- A player's own last start now counts as taken like anyone else's (looked past within 96 blocks of the place, 32 of the wake), so a new life never lands in the old one's village or camp.
+- Unchanged: the loading screen holds until the start is ready, no Aether starts except Divine-born, the 15 s search and 60 s land-wait limits, Start Together (party mates still wake beside each other), the world's first capital still rises by the spawn. Server log line "<name> sets out from x, z (N blocks from spawn)".
+- LifeStory (ORIGIN_SPREAD/ORIGIN_TRIES/ORIGIN_APART, origin, Wanted.origin, others keeps the player's past start), StoryGround.harbour/milestone take the origin.
+- Built; not played.
