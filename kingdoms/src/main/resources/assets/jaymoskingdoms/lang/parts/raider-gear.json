@@ -1,0 +1,23 @@
+{
+  "item.jaymoskingdoms.wanted_poster": "Blank Poster",
+  "item.jaymoskingdoms.wanted_poster.of": "Wanted: %s",
+  "item.jaymoskingdoms.wanted_poster.tooltip": "Illager work. Your own can be torn up; another's can be pinned up where illagers will see it.",
+  "item.jaymoskingdoms.wanted_poster.tooltip.blank": "Name it on an anvil.",
+  "item.jaymoskingdoms.raiders_horn": "Raider's Horn",
+  "item.jaymoskingdoms.raiders_horn.tooltip": "They come when it sounds. They do not come back soon if none of them go home.",
+  "item.jaymoskingdoms.rusty_key": "Rusty Key",
+  "item.jaymoskingdoms.rusty_key.tooltip": "Turns a simple lock once.",
+  "item.jaymoskingdoms.evoker_notes": "Evoker's Notes",
+  "item.jaymoskingdoms.evoker_notes.tooltip": "Close writing in the illager hand, and diagrams of something small and gold.",
+  "item.jaymoskingdoms.crude_totem": "Crude Totem",
+  "item.jaymoskingdoms.crude_totem.tooltip": "It will hold death off once. Not kindly.",
+  "message.jaymoskingdoms.wanted.marked": "The illagers know your face.",
+  "message.jaymoskingdoms.wanted.cleared": "The illagers have stopped asking after you.",
+  "message.jaymoskingdoms.wanted.quiet": "No horn answers. They will leave this ground be for a while.",
+  "message.jaymoskingdoms.working.lacking": "The working wants %s pages over a brewing stand, and an emerald block in your other hand.",
+  "message.jaymoskingdoms.working.failed": "The working comes apart in smoke.",
+  "illager_talk.jaymoskingdoms.buy_off": "Pay to have your posters taken down (%s)",
+  "illager_talk.jaymoskingdoms.line.bought_off.0": "Done. By morning nobody remembers the face. Do not make us draw it again.",
+  "illager_talk.jaymoskingdoms.line.bought_off.1": "Coin is a good eraser. The posters come down tonight.",
+  "illager_talk.jaymoskingdoms.line.bought_off.2": "Paid. You were never here. Neither was I."
+}

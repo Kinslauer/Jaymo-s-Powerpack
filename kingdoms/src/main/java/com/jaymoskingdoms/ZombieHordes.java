@@ -237,6 +237,8 @@ public final class ZombieHordes {
 		@Nullable Vec3 war;
 		/** The mangonel a big host of the Reaper's pushes to its war ({@link ReapedHost#engine}). */
 		@Nullable Mangonel engine;
+		/** A squad a raider's horn called ({@link #horn}): killed to the last, the illagers leave that ground alone. */
+		boolean horn;
 		/** A host its keeper called ({@link #call}): it keeps to them, fights what they fight, and is soon taken back. */
 		boolean called;
 
@@ -258,6 +260,10 @@ public final class ZombieHordes {
 	}
 
 	private static final List<Horde> HORDES = new ArrayList<>();
+	/** Set while a raider's horn is calling its squad ({@link #horn}). */
+	private static boolean hornCall;
+	/** On a squad's leader who carries a raider's horn (dropped when he dies, {@link RaiderGear}). */
+	static final String HORN_TAG = "jaymoskingdoms.squad_horn";
 	/** Player → the game time they may next draw a horde. */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
 	/** Grave-captains loaded, and their bars. */
@@ -415,6 +421,9 @@ public final class ZombieHordes {
 				chance = NIGHT_CHANCE + NIGHT_CHANCE_DANGER * danger;
 			} else if (overworld.isRaining()) {
 				chance = (NIGHT_CHANCE + NIGHT_CHANCE_DANGER * danger) / DAY_DIVISOR;
+			} else if (RaiderGear.wanted(player)) {
+				// wanted by the illagers: their squads come at any hour
+				chance = (NIGHT_CHANCE + NIGHT_CHANCE_DANGER * danger) * RaiderGear.DAY_SHARE;
 			} else {
 				continue;
 			}
@@ -436,6 +445,11 @@ public final class ZombieHordes {
 		if (level.dimension() == Level.NETHER) {
 			return Kind.NETHER;
 		}
+		boolean day = !night(level.getServer().overworld()) && !underground(player);
+		boolean quiet = RaiderGear.quiet(level, centre);
+		if (RaiderGear.wanted(player) && !quiet && (day && !surfaceWeather(level.getServer().overworld()) || random.nextFloat() < RaiderGear.SQUAD_SHARE)) {
+			return Kind.SQUAD;
+		}
 		if (danger >= REAPED_DANGER && random.nextFloat() < (blood ? REAPED_BLOOD_CHANCE : REAPED_CHANCE)) {
 			return Kind.REAPED;
 		}
@@ -444,7 +458,7 @@ public final class ZombieHordes {
 			return random.nextFloat() < 0.25F ? Kind.MIXED : Kind.DEAD;
 		}
 		int tier = WorldTiers.of(player).ordinal();
-		if ((danger >= SQUAD_DANGER || tier >= 2) && random.nextFloat() < SQUAD_CHANCE) {
+		if ((danger >= SQUAD_DANGER || tier >= 2) && !quiet && random.nextFloat() < SQUAD_CHANCE) {
 			return Kind.SQUAD;
 		}
 		if (byWater(level, centre) && random.nextFloat() < DROWNED_CHANCE) {
@@ -541,6 +555,16 @@ public final class ZombieHordes {
 				continue;
 			}
 			special(level, horde, tier, random);
+			if (kind == Kind.SQUAD) {
+				// its leader carries the poster of who they've come for, and now and then a horn
+				Mob leader = horde.members.getFirst();
+				leader.setItemSlot(EquipmentSlot.OFFHAND, RaiderGear.poster(player.getGameProfile().name()));
+				leader.setDropChance(EquipmentSlot.OFFHAND, 2.0F);
+				if (random.nextFloat() < RaiderGear.HORN_CHANCE) {
+					leader.addTag(HORN_TAG);
+				}
+				horde.horn = hornCall;
+			}
 			if (kind == Kind.SQUAD && !cave) {
 				SquadMounts.mount(level, horde.members, centre, random);
 			}
@@ -874,6 +898,9 @@ public final class ZombieHordes {
 			ServerLevel overworld = level.getServer().overworld();
 			boolean over = horde.members.isEmpty() || level.getGameTime() - horde.born > (horde.called ? CALL_AGE : MAX_AGE)
 				|| !horde.daylit() && !surfaceWeather(overworld);
+			if (horde.horn && horde.members.isEmpty()) {
+				RaiderGear.beaten(level, BlockPos.containing(horde.goal), level.getPlayerByUUID(horde.hunted) instanceof ServerPlayer p ? p : null);
+			}
 			if (over) {
 				// sunrise, or it's had its night: ordinary monsters again (the Reaper's host is taken back)
 				horde.members.forEach(m -> m.removeTag(TAG));
@@ -1023,6 +1050,19 @@ public final class ZombieHordes {
 				int h = m.getUUID().hashCode();
 				steer(m, horde.goal.add(((h & 7) - 3.5) * 0.8, 0.0, (((h >> 3) & 7) - 3.5) * 0.8), null, MARCH_LOUDNESS);
 			}
+		}
+	}
+
+	/** A raider's horn blown by {@code player} ({@link RaiderGear}): a hit squad comes for them now, wherever the Sun is. Returns how many. */
+	static int horn(ServerPlayer player) {
+		Kind was = forced;
+		forced = Kind.SQUAD;
+		hornCall = true;
+		try {
+			return send(player, Moons.Moon.NONE);
+		} finally {
+			forced = was;
+			hornCall = false;
 		}
 	}
 

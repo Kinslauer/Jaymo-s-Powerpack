@@ -208,6 +208,19 @@ public final class Lockpicking {
 		if (lock == null || !lock.locked()) {
 			return InteractionResult.PASS;
 		}
+		if (sp.getMainHandItem().is(RaiderGear.KEY) && lock.level() <= RaiderGear.KEY_LEVEL) {
+			// a rusty key (the illagers'): it turns a simple lock once, and snaps in it
+			sp.getMainHandItem().consume(1, sp);
+			for (BlockPos half : halves(server, lockPos)) {
+				BlockEntity be = server.getBlockEntity(half);
+				if (be != null && be.hasAttached(LOCK)) {
+					be.setAttached(LOCK, Lock.OPEN);
+					be.setChanged();
+				}
+			}
+			server.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.2F);
+			return InteractionResult.PASS;
+		}
 		server.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
 		int picks = sp.getInventory().countItem(LOCKPICK);
 		if (picks == 0) {

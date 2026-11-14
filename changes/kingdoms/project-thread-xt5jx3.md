@@ -30,3 +30,18 @@ Andy's picks from Immersive Pillagers, Mebahel's Draugr and Moog's Ocean Structu
   badlands, on horses on plains and savanna, two to a boat where there is water within 20 blocks (rowed toward you; they
   shoot from it and step out where it grounds), and one time in five under open sky two to a hot air balloon let down from
   26 blocks up (needs Jaymo's Powers). Mounts, boats and balloons are left behind for whoever wants them.
+- **Wanted by the illagers** (`RaiderGear`): every living illager you kill adds to a mark (6, a warlord 20, to 100). From
+  30 their hit squads come at any hour. It fades 3 a day, a friendly illager sells it back in the talk menu (an emerald's
+  worth a point), and beating a horn's squad takes 15 off.
+- **Wanted posters**: a squad's leader carries (and drops) the poster of whoever it hunts; use your own to tear it up (25
+  off). A Blank Poster (paper, ink sac, charcoal), named for a player on an anvil and used on a wall within 40 blocks of a
+  living illager camp's fire, is pinned there in a frame and adds 40 to that player's mark.
+- **Raider's Horn**: every camp warlord drops one, a squad leader one time in five. Blow it (6 uses, 2 minutes apart) and a
+  squad comes for you now, by day too. Kill all of it and no squad comes within 160 blocks of there for 5 days.
+- **Rusty Key**: 6% from a living illager you kill; used on a locked chest of lock level 1 or 2 it opens it and is used up.
+- **Evoker's lab**: illager camps raise one as they grow (after the last tent): a lean-to with a brewing stand, a lectern,
+  a cauldron and a chest locked at level 2 holding 2 to 4 Evoker's Notes. Evokers drop a page about one time in three.
+  Reading a page teaches 2 points of the illager tongue once a day. Five pages used on a brewing stand with an emerald
+  block in the other hand make a Crude Totem six times in ten (it saves you from death once, with Regeneration I for 15
+  s and Weakness for 30 s); otherwise smoke and Weakness.
+- Lore: `Lore.md`, "The illagers keep accounts" (new, for Andy).
