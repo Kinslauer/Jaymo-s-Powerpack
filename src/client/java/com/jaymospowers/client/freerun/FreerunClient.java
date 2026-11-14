@@ -112,6 +112,11 @@ public final class FreerunClient {
 		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.POLE;
 	}
 
+	/** Clinging to a wall (climbing it, shimmying along it or slipping down it): its hands are drawn in first person ({@code ClimbFirstPerson}). */
+	public static boolean clinging() {
+		return kind == Freerun.CLING;
+	}
+
 	/** Hanging from a bar: {@link #travel} moves the body instead of the vanilla travel. */
 	public static boolean hanging() {
 		return kind == Freerun.BAR;
