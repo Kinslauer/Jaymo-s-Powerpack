@@ -1,0 +1,9 @@
+# zombie hordes - more of the dead, walking together, growing with the world and biggest under blood moons
+- **Zombie hordes** (`ZombieHordes`, ideas from Harder Hordes (MIT) and Undead Nights (ARR); our own code): every 10 s each player in the Overworld may draw a horde of 3-12 zombies (husks in deserts and badlands) that comes up out of sight, 40-56 blocks behind them, groans once (sound only, no text) and shambles their way.
+- **Hidden danger** (0-1): world age (no hordes for the first 3 days, then full after 60 more), the player's world tier, their armour and the local difficulty. It sets how often (night: 2% to 8% per roll, a per-player 2 min wait after each), how big, and how many nearby zombies a new horde may bring the count to (12 to 32 within 64 blocks).
+- **Night and rain**: hordes come at night; by day only under rain, 10x rarer. At sunrise (or after half a day) a horde breaks up into ordinary zombies, which then run for shade as before.
+- **Blood moons**: 20% a roll (super blood moon 30%), 15 s wait, twice as big (super: three times), cap x1.5 (x2); the zombies claw up out of the ground like the moon's own.
+- **Keeping together**: members are led to where the player is (quietly, through mob senses' lure, so louder noise, light or blood still draws them off); once the player is 96+ blocks away the horde wanders on. Idle wild zombies within 12 blocks fall in (up to 24, 40 under a blood moon; never thralls, buds, risen orcs, drowned or piglins). When one attacks, the rest are called to the fight.
+- **Fight or run**: only 15%-50% of a horde is armed: a dead villager's old tools at Hearth, weapons of the world tier's grades above it (`MonsterGear.weaponFor`). Lit ground keeps them from coming up there.
+- Operators: `/kingdom horde` sends one at once (testing only; no player command).
+- Built; not played.
