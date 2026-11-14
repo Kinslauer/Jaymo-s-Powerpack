@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:string",
+    {
+      "id": "jaymoskitchen:hemp_fibre",
+      "required": false
+    }
+  ]
+}

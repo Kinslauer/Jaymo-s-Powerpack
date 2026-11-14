@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:wool",
+    {
+      "id": "jaymoskitchen:hemp_cloth",
+      "required": false
+    }
+  ]
+}

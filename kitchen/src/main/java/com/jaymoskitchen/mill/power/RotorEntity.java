@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,6 +37,10 @@ public class RotorEntity extends BlockEntity {
 	/** The shaft pieces set turning last time, to set still again when the run changes or it stops. */
 	private List<BlockPos> turning = new ArrayList<>();
 
+	/** A windmill's four sails' colours (Better With Mods': dyed one at a time, in turn), and the next one a dye goes to. */
+	private final DyeColor[] sails = {DyeColor.WHITE, DyeColor.WHITE, DyeColor.WHITE, DyeColor.WHITE};
+	private int nextSail;
+
 	/** Client side: the angle shown, now and last tick. */
 	public float angle, lastAngle;
 
@@ -54,6 +59,26 @@ public class RotorEntity extends BlockEntity {
 
 	public float speed() {
 		return speed;
+	}
+
+	public DyeColor sail(int sail) {
+		return sails[sail];
+	}
+
+	/** Dyes the next sail in turn; false (and no dye used) when that one is already this colour. */
+	public boolean dye(DyeColor colour) {
+		int sail = nextSail;
+		nextSail = (nextSail + 1) % sails.length;
+		if (sails[sail] == colour) {
+			setChanged();
+			return false;
+		}
+		sails[sail] = colour;
+		setChanged();
+		if (level != null) {
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+		}
+		return true;
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, RotorEntity rotor) {
@@ -118,6 +143,15 @@ public class RotorEntity extends BlockEntity {
 		super.loadAdditional(input);
 		speed = input.getFloatOr("Speed", 0.0F);
 		turning = new ArrayList<>(input.read("Turning", BlockPos.CODEC.listOf()).orElse(List.of()));
+		loadSails(input);
+		nextSail = Math.floorMod(input.getIntOr("NextSail", 0), sails.length);
+	}
+
+	private void loadSails(ValueInput input) {
+		List<DyeColor> saved = input.read("Sails", DyeColor.CODEC.listOf()).orElse(List.of());
+		for (int i = 0; i < sails.length; i++) {
+			sails[i] = i < saved.size() ? saved.get(i) : DyeColor.WHITE;
+		}
 	}
 
 	@Override
@@ -125,6 +159,8 @@ public class RotorEntity extends BlockEntity {
 		super.saveAdditional(output);
 		output.putFloat("Speed", speed);
 		output.store("Turning", BlockPos.CODEC.listOf(), turning);
+		output.store("Sails", DyeColor.CODEC.listOf(), List.of(sails));
+		output.putInt("NextSail", nextSail);
 	}
 
 	@Override
@@ -136,6 +172,7 @@ public class RotorEntity extends BlockEntity {
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
 		output.putFloat("Speed", speed);
+		output.store("Sails", DyeColor.CODEC.listOf(), List.of(sails));
 		return output.buildResult();
 	}
 }

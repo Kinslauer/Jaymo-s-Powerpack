@@ -1,5 +1,14 @@
 package com.jaymoskitchen.mill.power;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -69,6 +78,21 @@ public class RotorBlock extends BaseEntityBlock {
 	@Override
 	protected BlockState mirror(BlockState state, Mirror mirror) {
 		return state.rotate(mirror.getRotation(state.getValue(FACING)));
+	}
+
+	/** A dye on a windmill colours its next sail (Better With Mods' way), using up the dye. */
+	@Override
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+		InteractionHand hand, BlockHitResult hit) {
+		DyeColor colour = stack.getItem() instanceof DyeItem ? stack.get(DataComponents.DYE) : null;
+		if (rotor != Rotor.WINDMILL || colour == null || !(level.getBlockEntity(pos) instanceof RotorEntity entity)) {
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
+		if (!level.isClientSide() && entity.dye(colour)) {
+			stack.consume(1, player);
+			level.playSound(null, pos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+		}
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
