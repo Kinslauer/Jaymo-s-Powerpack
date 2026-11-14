@@ -71,7 +71,7 @@ public final class BloodCoatLayer {
 	/** (0.20.55) The body {@code corpse} is drawn as: its own blood, not whatever coat the stand-in body has. */
 	private static void corpseBody(Entity corpse, EntityRenderState state) {
 		state.setData(KEY, null);
-		state.setData(CORPSE, Bloodied.corpseBlood(corpse));
+		state.setData(CORPSE, BloodSettings.off() ? null : Bloodied.corpseBlood(corpse));
 	}
 
 	/** (0.20.55) Just after a dead player's plain body: its blood over it, in its pose. */
@@ -95,7 +95,7 @@ public final class BloodCoatLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		state.setData(KEY, Bloodied.coat(entity));
+		state.setData(KEY, BloodSettings.off() ? null : Bloodied.coat(entity));
 		state.setData(CORPSE, null);
 	}
 

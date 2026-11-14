@@ -386,6 +386,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Lays its pieces into {@code decals} for this frame. */
 	@Override
 	public void emit(BloodDecals.State decals, Camera camera, float partialTick) {
+		if (BloodSettings.off()) {
+			return;
+		}
 		float size = this.baseSize;
 		float age = this.age + partialTick;
 		if (age <= SPLAT_IN) {

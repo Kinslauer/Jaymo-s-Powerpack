@@ -260,6 +260,9 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 
 	@Override
 	public void emit(BloodDecals.State decals, Camera camera, float partialTick) {
+		if (BloodSettings.off()) {
+			return;
+		}
 		float age = this.age + partialTick;
 		float alpha = ALPHA;
 		int fadeFrom = this.washFrom >= 0 ? this.washFrom : this.lifetime - (this.stain ? BloodTrail.FADE : FADE);
@@ -395,6 +398,9 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	}
 
 	private static void add(Particle particle) {
+		if (BloodSettings.off()) {
+			return;
+		}
 		Minecraft.getInstance().particleEngine.add(particle);
 	}
 }

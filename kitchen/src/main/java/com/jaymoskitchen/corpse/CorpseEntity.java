@@ -2463,6 +2463,8 @@ public class CorpseEntity extends Entity {
 				dropped.setUnlimitedLifetime();
 			}
 		}
+		// what the eater leaves of it: bones, a gut pile, the tatters of its clothes
+		Gibs.eaten(this, level);
 		discard();
 		return meat;
 	}

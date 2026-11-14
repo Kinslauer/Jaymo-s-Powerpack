@@ -130,7 +130,7 @@ public final class ArmourGrimeTextures {
 		ArmourGrime.Grime grime = ArmourGrime.grime(stack);
 		boolean dirty = grime != null && grime.amount() > 0;
 		// (0.20.41) and blood, on any item
-		Smear smear = smear(Bloodied.blood(stack));
+		Smear smear = com.jaymospowers.client.blood.BloodSettings.off() ? null : smear(Bloodied.blood(stack));
 		if (!dirty && smear == null) {
 			return null;
 		}
