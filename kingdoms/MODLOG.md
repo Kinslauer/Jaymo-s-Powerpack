@@ -13633,3 +13633,11 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   flies you to your bed or respawn point: the screen flashes green, and layered light (a sigil, a ring, a blast, rising
   motes and leaves) marks where you left and where you land. Once a day per player (the day turns with the Overworld's
   clock): cry again the same day and Youth only makes a joke. With no bed, it tells you so, and the day's trip isn't spent.
+
+## 0.9.3 (2026-11-14): casters cast with hand gestures and sigils (#1570)
+
+- **Casting gestures**: every spell now has a hand motion instead of a punch swing. Bolts push a palm forward, Raise and Sanctuary sweep both hands down to the ground, drains pull a clawed hand back, Warding crosses the arms, Mending holds a hand out, Restoration, Frenzy and Whispers lift both hands, Hemorrhage sweeps sideways. A sigil in the spell's colour forms where the hands are (standing in front for bolts, on the ground for ground spells) and runes are drawn into the caster. New `Casting` class (gesture per spell, `cast_gesture` packet); `CastPose` poses the arms of players, MCA villagers and mobs, and the first-person hands (`CastFirstPersonMixin`).
+- Player casts (Spellcraft staff/imbue/bolt, Tomes pages, Absorption blasts, Restoration, Necromancy, Hemomancy, StormArts) and villager casters (necromancers, blood witches, shamans, court wizards, chants and mending) all use the same gestures, so what the film shows matches the game.
+- **Long defence film**: the mages use the same gestures (new GeckoLib moves cast_push, cast_push_left, cast_draw, cast_sweep, cast_raise, cast_ground, cast_give) and the typed magic effects: standing and ground sigils, beams, blasts, rings, a wave of light, rune and stroke cuts, motes instead of dust. The relay bolt is a thin beam, the paired spell ends in a sky beam over a ground sigil. Tape re-recorded (new SHAPE op).
+- Fx gains `shape(...)` (any MagicFx shape by reflection).
+- Film recorded and watched in a dev client. Villager casters seen casting sigils in a dev-client camp fight, but the arm gestures there were not seen up close; player casts compile-checked only.

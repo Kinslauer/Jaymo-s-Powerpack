@@ -5006,3 +5006,9 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - **Patterns**: take an old piece of armour or a weapon apart at the Drafting Table (with paper in your pack; use it twice) to learn its blueprint, one grade below the piece. That is how Juggernaut plate can be forged again: nobody sells its schematic.
 - The handgonne and arquebus barrels (Jaymo's Kingdoms) are forged at the anvil too, and their shots get their own muzzle blasts.
 - Built; not played.
+
+## 0.23.87 (2026-11-14): standing sigils, chapel world-load fix (#1570)
+
+- `MagicFx.sigil(level, at, facing, ...)` draws a sigil standing in the air facing a direction (both faces drawn); a zero facing still lies flat. `MagicFx.shape(...)` and `MagicFxClient.shape(...)` send or draw any shape directly, so Kingdoms' casters and films can use them.
+- Fixed the Darkened Chapel template pool: its structure-block ignore list used the old format, which 26.3 rejects, so worlds could fail to load with Powers.
+- Built; seen in the Kingdoms dev client.
