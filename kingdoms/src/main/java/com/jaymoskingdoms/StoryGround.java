@@ -482,15 +482,15 @@ public final class StoryGround {
 	/**
 	 * {@code player}'s whaler, fitted out and lying at a realm's harbour, then {@code then}; on giving up, {@code fallback}.
 	 * (0.7.235: the whaler start sent everyone to the wild: she was fitted out at once, at a harbour whose sea wasn't
-	 * loaded round her.) The realm is the one nearest spawn with a harbour that has a berth, else the coastal realm
-	 * nearest spawn (a harbour built for it), else a new kingdom raised on the shore nearest spawn; its land is kept
+	 * loaded round her.) The realm is the one nearest {@code spawn} (the setting out's own random point: LifeStory.origin)
+	 * with a harbour that has a berth, else the coastal realm nearest it (a harbour built for it), else a new kingdom raised
+	 * on the shore nearest it; its land is kept
 	 * loaded and ticking till she floats. A realm whose harbour can't be built or whose whaler won't float is passed
 	 * over for the next. (Tiv) So is one whose harbour isn't {@code free} (someone else's start: LifeStory).
 	 */
-	static void harbour(ServerPlayer player, java.util.function.BiPredicate<ServerLevel, BlockPos> free, Runnable then, Runnable fallback) {
+	static void harbour(ServerPlayer player, BlockPos spawn, java.util.function.BiPredicate<ServerLevel, BlockPos> free, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
-		BlockPos spawn = level.getRespawnData().pos();
 		Whaler w = new Whaler(player.getUUID(), spawn, free);
 		w.realm = w.next(level);
 		Faction first = w.realm < 0 ? null : Factions.get(server, w.realm);
@@ -525,15 +525,14 @@ public final class StoryGround {
 	 * one; the road between them is planned and its ends loaded so the milestones are set up ({@link Roads#hurry},
 	 * {@link Roads#openEnds}).
 	 */
-	static void milestone(ServerPlayer player, Runnable then, Runnable fallback) {
+	static void milestone(ServerPlayer player, BlockPos spawn, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		if (realmless(server)) {
-			capital(server, player, () -> milestone(player, then, fallback));
+			capital(server, player, () -> milestone(player, spawn, then, fallback));
 			return;
 		}
 		ServerLevel level = Factions.level(server);
 		UUID id = player.getUUID();
-		BlockPos spawn = level.getRespawnData().pos();
 		boolean[] raised = {false};
 		Job job = new Job(spawn, level.getGameTime() + ROAD_GIVE_UP_TICKS, l -> {
 			Roads.Stone stone = Roads.stoneNear(l, spawn);
