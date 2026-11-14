@@ -4933,3 +4933,8 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   `FinisherPose.powers`, lang part `power_finishers.json`. Lore: "How a power ends a fight" in Lore.md, for Andy to approve.
 - Compiled; not played. The player's own pose is the same for every body kind, and three poses are shared between the
   ten powers; the looks were set by eye.
+
+## 0.23.80 (2026-11-14): Character menu: Q and E turn pages (#1556)
+
+- Andy: "Q and E should navigate this screen". On every H-menu page Q opens the page before on the top strip and E the page after (round the ends), unless you are typing in a text box. The strip's end plates now read Q and E instead of arrows; clicking them still works.
+- Class: `MenuTabs`. Compiled; not played.

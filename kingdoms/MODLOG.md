@@ -13460,3 +13460,23 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Satyrs** (`beasts/Satyr`, `Satyrs`): goat-legged groves of 3-5 in forests, birch woods and meadows (creature spawn, weight 3), under a grey-coated eldest. At dusk they lay a campfire (or use one near home), the eldest plays one of three pipe tunes of our own (`kingdoms/tools/gen_satyr_pipes.py`) while the rest dance in a ring or sit; at dawn the fire they laid goes out. Strike one and the whole grove fights (head-butt charge, kicks) for 2 minutes. Give one honey, sweet or glow berries or wine (`jaymoskingdoms:satyr_gifts`) and the grove counts you a friend: by their fire while they play you get Regeneration and Luck. Goes down, dismemberable; drops leather and sometimes a goat horn.
 - Models, textures and animations from our own generators (`kingdoms/tools/gen_cyclops.py`, `gen_satyr.py`); two new loading-screen hints.
 - Built; not played.
+
+## 0.8.88 (2026-11-14): villager talk buttons legible
+
+- **MCA's villager screen, right-hand buttons**: every button in the column is now as wide as its longest label needs
+  (it still grows leftwards from the right edge, up to 150 or a third of the screen), so Ask about Money, Talk Them
+  Round, Where Were You and the rest read in full instead of scrolling cut off. A label still too long keeps its
+  scroll and shows its full text as a tooltip. The shown buttons stack with no gaps where hidden ones sat, the back
+  arrow moves out beside the wider column, and a dark panel in the purple of the info tags sits behind the column so
+  it reads over a busy world. Every page (main, Interact, Ask the Way, Professions, Work, Locations, a stranger's
+  page) gets it; every button keeps its own action, so all options and chat interactions work as before.
+- `client/mixin/mca/McaButtonColumnMixin` (after the other page mixins, priority 1100).
+- Built; not played.
+
+## 0.8.89 (2026-11-14): Captives and cleansers: no beating the downed, free captives walk free, a new life is a stranger
+
+- **Nobody cleanses the downed**: Truth followers sworn to cleanse a player (`CastOut`) stopped only for the dead, so they kept punching a downed player, and blows on a downed player are real harm: they beat Andy to death where he lay. Now they leave a downed player alone (back at it if they rise), and a downed cleanser doesn't hit either.
+- **Chained captives can't hit anyone**: a captive in chains has no AI, but `CastOut`'s blows were dealt by hand, so a chained captive who'd sworn to cleanse you punched you when you came to talk. Now a bound captive never hunts.
+- **Free captives aren't captives** (Andy: "if they are captive and find themselves able to walk free like this, they are no longer captive"): a captive nobody is leading home who is out of their chains, or has their legs back under them, drops captive status (`Captives.walkFree`): no more pleading to be freed while wandering about, and they're an ordinary villager again.
+- **A new life is a stranger** (Andy: "EVERYTHING resets"): what villagers and folk remembered, suspected or swore against a player was kept under their account, so a reincarnated player was still "unclean" to whoever cast out an old life. Each new life (`LifeStory.reincarnateAnew`) now gets its own id (`Recollections.life`, counted on the overworld in `Recollections.LIVES`): memories, bearings, suspicions and cast-outs of the old life stay with it.
+- Built; not played.
