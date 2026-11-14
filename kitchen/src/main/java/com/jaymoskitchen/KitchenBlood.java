@@ -35,6 +35,8 @@ public final class KitchenBlood {
 	private static boolean lookedForBody;
 	/** Powers' {@code BladeBlood.NO_BLOOD}. */
 	private static final int NO_BLOOD = -1;
+	/** {@link #of}: a body with no blood in it. */
+	public static final int NONE = NO_BLOOD;
 
 	/**
 	 * (0.5.86) Andy: "Kitchen's own blood ... double check that". {@code body}'s own blood (a living one's, or a corpse's: an
@@ -43,6 +45,23 @@ public final class KitchenBlood {
 	 */
 	public static void send(ServerLevel level, net.minecraft.world.entity.Entity body, double x, double y, double z, int count, double dx,
 		double dy, double dz, double speed) {
+		lookForBody();
+		if (bodyBlood != null && fleckOf != null) {
+			try {
+				int color = (int) bodyBlood.invoke(body);
+				if (color != NO_BLOOD) {
+					level.sendParticles((ParticleOptions) fleckOf.invoke(color, 1.0F), x, y, z, count, dx, dy, dz, speed);
+				}
+				return;
+			} catch (Throwable e) {
+				bodyBlood = null;
+			}
+		}
+		send(level, x, y, z, count, dx, dy, dz, speed);
+	}
+
+	/** Finds Powers' blood by name, once. */
+	private static void lookForBody() {
 		if (!lookedForBody) {
 			lookedForBody = true;
 			try {
@@ -57,18 +76,25 @@ public final class KitchenBlood {
 				fleckOf = null;
 			}
 		}
-		if (bodyBlood != null && fleckOf != null) {
+	}
+
+	/** Plain red, for a body's insides without Jaymo's Powers to say what it bleeds. */
+	public static final int RED = 0x80000D;
+
+	/**
+	 * {@code body}'s blood colour (RGB), as Jaymo's Powers has it (an enderman's purple, a zombie's rotten brown), or
+	 * {@link #NONE} for a body with no blood in it (a skeleton, a blaze). Plain {@link #RED} without Powers.
+	 */
+	public static int of(net.minecraft.world.entity.Entity body) {
+		lookForBody();
+		if (bodyBlood != null) {
 			try {
-				int color = (int) bodyBlood.invoke(body);
-				if (color != NO_BLOOD) {
-					level.sendParticles((ParticleOptions) fleckOf.invoke(color, 1.0F), x, y, z, count, dx, dy, dz, speed);
-				}
-				return;
+				return (int) bodyBlood.invoke(body);
 			} catch (Throwable e) {
 				bodyBlood = null;
 			}
 		}
-		send(level, x, y, z, count, dx, dy, dz, speed);
+		return RED;
 	}
 
 	/** Sends {@code count} of it at {@code x, y, z} as {@code sendParticles} would (nothing without Powers). */

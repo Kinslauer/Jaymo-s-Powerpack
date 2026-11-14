@@ -38,7 +38,7 @@ public final class Flies {
 
 	private static void tick(Minecraft mc) {
 		ClientLevel level = mc.level;
-		if (level == null || mc.isPaused() || level.getGameTime() % EVERY != 0 || mc.getCameraEntity() == null) {
+		if (level == null || mc.isPaused() || level.getGameTime() % EVERY != 0 || mc.getCameraEntity() == null || BloodSettings.off()) {
 			return;
 		}
 		long now = level.getGameTime();

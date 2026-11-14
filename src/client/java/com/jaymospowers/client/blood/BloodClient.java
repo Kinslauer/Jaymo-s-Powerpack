@@ -70,6 +70,9 @@ public final class BloodClient {
 		kind(registry, BloodParticles.SWIPE_1, 7, 32, true);
 		kind(registry, BloodParticles.SWIPE_2, 8, 32, true);
 		registry.register(BloodParticles.SPRAY, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
+			if (BloodSettings.off()) {
+				return null;
+			}
 			if (!options.stains() && drops != null) {
 				// (0.20.86) a cut's drip (the server lays its stain) is one small drop falling, not a splatter: drawn as a
 				// spatter's star, at a spray's size, it burst out of the body like blood clipping through it (Jung's clip)
@@ -127,7 +130,7 @@ public final class BloodClient {
 	/** (0.20.51) A fleck: now and then a small spatter, spurt or swipe, leaving no splash of its own. */
 	private static @Nullable Particle fleck(ClientLevel level, double x, double y, double z, double xd, double yd, double zd,
 		net.minecraft.util.RandomSource random, int color, float scale) {
-		if (random.nextFloat() >= FLECK_KEEP) {
+		if (BloodSettings.off() || random.nextFloat() >= FLECK_KEEP) {
 			return null;
 		}
 		Kind kind = shaped(random);
@@ -139,6 +142,9 @@ public final class BloodClient {
 	 * and kept instead of laid twice.
 	 */
 	private static @Nullable Particle puddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, BloodParticles.Puddle options) {
+		if (BloodSettings.off()) {
+			return null;
+		}
 		if (options.mark() == 0L) {
 			return splash(level, x, y, z, sprites, options);
 		}
@@ -249,7 +255,7 @@ public final class BloodClient {
 
 	/** (0.20.41) A drop of {@code color} this big falling straight down from here (off the end of a run on a wall). */
 	static void drip(ClientLevel level, double x, double y, double z, int color, float scale) {
-		if (drops != null) {
+		if (drops != null && !BloodSettings.off()) {
 			net.minecraft.client.Minecraft.getInstance().particleEngine.add(new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 4, 32, false, color, scale * 0.5F,
 				true).drip());
 		}
@@ -265,7 +271,7 @@ public final class BloodClient {
 			Kind kind = (level, x, y, z, xd, yd, zd, color, scale, stains) -> make(level, x, y, z, xd, yd, zd, sprites, frames, size,
 				directional, color, scale, stains);
 			KINDS.put(type, kind);
-			return (options, level, x, y, z, xd, yd, zd, random) -> kind.create(level, x, y, z, xd, yd, zd, RED, 1.0F, true);
+			return (options, level, x, y, z, xd, yd, zd, random) -> BloodSettings.off() ? null : kind.create(level, x, y, z, xd, yd, zd, RED, 1.0F, true);
 		});
 	}
 

@@ -38,7 +38,7 @@ public final class WeaponDrips {
 
 	private static void tick(Minecraft mc) {
 		ClientLevel level = mc.level;
-		if (level == null || mc.isPaused() || mc.getCameraEntity() == null) {
+		if (level == null || mc.isPaused() || mc.getCameraEntity() == null || BloodSettings.off()) {
 			return;
 		}
 		long now = level.getGameTime();

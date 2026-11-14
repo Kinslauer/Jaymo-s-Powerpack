@@ -39,7 +39,7 @@ abstract class ArmourGrimeMixin {
 	private void jaymospowers$grime(EquipmentClientInfo.LayerType layer, ResourceKey<EquipmentAsset> asset, Model<?> model, Object state, ItemStack stack,
 		PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, Identifier texture, int outlineColor, int order, CallbackInfo ci) {
 		jaymospowers$grime = ArmourGrime.grime(stack);
-		jaymospowers$blood = com.jaymospowers.core.blood.Bloodied.blood(stack);
+		jaymospowers$blood = com.jaymospowers.client.blood.BloodSettings.off() ? null : com.jaymospowers.core.blood.Bloodied.blood(stack);
 	}
 
 	/** Each of the armour's own layers (not the trim) is drawn from its grimy copy. */
