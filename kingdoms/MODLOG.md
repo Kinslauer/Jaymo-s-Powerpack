@@ -12910,3 +12910,11 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   `ReverentLayer` hangs `vigil_plate` (made by `kingdoms/tools/gen_fortress_knight.py`, spec
   `docs/Fortress-Knight-Model-Spec.md`) on whoever wears that look. The pieces still never drop.
 - Compiled; seen in renders only, not played.
+
+## 0.8.58 (2026-11-14): a chart to Mohknee (#1507)
+
+- Andy: "someone should sell a map to mohknee."
+- A blossom trader's captain, lying off a home harbour, now has a third answer beside passage: **Buy a copy of his chart** (15
+  emeralds' worth). It is a map of Mohknee's western shore (2048 blocks across, a red mark where his ship lies to). On the home
+  continent your marker sits on the map's edge toward that shore, so it gives the bearing to sail. Not sold off Mohknee itself.
+- `BlossomTraders.chart`. Compiled; not played. Not checked in game: that the far shore draws on the map before anyone has been there.
