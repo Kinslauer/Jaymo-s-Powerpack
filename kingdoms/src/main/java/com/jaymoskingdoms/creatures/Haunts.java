@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
 public final class Haunts {
 	static final int EVERY = 100, WINDOW = 4;
 	/** Chances a roll comes up: a ruin's shadows, its den, a structure's cube, a hill's warren, a cellar near a settlement, a cliff's harpy. */
-	static final float SHADOWS = 0.6F, DEN = 0.2F, CUBE = 0.45F, WARREN = 0.06F, CELLAR = 0.05F, HARPY = 0.12F;
+	static final float SHADOWS = 0.6F, DEN = 0.2F, CUBE = 0.45F, WARREN = 0.06F, CELLAR = 0.02F, HARPY = 0.12F;
 	/** Spawn chances a scan, and the most of each near the player (within 56 blocks). */
 	static final float CEILING = 0.4F, DEEP = 0.12F;
 	static final int PIERCERS_MOST = 5, FLIERS_MOST = 1, HARPIES_MOST = 2;
@@ -238,7 +238,7 @@ public final class Haunts {
 			Warrens.dig(level, top);
 			return;
 		}
-		if (seat != null && seatD > CELLAR_FROM && seatD < CELLAR_TO && Creatures.open(player, 0) && random.nextFloat() < CELLAR * 4 && roll(level, key(cx, cz, 5))) {
+		if (seatD > CELLAR_FROM && seatD < CELLAR_TO && Doubles.mayTake(level, seat) && Creatures.open(player, 0) && random.nextFloat() < CELLAR * 4 && roll(level, key(cx, cz, 5))) {
 			Doubles.cellar(level, top);
 			return;
 		}
@@ -323,7 +323,7 @@ public final class Haunts {
 		if (!Creatures.open(player, 0)) {
 			return;
 		}
-		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(40.0), x -> x.isAlive() && !x.isBaby()
+		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(40.0), x -> x.isAlive() && !x.isBaby() && Doubles.stealable(x)
 			&& !x.hasAttached(Doubles.STOLEN) && !x.hasAttached(Doubles.COPY))) {
 			BlockPos p = v.blockPosition();
 			if (level.canSeeSky(p) || p.getY() > level.getHeight(Heightmap.Types.WORLD_SURFACE, p.getX(), p.getZ()) - 4 || level.structureManager().getAllStructuresAt(p).isEmpty()) {
