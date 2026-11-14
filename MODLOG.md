@@ -4628,3 +4628,11 @@ Built, not played.
 - The black frame draws back and the line under it changes while you are free. Staying free is kept through logging out.
 - A buried body still holds its ghost by the grave (other mods say where a body rests through `Limbo.RESTING`).
 - Compiled; not played.
+
+## 0.23.55 (2026-11-14): Out of your body without crashing (#1510)
+
+- **Fix (client crash)**: knocked out of your body (`OutOfBody`), the ghost you look out of is made on your own
+  game and had no entity number. Cube Animals asks every drawn entity's number to see if it glows, and the game
+  crashed (Andy, after a creeper, 2026-11-14 2:43 AM). The ghost now gets a number of its own, below any the
+  server gives out.
+- Built.
