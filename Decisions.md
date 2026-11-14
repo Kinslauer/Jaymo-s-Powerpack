@@ -561,3 +561,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ## 2026-11-14 (Reaper host thread)
 - Andy: "only the undead illagers should ride spiders". Spider riders are reaped only; living illager squads never ride them.
 - Andy approved the lore paragraph "The drowned courts" ("good"); he will merge PR #1536 only when every patch is built ("ill merge when everything is done, build every patch").
+
+## 2026-11-14 (Rig style thread)
+- Andy picked 30 of 32 rows on the Awakening Rig pick list (not the suit hammer; assembly left as it is). His note on hit-stop: "yes bettercombat heavies need this".
