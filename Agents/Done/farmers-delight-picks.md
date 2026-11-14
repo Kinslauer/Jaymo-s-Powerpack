@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-o2rfe0
 with: Claude (cloud thread "Port Farmer's Delight picks into Kitchen")
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Flint, copper, golden, diamond and netherite knives that do everything the iron knife does; Backstabbing on knives; Comfort on waking in a homely room; Hot Cocoa. Built with Gradle (Kitchen build, Powers compileJava); not played.
+- 2026-11-14 03:13 PR #1490 is merged into master; moved to Agents/Done.

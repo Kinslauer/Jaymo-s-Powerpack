@@ -517,6 +517,13 @@ waterfall with no top ("follow the water the wrong way"), whales that swim throu
 stones tired of the ground, gold that grows on trees "higher", wizards on the floating rocks who "aren't hermits,
 they're halfway". A humming stone in your pack is best kept from the priests. Some villagers quietly build towers.
 
+(new) **The floor of the sky woods** (portable-mods thread, 2026-11-14; Andy picked "Living things" from The Aether II's
+world pieces). Nothing in the Aether is tended by the gods any more, so the woods keep themselves. The sky trees shed, and
+their leaves lie in piles under them until they rot back into the soil. The **rotshroom** is the Aether's undertaker: it
+grows only where something is rotting, eats the litter and fruits. Moss takes damp, shaded holystone and leaves it mossy.
+Aerbunnies strip the berry bushes and breed on them. Skyfolk gardeners rake leaves round a sapling or a picked bush to
+bring it on, and roast rotshrooms over the fire.
+
 **What lives up there.** Phygs, flying cows, sheepuffs, aerbunnies, moas, kirrids, burrukai, taegores, skyroot
 lizards, prismallards, glitterwings and shroudwings. **Aerwhales** swim the open sky, as big as the great whales of
 the sea. The hostile Aether has its zephyrs and tempests, cockatrices, blue and golden swets, aechor plants and
