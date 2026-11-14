@@ -1023,7 +1023,7 @@ not burn at sunrise; when its war is done the Reaper takes it back, and nothing 
 **reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
 them, and the Reaper is paid for what they kill near its keeper.
 
-(new) **The host at war** (Reaper's host thread, 2026-11-14; Claude's placement for Andy to approve). A host does not
+**The host at war** (Reaper's host thread, 2026-11-14; Claude's placement, approved by Andy 2026-11-14). A host does not
 always go back. When one of the reaped cuts down a camp's warlord, the camp does not fall: every illager left in it dies
 where it stands and gets up, a reaped warlord takes the seat, and the palisade is the Reaper's from then on. Such a
 hold raids the towns round it as the living camp did, grows by every illager its people kill, and stands until someone
@@ -1035,8 +1035,8 @@ there in the morning, and nobody will take her. The dead evokers no longer call 
 lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
 few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
 
-(new) **The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
-for Andy to approve). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
+**The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
 a poster, and from then on their hit squads do not wait for dark. A squad's leader carries the poster of the one it
 has come for. The mark fades if you leave them alone, an illager who likes you will sell it back, and a poster with
 another name on it, pinned where illagers will see it, does what you would expect. Squads come by whatever the country
@@ -1048,8 +1048,8 @@ Totem of Undying again, which they could once and cannot now: their camps raise 
 a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
 totem that holds death off once and leaves you weak, or a faceful of smoke.
 
-(new) **The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
-placement for Andy to approve). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
+**The tomb's ranks and the laughing bones** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's
+placement approved by Andy 2026-11-14). The draugr kept the ranks of the raid they died in. Most are the shield-wall's
 warriors. Some were its **archers** and still stand off and shoot. A **wight** was one the cold of the Frostborn's
 binding went deepest into: it wears a rimed grave-cloth and throws that cold from its free hand. A **scourge** was a
 ki-thrower, hooded now, and still throws ki, slowly, with no blade to fall back on. A **hall-guard** was the chief's
@@ -1058,8 +1058,8 @@ own, two swords and a crest, and steps aside from a blow as it did alive. None o
 with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
 back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
 
-(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
-for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+**The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+approved by Andy 2026-11-14). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
 it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
 over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
 hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
