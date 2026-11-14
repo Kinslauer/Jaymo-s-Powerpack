@@ -1,60 +1,136 @@
+/*
+ * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
+ * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/TempestModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
+ * Changed for Jaymo's Powers (2026-11): moved to this package, animations from the Java of branch 1.21.1-develop, posed from our own render state.
+ * This file stays under the LGPL v3.0.
+ */
 package com.jaymospowers.client.aether.monster;
 
+import net.minecraft.client.animation.KeyframeAnimation;
+import com.jaymospowers.client.aether.anim.TempestAnimations;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
 
-/** The tempest: a small beetle body, two long wing-case plates that spread open as it charges a thunderball, and short legs. */
 final class TempestModel extends AetherMonsterModel {
-	private final ModelPart head, plateL, plateR, legFl, legFr, legBl, legBr;
+	private final KeyframeAnimation flyAnimation;
+	private final KeyframeAnimation attackAnimation;
+	private final KeyframeAnimation despawnAnimation;
 
 	private TempestModel(ModelPart root) {
 		super(root);
-		this.head = root.getChild("head");
-		this.plateL = root.getChild("plate_l");
-		this.plateR = root.getChild("plate_r");
-		this.legFl = root.getChild("leg_fl");
-		this.legFr = root.getChild("leg_fr");
-		this.legBl = root.getChild("leg_bl");
-		this.legBr = root.getChild("leg_br");
+		this.flyAnimation = TempestAnimations.FLY.bake(root);
+		this.attackAnimation = TempestAnimations.ATTACK.bake(root);
+		this.despawnAnimation = TempestAnimations.DESPAWN.bake(root);
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(47, 69).addBox(-3.5F, -12.0F, -3.0F, 7.0F, 7.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 17.0F, 0.0F));
+
+		PartDefinition wingcase_left = body.addOrReplaceChild("wingcase_left", CubeListBuilder.create(), PartPose.offset(3.0F, -11.0F, 5.0F));
+
+		PartDefinition wingcase_left_r1 = wingcase_left.addOrReplaceChild("wingcase_left_r1", CubeListBuilder.create().texOffs(80, 76).addBox(-2.0F, -2.0F, -1.0F, 5.0F, 3.0F, 15.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2182F, 0.3491F, 0.1309F));
+
+		PartDefinition wingcase_right = body.addOrReplaceChild("wingcase_right", CubeListBuilder.create(), PartPose.offset(-3.0F, -11.0F, 5.0F));
+
+		PartDefinition wingcase_right_r1 = wingcase_right.addOrReplaceChild("wingcase_right_r1", CubeListBuilder.create().texOffs(8, 76).addBox(-3.0F, -2.0F, -1.0F, 5.0F, 3.0F, 15.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2182F, -0.3491F, -0.1309F));
+
+		PartDefinition legs_left = body.addOrReplaceChild("legs_left", CubeListBuilder.create(), PartPose.offset(3.5F, -6.0F, 5.5F));
+
+		PartDefinition legs_left_r1 = legs_left.addOrReplaceChild("legs_left_r1", CubeListBuilder.create().texOffs(95, 96).addBox(0.0F, 0.0F, -3.5F, 0.0F, 6.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -0.2618F));
+
+		PartDefinition legs_right = body.addOrReplaceChild("legs_right", CubeListBuilder.create(), PartPose.offset(-3.5F, -6.0F, 5.5F));
+
+		PartDefinition legs_right_r1 = legs_right.addOrReplaceChild("legs_right_r1", CubeListBuilder.create().texOffs(18, 96).addBox(0.0F, 0.0F, -3.5F, 0.0F, 6.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.2618F));
+
+		PartDefinition arm_left = body.addOrReplaceChild("arm_left", CubeListBuilder.create(), PartPose.offset(3.0F, -5.5F, 0.0F));
+
+		PartDefinition claw_left_r1 = arm_left.addOrReplaceChild("claw_left_r1", CubeListBuilder.create().texOffs(84, 111).addBox(0.75F, 8.5F, -6.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, 0.0F, 0.6981F, 0.0F, 0.0436F));
+
+		PartDefinition arm_left_2_r1 = arm_left.addOrReplaceChild("arm_left_2_r1", CubeListBuilder.create().texOffs(80, 100).addBox(-0.75F, 2.5F, -3.0F, 4.0F, 8.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, 0.0F, 0.2618F, 0.0F, 0.0436F));
+
+		PartDefinition arm_left_1_r1 = arm_left.addOrReplaceChild("arm_left_1_r1", CubeListBuilder.create().texOffs(83, 94).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.0F, -0.2618F));
+
+		PartDefinition arm_right = body.addOrReplaceChild("arm_right", CubeListBuilder.create(), PartPose.offset(-3.0F, -5.5F, 0.0F));
+
+		PartDefinition claw_right_r1 = arm_right.addOrReplaceChild("claw_right_r1", CubeListBuilder.create().texOffs(38, 111).addBox(-1.75F, 8.5F, -6.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, 0.0F, 0.6981F, 0.0F, -0.0436F));
+
+		PartDefinition arm_right_2_r1 = arm_right.addOrReplaceChild("arm_right_2_r1", CubeListBuilder.create().texOffs(34, 100).addBox(-3.25F, 2.5F, -3.0F, 4.0F, 8.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.0F, 0.0F, 0.2618F, 0.0F, -0.0436F));
+
+		PartDefinition arm_right_1_r1 = arm_right.addOrReplaceChild("arm_right_1_r1", CubeListBuilder.create().texOffs(37, 94).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.0F, 0.2618F));
+
+		PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, -8.0F, -2.0F));
+
+		PartDefinition head_inner_r1 = head.addOrReplaceChild("head_inner_r1", CubeListBuilder.create().texOffs(55, 98).addBox(-4.0F, 0.0F, -1.0F, 8.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+				.texOffs(48, 103).addBox(-4.0F, 0.0F, -7.0F, 8.0F, 4.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(48, 86).addBox(-4.0F, -4.0F, -7.0F, 8.0F, 4.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.5F, -1.0F, 0.0436F, 0.0F, 0.0F));
+
+		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(56, 115).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 4.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -9.0F, 7.0F));
+
+		PartDefinition tail_1 = tail.addOrReplaceChild("tail_1", CubeListBuilder.create().texOffs(79, 112).addBox(0.0F, -1.5F, 0.0F, 0.0F, 4.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 8.0F));
+
+		PartDefinition tail_2 = tail_1.addOrReplaceChild("tail_2", CubeListBuilder.create().texOffs(105, 114).addBox(0.0F, -1.5F, 0.0F, 0.0F, 4.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 12.0F));
+
+		PartDefinition cloud_shell = body.addOrReplaceChild("cloud_shell", CubeListBuilder.create().texOffs(30, 0).addBox(-7.5F, -6.0F, -11.0F, 15.0F, 10.0F, 19.0F, new CubeDeformation(0.0F))
+				.texOffs(30, 29).addBox(-7.5F, -6.0F, -11.0F, 15.0F, 10.0F, 19.0F, new CubeDeformation(-0.5F)), PartPose.offset(0.0F, -8.0F, 0.0F));
+
+		PartDefinition fin_right = cloud_shell.addOrReplaceChild("fin_right", CubeListBuilder.create(), PartPose.offsetAndRotation(-6.5F, -1.0F, -6.0F, 0.0F, -0.0873F, 0.0F));
+
+		PartDefinition fin_wisp_right_emissive_r1 = fin_right.addOrReplaceChild("fin_wisp_right_emissive_r1", CubeListBuilder.create().texOffs(1, -3).addBox(1.155F, -9.0F, 6.0F, 0.0F, 7.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(1, 4).addBox(1.15F, -9.0F, 6.0F, 0.0F, 7.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-3.0F, 4.0F, 4.5F, 0.0F, -0.3054F, 0.0F));
+
+		PartDefinition fin_right_r1 = fin_right.addOrReplaceChild("fin_right_r1", CubeListBuilder.create().texOffs(19, 0).addBox(1.0F, -4.0F, 1.0F, 3.0F, 7.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.0F, 0.0F, -2.0F, 0.0F, -0.2182F, 0.0F));
+
+		PartDefinition fin_left = cloud_shell.addOrReplaceChild("fin_left", CubeListBuilder.create(), PartPose.offsetAndRotation(6.5F, -1.0F, -6.0F, 0.0F, 0.0873F, 0.0F));
+
+		PartDefinition fin_wisp_left_emissive_r1 = fin_left.addOrReplaceChild("fin_wisp_left_emissive_r1", CubeListBuilder.create().texOffs(110, -3).addBox(-1.155F, -9.0F, 6.0F, 0.0F, 7.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(110, 4).addBox(-1.15F, -9.0F, 6.0F, 0.0F, 7.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.0F, 4.0F, 4.5F, 0.0F, 0.3054F, 0.0F));
+
+		PartDefinition fin_left_r1 = fin_left.addOrReplaceChild("fin_left_r1", CubeListBuilder.create().texOffs(79, 0).addBox(-4.0F, -4.0F, 1.0F, 3.0F, 7.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.0F, 0.0F, -2.0F, 0.0F, 0.2182F, 0.0F));
+
+		PartDefinition jaw = cloud_shell.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(47, 58).addBox(-6.0F, -2.1F, -3.75F, 12.0F, 4.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 3.0F, -9.5F));
+
+		PartDefinition jaw_left_2_r1 = jaw.addOrReplaceChild("jaw_left_2_r1", CubeListBuilder.create().texOffs(104, 55).addBox(0.25F, -3.6F, 10.2F, 2.0F, 4.0F, 10.0F, new CubeDeformation(0.1F))
+				.texOffs(80, 58).addBox(-0.75F, -1.6F, 1.0F, 3.0F, 4.0F, 9.0F, new CubeDeformation(0.1F)), PartPose.offsetAndRotation(3.0F, -0.5F, -5.0F, 0.0F, 0.5236F, 0.0F));
+
+		PartDefinition jaw_right_2_r1 = jaw.addOrReplaceChild("jaw_right_2_r1", CubeListBuilder.create().texOffs(0, 55).addBox(-2.25F, -3.6F, 10.2F, 2.0F, 4.0F, 10.0F, new CubeDeformation(0.1F))
+				.texOffs(24, 58).addBox(-2.25F, -1.6F, 1.0F, 3.0F, 4.0F, 9.0F, new CubeDeformation(0.1F)), PartPose.offsetAndRotation(-3.0F, -0.5F, -5.0F, 0.0F, -0.5236F, 0.0F));
+
+		PartDefinition wisp_left = cloud_shell.addOrReplaceChild("wisp_left", CubeListBuilder.create(), PartPose.offset(6.806F, -3.8194F, 7.6118F));
+
+		PartDefinition wisp_left_emissive_r1 = wisp_left.addOrReplaceChild("wisp_left_emissive_r1", CubeListBuilder.create().texOffs(80, 14).addBox(-0.005F, -1.0F, 0.0F, 0.0F, 7.0F, 20.0F, new CubeDeformation(0.0F))
+				.texOffs(80, 21).addBox(0.0F, -1.0F, 0.0F, 0.0F, 7.0F, 20.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.2618F, 0.1309F));
+
+		PartDefinition wisp_right = cloud_shell.addOrReplaceChild("wisp_right", CubeListBuilder.create(), PartPose.offset(-6.806F, -3.8194F, 7.6118F));
+
+		PartDefinition wisp_right_emissive_r1 = wisp_right.addOrReplaceChild("wisp_right_emissive_r1", CubeListBuilder.create().texOffs(7, 14).addBox(0.005F, -1.0F, 0.0F, 0.0F, 7.0F, 20.0F, new CubeDeformation(0.0F))
+				.texOffs(7, 21).addBox(0.0F, -1.0F, 0.0F, 0.0F, 7.0F, 20.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -0.2618F, -0.1309F));
+
+		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
 
 	static TempestModel create() {
-		return new TempestModel(layer().bakeRoot());
+		return new TempestModel(createBodyLayer().bakeRoot());
 	}
 
-	private static LayerDefinition layer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition r = mesh.getRoot();
-		part(r, "body", 0, 0, -3.5F, -3.5F, -5.0F, 7, 7, 10, 0.0F, 13.0F, 0.0F);
-		part(r, "head", 34, 0, -2.5F, -2.5F, -4.0F, 5, 5, 4, 0.0F, 12.0F, -5.0F);
-		part(r, "plate_l", 0, 17, 0.0F, -1.0F, -6.0F, 3, 2, 16, 3.5F, 10.0F, 0.0F);
-		part(r, "plate_r", 0, 35, -3.0F, -1.0F, -6.0F, 3, 2, 16, -3.5F, 10.0F, 0.0F);
-		part(r, "leg_fl", 38, 35, -0.5F, 0.0F, -0.5F, 1, 5, 1, 2.5F, 16.0F, -3.0F);
-		part(r, "leg_fr", 42, 35, -0.5F, 0.0F, -0.5F, 1, 5, 1, -2.5F, 16.0F, -3.0F);
-		part(r, "leg_bl", 46, 35, -0.5F, 0.0F, -0.5F, 1, 5, 1, 2.5F, 16.0F, 3.0F);
-		part(r, "leg_br", 50, 35, -0.5F, 0.0F, -0.5F, 1, 5, 1, -2.5F, 16.0F, 3.0F);
-		part(r, "stinger", 0, 53, -1.0F, -1.0F, 0.0F, 2, 2, 4, 0.0F, 13.0F, 5.0F);
-		return LayerDefinition.create(mesh, 64, 64);
-	}
+
+	/** How fast the flying loop runs on its age, and the part of the hiding animation that is scrubbed (ms). */
+	private static final float FLY_PACE = 0.35F, HIDE_MS = 4458.0F;
 
 	@Override
 	public void setupAnim(AetherMonsterRenderer.State state) {
 		super.setupAnim(state);
-		float t = state.ageInTicks;
-		this.root.y += Mth.sin(t * 0.12F) * 1.0F;
-		look(this.head, state);
-		// the plates hum at rest and fling wide when it charges
-		float buzz = Mth.sin(t * 1.6F) * 0.05F;
-		float open = state.charging ? -0.85F : 0.12F;
-		this.plateL.zRot = open + buzz;
-		this.plateR.zRot = -open - buzz;
-		float dangle = Mth.sin(t * 0.2F) * 0.15F;
-		this.legFl.xRot = dangle;
-		this.legFr.xRot = -dangle;
-		this.legBl.xRot = -dangle;
-		this.legBr.xRot = dangle;
+		this.flyAnimation.applyWalk(state.ageInTicks * FLY_PACE, 1.0F, 2.0F, 2.0F);
+		// charging its thunderball (1), from when it began
+		if (state.action == 1) {
+			this.attackAnimation.apply((long)(state.actionTime * 50.0F), 1.0F);
+		}
+		// hiding from the sun: it rears up, then shoots skyward and is gone
+		if (state.progress > 0.0F) {
+			this.despawnAnimation.apply((long)(state.progress * HIDE_MS), 1.0F);
+		}
 	}
 }

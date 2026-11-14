@@ -786,11 +786,7 @@ def lang():
 
 
 def main():
-    skins = [("zephyr", zephyr()), ("tempest", tempest()), ("cockatrice", cockatrice()), ("blue_swet", swet(False)), ("golden_swet", swet(True)),
-             ("aechor_plant", aechor_plant()), ("carrion_sprout", carrion_sprout()), ("skephid", skephid()),
-             ("arkenium_taluton", arkenium_taluton()), ("gravitite_taluton", gravitite_taluton()), ("bladeshroom_hunter", bladeshroom_hunter())]
-    for name, sk in skins:
-        sk.finish(os.path.join(ENTITY_DIR, name + ".png"))
+    # (the mob skins are painted by tools/gen_aether2_skins.py now: the models are The Aether II's, and no longer have part(...) lines)
     items()
     loot()
     lang()

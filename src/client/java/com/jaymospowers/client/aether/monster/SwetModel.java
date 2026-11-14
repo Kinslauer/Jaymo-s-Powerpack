@@ -1,37 +1,109 @@
+/*
+ * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
+ * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/SwetModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
+ * Changed for Jaymo's Powers (2026-11): moved to this package, the gel is a second pass of the same model, posed from our own render state.
+ * This file stays under the LGPL v3.0.
+ */
 package com.jaymospowers.client.aether.monster;
 
+import com.jaymospowers.client.aether.anim.SwetAnimation;
+import net.minecraft.client.animation.KeyframeAnimation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
 
-/** The swet: a 16-pixel gel cube round a 12-pixel core with a face on it. The skin is see-through; the core wobbles as it hops. */
 final class SwetModel extends AetherMonsterModel {
-	private final ModelPart core;
+	private final KeyframeAnimation groundAnimation;
+	private final KeyframeAnimation jumpAnimation;
+	public final ModelPart body;
+	public final ModelPart gel;
+	public final ModelPart squish;
+	public final ModelPart head;
+	private final ModelPart wisp_top_left;
+	private final ModelPart wisp_top_right;
+	private final ModelPart wisp_bottom_left;
+	private final ModelPart wisp_bottom_right;
+	private final boolean isGel;
 
-	private SwetModel(ModelPart root) {
+	private SwetModel(ModelPart root, boolean isGel) {
 		super(root);
-		this.core = root.getChild("core");
+		this.groundAnimation = SwetAnimation.GROUND.bake(root);
+		this.jumpAnimation = SwetAnimation.JUMP.bake(root);
+		this.body = root.getChild("body");
+		this.gel = this.body.getChild("gel");
+		this.squish = this.gel.getChild("squish");
+		this.head = this.body.getChild("head");
+		this.wisp_top_left = this.head.getChild("wisp_top_left");
+		this.wisp_top_right = this.head.getChild("wisp_top_right");
+		this.wisp_bottom_left = this.head.getChild("wisp_bottom_left");
+		this.wisp_bottom_right = this.head.getChild("wisp_bottom_right");
+		this.isGel = isGel;
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
+
+		PartDefinition gel = body.addOrReplaceChild("gel", CubeListBuilder.create().texOffs(64, 0).addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F, new CubeDeformation(0.0F))
+				.texOffs(8, 40).addBox(-6.0F, -6.0F, -6.0F, 12.0F, 12.0F, 12.0F, new CubeDeformation(1.1F)), PartPose.offset(0.0F, -8.0F, 0.0F));
+
+		PartDefinition squish = gel.addOrReplaceChild("squish", CubeListBuilder.create().texOffs(56, 32).addBox(-9.0F, -3.5F, -9.0F, 18.0F, 4.0F, 18.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 8.0F, 0.0F));
+
+		PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.5F, -4.5F, -4.5F, 9.0F, 9.0F, 9.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 18).addBox(-4.5F, -4.5F, -4.5F, 9.0F, 9.0F, 9.0F, new CubeDeformation(-0.5F)), PartPose.offset(0.0F, -8.5F, -0.5F));
+
+		PartDefinition wisp_top_left = head.addOrReplaceChild("wisp_top_left", CubeListBuilder.create(), PartPose.offset(4.5F, -2.5F, -1.5F));
+
+		PartDefinition wisp_top_left_r1 = wisp_top_left.addOrReplaceChild("wisp_top_left_r1", CubeListBuilder.create().texOffs(2, 28).addBox(0.0F, -1.0F, 0.0F, 0.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1309F, 0.1309F, 0.0F));
+
+		PartDefinition wisp_top_right = head.addOrReplaceChild("wisp_top_right", CubeListBuilder.create(), PartPose.offset(-4.5F, -2.5F, -1.5F));
+
+		PartDefinition wisp_top_right_r1 = wisp_top_right.addOrReplaceChild("wisp_top_right_r1", CubeListBuilder.create().texOffs(2, 28).mirror().addBox(0.0F, -1.0F, 0.0F, 0.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1309F, -0.1309F, 0.0F));
+
+		PartDefinition wisp_bottom_left = head.addOrReplaceChild("wisp_bottom_left", CubeListBuilder.create(), PartPose.offset(4.5F, 1.5F, -0.5F));
+
+		PartDefinition wisp_bottom_left_r1 = wisp_bottom_left.addOrReplaceChild("wisp_bottom_left_r1", CubeListBuilder.create().texOffs(3, 32).addBox(0.0F, 0.0F, 0.0F, 0.0F, 3.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.1309F, 0.1309F, 0.0F));
+
+		PartDefinition wisp_bottom_right = head.addOrReplaceChild("wisp_bottom_right", CubeListBuilder.create(), PartPose.offset(-4.5F, 1.5F, -0.5F));
+
+		PartDefinition wisp_bottom_right_r1 = wisp_bottom_right.addOrReplaceChild("wisp_bottom_right_r1", CubeListBuilder.create().texOffs(3, 32).mirror().addBox(0.0F, 0.0F, 0.0F, 0.0F, 3.0F, 7.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.1309F, -0.1309F, 0.0F));
+
+		return LayerDefinition.create(meshdefinition, 128, 64);
 	}
 
 	static SwetModel create() {
-		return new SwetModel(layer().bakeRoot());
+		return new SwetModel(createBodyLayer().bakeRoot(), false);
 	}
 
-	private static LayerDefinition layer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition r = mesh.getRoot();
-		part(r, "shell", 0, 0, -8.0F, -16.0F, -8.0F, 16, 16, 16, 0.0F, 24.0F, 0.0F);
-		part(r, "core", 0, 32, -6.0F, -14.0F, -6.0F, 12, 12, 12, 0.0F, 24.0F, 0.0F);
-		return LayerDefinition.create(mesh, 64, 64);
+	/** The see-through gel around it, drawn as a second pass. */
+	static SwetModel gel() {
+		return new SwetModel(createBodyLayer().bakeRoot(), true);
 	}
+
+
+	/** The gel's size when the swet is starving (it is full size when fed). */
+	private static final float GEL_HUNGRY = 0.8F;
 
 	@Override
 	public void setupAnim(AetherMonsterRenderer.State state) {
 		super.setupAnim(state);
-		float t = state.ageInTicks;
-		this.core.yRot = Mth.sin(t * 0.17F) * 0.12F + state.yRot * DEG * 0.2F;
-		this.core.xRot = Mth.sin(t * 0.13F) * 0.05F;
+		if (this.isGel) {
+			this.head.visible = false;
+			float scale = Mth.lerp(state.progress, GEL_HUNGRY, 1.0F);
+			this.gel.xScale = scale;
+			this.gel.yScale = scale;
+			this.gel.zScale = scale;
+		} else {
+			this.gel.visible = false;
+		}
+		// in the air (1) it stretches, and it squashes as it lands (0)
+		if (state.action == 1) {
+			this.jumpAnimation.apply((long)(state.actionTime * 50.0F), 1.0F);
+		} else {
+			this.groundAnimation.apply((long)(state.actionTime * 50.0F), 1.0F);
+		}
 	}
 }

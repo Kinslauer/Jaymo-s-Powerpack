@@ -1,65 +1,123 @@
+/*
+ * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
+ * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/AerbunnyModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
+ * Changed for Jaymo's Powers (2026-11): moved to this package, posed from our own render state.
+ * This file stays under the LGPL v3.0.
+ */
 package com.jaymospowers.client.aether.mob;
 
+import com.jaymospowers.client.aether.anim.AerbunnyAnimation;
+import net.minecraft.client.animation.KeyframeAnimation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-/** The aerbunny: a tiny round rabbit with long ears, puffed cheeks and a puff of a tail. Its ears stream back in the air. */
 final class AerbunnyModel extends AetherAnimalModel {
-	private final ModelPart head, earL, earR, legFl, legFr, legBl, legBr, tail;
+	private final KeyframeAnimation sittingAnimation;
+	private final ModelPart body;
+	private final ModelPart cloudpuff;
+	private final ModelPart head;
+	private final ModelPart ear_left;
+	private final ModelPart ear_right;
+	private final ModelPart whisker_left;
+	private final ModelPart whisker_right;
+	private final ModelPart leg_front_left;
+	private final ModelPart leg_front_right;
+	private final ModelPart leg_back_left;
+	private final ModelPart foot_back_left;
+	private final ModelPart leg_back_right;
+	private final ModelPart foot_back_right;
+	private final ModelPart tail;
 
 	private AerbunnyModel(ModelPart root) {
 		super(root);
-		this.head = root.getChild("head");
-		this.earL = this.head.getChild("ear_l");
-		this.earR = this.head.getChild("ear_r");
-		this.legFl = root.getChild("leg_fl");
-		this.legFr = root.getChild("leg_fr");
-		this.legBl = root.getChild("leg_bl");
-		this.legBr = root.getChild("leg_br");
-		this.tail = root.getChild("tail");
+		this.sittingAnimation = AerbunnyAnimation.SITTING.bake(root);
+		this.body = root.getChild("body");
+		this.cloudpuff = this.body.getChild("cloudpuff");
+		this.head = this.body.getChild("head");
+		this.ear_left = this.head.getChild("ear_left");
+		this.ear_right = this.head.getChild("ear_right");
+		this.whisker_left = this.head.getChild("whisker_left");
+		this.whisker_right = this.head.getChild("whisker_right");
+		this.leg_front_left = this.body.getChild("leg_front_left");
+		this.leg_front_right = this.body.getChild("leg_front_right");
+		this.leg_back_left = this.body.getChild("leg_back_left");
+		this.foot_back_left = this.leg_back_left.getChild("foot_back_left");
+		this.leg_back_right = this.body.getChild("leg_back_right");
+		this.foot_back_right = this.leg_back_right.getChild("foot_back_right");
+		this.tail = this.body.getChild("tail");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 15).addBox(-2.0F, -5.0F, 0.0F, 4.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 22.75F, -2.0F));
+
+		PartDefinition cloudpuff = body.addOrReplaceChild("cloudpuff", CubeListBuilder.create().texOffs(16, 0).addBox(-3.0F, -3.5F, -5.0F, 6.0F, 7.0F, 10.0F, new CubeDeformation(-0.75F)), PartPose.offset(0.0F, -2.5F, 3.0F));
+
+		PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 6).addBox(-2.0F, -2.0F, -2.25F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(12, 5).addBox(-1.0F, 0.0F, -2.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -2.5F, -1.75F));
+
+		PartDefinition ear_left = head.addOrReplaceChild("ear_left", CubeListBuilder.create(), PartPose.offset(0.5F, -2.0F, -2.0F));
+
+		PartDefinition ear_left_r1 = ear_left.addOrReplaceChild("ear_left_r1", CubeListBuilder.create().texOffs(6, 0).addBox(0.0F, -4.0F, 0.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.3054F, 0.0F, 0.1309F));
+
+		PartDefinition ear_right = head.addOrReplaceChild("ear_right", CubeListBuilder.create(), PartPose.offset(-0.5F, -2.0F, -2.0F));
+
+		PartDefinition ear_right_r1 = ear_right.addOrReplaceChild("ear_right_r1", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -4.0F, 0.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.3054F, 0.0F, -0.1309F));
+
+		PartDefinition whisker_left = head.addOrReplaceChild("whisker_left", CubeListBuilder.create(), PartPose.offset(2.0F, 0.0F, -1.25F));
+
+		PartDefinition whisker_left_r1 = whisker_left.addOrReplaceChild("whisker_left_r1", CubeListBuilder.create().texOffs(12, 7).mirror().addBox(0.0F, -1.5F, 0.0F, 2.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -0.5672F, 0.0F));
+
+		PartDefinition whisker_right = head.addOrReplaceChild("whisker_right", CubeListBuilder.create(), PartPose.offset(-2.0F, 0.0F, -1.25F));
+
+		PartDefinition whisker_right_r1 = whisker_right.addOrReplaceChild("whisker_right_r1", CubeListBuilder.create().texOffs(12, 7).addBox(-2.0F, -1.5F, 0.0F, 2.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5672F, 0.0F));
+
+		PartDefinition leg_front_left = body.addOrReplaceChild("leg_front_left", CubeListBuilder.create(), PartPose.offset(2.0F, -0.25F, -0.5F));
+
+		PartDefinition leg_front_left_r1 = leg_front_left.addOrReplaceChild("leg_front_left_r1", CubeListBuilder.create().texOffs(23, 17).addBox(-0.1281F, -0.8276F, -2.5225F, 1.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1745F, -0.1222F, 0.0F));
+
+		PartDefinition leg_front_right = body.addOrReplaceChild("leg_front_right", CubeListBuilder.create(), PartPose.offset(-2.0F, -0.25F, -0.5F));
+
+		PartDefinition leg_front_right_r1 = leg_front_right.addOrReplaceChild("leg_front_right_r1", CubeListBuilder.create().texOffs(15, 17).addBox(-0.8719F, -0.8276F, -2.5225F, 1.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1745F, 0.1222F, 0.0F));
+
+		PartDefinition leg_back_left = body.addOrReplaceChild("leg_back_left", CubeListBuilder.create().texOffs(48, 10).addBox(-0.75F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(2.25F, -0.8F, 4.75F));
+
+		PartDefinition foot_back_left = leg_back_left.addOrReplaceChild("foot_back_left", CubeListBuilder.create().texOffs(48, 16).addBox(-0.5F, 0.0F, -2.5F, 1.0F, 1.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.5F, 1.0F, 0.75F));
+
+		PartDefinition leg_back_right = body.addOrReplaceChild("leg_back_right", CubeListBuilder.create().texOffs(48, 0).addBox(-1.25F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(-2.25F, -0.8F, 4.75F));
+
+		PartDefinition foot_back_right = leg_back_right.addOrReplaceChild("foot_back_right", CubeListBuilder.create().texOffs(48, 6).addBox(-0.5F, 0.0F, -2.5F, 1.0F, 1.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(-0.5F, 1.0F, 0.75F));
+
+		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(22, 22).addBox(-1.5F, -1.5F, -0.5F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -2.75F, 7.0F));
+
+		return LayerDefinition.create(meshdefinition, 64, 32);
 	}
 
 	static AerbunnyModel create() {
-		return new AerbunnyModel(layer().bakeRoot());
+		return new AerbunnyModel(createBodyLayer().bakeRoot());
 	}
 
-	private static LayerDefinition layer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition r = mesh.getRoot();
-		PartDefinition head = part(r, "head", 0, 0, -2F, -2F, -4F, 4, 4, 4, 0F, 19F, -3F);
-		part(head, "ear_l", 16, 0, 0.5F, -6F, -2F, 1, 4, 1, 0F, 0F, 0F);
-		part(head, "ear_r", 20, 0, -1.5F, -6F, -2F, 1, 4, 1, 0F, 0F, 0F);
-		part(head, "cheek_l", 24, 0, 2F, 0F, -3F, 2, 2, 2, 0F, 0F, 0F);
-		part(head, "cheek_r", 32, 0, -4F, 0F, -3F, 2, 2, 2, 0F, 0F, 0F);
-		part(r, "body", 0, 8, -2F, -2F, -3F, 4, 4, 6, 0F, 20F, 0F);
-		part(r, "tail", 40, 0, -1.5F, -1.5F, 0F, 3, 3, 3, 0F, 20F, 3F);
-		part(r, "leg_bl", 0, 18, -1F, 0F, -1.5F, 2, 3, 3, 1.5F, 21F, 2F);
-		part(r, "leg_br", 10, 18, -1F, 0F, -1.5F, 2, 3, 3, -1.5F, 21F, 2F);
-		part(r, "leg_fl", 20, 18, -0.5F, 0F, -0.5F, 1, 2, 1, 1F, 22F, -2F);
-		part(r, "leg_fr", 24, 18, -0.5F, 0F, -0.5F, 1, 2, 1, -1F, 22F, -2F);
-		return LayerDefinition.create(mesh, 64, 32);
-	}
+
+	/** How much the cloud puff swells at full puff. */
+	private static final float PUFF = 0.5F;
 
 	@Override
 	public void setupAnim(AetherAnimalRenderer.State state) {
 		super.setupAnim(state);
-		look(this.head, state);
-		// a hop: hind legs and fore legs swing together
-		float hop = Mth.cos(state.walkAnimationPos * 0.6662F) * 1.2F * Math.min(state.walkAnimationSpeed, 1.0F);
-		this.legBl.xRot = hop;
-		this.legBr.xRot = hop;
-		this.legFl.xRot = -hop * 0.6F;
-		this.legFr.xRot = -hop * 0.6F;
-		// the ears stream back when it is in the air, and twitch a little when it is still
-		float back = state.air * 0.7F;
-		float twitch = Mth.sin(state.ageInTicks * 0.15F) * 0.05F;
-		this.earL.xRot = back + twitch;
-		this.earR.xRot = back - twitch;
-		this.earL.zRot = 0.1F;
-		this.earR.zRot = -0.1F;
-		this.tail.xRot = -state.air * 0.3F;
+		this.head.xRot = state.xRot * Mth.DEG_TO_RAD;
+		this.head.yRot = state.yRot * Mth.DEG_TO_RAD;
+		float speed = Math.min(state.walkAnimationSpeed, 1.0F);
+		this.leg_front_right.xRot = (Mth.cos(state.walkAnimationPos * 0.6662F) * 1.0F * speed) - this.body.xRot;
+		this.leg_front_left.xRot = (Mth.cos(state.walkAnimationPos * 0.6662F) * 1.0F * speed) - this.body.xRot;
+		this.leg_back_right.xRot = (Mth.cos(state.walkAnimationPos * 0.6662F + Mth.PI) * 1.2F * speed) - this.body.xRot;
+		this.leg_back_left.xRot = (Mth.cos(state.walkAnimationPos * 0.6662F + Mth.PI) * 1.2F * speed) - this.body.xRot;
+		float a = 1.0F + state.puff * PUFF;
+		this.cloudpuff.xScale = a;
+		this.cloudpuff.yScale = a;
+		this.cloudpuff.zScale = a;
 	}
 }

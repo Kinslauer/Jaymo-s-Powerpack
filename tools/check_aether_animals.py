@@ -130,7 +130,13 @@ for f in sorted(os.listdir(CLIENT)):
     if not f.endswith("Model.java") or f == "AetherAnimalModel.java":
         continue
     s = open(os.path.join(CLIENT, f), encoding="utf-8").read()
-    declared = set(re.findall(r'part\(\w+, "(\w+)"', s))
+    declared = set(re.findall(r'(?:part\(\w+, |addOrReplaceChild\()"(\w+)"', s))
+    if re.search(r'^abstract class', s, re.M):
+        # a shared base (kirrid, burrukai): its zone models declare the parts
+        base = f[:-len("Model.java")]
+        for g in os.listdir(CLIENT):
+            if g.endswith(base + "Model.java") and g != f:
+                declared |= set(re.findall(r'addOrReplaceChild\("(\w+)"', open(os.path.join(CLIENT, g), encoding="utf-8").read()))
     for child in re.findall(r'getChild\("(\w+)"\)', s):
         if child not in declared:
             errs.append("%s looks up part %s that it does not declare" % (f, child))

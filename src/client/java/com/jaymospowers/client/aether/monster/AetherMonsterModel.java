@@ -2,34 +2,18 @@ package com.jaymospowers.client.aether.monster;
 
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * What the Aether's monsters' models share: how a part is declared, and the walk. Every part is declared with one
- * {@code part(...)} call on a single line (parent, name, texture u and v, box x y z and w h d, pivot x y z, and
- * optionally how far the box is grown): tools/gen_aether_monsters.py reads those lines to paint each skin on the right
- * faces, so keep the shape. y is down, the feet are at y 24, and the mob faces -z.
+ * What the Aether's monsters' models share. The models themselves are The Aether II's (LGPL-3.0, see each file's header and
+ * docs/aether.md); tools/gen_aether2_skins.py reads the boxes they declare to paint each skin. y is down, the feet are
+ * at y 24, and the mob faces -z.
  */
 abstract class AetherMonsterModel extends EntityModel<AetherMonsterRenderer.State> {
 	static final float DEG = Mth.DEG_TO_RAD;
 
 	AetherMonsterModel(ModelPart root) {
 		super(root);
-	}
-
-	static PartDefinition part(PartDefinition parent, String name, int u, int v, float x, float y, float z, int w, int h, int d,
-		float px, float py, float pz) {
-		return parent.addOrReplaceChild(name, CubeListBuilder.create().texOffs(u, v).addBox(x, y, z, w, h, d), PartPose.offset(px, py, pz));
-	}
-
-	static PartDefinition part(PartDefinition parent, String name, int u, int v, float x, float y, float z, int w, int h, int d,
-		float px, float py, float pz, float grow) {
-		return parent.addOrReplaceChild(name, CubeListBuilder.create().texOffs(u, v).addBox(x, y, z, w, h, d, new CubeDeformation(grow)),
-			PartPose.offset(px, py, pz));
 	}
 
 	/** A pair of legs swinging in opposition (the walk), {@code amount} radians at full stride. */

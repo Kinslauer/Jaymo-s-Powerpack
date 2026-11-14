@@ -490,14 +490,7 @@ def lang():
 
 
 def main():
-    base = os.path.join(ASSETS, "textures", "entity", SUB)
-    phyg().finish(os.path.join(base, "phyg.png"))
-    cow().finish(os.path.join(base, "flying_cow.png"))
-    for color in WOOL:
-        sheepuff(color).finish(os.path.join(base, "sheepuff_%s.png" % color))
-    aerbunny().finish(os.path.join(base, "aerbunny.png"))
-    for kind in MOA:
-        moa(kind).finish(os.path.join(base, "moa_%s.png" % kind))
+    # (the mob skins are painted by tools/gen_aether2_skins.py now: the models are The Aether II's, and no longer have part(...) lines)
     items()
     loot()
     lang()

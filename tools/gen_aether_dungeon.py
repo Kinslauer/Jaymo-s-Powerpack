@@ -504,10 +504,7 @@ def mimic():
 def textures():
     for name, im in make_blocks().items():
         save(im, os.path.join(BLOCK_DIR, name + ".png"))
-    for name, sk in (("slider", slider(False)), ("slider_awake", slider(True)), ("detonation_sentry", detonation_sentry("asleep")),
-                     ("detonation_sentry_awake", detonation_sentry("awake")), ("detonation_sentry_lit", detonation_sentry("lit")),
-                     ("sentry_golem", sentry_golem()), ("mimic", mimic())):
-        save(sk.im, os.path.join(ENTITY_DIR, name + ".png"))
+    # (the mob skins are painted by tools/gen_aether2_skins.py now: the models are The Aether II's, and no longer have part(...) lines)
     save(sprite(BOMB_ROWS, BOMB_PALETTE), os.path.join(ITEM_DIR, "demolition_bomb.png"))
     for name, (c, spot, outline) in EGGS.items():
         save(egg_image(c, spot, outline, name, 8, ring=True), os.path.join(ITEM_DIR, name + ".png"))

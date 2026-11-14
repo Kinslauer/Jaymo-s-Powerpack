@@ -19,13 +19,13 @@ public final class AetherMobsClient {
 	}
 
 	public static void init() {
-		EntityRenderers.register(AetherMobs.PHYG, ctx -> new AetherAnimalRenderer<>(ctx, WingedAnimalModel.phyg(), 0.5F, AetherAnimalRenderer.phyg()));
-		EntityRenderers.register(AetherMobs.FLYING_COW, ctx -> new AetherAnimalRenderer<>(ctx, WingedAnimalModel.cow(), 0.6F, AetherAnimalRenderer.cow()));
+		EntityRenderers.register(AetherMobs.PHYG, ctx -> new AetherAnimalRenderer<>(ctx, PhygModel.create(), 0.5F, AetherAnimalRenderer.phyg()));
+		EntityRenderers.register(AetherMobs.FLYING_COW, ctx -> new AetherAnimalRenderer<>(ctx, FlyingCowModel.create(), 0.6F, AetherAnimalRenderer.cow()));
 		EntityRenderers.register(AetherMobs.SHEEPUFF, ctx -> new AetherAnimalRenderer<>(ctx, SheepuffModel.create(), 0.6F, AetherAnimalRenderer.sheepuff()));
 		EntityRenderers.register(AetherMobs.AERBUNNY, ctx -> new AetherAnimalRenderer<>(ctx, AerbunnyModel.create(), 0.25F, AetherAnimalRenderer.aerbunny()));
 		EntityRenderers.register(AetherMobs.MOA, ctx -> new AetherAnimalRenderer<>(ctx, MoaModel.create(), 0.5F, AetherAnimalRenderer.moa()));
-		EntityRenderers.register(AetherAnimals.KIRRID, ctx -> new AetherAnimalRenderer<>(ctx, KirridModel.create(), 0.6F, AetherAnimalRenderer.kirrid()));
-		EntityRenderers.register(AetherAnimals.BURRUKAI, ctx -> new AetherAnimalRenderer<>(ctx, BurrukaiModel.create(), 0.9F, AetherAnimalRenderer.burrukai()));
+		EntityRenderers.register(AetherAnimals.KIRRID, ctx -> new AetherAnimalRenderer<>(ctx, new AetherAnimalModel[] {HighfieldsKirridModel.create(), MagneticKirridModel.create(), ArcticKirridModel.create()}, 0.6F, AetherAnimalRenderer.kirrid()));
+		EntityRenderers.register(AetherAnimals.BURRUKAI, ctx -> new AetherAnimalRenderer<>(ctx, new AetherAnimalModel[] {PlainsBurrukaiModel.create(), PlainsBurrukaiModel.create(), ArcticBurrukaiModel.create()}, 0.9F, AetherAnimalRenderer.burrukai()));
 		EntityRenderers.register(AetherAnimals.TAEGORE, ctx -> new AetherAnimalRenderer<>(ctx, TaegoreModel.create(), 0.8F, AetherAnimalRenderer.taegore()));
 		EntityRenderers.register(AetherAnimals.SKYROOT_LIZARD, ctx -> new AetherAnimalRenderer<>(ctx, SkyrootLizardModel.create(), 0.3F, AetherAnimalRenderer.lizard()));
 		EntityRenderers.register(AetherAnimals.PRISMALLARD, ctx -> new AetherAnimalRenderer<>(ctx, PrismallardModel.create(), 0.25F, AetherAnimalRenderer.prismallard()));

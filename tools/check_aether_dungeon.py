@@ -131,7 +131,7 @@ for f in sorted(os.listdir(cdir)):
     if not f.endswith("Model.java") or f == "DungeonModel.java":
         continue
     s = read(os.path.join(cdir, f))
-    declared = set(re.findall(r'part\(\w+, "(\w+)"', s))
+    declared = set(re.findall(r'(?:part\(\w+, |addOrReplaceChild\()"(\w+)"', s))
     for child in re.findall(r'getChild\("(\w+)"\)', s):
         if child not in declared:
             errs.append("%s looks up part %s that it does not declare" % (f, child))

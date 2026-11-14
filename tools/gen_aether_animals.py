@@ -766,19 +766,7 @@ def lang():
 
 
 def main():
-    for zone in ZONES:
-        for wool in WOOL_NAMES + ["undyed"]:
-            kirrid(zone, wool).finish(os.path.join(SKINS, "kirrid_%s_%s.png" % (zone, wool)))
-        burrukai(zone).finish(os.path.join(SKINS, "burrukai_%s.png" % zone))
-        taegore(zone).finish(os.path.join(SKINS, "taegore_%s.png" % zone))
-    for name in LIZARD:
-        lizard(name).finish(os.path.join(SKINS, "skyroot_lizard_%s.png" % name))
-    prismallard().finish(os.path.join(SKINS, "prismallard.png"))
-    for name in GLITTER:
-        glitterwing(name).finish(os.path.join(SKINS, "glitterwing_%s.png" % name))
-    for name in SHROUD:
-        shroudwing(name).finish(os.path.join(SKINS, "shroudwing_%s.png" % name))
-    aerwhale().finish(os.path.join(SKINS, "aerwhale.png"))
+    # (the mob skins are painted by tools/gen_aether2_skins.py now: the models are The Aether II's, and no longer have part(...) lines)
     items()
     moa_egg_block()
     loot()
