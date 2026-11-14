@@ -1584,6 +1584,15 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+(new) **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
+gear, Claude's placement for Andy to approve). A smith makes armour the way he makes tools: each piece is a plating cast
+in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the
+Part Builder, good for nothing but pouring gold over. Hung on a leather cuirass instead of maille, the same plating
+makes travelers' gear (goggles, vest, pants and boots), lighter and quicker worn out, which carters, hunters and anyone
+long on the roads wear. Every metal guards in its own way, and smiths say so plainly: silver against the dead, iron
+against arrows, cobalt against the blade, manyullyn against spells, copper the deeper you go, hepatizon once you've
+been hurt; the slime metals mend themselves.
+
 (new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
 belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
 scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
