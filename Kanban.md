@@ -18,7 +18,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Agents/claude-cloud-arsenal-flying-blades|claude-cloud-arsenal-flying-blades]] · 💻 Odysseus · #1525 · in-review
+- [ ] [[Agents/Reaper spirit for death magic|Reaper spirit for death magic]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
