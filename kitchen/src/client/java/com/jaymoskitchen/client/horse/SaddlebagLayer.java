@@ -16,6 +16,7 @@ import net.minecraft.resources.Identifier;
 /** Draws saddlebags on a horse wearing them in its armor slot. */
 public class SaddlebagLayer extends RenderLayer<EquineRenderState, EntityModel<EquineRenderState>> {
 	private static final Identifier TEXTURE = JaymosKitchen.id("textures/entity/saddlebag.png");
+	private static final Identifier ENDER_TEXTURE = JaymosKitchen.id("textures/entity/ender_saddlebag.png");
 
 	private final SaddlebagModel model;
 
@@ -27,10 +28,11 @@ public class SaddlebagLayer extends RenderLayer<EquineRenderState, EntityModel<E
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, EquineRenderState state, float yRot,
 		float xRot) {
-		if (state.isInvisible || state.isBaby || !state.bodyArmorItem.is(Saddlebags.SADDLEBAG)) {
+		boolean ender = state.bodyArmorItem.is(Saddlebags.ENDER_SADDLEBAG);
+		if (state.isInvisible || state.isBaby || !(ender || state.bodyArmorItem.is(Saddlebags.SADDLEBAG))) {
 			return;
 		}
-		collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+		collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(ender ? ENDER_TEXTURE : TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 			-1, null, state.outlineColor);
 	}
 }
