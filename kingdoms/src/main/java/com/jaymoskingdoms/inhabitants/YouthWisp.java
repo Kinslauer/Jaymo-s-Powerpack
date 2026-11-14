@@ -46,6 +46,8 @@ import org.jspecify.annotations.Nullable;
 public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** It vanishes after this long with no question (ticks). */
 	static final int IDLE_TIMEOUT = 2 * 60 * 20;
+	/** How many "be right back" lines it has (message.jaymoskingdoms.youth_wisp.hold.0 ...). */
+	static final int HOLD_LINES = 6;
 	/** ...or when its asker is further than this (blocks) or in another dimension. */
 	static final double LEASH = 16.0;
 	/** At most this many in the world at once; summoning one more sends the longest-idle home. */
@@ -79,6 +81,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private @Nullable UUID asker;
 	private Vec3 spot = Vec3.ZERO;
 	private int lastAsked;
+	/** Summoned for a question whose answer hasn't come yet. */
+	private boolean pending;
 	private int vanishing = -1;
 
 	// the idle picker's state (client side)
@@ -101,7 +105,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	// ---------------------------------------------------------------- calling it, sending it home
 
 	/** Brings {@code player}'s wisp in beside them, or moves it there if it's already about. */
-	public static YouthWisp summon(ServerPlayer player) {
+	public static @Nullable YouthWisp summon(ServerPlayer player) {
 		YouthWisp wisp = BY_ASKER.get(player.getUUID());
 		if (wisp != null && (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.level() != player.level())) {
 			if (!wisp.isRemoved()) {
@@ -136,6 +140,19 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		return wisp;
 	}
 
+	/**
+	 * {@code player}'s wisp comes for a question (what {@code /youth summon} does: Hermes summons it the moment someone
+	 * asks). If the answer takes so long that the wisp would fade, it says a "be right back" line first ("Studying
+	 * that!"); the answer, when it comes ({@link #say}), brings it back.
+	 */
+	public static @Nullable YouthWisp hold(ServerPlayer player) {
+		YouthWisp wisp = summon(player);
+		if (wisp != null) {
+			wisp.pending = true;
+		}
+		return wisp;
+	}
+
 	/** Sends {@code player}'s wisp home; false if they had none. */
 	public static boolean dismiss(ServerPlayer player) {
 		YouthWisp wisp = BY_ASKER.get(player.getUUID());
@@ -149,7 +166,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** {@code player}'s wisp gestures, and {@code text} goes to them in chat as Youth's words. */
 	public static void say(ServerPlayer player, String text) {
 		gesture(player);
-		player.sendSystemMessage(line(text));
+		player.sendSystemMessage(line(Component.literal(text)));
 	}
 
 	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks. */
@@ -157,16 +174,17 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
+			wisp.pending = false;
 			wisp.triggerAnim("action", "talk");
 		}
 	}
 
 	/** One line of Youth's in chat: its name in its own colour, then the words. */
-	static Component line(String text) {
+	static Component line(Component text) {
 		return Component.literal("[").withStyle(ChatFormatting.DARK_GREEN)
 			.append(Component.translatable("entity.jaymoskingdoms.youth_wisp").withColor(COLOUR))
 			.append(Component.literal("] ").withStyle(ChatFormatting.DARK_GREEN))
-			.append(Component.literal(text).withStyle(ChatFormatting.WHITE));
+			.append(text.copy().withStyle(ChatFormatting.WHITE));
 	}
 
 	/** Whether {@code player} has a wisp about. */
@@ -239,6 +257,10 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		ServerPlayer player = this.askerPlayer();
 		if (player == null || player.level() != level || player.distanceToSqr(this) > LEASH * LEASH
 			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
+			if (player != null && this.pending && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
+				this.triggerAnim("action", "talk");
+				player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES))));
+			}
 			this.vanish();
 			return;
 		}
@@ -311,7 +333,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
 		if (player instanceof ServerPlayer serverPlayer) {
-			serverPlayer.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.how").getString()));
+			serverPlayer.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.how")));
 		}
 		return InteractionResult.SUCCESS;
 	}

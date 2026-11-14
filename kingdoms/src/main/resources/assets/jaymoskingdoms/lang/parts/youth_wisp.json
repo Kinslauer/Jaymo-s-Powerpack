@@ -1,4 +1,10 @@
 {
   "entity.jaymoskingdoms.youth_wisp": "Youth",
-  "message.jaymoskingdoms.youth_wisp.how": "Ask me in chat: \"youth, how does ... work?\""
+  "message.jaymoskingdoms.youth_wisp.how": "Ask me in chat: \"youth, how does ... work?\"",
+  "message.jaymoskingdoms.youth_wisp.hold.0": "Studying that! Back soon.",
+  "message.jaymoskingdoms.youth_wisp.hold.1": "Be right back!",
+  "message.jaymoskingdoms.youth_wisp.hold.2": "I'd have to check. Back in a moment!",
+  "message.jaymoskingdoms.youth_wisp.hold.3": "Ooh, good one. Let me go look it up!",
+  "message.jaymoskingdoms.youth_wisp.hold.4": "Off to ask the elders. Back soon!",
+  "message.jaymoskingdoms.youth_wisp.hold.5": "That needs some reading. Be right back!"
 }

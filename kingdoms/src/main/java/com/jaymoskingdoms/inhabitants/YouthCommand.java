@@ -16,7 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
  * Gamemaster level, so ordinary players can't.
  *
  * <ul>
- * <li>{@code /youth summon <player>}: the player's wisp comes in beside them (or moves there).</li>
+ * <li>{@code /youth summon <player>}: the player's wisp comes in beside them (or moves there) for a question. If the
+ * answer is so slow that it fades first, it says "be right back" and the answer brings it back.</li>
  * <li>{@code /youth say <player> <text>}: the wisp gestures and the text goes to that player as Youth's words.</li>
  * <li>{@code /youth sayall <text>}: Youth's words to everyone online.</li>
  * <li>{@code /youth dismiss <player>}: the player's wisp goes home.</li>
@@ -43,7 +44,7 @@ public final class YouthCommand {
 
 	private static int summon(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = EntityArgument.getPlayer(c, "player");
-		if (YouthWisp.summon(player) == null) {
+		if (YouthWisp.hold(player) == null) {
 			c.getSource().sendFailure(Component.literal("Youth couldn't come"));
 			return 0;
 		}
@@ -59,7 +60,7 @@ public final class YouthCommand {
 	}
 
 	private static int sayAll(CommandContext<CommandSourceStack> c) {
-		Component line = YouthWisp.line(clean(StringArgumentType.getString(c, "text")));
+		Component line = YouthWisp.line(Component.literal(clean(StringArgumentType.getString(c, "text"))));
 		for (ServerPlayer player : c.getSource().getServer().getPlayerList().getPlayers()) {
 			player.sendSystemMessage(line);
 			if (YouthWisp.has(player)) {
