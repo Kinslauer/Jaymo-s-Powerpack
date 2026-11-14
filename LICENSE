@@ -42,7 +42,8 @@ These keep their own licences, which ship beside them. Nothing in this notice li
   System Overhaul (MIT); the Darkened Chapel's building, from Tada_no_ahiru's Church of Sin (MIT).
 - Jaymo's Kitchen (kitchen/src/main/resources/LICENSE_*): the Rats model, animations, textures and sounds and the
   rat trap model (LGPL v3); the Horse Power parts (LGPL v3); the Farmer's Delight and Nifty Carts parts (MIT).
-- The flintlock gun models (art/guns/, CC BY 4.0, makers in art/guns/CREDITS.md).
+- The flintlock gun models (art/guns/, CC BY 4.0, makers in art/guns/CREDITS.md), and the blunderbuss model from
+  cleannrooster's Frontier Armaments (MIT, src/main/resources/licenses/LICENSE_frontier_armaments).
 - Every other mod, resource pack and shader the modpack downloads or ships (including the MCA jar and ports/trmt),
   under its own licence. The modpack zip lists most of them for CurseForge to download, and does not relicense them.
 

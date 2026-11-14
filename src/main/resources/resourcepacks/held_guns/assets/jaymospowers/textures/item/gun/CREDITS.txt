@@ -7,3 +7,12 @@ Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
 Changes: the cubes were turned into item-model JSON, laid along the diagonal of WeaponMod's musket sprite and drawn at
 half size; the muzzle flash, cartridge and ball pieces were left out; the texture was padded onto a 256x256 sheet
 (tools/gen_flintlock_rifle.py).
+
+blunderbuss.png and the held blunderbuss models (models/item/gun/blunderbuss.json, blunderbuss_reload.json)
+
+The Firecannon from Frontier Armaments by cleannrooster
+https://github.com/cleannrooster/frontier_armaments
+MIT licence, Copyright (c) 2026 cleannrooster (licenses/LICENSE_frontier_armaments in the Jaymo's Powers jar)
+
+Changes: scaled 1.6x, the cubes turned into item-model JSON laid along WeaponMod's blunderbuss sprite
+(tools/gen_guns_geckolib.py).
