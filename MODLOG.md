@@ -4404,3 +4404,16 @@ enter limbo if they don't come to."
 - Andy: "they should circle dead bodies in midair". Vultures first circle any body, edible part or downed body within 48 blocks for 20-40 s, 6-11 blocks wide and 10-18 up, rising and falling, then come down: to snatch a part, tear at the downed, or land by a body to gnaw it as a Kitchen scavenger (`LimbEaters.CircleGoal`). They only take a part after circling.
 - Andy: "is there a bird that can grab and fly off with the limbs? like a vulture?" Naturalist's vulture (`jaymospowers:limb_carriers`) spots a part from 32 blocks, swoops down, takes it up in its talons (the part rides under it), flies 20-40 blocks to a spot on dry ground as far from the nearest player as it can find, puts it down and eats it there. Hit on the way, it lets go; a reload keeps it carrying.
 - Built; not played.
+
+## 0.23.39 (2026-11-14): Boxing: one click, one punch, through the string (jab, cross...), at a foe or the air
+
+- (Jung: "left clicks still don't do jabs and crosses") A boxer's left click at the air or at a block now throws a
+  real punch: the style's string (Arrow Slit jab, lead hook, cross; Long Guard jab, jab, cross; Bastion jabs), with
+  the same rhythm, windup and stamina as a punch at a foe, ending in a soft swish. Before, only a click on a living
+  thing ran the string, so shadowboxing showed the same jab every time. Everyone sees it; the click still breaks a
+  block as before.
+- (Jung: "work like a standard combo-chain fighter") One click is one punch: holding the button no longer does
+  anything more (it still digs a block), and the string loops back to its first punch after its last, or after 1.5 s
+  without a punch. Mashing is clean: a click just before the next punch is due waits its turn, an earlier one is
+  ignored, and each punch's animation plays to the end before the next starts (always the punch actually thrown, not
+  a stand-in jab).
