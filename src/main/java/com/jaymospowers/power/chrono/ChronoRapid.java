@@ -2,6 +2,7 @@ package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.ground.ThrownRocks;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.AABB;
@@ -41,6 +43,10 @@ import net.minecraft.world.phys.Vec3;
  * it hangs before you. Use again and it flies back {@link #HURL_FACTOR} times as fast, down your sight.</li>
  * <li><b>Weapon snatch:</b> use on an armed mob while you run past: its main-hand weapon is in your hand (or your pack,
  * or on the ground). Never on players.</li>
+ * <li><b>Quickened rocks:</b> Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming
+ * a bullet". A loose rock a speedster throws ({@link ThrownRocks}), or a caught one hurled back, leaves the hand with
+ * its own time run fast: {@link #ROCK_SPEED} blocks a tick, dead flat, {@link #ROCK_DAMAGE} where it hits, a crack of
+ * air as it goes and a gold streak behind it.</li>
  * </ul>
  * The client sends one {@link Use} per press of use while it is at speed.
  */
@@ -54,6 +60,14 @@ public final class ChronoRapid {
 	static final double CATCH_REACH = 6.0, CATCH_WIDTH = 0.9, HOLD_AHEAD = 1.7;
 	/** Hurling: the speed it goes back at is this times the speed it came at, at least {@link #HURL_MIN} (blocks a tick), at most {@link #HURL_MAX}. */
 	static final double HURL_FACTOR = 2.2, HURL_MIN = 2.6, HURL_MAX = 5.0;
+	/**
+	 * A quickened rock: its speed (blocks a tick; 6 is 120 blocks a second), what it hits for, how long it flies before it
+	 * is gone (ticks), and its streak's colour, width and how long each stretch of it stays (ticks).
+	 */
+	public static final float ROCK_SPEED = 6.0F, ROCK_DAMAGE = 12.0F;
+	public static final int ROCK_LIFE = 40;
+	static final int ROCK_COLOR = 0xFFD070, ROCK_STREAK_TICKS = 8;
+	static final float ROCK_STREAK = 0.05F;
 	/** A held shot is let go after this many ticks, and if you stop being a speedster. */
 	static final int HOLD_TICKS = 100;
 	/** Weapon snatch: reach, the speed you need (blocks a tick), the wait between snatches. */
@@ -198,12 +212,53 @@ public final class ChronoRapid {
 		shot.setOwner(player);
 		shot.setNoGravity(true);
 		shot.snapTo(player.getEyePosition().add(look.scale(HOLD_AHEAD)));
-		shot.setDeltaMovement(look.scale(speed));
+		// a rock goes back quickened
+		boolean rock = shot instanceof Snowball ball && ThrownRocks.quicken(ball, ROCK_DAMAGE);
+		shot.setDeltaMovement(look.scale(rock ? ROCK_SPEED : speed));
 		shot.syncVelocity = true;
 		shot.needsSync = true;
+		if (rock) {
+			rockCrack(level, shot.position(), look);
+		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0F, 1.6F);
 		MagicFx.ring(level, shot.position(), 1.0F, 0xFFD070);
+	}
+
+	// ---------------------------------------------------------------- quickened rocks
+
+	/** Whether a rock {@code player} throws goes quickened: any speedster, overclocked. */
+	public static boolean quickens(Player player) {
+		return ChronoSpeed.overclocked(player);
+	}
+
+	/** {@code player}'s rock has just left the hand at {@link #ROCK_SPEED}: it is quickened from here ({@link ThrownRocks#quicken}). */
+	public static void quickened(ServerPlayer player, Snowball ball) {
+		if (ThrownRocks.quicken(ball, ROCK_DAMAGE)) {
+			ball.setNoGravity(true);
+			rockCrack(player.level(), ball.position(), ball.getDeltaMovement());
+		}
+	}
+
+	/** The crack of air as a quickened rock goes: a ring across its path, and the sound. */
+	private static void rockCrack(ServerLevel level, Vec3 at, Vec3 way) {
+		MagicFx.ring(level, at, way, 0.8F, ROCK_COLOR, MagicFx.RING_TICKS);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.9F, 1.7F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.8F, 1.9F);
+	}
+
+	/** A quickened rock's streak, over the stretch it flew this tick. */
+	public static void rockStreak(ServerLevel level, Vec3 from, Vec3 to) {
+		if (from.distanceToSqr(to) > 1.0E-4) {
+			MagicFx.beam(level, from, to, ROCK_STREAK, ROCK_COLOR, ROCK_STREAK_TICKS);
+		}
+	}
+
+	/** A quickened rock has struck at {@code at}: the last of its streak, and the burst. */
+	public static void rockStruck(ServerLevel level, Vec3 from, Vec3 at) {
+		rockStreak(level, from, at);
+		MagicFx.blast(level, at, 0.6F, ROCK_COLOR);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.7F, 0.8F);
 	}
 
 	/** Lets a held shot go gently, as it was (gravity back). */
