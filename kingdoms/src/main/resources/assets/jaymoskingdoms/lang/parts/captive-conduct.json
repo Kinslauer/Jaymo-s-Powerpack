@@ -9,5 +9,9 @@
   "message.jaymoskingdoms.shackle.sawing": "Sawing at the rope: %s%%",
   "message.jaymoskingdoms.hard.chains.broken": "A link gives way. The chain falls from your neck.",
   "message.jaymoskingdoms.hard.chains.cut": "The last strands part. The rope falls from your neck.",
-  "gui.jaymoskingdoms.story.hint.113": "Taken captive, your captors leave you be while you keep your place. Strike out, steal, break things or get caught at your bonds and the camp falls on you. A chain gives to a rock beaten on it, a rope to anything sharp, but both are heard or seen."
+  "gui.jaymoskingdoms.story.hint.113": "Taken captive, your captors leave you be while you keep your place. Strike out, steal, break things or get caught at your bonds and the camp falls on you, until you're down; then they haul you back up. The third time, they kill you. Kneel to work at your bonds: a chain gives to a rock beaten on it, a rope to anything sharp, but both are heard or seen.",
+  "message.jaymoskingdoms.captive.warned": "%s Once more and they'll kill you.",
+  "message.jaymoskingdoms.captive.doomed": "%s They've had enough of you. This time they mean to kill you.",
+  "message.jaymoskingdoms.captive.beaten": "They've beaten the fight out of you. Keep your place.",
+  "message.jaymoskingdoms.captive.hauled": "A captor hauls you back to your feet."
 }

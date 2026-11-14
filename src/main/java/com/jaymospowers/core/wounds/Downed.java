@@ -94,7 +94,9 @@ import org.jspecify.annotations.Nullable;
  * going for a revive you often pick up the player instead": sneak + use held is only the lift now, {@link Carry}, and
  * executions are left-click, {@code Finishers}). Held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
  * takes one of its own treats instead, {@link #TREATS}). Kingdoms' villagers tend the downed too, and ask for the
- * getting up with the tag {@link #REVIVE_TAG}.
+ * getting up with the tag {@link #REVIVE_TAG}. Andy (2026-11-14): "kneeling ... unlocks a context where you can use right click
+ * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold is now made from a
+ * kneel at their side ({@code Kneel}), and a tap from the kneel lifts them ({@link Carry#liftDowned}); standing, a hold does nothing.
  * <p>
  * (0.18.5) Andy (2026-10-29): "while downed, any attack that would deal 3 hearts or more of damage kills instantly ... if
  * anyone goes down without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too
@@ -279,11 +281,16 @@ public final class Downed {
 		boolean begun, over;
 		/** (0.21.39) Whether its bar has been carried on from the last hold on this body ({@link HoldProgress}). */
 		boolean resumed;
+		/** (Andy, 2026-11-14) Begun from a kneel at their side: a hold brings them round, a tap lifts them. Else only a tap. */
+		final boolean knelt;
+		/** Told to kneel first (a hold standing over them). */
+		boolean hinted;
 
-		Revive(LivingEntity body, long start) {
+		Revive(LivingEntity body, long start, boolean knelt) {
 			this.body = body;
 			this.start = start;
 			this.held = start;
+			this.knelt = knelt;
 		}
 	}
 
@@ -424,7 +431,8 @@ public final class Downed {
 		UseEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseEntityCallback.EVENT.register(LAST, (player, world, hand, entity, hit) ->
 			// ((0.15.98) and a plain click on a downed player is a revive's hold, not a bow drawn or a meal eaten)
-			(entity instanceof Mob || entity instanceof Player && !player.isShiftKeyDown()) && isDowned(entity) ? InteractionResult.SUCCESS
+			(entity instanceof Mob || entity instanceof Player && (!player.isShiftKeyDown() || com.jaymospowers.core.Stance.low(player))) && isDowned(entity)
+				? InteractionResult.SUCCESS
 				: InteractionResult.PASS);
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -1471,12 +1479,19 @@ public final class Downed {
 		if (isDowned(player)) {
 			return InteractionResult.FAIL;
 		}
-		if (player.isShiftKeyDown() || world.isClientSide() || hand != InteractionHand.MAIN_HAND) {
-			// (0.17.7) sneak + use on them is the lift (Carry), or medicine that wants sneak (Treatment)
+		if (world.isClientSide() || hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
 		}
 		if (Treatment.claimsDowned(player, hand, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
 			// (0.14.4) medicine in hand: Treatment's, not a revive
+			return InteractionResult.PASS;
+		}
+		// (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking,
+		// reviving, lifting": from a kneel at their side (Kneel: the low crouch, held still) a hold of use brings them round and
+		// a tap lifts them (Carry#liftDowned). Standing, a tap is only a tap (a Xenoform band torn off); a sneak standing over
+		// them is nothing of this any more (Carry leaves the downed to the kneel), and medicine that wants sneak is Treatment's
+		boolean knelt = player instanceof ServerPlayer sp && com.jaymospowers.core.Kneel.kneeling(sp);
+		if (player.isShiftKeyDown() && !knelt) {
 			return InteractionResult.PASS;
 		}
 		Revive held = REVIVING.get(player.getUUID());
@@ -1484,7 +1499,7 @@ public final class Downed {
 			// still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
 			held.held = world.getGameTime();
 		} else if (entity instanceof LivingEntity body && isDowned(body) && !player.isSpectator()) {
-			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime()));
+			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime(), knelt));
 		}
 		// (only watching: a tap on a downed guard still has Kingdoms take its weapons, and Downed's catch-all swallows the rest)
 		return InteractionResult.PASS;
@@ -1514,8 +1529,13 @@ public final class Downed {
 				// let go
 				it.remove();
 				if (!r.begun && r.held - r.start < TAP_TICKS && isDowned(body)) {
-					for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
-						listener.accept(player, body);
+					if (r.knelt) {
+						// (Andy, 2026-11-14) a tap from the kneel: taken up
+						com.jaymospowers.core.Carry.liftDowned(player, body);
+					} else {
+						for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
+							listener.accept(player, body);
+						}
 					}
 				}
 				if (r.begun && !r.over) {
@@ -1524,6 +1544,14 @@ public final class Downed {
 				continue;
 			}
 			if (r.over || r.held - r.start < TAP_TICKS) {
+				continue;
+			}
+			if (!r.knelt) {
+				// (Andy, 2026-11-14) a hold standing over them does nothing now: kneel at their side first
+				if (!r.hinted) {
+					r.hinted = true;
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.kneel_first", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				}
 				continue;
 			}
 			if (!r.begun) {
@@ -1542,7 +1570,7 @@ public final class Downed {
 					continue;
 				}
 			}
-			if (player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+			if (!com.jaymospowers.core.Kneel.crouched(player) || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
 				r.over = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;

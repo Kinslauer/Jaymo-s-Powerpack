@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * the whole time".
  * <ul>
  * <li><b>The struggle:</b> a downed player who is still awake ({@link Downed#awake}) holds use on a block for
- * {@link #STRUGGLE_TICKS}: the bar fills (the repeats of held use, every 4 ticks, are the hold going on) and then the block
+ * {@link #STRUGGLE_TICKS} (only one that does something when used, {@link #usable}): the bar fills (the repeats of held use, every 4 ticks, are the hold going on) and then the block
  * works as if the hand were empty. Let go and the bar keeps where it got to (Andy: "every meter should work this way"),
  * unless they turn to another block or leave it {@link #FORGET_TICKS}. With Spooky Doors in the pack
  * ({@link SpookyDoorsCompat}) a door swings a little further every moment it's pushed, shut ones open and open ones shut.</li>
@@ -138,6 +138,10 @@ public final class DownedStruggle {
 			// (already in it)
 			return InteractionResult.FAIL;
 		}
+		if (!usable(level, pos, state)) {
+			// (Andy, 2026-11-14) "it should not show up if it does nothing": the ground, a wall, a log: no struggle with it
+			return InteractionResult.FAIL;
+		}
 		boolean door = state.getBlock() instanceof DoorBlock && SpookyDoorsCompat.loaded();
 		if (door && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER) {
 			pos = pos.below();
@@ -179,6 +183,22 @@ public final class DownedStruggle {
 		// the block as if the hand were empty: the held item is never used, placed or eaten from
 		InteractionResult used = level.getBlockState(hit.getBlockPos()).useWithoutItem(level, player, hit);
 		return used.consumesAction() ? used : InteractionResult.FAIL;
+	}
+
+	/**
+	 * Whether the block at {@code pos} does something when used with an empty hand, so a struggle with it leads somewhere: a
+	 * bed, a door, gate or trapdoor, a button or lever, a bell or note block, or anything with a screen or a store (a chest,
+	 * a barrel, a furnace, a crafting table).
+	 */
+	static boolean usable(ServerLevel level, BlockPos pos, BlockState state) {
+		net.minecraft.world.level.block.Block block = state.getBlock();
+		if (block instanceof AbstractBedBlock || block instanceof DoorBlock || block instanceof net.minecraft.world.level.block.TrapDoorBlock
+			|| block instanceof net.minecraft.world.level.block.FenceGateBlock || block instanceof net.minecraft.world.level.block.ButtonBlock
+			|| block instanceof net.minecraft.world.level.block.LeverBlock || block instanceof net.minecraft.world.level.block.BellBlock
+			|| block instanceof net.minecraft.world.level.block.NoteBlock) {
+			return true;
+		}
+		return state.getMenuProvider(level, pos) != null || level.getBlockEntity(pos) instanceof net.minecraft.world.Container;
 	}
 
 	// ---- the bed ---------------------------------------------------------------------------------------------------------

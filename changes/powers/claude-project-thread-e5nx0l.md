@@ -1,0 +1,7 @@
+# Kneel to revive or lift the downed; the downed struggle only with blocks that do something
+- Andy (2026-11-14): "to lockpick and break out of chains you must first be kneeling then that unlocks a context where you can use right click to interact, for lockpicking, reviving, lifting, this should help free up some binds."
+- **Reviving** is done from a kneel at their side (`Kneel`: the low crouch, Shift + scroll down, held still): hold use to bring them round as before (the bar, the food). Standing over them, a hold does nothing but say to kneel first. Getting up from the kneel (letting the low crouch go) breaks it off.
+- **Lifting** someone downed is a tap of use from the same kneel (`Carry.liftDowned`): they're taken up at once (dragged, a piece of armour shed, or carried, as a full lift was). A sneak + hold standing over a downed body no longer lifts it. Every other lift (animals, severed parts, the Wind grab) is as it was.
+- Freed: plain hold use and sneak + hold use on a downed body. A plain tap standing still does what it did (Kingdoms' disarm, a Xenoform band torn off). Medicine on the downed is unchanged.
+- Andy: "it should not show up if it does nothing. only when it is actively doing something". A downed player's struggle (`DownedStruggle`) now starts only on a block that does something when used (`usable`: beds, doors, gates, trapdoors, buttons, levers, bells, note blocks, anything with a screen or a store). Right-clicking the ground, a wall or a log while down shows nothing.
+- Built; not played.
