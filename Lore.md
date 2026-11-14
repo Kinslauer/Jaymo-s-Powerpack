@@ -1671,6 +1671,19 @@ thickest in swamps and in autumn. On windy days sand runs in low streams over th
 lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
 breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
 
+(new) **Cyclopes and satyrs** (Andy's Mythika ask, 2026-11-14; our own make, Claude's placement for him to approve). The
+**cyclops** is a monster of legend: a one-eyed giant twice a man's height, the last of a herding people of the high
+rock who were old when the first keeps were raised. Each lives alone on the peaks or a stony shore, in a hall it cuts
+into the mountainside, with a fire burning on a bale under a smoke hole, a fold of sheep it counts every day, a shelf of
+its dinners' bones and a great stone beside the door. It comes out only once the borderlands are opened; shepherds
+below know it by the smoke. It sleeps by its fire at night. Its eye is its weakness: an arrow in the eye, or a blow
+struck while it sleeps, blinds it for a while, and blind it hunts by the sound of feet, so the wise creep. Steal its
+sheep and it follows them. The **satyrs** are the Green Huntsman's own revellers, goat-legged folk of the birch woods,
+forests and high meadows, who live in groves of three to five under their eldest, a grey-coated piper. At dusk they lay
+a fire and the eldest plays the old tunes while the rest dance or sit and listen; at dawn they put it out. They are
+nobody's enemy, but strike one and the whole grove comes at you with horns and hooves. Bring them honey, berries or wine
+and you are welcome at the fire, and a night there mends you and brings you luck.
+
 ## Daily life
 
 **Kitchen and table.** Food is cooked at hob, grill and oven, in pot, skillet and saucepan, and a cook can get a
