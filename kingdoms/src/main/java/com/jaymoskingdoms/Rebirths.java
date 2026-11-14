@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -15,6 +16,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +33,8 @@ import org.jspecify.annotations.Nullable;
  * the rite is done. The dead come back in <b>a new blood</b>, drawn at random from the bloods anyone may be born to (never the
  * old one, never one that has to be earned, never a brood's), and wake at the druid's feet, weak and cold. They keep their name,
  * their knowledge, their map, their standing, their class and skills, and what they carried; the old body's gifts are not
- * theirs now (a vampire's thirst, a wolf's curse, the powers of the old life: gone).
+ * theirs now (a vampire's thirst, a wolf's curse, the powers of the old life: gone), though their power affinity stays, so the
+ * power they leaned to wakes in them again. An old druid tells a Druid the rite ({@link #use}).
  */
 public final class Rebirths {
 	// ---- tuning ----
@@ -40,8 +44,16 @@ public final class Rebirths {
 	static final int CHANT = 20 * 20;
 	static final double DRUID_REACH = 8.0, SPELL_REACH = 6.0;
 	static final int COLOUR = 0x8FD36B;
+	/** The old druid's telling of the rite to a Druid: how many lines, this long apart (ticks), heard within this reach (blocks). */
+	static final int TELL_LINES = 3, TELL_GAP = 60;
+	static final double TELL_REACH = 8.0;
 
 	private static final Map<UUID, Integer> CHANTING = new HashMap<>();
+	/** A Druid being told the rite by an old druid: the druid, the next line, and when it is said. */
+	private record Telling(UUID druid, int line, int at) {
+	}
+
+	private static final Map<UUID, Telling> TELLING = new HashMap<>();
 
 	/** The body laid out for the rite: a body lying free, or a grave. */
 	record Body(@Nullable Entity corpse, @Nullable BlockPos grave) {
@@ -52,7 +64,75 @@ public final class Rebirths {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Rebirths::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> CHANTING.clear());
+		ServerTickEvents.END_SERVER_TICK.register(Rebirths::tell);
+		UseEntityCallback.EVENT.register(Rebirths::use);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			CHANTING.clear();
+			TELLING.clear();
+		});
+	}
+
+	/**
+	 * Andy: "the druid hermit needs to be able to tell a druid player about this ritual". A Druid (first or second calling)
+	 * who speaks to an old druid is told the rite, line by line, and knows it after; one who knows it already is reminded.
+	 * Anyone else gets nothing from them.
+	 */
+	private static InteractionResult use(Player player, net.minecraft.world.level.Level level, InteractionHand hand, Entity target,
+		net.minecraft.world.phys.@Nullable EntityHitResult hit) {
+		if (!(target instanceof Villager druid) || !druid.entityTags().contains(Groves.DRUID_TAG)
+			|| !Classes.both(player).contains(Classes.PlayerClass.DRUID)) {
+			return InteractionResult.PASS;
+		}
+		if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server)) {
+			return InteractionResult.SUCCESS;
+		}
+		if (hand != InteractionHand.MAIN_HAND || TELLING.containsKey(sp.getUUID())) {
+			return InteractionResult.CONSUME;
+		}
+		if (Classes.of(sp).spells().contains("rebirth")) {
+			Speech.sayPlainly(server, druid, sp, Component.translatable("speech.jaymoskingdoms.druid.knows"), COLOUR);
+		} else {
+			TELLING.put(sp.getUUID(), new Telling(druid.getUUID(), 0, server.getServer().getTickCount()));
+		}
+		return InteractionResult.CONSUME;
+	}
+
+	/** The telling goes on, a line at a time; walking off ends it, and only the whole of it teaches the rite. */
+	private static void tell(MinecraftServer server) {
+		if (TELLING.isEmpty()) {
+			return;
+		}
+		int now = server.getTickCount();
+		for (var it = TELLING.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Telling t = e.getValue();
+			if (now < t.at) {
+				continue;
+			}
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			Entity druid = player == null ? null : ((ServerLevel) player.level()).getEntity(t.druid);
+			if (druid == null || !druid.isAlive() || player.distanceTo(druid) > TELL_REACH) {
+				it.remove();
+				continue;
+			}
+			ServerLevel level = (ServerLevel) player.level();
+			Speech.sayPlainly(level, druid, player, Component.translatable("speech.jaymoskingdoms.druid.tells." + t.line), COLOUR);
+			if (t.line + 1 < TELL_LINES) {
+				e.setValue(new Telling(t.druid, t.line + 1, now + TELL_GAP));
+				continue;
+			}
+			it.remove();
+			Classes.Chosen c = Classes.of(player);
+			if (!c.spells().contains("rebirth")) {
+				List<String> spells = new ArrayList<>(c.spells());
+				spells.add("rebirth");
+				player.setAttached(Classes.CLASS, new Classes.Chosen(c.cls(), c.option(), List.copyOf(spells), c.selected()));
+				level.sendParticles(Fx.rune(COLOUR, 0.9F), player.getX(), player.getY() + 1.2, player.getZ(), 20, 0.4, 0.5, 0.4, 0.0);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.4F);
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spell.learned", Spellcraft.spellName("rebirth"))
+					.withStyle(ChatFormatting.LIGHT_PURPLE));
+			}
+		}
 	}
 
 	private static long today(ServerLevel level) {
