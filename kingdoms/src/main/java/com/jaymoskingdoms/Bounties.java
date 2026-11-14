@@ -485,6 +485,28 @@ public final class Bounties {
 		return out;
 	}
 
+	/** (Captures) One live bounty on {@code body}, with any court, or null. */
+	static @Nullable Bounty anyOn(MinecraftServer server, LivingEntity body) {
+		List<Bounty> on = onAnywhere(server, body);
+		return on.isEmpty() ? null : on.get(0);
+	}
+
+	/** (Captures) Where another wanted townsperson (not {@code teller}) was last seen, roughly, in words; null if there's none. */
+	static @Nullable Component hideout(MinecraftServer server, LivingEntity teller) {
+		List<Bounty> others = new ArrayList<>();
+		for (Bounty b : all(server).values()) {
+			if (!b.dead() && !b.player() && !b.target().equals(teller.getStringUUID())) {
+				others.add(b);
+			}
+		}
+		if (others.isEmpty()) {
+			return null;
+		}
+		Bounty b = others.get(teller.getRandom().nextInt(others.size()));
+		return Component.translatable("captive.jaymoskingdoms.hideout", Component.literal(b.name()),
+			Math.round(b.last().getX() / (float)ROUND) * ROUND, Math.round(b.last().getZ() / (float)ROUND) * ROUND);
+	}
+
 	// ---- the board -------------------------------------------------------------------------------------------------------
 
 	/** {@code player} reads the board at {@code pos}: its court's bounties, on the quest screen. */
@@ -875,17 +897,20 @@ public final class Bounties {
 				return true;
 			}
 		}
-		// a downed target brought before them
+		// a downed (or hogtied) target brought before them
 		for (LivingEntity body : level.getEntitiesOfClass(LivingEntity.class, ruler.getBoundingBox().inflate(CLAIM_RANGE),
-			e -> e != player && e.isAlive() && Downed.isDowned(e))) {
+			e -> e != player && e.isAlive() && (Downed.isDowned(e) || com.jaymoskingdoms.forms.Lasso.hogtied(e)))) {
 			Bounty b = on(server, body, court.id());
 			if (b == null) {
 				continue;
 			}
-			pay(level, player, ruler, court, b, b.price(), "alive");
+			// (a confession taken on the way pays more: Captures)
+			pay(level, player, ruler, court, b, (int)Math.ceil(b.price() * Captures.bonus(body)), "alive");
 			if (body instanceof ServerPlayer target) {
+				com.jaymoskingdoms.forms.Lasso.drop(target);
 				sentence(level, target, court, b);
 			} else {
+				Captures.handedOver(level, player, ruler, body, court);
 				// the relic a miniboss fought with is the hunter's
 				if (Boolean.TRUE.equals(body.getAttached(ARMED)) && !body.getMainHandItem().isEmpty()) {
 					give(player, body.getMainHandItem().copy());

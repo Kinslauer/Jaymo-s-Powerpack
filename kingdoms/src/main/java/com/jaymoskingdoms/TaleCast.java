@@ -545,7 +545,12 @@ final class TaleCast {
 
 	/** ({@link BoardWork}) {@code mob} is someone a piece of board work set out: kept like a tale's people until the work is over. */
 	static void adopt(Mob mob, String instance, String role) {
-		mob.setAttached(CAST, new Cast(instance, role, mob.blockPosition().asLong(), false, false, false, mob.level().getGameTime()));
+		adopt(mob, instance, role, false);
+	}
+
+	/** {@link #adopt}; {@code fight}: one of the work's foes, who fights as the work has them (and is never kept to its spot). */
+	static void adopt(Mob mob, String instance, String role, boolean fight) {
+		mob.setAttached(CAST, new Cast(instance, role, mob.blockPosition().asLong(), fight, false, false, mob.level().getGameTime()));
 		LOADED.add(mob);
 	}
 

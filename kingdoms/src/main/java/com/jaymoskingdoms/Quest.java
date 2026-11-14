@@ -69,6 +69,12 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * leave in the chest at pos.
 	 */
 	public static final int PACK = 19, ELITE = 20, DEFEND = 21, TREK = 22, INCURSION = 23, LAMPS = 24, BUILD = 25, BLAST = 26, STASH = 27;
+	/**
+	 * Kidnapping work ({@link QuestJobs}, {@link Captures}): one of the town's own held hogtied at pos by captors (target: their
+	 * kind; other: the captive, otherName: their name; progress 1 once they're free), to be brought home; a wanted criminal at
+	 * pos (other: them, otherName: their name and crime) to be brought back alive, hogtied or downed, to whoever posted it.
+	 */
+	public static final int HOSTAGE = 28, CAPTURE = 29;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

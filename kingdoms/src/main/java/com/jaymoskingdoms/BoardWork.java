@@ -42,10 +42,14 @@ final class BoardWork {
 	static final int ROOM_LEVEL = 3;
 	static final float LEVEL_CHANCE = 0.05F;
 	/** What a job pays for each star, by kind (an emerald's worth each); hearts with the poster and the town's good name, for each star. */
-	private static final Map<String, Integer> PAY = Map.of("pack", 4, "elite", 8, "defend", 7, "trek", 5, "incursion", 6, "lamps", 3, "build", 4, "blast", 5, "stash", 3);
+	private static final Map<String, Integer> PAY = Map.ofEntries(Map.entry("pack", 4), Map.entry("elite", 8), Map.entry("defend", 7), Map.entry("trek", 5),
+		Map.entry("incursion", 6), Map.entry("lamps", 3), Map.entry("build", 4), Map.entry("blast", 5), Map.entry("stash", 3), Map.entry("hostage", 7),
+		Map.entry("capture", 8));
 	static final int HEARTS = 2, REPUTATION = 3;
 	/** The board level a kind is first posted at. */
-	private static final Map<String, Integer> FROM = Map.of("pack", 1, "lamps", 1, "build", 1, "stash", 1, "trek", 1, "blast", 2, "incursion", 2, "elite", 3, "defend", 3);
+	private static final Map<String, Integer> FROM = Map.ofEntries(Map.entry("pack", 1), Map.entry("lamps", 1), Map.entry("build", 1), Map.entry("stash", 1),
+		Map.entry("trek", 1), Map.entry("blast", 2), Map.entry("incursion", 2), Map.entry("hostage", 2), Map.entry("capture", 2), Map.entry("elite", 3),
+		Map.entry("defend", 3));
 	/** How far from the town its work lies: hunts and dens, cave-ins, stashes, building. */
 	static final int HUNT_NEAR = 140, HUNT_FAR = 320, BUILD_NEAR = 44, BUILD_FAR = 70;
 	/** An escort goes to a town at least this far off. */
@@ -53,7 +57,7 @@ final class BoardWork {
 	/** How many things a town held through the night has to say to the one who held it. */
 	static final int DEFEND_THANKS = 3;
 
-	private static final List<String> KINDS = List.of("pack", "elite", "defend", "trek", "incursion", "lamps", "build", "blast", "stash");
+	private static final List<String> KINDS = List.of("pack", "elite", "defend", "trek", "incursion", "lamps", "build", "blast", "stash", "hostage", "capture");
 	/** What packs are made of; what an elite is; who comes at a town in the night. */
 	private static final List<String> PACKS = List.of("minecraft:wolf", "minecraft:spider", "minecraft:zombie", "minecraft:skeleton", "minecraft:pillager", "minecraft:husk", "minecraft:stray");
 	private static final List<String> ELITES = List.of("minecraft:vindicator", "minecraft:pillager", "minecraft:skeleton", "minecraft:zombie", "minecraft:spider", "minecraft:wolf", "minecraft:stray");
@@ -66,6 +70,13 @@ final class BoardWork {
 	/** What's stashed, by where: a hermit's food, a drop of iron, a shrine's candles. */
 	private static final Map<String, String> STASHES = Map.of("hermit", "minecraft:bread:4", "drop", "minecraft:iron_ingot:3", "shrine", "minecraft:candle:2");
 	private static final List<String> DENS = List.of("nest", "camp", "pit");
+	/** Who outlaws carry off (whose kin to the poster), and their names, a woman's or a man's. */
+	private static final List<String> KIN = List.of("daughter", "son", "sister", "brother", "wife", "husband", "mother", "father", "apprentice", "neighbour");
+	private static final List<String> WOMEN = List.of("Edda", "Maren", "Hild", "Ysolde", "Ilse", "Fenna", "Wenna", "Oda", "Sefa", "Brenna");
+	private static final List<String> MEN = List.of("Tomas", "Wil", "Oswin", "Bram", "Cael", "Ronan", "Aldo", "Piet", "Garran", "Hob");
+	/** A criminal's name (a first name and what they're called for it), and what they did. */
+	private static final List<String> EPITHETS = List.of("Fox", "Knife", "Ferret", "Smiler", "Crow", "Tally", "Quick", "Lantern", "Weasel", "Stitch", "Badger", "Coin");
+	private static final List<String> CRIMES = List.of("theft", "murder", "arson", "smuggling", "poaching", "desertion", "kidnapping", "forgery");
 
 	/** How many jobs have been finished off each town's board (faction id → jobs); on the overworld. */
 	static final AttachmentType<Map<String, Integer>> DONE = AttachmentRegistry.create(JaymosKingdoms.id("board_work_done"),
@@ -263,6 +274,25 @@ final class BoardWork {
 			case "blast" -> {
 				questKind = Quest.BLAST;
 				target = "minecraft:tnt";
+				pos = Tales.wild(level, seat, HUNT_NEAR + random.nextInt(HUNT_FAR - HUNT_NEAR), random);
+			}
+			case "hostage" -> {
+				// (one of the poster's own, held bound at an outlaws' camp)
+				questKind = Quest.HOSTAGE;
+				String kin = any(KIN, random);
+				boolean woman = switch (kin) {
+					case "daughter", "sister", "wife", "mother" -> true;
+					case "son", "brother", "husband", "father" -> false;
+					default -> random.nextBoolean();
+				};
+				otherName = any(woman ? WOMEN : MEN, random) + "|" + kin;
+				count = 2;
+				pos = Tales.wild(level, seat, HUNT_NEAR + random.nextInt(HUNT_FAR - HUNT_NEAR), random);
+			}
+			case "capture" -> {
+				// (a named criminal, wanted alive)
+				questKind = Quest.CAPTURE;
+				otherName = any(random.nextBoolean() ? WOMEN : MEN, random) + " the " + any(EPITHETS, random) + "|" + any(CRIMES, random);
 				pos = Tales.wild(level, seat, HUNT_NEAR + random.nextInt(HUNT_FAR - HUNT_NEAR), random);
 			}
 			default -> {

@@ -605,6 +605,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (the journal's Past page and the town boards' finished work keep attachments of their own)
 		LOGGER.debug("quest past and board work attachments: {} {}", QuestPast.PAST, BoardWork.DONE);
 		QuestJobs.register();
+		// (cutting captives free, and the wanted lying tied: what they say, by temper)
+		LOGGER.debug("capture mood attachment: {}", Captures.MOOD);
+		Captures.register();
 		Overheard.register();
 		Quests.register();
 		// (0.7.530) a town's troubles ask for help; its shared projects are built by whoever gives (and their attachments)
