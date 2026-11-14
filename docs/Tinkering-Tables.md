@@ -46,7 +46,7 @@ Both live in `TableExtras`, held by every table menu (`TinkerTableMenu`).
 items on top (the Forge's five along its top, the grid in 3x3). `StationEntity.busyFor` recognises the new menus.
 `StationEntity.open/changed/close` are public now.
 
-## Smeltery extras (melter, tank, channel)
+## Smeltery extras (melter, tank, channel, alloyer, foundry)
 
 After Tinkers' Construct 3 (MIT; its models and textures). All in `tinkering/smeltery/`, registered by `SmelteryExtras`.
 Anything that gives or takes metal is a `MoltenHolder` (smeltery, melter, tank, channel, casting table and basin); a faucet
@@ -58,6 +58,14 @@ sync every 5 ticks); `MoltenRenderer` draws the metal.
 | `seared_melter` | A one-block smeltery. Set it over heat (what the kiln counts: campfire, fire, lava, magma, a lit forge hearth; `kiln.Heat`). Right-click with up to 3 things that melt; empty hand takes back what hasn't melted, then reads the pool. Holds 12 ingots, does not alloy. A faucet on its side pours it. | `bgb` / `bbb` |
 | `seared_tank` | Holds 4 blocks of one metal. A faucet or channel over it fills it, a faucet on its side empties it; empty hand reads it. Breaking it loses the metal. | `bbb` / `bgb` / `bbb` |
 | `seared_channel` | A trough: joins to channels beside it, opens downward over a casting table, basin, tank or channel. A faucet above pours in; each stretch fills what is under it first, then passes metal on. Dregs under a nugget that can't move cool away after 10 s. | `b b` / `bbb` (3) |
+
+The scorched kind is fired from **nether grout** (magma cream + soul sand or soul soil + gravel, makes 2; smelt it for a
+scorched brick `s`):
+
+| Block | What it does | Recipe (s scorched brick, q quartz) |
+| --- | --- | --- |
+| `scorched_alloyer` | Over heat, with seared tanks or melters against its sides, it draws an alloy's metals out of them and mixes one batch every 2 ticks into its own pool (2 blocks, one alloy at a time; `Melting.ALLOYS`). A faucet on a free side pours it. | `sqs` / `sss` |
+| `foundry_controller`, `scorched_bricks`, `scorched_glass`, `scorched_drain` | The foundry: built and run exactly like the smeltery (same `SmelteryBlock`/`SmelteryEntity`, same screen, lava fuel) but of scorched blocks, and **it never alloys**, so copper and gold can lie in one pool. Seared and scorched blocks don't mix in one structure. Tinkers' ore byproducts are not built. | controller `sss` / `s s` / `sss`; bricks `ss` / `ss`; glass ` s ` / `sqs` / ` s `; drain `s s` x3 |
 
 ## Not done / notes
 - Tool Forge has no facing (its top runs north-south); JEI isn't told the Forge also makes tools.

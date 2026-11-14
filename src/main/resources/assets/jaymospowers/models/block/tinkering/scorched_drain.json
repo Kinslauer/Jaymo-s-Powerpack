@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "jaymospowers:block/tinkering/scorched_bricks",
+    "side": "jaymospowers:block/tinkering/scorched_bricks",
+    "front": "jaymospowers:block/tinkering/scorched_drain"
+  }
+}

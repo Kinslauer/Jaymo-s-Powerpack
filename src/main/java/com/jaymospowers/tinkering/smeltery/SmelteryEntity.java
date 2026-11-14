@@ -146,7 +146,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			fuel--;
 			dirty = true;
 		}
-		if (formed) {
+		if (formed && !foundry()) {
 			alloy();
 		}
 		boolean lit = formed && fuel > 0;
@@ -204,6 +204,11 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			dirty = true;
 		}
 		return false;
+	}
+
+	/** A foundry: built of scorched bricks, and it never alloys what it melts. */
+	private boolean foundry() {
+		return getBlockState().is(SmelteryExtras.FOUNDRY);
 	}
 
 	private void alloy() {
@@ -273,7 +278,8 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			// the floor under the bottom layer
 			for (int d = 0; d < depth && ok; d++) {
 				for (int s = -left; s <= right && ok; s++) {
-					ok = level.getBlockState(start.relative(inward, d).relative(side, s).below()).is(Tinkering.SEARED_BRICKS);
+					ok = level.getBlockState(start.relative(inward, d).relative(side, s).below())
+						.is(foundry() ? SmelteryExtras.SCORCHED_BRICKS : Tinkering.SEARED_BRICKS);
 				}
 			}
 			while (ok && height < MAX_HEIGHT && layer(level, start.above(height), inward, side, left, right, depth, drains)) {
@@ -312,7 +318,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 		return n;
 	}
 
-	/** One layer: open inside, seared walls all round (corners don't matter). */
+	/** One layer: open inside, seared (a foundry: scorched) walls all round (corners don't matter). */
 	private boolean layer(Level level, BlockPos start, Direction inward, Direction side, int left, int right, int depth,
 		List<BlockPos> drains) {
 		for (int d = 0; d < depth; d++) {
@@ -340,11 +346,13 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			return true;
 		}
 		BlockState state = level.getBlockState(pos);
-		if (state.is(Tinkering.DRAIN)) {
+		boolean foundry = foundry();
+		if (state.is(foundry ? SmelteryExtras.SCORCHED_DRAIN : Tinkering.DRAIN)) {
 			drains.add(pos);
 			return true;
 		}
-		return state.is(Tinkering.SEARED_BRICKS) || state.is(Tinkering.SEARED_GLASS);
+		return foundry ? state.is(SmelteryExtras.SCORCHED_BRICKS) || state.is(SmelteryExtras.SCORCHED_GLASS)
+			: state.is(Tinkering.SEARED_BRICKS) || state.is(Tinkering.SEARED_GLASS);
 	}
 
 	// --- the screen and faucets ---

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:magma_cream",
+    "#minecraft:soul_fire_base_blocks",
+    "minecraft:gravel"
+  ],
+  "result": {
+    "id": "jaymospowers:nether_grout",
+    "count": 2
+  }
+}

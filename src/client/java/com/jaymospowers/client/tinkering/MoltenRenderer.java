@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.tinkering.smeltery.AlloyerEntity;
 import com.jaymospowers.tinkering.smeltery.ChannelBlock;
 import com.jaymospowers.tinkering.smeltery.ChannelEntity;
 import com.jaymospowers.tinkering.smeltery.MelterEntity;
@@ -21,13 +22,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-/** The metal in a seared tank, a melter (its upper half) or a channel (the trough and its joined arms). */
+/** The metal in a seared tank, a melter (its upper half), an alloyer or a channel (the trough and its joined arms). */
 public class MoltenRenderer implements BlockEntityRenderer<MoltenEntity, MoltenRenderer.State> {
 	public static class State extends BlockEntityRenderState {
 		/** The liquids bottom first, and each one's share of the whole capacity. */
 		final List<Molten> molten = new ArrayList<>();
 		final List<Float> share = new ArrayList<>();
-		/** 0 a tank, 1 a melter, 2 a channel. */
+		/** 0 a tank, 1 a melter, 2 a channel, 3 an alloyer. */
 		int kind;
 		/** A channel's joined sides (north, east, south, west) and whether it opens downward. */
 		final boolean[] sides = new boolean[4];
@@ -56,7 +57,7 @@ public class MoltenRenderer implements BlockEntityRenderer<MoltenEntity, MoltenR
 			state.molten.add(layer.molten);
 			state.share.add(layer.amount / (float) Math.max(1, entity.tank().capacity()));
 		}
-		state.kind = entity instanceof ChannelEntity ? 2 : entity instanceof MelterEntity ? 1 : 0;
+		state.kind = entity instanceof ChannelEntity ? 2 : entity instanceof MelterEntity ? 1 : entity instanceof AlloyerEntity ? 3 : 0;
 		if (state.kind == 2) {
 			BlockState block = entity.getBlockState();
 			state.sides[0] = block.getValue(ChannelBlock.NORTH);
@@ -94,8 +95,8 @@ public class MoltenRenderer implements BlockEntityRenderer<MoltenEntity, MoltenR
 			}
 			return;
 		}
-		// inside the glass: the whole block for a tank, the upper half for a melter
-		float floor = state.kind == 1 ? 8.1F * PX : 0.1F * PX, room = 15.9F * PX - floor, y = floor;
+		// inside the glass: the whole block for a tank, the upper half for a melter, above its firebox for an alloyer
+		float floor = state.kind == 1 ? 8.1F * PX : state.kind == 3 ? 5.1F * PX : 0.1F * PX, room = 15.9F * PX - floor, y = floor;
 		for (int i = 0; i < state.molten.size(); i++) {
 			float top = Math.min(15.9F * PX, y + room * state.share.get(i));
 			MoltenQuads.box(poseStack, collector, MoltenQuads.sprite(sprites, state.molten.get(i)), 0.1F * PX, y, 0.1F * PX, 15.9F * PX, top,

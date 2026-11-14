@@ -31,6 +31,7 @@ public final class TinkeringClient {
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.TANK_ENTITY, MoltenRenderer::new);
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.MELTER_ENTITY, MoltenRenderer::new);
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.CHANNEL_ENTITY, MoltenRenderer::new);
+		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.ALLOYER_ENTITY, MoltenRenderer::new);
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.kiln.Kiln.KILN_LOAD_ENTITY, KilnLoadRenderer::new);
 		// (0.13) what melts by recipe, data file or forged weapon, as the server worked it out
 		ClientPlayNetworking.registerGlobalReceiver(MeltingRecipes.Sync.TYPE, (payload, context) -> Melting.setExtra(payload.items()));

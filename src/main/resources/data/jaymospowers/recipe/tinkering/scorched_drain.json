@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "s": "jaymospowers:scorched_brick"
+  },
+  "pattern": [
+    "s s",
+    "s s",
+    "s s"
+  ],
+  "result": {
+    "id": "jaymospowers:scorched_drain",
+    "count": 1
+  }
+}

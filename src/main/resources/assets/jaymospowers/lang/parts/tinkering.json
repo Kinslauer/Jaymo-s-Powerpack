@@ -347,5 +347,14 @@
   "block.jaymospowers.seared_channel": "Seared Channel",
   "message.jaymospowers.molten.holds": "%s: %s",
   "message.jaymospowers.molten.empty": "Empty",
-  "message.jaymospowers.melter.full": "The melter is full."
+  "message.jaymospowers.melter.full": "The melter is full.",
+  "block.jaymospowers.nether_grout": "Nether Grout",
+  "block.jaymospowers.scorched_bricks": "Scorched Bricks",
+  "block.jaymospowers.scorched_glass": "Scorched Glass",
+  "block.jaymospowers.foundry_controller": "Foundry Controller",
+  "block.jaymospowers.scorched_drain": "Scorched Drain",
+  "block.jaymospowers.scorched_alloyer": "Scorched Alloyer",
+  "item.jaymospowers.scorched_brick": "Scorched Brick",
+  "container.jaymospowers.foundry": "Foundry",
+  "gui.jaymospowers.foundry.unformed": "Not a foundry yet: it needs a floor of scorched bricks and scorched walls all round an open space, with this controller in the wall."
 }

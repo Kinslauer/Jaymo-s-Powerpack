@@ -193,7 +193,6 @@ public final class Tinkering {
 			new MenuType<>(ToolStationMenu::new, FeatureFlags.VANILLA_SET));
 
 		registerSmeltery();
-		com.jaymospowers.tinkering.smeltery.SmelteryExtras.register();
 		registerKnifeMetals();
 		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
 		com.jaymospowers.tinkering.kiln.Kiln.register();
@@ -220,6 +219,7 @@ public final class Tinkering {
 				output.accept(block);
 			}
 			output.accept(SEARED_BRICK);
+			output.accept(com.jaymospowers.tinkering.smeltery.SmelteryExtras.SCORCHED_BRICK);
 			for (Block block : List.of(SILVER_ORE, DEEPSLATE_SILVER_ORE, RAW_SILVER_BLOCK, SILVER_BLOCK)) {
 				output.accept(block);
 			}
@@ -311,10 +311,11 @@ public final class Tinkering {
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}
+		com.jaymospowers.tinkering.smeltery.SmelteryExtras.register();
 		SMELTERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("smeltery"),
-			new BlockEntityType<>(SmelteryEntity::new, Set.of(SMELTERY)));
+			new BlockEntityType<>(SmelteryEntity::new, Set.of(SMELTERY, com.jaymospowers.tinkering.smeltery.SmelteryExtras.FOUNDRY)));
 		DRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("seared_drain"),
-			new BlockEntityType<>(DrainEntity::new, Set.of(DRAIN)));
+			new BlockEntityType<>(DrainEntity::new, Set.of(DRAIN, com.jaymospowers.tinkering.smeltery.SmelteryExtras.SCORCHED_DRAIN)));
 		FAUCET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("seared_faucet"),
 			new BlockEntityType<>(FaucetEntity::new, Set.of(FAUCET)));
 		CASTING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("casting"),

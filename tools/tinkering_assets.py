@@ -246,6 +246,15 @@ SMELTERY_LANG = {
     "block.jaymospowers.seared_tank": "Seared Tank",
     "block.jaymospowers.seared_melter": "Seared Melter",
     "block.jaymospowers.seared_channel": "Seared Channel",
+    "block.jaymospowers.nether_grout": "Nether Grout",
+    "block.jaymospowers.scorched_bricks": "Scorched Bricks",
+    "block.jaymospowers.scorched_glass": "Scorched Glass",
+    "block.jaymospowers.foundry_controller": "Foundry Controller",
+    "block.jaymospowers.scorched_drain": "Scorched Drain",
+    "block.jaymospowers.scorched_alloyer": "Scorched Alloyer",
+    "item.jaymospowers.scorched_brick": "Scorched Brick",
+    "container.jaymospowers.foundry": "Foundry",
+    "gui.jaymospowers.foundry.unformed": "Not a foundry yet: it needs a floor of scorched bricks and scorched walls all round an open space, with this controller in the wall.",
     "message.jaymospowers.molten.holds": "%s: %s",
     "message.jaymospowers.molten.empty": "Empty",
     "message.jaymospowers.melter.full": "The melter is full.",
@@ -821,6 +830,41 @@ def smeltery_extras(tcon):
             parts.append({"when": {f: joined}, "apply": apply})
     write(os.path.join(ASSETS, "blockstates", "seared_channel.json"), {"multipart": parts})
     write(os.path.join(ASSETS, "items", "seared_channel.json"), {"model": ref("block/tinkering/seared_channel_center")})
+    # the scorched kind: nether grout and bricks, the foundry (a controller and drain like the smeltery's) and the alloyer
+    ftex = os.path.join(tcon, "assets", "tconstruct", "textures", "block", "foundry")
+    for name, rel in (("scorched_bricks", "scorched/bricks"), ("scorched_glass", "glass"), ("foundry_inactive", "controller/foundry_inactive"),
+                      ("foundry_active", "controller/foundry_active"), ("scorched_drain", "io/drain_front_active"),
+                      ("scorched_gauge_top", "tank/gauge_top"), ("alloyer_side", "controller/alloyer_side"),
+                      ("alloyer_inactive", "controller/alloyer_inactive"), ("alloyer_active", "controller/alloyer_active")):
+        copy_png(os.path.join(ftex, rel + ".png"), "block/tinkering/" + name)
+    copy_png(os.path.join(tcon, "assets", "tconstruct", "textures", "block", "nether_grout.png"), "block/tinkering/nether_grout")
+    copy_png(os.path.join(tcon, "assets", "tconstruct", "textures", "item", "materials", "scorched_brick.png"), "item/tinkering/scorched_brick")
+    model("item/tinkering/scorched_brick", "minecraft:item/generated", "item/tinkering/scorched_brick")
+    write(os.path.join(ASSETS, "items", "scorched_brick.json"), {"model": ref("item/tinkering/scorched_brick")})
+
+    def cube(name, data):
+        write(os.path.join(ASSETS, "models", "block", "tinkering", name + ".json"), data)
+
+    for block in ("nether_grout", "scorched_bricks", "scorched_glass"):
+        cube(block, {"parent": "minecraft:block/cube_all", "textures": {"all": t + block}})
+        write(os.path.join(ASSETS, "blockstates", block + ".json"), {"variants": {"": {"model": t + block}}})
+        write(os.path.join(ASSETS, "items", block + ".json"), {"model": ref("block/tinkering/" + block)})
+    for lit in ("inactive", "active"):
+        cube("foundry_" + lit, {"parent": "minecraft:block/orientable", "textures": {
+            "top": t + "scorched_bricks", "side": t + "scorched_bricks", "front": t + "foundry_" + lit}})
+        template(os.path.join("..", "foundry", "controller", "alloyer"), "scorched_alloyer_" + lit, {
+            "top": t + "scorched_gauge_top", "side": t + "alloyer_side", "brick": t + "scorched_bricks", "front": t + "alloyer_" + lit}, "alloyer_side")
+    for block, on, off in (("foundry_controller", "foundry_active", "foundry_inactive"),
+                           ("scorched_alloyer", "scorched_alloyer_active", "scorched_alloyer_inactive")):
+        write(os.path.join(ASSETS, "blockstates", block + ".json"), {"variants": {
+            "facing=%s,lit=%s" % (f, str(lit).lower()): {"model": t + (on if lit else off), "y": r}
+            for f, r in rotations.items() for lit in (False, True)}})
+        write(os.path.join(ASSETS, "items", block + ".json"), {"model": ref("block/tinkering/" + off)})
+    cube("scorched_drain", {"parent": "minecraft:block/orientable", "textures": {
+        "top": t + "scorched_bricks", "side": t + "scorched_bricks", "front": t + "scorched_drain"}})
+    write(os.path.join(ASSETS, "blockstates", "scorched_drain.json"), {"variants": {
+        "facing=" + f: {"model": t + "scorched_drain", "y": r} for f, r in rotations.items()}})
+    write(os.path.join(ASSETS, "items", "scorched_drain.json"), {"model": ref("block/tinkering/scorched_drain")})
 
 
 def shaped(name, pattern, key, result, count=1):
@@ -847,14 +891,29 @@ def smeltery_data():
     shaped("seared_tank", ["bbb", "bgb", "bbb"], dict(b, g="minecraft:glass"), NS + ":seared_tank")
     shaped("seared_melter", ["bgb", "bbb"], dict(b, g="minecraft:glass"), NS + ":seared_melter")
     shaped("seared_channel", ["b b", "bbb"], b, NS + ":seared_channel", 3)
+    s = {"s": NS + ":scorched_brick"}
+    write(os.path.join(DATA, "recipe", "tinkering", "nether_grout.json"), {
+        "type": "minecraft:crafting_shapeless", "category": "building",
+        "ingredients": ["minecraft:magma_cream", "#minecraft:soul_fire_base_blocks", "minecraft:gravel"],
+        "result": {"id": NS + ":nether_grout", "count": 2}})
+    write(os.path.join(DATA, "recipe", "tinkering", "scorched_brick.json"), {
+        "type": "minecraft:smelting", "category": "misc", "ingredient": NS + ":nether_grout",
+        "result": {"id": NS + ":scorched_brick"}, "experience": 0.3, "cookingtime": 200})
+    shaped("scorched_bricks", ["ss", "ss"], s, NS + ":scorched_bricks")
+    shaped("scorched_glass", [" s ", "sqs", " s "], dict(s, q="minecraft:quartz"), NS + ":scorched_glass")
+    shaped("foundry_controller", ["sss", "s s", "sss"], s, NS + ":foundry_controller")
+    shaped("scorched_drain", ["s s", "s s", "s s"], s, NS + ":scorched_drain")
+    shaped("scorched_alloyer", ["sqs", "sss"], dict(s, q="minecraft:quartz"), NS + ":scorched_alloyer")
     blocks = ["grout", "seared_bricks", "seared_glass", "smeltery_controller", "seared_drain", "seared_faucet",
-              "casting_table", "casting_basin", "seared_tank", "seared_melter", "seared_channel"]
+              "casting_table", "casting_basin", "seared_tank", "seared_melter", "seared_channel", "nether_grout", "scorched_bricks",
+              "scorched_glass", "foundry_controller", "scorched_drain", "scorched_alloyer"]
     for block in blocks:
         write(os.path.join(DATA, "loot_table", "blocks", block + ".json"), {
             "type": "minecraft:block", "random_sequence": NS + ":blocks/" + block,
             "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": NS + ":" + block}],
                        "condition": {"type": "minecraft:survives_explosion"}}]})
-    for tag, values in (("pickaxe", [NS + ":" + x for x in blocks if x != "grout"]), ("shovel", [NS + ":grout"])):
+    for tag, values in (("pickaxe", [NS + ":" + x for x in blocks if not x.endswith("grout")]),
+                        ("shovel", [NS + ":" + x for x in blocks if x.endswith("grout")])):
         path = os.path.join(MC_DATA, "tags", "block", "mineable", tag + ".json")
         old = json.load(open(path)) if os.path.exists(path) else {"values": []}
         write(path, {"values": old["values"] + [v for v in values if v not in old["values"]]})
