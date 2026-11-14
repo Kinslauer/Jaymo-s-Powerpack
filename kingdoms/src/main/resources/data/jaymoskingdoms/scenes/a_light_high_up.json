@@ -1,0 +1,6 @@
+{ "jobs": ["shepherd", "*"], "when": "night", "lines": [
+  ["a", "There. Did you see it? A light, high up, and moving."],
+  ["b", "A star."],
+  ["a", "Don't say that word to me after dark."],
+  ["b", "A lamp, then. A long way up. Come inside."]
+] }

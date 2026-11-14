@@ -1,0 +1,7 @@
+{ "jobs": ["guard", "*"], "when": "night", "lines": [
+  ["a", "Two on the wall tonight. There should be four."],
+  ["b", "Where are the other two?"],
+  ["a", "One was wed today. The other's at the wedding."],
+  ["b", "And if something comes?"],
+  ["a", "Then it had best like cake. There's plenty left."]
+] }

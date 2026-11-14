@@ -297,6 +297,11 @@ public final class Carousing {
 				return Component.translatable(key, friend.getDisplayName());
 			}
 			case RUMOUR -> {
+				// (now and then what was told over the cups is the start of a tale: Tales)
+				Component told = Tales.rumourHeard(level, host, player);
+				if (told != null) {
+					return Component.translatable("recall.jaymoskingdoms.night.rumour.tale", told);
+				}
 				BlockPos at = Rumours.place(level, player.blockPosition());
 				if (at == null) {
 					return null;

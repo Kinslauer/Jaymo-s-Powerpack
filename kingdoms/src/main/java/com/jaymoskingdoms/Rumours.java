@@ -70,6 +70,10 @@ final class Rumours {
 
 	/** {@code teller} tells {@code player} a rumour in a speech bubble. Returns the place it points at, or null (they know of none). */
 	static @Nullable BlockPos tell(ServerLevel level, Entity teller, ServerPlayer player) {
+		if (Tales.rumour(level, teller, player)) {
+			// (a tale's rumour instead of a treasure's: it's told its own way)
+			return null;
+		}
 		BlockPos at = place(level, teller.blockPosition());
 		if (at == null) {
 			Speech.tell(level, teller, player, Component.translatable("rumour.jaymoskingdoms.none"), Speech.WHITE);

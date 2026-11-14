@@ -1,0 +1,6 @@
+{ "jobs": ["farmer", "baker"], "when": "day", "lines": [
+  ["a", "The mill's had my sack three days. Three."],
+  ["b", "There's no wind. He has the horse walking it round."],
+  ["a", "Then why isn't my flour done?"],
+  ["b", "The horse is thinking it over."]
+] }

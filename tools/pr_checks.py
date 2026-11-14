@@ -108,6 +108,11 @@ def main():
     if styled.returncode:
         errors.append(styled.stdout.strip().replace("\n", " "))
 
+    # 1c. the story quests' data files (tales and overheard scenes) fit the format the game reads
+    tales = subprocess.run([sys.executable, str(ROOT / "tools" / "tale_check.py")], capture_output=True, text=True)
+    if tales.returncode:
+        errors.append(tales.stdout.strip().replace("\n", " | "))
+
     # 2. old jars in libs/
     jars = {}
     for jar in (ROOT / "libs").glob("*.jar"):

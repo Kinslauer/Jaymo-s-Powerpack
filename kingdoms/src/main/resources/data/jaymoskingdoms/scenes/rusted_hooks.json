@@ -1,0 +1,6 @@
+{ "jobs": ["toolsmith", "fisherman"], "when": "any", "lines": [
+  ["a", "That's the third hook this month you've brought back rusted through. I made them sound."],
+  ["b", "You made them. The Deep Mother unmakes them. Take it up with her."],
+  ["a", "I'll take it up with you. Dry your gear."],
+  ["b", "Dry, he says. To a fisherman."]
+] }

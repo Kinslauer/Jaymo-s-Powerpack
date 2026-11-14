@@ -1,0 +1,8 @@
+{ "jobs": ["*", "*"], "when": "night", "lines": [
+  ["a", "Where were you last night? Your wife was asking."],
+  ["b", "Nowhere."],
+  ["a", "And who sent you there?"],
+  ["b", "Nobody sent me."],
+  ["a", "Did you lose much?"],
+  ["b", "Everything but my boots."]
+] }

@@ -1,0 +1,6 @@
+{ "jobs": ["cartographer", "*"], "when": "any", "lines": [
+  ["a", "There's a village on my new map that isn't on the old one."],
+  ["b", "So it's new."],
+  ["a", "The carter says it has been there forty years."],
+  ["b", "Then the old map was being polite. Some places want leaving off."]
+] }

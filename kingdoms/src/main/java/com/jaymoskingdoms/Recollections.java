@@ -115,6 +115,9 @@ public final class Recollections {
 		PROMISED(0, 30, false, false, "%1$s promised you they would %2$s.", ""),
 		KEPT_WORD(4, 120, true, true, "%1$s kept their promise to you (to %2$s).", "%1$s kept their promise to %3$s (to %2$s)."),
 		BROKE_WORD(-6, 180, true, true, "%1$s broke their promise to you (to %2$s).", "%1$s broke their promise to %3$s (to %2$s)."),
+		/** {@link Tales}: saw them kill a foe who had yielded (%2$s: who); told how they let a beaten foe go (%2$s: who). */
+		CUT_DOWN(-4, 90, true, true, "You saw %1$s kill %2$s, who had yielded to them.", "%3$s saw %1$s kill %2$s, who had yielded."),
+		MERCY(3, 120, true, true, "%1$s had %2$s beaten, while about your trouble, and let them go.", "%3$s says %1$s had %2$s beaten and let them go."),
 		/** {@link HollowSighting}: saw them walking after death, one of the Hollow. */
 		SAW_TURNED(-3, 0, true, true, "You saw that %1$s had died and got up again, one of the Hollow: the walking dead.",
 			"%3$s saw that %1$s had died and got up again, one of the Hollow.");

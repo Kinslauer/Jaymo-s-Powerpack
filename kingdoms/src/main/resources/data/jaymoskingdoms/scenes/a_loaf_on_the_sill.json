@@ -1,0 +1,6 @@
+{ "jobs": ["baker", "*"], "when": "any", "lines": [
+  ["a", "You've left a loaf out on the sill again."],
+  ["b", "For the Hearthkeeper. It's always gone by morning."],
+  ["a", "Your Hearthkeeper has four legs and a tail. I watched it go."],
+  ["b", "She sends who she sends."]
+] }

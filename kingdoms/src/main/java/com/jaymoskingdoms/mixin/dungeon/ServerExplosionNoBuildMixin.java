@@ -24,6 +24,8 @@ public class ServerExplosionNoBuildMixin {
         if (self.getBlockInteraction() == Explosion.BlockInteraction.KEEP) {
             return blown;
         }
+        // (a cave-in someone's been asked to blast knows it's been blasted: QuestJobs)
+        com.jaymoskingdoms.QuestJobs.blasted(self.level(), BlockPos.containing(self.center()));
         Entity source = self.getIndirectSourceEntity();
         if (!(source instanceof ServerPlayer)) {
             return blown;

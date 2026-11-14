@@ -1,0 +1,7 @@
+{ "jobs": ["*", "*"], "when": "day", "lines": [
+  ["a", "His plums hang over my wall."],
+  ["b", "Then eat them."],
+  ["a", "I do. That's what he's cross about."],
+  ["b", "And what are you cross about?"],
+  ["a", "He's stopped watering it."]
+] }

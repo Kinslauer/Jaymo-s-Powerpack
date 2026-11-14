@@ -1,0 +1,7 @@
+{ "jobs": ["*", "*"], "when": "any", "lines": [
+  ["a", "The reeve has got one of those Frostborn eye-glasses."],
+  ["b", "What does it do?"],
+  ["a", "He looked at me through it and laughed."],
+  ["b", "That's not much for the money."],
+  ["a", "Then he looked at my goat and stopped laughing."]
+] }

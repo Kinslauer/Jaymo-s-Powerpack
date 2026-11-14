@@ -1,0 +1,6 @@
+{ "jobs": ["cleric", "*"], "when": "any", "lines": [
+  ["a", "The seven are tales, told by those who would not hear the Truth."],
+  ["b", "So you say every week. And who lit a candle to the Warden when your roof came in?"],
+  ["a", "That was for the light. To see the leak."],
+  ["b", "Of course it was."]
+] }

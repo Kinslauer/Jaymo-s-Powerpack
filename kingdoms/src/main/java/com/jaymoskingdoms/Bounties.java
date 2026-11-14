@@ -1426,7 +1426,9 @@ public final class Bounties {
 				}
 			}
 			// (0.7.168) no bounty to post: now and then a town notice instead, an errand or a bit of news, a few at a time
-			boolean news = next == null && town < TownNotices.MOST && random.nextFloat() < TownNotices.CHANCE;
+			// (a board whose work gets done holds more, more often: BoardWork)
+			Faction boardTown = next != null ? null : Factions.around(level.getServer(), level, anchor, Villages.VILLAGE_RADIUS);
+			boolean news = next == null && town < BoardWork.room(level, boardTown) && random.nextFloat() < BoardWork.chance(level, boardTown);
 			Villager v = next == null && !news ? null : poster(level, anchor);
 			String key = v == null ? null : next != null ? next.key() : TownNotices.pick(v, up, now, random, anchor.asLong());
 			if (key == null) {
@@ -1447,7 +1449,7 @@ public final class Bounties {
 		MinecraftServer server = level.getServer();
 		List<Villager> folk = level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(POST_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && v.getMainHandItem().isEmpty() && !Downed.isDowned(v)
-				&& !ERRANDS.containsKey(v.getUUID()) && bountyOn(server, v) == null);
+				&& !ERRANDS.containsKey(v.getUUID()) && bountyOn(server, v) == null && TaleCast.cast(v) == null);
 		return folk.isEmpty() ? null : folk.get(level.getRandom().nextInt(folk.size()));
 	}
 

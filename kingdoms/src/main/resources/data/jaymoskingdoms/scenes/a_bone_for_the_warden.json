@@ -1,0 +1,6 @@
+{ "jobs": ["shepherd", "*"], "when": "any", "lines": [
+  ["a", "The dog has dug up the bone I left out for the Lantern Warden."],
+  ["b", "Then the Warden has fed a dog. He'll not mind."],
+  ["a", "It's the third bone."],
+  ["b", "Then you've not got a faith. You've got a dog."]
+] }

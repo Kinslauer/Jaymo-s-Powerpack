@@ -1,0 +1,6 @@
+{ "jobs": ["butcher", "*"], "when": "day", "lines": [
+  ["a", "You're selling the feet now?"],
+  ["b", "Waste none. That's the Huntsman's rule."],
+  ["a", "And who buys pig's feet?"],
+  ["b", "You do. You're holding them."]
+] }

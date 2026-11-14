@@ -54,8 +54,16 @@ public final class Journal {
 	static final AttachmentType<Boolean> GIVEN = AttachmentRegistry.create(JaymosKingdoms.id("journal_given"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 
-	/** One quest as the journal shows it. */
-	public record Entry(boolean royal, boolean ready, Component title, Component giver, Component text, Component objective, Optional<BlockPos> target) {
+	/** The quest {@code player} tracks alone on screen ({@link Pin}): its id in their log. Saved, kept through death. */
+	static final AttachmentType<String> PINNED = AttachmentRegistry.create(JaymosKingdoms.id("journal_pinned"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+
+	/** One quest as the journal shows it. {@code quest}: its id in the player's log (it can be tracked), or "" for anything else written here. */
+	public record Entry(boolean royal, boolean ready, Component title, Component giver, Component text, Component objective, Optional<BlockPos> target,
+		String quest) {
+		public Entry(boolean royal, boolean ready, Component title, Component giver, Component text, Component objective, Optional<BlockPos> target) {
+			this(royal, ready, title, giver, text, objective, target, "");
+		}
 	}
 
 	/**
@@ -65,8 +73,13 @@ public final class Journal {
 	public record Place(String name, int type, int color, BlockPos seat, boolean rated, int reputation, String word, String kind, boolean realm) {
 	}
 
-	/** Server → player: open the journal. {@code here}: the player stands in the settlements' world (markers belong on the map). */
-	public record Book(List<Entry> entries, List<Place> places, boolean here) implements CustomPacketPayload {
+	/**
+	 * Server → player: open the journal. {@code here}: the player stands in the settlements' world (markers belong on the map).
+	 * {@code stories}: their tales, the ones under way first ({@link Tales#stories}); {@code past}: the quests they're done
+	 * with, newest first ({@link QuestPast}).
+	 */
+	public record Book(List<Entry> entries, List<Place> places, boolean here, List<Tales.Story> stories, List<QuestPast.Entry> past)
+		implements CustomPacketPayload {
 		public static final Type<Book> TYPE = new Type<>(JaymosKingdoms.id("journal_book"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Book> CODEC = CustomPacketPayload.codec(Book::write, Book::read);
 
@@ -81,6 +94,7 @@ public final class Journal {
 				ComponentSerialization.STREAM_CODEC.encode(buf, e.objective);
 				buf.writeBoolean(e.target.isPresent());
 				e.target.ifPresent(buf::writeBlockPos);
+				buf.writeUtf(e.quest);
 			}
 			buf.writeVarInt(places.size());
 			for (Place p : places) {
@@ -95,6 +109,23 @@ public final class Journal {
 				buf.writeBoolean(p.realm);
 			}
 			buf.writeBoolean(here);
+			buf.writeVarInt(stories.size());
+			for (Tales.Story s : stories) {
+				ComponentSerialization.STREAM_CODEC.encode(buf, s.title());
+				buf.writeVarInt(s.state());
+				ComponentSerialization.STREAM_CODEC.encode(buf, s.now());
+				buf.writeVarInt(s.lines().size());
+				for (Component line : s.lines()) {
+					ComponentSerialization.STREAM_CODEC.encode(buf, line);
+				}
+			}
+			buf.writeVarInt(past.size());
+			for (QuestPast.Entry p : past) {
+				ComponentSerialization.STREAM_CODEC.encode(buf, p.title());
+				buf.writeVarInt(p.how());
+				ComponentSerialization.STREAM_CODEC.encode(buf, p.text());
+				buf.writeVarLong(p.day());
+			}
 		}
 
 		private static Book read(RegistryFriendlyByteBuf buf) {
@@ -107,7 +138,7 @@ public final class Journal {
 				Component text = ComponentSerialization.STREAM_CODEC.decode(buf);
 				Component objective = ComponentSerialization.STREAM_CODEC.decode(buf);
 				Optional<BlockPos> target = buf.readBoolean() ? Optional.of(buf.readBlockPos()) : Optional.empty();
-				entries.add(new Entry(royal, ready, title, giver, text, objective, target));
+				entries.add(new Entry(royal, ready, title, giver, text, objective, target, buf.readUtf()));
 			}
 			n = buf.readVarInt();
 			List<Place> places = new ArrayList<>();
@@ -115,7 +146,27 @@ public final class Journal {
 				places.add(new Place(buf.readUtf(), buf.readVarInt(), buf.readInt(), buf.readBlockPos(), buf.readBoolean(), buf.readInt(), buf.readUtf(),
 					buf.readUtf(), buf.readBoolean()));
 			}
-			return new Book(entries, places, buf.readBoolean());
+			boolean here = buf.readBoolean();
+			n = buf.readVarInt();
+			List<Tales.Story> stories = new ArrayList<>();
+			for (int i = 0; i < n; i++) {
+				Component title = ComponentSerialization.STREAM_CODEC.decode(buf);
+				int state = buf.readVarInt();
+				Component now = ComponentSerialization.STREAM_CODEC.decode(buf);
+				int count = buf.readVarInt();
+				List<Component> lines = new ArrayList<>();
+				for (int j = 0; j < count; j++) {
+					lines.add(ComponentSerialization.STREAM_CODEC.decode(buf));
+				}
+				stories.add(new Tales.Story(title, state, now, lines));
+			}
+			n = buf.readVarInt();
+			List<QuestPast.Entry> past = new ArrayList<>();
+			for (int i = 0; i < n; i++) {
+				past.add(new QuestPast.Entry(ComponentSerialization.STREAM_CODEC.decode(buf), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf),
+					buf.readVarLong()));
+			}
+			return new Book(entries, places, here, stories, past);
 		}
 
 		@Override
@@ -131,6 +182,17 @@ public final class Journal {
 
 		@Override
 		public Type<Ask> type() {
+			return TYPE;
+		}
+	}
+
+	/** Player → server: track quest {@code quest} alone on screen ("": none, the tracker lists the quests as it did). */
+	public record Pin(String quest) implements CustomPacketPayload {
+		public static final Type<Pin> TYPE = new Type<>(JaymosKingdoms.id("journal_pin"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Pin> CODEC = CustomPacketPayload.codec((p, buf) -> buf.writeUtf(p.quest), buf -> new Pin(buf.readUtf()));
+
+		@Override
+		public Type<Pin> type() {
 			return TYPE;
 		}
 	}
@@ -173,6 +235,29 @@ public final class Journal {
 				player.sendOverlayMessage(Component.translatable("journal.jaymoskingdoms.need").withStyle(ChatFormatting.GRAY));
 			}
 		});
+		PayloadTypeRegistry.serverboundPlay().register(Pin.TYPE, Pin.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Pin.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (Quests.quest(player, payload.quest()) == null) {
+				player.removeAttached(PINNED);
+			} else {
+				player.setAttached(PINNED, payload.quest());
+			}
+			Quests.sync(player, true);
+		});
+	}
+
+	/** The id of the quest {@code player} tracks alone, or "". A pin whose quest has left their log is dropped here. */
+	static String pinned(ServerPlayer player) {
+		String id = player.getAttachedOrElse(PINNED, "");
+		if (!id.isEmpty() && Quests.quest(player, id) == null) {
+			// (a tale that's resting between its parts keeps its pin for when the next part comes)
+			if (!id.startsWith(Tales.QUEST) || Tales.run(player, id.substring(Tales.QUEST.length())) == null) {
+				player.removeAttached(PINNED);
+			}
+			return "";
+		}
+		return id;
 	}
 
 	/**
@@ -219,7 +304,7 @@ public final class Journal {
 			Component text = Quests.storyErrand(q)
 				? Quests.text(q).copy().append("\n\n").append(Component.translatable("journal.jaymoskingdoms.story_errand").withStyle(net.minecraft.ChatFormatting.DARK_GREEN))
 				: Quests.text(q);
-			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, text, Quests.objective(level, player, q), target));
+			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, text, Quests.objective(level, player, q), target, q.id()));
 		}
 		// (0.7.220) your jobs' orders
 		entries.addAll(Careers.journal(player));
@@ -247,6 +332,6 @@ public final class Journal {
 			places.add(new Place(f.name(), f.type().ordinal(), f.styleColor(server).getTextureDiffuseColor(), f.seat(), rated, rep, rated ? Reputation.word(rep) : "",
 				Hordes.journalKind(server, f), f.type() == FactionType.KINGDOM || Hordes.realm(server, f.id())));
 		}
-		ServerPlayNetworking.send(player, new Book(entries, places, level == Factions.level(server)));
+		ServerPlayNetworking.send(player, new Book(entries, places, level == Factions.level(server), Tales.stories(player), QuestPast.of(player)));
 	}
 }

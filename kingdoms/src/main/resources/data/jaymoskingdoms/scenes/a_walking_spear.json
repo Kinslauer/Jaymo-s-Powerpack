@@ -1,0 +1,7 @@
+{ "jobs": ["toolsmith", "*"], "when": "any", "lines": [
+  ["a", "I've cut a crutch for old Hobley. Ash, with a leather pad."],
+  ["b", "He'll not use it. Too proud."],
+  ["a", "I told him it was a walking spear."],
+  ["b", "And?"],
+  ["a", "He's been up and down the lane all morning, guarding it."]
+] }

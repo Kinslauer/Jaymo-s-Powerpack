@@ -1,0 +1,6 @@
+{ "jobs": ["fisherman", "*"], "when": "night", "lines": [
+  ["a", "You've left your nets on the shingle."],
+  ["b", "I'll fetch them at first light."],
+  ["a", "The tide will have them by then."],
+  ["b", "Then the tide can have them. I don't go down there after dark. Don't ask."]
+] }

@@ -1,0 +1,6 @@
+{ "jobs": ["baker", "*"], "when": "any", "lines": [
+  ["a", "Something has been at the flour again."],
+  ["b", "Rats."],
+  ["a", "Rats don't leave a coin on the shelf."],
+  ["b", "Then it's an honest rat. Leave it be."]
+] }

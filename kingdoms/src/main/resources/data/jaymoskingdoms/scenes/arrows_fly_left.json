@@ -1,0 +1,6 @@
+{ "jobs": ["archer", "fletcher"], "when": "day", "lines": [
+  ["a", "These arrows of yours fly left."],
+  ["b", "My arrows fly straight."],
+  ["a", "I missed the butt six times."],
+  ["b", "Then they flew where you sent them. I only make them. I don't aim them."]
+] }

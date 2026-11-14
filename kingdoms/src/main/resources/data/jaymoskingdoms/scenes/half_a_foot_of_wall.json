@@ -1,0 +1,6 @@
+{ "jobs": ["mason", "*"], "when": "day", "lines": [
+  ["a", "The elders want the wall a foot higher."],
+  ["b", "Will they pay for the stone?"],
+  ["a", "They'll pay for half a foot."],
+  ["b", "Then build it a foot higher on the side they walk past."]
+] }

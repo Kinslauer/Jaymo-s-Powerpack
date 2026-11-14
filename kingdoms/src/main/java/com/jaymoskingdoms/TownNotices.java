@@ -59,6 +59,8 @@ final class TownNotices {
 	static final float TIDINGS_CHANCE = 0.6F;
 	/** (0.7.220) A Help wanted notice's kind. */
 	static final int HELP = -2;
+	/** A notice of paid work ({@link BoardWork}): its kind. */
+	static final int WORK = -3;
 
 	static Item ITEM;
 
@@ -82,6 +84,10 @@ final class TownNotices {
 
 		boolean help() {
 			return kind == HELP;
+		}
+
+		boolean work() {
+			return kind == WORK;
 		}
 
 		Careers.@Nullable Job job() {
@@ -160,6 +166,9 @@ final class TownNotices {
 		if (p[1].startsWith("help.")) {
 			return Careers.Job.of(p[1].substring(5)) == null ? null : new N(p[1], HELP, "", 0, 0, 0);
 		}
+		if (p[1].startsWith("work.")) {
+			return BoardWork.kind(p[1]) == null ? null : new N(p[1], WORK, "", 0, 0, 0);
+		}
 		if (p[1].startsWith("tidings.")) {
 			// (0.7.424) the world's news, while it's kept
 			return Post.posted(p[1].substring(8)) == null ? null : N.news(p[1]);
@@ -205,6 +214,13 @@ final class TownNotices {
 				return "town|tidings." + news.id() + "|" + board + "|" + now;
 			}
 		}
+		if (random.nextFloat() < BoardWork.CHANCE && poster.level() instanceof ServerLevel world) {
+			// paid work of the newer kinds, rated in stars
+			String work = BoardWork.pick(world, poster, up, now, random);
+			if (work != null) {
+				return work;
+			}
+		}
 		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
 		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
 		if (random.nextFloat() < FAR_CHANCE && poster.level() instanceof ServerLevel far && OffWorldGoods.anyoneAsked(far.getServer())
@@ -247,6 +263,9 @@ final class TownNotices {
 		if (n.key().startsWith("tidings.")) {
 			return Component.translatable("quest.jaymoskingdoms.town.tidings.title");
 		}
+		if (n.work()) {
+			return BoardWork.title(n.key());
+		}
 		return Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".title");
 	}
 
@@ -262,6 +281,7 @@ final class TownNotices {
 		Post.Posted news = n.key().startsWith("tidings.") ? Post.posted(level.getServer(), n.key().substring(8)) : null;
 		Component words = n.errand() ? Component.translatable("quest.jaymoskingdoms.town.errand_lore")
 			: n.help() ? Component.translatable("quest.jaymoskingdoms.town.help.lore")
+			: n.work() ? BoardWork.lore(n.key())
 			: Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".text");
 		List<Component> lines = news != null ? Post.wrap(news.line()) : List.of(words);
 		stack.set(DataComponents.LORE, new ItemLore(lines.stream()
@@ -289,7 +309,7 @@ final class TownNotices {
 		if (n == null) {
 			return true;
 		}
-		if (!n.errand() && !n.help()) {
+		if (!n.errand() && !n.help() && !n.work()) {
 			ItemStack paper = item(level, key);
 			if (!player.getInventory().add(paper)) {
 				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
@@ -312,6 +332,9 @@ final class TownNotices {
 			// (0.7.220) the job, with whoever posted it
 			Careers.Job wanted = n.job();
 			return wanted != null && Careers.hire(level, player, f, wanted, giver);
+		}
+		if (n.work()) {
+			return BoardWork.take(level, player, giver, f, n.key());
 		}
 		RandomSource random = level.getRandom();
 		String job = giver instanceof Villager v

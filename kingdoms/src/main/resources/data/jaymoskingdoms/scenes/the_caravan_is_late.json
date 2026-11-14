@@ -1,0 +1,7 @@
+{ "jobs": ["*", "*"], "when": "day", "lines": [
+  ["a", "The caravan is four days late."],
+  ["b", "The roads are soft."],
+  ["a", "It's carrying my wife's mother."],
+  ["b", "Ah."],
+  ["a", "I'm not complaining. I'm only saying it's late."]
+] }

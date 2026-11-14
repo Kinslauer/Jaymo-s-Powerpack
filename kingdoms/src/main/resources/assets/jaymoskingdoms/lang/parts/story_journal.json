@@ -1,0 +1,22 @@
+{
+  "journal.jaymoskingdoms.tab.stories": "Stories",
+  "journal.jaymoskingdoms.tab.past": "Past",
+  "journal.jaymoskingdoms.sub.stories": "Stories under way: %1$s. Told: %2$s",
+  "journal.jaymoskingdoms.sub.past": "Quests behind you: %s",
+  "journal.jaymoskingdoms.no_stories": "No stories yet. They find you.",
+  "journal.jaymoskingdoms.no_past": "Nothing finished or failed yet.",
+  "journal.jaymoskingdoms.story.state.0": "Under way",
+  "journal.jaymoskingdoms.story.state.1": "Ended",
+  "journal.jaymoskingdoms.story.state.2": "Ended badly",
+  "journal.jaymoskingdoms.past.how.0": "Done",
+  "journal.jaymoskingdoms.past.how.1": "Failed",
+  "journal.jaymoskingdoms.past.how.2": "Given up",
+  "journal.jaymoskingdoms.past.day": "Day %s",
+  "journal.jaymoskingdoms.pin.on": "Track this quest on screen",
+  "journal.jaymoskingdoms.pin.off": "Stop tracking this quest",
+  "quest.jaymoskingdoms.tracker.rough.here": "Close by",
+  "quest.jaymoskingdoms.tracker.rough.near": "Near, to the %s",
+  "quest.jaymoskingdoms.tracker.rough.some": "Some way to the %s",
+  "quest.jaymoskingdoms.tracker.rough.far": "Far to the %s",
+  "quest.jaymoskingdoms.tracker.rough.very_far": "Very far to the %s"
+}

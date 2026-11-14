@@ -1,0 +1,326 @@
+{
+  "title": "The Fourth Measure",
+  "start": {
+    "by": "book", "weight": 1,
+    "book": {
+      "title": "Ebba Thorn's Reckoning",
+      "author": "Ebba Thorn",
+      "pages": [
+        "What is owed me, and what I am owed. E.T. her hand.\n\nThe tanner's girl, for the pains: two of feverfew, one of willow. Paid in eggs.\n\nThe drover, for his dog: nothing to be done. Paid anyway. A good man.\n\nThe hill house: one measure of the grey. To be taken in milk, a pinch at the new moon. Paid in silver thread, by the hand that always pays.",
+        "The hill house: second measure. The hand asked how long. I said: done slow, a season. Done quick, the healer will know it, and then the watch will know it.\n\nThe miller, for his wife's trouble. Ask no more of that.\n\nMy sister says I will hang for the hill house. My sister has never once paid for her own bread.",
+        "The hill house: third measure. The hand shook. I said it is not too late. A man comes back from two measures. A man comes back from three, if he is fed on honey and kept warm and his cup is watched. From four, nobody comes back.\n\nThe hand paid for four.\n\nThe fourth to be fetched at the dark of the moon, from the stump at the crossways, as before.",
+        "Somebody has been at my door in the night. Not the watch. The watch knocks.\n\nI have put the fourth measure in the stump at the crossways. Whoever comes for it, I want no more of the hill house. Let it be on the hand that pays.\n\nIf my sister reads this: the grey is in the blue jar. The answer to it is in the brown, and there is not much of it."
+      ],
+      "found": ["mob:minecraft:witch"],
+      "chance": 0.05
+    }
+  },
+  "roll": { "hand": ["wife", "son", "elder"] },
+  "cast": {
+    "healer": { "name": ["Hester Rowe", "Margery Lusk", "Joan Pridd"], "body": "villager", "job": "cleric", "female": true, "at": "house" },
+    "elder": { "name": "Aldous Wray", "body": "villager", "job": "shepherd", "female": false, "at": "house" },
+    "wife": { "name": "Mabyn Wray", "body": "villager", "job": "none", "female": true, "at": "house" },
+    "son": { "name": "Hal Wray", "body": "fighter", "female": false, "at": "house", "health": 50, "damage": 6, "armor": 8, "hand": "minecraft:iron_sword", "head": "minecraft:chainmail_helmet", "chest": "minecraft:leather_chestplate" },
+    "sister": { "name": ["Agna Thorn", "Brede Thorn", "Tilde Thorn"], "body": "fighter", "female": true, "at": "hut", "health": 55, "damage": 7, "armor": 4, "hand": "minecraft:iron_axe", "head": "minecraft:leather_helmet" }
+  },
+  "places": {
+    "seat": { "at": "town", "name": "the town" },
+    "house": { "at": "near", "from": "seat", "dist": [30, 70], "name": "the hill house" },
+    "crossways": { "at": "road", "from": "seat", "dist": [80, 160], "name": "the stump at the crossways" },
+    "hut": { "at": "wild", "from": "crossways", "dist": [160, 320], "name": "Ebba Thorn's hut in the fen" }
+  },
+  "first": "to_stump",
+  "steps": {
+    "to_stump": {
+      "do": "go", "to": "crossways", "goal": "Find {place:crossways}",
+      "journal": "A ledger came off a dead witch. Ebba Thorn sold a slow poison she called the grey, a measure at a time, to somebody of a hill house. Three measures had been taken. A man comes back from three. Nobody comes back from four, and the fourth was left in a stump at the crossways.",
+      "then": "search_stump"
+    },
+    "search_stump": {
+      "do": "search", "at": "crossways", "goal": "Search the stump at the crossways",
+      "clues": [
+        { "name": "A twist of grey powder", "item": "minecraft:gray_dye", "lore": ["Wrapped in a dock leaf, small as a thumb.", "It smells of nothing at all. A pinch in milk at the new moon, the ledger says."], "journal": "The fourth measure was still in the stump. Nobody had come for it." },
+        { "name": "Silver thread", "item": "minecraft:string", "lore": ["The twist is tied with silver thread, fine as hair, the kind braid is worked with.", "Paid in silver thread, by the hand that always pays."], "journal": "The twist was tied with silver braiding thread, the stuff the hand had paid in." },
+        { "name": "A small glove", "item": "minecraft:leather", "lore": ["A woman's glove, lined, trodden into the mud behind the stump.", "The fingertips are stained grey, as if with ash or with something finer."], "journal": "A woman's glove lay trodden in the mud behind the stump, grey at the fingertips.", "if": "hand=wife" },
+        { "name": "A round tag", "item": "minecraft:iron_nugget", "lore": ["A little iron tag with a number punched through it.", "The watch hang these at the belt to count their night rounds. This one's cord is snapped."], "journal": "A watchman's round tag lay at the foot of the stump, its cord snapped.", "if": "hand=son" },
+        { "name": "A chalk mark", "item": "minecraft:bone_meal", "lore": ["Drawn on the bark at the height a child draws: a house on a hill, and beside it a moon.", "Under them, four strokes. Three are crossed through."], "journal": "A child had chalked a house on a hill and a moon on the stump, and four strokes, three crossed through.", "if": "hand=elder" }
+      ],
+      "then": "to_house"
+    },
+    "to_house": { "do": "go", "to": "house", "goal": "Find {place:house} in the town", "then": "healer" },
+    "healer": {
+      "do": "talk", "who": "healer", "goal": "Speak with whoever tends the sick at {place:house}",
+      "say": [
+        "Boots off at the door, and quiet. He sleeps badly and wakes worse. I am {healer}. I keep the Hearthkeeper's hearth in this town, and I have kept {elder} alive since harvest on honey and stubbornness.",
+        "A wasting nobody can name. Grey at the lips, cold in the hands, a little worse every new moon and a little better between. I have prayed over him and bled him and fed him, and I am out of things to do. Why are you looking at me like that?"
+      ],
+      "replies": [
+        { "say": "Read this. The hill house is in a witch's ledger.", "then": "healer_more" },
+        { "say": "Who in this house pays in silver thread?", "then": "healer_more" }
+      ]
+    },
+    "healer_more": {
+      "do": "talk", "who": "healer",
+      "say": [
+        "The grey. She calls it the grey. Hearthkeeper keep us, I have been fighting a fever that was a hand all along. A pinch at the new moon, and the new moon is in four days.",
+        "Silver thread? Everybody in this house. {elder} made his name in braid. His wife, {wife}, works it still, and his son, {son}, sells it at market when he is not on the watch. It is the coin of this house.",
+        "If the answer is in that brown jar, I want it. A man comes back from three, she says. I want him back. Bring me the jar, and I will watch his cup myself, and I will not sleep."
+      ],
+      "replies": [
+        { "say": "I'll fetch the brown jar.", "then": "meet_wife", "journal": "{healer}, who keeps the Hearthkeeper's hearth, had nursed {elder} of the hill house since harvest. His wife, {wife}, and his son, {son}, of the watch, both dealt in silver thread. The new moon was four days off." },
+        { "say": "Burn the ledger. I'll not hang a house on a witch's word.", "then": "end:burned", "against": ["courage"], "journal": "The witch's ledger went into the hill house fire." }
+      ]
+    },
+    "meet_wife": {
+      "do": "talk", "who": "wife", "goal": "Speak with {wife}",
+      "say": {
+        "?hand=wife": [
+          "The healer says you are going into the fen for him. That is kind. That is very kind of you.",
+          "Will he live, do you think? No. Do not answer. I will fetch the honey for his milk. I always fetch it. Excuse me. My arm is stiff today, I slept on it."
+        ],
+        "?hand=elder": [
+          "The healer says you are going into the fen for him. Do you know, he will not have her near him at the new moon any more. He asks for his milk himself. He holds the cup himself, with both hands, as if somebody would take it.",
+          "Go if you must. I will keep the house. I have kept it since harvest."
+        ],
+        "?": [
+          "The healer says you are going into the fen for him. Bless you. I have sat up with him every night since harvest and I am so tired I cannot see the braid.",
+          "Hal has been good. Hal sits with him when the watch lets him. He is out at nights a great deal, the watch works him hard, and he is short of money, and I do not ask. A grown son does not want his father's wife asking."
+        ]
+      },
+      "replies": [
+        { "say": "Who brings him his milk?", "then": "meet_son" },
+        { "say": "I'll be back before the new moon.", "then": "meet_son" }
+      ]
+    },
+    "meet_son": {
+      "do": "talk", "who": "son", "goal": "Speak with {son}",
+      "say": {
+        "?hand=son": [
+          "You are the one with a book. The healer told me. Give it to me and I will take it to the watch myself, it is my watch, it will be quicker.",
+          "No? Well. As you like. What else did the healer say? Did she say how long?"
+        ],
+        "?hand=elder": [
+          "You are the one with a book. The healer told me. I am the watch, and I have seen nothing in this house but a sick old man.",
+          "Though he did pay the tanner's boy a coin a month back, to run to the crossways with a message. A wager, he said. My father has never made a wager in his life."
+        ],
+        "?": [
+          "You are the one with a book. The healer told me. I am the watch, and I would like to see it, when you are done.",
+          "He is a hard man, my father. He has been hard on her. I have told him so, and he laughed at me, and that was that. Do not judge this house by her face. Judge it by his hand."
+        ]
+      },
+      "journal": {
+        "?hand=son": "{son} of the watch asked for the witch's ledger, to take it to the watch himself, and asked how long his father had.",
+        "?hand=elder": "{son} said his father paid the tanner's boy to run a message to the crossways a month back, and called it a wager.",
+        "?": "{wife} seemed afraid, and kept her arm still. {son} said his father had been hard on her."
+      },
+      "then": "to_hut"
+    },
+    "to_hut": { "do": "go", "to": "hut", "goal": "Find {place:hut}", "then": "sister" },
+    "sister": {
+      "do": "talk", "who": "sister", "goal": "Speak with whoever keeps the hut",
+      "say": [
+        "Stop there. I know that book. I bound it for her. I know whose hands it came out of, too, because she is not in the hut, and she was never once away a night.",
+        "You killed my sister on the road, and now you have come to her shelves. Say why, and say it quickly. I have been shouting her name at the fen since the crows came."
+      ],
+      "replies": [
+        { "say": "She came at me with fire and a blade.", "then": "sister_more" },
+        { "say": "There's a man in a hill house with three measures of her grey in him.", "then": "sister_more" }
+      ]
+    },
+    "sister_more": {
+      "do": "talk", "who": "sister",
+      "say": [
+        "She came at you. Yes. She would have. She had been jumping at shadows for a month: somebody at the door at night, she said. Not the watch. The watch knocks.",
+        "The hill house. She wanted done with it. She said it every night: let it be on the hand that pays. The brown jar is on her shelf. It is the last of it, and it was mine as much as hers, and you owe me a sister."
+      ],
+      "journal": "Ebba Thorn's sister, {sister}, kept the hut in the fen. Ebba had been afraid for a month of somebody at her door at night.",
+      "replies": [
+        { "say": "Then let me pay for her burying. {coins:15}.", "needs_coins": 15, "then": "search_hut", "mark": "fm_paid", "journal": "{coins:15} went to {sister} for her sister's burying.",
+          "returns": { "who": "sister", "as": "warning", "days": [6, 10], "say": "I buried her by the alder with your coin, and then I sat in the hut and thought. Somebody at the door at night, she said. I found where they stood. Silver thread caught on the bramble by the window, and the print of town boots. The hand that pays wanted to be sure she would never tell. She is dead, so they have their wish. Watch that house.", "gift": ["minecraft:honey_bottle*2"] } },
+        { "say": "I am sorry for her. I would not have had it so.", "then": "search_hut", "journal": "{sister} was told it was not wished. She let the jar go for the sick man's sake.",
+          "returns": { "who": "sister", "as": "revenge", "days": [10, 16], "say": "Sorry. You were sorry. I said I would let the jar go for the old man's sake, and I did. I never said I would let you go. She was all I had." } },
+        { "say": "Stand aside, or lie down with her.", "then": "fight_sister" }
+      ]
+    },
+    "fight_sister": {
+      "do": "foe", "who": "sister", "goal": "Deal with {sister}",
+      "taunt": "Then come and finish what you started on the road.",
+      "plea": "Stop. Stop, I yield. I'll not be the last of us lying in the fen over a jar of honey.",
+      "mercy": "Then live, and stay out of my way.",
+      "thanks": "Take the jar. I will remember that you could have, and did not.",
+      "slain": "search_hut", "spared": "search_hut",
+      "spared_returns": { "as": "recruit", "days": [9, 14], "say": "There is nobody in the fen now but me and the crows, and the crows are poor company. I know every root and leaf between here and the hills, which will heal and which will kill. You let me up off the mud when you had no reason to. I would like to walk with somebody who does that." }
+    },
+    "search_hut": {
+      "do": "search", "at": "hut", "goal": "Search Ebba Thorn's shelves for the brown jar",
+      "clues": [
+        { "name": "The brown jar", "item": "minecraft:honey_bottle", "lore": ["Brown clay, stoppered with wax. A finger's depth of something thick and bitter-sweet.", "Scratched in the wax with a pin: the answer."], "journal": "The brown jar was on Ebba's shelf. There was not much in it." },
+        { "name": "The blue jar", "item": "minecraft:glass_bottle", "lore": ["Blue glaze, nearly empty. A fine grey dust in the bottom.", "Enough for one more measure. No more than that."], "journal": "The blue jar held enough of the grey for one more measure." },
+        { "name": "A letter in a careful hand", "item": "minecraft:paper", "lore": ["'You said there is a way that looks like a fever. I have three children and he has broken my arm twice. Name your price. M.'", "Folded small and kept, as if Ebba wanted something to show if it came to it."], "journal": "Ebba had kept a letter signed M.: a woman with three children whose husband had broken her arm twice, asking for a way that looks like a fever.", "if": "hand=wife" },
+        { "name": "A note of hand", "item": "minecraft:paper", "lore": ["'Four measures, paid on the fourth. The house sells by spring or the dice men have my hands. H.'", "Kept under a jar, with the thread still tied round it."], "journal": "Ebba had kept a note signed H.: the house must sell by spring, or the dice men would have his hands.", "if": "hand=son" },
+        { "name": "A letter in a shaking hand", "item": "minecraft:paper", "lore": ["'Make it slow, and make it look like the wasting. If I die of my own hand they will bury me outside the wall, and my wife gets nothing. The thread is from my own loom. A.'", "The letters climb the page like a man writing in bed."], "journal": "Ebba had kept a letter signed A.: a man who wanted to die slowly, of something that looked like a wasting, so that his wife would keep the house.", "if": "hand=elder" }
+      ],
+      "then": "bring_jar"
+    },
+    "bring_jar": {
+      "do": "bring", "who": "healer", "item": "minecraft:honey_bottle", "count": 1, "goal": "Bring the brown jar to {healer} before the new moon",
+      "give": [{ "item": "minecraft:honey_bottle", "count": 1, "name": "Ebba's brown jar", "lore": ["Thick, bitter-sweet, and not much of it.", "The answer to the grey."] }],
+      "journal": "The brown jar reached {healer} at the hill house before the new moon.",
+      "then": "wait_mend"
+    },
+    "wait_mend": {
+      "do": "wait", "days": [3, 5], "wake": "letter",
+      "letter": { "from": "{healer}", "lines": [
+        "He has had the answer, all of it, in warm milk and honey from my own hand, and nobody else has been near his cup. The new moon came and went, and last night he sat up and asked for bread.",
+        "Then he asked who had done it. I did not tell him, because I do not know, and I would not guess in this house.",
+        "{wife} has not slept. {son} has been in and out with the watch and will not sit down. {elder} has asked for you. Come to the hill house."
+      ] },
+      "then": "elder_talk"
+    },
+    "elder_talk": {
+      "do": "talk", "who": "elder", "goal": "Speak with {elder} at {place:house}",
+      "say": {
+        "?hand=elder": [
+          "You. You went into the fen and brought back the brown jar. Do you know what you have done? I was nearly through. Three measures, and the pain going grey and far off, like the sea at night.",
+          "I paid for four. My wife has three children and no trade of her own but the braid. If I die by my own hand the Truth's men bury me outside the wall, and the house goes to my brother. If I die of a wasting, she keeps it. Do you see? Do you see what you have done?"
+        ],
+        "?": [
+          "So you are the one who went into the fen for me. Sit. I am told I was poisoned. I am told it like a weather report. I have had three wives and buried two, and I know what this house thinks of me.",
+          "Find me the hand. I will not have it said I died of my own cup in my own house, and I will not have the one who did it eating my bread."
+        ]
+      },
+      "replies": [
+        { "say": "There is a fourth measure. If you want it, it is yours.", "if": "hand=elder", "then": "wait_after", "mark": "fm_eased", "journal": "The fourth measure went back to {elder}, at his own asking." },
+        { "say": "Let me speak with your household first.", "then": "confront" }
+      ]
+    },
+    "confront": {
+      "do": "talk", "who": { "?hand=son": "son", "?": "wife" }, "goal": { "?hand=son": "Speak with {son}", "?": "Speak with {wife}" },
+      "say": {
+        "?hand=wife": [
+          "You found my letter. I knew she kept things. Everybody said she kept things.",
+          "Look at my arm. Look how it set. Twice. And the boy's ear, that does not hear now. I went to the watch once, and the watch is his son. So I went into the fen. I went three times. I could not go a fourth. That is why it is still in the stump. I could not."
+        ],
+        "?hand=son": [
+          "Shut the door. You have the look of somebody holding a paper.",
+          "I owe the dice men more than this house is worth, and he will not sell. He would sooner leave it to the Truth's house than see me spend it. Do you know what they do to a watchman's hands? I made it slow. I would have sat with him to the end. I did sit with him. There is {coins:20} in the market chest. Take it, and let it have been a fever."
+        ],
+        "?": [
+          "You have been talking to him. Shut the door, then.",
+          "I know. I have known since the second new moon. He paid in thread from his own loom, and I keep the count of every hank in this house. I said nothing. I watched him get better between and worse at the dark and I said nothing, because he asked me with his eyes not to. Now he is mending, and he hates you, and I do not know what I feel."
+        ]
+      },
+      "replies": [
+        { "say": "The watch will hear of this.", "if": "hand=wife", "then": "wait_after", "mark": "fm_judged", "against": ["mercy"], "journal": "{wife}'s letter went to the watch." },
+        { "say": "Take the children and go tonight. I'll say it was a fever.", "if": "hand=wife", "then": "wait_after", "mark": "fm_fled", "against": ["vengeance"], "journal": "{wife} was let go in the night with her children, and the house was told it was a fever.",
+          "returns": { "who": "wife", "as": "thanks", "days": [7, 12], "say": "We are two valleys over, with my cousin, and the boy laughs now. He never laughed in that house. I do not know what you are owed for it. I only know nobody else in the whole town lifted a hand. I worked this on the road. It is the only thing I know how to make.", "gift": ["minecraft:string*8", "minecraft:white_wool*4"] } },
+        { "say": "You'll go before the ruler for this.", "if": "hand=son", "then": "foe_son" },
+        { "say": "{coins:20}, and it was a fever.", "if": "hand=son", "then": "wait_after", "mark": "fm_bought", "against": ["law"], "journal": "{son} paid {coins:20} from the market chest, and it was called a fever." },
+        { "say": "Say it to him yourself, at his bedside.", "then": { "?hand=son": "son_yields", "?": "wait_after" }, "journal": { "?hand=son": "{son} was told to go to his father's bedside and say it.", "?": "{wife} was told to go to {elder}'s bedside and say it." } }
+      ]
+    },
+    "foe_son": {
+      "do": "foe", "who": "son", "goal": "Deal with {son}",
+      "taunt": "Then I am dead either way, and I would sooner it was a blade than a rope.",
+      "plea": "Stop! I yield. I am his son. Whatever I did, I am still his son.",
+      "mercy": "Then go up and say it to him.",
+      "thanks": "I'll say it. Hearthkeeper help me, I'll say it.",
+      "slain": "wait_blood", "spared": "son_yields",
+      "spared_returns": { "as": "revenge", "days": [10, 16], "say": "He put me out of the house the same night. The watch took my tag. The dice men took the rest. Everything I had, gone in one evening on a stair, because you would not take twenty and walk away. Well. I have friends who also have nothing left to lose." }
+    },
+    "son_yields": {
+      "do": "talk", "who": "son",
+      "say": "I'll go up. I'll say it. Do not come with me. Let me at least do that much on my own feet.",
+      "mark": "fm_son_spared",
+      "journal": "{son} went up the stair alone to say it to his father himself.",
+      "then": "wait_after"
+    },
+    "wait_after": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{healer}", "lines": {
+        "?mark:fm_judged": [
+          "The watch came for {wife} the next morning. It was not {son} who came; he would not. {elder} sat up in bed to watch her taken, and asked for his breakfast after.",
+          "The ruler gave her the rope. The children are his to raise now. The eldest has stopped speaking. I bring honey to the house every day, and nobody eats it."
+        ],
+        "?mark:fm_fled": [
+          "{wife} is gone, and the children with her, in the night, with a cart and the good blankets. {elder} raged until he coughed blood, and then he stopped.",
+          "I told the house it was a fever, a long one, and it broke. I have never said a thing in the Hearthkeeper's name that I knew to be false until now. I said it, and I would say it again."
+        ],
+        "?mark:fm_bought": [
+          "{elder} mends. He walks to the gate and back now. {son} brings him his milk every evening, and sits with him while he drinks it, and holds his hand.",
+          "I watch the cup. I will always watch the cup. I do not know why I feel it is my own cup I am watching."
+        ],
+        "?mark:fm_eased": [
+          "{elder} died at the new moon, in his sleep, with his wife's hand in his. I named it a wasting. The Truth's men gave him the rite and buried him inside the wall, and the house is hers.",
+          "She said you had given him something. I did not ask what. I have kept this hearth twenty years, and I have learned there are some things the Hearthkeeper remembers and some she lets go."
+        ],
+        "?mark:fm_son_spared": [
+          "{son} went up the stair and said it to his father, all of it, the dice and the grey. {elder} listened to the end. Then he put his son out of the house in his shirt, and called for the watch to take his tag.",
+          "He lives, {elder}. He is stronger every day. He says he will see the house go to the Truth's house before his son has a thread of it."
+        ],
+        "?hand=wife": [
+          "{wife} went up to him and said it, the arm, the boy's ear, the fen. I was outside the door. He did not shout. He was quiet so long I went in.",
+          "He had his face to the wall. She is still in the house. I do not know what was agreed between them. He has not raised his hand since. I do not know if it will last."
+        ],
+        "?": [
+          "{wife} went up and told him she had known since the second new moon, and said nothing. He wept. I have never seen him weep.",
+          "He lives. He sits in the sun by the door, and she sits by him with the braid, and nobody in the house speaks of the fen. He is angry with you still. I think that will pass. I think he did not know she would rather have him."
+        ]
+      } },
+      "then": { "?mark:fm_judged": "end:judged", "?mark:fm_fled": "end:fled", "?mark:fm_bought": "end:bought", "?mark:fm_eased": "end:eased", "?": "end:told" }
+    },
+    "wait_blood": {
+      "do": "wait", "days": [3, 5], "wake": "letter",
+      "letter": { "from": "{healer}", "lines": [
+        "{elder} heard it from his bed: the blades on the stair and the fall. He made me help him down to see. He sat on the bottom step beside his son a long while.",
+        "The watch has called it what it was. There were dice men at the burying, at the back, who wanted to know who would pay what {son} owed. {elder} paid them. He lives. I do not think he is glad of it."
+      ] },
+      "then": "end:son_slain"
+    }
+  },
+  "endings": {
+    "burned": { "text": "Ebba Thorn's ledger went into the hill house fire, and nobody went into the fen for the brown jar.", "failed": true },
+    "judged": {
+      "text": "{wife} was named to the watch and hanged for the grey in her husband's milk. {elder} lives, and their children are his to raise.",
+      "reward": { "coins": 10, "reputation": 6 },
+      "marks": ["fm_named_wife"],
+      "town": ["They hanged the braid-woman from the hill house. Poisoner, they say. Her poor husband.", "Did you see her arm? Nobody looked at her arm."]
+    },
+    "fled": {
+      "text": "{wife} took her children and went in the night. {elder} lives, and the house was told it was a fever.",
+      "reward": { "coins": 8, "hearts": 6 },
+      "marks": ["fm_let_wife_go"],
+      "town": ["The old braid-master's wife ran off with the children and the good blankets. After all he gave her.", "A fever, the healer says. Long one. Broke, in the end."]
+    },
+    "bought": {
+      "text": "{son} paid {coins:20} for it to have been a fever. {elder} mends, and his son brings him his milk every evening.",
+      "reward": { "coins": 20 },
+      "marks": ["fm_took_son_coin"],
+      "town": ["The old braid-master's on his feet again. That son of his never leaves his side. Good lad.", "The healer's taken to calling at the hill house at milk-time. Every evening. Odd, that."]
+    },
+    "told": {
+      "text": {
+        "?mark:fm_son_spared": "{son} said it to his father himself. {elder} lives, and put his son out of the house in his shirt.",
+        "?hand=wife": "{wife} said it to {elder} herself, all of it. He lives, and she is still in the house, and he has not raised his hand since.",
+        "?": "{elder} lives, and knows his wife saw the grey and said nothing because he asked her with his eyes. She sits by him in the sun."
+      },
+      "reward": { "coins": 12, "hearts": 8, "reputation": 8 },
+      "marks": ["fm_house_told"],
+      "town": ["Something happened up at the hill house. They're all very quiet up there now.", "The braid-master's sitting out by his door in the sun. Never once saw him do that before."],
+      "returns": { "who": "healer", "as": "thanks", "days": [6, 10], "say": "I came to say the hill house is still standing, and everybody in it. I did not think it would be. I have kept the Hearthkeeper's hearth twenty years, and I have learned that most of what I do is watch a cup. You went into the fen instead. Take these, and keep them by you.", "gift": ["minecraft:honey_bottle*3", "minecraft:bread*4"] }
+    },
+    "son_slain": {
+      "text": "{son} drew on the hill house stair and died of it. {elder} lives, and paid his son's debts to the dice men at the burying.",
+      "reward": { "coins": 10, "reputation": 4 },
+      "marks": ["fm_slew_son"],
+      "town": ["The braid-master's son, killed on his own father's stair. Watchman, too.", "Dice men at a burying. Bold as you like. The old man paid them, they say."]
+    },
+    "eased": {
+      "text": "{elder} had his fourth measure at the new moon. He was buried inside the wall as a man who died of a wasting, and his wife keeps the house.",
+      "reward": { "coins": 12, "hearts": 4 },
+      "marks": ["fm_eased_elder"],
+      "town": ["Old braid-master's gone. Wasting, the healer says. Peaceful, at the end.", "His widow's kept the house and the loom. Good. She works harder than he ever did."],
+      "returns": { "who": "wife", "as": "thanks", "days": [6, 10], "say": "He went easy. He was holding my hand and he said the sea was a long way off now. I do not know what you gave him and I am not going to ask. The house is mine and the children's. This is the last braid he worked. He would want you to have it, I think. I would.", "gift": ["minecraft:string*6", "minecraft:gold_nugget*3"] }
+    }
+  }
+}

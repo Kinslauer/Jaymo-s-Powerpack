@@ -107,6 +107,9 @@ public final class Letters {
 			}
 			if (level.isClientSide()) {
 				open.accept(hand);
+			} else if (stack.is(SEALED) && player instanceof net.minecraft.server.level.ServerPlayer reader) {
+				// a tale's letter: reading it starts the tale, or wakes the one that was resting on it
+				Tales.opened(reader, stack);
 			}
 			return InteractionResult.SUCCESS;
 		});

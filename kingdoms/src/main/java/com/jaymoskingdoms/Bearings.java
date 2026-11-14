@@ -92,6 +92,8 @@ public final class Bearings {
 		deed(Recollections.Kind.ROBBED, -10, -2, -6);
 		deed(Recollections.Kind.KILLED_KIN, -40, 0, -40);
 		deed(Recollections.Kind.SPARED, 4, 4, 2);
+		deed(Recollections.Kind.CUT_DOWN, -8, 2, -8);
+		deed(Recollections.Kind.MERCY, 4, 1, 4);
 		deed(Recollections.Kind.SWORE, 2, 0, 0);
 		deed(Recollections.Kind.KEPT_WORD, 15, 5, 10);
 		deed(Recollections.Kind.PROMISED, 0, 0, 0);

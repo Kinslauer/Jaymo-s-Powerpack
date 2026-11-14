@@ -3159,6 +3159,9 @@ public final class LifeStory {
 			McaBridge.forgetPlayer(player);
 		}
 		Parties.reborn(player);
+		Tales.reborn(player);
+		QuestPast.reborn(player);
+		Overheard.reborn(player);
 		Captains.forgetPlayer(player.level().getServer(), player);
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);

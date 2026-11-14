@@ -1,0 +1,6 @@
+{ "jobs": ["mason", "*"], "when": "any", "lines": [
+  ["a", "The golem hasn't moved since Tuesday."],
+  ["b", "It's guarding."],
+  ["a", "It has a bird's nest on its shoulder."],
+  ["b", "Then it's guarding the nest. Don't you go near it."]
+] }

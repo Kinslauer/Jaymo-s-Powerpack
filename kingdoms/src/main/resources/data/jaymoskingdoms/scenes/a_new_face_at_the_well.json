@@ -1,0 +1,6 @@
+{ "jobs": ["*", "*"], "when": "any", "lines": [
+  ["a", "There was a new face at the well this morning."],
+  ["b", "Did they give a name?"],
+  ["a", "They gave one. I don't know that it was theirs."],
+  ["b", "Mine wasn't, when I came. You all got used to it."]
+] }

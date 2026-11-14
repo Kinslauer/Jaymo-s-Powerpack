@@ -1902,6 +1902,24 @@ final class McaBridge {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
 	}
 
+	/** {@link McaCompat#talePerson}. */
+	static @Nullable Villager talePerson(ServerLevel level, net.minecraft.world.phys.Vec3 at, @Nullable VillagerProfession job, @Nullable Boolean female, String name,
+		boolean fighter) {
+		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(at).withAge(0);
+		if (female != null) {
+			make = make.withGender(female ? Gender.FEMALE : Gender.MALE);
+		}
+		if (!name.isEmpty()) {
+			make = make.withName(name);
+		}
+		if (fighter) {
+			make = make.withProfession(ProfessionsMCA.GUARD);
+		} else if (job != null) {
+			make = make.withProfession(job);
+		}
+		return make.spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.351) A new MCA zombie villager at {@code at}, in the world ({@code nether.FortressHaunts}); null if it failed. */
 	static net.minecraft.world.entity.monster.zombie.@Nullable ZombieVillager spawnZombie(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return net.conczin.mca.entity.ZombieVillagerFactory.newVillager(level).withPosition(at).spawn(EntitySpawnReason.EVENT);
