@@ -1,0 +1,18 @@
+{
+  "entity.jaymoskingdoms.sea_skipper": "Skipper",
+  "entity.jaymoskingdoms.sea_hauler": "Hauler",
+  "entity.jaymoskingdoms.sea_fisher": "Fisher",
+  "entity.jaymoskingdoms.sea_passenger": "Passenger",
+  "talk.jaymoskingdoms.sea_sites.skipper.0": "Mind the rail. We sail round the pale stones, never over them. The Tideborn aboard won't have it, and won't say why.",
+  "talk.jaymoskingdoms.sea_sites.skipper.1": "A long ship with no flag is nobody's friend. If you see one off a quiet coast, pick another coast.",
+  "talk.jaymoskingdoms.sea_sites.skipper.2": "Welcome aboard. Touch nothing in the hold and we'll get on.",
+  "talk.jaymoskingdoms.sea_sites.hauler.0": "Everything on this deck is spoken for. Talk to the skipper if you're buying.",
+  "talk.jaymoskingdoms.sea_sites.hauler.1": "There's a church down there with its roof still on. Used to be a hill. She takes what she's owed.",
+  "talk.jaymoskingdoms.sea_sites.hauler.2": "Saw a raft yesterday. One man, one pot, no land for a week either way. Waved like he owned the sea.",
+  "talk.jaymoskingdoms.sea_sites.fisher.0": "On a flat day you can see a lamp burning down there. Nobody tends it. We don't drop a line near it.",
+  "talk.jaymoskingdoms.sea_sites.fisher.1": "Pulled up a rib once, long as this boat. Whatever wore it, I'm glad I'm late.",
+  "talk.jaymoskingdoms.sea_sites.fisher.2": "First shell of the day goes back over the side. Costs nothing, and the nets come up full.",
+  "talk.jaymoskingdoms.sea_sites.passenger.0": "I paid for a cabin and I got one. I did not pay to be told what's under the keel, and yet.",
+  "talk.jaymoskingdoms.sea_sites.passenger.1": "A Tideborn at my table went quiet the whole morning we crossed the columns. Asked her why. She changed tables.",
+  "talk.jaymoskingdoms.sea_sites.passenger.2": "Are you crew? No? Then you know as little as I do about when we arrive."
+}

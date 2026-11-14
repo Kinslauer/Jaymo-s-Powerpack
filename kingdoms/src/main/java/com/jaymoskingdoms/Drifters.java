@@ -213,6 +213,22 @@ public final class Drifters {
 		return v;
 	}
 
+	/** A drifter who lives at {@code at} (a raft out at sea, {@link SeaSites}): for hire like any other, but he never moves along. */
+	static @Nullable VillagerEntityMCA adrift(ServerLevel level, BlockPos at) {
+		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NITWIT).value();
+		if (!(McaCompat.visitor(level, Vec3.atBottomCenterOf(at), job, false) instanceof VillagerEntityMCA v)) {
+			return null;
+		}
+		// (a turning-up time that never grows old)
+		v.setAttached(DRIFTER, Long.MAX_VALUE / 2);
+		LOADED.add(v);
+		weaken(v);
+		v.setPersistenceRequired();
+		v.setHomeTo(at, SeaSites.ROAM);
+		v.setClothes(String.format(CLOTHES, v.getGenetics().getGender() == Gender.FEMALE ? "female" : "male"));
+		return v;
+	}
+
 	/** A spot on a road leading out of {@code f}, a way from its end; null if it has none loaded. */
 	static @Nullable BlockPos onRoad(ServerLevel level, Faction f, RandomSource random) {
 		List<Roads.Road> mine = Roads.network(level.getServer()).roads().stream().filter(r -> r.a() == f.id() || r.b() == f.id()).toList();

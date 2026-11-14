@@ -556,6 +556,13 @@ public final class McaCompat {
 		return McaBridge.stranger(level, at, yaw, role, home, radius);
 	}
 
+	/** With MCA, a drifter living on a raft at {@code at} ({@link SeaSites}). */
+	static void adrift(ServerLevel level, net.minecraft.core.BlockPos at) {
+		if (LOADED) {
+			Drifters.adrift(level, at);
+		}
+	}
+
 	/** (0.7.295) With MCA, an assassin ({@link Assassins}): a villager stranger at {@code at}, on his way to {@code mark}; or null. */
 	static net.minecraft.world.entity.@Nullable PathfinderMob assassin(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, net.minecraft.core.BlockPos mark) {
 		return LOADED ? McaBridge.stranger(level, at, yaw, Assassins.ASSASSIN, mark, 64) : null;

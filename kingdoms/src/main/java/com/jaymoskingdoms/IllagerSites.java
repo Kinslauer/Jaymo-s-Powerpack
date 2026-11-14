@@ -193,7 +193,13 @@ final class IllagerSites {
 		Map.entry("iceberg_shipyard", new Plan("smugglers", WorldTiers.Tier.DREAD, Mode.GARRISON, false, 6)),
 		Map.entry("iceberg_site", new Plan("illagers", WorldTiers.Tier.DREAD, Mode.CAMP, false, 8)),
 		Map.entry("tower_ruin", new Plan("abandoned", WorldTiers.Tier.BORDERLANDS, Mode.EMPTY, false, 0)),
-		Map.entry("ruined_church", new Plan("abandoned", WorldTiers.Tier.BORDERLANDS, Mode.EMPTY, false, 0)));
+		Map.entry("ruined_church", new Plan("abandoned", WorldTiers.Tier.BORDERLANDS, Mode.EMPTY, false, 0)),
+		// Moog's Ocean Structures' boats (SeaSites): built by that mod, peopled here
+		Map.entry(SeaSites.LONG_SHIP, new Plan("barbarians", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 5)),
+		Map.entry(SeaSites.HAULER_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 3)),
+		Map.entry(SeaSites.SMALL_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 2)),
+		Map.entry(SeaSites.TRAVEL_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 5)),
+		Map.entry(SeaSites.RAFT, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 1)));
 
 	/** The stable's crew: smugglers, with masked bandits hired as their muscle (Andy's "smugglers + bandits"). */
 	static final Set<String> BANDIT_MUSCLE = Set.of("illager_stable");
@@ -250,6 +256,7 @@ final class IllagerSites {
 			Folk.defineRole(new Folk.Role(role, roleName(role), false, false, null, (folk, faction) -> {
 			}));
 		}
+		SeaSites.register();
 		ServerTickEvents.END_SERVER_TICK.register(IllagerSites::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			byCamp = null;
@@ -394,11 +401,8 @@ final class IllagerSites {
 					}
 					for (Map.Entry<Structure, LongSet> e : chunk.getAllReferences().entrySet()) {
 						Identifier id = registry.getKey(e.getKey());
-						if (id == null || !id.getNamespace().equals(JaymosKingdoms.MOD_ID) || !id.getPath().startsWith(PREFIX)) {
-							continue;
-						}
-						String path = id.getPath().substring(PREFIX.length());
-						Plan plan = PLANS.get(path);
+						String path = id == null ? null : path(id);
+						Plan plan = path == null ? null : PLANS.get(path);
 						if (plan == null) {
 							continue;
 						}
@@ -419,14 +423,22 @@ final class IllagerSites {
 		}
 	}
 
+	/** The plan path of the structure {@code id}: one of ours, or one of Moog's boats ({@link SeaSites}); null if neither. */
+	private static @Nullable String path(Identifier id) {
+		if (id.getNamespace().equals(JaymosKingdoms.MOD_ID) && id.getPath().startsWith(PREFIX)) {
+			return id.getPath().substring(PREFIX.length());
+		}
+		return SeaSites.path(id);
+	}
+
 	/** (Dev games only, {@link DevCommands}) the place whose start is in the chunk at {@code x z} is moved into now. Returns 1 if one was. */
 	static int devSettle(ServerLevel level, int x, int z) {
 		Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 		ChunkAccess chunk = level.getChunk(x >> 4, z >> 4);
 		for (Map.Entry<Structure, StructureStart> e : chunk.getAllStarts().entrySet()) {
 			Identifier id = registry.getKey(e.getKey());
-			if (id != null && id.getNamespace().equals(JaymosKingdoms.MOD_ID) && id.getPath().startsWith(PREFIX) && e.getValue().isValid()) {
-				String path = id.getPath().substring(PREFIX.length());
+			String path = id == null ? null : path(id);
+			if (path != null && e.getValue().isValid()) {
 				Plan plan = PLANS.get(path);
 				if (plan != null) {
 					settle(level, e.getValue(), ChunkPos.pack(x >> 4, z >> 4), path, plan, level.getGameTime());
@@ -477,6 +489,19 @@ final class IllagerSites {
 				kinds.append(p.kind());
 			}
 		}
+		boolean boat = SeaSites.is(path);
+		if (boat) {
+			// Moog's boats come without posts: their people stand about the deck
+			for (BlockPos at : SeaSites.deck(level, box, random)) {
+				posts.add(at);
+				kinds.append('M');
+			}
+			if (posts.isEmpty()) {
+				// (sunk, or not a deck anyone can stand on: left alone, and not looked at again)
+				put(server, ref, new Site(path, center, box, "abandoned", -1, -1, 0, List.of(), "", now, Production.day(server)));
+				return;
+			}
+		}
 		// who moves in
 		Faction realm = null;
 		String dweller = plan.dwellers();
@@ -491,8 +516,11 @@ final class IllagerSites {
 		}
 		Mode mode = dweller.equals("abandoned") ? Mode.EMPTY : plan.mode();
 		// their loot in the chests nobody has opened
-		relabel(level, box, loot(path, dweller, plan.tier()), random);
-		BlockPos seat = seat(level, posts, kinds, center);
+		if (!boat) {
+			// (Moog's boats keep Moog's loot)
+			relabel(level, box, loot(path, dweller, plan.tier()), random);
+		}
+		BlockPos seat = boat ? posts.get(0) : seat(level, posts, kinds, center);
 		int faction = -1, crew = 0;
 		switch (mode) {
 			case EMPTY -> {
@@ -633,7 +661,7 @@ final class IllagerSites {
 		long now = level.getGameTime();
 		// (its data first: everything after asks what kind of camp it is)
 		Camps.putData(server, id, new Camps.CampData(seat, Direction.NORTH, now, now, Production.day(server), -1L, List.of(), 0L, Map.of(), kind, 0, 0));
-		Holds.update(server, id, h -> h.withGrim(JaymosKingdoms.MOD_ID + ":" + PREFIX + path, List.of()).withErected(true).withGuarded(box));
+		Holds.update(server, id, h -> h.withGrim(SeaSites.is(path) ? SeaSites.MOD + ":" + path.substring(SeaSites.PREFIX.length()) : JaymosKingdoms.MOD_ID + ":" + PREFIX + path, List.of()).withErected(true).withGuarded(box));
 		List<BlockPos> chests = containers(level, box, seat);
 		if (!chests.isEmpty()) {
 			Storage.register(server, id, chests.subList(0, Math.min(4, chests.size())), chests.get(0));
@@ -813,6 +841,10 @@ final class IllagerSites {
 		List<BlockPos> spots = new ArrayList<>(posts);
 		if (spots.isEmpty()) {
 			spots.add(seat);
+		}
+		if (SeaSites.is(path)) {
+			SeaSites.people(level, path, spots);
+			return;
 		}
 		if (dweller.equals("recluse")) {
 			spots = spots.subList(0, 1);
@@ -1030,7 +1062,7 @@ final class IllagerSites {
 	// ---- the peaceful folk (from Workers#step) ---------------------------------------------------------------------------
 
 	static boolean isPeaceRole(int role) {
-		return role == MONK || role == PRIOR || role == HERBALIST || role == RECLUSE;
+		return role == MONK || role == PRIOR || role == HERBALIST || role == RECLUSE || SeaSites.isRole(role);
 	}
 
 	/** A monk's, herbalist's or recluse's own step: kept near home, visitors greeted once a day (the herbalist mends them). False: their brain runs. */
@@ -1069,6 +1101,10 @@ final class IllagerSites {
 			case RECLUSE -> "recluse." + PASTS[Math.floorMod(mob.getUUID().hashCode(), PASTS.length)];
 			default -> "monk";
 		};
+		if (SeaSites.isRole(w.role())) {
+			Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.sea_sites." + SeaSites.greeting(w.role()) + "." + level.getRandom().nextInt(GREETINGS)), COLOR, SPEECH_RANGE);
+			return;
+		}
 		boolean hurt = player.getHealth() < player.getMaxHealth() * MEND_BELOW;
 		if (w.role() == HERBALIST && hurt) {
 			// the herbalist sees to a hurt visitor's wounds
