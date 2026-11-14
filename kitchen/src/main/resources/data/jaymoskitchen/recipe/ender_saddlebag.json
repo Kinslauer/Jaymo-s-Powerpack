@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "LSL",
+    "LEL"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:string",
+    "E": "minecraft:ender_chest"
+  },
+  "result": {
+    "id": "jaymoskitchen:ender_saddlebag"
+  }
+}
