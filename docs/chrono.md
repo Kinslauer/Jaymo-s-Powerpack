@@ -595,7 +595,7 @@ the held phase, which is Overclock's. Ideas only from another mod's speedster; a
 - **Momentum** (`ChronoMomentumClient`): speed builds over 30 ticks of straight running, a sharp view turn sheds speed and
   leans the body, letting go of every key slides you to a stop in ground dust.
 - **Speed healing** (`ChronoGears.tick`): gear 3 and up close wounds through `Mending.mend` (the wounds system), at a hunger price.
-- **Running blow, rapid bows, catch and hurl, weapon snatch** (`ChronoRapid`, three mixins, `ChronoRapidClient`).
+- **Running blow, rapid bows, catch and hurl, weapon snatch, quickened rocks** (`ChronoRapid`, three mixins, `ChronoRapidClient`; a thrown rock goes at 6 blocks a tick, flat, for 12, with a gold streak: `ThrownRocks.quicken`).
 - **Held phase** (`ChronoPhase`, `ChronoHeldPhaseMixin`): hold V at a wall; the meter shows under the gear chip.
 - **Running rings** (`ChronoRings`): a closed circle of radius 2 to 6 raises a vortex.
 - **Slow time** (`ChronoSlowTime`, `.` held): vanilla's tick freeze plus one stepped world tick in five.
