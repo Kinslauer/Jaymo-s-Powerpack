@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 branch: claude/project-thread-vb3yg2
 pr: 1495
 ---
