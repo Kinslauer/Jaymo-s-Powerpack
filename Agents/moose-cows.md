@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Cube Animals moose as cows beside our bull
 branch: claude/project-thread-dhegwo
 with: Claude (cloud thread "Add Cube moose as cows")
-pr: 
+pr: 1518
 mods: kingdoms
 versions: 
 started: 2026-11-14
