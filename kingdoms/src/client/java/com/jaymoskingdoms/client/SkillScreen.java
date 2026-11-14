@@ -7,6 +7,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.Stats;
+import com.jaymoskingdoms.forms.Forms;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,6 +40,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.514) The three pillars' tabs became one web ({@link SkillWeb}): a big circle, Strength on top, Survival lower
  * right, Stealth lower left, every page a branch running outward, and bridge perks on the borders. Drag to move round it,
  * scroll to zoom; pointing at a perk lights the path to it and says what it leads to.
+ * The web is spread wide and opens zoomed in, every node carries its own picture ({@link SkillIcons}), a click picks a
+ * node and a second one learns it, and framed panels hold the rest: your levels, points and attributes on the left, the
+ * picked perk in full on the right, the keys along the foot.
  */
 final class SkillScreen extends Screen {
 	/**
@@ -53,14 +58,31 @@ final class SkillScreen extends Screen {
 	static final int TRAINED = 0xFFC0503A;
 
 	private static KeyMapping key;
-	/** (0.7.514) The web's header and footer heights, its zoom range and how much a scroll notch zooms. */
-	static final int WEB_HEADER = 32, WEB_FOOTER = 22, WEB_CARD_W = 236;
-	static final double ZOOM_MIN = 0.35, ZOOM_MAX = 2.6, FIT_MAX = 1.2, ZOOM_STEP = 1.15, NODE = 6.0;
+	/** The web's top and bottom bars, its zoom range, how much a scroll notch zooms and a node's half size at zoom 1. */
+	static final int WEB_HEADER = 22, WEB_FOOTER = 22;
+	static final double ZOOM_MIN = 0.1, ZOOM_MAX = 2.4, ZOOM_STEP = 1.15, NODE = 9.0;
+	/** The zoom the web opens at and goes to for a picked perk; a perk picked below {@link #FOCUS_ZOOM} is brought up to it. */
+	static final double OPEN_ZOOM = 1.0, FOCUS_ZOOM = 0.8;
+	/** A node shows its picture from this half size up; perks' names and the gates' names show from these zooms up. */
+	static final int ICON_FROM = 6;
+	static final double NAMES_FROM = 1.0, GATE_NAMES_FROM = 0.6;
+	/** How fast the view glides to where it is headed (a share per second, eased). */
+	static final double GLIDE = 10.0;
+	/** The left panel's rows, the title's rules and the room the foot's buttons take. */
+	static final int PILLAR_ROW = 26, RAIL_STAT_ROW = 12, ARTS_HEAD = 11, ARTS_ROW = 10, TITLE_RULE = 34, FOOT_BUTTONS = 346;
+	/** How far the left panel's rows are scrolled (pixels), when the screen is too short for them all. */
+	private static int railScroll;
 	static final int COLOR_LOCKED_RIM = 0xFF4A4A56, COLOR_LOCKED_FILL = 0xFF16161C, COLOR_OPEN_FILL = 0xFF24202C, COLOR_PATH = 0xFFFFFFFF,
-		COLOR_RING = 0x22FFFFFF, COLOR_BORDER = 0x40FFFFFF, COLOR_BACK = 0xF00A0A12;
-	/** Where the web was left: moved by this much (screen pixels), at this zoom (NaN until first shown, then fitted). */
+		COLOR_RING = 0x22FFFFFF, COLOR_BORDER = 0x40FFFFFF, COLOR_BACK = 0xF00A0A12, COLOR_FRAME = 0xF00E0E16, COLOR_FRAME_LINE = 0xFF8C752A,
+		COLOR_OVER = 0x30FFFFFF, COLOR_DIMMED = 0xB0101016;
+	/** Where the web was left: moved by this much (screen pixels), at this zoom (NaN until first shown). */
 	private static double panX, panY, zoom = Double.NaN;
-	/** A press on the web: where, and the perk under it (it's learnt on release if the mouse hardly moved). */
+	/** Where the view is headed: it glides there ({@link #glide}). */
+	private static double targetX, targetY, targetZoom;
+	private long lastFrame;
+	/** The perk picked: the right panel shows it, and a second click, Enter or the panel's button learns it. */
+	private static Skills.@Nullable Perk selected;
+	/** A press on the web: where, and the perk under it (it's picked on release if the mouse hardly moved). */
 	private double pressX, pressY;
 	private boolean pressed;
 	private Skills.@Nullable Perk pressedPerk;
@@ -163,7 +185,7 @@ final class SkillScreen extends Screen {
 	@Override
 	protected void init() {
 		if (Double.isNaN(zoom)) {
-			fit();
+			open();
 		}
 		if (stats || jobs) {
 			// the Attributes and Jobs tabs keep their panel: the web's tab, then theirs
@@ -190,7 +212,7 @@ final class SkillScreen extends Screen {
 		}
 		// the web: the tabs at the header's right, the buttons along the foot
 		int tabW = Math.min(TAB_W, Math.max(40, (this.width - 12) / 8));
-		tabs(this.width - 6 - tabW * 3 - 8, 8, tabW);
+		tabs(this.width - 6 - tabW * 3 - 8, 3, tabW);
 		int fy = this.height - WEB_FOOTER + 3, right = this.width - 6;
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
@@ -233,16 +255,9 @@ final class SkillScreen extends Screen {
 		addRenderableWidget(jobsTab);
 	}
 
-	// ---- (0.7.514) ---------------------------------------------------------------------------------------------
+	// ---- the web ---------------------------------------------------------------------------------------------------
 
-	/** The whole web in view, centred, as big as fits (never past {@link #FIT_MAX}). */
-	private void fit() {
-		double[] b = SkillWeb.bounds();
-		double pad = 14.0, w = Math.max(60, this.width - 2 * pad), h = Math.max(60, this.height - WEB_HEADER - WEB_FOOTER - 2 * pad);
-		zoom = Math.max(ZOOM_MIN, Math.min(FIT_MAX, Math.min(w / (b[2] - b[0]), h / (b[3] - b[1]))));
-		panX = -(b[0] + b[2]) / 2.0 * zoom;
-		panY = -(b[1] + b[3]) / 2.0 * zoom;
-	}
+	private static final Skills.Pillar[] ORDER = {Skills.Pillar.STRENGTH, Skills.Pillar.SURVIVAL, Skills.Pillar.STEALTH};
 
 	private boolean onWeb() {
 		return !stats && !jobs;
@@ -253,12 +268,73 @@ final class SkillScreen extends Screen {
 		return onWeb() || (panelCollapsed && (stats || jobs));
 	}
 
+	/** The left panel's width (your pillars and attributes); a collapsed Attributes or Jobs panel leaves only its strip there. */
+	private int railL() {
+		return onWeb() ? Math.clamp(this.width / 5, 84, 112) : 30;
+	}
+
+	/** The right panel's width (the skill picked or pointed at). */
+	private int railR() {
+		return Math.clamp(this.width * 3 / 10, 120, 176);
+	}
+
+	/** The middle of the web's own area, between the two panels and the bars. */
+	private double areaX() {
+		return railL() + (this.width - railL() - railR()) / 2.0;
+	}
+
+	private double areaY() {
+		return WEB_HEADER + (this.height - WEB_HEADER - WEB_FOOTER) / 2.0;
+	}
+
+	/** Heads the view for {@code spot} in the middle, at zoom {@code z}. */
+	private static void look(SkillWeb.Spot spot, double z) {
+		targetZoom = z;
+		targetX = -spot.x() * z;
+		targetY = -spot.y() * z;
+	}
+
+	/** The first view: close in on the first rings of your strongest pillar, so every node there reads at once. */
+	private void open() {
+		Skills.Progress shown = progress();
+		Skills.Pillar best = Skills.Pillar.STRENGTH;
+		for (Skills.Pillar p : ORDER) {
+			if (shown.level(p) > shown.level(best)) {
+				best = p;
+			}
+		}
+		look(SkillWeb.focus(best), OPEN_ZOOM);
+		panX = targetX;
+		panY = targetY;
+		zoom = targetZoom;
+	}
+
+	/** Heads for the whole web in view, centred, as big as fits (never past {@link #OPEN_ZOOM}). */
+	private void fit() {
+		double[] b = SkillWeb.bounds();
+		double pad = 14.0, w = Math.max(60, this.width - railL() - railR() - 2 * pad), h = Math.max(60, this.height - WEB_HEADER - WEB_FOOTER - 2 * pad);
+		targetZoom = Math.max(ZOOM_MIN, Math.min(OPEN_ZOOM, Math.min(w / (b[2] - b[0]), h / (b[3] - b[1]))));
+		targetX = -(b[0] + b[2]) / 2.0 * targetZoom;
+		targetY = -(b[1] + b[3]) / 2.0 * targetZoom;
+	}
+
+	/** Moves the view a share of the way to where it is headed, by the time since the last frame. */
+	private void glide() {
+		long now = System.nanoTime();
+		double dt = this.lastFrame == 0L ? 1.0 : Math.min(0.1, (now - this.lastFrame) / 1.0e9);
+		this.lastFrame = now;
+		double k = 1.0 - Math.exp(-dt * GLIDE);
+		zoom += (targetZoom - zoom) * k;
+		panX += (targetX - panX) * k;
+		panY += (targetY - panY) * k;
+	}
+
 	private double centerX() {
-		return this.width / 2.0 + panX;
+		return areaX() + panX;
 	}
 
 	private double centerY() {
-		return WEB_HEADER + (this.height - WEB_HEADER - WEB_FOOTER) / 2.0 + panY;
+		return areaY() + panY;
 	}
 
 	private double sx(SkillWeb.Spot spot) {
@@ -271,12 +347,12 @@ final class SkillScreen extends Screen {
 
 	/** A perk's half size on screen: capstones (2 points or more) and bridges a little bigger. */
 	private int half(Skills.Perk perk) {
-		double size = NODE * (perk.cost >= 2 || perk.bridge() ? 1.3 : 1.0) * zoom;
-		return (int)Math.max(2, Math.min(12, Math.round(size)));
+		double size = NODE * (perk.cost >= 2 || perk.bridge() ? 1.25 : 1.0) * zoom;
+		return (int)Math.max(2, Math.min(20, Math.round(size)));
 	}
 
 	private boolean inWebArea(double mouseX, double mouseY) {
-		return mouseY >= WEB_HEADER && mouseY < this.height - WEB_FOOTER;
+		return mouseX >= railL() && mouseX < this.width - railR() && mouseY >= WEB_HEADER && mouseY < this.height - WEB_FOOTER;
 	}
 
 	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {
@@ -309,12 +385,41 @@ final class SkillScreen extends Screen {
 			if (spot == null) {
 				continue;
 			}
-			double r = Math.max(5, 9 * zoom);
+			double r = Math.max(5, 14 * zoom);
 			if (Math.abs(sx(spot) - mouseX) <= r && Math.abs(sy(spot) - mouseY) <= r) {
 				return p;
 			}
 		}
 		return null;
+	}
+
+	/** Whether {@code perk} can be learnt (or raised) right now. */
+	private boolean canLearn(Skills.Progress shown, Skills.Perk perk) {
+		var player = this.minecraft.player;
+		return shown.blocked(perk) == null && (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk)
+			&& !com.jaymoskingdoms.Learnables.classLocked(player, perk));
+	}
+
+	/** Picks {@code perk} for the right panel, and brings it to the middle if it sits near the edge or is too small to read. */
+	private void select(Skills.Perk perk) {
+		selected = perk;
+		this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+		SkillWeb.Spot spot = SkillWeb.SPOTS.get(perk);
+		if (spot == null) {
+			return;
+		}
+		double w = this.width - railL() - railR(), h = this.height - WEB_HEADER - WEB_FOOTER;
+		if (zoom < FOCUS_ZOOM || Math.abs(sx(spot) - areaX()) > w * 0.3 || Math.abs(sy(spot) - areaY()) > h * 0.3) {
+			look(spot, Math.max(targetZoom, OPEN_ZOOM));
+		}
+	}
+
+	/** Spends a point on {@code perk} if it can be learnt (the server checks it again). */
+	private void learn(Skills.Perk perk) {
+		if (canLearn(progress(), perk)) {
+			ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
+			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+		}
 	}
 
 	/** A straight line {@code w} pixels thick from one point to another (the pose turned to lie along it). */
@@ -357,6 +462,38 @@ final class SkillScreen extends Screen {
 		graphics.pose().popMatrix();
 	}
 
+	/** A 1 pixel outline. */
+	private static void outline(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int color) {
+		graphics.fill(x0, y0, x1, y0 + 1, color);
+		graphics.fill(x0, y1 - 1, x1, y1, color);
+		graphics.fill(x0, y0 + 1, x0 + 1, y1 - 1, color);
+		graphics.fill(x1 - 1, y0 + 1, x1, y1 - 1, color);
+	}
+
+	/** An item drawn to fill a node {@code h} each way from its middle. */
+	private static void icon(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y, int h) {
+		float s = (2 * h - 4) / 16F;
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x - 8 * s, y - 8 * s);
+		graphics.pose().scale(s, s);
+		graphics.item(stack, 0, 0);
+		graphics.pose().popMatrix();
+	}
+
+	/**
+	 * A side panel or bar of the web's screen: dark like the sky behind it in both screen looks, a thin dim-gold line
+	 * just inside its edge and a gold stud in each corner.
+	 */
+	private static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		graphics.fill(x, y, x + w, y + h, COLOR_FRAME);
+		outline(graphics, x + 2, y + 2, x + w - 2, y + h - 2, COLOR_FRAME_LINE);
+		for (int i = 0; i < 4; i++) {
+			int cx = i % 2 == 0 ? x + 2 : x + w - 3, cy = i < 2 ? y + 2 : y + h - 3;
+			graphics.fill(cx - 2, cy - 2, cx + 3, cy + 3, 0xFF000000);
+			graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, Ui.GOLD);
+		}
+	}
+
 	private static int darker(int color, float share) {
 		int r = Math.round(((color >> 16) & 0xFF) * share), g = Math.round(((color >> 8) & 0xFF) * share), b = Math.round((color & 0xFF) * share);
 		return 0xFF000000 | r << 16 | g << 8 | b;
@@ -384,7 +521,18 @@ final class SkillScreen extends Screen {
 		return out;
 	}
 
-	/** The web: rings, borders, the ties between perks, the perks, the crests and the branches' names. */
+	/** A name on a dark plate, centred on {@code x} with its top at {@code y}, drawn at {@code scale}. */
+	private void plate(GuiGraphicsExtractor graphics, Component name, int x, int y, float scale, int color) {
+		int tw = this.font.width(name);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y);
+		graphics.pose().scale(scale, scale);
+		graphics.fill(-tw / 2 - 2, -1, tw - tw / 2 + 2, 9, 0xA0000000);
+		graphics.text(this.font, name, -tw / 2, 0, color);
+		graphics.pose().popMatrix();
+	}
+
+	/** The web: rings, borders, the ties between perks, the perks with their pictures, the crests and the branches' names. */
 	private void web(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY, Skills.@Nullable Perk hovered) {
 		graphics.fill(0, 0, this.width, this.height, COLOR_BACK);
 		// a few faint stars, the same each time
@@ -393,20 +541,23 @@ final class SkillScreen extends Screen {
 			int x = stars.nextInt(Math.max(1, this.width)), y = stars.nextInt(Math.max(1, this.height));
 			graphics.fill(x, y, x + 1, y + 1, (0x20 + stars.nextInt(0x50)) << 24 | 0xC8C8FF);
 		}
-		graphics.enableScissor(0, WEB_HEADER, this.width, this.height - WEB_FOOTER);
+		int left = railL(), right = this.width - railR(), top = WEB_HEADER, bottom = this.height - WEB_FOOTER;
+		graphics.enableScissor(left, top, right, bottom);
 		double cx = centerX(), cy = centerY();
 		// the rings
 		for (int ring = 0; ring < SkillWeb.RINGS; ring++) {
 			double r = (SkillWeb.R0 + ring * SkillWeb.STEP) * zoom;
-			int dots = (int)Math.max(24, 2 * Math.PI * r / 5.0);
+			int dots = (int)Math.max(24, 2 * Math.PI * r / 6.0);
 			for (int i = 0; i < dots; i++) {
 				double a = 2 * Math.PI * i / dots;
 				int x = (int)Math.round(cx + r * Math.cos(a)), y = (int)Math.round(cy + r * Math.sin(a));
-				graphics.fill(x, y, x + 1, y + 1, COLOR_RING);
+				if (x >= left && x < right && y >= top && y < bottom) {
+					graphics.fill(x, y, x + 1, y + 1, COLOR_RING);
+				}
 			}
 		}
 		// the borders between pillars
-		double outer = (SkillWeb.R0 + (SkillWeb.RINGS - 0.5) * SkillWeb.STEP) * zoom, inner = (SkillWeb.CREST_R + 14) * zoom;
+		double outer = (SkillWeb.R0 + (SkillWeb.RINGS - 0.5) * SkillWeb.STEP) * zoom, inner = (SkillWeb.CREST_R + 24) * zoom;
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			if (!p.web()) {
 				continue;
@@ -414,8 +565,10 @@ final class SkillScreen extends Screen {
 			double a = Math.toRadians(SkillWeb.from(p));
 			segment(graphics, cx + inner * Math.cos(a), cy + inner * Math.sin(a), cx + outer * Math.cos(a), cy + outer * Math.sin(a), 1, COLOR_BORDER);
 		}
-		java.util.Set<Skills.Perk> path = hovered == null ? java.util.Set.of() : pathTo(hovered, shown);
-		int thick = zoom >= 1.2 ? 3 : 2;
+		// the path lit: to the perk pointed at, or else to the one picked
+		Skills.Perk lead = hovered != null ? hovered : selected;
+		java.util.Set<Skills.Perk> path = lead == null ? java.util.Set.of() : pathTo(lead, shown);
+		int thick = zoom >= 1.2 ? 3 : zoom >= 0.45 ? 2 : 1;
 		// the middle to each crest, each crest to its gates
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			SkillWeb.Spot crest = SkillWeb.CRESTS.get(p);
@@ -440,7 +593,7 @@ final class SkillScreen extends Screen {
 				SkillWeb.Spot gate = SkillWeb.GATES.get(SkillWeb.BRANCHES.get(perk));
 				if (gate != null && perk.requires.isEmpty()) {
 					int color = path.contains(perk) ? COLOR_PATH : learnt ? Ui.GOLD : darker(accent, 0.8F);
-					segment(graphics, sx(gate), sy(gate), sx(to), sy(to), learnt || path.contains(perk) ? thick : thick - 1, color);
+					segment(graphics, sx(gate), sy(gate), sx(to), sy(to), learnt || path.contains(perk) ? thick : Math.max(1, thick - 1), color);
 				}
 			}
 			for (Skills.Perk need : perk.requires) {
@@ -459,18 +612,23 @@ final class SkillScreen extends Screen {
 			}
 		}
 		// the perks
-		var player = this.minecraft.player;
 		for (Skills.Perk perk : Skills.Perk.values()) {
 			SkillWeb.Spot spot = SkillWeb.SPOTS.get(perk);
 			if (spot == null) {
 				continue;
 			}
 			int x = (int)Math.round(sx(spot)), y = (int)Math.round(sy(spot)), h = half(perk);
+			if (x < left - 80 || x > right + 80 || y < top - 40 || y > bottom + 40) {
+				continue;
+			}
 			int rank = shown.rank(perk), accent = perk.bridge() ? Ui.GOLD : accent(perk.pillar);
-			boolean open = shown.blocked(perk) == null && (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk)
-				&& !com.jaymoskingdoms.Learnables.classLocked(player, perk));
+			boolean open = canLearn(shown, perk);
 			int rim = perk == hovered ? COLOR_PATH : rank > 0 ? Ui.GOLD : open ? accent : COLOR_LOCKED_RIM;
 			int fill = rank >= perk.maxRank ? darker(accent, 0.75F) : rank > 0 ? darker(accent, 0.5F) : open ? COLOR_OPEN_FILL : COLOR_LOCKED_FILL;
+			if (perk == selected) {
+				// the one picked: a gold square standing off it
+				outline(graphics, x - h - 4, y - h - 4, x + h + 4, y + h + 4, Ui.GOLD);
+			}
 			if (perk.bridge()) {
 				diamond(graphics, x, y, h + 1, rim, fill);
 			} else {
@@ -481,32 +639,34 @@ final class SkillScreen extends Screen {
 					graphics.fill(x - h + 2, y + h - 3, x + h - 2, y + h - 2, rim);
 				}
 			}
-			if (rank > 0 && h >= 4) {
+			if (h >= ICON_FROM) {
+				// its own picture; dimmed while it can't be learnt yet
+				icon(graphics, SkillIcons.of(perk), x, y, perk.bridge() ? h - 2 : h);
+				if (rank == 0 && !open) {
+					int d = perk.bridge() ? h - 4 : h - 1;
+					graphics.fill(x - d, y - d, x + d, y + d, COLOR_DIMMED);
+				}
+			} else if (rank > 0 && h >= 4) {
 				// a glint in the corner
 				graphics.fill(x - h + 1, y - h + 1, x - h + 3, y - h + 3, 0x90FFFFFF);
 			}
 			// the ranks: a pip each under it, the learnt ones gold
-			if (perk.maxRank > 1 && zoom >= 0.6) {
-				int pw = 2, gap = 1, total = perk.maxRank * (pw + gap) - gap, px = x - total / 2, py = y + h + 3;
+			boolean pips = perk.maxRank > 1 && zoom >= 0.45;
+			if (pips) {
+				int pw = zoom >= 1.0 ? 3 : 2, gap = 1, total = perk.maxRank * (pw + gap) - gap, px = x - total / 2, py = y + h + 3;
 				for (int i = 0; i < perk.maxRank; i++) {
 					graphics.fill(px + i * (pw + gap), py, px + i * (pw + gap) + pw, py + 2, i < rank ? Ui.GOLD : Ui.BAR_BACK);
 				}
 			}
 			// names, once zoomed in far enough to have room for them
-			if (zoom >= 1.5 || perk == hovered) {
-				Component name = Component.translatable("skill.jaymoskingdoms.perk." + perk.key());
-				float scale = perk == hovered ? 1.0F : 0.75F;
-				int tw = this.font.width(name);
-				graphics.pose().pushMatrix();
-				graphics.pose().translate(x, y + h + (perk.maxRank > 1 ? 7 : 4));
-				graphics.pose().scale(scale, scale);
-				graphics.fill(-tw / 2 - 2, -1, tw - tw / 2 + 2, 9, 0xA0000000);
-				graphics.text(this.font, name, -tw / 2, 0, rank > 0 ? Ui.TEXT : open ? Ui.DIM : Ui.HINT);
-				graphics.pose().popMatrix();
+			boolean marked = perk == hovered || perk == selected;
+			if (zoom >= NAMES_FROM || marked) {
+				plate(graphics, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), x, y + h + (pips ? 8 : 5), marked ? 1.0F : 0.75F,
+					rank > 0 || marked ? Ui.TEXT : open ? Ui.DIM : Ui.HINT);
 			}
 		}
 		// the middle and the crests
-		int hub = (int)Math.max(5, Math.round(10 * zoom));
+		int hub = (int)Math.max(5, Math.round(16 * zoom));
 		diamond(graphics, cx, cy, hub, Ui.GOLD, 0xFF2A2210);
 		Skills.Pillar crestHover = crestAt(mouseX, mouseY);
 		for (Skills.Pillar p : Skills.Pillar.values()) {
@@ -514,14 +674,25 @@ final class SkillScreen extends Screen {
 			if (crest == null) {
 				continue;
 			}
-			int r = (int)Math.max(4, Math.round(8 * zoom));
-			tile(graphics, (int)Math.round(sx(crest)), (int)Math.round(sy(crest)), r, p == crestHover ? COLOR_PATH : accent(p), darker(accent(p), 0.35F));
+			int r = (int)Math.max(4, Math.round(13 * zoom)), x = (int)Math.round(sx(crest)), y = (int)Math.round(sy(crest));
+			tile(graphics, x, y, r, p == crestHover ? COLOR_PATH : accent(p), darker(accent(p), 0.35F));
+			if (r >= ICON_FROM) {
+				icon(graphics, SkillIcons.of(p), x, y, r);
+			}
+			if (zoom >= GATE_NAMES_FROM) {
+				plate(graphics, Component.translatable("skill.jaymoskingdoms." + p.key()), x, y + r + 4, 1.0F, accent(p));
+			}
 		}
 		for (java.util.Map.Entry<SkillWeb.Branch, SkillWeb.Spot> e : SkillWeb.GATES.entrySet()) {
-			int x = (int)Math.round(sx(e.getValue())), y = (int)Math.round(sy(e.getValue())), r = (int)Math.max(1, Math.round(2.5 * zoom));
+			int x = (int)Math.round(sx(e.getValue())), y = (int)Math.round(sy(e.getValue())), r = (int)Math.max(1, Math.round(4 * zoom));
+			graphics.fill(x - r - 1, y - r - 1, x + r + 1, y + r + 1, 0xFF000000);
 			graphics.fill(x - r, y - r, x + r, y + r, accent(e.getKey().pillar));
+			if (zoom >= GATE_NAMES_FROM) {
+				// the branch's name at its gate too, so it reads from the middle
+				plate(graphics, Component.translatable("gui.jaymoskingdoms.skills.branch." + e.getKey().key()), x, y + r + 3, 0.75F, accent(e.getKey().pillar));
+			}
 		}
-		// the branches' names
+		// the branches' names, past their last ring
 		for (SkillWeb.Label label : SkillWeb.LABELS) {
 			Component name = Component.translatable("gui.jaymoskingdoms.skills.branch." + label.key());
 			int tw = this.font.width(name), x = (int)Math.round(sx(label.at())), y = (int)Math.round(sy(label.at()));
@@ -530,97 +701,221 @@ final class SkillScreen extends Screen {
 		graphics.disableScissor();
 	}
 
-	/** The header across the top: each pillar's level, experience and points; the tabs sit at its right. */
-	private void webHeader(GuiGraphicsExtractor graphics, Skills.Progress shown) {
-		graphics.fill(0, 0, this.width, WEB_HEADER, 0xF0101018);
-		graphics.fill(0, WEB_HEADER - 1, this.width, WEB_HEADER, 0x80FFC21A);
-		int tabsW = Math.min(TAB_W, Math.max(40, (this.width - 12) / 8)) * 3 + 8 + 12;
-		Skills.Pillar[] order = {Skills.Pillar.STRENGTH, Skills.Pillar.SURVIVAL, Skills.Pillar.STEALTH};
-		int blockW = Math.max(60, Math.min(150, (this.width - 12 - tabsW) / order.length));
-		int x = 6;
-		for (Skills.Pillar p : order) {
-			int accent = accent(p), level = shown.level(p), xp = shown.xp(p), points = shown.points(p), w = blockW - 8;
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.level", Component.translatable("skill.jaymoskingdoms." + p.key()), level),
-				x, 4, w, accent);
-			if (level >= p.maxLevel) {
-				Ui.bar(graphics, x, 14, w, 2, 1.0F, accent);
-			} else {
-				Ui.bar(graphics, x, 14, w, 2, (xp - Skills.total(level)) / (float)Math.max(1, Skills.toNext(level)), accent);
-			}
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.points", points), x, 19, w, points > 0 ? Ui.GOOD : Ui.DIM);
-			x += blockW;
+	/** The bar across the top: the screen's name over the web, between two gold rules; the tabs sit at its right. */
+	private void topBar(GuiGraphicsExtractor graphics) {
+		frame(graphics, 0, 0, this.width, WEB_HEADER);
+		int cx = (int)areaX(), tw = this.font.width(this.title);
+		graphics.text(this.font, this.title, cx - tw / 2, 7, Ui.GOLD);
+		for (int side = -1; side <= 1; side += 2) {
+			int x0 = cx + side * (tw / 2 + 8), x1 = cx + side * (tw / 2 + 8 + TITLE_RULE);
+			graphics.fill(Math.min(x0, x1), 10, Math.max(x0, x1), 11, COLOR_FRAME_LINE);
+			graphics.fill(x1 - 1, 9, x1 + 2, 12, Ui.GOLD);
 		}
 	}
 
-	/** The card at the bottom left: the hovered perk in full, a hovered crest's pillar, or else how the web works. */
-	private void card(GuiGraphicsExtractor graphics, Skills.Progress shown, Skills.@Nullable Perk hovered, Skills.@Nullable Pillar crest) {
-		Component name;
-		int nameColor;
-		List<Component> text = new ArrayList<>();
-		var player = this.minecraft.player;
-		if (hovered != null) {
-			int rank = shown.rank(hovered), accent = hovered.bridge() ? Ui.GOLD : accent(hovered.pillar);
-			name = Component.translatable("skill.jaymoskingdoms.perk." + hovered.key()).append("  " + rank + "/" + hovered.maxRank);
-			nameColor = accent;
-			text.add(Component.translatable("skill.jaymoskingdoms.perk." + hovered.key() + ".desc"));
-			Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", hovered.cost);
-			if (hovered.minLevel > 0) {
-				cost = Component.empty().append(cost).append("  ·  ").append(Component.translatable("gui.jaymoskingdoms.skills.needs_level", hovered.minLevel));
-			}
-			text.add(cost.copy().withColor(Ui.DIM));
-			if (hovered.bridge() && hovered.other != null) {
-				text.add(Component.translatable("gui.jaymoskingdoms.skills.bridge", Component.translatable("skill.jaymoskingdoms." + hovered.pillar.key()),
-					Component.translatable("skill.jaymoskingdoms." + hovered.other.key())).withColor(Ui.GOLD));
-			}
-			if (!hovered.requires.isEmpty()) {
-				text.add(Component.translatable(hovered.bridge() ? "gui.jaymoskingdoms.skills.needs_any" : "gui.jaymoskingdoms.skills.needs", names(hovered.requires))
-					.withColor(Ui.DIM));
-			}
-			List<Skills.Perk> leads = SkillWeb.leadsTo(hovered);
-			if (!leads.isEmpty()) {
-				text.add(Component.translatable("gui.jaymoskingdoms.skills.leads", names(leads)).withColor(0xFFF0D28C));
-			}
-			String blocked = shown.blocked(hovered);
-			// (0.7.492) a higher technique wants Knowledge 4
-			if (blocked == null && player != null && com.jaymoskingdoms.Knowledge.lockedPerk(player, hovered)) {
-				blocked = "gui.jaymoskingdoms.skills.blocked.knowledge";
-			}
-			// (0.7.516) a class skill of another class
-			if (blocked == null && player != null && com.jaymoskingdoms.Learnables.classLocked(player, hovered)) {
-				blocked = "gui.jaymoskingdoms.skills.blocked.class";
-			}
-			java.util.Set<com.jaymoskingdoms.Classes.PlayerClass> forClasses = com.jaymoskingdoms.Learnables.classesFor(hovered);
-			if (forClasses != null) {
-				text.add(Component.translatable("gui.jaymoskingdoms.skills.for_classes", classNames(forClasses)).withColor(Ui.DIM));
-			}
-			if (shown.ranks().containsKey(com.jaymoskingdoms.Learnables.taughtKey(hovered))) {
-				text.add(Component.translatable("gui.jaymoskingdoms.skills.taught").withColor(Ui.GOOD));
-			}
-			text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD)
-				: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
-		} else if (crest != null) {
-			name = Component.translatable("skill.jaymoskingdoms." + crest.key());
-			nameColor = accent(crest);
-			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + crest.key()));
-		} else {
-			name = this.title;
-			nameColor = Ui.GOLD;
-			text.add(Component.translatable("gui.jaymoskingdoms.skills.web.help").withColor(Ui.DIM));
-			Classes.PlayerClass cls = player == null ? null : Classes.classOf(player);
-			text.add(cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none").withColor(Ui.DIM)
-				: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())).withColor(Ui.GOLD));
-			// (your alignment: the pillar you've made your own, as others see it over your head)
-			Skills.Pillar aligned = Renown.alignment(shown);
-			text.add(aligned == null ? Component.translatable("gui.jaymoskingdoms.skills.alignment.none", Renown.ALIGN_LEVEL).withColor(Ui.DIM)
-				: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
-					+ (shown.level(aligned) >= aligned.maxLevel ? ".master" : ""))).withColor(accent(aligned)));
+	/** The bar along the foot: what the mouse and keys do; the buttons sit at its right. */
+	private void bottomBar(GuiGraphicsExtractor graphics) {
+		frame(graphics, 0, this.height - WEB_FOOTER, this.width, WEB_FOOTER);
+		if (onWeb()) {
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.keys"), 8, this.height - WEB_FOOTER + 7,
+				this.width - FOOT_BUTTONS - 20, Ui.DIM);
 		}
-		int w = Math.min(WEB_CARD_W, this.width / 2 - 8);
-		int lines = Math.min(DETAIL_LINES + 3, Math.max(2, Ui.detailLines(this.font, w, name, text)));
-		int h = lines * Ui.LINE + 10, x = 6, y = this.height - WEB_FOOTER - h - 4;
-		graphics.fill(x, y, x + w, y + h, Ui.PANEL);
-		graphics.fill(x, y, x + 2, y + h, nameColor);
-		Ui.detail(graphics, this.font, x, y, w, lines, name, nameColor, text);
+	}
+
+	/** Where pillar {@code i}'s block starts in the left panel, and where its attribute rows start. */
+	private static int railPillarY(int i) {
+		return WEB_HEADER - railScroll + 31 + i * PILLAR_ROW;
+	}
+
+	/** Where the weapon arts on your belt start in the left panel (under your class and alignment). */
+	private static int railArtsY() {
+		return railPillarY(ORDER.length) + 32;
+	}
+
+	/** Your forms' book, once you know a form (nobody has a belt before that). */
+	private Forms.@Nullable Book arts() {
+		Forms.Book book = this.minecraft.player == null ? null : Forms.book(this.minecraft.player);
+		return book == null || book.known().isEmpty() ? null : book;
+	}
+
+	private int railStatsY() {
+		return railArtsY() + (arts() == null ? 0 : ARTS_HEAD + Forms.BELT_SLOTS * ARTS_ROW + 6);
+	}
+
+	/** How far the left panel's rows can scroll: what doesn't fit above the foot. */
+	private int railMaxScroll() {
+		return Math.max(0, railStatsY() + railScroll + shownStats().size() * RAIL_STAT_ROW + 4 - (this.height - WEB_FOOTER));
+	}
+
+	/**
+	 * The left panel: your character level and attribute points, each pillar's level, experience and points (press one to
+	 * go to its part of the web), your class and alignment, the weapon arts on your belt (press them for the belt menu)
+	 * and your attributes (press them to open their tab). The wheel scrolls it where the screen is too short.
+	 */
+	private void leftRail(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
+		int w = railL(), top = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, tx = 8, tw = w - 16;
+		frame(graphics, 0, top, w, h);
+		graphics.enableScissor(3, top + 3, w - 3, top + h - 3);
+		railScroll = Math.clamp(railScroll, 0, railMaxScroll());
+		int y = top - railScroll;
+		var player = this.minecraft.player;
+		int points = player == null ? 0 : Stats.points(player, shown);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", Stats.characterLevel(shown)), tx, y + 8, tw, Ui.GOLD);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.points", points), tx, y + 18, tw, points > 0 ? Ui.GOOD : Ui.DIM);
+		graphics.fill(6, y + 28, w - 6, y + 29, COLOR_FRAME_LINE);
+		for (int i = 0; i < ORDER.length; i++) {
+			Skills.Pillar p = ORDER[i];
+			int py = railPillarY(i), accent = accent(p), level = shown.level(p), spend = shown.points(p);
+			if (Ui.over(mouseX, mouseY, 4, py, w - 8, PILLAR_ROW - 2)) {
+				graphics.fill(4, py, w - 4, py + PILLAR_ROW - 2, COLOR_OVER);
+			}
+			graphics.fill(4, py, 6, py + PILLAR_ROW - 2, accent);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.level", Component.translatable("skill.jaymoskingdoms." + p.key()), level),
+				tx + 2, py + 1, tw - 2, accent);
+			Ui.bar(graphics, tx + 2, py + 11, tw - 2, 2,
+				level >= p.maxLevel ? 1.0F : (shown.xp(p) - Skills.total(level)) / (float)Math.max(1, Skills.toNext(level)), accent);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.points", spend), tx + 2, py + 15, tw - 2, spend > 0 ? Ui.GOOD : Ui.DIM);
+		}
+		int cy = railPillarY(ORDER.length);
+		graphics.fill(6, cy + 1, w - 6, cy + 2, COLOR_FRAME_LINE);
+		Classes.PlayerClass cls = player == null ? null : Classes.classOf(player);
+		Ui.line(graphics, this.font, cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none")
+			: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())), tx, cy + 6, tw,
+			cls == null ? Ui.DIM : Ui.GOLD);
+		// (your alignment: the pillar you've made your own, as others see it over your head)
+		Skills.Pillar aligned = Renown.alignment(shown);
+		Ui.line(graphics, this.font, aligned == null ? Component.translatable("gui.jaymoskingdoms.skills.alignment.none", Renown.ALIGN_LEVEL)
+			: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
+				+ (shown.level(aligned) >= aligned.maxLevel ? ".master" : ""))), tx, cy + 16, tw, aligned == null ? Ui.DIM : accent(aligned));
+		graphics.fill(6, cy + 28, w - 6, cy + 29, COLOR_FRAME_LINE);
+		Forms.Book book = arts();
+		if (book != null) {
+			// the weapon arts on your belt, the ones that fit what is in your hand bright (those are on the skill bar now)
+			int ay = railArtsY();
+			boolean overArts = mouseX < w && mouseY >= ay && mouseY < railStatsY() - 4;
+			if (overArts) {
+				graphics.fill(4, ay - 1, w - 4, railStatsY() - 5, COLOR_OVER);
+			}
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.arts"), tx, ay, tw, Ui.GOLD);
+			List<String> ready = Forms.barForms(player);
+			for (int i = 0; i < Forms.BELT_SLOTS; i++) {
+				Forms.Form form = Forms.get(book.belt().get(i));
+				int ry = ay + ARTS_HEAD + i * ARTS_ROW;
+				graphics.text(this.font, String.valueOf(i + 1), tx, ry, form == null ? Ui.HINT : Ui.GOLD);
+				Ui.line(graphics, this.font, form == null ? Component.translatable("gui.jaymoskingdoms.skills.web.arts.bare")
+					: Component.empty().append(form.name()).append("  " + book.rank(form.id())), tx + 9, ry, tw - 9,
+					form == null ? Ui.HINT : ready.contains(form.id()) ? Ui.TEXT : Ui.DIM);
+			}
+			graphics.fill(6, railStatsY() - 4, w - 6, railStatsY() - 3, COLOR_FRAME_LINE);
+		}
+		int sy = railStatsY(), cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player);
+		boolean overStats = mouseX < w && mouseY >= sy && mouseY < top + h;
+		for (Stats.Stat stat : shownStats()) {
+			int value = player == null ? 0 : Stats.value(player, shown, stat);
+			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), tx, sy, tw - 22, overStats ? Ui.TEXT : Ui.DIM);
+			Ui.lineRight(graphics, this.font, Component.literal(String.valueOf(value)), w - 8, sy, 20, value >= cap ? Ui.GOLD : Ui.TEXT);
+			Ui.bar(graphics, tx, sy + 9, tw, 1, value / (float)Stats.MAX, Ui.GOLD);
+			sy += RAIL_STAT_ROW;
+		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, w - 6, top + 4, h - 8, h - 8, h - 8 + railMaxScroll(), railScroll);
+	}
+
+	/** Where the right panel's Learn button sits: x, y, width, height. */
+	private int[] learnBox() {
+		int w = railR();
+		return new int[] {this.width - w + 8, this.height - WEB_FOOTER - 24, w - 16, 16};
+	}
+
+	/**
+	 * The right panel: the perk pointed at, or else the one picked, in full (its picture, name, branch and rank, what it
+	 * does, costs, needs and leads to) with the button that learns the picked one; a pointed-at crest's pillar; or else
+	 * how the web works.
+	 */
+	private void rightRail(GuiGraphicsExtractor graphics, Skills.Progress shown, Skills.@Nullable Perk hovered, Skills.@Nullable Pillar crest, int mouseX,
+		int mouseY) {
+		int w = railR(), x = this.width - w, y = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, ty = y + 8;
+		frame(graphics, x, y, w, h);
+		Skills.Perk perk = hovered != null ? hovered : selected;
+		List<Component> text = new ArrayList<>();
+		int accent = Ui.GOLD;
+		if (perk != null) {
+			int rank = shown.rank(perk);
+			accent = perk.bridge() ? Ui.GOLD : accent(perk.pillar);
+			graphics.fill(x + 8, ty, x + 30, ty + 22, accent);
+			graphics.fill(x + 9, ty + 1, x + 29, ty + 21, COLOR_OPEN_FILL);
+			icon(graphics, SkillIcons.of(perk), x + 19, ty + 11, 10);
+			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), x + 35, ty + 2, w - 43, accent);
+			SkillWeb.Branch branch = SkillWeb.BRANCHES.get(perk);
+			Component where = branch == null ? Component.translatable("skill.jaymoskingdoms." + perk.pillar.key())
+				: Component.translatable("gui.jaymoskingdoms.skills.branch." + branch.key());
+			Ui.line(graphics, this.font, Component.empty().append(where).append("  " + rank + "/" + perk.maxRank), x + 35, ty + 12, w - 43, Ui.DIM);
+			ty += 28;
+			describe(text, shown, perk);
+		} else if (crest != null) {
+			accent = accent(crest);
+			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms." + crest.key()), x + 9, ty, w - 18, accent);
+			ty += 12;
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + crest.key()).withColor(Ui.TEXT));
+		} else {
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.pick"), x + 9, ty, w - 18, accent);
+			ty += 12;
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.web.help").withColor(Ui.DIM));
+		}
+		boolean button = perk != null && perk == selected;
+		int[] box = learnBox();
+		int bottom = button ? box[1] - 4 : y + h - 6;
+		Ui.detail(graphics, this.font, x, ty, w, Math.max(1, (bottom - ty - 5) / Ui.LINE), null, accent, text);
+		if (button) {
+			int rank = shown.rank(perk);
+			Component label = rank >= perk.maxRank ? Component.translatable("gui.jaymoskingdoms.skills.web.learnt")
+				: rank > 0 ? Component.translatable("gui.jaymoskingdoms.skills.web.raise", rank + 1, perk.maxRank)
+				: Component.translatable("gui.jaymoskingdoms.skills.web.learn");
+			Ui.button(graphics, this.font, box[0], box[1], box[2], box[3], label, accent, Ui.over(mouseX, mouseY, box[0], box[1], box[2], box[3]),
+				canLearn(shown, perk));
+		}
+	}
+
+	/** What {@code perk} does, costs, needs and leads to, and whether it can be learnt (the right panel's text). */
+	private void describe(List<Component> text, Skills.Progress shown, Skills.Perk perk) {
+		var player = this.minecraft.player;
+		int accent = perk.bridge() ? Ui.GOLD : accent(perk.pillar);
+		text.add(Component.translatable("skill.jaymoskingdoms.perk." + perk.key() + ".desc").withColor(Ui.TEXT));
+		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
+		if (perk.minLevel > 0) {
+			cost = Component.empty().append(cost).append("  ·  ").append(Component.translatable("gui.jaymoskingdoms.skills.needs_level", perk.minLevel));
+		}
+		text.add(cost.copy().withColor(Ui.DIM));
+		if (perk.bridge() && perk.other != null) {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.bridge", Component.translatable("skill.jaymoskingdoms." + perk.pillar.key()),
+				Component.translatable("skill.jaymoskingdoms." + perk.other.key())).withColor(Ui.GOLD));
+		}
+		if (!perk.requires.isEmpty()) {
+			text.add(Component.translatable(perk.bridge() ? "gui.jaymoskingdoms.skills.needs_any" : "gui.jaymoskingdoms.skills.needs", names(perk.requires))
+				.withColor(Ui.DIM));
+		}
+		List<Skills.Perk> leads = SkillWeb.leadsTo(perk);
+		if (!leads.isEmpty()) {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.leads", names(leads)).withColor(0xFFF0D28C));
+		}
+		String blocked = shown.blocked(perk);
+		// a higher technique wants Knowledge 4
+		if (blocked == null && player != null && com.jaymoskingdoms.Knowledge.lockedPerk(player, perk)) {
+			blocked = "gui.jaymoskingdoms.skills.blocked.knowledge";
+		}
+		// a class skill of another class
+		if (blocked == null && player != null && com.jaymoskingdoms.Learnables.classLocked(player, perk)) {
+			blocked = "gui.jaymoskingdoms.skills.blocked.class";
+		}
+		java.util.Set<com.jaymoskingdoms.Classes.PlayerClass> forClasses = com.jaymoskingdoms.Learnables.classesFor(perk);
+		if (forClasses != null) {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.for_classes", classNames(forClasses)).withColor(Ui.DIM));
+		}
+		if (shown.ranks().containsKey(com.jaymoskingdoms.Learnables.taughtKey(perk))) {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.taught").withColor(Ui.GOOD));
+		}
+		text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD)
+			: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
 	}
 
 	/** (0.7.516) Classes' names, joined with commas. */
@@ -917,6 +1212,35 @@ final class SkillScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
+		if (onWeb()) {
+			int mx = (int)event.x(), my = (int)event.y();
+			int[] box = learnBox();
+			if (selected != null && Ui.over(mx, my, box[0], box[1], box[2], box[3])) {
+				learn(selected);
+				return true;
+			}
+			// the left panel: a pillar's block goes to its part of the web, the attributes open their tab
+			for (int i = 0; i < ORDER.length; i++) {
+				if (my >= WEB_HEADER && Ui.over(mx, my, 4, railPillarY(i), railL() - 8, PILLAR_ROW - 2)) {
+					look(SkillWeb.focus(ORDER[i]), Math.max(targetZoom, OPEN_ZOOM));
+					this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+					return true;
+				}
+			}
+			if (arts() != null && mx < railL() && my >= Math.max(WEB_HEADER, railArtsY()) && my < Math.min(railStatsY() - 4, this.height - WEB_FOOTER)) {
+				// the weapon arts: their belt menu
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				this.minecraft.gui.setScreen(new com.jaymoskingdoms.client.forms.BeltScreen());
+				return true;
+			}
+			if (mx < railL() && my >= Math.max(WEB_HEADER, railStatsY()) && my < this.height - WEB_FOOTER) {
+				listScroll = 0;
+				stats = true;
+				rebuildWidgets();
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				return true;
+			}
+		}
 		if (webOnScreen() && inWebArea(event.x(), event.y())) {
 			// a press on the web: a drag moves it, a click (hardly moved) on a perk learns it
 			pressed = true;
@@ -933,6 +1257,8 @@ final class SkillScreen extends Screen {
 		if (pressed && webOnScreen()) {
 			panX += dx;
 			panY += dy;
+			targetX += dx;
+			targetY += dy;
 			return true;
 		}
 		return super.mouseDragged(event, dx, dy);
@@ -944,12 +1270,20 @@ final class SkillScreen extends Screen {
 			pressed = false;
 			Skills.Perk perk = pressedPerk;
 			pressedPerk = null;
-			double moved = Math.abs(event.x() - pressX) + Math.abs(event.y() - pressY);
-			if (perk != null && moved < 4.0 && perk == perkAt(event.x(), event.y()) && progress().blocked(perk) == null
-				&& (this.minecraft.player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(this.minecraft.player, perk)
-					&& !com.jaymoskingdoms.Learnables.classLocked(this.minecraft.player, perk))) {
-				ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
-				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			if (Math.abs(event.x() - pressX) + Math.abs(event.y() - pressY) < 4.0) {
+				// a click, not a drag: the first on a perk picks it, the second learns it; a crest goes to its pillar
+				Skills.Pillar crest = perk == null ? crestAt(event.x(), event.y()) : null;
+				if (perk != null && perk == perkAt(event.x(), event.y())) {
+					if (perk == selected) {
+						learn(perk);
+					} else {
+						select(perk);
+					}
+				} else if (crest != null) {
+					look(SkillWeb.focus(crest), Math.max(targetZoom, OPEN_ZOOM));
+				} else if (perk == null) {
+					selected = null;
+				}
 			}
 			return true;
 		}
@@ -957,18 +1291,32 @@ final class SkillScreen extends Screen {
 	}
 
 	@Override
+	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		if (onWeb() && selected != null && (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER)) {
+			learn(selected);
+			return true;
+		}
+		return super.keyPressed(event);
+	}
+
+	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (onWeb() && scrollY != 0.0 && mouseX < railL() && mouseY >= WEB_HEADER && mouseY < this.height - WEB_FOOTER) {
+			// the left panel's rows, when they don't all fit
+			railScroll = Math.clamp(railScroll - (int)Math.signum(scrollY) * RAIL_STAT_ROW, 0, railMaxScroll());
+			return true;
+		}
 		if (webOnScreen() && scrollY != 0.0) {
 			// zoom about the mouse: the point under it stays put
-			double before = zoom;
-			zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom * (scrollY > 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP)));
-			double ux = (mouseX - centerX()) / before, uy = (mouseY - centerY()) / before;
-			panX += ux * before - ux * zoom;
-			panY += uy * before - uy * zoom;
+			double before = targetZoom;
+			targetZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, targetZoom * (scrollY > 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP)));
+			double ux = (mouseX - areaX() - targetX) / before, uy = (mouseY - areaY() - targetY) / before;
+			targetX += ux * (before - targetZoom);
+			targetY += uy * (before - targetZoom);
 			return true;
 		}
 		if (!panelCollapsed && (stats || jobs) && scrollY != 0.0 && maxScroll() > 0) {
-			// (0.7.540) the Attributes or Jobs rows, a row a notch
+			// the Attributes or Jobs rows, a row a notch
 			listScroll = Math.clamp(listScroll - (int)Math.signum(scrollY) * (jobs ? JOB_ROW : STAT_ROW), 0, maxScroll());
 			return true;
 		}
@@ -978,53 +1326,33 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
-		if (jobs) {
-			if (panelCollapsed) {
-				// panel collapsed: render web + expand tab
-				renderWebAndExpandTab(graphics, shown, mouseX, mouseY);
-				super.extractRenderState(graphics, mouseX, mouseY, a);
-				return;
+		if ((jobs || stats) && !panelCollapsed) {
+			if (jobs) {
+				jobs(graphics, mouseX, mouseY);
+			} else {
+				attributes(graphics, shown, mouseX, mouseY);
 			}
-			jobs(graphics, mouseX, mouseY);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
 		}
-		if (stats) {
-			if (panelCollapsed) {
-				// panel collapsed: render web + expand tab
-				renderWebAndExpandTab(graphics, shown, mouseX, mouseY);
-				super.extractRenderState(graphics, mouseX, mouseY, a);
-				return;
-			}
-			attributes(graphics, shown, mouseX, mouseY);
-			super.extractRenderState(graphics, mouseX, mouseY, a);
-			return;
-		}
+		glide();
 		Skills.Perk hovered = pressed && Math.abs(mouseX - pressX) + Math.abs(mouseY - pressY) >= 4.0 ? null : perkAt(mouseX, mouseY);
 		web(graphics, shown, mouseX, mouseY, hovered);
-		webHeader(graphics, shown);
-		graphics.fill(0, this.height - WEB_FOOTER, this.width, this.height, 0xF0101018);
-		card(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null);
+		topBar(graphics);
+		bottomBar(graphics);
+		rightRail(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null, mouseX, mouseY);
+		if (onWeb()) {
+			leftRail(graphics, shown, mouseX, mouseY);
+		} else {
+			// the Attributes or Jobs panel is collapsed away: the strip on the left brings it back
+			int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
+			graphics.fill(tabX, tabY, tabX + tabW, tabY + tabH, 0x80101018);
+			graphics.fill(tabX, tabY, tabX + 2, tabY + tabH, 0xFFFFC21A);
+			int cx = tabX + tabW - 8, cy = tabY + tabH / 2;
+			graphics.fill(cx - 4, cy - 4, cx, cy, 0xFFFFC21A);
+			graphics.fill(cx - 4, cy, cx, cy + 4, 0xFFFFC21A);
+		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
-	}
-
-	/** Renders the skill web with a thin expand tab on the left when the panel is collapsed. */
-	private void renderWebAndExpandTab(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
-		// Render the web as normal
-		Skills.Perk hovered = pressed && Math.abs(mouseX - pressX) + Math.abs(mouseY - pressY) >= 4.0 ? null : perkAt(mouseX, mouseY);
-		web(graphics, shown, mouseX, mouseY, hovered);
-		webHeader(graphics, shown);
-		graphics.fill(0, this.height - WEB_FOOTER, this.width, this.height, 0xF0101018);
-		card(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null);
-		// Render the expand tab on the far left
-		int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
-		int tabColor = 0x80FFFFFF;
-		graphics.fill(tabX, tabY, tabX + tabW, tabY + tabH, 0x80101018);
-		graphics.fill(tabX, tabY, tabX + 2, tabY + tabH, 0xFFFFC21A);
-		// Arrow pointing right (expand)
-		int cx = tabX + tabW - 8, cy = tabY + tabH / 2;
-		graphics.fill(cx - 4, cy - 4, cx, cy, 0xFFFFC21A);
-		graphics.fill(cx - 4, cy, cx, cy + 4, 0xFFFFC21A);
 	}
 
 }
