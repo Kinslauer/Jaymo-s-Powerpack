@@ -95,17 +95,18 @@ public final class QuestNet {
 		}
 	}
 
-	/** One quest in the tracker: its giver (for their mark), title, what's left, whether it's ready, and where it leads. */
-	public record Tracked(UUID giver, boolean royal, Component title, Component objective, boolean ready, Optional<BlockPos> target) {
+	/** One quest in the tracker: its id, its giver (for their mark), title, what's left, whether it's ready, and where it leads. */
+	public record Tracked(String id, UUID giver, boolean royal, Component title, Component objective, boolean ready, Optional<BlockPos> target) {
 	}
 
-	/** Server → player: their quest log, for the tracker and the givers' marks. */
-	public record Log(List<Tracked> quests) implements CustomPacketPayload {
+	/** Server → player: their quest log, for the tracker and the givers' marks. {@code pinned}: the id of the one they track alone, or "" ({@link Journal.Pin}). */
+	public record Log(List<Tracked> quests, String pinned) implements CustomPacketPayload {
 		public static final Type<Log> TYPE = new Type<>(JaymosKingdoms.id("quests_log"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Log> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.quests.size());
 				for (Tracked t : p.quests) {
+					buf.writeUtf(t.id);
 					UUIDUtil.STREAM_CODEC.encode(buf, t.giver);
 					buf.writeBoolean(t.royal);
 					ComponentSerialization.STREAM_CODEC.encode(buf, t.title);
@@ -114,20 +115,22 @@ public final class QuestNet {
 					buf.writeBoolean(t.target.isPresent());
 					t.target.ifPresent(buf::writeBlockPos);
 				}
+				buf.writeUtf(p.pinned);
 			},
 			buf -> {
 				int n = buf.readVarInt();
 				List<Tracked> quests = new ArrayList<>();
 				for (int i = 0; i < n; i++) {
+					String id = buf.readUtf();
 					UUID giver = UUIDUtil.STREAM_CODEC.decode(buf);
 					boolean royal = buf.readBoolean();
 					Component title = ComponentSerialization.STREAM_CODEC.decode(buf);
 					Component objective = ComponentSerialization.STREAM_CODEC.decode(buf);
 					boolean ready = buf.readBoolean();
 					Optional<BlockPos> target = buf.readBoolean() ? Optional.of(buf.readBlockPos()) : Optional.empty();
-					quests.add(new Tracked(giver, royal, title, objective, ready, target));
+					quests.add(new Tracked(id, giver, royal, title, objective, ready, target));
 				}
-				return new Log(quests);
+				return new Log(quests, buf.readUtf());
 			});
 
 		@Override

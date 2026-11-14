@@ -279,14 +279,12 @@ public final class QuestJobs {
 		for (Mob mob : foes(level, at, q.id())) {
 			mob.discard();
 		}
-		if (q.kind() == Quest.TREK && !Tales.ofTale(q) && q.objective().other().isPresent()
-			&& level.getEntity(q.objective().other().get()) instanceof Villager charge && charge.isAlive()) {
-			// (a board's traveller goes their own way)
-			McaCompat.stopFollowing(charge);
-			TaleCast.Cast c = charge.getAttached(TaleCast.CAST);
-			if (c != null) {
-				charge.setAttached(TaleCast.CAST, c.done(level.getGameTime()));
+		if (q.kind() == Quest.TREK && !Tales.ofTale(q)) {
+			// (a board's traveller goes their own way, now or when they're next seen)
+			if (q.objective().other().isPresent() && level.getEntity(q.objective().other().get()) instanceof Villager charge && charge.isAlive()) {
+				McaCompat.stopFollowing(charge);
 			}
+			TaleCast.ended(level, "work:" + q.id());
 		}
 	}
 
@@ -549,6 +547,11 @@ public final class QuestJobs {
 			fail(level, player, q, "left");
 			return;
 		}
+		if (o.other().isPresent() && level.getEntity(o.other().get()) instanceof LivingEntity keeper && Downed.isDowned(keeper)) {
+			// (the one the watch is kept for is down: nobody's left to ring the bell)
+			fail(level, player, q, "fallen");
+			return;
+		}
 		int stars = stars(player, q);
 		List<Mob> alive = foes(level, at, q.id());
 		int wave = WAVES.getOrDefault(q.id(), -(tick - WAVE_REST));
@@ -572,7 +575,9 @@ public final class QuestJobs {
 			}
 			return;
 		}
-		if (alive.isEmpty() || tick - wave > WAVE_TICKS) {
+		// (one beaten to the ground is out of the fight: the wave is over when none are left standing)
+		boolean standing = alive.stream().anyMatch(m -> !Downed.isDowned(m));
+		if (!standing || tick - wave > WAVE_TICKS) {
 			for (Mob mob : alive) {
 				mob.discard();
 			}

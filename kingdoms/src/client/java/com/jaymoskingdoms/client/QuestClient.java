@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Journal;
 import com.jaymoskingdoms.QuestNet;
 import com.jaymoskingdoms.Quests;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -35,11 +36,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.5.29) The client half of {@link Quests}: the giver's screen ({@link QuestScreen}), the marks over givers' heads (a
  * gold <b>!</b>: work on offer; a <b>?</b>: one of your quests, gold once it's ready to turn in) and the quest tracker on
- * the right of the screen.
+ * the right of the screen. A quest pinned in the journal ({@link JournalScreen}) is tracked alone: its name, its step
+ * and roughly which way it lies.
  */
 public final class QuestClient {
 	/** Tracker: how many quests it lists, its width, how far down the right edge it starts (under the effect icons). */
 	static final int TRACKED = 3, WIDTH = 150, TOP = 52;
+	/** The pinned quest's rough way: under this many blocks it's "close by", then "near", "some way", "far", and past the last "very far". */
+	static final double ROUGH_HERE = 24.0, ROUGH_NEAR = 100.0, ROUGH_SOME = 400.0, ROUGH_FAR = 1200.0;
 	/** Marks: how big; how far over the name tag spot their foot is (blocks), clear of the name tag; over a speech bubble, this much more per line. */
 	static final float MARK_SCALE = 0.065F;
 	static final double MARK_LIFT = 0.8, BUBBLE_LINE = 0.25, BUBBLE_LIFT = 0.85;
@@ -47,6 +51,8 @@ public final class QuestClient {
 
 	/** The player's quests, as last sent. */
 	private static List<QuestNet.Tracked> log = List.of();
+	/** The id of the quest tracked alone, or "". */
+	private static String pinned = "";
 	/** Givers of the player's quests → whether one's ready. */
 	private static final Map<UUID, Boolean> GIVERS = new HashMap<>();
 
@@ -62,6 +68,7 @@ public final class QuestClient {
 		ClientPlayNetworking.registerGlobalReceiver(QuestNet.Open.TYPE, (payload, context) -> context.client().gui.setScreen(new QuestScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(QuestNet.Log.TYPE, (payload, context) -> {
 			log = List.copyOf(payload.quests());
+			pinned = payload.pinned();
 			GIVERS.clear();
 			for (QuestNet.Tracked t : log) {
 				GIVERS.merge(t.giver(), t.ready(), Boolean::logicalOr);
@@ -69,9 +76,21 @@ public final class QuestClient {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			log = List.of();
+			pinned = "";
 			GIVERS.clear();
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MOB_EFFECTS, JaymosKingdoms.id("quest_tracker"), QuestClient::tracker);
+	}
+
+	/** The id of the quest tracked alone, or "". */
+	static String pinned() {
+		return pinned;
+	}
+
+	/** Tracks quest {@code id} alone ("": none); the server keeps it and sends the log back. */
+	static void pin(String id) {
+		pinned = id;
+		ClientPlayNetworking.send(new Journal.Pin(id));
 	}
 
 	// ---- marks ---------------------------------------------------------------------------------------------------------
@@ -131,13 +150,21 @@ public final class QuestClient {
 		int x = graphics.guiWidth() - WIDTH - 4;
 		int y = TOP;
 		int shown = 0;
+		// (a pinned quest is listed alone, its way in rough words)
+		QuestNet.Tracked only = null;
 		for (QuestNet.Tracked t : log) {
+			if (!pinned.isEmpty() && t.id().equals(pinned)) {
+				only = t;
+			}
+		}
+		boolean alone = only != null;
+		for (QuestNet.Tracked t : alone ? List.of(only) : log) {
 			if (shown++ >= TRACKED) {
 				break;
 			}
 			List<FormattedCharSequence> title = font.split(t.title(), WIDTH);
 			List<FormattedCharSequence> goal = font.split(t.objective(), WIDTH);
-			Component where = t.target().map(pos -> direction(player, pos)).orElse(null);
+			Component where = t.target().map(pos -> alone ? rough(player, pos) : direction(player, pos)).orElse(null);
 			int lines = Math.min(1, title.size()) + Math.min(2, goal.size()) + (where == null ? 0 : 1);
 			graphics.fill(x - 3, y - 2, x + WIDTH + 2, y + lines * 10, HudStyle.PLATE_SOFT);
 			graphics.text(font, title.get(0), x, y, t.royal() ? ROYAL : GOLD);
@@ -163,5 +190,18 @@ public final class QuestClient {
 		String[] points = {"s", "se", "e", "ne", "n", "nw", "w", "sw"};
 		int i = (int)Math.floorMod(Math.round(angle / 45.0), 8L);
 		return Component.translatable("quest.jaymoskingdoms.tracker.where", distance, Component.translatable("quest.jaymoskingdoms.tracker." + points[i]));
+	}
+
+	/** Roughly how far and which way {@code pos} lies from the player, in words. */
+	private static Component rough(LocalPlayer player, BlockPos pos) {
+		double dx = pos.getX() + 0.5 - player.getX(), dz = pos.getZ() + 0.5 - player.getZ();
+		double distance = Math.sqrt(dx * dx + dz * dz);
+		if (distance < ROUGH_HERE) {
+			return Component.translatable("quest.jaymoskingdoms.tracker.rough.here");
+		}
+		String[] points = {"s", "se", "e", "ne", "n", "nw", "w", "sw"};
+		int i = (int)Math.floorMod(Math.round(Math.toDegrees(Math.atan2(dx, dz)) / 45.0), 8L);
+		String far = distance < ROUGH_NEAR ? "near" : distance < ROUGH_SOME ? "some" : distance < ROUGH_FAR ? "far" : "very_far";
+		return Component.translatable("quest.jaymoskingdoms.tracker.rough." + far, Component.translatable("quest.jaymoskingdoms.tracker." + points[i]));
 	}
 }

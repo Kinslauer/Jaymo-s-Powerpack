@@ -3,6 +3,8 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Journal;
+import com.jaymoskingdoms.QuestPast;
+import com.jaymoskingdoms.Tales;
 import java.util.ArrayList;
 import java.util.List;
 import com.jaymoskingdoms.client.ui.FlatButton;
@@ -23,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
@@ -33,7 +36,9 @@ import net.minecraft.world.level.material.MapColor;
  * loaded; the rest is blank parchment), with you, your quests' places and the settlements on it, and zoom. <b>Reputation</b>:
  * what each settlement you know thinks of you. (0.7.40) Restyled like the H screen: a header, striped rows that light up
  * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full. The illustrated
- * tabs show the current page and light up under the mouse.
+ * tabs show the current page and light up under the mouse. Two more pages: <b>Stories</b>, each tale you're in or have
+ * seen the end of, with what's open now and the notes written so far; <b>Past</b>, the quests you finished, failed or gave
+ * up. On the quests page a quest's pin tracks that quest alone on screen ({@link QuestClient}).
  */
 final class JournalScreen extends Screen {
 	static final int PANEL_W = 400, PANEL_H = 280, HEADER = 34, TAB_H = 20, BODY_Y = 60, FOOTER = 24, QUEST_ROW = 18,
@@ -45,7 +50,14 @@ final class JournalScreen extends Screen {
 	static final int DEFAULT_ZOOM = 2;
 	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,
 		COLOR_PARCHMENT = Ui.PAPER, COLOR_HATED = 0xFFE04040;
-	static final int QUESTS = 0, MAP = 1, REPUTATION = 2;
+	static final int QUESTS = 0, MAP = 1, REPUTATION = 2, STORIES = 3, PAST = 4;
+	/** The pages' tabs, in order; the first three have their icons in {@link #TAB_ICONS}, the rest show an item. */
+	private static final String[] TABS = {"quests", "map", "reputation", "stories", "past"};
+	/** A tab's width beside its name (icon and edges), the gap between two tabs, and the size of a quest's pin (px). */
+	static final int TAB_PAD = 31, TAB_GAP = 4, PIN = 9;
+	/** Stories: the list's widest, a row's height, and where the picked tale's text starts under its name. Past: an entry's head, and the gap to the next. */
+	static final int STORY_LIST_W = 130, STORY_ROW = 18, STORY_HEAD = 31, PAST_HEAD = 14, PAST_GAP = 2;
+	static final int COLOR_ENDED = COLOR_DONE, COLOR_ENDED_BADLY = COLOR_HATED;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
 
@@ -54,6 +66,17 @@ final class JournalScreen extends Screen {
 	private int page = lastPage, zoom = lastZoom, scroll;
 	/** The quest last pressed, shown in the box when none is pointed at. */
 	private int selected;
+	/** Each tab's width, for this panel. */
+	private int[] tabWidths = new int[TABS.length];
+	/** Stories: the tale picked, the one its text was last wrapped for, that text, and how far it's scrolled (lines). */
+	private int story, storyWrapped = -1, textScroll;
+	private List<StoryLine> storyText = List.of();
+	/** Past: each entry's text, wrapped. */
+	private List<List<FormattedCharSequence>> pastText = List.of();
+
+	/** One line of a tale's page: a note's first line has a mark before it. */
+	private record StoryLine(FormattedCharSequence text, int color, boolean note, boolean first) {
+	}
 	/** The drawn map (ARGB per cell, row by row), its centre when drawn and the zoom and cell count it was drawn at. */
 	private int[] cells;
 	private int drawnX, drawnZ, drawnZoom = -1, drawnSize = -1;
@@ -90,13 +113,28 @@ final class JournalScreen extends Screen {
 		return Math.max(96, fit / CELL * CELL);
 	}
 
-	private int tabW() {
-		return Math.min(122, (panelW() - 20) / 3);
+	private int tabW(int which) {
+		return tabWidths[which];
 	}
 
 	private int tabX(int which) {
-		int w = tabW();
-		return left() + (panelW() - w * 3 - 8) / 2 + which * (w + 4);
+		int x = left() + 10;
+		for (int i = 0; i < which; i++) {
+			x += tabWidths[i] + TAB_GAP;
+		}
+		return x;
+	}
+
+	/** The tabs share the panel's width by what each one's name needs (a name still too long for its tab slides). */
+	private void layTabs() {
+		int room = panelW() - 20 - (TABS.length - 1) * TAB_GAP, need = 0;
+		for (int i = 0; i < TABS.length; i++) {
+			tabWidths[i] = TAB_PAD + this.font.width(Component.translatable("journal.jaymoskingdoms.tab." + TABS[i]));
+			need += tabWidths[i];
+		}
+		for (int i = 0; i < TABS.length; i++) {
+			tabWidths[i] = tabWidths[i] * room / need;
+		}
 	}
 
 	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
@@ -116,8 +154,49 @@ final class JournalScreen extends Screen {
 		return Math.max(1, (panelH() - FOOTER - 4 - BODY_Y) / REP_ROW);
 	}
 
+	private int storyRows() {
+		return Math.max(1, (panelH() - FOOTER - 4 - BODY_Y) / STORY_ROW);
+	}
+
+	private int storyListW() {
+		return Math.min(STORY_LIST_W, panelW() / 3);
+	}
+
+	/** Where the picked tale's page starts, right of the list. */
+	private int storyTextX() {
+		return left() + 6 + storyListW() + 7;
+	}
+
+	private int storyTextRows() {
+		return Math.max(1, (storyRows() * STORY_ROW - STORY_HEAD - 2) / Ui.LINE);
+	}
+
+	private int pastView() {
+		return panelH() - FOOTER - 4 - BODY_Y;
+	}
+
+	private int pastHeight(int index) {
+		int lines = pastText.get(index).size();
+		return PAST_HEAD + lines * Ui.LINE + (lines > 0 ? 2 : 0);
+	}
+
+	/** The furthest the past page scrolls: the first entry from which all the rest fit. */
+	private int pastMaxScroll() {
+		int room = pastView(), i = pastText.size();
+		while (i > 0 && room >= pastHeight(i - 1)) {
+			room -= pastHeight(--i) + PAST_GAP;
+		}
+		return Math.min(i, Math.max(0, pastText.size() - 1));
+	}
+
 	@Override
 	protected void init() {
+		layTabs();
+		storyWrapped = -1;
+		pastText = new ArrayList<>();
+		for (QuestPast.Entry e : book.past()) {
+			pastText.add(e.text().getString().isEmpty() ? List.of() : this.font.split(e.text(), panelW() - 26));
+		}
 		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
 			int bx = left() + 12 + mapSize() + 12;
@@ -136,6 +215,7 @@ final class JournalScreen extends Screen {
 	private void show(int which) {
 		page = lastPage = which;
 		scroll = 0;
+		textScroll = 0;
 		rebuildWidgets();
 	}
 
@@ -161,15 +241,24 @@ final class JournalScreen extends Screen {
 			}
 			return true;
 		}
-		int rows = page == QUESTS ? book.entries().size() - questRows() : (int)book.places().stream().filter(Journal.Place::rated).count() - repRows();
+		if (page == STORIES && x >= storyTextX()) {
+			textScroll = Mth.clamp(textScroll - (int)Math.signum(scrollY), 0, Math.max(0, storyText.size() - storyTextRows()));
+			return true;
+		}
+		int rows = switch (page) {
+			case QUESTS -> book.entries().size() - questRows();
+			case STORIES -> book.stories().size() - storyRows();
+			case PAST -> pastMaxScroll();
+			default -> (int)book.places().stream().filter(Journal.Place::rated).count() - repRows();
+		};
 		scroll = Mth.clamp(scroll - (int)Math.signum(scrollY), 0, Math.max(0, rows));
 		return true;
 	}
 
 	private int tabAt(int mouseX, int mouseY) {
 		int y = top() + HEADER + 2;
-		for (int i = 0; i < 3; i++) {
-			if (Ui.over(mouseX, mouseY, tabX(i), y, tabW(), TAB_H)) {
+		for (int i = 0; i < TABS.length; i++) {
+			if (Ui.over(mouseX, mouseY, tabX(i), y, tabW(i), TAB_H)) {
 				return i;
 			}
 		}
@@ -194,7 +283,21 @@ final class JournalScreen extends Screen {
 		if (page == QUESTS) {
 			int index = questAt(mouseX, mouseY);
 			if (index >= 0) {
-				selected = index;
+				String quest = book.entries().get(index).quest();
+				if (!quest.isEmpty() && overPin(mouseX, mouseY, index)) {
+					// (the same pin again lets go of it)
+					QuestClient.pin(quest.equals(QuestClient.pinned()) ? "" : quest);
+				} else {
+					selected = index;
+				}
+				click();
+				return true;
+			}
+		}
+		if (page == STORIES) {
+			int index = storyAt(mouseX, mouseY);
+			if (index >= 0) {
+				story = index;
 				click();
 				return true;
 			}
@@ -213,6 +316,11 @@ final class JournalScreen extends Screen {
 		Component sub = switch (page) {
 			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
 			case REPUTATION -> Component.translatable("journal.jaymoskingdoms.sub.reputation", rated);
+			case STORIES -> {
+				long open = book.stories().stream().filter(s -> s.state() == 0).count();
+				yield Component.translatable("journal.jaymoskingdoms.sub.stories", open, book.stories().size() - open);
+			}
+			case PAST -> Component.translatable("journal.jaymoskingdoms.sub.past", book.past().size());
 			default -> Component.translatable("journal.jaymoskingdoms.sub.quests", book.entries().size());
 		};
 		Ui.line(graphics, this.font, sub, x + 28, y + 18, w - 36, COLOR_DIM);
@@ -222,6 +330,8 @@ final class JournalScreen extends Screen {
 		switch (page) {
 			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY);
 			case REPUTATION -> reputation(graphics, x, bodyTop, mouseX, mouseY);
+			case STORIES -> stories(graphics, x, bodyTop, mouseX, mouseY);
+			case PAST -> past(graphics, x, bodyTop, mouseX, mouseY);
 			default -> quests(graphics, x, bodyTop, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -229,15 +339,18 @@ final class JournalScreen extends Screen {
 
 	/** Original journal icons and labels, with the same hover and picked fills as the newer screens' chips. */
 	private void tabs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		String[] names = {"quests", "map", "reputation"};
 		int y = top() + HEADER + 2;
-		for (int i = 0; i < names.length; i++) {
-			int x = tabX(i), w = tabW();
+		for (int i = 0; i < TABS.length; i++) {
+			int x = tabX(i), w = tabW(i);
 			boolean picked = page == i, hover = Ui.over(mouseX, mouseY, x, y, w, TAB_H);
 			graphics.fill(x, y, x + w, y + TAB_H, picked ? Ui.ROW_PICKED : hover ? Ui.ROW_HOVER : Ui.CHIP);
 			graphics.fill(x, y + TAB_H - 2, x + w, y + TAB_H, picked ? COLOR_GOLD : hover ? Ui.ROW_HOVER : Ui.ROW);
-			graphics.blit(RenderPipelines.GUI_TEXTURED, TAB_ICONS, x + 5, y + 2, i * 16.0F, 0.0F, 16, 16, 16, 16, 48, 16);
-			Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.tab." + names[i]), x + 26, y + 6, w - 31,
+			if (i < 3) {
+				graphics.blit(RenderPipelines.GUI_TEXTURED, TAB_ICONS, x + 5, y + 2, i * 16.0F, 0.0F, 16, 16, 16, 16, 48, 16);
+			} else {
+				graphics.item(new ItemStack(i == STORIES ? Items.WRITABLE_BOOK : Items.CLOCK), x + 5, y + 2);
+			}
+			Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.tab." + TABS[i]), x + 26, y + 6, w - 31,
 				picked ? COLOR_GOLD : hover ? COLOR_TEXT : COLOR_DIM);
 		}
 	}
@@ -257,6 +370,24 @@ final class JournalScreen extends Screen {
 
 	private static int questColor(Journal.Entry e) {
 		return e.ready() ? COLOR_DONE : e.royal() ? COLOR_ROYAL : COLOR_GOLD;
+	}
+
+	/** Whether the mouse is on the pin of the quest in row {@code index} (a little more than the pin itself). */
+	private boolean overPin(int mouseX, int mouseY, int index) {
+		return Ui.over(mouseX, mouseY, left() + panelW() - 10 - PIN - 2, top() + BODY_Y + (index - scroll) * QUEST_ROW + 2, PIN + 4, PIN + 4);
+	}
+
+	/** A quest's pin: a small box, filled while that quest is the one tracked on screen. */
+	private void pin(GuiGraphicsExtractor graphics, int x, int y, boolean on, boolean hover) {
+		int rim = hover ? COLOR_TEXT : on ? COLOR_GOLD : COLOR_DIM;
+		graphics.fill(x, y, x + PIN, y + PIN, Ui.CHIP);
+		graphics.fill(x, y, x + PIN, y + 1, rim);
+		graphics.fill(x, y + PIN - 1, x + PIN, y + PIN, rim);
+		graphics.fill(x, y + 1, x + 1, y + PIN - 1, rim);
+		graphics.fill(x + PIN - 1, y + 1, x + PIN, y + PIN - 1, rim);
+		if (on) {
+			graphics.fill(x + 3, y + 3, x + PIN - 3, y + PIN - 3, COLOR_GOLD);
+		}
 	}
 
 	/** A row per quest (its name, what's left, which way it lies), and the hovered or pressed one in full under them. */
@@ -282,6 +413,15 @@ final class JournalScreen extends Screen {
 			graphics.fill(x + 6, ry, x + 8, ry + QUEST_ROW - 1, color);
 			Ui.line(graphics, this.font, e.title(), x + 12, ry + 4, nameW, color);
 			int right = x + w - 10;
+			// (the pin, on the quests that can be tracked; its room is kept on every row so the columns line up)
+			if (!e.quest().isEmpty()) {
+				boolean on = e.quest().equals(QuestClient.pinned()), over = i == hovered && overPin(mouseX, mouseY, i);
+				pin(graphics, right - PIN, ry + 4, on, over);
+				if (over) {
+					Ui.tip(graphics, this.font, Component.translatable(on ? "journal.jaymoskingdoms.pin.off" : "journal.jaymoskingdoms.pin.on"), mouseX, mouseY);
+				}
+			}
+			right -= PIN + 6;
 			if (e.target().isPresent() && player != null && book.here()) {
 				Component where = where(player, e.target().get());
 				int ww = this.font.width(where);
@@ -308,6 +448,143 @@ final class JournalScreen extends Screen {
 		String[] points = {"s", "se", "e", "ne", "n", "nw", "w", "sw"};
 		int i = (int)Math.floorMod(Math.round(angle / 45.0), 8L);
 		return Component.translatable("quest.jaymoskingdoms.tracker.where", distance, Component.translatable("quest.jaymoskingdoms.tracker." + points[i]));
+	}
+
+	// ---- stories ---------------------------------------------------------------------------------------------------------
+
+	private int storyAt(int mouseX, int mouseY) {
+		int x = left(), top = top() + BODY_Y;
+		int end = Math.min(book.stories().size(), scroll + storyRows());
+		for (int i = scroll; i < end; i++) {
+			if (Ui.over(mouseX, mouseY, x + 6, top + (i - scroll) * STORY_ROW, storyListW(), STORY_ROW - 1)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private static int storyColor(Tales.Story s) {
+		return s.state() == 0 ? COLOR_GOLD : s.state() == 1 ? COLOR_ENDED : COLOR_ENDED_BADLY;
+	}
+
+	/** The picked tale's page wrapped to {@code width}: what's open now (or how it ended), then its notes, oldest first. */
+	private List<StoryLine> wrap(Tales.Story s, int width) {
+		List<StoryLine> out = new ArrayList<>();
+		for (FormattedCharSequence line : this.font.split(s.now(), width)) {
+			out.add(new StoryLine(line, COLOR_TEXT, false, false));
+		}
+		if (!out.isEmpty() && !s.lines().isEmpty()) {
+			out.add(new StoryLine(FormattedCharSequence.EMPTY, COLOR_TEXT, false, false));
+		}
+		for (Component note : s.lines()) {
+			boolean first = true;
+			for (FormattedCharSequence line : this.font.split(note, width - 6)) {
+				out.add(new StoryLine(line, COLOR_DIM, true, first));
+				first = false;
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * A row per tale down the left (the ones under way first, then the ones told), and the pressed one's page beside
+	 * them: its name, how it stands, what's open now and the notes written so far, which the wheel scrolls.
+	 */
+	private void stories(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
+		int w = panelW(), rows = storyRows(), h = rows * STORY_ROW + 2;
+		List<Tales.Story> stories = book.stories();
+		if (stories.isEmpty()) {
+			Ui.well(graphics, x + 5, top - 1, w - 10, h);
+			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_stories"), x + w / 2, top + 20, COLOR_DIM);
+			return;
+		}
+		int listW = storyListW();
+		Ui.well(graphics, x + 5, top - 1, listW + 2, h);
+		scroll = Mth.clamp(scroll, 0, Math.max(0, stories.size() - rows));
+		story = Mth.clamp(story, 0, stories.size() - 1);
+		int hovered = storyAt(mouseX, mouseY);
+		int end = Math.min(stories.size(), scroll + rows);
+		for (int i = scroll; i < end; i++) {
+			Tales.Story s = stories.get(i);
+			int ry = top + (i - scroll) * STORY_ROW;
+			graphics.fill(x + 6, ry, x + 6 + listW, ry + STORY_ROW - 1, i == hovered ? Ui.ROW_HOVER : i == story ? Ui.ROW_PICKED : i % 2 == 0 ? Ui.ROW : Ui.ROW_ALT);
+			graphics.fill(x + 6, ry, x + 8, ry + STORY_ROW - 1, storyColor(s));
+			Ui.line(graphics, this.font, s.title(), x + 12, ry + 4, listW - 9, s.state() == 0 ? COLOR_TEXT : COLOR_DIM);
+		}
+		Ui.scrollbar(graphics, x + 6 + listW + 2, top, rows * STORY_ROW, rows, stories.size(), scroll);
+		// the pressed tale's page
+		Tales.Story shown = stories.get(story);
+		int px = storyTextX(), pw = x + w - 6 - px;
+		Ui.well(graphics, px - 1, top - 1, pw + 2, h);
+		Ui.line(graphics, this.font, shown.title(), px + 5, top + 4, pw - 10, COLOR_TEXT);
+		Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.story.state." + Mth.clamp(shown.state(), 0, 2)), px + 5, top + 14, pw - 10,
+			storyColor(shown));
+		Ui.rule(graphics, px + 4, px + pw - 4, top + STORY_HEAD - 5);
+		if (storyWrapped != story) {
+			storyText = wrap(shown, pw - 10);
+			storyWrapped = story;
+			textScroll = 0;
+		}
+		int view = storyTextRows();
+		textScroll = Mth.clamp(textScroll, 0, Math.max(0, storyText.size() - view));
+		for (int i = textScroll; i < Math.min(storyText.size(), textScroll + view); i++) {
+			StoryLine line = storyText.get(i);
+			int ly = top + STORY_HEAD + (i - textScroll) * Ui.LINE;
+			if (line.first()) {
+				graphics.fill(px + 5, ly + 3, px + 7, ly + 5, storyColor(shown));
+			}
+			graphics.text(this.font, line.text(), px + (line.note() ? 11 : 5), ly, line.color());
+		}
+		Ui.scrollbar(graphics, x + w - 4, top + STORY_HEAD, view * Ui.LINE, view, storyText.size(), textScroll);
+	}
+
+	// ---- past ------------------------------------------------------------------------------------------------------------
+
+	private static int pastColor(int how) {
+		return how == QuestPast.DONE ? COLOR_DONE : how == QuestPast.FAILED ? COLOR_HATED : COLOR_DIM;
+	}
+
+	/** The quests you're done with, newest first: each one's name, how it went, the day, and under them how it ended. */
+	private void past(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
+		int w = panelW(), view = pastView();
+		List<QuestPast.Entry> past = book.past();
+		Ui.well(graphics, x + 5, top - 1, w - 10, view + 2);
+		if (past.isEmpty()) {
+			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_past"), x + w / 2, top + 20, COLOR_DIM);
+			return;
+		}
+		int most = pastMaxScroll();
+		scroll = Mth.clamp(scroll, 0, most);
+		int y = top;
+		for (int i = scroll; i < past.size(); i++) {
+			int h = pastHeight(i);
+			// (one that doesn't fit waits for the wheel; the first is drawn whatever its length, cut at the page's foot)
+			if (i > scroll && y + h > top + view) {
+				break;
+			}
+			QuestPast.Entry e = past.get(i);
+			int bottom = Math.min(y + h, top + view), color = pastColor(e.how());
+			Ui.row(graphics, x + 6, y, x + w - 6, bottom, i, Ui.over(mouseX, mouseY, x + 6, y, w - 12, bottom - y));
+			graphics.fill(x + 6, y, x + 8, bottom, color);
+			int right = x + w - 10;
+			Component day = Component.translatable("journal.jaymoskingdoms.past.day", e.day());
+			graphics.text(this.font, day, right - this.font.width(day), y + 3, COLOR_DIM);
+			right -= this.font.width(day) + 8;
+			Component how = Component.translatable("journal.jaymoskingdoms.past.how." + Mth.clamp(e.how(), 0, 2));
+			graphics.text(this.font, how, right - this.font.width(how), y + 3, color);
+			right -= this.font.width(how) + 8;
+			Ui.line(graphics, this.font, e.title(), x + 12, y + 3, right - x - 12, COLOR_TEXT);
+			int ly = y + PAST_HEAD;
+			for (FormattedCharSequence line : pastText.get(i)) {
+				if (ly + Ui.LINE > top + view) {
+					break;
+				}
+				graphics.text(this.font, line, x + 12, ly, COLOR_DIM);
+				ly += Ui.LINE;
+			}
+			y += h + PAST_GAP;
+		}
+		Ui.scrollbar(graphics, x + w - 4, top, view, past.size() - most, past.size(), scroll);
 	}
 
 	// ---- map -------------------------------------------------------------------------------------------------------------

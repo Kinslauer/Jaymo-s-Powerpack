@@ -97,6 +97,8 @@ public final class Tales {
 	static final float LETTER_DAILY = 0.2F, COMPANION_DAILY = 0.15F;
 	/** A companion who would ask must be within this many blocks. */
 	static final double COMPANION_RANGE = 16.0;
+	/** A companion's own tale seen through adds this to their bond; ended badly or given up, it takes this much away. */
+	static final int COMPANION_BOND_DONE = 20, COMPANION_BOND_FAILED = 12;
 	/** A tale's book lies in a ruin's chest this often (each chest opened), when one is written to be found there. */
 	static final float BOOK_CHEST_CHANCE = 0.04F;
 	/** A letter lost or never opened is sent again after this many days. */
@@ -764,19 +766,25 @@ public final class Tales {
 	 * nothing is written down until the player goes and looks. True if one was told.
 	 */
 	static boolean rumour(ServerLevel level, Entity teller, ServerPlayer player) {
-		if (level != Factions.level(level.getServer()) || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
-			return false;
-		}
-		Tale tale = pick("rumour", null, player, level.getRandom());
-		if (tale == null) {
-			return false;
-		}
-		Run run = start(level, player, tale, teller instanceof LivingEntity l ? l : null, factionAt(level, teller.blockPosition()), teller.blockPosition(), null);
-		MutableComponent said = words(player, run, tale.start(), "rumour");
+		Component said = rumourHeard(level, teller, player);
 		if (said != null) {
 			Speech.tell(level, teller, player, said, Speech.GOLD);
 		}
-		return true;
+		return said != null;
+	}
+
+	/** ({@link Carousing}) The same, for a rumour remembered the morning after: what was said, or null if it wasn't a tale's. */
+	static @Nullable Component rumourHeard(ServerLevel level, Entity teller, ServerPlayer player) {
+		if (level != Factions.level(level.getServer()) || level.getRandom().nextFloat() >= RUMOUR_CHANCE) {
+			return null;
+		}
+		Tale tale = pick("rumour", null, player, level.getRandom());
+		if (tale == null) {
+			return null;
+		}
+		Run run = start(level, player, tale, teller instanceof LivingEntity l ? l : null, factionAt(level, teller.blockPosition()), teller.blockPosition(), null);
+		MutableComponent said = words(player, run, tale.start(), "rumour");
+		return said == null ? Component.empty() : said;
 	}
 
 	// ---- books ---------------------------------------------------------------------------------------------------------------
@@ -1522,6 +1530,10 @@ public final class Tales {
 		if (f != null) {
 			Reputation.change(player, f, -ABANDON_REPUTATION);
 		}
+		Tale tale = Tale.get(run.tale);
+		if (tale != null && tale.by().equals("companion") && entity(level, run.giverId()) instanceof Mob companion) {
+			Bonds.add(companion, player.getUUID(), -COMPANION_BOND_FAILED);
+		}
 		close(player, run, "given_up", Component.translatable("tale.jaymoskingdoms.gave_up").getString(), true, QuestPast.GIVEN_UP);
 	}
 
@@ -1818,6 +1830,10 @@ public final class Tales {
 				McaCompat.hearts(giver, player, q.reward().hearts());
 			}
 			Recollections.remember(giver, player, failed ? Recollections.Kind.QUEST_FAILED : Recollections.Kind.QUEST_DONE, Component.literal(tale.title()));
+			if (tale.by().equals("companion") && giver instanceof Mob companion) {
+				// (a companion's own trouble: seeing it through brings them closer, leaving it badly costs)
+				Bonds.add(companion, player.getUUID(), failed ? -COMPANION_BOND_FAILED : COMPANION_BOND_DONE);
+			}
 			// (how it ended is the asker's to tell: who was let go)
 			String spared = run.vars.get("~spared");
 			if (spared != null) {
@@ -1830,7 +1846,7 @@ public final class Tales {
 			town.add(text(player, run, line));
 		}
 		if (!town.isEmpty() && run.faction >= 0) {
-			Overheard.townTalk(player, run.faction, town);
+			Overheard.townTalk(player, run.faction, town, failed);
 		}
 		// who comes back, and who stays
 		String joins = Tale.string(ending, "joins", "");

@@ -29,7 +29,7 @@ each class.
 - **Companions.** A few people you meet in tales can join you for good, and a companion you're close to may ask for
   help with their own past.
 - **Journal.** A Stories page tells each tale so far, with what you chose. A Past page keeps finished, failed and
-  given-up quests. Click a quest to track only that one on screen.
+  given-up quests. Tick the box on a quest's row to track only that one on screen, with a rough direction.
 - **Village life.** Villagers stop and talk to each other where you can overhear, and a town talks about how your
   tales there ended.
 
@@ -44,7 +44,7 @@ each class.
 | `BoardWork.java` | Star-rated work on the town board, and each board's level. |
 | `Overheard.java` | Villagers' scenes with each other (`data/<ns>/scenes/*.json`) and a town's talk about your tales. |
 | `QuestPast.java` | Finished, failed and given-up quests, for the journal. |
-| client `JournalScreen` | Stories and Past pages; click a quest to track it. |
+| client `JournalScreen`, `QuestClient` | Stories and Past pages; the pin box on a quest's row tracks it alone on screen. |
 
 ## 3. Writing a tale (the data format)
 
@@ -91,6 +91,9 @@ Each role is a person or a creature of the tale. The asker is always the role `g
   spared), or an entity id (`minecraft:wolf`, `jaymoskingdoms:...`) for a beast or monster.
 - `job` (villager): their trade, for clothes. `female`: true or false, if it matters.
 - `at`: the place they wait. They're set out when the player first comes near it.
+- `if`: a condition (below). Someone who is only in some tellings (`"if": "culprit=wolves"`) isn't set out in the
+  others. `late`: true for someone who must not be seen before the step that's about them (a beast met at the end).
+  Whoever the open step names as `who` is always set out.
 - `health`, `damage`, `armor`: numbers for a fighter or a beast (defaults 40, 5, 4).
 - `hand`, `head`, `chest`: item ids they carry and wear.
 - `men`: how many stand with a foe; `men_body`: `fighter` or an entity id (default: the same as the foe).
@@ -154,7 +157,8 @@ Every step has `do`, and may have:
 ### conditions and switches
 
 A condition is a string: `culprit=miller` (a roll), `mark:<name>`, `done:<tale id>`, `done:<tale id>:<ending id>`,
-`powers` (Jaymo's Powers is loaded). A leading `!` turns it round.
+`powers` (Jaymo's Powers is loaded). A leading `!` turns it round. Several joined with `&` must all hold
+(`mark:spared_robber & !fate=slain`).
 
 Anywhere a text, a `then`, or a number is wanted, a switch may stand instead: an object whose keys are `?<condition>`,
 tried in order, with `?` as the catch-all:
@@ -190,4 +194,70 @@ lines. The speakers stop, face each other and say them in turn.
 
 ## 5. As built
 
-(Filled in at the end of the build.)
+All 29 picked rows are built, in one PR. Built and compiled; `tools/tale_check.py` passes on every file and runs in
+`tools/pr_checks.py`. **Nothing has been played.**
+
+**What ships:** 14 tales (`data/jaymoskingdoms/tales/`), 21 to 34 steps and 5 to 10 endings each, every one resting
+for days between its parts (three to five waits in each, 1 to 10 days long), and 40 overheard scenes
+(`data/jaymoskingdoms/scenes/`).
+
+| Tale | Starts | What it is |
+|---|---|---|
+| The Empty Fold | shepherd, farmer, butcher, leatherworker | A fold found empty: a neighbour, den folk or wolves. |
+| The Lantern That Went Out | cleric, mason, librarian | A barrow's light is out; a three-night vigil; what to do with the one who took it. |
+| Salt and Iron | fisherman, smiths | An investigation between two houses; a wrong name makes it worse. |
+| The Night Bell | guard, archer, mason, cleric | Lamps, a palisade, a night defence, then who opened the postern. |
+| The Fair Left Behind | nitwit, unemployed, baker, farmer | A child the fair left; why, and where they belong. |
+| Hail Glass | librarian, cartographer | A guest's eye-glass is stolen, and three people could have taken it. |
+| The Cave-In | miner, mason, toolsmith | Blast a man out, and find out who he was. Someone can join you. |
+| The One Who Walks at Moonrise | cleric, butcher, shepherd, farmer | Cursed, a wolf, or a murder dressed as one. |
+| The Bride Road | anyone with work | Two escorts and an ambush someone paid for. |
+| The Stone That Hums | a rumour | Never explained. |
+| A Debt in Potatoes | a ledger found in a ruin chest or on a raider | Smugglers or the watch. |
+| What Was Owed | a close companion | Their past: a grave, a widow, a carter's son. |
+| The Brother Who Stayed | a close companion | Buried, bitter or outlawed. |
+| The Name She Left | a letter, only if you let the bride go | The sequel: her father went into the hills to look for her. |
+
+**How each row was built, and where it differs from the pick list**
+
+- **A1-A3, H1, H2** as planned. A tale is done once per player (any ending, or giving it up); one turned down before it
+  began can be offered again. A tale begun again starts with its own marks cleared.
+- **A4** The spared come back with thanks (19 endings), a warning (3), asking to join (3) or for revenge with two
+  friends (1). Who comes back is fixed per ending, not per choice inside it.
+- **A5** New memories `CUT_DOWN` and `MERCY` in Recollections and Bearings, spread by gossip like other deeds.
+- **A6** Clues are items lying at the scene with the finding written on them. Accusations at the priest and blood or
+  chalk marks as clues were not used: naming is done in talk with the asker.
+- **B1** Rumours from passers-by (`Rumours.tell`) and from a night's drinking (`Carousing`).
+- **B2** Books are found in ruin chests and on bodies (`start.book.found`). One tale starts this way so far.
+- **B3** A runner (a villager) walks up by day under open sky, never a pigeon. If you're indoors or it's night they
+  wait for another day. A letter that starts a tale has no placeholders (the tale hasn't begun).
+- **C1, C2** Stars are on the notice and the quest title. A board levels every 3 jobs finished from it (by anyone),
+  to level 5: one more notice from level 3, more often, harder kinds from levels 2 and 3, a little more pay.
+- **C3, C7** Humanoid foes go down before they die, as everywhere: a downed raider has to be finished to count.
+- **C4** From board level 3, three stars and up. The pick list said "a Nemesis card once you've met": `Nemesis` is the
+  Deck's hunter, so an elite you flee from or fall to marks you through it instead (hunters are sent).
+- **C5** Waves come once it's dark and you're in town. Lost if you leave, or if whoever posted it (they ring the bell)
+  is downed or killed. Guards and golems fight as they always do; nothing new was added for them.
+- **C6** The traveller follows on foot, and climbs into whatever you're riding if it has a seat. One ambush at most, off
+  settlement land. No cab wagon is hired for you.
+- **C8** Dark spots are picked on the town's own ground first, where `Lamplight` keeps lights. Torches count as well as
+  lanterns. Late is failed.
+- **D1** Counts blocks of the asked kind standing within 6 blocks of the mark, over what stood there before.
+- **D2** The pick list said the town's no-build rules would let this blast through: only tagged no-build dungeons block
+  blasts, and work is never set in one, so no exception was needed. Rubble dug by hand comes down again until it's blasted.
+- **D3** Any item of the asked kind counts, not only one handed to you by the tale.
+- **E1** One ending has someone join outright; three more have someone come back and ask.
+- **E2** Asked by a companion whose bond is close. Seen through, the bond rises by 20; ended badly or given up, it
+  falls by 12. No ending has the companion leave you.
+- **F1** A tracker already existed (three quests). This adds the pin: only that quest, with "far to the north-east"
+  instead of numbers. A pinned tale keeps its pin while it rests.
+- **F2, F3** Fourth and fifth journal tabs. The two new tabs use item icons (book and quill, clock) until
+  `tabs.png` gets art for them.
+- **G1** Bubbles in the speakers' own tongue, a voice pitched per villager, a head shake or an arm for the line. About
+  one scene every four minutes among folk; the same scene not again until 16 others.
+- **G2** Each ending's `town` lines are said to you once each, by different townsfolk, over the next 12 days: a cheer
+  from everyone near for the first if it went well, a shake of the head if badly. A town held through the night
+  thanks you the same way. A toast at the tavern or a tended grave happens only where a tale's own words say so.
+
+**Left for later (not in the picks):** time-of-day or moon conditions on a step; `returns` that depend on a choice;
+a cast member whose body changes with the roll; a tale-only item for `stash` and `build`.

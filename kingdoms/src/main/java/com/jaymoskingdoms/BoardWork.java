@@ -50,6 +50,8 @@ final class BoardWork {
 	static final int HUNT_NEAR = 140, HUNT_FAR = 320, BUILD_NEAR = 44, BUILD_FAR = 70;
 	/** An escort goes to a town at least this far off. */
 	static final double TREK_LEAST = 120.0;
+	/** How many things a town held through the night has to say to the one who held it. */
+	static final int DEFEND_THANKS = 3;
 
 	private static final List<String> KINDS = List.of("pack", "elite", "defend", "trek", "incursion", "lamps", "build", "blast", "stash");
 	/** What packs are made of; what an elite is; who comes at a town in the night. */
@@ -100,9 +102,18 @@ final class BoardWork {
 	}
 
 	/** {@code q} was brought back and paid: board work counts toward its town's board level. */
-	static void done(ServerLevel level, Faction f, Quest q) {
-		if (kind(q.template()) == null) {
+	static void done(ServerLevel level, ServerPlayer player, Faction f, Quest q) {
+		String kind = kind(q.template());
+		if (kind == null) {
 			return;
+		}
+		if (kind.equals("defend")) {
+			// (a town held through the night talks of who held it)
+			List<Component> thanks = new ArrayList<>();
+			for (int i = 0; i < DEFEND_THANKS; i++) {
+				thanks.add(Component.translatable("work.jaymoskingdoms.defend.thanks." + i, Post.nameOf(player)));
+			}
+			Overheard.townTalk(player, f.id(), thanks, false);
 		}
 		ServerLevel world = Factions.level(level.getServer());
 		Map<String, Integer> done = new HashMap<>(world.getAttachedOrElse(DONE, Map.of()));
@@ -208,6 +219,8 @@ final class BoardWork {
 				questKind = Quest.DEFEND;
 				target = any(RAIDERS, random);
 				count = 2 + stars / 2;
+				// (whoever posted it rings the bell: the watch is lost if they fall)
+				other = Optional.of(giver.getUUID());
 			}
 			case "trek" -> {
 				questKind = Quest.TREK;
@@ -222,7 +235,7 @@ final class BoardWork {
 					return true;
 				}
 				charge.setPersistenceRequired();
-				charge.setAttached(TaleCast.CAST, new TaleCast.Cast("work:" + id, "charge", by.asLong(), false, false, false, level.getGameTime()));
+				TaleCast.adopt(charge, "work:" + id, "charge");
 				otherName = charge.getName().getString();
 				other = Optional.of(charge.getUUID());
 				pos = to.seat();

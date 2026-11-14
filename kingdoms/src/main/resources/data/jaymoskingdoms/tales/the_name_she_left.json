@@ -1,0 +1,258 @@
+{
+  "title": "The Name She Left",
+  "start": {
+    "by": "letter", "weight": 3, "needs": ["mark:let_the_bride_go"],
+    "letter": {
+      "from": "One you let walk at the ninth milestone",
+      "days": [8, 14],
+      "lines": [
+        "You knew me by another name. Aboard the Grey Hen I am Wren, and I would be glad if you used it.",
+        "My father has gone into the hills to look for me. An old man with one good knee, a stick and a loaf. That was eleven days ago and he has not come down.",
+        "I cannot go up there. You know why better than anyone living. I am ashore for a few nights with the charcoal burners, who ask no questions of anyone with black hands.",
+        "Come if you can. I have nobody else I can ask without first explaining who I am."
+      ]
+    }
+  },
+  "roll": { "fate": ["lame", "taken", "done"] },
+  "cast": {
+    "wren": { "name": ["Wren"], "body": "villager", "job": "fisherman", "female": true, "at": "clearing" },
+    "father": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "gully", "if": "fate=lame" },
+    "father_held": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "cut", "if": "fate=taken" },
+    "chief": { "name": ["Marrow Jack", "Bess Calder", "Tam Rudd"], "body": "fighter", "at": "cut", "if": "fate=taken",
+      "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "clearing": { "at": "near", "from": "home", "dist": [120, 200], "name": "the charcoal burners' clearing" },
+    "hut": { "at": "wild", "from": "clearing", "dist": [220, 340], "name": "the summer shepherds' hut" },
+    "gully": { "at": "near", "from": "hut", "dist": [60, 110], "name": "the gully below the hut" },
+    "cut": { "at": "wild", "from": "hut", "dist": [140, 220], "name": "the old quarry cut" },
+    "cairn": { "at": "near", "from": "hut", "dist": [70, 120], "name": "the cairn on the saddle" }
+  },
+  "first": "to_clearing",
+  "steps": {
+    "to_clearing": { "do": "go", "to": "clearing", "goal": "Find Wren at {place:clearing}", "then": "ask" },
+    "ask": {
+      "do": "talk", "who": "wren", "goal": "Speak with Wren",
+      "say": {
+        "?mark:bride_road_lie": "You came. I was not sure the letter would find you, or that you would know the hand.\nHe never believed the road took me. He sat through the mourning and the miller's ham and then he cut a stick and went up to look for a body, because he could not find the lie and he could not swallow it either.\nHalf the valley has stopped searching. He has not. And I cannot walk into those hills and be found alive by the wrong man.",
+        "?": "You came. I was not sure the letter would find you, or that you would know the hand.\nYou told them the truth of it, and they have held it against him ever since. So he cut a stick and went up into the hills to fetch me back and put it right, as if I were a strayed ewe.\nIf I go after him I am fetched. If I do not, he is up there alone with one good knee."
+      },
+      "replies": [
+        { "say": "I'll find him. Where would he go?", "then": "ask_where", "journal": "Wren, who had another name when I walked her down the bride road, asked me to find her father in the hills." },
+        { "say": "The hills are wide. What can you pay?", "then": "ask_pay" },
+        { "say": "I let you go once. That was the end of my part in it.", "then": "end:refused" }
+      ]
+    },
+    "ask_pay": {
+      "do": "talk", "who": "wren",
+      "say": "Fish money. It is all I have and I earned every scale of it. Half now. Half when I know whether to mend his shirts or burn them.",
+      "give": [{ "item": "minecraft:cod", "count": 4, "name": "Salt cod, wrapped", "lore": ["A deckhand's wages, the part that keeps."] }],
+      "pay": 6,
+      "replies": [
+        { "say": "That will do. Where would he go?", "then": "ask_where", "journal": "Wren paid me half in advance, in fish money, to find her father in the hills." },
+        { "say": "Keep it. I'm not going up there.", "then": "end:refused" }
+      ]
+    },
+    "ask_where": {
+      "do": "talk", "who": "wren",
+      "say": "There is a hut the shepherds use in summer, {way:hut}. He took me up there every year until I was twelve, to count the lambs and to be away from my mother's tongue.\nIf he thinks I ran, that is where he thinks I ran to. Start there. And if you find him... no. Find him first.",
+      "then": "to_hut"
+    },
+    "to_hut": { "do": "go", "to": "hut", "goal": "Go up to {place:hut}", "then": "search_hut" },
+    "search_hut": {
+      "do": "search", "at": "hut", "goal": "Look over the shepherds' hut",
+      "clues": [
+        { "name": "A notched stick", "item": "minecraft:stick", "lore": ["A walking stick cut green, with a notch for each night. Nine notches.", "The ninth is not finished."], "journal": "Her father slept nine nights at the shepherds' hut and cut a notch for each." },
+        { "name": "The heel of a loaf", "item": "minecraft:bread", "lore": ["Hard as slate, and set on the sill where the mice could not reach it.", "He meant to come back for it."], "journal": "He left the last of his bread on the sill. He meant to come back." },
+        { "name": "Scuffed ground", "item": "minecraft:gravel", "lore": ["The bank below the door has gone, a man's width of it, down toward the gully.", "A stick was dropped at the top."], "journal": "The bank by the hut had given way under somebody, down toward the gully.", "if": "fate=lame" },
+        { "name": "A cut strap", "item": "minecraft:leather", "lore": ["The strap of a bread bag, cut clean with a knife, not torn.", "Three sets of boots came to the door, and four went away."], "journal": "Somebody took him from the hut. Three came, four left, toward the old quarry.", "if": "fate=taken" },
+        { "name": "Small stones, sorted", "item": "minecraft:cobblestone", "lore": ["A heap of flat stones by the door, picked for size, and a track worn from it up to the saddle.", "An old man's work, a few stones at a time."], "journal": "He had been carrying stones up to the saddle above the hut, a few at a time.", "if": "fate=done" }
+      ],
+      "then": { "?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn" }
+    },
+
+    "to_gully": { "do": "go", "to": "gully", "goal": "Climb down into {place:gully}", "then": "father_found" },
+    "father_found": {
+      "do": "talk", "who": "father", "goal": "Speak with {father}",
+      "say": "Don't touch the leg. It went under me two nights back and I heard it go.\nThere's a spring just there, so I've not been dry. I've been lying here working out what I'd say to her. I had it nearly right this morning.\nYou're not one of the search. Who sent you up a hill after an old fool?",
+      "replies": [
+        { "say": "Your daughter did. She is alive, and a day's walk from here.", "then": "father_truth", "mark": "wren_father_knows", "journal": "I found {father} in the gully with a broken leg, and I told him his daughter lives." },
+        { "say": "Somebody who wants you home. That is all I can say.", "then": "father_quiet", "journal": "I found {father} in the gully with a broken leg. I did not tell him who sent me." }
+      ]
+    },
+    "to_cut": { "do": "go", "to": "cut", "goal": "Follow the boots to {place:cut}", "then": "parley" },
+    "parley": {
+      "do": "talk", "who": "chief", "goal": "Speak with whoever holds him",
+      "say": "That's near enough. You'll be from the miller.\nWe found the old man shouting a girl's name in the hills. Now, a miller forgave that family a debt out of pity, and a miller who'll do that will pay to get the father back. That's only reasoning.\nSo. What did he send?",
+      "replies": [
+        { "say": "Twenty, and you forget his name.", "then": "freed", "needs_coins": 20, "journal": "I bought {father_held} back from the outlaws at the quarry cut." },
+        { "say": "The miller sent nothing. Nobody is paying for him. You have fed an old man for a week for no reason.", "then": "parley_truth" },
+        { "say": "He sent me.", "then": "fight" }
+      ]
+    },
+    "parley_truth": {
+      "do": "talk", "who": "chief",
+      "say": "...He eats like a horse, too.\nNo. I've gone a week on this. Somebody pays, or somebody carries a message down about what happens when nobody does.",
+      "replies": [
+        { "say": "Ten, for the bread he ate. Then you never saw him.", "then": "freed", "needs_coins": 10, "journal": "I talked the outlaws down and bought {father_held} back cheap." },
+        { "say": "Then I'll carry the message. Yours.", "then": "fight" }
+      ]
+    },
+    "fight": {
+      "do": "foe", "who": "chief", "goal": "Take {father_held} from them",
+      "taunt": "Put the old man behind the cart. This one wants to haggle with iron.",
+      "plea": "Hold! Hold. He's yours. He was never worth the porridge. Take him and let me keep my head.",
+      "mercy": "Go. If I hear of you on these hills again, I'll finish it.",
+      "thanks": "You'll not. On my mother.",
+      "slain": "freed", "spared": "freed"
+    },
+    "freed": {
+      "do": "talk", "who": "father_held", "goal": "Speak with {father_held}",
+      "say": "I told them nobody would pay. They'd not have it. A man can't even be worthless in peace.\nYou're not from the miller, whatever you let them think. And you're not one of the search, they gave it up. Who sends a stranger up a hill after an old fool?",
+      "replies": [
+        { "say": "Your daughter did. She is alive, and a day's walk from here.", "then": "held_truth", "mark": "wren_father_knows", "journal": "I told {father_held} his daughter lives." },
+        { "say": "Somebody who wants you home. That is all I can say.", "then": "held_quiet", "journal": "I did not tell {father_held} who sent me." }
+      ]
+    },
+
+    "father_truth": {
+      "do": "talk", "who": "father",
+      "say": "...\nSay it again. No. Don't. I heard it.\nI had a whole speech. It was about duty. I can't remember a word of it now. Get me up. I don't care about the leg. Get me up.",
+      "then": "escort_father"
+    },
+    "held_truth": {
+      "do": "talk", "who": "father_held",
+      "say": "...\nSay it again. No. Don't. I heard it.\nI had a whole speech. It was about duty. I can't remember a word of it now. Which way? I can walk. I walked up here.",
+      "then": "escort_held"
+    },
+    "escort_father": { "do": "escort", "who": "father", "to": "clearing", "goal": "Bring {father} down to {place:clearing}", "journal": "I brought him down off the hill, slowly, on a splinted leg and his own temper.", "then": "reunion" },
+    "escort_held": { "do": "escort", "who": "father_held", "to": "clearing", "goal": "Bring {father_held} down to {place:clearing}", "journal": "I brought him down off the hill. He did not stop once.", "then": "reunion" },
+    "reunion": {
+      "do": "talk", "who": "wren", "goal": "Speak with Wren",
+      "say": "You brought him here.\nI asked you to find him. I did not ask... Look at him. He has not said anything. He has just sat down on the ground.\nHe is going to ask me to come home. And I am going to say no, and he is going to have walked up a hill and broken himself for a no.",
+      "replies": [
+        { "say": "He didn't climb a hill to fetch you. He climbed it to see you. Let him.", "then": "wait_reunited", "journal": "I told Wren her father had not come to fetch her, only to see her. They sat by the burners' fire until it was ash." },
+        { "say": "Then say it kindly, and say it now, while he is too tired to argue.", "then": "wait_parted", "journal": "Wren told her father no, kindly, by the burners' fire. He nodded for a long time." }
+      ]
+    },
+    "wait_reunited": {
+      "do": "wait", "days": [5, 8], "wake": "letter",
+      "letter": { "from": "Wren", "lines": [
+        "He did not ask me to come home. He asked what a smack was, and whether the swell was hard on the knees, and whether a man who could count lambs could count fish.",
+        "He is mending nets on the shingle now, badly, and telling the Tideborn how sheep are better. They have given him a name I will not write down. He answers to it.",
+        "At home they think the hills took him as the road took me. I do not know what kind of family vanishes twice. Ours, it seems. Thank you for not minding your own business."
+      ] },
+      "then": "end:reunited"
+    },
+    "wait_parted": {
+      "do": "wait", "days": [5, 8], "wake": "letter",
+      "letter": { "from": "Wren", "lines": [
+        "He went home on a burner's cart with his leg out in front of him like a flagpole.",
+        "He has told nobody. I know, because the search has not started again and nobody has spat at the Grey Hen. He is carrying it by himself, the way I asked him to.",
+        "I thought it would feel like winning. He left me his stick. Nine notches and a half. I have hung it over my berth, and I do not know yet whether that was right."
+      ] },
+      "then": "end:parted"
+    },
+
+    "father_quiet": {
+      "do": "talk", "who": "father",
+      "say": "No. Well. I've a fair idea who'd send a stranger and not come themselves, and it's not my wife.\nKeep it, then. Get me home. I'll not go to the miller's surgeon, mind.",
+      "then": "escort_home"
+    },
+    "held_quiet": {
+      "do": "talk", "who": "father_held",
+      "say": "No. Well. I've a fair idea who'd send a stranger and not come themselves, and it's not my wife.\nKeep it, then. I'll go down. I've had my fill of hills.",
+      "then": "escort_home_held"
+    },
+    "escort_home": { "do": "escort", "who": "father", "to": "clearing", "goal": "Bring {father} down as far as the burners' carts", "journal": "I brought him down as far as the charcoal burners, who had a cart going his way. Wren watched from the trees and did not come out.", "then": "tell_wren" },
+    "escort_home_held": { "do": "escort", "who": "father_held", "to": "clearing", "goal": "Bring {father_held} down as far as the burners' carts", "journal": "I brought him down as far as the charcoal burners, who had a cart going his way. Wren watched from the trees and did not come out.", "then": "tell_wren" },
+    "tell_wren": {
+      "do": "talk", "who": "wren", "goal": "Speak with Wren",
+      "say": "I saw him. I was behind the stacks. He looked straight at the trees when the cart pulled off, and he took his hat off. To the trees.\nYou didn't tell him. Did you tell him?",
+      "replies": [
+        { "say": "No. But he knows who sends strangers.", "then": "wait_unsaid", "journal": "I told Wren I had said nothing, and that her father had guessed anyway." }
+      ]
+    },
+    "wait_unsaid": {
+      "do": "wait", "days": [6, 10], "wake": "letter",
+      "letter": { "from": "Wren", "lines": [
+        "A carter brought a parcel to the Grey Hen, for 'the deckhand who mends'. No name on it. A loaf, gone hard, and a pair of knitted stockings in my size.",
+        "He cannot write much and he did not try. There was only a tally stick in with it, cut with one notch.",
+        "I think that is one for the day he knew. I have cut one beside it. I do not know who we think is counting."
+      ] },
+      "then": "end:unsaid"
+    },
+
+    "to_cairn": { "do": "go", "to": "cairn", "goal": "Follow the worn track up to the saddle", "then": "search_cairn" },
+    "search_cairn": {
+      "do": "search", "at": "cairn", "goal": "Look over the cairn",
+      "clues": [
+        { "name": "A hat, weighted with a stone", "item": "minecraft:leather_helmet", "lore": ["Set on the cairn with a flat stone on the brim, so the wind would leave it.", "He is sitting with his back against the stones, facing the sea side. He has been there two nights."], "journal": "{father} is dead. He sat down against the cairn he was building, facing the coast, and did not get up." },
+        { "name": "A letter, not finished", "item": "minecraft:paper", "lore": ["'To my girl, wherever the road has her. I had a speech about duty. I have lost it somewhere on this hill and I am not sorry.'", "'I am building this where you can see the water. If you were ever going to run, you would run to the water. I only want'", "It stops there."], "journal": "He was writing to her when he died. He had guessed where she ran." }
+      ],
+      "then": "tell_dead"
+    },
+    "tell_dead": {
+      "do": "talk", "who": "wren", "goal": "Bring Wren the news",
+      "give": [{ "item": "minecraft:paper", "count": 1, "name": "An old man's letter, not finished", "lore": ["'To my girl, wherever the road has her.'"] }],
+      "say": "You are walking like someone carrying something. Put it down. Say it.\n...\nFacing the water. He always said the sea was a waste of good grazing.\nGive me the letter. No. Wait. Where is he? Is he just sitting up there?",
+      "replies": [
+        { "say": "He is. Come up and finish his cairn. I'll watch the track.", "then": "escort_wren", "journal": "I told Wren her father was dead on the saddle, and offered to take her up to him." },
+        { "say": "Stay hidden. I'll see him under the stones myself.", "then": "bury_alone", "journal": "I told Wren her father was dead on the saddle, and that I would bury him so she need not be seen." }
+      ]
+    },
+    "escort_wren": { "do": "escort", "who": "wren", "to": "cairn", "goal": "Take Wren up to the cairn", "then": "build_together" },
+    "build_together": {
+      "do": "build", "at": "cairn", "blocks": "minecraft:cobblestone", "count": 8, "goal": "Finish the cairn with her",
+      "journal": "We finished his cairn, she and I. She set his hat on top herself, and the stone on the brim.",
+      "then": "wait_cairn"
+    },
+    "bury_alone": {
+      "do": "build", "at": "cairn", "blocks": "minecraft:cobblestone", "count": 8, "goal": "Finish the cairn over him",
+      "journal": "I finished his cairn alone and set his hat on it, with the stone on the brim as he had it.",
+      "then": "wait_unseen"
+    },
+    "wait_cairn": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "Wren", "lines": [
+        "Somebody saw a woman on the saddle. It is all over the valley that the Ashdown girl's ghost came to bury her father, and the search is finished for good, because nobody hunts a ghost.",
+        "I have been called worse. It is the first thing that town ever said about me that I mean to keep.",
+        "You can see the cairn from the deck on a clear day, if you know where to look. He was right about the water."
+      ] },
+      "then": "end:cairn"
+    },
+    "wait_unseen": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "Wren", "lines": [
+        "I read his letter on the deck, at night, where nobody could see my face.",
+        "'I only want'. I have finished that line for him forty ways and I like none of them.",
+        "You kept me hidden, as I asked the first time and never had to ask the second. I can see the saddle from the water. I have not been up. I will tell you if I ever go."
+      ] },
+      "then": "end:unseen"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I had let her go once. I left it at that, and left her father to the hills.", "failed": true },
+    "reunited": {
+      "text": "Wren's father lives on the shingle by the Grey Hen now, mending nets badly. Their town thinks the hills took him, as the road took her.",
+      "reward": { "coins": 8, "items": ["minecraft:cod*8", "minecraft:nautilus_shell*1"] }, "marks": ["wren_reunited"],
+      "returns": { "who": "father", "days": [10, 16], "as": "thanks", "say": "I am told you are the one to thank for the knee, the daughter, and the smell of fish I shall never now be rid of. I count two of those to your credit. Here. Stockings. I knit now. Do not laugh.", "gift": ["minecraft:leather_boots*1", "minecraft:bread*4"] }
+    },
+    "parted": {
+      "text": "Wren told her father no, and he carried it home without a word to anyone. She kept his stick.",
+      "reward": { "coins": 8, "items": ["minecraft:cod*8"] }, "marks": ["wren_parted"]
+    },
+    "unsaid": {
+      "text": "I never told him, and he knew anyway. He sends her stockings with no name on the parcel. Neither of them has said a word.",
+      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unsaid"]
+    },
+    "cairn": {
+      "text": "Wren buried her father herself, on the saddle facing the water. The valley says a ghost did it, and has stopped looking for her.",
+      "reward": { "coins": 6, "items": ["minecraft:cod*6", "minecraft:nautilus_shell*1"] }, "marks": ["wren_cairn"]
+    },
+    "unseen": {
+      "text": "I buried Wren's father alone so she would not be seen. She has his last letter, which stops in the middle of a line.",
+      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unseen"]
+    }
+  }
+}

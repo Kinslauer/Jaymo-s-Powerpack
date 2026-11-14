@@ -452,7 +452,9 @@ def check_tale(path):
         if "town" in ending:
             check_text(c, where + ".town", ending["town"], tale)
         back = ending.get("returns")
-        if back:
+        if back and not isinstance(back, dict):
+            c.err(where, "returns is one object: { who, days, as, say, gift }")
+        elif back:
             check_role(c, where + ".returns", back.get("who"), tale)
             if back.get("as") not in RETURNS:
                 c.err(where, f"returns.as must be one of {sorted(RETURNS)}")

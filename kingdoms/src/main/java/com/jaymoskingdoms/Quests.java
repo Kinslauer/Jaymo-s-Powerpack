@@ -571,7 +571,7 @@ public final class Quests {
 		if (q.kind() >= Quest.PACK) {
 			// (board work: what it put in the world is cleared, and the board's name grows)
 			QuestJobs.over(level, player, q);
-			BoardWork.done(level, f, q);
+			BoardWork.done(level, player, f, q);
 		}
 		// (its kind is known now to the companions who saw it through: docs/Pawn-Plan.md row B3)
 		Remarks.questDone(player, q);
@@ -1534,17 +1534,19 @@ public final class Quests {
 			Optional<BlockPos> target = ready ? Optional.empty() : q.kind() == Quest.SLAY || q.kind() == Quest.GATHER ? Optional.empty() : q.objective().pos();
 			if (Tales.ofTale(q)) {
 				// (a tale's step: the mark goes over whoever is next to speak with, gold when it's a talk)
-				tracked.add(new QuestNet.Tracked(Tales.markOn(q), false, title(q), objective(level, player, q), Tales.spoken(q), target));
+				tracked.add(new QuestNet.Tracked(q.id(), Tales.markOn(q), false, title(q), objective(level, player, q), Tales.spoken(q), target));
 				continue;
 			}
-			tracked.add(new QuestNet.Tracked(q.giver().uuid(), q.royal(), title(q), objective(level, player, q), ready, target));
+			tracked.add(new QuestNet.Tracked(q.id(), q.giver().uuid(), q.royal(), title(q), objective(level, player, q), ready, target));
 		}
-		int hash = tracked.hashCode();
+		// (the one quest they track alone, if it's still in their log)
+		String pinned = Journal.pinned(player);
+		int hash = 31 * tracked.hashCode() + pinned.hashCode();
 		Integer last = SENT.get(player.getUUID());
 		if (!force && last != null && last == hash) {
 			return;
 		}
 		SENT.put(player.getUUID(), hash);
-		ServerPlayNetworking.send(player, new QuestNet.Log(tracked));
+		ServerPlayNetworking.send(player, new QuestNet.Log(tracked, pinned));
 	}
 }

@@ -499,21 +499,32 @@ final class TaleCast {
 
 	/** {@code run} is over: its people go their ways (now, the ones loaded; the rest when they're next seen). */
 	static void over(ServerLevel level, Tales.Run run, @Nullable String keep) {
+		ended(level, run.instance);
+	}
+
+	/** Whoever was set out for {@code instance} (a tale's run, or a piece of board work) goes their way. */
+	static void ended(ServerLevel level, String instance) {
 		ServerLevel world = Factions.level(level.getServer());
 		List<String> ended = new ArrayList<>(world.getAttachedOrElse(ENDED, List.of()));
-		ended.remove(run.instance);
-		ended.add(run.instance);
+		ended.remove(instance);
+		ended.add(instance);
 		while (ended.size() > ENDED_MAX) {
 			ended.remove(0);
 		}
 		world.setAttached(ENDED, List.copyOf(ended));
 		for (Mob mob : new ArrayList<>(LOADED)) {
 			Cast c = mob.getAttached(CAST);
-			if (c != null && !c.over() && c.instance().equals(run.instance)) {
+			if (c != null && !c.over() && c.instance().equals(instance)) {
 				mob.setAttached(CAST, c.done(level.getGameTime()));
 				calm(mob);
 			}
 		}
+	}
+
+	/** ({@link BoardWork}) {@code mob} is someone a piece of board work set out: kept like a tale's people until the work is over. */
+	static void adopt(Mob mob, String instance, String role) {
+		mob.setAttached(CAST, new Cast(instance, role, mob.blockPosition().asLong(), false, false, false, mob.level().getGameTime()));
+		LOADED.add(mob);
 	}
 
 	/** ({@link QuestJobs}) {@code mob} is being walked somewhere: where it stands is where it belongs now. */
