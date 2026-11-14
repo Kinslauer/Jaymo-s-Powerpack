@@ -1654,7 +1654,8 @@ allow you to add it to a schematic, so your kingdom can build it"; the rest Clau
 the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
 are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
 under them its prep, armory, beds and smithy, and a caster keeps the arena's best take and its caged allays in a box over
-the gate. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
+the gate. The greatest of these pits, the round arena of the far sands with its four towers and its crane, stands empty
+until a camp comes up from the Wildlands to take it. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
 tier they were drawn in can copy the place out and build it again. This is the Retaking done with stone as well as
 blades: the realms raise the raiders' own forts, towers and pits as their own.
 
@@ -1736,6 +1737,24 @@ Townsfolk speak of raids and smugglers the way they speak of weather: something 
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
 and breaks under enough blows, and a fighter who loses one fetches another from camp; steel on steel throws sparks.
+
+(new) **Troubles, runners and starred work** (Claude's placement for the story quest picks, 2026-11-14, for Andy to
+approve). Most of what goes wrong in a village is small and somebody's own: a fold found empty, a debt, a bell rung in
+the night, a brother who never came home. Folk carry such a trouble until someone outside it will listen, and it is
+never one errand. It runs over days and weeks, the one who asked sends word when there is more (a **runner**, a
+villager paid a coin to find you on the road by daylight with a sealed letter, never a pigeon), and it ends the way
+the one who took it up chose: who was named, who was let walk. Nobody is told which way was right. The spared remember
+it and so do the dead's kin; some come back with thanks, some asking to follow, some with friends and knives. Not every
+trouble is offered. Some are only a drunk's story, a ledger left in a camp, a diary in a ruin, and whoever goes to look
+has taken it up. Paid work on a town's board is rated the way carters rate roads: the poster chalks **one to five
+stars** on the notice for how many come back from it. A board whose work gets done gets a name, and harder work is
+brought to it: packs gone to ground, a nest or a camp or a soured pit dug in too near, lamps for the dark corners
+before nightfall, a fence to raise, a cave-in that wants powder, a chest to fill for a hermit, a shrine or someone who
+wants no names, a traveller who will not walk alone, a night watch kept beside whoever rings the bell, and now and then
+**one with a name** (Greyjaw, Split-ear), a killer old enough to have been hunted before, which goes after the ones it
+lets run. A town talks about how its troubles ended, to your face, for a week or two. And villagers talk to each
+other whether anyone listens or not: the dog that dug up the Lantern Warden's bone, the price of salt, whose turn it
+is on the wall.
 
 ## Rules for writing against this
 
