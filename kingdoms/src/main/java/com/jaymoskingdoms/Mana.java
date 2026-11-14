@@ -357,7 +357,7 @@ public final class Mana {
 	 * (0.7.244) Mana poured into {@code player} from outside (amethyst, a wand), up to {@link #OVERLOAD} times their most;
 	 * what goes past full strains them. How much went in.
 	 */
-	static float give(ServerPlayer player, float amount) {
+	public static float give(ServerPlayer player, float amount) {
 		float max = max(player), now = current(player);
 		float in = Math.max(0.0F, Math.min(amount, max * OVERLOAD - now));
 		if (in <= 0.0F) {

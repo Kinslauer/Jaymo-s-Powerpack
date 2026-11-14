@@ -174,6 +174,8 @@ public final class Spirits {
 		HandExtras.register();
 		Grimsby.register();
 		Varro.register();
+		Staggered.register();
+		AsOne.register();
 		Ambrose.register();
 		SpiritCharms.register();
 		Thessaly.register();
@@ -513,7 +515,7 @@ public final class Spirits {
 			CastHints.clear(player);
 			return;
 		}
-		Mana.pay(player, move.cost(player), move.intent());
+		Mana.pay(player, move.cost(player) * AsOne.costTimes(player), move.intent());
 		Moves.start(player, move, now);
 		show(player, move.pose(player), CastHints.reach(player));
 		CastHints.clear(player);

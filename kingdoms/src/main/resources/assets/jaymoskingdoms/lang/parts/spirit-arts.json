@@ -1,0 +1,20 @@
+{
+  "spirit.jaymoskingdoms.move.vault": "Over the Shoulder",
+  "spirit.jaymoskingdoms.move.short_road": "Short Road",
+  "spirit.jaymoskingdoms.move.pale_glaive": "Pale Glaive",
+  "spirit.jaymoskingdoms.move.take_the_rest": "Take the Rest",
+  "spirit.jaymoskingdoms.move.hauling_hand": "Hauling Hand",
+  "spirit.jaymoskingdoms.move.javelin_head": "Javelin Heads",
+  "spirit.jaymoskingdoms.move.marshals_voice": "The Marshal's Voice",
+  "spirit.jaymoskingdoms.move.break_will": "Break",
+  "spirit.jaymoskingdoms.move.as_one": "Two as One",
+  "spirit.jaymoskingdoms.javelin_head.plain": "plain",
+  "spirit.jaymoskingdoms.javelin_head.fire": "fire",
+  "spirit.jaymoskingdoms.javelin_head.frost": "frost",
+  "spirit.jaymoskingdoms.javelin_head.venom": "venom",
+  "spirit.jaymoskingdoms.javelin_head.light": "light",
+  "message.jaymoskingdoms.spirit.javelin_head": "Javelin heads: %s",
+  "message.jaymoskingdoms.spirit.as_one.grimsby": "\"Stand aside in there. I'll show you once.\"",
+  "message.jaymoskingdoms.spirit.as_one.varro": "\"My hands now. Watch how it's done!\"",
+  "message.jaymoskingdoms.spirit.as_one.over": "The spirit lets go of your hands."
+}
