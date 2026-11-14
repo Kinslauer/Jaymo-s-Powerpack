@@ -538,3 +538,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "merge and post the lore". PR #1517 (Tinkers armour) merged; the last of the 35 Portable Mods picks. The Lore.md paragraph "Plate and travelers' gear" is still (new), waiting for his approval.
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "approved." for the Lore.md paragraph "Plate and travelers' gear" (its (new) mark removed). Also: "always post the lore when you say that from now on, im not gonna go search for it" (quote pending lore paragraphs in replies).
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "approved." for the Lore.md paragraph "The town books" (its (new) mark removed). All Portable Mods picks are merged and their lore approved.
+- 2026-11-14 (Andy, moose thread): "merge". PR #1518 (moose cows and young bulls) merged.
