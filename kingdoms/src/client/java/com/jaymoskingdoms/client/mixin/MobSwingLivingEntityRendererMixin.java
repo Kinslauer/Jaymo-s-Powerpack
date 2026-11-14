@@ -28,6 +28,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 	private void jaymoskingdoms$swingState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		MobAnimations.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
+		// the lasso: whirled overhead, tying, or hogtied
+		com.jaymoskingdoms.client.forms.LassoPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BioAbsorbPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BloodGrabPose.extract(entity, state, partialTicks);
@@ -76,6 +78,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.StakeStruggle.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.forms.LassoPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		// (0.7.321) last: a goblin's body is the goblin's (so held items and the parts on it follow)
 		com.jaymoskingdoms.client.GoblinBody.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
