@@ -195,14 +195,12 @@ kit.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
 
-(new) **How a power ends a fight** (power finishers, 2026-11-14, for Andy to approve). A holder standing empty-handed
-over a fallen foe finishes them with the power itself, and each power has one way folk know it by. The Arsenal's holder
-opens the rift over them and whatever answers falls through. A Chrono draws their remaining hours off them. Cryo
-freezes them through and breaks them like ice. Darktide opens the pool beneath them and writes one stroke across.
-Gravity piles their own weight on them. Resonance finds their pitch and sings it through them. Smoke goes in at the
-mouth and comes out all at once. The web winds them in silk and hauls the lines apart. Wind pulls the air out of them
-and brings the sky down. The Xenoform band puts its light through them. None of it is quick or sure: the power has to
-be held on them to the end, and a holder whose hold slips is thrown clear while the foe gets back up.
+**How a power ends a fight** (Andy, 2026-11-14).
+Nobody is taught how a power finishes a fallen foe, and nobody knows it ahead of time, the holder least of all. There
+is no name for it and no known way. Standing empty-handed over someone who is down, a holder does whatever feels
+natural in that moment, and the power answers in its own nature; they find out what it does as it happens. Because it
+is found and not known, it is never sure: a holder who loses the feel of it partway is thrown clear, and the foe gets
+back up.
 
 **The elemental powers** (Andy, 2026-11-11). Smoke, Gravity and Cryokinesis come from ki attuning to an element the
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
@@ -1656,7 +1654,8 @@ allow you to add it to a schematic, so your kingdom can build it"; the rest Clau
 the deserts the pillagers keep **fighting pits**: a sunk sand floor under stepped stands, where villagers taken in raids
 are made to fight for the camp's sport and the warlord takes the pit himself; the stands hold its pillagers, the rooms
 under them its prep, armory, beds and smithy, and a caster keeps the arena's best take and its caged allays in a box over
-the gate. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
+the gate. The greatest of these pits, the round arena of the far sands with its four towers and its crane, stands empty
+until a camp comes up from the Wildlands to take it. Every hold's people keep **its plans**: whoever brings its leader down takes them, and a mason who has seen the
 tier they were drawn in can copy the place out and build it again. This is the Retaking done with stone as well as
 blades: the realms raise the raiders' own forts, towers and pits as their own.
 
@@ -1738,6 +1737,24 @@ Townsfolk speak of raids and smugglers the way they speak of weather: something 
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
 and breaks under enough blows, and a fighter who loses one fetches another from camp; steel on steel throws sparks.
+
+(new) **Troubles, runners and starred work** (Claude's placement for the story quest picks, 2026-11-14, for Andy to
+approve). Most of what goes wrong in a village is small and somebody's own: a fold found empty, a debt, a bell rung in
+the night, a brother who never came home. Folk carry such a trouble until someone outside it will listen, and it is
+never one errand. It runs over days and weeks, the one who asked sends word when there is more (a **runner**, a
+villager paid a coin to find you on the road by daylight with a sealed letter, never a pigeon), and it ends the way
+the one who took it up chose: who was named, who was let walk. Nobody is told which way was right. The spared remember
+it and so do the dead's kin; some come back with thanks, some asking to follow, some with friends and knives. Not every
+trouble is offered. Some are only a drunk's story, a ledger left in a camp, a diary in a ruin, and whoever goes to look
+has taken it up. Paid work on a town's board is rated the way carters rate roads: the poster chalks **one to five
+stars** on the notice for how many come back from it. A board whose work gets done gets a name, and harder work is
+brought to it: packs gone to ground, a nest or a camp or a soured pit dug in too near, lamps for the dark corners
+before nightfall, a fence to raise, a cave-in that wants powder, a chest to fill for a hermit, a shrine or someone who
+wants no names, a traveller who will not walk alone, a night watch kept beside whoever rings the bell, and now and then
+**one with a name** (Greyjaw, Split-ear), a killer old enough to have been hunted before, which goes after the ones it
+lets run. A town talks about how its troubles ended, to your face, for a week or two. And villagers talk to each
+other whether anyone listens or not: the dog that dug up the Lantern Warden's bone, the price of salt, whose turn it
+is on the wall.
 
 ## Rules for writing against this
 
@@ -2039,3 +2056,32 @@ have given up on the land altogether.
 (new) **A kept home; the kitchen's knives** (Claude's placement for the Portable Mods picks, patch 2, Farmer's Delight, 2026-11-14, for Andy to approve). A house with its stores put by (cabinets, baskets, crates and bags of the harvest), a rug on the floor and a light left burning is what the Hearthkeeper's folk mean by a home, and a night slept in one sends you out warm against the cold. Nobody preaches it; it is only how farm families have always kept house, and a bare room costs you nothing. The kitchen knife is a farm tool before it is a weapon: flint for those with nothing else, copper and iron from the forge, gold for show, and a diamond set in the edge by smiths who can afford it. Thieves prize one for the same reason cooks do: it goes in quietly from behind.
 
 (new) **The stable's last tricks** (Claude's placement for the Portable Mods picks, patch 6, Icy's Better Horses leftovers, 2026-11-14, for Andy to approve). Riders in the Chivalry realms' tilt-yards carry a horse medkit, a satchel of bandage and honey salve; any groom will use one on any hurt horse, whoever owns it. The glide harness and ender saddlebags are no saddler's work: only a court wizard makes them, and sells them dear. The harness is a racing saddle with phantom membrane worked into wings; spread on a drop, they let horse and rider down slowly. The saddlebags are lined like an ender chest and open onto their owner's own chest, so only the one who owns the horse can reach in; anyone else finds only the horse's own pack.
+
+(new) **The musketoon** (Claude's placement for Andy's Frontier Armaments picks, 2026-11-14, for Andy to approve). The
+caravan masters wanted a wall gun a man could carry, and the realms' gunsmiths gave them one: a cannon's barrel cut
+short, bound in brass and set on a walnut stock. It throws the same iron ball the wall guns do and takes as long to
+feed as a man can stand still, so a guard fires it once at whatever comes down the road and fights on with the butt
+while he loads. It is a road gun: the garrisons keep their muskets, and no shop sells one. The flared long gun folk
+call the blunderbuss is older and commoner, a fowler's piece grown mean.
+
+(new) **The Templars and the frontier's wear** (Claude's placement for Andy's Frontier Armaments picks, 2026-11-14, for Andy to approve). The
+Truth takes no idol, but its knights took a sign: a plain cross with flared arms, first painted on the surcoats of the
+Templars who guard its realms, now cut over its shrines and borne on every shield and banner of a realm that holds to
+it. The Crowned Sun's warrior orders wear the same plate from the same armourers, and neither side will say who wore
+it first; a smith of either faith sells it only to their own. The Grim keeps black theirs in steel. Out on the
+frontier the wear is plainer: a village's guards go under a kettle helm with a wide hat over it, and the farm folk and
+carters keep the hat and leave the helm. The realms' gunners took a harness of plate over dark leather with a lamp on
+the chest to load by, and the caravan guards copied it. Court wizards dress as the hedge mages they once were, in wine
+red now. The raiders of the dry country wrap themselves against the sun; the horned visage the Nether's warlords wear
+is the same wrapping grown teeth. The heavy horned plate a camp chief wears is older than his camp and nobody forges
+it now. The back rooms have their own blue hoods, the tailors sell the long coat the Mad Tinkerer made his name in,
+and an orc warchief's tusked gold plate is hammered to an orc's frame and sits on no one else.
+
+(new) **Measure, edge and breath** (Claude's placement for Andy's Knights & Heraldry picks, 2026-11-14, for Andy to approve). Every drillmaster in the
+realms teaches three things before any form. The first is your weapon's measure: the Skyward Reach keeps a spear's
+length, the Low Lantern steps inside it. The second is what your edge is good for: mail turns a cut, a point finds the
+gaps between the rings, and only a mace argues with plate, which is why the Anvil-Father's smiths sell maces to the
+same knights they armour. The third is breath: a knight who runs to the fight in full harness arrives with his hand
+already loose on the hilt, and the camps say the first blow of any battle is struck by the hill.
+
+(new) **The fire cannon, the avatars' callings, the smith's hammer and the mortar** (Claude's placement for Andy's Frontier Armaments picks, patch 3, 2026-11-14, for Andy to approve). The Flame Avatars' camps are not one kind of fighter. The fire takes people of every calling and leaves the calling standing: a camp has its warlord with a two-handed axe, its sorcerer, its brute who fights with his hands, its cleric who mends the others at the hearth, its thief, its paladin behind a shield, its monk, and its tinkerer. The tinkerers are why the camps still stand. Hemmed between the Hornkin forts and the piglin war camps, with no powder that would keep in that heat and no iron to waste on shot, they built a gun that burns what the Nether gives: a blaze rod goes out of it whole and straight, through any plate, and a pinch of blaze powder goes out as a sheet of fire. They call it only "the cannon", and every camp's tinkerer carries one. They hand one to no outsider; an Emberborn who tinkers is another matter. The Forge Hammer is older and plainer: a smith's own hammer made heavy enough to fight with, which the Anvil-Father's smiths carry on the road because it works the anvil, breaks stone and breaks heads, and a smith with one needs nothing else. The field mortar is the gun-keeping realms' answer to a wall: a short tube on four legs that two soldiers can carry, which drops its shell over the top. War parties bring one beside their field gun and count its shells before they march.
