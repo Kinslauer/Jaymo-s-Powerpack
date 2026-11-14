@@ -39,6 +39,8 @@ import org.jspecify.annotations.Nullable;
  * resting on blocks), stepped every tick, from the top of the coil as it was really drawn ({@link LassoSockets}) to:
  * <ul>
  * <li>nothing, while the lasso is only held: a short tail with the loop (a model) swinging on its end;</li>
+ * <li>the loop whirling over the holder's head while they hold use, a ring of rope going round faster and wider as it comes up to
+ * speed ({@link LassoPose#angle}, {@link LassoPose#radius});</li>
  * <li>the loop in flight ({@link Lasso.Loop}), the loop's model leading the rope;</li>
  * <li>the one it holds ({@link Lasso#HOLDER}), with a noose round their middle.</li>
  * </ul>
@@ -70,8 +72,13 @@ public final class LassoRope {
 	static final Identifier LOOP_MODEL = JaymosKingdoms.id("lasso_loop");
 	static final float LOOP_SCALE = 0.9F;
 
-	/** What a rope's far end is on: nothing, a loop in flight, someone held. */
-	private record End(@Nullable Entity on) {
+	/** The whirling loop's middle: this far over the holder's head (blocks), and ahead of the eyes in your own first-person view. */
+	static final double WHIRL_OVER_HEAD = 0.4, WHIRL_FIRST_UP = 0.55, WHIRL_FIRST_AHEAD = 0.35;
+	/** A hogtied body lies low: its rope is tied this high off its feet (blocks). */
+	static final double TIED_LOW = 0.3;
+
+	/** What a rope's far end is on: nothing (or, {@code whirl} ticks in, the whirling loop), a loop in flight, someone held. */
+	private record End(@Nullable Entity on, float whirl) {
 	}
 
 	/** Ropes by their holder's entity id. */
@@ -99,14 +106,14 @@ public final class LassoRope {
 		Map<Integer, End> ends = new HashMap<>();
 		for (Player player : level.players()) {
 			if (!player.isSpectator() && (player.getMainHandItem().is(Lasso.ITEM) || player.getOffhandItem().is(Lasso.ITEM))) {
-				ends.put(player.getId(), new End(null));
+				ends.put(player.getId(), new End(null, LassoPose.whirling(player, 0.0F)));
 			}
 		}
 		for (Entity entity : level.entitiesForRendering()) {
 			if (entity instanceof Lasso.Loop loop && loop.getOwner() != null) {
-				ends.put(loop.getOwner().getId(), new End(loop));
+				ends.put(loop.getOwner().getId(), new End(loop, -1.0F));
 			} else if (entity instanceof LivingEntity held && held.getAttached(Lasso.HOLDER) != null) {
-				ends.put(held.getAttached(Lasso.HOLDER), new End(held));
+				ends.put(held.getAttached(Lasso.HOLDER), new End(held, -1.0F));
 			}
 		}
 		return ends;
@@ -114,7 +121,24 @@ public final class LassoRope {
 
 	/** Where the rope is fastened to what it is on. */
 	private static Vec3 fastened(Entity on, float partialTick) {
-		return on.getPosition(partialTick).add(0.0, on instanceof Lasso.Loop ? on.getBbHeight() * 0.5 : on.getBbHeight() * TIED_AT, 0.0);
+		return on.getPosition(partialTick).add(0.0, on instanceof Lasso.Loop ? on.getBbHeight() * 0.5 : Lasso.hogtied(on) ? TIED_LOW
+			: on.getBbHeight() * TIED_AT, 0.0);
+	}
+
+	/** The whirling loop's middle, over the holder's head (in your own first-person view, up and ahead of your eyes). */
+	private static Vec3 whirlMiddle(Minecraft minecraft, LivingEntity holder, float partialTick) {
+		if (holder == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
+			Vec3 look = holder.getViewVector(partialTick).multiply(1.0, 0.0, 1.0);
+			look = look.lengthSqr() < 1.0E-6 ? Vec3.ZERO : look.normalize();
+			return holder.getEyePosition(partialTick).add(0.0, WHIRL_FIRST_UP, 0.0).add(look.scale(WHIRL_FIRST_AHEAD));
+		}
+		return holder.getPosition(partialTick).add(0.0, holder.getBbHeight() + WHIRL_OVER_HEAD, 0.0);
+	}
+
+	/** Where the rope meets the whirling loop, {@code t} ticks into the whirl: going round the ring. */
+	private static Vec3 whirlPoint(Vec3 middle, float t) {
+		double a = LassoPose.angle(t), r = LassoPose.radius(t);
+		return middle.add(Math.cos(a) * r, 0.0, Math.sin(a) * r);
 	}
 
 	/**
@@ -240,7 +264,8 @@ public final class LassoRope {
 			}
 			Vec3 hand = hand(minecraft, holder, 1.0F);
 			Entity on = entry.getValue().on();
-			Vec3 end = on == null ? null : fastened(on, 1.0F);
+			float whirl = entry.getValue().whirl();
+			Vec3 end = on == null ? whirl >= 0.0F ? whirlPoint(whirlMiddle(minecraft, holder, 1.0F), whirl + 1.0F) : null : fastened(on, 1.0F);
 			double want = end == null ? IDLE_LENGTH : Math.max(LEAST, hand.distanceTo(end) * SLACK);
 			LINES.computeIfAbsent(entry.getKey(), id -> new Line(hand, want)).step(level, hand, end, want);
 		}
@@ -263,7 +288,9 @@ public final class LassoRope {
 				continue;
 			}
 			Entity on = end.on();
-			Vec3 fastened = on == null ? null : fastened(on, partialTick);
+			float whirl = on == null && holder instanceof Player player ? LassoPose.whirling(player, partialTick) : -1.0F;
+			Vec3 middle = whirl >= 0.0F ? whirlMiddle(minecraft, holder, partialTick) : null;
+			Vec3 fastened = on == null ? middle != null ? whirlPoint(middle, whirl) : null : fastened(on, partialTick);
 			Vec3[] line = entry.getValue().frame(hand(minecraft, holder, partialTick), fastened, partialTick);
 			Vec3 tip = line[POINTS - 1];
 			int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(tip));
@@ -273,14 +300,20 @@ public final class LassoRope {
 			PoseStack poseStack = context.poseStack();
 			boolean noose = on instanceof LivingEntity;
 			double round = noose ? on.getBbWidth() * 0.5 + NOOSE_GAP : 0.0;
-			Vec3 middle = noose ? new Vec3(on.getPosition(partialTick).x, tip.y, on.getPosition(partialTick).z).subtract(camera.x, 0.0, camera.z) : null;
+			Vec3 neck = noose ? new Vec3(on.getPosition(partialTick).x, tip.y, on.getPosition(partialTick).z).subtract(camera.x, 0.0, camera.z) : null;
+			Vec3 ring = middle == null ? null : middle.subtract(camera);
+			double ringRound = middle == null ? 0.0 : LassoPose.radius(whirl);
 			context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityCutout(ShackleTether.ROPE), (pose, buffer) -> {
 				ShackleTether.rope(buffer, pose, line, light);
 				if (noose) {
-					ShackleTether.collar(buffer, pose, middle, round, NOOSE_THICK, light);
+					ShackleTether.collar(buffer, pose, neck, round, NOOSE_THICK, light);
+				}
+				if (ring != null) {
+					// the loop itself, whirling round over the head
+					ShackleTether.collar(buffer, pose, ring, ringRound, NOOSE_THICK, light);
 				}
 			});
-			if (!noose) {
+			if (!noose && ring == null) {
 				loop(context, level, line[POINTS - 1], line[POINTS - 1].subtract(line[POINTS - 2]), light);
 			}
 		}

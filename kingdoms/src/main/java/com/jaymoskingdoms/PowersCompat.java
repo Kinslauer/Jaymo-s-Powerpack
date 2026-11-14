@@ -3111,6 +3111,53 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- the lasso's hogtie: Powers' Carry lifts a bound body, and lets go of one that breaks free ------------------------
+
+	/**
+	 * Adds {@code check} to Powers' {@code Carry.BOUND_CHECKS}: a body it says is tied hand and foot may be lifted as someone
+	 * downed is, and a bound player can't jump out of the arms. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void boundCheck(java.util.function.Predicate<net.minecraft.world.entity.Entity> check) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.Carry").getField("BOUND_CHECKS").get(null);
+			((java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>>)list).add(check);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Carry.BOUND_CHECKS (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle carrierOf, slip;
+	private static boolean lookedForSlip;
+
+	/** Whoever has {@code body} in their arms (Powers' {@code Carry.carrierOf} and {@code Carry.slip}) drops it. Nothing without Powers. */
+	public static void dropFromArms(net.minecraft.world.entity.Entity body) {
+		if (!lookedForSlip) {
+			lookedForSlip = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+					carrierOf = lookup.findStatic(carry, "carrierOf", java.lang.invoke.MethodType.methodType(net.minecraft.world.entity.player.Player.class,
+						net.minecraft.world.entity.Entity.class));
+					slip = lookup.findStatic(carry, "slip", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					carrierOf = slip = null;
+				}
+			}
+		}
+		try {
+			if (carrierOf != null && slip != null && carrierOf.invoke(body) instanceof net.minecraft.server.level.ServerPlayer carrier) {
+				slip.invoke(carrier);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't drop a body from its carrier's arms", e);
+		}
+	}
+
 	/** (0.7.404) Whether a bolas can trip {@code body} (a mob built like a person, on its feet); false without Powers. */
 	public static boolean trippable(net.minecraft.world.entity.Entity body) {
 		lookForTrip();
