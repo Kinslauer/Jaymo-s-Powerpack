@@ -86,7 +86,7 @@ public class SandWorm extends ActingMonster {
 	/** Waking: how often players are looked at (ticks), and how far from the pyramid's middle it starts. */
 	static final int LOOK_EVERY = 20 * 5, WAKE_OUT = 22, WAKE_TRIES = 16;
 
-	/** Its moves, synced by their place here (the client's SandWormModel poses each; none of them: under the sand). */
+	/** Its moves, synced by their place here (each an animation of its model's, by name; none of them: under the sand). */
 	public static final String[] ACTIONS = {"warn", "rise", "up", "bite", "sink"};
 
 	/** On the Overworld: the pyramids whose worm has woken, by their start chunk. */
