@@ -64,7 +64,7 @@ public final class ReaperClient {
 	static final float LOOM_ALPHA = 0.8F, HARVEST_ALPHA = 0.95F;
 	/** Harvesting: how far from the ghost it stands (blocks), and the share of the harvest the scythe is drawn back for. */
 	static final double HARVEST_STAND = 1.3;
-	static final float HARVEST_DRAW = 0.7F;
+	static final float HARVEST_DRAW = 0.85F;
 	/** The wings: their size over the figure's, how long they stay open after it strikes (ticks), and their pose folded and open (radians). */
 	static final float WING_SIZE = 1.7F, OPEN_TICKS = 30.0F;
 	static final float FOLD_SWEEP = 1.15F, OPEN_SWEEP = 0.45F, FOLD_DROOP = 0.9F, OPEN_DROOP = -0.25F, WING_BEAT = 0.2F, WING_SPEED = 0.12F;
@@ -130,7 +130,7 @@ public final class ReaperClient {
 			float harvest = harvest(state, now);
 			Entity ghost = harvest >= 0.0F ? level.getEntity(state.harvestId()) : null;
 			if (ghost != null) {
-				drawHarvest(context, keeper, ghost, harvest, partial, camera, now);
+				drawHarvest(context, keeper, state, ghost, harvest, partial, camera, now);
 				continue;
 			}
 			int stage = Reaper.stage(state);
@@ -160,7 +160,7 @@ public final class ReaperClient {
 		pose.scale(size, size, size);
 		SubmitNodeCollector collector = context.submitNodeCollector();
 		if (MCA) {
-			McaReaper.submit(collector, pose, age, McaReaper.REST, ARGB.colorFromFloat(LOOM_ALPHA, 1.0F, 1.0F, 1.0F), ORDER);
+			McaReaper.submit(collector, pose, age, McaReaper.REST, Reaper.SCYTHE, ARGB.colorFromFloat(LOOM_ALPHA, 1.0F, 1.0F, 1.0F), ORDER);
 		}
 		if (stage >= Reaper.WINGS_STAGE) {
 			// open while it strikes; at the Shroud, folded otherwise
@@ -190,7 +190,7 @@ public final class ReaperClient {
 	}
 
 	/** Harvesting: it stands over the ghost, between it and its keeper, the scythe drawn back and then brought down. */
-	private static void drawHarvest(LevelRenderContext context, LivingEntity keeper, Entity ghost, float harvest, float partial, Vec3 camera, double now) {
+	private static void drawHarvest(LevelRenderContext context, LivingEntity keeper, Reaper.State state, Entity ghost, float harvest, float partial, Vec3 camera, double now) {
 		if (!MCA) {
 			return;
 		}
@@ -211,7 +211,7 @@ public final class ReaperClient {
 		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
 		pose.translate(0.0F, -(SIZE - 1.0F) * 1.5F, 0.0F);
 		pose.scale(SIZE, SIZE, SIZE);
-		McaReaper.submit(context.submitNodeCollector(), pose, (float)(now % 100000.0), harvest < HARVEST_DRAW ? McaReaper.DRAWN : McaReaper.DOWN,
+		McaReaper.submit(context.submitNodeCollector(), pose, (float)(now % 100000.0), harvest < HARVEST_DRAW ? McaReaper.DRAWN : McaReaper.DOWN, Reaper.weapon(state),
 			ARGB.colorFromFloat(HARVEST_ALPHA * formed, 1.0F, 1.0F, 1.0F), ORDER);
 		pose.popPose();
 	}

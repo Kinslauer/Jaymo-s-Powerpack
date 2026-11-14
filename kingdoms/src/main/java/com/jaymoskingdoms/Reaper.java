@@ -43,6 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -111,6 +112,10 @@ public final class Reaper {
 	static final int SHROUD_TICKS = 80;
 	/** What a body the sweep kills rises for (ticks), and the most Death's Company raises at once. */
 	static final int RISEN_LIFE = 20 * 60, COMPANY_MOST = 8;
+	/** The risen smoke every this many ticks; a risen beast strikes from this far past its own width, this hard, once a second. */
+	static final int RISEN_SMOKE_TICKS = 4;
+	static final double RISEN_REACH = 1.2;
+	static final float RISEN_BITE = 4.0F;
 	/** The grave-captain: twice a thrall's health, and it does not crumble with time. */
 	static final String CAPTAIN_TAG = "jaymoskingdoms.reaper_captain";
 	static final int CAPTAIN_LIFE = Integer.MAX_VALUE / 2;
@@ -127,6 +132,16 @@ public final class Reaper {
 	 * {@code dead} near by now; when its harvest began ({@code harvestAt}, game time, 0 for none) and of what ({@code harvestId},
 	 * an entity id); when it last struck ({@code actAt}: the wings open).
 	 */
+	/** What it strikes with: its scythe most often ({@link #SCYTHE_IN_TEN} times in ten), else one of the others. */
+	public static final int SCYTHE = 0, GREATSWORD = 1, GREATAXE = 2, WARHAMMER = 3, HALBERD = 4, WEAPONS = 5;
+	static final int SCYTHE_IN_TEN = 6;
+
+	/** The weapon of the kill {@code state} is making now: the same for every viewer, picked by when it began and of what. */
+	public static int weapon(State state) {
+		int roll = Math.floorMod(Long.hashCode(state.harvestAt() * 31L + state.harvestId()) * 0x9E3779B9, 100);
+		return roll < SCYTHE_IN_TEN * 10 ? SCYTHE : 1 + roll % (WEAPONS - 1);
+	}
+
 	public record State(int toll, long fed, long refused, int dead, long harvestAt, int harvestId, long actAt) {
 		public static final Codec<State> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("toll", 0).forGetter(State::toll),
@@ -434,6 +449,9 @@ public final class Reaper {
 			if (player.isSpectator() || !player.isAlive() || !(player.level() instanceof ServerLevel level)) {
 				continue;
 			}
+			if (tick % RISEN_SMOKE_TICKS == 0L) {
+				risenTick(level, player);
+			}
 			long beat = tick + player.getId();
 			if (beat % 100L == 0L) {
 				call(player);
@@ -581,6 +599,12 @@ public final class Reaper {
 			grave.reaped(level);
 			Mana.give(player, HARVEST_MANA);
 			feed(player, TOLL_GHOST);
+		} else if (ghost instanceof LivingEntity living && Downed.isDowned(living)) {
+			// the Reaping
+			if (!Necromancy.execute(level, living, player)) {
+				living.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
+			}
+			feed(player, TOLL_REAP);
 		} else if (ghost instanceof LivingEntity living) {
 			living.hurtServer(level, level.damageSources().indirectMagic(player, player), GHOST_DAMAGE);
 			if (!living.isAlive()) {
@@ -626,17 +650,18 @@ public final class Reaper {
 		Entity seen = inSight(player, level, REACH, e -> e instanceof LivingEntity l && l.isAlive() && !Thralls.isThrall(l) && !(e instanceof GraveGhost));
 		if (seen instanceof LivingEntity target) {
 			if (Downed.isDowned(target) && player.distanceTo(target) <= REAPING_REACH) {
+				if (state.harvestAt() != 0L) {
+					// (it is already at a kill)
+					return;
+				}
 				if (cooling(player, "reaping", REAPING_COOLDOWN)) {
 					return;
 				}
-				// the Reaping: its execution
+				// the Reaping: it steps out over them and does it itself (harvested() lands the blow)
 				strike(player, state);
-				level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY(0.5), target.getZ(), 16, 0.3, 0.4, 0.3, 0.04);
-				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.5F);
-				if (!Necromancy.execute(level, target, player)) {
-					target.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
-				}
-				feed(player, TOLL_REAP);
+				State struck = player.getAttached(REAPER);
+				player.setAttached(REAPER, (struck == null ? state : struck).harvesting(level.getGameTime(), target.getId()));
+				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 				return;
 			}
 			if (cooling(player, "hand", HAND_COOLDOWN)) {
@@ -711,16 +736,70 @@ public final class Reaper {
 		if (Thralls.count(r.master()) >= Necromancy.MAX_THRALLS) {
 			return;
 		}
-		EntityType<? extends Mob> as = Necromancy.risesAs(r.type(), Climate.at(r.level(), net.minecraft.core.BlockPos.containing(r.at())));
-		if (as == null) {
-			return;
-		}
 		Entity corpse = KitchenCompat.freeCorpseNear(r.level(), r.at(), 2.5);
 		if (KitchenCompat.loaded() && corpse == null) {
 			return;
 		}
-		if (Thralls.raise(r.level(), as, r.at(), -1, r.master(), true, RISEN_LIFE, null) != null && corpse != null) {
+		if (risen(r.level(), corpse, r.type(), r.at(), r.master(), RISEN_LIFE) != null && corpse != null) {
 			corpse.discard();
+		}
+	}
+
+	/**
+	 * What the Reaper raises gets up as the one that died: {@code body}'s own kind and saved look (a shaman a shaman, a
+	 * wolf a wolf), never a stand-in zombie. {@code type} is used when there is no body to read.
+	 */
+	private static @Nullable Mob risen(ServerLevel level, @Nullable Entity body, @Nullable EntityType<?> type, Vec3 at, UUID master, int life) {
+		EntityType<?> was = body == null ? null : KitchenCompat.sourceType(body);
+		if (was == null) {
+			was = type;
+		}
+		if (was == null || was == net.minecraft.world.entity.EntityTypes.PLAYER) {
+			return null;
+		}
+		Mob mob = Thralls.raiseAs(level, was, body == null ? null : KitchenCompat.lookTag(body), at, master, life);
+		if (mob instanceof net.minecraft.world.entity.npc.villager.Villager v && level.getServer().getPlayerList().getPlayer(master) instanceof ServerPlayer keeper
+			&& McaCompat.isMca(v)) {
+			McaCompat.follow(v, keeper);
+		}
+		return mob;
+	}
+
+	/**
+	 * A risen villager's step (from {@link Workers#step}): a caster casts for its master; anyone else goes for whoever
+	 * its master fights. True while its fight stands in place of its brain.
+	 */
+	static boolean risenStep(ServerLevel level, Worker w) {
+		PathfinderMob mob = w.mob();
+		if (w instanceof Enlisted e && Casters.isOffice(w.role())) {
+			return Casters.step(level, e);
+		}
+		LivingEntity foe = mob.getTarget();
+		if (foe != null && foe.isAlive() && mob.tickCount % 10 == 0) {
+			Rulers.charge(mob, foe);
+		}
+		return false;
+	}
+
+	/** The risen smoke black for as long as they are up; a beast with no fight of its own closes and strikes for its master. */
+	private static void risenTick(ServerLevel level, ServerPlayer keeper) {
+		for (Mob mob : Thralls.of(keeper.getUUID())) {
+			if (mob.level() != level || !mob.entityTags().contains(Thralls.RISEN_TAG)) {
+				continue;
+			}
+			level.sendParticles(Fx.miasma(SMOKE, 1.2F), mob.getX(), mob.getY() + mob.getBbHeight() * 0.55, mob.getZ(), 3,
+				mob.getBbWidth() * 0.35, mob.getBbHeight() * 0.3, mob.getBbWidth() * 0.35, 0.004);
+			LivingEntity foe = mob.getTarget();
+			if (foe == null || !foe.isAlive() || mob instanceof net.minecraft.world.entity.monster.Enemy || mob instanceof Worker) {
+				continue;
+			}
+			double reach = mob.getBbWidth() * 0.5 + foe.getBbWidth() * 0.5 + RISEN_REACH;
+			if (mob.distanceToSqr(foe) > reach * reach) {
+				mob.getNavigation().moveTo(foe, 1.3);
+			} else if (level.getGameTime() % 20L < RISEN_SMOKE_TICKS) {
+				mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				foe.hurtServer(level, level.damageSources().mobAttack(mob), RISEN_BITE);
+			}
 		}
 	}
 
@@ -745,11 +824,7 @@ public final class Reaper {
 			if (raised >= COMPANY_MOST) {
 				break;
 			}
-			EntityType<? extends Mob> as = Necromancy.risesAs(KitchenCompat.sourceType(body), Climate.at(level, body.blockPosition()));
-			if (as == null) {
-				continue;
-			}
-			Mob mob = Thralls.raise(level, as, body.position(), -1, player.getUUID(), true, captain ? Necromancy.RAISE_LIFE : CAPTAIN_LIFE, null);
+			Mob mob = risen(level, body, null, body.position(), player.getUUID(), captain ? Necromancy.RAISE_LIFE : CAPTAIN_LIFE);
 			if (mob == null) {
 				continue;
 			}
@@ -761,7 +836,9 @@ public final class Reaper {
 					health.setBaseValue(health.getBaseValue() * 2.0);
 					mob.setHealth(mob.getMaxHealth());
 				}
-				mob.setCustomName(Component.translatable("entity.jaymoskingdoms.reaper_captain"));
+				if (!mob.hasCustomName()) {
+					mob.setCustomName(Component.translatable("entity.jaymoskingdoms.reaper_captain"));
+				}
 			}
 			body.discard();
 			raised++;

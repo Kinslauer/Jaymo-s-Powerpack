@@ -158,6 +158,59 @@ public final class Thralls {
 		return mob;
 	}
 
+	/** What rose as itself, for the Reaper (a scoreboard tag): it smokes black, and anything with no fight of its own is given one. */
+	public static final String RISEN_TAG = "jaymoskingdoms.reaper_risen";
+	/** Nothing with more health than this gets up as itself (no giants, no bosses). */
+	static final float RISEN_MOST_HEALTH = 150.0F;
+
+	/**
+	 * The dead get up as who they were, for the player {@code master}: a mob of {@code type} with the body's own saved
+	 * data {@code look} (its name, its face, what it wore), whole again, for {@code life} ticks. Null if it can't
+	 * (not a mob, or too great a thing).
+	 */
+	public static @Nullable Mob raiseAs(ServerLevel level, EntityType<?> type, net.minecraft.nbt.@Nullable CompoundTag look, Vec3 at, UUID master, int life) {
+		if (!(type.create(level, EntitySpawnReason.MOB_SUMMONED) instanceof Mob mob)) {
+			return null;
+		}
+		if (look != null) {
+			for (String gone : new String[] {"UUID", "Health", "DeathTime", "HurtTime", "Pos", "Motion", "Rotation", "Passengers", "leash", "Fire", "Brain", "NoAI"}) {
+				look.remove(gone);
+			}
+			try {
+				mob.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess(), look));
+			} catch (RuntimeException e) {
+				// (another mod's saved part that won't load: the body keeps what was read before it)
+				JaymosKingdoms.LOGGER.warn("A risen {} only partly loaded: {}", type, e.toString());
+			}
+			mob.setUUID(UUID.randomUUID());
+			mob.entityTags().removeIf(t -> t.contains("downed"));
+		}
+		if (mob.getMaxHealth() > RISEN_MOST_HEALTH) {
+			mob.discard();
+			return null;
+		}
+		mob.snapTo(at.x, at.y, at.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		mob.setHealth(mob.getMaxHealth());
+		mob.clearFire();
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			mob.setDropChance(slot, 0.0F);
+		}
+		mob.setCanPickUpLoot(false);
+		mob.setPersistenceRequired();
+		var sight = mob.getAttribute(Attributes.FOLLOW_RANGE);
+		if (sight != null) {
+			sight.setBaseValue(SIGHT + 8.0);
+		}
+		mob.addTag(RISEN_TAG);
+		mob.setAttached(TAG, new Tag(-1, master, true, level.getGameTime() + life));
+		level.addFreshEntity(mob);
+		LOADED.add(mob);
+		level.sendParticles(ParticleTypes.SOUL, at.x, at.y + 0.3, at.z, 14, 0.35, 0.2, 0.35, 0.03);
+		level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.6F), at.x, at.y + 0.6, at.z, 24, 0.35, 0.5, 0.35, 0.01);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F, 0.7F);
+		return mob;
+	}
+
 	/** Falls back to dust: a puff of souls and bone meal, and it's gone. */
 	static void crumble(ServerLevel level, Mob mob) {
 		level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 1.0, mob.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
