@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Portable Mods picks, patch 3: Tinkers fishing rod, JEI transfer
 branch: claude/project-thread-vb3yg2
 with: Claude (cloud thread "Port picked pieces from other mods")
