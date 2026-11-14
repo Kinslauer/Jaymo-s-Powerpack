@@ -1023,6 +1023,18 @@ not burn at sunrise; when its war is done the Reaper takes it back, and nothing 
 **reaped warlord** at their head. They pass by whoever carries the Reaper, so long as that one never raises a hand to
 them, and the Reaper is paid for what they kill near its keeper.
 
+(new) **The host at war** (Reaper's host thread, 2026-11-14; Claude's placement for Andy to approve). A host does not
+always go back. When one of the reaped cuts down a camp's warlord, the camp does not fall: every illager left in it dies
+where it stands and gets up, a reaped warlord takes the seat, and the palisade is the Reaper's from then on. Such a
+hold raids the towns round it as the living camp did, grows by every illager its people kill, and stands until someone
+kills its warlord; the courts near it post his head. Part of a host rides: the pillagers' dead on skeleton horses, and
+some on spiders, which will carry the dead and nothing living, and take a wall as if it were a road. No living illager
+has ever sat one. A big host pushes a mangonel of bone-grey timber to the walls it means to break, crewed by two of its
+own. By the sea a host comes in a black long ship with no flag, moors off the shore and wades in; the ship is still
+there in the morning, and nobody will take her. The dead evokers no longer call their vexes. They lift whoever is
+lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
+few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
