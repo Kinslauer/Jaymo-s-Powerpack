@@ -1,0 +1,11 @@
+{
+  "item.jaymoskingdoms.captured_plans": "Captured Plans",
+  "item.jaymoskingdoms.captured_plans.of": "The plans of %s, taken with it",
+  "item.jaymoskingdoms.captured_plans.tier": "Drawn in %s",
+  "item.jaymoskingdoms.captured_plans.how": "Use them to copy the place among your designs.",
+  "message.jaymoskingdoms.captured_plans.taken": "You take the plans of %s.",
+  "message.jaymoskingdoms.captured_plans.beyond": "You can't make these plans out until %s is open to you.",
+  "message.jaymoskingdoms.captured_plans.lost": "These plans have faded past reading.",
+  "message.jaymoskingdoms.captured_plans.copied": "The plans of %s are copied as design %s (%s x %s, %s high, %s blocks), drawn on a building plan.",
+  "message.jaymoskingdoms.captured_plans.crews": "Lay the plan out and fill it, have a mason's table build it, or offer it to your settlement at one and its builders will put it up."
+}

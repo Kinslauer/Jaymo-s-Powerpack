@@ -52,6 +52,11 @@ public final class Designs {
 	 * refused when uploaded and left unread in the folder.
 	 */
 	static final int PLAN_SIDE = 96, PLAN_HEIGHT = 128, PLAN_BLOCKS = 120000;
+	/**
+	 * A hold taken from its people ({@link SitePlans}): a settlement's builders put up a design copied from one this big,
+	 * across, high and blocks in all (the place stood that big, so they can build it that big).
+	 */
+	static final int CAPTURED_SIDE = 64, CAPTURED_HEIGHT = 64, CAPTURED_BLOCKS = 60000;
 	/** The smallest: across. */
 	static final int MIN_SIDE = 2;
 	/** How many designs one player may keep (creative players any number). */
@@ -63,6 +68,8 @@ public final class Designs {
 	private static final Map<String, Optional<Blueprint>> CACHE = new HashMap<>();
 	/** Who made each design: the Mason's Table screen asks for every design on each refresh, so the files aren't reread. */
 	private static final Map<String, String> AUTHORS = new HashMap<>();
+	/** The place each design was copied from ({@link SitePlans}; "": drawn by hand or uploaded), as AUTHORS. */
+	private static final Map<String, String> CAPTURED = new HashMap<>();
 
 	/** The server running (designs are read from its world's save). */
 	private static @Nullable MinecraftServer server;
@@ -75,6 +82,7 @@ public final class Designs {
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			CACHE.clear();
 			AUTHORS.clear();
+			CAPTURED.clear();
 			server = null;
 		});
 	}
@@ -96,7 +104,24 @@ public final class Designs {
 
 	/** (0.7.488) A design small enough for a settlement's builders (else only a {@link MasonTable} puts it up). */
 	static boolean forCrews(Blueprint bp) {
-		return bp.width() <= MAX_SIDE && bp.depth() <= MAX_SIDE && bp.height() <= MAX_HEIGHT && bp.blocks().size() <= MAX_BLOCKS;
+		if (bp.width() <= MAX_SIDE && bp.depth() <= MAX_SIDE && bp.height() <= MAX_HEIGHT && bp.blocks().size() <= MAX_BLOCKS) {
+			return true;
+		}
+		// a hold taken from its people: as big as it stood
+		MinecraftServer server = Designs.server;
+		return server != null && isDesign(bp.id()) && !captured(server, bp.id().substring(PREFIX.length())).isEmpty()
+			&& bp.width() <= CAPTURED_SIDE && bp.depth() <= CAPTURED_SIDE && bp.height() <= CAPTURED_HEIGHT && bp.blocks().size() <= CAPTURED_BLOCKS;
+	}
+
+	/** The place design {@code name} was copied from when it was taken ({@link SitePlans}), or "". */
+	static String captured(MinecraftServer server, String name) {
+		return CAPTURED.computeIfAbsent(name, n -> {
+			try {
+				return NbtIo.readCompressed(file(server, n), NbtAccounter.unlimitedHeap()).getStringOr(SitePlans.FROM, "");
+			} catch (IOException | RuntimeException e) {
+				return "";
+			}
+		});
 	}
 
 	/** {@code id} is a design's building id. */
@@ -264,6 +289,7 @@ public final class Designs {
 		}
 		CACHE.remove(name);
 		AUTHORS.remove(name);
+		CAPTURED.remove(name);
 		return true;
 	}
 
@@ -323,6 +349,39 @@ public final class Designs {
 		return name;
 	}
 
+	/**
+	 * A hold's plans, taken with it ({@link SitePlans}), copied among {@code player}'s designs as {@code base} (or the next
+	 * free name: a second fort is {@code illager_fort_2}). {@code tag} is the place as it stood, a structure file. The name
+	 * it's kept as, or null (told why).
+	 */
+	static @Nullable String keepCaptured(ServerPlayer player, String base, CompoundTag tag) {
+		MinecraftServer server = player.level().getServer();
+		String name = base;
+		for (int n = 2; Files.isRegularFile(file(server, name)) && n < 100; n++) {
+			String suffix = "_" + n;
+			name = (base.length() + suffix.length() > 32 ? base.substring(0, 32 - suffix.length()) : base) + suffix;
+		}
+		if (!name.matches(NAME_PATTERN) || Files.isRegularFile(file(server, name))) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
+			return null;
+		}
+		if (!player.isCreative() && names(server).stream().filter(n -> author(server, n).equals(player.getGameProfile().name())).count() >= PER_PLAYER) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		Blueprint bp = Blueprint.fromTemplate(PREFIX + name, tag);
+		if (bp == null || !fits(bp)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unreadable").withStyle(ChatFormatting.RED));
+			return null;
+		}
+		tag.putString("author", player.getGameProfile().name());
+		if (!store(server, name, tag)) {
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			return null;
+		}
+		return name;
+	}
+
 	static boolean delete(ServerPlayer player, String name) {
 		MinecraftServer server = player.level().getServer();
 		boolean creative = player.isCreative();
@@ -346,6 +405,7 @@ public final class Designs {
 		}
 		CACHE.remove(name);
 		AUTHORS.remove(name);
+		CAPTURED.remove(name);
 		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
 		return true;
 	}

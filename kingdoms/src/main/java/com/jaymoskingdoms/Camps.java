@@ -649,6 +649,8 @@ public final class Camps {
 	 * is anyone's), and its tents start to rot.
 	 */
 	static void chiefSlain(ServerLevel level, LivingEntity chief, int campId, DamageSource source) {
+		// the place as it stands, before anything rots: its plans go to whoever took it (SitePlans)
+		SitePlans.taken(level, chief, campId, source);
 		// (0.7.435) a goblin king's or a warchief's spoils: his trophy, and a tribe's king his crown and weapon
 		Spoils.kingFell(level, chief, campId, source);
 		if (SwornCaptains.seatTaken(level, chief, campId, source)) {

@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:illager_sites/arena",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 64,
+    "separation": 28,
+    "spread_type": "triangular",
+    "salt": 73841701
+  }
+}
