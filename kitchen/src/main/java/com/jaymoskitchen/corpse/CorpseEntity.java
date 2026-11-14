@@ -1232,7 +1232,14 @@ public class CorpseEntity extends Entity {
 		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
 		if (entity != null) {
 			ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag);
-			entity.load(input);
+			try {
+				entity.load(input);
+			} catch (RuntimeException e) {
+				// another mod's own saved part that won't load here (Re:Animal's wolf ball-play is never made on the
+				// client, so reading it threw, and Andy's game crashed drawing a wolf's corpse, 2026-11-14 3:35 AM):
+				// the body keeps what was read before it
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A {} corpse's body only partly loaded: {}", type.get(), e.toString());
+			}
 			// (0.4.50) the game reads attributes only on the server; the client's body needs its size (scale) too
 			if (level().isClientSide() && entity instanceof LivingEntity living) {
 				input.read("attributes", AttributeInstance.Packed.LIST_CODEC).ifPresent(living.getAttributes()::apply);
