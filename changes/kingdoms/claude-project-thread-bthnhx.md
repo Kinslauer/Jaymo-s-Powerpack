@@ -1,0 +1,4 @@
+# Townsfolk react to one risen Hollow
+- **Seen risen Hollow**: a player who died and rose one of the Hollow is met with it by every townsperson the first time they see them (12 blocks, in sight): one who knew them (10+ MCA hearts) cries out their name and grieves (-15 hearts), a stranger screams that the dead are walking (-5 hearts), a child shrieks. Those who mind the Hollow, and every child, run. Each remembers it for good (`Recollections.Kind.SAW_TURNED`), brings it up later and tells others. A full mask hides it; those born Hollow aren't met this way (`HollowSighting`, attachment `hollow_risen`, lang part `hollow_sighting.json`).
+- **Not taken in**: a village no longer carries a Hollow player home to tend after a death (`Shelter.take`). Andy's risen Hollow was carried into Caelreach and hit again there.
+- Built; not played.
