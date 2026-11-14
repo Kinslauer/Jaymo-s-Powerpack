@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:honey_bottle",
+		"minecraft:sweet_berries",
+		"minecraft:glow_berries",
+		{
+			"id": "jaymoskitchen:berry_wine",
+			"required": false
+		},
+		{
+			"id": "jaymoskitchen:grape_wine",
+			"required": false
+		},
+		{
+			"id": "jaymoskitchen:mead",
+			"required": false
+		}
+	]
+}

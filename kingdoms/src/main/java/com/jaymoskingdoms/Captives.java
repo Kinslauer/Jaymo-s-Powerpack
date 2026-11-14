@@ -498,6 +498,8 @@ public final class Captives {
 		int home = c == null ? -1 : c.home();
 		int standing = c == null ? FOLK : c.standingIndex();
 		bind(captive, false);
+		// (out of a shallow grave, they climb up onto the ground)
+		Doubles.unearth(level, captive);
 		Sparks.act(player, Sparks.Act.FREED, false);
 		captive.setAttached(CAPTIVE, new Captive(home, Optional.of(player.getUUID()), level.getGameTime(), standing));
 		PLEADED.remove(captive.getUUID());
@@ -535,7 +537,11 @@ public final class Captives {
 			if (c == null) {
 				LOADED.remove(v);
 			} else if (c.rescuer().isEmpty()) {
-				plead(level, v, now);
+				if (bound(v) && v.isNoAi()) {
+					plead(level, v, now);
+				} else {
+					walkFree(v);
+				}
 			} else {
 				lead(level, v, c, now);
 			}
@@ -749,6 +755,22 @@ public final class Captives {
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * Andy: "if they are captive and find themselves able to walk free like this, they are no longer captive". Out of their
+	 * chains (or with their legs back under them) and nobody leading them home: they are just themselves again, and go their
+	 * own way like anyone else. Nothing is owed for it.
+	 */
+	private static void walkFree(Villager v) {
+		bind(v, false);
+		if (v.level() instanceof ServerLevel level) {
+			Doubles.unearth(level, v);
+		}
+		v.removeAttached(CAPTIVE);
+		LOADED.remove(v);
+		PLEADED.remove(v.getUUID());
+		WAITED.remove(v.getUUID());
 	}
 
 	/** Left behind (or too long on the road): they go their own way, still grateful. */

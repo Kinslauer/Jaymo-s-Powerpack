@@ -136,7 +136,7 @@ public final class Runes {
 				return InteractionResult.FAIL;
 			}
 			// fed by mana if they have it to give, else by the Toll
-			boolean fed = Mana.attuned(player) && Mana.current(player) >= MANA && Mana.pay(player, MANA, Mana.WARD) || Reaper.spendToll(player, TOLL);
+			boolean fed = Mana.hasMana(player) && Mana.current(player) >= MANA && Mana.pay(player, MANA, Mana.WARD) || Reaper.spendToll(player, TOLL);
 			Vec3 centre = Vec3.atBottomCenterOf(at);
 			if (!fed) {
 				level.playSound(null, at, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 1.6F);

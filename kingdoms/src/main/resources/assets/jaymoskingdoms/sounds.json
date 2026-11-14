@@ -1994,5 +1994,32 @@
 				"volume": 0.8
 			}
 		]
+	},
+	"satyr.pipes_1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:satyr/pipes_1",
+				"stream": true
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.satyr_pipes"
+	},
+	"satyr.pipes_2": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:satyr/pipes_2",
+				"stream": true
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.satyr_pipes"
+	},
+	"satyr.pipes_3": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:satyr/pipes_3",
+				"stream": true
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.satyr_pipes"
 	}
 }

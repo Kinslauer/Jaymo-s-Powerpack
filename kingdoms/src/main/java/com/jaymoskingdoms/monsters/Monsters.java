@@ -87,9 +87,9 @@ public final class Monsters {
 
 	/** The monsters of legend, the ones folk gossip about and send you after. */
 	public static List<EntityType<?>> legends() {
-		// (0.7.329) and the minotaur (beasts/Minotaur); not the mud golem, one of the swamps' common threats now
+		// (0.7.329) and the minotaur (beasts/Minotaur), and the cyclops (beasts/Cyclops); not the mud golem, one of the swamps' common threats now
 		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, com.jaymoskingdoms.beasts.Beasts.MINOTAUR,
-			com.jaymoskingdoms.hunger.Hunger.GAUNT, MADE_BRUTE);
+			com.jaymoskingdoms.hunger.Hunger.GAUNT, MADE_BRUTE, com.jaymoskingdoms.beasts.Satyrs.CYCLOPS);
 	}
 
 	public static boolean legend(EntityType<?> type) {

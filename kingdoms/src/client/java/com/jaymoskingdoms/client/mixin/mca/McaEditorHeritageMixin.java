@@ -61,7 +61,8 @@ abstract class McaEditorHeritageMixin {
 	@Inject(method = "drawGender", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$pickedAlready(int x, int y, CallbackInfo ci) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if ((Object)this instanceof DestinyScreen && player != null && player.getAttached(LifeStory.GENDER) != null) {
+		if ((Object)this instanceof DestinyScreen && player != null
+			&& (player.getAttached(LifeStory.GENDER) != null || com.jaymoskingdoms.client.CreatorTab.on() && com.jaymoskingdoms.client.CreatorTab.gender() != null)) {
 			ci.cancel();
 		}
 	}
@@ -94,6 +95,10 @@ abstract class McaEditorHeritageMixin {
 		// (0.7.304) Andy: "The first screen should be choosing your gender": MCA's start-up creator begins on the gender the
 		// story's first page picked (once the server's data for you is in, so it isn't written over; its gender buttons are gone)
 		String gender = player.getAttached(LifeStory.GENDER);
+		// (a skipped story has told the server nothing yet: the pick is still the story screen's)
+		if (gender == null && (Object)this instanceof DestinyScreen && com.jaymoskingdoms.client.CreatorTab.on()) {
+			gender = com.jaymoskingdoms.client.CreatorTab.gender();
+		}
 		if (!this.jaymoskingdoms$gendered && this.jaymoskingdoms$loaded && gender != null && (Object)this instanceof DestinyScreen) {
 			Gender want = LifeStory.FEMALE.equals(gender) ? Gender.FEMALE : Gender.MALE;
 			if (this.villager.getGenetics().getGender() == want) {
