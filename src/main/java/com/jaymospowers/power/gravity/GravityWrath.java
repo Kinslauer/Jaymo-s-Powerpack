@@ -75,7 +75,7 @@ final class GravityWrath implements ElementalCorruption.Wrath {
 				}
 			} else if (entity instanceof ItemEntity || entity instanceof FallingBlockEntity) {
 				entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 1.1, 0.0));
-				entity.needsSync = true;
+				entity.syncVelocity = true;
 			}
 		}
 		for (int i = 0; i < RING_BLASTS; i++) {
@@ -99,7 +99,7 @@ final class GravityWrath implements ElementalCorruption.Wrath {
 				Vec3 in = player.position().subtract(living.position()).multiply(1.0, 0.0, 1.0);
 				if (in.lengthSqr() > 1.0) {
 					living.push(in.normalize().scale(PULL));
-					living.needsSync = true;
+					living.syncVelocity = true;
 				}
 			}
 		}
