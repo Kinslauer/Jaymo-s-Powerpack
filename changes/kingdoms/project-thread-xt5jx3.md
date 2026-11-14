@@ -88,3 +88,9 @@ ends the body for good. Compiled, not played.
   (standing, walking, each blow, the shot, the roar, the rush), where before only the shoulders and hips turned.
 - **The draugr archer's own kit.** Archers no longer wear the shield warriors' gear: no horned helm or pauldrons, a
   fur-banded leather cap, a leather jerkin and kilt over the mail, and a quiver across the back.
+- **Light draugr.** Two more ranks rise in the tomb: the **brawler**, unarmed and stripped to the waist, and the
+  **skirmisher**, one sword and no shield, in leather under the horned helm. They and the archer are out of the mail
+  and plate, so all three move faster than the shield warriors (0.28 against 0.22) and have less armour (2 against 8).
+- **Draugr and the reaped come apart.** With Jaymo's Kitchen, the bodies of draugr and of reaped pillagers, vindicators
+  and evokers come apart as a zombie's does: lift one and a limb comes away in your hand, strike it and parts are
+  knocked off. A draugr's body is drawn without the parts it has lost.

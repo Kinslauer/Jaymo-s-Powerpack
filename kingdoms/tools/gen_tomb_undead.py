@@ -310,11 +310,14 @@ def draugr():
 	b.bone("waist", "root", (0, 15, 0))
 	b.cube("waist", (-4, 14, -2.5), (4, 17, 2.5), "leather", 0.1)
 	b.cube("waist", (-1, 14.5, -3.1), (1, 16.5, -2.6), "gold")
-	b.cube("waist", (-4.5, 9.5, -2.6), (4.5, 14, 2.6), "mail", 0.05)
+	# (the mail is in bones of its own, so the light ranks can go without: DraugrRenderer)
+	b.bone("mail_skirt", "waist", (0, 15, 0))
+	b.cube("mail_skirt", (-4.5, 9.5, -2.6), (4.5, 14, 2.6), "mail", 0.05)
 	b.bone("body", "waist", (0, 17, 0))
 	# a fighter's taper: the waist narrow, the chest broad
-	b.cube("body", (-4.5, 17, -2.8), (4.5, 22, 2.8), "mail")
-	b.cube("body", (-5.5, 22, -3.2), (5.5, 28, 3.2), "mail")
+	b.bone("mail", "body", (0, 17, 0))
+	b.cube("mail", (-4.5, 17, -2.8), (4.5, 22, 2.8), "mail")
+	b.cube("mail", (-5.5, 22, -3.2), (5.5, 28, 3.2), "mail")
 	# (its own bone, so the living Warrior-born of the lore film can leave it off: InhabitantsClient.DraugrRenderer)
 	b.bone("ribs", "body", (0, 21, -2.9))
 	b.cube("ribs", (-2, 19, -3.0), (2, 23, -2.7), "skin", faces_paint={"north": ribs})
@@ -388,8 +391,9 @@ def draugr():
 	b.cube("hood", (-5.5, 27.5, -5.0), (-4.7, 37.2, 4.7), "shroud")
 	b.bone("crest", "head", (0, 37, 0))
 	b.cube("crest", (-0.6, 37, -4.5), (0.6, 40, 4.5), "gold")
-	# the archer's kit: no helm, horns or pauldrons, a fur-banded leather cap, a leather jerkin and kilt over the mail,
-	# a quiver across the back
+	# the light ranks' kit, worn in place of the mail and plate. The archer's: a fur-banded leather cap, a leather jerkin
+	# and kilt, a quiver across the back. The skirmisher's: the jerkin and kilt under the horned helm. The brawler's: the
+	# kilt and its own bare chest (the torso, which the jerkin covers on the other two).
 	b.bone("cap", "head", (0, 28, 0))
 	b.cube("cap", (-4.3, 33.5, -4.3), (4.3, 36.6, 4.3), "leather", 0.1)
 	b.cube("cap", (-4.6, 32, -4.6), (4.6, 33.8, 4.6), "fur", 0.1)
@@ -405,6 +409,10 @@ def draugr():
 	b.cube("quiver", (1.4, 27, 3.6), (2.2, 30, 4.4), "bone")
 	b.cube("quiver", (2.6, 27, 4.4), (3.4, 29.5, 5.2), "bone")
 	b.cube("quiver", (1.6, 27, 4.8), (2.4, 29, 5.6), "bone")
+	b.bone("torso", "body", (0, 17, 0))
+	b.cube("torso", (-4.3, 17, -2.6), (4.3, 22, 2.6), "skin")
+	b.cube("torso", (-5.3, 22, -3.0), (5.3, 28, 3.0), "skin")
+	b.cube("torso", (-5.4, 23.5, -3.2), (5.4, 24.5, 3.2), "leather")
 	model = b.project("draugr")
 	R = "root"
 	walk = {

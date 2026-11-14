@@ -90,6 +90,8 @@ public final class InhabitantsClient {
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
 		/** Its three looks (tools/gen_tomb_undead.py DRAUGR_LOOKS), dead and alive, picked by its id. */
 		static final int LOOKS = 3;
+		/** Jaymo's Kitchen's missing-part bits, lowest first. */
+		static final String[] CORPSE_PARTS = {"head", "right_arm", "left_arm", "right_leg", "left_leg"};
 		static final Identifier[] DEAD = new Identifier[LOOKS], LIVING = new Identifier[LOOKS];
 
 		static {
@@ -128,7 +130,8 @@ public final class InhabitantsClient {
 			Draugr.Rank rank = Draugr.Rank.values()[info.getOrDefaultGeckolibData(DRAUGR_RANK, 0)];
 			boolean warrior = rank == Draugr.Rank.WARRIOR, scourge = rank == Draugr.Rank.SCOURGE;
 			snapshots.ifPresent("axe", bone -> bone.skipRender(!warrior || !axe));
-			snapshots.ifPresent("sword", bone -> bone.skipRender(warrior ? axe : rank != Draugr.Rank.WIGHT && rank != Draugr.Rank.HALL_GUARD));
+			snapshots.ifPresent("sword", bone -> bone.skipRender(warrior ? axe
+				: rank != Draugr.Rank.WIGHT && rank != Draugr.Rank.HALL_GUARD && rank != Draugr.Rank.SKIRMISHER));
 			snapshots.ifPresent("shield", bone -> bone.skipRender(!warrior || axe));
 			snapshots.ifPresent("bow", bone -> bone.skipRender(rank != Draugr.Rank.ARCHER));
 			snapshots.ifPresent("staff", bone -> bone.skipRender(!scourge));
@@ -136,18 +139,29 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("cloak", bone -> bone.skipRender(!scourge && rank != Draugr.Rank.WIGHT));
 			snapshots.ifPresent("sword_left", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
 			snapshots.ifPresent("crest", bone -> bone.skipRender(rank != Draugr.Rank.HALL_GUARD));
-			// the archer goes light: a leather cap for the horned helm, no pauldrons, a jerkin and kilt over the mail, a quiver
-			boolean archer = rank == Draugr.Rank.ARCHER;
-			snapshots.ifPresent("helm", bone -> bone.skipRender(archer));
-			snapshots.ifPresent("right_pauldron", bone -> bone.skipRender(archer));
-			snapshots.ifPresent("left_pauldron", bone -> bone.skipRender(archer));
-			for (String kit : new String[] {"cap", "jerkin", "kilt", "quiver"}) {
-				snapshots.ifPresent(kit, bone -> bone.skipRender(!archer));
+			// the light ranks go without the mail and pauldrons, in a leather kilt: the archer in a cap and jerkin with a
+			// quiver, the skirmisher in the jerkin under the horned helm, the brawler bare-headed and stripped to the waist
+			boolean archer = rank == Draugr.Rank.ARCHER, brawler = rank == Draugr.Rank.BRAWLER, light = rank.light();
+			snapshots.ifPresent("helm", bone -> bone.skipRender(archer || brawler));
+			for (String heavy : new String[] {"right_pauldron", "left_pauldron", "mail", "mail_skirt"}) {
+				snapshots.ifPresent(heavy, bone -> bone.skipRender(light));
 			}
-			boolean hornless = scourge || archer;
+			snapshots.ifPresent("torso", bone -> bone.skipRender(!light));
+			snapshots.ifPresent("kilt", bone -> bone.skipRender(!light));
+			snapshots.ifPresent("jerkin", bone -> bone.skipRender(!light || brawler));
+			snapshots.ifPresent("cap", bone -> bone.skipRender(!archer));
+			snapshots.ifPresent("quiver", bone -> bone.skipRender(!archer));
+			boolean hornless = scourge || archer || brawler;
 			snapshots.ifPresent("right_horn", bone -> bone.skipRender(hornless));
 			// (and the bronze chieftain's left horn is broken off)
 			snapshots.ifPresent("left_horn", bone -> bone.skipRender(hornless || look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
+			// a body lying dead that has had a limb pulled off it (Jaymo's Kitchen)
+			int lost = com.jaymoskingdoms.client.KitchenParts.missing(info.renderState());
+			for (int i = 0; i < CORPSE_PARTS.length; i++) {
+				if ((lost & 1 << i) != 0) {
+					snapshots.ifPresent(CORPSE_PARTS[i], bone -> bone.skipRender(true).skipChildrenRender(true));
+				}
+			}
 			// a lore film's finisher took its head or its weapon arm
 			int maimed = info.getOrDefaultGeckolibData(DRAUGR_MAIMED, 0);
 			if ((maimed & Draugr.MAIM_HEAD) != 0) {

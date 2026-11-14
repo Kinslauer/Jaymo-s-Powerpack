@@ -3364,10 +3364,18 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Andy: "same with zombies, they are decaying and dead": the long dead (a zombie's body, a skeleton's), built like a
-	 * person. Lifted, it doesn't come up whole: a limb comes away. Struck, it comes apart easily.
+	 * person. Lifted, it doesn't come up whole: a limb comes away. Struck, it comes apart easily. So do the other long
+	 * dead a data pack names ({@link Corpses#COMES_APART}).
 	 */
 	public boolean comesApart() {
-		return (kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON) && !isPlayerCorpse() && rig().shape == RagdollRig.Shape.HUMANOID;
+		if (isPlayerCorpse() || rig().shape != RagdollRig.Shape.HUMANOID) {
+			return false;
+		}
+		if (kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON) {
+			return true;
+		}
+		EntityType<?> type = sourceType();
+		return type != null && type.builtInRegistryHolder().is(Corpses.COMES_APART);
 	}
 
 	/** Where {@code part} is on the body as it lies. */

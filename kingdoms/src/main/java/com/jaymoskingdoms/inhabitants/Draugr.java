@@ -103,10 +103,26 @@ public class Draugr extends Monster implements GeoEntity {
 	public static final byte BLOCKED = 94;
 
 	/** What a draugr was in the old raids, and so how it fights now. */
-	public enum Rank { WARRIOR, ARCHER, WIGHT, SCOURGE, HALL_GUARD }
+	public enum Rank {
+		WARRIOR, ARCHER, WIGHT, SCOURGE, HALL_GUARD,
+		/** Fights with its bare hands, stripped to the waist. */
+		BRAWLER,
+		/** One sword and no shield, in leather. */
+		SKIRMISHER;
+
+		/** Out of the mail and plate (the archer, the brawler, the skirmisher): quicker on its feet and easier to cut. */
+		public boolean light() {
+			return this == ARCHER || this == BRAWLER || this == SKIRMISHER;
+		}
+	}
 
 	/** Of those that rise: archers, wights, scourges and hall-guards; the rest are the warriors. */
-	static final float ARCHER_SHARE = 0.2F, WIGHT_SHARE = 0.12F, SCOURGE_SHARE = 0.1F, HALL_GUARD_SHARE = 0.08F;
+	static final float ARCHER_SHARE = 0.2F, WIGHT_SHARE = 0.12F, SCOURGE_SHARE = 0.1F, HALL_GUARD_SHARE = 0.08F, BRAWLER_SHARE = 0.1F,
+		SKIRMISHER_SHARE = 0.12F;
+	/** The light ranks, without the weight of mail: their speed and armour (the others' are {@link #SPEED} and {@link #ARMOR}). */
+	static final double LIGHT_SPEED = 0.28, LIGHT_ARMOR = 2.0;
+	/** The brawler's and the skirmisher's health, and the brawler's base damage (it has no blade to add to it). */
+	static final double BRAWLER_HEALTH = 36.0, SKIRMISHER_HEALTH = 32.0, BRAWLER_DAMAGE = 6.0;
 	/** Health of the ranks that aren't a warrior's {@link #HEALTH}; the hall-guard's base damage (its sword adds 5) and speed. */
 	static final double ARCHER_HEALTH = 30.0, WIGHT_HEALTH = 50.0, SCOURGE_HEALTH = 28.0, HALL_GUARD_HEALTH = 60.0, HALL_GUARD_DAMAGE = 4.0,
 		HALL_GUARD_SPEED = 0.27;
@@ -252,7 +268,9 @@ public class Draugr extends Monster implements GeoEntity {
 		Rank rank = roll < ARCHER_SHARE ? Rank.ARCHER
 			: roll < ARCHER_SHARE + WIGHT_SHARE ? Rank.WIGHT
 			: roll < ARCHER_SHARE + WIGHT_SHARE + SCOURGE_SHARE ? Rank.SCOURGE
-			: roll < ARCHER_SHARE + WIGHT_SHARE + SCOURGE_SHARE + HALL_GUARD_SHARE ? Rank.HALL_GUARD : Rank.WARRIOR;
+			: roll < ARCHER_SHARE + WIGHT_SHARE + SCOURGE_SHARE + HALL_GUARD_SHARE ? Rank.HALL_GUARD
+			: roll < ARCHER_SHARE + WIGHT_SHARE + SCOURGE_SHARE + HALL_GUARD_SHARE + BRAWLER_SHARE ? Rank.BRAWLER
+			: roll < ARCHER_SHARE + WIGHT_SHARE + SCOURGE_SHARE + HALL_GUARD_SHARE + BRAWLER_SHARE + SKIRMISHER_SHARE ? Rank.SKIRMISHER : Rank.WARRIOR;
 		this.arm(rank, rank == Rank.WARRIOR && this.random.nextFloat() < AXE_SHARE);
 	}
 
@@ -262,7 +280,7 @@ public class Draugr extends Monster implements GeoEntity {
 		this.entityData.set(RANK, rank.ordinal());
 		this.entityData.set(AXE, axe);
 		// (the archer's bow and the scourge's staff are the model's own: their hands are empty, so they are weak up close)
-		boolean blade = rank == Rank.WARRIOR || rank == Rank.WIGHT || rank == Rank.HALL_GUARD;
+		boolean blade = rank == Rank.WARRIOR || rank == Rank.WIGHT || rank == Rank.HALL_GUARD || rank == Rank.SKIRMISHER;
 		this.setItemSlot(EquipmentSlot.MAINHAND, !blade ? ItemStack.EMPTY : new ItemStack(axe ? Items.IRON_AXE : Items.IRON_SWORD));
 		this.setItemSlot(EquipmentSlot.OFFHAND, rank == Rank.WARRIOR && !axe ? new ItemStack(Items.SHIELD) : ItemStack.EMPTY);
 		this.setDropChance(EquipmentSlot.MAINHAND, WEAPON_DROP);
@@ -272,6 +290,8 @@ public class Draugr extends Monster implements GeoEntity {
 			case WIGHT -> WIGHT_HEALTH;
 			case SCOURGE -> SCOURGE_HEALTH;
 			case HALL_GUARD -> HALL_GUARD_HEALTH;
+			case BRAWLER -> BRAWLER_HEALTH;
+			case SKIRMISHER -> SKIRMISHER_HEALTH;
 			default -> HEALTH;
 		};
 		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
@@ -279,6 +299,13 @@ public class Draugr extends Monster implements GeoEntity {
 		if (rank == Rank.HALL_GUARD) {
 			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(HALL_GUARD_DAMAGE);
 			this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(HALL_GUARD_SPEED);
+		}
+		if (rank.light()) {
+			this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(LIGHT_SPEED);
+			this.getAttribute(Attributes.ARMOR).setBaseValue(LIGHT_ARMOR);
+		}
+		if (rank == Rank.BRAWLER) {
+			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BRAWLER_DAMAGE);
 		}
 	}
 
@@ -525,7 +552,7 @@ public class Draugr extends Monster implements GeoEntity {
 		if (hit) {
 			this.triggerAnim("action", switch (this.rank()) {
 				case HALL_GUARD -> "attack_twin";
-				case ARCHER -> "swing_across";
+				case ARCHER, BRAWLER -> "swing_across";
 				default -> this.axe() ? "attack_axe" : "attack_sword";
 			});
 			if (target instanceof LivingEntity living) {
