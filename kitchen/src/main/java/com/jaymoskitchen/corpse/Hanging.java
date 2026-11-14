@@ -33,6 +33,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Take the head</b> (a cleaver), if it has one: the body's drawn without it ({@link #setOnHead}: Powers throws
  * it down as a severed head you can carry off).</li>
  * <li><b>Skin it</b> (a skinning knife), if it has anything to skin or pluck: its hide, wool or feathers.</li>
+ * <li><b>Gut it</b> (a skinning knife): its offal, before any cut is made.</li>
  * <li><b>Three cuts</b> (a cleaver): meat, fat, bones and the rest, a third at a time, with a proper job's extras
  * (as a butcher table's); gone after the last.</li>
  * </ol>
@@ -60,6 +61,8 @@ public final class Hanging {
 	/** Knives that skin slowly: flint and bone. */
 	public static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> POOR_KNIVES = net.minecraft.tags.TagKey.create(
 		net.minecraft.core.registries.Registries.ITEM, com.jaymoskitchen.JaymosKitchen.id("poor_knives"));
+	/** Offal from gutting it: a small body, most, and a big carcass. */
+	static final int OFFAL_SMALL = 1, OFFAL = 2, OFFAL_BIG = 4;
 	/** Animal fat from anything bigger than a chicken after the last cut (at least one, up to this many more). */
 	static final int FAT_MORE = 1;
 
@@ -321,6 +324,14 @@ public final class Hanging {
 				return use(corpse, level, player, held);
 			}
 			default -> {
+				if (stage == SKINNED && !corpse.gutted()) {
+					if (!knife) {
+						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_knife_gut"));
+						return InteractionResult.SUCCESS_SERVER;
+					}
+					gut(corpse, level, player, held);
+					return InteractionResult.SUCCESS_SERVER;
+				}
 				if (!cleaver) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_cleaver_cut"));
 					return InteractionResult.SUCCESS_SERVER;
@@ -401,6 +412,16 @@ public final class Hanging {
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.8F, 0.8F);
 		level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinned"));
+	}
+
+	/** Opened and emptied before the cuts: its offal. */
+	private static void gut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
+		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		corpse.spawnAtLocation(level, new ItemStack(Butchery.OFFAL, corpse.oneHanded() ? OFFAL_SMALL : corpse.tooBigToLift() ? OFFAL_BIG : OFFAL), 0.3F);
+		corpse.setGutted();
+		corpse.jolt(false);
+		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 0.8F, 0.7F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.gutted"));
 	}
 
 	private static void cut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {

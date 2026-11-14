@@ -977,7 +977,7 @@
 	"message.jaymoskitchen.hook.need_cleaver_head": "The head comes off with a cleaver",
 	"message.jaymoskitchen.hook.head_off": "Head off. Now skin it with a knife",
 	"message.jaymoskitchen.hook.need_knife": "Skin it with a knife",
-	"message.jaymoskitchen.hook.skinned": "Skinned. Three cleaver cuts left",
+	"message.jaymoskitchen.hook.skinned": "Skinned. Now gut it with a knife",
 	"message.jaymoskitchen.hook.need_cleaver_cut": "The cuts take a cleaver",
 	"message.jaymoskitchen.hook.cut": "Cut %s of %s",
 	"message.jaymoskitchen.hook.done": "Butchered down to the bones",

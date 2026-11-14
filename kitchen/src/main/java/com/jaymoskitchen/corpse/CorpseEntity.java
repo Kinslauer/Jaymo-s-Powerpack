@@ -260,6 +260,8 @@ public class CorpseEntity extends Entity {
 	private int butcherStage, bleedTotal, bleedLeft, bloodPoured, spilt;
 	/** Knife strokes into taking its skin off ({@link Hanging#SKIN_STROKES}). */
 	private int skinStrokes;
+	/** Its guts are out (the step after skinning, {@link Hanging}). */
+	private boolean gutted;
 	/** How it died, if that cost it hide or meat ({@link CleanKill}), and whether whoever's working it has been told. */
 	private String death = CleanKill.CLEAN;
 	private boolean deathTold;
@@ -996,6 +998,14 @@ public class CorpseEntity extends Entity {
 
 	void setButcherStage(int stage) {
 		this.butcherStage = stage;
+	}
+
+	boolean gutted() {
+		return gutted;
+	}
+
+	void setGutted() {
+		this.gutted = true;
 	}
 
 	/** One more knife stroke at its skin; how many that makes. */
@@ -3538,6 +3548,7 @@ public class CorpseEntity extends Entity {
 		this.bloodPoured = input.getIntOr("BloodPoured", 0);
 		this.spilt = input.getIntOr("Spilt", 0);
 		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
+		this.gutted = input.getBooleanOr("Gutted", false);
 		this.death = input.getStringOr("Death", CleanKill.CLEAN);
 		this.spoiled = new ArrayList<>(input.read("Spoiled", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
@@ -3602,6 +3613,7 @@ public class CorpseEntity extends Entity {
 			output.putInt("BloodPoured", bloodPoured);
 			output.putInt("Spilt", spilt);
 			output.putInt("SkinStrokes", skinStrokes);
+			output.putBoolean("Gutted", gutted);
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

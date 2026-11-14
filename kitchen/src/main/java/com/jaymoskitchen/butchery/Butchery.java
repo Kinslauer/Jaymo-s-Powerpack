@@ -55,6 +55,8 @@ public final class Butchery {
 	 * sausage (bottled blood, raw meat and grain, cooked), leather scraps (repair leather), the three leather finishes
 	 * (supple, harness, hardened: each for its own crafts), and a hide rug.
 	 */
+	/** Andy: "Yes i do" (gutting). What comes out of a carcass gutted on the hook ({@code corpse/Hanging}), raw and cooked. */
+	public static Item OFFAL, COOKED_OFFAL;
 	public static Item BLOOD_MEAL, RAW_BLOOD_SAUSAGE, BLOOD_SAUSAGE, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER;
 	public static Block HIDE_RUG;
 
@@ -83,6 +85,8 @@ public final class Butchery {
 		RAW_BLOOD_SAUSAGE = item("raw_blood_sausage", Item::new, new Item.Properties().food(food(2, 0.2F)));
 		BLOOD_SAUSAGE = item("blood_sausage", Item::new, new Item.Properties().food(food(7, 0.8F)));
 		LEATHER_SCRAPS = item("leather_scraps", Item::new, new Item.Properties());
+		OFFAL = item("offal", Item::new, new Item.Properties().food(food(2, 0.1F)));
+		COOKED_OFFAL = item("cooked_offal", Item::new, new Item.Properties().food(food(5, 0.6F)));
 		SUPPLE_LEATHER = item("supple_leather", Item::new, new Item.Properties());
 		HARNESS_LEATHER = item("harness_leather", Item::new, new Item.Properties());
 		HARDENED_LEATHER = item("hardened_leather", Item::new, new Item.Properties());
@@ -111,6 +115,8 @@ public final class Butchery {
 			output.accept(new ItemStack(BLOOD_BOTTLE));
 			output.accept(new ItemStack(RAW_BLOOD_SAUSAGE));
 			output.accept(new ItemStack(BLOOD_SAUSAGE));
+			output.accept(new ItemStack(OFFAL));
+			output.accept(new ItemStack(COOKED_OFFAL));
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			for (Item item : List.of(BLOOD_MEAL, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER)) {
