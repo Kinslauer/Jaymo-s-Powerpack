@@ -60,3 +60,22 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   environment variable; a network secret breaks it because Gemini rejects the Bearer header the proxy adds). Use only its
   text/code tools (`ask_gemini`, `gemini_code_review`, `gemini_challenge`, `gemini_analyze_codebase`) as an extra verifier;
   its answers are advice to check against the code. Media, agent and OpenRouter tools are denied in `.claude/settings.json`.
+
+## Coding guidelines (every agent, every task)
+
+From Andrej Karpathy's notes on common coding-agent mistakes, via
+[multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (its `CLAUDE.md`). The project
+rules above win where the two differ. For trivial tasks, use judgment.
+
+1. **Think before coding.** State your assumptions. If a request can be read more than one way, say which reading you
+   took (or ask) instead of picking silently. If something simpler exists, say so and push back. If something is
+   unclear, stop, name what's confusing and ask.
+2. **Simplicity first.** The minimum code that solves the problem: no features beyond what was asked, no abstractions
+   for single-use code, no configurability nobody requested, no error handling for impossible cases. If 200 lines
+   could be 50, rewrite it.
+3. **Surgical changes.** Touch only what the task needs. Don't "improve", refactor or restyle nearby code, comments or
+   formatting; match the existing style. Mention unrelated dead code instead of deleting it. Remove only the imports,
+   variables and functions your own change made unused. Every changed line should trace back to the request.
+4. **Goal-driven execution.** Turn the task into checkable goals ("fix the bug" -> a test or check that reproduces it,
+   then passes) and verify against them before calling the work done. For multi-step work, state a short plan with a
+   check for each step.

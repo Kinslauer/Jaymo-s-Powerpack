@@ -77,6 +77,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Monsters.SILVER_SKELETON,
 			context -> new InhabitantRenderer<SilverSkeleton>(context, "silver_skeleton", 1.0F, SILVER_SHADOW, "head"));
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
+		EntityRenderers.register(Inhabitants.YOUTH_WISP, YouthWispRenderer::new);
 	}
 
 	/**
