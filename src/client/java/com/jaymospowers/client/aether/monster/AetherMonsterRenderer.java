@@ -11,6 +11,8 @@ import com.jaymospowers.aether.monster.Swet;
 import com.jaymospowers.aether.monster.Tempest;
 import com.jaymospowers.aether.monster.Zephyr;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
@@ -31,6 +33,8 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 	static final class State extends LivingEntityRenderState {
 		/** What it is doing (each model says what the numbers mean). */
 		int action;
+		/** Ticks since {@link #action} last changed (the one-shot animations run on it). */
+		float actionTime;
 		/** 0 to 1: how far into whatever it is doing (hiding, digging, burying, snapping...). */
 		float progress;
 		boolean ceiling, armed, glowing, charging;
@@ -68,6 +72,11 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 	}
 
 	private final Look<T> look;
+	/** Per mob (by id): the action last seen and the tick it began, for {@link State#actionTime}. */
+	private final Map<Integer, float[]> actions = new HashMap<>();
+	/** The map is emptied past this many mobs; a mob first seen mid-action counts as long into it. */
+	private static final int ACTIONS_KEPT = 512;
+	private static final float LONG_AGO = 10000.0F;
 
 	AetherMonsterRenderer(EntityRendererProvider.Context context, AetherMonsterModel model, float shadow, Look<T> look) {
 		super(context, model, shadow);
@@ -99,6 +108,16 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 		state.attack = mob.getSwingAnimation(partialTicks);
 		state.stretch = mob.onGround() ? 0.0F : Mth.clamp((float)mob.getDeltaMovement().y * 2.5F, -0.4F, 0.6F);
 		this.look.extract(mob, state, partialTicks);
+		float now = mob.tickCount + partialTicks;
+		if (this.actions.size() > ACTIONS_KEPT) {
+			this.actions.clear();
+		}
+		float[] since = this.actions.computeIfAbsent(mob.getId(), id -> new float[] {state.action, now - LONG_AGO});
+		if (since[0] != state.action) {
+			since[0] = state.action;
+			since[1] = now;
+		}
+		state.actionTime = now - since[1];
 		state.isUpsideDown = state.ceiling;
 	}
 
@@ -138,6 +157,9 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 
 	// ---- the looks ----
 
+	/** The zephyr's model is drawn this much larger, to fill its box. */
+	private static final float ZEPHYR_SCALE = 1.8F;
+
 	static Look<Zephyr> zephyr() {
 		return new Look<>() {
 			@Override
@@ -148,6 +170,11 @@ final class AetherMonsterRenderer<T extends Mob> extends MobRenderer<T, AetherMo
 			@Override
 			public String skin(State state) {
 				return "zephyr";
+			}
+
+			@Override
+			public float scale(State state) {
+				return ZEPHYR_SCALE;
 			}
 		};
 	}
