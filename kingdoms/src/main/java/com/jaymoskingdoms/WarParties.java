@@ -48,6 +48,9 @@ import org.jspecify.annotations.Nullable;
  * players who marched get a cut and the realm's thanks ({@link #deliver}). Break the cart open, or kill its horse or
  * carter, and the spoils spill on the ground for the taking ({@link #cartBroken}). If the soldiers fall, a laden cart
  * goes on home alone.
+ *
+ * <p><b>The siege train.</b> A realm's party with soldiers enough brings siege engines, pushed by their crews
+ * ({@link SiegeTrain}).
  */
 final class WarParties {
 	/** How often each side of a war considers sending a party (ticks), the chance it does, and the least time between two (ticks). */
@@ -121,6 +124,9 @@ final class WarParties {
 		/** Where its cart last got on, and when (to help it over what stops it). */
 		@Nullable Vec3 cartMark;
 		long cartMarkAt;
+		/** Its siege engines, and the soldiers who push and work them ({@link SiegeTrain}). */
+		final List<UUID> engines = new ArrayList<>();
+		final Set<UUID> crew = new HashSet<>();
 
 		boolean laden() {
 			return !this.spoils.isEmpty() || this.spoilsSilver > 0;
@@ -281,6 +287,7 @@ final class WarParties {
 			ACTIVE.remove(key(war.id(), side));
 			return null;
 		}
+		SiegeTrain.muster(level, party, from, target, muster, great);
 		Banners.tell(level, target.seat(), war, Component.translatable("message.jaymoskingdoms.war.party", from.name(), target.name())
 			.withStyle(ChatFormatting.RED));
 		for (ServerPlayer player : Raids.players(level, target.seat(), Raids.ANNOUNCE_RANGE)) {
@@ -326,7 +333,8 @@ final class WarParties {
 		}
 		for (Party party : ACTIVE.values()) {
 			if (party.soldiers.contains(mob.getUUID())) {
-				return party.phase != Phase.SIEGE && !party.holders.contains(mob.getUUID()) && !Rulers.foeNear(level, mob);
+				return (party.phase != Phase.SIEGE || SiegeTrain.pushing(level, party, mob)) && !party.holders.contains(mob.getUUID())
+					&& !Rulers.foeNear(level, mob);
 			}
 		}
 		return false;
@@ -732,6 +740,8 @@ final class WarParties {
 				return;
 			}
 			ACTIVE.remove(key);
+			// (its engines stand where their crews fell)
+			SiegeTrain.end(level, party, party.phase == Phase.RETURN);
 			if (wagon != null) {
 				dismissCart(level, party);
 			} else if (!party.cartBroken && party.laden()) {
@@ -751,6 +761,7 @@ final class WarParties {
 			withdraw(party, soldiers, from, now);
 		}
 		driveCart(level, key, party, soldiers, from, target);
+		SiegeTrain.drive(level, party, from, target);
 		switch (party.phase) {
 			case MARCH -> {
 				if (!party.frontierPlanted) {
@@ -760,7 +771,7 @@ final class WarParties {
 				Wagon wagon = cart(level, party);
 				Vec3 seat = Vec3.atCenterOf(target.seat());
 				for (PathfinderMob soldier : soldiers) {
-					if (party.holders.contains(soldier.getUUID())) {
+					if (party.holders.contains(soldier.getUUID()) || SiegeTrain.serving(level, party, soldier) != null) {
 						continue;
 					}
 					if (Rulers.target(soldier) == null) {
@@ -813,7 +824,7 @@ final class WarParties {
 					if (home || !Raids.playerNear(level, soldier.blockPosition(), VANISH_RANGE)) {
 						vanish(level, soldier);
 						party.soldiers.remove(soldier.getUUID());
-					} else if (Rulers.target(soldier) == null && from != null) {
+					} else if (Rulers.target(soldier) == null && from != null && !SiegeTrain.pushing(level, party, soldier)) {
 						walk(level, soldier, from.seat());
 					}
 				}
@@ -822,6 +833,7 @@ final class WarParties {
 					// (the cart out of sight gets home unseen; a broken one's spoils were spilled, and what's left the soldiers carried)
 					deliver(level, party, from);
 					ACTIVE.remove(key);
+					SiegeTrain.end(level, party, true);
 				}
 			}
 		}
@@ -846,6 +858,9 @@ final class WarParties {
 			for (PathfinderMob guard : soldiers) {
 				if (keep <= 0) {
 					break;
+				}
+				if (party.crew.contains(guard.getUUID())) {
+					continue;
 				}
 				guard.setHomeTo(planted, HOLD_RADIUS);
 				party.holders.add(guard.getUUID());
@@ -989,5 +1004,6 @@ final class WarParties {
 		UNDO.clear();
 		STRAYS.clear();
 		STRAY_CARTS.clear();
+		SiegeTrain.clear();
 	}
 }

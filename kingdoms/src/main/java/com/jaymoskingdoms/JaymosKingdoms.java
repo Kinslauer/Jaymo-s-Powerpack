@@ -520,6 +520,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)
 		GolemLairs.register();
 		Cannonball.register();
+		// the siege engines a war party brings (SiegeTrain): the mangonel and its stone
+		Mangonel.register();
+		SiegeStone.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
 		Cannons.register();

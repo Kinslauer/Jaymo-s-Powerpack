@@ -122,7 +122,9 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			// but never on its own side's land or in a standing faction's buildings: a wall gun keeps its streets whole
 			net.minecraft.core.BlockPos struck = ((BlockHitResult) hit).getBlockPos();
 			if (!ownGround(level, (Worker) gunner, struck)) {
-				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck), com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
+				// (a siege train's field gun only tears up loose ground: the besieged keep what they built)
+				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck),
+					SiegeTrain.crew(gunner) ? SiegeStone.DENT : com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
 			}
 			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
 			return;
@@ -133,7 +135,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	}
 
 	/** (0.7.490) {@code pos} lies on land the gunner's own faction claims, or in a building some standing faction holds. */
-	private static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
+	static boolean ownGround(ServerLevel level, Worker gunner, net.minecraft.core.BlockPos pos) {
 		Faction own = Factions.get(level.getServer(), gunner.factionId());
 		if (own != null && own.claims(net.minecraft.world.level.ChunkPos.containing(pos))) {
 			return true;
@@ -147,7 +149,8 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e != gunner && e.isAlive() && !e.isSpectator())) {
 			double d = victim == direct ? 0.0 : victim.getBoundingBox().getCenter().distanceTo(at);
-			if (d > BURST_RADIUS || !Javelins.harms(gunner, victim)) {
+			// (a field gun at a siege hurts the besieged realm's fighters too: SiegeTrain)
+			if (d > BURST_RADIUS || !(Javelins.harms(gunner, victim) || SiegeTrain.crew(gunner) && SiegeTrain.harms(gunner, victim))) {
 				continue;
 			}
 			float share = (float) (1.0 - d / BURST_RADIUS);

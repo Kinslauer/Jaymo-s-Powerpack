@@ -72,10 +72,16 @@ public final class Cannon extends Entity {
 	private @Nullable BlockPos post;
 	private long next;
 	private float damage;
+	/** A war party's field gun ({@link SiegeTrain}): pushed by its crew, worked by the first of them, never saved. Null for a kingdom's own. */
+	@Nullable Haul haul;
+	private @Nullable LivingEntity mark;
 
 	/** Client side: ticks since it last fired, and its barrel's pitch last tick. */
 	public int sinceFired = RECOIL_TICKS;
 	public float pitchO;
+	/** Client side: how far it has rolled along the ground (blocks, forward positive), and where it stood last tick. */
+	public float rolled, rolledO;
+	private @Nullable Vec3 was;
 
 	public Cannon(EntityType<? extends Cannon> type, Level level) {
 		super(type, level);
@@ -129,6 +135,9 @@ public final class Cannon extends Entity {
 
 	/** {@code e} is an archer (a folk or a villager) of its kingdom's. */
 	private boolean gunnerOf(Entity e) {
+		if (this.haul != null) {
+			return this.haul.crew.contains(e.getUUID());
+		}
 		return e instanceof Worker w && w.role() == Folk.ARCHER && w.factionId() == this.faction;
 	}
 
@@ -155,9 +164,20 @@ public final class Cannon extends Entity {
 			if (this.sinceFired < RECOIL_TICKS) {
 				this.sinceFired++;
 			}
+			this.rolledO = this.rolled;
+			if (this.was != null) {
+				this.rolled += SiegeTrain.rolled(this, this.was);
+			}
+			this.was = this.position();
 			return;
 		}
 		long now = level.getGameTime();
+		if (this.haul != null && this.haul.to != null) {
+			// a field gun on the march
+			this.haul.step(level, this);
+			this.settle();
+			return;
+		}
 		if ((now + this.getId()) % UPKEEP_CHECK == 0 && !Muskets.afford(Factions.get(level.getServer(), this.faction), Muskets.KEEP_TREASURY)) {
 			// its kingdom can't keep it any more: sold
 			this.ejectPassengers();
@@ -165,7 +185,7 @@ public final class Cannon extends Entity {
 			return;
 		}
 		PathfinderMob gunner = this.gunner();
-		if (gunner instanceof Folk folk && (now + this.getId()) % CREW_CHECK == 0 && folk.getTarget() == null
+		if (this.haul == null && gunner instanceof Folk folk && (now + this.getId()) % CREW_CHECK == 0 && folk.getTarget() == null
 			&& Factions.get(level.getServer(), this.faction) instanceof Faction f && McaGunner.seat(level, f, this)) {
 			// (0.7.295) with MCA, its folk gunner hands his place to one of the realm's villagers
 			folk.stopRiding();
@@ -173,7 +193,7 @@ public final class Cannon extends Entity {
 			return;
 		}
 		if (gunner == null) {
-			if ((now + this.getId()) % CREW_CHECK == 0) {
+			if (this.haul == null && (now + this.getId()) % CREW_CHECK == 0) {
 				PathfinderMob crew = this.crew(level, CREW_REACH);
 				if (crew != null) {
 					crew.startRiding(this);
@@ -184,6 +204,13 @@ public final class Cannon extends Entity {
 		}
 		// ((0.7.295) a villager's foe is its brain's)
 		LivingEntity foe = Rulers.target(gunner);
+		if (this.haul != null && (foe == null || !foe.isAlive())) {
+			// a field gun at a siege finds its own mark when its gunner has none
+			if ((now + this.getId()) % CREW_CHECK == 0) {
+				this.mark = SiegeTrain.mark(level, gunner, this.position(), NEAREST, FURTHEST);
+			}
+			foe = this.mark;
+		}
 		if (foe == null || !foe.isAlive()) {
 			this.settle();
 			return;
@@ -306,6 +333,11 @@ public final class Cannon extends Entity {
 			this.discard();
 		}
 		return true;
+	}
+
+	@Override
+	public boolean shouldBeSaved() {
+		return this.haul == null;
 	}
 
 	@Override
