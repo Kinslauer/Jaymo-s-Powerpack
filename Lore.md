@@ -423,6 +423,14 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+(new) **The cloud skiffs** (portable-mods thread, 2026-11-13; Andy: "Only the purest souls can ride these, like the
+nimbus cloud"). Besides the balloon skiff at the mast, the sky folk ride small skiffs of their own: a slab of the
+Aether's cold cloud packed onto a skyroot keel, with a cloudwool sail on a mast at the stern. She hangs in the air
+where she is left and goes where her rider looks. The cloud is the afterlife's own, and it reads the same ledger the
+Judge weighs: it holds the just and nobody else. Anyone whose page would not weigh just sinks through it as through any
+cloud, and a rider who stops being just is let fall. The Divine-born think nothing of this, since it has never dropped
+one of them. A visitor from below who finds she carries them has been told something about themselves.
+
 (new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
 one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
 carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
