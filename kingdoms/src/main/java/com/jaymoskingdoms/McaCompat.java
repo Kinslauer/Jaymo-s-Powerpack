@@ -152,6 +152,25 @@ public final class McaCompat {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
 	}
 
+	/** {@link McaBridge#wearLook}; null without MCA. */
+	static net.minecraft.nbt.@Nullable CompoundTag wearLook(ServerPlayer player, Villager villager) {
+		return LOADED ? McaBridge.wearLook(player, villager) : null;
+	}
+
+	/** {@link McaBridge#setLook}; nothing without MCA. */
+	static void setLook(ServerPlayer player, net.minecraft.nbt.CompoundTag data) {
+		if (LOADED) {
+			McaBridge.setLook(player, data);
+		}
+	}
+
+	/** {@link McaBridge#ownFace}; nothing without MCA. */
+	static void ownFace(Villager villager) {
+		if (LOADED) {
+			McaBridge.ownFace(villager);
+		}
+	}
+
 	/** (0.5.50) An MCA villager's mood, -15 (depressed, crying) to +15 (overjoyed); 0 for a plain one. */
 	static int mood(Villager villager) {
 		return LOADED ? McaBridge.mood(villager) : 0;

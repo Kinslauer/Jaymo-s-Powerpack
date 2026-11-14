@@ -58,7 +58,7 @@ final class FactionScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - PANEL_H) / 2);
+		return Math.max(4 + MenuCompat.STRIP, (this.height - PANEL_H) / 2);
 	}
 
 	int[] corner() {

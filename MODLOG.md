@@ -4819,3 +4819,68 @@ Andy: "then we can make a setting to turn all blood off."
 - It is each player's own choice, like the other amounts: the server keeps its stains, so hunters still track trails and
   blood magic still works. Bodies themselves, sounds and gut piles are not hidden.
 - Compiled; not played.
+
+## 0.23.72 (2026-11-14): One death, one wake: no screens piled on the black (#1531)
+
+- **One wake per death**: Andy died mid-turn, rose a Hollow, and two seconds later the sun killed his out-cold body again (then once more after a village took him in): four wake lines in a row. For 10 seconds after being put down where you wake (the 5 s out cold and a little on your feet), a death is turned away; mobs don't execute you in that time either (`Mortality.WOKE_GRACE`, `justWoke`). Losing your head, the void, lava and executions by players still end it.
+- **The turning's green vignette** belongs to that black only: a later death clears it (it stayed through every wake after).
+- **Nothing over the black's line**: the line is no longer repeated small on the action bar; while a line is on the black, other action-bar lines (tongue notices, town names) wait and the last one shows once it lifts; chat and our HUD pieces stay hidden until it lifts. The "hold sneak to come to" bar still shows (`DownedHud.holdOverlay`, `SceneBlackOverlayMixin`).
+- Built; not played.
+
+## 0.23.73 (2026-11-14): chain axe swings like the flail, with its own 3D model (#1534)
+
+- Andy: "the chain axe and lasso should operate similar to the [whip] and flail, therefore they need blockbench models".
+- **Chain Axe** is whirled as the flail is (`armory/Lash`, `Lash.isFlail` now takes it): hold right click and the axe
+  head goes round you on its chain, clipping what it passes; a charged left click swipes it round in front; the flail's
+  finisher is its finisher. The old instant throw drawn in chain particles, and its hook and drag, are gone.
+- **The throw.** Andy: "after letting go of the right click hold the axe flies toward the cursor, up to 9 blocks". Let
+  go of the whirl and the head flies at what is under the crosshair (`Lash.THROW`, `ChainAxeItem.CHAIN` 9 blocks,
+  `THROW_SPEED` 1.5 blocks a tick), hitting harder the faster it was whirling. Off a wall, a raised shield or nothing it
+  comes back.
+- **The axe stays in.** Andy: "no hooking, a throw embeds the axe, and you have to remove it, either by closing the
+  distance, or ripping it out." The head stays buried in whoever the throw hits (`Lash.EMBED`, the new item component
+  `jaymospowers:buried_in` on the axe), drawn in the side of them that faces you with the chain running back to the
+  haft, and the haft's own blows do nothing until it is out. Right click beside them (`FREE_RANGE`, 3 blocks) to work it
+  free; right click from further off to rip it out by the chain: a second wound (`RIP_SHARE`, 60% of the axe's blow), a
+  point of wear and a longer wait (`RIP_WAIT`, 2 s). Past 9 blocks it tears out by itself; if what it is in dies it
+  drops free.
+- **The dropped haft.** Andy: "swapping with the head still embedded should drop the haft on the ground, still attached
+  and rendered in world. you would have to pick it up and remove it to continue." Switch away from the buried axe and the
+  haft falls where you stand (it never despawns while buried), the chain drawn from it to the head
+  (`LashRenderer.droppedHafts`). Take it up in your hand and it is buried as before, to be worked free or ripped out.
+  If what the head is in walks off past the chain's length, the haft is dragged after it (`DRAG`).
+- **Model**: in the hand it is a 3D haft (`chain_axe_handle`), the chain is the flail's physics chain leaving the staple
+  on the haft's top (`LashSockets.CHAIN_AXE_TIP`), and the head on the chain's end is a 3D bearded axe head
+  (`chain_axe_swung`, drawn by `LashRenderer.axeHead`, `AXE_HEAD_SCALE`). Dropped or in a frame it is the whole axe in 3D
+  (`chain_axe_whole`); the inventory icon is the painted one as before.
+- Blockbench project `art/chain_axe.bbmodel`; all of it is written by `tools/gen_chain_weapons.py`
+  (`docs/Chain-Weapons-Model-Spec.md`).
+- Compiled; not played. To look at in game: where the haft sits in the fist, that the chain meets its top in first and
+  third person, and the head's size on the chain, how the buried head sits in a mob, and the dropped haft being dragged.
+
+## 0.23.74 (2026-11-14): Character menu: one strip of tabs across the top (#1537)
+
+- Andy: "The H screen UI is now too cluttered with menus, can we swap the way we navigate? maybe a single scroll up top?" The column of tabs down the left edge of every H-menu page (it ran off the bottom of the screen) is gone. The pages are now one strip at the top of the screen: an icon each, the open page wider with its name, and an arrow at each end.
+- The wheel over the strip turns to the page before or after, the arrows do the same, and a click on an icon opens that page. When the icons don't all fit, the strip shows the ones round the open page.
+- The strip stays in the same place on every page; pages leave room for it at the top (`MenuTabs.ROOM`). The Powers page keeps its own four tabs on its window.
+- Class: `MenuTabs`. Compiled; not played.
+
+## 0.23.75 (2026-11-14): Kneel to revive or lift the downed; the downed struggle only with blocks that do something
+
+- Andy (2026-11-14): "to lockpick and break out of chains you must first be kneeling then that unlocks a context where you can use right click to interact, for lockpicking, reviving, lifting, this should help free up some binds."
+- **Reviving** is done from a kneel at their side (`Kneel`: the low crouch, Shift + scroll down, held still): hold use to bring them round as before (the bar, the food). Standing over them, a hold does nothing but say to kneel first. Getting up from the kneel (letting the low crouch go) breaks it off.
+- **Lifting** someone downed is a tap of use from the same kneel (`Carry.liftDowned`): they're taken up at once (dragged, a piece of armour shed, or carried, as a full lift was). A sneak + hold standing over a downed body no longer lifts it. Every other lift (animals, severed parts, the Wind grab) is as it was.
+- Freed: plain hold use and sneak + hold use on a downed body. A plain tap standing still does what it did (Kingdoms' disarm, a Xenoform band torn off). Medicine on the downed is unchanged.
+- Andy: "it should not show up if it does nothing. only when it is actively doing something". A downed player's struggle (`DownedStruggle`) now starts only on a block that does something when used (`usable`: beds, doors, gates, trapdoors, buttons, levers, bells, note blocks, anything with a screen or a store). Right-clicking the ground, a wall or a log while down shows nothing.
+- Built; not played.
+
+## 0.23.76 (2026-11-14): Rig style - moves keyed in beats, flight feel, hit-stop, dash and barrage, finishes (#1542)
+
+Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only, our own code, poses, names and art). Plan: `docs/RigStyle-Plan.md`.
+- **How the suit moves**: every Rig move plays as wind-up, release, settle with the whole body in it (`RigBeats`, `RigPose`): the palm blast, launcher and Unibeam fire a beat after the key, the recoil runs arm, chest, head (bigger on the Siege frame). New poses: a crouch before take-off, two fingers to the helm for a scan, arms out while the suit builds on, a glance at the wrist for the table.
+- **Flight feel** (`RigFlightFeel`): the view widens with speed, a layered thruster sound, the F5 camera settles low and behind at cruise, streaks and a crack at sprint speed, drawn flames on the boots. Core empty in the air: the thrusters sputter and you sink slowly for a few seconds. The Rig menu's "Take Off Into Flight" picks what a take-off starts in.
+- **Impact**: hit-stop (`core/HitStop`): attacker and target hold their pose for 2 to 4 ticks and the knockback waits. On Rig punches, the dash ram, and **every heavy melee blow** (a slow weapon, 1.3 swings a second or slower, taking 7 or more: Better Combat's heavies). The limb that charges brightens and flashes on release. Other sounds dip under a Unibeam or barrage; your own Unibeam slows your screen for half a second (Rig menu "Unibeam Slow Beat" switches it off; the server never slows).
+- **Weapons**: Thruster Dash (Rig menu; rams what it meets), a scan tags hostiles for 9 s (missiles with no lock each pick a tagged target, and your blows land 35% harder on them), Barrage (Rig menu, Mind level 5: marks the ground you look at, the pods empty upward, the missiles land round the mark; no block damage), bare-fist punches with the Arms flare and step in, the gauntlet is drawn on your own arm in first person and kicks when it fires, the Unibeam leaves a scorched line.
+- **Suit presence**: three finishes earned by deeds and picked at the Rig Forge (Deepwalker: kill a Warden in the whole suit; Skybreaker: crack the air in flight above Y 192; Last Stand: the failsafe came for you). Failsafe: a hit that leaves you at 3 hearts or less brings the parked suit on its own (Mind level 4, once a minute, Rig menu switch). A target card beside the visor's bracket (range, armour, what it holds, hostile or calm, tagged). `/hudmove` opens a screen to drag any zoned HUD piece; right-click puts it back.
+- Left out, as picked: the suit hammer and a new assembly. The dash draws a streak and ring, not an afterimage of the body.
+- Compiled; not played.

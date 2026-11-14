@@ -13126,3 +13126,123 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 - The reaped can't be talked with in the illager tongue.
 - Operators: `/kingdom horde reaped` sends a host at once.
 - Compiled (compileJava, compileClientJava); not played. Villagers don't yet flee the reaped the way they flee living illagers, and a reaped evoker's vexes won't go for living illagers.
+
+## 0.8.71 (2026-11-14): Townsfolk react to one risen Hollow (#1531)
+
+- **Seen risen Hollow**: a player who died and rose one of the Hollow is met with it by every townsperson the first time they see them (12 blocks, in sight): one who knew them (10+ MCA hearts) cries out their name and grieves (-15 hearts), a stranger screams that the dead are walking (-5 hearts), a child shrieks. Those who mind the Hollow, and every child, run. Each remembers it for good (`Recollections.Kind.SAW_TURNED`), brings it up later and tells others. A full mask hides it; those born Hollow aren't met this way (`HollowSighting`, attachment `hollow_risen`, lang part `hollow_sighting.json`).
+- **Not taken in**: a village no longer carries a Hollow player home to tend after a death (`Shelter.take`). Andy's risen Hollow was carried into Caelreach and hit again there.
+- Built; not played.
+
+## 0.8.72 (2026-11-14): lasso: a 3D coil in the hand and a physics rope like the whip's (#1534)
+
+- Andy: "the chain axe and lasso should operate similar to the [whip] and flail, therefore they need blockbench models".
+- **In the hand** the lasso is a 3D coil of rope (`lasso_coil`). A short tail hangs off it with the loop (a 3D model,
+  `lasso_loop`) swinging on its end.
+- **The rope** is a line of points on physics now (`client/forms/LassoRope`: gravity, drag, fixed links, resting on
+  blocks), from the top of the coil as it is really drawn (`LassoSockets` and four `LassoSocket*` mixins, the way
+  Powers finds a flail's handle) instead of a straight sagging line from a guessed spot under your eyes.
+- **Thrown**, the loop is the 3D loop flying on the end of the rope (it was the flat inventory icon with no rope);
+  **holding** something, the rope ends in a noose round its middle.
+- Dropped or in a frame the lasso is the coil and loop in 3D (`lasso_whole`); the inventory icon is unchanged. The
+  lasso's rules (reach, hauling, wrapping, breaking out) are untouched.
+- Blockbench project `kingdoms/art/lasso.bbmodel`, written by `tools/gen_chain_weapons.py`.
+- Compiled; not played. To look at in game: where the coil sits in the fist, and that the rope meets it in first and
+  third person.
+
+## 0.8.73 (2026-11-14): Character menu pages leave room for the strip of tabs (#1537)
+
+- With Jaymo's Powers' character menu now a strip of tabs across the top of the screen, Kingdoms' pages (Skills, Class, Story, Growth, Journal, Faction, Party, Weapon Forms) sit under it instead of reaching the top edge on a short screen, and the skill web's title bar sits under it too. Without Powers nothing moves.
+- Compiled; not played.
+
+## 0.8.74 (2026-11-14): Films: no screen filters, and a level field wherever they play (#1530)
+
+- While a film plays (the lore films, a boss's entrance, the farm waking), no screen filter is drawn over it: a Hollow's
+  or Nightborn's darkvision grey, blood sight, and the powers' own filters all wait until the film ends.
+- The Long Defence no longer breaks on rough land (the fight sank into ponds and went behind hillsides, and the camera
+  with it). The film now levels its own field for as long as it plays, on your screen only: hills are cut, ponds filled
+  and trees cleared over the stage, easing back into the land at its edges, and everything is put back when it ends.
+  Buildings and a kingdom's seat are left standing.
+- Lore films use your plain FOV setting (no sprint or speed widening), as the other films do.
+
+## 0.8.75 (2026-11-14): changelings take faces; shapeshifters far rarer and always MCA villagers (#1539)
+
+- **Far fewer stolen lives** (Andy: "they should be far less common", three in one clip). A settlement now loses at most
+  one of its own to a shapeshifter every ten days (`Doubles.TAKEN_GAP`, kept on the overworld as `stolen_taken`), whatever
+  the source. Before, every chunk in the ring 50 to 140 blocks round a seat could get its own cellar, and every villager
+  found underground in a village counted. A dungeon captive is a stolen life 15% of the time (was 50%), a cellar roll comes
+  up 0.02 (was 0.05), and copies already waiting for the same settlement are cut to one.
+- **Always an MCA villager** (Andy: "always copy an mca skin not the regular minecraft skin or anything else"). Only an MCA
+  villager can be stolen (`Doubles.stealable`), a copy that would not be one is never made, and copies of plain villagers
+  left in a world from before are removed when a player comes near. Without MCA there are no stolen lives.
+- **Changeling impostors**: one copy in three (`CHANGELING_IN`, fixed by whose face it is) is a Sylvan changeling under the
+  face, not the grey shapeshifter. Found out the same ways, it stays a villager: it gets a face, hair and name of its
+  own, the Sylvan blood and the Changeling look, says its piece and runs. It never fights.
+- **Changeling players**: Mirror Shift on an MCA villager within 16 blocks puts that villager's look on you (skin, face,
+  hair, clothes, build), shown to everyone and kept through a relog (`BorrowedFaces`, `McaBridge.wearLook`). It comes off
+  when you use Mirror Shift with nobody in sight, when you are hurt to half health, or when you die. On any other
+  creature Mirror Shift still trades places.
+- Not done: villagers do not treat a player wearing a face as that villager, and the borrowed name is not shown.
+- Built (compileJava); not played. The fresh logs could not be read from the cloud session, so the cause of the
+  vanilla-skinned copy was taken from the code (plain villagers under villages could be stolen), not seen in a log.
+
+## 0.8.76 (2026-11-14): random start spot for every new life
+
+- Andy, reincarnated into the very same area: "is it possible to put the player in a random spawn every time? i dont want it to be searching for the same spawn scenario when theyre are 12+ people online". Every setting out (a first start, a reincarnation, a story told again) is now worked out from its own random point up to 1500 blocks from the world's spawn (even over the area) instead of from the spawn itself, so the nearest village, farm, camp, wreck, realm, monolith, milestone, harbour or wild ring is a different one each life, and players setting out at once search different land instead of queueing past each other's taken places.
+- The point is drawn off the open sea when one of 8 tries is (biome noise only, nothing is made or loaded to pick it) and never within 480 blocks of where that player last woke. The same point is kept through the start's retries, so the land made in the background between them is still used.
+- A player's own last start now counts as taken like anyone else's (looked past within 96 blocks of the place, 32 of the wake), so a new life never lands in the old one's village or camp.
+- Unchanged: the loading screen holds until the start is ready, no Aether starts except Divine-born, the 15 s search and 60 s land-wait limits, Start Together (party mates still wake beside each other), the world's first capital still rises by the spawn. Server log line "<name> sets out from x, z (N blocks from spawn)".
+- LifeStory (ORIGIN_SPREAD/ORIGIN_TRIES/ORIGIN_APART, origin, Wanted.origin, others keeps the player's past start), StoryGround.harbour/milestone take the origin.
+- Built; not played.
+
+## 0.8.77 (2026-11-14): Captors stop once a captive is down, haul them up, and kill on the third strike; kneel to pick locks and work at bonds
+
+- Andy (2026-11-14), downed again and again in a camp: "after i am beaten i shouldnt continue to be downed, and they should help you up after being downed. you can only break the rules so many times before they end it though".
+- **A beating ends at the ground**: once a captive who acted up is downed, the camp's anger is spent (the 60 s `UNRULY` window is cleared), the captors let go and calm, and Resistance comes back. Before, the anger ran its full minute (and each blow back restarted it), so a captive who got up was downed again.
+- **Hauled up**: after 5 s down, the nearest captor (one fighting nobody, within 24 blocks) walks over, stoops at their side for 4 s and drags them up (Powers' revive tag). Getting yourself up still works.
+- **Strikes**: each time a captive acts up while keeping their place is a strike (`captive_strikes`, saved, cleared once the shackle is off). The second strike warns "Once more and they'll kill you"; the third (`STRIKE_LIMIT` = 3) is final: the camp beats them down and one of them executes them (Powers' MobExecutions, which now spare a held captive only while they aren't doomed; the nearest captor is set on them if no one is). The killing blow takes the shackle off and the death isn't a capture (`Captors.take` skips them), so they wake as anyone left for dead does, or their life ends as Mortality rolls.
+- Hint 113 says so. Classes: `CaptiveConduct` (beaten, haul, strikes, doomed, executed), `Downed.heldCaptive`, `Captors.take`, `StoryHard.release`; lang part `captive-conduct.json`.
+- **Kneel first** (Andy, 2026-11-14: "to lockpick and break out of chains you must first be kneeling"): picking any lock (a locked chest, a fitted door lock, the shackle, a cell door) and beating at a chain or sawing a rope are done from a kneel (Powers' low crouch held still; a crouch without Powers). Standing, a locked chest or door only rattles and says to kneel; a rock or blade in hand does what it otherwise would. Kneeling at a locked chest picks it whatever you hold (a held sneak used to skip it). `KneelFirst`; lang part `kneel-first.json`; hint 169, hint 11 and the chained wake text say so.
+- Built; not played.
+
+## 0.8.78 (2026-11-14): HUD pieces can be moved (#1542)
+
+- `HudZones` reads the shifts set by Powers' `/hudmove` screen, so this mod's HUD pieces can be dragged to a new spot too.
+- Compiled; not played.
+
+## 0.8.79 (2026-11-14): the Reaper steps out for its kills (#1541)
+
+Andy: "the reaper model from MCA needs to come out and do the execution with a random weapon but usually his scythe, same for
+when he kills ghosts".
+- **The Reaping** (L at one of the downed, from the Reach) is no longer an instant kill. The Reaper leaves its keeper's back,
+  stands over the downed, draws its weapon back and brings it down, and the blow lands as the swing ends (2.5 s, as a ghost's
+  harvest is). Everyone sees it, as they see it take a ghost. One kill at a time: L does nothing more at the downed until it
+  is done.
+- **Its weapon** (`Reaper.weapon`, `McaReaper`): six times in ten its scythe (MCA's own); otherwise a greatsword, a greataxe, a
+  warhammer or a halberd, the same for every viewer of that kill. Andy: "use the real models please": these are the pack's
+  real items (Powers' iron claymore; Balkon's WeaponMod iron battleaxe, warhammer and halberd), drawn in the scythe's hand so
+  MCA's own poses swing them. Only where an item isn't in the game does a plain box weapon stand in. The same roll is made
+  for each ghost it takes.
+- The weapon now hangs drawn back a little longer and comes down just before the blow (85% of the way through, was 70%).
+- **What the Reaper raises gets up as itself** (Andy: "they should always reanimate as the corpse that died, i killed an mca
+  shaman and he revived as a player zombie"). Reap and Death's Company used the necromancers' table, which turns every
+  person's body into a zombie. Now the body rises as the mob it was, from the corpse's own saved look (`Thralls.raiseAs`):
+  the same villager with the same name, face and gear, a wolf as a wolf. Nothing with more than 150 health rises, and never a
+  player's body. A risen villager follows its keeper and goes for whoever they fight (a risen caster casts for them:
+  `Reaper.risenStep`, `Casters.foe`); a risen beast with no attack of its own closes and bites for 4. The Death Sorcerers'
+  and court necromancers' raising is unchanged.
+- **The risen smoke black** for as long as they stand, not only as they get up.
+- Built with Gradle. Not played: how each real weapon sits in the hand is set by eye from the scythe's numbers, and a risen
+  MCA villager's fighting leans on MCA's own brain.
+
+## 0.8.80 (2026-11-14): the Reaper's risen are undead, and players rise too (#1543)
+
+Andy: "players can be reanimated too, and the shamans should still be undead so they get the player zombie buffs."
+- **Players' bodies.** Death's Company now raises a player's body with the rest: it gets up as Kitchen's zombie wearing
+  their face (`KitchenCompat.riseNow`), carrying what was left on the body, and fights for the Reaper's keeper. When its
+  time is up it is put down as a kill, not turned to ash, so what it carried of theirs is dropped. A headless player's body
+  still never rises. Reap does not raise a player it kills; only the Company does.
+- **The risen are undead** (`Thralls.risenDead`, `Thralls.bind`). A shaman still gets up as that shaman, but it is one of the
+  undead now: Restoration's healing treats it as it treats a zombie, and it gets what a risen player has: it sees 64 blocks,
+  has at least 2 armour, and hits for at least 3.
+- Built with Gradle. Not played. "The player zombie buffs" is read as a risen player's sight, armour and blow; other code that
+  asks the entity type's undead tag (smite, sunlight) does not see a risen villager as undead.

@@ -65,6 +65,10 @@ public final class Captors {
 		if (by == null || !sentient(by)) {
 			return null;
 		}
+		if (CaptiveConduct.executed(player)) {
+			// (Andy, 2026-11-14) a captive their captors put to death isn't taken again: they wake as anyone left for dead
+			return null;
+		}
 		MinecraftServer server = player.level().getServer();
 		Faction camp = campOf(server, by, player.blockPosition());
 		if (camp == null || camp.fallen() || camp.seat() == null) {

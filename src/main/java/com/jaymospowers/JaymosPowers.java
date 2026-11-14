@@ -84,6 +84,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
+		com.jaymospowers.core.HitStop.register();
 		com.jaymospowers.core.GroundCracks.register();
 		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
@@ -273,7 +274,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.ember.BurningSteed", "power.heritage.HeritageMoves",
 			"elemental.ElementalCorruption", "power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves",
 			"alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",

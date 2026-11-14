@@ -1,0 +1,7 @@
+{
+  "message.jaymoskingdoms.kneel.lock": "Kneel to pick the lock: get low (Shift + scroll down) and hold still, then use it.",
+  "message.jaymoskingdoms.kneel.shackle": "Kneel to work at the shackle: get low (Shift + scroll down) and hold still, then use the lockpick.",
+  "message.jaymoskingdoms.kneel.chain": "Kneel to beat at the chain: get low (Shift + scroll down) and hold still, then use the rock.",
+  "message.jaymoskingdoms.kneel.rope": "Kneel to saw at the rope: get low (Shift + scroll down) and hold still, then use the blade.",
+  "gui.jaymoskingdoms.story.hint.169": "Get low (Shift + scroll down) and hold still to kneel. From a kneel you pick locks, work at chains and ropes, and see to the downed: hold use to bring them round, tap it to lift them."
+}

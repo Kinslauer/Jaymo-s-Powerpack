@@ -42,6 +42,8 @@ import net.minecraft.world.item.Items;
  */
 public final class MenuCompat {
 	static final String POWERS = "jaymospowers";
+	/** The room Kingdoms' pages leave at the top of the screen for the character menu's strip of tabs (none without Powers). */
+	public static final int STRIP = FabricLoader.getInstance().isModLoaded(POWERS) ? 26 : 0;
 	static final String MENU = "com.jaymospowers.client.menu.MenuTabs";
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";

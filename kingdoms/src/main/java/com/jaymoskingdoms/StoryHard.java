@@ -127,6 +127,10 @@ public final class StoryHard {
 			if (shackle == null) {
 				return InteractionResult.PASS;
 			}
+			if (!KneelFirst.ready(sp, "shackle")) {
+				// (Andy, 2026-11-14) the shackle is picked from a kneel ({@link KneelFirst})
+				return InteractionResult.FAIL;
+			}
 			// (0.7.584) working at the shackle where a captor can see is trying to escape: the camp turns on them
 			if (CaptiveConduct.watched(sp)) {
 				CaptiveConduct.actUp(sp, "pick");
@@ -277,6 +281,14 @@ public final class StoryHard {
 		LifeStory.startHunt(level.getServer(), player, shackle.camp());
 	}
 
+	/** The shackle comes off quietly, with no hunt: a captive their captors killed ({@link CaptiveConduct#executed}). */
+	static void release(ServerPlayer player) {
+		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
+		SLIPPING.remove(player.getUUID());
+		STOOD.remove(player.getUUID());
+	}
+
 	// ---- sentenced -----------------------------------------------------------------------------------------------------
 
 	/**
@@ -339,6 +351,10 @@ public final class StoryHard {
 			return;
 		}
 		if (held.is(Lockpicking.LOCKPICK)) {
+			if (!KneelFirst.ready(player, "lock")) {
+				// (Andy, 2026-11-14) a lock is picked from a kneel ({@link KneelFirst})
+				return;
+			}
 			UUID id = player.getUUID();
 			Lockpicking.pickVirtual(player, Speakeasy.doorAt(jail.cell()), CELL_LEVEL, jail.cell().asLong() ^ 0x2545F491L, () -> {
 				ServerPlayer again = level.getServer().getPlayerList().getPlayer(id);

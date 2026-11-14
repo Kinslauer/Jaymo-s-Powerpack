@@ -68,14 +68,18 @@ def main():
     write(os.path.join(ASSETS, "items", "chain_axe_head.json"), {"model": hot(node)})
     paint(ICON, AXE, "item/chain_axe")
     write(os.path.join(ASSETS, "models", "item", "chain_axe.json"), {"parent": "minecraft:item/handheld", "textures": {"layer0": "jaymospowers:item/chain_axe"}})
-    write(os.path.join(ASSETS, "items", "chain_axe.json"), {"model": {"type": "minecraft:model", "model": "jaymospowers:item/chain_axe"}})
+    # items/chain_axe.json (the haft in the hand, this icon in a slot) is tools/gen_chain_weapons.py's
     write(os.path.join(DATA, "weapon_attributes", "chain_axe.json"), {"parent": "jaymospowers:combo_axe"})
     write(os.path.join(ASSETS, "lang", "parts", "mortal.json"), {
         "item.jaymospowers.chain_axe": "Chain Axe",
         "item.jaymospowers.chain_axe_head": "Chain Axe Head",
-        "jei.jaymospowers.chain_axe": ("An axe on a length of chain. Right click throws it out nine blocks and hauls it back: whoever it meets is cut "
-                                       "and tugged toward you. Sneak as you throw to drag them all the way in. Forged at the Tool Station from a "
-                                       "Chain Axe Head, a Tool Handle and an iron chain."),
+        "item.jaymospowers.chain_axe.whirl": "Hold right-click to whirl the axe head on its chain; let go to throw it where you look, up to 9 blocks",
+        "item.jaymospowers.chain_axe.buried": "It stays buried in what it hits: right-click beside them to work it free, or from afar to rip it out",
+        "jei.jaymospowers.chain_axe": ("An axe head on a length of chain. Hold right click to whirl it round you, and let go to throw it at "
+                                       "what you look at, up to nine blocks. The head stays buried in whoever it hits and the haft is useless "
+                                       "until it is out: right click beside them to work it free, or from further off to rip it out by the "
+                                       "chain for a second wound. Put the axe away while it is buried and the haft falls to the ground, still "
+                                       "chained to the head. Forged at the Tool Station from a Chain Axe Head, a Tool Handle and an iron chain."),
         "message.jaymospowers.mortal.power_strike": "Power Strike",
         "message.jaymospowers.mortal.sweep_kick": "Sweep Kick",
         "message.jaymospowers.mortal.second_wind": "Second Wind",

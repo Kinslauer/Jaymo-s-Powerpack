@@ -64,6 +64,13 @@ public final class DownedHud {
 
 	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
 	private static @org.jspecify.annotations.Nullable String line;
+	/**
+	 * The last action-bar line that came while a line was on the black ({@link #holdOverlay}), shown once the black has
+	 * lifted. Andy's clip had a tongue notice, a town's name and the line itself again all over the black.
+	 */
+	private static net.minecraft.network.chat.@org.jspecify.annotations.Nullable Component held;
+	/** The black this dark or more, with a line on it, keeps the chat and the rest of the HUD off the screen. */
+	static final float SCENE_DARK = 0.5F;
 
 	private static int downTicks;
 	/** (0.19.55) Ticks since the last heartbeat, and how far through the beat's swell the ring is (0-1). */
@@ -79,6 +86,33 @@ public final class DownedHud {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("downed_hud"), DownedHud::render);
 		// (0.18.84) over the hotbar and bars too, under only the "mash sneak" line
 		HudElementRegistry.attachElementBefore(VanillaHudElements.OVERLAY_MESSAGE, JaymosPowers.id("knocked_out_hud"), DownedHud::renderBlack);
+		// (the chat draws over everything before it: while a line is on the black it waits, its messages there once it lifts)
+		HudElementRegistry.replaceElement(VanillaHudElements.CHAT, old -> (graphics, delta) -> {
+			if (!scene() || Minecraft.getInstance().gui.screen() != null) {
+				old.extractRenderState(graphics, delta);
+			}
+		});
+	}
+
+	/** Whether a line is on the black (a death turned away, a turning, a wake) and the screen dark enough to read it alone. */
+	public static boolean scene() {
+		return line != null && black >= SCENE_DARK;
+	}
+
+	/**
+	 * An action-bar line arriving: while a line is on the black only the "hold sneak to come to" bar shows over it; anything
+	 * else is held back (true) and the last of it shown once the black has lifted.
+	 */
+	public static boolean holdOverlay(net.minecraft.network.chat.Component message) {
+		if (line == null || black <= 0.0F) {
+			return false;
+		}
+		if (message.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents said
+			&& said.getKey().startsWith("message.jaymospowers.mortality.come_to")) {
+			return false;
+		}
+		held = message;
+		return true;
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -99,6 +133,15 @@ public final class DownedHud {
 			: Math.max(0.0F, black - 1.0F / (line != null ? WAKE_OUT_TICKS : BLACK_OUT_TICKS));
 		if (black <= 0.0F) {
 			line = null;
+			if (held != null) {
+				net.minecraft.network.chat.Component show = held;
+				held = null;
+				minecraft.gui.hud.setOverlayMessage(show, false);
+			}
+		}
+		if (scene()) {
+			// (and every zoned piece of ours: the body, the badge, the bars)
+			com.jaymospowers.client.hud.HudZones.hideFor(100L);
 		}
 		beatSwellBefore = beatSwell;
 		if (player == null || !Downed.isDowned(player)) {

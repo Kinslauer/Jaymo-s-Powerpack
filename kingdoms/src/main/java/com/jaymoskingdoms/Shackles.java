@@ -97,6 +97,11 @@ public final class Shackles {
 				return InteractionResult.FAIL;
 			}
 			if (tether.rope() ? cutter(held) : rock(held)) {
+				if (!KneelFirst.ready(sp, tether.rope() ? "rope" : "chain")) {
+					// (Andy, 2026-11-14) the chain is beaten and the rope sawn from a kneel ({@link KneelFirst}); standing, the
+					// rock or blade does what it otherwise would
+					return InteractionResult.PASS;
+				}
 				work(sp, tether, held);
 				return InteractionResult.SUCCESS;
 			}

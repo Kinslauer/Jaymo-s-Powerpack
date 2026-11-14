@@ -95,6 +95,10 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (mob.entityTags().contains(Thralls.RISEN_TAG) && Thralls.isThrall(mob)) {
+			// risen as itself by the Reaper: its master's fight, in place of whatever it did in life
+			return Reaper.risenStep(level, w);
+		}
 		if (Banes.bandOf(mob) != null) {
 			// (0.7.619) a player's Bane, or one of its band, in a villager's body: their own doings
 			return Banes.villagerStep(level, w);

@@ -79,6 +79,8 @@ public final class Rig {
 	public static DataComponentType<String> FRAME;
 	/** On every Rig piece: the trim's paint (rgb), picked at the Forge; none is unpainted. The plates' paint is the dyed colour. */
 	public static DataComponentType<Integer> TRIM;
+	/** On every Rig piece: the finish over its plates ({@link RigFinish}); none is plain. */
+	public static DataComponentType<Integer> FINISH;
 
 	/** (0.11.87) The Mind's levels: the experience each one starts at (level 1 at 0). */
 	public static final int MAX_LEVEL = 5;
@@ -174,6 +176,8 @@ public final class Rig {
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		TRIM = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_trim"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_finish"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
 		Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
 		defense.put(ArmorType.HELMET, HELM_ARMOR);
@@ -225,6 +229,7 @@ public final class Rig {
 		RigWrecks.init();
 		RigLevels.init();
 		RigCall.init();
+		RigFinish.init();
 		RigSentry.init();
 		RigLimbs.init();
 		RigPicks.init();

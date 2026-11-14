@@ -258,7 +258,8 @@ public final class Downed {
 	 * Tiv (2026-11-08): whether {@code attacker} leaves the downed player {@code body} lying there rather than finish them,
 	 * in a war, in the wild or at sea as much as at home:
 	 * <ul>
-	 * <li>their captors, while they're held in a camp's shackle ({@link #heldCaptive}), even after they've acted up;</li>
+	 * <li>their captors, while they're held in a camp's shackle ({@link #heldCaptive}), even after they've acted up (but not
+	 * once they've done it too often: {@link CaptiveConduct#doomed});</li>
 	 * <li>a settlement's people ({@link HeldBack#townsperson}): every grown villager (MCA's guards and rulers too), the
 	 * realms' guards and archers, the sworn, and the settled factions' folk;</li>
 	 * <li>iron golems, and clockwork golems but a dungeon's rogue one.</li>
@@ -290,7 +291,9 @@ public final class Downed {
 	 * their chains is hunted as before. Powers' executions ask it too ({@link PowersCompat#spareRighteousGuards}).
 	 */
 	static boolean heldCaptive(Mob mob, LivingEntity body) {
-		return body instanceof ServerPlayer player && StoryHard.shackled(player) && CaptiveConduct.captor(mob, StoryHard.shackleCamp(player));
+		// (Andy, 2026-11-14) all but one who broke their rules once too often: that one they finish (CaptiveConduct#doomed)
+		return body instanceof ServerPlayer player && StoryHard.shackled(player) && !CaptiveConduct.doomed(player)
+			&& CaptiveConduct.captor(mob, StoryHard.shackleCamp(player));
 	}
 
 	/** {@code mob} lets go of downed {@code body}: no longer its target. */

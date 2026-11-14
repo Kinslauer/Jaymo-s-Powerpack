@@ -30,6 +30,8 @@ import org.jspecify.annotations.Nullable;
 public final class LashSockets {
 	/** The handle's tip on its sprite: Balkon's ball-less flail (flail-thrown.png, top right) and our whip's handle. */
 	static final Vector3f FLAIL_TIP = new Vector3f(13.2F / 16.0F, 13.4F / 16.0F, 0.5F), WHIP_TIP = new Vector3f(9.0F / 16.0F, 9.6F / 16.0F, 0.5F);
+	/** The staple on top of the chain axe's haft (its model's own space: tools/gen_chain_weapons.py). */
+	static final Vector3f CHAIN_AXE_TIP = new Vector3f(0.5F, 14.5F / 16.0F, 0.5F);
 	/** The hands are drawn as if the view were this wide (Camera's base HUD fov), whatever the world's fov is. */
 	private static final float HAND_FOV = 70.0F;
 	/** An offset further than this from the body is someone drawn elsewhere (a menu's preview): not kept. */
@@ -37,7 +39,7 @@ public final class LashSockets {
 	/** A tip not drawn for this many frames is stale (the hand isn't being drawn any more). */
 	private static final int STALE_FRAMES = 3;
 
-	private record Holder(int id, boolean flail, boolean firstPerson, double x, double y, double z) {
+	private record Holder(int id, Vector3f tip, boolean firstPerson, double x, double y, double z) {
 	}
 
 	private record Tip(Vec3 offset, long frame) {
@@ -73,8 +75,8 @@ public final class LashSockets {
 	}
 
 	private static @Nullable Holder holder(int id, ItemStack stack, boolean firstPerson, double x, double y, double z) {
-		boolean flail = Lash.isFlail(stack);
-		return flail || Lash.isWhip(stack) ? new Holder(id, flail, firstPerson, x, y, z) : null;
+		Vector3f tip = Lash.isChainAxe(stack) ? CHAIN_AXE_TIP : Lash.isFlail(stack) ? FLAIL_TIP : Lash.isWhip(stack) ? WHIP_TIP : null;
+		return tip == null ? null : new Holder(id, tip, firstPerson, x, y, z);
 	}
 
 	public static void done() {
@@ -88,7 +90,7 @@ public final class LashSockets {
 			return;
 		}
 		holder = null;
-		Vector3f tip = pose.transformPosition(held.flail() ? FLAIL_TIP : WHIP_TIP, new Vector3f());
+		Vector3f tip = pose.transformPosition(held.tip(), new Vector3f());
 		Minecraft minecraft = Minecraft.getInstance();
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		Vec3 at = new Vec3(tip.x(), tip.y(), tip.z());

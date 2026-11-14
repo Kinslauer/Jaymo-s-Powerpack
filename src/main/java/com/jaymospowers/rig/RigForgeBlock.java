@@ -51,7 +51,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 	static final int LIMB_POINTS = 4, LIMB_IRON = 3;
 	/** The hologram floats this high over the Forge's base (blocks), and the colour of the Forge's lights. */
 	public static final double HOLOGRAM_HEIGHT = 1.9;
-	static final int FX_COLOR = 0x5FE6FF;
+	public static final int FX_COLOR = 0x5FE6FF;
 
 	/** A piece's price: salvage points, then two plain materials. */
 	public record Cost(int points, Item first, int firstCount, Item second, int secondCount) {

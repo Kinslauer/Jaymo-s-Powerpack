@@ -1124,6 +1124,14 @@ public final class HeritageKits {
 			}
 			case MIRROR_SHIFT -> {
 				LivingEntity target = Arcana.sighted(p);
+				// a villager in sight: their face is taken; nobody in sight while wearing one: it comes off (BorrowedFaces)
+				if (target instanceof net.minecraft.world.entity.npc.villager.Villager v && target.distanceTo(p) <= MIRROR_RANGE && BorrowedFaces.wear(p, v)
+					|| target == null && BorrowedFaces.drop(p)) {
+					fx(p, MobEffects.INVISIBILITY, 2, 0);
+					burst(p, Fx.HEX, 20);
+					sound(p, SoundEvents.ENDERMAN_TELEPORT, 0.6F, 1.2F);
+					break;
+				}
 				Vec3 mine = p.position();
 				// (0.7.490) only a mob, never a player or a great one, and only where each fits in the other's place
 				if (!(target instanceof Mob) || unmirrorable(target) || target.distanceTo(p) > MIRROR_RANGE

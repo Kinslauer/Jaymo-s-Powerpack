@@ -133,6 +133,17 @@ public final class LifeStory {
 	 */
 	static final int PLACE_APART = 96, START_APART = 32;
 	/**
+	 * (2026-11-14) Andy, reincarnated into the very same area: "is it possible to put the player in a random spawn every time? i
+	 * dont want it to be searching for the same spawn scenario when theyre are 12+ people online". Every setting out (a new
+	 * player's first start, a reincarnation, a story told again) is worked out from its own random point up to ORIGIN_SPREAD
+	 * blocks from the world's spawn (even over the area), not from the spawn itself: the nearest village, camp, wreck, farm,
+	 * realm or wild ring is then a different one each time, and players setting out together look in different places rather
+	 * than all searching the same land and queueing past each other's taken places. Up to ORIGIN_TRIES points are drawn for
+	 * one off the open sea (biome noise only: no land is made to choose) and at least ORIGIN_APART blocks from where the
+	 * player last woke.
+	 */
+	static final int ORIGIN_SPREAD = 1500, ORIGIN_TRIES = 8, ORIGIN_APART = 480;
+	/**
 	 * A taken wreck or farmhouse is looked past at most FREE_TRIES times, each from FREE_STEP blocks further off; with no
 	 * free spot to wake near a start's place, one is looked for up to FREE_WIDEN blocks further out.
 	 */
@@ -1222,7 +1233,7 @@ public final class LifeStory {
 		Start road0 = byFate ? fated(server, player, random) : chosen;
 		// (0.7.605) fate may now give a realm's road (banished, sworn, the cells): a realm of its own choosing
 		Faction realmFor = byFate && road0.realm && roadRealm == null ? capital(server, random) : roadRealm;
-		Departure departure = new Departure(id, road, realmFor, bornAs, raised, cls, option, calling, byFate, new Wanted());
+		Departure departure = new Departure(id, road, realmFor, bornAs, raised, cls, option, calling, byFate, new Wanted(origin(server.overworld(), player, random)));
 		java.util.function.Consumer<Start> go = start -> departure.go(server, start);
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
@@ -1231,14 +1242,14 @@ public final class LifeStory {
 			// (0.7.235) always made ready first, even with a berth in port: her sea must be ticking for her to float
 			// (Tiv) at a harbour nobody else's whaler story started from (a party mate's on this road is shared)
 			Landing crewMate = together(player, Start.WHALERS, null);
-			StoryGround.harbour(player, freeFor(player, crewMate == null ? null : crewMate.who, PLACE_APART), () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
+			StoryGround.harbour(player, departure.wanted().origin, freeFor(player, crewMate == null ? null : crewMate.who, PLACE_APART), () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
 		} else if (road0 == Start.TRADER) {
 			// (0.7.414) a milestone to wake beside: a capital, a second town and the road between them are raised if the world has none
-			StoryGround.milestone(player, () -> go.accept(Start.TRADER), () -> go.accept(Start.WILD));
+			StoryGround.milestone(player, departure.wanted().origin, () -> go.accept(Start.TRADER), () -> go.accept(Start.WILD));
 		} else if (road0 == Start.VILLAGE || road0 == Start.SHIPWRECK) {
 			// (Deck crash 2026-11-13 07:43) the land where the start will most likely put them is made first, in the
 			// background, while they wait behind the loading screen; making it as the start ran held the server thread
-			BlockPos there = together(player, road0, null) == null ? landAhead(server, player, road0, bornAs) : null;
+			BlockPos there = together(player, road0, null) == null ? landAhead(server, player, road0, bornAs, departure.wanted().origin) : null;
 			if (there != null) {
 				StoryGround.ahead(player, there, () -> go.accept(road0));
 			} else {
@@ -1296,10 +1307,10 @@ public final class LifeStory {
 	 * Where a village or shipwreck start will most likely put {@code player}: the place {@link #begin} looks at first (a
 	 * realm of their own people's seat, else the nearest fitting village; a beached wreck, else any), so its land can be
 	 * made ready before they're put there ({@link StoryGround#ahead}). Null: nowhere found (the start makes do as ever).
+	 * Looked for from the departure's own random point ({@code spawn}, {@link #origin}), as {@link #begin} will.
 	 */
-	private static @Nullable BlockPos landAhead(MinecraftServer server, ServerPlayer player, Start start, Heritage.Kind heritage) {
+	private static @Nullable BlockPos landAhead(MinecraftServer server, ServerPlayer player, Start start, Heritage.Kind heritage, BlockPos spawn) {
 		ServerLevel level = server.overworld();
-		BlockPos spawn = level.getRespawnData().pos();
 		if (start == Start.SHIPWRECK) {
 			BlockPos beached = structure(level, BuiltinStructures.SHIPWRECK_BEACHED, spawn);
 			return beached != null ? beached : Scout.nearest(level, StructureTags.SHIPWRECK, spawn, STRUCTURE_SEARCH);
@@ -1517,7 +1528,9 @@ public final class LifeStory {
 	private static @Nullable Start beginHere(ServerPlayer player, Start start, @Nullable Faction named, Heritage.Kind heritage, RandomSource random) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = server.overworld();
-		BlockPos spawn = level.getRespawnData().pos();
+		// (2026-11-14) not the world's spawn but this setting out's own random point (ORIGIN_SPREAD), the same through its retries
+		Wanted setOut = WANTED;
+		BlockPos spawn = setOut != null ? setOut.origin : level.getRespawnData().pos();
 		BlockPos to = null;
 		// (0.7.417, Start Together) a party mate who took this road a few minutes ago wakes you beside them, and you share its trouble
 		Landing mate = together(player, start, named);
@@ -2228,6 +2241,8 @@ public final class LifeStory {
 	 * looks at them first ({@code primed}). Server thread only.
 	 */
 	static final class Wanted {
+		/** (2026-11-14) Where this setting out is worked out from ({@link #origin}): kept for every try, so the land made between them is looked at again. */
+		final BlockPos origin;
 		final List<BlockPos> fresh = new ArrayList<>();
 		final java.util.LinkedHashSet<ChunkPos> freshChunks = new java.util.LinkedHashSet<>();
 		List<BlockPos> primed = List.of();
@@ -2235,6 +2250,10 @@ public final class LifeStory {
 		int tries;
 		/** When the first wait began (System.nanoTime), or 0: none yet. */
 		long waitingSince;
+
+		Wanted(BlockPos origin) {
+			this.origin = origin.immutable();
+		}
 
 		/** Whether the time to wait for land ({@link #LAND_WAIT_MS}) is up. */
 		boolean outOfTime() {
@@ -2711,11 +2730,57 @@ public final class LifeStory {
 		};
 	}
 
-	/** Everyone's start but {@code player}'s own (a copy to take a mate's out of). */
+	/**
+	 * Everyone's start but {@code player}'s own (a copy to take a mate's out of). (2026-11-14) Their own last start, from a life
+	 * before (a reincarnation, a story told again), stays in under another key: it's looked past like anyone else's, so a new
+	 * life never wakes in the place the last one did.
+	 */
 	private static java.util.Map<String, Born> others(ServerPlayer player) {
 		java.util.Map<String, Born> all = new java.util.HashMap<>(player.level().getServer().overworld().getAttachedOrElse(BORN, java.util.Map.of()));
-		all.remove(player.getUUID().toString());
+		Born past = all.remove(player.getUUID().toString());
+		if (past != null) {
+			all.put(PAST + player.getUUID(), past);
+		}
 		return all;
+	}
+
+	/** (2026-11-14) The key {@link #others} keeps a player's own last start under. */
+	private static final String PAST = "past:";
+
+	/**
+	 * (2026-11-14) Where a setting out on {@code level} is worked out from ({@link #ORIGIN_SPREAD}): a random point round the
+	 * world's spawn, off the open sea if one of {@link #ORIGIN_TRIES} is, and never within {@link #ORIGIN_APART} of where
+	 * {@code player} last woke. Only biome noise is read, so nothing is made or loaded to choose it.
+	 */
+	static BlockPos origin(ServerLevel level, ServerPlayer player, RandomSource random) {
+		BlockPos spawn = level.getRespawnData().pos();
+		Born past = level.getServer().overworld().getAttachedOrElse(BORN, java.util.Map.of()).get(player.getUUID().toString());
+		BlockPos woke = past != null && past.dimension.equals(level.dimension().identifier().toString()) ? BlockPos.of(past.wake) : null;
+		int sea = net.minecraft.core.QuartPos.fromBlock(level.getSeaLevel());
+		BlockPos wet = null;
+		for (int i = 0; i < ORIGIN_TRIES; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0, d = ORIGIN_SPREAD * Math.sqrt(random.nextDouble());
+			BlockPos at = new BlockPos(spawn.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), spawn.getZ() + Mth.floor(Math.sin(angle) * d));
+			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART) {
+				continue;
+			}
+			if (!level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(at.getX()), sea, net.minecraft.core.QuartPos.fromBlock(at.getZ()))
+				.is(net.minecraft.tags.BiomeTags.IS_OCEAN)) {
+				logOrigin(player, at, spawn);
+				return at;
+			}
+			if (wet == null) {
+				wet = at;
+			}
+		}
+		BlockPos at = wet != null ? wet : spawn;
+		logOrigin(player, at, spawn);
+		return at;
+	}
+
+	private static void logOrigin(ServerPlayer player, BlockPos at, BlockPos spawn) {
+		JaymosKingdoms.LOGGER.info("{} sets out from {}, {} ({} blocks from spawn)", player.getName().getString(), at.getX(), at.getZ(),
+			(int) Math.sqrt(flat(at, spawn)));
 	}
 
 	/** (Tiv) Whether a start's place at {@code at} on {@code level} is free: nobody else's start was within {@link #PLACE_APART} of it. */

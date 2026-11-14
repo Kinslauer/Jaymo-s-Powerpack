@@ -64,6 +64,10 @@ public final class Shelter {
 		if (player.level() != level || player.getRandom().nextFloat() >= CHANCE) {
 			return null;
 		}
+		// (nobody carries one of the walking dead home to tend: HollowSighting)
+		if (Heritage.is(player, Heritage.Kind.HOLLOW)) {
+			return null;
+		}
 		Faction home = null;
 		double best = RANGE * RANGE;
 		for (Faction f : Factions.all(server)) {

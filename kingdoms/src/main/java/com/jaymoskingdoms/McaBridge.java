@@ -109,6 +109,68 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
+	// ---- borrowed faces (BorrowedFaces, Doubles) -----------------------------------------------------------------------
+
+	/** What of an MCA look is the face and body someone is known by (with every gene, saved as {@code Gene...}). */
+	private static final List<String> LOOK_KEYS = List.of("Clothes", "Skin", "Hair", "HairStyle", "HairBase", "HairBangs", "HairBack", "HairFront",
+		"HairExtra", "SkinColor", "HairColor", "EyeColor", "EyeColorLeft", "Gender");
+
+	private static boolean lookKey(String key) {
+		return key.startsWith("Gene") || LOOK_KEYS.contains(key);
+	}
+
+	/**
+	 * {@code player} takes on {@code villager}'s MCA look (skin, face, hair, clothes, build), shown to everyone. Returns the
+	 * look they had (to give back with {@link #setLook}), or null if it couldn't be done (not MCA's, or no look of their own yet).
+	 */
+	static @Nullable CompoundTag wearLook(ServerPlayer player, Villager villager) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!(villager instanceof VillagerEntityMCA v) || !save.isEntityDataSet()) {
+			return null;
+		}
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+			net.minecraft.util.ProblemReporter.DISCARDING, v.registryAccess());
+		if (!v.saveAsPassenger(out)) {
+			return null;
+		}
+		CompoundTag own = save.getEntityData().copy(), worn = own.copy();
+		CompoundTag from = NbtHelper.getCompoundOrSelf(out.buildResult(), "MCAData"), to = NbtHelper.getCompoundOrSelf(worn, "MCAData");
+		for (String key : new ArrayList<>(to.keySet())) {
+			if (lookKey(key)) {
+				to.remove(key);
+			}
+		}
+		for (String key : from.keySet()) {
+			net.minecraft.nbt.Tag tag = from.get(key);
+			if (lookKey(key) && tag != null) {
+				to.put(key, tag.copy());
+			}
+		}
+		setLook(player, worn);
+		return own;
+	}
+
+	/** {@code player}'s MCA look becomes {@code data}, shown to everyone. */
+	static void setLook(ServerPlayer player, CompoundTag data) {
+		PlayerSaveData.get(player).setEntityData(data);
+		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
+		}
+	}
+
+	/** {@code villager} (if MCA's) gets a face, hair and name of their own, new ones: a changeling's, the stolen face dropped. */
+	static void ownFace(Villager villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			v.getGenetics().randomize();
+			v.randomizeSkin();
+			v.randomizeHair();
+			String name = Names.pickCitizenName(v.getGenetics().getGender(), v);
+			if (name != null && !name.isBlank()) {
+				v.setName(name.strip());
+			}
+		}
+	}
+
 	/** (0.5.29) Hearts with {@code player} in an MCA villager's memory. */
 	static void hearts(Villager villager, ServerPlayer player, int hearts) {
 		if (villager instanceof VillagerEntityMCA v) {

@@ -3,7 +3,11 @@ package com.jaymospowers.client.rig;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.EmfCompat;
 import com.jaymospowers.rig.Rig;
+import org.jspecify.annotations.Nullable;
+import com.jaymospowers.rig.RigUnibeam;
+import com.jaymospowers.rig.RigMoves;
 import com.jaymospowers.rig.RigCall;
+import com.jaymospowers.rig.RigFinish;
 import com.jaymospowers.rig.RigFrame;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
@@ -101,12 +105,22 @@ public final class RigSuit {
 	static final RenderStateDataKey<int[]> COLORS = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_colors");
 	/** The plates are mid grey, so a dye is brightened this much before it tints them (or it comes out dark). */
 	static final float DYE_LIFT = 1.7F;
+	/**
+	 * A move's light on the suit: {the piece that charges ({@link Rig.Piece} ordinal), how bright its lights burn over
+	 * their own (0-1), the white flash as it lets go (0-1), 1 if the flash takes the whole suit}; null with no move on.
+	 */
+	static final RenderStateDataKey<float[]> CHARGE = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_charge");
+	/** The flash as a shot leaves: ticks it lasts, and how bright the palm blast's and the punch's are beside the Unibeam's full one. */
+	static final float FLASH_TICKS = 2.0F, PALM_FLASH = 0.55F;
+	/** First person: a build age at which every plate is on and settled, how far a firing gauntlet kicks back (model units) and how long the kick takes (ticks). */
+	static final float HAND_AGE = 10000.0F, HAND_KICK = 0.12F, HAND_KICK_TICKS = 5.0F;
 	/** The glow pass's colour (its lights coming up). */
 	static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_glow");
 
 	/** The frame this suit was built as ({@link RigFrame} ordinal), its trim paint (rgb, -1 for none), and whether its plates are flying in (a suit call). */
 	static final RenderStateDataKey<Integer> FRAME = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_frame");
 	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
+	static final RenderStateDataKey<Integer> FINISH = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_finish");
 	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
 	/** A called suit: how far (pixels) each plate starts from its place, how high above, and how much it tumbles on the way. */
 	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
@@ -118,6 +132,10 @@ public final class RigSuit {
 		JaymosPowers.id("textures/entity/rig/suit_shade.png"), JaymosPowers.id("textures/entity/rig/suit_siege.png")};
 	static final Identifier[] GLOW_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_glow.png"), JaymosPowers.id("textures/entity/rig/suit_glow_scrap.png"),
 		JaymosPowers.id("textures/entity/rig/suit_glow_shade.png"), JaymosPowers.id("textures/entity/rig/suit_glow_siege.png")};
+	/** A finish's painted layer ({@link RigFinish}'s order; none for the first), and which of them are drawn lit. */
+	static final Identifier[] FINISH_TEXTURES = {null, JaymosPowers.id("textures/entity/rig/finish_deepwalker.png"),
+		JaymosPowers.id("textures/entity/rig/finish_skybreaker.png"), JaymosPowers.id("textures/entity/rig/finish_last_stand.png")};
+	static final boolean[] FINISH_LIT = {false, true, false, false};
 	static final Identifier TRIM_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_trim.png");
 	static final Identifier TEXTURE = TEXTURES[0];
 	static final Identifier GLOW_TEXTURE = GLOW_TEXTURES[0];
@@ -254,7 +272,8 @@ public final class RigSuit {
 	 * the state: the Rig's pieces still on it come off it (the vanilla armour layer would draw them) and onto the suit.
 	 */
 	/** The Forge screen's preview: while {@code run} extracts the local player's render state, they wear the whole suit in this frame and paint (-1: bare). */
-	static void withPreview(RigFrame frame, int plates, int trim, Runnable run) {
+	static void withPreview(RigFrame frame, int plates, int trim, int finish, Runnable run) {
+		previewFinish = finish;
 		previewFrame = frame;
 		previewPlates = plates;
 		previewTrim = trim;
@@ -266,7 +285,7 @@ public final class RigSuit {
 	}
 
 	private static @org.jspecify.annotations.Nullable RigFrame previewFrame;
-	private static int previewPlates, previewTrim;
+	private static int previewPlates, previewTrim, previewFinish;
 	/** A piece this old (ticks) is fully on. */
 	private static final float PREVIEW_AGE = 10000.0F;
 
@@ -274,6 +293,7 @@ public final class RigSuit {
 		state.setData(AGES, null);
 		state.setData(FRAME, null);
 		state.setData(TRIM, null);
+		state.setData(FINISH, null);
 		state.setData(FLY, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
@@ -286,7 +306,7 @@ public final class RigSuit {
 		float[] ages = null;
 		int[] colors = null;
 		RigFrame frame = null;
-		int trim = -1;
+		int trim = -1, finish = RigFinish.NONE;
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
@@ -294,6 +314,9 @@ public final class RigSuit {
 				ItemStack stack = equipment(state, piece);
 				if (frame == null || piece == Rig.Piece.CORE) {
 					frame = RigFrame.of(stack);
+				}
+				if (finish == RigFinish.NONE || piece == Rig.Piece.CORE) {
+					finish = Math.max(finish, RigFinish.of(stack));
 				}
 				Integer painted = stack.get(Rig.TRIM);
 				if (painted != null && (trim < 0 || piece == Rig.Piece.CORE)) {
@@ -338,6 +361,7 @@ public final class RigSuit {
 			ages = new float[] {PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE};
 			frame = previewFrame;
 			trim = previewTrim;
+			finish = previewFinish;
 			colors = previewPlates < 0 ? null : new int[] {previewPlates, previewPlates, previewPlates, previewPlates};
 			state.headEquipment = ItemStack.EMPTY;
 			state.headItem.clear();
@@ -348,11 +372,13 @@ public final class RigSuit {
 		state.setData(AGES, ages);
 		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());
 		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
+		state.setData(FINISH, ages == null || finish == RigFinish.NONE ? null : finish);
 		state.setData(FLY, ages == null || !player.getAttachedOrElse(RigCall.FLYING_IN, false) ? null : Boolean.TRUE);
 		state.setData(COLORS, ages == null ? null : colors);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
 		state.setData(FACE, ages == null ? null : face(player, (float)time));
 		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
+		state.setData(CHARGE, ages == null ? null : charge(player, (float)time));
 	}
 
 	private static ItemStack equipment(AvatarRenderState state, Rig.Piece piece) {
@@ -387,6 +413,35 @@ public final class RigSuit {
 		}
 		float x = track[0];
 		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/** The light a move puts on the suit (see {@link #CHARGE}): the limb that charges brightens through the wind-up and flashes as it lets go. */
+	private static float @Nullable [] charge(Player player, float time) {
+		RigMoves.Move move = RigMoves.get(player);
+		if (move == null) {
+			return null;
+		}
+		float t = time - move.start();
+		return switch (move.kind()) {
+			case RigMoves.PALM -> light(Rig.Piece.ARMS, t, RigMoves.PALM_FIRE, RigMoves.PALM_FIRE, PALM_FLASH, false);
+			case RigMoves.PUNCH -> light(Rig.Piece.ARMS, t, 0.0F, 0.0F, PALM_FLASH, false);
+			case RigMoves.DASH -> light(Rig.Piece.THRUSTERS, t, RigMoves.DASH_FIRE, RigMoves.DASH_TICKS - 4.0F, PALM_FLASH, false);
+			case RigMoves.TAKEOFF -> light(Rig.Piece.THRUSTERS, t, RigMoves.TAKEOFF_CROUCH, RigMoves.TAKEOFF_CROUCH, PALM_FLASH, false);
+			case RigMoves.UNIBEAM -> light(Rig.Piece.CORE, t, RigUnibeam.CHARGE_TICKS, RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS, 1.0F, true);
+			default -> null;
+		};
+	}
+
+	/** Brightening up to {@code fire}, burning (flickering) until {@code end}, with a flash of {@code flash} at {@code fire}. */
+	private static float[] light(Rig.Piece piece, float t, float fire, float end, float flash, boolean whole) {
+		float burn = t < fire ? Mth.clamp(t / Math.max(fire, 1.0F), 0.0F, 1.0F) : t < end ? 0.8F + 0.2F * Mth.sin(t * 2.3F) : Mth.clamp(1.0F - (t - end) / 3.0F, 0.0F, 1.0F);
+		float flashed = t >= fire && t < fire + FLASH_TICKS ? flash * (1.0F - (t - fire) / FLASH_TICKS) : 0.0F;
+		return new float[] {piece.ordinal(), burn * burn, flashed, whole ? 1.0F : 0.0F};
+	}
+
+	private static int grey(float share) {
+		int v = Mth.clamp(Math.round(share * 255.0F), 0, 255);
+		return 0xFF000000 | v << 16 | v << 8 | v;
 	}
 
 	/** The glow pass's colour: full, but flickering up as the Core's reactor locks in (and down as it comes off). */
@@ -465,6 +520,65 @@ public final class RigSuit {
 		return 0xFF000000 | r << 16 | g << 8 | b;
 	}
 
+	// ---- first person ---------------------------------------------------------------------------------------------------
+
+	private static Suit wideHand, slimHand;
+	private static final float[] BUILT = {HAND_AGE, HAND_AGE, HAND_AGE, HAND_AGE};
+
+	/** First person, before the game draws your arm: a firing gauntlet kicks back toward you (from the avatar renderer's renderHand). */
+	public static void kickHand(PoseStack poseStack) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		RigMoves.Move move = player == null ? null : RigMoves.get(player);
+		if (move == null || !Rig.wears(player, Rig.Piece.ARMS)) {
+			return;
+		}
+		float t = player.level().getGameTime() - move.start() + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float fire = move.kind() == RigMoves.PALM ? RigMoves.PALM_FIRE : move.kind() == RigMoves.PUNCH ? 0.0F : -1.0F;
+		if (fire < 0.0F || t < fire) {
+			return;
+		}
+		float kick = RigBeats.at(t - fire, 0.0F, 0.0F, RigBeats.LINEAR, 1.0F, 1.0F, RigBeats.OUT, HAND_KICK_TICKS, 0.0F, RigBeats.SINE);
+		poseStack.translate(0.0F, -HAND_KICK * 0.3F * kick, HAND_KICK * kick);
+	}
+
+	/** First person, after the game draws your arm: the Arms' plates over it, lit, and brighter while a shot charges. */
+	public static void renderHand(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart arm, PlayerModel source) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (player == null || !Rig.wears(player, Rig.Piece.ARMS)) {
+			return;
+		}
+		if (wideHand == null) {
+			// these never re-run a wearer's animation (only the arm's own pose is copied below)
+			wideHand = new Suit(false, () -> source, Rig.Piece.ARMS.ordinal());
+			slimHand = new Suit(true, () -> source, Rig.Piece.ARMS.ordinal());
+		}
+		Suit suit = slimArm(arm, player.getSkin().model() == PlayerModelType.SLIM) ? slimHand : wideHand;
+		boolean right = arm == source.rightArm;
+		ModelPart sleeve = suit.hand(arm, right);
+		ItemStack stack = player.getItemBySlot(Rig.Piece.ARMS.slot);
+		int frame = Mth.clamp(RigFrame.of(stack).ordinal(), 0, TEXTURES.length - 1);
+		DyedItemColor dye = stack.get(DataComponents.DYED_COLOR);
+		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null,
+			tint(dye == null ? -1 : dye.rgb() & 0xFFFFFF));
+		int finish = RigFinish.of(stack);
+		if (finish != RigFinish.NONE) {
+			collector.submitModelPart(sleeve, poseStack, FINISH_LIT[finish] ? RenderTypes.eyes(FINISH_TEXTURES[finish])
+				: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
+		}
+		collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
+		float time = player.level().getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float[] charge = charge(player, time);
+		if (charge != null && (int)charge[0] == Rig.Piece.ARMS.ordinal()) {
+			if (charge[1] > 0.02F) {
+				collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, grey(charge[1]));
+			}
+			if (charge[2] > 0.02F) {
+				collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, grey(charge[2]));
+			}
+		}
+	}
+
 	/** Draws the Rig over a player: the plates, then their lights. */
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private final Suit wide, slim;
@@ -502,9 +616,28 @@ public final class RigSuit {
 					renderColoredCutoutModel(parts[i], TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors[i]), 1);
 				}
 			}
+			Integer finish = state.getData(FINISH);
+			if (finish != null) {
+				// the finish: its paint over the plates (lit for the ones that shine)
+				collector.order(2).submitModel(suit, state, poseStack, FINISH_LIT[finish] ? RenderTypes.eyes(FINISH_TEXTURES[finish])
+					: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), lightCoords, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, null, 0);
+			}
 			Integer glow = state.getData(GLOW);
 			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow == null ? 0xFFFFFFFF : glow, null, 0);
+			float[] charge = state.getData(CHARGE);
+			if (charge != null) {
+				// the piece that charges burns brighter over its own lights, and its plates flash white as the shot leaves
+				Suit piece = (slimArms ? this.slimParts : this.wideParts)[Mth.clamp((int)charge[0], 0, PIECES.length - 1)];
+				if (charge[1] > 0.02F) {
+					collector.order(1).submitModel(piece, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,
+						grey(charge[1]), null, 0);
+				}
+				if (charge[2] > 0.02F) {
+					collector.order(1).submitModel(charge[3] > 0.5F ? suit : piece, state, poseStack, RenderTypes.eyes(TEXTURES[frame]), lightCoords,
+						OverlayTexture.NO_OVERLAY, grey(charge[2]), null, 0);
+				}
+			}
 			Integer trim = state.getData(TRIM);
 			if (trim != null) {
 				// the trim, painted: its plates alone, in the trim colour, lit
@@ -596,6 +729,22 @@ public final class RigSuit {
 					}
 				}
 			}
+		}
+
+		/** One arm for the first-person view: posed like {@code arm}, its Arms plates on and the launcher's pod left off. */
+		ModelPart hand(ModelPart arm, boolean right) {
+			resetPose();
+			ModelPart bone = right ? this.rightArm : this.leftArm;
+			bone.loadPose(arm.storePose());
+			bone.visible = true;
+			hideSkinLayers();
+			assemble(BUILT, false);
+			for (int i = 0; i < this.plates.length; i++) {
+				if (this.pod[i]) {
+					this.plates[i].visible = false;
+				}
+			}
+			return bone;
 		}
 
 		/** Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. */
