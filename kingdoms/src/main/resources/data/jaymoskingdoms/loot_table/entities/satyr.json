@@ -1,0 +1,59 @@
+{
+	"type": "minecraft:entity",
+	"pools": [
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:leather",
+					"modifier": [
+						{
+							"type": "minecraft:set_count",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 0,
+								"max": 2
+							}
+						},
+						{
+							"type": "minecraft:enchanted_count_increase",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 0.0,
+								"max": 1.0
+							},
+							"enchantment": "minecraft:looting"
+						}
+					]
+				}
+			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:goat_horn",
+					"modifier": [
+						{
+							"type": "minecraft:set_instrument",
+							"options": "#minecraft:goat_horns"
+						}
+					]
+				}
+			],
+			"condition": {
+				"type": "minecraft:random_chance_with_enchanted_bonus",
+				"unenchanted_chance": 0.08,
+				"enchanted_chance": {
+					"type": "minecraft:linear",
+					"base": 0.11,
+					"per_level_above_first": 0.03
+				},
+				"enchantment": "minecraft:looting"
+			}
+		}
+	],
+	"random_sequence": "jaymoskingdoms:entities/satyr"
+}

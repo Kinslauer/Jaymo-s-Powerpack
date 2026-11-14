@@ -12,12 +12,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Vector3d;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,11 +50,14 @@ public final class FelledCompat {
 	 * Felled's rigid body, and Jolt only ever sees a standing tree as solid blocks, so it came to rest leaning on the next
 	 * tree instead of knocking it over the way ours do ({@link FallingTree#knock}). Each tick, a Felled tree still moving
 	 * (its top at least {@link #KNOCK_SPEED} blocks a tick, this tick or the last) looks just ahead of each of its logs
-	 * along the way it's going ({@link #KNOCK_AHEAD}); an upright log of a natural tree there, no more than
-	 * {@link FallingTree#KNOCK_SIZE} times its size, goes over that way ({@link Trees#knock}: as one of ours, which knocks
-	 * on in turn). At most {@link FallingTree#KNOCKS_MOST} a tree; never the stump it was cut from.
+	 * along the way it's going ({@link #KNOCK_AHEAD}), and the block under that; a log of a natural tree there, any size,
+	 * goes over that way ({@link Trees#knock}: as one of ours, which knocks on in turn); never the stump it was cut from.
+	 * Andy: "they should crash through what they hit, one time and straight to the ground". A tree that stopped short,
+	 * still leaning with its top {@link #LEANING} blocks or more over its stump, knocks over the tree it rests on too,
+	 * for its first {@link #LEAN_LOOK} ticks: slowed to nothing by what it struck, it had stayed propped there.
 	 */
-	static final double KNOCK_SPEED = 0.06;
+	static final double KNOCK_SPEED = 0.06, LEANING = 2.5;
+	static final int LEAN_LOOK = 600;
 	static final double[] KNOCK_AHEAD = {0.0, 0.6, 1.1};
 	/** How far (blocks, sideways) round where its trunk first stood counts as its own stump. */
 	static final double STUMP = 1.6;
@@ -69,7 +70,6 @@ public final class FelledCompat {
 	private static final class Motion {
 		@Nullable Vec3 top, stump, way;
 		double speed;
-		int knocks;
 	}
 
 	static void register() {
@@ -121,7 +121,15 @@ public final class FelledCompat {
 		}
 		m.top = top;
 		m.speed = speed;
-		if (m.way == null || m.knocks >= FallingTree.KNOCKS_MOST || Math.max(speed, was) < KNOCK_SPEED) {
+		boolean leaning = tree.tickCount < LEAN_LOOK && top.y - m.stump.y >= LEANING;
+		if (m.way == null && leaning) {
+			// (stopped before it ever got going: it leans the way its top lies from its stump)
+			Vec3 lay = new Vec3(top.x - m.stump.x, 0.0, top.z - m.stump.z);
+			if (lay.lengthSqr() > 0.04) {
+				m.way = lay.normalize();
+			}
+		}
+		if (m.way == null || (Math.max(speed, was) < KNOCK_SPEED && !leaning)) {
 			return;
 		}
 		Object grid = mGrid.invoke(tree);
@@ -141,24 +149,18 @@ public final class FelledCompat {
 		}
 		float heading = (float)Math.atan2(m.way.z, m.way.x);
 		heading = Math.round(heading / Mth.HALF_PI) * Mth.HALF_PI;
-		int most = Math.max(1, Math.round(logs.size() * FallingTree.KNOCK_SIZE));
 		for (Vec3 log : logs) {
 			for (double ahead : KNOCK_AHEAD) {
-				BlockPos pos = BlockPos.containing(log.x + m.way.x * ahead, log.y, log.z + m.way.z * ahead);
-				double sx = pos.getX() + 0.5 - m.stump.x, sz = pos.getZ() + 0.5 - m.stump.z;
-				if (sx * sx + sz * sz < STUMP * STUMP) {
-					continue;
-				}
-				BlockState there = level.getBlockState(pos);
-				if (!there.is(BlockTags.LOGS) || !there.hasProperty(BlockStateProperties.AXIS)
-					|| there.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y) {
-					continue;
-				}
-				if (Trees.knock(level, pos, heading, null, most) > 0) {
-					m.knocks++;
-					level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
-					level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
-					return;
+				BlockPos ahead0 = BlockPos.containing(log.x + m.way.x * ahead, log.y, log.z + m.way.z * ahead);
+				for (BlockPos pos : new BlockPos[] {ahead0, ahead0.below()}) {
+					double sx = pos.getX() + 0.5 - m.stump.x, sz = pos.getZ() + 0.5 - m.stump.z;
+					if (sx * sx + sz * sz < STUMP * STUMP || !level.getBlockState(pos).is(BlockTags.LOGS)) {
+						continue;
+					}
+					if (Trees.knock(level, pos, heading, null, Trees.FELL_MOST) > 0) {
+						level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
+						level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
+					}
 				}
 			}
 		}

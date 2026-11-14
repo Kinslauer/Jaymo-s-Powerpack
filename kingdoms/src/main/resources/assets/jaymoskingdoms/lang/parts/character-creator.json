@@ -11,6 +11,8 @@
   "gui.jaymoskingdoms.creator.random": "Randomize",
   "gui.jaymoskingdoms.creator.pick": "Pick one",
   "gui.jaymoskingdoms.creator.gender": "You are:",
+  "gui.jaymoskingdoms.creator.prev": "< Back",
+  "gui.jaymoskingdoms.creator.next": "Next >",
   "gui.jaymoskingdoms.creator.heritage": "Heritage:",
   "gui.jaymoskingdoms.creator.look": "Look:",
   "gui.jaymoskingdoms.creator.raised": "Raised by:",

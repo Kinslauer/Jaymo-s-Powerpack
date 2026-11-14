@@ -40,7 +40,7 @@ public class RunningSkull extends Monster implements ItemSupplier {
 	/** What a smashed skull spills: bones, arrows, experience, and now and then the skull itself. */
 	static final int BONES_MAX = 2, ARROWS_MAX = 2, XP = 7;
 	static final float SKULL_DROP = 0.08F;
-	/** (made on first use: an ItemStack built while the mod loads crashes 26.3, "Components not bound yet") */
+	/** Its look, made when first drawn: an item made as the class loads (at registration) is made before items are ready. */
 	private static @org.jspecify.annotations.Nullable ItemStack look;
 
 	private int ran;

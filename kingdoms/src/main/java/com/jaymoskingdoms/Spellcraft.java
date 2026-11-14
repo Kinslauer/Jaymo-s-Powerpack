@@ -414,6 +414,11 @@ public final class Spellcraft {
 		if (Counterspell.key(player, level)) {
 			return;
 		}
+		if (!bolt && element.equals("death")) {
+			// (Andy 2026-11-14: "they shouldnt get a blade imbuement") death's tap raises a body instead
+			Necromancy.tapKey(player, level);
+			return;
+		}
 		if (element.equals(WildMagic.WILD)) {
 			// the wild bloodline's blade and bolt take a different element every time
 			element = WildMagic.element(level.getRandom());

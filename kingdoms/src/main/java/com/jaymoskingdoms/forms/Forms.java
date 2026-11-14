@@ -36,6 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -535,7 +536,7 @@ public final class Forms {
 	 */
 	public static List<String> barForms(Player player) {
 		ItemStack main = player.getMainHandItem();
-		if (main.isEmpty() && !PowersCompat.lockedOn(player)) {
+		if ((main.isEmpty() || lockOnly(main)) && !PowersCompat.lockedOn(player)) {
 			return List.of();
 		}
 		Book book = book(player);
@@ -557,6 +558,24 @@ public final class Forms {
 			}
 		}
 		return out;
+	}
+
+	/** Powers' Chain Axe: its skill bar only while locked on ({@link #barOff}). */
+	private static final Identifier CHAIN_AXE = Identifier.fromNamespaceAndPath("jaymospowers", "chain_axe");
+
+	/**
+	 * A weapon whose skill bar (forms and its RPG Series weapon skill) shows only while locked on. Andy: "the chain axe
+	 * shouldnt have the toolbar attack until you lock on, that way your right click still throws the chain": Spell Engine
+	 * gives the use key to the bar's first skill when the held item has no use pose of its own, so the chain axe's whirl
+	 * and throw never started.
+	 */
+	public static boolean lockOnly(ItemStack main) {
+		return !main.isEmpty() && BuiltInRegistries.ITEM.getKey(main.getItem()).equals(CHAIN_AXE);
+	}
+
+	/** Whether {@code player}'s skill bar stays empty now: a {@link #lockOnly} weapon in hand and no lock. */
+	public static boolean barOff(Player player) {
+		return lockOnly(player.getMainHandItem()) && !PowersCompat.lockedOn(player);
 	}
 
 	/** (0.7.550) Whether {@code main} is a weapon some form family takes (a bare hand isn't, here). */

@@ -1174,7 +1174,8 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		if (this.skip != null) {
-			this.skip.visible = (s.question != null || s.gender) && !roadOnly();
+			// (Andy: "gender should be before you can select skip the story")
+			this.skip.visible = (s.question != null || s.gender) && !roadOnly() && (!McaCompat.LOADED || draft.gender >= 0);
 		}
 		if (this.asking) {
 			ask(graphics);
@@ -1660,7 +1661,7 @@ final class LifeStoryScreen extends Screen {
 		Answer raised = picked(Question.RAISED);
 		Classes.PlayerClass cls = youthClass();
 		return switch (f) {
-			// (in MCA's creator the body is a man's or a woman's by its own buttons)
+			// (in MCA's creator the body is the one picked on the story's first page, before the skip)
 			case GENDER -> McaCompat.LOADED && !tabbed();
 			case HERITAGE, LOOK -> heritage() != null;
 			case RAISED_REALM -> raised != null && raised.realm();
@@ -1717,6 +1718,91 @@ final class LifeStoryScreen extends Screen {
 			return List.of(Component.translatable(HeritageVariants.langKey(kind, lookIndex()) + ".trait"));
 		}
 		return f == Field.AFFINITY ? List.of(Component.translatable("gui.jaymoskingdoms.creator.affinity.fx")) : List.of();
+	}
+
+	/** The picture of a row's pick, for its card in MCA's creator. */
+	static ItemStack fieldIcon(Field f) {
+		Heritage.Kind kind = heritage();
+		Classes.PlayerClass cls = youthClass();
+		Answer a = picked(switch (f) {
+			case RAISED, RAISED_REALM -> Question.RAISED;
+			case CHILDHOOD -> Question.CHILDHOOD;
+			case AFFINITY -> Question.TURN;
+			default -> Question.YOUTH;
+		});
+		return switch (f) {
+			case GENDER -> new ItemStack(net.minecraft.world.item.Items.ARMOR_STAND);
+			case HERITAGE, LOOK -> kind == null ? ItemStack.EMPTY : new ItemStack(kind.icon);
+			case RAISED_REALM -> new ItemStack(net.minecraft.world.item.Items.BANNER.pick(net.minecraft.world.item.DyeColor.WHITE));
+			case CLASS, OPTION -> {
+				List<ItemStack> gear = cls == null ? List.of()
+					: Classes.gear(cls, draft.option >= 0 && draft.option < cls.options.size() ? cls.options.get(draft.option) : "");
+				yield !gear.isEmpty() ? gear.get(0) : a == null ? ItemStack.EMPTY : new ItemStack(a.icon());
+			}
+			default -> a == null ? ItemStack.EMPTY : new ItemStack(a.icon());
+		};
+	}
+
+	private static void say(List<Component> out, String key, net.minecraft.ChatFormatting colour, Object... args) {
+		if (Language.getInstance().has(key)) {
+			out.add(Component.translatable(key, args).withStyle(colour));
+		}
+	}
+
+	/** All there is to read of a row's pick, a paragraph each, for its card in MCA's creator: what it is, then what it gives (green) and costs (red). */
+	static List<Component> fieldText(Field f) {
+		Heritage.Kind kind = heritage();
+		Classes.PlayerClass cls = youthClass();
+		List<Component> out = new ArrayList<>();
+		net.minecraft.ChatFormatting plain = net.minecraft.ChatFormatting.WHITE, good = net.minecraft.ChatFormatting.GREEN;
+		switch (f) {
+			case GENDER -> say(out, "story.jaymoskingdoms.gender.desc", plain);
+			case HERITAGE -> {
+				if (kind != null) {
+					say(out, "heritage.jaymoskingdoms." + kind.key() + ".desc", plain);
+					say(out, "heritage.jaymoskingdoms." + kind.key() + ".gift", good);
+					say(out, "heritage.jaymoskingdoms." + kind.key() + ".flaw", net.minecraft.ChatFormatting.RED);
+				}
+			}
+			case LOOK -> {
+				if (kind != null) {
+					say(out, HeritageVariants.langKey(kind, lookIndex()) + ".desc", plain);
+					say(out, HeritageVariants.langKey(kind, lookIndex()) + ".trait", good);
+				}
+			}
+			case RAISED, CHILDHOOD, AFFINITY -> {
+				Question q = f == Field.RAISED ? Question.RAISED : f == Field.CHILDHOOD ? Question.CHILDHOOD : Question.TURN;
+				Answer a = picked(q);
+				if (a != null) {
+					say(out, story(q.key() + "." + a.key() + ".tale"), plain, java.util.Objects.requireNonNullElse(realmName(q), "..."));
+					if (f != Field.AFFINITY) {
+						for (Component line : gives(q, a, true)) {
+							out.add(Component.empty().append(line).withStyle(good));
+						}
+					}
+				}
+				if (f == Field.AFFINITY) {
+					say(out, "gui.jaymoskingdoms.creator.affinity.fx", net.minecraft.ChatFormatting.GRAY);
+				}
+			}
+			case RAISED_REALM -> {
+				Answer raised = picked(Question.RAISED);
+				if (raised != null) {
+					say(out, "story.jaymoskingdoms.realm." + raised.key() + ".desc", plain);
+				}
+			}
+			case CLASS -> {
+				if (cls != null) {
+					say(out, "class.jaymoskingdoms." + cls.key() + ".desc", plain);
+				}
+			}
+			case OPTION -> {
+				if (cls != null && draft.option >= 0 && draft.option < cls.options.size()) {
+					say(out, "class.jaymoskingdoms.option." + cls.options.get(draft.option) + ".desc", plain);
+				}
+			}
+		}
+		return out;
 	}
 
 	/** The creator's page: a row for each thing the story would have decided, then the harder life and the sparks as the story page has them. */
