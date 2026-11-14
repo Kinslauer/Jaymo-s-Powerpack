@@ -1,7 +1,7 @@
 /*
  * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
  * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/MoaModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
- * Changed for Jaymo's Powers (2026-11): moved to this package, posed from our own render state; the saddle (from MoaSaddleModel.java, its texture offsets moved by 100, 114) is part of this model.
+ * Changed for Jaymo's Powers (2026-11): moved to this package, posed from our own render state; the saddle (from MoaSaddleModel.java, its texture offsets moved by 100, 114) is part of this model, and so is the saddlebag (from MoaSaddlebagModel.java, moved by 28, 81).
  * This file stays under the LGPL v3.0.
  */
 package com.jaymospowers.client.aether.mob;
@@ -19,6 +19,7 @@ final class MoaModel extends AetherAnimalModel {
 	private final KeyframeAnimation flyAnimation;
 	private final ModelPart body_main;
 	private final ModelPart moa_saddle;
+	private final ModelPart saddlebag;
 	private final ModelPart body_front;
 	private final ModelPart neck;
 	private final ModelPart head_main;
@@ -75,6 +76,7 @@ final class MoaModel extends AetherAnimalModel {
 		this.flyAnimation = MoaAnimation.FLY.bake(root);
 		this.body_main = root.getChild("body_main");
 		this.moa_saddle = this.body_main.getChild("moa_saddle");
+		this.saddlebag = this.body_main.getChild("saddlebag");
 		this.body_front = this.body_main.getChild("body_front");
 		this.neck = this.body_front.getChild("neck");
 		this.head_main = this.neck.getChild("head_main");
@@ -245,6 +247,10 @@ final class MoaModel extends AetherAnimalModel {
 
 		PartDefinition stirrup_left = moa_saddle.addOrReplaceChild("stirrup_left", CubeListBuilder.create().texOffs(103, 127).addBox(0.0F, -2.0F, -2.0F, 0.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.0F, 0.5F, -2.0F, 0.0F, 0.0F, -0.48F));
 
+		// the saddlebag (MoaSaddlebagModel.java), behind the saddle; its texture offsets are moved by (28, 81)
+		PartDefinition saddlebag = body_main.addOrReplaceChild("saddlebag", CubeListBuilder.create().texOffs(28, 89).addBox(-5.0F, -1.8F, 1.0F, 10.0F, 5.0F, 5.0F, new CubeDeformation(0.0F))
+				.texOffs(31, 81).addBox(-4.0F, -5.8F, 1.0F, 8.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.1F, 9.0F, 0.1745F, 0.0F, 0.0F));
+
 		return LayerDefinition.create(meshdefinition, 168, 168);
 	}
 
@@ -266,5 +272,6 @@ final class MoaModel extends AetherAnimalModel {
 		this.walkAnimation.applyWalk(state.walkAnimationPos, Mth.clamp(state.walkAnimationSpeed - flyAmount, 0.0F, 1.0F), 2.0F, 2.5F);
 		this.flyAnimation.applyWalk(state.ageInTicks, flyAmount, WING_BEAT, 1.0F);
 		this.moa_saddle.visible = state.saddled;
+		this.saddlebag.visible = state.bagged;
 	}
 }

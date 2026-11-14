@@ -44,20 +44,40 @@ def box(m, part, i=0):
     return m["parts"][part]["boxes"][i]
 
 
+def keep_bright(p, test):
+    """Blanks every pixel a glow layer should not light."""
+    for y in range(p.im.height):
+        for x in range(p.im.width):
+            c = p.px[x, y]
+            if c[3] and not test(c):
+                p.px[x, y] = (0, 0, 0, 0)
+    return p
+
+
+def glow_of(painter, colours):
+    """The glow layer of a skin: only its pixels of these exact colours."""
+    keep = {tuple(c) for c in colours}
+
+    def paint(m, seed):
+        return keep_bright(painter(m, seed), lambda c: tuple(c[:3]) in keep)
+    return paint
+
+
 # ---------------------------------------------------------------- moa
 
 MOA = dict(blue=("4f86d2", "e9f2ff", "e2b65a"), white=("eeeae0", "b9d3ee", "d99a4a"), black=("34343e", "8d6ad0", "9a9aa8"))
 
 
-def moa(kind):
+def moa(kind, keratin_c=None):
     feather, accent, keratin = MOA[kind]
+    keratin = keratin_c or keratin
 
     def paint(m, seed):
         f = ramp_from(feather, dark=0.6, light=1.18); acc = ramp_from(accent, dark=0.7, light=1.1)
         k = ramp_from(keratin, dark=0.55, light=1.15); mouth = ramp_from("7a2f3a"); teeth = ramp_from("efe9d8", dark=0.8, light=1.05)
         leather = ramp_from("7a4a2c"); cloth = ramp_from("b8392f")
         p = a2paint.paint(m, seed, [
-            ("stirrup", leather, "smooth"), ("handle", leather, "horn"), ("rear_r1", cloth, "smooth"), ("moa_saddle", leather, "smooth"),
+            ("saddlebag", ramp_from("94704a"), "fur"), ("stirrup", leather, "smooth"), ("handle", leather, "horn"), ("rear_r1", cloth, "smooth"), ("moa_saddle", leather, "smooth"),
             ("jaw_teeth", teeth, "smooth"), ("beak_int", mouth, "smooth"),
             ("beak|jaw|head_front", k, "horn"), ("toe|foot|leg_\\w+_[23]", k, "scale"),
             ("feather", f, "plume"), ("brow", ramp_from(mix(hx(feather), (0, 0, 0), 0.25)), "feather"),
@@ -66,6 +86,13 @@ def moa(kind):
             if "feather" in name:
                 for b in m["parts"][name]["boxes"]:
                     a2paint.plume(p, b, f, acc)
+        # the saddlebag: a darker flap over the top half of the pouch, with a brass buckle
+        bag, roll = m["parts"]["saddlebag"]["boxes"]
+        for face in ("west", "east", "north", "south"):
+            tip(p, bag, face, leather, "y", "lo", 2)
+        p.rect(bag, "south", 4, 2, 2, 1, (232, 196, 96))
+        for face in ("west", "east"):
+            tip(p, roll, face, cloth, "x", "lo", 1)
         # the saddle's blanket trim
         sb = box(m, "moa_saddle", 0)
         for face in ("west", "east", "north", "south"):
@@ -77,6 +104,61 @@ def moa(kind):
 
 for _k in MOA:
     skin("moa_" + _k, "mob/MoaModel.java", hide=())(moa(_k))
+
+
+def moa_chick(kind, keratin_c=None):
+    feather, accent, keratin = MOA[kind]
+    keratin = keratin_c or keratin
+
+    def paint(m, seed):
+        # down is paler and fluffier than a grown moa's feathers
+        f = ramp_from(mix(hx(feather), (236, 232, 222), 0.35), dark=0.68, light=1.12); acc = ramp_from(accent, dark=0.7, light=1.1)
+        k = ramp_from(keratin, dark=0.55, light=1.15)
+        p = a2paint.paint(m, seed, [("leg_\\w+_2", k, "scale"), ("feather", f, "plume"), ("", f, "wool", 0.7)])
+        for name in m["order"]:
+            if "feather" in name:
+                for b in m["parts"][name]["boxes"]:
+                    a2paint.plume(p, b, f, acc)
+        head = box(m, "head")
+        # the beak is the front of the head box
+        tip(p, head, "west", k, "x", "hi", 2)
+        tip(p, head, "east", k, "x", "lo", 2)
+        tip(p, head, "top", k, "y", "hi", 2)
+        tip(p, head, "bottom", k, "y", "lo", 2)
+        tip(p, head, "north", k, "y", "hi", 3)
+        side_eyes(p, head, 3, 1, 2, 2, white=(250, 238, 190), pupil=(24, 20, 30))
+        return p
+    return paint
+
+
+for _k in MOA:
+    skin("moa_%s_baby" % _k, "mob/MoaBabyModel.java")(moa_chick(_k))
+
+
+# A moa's beak and legs are its own colour, apart from its feathers: an overlay that holds only those pixels (what
+# changes between two paintings that differ in nothing but the keratin colour).
+MOA_KERATIN = ["d8c9a0", "6f6a78", "c9772e", "b9a04a"]
+
+
+def keep_changed(p, q):
+    """Blanks every pixel of p that q has too."""
+    for y in range(p.im.height):
+        for x in range(p.im.width):
+            if p.px[x, y] == q.px[x, y]:
+                p.px[x, y] = (0, 0, 0, 0)
+    return p
+
+
+def moa_keratin(painter, colour):
+    def paint(m, seed):
+        # (seeded alike, so only the keratin differs)
+        return keep_changed(painter("blue", colour)(m, "moa_keratin"), painter("blue", "ff00ff")(m, "moa_keratin"))
+    return paint
+
+
+for _i, _c in enumerate(MOA_KERATIN):
+    skin("moa_keratin_%d" % _i, "mob/MoaModel.java")(moa_keratin(moa, _c))
+    skin("moa_baby_keratin_%d" % _i, "mob/MoaBabyModel.java")(moa_keratin(moa_chick, _c))
 
 
 # ---------------------------------------------------------------- sheepuff
@@ -225,6 +307,21 @@ def aerbunny(m, seed):
     return p
 
 
+@skin("aerbunny_collar", "mob/AerbunnyModel.java")
+def aerbunny_collar(m, seed):
+    """A tamed aerbunny's collar: a band round the bottom of the head with a brass tag in front (an overlay)."""
+    p = aerbunny(m, seed)
+    keep_bright(p, lambda c: False)
+    head = box(m, "head", 0)
+    band = ramp_from("b03a30")
+    for face in ("north", "south", "west", "east"):
+        fw = a2parse.faces(head)[face][2]
+        for i in range(fw):
+            p.rect(head, face, i, 3, 1, 1, band[2 + (i % 2)])
+    p.rect(head, "north", 1, 3, 2, 1, (232, 196, 96))
+    return p
+
+
 # ---------------------------------------------------------------- kirrid
 
 ZONE_HIDE = dict(highfields="8a6e58", magnetic="6f7486", arctic="dfe4ea")
@@ -250,6 +347,24 @@ def kirrid(zone, color):
 for _z in ZONE_HIDE:
     for _c in KIRRID_WOOL:
         skin("kirrid_%s_%s" % (_z, _c), "mob/%sKirridModel.java" % _z.capitalize())(kirrid(_z, _c))
+
+
+def kirrid_kid(zone, color):
+    def paint(m, seed):
+        hide_ = ramp_from(mix(hx(ZONE_HIDE[zone]), (236, 228, 214), 0.2), dark=0.66); wool = ramp_from(KIRRID_WOOL[color], dark=0.76, light=1.1)
+        plate = ramp_from("d9cfb4", dark=0.6, light=1.08); hoof = ramp_from("2e2a30")
+        p = a2paint.paint(m, seed, [("wool", wool, "wool", 0.8), ("plate", plate, "horn"), ("ear", hide_, "smooth"), ("", hide_, "fur", 0.8)])
+        head = box(m, "head")
+        side_eyes(p, head, 1, 1, 2, 2, white=(232, 196, 96), pupil=(30, 24, 20))
+        tip(p, head, "north", ramp_from("3a3038"), "y", "hi", 1)
+        hooves(p, m, "leg_", hoof, 1)
+        return p
+    return paint
+
+
+for _z in ZONE_HIDE:
+    for _c in KIRRID_WOOL:
+        skin("kirrid_%s_%s_baby" % (_z, _c), "mob/%sKirridBabyModel.java" % _z.capitalize())(kirrid_kid(_z, _c))
 
 
 # ---------------------------------------------------------------- burrukai, taegore
@@ -298,6 +413,34 @@ def taegore(zone):
 for _z in ZONE_FUR:
     skin("burrukai_" + _z, "mob/%sBurrukaiModel.java" % ("Arctic" if _z == "arctic" else "Plains"))(burrukai(_z))
     skin("taegore_" + _z, "mob/TaegoreModel.java")(taegore(_z))
+
+
+def burrukai_calf(zone):
+    def paint(m, seed):
+        fur_c, plate_c = ZONE_FUR[zone]
+        fur = ramp_from(mix(hx(fur_c), (236, 228, 214), 0.2), dark=0.62); plate = ramp_from(plate_c, dark=0.6, light=1.1)
+        p = a2paint.paint(m, seed, [("plate", plate, "horn"), ("ear", fur, "smooth"), ("", fur, "fur", 0.9)])
+        side_eyes(p, box(m, "head"), 1, 1, 2, 2, white=(240, 220, 150), pupil=(30, 20, 20))
+        tip(p, box(m, "head"), "north", ramp_from("3a2a2e"), "y", "hi", 1)
+        hooves(p, m, "leg_", ramp_from("26222a"), 2)
+        return p
+    return paint
+
+
+def taegore_piglet(zone):
+    def paint(m, seed):
+        fur_c, plate_c = ZONE_FUR[zone]
+        hide_ = ramp_from(mix(hx(fur_c), (150, 136, 124), 0.3), dark=0.64); plate = ramp_from(plate_c, dark=0.6, light=1.1)
+        p = a2paint.paint(m, seed, [("plate", plate, "horn"), ("snout", ramp_from("c89a94"), "smooth"), ("ear", hide_, "smooth"), ("", hide_, "fur", 0.8)])
+        side_eyes(p, box(m, "head"), 1, 2, 2, 2, white=(240, 220, 150), pupil=(30, 20, 20))
+        hooves(p, m, "leg_", ramp_from("26222a"), 1)
+        return p
+    return paint
+
+
+for _z in ZONE_FUR:
+    skin("burrukai_%s_baby" % _z, "mob/BurrukaiBabyModel.java")(burrukai_calf(_z))
+    skin("taegore_%s_baby" % _z, "mob/TaegoreBabyModel.java")(taegore_piglet(_z))
 
 
 # ---------------------------------------------------------------- skyroot lizard
@@ -403,6 +546,8 @@ def glitterwing(kind):
 
 for _k in GLITTER:
     skin("glitterwing_" + _k, "mob/GlitterwingModel.java")(glitterwing(_k))
+    # the marks and wing edges are lit (the dark-marked kinds only faintly: their marks are dark)
+    skin("glitterwing_%s_glow" % _k, "mob/GlitterwingModel.java")(glow_of(glitterwing(_k), ramp_from(GLITTER[_k][1])))
 
 SHROUD = dict(scarab=("2a7a5a", "e8c84a"), arctic=("c8dcec", "6a9ad0"), fire=("c8482a", "f8c84a"), moss=("5a7a3a", "a8c860"), ore=("5a5a66", "58d8c8"),
               purple=("6a3a9a", "d8a0f0"))
@@ -426,6 +571,7 @@ def shroudwing(kind):
 
 for _k in SHROUD:
     skin("shroudwing_" + _k, "mob/ShroudwingModel.java")(shroudwing(_k))
+    skin("shroudwing_%s_glow" % _k, "mob/ShroudwingModel.java")(glow_of(shroudwing(_k), ramp_from(SHROUD[_k][1])))
 
 
 # ---------------------------------------------------------------- aerwhale
@@ -460,15 +606,34 @@ def aerwhale(m, seed):
     return p
 
 
-# ---------------------------------------------------------------- monsters: tempest, swets, plants, skephid, talutons, hunter
+# ---------------------------------------------------------------- cloud skiff
 
-def keep_bright(p, test):
-    """Blanks every pixel a glow layer should not light."""
-    for y in range(p.im.height):
-        for x in range(p.im.width):
-            c = p.px[x, y]
-            if c[3] and not test(c):
-                p.px[x, y] = (0, 0, 0, 0)
+@skin("cloud_skiff", "mob/CloudSkiffModel.java")
+def cloud_skiff(m, seed):
+    """A sled of cold cloud on a skyroot keel, with a cloudwool sail on a skyroot mast."""
+    cloud = ramp_from("eef4fb", dark=0.86, light=1.03, cool=(120, 160, 210)); wood = ramp_from("8a6a48", dark=0.6, light=1.15)
+    sail = ramp_from("f6f1e4", dark=0.82, light=1.03); gold = ramp_from("d8b450")
+    p = a2paint.paint(m, seed, [("handle", wood, "smooth"), ("sail_rudder", wood, "smooth"), ("", cloud, "wool", 0.6)])
+    hull = m["parts"]["cloud_skiff"]["boxes"]
+    p.box(hull[1], wood, "smooth"); p.box(hull[2], wood, "smooth"); p.box(hull[3], wood, "smooth")
+    mast = m["parts"]["sail_rudder"]["boxes"]
+    p.box(mast[1], gold, "smooth"); p.box(mast[2], gold, "smooth")
+
+    def sailf(pt, lo, size, x, y):
+        up = (pt[1] - lo[1]) / size[1]            # 0 at the masthead, 1 at the foot
+        back = (pt[2] - lo[2]) / size[2]          # 0 at the mast, 1 at the leech
+        # a lateen: full at the boom, coming to a point at the masthead, the foot cut clear of the deck
+        if up > 0.62 or back > 0.08 + up * 1.45 or back < 0.03:
+            return None
+        if back > 0.02 + up * 1.45 or up > 0.59:
+            return gold[2]
+        seam = int(up * 48) % 8 == 0
+        return sail[max(0, min(4, (1 if seam else 3) - (1 if p.n(x, y, 3) > 0.5 else 0)))]
+    shape(p, mast[3], sailf)
+    return p
+
+
+# ---------------------------------------------------------------- monsters: tempest, swets, plants, skephid, talutons, hunter
 
 
 def glow_eyes(p, b, face, spots, c, w=2, h=2):
@@ -806,6 +971,7 @@ def slider(awake):
 
 skin("slider", "dungeon/SliderModel.java")(slider(False))
 skin("slider_awake", "dungeon/SliderModel.java")(slider(True))
+skin("slider_awake_glow", "dungeon/SliderModel.java")(glow_of(slider(True), [SENTRY_EYES["awake"], (235, 250, 255), (60, 150, 230)]))
 
 
 def detonation_sentry(mode):
@@ -855,6 +1021,8 @@ def detonation_sentry(mode):
 skin("detonation_sentry", "dungeon/DetonationSentryModel.java")(detonation_sentry("asleep"))
 skin("detonation_sentry_awake", "dungeon/DetonationSentryModel.java")(detonation_sentry("awake"))
 skin("detonation_sentry_lit", "dungeon/DetonationSentryModel.java")(detonation_sentry("lit"))
+skin("detonation_sentry_awake_glow", "dungeon/DetonationSentryModel.java")(glow_of(detonation_sentry("awake"), [SENTRY_EYES["awake"]]))
+skin("detonation_sentry_lit_glow", "dungeon/DetonationSentryModel.java")(glow_of(detonation_sentry("lit"), [SENTRY_EYES["lit"], (255, 120, 60)]))
 
 
 def sentry_golem(stone_c, trim_c, metal_c, eye):
@@ -894,6 +1062,8 @@ def sentry_golem(stone_c, trim_c, metal_c, eye):
 
 skin("sentry_golem", "dungeon/SentryGolemModel.java")(sentry_golem("7f8794", "a2a9b4", "b08a4a", (120, 220, 255)))
 skin("sky_warden", "dungeon/SentryGolemModel.java")(sentry_golem("c4cad2", "e4e8ee", "d8c070", (255, 226, 130)))
+for _n, _args in (("sentry_golem", ("7f8794", "a2a9b4", "b08a4a", (120, 220, 255))), ("sky_warden", ("c4cad2", "e4e8ee", "d8c070", (255, 226, 130)))):
+    skin(_n + "_glow", "dungeon/SentryGolemModel.java")(glow_of(sentry_golem(*_args), [_args[3], mix(_args[3], (255, 255, 255), 0.6)]))
 
 
 @skin("mimic", "dungeon/MimicModel.java")

@@ -644,7 +644,24 @@ branch `26.1.2-alpha.5`; the cockatrice, zephyr and tempest animations are the J
 - **What drives them** is still our render states (`AetherAnimalRenderer.State`, `AetherMonsterRenderer.State`,
   `DungeonRenderer.State`). One-shot animations run on `actionTime` (ticks since the mob's `action` changed, kept per mob
   in the renderer) or are scrubbed by a 0 to 1 `progress`. Kirrid and burrukai have a model per zone (the renderer picks
-  by `state.zone`). A swet is its solid core plus a see-through gel pass (`Look.gel()`). Babies are scaled by our
-  renderer; the mod's baby models and baby animations are not used.
-- Not ported: their renderers, entities, AI, layers and the mimic's billboard eye; our own saddles are added to the phyg
-  and flying cow, and the moa's saddle is their saddle model set into the body.
+  by `state.zone`). A swet is its solid core plus a see-through gel pass (`Look.gel()`).
+- **Young.** The moa, kirrid (one per zone), burrukai and taegore young use the mod's baby models and baby animations
+  (`AetherAnimalRenderer.babies(...)`, skins `<adult skin>_baby`); every other young animal is the adult at half size.
+- **Passes over the skin** (the idea of their layer classes, written on our renderers; no layer class was copied).
+  `AetherAnimalRenderer.Look.overlay` draws a second cut-out skin: a tamed aerbunny's collar, and each moa's own beak and
+  leg colour (`moa_keratin_<0-3>`, picked from its UUID; one moa in five keeps its kind's own). `Look.glow` (and
+  `DungeonRenderer.Look.glow`) draws a skin that is lit in the dark: the insects' marks, the Slider's eye when awake,
+  the detonation sentry's eyes, the sentry golem's eyes and core. The painter makes each from the skin it lies over
+  (`glow_of`, `moa_keratin`), so they always line up.
+- **Moa saddlebag** (their saddlebag model set into the body like the saddle; item `moa_saddlebag`, pelts round a chest).
+  Put on a saddled moa it gives two rows of storage, opened by sneak-clicking; it and its load drop when the moa dies.
+- **Sentry golem**: left standing, it looks around or checks itself for six seconds every 15 to 25 seconds (their
+  `look_around` and `check_self`; the beat is worked out on the client from the golem's id, nothing is sent).
+- **Cloud skiff** (`aether/mob/CloudSkiff`, item `cloud_skiff`: two cold aerclouds over three skyroot planks). Their model
+  and unfold animation; the entity is ours. It hangs where it is left, flies where its rider looks (jump climbs), seats
+  two, and a player's blow folds it back into the item. **Only the just may ride** (`Karma.just`; Andy: "Only the purest
+  souls can ride these, like the nimbus cloud"): anyone else sinks through, and a rider who stops being just is dropped.
+- **From their behaviour code** (read mob by mob; ours already matched their notes, these two were missing): a zephyr
+  keeps away from a lit ambrosium campfire (`Zephyr.FIRE_RANGE`), and the Slider goes for whoever has hurt it most.
+- Not ported: their renderers, entities, the mimic's billboard eye, the skiff's fold animation and boat physics; our own
+  saddles are added to the phyg and flying cow, and the moa's saddle is their saddle model set into the body.

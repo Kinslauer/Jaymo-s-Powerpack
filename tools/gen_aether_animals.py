@@ -557,6 +557,29 @@ def pelt(name):
     return sp.im
 
 
+def saddlebag(name):
+    """Two pelt pouches joined by a strap, each with a flap and a brass buckle."""
+    sp = Sprite(name)
+    strap = m_rect(4, 3, 11, 4)
+    sp.layer(strap, (hx("785838"), hx("60442a"), hx("4a3420")), hx("2e1e10"))
+    for x0 in (1, 9):
+        pouch = m_rect(x0, 5, x0 + 5, 13)
+        sp.layer(pouch, (hx("b08a5e"), hx("94704a"), hx("785838")), hx("3e2a18"), jitter=0.2)
+        sp.put(m_rect(x0, 5, x0 + 5, 8), hx("8a6642"))
+        sp.put(m_line(x0, 9, x0 + 5, 9), hx("5a3e26"))
+        sp.put({(x0 + 2, 9), (x0 + 3, 9)}, hx("e8c460"))
+    return sp.im
+
+
+def skiff(name):
+    """A slab of cloud on a keel, a mast and a three-cornered sail."""
+    sp = Sprite(name)
+    sp.layer(m_rect(7, 2, 8, 12), (hx("8a6a48"), hx("70543a"), hx("5a422c")), hx("3a2a1c"))
+    sp.layer(m_poly([(8, 2), (14, 10), (8, 10)]), (hx("f6f1e4"), hx("e2dccb"), hx("cbc4b0")), hx("8a8474"))
+    sp.layer(m_ellipse(8, 12.5, 6.5, 2.2), (hx("ffffff"), hx("e6eef8"), hx("c4d2e6")), hx("7f90a8"), jitter=0.1)
+    return sp.im
+
+
 def plate(name, colors, edge, ridge):
     sp = Sprite(name)
     mask = m_poly([(8, 1.5), (13.5, 4.5), (13.5, 11.5), (8, 14.5), (2.5, 11.5), (2.5, 4.5)])
@@ -622,11 +645,11 @@ ITEMS = {
     "prismallard_leg": "Prismallard Leg", "prismallard_roast": "Prismallard Roast",
     "skyroot_lizard_on_a_stick": "Skyroot Lizard on a Stick", "beast_pelt": "Beast Pelt", "burrukai_plate": "Burrukai Plate",
     "prismallard_feather": "Prismallard Feather", "moa_feather": "Moa Feather", "kirrid_plate": "Kirrid Plate",
-    "prismallard_egg": "Prismallard Egg",
+    "prismallard_egg": "Prismallard Egg", "moa_saddlebag": "Moa Saddlebag", "cloud_skiff": "Cloud Skiff",
 }
 SPAWN_NAMES = {"kirrid": "Kirrid", "burrukai": "Burrukai", "taegore": "Taegore", "skyroot_lizard": "Skyroot Lizard",
                "prismallard": "Prismallard", "glitterwing": "Glitterwing", "shroudwing": "Shroudwing", "aerwhale": "Aerwhale"}
-ENTITIES = dict(SPAWN_NAMES, prismallard_egg="Prismallard Egg")
+ENTITIES = dict(SPAWN_NAMES, prismallard_egg="Prismallard Egg", cloud_skiff="Cloud Skiff")
 
 
 def items():
@@ -639,7 +662,7 @@ def items():
         "burrukai_plate": plate("burrukai_plate", (hx("9aa088"), hx("80866e"), hx("666c58")), hx("363a2c"), hx("4e5442")),
         "prismallard_feather": feather("prismallard_feather", hx("2fc8c0"), hx("9a5ae0"), hx("f4f0d8"), 6.6, 2.4),
         "moa_feather": feather("moa_feather", hx("a8c8f0"), hx("3a62b8"), hx("f4f8ff"), 7.4, 3.0),
-        "kirrid_plate": kirrid_plate("kirrid_plate"),
+        "kirrid_plate": kirrid_plate("kirrid_plate"), "moa_saddlebag": saddlebag("moa_saddlebag"), "cloud_skiff": skiff("cloud_skiff"),
         "prismallard_egg": M.egg_image(hx("d4f0e8"), hx("9a6ad8"), hx("5a8a90"), "prismallard_egg", 8),
     }
     for name, (base, spot, outline) in SPAWN.items():
@@ -753,6 +776,18 @@ def recipes():
                                                       "ingredient": "%s:%s" % (NS, raw), "result": {"id": "%s:%s" % (NS, cooked)}})
 
 
+    # the saddlebag: pelts sewn round a chest, on a strap
+    write(os.path.join(out, "moa_saddlebag.json"), {
+        "type": "minecraft:crafting_shaped", "category": "equipment", "pattern": ["PSP", "PCP", " P "],
+        "key": {"P": "%s:beast_pelt" % NS, "S": "minecraft:string", "C": "minecraft:chest"}, "result": {"id": "%s:moa_saddlebag" % NS}})
+
+
+    # the cloud skiff: cold cloud on a skyroot keel
+    write(os.path.join(out, "cloud_skiff.json"), {
+        "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["A A", "SSS"],
+        "key": {"A": "%s:cold_aercloud" % NS, "S": "%s:skyroot_planks" % NS}, "result": {"id": "%s:cloud_skiff" % NS}})
+
+
 def lang():
     mine = {}
     for k, v in ENTITIES.items():
@@ -762,6 +797,7 @@ def lang():
     for k, v in SPAWN_NAMES.items():
         mine["item.jaymospowers.%s_spawn_egg" % k] = v + " Spawn Egg"
     mine["block.jaymospowers.moa_egg"] = "Moa Egg"
+    mine["entity.jaymospowers.cloud_skiff.sinks"] = "You sink through the cloud."
     write(os.path.join(ASSETS, "lang", "parts", "aether_animals.json"), mine)
 
 

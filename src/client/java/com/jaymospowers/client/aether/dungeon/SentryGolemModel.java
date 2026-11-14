@@ -136,6 +136,11 @@ final class SentryGolemModel extends DungeonModel {
 		}
 		this.walkAnimation.applyWalk(state.walkAnimationPos, state.walkAnimationSpeed, 1.0F, 1.0F);
 		this.idleAnimation.applyWalk(state.ageInTicks, 1.0F, 1.0F, 1.0F);
+		if (state.fidget == 1) {
+			this.lookAroundAnimation.apply((long)(state.fidgetTime * 50.0F), 1.0F);
+		} else if (state.fidget == 2) {
+			this.checkSelfAnimation.apply((long)(state.fidgetTime * 50.0F), 1.0F);
+		}
 		if (state.progress > 0.0F) {
 			// winding up a throw
 			this.rangeAttackReadyAnimation.apply((long)(state.progress * READY_MS), 1.0F);

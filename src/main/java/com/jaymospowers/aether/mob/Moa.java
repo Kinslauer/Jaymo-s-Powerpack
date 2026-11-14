@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -15,9 +16,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -36,6 +40,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -101,6 +107,18 @@ public class Moa extends RideableAnimal {
 	public static final int FEATHERS = 4, SHEAR_DAMAGE = 32, SHEAR_WAIT = 2000;
 
 	private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(Moa.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> BAGGED = SynchedEntityData.defineId(Moa.class, EntityDataSerializers.BOOLEAN);
+	/** A saddlebag holds this many rows of nine, and is opened from within this many blocks. */
+	public static final int BAG_ROWS = 2;
+	public static final double BAG_REACH = 8.0;
+
+	/** What its saddlebag holds (empty without one). */
+	private final SimpleContainer bag = new SimpleContainer(BAG_ROWS * 9) {
+		@Override
+		public boolean stillValid(Player player) {
+			return Moa.this.isAlive() && Moa.this.hasBag() && player.distanceToSqr(Moa.this) < BAG_REACH * BAG_REACH;
+		}
+	};
 
 	/** Raised by a player from an egg: the only kind that takes a saddle. */
 	private boolean raised;
@@ -148,6 +166,7 @@ public class Moa extends RideableAnimal {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(KIND, 0);
+		entityData.define(BAGGED, false);
 	}
 
 	public Kind kind() {
@@ -365,7 +384,38 @@ public class Moa extends RideableAnimal {
 			}
 			return InteractionResult.SUCCESS;
 		}
+		if (held.is(AetherAnimals.MOA_SADDLEBAG) && this.isSaddled() && !this.hasBag()) {
+			if (!this.level().isClientSide()) {
+				this.entityData.set(BAGGED, true);
+				held.consume(1, player);
+				this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F, 0.9F);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		// sneaking opens the bag (a plain click climbs on)
+		if (this.hasBag() && player.isSecondaryUseActive()) {
+			if (!this.level().isClientSide()) {
+				player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new ChestMenu(MenuType.GENERIC_9x2, id, inventory, this.bag, BAG_ROWS),
+					Component.translatable("item.jaymospowers.moa_saddlebag")));
+			}
+			return InteractionResult.SUCCESS;
+		}
 		return super.mobInteract(player, hand);
+	}
+
+	/** Whether it carries a saddlebag. */
+	public boolean hasBag() {
+		return this.entityData.get(BAGGED);
+	}
+
+	/** The bag and all it holds fall with the moa. */
+	@Override
+	protected void dropEquipment(ServerLevel level) {
+		super.dropEquipment(level);
+		if (this.hasBag()) {
+			this.spawnAtLocation(level, new ItemStack(AetherAnimals.MOA_SADDLEBAG));
+			Containers.dropContents(level, this, this.bag);
+		}
 	}
 
 	@Override
@@ -414,6 +464,8 @@ public class Moa extends RideableAnimal {
 		output.putInt("hunger_wait", this.hungerWait);
 		output.putInt("fed", this.fed);
 		output.putInt("stamina_shift", this.staminaShift);
+		output.putBoolean("bagged", this.hasBag());
+		this.bag.storeAsItemList(output.list("bag", ItemStack.CODEC));
 	}
 
 	@Override
@@ -427,6 +479,8 @@ public class Moa extends RideableAnimal {
 		this.hungerWait = input.getIntOr("hunger_wait", HUNGER_WAIT_MIN);
 		this.fed = input.getIntOr("fed", 0);
 		this.staminaShift = input.getIntOr("stamina_shift", 0);
+		this.entityData.set(BAGGED, input.getBooleanOr("bagged", false));
+		this.bag.fromItemList(input.listOrEmpty("bag", ItemStack.CODEC));
 	}
 
 	@Override

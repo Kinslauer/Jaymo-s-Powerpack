@@ -1,6 +1,9 @@
 package com.jaymospowers.aether.monster;
 
+import com.jaymospowers.aether.structure.AmbrosiumCampfireBlock;
+import com.jaymospowers.aether.structure.StructureBlocks;
 import java.util.EnumSet;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -23,8 +26,10 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The zephyr: a big, soft, wind-bellied flier of the open sky. It has no bite. Close in (under {@link #BLOW_RANGE}
@@ -47,6 +52,8 @@ public class Zephyr extends AetherMonster {
 	public static final double SHOOT_MIN = 8.0, SHOOT_MAX = 40.0;
 	public static final int SHOOT_CYCLE = 60, SHOOT_SOUND = 50, SHOOT_ANIM = 53;
 	public static final float BALL_SPEED = 0.9F;
+	/** A lit ambrosium campfire this near (blocks across, and up or down) drives it off; it flies this far on, and looks this often (ticks). */
+	public static final int FIRE_RANGE = 12, FIRE_HEIGHT = 6, FIRE_FLEE = 12, FIRE_LOOK_EVERY = 60;
 
 	/** 0 resting, 1 blowing (the breath and the gust), 2 spitting. */
 	private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(Zephyr.class, EntityDataSerializers.INT);
@@ -64,6 +71,7 @@ public class Zephyr extends AetherMonster {
 
 	@Override
 	protected void registerGoals() {
+		this.goalSelector.addGoal(0, new ShunFireGoal(this));
 		this.goalSelector.addGoal(1, new AttackGoal(this));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -112,6 +120,55 @@ public class Zephyr extends AetherMonster {
 	@Override
 	protected SoundEvent getDeathSound() {
 		return MonsterSounds.get("entity.breeze.death");
+	}
+
+	/** A lit ambrosium campfire within {@link #FIRE_RANGE} blocks drives it off: it forgets its quarry and flies away from the fire. */
+	private static final class ShunFireGoal extends Goal {
+		private final Zephyr zephyr;
+		private @Nullable BlockPos fire;
+
+		ShunFireGoal(Zephyr zephyr) {
+			this.zephyr = zephyr;
+			this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.TARGET));
+		}
+
+		@Override
+		public boolean canUse() {
+			Zephyr z = this.zephyr;
+			if ((z.tickCount + z.getId()) % FIRE_LOOK_EVERY != 0) {
+				return false;
+			}
+			this.fire = null;
+			BlockPos at = z.blockPosition();
+			for (BlockPos pos : BlockPos.betweenClosed(at.offset(-FIRE_RANGE, -FIRE_HEIGHT, -FIRE_RANGE), at.offset(FIRE_RANGE, FIRE_HEIGHT, FIRE_RANGE))) {
+				BlockState state = z.level().getBlockState(pos);
+				if (state.is(StructureBlocks.AMBROSIUM_CAMPFIRE) && state.getValue(AmbrosiumCampfireBlock.LIT)
+					&& (this.fire == null || pos.distSqr(at) < this.fire.distSqr(at))) {
+					this.fire = pos.immutable();
+				}
+			}
+			return this.fire != null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.fire != null && this.fire.distManhattan(this.zephyr.blockPosition()) <= FIRE_RANGE + FIRE_FLEE
+				&& this.zephyr.level().getBlockState(this.fire).is(StructureBlocks.AMBROSIUM_CAMPFIRE);
+		}
+
+		@Override
+		public void tick() {
+			Zephyr z = this.zephyr;
+			z.setTarget(null);
+			Vec3 away = z.position().subtract(Vec3.atCenterOf(this.fire)).multiply(1.0, 0.0, 1.0);
+			away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+			z.getMoveControl().setWantedPosition(z.getX() + away.x * FIRE_FLEE, z.getY() + 1.0, z.getZ() + away.z * FIRE_FLEE, 1.0);
+		}
+
+		@Override
+		public void stop() {
+			this.fire = null;
+		}
 	}
 
 	private static final class AttackGoal extends Goal {
