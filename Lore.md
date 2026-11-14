@@ -1392,7 +1392,7 @@ with ranks and wages at dusk; caravans of masters, captains and merchants walk t
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
 take tribute, and hold festivals.
 
-**The town books (new).** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
+**The town books.** Every seat keeps a ledger of its own affairs: who rules and how, what the stores hold and
 lack, how many hands it has, what troubles it bears, what it is building and with whom it holds treaties. In a realm the
 ruler keeps it and lets a friend copy it; in a village it sits on a shelf and anyone grown will fetch it down. A town
 that hates you keeps its books shut.
