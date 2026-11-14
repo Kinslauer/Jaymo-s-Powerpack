@@ -12886,3 +12886,10 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - The court wizard's "Enchanted tack" also sells Kitchen's ender saddlebags (20) when Kitchen is loaded.
 - The Horse Handbook's Tack page names both.
 - Our own art. Compiles against 26.3; not played.
+
+## 0.8.55 (2026-11-14): blossom steel is folded steel (#1503)
+
+- A folded bloom now gives Powers' **Folded Steel Ingot** instead of a plain steel ingot (an iron ingot without Powers): the only
+  metal a katana's or ninjato's blade is hammered from, so Mohknee's iron sand is the way to either.
+- The smith's last lesson says so in passing ("Our long blades are drawn from nothing else").
+- `BlossomSteel`. Compiled; not played.
