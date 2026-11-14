@@ -1978,6 +1978,11 @@ they keep their name and memory and lose what the old blood gave them. In the ca
 a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
 and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
 
+(new) **What the old druids teach** (Claude's placement for the druid rite follow-up, 2026-11-14, for Andy to approve;
+under "The body kept and the body given"). The old druids keep the rite of the new body to themselves, but not from
+their own: one who carries the sprig and sits with a hermit in his grove is told it, as the wood once told him. The
+new body keeps what its owner leaned to: a power that would have woken in the old life wakes in the new one, in time.
+
 (new) **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, for Andy to
 approve). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
 Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
