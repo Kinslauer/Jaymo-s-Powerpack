@@ -3,7 +3,8 @@
 The sky world: pale islands of holystone floating in an endless bright sky, mint grass and skyroot trees on top,
 clouds you can walk into. Andy asked for it to be HEAVILY based on The Aether mod, so the names, shapes, numbers and
 feel follow it; every line of Java and JSON is ours and every texture is painted by `tools/gen_aether.py` (clean room:
-behaviour only, nothing copied). The dimension is `jaymospowers:aether`. The way in is Wind's (`power/wind/aether/WindAether`),
+behaviour only, nothing copied), **except the mobs' models and animations, which are The Aether II's own code** (see
+"Mob models from The Aether II" at the end). The dimension is `jaymospowers:aether`. The way in is Wind's (`power/wind/aether/WindAether`),
 there is no portal. All numbers are `static final` constants at the top of the class named in brackets.
 
 This page is the blocks and items (Track A1) and then the dimension itself (Track A2: terrain, biomes, features, sky). Mobs are
@@ -418,7 +419,7 @@ spawn egg and a skin (plus glow overlays for seven). The five new drop items hav
 - **Shots** (`AetherShot.Kind`, one entity type and item each, drawn with `ThrownItemRenderer`): zephyr web, skephid web
   (both stun a blocking shield), thunderball (non-destructive blast plus a shock field), venomous dart, toxic dart, debris
   (accelerates). Monsters never hit each other directly (a thunderball's blast and field still reach them).
-- **Files**: `tools/gen_aether_monsters.py` reads the model `part()` lines and paints skins, glows, sprites, eggs, effect
+- **Files**: `tools/gen_aether_monsters.py` paints sprites, eggs, effect
   icons, item JSON, loot tables and `lang/parts/aether_monsters.json`; `tools/check_aether_monsters.py` validates them.
 
 Simplifications and additions: no buildup meters (plain effects instead); no cutting items (Aechor and Carrion cuttings left
@@ -434,8 +435,7 @@ sun behaviour of Tempest, Cockatrice and Skephid; shield stun from webbing balls
 Behaviour and numbers from `aether2-study/passive.md`, our own code, models and skins. `AetherAnimals` registers the new
 animals, their items, the moa egg block, the placements and every spawn (all the animals, old and new); `Zone` is the
 highfields / magnetic / arctic climate read from the biome tags (`#jaymospowers:is_aether_<zone>`). Art and data come from
-`tools/gen_aether_mobs.py` (older animals, sheepuff colours, their loot) then `tools/gen_aether_animals.py` (the rest; both read
-the models' `part(...)` lines); `tools/check_aether_animals.py .` checks the pieces hang together. Names are in
+`tools/gen_aether_mobs.py` (older animals, sheepuff colours, their loot) then `tools/gen_aether_animals.py` (the rest; the mob skins are `tools/gen_aether2_skins.py`'s now); `tools/check_aether_animals.py .` checks the pieces hang together. Names are in
 `lang/parts/aether_animals.json`.
 
 **Spawns** (weight, group; the biome files are not touched): highfields, magnetic and arctic biomes get taegore 14 (1-2),
@@ -621,3 +621,30 @@ in this mod yet): Hammer of Demolition, Sentry Boots, kinetic thrusters, gloves,
 **Check first in game**: gliding (hold right-click in the air: slow fall, steering, the blue and purple boosts once, no fall
 damage, landing refuels), the gravitite extra jump (a double tap of jump in the air in a full set), lifting blocks with a gravitite
 tool, the altar's screen and a repair, and the zanite and arkenium set bonuses on the attribute readout.
+
+## Mob models from The Aether II (LGPL-3.0)
+
+Andy (2026-11-14): "i think i'd like the aether 2 ported. the mobs you built dont look good at all", and he chose to port
+the mobs' shapes and movement while keeping our world, mobs' behaviour and lore. So every Aether mob's **model class and
+keyframe animation class** is now The Aether II's (by The Aether Team, https://github.com/The-Aether-Team/The-Aether-II,
+branch `26.1.2-alpha.5`; the cockatrice, zephyr and tempest animations are the Java ones of branch `1.21.1-develop`).
+
+- **Licence.** The Aether II's code is LGPL-3.0 and its assets are All Rights Reserved. We took Java only: the model
+  classes under `client/aether/{mob,monster,dungeon}` and the animation classes in `client/aether/anim`. Each file keeps a
+  header naming the file it came from and what was changed, and stays LGPL-3.0; the licence text is
+  `docs/licenses/Aether-II-LGPL-3.0.txt`. Anyone given the mod jar may ask for the source of those files (this repository).
+  **None of their textures, sounds or JSON animations were read or copied.** Where a mob's animation exists there only as
+  a JSON data file (aechor plant, taegore dig, gravitite taluton spin and attack, bladeshroom hunter), the posing is ours,
+  written in the model's `setupAnim`.
+- **Skins** are painted by `python3 -I tools/gen_aether2_skins.py [name...] [--preview DIR]`, which reads the boxes the Java
+  models declare (`tools/aether2/a2parse.py`) and paints each face (`a2paint.py`); `--preview` renders them (`a2render.py`).
+  The older generators (`gen_aether_mobs.py`, `gen_aether_animals.py`, `gen_aether_monsters.py`, `gen_aether_dungeon.py`)
+  still write the items, loot and names but no longer the mob skins. The Excalibur pack's copies are regraded with
+  `tools/excalibur_style/grade.py --one`.
+- **What drives them** is still our render states (`AetherAnimalRenderer.State`, `AetherMonsterRenderer.State`,
+  `DungeonRenderer.State`). One-shot animations run on `actionTime` (ticks since the mob's `action` changed, kept per mob
+  in the renderer) or are scrubbed by a 0 to 1 `progress`. Kirrid and burrukai have a model per zone (the renderer picks
+  by `state.zone`). A swet is its solid core plus a see-through gel pass (`Look.gel()`). Babies are scaled by our
+  renderer; the mod's baby models and baby animations are not used.
+- Not ported: their renderers, entities, AI, layers and the mimic's billboard eye; our own saddles are added to the phyg
+  and flying cow, and the moa's saddle is their saddle model set into the body.

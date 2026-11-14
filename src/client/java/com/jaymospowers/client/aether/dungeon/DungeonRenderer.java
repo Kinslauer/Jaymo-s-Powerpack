@@ -5,6 +5,8 @@ import com.jaymospowers.aether.dungeon.DetonationSentry;
 import com.jaymospowers.aether.dungeon.Mimic;
 import com.jaymospowers.aether.dungeon.SentryGolem;
 import com.jaymospowers.aether.dungeon.Slider;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -21,6 +23,10 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 		float progress;
 		/** The swing of a blow or bite, 0 to 1. */
 		float attack;
+		/** Standing as carved (a warden that has not woken). */
+		boolean still;
+		/** Ticks since {@link #progress} last fell back to nothing (a golem's throw follows its windup). */
+		float actionTime;
 	}
 
 	/** What one mob adds to the state. */
@@ -37,6 +43,11 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 	}
 
 	private final Look<T> look;
+	/** Per mob (by id): whether it was mid-progress when last seen and the tick that ended, for {@link State#actionTime}. */
+	private final Map<Integer, float[]> actions = new HashMap<>();
+	/** The map is emptied past this many mobs; a mob first seen counts as long past it. */
+	private static final int ACTIONS_KEPT = 512;
+	private static final float LONG_AGO = 10000.0F;
 
 	DungeonRenderer(EntityRendererProvider.Context context, DungeonModel model, float shadow, Look<T> look) {
 		super(context, model, shadow);
@@ -53,6 +64,17 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 		super.extractRenderState(mob, state, partialTicks);
 		state.attack = mob.getSwingAnimation(partialTicks);
 		this.look.extract(mob, state, partialTicks);
+		float now = mob.tickCount + partialTicks;
+		if (this.actions.size() > ACTIONS_KEPT) {
+			this.actions.clear();
+		}
+		float busy = state.progress > 0.0F ? 1.0F : 0.0F;
+		float[] since = this.actions.computeIfAbsent(mob.getId(), id -> new float[] {busy, now - LONG_AGO});
+		if (since[0] != busy) {
+			since[0] = busy;
+			since[1] = now;
+		}
+		state.actionTime = now - since[1];
 	}
 
 	@Override
@@ -138,6 +160,7 @@ final class DungeonRenderer<T extends Mob> extends MobRenderer<T, DungeonRendere
 			@Override
 			public void extract(com.jaymospowers.aether.sky.SkyWarden mob, State state, float partialTicks) {
 				state.awake = mob.awake();
+				state.still = !state.awake;
 			}
 
 			@Override

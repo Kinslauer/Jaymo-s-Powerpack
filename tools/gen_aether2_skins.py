@@ -752,6 +752,213 @@ skin("bladeshroom_hunter", "monster/BladeshroomHunterModel.java")(bladeshroom_hu
 skin("bladeshroom_hunter_glow", "monster/BladeshroomHunterModel.java")(bladeshroom_hunter(True))
 
 
+# ---------------------------------------------------------------- the Sentry Ruins: slider, sentries, golem, mimic
+
+SENTRY_EYES = dict(asleep=(58, 66, 84), awake=(120, 220, 255), lit=(255, 70, 50))
+
+
+def carved(p, b, stone, trim, faces_=("north", "south", "west", "east", "top", "bottom"), frame=2):
+    """A carved stone block: a raised frame round each face, and a chiselled line inside it."""
+    for face in faces_:
+        u, v, fw, fh = a2parse.faces(b)[face]
+        for j in range(fh):
+            for i in range(fw):
+                e = min(i, j, fw - 1 - i, fh - 1 - j)
+                if e < frame:
+                    p.put(u + i, v + j, trim[max(0, min(4, 3 - e + (1 if p.n(u + i, v + j, 2) > 0.4 else 0)))])
+                elif e == frame:
+                    p.put(u + i, v + j, stone[0])
+
+
+def slider(awake):
+    def paint(m, seed):
+        stone = ramp_from("8d94a0", dark=0.6, light=1.18, cool=(40, 48, 80)); trim = ramp_from("a9b0ba", dark=0.62, light=1.15)
+        core = ramp_from("3a6fb0" if awake else "30384a", dark=0.6, light=1.5)
+        p = a2paint.Painter(m, "slider")
+        outer, inner = m["parts"]["slider"]["boxes"]
+        p.box(outer, stone, "stone", 0.8)
+        p.box(inner, core, "stone", 0.6)
+        carved(p, outer, stone, trim, frame=3)
+        eye = SENTRY_EYES["awake" if awake else "asleep"]
+        for face in ("north", "south", "west", "east"):
+            u, v, fw, fh = a2parse.faces(outer)[face]
+            # a brow, one great eye, and a mouth of chisel marks
+            for i in range(9, 23):
+                for j in range(9, 11):
+                    p.put(u + i, v + j, stone[0])
+            for j in range(12, 18):
+                for i in range(11, 21):
+                    rim = j in (12, 17) or i in (11, 20)
+                    p.put(u + i, v + j, stone[0] if rim else eye)
+            if awake:
+                for j in range(13, 17):
+                    for i in range(14, 18):
+                        p.put(u + i, v + j, (235, 250, 255) if 14 < i < 17 and 13 < j < 16 else (60, 150, 230))
+            else:
+                for i in range(12, 20):
+                    p.put(u + i, v + 15, stone[1])
+            for i in range(10, 22, 2):
+                for j in range(21, 24):
+                    p.put(u + i, v + j, stone[0])
+        return p
+    return paint
+
+
+skin("slider", "dungeon/SliderModel.java")(slider(False))
+skin("slider_awake", "dungeon/SliderModel.java")(slider(True))
+
+
+def detonation_sentry(mode):
+    def paint(m, seed):
+        stone = ramp_from("7f8794", dark=0.6, light=1.2, cool=(40, 48, 80)); trim = ramp_from("a2a9b4", dark=0.62, light=1.15)
+        dark = ramp_from("3a4050", dark=0.6, light=1.3)
+        p = a2paint.Painter(m, "detonation_sentry")
+        eye = SENTRY_EYES[mode]
+        hb = m["parts"]["head"]["boxes"]
+        p.box(hb[0], stone, "stone", 0.8)
+        carved(p, hb[0], stone, trim, frame=1)
+        u, v, fw, fh = a2parse.faces(hb[0])["north"]
+        for ex in (3, 8):
+            for j in range(4, 7):
+                for i in range(ex, ex + 3):
+                    p.put(u + i, v + j, eye)
+            for i in range(ex, ex + 3):
+                p.put(u + i, v + 3, stone[0])
+        for i in range(4, 10):
+            p.put(u + i, v + 9, stone[0] if i % 2 else dark[1])
+        # the outer shell: only a fuse cap on top and corner studs, the rest is cut away
+        shell = hb[1]
+        for face, (u, v, fw, fh) in a2parse.faces(shell).items():
+            for j in range(fh):
+                for i in range(fw):
+                    corner = (i < 2 or i >= fw - 2) and (j < 2 or j >= fh - 2)
+                    cap = face == "top" and 4 <= i < fw - 4 and 4 <= j < fh - 4
+                    if corner:
+                        p.put(u + i, v + j, trim[3])
+                    elif cap:
+                        hot = mode == "lit" and (i + j) % 2 == 0
+                        p.put(u + i, v + j, (255, 120, 60) if hot else dark[2 if (i + j) % 3 else 1])
+        for name in m["order"]:
+            if name.startswith("leg_"):
+                lb = m["parts"][name]["boxes"]
+                p.box(lb[0], dark, "stone", 0.8)
+                for face in ("west", "east", "north", "south"):
+                    tip(p, lb[0], face, trim, "y", "hi", 2)
+                u, v, fw, fh = a2parse.faces(lb[1])["bottom"]
+                for j in range(fh):
+                    for i in range(fw):
+                        p.put(u + i, v + j, trim[1])
+        return p
+    return paint
+
+
+skin("detonation_sentry", "dungeon/DetonationSentryModel.java")(detonation_sentry("asleep"))
+skin("detonation_sentry_awake", "dungeon/DetonationSentryModel.java")(detonation_sentry("awake"))
+skin("detonation_sentry_lit", "dungeon/DetonationSentryModel.java")(detonation_sentry("lit"))
+
+
+def sentry_golem(stone_c, trim_c, metal_c, eye):
+    def paint(m, seed):
+        stone = ramp_from(stone_c, dark=0.6, light=1.2, cool=(40, 48, 80)); trim = ramp_from(trim_c, dark=0.62, light=1.15)
+        metal = ramp_from(metal_c, dark=0.5, light=1.3); dark = ramp_from("353a48", dark=0.6, light=1.3)
+        p = a2paint.paint(m, seed, [("shoulder", trim, "stone"), ("rotator", metal, "smooth"), ("hand", metal, "horn"), ("arm_bottom|leg", stone, "stone"),
+                                    ("arm", dark, "smooth"), ("head", trim, "stone"), ("", stone, "stone")])
+        tb = m["parts"]["torso"]["boxes"]
+        carved(p, tb[0], stone, trim, ("north", "south"), frame=1)
+        for b in tb[1:5]:
+            p.box(b, metal, "smooth")
+        p.box(tb[5], dark, "stone", 0.7)
+        # a lit core in the chest and the eyes under the head's brow
+        u, v, fw, fh = a2parse.faces(tb[0])["north"]
+        for j in range(3, 6):
+            for i in range(6, 9):
+                p.put(u + i, v + j, eye if (i, j) != (7, 4) else mix(eye, (255, 255, 255), 0.6))
+        hb = box(m, "head")
+        u, v, fw, fh = a2parse.faces(hb)["north"]
+        for i in range(fw):
+            p.put(u + i, v, trim[1])
+        for ex in (1, 4):
+            for i in range(ex, ex + 2):
+                p.put(u + i, v + 2, eye)
+        for name in ("left_shoulder_guard_r1", "right_shoulder_r1"):
+            for b in m["parts"][name]["boxes"]:
+                carved(p, b, trim, metal, ("top", "west", "east"), frame=1)
+        # the flat fins on the forearms and shins
+        for name in m["order"]:
+            for b in m["parts"][name]["boxes"]:
+                if 0 in (b["w"], b["h"], b["d"]):
+                    plume(p, b, metal, taper_from=0.2, blunt=0.35)
+        return p
+    return paint
+
+
+skin("sentry_golem", "dungeon/SentryGolemModel.java")(sentry_golem("7f8794", "a2a9b4", "b08a4a", (120, 220, 255)))
+skin("sky_warden", "dungeon/SentryGolemModel.java")(sentry_golem("c4cad2", "e4e8ee", "d8c070", (255, 226, 130)))
+
+
+@skin("mimic", "dungeon/MimicModel.java")
+def mimic(m, seed):
+    wood = ramp_from("8a6a42", dark=0.55, light=1.2); band = ramp_from("5a5e68", dark=0.55, light=1.3); maw = ramp_from("5a1c2a", dark=0.5, light=1.3)
+    tongue = ramp_from("d0507a", dark=0.6, light=1.2); tooth = ramp_from("f0ead4", dark=0.65, light=1.05); limb = ramp_from("4a3a30", dark=0.55, light=1.3)
+    p = a2paint.Painter(m, seed)
+    inner, outer = m["parts"]["cube_r2"]["boxes"]
+    # the chest hangs open corner-first: its two front faces are the gape, so they are cut out to a rim
+    gape = ("bottom", "south")
+    for face, (u, v, fw, fh) in a2parse.faces(outer).items():
+        for j in range(fh):
+            for i in range(fw):
+                e = min(i, j, fw - 1 - i, fh - 1 - j)
+                if face in gape:
+                    if e == 0:
+                        p.put(u + i, v + j, band[2 + (i + j) % 2])
+                    continue
+                if e == 0 or i in (4, fw - 5):
+                    p.put(u + i, v + j, band[max(0, min(4, 2 + (1 if p.n(u + i, v + j, 2) > 0.3 else 0)))])
+                else:
+                    p.put(u + i, v + j, wood[max(0, min(4, int(2 + p.n(u + i // 3 * 3, v + j, 1) * 1.3 - (0.8 if j % 4 == 3 else 0))))])
+    for face, rect in a2parse.faces(inner).items():
+        if face not in gape:
+            p.face(rect, face, maw, "smooth", 0.8)
+    for b in m["parts"]["cube_r1"]["boxes"]:
+        p.box(b, band, "smooth")
+    for b in m["parts"]["tooth_left_5_r1"]["boxes"]:
+        plume(p, b, tooth, taper_from=0.0, blunt=0.15)
+
+    def eye(pt, lo, size, x, y):
+        dx, dy = pt[0] - (lo[0] + size[0] / 2.0), pt[1] - (lo[1] + size[1] / 2.0)
+        r = (dx * dx + dy * dy) ** 0.5
+        if r > 4.4:
+            return None
+        if r > 3.4:
+            return (70, 20, 30)
+        if r < 1.2:
+            return (20, 14, 20)
+        if r < 2.4:
+            return (240, 190, 60)
+        return (250, 244, 225)
+    shape(p, box(m, "eye"), eye)
+    for name in ("tongue_1", "tongue_2", "tongue_3"):
+        b = box(m, name)
+        p.box(b, tongue, "smooth", 0.8)
+        for f in ("top", "bottom"):
+            u, v, fw, fh = a2parse.faces(b)[f]
+            for j in range(fh):
+                p.put(u + fw // 2, v + j, tongue[1])
+                p.put(u + fw // 2 - 1, v + j, tongue[1])
+    plume(p, box(m, "tongue_3"), tongue, taper_from=0.3, blunt=0.4)
+    for name in ("leg_left", "leg_right"):
+        lb = m["parts"][name]["boxes"]
+        p.box(lb[0], limb, "fur", 0.8)
+        p.box(lb[1], limb, "smooth", 0.8)
+        for face in ("west", "east", "north", "south"):
+            tip(p, lb[0], face, tooth, "y", "hi", 2)
+    for name in ("cube_r3", "cube_r5"):
+        p.box(box(m, name), limb, "fur", 0.8)
+    for name in ("cube_r4", "cube_r6"):
+        plume(p, box(m, name), limb, tooth, acc_from=0.75, taper_from=0.2, blunt=0.3)
+    return p
+
+
 # ---------------------------------------------------------------- run
 
 def main():
