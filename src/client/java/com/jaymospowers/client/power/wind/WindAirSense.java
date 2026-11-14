@@ -86,7 +86,7 @@ public final class WindAirSense {
 	/** The breeze heard in the focus: its volume at full focus and its pitch (the flight's wind, low and soft). */
 	static final float BREEZE_VOLUME = 0.18F, BREEZE_PITCH = 0.55F;
 	/** A light grey veil over the whole view, HUD too (0xRRGGBB, and its most opaque, 0-255); the world's own colour goes with {@link #greyEffect}. */
-	static final int GREY = 0x8C9096, GREY_ALPHA = 0x28;
+	static final int GREY = 0xC8CCD0, GREY_ALPHA = 0x20;
 	/** The white frame: its most opaque at the very edge (0-255), its depth (a share of the smaller screen side), and its soft steps. */
 	static final int FRAME_ALPHA = 0x6E, FRAME_STEPS = 12;
 	static final float FRAME_DEPTH = 0.2F;

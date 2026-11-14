@@ -16,6 +16,6 @@ layout(location = 0) out vec4 fragColor;
 void main() {
     vec3 color = texture(InSampler, texCoord).rgb;
     float grey = dot(color, vec3(0.299, 0.587, 0.114));
-    vec3 washed = mix(vec3(grey), vec3(1.0), 0.18);
+    vec3 washed = mix(vec3(grey), vec3(1.0), 0.3);
     fragColor = vec4(mix(color, washed, Strength), 1.0);
 }

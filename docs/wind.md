@@ -676,9 +676,9 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
   flight's wind at `BREEZE_PITCH` 0.55, up to `BREEZE_VOLUME` 0.18, on the master category, which the hush leaves
   alone). The world's colour drains to grey and white (Jung: "make the screen go grey and white colour wise"): the
   `wind_sense_grey` post effect (`shaders/post/wind_sense_grey.fsh`, asked for each frame by
-  `WindSenseGameRendererMixin`) turns each pixel to its grey, washed 18% toward white, in four steps as the focus comes
-  in (`wind_sense_grey_1` to `_4`: a quarter to all the way; none in low-end mode). Over it, a light grey veil (`GREY`
-  at up to `GREY_ALPHA` 0x28) and a soft white frame
+  `WindSenseGameRendererMixin`) turns each pixel to its grey, washed 30% toward white, in four steps as the focus comes
+  in (`wind_sense_grey_1` to `_4`: a quarter to all the way; none in low-end mode). Over it, a pale grey veil (`GREY`
+  at up to `GREY_ALPHA` 0x20) and a soft white frame
   (`FRAME_ALPHA` 0x6E at the edge, gone `FRAME_DEPTH` 0.2 of the way in). No tunnel: the middle is as clear as the
   edges, only greyer, and the ripples are drawn over it. Letting go brings it back over `FOCUS_OUT` 6 ticks.
 - **Client side only**, from what the client already knows of the things round it (so never beyond the server's entity
