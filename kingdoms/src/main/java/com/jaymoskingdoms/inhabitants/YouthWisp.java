@@ -61,6 +61,11 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final int HOME_COLOUR = 0x5CE07A;
 	/** How many lines it says as it carries someone home, and how many villager gossip lines there are of it. */
 	static final int HOME_LINES = 3, GOSSIP_LINES = 8;
+	/** How many jokes it makes when someone cries for help again the same day (a trip home is once a day). */
+	static final int JOKE_LINES = 8;
+	/** On a player: the day (the Overworld's clock, in days) they were last carried home. Kept, and kept through death. */
+	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Long> CARRIED_DAY = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+		.create(com.jaymoskingdoms.JaymosKingdoms.id("youth_carried_day"), builder -> builder.persistent(com.mojang.serialization.Codec.LONG).copyOnDeath());
 	/** How often a villager's gossip is of the wisps (Overworld only). */
 	static final float GOSSIP_CHANCE = 0.03F;
 
@@ -221,12 +226,19 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/**
 	 * {@code player} cried for help where this wisp could see them: it carries them to their bed (or wherever they'd wake),
-	 * in a green flash, leaves and light rising where they stood and falling where they land, and goes home itself. With
-	 * no bed to go to, it says so and stays.
+	 * in a green flash, leaves and light rising where they stood and falling where they land, and goes home itself. Once
+	 * a day (Andy): cry again the same day and it only makes a joke. With no bed to go to, it says so and stays (and the
+	 * day's trip isn't spent).
 	 */
 	void carryHome(ServerPlayer player) {
 		this.triggerAnim("action", "talk");
 		this.lastAsked = this.tickCount;
+		long day = player.level().getOverworldClockTime() / 24000L;
+		Long last = player.getAttached(CARRIED_DAY);
+		if (last != null && last == day) {
+			player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.joke." + this.random.nextInt(JOKE_LINES))));
+			return;
+		}
 		net.minecraft.world.level.portal.TeleportTransition home = player.getRespawnConfig() == null ? null
 			: player.findRespawnPositionAndUseSpawnBlock(false, net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING);
 		if (home == null || home.missingRespawnBlock()) {
@@ -238,6 +250,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HomeFlash.TYPE)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HomeFlash());
 		}
+		player.setAttached(CARRIED_DAY, day);
 		homeLight(player.level(), player.position(), true);
 		player.stopRiding();
 		if (player.teleport(home) != null) {

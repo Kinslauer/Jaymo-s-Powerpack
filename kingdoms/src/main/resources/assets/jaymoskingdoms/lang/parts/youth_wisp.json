@@ -1,6 +1,6 @@
 {
   "entity.jaymoskingdoms.youth_wisp": "Youth",
-  "message.jaymoskingdoms.youth_wisp.how": "Just say \"youth\" in chat and ask me. Lost? Cry \"help!\" while I'm in sight and I'll fly you to your bed.",
+  "message.jaymoskingdoms.youth_wisp.how": "Just say \"youth\" in chat and ask me. Lost? Cry \"help!\" while I'm in sight and I'll fly you to your bed, once a day.",
   "message.jaymoskingdoms.youth_wisp.hold.0": "Studying that! Back soon.",
   "message.jaymoskingdoms.youth_wisp.hold.1": "Be right back!",
   "message.jaymoskingdoms.youth_wisp.hold.2": "I'd have to check. Back in a moment!",
@@ -19,5 +19,13 @@
   "talk.jaymoskingdoms.gossip.youth.4": "The Sylvan elders forget nothing, they say. Their wisps carry it to anyone who asks aloud.",
   "talk.jaymoskingdoms.gossip.youth.5": "If you're ever lost and a wisp's in sight, cry for help. It'll have you home in your bed before you blink.",
   "talk.jaymoskingdoms.gossip.youth.6": "I said its name once, half joking. And there it was, turning cartwheels in the air, grinning at me.",
-  "talk.jaymoskingdoms.gossip.youth.7": "The children shout \"youth!\" in the fields all day. Half the time something answers."
+  "talk.jaymoskingdoms.gossip.youth.7": "The children shout \"youth!\" in the fields all day. Half the time something answers.",
+  "message.jaymoskingdoms.youth_wisp.joke.0": "Again? My wings are only this big, you know.",
+  "message.jaymoskingdoms.youth_wisp.joke.1": "Help? Help yourself! Ha! ...No, really, once a day. Walk.",
+  "message.jaymoskingdoms.youth_wisp.joke.2": "I'm a wisp, not a horse. Come back tomorrow!",
+  "message.jaymoskingdoms.youth_wisp.joke.3": "Have you tried walking? One foot, then the other. I hear it works.",
+  "message.jaymoskingdoms.youth_wisp.joke.4": "Lost twice in one day? That's almost impressive.",
+  "message.jaymoskingdoms.youth_wisp.joke.5": "I've already flown you once today. Think happy thoughts and maybe you'll fly yourself!",
+  "message.jaymoskingdoms.youth_wisp.joke.6": "Sorry, the elders say one rescue a day. I didn't make the rules! ...I did make this face, though.",
+  "message.jaymoskingdoms.youth_wisp.joke.7": "Help! Help! Oh, sorry, I thought we were shouting things. Tomorrow, friend."
 }
