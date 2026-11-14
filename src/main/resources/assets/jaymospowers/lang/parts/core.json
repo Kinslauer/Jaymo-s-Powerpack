@@ -55,6 +55,7 @@
 	"message.jaymospowers.fall_pose.9": "Falling: curled up tight (kept for your next falls)",
 	"message.jaymospowers.fall_pose.10": "Falling: a pencil drop, feet first (kept for your next falls)",
 	"message.jaymospowers.fall_pose.11": "Falling: gone limp (kept for your next falls)",
+	"message.jaymospowers.fall_pose.random": "Falling: random again (a new pose each fall)",
 	"message.jaymospowers.sit.ground.0": "Sitting cross-legged",
 	"message.jaymospowers.sit.ground.1": "Sitting with your knees up",
 	"message.jaymospowers.sit.ground.2": "Leaning back on your hands",

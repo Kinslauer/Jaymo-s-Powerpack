@@ -60,7 +60,7 @@ import org.jspecify.annotations.Nullable;
  * chose next fall"): the Sit key goes round the falling poses instead ({@link #FALL_POSES} of them: FreefallPose's
  * styles, all but the brace for the ground, which still comes before landing). The one you land on is kept
  * ({@link #FALL_POSE}, saved with the player and seen by everyone) and every fall after uses it in place of the random
- * pick, until you choose another.</li>
+ * pick, until you choose another. After the last pose the key goes back to random falls, then round again.</li>
  * <li><b>Getting up:</b> press Sneak, move, jump, or get hurt; breaking the seat drops you off it.</li>
  * <li><b>By the fire:</b> sitting within {@link #FIRE_RANGE} of a lit campfire heals {@link #FIRE_HEAL} every
  * {@link #FIRE_HEAL_EVERY} ticks and (with Jaymo's Kitchen) warms you by {@link #FIRE_WARMTH} more.</li>
@@ -226,15 +226,23 @@ public final class Sitting {
 	}
 
 	/**
-	 * The Sit key in midair: the falling pose after the one showing ({@code shown}, as the player's own screen draws it;
-	 * else after the one chosen before), kept for this fall and the ones after.
+	 * The Sit key in midair: the falling pose after the one chosen before (none chosen: after the one showing,
+	 * {@code shown}, as the player's own screen draws it), kept for this fall and the ones after. After the last pose
+	 * comes random again (nothing chosen: each fall picks its own), then round to the first.
 	 */
 	private static void fallKey(ServerPlayer player, int shown) {
 		if (player.onGround() || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isInWater()
 			|| player.getAbilities().flying || player.isFallFlying()) {
 			return;
 		}
-		int from = shown >= 0 && shown < FALL_POSES ? shown : player.getAttachedOrElse(FALL_POSE, -1);
+		Integer chosen = player.getAttached(FALL_POSE);
+		if (chosen != null && chosen >= FALL_POSES - 1) {
+			// after the last pose comes random again (Andy: "please", to a way back to random falls)
+			player.removeAttached(FALL_POSE);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.fall_pose.random").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		int from = chosen != null ? chosen : shown >= 0 && shown < FALL_POSES ? shown : -1;
 		int next = Math.floorMod(from + 1, FALL_POSES);
 		player.setAttached(FALL_POSE, next);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.fall_pose." + next).withStyle(ChatFormatting.GRAY));
