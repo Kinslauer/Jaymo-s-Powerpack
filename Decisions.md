@@ -545,3 +545,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, flying blades thread): the rocks' "Harry" order is named "Harrier" on the wheel.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1526 (the Reaper) merged.
 - 2026-11-14 (Andy, Reaper thread): "merge". PR #1528 (/kingdom reaper toll) merged.
+- 2026-11-14 (Andy, flying blades thread): approved the lore paragraph "The blades that wait".

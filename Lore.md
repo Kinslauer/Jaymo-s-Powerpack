@@ -1133,8 +1133,8 @@ placement). The Arsenal's reach pulls from anywhere, and now and then it comes b
 strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
 it is from; like everything the rift gives, it goes back.
 
-(new) **The blades that wait** (Andy, 2026-11-14: "arsenal should be able to do something like this", of two
-flying-sword mods; Claude's placement for Andy to approve). A holder who has learned the rift a little can ask it not to
+**The blades that wait** (Andy, 2026-11-14: "arsenal should be able to do something like this", of two
+flying-sword mods; approved 2026-11-14). A holder who has learned the rift a little can ask it not to
 hand a weapon over but to hold it: the blade hangs in the air from a small tear of its own, at the holder's shoulder,
 and goes where their attention goes. Two answer at first, then four, then six. They are still on loan and go back
 when their time is up. Until the power is mastered the blades are not truly commanded: they pick fights of their own,
