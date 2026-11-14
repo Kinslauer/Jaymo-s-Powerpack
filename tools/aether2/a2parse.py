@@ -22,7 +22,7 @@ def parse(path, method=None):
         elif posekind == "rotation": pos, rot = [0, 0, 0], pose[:3]
         else: pos, rot = [0, 0, 0], [0, 0, 0]
         boxes = []; u = v = 0; mirror = False
-        for t in re.finditer(r'\.texOffs\((\d+),\s*(\d+)\)|\.mirror\((false)?\)|\.addBox\(' + r',\s*'.join([NUM] * 6) + r'(?:,\s*new CubeDeformation\(' + NUM + r'\))?\)', cubes):
+        for t in re.finditer(r'\.texOffs\((-?\d+),\s*(-?\d+)\)|\.mirror\((false)?\)|\.addBox\(' + r',\s*'.join([NUM] * 6) + r'(?:,\s*new CubeDeformation\(' + NUM + r'\))?\)', cubes):
             s = t.group(0)
             if s.startswith(".texOffs"): u, v = int(t.group(1)), int(t.group(2))
             elif s.startswith(".mirror"): mirror = t.group(3) is None

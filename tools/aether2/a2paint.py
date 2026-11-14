@@ -202,3 +202,32 @@ def clear_except(p, m, keep):
     for y in range(p.im.height):
         for x in range(p.im.width):
             if (x, y) not in mask: p.px[x, y] = (0, 0, 0, 0)
+
+def fan(p, b, rmp, acc=None, scallop=3):
+    """A flat plane that spreads both ways from its middle (a frill, a pair of flaps): scalloped outer edges."""
+    lo = (b["x"], b["y"], b["z"]); size = (b["w"], b["h"], b["d"])
+    order = sorted(range(3), key=lambda a: -size[a]); la, wa = order[0], order[1]
+    n = len(rmp)
+    for face, (u, v, fw, fh) in a2parse.faces(b).items():
+        for j in range(fh):
+            for i in range(fw):
+                pt = face_point(b, face, i, j)
+                t = abs((pt[la] - lo[la]) / size[la] * 2 - 1)                 # 0 at the middle, 1 at either end
+                c = int(pt[wa] - lo[wa])
+                x, y = u + i, v + j
+                edge = 1.0 - (0.22 if c % scallop == scallop - 1 else 0.0) - (0.12 if c % scallop == 0 else 0.0)
+                if t > edge or t < 0.12:
+                    p.put(x, y, (0, 0, 0), 0); continue
+                val = (0.5 - t) * 0.9 + p.n(x, y, 2) * 0.3 - (0.5 if c % scallop == 0 else 0)
+                r = acc if (acc and t > 0.7) else rmp
+                p.put(x, y, r[max(0, min(len(r) - 1, int(round((n - 1) / 2 + val * (n - 1) / 3.0))))])
+
+def shape(p, b, fn):
+    """Paints every face pixel of a box from fn(point, lo, size) -> colour or None (cut out)."""
+    lo = (b["x"], b["y"], b["z"]); size = (b["w"], b["h"], b["d"])
+    for face, (u, v, fw, fh) in a2parse.faces(b).items():
+        for j in range(fh):
+            for i in range(fw):
+                c = fn(face_point(b, face, i, j), lo, size, u + i, v + j)
+                if c is None: p.put(u + i, v + j, (0, 0, 0), 0)
+                else: p.put(u + i, v + j, c)

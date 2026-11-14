@@ -16,13 +16,18 @@ import com.jaymospowers.aether.mob.Wool;
 import com.jaymospowers.aether.mob.Zone;
 import com.jaymospowers.aether.mob.ZoneAnimal;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.Map;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Draws the Aether's animals: one renderer, many looks. What differs per animal (which skin, what extra state
@@ -51,6 +56,9 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 		float eating;
 		/** An aerbunny's swell, 0 to 1, and 1 when it is off the ground. */
 		float puff, air;
+		/** What it is doing (0 nothing, 1 winding up, 2 digging, 3 resting, 4 in the air) and the ticks since that changed. */
+		int action;
+		float actionTime;
 	}
 
 	/** What one animal adds to the state, and which skin it wears. */
@@ -61,10 +69,33 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 	}
 
 	private final Look<T> look;
+	/** One model per zone (highfields, magnetic, arctic) for the animals whose shape differs by zone, or null. */
+	private final AetherAnimalModel @Nullable [] zoneModels;
+	/** Per mob (by id): the action last seen and the tick it began, for {@link State#actionTime}. */
+	private final Map<Integer, float[]> actions = new HashMap<>();
+	/** The map is emptied past this many mobs; a mob first seen mid-action counts as long into it. */
+	private static final int ACTIONS_KEPT = 512;
+	private static final float LONG_AGO = 10000.0F;
 
 	AetherAnimalRenderer(EntityRendererProvider.Context context, AetherAnimalModel model, float shadow, Look<T> look) {
 		super(context, model, shadow);
 		this.look = look;
+		this.zoneModels = null;
+	}
+
+	/** For an animal with a different shape in each zone: {@code zoneModels} in {@link Zone} order. */
+	AetherAnimalRenderer(EntityRendererProvider.Context context, AetherAnimalModel[] zoneModels, float shadow, Look<T> look) {
+		super(context, zoneModels[0], shadow);
+		this.look = look;
+		this.zoneModels = zoneModels;
+	}
+
+	@Override
+	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+		if (this.zoneModels != null) {
+			this.model = this.zoneModels[Math.floorMod(state.zone, this.zoneModels.length)];
+		}
+		super.submit(state, poseStack, collector, camera);
 	}
 
 	@Override
@@ -84,6 +115,17 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 			state.flapSpeed = Mth.lerp(partialTicks, rideable.oFlapSpeed, rideable.flapSpeed);
 		}
 		this.look.extract(mob, state, partialTicks);
+		state.action = state.windup ? 1 : state.digging ? 2 : state.resting ? 3 : state.air > 0.0F ? 4 : 0;
+		float now = mob.tickCount + partialTicks;
+		if (this.actions.size() > ACTIONS_KEPT) {
+			this.actions.clear();
+		}
+		float[] since = this.actions.computeIfAbsent(mob.getId(), id -> new float[] {state.action, now - LONG_AGO});
+		if (since[0] != state.action) {
+			since[0] = state.action;
+			since[1] = now;
+		}
+		state.actionTime = now - since[1];
 	}
 
 	@Override
@@ -289,6 +331,9 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 	}
 
 	/** A glitterwing's or shroudwing's kind decides the skin. */
+	/** The insects' models are drawn this much smaller, and the glitterwing's flat model lifted a little (blocks, down is positive). */
+	private static final float INSECT_SIZE = 0.725F, GLITTERWING_LOWER = -0.125F;
+
 	static Look<Insect> insect(boolean glitter) {
 		String[] kinds = glitter ? Insect.GLITTERWING : Insect.SHROUDWING;
 		Identifier[] skins = new Identifier[kinds.length];
@@ -300,6 +345,8 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 			public void extract(Insect mob, State state, float partialTicks) {
 				state.variant = mob.variant();
 				state.resting = mob.isResting();
+				state.size = INSECT_SIZE;
+				state.lower = glitter ? GLITTERWING_LOWER : 0.0F;
 			}
 
 			@Override
@@ -313,7 +360,7 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 	 * The whale is drawn this many times its model: about fifteen blocks nose to tail, a little longer than Kingdoms' great
 	 * whale (about fourteen). Lowered so its head and jaw sit in its body's box, and seen this far (blocks) past that box.
 	 */
-	private static final float WHALE_SIZE = 3.2F, WHALE_LOWER = 2.5F, WHALE_REACH = 9.0F;
+	private static final float WHALE_SIZE = 2.7F, WHALE_LOWER = 0.0F, WHALE_REACH = 9.0F;
 
 	static Look<Aerwhale> aerwhale() {
 		Identifier skin = skin("aerwhale");

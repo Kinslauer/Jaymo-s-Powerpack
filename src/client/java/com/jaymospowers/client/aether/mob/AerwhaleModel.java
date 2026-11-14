@@ -1,51 +1,93 @@
+/*
+ * From The Aether II by The Aether Team (https://github.com/The-Aether-Team/The-Aether-II), file
+ * src/main/java/com/aetherteam/aetherii/client/renderer/entity/model/AerwhaleModel.java, used under the GNU Lesser General Public License v3.0 (docs/licenses/Aether-II-LGPL-3.0.txt).
+ * Changed for Jaymo's Powers (2026-11): moved to this package, posed from our own render state.
+ * This file stays under the LGPL v3.0.
+ */
 package com.jaymospowers.client.aether.mob;
 
+import com.jaymospowers.client.aether.anim.AerwhaleAnimations;
+import net.minecraft.client.animation.KeyframeAnimation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
-/** The aerwhale: a huge blunt head over a flat jaw plate, a deep body, a dorsal fin, a tail ending in a wide fluke and two long flippers; all of it sways slowly as it drifts. */
 final class AerwhaleModel extends AetherAnimalModel {
-	private final ModelPart tail, fluke, finL, finR, head;
+	private final KeyframeAnimation glideAnimation;
+
+
+	private final ModelPart Aerwhale;
+	private final ModelPart HeadandJaw;
+	private final ModelPart Head;
+	private final ModelPart Jaw;
+	private final ModelPart Body;
+	private final ModelPart Tail2;
+	private final ModelPart Tail;
+	private final ModelPart TailFin;
+	private final ModelPart LeftFin;
+	private final ModelPart RightFin;
 
 	private AerwhaleModel(ModelPart root) {
 		super(root);
-		this.head = root.getChild("head");
-		this.tail = root.getChild("tail");
-		this.fluke = this.tail.getChild("fluke");
-		this.finL = root.getChild("fin_l");
-		this.finR = root.getChild("fin_r");
+		this.glideAnimation = AerwhaleAnimations.glide.bake(root);
+
+		this.Aerwhale = root.getChild("Aerwhale");
+		this.HeadandJaw = this.Aerwhale.getChild("HeadandJaw");
+		this.Head = this.HeadandJaw.getChild("Head");
+		this.Jaw = this.HeadandJaw.getChild("Jaw");
+		this.Body = this.Aerwhale.getChild("Body");
+		this.Tail2 = this.Aerwhale.getChild("Tail2");
+		this.Tail = this.Tail2.getChild("Tail");
+		this.TailFin = this.Tail2.getChild("TailFin");
+		this.LeftFin = this.Aerwhale.getChild("LeftFin");
+		this.RightFin = this.Aerwhale.getChild("RightFin");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition Aerwhale = partdefinition.addOrReplaceChild("Aerwhale", CubeListBuilder.create(), PartPose.offset(-0.55F, 13.1F, -6.6F));
+
+		PartDefinition HeadandJaw = Aerwhale.addOrReplaceChild("HeadandJaw", CubeListBuilder.create(), PartPose.offset(0.3F, -0.1F, -1.9F));
+
+		PartDefinition Head = HeadandJaw.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 0).addBox(-13.0F, -18.0F, -41.0F, 25.0F, 13.0F, 32.0F, new CubeDeformation(0.0F)), PartPose.offset(0.25F, 11.0F, 8.5F));
+
+		PartDefinition Jaw = HeadandJaw.addOrReplaceChild("Jaw", CubeListBuilder.create(), PartPose.offset(-0.25F, -1.0F, -10.5F));
+
+		PartDefinition Jaw_r1 = Jaw.addOrReplaceChild("Jaw_r1", CubeListBuilder.create().texOffs(82, 0).addBox(-13.5F, -2.0F, -23.0F, 27.0F, 9.0F, 23.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0873F, 0.0F, 0.0F));
+
+		PartDefinition Body = Aerwhale.addOrReplaceChild("Body", CubeListBuilder.create().texOffs(0, 45).addBox(-9.5F, -6.5F, -9.5F, 19.0F, 12.0F, 18.0F, new CubeDeformation(0.0F)), PartPose.offset(0.05F, -0.6F, 7.1F));
+
+		PartDefinition DorsalFin_r1 = Body.addOrReplaceChild("DorsalFin_r1", CubeListBuilder.create().texOffs(24, 100).addBox(-1.5F, -7.0F, -3.0F, 3.0F, 14.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.5F, -11.5F, -0.5236F, 0.0F, 0.0F));
+
+		PartDefinition Tail2 = Aerwhale.addOrReplaceChild("Tail2", CubeListBuilder.create(), PartPose.offset(-0.45F, -0.1F, 15.6F));
+
+		PartDefinition Tail = Tail2.addOrReplaceChild("Tail", CubeListBuilder.create().texOffs(0, 100).addBox(-2.0F, -21.0F, 23.0F, 3.0F, 14.0F, 6.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 75).addBox(-7.0F, -16.0F, 9.0F, 13.0F, 8.0F, 17.0F, new CubeDeformation(0.0F)), PartPose.offset(1.0F, 11.0F, -9.0F));
+
+		PartDefinition TailFin = Tail2.addOrReplaceChild("TailFin", CubeListBuilder.create().texOffs(40, 80).addBox(-19.5F, 0.0F, 0.0F, 39.0F, 1.0F, 20.0F, new CubeDeformation(0.0F)), PartPose.offset(0.5F, -1.0F, 18.0F));
+
+		PartDefinition LeftFin = Aerwhale.addOrReplaceChild("LeftFin", CubeListBuilder.create(), PartPose.offset(9.55F, -1.1F, -6.4F));
+
+		PartDefinition LeftFin_r1 = LeftFin.addOrReplaceChild("LeftFin_r1", CubeListBuilder.create().texOffs(97, 50).addBox(-3.0F, 0.0F, 0.0F, 27.0F, 1.0F, 17.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.0F, 1.0F, -4.0F, -0.1222F, -0.1745F, 0.6109F));
+
+		PartDefinition RightFin = Aerwhale.addOrReplaceChild("RightFin", CubeListBuilder.create(), PartPose.offset(-8.45F, 0.9F, -6.4F));
+
+		PartDefinition RightFin_r1 = RightFin.addOrReplaceChild("RightFin_r1", CubeListBuilder.create().texOffs(97, 32).addBox(-24.0F, 0.0F, 0.0F, 27.0F, 1.0F, 17.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-4.0F, 0.0F, -4.0F, -0.1222F, 0.1745F, -0.6109F));
+
+		return LayerDefinition.create(meshdefinition, 256, 128);
 	}
 
 	static AerwhaleModel create() {
-		return new AerwhaleModel(layer().bakeRoot());
+		return new AerwhaleModel(createBodyLayer().bakeRoot());
 	}
 
-	private static LayerDefinition layer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition r = mesh.getRoot();
-		part(r, "body", 0, 45, -9.5F, -6F, -9F, 19, 12, 18, 0F, 0F, 0F);
-		PartDefinition head = part(r, "head", 0, 0, -12.5F, -6.5F, -32F, 25, 13, 32, 0F, 0F, -9F);
-		part(head, "jaw", 114, 0, -13.5F, 2.5F, -30F, 27, 9, 23, 0F, 0F, 0F);
-		part(r, "dorsal", 74, 45, -1.5F, -14F, -3F, 3, 14, 6, 0F, -6F, 2F);
-		PartDefinition tail = part(r, "tail", 92, 45, -1.5F, -7F, 0F, 3, 14, 6, 0F, 0F, 9F);
-		part(tail, "fluke", 0, 75, -19.5F, -0.5F, 0F, 39, 1, 20, 0F, 0F, 6F);
-		part(r, "fin_l", 118, 75, 0F, -0.5F, -8F, 27, 1, 17, 8F, 3F, -3F);
-		part(r, "fin_r", 118, 93, -27F, -0.5F, -8F, 27, 1, 17, -8F, 3F, -3F);
-		return LayerDefinition.create(mesh, 256, 128);
-	}
 
 	@Override
 	public void setupAnim(AetherAnimalRenderer.State state) {
 		super.setupAnim(state);
-		float t = state.ageInTicks * 0.06F;
-		this.head.xRot = state.xRot * DEG * 0.4F;
-		this.head.yRot = state.yRot * DEG * 0.4F;
-		this.tail.yRot = Mth.sin(t) * 0.2F;
-		this.fluke.xRot = Mth.sin(t * 1.3F) * 0.15F;
-		this.finL.zRot = 0.35F + Mth.sin(t * 1.5F) * 0.2F;
-		this.finR.zRot = -0.35F - Mth.sin(t * 1.5F) * 0.2F;
+		this.glideAnimation.applyWalk(state.ageInTicks, 1.0F, 1.0F, 1.0F);
 	}
 }
