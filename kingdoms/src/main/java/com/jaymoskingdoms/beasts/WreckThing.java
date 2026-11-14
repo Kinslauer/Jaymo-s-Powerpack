@@ -91,7 +91,7 @@ public class WreckThing extends ActingMonster {
 	private static final Identifier COIL = Identifier.fromNamespaceAndPath("jaymospowers", "clinging_coil"),
 		TOOTH = Identifier.fromNamespaceAndPath("jaymospowers", "deep_tooth");
 
-	/** Its moves, synced by their place here (the client's WreckThingModel poses each). */
+	/** Its moves, synced by their place here (each an animation of its model's, by name). */
 	public static final String[] ACTIONS = {"lash", "grab", "ink"};
 
 	/** On the wrecks' level: the wrecks already looked at (packed places). */
