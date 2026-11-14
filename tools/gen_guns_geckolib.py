@@ -9,7 +9,7 @@ hammer, ramrod and muzzle flash move: drawn, held, aimed, fired, reloaded, spent
 - flintlock: the "Dueling Pistol" (Blockbench Workshop, CC BY 4.0), cut into body, hammer and ramrod. The Void Flintlock
   draws the same pistol in void colours.
 - blunderbuss: the Firecannon from cleannrooster's Frontier Armaments (MIT; tools/bbmodels/frontier-armaments/), a
-  brass-banded barrel with a bell mouth, its hammer cut into its own bone.
+  brass-banded barrel with a bell mouth, its hammer cut into its own bone, its breech gem painted steel, a ramrod added.
 
 Each gun gets a muzzle flash bone (our flash picture, drawn full-bright by a glow layer) that only shows while it fires.
 
@@ -431,6 +431,17 @@ def flintlock():
 	return out
 
 
+def ramrod_picture():
+	"""The blunderbuss's ramrod, 16 by 8: steel on the top half, the brass tip's on the bottom."""
+	img = Image.new("RGBA", (16, 8))
+	rnd = random.Random(5)
+	for y in range(8):
+		for x in range(16):
+			base, light = ((128, 132, 140), (200, 204, 214)) if y < 4 else ((190, 146, 60), (240, 208, 122))
+			img.putpixel((x, y), shade(light if y % 4 == 0 else base, 1 + rnd.uniform(-0.04, 0.04)))
+	return img
+
+
 def frontier_cube(c, src, dst, k):
 	"""One of Frontier Armaments' GeckoLib cubes as a project cube: x turned back (a geo file stores -x), then moved and
 	scaled so the point `src` lands on `dst`, `k` times bigger. Its per-face uvs kept on texture 0."""
@@ -460,25 +471,42 @@ def frontier_cube(c, src, dst, k):
 def blunderbuss():
 	"""The Firecannon of cleannrooster's Frontier Armaments (MIT, tools/bbmodels/frontier-armaments/): a brass-banded
 	barrel with a bell mouth on a short stock. Its bone's display tilt dropped, then laid as our old blunderbuss lay:
-	muzzle toward -z, top up, about 29 pixels long. Its hammer (the slanted cock behind the barrel) gets its own bone;
-	it has no ramrod. Muzzle flash and animations are ours."""
+	muzzle toward -z, top up, about 29 pixels long. Its hammer (the slanted cock behind the barrel) gets its own bone.
+	Ours on top: the red gem on the breech plate painted over in the plate's steel (Andy), a steel ramrod with a brass tip
+	under the barrel, the muzzle flash and the animations."""
 	src_dir = os.path.join(BBMODELS, "frontier-armaments")
 	geo = json.load(open(os.path.join(src_dir, "firecannon.geo.json"), encoding="utf-8"))["minecraft:geometry"][0]
 	cubes = geo["bones"][0]["cubes"]
 	# the muzzle's middle (the barrel's line, the front of the lip ring) to where our old muzzle was
 	src, dst, k = (-1.43281, 0.02014, -10.50296), (0.0, 11.55, -18.4), 1.6
 	parts = [frontier_cube(c, src, dst, k) for c in cubes]
-	textures = [texture_entry("blunderbuss", Image.open(os.path.join(src_dir, "firecannon.png")).convert("RGBA")),
-		texture_entry("flash", flash_picture())]
+	sheet = Image.open(os.path.join(src_dir, "firecannon.png")).convert("RGBA")
+	px = sheet.load()
+	# the breech plate's top face (84-88, 23-27): its red gem takes the plate's own steel
+	steel = [px[x, y] for x in range(84, 88) for y in range(23, 27) if not (px[x, y][0] > 150 and px[x, y][1] < 80)]
+	steel = tuple(sum(c[i] for c in steel) // len(steel) for i in range(4))
+	for x in range(84, 88):
+		for y in range(23, 27):
+			if px[x, y][0] > 150 and px[x, y][1] < 80:
+				px[x, y] = steel
+	textures = [texture_entry("blunderbuss", sheet), texture_entry("flash", flash_picture()),
+		texture_entry("ramrod", ramrod_picture())]
 	hammer_at = parts[13]["origin"]
 	hammer = group("hammer", hammer_at, [parts[13]])
+	# the ramrod under the barrel, through the front bands and into the forestock; its tip toward the muzzle
+	ramrod = group("ramrod", (0, 9.04, -17.4), [
+		cube("ramrod", (-0.4, 8.64, -17.0), (0.4, 9.44, -6.0), {"all": (0, 0)}, 2),
+		cube("ramrod_tip", (-0.5, 8.54, -17.6), (0.5, 9.54, -17.0), {"all": (0, 4)}, 2),
+	])
 	flash = flash_bone((0, dst[1], dst[2] - 0.1), "z", 9.0, 1)
-	gun = group("gun", (0, 9.5, 5.0), parts[:13] + [hammer, flash])
+	gun = group("gun", (0, 9.5, 5.0), parts[:13] + [hammer, ramrod, flash])
 	data = project("blunderbuss", [group("root", (0, 0, 0), [gun])], textures, (128, 128))
 	data["textures"][1]["uv_width"], data["textures"][1]["uv_height"] = 32, 16
+	data["textures"][2]["uv_width"], data["textures"][2]["uv_height"] = 16, 8
 	uuids = {g["name"]: g["uuid"] for g in data["groups"]}
+	# reload: drawn out forward and up to the bore's line (2.5 up, 12.5 out puts it just past the muzzle), rammed, put back
 	anims = standard_anims("blunderbuss", "gun", "hammer", (0, 0, 0), (-40, 0, 0), "x", (0, 0, 1), 2.1, 2.3,
-		reload_tilt=48.0)
+		ramrod="ramrod", ramrod_out=(0, 2.5, -12.5), reload_tilt=48.0)
 	data["animations"] = [a.blockbench("blunderbuss", uuids) for a in anims]
 	return data
 
