@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "S": "minecraft:stick",
-    "W": "#minecraft:wool"
+    "W": "#jaymoskingdoms:sail_cloth"
   },
   "pattern": [
     " S ",
