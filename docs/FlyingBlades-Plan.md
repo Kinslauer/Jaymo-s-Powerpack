@@ -31,7 +31,7 @@ of 36 rows on the pick page (https://claude.ai/artifact/FdTQFbbhv8615nRy6t3QnC).
 | Closing Ring, Step to a blade | on the order wheel | same |
 | Blade Storm | hold V (a tap is still Barrage, on letting go); also on the wheel | on the wheel |
 | Blade riding (step on, and step off and send it) | double tap Jump | same |
-| Gravity: the rocks' order wheel (Harry, Steer, Stone storm, Closing ring) | hold B+G with the rocks out (a tap changes formation) | n/a |
+| Gravity: the rocks' order wheel (Harrier, Steer, Stone storm, Closing ring) | hold B+G with the rocks out (a tap changes formation) | n/a |
 
 The Void Arsenal differs because its Sneak + V already steps through gates.
 
@@ -62,7 +62,7 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
    so there is no meter left to add to); gifted Arsenal villagers keep two blades at their shoulders in a fight, strike
    with them and ward with them (`ArsenalGift`). Not done: the Sword in the Stone's gift on the wing.
 7. **Gravity's rocks** (built, `GravityRockOrders`): the harnessed rocks (`GravityRocks`) take the blades' orders, no
-   riding. With the rocks out, B+G held opens their wheel: Harry (the rocks go at whoever you look at, one after
+   riding. With the rocks out, B+G held opens their wheel: Harrier (the rocks go at whoever you look at, one after
    another, until called off), Steer (they follow your eye and batter what they meet), Stone storm (they loop through
    your aim point, and you are slowed) and Closing ring (they ring a foe, hold, then crash in). A B+G tap still changes
    the formation, and with a guard raised a rock is spent to take a hit. Formation, strike and whirl were already the

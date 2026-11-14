@@ -51,7 +51,7 @@
 	"message.jaymospowers.gravity_rocks.recharging": "The rocks aren't ready: %ss",
 	"screen.jaymospowers.gravity_rocks": "Harnessed rocks",
 	"gui.jaymospowers.gravity_rocks.hint": "Let go over an order. The middle cancels",
-	"gui.jaymospowers.gravity_rocks.0": "Harry",
+	"gui.jaymospowers.gravity_rocks.0": "Harrier",
 	"gui.jaymospowers.gravity_rocks.0.hint": "Set the rocks on what you look at. Again calls them off",
 	"gui.jaymospowers.gravity_rocks.1": "Steer",
 	"gui.jaymospowers.gravity_rocks.1.hint": "The rocks fly where you look for 5 s. Again calls them back",
