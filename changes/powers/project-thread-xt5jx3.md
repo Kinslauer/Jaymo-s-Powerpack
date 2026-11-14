@@ -7,3 +7,5 @@
 - `docs/ReaperHost-Plan.md`: the patches for the rest of Andy's picks from Immersive Pillagers, Mebahel's Draugr and
   Moog's Ocean Structures.
 - Not played. The boats stand empty until the crews patch.
+- The hot air balloon carries illagers as well as players (`HotAirBalloon.canAddPassenger`), for Jaymo's Kingdoms' hit
+  squads that come down from the sky.

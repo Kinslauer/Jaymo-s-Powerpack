@@ -363,6 +363,9 @@ public final class ZombieHordes {
 		long ticks = server.getTickCount();
 		if (!HORDES.isEmpty()) {
 			for (Horde horde : HORDES) {
+				if (horde.kind == Kind.SQUAD) {
+					SquadMounts.row(horde.members, horde.goal);
+				}
 				HordeMoves.tick(horde.level, horde.members, horde.goal, horde.danger, horde.kind.dead() || horde.kind == Kind.SQUAD || horde.kind == Kind.NETHER || horde.kind == Kind.REAPED);
 			}
 			if (ticks % MARCH_EVERY == 0) {
@@ -538,6 +541,9 @@ public final class ZombieHordes {
 				continue;
 			}
 			special(level, horde, tier, random);
+			if (kind == Kind.SQUAD && !cave) {
+				SquadMounts.mount(level, horde.members, centre, random);
+			}
 			if (kind == Kind.REAPED) {
 				horde.war = warSeat(level, centre);
 				ReapedHost.mount(level, horde.members, random);

@@ -26,3 +26,7 @@ Andy's picks from Immersive Pillagers, Mebahel's Draugr and Moog's Ocean Structu
 - **A black long ship** (`ReapedHost.longship`): by the water, half the hosts come in a dark oak drakkar moored within 40
   blocks, out of sight, and wade in from her deck. She is left where she moored.
 - Lore: `Lore.md`, "The host at war" (new, for Andy).
+- **The hit squad arrives by the land it crosses** (`SquadMounts`; living illagers only): two to a camel in deserts and
+  badlands, on horses on plains and savanna, two to a boat where there is water within 20 blocks (rowed toward you; they
+  shoot from it and step out where it grounds), and one time in five under open sky two to a hot air balloon let down from
+  26 blocks up (needs Jaymo's Powers). Mounts, boats and balloons are left behind for whoever wants them.
