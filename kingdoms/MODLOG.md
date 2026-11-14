@@ -13074,3 +13074,10 @@ scythe", and "the reaper is now one you can pact with".
 - Built with Gradle. Not played: the figure's place over the back, the wings' fold and the scythe swing are set by eye from
   the numbers. Not built from the plan: NPC necromancers carrying one, a clash film against a mana spirit, the smoke threads
   from each corpse.
+
+## 0.8.67 (2026-11-14): the Reaper's Toll by command (#1528)
+
+Andy: "what commands can i test with?"
+- `/kingdom reaper toll <0-100>` (operators) sets your own Toll, so each of the Reaper's five stages can be looked at without
+  the kills: 0, 20, 40, 60 and 80 are the Pall, the Mantle, the Reach, the Wing-arms and the Shroud. It needs a Reaper
+  already: `/kingdom class set @s warlock reaper` brings one within five seconds.
