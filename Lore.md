@@ -1058,6 +1058,18 @@ own, two swords and a crest, and steps aside from a blow as it did alive. None o
 with the Skeleton Lord's laughter settled in them. Knock one down and its skull runs off laughing and grows the rest
 back, until the skull is smashed. Gold burns the laughter out, as it burns out his curse.
 
+(new) **The Raid-King under the seal** (Reaper's host thread, Mebahel's Draugr picks, 2026-11-14; Claude's placement
+for Andy to approve). The Frostborn Z Fighter who trapped the raiders in the Stormborn Tomb could bind the host where
+it stood, but not its chieftain. The **Raid-King** was laid under the great hall's floor with the jailer's own seal
+over him and a chain across his chest. The seal broke long ago. His captains (the wights, the scourges and the
+hall-guards) each carry a shard of it and keep the shards apart, because the seal mended and set down in his hall is
+the one thing that wakes him. Whoever does it meets the hall's dead in waves first, and him last: a head and a half
+taller than his host, crowned over the horned helm, his beard hoar-white, his tail loose and not wrapped as a fighter
+keeps it. He falls once in each tomb. The Skeleton Lord's arena lies beyond the hall and is no part of this: the
+laughing king came to the tomb later and the draugr do not serve him. **Runes** cut for traps are the alchemists'
+answer to the jailer's craft: a stone from the crucible, laid on the ground and fed with mana or with the Reaper's
+Toll, that goes off under a monster's foot.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
