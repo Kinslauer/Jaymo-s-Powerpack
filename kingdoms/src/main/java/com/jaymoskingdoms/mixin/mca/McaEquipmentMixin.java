@@ -36,7 +36,8 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = "equipBestArmor", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$belowTheCrown(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
 		// (and a guard's issue is their settlement's: Templar plate, the settler's gear, a gunner's harness)
-		villager.setItemSlot(slot, FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot)));
+		// (and a realm's knight puts on its plate and harness)
+		villager.setItemSlot(slot, com.jaymoskingdoms.HeraldryWear.issue(villager, slot, FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot))));
 	}
 
 	/** A caravan guard's musketoon stays in his hands when MCA would arm him with a sword or a bow. */

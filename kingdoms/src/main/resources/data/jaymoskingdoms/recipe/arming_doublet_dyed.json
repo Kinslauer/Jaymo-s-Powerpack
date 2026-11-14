@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "jaymoskingdoms:arming_doublet"
+  },
+  "target": "jaymoskingdoms:arming_doublet"
+}

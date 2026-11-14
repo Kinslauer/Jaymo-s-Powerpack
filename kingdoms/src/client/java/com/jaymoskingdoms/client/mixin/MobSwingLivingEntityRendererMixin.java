@@ -57,6 +57,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		// (0.7.486) the sea-blooded Tideborn's fins, tentacles, shells and spines
 		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
+		// what they wear in the harness (HeraldryLayer, UnderArmourLayer)
+		com.jaymoskingdoms.client.HeraldryLayer.extract(entity, state);
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}
 

@@ -483,6 +483,8 @@ public final class Masterless {
 		// and the Foxshade mantle on his shoulders, his killer's to take
 		v.setItemSlot(EquipmentSlot.CHEST, FrontierArmour.stack("foxshade", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
 		v.setDropChance(EquipmentSlot.CHEST, 1.0F);
+		// and what is left of his cloak and hood
+		HeraldryWear.bandit(v, true);
 		int men = MEN_MIN + v.getRandom().nextInt(MEN_MAX - MEN_MIN + 1);
 		Map<String, Integer> stars = v.getAttachedOrElse(FoeLore.STARS, Map.of());
 		int wins = v.getAttachedOrElse(Learners.WINS, 0);
@@ -497,6 +499,7 @@ public final class Masterless {
 			if (Bandits.BANDANA != null) {
 				man.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Bandits.BANDANA));
 			}
+			HeraldryWear.bandit(man, false);
 			// what the old master taught the leader, the leader teaches them
 			if (!stars.isEmpty()) {
 				man.setAttached(FoeLore.STARS, Map.copyOf(stars));

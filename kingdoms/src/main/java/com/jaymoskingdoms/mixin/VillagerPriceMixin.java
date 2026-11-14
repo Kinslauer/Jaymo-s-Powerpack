@@ -24,6 +24,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.HavenWares.offers((Villager)(Object)this, player);
 		// what the settlement's people wear, on its armourer's and tailor's counters (and a fence's)
 		com.jaymoskingdoms.FrontierWear.offers((Villager)(Object)this, player);
+		// the tailor's doublets, hoods, cloaks and giorneas, and the armourer's crests
+		com.jaymoskingdoms.HeraldryWear.offers((Villager)(Object)this, player);
 		// (0.7.519) and a trade charter partner's people pay less
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more

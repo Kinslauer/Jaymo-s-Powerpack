@@ -5,6 +5,8 @@ import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.core.LockOnRegions;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.BodyPlan;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.component.DataComponents;
@@ -42,6 +44,11 @@ import org.jspecify.annotations.Nullable;
  * The piece asked is the one over where the blow lands when a lock-on region says where ({@link LockOnRegions}), else
  * the chest piece; a bare place or a broken piece changes nothing. Since armour wears by the damage it is asked to stop,
  * a blow that crushes plate wears it faster too, and one that mail turns wears it less.</li>
+ * <li><b>The layers under it</b> (Jaymo's Kingdoms' harness, {@link ArmourKind#harness}): a blow to the body meets the
+ * chest piece, then the mail and padding under it; one to an arm meets the arm's own plate (else the chest piece) and
+ * the sleeves under it; one to a leg the cuisses or greaves over the leggings. The outermost layer sets the share, and
+ * each layer under it that is better against this kind of blow pulls the share {@link #UNDER_SOAK} of the way down to
+ * its own: padding soaks the blunt blow that crushes plate, mail the cut.</li>
  * </ul>
  * Both multiply the blow's damage before armour and the wounds see it, so class perks, ripostes, Weapon Forms and the
  * lock-on's own head bonus stack with them as they stack with each other. Nothing is said: a ring in the striker's ear
@@ -49,6 +56,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Blows {
 	// ===== the knobs ================================================================================================
+	/** How far each layer under the one struck pulls a blow's share down to what it would do against that layer alone. */
+	public static final float UNDER_SOAK = 0.4F;
 	/** A blow at the heart of its weapon's distance does this many times its damage. */
 	public static final float HEART_BONUS = 1.1F;
 	/** The heart: this share of the band, about its middle. */
@@ -172,18 +181,39 @@ public final class Blows {
 		if (kind == null) {
 			return damage;
 		}
-		ArmourKind armour = ArmourKind.worn(victim, struck(victim, source));
+		BodyPlan plan = BodyPlan.of(victim);
+		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
+		EquipmentSlot slot = slot(part);
+		List<ArmourKind> layers = new ArrayList<>();
+		String place = place(part);
+		List<ArmourKind> limb = place.equals("torso") ? List.of() : ArmourKind.layers(victim, place);
+		if (place.equals("arms") && !limb.isEmpty()) {
+			// the arm's own plate and the sleeves under it, not the chest piece
+			layers.addAll(limb);
+		} else {
+			layers.addAll(place.equals("legs") ? limb : List.of());
+			layers.add(ArmourKind.worn(victim, slot));
+			if (slot == EquipmentSlot.CHEST) {
+				layers.addAll(ArmourKind.layers(victim, "torso"));
+			}
+		}
+		layers.removeIf(k -> k == ArmourKind.NONE);
+		ArmourKind armour = layers.isEmpty() ? ArmourKind.NONE : layers.get(0);
 		float factor = kind.against(armour);
+		for (int i = 1; i < layers.size(); i++) {
+			float under = kind.against(layers.get(i));
+			if (under < factor) {
+				factor += (under - factor) * UNDER_SOAK;
+			}
+		}
 		if (factor >= BITES || factor <= TURNED) {
 			tellArmour(level, victim, attacker, armour, factor >= BITES);
 		}
 		return damage * factor;
 	}
 
-	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */
-	static EquipmentSlot struck(LivingEntity victim, DamageSource source) {
-		BodyPlan plan = BodyPlan.of(victim);
-		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
+	/** The armour slot over {@code part} (where the lock-on says a blow lands; null: unaimed, the chest). */
+	static EquipmentSlot slot(@Nullable BodyPart part) {
 		if (part == null) {
 			return EquipmentSlot.CHEST;
 		}
@@ -192,6 +222,19 @@ public final class Blows {
 			case LEFT_LEG, RIGHT_LEG, FRONT_LEGS, HIND_LEGS, LEGS -> EquipmentSlot.LEGS;
 			case LEFT_FOOT, RIGHT_FOOT -> EquipmentSlot.FEET;
 			default -> EquipmentSlot.CHEST;
+		};
+	}
+
+	/** The harness's place ({@link ArmourKind#harness}) over {@code part}: "arms", "legs", or "torso" for the rest. */
+	static String place(@Nullable BodyPart part) {
+		if (part == null) {
+			return "torso";
+		}
+		return switch (part) {
+			case LEFT_ARM, RIGHT_ARM -> "arms";
+			case LEFT_LEG, RIGHT_LEG, FRONT_LEGS, HIND_LEGS, LEGS -> "legs";
+			case HEAD, LEFT_FOOT, RIGHT_FOOT -> "none";
+			default -> "torso";
 		};
 	}
 

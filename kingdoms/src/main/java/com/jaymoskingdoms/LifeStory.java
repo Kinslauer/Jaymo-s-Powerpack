@@ -2407,6 +2407,10 @@ public final class LifeStory {
 				equip(player, stack.copy());
 			}
 		}
+		if (start == Start.BANISHED && !RAGS_ONLY) {
+			// turned out in what they stood in: a torn cloak and hood
+			HeraldryWear.banished(player);
+		}
 		if (HARD_MESSAGES.contains(landed)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story." + landed.name().toLowerCase(Locale.ROOT))
 				.withStyle(ChatFormatting.GRAY));

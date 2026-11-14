@@ -251,6 +251,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		UnderArmourLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
+		// the late-medieval harness: its layer, its screen and tab, the visor key and the view through a lowered visor
+		HeraldryLayer.register();
+		HeraldryClient.register();
 		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
 		TinkererOutfit.register();
 		// 0.7.23: Verdants' antennae

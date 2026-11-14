@@ -49,6 +49,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		McaCompat.register();
 		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
+		// and the harness: what a blow meets in its layers, a shut visor's glance, who may have plate gilded
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareHarness());
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// (0.7.251) spoken lines: the narrator and the spirits
@@ -129,6 +131,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		FrontierArmour.register();
 		FrontierWear.register();
 		FrontierPerks.register();
+		// the late-medieval harness: its pieces, the slots they go in, visors, and who wears and sells it
+		HeraldryArmour.register();
+		Harness.register();
+		Visors.register();
+		HeraldryWear.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it

@@ -67,6 +67,12 @@ public final class LockOnRegions {
 	 * (its {@code PowersCompat}); without Kingdoms nobody has any.
 	 */
 	public static ToDoubleFunction<Player> finesse = player -> 0.0;
+	/**
+	 * How much likelier a head shot is to glance off {@code victim}'s face than off a bare head: more behind a lowered
+	 * visor or a helm with a shut face, no more with the visor raised. Jaymo's Kingdoms holds the helms and sets this at
+	 * server start (its {@code PowersCompat}); without Kingdoms every face is 1.
+	 */
+	public static ToDoubleFunction<LivingEntity> face = victim -> 1.0;
 	/** The last aimed hit's roll on each victim, so the one blow asked twice (routing, then its damage) glances the same. */
 	private static final Map<LivingEntity, Rolled> ROLLED = new WeakHashMap<>();
 
@@ -296,12 +302,17 @@ public final class LockOnRegions {
 		}
 		Region region = aimed;
 		// a head shot may glance off onto the torso
-		if (region == Region.HEAD && victim.getRandom().nextFloat() < HEAD_GLANCE * steadiness(player)) {
+		if (region == Region.HEAD && victim.getRandom().nextFloat() < glance(victim, player)) {
 			region = Region.TORSO;
 		}
 		BodyPart part = part(victim, plan, region, player.getEyePosition());
 		ROLLED.put(victim, new Rolled(source, part));
 		return plan.index(part) >= 0 ? part : null;
+	}
+
+	/** The chance {@code player}'s head shot on {@code victim} glances off: {@link #HEAD_GLANCE}, more behind a shut visor ({@link #face}), less with Finesse. */
+	static float glance(LivingEntity victim, Player player) {
+		return (float)Math.min(1.0, HEAD_GLANCE * face.applyAsDouble(victim)) * steadiness(player);
 	}
 
 	/** {@link Dismember}'s bit for where {@code attacker}'s lock on {@code target} aims (head, an arm, a leg), or null (the torso, or no lock). */
@@ -317,7 +328,7 @@ public final class LockOnRegions {
 		if (region == Region.TORSO || region == Region.TAIL) {
 			return null;
 		}
-		if (region == Region.HEAD && target.getRandom().nextFloat() < HEAD_GLANCE * steadiness(player)) {
+		if (region == Region.HEAD && target.getRandom().nextFloat() < glance(target, player)) {
 			// glanced off the head onto the shoulder: the nearer arm (the torso itself never comes off)
 			region = regions(target).contains(Region.ARMS) ? Region.ARMS : Region.LEGS;
 			if (!regions(target).contains(region)) {

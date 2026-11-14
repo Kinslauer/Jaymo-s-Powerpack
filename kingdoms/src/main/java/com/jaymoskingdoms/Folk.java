@@ -425,6 +425,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		KnightsCompat.dress(this, faction, climate);
 		// and the sets its faith, its trade or its camp's country puts on it (FrontierWear)
 		FrontierWear.folk(this, faction, climate);
+		HeraldryWear.folk(this, faction, climate);
 		this.outfit = Outfits.VERSION;
 		// townsfolk are born to a heritage (VillagerHeritage)
 		VillagerHeritage.folkSetup(this);
@@ -742,6 +743,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		Outfits.dress(this, faction, climate);
 		KnightsCompat.dress(this, faction, climate);
 		FrontierWear.folk(this, faction, climate);
+		HeraldryWear.folk(this, faction, climate);
 		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF || Orcs.isOrc(this)) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
 		}

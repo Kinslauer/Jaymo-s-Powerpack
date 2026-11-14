@@ -2817,6 +2817,27 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * Hands Jaymo's Powers the {@link Harness}: what a blow meets in its layers and what it weighs ({@code ArmourKind.harness}),
+	 * how much likelier a head blow glances off a shut visor ({@code LockOnRegions.face}), and who may have plate gilded
+	 * at the anvil ({@code HeraldryForging.noble}).
+	 */
+	public static void shareHarness() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.util.function.BiFunction<LivingEntity, String, java.util.List<net.minecraft.world.item.ItemStack>> layers = Harness::layers;
+			Class.forName("com.jaymospowers.core.ArmourKind").getField("harness").set(null, layers);
+			java.util.function.ToDoubleFunction<LivingEntity> face = Visors::glance;
+			Class.forName("com.jaymospowers.core.LockOnRegions").getField("face").set(null, face);
+			java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> noble = p -> HeraldryWear.noble(p.level().getServer(), p.getUUID());
+			Class.forName("com.jaymospowers.tinkering.smithing.HeraldryForging").getField("noble").set(null, noble);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the harness (older Powers?)", e);
+		}
+	}
+
 	/** Powers' {@code LockOnClient}: its private {@code pick(Minecraft, LocalPlayer)} and {@code locked}/{@code blind} fields, and the {@code LockOn.Packet(int)} record. */
 	private static java.lang.reflect.@Nullable Method lockPick;
 	private static java.lang.reflect.@Nullable Field lockLocked, lockBlind;

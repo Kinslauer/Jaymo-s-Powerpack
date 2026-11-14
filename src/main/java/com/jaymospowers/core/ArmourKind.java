@@ -1,7 +1,10 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,6 +34,11 @@ import net.minecraft.world.item.equipment.Equippable;
  * <li>and anything left is plate.</li>
  * </ol>
  * An empty slot, and a piece worn out ({@link ArmourWear#broken}), is {@link #NONE}: nothing between the blow and the body.
+ * <p>
+ * Armour can be worn in layers beyond the four slots: Jaymo's Kingdoms' harness (padding and mail under the chest piece,
+ * plate on the arms and legs) is handed over as {@link #harness}. Its pieces are known by their tags alone
+ * ({@link #layer}); each adds its weight to the load ({@link #HARNESS_SHARE}), and {@code combat/Blows} lets the layers
+ * under the one struck soak what they are good against.
  */
 public enum ArmourKind {
 	/** Nothing there, or a broken piece. */
@@ -43,6 +51,8 @@ public enum ArmourKind {
 	// ===== the knobs ================================================================================================
 	/** How much of a body's load each slot's piece is (they add up to 1: a full suit of plate is a load of 1). */
 	static final float HEAD_SHARE = 0.15F, CHEST_SHARE = 0.4F, LEGS_SHARE = 0.3F, FEET_SHARE = 0.15F;
+	/** How much of a body's load each harness piece is, by its weight (a whole layered harness on top of plate is about 0.6 more), and the most a load can be. */
+	static final float HARNESS_SHARE = 0.1F, MAX_LOAD = 1.6F;
 	/** Words in an item's id that make it plate, mail or padding (plate is asked first: "platemail" is plate). */
 	static final String[] PLATE_WORDS = {"plate", "cuirass", "armet", "bascinet", "sallet", "barbute", "greathelm", "kettlehat"};
 	static final String[] MAIL_WORDS = {"chain", "mail", "hauberk", "coif", "lamellar", "scale", "brigandine"};
@@ -53,6 +63,13 @@ public enum ArmourKind {
 	public static final TagKey<Item> CLOTH_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("cloth_armor")),
 		MAIL_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("mail_armor")),
 		PLATE_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("plate_armor"));
+
+	/**
+	 * What a body wears in layers beyond its four slots, outermost first, at a place: "torso" (under the chest piece),
+	 * "arms" (the limb's own plate, then the sleeves under it; nothing when no limb piece is worn), "legs" (over the
+	 * leggings), "all" (every piece with weight). Jaymo's Kingdoms sets this at server start; without it there are none.
+	 */
+	public static BiFunction<LivingEntity, String, List<ItemStack>> harness = (body, place) -> List.of();
 
 	/** How heavy a piece of this kind is to fight in, as a share of plate's weight. */
 	public final float weight;
@@ -127,6 +144,26 @@ public enum ArmourKind {
 		return false;
 	}
 
+	/** What a harness piece (worn in a layer, not a slot) is made like, by its tag alone; {@link #NONE} untagged or broken. */
+	public static ArmourKind layer(ItemStack stack) {
+		if (stack.isEmpty() || ArmourWear.broken(stack) || stack.isBroken()) {
+			return NONE;
+		}
+		return stack.is(PLATE_TAG) ? PLATE : stack.is(MAIL_TAG) ? MAIL : stack.is(CLOTH_TAG) ? CLOTH : NONE;
+	}
+
+	/** The harness layers {@code body} wears at {@code place} ({@link #harness}), outermost first, as kinds (none left out). */
+	public static List<ArmourKind> layers(LivingEntity body, String place) {
+		List<ArmourKind> out = new ArrayList<>();
+		for (ItemStack stack : harness.apply(body, place)) {
+			ArmourKind kind = layer(stack);
+			if (kind != NONE) {
+				out.add(kind);
+			}
+		}
+		return out;
+	}
+
 	/** What stands between a blow and {@code body} at {@code slot}: the piece worn there, or {@link #NONE} if it's bare or broken. */
 	public static ArmourKind worn(LivingEntity body, EquipmentSlot slot) {
 		ItemStack piece = body.getItemBySlot(slot);
@@ -135,10 +172,20 @@ public enum ArmourKind {
 
 	/**
 	 * How heavily {@code body} is armoured, 0 (nothing on) to 1 (plate from head to foot): each piece's {@link #weight} by
-	 * its slot's share. A broken piece weighs what it always did.
+	 * its slot's share. A broken piece weighs what it always did. Each harness piece adds its weight by
+	 * {@link #HARNESS_SHARE}, up to {@link #MAX_LOAD} in all.
 	 */
 	public static float load(LivingEntity body) {
-		return of(body.getItemBySlot(EquipmentSlot.HEAD)).weight * HEAD_SHARE + of(body.getItemBySlot(EquipmentSlot.CHEST)).weight * CHEST_SHARE
+		float load = of(body.getItemBySlot(EquipmentSlot.HEAD)).weight * HEAD_SHARE + of(body.getItemBySlot(EquipmentSlot.CHEST)).weight * CHEST_SHARE
 			+ of(body.getItemBySlot(EquipmentSlot.LEGS)).weight * LEGS_SHARE + of(body.getItemBySlot(EquipmentSlot.FEET)).weight * FEET_SHARE;
+		for (ItemStack piece : harness.apply(body, "all")) {
+			load += kind(piece).weight * HARNESS_SHARE;
+		}
+		return Math.min(MAX_LOAD, load);
+	}
+
+	/** A harness piece's kind, broken or not (it weighs the same). */
+	private static ArmourKind kind(ItemStack stack) {
+		return stack.isEmpty() ? NONE : stack.is(PLATE_TAG) ? PLATE : stack.is(MAIL_TAG) ? MAIL : stack.is(CLOTH_TAG) ? CLOTH : NONE;
 	}
 }
