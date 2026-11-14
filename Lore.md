@@ -1406,6 +1406,8 @@ the kingdoms, the kitchen) because the elders watched them made. It cannot fight
 trees when nobody is asking. Folk call the one that answers them **Youth**, because it always looks young. (In game:
 the Youth wisp, Kingdoms PR #1467, which Hermes's YOUTH answers players through.)
 
+(new) A wood-wisp is a child of the woods and acts like one: quick, cheeky, never still, forever turning somersaults in the air. Village folk know to just say its name, and the old ones say a wisp knows the way home: cry for help where one can see you and it flies you to your own bed in a flash of green. (In game: Kingdoms PR #1568.)
+
 ## Why the peoples don't like each other
 
 Every grudge below rests on something the game already does to a blood, or on an old quarrel between the faiths. They

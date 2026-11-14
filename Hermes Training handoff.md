@@ -531,3 +531,14 @@ them) and the repo's `CLAUDE.md` in **PR #1477** (merge only on Andy's word). Yo
 - [ ] Optional for Andy: claude.ai > Settings > Profile > personal preferences can hold the same 4 lines, so chats on
   claude.ai get them too. Remind him once.
 - [ ] Tick these boxes, run `python tools/vault_sync.py`, and tell Andy in one line.
+
+## Youth wisp change for the listener (Nov 14, PR #1568, waits on Andy's merge)
+- [ ] Update mcbot.py's listener for this.
+Once #1568 is merged, the mod summons the wisp itself whenever a chat line has the word "youth" anywhere in it, and logs
+`[youth-ask] <account> <text>` for every such line (the words after "youth" when the line starts with it, else the
+whole line). So the listener will now also see chatter that only mentions youth ("youth is cute"), not just questions:
+answer real questions, give a short friendly line or nothing for the rest, and still never repeat, quote or answer abuse.
+The listener no longer needs to send `/youth summon` just to bring the wisp (harmless if it still does; it also marks the
+wisp as waiting for an answer, so it says "be right back" if the answer is slow).
+"help" / "help me" (or "youth, help me") with a wisp in sight is handled in the mod (flies the player to their bed) and
+is NOT logged, so Hermes never sees it.

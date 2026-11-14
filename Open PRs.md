@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-14 09:24
+updated: 2026-11-14 11:51
 ---
 # Open PRs
 
-4 open, as of 2026-11-14 09:24. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-14 11:51. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
@@ -11,17 +11,17 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** [[armor-pngs-vanilla-style]]
 
-## [#1549](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1549) Blunderbuss drawn as Frontier Armaments' Firecannon
-- **Branch:** `claude/project-thread-f4k011` · **Updated:** 2026-11-14 (today)
-- **Checks:** no checks
+## [#1568](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1568) Youth wisp: Peter Pan remake, comes when named, HELP carries you home
+- **Branch:** `claude/project-thread-f24uld` · **Updated:** 2026-11-14 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1552](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1552) Captured sites as kingdom plans; desert arenas (ours and Illager Arena's)
-- **Branch:** `claude/project-thread-p3lx1w` · **Updated:** 2026-11-14 (today)
-- **Checks:** ⏳ 3 of 4 running
+## [#1569](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1569) Tales: story quests over days and weeks, starred board work, a fuller journal
+- **Branch:** `claude/project-thread-bqvg9c` · **Updated:** 2026-11-14 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1564](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1564) Swings match the lock-on region; work tools swing plainly unless locked on
-- **Branch:** `claude/project-thread-mwd38b` · **Updated:** 2026-11-14 (today)
+## [#1570](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1570) Casters cast with hand gestures and sigils; film mages match
+- **Branch:** `claude/project-thread-9yvqn9` · **Updated:** 2026-11-14 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
