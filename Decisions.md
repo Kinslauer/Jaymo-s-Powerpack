@@ -495,3 +495,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 6:10 PM (Andy, Deck admin session): start a NEW world on the Deck with Chunky pre-generating 2,500 blocks round spawn (the old world is renamed on the Deck, kept).
 - 2026-11-13 5:42 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "its fine" to the Lore.md paragraph "The Cloud Sea". Approved; the (new) mark is off.
 - 2026-11-13 5:51 PM ET (Add a cloud layer between overworld and Aether thread): Andy said "merge" for PR #1469 (the Cloud Sea). Squash-merged.
+- 2026-11-13 6:25 PM (Andy, Deck admin session): Deck server heap 6 GB -> 8 GB (start.sh -Xmx8G), and Chunky pauses while any player is on (ChunkyCompat).
+- 2026-11-13 7:00 PM ET (Add Karpathy coding guidelines everywhere thread): Andy: "Yeah add it to every claude session too why not". The Karpathy coding guidelines (github.com/multica-ai/andrej-karpathy-skills) go in the cloud project instructions, the repo CLAUDE.md (PR #1477, merge on his word), PC Claude's ~/.claude/CLAUDE.md and every Hermes bot's SOUL rules (handoff section).
+- 2026-11-13 7:04 PM ET (project chat): Andy said "merge" for PR #1477 (Karpathy coding guidelines in CLAUDE.md). Squash-merged.

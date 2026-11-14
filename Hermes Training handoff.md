@@ -471,3 +471,42 @@ Andy approved the wood-wisp lore (in Lore.md since Nov 13) and his decisions are
 
 Ask Andy before the first in-game test with friends online. No account,
 no offline mode, no key handling needed. Estimated 2-4 hours for step 1, 3-6 for step 2.
+
+## New (Nov 14): Karpathy coding guidelines for every Claude and every bot (cloud thread "Add Karpathy coding guidelines everywhere")
+
+**Andy's choice (Nov 14, 12:00 AM ET, append to `Decisions.md`):** "Yeah add it to every claude session too why not",
+about the coding guidelines in [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills)
+(Andrej Karpathy's notes on coding-agent mistakes). Already done: the cloud project instructions (new cloud threads get
+them) and the repo's `CLAUDE.md` in **PR #1477** (merge only on Andy's word). Your part is the PC side:
+
+- [ ] **Your user-level `~/.claude/CLAUDE.md`** (`C:\Users\toopo\.claude\CLAUDE.md`; create it if missing, keep what's
+  there). Add this block, so every Claude Code session on the PC gets it, in any folder:
+
+  ```
+  ## Coding guidelines (from github.com/multica-ai/andrej-karpathy-skills)
+  1. Think before coding: state assumptions, say which reading of an unclear ask you took (or ask), push back when
+     something simpler exists, and stop and ask when confused instead of guessing.
+  2. Simplicity first: the minimum code that solves the problem. No unrequested features, abstractions,
+     configurability, or error handling for impossible cases.
+  3. Surgical changes: touch only what the task needs. Don't refactor or restyle nearby code; match existing style.
+     Mention unrelated dead code instead of deleting it; remove only what your own change made unused.
+  4. Goal-driven execution: turn the task into checkable goals (tests where possible) and verify against them before
+     calling the work done.
+  ```
+
+- [ ] **Bot SOUL rules.** Back up each file first, then add the short form below to the rules of YOUTH
+  (`E:/hermes/SOUL.md`) and of every bot profile's SOUL (`E:/hermes/profiles/<name>/SOUL.md`: Apollo, Bacchus,
+  Hephaestus, Prometheus, Quill and any other profile there). Hephaestus and the builders gain most: bloated and
+  off-task diffs are what it targets. For Quill, keep the wording (it writes text, not code; rule 3 still applies to
+  files it edits). Then run `hermes sessions refresh-prompts`.
+
+  ```
+  Working rules (Karpathy): 1) Think first: state your assumptions; if the ask is unclear, say which reading you took
+  or ask. 2) Keep it simple: the least code or text that does the job, nothing nobody asked for. 3) Surgical: change
+  only what the task needs; don't tidy, refactor or restyle anything else. 4) Prove it: decide how you'll check the
+  work (build, test, rerun) and check it before saying it's done.
+  ```
+
+- [ ] Optional for Andy: claude.ai > Settings > Profile > personal preferences can hold the same 4 lines, so chats on
+  claude.ai get them too. Remind him once.
+- [ ] Tick these boxes, run `python tools/vault_sync.py`, and tell Andy in one line.

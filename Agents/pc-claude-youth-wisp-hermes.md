@@ -27,6 +27,19 @@ listener, a mechanics skill + cheatsheet, a SOUL rule, then tests. Mod side is P
 - YOUTH only writes the answer; the listener sends it through `mcbot.py say` (YOUTH never builds a console command).
 
 ## Notes
-- 
+- Built (Nov 13, 7 PM): `E:/hermes/scripts/mcbot.py` (verbs who/where/status/summon/say/dismiss/off/on, listen,
+  ensure-listener, stop-listener, ask, answer), `mcbot_listener.py` + Hermes cron `mcbot-listener` (every 1 min,
+  no agent, id 718bc8bcb6b0), skill `skills/minecraft/minecraft-mechanics` + `references/mechanics-cheatsheet.md`
+  (83 sections, 11k words, 690 claims checked by a second reader, 110 fixed), SOUL section "Minecraft server: Youth".
+  Backup `E:/hermes/backups/SOUL.md.2026-11-13-minecraft.bak`. State/logs in `E:/hermes/mcbot/`.
+- In-game answers: the listener picks the matching cheatsheet sections and asks YOUTH with NO file/skill/terminal
+  tools (`-t todo`, `--source tool`, `--reasoning low`), so a player's words can't make it change anything. YOUTH only
+  writes `<say>…</say>`; the script sends it through `/youth say` (or `tellraw` until #1467 is on the server).
+- Kill switch is OFF (chat ignored) until Andy OKs an in-game test: `py -3 E:/hermes/scripts/mcbot.py on`.
+- PR #1467: added `display` to `/youth status` (chat shows display names, e.g. "Sora Stormbour'ne"), commit 492267aec.
+- Gateway trouble seen tonight (not from this work): 6:26 PM a 326 s idle GC ("mem_trim") froze the gateway, Discord
+  dropped; 6:49 PM its liveness watchdog exited (code 75) and it stayed down until `schtasks /run` at 6:54 PM.
+- Old listener pid 13320 (first version) is still alive in session 0 (couldn't kill it from the desktop). It's idle
+  while the kill switch is off. Kill it before turning chat on: `taskkill /PID 13320 /F` (or reboot).
 
 ## Done
