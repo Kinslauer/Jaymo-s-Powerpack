@@ -1449,8 +1449,8 @@ a few sailors about the home harbours have made it once, in the wake of a blosso
 again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
 harbour will sail any course you name and has only stories about the east.
 
-(new) **The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; who sells it is
-Claude's placement for him to approve). The home continent still draws no chart of the east. The blossom captains have
+**The captain's chart** (katana thread, 2026-11-14; Andy: "someone should sell a map to mohknee"; approved by Andy
+2026-11-14). The home continent still draws no chart of the east. The blossom captains have
 their own, drawn by their own hands, and one lying off a home harbour will sell a copy for coin: his landfall on
 Mohknee's western shore and nothing of the sea between, which is enough for a helmsman to keep a heading by.
 
@@ -1480,8 +1480,8 @@ black sand, burnt to a rough bloom, and folded on the anvil until the slag is go
 continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
 each step to someone who has done the one before.
 
-(new) **The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
-a reason to go to mohknee"; the reason given here is Claude's for him to approve). Folded steel does everything smeltery
+**The long blade** (katana thread, 2026-11-14; Andy: "the katana should only be craftable with iron sand, giving it
+a reason to go to mohknee"; approved by Andy 2026-11-14). Folded steel does everything smeltery
 steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
 under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
 
