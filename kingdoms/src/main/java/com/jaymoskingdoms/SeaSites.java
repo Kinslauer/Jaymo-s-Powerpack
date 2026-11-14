@@ -3,6 +3,7 @@ package com.jaymoskingdoms;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -28,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>the <b>travel ship</b>: a skipper and passengers;</li>
  * <li>the <b>wanderer raft</b>: one drifter, for hire like any other ({@link Drifters#adrift}), who never moves along.</li>
  * </ul>
+ * The long ships, the hauling ship and the small ship also get a ship's helm ({@link #helm}), which makes each a ship a
+ * player can take, sail, and draw plans of.
  */
 final class SeaSites {
 	static final String MOD = "mos", PREFIX = "mos/";
@@ -39,6 +42,8 @@ final class SeaSites {
 	static final int ROAM = 5;
 	/** The most deck spots looked for, and how far apart they are kept (blocks). */
 	static final int SPOTS = 10, APART = 2;
+	/** A helm goes within this share of her length from one end. */
+	static final float HELM_END = 0.3F;
 	/** What a hauling ship's skipper might deal in. */
 	private static final List<ResourceKey<VillagerProfession>> GOODS = List.of(VillagerProfession.FARMER, VillagerProfession.MASON,
 		VillagerProfession.SHEPHERD, VillagerProfession.LEATHERWORKER, VillagerProfession.TOOLSMITH, VillagerProfession.CARTOGRAPHER);
@@ -116,6 +121,45 @@ final class SeaSites {
 			}
 		}
 		return picked;
+	}
+
+	/** Whether the boat at {@code path} is one a helm goes on: a long ship, the hauling ship or the small ship. */
+	static boolean sails(String path) {
+		return path.equals(LONG_SHIP) || path.equals(HAULER_SHIP) || path.equals(SMALL_SHIP);
+	}
+
+	/**
+	 * Sets a ship's helm ({@link com.jaymoskingdoms.sailing.Sailing#HELM}) on the deck of the boat in {@code box}, so she is
+	 * a ship of blocks like any a player builds: cast off from the helm, or draw her with Ship's Plans and build more of
+	 * her from the kit. Nothing of hers is copied anywhere; she is Moog's own boat where the mod floated her. The helm
+	 * goes on her middle line within {@link #HELM_END} of one end of her length (the end with deck to stand it on),
+	 * facing the other, which is her bow from then on. False if she has no such deck.
+	 */
+	static boolean helm(ServerLevel level, BoundingBox box) {
+		boolean alongX = box.getXSpan() >= box.getZSpan();
+		int length = alongX ? box.getXSpan() : box.getZSpan();
+		int lo = alongX ? box.minX() : box.minZ(), hi = alongX ? box.maxX() : box.maxZ();
+		int mid = alongX ? (box.minZ() + box.maxZ()) / 2 : (box.minX() + box.maxX()) / 2;
+		int sea = level.getSeaLevel(), reach = Math.max(2, (int) (length * HELM_END));
+		for (boolean fromLo : new boolean[] {true, false}) {
+			for (int step = 1; step <= reach; step++) {
+				int along = fromLo ? lo + step : hi - step;
+				for (int off : new int[] {0, 1, -1}) {
+					for (int y = sea + 1; y <= Math.min(box.maxY(), sea + 8); y++) {
+						BlockPos at = alongX ? new BlockPos(along, y, mid + off) : new BlockPos(mid + off, y, along);
+						BlockPos under = at.below();
+						if (clear(level, at) && clear(level, at.above()) && level.getBlockState(under).isFaceSturdy(level, under, Direction.UP)
+							&& level.getFluidState(under).isEmpty()) {
+							Direction bow = alongX ? (fromLo ? Direction.EAST : Direction.WEST) : (fromLo ? Direction.SOUTH : Direction.NORTH);
+							level.setBlockAndUpdate(at, com.jaymoskingdoms.sailing.Sailing.HELM.defaultBlockState()
+								.setValue(com.jaymoskingdoms.sailing.HelmBlock.FACING, bow));
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private static boolean clear(ServerLevel level, BlockPos at) {

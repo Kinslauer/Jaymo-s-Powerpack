@@ -501,6 +501,9 @@ final class IllagerSites {
 				put(server, ref, new Site(path, center, box, "abandoned", -1, -1, 0, List.of(), "", now, Production.day(server)));
 				return;
 			}
+			if (SeaSites.sails(path)) {
+				SeaSites.helm(level, box);
+			}
 		}
 		// who moves in
 		Faction realm = null;

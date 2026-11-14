@@ -78,3 +78,9 @@ ends the body for good. Compiled, not played.
   it costs 12 mana if you are attuned, else 2 of the Reaper's Toll, and won't take with neither. A laid rune shows its
   sigil, goes off under monsters only (3 charges), and its layer takes it back by sneak-using an empty hand on it. At
   most 8 laid per player.
+- **Moog's boats are ships.** Each long ship, hauling ship and small ship Moog's mod floats gets a ship's helm on her
+  deck when her people move in (near one end of her middle line, facing the other, which is her bow). She is then a ship
+  of blocks like one you built: cast off from the helm and sail her, or sneak-use Ship's Plans on the helm to draw her
+  and build more of her from the plans. The long ships' barbarians have to be dealt with first. Nothing of Moog's is
+  copied into our files. NPC crews don't sail these hulls yet. Boats found before this update keep no helm. Compiled,
+  not played: whether each of Moog's hulls floats and steers well as built is untested.

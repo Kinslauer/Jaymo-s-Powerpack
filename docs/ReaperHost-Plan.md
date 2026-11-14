@@ -16,7 +16,7 @@ One PR per patch, in this order. Each fits `Lore.md` first and adds its placemen
 | 6 | Wanted: the mark, posters, the raider's horn, rusty keys and caches, lost labs and the crude totem | ip_wanted, ip_poster, ip_horn, ip_keys, ip_labs | `IllagerSites`, `IllagerTalk`, `HordeLure`, Alchemy |
 | 7 | Draugr ranks: archer, wight, scourge, the one that dodges, reading the fight; the skull that runs | dr_archer, dr_wight, dr_scourge, dr_dodge, dr_smart, dr_head | `Draugr`, Stormborn Tomb, chapels and barrows |
 | 8 | The lord of the Stormborn Tomb (Andy: "use blockbench and fable, go all out for this"): own model, intro film, the seal in pieces, the hall's waves, rune traps | dr_overlord, dr_claw, dr_waves, dr_traps | Stormborn Tomb, `UltimateFilm`, Alchemy |
-| 9 | Moog's boats as hulls you can build and sail | mos_sail | `ShipKits`, `Fleet`; keep Moog's LGPL notice in `licenses/` |
+| 9 | Moog's boats made ships: a helm set on each long ship, hauling ship and small ship where the mod floats her, so she can be taken, sailed and drawn with Ship's Plans into a kit. Nothing of Moog's is copied into our jar, so no notice is needed. NPC crews do not sail them yet (that needs their hulls as `Fleet` designs) | mos_sail | `SeaSites.helm`, `IllagerSites` |
 
 ## Rules that shape these
 - Draugr never leave the Stormborn Tomb. Everything in 7 and 8 stays inside it; the running skull is a skeleton of the
