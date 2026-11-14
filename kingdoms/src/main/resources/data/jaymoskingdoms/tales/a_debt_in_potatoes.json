@@ -1,0 +1,260 @@
+{
+  "title": "A Debt In Potatoes",
+  "start": {
+    "by": "book", "weight": 1,
+    "book": {
+      "title": "Dunnock's Tally",
+      "author": "Hob Dunnock",
+      "pages": [
+        "Hob Dunnock, carter. Potatoes and wheat, town to town, by handcart. If the watch is reading this: it is potatoes and wheat.\n\nSeed month. 9 sacks potato, 2 wheat. Under: 3 bricks. Serjeant at the gate, 2. Home dry.\n\nHay month. 11 potato. Under: 4 bricks, 1 pouch of the leaf. Serjeant at the gate, 2. Wheel split at the ford, lost a day.\n\nHarvest. 8 potato, 4 wheat. Under: 4. The serjeant wants 3 now. Paid 3.",
+        "Cart taken at the ford, load and all. Six bricks gone that were not mine. The Room says I owe for them: 24. I said the ford was never watched before. The Room says that is my trouble.\n\nThe Room's man came to the lodging. He did not touch the boy. He looked at him a good while. Then he said: the dark of the moon, carter.",
+        "Borrowed a cart. Last run. 10 potato, 4 bricks under. This clears the 24 and I am done with it. I swear it on the boy.\n\nIf I am late: the load goes in the chest at the old lime kiln. Bricks only, lid shut, and walk away. The Room's runner lifts it by night. Do not wait to see him. He does not like to be seen.",
+        "Somebody is on the road behind me. Two days now. Not the watch. The watch does not trouble to hide.\n\nIf you are reading this and you are not me, then I am dead or taken, and the cart is in the alders by the ford with the load still under the sacks. Put it in the kiln and my boy is left alone. Or take it to the watch and be thanked. I would not blame you.\n\nBut he is nine, and he lodges with my sister behind the tannery, and the Room knows the door."
+      ],
+      "found": ["ruin", "mob:minecraft:pillager", "mob:minecraft:vindicator"],
+      "chance": 0.05
+    }
+  },
+  "cast": {
+    "sister": { "name": ["Annis Dunnock", "Kate Dunnock", "Marjory Dunnock"], "body": "villager", "job": "leatherworker", "female": true, "at": "lodging" },
+    "captain": { "name": ["Edmund Sark", "Rafe Holloway", "Giles Warrender"], "body": "fighter", "female": false, "at": "gatehouse", "health": 70, "damage": 7, "armor": 12, "hand": "minecraft:iron_sword", "head": "minecraft:iron_helmet", "chest": "minecraft:iron_chestplate" },
+    "fence": { "name": ["Sal Vetch", "Nell Quillon", "Agnes Orrin"], "body": "villager", "job": "none", "female": true, "at": "den" },
+    "sergeant": { "name": ["Brock Harl", "Wat Gannon", "Denny Shaw"], "body": "fighter", "female": false, "at": "toll", "health": 65, "damage": 7, "armor": 9, "hand": "minecraft:iron_sword", "head": "minecraft:chainmail_helmet", "chest": "minecraft:chainmail_chestplate", "men": 2, "men_body": "minecraft:pillager" }
+  },
+  "places": {
+    "seat": { "at": "town", "name": "the town" },
+    "cart": { "at": "road", "from": "seat", "dist": [140, 280], "name": "the alders by the ford" },
+    "lodging": { "at": "near", "from": "seat", "dist": [30, 70], "name": "the lodging behind the tannery" },
+    "gatehouse": { "at": "near", "from": "seat", "dist": [30, 70], "name": "the gatehouse" },
+    "kiln": { "at": "wild", "from": "seat", "dist": [100, 200], "name": "the old lime kiln" },
+    "den": { "at": "near", "from": "seat", "dist": [20, 60], "name": "the hatch behind the chandlers' row" },
+    "toll": { "at": "road", "from": "seat", "dist": [220, 400], "name": "the toll stone on the camp road" }
+  },
+  "first": "to_cart",
+  "steps": {
+    "to_cart": {
+      "do": "go", "to": "cart", "goal": "Find the cart in the alders by the ford",
+      "journal": "I read a dead carter's tally. Hob Dunnock pushed potatoes with something else under the sacks, owed a den called the Room, and feared for his boy. His last load is hidden by a ford.",
+      "then": "search_cart"
+    },
+    "search_cart": {
+      "do": "search", "at": "cart", "goal": "Search Dunnock's cart",
+      "clues": [
+        { "name": "The load, under the sacks", "item": "minecraft:potato", "lore": ["Ten sacks of potatoes, sprouting. Under them, four bricks sewn in oilcloth.", "They smell of nothing at all, which is the point of the oilcloth."], "journal": "The cart is where the tally said. The load is still under the potatoes: four wrapped bricks." },
+        { "name": "A black-fletched bolt", "item": "minecraft:arrow", "lore": ["Sunk in the tailboard to the feathers. A raider's make.", "Two more stand in the alder behind. Nobody was shooting at potatoes."], "journal": "There are raiders' bolts in the tailboard. Dunnock was shot at here, and the load was never touched." },
+        { "name": "A gate tally", "item": "minecraft:paper", "lore": ["Folded small in the axle box. A date on each line, and beside it: serjeant, 2. Later, serjeant, 3.", "The last line: 'He asked which night I cross the ford. Told him. Why would a gate man ask that?'"], "journal": "Dunnock paid the serjeant at the town gate on every run. Before the last one the serjeant asked which night he would cross the ford, and Dunnock told him." },
+        { "name": "A wooden horse, half carved", "item": "minecraft:stick", "lore": ["Whittled from alder. Three legs are done.", "Knife work by firelight, for somebody small."], "journal": "There was a toy horse in the cart, three legs carved. For the boy." }
+      ],
+      "then": "to_lodging"
+    },
+    "to_lodging": {
+      "do": "go", "to": "lodging", "goal": "Find the carter's sister behind the tannery",
+      "give": [{ "item": "minecraft:brick", "count": 4, "name": "A wrapped brick", "lore": ["Sewn in oilcloth, and heavy for its size.", "Dunnock's last load."] }],
+      "then": "sister"
+    },
+    "sister": {
+      "do": "talk", "who": "sister", "goal": "Speak with {sister}",
+      "say": [
+        "That is Hob's book. I know the cover: he bound it in a flour sack. So he is dead. No, do not soften it. Nobody brings a carter's tally home but the carter.",
+        "He was not a bad man. He pushed potatoes for nine years and it kept us in turnips, and then somebody showed him what else fits under a sack. The boy is out the back. Wilf. He thinks his father is late. What do you want here? You have the look of a body who has not decided."
+      ],
+      "replies": [
+        { "say": "His book says the load clears the debt. Does it?", "then": "sister_more" },
+        { "say": "Who are the Room?", "then": "sister_more" }
+      ]
+    },
+    "sister_more": {
+      "do": "talk", "who": "sister",
+      "say": [
+        "The Tallow Room. Down a hatch in the grass behind the chandlers' row, and you tell them nobody sent you. {fence} keeps it. Dice, a fight pit, and the two goods that come in under potatoes. Hob owed her {coins:24} for a load the raiders took. She sent a man to look at Wilf. Only to look.",
+        "So there are three roads, as I see it. Put the bricks in the kiln as he wrote, and she says we are quit, and perhaps it is even so. Or carry them to Captain {captain} at the gatehouse and be thanked, and then see what the Room does to the door of a carter whose load went to the watch. Or you have {coins:24} about you, which I doubt.",
+        "I'll not tell you which. I told Hob which for nine years, and here we are."
+      ],
+      "replies": [
+        { "say": "I'll finish his run. The kiln.", "then": "drop", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I said I would finish his run and make the drop." },
+        { "say": "This goes to the watch.", "then": "see_captain", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I am taking the load to the watch." },
+        { "say": "Here is {coins:24}. Pay her, and be free of it.", "needs_coins": 24, "then": "wait_paid", "mark": "potato_paid_debt", "journal": "{sister}, the carter's sister, keeps his boy Wilf. Dunnock owed {coins:24} to {fence} of the Tallow Room. I paid it out of my own purse." },
+        { "say": "This is none of mine. Here is his book.", "then": "end:left" }
+      ]
+    },
+    "see_captain": {
+      "do": "talk", "who": "captain", "goal": "Take the load to {captain} at {place:gatehouse}",
+      "say": [
+        "Four bricks of Shash and a dead carter's daybook. Put them on the table. No, I am not going to chain you. If I chained everybody who found something on the road, I would have no road.",
+        "I know the Tallow Room is there. Every watch knows where its dens are. I have never had a reason the ruler would sign, and I have never known which night the goods go down the ladder. Now I have a book that names a drop."
+      ],
+      "replies": [
+        { "say": "There is a gate serjeant in that book too.", "then": "captain_more" },
+        { "say": "What do you want of me?", "then": "captain_more" }
+      ]
+    },
+    "captain_more": {
+      "do": "talk", "who": "captain",
+      "say": [
+        "I can read. 'Serjeant, two.' That is {sergeant}, eleven years on my gate. I'll not take him tonight. A man who takes two a cart is one thing. A man who asks a carter which night he crosses the ford is another, and I want to see who he runs to.",
+        "Here is what you will do. Take the bricks back. Make the drop at the kiln exactly as the carter wrote, lid shut, and walk away. My men will lie up in the furze and follow the runner to the hatch, and we go down the ladder the same night, in force. You will have the watch's thanks and {coins:12}. The sister will have my word that her door is watched."
+      ],
+      "replies": [
+        { "say": "Your word. I'll hold you to it.", "then": "drop", "mark": "potato_told_watch", "journal": "{captain} of the watch wants the drop made as written, so his men can follow the runner down the hatch and raid the Room. He knows his own serjeant, {sergeant}, is in the book, and is letting him run a while." },
+        { "say": "And the boy? The Room knows his door.", "then": "drop", "mark": "potato_told_watch", "journal": "{captain} of the watch wants the drop made as written, so his men can follow the runner down the hatch and raid the Room. I asked about the boy. He said the door would be watched, and said it twice." }
+      ]
+    },
+    "drop": {
+      "do": "stash", "at": "kiln", "item": "minecraft:brick", "count": 4, "goal": "Leave the four bricks in the chest at {place:kiln}",
+      "journal": "I left the four bricks in the kiln chest, shut the lid and walked away, as Dunnock wrote.",
+      "then": { "?mark:potato_told_watch": "wait_raid", "?": "wait_room" }
+    },
+    "wait_room": {
+      "do": "wait", "days": [2, 4], "wake": "letter",
+      "letter": { "from": "{fence}", "lines": [
+        "The carter's debt is quit. I keep my books straight, whatever is said of me. The boy will not be looked at again.",
+        "But a stranger who finishes a dead man's run, and does not open the bricks, and does not go to the gate: that is a rarer thing than four bricks. I would like a look at you.",
+        "The hatch is in the grass behind the chandlers' row. Tell them nobody sent you."
+      ] },
+      "then": "to_den"
+    },
+    "to_den": { "do": "go", "to": "den", "goal": "Go down {place:den}", "then": "see_fence" },
+    "see_fence": {
+      "do": "talk", "who": "fence", "goal": "Speak with {fence}",
+      "say": [
+        "So you are the one. Sit where I can see your hands. I am told you found Hob in the alders. I was fond of Hob. He was the worst smuggler I ever had, and he never once shorted me.",
+        "He did not die of bad luck. That ford was never watched in nine years. Then twice in a season, both times on the dark night, both times a cart of mine. Somebody is selling my carters to the camp. I have lost three. Hob wrote something of it, I think, or you would not be looking at me like that."
+      ],
+      "replies": [
+        { "say": "The gate serjeant asked him which night he would cross.", "then": "fence_more" },
+        { "say": "What is the name worth to you?", "then": "fence_more" }
+      ]
+    },
+    "fence_more": {
+      "do": "talk", "who": "fence",
+      "say": [
+        "{sergeant}. Eleven years I have paid that man to look at the sky when my carts go by. And all the while he takes a third from the camp for telling them which carts carry more than potatoes. Paid at both ends. I could almost admire it.",
+        "He meets the camp's runners at the toll stone, {way:toll}, on the nights after a taking. Go and make it stop. I do not tell you how. There is {coins:20} when it has stopped. And if you wonder why I do not send my own: a dead serjeant with my knife in him is a raid. A dead serjeant with a stranger's is a mystery."
+      ],
+      "replies": [
+        { "say": "I'll go to the toll stone.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate serjeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. She will pay {coins:20} to have it stopped." },
+        { "say": "For Hob. Not for you.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate serjeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. I am going after him, and not on her account." }
+      ]
+    },
+    "wait_raid": {
+      "do": "wait", "days": [2, 3], "wake": "letter",
+      "letter": { "from": "{captain}", "lines": [
+        "We went down the ladder last night. {fence} and six of hers are before the ruler this morning, and the hatch is nailed shut under iron. It will hold a few days. That trade always creeps back, but a few days is what I am paid for.",
+        "Two things went wrong. {sergeant} was not at muster. Somebody warned him, or he can count. And the carter's sister had her door kicked in before my man reached it. She and the boy are unhurt. She is asking for you, and not kindly.",
+        "He will have run to his friends on the camp road. There is a toll stone, {way:toll}. I cannot send the watch against its own serjeant on a carter's scribble. You are not the watch."
+      ] },
+      "then": "sister_raid"
+    },
+    "sister_raid": {
+      "do": "talk", "who": "sister", "goal": "Go to {sister} at {place:lodging}",
+      "say": [
+        "Look at my door. Go on, look at it. That was the Room's last free man, an hour before the watch went down the hatch, come to ask who told. He did not find Wilf. Wilf was under the lid of the bark pit, where I put him when I heard you had been to the gatehouse.",
+        "I asked you for nothing. Hob asked you for one thing, in writing. The watch will mind my door for a week, and then it will not. So. Is it finished? Is the one who sold my brother at least to answer for it?"
+      ],
+      "replies": [
+        { "say": "The serjeant sold him. I am going after him now.", "then": "to_toll" },
+        { "say": "I did what I thought right.", "then": "to_toll" }
+      ],
+      "journal": "The watch raided the Tallow Room. Before it did, one of the Room's men kicked in {sister}'s door looking for who told. She had hidden the boy. The serjeant has run for the camp road."
+    },
+    "to_toll": { "do": "go", "to": "toll", "goal": "Find {sergeant} at {place:toll}", "then": "see_sergeant" },
+    "see_sergeant": {
+      "do": "talk", "who": "sergeant", "goal": "Face {sergeant}",
+      "say": [
+        "Stop there. You are the one with Dunnock's book. I knew that book would be the end of me. I told him not to write things down. He said a carter who cannot show his tally is a thief.",
+        "Before you draw, do a sum. There are forty in that camp. Six winters back they came down on the east farms twice a year. Then I went up and made an arrangement. I tell them which carts carry more than potatoes. They take those and leave the farms be. Smugglers. Men nobody counts. Six years, and not one farmer buried. Now tell me which of us has kept this town."
+      ],
+      "replies": [
+        { "say": "You took a third for it.", "then": "sergeant_more" },
+        { "say": "Dunnock had a boy of nine.", "then": "sergeant_more" }
+      ]
+    },
+    "sergeant_more": {
+      "do": "talk", "who": "sergeant",
+      "say": [
+        "A third, yes. The watch has not had its full pay since the old ruler died. And yes, I knew about the boy. I knew about all their boys. I am not telling you that I sleep.",
+        "Here is my offer, and it is the only one I have. Walk away. The arrangement stands, the farms stay quiet, and there is {coins:15} in it for you to have seen nothing. Or kill me, and find out by the next dark night what the camp does when nobody tells it where the easy meat is."
+      ],
+      "journal": "{sergeant} does not deny it. He says he feeds the raider camp smugglers so that it leaves the farms alone, and that no farmer has been buried in six years.",
+      "replies": [
+        { "say": "No more carters. Draw.", "then": "fight_sergeant" },
+        { "say": "Leave the gate tonight. Tell the camp nothing more.", "then": "wait_spared", "journal": "I let {sergeant} go without a blow, on his word that he leaves the gate and tells the camp nothing more." },
+        { "say": "{coins:15}, and I saw nothing.", "then": "end:cut_in", "journal": "I took {coins:15} from {sergeant} to have seen nothing." }
+      ]
+    },
+    "fight_sergeant": {
+      "do": "foe", "who": "sergeant", "goal": "Deal with {sergeant}",
+      "taunt": "Then the farms are on your head. To me!",
+      "plea": "Enough. Enough! I yield. Think what you are doing. Think who they come for next.",
+      "mercy": "Leave the gate. Tell them nothing more.",
+      "thanks": "I'll leave it. It will not stop, you know. But I'll leave it.",
+      "slain": "wait_slain", "spared": "wait_spared"
+    },
+    "wait_slain": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{sister}", "lines": [
+        "They found {sergeant} at the toll stone with two dead raiders beside him. The captain has called it a brave death in the town's defence. He is to have a stone. Hob has the alders.",
+        "Three nights after, the camp came down on the east farms. The first time in six years. A barn, four cows, and old Peg's son with a bolt through his leg. They are saying at the well that the camp used to get its living some quieter way, and now it does not.",
+        "I do not know what I wanted. Not this. But I'll not pretend I wanted him alive, either. Wilf asks when his father is coming. I have told him. He asked again the next day."
+      ] },
+      "then": { "?mark:potato_told_watch": "end:clean_gate", "?": "end:rooms_knife" }
+    },
+    "wait_spared": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{sergeant}", "lines": [
+        "You let me walk. I have thought on why, and I think you did the sum, the same as I did, and could not make it come out either.",
+        "A wheat carter did not come home on the dark night. A real one, with real wheat. I had told the camp nothing. I have told them nothing since the toll stone. It seems they have learned the ford without me. They do not read tallies. They cannot tell a smuggler's cart from any other.",
+        "I have put in to leave the gate. I thought you should know that it does not stop because one of us stops."
+      ] },
+      "then": "end:let_walk"
+    },
+    "wait_paid": {
+      "do": "wait", "days": [3, 5], "wake": "letter",
+      "letter": { "from": "{fence}", "lines": [
+        "Twenty-four, counted, from the sister's hand. The carter's debt is quit and the boy will not be looked at again. I keep my books straight.",
+        "I am told it was a stranger's money. A stranger who pays a dead smuggler's debt in clean coin is a saint or the watch, and I have never met a saint. I had the boy asked which you are. He said you had kind boots. I do not know what to do with that.",
+        "Four bricks of mine are still on the road somewhere. I expect they will find their way to the kiln. In your place, I would see that they did."
+      ] },
+      "then": "end:paid"
+    }
+  },
+  "endings": {
+    "left": { "text": "I gave the carter's book to his sister and left his debt where it lay.", "failed": true },
+    "paid": {
+      "text": "I paid Dunnock's debt out of my own purse. The Room has its money and still wants its bricks. The boy is left alone, for now.",
+      "reward": { "hearts": 8, "reputation": 4 },
+      "marks": ["potato_paid_debt"],
+      "town": ["Somebody paid off Hob Dunnock's debt after he was dead. Who does that? Nobody honest.", "The carter's boy has new shoes. Don't ask me where a tanner's lodger finds shoes."]
+    },
+    "rooms_knife": {
+      "text": "{sergeant} is dead at the toll stone, and the Tallow Room has stopped losing carters. The camp is no longer fed. It has gone back to the farms.",
+      "reward": { "coins": 20, "reputation": 4 },
+      "marks": ["nobody_sent_you", "slew_gate_sergeant"],
+      "town": ["The serjeant's to have a stone. Died defending us, the captain says. From what, on the camp road, at night?", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
+      "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a little over what was agreed, because you never asked what was in the bricks. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:emerald*3", "minecraft:baked_potato*8"] }
+    },
+    "clean_gate": {
+      "text": "The Tallow Room is nailed shut and {sergeant} is dead at the toll stone. The gate is clean. The camp is no longer fed and has gone back to the farms, and the carter's sister bars her door.",
+      "reward": { "coins": 12, "hearts": 4, "reputation": 14 },
+      "marks": ["potato_told_watch", "slew_gate_sergeant"],
+      "town": ["They nailed the hatch behind the chandlers' row. Give it a week. That trade's like damp.", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
+      "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door on the eighth day, as I said it would. On the ninth there was a potato on the step, cut in half. I know what that means and so do you. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] }
+    },
+    "let_walk": {
+      "text": {
+        "?mark:potato_told_watch": "The Tallow Room is nailed shut, and I let {sergeant} walk from the toll stone. He has left the gate. The camp has learned the ford without him.",
+        "?": "The carter's debt is quit, and I let {sergeant} walk from the toll stone. He has left the gate. The camp has learned the ford without him."
+      },
+      "reward": { "coins": 8, "hearts": 6, "reputation": 6 },
+      "marks": ["spared_gate_sergeant"],
+      "town": ["{sergeant}'s gone from the gate. Eleven years, and off without a word or a pension.", "A wheat carter lost on the ford road. Honest wheat. That road's cursed, I tell you."],
+      "returns": { "who": "sergeant", "days": [7, 12], "as": "recruit", "say": "I have no gate and no arrangement, and I find I cannot sit in an alehouse while carts go out to that ford. You did the sum and still would not have it. I should like to learn how that is done. I can hold a line, and I know every raider path within a day's walk." }
+    },
+    "cut_in": {
+      "text": "I took {sergeant}'s money. The arrangement stands. The farms are quiet, and the carters go on dying at the ford.",
+      "reward": { "coins": 15 },
+      "marks": ["takes_gate_coin"],
+      "town": ["A quiet season at the east farms. Somebody up there must like us.", "Another potato man gone on the ford road. Well. They know the risks, that sort."]
+    }
+  }
+}

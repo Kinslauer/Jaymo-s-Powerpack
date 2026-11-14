@@ -55,6 +55,20 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * {@code captive:<uuid>}, other: the child, otherName: their name, pos: where they're held, place: the raiders' realm.
 	 */
 	public static final int RESCUE = 17;
+	/**
+	 * A tale's open step ({@link Tales}): its template is {@code tale:<tale id>}, its target what kind of step it is
+	 * ({@code talk}, {@code go}, {@code search}, {@code foe}), and {@link Tales} decides when it's done. Never turned in.
+	 */
+	public static final int TALE = 18;
+	/**
+	 * Work from the town board, and the same work as a tale's step ({@link QuestJobs}): a pack to kill at pos (target: its
+	 * kind, count: how many); an elite at pos (other: it, otherName: its name); hold the town at pos through count waves
+	 * after dark (other: the one who must live); walk someone overland to pos (other: them, otherName: their name); an
+	 * incursion to clear at pos (target: its kind, count: how many); count dark spots to light in the town at pos; count
+	 * blocks (target: a block id or #tag) to place at pos; a cave-in at pos to blast open; count of an item (target) to
+	 * leave in the chest at pos.
+	 */
+	public static final int PACK = 19, ELITE = 20, DEFEND = 21, TREK = 22, INCURSION = 23, LAMPS = 24, BUILD = 25, BLAST = 26, STASH = 27;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

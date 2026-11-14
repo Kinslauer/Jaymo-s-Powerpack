@@ -1,0 +1,216 @@
+{
+  "title": "The Empty Fold",
+  "start": { "by": "giver", "jobs": ["shepherd", "farmer", "butcher", "leatherworker"], "weight": 2 },
+  "roll": { "culprit": ["neighbour", "denfolk", "wolves"] },
+  "cast": {
+    "neighbour": { "name": ["Odo Marrec", "Hale Brandt", "Tam Corwick"], "body": "villager", "job": "farmer", "at": "steading" },
+    "herdboy": { "name": ["Pip", "Wren", "Jory"], "body": "villager", "job": "none", "at": "fold" },
+    "collector": { "name": ["Garrow Vane", "Silas Dunmore"], "body": "fighter", "at": "crossing", "health": 60, "damage": 6, "armor": 8, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate", "men": 2 },
+    "denmother": { "name": ["Ashka", "Merrow", "Senna"], "body": "villager", "job": "none", "female": true, "at": "den" },
+    "packleader": { "name": "the grey one", "body": "minecraft:wolf", "at": "den", "health": 50, "damage": 7, "men": 4 }
+  },
+  "places": {
+    "fold": { "at": "near", "from": "home", "dist": [40, 70], "name": "the fold" },
+    "steading": { "at": "near", "from": "home", "dist": [50, 90], "name": "the neighbouring steading" },
+    "den": { "at": "wild", "from": "home", "dist": [180, 320], "name": "the hollow in the hills" },
+    "crossing": { "at": "road", "from": "home", "dist": [120, 220], "name": "the crossing" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "Three nights running I've counted them in at dusk and counted short at dawn. Seven gone now. No blood on the grass, no wool on the wire. The dog doesn't even bark.",
+        "Folk here say wolves. Wolves leave a mess. I'd pay to know what doesn't."
+      ],
+      "replies": [
+        { "say": "Show me where they're kept.", "then": "to_fold", "journal": "{giver} is losing sheep by night, seven so far, and nothing left behind. I said I'd look." },
+        { "say": "Who gains if your flock shrinks?", "then": "ask_gain" },
+        { "say": "Sheep wander. I've other work.", "then": "end:refused" }
+      ]
+    },
+    "ask_gain": {
+      "do": "talk", "who": "giver",
+      "say": "Gains? {neighbour} has wanted my lower pasture since before my father died. But wanting grass and taking mutton aren't the same thing, and I'll not say it of a neighbour without cause. Look first.",
+      "replies": [
+        { "say": "Then I'll look.", "then": "to_fold", "journal": "{giver} is losing sheep by night. There's a neighbour, {neighbour}, who wants the pasture. I said I'd look before anyone is named." },
+        { "say": "Not my quarrel.", "then": "end:refused" }
+      ]
+    },
+    "to_fold": { "do": "go", "to": "fold", "goal": "Go to the fold", "then": "search_fold" },
+    "search_fold": {
+      "do": "search", "at": "fold", "need": 2, "goal": "Look over the fold",
+      "clues": [
+        { "name": "A slipped gate latch", "item": "minecraft:tripwire_hook", "lore": ["The latch was lifted, not forced.", "A beast doesn't lift a latch."], "journal": "The fold's gate was unlatched by a hand.", "if": "!culprit=wolves" },
+        { "name": "A torn fleece", "item": "minecraft:white_wool", "lore": ["Ripped, and dragged under the rail.", "There are long grey hairs caught in it."], "journal": "Something dragged a sheep under the rail. Grey hairs in the fleece.", "if": "culprit=wolves" },
+        { "name": "A twist of barley straw", "item": "minecraft:wheat", "lore": ["Barley, dropped in a trail toward the gate.", "{giver} grows no barley. Someone led them out with it."], "journal": "Barley straw laid toward the gate. The sheep were coaxed, not chased.", "if": "culprit=neighbour" },
+        { "name": "A small bare footprint, cast in mud", "item": "minecraft:clay_ball", "lore": ["A child's foot, or near enough.", "The toes end in points."], "journal": "A bare print by the trough, small, with claws at the toes.", "if": "culprit=denfolk" },
+        { "name": "A chewed length of rope", "item": "minecraft:lead", "lore": ["The dog's tether. Gnawed through from the dog's end.", "It got loose every night and was back by morning."], "journal": "The dog has been chewing itself free at night and coming back." },
+        { "name": "A tally stick", "item": "minecraft:stick", "lore": ["Notched in sevens. The newest notches are clumsy.", "Someone else has been keeping the count."], "journal": "The herd boy has been keeping his own count of the losses." }
+      ],
+      "then": "boy"
+    },
+    "boy": {
+      "do": "talk", "who": "herdboy", "goal": "Ask the herd boy what he's seen",
+      "say": {
+        "?culprit=wolves": "I heard them. Not howling. Wolves don't howl when they're working, my gran says. Just the dog whining and then quiet. In the morning there's a place in the grass going up toward the hills, all pressed flat.",
+        "?culprit=denfolk": "Don't tell {giver}. I saw one. Little, in a hood, with a tail. It didn't take a sheep, it carried a lamb, like you'd carry a baby. It looked right at me and put a finger up. Like this. Shh.",
+        "?": "I fall asleep. I'm not meant to. But the dog knows whoever it is, because it wags. It only wags for people who feed it."
+      },
+      "replies": [
+        { "say": "Which way did they go?", "then": "boy_way" },
+        { "say": "You did well to keep count.", "then": "boy_way", "mark": "kind_to_herdboy" }
+      ]
+    },
+    "boy_way": {
+      "do": "talk", "who": "herdboy",
+      "say": {
+        "?culprit=neighbour": "Down. Toward {neighbour}'s. But lots of things are down that way.",
+        "?": "Up. Past the stones, into the hills. There's a hollow up there nobody grazes."
+      },
+      "journal": {
+        "?culprit=neighbour": "The boy says the dog knows the thief, and the trail goes down toward {neighbour}'s steading.",
+        "?culprit=denfolk": "The boy saw a small hooded thing with a tail carry off a lamb, gently. It went up into the hills.",
+        "?": "The boy heard the dog go quiet, and found the grass pressed flat toward the hills."
+      },
+      "then": { "?culprit=neighbour": "to_steading", "?": "to_den" }
+    },
+
+    "to_steading": { "do": "go", "to": "steading", "goal": "Go to {neighbour}'s steading", "then": "confront" },
+    "confront": {
+      "do": "talk", "who": "neighbour", "goal": "Speak with {neighbour}",
+      "say": [
+        "You've been at the fold. I saw you from the top field. So ask it.",
+        "Yes. Seven. They're in my byre, fed and not harmed. I owe a man called {collector} {coins:11} from a bad winter, and he doesn't take 'next season'. He takes fingers. He's due at the crossing in three days and seven sheep is what the debt comes to."
+      ],
+      "replies": [
+        { "say": "Give them back tonight and I'll deal with your collector.", "then": "wait_collector", "journal": "{neighbour} took the sheep to pay a debt to a man named {collector}. I said I'd meet the collector myself if the flock went home." },
+        { "say": "That's for {giver} to hear, not me.", "then": "report_theft", "journal": "{neighbour} took the sheep to pay a debt. I'm taking it to {giver}." },
+        { "say": "Here. {coins:11}. Pay him and take the sheep home.", "needs_coins": 11, "then": "wait_paid", "mark": "paid_marrec_debt", "journal": "{neighbour} took the sheep to pay a debt. I paid it. The sheep go home tonight and nobody need know." }
+      ]
+    },
+    "report_theft": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} who took the sheep",
+      "say": "{neighbour}. I sat at that man's table at midwinter. Well. The sheep come home, and the elders will hear of it, and he can find out what a neighbour's worth when he has none.",
+      "then": "end:exposed"
+    },
+    "wait_paid": { "do": "wait", "days": [3, 5], "wake": "letter", "letter": { "from": "{neighbour}", "lines": ["The sheep went back over the wall the same night, and {giver} thinks the hills gave them up.", "The man came to the crossing. I paid him with your silver and he counted it twice and left.", "I have nothing to give you that's worth it. Come by at shearing and take the best fleece. I mean it."] }, "then": "end:paid" },
+    "wait_collector": { "do": "wait", "days": [3, 3], "wake": "none", "then": "to_crossing" },
+    "to_crossing": { "do": "go", "to": "crossing", "goal": "Meet the collector at the crossing", "then": "parley" },
+    "parley": {
+      "do": "talk", "who": "collector", "goal": "Speak with {collector}",
+      "say": "You're not {neighbour}, and you've no sheep with you. So you're here to tell me a story or to pay me. I like the second better.",
+      "replies": [
+        { "say": "{coins:11}. Count it.", "needs_coins": 11, "then": "end:paid", "mark": "paid_marrec_debt" },
+        { "say": "The debt's void. Walk away.", "then": "fight_collector" },
+        { "say": "What was the loan, truly?", "then": "parley_truth" }
+      ]
+    },
+    "parley_truth": {
+      "do": "talk", "who": "collector",
+      "say": "{coins:4}, two winters back. It's {coins:11} now because that's what a debt becomes. You look at me like I made the sums up. I didn't. I only carry them.",
+      "replies": [
+        { "say": "Then carry this back: {coins:4}, and no more.", "needs_coins": 4, "then": "end:paid", "mark": "paid_marrec_debt" },
+        { "say": "Draw.", "then": "fight_collector" }
+      ]
+    },
+    "fight_collector": {
+      "do": "foe", "who": "collector", "goal": "Deal with {collector}",
+      "taunt": "Fingers, then. Yours first.",
+      "plea": "Enough! Enough. It isn't my money. I'm a hand, same as you. Kill me and they send another with a longer list.",
+      "mercy": "Then go back and tell them this debt is paid.",
+      "thanks": "Paid. I'll say paid. I'll say it loud.",
+      "slain": "end:collector_slain", "spared": "end:collector_spared"
+    },
+
+    "to_den": { "do": "go", "to": "den", "goal": "Follow the trail to the hollow in the hills", "then": { "?culprit=denfolk": "den_talk", "?": "den_wolves" } },
+    "den_wolves": {
+      "do": "foe", "who": "packleader", "goal": "Put an end to the pack",
+      "journal": "It was wolves after all. An old grey one that had taught the pack to take them quietly, one a night.",
+      "slain": "report_wolves"
+    },
+    "report_wolves": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} it's done",
+      "say": "Wolves that don't leave a mess. I'd not have believed it. Well, they'll leave none now. You've saved me the flock, and I'll not forget it.",
+      "then": "end:wolves"
+    },
+    "den_talk": {
+      "do": "talk", "who": "denmother", "goal": "Speak with whoever lives in the hollow",
+      "say": [
+        "Stop there. That's far enough. You came for the sheep.",
+        "Five are alive. Two we ate. I have four little ones and the town shut its gate on us at first frost, so tell me what you'd have done. I tell the children to take the old ewes, the ones that won't see spring. They take lambs because lambs are soft to carry. They're children."
+      ],
+      "replies": [
+        { "say": "Keep two ewes. Send the rest home, and take no more.", "then": "wait_den", "journal": "The thieves are den-folk, a mother and four young, turned from the town at first frost. I left them two ewes on her word that it stops.", "mark": "spared_denfolk" },
+        { "say": "{giver} will want all of them, and you gone.", "then": "report_den", "journal": "The thieves are den-folk living in the hollow. I'm taking it to {giver}." },
+        { "say": "Take this. It'll see you to spring.", "needs_item": { "item": "minecraft:bread", "count": 8 }, "then": "wait_den", "mark": "fed_denfolk", "journal": "The thieves are den-folk, a mother and four young. I gave them bread enough to stop the stealing and sent the flock home." }
+      ]
+    },
+    "report_den": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} what lives in the hollow",
+      "say": "Beast-folk. In my hills, eating my flock. I'll have the men up there by morning with dogs and fire. You've done right by me. Don't look like that. They'd have had every head by midwinter.",
+      "then": "end:den_driven"
+    },
+    "wait_den": {
+      "do": "wait", "days": [4, 7], "wake": "giver", "then": "den_after"
+    },
+    "den_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} has to say",
+      "say": {
+        "?mark:fed_denfolk": "Here's a thing. Five came home the night you left. And this morning there was a hare on my gatepost, dressed and hung, neat as a butcher's. And yesterday a brace of pigeons. Somebody up there pays their debts. You know more than you've told me, and I find I don't need to ask.",
+        "?": "Five came home the night you left, and none gone since. Two short still. You know more than you've told me. I'll take five and the quiet, and not ask."
+      },
+      "then": { "?mark:fed_denfolk": "end:den_fed", "?": "end:den_spared" }
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver} to count sheep alone.", "failed": true },
+    "exposed": {
+      "text": "{neighbour} was named a thief before the elders. The sheep went home. Nobody asked who the debt was owed to.",
+      "reward": { "coins": 10, "hearts": 10, "reputation": 12 },
+      "marks": ["exposed_marrec"],
+      "town": ["{neighbour}, of all people. You'd never have thought it.", "They say the collector came anyway. Nobody's seen {neighbour} at market since."]
+    },
+    "paid": {
+      "text": "The debt is paid and the sheep are home. {giver} believes the hills gave them back.",
+      "reward": { "hearts": 6, "reputation": 8 },
+      "town": ["Seven sheep walked home on their own, they say. Out of the hills.", "{neighbour}'s been whistling. Hasn't whistled in two winters."],
+      "returns": { "who": "neighbour", "days": [8, 12], "as": "thanks", "say": "I said the best fleece and I meant it. And this. My wife baked it. She doesn't know why and she didn't ask.", "gift": ["minecraft:white_wool*12", "minecraft:pumpkin_pie*2"] }
+    },
+    "collector_slain": {
+      "text": "{collector} is dead at the crossing. Whoever sent him has a ledger with {neighbour}'s name still in it.",
+      "reward": { "coins": 6, "hearts": 4, "reputation": 6 },
+      "marks": ["slew_collector"],
+      "town": ["There was a man found dead at the crossing. Hired sort. Nobody's weeping.", "{neighbour} keeps the door barred at night now. Says he's waiting on somebody."]
+    },
+    "collector_spared": {
+      "text": "{collector} went back to say the debt was paid. {neighbour} keeps his fingers and {giver} keeps the flock.",
+      "reward": { "hearts": 8, "reputation": 10 },
+      "marks": ["spared_collector"],
+      "town": ["That collector fellow came through white as milk and didn't stop to drink.", "{neighbour}'s debt is gone, they say. Just gone."],
+      "returns": { "who": "collector", "days": [6, 10], "as": "recruit", "say": "I told them paid, and they told me I was done. So I'm a hand with no work and one person alive who had cause to kill me and didn't. I'd sooner carry a sword for that one than a ledger for them." }
+    },
+    "wolves": {
+      "text": "It was wolves. An old grey one and the pack it taught. {giver}'s flock is safe.",
+      "reward": { "coins": 12, "items": ["minecraft:mutton*4"], "hearts": 10, "reputation": 12 },
+      "town": ["Wolves that lift a sheep without a sound. I'm keeping mine in the house.", "{giver} has the grey one's pelt over the door."]
+    },
+    "den_driven": {
+      "text": "{giver} took men, dogs and fire to the hollow. Five sheep came back. I didn't go up to see what else.",
+      "reward": { "coins": 14, "hearts": 10, "reputation": 12 },
+      "marks": ["drove_out_denfolk"],
+      "town": ["They burned something out of the hills last night. You could see it from the square.", "Beast-folk, it was. Living right over us all this time."]
+    },
+    "den_spared": {
+      "text": "Five sheep went home and the stealing stopped. {giver} doesn't ask who lives in the hollow.",
+      "reward": { "coins": 8, "hearts": 8, "reputation": 8 },
+      "town": ["{giver} lost two sheep for good and seems glad of it. Odd."]
+    },
+    "den_fed": {
+      "text": "The den-folk wintered in the hollow. Game turns up on {giver}'s gatepost, dressed and hung, and nobody says where from.",
+      "reward": { "coins": 8, "items": ["minecraft:rabbit*2"], "hearts": 12, "reputation": 10 },
+      "town": ["Somebody's leaving dressed hares on {giver}'s gate. Good ones too.", "The hills have been quiet. Even the wolves keep off, as if something up there minds the place."],
+      "returns": { "who": "denmother", "days": [10, 16], "as": "thanks", "say": "You fed mine when the town would not. We do not forget a scent. This is from the little ones. They made it themselves, so do not look too closely.", "gift": ["minecraft:rabbit_hide*6", "minecraft:bone*3"] }
+    }
+  }
+}

@@ -1,0 +1,341 @@
+{
+  "title": "The Cave-In",
+  "start": { "by": "giver", "jobs": ["miner", "mason", "toolsmith"], "weight": 2 },
+  "roll": { "past": ["deserter", "outlaw", "informer"] },
+  "cast": {
+    "quiet": { "name": ["Harl Dunmere", "Brand Ostrey", "Wace Tolliver"], "body": "fighter", "at": "minehead", "health": 60, "damage": 6, "armor": 6, "hand": "minecraft:iron_pickaxe" },
+    "hurt": { "name": ["Osric Lunt", "Ebb Carrow", "Dag Fennimore"], "body": "villager", "job": "toolsmith", "at": "minehead" },
+    "healer": { "name": ["Wenna Ashby", "Jude Marlow", "Sabra Kell"], "body": "villager", "job": "cleric", "female": true, "at": "minehead" },
+    "hunter": { "name": ["Rafe Holloway", "Gerent Voss", "Mather Crane"], "body": "fighter", "at": "ford", "health": 80, "damage": 8, "armor": 10, "hand": "minecraft:iron_sword", "chest": "minecraft:iron_chestplate", "men": 2 }
+  },
+  "places": {
+    "mine": { "at": "wild", "from": "home", "dist": [150, 300], "name": "the Number Two heading" },
+    "minehead": { "at": "near", "from": "mine", "dist": [15, 35], "name": "the minehead" },
+    "ford": { "at": "road", "from": "home", "dist": [120, 220], "name": "the ford on the mine road" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "The Number Two heading came down at the change of shift. Three behind it: old {hurt}, a boy of fourteen, and the new man, {quiet}. We hear tapping. Three taps, then nothing, then three.",
+        "We've been at it with picks since dawn and it's wedged like a keystone. Every stone we pull, the hill sends down two more. It wants powder, set low and to the left, by someone whose hands don't shake. Mine shake. I've known {hurt} forty years."
+      ],
+      "replies": [
+        { "say": "Give me the powder.", "then": "to_mine", "journal": "A heading has come down at {giver}'s mine with three men behind it. Picks only bring down more. I said I'd set the powder." },
+        { "say": "Who are the three?", "then": "ask_men" },
+        { "say": "I'm no miner.", "then": "end:refused" }
+      ]
+    },
+    "ask_men": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "{hurt} cut the first drift in that hill, and he'll be telling the other two right now how it ought to have been timbered. The boy is the cooper's youngest, in his first month below.",
+        "And {quiet} came up the road two months back. Said he'd been a drover and was tired of walking behind cattle. Works like two men. Doesn't drink with the shift. I don't ask. A hill doesn't care where a man was before."
+      ],
+      "replies": [
+        { "say": "Give me the powder.", "then": "to_mine", "journal": "A heading has come down at {giver}'s mine with three behind it: an old miner, a boy, and a newcomer called {quiet} who says he was a drover. I said I'd set the powder." },
+        { "say": "I'm no miner.", "then": "end:refused" }
+      ]
+    },
+    "to_mine": {
+      "do": "go", "to": "mine", "goal": "Go to the Number Two heading",
+      "give": [
+        { "item": "minecraft:tnt", "count": 2, "name": "Blasting powder", "lore": ["'Low and to the left.'"] },
+        { "item": "minecraft:flint_and_steel", "count": 1 }
+      ],
+      "then": "blow"
+    },
+    "blow": {
+      "do": "blast", "at": "mine", "goal": "Blow the fall open, low and to the left",
+      "journal": "I set the powder low and to the left and the fall came open. Three came out of the dark alive.",
+      "then": "out"
+    },
+    "out": {
+      "do": "talk", "who": "hurt", "goal": "Speak with the old miner",
+      "say": [
+        "Low and to the left. Somebody listened to somebody. Is that daylight? I'd forgotten it was that colour.",
+        "Leg's broke. The boy is whole, only frightened: he's had the whole year's nightmares in one night. And that one, {quiet}: ribs, I think, though he'll not say so. He held a prop on his back for an hour while the boy and I crawled under it. An hour. I counted it in songs."
+      ],
+      "replies": [
+        { "say": "What do you need?", "then": "bring_wool", "journal": "All three are out. {hurt} has a broken leg. He says {quiet} held a roof prop on his back for an hour so the other two could crawl clear. The healer wants wool for bindings." },
+        { "say": "Lie still. I'll fetch what the healer wants.", "then": "bring_wool", "journal": "All three are out. {hurt} has a broken leg. He says {quiet} held a roof prop on his back for an hour so the other two could crawl clear. The healer wants wool for bindings." }
+      ]
+    },
+    "bring_wool": {
+      "do": "bring", "who": "healer", "item": "minecraft:white_wool", "count": 6, "goal": "Bring {healer} six wool for bindings",
+      "journal": "I brought wool to the minehead and {healer} bound up the hurt.",
+      "then": "healer_talk"
+    },
+    "healer_talk": {
+      "do": "talk", "who": "healer", "goal": "Speak with {healer}",
+      "say": {
+        "?past=deserter": [
+          "That'll do. Hold this end. No, tighter, he's a miner, he'll not break. Well. He has broken, but not there.",
+          "Here's a thing, since you've eyes. I'd not have needed to set that leg at all. It was set already, down there in the dark, with a pick handle and a belt, and set right. And the knot on it is one I've seen twice before, both times on men who'd marched under somebody's banner. A drover ties a different knot."
+        ],
+        "?past=outlaw": [
+          "That'll do. Hold this end. No, tighter, he's a miner, he'll not break. Well. He has broken, but not there.",
+          "Here's a thing, since you've eyes. When I cut {quiet}'s shirt to see the ribs, he flinched before I touched him. Not at the pain. At the hand. And there's a rope scar round that neck that is older than this hill's troubles. A drover gets a different sort of scar."
+        ],
+        "?": [
+          "That'll do. Hold this end. No, tighter, he's a miner, he'll not break. Well. He has broken, but not there.",
+          "Here's a thing, since you've eyes. While I strapped {quiet}'s ribs he asked me three times who had come up the road today. Not who was hurt. Who had come. And he sat where he could see the path. A man fresh out of a grave, watching a path."
+        ]
+      },
+      "replies": [
+        { "say": "I'll ask the old man what he saw.", "then": "hurt_more" },
+        { "say": "A man's past is his own.", "then": "hurt_more", "journal": "I told {healer} a man's past is his own. She said that was true until it came up the road after him." }
+      ]
+    },
+    "hurt_more": {
+      "do": "talk", "who": "hurt", "goal": "Ask {hurt} about the hours in the dark",
+      "say": {
+        "?past=deserter": "He talked in his sleep, the little he slept. 'Fourth file, hold.' 'Don't light it.' Over and over, don't light it. And he shared out the water by measure, scratching the flask, like a quartermaster. Took the smallest measure himself. I've worked with drovers. They take the biggest.",
+        "?past=outlaw": "When we thought the air was going, he said a thing. He said, 'I'd as soon it was a hill as a rope.' Then he saw I'd heard, and said nothing more for six hours. And he shared out the water by measure, and took the smallest himself. I've known honest men who didn't.",
+        "?": "When we thought the air was going, the boy asked was he afraid. He said no, he'd been dead since the Hollow Road, and this was only the earth catching up. Then he said twelve names, slow, like a man telling the hours. And he took the smallest share of the water. Look where we lay, if you want more. He dropped something. I heard it go."
+      },
+      "journal": {
+        "?past=deserter": "{healer} says {hurt}'s leg was set in the dark with a soldier's knot. {hurt} says {quiet} gave orders in his sleep, and kept saying 'don't light it'.",
+        "?past=outlaw": "{healer} saw an old rope scar on {quiet}'s neck. {hurt} heard him say he would as soon it was a hill as a rope.",
+        "?": "{healer} says {quiet} kept asking who had come up the road. {hurt} heard him say he had been dead since the Hollow Road, and then twelve names."
+      },
+      "then": "search_fall"
+    },
+    "search_fall": {
+      "do": "search", "at": "mine", "need": 2, "goal": "Look over the place where the three lay",
+      "clues": [
+        { "name": "A scratched flask", "item": "minecraft:glass_bottle", "lore": ["Three sets of marks cut in the leather, to share the water by measure.", "The measure marked for himself is the smallest."], "journal": "{quiet} shared out the water by measure and took the least." },
+        { "name": "A sound pit prop", "item": "minecraft:oak_log", "lore": ["Snapped clean, and good timber right through.", "Nobody's neglect brought this roof down. The hill shifted."], "journal": "The prop that failed was sound. The fall was nobody's doing." },
+        { "name": "A levy tag", "item": "minecraft:iron_nugget", "lore": ["A stamped iron tag on a thong: a company mark and a number.", "The marching realms hang them on their soldiers so the dead can be counted."], "journal": "In the rubble where {quiet} lay was a soldier's levy tag. I kept it.", "if": "past=deserter" },
+        { "name": "A road mask", "item": "minecraft:black_wool", "lore": ["Black cloth, folded small, the eyeholes worn soft.", "A man doesn't keep a mask he never wore."], "journal": "In the rubble where {quiet} lay was a bandit's road mask, long kept.", "if": "past=outlaw" },
+        { "name": "A pardon under a sun seal", "item": "minecraft:paper", "lore": ["It pardons the bearer 'for service to the law in the matter of the Hollow Road band'.", "Twelve other names are written below, each one struck through."], "journal": "In the rubble where {quiet} lay was a pardon under a sun seal, for giving up the Hollow Road band. Twelve names on it are struck through.", "if": "past=informer" }
+      ],
+      "then": "quiet1"
+    },
+    "quiet1": {
+      "do": "talk", "who": "quiet", "goal": "Speak with {quiet}",
+      "say": [
+        "You set the powder. Low and to the left. Then I owe you for a hill, and I don't own one. Ask what you came to ask.",
+        "I was a drover. I got tired of walking behind cattle. That's what I told {giver}, and {giver} had the manners to stop there."
+      ],
+      "replies": [
+        { "say": "Something of yours was lying where you lay.", "then": "quiet2" },
+        { "say": "The old man says you talk in your sleep.", "then": "quiet2" },
+        { "say": "Then I'll stop there too.", "then": "report", "journal": "{quiet} says he was a drover. I let it stand." }
+      ]
+    },
+    "quiet2": {
+      "do": "talk", "who": "quiet",
+      "say": {
+        "?past=deserter": "Then you know what marching is, and you know they don't let a man hand his number back. I'll not tell the rest today. I'll tell you this. I have given that hill two months of honest work and it tried to eat me, and I mean to go on giving it. If I've a favour to ask of the one who dug me out, it's that. Blunt eyes.",
+        "?past=outlaw": "Then you know what I wore on my face, and you can guess the rest near enough. I'll not tell it today. I'll tell you this. I have given that hill two months of honest work and it tried to eat me, and I mean to go on giving it. If I've a favour to ask of the one who dug me out, it's that. Blunt eyes.",
+        "?": "Then you've counted the names. I'll not tell the rest today. I'll tell you this. I have given that hill two months of honest work and it tried to eat me, and I mean to go on giving it. If I've a favour to ask of the one who dug me out, it's that. Blunt eyes."
+      },
+      "replies": [
+        { "say": "Blunt eyes. For now.", "then": "report", "journal": "{quiet} was no drover, and knows that I know. He asked me to keep it to myself. For now I will." },
+        { "say": "I'll keep it. But one day I'll want the rest.", "then": "report", "journal": "{quiet} was no drover, and knows that I know. He asked me to keep it to myself. I said I would, and that I'd want the rest of it one day." }
+      ]
+    },
+    "report": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} the three are out", "pay": 10,
+      "say": [
+        "Forty years, and he comes out complaining about the timbering. I could weep. Here. It isn't what three men are worth, but it's what the tally box holds.",
+        "The heading is shut a week while we prop it. The boy's mother has him. {hurt} is giving orders from a chair. And {quiet} was back at the face this morning with his ribs strapped, shifting spoil, before I was up. Whatever he was, I know what he is. Come by when we open. There'll be ale."
+      ],
+      "replies": [
+        { "say": "I'll come by.", "then": "wait_week" }
+      ]
+    },
+    "wait_week": { "do": "wait", "days": [4, 7], "wake": "giver", "then": "news" },
+    "news": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": {
+        "?past=deserter": [
+          "It isn't ale. Three riders came in last night under a marching realm's colours. A provost, name of {hunter}, and two with him. He has a paper with a seal and a list, and one line of the list is a man of {quiet}'s height with a levy number.",
+          "The whole road has told the story of the fall, so he knows where to look. He's at the ford, watering horses. He'll be at the minehead by evening. I've sent nobody to warn {quiet}. I'm the elders' foreman. I can't be seen to."
+        ],
+        "?past=outlaw": [
+          "It isn't ale. Three riders came in last night. A thief-taker, name of {hunter}, and two hired men. He has a bill with a drawing on it, and the drawing has a rope scar on its neck. There's {coins:40} on it, put up by a toll-keeper's widow.",
+          "The whole road has told the story of the fall, so he knows where to look. He's at the ford, watering horses. He'll be at the minehead by evening. I've sent nobody to warn {quiet}. I'm the elders' foreman. I can't be seen to."
+        ],
+        "?": [
+          "It isn't ale. Three men came in last night, on foot, by the back lanes, and they've no paper at all. The one in front gives his name as {hunter} and asks after 'an old friend from the Hollow Road'. He asks it smiling. I've seen that smile on a dog.",
+          "The whole road has told the story of the fall, so he knows where to look. He's down by the ford. He'll be at the minehead by evening. I've sent nobody to warn {quiet}. I'm the elders' foreman. I can't be seen to."
+        ]
+      },
+      "replies": [
+        { "say": "I'm nobody's foreman. I'll warn him.", "then": "warn", "journal": { "?past=deserter": "A provost named {hunter} has come with two soldiers and a list, looking for a man of {quiet}'s description. He is at the ford.", "?past=outlaw": "A thief-taker named {hunter} has come with two hired men and a bill for a man with a rope scar. A toll-keeper's widow has put {coins:40} on him. He is at the ford.", "?": "Three men have come by the back lanes with no paper, led by one {hunter}, asking after an old friend from the Hollow Road. They are at the ford." } }
+      ]
+    },
+    "warn": {
+      "do": "talk", "who": "quiet", "goal": "Warn {quiet}",
+      "say": {
+        "?past=deserter": [
+          "{hunter}. Yes. He'd come himself.",
+          "I was a serjeant of the fourth file. We took a village that had already opened its gates, and the order came down to fire the granary with the people's winter in it, so that the next village would open quicker. I said don't light it. They lit it. I walked out of camp that night with my tag still on. That's desertion. It's also the only order I ever refused.",
+          "He'll hang me at the ford and call it the count coming right. He isn't a cruel man. He's a tidy one."
+        ],
+        "?past=outlaw": [
+          "A widow's money. Then it's the toll-keeper.",
+          "I rode masked with a band on the south road for three years. We took carts, mostly. One night a toll-keeper wouldn't stand aside, and there was a struggle over a lantern, and I hit him harder than a lantern is worth. He died of it. I left the band that week with nothing. That's the whole of it, and there's no part of it that isn't mine.",
+          "They hanged me for it once, near enough, at a crossroads. The rope was rotten. I've been living on that rope's time ever since."
+        ],
+        "?": [
+          "Smiling. That's {hunter}. He smiles when he's counting.",
+          "I rode with the Hollow Road band. Twelve of us, and him. When they took to killing the carters as well as robbing them, I went to the Sun's men and gave them the camp, the night and the password. For a pardon. Twelve hanged in a row. {hunter} was away buying horses. I had broken bread with every one of the twelve.",
+          "The law says I did right. I've the paper. I have never once felt it."
+        ]
+      },
+      "replies": [
+        { "say": "Stay at the face. I'll go down and hear him.", "then": "to_ford", "journal": { "?past=deserter": "{quiet} was a serjeant who refused an order to burn a surrendered village's granary, and walked out of camp that night. He says the provost will hang him.", "?past=outlaw": "{quiet} rode with bandits, and killed a toll-keeper in a struggle. He was hanged for it once and the rope broke. He says all of it is his.", "?": "{quiet} rode with the Hollow Road band and sold twelve of them to the Sun's law for a pardon when they turned to killing. {hunter} is the thirteenth." } },
+        { "say": "Is all of that true?", "then": "warn2" }
+      ]
+    },
+    "warn2": {
+      "do": "talk", "who": "quiet",
+      "say": "It's what I remember. {hunter} will tell it another way, and he was there for some of it. Hear him. Then do what you'd have done if you had never dug me out. I'll be at the face. I've spoil to shift.",
+      "journal": {
+        "?past=deserter": "{quiet} was a serjeant who refused an order to burn a surrendered village's granary, and walked out of camp that night. He told me to hear the provost's side and then do as I saw fit.",
+        "?past=outlaw": "{quiet} rode with bandits, and killed a toll-keeper in a struggle. He was hanged for it once and the rope broke. He told me to hear the thief-taker's side and then do as I saw fit.",
+        "?": "{quiet} rode with the Hollow Road band and sold twelve of them to the Sun's law for a pardon. {hunter} is the thirteenth. He told me to hear {hunter}'s side and then do as I saw fit."
+      },
+      "then": "to_ford"
+    },
+    "to_ford": { "do": "go", "to": "ford", "goal": "Meet {hunter} at the ford", "then": "parley" },
+    "parley": {
+      "do": "talk", "who": "hunter", "goal": "Speak with {hunter}",
+      "say": {
+        "?past=deserter": [
+          "You're the one who blew the fall. Then you've met my serjeant. Don't trouble to tell me he's a drover.",
+          "He'll have told you about a granary. He tells it well. He leaves out that the fourth file broke when he walked, and that eleven of them were cut down in the rout a week after, for want of a serjeant. I've their tags in this bag. His is the only number missing. I don't hate him. I count."
+        ],
+        "?past=outlaw": [
+          "You're the one who blew the fall. Then you've met my bill. Don't trouble to tell me he's a drover.",
+          "He'll have told you about a lantern, and a struggle. He tells it well. The toll-keeper was sixty and had his back turned. His widow sold her cow to put {coins:40} on that neck. I don't hate him. I'm paid, and she is owed."
+        ],
+        "?": [
+          "You're the one who blew the fall. Then you've met my old friend. Don't trouble to tell me he's a drover.",
+          "He'll have told you about carters, and his tender heart. He tells it well. He leaves out that he took his share of every cart for three years, and turned on us the week the law put a price up. Twelve men choked for his paper. I don't hate him. I owe him, twelve times."
+        ]
+      },
+      "replies": [
+        { "say": "He's under the hill. The fall took him before the powder went in.", "then": "lie" },
+        { "say": "He's at the face. He'll come down if you call.", "then": "wait_handed", "journal": "I heard {hunter}'s side of it, and told him where {quiet} was." },
+        { "say": "You'll not have him.", "then": "fight", "journal": "I heard {hunter}'s side of it, and told him he would not have {quiet}." }
+      ]
+    },
+    "lie": {
+      "do": "talk", "who": "hunter",
+      "say": {
+        "?past=deserter": "Under the hill. Then I want his tag, or the foreman's tally with his name struck. A provost does not write 'I was told'. Show me iron with his number on it and I'll close the line and ride. Without it, you have dug a man out and then buried him again with your mouth. Kindly meant. Stand aside.",
+        "?past=outlaw": "Under the hill. The widow's coin is for a neck, not for a rumour. But I'm forty days on this road, and paid by the bill, not the day, and a hill is as good a hangman as any. Show me the fall and I'll tell her the earth did what the rope couldn't.",
+        "?": "Under the hill. No. A hill doesn't get to have him. I do. If he's under it I'll dig, and if he isn't I'll know you for a liar, and either way I go up that road tonight. Stand aside, or stand in it."
+      },
+      "replies": [
+        { "say": "Here is his tag. The rest of him is under forty tons of stone.", "if": "past=deserter", "needs_item": { "item": "minecraft:iron_nugget", "count": 1 }, "then": "wait_lie", "journal": "I told the provost that {quiet} died in the fall, and gave him the levy tag to prove it. He closed the line in his book." },
+        { "say": "Come and look at the fall, then.", "if": "past=outlaw", "then": "wait_lie", "journal": "I told the thief-taker that {quiet} died in the fall, and showed him the heading. He chose to believe a hill." },
+        { "say": "Then you go through me.", "then": "fight", "journal": "I told {hunter} the hill had taken {quiet}. He did not believe it, and I stood in the road." },
+        { "say": "He's at the face. Take him.", "then": "wait_handed", "journal": "I told {hunter} the hill had taken {quiet}. He did not believe it, and I gave way." }
+      ]
+    },
+    "fight": {
+      "do": "foe", "who": "hunter", "goal": "Stand against {hunter} at the ford",
+      "taunt": "So he has bought himself a sword with a rescue. Cheap at the price.",
+      "plea": "Enough. Enough! I came for one man, not for a grave of my own. Call it.",
+      "mercy": "Go back and say the hill took him. Say you saw the fall.",
+      "thanks": "The hill took him. I saw the fall. I'll say it until I believe it.",
+      "slain": "after_slain", "spared": "after_spared"
+    },
+    "after_slain": {
+      "do": "talk", "who": "quiet", "goal": "Tell {quiet} how it went at the ford",
+      "say": [
+        "Dead. Then that's on my tally, not yours, whatever your arm did.",
+        "There'll be another. There is always a list, and someone who keeps it, and I can't stay at {giver}'s hill and wait for the next one to find it by me. I've a pick, and I know which end of a sword to hold. If you've a use for either, I'd as soon walk behind the one who dug me out."
+      ],
+      "replies": [
+        { "say": "Walk with me, then.", "then": "end:joined", "journal": "{hunter} is dead at the ford. {quiet} will not stay at the mine to draw the next one there. He asked to walk with me, and I said yes." },
+        { "say": "Stay. The hill owes you a quiet life.", "then": "end:stayed_slain", "journal": "{hunter} is dead at the ford. {quiet} asked to walk with me. I told him to stay at the mine." }
+      ]
+    },
+    "after_spared": {
+      "do": "talk", "who": "quiet", "goal": "Tell {quiet} how it went at the ford",
+      "say": [
+        "Alive, and gone to say the hill took me. You let him walk. I'd not have. That's why it had to be you at the ford.",
+        "So I'm dead under the Number Two, by the word of the one who came for me. I can be a dead man here, shifting spoil. Or I can be a dead man on the road behind you, and of some use. Say which."
+      ],
+      "replies": [
+        { "say": "On the road. Fetch your pick.", "then": "end:joined", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} asked to walk with me, and I said yes." },
+        { "say": "Stay dead here. It suits you.", "then": "end:stayed_spared", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} stays at the mine, a dead man on the tally." }
+      ]
+    },
+    "wait_lie": { "do": "wait", "days": [3, 6], "wake": "giver", "then": "lie_after" },
+    "lie_after": {
+      "do": "talk", "who": "giver", "goal": "Hear how things stand at the mine",
+      "say": [
+        "They rode off the morning after. Looked at the fall, looked at my tally book, which I had seen to, looked at me. I've an honest face. It's been a trial to me all my life and it finally paid.",
+        "{quiet} has asked me to leave the book as it is. So I've a dead man on my shift who draws wages. {hurt} says it's the best joke he has heard in forty years, and has promised not to tell it."
+      ],
+      "then": "end:hill_kept"
+    },
+    "wait_handed": { "do": "wait", "days": [3, 5], "wake": "giver", "then": "handed_after" },
+    "handed_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what became of {quiet}",
+      "say": {
+        "?past=deserter": [
+          "They hanged him at the ford the same evening, from the alder. He walked down to them himself when he was called. {hunter} read out the charge and the number, wrote it in his book, and had his men bury him decent. I'll grant him that.",
+          "Then he gave me the tag, for my tally. I've forty years of men's names in that box, and that's the first I've been handed like a receipt. {hurt} hasn't spoken to me since. He'd speak to you, he says, only he has nothing to say."
+        ],
+        "?past=outlaw": [
+          "They took him south in irons, to hang where the toll-keeper's widow can see it done. He walked down to them himself when he was called, and went quietly.",
+          "He asked that his two months' wages go to her. The widow. I counted it out into {hunter}'s hand myself, and {hunter} wrote me a line for it, which I'd not looked for from a thief-taker. {hurt} says a man who shares the water like that had paid already. I don't know what a man owes. I only keep a tally."
+        ],
+        "?": [
+          "They didn't hang him. He walked down to them himself when he was called, and they took him up the back lane toward the hills, the three of them, with {hunter} still smiling. No paper. No elder. No law in it anywhere.",
+          "{hurt} says we gave a pardoned man to outlaws because we didn't care for how he came by the pardon. I've no answer to that. Have you?"
+        ]
+      },
+      "then": "end:handed"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver} to the hill and the tapping.", "failed": true },
+    "joined": {
+      "text": "{quiet} left the mine with his pick over his shoulder and walks with me now. The tally at the Number Two has a line through his name.",
+      "reward": { "coins": 14, "hearts": 10, "reputation": 10 },
+      "marks": ["cavein_quiet_joined"],
+      "town": ["That quiet one from the Number Two has gone off with the stranger who blew the fall. Left his last week's wages for the boy.", "{hurt} says the hill's lost its best back. Then he says good riddance, and then he asks if there's been word."],
+      "joins": "quiet"
+    },
+    "stayed_slain": {
+      "text": "{hunter} is dead at the ford and {quiet} is back at the face. He watches the mine road when he thinks nobody sees.",
+      "reward": { "coins": 16, "hearts": 8, "reputation": 8 },
+      "marks": ["cavein_slew_hunter"],
+      "town": ["Three men dead at the ford on the mine road, and nobody at the mine knows a thing about it. Not one thing.", "The Number Two's open again. They've a man there who works like two and sits facing the door."]
+    },
+    "stayed_spared": {
+      "text": "{hunter} went back to say the hill took {quiet}. {quiet} is a dead man on the tally and a live one at the face, for as long as that word holds.",
+      "reward": { "coins": 16, "hearts": 10, "reputation": 10 },
+      "marks": ["cavein_spared_hunter"],
+      "town": ["They say one of the three died in the fall after all. Funny. I counted three come out.", "The Number Two's open again. There's a man there draws wages under no name. {giver} says mind your own tally."],
+      "returns": { "who": "hunter", "days": [8, 14], "as": "revenge", "say": "I said the hill took him. I said it to people who matter. Then I heard a dead man draws wages at the Number Two. You made a liar of me. I've come to make it true, and you first." }
+    },
+    "hill_kept": {
+      "text": "{hunter} rode away believing the hill had kept {quiet}. Nobody was hurt at the ford. A dead man shifts spoil at the Number Two.",
+      "reward": { "coins": 18, "hearts": 12, "reputation": 10 },
+      "marks": ["cavein_hill_kept"],
+      "town": ["They say one of the three died in the fall after all. Funny. I counted three come out.", "Riders came for somebody at the mine and went off empty. {giver} looked them in the eye the whole time. Honest as bread, {giver}."],
+      "returns": { "who": "quiet", "days": [9, 15], "as": "thanks", "say": "First seam I've struck on my own account. A dead man's wages. {hurt} says to tell you the timbering is sound now, and that he did it. I'm not one for speeches. This is the speech.", "gift": ["minecraft:raw_iron*10", "minecraft:lantern*1"] }
+    },
+    "handed": {
+      "text": {
+        "?past=deserter": "I told the provost where to find his serjeant. {quiet} was hanged at the ford and buried decent, and his number is in the book. Eleven tags and one.",
+        "?past=outlaw": "I told the thief-taker where to find his bill. {quiet} went south in irons, and his wages went to the toll-keeper's widow.",
+        "?": "I told {hunter} where to find his old friend. There was no law in it. Three outlaws took a pardoned man up into the hills, and I pointed the way."
+      },
+      "reward": { "coins": 8, "reputation": 4 },
+      "marks": ["cavein_handed_over"],
+      "town": ["The one who dug them out is the one who gave him up. Same hands. I don't know what to make of that.", "{hurt} sits by the Number Two of an evening with two cups out. Doesn't fill the second."]
+    }
+  }
+}

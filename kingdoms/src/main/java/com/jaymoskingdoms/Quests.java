@@ -199,6 +199,40 @@ public final class Quests {
 		player.setAttached(LOG, List.copyOf(list));
 	}
 
+	/** {@code quest} goes into {@code player}'s log, in place of one with its id if there is one (a tale's open step, {@link Tales}). */
+	static void set(ServerPlayer player, Quest quest) {
+		List<Quest> list = new ArrayList<>(log(player));
+		list.removeIf(q -> q.id().equals(quest.id()));
+		list.add(quest);
+		player.setAttached(LOG, List.copyOf(list));
+	}
+
+	/** Quest {@code id} comes off {@code player}'s log, with nothing said or paid. */
+	static void drop(ServerPlayer player, String id) {
+		if (quest(player, id) != null) {
+			remove(player, id);
+		}
+	}
+
+	/** How many of {@code player}'s quests count against what they may carry: not a king's, and not a tale's steps. */
+	private static long carried(ServerPlayer player) {
+		return log(player).stream().filter(q -> !q.royal() && !Tales.ofTale(q)).count();
+	}
+
+	/** What {@code q} pays, paid: coins in the giver's realm's coin, its goods, and their settlement's good name ({@link Tales}, an ending). */
+	static void payOut(ServerLevel level, ServerPlayer player, Quest q) {
+		Faction f = Factions.get(level.getServer(), q.giver().faction());
+		if (q.reward().milli() > 0) {
+			Money.pay(player, f, q.reward().milli());
+		}
+		for (ItemStack stack : goods(level, q)) {
+			give(player, stack);
+		}
+		if (f != null && q.reward().reputation() != 0) {
+			Reputation.change(player, f, q.reward().reputation());
+		}
+	}
+
 	/**
 	 * (0.7.184) {@code player} carries a quest item ({@link Retinue#passage}): a letter or keepsake for a quest they're
 	 * on, or the work a ruler of {@code faction} gave them, done and ready to turn in.
@@ -222,7 +256,8 @@ public final class Quests {
 			case Quest.FETCH -> find(player, q.id()) >= 0;
 			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
 			case Quest.LEAD -> led(player, q.objective().target()).size() >= q.objective().count();
-			default -> q.counted();
+			// (a tale's step is never brought back: the tale moves on by itself)
+			default -> !Tales.ofTale(q) && q.counted();
 		};
 	}
 
@@ -264,7 +299,7 @@ public final class Quests {
 			offer = new Offer(day + 1, hasWork(giver, rep, level.getRandom()), Optional.empty());
 			giver.setAttached(OFFER, offer);
 		}
-		mark(giver, offer.has());
+		mark(giver, offer.has() || Tales.wants(giver));
 		return offer;
 	}
 
@@ -332,7 +367,9 @@ public final class Quests {
 		if (offer.quest().isPresent()) {
 			return offer.quest().get();
 		}
-		Quest q = giver instanceof Folk ? QuestBoard.king(level, giver, f, level.getRandom()) : QuestBoard.villager(level, giver, f, level.getRandom());
+		// (some of those with work have a tale to tell instead of an errand)
+		Quest tale = giver instanceof Folk ? null : Tales.offer(level, giver, f);
+		Quest q = tale != null ? tale : giver instanceof Folk ? QuestBoard.king(level, giver, f, level.getRandom()) : QuestBoard.villager(level, giver, f, level.getRandom());
 		giver.setAttached(OFFER, new Offer(offer.nextDay(), q != null, Optional.ofNullable(q)));
 		mark(giver, q != null);
 		return q;
@@ -348,6 +385,10 @@ public final class Quests {
 		if (!Languages.understands(player, giver)) {
 			// (0.7.20) work's explained in words, and you don't have theirs
 			Languages.shrug(player, giver);
+			return;
+		}
+		if (Tales.talk(player, giver)) {
+			// (a tale of theirs has something for the two of them to say)
 			return;
 		}
 		Faction f = settlement(level, giver);
@@ -366,7 +407,7 @@ public final class Quests {
 		}
 		List<QuestNet.View> views = new ArrayList<>();
 		for (Quest q : log(player)) {
-			if (q.giver().uuid().equals(giver.getUUID())) {
+			if (q.giver().uuid().equals(giver.getUUID()) && !Tales.ofTale(q)) {
 				views.add(view(level, player, q, ready(player, q) ? QuestNet.READY : QuestNet.ACTIVE));
 			}
 		}
@@ -380,6 +421,13 @@ public final class Quests {
 				giver.setAttached(OFFER, new Offer(day(level) + 1, false, Optional.empty()));
 			}
 			Quest q = offered(level, giver, f, rep);
+			if (q != null && Tales.ofTale(q)) {
+				// (a tale is told, not laid out: the giver starts in on it, if it's one for this player)
+				if (Tales.begin(level, player, giver, f, q)) {
+					return;
+				}
+				q = null;
+			}
 			if (q != null) {
 				views.add(view(level, player, q, QuestNet.OFFER));
 			}
@@ -463,7 +511,7 @@ public final class Quests {
 			return;
 		}
 		long royal = log(player).stream().filter(Quest::royal).count();
-		long common = log(player).size() - royal;
+		long common = carried(player);
 		if (q.royal() ? royal >= MAX_ROYAL : common >= MAX_QUESTS) {
 			player.sendSystemMessage(Component.translatable(q.royal() ? "quest.jaymoskingdoms.full.royal" : "quest.jaymoskingdoms.full", MAX_QUESTS)
 				.withStyle(ChatFormatting.RED));
@@ -548,6 +596,7 @@ public final class Quests {
 			Speech.GOLD);
 		// (0.7.109) and they remember it
 		Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
+		QuestPast.add(player, title(q), QuestPast.DONE, Component.translatable("past.jaymoskingdoms.done", q.giver().name()));
 		// a town errand toward the story's first act, for the party near too (only the ones marked as such: storyErrand)
 		if (storyErrand(q)) {
 			Retaking.errand(player);
@@ -577,6 +626,7 @@ public final class Quests {
 
 	/** (0.5.49) The giver's settlement thinks less of one who gave up their quest. */
 	private static void disappoint(ServerPlayer player, Quest q) {
+		QuestPast.add(player, title(q), QuestPast.GIVEN_UP, Component.translatable("past.jaymoskingdoms.given_up", q.giver().name()));
 		Faction f = Factions.get(player.level().getServer(), q.giver().faction());
 		if (f == null) {
 			return;
@@ -595,7 +645,7 @@ public final class Quests {
 	 * False if their log is full.
 	 */
 	static boolean takeFromBoard(ServerLevel level, ServerPlayer player, Quest q) {
-		long common = log(player).stream().filter(o -> !o.royal()).count();
+		long common = carried(player);
 		if (common >= MAX_QUESTS) {
 			player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.full", MAX_QUESTS).withStyle(ChatFormatting.RED));
 			return false;
@@ -1138,7 +1188,7 @@ public final class Quests {
 					if (f != null) {
 						refresh(level, giver, Reputation.get(player, f.id()));
 					} else {
-						mark(giver, false);
+						mark(giver, Tales.wants(giver));
 					}
 				}
 			}
@@ -1290,6 +1340,12 @@ public final class Quests {
 	static final int STORY_ONE_IN = 3;
 
 	static Component title(Quest q) {
+		if (Tales.ofTale(q)) {
+			return Tales.title(q);
+		}
+		if (q.kind() >= Quest.PACK) {
+			return QuestJobs.title(q);
+		}
 		String key = Rulers.her("quest.jaymoskingdoms." + q.template() + ".title", ruled(q));
 		return switch (q.kind()) {
 			// (who a letter's for and where; whose chief, or whose king)
@@ -1359,6 +1415,12 @@ public final class Quests {
 
 	/** The quest's story as the giver tells it. */
 	static Component text(Quest q) {
+		if (Tales.ofTale(q)) {
+			return Component.empty();
+		}
+		if (q.kind() >= Quest.PACK) {
+			return QuestJobs.text(q);
+		}
 		String key = Rulers.her("quest.jaymoskingdoms." + q.template() + ".text", ruled(q));
 		Quest.Objective o = q.objective();
 		return switch (q.kind()) {
@@ -1385,6 +1447,12 @@ public final class Quests {
 
 	/** What's left to do (or that it's done). */
 	static Component objective(ServerLevel level, ServerPlayer player, Quest q) {
+		if (q.kind() >= Quest.PACK && !(Tales.ofTale(q) || ready(player, q))) {
+			return QuestJobs.objective(level, player, q);
+		}
+		if (Tales.ofTale(q)) {
+			return Tales.goal(player, q);
+		}
 		if (ready(player, q)) {
 			return Component.translatable("quest.jaymoskingdoms.objective.return", q.giver().name());
 		}
@@ -1453,6 +1521,11 @@ public final class Quests {
 		for (Quest q : log(player)) {
 			boolean ready = ready(player, q);
 			Optional<BlockPos> target = ready ? Optional.empty() : q.kind() == Quest.SLAY || q.kind() == Quest.GATHER ? Optional.empty() : q.objective().pos();
+			if (Tales.ofTale(q)) {
+				// (a tale's step: the mark goes over whoever is next to speak with, gold when it's a talk)
+				tracked.add(new QuestNet.Tracked(Tales.markOn(q), false, title(q), objective(level, player, q), Tales.spoken(q), target));
+				continue;
+			}
 			tracked.add(new QuestNet.Tracked(q.giver().uuid(), q.royal(), title(q), objective(level, player, q), ready, target));
 		}
 		int hash = tracked.hashCode();

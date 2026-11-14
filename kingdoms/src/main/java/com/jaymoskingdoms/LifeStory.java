@@ -3097,6 +3097,8 @@ public final class LifeStory {
 			McaBridge.forgetPlayer(player);
 		}
 		Parties.reborn(player);
+		Tales.reborn(player);
+		QuestPast.reborn(player);
 		Captains.forgetPlayer(player.level().getServer(), player);
 		McaCompat.newDestiny(player);
 		return reincarnate(player);

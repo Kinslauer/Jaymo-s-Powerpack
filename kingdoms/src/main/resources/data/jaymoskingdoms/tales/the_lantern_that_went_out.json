@@ -1,0 +1,361 @@
+{
+  "title": "The Lantern That Went Out",
+  "start": { "by": "giver", "jobs": ["cleric", "mason", "librarian"], "weight": 1 },
+  "roll": { "fate": ["slain", "joined", "fled"] },
+  "cast": {
+    "keeper": { "name": ["Ansel Varrow", "Corbin Thale", "Jessop Marle"], "body": "villager", "job": "none", "at": "inner" },
+    "ward": { "name": ["Nessa", "Maud", "Edda"], "body": "villager", "job": "none", "female": true, "at": "cottage" },
+    "robber": { "name": ["Morna Sedge", "Hesper Coyle", "Rill Ashby"], "body": "fighter", "female": true, "at": "hollow", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "barrow": { "at": "ruin", "name": "the old barrow" },
+    "inner": { "at": "near", "from": "barrow", "dist": [24, 40], "name": "the lord's mound" },
+    "cottage": { "at": "near", "from": "home", "dist": [40, 80], "name": "the keeper's cottage" },
+    "hollow": { "at": "wild", "from": "barrow", "dist": [160, 300], "name": "the charcoal burners' hollow" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "You came in by the moor road. Did you see a light on the hill as you came? No. Nor has anyone, five nights now.",
+        "Old {keeper} has carried a lantern up to {place:barrow} every dusk since before I was born. He has not come down. And last night something stood at the end of my lane until cockcrow. It did not knock. I would pay to have somebody go up who is not from here."
+      ],
+      "replies": [
+        { "say": "I'll go up. Which way?", "then": "to_barrow", "journal": "{giver} says the light on the barrow has been dark five nights, and its keeper, {keeper}, has not come down. Something stood in the lane last night. I said I'd go up." },
+        { "say": "Who is he, this keeper? And why not go yourselves?", "then": "ask_keeper" },
+        { "say": "The dead are no business of mine.", "then": "end:refused" }
+      ]
+    },
+    "ask_keeper": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "His people are Nightborn, lantern-keepers since before this town had a wall. The lords under that hill swore to the Lantern Warden to keep a light over their own dead, and a living hand has to carry it up to them. That is all I know of it, and I am not sure I believe the half.",
+        "What I do know is this. Three winters back the town stopped paying the lamp tithe. Oil is dear, and nobody had seen a dead man walk in forty years. I spoke for stopping it. So you see why I would sooner a stranger looked.",
+        "He has no kin. There is a girl, {ward}, a foundling he took in. She has gone to the foot of the hill every dusk and no further. He never let her carry it."
+      ],
+      "replies": [
+        { "say": "I'll go up.", "then": "to_barrow", "journal": "{giver} says the barrow light has been dark five nights and its keeper, {keeper}, has not come down. The town stopped paying him three winters ago, and {giver} spoke for stopping. I said I'd go up." },
+        { "say": "Then it is your debt, not mine.", "then": "end:refused" }
+      ]
+    },
+    "to_barrow": {
+      "do": "go", "to": "barrow", "goal": "Go up to {place:barrow}",
+      "give": [{ "item": "minecraft:lantern", "count": 1, "name": "A borrowed lantern", "lore": ["Carry it lit, and carry it where it can be seen.", "Those under the hill let a lantern pass."] }],
+      "then": "search_barrow"
+    },
+    "search_barrow": {
+      "do": "search", "at": "barrow", "goal": "Search the first mound",
+      "clues": [
+        { "name": "The keeper's lantern", "item": "minecraft:lantern", "lore": ["Cold, and lying on its side by the door stone.", "The oil is not spent. It did not burn dry."], "journal": "{keeper}'s lantern lay cold at the mound door with oil still in it." },
+        { "name": "Charcoal strokes on the door stone", "item": "minecraft:charcoal", "lore": ["Three strokes drawn across the stone, and a pinch of coal left on the sill.", "An offering. The Ash Whisperer's people leave one where they mean to take."], "journal": "Charcoal strokes on the door stone and coal left on the sill. The Ash Whisperer's folk have been at the mound." },
+        { "name": "A snapped flint wedge", "item": "minecraft:flint", "lore": ["Broken off under the lid of the first cist.", "The lid is shifted. Whatever lay on the breast is gone."], "journal": "The first cist was levered open and stripped." },
+        { "name": "A torn sleeve", "item": "minecraft:brown_wool", "lore": ["Homespun, patched at the elbow, stiff and dark.", "The drag marks beside it go inward, not out."], "journal": "A sleeve of the keeper's coat, bloodied. Somebody was dragged further into the mound.", "if": "fate=slain" },
+        { "name": "A pair of boots, set side by side", "item": "minecraft:leather_boots", "lore": ["Stood neatly by the inner door, as a man leaves them at a bedside.", "Nobody robs a man and leaves his boots tidy."], "journal": "The keeper's boots stood side by side at the inner door. He took them off himself.", "if": "fate=joined" },
+        { "name": "A buyer's tally", "item": "minecraft:paper", "lore": ["One cup. One torc. Two arm rings. Paid, paid, paid.", "Each line is signed with a small lantern, drawn by the seller as his mark."], "journal": "A tally of grave goods bought and paid for. Each line is signed with a little drawn lantern.", "if": "fate=fled" }
+      ],
+      "then": "barrow_dead"
+    },
+    "barrow_dead": {
+      "do": "pack", "at": "barrow", "foes": "minecraft:skeleton", "count": 4, "goal": "Put down the dead that have come out",
+      "journal": "With no light kept, the outer dead were up and walking among the mounds. I put four of them back.",
+      "then": "ward"
+    },
+    "ward": {
+      "do": "talk", "who": "ward", "goal": "Speak with {ward} at {place:cottage}",
+      "say": {
+        "?fate=slain": [
+          "You have been up. That is his lantern, I know the dent in it. So he is not carrying it.",
+          "He went up at dusk the same as every dusk. He would have come down. He came down once with a fever on him and once with his ankle turned, crawling. He always came down."
+        ],
+        "?fate=joined": [
+          "You have been up. That is his lantern, I know the dent in it. So he is not carrying it.",
+          "The last evening he gave me the door key. He has never once given me the key. He said the ones below were easier company than the town, and he laughed, and I did not."
+        ],
+        "?": [
+          "You have been up. That is his lantern, I know the dent in it. So he is not carrying it.",
+          "He had new boots at midsummer, and oil in the jar, when the tithe has been dead three winters. I did not ask where from. I should have asked."
+        ]
+      },
+      "replies": [
+        { "say": "There were others up there. Robbers.", "then": "ward_men" },
+        { "say": "Did he have visitors of late?", "then": "ward_men" }
+      ]
+    },
+    "ward_men": {
+      "do": "talk", "who": "ward",
+      "say": [
+        "Three of them, with a handcart, a fortnight back. A woman did the talking. {robber}, the others called her. She asked him what lay in the old mounds as if she were asking the price of eggs.",
+        "They burn charcoal in a hollow, {way:hollow}. You can see the smoke on a still day. He never let me carry the light. He said I wanted it for the wrong reason. If you find him, ask him what the right one is."
+      ],
+      "journal": "{ward}, the keeper's foundling, says a woman named {robber} came asking about the mounds a fortnight back. Her people burn charcoal in a hollow off the moor.",
+      "then": "to_hollow"
+    },
+    "to_hollow": { "do": "go", "to": "hollow", "goal": "Find the charcoal burners' hollow", "then": "parley" },
+    "parley": {
+      "do": "talk", "who": "robber", "goal": "Speak with {robber}",
+      "say": [
+        "That is a keeper's lantern on your belt, and you are not the keeper. Sit down, then. Nobody has cut a throat at my fire yet today.",
+        "Yes, we opened the first mound. Cups, a torc, arm rings: gold that has done nobody any good for four hundred years. I have eleven mouths in this hollow, and the Sun's men hanged my brother for a sack of barley. Tell me the dead need it more."
+      ],
+      "replies": [
+        { "say": "I did not come about gold. Where is {keeper}?", "then": "parley_keeper" },
+        { "say": "The dead can wait. What did you do with the old man?", "then": "parley_keeper" }
+      ]
+    },
+    "parley_keeper": {
+      "do": "talk", "who": "robber",
+      "say": {
+        "?fate=slain": [
+          "He came in on us in the first room with nothing in his hand but that lantern, shouting that we would wake them. Rusk hit him with the bar. Once. I had not told him to and I did not stop him, and I have turned that over every night since.",
+          "We laid him in the inner passage, straight, with his hands folded. It was all the decency we had on us. Rusk went south the next morning. I did not stop that either."
+        ],
+        "?fate=joined": [
+          "Touch him? Listen. He stood in the inner door, and behind him there were men in helms, standing, with swords, and no breath coming off them in the cold. He looked at us the way you would look at mice in a pantry.",
+          "Then he pinched the lantern out with his own fingers, set it down, and walked in among them. They made room. The door ground shut with nobody's hand on it. We took what was in the first room and ran, and I am not ashamed of the running."
+        ],
+        "?": [
+          "Do with him? We paid him. Three times this summer he met us at the door and sold us the first mound a cup at a time, and signed for it with a little lantern, like a man proud of his mark.",
+          "Then I said we would come in and choose for ourselves, and he lost his nerve. Took his purse, left his lamp on the step and went down the south road without looking back. Whatever is walking on that hill, he is not under it."
+        ]
+      },
+      "journal": {
+        "?fate=slain": "{robber} says one of her men, Rusk, struck the keeper down in the first room. They laid him in the inner passage. Rusk has gone south.",
+        "?fate=joined": "{robber} swears the keeper put out his own lantern and walked in among armed dead in the inner mound, and that the door shut behind him.",
+        "?": "{robber} says the keeper sold her the grave gold himself, cup by cup, and ran south when she pressed him for more."
+      },
+      "replies": [
+        { "say": "The gold goes back. Here is {coins:14} for your eleven mouths.", "needs_coins": 14, "then": "lay_goods", "mark": "lantern_bought_gold" },
+        { "say": "The gold goes back, or you go into the ground with it.", "then": "fight_robber" },
+        { "say": "Keep it. Put your fires out and be gone by morning.", "then": "tell_ward", "mark": "lantern_let_thieves_go", "journal": "I let {robber} keep the grave gold, on her word that the hollow is empty by morning." }
+      ]
+    },
+    "fight_robber": {
+      "do": "foe", "who": "robber", "goal": "Deal with {robber}",
+      "taunt": "Then you are only one more of them with a rope. Up, lads!",
+      "plea": "Hold! Hold. It is in the cart, under the sacks. Take it. There are children in this hollow who will watch whatever you do next.",
+      "mercy": "Take your people off this moor. Tonight.",
+      "thanks": "We will be gone by moonrise. I'll remember which of us had the blade and did not use it.",
+      "slain": "lay_goods", "spared": "robber_yields"
+    },
+    "robber_yields": {
+      "do": "talk", "who": "robber",
+      "say": [
+        "Here. Every piece. Count it. I am a thief, not a cheat.",
+        "You could have finished it and you did not, and I do not know what to do with that. Her people do not leave a debt lying, whatever the Sun's men say of us. If that hill ever wants something a thief can give, send word to the ford below the moor."
+      ],
+      "mark": "lantern_spared_thief",
+      "then": "lay_goods"
+    },
+    "lay_goods": {
+      "do": "stash", "at": "barrow", "item": "minecraft:gold_nugget", "count": 3, "goal": "Lay the grave gold back in the first mound",
+      "give": [{ "item": "minecraft:gold_nugget", "count": 3, "name": "Grave gold", "lore": ["A cup, a torc and an arm ring, beaten thin.", "Cold, however long it is held."] }],
+      "journal": {
+        "?mark:lantern_spared_thief": "{robber} yielded and gave up the grave gold, and I let her go. She says she owes the hill a debt. I laid the gold back in the first mound.",
+        "?mark:lantern_bought_gold": "I bought the grave gold back from {robber} for {coins:14} and nobody's blood, and laid it in the first mound.",
+        "?": "{robber} is dead in her hollow. I took the grave gold from her cart and laid it back in the first mound."
+      },
+      "then": "tell_ward"
+    },
+    "tell_ward": {
+      "do": "talk", "who": "ward", "goal": "Tell {ward} what became of {keeper}",
+      "say": "You have been to the hollow. I watched the smoke. Say it straight. I am not a child, and I will know if you dress it.",
+      "replies": [
+        { "say": "I'll tell you what {robber} told me, word for word.", "then": "ward_truth" },
+        { "say": "Sit down first.", "then": "ward_truth" },
+        { "say": "He died at the mound door, keeping them out.", "if": "!fate=slain", "then": "ward_oath", "mark": "lantern_lied", "journal": "I told {ward} the keeper died at the mound door, keeping the robbers out. It is not what happened." }
+      ]
+    },
+    "ward_truth": {
+      "do": "talk", "who": "ward",
+      "say": {
+        "?fate=slain": "Rusk. I will keep that name. So he is lying in the inner passage with his hands folded, and it was thieves who did that much for him, and the town that did nothing. He would say that was about right.",
+        "?fate=joined": "In among them. With his boots off. He told me they were easier company, and I took it for the sort of joke an old man makes. Then he was not taken. He left. He looked at me and at them, and he chose.",
+        "?": "No. He would not. New boots at midsummer. Oil in the jar. Forty years, and he sold them by the cup. And he told me that I wanted the lantern for the wrong reason."
+      },
+      "journal": {
+        "?fate=slain": "I told {ward} the truth: the keeper was struck down in the first room and lies in the inner passage.",
+        "?fate=joined": "I told {ward} the truth: the keeper went in among the dead of his own will.",
+        "?": "I told {ward} the truth: the keeper sold the graves he kept, and ran."
+      },
+      "then": "ward_oath"
+    },
+    "ward_oath": {
+      "do": "talk", "who": "ward",
+      "say": [
+        "Then hear the one thing he did teach me. When the light has been let go out, it must stand at the mound door three nights running, dusk to dawn, carried up by a living hand, before they will lie down again.",
+        "It should be my hand. But I have never once been let past the foot of the hill, and you have walked in and out of it twice. Set the light. Keep it three nights. Then we will see whose it is."
+      ],
+      "replies": [
+        { "say": "Three nights, then.", "then": "set_light", "journal": "{ward} says the dead will not settle until a light has stood at the mound door three nights running. I said I'd keep it." },
+        { "say": "Come up with me. You should learn the path.", "then": "set_light", "mark": "lantern_ward_walked", "journal": "{ward} says the dead will not settle until a light has stood at the mound door three nights running. I took her up the hill with me. It is the first time she has been past the foot of it." }
+      ]
+    },
+    "set_light": {
+      "do": "build", "at": "barrow", "blocks": "minecraft:lantern", "count": 1, "goal": "Set a lantern at the mound door",
+      "journal": "I set a light at the mound door at dusk.",
+      "then": "vigil"
+    },
+    "vigil": {
+      "do": "wait", "days": [3, 3], "wake": "none", "goal": "Keep the light three nights",
+      "journal": {
+        "?mark:lantern_let_thieves_go": "Three nights I kept the light. Each night they stood at the inner door and looked at the empty cist, and they did not go down until the third dawn.",
+        "?": "Three nights I kept the light. On the third they went back down, one by one, and the moor was quiet."
+      },
+      "then": { "?fate=joined": "to_inner", "?": "report" }
+    },
+    "to_inner": { "do": "go", "to": "inner", "goal": "Carry the light to the door of {place:inner}", "then": "keeper" },
+    "keeper": {
+      "do": "talk", "who": "keeper", "goal": "Speak with the one standing in the door",
+      "say": [
+        "That is far enough, and I thank you for the three nights. I counted them from this side. Do not lift the lantern to my face. I know what you would see, and so do you.",
+        "Forty years I carried a light up this hill to keep them company. This summer, when the thieves came, I understood I had it the wrong way about. They were keeping me. The town had stopped paying, the girl looked at my lantern more than at me, and here there was a place set."
+      ],
+      "replies": [
+        { "say": "{ward} is asking after you. What do I tell her?", "then": "keeper_ask" },
+        { "say": "Come out. The oath wants a living hand.", "then": "keeper_ask" }
+      ]
+    },
+    "keeper_ask": {
+      "do": "talk", "who": "keeper",
+      "say": [
+        "I am not coming out. There is not enough left of me to make the walk. Tell her what you like. The truth will hurt her, and a lie will hold only until she comes up here herself, which she will.",
+        "Here is what I want, and you may weigh it against what she wants. Let it end. Wall the door, and let the lantern go out with the last fool who carried it. The oath is kept from this side now. Do not hand a child forty years on a hill."
+      ],
+      "journal": "{keeper} stands among the dead in the lord's mound and will not come out. He asks that the door be walled and that nobody carry the lantern after him, {ward} least of all.",
+      "then": "report"
+    },
+    "report": {
+      "do": "talk", "who": "giver", "goal": "Bring word to {giver}",
+      "say": [
+        "Three nights, and nothing in my lane. I slept. I had forgotten what that was like.",
+        "So. The lantern. The town will pay the tithe again, I will see to it, I owe the hill that much. But pay it to whom? {ward} is fourteen and wants that lamp as a hungry dog wants a bone. Or I could have the door walled in a day and be done with oil for good. You have stood up there and I have not. Say what is to be done and I will back it."
+      ],
+      "replies": [
+        { "say": "It is {ward}'s. She has waited long enough.", "then": "wait_ward", "journal": "I told {giver} the lantern should go to {ward}." },
+        { "say": "I'll carry it myself, while I am in these parts.", "then": "wait_self", "journal": "I told {giver} I would carry the lantern myself." },
+        { "say": "Wall the mound. Let the lantern go out.", "then": "wall", "journal": "I told {giver} the mound should be walled and the lantern let go out." },
+        { "say": "There is a thief by the ford who owes that hill a debt.", "if": "mark:lantern_spared_thief", "then": "wait_thief", "journal": "I told {giver} to send to the ford for {robber}. A thief will keep the light over the graves she robbed." }
+      ]
+    },
+    "wall": {
+      "do": "build", "at": "barrow", "blocks": "minecraft:cobblestone", "count": 12, "goal": "Wall up the mound door",
+      "journal": "I walled the mound door with my own hands. The lantern stood inside until the last stone, and I did not look to see it go out.",
+      "then": "wait_wall"
+    },
+    "wait_wall": {
+      "do": "wait", "days": [5, 9], "wake": "letter",
+      "letter": { "from": "{ward}", "lines": [
+        "I went up to see your wall. It is a good wall. {giver} is pleased with it and the town sleeps.",
+        "On still nights there is a sound from behind it, like a hand laid flat on stone. Not knocking. Only resting there.",
+        "I am going south at the thaw. There is nothing here that is mine. I wanted you to know I do not blame you. I have not yet decided whether that is true."
+      ] },
+      "then": "end:walled"
+    },
+    "wait_self": { "do": "wait", "days": [5, 8], "wake": "giver", "then": "self_after" },
+    "self_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} has to say",
+      "say": [
+        "You have kept it every night by my count, and kept it well, and you have been looking at the road. Do not tell me you have not. A keeper with somewhere else to be is a missed night waiting to happen.",
+        "{ward} goes up behind you each dusk. She stands at the foot and watches how you set it. Yesterday she asked me what becomes of it when you leave. I had no answer for her. Have you?"
+      ],
+      "replies": [
+        { "say": "It goes with me. A light is a light, wherever it is carried.", "then": "end:bearer" },
+        { "say": "Then it is hers. She has watched long enough to know the way.", "then": "end:ward_keeps" }
+      ]
+    },
+    "wait_ward": {
+      "do": "wait", "days": [6, 10], "wake": "letter",
+      "letter": { "from": "{ward}", "lines": [
+        "I have carried it every dusk since you put it in my hand. My arm aches and I talk to myself going up. I understand some things about him better than I did.",
+        "Come to the cottage when your road allows. There is something I mean to ask you, and I will not put it on paper."
+      ] },
+      "then": { "?mark:lantern_lied": "ward_found_out", "?": "ward_after" }
+    },
+    "ward_after": {
+      "do": "talk", "who": "ward", "goal": "Visit {ward} at {place:cottage}",
+      "say": {
+        "?fate=slain": [
+          "I had them bring him out of the inner passage and lay him by the door stone, under a cairn, where the light falls first. I pass him going up and coming down.",
+          "Here is what I meant to ask. He said I wanted the lantern for the wrong reason. I have carried it all these nights and I want it still. Is wanting a thing the wrong reason for having it?"
+        ],
+        "?fate=joined": [
+          "He stands at the inner door when I come up. Second from the left. He does not speak and I do not lift the light to his face. We have an understanding.",
+          "Here is what I meant to ask. He said I wanted the lantern for the wrong reason. I have carried it all these nights and I want it still. Is wanting a thing the wrong reason for having it?"
+        ],
+        "?": [
+          "A carter says there is an old man selling lamp oil in the next town south, who trims a wick like a keeper. I have not gone to look. I do not know that I will.",
+          "Here is what I meant to ask. He said I wanted the lantern for the wrong reason. I have carried it all these nights and I want it still. Is wanting a thing the wrong reason for having it?"
+        ]
+      },
+      "replies": [
+        { "say": "It is reason enough. Somebody has to want it.", "then": "end:ward_keeps" },
+        { "say": "He carried it forty years and it emptied him. Want other things too.", "then": "end:ward_keeps", "mark": "lantern_warned_ward" }
+      ]
+    },
+    "ward_found_out": {
+      "do": "talk", "who": "ward", "goal": "Visit {ward} at {place:cottage}",
+      "say": {
+        "?fate=fled": [
+          "You said he died at the door. A carter came through from the south. There is an old man there selling lamp oil at a stall, and he trims a wick with his thumbnail, the way only one man I ever knew did.",
+          "All these nights I have carried this up that hill for a dead man's honour. He is not dead and he had none. And you knew."
+        ],
+        "?": [
+          "You said he died at the door. I went in. Past the first room, to the inner door, with the light held up, the way you are not meant to. He is standing there in a row with the rest of them. He turned his head.",
+          "All these nights I have carried this up that hill for a man who died keeping faith. He is not dead and he did not keep it. He left. And you knew."
+        ]
+      },
+      "replies": [
+        { "say": "I thought the lie was the kinder thing.", "then": "end:ward_lie" },
+        { "say": "Would you have carried it at all, had you known?", "then": "end:ward_lie" }
+      ]
+    },
+    "wait_thief": {
+      "do": "wait", "days": [5, 9], "wake": "letter",
+      "letter": { "from": "{robber}", "lines": [
+        "They told me at the ford what you want of me. A thief, to carry the Warden's light over the graves she robbed. I laughed. Then I came up and did it, and I have done it every night since.",
+        "The girl stands at the foot of the hill and watches me with a stone in her hand. She has not thrown it yet. I would not blame her.",
+        "My lady loves a fire that does not bite. I reckon a lantern is one. I will keep it for as long as I am let."
+      ] },
+      "then": "end:thief_keeps"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver} to watch the dark hill alone.", "failed": true },
+    "ward_keeps": {
+      "text": "{ward} carries the lantern up to {place:barrow} each dusk, and the town pays the tithe again. She is fourteen. The last keeper carried it forty years.",
+      "reward": { "coins": 14, "items": ["minecraft:candle*4"], "hearts": 10, "reputation": 12 },
+      "marks": ["lantern_given_to_ward"],
+      "town": ["There's a light on the hill again. Lower than it was. The girl hasn't the old man's reach.", "We pay the lamp tithe again. Nobody argued this time."],
+      "returns": { "who": "ward", "days": [10, 16], "as": "thanks", "say": "This was on the sill of the first mound one dawn, where the thieves left their coal. It is not grave goods. I asked them, in my way, and nobody minded. He used to say a keeper ought to give light and not only carry it. So.", "gift": ["minecraft:soul_lantern*1"] }
+    },
+    "ward_lie": {
+      "text": "{ward} carries the lantern, and knows that I lied to her about {keeper}. She keeps the light. She does not speak to me.",
+      "reward": { "coins": 10, "reputation": 4 },
+      "marks": ["lantern_given_to_ward", "lantern_lied_to_ward"],
+      "town": ["The girl keeps the hill light and keeps her own counsel. Something soured there.", "Ask her about the old keeper and she walks off. Mid-word."]
+    },
+    "bearer": {
+      "text": "I carry the keeper's lantern myself. When I am near, there is a light on the hill. When I am not, there is none.",
+      "reward": { "coins": 8, "hearts": 6, "reputation": 6 },
+      "marks": ["barrow_lantern_bearer"],
+      "town": ["The stranger took the hill light off down the road. A light's a light, they said. Tell that to the hill.", "{ward} sits at the foot of the barrow at dusk with a candle stub. It isn't the same, and she knows it."]
+    },
+    "walled": {
+      "text": {
+        "?fate=joined": "The mound is walled with {keeper} inside it, as he asked. Nobody carries the lantern now.",
+        "?": "The mound is walled, and the lantern went out behind the stones. Nobody carries it now."
+      },
+      "reward": { "coins": 16, "reputation": 10 },
+      "marks": ["walled_the_barrow"],
+      "town": ["A good stout wall on the old mound. Should have been done in my grandfather's day.", "My dog won't pass that wall. Sits down in the moor road and won't be pulled."]
+    },
+    "thief_keeps": {
+      "text": "{robber} carries the Lantern Warden's light over the graves she robbed. It burns every night. {ward} has not forgiven me for it.",
+      "reward": { "coins": 12, "hearts": 4, "reputation": 6 },
+      "marks": ["lantern_given_to_thief"],
+      "town": ["A charcoal burner keeping the barrow light. Her sort. And yet it's lit every dusk, I'll say that.", "She leaves a pinch of coal on the sill by the lamp, they say. Two gods on one doorstep. No good comes of that."],
+      "returns": { "who": "robber", "days": [9, 14], "as": "thanks", "say": "I came down off the hill for one day. The girl is minding it. Yes, her. She put the stone down and held out the other hand, and I put the lantern in it, and tomorrow I take it back. We have an arrangement. This is from the hollow.", "gift": ["minecraft:charcoal*16", "minecraft:lantern*1"] }
+    }
+  }
+}

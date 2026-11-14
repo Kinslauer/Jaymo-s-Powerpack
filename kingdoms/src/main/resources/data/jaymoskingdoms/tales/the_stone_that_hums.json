@@ -1,0 +1,261 @@
+{
+  "title": "The Stone That Hums",
+  "start": {
+    "by": "rumour", "weight": 1,
+    "rumour": "There's a stone out {way:stone} that hums. Not the wind. It hums on a still night. An old fellow has a hut beside it, and nobody from here walks that way after dark. The cleric means to have him moved on before the frost. I say let well alone. But then I've never been up to look."
+  },
+  "cast": {
+    "hermit": { "name": ["Ferris Oake", "Bertram Sallow", "Aldwin Reck"], "body": "villager", "job": "none", "female": false, "at": "stone" },
+    "cleric": { "name": ["Lowen Garth", "Edric Pallant", "Hugh Maddern"], "body": "villager", "job": "cleric", "female": false, "at": "seat" },
+    "mother": { "name": ["Joan Kettle", "Ellin Marsh", "Mabby Thorne"], "body": "villager", "job": "farmer", "female": true, "at": "house" },
+    "picker": { "name": ["Corley Finch", "Jass Tolland", "Wat Sperrin"], "body": "fighter", "female": false, "at": "track", "health": 50, "damage": 6, "armor": 5, "hand": "minecraft:iron_pickaxe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "stone": { "at": "wild", "from": "home", "dist": [220, 400], "name": "the humming stone" },
+    "seat": { "at": "town", "name": "the town below" },
+    "house": { "at": "near", "from": "seat", "dist": [20, 50], "name": "the house by the well" },
+    "track": { "at": "near", "from": "stone", "dist": [35, 60], "name": "the sheep track under the stone" }
+  },
+  "first": "find",
+  "steps": {
+    "find": {
+      "do": "go", "to": "stone", "hidden": true,
+      "journal": "I followed a drunk's rumour out to a standing stone. It does hum. I felt it in my teeth before I heard it.",
+      "then": "meet"
+    },
+    "meet": {
+      "do": "talk", "who": "hermit", "goal": "Speak with the man at the hut",
+      "say": [
+        "Read the post. No? It says go back. I cut it deep enough.",
+        "You have stood there the best part of a minute and you have not asked me what it is. Good. I do not know what it is. Thirty-one years beside it, and I do not know. Anyone who tells you he knows is selling something."
+      ],
+      "replies": [
+        { "say": "I heard a man lived out here. I came to see.", "then": "meet_more" },
+        { "say": "They say in town you are to be moved on.", "then": "meet_more" },
+        { "say": "Does it never stop?", "then": "meet_more" }
+      ]
+    },
+    "meet_more": {
+      "do": "talk", "who": "hermit",
+      "say": [
+        "It does not stop. It is quietest at noon and worst at the dark of the moon. You feel it in your back teeth first. After an hour you will think you have nearly caught the tune. That is the time to walk away. Do not try for the end of it.",
+        "If you want to be of use and not only a nuisance, fetch me wool. Clean white fleece, four good handfuls. Mine has rotted. Bring that, and I will give you the time of day."
+      ],
+      "replies": [
+        { "say": "Wool it is.", "then": "wool", "journal": "An old man named {hermit} lives beside the stone and wants no visitors. He asked me for wool, and would not say what for." },
+        { "say": "Keep your stone, old man. I'm no errand runner.", "then": "end:left" }
+      ]
+    },
+    "wool": { "do": "bring", "who": "hermit", "item": "minecraft:white_wool", "count": 4, "goal": "Bring {hermit} four white wool", "then": "wool_talk" },
+    "wool_talk": {
+      "do": "talk", "who": "hermit",
+      "say": [
+        "Good fleece. Here, take some back. Twist it small and stop your ears when the light goes. That is what it is for. I have slept with wool in my ears every night since my beard was brown, and I give it to any fool who comes up here and will not turn round.",
+        "Now. You will have heard that {cleric} wants me gone and the stone split. He has masons coming before the frost. And twice this month men with a mule have been by, asking what I would take for a piece of it.",
+        "Go down and hear {cleric}. He is no liar. Hear him, look where he tells you to look, and then come and ask me to my face."
+      ],
+      "journal": "The wool is for stopping the ears after dark. {hermit} says the town's cleric, {cleric}, means to have the stone split, and that men with a mule have been asking to buy pieces of it. He sent me down to hear the cleric's side for myself.",
+      "then": "to_town"
+    },
+    "to_town": { "do": "go", "to": "seat", "goal": "Go down to the town and find {cleric}", "then": "hear_cleric" },
+    "hear_cleric": {
+      "do": "talk", "who": "cleric", "goal": "Hear {cleric}",
+      "say": [
+        "You have been up to it. I can tell: you are holding your jaw. Sit. I am not going to tell you it is a devil. The Truth has no need of devils. It is a rock with a flaw in it, and the wind sings in the flaw.",
+        "But I will tell you what is so. Folk from this town go up there by night and leave candles and milk at a rock. Three children have been found standing at it at dawn in their nightshirts, a mile from their beds, not knowing how they came there. One has not spoken since spring. And an old man sits beside it and keeps it company."
+      ],
+      "replies": [
+        { "say": "He sent me to you. He said you were no liar.", "then": "cleric_more" },
+        { "say": "And when the stone is split?", "then": "cleric_more" }
+      ]
+    },
+    "cleric_more": {
+      "do": "talk", "who": "cleric",
+      "say": [
+        "Then it is rubble in a pinfold wall, and there is nothing to walk to. The masons come in four days. I would sooner he went quietly. There is {coins:18} of the town's money for him if he takes the road, and something for whoever persuades him.",
+        "One thing more, since he told you to look where I point. He had a wife. Elsbeth. Nobody in this town saw her leave, and behind his hut there is a mound the length of a woman. I have never had the men to dig it.",
+        "Before you judge me hard, go and see {mother}, by the well. It is her boy who does not speak."
+      ],
+      "journal": "{cleric} says children of the town have been found at the stone at dawn, and one has not spoken since spring. Masons come in four days to split it. He offers {hermit} {coins:18} to go quietly. He says {hermit} had a wife, Elsbeth, whom nobody saw leave, and that there is a mound behind the hut.",
+      "then": "see_mother"
+    },
+    "see_mother": {
+      "do": "talk", "who": "mother", "goal": "See {mother} at {place:house}",
+      "say": [
+        "You have come from {cleric}. He will have told you my Davy does not speak. That is so. He walked out in his sleep in spring. I found him at that stone at first light with his hand laid flat on it, and he has not said a word since.",
+        "He will not have told you the rest, because I have not told him. Davy does not sleep. Not here. But when I take him up there, and old {hermit} sits him by the fire and hums that sound back to him, low, he sleeps like a babe."
+      ],
+      "replies": [
+        { "say": "What do you want done?", "then": "mother_more" },
+        { "say": "I'll not tell {cleric} that you go up there.", "then": "mother_more", "mark": "stone_kept_mothers_secret" }
+      ]
+    },
+    "mother_more": {
+      "do": "talk", "who": "mother",
+      "say": [
+        "Want? I want my boy to say my name. If the stone is broken, perhaps he wakes. Perhaps he never sleeps again. Nobody can tell me which, and everybody is certain.",
+        "So you tell me who is harming my son: the rock, or the old man, or the cleric. I do not know. If you are going back up, take him this loaf. He will not take money."
+      ],
+      "journal": "{mother}'s son was found at the stone and has not spoken since. Yet he sleeps only when {hermit} hums the stone's sound to him. She takes the boy up in secret. She does not know what she wants done.",
+      "then": "search_hut"
+    },
+    "search_hut": {
+      "do": "search", "at": "stone", "goal": "Look round the hut by {place:stone}",
+      "give": [{ "item": "minecraft:bread", "count": 2, "name": "A loaf from the house by the well", "lore": ["For the old man.", "He will not take money."] }],
+      "clues": [
+        { "name": "The warning post", "item": "minecraft:oak_sign", "lore": ["GO BACK, cut deep, and cut again each year as the wood weathers.", "Lower down, in a smaller and older hand: not after dark."], "journal": "The post by the hut says GO BACK. Under that, older: not after dark." },
+        { "name": "A tally of nights", "item": "minecraft:stick", "lore": ["A door post notched from lintel to sill, and a second begun beside it.", "Thirty-one years of nights. None is missing."], "journal": "{hermit} has notched every night for thirty-one years on his door post. He has not missed one." },
+        { "name": "A rusted mason's wedge", "item": "minecraft:iron_nugget", "lore": ["Driven a finger deep into a seam of the stone, long ago, and left.", "The iron is bent flat, as though the seam had shut on it."], "journal": "Somebody tried to split the stone once before. The wedge is still in it, bent flat." },
+        { "name": "The mound behind the hut", "item": "minecraft:flint", "lore": ["The turf lifts at one corner. No bones. Chips of the stone, hundreds, each wrapped in fleece.", "Held to the ear, one is silent. Laid together again, they are not."], "journal": "The mound behind the hut is no grave. It is full of chips broken from the stone, each wrapped in wool. One alone is silent. Together they are not." }
+      ],
+      "then": "ask_elsbeth"
+    },
+    "ask_elsbeth": {
+      "do": "talk", "who": "hermit", "goal": "Ask {hermit} about the mound, and about Elsbeth",
+      "say": [
+        "So you lifted the turf. Good. Now you know more than {cleric}, who has pointed at that mound for eleven years and never once walked round to it.",
+        "Every piece anyone ever broke off it. Some I bought back. Some I took back. One I took from a dead man in a ditch four miles off, who had it held to his ear with both hands. I put them where they can hear each other. I could not tell you why. It seemed owed."
+      ],
+      "replies": [
+        { "say": "And Elsbeth?", "then": "elsbeth" },
+        { "say": "The cleric thinks she is under there.", "then": "elsbeth" }
+      ]
+    },
+    "elsbeth": {
+      "do": "talk", "who": "hermit",
+      "say": [
+        "We came up here for the grazing. She heard it before I did. She said it was a tune, and that she nearly had the end of it. I laughed at her. One night at the dark of the moon she took the wool out of her ears and went out to it. I heard her laugh, I was that near. A glad laugh.",
+        "I got to the door, and there was the stone, and the grass, and two twists of wool on the ground. That is all. I have told it so to three clerics, and each one looked at the mound. I stay because somebody must turn folk back. And because, if she ever finds the way home, this is where she will come."
+      ],
+      "replies": [
+        { "say": "I believe you.", "then": "hermit_plan", "mark": "stone_believed_hermit" },
+        { "say": "That is a hard thing to believe.", "then": "hermit_plan" }
+      ]
+    },
+    "hermit_plan": {
+      "do": "talk", "who": "hermit",
+      "say": [
+        "Believe it or not, as you like. The stone does not mind, and I am past minding. The masons come in four days, and the mule men will come before them. That sort always comes the night before, once they hear a thing is to be broken anyway.",
+        "I am seventy and I have a spade. If you mean to be here, be here on the third night, with wool in your ears."
+      ],
+      "journal": "{hermit} says his wife Elsbeth went out to the stone one night with her ears unstopped, laughed, and was gone. He stays to turn folk back, and in case she comes home. He expects the stone-pickers on the third night, the night before the masons.",
+      "then": "wait_masons"
+    },
+    "wait_masons": { "do": "wait", "days": [3, 3], "wake": "none", "goal": "Wait for the third night", "then": "to_track" },
+    "to_track": { "do": "go", "to": "track", "goal": "Meet the mule men on {place:track}", "then": "picker_talk" },
+    "picker_talk": {
+      "do": "talk", "who": "picker", "goal": "Speak with {picker}",
+      "say": [
+        "Evening. You will be the old man's hired hand. No call for that face. We are not robbers. We are in the building trade, in a manner of speaking.",
+        "That rock is to be broken up for a sheepfold the day after tomorrow. Everybody knows it. There is a gentleman at a court two realms off who pays by weight for the sort of stone that hums. He does not say why and I do not ask. It seems a waste to pen sheep with it. Stand aside an hour, and there is {coins:25} in it for you."
+      ],
+      "replies": [
+        { "say": "{hermit} says no. So do I.", "then": "fight_picker" },
+        { "say": "What became of the last man who carried a piece off?", "then": "picker_more" },
+        { "say": "An hour, then. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks." }
+      ]
+    },
+    "picker_more": {
+      "do": "talk", "who": "picker",
+      "say": "Old Jem? Found in a ditch, so I heard, with his hands to his head. He drank. Men who drink are found in ditches. I wear wax in my ears and I do not listen to rocks, and I have had eleven years in this trade. Last time of asking. Aside, or not?",
+      "replies": [
+        { "say": "Not.", "then": "fight_picker" },
+        { "say": "Aside. Pay first.", "then": "end:sold", "journal": "I took {coins:25} from {picker} and stood aside while his men went up to the stone with picks." }
+      ]
+    },
+    "fight_picker": {
+      "do": "foe", "who": "picker", "goal": "Drive the stone-pickers off",
+      "taunt": "Have it your way. Mind the mule, lads.",
+      "plea": "Enough! Enough, I say. It is a rock. I'll not die for a rock, whatever the gentleman pays.",
+      "mercy": "Go. And tell your gentleman it is not for sale.",
+      "thanks": "I'll tell him. He will only send somebody worse. That is no threat. It is how he is.",
+      "journal": "The stone-pickers came on the third night, as {hermit} said they would. They did not reach the stone.",
+      "slain": "dawn", "spared": "dawn"
+    },
+    "dawn": {
+      "do": "talk", "who": "hermit", "goal": "Speak with {hermit} before the masons come",
+      "say": [
+        "They will be here by noon tomorrow with wedges and a writ. I have thought about it all night, which is easy, since I have not slept a night through in thirty-one years.",
+        "I could stand in front of it with my spade and be carried off, and it is broken all the same. I could take the cleric's money and go. Or. You tell me. You have heard everybody now, and you are the only one in this who wants nothing from it."
+      ],
+      "replies": [
+        { "say": "Stay. I'll go down and face {cleric} myself.", "then": "face_cleric", "journal": "I told {hermit} to stay, and went down to stop the masons." },
+        { "say": "Take the money. Go, and do not look back at it.", "then": "wait_split", "journal": "I told {hermit} to take the cleric's money and go. He looked at the stone a long while, then fetched his spade and his blanket." },
+        { "say": "Bury it. Earth over stone. Nobody breaks it, nobody hears it.", "then": "mound", "journal": "I told {hermit} we should bury the stone before the masons came." }
+      ]
+    },
+    "face_cleric": {
+      "do": "talk", "who": "cleric", "goal": "Stop the masons in {place:seat}",
+      "say": [
+        "So you stand with him. You have a blade and I have a writ, and I'll not have blood shed over a rock. That would make a shrine of it for certain.",
+        "Hear my terms. One winter. He turns back every soul who comes, and he sends me word of each. If one more child is found at that stone, I come up with the realm's soldiers and not with masons, and I split it with you watching."
+      ],
+      "replies": [
+        { "say": "One winter. He will keep to it.", "then": "wait_stays" },
+        { "say": "One winter is all he asks.", "then": "wait_stays" }
+      ],
+      "journal": "{cleric} sent the masons home, on terms: one winter, every visitor turned back and reported, and no more children at the stone."
+    },
+    "wait_stays": {
+      "do": "wait", "days": [5, 8], "wake": "letter",
+      "letter": { "from": "{hermit}", "lines": [
+        "The masons were sent home. You have bought me a winter, and I thank you for it in my fashion, which is to tell you what it cost.",
+        "Two children came up last night, hand in hand, asleep on their feet. I stopped their ears and walked them home and put them in at their own doors. I sent no word to {cleric}. That is the first lie I have told about this stone in thirty-one years, and I lay it at your door beside my own.",
+        "There is a new notch post begun. I do not expect to fill it."
+      ] },
+      "then": "end:stays"
+    },
+    "wait_split": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{mother}", "lines": [
+        "They split it the day after he left. It took the masons till dusk and three wedges, and the big one swore it was like cutting a bell. It is in the pinfold wall now, at the low end. {cleric} preached on it.",
+        "Davy spoke. One word, the night it was broken. It was not my name. It was no word I know. He has said nothing since.",
+        "He sleeps now. Out of doors, against the pinfold wall, in the frost. I cannot keep him in. The sheep will not go to that end of the fold. I thought you should know what was done, since you had a hand in it, as I did."
+      ] },
+      "then": "end:split"
+    },
+    "mound": {
+      "do": "build", "at": "stone", "blocks": "minecraft:dirt", "count": 24, "goal": "Raise a mound of earth over the stone",
+      "journal": "{hermit} and I buried the stone under a mound of earth before the masons came. He laid the chips from behind his hut in beside it first, one by one.",
+      "then": "wait_mound"
+    },
+    "wait_mound": {
+      "do": "wait", "days": [5, 8], "wake": "letter",
+      "letter": { "from": "{cleric}", "lines": [
+        "I came up with the masons and found a hill where there had been a rock. I'll own that I stood a while. A writ to split a stone says nothing of digging up a hill, and I am a man of the plain word.",
+        "Nobody leaves candles at a hill. So far I am satisfied. The old man has shut his hut and gone down the west road with a spade over his shoulder. He would take none of the town's money.",
+        "The grass has taken on it already, though it is late in the year for grass. The sheep graze round it and not on it. I mention that only because it is so."
+      ] },
+      "then": "end:buried"
+    }
+  },
+  "endings": {
+    "left": { "text": "I left the old man to his stone.", "failed": true },
+    "sold": {
+      "text": "I took the stone-pickers' money. They worked an hour with picks and went off with a laden mule. {hermit} watched from his door and said nothing to me.",
+      "reward": { "coins": 25 },
+      "marks": ["sold_the_humming_stone"],
+      "town": ["The humming stone's a hand shorter than it was, they say. The cleric's masons will see to the rest.", "A carter found a mule loose on the west road, pack and all, and no men with it. He left the pack lying."]
+    },
+    "stays": {
+      "text": "{hermit} keeps his hut by the stone for one more winter, on the cleric's terms. He has broken them once already, for my sake and his own.",
+      "reward": { "coins": 10, "hearts": 10, "reputation": 8 },
+      "marks": ["stood_by_the_humming_stone"],
+      "town": ["The old fellow's still up by the stone. The cleric's face is a shut door about it.", "My two walked in their sleep last week and woke in their own beds with wool in their ears. I've not asked who."],
+      "returns": { "who": "mother", "days": [8, 14], "as": "thanks", "say": "I take Davy up twice a week now, in daylight, and nobody stops me. He has not spoken. But he sleeps, and last night he put his hand on my face the way he used to. I will take that. The old man says you would not want thanking. I am doing it anyway.", "gift": ["minecraft:bread*6", "minecraft:honey_bottle*2"] }
+    },
+    "split": {
+      "text": "{hermit} took the road, and the stone was split and built into the pinfold wall. {cleric} is satisfied. The boy sleeps against the wall.",
+      "reward": { "coins": 14, "reputation": 10 },
+      "marks": ["let_the_humming_stone_be_split"],
+      "town": ["Like cutting a bell, the mason said. He's gone home and won't take work here again.", "There's nothing up there to walk to now. So the children walk to the pinfold."],
+      "returns": { "who": "hermit", "days": [10, 16], "as": "warning", "say": "I went back to look. I should not have. They have it in the fold wall at the low end, in nine pieces, with mortar between. Nine pieces, laid together. You saw what was under my mound. I'll say no more than that. Do not lodge in that town at the dark of the moon. This was on her lead ewe. I have no door to hang it by now.", "gift": ["minecraft:bell*1", "minecraft:white_wool*4"] }
+    },
+    "buried": {
+      "text": "The stone lies whole under a mound of earth, with every chip that was ever broken from it. {hermit} has gone west. Grass grows on the mound out of season.",
+      "reward": { "coins": 12, "hearts": 6, "reputation": 10 },
+      "marks": ["buried_the_humming_stone"],
+      "town": ["There's a hill out that way that wasn't there at harvest. Don't ask me. I only count sheep.", "You can't hear it now. My gran says she can. But then she says she can hear the stars."]
+    }
+  }
+}

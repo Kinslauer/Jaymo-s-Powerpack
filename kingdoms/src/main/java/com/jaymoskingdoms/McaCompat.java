@@ -142,6 +142,23 @@ public final class McaCompat {
 		return LOADED ? McaBridge.spawnGuard(level, at) : null;
 	}
 
+	/**
+	 * One of a tale's people ({@link TaleCast}) at {@code at}, in the world: a townsperson of trade {@code job}, or (with
+	 * {@code fighter}) an armed one; a woman or a man if {@code female} says, called {@code name} if it isn't empty. MCA's
+	 * villager with MCA; without it a plain villager, and no fighter (null).
+	 */
+	static @Nullable Villager talePerson(ServerLevel level, net.minecraft.world.phys.Vec3 at, net.minecraft.world.entity.npc.villager.@Nullable VillagerProfession job,
+		@Nullable Boolean female, String name, boolean fighter) {
+		if (LOADED) {
+			return McaBridge.talePerson(level, at, job, female, name, fighter);
+		}
+		Villager v = fighter ? null : visitor(level, at, job, false);
+		if (v != null && !name.isEmpty()) {
+			v.setCustomName(net.minecraft.network.chat.Component.literal(name));
+		}
+		return v;
+	}
+
 	/** (0.7.351) A new MCA zombie villager at {@code at}, in the world ({@code nether.FortressHaunts}); null without MCA or if it failed. */
 	public static net.minecraft.world.entity.monster.zombie.@Nullable ZombieVillager spawnZombie(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return LOADED ? McaBridge.spawnZombie(level, at) : null;
@@ -763,6 +780,11 @@ public final class McaCompat {
 	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
 	 */
 	public static boolean foe(LivingEntity guard, LivingEntity target) {
+		Boolean tale = TaleCast.foe(guard, target);
+		if (tale != null) {
+			// a tale's people fight the players of their tale once it comes to that, and nobody's guard goes for them
+			return tale;
+		}
 		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);

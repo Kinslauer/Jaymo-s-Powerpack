@@ -1,0 +1,412 @@
+{
+  "title": "Hail Glass",
+  "start": { "by": "giver", "jobs": ["librarian", "cartographer"], "weight": 2 },
+  "roll": { "thief": ["clerk", "traveller", "ember"] },
+  "cast": {
+    "traveller": { "name": ["Tavik Oun", "Isk Varn", "Sele Korrin"], "body": "villager", "job": "none", "at": "house" },
+    "clerk": { "name": ["Perrin Dow", "Aldis Wren", "Hew Tarling"], "body": "villager", "job": "librarian", "at": "house" },
+    "ember": { "name": ["Kessa Brand", "Oda Harl", "Runa Sprake"], "body": "villager", "job": "toolsmith", "female": true, "at": "works" },
+    "fence": { "name": ["Nan Corry", "Sib Harrow", "Jass Quillon"], "body": "villager", "job": "none", "female": true, "at": "hatch" },
+    "sword": { "name": ["Dunstan Roke", "Lew Garrick", "Hob Marsh"], "body": "fighter", "at": "hatch", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate" }
+  },
+  "places": {
+    "house": { "at": "home", "name": "the house" },
+    "room": { "at": "near", "from": "home", "dist": [5, 15], "name": "the guest room" },
+    "works": { "at": "near", "from": "home", "dist": [40, 80], "name": "the glass-grinder's shop" },
+    "hatch": { "at": "near", "from": "home", "dist": [80, 140], "name": "the hatch behind the tannery" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "I've a guest. A Frostborn, straight down from wherever it is they come from, here to read my shelves for the old north roads. Pays well, complains of the heat, and wears a glass over one eye that half of {town} has found a reason to come and stare at.",
+        "This morning the glass is gone from the guest room, and my guest is sitting in my cellar, where it's cool, saying nothing at all. Which is worse than shouting. The street already says {ember} took it, because she's Emberborn and the two of them had words in the square. The watch will have her by evening unless somebody looks properly."
+      ],
+      "replies": [
+        { "say": "I'll look properly.", "then": "see_traveller", "journal": "A Frostborn traveller lodging with {giver} has had the glass stolen that he wears over one eye. The street blames {ember}, an Emberborn. I said I'd look into it." },
+        { "say": "Why does one eyeglass matter so?", "then": "ask_more" },
+        { "say": "The watch can see to it.", "then": "end:refused" }
+      ]
+    },
+    "ask_more": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "It's a scouter. Made on Hail. It reads a thing at a distance and tells you how much of it to fear, or so they say. I've not been let near it. There aren't six in the realm, and every reeve and captain who has seen one wants one.",
+        "If a Frostborn goes home robbed from my house, no ship of theirs sets down within ten leagues of {town} again, and everyone who hoped for their trade will know whose roof it happened under."
+      ],
+      "replies": [
+        { "say": "Then I'll look properly.", "then": "see_traveller", "journal": "A Frostborn traveller lodging with {giver} has had his scouter stolen, a glass made on Hail that reads a thing from far off. The street blames {ember}, an Emberborn. I said I'd look into it." },
+        { "say": "The watch can see to it.", "then": "end:refused" }
+      ]
+    },
+    "see_traveller": {
+      "do": "talk", "who": "traveller", "goal": "Speak with {traveller} in the cellar",
+      "say": {
+        "?thief=traveller": [
+          "You are the finder. Your host is kind. I did not ask for a finder.",
+          "The glass is gone. I have accepted it. On Hail a thing set on a table is on the table in the morning, and I was foolish to think one world is like another. Let it be. I leave by the north road within the week."
+        ],
+        "?": [
+          "You are the finder. Good. Sit there, not near. You are all so warm.",
+          "On Hail a thing set on a table is on the table in the morning. I was told your world was warm. I was not told it had fingers. The glass was my mother's make. It has read every horizon I have stood on. Find it."
+        ]
+      },
+      "replies": [
+        { "say": "When did you last have it?", "then": "traveller_more" },
+        { "say": "They say you quarrelled with {ember}.", "then": "traveller_more" }
+      ]
+    },
+    "traveller_more": {
+      "do": "talk", "who": "traveller",
+      "say": {
+        "?thief=traveller": "At the lamp-lighting I set it in its case. In the morning the case was empty. That is all there is. As for the Emberborn: she asked what it would cost to look through it once, and I named a price a child would know for a refusal. She has a temper. That proves nothing. I would not have her taken on my account. Say so to your watch.",
+        "?": "At the lamp-lighting I set it in its case, and slept, badly, in your heat. In the morning the case was empty. As for the Emberborn: she asked what it would cost to look through it once, and I named a price a child would know for a refusal. She said my people sell the Overworld its own eyes back at a profit. I recall it exactly."
+      },
+      "journal": {
+        "?thief=traveller": "{traveller} put the glass in its case at lamp-lighting and found the case empty at dawn. He refused {ember} a look through it. He did not ask for a finder, and wants the watch to leave her be.",
+        "?": "{traveller} put the glass in its case at lamp-lighting and found the case empty at dawn. It was his mother's make. He refused {ember} a look through it, and she said hard things."
+      },
+      "then": "search_room"
+    },
+    "search_room": {
+      "do": "search", "at": "room", "need": 3, "goal": "Look over the guest room",
+      "clues": [
+        { "name": "A case of grey hide", "item": "minecraft:leather", "lore": ["Lined, and shaped for something the size of a hen's egg.", "The clasp was opened, not forced."], "journal": "The scouter's case was opened by its clasp. Nothing was forced." },
+        { "name": "A bead of furnace glass", "item": "minecraft:glass_pane", "lore": ["Such as falls from a glass-worker's apron.", "{ember} was in this house yesterday, selling lamp chimneys."], "journal": "A bead of furnace glass lay by the guest room door. {ember} was in the house yesterday on business." },
+        { "name": "An inky thumbprint", "item": "minecraft:ink_sac", "lore": ["On the inside of the door, low down, where a hand feels for a latch in the dark.", "Whoever came in had a key, and a copyist's fingers."], "journal": "An inky thumb felt for the latch on the inside of the guest room door.", "if": "thief=clerk" },
+        { "name": "A page of wandering letters", "item": "minecraft:paper", "lore": ["Someone tried to copy the marks from the case lid.", "The lines run off the rule, as if the writer could not see where the page ended."], "journal": "Someone copied the marks from the case lid, in lines that wander off the page.", "if": "thief=clerk" },
+        { "name": "A scorched latch", "item": "minecraft:charcoal", "lore": ["The window latch has a brown bloom on it.", "Hot fingers held it a good while."], "journal": "The window latch is scorched, as if by a very warm hand.", "if": "thief=ember" },
+        { "name": "A charcoal drawing", "item": "minecraft:paper", "lore": ["A lens in its mount, drawn fast, with measures down the side.", "Made at this table, by this window, in the night."], "journal": "Someone sat at the guest room table in the night and drew the scouter, with measures.", "if": "thief=ember" },
+        { "name": "A reckoning of passage", "item": "minecraft:paper", "lore": ["Figures in a narrow hand: carter, bearers, a guide to the snowfields.", "The sum is underlined twice. It is more than a traveller carries."], "journal": "Among the guest's papers is a reckoning of the cost of the road north. It is a large sum, underlined twice.", "if": "thief=traveller" },
+        { "name": "A clay token", "item": "minecraft:brick", "lore": ["Stamped with a hatch and a blade of grass.", "The dens give them to those who have sold there. It was under the bolster."], "journal": "A den's token was under the bolster of the guest's own bed.", "if": "thief=traveller" }
+      ],
+      "then": "see_ember"
+    },
+    "see_ember": {
+      "do": "talk", "who": "ember", "goal": "Hear what {ember} has to say",
+      "say": {
+        "?thief=ember": [
+          "Here it comes. Somebody loses a thing and the street walks straight to the Emberborn. Go on, look round. Mind the bench. Somebody has been through it already this morning and I've not finished swearing about that.",
+          "I wanted that glass. I'll say so to anyone. I grind lenses, and that is the best lens in the world, and it sits on the face of a man who thinks we're cattle. Wanting isn't taking."
+        ],
+        "?": [
+          "Here it comes. Somebody loses a thing and the street walks straight to the Emberborn. Go on, look round. Lift things. I've nothing to do today but be searched.",
+          "I wanted that glass. I'll say so to anyone. I grind lenses, and that is the best lens in the world, and it sits on the face of a man who thinks we're cattle. Wanting isn't taking."
+        ]
+      },
+      "replies": [
+        { "say": "Where were you at the lamp-lighting?", "then": "ember_more" },
+        { "say": "If not you, where would such a thing go?", "then": "ember_more" }
+      ]
+    },
+    "ember_more": {
+      "do": "talk", "who": "ember",
+      "say": {
+        "?thief=ember": "Here. Working. Alone, which is how grinding is done, so nobody saw me. Handy for you. As for where it goes: where everything goes that can't be sold in daylight. The hatch behind the tannery. Only the watch nailed that down three days back, so whoever holds the glass is holding it yet. Try being quick, for once, you people.",
+        "?": "Here. Working, with the shutters open for the cool, and the tanner's wife watched me through them till past midnight. Ask her. As for where it goes: where everything goes that can't be sold in daylight. The hatch behind the tannery. Only the watch nailed that down three days back, so whoever holds the glass is holding it yet."
+      },
+      "journal": {
+        "?thief=ember": "{ember} owns that she wanted the glass. She says she worked alone that night, and that her bench was rifled this morning. Stolen goods go to the hatch behind the tannery, which the watch nailed shut three days ago.",
+        "?": "{ember} owns that she wanted the glass. The tanner's wife saw her at her bench until past midnight. Stolen goods go to the hatch behind the tannery, which the watch nailed shut three days ago."
+      },
+      "then": "see_clerk"
+    },
+    "see_clerk": {
+      "do": "talk", "who": "clerk", "goal": "Ask {giver}'s copyist what he saw",
+      "say": {
+        "?thief=clerk": [
+          "Oh. Yes. The glass. Terrible. I was copying late, the north sheets, by the one candle. I didn't hear anything. My eyes were tired. I went up.",
+          "I never went near the guest room. Why would I? I've my own work. I've plenty of work. {giver} will tell you how much work I have."
+        ],
+        "?thief=traveller": [
+          "Oh. Yes. The glass. Terrible. I was copying late, the north sheets. I did see something, only it isn't about a thief, so I don't know that it counts.",
+          "The guest went out after the lamps were lit. Cloak up, in that heat. He was back within the hour, walking lighter. I don't mean quicker. I mean like a man who has put something down. I thought nothing of it. I still mostly think nothing of it."
+        ],
+        "?": [
+          "Oh. Yes. The glass. Terrible. I was copying late, the north sheets. I did notice something, only it's a small thing, so I don't know that it counts.",
+          "The guest room window was open at dawn. He never opens it. He says the air out there is soup. And the sill was warm when I shut it, on the shady side of the house. I thought that was odd, and then I had sheets to rule."
+        ]
+      },
+      "replies": [
+        { "say": "You hold those pages very close.", "then": "clerk_more" },
+        { "say": "Who has keys to that room?", "then": "clerk_more" }
+      ]
+    },
+    "clerk_more": {
+      "do": "talk", "who": "clerk",
+      "say": {
+        "?thief=clerk": "The light in here is bad. That's all. Everybody says so. Keys: {giver} has one, and I've one, for the dusting, and the guest. I'd like to get on, please. I've a sheet to finish and I keep losing the line.",
+        "?": "The light in here is bad, that's all, and the hand on these sheets is small. Keys: {giver} has one, and I've one, for the dusting, and the guest. Mine is on its nail. You can look."
+      },
+      "journal": {
+        "?thief=clerk": "{clerk}, the copyist, says he saw and heard nothing. He has a key to the guest room. He reads with the page almost against his face.",
+        "?thief=traveller": "{clerk}, the copyist, saw {traveller} go out cloaked after lamp-lighting and come back within the hour, 'like a man who has put something down'.",
+        "?": "{clerk}, the copyist, found the guest room window open at dawn and the sill warm to the hand, on the shady side of the house."
+      },
+      "then": "tell_giver"
+    },
+    "tell_giver": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} where the trail leads",
+      "say": [
+        "The hatch behind the tannery. I know of it, the way you know of a drain. The watch went down it in force three days ago and nailed it shut under iron, so nothing has gone in or out since.",
+        "Which means the glass is still above ground, in somebody's hands, waiting for the nails to work loose. They always do. A day or two. I'll send word when there's lamplight under the grass again."
+      ],
+      "replies": [
+        { "say": "Send word.", "then": "wait_hatch" },
+        { "say": "And {ember}, meanwhile?", "then": "wait_hatch", "journal": "{giver} has asked the watch to leave {ember} be until the hatch opens. The watch agreed to wait once." }
+      ]
+    },
+    "wait_hatch": {
+      "do": "wait", "days": [1, 3], "wake": "letter",
+      "letter": { "from": "{giver}", "lines": [
+        "There is lamplight under the grass behind the tannery again.",
+        "Go at dusk. Knock twice and say nobody sent you. It is the only true thing anyone says down there.",
+        "Take money. They will not give it up for a kind word. And be quick: the watch wants {ember} by tomorrow, and they will not wait for me twice."
+      ] },
+      "then": "to_hatch"
+    },
+    "to_hatch": { "do": "go", "to": "hatch", "goal": "Go to the hatch behind the tannery", "then": "see_fence" },
+    "see_fence": {
+      "do": "talk", "who": "fence", "goal": "Speak with the fence",
+      "say": [
+        "Nobody sent you. Good. Nobody sends all my best customers.",
+        "A glass from Hail, with the numbers still swimming in it? I might have seen one. It came down my ladder the very night the nails came out. {coins:25}, and it goes back up the ladder with you. I'm told that's a tenth of its worth, so you're robbing me, and we're both content.",
+        "The name of who brought it? Pay for the glass and I'll throw the name in, because I like your boots. Or take it up with {sword}. He's the one stood behind you."
+      ],
+      "replies": [
+        { "say": "{coins:25}. The glass and the name.", "needs_coins": 25, "then": "fence_tells", "mark": "hail_bought_glass", "journal": "I bought the scouter back from the fence under the tannery for {coins:25}." },
+        { "say": "It's stolen. I'll take it, and I'll take it up with him.", "then": "fight" }
+      ]
+    },
+    "fight": {
+      "do": "foe", "who": "sword", "goal": "Deal with {sword}",
+      "taunt": "Nothing in it, friend. She pays me by the week.",
+      "plea": "Hold! Hold. It's a week's wages, not a cause. I don't even know what the thing does.",
+      "mercy": "Then stand aside, and tell her the glass is leaving.",
+      "thanks": "Standing aside. Gladly. Give it over, mistress. I'm not dying for an eyeglass.",
+      "slain": "fence_cold", "spared": "fence_tells"
+    },
+    "fence_tells": {
+      "do": "talk", "who": "fence", "goal": "Take the glass from the fence",
+      "give": [{ "item": "minecraft:spyglass", "count": 1, "name": "The Hail-glass", "lore": ["A Frostborn scouter.", "Small cold numbers swim in it."] }],
+      "say": {
+        "?thief=clerk": [
+          "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
+          "Who brought it? A boy with ink to the elbows, squinting like a mole. Wanted {coins:6}. I gave him four, and he counted them holding each one up to his nose. Whatever he stole it for, it wasn't to get rich."
+        ],
+        "?thief=traveller": [
+          "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
+          "Who brought it? Why, the frost-man himself. Came down my ladder with his hood up, as if anyone else in {town} is that shape. Wanted {coins:40} for passage north, took twenty, and asked me to forget his face. I've done my best. It isn't a face that helps."
+        ],
+        "?": [
+          "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
+          "Who brought it? Nobody sold it. {sword} lifted it off the Emberborn's bench while she was at the well. She'd had it one night and drawn it six ways. So if you're counting thieves, count two, and one of them works for me."
+        ]
+      },
+      "journal": {
+        "?thief=clerk": "The fence says the glass was sold to her by a squinting boy with inky hands, for four coins. That is {clerk}.",
+        "?thief=traveller": "The fence says {traveller} sold her the glass himself, hooded, for passage money, and asked her to forget his face.",
+        "?": "The fence says her own man stole the glass from {ember}'s bench. {ember} had already had it a night, and had drawn it six ways."
+      },
+      "then": { "?thief=clerk": "clerk_truth", "?thief=traveller": "owner_truth", "?": "ember_truth" }
+    },
+    "fence_cold": {
+      "do": "talk", "who": "fence", "goal": "Take the glass from the fence",
+      "give": [{ "item": "minecraft:spyglass", "count": 1, "name": "The Hail-glass", "lore": ["A Frostborn scouter.", "Small cold numbers swim in it."] }],
+      "say": [
+        "You've killed {sword}. Over an eyeglass. Take it. It's bad luck now, and I'd not get a tenth of a tenth.",
+        "The name? No. The name was for people whose boots I liked. Nobody sent you, and nobody will tell you. Unless you have {coins:15} for the woman he's left me to explain it to."
+      ],
+      "replies": [
+        { "say": "{coins:15}. For her. And the name.", "needs_coins": 15, "then": "fence_name" },
+        { "say": "Keep your name. I have what I came for.", "then": "return_blind", "journal": "I killed the fence's man and took the scouter. She would not tell me who brought it to her, and I did not pay to know." }
+      ]
+    },
+    "fence_name": {
+      "do": "talk", "who": "fence",
+      "say": {
+        "?thief=clerk": "A boy with ink to the elbows, squinting like a mole. He asked six and I gave him four. Now go up my ladder and don't come down it again.",
+        "?thief=traveller": "The frost-man himself, with his hood up, wanting passage money. He took twenty and asked me to forget his face. Now go up my ladder and don't come down it again.",
+        "?": "Nobody sold it. The man you've just killed lifted it off the Emberborn's bench. She'd had it a night and drawn it six ways. Now go up my ladder and don't come down it again."
+      },
+      "journal": {
+        "?thief=clerk": "I killed the fence's man. For {coins:15} she told me the glass was sold to her by a squinting boy with inky hands. That is {clerk}.",
+        "?thief=traveller": "I killed the fence's man. For {coins:15} she told me {traveller} sold her the glass himself, for passage money.",
+        "?": "I killed the fence's man. For {coins:15} she told me he had stolen the glass from {ember}'s bench, after {ember} had kept it a night and drawn it."
+      },
+      "then": { "?thief=clerk": "clerk_truth", "?thief=traveller": "owner_truth", "?": "ember_truth" }
+    },
+
+    "clerk_truth": {
+      "do": "talk", "who": "clerk", "goal": "Put it to {clerk}",
+      "say": [
+        "Four coins. She told you four. I asked six, and I couldn't even get that right.",
+        "I can't see the rule lines any more. They swim. A copyist who can't keep a line is a mouth {giver} feeds out of pity, and then not even that. I heard the glass brings far things near. I thought if it would only show me the page. It showed me numbers. Cold little numbers beside everything. Beside my own hand.",
+        "So I sold it, to be rid of it. The four coins went to the herb-woman for an eye wash. It stings and does nothing. Are you going to tell them?"
+      ],
+      "replies": [
+        { "say": "He must be told. And {giver}.", "then": "return_named", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to tell {traveller} and {giver} all of it." },
+        { "say": "The fence's man stole it. That is all anyone need hear.", "then": "return_covered", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to say the den's man stole it and leave the boy out." }
+      ]
+    },
+    "ember_truth": {
+      "do": "talk", "who": "ember", "goal": "Put it to {ember}",
+      "say": [
+        "So she told you. I'd have had it back by morning. In at the window, a night's drawing, and on his table again before he woke. Then that ox of hers came through my shop while I was at the well.",
+        "I wasn't going to keep it. I was going to never need one of theirs again. None of us would. Do you know what they ask for a lens? Do you know how they look at you while they ask it? I've six drawings. Give me a winter and I'll grind one that reads half as far for a twentieth of the price."
+      ],
+      "replies": [
+        { "say": "He must be told. And the watch.", "then": "return_named", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to tell {traveller} and the watch all of it." },
+        { "say": "The fence's man stole it. Burn the drawings tonight.", "then": "return_covered", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. I told her to burn the drawings." },
+        { "say": "The fence's man stole it. Hide the drawings well.", "then": "return_covered", "mark": "hail_drawings", "journal": "{ember} took the glass for one night, to draw it and learn how it is made. I mean to say the den's man stole it. She keeps her drawings." }
+      ]
+    },
+    "owner_truth": {
+      "do": "talk", "who": "traveller", "goal": "Put it to {traveller}",
+      "say": [
+        "You have it in your hand. Then you have been down the ladder, and you know who else has. Do not hold it out to me. Not yet.",
+        "My passage money went into a river with a bearer and a mule, eleven days ago. I am very far from the snow, in a heat that is taking me apart. A child of Hail does not beg. A child of Hail does not sell their mother's glass. I did one of those in the dark, and called it theft so that I need not say which.",
+        "And your host hired a finder. I had not accounted for kindness. We do not keep much of it on Hail. It does not store."
+      ],
+      "replies": [
+        { "say": "Take it back. Nobody need know how it left.", "then": "wait_secret", "journal": "{traveller} sold his own glass to pay for the road north, and called it theft out of pride. I gave it back and said nothing to anyone." },
+        { "say": "Take it, and {coins:20} for the road. Pay me back in maps.", "needs_coins": 20, "then": "wait_owed", "mark": "hail_paid_passage", "journal": "{traveller} sold his own glass to pay for the road north, and called it theft out of pride. I gave it back with {coins:20} for his passage, and said nothing to anyone." },
+        { "say": "{giver} hired me for the truth and will have it.", "then": "owner_told", "journal": "{traveller} sold his own glass to pay for the road north, and called it theft out of pride. {giver} is owed the truth." }
+      ]
+    },
+    "owner_told": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} who sold the glass",
+      "say": [
+        "Sold it himself. And sat in my cellar while the street fitted {ember} for a rope.",
+        "No. That isn't fair. He told the watch to leave her be. I heard him. He'd not have let her hang. He'd only have let her be suspected, which round here is half of it. I'll not put him out. But I'll not pretend at table either, and he will know it by my face. For his sort, I think that's worse than the door."
+      ],
+      "then": "end:shamed"
+    },
+    "return_named": {
+      "do": "talk", "who": "traveller", "goal": "Return the glass to {traveller}",
+      "say": {
+        "?thief=clerk": [
+          "The copyist. The one who brings the water and spills it.",
+          "He looked through it. Then he has seen what I see, and it frightened him, and he sold my mother's glass for four coins. I will have him before your elders. On Hail I would not need to ask. Give it here. It is warm. Everything you people touch is warm."
+        ],
+        "?": [
+          "The Emberborn. So the street was right, and for the wrong reason, which is how streets are right.",
+          "She drew it. Then the drawings are mine as the glass is mine. I will have them burnt before your elders, and her dealt with as your law deals. Give it here. It is warm. Everything you people touch is warm."
+        ]
+      },
+      "then": "wait_named"
+    },
+    "return_covered": {
+      "do": "talk", "who": "traveller", "goal": "Return the glass to {traveller}",
+      "say": [
+        "A den's hired thief. Through a shut door, past a clasp that was not forced. You say so.",
+        "I have the glass, and a finder's word, and I am too far from home to weigh the one against the other. So. It was the den. Give it here. It is warm. Everything you people touch is warm."
+      ],
+      "then": "wait_covered"
+    },
+    "return_blind": {
+      "do": "talk", "who": "traveller", "goal": "Return the glass to {traveller}",
+      "say": {
+        "?thief=traveller": "You have it. And you do not know how it came to be where it was. No. Good. Then nobody does, and a man is dead over it. I did not want that. Give it here. I leave within the week.",
+        "?": "You have it, and you killed for it, and you cannot tell me whose hand took it from my table. Then the Emberborn's name stays where the street put it, and I leave a thief behind me uncounted. It is half a finding. I will pay for half. Give it here."
+      },
+      "then": "end:blind"
+    },
+    "wait_named": { "do": "wait", "days": [3, 5], "wake": "giver", "then": "named_after" },
+    "named_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what came of it",
+      "say": {
+        "?thief=clerk": [
+          "The elders heard it yesterday. {traveller} stood there like a drawn knife and asked for the Sun's law. I asked for the boy's eyes to be looked at first. The herb-woman says a year, perhaps two, and then the dark.",
+          "They'll not hang a boy who is going blind. They've put him out of my house instead, by their order, and I'm bound by it. He has gone to an uncle who keeps pigs. You don't need eyes for pigs, the elder said. He was pleased with that."
+        ],
+        "?": [
+          "The watch took {ember} from her bench. {traveller} had the six drawings burnt in the square and watched every one of them go. She's to be put out of {town} at the month's end.",
+          "The street is well content. It said so all along. Who will make our lamp chimneys I don't know. Nobody has asked. And the Frostborn has gone north, satisfied, and has promised to speak well of my house."
+        ]
+      },
+      "then": "end:named"
+    },
+    "wait_covered": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{thief}", "lines": [
+        "The glass went north on its owner's face, and I am told a den's man was blamed for it. I know who told it that way.",
+        "I don't know what to do with being let off. I am doing my work. It is all I have to pay with just now.",
+        "If you ever want a thing copied or a thing made in {town}, you will not pay for it."
+      ] },
+      "then": { "?thief=clerk": "end:covered", "?mark:hail_drawings": "end:drawings", "?": "end:covered" }
+    },
+    "wait_secret": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{traveller}", "lines": [
+        "I write from the last milestone, waiting on a carter who is late, as everything here is late, and warm.",
+        "The glass is on my face again and my purse is as empty as it was. So I go north on foot. It is fitting. I will be cold sooner.",
+        "You kept a thing for me that I could not have kept myself. On Hail we have no word for that which is not also the word for debt."
+      ] },
+      "then": "end:secret"
+    },
+    "wait_owed": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{traveller}", "lines": [
+        "I write from the last milestone, with a carter paid and waiting. He is late, as everything here is late, and warm.",
+        "I have looked at you through the glass. I will not tell you the number. It was larger than I expected.",
+        "You said maps. A child of Hail pays. Look for them when the north road opens."
+      ] },
+      "then": "end:owed"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver}'s guest and his glass to the watch.", "failed": true },
+    "named": {
+      "text": {
+        "?thief=clerk": "{clerk} took the scouter, hoping it would show him the page he can no longer see. I named him. He keeps pigs now, for an uncle. {traveller} went north satisfied.",
+        "?": "{ember} took the scouter for a night to learn its making. I named her. Her drawings were burnt in the square and she is to be put out of {town}. {traveller} went north satisfied."
+      },
+      "reward": { "coins": 24, "hearts": 6, "reputation": 14 },
+      "marks": ["hail_named_thief"],
+      "town": ["It was {thief} took the frost-man's glass. He had the elders sit on it, and stood there the whole time like an icicle.", "The Frostborn went home content. There'll be a ship of theirs down by spring, {giver} says. Good for trade."]
+    },
+    "covered": {
+      "text": {
+        "?thief=clerk": "{traveller} has his glass, and {town} believes a den's hired thief took it. {clerk} still rules lines at {giver}'s, while he can see them.",
+        "?": "{traveller} has his glass, and {town} believes a den's hired thief took it. {ember} burnt her drawings and went back to lamp chimneys."
+      },
+      "reward": { "coins": 18, "hearts": 10, "reputation": 10 },
+      "marks": ["hail_covered_thief"],
+      "town": ["The den had the frost-man's glass all along. The watch ought to nail that hatch and leave it nailed.", "They were all set to take {ember} for it, you know. Nobody's said sorry. Nobody will."]
+    },
+    "drawings": {
+      "text": "{traveller} has his glass, and {town} believes a den's hired thief took it. {ember} has six drawings under her floor and a winter to grind by.",
+      "reward": { "coins": 18, "hearts": 10, "reputation": 10 },
+      "marks": ["hail_covered_thief", "hail_drawings"],
+      "town": ["The den had the frost-man's glass all along. The watch ought to nail that hatch and leave it nailed.", "{ember} has her shutters closed at night now. Says it's the cold. An Emberborn, shutting out the cold."],
+      "returns": { "who": "ember", "days": [12, 20], "as": "thanks", "say": "Don't hold it up where folk can see. It reads half as far as his and shows no numbers, and I ground every part of it myself. First one made this side of the sky. I'd sooner you had it than anyone who'd sell it.", "gift": ["minecraft:spyglass*1"] }
+    },
+    "blind": {
+      "text": "I killed a man for the glass and brought it back without learning whose hand first took it. {traveller} paid for half a finding.",
+      "reward": { "coins": 9, "reputation": 4 },
+      "marks": ["hail_slew_sword"],
+      "town": ["They say {ember} took the frost-man's eye and got clean away with it. I'd not buy a lamp chimney there now.", "There was a man killed down the tannery hatch. Nobody sent him, nobody's burying him."]
+    },
+    "secret": {
+      "text": "{traveller} sold his own glass and called it theft. I gave it back and kept his secret. He walks north on foot, owing me in a tongue that has one word for thanks and debt.",
+      "reward": { "coins": 12, "hearts": 8, "reputation": 8 },
+      "marks": ["hail_kept_secret"],
+      "town": ["The frost-man's glass turned up. Nobody was taken for it. Odd, that. Somebody's usually taken.", "He went off up the north road on foot, with the thing on his face, looking at everyone. Counting us, I'd say."]
+    },
+    "owed": {
+      "text": "{traveller} sold his own glass and called it theft. I gave it back with the price of his passage and kept his secret. He says a child of Hail pays.",
+      "reward": { "hearts": 10, "reputation": 8 },
+      "marks": ["hail_kept_secret", "hail_paid_passage"],
+      "town": ["The frost-man's glass turned up. Nobody was taken for it. Odd, that. Somebody's usually taken.", "He left by carter, paid in full. Bowed to {giver} at the door. I didn't know they bent."],
+      "returns": { "who": "traveller", "days": [14, 24], "as": "thanks", "say": "You said maps. These are the north roads as Hail drew them, before your people had roads. And the sum you lent, counted twice. I came down from the snow to hand them over myself. It is still too warm here.", "gift": ["minecraft:map*3", "minecraft:compass*1", "minecraft:gold_ingot*4"] }
+    },
+    "shamed": {
+      "text": "{traveller} sold his own glass and called it theft, and I told {giver} so. He has the glass again, and a host who will not meet his eye.",
+      "reward": { "coins": 20, "hearts": 6, "reputation": 10 },
+      "marks": ["hail_shamed_traveller"],
+      "town": ["Sold it himself! And let us all look sideways at {ember} for it. So much for Hail and its tables.", "{giver} still gives him the cellar. Sets his plate down a bit hard, mind."]
+    }
+  }
+}

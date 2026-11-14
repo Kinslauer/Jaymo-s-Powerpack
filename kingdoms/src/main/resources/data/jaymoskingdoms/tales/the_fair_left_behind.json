@@ -1,0 +1,362 @@
+{
+  "title": "The Fair Left Behind",
+  "start": { "by": "giver", "jobs": ["nitwit", "none", "baker", "farmer"], "weight": 2 },
+  "roll": { "why": ["driven", "given", "hid"] },
+  "cast": {
+    "child": { "name": ["Bobbin", "Jink", "Tumble"], "body": "villager", "job": "none", "at": "shed" },
+    "neighbour": { "name": ["Orla Fenn", "Hilde Crabb", "Prue Sallow"], "body": "villager", "job": "farmer", "female": true, "at": "lane" },
+    "carter": { "name": ["Dunn Harker", "Wilf Otley", "Sim Radley"], "body": "villager", "job": "leatherworker", "at": "crossroads" },
+    "master": { "name": ["Ansel Crake", "Hob Tarrant", "Jory Maddern"], "body": "villager", "job": "nitwit", "at": "fairground" },
+    "mother": { "name": ["Kitty Spring", "Sorrel Bright", "Mag Lissom"], "body": "villager", "job": "none", "female": true, "at": "fairground" }
+  },
+  "places": {
+    "shed": { "at": "near", "from": "home", "dist": [10, 25], "name": "the shed" },
+    "lane": { "at": "near", "from": "home", "dist": [30, 60], "name": "the lane" },
+    "pitch": { "at": "near", "from": "home", "dist": [60, 110], "name": "the fair's old pitch" },
+    "crossroads": { "at": "road", "from": "home", "dist": [100, 180], "name": "the crossroads" },
+    "fairground": { "at": "wild", "from": "home", "dist": [300, 500], "name": "the fair's winter ground" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "There's a child in my shed. One of the bendy folk, the bright ones, from the fair. The fair pulled out six days ago and this one wasn't on a wagon.",
+        "I've been putting food out. Half the street says I'm feeding a stray that will turn. The elder says hand it to the next caravan, like a parcel. I say a child goes back to its own people, and somebody has to find where its people went."
+      ],
+      "replies": [
+        { "say": "I'll find the fair.", "then": "meet_child", "journal": "A child of the Rubber-folk was left in {town} when the fair moved on, and is living in {giver}'s shed. I said I'd find where the fair went." },
+        { "say": "What is the street afraid of?", "then": "ask_fear" },
+        { "say": "The caravan is the sensible way.", "then": "end:refused" }
+      ]
+    },
+    "ask_fear": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "{neighbour}'s hen went into it whole. Feathers and all. The child clucked for a day after, and scratched at the dirt, and looked sorry about it.",
+        "Folk will pay {coins:1} to laugh at a thing like that on fair day. They don't laugh when it's in the next yard and the fair has gone. And they bounce, that sort, so boys throw things. To see."
+      ],
+      "replies": [
+        { "say": "I'll find the fair.", "then": "meet_child", "journal": "A child of the Rubber-folk was left in {town} when the fair moved on, and is living in {giver}'s shed. It swallowed a neighbour's hen, and the street wants it gone. I said I'd find where the fair went." },
+        { "say": "This isn't my trouble.", "then": "end:refused" }
+      ]
+    },
+    "meet_child": {
+      "do": "talk", "who": "child", "goal": "Speak with the child in {giver}'s shed",
+      "say": {
+        "?why=driven": [
+          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "There was shouting, and lanterns, and men with sticks. Ma says when there's shouting you get under something and stay under. So I got under the cooper's shed and stayed. When I came out, the field was just a field."
+        ],
+        "?why=given": [
+          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "I went to sleep in the third wagon and I woke up in straw, and the door was a different door. There was a honey cake by my head, and my other shirt, folded twice. Ma folds things twice. So it's a trick. She's good at tricks. I just haven't worked out the end of it yet."
+        ],
+        "?": [
+          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "I overslept. That's all. Wagons go at dawn and I'm a terrible sleeper, everyone says so. They'll have counted by now. They always count. Any day they'll be back up that road, any day at all, and won't I get a hiding."
+        ]
+      },
+      "replies": [
+        { "say": "Where was the fair bound next?", "then": "child_more" },
+        { "say": "No cake. Only questions.", "then": "child_more" }
+      ]
+    },
+    "child_more": {
+      "do": "talk", "who": "child",
+      "say": "Winter ground! It's past a hill, and there's a pond the wagons go round. I've only ever seen it from the third wagon, and from the third wagon everything is the back of the second wagon. {master} knows the way. {master} knows everything. He says so every morning.",
+      "replies": [
+        { "say": "Would you go back, if I found them?", "then": "child_back" },
+        { "say": "Stay in the shed until I come for you.", "then": "search_pitch", "journal": "The child is called {child} and plays the Boneless Wonder. The fair is {master}'s and was bound for its winter ground. {child} doesn't know the road." }
+      ]
+    },
+    "child_back": {
+      "do": "talk", "who": "child",
+      "say": {
+        "?why=driven": "Course I would! I've an act. Who'd do the Wonder? Only it's quiet here. The bed is in the same place every morning. Is that usual? Is that what people have?",
+        "?why=given": "Course I would! It's a trick, I said, and you don't walk out in the middle of a trick. {giver} gave me a heel of bread on fair day and didn't want a coin for it. I told Ma. She asked me which door.",
+        "?": "Course! Course I would. Why wouldn't I? Is it far? I hope it's far. For the walk, I mean. I like a walk. A long one."
+      },
+      "journal": {
+        "?why=driven": "The child is called {child} and plays the Boneless Wonder. The fair is {master}'s and was bound for its winter ground. {child} hid from shouting on the night it left, and has noticed that beds here stay where they are put.",
+        "?why=given": "The child is called {child} and plays the Boneless Wonder. The fair is {master}'s and was bound for its winter ground. {child} woke in the shed with a honey cake and a folded shirt, and thinks it a trick of its mother's.",
+        "?": "The child is called {child} and plays the Boneless Wonder. The fair is {master}'s and was bound for its winter ground. {child} says it overslept, and hopes the walk back is a long one."
+      },
+      "then": "search_pitch"
+    },
+    "search_pitch": {
+      "do": "search", "at": "pitch", "need": 3, "goal": "Look over the field where the fair stood",
+      "clues": [
+        { "name": "Wagon ruts", "item": "minecraft:clay_ball", "lore": ["Seven wagons, by the wheels, turning east on to the road.", "One drags on the near side: a wagon short of a horse."], "journal": "Seven wagons left the pitch and turned east, one of them short of a horse." },
+        { "name": "A torn playbill", "item": "minecraft:paper", "lore": ["'The Fair of Wonders. The Boneless Family. The Strong Smith. Cakes.'", "At the foot, in another hand: 'Winter ground by first frost.'"], "journal": "The fair's bill says it makes for its winter ground by first frost." },
+        { "name": "A split cudgel", "item": "minecraft:stick", "lore": ["Watch issue, broken over something that gave.", "The fair did not leave this field at its own pace."], "journal": "A watchman's cudgel lay broken on the pitch. The fair was hurried off.", "if": "why=driven" },
+        { "name": "A trampled lantern", "item": "minecraft:lantern", "lore": ["Stamped flat beside a scorched strip of canvas.", "Someone put fire to a tent here. Fire, to these folk."], "journal": "Someone set a torch to one of the fair's tents. The Rubber-folk fear fire above everything.", "if": "why=driven" },
+        { "name": "A drawn tent peg", "item": "minecraft:stick", "lore": ["Every peg pulled, every hole trodden flat again.", "The fair left in good order and in no hurry."], "journal": "The fair struck its tents carefully and left in good order.", "if": "why=given" },
+        { "name": "A ribbon on the gatepost", "item": "minecraft:string", "lore": ["Tied in a bow at a child's height, on the post that faces the town.", "A thing you tie when you want to be found, or forgiven."], "journal": "Someone tied a ribbon at a child's height on the last gatepost, facing the town.", "if": "why=given" },
+        { "name": "A nest under the cooper's shed", "item": "minecraft:wheat", "lore": ["Straw, a blanket, and a week of fair-day sweets laid by.", "This was made before the fair left, not after."], "journal": "There is a nest under the cooper's shed, stocked with a week of sweets. It was made before the fair left.", "if": "why=hid" },
+        { "name": "A chewed paper with a seal", "item": "minecraft:paper", "lore": ["What's left reads: 'the child, sound and whole, to the hall at'.", "The rest has been chewed away. Small teeth."], "journal": "A sealed paper, chewed by small teeth, spoke of a child being sent to a hall.", "if": "why=hid" }
+      ],
+      "then": "neighbour"
+    },
+    "neighbour": {
+      "do": "talk", "who": "neighbour", "goal": "Ask {neighbour} about the night the fair left",
+      "say": {
+        "?why=driven": [
+          "I'll tell you what I told the elder. A silver cup went from the Sun's shrine on fair night, and who else would it be? The watch went down with torches and saw them off before dawn, and quite right.",
+          "The cup? It turned up behind the altar cloth on the second day. Well. It might have been them. It usually is."
+        ],
+        "?why=given": [
+          "I'll tell you what I told the elder. There was a woman stood at the corner by {giver}'s three evenings running. Bendy sort, with a shawl up, as if a shawl hides that. Just looking at the door.",
+          "I thought she was choosing what to steal. Then the fair went, quiet as you like, and next morning there's a child in the shed. I'm not saying anything. I'm saying I can count."
+        ],
+        "?": [
+          "I'll tell you what I told the elder. That creature was laying in stores before the fair ever left. Two of my pies off the sill, and sweets, and a blanket off the line. Like a mouse before winter.",
+          "You don't lay in stores if you think you're leaving. Left behind, my eye. It stayed behind."
+        ]
+      },
+      "replies": [
+        { "say": "And your hen?", "then": "neighbour_more" },
+        { "say": "Which road did the fair take?", "then": "neighbour_more" }
+      ]
+    },
+    "neighbour_more": {
+      "do": "talk", "who": "neighbour",
+      "say": [
+        "A hen is a hen. I'll get over a hen. It's what comes after hens that I think about. It can't live in a shed for ever, and it can't go in a house with a hearth, not that sort. They go up like tallow. So where does it go? I've asked the elder and I'll ask you.",
+        "As for the road, ask {carter}. He was out with the dawn load the morning they went. He's on his round, and back in a day or two."
+      ],
+      "journal": {
+        "?why=driven": "{neighbour} says the watch drove the fair off with torches over a silver cup from the Sun's shrine. The cup was found behind the altar cloth two days later. The carter saw which road the fair took.",
+        "?why=given": "{neighbour} saw a woman of the Rubber-folk watch {giver}'s door for three evenings before the fair left. The carter saw which road the fair took.",
+        "?": "{neighbour} says the child was hoarding food and a blanket before the fair ever left. The carter saw which road the fair took."
+      },
+      "then": "tell_giver"
+    },
+    "tell_giver": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} what you've found",
+      "say": [
+        "East, then. And {carter} is the one who'd know how far, and he's on his round. A day. Two. I'll send when he's in.",
+        "I looked in on the shed while you were gone. It has taught itself to sweep. Badly. Don't tell it I said badly."
+      ],
+      "replies": [
+        { "say": "Send for me.", "then": "wait_carter" },
+        { "say": "You're growing fond of it.", "then": "wait_carter", "journal": "I told {giver} they were growing fond of the child. {giver} said a person can watch a shed being swept without it meaning anything." }
+      ]
+    },
+    "wait_carter": { "do": "wait", "days": [1, 2], "wake": "giver", "then": "carter_back" },
+    "carter_back": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "give": [{ "item": "minecraft:cake", "count": 1, "name": "A cake for the road", "lore": ["'It was going stale anyway.'"] }],
+      "say": [
+        "{carter} is in. He's at the crossroads, watering the horse.",
+        "And you should know there were boys at the shed last night, with stones. To see it bounce. I ran them off with a broom, and this morning one of their fathers came round to tell me I'd frightened his son. So sooner is better. Here, for the road. That sort never turn down a cake."
+      ],
+      "replies": [
+        { "say": "I'll see {carter}, and then we go.", "then": "see_carter", "journal": "Boys stoned the shed in the night to see the child bounce. {giver} wants the child on the road soon, and baked a cake for it." }
+      ]
+    },
+    "see_carter": {
+      "do": "talk", "who": "carter", "goal": "Ask {carter} which way the fair went",
+      "say": "The fair? I passed them on the east road the morning they left. Slow. One wagon short of a horse, and the strong man in the shafts instead, which you don't forget in a hurry. I gave him good day and he gave it back without puffing.",
+      "replies": [
+        { "say": "Where were they bound?", "then": "carter_tells" },
+        { "say": "How did they look, leaving?", "then": "carter_tells" }
+      ]
+    },
+    "carter_tells": {
+      "do": "talk", "who": "carter",
+      "say": {
+        "?why=driven": "The winter ground. {way:fairground}, a hollow with a pond in it. They've wintered there since my father's day. They'd a tent with a burnt side lashed on the last wagon, and a woman walking behind it looking back the whole way. I thought she'd dropped something.",
+        "?why=given": "The winter ground. {way:fairground}, a hollow with a pond in it. They've wintered there since my father's day. There was a woman walking behind the last wagon, and she didn't look back. Not once. You could tell what it cost her by how straight she walked.",
+        "?": "The winter ground. {way:fairground}, a hollow with a pond in it. They've wintered there since my father's day. The fair-master was up and down the line like a man who's lost his purse, looking under every tilt. He'd a face like thunder."
+      },
+      "journal": {
+        "?why=driven": "{carter} says the fair winters in a hollow with a pond. A woman walked behind the last wagon looking back the whole way.",
+        "?why=given": "{carter} says the fair winters in a hollow with a pond. A woman walked behind the last wagon and never once looked back.",
+        "?": "{carter} says the fair winters in a hollow with a pond. The fair-master was searching his own wagons as they went."
+      },
+      "then": "walk"
+    },
+    "walk": {
+      "do": "escort", "who": "child", "to": "fairground", "goal": "Walk {child} to the fair's winter ground",
+      "journal": "I walked {child} east to the hollow where the fair winters.",
+      "then": { "?why=driven": "master_driven", "?why=given": "master_given", "?": "master_hid" }
+    },
+
+    "master_driven": {
+      "do": "talk", "who": "master", "goal": "Speak with the fair-master",
+      "say": [
+        "Seven wagons, and one seat empty on the third. I have counted that seat every morning since. And here it comes, walking in with a stranger. {mother}! Put that down and come here!",
+        "We looked. Tell your town that. We were still looking when their watch put a torch to the cook tent. Our sort don't stand and argue with fire. I got six wagons of people out and left one child, and I'd do that sum the same way again, and I've not slept since.",
+        "The cup was found, I'll wager. It's always found, after. And nobody rides out to say so. We'll not pitch at {town} again. Carry that back, if you carry anything."
+      ],
+      "replies": [
+        { "say": "It was found. Behind the altar cloth.", "then": "mother_driven", "journal": "{master} says they were searching for {child} when the watch set fire to a tent. He will not bring the fair to {town} again. I told him the cup was found." },
+        { "say": "I only carry the child.", "then": "mother_driven", "journal": "{master} says they were searching for {child} when the watch set fire to a tent. He will not bring the fair to {town} again." }
+      ]
+    },
+    "mother_driven": {
+      "do": "talk", "who": "mother", "goal": "Speak with {mother}",
+      "say": [
+        "I walked behind the wagons looking back until {master} near enough had me tied on. Look at you. You've grown, or I've shrunk. Who fed you?",
+        "{child} says there was a shed, and a bed that stayed put, and somebody who put food out and asked nothing for it. And says, very quietly, so as not to hurt me, that it was nice. I heard that. I'm the mother. So I'll ask you, since you've seen both. What sort of place is it?"
+      ],
+      "replies": [
+        { "say": "A hard town with one soft door in it.", "then": "child_choice" },
+        { "say": "A place with beds that stay put. Let {child} say.", "then": "child_choice" },
+        { "say": "No place for your kind. Keep {child} close.", "then": "wait_fair", "journal": "{mother} asked me what sort of place {town} was. I told her it was no place for her kind, and {child} went back to the third wagon." }
+      ]
+    },
+    "child_choice": {
+      "do": "talk", "who": "child", "goal": "Hear what {child} wants",
+      "say": [
+        "Step up, step up! The Boneless Wonder will now choose, before your very eyes! I want Ma. And I want the shed. Can't there be a shed that goes on a wagon? No. I know.",
+        "I could do fair days. I could live in the shed and do the Wonder on fair days. Only {master} says no more fair days there. So it's walking. Is that a thing people do, Ma? Walk between?"
+      ],
+      "replies": [
+        { "say": "The shed, then. And the road between, when you're grown enough to walk it.", "then": "wait_stay", "journal": "{child} wanted its mother and the shed both. {mother} let it choose, and it chose the shed. The fair won't come to {town} again, so the child will have to walk to see her." },
+        { "say": "Your place is on the third wagon, with her.", "then": "wait_fair", "journal": "{child} wanted its mother and the shed both. I said its place was on the third wagon, and {mother} did not argue." }
+      ]
+    },
+
+    "master_given": {
+      "do": "talk", "who": "master", "goal": "Speak with the fair-master",
+      "say": [
+        "Ah. No. No, no. You've brought it back. {mother}! Your parcel has been returned!",
+        "I told her it wouldn't hold. A town keeps one of ours about as long as it keeps a stray dog: until the first hen goes. But it wasn't my child and it wasn't my say. Take it up with her. I've a tent to patch."
+      ],
+      "journal": "{master} was not surprised to see us. {child} was not forgotten. Its mother left it in {town} on purpose.",
+      "then": "mother_given"
+    },
+    "mother_given": {
+      "do": "talk", "who": "mother", "goal": "Speak with {mother}",
+      "say": [
+        "Don't. Don't run to me. Stand there and let me look at you. And who are you? Not the one with the shed. A finder. Of course that door would send a finder. I picked too well.",
+        "I've bounced off every road in this realm since I was smaller than that one, and all I own is in a sack. My man went in a tent fire, at a town that didn't care for the show. Fire is all it takes with us. I wanted one of mine to have a door that stays where it's put. I watched that street three evenings. One door gave my child bread for nothing."
+      ],
+      "replies": [
+        { "say": "That street threw stones at your child, to see the bounce.", "then": "mother_given2" },
+        { "say": "{giver} would keep {child}, and gladly, and never say so.", "then": "mother_given2" }
+      ]
+    },
+    "mother_given2": {
+      "do": "talk", "who": "mother",
+      "say": "Stones bounce off. It's the one thing we're good for. Fire doesn't, and the road is all fire sooner or later: a lamp kicked over, a town with torches. So I did the sum. Stones and a roof, or cake and a wagon and one bad night. Tell me I did it wrong. Go on. You've walked it.",
+      "replies": [
+        { "say": "You did it right. I'll take {child} back to the shed.", "then": "wait_stay", "journal": "{mother} left {child} at {giver}'s door so that one of hers would have a home that stays put. Her man died in a tent fire. I told her she chose well, and took the child back." },
+        { "say": "You did it wrong. A child wants its mother more than a door.", "then": "wait_fair", "journal": "{mother} left {child} at {giver}'s door so that one of hers would have a home that stays put. I told her a child wants its mother more, and she took {child} back on the third wagon." },
+        { "say": "Do it better. Come back with us.", "then": "mother_given3" }
+      ]
+    },
+    "mother_given3": {
+      "do": "talk", "who": "mother",
+      "say": "Me. In a town. I walk a rope. There's small call for that between a baker's and a butcher's. I can knead, mind. I've the arms for it: they go twice round. Would that door take a hand that won't come within two yards of an oven?",
+      "replies": [
+        { "say": "Ask at the door. It gave bread once for nothing.", "then": "wait_both", "journal": "{mother} left {child} at {giver}'s door so that one of hers would have a home that stays put. I told her to come too. She left the fair and walked back with us." },
+        { "say": "No. You're right. {town} isn't ready for two.", "then": "wait_stay", "journal": "{mother} left {child} at {giver}'s door so that one of hers would have a home that stays put. She would have come too, and I told her the town would not stand for two. I took the child back alone." }
+      ]
+    },
+
+    "master_hid": {
+      "do": "talk", "who": "master", "goal": "Speak with the fair-master",
+      "say": [
+        "There it is! Nine days I've had a baron's steward sending to ask where his tumbler has got to, and here it comes, strolling in with an escort. I'm obliged to you. Truly.",
+        "It's signed and sealed. {coins:30} to the fair, paid at midsummer and long since eaten, and one Boneless Wonder to the baron's hall for seven years. A warm bed, meat on feast days, and nothing to do but fold up small when his guests are bored. There's worse in the world. I've lived most of it.",
+        "A child doesn't agree to porridge either. The mother put her mark. Ask {mother} if I held her hand to do it. The fair was a horse short and a winter short, and I've forty mouths. The count came out at one small one who'd eat better than any of us."
+      ],
+      "replies": [
+        { "say": "I'll hear it from her.", "then": "mother_hid", "journal": "{child} was not left behind. It ran. {master} has sold seven years of it to a baron's hall for {coins:30}, and its own mother put her mark to the paper." }
+      ]
+    },
+    "mother_hid": {
+      "do": "talk", "who": "mother", "goal": "Speak with {mother}",
+      "say": [
+        "You ran. Under the cooper's shed, with sweets. I knew it the minute I saw the third wagon empty, and I didn't tell him where to look. That's all I have to say for myself, and it isn't much.",
+        "I put my mark on it. The horse had died, and {master} had the paper there, and he said a warm hall, seven years, and home again with a trade. I told myself a hall has walls and no torches. Then I saw how the steward looked the child over. The way you'd look at a footstool. I'd have liked to be the one who ran."
+      ],
+      "replies": [
+        { "say": "Here is {coins:30}. The bond is bought. Burn it.", "needs_coins": 30, "then": "wait_bought", "mark": "fair_bought_bond", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I paid the {coins:30} myself and told her to burn it." },
+        { "say": "Then I never found the fair. {child} comes back with me.", "then": "mother_hid2" },
+        { "say": "The paper stands. {master} has forty mouths to feed.", "then": "end:sold", "journal": "{mother} signed the paper when the fair was a horse and a winter short, and has been sorry since. I said the paper stood. {child} did not do the patter when I left." }
+      ]
+    },
+    "mother_hid2": {
+      "do": "talk", "who": "mother",
+      "say": "No. You never did. And I never saw you. Go round by the pond, he's busy with his tent. Tell the one with the shed: no hearth in the room where it sleeps. Not ever. And cake on its naming day. It will say it doesn't mind about cake. It minds.",
+      "journal": "{mother} signed the paper and has been sorry since. She let me walk {child} out of the hollow behind the fair-master's back, and sent word for {giver}: no hearth where it sleeps, and cake on its naming day.",
+      "then": "wait_stay"
+    },
+
+    "wait_stay": { "do": "wait", "days": [4, 7], "wake": "giver", "then": "stay_after" },
+    "stay_after": {
+      "do": "talk", "who": "giver", "goal": "See how {child} is faring at {giver}'s",
+      "say": [
+        "The shed has a door now. I hung it myself. And a shutter, and no fire anywhere near it, and don't ask me how I knew to do that. I knew.",
+        "{neighbour} came round with a hen. A live one. Said if it was going to eat them it could eat them by arrangement, and learn to pluck first. The boys still throw things. But {child} throws them back now, and has the better arm, on account of the arm going round twice."
+      ],
+      "then": "end:stayed"
+    },
+    "wait_fair": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{mother}", "lines": [
+        "Written for me by the strong smith, who has his letters.",
+        "{child} is on the third wagon, doing the Wonder twice a day and sulking between. It keeps a heel of bread in its pocket and won't eat it or say why.",
+        "Tell the one with the shed that somebody remembers the door."
+      ] },
+      "then": "end:reunited"
+    },
+    "wait_bought": {
+      "do": "wait", "days": [3, 6], "wake": "letter",
+      "letter": { "from": "{mother}", "lines": [
+        "Written for me by the strong smith, who has his letters.",
+        "The paper is ash. I burnt it myself, at arm's length, on a long stick.",
+        "{master} sent your coins on to the baron's steward with word that the Wonder had died of a chill. He wept as he wrote it. He is very good.",
+        "We go north with the thaw. If you see seven wagons, the third one owes you."
+      ] },
+      "then": "end:bought"
+    },
+    "wait_both": { "do": "wait", "days": [4, 7], "wake": "giver", "then": "both_after" },
+    "both_after": {
+      "do": "talk", "who": "giver", "goal": "See how the two of them are faring at {giver}'s",
+      "say": [
+        "She's in my kitchen. Kneading. From across the room, mind: she'll not come within two yards of the fire, so I do the fire and she does everything else, and I've never had dough like it.",
+        "{neighbour} crossed the street twice this week sooner than pass my door. Then she came in for a loaf, to look. Bought two. The child sweeps. Still badly. I've stopped saying so."
+      ],
+      "then": "end:both"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver} to wait for a caravan that would take a child like a parcel.", "failed": true },
+    "reunited": {
+      "text": "{child} is back on the third wagon of {master}'s fair, with {mother}. {giver}'s shed is empty, and swept.",
+      "reward": { "coins": 10, "hearts": 8, "reputation": 8 },
+      "town": ["The bendy child's gone back to the fair. Good. Well. Good.", "{giver} still puts a plate out by the shed. Habit, {giver} says."],
+      "returns": { "who": "child", "days": [10, 16], "as": "thanks", "say": "Step up, step up! The fair went by on the east road and I ran ahead. Ma says this is yours. It was a whole pie when I set out, and I only bounced on it twice.", "gift": ["minecraft:pumpkin_pie*1", "minecraft:cookie*8"] }
+    },
+    "stayed": {
+      "text": "{child} lives in {giver}'s shed, which has a door now and no fire near it. The street has not made up its mind, but it has stopped saying 'it'.",
+      "reward": { "coins": 10, "items": ["minecraft:cake*1"], "hearts": 10, "reputation": 8 },
+      "marks": ["fair_child_stayed"],
+      "town": ["The bendy child's still at {giver}'s. Swept my step yesterday without being asked. Badly.", "I counted my hens this morning. All there. I count every morning now, mind."],
+      "returns": { "who": "mother", "days": [9, 15], "as": "thanks", "say": "I came to look at the door. It's still where I put it. I'm not stopping, and you never saw me. Give the child this, and say it fell off a wagon.", "gift": ["minecraft:honey_bottle*2", "minecraft:cookie*6"] }
+    },
+    "both": {
+      "text": "{mother} left the fair and kneads bread at {giver}'s, two yards from the oven. {child} has its mother and a door that stays put. {town} has two of the Rubber-folk and is deciding how it feels.",
+      "reward": { "coins": 8, "items": ["minecraft:bread*6"], "hearts": 12, "reputation": 6 },
+      "marks": ["fair_both_stayed"],
+      "town": ["There's two of them at {giver}'s now. Two. And the bread has never been better, which is the worst of it.", "The tall one won't go near the oven. Stands across the room and kneads from there. I've seen it."]
+    },
+    "bought": {
+      "text": "I bought {child}'s bond and {mother} burnt it. The fair goes north with the thaw, and a baron's steward has been told the Wonder died of a chill.",
+      "reward": { "hearts": 12, "reputation": 10 },
+      "marks": ["fair_bought_bond"],
+      "town": ["{giver} had a letter from the fair. Read it at the door, went in, and baked all night.", "Somebody paid a fair child's bond, they say. Thirty. For one that eats hens."]
+    },
+    "sold": {
+      "text": "The paper stood. {child} goes to a baron's hall for seven years, to fold up small when the guests are bored. The fair will eat this winter.",
+      "reward": { "coins": 5, "reputation": 2 },
+      "marks": ["fair_sold_child"],
+      "town": ["They say the fair sold the little bendy one to a baron. Well. It'll be fed.", "{giver} asked after the child and was told. Hasn't opened the shed since."]
+    }
+  }
+}

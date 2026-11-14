@@ -577,6 +577,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.509) every villager and townsperson holds a faith (patron gods, patch 11a)
 		LOGGER.debug("faith attachment: {}", Faiths.FAITH);
 		Faiths.register();
+		// (before Quests: using one of a tale's people is the tale's talk first)
+		Tales.register();
+		QuestJobs.register();
+		Overheard.register();
 		Quests.register();
 		// (0.7.530) a town's troubles ask for help; its shared projects are built by whoever gives (and their attachments)
 		LOGGER.debug("town trouble and project attachments: {} {} {}", TownTroubles.TROUBLES, TownTroubles.DRY, TownProjects.PROJECTS);
