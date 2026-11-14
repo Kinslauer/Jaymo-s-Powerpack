@@ -51,7 +51,7 @@ final class Cannons {
 			if (!Muskets.afford(f, Muskets.ARM_TREASURY) || !com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 				continue;
 			}
-			List<Cannon> have = new ArrayList<>(level.getEntitiesOfClass(Cannon.class, new AABB(f.seat()).inflate(RANGE), c -> c.isAlive() && c.faction() == f.id()));
+			List<Cannon> have = new ArrayList<>(level.getEntitiesOfClass(Cannon.class, new AABB(f.seat()).inflate(RANGE), c -> c.isAlive() && c.faction() == f.id() && c.haul == null));
 			int want = FEWEST + Math.floorMod(f.id() * 31 + 7, MOST - FEWEST + 1);
 			for (BlockPos spot : spots(level, f)) {
 				if (have.size() >= want) {
