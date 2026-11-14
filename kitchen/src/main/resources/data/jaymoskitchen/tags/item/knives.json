@@ -2,6 +2,11 @@
   "replace": false,
   "values": [
     "jaymoskitchen:iron_knife",
+    "jaymoskitchen:flint_knife",
+    "jaymoskitchen:copper_knife",
+    "jaymoskitchen:golden_knife",
+    "jaymoskitchen:diamond_knife",
+    "jaymoskitchen:netherite_knife",
     {
       "id": "jaymospowers:primitive_knife",
       "required": false
