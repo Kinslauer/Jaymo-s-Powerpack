@@ -43,8 +43,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.231) Death magic, the eighth Sorcerer element ({@link ForbiddenArts}). It works on the dead and the dying: violet
  * and ash, with the soul's wail.
  * <ul>
- * <li><b>The Death Sorcerer:</b> {@code J} imbues their blade as any Sorcerer's, and every blow it lands <b>blights</b>
- * (no healing at all, {@link #blighted}, until it wears off or healing magic lifts it); a burst withers too. Sneak and
+ * <li><b>The Death Sorcerer:</b> draws on mana but is never attuned ({@link Mana#hasMana}). A tap of {@code J} raises the
+ * body they look at ({@link #tapKey}; no blade imbue, Andy 2026-11-14), one weak risen at a time. A death bolt's burst
+ * <b>blights</b> (no healing at all, {@link #blighted}, until it wears off or healing magic lifts it) and withers. Sneak and
  * {@code J}: looking at the downed, <b>Reap</b> (dead at once, and some of their life comes back to you as mana); at the
  * living, a death bolt; at nothing living but a body lying near (Jaymo's Kitchen's), <b>Raise the Fallen</b>: the
  * corpse gets up as your thrall ({@link Thralls}) a few minutes. A monster rises as itself, a person or a horse as the
@@ -66,6 +67,14 @@ public final class Necromancy {
 	/** Raise the Fallen: how far a body may lie, how long a thrall stands (ticks), the most at once, its cooldown (ticks). */
 	static final double RAISE_REACH = 8.0;
 	static final int RAISE_LIFE = 20 * 180, MAX_THRALLS = 3, RAISE_COOLDOWN = 20 * 20;
+	/**
+	 * Andy (2026-11-14): "death sorcerers should get a weak reanimation of a single corpse". The Death Sorcerer keeps one
+	 * risen at a time ({@link #MAX_THRALLS} is the Reaper's sweep), and it stands up a shadow of what it was: its health and
+	 * its blow cut by these shares.
+	 */
+	static final int SORCERER_THRALLS = 1;
+	static final double RAISED_HEALTH_CUT = -0.5, RAISED_BLOW_CUT = -0.5;
+	static final net.minecraft.resources.Identifier WEAK_RISEN_ID = JaymosKingdoms.id("death_sorcerer_risen");
 
 	// ---- the spells (times a caster's power) ----
 	/** Blight: how long (ticks), its wither's strength. */
@@ -178,6 +187,19 @@ public final class Necromancy {
 
 	// ---- the Sorcerer's sneak and J ------------------------------------------------------------------------------------
 
+	/**
+	 * A tap of {@code J}. Andy (2026-11-14): "they shouldnt get a blade imbuement". Death's tap raises the body lying where
+	 * they look ({@link #raise}) instead of charging a blade.
+	 */
+	static void tapKey(ServerPlayer player, ServerLevel level) {
+		Entity corpse = corpseInSight(player, level, RAISE_REACH);
+		if (corpse == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.death.no_body"));
+			return;
+		}
+		raise(player, level, corpse);
+	}
+
 	/** Sneak and {@code J}: Reap the downed, else a death bolt at the living (false: let {@link Spellcraft} throw it), else raise a body. */
 	static boolean key(ServerPlayer player, ServerLevel level) {
 		LivingEntity target = Arcana.sighted(player);
@@ -266,8 +288,8 @@ public final class Necromancy {
 				Component.translatable("message.jaymoskingdoms.death.raise"), (RAISE_READY.get(player.getUUID()) - now + 19) / 20));
 			return;
 		}
-		if (Thralls.count(player.getUUID()) >= MAX_THRALLS) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.death.too_many", MAX_THRALLS));
+		if (Thralls.count(player.getUUID()) >= SORCERER_THRALLS) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.death.too_many_one"));
 			return;
 		}
 		EntityType<? extends Mob> type = risesAs(KitchenCompat.sourceType(corpse), Climate.at(level, corpse.blockPosition()));
@@ -278,9 +300,11 @@ public final class Necromancy {
 		if (ForbiddenArts.stayed(player) || !Mana.cast(player, "raise")) {
 			return;
 		}
-		if (Thralls.raise(level, type, corpse.position(), -1, player.getUUID(), true, RAISE_LIFE, null) == null) {
+		Mob risen = Thralls.raise(level, type, corpse.position(), -1, player.getUUID(), true, RAISE_LIFE, null);
+		if (risen == null) {
 			return;
 		}
+		weaken(risen);
 		Commandments.act(player, "necromancy");
 		Sorcery.beam(level, player, corpse.position().add(0.0, 0.3, 0.0), VIOLET);
 		corpse.discard();
@@ -289,6 +313,19 @@ public final class Necromancy {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1.0F, 0.7F);
 		Reaper.feed(player, Reaper.TOLL_RAISE);
 		ForbiddenArts.cast(player, level, false, ForbiddenArts.RAISING_CORRUPTION);
+	}
+
+	/** A Death Sorcerer's risen: a shadow of what it was, half its health and half its blow. */
+	private static void weaken(Mob risen) {
+		var health = risen.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.addOrReplacePermanentModifier(new AttributeModifier(WEAK_RISEN_ID, RAISED_HEALTH_CUT, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			risen.setHealth(risen.getMaxHealth());
+		}
+		var blow = risen.getAttribute(Attributes.ATTACK_DAMAGE);
+		if (blow != null) {
+			blow.addOrReplacePermanentModifier(new AttributeModifier(WEAK_RISEN_ID, RAISED_BLOW_CUT, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
 	}
 
 	/**

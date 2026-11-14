@@ -13480,3 +13480,59 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Free captives aren't captives** (Andy: "if they are captive and find themselves able to walk free like this, they are no longer captive"): a captive nobody is leading home who is out of their chains, or has their legs back under them, drops captive status (`Captives.walkFree`): no more pleading to be freed while wandering about, and they're an ordinary villager again.
 - **A new life is a stranger** (Andy: "EVERYTHING resets"): what villagers and folk remembered, suspected or swore against a player was kept under their account, so a reincarnated player was still "unclean" to whoever cast out an old life. Each new life (`LifeStory.reincarnateAnew`) now gets its own id (`Recollections.life`, counted on the overworld in `Recollections.LIVES`): memories, bearings, suspicions and cast-outs of the old life stay with it.
 - Built; not played.
+
+## 0.8.90 (2026-11-14): falling trees crash through to the ground
+
+- Andy: "the trees in this clip keep falling, they should crash through what they hit, one time and straight to the ground. dealing damage the whole way." A felled tree now knocks over every standing tree its wood reaches, trunk or branch, however slowly it is turning and however big that tree is, so it goes on to the ground instead of stopping propped against it. The knocked tree goes over already turning as fast as the one that hit it, and knocks on in turn. A falling tree now only stops early against something that isn't a tree (a wall, a rise of ground). (`FallingTree.knock`, `Trees.knock` with a speed and a branch-to-trunk lookup `Trees.trunkOf`; the old size limit `KNOCK_SIZE` and the four-knock limit `KNOCKS_MOST` are gone.)
+- Why it kept falling: a propped tree checked every second whether it could turn one more degree, but its real next step was a different size, so it fell on, struck the same thing at once, and landed again with a crash, every second, forever (a tree lying raised over the ground did the same). It now checks the exact step it would take, from where it would start (`FallingTree.firstStep`, `FallingTree.free`). A tree already propped on a tree in an old save knocks that tree over at its next check.
+- Andy's guess was right about the speed: knocking used to need the wood to be moving at least 0.12 blocks a tick where it struck, so a tree that leaned into its neighbour early (the low trunk, or close dark-oak canopies) was too slow to knock it and stopped there.
+- Felled's trees (`FelledCompat.knockOn`): no speed or size limit either; one that stopped short still leaning (top 2.5+ blocks over its stump, within its first 30 s) knocks over the tree it rests on; it also looks one block lower ahead of each log.
+- Built; not played.
+
+## 0.8.91 (2026-11-14): no harm behind the loading screen; Death Sorcerers unattuned, raise one weak body
+
+- **Woke already downed** (Andy's clip, 2026-11-14): a new life on "Alone in the wild" found no wild spot and was left where
+  stasis let them down (the world's spawn, a village at night) with no arrival grace, while the loading screen was still up,
+  so whatever roamed there downed them before they could see. Now nothing harms a player who can't see the world yet
+  (loading screen up, land settling, or the 2 s after it lifts; `StoryGround.unseen`) and mobs going for them are called
+  off (`StoryStasis`), and the stay-where-you-are fallback gives the arrival grace too (`LifeStory.arrive`).
+- **A start that gives up lands on its own land** (Andy: "yes i want that"): when the start and then the wild both find
+  nowhere (the land budget ran out in a new, lagging world), the player is put on the land made for that start while they
+  waited (`LifeStory.madeGround`: open ground first, then any floor, then its origin), not left at the world's spawn.
+- **Death Sorcerers are never attuned** (Andy: "death magic is not ki, but it does draw on mana"): they hold and spend mana
+  as a natural caster (`Mana.hasMana`), with no attuning flare or line, no glow the attuned can read, no sight of others'
+  mana or spirits, and an amethyst seam doesn't take. One already attuned loses it and keeps the mana; a fresh one starts
+  full. Arcana shows and rune feeding works for them.
+- **No blade imbue for death** (Andy: "a weak reanimation of a single corpse, and they shouldnt get a blade imbuement"): a
+  tap of J raises the body you look at (`Necromancy.tapKey`), one risen at a time, at half health and half its blow.
+  Sneak and J is unchanged (Reap, death bolt, raise). The Reaper's sweep keeps its own cap of 3.
+- Built; not played.
+
+## 0.8.92 (2026-11-14): Life tab: one thing at a time, with a picture and a box to read (#1553)
+
+- The Life tab in MCA's creator (for those who skip the life story) shows one thing to set at a time instead of a list of sliding buttons: its picture in a square like the life story's, arrows either side to change the pick, the pick's name, and under it a box with everything there is to read about it (a heritage's description, gift and flaw, a class's description, your upbringing's line and what it gives). The box wraps the text and scrolls with the mouse wheel when it runs long (Rubber-folk).
+- Back and Next at the bottom move to the thing before and the next.
+- "Skip the story" only shows once you have picked man or woman on the first page. MCA's creator then starts on that body, without its own man/woman buttons, as it does after a told story.
+- The Nature page (ideal, bond, flaw) has the same cards.
+
+## 0.8.93 (2026-11-14): A werewolf tearing out no longer crashes the server (#1561)
+
+- **Fix (server crash)**: when the beast tears out of its host, everyone who was fighting the host turns on the
+  beast. Finding them read each nearby mob's attack-target memory, and a mob whose brain doesn't keep one (most
+  hostiles) made the game throw (Deck crash 2026-11-14 8:42 AM). Only mobs that keep that memory are asked now.
+  The other 16 direct memory reads in the three mods were checked: all guarded or villager-only.
+- Built.
+
+## 0.8.94 (2026-11-14): Chain axe: no skill bar until locked on
+
+- Andy: "the chain axe shouldnt have the toolbar attack until you lock on, that way your right click still throws the chain". Spell Engine gives the use key to the skill bar's first skill when the held item has no use pose of its own, so with the chain axe in hand right click cast Cleave (its RPG Series weapon skill) and the whirl and throw never started.
+- With Powers' Chain Axe in hand and no lock-on, the skill bar is empty: no Cleave, no Weapon Forms, no other bar moves (`Forms.lockOnly`, `Forms.barOff`, `SpellContainerSourceMixin`, `FormSkills.spells`), so right click whirls and throws the chain. Lock on and the bar comes back, its first skill on right click as before; the bar's dirty check now counts the lock, so it updates as soon as you lock or let go.
+- Compiled; not played.
+
+## 0.8.95 (2026-11-14): Stolen lives buried in shallow graves, never held in water
+
+- **Shallow graves** (Andy: "the shapeshifters should bury their stolen lives, in shallow graves, so much so you can hear (see) their text through the ground and find them that way"): 50-140 blocks from their settlement, a shapeshifter may now bury the real villager alive, tied up, in a shallow grave: two blocks of turned earth (coarse dirt) in soft ground, the villager standing in the dark under one end with one block of earth over their head (`Doubles.grave`). Their pleas show up through the ground (speech already shows through blocks), so you follow the words, dig the one block, and crouch and talk to them as with any captive. Once freed, they climb out onto the ground (`Doubles.unearth`, attachment `jaymoskingdoms:stolen_grave`).
+- Cellars stay (Andy: "it can use the cellars too"): each roll near a settlement is a grave or a cellar, half and half, at the cellar's old rate. Dungeon captives can still be stolen lives.
+- **Never held in water** (Andy: "anything but being spawned out in the water like last time"): a villager counted as "shut in under a ruin or village" (`Haunts.buried`) was judged by `WORLD_SURFACE`, which counts water, so a villager four blocks down in a village lake was bound as a stolen life where it swam. Now one in water is never taken, and the depth is measured to solid ground (`OCEAN_FLOOR`).
+- Loading hint 172.
+- Built; not played.
