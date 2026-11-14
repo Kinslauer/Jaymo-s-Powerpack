@@ -1,17 +1,18 @@
 package com.jaymoskitchen.client.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.client.bb.BbModel;
 import com.jaymoskitchen.corpse.Gib;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -21,6 +22,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.UvMapping;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -33,9 +35,13 @@ import org.jspecify.annotations.Nullable;
  * Kingdoms kind's are its own. Each chunk picks its box by its id. A body the client can't rebuild (a player's) throws
  * plain lumps of meat ({@link #MEAT}). It tumbles as it flies, lies at rest, and sinks into the ground at the end.
  * <p>
- * A piece of the body's insides ({@link Gib#piece}) is one of our own small models off {@link #GORE} instead: an organ
- * and a rope of gut in the body's blood colour, ribs, spine, a bone shard, a scrap of cloth. None of it is drawn for a
- * player who has blood turned off (Jaymo's Powers' Video Settings button).
+ * A piece of the body's insides ({@link Gib#piece}) is one of our own Blockbench models instead
+ * ({@code tools/bbmodels/gore-pieces.bbmodel}, baked to {@code bbmodels/gore.json}): an organ and a rope of gut in the
+ * body's blood colour, ribs, spine, a bone shard, a scrap of cloth. Andy: "the tatters should use the colors on the
+ * corpse' model that it came from": a scrap is cut from the body's own clothes (an MCA villager's or player's
+ * clothing texture), a player's skin, or a patch off the creature's own model ({@link #tatters}); only a body the
+ * client can't rebuild leaves plain cloth. None of it is drawn for a player who has blood turned off (Jaymo's Powers'
+ * Video Settings button).
  */
 public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	static final Identifier MEAT = JaymosKitchen.id("textures/entity/gib.png");
@@ -46,21 +52,48 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	/** How deep it has sunk at the end (blocks, for a man's size). */
 	static final float SINK_DEPTH = 0.25F;
 
-	/** The insides' sheet (64x32, painted by tools/gen_gore.py): soft pieces in greys for the blood's tint, bone, cloth. */
-	static final Identifier GORE = JaymosKitchen.id("textures/entity/gore.png");
+	/** The insides' bones in the Blockbench model, by {@link Gib#piece} (none for a chunk). */
+	static final String[] GORE_BONES = {"", "organ", "guts", "ribs", "spine", "bone", "tatters"};
+	/**
+	 * Where clothes lie on a skin laid out as a player's (64x64; x, y, width, height): the front and back of the trunk,
+	 * an arm and a leg of each side. A scrap is a {@link #PATCH}-pixel square of one of them (smaller on a limb).
+	 */
+	static final int[][] CLOTHED = {{20, 20, 8, 12}, {32, 20, 8, 12}, {44, 20, 4, 12}, {4, 20, 4, 12}, {20, 52, 4, 12}, {36, 52, 4, 12}};
+	static final int PATCH = 6;
 	/** A soft piece is its body's blood this much brighter, and a rope of gut this far toward {@link #GUT_PINK}. */
 	static final float SOFT_BRIGHT = 1.6F, GUT_PALE = 0.3F;
 	static final int GUT_PINK = 0xFFC8C8;
 
 	private static @Nullable ModelPart meat;
-	/** The insides' models by {@link Gib#piece} (none for a chunk), and half their height at rest (pixels). */
-	private static ModelPart @Nullable [] gore;
-	private static final float[] GORE_HALF_HEIGHT = {0.0F, 1.5F, 1.0F, 1.0F, 1.0F, 0.5F, 0.125F};
+	/** The insides by {@link Gib#piece} (none for a chunk), and their sheet. */
+	private static Inside @Nullable [] gore;
+	private static @Nullable Identifier goreTexture;
+
+	/** One of the insides: its bone, drawn about its own middle; half its height at rest (pixels); the rectangle of the sheet its faces use. */
+	record Inside(ModelPart part, float halfHeight, float u0, float v0, float u1, float v1) {
+	}
+
+	/** Lays a scrap's faces, drawn over {@code from} on the insides' sheet, over {@code to} on another texture (a skin). */
+	record Cut(float fromU0, float fromV0, float fromU1, float fromV1, float u0, float v0, float u1, float v1) implements UvMapping {
+		@Override
+		public float getU(float u) {
+			return Mth.lerp(Mth.clamp((u - fromU0) / (fromU1 - fromU0), 0.0F, 1.0F), u0, u1);
+		}
+
+		@Override
+		public float getV(float v) {
+			return Mth.lerp(Mth.clamp((v - fromV0) / (fromV1 - fromV0), 0.0F, 1.0F), v0, v1);
+		}
+	}
 	/** Each chunk's box and skin, worked out once. */
 	private final Map<Gib, Piece> pieces = new java.util.WeakHashMap<>();
 
 	/** A box cut loose (alone in a part of its own, at no pose), its skin, its middle (pixels) and how much it's shrunk. */
-	record Piece(ModelPart part, Identifier texture, float x, float y, float z, float fit, float halfHeight) {
+	record Piece(ModelPart part, Identifier texture, float x, float y, float z, float fit, float halfHeight, @Nullable UvMapping uv) {
+		Piece(ModelPart part, Identifier texture, float x, float y, float z, float fit, float halfHeight) {
+			this(part, texture, x, y, z, fit, halfHeight, null);
+		}
+
 		static Piece of(ModelPart.Cube cube, Identifier texture) {
 			float longest = Math.max(cube.maxX - cube.minX, Math.max(cube.maxY - cube.minY, cube.maxZ - cube.minZ));
 			float fit = longest > MAX_PIXELS ? MAX_PIXELS / longest : 1.0F;
@@ -110,8 +143,18 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		int inside = gib.piece();
 		if (inside != Gib.CHUNK) {
 			build();
-			int which = Mth.clamp(inside, 1, gore.length - 1);
-			return new Piece(gore[which], GORE, 0.0F, 0.0F, 0.0F, 1.0F, GORE_HALF_HEIGHT[which]);
+			Inside which = gore[Mth.clamp(inside, 1, gore.length - 1)];
+			UvMapping cut = null;
+			Identifier texture = goreTexture;
+			if (inside == Gib.TATTERS) {
+				Map.Entry<Identifier, float[]> cloth = tatters(gib, partialTicks);
+				if (cloth != null) {
+					float[] to = cloth.getValue();
+					texture = cloth.getKey();
+					cut = new Cut(which.u0(), which.v0(), which.u1(), which.v1(), to[0], to[1], to[2], to[3]);
+				}
+			}
+			return new Piece(which.part(), texture, 0.0F, 0.0F, 0.0F, 1.0F, which.halfHeight(), cut);
 		}
 		Entity body = gib.clientBody();
 		if (body != null) {
@@ -153,9 +196,67 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		poseStack.scale(-scale, -scale, scale);
 		poseStack.translate(-piece.x(), -piece.y(), -piece.z());
 		collector.submitModelPart(piece.part(), poseStack, RenderTypes.entityCutout(piece.texture()), state.lightCoords,
-			OverlayTexture.NO_OVERLAY, null, state.tint);
+			OverlayTexture.NO_OVERLAY, piece.uv(), state.tint);
 		poseStack.popPose();
 		super.submit(state, poseStack, collector, camera);
+	}
+
+	/**
+	 * What a scrap of cloth off {@code gib}'s body is cut from: a texture and the rectangle of it (u0, v0, u1, v1) the scrap
+	 * shows. The body's MCA clothes first (a villager's, or the villager MCA draws that player as), then a player's own
+	 * skin, both where clothes lie on a player's skin ({@link #CLOTHED}); for any other creature a face of one box of its
+	 * model (a humanoid's trunk, arms or legs, never its head). Null for a body the client can't rebuild.
+	 */
+	@SuppressWarnings("unchecked")
+	private Map.@Nullable Entry<Identifier, float[]> tatters(Gib gib, float partialTicks) {
+		RandomSource random = RandomSource.create(gib.getId() * 7919L);
+		java.util.Optional<java.util.UUID> owner = gib.owner();
+		Entity body = owner.isPresent() ? McaLooks.of(owner) : gib.clientBody();
+		Identifier clothes = McaLooks.clothes(body);
+		if (clothes == null && owner.isPresent()) {
+			clothes = Skins.of(owner).body().texturePath();
+		}
+		if (clothes != null) {
+			int[] where = CLOTHED[random.nextInt(CLOTHED.length)];
+			int w = Math.min(PATCH, where[2]), h = Math.min(PATCH, where[3]);
+			int x = where[0] + random.nextInt(where[2] - w + 1), y = where[1] + random.nextInt(where[3] - h + 1);
+			return Map.entry(clothes, new float[] {x / 64.0F, y / 64.0F, (x + w) / 64.0F, (y + h) / 64.0F});
+		}
+		if (body == null) {
+			return null;
+		}
+		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
+		if (!(renderer instanceof LivingEntityRenderer<?, ?, ?> living)
+			|| !(renderer.createRenderState(body, partialTicks) instanceof LivingEntityRenderState bodyState)) {
+			return null;
+		}
+		Identifier texture = ((LivingEntityRenderer<?, LivingEntityRenderState, ?>) living).getTextureLocation(bodyState);
+		List<ModelPart> parts = living.getModel() instanceof HumanoidModel<?> humanoid
+			? List.of(humanoid.body, humanoid.rightArm, humanoid.leftArm, humanoid.rightLeg, humanoid.leftLeg)
+			: living.getModel().allParts();
+		parts = parts.stream().filter(part -> !part.isEmpty()).toList();
+		if (parts.isEmpty()) {
+			return null;
+		}
+		// the widest face of one of its boxes
+		ModelPart.Cube cube = parts.get(random.nextInt(parts.size())).getRandomCube(random);
+		float[] best = null;
+		float bestArea = 0.0F;
+		for (ModelPart.Polygon polygon : cube.polygons) {
+			float u0 = 1.0F, v0 = 1.0F, u1 = 0.0F, v1 = 0.0F;
+			for (ModelPart.Vertex vertex : polygon.vertices()) {
+				u0 = Math.min(u0, vertex.u());
+				v0 = Math.min(v0, vertex.v());
+				u1 = Math.max(u1, vertex.u());
+				v1 = Math.max(v1, vertex.v());
+			}
+			float area = (u1 - u0) * (v1 - v0);
+			if (area > bestArea) {
+				bestArea = area;
+				best = new float[] {u0, v0, u1, v1};
+			}
+		}
+		return best == null ? null : Map.entry(texture, best);
 	}
 
 	/** A soft piece's tint: its body's blood, brightened (gut paler and pinker); none for bone, cloth and chunks. */
@@ -199,40 +300,33 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		return false;
 	}
 
-	/** A lump of meat, 4x3x4 about its middle (texture 16x16, the box's strip at 0,0); and the insides, each about its middle. */
+	/** A lump of meat, 4x3x4 about its middle (texture 16x16, the box's strip at 0,0); and the insides, off their Blockbench model. */
 	private static void build() {
 		if (meat != null) {
 			return;
 		}
-		MeshDefinition insides = new MeshDefinition();
-		PartDefinition root = insides.getRoot();
-		root.addOrReplaceChild("organ", CubeListBuilder.create().texOffs(0, 0).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F)
-			.texOffs(0, 6).addBox(1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 2.0F), PartPose.ZERO);
-		root.addOrReplaceChild("guts", CubeListBuilder.create().texOffs(16, 0).addBox(-3.0F, -1.0F, -2.5F, 6.0F, 2.0F, 2.0F)
-			.texOffs(16, 4).addBox(1.0F, -1.0F, -0.5F, 2.0F, 2.0F, 5.0F)
-			.texOffs(16, 11).addBox(-3.0F, -1.0F, 2.5F, 4.0F, 2.0F, 2.0F), PartPose.ZERO);
-		CubeListBuilder ribs = CubeListBuilder.create().texOffs(32, 2).addBox(-0.5F, -1.0F, -2.5F, 1.0F, 1.0F, 5.0F);
-		for (float z = -2.5F; z < 2.0F; z += 2.0F) {
-			// each rib arches: across, then down at both ends
-			ribs.texOffs(32, 0).addBox(-3.0F, -0.5F, z, 6.0F, 1.0F, 1.0F)
-				.texOffs(32, 8).addBox(-3.0F, 0.5F, z, 1.0F, 1.0F, 1.0F)
-				.texOffs(32, 8).addBox(2.0F, 0.5F, z, 1.0F, 1.0F, 1.0F);
+		BbModel model = BbModel.load(JaymosKitchen.MOD_ID, "gore");
+		goreTexture = model.texture;
+		gore = new Inside[GORE_BONES.length];
+		for (int i = 1; i < GORE_BONES.length; i++) {
+			ModelPart part = model.part(GORE_BONES[i]);
+			// drawn alone, about its own middle: not where it stands in the Blockbench file
+			part.setPos(0.0F, 0.0F, 0.0F);
+			float[] bounds = {Float.MAX_VALUE, -Float.MAX_VALUE, 1.0F, 1.0F, 0.0F, 0.0F};
+			part.visit(new PoseStack(), (pose, path, index, cube) -> {
+				bounds[0] = Math.min(bounds[0], cube.minY);
+				bounds[1] = Math.max(bounds[1], cube.maxY);
+				for (ModelPart.Polygon polygon : cube.polygons) {
+					for (ModelPart.Vertex vertex : polygon.vertices()) {
+						bounds[2] = Math.min(bounds[2], vertex.u());
+						bounds[3] = Math.min(bounds[3], vertex.v());
+						bounds[4] = Math.max(bounds[4], vertex.u());
+						bounds[5] = Math.max(bounds[5], vertex.v());
+					}
+				}
+			});
+			gore[i] = new Inside(part, (bounds[1] - bounds[0]) / 2.0F, bounds[2], bounds[3], bounds[4], bounds[5]);
 		}
-		root.addOrReplaceChild("ribs", ribs, PartPose.ZERO);
-		CubeListBuilder spine = CubeListBuilder.create().texOffs(48, 4).addBox(-0.5F, -0.5F, -3.5F, 1.0F, 1.0F, 7.0F);
-		for (float z = -3.5F; z < 3.0F; z += 2.0F) {
-			spine.texOffs(48, 0).addBox(-1.0F, -1.0F, z, 2.0F, 2.0F, 1.0F);
-		}
-		root.addOrReplaceChild("spine", spine, PartPose.ZERO);
-		root.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(0, 16).addBox(-0.5F, -0.5F, -2.5F, 1.0F, 1.0F, 5.0F)
-			.texOffs(0, 22).addBox(-1.0F, -0.5F, 2.0F, 2.0F, 1.0F, 1.0F), PartPose.ZERO);
-		// a scrap of cloth: three thin strips, so its edge is ragged
-		root.addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(16, 16).addBox(-3.0F, -0.125F, -1.0F, 6.0F, 0.25F, 2.0F)
-			.texOffs(16, 19).addBox(-2.0F, -0.125F, 1.0F, 3.0F, 0.25F, 3.0F)
-			.texOffs(16, 23).addBox(1.0F, -0.125F, -4.0F, 2.0F, 0.25F, 3.0F), PartPose.ZERO);
-		ModelPart baked = LayerDefinition.create(insides, 64, 32).bakeRoot();
-		gore = new ModelPart[] {null, baked.getChild("organ"), baked.getChild("guts"), baked.getChild("ribs"), baked.getChild("spine"),
-			baked.getChild("bone"), baked.getChild("tatters")};
 		MeshDefinition mesh = new MeshDefinition();
 		mesh.getRoot().addOrReplaceChild("meat", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -1.5F, -2.0F, 4.0F, 3.0F, 4.0F),
 			PartPose.ZERO);

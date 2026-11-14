@@ -152,7 +152,8 @@ public final class Gibs {
 		DamageSource source = mob.getLastDamageSource();
 		burst(level, mob, Corpses.look(mob), mob.getScale(), mob.getBbWidth(), count(level.getRandom(), mob.getBbWidth()),
 			source == null ? null : source.getSourcePosition(), source, damage, all,
-			Insides.of(mob, CorpseKind.of(mob), mob.getType(), mob instanceof Player, false));
+			Insides.of(mob, CorpseKind.of(mob), mob.getType(), mob instanceof Player, false, Corpses.look(mob),
+				mob instanceof Player ? mob.getStringUUID() : ""));
 	}
 
 	/** A creeper just went off: a few chunks of it are thrown out (it dropped nothing, as ever, and leaves no corpse). */
@@ -214,22 +215,24 @@ public final class Gibs {
 
 	/**
 	 * What a body has in it to throw: {@code blood} its colour (RGB) if it has soft insides (organs, gut), or
-	 * {@link KitchenBlood#NONE}; whether it has bones; whether it wore clothes.
+	 * {@link KitchenBlood#NONE}; whether it has bones; whether it wore clothes, and then its look and (a player's) id, so
+	 * the scraps are cut from its own clothes.
 	 */
-	private record Insides(int blood, boolean bones, boolean clothes) {
-		static final Insides NONE = new Insides(KitchenBlood.NONE, false, false);
+	private record Insides(int blood, boolean bones, boolean clothes, String look, String owner) {
+		static final Insides NONE = new Insides(KitchenBlood.NONE, false, false, "", "");
 
 		boolean soft() {
 			return blood != KitchenBlood.NONE;
 		}
 
 		static Insides of(CorpseEntity corpse) {
-			return of(corpse, corpse.kind(), corpse.sourceType(), corpse.isPlayerCorpse(), corpse.gutted());
+			return of(corpse, corpse.kind(), corpse.sourceType(), corpse.isPlayerCorpse(), corpse.gutted(), corpse.look(), corpse.ownerId());
 		}
 
-		static Insides of(Entity body, CorpseKind kind, @Nullable EntityType<?> type, boolean player, boolean gutted) {
+		static Insides of(Entity body, CorpseKind kind, @Nullable EntityType<?> type, boolean player, boolean gutted, String look,
+			String owner) {
 			if (kind == CorpseKind.SKELETON) {
-				return new Insides(KitchenBlood.NONE, true, false);
+				return new Insides(KitchenBlood.NONE, true, false, "", "");
 			}
 			// a fish or a small critter is too little to come apart into more than its chunks
 			if (kind == CorpseKind.FISH || Corpses.isMachine(type) || type == EntityTypes.CREEPER
@@ -243,7 +246,7 @@ public final class Gibs {
 			boolean clothes = player || kind == CorpseKind.ZOMBIE || type != null && (type.builtInRegistryHolder().is(Corpses.VILLAGERS)
 				|| type.builtInRegistryHolder().is(EntityTypeTags.ILLAGER) || type == EntityTypes.WITCH);
 			// a carcass gutted on the hook has its bones and nothing soft
-			return new Insides(gutted ? KitchenBlood.NONE : blood, true, clothes);
+			return new Insides(gutted ? KitchenBlood.NONE : blood, true, clothes, look, owner);
 		}
 	}
 
@@ -301,7 +304,11 @@ public final class Gibs {
 		gib.snapTo(at.x + cos * reach, at.y, at.z + sin * reach, random.nextFloat() * 360.0F, 0.0F);
 		double out = GIB_SPEED * speed * (0.4 + random.nextDouble() * 0.6);
 		gib.setDeltaMovement((away.x * 0.7 + cos * 0.6) * out, GIB_HOP * speed * (0.6 + random.nextDouble() * 0.6), (away.z * 0.7 + sin * 0.6) * out);
-		gib.setUp("", size, life);
+		// a scrap of cloth knows whose it was, to be cut from their clothes
+		gib.setUp(piece == Gib.TATTERS ? insides.look() : "", size, life);
+		if (piece == Gib.TATTERS) {
+			gib.setOwner(insides.owner());
+		}
 		gib.setPiece(piece, insides.soft() ? insides.blood() : KitchenBlood.RED);
 		level.addFreshEntity(gib);
 	}

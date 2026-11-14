@@ -15,6 +15,8 @@ import net.minecraft.world.level.storage.ValueOutput;
  * <p>
  * Or a piece of what was inside it ({@link #piece}): an organ, a rope of gut, a slab of ribs, a length of spine, a
  * shard of bone, a scrap of what it wore. The soft pieces are drawn in the body's own blood colour ({@link #tint}).
+ * A scrap of cloth keeps the body's look (and a player's id, {@link #owner}), so the client cuts it from that body's
+ * own clothes or skin.
  */
 public class Gib extends SpiderLeg {
 	/** What it is: a chunk of the body's own model, or one of its insides. */
@@ -22,6 +24,7 @@ public class Gib extends SpiderLeg {
 
 	private static final EntityDataAccessor<Byte> PIECE = SynchedEntityData.defineId(Gib.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Integer> TINT = SynchedEntityData.defineId(Gib.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(Gib.class, EntityDataSerializers.STRING);
 
 	public Gib(EntityType<? extends Gib> type, Level level) {
 		super(type, level);
@@ -31,6 +34,20 @@ public class Gib extends SpiderLeg {
 	void setPiece(int piece, int tint) {
 		this.entityData.set(PIECE, (byte) piece);
 		this.entityData.set(TINT, tint);
+	}
+
+	/** The dead player it came off (their id as text), for a scrap of their clothes. */
+	void setOwner(String owner) {
+		this.entityData.set(OWNER, owner);
+	}
+
+	/** The dead player it came off, if it was one. */
+	public java.util.Optional<java.util.UUID> owner() {
+		try {
+			return java.util.Optional.of(java.util.UUID.fromString(this.entityData.get(OWNER)));
+		} catch (IllegalArgumentException e) {
+			return java.util.Optional.empty();
+		}
 	}
 
 	public int piece() {
@@ -47,6 +64,7 @@ public class Gib extends SpiderLeg {
 		super.defineSynchedData(builder);
 		builder.define(PIECE, (byte) CHUNK);
 		builder.define(TINT, com.jaymoskitchen.KitchenBlood.RED);
+		builder.define(OWNER, "");
 	}
 
 	@Override
@@ -54,6 +72,7 @@ public class Gib extends SpiderLeg {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(PIECE, input.getByteOr("Piece", (byte) CHUNK));
 		this.entityData.set(TINT, input.getIntOr("Tint", com.jaymoskitchen.KitchenBlood.RED));
+		this.entityData.set(OWNER, input.getStringOr("Owner", ""));
 	}
 
 	@Override
@@ -61,5 +80,6 @@ public class Gib extends SpiderLeg {
 		super.addAdditionalSaveData(output);
 		output.putByte("Piece", this.entityData.get(PIECE));
 		output.putInt("Tint", this.entityData.get(TINT));
+		output.putString("Owner", this.entityData.get(OWNER));
 	}
 }
