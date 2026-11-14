@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * basilisk's den with its statues, or a gorgon's ring of broken columns with hers ({@link Statues}).</li>
  * <li><b>Mineshafts, strongholds, trial chambers:</b> a clear cube in the corridors.</li>
  * <li><b>Hills, taiga, savanna:</b> a digger warren ringed with pits ({@link Warrens}).</li>
- * <li><b>Near a settlement:</b> a cellar with a stolen life tied up in it ({@link Doubles}); villagers found shut in under a
+ * <li><b>Near a settlement:</b> a shallow grave with a stolen life buried alive in it ({@link Doubles#grave}); villagers found shut in under a
  * Grim ruin or village are such lives too.</li>
  * <li><b>Sea cliffs:</b> a harpy singing on the edge.</li>
  * <li><b>Cave ceilings:</b> piercers hanging overhead, and in the deep a cloak flier.</li>
@@ -53,13 +53,13 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Haunts {
 	static final int EVERY = 100, WINDOW = 4;
-	/** Chances a roll comes up: a ruin's shadows, its den, a structure's cube, a hill's warren, a cellar near a settlement, a cliff's harpy. */
-	static final float SHADOWS = 0.6F, DEN = 0.2F, CUBE = 0.45F, WARREN = 0.06F, CELLAR = 0.02F, HARPY = 0.12F;
+	/** Chances a roll comes up: a ruin's shadows, its den, a structure's cube, a hill's warren, a stolen life's grave near a settlement, a cliff's harpy. */
+	static final float SHADOWS = 0.6F, DEN = 0.2F, CUBE = 0.45F, WARREN = 0.06F, GRAVE = 0.03F, HARPY = 0.12F;
 	/** Spawn chances a scan, and the most of each near the player (within 56 blocks). */
 	static final float CEILING = 0.4F, DEEP = 0.12F;
 	static final int PIERCERS_MOST = 5, FLIERS_MOST = 1, HARPIES_MOST = 2;
-	/** A settlement's quiet ground: nearer than this (blocks) to its seat no warren is dug; a cellar is dug between these. */
-	static final double WARREN_CLEAR = 110.0, CELLAR_FROM = 50.0, CELLAR_TO = 140.0;
+	/** A settlement's quiet ground: nearer than this (blocks) to its seat no warren is dug; a stolen life's grave is dug between these. */
+	static final double WARREN_CLEAR = 110.0, GRAVE_FROM = 50.0, GRAVE_TO = 140.0;
 
 	static final AttachmentType<List<Long>> ROLLED = AttachmentRegistry.create(com.jaymoskingdoms.JaymosKingdoms.id("haunts_rolled"),
 		b -> b.persistent(Codec.LONG.listOf()));
@@ -238,8 +238,8 @@ public final class Haunts {
 			Warrens.dig(level, top);
 			return;
 		}
-		if (seatD > CELLAR_FROM && seatD < CELLAR_TO && Doubles.mayTake(level, seat) && Creatures.open(player, 0) && random.nextFloat() < CELLAR * 4 && roll(level, key(cx, cz, 5))) {
-			Doubles.cellar(level, top);
+		if (seatD > GRAVE_FROM && seatD < GRAVE_TO && Doubles.mayTake(level, seat) && Creatures.open(player, 0) && random.nextFloat() < GRAVE * 4 && roll(level, key(cx, cz, 5))) {
+			Doubles.grave(level, top);
 			return;
 		}
 		if (Creatures.open(player, 1) && cliff(level, top) && random.nextFloat() < HARPY * 4 && roll(level, key(cx, cz, 6))

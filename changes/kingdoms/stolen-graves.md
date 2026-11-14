@@ -1,0 +1,5 @@
+# Stolen lives buried in shallow graves
+- **Shallow graves** (Andy: "the shapeshifters should bury their stolen lives, in shallow graves, so much so you can hear (see) their text through the ground and find them that way"): the cellar near a settlement is gone. A shapeshifter now buries the real villager alive, tied up, in a shallow grave 50-140 blocks from their settlement: two blocks of turned earth (coarse dirt) in soft ground, with the villager standing in the dark under one end and one block of earth over their head (`Doubles.grave`). Their pleas show up through the ground (speech already shows through blocks), so you follow the words, dig the one block, and crouch and talk to them as with any captive. Once freed, they climb out onto the ground (`Doubles.unearth`, attachment `jaymoskingdoms:stolen_grave`).
+- Dungeon captives are no longer stolen lives (a shapeshifter buries its own), so graves are rolled a little more often (`Haunts.GRAVE` 0.03, was the cellar's 0.02). Villagers found shut in under a ruin still count as stolen lives.
+- Loading hint 172.
+- Built; not played.
