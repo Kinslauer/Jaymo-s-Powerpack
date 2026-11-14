@@ -33,6 +33,10 @@ abstract class SpellContainerSourceMixin {
 	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE",
 		target = "Lnet/spell_engine/api/spell/container/SpellContainerHelper;containerFromItemStack(Lnet/minecraft/world/item/ItemStack;)Lnet/spell_engine/api/spell/container/SpellContainer;"))
 	private static SpellContainer jaymoskingdoms$formWeapon(SpellContainer held, @Local(argsOnly = true) Player player) {
+		if (player != null && com.jaymoskingdoms.forms.Forms.barOff(player)) {
+			// the chain axe without a lock: not even its own weapon skill, which would take right click from the throw
+			return null;
+		}
 		if (player == null || held != null && held.isResolver() || FormSkills.spells(player).isEmpty()) {
 			return held;
 		}

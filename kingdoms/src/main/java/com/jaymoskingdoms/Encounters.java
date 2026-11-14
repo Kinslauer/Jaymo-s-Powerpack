@@ -143,6 +143,9 @@ public final class Encounters {
 		// allies at their huts (monsters/WitchHuts). The minotaur no longer roams the mountains: it keeps the great
 		// dungeons under the Overworld (beasts/Labyrinths).
 		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", MUD_GOLEM_WEIGHT, 1, 2),
+		// the cyclops of the peaks and the stony shores (beasts/Cyclops); out roaming only where a player near has reached
+		// Borderlands, its hall cut into the slope where it comes into the world (beasts/CyclopsCaves)
+		new Encounter("jaymoskingdoms:cyclops", "jaymoskingdoms:has_cyclops", 3, 1, 1),
 		// (0.7.137) the wind dragons (dragons/Dragons), rare: Notus over the badlands, Boreas over the frozen peaks, Zephyrus
 		// in the swamps
 		new Encounter("jaymoskingdoms:notus_dragon", "jaymoskingdoms:has_notus_dragon", 2, 1, 1),
@@ -269,6 +272,9 @@ public final class Encounters {
 				return false;
 			}
 			ServerLevel server = level.getLevel();
+			if (type == com.jaymoskingdoms.beasts.Satyrs.CYCLOPS && !com.jaymoskingdoms.beasts.Cyclops.roamTierOpen(server, pos)) {
+				return false;
+			}
 			return Factions.around(server.getServer(), server, pos, SETTLEMENT_CLEARANCE) == null;
 		}
 		return true;

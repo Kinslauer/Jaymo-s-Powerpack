@@ -115,6 +115,11 @@ def packMods = [
 	// from vanilla blocks, mobs and loot (structure ids epic:*). Data only, no dependencies. 1.0.5 and 1.0.3.
 	[dep: "maven.modrinth:epic-structures-igloo:nXW1eymX", cf: [1511498, 8528158]],
 	[dep: "maven.modrinth:epic-structures-jungle-temples:ImFhV10j", cf: [1600197, 8984105]],
+	// Illager Arena (SuperWarioModTeam; the CurseForge and Modrinth pages say all rights reserved, its jar says CC0-1.0;
+	// shipped unchanged, never edited): a great desert arena (structure illager_arena:illager_arena, vanilla blocks).
+	// Jaymo's Kingdoms clears out its own mobs and moves one of its illager camps in when the Wildlands open
+	// (IllagerSites), beside our own drawn arena. 1.0.0.
+	[dep: "maven.modrinth:illager-arena:fVj7sO1D", cf: [1358983, 8935661]],
 	// Towns and Towers (CC BY-NC-ND 4.0, by Kubek, Biban_Auriu and Cristelknight999; shipped unchanged, never edited,
 	// with credit and a link: modrinth.com/mod/towns-and-towers):
 	// new villages per biome (tagged as villages, so Jaymo's Kingdoms founds capitals in them too), biome pillager outposts

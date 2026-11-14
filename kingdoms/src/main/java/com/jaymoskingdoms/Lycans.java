@@ -527,7 +527,8 @@ public final class Lycans {
 		var attack = net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET;
 		for (net.minecraft.world.entity.Mob m : host.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
 			host.getBoundingBox().inflate(UNTARGET_RANGE), m -> m != w && m != host
-				&& (m.getTarget() == host || m.getBrain().getMemory(attack).orElse(null) == host))) {
+				&& (m.getTarget() == host || m.getBrain().checkMemory(attack, net.minecraft.world.entity.ai.memory.MemoryStatus.REGISTERED)
+					&& m.getBrain().getMemory(attack).orElse(null) == host))) {
 			LivingEntity beast = w.isAlive() && m.canAttack(w) ? w : null;
 			m.setTarget(beast);
 			if (m.getBrain().checkMemory(attack, net.minecraft.world.entity.ai.memory.MemoryStatus.REGISTERED)) {

@@ -245,6 +245,14 @@ public final class Recollections {
 	static final AttachmentType<Map<UUID, Person>> MEMORIES = AttachmentRegistry.create(JaymosKingdoms.id("recollections"),
 		builder -> builder.persistent(Codec.unboundedMap(UUIDUtil.STRING_CODEC, Person.CODEC)));
 
+	/**
+	 * On the overworld: player (account) → how many times they have been born anew ({@link LifeStory#reincarnateAnew}).
+	 * Saved. Each new life is a stranger: what anyone remembered, suspected or swore against the old one stays with the old
+	 * one ({@link #key}).
+	 */
+	static final AttachmentType<Map<UUID, Integer>> LIVES = AttachmentRegistry.create(JaymosKingdoms.id("lives"),
+		builder -> builder.persistent(Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.INT)));
+
 	private Recollections() {
 	}
 
@@ -267,7 +275,25 @@ public final class Recollections {
 	/** The id {@code who} knows {@code player} by: theirs, or the costume's while they're a masked stranger to them. */
 	static UUID key(ServerPlayer player, LivingEntity who) {
 		String mask = Identities.maskedAs(player);
-		return mask != null && Identities.hiddenFrom(player, who) ? Identities.standIn(mask) : player.getUUID();
+		return mask != null && Identities.hiddenFrom(player, who) ? Identities.standIn(mask) : life(player);
+	}
+
+	/** The id {@code player}'s present life is known by: their own on their first life, then one of its own for each new one. */
+	static UUID life(ServerPlayer player) {
+		int n = player.level().getServer().overworld().getAttachedOrElse(LIVES, Map.of()).getOrDefault(player.getUUID(), 0);
+		return n <= 0 ? player.getUUID() : UUID.nameUUIDFromBytes((player.getUUID() + "#life" + n).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	}
+
+	/**
+	 * (From {@link LifeStory#reincarnateAnew}) {@code player} is born anew: from now on they are someone nobody has met. Andy:
+	 * "EVERYTHING resets" on a reincarnation, and the old life's sins (a Truth follower's oath to cleanse it, a suspicion, a
+	 * grudge) stay with the old life.
+	 */
+	static void bornAnew(ServerPlayer player) {
+		ServerLevel over = player.level().getServer().overworld();
+		Map<UUID, Integer> lives = new HashMap<>(over.getAttachedOrElse(LIVES, Map.of()));
+		lives.merge(player.getUUID(), 1, Integer::sum);
+		over.setAttached(LIVES, Map.copyOf(lives));
 	}
 
 	/** The name {@code who} knows {@code player} by. */

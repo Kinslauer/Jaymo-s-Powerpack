@@ -13,11 +13,14 @@ import net.minecraft.world.level.Level;
 /**
  * The axe on a chain: a haft in the hand with the axe head hanging off it on a length of chain. Andy: "the chain axe
  * and lasso should operate similar to the [whip] and flail", so it is whirled as the flail is ({@link Lash}: hold use
- * and the head goes round on its chain; a charged left click swipes it round in front), the chain and head drawn
+ * and the head goes round on its chain), the chain and head drawn
  * physically by client/armory/LashRenderer. What is its own, Andy: "a throw embeds the axe, and you have to remove it,
  * either by closing the distance, or ripping it out ... after letting go of the right click hold the axe flies toward
  * the cursor, up to 9 blocks":
  * <ul>
+ * <li>a charged left click is an overhead chop ({@code Lash.HEW}): the head goes up over you and comes down through
+ * where you aim (the locked foe's picked region first). Only the head hurts, where it meets something; the haft's own
+ * blow does nothing. Kingdoms keeps the skill bar off it until you lock on, so right click stays the whirl;</li>
  * <li>let go of the whirl and the head flies at what you look at ({@code Lash.THROW}, as far as {@link #CHAIN}, at
  * {@link #THROW_SPEED}), harder the faster it was whirling;</li>
  * <li>it stays buried in whoever it hits ({@code Lash.EMBED}, and {@code Mortal.BURIED_IN} on the axe), and the haft

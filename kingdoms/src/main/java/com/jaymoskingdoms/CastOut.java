@@ -212,13 +212,15 @@ public final class CastOut {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
+			// (a downed player is down: nobody beats them where they lie (Andy: humanoids go down, not die))
+			if (!player.isAlive() || player.isCreative() || player.isSpectator() || Downed.isDowned(player)) {
 				continue;
 			}
 			ServerLevel level = player.level();
 			long now = level.getGameTime();
+			// (a captive in chains can't lift a hand to anyone, sworn or not)
 			for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNT_RANGE),
-				x -> x.isAlive() && !x.isBaby() && !x.isSleeping() && x.hasAttached(CAST))) {
+				x -> x.isAlive() && !x.isBaby() && !x.isSleeping() && x.hasAttached(CAST) && !Captives.bound(x) && !Downed.isDowned(x))) {
 				if (!EVIL.equals(why(m, player))) {
 					continue;
 				}
