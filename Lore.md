@@ -1035,6 +1035,19 @@ there in the morning, and nobody will take her. The dead evokers no longer call 
 lying nearest. And a keeper whose Reaper has reached its Shroud, standing where there is nobody to raise, can call a
 few of the host to walk with them for one fight; the Reaper is paid for it out of what it has been given.
 
+(new) **The illagers keep accounts** (Reaper's host thread, Immersive Pillagers picks, 2026-11-14; Claude's placement
+for Andy to approve). The living illagers remember who kills them. Kill enough and your face goes up in their camps on
+a poster, and from then on their hit squads do not wait for dark. A squad's leader carries the poster of the one it
+has come for. The mark fades if you leave them alone, an illager who likes you will sell it back, and a poster with
+another name on it, pinned where illagers will see it, does what you would expect. Squads come by whatever the country
+gives them: two to a camel in the sands, on horses over open grass, by boat where there is water, and now and then
+down out of the sky in a balloon, since the pillagers built their towers for those long ago. A warlord's horn calls
+them. Blow one yourself and they come at once; if none go home, the camps write that ground off for a few days. Their
+dead sometimes carry a rusty key that fits the plain locks they use. And the evokers have been trying to make the
+Totem of Undying again, which they could once and cannot now: their camps raise a lean-to with a still, a lectern and
+a locked chest of notes, and anyone who gathers enough pages and tries the working over a brewing stand gets a crude
+totem that holds death off once and leaves you weak, or a faceful of smoke.
+
 **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
