@@ -53,6 +53,18 @@ public final class RigNet {
 	 * Client → server, from the Forge's screen: what it is set to build ({@code selection}, {@code frame} by ordinal), the
 	 * paints (a dye's id, {@link #PAINT_WASH} to wash it off, {@link #PAINT_LEAVE} to leave it), and whether to build now.
 	 */
+	/** The Forge screen's finish pick ({@link RigFinish}), for the suit worn. */
+	public record Finish(net.minecraft.core.BlockPos pos, int finish) implements CustomPacketPayload {
+		public static final Type<Finish> TYPE = new Type<>(JaymosPowers.id("rig_finish"));
+		public static final StreamCodec<ByteBuf, Finish> CODEC = StreamCodec.composite(net.minecraft.core.BlockPos.STREAM_CODEC, Finish::pos,
+			ByteBufCodecs.VAR_INT, Finish::finish, Finish::new);
+
+		@Override
+		public Type<Finish> type() {
+			return TYPE;
+		}
+	}
+
 	public record ForgeSet(net.minecraft.core.BlockPos pos, int selection, int frame, int plates, int trim, boolean build) implements CustomPacketPayload {
 		public static final Type<ForgeSet> TYPE = new Type<>(JaymosPowers.id("rig_forge_set"));
 		public static final StreamCodec<ByteBuf, ForgeSet> CODEC = StreamCodec.composite(
@@ -172,7 +184,9 @@ public final class RigNet {
 		PayloadTypeRegistry.serverboundPlay().register(Lock.TYPE, Lock.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Volley.TYPE, Volley.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ForgeSet.TYPE, ForgeSet.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Finish.TYPE, Finish.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ForgeOpen.TYPE, ForgeOpen.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Finish.TYPE, (payload, context) -> RigFinish.set(context.player(), payload.pos(), payload.finish()));
 		ServerPlayNetworking.registerGlobalReceiver(ForgeSet.TYPE, (payload, context) -> RigForgeBlock.set(context.player(), payload));
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Scan.TYPE, Scan.CODEC);

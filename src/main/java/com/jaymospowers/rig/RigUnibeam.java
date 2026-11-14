@@ -28,6 +28,8 @@ public final class RigUnibeam {
 	/** Charge it takes, its cooldown (ticks), the whine-up and the beam's length (ticks). */
 	static final int COST = 300, COOLDOWN = 200;
 	public static final int CHARGE_TICKS = 12, BEAM_TICKS = 16;
+	/** How wide a groove the beam scorches into soft ground where it lands (blocks). */
+	static final double SCAR_RADIUS = 0.8;
 	/** Reach (blocks), how wide it catches (blocks either side), and a hit every this many ticks. */
 	static final double RANGE = 40.0, WIDTH = 0.6;
 	static final int HIT_EVERY = 2;
@@ -103,6 +105,8 @@ public final class RigUnibeam {
 		BlockHitResult block = level.clip(new ClipContext(chest, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		if (block.getType() != HitResult.Type.MISS) {
 			end = block.getLocation();
+			// it scorches a line into soft ground as it sweeps
+			com.jaymospowers.core.BeamScars.touch(player, block, SCAR_RADIUS);
 		}
 		// the beam: a thick white-hot core with sparks round it, and a splash where it lands
 		double length = chest.distanceTo(end);

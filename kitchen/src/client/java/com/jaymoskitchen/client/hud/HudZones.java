@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * While a film plays (an ultimate, a beam or spirit clash, a handshake, a curtain) {@link #hideFor} makes {@link #place}
  * answer {@code null}: the piece doesn't draw.
+ * <p>
+ * The player can drag any piece off its spot ({@link #offsets}); the zone still keeps its place for the others.
  */
 public final class HudZones {
 	public static final String DOCK_RIGHT = "dock_right", DOCK_LEFT = "dock_left", FOCUS = "focus", ABOVE = "above", BELOW = "below",
@@ -62,7 +64,8 @@ public final class HudZones {
 	/** A piece not seen this long is gone (ns). */
 	static final long FRESH_NANOS = 150_000_000L;
 
-	private static final String SHARE_TABLE = "jaymos:hud_zones", SHARE_HIDE = "jaymos:hud_hidden_until";
+	private static final String SHARE_TABLE = "jaymos:hud_zones", SHARE_HIDE = "jaymos:hud_hidden_until", SHARE_OFFSETS = "jaymos:hud_offsets";
+	private static @Nullable Map<String, int[]> offsets;
 	/** zone -> piece id -> {row, width, height, last seen (ns)}. */
 	private static @Nullable Map<String, Map<String, long[]>> table;
 	private static @Nullable AtomicLong hiddenUntil;
@@ -82,6 +85,59 @@ public final class HudZones {
 			table = (Map<String, Map<String, long[]>>)shared;
 		}
 		return table;
+	}
+
+	/**
+	 * The player's own shifts, by {@code zone + "/" + id}: {dx, dy} added to where the zone puts the piece. Filled by the
+	 * arrange screen (Powers' {@code client.hud.HudArrange}, the command {@code /hudmove}); shared like the table.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, int[]> offsets() {
+		if (offsets == null) {
+			Object shared = FabricLoader.getInstance().getObjectShare().get(SHARE_OFFSETS);
+			if (shared == null) {
+				FabricLoader.getInstance().getObjectShare().putIfAbsent(SHARE_OFFSETS, new ConcurrentHashMap<String, int[]>());
+				shared = FabricLoader.getInstance().getObjectShare().get(SHARE_OFFSETS);
+			}
+			offsets = (Map<String, int[]>)shared;
+		}
+		return offsets;
+	}
+
+	private static int @Nullable [] shifted(String zone, String id, int @Nullable [] at) {
+		int[] by = at == null ? null : offsets().get(zone + "/" + id);
+		return by == null ? at : new int[] {at[0] + by[0], at[1] + by[1]};
+	}
+
+	/** Every piece that drew within the last {@code millis}: {zone, id} each. */
+	public static List<String[]> seen(long millis) {
+		long now = System.nanoTime();
+		List<String[]> seen = new ArrayList<>();
+		for (Map.Entry<String, Map<String, long[]>> zone : table().entrySet()) {
+			for (Map.Entry<String, long[]> piece : zone.getValue().entrySet()) {
+				if (now - piece.getValue()[3] <= millis * 1_000_000L) {
+					seen.add(new String[] {zone.getKey(), piece.getKey()});
+				}
+			}
+		}
+		return seen;
+	}
+
+	/**
+	 * For the arrange screen: keeps a piece in its zone as if it had just drawn, and answers its box {x, y, width, height}
+	 * (shifted), or {@code null} for a piece the table has never seen.
+	 */
+	public static int @Nullable [] hold(String zone, String id) {
+		Map<String, long[]> pieces = table().get(zone);
+		long[] piece = pieces == null ? null : pieces.get(id);
+		if (piece == null) {
+			return null;
+		}
+		long now = System.nanoTime();
+		piece[3] = now;
+		Minecraft minecraft = Minecraft.getInstance();
+		int[] at = shifted(zone, id, locate(zone, id, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), now));
+		return at == null ? null : new int[] {at[0], at[1], (int)piece[1], (int)piece[2]};
 	}
 
 	private static AtomicLong hiddenClock() {
@@ -121,7 +177,7 @@ public final class HudZones {
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		int w = minecraft.getWindow().getGuiScaledWidth(), h = minecraft.getWindow().getGuiScaledHeight();
-		return locate(zone, id, w, h, now);
+		return shifted(zone, id, locate(zone, id, w, h, now));
 	}
 
 	/** Forget a piece at once (it stopped drawing and its slot shouldn't linger). Optional: stale pieces go by themselves. */

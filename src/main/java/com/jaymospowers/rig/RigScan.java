@@ -55,6 +55,7 @@ public final class RigScan {
 			return;
 		}
 		state.scanCooldown = SCAN_COOLDOWN;
+		RigMoves.start(player, RigMoves.SCAN);
 		ServerLevel level = player.level();
 
 		List<Integer> ids = new ArrayList<>();
@@ -113,6 +114,14 @@ public final class RigScan {
 			kinds.add(found.get(i).kind());
 		}
 		ServerPlayNetworking.send(player, new RigNet.Scan(ids, blocks, kinds));
+		// the hostiles it found are tagged: missiles find them and the suit hits them harder ({@link RigStrikes})
+		List<Integer> hostile = new ArrayList<>();
+		for (int i = 0; i < ids.size(); i++) {
+			if (kinds.get(i) == RigNet.FOUND_HOSTILE) {
+				hostile.add(ids.get(i));
+			}
+		}
+		RigStrikes.tag(player, hostile);
 
 		// the sweep, on the wearer's screen: a ring of sparks going out, and a low hum everyone near hears
 		for (int i = 0; i < 32; i++) {

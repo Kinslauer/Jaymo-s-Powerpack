@@ -44,6 +44,18 @@ public final class RigCall {
 	/** Where a call from a sentry post starts. */
 	private static final Map<UUID, Vec3> FROM = new HashMap<>();
 
+	/**
+	 * The failsafe: a hit that leaves the owner alive at {@link #FAILSAFE_HEALTH} or less brings the parked suit on its own,
+	 * if its Mind is level {@link #FAILSAFE_LEVEL}, no oftener than every {@link #FAILSAFE_COOLDOWN} ticks. The Rig menu
+	 * switches it off ({@link #FAILSAFE_OFF}, kept).
+	 */
+	static final int FAILSAFE_LEVEL = 4, FAILSAFE_COOLDOWN = 1200;
+	static final float FAILSAFE_HEALTH = 6.0F;
+	public static final AttachmentType<Boolean> FAILSAFE_OFF = AttachmentRegistry.create(JaymosPowers.id("rig_failsafe_off"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath()
+			.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+	private static final Map<UUID, Long> FAILSAFE_READY = new HashMap<>();
+
 	/** The streak of sparks coming in before the first piece lands (ticks). */
 	static final int INBOUND_TICKS = 12;
 	/**
@@ -66,6 +78,44 @@ public final class RigCall {
 
 	static void init() {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> CALLING.remove(handler.player.getUUID()));
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
+			if (victim instanceof ServerPlayer player && taken > 0.0F && player.isAlive() && player.getHealth() <= FAILSAFE_HEALTH) {
+				failsafe(player);
+			}
+		});
+	}
+
+	/** Whether this player's failsafe is switched on (either side). */
+	public static boolean failsafeOn(Player player) {
+		return !player.getAttachedOrElse(FAILSAFE_OFF, false);
+	}
+
+	/** The Rig menu's switch. */
+	static void toggleFailsafe(ServerPlayer player) {
+		if (failsafeOn(player)) {
+			player.setAttached(FAILSAFE_OFF, true);
+		} else {
+			player.removeAttached(FAILSAFE_OFF);
+		}
+	}
+
+	private static void failsafe(ServerPlayer player) {
+		if (!failsafeOn(player) || CALLING.containsKey(player.getUUID()) || !parked(player)) {
+			return;
+		}
+		List<ItemStack> parked = player.getAttachedOrElse(PARKED, List.of());
+		int core = Rig.Piece.CORE.ordinal();
+		if (parked.size() <= core || Rig.level(parked.get(core)) < FAILSAFE_LEVEL) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (now < FAILSAFE_READY.getOrDefault(player.getUUID(), 0L)) {
+			return;
+		}
+		FAILSAFE_READY.put(player.getUUID(), now + FAILSAFE_COOLDOWN);
+		call(player);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.failsafe"));
+		RigFinish.earn(player, RigFinish.LAST_STAND);
 	}
 
 	/** Whether this player has pieces parked (either side). */
@@ -134,6 +184,8 @@ public final class RigCall {
 			FROM.put(player.getUUID(), post);
 		}
 		player.setAttached(FLYING_IN, true);
+		// arms out and feet planted while it builds on
+		RigMoves.start(player, RigMoves.CALL);
 		CALLING.put(player.getUUID(), new int[1]);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.calling"));
