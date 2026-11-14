@@ -557,3 +557,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, undead illagers thread): the first reaped skins "just look like zombies": "the reaped need to keep the vindicator and pillager/ evoker bodies with hanging arms and undead skulls matching theirs"; own model built; then "these look good" and "merge". PR #1532 (the reaped) merged. Lore.md paragraph "The reaped" still (new).
 - 2026-11-14 (Andy, chain axe thread): "merge". PR #1534 (chain axe throw and buried head, lasso physics rope, models) merged.
 - 2026-11-14 (Andy, undead illagers thread): "i made the picks, and the lore looks good". Lore.md paragraph "The reaped" approved ((new) mark removed). Picks: 32 of 35 on the Reaper Host pick-list (not draugr structures in the world, not surface draugr raids, not charts to Moog's wrecks); note on the draugr lord: "use blockbench and fable, go all out for this".
+
+## 2026-11-14 (Reaper host thread)
+- Andy: "only the undead illagers should ride spiders". Spider riders are reaped only; living illager squads never ride them.
