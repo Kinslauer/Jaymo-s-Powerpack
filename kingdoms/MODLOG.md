@@ -13347,3 +13347,10 @@ ends the body for good. Compiled, not played.
 - **More of the dead come apart.** The zombie knight's and the revenant's bodies come apart like the draugr's. Alive,
   the draugr, the reaped, the zombie knight and the revenant can lose limbs as zombies can (to blades, and to a knock
   with Jaymo's Powers). The draugr now counts as undead (Smite bites, healing harms).
+
+## 0.8.82 (2026-11-14): a kneeling boss with little health left can be finished (#1545)
+
+- A boss whose posture breaks at a fifth of its health or less (`BossPosture.FINISH_SHARE`) kneels twice as long (6 s)
+  and is open to Powers' prompted finisher. It stays down while a finisher plays on it and gets straight up if the
+  player misses a key. A riposte blow still works as before. Nothing changes without Jaymo's Powers.
+- Compiled; not played.
