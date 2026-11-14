@@ -541,5 +541,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "approved." for the Lore.md paragraph "The town books" (its (new) mark removed). All Portable Mods picks are merged and their lore approved.
 - 2026-11-14 (Andy, moose thread): "merge". PR #1518 (moose cows and young bulls) merged.
 
-- 2026-11-14 (Reaper, PR #1526): Andy: "death sorcerers should NOT be attuned". Death Sorcerers never carry the Reaper. Built as: Reaper-pact Warlocks and other classes with a forbidden death spell carry it (the second part is my reading, asked on a decision card).
+- 2026-11-14 (Reaper, PR #1526): Andy: "death sorcerers should NOT be attuned". Death Sorcerers never carry the Reaper. Built as: Reaper-pact Warlocks and other classes with a forbidden death spell carry it (Andy confirmed both on a decision card).
 - 2026-11-14 (Andy, flying blades thread): the rocks' "Harry" order is named "Harrier" on the wheel.
