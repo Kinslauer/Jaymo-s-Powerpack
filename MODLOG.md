@@ -4946,3 +4946,10 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - **Only the head hurts.** The haft's own blow is gone: clicking a creature no longer hits it at once. The head strikes the first creature it passes through (`CHOP_HIT`), for the axe's full blow times the swing's charge (`CHOP_SHARE`), and stops in it with a point of wear on the axe; a raised shield or guard doesn't stop it (it comes over the top, a share lighter, as the flail's chop does). If it meets nobody it stops where it comes down into the ground. A weak click (under 60% charge) does nothing.
 - The horizontal swipe is no longer the chain axe's; the flail and whip keep theirs. Item tooltip and JEI text say how the chop works.
 - Compiled; not played. To check in game: the chop's arc from first and third person, that it lands on a locked foe's picked region, and the chain while it swings.
+
+## 0.23.82 (2026-11-14): power finishers carry no names (#1562)
+
+- Andy: "nothing labels them". A power's own finisher no longer shows a move name on the action bar when it starts
+  (weapon finishers still show theirs), and the ten names are gone from the lang files. Nobody in the world knows or
+  names these: a holder finds out what the power does as it happens.
+- Compiled; not played.
