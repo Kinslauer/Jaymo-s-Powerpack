@@ -106,6 +106,10 @@ abstract class McaAnswersMixin {
 			// (Andy, 2026-11-12) a wizard or a necromancer, while you hold a mane lock
 			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseRevival.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseKit.canAsk(villager)) {
+			// (Andy, 2026-11-14) only a court wizard sells enchanted tack
+			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseKit.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.TalkErrands.canAsk(villager)) {
 			// (Andy, 2026-11-12) town business only with a realm's or a village's folk
 			cir.getReturnValue().remove(com.jaymoskingdoms.TalkErrands.ANSWER);

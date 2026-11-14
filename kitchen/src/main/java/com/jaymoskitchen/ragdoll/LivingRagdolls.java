@@ -42,8 +42,6 @@ public final class LivingRagdolls {
 	/** A relayed body must be about player-sized and this near the player (blocks), or it's thrown away. */
 	private static final float MIN_SIZE = 0.1F, MAX_SIZE = 8.0F;
 	private static final double MAX_OFFSET = 32.0;
-	/** A hit this big (damage before armour, half-hearts) knocks a player limp; a blast too. */
-	private static final float BIG_HIT = 8.0F;
 	/** A landing that really hurt this much (damage taken, half-hearts) knocks them limp. */
 	private static final float HARD_LANDING = 6.0F;
 	/**
@@ -193,8 +191,9 @@ public final class LivingRagdolls {
 	}
 
 	/**
-	 * Only damage that really landed counts: a big blow or blast, or a fall that hurt. Negated falls (Smoke, a power's
-	 * cushion) never get here, and slow falling never counts.
+	 * Only damage that really landed counts: a big blow or blast, one that takes a big share of their health, a solid
+	 * swing of a big blade (see {@link HeavyHits}), or a fall that hurt. Negated falls (Smoke, a power's cushion) never
+	 * get here, and slow falling never counts.
 	 */
 	private static void knockFrom(ServerPlayer player, DamageSource source, float baseDamage, float damageTaken) {
 		if (source.is(DamageTypeTags.IS_FALL)) {
@@ -209,9 +208,8 @@ public final class LivingRagdolls {
 			}
 			return;
 		}
-		boolean blast = source.is(DamageTypeTags.IS_EXPLOSION);
 		Vec3 from = source.getSourcePosition();
-		if (baseDamage < BIG_HIT || from == null && !blast) {
+		if (!HeavyHits.heavy(player, source, baseDamage, damageTaken)) {
 			// small hits, and anything that comes from nowhere (fire, drowning, starving, magic)
 			return;
 		}

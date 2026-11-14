@@ -4588,3 +4588,36 @@ Built, not played.
 - **Fix**: a cod, salmon, pufferfish or tropical fish let go through catch-and-release is now marked as from a
   bucket, so Kingdoms' new thinning of worldgen fish (which skips bucket fish) leaves it alone.
 - Built.
+
+## 0.23.51 (2026-11-14): Longsword and claymore take up less of the first-person view (#1499)
+
+- **Armory**: the longsword and claymore (every material) are drawn at 0.7x their old size in first person, both
+  hands. They shrink toward the cross-guard, so the grip stays where the hand is. The longsword's tip now stops a
+  little above the middle of the screen instead of near the top. The claymore still looks the bigger of the two and no
+  longer reaches the top edge. Third person, the ground and the inventory icon are unchanged.
+- `tools/armory_assets.py` keeps the new poses (`FIRST_PERSON`) when the models are regenerated.
+- Built; checked in a projection of the first-person view, not played.
+
+## 0.23.52 (2026-11-14): JMB's 3D models for the longsword, glaive, quarterstaff, cudgel and battleaxe; blood on 3D weapons (#1500)
+
+- Andy picked five of JMB's Better Weapons' 3D models (MIT, jmb19905; licence kept in the pack and `docs/licenses`). In the hand they are now solid: the **longsword**, the **glaive** (every tier), the **quarterstaff** as JMB's battlestaff (wood and iron, swinging across into JMB's blocking hold while raised), the **cudgel** as JMB's club (wood, and a stone one in cobblestone), and WeaponMod's **battleaxe** as JMB's long axe (every metal). The inventory icons stay as they were.
+- Stone and copper versions are JMB's iron palette recoloured along vanilla's stone and copper sword heads.
+- They live in the built-in "3D items and plants" pack (`tools/gen_held_3d.py`, sources in `tools/jmb_weapons/`), so switching that pack off brings the flat look back.
+- **Blood on 3D weapons**: a bloody modelled weapon (these, and the dagger) now shows its blood in the hand, on the ground and in frames, painted onto each texture it's drawn from (`BloodItemOverlay`, `ArmourGrimeTextures.sprite`). Before, only flat weapons did.
+- Compiles; not played.
+
+## 0.23.53 (2026-11-14): katanas and ninjatos are folded steel only (#1503)
+
+- Andy: "the katana should only be craftable with iron sand, giving it a reason to go to mohknee."
+- **Folded Steel Ingot** (new): what Kingdoms' blossom smiths teach you to make from Mohknee's iron sand. It heats, hammers and
+  melts as steel, and a Hot Ingot of it stays folded (it cools or quenches back to a Folded Steel Ingot, and won't pile with plain steel).
+- **Katana Blade**: hammered only from 2 hot Folded Steel Ingots on an iron Smithing Anvil with a steel hammer; plain steel never
+  offers it. With a Crossguard and a Tool Handle it makes WeaponMod's iron katana. Stone (Part Builder), iron, gold and copper
+  katana blades are no longer made, and old iron, gold or copper blades no longer assemble. Finished katanas, the katana blueprint
+  and Darktide's blade of dark water are untouched.
+- **Ninjato Blade** (Andy: "yes ninjato too"): the same rule; 2 hot Folded Steel Ingots, makes the iron ninjato. Stone, iron and gold
+  ninjato blades are no longer made and old ones no longer assemble.
+- Idea from Nihon Blacksmithing (All Rights Reserved, so no code or art of theirs): iron sand from rivers as the only way to their blades.
+- `smithing/FoldedSteel` (item, `folded_steel` component, the anvil check), `WeaponParts.Scheme.FOLDED`, `HotMetal`, `Quenching`,
+  `SmithingAnvilEntity.put`. Art: our steel ingot with a fold line; the steel blade is the redrawn iron one recoloured.
+- Compiled; not played.

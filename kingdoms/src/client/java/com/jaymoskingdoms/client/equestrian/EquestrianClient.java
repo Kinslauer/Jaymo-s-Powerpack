@@ -129,6 +129,7 @@ public final class EquestrianClient {
 		ClientPlayNetworking.registerGlobalReceiver(Herding.Roster.TYPE, (payload, context) -> RosterScreen.receive(payload));
 		Tackroom.openHandbook = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		MythicMountsClient.register();
+		GlideHarnessClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(Equestrian.Shied.TYPE, (payload, context) -> {
 			if (payload.horse() == riding) {
 				gait = Gait.WALK;

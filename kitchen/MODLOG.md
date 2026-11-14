@@ -2139,3 +2139,20 @@ trader seeds, and the dishes). This adds what was missing (MIT, by vectorwing; L
 - **Harsher hunger**: at 6 food or less you walk 15% slower, at 4 or less 30% slower with Weakness, at 2 or less half speed with Weakness II and Mining Fatigue. Jumping is left alone. Androids and the Divine-born are kept full, so they never feel it. `hardcore/Hardcore`.
 - **Beds don't set your spawn**: you still sleep in them. This covers vanilla sleep, Kingdoms' bed rest and ship berths. Respawn anchors, lit outpost campfires and the world spawn are left. `mixin/BedSpawnMixin`.
 - Changed classes compile against 26.3; not played.
+
+## 0.6.14 (2026-11-14): Heavy hits and big blades knock bodies into ragdolls (#1501)
+
+- **Heavy hits ragdoll everyone** (Andy, after Ragdoll Reactions, which is All Rights Reserved on CurseForge, so remade): players already went limp at 8 damage before armour. Now the same rules knock **mobs** limp too, and both get two more ways down. `ragdoll/HeavyHits`.
+  - **A big blow** is 8 damage before armour for a body a player's size. A bigger body takes more, a smaller one less, by its standing box (an iron golem about 64, a chicken 4).
+  - **A blow that takes 35% of the body's whole health at once** (and at least 3 damage).
+  - **A solid swing of a big blade**, 5 or more damage. Big blades are greatswords, longswords, claymores, broadswords, zweihanders, flamberges, bastard swords, nodachi, great axes, war axes, battle axes, glaives, halberds, scythes, naginatas, bardiches and poleaxes, from any mod, by item name (not their blade or head parts). Only bodies up to 2.6 blocks tall and 1.4 wide go down this way: a person, a wolf or a cow, not a golem or a ravager. The blade has to be swung by hand, not thrown.
+  - As before, fire, drowning, hunger and magic from nowhere never count.
+- **Limp mobs**: a mob knocked limp falls where the blow put it, as a ragdoll worked out on the server (as a corpse's is) and drawn by every client. While it's down it has no mind: no goals, no walking, no attacks. Blows on it shove the body. It gets back up where it lies once it lies still (at least 1.5 s, at most 7 s), and can't be floored again for 2 s. If it dies down there, its corpse starts from exactly that body. A rider knocked limp falls off its mount. `ragdoll/MobRagdolls`, `mixin/LimpMobAiMixin`, `mixin/LimpMobTravelMixin`, `Corpses.deathBody`.
+- **Never knocked limp**: bosses (`c:bosses`), anything over 4 blocks either way, mobs in water or lava, NoAI mobs, mobs carrying a rider, and bodies Jaymo's Powers has downed or is finishing (Powers draws them lying its own way). A limp mob that gets downed, lands in water or is picked up is let go of the ragdoll.
+- **Drawing**: limp mobs are drawn from their ragdoll's points like corpses, with limbs following the physics and loose parts hanging (`client/ragdoll/LimpMobs`, `client/mixin/LimpMobRotationsMixin`). A GeckoLib mob is laid down on the ragdoll as a whole, and its bones keep their own animation (`client/mixin/GeoLimpMobMixin`).
+- Built against 26.3 (Kitchen `gradlew build` passes); the mixins weren't loaded in a dev run, and none of it has been played.
+
+## 0.6.15 (2026-11-14): Ender saddlebags (#1500)
+
+- **Ender saddlebags**, not crafted: a court wizard sells them (Kingdoms). Worn in a horse's armour slot like saddlebags: the horse's owner opens their own ender chest from them, by sneak-clicking the horse or opening its inventory while riding. Anyone else gets the horse's own screen. Shears take them off. `horse/Saddlebags`, `mixin/AbstractHorseMixin`, client `SaddlebagLayer`.
+- Our own art (the saddlebags recoloured). Compiles against 26.3; not played.
