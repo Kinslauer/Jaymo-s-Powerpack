@@ -4781,3 +4781,9 @@ Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost
 - **The ghost in third person**: the ghost drifts as a ghost (legs together trailing back, arms floating loose, leaning into the drift) instead of walking on air, for everyone; its owner now sees it in third person, drawn where their view is each frame, and Limbo no longer shows vanilla's still floating spectator head.
 - Classes: Downed (standless, feet, halved branch), Dismember (halvedDown, halved), Crutches (downed gait), HealStruggle, SelfRevive, DownedStruggle, Resting, CrawlPose, PlayerGhostRenderer, OutOfBodyClient, new GhostUnseenMixin, DownedLookMixin, LimboSelfHiddenMixin; lang part downed_legless.json.
 - Built; not played.
+
+## 0.23.68 (2026-11-14): the Chrono future's hordes are bigger (#1512)
+
+- The future's feral packs are 5-10 strong (were 3-6), up to 18 near a player by day and 36 by night (were 10 and 20): the most anywhere outside a blood moon, above Kingdoms' new zombie hordes.
+- Sun shelter: zombies and skeletons don't look for shade where the game's `MONSTERS_BURN` is off (Kingdoms' overcast horde days).
+- Built; not played.
