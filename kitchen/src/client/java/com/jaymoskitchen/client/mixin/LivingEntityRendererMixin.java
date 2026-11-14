@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** A creature hit in the legs is drawn crawling (see CrawlPose); a corpse with its eyes shut (see ClosedEyes). */
+/** A creature hit in the legs is drawn crawling (see CrawlPose); a corpse with its eyes shut (see ClosedEyes), skinned or gutted (see Dressed). */
 @Mixin(LivingEntityRenderer.class)
 abstract class LivingEntityRendererMixin {
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
@@ -39,6 +39,8 @@ abstract class LivingEntityRendererMixin {
 
 	@ModifyVariable(method = "getRenderType", at = @At("STORE"), ordinal = 0)
 	private Identifier jaymoskitchen$closedEyes(Identifier texture, LivingEntityRenderState state) {
-		return com.jaymoskitchen.client.corpse.ClosedEyes.texture(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state, texture);
+		var model = ((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel();
+		// a skinned or gutted carcass is painted over the shut-eyed copy
+		return com.jaymoskitchen.client.corpse.Dressed.texture(model, state, com.jaymoskitchen.client.corpse.ClosedEyes.texture(model, state, texture));
 	}
 }

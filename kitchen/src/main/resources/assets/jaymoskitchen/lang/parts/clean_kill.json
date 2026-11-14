@@ -1,0 +1,14 @@
+{
+	"message.jaymoskitchen.corpse.death.mauled": "Mauled: the hide is torn",
+	"message.jaymoskitchen.corpse.death.burnt": "Burnt: the hide is ruined",
+	"message.jaymoskitchen.corpse.death.battered": "Battered: some of the meat is bruised",
+	"message.jaymoskitchen.corpse.death.saved": "You trim round the damage: nothing is lost",
+	"message.jaymoskitchen.hook.unskilled": "You don't know the hook's work. Take it to a Butcher Block",
+	"message.jaymoskitchen.hook.need_knife_gut": "Gut it with a knife before the cuts",
+	"message.jaymoskitchen.hook.gutted": "Gutted. Three cleaver cuts left",
+	"item.jaymoskitchen.offal": "Offal",
+	"block.jaymoskitchen.offal_pile": "Gut Pile",
+	"block.jaymoskitchen.salt_lick": "Salt Lick",
+	"item.jaymoskitchen.cooked_offal": "Cooked Offal",
+	"message.jaymoskitchen.hook.skinning": "Skinning: pull %s of %s"
+}

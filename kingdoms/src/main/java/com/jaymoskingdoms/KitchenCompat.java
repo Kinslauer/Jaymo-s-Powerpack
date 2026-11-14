@@ -266,6 +266,14 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Green Huntsman's meat hook blessings (needs 0.5.57): {}", e.toString());
 		}
+		// Butcher's Hand: without a rank Kitchen's meat hook can't be worked; it skins faster for more, and at the last saves what a rough death spoiled
+		try {
+			Class.forName("com.jaymoskitchen.corpse.Hanging").getMethod("setButcherSkill", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
+					Skills.rank(player, Skills.Perk.BUTCHERS_HAND));
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Butcher's Hand (needs clean kills and skinning pulls): {}", e.toString());
+		}
 		HunterBow.kitchenHooks();
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {

@@ -311,6 +311,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
+		Dressed.mark(bodyState, corpse.dressed());
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -373,6 +374,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		CorpseDressing.body(corpse, bodyState);
 		bodyState.setData(Pinned.KEY, Pinned.HANGING);
 		ClosedEyes.mark(bodyState);
+		Dressed.mark(bodyState, corpse.dressed());
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -468,6 +470,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
+		Dressed.mark(bodyState, corpse.dressed());
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose
 		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), state.age, !corpse.isTumbling(),

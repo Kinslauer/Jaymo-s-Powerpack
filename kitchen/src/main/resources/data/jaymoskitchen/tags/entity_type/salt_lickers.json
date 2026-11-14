@@ -1,0 +1,61 @@
+{
+	"values": [
+		"minecraft:cow",
+		"minecraft:mooshroom",
+		"minecraft:sheep",
+		"minecraft:pig",
+		"minecraft:horse",
+		"minecraft:donkey",
+		"minecraft:mule",
+		"minecraft:llama",
+		"minecraft:rabbit",
+		{
+			"id": "naturalist:deer",
+			"required": false
+		},
+		{
+			"id": "naturalist:boar",
+			"required": false
+		},
+		{
+			"id": "naturalist:zebra",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:roedeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reddeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reindeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:moose",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:bison",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:moose",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:muskox",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:serow",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:shrine_deer",
+			"required": false
+		}
+	]
+}
