@@ -539,3 +539,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "approved." for the Lore.md paragraph "Plate and travelers' gear" (its (new) mark removed). Also: "always post the lore when you say that from now on, im not gonna go search for it" (quote pending lore paragraphs in replies).
 - 2026-11-14 (Andy, Port picked pieces from other mods thread): "approved." for the Lore.md paragraph "The town books" (its (new) mark removed). All Portable Mods picks are merged and their lore approved.
 - 2026-11-14 (Andy, moose thread): "merge". PR #1518 (moose cows and young bulls) merged.
+- 2026-11-14 (Andy, flying blades thread): the rocks' "Harry" order is named "Harrier" on the wheel.
