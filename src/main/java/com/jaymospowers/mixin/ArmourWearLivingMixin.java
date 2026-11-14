@@ -1,5 +1,6 @@
 package com.jaymospowers.mixin;
 
+import com.jaymospowers.combat.Blows;
 import com.jaymospowers.core.ArmourWear;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.damagesource.DamageSource;
@@ -16,7 +17,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.20.68) {@link ArmourWear}: armour absorbs more of each hit, heavy and blunt weapons wear it faster, and NPCs' armour
- * wears too (vanilla's {@code LivingEntity#hurtArmor} does nothing; only {@code Player} overrides it).
+ * wears too (vanilla's {@code LivingEntity#hurtArmor} does nothing; only {@code Player} overrides it). And what the
+ * blow is meets what the armour is ({@link Blows#meetArmour}: a cut, a thrust or a blunt blow on padding, mail or plate),
+ * before the armour wears and takes its share.
  */
 @Mixin(LivingEntity.class)
 abstract class ArmourWearLivingMixin {
@@ -33,6 +36,11 @@ abstract class ArmourWearLivingMixin {
 	@ModifyVariable(method = "doHurtEquipment", at = @At("HEAD"), argsOnly = true)
 	private float jaymospowers$heavyWear(float damage, @Local(argsOnly = true) DamageSource source) {
 		return ArmourWear.wear(source, damage);
+	}
+
+	@ModifyVariable(method = "getDamageAfterArmorAbsorb", at = @At("HEAD"), argsOnly = true)
+	private float jaymospowers$blowMeetsArmour(float damage, @Local(argsOnly = true) DamageSource source) {
+		return Blows.meetArmour((LivingEntity) (Object) this, source, damage);
 	}
 
 	@ModifyArg(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE",
