@@ -13749,3 +13749,11 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Structure searches found nothing in a stacked world**: the stacked level's own structure state has no placements (each band keeps its own), so the first capital's village search looked at "0 of 0 places" and every first capital was raised from nothing, and `Scout` (life story villages and shipwrecks, rumours, quest board sites) never found a structure. Both now use the Overworld band's placements, ground and structure checks (`Stacked.overworldGround(...).structures()`, `Stacked.searchingOverworld`, which marks the search the way CustomChunks' own /locate does).
 - **Ground read from the clouds**: the level's generator answers "how high is the ground" with the Cloud Sea's overcast, so these now read the Overworld band's own ground: road planning (`Roads.start`/`route`: roads were planned flat and dry across sea and hill), a tale's wild spot (`Tales.wild`), a Blossom village's "water near?" (`BlossomVillages.waterNear`), the Mohknee go and map commands, and the Sunken Palace's sites (`SunkenPalace.sites`: the stacked generator isn't the Overworld's, so no palace was ever sited).
 - An ordinary world is unchanged. Built; not played.
+
+## 0.9.17 (2026-11-15): damp powder, downpours soak, wet hint (#1578)
+
+- A soaked gunner's powder is damp: half of his handgonne and arquebus shots fizzle out of the rain too ("Your powder is damp."), guards included (`EarlyGuns.wet`, `PowersCompat.soaked`).
+- Downpours soak you through in Jaymo's Powers' wetness as well as Kitchen's (`Downpours.soak`).
+- Draugr and silver skeletons (the Dead Traveler) have rusted iron, each its own amount from its id (draugr 2-10 of 10, skeletons 1-10), painted into their textures' cool-grey iron only (`client/inhabitants/RustedTextures`); a chieftain's bronze, flesh, shroud, fur and wood are left alone, and a lore film's living draugr is clean.
+- Loading-screen hint 187 on being soaked and scrubbing (`lang/parts/wet.json`).
+- Built; not played.
