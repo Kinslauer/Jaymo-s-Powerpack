@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: tinker-gadget-icons
 branch: claude/tinker-gadget-icons
 with: 
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 A player sees 19 distinct hand-drawn gadget icons in the hotbar and the Tinkerer's Notebook instead of the flat placeholders. Checked side by side at hotbar size on light and dark slots; not seen in game.
+- 2026-11-15 14:25 PR #1611 is merged into master; moved to Agents/Done.
