@@ -482,6 +482,17 @@ final class Arrests {
 				return true;
 			}
 			case EXECUTE -> {
+				// in the Crowned Sun's realms the blow is the headsman's, if he's near: he comes to it (Headsmen)
+				PathfinderMob headsman = Headsmen.of(level, f, crook);
+				if (headsman != null && Headsmen.coming(headsman, crook, a.blows)) {
+					a.blows += Headsmen.CALL_STEP;
+					a.next = now + Headsmen.CALL_STEP;
+					return true;
+				}
+				if (headsman != null && headsman.distanceToSqr(crook) <= Headsmen.STRIKE_REACH * Headsmen.STRIKE_REACH) {
+					guard = headsman;
+					Headsmen.strike(level, headsman);
+				}
 				guard.getLookControl().setLookAt(crook, 30.0F, 30.0F);
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 				level.playSound(null, crook.getX(), crook.getY(), crook.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 1.0F, 0.8F);

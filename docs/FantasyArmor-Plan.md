@@ -91,7 +91,7 @@ these GeckoLib sets: a new render layer draws each worn Fantasy Armor piece's ow
 run time, nothing copied) on the actor's head, body, arm and leg bones. Without the mod the cast looks as it does now.
 Lady Maria is used here, so the trim datapack keeps her set.
 
-### 9. The headsmen (Kingdoms; Andy asked for it to be planned, 2026-11-15)
+### 9. The headsmen (Kingdoms; Andy asked for it to be planned, 2026-11-15; built as `Headsmen`)
 Lore (approved): the Crowned Sun's headsmen carry out the crown's sentences, the thieves' hangings among them, in black
 plate edged with gold (Golden Execution); a headsman's plate goes dull if he goes too long without his work; the Ash
 Whisperer's people spit at both orders.
