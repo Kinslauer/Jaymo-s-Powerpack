@@ -1728,6 +1728,14 @@ scrap of leather for the pad, and every village has seen them: old soldiers, the
 a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
 answer, and no stick helps the one who has lost both.
 
+(new) **Wet, washing and rust** (Claude's placement, 2026-11-15, for Andy to approve). Everyone knows the wet: a
+soaked man feels the cold twice over, his padding hangs heavy, his powder won't take, fire takes him slowly, and a
+storm finds him first. Farm folk twist two sheaves' straw into a wisp and scrub pots, horses and themselves with it at
+the river, and that is how old blood comes off, the black stuff no rain will shift. Sand scours harder, and a soldier
+scours his mail with it, because iron left wet rusts. The Anvil-Father's iron has never liked the Deep Mother's water:
+sea spray rusts it twice as fast as rain, which the sailors say is the old quarrel showing. Gold, copper and bronze
+don't rust; that's why the rich wear them.
+
 (new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
 rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
 potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
