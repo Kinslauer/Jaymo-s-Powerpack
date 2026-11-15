@@ -229,6 +229,11 @@ public final class Mohknee {
 	private static int buildPalace(CommandContext<CommandSourceStack> c) {
 		ServerLevel level = c.getSource().getLevel();
 		BlockPos floor = level.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, BlockPos.containing(c.getSource().getPosition()));
+		// a palace of the seabed only: on dry land its halls' water runs out over the country round it
+		if (!level.getFluidState(floor).is(net.minecraft.tags.FluidTags.WATER)) {
+			c.getSource().sendFailure(Component.literal("The sunken palace stands on the seabed: go out over deep water to build one."));
+			return 0;
+		}
 		com.jaymoskingdoms.blossomland.SunkenPalace.build(level, floor, level.getRandom());
 		c.getSource().sendSuccess(() -> Component.literal("A sunken palace built at " + floor.getX() + ", " + floor.getY() + ", " + floor.getZ() + "."), true);
 		return 1;

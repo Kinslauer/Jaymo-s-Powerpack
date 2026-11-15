@@ -26,7 +26,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -36,7 +35,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.250) Blossom villages: the pack's Japan. Andy (2026-10-27) pointed at Tax' Village Architect's cherry blossom
  * village (all rights reserved, Forge 1.21.1 only: nothing of it is used). No village is generated among the cherry
- * trees, so one rises there by itself: out in a cherry grove away from every other settlement, out of sight of the
+ * trees, so one rises by itself on Mohknee's dry land, away from every other settlement, out of sight of the
  * player passing by, a ring of minka round a bell, a shrine at its heart, a torii over the road in, a butcher's shop, a
  * hunting lodge and two market stalls, all drawn in the Blossom way ({@link Blossom}, {@link JobHalls}). It is an
  * ordinary {@link FactionType#VILLAGE} from then on (an elder, a shed, a builder crew, its own growth, the Blossom
@@ -184,11 +183,10 @@ public final class BlossomVillages {
 
 	// ---- rising --------------------------------------------------------------------------------------------------------
 
-	/** Looks round a player in a cherry grove on Mohknee for a site, and raises a village there. */
+	/** Looks round a player on Mohknee's dry land for a site, and raises a village there. */
 	private static void tryRise(ServerLevel level) {
 		// only on Mohknee, the blossom folk's own continent: the home continent's cherry groves are wild ones
-		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator() && com.jaymoskingdoms.seas.Mohknee.on(level, p.blockPosition())
-			&& level.getBiome(p.blockPosition()).is(Biomes.CHERRY_GROVE)).toList();
+		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator() && dryLand(level, p.blockPosition())).toList();
 		if (players.isEmpty()) {
 			return;
 		}
@@ -225,7 +223,21 @@ public final class BlossomVillages {
 		}
 	}
 
-	/** {@code at} is free for a Blossom village: loaded, a cherry grove all round, nobody's land, no settlement or bell near, out of sight. */
+	/**
+	 * {@code pos} is Mohknee's dry land: any of its biomes but sea, river and beach. Cherry groves are only an eighth of
+	 * the land and mostly steep, and Mohknee has no village of the home continent's (MohkneeStructureMixin), so asking
+	 * for cherry grove left the land almost empty; every settlement on Mohknee is Blossom by its place ({@code Palette.at}).
+	 */
+	private static boolean dryLand(ServerLevel level, BlockPos pos) {
+		if (!com.jaymoskingdoms.seas.Mohknee.on(level, pos)) {
+			return false;
+		}
+		var biome = level.getBiome(pos);
+		return !biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN) && !biome.is(net.minecraft.tags.BiomeTags.IS_RIVER)
+			&& !biome.is(net.minecraft.tags.BiomeTags.IS_BEACH);
+	}
+
+	/** {@code at} is free for a Blossom village: loaded, Mohknee's dry land all round, nobody's land, no settlement or bell near, out of sight. */
 	private static boolean open(ServerLevel level, BlockPos at) {
 		MinecraftServer server = level.getServer();
 		if (!level.isPositionEntityTicking(at) || !com.jaymoskingdoms.seas.Mohknee.on(level, at)) {
@@ -233,7 +245,7 @@ public final class BlossomVillages {
 		}
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, 0, -RADIUS), at.offset(-RADIUS, 0, RADIUS),
 			at.offset(RADIUS, 0, RADIUS)}) {
-			if (!com.jaymoskingdoms.Loaded.made(level, corner) || !level.getBiome(corner).is(Biomes.CHERRY_GROVE) || Factions.at(server, level, corner) != null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, corner) || !dryLand(level, corner) || Factions.at(server, level, corner) != null) {
 				return false;
 			}
 		}
