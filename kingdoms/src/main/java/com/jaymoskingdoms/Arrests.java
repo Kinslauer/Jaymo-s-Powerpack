@@ -120,6 +120,8 @@ final class Arrests {
 		Stage stage = Stage.CHASE;
 		long until, next;
 		@Nullable Sentence sentence;
+		/** A sentence decided before the audience (null: the ruler weighs it up). */
+		@Nullable Sentence fixed;
 		/** The court's circle of truth is up. */
 		boolean truthSpoken;
 		int blows;
@@ -153,6 +155,18 @@ final class Arrests {
 	/** {@code e} is being chased down, held or judged by the guards. */
 	static boolean held(Entity e) {
 		return ARRESTS.containsKey(e.getUUID());
+	}
+
+	/**
+	 * (Andy, 2026-11-15: navies spare the beaten and take prisoners) {@code crook}, brought ashore from a sunk ship, is taken
+	 * by the nearest free guard of {@code f} before its ruler and to the cells. False if there's no guard to take them.
+	 */
+	static boolean jail(ServerLevel level, Villager crook, Faction f, String crime) {
+		if (ARRESTS.containsKey(crook.getUUID()) || !arrest(level, crook, f, crime)) {
+			return false;
+		}
+		ARRESTS.get(crook.getUUID()).fixed = Sentence.JAIL;
+		return true;
 	}
 
 	/**
@@ -414,7 +428,7 @@ final class Arrests {
 		// in the circle of truth the record decides more than the dice
 		int spread = Liars.honest(a.crook) ? CHANCE_SPREAD / 3 : CHANCE_SPREAD;
 		int score = a.notoriety * PER_NOTORIETY + lean + random.nextInt(spread + 1);
-		a.sentence = score >= EXECUTE_FROM ? Sentence.EXECUTE : score >= EXILE_FROM ? Sentence.EXILE : score >= FLOG_FROM ? Sentence.FLOG : Sentence.PARDON;
+		a.sentence = a.fixed != null ? a.fixed : score >= EXECUTE_FROM ? Sentence.EXECUTE : score >= EXILE_FROM ? Sentence.EXILE : score >= FLOG_FROM ? Sentence.FLOG : Sentence.PARDON;
 		if (a.sentence == Sentence.EXILE && a.looter()) {
 			// (0.7.132) no realm lets a looter go to rob the next field: the cells
 			a.sentence = Sentence.JAIL;

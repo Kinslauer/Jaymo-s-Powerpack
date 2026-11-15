@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.whaling;
 
+import com.jaymoskingdoms.GutteringLamps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -28,26 +29,30 @@ import net.minecraft.world.phys.BlockHitResult;
  * {@link #MOST_OIL} measures and comes empty (a bottle of whale oil fills it and gives the bottle back); lit, it burns a measure every
  * {@link #BURN_TICKS}, so a full lamp left burning lasts a day, and goes out dry. Use it with an empty hand to light it or
  * snuff it. In a settlement its folk tend their lamps ({@link Lamplighters}): lit at dusk, snuffed at dawn, filled from
- * the stores while there's oil.
+ * the stores while there's oil. (medieval picks) Lit in an abandoned place, it gutters ({@link #GUTTERED}, {@link GutteringLamps}).
  */
 public final class OilLampBlock extends LanternBlock {
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final int MOST_OIL = 4;
 	public static final IntegerProperty OIL = IntegerProperty.create("oil", 0, MOST_OIL);
+	/** Lit, but guttered down near dark for a moment (an abandoned place's lamp, {@link GutteringLamps}). */
+	public static final BooleanProperty GUTTERED = BooleanProperty.create("guttered");
 	/** Ticks a measure of oil burns. */
 	static final int BURN_TICKS = 6000;
 	/** Its light, lit. */
 	static final int LIGHT = 15;
+	/** Its light, guttered. */
+	static final int GUTTERED_LIGHT = 5;
 
 	public OilLampBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.defaultBlockState().setValue(LIT, false).setValue(OIL, 0));
+		this.registerDefaultState(this.defaultBlockState().setValue(LIT, false).setValue(OIL, 0).setValue(GUTTERED, false));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		super.createBlockStateDefinition(builder);
-		builder.add(LIT, OIL);
+		builder.add(LIT, OIL, GUTTERED);
 	}
 
 	@Override
@@ -88,7 +93,7 @@ public final class OilLampBlock extends LanternBlock {
 		if (lit && state.getValue(OIL) == 0 || state.getValue(LIT) == lit) {
 			return;
 		}
-		level.setBlock(pos, state.setValue(LIT, lit), Block.UPDATE_ALL);
+		level.setBlock(pos, state.setValue(LIT, lit).setValue(GUTTERED, false), Block.UPDATE_ALL);
 		if (lit) {
 			level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.3F, 1.6F);
 			level.scheduleTick(pos, state.getBlock(), BURN_TICKS);
@@ -117,7 +122,7 @@ public final class OilLampBlock extends LanternBlock {
 		}
 		int oil = state.getValue(OIL) - 1;
 		if (oil <= 0) {
-			level.setBlock(pos, state.setValue(OIL, 0).setValue(LIT, false), Block.UPDATE_ALL);
+			level.setBlock(pos, state.setValue(OIL, 0).setValue(LIT, false).setValue(GUTTERED, false), Block.UPDATE_ALL);
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.3F, 1.8F);
 			return;
 		}
@@ -125,8 +130,25 @@ public final class OilLampBlock extends LanternBlock {
 		level.scheduleTick(pos, this, BURN_TICKS);
 	}
 
+	/** (medieval picks) Lit, it looks now and then whether its place is abandoned, and gutters there. */
+	@Override
+	protected boolean isRandomlyTicking(BlockState state) {
+		return state.getValue(LIT) || state.getValue(GUTTERED);
+	}
+
+	@Override
+	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		GutteringLamps.oilLampTick(state, level, pos);
+	}
+
+	/** Its light: full, guttered low, or out. */
+	public static int light(BlockState state) {
+		return !state.getValue(LIT) ? 0 : state.getValue(GUTTERED) ? GUTTERED_LIGHT : LIGHT;
+	}
+
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		GutteringLamps.oilLampSmoke(state, level, pos, random);
 		if (state.getValue(LIT) && random.nextInt(5) == 0) {
 			double y = pos.getY() + (state.getValue(HANGING) ? 0.85 : 0.6);
 			level.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5, y, pos.getZ() + 0.5, 0.0, 0.01, 0.0);

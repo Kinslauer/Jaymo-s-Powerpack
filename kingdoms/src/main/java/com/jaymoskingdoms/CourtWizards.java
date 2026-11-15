@@ -273,8 +273,19 @@ public final class CourtWizards {
 			return true;
 		}
 		if (e instanceof ServerPlayer player) {
+			// (am-sieges) a siege's sides first (one who stands with the seat, to a caster marching on it)
+			Boolean siege = Hermits.is(w) ? null : Sieges.foe(mob, player);
+			if (siege != null) {
+				return siege;
+			}
 			// (0.5.62) a hermit minds only who strikes them
 			return !Hermits.is(w) && Reputation.get(player, w.factionId()) <= Reputation.HOSTILE;
+		}
+		if (e instanceof Worker other && !(e instanceof Folk) && !Hermits.is(w) && (other.role() == Folk.GUARD || other.role() == Folk.ARCHER)
+			&& other.factionId() >= 0 && mob.level().getServer() != null
+			&& Relations.between(mob.level().getServer(), w.factionId(), other.factionId()) == Relation.WAR) {
+			// (am-mages) an enemy realm's MCA guards and archers in a war (a war party's, or the seat's it marches on)
+			return true;
 		}
 		if (e instanceof Folk folk) {
 			if (Hermits.is(w)) {

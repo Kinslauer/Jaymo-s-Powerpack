@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +34,9 @@ import org.jspecify.annotations.Nullable;
  * out in the full harness: their realm's helm (one of the eight, the same for all its knights), cuirass and sabatons,
  * and under and round them the arming doublet in the realm's colour, the haubergeon, spaulders of the realm's make
  * (plate, mail or brigandine), arm harness, gauntlets, cuisses and greaves. Bright in most realms, blackened in some.
- * A realm whose faith or armoury already dresses its guards keeps that.</li>
+ * A realm whose faith or armoury already dresses its guards keeps that. (medieval picks) Their helm and the war arm they
+ * carry are the realm's own make (Powers' {@code RealmPatterns}), and a knight slain by a player sometimes leaves a
+ * captured pattern of one ({@link #KNIGHT_PATTERN_CHANCE}).</li>
  * <li><b>Kings and lords</b> wear their realm's crest beast over the crown, its torse in the realm's colour, and gilded
  * spaulders. The beast comes from the realm as its arms do. A player who takes a crown is given theirs.</li>
  * <li><b>Gilded plate</b> is for royals and lords: anyone else who puts a gilded piece on has it come off again.</li>
@@ -56,11 +59,19 @@ public final class HeraldryWear {
 	static final float PRICE_MULT = 0.05F;
 	/** The lands whose realms field knights in the harness (the others keep their own land's gear). */
 	static final Set<Climate> KNIGHT_LANDS = EnumSet.of(Climate.PLAINS, Climate.TAIGA, Climate.SWAMP);
+	/** (medieval picks) The chance a realm knight a player slays leaves a captured pattern of his helm or war arm. */
+	static final float KNIGHT_PATTERN_CHANCE = 0.2F;
 
 	private HeraldryWear() {
 	}
 
 	static void register() {
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof Mob mob && source.getEntity() instanceof ServerPlayer && mob.level() instanceof ServerLevel level
+				&& level.getRandom().nextFloat() < KNIGHT_PATTERN_CHANCE) {
+				fallenKnight(level, mob);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % GILDED_CHECK == 0) {
 				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -123,12 +134,20 @@ public final class HeraldryWear {
 		return Math.floorMod(hash(realm(f)) >>> 24, (long)BLACKENED_REALMS) == 0 ? HeraldryArmour.BLACKENED : "";
 	}
 
-	/** What {@code f}'s knights wear in {@code slot} (helm, cuirass or sabatons), or empty for the other slots. */
-	private static ItemStack plate(Faction f, EquipmentSlot slot) {
+	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm; the cuirass carries the realm's cape), or empty for the other slots. */
+	private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
 		String finish = finish(f);
+		String tag = server == null ? null : realmTag(server, f);
+		String arm = arm(realm(f));
 		return switch (slot) {
-			case HEAD -> HeraldryArmour.stack(pick(HeraldryArmour.HELMS, hash(realm(f)) >>> 8), finish);
-			case CHEST -> HeraldryArmour.stack("plate_cuirass", finish);
+			case HEAD -> {
+				ItemStack helm = HeraldryArmour.stack(helm(realm(f)), finish);
+				yield tag == null ? helm : PowersCompat.realmMarked(helm, tag);
+			}
+			case MAINHAND -> tag == null || arm == null ? ItemStack.EMPTY : PowersCompat.realmArm(arm, tag);
+			// (gb-capes) a knight's cuirass carries the realm's cape
+			case CHEST -> server == null ? HeraldryArmour.stack("plate_cuirass", finish)
+				: Capes.cape(HeraldryArmour.stack("plate_cuirass", finish), Outfits.heraldry(f, server));
 			case FEET -> HeraldryArmour.stack("plate_sabatons", finish);
 			default -> ItemStack.EMPTY;
 		};
@@ -149,8 +168,11 @@ public final class HeraldryWear {
 		if (role == Folk.KING || role == Folk.LORD) {
 			ruler(folk, faction);
 		} else if (role == Folk.GUARD && FrontierArmour.setOf(folk.getItemBySlot(EquipmentSlot.CHEST)) == null && knightly(folk, faction, climate)) {
-			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET}) {
-				folk.setItemSlot(slot, plate(faction, slot));
+			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
+				ItemStack piece = plate(folk.level().getServer(), faction, slot);
+				if (!piece.isEmpty()) {
+					folk.setItemSlot(slot, piece);
+				}
 			}
 			harness(folk, faction);
 		} else if (folk.hasAttached(Harness.WORN)) {
@@ -158,9 +180,30 @@ public final class HeraldryWear {
 		}
 	}
 
+	/**
+	 * (medieval picks, troop ladders: {@link Ranks}) {@code mob}, risen to knight in {@code f}'s tree, is put in its knights'
+	 * plate, helm, war arm and harness, as they wear it. False (nothing put on) where the realm fields no knights in harness.
+	 */
+	static boolean knight(Mob mob, Faction f) {
+		if (!(mob.level() instanceof ServerLevel level) || !f.type().isRealm() || f.fallen() || !KNIGHT_LANDS.contains(Climate.at(level, f.seat()))
+			|| !Outfits.ironRich(mob, f) || Outfits.heraldry(f, level.getServer()).armoury()) {
+			return false;
+		}
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
+			ItemStack piece = plate(level.getServer(), f, slot);
+			if (!piece.isEmpty()) {
+				mob.setItemSlot(slot, piece);
+			}
+		}
+		harness(mob, f);
+		return true;
+	}
+
 	/** {@code mob} rules {@code faction} (a king, a lord; from {@link Rulers#fit} too): the realm's crest, and gilded spaulders. */
 	static void ruler(Mob mob, Faction faction) {
 		Harness.dress(mob, crest(mob.level().getServer(), faction), HeraldryArmour.stack("plate_spaulders", HeraldryArmour.GILDED));
+		// (gb-capes) and the realm's cape on whatever chest piece they wear
+		Capes.ensure(mob, faction, true);
 	}
 
 	/** Off the throne ({@link Rulers#unfit}): the crest and the gilt go. */
@@ -183,12 +226,17 @@ public final class HeraldryWear {
 		if (f == null || !knightly(mob, f, Climate.at(level, f.seat()))) {
 			return stack;
 		}
-		ItemStack plate = plate(f, slot);
+		ItemStack plate = plate(server, f, slot);
 		if (plate.isEmpty()) {
 			return stack;
 		}
 		if (slot == EquipmentSlot.CHEST) {
 			harness(mob, f);
+			// (and he takes up the realm's war arm)
+			ItemStack arm = plate(server, f, EquipmentSlot.MAINHAND);
+			if (!arm.isEmpty()) {
+				mob.setItemSlot(EquipmentSlot.MAINHAND, arm);
+			}
 		}
 		return plate;
 	}
@@ -216,6 +264,63 @@ public final class HeraldryWear {
 	public static boolean noble(MinecraftServer server, UUID player) {
 		Faction f = Factions.of(server, player);
 		return f != null && (Crowns.rules(server, f, player) || Wars.isLord(f, player));
+	}
+
+	// ---- (medieval picks) a realm's own designs ------------------------------------------------------------------------
+
+	/** The helm {@code realm}'s knights wear (an item name of {@link HeraldryArmour#HELMS}). */
+	private static String helm(int realm) {
+		return pick(HeraldryArmour.HELMS, hash(realm) >>> 8);
+	}
+
+	/** The war arm {@code realm}'s knights carry (a Powers weapon head, of those in the game), or null without Powers. */
+	private static @Nullable String arm(int realm) {
+		List<String> arms = PowersCompat.realmArms();
+		return arms.isEmpty() ? null : pick(arms, hash(realm) >>> 40);
+	}
+
+	/** {@code f}'s realm as Powers' {@code RealmPatterns} passes it round ("id|name"; a fiefdom's is its overlord's), or null. */
+	static @Nullable String realmTag(MinecraftServer server, Faction f) {
+		Faction realm = realm(f) == f.id() ? f : Factions.get(server, realm(f));
+		return realm == null ? null : realm.id() + "|" + realm.name();
+	}
+
+	/**
+	 * The realm {@code smith} is sworn to (Powers' {@code RealmPatterns.sworn}): a standing kingdom's or fiefdom's people to
+	 * its realm (a fiefdom's to its overlord's); null for anyone else. Its smiths are offered the realm's own make.
+	 */
+	public static @Nullable String sworn(MinecraftServer server, UUID smith) {
+		Faction mine = Factions.of(server, smith);
+		if (mine == null || !mine.type().isRealm() || mine.fallen()) {
+			return null;
+		}
+		Faction realm = realm(mine) == mine.id() ? mine : Factions.get(server, realm(mine));
+		return realm == null || realm.fallen() ? null : realmTag(server, realm);
+	}
+
+	/** Whether the realm (a tag) keeps {@code shape} (Powers' {@code Blueprints.shape}) as its own: its knights' helm and its war arm. */
+	public static boolean keeps(String tag, String shape) {
+		int bar = tag.indexOf('|');
+		int realm;
+		try {
+			realm = Integer.parseInt(bar < 0 ? tag : tag.substring(0, bar));
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		String arm = arm(realm);
+		return shape.equals("heraldry/" + helm(realm)) || arm != null && shape.equals("weapon/" + arm);
+	}
+
+	/** A realm knight slain by a player: a captured pattern of his helm or his war arm (if they're the realm's make). */
+	private static void fallenKnight(ServerLevel level, Mob mob) {
+		boolean helmFirst = level.getRandom().nextBoolean();
+		ItemStack pattern = PowersCompat.realmPattern(mob.getItemBySlot(helmFirst ? EquipmentSlot.HEAD : EquipmentSlot.MAINHAND));
+		if (pattern.isEmpty()) {
+			pattern = PowersCompat.realmPattern(mob.getItemBySlot(helmFirst ? EquipmentSlot.MAINHAND : EquipmentSlot.HEAD));
+		}
+		if (!pattern.isEmpty()) {
+			mob.spawnAtLocation(level, pattern);
+		}
 	}
 
 	/** Whether {@code player} may wear {@code stack}: anything but gilded plate, which is a royal's or a lord's. (Always true on the client: the server decides.) */

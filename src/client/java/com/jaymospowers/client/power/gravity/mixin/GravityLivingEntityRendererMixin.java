@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * An earthboard rider leans into turns and tips into the speed (see GravityBoardPose); the weighed-down kneel
- * (GravityKneelPose); a wall walker stands on the wall or ceiling, a forward fall dives head first (GravityWalkPose).
+ * (GravityKneelPose); Overturn's upside-down fall and its holding on to the ground (GravityGraspPose); a wall walker stands on the wall or ceiling, a forward fall dives head first (GravityWalkPose).
  */
 @Mixin(LivingEntityRenderer.class)
 abstract class GravityLivingEntityRendererMixin {
@@ -20,6 +20,7 @@ abstract class GravityLivingEntityRendererMixin {
 	private void jaymospowers$boardLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		GravityBoardPose.rotate(state, poseStack);
 		com.jaymospowers.client.power.gravity.GravityKneelPose.rotate(state, poseStack);
+		com.jaymospowers.client.power.gravity.GravityGraspPose.rotate(state, poseStack);
 		com.jaymospowers.client.power.gravity.GravityWalkPose.rotate(state, poseStack, bodyRot, entityScale);
 	}
 
@@ -29,6 +30,7 @@ abstract class GravityLivingEntityRendererMixin {
 	private void jaymospowers$boardRide(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		GravityBoardPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.gravity.GravityKneelPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.gravity.GravityGraspPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.gravity.GravityWalkPose.extract(entity, state, partialTicks);
 	}
 }

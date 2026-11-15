@@ -1,0 +1,30 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:sunstep_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:pillared_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:mound_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:court_ruins",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 40,
+    "separation": 14,
+    "salt": 731905117,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 10
+    }
+  }
+}

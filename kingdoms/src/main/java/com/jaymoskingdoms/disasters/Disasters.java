@@ -46,6 +46,8 @@ public final class Disasters {
 	public static Block STORM_BELL, WEATHERVANE;
 	/** (0.7.31) The sand a sandstorm piles up, in layers like snow. */
 	public static Block SAND_LAYER, RED_SAND_LAYER;
+	/** The ash a volcano lets fall, in layers like snow ({@link Volcanoes}). */
+	public static Block ASH_LAYER;
 	public static Item STORM_BELL_ITEM, WEATHERVANE_ITEM, BAROMETER;
 	/** (0.7.31) The almanac: use it to read what disasters are foretold near you. */
 	public static Item ALMANAC;
@@ -67,6 +69,8 @@ public final class Disasters {
 			.strength(0.2F).sound(SoundType.SAND).replaceable().forceSolidOff().pushReaction(net.minecraft.world.level.material.PushReaction.POPPED));
 		RED_SAND_LAYER = block("red_sand_layer", SandLayerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 			.strength(0.2F).sound(SoundType.SAND).replaceable().forceSolidOff().pushReaction(net.minecraft.world.level.material.PushReaction.POPPED));
+		ASH_LAYER = block("ash_layer", SandLayerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
+			.strength(0.1F).sound(SoundType.SAND).replaceable().forceSolidOff().pushReaction(net.minecraft.world.level.material.PushReaction.POPPED));
 		STORM_BELL = block("storm_bell", Instruments.StormBell::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
 			.strength(3.0F).sound(SoundType.ANVIL).noOcclusion().requiresCorrectToolForDrops());
 		WEATHERVANE = block("weathervane", Instruments.Weathervane::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -77,6 +81,7 @@ public final class Disasters {
 		BAROMETER = Registry.register(BuiltInRegistries.ITEM, barometer, new Item(new Item.Properties().setId(barometer).stacksTo(1)));
 		ResourceKey<Item> almanac = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("almanac"));
 		ALMANAC = Registry.register(BuiltInRegistries.ITEM, almanac, new Almanac(new Item.Properties().setId(almanac).stacksTo(1)));
+		LastBell.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.insertAfter(Items.CLOCK, BAROMETER);
 			output.insertAfter(BAROMETER, ALMANAC);
@@ -90,9 +95,33 @@ public final class Disasters {
 		ServerTickEvents.END_SERVER_TICK.register(Storms::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Calamities::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Downpours::tick);
+		// the great disasters (medieval picks): every block they change shares one budget a tick
+		RedSky.register();
+		JaymosKingdoms.LOGGER.debug("great disaster attachments: {} {} {} {} {}", Doomsday.STATE, Volcanoes.SAVED, HighGround.FITTED, Bolides.VEIL_UNTIL, Tsunamis.UNDRAINED);
+		ServerTickEvents.START_SERVER_TICK.register(server -> BlockBudget.refill());
+		ServerTickEvents.END_SERVER_TICK.register(Signs::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Earthquakes::work);
+		ServerTickEvents.END_SERVER_TICK.register(Volcanoes::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Tsunamis::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Hurricanes::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Avalanches::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Bolides::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Doomsday::tick);
+		ServerTickEvents.END_SERVER_TICK.register(HighGround::tick);
+		ServerTickEvents.END_SERVER_TICK.register(RedSky::tick);
 		// (0.7.31) floods drain before the world is saved
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> Calamities.clear(server.overworld()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> Storms.clear());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			Calamities.clear(server.overworld());
+			Tsunamis.stop(server.overworld());
+		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			Storms.clear();
+			Volcanoes.clear();
+			Hurricanes.clear();
+			Avalanches.clear();
+			Bolides.clear();
+			Earthquakes.clearWork();
+		});
 	}
 
 	private static Block block(String name, java.util.function.Function<BlockBehaviour.Properties, Block> make, BlockBehaviour.Properties properties) {
@@ -108,6 +137,7 @@ public final class Disasters {
 	/**
 	 * {@code /kingdom disaster storm|thunder|supercell|dust_devil|tornado|monster|clear} (ops): a storm cell right
 	 * overhead, or a tornado touching down 60 blocks ahead of you (under a supercell of its own); or clear them all.
+	 * {@code doom start|stop}: the world's ending, now, or passing (the test switch, {@link Doomsday}).
 	 */
 	public static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("disaster").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -132,9 +162,25 @@ public final class Disasters {
 				c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.foretold"), true);
 				return 1;
 			}))
+			.then(Commands.literal("doom")
+				.then(Commands.literal("start").executes(c -> {
+					Doomsday.opStart(c.getSource().getServer());
+					c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.doom.start"), true);
+					return 1;
+				}))
+				.then(Commands.literal("stop").executes(c -> {
+					Doomsday.opStop(c.getSource().getServer());
+					c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.doom.stop"), true);
+					return 1;
+				})))
 			.then(Commands.literal("clear").executes(c -> {
 				Storms.clear();
 				Calamities.clear(c.getSource().getServer().overworld());
+				Tsunamis.clear(c.getSource().getServer().overworld());
+				Volcanoes.calm(c.getSource().getServer().overworld());
+				Hurricanes.clear();
+				Avalanches.clear();
+				Bolides.clear();
 				c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.cleared"), true);
 				return 1;
 			}));

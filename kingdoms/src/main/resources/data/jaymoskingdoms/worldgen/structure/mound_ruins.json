@@ -1,0 +1,8 @@
+{
+  "type": "jaymoskingdoms:old_ruins",
+  "people": "mound",
+  "biomes": "#jaymoskingdoms:has_structure/mound_ruins",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -111,6 +112,19 @@ public final class Calamities {
 	static final double NEWS_RANGE = 300.0;
 	/** How many sandstorms, blizzards and hail showers at once; floods and wildfires. */
 	static final int MOST = 4, MOST_FLOODS = 2, MOST_FIRES = 2;
+	/** (nd-hailhelm) Hail this strong ({@link Magnitude}) comes down as great stones: this much a hit on the bareheaded; a
+	 * helmet turns it and takes this much wear. */
+	static final int GIANT_HAIL = Magnitude.GREAT;
+	static final float GIANT_DAMAGE = 5.0F;
+	static final int GIANT_HELMET_WEAR = 3;
+	/** (nd-chains) A blizzard this strong may let go a slope above someone: the odds a tick, at full strength. */
+	static final int AVALANCHE_FROM = Magnitude.SEVERE;
+	static final float AVALANCHE_CHANCE = 1.0F / 2400.0F;
+	/** (Medieval picks) Of the disasters rolled, the share that is one of the great ones when the land suits it (a
+	 * volcano, a tsunami, a hurricane, a slide). */
+	static final float GREAT_SHARE = 0.25F;
+	/** (nd-meteor) How much colder the open air is under a great star's dust ({@link Bolides#veil}). */
+	static final double BODY_VEIL = 20.0;
 
 	static final ResourceKey<DamageType> HAIL = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKingdoms.id("hail"));
 
@@ -140,6 +154,7 @@ public final class Calamities {
 	static void clear(@Nullable ServerLevel level) {
 		SERVER.clear();
 		FORECASTS.clear();
+		SIGNED.clear();
 		FIRES.clear();
 		HAIL_ROLLED.clear();
 		RAINED.clear();
@@ -175,11 +190,12 @@ public final class Calamities {
 	public static double bodyHeat(ServerPlayer p) {
 		double x = p.getX(), z = p.getZ();
 		float snow = cover(p.level(), Calamity.BLIZZARD, x, z), sand = cover(p.level(), Calamity.SANDSTORM, x, z);
-		if (snow <= 0.05F && sand <= 0.05F) {
+		float veil = p.level() instanceof ServerLevel server ? Bolides.veil(server) : 0.0F;
+		if (snow <= 0.05F && sand <= 0.05F && veil <= 0.05F) {
 			return 0.0;
 		}
 		double open = p.level().canSeeSky(BlockPos.containing(p.getEyePosition())) ? 1.0 : 0.3;
-		return (sand * BODY_SAND - snow * BODY_SNOW) * open;
+		return (sand * BODY_SAND - snow * BODY_SNOW - veil * BODY_VEIL) * open;
 	}
 
 	/** Whether a wildfire burns near {@code pos}: the settlements there fight it all-out ({@code Firefighting}). */
@@ -256,6 +272,13 @@ public final class Calamities {
 			BlockPos at = target.blockPosition();
 			String kind = random.nextFloat() < (Earthquakes.mountainous(level, at) ? Earthquakes.MOUNTAINS : Earthquakes.ELSEWHERE)
 				? "quake" : suits(level, at, random);
+			// (medieval picks) now and then one of the great ones, where the land holds it
+			if (random.nextFloat() < GREAT_SHARE) {
+				String great = greatSuits(level, target, random);
+				if (great != null) {
+					kind = great;
+				}
+			}
 			FORECASTS.add(new Forecast(kind, at, level.getGameTime() + FORECAST_TICKS));
 		}
 	}
@@ -273,6 +296,8 @@ public final class Calamities {
 	/** (Stage 3) The almanac and the wizards foretell disasters within this distance. */
 	public static final double FORETOLD_RANGE = 1200.0;
 	private static final List<Forecast> FORECASTS = new ArrayList<>();
+	/** (nd-signs) Forecasts whose signs have begun. */
+	private static final Set<Forecast> SIGNED = new HashSet<>();
 
 	/** (Testing) Something suited to where {@code p} stands is foretold there, coming in a minute. */
 	static void foretellNow(ServerLevel level, ServerPlayer p) {
@@ -286,9 +311,14 @@ public final class Calamities {
 		for (java.util.Iterator<Forecast> it = FORECASTS.iterator(); it.hasNext(); ) {
 			Forecast f = it.next();
 			if (now < f.when()) {
+				// (nd-signs) a little before it comes, the animals and the ground know
+				if (f.when() - now <= Signs.LEAD && SIGNED.add(f) && !harvestMoon(level)) {
+					Signs.before(level, f.at(), f.kind());
+				}
 				continue;
 			}
 			it.remove();
+			SIGNED.remove(f);
 			if (harvestMoon(level)) {
 				continue;
 			}
@@ -350,10 +380,42 @@ public final class Calamities {
 		return "hail";
 	}
 
-	/** Starts a {@code kind} ({@code sandstorm}, {@code blizzard}, {@code wildfire}, {@code flood}, {@code hail}) by
-	 * {@code target}. Whether it could (a flood needs water near, a wildfire needs block damage on). */
+	/**
+	 * (Medieval picks) One of the great disasters the land round {@code target} holds, or null: a volcano by a hot peak, a
+	 * slide on snowy mountains, a tsunami or a hurricane on a coast.
+	 */
+	static @Nullable String greatSuits(ServerLevel level, ServerPlayer target, RandomSource random) {
+		List<String> can = new ArrayList<>();
+		if (Volcanoes.peakNear(level, target.blockPosition()) != null) {
+			can.add("volcano");
+		}
+		if (Avalanches.snowyHills(level, target.blockPosition())) {
+			can.add("avalanche");
+		}
+		if (Tsunamis.coastNear(level, target.blockPosition()) != null) {
+			can.add("tsunami");
+			can.add("hurricane");
+		}
+		return can.isEmpty() ? null : can.get(random.nextInt(can.size()));
+	}
+
+	/** Starts a {@code kind} ({@code sandstorm}, {@code blizzard}, {@code wildfire}, {@code flood}, {@code hail}; and the
+	 * great ones, {@code volcano}, {@code tsunami}, {@code hurricane}, {@code avalanche}) by {@code target}. Whether it
+	 * could (a flood needs water near, a wildfire needs block damage on). */
 	static boolean start(ServerLevel level, ServerPlayer target, String kind, RandomSource random) {
 		switch (kind) {
+			case "volcano" -> {
+				return Volcanoes.wakeNear(level, target.blockPosition(), 0, false);
+			}
+			case "tsunami" -> {
+				return Tsunamis.toward(level, target.blockPosition(), 0, 1);
+			}
+			case "hurricane" -> {
+				return Hurricanes.start(level, target.position(), 0) != null;
+			}
+			case "avalanche" -> {
+				return Avalanches.near(level, target, 0, random);
+			}
 			case "quake" -> {
 				Calamity c = Earthquakes.start(level, target.position(), 0, random);
 				if (c != null) {
@@ -371,7 +433,7 @@ public final class Calamities {
 				return wildfire(level, target.position(), random);
 			}
 			case "flood" -> {
-				return flood(level, target.blockPosition(), random);
+				return flood(level, target.blockPosition(), random, 0);
 			}
 			default -> {
 				// a thunderstorm comes in upwind, carrying hail
@@ -400,21 +462,39 @@ public final class Calamities {
 		return sand >= 4;
 	}
 
-	/** A sandstorm or blizzard rolls in over {@code near} from upwind. */
+	/** A sandstorm or blizzard rolls in over {@code near} from upwind: (nd-tiers) wider, longer, faster and harder by its
+	 * magnitude. */
 	private static @Nullable Calamity land(ServerLevel level, Vec3 near, int kind, RandomSource random) {
 		if (SERVER.size() >= MOST) {
 			return null;
 		}
+		int m = Magnitude.roll(level, random, Magnitude.MINOR);
 		double wx = Math.cos(Storms.windAngle), wz = Math.sin(Storms.windAngle);
-		float radius = Mth.lerp(random.nextFloat(), LAND_RADIUS_MIN, LAND_RADIUS_MAX);
+		float radius = Mth.lerp(random.nextFloat(), LAND_RADIUS_MIN, LAND_RADIUS_MAX) * Magnitude.size(m);
 		double back = radius * 0.5;
-		float speed = Storms.windSpeed * LAND_DRIFT;
+		float speed = Storms.windSpeed * LAND_DRIFT * Magnitude.speed(m);
 		Calamity c = new Calamity(Storms.nextId(), kind, near.x - wx * back, near.z - wz * back, wx * speed, wz * speed, radius, 0,
-			Mth.nextInt(random, LAND_LIFE_MIN, LAND_LIFE_MAX), -1);
+			Math.round(Mth.nextInt(random, LAND_LIFE_MIN, LAND_LIFE_MAX) * Magnitude.length(m)), -1).magnitude(m);
 		SERVER.add(c);
 		news(level, c.x, c.z, "disaster.jaymoskingdoms." + Calamity.NAMES[kind]);
-		com.jaymoskingdoms.DisasterRelief.struck(level, near.x, near.z, radius, Calamity.NAMES[kind], 1);
+		com.jaymoskingdoms.DisasterRelief.struck(level, near.x, near.z, radius, Calamity.NAMES[kind], m);
 		return c;
+	}
+
+	/** (nd-tiers) The strongest {@code kind} over (x, z) (server), or null. */
+	static @Nullable Calamity strongest(int kind, double x, double z) {
+		Calamity best = null;
+		for (Calamity c : SERVER) {
+			if (c.kind == kind && c.over(x, z) > 0.05F && (best == null || c.magnitude > best.magnitude)) {
+				best = c;
+			}
+		}
+		return best;
+	}
+
+	private static int magnitudeOver(int kind, double x, double z) {
+		Calamity c = strongest(kind, x, z);
+		return c == null ? Magnitude.MODERATE : c.magnitude;
 	}
 
 	/** Players near (x, z) hear of it ({@code key} takes the direction it lies in). */
@@ -456,10 +536,12 @@ public final class Calamities {
 			HAIL_ROLLED.put(s.id, false);
 			float odds = s.kind == Storm.SUPERCELL ? HAIL_SUPERCELL : HAIL_THUNDER;
 			if ((sent || random.nextFloat() < odds) && SERVER.size() < MOST) {
-				SERVER.add(new Calamity(Storms.nextId(), Calamity.HAIL, s.x, s.z, s.vx, s.vz, s.radius * HAIL_SHARE, 0,
-					Mth.nextInt(random, HAIL_LIFE_MIN, HAIL_LIFE_MAX), s.id));
+				// (nd-tiers) a supercell's is the worse; the great ones come down as stones (nd-hailhelm)
+				int m = Magnitude.roll(level, random, s.kind == Storm.SUPERCELL ? Magnitude.MODERATE : Magnitude.MINOR);
+				SERVER.add(new Calamity(Storms.nextId(), Calamity.HAIL, s.x, s.z, s.vx, s.vz, Math.min(s.radius, s.radius * HAIL_SHARE * Magnitude.size(m)), 0,
+					Math.round(Mth.nextInt(random, HAIL_LIFE_MIN, HAIL_LIFE_MAX) * Magnitude.length(m)), s.id).magnitude(m));
 				news(level, s.x, s.z, "disaster.jaymoskingdoms.hail");
-				com.jaymoskingdoms.DisasterRelief.struck(level, s.x, s.z, s.radius, "hail", 1);
+				com.jaymoskingdoms.DisasterRelief.struck(level, s.x, s.z, s.radius, "hail", m);
 			}
 		}
 	}
@@ -472,8 +554,12 @@ public final class Calamities {
 			return;
 		}
 		boolean open = level.canSeeSky(BlockPos.containing(p.getEyePosition())) && !p.isCreative();
+		// (nd-tiers) how strong each is here
+		float sandHarm = sand > 0.05F ? Magnitude.harm(magnitudeOver(Calamity.SANDSTORM, x, z)) : 1.0F;
+		float snowHarm = snow > 0.05F ? Magnitude.harm(magnitudeOver(Calamity.BLIZZARD, x, z)) : 1.0F;
+		int hailM = hail > 0.05F ? magnitudeOver(Calamity.HAIL, x, z) : Magnitude.MINOR;
 		if (sand > 0.3F && open && now % 2 == 0 && !p.getAbilities().flying) {
-			double push = SAND_PUSH * 2.0 * sand;
+			double push = SAND_PUSH * 2.0 * sand * sandHarm;
 			p.push(Math.cos(Storms.windAngle) * push, 0.0, Math.sin(Storms.windAngle) * push);
 			p.syncVelocity = true;
 		}
@@ -482,17 +568,34 @@ public final class Calamities {
 				warmth(level, p);
 			}
 			if (open && p.canFreeze() && !WARM.contains(p.getUUID())) {
-				int add = FREEZE_ADD + (now % 2 == 0 ? 1 : 0);
+				int add = Math.round((FREEZE_ADD + (now % 2 == 0 ? 1 : 0)) * snowHarm);
 				p.setTicksFrozen(Math.min(p.getTicksRequiredToFreeze(), p.getTicksFrozen() + add));
 			}
-		}
-		if (hail > 0.4F && open && now % 10 == 0 && random.nextFloat() < HAIL_STING * hail) {
-			if (p.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-				DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(HAIL));
-				p.hurtServer(level, source, HAIL_DAMAGE);
-			} else {
-				level.playSound(null, p.blockPosition().above(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.WEATHER, 0.6F, 1.6F);
+			// (nd-chains) a strong blizzard may let a slope go above them
+			if (damage && magnitudeOver(Calamity.BLIZZARD, x, z) >= AVALANCHE_FROM && random.nextFloat() < AVALANCHE_CHANCE * snow) {
+				Avalanches.near(level, p, magnitudeOver(Calamity.BLIZZARD, x, z) - 1, random);
 			}
+		}
+		if (hail > 0.4F && open && now % 10 == 0 && random.nextFloat() < HAIL_STING * hail * Math.min(2.0F, Magnitude.harm(hailM))) {
+			boolean giant = hailM >= GIANT_HAIL;
+			ItemStack helmet = p.getItemBySlot(EquipmentSlot.HEAD);
+			if (helmet.isEmpty()) {
+				DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(HAIL));
+				p.hurtServer(level, source, giant ? GIANT_DAMAGE : HAIL_DAMAGE * Magnitude.harm(hailM));
+				if (giant) {
+					level.playSound(null, p.blockPosition().above(), SoundEvents.STONE_HIT, SoundSource.WEATHER, 1.0F, 0.6F);
+				}
+			} else {
+				// (nd-hailhelm) any helmet turns it; a great stone rings off it and dents it
+				level.playSound(null, p.blockPosition().above(), giant ? SoundEvents.ANVIL_LAND : SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.WEATHER,
+					giant ? 0.35F : 0.6F, giant ? 1.8F : 1.6F);
+				if (giant && helmet.isDamageableItem()) {
+					helmet.hurtAndBreak(GIANT_HELMET_WEAR, p, EquipmentSlot.HEAD);
+				}
+			}
+		}
+		if (hail > 0.4F && hailM >= GIANT_HAIL && now % 20 == 0) {
+			giantHail(level, p, random, hail);
 		}
 		if (!damage) {
 			return;
@@ -505,6 +608,32 @@ public final class Calamities {
 		}
 		if (hail > 0.4F) {
 			batter(level, p.blockPosition(), random);
+			if (hailM >= GIANT_HAIL) {
+				batter(level, p.blockPosition(), random);
+			}
+		}
+	}
+
+	/** (nd-hailhelm) Great hailstones strike the bareheaded creatures out in the open round {@code p}, and the ground
+	 * puffs where they land. */
+	private static void giantHail(ServerLevel level, ServerPlayer p, RandomSource random, float hail) {
+		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(HAIL));
+		for (net.minecraft.world.entity.LivingEntity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+			p.getBoundingBox().inflate(24.0, 8.0, 24.0), e -> e != p && e.isAlive() && !(e instanceof ServerPlayer))) {
+			if (random.nextFloat() < 0.25F * hail && level.canSeeSky(BlockPos.containing(e.getEyePosition()))
+				&& e.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				e.hurtServer(level, source, GIANT_DAMAGE * 0.6F);
+			}
+		}
+		for (int i = 0; i < 3; i++) {
+			int x = p.getBlockX() + random.nextInt(25) - 12, z = p.getBlockZ() + random.nextInt(25) - 12;
+			if (!com.jaymoskingdoms.Loaded.made(level, x, z)) {
+				continue;
+			}
+			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState()),
+				x + 0.5, y + 0.1, z + 0.5, 6, 0.2, 0.05, 0.2, 0.1);
+			level.playSound(null, x + 0.5, y, z + 0.5, SoundEvents.GLASS_HIT, SoundSource.WEATHER, 0.7F, 0.5F);
 		}
 	}
 
@@ -607,7 +736,10 @@ public final class Calamities {
 			bolt.snapTo(Vec3.atBottomCenterOf(top));
 			level.addFreshEntity(bolt);
 		}
-		Wildfire fire = new Wildfire(top.getX() + 0.5, top.getZ() + 0.5, Mth.nextInt(level.getRandom(), FIRE_LIFE_MIN, FIRE_LIFE_MAX));
+		// (nd-tiers) a strong one burns longer, spreads faster and runs further
+		int m = Magnitude.roll(level, random, Magnitude.MINOR);
+		Wildfire fire = new Wildfire(top.getX() + 0.5, top.getZ() + 0.5, Math.round(Mth.nextInt(level.getRandom(), FIRE_LIFE_MIN, FIRE_LIFE_MAX)
+			* Magnitude.length(m)), Math.max(1, Math.round(FIRE_SPREAD * Magnitude.speed(m))), FIRE_REACH * Magnitude.size(m));
 		// it catches where the bolt struck, or on the dry grass close by
 		for (int i = 0; i < 12 && fire.front.isEmpty(); i++) {
 			BlockPos at = i == 0 ? top : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -619,7 +751,30 @@ public final class Calamities {
 		}
 		FIRES.add(fire);
 		news(level, fire.x, fire.z, "disaster.jaymoskingdoms.wildfire");
-		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, FIRE_REACH, "wildfire", 1);
+		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m);
+		return true;
+	}
+
+	/** (nd-chains) A fire catches at {@code at} (a great star's landing, a volcano's burning cloud) and runs as a wildfire
+	 * of {@code m}. Whether it caught. */
+	static boolean wildfireAt(ServerLevel level, BlockPos at, int m, RandomSource random) {
+		if (FIRES.size() >= MOST_FIRES || !level.getGameRules().get(Disasters.DISASTER_DAMAGE)) {
+			return false;
+		}
+		Wildfire fire = new Wildfire(at.getX() + 0.5, at.getZ() + 0.5, Math.round(Mth.nextInt(random, FIRE_LIFE_MIN, FIRE_LIFE_MAX) * Magnitude.length(m)),
+			Math.max(1, Math.round(FIRE_SPREAD * Magnitude.speed(m))), FIRE_REACH * Magnitude.size(m));
+		for (int i = 0; i < 16 && fire.front.size() < 3; i++) {
+			BlockPos column = at.offset(random.nextInt(13) - 6, 0, random.nextInt(13) - 6);
+			if (com.jaymoskingdoms.Loaded.made(level, column)) {
+				fire.ignite(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column));
+			}
+		}
+		if (fire.front.isEmpty()) {
+			return false;
+		}
+		FIRES.add(fire);
+		// a great disaster's own fire: no word in chat
+		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m, true);
 		return true;
 	}
 
@@ -627,13 +782,18 @@ public final class Calamities {
 	private static final class Wildfire {
 		final double x, z;
 		final int life;
+		/** (nd-tiers) How many of its fires spread each time, how far it runs from where it began. */
+		final int spread;
+		final double reach;
 		int age;
 		final ArrayDeque<BlockPos> front = new ArrayDeque<>();
 
-		Wildfire(double x, double z, int life) {
+		Wildfire(double x, double z, int life, int spread, double reach) {
 			this.x = x;
 			this.z = z;
 			this.life = life;
+			this.spread = spread;
+			this.reach = reach;
 		}
 
 		boolean near(BlockPos pos, double range) {
@@ -675,11 +835,11 @@ public final class Calamities {
 			if (now % FIRE_SPREAD_EVERY == 0) {
 				List<BlockPos> from = new ArrayList<>(front);
 				double wx = Math.cos(Storms.windAngle), wz = Math.sin(Storms.windAngle);
-				for (int i = 0; i < FIRE_SPREAD; i++) {
+				for (int i = 0; i < spread; i++) {
 					BlockPos f = from.get(random.nextInt(from.size()));
 					double ahead = 1.0 + random.nextDouble() * 3.0, side = (random.nextDouble() - 0.5) * 5.0;
 					double nx = f.getX() + 0.5 + wx * ahead - wz * side, nz = f.getZ() + 0.5 + wz * ahead + wx * side;
-					if ((nx - x) * (nx - x) + (nz - z) * (nz - z) > FIRE_REACH * FIRE_REACH) {
+					if ((nx - x) * (nx - x) + (nz - z) * (nz - z) > reach * reach) {
 						continue;
 					}
 					BlockPos column = BlockPos.containing(nx, f.getY(), nz);
@@ -717,7 +877,7 @@ public final class Calamities {
 			int rained = RAINED.getOrDefault(p.getUUID(), 0);
 			rained = level.isRainingAt(top) ? rained + ROLL_TICKS : Math.max(0, rained - ROLL_TICKS * 2);
 			if (rained >= RAIN_BEFORE_FLOOD && random.nextFloat() < FLOOD_CHANCE && level.getGameRules().get(Disasters.DISASTER_DAYS) > 0
-				&& flood(level, p.blockPosition(), random)) {
+				&& flood(level, p.blockPosition(), random, 0)) {
 				rained = 0;
 			}
 			RAINED.put(p.getUUID(), rained);
@@ -725,13 +885,22 @@ public final class Calamities {
 		RAINED.keySet().retainAll(here);
 	}
 
-	/** The river or lake nearest {@code near} rises. Whether there was one. */
-	private static boolean flood(ServerLevel level, BlockPos near, RandomSource random) {
+	/** The river, lake or sea nearest {@code near} rises, as strong as {@code m} ({@link Magnitude}; 0: by chance).
+	 * Whether there was one. */
+	static boolean flood(ServerLevel level, BlockPos near, RandomSource random, int m) {
+		return flood(level, near, random, m, false);
+	}
+
+	/** The same, {@code quiet}: no word in chat (a hurricane's landfall, the world's ending; the news board carries it). */
+	static boolean flood(ServerLevel level, BlockPos near, RandomSource random, int m, boolean quiet) {
 		if (FLOODS.size() >= MOST_FLOODS) {
 			return false;
 		}
+		if (m <= 0) {
+			m = Magnitude.roll(level, random, Magnitude.MINOR);
+		}
 		for (Flood f : FLOODS) {
-			if (f.center.closerThan(near, FLOOD_RADIUS * 2.0)) {
+			if (f.center.closerThan(near, f.radius * 2.0)) {
 				return false;
 			}
 		}
@@ -766,10 +935,12 @@ public final class Calamities {
 				center = b;
 			}
 		}
-		Flood flood = new Flood(center, level.getGameRules().get(Disasters.DISASTER_DAMAGE));
+		Flood flood = new Flood(center, level.getGameRules().get(Disasters.DISASTER_DAMAGE), m);
 		FLOODS.add(flood);
-		news(level, center.getX(), center.getZ(), "disaster.jaymoskingdoms.flood");
-		com.jaymoskingdoms.DisasterRelief.struck(level, center.getX(), center.getZ(), FLOOD_RADIUS + 20.0, "flood", 1);
+		if (!quiet) {
+			news(level, center.getX(), center.getZ(), "disaster.jaymoskingdoms.flood");
+		}
+		com.jaymoskingdoms.DisasterRelief.struck(level, center.getX(), center.getZ(), flood.radius + 20.0, "flood", m, quiet);
 		return true;
 	}
 
@@ -780,6 +951,8 @@ public final class Calamities {
 	private static final class Flood {
 		final BlockPos center;
 		final boolean damage;
+		/** (nd-tiers) How many blocks it rises, how far it spreads, the most blocks it puts down, by its magnitude. */
+		final int rise, radius, most;
 		/** The blocks it has put down (in order), and the next layer's still to put down. */
 		final List<BlockPos> placed = new ArrayList<>();
 		final ArrayDeque<BlockPos> pending = new ArrayDeque<>();
@@ -789,9 +962,12 @@ public final class Calamities {
 		int hold = FLOOD_HOLD;
 		boolean draining;
 
-		Flood(BlockPos center, boolean damage) {
+		Flood(BlockPos center, boolean damage, int m) {
 			this.center = center.immutable();
 			this.damage = damage;
+			this.rise = Mth.clamp(Math.round(FLOOD_RISE * Magnitude.size(m)), 1, 6);
+			this.radius = Math.round(FLOOD_RADIUS * Math.min(1.6F, Magnitude.size(m)));
+			this.most = Math.round(FLOOD_MOST * Magnitude.size(m));
 		}
 
 		/** One tick; false when it has drained. */
@@ -803,7 +979,7 @@ public final class Calamities {
 				return !placed.isEmpty();
 			}
 			if (pending.isEmpty()) {
-				if (layer < FLOOD_RISE && placed.size() < FLOOD_MOST) {
+				if (layer < rise && placed.size() < most) {
 					nextLayer(level);
 				}
 				if (pending.isEmpty() && --hold <= 0) {
@@ -837,9 +1013,9 @@ public final class Calamities {
 			List<BlockPos> seeds = new ArrayList<>();
 			if (layer == 1) {
 				// the water's own surface, round about
-				for (int dx = -FLOOD_RADIUS; dx <= FLOOD_RADIUS; dx += 1) {
-					for (int dz = -FLOOD_RADIUS; dz <= FLOOD_RADIUS; dz += 1) {
-						if (dx * dx + dz * dz > FLOOD_RADIUS * FLOOD_RADIUS) {
+				for (int dx = -radius; dx <= radius; dx += 1) {
+					for (int dz = -radius; dz <= radius; dz += 1) {
+						if (dx * dx + dz * dz > radius * radius) {
 							continue;
 						}
 						BlockPos below = new BlockPos(center.getX() + dx, center.getY(), center.getZ() + dz);
@@ -859,7 +1035,7 @@ public final class Calamities {
 				}
 			}
 			List<BlockPos> fill = new ArrayList<>();
-			while (!open.isEmpty() && placed.size() + fill.size() < FLOOD_MOST) {
+			while (!open.isEmpty() && placed.size() + fill.size() < most) {
 				BlockPos p = open.removeFirst();
 				if (!com.jaymoskingdoms.Loaded.made(level, p) || !floodable(level, p) || !held(level, p.below())) {
 					continue;
@@ -868,7 +1044,7 @@ public final class Calamities {
 				for (Direction d : Direction.Plane.HORIZONTAL) {
 					BlockPos n = p.relative(d);
 					int dx = n.getX() - center.getX(), dz = n.getZ() - center.getZ();
-					if (dx * dx + dz * dz <= FLOOD_RADIUS * FLOOD_RADIUS && n.getY() == y && seen.add(n)) {
+					if (dx * dx + dz * dz <= radius * radius && n.getY() == y && seen.add(n)) {
 						open.add(n);
 					}
 				}

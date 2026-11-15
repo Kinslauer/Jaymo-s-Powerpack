@@ -234,6 +234,8 @@ public final class Bombardment {
 	}
 
 	private static void remove(ServerLevel level, BlockPos pos, BlockState state, Crater c, int nth) {
+		// (am-sieges) a breach in a besieged seat's walls, kept for its masons
+		com.jaymoskingdoms.Sieges.broken(level, pos, state);
 		if (nth % Math.max(1, c.dropEvery()) == 0) {
 			Block.dropResources(state, level, pos);
 		}

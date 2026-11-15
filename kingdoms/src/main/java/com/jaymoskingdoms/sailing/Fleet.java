@@ -45,7 +45,18 @@ public final class Fleet {
 		GALLEON(JakiShips.Design.GALLEON), DRAKKAR(JakiShips.Design.DRAKKAR), WAR_TRIREME(JakiShips.Design.WAR_TRIREME),
 		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER),
 		/** A realm's fishing smack ({@code Fishers}), drawn as her kit is ({@link ShipKits.Kind#FISHING_SMACK}). */
-		SMACK;
+		SMACK,
+		/**
+		 * A realm's whaleship (Andy, 2026-11-15: "a dedicated large whaleship ... lots of room for storage and tryworks for
+		 * the larger oceans"): our own, long and beamy, three masts, a hold lined with chests below her deck, and two
+		 * tryworks amidships ({@link #WHALESHIP_WORKS}).
+		 */
+		WHALESHIP,
+		/**
+		 * The flagship of a rich realm's fleet (Andy, 2026-11-15: "the largest for the richer kingdoms"): our own, the
+		 * longest hull afloat, three tall masts, a broadside of guns down each side, a hold for her powder and shot.
+		 */
+		MAN_OF_WAR;
 
 		/** Her design, if she's one of Jaki's (null: one of ours, drawn as the kits are). */
 		final JakiShips.@Nullable Design jaki;
@@ -85,6 +96,15 @@ public final class Fleet {
 
 	// ---- the designs ----
 
+	/** The whaleship: her hull (half length, half beam), her deck's layer, her masts (row, height), her tryworks' rows, her hold's chests every this many rows. */
+	static final int WHALESHIP_HALF_LENGTH = 21, WHALESHIP_HALF_BEAM = 5, WHALESHIP_DECK = 5, WHALESHIP_CHEST_EVERY = 2;
+	static final int[][] WHALESHIP_MASTS = {{13, 16}, {1, 19}, {-11, 14}};
+	public static final int[] WHALESHIP_WORKS = {5, 8};
+	/** The man-of-war: her hull (half length, half beam), her deck's layer, her guns' rows (each side), her masts (row, height), her hatch's row. */
+	static final int MAN_OF_WAR_HALF_LENGTH = 23, MAN_OF_WAR_HALF_BEAM = 6, MAN_OF_WAR_DECK = 4, MAN_OF_WAR_HATCH = -14;
+	static final int[] MAN_OF_WAR_GUNS = {-12, -7, -2, 3, 8, 13};
+	static final int[][] MAN_OF_WAR_MASTS = {{15, 19}, {3, 23}, {-9, 18}};
+
 	/** A design's cells, as the kits draw them (x across, y up from her keel, z along her, bow +z). */
 	static List<ShipKits.Cell> cells(Rig rig) {
 		List<ShipKits.Cell> cells = new ArrayList<>();
@@ -99,6 +119,8 @@ public final class Fleet {
 				}
 				cells.add(new ShipKits.Cell(-1, 1, 2, ShipFrameBlock.Want.CHEST, Direction.NORTH));
 			}
+			case WHALESHIP -> whaleship(cells);
+			case MAN_OF_WAR -> manOfWar(cells);
 			case FRIGATE -> {
 				ShipKits.Shape s = new ShipKits.Shape(11, 3, 3, 3, 3, true);
 				LongOpenHashSet holes = new LongOpenHashSet();
@@ -118,6 +140,89 @@ public final class Fleet {
 			}
 		}
 		return cells;
+	}
+
+	/**
+	 * The whaleship's cells: a deep hull with two hatches down to her hold (steps of planking and a chest), the hold
+	 * lined both sides with chests, sweeps fore and aft, three masts, the helm aft. Her tryworks are added with her
+	 * blocks ({@link #parts}).
+	 */
+	private static void whaleship(List<ShipKits.Cell> cells) {
+		int deck = WHALESHIP_DECK;
+		ShipKits.Shape s = new ShipKits.Shape(WHALESHIP_HALF_LENGTH, WHALESHIP_HALF_BEAM, 5, deck, deck, true);
+		LongOpenHashSet holes = new LongOpenHashSet();
+		int[] hatches = {-8, WHALESHIP_HALF_LENGTH - 6};
+		for (int z : hatches) {
+			for (int x : new int[] {-1, 1}) {
+				holes.add(BlockPos.asLong(x, deck, z));
+				holes.add(BlockPos.asLong(x, deck, z + 1));
+			}
+		}
+		ShipKits.hull(cells, s, holes);
+		// each hatch's steps up from her hold, forward: planks one up and one on, a chest last, then her deck
+		for (int z : hatches) {
+			for (int x : new int[] {-1, 1}) {
+				for (int k = 1; k <= deck - 2; k++) {
+					cells.add(new ShipKits.Cell(x, k, z - (deck - 2) + k, ShipFrameBlock.Want.HULL, Direction.NORTH));
+				}
+				cells.add(new ShipKits.Cell(x, deck - 1, z + 1, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+			}
+		}
+		// her hold: chests down both sides, a row apart so none join
+		for (int z = -WHALESHIP_HALF_LENGTH + 4; z <= WHALESHIP_HALF_LENGTH - 7; z += WHALESHIP_CHEST_EVERY) {
+			if (Math.abs(z - hatches[0]) <= 2 || Math.abs(z - hatches[1]) <= 2) {
+				continue;
+			}
+			int w = s.width(1, z) - 1;
+			if (w >= 2) {
+				cells.add(new ShipKits.Cell(w, 1, z, ShipFrameBlock.Want.CHEST, Direction.WEST));
+				cells.add(new ShipKits.Cell(-w, 1, z, ShipFrameBlock.Want.CHEST, Direction.EAST));
+			}
+		}
+		int sweeps = WHALESHIP_HALF_LENGTH - 4;
+		ShipKits.rail(cells, s, Map.of(-sweeps, ShipFrameBlock.Want.OAR, sweeps, ShipFrameBlock.Want.OAR));
+		for (int[] m : WHALESHIP_MASTS) {
+			ShipKits.mast(cells, s, m[0], m[1]);
+		}
+		cells.add(new ShipKits.Cell(0, deck + 1, -WHALESHIP_HALF_LENGTH + 2, ShipFrameBlock.Want.HELM, Direction.SOUTH));
+	}
+
+	/**
+	 * The man-of-war's cells: a long, beamy hull with one hatch aft down to her hold (steps of planking and a chest), her
+	 * powder and shot in chests down both sides below, her guns in the rail both sides, sweeps fore and aft, three masts,
+	 * the helm aft.
+	 */
+	private static void manOfWar(List<ShipKits.Cell> cells) {
+		int deck = MAN_OF_WAR_DECK, hatch = MAN_OF_WAR_HATCH;
+		ShipKits.Shape s = new ShipKits.Shape(MAN_OF_WAR_HALF_LENGTH, MAN_OF_WAR_HALF_BEAM, 6, deck, deck, true);
+		LongOpenHashSet holes = new LongOpenHashSet();
+		for (int x : new int[] {-1, 1}) {
+			holes.add(BlockPos.asLong(x, deck, hatch));
+			holes.add(BlockPos.asLong(x, deck, hatch + 1));
+		}
+		ShipKits.hull(cells, s, holes);
+		for (int x : new int[] {-1, 1}) {
+			for (int k = 1; k <= deck - 2; k++) {
+				cells.add(new ShipKits.Cell(x, k, hatch - (deck - 2) + k, ShipFrameBlock.Want.HULL, Direction.NORTH));
+			}
+			cells.add(new ShipKits.Cell(x, deck - 1, hatch + 1, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+		}
+		for (int z = hatch + 4; z <= hatch + 10; z += 2) {
+			int w = s.width(1, z) - 1;
+			cells.add(new ShipKits.Cell(w, 1, z, ShipFrameBlock.Want.CHEST, Direction.WEST));
+			cells.add(new ShipKits.Cell(-w, 1, z, ShipFrameBlock.Want.CHEST, Direction.EAST));
+		}
+		Map<Integer, ShipFrameBlock.Want> slots = new java.util.HashMap<>();
+		for (int z : MAN_OF_WAR_GUNS) {
+			slots.put(z, ShipFrameBlock.Want.CANNON);
+		}
+		slots.put(-(MAN_OF_WAR_HALF_LENGTH - 5), ShipFrameBlock.Want.OAR);
+		slots.put(MAN_OF_WAR_HALF_LENGTH - 5, ShipFrameBlock.Want.OAR);
+		ShipKits.rail(cells, s, slots);
+		for (int[] m : MAN_OF_WAR_MASTS) {
+			ShipKits.mast(cells, s, m[0], m[1]);
+		}
+		cells.add(new ShipKits.Cell(0, deck + 1, -MAN_OF_WAR_HALF_LENGTH + 2, ShipFrameBlock.Want.HELM, Direction.SOUTH));
 	}
 
 	/** One block of a ship as she's built: where (in her frame), what, and (0.7.112) the loot her barrel's filled with (null: none). */
@@ -153,6 +258,13 @@ public final class Fleet {
 			}
 			parts.add(new Part(new BlockPos(c.x(), c.y(), c.z()), state));
 		}
+		if (rig == Rig.WHALESHIP) {
+			// her tryworks, amidships on her centreline
+			for (int z : WHALESHIP_WORKS) {
+				parts.add(new Part(new BlockPos(0, WHALESHIP_DECK + 1, z),
+					com.jaymoskingdoms.whaling.Whaling.TRYWORKS.defaultBlockState().setValue(com.jaymoskingdoms.whaling.TryworksBlock.FACING, Direction.SOUTH)));
+			}
+		}
 		// her colours: three cells aft of the masthead, two deep, the emblem in the middle of the upper row
 		for (int dz = 1; dz <= 3; dz++) {
 			for (int dy = 0; dy <= 1; dy++) {
@@ -180,6 +292,15 @@ public final class Fleet {
 		if (helm == null) {
 			return null;
 		}
+		return launchLaid(level, helm, where, crew);
+	}
+
+	/**
+	 * A ship already standing in the world (her blocks at {@code where}, laid by {@link #lay} or built up in a yard,
+	 * {@link Slip}), her hold bailed dry and cast off with {@code crew}: the ship, or null if she wouldn't go (her blocks
+	 * taken up again).
+	 */
+	public static @Nullable Ship launchLaid(ServerLevel level, BlockPos helm, List<BlockPos> where, Crew crew) {
 		// her hold bailed dry, then away
 		ShipKits.placed(level, helm, null);
 		crew.born = level.getGameTime();
@@ -194,7 +315,12 @@ public final class Fleet {
 			}
 			return null;
 		}
-		// her hold: the first chest aboard ((0.7.112) or barrel, on a ship with no chests)
+		hold(ship, crew);
+		return ship;
+	}
+
+	/** Her hold: the first chest aboard ((0.7.112) or barrel, on a ship with no chests). */
+	private static void hold(Ship ship, Crew crew) {
 		Hull h = ship.hull();
 		if (h != null) {
 			for (Ship.Piece p : h.pieces) {
@@ -207,7 +333,47 @@ public final class Fleet {
 				}
 			}
 		}
+	}
+
+	/** A ship already laid in the world with her helm at {@code helm} (an airship laid in the sky), cast off at once with {@code crew}; null if she wouldn't go. */
+	public static @Nullable Ship castOff(ServerLevel level, BlockPos helm, Crew crew) {
+		ShipKits.placed(level, helm, null);
+		crew.born = level.getGameTime();
+		Ship ship = Ship.castOff(level, helm, null, crew);
+		if (ship != null) {
+			hold(ship, crew);
+		}
 		return ship;
+	}
+
+	/** Whether the one at her wheel is down there, hurt but alive (he may get up and take it again). */
+	public static boolean helmsmanDown(Ship ship) {
+		Vec3 helm = stations(ship).helm();
+		if (helm == null) {
+			return false;
+		}
+		for (net.minecraft.world.entity.LivingEntity e : ship.crewAboard()) {
+			Vec3 seat = e.getAttached(Ship.SEAT);
+			if (seat != null && seat.distanceToSqr(helm) < 0.75 * 0.75 && e.isAlive() && com.jaymoskingdoms.Downed.isDowned(e)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Whether one of her crew stands at her wheel (a balloon's: let go of it, she drifts and comes down). */
+	public static boolean wheelManned(Ship ship) {
+		Vec3 helm = stations(ship).helm();
+		if (helm == null) {
+			return false;
+		}
+		for (net.minecraft.world.entity.LivingEntity e : ship.crewAboard()) {
+			Vec3 seat = e.getAttached(Ship.SEAT);
+			if (seat != null && seat.distanceToSqr(helm) < 0.75 * 0.75 && !com.jaymoskingdoms.Downed.isDowned(e)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -215,8 +381,120 @@ public final class Fleet {
 	 * in the world (where they went added to {@code where}): her helm, or null if there's no room or water deep enough there.
 	 */
 	public static @Nullable BlockPos lay(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, List<BlockPos> where) {
-		// (0.7.285) her boarding ladders, and sweeps if she was drawn with no oars
-		List<Part> parts = ShipFittings.fit(parts(level, rig, look));
+		Slip slip = slip(level, rig, look, water, bow);
+		if (slip == null) {
+			return null;
+		}
+		where.addAll(slip.where);
+		for (int i = 0; i < slip.size(); i++) {
+			slip.place(level, i);
+		}
+		return slip.join(level);
+	}
+
+	/**
+	 * A ship to be built where she'll float: her blocks (her boarding ladders and sweeps fitted, {@link ShipFittings}) and
+	 * where each goes, in the order a shipwright lays them: her keel first, then up through her hull and decks layer by
+	 * layer from amidships out, her masts and rigging as they come, her helm last of all (nobody casts her off half built).
+	 */
+	public static final class Slip {
+		final List<Part> parts;
+		final List<BlockPos> where;
+		final Rotation turn;
+		/** Where her frame's (0, 0, 0) is in the world, and her bow; with her rig and look, all that's needed to find her again. */
+		public final BlockPos origin;
+		public final Direction bow;
+
+		private Slip(List<Part> parts, BlockPos origin, Direction bow) {
+			this.parts = parts;
+			this.origin = origin;
+			this.bow = bow;
+			this.turn = ShipKits.turn(bow);
+			List<BlockPos> at = new ArrayList<>(parts.size());
+			for (Part p : parts) {
+				at.add(origin.offset(p.at().rotate(this.turn)));
+			}
+			this.where = at;
+		}
+
+		public int size() {
+			return this.parts.size();
+		}
+
+		public BlockPos at(int i) {
+			return this.where.get(i);
+		}
+
+		public List<BlockPos> where() {
+			return List.copyOf(this.where);
+		}
+
+		/** Block {@code i} as it goes in (turned her way, dry). */
+		public BlockState state(int i) {
+			BlockState state = this.parts.get(i).state().rotate(this.turn);
+			return state.hasProperty(BlockStateProperties.WATERLOGGED) ? state.setValue(BlockStateProperties.WATERLOGGED, false) : state;
+		}
+
+		/** Whether block {@code i} is in already (its block there, however it's joined to its neighbours). */
+		public boolean laid(ServerLevel level, int i) {
+			return level.getBlockState(this.at(i)).is(this.state(i).getBlock());
+		}
+
+		/** Puts block {@code i} in (its barrel filled, if it has loot). */
+		public void place(ServerLevel level, int i) {
+			BlockPos at = this.at(i);
+			level.setBlock(at, this.state(i), Block.UPDATE_CLIENTS);
+			if (this.parts.get(i).loot() != null && level.getBlockEntity(at) instanceof RandomizableContainer box) {
+				box.setLootTable(this.parts.get(i).loot(), level.getRandom().nextLong());
+			}
+		}
+
+		/** All of her in (whatever's missing put back), joined up: fences to their neighbours, sails into one sheet. Her helm, or null if she has none. */
+		public @Nullable BlockPos join(ServerLevel level) {
+			BlockPos helm = null;
+			for (int i = 0; i < this.size(); i++) {
+				if (!this.laid(level, i)) {
+					this.place(level, i);
+				}
+				if (this.state(i).getBlock() instanceof HelmBlock) {
+					helm = this.at(i);
+				}
+			}
+			for (BlockPos at : this.where) {
+				BlockState state = level.getBlockState(at);
+				BlockState next = Block.updateFromNeighbourShapes(state, level, at);
+				if (next.getBlock() instanceof SailBlock) {
+					next = SailBlock.connect(next, level, at);
+				}
+				if (next.hasProperty(BlockStateProperties.WATERLOGGED)) {
+					next = next.setValue(BlockStateProperties.WATERLOGGED, false);
+				}
+				if (next != state) {
+					level.setBlock(at, next, Block.UPDATE_CLIENTS);
+				}
+			}
+			return helm;
+		}
+	}
+
+	/** Her blocks in the order she's built (see {@link Slip}). */
+	private static List<Part> building(ServerLevel level, Rig rig, Look look) {
+		List<Part> parts = new ArrayList<>(ShipFittings.fit(parts(level, rig, look)));
+		parts.sort(java.util.Comparator.<Part>comparingInt(p -> p.state().getBlock() instanceof HelmBlock ? 1 : 0)
+			.thenComparingInt(p -> p.at().getY())
+			.thenComparingInt(p -> Math.abs(p.at().getZ()))
+			.thenComparingInt(p -> Math.abs(p.at().getX()))
+			.thenComparingInt(p -> p.at().getZ())
+			.thenComparingInt(p -> p.at().getX()));
+		return parts;
+	}
+
+	/**
+	 * A {@code rig} in {@code look} to build on the water at {@code water} (her stern just beyond it, her bow toward
+	 * {@code bow}), nothing of her laid yet: null if there's no room or water deep enough there.
+	 */
+	public static @Nullable Slip slip(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow) {
+		List<Part> parts = building(level, rig, look);
 		if (parts.isEmpty()) {
 			return null;
 		}
@@ -230,37 +508,12 @@ public final class Fleet {
 				return null;
 			}
 		}
-		where.addAll(room);
-		Rotation turn = ShipKits.turn(bow);
-		BlockPos helm = null;
-		for (int i = 0; i < parts.size(); i++) {
-			BlockState state = parts.get(i).state().rotate(turn);
-			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
-				state = state.setValue(BlockStateProperties.WATERLOGGED, false);
-			}
-			level.setBlock(where.get(i), state, Block.UPDATE_CLIENTS);
-			if (parts.get(i).loot() != null && level.getBlockEntity(where.get(i)) instanceof RandomizableContainer box) {
-				box.setLootTable(parts.get(i).loot(), level.getRandom().nextLong());
-			}
-			if (state.getBlock() instanceof HelmBlock) {
-				helm = where.get(i);
-			}
-		}
-		// joined up: fences to their neighbours, sails into one sheet
-		for (BlockPos at : where) {
-			BlockState state = level.getBlockState(at);
-			BlockState next = Block.updateFromNeighbourShapes(state, level, at);
-			if (next.getBlock() instanceof SailBlock) {
-				next = SailBlock.connect(next, level, at);
-			}
-			if (next.hasProperty(BlockStateProperties.WATERLOGGED)) {
-				next = next.setValue(BlockStateProperties.WATERLOGGED, false);
-			}
-			if (next != state) {
-				level.setBlock(at, next, Block.UPDATE_CLIENTS);
-			}
-		}
-		return helm;
+		return new Slip(parts, room.get(0).subtract(parts.get(0).at().rotate(ShipKits.turn(bow))), bow);
+	}
+
+	/** The {@link Slip} of a {@code rig} in {@code look} already begun at {@code origin}, bow toward {@code bow} (as it was saved). */
+	public static Slip slipAt(ServerLevel level, Rig rig, Look look, BlockPos origin, Direction bow) {
+		return new Slip(building(level, rig, look), origin, bow);
 	}
 
 	/** (0.7.112) The ship {@link #lay laid} with her helm at {@code helm}, her hold bailed and cast off with no crew (null: she wouldn't go). */

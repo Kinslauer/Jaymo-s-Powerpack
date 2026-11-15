@@ -93,6 +93,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// (0.20.41) blood splashed on bodies
 		com.jaymospowers.client.blood.BloodCoatLayer.register();
 		com.jaymospowers.client.wounds.WoundMarksLayer.register();
+		// (medieval picks) webbed up: the wrap everyone sees, the strands across your own view
+		com.jaymospowers.client.power.web.WebbedLook.register();
+		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
@@ -116,6 +119,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();
 		com.jaymospowers.client.fx.MagicFxClient.init();
@@ -132,6 +136,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
 		// (BWM port) enchanted books say what gear each enchantment goes on
 		com.jaymospowers.client.enchanting.EnchantSlotTooltip.init();
+		com.jaymospowers.client.enchanting.InscriptionScreen.register(); // (medieval picks) the Inscription Table
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// (0.18.47) the clockwork hornets: small brass drones, drawn as their item sprite

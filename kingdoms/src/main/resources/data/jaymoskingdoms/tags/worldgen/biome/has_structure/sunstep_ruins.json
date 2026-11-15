@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:desert",
+    {
+      "id": "biomesoplenty:dune_beach",
+      "required": false
+    },
+    {
+      "id": "natures_spirit:desert_oasis",
+      "required": false
+    }
+  ]
+}

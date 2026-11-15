@@ -68,11 +68,13 @@ final class GoblinVillages {
 		return data != null && KIND.equals(data.kind());
 	}
 
-	/** Goblin country: woods, plains, swamps and jungles (not deserts, snow, mountains or the sea). */
+	/** Goblin country: woods, plains, swamps and jungles, and the mountain holds whose clans raid the realms below
+	 *  (Raids#mountainGoblins); not deserts, flat snow or the sea. */
 	static boolean land(ServerLevel level, BlockPos at) {
 		Holder<Biome> biome = level.getBiome(at);
 		return biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) || biome.is(Biomes.PLAINS)
-			|| biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) || biome.is(Biomes.MEADOW) || biome.is(Biomes.SUNFLOWER_PLAINS);
+			|| biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) || biome.is(Biomes.MEADOW) || biome.is(Biomes.SUNFLOWER_PLAINS)
+			|| biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL) || biome.is(Biomes.GROVE);
 	}
 
 	// ---- founding ------------------------------------------------------------------------------------------------------

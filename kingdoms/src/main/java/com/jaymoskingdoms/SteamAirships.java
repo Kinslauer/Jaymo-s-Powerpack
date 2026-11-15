@@ -673,6 +673,18 @@ public final class SteamAirships implements Ship.Skyfaring {
 			return this.before != null ? this.before.helm(level, ship) : null;
 		}
 		long now = level.getGameTime();
+		if (!Fleet.wheelManned(ship)) {
+			ship.letDrift();
+			if (Fleet.helmsmanDown(ship)) {
+				// her captain downed at her wheel: she drifts on the wind while he's down, and flies on when he's up at it again
+				return null;
+			}
+			// her captain dead: she is let go, drifts on the wind and comes down; her town builds another in time
+			ship.removeAttached(TRIP);
+			FLIGHTS.remove(ship.getUUID());
+			wrecked(level, trip);
+			return null;
+		}
 		Flight flight = FLIGHTS.computeIfAbsent(ship.getUUID(), id -> new Flight());
 		if (now % SAFE_EVERY == 0) {
 			care(level, ship, now);
@@ -824,7 +836,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 	}
 
 	/** The highest ground (its top block's height) under her and at {@link #LOOK_AHEAD} along her heading, where it is loaded. */
-	private static double groundAhead(ServerLevel level, Ship ship) {
+	static double groundAhead(ServerLevel level, Ship ship) {
 		float heading = ship.getYRot() * Mth.DEG_TO_RAD;
 		double sx = -Mth.sin(heading), sz = Mth.cos(heading);
 		int top = level.getMinY();

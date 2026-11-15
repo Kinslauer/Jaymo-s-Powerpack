@@ -64,6 +64,11 @@ final class Corsairs implements Ship.Captaincy {
 	static final double ENGAGE = 30.0, TOO_CLOSE = 12.0;
 	/** Sail set: patrolling, chasing, fighting, running. */
 	static final double PATROL_SAIL = 0.5, CHASE_SAIL = 1.0, FIGHT_SAIL = 0.6, RUN_SAIL = 1.0;
+	/**
+	 * A fleet (Navies#fleetOf): its ships keep station on its flagship within this (blocks), this far astern of her a
+	 * pair (and this far out on her quarter), easing sail within this of their place; and go to a fleet-mate's foe within this.
+	 */
+	static final double FLEET_REACH = 400.0, STATION_ASTERN = 24.0, STATION_ABEAM = 14.0, STATION_CLOSE = 12.0, RALLY = 200.0;
 	/** Under oars when her sails give less than this (blocks a tick: she's head to wind). */
 	static final double ROW_BELOW = 0.12;
 	/** Her guns: their reach, the least range, how far off their line they're laid (a cosine), and how long a reload takes (ticks). */
@@ -135,6 +140,12 @@ final class Corsairs implements Ship.Captaincy {
 		if (ship == null) {
 			return null;
 		}
+		man(level, ship, crew, faction, complement);
+		return ship;
+	}
+
+	/** {@code ship}'s company mustered aboard her: her captain at the helm, gunners to her guns, her boys and hands about her deck. */
+	static void man(ServerLevel level, Ship ship, Crew crew, Faction faction, Complement complement) {
 		Fleet.Stations stations = Fleet.stations(ship);
 		BlockPos home = crew.home;
 		if (stations.helm() != null) {
@@ -168,7 +179,6 @@ final class Corsairs implements Ship.Captaincy {
 		for (int i = 0; i < complement.hands() && k < deck.size(); i++) {
 			hand(level, ship, faction, complement.hand(), deck.get(k++), home, crew.side);
 		}
-		return ship;
 	}
 
 	/**
@@ -237,6 +247,10 @@ final class Corsairs implements Ship.Captaincy {
 			}
 			return null;
 		}
+		if (SkyShips.sky(crew) && ship.flying()) {
+			// an airship's captain: a sky pirate circles what he has marked and comes down on it; a patrol rounds her realm
+			return SkyShips.PIRATE.equals(crew.flag) ? SkyPirates.helm(level, ship, crew) : AirPatrols.helm(level, ship, crew);
+		}
 		if ((now + ship.getId()) % THINK == 0) {
 			this.think(level, ship, crew);
 		}
@@ -273,6 +287,11 @@ final class Corsairs implements Ship.Captaincy {
 		if (foe != null && crew.side != Crew.Side.MERCHANT && crew.side != Crew.Side.WHALER && crew.side != Crew.Side.FISHER && fromHome > leash) {
 			foe = null;
 		}
+		// a fleet's ship goes to the foe a fleet-mate is fighting, however far from her own harbour
+		if (foe == null && crew.side == Crew.Side.NAVY) {
+			foe = this.rally(level, ship, crew);
+		}
+		Vec3 station = foe == null && crew.side == Crew.Side.NAVY ? this.station(level, ship) : null;
 		crew.target = foe == null ? -1 : foe.getId();
 		crew.goal = null;
 		this.lookAshore(level, ship, crew, foe);
@@ -354,6 +373,14 @@ final class Corsairs implements Ship.Captaincy {
 				// (0.7.490) on her mark she lies hove to (she still swings her beam round), not creeping off it
 				sail = d < WAYPOINT_REACH ? 0.0 : SHORE_SAIL;
 			}
+		} else if (station != null) {
+			// in her fleet's line, on her place astern of the flagship (her heading once she's on it)
+			crew.mode = "station";
+			crew.goal = BlockPos.containing(station);
+			double d = Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.goal));
+			Ship admiral = Navies.admiral(level, crew.faction);
+			want = d < STATION_CLOSE && admiral != null ? admiral.getYRot() : Fleet.bearing(ship, station.x, station.z);
+			sail = d < STATION_CLOSE ? PATROL_SAIL * 0.8 : d < 40.0 ? PATROL_SAIL : CHASE_SAIL;
 		} else {
 			crew.mode = "patrol";
 			double range = crew.side == Crew.Side.NAVY ? NAVY_PATROL : PATROL;
@@ -530,6 +557,55 @@ final class Corsairs implements Ship.Captaincy {
 		return ShotKind.ROUND;
 	}
 
+	/**
+	 * (Andy, 2026-11-15: "it adds any kingdom underneath's ships to their fleet") Her place in her fleet's line: astern of
+	 * its flagship (her realm's overlord's, at the top, or her own realm's) in pairs, port and starboard; null if she's the
+	 * flagship herself, or none is in reach.
+	 */
+	private @Nullable Vec3 station(ServerLevel level, Ship ship) {
+		Crew crew = ship.crew;
+		Ship admiral = crew == null ? null : Navies.admiral(level, crew.faction);
+		if (admiral == null || admiral == ship || ship.distanceTo(admiral) > FLEET_REACH) {
+			return null;
+		}
+		int fleet = Navies.fleetOf(level.getServer(), crew.faction);
+		List<Ship> line = new ArrayList<>();
+		for (Ship other : Ships.in(level)) {
+			Crew them = other.crew;
+			if (other != admiral && them != null && them.side == Crew.Side.NAVY && !other.foundering() && other.distanceTo(admiral) <= FLEET_REACH
+				&& Navies.fleetOf(level.getServer(), them.faction) == fleet) {
+				line.add(other);
+			}
+		}
+		line.sort(java.util.Comparator.comparing(Ship::getUUID));
+		int i = line.indexOf(ship);
+		if (i < 0) {
+			return null;
+		}
+		float yaw = admiral.getYRot() * Mth.DEG_TO_RAD;
+		double back = STATION_ASTERN * (1 + i / 2), out = (i % 2 == 0 ? 1 : -1) * STATION_ABEAM;
+		// (her bow is toward -sin, cos of her heading)
+		return new Vec3(admiral.getX() + Mth.sin(yaw) * back + Mth.cos(yaw) * out, admiral.getY(),
+			admiral.getZ() - Mth.cos(yaw) * back + Mth.sin(yaw) * out);
+	}
+
+	/** The foe a ship of her fleet is fighting within {@link #RALLY} of her (null: none). */
+	private @Nullable Ship rally(ServerLevel level, Ship ship, Crew crew) {
+		int fleet = Navies.fleetOf(level.getServer(), crew.faction);
+		for (Ship other : Ships.in(level)) {
+			Crew them = other.crew;
+			if (other == ship || them == null || them.side != Crew.Side.NAVY || them.target < 0 || other.distanceTo(ship) > RALLY
+				|| Navies.fleetOf(level.getServer(), them.faction) != fleet) {
+				continue;
+			}
+			if (level.getEntity(them.target) instanceof Ship foe && !foe.isRemoved() && !foe.foundering() && foe.distanceTo(ship) <= RALLY
+				&& this.hostile(level, crew, foe)) {
+				return foe;
+			}
+		}
+		return null;
+	}
+
 	/** The foe her lookout sights nearest (null: none). */
 	private @Nullable Ship lookout(ServerLevel level, Ship ship, Crew crew) {
 		double sight = crew.side == Crew.Side.NAVY ? NAVY_SIGHT : crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER || crew.side == Crew.Side.FISHER ? MERCHANT_SIGHT : PIRATE_SIGHT;
@@ -619,7 +695,12 @@ final class Corsairs implements Ship.Captaincy {
 					crew.loading.put(gun, now + (monkey ? RELOAD_MONKEY : RELOAD) + level.getRandom().nextInt(30));
 				} else if (now >= ready) {
 					crew.loading.remove(gun);
-					ship.loadGun(gun, this.pick(level, ship, crew, foe));
+					ShotKind kind = this.pick(level, ship, crew, foe);
+					// (an airship's guns load from her hold: powder and shot spent, and none left, none fired)
+					if (SkyShips.sky(crew) && (kind = SkyShips.charge(ship, kind)) == null) {
+						continue;
+					}
+					ship.loadGun(gun, kind);
 				}
 				continue;
 			}
@@ -682,7 +763,8 @@ final class Corsairs implements Ship.Captaincy {
 		double turn = Math.toRadians((random.nextFloat() - 0.5F) * 2.0F * AIM_SPREAD);
 		double c = Math.cos(turn), s = Math.sin(turn);
 		double ax = hx * c - hz * s, az = hx * s + hz * c;
-		double up = Math.toRadians(Mth.clamp(elevation, LOWEST, HIGHEST));
+		// (an airship's gunners lay their guns well down on what's below her)
+		double up = Math.toRadians(Mth.clamp(elevation, ship.flying() ? SkyShips.GUN_LOWEST : LOWEST, HIGHEST));
 		return new Vec3(ax * Math.cos(up), Math.sin(up), az * Math.cos(up)).normalize();
 	}
 
@@ -732,6 +814,8 @@ final class Corsairs implements Ship.Captaincy {
 		if ((now + ship.getId()) % MAN_CHECK == 0) {
 			manGuns(ship, crew, deck, aboard);
 		}
+		// boarders on her deck (up a rope from below, or over the side): her hands go for them
+		ServerPlayer boarder = boarder(level, ship, crew);
 		// (0.7.246) the downed aboard are got up: a hand runs to each
 		Crewmen.care(level, ship, crew, deck, aboard, foe != null);
 		RandomSource random = level.getRandom();
@@ -784,6 +868,14 @@ final class Corsairs implements Ship.Captaincy {
 				to = guns.isEmpty() ? null : guns.get(random.nextInt(guns.size()));
 				walk.pace = RUN_PACE;
 				idle = MONKEY_IDLE + random.nextInt(MONKEY_IDLE);
+			} else if (boarder != null && !monkey) {
+				// a hand with boarders on deck: at them, cutlass out
+				to = deck.nearest(ship.toLocal(boarder.position()));
+				walk.pace = RUN_PACE;
+				idle = GUNNER_IDLE;
+				if (hand instanceof net.minecraft.world.entity.Mob m && m.getTarget() == null) {
+					m.setTarget(boarder);
+				}
 			} else {
 				// a hand: somewhere a few steps off that nobody else is standing at or making for
 				to = this.stroll(crew, deck, aboard, seat, random);
@@ -799,6 +891,24 @@ final class Corsairs implements Ship.Captaincy {
 			walk.rest = now + (int)(way.size() / walk.pace) + idle;
 		}
 		crew.walks.keySet().retainAll(here);
+	}
+
+	/** The nearest player on her own deck she counts a foe (a pirate's: anyone; a realm's: one it holds hostile), or null. */
+	static @Nullable ServerPlayer boarder(ServerLevel level, Ship ship, Crew crew) {
+		ServerPlayer best = null;
+		double bestD = Double.MAX_VALUE;
+		for (ServerPlayer p : playersAboard(level, ship)) {
+			if (p.isCreative() || p.isSpectator() || !p.isAlive() || p.getVehicle() == ship
+				|| crew.side != Crew.Side.PIRATE && Reputation.get(p, crew.faction) > Reputation.HOSTILE) {
+				continue;
+			}
+			double d = p.distanceToSqr(ship);
+			if (d < bestD) {
+				best = p;
+				bestD = d;
+			}
+		}
+		return best;
 	}
 
 	/** Where a hand strolls to: a free place on her deck he can walk to, not too far off; null to stay put. */
@@ -911,6 +1021,8 @@ final class Corsairs implements Ship.Captaincy {
 			player = by instanceof Player p ? (ServerPlayer)p : null;
 		}
 		DamageSource source = player != null ? level.damageSources().playerAttack(player) : level.damageSources().drown();
+		// (Andy, 2026-11-15) a navy's prisoners, a pirate's captives, pulled out before the rest go down with her
+		SeaPrisoners.taken(level, ship, crew, by);
 		for (LivingEntity hand : ship.crewAboard()) {
 			hand.setInvulnerableTime(0);
 			hand.hurtServer(level, source, Float.MAX_VALUE);
@@ -924,13 +1036,21 @@ final class Corsairs implements Ship.Captaincy {
 		switch (crew.side) {
 			case PIRATE -> {
 				// (0.7.437) a far ground's sea rover isn't her camp's own ship
-				if (FarGrounds.rover(level, ship)) {
+				if (SkyShips.PIRATE.equals(crew.flag)) {
+					SkyPirates.shipLost(level, crew, ship);
+				} else if (FarGrounds.rover(level, ship)) {
 					FarGrounds.roverLost(level, ship);
 				} else {
 					PirateCoves.shipLost(level, crew, ship, player);
 				}
 			}
-			case NAVY, MERCHANT -> Navies.shipLost(level, crew, player);
+			case NAVY, MERCHANT -> {
+				if (SkyShips.PATROL.equals(crew.flag)) {
+					AirPatrols.lost(level, crew, ship, player);
+				} else {
+					Navies.shipLost(level, ship, crew, player);
+				}
+			}
 			case WHALER -> Whalers.lost(level, crew);
 			case FISHER -> Fishers.lost(level, crew, player);
 		}
@@ -1101,8 +1221,16 @@ final class Corsairs implements Ship.Captaincy {
 		if ((folk.tickCount + folk.getId()) % 20 != 0 || folk.getTarget() != null && folk.getTarget().isAlive() || !folk.combatant()) {
 			return;
 		}
-		if (!(folk.getVehicle() instanceof Ship ship) || ship.crew == null || ship.crew.target < 0
-			|| !(level.getEntity(ship.crew.target) instanceof Ship foe)) {
+		if (!(folk.getVehicle() instanceof Ship ship) || ship.crew == null) {
+			return;
+		}
+		// boarders on her own deck before anyone across the water
+		ServerPlayer boarder = boarder(level, ship, ship.crew);
+		if (boarder != null) {
+			folk.setTarget(boarder);
+			return;
+		}
+		if (ship.crew.target < 0 || !(level.getEntity(ship.crew.target) instanceof Ship foe)) {
 			return;
 		}
 		LivingEntity best = null;

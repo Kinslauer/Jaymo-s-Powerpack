@@ -40,6 +40,8 @@ final class Haul {
 	final List<UUID> crew = new ArrayList<>();
 	/** Where it's being pushed to, or null when it's set down. */
 	@Nullable Vec3 to;
+	/** (am-sieges) A lull in the siege: nobody works it. */
+	boolean quiet;
 	private int stuck;
 
 	/** Its crew still alive and in the world. */
@@ -55,6 +57,9 @@ final class Haul {
 
 	/** The crewman who works it (the first still standing), or null. */
 	@Nullable PathfinderMob operator(ServerLevel level) {
+		if (this.quiet) {
+			return null;
+		}
 		List<PathfinderMob> crew = this.crew(level);
 		return crew.isEmpty() ? null : crew.getFirst();
 	}

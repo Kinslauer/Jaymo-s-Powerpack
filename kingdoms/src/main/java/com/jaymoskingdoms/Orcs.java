@@ -182,7 +182,8 @@ public final class Orcs {
 
 	/** (0.7.490) What an orc of camp {@code camp} attacks on sight: {@link #prey(LivingEntity)}, and the folk of a camp it is raiding or being raided by. */
 	static boolean prey(int camp, LivingEntity target) {
-		return prey(target) || Brutality.foe(camp, target);
+		// ((am-feuds) and goblins met in the wild)
+		return prey(target) || Brutality.foe(camp, target) || Feuds.greenskins(camp, target, true);
 	}
 
 	/** What an orc attacks on sight. */

@@ -59,7 +59,7 @@ public final class DeckOfFates {
 	static final int WISH_COINS = 200, WISH_LEARNING = 800, WISH_STANDING = 30;
 	/** How far off the keep is raised (blocks), and how far the gate throws (blocks). */
 	static final int KEEP_AHEAD = 48, GATE = 300;
-	static final String KNIGHT_TAG = "jaymos_death_knight";
+	public static final String KNIGHT_TAG = "jaymos_death_knight";
 
 	private enum Card {
 		THRONE(3), NEMESIS(3), RUIN(2), WISH(2), MIND(3), AMNESIA(3), KNIGHT(3), JESTER(3), RELIC(4), DARK_MOON(3), SUN(4), GATE(3);

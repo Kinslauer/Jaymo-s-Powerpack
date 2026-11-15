@@ -79,7 +79,7 @@ public final class ZFighterScouter {
 	 * attuning to the element its holder was exposed to, so little of it shows: their power level is this share of anyone
 	 * else's, and ki sense reads them as weaker than they are.
 	 */
-	static final double ELEMENTAL_AURA = 0.4;
+	public static final double ELEMENTAL_AURA = 0.4;
 
 	public static final ResourceKey<EquipmentAsset> ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("scouter"));
 	public static Item SCOUTER;

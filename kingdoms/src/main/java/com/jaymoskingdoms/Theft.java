@@ -153,7 +153,13 @@ public final class Theft {
 		/** A forged pass or pardon shown to a guard who saw through it ({@link ForgedPapers}). */
 		FORGERY(Weight.MEDIUM, "forgery"),
 		/** A captive made into a great foe by blood magic ({@link BruteRite}): the heaviest crime there is. */
-		UNMAKING(Weight.HEAVY, "unmaking");
+		UNMAKING(Weight.HEAVY, "unmaking"),
+		/** (gb-customs) a sacred cherry felled in Blossom land ({@link Customs#sacred}). */
+		FELLING(Weight.LIGHT, "felling"),
+		/** (gb-customs) water drawn in the sands' land without paying its toll ({@link Customs}). */
+		WATER(Weight.LIGHT, "water"),
+		/** (gb-tent) someone else's homestead broken into where a realm's law holds ({@link Homesteads}). */
+		HOMESTEAD(Weight.LIGHT, "vandal");
 
 		final Weight weight;
 		final String cry;
@@ -439,7 +445,8 @@ public final class Theft {
 	}
 
 	private static void broke(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
-		boolean own = Placed.byPlayer(player, level, pos, state);
+		// (gb-tent) and the land's own blocks in your own homestead are yours (never anyone's goods there)
+		boolean own = Placed.byPlayer(player, level, pos, state) || Homesteads.mayBreak(player, level, pos, state, entity);
 		Placed.forget(level, pos);
 		if (own) {
 			// (0.5.46) breaking a block you placed yourself is no crime
@@ -455,6 +462,11 @@ public final class Theft {
 			commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false);
 			return;
 		}
+		if (owner == null && Homesteads.ownerAt(level, pos) != null) {
+			// (gb-tent) the realm's people count a homestead its holder's: breaking into another's is vandalism
+			commit(player, level, f, Crime.HOMESTEAD, pos, null, false);
+			return;
+		}
 		Crime crime;
 		if (owner != null) {
 			crime = Crime.STOREHOUSE;
@@ -468,6 +480,8 @@ public final class Theft {
 			crime = Crime.JOB_BLOCK;
 		} else if (state.is(BlockTags.CROPS)) {
 			crime = Crime.CROP;
+		} else if (Customs.sacred(level, f, state)) {
+			crime = Crime.FELLING;
 		} else {
 			return;
 		}

@@ -18,15 +18,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 /**
  * Veterans for hire on the roads (docs/Pawn-Plan.md row A3; after the higher-level pawns of Dragon's Dogma, a
@@ -118,10 +115,9 @@ public final class Veterans {
 		if (damage != null) {
 			damage.setBaseValue(DAMAGE[grade]);
 		}
-		v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(grade == KNIGHT ? Items.IRON_SWORD : Items.STONE_SWORD));
-		v.setItemSlot(EquipmentSlot.CHEST, new ItemStack(grade == KNIGHT ? Items.IRON_CHESTPLATE : Items.LEATHER_CHESTPLATE));
-		if (grade == KNIGHT) {
-			v.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+		// (medieval picks) what they've won puts them on their realm's ladder, in its kit: an old hand a soldier, a fallen knight a knight
+		if (v instanceof net.conczin.mca.entity.VillagerEntityMCA mca) {
+			Ranks.rise(mca, true);
 		}
 		// a few kinds they've fought often enough to know (row B1): two at two stars, a knight three and one at three
 		List<String> kinds = new ArrayList<>(List.of(KNOWN_KINDS));

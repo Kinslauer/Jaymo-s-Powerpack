@@ -577,6 +577,102 @@ public final class KingdomsCompat {
 		}
 	}
 
+	private static Method greatStarStruck;
+	private static boolean greatStarLooked;
+
+	/**
+	 * (medieval picks, nd-meteor) A great falling star has struck at (x, y, z): Kingdoms' disasters take it from there (the
+	 * ground shakes, the land burns, its dust hangs in the sky, the settlements near hear of it and remember;
+	 * {@code disasters.Bolides.powersStar}). Nothing without Kingdoms.
+	 */
+	public static void greatStar(net.minecraft.server.level.ServerLevel level, double x, double y, double z, int magnitude, int radius) {
+		if (!LOADED) {
+			return;
+		}
+		if (!greatStarLooked) {
+			greatStarLooked = true;
+			try {
+				greatStarStruck = Class.forName("com.jaymoskingdoms.disasters.Bolides").getMethod("powersStar", net.minecraft.server.level.ServerLevel.class,
+					double.class, double.class, double.class, int.class, int.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				greatStarStruck = null;
+			}
+		}
+		try {
+			if (greatStarStruck != null) {
+				greatStarStruck.invoke(null, level, x, y, z, magnitude, radius);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms: the crater is all there is)
+		}
+	}
+
+	private static Method bellOut, bellMake, bellMade;
+	private static boolean bellLooked;
+
+	private static void lookBell() {
+		if (bellLooked) {
+			return;
+		}
+		bellLooked = true;
+		try {
+			Class<?> bell = Class.forName("com.jaymoskingdoms.disasters.LastBell");
+			bellOut = bell.getMethod("isOut", net.minecraft.server.MinecraftServer.class);
+			bellMake = bell.getMethod("make", net.minecraft.server.MinecraftServer.class);
+			bellMade = bell.getMethod("made", net.minecraft.server.MinecraftServer.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			bellOut = bellMake = bellMade = null;
+		}
+	}
+
+	/** (medieval picks, nd-harbinger) Whether Kingdoms has the Last Bell to give. */
+	public static boolean hasLastBell() {
+		if (!LOADED) {
+			return false;
+		}
+		lookBell();
+		return bellOut != null && bellMake != null && bellMade != null;
+	}
+
+	/** (medieval picks, nd-harbinger) The Arsenal pulled a Last Bell through: it counts as out in the world now. */
+	public static void lastBellMade(net.minecraft.server.MinecraftServer server) {
+		if (!hasLastBell() || server == null) {
+			return;
+		}
+		try {
+			bellMade.invoke(null, server);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (it simply isn't counted)
+		}
+	}
+
+	/** (medieval picks, nd-harbinger) Whether the Last Bell can be pulled through now: Kingdoms is here and none is out. */
+	public static boolean lastBellFree(net.minecraft.server.MinecraftServer server) {
+		if (!LOADED || server == null) {
+			return false;
+		}
+		lookBell();
+		try {
+			return bellOut != null && bellMake != null && bellOut.invoke(null, server) instanceof Boolean out && !out;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** (medieval picks, nd-harbinger) A new Last Bell, now out in the world (Kingdoms' {@code disasters.LastBell.make}); empty without Kingdoms. */
+	public static net.minecraft.world.item.ItemStack newLastBell(net.minecraft.server.MinecraftServer server) {
+		if (!LOADED || server == null) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		lookBell();
+		try {
+			return bellMake != null && bellMake.invoke(null, server) instanceof net.minecraft.world.item.ItemStack stack ? stack
+				: net.minecraft.world.item.ItemStack.EMPTY;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
 	private static Method mimicTinkerer, mimicShop;
 	private static boolean mimicLooked;
 

@@ -100,6 +100,11 @@ final class QuestScreen extends Screen {
 				addRenderableWidget(FlatButton.builder(Component.translatable(board() ? "bounty.jaymoskingdoms.button.take"
 						: v.royal() ? "quest.jaymoskingdoms.button.accept.king" : "quest.jaymoskingdoms.button.accept"),
 					b -> act(v, QuestNet.ACCEPT)).bounds(x + 6, y, 100, 16).build());
+				if (v.haggle()) {
+					// (gb-haggle) ask for more before taking it
+					addRenderableWidget(FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.haggle"), b -> act(v, QuestNet.HAGGLE))
+						.bounds(x + 110, y, 100, 16).build());
+				}
 			} else {
 				Button turnIn = FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.turn_in"), b -> act(v, QuestNet.TURN_IN))
 					.bounds(x + 6, y, 90, 16).build();
@@ -107,6 +112,11 @@ final class QuestScreen extends Screen {
 				addRenderableWidget(turnIn);
 				addRenderableWidget(FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.abandon"), b -> act(v, QuestNet.ABANDON))
 					.bounds(x + 100, y, 70, 16).build());
+				if (v.haggle()) {
+					// (gb-haggle) board work just taken: ask its poster for more before setting out
+					addRenderableWidget(FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.haggle"), b -> act(v, QuestNet.HAGGLE))
+						.bounds(x + 174, y, 76, 16).build());
+				}
 			}
 		}
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(x + PANEL_W - 66, y, 60, 16).build());
