@@ -1,4 +1,4 @@
-# The Hollow's blight reworked (signs, cures, spread), new horde kinds
+# The Hollow's blight reworked (signs, cures, spread), new horde kinds, the dead's looks
 - **How it takes you**: armour wards off a dead one's blow (up to 70% with full armour; broken armour wards nothing), and it gets in twice as easily through a bleeding wound. A fresh blight settles in for 2 minutes, and binding the wound in that time clears it most times. Only someone with Medicine training feels it go in.
 - **Wider symptoms**: hunger or slowness once it takes hold, weakness and nausea near the end, rests between bouts, and one short withering in its last hour.
 - **Signs others can see**: the skin greys toward the Hollow being made (hidden by a full mask), a wet cough now and then (our own synthesised sound), and flies at the end. Villagers who hear the cough say so ("That's no regular cough."), back away and think less of you.
@@ -20,6 +20,10 @@
   - Scouts are quick and frail and range ahead of the horde. When one finds you it howls: the rest come and keep on your trail a while, and the scout hangs back out of reach.
 - **Tools and sieges**: a horde zombie with the right tool (pick on stone, axe on wood, shovel on dirt) breaks through much faster, and the dead's old tools now include a wooden pick. Stay within a small area after dark and, once you're dug in, waves keep coming every few minutes until dawn, each bigger than the last.
 - **Horde animations**: arms reach and claw as they walk, a shoulder into the door they pound, a stagger when hit hard, a lunge at the last step, and a scout's head thrown back to howl. Fresh Animations steps aside for them.
+- **Where the dead rose**: the present's zombies are dressed by where they rose: dried in deserts, badlands and savannas, bloated by swamps, rivers and shores, pale from caves, the deep dark and deep sunless ground, frostbitten in snowy and frozen lands, else plain. Each wears its land's villager clothes and keeps its look wherever it walks (RisenLooks).
+- **Three stages of rot**: still with its face and nose, down to bone at the hands and shins, or a skull in rags with the ribs showing. 189 new skins of our own (kingdoms/tools/gen_old_dead.py). The old dead now wear their skins in every world but Chrono's future, not just the Overworld.
+- **Eyes that glow**: at night a cold light sits in every zombie's and husk's eyes, brighter and red under a blood moon (DeadEyes).
+- **Tissou's Zombie Pack** (by Tissou, with thanks) joins the pack for the future only: half of the future's zombies wear its skins when Entity Texture Features is loaded and the pack is on, tails and all. While it is on, the present's drowned, zombie villagers and villagers keep the game's own textures (TissouPack, deadlooks mixins). Its zombie sounds replace the game's everywhere while it's on.
 - Four new loading-screen hints.
 - Classes: HollowBlight, BlightSigns, BlightCures, BlightSpread, BlightQuarantine, WitchThralls, Restoration, BoardWork, QuestJobs, Recollections, HordeKinds, ZombieHordes, HordeMoves, DoorPounding; client BlightLook, HordePoses.
 - Built; not played.
