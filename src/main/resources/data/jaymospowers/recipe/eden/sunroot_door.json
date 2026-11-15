@@ -2,16 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "group": "wooden_door",
-  "key": {
-    "#": "jaymospowers:sunroot_planks"
-  },
   "pattern": [
-    "##",
-    "##",
-    "##"
+    "PPN",
+    "PP ",
+    "PP "
   ],
+  "key": {
+    "P": "jaymospowers:sunroot_planks",
+    "N": "#jaymospowers:door_fittings"
+  },
   "result": {
     "id": "jaymospowers:sunroot_door",
-    "count": 3
+    "count": 1
   }
 }

@@ -46,6 +46,8 @@ FORM_BRICKS = 4
 # glass dust: sand and flint dust
 GLASS_SAND = 4
 GLASS_DUST = 4
+# pit-firing: unfired bricks and the unfired clay bucket fired on a lit campfire (the first bricks, before there's a kiln)
+PIT_FIRING_TICKS = 600
 # bronze dust: three copper to one tin
 BRONZE_COPPER = 3
 BRONZE_DUST = 4
@@ -80,7 +82,10 @@ LANG = {
 }
 
 # vanilla recipes switched off (replaced below)
-OFF = ["crafting_table", "chest", "iron_door", "torch", "paper", "brick", "glass"]
+OFF = ["crafting_table", "chest", "iron_door", "torch", "copper_torch", "soul_torch", "paper", "brick", "glass"]
+# our own woods' recipes (data/jaymospowers/recipe/...), written by tools/gen_aether_flora.py and tools/gen_eden.py: their
+# doors, fences and gates are rewritten in place by the same rules (so run this after those two)
+OWN_WOODS = [os.path.join("aether", "flora"), "eden"]
 
 WOODEN_UNMENDABLE = ["broadsword", "claymore", "cleaver", "cudgel", "dagger", "flanged_mace", "glaive", "hatchet", "lance",
                      "longsword", "machete", "ninjato", "quarterstaff", "rapier", "saber", "skewer", "war_axe", "war_scythe"]
@@ -133,6 +138,21 @@ def planks_key(r):
     return None
 
 
+def woodwork(name, r, rail):
+    """A wooden door, fence or gate recipe by our rules (fittings, rails), or None if it isn't one."""
+    planks = planks_key(r)
+    if planks is None or r.get("type") != "minecraft:crafting_shaped":
+        return None
+    result = r["result"]["id"]
+    if name.endswith("_door") and result.endswith("_door"):
+        return shaped("redstone", ["PPN", "PP ", "PP "], {"P": planks, "N": "#" + NS + ":door_fittings"}, result, WOOD_DOORS, "wooden_door")
+    if name.endswith("_fence") and "minecraft:stick" in r["key"].values():
+        return shaped("misc", ["W#W", "W#W"], {"W": planks, "#": rail}, result, FENCES, "wooden_fence")
+    if name.endswith("_fence_gate") and "minecraft:stick" in r["key"].values():
+        return shaped("redstone", ["#W#", "#W#"], {"W": planks, "#": rail}, result, GATES, "wooden_fence_gate")
+    return None
+
+
 def data(jar):
     recipes = vanilla_recipes(jar)
     for name in OFF:
@@ -145,29 +165,32 @@ def data(jar):
                            "minecraft:chest"))
     # doors with fittings, fences and gates with rails, slabs with the saw
     for name, r in sorted(recipes.items()):
-        planks = planks_key(r)
-        if planks is None or r.get("type") != "minecraft:crafting_shaped":
-            continue
-        result = r["result"]["id"]
-        if name.endswith("_door") and result.endswith("_door"):
+        made = woodwork(name, r, rail)
+        if made is not None:
             off(name)
-            recipe(name, shaped("redstone", ["PPN", "PP ", "PP "], {"P": planks, "N": "#" + NS + ":door_fittings"}, result, WOOD_DOORS,
-                                "wooden_door"))
-        elif name.endswith("_fence") and "minecraft:stick" in r["key"].values():
-            off(name)
-            recipe(name, shaped("misc", ["W#W", "W#W"], {"W": planks, "#": rail}, result, FENCES, "wooden_fence"))
-        elif name.endswith("_fence_gate") and "minecraft:stick" in r["key"].values():
-            off(name)
-            recipe(name, shaped("redstone", ["#W#", "#W#"], {"W": planks, "#": rail}, result, GATES, "wooden_fence_gate"))
-        elif name.endswith("_slab") and r.get("pattern") == ["###"]:
-            recipe(name + "_from_saw", shapeless("building", [saw, planks, planks, planks], result, SAW_SLABS, group="wooden_slab"))
+            recipe(name, made)
+        elif name.endswith("_slab") and r.get("pattern") == ["###"] and planks_key(r) is not None:
+            planks = planks_key(r)
+            recipe(name + "_from_saw", shapeless("building", [saw, planks, planks, planks], r["result"]["id"], SAW_SLABS, group="wooden_slab"))
+    for folder in OWN_WOODS:
+        path = os.path.join(DATA, NS, "recipe", folder)
+        for file in sorted(os.listdir(path)):
+            with open(os.path.join(path, file), encoding="utf-8") as f:
+                made = woodwork(file[:-5], json.load(f), rail)
+            if made is not None:
+                write(os.path.join(path, file), made)
     recipe("iron_door", shaped("redstone", ["IIS", "II ", "II "], {"I": "minecraft:iron_ingot", "S": NS + ":steel_ingot"},
                                "minecraft:iron_door", IRON_DOORS))
     recipe("sticks_from_saw", shapeless("misc", [saw, "#minecraft:planks", "#minecraft:planks"], "minecraft:stick", SAW_STICKS))
     recipe("fence_rail", shapeless("misc", [saw, "#minecraft:wooden_slabs"], rail, SAW_RAILS))
     # torches by fuel
     for fuel, count in TORCH_YIELDS.items():
-        recipe("torch_from_" + fuel.split(":")[1], shaped("misc", ["X", "#"], {"X": fuel, "#": "minecraft:stick"}, "minecraft:torch", count))
+        burns = fuel.split(":")[1]
+        recipe("torch_from_" + burns, shaped("misc", ["X", "#"], {"X": fuel, "#": "minecraft:stick"}, "minecraft:torch", count))
+        recipe("copper_torch_from_" + burns, shaped("misc", ["C", "X", "#"], {"C": "minecraft:copper_nugget", "X": fuel, "#": "minecraft:stick"},
+                                                    "minecraft:copper_torch", count))
+        recipe("soul_torch_from_" + burns, shaped("misc", ["X", "#", "S"], {"X": fuel, "#": "minecraft:stick", "S": "#minecraft:soul_fire_base_blocks"},
+                                                  "minecraft:soul_torch", count))
     # tools kept in the grid (ground/GridToolRecipe)
     tool = NS + ":tool_crafting"
     water = ["minecraft:water_bucket", NS + ":clay_water_bucket"]
@@ -178,6 +201,10 @@ def data(jar):
     recipe("unfired_bricks_from_balls", shapeless("misc", [NS + ":brick_form"] + ["minecraft:clay_ball"] * FORM_BRICKS,
                                                   NS + ":unfired_brick", FORM_BRICKS, tool))
     recipe("unfired_clay_bucket", shaped("misc", ["C C", " C "], {"C": "#" + NS + ":bucket_clay"}, NS + ":unfired_clay_bucket"))
+    for unfired, fired in ((NS + ":unfired_brick", "minecraft:brick"), (NS + ":unfired_clay_bucket", NS + ":clay_bucket")):
+        recipe(fired.split(":")[1] + "_from_pit_firing", {"type": "minecraft:campfire_cooking", "category": "misc",
+                                                         "cookingtime": PIT_FIRING_TICKS, "experience": 0.1, "ingredient": unfired,
+                                                         "result": {"id": fired}})
     recipe("glass_dust", shapeless("misc", ["#minecraft:smelts_to_glass"] * GLASS_SAND + [NS + ":flint_dust"], NS + ":glass_dust", GLASS_DUST))
     recipe("bronze_dust", shapeless("misc", [NS + ":copper_dust"] * BRONZE_COPPER + ["#c:dusts/tin"], NS + ":bronze_dust", BRONZE_DUST))
 
@@ -197,6 +224,7 @@ def data(jar):
     unmendable = ["minecraft:wooden_" + t for t in ("sword", "shovel", "pickaxe", "axe", "hoe", "spear")]
     unmendable += [{"id": NS + ":wooden_" + w, "required": False} for w in WOODEN_UNMENDABLE]
     unmendable += [{"id": NS + ":" + i, "required": False} for i in ("hand_axe", "primitive_knife", "primitive_spear", "throwing_stick")]
+    unmendable += [{"id": i, "required": False} for i in ("jaymoskitchen:flint_knife", "rogues:flint_dagger")]
     write(os.path.join(tags, "unmendable.json"), {"values": unmendable})
     # tin arrives in patch 4: bronze dust is mixed from whatever joins this tag
     write(os.path.join(DATA, "c", "tags", "item", "dusts", "tin.json"), {"replace": False, "values": []})

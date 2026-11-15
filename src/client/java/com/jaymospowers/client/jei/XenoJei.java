@@ -60,7 +60,7 @@ public final class XenoJei implements IModPlugin {
 		registration.addRecipes(BULWARK, grind);
 		List<SimpleCategory.Recipe> pyre = new ArrayList<>();
 		for (Item[] pair : new Item[][] {{Items.RAW_IRON, Items.IRON_INGOT}, {Items.RAW_COPPER, Items.COPPER_INGOT}, {Items.RAW_GOLD, Items.GOLD_INGOT},
-			{Items.SAND, Items.GLASS}, {Items.COBBLESTONE, Items.STONE}, {Items.BEEF, Items.COOKED_BEEF}, {Items.CLAY_BALL, Items.BRICK}}) {
+			{Items.COBBLESTONE, Items.STONE}, {Items.BEEF, Items.COOKED_BEEF}}) {
 			pyre.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(pair[0], XenoFinds.PYRE_BATCH))),
 				List.of(new ItemStack(pair[1], XenoFinds.PYRE_BATCH)),
 				List.of(Component.translatable("jei.jaymospowers.xeno_pyre.how"), Component.translatable("jei.jaymospowers.xeno_pyre.any"))));

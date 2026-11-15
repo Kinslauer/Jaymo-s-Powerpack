@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "misc",
+  "cookingtime": 600,
+  "experience": 0.1,
+  "ingredient": "jaymospowers:unfired_clay_bucket",
+  "result": {
+    "id": "jaymospowers:clay_bucket"
+  }
+}

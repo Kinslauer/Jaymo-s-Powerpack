@@ -1,17 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
-  "key": {
-    "#": "jaymospowers:greatroot_planks"
-  },
+  "group": "wooden_door",
   "pattern": [
-    "##",
-    "##",
-    "##"
+    "PPN",
+    "PP ",
+    "PP "
   ],
+  "key": {
+    "P": "jaymospowers:greatroot_planks",
+    "N": "#jaymospowers:door_fittings"
+  },
   "result": {
     "id": "jaymospowers:greatroot_door",
-    "count": 3
-  },
-  "group": "wooden_door"
+    "count": 1
+  }
 }

@@ -29,8 +29,11 @@ import org.jspecify.annotations.Nullable;
  * ingots' worth (Tinkers' ore doubling); metal gear melts back into the ingots it took.
  */
 public final class Melting {
-	/** (GTNH picks) Molten glass a basin casts into a block of glass, and a pane cast into a pane. */
-	public static final int GLASS_BLOCK_MB = 1000, PANE_MB = 250;
+	/**
+	 * (GTNH picks) Molten glass a basin casts into a block of glass (what a glass dust and a block melt into), and a pane
+	 * cast into a pane. A block's worth is under what the smallest smeltery holds ({@link Molten#BLOCK}), so it never stalls.
+	 */
+	public static final int GLASS_BLOCK_MB = 500, PANE_MB = 125;
 	/** (0.8.115) Molten gold to gild Sora's Dagger: a block's worth, as the gold block it took before. */
 	static final int DAGGER_GILDING = Molten.BLOCK;
 

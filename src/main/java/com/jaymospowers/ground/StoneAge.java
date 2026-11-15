@@ -9,6 +9,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -108,10 +109,18 @@ public final class StoneAge {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack mesh = player.getItemInHand(hand);
 			BlockPos pos = hit.getBlockPos();
-			if (player.isSpectator() || !mesh.is(FirstTools.PLANT_MESH) || !level.getBlockState(pos).is(Blocks.GRAVEL)) {
+			BlockState gravel = level.getBlockState(pos);
+			if (player.isSpectator() || !mesh.is(FirstTools.PLANT_MESH) || !gravel.is(Blocks.GRAVEL)) {
+				return InteractionResult.PASS;
+			}
+			// sifting takes the block away, so it's allowed only where breaking it would be (not in adventure mode, claims, dungeons)
+			if (!player.mayBuild() || !level.mayInteract(player, pos) || !player.mayUseItemAt(pos, hit.getDirection(), mesh)) {
 				return InteractionResult.PASS;
 			}
 			if (level instanceof ServerLevel server) {
+				if (!PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(server, player, pos, gravel, null)) {
+					return InteractionResult.FAIL;
+				}
 				sift(server, player, mesh, pos);
 			}
 			return InteractionResult.SUCCESS;

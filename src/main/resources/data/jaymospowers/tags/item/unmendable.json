@@ -93,6 +93,14 @@
     {
       "id": "jaymospowers:throwing_stick",
       "required": false
+    },
+    {
+      "id": "jaymoskitchen:flint_knife",
+      "required": false
+    },
+    {
+      "id": "rogues:flint_dagger",
+      "required": false
     }
   ]
 }
