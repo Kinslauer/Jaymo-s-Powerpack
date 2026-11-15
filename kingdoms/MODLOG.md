@@ -13988,3 +13988,20 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 
 - A Fantasy Armor lore set with a worn-out piece doesn't count until it's repaired. That covers the headsman's dull plate, the twinned oath, the barrow keepers and every other whole-set effect.
 - Built; not played.
+
+## 0.9.34 (2026-11-15): Dawnwatch, sky elders and well-wardens (#1600)
+
+These apply only where Fantasy Armor is loaded.
+- The Sun-Marshal's sun-guard wear the dawnwatch's gilded plate, and it never drops from them. Without Fantasy Armor they keep their golden helmets.
+- Each sky village and sky town names an elder: the grown villager nearest its middle who holds no other post. The elder wears the wind-faith robes and keeps them on. When an elder dies, another is named.
+- Cloudwrights sell the wind-faith robes, and stalls that already exist get them at their next restock.
+- The sky lord's wardens are the well-wardens. They wear the grey well-warden plate on duty and take it off with the rest of their arms, like every guard.
+- Built; not played.
+
+## 0.9.35 (2026-11-15): The orders' sets show (#1600)
+
+These apply only where Fantasy Armor is loaded.
+- Anyone wearing the whole of an order's set gives off a faint mote now and then, in the set's colour. A set with a worn-out piece gives none. This covers the dawnwatch, the headsmen, the sky elders, the well-wardens, the ashen plate, the hunters, the barrow wardens, the Giant-slayers, the pit, the twinned and the blossom guards' folded lamellar.
+- People notice a player in one of those sets and say so in one oblique line. Each person says it at most once a day. Goblins and orcs have their own lines.
+- Fantasy Armor's own capes already hang from its sets, so we add none.
+- Built; not played.
