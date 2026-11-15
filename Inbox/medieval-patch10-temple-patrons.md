@@ -18,4 +18,4 @@ Andy's pairings (2026-11-15) for cv-avatars / cv-ruins. An offering at the templ
 | Ash Whisperer | Cinder-Shade | walled palace in Blossom |
 | The Truth | Inquisitor | a bare old house in the Aether (no new dimension) |
 
-Lore: "Whose the old temples were" in Lore.md (new, awaiting Andy's approval).
+Lore: "Whose the old temples were" in Lore.md (Andy approved 2026-11-15).
