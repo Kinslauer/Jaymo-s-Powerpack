@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Agents/combat-animations-trial|combat-animations-trial]] · 💻 Odysseus · blocked
 
 
 ## Done
