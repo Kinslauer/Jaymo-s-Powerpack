@@ -38,6 +38,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.CastPose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
+		com.jaymoskingdoms.client.BlightLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorWingsLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);

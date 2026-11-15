@@ -113,7 +113,7 @@ public final class HollowSighting {
 	}
 
 	/** {@code who} runs from {@code from}. */
-	private static void flee(LivingEntity who, ServerPlayer from) {
+	static void flee(LivingEntity who, net.minecraft.world.entity.Entity from) {
 		if (!(who instanceof net.minecraft.world.entity.PathfinderMob mob)) {
 			return;
 		}

@@ -2027,5 +2027,14 @@
 		"sounds": [
 			"jaymoskingdoms:film/whale_breach"
 		]
+	},
+	"blight.cough": {
+		"subtitle": "subtitles.jaymoskingdoms.blight.cough",
+		"sounds": [
+			"jaymoskingdoms:blight/cough_0",
+			"jaymoskingdoms:blight/cough_1",
+			"jaymoskingdoms:blight/cough_2",
+			"jaymoskingdoms:blight/cough_3"
+		]
 	}
 }

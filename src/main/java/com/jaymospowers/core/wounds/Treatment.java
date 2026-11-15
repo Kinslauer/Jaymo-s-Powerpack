@@ -112,6 +112,9 @@ public final class Treatment {
 	public static final String HEATED_KEY = "jaymospowers:heated";
 	/** (0.18.45) Told of every treatment a player finishes on someone else. Jaymo's Kingdoms adds one (by reflection): a villager remembers who dressed their wounds. */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TENDED_LISTENERS = new ArrayList<>();
+	/** Told of every treatment a player finishes, on themselves too. Jaymo's Kingdoms adds one (by reflection): a wound bound
+	 * soon after a blow from the dead may keep the Hollow's blight from settling in. */
+	public static final List<BiConsumer<ServerPlayer, LivingEntity>> ANY_TENDED_LISTENERS = new ArrayList<>();
 
 	/** (0.14.4) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
 	public enum Remedy {
@@ -939,6 +942,9 @@ public final class Treatment {
 		}
 		// (0.15.49) a little Survival experience (Kingdoms)
 		MedicineSkill.treated(player);
+		for (BiConsumer<ServerPlayer, LivingEntity> listener : ANY_TENDED_LISTENERS) {
+			listener.accept(player, body);
+		}
 		if (body != player) {
 			for (BiConsumer<ServerPlayer, LivingEntity> listener : TENDED_LISTENERS) {
 				listener.accept(player, body);
