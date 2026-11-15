@@ -12,6 +12,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
 
 /**
  * (0.7.528) One Dimension worlds (One Dimension + CustomChunks, CodxIO; shipped unchanged): the Aether, the Overworld and
@@ -27,7 +30,7 @@ import net.minecraft.world.level.Level;
 public final class Stacked {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("customchunks");
 	private static boolean ready;
-	private static Method dimensionAt, stacksOf, bandOf, bandShift, bandMin, bandMax, enter, leave;
+	private static Method dimensionAt, stacksOf, bandOf, bandShift, bandMin, bandMax, enter, leave, bandGenerator, bandRandomState, bandHeight;
 
 	private Stacked() {
 	}
@@ -52,6 +55,9 @@ public final class Stacked {
 				Class<?> context = Class.forName("codx.customchunks.BandContext");
 				enter = context.getMethod("enter", Level.class, int.class);
 				leave = context.getMethod("leave", Object.class);
+				bandGenerator = band.getMethod("generator");
+				bandRandomState = band.getMethod("randomState");
+				bandHeight = band.getMethod("localHeight");
 			} catch (ReflectiveOperationException | LinkageError e) {
 				dimensionAt = null;
 			}
@@ -164,6 +170,32 @@ public final class Stacked {
 		}
 		ServerLevel level = server.getLevel(realm);
 		return level == null ? 0 : level.getMaxY();
+	}
+
+	/**
+	 * How the ground of a realm is made: its generator, the random state it reads, the heights it works in, and what to
+	 * add to one of its heights to get the height in the level ({@link #shift}).
+	 */
+	public record Ground(ChunkGenerator generator, RandomState randomState, LevelHeightAccessor heights, int shift) {
+	}
+
+	/**
+	 * The Overworld's ground in {@code level}. A stacked level's own generator answers "how high is the ground here" with
+	 * the top band that has any, which over the Overworld is the Cloud Sea's overcast or an Aether island: a town raised
+	 * from that answer is built in the clouds. So in a stacked world this is the Overworld band's own generator, read in its
+	 * own heights (add {@code shift} to place anything in the level); anywhere else the level's own, shift 0.
+	 */
+	public static Ground overworldGround(ServerLevel level) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		if (band != null) {
+			try {
+				return new Ground((ChunkGenerator) bandGenerator.invoke(band), (RandomState) bandRandomState.invoke(band),
+					(LevelHeightAccessor) bandHeight.invoke(band), read(band, bandShift, 0));
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// fall through to the level's own
+			}
+		}
+		return new Ground(level.getChunkSource().getGenerator(), level.getChunkSource().randomState(), level, 0);
 	}
 
 	/**
