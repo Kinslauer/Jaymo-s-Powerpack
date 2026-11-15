@@ -3,7 +3,7 @@ status: in-review
 task: shipwright-yards
 branch: claude/project-thread-c00opi
 with: 
-pr: 
+pr: 1603
 mods: kingdoms
 started: 2026-11-15
 owns:
