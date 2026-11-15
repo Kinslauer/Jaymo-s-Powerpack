@@ -1,10 +1,10 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
 thread: 1571611384016281601
-claimed_by: hermes-a
+claimed_by: hermes-writer
 pr:
 suggested_owns: []
 writer: hermes-writer
