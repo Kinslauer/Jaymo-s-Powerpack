@@ -216,6 +216,17 @@ public final class Mortality {
 	public static final List<java.util.function.Function<ServerPlayer, net.minecraft.core.@Nullable GlobalPos>> BERTHS = new ArrayList<>();
 
 	/**
+	 * (medieval picks, de-spiders; Andy: "you can awaken from a death roll, webbed up inside a lair instead of poisoned and
+	 * out in the world") Where spiders carry one left for dead home wrapped (Kingdoms: a nest cave near by, or a lair they
+	 * hollowed out), asked after {@link #CAPTORS} and before {@link #BERTHS}. Given the player and whoever downed them (or
+	 * null); the first to name a place has them wake there, webbed up ({@link #LAIR_WEB_TICKS}, every layer) instead of the
+	 * cause's injury. It takes their gear itself.
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, @Nullable Entity, net.minecraft.core.@Nullable GlobalPos>> LAIRS = new ArrayList<>();
+	/** How long the top layer of a lair wake's web holds (ticks): past the black they come round in, then the rest under it. */
+	static final int LAIR_WEB_TICKS = OUT_AFTER + 100;
+
+	/**
 	 * (0.20.27) Deaths that turn one instead of ending them (Kingdoms: the Hollow; Andy: "the death method that killed them turns
 	 * them into one of those specific hollows, like enthralled by a vampire, or maybe zombified by a witch"). Given the player and
 	 * whoever killed them, each may roll and hand back what to do to them as they rise; the first to hand one back has them. A
@@ -1082,6 +1093,23 @@ public final class Mortality {
 				}
 			}
 		}
+		// (medieval picks) or carried off wrapped to a spiders' lair
+		if (wake.turn == null && wake.tries == 0 && wake.far == null && wake.cause != Cause.BOSS) {
+			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> lair : LAIRS) {
+				net.minecraft.core.GlobalPos in;
+				try {
+					in = lair.apply(player, wake.by);
+				} catch (RuntimeException e) {
+					JaymosPowers.LOGGER.warn("A lair failed to take {}", player.getScoreboardName(), e);
+					in = null;
+				}
+				ServerLevel to = in == null ? null : server.getLevel(in.dimension());
+				if (to != null) {
+					wakeAt(player, to, in.pos(), wake, "lair");
+					return true;
+				}
+			}
+		}
 		// or back in a berth of their own (a bed aboard a ship), if she's still there (not one a boss spared: dumped far off)
 		if (wake.turn == null && wake.tries == 0 && wake.far == null && wake.cause != Cause.BOSS) {
 			for (java.util.function.Function<ServerPlayer, net.minecraft.core.GlobalPos> berth : BERTHS) {
@@ -1257,7 +1285,12 @@ public final class Mortality {
 		player.resetFallDistance();
 		player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
 		if (wake.turn == null) {
-			injure(player, wake.cause, wake.sub);
+			if ("lair".equals(line)) {
+				// (medieval picks) wrapped head to foot instead of the bite's poison
+				com.jaymospowers.power.web.Webbed.wrap(player, LAIR_WEB_TICKS, com.jaymospowers.power.web.Webbed.MOST);
+			} else {
+				injure(player, wake.cause, wake.sub);
+			}
 			player.setAttached(SURVIVOR, true);
 			if ("sheltered".equals(line)) {
 				// (0.20.83) those who took them in bound their wounds and splinted what was broken

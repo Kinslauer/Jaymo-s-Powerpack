@@ -93,6 +93,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// (0.20.41) blood splashed on bodies
 		com.jaymospowers.client.blood.BloodCoatLayer.register();
 		com.jaymospowers.client.wounds.WoundMarksLayer.register();
+		// (medieval picks) webbed up: the wrap everyone sees, the strands across your own view
+		com.jaymospowers.client.power.web.WebbedLook.register();
+		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
