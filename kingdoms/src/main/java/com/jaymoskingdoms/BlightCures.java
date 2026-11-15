@@ -89,6 +89,10 @@ public final class BlightCures {
 	private static final AttachmentType<List<Long>> HUTS_DRAWN = AttachmentRegistry.create(JaymosKingdoms.id("witch_cures_drawn"),
 		builder -> builder.persistent(Codec.LONG.listOf()));
 
+	/** A Druid-class player who has studied the druids' remedy (Research, "The Druids' Remedies"): they can brew the cure. Saved. */
+	public static final AttachmentType<Boolean> KNOWS_CURE = AttachmentRegistry.create(JaymosKingdoms.id("knows_hollows_cure"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+
 	public static Item SEARED_FLESH, GILDED_FLESH, CURE;
 
 	private BlightCures() {
@@ -104,6 +108,7 @@ public final class BlightCures {
 			output.insertAfter(SEARED_FLESH, GILDED_FLESH);
 			output.insertAfter(GILDED_FLESH, CURE);
 		});
+		Research.addTopic(remedies());
 		UseBlockCallback.EVENT.register(BlightCures::useBlock);
 		UseEntityCallback.EVENT.register(BlightCures::useEntity);
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -111,6 +116,34 @@ public final class BlightCures {
 				witch.spawnAtLocation(level, new ItemStack(CURE));
 			}
 		});
+	}
+
+	/** The druids' remedies, a line of study only a Druid can follow: the Hollow's Cure, learned once. */
+	private static Research.Topic remedies() {
+		return new Research.Topic() {
+			@Override
+			public String id() {
+				return "druid_remedies";
+			}
+
+			@Override
+			public Component title() {
+				return Component.translatable("research.jaymoskingdoms.topic.druid_remedies");
+			}
+
+			@Override
+			public List<Research.Subject> subjects(ServerPlayer player) {
+				return Classes.both(player).contains(Classes.PlayerClass.DRUID) && !player.getAttachedOrElse(KNOWS_CURE, false)
+					? List.of(new Research.Subject("hollows_cure", Component.translatable("item.jaymoskingdoms.hollows_cure")))
+					: List.of();
+			}
+
+			@Override
+			public Component learn(ServerPlayer player, String subject) {
+				player.setAttached(KNOWS_CURE, true);
+				return Component.translatable("research.jaymoskingdoms.druid_remedies.learned");
+			}
+		};
 	}
 
 	private static Item item(String name, java.util.function.Function<Item.Properties, Item> make) {
@@ -206,14 +239,19 @@ public final class BlightCures {
 
 	/** A Druid brewing the cure at a cauldron over a fire, or a bottle dipped in a witch's hut cauldron. */
 	private static InteractionResult useBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
-		if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server) || player.isSpectator()) {
-			return InteractionResult.PASS;
-		}
 		ItemStack held = player.getItemInHand(hand);
 		BlockPos pos = hit.getBlockPos();
 		BlockState state = level.getBlockState(pos);
-		if (held.is(GILDED_FLESH) && state.is(Blocks.WATER_CAULDRON) && heated(level, pos.below())
-			&& Classes.both(sp).contains(Classes.PlayerClass.DRUID) && takeBottle(sp)) {
+		boolean brewing = held.is(GILDED_FLESH) && state.is(Blocks.WATER_CAULDRON) && heated(level, pos.below());
+		if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server) || player.isSpectator()) {
+			// (the client mustn't go on to eat the flesh while it's worked into the brew)
+			return brewing && !player.isSpectator() ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		}
+		if (brewing && Classes.both(sp).contains(Classes.PlayerClass.DRUID) && !sp.getAttachedOrElse(KNOWS_CURE, false)) {
+			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blight_cures.study").withStyle(net.minecraft.ChatFormatting.GRAY));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		if (brewing && Classes.both(sp).contains(Classes.PlayerClass.DRUID) && takeBottle(sp)) {
 			held.consume(1, sp);
 			LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 			give(sp, new ItemStack(CURE));

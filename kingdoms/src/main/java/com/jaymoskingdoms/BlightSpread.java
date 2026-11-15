@@ -88,8 +88,14 @@ public final class BlightSpread {
 	private static final Set<Villager> SICK = new HashSet<>();
 	private static final Set<Entity> DEAD = new HashSet<>();
 	/** Deaths to find the bodies of on the next tick: where, and the night. */
-	private record Death(ServerLevel level, Vec3 at, long night, Set<UUID> before) {
+	private record Death(ServerLevel level, Vec3 at, long night, Set<UUID> before, int[] left) {
 	}
+	/** A death's body is looked for this many ticks (it may be laid down a tick or two after). */
+	static final int BODY_TICKS = 5;
+	/** On the overworld: the blighted bodies that rose (for the burning work), the most remembered. Saved. */
+	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<List<String>> ROSE_SAVED = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+		.create(JaymosKingdoms.id("blighted_risen"), builder -> builder.persistent(com.mojang.serialization.Codec.STRING.listOf()));
+	static final int ROSE_KEPT = 128;
 
 	private static final List<Death> DEATHS = new ArrayList<>();
 	/** Bodies that rose (for the burning work: one that rose wasn't burned). Not kept. */
@@ -226,10 +232,7 @@ public final class BlightSpread {
 	// ---- the tick ------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
-		for (Death d : DEATHS) {
-			bodyOf(d);
-		}
-		DEATHS.clear();
+		DEATHS.removeIf(d -> bodyOf(d) || --d.left()[0] <= 0);
 		long tick = server.getTickCount();
 		if (tick % 20 == 0) {
 			for (Villager v : new ArrayList<>(SICK)) {
@@ -366,18 +369,20 @@ public final class BlightSpread {
 		for (Entity e : level.getEntities((Entity) null, entity.getBoundingBox().inflate(BODY_RANGE), KitchenCompat::isCorpse)) {
 			before.add(e.getUUID());
 		}
-		DEATHS.add(new Death(level, entity.position(), nightOf(level.getOverworldClockTime()), before));
+		DEATHS.add(new Death(level, entity.position(), nightOf(level.getOverworldClockTime()), before, new int[] {BODY_TICKS}));
 	}
 
-	private static void bodyOf(Death d) {
+	/** Looks for the body a blighted death left and marks it; true once found. */
+	private static boolean bodyOf(Death d) {
 		for (Entity e : d.level().getEntities((Entity) null, new AABB(d.at(), d.at()).inflate(BODY_RANGE), KitchenCompat::isCorpse)) {
 			if (!d.before().contains(e.getUUID()) && !e.entityTags().contains(DEAD_TAG)) {
 				e.addTag(DEAD_TAG);
 				e.addTag(DEAD_TAG + "." + d.night());
 				DEAD.add(e);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/** The night a blighted body was left in, from its tag. */
@@ -417,14 +422,21 @@ public final class BlightSpread {
 		level.playSound(null, body.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_AMBIENT, SoundSource.HOSTILE, 1.0F, 0.7F);
 		level.sendParticles(Fx.miasma(0x9A9E92, 0.8F), body.getX(), body.getY() + 0.4, body.getZ(), 8, 0.3, 0.2, 0.3, 0.01);
 		ROSE.add(body.getUUID());
+		ServerLevel world = Factions.level(level.getServer());
+		List<String> saved = new ArrayList<>(world.getAttachedOrElse(ROSE_SAVED, List.of()));
+		saved.add(body.getStringUUID());
+		while (saved.size() > ROSE_KEPT) {
+			saved.removeFirst();
+		}
+		world.setAttached(ROSE_SAVED, saved);
 		DEAD.remove(body);
 		body.discard();
 		JaymosKingdoms.LOGGER.info("A blighted body rose unburned at {}", body.blockPosition());
 	}
 
 	/** Whether the blighted body {@code id} got up (it wasn't burned). */
-	static boolean rose(UUID id) {
-		return ROSE.contains(id);
+	static boolean rose(ServerLevel level, UUID id) {
+		return ROSE.contains(id) || Factions.level(level.getServer()).getAttachedOrElse(ROSE_SAVED, List.of()).contains(id.toString());
 	}
 
 	// ---- outbreaks ---------------------------------------------------------------------------------------------------

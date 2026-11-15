@@ -42,6 +42,8 @@ public final class BlightSigns {
 	static final int[] COUGH_EVERY = {0, 70, 25};
 	/** Villagers this close hear a cough; one of them remarks on it, at most this often for one cougher (ticks). */
 	static final double HEAR_RANGE = 12.0;
+	/** Villagers this close to a cough back away from whoever coughed (blocks). */
+	static final double SHY_RANGE = 8.0;
 	static final int REMARK_GAP = 20 * 60;
 	/** Lines for a cough heard ({@code blight_signs.jaymoskingdoms.cough.<n>}) and for a healer who sees it in you. */
 	static final int COUGH_LINES = 5, HEALER_LINES = 4;
@@ -102,6 +104,11 @@ public final class BlightSigns {
 		BlightSpread.coughed(level, body);
 		if (body instanceof ServerPlayer player) {
 			BlightQuarantine.coughed(level, player);
+		}
+		// everyone close who hears it backs away, children too (Andy: "This happening is why people avoid those that cough")
+		for (net.minecraft.world.entity.npc.villager.Villager v : level.getEntitiesOfClass(net.minecraft.world.entity.npc.villager.Villager.class,
+			body.getBoundingBox().inflate(SHY_RANGE), x -> x != body && x.isAlive() && !x.isSleeping() && !HollowBlight.blighted(x))) {
+			HollowSighting.flee(v, body);
 		}
 		long now = level.getGameTime();
 		Long last = REMARKED.get(body.getUUID());

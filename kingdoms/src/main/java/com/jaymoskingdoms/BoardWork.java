@@ -319,7 +319,8 @@ final class BoardWork {
 				}
 				StringBuilder ids = new StringBuilder();
 				for (int i = 0; i < Math.min(dead.size(), OUTBREAK_MOST); i++) {
-					ids.append(dead.get(i).getStringUUID()).append(';');
+					net.minecraft.core.BlockPos at = dead.get(i).blockPosition();
+					ids.append(dead.get(i).getStringUUID()).append('@').append(at.getX()).append(',').append(at.getY()).append(',').append(at.getZ()).append(';');
 				}
 				otherName = ids.toString();
 				count = Math.min(dead.size(), OUTBREAK_MOST);

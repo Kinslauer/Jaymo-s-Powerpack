@@ -13,5 +13,8 @@
   "blight_cures.jaymoskingdoms.druid.bottle": "Bring me a bottle and I'll draw the cure from that.",
   "blight_cures.jaymoskingdoms.druid.brew.0": "Gold and fire. The old way. Drink it before the cold sets in.",
   "blight_cures.jaymoskingdoms.druid.brew.1": "The witches keep this from the villages. I never would.",
-  "blight_cures.jaymoskingdoms.druid.brew.2": "There. Carry it to whoever has the grey on them."
+  "blight_cures.jaymoskingdoms.druid.brew.2": "There. Carry it to whoever has the grey on them.",
+  "research.jaymoskingdoms.topic.druid_remedies": "The Druids' Remedies",
+  "research.jaymoskingdoms.druid_remedies.learned": "You learned the druids' way with the Hollow's Cure: gilded flesh worked into a boiling cauldron, drawn off into a bottle.",
+  "message.jaymoskingdoms.blight_cures.study": "You'd need to study the druids' remedies first, with a sage or at a library."
 }

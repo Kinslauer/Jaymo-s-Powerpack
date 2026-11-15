@@ -1038,7 +1038,7 @@ public final class QuestJobs {
 	/**
 	 * Outbreak work ({@link BlightSpread}): the sick are counted as they're cured ({@link #curedSick}); the town's sick all gone
 	 * another way (turned, or cured by others) ends it with what was done, or fails it if nothing was. The blighted dead count
-	 * once burning or gone to the grave; one that rose fails it.
+	 * once gone (burned to ash, or taken to the grave) where their ground is loaded; one that rose fails it.
 	 */
 	private static void outbreak(ServerLevel level, ServerPlayer player, Quest q, BlockPos at) {
 		Quest.Objective o = q.objective();
@@ -1060,28 +1060,36 @@ public final class QuestJobs {
 			return;
 		}
 		int burned = 0;
-		for (String id : o.otherName().split(";")) {
-			if (id.isEmpty()) {
+		for (String entry : o.otherName().split(";")) {
+			int atSign = entry.indexOf('@');
+			if (atSign < 0) {
 				continue;
 			}
 			UUID uuid;
+			BlockPos where;
 			try {
-				uuid = UUID.fromString(id);
-			} catch (IllegalArgumentException e) {
+				uuid = UUID.fromString(entry.substring(0, atSign));
+				String[] xyz = entry.substring(atSign + 1).split(",");
+				where = new BlockPos(Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2]));
+			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
 				continue;
 			}
-			if (BlightSpread.rose(uuid)) {
+			if (BlightSpread.rose(level, uuid)) {
 				fail(level, player, q, "dead_rose");
 				return;
 			}
 			Entity body = level.getEntity(uuid);
-			if (body == null || body.isRemoved() || body.isOnFire()) {
-				burned++;
+			if (body == null || body.isRemoved()) {
+				// (gone: burned to ash or carried to the grave; only counted where the ground it lay on is loaded)
+				// (progress never goes back, so one whose ground isn't loaded just waits to be counted)
+				if (level.isLoaded(where) && level.isPositionEntityTicking(where)) {
+					burned++;
+				}
 			} else if (level.getGameTime() % 40 == 0) {
 				level.sendParticles(player, ParticleTypes.END_ROD, true, false, body.getX(), body.getY() + 1.0, body.getZ(), 3, 0.1, 0.5, 0.1, 0.0);
 			}
 		}
-		if (burned != o.progress()) {
+		if (burned > o.progress()) {
 			Quest next = progress(q, burned);
 			save(player, next);
 			if (next.counted()) {

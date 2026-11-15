@@ -46,7 +46,7 @@ public final class HollowBlight {
 	 */
 	static final float ARMOUR_WARD_MAX = 0.7F, FULL_ARMOUR = 30.0F;
 	/** It gets in through the wound: a blow that leaves a part bleeding is this much likelier, one that doesn't this much. */
-	static final float WOUND_TIMES = 2.0F, NO_WOUND_TIMES = 0.5F;
+	static final float WOUND_TIMES = 2.0F, NO_WOUND_TIMES = 1.0F;
 	/** A blight just taken settles in over this long (ticks); a treatment on the wound in that time clears it this often. */
 	static final int SETTLE_TICKS = 20 * 120;
 	static final float TEND_CLEARS = 0.75F;
@@ -146,8 +146,8 @@ public final class HollowBlight {
 	static final int COUGH_HEARTS = 2;
 
 	/**
-	 * {@code by} heard {@code cougher} cough the blight's cough (Andy: "This happening is why people avoid those that cough"):
-	 * they back off, a child or one who minds the Hollow runs, and they think a little less of a player they heard.
+	 * {@code by}, who remarked on {@code cougher}'s cough (Andy: "This happening is why people avoid those that cough"), backs
+	 * off and thinks a little less of a player they heard.
 	 */
 	static void heardCough(net.minecraft.world.entity.LivingEntity by, net.minecraft.world.entity.LivingEntity cougher) {
 		HollowSighting.flee(by, cougher);
