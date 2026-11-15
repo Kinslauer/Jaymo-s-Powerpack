@@ -282,6 +282,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return this.entityData.get(COLOR);
 	}
 
+	/**
+	 * (gb-realmcards) A figure drawn on a screen, never put in the world (the life story's realm page): the look of a
+	 * {@code role} in dye {@code color} (a {@link net.minecraft.world.item.DyeColor} id) of {@code climate}'s land.
+	 */
+	public void preview(int role, int color, int climate) {
+		this.entityData.set(ROLE, role);
+		this.entityData.set(COLOR, color);
+		this.entityData.set(CLIMATE, climate);
+	}
+
 	/** The land its faction's seat is in. */
 	public Climate climate() {
 		return Climate.byId(this.entityData.get(CLIMATE));

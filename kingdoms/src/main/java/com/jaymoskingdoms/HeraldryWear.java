@@ -124,11 +124,12 @@ public final class HeraldryWear {
 	}
 
 	/** What {@code f}'s knights wear in {@code slot} (helm, cuirass or sabatons), or empty for the other slots. */
-	private static ItemStack plate(Faction f, EquipmentSlot slot) {
+	private static ItemStack plate(Faction f, EquipmentSlot slot, MinecraftServer server) {
 		String finish = finish(f);
 		return switch (slot) {
 			case HEAD -> HeraldryArmour.stack(pick(HeraldryArmour.HELMS, hash(realm(f)) >>> 8), finish);
-			case CHEST -> HeraldryArmour.stack("plate_cuirass", finish);
+			// (gb-capes) a knight's cuirass carries the realm's cape
+			case CHEST -> Capes.cape(HeraldryArmour.stack("plate_cuirass", finish), Outfits.heraldry(f, server));
 			case FEET -> HeraldryArmour.stack("plate_sabatons", finish);
 			default -> ItemStack.EMPTY;
 		};
@@ -150,7 +151,7 @@ public final class HeraldryWear {
 			ruler(folk, faction);
 		} else if (role == Folk.GUARD && FrontierArmour.setOf(folk.getItemBySlot(EquipmentSlot.CHEST)) == null && knightly(folk, faction, climate)) {
 			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET}) {
-				folk.setItemSlot(slot, plate(faction, slot));
+				folk.setItemSlot(slot, plate(faction, slot, folk.level().getServer()));
 			}
 			harness(folk, faction);
 		} else if (folk.hasAttached(Harness.WORN)) {
@@ -183,7 +184,7 @@ public final class HeraldryWear {
 		if (f == null || !knightly(mob, f, Climate.at(level, f.seat()))) {
 			return stack;
 		}
-		ItemStack plate = plate(f, slot);
+		ItemStack plate = plate(f, slot, server);
 		if (plate.isEmpty()) {
 			return stack;
 		}

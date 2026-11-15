@@ -36,6 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -285,6 +286,8 @@ final class LifeStoryScreen extends Screen {
 	public void removed() {
 		// (0.7.286) the stand-in figure is no longer MCA's editor figure
 		StoryFigure.closed();
+		// (gb-realmcards) nor are the realms' people kept
+		REALM_FOLK.clear();
 		// ((0.7.474) and you're no longer drawn on the greenskin road's slider)
 		GreenskinLooks.previewTone = -1.0F;
 		// (0.7.360) Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off
@@ -335,7 +338,7 @@ final class LifeStoryScreen extends Screen {
 		if (McaCompat.LOADED) {
 			out.add(Step.GENDER);
 		}
-		for (Question q : Question.values()) {
+		for (Question q : Question.told()) {
 			// (0.7.356) the road waits for MCA's creator when it's still to come
 			if (!q.asked() || q == Question.ROAD && creatorAhead) {
 				continue;
@@ -522,6 +525,22 @@ final class LifeStoryScreen extends Screen {
 	private static List<Integer> listed(Question q) {
 		List<Integer> out = new ArrayList<>();
 		Heritage.Kind kind = bornAs();
+		if (q == Question.FAITH) {
+			// (gb-faith) every patron is open to every blood (folk of any blood hold any faith now and then), the one most of
+			// your blood pray to listed first
+			com.jaymoskingdoms.Patron usual = kind == null ? null : com.jaymoskingdoms.Faiths.startOf(kind);
+			for (int i = 0; i < q.answers().size(); i++) {
+				if (q.answers().get(i).patron() == usual) {
+					out.add(i);
+				}
+			}
+			for (int i = 0; i < q.answers().size(); i++) {
+				if (q.answers().get(i).patron() != usual) {
+					out.add(i);
+				}
+			}
+			return out;
+		}
 		for (int i = 0; i < q.answers().size(); i++) {
 			if (q == Question.ROAD || q == Question.BORN || q.answers().get(i).fits(kind)) {
 				out.add(i);
@@ -630,6 +649,9 @@ final class LifeStoryScreen extends Screen {
 		int viewTop = top() + HEADER, viewBottom = top() + panelH() - FOOTER;
 		if (mouseY < viewTop || mouseY >= viewBottom) {
 			return -1;
+		}
+		if (s.realm) {
+			return cardAt(mouseX, mouseY);
 		}
 		int rh = rowH(s);
 		for (int i = 0; i < rowCount(s); i++) {
@@ -826,7 +848,7 @@ final class LifeStoryScreen extends Screen {
 			if (draft.explicit) {
 				return out;
 			}
-			for (Question q : Question.values()) {
+			for (Question q : Question.told()) {
 				Answer a = q.asked() ? picked(q) : null;
 				if (a != null) {
 					out.add(story(q.key() + "." + a.key() + ".tale"));
@@ -984,7 +1006,15 @@ final class LifeStoryScreen extends Screen {
 			int row = rowAt(s, mx, my);
 			if (row >= 0) {
 				if (s.realm) {
-					setRealm(s.question, realms.get(row).id());
+					int id = realms.get(row).id();
+					if (id != realmOf(s.question)) {
+						// (gb-realmcards) the one picked walks over from its card to the review card
+						walkRealm = id;
+						walkAt = System.currentTimeMillis();
+						walkFromX = cardX(row) + CARD_W / 2.0F;
+						walkFromY = cardY(row) + CARD_TOP;
+					}
+					setRealm(s.question, id);
 				} else {
 					int index = listed(s.question).get(row);
 					Answer a = s.question.answers().get(index);
@@ -1149,6 +1179,10 @@ final class LifeStoryScreen extends Screen {
 			boolean last = draft.step >= steps().size() - 1;
 			String label = roadOnly() ? last ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"
 				: s.summary() ? creatorAhead ? "gui.jaymoskingdoms.story.creator" : "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next";
+			// (gb-realmcards) a realm picked, the review card is confirmed
+			if (s.realm && answered(s) && !(roadOnly() && last)) {
+				label = "gui.jaymoskingdoms.story.confirm";
+			}
 			this.next.setMessage(Component.translatable(label));
 			this.next.active = answered(s);
 		}
@@ -1555,6 +1589,10 @@ final class LifeStoryScreen extends Screen {
 
 	/** A question's answers (or the realms) down the right, the picked one marked. */
 	private void rows(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
+		if (s.realm) {
+			realmCards(graphics, s, mouseX, mouseY);
+			return;
+		}
 		int n = rowCount(s), rh = rowH(s);
 		this.contentH = n * rh;
 		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
@@ -1566,6 +1604,7 @@ final class LifeStoryScreen extends Screen {
 			boolean picked, open = true;
 			Component label;
 			ItemStack icon = ItemStack.EMPTY;
+			net.minecraft.resources.@Nullable Identifier glyph = null;
 			if (s.gender) {
 				picked = draft.gender == i;
 				label = Component.translatable("story.jaymoskingdoms.gender." + GENDERS[i]);
@@ -1580,13 +1619,17 @@ final class LifeStoryScreen extends Screen {
 				open = open(a);
 				label = Component.translatable(story(s.question.key() + "." + a.key()));
 				icon = new ItemStack(a.icon());
+				glyph = glyph(a);
 			}
 			graphics.fill(x0, ry, x1, ry + rh - 2, picked ? Ui.ROW_PICKED : i == hover && open ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW_ALT : 0x0CFFFFFF);
 			if (picked) {
 				graphics.fill(x0, ry, x0 + 2, ry + rh - 2, ACCENT);
 			}
 			int tx = x0 + 6;
-			if (icons && !icon.isEmpty()) {
+			if (icons && glyph != null) {
+				drawGlyph(graphics, glyph, x0 + 4, ry + 1);
+				tx = x0 + 23;
+			} else if (icons && !icon.isEmpty()) {
 				graphics.item(icon, x0 + 4, ry + 1);
 				tx = x0 + 23;
 			}
@@ -1653,7 +1696,7 @@ final class LifeStoryScreen extends Screen {
 	 * the start: a skipped story's is fate's ({@link #settle}, and the server's {@code LifeStory.SKIPPED}).
 	 */
 	enum Field {
-		GENDER, HERITAGE, LOOK, RAISED, RAISED_REALM, CHILDHOOD, CLASS, OPTION, AFFINITY;
+		GENDER, HERITAGE, LOOK, FAITH, RAISED, RAISED_REALM, CHILDHOOD, CLASS, OPTION, AFFINITY;
 
 		String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -1696,6 +1739,7 @@ final class LifeStoryScreen extends Screen {
 			case GENDER -> Component.translatable(draft.gender < 0 ? "gui.jaymoskingdoms.creator.pick" : "story.jaymoskingdoms.gender." + GENDERS[draft.gender]);
 			case HERITAGE -> kind == null ? Component.empty() : Component.translatable("heritage.jaymoskingdoms." + kind.key());
 			case LOOK -> kind == null ? Component.empty() : HeritageVariants.title(kind, lookIndex());
+			case FAITH -> answerName(Question.FAITH);
 			case RAISED -> answerName(Question.RAISED);
 			case RAISED_REALM -> Component.literal(realmNameOf(draft.raisedRealm));
 			case CHILDHOOD -> answerName(Question.CHILDHOOD);
@@ -1711,6 +1755,7 @@ final class LifeStoryScreen extends Screen {
 		Heritage.Kind kind = heritage();
 		Classes.PlayerClass cls = youthClass();
 		Answer a = picked(switch (f) {
+			case FAITH -> Question.FAITH;
 			case RAISED, RAISED_REALM -> Question.RAISED;
 			case CHILDHOOD -> Question.CHILDHOOD;
 			case AFFINITY -> Question.TURN;
@@ -1756,8 +1801,8 @@ final class LifeStoryScreen extends Screen {
 					say(out, HeritageVariants.langKey(kind, lookIndex()) + ".trait", good);
 				}
 			}
-			case RAISED, CHILDHOOD, AFFINITY -> {
-				Question q = f == Field.RAISED ? Question.RAISED : f == Field.CHILDHOOD ? Question.CHILDHOOD : Question.TURN;
+			case FAITH, RAISED, CHILDHOOD, AFFINITY -> {
+				Question q = f == Field.FAITH ? Question.FAITH : f == Field.RAISED ? Question.RAISED : f == Field.CHILDHOOD ? Question.CHILDHOOD : Question.TURN;
 				Answer a = picked(q);
 				if (a != null) {
 					say(out, story(q.key() + "." + a.key() + ".tale"), plain, java.util.Objects.requireNonNullElse(realmName(q), "..."));
@@ -1798,6 +1843,7 @@ final class LifeStoryScreen extends Screen {
 			case GENDER -> draft.gender = draft.gender < 0 ? dir > 0 ? 0 : 1 : 1 - draft.gender;
 			case HERITAGE -> cycleBlood(dir);
 			case LOOK -> cycleLook(dir);
+			case FAITH -> cycleAnswer(Question.FAITH, dir);
 			case RAISED -> cycleAnswer(Question.RAISED, dir);
 			case RAISED_REALM -> draft.raisedRealm = cycleRealm(draft.raisedRealm, dir);
 			case CHILDHOOD -> cycleAnswer(Question.CHILDHOOD, dir);
@@ -2282,7 +2328,7 @@ final class LifeStoryScreen extends Screen {
 	/** The whole story as one tale: each answer's line, in order. */
 	private static Component tale() {
 		var out = Component.empty();
-		for (Question q : Question.values()) {
+		for (Question q : Question.told()) {
 			Answer a = q.asked() ? picked(q) : null;
 			if (a == null) {
 				continue;
@@ -2322,7 +2368,7 @@ final class LifeStoryScreen extends Screen {
 	/** What the story makes of you, a row each. */
 	private static List<Component> results() {
 		List<Component> out = new ArrayList<>();
-		for (Question q : Question.values()) {
+		for (Question q : Question.told()) {
 			Answer a = q.asked() ? picked(q) : null;
 			if (a != null) {
 				out.addAll(gives(q, a, true));
@@ -2350,6 +2396,9 @@ final class LifeStoryScreen extends Screen {
 		}
 		if (a.realm() && q == Question.RAISED) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.noble"));
+		}
+		if (a.patron() != null) {
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.faith", a.patron().named()));
 		}
 		if (a.key().equals("merchants")) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.purse"));
@@ -2410,8 +2459,14 @@ final class LifeStoryScreen extends Screen {
 		int x = left(), y = top(), w = TELL_W;
 		Component name;
 		ItemStack icon = ItemStack.EMPTY;
+		net.minecraft.resources.@Nullable Identifier glyph = null;
 		List<Component> lines = new ArrayList<>();
 		List<Component> good = new ArrayList<>();
+		if (s.realm) {
+			// (gb-realmcards) the realm page's left is the review card the one picked walks over to
+			reviewCard(graphics, s, mouseX, mouseY);
+			return;
+		}
 		if (s.gender) {
 			int row = rowAt(s, mouseX, mouseY);
 			int g = row >= 0 ? row : draft.gender;
@@ -2448,6 +2503,7 @@ final class LifeStoryScreen extends Screen {
 				lines.add(Component.translatable("gui.jaymoskingdoms.story.lead").withColor(Ui.DIM));
 			} else {
 				icon = new ItemStack(a.icon());
+				glyph = glyph(a);
 				name = Component.translatable(story(s.question.key() + "." + a.key()));
 				// (0.7.360) the option's short line; its whole tale is told on the last page
 				Component line = shortLine(s.question, a);
@@ -2463,7 +2519,10 @@ final class LifeStoryScreen extends Screen {
 		int ty = y + 8;
 		Ui.line(graphics, this.font, this.title, x + 8, ty, w - 16, Ui.DIM);
 		ty += 14;
-		if (!icon.isEmpty()) {
+		if (glyph != null) {
+			Ui.well(graphics, x + 8, ty, 20, 20);
+			drawGlyph(graphics, glyph, x + 10, ty + 2);
+		} else if (!icon.isEmpty()) {
 			Ui.well(graphics, x + 8, ty, 20, 20);
 			graphics.item(icon, x + 10, ty + 2);
 		}
@@ -2576,11 +2635,12 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		List<String> scenes = new ArrayList<>();
-		for (Question q : Question.values()) {
+		List<Question> told = Question.told();
+		for (Question q : told) {
 			if (!q.asked()) {
 				continue;
 			}
-			if (s.question != null && q.ordinal() > s.question.ordinal()) {
+			if (s.question != null && told.indexOf(q) > told.indexOf(s.question)) {
 				break;
 			}
 			Answer a = q == s.question ? here : picked(q);
@@ -2615,6 +2675,206 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		StoryFigure.draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, draft.gender);
+	}
+
+	// ---- the realm page's people (gb-realmcards) ----------------------------------------------------------------------
+
+	/**
+	 * A realm's card on the realm page: its size, and where the figure stands in it; how long the one picked takes to walk
+	 * over to the review card (ms), and how long one stride of it takes (ms).
+	 */
+	static final int CARD_W = 58, CARD_H = 82, CARD_TOP = 6, CARD_FOOT = 13;
+	static final long WALK_MS = 1200L, STRIDE_MS = 50L;
+	/** The review card's figure: its height at most, and the least room it is drawn in. */
+	static final int REVIEW_FIGURE_H = 84, REVIEW_FIGURE_MIN = 40;
+	/** A figure of each realm's people, made on the client to be drawn (never in the world), by realm id. */
+	private static final java.util.Map<Integer, com.jaymoskingdoms.Folk> REALM_FOLK = new java.util.HashMap<>();
+	/** The realm whose person is walking over, when they set off (ms), and from where (the middle of their card's top). */
+	private static int walkRealm = -1;
+	private static long walkAt, lastStride;
+	private static float walkFromX, walkFromY;
+
+	private int cardCols() {
+		return Math.max(1, (paneW() - 14) / CARD_W);
+	}
+
+	private int cardX(int i) {
+		return paneX() + 6 + i % cardCols() * CARD_W;
+	}
+
+	private int cardY(int i) {
+		return top() + HEADER + i / cardCols() * CARD_H - this.scroll;
+	}
+
+	private int cardAt(int mouseX, int mouseY) {
+		for (int i = 0; i < realms.size(); i++) {
+			if (Ui.over(mouseX, mouseY, cardX(i) + 1, cardY(i) + 1, CARD_W - 2, CARD_H - 2)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private static LifeStory.@Nullable Realm realmById(int id) {
+		for (LifeStory.Realm r : realms) {
+			if (r.id() == id) {
+				return r;
+			}
+		}
+		return null;
+	}
+
+	private static int realmRgb(LifeStory.Realm r) {
+		return 0xFF000000 | net.minecraft.world.item.DyeColor.byId(r.colour()).getTextureDiffuseColor();
+	}
+
+	/** A person of realm {@code r} in its dress, made once (a client-side figure, never in the world). */
+	private static com.jaymoskingdoms.@Nullable Folk realmFolk(LifeStory.Realm r) {
+		Minecraft minecraft = Minecraft.getInstance();
+		com.jaymoskingdoms.Folk folk = REALM_FOLK.get(r.id());
+		if (folk != null && folk.level() == minecraft.level) {
+			return folk;
+		}
+		if (minecraft.level == null) {
+			return null;
+		}
+		folk = com.jaymoskingdoms.JaymosKingdoms.FOLK.create(minecraft.level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		if (folk == null) {
+			return null;
+		}
+		folk.preview(com.jaymoskingdoms.Folk.GUARD, r.colour(), r.climate());
+		net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+			net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+			net.minecraft.world.entity.EquipmentSlot.OFFHAND};
+		for (int i = 0; i < slots.length && i < r.dress().size(); i++) {
+			try {
+				folk.setItemSlot(slots[i], r.dress().get(i).copy());
+			} catch (RuntimeException e) {
+				// (another mod's equip hook; the figure is dressed all the same)
+			}
+		}
+		REALM_FOLK.put(r.id(), folk);
+		return folk;
+	}
+
+	/** {@code r}'s person in the box, looking toward ({@code lookX}, {@code lookY}); striding along while {@code walking}. */
+	private static void drawRealmFolk(GuiGraphicsExtractor graphics, LifeStory.Realm r, float x0, float y0, float x1, float y1, boolean walking,
+		float lookX, float lookY) {
+		com.jaymoskingdoms.Folk folk = realmFolk(r);
+		if (folk == null || y1 - y0 < 8) {
+			return;
+		}
+		long now = System.currentTimeMillis();
+		if (walking && now - lastStride >= STRIDE_MS) {
+			lastStride = now;
+			folk.walkAnimation.update(StoryFigure.STRIDE, 1.0F, 1.0F);
+		}
+		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE));
+		net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, (int)x0, (int)y0, (int)x1, (int)y1,
+			size, 0.0625F, lookX, lookY, folk);
+	}
+
+	/** The realm page: a card for each realm with one of its people in its dress; the one picked has walked off its card. */
+	private void realmCards(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
+		int n = realms.size(), cols = cardCols();
+		this.contentH = (n + cols - 1) / cols * CARD_H;
+		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
+		int hover = cardAt(mouseX, mouseY), picked = realmOf(s.question);
+		int viewTop = top() + HEADER, viewBottom = top() + panelH() - FOOTER;
+		for (int i = 0; i < n; i++) {
+			LifeStory.Realm r = realms.get(i);
+			int x = cardX(i), y = cardY(i);
+			if (y + CARD_H < viewTop || y > viewBottom) {
+				continue;
+			}
+			boolean mine = r.id() == picked;
+			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + CARD_H - 1, mine ? Ui.ROW_PICKED : i == hover ? Ui.ROW_HOVER : Ui.ROW_ALT);
+			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + 3, realmRgb(r));
+			if (!mine) {
+				drawRealmFolk(graphics, r, x + 4, y + CARD_TOP, x + CARD_W - 4, y + CARD_H - CARD_FOOT, false, mouseX, mouseY);
+			}
+			Ui.line(graphics, this.font, Component.literal(r.name()), x + 4, y + CARD_H - CARD_FOOT + 2, CARD_W - 8, mine ? ACCENT : i == hover ? Ui.TEXT : Ui.DIM);
+		}
+	}
+
+	/**
+	 * The realm page's left: the review card. The person of the realm picked walks over from its card and stands on it, over
+	 * your stats as the story has them so far, the realm, and the faith you grew up in; Next (Confirm) goes on with it.
+	 */
+	private void reviewCard(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
+		int x = left(), y = top(), w = TELL_W;
+		int ty = y + 8;
+		Ui.line(graphics, this.font, this.title, x + 8, ty, w - 16, Ui.DIM);
+		ty += 14;
+		LifeStory.Realm r = realmById(realmOf(s.question));
+		Component name = r == null ? Component.translatable("story.jaymoskingdoms.realm.title") : Component.literal(r.name());
+		Ui.line(graphics, this.font, name, x + 9, ty, w - 18, r == null ? ACCENT : realmRgb(r));
+		ty += 12;
+		List<Component> lines = new ArrayList<>();
+		lines.add(Component.translatable("story.jaymoskingdoms.realm." + keyOf(picked(s.question)) + ".desc"));
+		List<Component> good = new ArrayList<>();
+		java.util.Map<com.jaymoskingdoms.Stats.Stat, Integer> points = new java.util.EnumMap<>(com.jaymoskingdoms.Stats.Stat.class);
+		int free = 0;
+		for (Question q : List.of(Question.RAISED, Question.CHILDHOOD)) {
+			Answer a = picked(q);
+			if (a != null && a.stat() != null) {
+				points.merge(a.stat(), 1, Integer::sum);
+			}
+			if (a != null && a.freePoint()) {
+				free++;
+			}
+		}
+		for (var e : points.entrySet()) {
+			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + e.getKey().key()),
+				e.getValue() * com.jaymoskingdoms.Stats.STEP));
+		}
+		if (free > 0) {
+			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.free", free * com.jaymoskingdoms.Stats.STEP));
+		}
+		Answer faith = picked(Question.FAITH);
+		com.jaymoskingdoms.Patron patron = faith == null ? null : faith.patron();
+		if (r != null) {
+			good.add(Component.translatable("gui.jaymoskingdoms.story.review.realm", r.name()));
+		}
+		int bottom = y + panelH() - FOOTER - 2;
+		// the faith, its glyph beside it, at the foot of the card
+		net.minecraft.resources.Identifier faithGlyph = faith == null ? null : glyph(faith);
+		if (patron != null && faithGlyph != null) {
+			bottom -= 20;
+			Ui.well(graphics, x + 8, bottom + 1, 18, 18);
+			drawGlyph(graphics, faithGlyph, x + 9, bottom + 2);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.story.review.faith", patron.named()), x + 30, bottom + 6, w - 38,
+				0xFF000000 | patron.colour);
+		}
+		int textH = (good.size() + 4) * Ui.LINE + 8;
+		int figureH = Math.min(REVIEW_FIGURE_H, bottom - ty - textH);
+		if (r != null && figureH >= REVIEW_FIGURE_MIN) {
+			float fx0 = x + 8, fx1 = x + w - 8, fy0 = ty;
+			long since = System.currentTimeMillis() - walkAt;
+			float t = r.id() == walkRealm ? Mth.clamp(since / (float)WALK_MS, 0.0F, 1.0F) : 1.0F;
+			float e = t * t * (3.0F - 2.0F * t);
+			float cardH = CARD_H - CARD_TOP - CARD_FOOT, cardHalf = (CARD_W - 8) / 2.0F;
+			float cx = Mth.lerp(e, walkFromX, (fx0 + fx1) / 2.0F), top = Mth.lerp(e, walkFromY, fy0);
+			float h = Mth.lerp(e, cardH, figureH), half = Mth.lerp(e, cardHalf, (fx1 - fx0) / 2.0F);
+			boolean walking = t < 1.0F;
+			// walking over, it faces the way it goes; there, it looks about at you
+			float lookX = walking ? cx + Math.signum((fx0 + fx1) / 2.0F - walkFromX) * 200.0F : mouseX;
+			float lookY = walking ? top + h * 0.3F : mouseY;
+			drawRealmFolk(graphics, r, cx - half, top, cx + half, top + h, walking, lookX, lookY);
+			ty += figureH + 4;
+		}
+		ty += 2;
+		block(graphics, lines, good, x, ty, w, bottom);
+	}
+
+	/** (gb-faith) A faith answer's own picture: its patron's shrine glyph; null for any other answer. */
+	private static net.minecraft.resources.@Nullable Identifier glyph(Answer a) {
+		com.jaymoskingdoms.Patron p = a.patron();
+		return p == null ? null : com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + p.key + ".png");
+	}
+
+	private static void drawGlyph(GuiGraphicsExtractor graphics, net.minecraft.resources.Identifier glyph, int x, int y) {
+		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, 16, 16, 16, 16, 16, 16);
 	}
 
 	private static String keyOf(@Nullable Answer a) {

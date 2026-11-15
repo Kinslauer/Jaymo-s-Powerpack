@@ -407,6 +407,16 @@ public final class LifeStory {
 			return new Answer(key, icon, null, null, false, null, power, List.of(), null, false);
 		}
 
+		/** (gb-faith) Who you grew up praying to: one of the eight patrons, its key the answer's. */
+		static Answer faith(Patron patron, Item icon) {
+			return new Answer(patron.key, icon, null, null, false, null, "", List.of(), null, false);
+		}
+
+		/** (gb-faith) The patron a faith answer names, or null for any other answer. */
+		public @Nullable Patron patron() {
+			return Question.FAITH.answers.contains(this) ? Patron.byKey(this.key) : null;
+		}
+
 		static Answer road(Start start, Item icon) {
 			return new Answer(start.name().toLowerCase(Locale.ROOT), icon, null, null, false, null, "", List.of(), start, start.realm);
 		}
@@ -461,9 +471,19 @@ public final class LifeStory {
 		}
 	}
 
-	/** The six questions, in order, and their answers. */
+	/**
+	 * The questions and their answers. Saved by ordinal in {@link #STORY}, so (gb-faith) the faith, asked second, is last
+	 * here and kept apart ({@link #FAITH}); {@link #told} is the order the pages come in.
+	 */
 	public enum Question {
-		BORN, RAISED, CHILDHOOD, YOUTH, TURN, ROAD;
+		BORN, RAISED, CHILDHOOD, YOUTH, TURN, ROAD, FAITH;
+
+		private static final List<Question> TOLD = List.of(BORN, FAITH, RAISED, CHILDHOOD, YOUTH, TURN, ROAD);
+
+		/** (gb-faith) The questions in the order they are asked: the faith straight after the birthplace. */
+		public static List<Question> told() {
+			return TOLD;
+		}
 
 		private final List<Answer> answers = new ArrayList<>();
 
@@ -602,6 +622,16 @@ public final class LifeStory {
 				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
 				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
+			// (gb-faith) the eight patrons, each drawn by its own shrine glyph on the page (the item is the fallback picture)
+			FAITH.answers.addAll(List.of(
+				Answer.faith(Patron.HEARTHKEEPER, Items.CAMPFIRE),
+				Answer.faith(Patron.ANVIL_FATHER, Items.ANVIL),
+				Answer.faith(Patron.DEEP_MOTHER, Items.NAUTILUS_SHELL),
+				Answer.faith(Patron.GREEN_HUNTSMAN, Items.BOW),
+				Answer.faith(Patron.LANTERN_WARDEN, Items.LANTERN),
+				Answer.faith(Patron.CROWNED_SUN, Items.SUNFLOWER),
+				Answer.faith(Patron.ASH_WHISPERER, Items.CHARCOAL),
+				Answer.faith(Patron.TRUTH, Items.WRITABLE_BOOK)));
 		}
 	}
 
@@ -612,6 +642,14 @@ public final class LifeStory {
 	public static final AttachmentType<List<String>> STORY = AttachmentRegistry.create(JaymosKingdoms.id("life_story"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath()
 			.syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (gb-faith) The patron a player grew up praying to (its key), from the life story's faith page: they start sworn to it
+	 * ({@link Patrons#storyStart}). Kept apart from {@link #STORY}, whose places after the road hold other things. Saved,
+	 * kept through death, synced to its own player (the road told after MCA's creator reads it back).
+	 */
+	public static final AttachmentType<String> FAITH = AttachmentRegistry.create(JaymosKingdoms.id("story_faith"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
 
 	/**
 	 * (0.7.304) The road a told story still owes its player: "START|realm id|calling", till they're put at that start.
@@ -677,8 +715,44 @@ public final class LifeStory {
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
 	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
 
-	/** A realm a player can name in their story: its id and name. */
-	public record Realm(int id, String name) {
+	/**
+	 * A realm a player can name in their story: its id and name, and (gb-realmcards) one of its people as the realm page
+	 * shows them: the land they dress for ({@link Climate} ordinal), the realm's colour (a dye id), and a guard's gear in its
+	 * arms and its land's dress (head, chest, legs, feet, main hand, off hand).
+	 */
+	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress) {
+	}
+
+	/** (gb-realmcards) A realm's person as last dressed, by faction id: dressed once a server run (it draws gear at random). */
+	private static final java.util.Map<Integer, Realm> DRESSED = new java.util.HashMap<>();
+	private static final EquipmentSlot[] DRESS_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET,
+		EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
+
+	/** (gb-realmcards) {@code f} as the realm page shows it: one of its guards dressed as its folk are (never put in the world). */
+	private static Realm dressed(ServerLevel level, Faction f) {
+		Realm known = DRESSED.get(f.id());
+		if (known != null && known.name().equals(f.name())) {
+			return known;
+		}
+		Climate climate = Climate.at(level, f.seat());
+		int colour = f.styleColor(level.getServer()).getId();
+		List<ItemStack> dress = new ArrayList<>();
+		try {
+			Folk folk = JaymosKingdoms.FOLK.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+			if (folk != null) {
+				folk.setup(Folk.GUARD, f, f.seat(), 4);
+				for (EquipmentSlot slot : DRESS_SLOTS) {
+					dress.add(folk.getItemBySlot(slot).copy());
+				}
+				folk.discard();
+			}
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("A realm's figure for the life story couldn't be dressed", e);
+			dress.clear();
+		}
+		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress));
+		DRESSED.put(f.id(), r);
+		return r;
 	}
 
 	/**
@@ -699,6 +773,9 @@ public final class LifeStory {
 				for (Realm r : p.realms) {
 					buf.writeVarInt(r.id);
 					buf.writeUtf(r.name);
+					buf.writeVarInt(r.climate);
+					buf.writeInt(r.colour);
+					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.dress);
 				}
 				buf.writeVarInt(p.mates.size());
 				for (Mate m : p.mates) {
@@ -719,7 +796,7 @@ public final class LifeStory {
 				int n = buf.readVarInt();
 				List<Realm> realms = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
-					realms.add(new Realm(buf.readVarInt(), buf.readUtf()));
+					realms.add(new Realm(buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readInt(), List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf))));
 				}
 				int m = buf.readVarInt();
 				List<Mate> mates = new ArrayList<>(m);
@@ -833,6 +910,7 @@ public final class LifeStory {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::hunt);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			HUNTS.clear();
+			DRESSED.clear();
 			DEPARTED.clear();
 			ROAD_ASKED.clear();
 			LANDINGS.clear();
@@ -868,6 +946,12 @@ public final class LifeStory {
 		ServerPlayNetworking.registerGlobalReceiver(Road.TYPE, (payload, context) -> road(context.player(), payload));
 	}
 
+	/** (gb-faith) The patron {@code player}'s story says they grew up praying to, or null (no faith page in their story). */
+	public static @Nullable Patron faithOf(Player player) {
+		Answer a = answer(player, Question.FAITH);
+		return a == null ? null : a.patron();
+	}
+
 	/** Whether Jaymo's Powers is here (question 5 is asked, and its answer is an affinity). */
 	public static boolean powers() {
 		return FabricLoader.getInstance().isModLoaded("jaymospowers");
@@ -879,6 +963,15 @@ public final class LifeStory {
 
 	/** {@code player}'s answer to {@code q}, or null (none, or not asked). */
 	public static @Nullable Answer answer(Player player, Question q) {
+		if (q == Question.FAITH) {
+			String faith = player.getAttached(FAITH);
+			for (Answer a : q.answers) {
+				if (a.key.equals(faith)) {
+					return a;
+				}
+			}
+			return null;
+		}
 		List<String> story = of(player);
 		if (story == null || story.size() <= q.ordinal()) {
 			return null;
@@ -1004,7 +1097,7 @@ public final class LifeStory {
 		List<Realm> realms = new ArrayList<>();
 		for (Faction f : Factions.all(server)) {
 			if (f.type().isRealm() && !f.fallen()) {
-				realms.add(new Realm(f.id(), f.name()));
+				realms.add(dressed(Factions.level(server), f));
 			}
 		}
 		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player), mates(player),
@@ -1068,7 +1161,8 @@ public final class LifeStory {
 		}
 		MinecraftServer server = player.level().getServer();
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
-			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers());
+			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers()),
+			faith = at(Question.FAITH, live.answers());
 		// (0.7.356) with MCA's creator still to come, the road is told after it ({@link #road})
 		boolean later = road == null && McaCompat.destinyPending(player);
 		if (born == null || raised == null || child == null || youth == null || road == null && !later || powers() && turn == null
@@ -1130,6 +1224,10 @@ public final class LifeStory {
 		}
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road == null ? "" : road.key));
+		// (gb-faith) who they grew up praying to: sworn to it from the start (Patrons.storyStart, below)
+		if (faith != null) {
+			player.setAttached(FAITH, faith.key);
+		}
 		// (Powers' Motion patch 1) the temperament the story makes, fixed for good; told once the road is chosen too
 		PlayerTemperaments.settle(player, road != null);
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
@@ -3059,6 +3157,7 @@ public final class LifeStory {
 	 */
 	static void unmake(ServerPlayer p) {
 		p.removeAttached(STORY);
+		p.removeAttached(FAITH);
 		p.removeAttached(ROAD);
 		p.removeAttached(GENDER);
 		p.removeAttached(CALLING);
