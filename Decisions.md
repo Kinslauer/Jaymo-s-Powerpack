@@ -636,3 +636,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, future-Mosslorn thread): asked to change the Chrono future's Los Perrito map to Mosslorn (milkshake_mp3, linked via the Petrichor Mosslorn Official modpack). Map is ARR and asks to be contacted before modpack use, so the swap PR waits on the author's OK.
 
 - 2026-11-15 (shipwright thread): Andy asked for warship fleets: the largest ship for the richer kingdoms, every vassal's ships in its overlord's fleet, "only pirates raze ships and enslave their victims". On the card he chose "Spare and take prisoners": navies still sink pirates but pull survivors out and jail them at their port; pirates sink ships and drag survivors to their cove in chains.
+- 2026-11-15 (Andy, future-Mosslorn thread): chose Both: our own moss overgrowth on Los Perrito now, Mosslorn swap later if the author agrees. Approved the lore paragraph "The moss".
