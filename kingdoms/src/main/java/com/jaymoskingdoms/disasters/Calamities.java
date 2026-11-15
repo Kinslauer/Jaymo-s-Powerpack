@@ -773,7 +773,8 @@ public final class Calamities {
 			return false;
 		}
 		FIRES.add(fire);
-		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m);
+		// a great disaster's own fire: no word in chat
+		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m, true);
 		return true;
 	}
 
@@ -887,6 +888,11 @@ public final class Calamities {
 	/** The river, lake or sea nearest {@code near} rises, as strong as {@code m} ({@link Magnitude}; 0: by chance).
 	 * Whether there was one. */
 	static boolean flood(ServerLevel level, BlockPos near, RandomSource random, int m) {
+		return flood(level, near, random, m, false);
+	}
+
+	/** The same, {@code quiet}: no word in chat (a hurricane's landfall, the world's ending; the news board carries it). */
+	static boolean flood(ServerLevel level, BlockPos near, RandomSource random, int m, boolean quiet) {
 		if (FLOODS.size() >= MOST_FLOODS) {
 			return false;
 		}
@@ -931,8 +937,10 @@ public final class Calamities {
 		}
 		Flood flood = new Flood(center, level.getGameRules().get(Disasters.DISASTER_DAMAGE), m);
 		FLOODS.add(flood);
-		news(level, center.getX(), center.getZ(), "disaster.jaymoskingdoms.flood");
-		com.jaymoskingdoms.DisasterRelief.struck(level, center.getX(), center.getZ(), flood.radius + 20.0, "flood", m);
+		if (!quiet) {
+			news(level, center.getX(), center.getZ(), "disaster.jaymoskingdoms.flood");
+		}
+		com.jaymoskingdoms.DisasterRelief.struck(level, center.getX(), center.getZ(), flood.radius + 20.0, "flood", m, quiet);
 		return true;
 	}
 

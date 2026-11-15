@@ -131,7 +131,7 @@ public final class Bolides {
 		if (!damage) {
 			return false;
 		}
-		int share = BlockBudget.share();
+		int share = BlockBudget.share(BlockBudget.Of.STONE);
 		for (int i = 0; i < share && !b.dig.isEmpty(); i++) {
 			BlockPos p = b.dig.removeFirst();
 			if (!Loaded.made(level, p)) {
@@ -146,7 +146,7 @@ public final class Bolides {
 			if (state == laid || state.isAir() && laid.isAir()) {
 				continue;
 			}
-			if (!BlockBudget.set(level, p, laid)) {
+			if (!BlockBudget.set(BlockBudget.Of.STONE, level, p, laid)) {
 				b.dig.addFirst(p);
 				break;
 			}
@@ -234,7 +234,7 @@ public final class Bolides {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			BlockState fire = BaseFireBlock.getState(level, at);
 			if (level.getBlockState(at).isAir() && fire.canSurvive(level, at)) {
-				BlockBudget.set(level, at, fire);
+				BlockBudget.set(BlockBudget.Of.STONE, level, at, fire);
 			}
 		}
 	}

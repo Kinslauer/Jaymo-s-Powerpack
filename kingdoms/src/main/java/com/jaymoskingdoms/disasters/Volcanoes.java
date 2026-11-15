@@ -87,15 +87,22 @@ public final class Volcanoes {
 
 	static final int SWELL = 0, ERUPT = 1, CALDERA = 2, COOL = 3;
 
-	/** A volcano as saved: where its summit is, its strength, what it's doing and since when, and how long it swells. */
-	record Saved(BlockPos summit, int magnitude, int phase, long since, int swell) {
+	/**
+	 * A volcano as saved: where its summit is, its strength, what it's doing and since when, how long it swells, and
+	 * every lava source it has put down that hasn't cooled yet (it stays awake until they all have).
+	 */
+	record Saved(BlockPos summit, int magnitude, int phase, long since, int swell, List<BlockPos> sources) {
 		static final Codec<Saved> CODEC = RecordCodecBuilder.create(i -> i.group(
 			BlockPos.CODEC.fieldOf("summit").forGetter(Saved::summit),
 			Codec.INT.fieldOf("magnitude").forGetter(Saved::magnitude),
 			Codec.INT.fieldOf("phase").forGetter(Saved::phase),
 			Codec.LONG.fieldOf("since").forGetter(Saved::since),
-			Codec.INT.fieldOf("swell").forGetter(Saved::swell)).apply(i, Saved::new));
+			Codec.INT.fieldOf("swell").forGetter(Saved::swell),
+			BlockPos.CODEC.listOf().optionalFieldOf("sources", List.of()).forGetter(Saved::sources)).apply(i, Saved::new));
 	}
+
+	/** Lava sources cooled a tick at most, once cooling (only where their land is loaded; the rest wait for it). */
+	static final int COOL_SOURCES = 64;
 
 	static final AttachmentType<List<Saved>> SAVED = AttachmentRegistry.create(JaymosKingdoms.id("volcanoes"), b -> b.persistent(Saved.CODEC.listOf()));
 
@@ -112,6 +119,9 @@ public final class Volcanoes {
 		final ArrayDeque<BlockPos> caldera = new ArrayDeque<>();
 		final java.util.Set<BlockPos> lake = new java.util.HashSet<>();
 		boolean calderaLaid;
+		/** The lava sources it put down, still to cool; whether that changed since it was saved. */
+		final java.util.Set<BlockPos> sources = new java.util.LinkedHashSet<>();
+		boolean dirty;
 
 		Volcano(Saved s) {
 			this.summit = s.summit();
@@ -119,10 +129,16 @@ public final class Volcanoes {
 			this.phase = s.phase();
 			this.since = s.since();
 			this.swell = s.swell();
+			this.sources.addAll(s.sources());
 		}
 
 		Saved saved() {
-			return new Saved(summit, magnitude, phase, since, swell);
+			return new Saved(summit, magnitude, phase, since, swell, List.copyOf(sources));
+		}
+
+		void lava(BlockPos at) {
+			sources.add(at.immutable());
+			dirty = true;
 		}
 	}
 
@@ -152,9 +168,15 @@ public final class Volcanoes {
 		loaded = false;
 	}
 
-	/** Everything stops at once (an op cleared the skies): the eruptions end where they stand. */
+	/** Everything stops at once (an op cleared the skies): the eruptions end where they stand, and their lava cools. */
 	static void calm(ServerLevel level) {
-		AWAKE.clear();
+		load(level);
+		for (Volcano v : AWAKE) {
+			v.phase = COOL;
+			v.since = level.getGameTime() - COOL_TICKS;
+			v.flows.clear();
+			v.caldera.clear();
+		}
 		save(level);
 	}
 
@@ -245,7 +267,8 @@ public final class Volcanoes {
 	/** The peak at {@code summit} wakes. */
 	static boolean wake(ServerLevel level, BlockPos summit, int m, boolean quick) {
 		load(level);
-		if (AWAKE.size() >= MOST) {
+		// one only cooling (its lava waiting for its land to load) doesn't count
+		if (AWAKE.stream().filter(v -> v.phase != COOL).count() >= MOST) {
 			return false;
 		}
 		for (Volcano v : AWAKE) {
@@ -257,7 +280,7 @@ public final class Volcanoes {
 			m = Magnitude.roll(level, level.getRandom(), Magnitude.MODERATE);
 		}
 		int swell = quick ? QUICK_SWELL : SWELL_PER_MAGNITUDE * m;
-		AWAKE.add(new Volcano(new Saved(summit.immutable(), m, SWELL, level.getGameTime(), swell)));
+		AWAKE.add(new Volcano(new Saved(summit.immutable(), m, SWELL, level.getGameTime(), swell, List.of())));
 		save(level);
 		return true;
 	}
@@ -324,7 +347,9 @@ public final class Volcanoes {
 					if (near && damage) {
 						cool(level, v, random);
 					}
-					if (age >= COOL_TICKS) {
+					// its own lava cools wherever its land is loaded, someone near or not
+					coolSources(level, v);
+					if (age >= COOL_TICKS && v.sources.isEmpty()) {
 						if (v.ash != null) {
 							v.ash.life = Math.min(v.ash.life, v.ash.age + Calamities.GATHER_TICKS);
 						}
@@ -333,9 +358,31 @@ public final class Volcanoes {
 					}
 				}
 			}
+			changed |= v.dirty;
+			v.dirty = false;
 		}
 		if (changed) {
 			save(level);
+		}
+	}
+
+	/** The lava sources {@code v} put down, those on loaded land, set to obsidian (a few a tick). */
+	private static void coolSources(ServerLevel level, Volcano v) {
+		int n = 0;
+		for (java.util.Iterator<BlockPos> it = v.sources.iterator(); it.hasNext() && n < COOL_SOURCES; ) {
+			BlockPos p = it.next();
+			if (!Loaded.made(level, p)) {
+				continue;
+			}
+			net.minecraft.world.level.material.FluidState fluid = level.getFluidState(p);
+			if (fluid.is(net.minecraft.tags.FluidTags.LAVA)) {
+				if (!BlockBudget.set(BlockBudget.Of.VOLCANO, level, p, fluid.isSource() ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.BASALT.defaultBlockState())) {
+					return;
+				}
+				n++;
+			}
+			it.remove();
+			v.dirty = true;
 		}
 	}
 
@@ -374,7 +421,7 @@ public final class Volcanoes {
 				v.summit.offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4)).below();
 			BlockState was = level.getBlockState(at);
 			if ((was.is(BlockTags.BASE_STONE_OVERWORLD) || was.is(BlockTags.DIRT) || was.is(BlockTags.SAND) || was.is(BlockTags.TERRACOTTA))
-				&& BlockBudget.set(level, at, Blocks.MAGMA_BLOCK.defaultBlockState())) {
+				&& BlockBudget.set(BlockBudget.Of.VOLCANO, level, at, Blocks.MAGMA_BLOCK.defaultBlockState())) {
 				v.magma++;
 				level.playSound(null, at, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 1.0F, 0.6F);
 			}
@@ -423,8 +470,9 @@ public final class Volcanoes {
 			// lava wells over the summit and runs down
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
 				v.summit.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2));
-			if (level.getBlockState(at).canBeReplaced() && BlockBudget.set(level, at, Blocks.LAVA.defaultBlockState())) {
+			if (level.getBlockState(at).canBeReplaced() && BlockBudget.set(BlockBudget.Of.VOLCANO, level, at, Blocks.LAVA.defaultBlockState())) {
 				v.lava++;
+				v.lava(at);
 			}
 		}
 		if (v.rocks < ROCKS_PER_MAGNITUDE * v.magnitude && random.nextFloat() < ROCK_CHANCE * v.magnitude) {
@@ -451,7 +499,7 @@ public final class Volcanoes {
 	/** A rock thrown out of the summit: a real falling stone that lands where it lands. */
 	private static void throwRock(ServerLevel level, Volcano v, RandomSource random) {
 		BlockPos at = v.summit.above(3);
-		if (!level.getBlockState(at).isAir() || !BlockBudget.spend()) {
+		if (!level.getBlockState(at).isAir() || !BlockBudget.spend(BlockBudget.Of.VOLCANO)) {
 			return;
 		}
 		BlockState rock = switch (random.nextInt(3)) {
@@ -523,13 +571,13 @@ public final class Volcanoes {
 				if ((was.isAir() || was.is(BlockTags.REPLACEABLE)) && was.getFluidState().isEmpty()) {
 					BlockState fire = BaseFireBlock.getState(level, top);
 					if (fire.canSurvive(level, top)) {
-						BlockBudget.set(level, top, fire);
+						BlockBudget.set(BlockBudget.Of.VOLCANO, level, top, fire);
 					}
 				}
 				// leaves and grass it passes are scorched off
 				BlockState under = level.getBlockState(top.below());
 				if (under.is(Blocks.GRASS_BLOCK)) {
-					BlockBudget.set(level, top.below(), Blocks.COARSE_DIRT.defaultBlockState());
+					BlockBudget.set(BlockBudget.Of.VOLCANO, level, top.below(), Blocks.COARSE_DIRT.defaultBlockState());
 				}
 			}
 		}
@@ -549,20 +597,20 @@ public final class Volcanoes {
 		if (here.is(Disasters.ASH_LAYER)) {
 			int layers = here.getValue(SnowLayerBlock.LAYERS);
 			if (layers < deepest) {
-				BlockBudget.set(level, top, here.setValue(SnowLayerBlock.LAYERS, layers + 1));
+				BlockBudget.set(BlockBudget.Of.VOLCANO, level, top, here.setValue(SnowLayerBlock.LAYERS, layers + 1));
 			}
 			return;
 		}
 		if (under.is(Disasters.ASH_LAYER)) {
 			int layers = under.getValue(SnowLayerBlock.LAYERS);
 			if (layers < deepest) {
-				BlockBudget.set(level, top.below(), under.setValue(SnowLayerBlock.LAYERS, layers + 1));
+				BlockBudget.set(BlockBudget.Of.VOLCANO, level, top.below(), under.setValue(SnowLayerBlock.LAYERS, layers + 1));
 			}
 			return;
 		}
 		BlockState fresh = Disasters.ASH_LAYER.defaultBlockState();
 		if ((here.isAir() || here.is(BlockTags.REPLACEABLE) && !here.is(Blocks.WATER)) && here.getFluidState().isEmpty() && fresh.canSurvive(level, top)) {
-			BlockBudget.set(level, top, fresh);
+			BlockBudget.set(BlockBudget.Of.VOLCANO, level, top, fresh);
 		}
 	}
 
@@ -598,15 +646,17 @@ public final class Volcanoes {
 			level.playSound(null, v.summit, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 12.0F, 0.25F);
 			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, v.summit.getX() + 0.5, v.summit.getY(), v.summit.getZ() + 0.5, 2, radius, 1.0, radius, 0.0);
 		}
-		int share = BlockBudget.share();
+		int share = BlockBudget.share(BlockBudget.Of.VOLCANO);
 		for (int i = 0; i < share && !v.caldera.isEmpty(); i++) {
 			BlockPos p = v.caldera.removeFirst();
 			BlockState state = level.getBlockState(p);
 			if (state.isAir() || state.hasBlockEntity() || state.is(BlockTags.FEATURES_CANNOT_REPLACE)) {
 				continue;
 			}
-			boolean lake = v.lake.contains(p) && !level.getBlockState(p.below()).isAir();
-			BlockBudget.set(level, p, lake && level.getRandom().nextInt(3) > 0 ? Blocks.LAVA.defaultBlockState() : Blocks.AIR.defaultBlockState());
+			boolean lake = v.lake.contains(p) && !level.getBlockState(p.below()).isAir() && level.getRandom().nextInt(3) > 0;
+			if (BlockBudget.set(BlockBudget.Of.VOLCANO, level, p, lake ? Blocks.LAVA.defaultBlockState() : Blocks.AIR.defaultBlockState()) && lake) {
+				v.lava(p);
+			}
 		}
 		return v.caldera.isEmpty();
 	}
@@ -614,7 +664,7 @@ public final class Volcanoes {
 	/** Cooling: running lava sets to basalt, standing lava to obsidian. */
 	private static void cool(ServerLevel level, Volcano v, RandomSource random) {
 		int radius = COOL_RADIUS + COOL_RADIUS_PER_MAGNITUDE * v.magnitude;
-		for (int i = 0; i < COOL_COLUMNS && !BlockBudget.empty(); i++) {
+		for (int i = 0; i < COOL_COLUMNS && !BlockBudget.empty(BlockBudget.Of.VOLCANO); i++) {
 			double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * radius;
 			int x = v.summit.getX() + Mth.floor(Math.cos(a) * r), z = v.summit.getZ() + Mth.floor(Math.sin(a) * r);
 			if (!Loaded.made(level, x, z)) {
@@ -625,7 +675,7 @@ public final class Volcanoes {
 				BlockPos p = new BlockPos(x, y, z);
 				net.minecraft.world.level.material.FluidState fluid = level.getFluidState(p);
 				if (fluid.is(net.minecraft.tags.FluidTags.LAVA)) {
-					BlockBudget.set(level, p, fluid.isSourceOfType(Fluids.LAVA) ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.BASALT.defaultBlockState());
+					BlockBudget.set(BlockBudget.Of.VOLCANO, level, p, fluid.isSourceOfType(Fluids.LAVA) ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.BASALT.defaultBlockState());
 					if (random.nextInt(8) == 0) {
 						level.sendParticles(ParticleTypes.LARGE_SMOKE, x + 0.5, y + 1.0, z + 0.5, 3, 0.3, 0.2, 0.3, 0.02);
 						level.playSound(null, p, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 0.8F);

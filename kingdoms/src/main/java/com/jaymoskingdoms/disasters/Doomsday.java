@@ -176,7 +176,7 @@ public final class Doomsday {
 				Volcanoes.wakeAnyNear(level, p.blockPosition(), Magnitude.CATASTROPHIC);
 			}
 			if (t % FLOOD_EVERY == 0 && Tsunamis.coastNear(level, p.blockPosition()) != null) {
-				Calamities.flood(level, p.blockPosition(), random, Magnitude.CATASTROPHIC);
+				Calamities.flood(level, p.blockPosition(), random, Magnitude.CATASTROPHIC, true);
 			}
 			if (t % TSUNAMI_EVERY == 0) {
 				Tsunamis.toward(level, p.blockPosition(), Magnitude.CATASTROPHIC, 3);

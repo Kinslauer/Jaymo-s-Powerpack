@@ -165,7 +165,7 @@ public final class Hurricanes {
 					// (nd-chains) it puts down tornadoes once it's ashore
 					double a = random.nextDouble() * Math.PI * 2.0, d = 30.0 + random.nextDouble() * 40.0;
 					Tornadoes.spawn(level, h.magnitude >= Magnitude.GREAT ? Tornado.MONSTER : Tornado.TORNADO, s, p.getX() + Math.cos(a) * d,
-						p.getZ() + Math.sin(a) * d, random);
+						p.getZ() + Math.sin(a) * d, random, true);
 					h.tornadoes++;
 				}
 			}
@@ -187,7 +187,7 @@ public final class Hurricanes {
 			}
 		}
 		if (near != null) {
-			Calamities.flood(level, near.blockPosition(), random, h.magnitude);
+			Calamities.flood(level, near.blockPosition(), random, h.magnitude, true);
 		}
 		com.jaymoskingdoms.DisasterRelief.struck(level, s.x, s.z, s.radius, "hurricane", h.magnitude);
 	}
@@ -233,7 +233,7 @@ public final class Hurricanes {
 		float hardness = state.getDestroySpeed(level, top);
 		boolean light = state.is(BlockTags.LEAVES) || state.is(BlockTags.FENCES) || state.is(BlockTags.WOOL) || state.is(BlockTags.FLOWERS)
 			|| state.is(BlockTags.CROPS) || hardness >= 0.0F && hardness <= WRECK_HARDEST;
-		if (!light || !BlockBudget.spend()) {
+		if (!light || !BlockBudget.spend(BlockBudget.Of.HURRICANE)) {
 			return;
 		}
 		if (!state.canSurvive(level, top) || state.is(BlockTags.REPLACEABLE)) {

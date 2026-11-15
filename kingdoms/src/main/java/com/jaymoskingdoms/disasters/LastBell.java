@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -28,9 +29,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -65,22 +65,24 @@ public final class LastBell extends Item {
 	public static final int RANGE = 512;
 	/** The last ringing: held this long (ticks), a worse vision every so often. */
 	static final int FINAL_HOLD = 200, VISION_EVERY = 40;
-	/** A bell not seen in anyone's hands for this long is lost, and the Arsenal may pull another (ticks); how often it's seen. */
-	static final long LOST_AFTER = 7L * 24000L;
-	static final int SEEN_EVERY = 1200;
 	private static final int FOREVER = 72000;
 
 	public static Item ITEM;
 	/** How many times it has been rung; when it may next be. */
 	public static DataComponentType<Integer> RINGS;
 	public static DataComponentType<Long> NEXT;
+	/** Which bell this is (the world's count of them when it was pulled through): only the one out counts. */
+	public static DataComponentType<Integer> SERIAL;
 
-	/** Whether a bell is out in the world, and when one was last seen. */
-	record Out(boolean out, long seen) {
-		static final Out NONE = new Out(false, 0L);
+	/**
+	 * Whether a bell is out in the world, and which. It stays out wherever it is (a pack, a chest in land nobody has
+	 * loaded for months) until it's destroyed (burned, in the void, despawned: {@link #gone}) or the end it rang passes.
+	 */
+	record Out(boolean out, int serial) {
+		static final Out NONE = new Out(false, 0);
 		static final Codec<Out> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.BOOL.fieldOf("out").forGetter(Out::out),
-			Codec.LONG.fieldOf("seen").forGetter(Out::seen)).apply(i, Out::new));
+			Codec.INT.optionalFieldOf("serial", 0).forGetter(Out::serial)).apply(i, Out::new));
 	}
 
 	static final AttachmentType<Out> OUT = AttachmentRegistry.create(JaymosKingdoms.id("last_bell"), b -> b.persistent(Out.CODEC));
@@ -133,6 +135,14 @@ public final class LastBell extends Item {
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		NEXT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("bell_next"),
 			DataComponentType.<Long>builder().persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).build());
+		SERIAL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("bell_serial"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		// the bell out in the world, destroyed (burned, in the void, despawned): another may come
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity instanceof ItemEntity item && entity.getRemovalReason() != null && entity.getRemovalReason().shouldDestroy()) {
+				gone(level.getServer(), item.getItem());
+			}
+		});
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("last_bell"));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, key, new LastBell(new Item.Properties().setId(key).stacksTo(1)
 			.rarity(Rarity.EPIC).fireResistant()));
@@ -146,33 +156,45 @@ public final class LastBell extends Item {
 
 	/** (Powers, through reflection) Whether a bell is out in the world now. */
 	public static boolean isOut(MinecraftServer server) {
-		ServerLevel level = server.overworld();
-		Out o = level.getAttachedOrElse(OUT, Out.NONE);
-		return o.out() && level.getGameTime() - o.seen() < LOST_AFTER;
+		return server.overworld().getAttachedOrElse(OUT, Out.NONE).out();
 	}
 
-	/** (Powers, through reflection) A new bell (it isn't out until {@link #made}: the Arsenal shows one as its rift opens). */
+	/**
+	 * (Powers, through reflection) A new bell, the next of them (it isn't out until {@link #made}: the Arsenal shows one
+	 * as its rift opens).
+	 */
 	public static ItemStack make(MinecraftServer server) {
-		return new ItemStack(ITEM);
+		ItemStack stack = new ItemStack(ITEM);
+		stack.set(SERIAL, server.overworld().getAttachedOrElse(OUT, Out.NONE).serial() + 1);
+		return stack;
 	}
 
-	/** (Powers, through reflection: the Arsenal has pulled it through) A bell is out in the world now. */
+	/**
+	 * (Powers, through reflection: the Arsenal has pulled it through) A bell is out in the world now: the new one, or
+	 * (taken from where it lay) the one that already was.
+	 */
 	public static void made(MinecraftServer server) {
 		ServerLevel level = server.overworld();
-		level.setAttached(OUT, new Out(true, level.getGameTime()));
+		Out o = level.getAttachedOrElse(OUT, Out.NONE);
+		if (!o.out()) {
+			level.setAttached(OUT, new Out(true, o.serial() + 1));
+		}
 	}
 
 	/** (Doomsday) The end it rang has passed: no bell is out now. */
 	static void passed(ServerLevel level) {
-		level.setAttached(OUT, Out.NONE);
+		level.setAttached(OUT, new Out(false, level.getAttachedOrElse(OUT, Out.NONE).serial()));
 	}
 
-	@Override
-	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
-		if (level.getGameTime() % SEEN_EVERY == 0) {
-			ServerLevel overworld = level.getServer().overworld();
-			Out o = overworld.getAttachedOrElse(OUT, Out.NONE);
-			overworld.setAttached(OUT, new Out(true, Math.max(o.seen(), overworld.getGameTime())));
+	/** {@code stack} was destroyed in the world: if it was the bell that's out, none is now. */
+	private static void gone(@Nullable MinecraftServer server, ItemStack stack) {
+		if (server == null || stack.isEmpty() || !stack.is(ITEM)) {
+			return;
+		}
+		ServerLevel level = server.overworld();
+		Out o = level.getAttachedOrElse(OUT, Out.NONE);
+		if (o.out() && stack.getOrDefault(SERIAL, 0) == o.serial()) {
+			level.setAttached(OUT, new Out(false, o.serial()));
 		}
 	}
 
@@ -273,9 +295,9 @@ public final class LastBell extends Item {
 				Earthquakes.start(level, at, Math.max(1, m - 1), random, true);
 				return true;
 			}
-			Calamity c = Earthquakes.start(level, at, Math.max(m, Magnitude.GREAT), random);
+			Calamity c = Earthquakes.start(level, at, Math.max(m, Magnitude.GREAT), random, true);
 			if (c != null) {
-				DisasterRelief.struck(level, c.x, c.z, c.radius, "quake", Earthquakes.magnitude(c));
+				DisasterRelief.struck(level, c.x, c.z, c.radius, "quake", Earthquakes.magnitude(c), true);
 				return true;
 			}
 		}

@@ -35,6 +35,8 @@ final class BellMapScreen extends Screen {
 
 	private final int range;
 	private final int[] colours = new int[CELLS * CELLS];
+	/** Whether the bell can be rung over each cell: only over land that is loaded now (the server will take no other). */
+	private final boolean[] open = new boolean[CELLS * CELLS];
 	private int originX, originZ;
 
 	BellMapScreen(int range) {
@@ -56,6 +58,7 @@ final class BellMapScreen extends Screen {
 			for (int cx = 0; cx < CELLS; cx++) {
 				int x = this.originX - this.range + cx * step + step / 2, z = this.originZ - this.range + cz * step + step / 2;
 				this.colours[cx + cz * CELLS] = colour(level, map, x, z);
+				this.open[cx + cz * CELLS] = level.getChunkSource().hasChunk(x >> 4, z >> 4);
 			}
 		}
 		level.playLocalSound(this.minecraft.player.getX(), this.minecraft.player.getY(), this.minecraft.player.getZ(), SoundEvents.BELL_RESONATE,
@@ -126,7 +129,7 @@ final class BellMapScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int at = cellAt(event.x(), event.y());
-		if (at < 0) {
+		if (at < 0 || !this.open[at]) {
 			return super.mouseClicked(event, doubleClick);
 		}
 		int step = this.range * 2 / CELLS;
@@ -143,6 +146,10 @@ final class BellMapScreen extends Screen {
 		for (int i = 0; i < this.colours.length; i++) {
 			int x = x0 + i % CELLS * c, y = y0 + i / CELLS * c;
 			graphics.fill(x, y, x + c, y + c, this.colours[i]);
+			if (!this.open[i]) {
+				// far land the bell can't reach now: shown (from a map) but dark
+				graphics.fill(x, y, x + c, y + c, 0xB0000000);
+			}
 		}
 		// a red cast over it all, deeper toward the edge
 		graphics.fill(x0, y0, x0 + size, y0 + size, ARGB.color(40, 0x8A, 0x14, 0x08));
@@ -150,7 +157,7 @@ final class BellMapScreen extends Screen {
 		graphics.fill(x0 + mid * c - 1, y0 + mid * c - 3, x0 + mid * c + 1, y0 + mid * c + 3, HOLDER);
 		graphics.fill(x0 + mid * c - 3, y0 + mid * c - 1, x0 + mid * c + 3, y0 + mid * c + 1, HOLDER);
 		int at = cellAt(mouseX, mouseY);
-		if (at >= 0) {
+		if (at >= 0 && this.open[at]) {
 			graphics.outline(x0 + at % CELLS * c - 1, y0 + at / CELLS * c - 1, c + 2, c + 2, PICK);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);

@@ -100,9 +100,30 @@ public final class FallingStars {
 		}
 	}
 
-	/** A crater being carved: blocks to clear (top down), then the lip to raise, a few a tick. */
-	private record Carve(ResourceKey<Level> dimension, ArrayDeque<BlockPos> dig, ArrayDeque<BlockPos> floor, ArrayDeque<BlockPos> lip, BlockPos heart) {
+	/**
+	 * A crater being carved: its bowl's columns (each dug out top down when its land is loaded, its height read only
+	 * then), then the lip's; columns out of loaded land wait and are tried again. The column being dug, block by block.
+	 */
+	private static final class Carve {
+		final ResourceKey<Level> dimension;
+		final BlockPos centre, heart;
+		final ArrayDeque<int[]> bowl = new ArrayDeque<>(), lip = new ArrayDeque<>(), waiting = new ArrayDeque<>();
+		final ArrayDeque<BlockPos> dig = new ArrayDeque<>();
+		@org.jspecify.annotations.Nullable BlockPos floor;
+
+		Carve(ResourceKey<Level> dimension, BlockPos centre, BlockPos heart) {
+			this.dimension = dimension;
+			this.centre = centre;
+			this.heart = heart;
+		}
+
+		boolean done() {
+			return bowl.isEmpty() && lip.isEmpty() && waiting.isEmpty() && dig.isEmpty() && floor == null;
+		}
 	}
+
+	/** Columns of a crater out of loaded land are tried again this often (ticks). */
+	public static final int CARVE_RETRY = 100;
 
 	private static final List<GreatStar> GREAT = new ArrayList<>();
 	private static final List<Carve> CARVES = new ArrayList<>();
@@ -378,7 +399,11 @@ public final class FallingStars {
 	/** It strikes: the blast and the shockwave, the crater (carved a little at a time), its iron heart, earth and fire. */
 	private static void landGreat(ServerLevel level, Vec3 to) {
 		RandomSource random = level.getRandom();
-		level.explode(null, to.x, to.y, to.z, GREAT_BLAST, Level.ExplosionInteraction.NONE);
+		// nothing on land that isn't loaded is touched: the crater waits for it (carve)
+		boolean here = level.isLoaded(BlockPos.containing(to));
+		if (here) {
+			level.explode(null, to.x, to.y, to.z, GREAT_BLAST, Level.ExplosionInteraction.NONE);
+		}
 		com.jaymospowers.core.Shakes.around(level, to, GREAT_SHAKE_RANGE, GREAT_SHAKE);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 16.0F, 0.4F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 16.0F, 0.6F);
@@ -400,31 +425,22 @@ public final class FallingStars {
 			e.syncVelocity = true;
 		}
 		BlockPos centre = BlockPos.containing(to).below();
-		ArrayDeque<BlockPos> dig = new ArrayDeque<>(), floor = new ArrayDeque<>(), lip = new ArrayDeque<>();
-		BlockPos heart = centre.below(CRATER_DEPTH - 1);
-		// the bowl, column by column, top down; the lip a ring round it
+		Carve carve = new Carve(level.dimension(), centre, centre.below(CRATER_DEPTH - 1));
+		// the bowl's columns, the middle first (its heart); the lip a ring round it (heights are read as each is carved)
+		carve.bowl.add(new int[] {0, 0});
 		for (int dx = -CRATER_RADIUS - LIP; dx <= CRATER_RADIUS + LIP; dx++) {
 			for (int dz = -CRATER_RADIUS - LIP; dz <= CRATER_RADIUS + LIP; dz++) {
 				double r = Math.sqrt(dx * dx + dz * dz);
-				int x = centre.getX() + dx, z = centre.getZ() + dz;
-				if (r <= CRATER_RADIUS) {
-					double k = r / CRATER_RADIUS;
-					int bottom = centre.getY() - (int)Math.round(CRATER_DEPTH * (1.0 - k * k));
-					int top = Math.max(centre.getY() + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z));
-					for (int y = top; y > bottom; y--) {
-						dig.add(new BlockPos(x, y, z));
-					}
-					// the floor left behind
-					floor.add(new BlockPos(x, bottom, z));
-				} else if (r <= CRATER_RADIUS + LIP && random.nextFloat() < 0.8F) {
-					lip.add(new BlockPos(x, 0, z));
+				if (r <= CRATER_RADIUS && (dx != 0 || dz != 0)) {
+					carve.bowl.add(new int[] {dx, dz});
+				} else if (r > CRATER_RADIUS && r <= CRATER_RADIUS + LIP && random.nextFloat() < 0.8F) {
+					carve.lip.add(new int[] {dx, dz});
 				}
 			}
 		}
-		CARVES.add(new Carve(level.dimension(), dig, floor, lip, heart));
-		level.setBlock(heart, Tinkering.METEORIC_IRON_HEART.defaultBlockState(), Block.UPDATE_ALL);
+		CARVES.add(carve);
 		// earth thrown out of it, landing round about
-		for (int i = 0; i < THROWN; i++) {
+		for (int i = 0; here && i < THROWN; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			BlockPos at = BlockPos.containing(to.x + Math.cos(a) * 2.0, to.y + 2.0 + i % 4, to.z + Math.sin(a) * 2.0);
 			if (!level.getBlockState(at).isAir()) {
@@ -445,56 +461,97 @@ public final class FallingStars {
 		com.jaymospowers.compat.KingdomsCompat.greatStar(level, to.x, to.y, to.z, GREAT_MAGNITUDE, CRATER_RADIUS);
 	}
 
-	/** Each tick, a few hundred blocks of each crater: dug out (the floor scorched), then the lip piled up and fires lit. */
+	/**
+	 * Each tick, {@link #CARVE_PER_TICK} blocks at most across every crater: the bowl dug out column by column (its floor
+	 * scorched, the heart set in the middle one), then the lip piled up and fires lit. Only on loaded land: a column whose
+	 * land isn't loaded waits, and nothing is read or changed there till it is.
+	 */
 	private static void carve(MinecraftServer server) {
+		int budget = CARVE_PER_TICK;
+		boolean retry = server.getTickCount() % CARVE_RETRY == 0;
 		for (Iterator<Carve> it = CARVES.iterator(); it.hasNext(); ) {
 			Carve c = it.next();
-			ServerLevel level = server.getLevel(c.dimension());
+			ServerLevel level = server.getLevel(c.dimension);
 			if (level == null) {
 				it.remove();
 				continue;
 			}
 			RandomSource random = level.getRandom();
-			int budget = CARVE_PER_TICK;
-			while (budget > 0 && !c.dig().isEmpty()) {
-				BlockPos p = c.dig().poll();
-				budget--;
-				if (p.equals(c.heart()) || !level.isLoaded(p) || !breakable(level, p)) {
+			if (retry) {
+				c.bowl.addAll(c.waiting.stream().filter(col -> col.length == 2).toList());
+				c.lip.addAll(c.waiting.stream().filter(col -> col.length == 3).map(col -> new int[] {col[0], col[1]}).toList());
+				c.waiting.clear();
+			}
+			while (budget > 0) {
+				if (!c.dig.isEmpty()) {
+					BlockPos p = c.dig.poll();
+					budget--;
+					if (!p.equals(c.heart) && level.isLoaded(p) && breakable(level, p)) {
+						level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
 					continue;
 				}
-				level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-			}
-			while (budget > 0 && c.dig().isEmpty() && !c.floor().isEmpty()) {
-				// the floor left behind, scorched
-				BlockPos p = c.floor().poll();
-				budget--;
-				if (level.isLoaded(p) && !p.equals(c.heart()) && breakable(level, p)) {
-					level.setBlock(p, scorched(random), Block.UPDATE_CLIENTS);
+				if (c.floor != null) {
+					// the floor left behind, scorched (and the heart in the middle)
+					BlockPos p = c.floor;
+					c.floor = null;
+					budget--;
+					if (level.isLoaded(p)) {
+						if (p.getX() == c.centre.getX() && p.getZ() == c.centre.getZ()) {
+							level.setBlock(p, scorched(random), Block.UPDATE_CLIENTS);
+							level.setBlock(c.heart, Tinkering.METEORIC_IRON_HEART.defaultBlockState(), Block.UPDATE_ALL);
+						} else if (breakable(level, p)) {
+							level.setBlock(p, scorched(random), Block.UPDATE_CLIENTS);
+						}
+					}
+					continue;
 				}
-			}
-			while (budget > 0 && c.floor().isEmpty() && !c.lip().isEmpty()) {
-				BlockPos col = c.lip().poll();
+				if (!c.bowl.isEmpty()) {
+					int[] col = c.bowl.poll();
+					int x = c.centre.getX() + col[0], z = c.centre.getZ() + col[1];
+					if (!level.isLoaded(new BlockPos(x, 0, z))) {
+						c.waiting.add(col);
+						continue;
+					}
+					double k = Math.sqrt(col[0] * col[0] + col[1] * col[1]) / CRATER_RADIUS;
+					int bottom = c.centre.getY() - (int)Math.round(CRATER_DEPTH * (1.0 - k * k));
+					int top = Math.max(c.centre.getY() + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z));
+					for (int y = top; y > bottom; y--) {
+						c.dig.add(new BlockPos(x, y, z));
+					}
+					c.floor = new BlockPos(x, bottom, z);
+					continue;
+				}
+				if (c.lip.isEmpty()) {
+					break;
+				}
+				int[] col = c.lip.poll();
+				int x = c.centre.getX() + col[0], z = c.centre.getZ() + col[1];
+				if (!level.isLoaded(new BlockPos(x, 0, z))) {
+					c.waiting.add(new int[] {col[0], col[1], 1});
+					continue;
+				}
 				budget -= 3;
-				if (!level.isLoaded(col)) {
-					continue;
-				}
-				int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, col.getX(), col.getZ());
+				int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 				int high = 1 + random.nextInt(2);
 				for (int i = 0; i < high; i++) {
-					BlockPos at = new BlockPos(col.getX(), y + i, col.getZ());
+					BlockPos at = new BlockPos(x, y + i, z);
 					if (level.getBlockState(at).canBeReplaced()) {
 						level.setBlock(at, random.nextBoolean() ? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.GRAVEL.defaultBlockState(), Block.UPDATE_CLIENTS);
 					}
 				}
 				if (random.nextInt(Math.max(1, (CRATER_RADIUS + LIP) * 8 / RIM_FIRES)) == 0) {
-					BlockPos fire = new BlockPos(col.getX(), y + high, col.getZ());
+					BlockPos fire = new BlockPos(x, y + high, z);
 					if (level.getBlockState(fire).isAir()) {
 						level.setBlock(fire, Blocks.FIRE.defaultBlockState(), Block.UPDATE_ALL);
 					}
 				}
 			}
-			if (c.dig().isEmpty() && c.floor().isEmpty() && c.lip().isEmpty()) {
+			if (c.done()) {
 				it.remove();
+			}
+			if (budget <= 0) {
+				break;
 			}
 		}
 	}

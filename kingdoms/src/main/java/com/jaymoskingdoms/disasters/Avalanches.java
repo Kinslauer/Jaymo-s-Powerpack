@@ -158,7 +158,7 @@ public final class Avalanches {
 	private static boolean run(ServerLevel level, Slide s, RandomSource random) {
 		s.speed = Math.min(TOP_SPEED * Magnitude.speed(s.magnitude), s.speed + GATHER);
 		int target = Mth.floor(s.front + s.speed);
-		while (s.row < target && !BlockBudget.empty()) {
+		while (s.row < target && !BlockBudget.empty(BlockBudget.Of.SLIDE)) {
 			s.row++;
 			row(level, s, s.row, random);
 		}
@@ -190,7 +190,7 @@ public final class Avalanches {
 					if (state.isAir() || state.is(BlockTags.REPLACEABLE) && !snowy(state)) {
 						continue;
 					}
-					if (!(s.snow ? snowy(state) : loose(state)) || !BlockBudget.set(level, p, Blocks.AIR.defaultBlockState())) {
+					if (!(s.snow ? snowy(state) : loose(state)) || !BlockBudget.set(BlockBudget.Of.SLIDE, level, p, Blocks.AIR.defaultBlockState())) {
 						break;
 					}
 					s.carried++;
@@ -209,7 +209,7 @@ public final class Avalanches {
 					}
 					BlockState laid = s.snow ? Blocks.SNOW_BLOCK.defaultBlockState()
 						: random.nextInt(3) == 0 ? Blocks.GRAVEL.defaultBlockState() : random.nextBoolean() ? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.DIRT.defaultBlockState();
-					if (!state.isAir() && !BlockBudget.destroy(level, p, true) || !BlockBudget.set(level, p, laid)) {
+					if (!state.isAir() && !BlockBudget.destroy(BlockBudget.Of.SLIDE, level, p, true) || !BlockBudget.set(BlockBudget.Of.SLIDE, level, p, laid)) {
 						return;
 					}
 					s.carried--;
@@ -227,7 +227,7 @@ public final class Avalanches {
 		for (int t = 0; t < TUMBLE && s.carried > 0; t++) {
 			Vec3 at = s.at(r, (random.nextDouble() - 0.5) * s.width);
 			BlockPos p = BlockPos.containing(at.x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(at.x), Mth.floor(at.z)) + 1, at.z);
-			if (Loaded.made(level, p) && level.getBlockState(p).isAir() && BlockBudget.spend()) {
+			if (Loaded.made(level, p) && level.getBlockState(p).isAir() && BlockBudget.spend(BlockBudget.Of.SLIDE)) {
 				BlockState look = s.snow ? Blocks.SNOW_BLOCK.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
 				level.setBlock(p, look, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
 				FallingBlockEntity tumble = FallingBlockEntity.fall(level, p, look);
