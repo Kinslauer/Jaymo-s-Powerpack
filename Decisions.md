@@ -637,3 +637,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-15 (shipwright thread): Andy asked for warship fleets: the largest ship for the richer kingdoms, every vassal's ships in its overlord's fleet, "only pirates raze ships and enslave their victims". On the card he chose "Spare and take prisoners": navies still sink pirates but pull survivors out and jail them at their port; pirates sink ships and drag survivors to their cove in chains.
 - 2026-11-15 (Andy, future-Mosslorn thread): chose Both: our own moss overgrowth on Los Perrito now, Mosslorn swap later if the author agrees. Approved the lore paragraph "The moss".
+
+- 2026-11-15 (shipwright thread): Andy approved the lore "The fleets" and the change to "the deepest hull" in The yards (PR #1605).
