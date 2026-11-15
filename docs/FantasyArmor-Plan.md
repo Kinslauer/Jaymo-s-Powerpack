@@ -80,6 +80,8 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - `ship-dress`: `FantasyArmorCompat` (like `KnightsCompat`, by registry id, no dependency): monsters, undead and kings
   only, so royal tiers still hold.
 - `ship-repaint`: waits for Andy's look at the model sheet.
+- Built (2026-11-15): packMods entry, `FantasyArmorPreset` (descriptions off), trim datapack in Powers
+  (`data/fantasy_armor/recipe`), `FantasyArmorCompat` (risen dead at world tier 3+, gilded kings via `Regalia`).
 
 ### 8. The Long Defence's cast in Fantasy Armor (Kingdoms client, only when Fantasy Armor is loaded)
 Andy (2026-11-15): the Quiet One in the Redeemer plate, Thessaly in Lady Maria, Varro in Golden Horns with no helm,
@@ -88,6 +90,20 @@ Dark Cover. Film actors are jointed GeckoLib bodies, so `FilmGear` (which paints
 these GeckoLib sets: a new render layer draws each worn Fantasy Armor piece's own model (read from the mod's assets at
 run time, nothing copied) on the actor's head, body, arm and leg bones. Without the mod the cast looks as it does now.
 Lady Maria is used here, so the trim datapack keeps her set.
+
+## If the lore sets reuse Fantasy Armor's models (Andy chose this on a decision card, 2026-11-15)
+Each lore set becomes the Fantasy Armor set that matches it; our code adds who wears, drops and sells it and the
+whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they are unless they clash):
+- Barrow warden's mail = Grave Sentinel (its helm stays out; a barrow knight goes bare-headed or in a rusted iron helm).
+- Dawnwatch plate = Dawncrest; Headsman's plate = Golden Execution.
+- Giant-slayer harness = Dragonslayer; wind-faith robes = Wind Worshipper; well-warden plate = Fog Guard.
+- Ashen plate = Dark Lord (the Grue's in the film, the demon captains' in the Ash).
+- Warden hunter's coat = Evening Ghost (Gilded Hunt is the kings'); folded lamellar = Ronin; pit harness = Dead Gladiator.
+- Back to back (twinned) = Twinned.
+Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
+guards. Still to place (their wearers don't exist in code yet, or MCA re-arms them): sky elders and well-wardens (the sky
+castle's wardens are MCA guards), dawnwatch (Sun-Marshal's guard), headsmen, demon captains of the Ash, Warden's hunters'
+sellers, pit warlords, twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)
