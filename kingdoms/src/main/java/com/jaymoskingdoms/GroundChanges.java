@@ -252,23 +252,45 @@ public final class GroundChanges {
 
 	/**
 	 * (GTNH picks, patch 7) One of Powers' lone small ores of {@code metal} in the column at {@code x, z}, a few blocks
-	 * under the top of the ground, if the block there is stone or deepslate. Nothing without Powers.
+	 * under the top of the ground, if the block there is stone or deepslate. Nothing without Powers. The chunk is loaded
+	 * and may be lived in, so only natural ground: never in a village's or kingdom's land, only where the column's top is
+	 * bare terrain and every block from it down is natural, and only buried, with natural rock or soil on all six sides
+	 * (so never in a wall, floor or roof of a base, nor in sight).
 	 */
 	private static void small(ServerLevel level, String metal, int x, int z, RandomSource random) {
 		Block stone = block("jaymospowers:small_" + metal + "_ore"), deep = block("jaymospowers:deepslate_small_" + metal + "_ore");
 		if (stone == null || deep == null) {
 			return;
 		}
-		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
 		BlockPos at = new BlockPos(x, top - HINT_SHALLOW_MIN - random.nextInt(HINT_SHALLOW_MOST - HINT_SHALLOW_MIN + 1), z);
-		if (at.getY() <= level.getMinY() || level.isOutsideBuildHeight(at)) {
+		if (at.getY() <= level.getMinY() || level.isOutsideBuildHeight(at) || Factions.at(level.getServer(), level, at) != null
+			|| Factions.around(level.getServer(), level, at, Villages.VILLAGE_RADIUS) != null) {
 			return;
+		}
+		BlockPos.MutableBlockPos column = new BlockPos.MutableBlockPos(x, top, z);
+		for (; column.getY() > at.getY(); column.move(Direction.DOWN)) {
+			if (!bare(level.getBlockState(column))) {
+				return;
+			}
+		}
+		for (Direction d : Direction.values()) {
+			if (!bare(level.getBlockState(at.relative(d)))) {
+				return;
+			}
 		}
 		BlockState there = level.getBlockState(at);
 		Block ore = there.is(BlockTags.STONE_ORE_REPLACEABLES) ? stone : there.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES) ? deep : null;
 		if (ore != null) {
 			level.setBlock(at, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
+	}
+
+	/** Untouched ground: soil, sand, gravel, snow, terracotta, the world's own rock and its ores. Not air, water, wood or anything laid. */
+	private static boolean bare(BlockState state) {
+		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.GRAVEL)
+			|| state.is(Blocks.SNOW_BLOCK) || state.is(BlockTags.TERRACOTTA) || state.is(Blocks.CLAY)
+			|| state.is(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags.ORES);
 	}
 
 	/**

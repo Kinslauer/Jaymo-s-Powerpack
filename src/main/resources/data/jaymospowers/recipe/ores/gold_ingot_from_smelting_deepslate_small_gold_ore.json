@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.7,
+  "group": "gold_ingot",
+  "ingredient": "jaymospowers:deepslate_small_gold_ore",
+  "result": {
+    "id": "minecraft:gold_ingot"
+  }
+}

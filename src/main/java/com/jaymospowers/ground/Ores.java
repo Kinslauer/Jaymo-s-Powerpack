@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  * dusts make a dust (the mortar's metal dusts); one melts as a nugget's worth.</li>
  * <li><b>Small ores</b> (or-small): lone ore stones in the stone just under the ground ({@link #SHALLOW_MIN} to
  * {@link #SHALLOW_MOST} blocks down), one {@link Metal} each, stone and deepslate. Mined (with the tool their full ore
- * wants) they give one crushed ore, not raw ore. A few are scattered anywhere ({@link Scatter}, by {@link Metal#scatter});
+ * wants) they give one crushed ore, not raw ore; silk-touched, the block melts and smelts as that crushed ore does. A few are scattered anywhere ({@link Scatter}, by {@link Metal#scatter});
  * many more lie over each great vein, mostly its own metal and some its partner's ({@link BigVeinFeature#HINT_TRIES}), so
  * the small ores a country shows lean toward the veins under it.</li>
  * <li><b>The dowsing rod</b> (or-dowse): {@link DowsingRodItem}.</li>
@@ -62,23 +62,26 @@ public final class Ores {
 
 	/** The metals that have small ores, their dowsing sample's tag, their crushed ore and how often the scatter picks them. */
 	public enum Metal {
-		IRON("iron", ConventionalBlockTags.IRON_ORES, OreWashing.Ore.IRON, 4),
-		COPPER("copper", ConventionalBlockTags.COPPER_ORES, OreWashing.Ore.COPPER, 4),
-		TIN("tin", tag("tin"), OreWashing.Ore.TIN, 1),
-		GOLD("gold", ConventionalBlockTags.GOLD_ORES, OreWashing.Ore.GOLD, 1),
-		SILVER("silver", tag("silver"), OreWashing.Ore.SILVER, 1);
+		IRON("iron", ConventionalBlockTags.IRON_ORES, OreWashing.Ore.IRON, Molten.IRON, 4),
+		COPPER("copper", ConventionalBlockTags.COPPER_ORES, OreWashing.Ore.COPPER, Molten.COPPER, 4),
+		TIN("tin", tag("tin"), OreWashing.Ore.TIN, Molten.TIN, 1),
+		GOLD("gold", ConventionalBlockTags.GOLD_ORES, OreWashing.Ore.GOLD, Molten.GOLD, 1),
+		SILVER("silver", tag("silver"), OreWashing.Ore.SILVER, Molten.SILVER, 1);
 
 		public final String id;
 		/** Every ore block of this metal (its great veins' and its small ores), for the dowsing rod. */
 		public final TagKey<Block> ores;
 		public final OreWashing.Ore ore;
+		/** What its small ore melts into (as much as its crushed ore). */
+		final Molten molten;
 		final int scatter;
 		public Block small, smallDeep;
 
-		Metal(String id, TagKey<Block> ores, OreWashing.Ore ore, int scatter) {
+		Metal(String id, TagKey<Block> ores, OreWashing.Ore ore, Molten molten, int scatter) {
 			this.id = id;
 			this.ores = ores;
 			this.ore = ore;
+			this.molten = molten;
 			this.scatter = scatter;
 		}
 
@@ -125,6 +128,8 @@ public final class Ores {
 				.instrument(NoteBlockInstrument.BASEDRUM).strength(3.0F, 3.0F).requiresCorrectToolForDrops());
 			metal.smallDeep = block("deepslate_small_" + metal.id + "_ore", BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE)
 				.instrument(NoteBlockInstrument.BASEDRUM).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE).requiresCorrectToolForDrops());
+			// a silk-touched small ore is one crushed ore in its rock: it melts as one (and smelts, slowly, to an ingot: data)
+			Melting.ores(metal.molten, metal.small.asItem(), metal.smallDeep.asItem());
 		}
 
 		DOWSING_SAMPLE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("dowsing_sample"),

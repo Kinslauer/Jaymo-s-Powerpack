@@ -65,6 +65,8 @@ FULL_ORE = {
     "gold": ("minecraft:gold_ore", "minecraft:deepslate_gold_ore"),
     "silver": (NS + ":silver_ore", NS + ":deepslate_silver_ore"),
 }
+INGOTS = {"iron": "minecraft:iron_ingot", "copper": "minecraft:copper_ingot", "tin": NS + ":tin_ingot", "gold": "minecraft:gold_ingot",
+          "silver": NS + ":silver_ingot"}
 # the tiny dusts: what nine of them make, and the dust whose colours they take
 TINY = {"iron": (NS + ":iron_dust", "item/iron_dust"), "copper": (NS + ":copper_dust", "item/copper_dust"),
         "tin": (NS + ":tin_dust", "item/tin/tin_dust")}
@@ -83,8 +85,8 @@ LANG = {
     "jei.jaymospowers.small_ores.where": "Lone, just under the ground; most over a vein",
     "jei.jaymospowers.small_ores.tool": "Mined as its full ore is",
     "jei.jaymospowers.tiny_dust": "Washed out of the crushed ore of a mixed vein, now and then. Nine make a dust; it melts as a nugget does.",
-    "jei.jaymospowers.small_ore": "A lone stone of ore in the rock just under the ground. It breaks into one crushed ore. Most lie over a great vein: "
-                                  "its own metal, and some of the metal streaked through it.",
+    "jei.jaymospowers.small_ore": "A lone stone of ore in the rock just under the ground. It breaks into one crushed ore; taken whole, it smelts "
+                                  "and melts as that crushed ore does. Most lie over a great vein: its own metal, and some of the metal streaked through it.",
     "jei.jaymospowers.dowsing_rod.1": "Right-click a sample onto the rod in your inventory: a raw ore, a crushed ore or a small ore. "
                                       "Right-click the rod with an empty hand to take it out.",
     "jei.jaymospowers.dowsing_rod.2": "Held in either hand, it ticks when ore of the sample's metal lies within %s blocks, faster and higher the nearer it is.",
@@ -273,6 +275,13 @@ def data():
             recipe("tin_ingot_from_" + kind + "_" + src, {"type": "minecraft:" + kind, "category": "misc", "cookingtime": time, "experience": 0.7,
                                                           "group": "tin_ingot", "ingredient": NS + ":" + src + "_tin_ore",
                                                           "result": {"id": NS + ":tin_ingot"}})
+    # a silk-touched small ore smelts like the crushed ore it holds (slowly in a plain furnace: slow_smelt)
+    for metal, ingot in INGOTS.items():
+        for name in ("small_" + metal + "_ore", "deepslate_small_" + metal + "_ore"):
+            for kind, time in (("smelting", 200), ("blasting", 100)):
+                recipe(metal + "_ingot_from_" + kind + "_" + name, {"type": "minecraft:" + kind, "category": "misc", "cookingtime": time,
+                                                                   "experience": 0.7, "group": metal + "_ingot", "ingredient": NS + ":" + name,
+                                                                   "result": {"id": ingot}})
     loot()
     tags()
     worldgen()
@@ -301,7 +310,9 @@ def tags():
         # the block tags only (the prospector's pick, the dowsing rod, ore tells): no item tag, so no smelting recipe takes them
         merge_tag(os.path.join(c, "ores", metal + ".json"), ids)
     merge_tag(os.path.join(mc, "mineable", "pickaxe.json"), every)
-    merge_tag(os.path.join(DATA, NS, "tags", "item", "slow_smelt.json"), [NS + ":crushed_tin_ore"])
+    merge_tag(os.path.join(DATA, NS, "tags", "item", "slow_smelt.json"), [NS + ":crushed_tin_ore"] + every)
+    # silver's ores count as ores (the prospector's pick, ore tells, vein mining), as tin's do
+    merge_tag(os.path.join(c, "ores.json"), ["#c:ores/silver"])
 
 
 def worldgen():

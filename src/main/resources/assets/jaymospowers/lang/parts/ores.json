@@ -12,7 +12,7 @@
   "jei.jaymospowers.small_ores.where": "Lone, just under the ground; most over a vein",
   "jei.jaymospowers.small_ores.tool": "Mined as its full ore is",
   "jei.jaymospowers.tiny_dust": "Washed out of the crushed ore of a mixed vein, now and then. Nine make a dust; it melts as a nugget does.",
-  "jei.jaymospowers.small_ore": "A lone stone of ore in the rock just under the ground. It breaks into one crushed ore. Most lie over a great vein: its own metal, and some of the metal streaked through it.",
+  "jei.jaymospowers.small_ore": "A lone stone of ore in the rock just under the ground. It breaks into one crushed ore; taken whole, it smelts and melts as that crushed ore does. Most lie over a great vein: its own metal, and some of the metal streaked through it.",
   "jei.jaymospowers.dowsing_rod.1": "Right-click a sample onto the rod in your inventory: a raw ore, a crushed ore or a small ore. Right-click the rod with an empty hand to take it out.",
   "jei.jaymospowers.dowsing_rod.2": "Held in either hand, it ticks when ore of the sample's metal lies within %s blocks, faster and higher the nearer it is.",
   "block.jaymospowers.small_iron_ore": "Small Iron Ore",

@@ -38,14 +38,18 @@ import org.jspecify.annotations.Nullable;
  * the nearer the nearest block of the sample's metal is ({@link Ores.Metal#ores}: a great vein's ore or a lone small ore),
  * up to {@link #REACH} blocks; beyond that it is still. Sound only, heard only by the holder.
  * <p>
- * It never scans every tick: every {@link #SEARCH_EVERY} ticks it looks over the loaded chunk sections round the holder
- * that could hold that ore (a section's palette says whether it has any at all), nearest first, and stops once no
- * section left could be nearer than what it found. So it hears old veins, Kingdoms' grown ones and small ores alike.
+ * It never scans every tick: every {@link #SEARCH_EVERY} ticks it lists the loaded chunk sections round the holder that
+ * could hold that ore (a section's palette says whether it may have any), then reads them nearest first, at most
+ * {@link #SECTIONS_PER_TICK} a tick (so a few thousand block checks a tick at worst, however full the palettes are), and
+ * stops once no section left could be nearer than what it found; until then it keeps the last answer. So it hears old
+ * veins, Kingdoms' grown ones and small ores alike.
  */
 public class DowsingRodItem extends Item {
 	/** How far it hears (blocks), and how often (ticks) it looks again. */
 	public static final int REACH = 40;
 	static final int SEARCH_EVERY = 40;
+	/** Chunk sections (4096 blocks each) a search reads in one tick at most, nearest first. */
+	static final int SECTIONS_PER_TICK = 2;
 	/** Ticks between ticks at the edge of its reach, and right on the ore. */
 	static final int SLOWEST = 34, FASTEST = 3;
 	/** How sharply the rate climbs with nearness (above 1: slow until close). */
@@ -60,6 +64,8 @@ public class DowsingRodItem extends Item {
 	private static final Map<UUID, Heard> HEARD = new HashMap<>();
 	/** The game time each holder's next tick is due. Not saved. */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
+	/** Each holder's search under way, read a few sections a tick. Not saved. */
+	private static final Map<UUID, Search> SEARCHES = new HashMap<>();
 
 	public DowsingRodItem(Properties properties) {
 		super(properties);
@@ -74,10 +80,12 @@ public class DowsingRodItem extends Item {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			HEARD.remove(handler.player.getUUID());
 			NEXT.remove(handler.player.getUUID());
+			SEARCHES.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			HEARD.clear();
 			NEXT.clear();
+			SEARCHES.clear();
 		});
 	}
 
@@ -102,14 +110,27 @@ public class DowsingRodItem extends Item {
 		UUID id = player.getUUID();
 		if (metal == null) {
 			HEARD.remove(id);
+			SEARCHES.remove(id);
 			return;
 		}
 		Heard heard = HEARD.get(id);
-		if (heard == null || heard.metal() != metal || now - heard.at() >= SEARCH_EVERY) {
-			heard = new Heard(metal, now, nearest(player.level(), player.blockPosition(), metal.ores));
-			HEARD.put(id, heard);
+		Search search = SEARCHES.get(id);
+		if (search != null && search.metal != metal) {
+			search = null;
 		}
-		if (heard.distance() > REACH || now < NEXT.getOrDefault(id, 0L)) {
+		if (search == null && (heard == null || heard.metal() != metal || now - heard.at() >= SEARCH_EVERY)) {
+			search = new Search(player.level(), player.blockPosition(), metal);
+		}
+		if (search != null) {
+			if (search.step()) {
+				heard = new Heard(metal, now, search.distance());
+				HEARD.put(id, heard);
+				SEARCHES.remove(id);
+			} else {
+				SEARCHES.put(id, search);
+			}
+		}
+		if (heard == null || heard.metal() != metal || heard.distance() > REACH || now < NEXT.getOrDefault(id, 0L)) {
 			return;
 		}
 		double near = 1.0 - Mth.clamp(heard.distance() / REACH, 0.0, 1.0);
@@ -124,56 +145,78 @@ public class DowsingRodItem extends Item {
 	private record Candidate(LevelChunk chunk, int index, double least) {
 	}
 
-	/** How far (blocks) the nearest {@code ores} block within {@link #REACH} of {@code from} is, or more than REACH if none. */
-	static double nearest(ServerLevel level, BlockPos from, TagKey<Block> ores) {
-		int reach = Mth.ceil(REACH / 16.0);
-		int fx = SectionPos.blockToSectionCoord(from.getX()), fy = SectionPos.blockToSectionCoord(from.getY()),
-			fz = SectionPos.blockToSectionCoord(from.getZ());
-		double best = (double) (REACH + 1) * (REACH + 1);
-		List<Candidate> candidates = new ArrayList<>();
-		for (int cx = fx - reach; cx <= fx + reach; cx++) {
-			for (int cz = fz - reach; cz <= fz + reach; cz++) {
-				LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
-				if (chunk == null) {
-					continue;
-				}
-				LevelChunkSection[] sections = chunk.getSections();
-				for (int sy = fy - reach; sy <= fy + reach; sy++) {
-					int index = chunk.getSectionIndexFromSectionY(sy);
-					if (index < 0 || index >= sections.length) {
+	/**
+	 * A search for the nearest block of {@code metal}'s ore within {@link #REACH} of {@code from}: the sections that may
+	 * hold it, listed once (palette checks only), then read a few a tick ({@link #step}), nearest first.
+	 */
+	private static final class Search {
+		final Ores.Metal metal;
+		private final BlockPos from;
+		private final List<Candidate> candidates = new ArrayList<>();
+		private int next;
+		private double best = (double) (REACH + 1) * (REACH + 1);
+
+		Search(ServerLevel level, BlockPos from, Ores.Metal metal) {
+			this.metal = metal;
+			this.from = from;
+			TagKey<Block> ores = metal.ores;
+			int reach = Mth.ceil(REACH / 16.0);
+			int fx = SectionPos.blockToSectionCoord(from.getX()), fy = SectionPos.blockToSectionCoord(from.getY()),
+				fz = SectionPos.blockToSectionCoord(from.getZ());
+			for (int cx = fx - reach; cx <= fx + reach; cx++) {
+				for (int cz = fz - reach; cz <= fz + reach; cz++) {
+					LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+					if (chunk == null) {
 						continue;
 					}
-					LevelChunkSection section = sections[index];
-					if (section.hasOnlyAir() || !section.maybeHas(state -> state.is(ores))) {
-						continue;
-					}
-					double least = gap(from.getX(), cx << 4) + gap(from.getY(), sy << 4) + gap(from.getZ(), cz << 4);
-					if (least < best) {
-						candidates.add(new Candidate(chunk, index, least));
-					}
-				}
-			}
-		}
-		candidates.sort((a, b) -> Double.compare(a.least(), b.least()));
-		for (Candidate c : candidates) {
-			if (c.least() >= best) {
-				break;
-			}
-			LevelChunkSection section = c.chunk().getSections()[c.index()];
-			int x0 = c.chunk().getPos().getMinBlockX(), y0 = SectionPos.sectionToBlockCoord(c.chunk().getSectionYFromSectionIndex(c.index())),
-				z0 = c.chunk().getPos().getMinBlockZ();
-			for (int x = 0; x < 16; x++) {
-				for (int y = 0; y < 16; y++) {
-					for (int z = 0; z < 16; z++) {
-						if (section.getBlockState(x, y, z).is(ores)) {
-							double dx = x0 + x - from.getX(), dy = y0 + y - from.getY(), dz = z0 + z - from.getZ();
-							best = Math.min(best, dx * dx + dy * dy + dz * dz);
+					LevelChunkSection[] sections = chunk.getSections();
+					for (int sy = fy - reach; sy <= fy + reach; sy++) {
+						int index = chunk.getSectionIndexFromSectionY(sy);
+						if (index < 0 || index >= sections.length) {
+							continue;
+						}
+						LevelChunkSection section = sections[index];
+						if (section.hasOnlyAir() || !section.maybeHas(state -> state.is(ores))) {
+							continue;
+						}
+						double least = gap(from.getX(), cx << 4) + gap(from.getY(), sy << 4) + gap(from.getZ(), cz << 4);
+						if (least < best) {
+							candidates.add(new Candidate(chunk, index, least));
 						}
 					}
 				}
 			}
+			candidates.sort((a, b) -> Double.compare(a.least(), b.least()));
 		}
-		return Math.sqrt(best);
+
+		/** Reads up to {@link #SECTIONS_PER_TICK} more sections; true once the answer is sure. */
+		boolean step() {
+			for (int read = 0; read < SECTIONS_PER_TICK; read++) {
+				if (next >= candidates.size() || candidates.get(next).least() >= best) {
+					return true;
+				}
+				Candidate c = candidates.get(next++);
+				LevelChunkSection section = c.chunk().getSections()[c.index()];
+				int x0 = c.chunk().getPos().getMinBlockX(), y0 = SectionPos.sectionToBlockCoord(c.chunk().getSectionYFromSectionIndex(c.index())),
+					z0 = c.chunk().getPos().getMinBlockZ();
+				for (int x = 0; x < 16; x++) {
+					for (int y = 0; y < 16; y++) {
+						for (int z = 0; z < 16; z++) {
+							if (section.getBlockState(x, y, z).is(metal.ores)) {
+								double dx = x0 + x - from.getX(), dy = y0 + y - from.getY(), dz = z0 + z - from.getZ();
+								best = Math.min(best, dx * dx + dy * dy + dz * dz);
+							}
+						}
+					}
+				}
+			}
+			return next >= candidates.size() || candidates.get(next).least() >= best;
+		}
+
+		/** How far (blocks) the nearest block found is, or more than {@link #REACH} if none. */
+		double distance() {
+			return Math.sqrt(best);
+		}
 	}
 
 	/** The squared distance along one axis from {@code at} to the 16 blocks starting at {@code start} (0 inside). */
