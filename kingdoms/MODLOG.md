@@ -13696,3 +13696,18 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - "Skip the story" no longer asks the server to send MCA's creator again. That request reset MCA's mark that your body was made, and if the creator then didn't come, the game waited for it forever and never set you down at your start.
 - "< The story" on the Life tab still takes you back to the life story; MCA's creator now comes back as soon as the story is lived or skipped again, without asking the server.
 - "Live this life" on a skipped story's own page tidies the picks first (the start is left to fate), so the server always accepts them.
+
+## 0.9.9 (2026-11-15): Kidnapping work and the wanted taken alive
+
+- New board work, **Taken by outlaws**: one of the poster's own is held hogtied at an outlaws' camp. Cut them free with a blade, axe or shears, or untie them by hand (hold use, not sneaking), or carry them out tied, and bring them home. Their captors fight anyone who comes for them, and their knots can't be struggled out of.
+- New board work, **Wanted alive**: a named criminal and their men, camped out in the wild. Bring them back to whoever posted it hogtied or downed, and they're handed over to the cells.
+- A bounty target brought before the court's ruler hogtied counts as alive, as a downed one always did.
+- Talk to a hogtied wanted person with an empty hand: each temperament makes its own offer once. The kindhearted ask to make amends, the cheerful to be let off, the greedy bribe, the brave offer their service, the proud want a fair fight, the devout confess (worth more at the court), the dutiful and gloomy come quietly, the suspicious and timid tell what they know, the hotheaded get gagged, and the spiteful may swear off revenge. You can always untie them and let them go, but that's against the law, and it takes their bounty down.
+- Temper sets how fast a mob works out of a hogtie: the hotheaded tear free soonest, the timid hardly try.
+
+## 0.9.10 (2026-11-15): Old druids teach the rite of rebirth (#1575)
+
+- **Old druids tell Druids the rite**: a Druid player (first or second calling) who talks to an old grove druid hears
+  the rite of rebirth in three lines, a few seconds apart, and knows the Rebirth spell after. Walking more than 8 blocks
+  off ends the telling. A Druid who knows it already gets a one-line reminder. `Rebirths.use`/`tell`, lang part `druid_tells`.
+- Compile-checked; not played.

@@ -5023,3 +5023,10 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - **Dirt others can see**: `ArmourGrime.noticed(body)` (-1 none, 0 dusty, 1 muddy, 2 filthy, from the dirtiest armour piece or the body's own clothes) for Jaymo's Kingdoms' remarks and MCA hearts. The body's grime now counts toward how bad you smell, as armour's does.
 - Classes: `ArmourGrime`, `ArmourGrimeTextures`, `BloodCoatLayer`, `Smell`; masks redrawn by `tools/grime_textures.py`. Previews in project files `art-overhaul/armour-grime/`.
 - Built; not played.
+
+## 0.23.89 (2026-11-15): Reborn players keep their power affinity (#1575)
+
+- **Druid's rite keeps your leaning**: a player given a new body by the druid's rite keeps their power affinity. If they
+  had none of their own (or left it to fate), the power they lost becomes their affinity, so the same power wakes in them
+  again after the usual 3-5 days. `Mortality.shedGifts`, `Affinity.keepLeaning`.
+- Compile-checked; not played.
