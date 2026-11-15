@@ -609,3 +609,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, via coordinator): with the lasso rework, add kidnapping quests (save a hogtied captive, or capture a criminal), and anyone with a bounty can be brought back alive, with extra interactions by temperament. Built as board work Taken by outlaws + Wanted alive and Captures.java (branch claude/project-thread-bqvg9c).
 - 2026-11-14 (Andy, druid reincarnation thread): the old druid hermit must be able to tell a Druid player about the rite of rebirth (built: the telling teaches the Rebirth spell); a reborn player keeps their power affinity (built: no affinity of their own -> the lost power becomes it). Branch claude/project-thread-fi8ahr.
 - 2026-11-15 (Andy, druid reincarnation thread): approved the Lore paragraph "What the old druids teach" (PR #1575).
+- 2026-11-14 (Andy): "add it": kidnapping (rescue/capture) as story-quest steps too; new tale The Asking Price.
