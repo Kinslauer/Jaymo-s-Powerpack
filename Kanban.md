@@ -4,16 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:46). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:50). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]] · 🍇 Bacchus · claimed
 
 
 ## In review
