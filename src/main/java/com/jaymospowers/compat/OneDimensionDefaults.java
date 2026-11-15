@@ -38,7 +38,7 @@ public final class OneDimensionDefaults {
 	private static final String ABOUT = "Jaymo's Powers' defaults: the high sky over the Aether over the Cloud Sea over the Overworld over the Nether."
 		+ " Each world keeps the order it was made with; changing this file never changes a world that exists.";
 	/** Not stacked: reached as before. */
-	static final List<String> LEFT_OUT = List.of("minecraft:the_end", "jaymospowers:future", "jaymospowers:moon", "jaymospowers:verdant_world",
+	static final List<String> LEFT_OUT = List.of("minecraft:the_end", "jaymospowers:future", "jaymospowers:moon", "jaymospowers:verdant_world", "jaymospowers:giant_ring",
 		"jaymospowers:rustfall", "jaymospowers:cinder", "jaymospowers:glacia", "jaymospowers:maw", "jaymospowers:time_chamber",
 		"jaymospowers:arsenal_pocket");
 
