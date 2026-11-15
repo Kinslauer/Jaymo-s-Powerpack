@@ -2,6 +2,8 @@ package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
+import com.jaymoskingdoms.wild.nest.EggSacBlock;
+import com.jaymoskingdoms.wild.nest.SilkDeeps;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -38,11 +39,13 @@ import org.jspecify.annotations.Nullable;
  * lair instead of out in the wild with the bite's poison: wrapped head to foot (Powers' Webbed, every layer), with
  * everything you carried in a cache by the wall, wrapped in silk with eggs laid on it.
  * <ul>
- * <li><b>The lair:</b> a nest cave near by if there is one (a spider spawner among cobwebs, the old mines' nests; you wake
+ * <li><b>The lair:</b> the silk deeps if they're near ({@link SilkDeeps}, the spiders' own nest caves: you wake in one of
+ * their hollows, {@link #DEEPS_TRIES}), else a nest cave near by if there is one (a spider spawner among cobwebs, the old mines' nests; you wake
  * a little way off from it, {@link #NEST_KEEP_OFF}), else a small round hollow the spiders dug: beneath where you
  * fell if that was open ground (with a burrow sloping up to the air), or about where you fell underground. Only natural
  * ground is dug; with nowhere to dig, nobody takes you and you wake as anyone left for dead.</li>
- * <li><b>The cache:</b> a chest (two if it needs) at the hollow's wall, cobwebs round it and eggs laid on top.</li>
+ * <li><b>The cache:</b> a chest (two if it needs) at the hollow's wall, cobwebs round it and egg sacs laid on top
+ * ({@link EggSacBlock}), which don't stir for {@link #EGG_GRACE} after: long enough to get up and get your things.</li>
  * </ul>
  * Lore: the silk deeps (Medieval-Plan): spiders that take a living thing alive carry it home wrapped, which is how the
  * dead sometimes wake there.
@@ -61,8 +64,10 @@ public final class SpiderLairs {
 	static final int DEPTH = 6;
 	/** The hollow's half width and inside height (blocks), and how many cobwebs hang in it. */
 	static final int HALF = 3, HEIGHT = 3, WEBS = 9;
-	/** Eggs laid on the cache. */
-	static final int EGGS = 3;
+	/** The silk deeps are looked for this many times round where you fell, up to {@link #NEST_CHUNKS} chunks out and this far (blocks) up or down. */
+	static final int DEEPS_TRIES = 96, DEEPS_RISE = 24;
+	/** The egg sacs on the cache don't hatch for this long (ticks) after you wake: two minutes. */
+	static final int EGG_GRACE = 2400;
 
 	private SpiderLairs() {
 	}
@@ -98,8 +103,35 @@ public final class SpiderLairs {
 
 	// ---- a nest cave ----
 
-	/** A spot to lie in a nest cave near {@code from}: a spawner with cobwebs round it, and open floor a little way off it. */
+	/** A spot to lie in the silk deeps near {@code from}, the nearest found; else a nest cave near ({@link #spawnerNest}). */
 	private static @Nullable BlockPos nest(ServerLevel level, BlockPos from, RandomSource random) {
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		int reach = NEST_CHUNKS * 16;
+		for (int tries = 0; tries < DEEPS_TRIES; tries++) {
+			BlockPos column = from.offset(random.nextInt(reach * 2 + 1) - reach, random.nextInt(DEEPS_RISE * 2 + 1) - DEEPS_RISE,
+				random.nextInt(reach * 2 + 1) - reach);
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null || !level.isInsideBuildHeight(column)
+				|| !level.getBiome(column).is(SilkDeeps.SILK_DEEPS)) {
+				continue;
+			}
+			for (int dy = 6; dy >= -6; dy--) {
+				BlockPos feet = column.above(dy);
+				if (standable(level, feet) && !level.canSeeSky(feet) && cacheSpot(level, feet, 3) != null) {
+					double d = feet.distSqr(from);
+					if (d < bestD) {
+						bestD = d;
+						best = feet;
+					}
+					break;
+				}
+			}
+		}
+		return best != null ? best : spawnerNest(level, from, random);
+	}
+
+	/** A spot to lie in a nest cave near {@code from}: a spawner with cobwebs round it, and open floor a little way off it. */
+	private static @Nullable BlockPos spawnerNest(ServerLevel level, BlockPos from, RandomSource random) {
 		int cx = from.getX() >> 4, cz = from.getZ() >> 4;
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
@@ -319,8 +351,7 @@ public final class SpiderLairs {
 			chest.setChanged();
 			// laid on it, and wrapped round it
 			if (level.getBlockState(spot.above()).isAir()) {
-				level.setBlock(spot.above(), Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, 1 + random.nextInt(EGGS + 1) % 4),
-					Block.UPDATE_ALL);
+				EggSacBlock.lay(level, spot.above(), false, EGG_GRACE);
 			}
 			for (Direction d : Direction.Plane.HORIZONTAL) {
 				BlockPos side = spot.relative(d);

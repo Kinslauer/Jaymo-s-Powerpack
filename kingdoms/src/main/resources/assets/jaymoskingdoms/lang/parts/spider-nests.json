@@ -1,0 +1,13 @@
+{
+  "biome.jaymoskingdoms.silk_deeps": "Silk Deeps",
+  "block.jaymoskingdoms.spider_stone": "Spider Stone",
+  "block.jaymoskingdoms.nest_silk": "Nest Silk",
+  "block.jaymoskingdoms.shed_skin": "Shed Skin",
+  "block.jaymoskingdoms.egg_sac": "Egg Sac",
+  "block.jaymoskingdoms.brood_egg": "Brood Egg",
+  "item.jaymoskingdoms.silk_gland": "Silk Gland",
+  "item.jaymoskingdoms.nest_map": "Nest Map",
+  "entity.jaymoskingdoms.brood_queen": "Brood Queen",
+  "item.jaymoskingdoms.brood_queen_spawn_egg": "Brood Queen Spawn Egg",
+  "message.jaymoskingdoms.knowledge.locked.brood_egg": "The egg rings dull under your blow. (Knowledge 1: the Goblin King)"
+}

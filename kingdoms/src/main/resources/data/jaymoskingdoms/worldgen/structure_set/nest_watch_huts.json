@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:nest_watch_hut",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 14,
+    "separation": 4,
+    "salt": 552918307
+  }
+}

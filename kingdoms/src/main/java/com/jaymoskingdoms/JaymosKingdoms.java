@@ -528,6 +528,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		GutteringLamps.register();
 		MoteLanterns.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
+		// medieval picks: spider nests (the silk deeps, their egg sacs and the brood queen)
+		com.jaymoskingdoms.wild.nest.SpiderNests.register();
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
 		com.jaymoskingdoms.wild.SpiderMinds.register();
