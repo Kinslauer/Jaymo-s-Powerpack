@@ -134,7 +134,7 @@ public final class HeraldryWear {
 		return Math.floorMod(hash(realm(f)) >>> 24, (long)BLACKENED_REALMS) == 0 ? HeraldryArmour.BLACKENED : "";
 	}
 
-	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm), or empty for the other slots. */
+	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm; the cuirass carries the realm's cape), or empty for the other slots. */
 	private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
 		String finish = finish(f);
 		String tag = server == null ? null : realmTag(server, f);
@@ -145,7 +145,9 @@ public final class HeraldryWear {
 				yield tag == null ? helm : PowersCompat.realmMarked(helm, tag);
 			}
 			case MAINHAND -> tag == null || arm == null ? ItemStack.EMPTY : PowersCompat.realmArm(arm, tag);
-			case CHEST -> HeraldryArmour.stack("plate_cuirass", finish);
+			// (gb-capes) a knight's cuirass carries the realm's cape
+			case CHEST -> server == null ? HeraldryArmour.stack("plate_cuirass", finish)
+				: Capes.cape(HeraldryArmour.stack("plate_cuirass", finish), Outfits.heraldry(f, server));
 			case FEET -> HeraldryArmour.stack("plate_sabatons", finish);
 			default -> ItemStack.EMPTY;
 		};

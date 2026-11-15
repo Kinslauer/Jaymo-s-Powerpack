@@ -323,6 +323,11 @@ public final class Crowns {
 
 	/** A failure message (key and arguments), or null once {@code player} has founded a realm at their feet. */
 	static @Nullable Component found(ServerPlayer player, @Nullable String name) {
+		return found(player, name, player.blockPosition());
+	}
+
+	/** (gb-tent) {@link #found}, at {@code at} (a homestead's tent: {@link Homesteads}). */
+	static @Nullable Component found(ServerPlayer player, @Nullable String name, BlockPos at) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
 		if (player.level() != level) {
@@ -334,7 +339,6 @@ public final class Crowns {
 		if (name != null && Factions.byName(server, name) != null) {
 			return Component.translatable("message.jaymoskingdoms.crown.name_taken", name);
 		}
-		BlockPos at = player.blockPosition();
 		Faction near = Factions.realmNear(server, at, KingdomEvents.CAPITAL_SPACING);
 		if (near == null) {
 			near = Factions.near(server, at, KingdomEvents.TOWN_RADIUS);

@@ -1025,7 +1025,8 @@ public final class Tales {
 			if (!mark.isEmpty()) {
 				state(player).marks.add(mark);
 			}
-			int pay = Tale.pickNumber(step, "pay", facts(player, run), 0);
+			// (gb-haggle) as much more as was haggled for
+			int pay = Haggle.talePay(Tale.pickNumber(step, "pay", facts(player, run), 0), run.vars);
 			if (pay > 0) {
 				Money.pay(player, faction(player, run), Money.worth(pay));
 			}
@@ -1076,6 +1077,13 @@ public final class Tales {
 		if (kind.equals("talk") && speaker != null && is(run, who, speaker)) {
 			say(player, run, step, speaker, 0);
 		}
+	}
+
+	/** (gb-haggle) Asked for more, {@code giver} took offence: the tale they were putting to {@code player} is off. */
+	private static void refused(ServerPlayer player, Run run, LivingEntity giver) {
+		state(player).runs.remove(run);
+		Quests.withdraw(giver, QUEST);
+		Quests.sync(player, true);
 	}
 
 	/** The tale is the player's now: the asker's offer is gone, and the party's members near are in it too. */
@@ -1463,6 +1471,18 @@ public final class Tales {
 				choices.add(Menus.Choice.of(Component.translatable("tale.jaymoskingdoms.go_on"), p -> {
 					if (open(p, run, at)) {
 						go(p, run, step.get("then"), who);
+					}
+				}));
+			}
+			if (!run.taken && is(run, "giver", who) && !run.vars.containsKey(Haggle.TALE_VAR) && !Haggle.haggled(player, run.quest())) {
+				// (gb-haggle) the tale's still being put to them: they may ask for more before they take it on
+				choices.add(Menus.Choice.of(Component.translatable("tale.jaymoskingdoms.haggle"), p -> {
+					if (open(p, run, at)) {
+						if (Haggle.tale(p, who, run.vars, run.quest()) == Haggle.Outcome.OFFENCE) {
+							refused(p, run, who);
+						} else {
+							say(p, run, step, who, i);
+						}
 					}
 				}));
 			}
@@ -2003,7 +2023,7 @@ public final class Tales {
 		Quest q = new Quest(run.quest(), Quest.TALE, QUEST + tale.id,
 			new Quest.Giver(run.giverId() == null ? new UUID(0L, 0L) : run.giverId(), run.giverName, run.faction, false, run.job),
 			new Quest.Objective("end", 1, 1, Optional.empty(), Optional.empty(), "", "", false),
-			new Quest.Reward(Tale.pickNumber(reward, "coins", facts, 0), Tale.strings(reward.get("items")),
+			new Quest.Reward(Haggle.talePay(Tale.pickNumber(reward, "coins", facts, 0), run.vars), Tale.strings(reward.get("items")),
 				reward.has("book") ? Optional.of(Tale.string(reward, "book", "")) : Optional.empty(),
 				reward.has("relic") ? Optional.of(Tale.string(reward, "relic", "")) : Optional.empty(),
 				Tale.number(reward, "hearts", 0), Tale.number(reward, "reputation", 0), 0), level.getGameTime());

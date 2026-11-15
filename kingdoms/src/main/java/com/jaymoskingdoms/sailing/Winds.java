@@ -59,7 +59,11 @@ public final class Winds {
 
 	/** How much of the wind her sails catch heading {@code yaw} (0 in irons to 1). */
 	public static float catches(float yaw) {
-		float angle = offWind(yaw);
+		return catchesOff(offWind(yaw));
+	}
+
+	/** How much of the wind sails catch {@code angle} degrees off it. */
+	private static float catchesOff(float angle) {
 		for (int i = 1; i < ANGLES.length; i++) {
 			if (angle <= ANGLES[i]) {
 				float t = (angle - ANGLES[i - 1]) / (ANGLES[i] - ANGLES[i - 1]);
@@ -67,6 +71,27 @@ public final class Winds {
 			}
 		}
 		return 0.0F;
+	}
+
+	// ---- the client's own reading of it (gb-sails: how her sails are drawn) ------------------------------------------
+
+	/** Client: the angle (degrees, 0 to 180) between a ship heading {@code yaw} and the wind as the client has it. */
+	public static float clientOffWind(float yaw) {
+		double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD), fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
+		float a = Storms.clientWindAngle;
+		double dot = fx * Math.cos(a) + fz * Math.sin(a);
+		return (float)Math.toDegrees(Math.acos(Mth.clamp(dot, -1.0, 1.0)));
+	}
+
+	/** Client: how much of the wind her sails catch heading {@code yaw}. */
+	public static float clientCatches(float yaw) {
+		return catchesOff(clientOffWind(yaw));
+	}
+
+	/** Client: how hard the wind blows at (x, z) for her sails, as {@link #strength}. */
+	public static float clientStrength(Level level, double x, double z) {
+		float rain = Math.max(level.getRainLevel(1.0F), Storms.cover(level, x, z));
+		return (LEAST + (MOST - LEAST) * Storms.clientWindStrength() + RAIN * rain + THUNDER * Storms.thunder(level, x, z)) * SeaEvents.wind(level, x, z);
 	}
 
 	public static Point point(float yaw) {
