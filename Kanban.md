@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 15:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 15:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Agents/wall-slump|wall-slump]] · 💻 Odysseus · #1601 · in-review
-- [ ] [[Agents/warship-fleets|warship-fleets]] · 💻 Odysseus · #1605 · in-review
 
 
 ## Needs Andy
