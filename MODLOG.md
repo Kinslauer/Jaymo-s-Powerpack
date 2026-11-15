@@ -5147,3 +5147,11 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 
 - Long notes under our JEI pages (ore washing, small ores, tin ore, brick mending, salvage, quenching, xeno and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
 - Built; not played.
+
+## 0.24.1 (2026-11-15): the blue giant's ring - fly to the planet over the Verdant World
+
+- **The Blue Giant's Ring**: the ringed blue giant in the Verdant World's sky is now a pod stop (Andy picked its ring). On the star map it sits on the Verdant World's orbit with the Verdant World going round it, and is there whenever the Verdant World's chart is read. The hop between the two burns 1 fuel; from anywhere else 3 (grade II).
+- **The ring itself** (new dimension `jaymospowers:giant_ring`, made by `tools/gen_giant_ring.py`): no ground, just flat drifts of packed ice and tuff, topped with snow, calcite and blue ice, hanging between about y 60 and 130, veined with gravilite blocks and set with gravilite shards. Nothing spawns. Black sky, and the giant itself fills a quarter of it, rising off the horizon (VerdantSkyClient).
+- Half gravity and 6 extra blocks of safe fall; no air (Breath counts it airless like the Pale Moon and the Maw). Fall off a drift below y -24 and the giant's winds throw you back onto the nearest drift (or beside the ring's pod) for 6 damage.
+- Left out of the One Dimension stack (OneDimensionDefaults). Missions, warrants and charts of their own: none.
+- Compiled; the worldgen generated on a plain 26.3 server (drifts fill about a fifth of the band, 88% of columns have one); not played in the pack.
