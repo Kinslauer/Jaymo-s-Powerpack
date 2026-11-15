@@ -5,12 +5,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -18,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Andy: "skeletons should carry tattered quivers". Every bow skeleton (skeleton, stray, bogged, parched) wears a
@@ -30,7 +34,30 @@ public final class QuiverLayer {
 	/** Where it sits on the back (model pixels: across, down from the neck, out from the spine), its size and slant (degrees). */
 	static final float ACROSS = 0.0F, DOWN = 5.5F, OUT = 2.6F, SIZE = 0.75F, SLANT = 0.0F;
 
+	/**
+	 * Jaymo's Powers (optional) draws a severed head or limb as the whole body with only that part showing, marking its
+	 * render state with {@code Dismembered.ONLY}. The quiver isn't on any of those parts: without this a dead skeleton's
+	 * quiver was drawn again on its head, both arms and both legs.
+	 */
+	private static final @Nullable RenderStateDataKey<?> ONLY_PART = onlyPartKey();
+
 	private QuiverLayer() {
+	}
+
+	private static @Nullable RenderStateDataKey<?> onlyPartKey() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return null;
+		}
+		try {
+			return (RenderStateDataKey<?>) Class.forName("com.jaymospowers.client.Dismembered").getField("ONLY").get(null);
+		} catch (ReflectiveOperationException | ClassCastException | LinkageError e) {
+			return null;
+		}
+	}
+
+	/** {@code state} is a severed part's body (only that part drawn). */
+	static boolean severedPart(EntityRenderState state) {
+		return ONLY_PART != null && state.getData(ONLY_PART) != null;
 	}
 
 	public static void register() {
@@ -55,7 +82,7 @@ public final class QuiverLayer {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			if (state.isInvisible) {
+			if (state.isInvisible || severedPart(state)) {
 				return;
 			}
 			Minecraft minecraft = Minecraft.getInstance();

@@ -195,14 +195,20 @@ public final class MindSpells {
 	/** {@code target} lets go of whatever is in their hand (a mob cannot pick it up again for a moment). */
 	private static void drop(ServerLevel level, LivingEntity target) {
 		ItemStack held = target.getMainHandItem().copy();
+		EquipmentSlot from = EquipmentSlot.MAINHAND;
 		if (held.isEmpty()) {
 			held = target.getOffhandItem().copy();
+			from = EquipmentSlot.OFFHAND;
 			target.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
 		} else {
 			target.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 		}
 		if (held.isEmpty()) {
 			return;
+		}
+		if (target instanceof Mob && !WornGear.pickedUp(target, from)) {
+			// a mob's own weapon has seen hard use
+			WornGear.wear(held, target.getRandom());
 		}
 		ItemEntity item = target instanceof ServerPlayer sp ? sp.drop(held, false, Prediction.SERVER_ONLY) : target.spawnAtLocation(level, held);
 		if (item != null) {
