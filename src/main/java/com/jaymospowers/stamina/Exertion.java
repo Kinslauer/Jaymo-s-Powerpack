@@ -41,7 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The downed</b> ({@link Downed#isDowned}) tire of nothing and get their breath back lying there; what they
  * held, they dropped going down ({@link DroppedArms}).</li>
  * </ul>
- * Survival and adventure only.
+ * Survival and adventure only. Every jump, armoured or not, also costs {@link #JUMP_EXHAUSTION} of hunger, except one
+ * that a parkour move already paid feathers for ({@link #JUMP_PAID_GAP}).
  */
 public final class Exertion {
 	// ===== the knobs (half-feathers, in plate from head to foot) ======================================================
@@ -59,6 +60,10 @@ public final class Exertion {
 	public static final int SWING_LANDS = 20;
 	/** With adrenaline running, everything wears this share as much. */
 	public static final float ADRENALINE_EASE = 0.5F;
+	/** Hunger exhaustion each jump adds on top of vanilla's (sprint-jump 0.2, jump 0.05), armour or none. */
+	public static final float JUMP_EXHAUSTION = 0.1F;
+	/** A jump this soon (ticks) after spending feathers on a move is that move, already paid for: no extra exhaustion. */
+	public static final int JUMP_PAID_GAP = 10;
 	// ================================================================================================================
 
 	/** Server, by player: the jumps counted last tick, and the game times of the last swing counted and the last one Better Combat started. */
@@ -100,6 +105,10 @@ public final class Exertion {
 			int jumps = jumps(player);
 			int jumped = (int)Math.max(0L, jumps - seen[0]);
 			seen[0] = jumps;
+			if (jumped > 0 && !player.isCreative() && !player.isSpectator()
+					&& player.level().getGameTime() - Feathers.lastSpend(player) > JUMP_PAID_GAP) {
+				player.causeFoodExhaustion(jumped * JUMP_EXHAUSTION);
+			}
 			float drain = jumped * JUMP_DRAIN;
 			if (player.isSprinting() && !player.isPassenger() && !player.isFallFlying()) {
 				drain += SPRINT_DRAIN / 20.0F;

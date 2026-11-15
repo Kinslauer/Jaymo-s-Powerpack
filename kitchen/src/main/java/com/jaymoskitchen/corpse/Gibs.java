@@ -126,6 +126,10 @@ public final class Gibs {
 		if (mob instanceof Creeper) {
 			return true;
 		}
+		if (mob.getType().builtInRegistryHolder().is(com.jaymoskitchen.farm.Familiarity.FARM_ANIMALS)) {
+			// (GT New Horizons picks) a farm animal isn't blown apart: it leaves a bruised body (CleanKill#BRUISED)
+			return false;
+		}
 		// (0.5.67) Jaymo's Powers rolls it by how close the blast was (its BlastGore): its word goes; without it, the blast's damage
 		if (mob.entityTags().contains(GIB_TAG)) {
 			return true;

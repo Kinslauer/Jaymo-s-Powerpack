@@ -98,9 +98,16 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.rats.Rats.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.TiredSoil.register();
+		// (GT New Horizons picks) slow herds and crowded pens; before Familiarity, so a milked cow gives no extra bucket
+		com.jaymoskitchen.farm.Herds.register();
 		com.jaymoskitchen.farm.Familiarity.register();
+		// (GT New Horizons picks) farmland only near water, seeds scratched from dry grass
+		com.jaymoskitchen.farm.DryFields.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		// (GT New Horizons picks) a heart for a varied diet, its food journal (its attachment is class-loaded here), the lunch box
+		com.jaymoskitchen.stomach.Variety.register();
+		com.jaymoskitchen.stomach.LunchBox.register();
 		com.jaymoskitchen.hardcore.Hardcore.register();
 		com.jaymoskitchen.fresh.Freshness.register();
 		com.jaymoskitchen.fresh.Curing.register();

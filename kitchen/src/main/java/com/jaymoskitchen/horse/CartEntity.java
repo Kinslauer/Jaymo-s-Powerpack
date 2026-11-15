@@ -585,6 +585,10 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		BlockState state = level.getBlockState(pos);
 		BlockState tilled;
 		if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.DIRT_PATH)) {
+			if (!com.jaymoskitchen.farm.DryFields.nearWater(level, pos)) {
+				// (dry fields: farmland only near water)
+				return false;
+			}
 			tilled = Blocks.FARMLAND.defaultBlockState();
 		} else if (state.is(Blocks.COARSE_DIRT) || state.is(Blocks.ROOTED_DIRT)) {
 			tilled = Blocks.DIRT.defaultBlockState();

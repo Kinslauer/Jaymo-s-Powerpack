@@ -3,7 +3,6 @@ package com.jaymoskitchen.delight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -17,9 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
  * past its last stage into the tomato vine ({@link TomatoBlock}).
  */
 public class BuddingTomatoBlock extends BuddingBushBlock implements BonemealableBlock {
-	/** Bone meal pushes the bush on by this many stages (past the last one, the rest grows the vine). */
-	private static final int BONEMEAL_MIN = 1, BONEMEAL_MAX = 4;
-
 	public BuddingTomatoBlock(Properties properties) {
 		super(properties);
 	}
@@ -56,7 +52,7 @@ public class BuddingTomatoBlock extends BuddingBushBlock implements Bonemealable
 	@Override
 	public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
 		int maxAge = getMaxAge();
-		int grown = Math.min(getAge(state) + Mth.nextInt(level.getRandom(), BONEMEAL_MIN, BONEMEAL_MAX), 7);
+		int grown = Math.min(getAge(state) + com.jaymoskitchen.farm.SlowFarms.BONE_MEAL_STAGES, 7);
 		if (grown <= maxAge) {
 			level.setBlockAndUpdate(pos, state.setValue(AGE, grown));
 		} else {

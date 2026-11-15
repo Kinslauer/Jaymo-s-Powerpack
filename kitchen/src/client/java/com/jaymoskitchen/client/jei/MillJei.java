@@ -27,7 +27,7 @@ import net.minecraft.world.item.Items;
  */
 public final class MillJei implements IModPlugin {
 	static final IRecipeType<SimpleCategory.Recipe> GRINDING = type("grinding"), CHOPPING = type("chopping"), PRESSING = type("pressing"),
-		DRYING = type("drying");
+		DRYING = type("drying"), FORAGING = type("foraging");
 
 	private static IRecipeType<SimpleCategory.Recipe> type(String id) {
 		return IRecipeType.create(JaymosKitchen.MOD_ID, id, SimpleCategory.Recipe.class);
@@ -45,7 +45,8 @@ public final class MillJei implements IModPlugin {
 			new SimpleCategory(gui, GRINDING, title("grinding"), Mill.MACHINES.get(MachineKind.HAND_GRINDSTONE), 1),
 			new SimpleCategory(gui, CHOPPING, title("chopping"), Mill.MACHINES.get(MachineKind.CHOPPING_BLOCK), 2),
 			new SimpleCategory(gui, PRESSING, title("pressing"), Mill.MACHINES.get(MachineKind.PRESS), 2),
-			new SimpleCategory(gui, DRYING, title("drying"), com.jaymoskitchen.tanning.Hides.DRYING_RACK, 1));
+			new SimpleCategory(gui, DRYING, title("drying"), com.jaymoskitchen.tanning.Hides.DRYING_RACK, 1),
+			new SimpleCategory(gui, FORAGING, title("foraging"), Items.WOODEN_HOE, 2));
 	}
 
 	@Override
@@ -59,6 +60,9 @@ public final class MillJei implements IModPlugin {
 			registration.addCraftingStation(type, Mill.MACHINES.get(kind));
 		}
 		registration.addCraftingStation(DRYING, com.jaymoskitchen.tanning.Hides.DRYING_RACK);
+		for (ItemStack hoe : hoes()) {
+			registration.addCraftingStation(FORAGING, hoe);
+		}
 	}
 
 	@Override
@@ -99,6 +103,14 @@ public final class MillJei implements IModPlugin {
 				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
 		}
 		registration.addRecipes(DRYING, drying);
+		// (GT New Horizons picks) seeds a hoe scratches from grass too far from water for farmland, land by land
+		List<ItemStack> hoes = hoes();
+		List<SimpleCategory.Recipe> foraging = new ArrayList<>();
+		for (com.jaymoskitchen.farm.DryFields.Forage forage : com.jaymoskitchen.farm.DryFields.FORAGE) {
+			foraging.add(new SimpleCategory.Recipe(List.of(hoes, List.of(new ItemStack(Items.GRASS_BLOCK))), List.of(new ItemStack(forage.seed().get())),
+				List.of(note("foraging.where." + forage.where()), note("foraging.odds", com.jaymoskitchen.farm.DryFields.FORAGE_ODDS))));
+		}
+		registration.addRecipes(FORAGING, foraging);
 		// (Hardrock picks) warmth you build: how the hearth, icebox, thermometer, linings and warm or cold water work
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
@@ -129,6 +141,18 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(Items.BLAST_FURNACE, note("soot"));
 		registration.addIngredientInfo(Items.BONE_MEAL, note("tired_fields"));
 		registration.addIngredientInfo(com.jaymoskitchen.delight.DelightFarm.ORGANIC_COMPOST, note("tired_fields"));
+	}
+
+	/** Everything that works the ground as a hoe. */
+	private static List<ItemStack> hoes() {
+		List<ItemStack> hoes = new ArrayList<>();
+		for (Item item : BuiltInRegistries.ITEM) {
+			ItemStack stack = new ItemStack(item);
+			if (com.jaymoskitchen.farm.DryFields.isHoe(stack)) {
+				hoes.add(stack);
+			}
+		}
+		return hoes;
 	}
 
 	private static Component title(String id) {

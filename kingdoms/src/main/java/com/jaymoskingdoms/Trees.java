@@ -74,8 +74,11 @@ import org.jspecify.annotations.Nullable;
  * Sleeping through a night ({@link Nights}) grows them on as well.
  */
 public final class Trees {
-	/** A growing tree's step takes this long, and up to this much more at random (ticks). */
-	static final int GROW_TICKS = 6000, GROW_JITTER = 4000;
+	/**
+	 * A growing tree's step takes this long, and up to this much more at random (ticks). Twice what it was: farms grow at
+	 * half speed (the GT New Horizons picks, with Kitchen's slow saplings).
+	 */
+	static final int GROW_TICKS = 12000, GROW_JITTER = 8000;
 	/** How often growing trees are looked at, and the light one needs. */
 	static final int CHECK_TICKS = 100, LIGHT = 9;
 	/** Steps: a sapling tree, a young tree; after that, the full tree. */
@@ -356,6 +359,28 @@ public final class Trees {
 			store(server, list);
 		}
 		return grown;
+	}
+
+	/**
+	 * Jaymo's Powers' Time Bloom (by reflection): the growing trees standing within {@code radius} of {@code centre} come
+	 * {@code ticks} nearer their next step. They grow when next looked at.
+	 */
+	public static void hurry(ServerLevel level, BlockPos centre, double radius, long ticks) {
+		if (level != Factions.level(level.getServer())) {
+			return;
+		}
+		List<Growing> list = new ArrayList<>(growing(level.getServer()));
+		boolean changed = false;
+		for (int i = 0; i < list.size(); i++) {
+			Growing g = list.get(i);
+			if (g.pos().closerThan(centre, radius)) {
+				list.set(i, new Growing(g.pos(), g.sapling(), g.stage(), g.next() - ticks));
+				changed = true;
+			}
+		}
+		if (changed) {
+			store(level.getServer(), list);
+		}
 	}
 
 	/** One step up: a sapling tree to a young one, a young one to its full tree (null: grown, no longer kept). */

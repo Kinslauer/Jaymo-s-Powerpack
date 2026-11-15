@@ -1,0 +1,15 @@
+{
+	"item.jaymoskitchen.food_journal": "Food Journal",
+	"item.jaymoskitchen.lunch_box": "Lunch Box",
+	"screen.jaymoskitchen.food_journal.eaten": "Eaten",
+	"screen.jaymoskitchen.food_journal.untried": "Not Yet Tried",
+	"jei.jaymoskitchen.foraging": "Foraging",
+	"jei.jaymoskitchen.foraging.where.anywhere": "Anywhere",
+	"jei.jaymoskitchen.foraging.where.plains": "Plains",
+	"jei.jaymoskitchen.foraging.where.woods": "Forests and taiga",
+	"jei.jaymoskitchen.foraging.where.hot": "Hot lands",
+	"jei.jaymoskitchen.foraging.where.jungle_savanna": "Jungles and savannas",
+	"jei.jaymoskitchen.foraging.where.jungle": "Jungles",
+	"jei.jaymoskitchen.foraging.where.swamp": "Swamps",
+	"jei.jaymoskitchen.foraging.odds": "Dry grass, far from water: 1 in %s"
+}

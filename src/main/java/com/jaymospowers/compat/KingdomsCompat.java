@@ -547,4 +547,33 @@ public final class KingdomsCompat {
 			// (an older Kingdoms: no guns to meld into)
 		}
 	}
+
+	private static Method treesHurry;
+	private static boolean treesLooked;
+
+	/**
+	 * Chrono's Time Bloom (GT New Horizons picks: "bloom affects all of them"): Kingdoms' growing trees within {@code radius}
+	 * of {@code centre} come {@code ticks} nearer their next step ({@code Trees.hurry}). Nothing without Kingdoms.
+	 */
+	public static void hurryTrees(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos centre, double radius, long ticks) {
+		if (!LOADED) {
+			return;
+		}
+		if (!treesLooked) {
+			treesLooked = true;
+			try {
+				treesHurry = Class.forName("com.jaymoskingdoms.Trees").getMethod("hurry", net.minecraft.server.level.ServerLevel.class,
+					net.minecraft.core.BlockPos.class, double.class, long.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				treesHurry = null;
+			}
+		}
+		try {
+			if (treesHurry != null) {
+				treesHurry.invoke(null, level, centre, radius, ticks);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms: its trees grow as they will)
+		}
+	}
 }

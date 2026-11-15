@@ -19,7 +19,8 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Andy: "Yeah 1 and 3" (clean kills). How an animal died decides what its carcass gives, as a hunter's kill does: a
  * blade or an arrow leaves it whole; teeth and claws tear the hide ({@link #MAULED}); fire ruins it ({@link #BURNT});
- * a fall, a blast, a club or bare fists bruise the meat ({@link #BATTERED}). The loss is taken from the body's loot as
+ * a fall, a blast, a club or bare fists bruise the meat ({@link #BATTERED}), and a farm animal killed so (GT New Horizons
+ * picks) is pulped: half its meat and its hide torn ({@link #BRUISED}). The loss is taken from the body's loot as
  * it's made, so every way of butchering it (ground, block, hook, a butcher villager) sees the same carcass. What was
  * lost is kept with the body: a practised butcher ({@link Hanging#SKILL_SAVES}) trims round the damage and has it back,
  * all but a burnt hide.
@@ -27,17 +28,24 @@ import net.minecraft.world.item.ItemStack;
 public final class CleanKill {
 	/** Weapons that bruise the meat: maces, hammers, clubs, staves. */
 	public static final TagKey<Item> BRUISING_WEAPONS = TagKey.create(Registries.ITEM, JaymosKitchen.id("bruising_weapons"));
-	static final String CLEAN = "", MAULED = "mauled", BURNT = "burnt", BATTERED = "battered";
+	static final String CLEAN = "", MAULED = "mauled", BURNT = "burnt", BATTERED = "battered", BRUISED = "bruised";
 	/** A battered carcass loses one piece of meat in this many (never its last). */
 	static final int BRUISED_ONE_IN = 3;
 	/** A mauled carcass keeps one skin in this many. */
 	static final int TORN_KEEPS_ONE_IN = 2;
+	/** A bruised farm animal keeps one piece of meat in this many (never less than one). */
+	static final int BRUISED_KEEPS_ONE_IN = 2;
 
 	private CleanKill() {
 	}
 
 	/** How {@code mob}, just now dying, was killed. */
 	static String of(LivingEntity mob) {
+		String death = how(mob);
+		return death.equals(BATTERED) && mob.getType().builtInRegistryHolder().is(com.jaymoskitchen.farm.Familiarity.FARM_ANIMALS) ? BRUISED : death;
+	}
+
+	private static String how(LivingEntity mob) {
 		DamageSource last = mob.getLastDamageSource();
 		if (mob.isOnFire() || last != null && last.is(DamageTypeTags.IS_FIRE)) {
 			return BURNT;
@@ -67,6 +75,8 @@ public final class CleanKill {
 				case BURNT -> stack.is(Butchery.SKINS) ? 0 : count;
 				case MAULED -> stack.is(Butchery.SKINS) ? count / TORN_KEEPS_ONE_IN : count;
 				case BATTERED -> stack.has(DataComponents.FOOD) ? Math.max(1, count - (count + BRUISED_ONE_IN - 1) / BRUISED_ONE_IN) : count;
+				case BRUISED -> stack.is(Butchery.SKINS) ? count / TORN_KEEPS_ONE_IN
+					: stack.has(DataComponents.FOOD) ? Math.max(1, count / BRUISED_KEEPS_ONE_IN) : count;
 				default -> count;
 			};
 			if (keep < count) {

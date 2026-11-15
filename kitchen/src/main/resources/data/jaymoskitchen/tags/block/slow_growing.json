@@ -1,0 +1,29 @@
+{
+  "values": [
+    "#minecraft:crops",
+    "#minecraft:saplings",
+    "minecraft:sugar_cane",
+    "minecraft:cactus",
+    "minecraft:cocoa",
+    "minecraft:nether_wart",
+    "minecraft:sweet_berry_bush",
+    "minecraft:cave_vines",
+    "jaymoskitchen:hemp",
+    "jaymoskitchen:cabbages",
+    "jaymoskitchen:rice",
+    "jaymoskitchen:rice_panicles",
+    "jaymoskitchen:onions",
+    "jaymoskitchen:budding_tomatoes",
+    "jaymoskitchen:tomatoes",
+    "jaymoskitchen:tomatoes_on_rope",
+    "jaymoskitchen:pmeh_crop",
+    {
+      "id": "jaymospowers:orange_tree",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:berry_bush_stem",
+      "required": false
+    }
+  ]
+}

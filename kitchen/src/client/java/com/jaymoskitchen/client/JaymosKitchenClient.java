@@ -74,6 +74,10 @@ public class JaymosKitchenClient implements ClientModInitializer {
 
 		// the horse drop: wagons and carriages, and saddlebags drawn on horses wearing them
 		CartClient.register();
+		// (GT New Horizons picks) the food journal and the lunch box
+		com.jaymoskitchen.stomach.FoodJournalItem.openScreen = com.jaymoskitchen.client.stomach.FoodJournalScreen::open;
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.stomach.LunchBox.MENU,
+			com.jaymoskitchen.client.stomach.LunchBoxScreen::new);
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
