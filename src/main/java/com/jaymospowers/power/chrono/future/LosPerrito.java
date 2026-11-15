@@ -24,11 +24,10 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.storage.LevelResource;
 
 /**
- * The city the future is made of. It used to be Los Perrito City by Uospag
- * (https://www.curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0); new futures are built from Mosslorn by
- * milkshake_mp3 ({@link #MOSSLORN}), a city slowly overgrown with moss. Whichever map it is, in the world it is still
- * Los Perrito. A world whose future was already built from the old map keeps it until an operator runs
- * {@code /future swap} ({@link #requestSwap}).
+ * The city the future is made of: Los Perrito City by Uospag (https://www.curseforge.com/minecraft/worlds/los-perrito,
+ * CC BY 4.0), or, once its author agrees, Mosslorn by milkshake_mp3 ({@link #MOSSLORN}), a city slowly overgrown with
+ * moss. Whichever map it is, in the world it is still Los Perrito. New futures are built from {@link #NEWEST}; a world
+ * whose future was built from another map keeps it until an operator runs {@code /future swap} ({@link #requestSwap}).
  * <p>A map at half a gigabyte can't ride in a jar, so the first time anyone tries to leap forward the server fetches it
  * from CurseForge (or uses the zip if someone dropped it in the server or world folder), unpacks its region, entity and
  * POI files into the {@link Future#FUTURE} dimension's folder, and copies any map arts (billboards, posters) in above
@@ -58,8 +57,11 @@ public final class LosPerrito {
 		"https://www.curseforge.com/api/v1/mods/1272043/files/8007945/download",
 		"https://www.curseforge.com/minecraft/worlds/mosslorn-1000x1000-abandoned-overgrown-city",
 		"message.jaymospowers.future.credit.mosslorn", "mosslorn.txt", -140, -85, -3 * 512, 3 * 512 - 1, -3 * 512, 3 * 512 - 1);
-	/** What a new future is built from. */
-	static final CityMap NEWEST = MOSSLORN;
+	/**
+	 * What a new future is built from. Still Los Perrito: Mosslorn is All Rights Reserved and its author asks to be asked
+	 * before it goes in a modpack, so it waits for their yes (then this becomes {@link #MOSSLORN}).
+	 */
+	static final CityMap NEWEST = PERRITO;
 	static final CityMap[] ALL = {MOSSLORN, PERRITO};
 	/** The parts of the world folder inside the zip we take (the folder's own name differs from map to map). */
 	static final String[] TAKEN = {"region/", "entities/", "poi/"};
