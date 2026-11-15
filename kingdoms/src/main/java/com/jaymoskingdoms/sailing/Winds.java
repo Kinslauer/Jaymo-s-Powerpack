@@ -4,6 +4,7 @@ import com.jaymoskingdoms.disasters.Storms;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.7.18) The wind in a ship's sails: the world's own wind ({@link Storms}, the one that drives its storm cells), harder
@@ -40,6 +41,12 @@ public final class Winds {
 		// the sea's own weather: dead calm in the doldrums, harder in a squall
 		return (LEAST + (MOST - LEAST) * Mth.clamp(Storms.windStrength(), 0.0F, 1.0F) + RAIN * rain + THUNDER * Storms.thunder(level, x, z))
 			* SeaEvents.wind(level, x, z);
+	}
+
+	/** The way the wind blows (flat, a unit long): what nobody steers drifts along it. */
+	public static Vec3 way() {
+		float a = Storms.windAngle();
+		return new Vec3(Math.cos(a), 0.0, Math.sin(a));
 	}
 
 	/** The angle (degrees, 0 to 180) between a ship heading {@code yaw} and the way the wind blows. */

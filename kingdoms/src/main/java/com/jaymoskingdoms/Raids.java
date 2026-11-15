@@ -211,7 +211,8 @@ final class Raids {
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
 			// ((0.7.491) a greenskin realm on the warpath: it and its vassals all go for the one target, often)
 			Faction warpath = data == null ? null : warpathTarget(server, level, camp);
-			if (data == null || data.clearedAt() >= 0 || IllagerSites.noRaids(server, camp.id())
+			// (a sky cove's pirates don't go raiding on foot: their airship comes down on what they mark, SkyPirates)
+			if (data == null || data.clearedAt() >= 0 || IllagerSites.noRaids(server, camp.id()) || SkyPirates.KIND.equals(data.kind())
 				|| now - data.lastRaid() < (warpath != null ? COOLDOWN_TICKS / 4 : hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
 				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null) {
 				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls)
@@ -464,6 +465,8 @@ final class Raids {
 		switch (raid.phase) {
 			case MARCH -> {
 				boolean arrived = now - raid.phaseAt > MARCH_TICKS;
+				// (an orc or barbarian band beats its war drum as it comes)
+				WarDrums.march(level, raid.camp, party, now);
 				// a camp that has got into this town before comes the same way in (docs/Pawn-Plan.md row B2)
 				BlockPos way = Wayfinding.wayIn(server, raid.camp, raid.target);
 				for (Mob raider : party) {
