@@ -85,6 +85,8 @@ King, the spirits, the Banes, the demons' country, the Judge's weighing, the Gru
 the Grue's legion raised again at the ford: the Second Defence). Each power, class and faith has its own road into the
 same acts. The story says what was done, never what it means: that still comes from people, books and wordless films.
 
+**The old age's peoples** (Andy approved, 2026-11-15; medieval picks; Andy: "old age money was emeralds"). Before the long defence, every land had a people of its own who are gone now: stepped tombs in the sands, columned temples on the plains, barrows and long halls in the north, a walled palace in Blossom. They traded in **emeralds**, which is why villagers still prize them and money changers buy them. Their rulers lie in their tombs with their guard and wake when the tomb is broken. Their temples were the patrons' before the realms', and an offering there still calls the patron's champion down to test the one who made it. A few of their descendants live on hidden in the ruins, speaking the old tongue and trading old goods and maps.
+
 ## Ki and mana are the same thing
 
 There is one energy in the world, and two words for it. **Ki** is what a Z Fighter calls it and **mana** is what
@@ -320,6 +322,8 @@ living things the fire did not consume. A burning steed is faster than any horse
 crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
 kin to the fire; anyone else is burned and thrown.
 
+**The Last Bell** (Andy approved, 2026-11-15; Andy: "doomsday should be tied to the arsenal ... his activation will bring upon the end of the world"; Claude's name and shape). Late in its mastery the Arsenal's reach pulls through a thing it should not: a cracked bronze bell from a world that ended. Rung over a map, it brings a disaster down where it is pointed; each ringing shows its holder more of what it did to its own world. Rung to the end, it does it again: the sky goes red, stars fall to the bedrock, the sea comes in, the mountains open. Very rarely the world comes to that end without anyone ringing anything.
+
 ## The Z Fighters
 
 **The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
@@ -485,6 +489,8 @@ and flame wraiths that you can see through, silver skeletons that rise and sprin
 chest mimics, the bull-headed **minotaur** with his hammer, the snake-haired **gorgon** archer of the jungles and
 swamps, the **redstone golem** of the deep mines, the **skulk golem** that guards the deep dark, and haunted armour
 stands.
+
+**The great disasters** (Andy approved, 2026-11-15; medieval picks). The world is not quiet under the realms: mountains in the hot lands wake as volcanoes, quakes under the sea send waves inland, hurricanes come off the sea, a star sometimes falls far bigger than the rest and leaves a crater with a heart of meteoric iron, and slopes let go their snow and earth. Each comes in its strength, from minor to catastrophic, and one sets off the next. Animals know first.
 
 ## The sky: the Aether and the remnants
 
@@ -991,6 +997,8 @@ falls to whoever beats them three times: the **Hearth-Warden** (Hearthkeeper, in
 Warden, in a crypt or the Nether's soul valleys), the **Sun-Marshal** (Crowned Sun), the **Cinder-Shade** (Ash
 Whisperer) and the **Inquisitor** (the Truth, in a Faith realm's great temple or a ruined cathedral). A patron's wrath
 falls on those who break faith badly.
+
+**The faith you were raised in** (Andy approved, 2026-11-15; medieval picks). Everyone grew up praying to someone. A life story now names the patron of your childhood, which a person may later keep or leave.
 
 ## The dark
 
@@ -1533,6 +1541,10 @@ way up". Pod crews trade a rumour that **somebody lives on the Pale Moon**, and 
 escapee is "somebody's unfinished work". The spider's bite leaves a person quieter. None of it names the old war, the
 Quiet One, the Tinkerer's labs or the elder.
 
+**The realms' ways** (Andy approved, 2026-11-15; medieval picks). Each land's realms keep their own manners and laws: the north allows the duel, the sands charge for water, Blossom bows on greeting, the plains keep market days, and what is a crime in one is nothing in the next. Their soldiers come in five ranks (militia, soldier, knight, veteran, leader), and the militia lock shields in a wall with the archers behind. Keeps change hands in war and fly the winner's colours. A war on a seat comes in waves, with a lull between, and the realm's war chest pays for its defence; its court casters march with its war bands.
+
+**The realm steels** (Andy approved, 2026-11-15; medieval picks). Each people keeps its own steel: the Stoneborn a deep steel worked with lead, the forest folk a bright steel with silver in it, the orcs a crude bronze with ash. A realm's armour and weapon patterns are its own, forged only by its sworn smiths or from a captured pattern. The Stoneborn ride the big mountain goats no one else can tame, and the mountain goblins come down from the north in hordes.
+
 ## The sea
 
 A page found on drowned men, unsigned, called "A Wet Page": the tide brought the same stone up three times, and a stone
@@ -1619,6 +1631,8 @@ a reason to go to mohknee"; approved by Andy 2026-11-14). Folded steel does ever
 steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
 under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
 
+**Sky pirates** (Andy approved, 2026-11-15; medieval picks). When the steam towns first put balloon ships in the air, some were taken, and their takers stayed up there. Sky pirates keep a cove on a high peak, circle what they've marked, and come down on caravans, ships and towns with broadsides and powder kegs. A ship whose helmsman falls drifts on the wind and sinks. Rich realms keep a patrol airship of their own, lent by the steam towns, that fires a signal over a war band and blows a horn; the orc and barbarian bands beat war drums as they come.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -1693,6 +1707,8 @@ forests and high meadows, who live in groves of three to five under their eldest
 a fire and the eldest plays the old tunes while the rest dance or sit and listen; at dawn they put it out. They are
 nobody's enemy, but strike one and the whole grove comes at you with horns and hooves. Bring them honey, berries or wine
 and you are welcome at the fire, and a night there mends you and brings you luck.
+
+**The silk deeps** (Andy approved, 2026-11-15; medieval picks). Under the old hills some caves have gone to the spiders: silk over the walls, shed skins underfoot, egg sacs hung like fruit, the stone itself dark with them. At the deepest lies a **brood queen**, a spider grown huge on the cave's life, sleeping on her egg; strike the egg and she wakes. Above, a web-hung hut where someone once watched the nest keeps a map down. Spiders that take a living thing alive carry it home wrapped, which is how the dead sometimes wake there. Deep below the nests the **netcasters** hunt with thrown silk, and in the crimson and warped woods of the Nether a small spined spider bursts into web.
 
 ## Daily life
 
@@ -1787,6 +1803,8 @@ is on the wall.
 **Folded lamellar and the pit harness** (same thread). The blossom lords' guards wear the ronin's lamellar remade in folded steel, which only Mohknee's black sand gives. The fighting pits' champions wear the gladiator's harness, remade with the pit's own trophies; it is taken from a pit's warlord, never bought.
 
 **Back to back** (same thread). The four fought the long defence in pairs, back to back. Smiths still make paired harness for two who swear it at a shrine: each wears half, and a blow that lands on one is partly borne by the other.
+
+**The everburning mote** (Andy approved, 2026-11-15; Andy: "court wizards have developed a spell that lets a light mote inside a lantern burn indefinitely"). It is a court wizard's working, sold to those who can pay: a mote of their light shut in a lantern, which never needs oil and never gutters. Abandoned places have no one to tend their lamps, which is why the lamps of ruins flicker.
 
 ## Rules for writing against this
 
