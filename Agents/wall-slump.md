@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Ragdolls knocked into walls slide down and sit against them (not all lying flat)
 branch: claude/project-thread-7ttuy5
 with: Claude (cloud thread "Slump ragdolls against walls")
-pr: 
+pr: 1601
 mods: kitchen, powers
 versions: 
 started: 2026-11-15
@@ -27,3 +27,4 @@ owns:
 - Checked in tools/ragdoll_sim (new section).
 
 ## Done
+PR #1601. Humanoid corpses flung into a wall (or killed beside it) slide down and sit, back to the wall, until disturbed; blood smear down the wall. Kitchen + Powers compile with Gradle; ragdoll_sim passes; not played.
