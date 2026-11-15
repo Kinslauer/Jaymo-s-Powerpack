@@ -3,6 +3,7 @@ package com.jaymoskingdoms;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -28,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * take you for one of their own at a distance: they let you be. Come within {@link #CLOSE} of one (further,
  * {@link #CLOSE_WARY}, while the realm is at war: {@link WarAlert#atWar}) and he looks closer; stay there
  * {@link #LOOK_TICKS} and he sees who you are. Speak near them, or go up to one of its people, and you're known at
- * once. Seen through, their guards know you for {@link #SEEN_TICKS}; change out of the colours and back, it's no help.
+ * once; and so does a blow at any of its people (or its sworn), struck by you or what you shot. Seen through, their guards
+ * know you for {@link #SEEN_TICKS}; change out of the colours and back, it's no help.
  */
 public final class Colours {
 	/** A guard looks closer this near (blocks), and this near while his realm is at war; he takes this long to see who it is (ticks). */
@@ -60,6 +62,11 @@ public final class Colours {
 			SEEN.clear();
 			LOOKED.clear();
 			WEARING.clear();
+		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
+			if (source.getEntity() instanceof ServerPlayer p && victim != p && WEARING.containsKey(p.getUUID())) {
+				struck(p, victim);
+			}
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (!world.isClientSide() && player instanceof ServerPlayer sp && entity instanceof Worker w && w.factionId() >= 0) {
@@ -133,6 +140,34 @@ public final class Colours {
 			if (f != null && !known(p, f.id()) && wears(p, f)) {
 				seen(level, p, f, m);
 			}
+		}
+	}
+
+	/** {@code p} in a realm's colours struck {@code victim}: if it's one of that realm's (its folk, or one sworn to it), they're known. */
+	private static void struck(ServerPlayer p, LivingEntity victim) {
+		MinecraftServer server = p.level().getServer();
+		int realm = victim instanceof Worker w ? w.factionId() : -1;
+		if (realm < 0 && victim instanceof ServerPlayer other) {
+			Faction sworn = Factions.of(server, other.getUUID());
+			realm = sworn == null ? -1 : sworn.id();
+		}
+		java.util.Set<Integer> in = WEARING.get(p.getUUID());
+		Faction f = realm >= 0 && in != null && in.contains(realm) ? Factions.get(server, realm) : null;
+		if (f == null || known(p, f.id())) {
+			return;
+		}
+		Mob by = victim instanceof Mob m ? m : null;
+		int id = f.id();
+		if (by == null) {
+			for (Mob m : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(HEARD), e -> e.isAlive() && e instanceof Worker w && w.factionId() == id)) {
+				by = m;
+				break;
+			}
+		}
+		if (by != null) {
+			seen(p.level(), p, f, by);
+		} else {
+			SEEN.put(p.getUUID() + "|" + f.id(), p.level().getGameTime() + SEEN_TICKS);
 		}
 	}
 

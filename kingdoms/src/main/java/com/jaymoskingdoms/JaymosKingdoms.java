@@ -290,10 +290,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sieges.register();
 		HomeRaids.register();
 		Hunts.register();
-		LOGGER.debug("hunt attachment: {}", Hunts.HUNTED_AT);
+		LOGGER.debug("siege and war attachments: {} {} {} {} {}", Hunts.HUNTED_AT, SiegeScars.BOOK, HomeRaids.RAIDED_AT, WhiteFlags.WAITS,
+			Fixers.FIXED);
+		SiegeScars.register();
 		WhiteFlags.register();
 		Colours.register();
-		Fixers.register();
 		Feuds.register();
 		// (gb-haggle) the jobs haggled over
 		LOGGER.debug("haggle attachments: {} {}", Haggle.HAGGLED, Haggle.OFFER_HAGGLED);

@@ -45,9 +45,9 @@ final class Sappers {
 	static final int DOOR_SEARCH = 20, DOOR_HEIGHT = 4;
 	/** Ticks to dig each of the hole's two blocks, the keg's fuse, and how far he runs from it. */
 	static final int DIG_TICKS = 60, DIG_DEPTH = 2, FUSE = 80;
-	static final double RUN_FROM = 9.0;
-	/** What the blast took is looked for this far round the keg, this long after the fuse. */
-	static final int BLAST_REACH = 4, BLAST_LOOK = 6;
+	static final double RUN_FROM = 10.0;
+	/** What the blast took is looked for this far round the keg, this long (ticks) after it went up. */
+	static final int BLAST_REACH = 4, BLAST_LOOK = 10;
 	/** How often a sapper with nothing to work on looks again (ticks). */
 	static final int LOOK_EVERY = 60;
 	/** How fast he goes about it. */
@@ -62,6 +62,8 @@ final class Sappers {
 		int work, dug;
 		long lookAt, blowAt = -1;
 		final Map<Long, BlockState> before = new HashMap<>();
+		/** What he carried in his off hand before (his shield), given back when it's over. */
+		ItemStack offhand = ItemStack.EMPTY;
 
 		Sapper(UUID id, boolean ram, int kegs) {
 			this.id = id;
@@ -92,10 +94,13 @@ final class Sappers {
 			boolean ram = i < RAMMERS;
 			Sapper s = new Sapper(m.getUUID(), ram, ram ? 0 : kegs);
 			party.sappers.add(s);
+			s.offhand = m.getItemBySlot(EquipmentSlot.OFFHAND).copy();
 			m.setItemSlot(EquipmentSlot.OFFHAND, ram ? new ItemStack(Items.SPRUCE_LOG) : new ItemStack(Items.TNT, kegs));
 			if (!ram) {
 				long cost = kegs * KEG_COST;
 				Factions.update(level.getServer(), from.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - cost)));
+				// (kept in the world's books, so a restart mid-siege gives them back)
+				SiegeScars.kegs(from.id(), cost);
 			}
 		}
 	}
@@ -121,19 +126,23 @@ final class Sappers {
 		}
 		Castle.Keep keep = party.target >= 0 ? Factions.keep(level.getServer(), party.target) : null;
 		for (Sapper s : party.sappers) {
-			if (s.blowAt >= 0 && now >= s.blowAt + BLAST_LOOK) {
+			if (s.blowAt >= 0 && now >= s.blowAt + FUSE + BLAST_LOOK) {
+				// the keg has gone up: what it took is kept for the masons, and he's free for the next
 				blasted(level, s);
 			}
-			if (!(level.getEntity(s.id) instanceof PathfinderMob m) || !m.isAlive() || Downed.isDowned(m) || !s.armed()) {
+			if (!(level.getEntity(s.id) instanceof PathfinderMob m) || !m.isAlive() || Downed.isDowned(m)) {
 				continue;
 			}
-			if (s.blowAt >= 0 && now < s.blowAt + FUSE && s.aim != null) {
-				// a keg lit: away from it
+			if (s.blowAt >= 0 && s.aim != null) {
+				// a keg lit: away from it, until it's gone up
 				Vec3 away = m.position().subtract(Vec3.atCenterOf(s.aim)).multiply(1.0, 0.0, 1.0);
-				if (away.lengthSqr() < RUN_FROM * RUN_FROM && m.getNavigation().isDone()) {
+				if (away.lengthSqr() < RUN_FROM * RUN_FROM) {
 					Vec3 to = m.position().add(away.lengthSqr() < 0.01 ? new Vec3(RUN_FROM, 0, 0) : away.normalize().scale(RUN_FROM));
-					m.getNavigation().moveTo(to.x, to.y, to.z, SPEED * 1.2);
+					m.getNavigation().moveTo(to.x, to.y, to.z, SPEED * 1.3);
 				}
+				continue;
+			}
+			if (!s.armed()) {
 				continue;
 			}
 			if (Rulers.target(m) != null) {
@@ -164,7 +173,7 @@ final class Sappers {
 			if (s.ram) {
 				ram(level, party, s, m, now);
 			} else {
-				dig(level, s, m, now);
+				dig(level, party, s, m, now);
 			}
 		}
 	}
@@ -191,19 +200,19 @@ final class Sappers {
 			}
 		}
 		if (s.ram) {
-			s.aim = best != null ? best : door(level, goal, m);
+			s.aim = best != null ? best : door(level, party, goal, m);
 			return;
 		}
 		if (keep != null) {
-			// beside the keep's door, at the foot of its wall: dig in under it
+			// beside the keep's door, at the foot of its wall: dig in under it (each keg on the other side from the last)
 			Direction in = direction(keep.gate(), keep.hall());
 			Direction across = in.getClockWise();
-			int side = level.getRandom().nextBoolean() ? 1 : -1;
+			int side = s.kegs % 2 == 0 ? 1 : -1;
 			s.stand = keep.gate().relative(in, 1).relative(across, 4 * side);
 			s.aim = s.stand.below();
 			return;
 		}
-		BlockPos door = door(level, goal, m);
+		BlockPos door = door(level, party, goal, m);
 		if (door != null) {
 			Direction out = direction(door, m.blockPosition());
 			s.stand = door.relative(out);
@@ -215,11 +224,12 @@ final class Sappers {
 		return Direction.getApproximateNearest(to.getX() - from.getX(), 0, to.getZ() - from.getZ());
 	}
 
-	/** The nearest closed-in wooden door (its lower half) round {@code goal}, or null. */
-	private static @Nullable BlockPos door(ServerLevel level, BlockPos goal, PathfinderMob m) {
+	/** The nearest wooden door (its lower half) round {@code goal} (a homestead's: only on its own patch), or null. */
+	private static @Nullable BlockPos door(ServerLevel level, WarParties.Party party, BlockPos goal, PathfinderMob m) {
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
-		for (BlockPos pos : BlockPos.betweenClosed(goal.offset(-DOOR_SEARCH, -DOOR_HEIGHT, -DOOR_SEARCH), goal.offset(DOOR_SEARCH, DOOR_HEIGHT, DOOR_SEARCH))) {
+		int r = party.home != null ? Homesteads.RADIUS : DOOR_SEARCH, h = party.home != null ? Homesteads.HEIGHT : DOOR_HEIGHT;
+		for (BlockPos pos : BlockPos.betweenClosed(goal.offset(-r, -h, -r), goal.offset(r, h, r))) {
 			if (!Loaded.made(level, pos)) {
 				continue;
 			}
@@ -258,26 +268,26 @@ final class Sappers {
 			Sieges.broken(level, s.aim.above(), level.getBlockState(s.aim.above()));
 		}
 		level.playSound(null, s.aim, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.HOSTILE, 1.0F, 0.9F);
-		level.destroyBlock(s.aim, false, m);
+		// (a homestead's door drops, nobody mends it; a seat's is put back by its masons)
+		level.destroyBlock(s.aim, party.home != null, m);
 		s.aim = null;
 		s.work = 0;
 	}
 
 	/** The keg man digs his hole ({@link #DIG_DEPTH} deep), sets a keg in it and lights it. */
-	private static void dig(ServerLevel level, Sapper s, PathfinderMob m, long now) {
+	private static void dig(ServerLevel level, WarParties.Party party, Sapper s, PathfinderMob m, long now) {
 		BlockPos at = s.aim.below(s.dug);
 		BlockState state = level.getBlockState(at);
 		if (s.dug < DIG_DEPTH && !state.isAir() && state.getFluidState().isEmpty() && state.getDestroySpeed(level, at) >= 0.0F) {
-			if (now % 10 == 0) {
-				m.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-				level.playSound(null, at, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.8F, 0.8F);
-			}
-			s.work++;
+			m.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			level.playSound(null, at, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.8F, 0.8F);
+			// (he's seen to once a party step, WarParties#TICK ticks)
+			s.work += WarParties.TICK;
 			level.destroyBlockProgress(m.getId(), at, Math.min(9, s.work * 10 / DIG_TICKS));
 			if (s.work >= DIG_TICKS) {
 				level.destroyBlockProgress(m.getId(), at, -1);
 				Sieges.broken(level, at, state);
-				level.destroyBlock(at, false, m);
+				level.destroyBlock(at, party.home != null, m);
 				s.work = 0;
 				s.dug++;
 			}
@@ -297,6 +307,7 @@ final class Sappers {
 		level.addFreshEntity(tnt);
 		level.playSound(null, keg, SoundEvents.TNT_PRIMED, SoundSource.HOSTILE, 1.0F, 1.0F);
 		s.kegs--;
+		SiegeScars.kegs(party.faction, -KEG_COST);
 		s.blowAt = now;
 		s.aim = keg;
 		s.dug = 0;
@@ -319,10 +330,12 @@ final class Sappers {
 
 	/** The siege over: the sappers put down their logs and what kegs they have left go back into the realm's treasury. */
 	static void end(ServerLevel level, WarParties.Party party) {
-		long back = 0;
+		long back = 0, carried = 0;
 		for (Sapper s : party.sappers) {
+			carried += s.kegs * KEG_COST;
 			if (level.getEntity(s.id) instanceof PathfinderMob m && m.isAlive()) {
-				m.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+				// the log or kegs put down, his shield taken up again
+				m.setItemSlot(EquipmentSlot.OFFHAND, s.offhand);
 				back += s.kegs * KEG_COST;
 			}
 			if (s.aim != null) {
@@ -330,6 +343,7 @@ final class Sappers {
 			}
 		}
 		party.sappers.clear();
+		SiegeScars.kegs(party.faction, -carried);
 		long refund = back;
 		if (refund > 0 && Factions.get(level.getServer(), party.faction) != null) {
 			Factions.update(level.getServer(), party.faction, f -> f.withTreasury(f.treasury() + refund));

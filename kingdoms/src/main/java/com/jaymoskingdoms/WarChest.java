@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -79,6 +78,7 @@ final class WarChest {
 				BlockState there = level.getBlockState(pos);
 				if (there.canBeReplaced() && there.getFluidState().isEmpty()) {
 					party.gate.put(pos.asLong(), there);
+					SiegeScars.gate(pos, there);
 					set.add(pos);
 				}
 			}
@@ -112,14 +112,15 @@ final class WarChest {
 		}
 	}
 
-	/** The siege over: the barricade down, the door as it was. */
+	/** The siege over: the barricade down, the door as it was (where its land isn't loaded, once it is: {@link SiegeScars}). */
 	static void openGate(ServerLevel level, WarParties.Party party) {
 		for (Map.Entry<Long, BlockState> e : party.gate.entrySet()) {
 			BlockPos pos = BlockPos.of(e.getKey());
-			BlockState now = level.getBlockState(pos);
-			if (Loaded.made(level, pos) && (now.is(Blocks.SPRUCE_FENCE) || now.is(Blocks.IRON_BARS))) {
+			boolean loaded = Loaded.made(level, pos);
+			if (loaded && SiegeScars.barricade(level.getBlockState(pos))) {
 				level.setBlock(pos, e.getValue(), Block.UPDATE_ALL);
 			}
+			SiegeScars.gateDown(pos, e.getValue(), !loaded);
 		}
 		party.gate.clear();
 		party.strongGate = false;
@@ -179,13 +180,12 @@ final class WarChest {
 			}
 			BlockPos pos = BlockPos.of(e.getKey());
 			party.breaches.remove(e.getKey());
-			BlockState there = level.getBlockState(pos);
-			if (!Loaded.made(level, pos) || !there.canBeReplaced()
-				|| !level.getEntitiesOfClass(LivingEntity.class, new AABB(pos), LivingEntity::isAlive).isEmpty()) {
-				continue;
+			boolean loaded = Loaded.made(level, pos);
+			// (one whose land isn't loaded is mended when it is)
+			SiegeScars.breachDone(pos, e.getValue(), !loaded);
+			if (loaded && SiegeScars.mend(level, pos, e.getValue())) {
+				done++;
 			}
-			level.setBlock(pos, e.getValue(), Block.UPDATE_CLIENTS);
-			done++;
 		}
 		if (done > 0 && !todo.isEmpty()) {
 			BlockPos at = BlockPos.of(todo.getFirst().getKey());
@@ -222,27 +222,30 @@ final class WarChest {
 		long chest = f.treasury();
 		Component words = Component.translatable("speech.jaymoskingdoms.warchest.open", Money.text(f, Money.worth(chest)));
 		List<Menus.Choice> choices = new ArrayList<>();
-		choices.add(choice(f, "levy", LEVY_COST * LEVY_HIRE, party.levies.size() + LEVY_HIRE <= LEVY_MOST, sp -> hire(level, party, f, sp)));
-		choices.add(choice(f, "mend", MEND_COST, !party.breaches.isEmpty(), sp -> repair(level, party, MEND_BLOCKS)));
-		choices.add(choice(f, "arrows", ARROWS_COST, true, sp -> arrows(defenders(level, party, f), ARROWS)));
-		choices.add(choice(f, "gate", GATE_COST, !party.strongGate && !party.gate.isEmpty(), sp -> strengthen(level, party)));
-		choices.add(choice(f, "draught", DRAUGHT_COST, true, sp -> draught(level, defenders(level, party, f))));
+		choices.add(choice(f, "levy", LEVY_COST * LEVY_HIRE, () -> levies(level, party) + LEVY_HIRE <= LEVY_MOST, sp -> hire(level, party, f, sp)));
+		choices.add(choice(f, "mend", MEND_COST, () -> !party.breaches.isEmpty(), sp -> repair(level, party, MEND_BLOCKS)));
+		choices.add(choice(f, "arrows", ARROWS_COST, () -> true, sp -> arrows(defenders(level, party, f), ARROWS)));
+		choices.add(choice(f, "gate", GATE_COST, () -> !party.strongGate && !party.gate.isEmpty(), sp -> strengthen(level, party)));
+		choices.add(choice(f, "draught", DRAUGHT_COST, () -> true, sp -> draught(level, defenders(level, party, f))));
 		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.warchest.leave"), sp -> {
 		}));
 		Speech.tell(level, folk, player, words, Speech.GOLD);
 		Menus.ask(player, folk, words, choices);
 	}
 
-	/** A line on the card: what it's for and what it costs; picked, it's paid for and done, and the card comes back. */
-	private static Menus.Choice choice(Faction f, String what, long cost, boolean can, Consumer<ServerPlayer> act) {
+	/**
+	 * A line on the card: what it's for and what it costs; picked, it's paid for and done, and the card comes back. Whether
+	 * it can be had ({@code can}, the purse) is asked again when it's picked, the card may be stale by then.
+	 */
+	private static Menus.Choice choice(Faction f, String what, long cost, java.util.function.BooleanSupplier can, Consumer<ServerPlayer> act) {
 		Component label = Component.translatable("speech.jaymoskingdoms.warchest." + what, Money.text(f, Money.worth(cost)));
-		return Menus.Choice.of(label, can && f.treasury() >= cost, sp -> {
+		return Menus.Choice.of(label, can.getAsBoolean() && f.treasury() >= cost, sp -> {
 			if (!(sp.level() instanceof ServerLevel level)) {
 				return;
 			}
 			Faction now = Factions.get(level.getServer(), f.id());
 			WarParties.Party party = Sieges.of(f.id());
-			if (now == null || now.treasury() < cost || party == null || party.phase != WarParties.Phase.SIEGE) {
+			if (now == null || now.treasury() < cost || party == null || party.phase != WarParties.Phase.SIEGE || !can.getAsBoolean()) {
 				return;
 			}
 			pay(level.getServer(), now, cost);
@@ -253,6 +256,12 @@ final class WarChest {
 				open(level, sp, ruler, party, now.id());
 			}
 		});
+	}
+
+	/** The levies still standing ({@code party}'s list, the fallen dropped). */
+	private static int levies(ServerLevel level, WarParties.Party party) {
+		party.levies.removeIf(id -> !(level.getEntity(id) instanceof LivingEntity e) || !e.isAlive());
+		return party.levies.size();
 	}
 
 	private static void pay(MinecraftServer server, Faction f, long cost) {

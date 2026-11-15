@@ -1,9 +1,8 @@
 package com.jaymoskingdoms;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -37,7 +36,9 @@ final class HomeRaids {
 	/** Stacks it carries off from what's stored there. */
 	static final int SACK_STACKS = 6;
 
-	private static final Map<UUID, Long> LAST = new HashMap<>();
+	/** On a player: when their homestead was last marched on (game time). Saved. */
+	static final AttachmentType<Long> RAIDED_AT = AttachmentRegistry.create(JaymosKingdoms.id("homestead_raided_at"),
+		builder -> builder.persistent(Codec.LONG));
 
 	private HomeRaids() {
 	}
@@ -49,14 +50,13 @@ final class HomeRaids {
 				consider(server, level);
 			}
 		});
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST.clear());
 	}
 
 	private static void consider(MinecraftServer server, ServerLevel level) {
 		long now = level.getGameTime();
 		for (ServerPlayer p : level.players()) {
 			if (p.isCreative() || p.isSpectator() || WarParties.raidingHome(p.getUUID())
-				|| now - LAST.getOrDefault(p.getUUID(), -GAP_TICKS) < GAP_TICKS) {
+				|| now - p.getAttachedOrElse(RAIDED_AT, -GAP_TICKS) < GAP_TICKS) {
 				continue;
 			}
 			BlockPos home = Homesteads.of(level, p.getUUID());
@@ -79,7 +79,7 @@ final class HomeRaids {
 			if (!level.getFluidState(muster).isEmpty() || !level.getFluidState(muster.below()).isEmpty()) {
 				continue;
 			}
-			LAST.put(p.getUUID(), now);
+			p.setAttached(RAIDED_AT, now);
 			if (WarParties.startHome(level, from, p.getUUID(), home, muster) != null) {
 				// a far horn, from the way they're coming
 				level.playSound(null, muster, SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4.0F, 0.9F);

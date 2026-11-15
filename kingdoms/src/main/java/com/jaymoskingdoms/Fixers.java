@@ -1,12 +1,14 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.money.Money;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  * hands, by the bookie) knows whose palms to grease. Talk to him and he names the realms that think ill of you (or
  * hunt you), up to {@link #SHOWN}, and what he'd want to put it right with each: {@link #BASE} and one more for every
  * {@link #PER_POINTS} of ill will, for up to {@link #MOST} of it mended (and the hunt for you there called off). Once
- * a day for each realm; he can't make a realm love you.
+ * a day for each realm (saved on you, {@link #FIXED}); he can't make a realm love you.
  */
 final class Fixers {
 	static final String TAG = "jaymoskingdoms.fixer";
@@ -34,14 +36,15 @@ final class Fixers {
 	static final long GAP_TICKS = 24000L;
 	static final int LINES = 2;
 
-	/** player|realm → when he last mended it. */
-	private static final Map<String, Long> LAST = new HashMap<>();
+	/** On a player: realm → when he last mended their name there (game time). Saved. */
+	static final AttachmentType<Map<String, Long>> FIXED = AttachmentRegistry.create(JaymosKingdoms.id("fixer_mended"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
 
 	private Fixers() {
 	}
 
-	static void register() {
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST.clear());
+	private static long last(ServerPlayer p, int realm) {
+		return p.getAttachedOrElse(FIXED, Map.of()).getOrDefault(Integer.toString(realm), -GAP_TICKS);
 	}
 
 	/** Where he stands, beside the bookie at the back of the room. */
@@ -58,7 +61,7 @@ final class Fixers {
 		List<Faction> ill = new ArrayList<>();
 		for (Faction f : Factions.all(server)) {
 			if (!f.fallen() && f.type().isRealm() && (Reputation.get(p, f.id()) < Reputation.WELCOME || Theft.wanted(p, f.id()))
-				&& now - LAST.getOrDefault(p.getUUID() + "|" + f.id(), -GAP_TICKS) >= GAP_TICKS) {
+				&& now - last(p, f.id()) >= GAP_TICKS) {
 				ill.add(f);
 			}
 		}
@@ -95,10 +98,14 @@ final class Fixers {
 	private static void fix(ServerLevel level, ServerPlayer p, Villager v, Faction f, @Nullable Faction here) {
 		int mend = mend(p, f);
 		long milli = Money.worth(price(mend));
-		if (!Money.charge(p, here, milli)) {
+		long now = level.getGameTime();
+		if (now - last(p, f.id()) < GAP_TICKS || !Money.canPay(p, here, milli) || !Money.charge(p, here, milli)) {
 			return;
 		}
-		LAST.put(p.getUUID() + "|" + f.id(), level.getGameTime());
+		Map<String, Long> fixed = new HashMap<>(p.getAttachedOrElse(FIXED, Map.of()));
+		fixed.values().removeIf(t -> now - t >= GAP_TICKS);
+		fixed.put(Integer.toString(f.id()), now);
+		p.setAttached(FIXED, Map.copyOf(fixed));
 		if (mend > 0) {
 			Reputation.change(p, f, mend);
 		}

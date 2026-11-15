@@ -15,11 +15,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -39,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * seat who isn't sworn to either side and asks, on the talk card ({@link Menus}), which way they'll go: stand with the
  * seat (its guards count them a friend and they may spend its war chest), throw in with the attackers (who share their
  * spoils; the seat's guards go for them), or stay out of it (the attackers leave them be). A sworn player is on their
- * realm's side without asking. Striking one side settles it: you're with the other.
+ * realm's side without asking. One who never answers and strikes one side's guards on purpose is with the other.
  */
 public final class Sieges {
 	/** Waves before the sack, at a seat and at a homestead; how long each lasts and the lull after it (ticks). */
@@ -59,6 +62,8 @@ public final class Sieges {
 	static final int BROKEN_REP = 20;
 	/** What the siege broke this near its seat is mended by the war chest ({@link WarChest}). */
 	static final double BREACH_RANGE = 56.0;
+	/** At most this many breaches are kept for a siege. */
+	static final int BREACH_MOST = 2000;
 	/** Lines for each (speech.jaymoskingdoms.siege.<key>.<n>). */
 	static final int LINES = 2;
 
@@ -77,7 +82,7 @@ public final class Sieges {
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer p) {
-				struck(p, victim);
+				struck(p, victim, source);
 			}
 		});
 	}
@@ -324,6 +329,11 @@ public final class Sieges {
 		party.siegeEnded = true;
 		ASKS.values().removeIf(a -> a.party() == party);
 		Sappers.end(level, party);
+		// (what's left unmended when it's over stays broken)
+		for (Map.Entry<Long, BlockState> e : party.breaches.entrySet()) {
+			SiegeScars.breachDone(BlockPos.of(e.getKey()), e.getValue(), false);
+		}
+		party.breaches.clear();
 		if (party.wave == 0) {
 			return;
 		}
@@ -402,9 +412,20 @@ public final class Sieges {
 		return foe(attacker, target) == Boolean.FALSE;
 	}
 
-	/** {@code p} struck {@code victim}: one who hadn't taken a side (or stayed out) is now against whoever they struck. */
-	private static void struck(ServerPlayer p, LivingEntity victim) {
-		if (!(victim instanceof Worker w) || WarParties.active().isEmpty()) {
+	/** A blow struck on purpose: the player's own swing, or something they shot or threw. */
+	private static boolean deliberate(ServerPlayer p, DamageSource source) {
+		return source.getEntity() == p && (source.getDirectEntity() == p && source.is(DamageTypes.PLAYER_ATTACK)
+			|| source.getDirectEntity() instanceof Projectile);
+	}
+
+	/**
+	 * {@code p} struck {@code victim} on purpose: one who's taken no side yet is now against whoever they struck (and
+	 * one who struck the seat's guards stands as badly with it as one who chose the attackers). One who said they'd stay
+	 * out and then strikes the seat's guards has done an assault, as any day. The card is the way to choose; this is
+	 * for those who never answered it.
+	 */
+	private static void struck(ServerPlayer p, LivingEntity victim, DamageSource source) {
+		if (!(victim instanceof Worker w) || w.role() != Folk.GUARD && w.role() != Folk.ARCHER || WarParties.active().isEmpty() || !deliberate(p, source)) {
 			return;
 		}
 		MinecraftServer server = p.level().getServer();
@@ -412,16 +433,28 @@ public final class Sieges {
 			if (party.phase != WarParties.Phase.SIEGE) {
 				continue;
 			}
+			boolean attacker = party.soldiers.contains(victim.getUUID());
+			boolean defender = !attacker && party.target >= 0 && w.factionId() >= 0 && besieged(server, party, w.factionId());
 			int side = side(party, p);
-			if (side == ATTACK || side == DEFEND && !party.soldiers.contains(victim.getUUID())) {
+			if (!attacker && !defender || side == ATTACK || side == DEFEND) {
 				continue;
 			}
-			if (party.soldiers.contains(victim.getUUID())) {
+			Faction target = party.target >= 0 ? Factions.get(server, party.target) : null;
+			if (side == OUT) {
+				Faction theirs = defender ? Factions.get(server, w.factionId()) : null;
+				if (theirs != null) {
+					Theft.commit(p, p.level(), theirs, Theft.Crime.ASSAULT, victim.blockPosition(), null, true);
+				}
+				continue;
+			}
+			ASKS.remove(p.getUUID());
+			if (attacker) {
 				choose(party, p, DEFEND);
-				ASKS.remove(p.getUUID());
-			} else if (party.target >= 0 && w.factionId() >= 0 && besieged(server, party, w.factionId()) && side != DEFEND) {
+			} else {
 				choose(party, p, ATTACK);
-				ASKS.remove(p.getUUID());
+				if (target != null) {
+					Reputation.change(p, target, BETRAY_REP);
+				}
 			}
 		}
 	}
@@ -441,8 +474,11 @@ public final class Sieges {
 				continue;
 			}
 			BlockPos goal = WarParties.goal(level.getServer(), party);
-			if (goal != null && goal.distSqr(pos) <= Mth.square(BREACH_RANGE) && !party.gate.containsKey(pos.asLong())) {
-				party.breaches.putIfAbsent(pos.asLong(), state);
+			if (goal != null && goal.distSqr(pos) <= Mth.square(BREACH_RANGE) && !party.gate.containsKey(pos.asLong())
+				&& party.breaches.size() < BREACH_MOST && !party.breaches.containsKey(pos.asLong())) {
+				party.breaches.put(pos.asLong(), state);
+				// (in the world's books too: a restart mid-siege, and they're mended as their land loads)
+				SiegeScars.breach(pos, state);
 			}
 		}
 	}
