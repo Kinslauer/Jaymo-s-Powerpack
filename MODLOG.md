@@ -5308,3 +5308,10 @@ Built; not played.
 ## 0.24.18 (2026-11-15): Dynamic Waters: no more chunks without terrain from crossing streams
 
 - When two mountain streams' mouths landed on each other, Dynamic Waters' check for streams left dry by ravines asked each one about the other forever. The worker thread ran out of stack and the chunk was left without terrain (seen during a new world's pregen). A stream met again in the same check now counts as not left dry.
+
+## 0.24.19 (2026-11-15): the future is built from Mosslorn (#1615)
+
+- **The future's city**: milkshake_mp3 gave permission, so new futures are now fetched from Mosslorn (v4.0, 553 MB) instead of Los Perrito City; in the world it is still Los Perrito, ruined and overgrown as before. You arrive on the street the map's own lobby sends players to. The first visit credits the map with a link to its page.
+- **Crates and command blocks**: the map's crates are refilled from our `chests/future/food|household|scrap|cache` tables, and its command blocks are removed.
+- **Old worlds** keep their Los Perrito future until an operator runs `/future swap`: the old city (and everything built or left in the future) is cleared at the next server start, and the next leap fetches Mosslorn.
+- Built; not played.
