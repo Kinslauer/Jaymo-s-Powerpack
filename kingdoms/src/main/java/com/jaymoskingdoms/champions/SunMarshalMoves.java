@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.FantasyArmorCompat;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.List;
@@ -21,7 +22,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.518) The Sun-Marshal's moves: Sunbeam (a ring follows you, then holds), Royal Guard (strike him from behind), Noon (break
- * his sight); in a group, the sun-guard.
+ * his sight); in a group, the sun-guard: the dawnwatch, in its gilded plate where Fantasy Armor is loaded (Lore.md, "The
+ * dawnwatch and the headsmen"). Their plate stays on them: it's only had from the Sun's armourers.
  */
 final class SunMarshalMoves implements Moves {
 	static final int BEAM_WINDUP = 25, BEAM_COOLDOWN = 140, BEAM_FOLLOW = 15, BEAM_FIRE = 100;
@@ -139,7 +141,13 @@ final class SunMarshalMoves implements Moves {
 			if (guard == null) {
 				continue;
 			}
-			guard.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+			if (FantasyArmorCompat.dress(guard, FantasyArmorCompat.DAWNWATCH)) {
+				for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+					guard.setDropChance(slot, 0.0F);
+				}
+			} else {
+				guard.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+			}
 			guard.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
 			MoveKit.name(guard, "sun_guard");
 			c.spawnAdd(level, guard);

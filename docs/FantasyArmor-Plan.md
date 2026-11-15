@@ -117,9 +117,8 @@ whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they 
 - Warden hunter's coat = Evening Ghost (Gilded Hunt is the kings'); folded lamellar = Ronin; pit harness = Dead Gladiator.
 - Back to back (twinned) = Twinned.
 Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
-guards. Still to place (their wearers don't exist in code yet, or MCA re-arms them): sky elders and well-wardens (the sky
-castle's wardens are MCA guards), dawnwatch wearers (Sun-Marshal's guard), headsmen, demon captains of the Ash, pit
-warlords. Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
+guards. All placed: headsmen (`Headsmen`); sky elders (`SkyCourt#ELDER_TAG`), well-wardens = the sky lord's wardens and the
+dawnwatch = the Sun-Marshal's sun-guard (`FantasyArmorCompat#issue`, `SunMarshalMoves#hand`); demon captains and pit warlords (#1594). Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)

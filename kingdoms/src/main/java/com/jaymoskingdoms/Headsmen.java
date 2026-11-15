@@ -14,7 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.illager.AbstractIllager;
@@ -32,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Who.</b> Each realm whose state patron is the Crowned Sun keeps one at its seat: the guard nearest the seat is
  * named ({@link #TAG}) when a player is about and it has none, and another when he dies. Where Fantasy Armor is loaded he
- * wears the whole set on duty and off ({@link #issue}, {@link #keeps}); without it he is a guard like the rest.</li>
+ * wears the whole set on duty and off ({@link FantasyArmorCompat#issue}, {@link FantasyArmorCompat#keeps}); without it he is a guard like the rest.</li>
  * <li><b>His work.</b> In his realm a sentence of death at an audience ({@link Arrests}) is his when he is within
  * {@link #CALL} blocks: he walks to the one sentenced and the blow is his ({@link #strike}).</li>
  * <li><b>The dull plate.</b> {@link #DULL_DAYS} days after his last execution his plate is dull: its Strength is gone and he
@@ -206,24 +205,5 @@ public final class Headsmen {
 	/** The headsman has carried out a sentence: his plate is bright again. */
 	static void strike(ServerLevel level, PathfinderMob headsman) {
 		headsman.setAttached(LAST_WORK, level.getGameTime());
-	}
-
-	/** From {@code McaEquipmentMixin} by way of {@link FrontierWear#issue}: a headsman's piece for {@code slot}, or null. */
-	static @Nullable ItemStack issue(LivingEntity villager, EquipmentSlot slot) {
-		if (!villager.entityTags().contains(TAG)) {
-			return null;
-		}
-		for (int i = 0; i < FantasyArmorCompat.SLOTS.length; i++) {
-			if (FantasyArmorCompat.SLOTS[i] == slot) {
-				return FantasyArmorCompat.piece(FantasyArmorCompat.HEADSMAN, i).map(ItemStack::new).orElse(null);
-			}
-		}
-		return null;
-	}
-
-	/** By way of {@link FrontierWear#keeps}: a headsman keeps his plate on, off duty too. */
-	static boolean keeps(LivingEntity villager, EquipmentSlot slot) {
-		return villager.entityTags().contains(TAG) && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR
-			&& issue(villager, slot) instanceof ItemStack piece && villager.getItemBySlot(slot).is(piece.getItem());
 	}
 }

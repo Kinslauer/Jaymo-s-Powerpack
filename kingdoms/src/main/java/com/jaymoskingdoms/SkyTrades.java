@@ -123,6 +123,8 @@ public final class SkyTrades {
 		buy(list, "golden_aercloud", 6, 2);
 		MerchantOffers offers = new MerchantOffers();
 		offers.addAll(list);
+		// and the wind-faith robes the elders wear, where Fantasy Armor is loaded
+		FantasyArmorCompat.robes(offers);
 		return offers;
 	}
 

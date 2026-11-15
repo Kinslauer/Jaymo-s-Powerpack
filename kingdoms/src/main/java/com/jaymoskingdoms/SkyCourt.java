@@ -31,7 +31,11 @@ import net.minecraft.world.phys.AABB;
  * was found, wears the mantle ({@link SkyFolk#outfits}) and talks as a lord does. When he dies the next look names
  * another from the castle's people; with none left the seat stands empty.</li>
  * <li><b>His wardens.</b> Up to {@link #WARDENS} more take up a guard's trade ({@link #WARDEN_TAG}): MCA arms them and
- * has them fight what comes over the wall, and anyone who strikes the castle's people.</li>
+ * has them fight what comes over the wall, and anyone who strikes the castle's people. They are the well-wardens, in
+ * grey plate where Fantasy Armor is loaded ({@link FantasyArmorCompat#WELL_WARDEN}).</li>
+ * <li><b>The villages' elders.</b> Where Fantasy Armor is loaded, each sky village and town has an elder ({@link #ELDER_TAG}):
+ * the grown villager nearest its middle who holds no other post, in the wind-faith robes ({@link FantasyArmorCompat#SKY_ROBES}),
+ * which they keep on. When the elder dies the next look names another.</li>
  * </ul>
  * The court is nobody's kingdom: it holds no land, pays and takes no tribute and goes to no war. The realms below settle
  * their affairs on foot, and there is no road up. But the seat can be taken by force: a power-hungry traveller now and then
@@ -40,6 +44,8 @@ import net.minecraft.world.phys.AABB;
 public final class SkyCourt {
 	/** On the castle's lord, and on each of his wardens. */
 	public static final String LORD_TAG = "jaymoskingdoms.sky_lord", WARDEN_TAG = "jaymoskingdoms.sky_warden";
+	/** On a sky village's elder. */
+	public static final String ELDER_TAG = "jaymoskingdoms.sky_elder";
 	/** What Powers puts on the villager it seats on the throne (it may not outlast MCA making him its own). */
 	static final String BUILT_LORD_TAG = "jaymospowers_sky_lord";
 	/** How often the chunks round players in the Aether are looked over (ticks), and how far round (chunks). */
@@ -106,6 +112,7 @@ public final class SkyCourt {
 								hold(level, box);
 							} else {
 								SkyFerries.moored(level, box, ref);
+								elder(level, box);
 								if (id.getPath().startsWith(VILLAGE)) {
 									// a sky village is a haven of the Divine-born (SkyHavens)
 									SkyHavens.found(level, box);
@@ -121,6 +128,31 @@ public final class SkyCourt {
 	/** The grown MCA villagers in and about {@code box}. */
 	static List<Villager> people(ServerLevel level, BoundingBox box) {
 		return level.getEntitiesOfClass(Villager.class, AABB.of(box).inflate(COURT_REACH), v -> v.isAlive() && McaBridge.adult(v));
+	}
+
+	/** A sky village's elder named, if Fantasy Armor is loaded and it has none. */
+	private static void elder(ServerLevel level, BoundingBox box) {
+		if (!FantasyArmorCompat.LOADED) {
+			return;
+		}
+		net.minecraft.world.phys.Vec3 at = net.minecraft.world.phys.Vec3.atCenterOf(box.getCenter());
+		Villager elder = null;
+		for (Villager v : people(level, box)) {
+			if (v.entityTags().contains(ELDER_TAG)) {
+				return;
+			}
+			if (SkyUsurpers.party(v) || v.entityTags().contains(LORD_TAG) || v.entityTags().contains(WARDEN_TAG) || McaBridge.isGuard(v)) {
+				continue;
+			}
+			if (elder == null || v.distanceToSqr(at) < elder.distanceToSqr(at)) {
+				elder = v;
+			}
+		}
+		if (elder != null) {
+			elder.addTag(ELDER_TAG);
+			elder.setPersistenceRequired();
+			FantasyArmorCompat.dress(elder, FantasyArmorCompat.SKY_ROBES);
+		}
 	}
 
 	/** One castle: a lord named if it has none, and its wardens made up to their number. */
@@ -163,6 +195,8 @@ public final class SkyCourt {
 			Villager warden = free.remove(0);
 			warden.addTag(WARDEN_TAG);
 			McaBridge.toGuard(warden);
+			// (the well-wardens' grey plate, where Fantasy Armor is loaded; MCA puts it back on them from then on)
+			FantasyArmorCompat.dress(warden, FantasyArmorCompat.WELL_WARDEN);
 			wardens++;
 		}
 		// now and then a power-hungry traveller comes for the seat (SkyUsurpers)
