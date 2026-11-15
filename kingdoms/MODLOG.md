@@ -13924,3 +13924,18 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Blossom villages** now rise on any of Mohknee's dry land (meadow, plains, forest, flower forest, cherry grove...), not only in cherry groves. Cherry groves are about an eighth of Mohknee and mostly steep, and the home continent's villages are kept off Mohknee, so the land stayed nearly empty. Everything else holds: by the water, never on an island, 384 blocks from any other seat, out of sight; the first one with no kingdom near is the castle town. Every settlement on Mohknee is Blossom by its place (`Palette.at`), whatever its biome (`BlossomVillages.dryLand`).
 - **`/kingdom mohknee palace build`** refuses on dry land: the sunken palace belongs on the seabed, and built on land its halls' water ran out over the country round it.
 - Not built or seen in game here; CI compiles it.
+
+## 0.9.30 (2026-11-15): Armourers' orders: hunters' coats, dawnwatch plate, ashen plate, pit harness, back to back (#1594)
+
+- Where Fantasy Armor is loaded (`FantasyArmorCompat`), more of the orders in Lore.md wear its sets:
+  - **The Warden's hunters' coats** (Evening Ghost): an armourer of a realm that keeps the Lantern Warden sells them to
+    those sworn to him; anyone else never sees them on the counter.
+  - **Dawnwatch plate** (Dawncrest): the Crowned Sun's realms' armourers sell it to his sworn at favour tier 3 or more.
+  - **Back to back** (Twinned): two players, each in at least two of its pieces, both at a shrine (within 4 blocks of it), who use it one after the other (within 10 s) are sworn to each other; alone at a shrine its wearer prays as anyone
+    does. While both have their half on and are within 16 blocks, a quarter of each hit on
+    one is borne by the other. Swearing someone new ends the old oath. A blow that kills outright isn't shared.
+  - **The demons' ashen plate** (Dark Lord): a demon captain of the Ash (Jaymo's Powers' demon realm) drops a piece 35%
+    of the time.
+  - **The pit harness** (Dead Gladiator): the warlord of a fighting pit's camp (our desert arena or Illager Arena's)
+    always drops a piece; it is never sold.
+- Built; not played.

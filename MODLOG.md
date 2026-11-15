@@ -5155,3 +5155,9 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - Half gravity and 6 extra blocks of safe fall; no air (Breath counts it airless like the Pale Moon and the Maw). Fall off a drift below y -24 and the giant's winds throw you back onto the nearest drift (or beside the ring's pod) for 6 damage.
 - Left out of the One Dimension stack (OneDimensionDefaults). Missions, warrants and charts of their own: none.
 - Compiled; the worldgen generated on a plain 26.3 server (drifts fill about a fifth of the band, 88% of columns have one); not played in the pack.
+
+## 0.24.2 (2026-11-15): Demon captains carry their layer (#1594)
+
+- A demon captain of the demon realm now carries a tag naming its layer (Gloam, Ash, Abyss), so Jaymo's Kingdoms can have
+  the Ash's captains drop the demons' ashen plate where Fantasy Armor is loaded. Nothing else changes.
+- Built; not played.
