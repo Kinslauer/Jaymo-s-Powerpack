@@ -5130,3 +5130,56 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   becomes its plainer kin: armour Kingdoms' steel plate (iron if Kingdoms is missing), everything else the iron one of
   the same kind, enchantments and name kept (`tinkering/smithing/NoDiamondGear`). Diamond gear already in a world stays.
 - Built; not played.
+
+## 0.23.99 (2026-11-15): Fantasy Armor in the pack (#1590)
+
+- Andy picked it (2026-11-15): Fantasy Armor (Medieval Series, kenddie) 1.3 for 26.3 is in the pack as a CurseForge /
+  Modrinth reference (all rights reserved in effect; linked, never bundled or edited). It needs GeckoLib and Cloth
+  Config, both already in.
+- Its tooltip descriptions are switched off once per install (`FantasyArmorPreset`), since no screen text tells lore.
+- A datapack takes out the recipes for the sets named after other games' characters (Malenia, Ornstein, Crucible
+  Knight, Silver Knight, Old Knight) and for the Grave Sentinel helmet (Andy: "the grave sentinel helmet should be
+  removed"). Lady Maria stays: Thessaly wears it in the Long Defence.
+- Its sets are still made over netherite, which is now smithed over steel plate.
+- Built; not played.
+
+## 0.24.0 (2026-11-15): JEI notes no longer cut off (#1591)
+
+- Long notes under our JEI pages (ore washing, small ores, tin ore, brick mending, salvage, quenching, xeno and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
+- Built; not played.
+
+## 0.24.1 (2026-11-15): the blue giant's ring - fly to the planet over the Verdant World
+
+- **The Blue Giant's Ring**: the ringed blue giant in the Verdant World's sky is now a pod stop (Andy picked its ring). On the star map it sits on the Verdant World's orbit with the Verdant World going round it, and is there whenever the Verdant World's chart is read. The hop between the two burns 1 fuel; from anywhere else 3 (grade II).
+- **The ring itself** (new dimension `jaymospowers:giant_ring`, made by `tools/gen_giant_ring.py`): no ground, just flat drifts of packed ice and tuff, topped with snow, calcite and blue ice, hanging between about y 60 and 130, veined with gravilite blocks and set with gravilite shards. Nothing spawns. Black sky, and the giant itself fills a quarter of it, rising off the horizon (VerdantSkyClient).
+- Half gravity and 6 extra blocks of safe fall; no air (Breath counts it airless like the Pale Moon and the Maw). Fall off a drift below y -24 and the giant's winds throw you back onto the nearest drift (or beside the ring's pod) for 6 damage.
+- Left out of the One Dimension stack (OneDimensionDefaults). Missions, warrants and charts of their own: none.
+- Compiled; the worldgen generated on a plain 26.3 server (drifts fill about a fifth of the band, 88% of columns have one); not played in the pack.
+
+## 0.24.2 (2026-11-15): Demon captains carry their layer (#1594)
+
+- A demon captain of the demon realm now carries a tag naming its layer (Gloam, Ash, Abyss), so Jaymo's Kingdoms can have
+  the Ash's captains drop the demons' ashen plate where Fantasy Armor is loaded. Nothing else changes.
+- Built; not played.
+
+## 0.24.3 (2026-11-15): The Maw's ruins cover the ground
+
+- **Ruined cities nearly everywhere under the Maw.** The Lost Cities ruins only covered about a quarter of the Maw's wasteland, in patches with up to 1000 blocks of bare ground between them, so you could land and see nothing but dirt and rock. Now about nine chunks in ten are ruined city, with scattered open ground between the districts. Buildings still top out well under the broken world.
+- Only ground that hasn't been visited yet changes: Maw chunks already generated stay as they are, so in an existing world the ruins show up past the parts you've explored (or everywhere once the Maw is reset).
+- Code: `power/zfighter/MawCities.SPREAD` (Lost Cities' `CITY_PERLIN_OFFSET` for the Maw's profile, was 0.2, now -0.6).
+- Checked on a dev server: the 16x16 chunks under (519, -156) went from no buildings to 238 of 256 chunks built, nothing above y 111. Not played.
+
+## 0.24.4 (2026-11-15): Fantasy Armor wears out (#1598)
+
+- Fantasy Armor's durability is switched on, once per install, by the same preset that hides its descriptions. Each piece gets 30% of Fantasy Armor's own durability, the same cut every other armour has. A number someone has already changed in `fantasy_armor-attributes.json` is kept.
+- Nothing breaks. A worn-out piece stays on and protects nothing until it is repaired at an anvil (netherite), and not during a fight, as with all armour.
+- A set with a worn-out piece gives no set effects until that piece is repaired.
+- Built; not played.
+
+## 0.24.5 (2026-11-15): chopping block - stand logs on it and split them into planks with an axe (#1599)
+
+- **Chopping block** (Andy: "a chopping block like SevTech and GTNH so you can place wood and chop into planks easier"; our own code, after Pyrotech's idea): set a log down, sneak and use an axe on its top, and it is cut down into a chopping block of that wood (eleven vanilla woods, each drawn from its own log textures; other mods' logs carve the oak one). Use logs on it to stand them up (one a click, sneak for all you hold, up to 16), then use an axe on it, or hold use: a log takes 4 blows with flint or stone, 3 with copper, 2 with iron or better, and splits into a plank more than on the ground (3/4/5), a quarter of the time with sawdust. Logs stay loaded, so you just keep swinging. An empty hand takes the logs back; breaking it drops them.
+- Logs still don't craft into planks in the grid, and the plain axe-on-a-set-down-log split stays as it was.
+- JEI: a Chopping Block page (every log with planks, blows and planks by axe) and an info page on each block.
+- Classes: `ground/Chopping`, `ChoppingBlock`, `ChoppingBlockEntity`, client `ground/ChoppingBlockRenderer`, `jei/ChoppingJei`; `FirstTools` routes the sneak click. Assets from `tools/gen_chopping_block.py`.
+- Built; not played.

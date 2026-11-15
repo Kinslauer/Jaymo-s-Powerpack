@@ -186,6 +186,11 @@ public final class FrontierWear {
 		if (server == null || slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) {
 			return stack;
 		}
+		// an order's plate is its own (a headsman's, a sky lord's warden's: FantasyArmorCompat)
+		ItemStack order = FantasyArmorCompat.issue(villager, slot);
+		if (order != null) {
+			return order;
+		}
 		Faction f = villager instanceof Worker w && w.factionId() >= 0 ? Factions.get(server, w.factionId())
 			: Factions.at(server, villager.level(), villager.blockPosition());
 		String look = lookOf(villager, f);
@@ -212,7 +217,7 @@ public final class FrontierWear {
 		if (slot.getType() == EquipmentSlot.Type.HAND) {
 			return Musketoon.holds(villager) || EarlyGuns.gunner(villager) || com.jaymoskingdoms.nether.AvatarClasses.of(villager) != null;
 		}
-		return !guard && FrontierArmour.setOf(villager.getItemBySlot(slot)) != null;
+		return !guard && FrontierArmour.setOf(villager.getItemBySlot(slot)) != null || FantasyArmorCompat.keeps(villager, slot);
 	}
 
 	/** The villagers round each player: those whose trade has a look of ours put it on. */
@@ -320,6 +325,8 @@ public final class FrontierWear {
 			if (f.type() == FactionType.KINGDOM && f.treasury() >= RANGER_TREASURY) {
 				schematic(offers, "ranger");
 			}
+			// and the armourers' orders' sets, to their own (FantasyArmorCompat)
+			FantasyArmorCompat.armourer(server, f, player, offers);
 		} else if (job.equals("shepherd")) {
 			sell(offers, SANGUINE[Math.floorMod(v.getUUID().hashCode(), SANGUINE.length)], SANGUINE_PRICE, TYPES);
 			sell(offers, "hedge", HEDGE_PRICE, TYPES);

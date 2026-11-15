@@ -61,7 +61,7 @@ public final class SalvageJei implements IModPlugin {
 			salvage.add(new SimpleCategory.Recipe(List.of(List.of(PodParts.itemOf(part, true)), List.of(SalvageRack.metalOf(part)), hammers),
 				List.of(PodParts.itemOf(part, false)), notes));
 		}
-		registration.addRecipes(SALVAGE, salvage);
+		SimpleCategory.addRecipes(registration, SALVAGE, salvage);
 		List<SimpleCategory.Recipe> mending = new ArrayList<>();
 		for (int grade = 1; grade <= PodGrades.MAX_GRADE; grade++) {
 			List<Component> notes = List.of(Component.translatable("jei.jaymospowers.mending.how"),
@@ -69,6 +69,6 @@ public final class SalvageJei implements IModPlugin {
 				Component.translatable("jei.jaymospowers.mending.from", Component.translatable("space.jaymospowers.dest." + PodGrades.worldOf(grade))));
 			mending.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(PodGrades.partFor(grade)))), List.of(PodParts.stackOf(PodPart.KEEL, false, grade)), notes));
 		}
-		registration.addRecipes(MENDING, mending);
+		SimpleCategory.addRecipes(registration, MENDING, mending);
 	}
 }

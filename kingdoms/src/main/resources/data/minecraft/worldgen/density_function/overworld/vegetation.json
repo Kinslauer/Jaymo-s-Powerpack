@@ -4,7 +4,7 @@
   "first": {
     "type": "minecraft:lerp",
     "alpha": "jaymoskingdoms:mohknee/climate",
-    "first": "jaymoskingdoms:mohknee/home_vegetation",
+    "first": "jaymoskingdoms:continents/vegetation",
     "second": {
       "type": "minecraft:clamp",
       "input": {

@@ -77,7 +77,7 @@ public final class CokeAndSteelJei implements IModPlugin {
 			new ItemStack(com.jaymospowers.ground.StoneAge.CLAY_BUCKET))), List.of(new ItemStack(CokeAndSteel.CREOSOTE_BUCKET),
 			new ItemStack(CokeAndSteel.CLAY_CREOSOTE_BUCKET)), List.of(Component.translatable("jei.jaymospowers.coke_oven.draw", CokeOvenEntity.BUCKET),
 			Component.translatable("jei.jaymospowers.coke_oven.full"))));
-		registration.addRecipes(COKE_OVEN, bakes);
+		SimpleCategory.addRecipes(registration, COKE_OVEN, bakes);
 
 		List<ItemStack> logs = matching(s -> s.is(net.minecraft.tags.ItemTags.LOGS_THAT_BURN));
 		List<ItemStack> cover = new ArrayList<>();
@@ -86,19 +86,19 @@ public final class CokeAndSteelJei implements IModPlugin {
 				cover.add(new ItemStack(block));
 			}
 		}
-		registration.addRecipes(CHARCOAL_PIT, List.of(
+		SimpleCategory.addRecipes(registration, CHARCOAL_PIT, List.of(
 			new SimpleCategory.Recipe(List.of(logs, cover, List.of(new ItemStack(Items.FLINT_AND_STEEL), new ItemStack(Items.FIRE_CHARGE))),
 				List.of(new ItemStack(CokeAndSteel.CHARRED_LOG)), List.of(Component.translatable("jei.jaymospowers.charcoal_pit.days", CharcoalPit.BURN_DAYS),
 				Component.translatable("jei.jaymospowers.charcoal_pit.air"))),
 			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(CokeAndSteel.CHARRED_LOG))), List.of(new ItemStack(Items.CHARCOAL, CharcoalPit.CHARCOAL_PER_LOG)),
 				List.of(Component.translatable("jei.jaymospowers.charcoal_pit.break"), Component.empty()))));
 
-		registration.addRecipes(BLAST_FURNACE, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Items.IRON_INGOT)),
+		SimpleCategory.addRecipes(registration, BLAST_FURNACE, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Items.IRON_INGOT)),
 			List.of(new ItemStack(CokeAndSteel.COAL_COKE, BlastFurnaceEntity.COKE_PER_STEEL))), List.of(new ItemStack(Tinkering.STEEL_INGOT)),
 			List.of(Component.translatable("jei.jaymospowers.brick_blast_furnace.time", BlastFurnaceEntity.STEEL_TICKS / TICKS_PER_SECOND / 60),
 				Component.empty()), List.of(new ItemStack(CokeAndSteel.ASH, BlastFurnaceEntity.ASH_PER_STEEL)))));
 
-		registration.addRecipes(TIN_ORE, List.of(
+		SimpleCategory.addRecipes(registration, TIN_ORE, List.of(
 			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tin.TIN_ORE), new ItemStack(Tin.DEEPSLATE_TIN_ORE))), List.of(new ItemStack(Tin.RAW_TIN)),
 				List.of(Component.translatable("jei.jaymospowers.tin_ore.where"))),
 			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tin.TIN_SAND))), List.of(new ItemStack(Tin.TIN_SAND)),

@@ -39,7 +39,8 @@ import net.minecraft.world.phys.BlockHitResult;
  * <li>a shard on a stick makes the primitive knife;</li>
  * <li>grass cut with a knife gives plant fibre, 3 twist into plant string;</li>
  * <li>shard, string and stick make the flint hatchet (Armory's hand axe), the first thing that cuts wood;</li>
- * <li>logs don't craft into planks ({@code tinkering/Uncraftable}): set one down and right click its top with an axe.</li>
+ * <li>logs don't craft into planks ({@code tinkering/Uncraftable}): set one down and right click its top with an axe
+ * (sneak to cut it into a {@link Chopping} block, which splits more planks a log).</li>
  * </ol>
  * (0.16.24) Andy: "a way to strike and start flame like flint and steel but with a rock in one hand and the flint in the
  * other, it chips the flint and breaks the rock": right click a block with flint and a rock in your two hands. A strike
@@ -106,7 +107,9 @@ public final class FirstTools {
 			if (stack.is(ItemTags.AXES) && state.is(BlockTags.LOGS)) {
 				Item planks = planksOf(state);
 				if (planks != null) {
-					return plank(player, level, hand, stack, hit.getBlockPos(), planks);
+					// sneak: cut the log down into a chopping block instead (Chopping)
+					return player.isSecondaryUseActive() ? Chopping.carve(player, level, hand, stack, hit.getBlockPos(), planks)
+						: plank(player, level, hand, stack, hit.getBlockPos(), planks);
 				}
 			}
 			return InteractionResult.PASS;
@@ -250,8 +253,7 @@ public final class FirstTools {
 
 	private static InteractionResult plank(Player player, Level level, InteractionHand hand, ItemStack axe, BlockPos pos, Item planks) {
 		if (level instanceof ServerLevel) {
-			float speed = axe.getDestroySpeed(Blocks.OAK_LOG.defaultBlockState());
-			int count = speed >= FINE_SPEED ? PLANKS_FINE : speed >= FAIR_SPEED ? PLANKS_FAIR : PLANKS_CRUDE;
+			int count = planksFor(axe);
 			level.removeBlock(pos, false);
 			level.gameEvent(player, GameEvent.BLOCK_DESTROY, pos);
 			Block.popResource(level, pos.above(), new ItemStack(planks, count));
@@ -259,6 +261,12 @@ public final class FirstTools {
 			axe.hurtAndBreak(1, player, hand);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Planks a log split on the ground gives under {@code axe}, by its speed on oak. */
+	static int planksFor(ItemStack axe) {
+		float speed = axe.getDestroySpeed(Blocks.OAK_LOG.defaultBlockState());
+		return speed >= FINE_SPEED ? PLANKS_FINE : speed >= FAIR_SPEED ? PLANKS_FAIR : PLANKS_CRUDE;
 	}
 
 	/**

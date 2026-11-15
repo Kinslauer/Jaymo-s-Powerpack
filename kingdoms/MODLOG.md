@@ -13900,3 +13900,108 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   whoever he is hunting. As before, the bar stays while they're within 48 blocks. Boss music and anything else that
   asks whether a player is in a boss's fight count them in too.
 - Built; not played.
+
+## 0.9.28 (2026-11-15): Fantasy Armor on monsters and kings (#1590)
+
+- Where Fantasy Armor is loaded (`FantasyArmorCompat`, by registry id, no dependency): at the higher world tiers one of
+  the risen dead now and then comes up in a whole dark set (dark cover, grave sentinel), enchanted as legendary gear;
+  a king in gilded attire wears one of its sets under his crown (Andy: "kings can wear whatever they want, except
+  dawncrest"; the trimmed sets are out too) instead of trimmed netherite. Nobody below a king wears it, so the royal tiers hold. The Grave Sentinel helmet is
+  never put on anyone.
+- The armourers' orders (Lore.md, "What the armourers make") wear Fantasy Armor's sets (Andy chose its models over new
+  art): barrow wardens' mail = Grave Sentinel, dawnwatch = Dawncrest, headsmen = Golden Execution, Giant-slayers =
+  Dragonslayer, sky elders = Wind Worshipper, well-wardens = Fog Guard, ashen plate = Dark Lord, the Warden's hunters =
+  Evening Ghost, folded lamellar = Ronin, pit harness = Dead Gladiator, back to back = Twinned. In this patch:
+  - Barrow wardens' mail falls from the barrow's dead (a knight 8%, the revenant 60%; never the helm), and whoever wears
+    all of it is let pass by them as a lantern-bearer is.
+  - When a Giant falls, a Dragonslayer plate lies where it fell for each player within 48 blocks.
+  - About a third of the Blossom land's guards wear folded lamellar instead of the Armory's ronin harness.
+- With the mod in, the Long Defence's cast now shows in its sets (after re-recording the film once).
+- Built; not played.
+
+## 0.9.29 (2026-11-15): Blossom villages across all of Mohknee; no sunken palace on dry land
+
+- **Blossom villages** now rise on any of Mohknee's dry land (meadow, plains, forest, flower forest, cherry grove...), not only in cherry groves. Cherry groves are about an eighth of Mohknee and mostly steep, and the home continent's villages are kept off Mohknee, so the land stayed nearly empty. Everything else holds: by the water, never on an island, 384 blocks from any other seat, out of sight; the first one with no kingdom near is the castle town. Every settlement on Mohknee is Blossom by its place (`Palette.at`), whatever its biome (`BlossomVillages.dryLand`).
+- **`/kingdom mohknee palace build`** refuses on dry land: the sunken palace belongs on the seabed, and built on land its halls' water ran out over the country round it.
+- Not built or seen in game here; CI compiles it.
+
+## 0.9.30 (2026-11-15): Armourers' orders: hunters' coats, dawnwatch plate, ashen plate, pit harness, back to back (#1594)
+
+- Where Fantasy Armor is loaded (`FantasyArmorCompat`), more of the orders in Lore.md wear its sets:
+  - **The Warden's hunters' coats** (Evening Ghost): an armourer of a realm that keeps the Lantern Warden sells them to
+    those sworn to him; anyone else never sees them on the counter.
+  - **Dawnwatch plate** (Dawncrest): the Crowned Sun's realms' armourers sell it to his sworn at favour tier 3 or more.
+  - **Back to back** (Twinned): two players, each in at least two of its pieces, both at a shrine (within 4 blocks of it), who use it one after the other (within 10 s) are sworn to each other; alone at a shrine its wearer prays as anyone
+    does. While both have their half on and are within 16 blocks, a quarter of each hit on
+    one is borne by the other. Swearing someone new ends the old oath. A blow that kills outright isn't shared.
+  - **The demons' ashen plate** (Dark Lord): a demon captain of the Ash (Jaymo's Powers' demon realm) drops a piece 35%
+    of the time.
+  - **The pit harness** (Dead Gladiator): the warlord of a fighting pit's camp (our desert arena or Illager Arena's)
+    always drops a piece; it is never sold.
+- Built; not played.
+
+## 0.9.31 (2026-11-15): The Crowned Sun's headsmen (#1597)
+
+- Andy asked for them (2026-11-15; Lore.md, "The dawnwatch and the headsmen"). Each realm whose state patron is the
+  Crowned Sun keeps a headsman at its seat: when a player is about and there's none, the guard nearest the seat is named
+  (`Headsmen`), and another when he dies. Where Fantasy Armor is loaded he wears the whole Golden Execution set, on duty
+  and off; without it he is a guard like the rest.
+- His work: in his realm a sentence of death at an audience is his when he's within 32 blocks. He walks to the one
+  sentenced (waiting up to 10 s for him) and the blow is his.
+- The dull plate: three days after his last execution his plate is dull, its Strength gone and he is slower. A player in
+  the whole set is the same unless they have killed a person (a villager, an illager, a player) in the last three days.
+  Nothing on screen says so.
+- He spits at anyone sworn to the Ash Whisperer who comes within 6 blocks (now and then).
+- Never sold: a headsman lets one piece of his plate fall when he dies.
+- Built; not played.
+
+## 0.9.32 (2026-11-15): continental world gen - great continents, wide oceans, a climate map
+
+- **Continents**: the Overworld's land now forms a few great continents, most several thousand blocks across, with open
+  ocean between them, often over 1,500 blocks from any shore. About 30% of the world is land (it varies by seed), and over 90% of it is in the
+  continents. Coasts are ragged, with capes, bays and islets near shore, and a narrow shelf of shallow sea before the
+  deep ocean. Rare islands rise out on the open sea. The land round the world's origin is lifted so the spawn stands on a
+  continent. Mohknee, its crossing and its islands are unchanged. New shape: `jaymoskingdoms:continents/shape` (noises
+  `continents/land`, `continents/isles`), used by `overworld/continents` as the home world's shape;
+  `mohknee/home_continents` removed.
+- **Land lifted with the higher sea**: the game's own offset (overworld, large biomes, amplified) is 8 blocks higher,
+  the same as `HighSea.RISE`. Before, the +8 sea drowned every low plain and river flat, so the 25% of land left was
+  in thousands of islets and pools (measured on seed 1234: 4,350 separate pieces in 24,000 blocks square, now 740, most of them
+  shore rocks). Coasts, beaches and plains now stand at the sea as the game meant them.
+- **Climate map** (Andy: "biomes and civilizations should follow a continental heatmap too"): heat now runs by
+  latitude, cold to the north (-z) and hot to the south (+z), in bands that repeat like a globe's. A pole lies 6,000
+  blocks north of the origin and the equator 6,000 blocks south. Continent-sized wobbles bend the bands, and a
+  continent's middle is harsher than its coasts. Coasts are wet and interiors dry, with a dry desert belt on the
+  equator side of the temperate band and a wet, jungle equator. The seas follow it too: frozen seas in the north,
+  warm seas in the south. Snow, taiga, savanna, desert, badlands and jungle all now lie within about 5,000 blocks of
+  spawn on the seeds checked (on seed 1234, deserts were 11,700 blocks away before). Settlements follow the biomes, so
+  their buildings (Palette), dress (Climate), coin (Currencies) and heritage mix (VillagerHeritage), and heritage home
+  villages (LifeStory), follow the map. New `continents/latitude`, `continents/temperature`, `continents/vegetation`;
+  `mohknee/home_temperature` and `home_vegetation` removed (Mohknee keeps its own climate).
+- Written by `tools/gen_continents.py` (reads the 26.3 jar for the game's offset files), then `tools/gen_mohknee.py`.
+- Needs a new world: chunks made before it won't match new ones at the seam. Checked with the real generator on a dev
+  server (land share, landmass and ocean sizes on three seeds, biome map 60,000 blocks across, a new world boots and
+  spawns on land in 8-12 s; the biome map by land share and nearest of each to spawn on three seeds; /locate finds every
+  village type, snowy at 650 blocks, desert at 6,800); not played.
+
+## 0.9.33 (2026-11-15): Worn-out lore sets do nothing (#1598)
+
+- A Fantasy Armor lore set with a worn-out piece doesn't count until it's repaired. That covers the headsman's dull plate, the twinned oath, the barrow keepers and every other whole-set effect.
+- Built; not played.
+
+## 0.9.34 (2026-11-15): Dawnwatch, sky elders and well-wardens (#1600)
+
+These apply only where Fantasy Armor is loaded.
+- The Sun-Marshal's sun-guard wear the dawnwatch's gilded plate, and it never drops from them. Without Fantasy Armor they keep their golden helmets.
+- Each sky village and sky town names an elder: the grown villager nearest its middle who holds no other post. The elder wears the wind-faith robes and keeps them on. When an elder dies, another is named.
+- Cloudwrights sell the wind-faith robes, and stalls that already exist get them at their next restock.
+- The sky lord's wardens are the well-wardens. They wear the grey well-warden plate on duty and take it off with the rest of their arms, like every guard.
+- Built; not played.
+
+## 0.9.35 (2026-11-15): The orders' sets show (#1600)
+
+These apply only where Fantasy Armor is loaded.
+- Anyone wearing the whole of an order's set gives off a faint mote now and then, in the set's colour. A set with a worn-out piece gives none. This covers the dawnwatch, the headsmen, the sky elders, the well-wardens, the ashen plate, the hunters, the barrow wardens, the Giant-slayers, the pit, the twinned and the blossom guards' folded lamellar.
+- People notice a player in one of those sets and say so in one oblique line. Each person says it at most once a day. Goblins and orcs have their own lines.
+- Fantasy Armor's own capes already hang from its sets, so we add none.
+- Built; not played.

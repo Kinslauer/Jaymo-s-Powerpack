@@ -100,7 +100,7 @@ public final class MedicineJei implements IModPlugin {
 		List<ItemStack> fires = List.of(new ItemStack(Items.CAMPFIRE), new ItemStack(Items.LAVA_BUCKET));
 		recipes.add(new SimpleCategory.Recipe(List.of(blades, fires), List.of(),
 			List.of(note("cautery.1", Treatment.HEAT_TICKS / 20), note("cautery.2"), note("cautery.3", num(Treatment.CAUTERY_BURN)))));
-		registration.addRecipes(MEDICINE, recipes);
+		SimpleCategory.addRecipes(registration, MEDICINE, recipes);
 	}
 
 	private static void add(List<SimpleCategory.Recipe> recipes, Item item, Component... notes) {

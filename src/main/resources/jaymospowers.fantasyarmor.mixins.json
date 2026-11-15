@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.fantasyarmor",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"FantasyArmorSetMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

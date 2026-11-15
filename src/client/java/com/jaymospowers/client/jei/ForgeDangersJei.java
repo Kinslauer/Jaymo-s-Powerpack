@@ -65,7 +65,7 @@ public final class ForgeDangersJei implements IModPlugin {
 			melts.add(new SimpleCategory.Recipe(List.of(List.of(egg)), List.of(), List.of(
 				burn(Molten.BLOOD, com.jaymospowers.tinkering.smeltery.SmelteryEntity.COOK_BLOOD), burn(creature.molten(), creature.perBurn()))));
 		}
-		registration.addRecipes(CREATURE_MELTING, melts);
+		SimpleCategory.addRecipes(registration, CREATURE_MELTING, melts);
 
 		List<ItemStack> hammers = new ArrayList<>();
 		for (Item item : BuiltInRegistries.ITEM) {
@@ -78,7 +78,7 @@ public final class ForgeDangersJei implements IModPlugin {
 		Cracks.mendings().forEach((cracked, whole) -> mendings.add(new SimpleCategory.Recipe(
 			List.of(List.of(cracked), List.of(new ItemStack(Tinkering.GROUT)), hammers), List.of(whole),
 			List.of(Component.translatable("jei.jaymospowers.brick_mending.how")))));
-		registration.addRecipes(MENDING, mendings);
+		SimpleCategory.addRecipes(registration, MENDING, mendings);
 
 		registration.addIngredientInfo(SmithingGloves.ITEM, Component.translatable("jei.jaymospowers.smithing_gloves"));
 		registration.addIngredientInfo(Tinkering.GROUT, Component.translatable("jei.jaymospowers.grout.mends"));

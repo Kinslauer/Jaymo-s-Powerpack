@@ -2311,3 +2311,9 @@ corpse' model that it came from".
 - Code: `ragdoll/KeelOver` (pure, steers the ragdoll's points through its physics, so ground and walls still hold it), `Corpses.keelFor` / `spawnCorpse`, `CorpseRagdoll` (steering, ending the keel), synced `CorpseEntity.keeling()`; client `ClientRagdolls.Track.settle` doesn't ease a keeling animal onto its side, then keeps it drawn on that side for 2 s afterwards (its physics rolls it back onto its legs). Player deaths are unchanged.
 - `tools/ragdoll_sim` checks cows, wolves, chickens, a cube animal, players and a giant: bones keep their length, nothing goes into the ground, animals end on their side nearly still, humanoids let go of partway over and end lying down.
 - Built; not played.
+
+## 0.6.29 (2026-11-15): Cactus water and JEI notes (#1591)
+
+- A bucket of cactus water only quenches thirst: it no longer shows meal hearts or takes the stomach's drink slot.
+- Long notes under the Mill pages in JEI (sails, building a mill or steam engine, pressing, foraging and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
+- Built; not played.

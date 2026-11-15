@@ -43,9 +43,9 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
   steel plate or netherite piece + one token item = that set's piece. One table of set -> token.
 - **Per-piece bonuses** (`piece-spread`): each set's pieces carry their own small modifiers (speed on boots, attack speed
   on the chest, health on the helm, luck on hoods), constants at the top of the set class.
-- **Whole-set sign** (`set-motes`): faint MagicFx motes in the set's colour while the whole set is worn.
-- **Set capes** (`set-capes`): `ClothCape` hung from chosen chestpieces, in the set's colour.
-- **Villager remarks** (`set-remarks`): MCA villagers make one oblique remark on a known set (like the grime remarks),
+- **Whole-set sign** (`set-motes`, built as `SetSigns`): faint MagicFx motes in the set's colour while the whole set is worn.
+- **Set capes** (`set-capes`, dropped: Fantasy Armor's sets hang their own): `ClothCape` hung from chosen chestpieces, in the set's colour.
+- **Villager remarks** (`set-remarks`, built as `SetSigns`): MCA villagers make one oblique remark on a known set (like the grime remarks),
   never a tooltip paragraph.
 - **Twinned** (`twinned`): paired harness sworn at a shrine; while both halves are worn within 16 blocks, 25% of a hit on
   one goes to the other.
@@ -80,6 +80,8 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - `ship-dress`: `FantasyArmorCompat` (like `KnightsCompat`, by registry id, no dependency): monsters, undead and kings
   only, so royal tiers still hold.
 - `ship-repaint`: waits for Andy's look at the model sheet.
+- Built (2026-11-15): packMods entry, `FantasyArmorPreset` (descriptions off), trim datapack in Powers
+  (`data/fantasy_armor/recipe`), `FantasyArmorCompat` (risen dead at world tier 3+, gilded kings via `Regalia`).
 
 ### 8. The Long Defence's cast in Fantasy Armor (Kingdoms client, only when Fantasy Armor is loaded)
 Andy (2026-11-15): the Quiet One in the Redeemer plate, Thessaly in Lady Maria, Varro in Golden Horns with no helm,
@@ -88,6 +90,35 @@ Dark Cover. Film actors are jointed GeckoLib bodies, so `FilmGear` (which paints
 these GeckoLib sets: a new render layer draws each worn Fantasy Armor piece's own model (read from the mod's assets at
 run time, nothing copied) on the actor's head, body, arm and leg bones. Without the mod the cast looks as it does now.
 Lady Maria is used here, so the trim datapack keeps her set.
+
+### 9. The headsmen (Kingdoms; Andy asked for it to be planned, 2026-11-15; built as `Headsmen`)
+Lore (approved): the Crowned Sun's headsmen carry out the crown's sentences, the thieves' hangings among them, in black
+plate edged with gold (Golden Execution); a headsman's plate goes dull if he goes too long without his work; the Ash
+Whisperer's people spit at both orders.
+- **Who.** Each realm whose state patron is the Crowned Sun keeps one headsman at its seat: a guard picked and tagged
+  like the sky castle's wardens (`jaymoskingdoms.headsman`), in the whole Golden Execution set where Fantasy Armor is
+  loaded (plain blackened iron and a gold-trimmed helm without it), an axe in hand. A new one is picked when he dies.
+- **His work.** An audience's execution sentence (`Arrests`, today carried out by the guard where the crook stands) is
+  his in those realms: he walks to the crook and the beheading is his. A thief taken in his realm is the one sentence he
+  always gets.
+- **The dull plate.** Each execution sets the realm's last-execution day. After 3 days without one his plate is dull:
+  he loses its bonus (no Strength, slower), and a player who wears the whole set is the same unless they have carried out
+  a sentence or finished a downed foe in the last 3 days (finishers). Nothing on screen says so; villagers may remark.
+- **Others.** The Ash Whisperer's sworn are spat at (a gesture and a growl from his and from the dawnwatch) and pay more
+  at his realm's counters. The set is never sold; it falls from a headsman (one piece) when he dies.
+
+## If the lore sets reuse Fantasy Armor's models (Andy chose this on a decision card, 2026-11-15)
+Each lore set becomes the Fantasy Armor set that matches it; our code adds who wears, drops and sells it and the
+whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they are unless they clash):
+- Barrow warden's mail = Grave Sentinel (its helm stays out; a barrow knight goes bare-headed or in a rusted iron helm).
+- Dawnwatch plate = Dawncrest; Headsman's plate = Golden Execution.
+- Giant-slayer harness = Dragonslayer; wind-faith robes = Wind Worshipper; well-warden plate = Fog Guard.
+- Ashen plate = Dark Lord (the Grue's in the film, the demon captains' in the Ash).
+- Warden hunter's coat = Evening Ghost (Gilded Hunt is the kings'); folded lamellar = Ronin; pit harness = Dead Gladiator.
+- Back to back (twinned) = Twinned.
+Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
+guards. All placed: headsmen (`Headsmen`); sky elders (`SkyCourt#ELDER_TAG`), well-wardens = the sky lord's wardens and the
+dawnwatch = the Sun-Marshal's sun-guard (`FantasyArmorCompat#issue`, `SunMarshalMoves#hand`); demon captains and pit warlords (#1594). Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)

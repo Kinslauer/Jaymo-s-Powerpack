@@ -148,7 +148,7 @@ public final class Stench {
 	 * of the lines {@code prefix}.0.. ({@code lines} of them; goblins and orcs {@code prefix}.green.0.., {@code green} of
 	 * them). False if nobody did.
 	 */
-	private static boolean remark(ServerPlayer player, Map<String, Long> said, int cooldown, String prefix, int lines, int green, long now) {
+	static boolean remark(ServerPlayer player, Map<String, Long> said, int cooldown, String prefix, int lines, int green, long now) {
 		ServerLevel level = player.level();
 		UUID who = player.getUUID();
 		List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(REMARK_RANGE),

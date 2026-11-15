@@ -168,6 +168,8 @@ public class JaymosPowers implements ModInitializer {
 		// sulphur and saltpetre: ores, loose crust, and the true black powder
 		com.jaymospowers.ground.PowderMinerals.init();
 		com.jaymospowers.ground.FirstTools.init();
+		// the chopping block: logs stood on it split into planks under an axe
+		com.jaymospowers.ground.Chopping.init();
 		// Andy's GT New Horizons picks, patch 1: the Stone Age recipes (the sieve, the mortar's grinds, brick forms, clay buckets, glass)
 		com.jaymospowers.ground.StoneAge.init();
 		// Andy's GT New Horizons picks, patch 7: mixed veins and their tiny dusts, small ores, the dowsing rod

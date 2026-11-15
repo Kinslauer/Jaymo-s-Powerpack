@@ -4,7 +4,7 @@
   "first": {
     "type": "minecraft:lerp",
     "alpha": "jaymoskingdoms:mohknee/climate",
-    "first": "jaymoskingdoms:mohknee/home_temperature",
+    "first": "jaymoskingdoms:continents/temperature",
     "second": {
       "type": "minecraft:clamp",
       "input": {

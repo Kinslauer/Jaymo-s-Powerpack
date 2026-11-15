@@ -122,6 +122,8 @@ public final class ZFighterDemonRealm {
 	static final float[] CAPTAIN_SHARE = {0.1F, 0.2F, 0.35F};
 	static final double CAPTAIN_SCALE = 1.35;
 	static final String ARMY_TAG = "jaymospowers_demon";
+	/** On a captain, with its layer after it (0 Gloam, 1 Ash, 2 Abyss). */
+	static final String CAPTAIN_TAG = "jaymospowers_demon_captain_";
 	static final String MASTER_TAG = "jaymospowers_demon_master";
 
 	/** The villages built in the Nether (a centre with y 0 is a spot that had no floor, never retried). Saved. */
@@ -671,6 +673,10 @@ public final class ZFighterDemonRealm {
 		mob.setCustomName(Component.translatable(captain ? "entity.jaymospowers.demon_captain" : "entity.jaymospowers.demon_soldier"));
 		mob.setCustomNameVisible(captain);
 		mob.addTag(ARMY_TAG);
+		if (captain) {
+			// (Jaymo's Kingdoms reads it: a captain of the Ash drops a piece of the ashen plate where Fantasy Armor is loaded)
+			mob.addTag(CAPTAIN_TAG + layer);
+		}
 		mob.setTarget(target);
 		level.addFreshEntity(mob);
 		level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y + 1.0, at.z, 12, 0.3, 0.6, 0.3, 0.03);

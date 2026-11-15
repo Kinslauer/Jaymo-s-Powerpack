@@ -38,6 +38,7 @@ public final class TinkeringClient {
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.CHANNEL_ENTITY, MoltenRenderer::new);
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.smeltery.SmelteryExtras.ALLOYER_ENTITY, MoltenRenderer::new);
 		BlockEntityRenderers.register(com.jaymospowers.tinkering.kiln.Kiln.KILN_LOAD_ENTITY, KilnLoadRenderer::new);
+		BlockEntityRenderers.register(com.jaymospowers.ground.Chopping.ENTITY, com.jaymospowers.client.ground.ChoppingBlockRenderer::new);
 		// (0.13) what melts by recipe, data file or forged weapon, as the server worked it out
 		ClientPlayNetworking.registerGlobalReceiver(MeltingRecipes.Sync.TYPE, (payload, context) -> Melting.setExtra(payload.items()));
 		// (0.8.76) Armory weapons level up and take modifiers like tinker tools

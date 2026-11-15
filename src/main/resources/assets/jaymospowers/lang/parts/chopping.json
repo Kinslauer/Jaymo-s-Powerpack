@@ -1,0 +1,18 @@
+{
+  "block.jaymospowers.oak_chopping_block": "Oak Chopping Block",
+  "block.jaymospowers.spruce_chopping_block": "Spruce Chopping Block",
+  "block.jaymospowers.birch_chopping_block": "Birch Chopping Block",
+  "block.jaymospowers.jungle_chopping_block": "Jungle Chopping Block",
+  "block.jaymospowers.acacia_chopping_block": "Acacia Chopping Block",
+  "block.jaymospowers.dark_oak_chopping_block": "Dark Oak Chopping Block",
+  "block.jaymospowers.mangrove_chopping_block": "Mangrove Chopping Block",
+  "block.jaymospowers.cherry_chopping_block": "Cherry Chopping Block",
+  "block.jaymospowers.pale_oak_chopping_block": "Pale Oak Chopping Block",
+  "block.jaymospowers.crimson_chopping_block": "Crimson Chopping Block",
+  "block.jaymospowers.warped_chopping_block": "Warped Chopping Block",
+  "jei.jaymospowers.chopping": "Chopping Block",
+  "jei.jaymospowers.chopping.ground": "Or set the log down anywhere and use an axe on its top: a plank fewer.",
+  "jei.jaymospowers.chopping_block": "Set a log down, sneak and use an axe on its top to cut it into a chopping block of that wood. Stand logs on it (up to 16; sneak for all you hold), then use an axe on it: each log takes a few blows (fewer with a better axe) and splits into a plank more than it would on the ground, sometimes with sawdust. An empty hand takes the logs back.",
+  "jei.jaymospowers.chopping.how": "Stand logs on the block, then use an axe on it: %s blows a log with flint or stone, %s with copper, %s with iron or better.",
+  "jei.jaymospowers.chopping.yield": "Splits into %s, %s or %s planks by the same axes, sometimes with sawdust."
+}

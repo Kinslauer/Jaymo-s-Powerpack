@@ -370,6 +370,16 @@ final class IllagerSites {
 		return byCamp(server).get(camp);
 	}
 
+	/** {@code entity} is the warlord of a camp that holds a fighting pit (our desert arena, or Illager Arena's). */
+	static boolean pitWarlord(MinecraftServer server, Entity entity) {
+		Illagers.Tag tag = Illagers.tag(entity);
+		if (tag == null || tag.role() != Illagers.WARLORD) {
+			return false;
+		}
+		Site s = site(server, tag.camp());
+		return s != null && (s.path().equals("arena") || s.path().equals(ILLAGER_ARENA));
+	}
+
 	/** {@code camp} holds its place and never raids (a garrison, a smugglers' den). */
 	static boolean noRaids(MinecraftServer server, int camp) {
 		Site s = site(server, camp);
