@@ -219,6 +219,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ScreenShake.init();
 		BlindedHud.init();
 		com.jaymospowers.client.sound.Blasts.init();
+		com.jaymospowers.client.blast.BlastFx.init();
 		com.jaymospowers.client.sound.ShellWhistle.init();
 		PanicCam.init();
 		com.jaymospowers.client.water.BoatWakes.init();

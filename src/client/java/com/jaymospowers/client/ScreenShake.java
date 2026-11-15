@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -49,9 +50,16 @@ public final class ScreenShake {
 	static final int EXPLOSION_TICKS = 18;
 	/** Closer than this to the camera, a shake's spot counts as under you. */
 	static final double UNDERFOOT = 1.2;
+	/** An explosion shakes this much harder when neither you nor it can see the sky (a cave, a cellar, a mine). */
+	static final float ENCLOSED = 1.4F;
+	/** A daze's slow sway (radians a tick, of its roll and its nod). */
+	static final float DAZE_ROLL_SPEED = 0.11F, DAZE_NOD_SPEED = 0.07F;
 
 	private static final List<Active> ACTIVE = new ArrayList<>();
 	private static int clock;
+	/** The daze after a blast beside you (BlastFx): degrees at its worst, how long it lasts, how far in it is. */
+	private static float dazeDegrees;
+	private static int dazeTicks, dazeAge;
 
 	private ScreenShake() {
 	}
@@ -151,25 +159,46 @@ public final class ScreenShake {
 		double reach = radius * EXPLOSION_REACH;
 		double d = minecraft.player.getEyePosition().distanceTo(at);
 		if (d < reach) {
-			add(Math.min(EXPLOSION_MAX, radius * EXPLOSION_PER_RADIUS) * (float)Math.pow(1.0 - d / reach, Shakes.FALLOFF_POWER), EXPLOSION_TICKS, at);
+			float strength = Math.min(EXPLOSION_MAX, radius * EXPLOSION_PER_RADIUS) * (float)Math.pow(1.0 - d / reach, Shakes.FALLOFF_POWER);
+			if (!minecraft.player.level().canSeeSky(BlockPos.containing(at)) && !minecraft.player.level().canSeeSky(minecraft.player.blockPosition())) {
+				strength *= ENCLOSED;
+			}
+			add(strength, EXPLOSION_TICKS, at);
+		}
+	}
+
+	/** A slow, unsteady sway of the view of {@code degrees} at first, easing off over {@code ticks} (a blast went off beside you). */
+	public static void daze(float degrees, int ticks) {
+		if (degrees <= 0.0F || ticks <= 0) {
+			return;
+		}
+		float left = dazeAge < dazeTicks ? dazeDegrees * (1.0F - dazeAge / (float)dazeTicks) : 0.0F;
+		if (degrees > left) {
+			dazeDegrees = degrees;
+			dazeTicks = ticks;
+			dazeAge = 0;
 		}
 	}
 
 	private static void tick(Minecraft minecraft) {
 		if (minecraft.level == null) {
 			ACTIVE.clear();
+			dazeAge = dazeTicks;
 			return;
 		}
 		if (minecraft.isPaused()) {
 			return;
 		}
 		clock++;
+		if (dazeAge < dazeTicks) {
+			dazeAge++;
+		}
 		ACTIVE.removeIf(a -> ++a.age >= a.ticks);
 	}
 
 	/** Tips the view by every shake running (called with the hurt bob). */
 	public static void apply(CameraRenderState camera, PoseStack poseStack) {
-		if (ACTIVE.isEmpty() || camera.pos == null) {
+		if (ACTIVE.isEmpty() && dazeAge >= dazeTicks || camera.pos == null) {
 			return;
 		}
 		float partialTicks = camera.cameraEntityPartialTicks;
@@ -212,6 +241,12 @@ public final class ScreenShake {
 				roll += kick * (float)left;
 				yaw += kick * 0.3F * (float)left;
 			}
+		}
+		if (dazeAge < dazeTicks) {
+			float t = (dazeAge + partialTicks) / dazeTicks;
+			float s = dazeDegrees * (1.0F - t) * (1.0F - t) * intensity;
+			roll += s * Mth.sin(now * DAZE_ROLL_SPEED);
+			pitch += s * 0.5F * Mth.sin(now * DAZE_NOD_SPEED + 1.0F);
 		}
 		float total = Math.abs(pitch) + Math.abs(yaw) + Math.abs(roll);
 		float most = MAX_DEGREES * Math.max(1.0F, intensity);
