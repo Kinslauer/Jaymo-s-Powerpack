@@ -18,6 +18,8 @@ owns:
   - src/main/java/com/jaymospowers/core/wounds/DownedLie.java (wall, propSpot, prop, PROPPED)
   - src/main/java/com/jaymospowers/core/Carry.java (prop on let-go)
   - src/client/java/com/jaymospowers/client/mixin/ProneCameraMixin.java (WallSit eye)
+  - src/client/java/com/jaymospowers/client/wounds/WallSitArms.java
+  - src/client/java/com/jaymospowers/client/CrawlPose.java (lay pins the sit's limbs, bendArms)
 ---
 # Wall slump
 
@@ -34,3 +36,4 @@ owns:
 PR #1601. Humanoid corpses flung into a wall (or killed beside it) slide down and sit, back to the wall, until disturbed; blood smear down the wall. Kitchen + Powers compile with Gradle; ragdoll_sim passes; not played.
 PR #1601 now also: downed players/mobs sit against walls (WallSit, DownedPose WALL), corpse stays sat.
 PR #1601 third commit (Andy: "the view needs to move to the exact height on the model. other players should be able to place them on the wall, and there should be a smooth animation for the 1.5s it takes to get onto the wall"): 1.5 s get-up (roll onto back, sit up, scoot round, shuffle back, lean), carriers set downed folk against a wall (look at it within 3 blocks and let go, or let go of a drag beside one; synced `downed_propped`), first-person view at the model's eyes. Powers compiles; pose sim checked; not played.
+PR #1601 fourth commit (Andy: "I dont see the arms being used in the frames, that's fine if they dont have any or if they are broken, but they should use what they can"): `WallSitArms` plans each arm (top arm pushes off to roll, both prop the sit-up, hands step round during the turn, two pushes back to the wall; broken/missing arms hang, out cold or set down by a carrier both hang) and a two-bone reach puts planted hands on the floor; body schedule now leans back on the hands as far as the wall allows, two-step shuffle. Java arm code run against the Python pose sim (match to 1e-4); Powers compiles; not played. Preview: project-files art-overhaul/wall-slump/wall-sit-arms.png.
