@@ -1807,6 +1807,8 @@ is on the wall.
 
 **The sky folk's robes and the well-wardens** (same thread). The sky folk's elders wear light, wind-cut robes and walk off island edges as if the overcast were a step down. Their **well-wardens** keep watch over the open wells in the Cloud Sea in grey, cloud-coloured plate, so that no skiff goes down one by mistake; in fog they are hard to see at all.
 
+(new) **Who the well-wardens are** (Fantasy Armor thread, 2026-11-15, for Andy to approve). The well-wardens are the sky lord's wardens. They hold his castle, and they take turns going down to stand over the wells. Each sky village's elder is the one the village goes to first. The dawnwatch is the Sun-Marshal's sun-guard, and they stand with him when a group comes to try him.
+
 **The demons' ashen plate** (same thread). The demon captains of the Ash wear black spiked plate, forged down there in the dark. It falls from them and is the Nether's own make, not the war forts' Primal Visage.
 
 **The Warden's hunters** (same thread). In the Nightfall years the Lantern Warden's faithful hunted the blood-drinkers in long coats with silvered trim and a lantern at the belt. A few still do, and their coats can still be bought from the Warden's own.
