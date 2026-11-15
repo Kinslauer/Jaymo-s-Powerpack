@@ -341,6 +341,10 @@ public final class Outfits {
 		folk.setItemSlot(EquipmentSlot.CHEST, chest);
 		folk.setItemSlot(EquipmentSlot.LEGS, legs);
 		folk.setItemSlot(EquipmentSlot.FEET, feet);
+		if (climate == Climate.CHERRY && random.nextFloat() < FantasyArmorCompat.FOLDED_CHANCE) {
+			// some of the Blossom land's guards in folded lamellar instead, where Fantasy Armor is loaded
+			FantasyArmorCompat.dress(folk, FantasyArmorCompat.FOLDED);
+		}
 		float spear = climate == Climate.JUNGLE ? JUNGLE_SPEAR_CHANCE : GUARD_SPEAR_CHANCE;
 		folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < spear ? Items.IRON_SPEAR : Items.IRON_SWORD));
 		folk.setItemSlot(EquipmentSlot.OFFHAND, shield(folk, arms, false));
@@ -486,6 +490,10 @@ public final class Outfits {
 	 * in {@code color}; a piece the set lacks keeps what's there.
 	 */
 	static void ronin(LivingEntity mob, DyeColor color) {
+		// some of them in the folded lamellar instead, where Fantasy Armor is loaded (FantasyArmorCompat)
+		if (mob.getRandom().nextFloat() < FantasyArmorCompat.FOLDED_CHANCE && FantasyArmorCompat.dress(mob, FantasyArmorCompat.FOLDED)) {
+			return;
+		}
 		for (ArmorType type : new ArmorType[] {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
 			EquipmentSlot slot = type.getSlot();
 			mob.setItemSlot(slot, armoury("ronin", type, rgb(color), mob.getItemBySlot(slot)));
@@ -495,7 +503,8 @@ public final class Outfits {
 	/** (0.7.250) {@code mob} wears the ronin harness's cuirass. */
 	static boolean wearsRonin(LivingEntity mob) {
 		Item chest = Armory.piece("ronin", ArmorType.CHESTPLATE);
-		return chest != null && mob.getItemBySlot(EquipmentSlot.CHEST).is(chest);
+		return chest != null && mob.getItemBySlot(EquipmentSlot.CHEST).is(chest)
+			|| FantasyArmorCompat.piece(FantasyArmorCompat.FOLDED, 1).filter(mob.getItemBySlot(EquipmentSlot.CHEST)::is).isPresent();
 	}
 
 	/** A piece of an {@link Armory} set, its cloth dyed {@code rgb} (-1: the set's own colour); {@code fallback} if there's no such piece. */
