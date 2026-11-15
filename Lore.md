@@ -1566,6 +1566,8 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
+(new) **The yards** (shipwright thread, 2026-11-15; Claude's placement for Andy to approve). A realm's ships are its own shipwright's work. He lays each one down beside its pier, keel first, the planking and decks rising over the days and the masts stepped last, so the whole harbour watches her grow. A realm goes whaling only once its yard has launched a whaler, the biggest hull a shipwright builds, and a ship lost at sea is laid down again the same way. Shipwrights keep the Deep Mother: no ship of theirs goes afloat until something has gone back to her over the bow. Whoever brings the yard timber hurries the work and is remembered for it.
+
 (new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
 banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
 are her drinking, and she takes boats and swimmers with the draught. Waterspouts are the land's tornadoes come down on
