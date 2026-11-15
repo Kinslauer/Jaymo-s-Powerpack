@@ -380,8 +380,8 @@ final class WarParties {
 			ACTIVE.remove(key);
 			return null;
 		}
+		// (Andy: a homestead is marched on with siege engines, no rammers or keg men)
 		SiegeTrain.muster(level, party, from, home, muster, false);
-		Sappers.muster(level, party, from);
 		Treasuries.wages(server, from, party.soldiers.size());
 		JaymosKingdoms.LOGGER.info("{} sends {} soldiers against a homestead at {} from {}", from.name(), party.soldiers.size(), home, muster);
 		return party;
