@@ -1,0 +1,122 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:clamp",
+    "input": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:spline",
+            "spline": {
+              "coordinate": "jaymoskingdoms:continents/shape",
+              "points": [
+                {
+                  "derivative": 0.0,
+                  "location": -1.2,
+                  "value": 0.15
+                },
+                {
+                  "derivative": -0.0769,
+                  "location": -0.11,
+                  "value": 0.2
+                },
+                {
+                  "derivative": -0.7609,
+                  "location": 0.1,
+                  "value": 0.05
+                },
+                {
+                  "derivative": -0.6667,
+                  "location": 0.35,
+                  "value": -0.15
+                },
+                {
+                  "derivative": -0.3846,
+                  "location": 0.7,
+                  "value": -0.35
+                },
+                {
+                  "derivative": 0.0,
+                  "location": 1.0,
+                  "value": -0.4
+                }
+              ]
+            }
+          },
+          "right": {
+            "type": "minecraft:spline",
+            "spline": {
+              "coordinate": "jaymoskingdoms:continents/latitude",
+              "points": [
+                {
+                  "derivative": 0.0,
+                  "location": -1.0,
+                  "value": -0.15
+                },
+                {
+                  "derivative": 0.1304,
+                  "location": -0.3,
+                  "value": 0.12
+                },
+                {
+                  "derivative": -0.6267,
+                  "location": 0.15,
+                  "value": 0.0
+                },
+                {
+                  "derivative": 0.0,
+                  "location": 0.45,
+                  "value": -0.35
+                },
+                {
+                  "derivative": 1.9149,
+                  "location": 0.75,
+                  "value": 0.0
+                },
+                {
+                  "derivative": 2.4,
+                  "location": 0.92,
+                  "value": 0.55
+                },
+                {
+                  "derivative": 0.0,
+                  "location": 1.0,
+                  "value": 0.6
+                }
+              ]
+            }
+          }
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": 0.5,
+          "right": {
+            "type": "minecraft:noise",
+            "noise": "minecraft:vegetation_large",
+            "shift_x": "minecraft:shift_x",
+            "shift_z": "minecraft:shift_z",
+            "xz_scale": 0.25,
+            "y_scale": 0.0
+          }
+        }
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": 0.15,
+        "right": {
+          "type": "minecraft:noise",
+          "noise": "minecraft:vegetation",
+          "shift_x": "minecraft:shift_x",
+          "shift_z": "minecraft:shift_z",
+          "xz_scale": 0.25,
+          "y_scale": 0.0
+        }
+      }
+    },
+    "min": -1.0,
+    "max": 1.0
+  }
+}

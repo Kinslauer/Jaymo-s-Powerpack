@@ -9,6 +9,8 @@ Writes kingdoms/src/main/resources/data:
   sea between continents is open ocean, not shallows full of islands. Rare islands rise out on the open sea, and the
   land is lifted round the world's origin so the world's spawn stands on a continent.
   tools/gen_mohknee.py uses it as the home world's shape everywhere off Mohknee and its sea.
+- jaymoskingdoms/worldgen/density_function/continents/{latitude,temperature,vegetation}.json: the home world's climate,
+  a heat map over the continents (see the climate section below); gen_mohknee.py uses them off Mohknee.
 - minecraft/worldgen/density_function/{overworld,overworld_large_biomes,overworld_amplified}/offset.json: the game's
   own land height, RAISE higher. The higher sea (seas/HighSea, +8 in new worlds) drowned every low plain and river flat
   into thousands of islets and pools (measured: 25% land in over 5,000 pieces); with the ground lifted as far as the
@@ -111,6 +113,35 @@ isles = mul(ISLE_LIFT, clamp(mul(ISLE_STEEP, add(noise('jaymoskingdoms:continent
 home = mul(HOME_LIFT, within(distance(0, 0), HOME_REACH, HOME_BAND))
 write('jaymoskingdoms/worldgen/density_function/continents/shape.json',
       {'type': 'minecraft:cache', 'input': spline(add(add(land, isles), home), SPLINE)})
+
+# ---- the climate: a heat map laid over the continents ----
+# Latitude: cold to the north (-z), hot to the south (+z), the world's origin between, in bands that repeat as on a
+# globe (pole, temperate, equator, temperate, pole ...). Continent-sized wobbles of the game's own large temperature
+# noise bend the bands, and the land's middle is harsher than its coasts (hotter in the south, colder in the north).
+# Wet coasts and dry interiors, a dry belt (deserts) on the equator's side of the temperate band, a wet equator
+# (jungle). Biomes follow these numbers, and the settlements, their buildings, dress, coin and blood follow the biomes.
+LATITUDE = 6000            # blocks from the origin to a pole (north) or to the equator (south); a whole band is twice this
+LATITUDE_HEAT = 0.8        # how hot the equator is and how cold a pole is (the game's temperature runs -1 to 1)
+INLAND_EXTREMES = 0.35     # how much harsher the heat or cold is deep inland (by continentalness 0 to 1)
+HEAT_WOBBLE = 0.5          # the large temperature noise (continent-sized) bending the bands
+HEAT_LOCAL = 0.15          # the game's own temperature noise, for local variety
+WET_WOBBLE = 0.5           # the large vegetation noise
+WET_LOCAL = 0.15           # the game's own vegetation noise
+# rain by continentalness (coasts wet, interiors dry) and by latitude (-1 pole, 0 the origin's band, 1 equator)
+COAST_RAIN = [(-1.2, 0.15), (-0.11, 0.2), (0.1, 0.05), (0.35, -0.15), (0.7, -0.35), (1.0, -0.4)]
+LATITUDE_RAIN = [(-1.0, -0.15), (-0.3, 0.12), (0.15, 0.0), (0.45, -0.35), (0.75, 0.0), (0.92, 0.55), (1.0, 0.6)]
+
+SHAPE = 'jaymoskingdoms:continents/shape'
+latitude = {'type': 'minecraft:gradient', 'axis': 'z', 'tiling': 'mirrored_repeat', 'from_coordinate': -LATITUDE,
+            'to_coordinate': LATITUDE, 'from_value': -1.0, 'to_value': 1.0}
+write('jaymoskingdoms/worldgen/density_function/continents/latitude.json', {'type': 'minecraft:cache', 'input': latitude})
+LAT = 'jaymoskingdoms:continents/latitude'
+heat = mul(LATITUDE_HEAT, mul(LAT, add(1.0, mul(INLAND_EXTREMES, clamp(SHAPE, 0.0, 1.0)))))
+heat = add(add(heat, mul(HEAT_WOBBLE, noise('minecraft:temperature_large', 0.25))), mul(HEAT_LOCAL, noise('minecraft:temperature', 0.25)))
+write('jaymoskingdoms/worldgen/density_function/continents/temperature.json', {'type': 'minecraft:cache', 'input': clamp(heat, -1.0, 1.0)})
+wet = add(spline(SHAPE, COAST_RAIN), spline(LAT, LATITUDE_RAIN))
+wet = add(add(wet, mul(WET_WOBBLE, noise('minecraft:vegetation_large', 0.25))), mul(WET_LOCAL, noise('minecraft:vegetation', 0.25)))
+write('jaymoskingdoms/worldgen/density_function/continents/vegetation.json', {'type': 'minecraft:cache', 'input': clamp(wet, -1.0, 1.0)})
 
 # ---- the land lifted with the sea ----
 with open(os.path.join(ROOT, '..', '..', 'java', 'com', 'jaymoskingdoms', 'seas', 'HighSea.java')) as f:
