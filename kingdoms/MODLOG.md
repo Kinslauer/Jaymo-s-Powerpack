@@ -13729,3 +13729,10 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Fixed**: `GrandSeats.generate` builds by the Overworld band's own generator, random state and heights and moves the pieces into the level's heights (`Stacked.overworldGround`); an ordinary world is unchanged. The new kingdom's "is this the mainland, not an island?" check (`StoryGround.mainland`, `Offshore.island`) reads the Overworld's ground too; it read the clouds, so every spot looked like dry mainland. Havens only call a settlement an island haven when it stands in the Overworld's band.
 - Existing worlds keep what they have (Andy is starting a new map).
 - Built; not played.
+
+## 0.9.14 (2026-11-15): throw coins to draw villagers
+
+- **Coin toss** (Andy: "you should be able to throw coins, and it will attract most villagers"): use (right click) with coins in your main hand, aimed past any block within reach (so clicks on doors, stalls and tables stay what they were), tosses one ahead of you; sneak + use scatters a handful (up to 5). The coins are spent from your stack and lie on the ground as real coins anyone can pick up after a moment. Realm coins (silver, hacksilver, dinars, shells, mon), copper bits and bent copper throw; emeralds and gold ingots don't, so they keep their own uses.
+- A coin lands with a clink. Villagers within 10 blocks hear it and run for it, out to 16 if they can see it; the first to reach it pockets it in their bag (a pickpocket can find it there again) and sometimes says so (children have their own lines). Most come: guards, anyone asleep, trading, downed, in chains, held, fleeing a creeper, panicking or under attack don't, and one in five (always the same villagers) is too proud to stoop. After a minute on the ground a coin is just a lost coin.
+- New loading-screen hint (186). `CoinToss`, `CreeperFlight.fleeing`, lang part `coin_toss.json`.
+- Built; not played.
