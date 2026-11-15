@@ -18,6 +18,7 @@
   "space.jaymospowers.dest.cinder": "Cinder",
   "space.jaymospowers.dest.maw": "The Maw",
   "space.jaymospowers.dest.verdant": "Verdant World",
+  "space.jaymospowers.dest.giant": "The Blue Giant's Ring",
   "space.jaymospowers.rustfall.free_intro": "Rustfall's iron-masters bled the world dry and set captains over the ruins. Their boss sits above them all. Break the grip.",
   "space.jaymospowers.rustfall.conquer_intro": "Rustfall's natives are proud and heavy, and their champions will not bend. Beat them and plant your flag where all can see.",
   "space.jaymospowers.rustfall.free_done": "The captains are broken and their boss is down. Rustfall breathes again.",
@@ -44,6 +45,7 @@
   "message.jaymospowers.space_no_pod": "Open the star map at a pod and stay close to it.",
   "message.jaymospowers.space_cooldown": "The pod is cooling. Ready in %1$s s.",
   "message.jaymospowers.space_here": "You are already there.",
+  "message.jaymospowers.space_giant_winds": "The giant's winds throw you back up to the pod.",
   "message.jaymospowers.space_future_dead": "The star map is dark. A lifetime on, every world it knows is dust. Only going back in time leads home.",
   "message.jaymospowers.space_unreachable": "The star map shows nothing there. The world is not on this server.",
   "message.jaymospowers.space_countdown": "Launch in %1$s...",
@@ -98,6 +100,7 @@
   "space.jaymospowers.cinder.gravity": "Gravity: normal",
   "space.jaymospowers.maw.gravity": "Gravity: the broken world's pull",
   "space.jaymospowers.verdant.gravity": "Gravity: normal",
+  "space.jaymospowers.giant.gravity": "Gravity: half of home's",
   "space.jaymospowers.home.about": "Where you flew from. The pod comes down on that spot, or at the world's spawn if that world is gone.",
   "space.jaymospowers.moon.about": "Grey dust under a black sky. You weigh a third of what you do at home and can fall a long way unhurt. Ore lies under the dust, and Endermen walk the dark.",
   "space.jaymospowers.rustfall.about": "A red, rusted world. Its weight slows you and keeps your jumps low, but Z Fighters train twice as fast under it. It has a mission: free it or conquer it.",
@@ -105,5 +108,6 @@
   "space.jaymospowers.cinder.about": "The world nearest the sun, all lava and ore. The pod sets down on a cave floor, and the heat makes you hungry fast. It has a mission: free it or conquer it.",
   "space.jaymospowers.maw.about": "A world in pieces, hanging in its own pull. It draws you in slowly and never stops, and its burning heart throws you back hurt. Wrecks hang round it, and the pod sets down on one. Far below, a country of empty streets.",
   "space.jaymospowers.verdant.about": "A green world of plains, moss and vines, with open land to come down on.",
+  "space.jaymospowers.giant.about": "Drifts of ice and rock hanging in a wide band round the blue giant, veined with glowing blue crystal. No air, and nothing under the drifts but the giant's clouds: step off and its winds throw you back, hurt. A short hop from the Verdant World.",
   "space.jaymospowers.dest.future": "The Future"
 }

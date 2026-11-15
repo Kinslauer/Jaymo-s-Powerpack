@@ -21,6 +21,10 @@ import net.minecraft.world.phys.Vec3;
  * same place overhead, a ring round it, faint by day and bright at night. It is drawn round the camera at the edge of what
  * is loaded, so the land in front of it hides it as it would hide anything far off. Art: Eden Ring's planet and rings
  * (paulevs, MIT), {@code textures/environment/eden_planet.png} and {@code eden_rings.png}.
+ * <p>
+ * From the giant's own ring (the pod's stop past the Verdant World) the giant is close: it fills a quarter of the sky, sat on
+ * the ring's plane so it rises half out of the drifts' level, always full bright (no air to dim it). The ring itself is no
+ * sheet there: it is the drifts all round.
  */
 public final class VerdantSkyClient {
 	// ---- tuning ----
@@ -34,10 +38,13 @@ public final class VerdantSkyClient {
 	static final float DAY_ALPHA = 0.5F, NIGHT_ALPHA = 1.0F;
 	/** It is drawn this share of the loaded distance away, and never nearer than this many blocks. */
 	static final float DISTANCE_SHARE = 0.95F, LEAST_DISTANCE = 96.0F;
+	/** From the ring: where the giant hangs (degrees above the horizon, and round from east toward south) and how wide. */
+	static final float RING_ELEVATION = 6.0F, RING_AROUND = 160.0F, RING_PLANET_SIZE = 1.5F;
 
 	static final Identifier PLANET = JaymosPowers.id("textures/environment/eden_planet.png");
 	static final Identifier RINGS = JaymosPowers.id("textures/environment/eden_rings.png");
 	static final ResourceKey<Level> VERDANT_WORLD = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("verdant_world"));
+	static final ResourceKey<Level> GIANT_RING = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("giant_ring"));
 
 	private VerdantSkyClient() {
 	}
@@ -49,17 +56,21 @@ public final class VerdantSkyClient {
 	private static void render(LevelRenderContext context) {
 		Minecraft minecraft = Minecraft.getInstance();
 		ClientLevel level = minecraft.level;
-		if (level == null || level.dimension() != VERDANT_WORLD) {
+		if (level == null) {
+			return;
+		}
+		boolean fromRing = level.dimension() == GIANT_RING;
+		if (!fromRing && level.dimension() != VERDANT_WORLD) {
 			return;
 		}
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
 		// 1 at noon, -1 at midnight
 		float sun = (float) Math.cos(Math.PI * 2.0 * ((time - 6000L + partial) / 24000.0));
-		int alpha = Math.round(255.0F * Mth.lerp(Mth.clamp(sun * 2.0F + 0.5F, 0.0F, 1.0F), NIGHT_ALPHA, DAY_ALPHA));
+		int alpha = fromRing ? 255 : Math.round(255.0F * Mth.lerp(Mth.clamp(sun * 2.0F + 0.5F, 0.0F, 1.0F), NIGHT_ALPHA, DAY_ALPHA));
 		int colour = alpha << 24 | 0xFFFFFF;
 		float distance = Math.max(LEAST_DISTANCE, minecraft.options.getEffectiveRenderDistance() * 16.0F * DISTANCE_SHARE);
-		double e = Math.toRadians(ELEVATION), a = Math.toRadians(AROUND);
+		double e = Math.toRadians(fromRing ? RING_ELEVATION : ELEVATION), a = Math.toRadians(fromRing ? RING_AROUND : AROUND);
 		Vec3 to = new Vec3(Math.cos(e) * Math.cos(a), Math.sin(e), Math.cos(e) * Math.sin(a));
 		Vec3 side = to.cross(new Vec3(0.0, 1.0, 0.0)).normalize();
 		Vec3 up = side.cross(to).normalize();
@@ -68,9 +79,14 @@ public final class VerdantSkyClient {
 		Vec3 along = side.scale(Math.cos(roll)).add(up.scale(Math.sin(roll)));
 		Vec3 across = up.scale(Math.cos(roll)).subtract(side.scale(Math.sin(roll)));
 		Vec3 middle = to.scale(distance);
-		float ring = distance * RING_SIZE * 0.5F, planet = distance * PLANET_SIZE * 0.5F;
+		float ring = distance * RING_SIZE * 0.5F, planet = distance * (fromRing ? RING_PLANET_SIZE : PLANET_SIZE) * 0.5F;
 		Vec3 ringAlong = along.scale(ring), ringAcross = across.scale(ring * RING_TILT);
 		PoseStack poseStack = context.poseStack();
+		if (fromRing) {
+			context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(PLANET), (pose, buffer) ->
+				band(buffer, pose, middle, side.scale(planet), up.scale(planet), 0.0F, 1.0F, colour));
+			return;
+		}
 		// the far half of the ring, the giant in front of it, then the near half in front of the giant
 		context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(RINGS), (pose, buffer) ->
 			band(buffer, pose, middle, ringAlong, ringAcross, 0.0F, 0.5F, colour));

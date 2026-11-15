@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:giant_ring",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "jaymospowers:giant_ring",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jaymospowers:giant_ring"
+    }
+  }
+}

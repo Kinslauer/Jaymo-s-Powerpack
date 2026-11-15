@@ -92,7 +92,9 @@ public final class ZFighterSpace {
 	/** (0.18.6) The fuel a pod holds at most, and what each trip burns, by destination index (Home burns what the world you are on costs). */
 	public static final int MAX_FUEL = 12;
 	public static final IntegerProperty FUEL = IntegerProperty.create("fuel", 0, MAX_FUEL);
-	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
+	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0, 3};
+	/** The blue giant's ring from its own moon, the Verdant World, and back: a short hop. */
+	public static final int GIANT_HOP_COST = 1;
 	/** What Home burns from anywhere that isn't a far world (the overworld, the Nether...). */
 	public static final int HOME_COST = 1;
 	/** The landing pad's radius, and how far (blocks) the search for a flat place widens each try; how many tries. */
@@ -102,6 +104,13 @@ public final class ZFighterSpace {
 	/** The moon's gravity (share of normal) and the extra fall it forgives; Rustfall's gravity, slowing and jump. */
 	public static final double MOON_GRAVITY = 0.35, MOON_SAFE_FALL = 8.0;
 	public static final double RUSTFALL_GRAVITY = 2.2, RUSTFALL_SPEED = -0.15, RUSTFALL_JUMP = -0.2;
+	/** The ring's weight (share of normal: the gravilite holds it up) and the extra fall it forgives. */
+	public static final double GIANT_GRAVITY = 0.5, GIANT_SAFE_FALL = 6.0;
+	/** Fall below this height off the ring and the giant's winds throw you back up to the pod, hurt this much. */
+	static final int GIANT_FALL_Y = -24;
+	static final float GIANT_FALL_DAMAGE = 6.0F;
+	/** How far round (blocks) the winds look for a drift to set you on, and the height of a pad built in open air. */
+	static final int GIANT_CATCH_RANGE = 48, GIANT_PAD_Y = 100;
 	/** Z Fighters train this many times faster under Rustfall's weight. */
 	public static final float RUSTFALL_TRAINING = 2.0F;
 	/** Cinder's heat: extra hunger every second. */
@@ -132,7 +141,7 @@ public final class ZFighterSpace {
 	public record Dest(String key, ResourceKey<Level> level, Kind kind, Block floor, Block light) {
 	}
 
-	public static final int MOON = 0, RUSTFALL = 1, GLACIA = 2, CINDER = 3, MAW = 4, VERDANT = 5, FUTURE = 6;
+	public static final int MOON = 0, RUSTFALL = 1, GLACIA = 2, CINDER = 3, MAW = 4, VERDANT = 5, FUTURE = 6, GIANT = 7;
 
 	private static ResourceKey<Level> dimension(String name) {
 		return ResourceKey.create(Registries.DIMENSION, JaymosPowers.id(name));
@@ -146,6 +155,7 @@ public final class ZFighterSpace {
 		new Dest("maw", dimension("maw"), Kind.WRECKS, Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN),
 		new Dest("verdant", ZFighterSites.VERDANT_WORLD, Kind.SURFACE, Blocks.MOSSY_STONE_BRICKS, Blocks.SEA_LANTERN),
 		new Dest("future", Future.FUTURE, Kind.FUTURE, Blocks.STONE_BRICKS, Blocks.SEA_LANTERN),
+		new Dest("giant", dimension("giant_ring"), Kind.SURFACE, Blocks.CALCITE, Blocks.SEA_LANTERN),
 	};
 
 	/** Where a player came from before the far places, kept through death: the dimension and the pod he used. */
@@ -308,6 +318,12 @@ public final class ZFighterSpace {
 
 	/** What a trip to {@code index} (or Home) burns from {@code from}. */
 	public static int cost(int index, ResourceKey<Level> from) {
+		if (index == GIANT && from == DESTS[VERDANT].level()) {
+			return GIANT_HOP_COST;
+		}
+		if (index == VERDANT && from == DESTS[GIANT].level()) {
+			return GIANT_HOP_COST;
+		}
 		if (index != HOME_INDEX) {
 			return index >= 0 && index < COSTS.length ? COSTS[index] : HOME_COST;
 		}
@@ -330,14 +346,19 @@ public final class ZFighterSpace {
 		return null;
 	}
 
-	/** Whether {@code level} is one of the five places the pod made new (not the Verdant World or the future). */
+	/** Whether {@code level} is one of the places the pod made new (not the Verdant World or the future): five, and the giant's ring. */
 	static boolean far(ResourceKey<Level> level) {
 		for (int i = MOON; i <= MAW; i++) {
 			if (DESTS[i].level() == level) {
 				return true;
 			}
 		}
-		return false;
+		return DESTS[GIANT].level() == level;
+	}
+
+	/** Whether {@code index} is on {@code read}'s star map: a read chart, or the giant, seen over the Verdant World whose chart is read. */
+	public static boolean charted(int read, int index) {
+		return index == GIANT ? (read & 1 << VERDANT) != 0 : index >= 0 && index < Charts.WORLDS && (read & 1 << index) != 0;
 	}
 
 	/** The share of training Rustfall's weight gives a Z Fighter. */
@@ -393,7 +414,7 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unreachable").withStyle(ChatFormatting.RED));
 			return;
 		}
-		if (index != HOME_INDEX && index < Charts.WORLDS && (readCharts(player) & 1 << index) == 0) {
+		if (index != HOME_INDEX && !charted(readCharts(player), index)) {
 			// (0.18.53) a world whose chart is unread is not on the map: the pod will not fly there
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unread").withStyle(ChatFormatting.GRAY));
 			return;
@@ -455,6 +476,14 @@ public final class ZFighterSpace {
 		if (maw != null && !maw.players().isEmpty()) {
 			pull(maw);
 		}
+		ServerLevel giant = server.getLevel(DESTS[GIANT].level());
+		if (giant != null && now % 5 == 0) {
+			for (ServerPlayer player : giant.players()) {
+				if (player.isAlive() && !player.isSpectator() && player.getY() < GIANT_FALL_Y && !ZFighterPodTrip.flying(player)) {
+					thrownBack(giant, player);
+				}
+			}
+		}
 		ServerLevel cinder = server.getLevel(DESTS[CINDER].level());
 		if (cinder != null && now % 20 == 0) {
 			for (ServerPlayer player : cinder.players()) {
@@ -467,13 +496,15 @@ public final class ZFighterSpace {
 
 	// ---------------------------------------------------------------- gravity
 
-	/** Gravity and weight for where {@code player} is: the moon light, Rustfall heavy, everywhere else nothing. */
+	/** Gravity and weight for where {@code player} is: the moon and the giant's ring light, Rustfall heavy, everywhere else nothing. */
 	private static void weigh(ServerPlayer player) {
 		ResourceKey<Level> where = player.level().dimension();
 		boolean moon = where == DESTS[MOON].level();
 		boolean rustfall = where == DESTS[RUSTFALL].level();
-		set(player, Attributes.GRAVITY, GRAVITY_ID, moon ? MOON_GRAVITY - 1.0 : rustfall ? RUSTFALL_GRAVITY - 1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		set(player, Attributes.SAFE_FALL_DISTANCE, SAFE_FALL_ID, moon ? MOON_SAFE_FALL : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		boolean giant = where == DESTS[GIANT].level();
+		set(player, Attributes.GRAVITY, GRAVITY_ID, moon ? MOON_GRAVITY - 1.0 : giant ? GIANT_GRAVITY - 1.0 : rustfall ? RUSTFALL_GRAVITY - 1.0 : 0.0,
+			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.SAFE_FALL_DISTANCE, SAFE_FALL_ID, moon ? MOON_SAFE_FALL : giant ? GIANT_SAFE_FALL : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, rustfall ? RUSTFALL_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.JUMP_STRENGTH, JUMP_ID, rustfall ? RUSTFALL_JUMP : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
@@ -491,6 +522,47 @@ public final class ZFighterSpace {
 		} else if (instance.hasModifier(id)) {
 			instance.removeModifier(id);
 		}
+	}
+
+	// ---------------------------------------------------------------- off the edge of the ring
+
+	/**
+	 * Fallen off the ring toward the giant: its winds throw {@code player} back up onto the nearest drift (or beside the pod, if
+	 * no drift is near), hurt and shaken.
+	 */
+	private static void thrownBack(ServerLevel giant, ServerPlayer player) {
+		BlockPos at = nearestDrift(giant, player.getBlockX(), player.getBlockZ());
+		if (at == null) {
+			at = pad(giant, DESTS[GIANT]).south(2);
+		}
+		player.teleportTo(giant, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, java.util.Set.of(), player.getYRot(), player.getXRot(), true);
+		player.setDeltaMovement(Vec3.ZERO);
+		player.resetFallDistance();
+		player.syncVelocity = true;
+		if (!player.isCreative()) {
+			player.hurtServer(giant, giant.damageSources().fall(), GIANT_FALL_DAMAGE);
+		}
+		giant.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
+		Shakes.send(player, 0.7F, player.position());
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_giant_winds").withStyle(ChatFormatting.AQUA));
+	}
+
+	/** The top of the nearest drift to column (x, z) in loaded chunks, searched in rings out to {@link #GIANT_CATCH_RANGE}, or null. */
+	private static @Nullable BlockPos nearestDrift(ServerLevel level, int x, int z) {
+		for (int r = 0; r <= GIANT_CATCH_RANGE; r += 4) {
+			for (int dx = -r; dx <= r; dx += 4) {
+				for (int dz = -r; dz <= r; dz += 4) {
+					if (Math.max(Math.abs(dx), Math.abs(dz)) != r || level.getChunkSource().getChunkNow((x + dx) >> 4, (z + dz) >> 4) == null) {
+						continue;
+					}
+					int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + dx, z + dz);
+					if (top > GIANT_FALL_Y + 8) {
+						return new BlockPos(x + dx, top, z + dz);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	// ---------------------------------------------------------------- the broken world's pull
@@ -609,7 +681,9 @@ public final class ZFighterSpace {
 		if (dest.kind() == Kind.FORGE) {
 			return new BlockPos(0, 80, 0);
 		}
-		return new BlockPos(0, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0), 0);
+		int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
+		// a world with no ground under the middle (the giant's ring): the pad is built hanging in the air at the drifts' height
+		return new BlockPos(0, top > level.getMinY() + 4 ? top : GIANT_PAD_Y, 0);
 	}
 
 	/** A flat spot of open ground at column (x, z) for a pad (no water under it, no steep slope across it), or null. */
