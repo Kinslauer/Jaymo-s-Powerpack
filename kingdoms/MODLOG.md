@@ -14192,3 +14192,11 @@ Built; not played.
 - **The Mad Tinkerer** (Andy: "the mad tinkerer can sell and teach you these too. only to tinkerer"): his talk menu gets "Ask about his gadgets" for Tinkerers only, a trade screen to buy any gadget (12 silver) or learn its drawing (20 silver).
 - Mixins: `EndermanBlinkMixin` (marks a blink), `ClimbingClawsMixin` (walls climbable with claws held).
 - Built; not played.
+
+## 0.9.50 (2026-11-15): Marksmen start with a flintlock
+
+- Andy: "Marksmen should get a flintlock not a musket". The Marksman's class gear (its card portrait, and the kit a
+  geared start hands out) is now WeaponMod's flintlock pistol instead of its musket (a crossbow without WeaponMod).
+  The ammo stays as it was, 16 musket rounds, which the flintlock fires too (WeaponMod's `bullets` tag).
+  `Classes.gear`.
+- Built; not played.
