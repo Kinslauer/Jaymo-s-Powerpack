@@ -1770,6 +1770,24 @@ lets run. A town talks about how its troubles ended, to your face, for a week or
 other whether anyone listens or not: the dog that dug up the Lantern Warden's bone, the price of salt, whose turn it
 is on the wall.
 
+(new) **What the armourers make** (Fantasy Armor thread, 2026-11-15; Andy: "diamond gear should be removed, and replaced with something like this, netherite should remain as plating but for steel armor"; the rest is Claude's placement for Andy to approve). No smith hammers armour out of diamond; diamond is too dear to beat flat and too brittle to take a blow. The best a smith makes is steel plate, and the best a rich man buys is netherite laid over it. A diamond goes into the **temper-stone** instead: a cut diamond set in amethyst and glow ink, which a smith works into a finished piece with one token of the order or the deed the armour is made for. The armour then is that order's, and anyone who has met the order knows it on sight. Villagers say so when they see it; nothing else does.
+
+(new) **The barrow wardens' mail** (same thread). The barrow knights' own harness: kettle helm, long mail and a Warden-blue cloth. It falls rusted from them and stays rusted. Whoever wears all of it walks in the barrows as the knights' own, and the lantern rule still holds.
+
+(new) **The dawnwatch and the headsmen** (same thread). The Crowned Sun keeps two orders in his realms. The **dawnwatch** are the Sun-Marshal's sworn knights in gilded plate with the rising sun on the breast; they stand the last watch of the night and are let go at sunrise. The **headsmen** carry out the crown's sentences, the thieves' hangings among them, in black plate edged with gold; a headsman's plate goes dull if he goes too long without his work. The Ash Whisperer's people spit at both.
+
+(new) **The Giant-slayers** (same thread). When a Giant falls, its plates lie where it fell. A smith of the Anvil-Father can work them into a harness, each in the colour and weight of the highland its Giant kept (Highfield, Magnetic, Arctic, Irradiated). Only those who were there for the fall are ever seen in one.
+
+(new) **The sky folk's robes and the well-wardens** (same thread). The sky folk's elders wear light, wind-cut robes and walk off island edges as if the overcast were a step down. Their **well-wardens** keep watch over the open wells in the Cloud Sea in grey, cloud-coloured plate, so that no skiff goes down one by mistake; in fog they are hard to see at all.
+
+(new) **The demons' ashen plate** (same thread). The demon captains of the Ash wear black spiked plate, forged down there in the dark. It falls from them and is the Nether's own make, not the war forts' Primal Visage.
+
+(new) **The Warden's hunters** (same thread). In the Nightfall years the Lantern Warden's faithful hunted the blood-drinkers in long coats with silvered trim and a lantern at the belt. A few still do, and their coats can still be bought from the Warden's own.
+
+(new) **Folded lamellar and the pit harness** (same thread). The blossom lords' guards wear the ronin's lamellar remade in folded steel, which only Mohknee's black sand gives. The fighting pits' champions wear the gladiator's harness, remade with the pit's own trophies; it is taken from a pit's warlord, never bought.
+
+(new) **Back to back** (same thread). The four fought the long defence in pairs, back to back. Smiths still make paired harness for two who swear it at a shrine: each wears half, and a blow that lands on one is partly borne by the other.
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
