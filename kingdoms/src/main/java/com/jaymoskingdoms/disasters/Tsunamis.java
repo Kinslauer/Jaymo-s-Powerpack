@@ -1,9 +1,13 @@
 package com.jaymoskingdoms.disasters;
 
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Loaded;
+import com.mojang.serialization.Codec;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
@@ -67,8 +71,22 @@ public final class Tsunamis {
 	record Coast(Vec3 sea, Vec3 inland) {
 	}
 
-	private record Placed(BlockPos pos, long at) {
+	/**
+	 * A block column the wave flooded, or one beside it (water flowing over can turn to new sources there): {@code pos}
+	 * is the column at the height its ground (and any water it already had) reached before the wave came, so anything
+	 * wet from there up is the wave's. Looked at again after it's drained ({@code pass}), in case new sources formed.
+	 */
+	private record Drain(long pos, long at, int pass) {
 	}
+
+	/** How far beside a flooded column its footprint reaches (blocks), and how many times a column is drained. */
+	static final int FOOTPRINT = 2, PASSES = 4;
+	/** How often columns that were out of loaded land are looked at again (ticks). */
+	static final int LATER_EVERY = 200;
+
+	/** The wave's footprint still to drain, saved with the world so a stop or restart never leaves the water standing. */
+	static final AttachmentType<List<Long>> UNDRAINED = AttachmentRegistry.create(JaymosKingdoms.id("tsunami_undrained"),
+		b -> b.persistent(Codec.LONG.listOf()));
 
 	private static final class Wave {
 		final Vec3 origin, dir, perp;
@@ -77,7 +95,11 @@ public final class Tsunamis {
 		double front;
 		int row = -1, wavesLeft, waitUntil;
 		final boolean[] dead;
-		final float[] inland;
+		/** By lane: the row where it first came on land (-1: not yet). */
+		final int[] shore;
+		/** The block columns of the row being worked, and how far through them it is. */
+		long @Nullable [] cells;
+		int cell;
 		boolean landed;
 		long nextHurt;
 
@@ -90,7 +112,8 @@ public final class Tsunamis {
 			this.height = height;
 			this.wavesLeft = waves;
 			this.dead = new boolean[width];
-			this.inland = new float[width];
+			this.shore = new int[width];
+			java.util.Arrays.fill(this.shore, -1);
 		}
 
 		Vec3 at(double along, double across) {
@@ -108,23 +131,56 @@ public final class Tsunamis {
 	}
 
 	private static final List<Wave> WAVES = new ArrayList<>();
-	private static final ArrayDeque<Placed> PLACED = new ArrayDeque<>();
+	private static final ArrayDeque<Drain> FLOODED = new ArrayDeque<>();
+	/** Footprint columns that were out of loaded land when their turn came. */
+	private static final ArrayDeque<Drain> LATER = new ArrayDeque<>();
+	/** The columns already in the footprint (x, z packed), so each is taken once. */
+	private static final java.util.Set<Long> SEEN = new java.util.HashSet<>();
 	private static int ticks;
+	private static boolean loaded;
 
 	private Tsunamis() {
 	}
 
-	/** Every wave ends and its water drains at once (the server's stopping, or an op cleared the skies). */
+	/** An op cleared the skies: every wave ends, and its water drains from now on (a share a tick, as ever). */
 	static void clear(@Nullable ServerLevel level) {
 		WAVES.clear();
-		if (level != null) {
-			for (Placed p : PLACED) {
-				if (Loaded.made(level, p.pos()) && level.getBlockState(p.pos()).is(Blocks.WATER)) {
-					level.setBlock(p.pos(), Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
-				}
-			}
+		List<Drain> all = new ArrayList<>(FLOODED);
+		all.addAll(LATER);
+		FLOODED.clear();
+		LATER.clear();
+		for (Drain d : all) {
+			FLOODED.addLast(new Drain(d.pos(), Long.MIN_VALUE / 2, d.pass()));
 		}
-		PLACED.clear();
+	}
+
+	/** The server is stopping: the waves end, and what's left to drain is saved to drain after it starts again. */
+	static void stop(ServerLevel level) {
+		WAVES.clear();
+		List<Long> left = new ArrayList<>();
+		FLOODED.forEach(d -> left.add(d.pos()));
+		LATER.forEach(d -> left.add(d.pos()));
+		level.setAttached(UNDRAINED, left);
+		FLOODED.clear();
+		LATER.clear();
+		SEEN.clear();
+		loaded = false;
+	}
+
+	private static void load(ServerLevel level) {
+		if (loaded) {
+			return;
+		}
+		loaded = true;
+		for (long pos : level.getAttachedOrElse(UNDRAINED, List.<Long>of())) {
+			FLOODED.addLast(new Drain(pos, Long.MIN_VALUE / 2, 0));
+			SEEN.add(column(BlockPos.getX(pos), BlockPos.getZ(pos)));
+		}
+		level.removeAttached(UNDRAINED);
+	}
+
+	private static long column(int x, int z) {
+		return (long)x << 32 | z & 0xFFFFFFFFL;
 	}
 
 	/** Whether (x, z) is open sea. */
@@ -233,6 +289,7 @@ public final class Tsunamis {
 	static void tick(MinecraftServer server) {
 		ServerLevel level = server.overworld();
 		ticks++;
+		load(level);
 		drain(level);
 		if (WAVES.isEmpty()) {
 			return;
@@ -261,13 +318,26 @@ public final class Tsunamis {
 		int sea = level.getSeaLevel();
 		double speed = SPEED * Magnitude.speed(w.magnitude);
 		int targetRow = Mth.floor(w.front + speed);
-		// work every row it has reached, while the budget lasts (else it waits there)
-		while (w.row < targetRow) {
-			if (BlockBudget.empty()) {
+		// work every row it has reached, a whole column at a time while the budget lasts (else it waits there)
+		while (true) {
+			if (w.cells == null) {
+				if (w.row >= targetRow) {
+					break;
+				}
+				w.row++;
+				w.cells = cells(w, w.row);
+				w.cell = 0;
+			}
+			while (w.cell < w.cells.length) {
+				if (damage && BlockBudget.share(BlockBudget.Of.TSUNAMI) < CREST * 2) {
+					break;
+				}
+				column(level, w, w.row, w.cells[w.cell++], sea, damage);
+			}
+			if (w.cell < w.cells.length) {
 				break;
 			}
-			w.row++;
-			row(level, w, w.row, sea, damage);
+			w.cells = null;
 		}
 		w.front = Math.min(w.front + speed, w.row + 0.999);
 		carry(level, w, sea);
@@ -279,65 +349,111 @@ public final class Tsunamis {
 		return !w.spent() && w.front < OFFSHORE + RUN_MOST + 40;
 	}
 
-	/** The front reaches row {@code r}: each column of it on land floods, or the wave dies there. */
-	private static void row(ServerLevel level, Wave w, int r, int sea, boolean damage) {
-		float smash = SMASH[w.magnitude];
-		boolean struck = false;
-		for (int i = 0; i < w.width; i++) {
-			if (w.dead[i]) {
-				continue;
-			}
-			Vec3 at = w.at(r, i - w.width / 2.0);
-			int x = Mth.floor(at.x), z = Mth.floor(at.z);
-			if (!Loaded.made(level, x, z)) {
-				w.dead[i] = true;
-				continue;
-			}
-			int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-			BlockPos below = new BlockPos(x, ground - 1, z);
-			if (ground <= sea + 1 && level.getFluidState(below).is(FluidTags.WATER)) {
-				// still the sea: it passes as a swell (and spray where it rises)
-				if (w.inland[i] > 0.0F || level.getRandom().nextInt(40) == 0) {
-					level.sendParticles(ParticleTypes.SPLASH, x + 0.5, sea + 1.0, z + 0.5, 4, 0.5, 0.3, 0.5, 0.2);
-				}
-				continue;
-			}
-			float left = w.height - w.inland[i] * DECAY;
-			w.inland[i] += 1.0F;
-			int line = Mth.floor(sea + left);
-			if (ground >= line || w.inland[i] > RUN_MOST) {
-				w.dead[i] = true;
-				continue;
-			}
-			struck = true;
-			if (!damage) {
-				continue;
-			}
-			int top = Math.min(line, ground + CREST);
-			for (int y = ground; y < top; y++) {
-				BlockPos p = new BlockPos(x, y, z);
-				BlockState state = level.getBlockState(p);
-				if (!state.isAir() && !weak(level, p, state, smash)) {
+	/**
+	 * Every block column whose middle lies in the front's row {@code r} (the strip from {@code r} to {@code r + 1} along
+	 * the wave, its width across), each once: worked row by row, they cover the wave's whole path with no gaps however it's
+	 * angled.
+	 */
+	private static long[] cells(Wave w, int r) {
+		double half = w.width / 2.0;
+		Vec3[] corners = {w.at(r, -half), w.at(r, half), w.at(r + 1, -half), w.at(r + 1, half)};
+		double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
+		for (Vec3 c : corners) {
+			minX = Math.min(minX, c.x);
+			maxX = Math.max(maxX, c.x);
+			minZ = Math.min(minZ, c.z);
+			maxZ = Math.max(maxZ, c.z);
+		}
+		java.util.List<Long> out = new ArrayList<>();
+		for (int x = Mth.floor(minX) - 1; x <= Mth.floor(maxX) + 1; x++) {
+			for (int z = Mth.floor(minZ) - 1; z <= Mth.floor(maxZ) + 1; z++) {
+				double rx = x + 0.5 - w.origin.x, rz = z + 0.5 - w.origin.z;
+				if (Mth.floor(rx * w.dir.x + rz * w.dir.z) != r || Math.abs(rx * w.perp.x + rz * w.perp.z) > half) {
 					continue;
 				}
-				if (!state.isAir() && !BlockBudget.destroy(level, p, true)) {
-					return;
-				}
-				if (!BlockBudget.set(level, p, Blocks.WATER.defaultBlockState())) {
-					return;
-				}
-				PLACED.addLast(new Placed(p, ticks));
-			}
-			// the white water at its crest
-			if (level.getRandom().nextInt(3) == 0) {
-				level.sendParticles(ParticleTypes.SPLASH, x + 0.5, top + 0.5, z + 0.5, 6, 0.5, 0.4, 0.5, 0.3);
-				level.sendParticles(ParticleTypes.CLOUD, x + 0.5, top + 0.5, z + 0.5, 1, 0.4, 0.2, 0.4, 0.02);
+				out.add(column(x, z));
 			}
 		}
-		if (struck && !w.landed) {
+		long[] cells = new long[out.size()];
+		for (int i = 0; i < cells.length; i++) {
+			cells[i] = out.get(i);
+		}
+		return cells;
+	}
+
+	/** The front reaches the block column {@code cell} in row {@code r}: on land it floods, or the wave dies there. */
+	private static void column(ServerLevel level, Wave w, int r, long cell, int sea, boolean damage) {
+		int x = (int)(cell >> 32), z = (int)cell;
+		double rx = x + 0.5 - w.origin.x, rz = z + 0.5 - w.origin.z;
+		int i = Mth.clamp(Mth.floor(rx * w.perp.x + rz * w.perp.z + w.width / 2.0), 0, w.width - 1);
+		if (w.dead[i]) {
+			return;
+		}
+		if (!Loaded.made(level, x, z)) {
+			w.dead[i] = true;
+			return;
+		}
+		int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+		BlockPos below = new BlockPos(x, ground - 1, z);
+		if (ground <= sea + 1 && level.getFluidState(below).is(FluidTags.WATER)) {
+			// still the sea: it passes as a swell (and spray where it rises)
+			if (w.shore[i] >= 0 || level.getRandom().nextInt(40) == 0) {
+				level.sendParticles(ParticleTypes.SPLASH, x + 0.5, sea + 1.0, z + 0.5, 4, 0.5, 0.3, 0.5, 0.2);
+			}
+			return;
+		}
+		if (w.shore[i] < 0) {
+			w.shore[i] = r;
+		}
+		int inland = r - w.shore[i] + 1;
+		float left = w.height - inland * DECAY;
+		int line = Mth.floor(sea + left);
+		if (ground >= line || inland > RUN_MOST) {
+			w.dead[i] = true;
+			return;
+		}
+		if (!w.landed) {
 			w.landed = true;
-			Vec3 mid = w.at(r, 0.0);
-			com.jaymoskingdoms.DisasterRelief.struck(level, mid.x, mid.z, w.width, "tsunami", w.magnitude);
+			com.jaymoskingdoms.DisasterRelief.struck(level, x, z, w.width, "tsunami", w.magnitude);
+		}
+		if (!damage) {
+			return;
+		}
+		// before the water comes: this column and those beside it, as they were, to drain back to
+		footprint(level, x, z);
+		float smash = SMASH[w.magnitude];
+		int top = Math.min(line, ground + CREST);
+		for (int y = ground; y < top; y++) {
+			BlockPos p = new BlockPos(x, y, z);
+			BlockState state = level.getBlockState(p);
+			if (!state.isAir() && !weak(level, p, state, smash)) {
+				continue;
+			}
+			if (!state.isAir() && !BlockBudget.destroy(BlockBudget.Of.TSUNAMI, level, p, true)) {
+				return;
+			}
+			if (!BlockBudget.set(BlockBudget.Of.TSUNAMI, level, p, Blocks.WATER.defaultBlockState())) {
+				return;
+			}
+		}
+		// the white water at its crest
+		if (level.getRandom().nextInt(3) == 0) {
+			level.sendParticles(ParticleTypes.SPLASH, x + 0.5, top + 0.5, z + 0.5, 6, 0.5, 0.4, 0.5, 0.3);
+			level.sendParticles(ParticleTypes.CLOUD, x + 0.5, top + 0.5, z + 0.5, 1, 0.4, 0.2, 0.4, 0.02);
+		}
+	}
+
+	/** The columns round (x, z) join the footprint, each at the height its ground and old water had before the wave. */
+	private static void footprint(ServerLevel level, int x, int z) {
+		for (int dx = -FOOTPRINT; dx <= FOOTPRINT; dx++) {
+			for (int dz = -FOOTPRINT; dz <= FOOTPRINT; dz++) {
+				int cx = x + dx, cz = z + dz;
+				if (!Loaded.made(level, cx, cz) || !SEEN.add(column(cx, cz))) {
+					continue;
+				}
+				int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, cz);
+				FLOODED.addLast(new Drain(BlockPos.asLong(cx, ground, cz), ticks, 0));
+			}
 		}
 	}
 
@@ -381,17 +497,45 @@ public final class Tsunamis {
 		}
 	}
 
-	/** The water behind the waves drains away, oldest first. */
+	/**
+	 * The water behind the waves drains away, oldest first: every block of water in a footprint column above where its
+	 * ground and old water stood, sources the flowing water made included. Each column is looked at again a few times
+	 * after, until no water has come back into it; one out of loaded land waits until it's loaded again.
+	 */
 	private static void drain(ServerLevel level) {
 		int n = 0;
-		while (!PLACED.isEmpty() && n < DRAIN_PER_TICK && ticks - PLACED.peekFirst().at() >= HOLD) {
-			Placed p = PLACED.removeFirst();
-			if (Loaded.made(level, p.pos()) && level.getBlockState(p.pos()).is(Blocks.WATER) && BlockBudget.spend()) {
-				level.setBlock(p.pos(), Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
-				n++;
-			} else if (BlockBudget.empty()) {
-				PLACED.addFirst(p);
+		while (!FLOODED.isEmpty() && n < DRAIN_PER_TICK && ticks - FLOODED.peekFirst().at() >= HOLD) {
+			if (BlockBudget.share(BlockBudget.Of.TSUNAMI) < CREST + 3) {
 				break;
+			}
+			Drain d = FLOODED.removeFirst();
+			int x = BlockPos.getX(d.pos()), y0 = BlockPos.getY(d.pos()), z = BlockPos.getZ(d.pos());
+			if (!Loaded.made(level, x, z)) {
+				LATER.addLast(d);
+				continue;
+			}
+			boolean wet = false;
+			for (int y = y0; y <= y0 + CREST + 2; y++) {
+				BlockPos p = new BlockPos(x, y, z);
+				if (level.getBlockState(p).is(Blocks.WATER) && BlockBudget.set(BlockBudget.Of.TSUNAMI, level, p, Blocks.AIR.defaultBlockState())) {
+					wet = true;
+					n++;
+				}
+			}
+			if (wet && d.pass() + 1 < PASSES) {
+				FLOODED.addLast(new Drain(d.pos(), ticks, d.pass() + 1));
+			} else {
+				SEEN.remove(column(x, z));
+			}
+		}
+		if (ticks % LATER_EVERY == 0) {
+			for (int i = LATER.size(); i > 0; i--) {
+				Drain d = LATER.removeFirst();
+				if (Loaded.made(level, BlockPos.getX(d.pos()), BlockPos.getZ(d.pos()))) {
+					FLOODED.addLast(new Drain(d.pos(), Long.MIN_VALUE / 2, d.pass()));
+				} else {
+					LATER.addLast(d);
+				}
 			}
 		}
 	}

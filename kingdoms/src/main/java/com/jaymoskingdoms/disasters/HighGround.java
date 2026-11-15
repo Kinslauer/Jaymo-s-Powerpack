@@ -137,7 +137,7 @@ public final class HighGround {
 		boolean built = !state.is(BlockTags.BASE_STONE_OVERWORLD) && !state.is(BlockTags.DIRT) && !state.is(BlockTags.LOGS)
 			&& !state.is(BlockTags.LEAVES) && !state.is(BlockTags.SAND) && state.getFluidState().isEmpty();
 		if (built && level.getBlockState(best).isAir() && state.isFaceSturdy(level, roof, net.minecraft.core.Direction.UP)) {
-			level.setBlock(best, Blocks.LIGHTNING_ROD.waxed().unaffected().defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
+			BlockBudget.set(BlockBudget.Of.RODS, level, best, Blocks.LIGHTNING_ROD.waxed().unaffected().defaultBlockState());
 		}
 	}
 }

@@ -1,9 +1,11 @@
 package com.jaymoskingdoms.disasters;
 
+import java.util.ArrayDeque;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -105,6 +107,50 @@ public final class Earthquakes {
 		return c;
 	}
 
+	/** A block a crack or sinkhole is to open (or, on a sinkhole's floor, rubble to lie), done as the shared budget allows. */
+	private record Work(BlockPos pos, int kind) {
+	}
+
+	private static final int CRACK = 0, SINK = 1, RUBBLE = 2;
+	private static final ArrayDeque<Work> WORK = new ArrayDeque<>();
+
+	/** The cracks and sinkholes open, a share of their blocks a tick ({@link BlockBudget}); on loaded land only. */
+	static void work(MinecraftServer server) {
+		if (WORK.isEmpty()) {
+			return;
+		}
+		ServerLevel level = server.overworld();
+		while (!WORK.isEmpty() && !BlockBudget.empty(BlockBudget.Of.QUAKE)) {
+			Work w = WORK.removeFirst();
+			if (!com.jaymoskingdoms.Loaded.made(level, w.pos())) {
+				continue;
+			}
+			BlockState state = level.getBlockState(w.pos());
+			switch (w.kind()) {
+				case CRACK -> {
+					if (!state.isAir() && (ground(state) || state.is(BlockTags.REPLACEABLE)) && BlockBudget.spend(BlockBudget.Of.QUAKE)) {
+						level.destroyBlock(w.pos(), false);
+					}
+				}
+				case SINK -> {
+					if (!state.isAir() && (ground(state) || loose(level, w.pos(), state))) {
+						BlockBudget.set(BlockBudget.Of.QUAKE, level, w.pos(), Blocks.AIR.defaultBlockState());
+					}
+				}
+				default -> {
+					if (state.isAir()) {
+						BlockBudget.set(BlockBudget.Of.QUAKE, level, w.pos(), Blocks.GRAVEL.defaultBlockState());
+					}
+				}
+			}
+		}
+	}
+
+	/** The server stopped: what was still to open is left as it is. */
+	static void clearWork() {
+		WORK.clear();
+	}
+
 	/** One tick of a quake. */
 	static void tick(ServerLevel level, Calamity c, RandomSource random, long now, boolean damage) {
 		int m = magnitude(c);
@@ -156,7 +202,7 @@ public final class Earthquakes {
 			at.move(0, 1, 0);
 		}
 		BlockState state = level.getBlockState(at);
-		if (state.isAir() || !level.getBlockState(at.below()).isAir() || !loose(level, at, state)) {
+		if (state.isAir() || !level.getBlockState(at.below()).isAir() || !loose(level, at, state) || !BlockBudget.spend(BlockBudget.Of.QUAKE)) {
 			return;
 		}
 		FallingBlockEntity falling = FallingBlockEntity.fall(level, at.immutable(), state);
@@ -200,15 +246,14 @@ public final class Earthquakes {
 			int depth = Math.max(1, Math.round(Mth.lerp(middle, 1, Mth.nextInt(random, CRACK_DEPTH_MIN, CRACK_DEPTH_MAX))));
 			for (int y = 0; y < depth; y++) {
 				BlockPos q = top.below(y);
-				BlockState state = level.getBlockState(q);
-				if (!ground(state)) {
+				if (!ground(level.getBlockState(q))) {
 					break;
 				}
-				level.destroyBlock(q, false);
+				WORK.addLast(new Work(q, CRACK));
 			}
 			// a plant on the crack's lip falls in
 			if (level.getBlockState(top.above()).is(BlockTags.REPLACEABLE)) {
-				level.destroyBlock(top.above(), false);
+				WORK.addLast(new Work(top.above(), CRACK));
 			}
 		}
 		level.playSound(null, BlockPos.containing(x, near.getY(), z), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.5F, 0.4F);
@@ -232,19 +277,11 @@ public final class Earthquakes {
 				BlockPos column = top.offset(dx, 0, dz);
 				int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
 				for (int y = ground + 1; y >= top.getY() - down; y--) {
-					BlockPos q = new BlockPos(column.getX(), y, column.getZ());
-					BlockState state = level.getBlockState(q);
-					if (state.isAir() || !ground(state) && !loose(level, q, state)) {
-						continue;
-					}
-					level.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+					WORK.addLast(new Work(new BlockPos(column.getX(), y, column.getZ()), SINK));
 				}
 				// a little rubble on the floor
 				if (random.nextInt(3) == 0) {
-					BlockPos floor = new BlockPos(column.getX(), top.getY() - down, column.getZ());
-					if (level.getBlockState(floor).isAir()) {
-						level.setBlock(floor, Blocks.GRAVEL.defaultBlockState(), Block.UPDATE_ALL);
-					}
+					WORK.addLast(new Work(new BlockPos(column.getX(), top.getY() - down, column.getZ()), RUBBLE));
 				}
 			}
 		}

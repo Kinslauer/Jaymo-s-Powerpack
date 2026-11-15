@@ -100,6 +100,11 @@ public final class Tornadoes {
 
 	/** A tornado of {@code size} touches down at (x, z) (under {@code storm}, or alone for a dust devil). */
 	static Tornado spawn(ServerLevel level, int size, @Nullable Storm storm, double x, double z, RandomSource random) {
+		return spawn(level, size, storm, x, z, random, false);
+	}
+
+	/** The same, {@code quiet}: no word of it in chat (a hurricane's own tornadoes). */
+	static Tornado spawn(ServerLevel level, int size, @Nullable Storm storm, double x, double z, RandomSource random, boolean quiet) {
 		int life = Mth.nextInt(random, LIFE_MIN[size], LIFE_MAX[size]);
 		double vx, vz;
 		if (storm != null) {
@@ -113,7 +118,7 @@ public final class Tornadoes {
 		Tornado t = new Tornado(Storms.nextId(), size, storm == null ? -1 : storm.id, x, y, z, vx, vz, 0, life, random.nextFloat() * 100.0F);
 		t.water = onWater(level, x, y, z);
 		SERVER.add(t);
-		if (size != Tornado.DUST_DEVIL) {
+		if (size != Tornado.DUST_DEVIL && !quiet) {
 			// over the sea it's a waterspout: the same funnel, its foot on the water
 			String news = t.water ? "disaster.jaymoskingdoms.touchdown.waterspout." + Tornado.NAMES[size] : "disaster.jaymoskingdoms.touchdown." + Tornado.NAMES[size];
 			for (ServerPlayer p : level.players()) {
