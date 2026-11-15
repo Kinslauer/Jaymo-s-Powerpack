@@ -2241,6 +2241,10 @@ final class McaBridge {
 		return Config.getInstance().launchIntoDestiny && !PlayerSaveData.get(player).isEntityDataSet();
 	}
 
+	static void launchDestiny(ServerPlayer player) {
+		net.conczin.mca.server.ServerInteractionManager.launchDestiny(player);
+	}
+
 	/**
 	 * (0.7.573) A new life (Jaymo's Powers' third death, {@link LifeStory#reincarnateAnew}): MCA's own player reset (single
 	 * again, as its admin command does), their look unset, and its creator sent anew, as on a first join. False if MCA's

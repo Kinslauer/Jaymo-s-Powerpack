@@ -153,6 +153,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HeritageScreen.register();
 		LifeStoryScreen.register();
 		StoryHoldScreen.register();
+		SignInScreen.register();
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
 		LineageScreen.register();
