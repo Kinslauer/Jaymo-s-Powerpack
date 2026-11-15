@@ -14,6 +14,10 @@ owns:
   - kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseEntity.java (slumpWall, stillPropped, Propped save)
   - src/main/java/com/jaymospowers/core/BladeBlood.java (wallSmear)
   - src/main/java/com/jaymospowers/power/web/KitchenCompat.java (onSlump hook)
+  - src/client/java/com/jaymospowers/client/wounds/WallSit.java
+  - src/main/java/com/jaymospowers/core/wounds/DownedLie.java (wall, propSpot, prop, PROPPED)
+  - src/main/java/com/jaymospowers/core/Carry.java (prop on let-go)
+  - src/client/java/com/jaymospowers/client/mixin/ProneCameraMixin.java (WallSit eye)
 ---
 # Wall slump
 
@@ -29,3 +33,4 @@ owns:
 ## Done
 PR #1601. Humanoid corpses flung into a wall (or killed beside it) slide down and sit, back to the wall, until disturbed; blood smear down the wall. Kitchen + Powers compile with Gradle; ragdoll_sim passes; not played.
 PR #1601 now also: downed players/mobs sit against walls (WallSit, DownedPose WALL), corpse stays sat.
+PR #1601 third commit (Andy: "the view needs to move to the exact height on the model. other players should be able to place them on the wall, and there should be a smooth animation for the 1.5s it takes to get onto the wall"): 1.5 s get-up (roll onto back, sit up, scoot round, shuffle back, lean), carriers set downed folk against a wall (look at it within 3 blocks and let go, or let go of a drag beside one; synced `downed_propped`), first-person view at the model's eyes. Powers compiles; pose sim checked; not played.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: shipwright-yards
 branch: claude/project-thread-c00opi
 with: 
@@ -28,3 +28,6 @@ MCA villager seen assembling ships at a kingdom's dock, with a whaler that unloc
 - A realm whales only after its yard launches a whaler; lost whalers are rebuilt. Talk about work + timber help.
 - Lore paragraph "The yards" added to Lore.md as (new), awaiting Andy.
 - Kingdoms `gradlew build` passes. Not played, not booted.
+
+## Notes
+- 2026-11-15 15:21 PR #1603 is merged into master; moved to Agents/Done.
