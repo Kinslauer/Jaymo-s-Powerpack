@@ -61,3 +61,4 @@ No code change is needed. Replace the PNGs in place, keeping the same filenames.
 - Check in game, or render them side by side: each icon must be told apart from the others at hotbar size.
 - Open the PR against master with a change note `changes/kingdoms/<branch>.md` (art only, no version bump), then set
   the task to in-review.
+- 2026-11-15 13:52 Claude (cloud session): Andy asked me to take this over from hermes-modeller; branch claude/tinker-gadget-icons.
