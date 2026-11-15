@@ -3,6 +3,7 @@ package com.jaymospowers.client.wounds;
 import com.jaymospowers.client.PoseBlend;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Prosthetics;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.DownedLie;
 import com.jaymospowers.core.wounds.Wounds;
@@ -70,15 +71,20 @@ public final class WallSit {
 	static final float SET_GRACE = 6.0F;
 	/**
 	 * Getting up from the floor, the stages (shares of it): rolled over onto the back; sat up, the hips coming down onto
-	 * the floor; scooted round on them to face out of the wall; shuffled back to it and leaned back on it. The limbs are
-	 * taken over from the crawl's by {@code LIMBS_END}.
+	 * the floor; turned round on them to put the back to the wall; pushed back to it twice on the hands ({@link WallSitArms});
+	 * the head lolled at the end. The limbs are taken over from the crawl's by {@code LIMBS_END}.
 	 */
-	static final float ROLL_END = 0.35F, SIT_FROM = 0.22F, SIT_END = 0.6F, HIPS_FROM = 0.25F, HIPS_END = 0.65F, TURN_FROM = 0.4F,
-		TURN_END = 0.8F, SHUFFLE_FROM = 0.65F, LEAN_FROM = 0.75F, LIMBS_END = 0.25F;
+	static final float ROLL_FROM = 0.04F, ROLL_END = 0.34F, SIT_FROM = 0.22F, SIT_END = 0.5F, HIPS_FROM = 0.25F, HIPS_END = 0.55F,
+		TURN_FROM = 0.42F, TURN_END = 0.68F, PUSH_1_FROM = 0.7F, PUSH_1_END = 0.78F, PUSH_2_FROM = 0.82F, PUSH_2_END = 0.9F,
+		LOLL_FROM = 0.86F, LIMBS_END = 0.25F;
+	/** How much of the way back to the wall the first push goes; how far each lifts the hips off the floor (blocks). */
+	static final float FIRST_PUSH = 0.65F, SCOOT_LIFT = 0.015F;
+	/** Sat up, it leans back on its hands as far as the wall behind lets it, but no further than this (radians). */
+	static final float PROP = 0.55F;
 	/** Rolling over, the body comes up off the floor this much on its shoulder (blocks), so the arm under it doesn't go in. */
 	static final float ROLL_LIFT = 0.2F;
-	/** Sitting up and scooting round, the hands push on the floor behind the hips (radians back); the chin's tucked (radians). */
-	static final float PUSH_BACK = 0.25F, CHIN = 0.35F;
+	/** Getting up, the chin's tucked (radians). */
+	static final float CHIN = 0.35F;
 	/** First person: the view moves over from vanilla's crawl eye onto the model's eyes in this first share of getting up. */
 	static final float VIEW_END = 0.3F;
 	/**
@@ -100,8 +106,15 @@ public final class WallSit {
 		}
 	}
 
-	/** A downed player sitting (or getting up against the wall, or back down off it): the body as it's drawn, and how far. */
-	record PlayerSit(Matrix4f body, float p, boolean placed, int id, boolean out, int broken) {
+	/**
+	 * A downed player sitting (or getting up against the wall, or back down off it): the body as it's drawn, and how far;
+	 * the body's pitch (radians, the legs kept along the floor under it); the arms ({@link WallSitArms#pose}).
+	 */
+	record PlayerSit(Matrix4f body, float p, boolean placed, int id, boolean out, int broken, float pitch, float[] arms) {
+		/** How far the limbs are the sit's rather than the crawl's (0-1). */
+		float taken() {
+			return this.placed ? 1.0F : PoseBlend.seg(this.p, 0.0F, LIMBS_END);
+		}
 	}
 
 	public static final RenderStateDataKey<PlayerSit> KEY = RenderStateDataKey.create(() -> "jaymospowers:wall_sit");
@@ -125,6 +138,8 @@ public final class WallSit {
 		float turn, facing;
 		/** Which way it rolls over onto its back (1 or -1). */
 		float roll = 1.0F;
+		/** What the arms do getting up (made with the turn). */
+		WallSitArms.Plan plan;
 
 		Seat(Sit sit) {
 			this.sit = sit;
@@ -139,12 +154,21 @@ public final class WallSit {
 			return Math.min(1.0F, this.from + dt / (this.placed ? PLACE_TICKS : IN_TICKS));
 		}
 
-		/** Getting up from the floor from where it lies now, facing {@code bodyRot}: the turn round it takes. */
-		void turnFrom(float bodyRot, int id) {
+		/**
+		 * Getting up from the floor from where it lies now, facing {@code bodyRot}: the turn round it takes, and what the
+		 * arms that work do (the one that pushes off ends up on top, rolling over).
+		 */
+		void turnFrom(Player player, float bodyRot) {
+			int id = player.getId();
 			this.facing = bodyRot;
 			// rolled over onto the back they'd face the other way; the rest of the way round to face out of the wall
 			this.turn = Mth.wrapDegrees(bodyRot + 180.0F - this.sit.yaw());
 			this.roll = Math.abs(this.turn) > 1.0F ? Math.signum(this.turn) : DownedLie.pick(id * 13) < 0.5F ? 1.0F : -1.0F;
+			// (an arm broken, or gone with nothing fitted in its place, isn't used)
+			int useless = Wounds.brokenLimbs(player) | Dismember.missing(player) & ~Prosthetics.fitted(player);
+			int arms = ((useless & Dismember.RIGHT_ARM) == 0 ? 1 : 0) | ((useless & Dismember.LEFT_ARM) == 0 ? 2 : 0);
+			this.plan = WallSitArms.plan(room(this, bodyRot, player.getScale()), this.placed, Downed.passedOut(player), arms, this.turn, this.roll);
+			this.roll = this.plan.roll(this.roll);
 		}
 
 		/** The turn round, for the body facing {@code bodyRot} now (it ends facing out of the wall however the body turns). */
@@ -255,7 +279,7 @@ public final class WallSit {
 					set.placed = false;
 					set.from = 1.0F;
 				}
-				set.turnFrom(bodyRot, id);
+				set.turnFrom(player, bodyRot);
 				SEATS.put(id, seat = set);
 				LAST_MOVED.put(id, now);
 			}
@@ -275,7 +299,7 @@ public final class WallSit {
 			seat.placed = false;
 			seat.from = 1.0F;
 			seat.at = now;
-			seat.turnFrom(bodyRot, id);
+			seat.turnFrom(player, bodyRot);
 		}
 		if (seat != null) {
 			Sit live = of(player);
@@ -308,7 +332,7 @@ public final class WallSit {
 				float from = seat != null ? seat.progress(now) : 0.0F;
 				if (seat == null || seat.sit.nx() != sit.nx() || seat.sit.nz() != sit.nz()) {
 					up.sit = sit;
-					up.turnFrom(bodyRot, id);
+					up.turnFrom(player, bodyRot);
 				}
 				up.sit = sit;
 				up.placed = false;
@@ -343,19 +367,47 @@ public final class WallSit {
 			m.translate(0.0F, -HIP, 0.0F);
 			return m;
 		}
-		float roll = PoseBlend.seg(p, 0.0F, ROLL_END), up = PoseBlend.seg(p, SIT_FROM, SIT_END), turn = PoseBlend.seg(p, TURN_FROM, TURN_END);
-		float hips = PoseBlend.seg(p, HIPS_FROM, HIPS_END), shuffle = PoseBlend.seg(p, SHUFFLE_FROM, 1.0F), lean = PoseBlend.seg(p, LEAN_FROM, 1.0F);
-		slide(m, sit, bodyRot, move * shuffle);
-		// (scooting round about the hips, once they're under its middle)
+		float roll = PoseBlend.seg(p, ROLL_FROM, ROLL_END), up = PoseBlend.seg(p, SIT_FROM, SIT_END), turn = PoseBlend.seg(p, TURN_FROM, TURN_END);
+		float hips = PoseBlend.seg(p, HIPS_FROM, HIPS_END);
+		slide(m, sit, bodyRot, move * shuffle(p));
+		// (turning round about the hips, once they're under its middle)
 		m.rotateY(seat.turn(bodyRot) * turn * Mth.DEG_TO_RAD);
-		// the hips: from behind its middle a little off the floor, up onto the shoulder rolling over, down onto the floor
-		m.translate(0.0F, Mth.lerp(hips, CRAWL_HIPS, SEAT) + ROLL_LIFT * Mth.sin(Mth.PI * roll), CRAWL_BEHIND * (1.0F - up));
-		// face down (vanilla's crawl) up to sitting, then leaned back against the wall (rolled over, its back is ahead:
-		// tipped that way)
-		m.rotateX(-Mth.HALF_PI * (1.0F - up) - LEAN * lean);
+		// the hips: from behind its middle a little off the floor, up onto the shoulder rolling over, down onto the floor,
+		// lifted a little on each push back
+		m.translate(0.0F, Mth.lerp(hips, CRAWL_HIPS, SEAT) + ROLL_LIFT * Mth.sin(Mth.PI * roll) + SCOOT_LIFT * scoot(p), CRAWL_BEHIND * (1.0F - up));
+		// face down (vanilla's crawl) up to sitting, leant back on the hands (rolled over, its back is ahead: tipped that way)
+		m.rotateX(pitch(p, move));
 		m.rotateY(Mth.PI * roll * seat.roll);
 		m.translate(0.0F, -HIP, 0.0F);
 		return m;
+	}
+
+	/** How far back to the wall it's pushed itself getting up (0-1): two pushes. */
+	private static float shuffle(float p) {
+		return FIRST_PUSH * PoseBlend.seg(p, PUSH_1_FROM, PUSH_1_END) + (1.0F - FIRST_PUSH) * PoseBlend.seg(p, PUSH_2_FROM, PUSH_2_END);
+	}
+
+	/** The hips lifted off the floor on each push (0-1). */
+	private static float scoot(float p) {
+		return Mth.sin(Mth.PI * Mth.clamp((p - PUSH_1_FROM) / (PUSH_1_END - PUSH_1_FROM), 0.0F, 1.0F))
+			+ Mth.sin(Mth.PI * Mth.clamp((p - PUSH_2_FROM) / (PUSH_2_END - PUSH_2_FROM), 0.0F, 1.0F));
+	}
+
+	/**
+	 * The body's pitch getting up (radians, + tips the top back): face down, up to sitting leant back on its hands as far
+	 * as the wall behind lets it ({@link #PROP} at most), which is {@link #LEAN} sat back against it. {@code move}: how far
+	 * its middle goes to the wall (model blocks).
+	 */
+	private static float pitch(float p, float move) {
+		float behind = (SEAT_BACK + move * (1.0F - shuffle(p))) / PX - BACK;
+		float prop = Mth.clamp((float) Math.asin(Mth.clamp(behind / SHOULDERS, -1.0F, 1.0F)), LEAN, PROP);
+		return Mth.lerp(PoseBlend.seg(p, SIT_FROM, SIT_END), -Mth.HALF_PI, -prop);
+	}
+
+	/** Where it gets up, for the arms: the body, and the wall in the standing frame turned to face {@code bodyRot}. */
+	private static WallSitArms.Room room(Seat seat, float bodyRot, float scale) {
+		Vector3f n = new Vector3f(seat.sit.nx(), 0.0F, seat.sit.nz()).rotateY((bodyRot - 180.0F) * Mth.DEG_TO_RAD);
+		return new WallSitArms.Room(at -> body(seat, at, bodyRot, scale), n.x, n.z, seat.sit.distance() / scale);
 	}
 
 	/** Moves the body {@code move} toward the wall (model blocks, in the world), in the frame turned to face {@code bodyRot}. */
@@ -365,7 +417,7 @@ public final class WallSit {
 
 	/** How far the head's lolled sat {@code p} of the way (0-1). */
 	private static float lolled(boolean placed, float p) {
-		return placed ? 1.0F : PoseBlend.seg(p, 0.7F, 1.0F);
+		return placed ? 1.0F : PoseBlend.seg(p, LOLL_FROM, 1.0F);
 	}
 
 	/** The head's turn sat {@code p} of the way (x, y, z, as on the model): the chin tucked getting up, then lolled. */
@@ -384,8 +436,19 @@ public final class WallSit {
 			return;
 		}
 		float p = seat.progress(player.level().getGameTime() + partialTicks);
-		state.setData(KEY, new PlayerSit(body(seat, p, state.bodyRot, state.scale), p, seat.placed, player.getId(), Downed.passedOut(player),
-			Wounds.brokenLimbs(player)));
+		boolean out = Downed.passedOut(player);
+		int broken = Wounds.brokenLimbs(player);
+		// the arms resting sat there at the end, the elbows eased out a little (not one that's broken, or holding it)
+		PoseBlend.Frame sat = new PoseBlend.Frame(new ModelPart[0]);
+		limbs(sat, player.tickCount + partialTicks, player.getId(), out, broken);
+		boolean cradle = Integer.bitCount(broken & (Dismember.RIGHT_ARM | Dismember.LEFT_ARM)) == 1;
+		float[] rest = {sat.get(PoseBlend.RIGHT_ARM), sat.get(PoseBlend.RIGHT_ARM + 1), sat.get(PoseBlend.RIGHT_ARM + 2),
+			out || cradle || (broken & Dismember.RIGHT_ARM) != 0 ? 0.0F : WallSitArms.FOLD, sat.get(PoseBlend.LEFT_ARM),
+			sat.get(PoseBlend.LEFT_ARM + 1), sat.get(PoseBlend.LEFT_ARM + 2),
+			out || cradle || (broken & Dismember.LEFT_ARM) != 0 ? 0.0F : -WallSitArms.FOLD};
+		float move = (seat.sit.distance() - SEAT_BACK * state.scale) / state.scale;
+		state.setData(KEY, new PlayerSit(body(seat, p, state.bodyRot, state.scale), p, seat.placed, player.getId(), out, broken,
+			seat.placed ? 0.0F : pitch(p, move), WallSitArms.pose(room(seat, state.bodyRot, state.scale), seat.plan, p, rest)));
 	}
 
 	/**
@@ -422,16 +485,18 @@ public final class WallSit {
 		// the legs stay along the floor as the body sits up off it and leans back (set against the wall, they swing out from
 		// under it as it slides down)
 		float up = placed ? PoseBlend.smooth(p) : PoseBlend.seg(p, SIT_FROM, SIT_END);
-		float legs = placed ? sat.get(PoseBlend.RIGHT_LEG) * up : -(Mth.HALF_PI * up - LEAN * PoseBlend.seg(p, LEAN_FROM, 1.0F));
-		float rest = placed ? 1.0F : PoseBlend.seg(p, 0.75F, 1.0F);
-		float push = placed ? 0.0F : PoseBlend.bump(p, 0.3F, 0.42F, 0.75F, 0.9F);
-		float k = placed ? 1.0F : PoseBlend.seg(p, 0.0F, LIMBS_END);
+		float legs = placed ? sat.get(PoseBlend.RIGHT_LEG) * up : -(Mth.HALF_PI + sitting.pitch());
+		float rest = placed ? 1.0F : PoseBlend.seg(p, LOLL_FROM, 1.0F);
+		float k = sitting.taken();
 		float[] head = head(placed, p, sitting.id());
 		float breath = sitting.out() ? 0.0F : Mth.sin(state.ageInTicks * BREATH_RATE) * BREATH_DEPTH * rest;
 		f.mix(PoseBlend.HEAD, head[0] - breath, head[1], head[2], k);
-		for (int arm : new int[] {PoseBlend.RIGHT_ARM, PoseBlend.LEFT_ARM}) {
-			// along the sides rolling over, pushing on the floor behind sitting up and scooting round, fallen at the sides sat
-			f.mix(arm, Mth.lerp(rest, PUSH_BACK * push, sat.get(arm)), Mth.lerp(rest, 0.0F, sat.get(arm + 1)), Mth.lerp(rest, 0.0F, sat.get(arm + 2)), k);
+		float[] arms = sitting.arms();
+		for (int i = 0; i < 2; i++) {
+			// pushing off, propping, stepping round and pushing back on the floor, then fallen at the sides (WallSitArms),
+			// each turned the short way from where the crawl has it
+			int arm = i == 0 ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM;
+			f.mix(arm, near(arms[i * 4], f.get(arm)), near(arms[i * 4 + 1], f.get(arm + 1)), near(arms[i * 4 + 2], f.get(arm + 2)), k);
 		}
 		for (int leg : new int[] {PoseBlend.RIGHT_LEG, PoseBlend.LEFT_LEG}) {
 			f.mix(leg, legs, sat.get(leg + 1) * up, sat.get(leg + 2), k);
@@ -448,10 +513,24 @@ public final class WallSit {
 		return sitting == null ? 0.0F : HEAD_FORWARD * lolled(sitting.placed(), sitting.p());
 	}
 
-	/** Whether this player is drawn sitting against a wall, or most of the way there (the crawl's bent elbows and knees are left off). */
-	public static boolean sitting(AvatarRenderState state) {
+	/** {@code a} turned the short way round from {@code from} (radians). */
+	private static float near(float a, float from) {
+		return from + WallSitArms.wrap(a - from);
+	}
+
+	/** How far this player's limbs are the sit's rather than the crawl's (0-1; 0 if they aren't sitting or getting up). */
+	public static float taken(AvatarRenderState state) {
 		PlayerSit sitting = state.getData(KEY);
-		return sitting != null && (sitting.placed() || sitting.p() >= LIMBS_END * 0.5F);
+		return sitting == null ? 0.0F : sitting.taken();
+	}
+
+	/**
+	 * How far this player's elbow is folded across for the sit (radians, as {@code KneeBend} folds it), weighed by how
+	 * far the limbs are the sit's; 0 if they aren't sitting or getting up.
+	 */
+	public static float elbow(AvatarRenderState state, boolean right) {
+		PlayerSit sitting = state.getData(KEY);
+		return sitting == null ? 0.0F : sitting.arms()[right ? 3 : 7] * sitting.taken();
 	}
 
 	/**
