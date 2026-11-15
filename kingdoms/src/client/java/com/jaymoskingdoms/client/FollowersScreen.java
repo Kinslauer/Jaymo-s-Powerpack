@@ -44,6 +44,10 @@ public final class FollowersScreen extends Screen {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(Followers.Give.TYPE)) {
+					if (!com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.ORDERS)) {
+						// (Andy's skill-tree locks) the orders are learned: Command
+						continue;
+					}
 					Villager aimed = aimed(minecraft);
 					minecraft.gui.setScreen(aimed == null ? new FollowersScreen(-1, Component.translatable("gui.jaymoskingdoms.followers.all"))
 						: new FollowersScreen(aimed.getId(), aimed.getDisplayName()));
@@ -55,7 +59,8 @@ public final class FollowersScreen extends Screen {
 	/** Opens the orders for {@code villager} (from MCA's menu, which Orders stands in for), if the server can take orders. */
 	public static void open(Entity villager) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)) {
+		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)
+			&& com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.ORDERS)) {
 			minecraft.gui.setScreen(new FollowersScreen(villager.getId(), villager.getDisplayName()));
 		}
 	}

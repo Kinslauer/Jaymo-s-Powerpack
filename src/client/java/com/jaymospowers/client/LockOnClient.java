@@ -243,6 +243,10 @@ public final class LockOnClient {
 			return true;
 		}
 		wheel -= steps * SCROLL_STEP;
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIM_PARTS)) {
+			// (Andy's skill-tree locks) aiming at a part is learned: Aim for the Gaps; until then the aim stays on the torso
+			return true;
+		}
 		List<Region> regions = LockOnRegions.regions(current);
 		int at = regions.indexOf(LockOnRegions.fit(current, region));
 		// a scroll down (negative) moves the aim down the body

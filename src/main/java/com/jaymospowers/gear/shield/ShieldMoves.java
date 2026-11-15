@@ -120,6 +120,10 @@ public final class ShieldMoves {
 		}
 		State state = state(player);
 		long now = player.level().getGameTime();
+		// (Andy's skill-tree locks) the throw is the Shield Throw perk's; the slam and the charge Shieldbearer's
+		if (!com.jaymospowers.core.TreeLocks.check(player, kind == THROW ? com.jaymospowers.core.TreeLocks.SHIELD_THROW : com.jaymospowers.core.TreeLocks.SHIELD_MOVES)) {
+			return;
+		}
 		switch (kind) {
 			case THROW -> {
 				if (now >= state.throwReady && Feathers.spend(player, THROW_FEATHERS) && throwShield(player)) {
@@ -320,7 +324,9 @@ public final class ShieldMoves {
 		if (up && now < state.chargeEnd) {
 			ram(player, state, level);
 		}
-		boolean still = up && player.onGround() && !player.isSprinting() && (moved.lengthSqr() < STILL || player.isShiftKeyDown()) && now >= state.chargeEnd;
+		// (Andy's skill-tree locks) bracing is Shieldbearer's
+		boolean still = up && player.onGround() && !player.isSprinting() && (moved.lengthSqr() < STILL || player.isShiftKeyDown()) && now >= state.chargeEnd
+			&& com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SHIELD_MOVES);
 		state.still = still ? state.still + 1 : 0;
 		boolean braced = state.still >= BRACE_TICKS;
 		if (braced != state.braced) {

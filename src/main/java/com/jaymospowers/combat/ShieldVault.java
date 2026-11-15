@@ -154,7 +154,7 @@ public final class ShieldVault {
 		long now = level.getGameTime();
 		if (!(level.getEntity(id) instanceof LivingEntity foe) || now < NEXT.getOrDefault(player.getUUID(), 0L) || VAULTS.containsKey(player.getUUID())
 			|| player.isSpectator() || Downed.isDowned(player) || player.isPassenger() || foe == player || !foe.isAlive() || !Shields.raised(foe)
-			|| foe.distanceTo(player) > REACH + SERVER_SLACK + foe.getBbWidth() + 1.0) {
+			|| foe.distanceTo(player) > REACH + SERVER_SLACK + foe.getBbWidth() + 1.0 || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SHIELD_VAULT)) {
 			return;
 		}
 		NEXT.put(player.getUUID(), now + COOLDOWN);

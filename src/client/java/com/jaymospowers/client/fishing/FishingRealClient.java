@@ -77,7 +77,10 @@ public final class FishingRealClient {
         net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) -> {
             if (level.isClientSide() && com.jaymospowers.fishing.FishLog.JOURNAL != null
                     && player.getItemInHand(hand).is(com.jaymospowers.fishing.FishLog.JOURNAL)) {
-                Minecraft.getInstance().gui.setScreen(new JournalScreen());
+                // (Andy's skill-tree locks) the journal is learned: Angler, on Survival's Trades page
+                if (com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.ANGLER)) {
+                    Minecraft.getInstance().gui.setScreen(new JournalScreen());
+                }
                 return net.minecraft.world.InteractionResult.SUCCESS;
             }
             return net.minecraft.world.InteractionResult.PASS;

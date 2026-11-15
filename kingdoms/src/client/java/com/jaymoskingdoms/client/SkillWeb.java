@@ -65,9 +65,11 @@ final class SkillWeb {
 		// (0.7.516) the RPG Series' skills and the Weapon Forms (Learnables) sit in the middle of each wedge, clear of the bridges
 		WILL(Skills.Pillar.STRENGTH), COMBAT_ARTS(Skills.Pillar.STRENGTH), WARFARE(Skills.Pillar.STRENGTH), WEAPON_FORMS(Skills.Pillar.STRENGTH),
 		MIGHT(Skills.Pillar.STRENGTH),
-		FORAGING(Skills.Pillar.SURVIVAL), ARCHERY(Skills.Pillar.SURVIVAL), SPELLCRAFT(Skills.Pillar.SURVIVAL), MEDICINE(Skills.Pillar.SURVIVAL),
-		FREERUNNING(Skills.Pillar.STEALTH), ROGUES_ARTS(Skills.Pillar.STEALTH), KNIFE_ARTS(Skills.Pillar.STEALTH), THIEVERY(Skills.Pillar.STEALTH),
-		SHADOWS(Skills.Pillar.STEALTH);
+		// the skill-tree locks' Trades and Heritage (Survival) and the Night page (Stealth, hidden until you're turned)
+		FORAGING(Skills.Pillar.SURVIVAL), TRADES(Skills.Pillar.SURVIVAL), ARCHERY(Skills.Pillar.SURVIVAL), SPELLCRAFT(Skills.Pillar.SURVIVAL),
+		HERITAGE(Skills.Pillar.SURVIVAL), MEDICINE(Skills.Pillar.SURVIVAL),
+		FREERUNNING(Skills.Pillar.STEALTH), ROGUES_ARTS(Skills.Pillar.STEALTH), KNIFE_ARTS(Skills.Pillar.STEALTH), NIGHT(Skills.Pillar.STEALTH),
+		THIEVERY(Skills.Pillar.STEALTH), SHADOWS(Skills.Pillar.STEALTH);
 
 		final Skills.Pillar pillar;
 
@@ -82,7 +84,41 @@ final class SkillWeb {
 
 	/** (0.7.516) The branches that start {@link #SKILL_BRANCH_RING} rings out. */
 	static final java.util.Set<Branch> LATE_BRANCHES = java.util.EnumSet.of(Branch.WARFARE, Branch.WEAPON_FORMS, Branch.ARCHERY,
-		Branch.SPELLCRAFT, Branch.ROGUES_ARTS, Branch.KNIFE_ARTS);
+		Branch.SPELLCRAFT, Branch.ROGUES_ARTS, Branch.KNIFE_ARTS, Branch.TRADES, Branch.HERITAGE, Branch.NIGHT);
+
+	/**
+	 * The rings the skill-tree locks' perks sit on (they open on nothing, so their depth would put them all on the first
+	 * ring): each page's new perks spread out over the rings its own perks leave free.
+	 */
+	private static final Map<Skills.Perk, Integer> RING = new EnumMap<>(Skills.Perk.class);
+
+	static {
+		ring(2, Skills.Perk.CHARGE_JUMP, Skills.Perk.LONG_JUMP);
+		ring(3, Skills.Perk.SLIDE, Skills.Perk.STRONG_SWIMMER);
+		ring(0, Skills.Perk.SHOVE, Skills.Perk.AIM_PARTS);
+		ring(2, Skills.Perk.SWEEP_KICK);
+		ring(3, Skills.Perk.BOXER, Skills.Perk.COMMAND);
+		ring(4, Skills.Perk.TWO_BLADES, Skills.Perk.SHIELDBEARER, Skills.Perk.THROWER);
+		ring(5, Skills.Perk.HAUL_BOUND, Skills.Perk.PATH_STRENGTH);
+		ring(6, Skills.Perk.SECOND_STRENGTH);
+		ring(2, Skills.Perk.HORSEMAN);
+		ring(3, Skills.Perk.SKYFARER);
+		ring(4, Skills.Perk.PATH_SURVIVAL, Skills.Perk.PATH_STEALTH);
+		ring(5, Skills.Perk.SECOND_SURVIVAL, Skills.Perk.SECOND_STEALTH);
+		ring(2, Skills.Perk.READ_SCROLLS, Skills.Perk.SORCERY);
+		ring(1, Skills.Perk.SWAT);
+		ring(SKILL_BRANCH_RING, Skills.Perk.SMITH, Skills.Perk.BREWER, Skills.Perk.SAWYER, Skills.Perk.BLOOD_AWAKENING,
+			Skills.Perk.LIFELEECH, Skills.Perk.NIGHT_SENSE);
+		ring(SKILL_BRANCH_RING + 1, Skills.Perk.ANGLER, Skills.Perk.ALCHEMIST, Skills.Perk.SMELTER, Skills.Perk.NIGHT_POUND, Skills.Perk.BAT_WINGS);
+		ring(SKILL_BRANCH_RING + 2, Skills.Perk.MILLWRIGHT, Skills.Perk.GEMCUTTER, Skills.Perk.WHALER);
+		ring(SKILL_BRANCH_RING + 3, Skills.Perk.RIGWRIGHT);
+	}
+
+	private static void ring(int ring, Skills.Perk... perks) {
+		for (Skills.Perk perk : perks) {
+			RING.put(perk, ring);
+		}
+	}
 
 	/** A point on the web (web units). */
 	record Spot(double x, double y) {
@@ -112,8 +148,8 @@ final class SkillWeb {
 		return switch (perk.pillar) {
 			case STRENGTH -> page >= 5 ? Branch.WEAPON_FORMS : page == 4 ? Branch.WARFARE : page >= 2 ? Branch.WILL
 				: page == 1 || perk == Skills.Perk.WEAPON_FORMS ? Branch.COMBAT_ARTS : Branch.MIGHT;
-			case SURVIVAL -> page >= 3 ? Branch.SPELLCRAFT : page == 2 ? Branch.ARCHERY : page == 1 ? Branch.MEDICINE : Branch.FORAGING;
-			case STEALTH -> page >= 4 ? Branch.KNIFE_ARTS : page == 3 ? Branch.ROGUES_ARTS : page == 1 ? Branch.FREERUNNING
+			case SURVIVAL -> page >= 6 ? Branch.HERITAGE : page == 5 ? Branch.TRADES : page >= 3 ? Branch.SPELLCRAFT : page == 2 ? Branch.ARCHERY : page == 1 ? Branch.MEDICINE : Branch.FORAGING;
+			case STEALTH -> page >= 5 ? Branch.NIGHT : page == 4 ? Branch.KNIFE_ARTS : page == 3 ? Branch.ROGUES_ARTS : page == 1 ? Branch.FREERUNNING
 				: page == 2 ? Branch.SHADOWS : Branch.THIEVERY;
 			case SCHOLAR -> throw new IllegalArgumentException("the Scholar pillar is not on the web");
 		};
@@ -151,6 +187,10 @@ final class SkillWeb {
 		}
 		if (parents.isEmpty() && LATE_BRANCHES.contains(branch(perk))) {
 			d = SKILL_BRANCH_RING;
+		}
+		Integer ring = RING.get(perk);
+		if (ring != null) {
+			d = ring;
 		}
 		DEPTH.put(perk, d);
 		return d;

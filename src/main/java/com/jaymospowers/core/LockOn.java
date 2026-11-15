@@ -165,7 +165,8 @@ public final class LockOn {
 	public static LockOnRegions.Region region(Player player) {
 		if (player instanceof ServerPlayer) {
 			Lock lock = LOCKS.get(player.getUUID());
-			return lock == null ? LockOnRegions.Region.TORSO : lock.region;
+			// (Andy's skill-tree locks) without the perk the aim is always the torso
+			return lock == null || !TreeLocks.has(player, TreeLocks.AIM_PARTS) ? LockOnRegions.Region.TORSO : lock.region;
 		}
 		return player.level().isClientSide() ? clientRegion.apply(player) : LockOnRegions.Region.TORSO;
 	}

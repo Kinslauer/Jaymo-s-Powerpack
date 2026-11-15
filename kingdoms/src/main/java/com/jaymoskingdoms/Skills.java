@@ -363,7 +363,60 @@ public final class Skills {
 		// the air roll (Jaymo's Powers' AirRoll): a Sprint press just after a sprint jump rolls you forward through the air. Its own perk
 		// beside Leap of Faith, on the empty middle column under Freerunner (a rank of Freerunner would put a distance move on the
 		// flip's perk); last, so no ordinal moves
-		AIR_ROLL(Pillar.STEALTH, 1, 1, 8, 5, 1, FREERUNNER);
+		AIR_ROLL(Pillar.STEALTH, 1, 1, 8, 5, 1, FREERUNNER),
+		// Andy's skill-tree locks: abilities everyone used to have are learned here now, and refused until then ({@link TreeLocks});
+		// last, so no ordinal moves. Freerunning: the slide, the long jump, the charge jump; Strong Swimmer the swim burst and the breach
+		SLIDE(Pillar.STEALTH, 1, 1, 3, 4, 0),
+		LONG_JUMP(Pillar.STEALTH, 1, 1, 3, 4, 1),
+		CHARGE_JUMP(Pillar.STEALTH, 1, 1, 3, 4, 0),
+		STRONG_SWIMMER(Pillar.STEALTH, 1, 1, 3, 4, 2),
+		// Might: shove and trip, aiming at body parts, the no-power Sweep Kick, boxing styles, lifting the hogtied, the orders,
+		// two blades, the shield's slam, charge and brace, and throwing weapons and the belt
+		SHOVE(Pillar.STRENGTH, 1, 1, 0, 0, 0),
+		AIM_PARTS(Pillar.STRENGTH, 1, 1, 0, 0, 2),
+		SWEEP_KICK(Pillar.STRENGTH, 1, 1, 1, 1, 1),
+		BOXER(Pillar.STRENGTH, 1, 1, 1, 2, 0),
+		HAUL_BOUND(Pillar.STRENGTH, 1, 1, 1, 2, 0),
+		COMMAND(Pillar.STRENGTH, 1, 1, 2, 2, 2),
+		TWO_BLADES(Pillar.STRENGTH, 1, 1, 2, 3, 0),
+		SHIELDBEARER(Pillar.STRENGTH, 1, 1, 2, 3, 1),
+		THROWER(Pillar.STRENGTH, 1, 1, 2, 3, 2),
+		// Combat Arts: vaulting a raised shield; Will: batting an arrow back with a perfect parry
+		SHIELD_VAULT(Pillar.STRENGTH, 1, 1, 2, 4, 1, WEAPON_FORMS),
+		SWAT(Pillar.STRENGTH, 1, 1, 5, 8, 1),
+		// Foraging: the horse whistle (rank 1) and tricks (rank 2); the paraglider (rank 1) and the hot air balloon (rank 2)
+		HORSEMAN(Pillar.SURVIVAL, 2, 1, 0, 2, 1),
+		SKYFARER(Pillar.SURVIVAL, 2, 1, 3, 3, 2),
+		// Spellcraft: reading a scroll to cast it (a Mage needs not), the Sorcerer's imbue, absorbing and barrage, and Death and Blood
+		READ_SCROLLS(Pillar.SURVIVAL, 1, 1, 0, 12, 1),
+		SORCERY(Pillar.SURVIVAL, 1, 1, 0, 12, 2),
+		FORBIDDEN_ARTS(Pillar.SURVIVAL, 1, 1, 10, 13, 2, SORCERY),
+		// a class path ({@link Paths}), from any pillar at level 10; a second class ({@link SecondClass}) from the same pillar's path at 15
+		PATH_SURVIVAL(Pillar.SURVIVAL, 1, 1, 10, 3, 0),
+		PATH_STEALTH(Pillar.STEALTH, 1, 1, 10, 3, 0),
+		PATH_STRENGTH(Pillar.STRENGTH, 1, 1, 10, 3, 2),
+		SECOND_SURVIVAL(Pillar.SURVIVAL, 1, 1, 15, 3, 0, PATH_SURVIVAL),
+		SECOND_STEALTH(Pillar.STEALTH, 1, 1, 15, 3, 0, PATH_STEALTH),
+		SECOND_STRENGTH(Pillar.STRENGTH, 1, 1, 15, 3, 2, PATH_STRENGTH),
+		// Survival's Trades page: using (and making) each craft's stations
+		SMITH(Pillar.SURVIVAL, 1, 1, 3, 20, 0),
+		BREWER(Pillar.SURVIVAL, 1, 1, 3, 20, 1),
+		SAWYER(Pillar.SURVIVAL, 1, 1, 3, 20, 2),
+		ANGLER(Pillar.SURVIVAL, 1, 1, 3, 21, 0),
+		ALCHEMIST(Pillar.SURVIVAL, 1, 1, 4, 21, 1),
+		SMELTER(Pillar.SURVIVAL, 1, 1, 5, 21, 2),
+		MILLWRIGHT(Pillar.SURVIVAL, 1, 1, 5, 22, 0),
+		GEMCUTTER(Pillar.SURVIVAL, 1, 1, 6, 22, 1),
+		WHALER(Pillar.SURVIVAL, 1, 1, 6, 22, 2),
+		RIGWRIGHT(Pillar.SURVIVAL, 1, 1, 8, 23, 1),
+		// Survival's Heritage page: your own blood's moves (its heritage-key move and its left-mouse hold; its gifts stay free)
+		BLOOD_AWAKENING(Pillar.SURVIVAL, 1, 1, 3, 24, 1),
+		// Stealth's Night page, shown once you're turned (and to dhampirs and wolfbloods): lifeleech, kin and pack sense,
+		// the Groundpound and the Howl, the bat wings
+		LIFELEECH(Pillar.STEALTH, 1, 1, 0, 20, 0),
+		NIGHT_SENSE(Pillar.STEALTH, 1, 1, 0, 20, 2),
+		NIGHT_POUND(Pillar.STEALTH, 1, 1, 3, 21, 0),
+		BAT_WINGS(Pillar.STEALTH, 1, 1, 3, 21, 2);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -895,6 +948,10 @@ public final class Skills {
 		}
 		if (Learnables.classLocked(player, perk)) {
 			// (0.7.516) a class skill of another class
+			return;
+		}
+		if (TreeLocks.hidden(player, perk)) {
+			// the Night page, before they're turned
 			return;
 		}
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());

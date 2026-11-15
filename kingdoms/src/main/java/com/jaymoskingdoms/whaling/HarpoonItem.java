@@ -37,6 +37,10 @@ public final class HarpoonItem extends Item {
 
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHALER)) {
+			// (Andy's skill-tree locks) whaling is learned: Whaler, on Survival's Trades page
+			return InteractionResult.FAIL;
+		}
 		player.startUsingItem(hand);
 		return InteractionResult.CONSUME;
 	}

@@ -316,6 +316,10 @@ public final class RubberFolk {
 		if (player.isShiftKeyDown() && HeritageHold.channel(player) == null && RubberStomach.bringUp(player)) {
 			return;
 		}
+		if (HeritageHold.channel(player) == null && !TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
+			// (Andy's skill-tree locks) swallowing is learned: Blood Awakening (bringing one back up, or letting go, never is)
+			return;
+		}
 		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
 	}
 

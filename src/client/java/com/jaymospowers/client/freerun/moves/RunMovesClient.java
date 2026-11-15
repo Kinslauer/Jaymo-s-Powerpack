@@ -59,6 +59,8 @@ public final class RunMovesClient {
 	static final int CHARGE_COLOUR = 0x70FFFFFF;
 
 	private static boolean sneakWas, jumpWas, sprintWas, wasOnGround;
+	/** Ticks of a charge jump's wind-up held without the perk (Andy's skill-tree locks), for the refusal at the jump. */
+	private static int lockedWind;
 	/** Client tick of the last jump out of a sprint, and whether this run of air's leap and air roll are spent. */
 	private static long sprintJumpAt = Long.MIN_VALUE / 2;
 	private static boolean leapt, airRolled;
@@ -201,11 +203,16 @@ public final class RunMovesClient {
 			return;
 		}
 		charge = 0;
+		if (lockedWind >= ChargeJump.MIN_TICKS) {
+			com.jaymospowers.core.TreeLocks.refuse(player, com.jaymospowers.core.TreeLocks.CHARGE_JUMP);
+		}
+		lockedWind = 0;
 		boolean tapped = now - pressedAt <= LongJump.TAP_BEFORE && (sneakHeld == 0 ? releasedAt - pressedAt <= TAP_HOLD_TICKS : sneakHeld <= TAP_HOLD_TICKS);
 		if (tapped && longJump(player)) {
 			return;
 		}
-		if (FastRun.active(player) && player.getRandom().nextFloat() < TrickJump.CHANCE) {
+		// (Andy's skill-tree locks) the flips are Freerunner's: without it, no flip (they're only for show, so nothing is said)
+		if (FastRun.active(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.TRICK_JUMP) && player.getRandom().nextFloat() < TrickJump.CHANCE) {
 			trickKind = player.getRandom().nextFloat() < TrickJump.BACK_SHARE ? WebPose.BACK_FLIP : WebPose.FRONT_FLIP;
 			trickAt = now + Math.max(TrickJump.DELAY_TICKS, LongJump.TAP_AFTER + 1);
 		}
@@ -257,6 +264,10 @@ public final class RunMovesClient {
 		if (!FastRun.active(player) || !Feathers.canSpend(player, LongJump.COST) || FreerunClient.active()) {
 			return false;
 		}
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.LONG_JUMP)) {
+			// (Andy's skill-tree locks) learned: Long Jump
+			return false;
+		}
 		Vec3 v = player.getDeltaMovement();
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		double speed = Mth.clamp(v.horizontalDistance() * LongJump.BOOST, LongJump.MIN_SPEED, LongJump.MAX_SPEED);
@@ -273,8 +284,11 @@ public final class RunMovesClient {
 	/** Standing still with Sneak held: wind up. Moving, a power's body, water, or letting go loses it. */
 	private static void tickCharge(LocalPlayer player, boolean sneak, boolean onGround) {
 		Input input = player.input.keyPresses;
-		boolean still = onGround && sneak && !doubleTap && !input.forward() && !input.backward() && !input.left() && !input.right()
-			&& player.getDeltaMovement().horizontalDistance() < ChargeJump.MOVE_CANCEL && !player.isInWater() && ChargeJump.allowed(player);
+		boolean body = onGround && sneak && !doubleTap && !input.forward() && !input.backward() && !input.left() && !input.right()
+			&& player.getDeltaMovement().horizontalDistance() < ChargeJump.MOVE_CANCEL && !player.isInWater();
+		boolean still = body && ChargeJump.allowed(player);
+		// (Andy's skill-tree locks) a wind-up that only the lock stops: a jump out of it is told Charge Jump isn't learned
+		lockedWind = body && !ChargeJump.learned(player) && sneakHeld > ChargeJump.START_TICKS ? lockedWind + 1 : onGround ? 0 : lockedWind;
 		if (!still) {
 			if (onGround) {
 				charge = 0;
@@ -349,13 +363,15 @@ public final class RunMovesClient {
 		if (!swimming) {
 			return;
 		}
-		if (sprintPressed && now - burstAt >= SwimBurst.COOLDOWN && SwimBurst.hasAir(player) && Feathers.canSpend(player, SwimBurst.COST)) {
+		if (sprintPressed && now - burstAt >= SwimBurst.COOLDOWN && SwimBurst.hasAir(player) && Feathers.canSpend(player, SwimBurst.COST)
+			&& com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.SWIM_BURST)) {
 			Vec3 v = player.getDeltaMovement().add(player.getLookAngle().scale(SwimBurst.PUSH));
 			double speed = v.length();
 			player.setDeltaMovement(speed > SwimBurst.MAX_SPEED ? v.scale(SwimBurst.MAX_SPEED / speed) : v);
 			burstAt = now;
 			send(RunMoves.SWIM_BURST, 0L);
-		} else if (jumpPressed && !player.onGround() && !player.isUnderWater() && now - breachAt >= Breach.COOLDOWN && Feathers.canSpend(player, Breach.COST)) {
+		} else if (jumpPressed && !player.onGround() && !player.isUnderWater() && now - breachAt >= Breach.COOLDOWN && Feathers.canSpend(player, Breach.COST)
+			&& com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.BREACH)) {
 			// out of the water the way you look, at least a little up so a level look still clears it
 			Vec3 look = player.getLookAngle();
 			Vec3 flat = new Vec3(look.x, 0.0, look.z);

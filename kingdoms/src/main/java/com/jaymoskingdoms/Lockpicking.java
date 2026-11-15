@@ -224,6 +224,10 @@ public final class Lockpicking {
 			return InteractionResult.PASS;
 		}
 		server.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
+		if (!TreeLocks.check(sp, TreeLocks.Lock.LOCKPICK)) {
+			// (Andy's skill-tree locks) picking a lock is learned: Lockpicking Prowess (a Thief knows how)
+			return InteractionResult.FAIL;
+		}
 		int picks = sp.getInventory().countItem(LOCKPICK);
 		if (picks == 0) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.no_pick." + (lock.kind() == Kind.ROTARY.ordinal() ? "rotary" : "pin"),
@@ -324,6 +328,11 @@ public final class Lockpicking {
 	 * have no lockpick (or can't play it).
 	 */
 	public static boolean pickLock(ServerPlayer sp, BlockPos at, Kind kind, int level, long seed, Runnable picked) {
+		if (!TreeLocks.check(sp, TreeLocks.Lock.LOCKPICK)) {
+			// (Andy's skill-tree locks: doors, cells and shackles too) not learned: told so, and nothing opens. True, so the
+			// caller doesn't add its own "no lockpick" line over the one naming the perk
+			return true;
+		}
 		int picks = sp.getInventory().countItem(LOCKPICK);
 		if (picks == 0 || !ServerPlayNetworking.canSend(sp, Open.TYPE)) {
 			return false;

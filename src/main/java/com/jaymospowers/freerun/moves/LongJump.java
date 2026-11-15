@@ -39,7 +39,9 @@ public final class LongJump {
 	static void jumped(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < GAP_TICKS || !FastRun.active(player) || !Freerun.canMove(player)) {
+		// (Andy's skill-tree locks) learned: Long Jump, on Stealth's Freerunning page
+		if (last != null && now - last < GAP_TICKS || !FastRun.active(player) || !Freerun.canMove(player)
+			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.LONG_JUMP)) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {
