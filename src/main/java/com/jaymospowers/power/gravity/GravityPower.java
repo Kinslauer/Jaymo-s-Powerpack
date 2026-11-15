@@ -118,6 +118,11 @@ public final class GravityPower implements Power {
 	/** Longest a lift lasts, and the cooldown after it ends. */
 	public static final int LIFT_MAX_TICKS = 120;
 	public static final int LIFT_COOLDOWN = 160;
+	/**
+	 * A person (player or humanoid mob) Lift takes off the ground digs its hands in and holds on this long (ticks) before
+	 * it's torn loose and pulled away (drawn by GravityGraspPose).
+	 */
+	static final int LIFT_GRASP_TICKS = 30;
 	static final float LIFT_EXHAUSTION = 0.012F;
 
 	// ---- Gravity Well (G) ----
@@ -398,6 +403,8 @@ public final class GravityPower implements Power {
 		int liftTicks;
 		long crushFrom = -1;
 		int weightlessTicks;
+		/** A person Lift took off the ground holds on to it until then (game time), or -1. */
+		long graspUntil = -1;
 		/** The held thing is a dropped item being drawn in (right click). */
 		boolean drawing;
 		/** It floated by NoGravity (not alive, no weight to take away); whether it had NoGravity before. */
@@ -545,6 +552,7 @@ public final class GravityPower implements Power {
 			GravityForward.clear();
 			GravityCometRam.clear();
 			GravityWalk.clear();
+			GravityOverturn.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
 	}
@@ -704,6 +712,18 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
+				if (down && PowerInput.isDown(player, PowerKey.ABILITY_4) && state.liftTarget < 0 && !state.chunkHold && state.ripFrom < 0
+					&& com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4)) {
+					// B+V (B held, V pressed and kept held): Overturn, the creature in sight falls up, or holds on to the ground if it's
+					// the stronger, until V is let go (B's cooldown starts then); the B held for it never lands its Crush or Wave, and
+					// this V never toggles Weightless
+					state.crushFrom = -1;
+					state.vDownAt = -1;
+					if (!ready(player, CRUSH) || !GravityOverturn.start(player)) {
+						fizzle(player);
+					}
+					return;
+				}
 				// held down before Weightless is yours: the item pull (see tick)
 				if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
 					return;
@@ -886,8 +906,14 @@ public final class GravityPower implements Power {
 			target.setNoGravity(true);
 		}
 		target.setAttached(LIFTED, true);
+		state.graspUntil = -1;
 		if (target instanceof LivingEntity living) {
 			touch(living, player);
+			if (living.onGround() && com.jaymospowers.power.darktide.DarktideStatus.humanoid(living)) {
+				// a person grabs the ground and holds on, before it's torn loose
+				state.graspUntil = player.level().getGameTime() + LIFT_GRASP_TICKS;
+				living.setAttached(GravityOverturn.GRASP, player.level().getGameTime());
+			}
 		}
 		if (target instanceof ServerPlayer held) {
 			boolean wind = Powers.has(held, com.jaymospowers.power.wind.WindPower.INSTANCE);
@@ -926,6 +952,19 @@ public final class GravityPower implements Power {
 		if (state.drawing && isCorpse(target)) {
 			drawCorpse(player, state, target);
 			return;
+		}
+		if (state.graspUntil >= 0) {
+			if (player.level().getGameTime() < state.graspUntil) {
+				// holding on to the ground: rooted, straining against the pull
+				GravityOverturn.holdOn(player.level(), (LivingEntity)target);
+				player.causeFoodExhaustion(LIFT_EXHAUSTION);
+				return;
+			}
+			// torn loose
+			letGo(state, target);
+			BlockPos under = target.blockPosition().below();
+			com.jaymospowers.core.Debris.puff(player.level(), under, player.level().getBlockState(under), 0.9F);
+			player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.0F, 0.7F);
 		}
 		if (state.reeled) {
 			// the wheel has it: it follows to where it was asked, the heavier the slower
@@ -988,6 +1027,9 @@ public final class GravityPower implements Power {
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
 		state.liftTarget = -1;
+		if (entity != null) {
+			letGo(state, entity);
+		}
 		if (state.hurlAt >= 0) {
 			// (0.21.8) let go mid wind-up: no hurl
 			state.hurlAt = -1;
@@ -1417,9 +1459,23 @@ public final class GravityPower implements Power {
 		return best;
 	}
 
+	/** A person holding on to the ground (Lift's grasp) lets go of it. */
+	private static void letGo(State state, Entity target) {
+		if (state.graspUntil >= 0) {
+			state.graspUntil = -1;
+			target.removeAttached(GravityOverturn.GRASP);
+		}
+	}
+
+	/** Puts {@code ticks} on B's cooldown (Overturn, when it lets go). */
+	static void coolCrush(ServerPlayer player, int ticks) {
+		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(player.level().getGameTime() + ticks, ticks));
+	}
+
 	/** Lift ends for a slam: weight back on, cooldown, no Collapse fling. */
 	private static void dropLiftQuietly(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = -1;
+		letGo(state, target);
 		if (state.hurlAt >= 0) {
 			state.hurlAt = -1;
 			com.jaymospowers.ground.ThrownRocks.hurlDropped(player);
@@ -2143,6 +2199,7 @@ public final class GravityPower implements Power {
 		GravitySideFall.tick(server);
 		GravityWave.tick(server);
 		GravityGutPunch.tick(server);
+		GravityOverturn.tick(server);
 		GravityWalk.tick(server);
 		if (!SLAMS.isEmpty()) {
 			tickSlams(server);
