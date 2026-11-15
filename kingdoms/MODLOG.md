@@ -13777,3 +13777,89 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Crocodiles hunt like crocodiles**: Cube Animals' crocodile only notices prey within 6 blocks, so it ignored a player walking past. In water or at night it now notices you out to 16 blocks (an ambush hunter in the river, a night hunter on land); basking on the bank by day it keeps its 6 (`wild/Crocodiles`). Dev server: at night a crocodile 12 blocks off came for the player; by day on land it didn't.
 - **Illagers on the march come at you**: a patrol or pillager caravan that saw you only stood and stared while you stayed more than 10 blocks off. Now they size you up for 3 seconds, then all of them attack (`mixin/HoldGroundStareMixin`, also the Night Bleeder). Dev server: a caravan 14-20 blocks off opened fire after the stare.
 - Built and dev-server tested; not played.
+
+## 0.9.20 (2026-11-15): GT New Horizons picks, patch 2 - slower trees, no instant bone meal
+
+- **Trees grow at half speed** (`Trees`): each step of a growing tree takes twice as long (10 to 17 minutes).
+- **Weaker bone meal** (`mixin/SaplingBlockMixin`): bone meal on a sapling adds a growth step like any other; a
+  sapling ready to grow sprouts a growing tree whether it got there by bone meal or by time, never a whole tree at once.
+- `Trees.hurry`: Jaymo's Powers' Time Bloom brings the growing trees in it nearer their next step.
+- Built; not played.
+
+## 0.9.21 (2026-11-15): GT New Horizons picks, patch 6 - marked monsters, mother and flying spiders, turned villagers' trades, punji stakes
+
+- **Marked monsters** (`MarkedMonsters`): a hostile monster may rise marked with 1 to 4 marks, at a chance by the world
+  tier of the players near it (1% at Hearth up to 20% at Legend, more marks at higher tiers): Vengeance (a quarter of a
+  melee blow goes back to the striker), Regen, Sapper (its blows drain food), Webber (webs you where you stand), Ghastly
+  (a fireball now and then), Blastoff (throws you up), Ninja (now and then steps out behind you), Sticky (knocks your
+  weapon out of your hand to the ground near by), Rust (your armour wears faster), Storm (rarely, lightning near you,
+  under open sky, after a crackle of warning). No words name a mark: each shows by a faint aura of its own typed
+  `Fx` mote, haze or spark and its own sound; three or more marks bring a boss bar (`BossBars`, only for those who
+  struck it). A little more loot and experience for each mark. Never on bosses, captains, villagers and folk, thralls,
+  or anyone's own beast, and never on a spawner's mobs (no marked farms). Storm and Ghastly marks only turn on players,
+  and a Ninja steps behind only a foe it can see.
+- **Captains** (Andy: "give these to captains"): the ten marks are also `Captains.Trait` strengths, rolled with the
+  others (a heavy-footed or iron-clad one is never a Ninja, one who fears fire never Ghastly), named in the journal and
+  told under questioning in each dialect; they act through the same code from `CaptainWays.step`.
+- **Mother spider** (`wild/SpiderKinds`, `SpiderMinds`): now and then a temperate spider is a mother, full grown and
+  slower, her brood on her back (a wolf spider's way); killed, she bursts into 3 to 6 tiny, quick spiderlings that go
+  for her killer and drop nothing.
+- **Flying spider**: in forests and taiga, a jumping spider that sits up in the canopy and watches; prey below and near,
+  it leaps down on a dragline, and the line hauls the prey up to 4 blocks off the ground before it lets go. Skins for
+  the mother, spiderling and flyer from `tools/gen_spider_kinds.py`.
+- **Turned villagers remember** (`TurnedVillagers`, MCA only): an MCA villager who turns keeps their trade's trick:
+  fishers cast a rod and reel you in, fletchers, guards, archers and hunters shoot their old bow from a quiver that
+  runs out (`MobAmmo`; the arrows can be picked up), farmers throw their hoe once (it lands as the hoe). Plain
+  zombies, the old dead and skeletons get nothing new.
+- **Punji stakes** (`creatures/PunjiBlock`): whittled from 4 sticks (or 4 bamboo) with a knife in the grid, the knife
+  handed back worn (`creatures/WhittlingRecipe`, JEI's crafting page). Whatever walks into them is slowed and stabbed at
+  each step, a fall onto them hurts as a stalagmite does, and mobs go round them when they can. Diggers set them in
+  their pits (in place of pointed dripstone) and along a new bolt-hole tunnel out of each warren's chamber, and are
+  never stabbed by them (the bolt-hole is dug only where it breaks into no water and takes no chest); barbarian camps are founded with patches of them round the outside of the palisade.
+- Built; not played.
+
+## 0.9.22 (2026-11-15): GT New Horizons picks, patch 4 - weather-proof blocks, tin on the trade roads
+
+- **Weathering skips weather-proof blocks** (`Weathering`): blocks in the tag `#jaymospowers:weather_proof` (Jaymo's Powers' creosote-treated planks) never weather, rot or grow moss. Read by the tag's id, so Powers needn't be loaded.
+- **Caravans carry tin** (with Jaymo's Powers loaded): tin ingots, raw tin and bronze ingots (`#c:ingots/tin`, `#c:raw_materials/tin`, `#c:ingots/bronze`) are metal goods on the trade roads (`TradeRoutes`), tin at copper's worth (3 coppers) and bronze at 4, so towns' caravans load and sell them like copper. A mining town's levy can hold raw tin (`Caravans`). A roaming merchant caravan's packs are sometimes tin ingots, and one merchant in two also sells 4 tin ingots for an emerald (`RoamingCaravans`). Smiths' tin trades are Powers' data.
+- Built; not played.
+
+## 0.9.23 (2026-11-15): GT New Horizons picks, patch 7 - grown veins are mixed and show small ores
+
+- **Grown veins are mixed** (`GroundChanges`): a vein a world tier lays under loaded chunks now carries short streaks of a partner ore, as Jaymo's Powers' worldgen veins do: iron with copper, copper with Powers' tin, gold with iron (lapis none). About one block in 14.
+- **Small ores over grown veins**: each grown iron, copper or gold vein also leaves up to 6 of Powers' lone small ores in the stone 3 to 20 blocks under the ground of its chunk, most of its own metal and a quarter its partner's, so Powers' small ores hint at it as they do at worldgen veins. Only in natural ground: never in a village's or kingdom's land, only where the column is bare terrain from its top down, and only buried in natural rock or soil on all six sides, so no wall, floor or roof of a base turns to ore. Tin ore and the small ores are looked up by id: without Powers there's no tin streak and no small ore.
+- Built; not played.
+
+## 0.9.24 (2026-11-15): GT New Horizons picks, patch 9 - the steam town, its tinkers and engineers, its airships
+
+- **Steam towns** (`SteamTowns`, `SteamBuildings`): a new settlement, raised by the craftsmen who built for the Mad
+  Tinkerer and stayed together after he vanished. A smoky town of brick, iron and timber round a bell square: six
+  houses with smoking chimneys, a tinkers' and an engineers' workshop, a boiler house (two fireboxes, boilers and steam
+  engines on shafts, under a tall chimney), a windmill tower, a coke yard and an airfield with a mast and windsock. With
+  Jaymo's Powers it is built of treated planks, coke oven bricks, firebricks and a real coke oven; with Jaymo's Kitchen
+  its fireboxes, boilers, engines, shafts, windmill and windsock are Kitchen's. Without them, plain brick, spruce,
+  furnaces and copper.
+- It rises as Blossom villages do, by itself near a player and out of sight, and only once a player near the site has
+  opened the Borderlands tier. It rises rarely (a few minutes' roll at 12%), only on open, fairly level land away from
+  the sea, rivers, Mohknee, claimed land, anything a player has built and other settlements, and at least 1400 blocks from another steam town. From
+  then on it is an ordinary village faction: elder, shed, builders, its own coin.
+- **Tinkers, engineers and an aeronaut** (`SteamTrades`, `Professions`): each steam town takes on two tinkers, two
+  engineers and one aeronaut from its idle grown villagers (never its elder, a visitor or someone downed), and restocks their stalls each day. Tinkers sell Kitchen's
+  steam cylinder, safety valve, firebox, boilers, steam engine, shafts, gearbox, sails and windsock, and buy copper
+  and iron. Engineers sell Powers' coal coke, creosote, treated planks, coke oven bricks, firebricks and tin, and buy
+  coal, charcoal, logs and raw tin. The aeronaut sells a spyglass, compass and leads. Each mod's goods are on the
+  stall only when that mod is loaded. Prices are in the town's own coin.
+- **Airships** (`SteamAirships`): each steam town keeps an airship on its mast, a railed deck with a wheel and a boiler
+  under a bag of wool in the town's colour, and her captain (the aeronaut) waits on the landing stage beside her.
+  Standing on her deck, buy passage from him ("Buy Passage" on
+  MCA's Interact page) to one of the three nearest other steam towns, or home if she lies away. The fare grows with
+  distance. She casts off with her captain at the wheel (no player may take it while she flies), climbs, and flies on the wind with her boiler pushing, going
+  over high ground ahead. She then comes down onto that town's visitor berth and is blocks again. If she can't get
+  there, or finds the berth built over, she comes down onto the ground where she is.
+- Her passengers come to no harm while aboard her in flight and for ten seconds after: no damage, no fall, and anyone
+  who goes over the rail is set back on her deck. With no other steam town to fly to, the captain shakes his head and says so in a
+  speech bubble.
+- An airship lying away waits a day, then she and her captain are gone from that berth and back home the next time
+  each is loaded with nobody near; one come down in the country goes home the same way. An empty flight home loads no
+  chunks. A wrecked or stolen one is built again after two days.
+- Built; not played.

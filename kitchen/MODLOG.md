@@ -2233,3 +2233,72 @@ corpse' model that it came from".
 - With Jaymo's Powers' Wet and Soaked (`climate/Wetness`, read by id): Wet chills as before (-10); Soaked chills twice that, and half as much again on cold land; soaked clothes keep half their warmth, wool all of it (`BodyHeat.warmPieces`). Without Powers the old wet timer is kept.
 - Leather worn soaked through (out of water) wears at half the in-water rate (`HideTraits.soakWear`).
 - Built; not played.
+
+## 0.6.24 (2026-11-15): GT New Horizons picks, patch 2 - farms, herds, the food journal and the lunch box
+
+- **Farmland only near water** (`farm/DryFields`): a hoe makes farmland only within 4 blocks of water (vanilla's
+  hydration reach). The plow follows the same rule (`horse/CartEntity.tillOne`).
+- **Seeds from dry grass** (`farm/DryFields`): grass and ferns drop no seeds any more (Kitchen's hemp and cabbage seed
+  pools on short and tall grass are gone). A hoe used on a grass block more than 4 blocks from water forages instead:
+  1 in 4 times a seed pops out, by biome (wheat and hemp anywhere; cabbage and beetroot on plains; pumpkin in forests
+  and taiga; tomato in hot lands; pmeh in jungles and savannas; melon in jungles; rice in swamps), and each try costs
+  1 durability.
+- **Farms grow at half speed** (`farm/SlowFarms`, `SlowGrowthMixin`): everything in `#jaymoskitchen:slow_growing`
+  (crops, saplings, cane, cactus, cocoa, nether wart, sweet berries, glow berries, Kitchen's crops, Powers' orange tree
+  and berry bushes) takes half its random growth ticks, on top of the season rule. Other mods' fruit trees can join the tag.
+- **Slow herds** (`farm/Herds`, `HerdAgeMixin`): young animals take twice as long to grow up and the wait to breed
+  again is twice as long; hens lay half as often (`farm/LayingHens`); a cow, mooshroom or goat gives milk once every
+  20 minutes, and a bucket on one milked since gives nothing.
+- **Weaker bone meal** (`CropBoneMealMixin`, `StemBoneMealMixin`, the tomatoes): bone meal pushes a crop or stem one
+  stage, never 2 to 5.
+- **Hoes wear out fast**: tilling costs 5 durability (the vanilla hoe block transformer, overridden).
+- **Crowded pens** (`farm/Herds`, `CrowdedPenMixin`): more than 12 adult farm animals of a kind within 8 blocks
+  won't breed, and now and then butt one another for half a heart.
+- **Kill clean or lose the meat** (`corpse/CleanKill`, `corpse/Gibs`): a farm animal killed by fist, blunt weapon or
+  blast leaves a bruised corpse: half the meat and a torn hide. Farm animals never burst any more. A knife, cleaver or
+  blade kill gives the full yield, as before.
+- **Eat widely, grow stronger** (`stomach/Variety`): each kind of food eaten the first time adds points equal to its
+  hunger value; every 50 points is a lasting extra heart, up to 10, kept through death. The Food Journal (book,
+  feather and wheat) opens on two pages: the foods eaten and those not yet tried.
+- **Lunch box** (`stomach/LunchBox`): a hemp-cloth pouch (string and five hemp cloth) holding 9 foods. Carried
+  anywhere in the inventory, it feeds you the biggest food in it that your hunger has room for, or, once you're down
+  to 3 shanks, the smallest even if it won't fit; bowls and bottles come back to you. Not while it's open.
+- JEI: a Foraging category shows each hoe forage seed with where it grows and the odds; the food journal and the
+  lunch box show through their recipes.
+- Time Bloom (Jaymo's Powers) reaches all of these clocks: `SlowFarms.hurry` and `Herds.bloom` are its hooks.
+- Built; not played.
+
+## 0.6.25 (2026-11-15): GT New Horizons picks, patch 3 - water you can't copy and cactus water
+
+- **Water you can't copy** (`climate/FiniteWater`, `FiniteWaterMixin`): two water sources make a third only in
+  rivers, oceans and swamps (`#jaymoskitchen:renews_water`: `#minecraft:is_river`, `#minecraft:is_ocean`, beaches,
+  swamp, mangrove swamp and `#c:is_swamp`, counted up to 6 blocks out so river banks and shores keep giving), or where the new source is open to the sky while it rains there. Anywhere else a
+  pool holds the water put in it, so a pond drunk dry by bottles and waterskins stays dry and a 2x2 pool is no
+  longer an endless bucket. Rain wakes a pond that settled in dry weather, so open pools refill while it rains.
+  Dynamic Waters paints the river biome down the middle of its rivers; the 6-block reach covers their banks. The game rule
+  `waterSourceConversion` still switches conversion off everywhere; lava is untouched.
+- **Cactus water** (`climate/Climate`, `climate/Thirst`): eight cacti round an empty bucket make a Bucket of Bitter
+  Water. Drunk straight from the bucket it gives 8 water but counts as unpurified (the same 35% parasite chance as a
+  pond bottle). Used on any fire that boils a bottle (campfire, firepit, bonfire, hearth, hot cooking pot or pan) it
+  becomes Boiled Cactus Water (a clearer bucket): clean, and it cools you like Clean Water. The bucket comes back.
+- JEI: the recipe shows as a crafting recipe; the bucket has an info page.
+- Built; not played.
+
+## 0.6.26 (2026-11-15): GT New Horizons picks, patch 4 - heavy soot
+
+- **Heavy soot sources** (`climate/Soot`): a lit block in the new tag `#jaymoskitchen:heavy_soot` counts 4 times over (`Soot.HEAVY`), chimney or not. It holds Jaymo's Powers' smouldering charcoal pit and brick blast furnace (both optional). Powers' coke oven counts as one ordinary lit source while it bakes.
+- Built; not played.
+
+## 0.6.27 (2026-11-15): GT New Horizons picks, patch 8 - steam and wind
+
+- **Windmill sails** (`mill/power/SailKind`, `SailItem`, `RotorEntity`): a windmill now goes up as its hub and bare spars (eight sticks round a log), and its four sails are fitted by hand: use a sail on the hub and it goes on the first bare or torn spar. Hemp (four hemp cloth and two sticks) pulls hardest and lasts 5 days of turning; wool pulls 85% and lasts 3; leather pulls 70% but lasts 8 and seldom tears; paper pulls 60%, lasts 1 and the first storm shreds it. Sails wear only while they turn (faster in a strong wind) and can tear in a thunderstorm or a gale, worn ones twice as easily; a worn sail shows holes and a torn one hangs in rags and pulls nothing. Patch a sail that has used a twentieth of its life or more with its own stuff on the hub (a quarter of its life back; with nothing to patch, a wool block or paper does what it always did) or at an anvil; a torn sail is gone: put a new one on that spar. Sneak with an empty hand on the hub to take the last sail down, as worn as it is. Breaking a windmill drops its whole sails. Dyes still colour the sails in turn.
+- **Our wind** (`mill/power/Wind`, `Rotor`): a windmill turns with the world's wind, Kingdoms' own (its storms and its ships' wind, reached by reflection) when Kingdoms is loaded, else Kitchen's day's wind (the one that carries soot). It turns faster the harder it blows, best with the wind square on its sails (either side), better the higher its hub stands over sea level (70% at sea level, full at 20 up, up to 125% at 60 up) and the more open the air before and behind it (40% boxed in). Its speed tops out where the old thunderstorm speed did.
+- **Old windmills keep working**: a windmill from an older world, and every village windmill, carries four new hemp sails. A windmill item still in someone's pack goes up bare and needs sails.
+- **Windsock** (`mill/power/WindsockBlock`, `WindsockEntity`, client `WindsockRenderer`): a pole with a red and white sock (three sticks, two sail cloth). The sock streams the way the wind blows, stands out level in a gale, hangs limp in a calm or under a roof, and ripples faster the harder it blows. No text.
+- **Small steam boiler** (`mill/steam/`): a **firebox** (bricks round iron bars) burns anything a furnace burns, as long, stoked by hand (sneak with an empty hand to rake the fuel out); lit, it glows, crackles and puts soot in the air like a furnace. A **copper boiler** (eight copper ingots round a **safety valve**) or a **bronze boiler** (the same in bronze; its recipe only loads when something is tagged `#c:ingots/bronze`, Jaymo's Powers' bronze) sits on it and is filled a bucket at a time (water bucket or Powers' clay bucket, item tag `#jaymoskitchen:boiler_water`) or by any pipe that speaks Fabric's fluid transfer (it never gives water back). The fire boils it in about 10 seconds; a **steam engine** (a **steam cylinder**, a shaft, planks and cobblestone) set beside or on top of the boiler runs on its steam and turns a shaft out of its front for the mill machines and gearbox, at about speed 1 on copper, 1.25 on bronze; a copper boiler holds 4 buckets (about 7 minutes of running), bronze 8. The higher the pressure the faster the flywheel turns; full, the safety valve lifts with a hiss and a puff of steam.
+- **Signs, not text**: the boiler's gauge glass shows the water left; hot, it ticks; boiling, it steams and bubbles; boiled dry over the fire it keeps heating and, after about 30 seconds, glows red-hot, smokes and hisses. Pour water into a red-hot boiler (by hand or pipe) and it bursts: a small explosion (copper 2, bronze 2.5; a creeper is 3) that breaks blocks only where the mob griefing rule is on, as the pack has it. Let it cool below red-hot first and it fills safely. The engine puffs and chuffs with each stroke.
+- The steam cylinder and safety valve are parts of their own, for a trader to sell.
+- Time Bloom: every clock here is a per-tick counter or rate, so extra block entity ticks just run windmills, fireboxes, boilers and engines faster.
+- JEI: a Wind page (each sail with its patch, pull, life and how often storms tear it; the windsock), a Steam page (each boiler with its fuels, its water and the engine, what it holds and how hard it drives), and a Building a Mill page (windmill: shaft, windmill, sails, windsock; steam: firebox, boiler, engine, shaft; both to a horse mill). Every new recipe shows in crafting.
+- Art: `kitchen/tools/gen_gtnh_steam.py` (vanilla textures recoloured; the hemp sail's worn and torn looks from Kitchen's sailcloth).
+- Built; not played.
