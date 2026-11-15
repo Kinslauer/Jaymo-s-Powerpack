@@ -31,6 +31,12 @@
     "jaymospowers:deepslate_tin_ore",
     "jaymospowers:raw_tin_block",
     "jaymospowers:tin_block",
-    "jaymospowers:bronze_block"
+    "jaymospowers:bronze_block",
+    "jaymospowers:small_iron_ore",
+    "jaymospowers:deepslate_small_iron_ore",
+    "jaymospowers:small_copper_ore",
+    "jaymospowers:deepslate_small_copper_ore",
+    "jaymospowers:small_tin_ore",
+    "jaymospowers:deepslate_small_tin_ore"
   ]
 }

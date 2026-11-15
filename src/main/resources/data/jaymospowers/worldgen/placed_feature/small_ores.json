@@ -1,0 +1,8 @@
+{
+  "feature": "jaymospowers:small_ores",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

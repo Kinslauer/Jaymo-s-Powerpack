@@ -180,6 +180,16 @@
     "jaymospowers:coal_coke_block",
     "jaymospowers:cracked_bricks",
     "jaymospowers:cracked_mud_bricks",
-    "jaymospowers:cracked_red_nether_bricks"
+    "jaymospowers:cracked_red_nether_bricks",
+    "jaymospowers:small_iron_ore",
+    "jaymospowers:deepslate_small_iron_ore",
+    "jaymospowers:small_copper_ore",
+    "jaymospowers:deepslate_small_copper_ore",
+    "jaymospowers:small_tin_ore",
+    "jaymospowers:deepslate_small_tin_ore",
+    "jaymospowers:small_gold_ore",
+    "jaymospowers:deepslate_small_gold_ore",
+    "jaymospowers:small_silver_ore",
+    "jaymospowers:deepslate_small_silver_ore"
   ]
 }

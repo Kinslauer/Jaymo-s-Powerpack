@@ -170,6 +170,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.FirstTools.init();
 		// Andy's GT New Horizons picks, patch 1: the Stone Age recipes (the sieve, the mortar's grinds, brick forms, clay buckets, glass)
 		com.jaymospowers.ground.StoneAge.init();
+		// Andy's GT New Horizons picks, patch 7: mixed veins and their tiny dusts, small ores, the dowsing rod
+		com.jaymospowers.ground.Ores.init();
 		// Andy's GT New Horizons picks, patch 4: the coke oven, creosote, the charcoal pit and the brick blast furnace
 		com.jaymospowers.tinkering.coke.CokeAndSteel.init();
 		// Andy's GT New Horizons picks, patch 5: the forge's dangers (hot walls, rain on the fire, cracked bricks, hot to hold)

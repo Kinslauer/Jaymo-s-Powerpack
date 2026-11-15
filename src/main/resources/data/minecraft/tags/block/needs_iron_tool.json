@@ -14,6 +14,10 @@
     "jaymospowers:star_metal_ore",
     "jaymospowers:heart_crystal_ore",
     "jaymospowers:heart_crystal_ore_deepslate",
-    "jaymospowers:cobalt_ore"
+    "jaymospowers:cobalt_ore",
+    "jaymospowers:small_gold_ore",
+    "jaymospowers:deepslate_small_gold_ore",
+    "jaymospowers:small_silver_ore",
+    "jaymospowers:deepslate_small_silver_ore"
   ]
 }

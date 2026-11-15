@@ -2,6 +2,8 @@ package com.jaymospowers.tinkering.ore;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.cauldron.CauldronBrewing;
+import com.jaymospowers.ground.Ores;
+import com.jaymospowers.tinkering.Tin;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.smeltery.Melting;
 import com.jaymospowers.tinkering.smeltery.Molten;
@@ -53,6 +55,9 @@ import org.jspecify.annotations.Nullable;
  * that rides along with it ({@link Ore#byproduct}, after GregTech's byproducts where the pack has the metal), and
  * washed ore smelts at full speed in a plain furnace, where raw and crushed ore smelt slowly
  * ({@code jaymospowers:slow_smelt}). In the smeltery crushed and washed ore melt as raw ore does.</li>
+ * <li><b>Mixed veins</b> (GTNH picks, patch 7, {@code ground/Ores}): each great vein carries streaks of a partner ore, and
+ * every ore washed has a {@link #PARTNER_CHANCE} chance, too, to give up a tiny dust of that partner ({@link Ore#partner}).
+ * Tin crushes and washes as the others do.</li>
  * </ul>
  */
 public final class OreWashing {
@@ -64,27 +69,48 @@ public final class OreWashing {
 	public static final int CAULDRON_SOAK = 40, RIVER_SOAK = 200;
 	/** The chance each washed ore gives a nugget of its byproduct. */
 	public static final float BYPRODUCT_CHANCE = 0.15F;
+	/** (GTNH picks, patch 7) The chance each washed ore gives a tiny dust of its vein's partner. */
+	public static final float PARTNER_CHANCE = 0.2F;
 	/** How often (ticks) the loaded worlds are looked over for crushed ore in running water. */
 	static final int RIVER_EVERY = 20;
 
-	/** The ores that crush and wash, what they melt into, and what rides along with them. */
+	/**
+	 * The ores that crush and wash, what they melt into, what rides along with them, and (patch 7) the tiny dust of the
+	 * partner their great vein is mixed with (the partner set in worldgen/feature/big_vein_*.json).
+	 */
 	public enum Ore {
-		IRON("iron", () -> Items.RAW_IRON, () -> Items.IRON_INGOT, () -> Items.COPPER_NUGGET, Molten.IRON),
-		COPPER("copper", () -> Items.RAW_COPPER, () -> Items.COPPER_INGOT, () -> Items.GOLD_NUGGET, Molten.COPPER),
-		GOLD("gold", () -> Items.RAW_GOLD, () -> Items.GOLD_INGOT, () -> Tinkering.SILVER_NUGGET, Molten.GOLD),
-		SILVER("silver", () -> Tinkering.RAW_SILVER, () -> Tinkering.SILVER_INGOT, () -> Items.COPPER_NUGGET, Molten.SILVER);
+		IRON("iron", () -> Items.RAW_IRON, () -> Items.IRON_INGOT, () -> Items.COPPER_NUGGET, () -> Ores.TINY_COPPER_DUST, Molten.IRON),
+		COPPER("copper", () -> Items.RAW_COPPER, () -> Items.COPPER_INGOT, () -> Items.GOLD_NUGGET, () -> Ores.TINY_TIN_DUST, Molten.COPPER),
+		GOLD("gold", () -> Items.RAW_GOLD, () -> Items.GOLD_INGOT, () -> Tinkering.SILVER_NUGGET, () -> Ores.TINY_IRON_DUST, Molten.GOLD),
+		SILVER("silver", () -> Tinkering.RAW_SILVER, () -> Tinkering.SILVER_INGOT, () -> Items.COPPER_NUGGET, () -> Ores.TINY_COPPER_DUST, Molten.SILVER),
+		TIN("tin", () -> Tin.RAW_TIN, () -> Tin.TIN_INGOT, () -> Items.IRON_NUGGET, () -> Ores.TINY_COPPER_DUST, Molten.TIN);
 
 		public final String id;
-		final Supplier<Item> raw, ingot, byproduct;
+		final Supplier<Item> raw, ingot, byproduct, partner;
 		final Molten molten;
 		public Item crushed, purified;
 
-		Ore(String id, Supplier<Item> raw, Supplier<Item> ingot, Supplier<Item> byproduct, Molten molten) {
+		Ore(String id, Supplier<Item> raw, Supplier<Item> ingot, Supplier<Item> byproduct, Supplier<Item> partner, Molten molten) {
 			this.id = id;
 			this.raw = raw;
 			this.ingot = ingot;
 			this.byproduct = byproduct;
+			this.partner = partner;
 			this.molten = molten;
+		}
+
+		public Item raw() {
+			return raw.get();
+		}
+
+		/** The nugget that now and then rides along when it's washed. */
+		public Item byproduct() {
+			return byproduct.get();
+		}
+
+		/** The tiny dust of its vein's partner, that now and then washes out of it. */
+		public @Nullable Item partner() {
+			return partner.get();
 		}
 	}
 
@@ -241,6 +267,16 @@ public final class OreWashing {
 		Item byproduct = ore.byproduct.get();
 		if (nuggets > 0 && byproduct != null) {
 			level.addFreshEntity(new ItemEntity(level, at.x, at.y, at.z, new ItemStack(byproduct, nuggets)));
+		}
+		int dusts = 0;
+		for (int i = 0; i < count; i++) {
+			if (level.getRandom().nextFloat() < PARTNER_CHANCE) {
+				dusts++;
+			}
+		}
+		Item partner = ore.partner();
+		if (dusts > 0 && partner != null) {
+			level.addFreshEntity(new ItemEntity(level, at.x, at.y, at.z, new ItemStack(partner, dusts)));
 		}
 	}
 

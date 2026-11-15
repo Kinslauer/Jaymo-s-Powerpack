@@ -19,7 +19,7 @@ import net.minecraft.world.level.ItemLike;
 final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 	/**
 	 * A recipe as JEI shows it: each input slot's choices, the result's (empty for none), the notes below, and (GTNH picks)
-	 * a byproduct beside the result (empty for none).
+	 * the byproducts beside the result, each in a slot of its own (empty for none; at most {@link #MAX_BYPRODUCTS}).
 	 */
 	record Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes, List<ItemStack> byproduct) {
 		Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes) {
@@ -27,8 +27,8 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 		}
 	}
 
-	static final int MAX_INPUTS = 5;
-	private static final int SLOT = 18, ARROW = 24, TEXT_LINE = 10, WIDTH = SLOT * MAX_INPUTS + 4 + ARROW + 4 + SLOT + 40;
+	static final int MAX_INPUTS = 5, MAX_BYPRODUCTS = 2;
+	private static final int SLOT = 18, ARROW = 24, TEXT_LINE = 10, WIDTH = SLOT * MAX_INPUTS + 4 + ARROW + 4 + SLOT + 2 + MAX_BYPRODUCTS * (SLOT + 2);
 
 	private final IRecipeType<Recipe> type;
 	private final Component title;
@@ -76,8 +76,8 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 		if (!recipe.output().isEmpty()) {
 			builder.addOutputSlot(outputX(), 1).setOutputSlotBackground().addItemStacks(recipe.output());
 		}
-		if (!recipe.byproduct().isEmpty()) {
-			builder.addOutputSlot(outputX() + SLOT + 2, 1).setOutputSlotBackground().addItemStacks(recipe.byproduct());
+		for (int i = 0; i < recipe.byproduct().size() && i < MAX_BYPRODUCTS; i++) {
+			builder.addOutputSlot(outputX() + (i + 1) * (SLOT + 2), 1).setOutputSlotBackground().addItemStacks(List.of(recipe.byproduct().get(i)));
 		}
 	}
 

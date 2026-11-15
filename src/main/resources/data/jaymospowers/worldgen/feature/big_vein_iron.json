@@ -2,5 +2,11 @@
   "type": "jaymospowers:big_vein",
   "ore": "minecraft:iron_ore",
   "size": 90,
-  "deep": "minecraft:deepslate_iron_ore"
+  "deep": "minecraft:deepslate_iron_ore",
+  "partner": "minecraft:copper_ore",
+  "partner_deep": "minecraft:deepslate_copper_ore",
+  "small": "jaymospowers:small_iron_ore",
+  "small_deep": "jaymospowers:deepslate_small_iron_ore",
+  "small_partner": "jaymospowers:small_copper_ore",
+  "small_partner_deep": "jaymospowers:deepslate_small_copper_ore"
 }

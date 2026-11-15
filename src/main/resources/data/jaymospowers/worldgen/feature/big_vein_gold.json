@@ -2,5 +2,11 @@
   "type": "jaymospowers:big_vein",
   "ore": "minecraft:gold_ore",
   "size": 60,
-  "deep": "minecraft:deepslate_gold_ore"
+  "deep": "minecraft:deepslate_gold_ore",
+  "partner": "minecraft:iron_ore",
+  "partner_deep": "minecraft:deepslate_iron_ore",
+  "small": "jaymospowers:small_gold_ore",
+  "small_deep": "jaymospowers:deepslate_small_gold_ore",
+  "small_partner": "jaymospowers:small_iron_ore",
+  "small_partner_deep": "jaymospowers:deepslate_small_iron_ore"
 }

@@ -1,0 +1,12 @@
+{
+  "type": "jaymospowers:hammer_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:raw_tin",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:crushed_tin_ore",
+    "count": 1
+  }
+}

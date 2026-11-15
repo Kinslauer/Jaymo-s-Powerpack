@@ -1,6 +1,8 @@
 {
   "values": [
     "jaymospowers:silver_ore",
-    "jaymospowers:deepslate_silver_ore"
+    "jaymospowers:deepslate_silver_ore",
+    "jaymospowers:small_silver_ore",
+    "jaymospowers:deepslate_small_silver_ore"
   ]
 }
