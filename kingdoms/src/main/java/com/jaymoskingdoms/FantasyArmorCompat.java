@@ -151,7 +151,7 @@ public final class FantasyArmorCompat {
 		int n = 0;
 		for (int i = 0; i < SLOTS.length; i++) {
 			Optional<Item> piece = piece(set, i);
-			if (piece.isPresent() && e.getItemBySlot(SLOTS[i]).is(piece.get())) {
+			if (piece.isPresent() && e.getItemBySlot(SLOTS[i]).is(piece.get()) && !e.getItemBySlot(SLOTS[i]).isBroken()) {
 				n++;
 			}
 		}

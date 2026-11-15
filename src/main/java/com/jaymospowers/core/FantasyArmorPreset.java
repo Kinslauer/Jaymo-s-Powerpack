@@ -24,15 +24,15 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
  * Its durability is on too (Andy, 2026-11-15: "turn on durability. but still nothing breaks, it becomes useless and
  * requires repair"): {@code enableDurability} is switched on, and each piece's durability in
  * {@code config/fantasy_armor-attributes.json} is set to {@link #DURABILITY} of Fantasy Armor's own, the share every
- * other armour keeps ({@link ArmourWear#DURABILITY}; Fantasy Armor sets its own number on each piece, so the item-wide
- * cut doesn't reach them). A piece someone gave another number keeps it. A worn-out piece stays on doing nothing until
+ * other armour keeps ({@link ArmourWear#DURABILITY}; Fantasy Armor sets its own number on each piece, so {@link ArmourWear}
+ * leaves its items out of the item-wide cut). A piece someone gave another number keeps it. A worn-out piece stays on doing nothing until
  * repaired ({@link ArmourWear}), and a set with one gives no set effects ({@code FantasyArmorSetMixin}).
  */
 public final class FantasyArmorPreset implements PreLaunchEntrypoint {
 	/** Bump to switch the descriptions off again. */
 	private static final String MARKER = "jaymospowers-fantasy-armor-preset-v2";
-	/** Share of Fantasy Armor's own durability each piece gets (as {@link ArmourWear#DURABILITY}, not read from it: this runs before Minecraft's classes may load). */
-	static final double DURABILITY = 0.3;
+	/** Share of Fantasy Armor's own durability each piece gets (a constant, so reading it loads nothing). */
+	static final double DURABILITY = ArmourWear.DURABILITY;
 	/** Fantasy Armor 1.3's own defaults, with its descriptions off. */
 	private static final String DEFAULTS = """
 		{
@@ -71,13 +71,20 @@ public final class FantasyArmorPreset implements PreLaunchEntrypoint {
 				matcher = WEAR.matcher(text);
 				if (matcher.find()) {
 					text = matcher.replaceFirst("$1true");
+				} else if (!text.contains("\"enableDurability\"")) {
+					text = text.replaceFirst("\\{", "{\n  \"enableDurability\": true,");
 				}
 				Files.writeString(config, text);
 			} else {
 				Files.createDirectories(config.getParent());
 				Files.writeString(config, DEFAULTS);
 			}
-			wear(loader);
+			try {
+				wear(loader);
+			} catch (RuntimeException e) {
+				// (a hand-edited attributes file it can't read: left as it is)
+				com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't set Fantasy Armor's durability in its attributes config", e);
+			}
 			Files.writeString(marker, "Jaymo's Powers switched Fantasy Armor's tooltip descriptions off and its durability on. Delete this file to do it again.\n");
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't set Fantasy Armor's descriptions and durability in {}", config, e);
