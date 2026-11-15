@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: working
 task: Andy (Claude app, 2026-11-15): Epic Fight style combat animations for players, humanoid mobs and bosses
 branch: claude/combat-animations-trial
 with: 
@@ -30,11 +30,10 @@ and the fuller write-up from source in the Claude project: "Epic Fight animation
   top of it, not a second combat system.
 
 ## Notes
-- Blocked on Andy, three questions asked in the thread: who animates (a person in the tools, or keyframes by script as
-  `tools/combat_animations.py` does today); whether the Blender route should replace blocky limbs with a smooth
-  weighted body; whether longsword is the right trial weapon.
-- This cloud session cannot build: no JDK 25 and Gradle cannot be downloaded here. Code goes up as a PR and the PR
-  checks compile it. Nothing can be played from here.
+- Andy answered (2026-11-15): Claude animates, with Blender run headless by script; keep the blocky body (no weighted
+  mesh) on both routes; longsword. So the Blender route is the blocky rig keyed in Blender and exported, not a new body.
+- The new cloud session builds: JDK 25 (Temurin, /opt/jdk25) and `./gradlew build` pass; Blender 5.3 at /opt/blender-5.3.0-linux-x64.
+  Nothing can be played from here: Andy judges the two routes in game.
 - No new thing in the world, so no new lore. Movesets follow the schools' styles already in Lore.md (Still Water for
   the longsword trial).
 
