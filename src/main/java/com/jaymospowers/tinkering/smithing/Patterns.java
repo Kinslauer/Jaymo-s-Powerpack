@@ -74,9 +74,9 @@ public final class Patterns {
 	public static ItemStack pattern(ItemStack piece, String shape) {
 		Grade grade = Grades.of(piece);
 		ItemStack pattern = Blueprints.stack(shape, Blueprints.xpOf(grade == null ? Grade.WELL : grade.lower()));
-		// (medieval picks) a captured pattern: it lets its holder forge another realm's design (RealmPatterns)
-		pattern.set(RealmPatterns.CAPTURED, true);
-		return pattern;
+		// (medieval picks) a realm's marked piece gives a captured pattern: it lets its holder forge that realm's version (RealmPatterns)
+		String realm = piece.get(RealmPatterns.REALM_DESIGN);
+		return realm == null ? pattern : RealmPatterns.capture(pattern, realm);
 	}
 
 	/** {@code smith} uses a Drafting Table with {@code piece} (which has a shape) in hand. */

@@ -183,6 +183,76 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (medieval picks) Powers' {@code RealmPatterns}: {@code mark}, {@code warArm}, {@code warArms} and {@code patternOf}. */
+	private static java.lang.invoke.@Nullable MethodHandle realmMark, realmArm, realmArms, realmPattern;
+	private static boolean lookedForRealms;
+	private static java.util.@Nullable List<String> warArms;
+
+	private static void lookForRealms() {
+		if (lookedForRealms) {
+			return;
+		}
+		lookedForRealms = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> realms = Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns");
+			var lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> stack = net.minecraft.world.item.ItemStack.class;
+			realmMark = lookup.findStatic(realms, "mark", java.lang.invoke.MethodType.methodType(stack, stack, String.class));
+			realmArm = lookup.findStatic(realms, "warArm", java.lang.invoke.MethodType.methodType(stack, String.class, String.class));
+			realmArms = lookup.findStatic(realms, "warArms", java.lang.invoke.MethodType.methodType(java.util.List.class));
+			realmPattern = lookup.findStatic(realms, "patternOf", java.lang.invoke.MethodType.methodType(stack, stack));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' realm designs", e);
+		}
+	}
+
+	/** {@code stack} made the realm's make (a realm tag, {@link HeraldryWear#realmTag}); unchanged without Powers. */
+	static net.minecraft.world.item.ItemStack realmMarked(net.minecraft.world.item.ItemStack stack, String realm) {
+		lookForRealms();
+		try {
+			return realmMark == null ? stack : (net.minecraft.world.item.ItemStack) realmMark.invoke(stack, realm);
+		} catch (Throwable e) {
+			return stack;
+		}
+	}
+
+	/** A finished war arm with this head (a weapon part), the realm's make; empty without Powers or its weapon. */
+	static net.minecraft.world.item.ItemStack realmArm(String part, String realm) {
+		lookForRealms();
+		try {
+			return realmArm == null ? net.minecraft.world.item.ItemStack.EMPTY : (net.minecraft.world.item.ItemStack) realmArm.invoke(part, realm);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** The weapon heads a realm may keep as its war arm (those whose weapons are in the game), or none without Powers. */
+	@SuppressWarnings("unchecked")
+	static java.util.List<String> realmArms() {
+		lookForRealms();
+		if (warArms == null) {
+			try {
+				warArms = realmArms == null ? java.util.List.of() : java.util.List.copyOf((java.util.List<String>) realmArms.invoke());
+			} catch (Throwable e) {
+				warArms = java.util.List.of();
+			}
+		}
+		return warArms;
+	}
+
+	/** The captured pattern a realm's marked piece gives, or empty (not one, or no Powers). */
+	static net.minecraft.world.item.ItemStack realmPattern(net.minecraft.world.item.ItemStack piece) {
+		lookForRealms();
+		try {
+			return realmPattern == null ? net.minecraft.world.item.ItemStack.EMPTY : (net.minecraft.world.item.ItemStack) realmPattern.invoke(piece);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
 	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
 	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
 	private static boolean lookedForClash;
@@ -2902,11 +2972,15 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the harness (older Powers?)", e);
 		}
-		// (medieval picks) whose a realm's designs are (RealmPatterns.sworn), and who knows each people's steel (RealmSteels.knows)
+		// (medieval picks) which realm each smith is sworn to and which designs a realm keeps (RealmPatterns.sworn, .keeps),
+		// and who knows each people's steel (RealmSteels.knows)
 		try {
-			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> sworn =
-				(p, shape) -> HeraldryWear.mayForge(p.level().getServer(), p.getUUID(), shape);
-			Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns").getField("sworn").set(null, sworn);
+			java.util.function.Function<net.minecraft.server.level.ServerPlayer, String> sworn =
+				p -> HeraldryWear.sworn(p.level().getServer(), p.getUUID());
+			java.util.function.BiPredicate<String, String> keeps = HeraldryWear::keeps;
+			Class<?> realms = Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns");
+			realms.getField("sworn").set(null, sworn);
+			realms.getField("keeps").set(null, keeps);
 			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> knows = PowersCompat::knowsSteel;
 			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("knows").set(null, knows);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {

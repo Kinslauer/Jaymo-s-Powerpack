@@ -3,6 +3,7 @@ package com.jaymospowers.client.combat;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -17,6 +18,8 @@ import net.minecraft.client.resources.palette.PalettedTextureManager;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.trim.ArmorTrim;
@@ -31,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class NetheriteShieldRenderer implements SpecialModelRenderer<DataComponentMap> {
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/netherite_shield.png");
-	/** Whether each trim decal exists (looked up once). */
+	/** Whether each trim decal exists (looked up once per resource reload). */
 	private static final Map<Identifier, Boolean> DECALS = new HashMap<>();
 
 	private final ShieldModel model;
@@ -42,6 +45,9 @@ public class NetheriteShieldRenderer implements SpecialModelRenderer<DataCompone
 
 	public static void init() {
 		SpecialModelRenderers.ID_MAPPER.put(JaymosPowers.id("netherite_shield"), Unbaked.MAP_CODEC);
+		// a resource pack can add or take away decals: look them up again after each reload
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(JaymosPowers.id("netherite_shield_decals"),
+			(ResourceManagerReloadListener) manager -> DECALS.clear());
 	}
 
 	@Override

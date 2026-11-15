@@ -167,7 +167,10 @@ public final class ShieldCraft {
 		}
 		projectile.setYRot((float) (Math.atan2(aim.x, aim.z) * (180.0 / Math.PI)));
 		projectile.setXRot((float) (Math.atan2(aim.y, aim.horizontalDistance()) * (180.0 / Math.PI)));
-		projectile.setOwner(player);
+		if (!(projectile instanceof net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl)) {
+			// (a pearl stays its thrower's, or the parrier would be the one carried to where it lands)
+			projectile.setOwner(player);
+		}
 		projectile.needsSync = true;
 		ServerLevel level = player.level();
 		level.playSound(null, projectile.getX(), projectile.getY(), projectile.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 1.4F);

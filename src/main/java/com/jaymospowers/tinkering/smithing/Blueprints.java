@@ -158,10 +158,8 @@ public final class Blueprints {
 		}
 		ItemStack copy = stack(data.shape(), xpOf(data.level().lower()));
 		// (medieval picks) a copy of a captured pattern is captured too (RealmPatterns)
-		if (Boolean.TRUE.equals(blueprint.get(RealmPatterns.CAPTURED))) {
-			copy.set(RealmPatterns.CAPTURED, true);
-		}
-		return copy;
+		String realm = blueprint.get(RealmPatterns.REALM_DESIGN);
+		return realm == null ? copy : RealmPatterns.capture(copy, realm);
 	}
 
 	/** The highest-level blueprint for this forging's shape anywhere on the smith, or null. */

@@ -171,7 +171,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 		}
 		Component refusal = refuse(player, option);
 		if (refusal != null) {
-			player.sendOverlayMessage(refusal);
+			tell(player, refusal);
 			return;
 		}
 		smith = player.getUUID();
@@ -191,16 +191,33 @@ public class SmithingAnvilEntity extends BlockEntity {
 			Component why = refuse(player, option);
 			if (why == null) {
 				choices.add(new SmithingNet.Choice(option.id(), option.result(), option.ingots()));
-			} else if (refusal == null && !FrontierForging.is(option) && !RealmPatterns.claimable(option)) {
-				// (a set whose schematic the smith hasn't got, or another realm's design, is simply not on offer)
+				// (medieval picks) and the realm's own version, for a smith sworn to it or holding its captured pattern (RealmPatterns)
+				for (String realm : RealmPatterns.realms(player, option)) {
+					choices.add(new SmithingNet.Choice(option.id() + RealmPatterns.MARK + realm, RealmPatterns.mark(option.result().copy(), realm),
+						option.ingots()));
+				}
+			} else if (refusal == null && !FrontierForging.is(option)) {
+				// (a set whose schematic the smith hasn't got is simply not on offer)
 				refusal = why;
 			}
 		}
 		if (choices.isEmpty()) {
-			player.sendOverlayMessage(refusal != null ? refusal : Component.translatable("message.jaymospowers.smithing.nothing"));
+			tell(player, refusal != null ? refusal : Component.translatable("message.jaymospowers.smithing.nothing"));
 			return;
 		}
 		ServerPlayNetworking.send(player, new SmithingNet.OpenForge(worldPosition, choices));
+	}
+
+	/** A refusal: in words, or for {@link Forging#DULL} only a dull clank and a puff of smoke off the anvil. */
+	private void tell(ServerPlayer player, Component why) {
+		if (why != Forging.DULL) {
+			player.sendOverlayMessage(why);
+			return;
+		}
+		ServerLevel server = (ServerLevel) level;
+		server.playSound(null, worldPosition, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3F, 0.5F);
+		server.sendParticles(ParticleTypes.SMOKE, worldPosition.getX() + 0.5, worldPosition.getY() + 1.05, worldPosition.getZ() + 0.5, 4,
+			0.12, 0.02, 0.12, 0.005);
 	}
 
 	private @Nullable Component refuse(ServerPlayer player, Forging.Option option) {
@@ -215,9 +232,12 @@ public class SmithingAnvilEntity extends BlockEntity {
 
 	/** The smith chose what to make: the ingots it takes become a forging blank, the rest go back to them. */
 	public void choose(ServerPlayer player, String id) {
-		Forging.Option option = Forging.byId(id);
+		// (medieval picks) a realm's version: the option's id, then its realm (RealmPatterns)
+		int mark = id.indexOf(RealmPatterns.MARK);
+		String design = mark < 0 ? null : id.substring(mark + RealmPatterns.MARK.length());
+		Forging.Option option = Forging.byId(mark < 0 ? id : id.substring(0, mark));
 		long now = now();
-		if (option == null || !work.is(Smithing.HOT_INGOT) || !HotMetal.hot(work, now) || RealmSteels.forgesAs(HotMetal.metal(work)) != option.metal()
+		if (option == null || design != null && !RealmPatterns.realms(player, option).contains(design) || !work.is(Smithing.HOT_INGOT) || !HotMetal.hot(work, now) || RealmSteels.forgesAs(HotMetal.metal(work)) != option.metal()
 			|| work.getCount() < option.ingots() || refuse(player, option) != null || !result.isEmpty()) {
 			return;
 		}
@@ -234,6 +254,9 @@ public class SmithingAnvilEntity extends BlockEntity {
 		Molten realm = RealmSteels.of(work);
 		if (realm != null) {
 			blank.set(RealmSteels.REALM_STEEL, realm.id);
+		}
+		if (design != null) {
+			blank.set(RealmPatterns.REALM_DESIGN, design);
 		}
 		work = blank;
 		smith = player.getUUID();
@@ -260,7 +283,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 		// the rules hold for every blow, not just the first (a steel forging can't be finished with a copper hammer)
 		Component why = refuse(player, option);
 		if (why != null) {
-			player.sendOverlayMessage(why);
+			tell(player, why);
 			sendSession(player, progress, option);
 			return;
 		}
