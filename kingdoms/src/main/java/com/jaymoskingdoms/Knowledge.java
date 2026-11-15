@@ -109,6 +109,10 @@ public final class Knowledge {
 			return END_PORTAL;
 		}
 		var id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+		// (medieval picks) Jaymo's Powers' Inscription Table carves enchantments, so it wants what the enchanting table does
+		if (id.getNamespace().equals("jaymospowers") && id.getPath().equals("inscription_table")) {
+			return ENCHANTING;
+		}
 		// Jaymo's Tinkering's iron Smithing Anvil (the Stone Anvil stays open)
 		return id.getNamespace().equals("jaymospowers") && id.getPath().equals("smithing_anvil") ? ANVILS : 0;
 	}

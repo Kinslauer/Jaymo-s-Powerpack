@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:nest_silk",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:shed_skin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:egg_sac",
+      "required": false
+    }
+  ]
+}

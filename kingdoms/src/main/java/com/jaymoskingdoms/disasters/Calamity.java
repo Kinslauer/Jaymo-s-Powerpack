@@ -11,7 +11,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
  */
 public final class Calamity {
 	public static final int SANDSTORM = 0, BLIZZARD = 1, HAIL = 2, QUAKE = 3;
-	public static final String[] NAMES = {"sandstorm", "blizzard", "hail", "quake"};
+	/** (Medieval picks, nd-signs) The signs before a disaster: a faint trembling, a darker sky, distant rumbles
+	 * ({@link Signs}). (nd-volcano) The ash a waking volcano throws over the land round it ({@link Volcanoes}). */
+	public static final int SIGN = 4, ASH = 5;
+	public static final String[] NAMES = {"sandstorm", "blizzard", "hail", "quake", "sign", "ash"};
 
 	public final int id;
 	public final int kind;
@@ -20,6 +23,8 @@ public final class Calamity {
 	public int age, life;
 	/** A hail shower's thunderstorm (its id), which it rides under; -1 for the rest. */
 	public final int storm;
+	/** (Medieval picks, nd-tiers) Its strength, minor (1) to catastrophic (5): {@link Magnitude}. */
+	public int magnitude = Magnitude.MODERATE;
 
 	public Calamity(int id, int kind, double x, double z, double vx, double vz, float radius, int age, int life, int storm) {
 		this.id = id;
@@ -36,7 +41,7 @@ public final class Calamity {
 
 	/** How built up it is, 0..1: it gathers over its first {@link Calamities#GATHER_TICKS} and dies down over its last. */
 	public float strength() {
-		float gather = kind == QUAKE ? Earthquakes.GATHER : Calamities.GATHER_TICKS;
+		float gather = kind == QUAKE ? Earthquakes.GATHER : kind == SIGN ? Signs.GATHER : Calamities.GATHER_TICKS;
 		float in = Math.min(1.0F, age / gather);
 		float out = Math.min(1.0F, Math.max(0, life - age) / gather);
 		return Math.max(0.0F, Math.min(in, out));
@@ -68,10 +73,19 @@ public final class Calamity {
 		buf.writeVarInt(age);
 		buf.writeVarInt(life);
 		buf.writeVarInt(storm);
+		buf.writeVarInt(magnitude);
 	}
 
 	static Calamity read(RegistryFriendlyByteBuf buf) {
-		return new Calamity(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat(),
+		Calamity c = new Calamity(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat(),
 			buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
+		c.magnitude = buf.readVarInt();
+		return c;
+	}
+
+	/** With strength {@code m} ({@link Magnitude}). */
+	Calamity magnitude(int m) {
+		this.magnitude = Magnitude.clamp(m);
+		return this;
 	}
 }

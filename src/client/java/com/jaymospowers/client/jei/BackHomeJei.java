@@ -70,6 +70,8 @@ public final class BackHomeJei implements IModPlugin {
 		registration.addIngredientInfo(BackHome.VERDANT_FRUIT, Component.translatable("jei.jaymospowers.found.verdant_fruit"));
 		registration.addIngredientInfo(BackHome.GLACIA_SALT, Component.translatable("jei.jaymospowers.found.glacia_salt"));
 		registration.addIngredientInfo(Tinkering.STAR_METAL_ORE, Component.translatable("jei.jaymospowers.found.star_metal_ore"));
+		registration.addIngredientInfo(Tinkering.METEORIC_IRON_HEART, Component.translatable("jei.jaymospowers.found.meteoric_iron_heart"));
+		registration.addIngredientInfo(Tinkering.METEORIC_IRON, Component.translatable("jei.jaymospowers.found.meteoric_iron"));
 		SimpleCategory.addRecipes(registration, LENS, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(BackHome.STARLIT_LENS)), List.of(PodParts.itemOf(PodPart.MAST, false))),
 			List.of(PodParts.itemOf(PodPart.MAST, false)), List.of(Component.translatable("jei.jaymospowers.star_lens.how"), Component.translatable("jei.jaymospowers.star_lens.shows")))));
 	}

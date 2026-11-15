@@ -1903,6 +1903,2118 @@
 			}
 		]
 	},
+	"foe_theme.ruler_sunstep.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/drone_a"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/drone_b"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/pulse_a"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/pulse_b"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/motif_a"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/motif_b"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/motif_c"
+			}
+		]
+	},
+	"foe_theme.ruler_sunstep.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_sunstep/stab"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/drone_a"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/drone_b"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/pulse_a"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/pulse_b"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/motif_a"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/motif_b"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/motif_c"
+			}
+		]
+	},
+	"foe_theme.ruler_pillared.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_pillared/stab"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/drone_a"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/drone_b"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/pulse_a"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/pulse_b"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/motif_a"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/motif_b"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/motif_c"
+			}
+		]
+	},
+	"foe_theme.ruler_mound.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_mound/stab"
+			}
+		]
+	},
+	"foe_theme.ruler_court.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/drone_a"
+			}
+		]
+	},
+	"foe_theme.ruler_court.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/drone_b"
+			}
+		]
+	},
+	"foe_theme.ruler_court.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/pulse_a"
+			}
+		]
+	},
+	"foe_theme.ruler_court.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/pulse_b"
+			}
+		]
+	},
+	"foe_theme.ruler_court.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/motif_a"
+			}
+		]
+	},
+	"foe_theme.ruler_court.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/motif_b"
+			}
+		]
+	},
+	"foe_theme.ruler_court.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/motif_c"
+			}
+		]
+	},
+	"foe_theme.ruler_court.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/ruler_court/stab"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_hearthkeeper.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_hearthkeeper/stab"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_anvil_father.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_anvil_father/stab"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_deep_mother.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_deep_mother/stab"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_green_huntsman.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_green_huntsman/stab"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_lantern_warden.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_lantern_warden/stab"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_crowned_sun.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_crowned_sun/stab"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_ash_whisperer.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_ash_whisperer/stab"
+			}
+		]
+	},
+	"foe_theme.champion_truth.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/drone_a"
+			}
+		]
+	},
+	"foe_theme.champion_truth.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/drone_b"
+			}
+		]
+	},
+	"foe_theme.champion_truth.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/pulse_a"
+			}
+		]
+	},
+	"foe_theme.champion_truth.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/pulse_b"
+			}
+		]
+	},
+	"foe_theme.champion_truth.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/motif_a"
+			}
+		]
+	},
+	"foe_theme.champion_truth.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/motif_b"
+			}
+		]
+	},
+	"foe_theme.champion_truth.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/motif_c"
+			}
+		]
+	},
+	"foe_theme.champion_truth.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/champion_truth/stab"
+			}
+		]
+	},
+	"foe_theme.brood_queen.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/drone_a"
+			}
+		]
+	},
+	"foe_theme.brood_queen.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/drone_b"
+			}
+		]
+	},
+	"foe_theme.brood_queen.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/pulse_a"
+			}
+		]
+	},
+	"foe_theme.brood_queen.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/pulse_b"
+			}
+		]
+	},
+	"foe_theme.brood_queen.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/motif_a"
+			}
+		]
+	},
+	"foe_theme.brood_queen.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/motif_b"
+			}
+		]
+	},
+	"foe_theme.brood_queen.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/motif_c"
+			}
+		]
+	},
+	"foe_theme.brood_queen.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/brood_queen/stab"
+			}
+		]
+	},
+	"foe_theme.snow_widow.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/drone_a"
+			}
+		]
+	},
+	"foe_theme.snow_widow.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/drone_b"
+			}
+		]
+	},
+	"foe_theme.snow_widow.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/pulse_a"
+			}
+		]
+	},
+	"foe_theme.snow_widow.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/pulse_b"
+			}
+		]
+	},
+	"foe_theme.snow_widow.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/motif_a"
+			}
+		]
+	},
+	"foe_theme.snow_widow.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/motif_b"
+			}
+		]
+	},
+	"foe_theme.snow_widow.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/motif_c"
+			}
+		]
+	},
+	"foe_theme.snow_widow.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/snow_widow/stab"
+			}
+		]
+	},
+	"foe_theme.unburied.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/drone_a"
+			}
+		]
+	},
+	"foe_theme.unburied.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/drone_b"
+			}
+		]
+	},
+	"foe_theme.unburied.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/pulse_a"
+			}
+		]
+	},
+	"foe_theme.unburied.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/pulse_b"
+			}
+		]
+	},
+	"foe_theme.unburied.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/motif_a"
+			}
+		]
+	},
+	"foe_theme.unburied.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/motif_b"
+			}
+		]
+	},
+	"foe_theme.unburied.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/motif_c"
+			}
+		]
+	},
+	"foe_theme.unburied.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/unburied/stab"
+			}
+		]
+	},
+	"foe_theme.necromancer.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/drone_a"
+			}
+		]
+	},
+	"foe_theme.necromancer.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/drone_b"
+			}
+		]
+	},
+	"foe_theme.necromancer.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/pulse_a"
+			}
+		]
+	},
+	"foe_theme.necromancer.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/pulse_b"
+			}
+		]
+	},
+	"foe_theme.necromancer.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/motif_a"
+			}
+		]
+	},
+	"foe_theme.necromancer.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/motif_b"
+			}
+		]
+	},
+	"foe_theme.necromancer.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/motif_c"
+			}
+		]
+	},
+	"foe_theme.necromancer.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/necromancer/stab"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/drone_a"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/drone_b"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/pulse_a"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/pulse_b"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/motif_a"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/motif_b"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/motif_c"
+			}
+		]
+	},
+	"foe_theme.fortress_knight.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/fortress_knight/stab"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/drone_a"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/drone_b"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/pulse_a"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/pulse_b"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/motif_a"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/motif_b"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/motif_c"
+			}
+		]
+	},
+	"foe_theme.kingdom_ruler.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/kingdom_ruler/stab"
+			}
+		]
+	},
+	"foe_theme.grave_captain.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/drone_a"
+			}
+		]
+	},
+	"foe_theme.grave_captain.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/drone_b"
+			}
+		]
+	},
+	"foe_theme.grave_captain.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/pulse_a"
+			}
+		]
+	},
+	"foe_theme.grave_captain.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/pulse_b"
+			}
+		]
+	},
+	"foe_theme.grave_captain.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/motif_a"
+			}
+		]
+	},
+	"foe_theme.grave_captain.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/motif_b"
+			}
+		]
+	},
+	"foe_theme.grave_captain.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/motif_c"
+			}
+		]
+	},
+	"foe_theme.grave_captain.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grave_captain/stab"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/drone_a"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/drone_b"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/pulse_a"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/pulse_b"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/motif_a"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/motif_b"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/motif_c"
+			}
+		]
+	},
+	"foe_theme.illager_warlord.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/illager_warlord/stab"
+			}
+		]
+	},
+	"foe_theme.quest_champion.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/drone_a"
+			}
+		]
+	},
+	"foe_theme.quest_champion.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/drone_b"
+			}
+		]
+	},
+	"foe_theme.quest_champion.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/pulse_a"
+			}
+		]
+	},
+	"foe_theme.quest_champion.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/pulse_b"
+			}
+		]
+	},
+	"foe_theme.quest_champion.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/motif_a"
+			}
+		]
+	},
+	"foe_theme.quest_champion.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/motif_b"
+			}
+		]
+	},
+	"foe_theme.quest_champion.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/motif_c"
+			}
+		]
+	},
+	"foe_theme.quest_champion.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/quest_champion/stab"
+			}
+		]
+	},
+	"foe_theme.warchief.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/drone_a"
+			}
+		]
+	},
+	"foe_theme.warchief.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/drone_b"
+			}
+		]
+	},
+	"foe_theme.warchief.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/pulse_a"
+			}
+		]
+	},
+	"foe_theme.warchief.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/pulse_b"
+			}
+		]
+	},
+	"foe_theme.warchief.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/motif_a"
+			}
+		]
+	},
+	"foe_theme.warchief.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/motif_b"
+			}
+		]
+	},
+	"foe_theme.warchief.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/motif_c"
+			}
+		]
+	},
+	"foe_theme.warchief.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/warchief/stab"
+			}
+		]
+	},
+	"foe_theme.outlaw.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/drone_a"
+			}
+		]
+	},
+	"foe_theme.outlaw.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/drone_b"
+			}
+		]
+	},
+	"foe_theme.outlaw.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/pulse_a"
+			}
+		]
+	},
+	"foe_theme.outlaw.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/pulse_b"
+			}
+		]
+	},
+	"foe_theme.outlaw.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/motif_a"
+			}
+		]
+	},
+	"foe_theme.outlaw.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/motif_b"
+			}
+		]
+	},
+	"foe_theme.outlaw.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/motif_c"
+			}
+		]
+	},
+	"foe_theme.outlaw.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/outlaw/stab"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/drone_a"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/drone_b"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/pulse_a"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/pulse_b"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/motif_a"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/motif_b"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/motif_c"
+			}
+		]
+	},
+	"foe_theme.skeleton_lord.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/skeleton_lord/stab"
+			}
+		]
+	},
+	"foe_theme.grue.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/drone_a"
+			}
+		]
+	},
+	"foe_theme.grue.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/drone_b"
+			}
+		]
+	},
+	"foe_theme.grue.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/pulse_a"
+			}
+		]
+	},
+	"foe_theme.grue.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/pulse_b"
+			}
+		]
+	},
+	"foe_theme.grue.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/motif_a"
+			}
+		]
+	},
+	"foe_theme.grue.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/motif_b"
+			}
+		]
+	},
+	"foe_theme.grue.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/motif_c"
+			}
+		]
+	},
+	"foe_theme.grue.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/grue/stab"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/drone_a"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/drone_b"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/pulse_a"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/pulse_b"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/motif_a"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/motif_b"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/motif_c"
+			}
+		]
+	},
+	"foe_theme.pirate_captain.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/pirate_captain/stab"
+			}
+		]
+	},
+	"foe_theme.death_knight.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/drone_a"
+			}
+		]
+	},
+	"foe_theme.death_knight.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/drone_b"
+			}
+		]
+	},
+	"foe_theme.death_knight.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/pulse_a"
+			}
+		]
+	},
+	"foe_theme.death_knight.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/pulse_b"
+			}
+		]
+	},
+	"foe_theme.death_knight.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/motif_a"
+			}
+		]
+	},
+	"foe_theme.death_knight.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/motif_b"
+			}
+		]
+	},
+	"foe_theme.death_knight.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/motif_c"
+			}
+		]
+	},
+	"foe_theme.death_knight.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/death_knight/stab"
+			}
+		]
+	},
+	"foe_theme.raid_king.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/drone_a"
+			}
+		]
+	},
+	"foe_theme.raid_king.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/drone_b"
+			}
+		]
+	},
+	"foe_theme.raid_king.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/pulse_a"
+			}
+		]
+	},
+	"foe_theme.raid_king.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/pulse_b"
+			}
+		]
+	},
+	"foe_theme.raid_king.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/motif_a"
+			}
+		]
+	},
+	"foe_theme.raid_king.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/motif_b"
+			}
+		]
+	},
+	"foe_theme.raid_king.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/motif_c"
+			}
+		]
+	},
+	"foe_theme.raid_king.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/raid_king/stab"
+			}
+		]
+	},
+	"foe_theme.clockwork.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/drone_a"
+			}
+		]
+	},
+	"foe_theme.clockwork.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/drone_b"
+			}
+		]
+	},
+	"foe_theme.clockwork.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/pulse_a"
+			}
+		]
+	},
+	"foe_theme.clockwork.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/pulse_b"
+			}
+		]
+	},
+	"foe_theme.clockwork.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/motif_a"
+			}
+		]
+	},
+	"foe_theme.clockwork.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/motif_b"
+			}
+		]
+	},
+	"foe_theme.clockwork.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/motif_c"
+			}
+		]
+	},
+	"foe_theme.clockwork.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/clockwork/stab"
+			}
+		]
+	},
+	"foe_theme.piglin_king.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/drone_a"
+			}
+		]
+	},
+	"foe_theme.piglin_king.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/drone_b"
+			}
+		]
+	},
+	"foe_theme.piglin_king.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/pulse_a"
+			}
+		]
+	},
+	"foe_theme.piglin_king.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/pulse_b"
+			}
+		]
+	},
+	"foe_theme.piglin_king.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/motif_a"
+			}
+		]
+	},
+	"foe_theme.piglin_king.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/motif_b"
+			}
+		]
+	},
+	"foe_theme.piglin_king.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/motif_c"
+			}
+		]
+	},
+	"foe_theme.piglin_king.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/piglin_king/stab"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/drone_a"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/drone_b"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/pulse_a"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/pulse_b"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/motif_a"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/motif_b"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/motif_c"
+			}
+		]
+	},
+	"foe_theme.wreck_thing.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/wreck_thing/stab"
+			}
+		]
+	},
+	"foe_theme.sand_worm.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/drone_a"
+			}
+		]
+	},
+	"foe_theme.sand_worm.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/drone_b"
+			}
+		]
+	},
+	"foe_theme.sand_worm.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/pulse_a"
+			}
+		]
+	},
+	"foe_theme.sand_worm.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/pulse_b"
+			}
+		]
+	},
+	"foe_theme.sand_worm.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/motif_a"
+			}
+		]
+	},
+	"foe_theme.sand_worm.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/motif_b"
+			}
+		]
+	},
+	"foe_theme.sand_worm.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/motif_c"
+			}
+		]
+	},
+	"foe_theme.sand_worm.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/sand_worm/stab"
+			}
+		]
+	},
+	"foe_theme.made_brute.drone_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/drone_a"
+			}
+		]
+	},
+	"foe_theme.made_brute.drone_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/drone_b"
+			}
+		]
+	},
+	"foe_theme.made_brute.pulse_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/pulse_a"
+			}
+		]
+	},
+	"foe_theme.made_brute.pulse_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/pulse_b"
+			}
+		]
+	},
+	"foe_theme.made_brute.motif_a": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/motif_a"
+			}
+		]
+	},
+	"foe_theme.made_brute.motif_b": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/motif_b"
+			}
+		]
+	},
+	"foe_theme.made_brute.motif_c": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/motif_c"
+			}
+		]
+	},
+	"foe_theme.made_brute.stab": {
+		"subtitle": "subtitles.jaymoskingdoms.foe_theme",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:foe/made_brute/stab"
+			}
+		]
+	},
 	"impaler.attack": {
 		"subtitle": "subtitles.jaymoskingdoms.impaler.attack",
 		"sounds": [
@@ -2026,6 +4138,12 @@
 		"subtitle": "subtitles.jaymoskingdoms.film.whale_breach",
 		"sounds": [
 			"jaymoskingdoms:film/whale_breach"
+		]
+	},
+	"war_drum": {
+		"subtitle": "subtitles.jaymoskingdoms.war_drum",
+		"sounds": [
+			"jaymoskingdoms:war_drum"
 		]
 	}
 }

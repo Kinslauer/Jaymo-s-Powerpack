@@ -399,7 +399,8 @@ public final class Outfits {
 		// the crown: gold, set with the realm's gem (diamond if its own metal is gold), glinting
 		ResourceKey<TrimMaterial> gem = arms.material() == TrimMaterials.GOLD ? TrimMaterials.DIAMOND : arms.material();
 		folk.setItemSlot(EquipmentSlot.HEAD, glint(trimmed(folk, Items.GOLDEN_HELMET, arms.pattern(), gem)));
-		folk.setItemSlot(EquipmentSlot.CHEST, trimmed(folk, Items.NETHERITE_CHESTPLATE, arms.pattern(), TrimMaterials.GOLD));
+		// (gb-capes) and a cape in the realm's colours
+		folk.setItemSlot(EquipmentSlot.CHEST, Capes.cape(trimmed(folk, Items.NETHERITE_CHESTPLATE, arms.pattern(), TrimMaterials.GOLD), arms));
 		folk.setItemSlot(EquipmentSlot.LEGS, trimmed(folk, Items.NETHERITE_LEGGINGS, arms.pattern(), TrimMaterials.GOLD));
 		folk.setItemSlot(EquipmentSlot.FEET, switch (climate) {
 			case SNOWY -> dyed(Items.LEATHER_BOOTS, SNOW);
@@ -418,7 +419,7 @@ public final class Outfits {
 			default -> ItemStack.EMPTY;
 		});
 		// (0.7.631) diamond and netherite are the crown's ({@link Regalia#plate}): a lord's plate is iron
-		folk.setItemSlot(EquipmentSlot.CHEST, trimmed(folk, Items.IRON_CHESTPLATE, arms.pattern(), arms.material()));
+		folk.setItemSlot(EquipmentSlot.CHEST, Capes.cape(trimmed(folk, Items.IRON_CHESTPLATE, arms.pattern(), arms.material()), arms));
 		folk.setItemSlot(EquipmentSlot.LEGS, trimmed(folk, Items.IRON_LEGGINGS, arms.pattern(), arms.material()));
 		folk.setItemSlot(EquipmentSlot.FEET, trimmed(folk, Items.IRON_BOOTS, arms.pattern(), arms.material()));
 		folk.setItemSlot(EquipmentSlot.OFFHAND, shield(folk, arms, false));

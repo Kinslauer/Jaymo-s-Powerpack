@@ -1,0 +1,23 @@
+{
+  "entity.jaymoskingdoms.old_ruler": "Old Ruler",
+  "entity.jaymoskingdoms.old_ruler.sunstep": "The Sun-Crowned Dead",
+  "entity.jaymoskingdoms.old_ruler.pillared": "The Last Consul",
+  "entity.jaymoskingdoms.old_ruler.mound": "The Barrow-King",
+  "entity.jaymoskingdoms.old_ruler.court": "The Jade Empress",
+  "entity.jaymoskingdoms.tomb_guard": "Tomb Guard",
+  "entity.jaymoskingdoms.tomb_guard.sunstep": "Sunstep Tomb Guard",
+  "entity.jaymoskingdoms.tomb_guard.pillared": "Pillared Legionary",
+  "entity.jaymoskingdoms.tomb_guard.mound": "Mound-kin Hearth-Guard",
+  "entity.jaymoskingdoms.tomb_guard.court": "Court Sworn Blade",
+  "item.jaymoskingdoms.old_ruler_spawn_egg": "Old Ruler Spawn Egg",
+  "item.jaymoskingdoms.tomb_guard_spawn_egg": "Tomb Guard Spawn Egg",
+  "block.jaymoskingdoms.tomb_seal": "Tomb Seal",
+  "block.jaymoskingdoms.old_altar": "Old Altar",
+  "item.jaymoskingdoms.sun_scarab": "Sun Scarab",
+  "item.jaymoskingdoms.marble_bust": "Marble Bust",
+  "item.jaymoskingdoms.barrow_brooch": "Barrow Brooch",
+  "item.jaymoskingdoms.jade_seal": "Jade Seal",
+  "filled_map.jaymoskingdoms.old_ruins": "Map to an Old City",
+  "entity.minecraft.villager.jaymoskingdoms.ruin_keeper": "Ruin Keeper",
+  "language.jaymoskingdoms.old": "the old tongue"
+}

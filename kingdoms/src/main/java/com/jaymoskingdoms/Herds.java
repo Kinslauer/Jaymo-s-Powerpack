@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * the downed. They run from the killer, or from the body if nothing killed it. Only a ridden or tamed animal keeps its
  * head; a leashed one strains at the rope.
  */
-final class Herds {
+public final class Herds {
 	/** The herd animals. */
 	static final TagKey<EntityType<?>> SKITTISH = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("skittish"));
 	/** How far a hurt animal's kin panic with it; how close a sprinting or digging player spooks one (blocks). */
@@ -53,7 +53,11 @@ final class Herds {
 	/** How far a killing scares herd animals that see it; how close they hear it out of sight (blocks). */
 	static final double KILL_SEEN = 16.0, KILL_HEARD = 6.0;
 
-	private record Flight(Entity from, long until) {
+	/** What it runs from: a creature, or (no creature) a place, where a disaster is coming (Signs). */
+	private record Flight(@Nullable Entity from, Vec3 at, long until) {
+		Vec3 away() {
+			return from != null ? from.position() : at;
+		}
 	}
 
 	private static final Map<PathfinderMob, Flight> FLIGHTS = new HashMap<>();
@@ -146,8 +150,20 @@ final class Herds {
 	}
 
 	private static void flee(ServerLevel level, PathfinderMob m, Entity from) {
-		FLIGHTS.put(m, new Flight(from, level.getGameTime() + FLEE_TICKS));
-		run(m, from);
+		FLIGHTS.put(m, new Flight(from, from.position(), level.getGameTime() + FLEE_TICKS));
+		run(m, from.position());
+	}
+
+	/**
+	 * (Medieval picks, nd-signs) Animals know first: every herd animal within {@code range} of {@code near} runs from
+	 * {@code from} (where a disaster is coming) for {@code ticks}. Only a ridden or tamed animal keeps its head.
+	 */
+	public static void dread(ServerLevel level, Vec3 near, Vec3 from, double range, int ticks) {
+		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, new net.minecraft.world.phys.AABB(near, near).inflate(range),
+			m -> m.isAlive() && skittish(m) && !FLIGHTS.containsKey(m) && !m.isVehicle() && !owned(m))) {
+			FLIGHTS.put(m, new Flight(null, from, level.getGameTime() + ticks));
+			run(m, from);
+		}
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -166,14 +182,14 @@ final class Herds {
 			if (!m.isAlive() || m.isRemoved() || m.level().getGameTime() > e.getValue().until()) {
 				it.remove();
 			} else if (ticks % EVERY == 0 || m.getNavigation().isDone()) {
-				run(m, e.getValue().from());
+				run(m, e.getValue().away());
 			}
 		}
 	}
 
 	/** It heads for a spot away from {@code from}: through its brain if it has one that walks, else its navigation. */
-	private static void run(PathfinderMob m, Entity from) {
-		Vec3 to = DefaultRandomPos.getPosAway(m, RUN, RUN_Y, from.position());
+	private static void run(PathfinderMob m, Vec3 from) {
+		Vec3 to = DefaultRandomPos.getPosAway(m, RUN, RUN_Y, from);
 		if (to == null) {
 			return;
 		}

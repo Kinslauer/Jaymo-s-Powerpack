@@ -160,7 +160,12 @@ public final class Melting {
 		// two of copper to one of cobalt with amethyst
 		new Alloy(Molten.MANYULLYN, 36, List.of(new Input(Molten.COBALT, 27), new Input(Molten.STEEL, 9))),
 		new Alloy(Molten.QUEEN_SLIME, 18, List.of(new Input(Molten.COBALT, 9), new Input(Molten.GOLD, 9), new Input(Molten.SLIME, 25))),
-		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))));
+		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))),
+		// (medieval picks) the realm steels (smithing/RealmSteels): the Stoneborn's deep steel, three of steel to one of lead;
+		// the forest folk's bright steel, three of steel to one of silver; the orcs' crude bronze, bronze run with ash
+		new Alloy(Molten.DEEP_STEEL, 36, List.of(new Input(Molten.STEEL, 27), new Input(Molten.LEAD, 9))),
+		new Alloy(Molten.BRIGHT_STEEL, 36, List.of(new Input(Molten.STEEL, 27), new Input(Molten.SILVER, 9))),
+		new Alloy(Molten.ASH_BRONZE, 36, List.of(new Input(Molten.BRONZE, 27), new Input(Molten.ASH, 25))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/** (GTNH picks) The dusts, which melt faster ({@link #DUST_SPEEDUP}). */
@@ -245,6 +250,11 @@ public final class Melting {
 	/** (0.18.56) Star metal ore melts in the smeltery, one ore for one ingot's worth. */
 	public static void starMetal(Item ore) {
 		add(Molten.STAR_METAL, Molten.INGOT, ore);
+	}
+
+	/** (medieval picks, nd-meteor) A lump of a great star's iron heart: two ingots' worth of star metal. */
+	public static void meteoricIron(Item lump) {
+		add(Molten.STAR_METAL, Molten.INGOT * 2, lump);
 	}
 
 	/** (GTNH picks) A dust ground in the mortar ({@code ground/StoneAge}): {@code amount} of the liquid, melting fast. */
@@ -434,8 +444,8 @@ public final class Melting {
 			return new ItemStack(Tinkering.CASTS.get(shape));
 		}
 		WeaponParts.Kind kind = ((WeaponPartItem) cast.getItem()).kind;
-		if (WeaponParts.king(kind)) {
-			// (Havens patch 5) a king's weapon is taken, never copied
+		if (WeaponParts.king(kind) || WeaponParts.patternOnly(kind)) {
+			// (Havens patch 5) a king's weapon is taken, never copied (medieval picks: an old age's is forged only from its pattern)
 			return null;
 		}
 		ItemStack made = WeaponParts.cast(kind);

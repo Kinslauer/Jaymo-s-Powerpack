@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "jaymoskingdoms:block/old_altar_lit"
+    },
+    "lit=false": {
+      "model": "jaymoskingdoms:block/old_altar"
+    }
+  }
+}

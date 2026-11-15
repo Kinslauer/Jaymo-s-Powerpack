@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * beyond a camp's chief: hundreds of health, plated, unshoveable, a boss bar) and its escort, which calls more to its side
  * when hurt, rages near its end, and throws back whoever crowds it.
  */
-final class QuestFoes {
+public final class QuestFoes {
 	/** How near (blocks, flat) the quest's player must come for its cache or champion to be set out. */
 	static final double SET_OUT_RANGE = 48.0;
 	/** A champion: health (a beast's more), its blows on top of its own, armour, toughness. */
@@ -157,7 +157,7 @@ final class QuestFoes {
 	}
 
 	/** A champion (a boss bar's boss, {@link BossBars}). */
-	static boolean champion(Entity entity) {
+	public static boolean champion(Entity entity) {
 		Tag tag = entity.getAttached(FOE);
 		return tag != null && tag.champion();
 	}

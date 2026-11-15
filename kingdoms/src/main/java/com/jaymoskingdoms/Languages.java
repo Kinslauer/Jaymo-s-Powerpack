@@ -60,7 +60,9 @@ public final class Languages {
 		/** Jungle and swamp. */
 		WILDWOOD("ko", "tla", "ua", "xi", "pa", "teo", "mak", "nu", "ich", "hu", "za", "ama", "ok", "il"),
 		/** The cherry groves. */
-		BLOSSOM("ka", "shi", "ro", "mei", "ten", "yu", "sa", "hon", "ri", "ko", "na", "jin", "ha", "mo");
+		BLOSSOM("ka", "shi", "ro", "mei", "ten", "yu", "sa", "hon", "ri", "ko", "na", "jin", "ha", "mo"),
+		/** (medieval picks) The old age's tongue, spoken now only by its descendants in the ruins ({@code oldage/RuinFolk}). */
+		OLD("ush", "anu", "mer", "teh", "ka", "sar", "ith", "khe", "nam", "ur", "eb", "zu", "til", "ash");
 
 		final String[] syllables;
 
@@ -222,6 +224,10 @@ public final class Languages {
 			// (0.7.384) so too a school master
 			// (0.7.319) Powers' Z Fighter characters speak to anyone who comes to them
 			return null;
+		}
+		if (com.jaymoskingdoms.oldage.RuinFolk.is(speaker)) {
+			// (medieval picks) the old age's descendants keep the old tongue
+			return Tongue.OLD;
 		}
 		MinecraftServer server = level.getServer();
 		Faction f;

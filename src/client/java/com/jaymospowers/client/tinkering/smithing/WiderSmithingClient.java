@@ -28,6 +28,11 @@ final class WiderSmithingClient {
 				lines.add(Tinkering.traitDetails.getAsBoolean() ? Component.translatable("tooltip.jaymospowers.tinkering.trait", trait.name(1),
 					trait.description().copy().withStyle(ChatFormatting.DARK_GRAY)).withStyle(trait.colour) : trait.name(1).copy().withStyle(trait.colour));
 			}
+			// (medieval picks) forged of a realm steel
+			String realm = stack.get(com.jaymospowers.tinkering.smithing.RealmSteels.REALM_STEEL);
+			if (realm != null) {
+				lines.add(Component.translatable("molten.jaymospowers." + realm).withStyle(ChatFormatting.DARK_AQUA));
+			}
 			String maker = stack.get(Provenance.FORGED_BY);
 			if (maker != null) {
 				lines.add(Component.translatable("tooltip.jaymospowers.forged_by", maker).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));

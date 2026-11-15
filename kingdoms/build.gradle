@@ -34,6 +34,19 @@ loom {
 	}
 }
 
+// Xaero's Minimap carries its library (xaerolib) nested in its jar; it's taken out here to compile against
+def xaeroMinimap = "maven.modrinth:xaeros-minimap:eUEhnw8G"
+def xaeroLibDir = layout.buildDirectory.dir("xaero-lib")
+def xaeroLib = tasks.register("xaeroLib", Copy) {
+	def jar = configurations.detachedConfiguration(dependencies.create(xaeroMinimap)).tap { transitive = false }
+	from({ zipTree(jar.singleFile) }) {
+		include "META-INF/jars/xaerolib-*.jar"
+		eachFile { path = "xaerolib.jar" }
+	}
+	includeEmptyDirs = false
+	into xaeroLibDir
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -88,6 +101,10 @@ dependencies {
 	// the big forms' voices further and lets a giant hear the ground. Only its API is used; compiled against, never required.
 	compileOnly "maven.modrinth:simple-voice-chat:x9jLR94Q"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
+	// Xaero's Minimap (all rights reserved, xaero96; in Powers' pack): client/XaeroRealms puts the realms' seats, holders and
+	// borders on it (RealmMap). Compiled against the pack's version and the library it carries inside it, never required.
+	compileOnly xaeroMinimap
+	compileOnly files(xaeroLibDir.map { it.file("xaerolib.jar") }).builtBy(xaeroLib)
 }
 
 // lang lives in small part files, lang/parts/*.json (tools/lang_split.py made them); they're merged into en_us.json here

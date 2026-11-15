@@ -1,0 +1,16 @@
+# Medieval picks, patch 5: Realms and the intro
+
+- The faith you were raised in: the life story has a new page after where you were born, "Who did you grow up praying to?", with the eight patrons, each shown with its own shrine glyph (your blood's usual patron first). You start sworn to the one you pick (a devout start more so, with its book), and the summary and character sheet show it. (`LifeStory`, `Patrons`, `LifeStoryScreen`)
+- The realm page shows a card for each realm with one of its people standing in its own dress, its colour along the top. Pick one and that person walks off their card over to a review card on the left, which shows your stats so far, the realm and your faith (with its glyph); Next becomes Confirm. (`LifeStory.Realm`, `Folk.preview`, `LifeStoryScreen`)
+- The realms' ways, which villagers and guards hold you to. You learn them from looks, speech bubbles and what it does to your name, never from chat (`Customs`):
+  - In the north (snow and taiga realms), striking an armed townsman is a duel they take up. Nobody else joins in and it is no crime, and beating an opponent wins a little respect (once per opponent). Striking the unarmed, the old or children is still assault.
+  - In the sands (desert and badlands realms), water drawn with a bucket or bottle in their land costs a silver a day, paid into the treasury when their people see. Drawing it without the coin is water theft.
+  - In Blossom (cherry realms), their people bow as you come up to them. Bow back (sneak, facing them) and they're pleased; walk on and they're slighted.
+  - On the plains, each realm holds a market day once a week: its traders take a share off, and criers call it in the streets.
+  - Crimes differ: felling a cherry tree in Blossom land is a crime.
+- Tents: lay a 3 x 3 foundation of your own blocks and pitch a tent on its middle, away from any settlement's land and anyone else's homestead. It claims a small patch round it as your homestead. Breaking the land's own blocks there is no crime (never anyone's beds, chests, doors or workstations), and others breaking into it where a realm's law holds are vandals. Sneak and ring a bell you hung in your homestead, with the founding coin on you, and your own realm is founded at the tent. Crafted from wool and sticks. (`Homesteads`, `Crowns.found`)
+- Lords', kings' and knights' chest armour carries a cape in the realm's colours (its field, edged in its charge). The cape hangs as cloth, lifting out behind as they walk, swaying with the stride, swinging out on a turn and floating up in a fall. (`Capes`, `CapeLayer`)
+- Sails billow with the gusts and a ripple runs up the cloth. They flog when the ship turns across the wind or lies head to it, and hang slacker in a calm; the yard stays where it hangs. (`ShipRenderer`, `Winds`)
+- Haggling: before you take a giver's work, take on a tale they're putting to you, or set out on board work you've just pulled from the board, you can ask for more pay. Their nature and your way with words decide whether they agree, meet you halfway, or take offence and withdraw the offer. Each offer or job can only be haggled once, by anyone. (`Haggle`, `Quests`, `Tales`, `QuestScreen`)
+
+Built; not played.

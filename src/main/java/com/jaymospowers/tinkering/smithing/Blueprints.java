@@ -153,7 +153,13 @@ public final class Blueprints {
 	/** A copy a Drafting Table makes: the same shape, one level lower (Well is as low as it goes). */
 	public static ItemStack copyOf(ItemStack blueprint) {
 		Blueprint data = blueprint.get(BLUEPRINT);
-		return data == null ? ItemStack.EMPTY : stack(data.shape(), xpOf(data.level().lower()));
+		if (data == null) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack copy = stack(data.shape(), xpOf(data.level().lower()));
+		// (medieval picks) a copy of a captured pattern is captured too (RealmPatterns)
+		String realm = blueprint.get(RealmPatterns.REALM_DESIGN);
+		return realm == null ? copy : RealmPatterns.capture(copy, realm);
 	}
 
 	/** The highest-level blueprint for this forging's shape anywhere on the smith, or null. */

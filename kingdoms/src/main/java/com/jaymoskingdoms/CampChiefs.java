@@ -28,7 +28,7 @@ import net.minecraft.world.entity.PathfinderMob;
  * bar, shown to those near ({@link BossBars}), his second wind at {@link Folk#RALLY_AT} that calls his camp to his foe,
  * and his death clearing the camp ({@link Camps#chiefSlain}).
  */
-final class CampChiefs {
+public final class CampChiefs {
 	/** How long a chief's rally lasts (ticks), and how far he calls his own in. */
 	static final int RALLY_TICKS = 20 * 60;
 	static final double RALLY_CALL = 48.0;
@@ -64,7 +64,7 @@ final class CampChiefs {
 	}
 
 	/** Whether {@code mob} is a camp chief showing his bar. */
-	static boolean barred(net.minecraft.world.entity.Entity mob) {
+	public static boolean barred(net.minecraft.world.entity.Entity mob) {
 		return BARS.containsKey(mob.getUUID());
 	}
 

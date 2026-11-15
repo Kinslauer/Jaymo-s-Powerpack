@@ -1,0 +1,8 @@
+{
+  "type": "jaymoskingdoms:old_ruins",
+  "people": "sunstep",
+  "biomes": "#jaymoskingdoms:has_structure/sunstep_ruins",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

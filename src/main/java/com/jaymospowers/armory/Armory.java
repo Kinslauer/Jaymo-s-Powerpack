@@ -209,6 +209,8 @@ public final class Armory {
 		throwing("pitchfork", p -> p.sword(ToolMaterial.IRON, 3.0F, -2.7F).component(DataComponents.TOOL, pitchforkTool()), PITCHFORK_THROWN, false);
 		// the armoured wars' bec de corbin, war dart and heavy crossbow
 		WarArms.init();
+		// (medieval picks) the old age's peoples' arms, found in their ruins and forged from their patterns
+		OldAgeArms.init();
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
 		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
 		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only

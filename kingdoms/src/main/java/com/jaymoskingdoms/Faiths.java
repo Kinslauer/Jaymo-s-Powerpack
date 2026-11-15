@@ -101,7 +101,7 @@ public final class Faiths {
 	}
 
 	/** (0.7.509) The patron a player's blood starts with: Dawnborn the Crowned Sun, other humans The Truth, the rest their lean. */
-	static Patron startOf(Heritage.Kind kind) {
+	public static Patron startOf(Heritage.Kind kind) {
 		if (kind == Heritage.Kind.DAWNBORN) {
 			return Patron.CROWNED_SUN;
 		}
