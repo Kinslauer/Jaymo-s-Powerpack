@@ -653,7 +653,9 @@ final class Caravans {
 	private static List<Map<String, Integer>> levy(ServerLevel level, Faction f, Focus.Kind focus) {
 		int n = LEVY_BASE + f.holdings().population() * LEVY_PER_VILLAGER;
 		Item[] goods = focus == Focus.Kind.MINING
-			? new Item[] {Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.STONE, Items.COAL, Items.RAW_IRON, Items.RAW_COPPER, Items.ANDESITE}
+			? new Item[] {Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.STONE, Items.COAL, Items.RAW_IRON, Items.RAW_COPPER, Items.ANDESITE,
+				// (GTNH picks) Jaymo's Powers' raw tin, or more copper without it
+				BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "raw_tin")).orElse(Items.RAW_COPPER)}
 			: new Item[] {Items.WHEAT, Items.WHEAT, Items.BREAD, Items.POTATO, Items.CARROT, Items.BEETROOT, Items.BEEF, Items.MUTTON, Items.APPLE};
 		Map<String, Integer> all = new LinkedHashMap<>();
 		for (int i = 0; i < n; i++) {

@@ -1,3 +1,4 @@
-# GT New Horizons picks, patch 4 - weather-proof blocks
+# GT New Horizons picks, patch 4 - weather-proof blocks, tin on the trade roads
 - **Weathering skips weather-proof blocks** (`Weathering`): blocks in the tag `#jaymospowers:weather_proof` (Jaymo's Powers' creosote-treated planks) never weather, rot or grow moss. Read by the tag's id, so Powers needn't be loaded.
+- **Caravans carry tin** (with Jaymo's Powers loaded): tin ingots, raw tin and bronze ingots (`#c:ingots/tin`, `#c:raw_materials/tin`, `#c:ingots/bronze`) are metal goods on the trade roads (`TradeRoutes`), tin at copper's worth (3 coppers) and bronze at 4, so towns' caravans load and sell them like copper. A mining town's levy can hold raw tin (`Caravans`). A roaming merchant caravan's packs are sometimes tin ingots, and one merchant in two also sells 4 tin ingots for an emerald (`RoamingCaravans`). Smiths' tin trades are Powers' data.
 - Built; not played.

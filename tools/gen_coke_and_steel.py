@@ -54,6 +54,8 @@ TIN_VEIN_SIZE, TIN_RARITY, TIN_LOW, TIN_HIGH = 70, 24, 48, 200
 SAND_RARITY, SAND_RADIUS_MIN, SAND_RADIUS_MAX = 3, 2, 4
 # smiths: tin ingots bought for an emerald (level 2), and tin ingots sold for one (level 3)
 TRADE_TIN_WANTED, TRADE_TIN_GIVEN = 6, 3
+# Kitchen's kettles in bronze: as many ingots as its iron recipes take
+KETTLE_BRONZE = {"cooking_pot": 3, "saucepan": 2}
 
 BLOCKS_COKE = ["coke_oven_bricks", "firebricks", "coal_coke_block", "treated_planks"]
 BLOCKS_TIN = ["tin_ore", "deepslate_tin_ore", "raw_tin_block", "tin_block", "bronze_block", "tin_sand"]
@@ -595,6 +597,11 @@ def data():
         recipe(name, sa.shapeless("misc", [big], small, 9))
     # a bell is cast bronze (it melts back to bronze: Melting)
     recipe("bell", sa.shaped("misc", [" S ", "BBB", "B B"], {"S": "minecraft:stick", "B": bronze}, "minecraft:bell"))
+    # Kitchen's kettles (the cooking pot and the saucepan) in bronze, beside its iron recipes; only with Kitchen loaded
+    for pot, others in (("cooking_pot", ["minecraft:bowl"]), ("saucepan", ["minecraft:stick"])):
+        made = sa.shapeless("equipment", others + ["#c:ingots/bronze"] * KETTLE_BRONZE[pot], "jaymoskitchen:" + pot)
+        recipe(pot + "_from_bronze", dict({"fabric:load_conditions": [{"condition": "fabric:registry_contains", "registry": "minecraft:item",
+                                                                      "values": ["jaymoskitchen:" + pot]}]}, **made))
 
     # burn times, like vanilla's
     for name, ticks in (("time_coal_coke", BURN_COAL_COKE), ("time_coal_coke_block", BURN_COAL_COKE_BLOCK),
