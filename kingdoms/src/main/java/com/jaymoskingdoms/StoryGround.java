@@ -414,16 +414,18 @@ public final class StoryGround {
 	 * blocks (or {@code near} if there is none): read from the ground's shape, so nothing is loaded.
 	 */
 	private static BlockPos mainland(ServerLevel level, BlockPos near) {
-		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
-		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
+		// (the Overworld's own ground in a One Dimension world: the level's generator would read the clouds overhead, dry everywhere)
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		net.minecraft.world.level.chunk.ChunkGenerator generator = ground.generator();
+		net.minecraft.world.level.levelgen.RandomState state = ground.randomState();
 		int dry = generator.getSeaLevel() + 2;
 		for (int r = 0; r <= MAINLAND_SEARCH; r += MAINLAND_STEP) {
 			int points = r == 0 ? 1 : Math.max(8, (int)(Math.PI * 2.0 * r / (MAINLAND_STEP * 2)));
 			for (int i = 0; i < points; i++) {
 				double a = Math.PI * 2.0 * i / points;
 				int x = near.getX() + (int)Math.round(Math.cos(a) * r), z = near.getZ() + (int)Math.round(Math.sin(a) * r);
-				if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= dry
-					&& !com.jaymoskingdoms.seas.Offshore.island(generator, level, state, x, z)) {
+				if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) >= dry
+					&& !com.jaymoskingdoms.seas.Offshore.island(generator, ground.heights(), state, x, z)) {
 					if (r > 0) {
 						JaymosKingdoms.LOGGER.info("{} is at sea or on an island: the new kingdom goes to the mainland at {}, {}", near, x, z);
 					}

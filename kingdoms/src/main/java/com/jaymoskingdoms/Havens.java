@@ -115,7 +115,7 @@ public final class Havens {
 		}
 		// (Andy's ocean pick-list: "Tideborn islands") a settlement out on an island, one only a boat reaches, is
 		// always a Tideborn haven
-		if (com.jaymoskingdoms.seas.Offshore.island(level, f.seat().getX(), f.seat().getZ())) {
+		if (Stacked.band(level.getServer(), f.seat().getY()) == 0 && com.jaymoskingdoms.seas.Offshore.island(level, f.seat().getX(), f.seat().getZ())) {
 			return Heritage.Kind.TIDEBORN.key();
 		}
 		if (Tempers.of(f) == Tempers.Temper.PURIST) {
