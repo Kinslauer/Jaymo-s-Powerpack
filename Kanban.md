@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 14:27). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · claimed
 
 
 ## In review
