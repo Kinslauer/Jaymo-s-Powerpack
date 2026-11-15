@@ -5281,3 +5281,10 @@ Built; not played.
 - The Mad Tinkerer's talk menu offers "Ask about his gadgets" to a player of Kingdoms' Tinkerer class, even one with no ki in them, and opens Kingdoms' gadget trade (`KingdomsCompat.tinkerer`, `mimicShop`, by reflection).
 - A rewind watch (Kingdoms) carried anywhere in the inventory at death lets its holder cheat death exactly as a Chrono does: R inside the same window on the death or out-cold screen, with no prompt or hint anywhere. A watch alone reaches back the first minute (a Chrono's reach still grows with their power); a watch's rewind adds nothing to Chrono's own memory (`ChronoCheatDeath.carriesWatch`, by item id, so nothing changes without Kingdoms).
 - Built; not played.
+
+## 0.24.15 (2026-11-15): Tissou's Zombie Pack, hooks for the Hollow's blight (#1610)
+
+- `Treatment.ANY_TENDED_LISTENERS`: told of every finished treatment, your own on yourself too (Jaymo's Kingdoms: a wound bound while the blight is still settling in may clear it).
+- `Bloodied.zombieBlood` / `washZombieBlood`: how much of a zombie's rotten blood is on a body's skin or worn armour, and washing it all off when soaked through (Kingdoms: the blight gets in through it).
+- Tissou's Zombie Pack (by Tissou) is fetched and switched on with the other resource packs; Jaymo's Kingdoms keeps its skins on Chrono's future dead.
+- Built; not played.
