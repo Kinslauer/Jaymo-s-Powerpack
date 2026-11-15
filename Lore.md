@@ -710,6 +710,23 @@ rise as one of his, light, "with very little left of you to feel". Gold burns it
 realms openly. Those with the forbidden Death element raise a thrall of their own. (The dead who come back on their own
 for one person are the Banes, under *The dark*.)
 
+(new) **The crowd remembers its work** (Andy's horde picks, 2026-11-15). The old dead keep the shapes of the lives they
+had, worn down to a single habit. Those who were builders and hedgers still carry a few stones or planks and lay them
+without thinking, a step here, a span there, until they stand where the living hide. The young who died running still run
+when they see the living, and those who were the village's strong backs walk as brutes who shoulder doors in. Ahead of
+the crowd go its scouts: thin, quick dead who were once the herders and messengers. They raise the old village call when
+they find someone, and the rest come. Settle in one place through the night and they keep coming, a bigger crowd each
+time, as if the whole graveyard had remembered where the village used to be.
+
+(new) **Where the dead rose** (Andy's looks picks, 2026-11-15). The old dead keep the mark of the ground that held
+them. Those that lay in the sands and the red badlands come up dried to leather and split along the creases; those from
+the swamps, the river mud and the shore come up swollen and sodden, trailing weed. Those that lay deep, where no sky
+reaches, in the caves and the deep dark, come up bloodless and chalk-white, strung with cobweb, and the ones from the snows
+come up rimed, with black fingers. They still wear their land's robes, and some are further gone than others: one still
+has its face, another is a skull in rags. At night a cold light wakes in their empty sockets, the light of the one hunger
+left to them, and under a blood moon it burns red like the moon. In Chrono's ruined future the dead wear the clothes of a
+city nobody here has seen.
+
 **The bodies that stay.** The dead lie where they fall, and the living treat them as people would: blasts tear
 them apart, spiders are crushed to legs, looters rob them, and kin carry their fallen home. A fallen ruler is stripped
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
@@ -1143,6 +1160,28 @@ cleric's restoration lifts the curse, as it lifts any.
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
 *"There's no hunger where we go. Only the one."* It is cured with weakness first, then a golden apple before it
 finishes; "the gold burns going down".
+
+(new) **How the blight shows, and how it's fought** (Andy's picks, 2026-11-15, from Contagion's ideas). Armour keeps
+most of it out, and it gets in easiest through a wound that bleeds; a wound bound in the first hours often never lets it
+settle. Once it takes hold the skin greys toward the Hollow it is making, a wet cough comes now and then, and at the end
+flies gather. Townsfolk know that cough ("That's no regular cough") and keep away. Those who know wounds (any healer's
+training) see the sickness in a body from the start, and a town's clerics say so. The cures are old. Rotten flesh eaten
+raw can give it you, but seared and worked through with gold it is the **old druid remedy**: it holds the blight back a
+while, and most folk sneer at it. The true cure, the **Hollow's Cure**, is brewed only by the druids of the groves and
+those trained in their way, from gilded flesh over a fire. The swamp witches have it too and keep it hidden in their huts,
+and they raise the dead out of the mud as **thralls** to guard them, beside their mud golems. A temple healer will burn it
+out of you for coin, though a righteous temple turns the Hollow away. A totem spends itself to save you. Whoever is cured
+of it once can never take it again.
+
+(new) **How the blight spreads** (Andy's picks, 2026-11-15). Near the end a carrier's cough can pass it to whoever stands
+close before them, and a carrier's own blows pass it once it has hold. The dead's rotten blood carries it too: on your skin
+or your armour it can get in, the more so through an open wound, until it is scrubbed off or washed away in a soaking.
+Villagers catch it like anyone: they sicken for a day and rise as one of the dead unless someone cures them, and their
+kin grieve; one who is cured remembers who saved them. A town's guards order a coughing carrier out; one who stays is
+taken and shut in the cells until it leaves them, cured or turned, and the hot-tempered guards don't bother with words.
+Now and then a town falls sick and the sick spread it among their neighbours, and then the board posts work to cure the
+sick and burn the blighted dead, for anyone who dies with it in them gets up the next night unless the body is burned or
+buried.
 
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
