@@ -212,7 +212,7 @@ public final class McaCompat {
 	}
 
 	/** (0.7.61) A new grown villager at {@code at} (MCA's, with MCA), not yet added to the world ({@link Captives}). */
-	static @Nullable Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+	public static @Nullable Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		if (LOADED) {
 			return McaBridge.newVillager(level, at);
 		}

@@ -69,6 +69,8 @@ public final class BossBars {
 			|| entity instanceof com.jaymoskingdoms.wild.Grizzly
 			// the great necromancer
 			|| entity instanceof GreatNecromancer
+			// (medieval picks) an old age's ruler, once woken
+			|| entity instanceof com.jaymoskingdoms.oldage.OldRuler ruler && ruler.awake()
 			// the blossom lands' great night things
 			|| entity instanceof com.jaymoskingdoms.blossomland.SnowWidow || entity instanceof com.jaymoskingdoms.blossomland.Unburied
 			// the brood queen, once woken

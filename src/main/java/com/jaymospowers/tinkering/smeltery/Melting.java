@@ -444,8 +444,8 @@ public final class Melting {
 			return new ItemStack(Tinkering.CASTS.get(shape));
 		}
 		WeaponParts.Kind kind = ((WeaponPartItem) cast.getItem()).kind;
-		if (WeaponParts.king(kind)) {
-			// (Havens patch 5) a king's weapon is taken, never copied
+		if (WeaponParts.king(kind) || WeaponParts.patternOnly(kind)) {
+			// (Havens patch 5) a king's weapon is taken, never copied (medieval picks: an old age's is forged only from its pattern)
 			return null;
 		}
 		ItemStack made = WeaponParts.cast(kind);

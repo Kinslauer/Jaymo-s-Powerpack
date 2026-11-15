@@ -84,6 +84,13 @@ public final class FoeThemes {
 		if (entity instanceof AetherGiant giant) {
 			return giant.element().name().toLowerCase(Locale.ROOT);
 		}
+		// (medieval picks, cv-music) an old age's ruler, and a patron's champion, each their own
+		if (entity instanceof com.jaymoskingdoms.oldage.OldRuler ruler) {
+			return ruler.awake() ? ruler.people().theme() : null;
+		}
+		if (entity instanceof com.jaymoskingdoms.PatronChampion champion) {
+			return champion.decoy() || champion.dormant() ? null : "champion_" + champion.patron().key;
+		}
 		var type = entity.getType();
 		if (type == com.jaymoskingdoms.hunger.Hunger.GAUNT) {
 			return "gaunt";

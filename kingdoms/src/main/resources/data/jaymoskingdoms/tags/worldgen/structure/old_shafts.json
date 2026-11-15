@@ -1,0 +1,67 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:mineshaft",
+    "minecraft:mineshaft_mesa",
+    {
+      "id": "mmr:mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:dark_oak_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:dark_oak_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:desert_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:desert_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:jungle_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:jungle_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:mesa_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:mesa_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:mushroom_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:mushroom_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:snowy_mineshaft",
+      "required": false
+    },
+    {
+      "id": "mmr:snowy_mineshaft_underground",
+      "required": false
+    },
+    {
+      "id": "mmr:deep_dark_mineshaft_underground",
+      "required": false
+    }
+  ]
+}

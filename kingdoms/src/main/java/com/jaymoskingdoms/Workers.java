@@ -174,6 +174,10 @@ public final class Workers {
 			// a farmhand's family (FarmhandHome): wary of monsters, indoors at night, at work on their farm by day
 			return FarmFamily.step(level, w);
 		}
+		if (w.role() == Pirates.SHIPWRIGHT && Shipyards.step(level, w)) {
+			// a harbour's shipwright with a ship on his slip: at the work by day (Shipyards)
+			return true;
+		}
 		if (Rulers.leaderRole(w.role()) && w instanceof Enlisted e) {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);

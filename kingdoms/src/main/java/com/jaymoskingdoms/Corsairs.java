@@ -139,7 +139,7 @@ final class Corsairs implements Ship.Captaincy {
 		return ship;
 	}
 
-	/** {@code ship}, just cast off, manned for {@code faction}: her captain at the helm, a gunner to each gun or two, the rest about her deck. */
+	/** {@code ship}'s company mustered aboard her: her captain at the helm, gunners to her guns, her boys and hands about her deck. */
 	static void man(ServerLevel level, Ship ship, Crew crew, Faction faction, Complement complement) {
 		Fleet.Stations stations = Fleet.stations(ship);
 		BlockPos home = crew.home;

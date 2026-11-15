@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymoskingdoms:block/old_altar_top_lit",
+    "side": "jaymoskingdoms:block/old_altar_side",
+    "bottom": "jaymoskingdoms:block/old_altar_bottom"
+  }
+}

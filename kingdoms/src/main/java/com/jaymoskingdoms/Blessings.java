@@ -491,7 +491,7 @@ public final class Blessings {
 	// ---- the boons ------------------------------------------------------------------------------------------------------------------------------
 
 	/** The tier 4 boon of {@code patron}, called by {@code sp}. */
-	static void boon(ServerPlayer sp, Patron patron) {
+	public static void boon(ServerPlayer sp, Patron patron) {
 		ServerLevel level = sp.level();
 		long now = level.getGameTime();
 		level.playSound(null, sp.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.9F, 1.1F);

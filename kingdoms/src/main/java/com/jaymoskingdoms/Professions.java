@@ -38,6 +38,8 @@ public final class Professions {
 	public static VillagerProfession SKY_WHALER, AMBROSIA_FARMER;
 	/** A steam town's tinker, engineer and airship captain ({@link SteamTrades}): taken on by the town, never a player's pick. */
 	public static VillagerProfession TINKER, ENGINEER, AERONAUT;
+	/** (medieval picks) An old age's descendant keeping the ruin's stall ({@code oldage/RuinFolk}): never a player's pick. Trades old goods. */
+	public static VillagerProfession RUIN_KEEPER;
 
 	private Professions() {
 	}
@@ -68,6 +70,7 @@ public final class Professions {
 		TINKER = register("tinker", SoundEvents.VILLAGER_WORK_TOOLSMITH);
 		ENGINEER = register("engineer", SoundEvents.VILLAGER_WORK_ARMORER);
 		AERONAUT = register("aeronaut", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
+		RUIN_KEEPER = register("ruin_keeper", SoundEvents.VILLAGER_WORK_MASON);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {

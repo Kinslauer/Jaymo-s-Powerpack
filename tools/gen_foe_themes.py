@@ -1,7 +1,9 @@
 """Synthesizes the great foes' themes (kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/foe/<theme>/<stem>.ogg) and
 writes their entries into kingdoms/src/main/resources/assets/jaymoskingdoms/sounds.json. Run it from the repository root:
 
-    python3 -I tools/gen_foe_themes.py
+    python3 -I tools/gen_foe_themes.py [theme ...]
+
+Named themes only are synthesized again (all of them without names); the sounds.json entries are written for every theme.
 
 Every theme is a handful of short mono stems at a low sample rate: two drones, two pulses (drums), three motifs (a few
 notes of a tune), and a stab for when the fight turns. The client (FoeMusicClient) plays them one at a time at uneven
@@ -13,6 +15,7 @@ import json
 import math
 import os
 import subprocess
+import sys
 import tempfile
 import wave
 
@@ -46,6 +49,20 @@ THEMES = {
     "werewolf": dict(root=37, mode="minor", bpm=96, drone="breath", drum="tom", lead="wail", unit=0.75),
     "dragon": dict(root=31, mode="mixolydian", bpm=78, drone="open", drum="tom", lead="horn", unit=1.0),
     "warlord": dict(root=38, mode="phrygian", bpm=100, drone="sub", drum="stomp", lead="horn", unit=0.5),
+    # (medieval picks, cv-music) the old age's rulers (oldage/OldRuler), one to each people
+    "ruler_sunstep": dict(root=40, mode="harmonic", bpm=76, drone="breath", drum="tom", lead="wail", unit=1.0),
+    "ruler_pillared": dict(root=41, mode="dorian", bpm=92, drone="open", drum="stomp", lead="horn", unit=0.75),
+    "ruler_mound": dict(root=34, mode="minor", bpm=64, drone="choir", drum="stomp", lead="horn", unit=1.5),
+    "ruler_court": dict(root=44, mode="pentatonic", bpm=84, drone="glass", drum="clang", lead="bell", unit=1.0),
+    # and the patrons' champions (PatronChampion), each their own
+    "champion_hearthkeeper": dict(root=39, mode="mixolydian", bpm=88, drone="open", drum="tom", lead="horn", unit=1.0),
+    "champion_anvil_father": dict(root=36, mode="dorian", bpm=96, drone="sub", drum="clang", lead="metal", unit=0.5),
+    "champion_deep_mother": dict(root=37, mode="lydian", bpm=58, drone="glass", drum="soft", lead="bell", unit=2.0),
+    "champion_green_huntsman": dict(root=42, mode="pentatonic", bpm=104, drone="breath", drum="tom", lead="horn", unit=0.75),
+    "champion_lantern_warden": dict(root=43, mode="minor", bpm=70, drone="choir", drum="soft", lead="bell", unit=1.5),
+    "champion_crowned_sun": dict(root=45, mode="lydian", bpm=90, drone="open", drum="stomp", lead="horn", unit=1.0),
+    "champion_ash_whisperer": dict(root=35, mode="locrian", bpm=68, drone="breath", drum="bone", lead="wail", unit=1.5),
+    "champion_truth": dict(root=47, mode="dorian", bpm=80, drone="choir", drum="soft", lead="bell", unit=1.0),
 }
 STEMS = ["drone_a", "drone_b", "pulse_a", "pulse_b", "motif_a", "motif_b", "motif_c", "stab"]
 
@@ -240,8 +257,16 @@ def encode(samples, path):
 
 
 def main():
+    only = set(sys.argv[1:])
     entries = {}
     for name, theme in THEMES.items():
+        for stem in STEMS:
+            entries["foe_theme.%s.%s" % (name, stem)] = {
+                "subtitle": "subtitles.jaymoskingdoms.foe_theme",
+                "sounds": [{"name": "jaymoskingdoms:foe/%s/%s" % (name, stem)}],
+            }
+        if only and name not in only:
+            continue
         rng = np.random.default_rng(sum(ord(c) * (i + 1) for i, c in enumerate(name)))
         stems = {
             "drone_a": drone(rng, theme["drone"], theme["root"], theme["mode"], 6.5, 4),
@@ -255,10 +280,6 @@ def main():
         }
         for stem in STEMS:
             encode(normalise(stems[stem]), os.path.join(OUT, name, stem + ".ogg"))
-            entries["foe_theme.%s.%s" % (name, stem)] = {
-                "subtitle": "subtitles.jaymoskingdoms.foe_theme",
-                "sounds": [{"name": "jaymoskingdoms:foe/%s/%s" % (name, stem)}],
-            }
     with open(SOUNDS_JSON, encoding="utf-8") as f:
         sounds = json.load(f)
     sounds = {k: v for k, v in sounds.items() if not k.startswith("foe_theme.")}

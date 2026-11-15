@@ -186,6 +186,13 @@ public final class WeaponParts {
 	/** (0.21.19) A Bane's weapon head, taken when it's ended with its marks (Kingdoms {@code Banes}; {@code armory/BaneWeapons}). */
 	public static final String GRAVESWORN_BLADE = "gravesworn_blade", GRUDGE_HEAD = "grudge_head", HORNSCYTHE_BLADE = "hornscythe_blade";
 	public static final Set<String> BANES = Set.of(GRAVESWORN_BLADE, GRUDGE_HEAD, HORNSCYTHE_BLADE);
+	/**
+	 * (medieval picks, cv-weapons) The old age's peoples' arms ({@code armory/OldAgeArms}): found in their ruins (Jaymo's
+	 * Kingdoms), and forged only from a pattern drawn off one at the Drafting Table; never shaped, and no cast is made of
+	 * them. Iron only.
+	 */
+	public static final Set<String> OLD_AGE = Set.of("sickle_sword_blade", "legion_sword_blade", "tall_shield_face", "leaf_spear_head",
+		"old_round_shield_face", "broad_sabre_blade", "bearded_axe_head");
 	/** Every kind, by its head's id; costs are the ingots their old crafting recipes took. */
 	public static final Map<String, Kind> KINDS = new LinkedHashMap<>();
 	public static final Map<Kind, Item> PARTS = new LinkedHashMap<>();
@@ -311,16 +318,31 @@ public final class WeaponParts {
 		add(new Kind("arquebus_barrel", "jaymoskingdoms:arquebus", Scheme.SINGLE, 4 * INGOT, Assembly.TOUGH_BINDING, 1));
 		// the axe on a chain (mortal/ChainAxeItem)
 		add(new Kind("chain_axe_head", "jaymospowers:chain_axe", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_CHAIN, 1));
+		// (medieval picks) the old age's arms (armory/OldAgeArms, OLD_AGE): the sands' hooked sickle-sword, the plains' short
+		// legion blade and tall shield, leaf-bladed spear and round shield, Blossom's broad sabre, the north's bearded axe
+		add(new Kind("sickle_sword_blade", "jaymospowers:sickle_sword", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("legion_sword_blade", "jaymospowers:legion_sword", Scheme.SINGLE, 2 * INGOT, Assembly.GUARD_ROD, 1));
+		add(new Kind("tall_shield_face", "jaymospowers:tall_shield", Scheme.SINGLE, 4 * INGOT, Assembly.BINDING, 1));
+		add(new Kind("leaf_spear_head", "jaymospowers:leaf_spear", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("old_round_shield_face", "jaymospowers:old_round_shield", Scheme.SINGLE, 3 * INGOT, Assembly.BINDING, 1));
+		add(new Kind("broad_sabre_blade", "jaymospowers:broad_sabre", Scheme.SINGLE, 3 * INGOT, Assembly.GUARD_ROD, 1));
+		add(new Kind("bearded_axe_head", "jaymospowers:bearded_axe", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
 		found.addAll(PATRONS);
 		found.addAll(BANES);
 		found.add(SORAS_DAGGER_BLADE);
+		found.addAll(OLD_AGE);
 		FOUND = Set.copyOf(found);
 	}
 
 	/** (Havens patch 5) A king's weapon head ({@link #KINGS}): taken, never shaped, cast or forged. */
 	public static boolean king(Kind kind) {
 		return KINGS.contains(kind.part()) || PATRONS.contains(kind.part()) || BANES.contains(kind.part());
+	}
+
+	/** (medieval picks) An old age's head ({@link #OLD_AGE}): forged only from a pattern, never shaped or cast. */
+	public static boolean patternOnly(Kind kind) {
+		return OLD_AGE.contains(kind.part());
 	}
 
 	/** (0.18.50) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
@@ -383,13 +405,13 @@ public final class WeaponParts {
 	/** The head pouring this liquid over a cast of this kind makes, or null. */
 	public static @Nullable ItemStack castResult(Kind kind, Molten molten) {
 		Metal metal = Metal.of(molten);
-		return metal == null || king(kind) || kind.in(metal) == null ? null : WeaponPartItem.of(kind, metal, 1);
+		return metal == null || king(kind) || patternOnly(kind) || kind.in(metal) == null ? null : WeaponPartItem.of(kind, metal, 1);
 	}
 
 	/** The metal heads a cast of this kind makes. */
 	public static List<ItemStack> castResults(Kind kind) {
 		List<ItemStack> out = new ArrayList<>();
-		if (king(kind)) {
+		if (king(kind) || patternOnly(kind)) {
 			return out;
 		}
 		for (Metal metal : Metal.values()) {
@@ -403,8 +425,8 @@ public final class WeaponParts {
 	/** Every head of this kind (stone and metals), any of which gold turns into its cast. */
 	public static List<ItemStack> heads(Kind kind) {
 		List<ItemStack> out = new ArrayList<>();
-		if (king(kind)) {
-			// (Havens patch 5) a king's head comes in his own iron only
+		if (king(kind) || patternOnly(kind)) {
+			// (Havens patch 5) a king's head comes in his own iron only (and so does an old age's)
 			out.add(WeaponPartItem.of(kind, Metal.IRON, 1));
 			return out;
 		}
