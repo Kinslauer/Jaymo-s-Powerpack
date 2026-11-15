@@ -210,8 +210,19 @@ public final class ForgeDangers {
 
 	// --- mending ---
 
-	/** A hammer on a cracked brick, with grout in the other hand or the pack: the grout is pressed in and the brick mended. */
+	/**
+	 * A hammer on a cracked brick, with grout in the other hand or the pack (either hand may hold either): the grout is
+	 * pressed in and the brick mended.
+	 */
 	private static InteractionResult mend(Player player, Level level, InteractionHand hand, BlockPos pos) {
+		InteractionHand other = hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+		if (!player.getItemInHand(hand).is(HAMMERS) && player.getItemInHand(hand).is(Tinkering.GROUT.asItem())
+			&& player.getItemInHand(other).is(HAMMERS)) {
+			// grout in this hand, the hammer in the other: hammer with the other, so the grout isn't placed
+			InteractionHand swap = hand;
+			hand = other;
+			other = swap;
+		}
 		ItemStack hammer = player.getItemInHand(hand);
 		if (player.isSpectator() || !hammer.is(HAMMERS)) {
 			return InteractionResult.PASS;
@@ -221,7 +232,7 @@ public final class ForgeDangers {
 		if (mended == null) {
 			return InteractionResult.PASS;
 		}
-		ItemStack grout = grout(player);
+		ItemStack grout = grout(player, other);
 		if (grout.isEmpty() && !player.hasInfiniteMaterials()) {
 			return InteractionResult.PASS;
 		}
@@ -239,11 +250,11 @@ public final class ForgeDangers {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** Grout from the off hand first, then the pack; empty if there's none. */
-	private static ItemStack grout(Player player) {
+	/** Grout from the hand without the hammer first, then the pack; empty if there's none. */
+	private static ItemStack grout(Player player, InteractionHand free) {
 		Item grout = Tinkering.GROUT.asItem();
-		if (player.getOffhandItem().is(grout)) {
-			return player.getOffhandItem();
+		if (player.getItemInHand(free).is(grout)) {
+			return player.getItemInHand(free);
 		}
 		Inventory inventory = player.getInventory();
 		for (int i = 0; i < inventory.getContainerSize(); i++) {

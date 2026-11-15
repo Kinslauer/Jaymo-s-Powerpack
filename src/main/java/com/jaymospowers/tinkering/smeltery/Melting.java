@@ -44,9 +44,10 @@ public final class Melting {
 	public static final int PEARL_MB = 250, SLIME_BALL_MB = 250, BLAZE_ROD_MB = 250, BLAZE_POWDER_MB = 125;
 	/**
 	 * What each creature that's made of something gives at each burn in the smeltery, besides its blood
-	 * ({@code SmelteryEntity#COOK_BLOOD}): an enderman 40 health, a golem 100, a big slime 16, a blaze 20, two a burn.
+	 * ({@code SmelteryEntity#COOK_BLOOD}): an enderman 40 health, a golem 100, a big slime 16, a blaze 20, two a burn. A golem
+	 * gives about an ingot in all, well under its drop.
 	 */
-	public static final int ENDER_PER_BURN = 25, IRON_PER_BURN = 10, SLIME_PER_BURN = 25, BLAZE_PER_BURN = 25;
+	public static final int ENDER_PER_BURN = 25, IRON_PER_BURN = 2, SLIME_PER_BURN = 25, BLAZE_PER_BURN = 25;
 
 	/** A creature that melts into what it's made of, on top of its blood. */
 	public record Creature(EntityType<?> type, Molten molten, int perBurn) {

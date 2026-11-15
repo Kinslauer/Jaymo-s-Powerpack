@@ -5,6 +5,8 @@ import com.jaymospowers.tinkering.dangers.Cracks;
 import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -20,6 +22,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +73,16 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	public static final int RAIN_FUEL_LOSS = 5;
 	public static final float CRACK_CHANCE = 1 / 400F, LEAK_CHANCE = 1 / 40F;
 	public static final int LEAK_MB = Molten.NUGGET;
+	/** How long after a burn a creature stays held in the smeltery (an enderman can't teleport out). */
+	static final int HELD_TICKS = 40;
+	/** Creatures cooking in a smeltery, and until when (server thread only). */
+	private static final Map<Entity, Long> COOKING = new WeakHashMap<>();
+
+	/** This creature is cooking in a smeltery: it can't teleport out ({@code EndermanCookingMixin}). */
+	public static boolean cooking(Entity entity) {
+		Long until = COOKING.get(entity);
+		return until != null && entity.level().getGameTime() <= until;
+	}
 
 	private final NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
 	private final int[] progress = new int[MAX_SLOTS];
@@ -84,6 +97,8 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	private boolean dirty;
 	/** (bellows) Melts faster until this game time. */
 	private long blownUntil;
+	/** (the forge's dangers) This storm has already cracked a brick. */
+	private boolean stormCracked;
 	/** (the forge's dangers) The seared bricks of its floor and walls, whole and cracked, as last checked. */
 	private final List<BlockPos> whole = new ArrayList<>(), cracked = new ArrayList<>();
 
@@ -149,8 +164,6 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			checkStructure(level, state);
 			if (formed) {
 				leak(level);
-			}
-			if (formed && fuel > 0) {
 				weather(level);
 			}
 			if (formed && fuel > 0) {
@@ -242,15 +255,27 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 
 	/**
 	 * Rain falling in at the top: the lava fuel hisses away ({@link #RAIN_FUEL_LOSS} each check). A thunderstorm's
-	 * downpour puts it out (the fuel is gone) and the shock of it cracks a seared brick.
+	 * downpour puts it out (the fuel is gone, and any put in goes too until the storm passes); the shock of the first
+	 * dousing cracks a seared brick, once a storm.
 	 */
 	private void weather(ServerLevel level) {
 		BlockPos open = new BlockPos((low.getX() + high.getX()) / 2, high.getY(), (low.getZ() + high.getZ()) / 2);
-		if (ForgeDangers.storm(level, open)) {
+		boolean storm = ForgeDangers.storm(level, open);
+		if (!storm && stormCracked) {
+			stormCracked = false;
+			dirty = true;
+		}
+		if (fuel <= 0) {
+			return;
+		}
+		if (storm) {
 			fuel = 0;
 			dirty = true;
 			ForgeDangers.hiss(level, open, true);
-			crackOne(level);
+			if (!stormCracked) {
+				stormCracked = true;
+				crackOne(level);
+			}
 		} else if (ForgeDangers.wet(level, open)) {
 			fuel = Math.max(0, fuel - RAIN_FUEL_LOSS);
 			dirty = true;
@@ -339,6 +364,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 				continue;
 			}
 			DamageSource heat = living.fireImmune() ? level.damageSources().generic() : level.damageSources().lava();
+			COOKING.put(living, level.getGameTime() + HELD_TICKS);
 			if (living.hurtServer(level, heat, COOK_DAMAGE) && !(living instanceof Player)) {
 				tank.fill(Molten.BLOOD, COOK_BLOOD, false);
 				if (made != null) {
@@ -377,10 +403,21 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 					note(floor, under);
 				}
 			}
-			while (ok && height < MAX_HEIGHT && layer(level, start.above(height), inward, side, left, right, depth, drains)) {
+			while (ok && height < MAX_HEIGHT) {
+				int wholeBefore = whole.size(), crackedBefore = cracked.size();
+				if (!layer(level, start.above(height), inward, side, left, right, depth, drains)) {
+					// a failed (part-built) layer above the top isn't part of it: forget the bricks it noted
+					whole.subList(wholeBefore, whole.size()).clear();
+					cracked.subList(crackedBefore, cracked.size()).clear();
+					break;
+				}
 				height++;
 			}
 			ok = height > 0;
+		}
+		if (!ok) {
+			whole.clear();
+			cracked.clear();
 		}
 		boolean was = formed;
 		formed = ok;
@@ -495,6 +532,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 		ContainerHelper.loadAllItems(input, items);
 		tank.load(input);
 		fuel = input.getIntOr("fuel", 0);
+		stormCracked = input.getBooleanOr("storm_cracked", false);
 		formed = input.getBooleanOr("formed", false);
 		low = BlockPos.of(input.getLongOr("low", 0L));
 		high = BlockPos.of(input.getLongOr("high", 0L));
@@ -514,6 +552,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	private void saveShared(ValueOutput output) {
 		tank.save(output);
 		output.putInt("fuel", fuel);
+		output.putBoolean("storm_cracked", stormCracked);
 		output.putBoolean("formed", formed);
 		output.putLong("low", low.asLong());
 		output.putLong("high", high.asLong());
