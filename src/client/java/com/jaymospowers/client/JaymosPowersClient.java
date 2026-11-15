@@ -183,6 +183,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// the longsword trial (tools/combat_trial): off, the longsword moves keyed in Blockbench; on, the same moves keyed
+		// in Blender, so the two can be compared in game
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("longsword_blender"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: longsword trial, Blender moves"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		// Klei_Wright's own tundra art (CC BY-NC-SA 4.0, resourcepacks/klei_tundra/CREDITS.txt) over ours for the tundra's
 		// blocks, lichen and phosphor; on by default, switched off in Resource Packs for our own art
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("klei_tundra"),

@@ -2,7 +2,8 @@
 
     python3 -I tools/check_player_animations.py
 
-Every file in assets/jaymospowers/player_animations must parse; its emote must have beginTick <= endTick <= stopTick;
+Every file in assets/jaymospowers/player_animations (and the longsword_blender pack's) must parse; its emote must
+have beginTick <= endTick <= stopTick;
 every move's tick must lie within 0..stopTick; every easing must be one of the names the format reads; every move must
 name exactly one known part with known channels. With --expect, the begin/end/stop ticks must also match the ones
 Better Combat's damage windows were tuned to (EXPECTED). Exits 1 on any problem.
@@ -13,6 +14,9 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ANIMS = os.path.join(ROOT, "src", "main", "resources", "assets", "jaymospowers", "player_animations")
+# the longsword trial's Blender moves, in their built-in resource pack (tools/combat_trial)
+PACK_ANIMS = os.path.join(ROOT, "src", "main", "resources", "resourcepacks", "longsword_blender", "assets", "jaymospowers",
+                          "player_animations")
 
 # the easings in use (ours and Better Combat's own files); others may be valid, but these are known to load
 EASINGS = {"LINEAR", "CONSTANT", "EASEINQUAD", "EASEOUTQUAD", "EASEINOUTQUAD"}
@@ -23,6 +27,7 @@ EXPECTED = {
     "sword_twirl_slash": (9, 20, 28), "sword_whirl": (6, 20, 28), "axe_flip_chop": (9, 20, 28),
     "dagger_flip": (3, 20, 28), "polearm_whirl": (6, 20, 28), "staff_twirl_front": (4, 20, 28),
     "staff_whirlwind": (6, 20, 28), "staff_twirl_overhead": (3, 20, 28),
+    "longsword_first_cut": (0, 20, 30), "longsword_heavy_overhead": (0, 20, 30),
 }
 
 
@@ -65,10 +70,10 @@ def check(path, expect):
 
 def main():
     expect = "--expect" in sys.argv
-    files = sorted(f for f in os.listdir(ANIMS) if f.endswith(".json"))
+    files = [os.path.join(d, f) for d in (ANIMS, PACK_ANIMS) for f in sorted(os.listdir(d)) if f.endswith(".json")]
     problems = []
     for f in files:
-        problems += check(os.path.join(ANIMS, f), expect)
+        problems += check(f, expect)
     for p in problems:
         print(p)
     print(f"{len(files)} animations checked, {len(problems)} problems")

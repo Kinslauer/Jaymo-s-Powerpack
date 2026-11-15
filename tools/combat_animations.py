@@ -357,13 +357,14 @@ COMBOS = {
         attack(F, 0.9, "two_handed_stab_right", "staff_stab"),
         attack(V, 1.5, NS + ":staff_twirl_overhead", "staff_slam", 150, 0.6),
     ]},
-    # rising cut, cross cut, half-sword thrust, falling cut
-    "longsword": {"range_bonus": 0.25, "two_handed": True, "pose": "bettercombat:pose_two_handed_sword",
+    # Still Water (the combat-animation trial's moves, tools/combat_trial): from its own guard, a first cut falling
+    # right to left, cross cut, half-sword thrust, a heavy overhead
+    "longsword": {"range_bonus": 0.25, "two_handed": True, "pose": NS + ":longsword_guard",
                   "category": "claymore", "attacks": [
-        attack(V, 0.9, "two_handed_slash_vertical_right", "claymore_swing", 150),
+        attack(V, 0.9, NS + ":longsword_first_cut", "claymore_swing", 150),
         attack(H, 1.0, "two_handed_slash_horizontal_left", "claymore_swing", 150),
         attack(F, 1.1, "two_handed_stab_right", "claymore_stab", 0),
-        attack(V, 1.2, "two_handed_slash_vertical_left", "claymore_slam", 150),
+        attack(V, 1.2, NS + ":longsword_heavy_overhead", "claymore_slam", 150, 0.6),
     ]},
     # wide sweeps and a crushing overhead
     "claymore": {"range_bonus": 0.25, "two_handed": True, "pose": "bettercombat:pose_two_handed_sword",

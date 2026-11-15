@@ -23,6 +23,8 @@ abstract class CrawlAvatarRendererMixin {
 		CrawlPose.extract(entity, state, partialTicks);
 		// (0.15.42) the freerun slide's own lie-back in place of the swimming tilt (see RunPose)
 		com.jaymospowers.client.freerun.RunPose.extractAvatar(entity, state, partialTicks);
+		// and the elbows a Better Combat animation folds (see SwingElbows)
+		com.jaymospowers.client.combat.SwingElbows.extract(entity, state);
 	}
 
 	@Inject(
