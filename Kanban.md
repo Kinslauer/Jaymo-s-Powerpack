@@ -12,6 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Agents/wall-slump|wall-slump]] · 💻 Odysseus · running
 
 
 ## In review
