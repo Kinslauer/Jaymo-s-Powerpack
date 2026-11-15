@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: hermes-modeller
 from: coordinator
 asked: 2026-11-15
-claimed_by: 
+claimed_by: tinker-gadget-icons
 pr: 
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWUTuunHRPHZ4DW2GXz6y1Qf
 ---
