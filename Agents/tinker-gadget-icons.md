@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: tinker-gadget-icons
 branch: claude/tinker-gadget-icons
 with: 
-pr: 
+pr: 1611
 mods: kingdoms
 versions: 
 started: 2026-11-15
@@ -20,6 +20,7 @@ owns:
 - Render all 19 side by side at hotbar size and check each reads apart.
 
 ## Notes
-- 
+- Change note: changes/kingdoms/tinker-gadget-icons.md. tools/gen_tinker_mimic.py left alone.
 
 ## Done
+A player sees 19 distinct hand-drawn gadget icons in the hotbar and the Tinkerer's Notebook instead of the flat placeholders. Checked side by side at hotbar size on light and dark slots; not seen in game.
