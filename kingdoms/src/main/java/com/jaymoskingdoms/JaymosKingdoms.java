@@ -44,6 +44,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Attention.register();
 		FantasyArmorCompat.register();
 		Headsmen.register();
+		SetSigns.register();
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')

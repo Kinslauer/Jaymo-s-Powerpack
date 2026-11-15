@@ -43,9 +43,9 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
   steel plate or netherite piece + one token item = that set's piece. One table of set -> token.
 - **Per-piece bonuses** (`piece-spread`): each set's pieces carry their own small modifiers (speed on boots, attack speed
   on the chest, health on the helm, luck on hoods), constants at the top of the set class.
-- **Whole-set sign** (`set-motes`): faint MagicFx motes in the set's colour while the whole set is worn.
-- **Set capes** (`set-capes`): `ClothCape` hung from chosen chestpieces, in the set's colour.
-- **Villager remarks** (`set-remarks`): MCA villagers make one oblique remark on a known set (like the grime remarks),
+- **Whole-set sign** (`set-motes`, built as `SetSigns`): faint MagicFx motes in the set's colour while the whole set is worn.
+- **Set capes** (`set-capes`, dropped: Fantasy Armor's sets hang their own): `ClothCape` hung from chosen chestpieces, in the set's colour.
+- **Villager remarks** (`set-remarks`, built as `SetSigns`): MCA villagers make one oblique remark on a known set (like the grime remarks),
   never a tooltip paragraph.
 - **Twinned** (`twinned`): paired harness sworn at a shrine; while both halves are worn within 16 blocks, 25% of a hit on
   one goes to the other.
