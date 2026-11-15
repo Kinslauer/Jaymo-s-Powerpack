@@ -46,7 +46,7 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = {"equipBestWeapon", "equipBestRanged"}, at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$gunStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
 		// (and a ranked recruit's issue, a soldier's shield or standard: Ranks)
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
 			villager.setItemSlot(slot, stack);
 		}
 	}
@@ -54,7 +54,7 @@ abstract class McaEquipmentMixin {
 	/** Nor is it put away with a guard's off-duty hands, and what a carter, a fence or a wizard was dressed in isn't taken off them. */
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$issueStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
 			villager.setItemSlot(slot, stack);
 		}
 	}
@@ -62,7 +62,7 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$handStays(VillagerEntityMCA villager, InteractionHand hand, ItemStack stack) {
 		EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
 			villager.setItemInHand(hand, stack);
 		}
 	}

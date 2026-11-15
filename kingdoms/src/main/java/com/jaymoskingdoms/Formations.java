@@ -34,7 +34,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -87,6 +86,12 @@ public final class Formations {
 	static final float WALK = 0.7F, RUN = 1.0F;
 	/** How often ranks are kept (ticks), and how long a locked shield is held each time. */
 	static final int EVERY = 5, SHIELD_TICKS = 15;
+	/** A place's ground is looked for at these heights from its own (a step up at most: never onto a roof), then this far along its rank (blocks). */
+	static final int[] HEIGHTS = {0, -1, 1, -2, -3};
+	static final double[] SHIFTS = {0.0, 1.0, -1.0, 2.0, -2.0};
+	/** Home squads: how often they're kept (ticks), how many follow a leader, how near him they're gathered and how near a player he must be; moving faster than this (squared, a tick) he's walking. */
+	static final int HOME_EVERY = 10, HOME_SQUAD = 5;
+	static final double HOME_NEAR = 12.0, HOME_ROUND = 48.0, MOVING = 0.003;
 
 	/** One player's formation. */
 	static final class Formation {
@@ -126,6 +131,7 @@ public final class Formations {
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Give.TYPE, Give.CODEC);
+		ServerTickEvents.END_SERVER_TICK.register(Formations::homeSquads);
 		if (!McaCompat.LOADED) {
 			return;
 		}
@@ -291,7 +297,7 @@ public final class Formations {
 		return best;
 	}
 
-	/** Whoever {@code player} points at (not one of theirs), within {@link #MARK_REACH}; null if nobody. */
+	/** Whoever {@code player} points at, within {@link #MARK_REACH}, if they're a fair foe ({@link #fair}); null if not. */
 	private static @Nullable LivingEntity mark(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition(), end = eye.add(player.getViewVector(1.0F).scale(MARK_REACH));
 		HitResult block = player.pick(MARK_REACH, 1.0F, false);
@@ -300,7 +306,41 @@ public final class Formations {
 		}
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.0),
 			e -> e instanceof LivingEntity l && l.isAlive() && !e.isSpectator() && !Followers.takesOrders(e, player), eye.distanceToSqr(end));
-		return hit != null && hit.getEntity() instanceof LivingEntity l ? l : null;
+		return hit != null && hit.getEntity() instanceof LivingEntity l && fair(player, l) ? l : null;
+	}
+
+	/**
+	 * Whether {@code player}'s people may be set on {@code e}: a monster; anyone already fighting them or theirs; a realm's
+	 * soldier whose realm is at war with theirs. Never a villager, a guard, someone's pet or another player otherwise
+	 * (a player only when the server allows fighting and the two are at it already).
+	 */
+	static boolean fair(ServerPlayer player, LivingEntity e) {
+		if (Followers.takesOrders(e, player)) {
+			return false;
+		}
+		LivingEntity aims = e instanceof Mob m ? Comrades.target(m) : null;
+		boolean fighting = player.getLastHurtMob() == e || player.getLastHurtByMob() == e
+			|| aims == player || aims != null && Followers.takesOrders(aims, player);
+		if (e instanceof net.minecraft.world.entity.player.Player) {
+			return fighting && player.level().isPvpAllowed();
+		}
+		if (fighting) {
+			return true;
+		}
+		if (e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwnerReference() != null) {
+			return false;
+		}
+		if (e instanceof Worker w && w.factionId() >= 0) {
+			MinecraftServer server = player.level().getServer();
+			Faction mine = Factions.of(server, player.getUUID()), theirs = Factions.get(server, w.factionId());
+			return mine != null && theirs != null && Relations.atWar(mine, theirs);
+		}
+		return e instanceof Enemy && !(e instanceof Villager);
+	}
+
+	/** Whether {@code v} will go at {@code foe} on {@code player}'s word: the same refusals an order to form meets. */
+	private static boolean heeds(Villager v, ServerPlayer player, LivingEntity foe) {
+		return !Possession.held(v) && !Murmur.ignores(v, player) && !Commandments.refusesCommand(v, player, "follow") && !Commandments.spares(v, foe);
 	}
 
 	/** The one looked at in the screen ({@code target}), else the nearest of {@code player}'s, goes for whoever they point at. */
@@ -322,7 +362,7 @@ public final class Formations {
 				}
 			}
 		}
-		if (sent == null || !Languages.understands(player, sent)) {
+		if (sent == null || !Languages.understands(player, sent) || !heeds(sent, player, foe)) {
 			return;
 		}
 		Comrades.aim(sent, foe);
@@ -390,8 +430,61 @@ public final class Formations {
 					keeping.add(v);
 				}
 			}
-			drill(level, keeping, f.shape, f.anchor, f.yaw, false);
+			drill(level, keeping, f.shape, f.anchor, f.yaw, false, player.position());
 		}
+	}
+
+	/**
+	 * Home squads (me-ranks): near players, each leader among a realm's guards at home ({@link Ranks#leads}) heads the
+	 * guards of his realm about him, up to {@link #HOME_SQUAD}: in column behind him while he walks his round, in a line
+	 * before him where he stands (at the gate). Anyone fighting is left to it.
+	 */
+	private static void homeSquads(MinecraftServer server) {
+		if (server.getTickCount() % HOME_EVERY != 0) {
+			return;
+		}
+		for (ServerLevel level : server.getAllLevels()) {
+			if (level.players().isEmpty()) {
+				continue;
+			}
+			Set<UUID> taken = new HashSet<>();
+			for (ServerPlayer player : level.players()) {
+				for (PathfinderMob leader : level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(HOME_ROUND),
+					m -> homeGuard(m) && Ranks.leads(m))) {
+					if (!taken.add(leader.getUUID()) || Comrades.target(leader) != null) {
+						continue;
+					}
+					int faction = ((Worker) leader).factionId();
+					List<PathfinderMob> squad = new ArrayList<>();
+					for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, leader.getBoundingBox().inflate(HOME_NEAR),
+						m -> m != leader && homeGuard(m) && ((Worker) m).factionId() == faction && !Ranks.leads(m) && Comrades.target(m) == null)) {
+						if (squad.size() < HOME_SQUAD && taken.add(m.getUUID())) {
+							squad.add(m);
+						}
+					}
+					if (squad.isEmpty()) {
+						continue;
+					}
+					boolean moving = leader.getDeltaMovement().horizontalDistanceSqr() > MOVING || leader.getNavigation().isInProgress();
+					float yaw = leader.getYRot();
+					Vec3 ahead = facing(yaw);
+					Vec3 anchor = moving ? leader.position().subtract(ahead.scale(SPACING)) : leader.position().add(ahead.scale(SPACING));
+					drill(level, squad, moving ? COLUMN : LINE, anchor, yaw, false, leader.position());
+				}
+			}
+		}
+	}
+
+	/** A realm's guard or archer at home: on duty for a standing realm, not out with a war party, nobody's follower, in no player's ranks. */
+	private static boolean homeGuard(PathfinderMob m) {
+		if (!m.isAlive() || m.isBaby() || m.isSleeping() || m.isPassenger() || Downed.isDowned(m) || !(m instanceof Worker w)
+			|| w.role() != Folk.GUARD && w.role() != Folk.ARCHER || m.hasAttached(Ranks.RANK) || inRanks(m) || WarParties.marching(m.getUUID())) {
+			return false;
+		}
+		if (m instanceof Villager v && (McaCompat.following(v) != null || v.hasAttached(Followers.ORDER))) {
+			return false;
+		}
+		return Ranks.of(m) >= 0;
 	}
 
 	/** The way {@code yaw} faces, flat. */
@@ -489,6 +582,11 @@ public final class Formations {
 	 * walk them by their navigation (a war party on the march, its villagers' brains held), else by their brains.
 	 */
 	static void drill(ServerLevel level, List<? extends PathfinderMob> members, int shape, Vec3 anchor, float yaw, boolean steer) {
+		drill(level, members, shape, anchor, yaw, steer, null);
+	}
+
+	/** {@link #drill}; a place nobody can stand at sends its fighter to {@code fallback} (the leader's place if null). */
+	static void drill(ServerLevel level, List<? extends PathfinderMob> members, int shape, Vec3 anchor, float yaw, boolean steer, @Nullable Vec3 fallback) {
 		if (members.isEmpty()) {
 			return;
 		}
@@ -499,20 +597,43 @@ public final class Formations {
 		List<? extends PathfinderMob> sorted = new ArrayList<>(members);
 		sort(sorted);
 		List<Place> places = places(sorted, shape, anchor, yaw);
+		Vec3 back = fallback != null ? fallback : sorted.getFirst().position();
 		for (int i = 0; i < sorted.size(); i++) {
-			keep(level, sorted.get(i), places.get(i), foe, shape == LINE && places.get(i).front(), steer);
+			keep(level, sorted.get(i), places.get(i), foe, shape == LINE && places.get(i).front(), steer, back);
 		}
 	}
 
-	private static void keep(ServerLevel level, PathfinderMob m, Place place, @Nullable LivingEntity foe, boolean wall, boolean steer) {
+	/**
+	 * (WarParties, at the siege) {@code squad}'s shield wall before the seat: only its shields and its bows hold the
+	 * line; its other blades go on with the assault, and anyone already fighting keeps at it.
+	 */
+	static void wall(ServerLevel level, List<? extends PathfinderMob> squad, Vec3 anchor, float yaw) {
+		List<PathfinderMob> holding = new ArrayList<>();
+		for (PathfinderMob m : squad) {
+			if (Comrades.target(m) == null && (archer(m) || m.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS))) {
+				holding.add(m);
+			}
+		}
+		drill(level, holding, LINE, anchor, yaw, false);
+	}
+
+	/** Whether a shot from {@code owner}, a soldier, passes {@code target} by: one of their own side (ProjectileAlliesMixin). */
+	public static boolean spares(@Nullable Entity owner, Entity target) {
+		if (!(owner instanceof Mob m) || !(target instanceof LivingEntity e) || owner == target || !(inRanks(m) || Ranks.of(m) >= 0)) {
+			return false;
+		}
+		return Comrades.side(e).equals(Comrades.side(m));
+	}
+
+	private static void keep(ServerLevel level, PathfinderMob m, Place place, @Nullable LivingEntity foe, boolean wall, boolean steer, Vec3 fallback) {
 		if (Downed.isDowned(m) || m.isPassenger() || m.isSleeping()) {
 			return;
 		}
-		Vec3 at = ground(level, place.at());
+		Vec3 at = ground(level, place, fallback);
 		boolean bow = archer(m);
 		LivingEntity target = Comrades.target(m);
-		if (target != null && !bow && target.position().distanceToSqr(at) > ENGAGE * ENGAGE) {
-			// (holding the line: they let it come to them)
+		if (target != null && !bow && target.position().distanceToSqr(at) > ENGAGE * ENGAGE && !engaged(m, target)) {
+			// (holding the line: they let it come to them; one already at blows with it keeps at it)
 			Comrades.stand(m);
 			target = null;
 		}
@@ -547,14 +668,41 @@ public final class Formations {
 		}
 	}
 
-	/** {@code to} brought to the ground near its height (unchanged where the ground is far above or below it: a roof, a cliff). */
-	private static Vec3 ground(ServerLevel level, Vec3 to) {
-		BlockPos column = BlockPos.containing(to);
-		if (!level.hasChunkAt(column)) {
-			return to;
+	/** Whether {@code m} is at blows with {@code target}: it's on them, or one of the two has just struck the other. */
+	private static boolean engaged(Mob m, LivingEntity target) {
+		return m.distanceToSqr(target) <= ENGAGE * ENGAGE || m.getLastHurtByMob() == target || m.getLastHurtMob() == target;
+	}
+
+	/**
+	 * Where to stand for {@code place}: ground near its own height ({@link #HEIGHTS}; never up onto a roof), else
+	 * the nearest such spot along its rank ({@link #SHIFTS}), else {@code fallback}.
+	 */
+	private static Vec3 ground(ServerLevel level, Place place, Vec3 fallback) {
+		Vec3 along = new Vec3(-place.face().z, 0.0, place.face().x);
+		for (double s : SHIFTS) {
+			Vec3 p = place.at().add(along.scale(s));
+			BlockPos feet = standable(level, BlockPos.containing(p));
+			if (feet != null) {
+				return new Vec3(p.x, feet.getY(), p.z);
+			}
 		}
-		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-		return Math.abs(top.getY() - to.y) <= 4.0 ? Vec3.atBottomCenterOf(top) : to;
+		return fallback;
+	}
+
+	/** A spot near {@code at}'s height with a floor and room for a body (two blocks clear), or null. */
+	private static @Nullable BlockPos standable(ServerLevel level, BlockPos at) {
+		if (!level.hasChunkAt(at)) {
+			return null;
+		}
+		for (int dy : HEIGHTS) {
+			BlockPos feet = at.above(dy);
+			if (!level.getBlockState(feet.below()).getCollisionShape(level, feet.below()).isEmpty()
+				&& level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()
+				&& level.getBlockState(feet.above()).getCollisionShape(level, feet.above()).isEmpty()) {
+				return feet;
+			}
+		}
+		return null;
 	}
 
 	private static void walk(PathfinderMob m, Vec3 to, boolean steer) {

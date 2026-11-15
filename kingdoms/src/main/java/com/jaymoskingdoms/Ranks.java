@@ -345,10 +345,17 @@ public final class Ranks {
 
 	/** A knight's kit: the realm's knights' plate in the temperate lands, else the land's own champions' set, else trimmed iron. */
 	private static void champion(ServerLevel level, VillagerEntityMCA v, @Nullable Faction realm, Outfits.@Nullable Heraldry arms, Climate climate, boolean iron) {
+		EquipmentSlot[] knights = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND};
+		ItemStack[] had = new ItemStack[knights.length];
+		for (int i = 0; i < knights.length; i++) {
+			had[i] = v.getItemBySlot(knights[i]).copy();
+		}
 		if (realm != null && HeraldryWear.knight(v, realm)) {
-			// (worn as his realm's knights wear it; into the pack too, which MCA dresses from)
-			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET}) {
-				v.getInventory().addItem(v.getItemBySlot(slot).copy());
+			// (his realm's knights' plate, issued as the rest is: what he had back on, and each piece put on only where it's better)
+			for (int i = 0; i < knights.length; i++) {
+				ItemStack plate = v.getItemBySlot(knights[i]).copy();
+				v.setItemSlot(knights[i], had[i]);
+				wear(v, knights[i], plate);
 			}
 			wear(v, EquipmentSlot.LEGS, trim(level, new ItemStack(Items.CHAINMAIL_LEGGINGS), arms));
 			return;
@@ -390,25 +397,108 @@ public final class Ranks {
 		}
 	}
 
-	/** {@code v} puts {@code piece} on in {@code slot}; armour goes in their pack too (MCA dresses from it), and what it replaces leaves the pack. */
+	/**
+	 * {@code v} is issued {@code piece} for {@code slot}: put on where the slot is empty or holds something worse, else
+	 * not issued (their own better gear stays on). Nothing is ever lost: what it displaces goes into their pack, or drops
+	 * at their feet if that's full. Armour and weapons go in the pack as well (MCA dresses and arms them from it, and
+	 * would take off what isn't there); a weapon of the other kind (a bow for a blade) only goes in the pack, so they
+	 * still change between them by range.
+	 */
 	private static void wear(VillagerEntityMCA v, EquipmentSlot slot, ItemStack piece) {
-		if (piece.isEmpty()) {
+		if (piece.isEmpty() || !(v.level() instanceof ServerLevel level)) {
 			return;
 		}
 		SimpleContainer pack = v.getInventory();
 		ItemStack worn = v.getItemBySlot(slot);
+		boolean weapon = slot == EquipmentSlot.MAINHAND, packed = weapon || slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
 		if (!worn.isEmpty()) {
-			for (int i = 0; i < pack.getContainerSize(); i++) {
-				if (ItemStack.isSameItemSameComponents(pack.getItem(i), worn)) {
-					pack.removeItem(i, 1);
-					break;
+			if (weapon && weapon(worn) && ranged(worn) != ranged(piece)) {
+				// (the other kind: carried, not held)
+				if (!holds(pack, piece)) {
+					pack.addItem(piece.copy());
 				}
+				return;
+			}
+			if (!better(v, slot, piece, worn)) {
+				return;
 			}
 		}
-		v.setItemSlot(slot, piece.copy());
-		if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-			pack.addItem(piece.copy());
+		if (packed && !pack.addItem(piece.copy()).isEmpty()) {
+			// (no room in their pack, so MCA would take it off them again: not issued)
+			return;
 		}
+		if (!worn.isEmpty()) {
+			stow(level, v, worn);
+		}
+		// (the very stack in their pack, as MCA dresses them: wear on one is wear on the other)
+		ItemStack own = packed ? held(pack, piece) : null;
+		v.setItemSlot(slot, own != null ? own : piece.copy());
+	}
+
+	/** The stack in {@code pack} the same as {@code stack}, or null. */
+	private static @Nullable ItemStack held(SimpleContainer pack, ItemStack stack) {
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (ItemStack.isSameItemSameComponents(pack.getItem(i), stack)) {
+				return pack.getItem(i);
+			}
+		}
+		return null;
+	}
+
+	/** {@code stack}, taken off {@code v}, goes into their pack (if it isn't there already), or drops at their feet. */
+	private static void stow(ServerLevel level, VillagerEntityMCA v, ItemStack stack) {
+		SimpleContainer pack = v.getInventory();
+		if (holds(pack, stack)) {
+			return;
+		}
+		ItemStack left = pack.addItem(stack.copy());
+		if (!left.isEmpty()) {
+			v.spawnAtLocation(level, left);
+		}
+	}
+
+	private static boolean holds(SimpleContainer pack, ItemStack stack) {
+		return held(pack, stack) != null;
+	}
+
+	private static boolean weapon(ItemStack stack) {
+		return stack.has(DataComponents.WEAPON) || ranged(stack);
+	}
+
+	private static boolean ranged(ItemStack stack) {
+		return stack.getItem() instanceof ProjectileWeaponItem;
+	}
+
+	/**
+	 * Whether {@code piece} is better in {@code slot} than {@code worn}: more armour (and toughness), a weapon that hits
+	 * harder (or any weapon over a thing that isn't one), a banner for a leader's hand, the realm's shield over a plain one.
+	 */
+	private static boolean better(LivingEntity e, EquipmentSlot slot, ItemStack piece, ItemStack worn) {
+		if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+			return value(piece, Attributes.ARMOR, 0.0, slot) + value(piece, Attributes.ARMOR_TOUGHNESS, 0.0, slot)
+				> value(worn, Attributes.ARMOR, 0.0, slot) + value(worn, Attributes.ARMOR_TOUGHNESS, 0.0, slot);
+		}
+		if (slot == EquipmentSlot.MAINHAND) {
+			if (!weapon(worn)) {
+				return true;
+			}
+			if (ranged(worn)) {
+				// (a bow for a bow: theirs stays)
+				return false;
+			}
+			double base = e.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+			return value(piece, Attributes.ATTACK_DAMAGE, base, slot) > value(worn, Attributes.ATTACK_DAMAGE, base, slot);
+		}
+		if (piece.getItem() instanceof BannerItem) {
+			return !(worn.getItem() instanceof BannerItem);
+		}
+		return piece.has(DataComponents.BLOCKS_ATTACKS) && worn.has(DataComponents.BLOCKS_ATTACKS) && !worn.has(DataComponents.BANNER_PATTERNS)
+			&& piece.has(DataComponents.BANNER_PATTERNS);
+	}
+
+	private static double value(ItemStack stack, Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute, double base, EquipmentSlot slot) {
+		return stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY)
+			.compute(attribute, base, slot);
 	}
 
 	/** A shield bearing {@code arms}. */
@@ -457,18 +547,27 @@ public final class Ranks {
 	}
 
 	/**
-	 * From {@code McaEquipmentMixin}: whether MCA's own routine leaves {@code villager}'s {@code slot} hand as it is: a
-	 * ranked recruit's issued weapon and shield, and any soldier's shield or banner (a militia's wall, a leader's standard).
+	 * From {@code McaEquipmentMixin}: whether MCA's own routine leaves {@code villager}'s {@code slot} hand as it is
+	 * instead of putting {@code stack} there: a soldier's shield or banner in the off hand (a militia's wall, a leader's
+	 * standard), which MCA would swap for a plain shield or nothing, unless it's arming that hand. A recruit's weapons
+	 * are theirs to change: MCA arms them from their pack (where their issue is), the best blade or bow for the range;
+	 * one held that isn't in the pack goes into it first, so nothing is lost.
 	 */
-	public static boolean keeps(LivingEntity villager, EquipmentSlot slot) {
-		if (slot.getType() != EquipmentSlot.Type.HAND || villager.level().isClientSide() || of(villager) < 0) {
+	public static boolean keeps(LivingEntity villager, EquipmentSlot slot, ItemStack stack) {
+		if (slot.getType() != EquipmentSlot.Type.HAND || !(villager.level() instanceof ServerLevel level) || of(villager) < 0) {
 			return false;
 		}
 		ItemStack held = villager.getItemBySlot(slot);
-		if (held.isEmpty()) {
+		if (held.isEmpty() || ItemStack.isSameItemSameComponents(held, stack)) {
 			return false;
 		}
-		return villager.hasAttached(RANK) || slot == EquipmentSlot.OFFHAND && (held.has(DataComponents.BLOCKS_ATTACKS) || held.getItem() instanceof BannerItem);
+		if (slot == EquipmentSlot.OFFHAND && (held.has(DataComponents.BLOCKS_ATTACKS) || held.getItem() instanceof BannerItem) && !weapon(stack)) {
+			return true;
+		}
+		if (villager.hasAttached(RANK) && villager instanceof VillagerEntityMCA v && weapon(held) && !holds(v.getInventory(), held)) {
+			stow(level, v, held);
+		}
+		return false;
 	}
 
 	/** The soldiers round each player: their rank's toughness; a realm's militia and soldiers take up its shield, its leaders its banner. */

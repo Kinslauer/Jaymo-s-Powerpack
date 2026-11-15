@@ -937,7 +937,7 @@ final class WarParties {
 				continue;
 			}
 			float yaw = leader.getYRot();
-			Formations.drill(level, rest, Formations.COLUMN, leader.position().subtract(Formations.facing(yaw).scale(Formations.SPACING)), yaw, true);
+			Formations.drill(level, rest, Formations.COLUMN, leader.position().subtract(Formations.facing(yaw).scale(Formations.SPACING)), yaw, true, leader.position());
 			for (PathfinderMob m : rest) {
 				done.add(m.getUUID());
 			}
@@ -964,7 +964,7 @@ final class WarParties {
 				continue;
 			}
 			Vec3 anchor = rally.add(right.scale((i - (n - 1) / 2.0) * width)).add(ahead.scale(WALL_AHEAD));
-			Formations.drill(level, squad, Formations.LINE, anchor, yaw, false);
+			Formations.wall(level, squad, anchor, yaw);
 		}
 	}
 
@@ -1081,6 +1081,16 @@ final class WarParties {
 			}
 			STRAYS.add(folk);
 		}
+	}
+
+	/** (Formations' home squads) whether {@code id} is out with a war party. */
+	static boolean marching(UUID id) {
+		for (Party party : ACTIVE.values()) {
+			if (party.soldiers.contains(id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	static void clear() {
