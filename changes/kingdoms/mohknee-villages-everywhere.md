@@ -1,4 +1,0 @@
-# Blossom villages across all of Mohknee; no sunken palace on dry land
-- **Blossom villages** now rise on any of Mohknee's dry land (meadow, plains, forest, flower forest, cherry grove...), not only in cherry groves. Cherry groves are about an eighth of Mohknee and mostly steep, and the home continent's villages are kept off Mohknee, so the land stayed nearly empty. Everything else holds: by the water, never on an island, 384 blocks from any other seat, out of sight; the first one with no kingdom near is the castle town. Every settlement on Mohknee is Blossom by its place (`Palette.at`), whatever its biome (`BlossomVillages.dryLand`).
-- **`/kingdom mohknee palace build`** refuses on dry land: the sunken palace belongs on the seabed, and built on land its halls' water ran out over the country round it.
-- Not built or seen in game here; CI compiles it.
