@@ -545,6 +545,7 @@ public final class GravityPower implements Power {
 			GravityForward.clear();
 			GravityCometRam.clear();
 			GravityWalk.clear();
+			GravityOverturn.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
 	}
@@ -704,6 +705,24 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
+				if (down && PowerInput.isDown(player, PowerKey.ABILITY_4) && state.liftTarget < 0 && !state.chunkHold && state.ripFrom < 0
+					&& com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4)) {
+					// B+V (B held, V tapped): Overturn, the creature in sight falls up, or holds on to the ground if it's the stronger;
+					// the B held for it never lands its Crush or Wave, and this V never toggles Weightless
+					state.crushFrom = -1;
+					state.vDownAt = -1;
+					if (!ready(player, CRUSH)) {
+						fizzle(player);
+						return;
+					}
+					int cooldown = GravityOverturn.start(player);
+					if (cooldown < 0) {
+						fizzle(player);
+					} else {
+						player.setAttached(COOLDOWNS, cooldowns(player).withCrush(player.level().getGameTime() + cooldown, cooldown));
+					}
+					return;
+				}
 				// held down before Weightless is yours: the item pull (see tick)
 				if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
 					return;
@@ -2143,6 +2162,7 @@ public final class GravityPower implements Power {
 		GravitySideFall.tick(server);
 		GravityWave.tick(server);
 		GravityGutPunch.tick(server);
+		GravityOverturn.tick(server);
 		GravityWalk.tick(server);
 		if (!SLAMS.isEmpty()) {
 			tickSlams(server);

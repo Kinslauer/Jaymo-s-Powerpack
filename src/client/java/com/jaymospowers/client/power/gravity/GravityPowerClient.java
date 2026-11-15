@@ -144,8 +144,8 @@ public final class GravityPowerClient implements PowerClient {
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		long now = player.level().getGameTime();
 		GravityCooldowns cooldowns = cooldowns(player);
-		if (key == PowerKey.ABILITY_2 && down && crushFrom >= 0) {
-			// (0.21.10) B+G: the rocks, not a Crush (the held B lands nothing)
+		if ((key == PowerKey.ABILITY_2 || key == PowerKey.ABILITY_3) && down && crushFrom >= 0) {
+			// (0.21.10) B+G: the rocks, not a Crush (the held B lands nothing); B+V: Overturn, likewise
 			crushFrom = -1;
 		} else if (key == PowerKey.ABILITY_4) {
 			crushFrom = down && now >= cooldowns.crush() ? now : -1;
