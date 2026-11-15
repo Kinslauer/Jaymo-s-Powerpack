@@ -1166,8 +1166,14 @@ public final class Tales {
 			pos = Optional.of(BlockPos.of(left));
 		}
 		UUID giver = run.giverId();
-		Optional<UUID> other = who.equals("giver") || kind.equals("defend") ? Optional.ofNullable(giver) : Optional.ofNullable(uuid(run.cast.get(who)));
+		// (a captive or a criminal is set out by the job itself, at its camp: QuestJobs)
+		boolean kidnap = kind.equals("rescue") || kind.equals("capture");
+		Optional<UUID> other = kidnap ? Optional.empty() : who.equals("giver") || kind.equals("defend") ? Optional.ofNullable(giver) : Optional.ofNullable(uuid(run.cast.get(who)));
 		String otherName = who.equals("giver") ? run.giverName : run.names.getOrDefault(who, "");
+		if (kidnap) {
+			// (whose kin the captive is, what the criminal did: after the bar, as on the board)
+			otherName += "|" + (kind.equals("rescue") ? Tale.pickString(step, "kin", facts, "neighbour") : Tale.pickString(step, "crime", facts, "theft"));
+		}
 		int count = Tale.pickNumber(step, kind.equals("defend") ? "waves" : "count", facts, kind.equals("defend") ? 3 : 1);
 		int questKind = switch (kind) {
 			case "slay" -> Quest.SLAY;
@@ -1178,6 +1184,8 @@ public final class Tales {
 			case "blast" -> Quest.BLAST;
 			case "stash" -> Quest.STASH;
 			case "lamps" -> Quest.LAMPS;
+			case "rescue" -> Quest.HOSTAGE;
+			case "capture" -> Quest.CAPTURE;
 			default -> Quest.TALE;
 		};
 		String target = switch (kind) {
@@ -1212,7 +1220,8 @@ public final class Tales {
 		Quest.Objective o = q.objective();
 		if (goal == null) {
 			String kind = Tale.string(step, "do", "");
-			goal = Component.translatable("tale.jaymoskingdoms.goal." + kind, o.otherName().isEmpty() ? o.place() : o.otherName(), o.place());
+			String name = o.otherName().contains("|") ? o.otherName().substring(0, o.otherName().indexOf('|')) : o.otherName();
+			goal = Component.translatable("tale.jaymoskingdoms.goal." + kind, name.isEmpty() ? o.place() : name, o.place());
 		}
 		if (o.count() > 1 && (q.kind() == Quest.SLAY || q.kind() >= Quest.PACK)) {
 			goal.append(Component.literal(" (" + o.progress() + "/" + o.count() + ")"));
@@ -1238,6 +1247,12 @@ public final class Tales {
 		return step == null ? 2 : Math.clamp(Tale.pickNumber(step, "stars", facts(player, run), 2), 1, 5);
 	}
 
+	/** ({@link QuestJobs}) Where a tale's captive is brought home to: the tale's home. Null if it isn't a tale's. */
+	static @Nullable BlockPos home(ServerPlayer player, Quest q) {
+		Run run = runOf(player, q);
+		return run == null ? null : BlockPos.of(run.home);
+	}
+
 	/** ({@link QuestJobs}) A tale's job step is done. */
 	static void jobDone(ServerPlayer player, Quest q) {
 		Run run = runOf(player, q);
@@ -1251,16 +1266,33 @@ public final class Tales {
 				long at = charge.blockPosition().asLong();
 				each(player, run, r -> r.places.put("@" + who, at));
 			}
+			if (q.kind() == Quest.HOSTAGE && q.objective().other().isPresent() && player.level() instanceof ServerLevel level
+				&& level.getEntity(q.objective().other().get()) instanceof Mob freed) {
+				// (the one brought home is the tale's own from now on, where they stand)
+				String who = Tale.pickString(step, "who", facts(player, run), "");
+				long at = freed.blockPosition().asLong();
+				String id = freed.getStringUUID();
+				each(player, run, r -> {
+					r.cast.put(who, id);
+					r.places.put("@" + who, at);
+				});
+				TaleCast.adopt(freed, run.instance, who);
+			}
 			go(player, run, step.get("then"), null);
 		}
 	}
 
 	/** ({@link QuestJobs}) A tale's job step failed: the tale goes where the step says a failure leads, or the step is set again. */
-	static void jobFailed(ServerPlayer player, Quest q) {
+	static void jobFailed(ServerPlayer player, Quest q, String why) {
 		Run run = runOf(player, q);
 		Tale tale = run == null ? null : Tale.get(run.tale);
 		JsonObject step = tale == null ? null : tale.step(run.step);
 		if (step == null || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		if ((why.equals("let_go") || why.equals("joined")) && step.has("let_go")) {
+			// (a criminal let go, or taken into service: the tale says where that leads)
+			go(player, run, step.get("let_go"), null);
 			return;
 		}
 		if (step.has("failed")) {

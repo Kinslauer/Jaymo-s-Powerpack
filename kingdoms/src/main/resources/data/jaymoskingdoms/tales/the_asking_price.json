@@ -1,0 +1,499 @@
+{
+	"title": "The Asking Price",
+	"start": {
+		"by": "giver",
+		"jobs": [
+			"farmer",
+			"fletcher",
+			"mason",
+			"cartographer",
+			"shepherd",
+			"fisherman"
+		],
+		"weight": 2
+	},
+	"roll": {
+		"betrayer": [
+			"none",
+			"steward"
+		]
+	},
+	"cast": {
+		"taken": {
+			"name": [
+				"Edda",
+				"Maren",
+				"Ysolde",
+				"Fenna"
+			],
+			"body": "villager",
+			"job": "none",
+			"female": true,
+			"at": "yard",
+			"late": true
+		},
+		"ringleader": {
+			"name": [
+				"Corran Ashby",
+				"Wat Mallory",
+				"Dunstan Pike"
+			],
+			"body": "fighter",
+			"female": false,
+			"at": "hut",
+			"late": true,
+			"health": 70,
+			"damage": 7,
+			"armor": 6,
+			"hand": "minecraft:iron_sword",
+			"chest": "minecraft:leather_chestplate"
+		},
+		"moll": {
+			"name": [
+				"Moll Gorse",
+				"Bet Hanley",
+				"Old Agna"
+			],
+			"body": "villager",
+			"job": "none",
+			"female": true,
+			"at": "tavern"
+		},
+		"steward": {
+			"if": "betrayer=steward",
+			"name": [
+				"Jory Fenn",
+				"Hob Carrick",
+				"Alder Wynne"
+			],
+			"body": "villager",
+			"job": "none",
+			"female": false,
+			"at": "yard"
+		}
+	},
+	"places": {
+		"yard": {
+			"at": "home",
+			"name": "the yard"
+		},
+		"tavern": {
+			"at": "town",
+			"name": "the tavern"
+		},
+		"oak": {
+			"at": "road",
+			"from": "home",
+			"dist": [
+				100,
+				180
+			],
+			"name": "the hollow oak"
+		},
+		"camp": {
+			"at": "wild",
+			"from": "home",
+			"dist": [
+				200,
+				360
+			],
+			"name": "the outlaws' camp"
+		},
+		"hut": {
+			"at": "wild",
+			"from": "camp",
+			"dist": [
+				150,
+				300
+			],
+			"name": "the charcoal burners' hut"
+		}
+	},
+	"first": "ask",
+	"steps": {
+		"ask": {
+			"do": "talk",
+			"who": "giver",
+			"say": [
+				"{taken} went to market four days ago and didn't come home. This morning there was a note pushed under my door.",
+				"It says {coins:30} at {place:oak}, three nights from now, and I'll have her back. I haven't got {coins:30}. I haven't got half of it."
+			],
+			"replies": [
+				{
+					"say": "Show me the note.",
+					"then": "note",
+					"journal": "{taken}, {giver}'s daughter, has been taken on the market road. Whoever has her wants {coins:30} left at {place:oak}."
+				},
+				{
+					"say": "I'll carry the money for you.",
+					"needs_coins": 30,
+					"then": "paying",
+					"mark": "ap_paid",
+					"journal": "{taken}, {giver}'s daughter, has been taken. I'm to leave {coins:30} of my own at {place:oak}."
+				},
+				{
+					"say": "I can't help you.",
+					"then": "end:refused"
+				}
+			]
+		},
+		"note": {
+			"do": "talk",
+			"who": "giver",
+			"say": [
+				"Here. Somebody wrote it who can write, which is more than most up on the moor.",
+				"It knows her name. It knows she'd be on the road that day, alone. Nobody knew that but us."
+			],
+			"replies": [
+				{
+					"say": "Who else knew she'd be on the road?",
+					"then": "who_knew"
+				},
+				{
+					"say": "I'll watch the drop and see who comes for it.",
+					"then": "wait_drop",
+					"journal": "The note knew {taken} would be on the road alone. I'm going to watch {place:oak}."
+				}
+			]
+		},
+		"who_knew": {
+			"do": "talk",
+			"who": "giver",
+			"say": {
+				"?betrayer=steward": "Us. And {steward}, who drove the cart as far as the ford and came back without her. He says she wanted to walk the last of it. She does like to walk.",
+				"?": "Half the market, I suppose. She sells there every week. Ask at the tavern. Whoever does this drinks somewhere."
+			},
+			"then": "to_tavern",
+			"journal": {
+				"?betrayer=steward": "Only {giver}'s household knew {taken} would be on the road, and {steward}, who drove her as far as the ford.",
+				"?": "Anyone at market could have known {taken}'s road. Someone at the tavern may know who takes people."
+			}
+		},
+		"paying": {
+			"do": "talk",
+			"who": "giver",
+			"say": "You'd do that? For us? Then go, and bring her back, and I'll pay you back if it takes me ten years.",
+			"then": "wait_drop"
+		},
+		"to_tavern": {
+			"do": "go",
+			"to": "tavern",
+			"goal": "Ask around at {place:tavern}",
+			"then": "gossip"
+		},
+		"gossip": {
+			"do": "talk",
+			"who": "moll",
+			"goal": "Speak with {moll}",
+			"say": [
+				"Takers, is it? There's a band up past the hills that's been doing it since the patrols stopped coming. They take one, they keep them tied at the fire, they send a note. Folk pay.",
+				"They don't always give back what they're paid for, mind. Two springs ago they sent a boy home without his ears because the father was short."
+			],
+			"replies": [
+				{
+					"say": "Where's their camp?",
+					"needs_coins": 3,
+					"then": "told_camp",
+					"journal": "{moll} at the tavern told me where the takers camp, for a few coins."
+				},
+				{
+					"say": "Then I'll watch the drop.",
+					"then": "wait_drop"
+				}
+			]
+		},
+		"told_camp": {
+			"do": "talk",
+			"who": "moll",
+			"say": "Past {place:oak}, out in the wild, where the smoke goes up and nobody goes to look. {way:camp}. Don't tell them it was Moll.",
+			"then": "to_camp"
+		},
+		"wait_drop": {
+			"do": "wait",
+			"days": [
+				2,
+				3
+			],
+			"wake": "none",
+			"then": "to_oak"
+		},
+		"to_oak": {
+			"do": "go",
+			"to": "oak",
+			"goal": "Watch {place:oak}",
+			"then": "search_oak"
+		},
+		"search_oak": {
+			"do": "search",
+			"at": "oak",
+			"need": 2,
+			"goal": "Look over {place:oak}",
+			"clues": [
+				{
+					"name": "Boot marks in the mud",
+					"item": "minecraft:leather_boots",
+					"lore": [
+						"Three men, heavy, one with a dragging foot.",
+						"The tracks go off toward the wild."
+					],
+					"journal": "Three men came to {place:oak}. Their tracks lead off into the wild."
+				},
+				{
+					"name": "A second note",
+					"item": "minecraft:paper",
+					"lore": {
+						"?mark:ap_paid": [
+							"Thank you for the coin.",
+							"She's worth twice that. Same place, three days."
+						],
+						"?": [
+							"No coin, no girl.",
+							"You have one more chance."
+						]
+					},
+					"journal": {
+						"?mark:ap_paid": "They took the coin and asked for twice as much. They were never going to give her back.",
+						"?": "They left a second note. They're losing patience."
+					}
+				},
+				{
+					"name": "A cart driver's whip",
+					"item": "minecraft:string",
+					"lore": [
+						"Plaited leather, the kind a household's driver carries.",
+						"Someone dropped it while they waited."
+					],
+					"journal": "A driver's whip was dropped at the drop. I've seen one like it in {giver}'s yard.",
+					"if": "betrayer=steward"
+				}
+			],
+			"then": "to_camp"
+		},
+		"to_camp": {
+			"do": "go",
+			"to": "camp",
+			"goal": "Find the outlaws' camp",
+			"then": "free_her"
+		},
+		"free_her": {
+			"do": "rescue",
+			"who": "taken",
+			"at": "camp",
+			"kin": "daughter",
+			"stars": 2,
+			"goal": "Free {taken} and bring her home to {place:yard}",
+			"journal": "{taken} was tied at the outlaws' fire. I got her out.",
+			"failed": "end:lost",
+			"then": "home_talk"
+		},
+		"home_talk": {
+			"do": "talk",
+			"who": "taken",
+			"goal": "Speak with {taken}",
+			"say": {
+				"?betrayer=steward": [
+					"I knew him. The one who took the cart from me at the ford. It was {steward}'s cart, and {steward} handed me down to them himself.",
+					"The one in charge is called {ringleader}. He went off before you came, with the coin. He said there were other farms."
+				],
+				"?": [
+					"They kept me tied at the fire like a sack of meal. They talked about the next one while I listened.",
+					"The one in charge is called {ringleader}. He went off before you came. He said there were other farms."
+				]
+			},
+			"replies": [
+				{
+					"say": "Then I'll bring {ringleader} in to answer for it.",
+					"then": "tell_giver",
+					"journal": "{taken} is home. The one who leads the takers is {ringleader}, and he's out there still."
+				},
+				{
+					"say": "You're home. That's what matters.",
+					"then": "end:home_only"
+				}
+			]
+		},
+		"tell_giver": {
+			"do": "talk",
+			"who": "giver",
+			"goal": "Speak with {giver}",
+			"say": {
+				"?betrayer=steward": "{steward}? In my house twelve years, eating at my table? Find him. No. Find the other one first. I want them both standing in front of the court, and I want to look at them.",
+				"?": "She's home. She's home. And you want to go after them. I won't stop you. The court pays for takers brought in alive. They want to hang them in front of people."
+			},
+			"then": {
+				"?betrayer=steward": "steward_talk",
+				"?": "wait_hunt"
+			}
+		},
+		"steward_talk": {
+			"do": "talk",
+			"who": "steward",
+			"goal": "Speak with {steward}",
+			"say": [
+				"She told you. Of course she did.",
+				"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked another man's ground."
+			],
+			"replies": [
+				{
+					"say": "Where's {ringleader}?",
+					"then": "steward_tells",
+					"journal": "{steward} sold {taken} to the takers for a share of the ransom."
+				},
+				{
+					"say": "You'll answer to {giver}.",
+					"then": "steward_tells",
+					"mark": "ap_exposed",
+					"journal": "{steward} sold {taken} to the takers. {giver} will know it."
+				}
+			]
+		},
+		"steward_tells": {
+			"do": "talk",
+			"who": "steward",
+			"say": "{place:hut}. He holes up there between jobs. Go on, then. I won't run. Where would I run to?",
+			"then": "wait_hunt"
+		},
+		"wait_hunt": {
+			"do": "wait",
+			"days": [
+				3,
+				6
+			],
+			"wake": "letter",
+			"letter": {
+				"from": "{moll}",
+				"lines": [
+					"You didn't hear this from me.",
+					"{ringleader} came down to drink last night with two of his and a purse that wasn't his. They've gone to ground at {place:hut} until the talk dies down.",
+					"If you're going, go soon. They don't stay anywhere long."
+				]
+			},
+			"then": "to_hut"
+		},
+		"to_hut": {
+			"do": "go",
+			"to": "hut",
+			"goal": "Go to {place:hut}",
+			"then": "take_him"
+		},
+		"take_him": {
+			"do": "capture",
+			"who": "ringleader",
+			"at": "hut",
+			"crime": "kidnapping",
+			"stars": 3,
+			"goal": "Bring {ringleader} back to {giver} alive, tied or beaten down",
+			"journal": "{ringleader} was brought back alive and handed over to the court.",
+			"failed": "end:ringleader_dead",
+			"let_go": "end:let_go",
+			"then": {
+				"?betrayer=steward": "steward_end",
+				"?": "wait_after"
+			}
+		},
+		"steward_end": {
+			"do": "talk",
+			"who": "giver",
+			"goal": "Speak with {giver}",
+			"say": {
+				"?mark:ap_exposed": "I told the court about {steward} too. They took him with the other one. He didn't look at me. Twelve years.",
+				"?": "{steward} is gone. Packed his bag in the night and walked. I let him. I couldn't have stood to look at him in a court."
+			},
+			"then": "wait_after"
+		},
+		"wait_after": {
+			"do": "wait",
+			"days": [
+				5,
+				8
+			],
+			"wake": "letter",
+			"letter": {
+				"from": "{taken}",
+				"lines": [
+					"I walked to market today. On my own. Father wanted to come and I told him no.",
+					"They hanged {ringleader} at the crossroads last week. I didn't go to see. I thought I'd want to and I didn't.",
+					"Come by when you pass. We'll have the good bread."
+				]
+			},
+			"then": "end:justice"
+		}
+	},
+	"endings": {
+		"refused": {
+			"text": "I left {giver} with a note and a price they couldn't pay.",
+			"failed": true
+		},
+		"lost": {
+			"text": "{taken} died before she came home. {giver} paid for nothing in the end, and neither did I.",
+			"failed": true,
+			"town": [
+				"They say {giver}'s girl didn't come back. They say someone went for her and it wasn't enough."
+			]
+		},
+		"home_only": {
+			"text": "{taken} is home. {ringleader} is still out there with the next note in his pocket.",
+			"reward": {
+				"coins": 10,
+				"hearts": 12,
+				"reputation": 8
+			},
+			"town": [
+				"{giver}'s girl came home. Somebody went up and fetched her out of the takers' camp.",
+				"They still take people on the market road. Nobody's gone after the one in charge."
+			]
+		},
+		"justice": {
+			"text": "{taken} is home, and {ringleader} answered for it in front of the court, alive, as the court wanted.",
+			"reward": {
+				"coins": 18,
+				"hearts": 15,
+				"reputation": 15
+			},
+			"marks": [
+				"ap_justice"
+			],
+			"town": [
+				"They brought {ringleader} in trussed like a hog. The whole square came out to see.",
+				"The market road's quiet again. Folk are letting their children walk it."
+			],
+			"returns": {
+				"who": "taken",
+				"days": [
+					6,
+					10
+				],
+				"as": "thanks",
+				"say": "I said the good bread and I meant it. Father sent this too. He says it isn't enough and he's right.",
+				"gift": [
+					"minecraft:bread*6",
+					"minecraft:emerald*4"
+				]
+			}
+		},
+		"ringleader_dead": {
+			"text": "{taken} is home. {ringleader} is dead, and the court wanted him alive to answer. Nobody heard what he'd have said.",
+			"reward": {
+				"coins": 8,
+				"hearts": 10,
+				"reputation": 4
+			},
+			"town": [
+				"{ringleader}'s dead. Good riddance, but the court's sour about it. They wanted him for the crossroads."
+			]
+		},
+		"let_go": {
+			"text": "{taken} is home. I had {ringleader} tied at my feet and let him go.",
+			"reward": {
+				"coins": 6,
+				"hearts": 6
+			},
+			"against": [
+				"law"
+			],
+			"town": [
+				"They say whoever brought {giver}'s girl home had the taker himself and let him walk. I don't understand people."
+			]
+		}
+	}
+}
