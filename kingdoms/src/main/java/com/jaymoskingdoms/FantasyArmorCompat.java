@@ -265,7 +265,8 @@ public final class FantasyArmorCompat {
 		for (int i = 0; i < SLOTS.length; i++) {
 			Optional<Item> piece = piece(set, i);
 			if (piece.isPresent()) {
-				if (!e.getItemBySlot(SLOTS[i]).is(piece.get())) {
+				// (a worn-out piece does nothing till it is repaired)
+				if (!e.getItemBySlot(SLOTS[i]).is(piece.get()) || e.getItemBySlot(SLOTS[i]).isBroken()) {
 					return false;
 				}
 				any = true;
