@@ -573,6 +573,56 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Bloodied.zombieBlood(LivingEntity)} and {@code washZombieBlood(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle zombieBloodOf, washZombieBloodOf;
+	private static boolean lookedForZombieBlood;
+
+	private static void lookForZombieBlood() {
+		if (lookedForZombieBlood) {
+			return;
+		}
+		lookedForZombieBlood = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> bloodied = Class.forName("com.jaymospowers.core.blood.Bloodied");
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			zombieBloodOf = lookup.findStatic(bloodied, "zombieBlood",
+				java.lang.invoke.MethodType.methodType(float.class, net.minecraft.world.entity.LivingEntity.class));
+			washZombieBloodOf = lookup.findStatic(bloodied, "washZombieBlood",
+				java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' zombie blood (older Powers?)", e);
+		}
+	}
+
+	/** How much of a zombie's rotten blood is on {@code body}'s skin or armour, 0 to 1 (Jaymo's Powers); 0 without it. */
+	public static float zombieBlood(net.minecraft.world.entity.LivingEntity body) {
+		lookForZombieBlood();
+		if (zombieBloodOf == null) {
+			return 0.0F;
+		}
+		try {
+			return (float)zombieBloodOf.invoke(body);
+		} catch (Throwable e) {
+			return 0.0F;
+		}
+	}
+
+	/** Washes every bit of a zombie's blood off {@code body} and its armour (soaked through); true if there was any. */
+	public static boolean washZombieBlood(net.minecraft.world.entity.LivingEntity body) {
+		lookForZombieBlood();
+		if (washZombieBloodOf == null) {
+			return false;
+		}
+		try {
+			return (boolean)washZombieBloodOf.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Powers' {@code DivineSense.stayed(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle stayedDivine;
 	private static boolean lookedForStayed;

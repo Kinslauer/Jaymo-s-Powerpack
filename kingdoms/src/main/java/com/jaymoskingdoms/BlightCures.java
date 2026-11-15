@@ -240,8 +240,22 @@ public final class BlightCures {
 		return InteractionResult.PASS;
 	}
 
-	/** Gilded flesh and an empty bottle handed to an old druid of the groves: they brew the cure. */
+	/** The cure given to a sick villager; gilded flesh and an empty bottle handed to an old druid of the groves: they brew the cure. */
 	private static InteractionResult useEntity(Player player, Level level, InteractionHand hand, Entity target, @Nullable EntityHitResult hit) {
+		if (target instanceof Villager sick && player.getItemInHand(hand).is(CURE) && HollowBlight.blighted(sick)) {
+			// the cure given to one of the sick: they're well, and they remember who did it
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && HollowBlight.cure(sick)) {
+				ItemStack held = player.getItemInHand(hand);
+				if (!player.hasInfiniteMaterials()) {
+					held.shrink(1);
+					give(sp, new ItemStack(Items.GLASS_BOTTLE));
+				}
+				level.playSound(null, sick.getX(), sick.getY(), sick.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
+				Fx.burst(server, sick.getX(), sick.getY() + 1.2, sick.getZ(), 0xE8C860, 0.5F, 8, 0.3, 0.3, 0.3);
+				BlightSpread.cured(server, sick, sp);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (!(target instanceof Villager druid) || !druid.entityTags().contains(Groves.DRUID_TAG) || !player.getItemInHand(hand).is(GILDED_FLESH)) {
 			return InteractionResult.PASS;
 		}

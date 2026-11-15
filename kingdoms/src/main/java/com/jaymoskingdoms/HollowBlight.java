@@ -129,6 +129,8 @@ public final class HollowBlight {
 		});
 		BlightSigns.init();
 		BlightCures.register();
+		BlightSpread.register();
+		BlightQuarantine.register();
 		ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
 		PowersCompat.tellMidTurns(HollowBlight::midTurn);
 		PowersCompat.<net.minecraft.world.entity.LivingEntity>listen("com.jaymospowers.core.wounds.Treatment", "ANY_TENDED_LISTENERS",
@@ -154,7 +156,7 @@ public final class HollowBlight {
 		}
 	}
 
-	private static boolean immune(ServerPlayer player) {
+	static boolean immune(ServerPlayer player) {
 		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
 			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player)
 			|| BlightCures.proof(player);
@@ -263,6 +265,7 @@ public final class HollowBlight {
 		BlightSigns.clear(player);
 		REST.remove(player.getUUID());
 		WITHERED.remove(player.getUUID());
+		BlightQuarantine.cleared(player);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -384,6 +387,7 @@ public final class HollowBlight {
 		player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), blight.told(), true,
 				player.level().getGameTime() + TURN_DARK, 0L));
 		BlightSigns.clear(player);
+		BlightQuarantine.cleared(player);
 		player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		// Pass out via Powers' downing (eyes closed, black screen) instead of a scoreboard tag: Powers owns
 		// the downed state and wakes them itself. Kingdoms rises the turn at wakeAt, the same moment.

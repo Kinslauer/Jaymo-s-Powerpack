@@ -487,6 +487,41 @@ public final class Bloodied {
 		}
 	}
 
+	/**
+	 * How much of the dead's own blood ({@link com.jaymospowers.core.BladeBlood#ROTTEN}, a zombie's) is on {@code body}'s skin
+	 * or the armour it wears, 0 to 1 (the most on any of them). Jaymo's Kingdoms' Hollow's blight gets in through it.
+	 */
+	public static float zombieBlood(LivingEntity body) {
+		Coat coat = coat(body);
+		float most = coat != null && (coat.color() & 0xFFFFFF) == com.jaymospowers.core.BladeBlood.ROTTEN ? coat.level() : 0.0F;
+		for (EquipmentSlot slot : SLOTS) {
+			Blood blood = blood(body.getItemBySlot(slot));
+			if (blood != null && (blood.color() & 0xFFFFFF) == com.jaymospowers.core.BladeBlood.ROTTEN) {
+				most = Math.max(most, blood.level());
+			}
+		}
+		return most;
+	}
+
+	/** Soaked through: the dead's blood ({@link #zombieBlood}) comes off {@code body} and its armour, all of it. True if there was any. */
+	public static boolean washZombieBlood(LivingEntity body) {
+		boolean any = false;
+		Coat coat = coat(body);
+		if (coat != null && (coat.color() & 0xFFFFFF) == com.jaymospowers.core.BladeBlood.ROTTEN) {
+			body.removeAttached(COAT);
+			any = true;
+		}
+		for (EquipmentSlot slot : SLOTS) {
+			ItemStack stack = body.getItemBySlot(slot);
+			Blood blood = blood(stack);
+			if (blood != null && (blood.color() & 0xFFFFFF) == com.jaymospowers.core.BladeBlood.ROTTEN) {
+				stack.remove(BLOOD);
+				any = true;
+			}
+		}
+		return any;
+	}
+
 	/** Whether {@code body} or anything it wears or holds has blood on it. */
 	public static boolean anyBlood(LivingEntity body) {
 		if (coat(body) != null || blood(body.getMainHandItem()) != null || blood(body.getOffhandItem()) != null) {

@@ -99,6 +99,10 @@ public final class BlightSigns {
 		net.minecraft.world.phys.Vec3 look = body.getLookAngle();
 		level.sendParticles(Fx.miasma(0x9A9E92, 0.6F), body.getX() + look.x * 0.4, body.getEyeY() - 0.1, body.getZ() + look.z * 0.4, 3,
 			0.08, 0.05, 0.08, 0.01);
+		BlightSpread.coughed(level, body);
+		if (body instanceof ServerPlayer player) {
+			BlightQuarantine.coughed(level, player);
+		}
 		long now = level.getGameTime();
 		Long last = REMARKED.get(body.getUUID());
 		if (last != null && now - last < REMARK_GAP && now >= last) {
@@ -120,7 +124,7 @@ public final class BlightSigns {
 	}
 
 	/** The motes only the knowing see, and a healer who sees it in {@code player}. */
-	private static void tell(ServerLevel level, LivingEntity body, long now) {
+	static void tell(ServerLevel level, LivingEntity body, long now) {
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, body.getBoundingBox().inflate(TELL_RANGE),
 			p -> p.isAlive() && knowsWounds(p))) {
 			level.sendParticles(p, Fx.mote(MOTE, MOTE_SIZE), false, false, body.getX(), body.getY() + body.getBbHeight() * 0.55, body.getZ(), 3,
