@@ -50,6 +50,12 @@ public final class MonsterGear {
 	static final float RARE_ENCHANT_CHANCE = 0.3F;
 	static final int RARE_ENCHANT_LEVEL = 12, LEGENDARY_ENCHANT_LEVEL = 25;
 
+	/**
+	 * Per world tier: the chance one of the risen dead comes up in a whole dark set of Fantasy Armor's instead
+	 * ({@link FantasyArmorCompat}, only where that mod is loaded), always enchanted as legendary gear is.
+	 */
+	static final float[] FANTASY_SET_CHANCE = {0.0F, 0.0F, 0.0F, 0.04F, 0.10F};
+
 	/** (0.7.386) How often a star-touched mob that wears armour takes each empty slot's dyed piece. */
 	static final float STAR_PIECE_CHANCE = 0.75F;
 
@@ -89,9 +95,13 @@ public final class MonsterGear {
 			return;
 		}
 		RandomSource random = mob.getRandom();
+		String set = random.nextFloat() < FANTASY_SET_CHANCE[tier] ? FantasyArmorCompat.pick(FantasyArmorCompat.UNDEAD_SETS, random) : null;
 		for (int i = 0; i < ARMOR_SLOTS.length; i++) {
 			EquipmentSlot slot = ARMOR_SLOTS[i];
-			if (mob.getItemBySlot(slot).isEmpty() && random.nextFloat() < ARMOR_CHANCE[tier]) {
+			Optional<Item> dark = FantasyArmorCompat.piece(set, i);
+			if (mob.getItemBySlot(slot).isEmpty() && dark.isPresent()) {
+				mob.setItemSlot(slot, finish(level, random, new ItemStack(dark.get()), 4));
+			} else if (mob.getItemBySlot(slot).isEmpty() && random.nextFloat() < ARMOR_CHANCE[tier]) {
 				int grade = grade(random, tier);
 				Item piece = grade < ARMOR.length ? ARMOR[grade][i] : item(LEGENDARY_ARMOR[i]).orElse(ARMOR[ARMOR.length - 1][i]);
 				mob.setItemSlot(slot, finish(level, random, new ItemStack(piece), grade));

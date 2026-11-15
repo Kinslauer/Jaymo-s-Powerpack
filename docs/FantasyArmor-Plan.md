@@ -80,6 +80,8 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - `ship-dress`: `FantasyArmorCompat` (like `KnightsCompat`, by registry id, no dependency): monsters, undead and kings
   only, so royal tiers still hold.
 - `ship-repaint`: waits for Andy's look at the model sheet.
+- Built (2026-11-15): packMods entry, `FantasyArmorPreset` (descriptions off), trim datapack in Powers
+  (`data/fantasy_armor/recipe`), `FantasyArmorCompat` (risen dead at world tier 3+, gilded kings via `Regalia`).
 
 ### 8. The Long Defence's cast in Fantasy Armor (Kingdoms client, only when Fantasy Armor is loaded)
 Andy (2026-11-15): the Quiet One in the Redeemer plate, Thessaly in Lady Maria, Varro in Golden Horns with no helm,

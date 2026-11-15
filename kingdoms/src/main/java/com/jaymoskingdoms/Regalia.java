@@ -118,6 +118,9 @@ public final class Regalia {
 		}
 		switch (attire) {
 			case GILDED -> {
+				if (role == Folk.KING && !female && king(mob, random)) {
+					return;
+				}
 				// (0.7.631) netherite for a king, diamond for a rich realm's queen, gold for a poorer one's, iron below ({@link #plate})
 				put(mob, EquipmentSlot.CHEST, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.CHEST)), arms.pattern(), TrimMaterials.GOLD));
 				put(mob, EquipmentSlot.LEGS, trimmed(mob, new ItemStack(plate(mob, role, faction, female, EquipmentSlot.LEGS)), arms.pattern(), TrimMaterials.GOLD));
@@ -134,6 +137,22 @@ public final class Regalia {
 				put(mob, EquipmentSlot.FEET, trimmed(mob, new ItemStack(Items.IRON_BOOTS), arms.pattern(), gem));
 			}
 		}
+	}
+
+	/**
+	 * A king in a gilded set of Fantasy Armor's ({@link FantasyArmorCompat}) from the breastplate down, where that mod is
+	 * loaded: false (nothing put on) where it isn't.
+	 */
+	private static boolean king(PathfinderMob mob, RandomSource random) {
+		String set = FantasyArmorCompat.pick(FantasyArmorCompat.KING_SETS, random);
+		if (set == null) {
+			return false;
+		}
+		for (int i = 1; i < FantasyArmorCompat.SLOTS.length; i++) {
+			int slot = i;
+			FantasyArmorCompat.piece(set, i).ifPresent(item -> put(mob, FantasyArmorCompat.SLOTS[slot], new ItemStack(item)));
+		}
+		return true;
 	}
 
 	/** The same draws each time for the same ruler and rank (their crown first, then their attire). */
