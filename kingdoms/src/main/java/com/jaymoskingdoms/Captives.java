@@ -233,6 +233,11 @@ public final class Captives {
 
 	/** A villager taken from the settlement nearest {@code at}, put there in chains. */
 	static @Nullable Villager take(ServerLevel level, BlockPos at) {
+		return take(level, at, nearestSettlement(level.getServer(), at));
+	}
+
+	/** A villager taken from {@code home} (null: nowhere), put at {@code at} in chains. */
+	static @Nullable Villager take(ServerLevel level, BlockPos at, @Nullable Faction home) {
 		Vec3 pos = Vec3.atBottomCenterOf(at);
 		Villager v = McaCompat.newVillager(level, pos);
 		if (v == null) {
@@ -241,7 +246,6 @@ public final class Captives {
 		v.snapTo(pos.x, pos.y, pos.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		// (0.7.77) set up as a fresh spawn would be: it's here MCA rolls their genes and skin (built bare, they had none)
 		v.finalizeSpawn(level, level.getCurrentDifficultyAt(at), net.minecraft.world.entity.EntitySpawnReason.EVENT, null);
-		Faction home = nearestSettlement(level.getServer(), at);
 		v.setAttached(CAPTIVE, new Captive(home == null ? -1 : home.id(), Optional.empty(), level.getGameTime(), standing(home, level.getRandom())));
 		bind(v, true);
 		v.setPersistenceRequired();

@@ -51,7 +51,12 @@ public final class Fleet {
 		 * the larger oceans"): our own, long and beamy, three masts, a hold lined with chests below her deck, and two
 		 * tryworks amidships ({@link #WHALESHIP_WORKS}).
 		 */
-		WHALESHIP;
+		WHALESHIP,
+		/**
+		 * The flagship of a rich realm's fleet (Andy, 2026-11-15: "the largest for the richer kingdoms"): our own, the
+		 * longest hull afloat, three tall masts, a broadside of guns down each side, a hold for her powder and shot.
+		 */
+		MAN_OF_WAR;
 
 		/** Her design, if she's one of Jaki's (null: one of ours, drawn as the kits are). */
 		final JakiShips.@Nullable Design jaki;
@@ -95,6 +100,10 @@ public final class Fleet {
 	static final int WHALESHIP_HALF_LENGTH = 21, WHALESHIP_HALF_BEAM = 5, WHALESHIP_DECK = 5, WHALESHIP_CHEST_EVERY = 2;
 	static final int[][] WHALESHIP_MASTS = {{13, 16}, {1, 19}, {-11, 14}};
 	public static final int[] WHALESHIP_WORKS = {5, 8};
+	/** The man-of-war: her hull (half length, half beam), her deck's layer, her guns' rows (each side), her masts (row, height), her hatch's row. */
+	static final int MAN_OF_WAR_HALF_LENGTH = 23, MAN_OF_WAR_HALF_BEAM = 6, MAN_OF_WAR_DECK = 4, MAN_OF_WAR_HATCH = -14;
+	static final int[] MAN_OF_WAR_GUNS = {-12, -7, -2, 3, 8, 13};
+	static final int[][] MAN_OF_WAR_MASTS = {{15, 19}, {3, 23}, {-9, 18}};
 
 	/** A design's cells, as the kits draw them (x across, y up from her keel, z along her, bow +z). */
 	static List<ShipKits.Cell> cells(Rig rig) {
@@ -111,6 +120,7 @@ public final class Fleet {
 				cells.add(new ShipKits.Cell(-1, 1, 2, ShipFrameBlock.Want.CHEST, Direction.NORTH));
 			}
 			case WHALESHIP -> whaleship(cells);
+			case MAN_OF_WAR -> manOfWar(cells);
 			case FRIGATE -> {
 				ShipKits.Shape s = new ShipKits.Shape(11, 3, 3, 3, 3, true);
 				LongOpenHashSet holes = new LongOpenHashSet();
@@ -175,6 +185,44 @@ public final class Fleet {
 			ShipKits.mast(cells, s, m[0], m[1]);
 		}
 		cells.add(new ShipKits.Cell(0, deck + 1, -WHALESHIP_HALF_LENGTH + 2, ShipFrameBlock.Want.HELM, Direction.SOUTH));
+	}
+
+	/**
+	 * The man-of-war's cells: a long, beamy hull with one hatch aft down to her hold (steps of planking and a chest), her
+	 * powder and shot in chests down both sides below, her guns in the rail both sides, sweeps fore and aft, three masts,
+	 * the helm aft.
+	 */
+	private static void manOfWar(List<ShipKits.Cell> cells) {
+		int deck = MAN_OF_WAR_DECK, hatch = MAN_OF_WAR_HATCH;
+		ShipKits.Shape s = new ShipKits.Shape(MAN_OF_WAR_HALF_LENGTH, MAN_OF_WAR_HALF_BEAM, 6, deck, deck, true);
+		LongOpenHashSet holes = new LongOpenHashSet();
+		for (int x : new int[] {-1, 1}) {
+			holes.add(BlockPos.asLong(x, deck, hatch));
+			holes.add(BlockPos.asLong(x, deck, hatch + 1));
+		}
+		ShipKits.hull(cells, s, holes);
+		for (int x : new int[] {-1, 1}) {
+			for (int k = 1; k <= deck - 2; k++) {
+				cells.add(new ShipKits.Cell(x, k, hatch - (deck - 2) + k, ShipFrameBlock.Want.HULL, Direction.NORTH));
+			}
+			cells.add(new ShipKits.Cell(x, deck - 1, hatch + 1, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+		}
+		for (int z = hatch + 4; z <= hatch + 10; z += 2) {
+			int w = s.width(1, z) - 1;
+			cells.add(new ShipKits.Cell(w, 1, z, ShipFrameBlock.Want.CHEST, Direction.WEST));
+			cells.add(new ShipKits.Cell(-w, 1, z, ShipFrameBlock.Want.CHEST, Direction.EAST));
+		}
+		Map<Integer, ShipFrameBlock.Want> slots = new java.util.HashMap<>();
+		for (int z : MAN_OF_WAR_GUNS) {
+			slots.put(z, ShipFrameBlock.Want.CANNON);
+		}
+		slots.put(-(MAN_OF_WAR_HALF_LENGTH - 5), ShipFrameBlock.Want.OAR);
+		slots.put(MAN_OF_WAR_HALF_LENGTH - 5, ShipFrameBlock.Want.OAR);
+		ShipKits.rail(cells, s, slots);
+		for (int[] m : MAN_OF_WAR_MASTS) {
+			ShipKits.mast(cells, s, m[0], m[1]);
+		}
+		cells.add(new ShipKits.Cell(0, deck + 1, -MAN_OF_WAR_HALF_LENGTH + 2, ShipFrameBlock.Want.HELM, Direction.SOUTH));
 	}
 
 	/** One block of a ship as she's built: where (in her frame), what, and (0.7.112) the loot her barrel's filled with (null: none). */

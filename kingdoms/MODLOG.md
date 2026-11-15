@@ -14014,3 +14014,12 @@ These apply only where Fantasy Armor is loaded.
 - **Unseen work**: with no player near, the work goes on unseen at the same daylight pace and is put in the world when someone comes; she's only launched with someone there.
 - **Talk about work** with the shipwright: what's on the slip and how much of her is in; **Lend a hand** hands him your planks and logs (a log is 4 planks' worth, up to 128 a time): he lays 3 more blocks a beat until that much is used, and the realm thinks better of you (up to +6 rep). Nobody loses anything for leaving him be.
 - Built; not played. Not booted in a dev server.
+
+## 0.9.37 (2026-11-15): warship fleets - man-of-war flagships, squadrons, vassal ships in the overlord's fleet, prisoners at sea (#1605)
+
+- **Man-of-war**: a new ship of our own (`Fleet.Rig.MAN_OF_WAR`), the longest hull afloat (47 blocks), three tall masts, six guns down each side, a hatch down to a hold of powder and shot chests. A realm worth 5000+ takes her as its flagship (frigate from 2000, war trireme below).
+- **Squadrons**: a realm's flagship gets consorts as its treasury grows, one each at 3000, 5000 and 8000 (frigates for a realm with a man-of-war, war triremes below). With MCA the shipwright lays each one down in the yard after the flagship (`Shipyards.CONSORT`, his own talk lines); without MCA they're put out a day apart. A lost consort is struck off and built again (`Navies.shipLost` now takes the ship).
+- **Fleets**: every vassal's warships are part of its top overlord's fleet (`Navies.fleetOf`). Within 400 blocks of the fleet's flagship, its other ships keep station astern of her in pairs, port and starboard (`Corsairs.station`), and any of them goes to the foe a fleet-mate is fighting within 200 blocks (`Corsairs.rally`).
+- **Only pirates enslave** (Andy picked "spare and take prisoners"): a navy that sinks a pirate pulls up to 3 survivors out of the sea and puts them ashore at its harbour, where its guards take them before the ruler and to the cells for piracy (`Arrests.jail`, a fixed jail sentence). A pirate that sinks anyone else drags up to 3 survivors to its cove in chains, captives to be freed and brought home (`SeaPrisoners`; with the cove out of reach they come up there in chains once a player is near). Only MCA villagers are taken; the rest go down with her as before.
+- Lore "The fleets" added (new) for Andy to approve.
+- Built; not played.
