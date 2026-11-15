@@ -672,4 +672,48 @@ public final class KingdomsCompat {
 			return net.minecraft.world.item.ItemStack.EMPTY;
 		}
 	}
+
+	private static Method mimicTinkerer, mimicShop;
+	private static boolean mimicLooked;
+
+	private static void lookForMimic() {
+		if (mimicLooked) {
+			return;
+		}
+		mimicLooked = true;
+		try {
+			Class<?> bench = Class.forName("com.jaymoskingdoms.tinker.MimicBench");
+			mimicTinkerer = bench.getMethod("tinkerer", net.minecraft.server.level.ServerPlayer.class);
+			mimicShop = bench.getMethod("shop", net.minecraft.server.level.ServerPlayer.class, LivingEntity.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			mimicTinkerer = null;
+			mimicShop = null;
+		}
+	}
+
+	/** Whether {@code player} is of Kingdoms' Tinkerer class ({@code MimicBench.tinkerer}): the Mad Tinkerer trades his gadgets only with them. */
+	public static boolean tinkerer(net.minecraft.server.level.ServerPlayer player) {
+		if (!LOADED) {
+			return false;
+		}
+		lookForMimic();
+		try {
+			return mimicTinkerer != null && (boolean)mimicTinkerer.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Opens the Mad Tinkerer's gadget trade for a Tinkerer ({@code MimicBench.shop}); false if it didn't open. */
+	public static boolean mimicShop(net.minecraft.server.level.ServerPlayer player, LivingEntity tinkerer) {
+		if (!LOADED) {
+			return false;
+		}
+		lookForMimic();
+		try {
+			return mimicShop != null && (boolean)mimicShop.invoke(null, player, tinkerer);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
 }

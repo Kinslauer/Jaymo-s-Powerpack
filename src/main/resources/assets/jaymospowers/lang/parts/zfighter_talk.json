@@ -54,5 +54,7 @@
   "talk.jaymospowers.master.no_spark": "\"No spark of ki in you, child. Come back when there is.\"",
   "talk.jaymospowers.dark_master.greet": "\"You want what I know? Lessons here are paid in blood.\"",
   "talk.jaymospowers.dark_master.greet_today": "\"You've bled enough today.\"",
-  "talk.jaymospowers.dark_master.no_spark": "\"No ki in you. You're not worth the lesson.\""
+  "talk.jaymospowers.dark_master.no_spark": "\"No ki in you. You're not worth the lesson.\"",
+  "talk.jaymospowers.tinkerer.gadgets": "Ask about his gadgets",
+  "talk.jaymospowers.tinkerer.gadgets.greet": "\"A tinker! At last, somebody who knows which end of a spanner to hold. No spark in you, mind. Never mind that. Come and see the gadgets.\""
 }

@@ -396,9 +396,14 @@ public final class ZFighterAndroid {
 		com.jaymospowers.power.chrono.ChronoRoad.tinkerer(player);
 		Runnable back = () -> talkMenu(player, scientist);
 		Runnable next = () -> ZFighterNpcs.reply(player, scientist, () -> talk(player, scientist), back);
+		// (Andy, 2026-11-15) a Tinkerer of Kingdoms' calling, and only one, may buy his gadgets or learn their drawings
+		ZFighterNpcs.Option gadgets = com.jaymospowers.compat.KingdomsCompat.tinkerer(player)
+			? ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.gadgets", true, () -> com.jaymospowers.compat.KingdomsCompat.mimicShop(player, scientist))
+			: null;
 		if (!ZFighterBranchForms.fighter(player) || OPERATIONS.containsKey(player.getUUID())) {
 			ZFighterNpcs.ask(player, scientist, Component.translatable(OPERATIONS.containsKey(player.getUUID())
-				? "message.jaymospowers.zfighter_scientist_operating" : "message.jaymospowers.zfighter_scientist_no_spark"), java.util.List.of());
+				? "message.jaymospowers.zfighter_scientist_operating" : gadgets != null ? "talk.jaymospowers.tinkerer.gadgets.greet"
+				: "message.jaymospowers.zfighter_scientist_no_spark"), gadgets != null ? java.util.List.of(gadgets) : java.util.List.of());
 			return;
 		}
 		int stage = stage(player);
@@ -414,6 +419,9 @@ public final class ZFighterAndroid {
 				: "talk.jaymospowers.tinkerer.test", true, next));
 			case OPERATION_STAGE -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.operate", true, next));
 			default -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.after", true, next));
+		}
+		if (gadgets != null) {
+			options.add(gadgets);
 		}
 		// (0.18.5, Andy) the pod was his: he lost the know-how along with his time machine
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.pod", true, () -> ZFighterNpcs.ask(player, scientist,
