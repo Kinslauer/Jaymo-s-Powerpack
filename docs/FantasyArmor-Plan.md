@@ -10,7 +10,7 @@ Fantasy Armor 1.3 has a Fabric 26.3 build; it needs GeckoLib and Cloth Config (b
 
 **Andy's notes.** Repaint: "let me see the models first." Upgrade: "diamond gear should be removed, and replaced with
 something like this, netherite should remain as plating but for steel armor." Armour only or tools too is on a decision
-card; this plan assumes armour only until he answers.
+card; Andy chose armour, tools and weapons (2026-11-15).
 
 **Lore.** One grouped `(new)` entry, "What the armourers make" and the eight paragraphs after it, sits before "Rules for
 writing against this" in Lore.md, for Andy's approval. Nothing is built before he approves it.
@@ -30,7 +30,8 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - Netherite upgrade: smithing table takes Armory's steel plate (not diamond) with the upgrade template and an ingot.
 - Royal tiers: rich queens wear trimmed steel plate where they wore diamond (`Regalia.plate`, `RoyalDress.conform`);
   `McaEquipmentMixin` swaps any diamond armour for steel plate. Loot tables that give diamond armour give steel plate.
-- Tools and weapons only if Andy picks that option.
+- Diamond tools and swords go too (Andy's choice): grid recipes removed; steel tools and blades forged through Tinkers
+  fill the tier, and netherite tools are made from steel ones (smithing table or Tool Forge) instead of diamond ones.
 
 ### 2. Set framework (Kingdoms, Armory)
 - **Temper-stone** (`upgrade-catalyst`): a diamond, amethyst and glow ink at the Tool Forge; temper-stone + a finished
@@ -74,6 +75,6 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - `ship-repaint`: waits for Andy's look at the model sheet.
 
 ## Open questions
-1. Diamond: armour only, or tools and weapons too (decision card).
+1. (Answered: armour, tools and weapons all go.)
 2. Repaint Fantasy Armor's textures in our style, or leave its art as it is?
 3. Approve the lore paragraphs.
