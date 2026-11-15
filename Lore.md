@@ -778,6 +778,15 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
+**The giant's ring** (ring thread, 2026-11-15; Andy: "you should be able to travel to that planet", picked the ring).
+Nobody comes down on the blue giant itself: it is cloud all the way down. But a pod can make the short hop up from the
+Verdant World to its ring, which close to is no band at all but a field of drifts, slabs of old ice and dark rock hanging
+in the sun with no air between them. Gravilite runs through the drifts in veins and stands on them in shards; it is what
+holds them up, and why everything on the ring weighs half what it should. Nothing lives there. A traveller who steps off a
+drift falls toward the giant's clouds until the wind coming up off them throws them back onto the ice, bruised. The
+Verdant say the gravilite in their fields fell from here, and pod crews who have been agree: it is the same stuff, only
+more of it.
+
 (new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
 its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
 its bloom glows; **lonlix** is the common tuft of the warm lands; **parignum** lies in mats with small lit flowers;

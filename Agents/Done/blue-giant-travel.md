@@ -3,7 +3,7 @@ status: stalled
 task: Travel to the Verdant World's ringed blue giant
 branch: claude/project-thread-kx4q9p
 with: 
-pr: 
+pr: 1595
 mods: powers
 versions: 
 started: 2026-11-15
