@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -342,6 +343,8 @@ public class CorpseEntity extends Entity {
 	private @Nullable RagdollRig rigCache;
 	/** (0.5.1) Points loaded from a save (relative to where it was), put back on the first tick. */
 	private float @Nullable [] savedPoints;
+	/** Saved sitting against a wall, the wall's face (see {@link CorpseRagdoll#prop}); null once the body is made. */
+	private @Nullable Direction savedPropped;
 
 	/** A slim-skinned player's body (or their zombie's): it sounds higher. */
 	private boolean slim;
@@ -703,8 +706,14 @@ public class CorpseEntity extends Entity {
 				}
 				savedPoints = null;
 			}
+			Direction propped = savedPropped;
+			savedPropped = null;
 			if (saved != null) {
 				ragdoll = new CorpseRagdoll(this, saved);
+				if (propped != null) {
+					// it was sitting against a wall: still there, not sliding off it now gravity's back
+					ragdoll.prop(propped);
+				}
 			} else {
 				lieDown(getDeltaMovement(), false);
 			}
@@ -2749,6 +2758,114 @@ public class CorpseEntity extends Entity {
 		return best;
 	}
 
+	/** How far below a body flung into a wall (blocks, from its underside) the floor may be for it to slide down and sit. */
+	private static final double SLUMP_DROP = 3.0;
+
+	/** A wall a body was flung into: its face (pointing out of it), where that face is along it, and the floor at its foot. */
+	record SlumpWall(Direction face, double wall, double floorY) {
+	}
+
+	/**
+	 * The wall {@code body} just struck, losing {@code (lx, lz)} of its speed against it, if it's one to slide down and
+	 * sit against: a solid face where it struck that goes on down to a floor no more than {@link #SLUMP_DROP} below it.
+	 */
+	@Nullable SlumpWall slumpWall(RagdollBody body, double lx, double lz) {
+		Direction toward = Math.abs(lx) >= Math.abs(lz) ? (lx > 0.0 ? Direction.EAST : Direction.WEST)
+			: (lz > 0.0 ? Direction.SOUTH : Direction.NORTH);
+		Direction face = toward.getOpposite();
+		boolean alongX = toward.getAxis() == Direction.Axis.X;
+		double[] box = body.bounds();
+		double[] m = body.middle();
+		double edge = switch (toward) {
+			case EAST -> box[3];
+			case WEST -> box[0];
+			case SOUTH -> box[5];
+			default -> box[2];
+		};
+		Level level = level();
+		// the block it struck, just past its edge at its middle's height
+		BlockPos struck = BlockPos.containing(alongX ? edge + toward.getStepX() * 0.1 : m[0], m[1],
+			alongX ? m[2] : edge + toward.getStepZ() * 0.1);
+		if (!level.getBlockState(struck).isFaceSturdy(level, struck, face)) {
+			return null;
+		}
+		// the floor in front of the wall: the first block down from its middle
+		double floorY = Double.NaN;
+		int lowest = Mth.floor(box[1] - SLUMP_DROP);
+		for (BlockPos.MutableBlockPos pos = struck.relative(face).mutable(); pos.getY() >= lowest; pos.move(Direction.DOWN)) {
+			net.minecraft.world.phys.shapes.VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+			if (!shape.isEmpty()) {
+				floorY = pos.getY() + shape.max(Direction.Axis.Y);
+				break;
+			}
+		}
+		if (Double.isNaN(floorY) || floorY > m[1]) {
+			return null;
+		}
+		// the wall goes down to it, behind where the body will sit
+		BlockPos behind = new BlockPos(struck.getX(), Mth.floor(floorY + 0.5), struck.getZ());
+		if (!level.getBlockState(behind).isFaceSturdy(level, behind, face)) {
+			return null;
+		}
+		double coord = alongX ? struck.getX() : struck.getZ();
+		double plane = toward.getAxisDirection() == Direction.AxisDirection.POSITIVE ? coord : coord + 1.0;
+		// where the face is along its own way out (n . p for any point p on it)
+		return new SlumpWall(face, plane * (face.getStepX() + face.getStepZ()), floorY);
+	}
+
+	/**
+	 * Server: a body that died sat against the wall facing {@code face} (downed there: see {@link Corpses#PROPPED_TAG})
+	 * starts sat against it, as one that slid down it ends up, if the wall's still there at its back. A body that isn't
+	 * built like a person, or has no wall there, lies as it was made.
+	 */
+	void sitAgainst(Direction face) {
+		if (ragdoll == null || !com.jaymoskitchen.ragdoll.WallSlump.fits(ragdoll.body.rig)) {
+			return;
+		}
+		Direction toward = face.getOpposite();
+		boolean alongX = toward.getAxis() == Direction.Axis.X;
+		// the wall: the first block that way from its feet (a downed body lies within a block of it)
+		BlockPos feet = BlockPos.containing(getX(), getY() + 0.3, getZ());
+		Level level = level();
+		for (int i = 1; i <= 2; i++) {
+			BlockPos wall = feet.relative(toward, i);
+			if (!level.getBlockState(wall).isFaceSturdy(level, wall, face)) {
+				continue;
+			}
+			double coord = alongX ? wall.getX() : wall.getZ();
+			double plane = toward.getAxisDirection() == Direction.AxisDirection.POSITIVE ? coord : coord + 1.0;
+			com.jaymoskitchen.ragdoll.WallSlump slump = new com.jaymoskitchen.ragdoll.WallSlump(ragdoll.body, face.getStepX(),
+				face.getStepZ(), plane * (face.getStepX() + face.getStepZ()), getY(), random.nextLong());
+			slump.sit(ragdoll.body);
+			ragdoll.prop(face);
+			ragdoll.send(this);
+			return;
+		}
+	}
+
+	/**
+	 * Whether a body sitting against the wall facing {@code face} still has the wall at its back (where it leans on it
+	 * most) and the floor under its hips.
+	 */
+	boolean stillPropped(RagdollBody body, Direction face) {
+		int nx = face.getStepX(), nz = face.getStepZ();
+		int back = 0;
+		for (int i = 1; i < body.rig.count; i++) {
+			if (body.x[i] * nx + body.z[i] * nz < body.x[back] * nx + body.z[back] * nz) {
+				back = i;
+			}
+		}
+		double reach = body.rig.radius[back] + 0.3;
+		BlockPos behind = BlockPos.containing(body.x[back] - nx * reach, body.y[back], body.z[back] - nz * reach);
+		double hx = (body.x[RagdollRig.R_HIP] + body.x[RagdollRig.L_HIP]) * 0.5;
+		double hy = (body.y[RagdollRig.R_HIP] + body.y[RagdollRig.L_HIP]) * 0.5 - body.rig.radius[RagdollRig.R_HIP] - 0.1;
+		double hz = (body.z[RagdollRig.R_HIP] + body.z[RagdollRig.L_HIP]) * 0.5;
+		BlockPos under = BlockPos.containing(hx, hy, hz);
+		Level level = level();
+		return level.getBlockState(behind).isFaceSturdy(level, behind, face)
+			&& !level.getBlockState(under).getCollisionShape(level, under).isEmpty();
+	}
+
 	/** (0.5.24) A butcher table is at most this many blocks across, each way (a long counter pins a body to part of it). */
 	private static final int TABLE_MAX = 3;
 
@@ -3593,6 +3710,8 @@ public class CorpseEntity extends Entity {
 		this.rigHeight = input.getFloatOr("RigH", 0.0F);
 		this.rigCache = null;
 		List<Float> points = input.read("Points", Codec.FLOAT.listOf()).orElse(List.of());
+		int propped = input.getIntOr("Propped", -1);
+		this.savedPropped = propped >= 0 ? Direction.from2DDataValue(propped) : null;
 		if (!points.isEmpty()) {
 			this.savedPoints = new float[points.size()];
 			for (int i = 0; i < savedPoints.length; i++) {
@@ -3669,6 +3788,10 @@ public class CorpseEntity extends Entity {
 				points.add(value);
 			}
 			output.store("Points", Codec.FLOAT.listOf(), points);
+			Direction propped = ragdoll.propped();
+			if (propped != null) {
+				output.putInt("Propped", propped.get2DDataValue());
+			}
 		}
 		if (this.slungHorse != null) {
 			output.putString("SlungOn", this.slungHorse.toString());

@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -229,6 +230,7 @@ public final class CrawlPose {
 			state.setData(ProneTransition.KEY, null);
 			state.setData(ProneHaulPose.KEY, null);
 			state.setData(KEY, null);
+			state.setData(com.jaymospowers.client.wounds.WallSit.KEY, null);
 			state.setData(RISEN_KEY, null);
 			return;
 		}
@@ -244,6 +246,7 @@ public final class CrawlPose {
 		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
 			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
 			state.setData(KEY, null);
+			state.setData(com.jaymospowers.client.wounds.WallSit.KEY, null);
 			Long risen = RISEN.get(entity.getId());
 			boolean fresh = risen != null && entity.level().getGameTime() - risen <= RISEN_TICKS;
 			if (risen != null && !fresh) {
@@ -271,6 +274,8 @@ public final class CrawlPose {
 			RISEN.remove(player.getId());
 		}
 		rise = sink(player.getId(), downed, rise, time + partialTicks);
+		// (Andy, 2026-11-15) downed and lying still beside a wall a moment: sat up against it
+		com.jaymospowers.client.wounds.WallSit.extract(player, state, partialTicks, rise >= 0.0F);
 		// (0.19.30) which way they're going along the body: the way they face, or backing up
 		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
@@ -372,6 +377,10 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl == null || !state.isVisuallySwimming) {
+			return;
+		}
+		if (com.jaymospowers.client.wounds.WallSit.rotatePlayer(state, poseStack)) {
+			// (2026-11-15) downed, sat against a wall
 			return;
 		}
 		if (ProneHaulPose.rotate(state, poseStack)) {
@@ -501,14 +510,14 @@ public final class CrawlPose {
 			f.set(PoseBlend.LEFT_LEG, 0.02F, 0.0F, -0.08F);
 			f.set(PoseBlend.HEAD, HEAD_DOWN_REST, OUT_HEAD_TURN, 0.0F);
 			f.set(PoseBlend.BODY + 1, 0.0F);
-			track.apply(h, f, 0.6F);
+			lay(track, h, state, f, 0.6F);
 			return;
 		}
 		int broken = crawl.broken();
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
 		if (crawl.rise() >= 0.0F) {
 			rise(f, crawl, rightArm, leftArm);
-			track.apply(h, f, 1.2F);
+			lay(track, h, state, f, 1.2F);
 			return;
 		}
 		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F, elbow(state, true), elbow(state, false), crawl.strength());
@@ -561,7 +570,39 @@ public final class CrawlPose {
 		if (crawl.held() != 0 && crawl.downed() >= 0.0F) {
 			stem(f, crawl, rightArm, leftArm);
 		}
-		track.apply(h, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
+		lay(track, h, state, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
+	}
+
+	/**
+	 * (Andy, 2026-11-15) Lays a downed player's limbs on, gone over to the sit's as far as they're getting up against a
+	 * wall (WallSit), with what the crawl shook on past the springs going with them.
+	 */
+	private static void lay(PoseBlend.Track track, HumanoidModel<?> h, AvatarRenderState state, PoseBlend.Frame f, float stiffness) {
+		float sat = com.jaymospowers.client.wounds.WallSit.posePlayer(state, f);
+		if (sat > 0.0F) {
+			for (int i = 0; i < f.raw.length; i++) {
+				f.raw[i] *= 1.0F - sat;
+			}
+		}
+		track.apply(h, f, Mth.lerp(sat, stiffness, 1.0F));
+		if (sat > 0.0F && !PosedCopy.of(h)) {
+			// (its head hung forward off the neck, clear of the wall)
+			h.head.z -= com.jaymospowers.client.wounds.WallSit.headForward(state);
+			// the arms and legs right where the sit has them, not trailing on the springs: a hand on the floor stays put as the
+			// body moves over it, the legs stay along the floor as it sits up
+			float w = track.amount();
+			pin(h.rightArm, f, PoseBlend.RIGHT_ARM, w, sat);
+			pin(h.leftArm, f, PoseBlend.LEFT_ARM, w, sat);
+			pin(h.rightLeg, f, PoseBlend.RIGHT_LEG, w, sat);
+			pin(h.leftLeg, f, PoseBlend.LEFT_LEG, w, sat);
+		}
+	}
+
+	/** {@code part} moved {@code t} of the way to where {@code f} has it (laid on by the track's weight {@code w}). */
+	private static void pin(ModelPart part, PoseBlend.Frame f, int slot, float w, float t) {
+		part.xRot = Mth.lerp(t, part.xRot, f.vanilla(slot) + (f.get(slot) - f.vanilla(slot)) * w);
+		part.yRot = Mth.lerp(t, part.yRot, f.vanilla(slot + 1) + (f.get(slot + 1) - f.vanilla(slot + 1)) * w);
+		part.zRot = Mth.lerp(t, part.zRot, f.vanilla(slot + 2) + (f.get(slot + 2) - f.vanilla(slot + 2)) * w);
 	}
 
 	/**
@@ -831,11 +872,14 @@ public final class CrawlPose {
 		State crawl = state.getData(KEY);
 		if (crawl == null || crawl.roll() != null || crawl.out() || crawl.rise() >= 0.0F
 			|| state.getData(ProneTransition.KEY) != null && crawl.downed() < 0.0F) {
+			bendArms(h, state, 0.0F, 0.0F);
 			return;
 		}
 		PoseBlend.Track track = BLEND.peek(crawl.id());
-		float w = track == null ? 0.0F : track.amount();
+		// (Andy, 2026-11-15) getting up against a wall, the crawl's bends give way to the sit's (WallSit)
+		float w = (track == null ? 0.0F : track.amount()) * (1.0F - com.jaymospowers.client.wounds.WallSit.taken(state));
 		if (w <= 0.0F) {
+			bendArms(h, state, 0.0F, 0.0F);
 			return;
 		}
 		int broken = crawl.broken();
@@ -848,17 +892,20 @@ public final class CrawlPose {
 			if ((broken & Dismember.LEFT_LEG) == 0) {
 				KneeBend.bend(h.leftLeg, 2.0F * Math.max(0.0F, -h.leftLeg.xRot) * w, KneeBend.KNEE, false);
 			}
+			bendArms(h, state, 0.0F, 0.0F);
 			return;
 		}
 		float flat = w * (1.0F - back);
 		float phase = phase(crawl), moving = moving(crawl);
 		float press = 1.0F - (crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F);
+		float right = 0.0F, left = 0.0F;
 		if ((broken & Dismember.RIGHT_ARM) == 0 && elbow(state, true)) {
-			KneeBend.bend(h.rightArm, arm(cycle(phase), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
+			right = arm(cycle(phase), moving, true, crawl.strength()).elbow() * flat * press;
 		}
 		if ((broken & Dismember.LEFT_ARM) == 0 && elbow(state, false)) {
-			KneeBend.bend(h.leftArm, -arm(cycle(phase + Mth.PI), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
+			left = -arm(cycle(phase + Mth.PI), moving, true, crawl.strength()).elbow() * flat * press;
 		}
+		bendArms(h, state, right, left);
 		if (crawl.downed() < 0.0F) {
 			// the knee drawn up the side folds its shin back along the ground, the foot behind it
 			if ((broken & Dismember.RIGHT_LEG) == 0) {
@@ -868,6 +915,12 @@ public final class CrawlPose {
 				KneeBend.bend(h.leftLeg, KNEE_FOLD * KNEE_DRIVE * knee(cycle(phase), moving) * flat, KneeBend.KNEE, true);
 			}
 		}
+	}
+
+	/** The elbows folded across for this draw: the crawl's ({@code right}, {@code left}) and the sit's getting up against a wall. */
+	private static void bendArms(HumanoidModel<?> h, AvatarRenderState state, float right, float left) {
+		KneeBend.bend(h.rightArm, right + com.jaymospowers.client.wounds.WallSit.elbow(state, true), ELBOW, true);
+		KneeBend.bend(h.leftArm, left + com.jaymospowers.client.wounds.WallSit.elbow(state, false), ELBOW, true);
 	}
 
 	/**

@@ -409,6 +409,13 @@ public final class RagdollBody {
 		quiet = 0;
 	}
 
+	/** Still and asleep where it is now: a body put somewhere to rest that the physics wouldn't settle (see WallSlump). */
+	public void settle() {
+		stop();
+		asleep = true;
+		sleepingFor = 0;
+	}
+
 	public boolean asleep() {
 		return asleep;
 	}
