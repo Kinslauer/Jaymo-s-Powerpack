@@ -1,12 +1,20 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Careers;
+import com.jaymoskingdoms.Carousing;
+import com.jaymoskingdoms.ChalkMarks;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Lessons;
+import com.jaymoskingdoms.Lifestyle;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
+import com.jaymoskingdoms.Sparks;
+import com.jaymoskingdoms.StartPerks;
 import com.jaymoskingdoms.Stats;
+import com.jaymoskingdoms.Valor;
+import com.jaymoskingdoms.WorldTiers;
 import com.jaymoskingdoms.forms.Forms;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
@@ -21,10 +29,14 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -43,15 +55,19 @@ import org.jspecify.annotations.Nullable;
  * The web is spread wide and opens zoomed in, every node carries its own picture ({@link SkillIcons}), a click picks a
  * node and a second one learns it, and framed panels hold the rest: your levels, points and attributes on the left, the
  * picked perk in full on the right, the keys along the foot.
+ * The Attributes tab and the Jobs & Standing tab take the same look: the starry sky, the framed bars top and foot, their
+ * rows in a framed panel and what the mouse points at in the framed panel on the right; Standing (what used to be its
+ * own screen) is the framed panel on the left of the Jobs tab. Valor's and the world tiers' buttons show only once you
+ * have them: a Valor awakened, and a world tier past Hearth open to you ({@link WorldTiers#unlocked}).
  */
 final class SkillScreen extends Screen {
 	/**
-	 * (0.7.540) The Attributes and Jobs panel: as tall as the screen allows up to {@link #PANEL_H}, the rows from
-	 * {@link #TREE_Y} down to the detail box ({@link #DETAIL_H} tall, {@link #DETAIL_LINES} lines) just above the footer.
-	 * Rows that don't fit scroll (the wheel), clipped to their own area, so they never run under the detail box.
+	 * The Attributes and Jobs rows: at most {@link #CONTENT_W} wide in the middle of their framed panel, under a header
+	 * {@link #HEADER} tall. Rows that don't fit scroll (the wheel), clipped to their own area. The tabs are at least
+	 * {@link #TAB_W} wide; Standing's panel is {@link #STAND_MIN} to {@link #STAND_MAX} wide, its lines {@link #STAND_LINE} apart.
 	 */
-	static final int PANEL_W = 340, PANEL_H = 300, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16,
-		TREE_Y = 56, DETAIL_LINES = 5, DETAIL_H = 54, FOOTER = 22, XP_BAR_W = 120;
+	static final int CONTENT_W = 340, HEADER = 34, TAB_W = 40, TAB_H = 16, STAT_ROW = 16, STAND_MIN = 110, STAND_MAX = 170, STAND_LINE = 10,
+		GIVE_RANGE = 8;
 	/** (0.7.540) The attribute bar: ten segments of ten points each. */
 	static final int SEG_W = 13, SEG_GAP = 2, SEGMENTS = 10, LOCKED = 0xFF0E0E14;
 	/** The bar's share trained in the weights (Might only, {@link Stats#trainMight}). */
@@ -71,8 +87,8 @@ final class SkillScreen extends Screen {
 	static final double NAMES_FROM = 1.0, GATE_NAMES_FROM = 0.6;
 	/** How fast the view glides to where it is headed (a share per second, eased). */
 	static final double GLIDE = 10.0;
-	/** The left panel's rows, the title's rules and the room the foot's buttons take. */
-	static final int PILLAR_ROW = 26, RAIL_STAT_ROW = 12, ARTS_HEAD = 11, ARTS_ROW = 10, TITLE_RULE = 34, FOOT_BUTTONS = 346;
+	/** The left panel's rows and the title's rules. */
+	static final int PILLAR_ROW = 26, RAIL_STAT_ROW = 12, ARTS_HEAD = 11, ARTS_ROW = 10, TITLE_RULE = 34;
 	/** How far the left panel's rows are scrolled (pixels), when the screen is too short for them all. */
 	private static int railScroll;
 	static final int COLOR_LOCKED_RIM = 0xFF4A4A56, COLOR_LOCKED_FILL = 0xFF16161C, COLOR_OPEN_FILL = 0xFF24202C, COLOR_PATH = 0xFFFFFFFF,
@@ -97,9 +113,12 @@ final class SkillScreen extends Screen {
 	static final int JOB_ROW = 12, JOB_ACCENT = 0xFFC8A060;
 	/** (0.7.540) How far the Attributes or Jobs rows are scrolled (pixels). */
 	private static int listScroll;
-
-	/** Whether the Attributes/Jobs panel is collapsed to a thin tab on the left. */
-	private static boolean panelCollapsed;
+	/** How far Standing's lines are scrolled (pixels). */
+	private static int standScroll;
+	/** Where the foot's buttons start (the keys' hint stops short of it), and where the top bar's tabs start. */
+	private int footLeft, tabsLeft;
+	/** A spark just given away: its buttons go at once, before the server's word comes back. */
+	private boolean sparkGiven;
 
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
@@ -136,39 +155,41 @@ final class SkillScreen extends Screen {
 		};
 	}
 
-	private int panelW() {
-		return Math.min(PANEL_W, this.width - 12);
+	/** The Standing panel's width, on the Jobs tab. */
+	private int standW() {
+		return Math.clamp(this.width / 4, STAND_MIN, STAND_MAX);
 	}
 
-	private int left() {
-		return (this.width - panelW()) / 2;
+	/** The Attributes or Jobs panel: from the left edge (or Standing's panel) to the right panel. */
+	private int mainL() {
+		return jobs ? standW() : 0;
 	}
 
-	private int panelH() {
-		return Math.min(PANEL_H, this.height - 8 - MenuCompat.STRIP);
+	private int mainR() {
+		return this.width - railR();
 	}
 
-	private int top() {
-		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
+	/** The rows' width and left edge, in the middle of their panel. */
+	private int contentW() {
+		return Math.min(CONTENT_W, mainR() - mainL() - 12);
 	}
 
-	/** (0.7.649) The panel's top-left corner, where Jaymo's Powers' character menu hangs its tabs ({@link MenuCompat}). */
+	private int contentX() {
+		return mainL() + (mainR() - mainL() - contentW()) / 2;
+	}
+
+	/** The screen's top-left corner, below Jaymo's Powers' character menu strip ({@link MenuCompat}). */
 	int[] corner() {
-		return new int[] {left(), top()};
+		return new int[] {0, MenuCompat.STRIP};
 	}
 
-	/** (0.7.540) Where the detail box starts, just above the footer. */
-	private int detailY() {
-		return top() + panelH() - FOOTER - DETAIL_H;
-	}
-
-	/** (0.7.540) The rows' area: from under the tabs to a little above the detail box. */
+	/** The rows' area: from under the header to just above the foot. */
 	private int listTop() {
-		return top() + TREE_Y;
+		return WEB_HEADER + HEADER;
 	}
 
 	private int listBottom() {
-		return detailY() - 4;
+		return this.height - WEB_FOOTER - 6;
 	}
 
 	/** (0.7.540) The rows' height, all of them, on the tab shown. */
@@ -185,77 +206,93 @@ final class SkillScreen extends Screen {
 		return mouseY >= listTop() && mouseY < listBottom();
 	}
 
+	/** Whether {@code player} has woken a Valor (its page's button shows from then). */
+	static boolean valorShown(@Nullable Player player) {
+		return player != null && Valor.has(player);
+	}
+
+	/** Whether the world tiers' button shows: a tier past Hearth is open to {@code player}. */
+	static boolean tierShown(@Nullable Player player) {
+		return player != null && WorldTiers.unlocked(player);
+	}
+
 	@Override
 	protected void init() {
 		if (Double.isNaN(zoom)) {
 			open();
 		}
-		if (stats || jobs) {
-			// the Attributes and Jobs tabs keep their panel: the web's tab, then theirs
-			int tabs = 3;
-			int tabW = Math.min(TAB_W, (panelW() - 12 - 4 * (tabs - 1)) / tabs);
-			int x = left() + (panelW() - tabW * tabs - 4 * (tabs - 1)) / 2, y = top() + HEADER + 2;
-			tabs(x, y, tabW);
-			int fy = top() + panelH() - FOOTER + 3;
-			int right = left() + panelW() - 6;
-			addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
-			// (0.7.82) the world tiers, beside Done
-			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
-				.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
-			addRenderableWidget(FlatButton.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
-				.bounds(right - 60 - 4 - 80 - 4 - 70, fy, 70, 16).build());
-			// a small arrow on the panel's left edge collapses it; the strip on the left brings it back
-			if (!panelCollapsed) {
-				addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> {
-					panelCollapsed = true;
-					rebuildWidgets();
-				}).bounds(left() - 20, top() + panelH() / 2 - 10, 16, 16).build());
+		tabs(WEB_HEADER - WEB_BAR + 3);
+		// the buttons along the foot, from the right
+		var player = this.minecraft.player;
+		int fy = this.height - WEB_FOOTER + 3, x = this.width - 6;
+		x = foot(x, fy, 60, Component.translatable("gui.done"), b -> onClose());
+		if (jobs) {
+			// Standing's one deed: give your spark to a friend standing near
+			if (player != null && !this.sparkGiven && Sparks.held(player)) {
+				for (Player friend : friends()) {
+					if (x - 80 < 8) {
+						break;
+					}
+					x = foot(x, fy, 80, Component.translatable("standing.jaymoskingdoms.give", friend.getName()), b -> {
+						ClientPlayNetworking.send(new Sparks.Give(friend.getUUID()));
+						this.sparkGiven = true;
+						rebuildWidgets();
+					});
+				}
 			}
-			return;
+		} else {
+			// (0.7.82) the world tiers, once one past Hearth is open to you
+			if (tierShown(player)) {
+				x = foot(x, fy, 80, Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)));
+			}
+			if (onWeb()) {
+				// (0.7.361) Valor's page, once your Valor has woken
+				if (valorShown(player)) {
+					x = foot(x, fy, 60, Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)));
+				}
+				x = foot(x, fy, 60, Component.translatable("gui.jaymoskingdoms.skills.web.center"), b -> fit());
+			}
 		}
-		// the web: the tabs at the header's right, the buttons along the foot
-		int tabW = Math.min(TAB_W, Math.max(40, (this.width - 12) / 8));
-		tabs(this.width - 6 - tabW * 3 - 8, WEB_HEADER - WEB_BAR + 3, tabW);
-		int fy = this.height - WEB_FOOTER + 3, right = this.width - 6;
-		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
-		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
-			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
-		// (0.7.361) Valor's page, from Strength
-		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)))
-			.bounds(right - 60 - 4 - 80 - 4 - 60, fy, 60, 16).build());
-		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.skills.web.center"), b -> fit())
-			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60, fy, 60, 16).build());
-		addRenderableWidget(FlatButton.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
-			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60 - 4 - 70, fy, 70, 16).build());
+		this.footLeft = x;
 	}
 
-	/** The three tabs: the web, Attributes, Jobs. */
-	private void tabs(int x, int y, int tabW) {
-		Button webTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.skills.web.tab"), b -> {
-			stats = false;
-			jobs = false;
-			rebuildWidgets();
-		}).bounds(x, y, tabW, TAB_H).build();
-		webTab.active = stats || jobs;
-		addRenderableWidget(webTab);
-		x += tabW + 4;
-		Button statsTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
-			listScroll = 0;
-			stats = true;
-			jobs = false;
-			rebuildWidgets();
-		}).bounds(x, y, tabW, TAB_H).build();
-		statsTab.active = !stats;
-		addRenderableWidget(statsTab);
-		x += tabW + 4;
-		Button jobsTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.jobs.tab"), b -> {
-			listScroll = 0;
-			jobs = true;
-			stats = false;
-			rebuildWidgets();
-		}).bounds(x, y, tabW, TAB_H).build();
-		jobsTab.active = !jobs;
-		addRenderableWidget(jobsTab);
+	/** A button along the foot whose right edge is {@code right}; returns where the next one's right edge goes. */
+	private int foot(int right, int y, int w, Component label, Button.OnPress press) {
+		addRenderableWidget(FlatButton.builder(label, press).bounds(right - w, y, w, 16).build());
+		return right - w - 4;
+	}
+
+	/** The tab shown: 0 the web, 1 Attributes, 2 Jobs & Standing. */
+	private static int page() {
+		return jobs ? 2 : stats ? 1 : 0;
+	}
+
+	private void page(int page) {
+		listScroll = 0;
+		stats = page == 1;
+		jobs = page == 2;
+		rebuildWidgets();
+	}
+
+	/** The three tabs at the top bar's right, each as wide as its name: the web, Attributes, Jobs & Standing. */
+	private void tabs(int y) {
+		Component[] names = {Component.translatable("gui.jaymoskingdoms.skills.web.tab"), Component.translatable("gui.jaymoskingdoms.stats.tab"),
+			Component.translatable("gui.jaymoskingdoms.jobs.tab")};
+		int[] w = new int[names.length];
+		int total = 4 * (names.length - 1);
+		for (int i = 0; i < names.length; i++) {
+			w[i] = Math.max(TAB_W, this.font.width(names[i]) + 14);
+			total += w[i];
+		}
+		int x = this.width - 6 - total;
+		this.tabsLeft = x;
+		for (int i = 0; i < names.length; i++) {
+			int page = i;
+			Button tab = FlatButton.builder(names[i], b -> page(page)).bounds(x, y, w[i], TAB_H).build();
+			tab.active = page() != i;
+			addRenderableWidget(tab);
+			x += w[i] + 4;
+		}
 	}
 
 	// ---- the web ---------------------------------------------------------------------------------------------------
@@ -266,14 +303,9 @@ final class SkillScreen extends Screen {
 		return !stats && !jobs;
 	}
 
-	/** The web takes the mouse: the web tab itself, or a list tab whose panel is collapsed away. */
-	private boolean webOnScreen() {
-		return onWeb() || (panelCollapsed && (stats || jobs));
-	}
-
-	/** The left panel's width (your pillars and attributes); a collapsed Attributes or Jobs panel leaves only its strip there. */
+	/** The left panel's width (your pillars and attributes). */
 	private int railL() {
-		return onWeb() ? Math.clamp(this.width / 5, 84, 112) : 30;
+		return Math.clamp(this.width / 5, 84, 112);
 	}
 
 	/** The right panel's width (the skill picked or pointed at). */
@@ -359,7 +391,7 @@ final class SkillScreen extends Screen {
 	}
 
 	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {
-		if (!webOnScreen() || !inWebArea(mouseX, mouseY)) {
+		if (!onWeb() || !inWebArea(mouseX, mouseY)) {
 			return null;
 		}
 		Skills.Perk best = null;
@@ -380,7 +412,7 @@ final class SkillScreen extends Screen {
 
 	/** The pillar crest under the mouse, if any. */
 	private Skills.@Nullable Pillar crestAt(double mouseX, double mouseY) {
-		if (!webOnScreen() || !inWebArea(mouseX, mouseY)) {
+		if (!onWeb() || !inWebArea(mouseX, mouseY)) {
 			return null;
 		}
 		for (Skills.Pillar p : Skills.Pillar.values()) {
@@ -537,13 +569,7 @@ final class SkillScreen extends Screen {
 
 	/** The web: rings, borders, the ties between perks, the perks with their pictures, the crests and the branches' names. */
 	private void web(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY, Skills.@Nullable Perk hovered) {
-		graphics.fill(0, 0, this.width, this.height, COLOR_BACK);
-		// a few faint stars, the same each time
-		java.util.Random stars = new java.util.Random(83L);
-		for (int i = 0; i < 160; i++) {
-			int x = stars.nextInt(Math.max(1, this.width)), y = stars.nextInt(Math.max(1, this.height));
-			graphics.fill(x, y, x + 1, y + 1, (0x20 + stars.nextInt(0x50)) << 24 | 0xC8C8FF);
-		}
+		sky(graphics);
 		int left = railL(), right = this.width - railR(), top = WEB_HEADER, bottom = this.height - WEB_FOOTER;
 		graphics.enableScissor(left, top, right, bottom);
 		double cx = centerX(), cy = centerY();
@@ -704,13 +730,26 @@ final class SkillScreen extends Screen {
 		graphics.disableScissor();
 	}
 
-	/** The bar across the top: the screen's name over the web, between two gold rules; the tabs sit at its right. */
-	private void topBar(GuiGraphicsExtractor graphics) {
+	/** The dark sky behind every tab, with a few faint stars, the same each time. */
+	private void sky(GuiGraphicsExtractor graphics) {
+		graphics.fill(0, 0, this.width, this.height, COLOR_BACK);
+		java.util.Random stars = new java.util.Random(83L);
+		for (int i = 0; i < 160; i++) {
+			int x = stars.nextInt(Math.max(1, this.width)), y = stars.nextInt(Math.max(1, this.height));
+			graphics.fill(x, y, x + 1, y + 1, (0x20 + stars.nextInt(0x50)) << 24 | 0xC8C8FF);
+		}
+	}
+
+	/** The bar across the top: {@code name} over the middle of the tab's own area, between two gold rules; the tabs sit at its right. */
+	private void topBar(GuiGraphicsExtractor graphics, Component name, int cx) {
 		int y = WEB_HEADER - WEB_BAR;
 		frame(graphics, 0, y, this.width, WEB_BAR);
-		int cx = (int)areaX(), tw = this.font.width(this.title);
-		graphics.text(this.font, this.title, cx - tw / 2, y + 7, Ui.GOLD);
-		for (int side = -1; side <= 1; side += 2) {
+		int tw = this.font.width(name);
+		// on a narrow screen the name moves left, clear of the tabs
+		cx = Math.max(6 + tw / 2, Math.min(cx, this.tabsLeft - 8 - tw / 2 - (tw & 1)));
+		graphics.text(this.font, name, cx - tw / 2, y + 7, Ui.GOLD);
+		// the rules, where they stay clear of the tabs
+		for (int side = -1; side <= 1 && cx + tw / 2 + 10 + TITLE_RULE < this.tabsLeft; side += 2) {
 			int x0 = cx + side * (tw / 2 + 8), x1 = cx + side * (tw / 2 + 8 + TITLE_RULE);
 			graphics.fill(Math.min(x0, x1), y + 10, Math.max(x0, x1), y + 11, COLOR_FRAME_LINE);
 			graphics.fill(x1 - 1, y + 9, x1 + 2, y + 12, Ui.GOLD);
@@ -722,7 +761,7 @@ final class SkillScreen extends Screen {
 		frame(graphics, 0, this.height - WEB_FOOTER, this.width, WEB_FOOTER);
 		if (onWeb()) {
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.keys"), 8, this.height - WEB_FOOTER + 7,
-				this.width - FOOT_BUTTONS - 20, Ui.DIM);
+				this.footLeft - 16, Ui.DIM);
 		}
 	}
 
@@ -948,6 +987,23 @@ final class SkillScreen extends Screen {
 		return out;
 	}
 
+	/**
+	 * The right panel on the Attributes and Jobs tabs, framed like the web's: {@code name} in {@code accent}, then
+	 * {@code text} under a rule (more than fits scrolls slowly through).
+	 */
+	private void sidePanel(GuiGraphicsExtractor graphics, Component name, int accent, List<Component> text) {
+		int w = railR(), x = this.width - w, y = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, ty = y + 8;
+		frame(graphics, x, y, w, h);
+		Ui.line(graphics, this.font, name, x + 9, ty, w - 18, accent);
+		ty += 12;
+		Ui.detail(graphics, this.font, x, ty, w, Math.max(1, (y + h - 6 - ty - 5) / Ui.LINE), null, accent, text);
+	}
+
+	/** The framed panel the Attributes or Jobs rows sit in. */
+	private void mainFrame(GuiGraphicsExtractor graphics) {
+		frame(graphics, mainL(), WEB_HEADER, mainR() - mainL(), this.height - WEB_HEADER - WEB_FOOTER);
+	}
+
 	// ---- (0.7.57) the Attributes tab --------------------------------------------------------------------------------
 
 	/** (0.7.212) The rows shown: all but Arcana, which shows once you're attuned. */
@@ -970,7 +1026,7 @@ final class SkillScreen extends Screen {
 			return null;
 		}
 		for (Stats.Stat stat : shownStats()) {
-			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, STAT_ROW - 2)) {
+			if (Ui.over((int)mouseX, (int)mouseY, contentX() + 8, statY(stat), contentW() - 16, STAT_ROW - 2)) {
 				return stat;
 			}
 		}
@@ -996,9 +1052,9 @@ final class SkillScreen extends Screen {
 
 	/** The header, a row per attribute (a bar of ten segments of ten points, your tier's cap notched) and the detail box. */
 	private void attributes(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
-		int x = left(), y = top(), w = panelW();
+		int x = contentX(), y = WEB_HEADER, w = contentW();
 		int accent = Ui.GOLD;
-		Ui.window(graphics, x, y, w, panelH());
+		mainFrame(graphics);
 		var player = this.minecraft.player;
 		int level = Stats.characterLevel(shown), points = player == null ? 0 : Stats.points(player, shown);
 		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
@@ -1059,7 +1115,7 @@ final class SkillScreen extends Screen {
 		if (hovered != null && player != null) {
 			int value = Stats.value(player, shown, hovered);
 			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
-			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc"));
+			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc").withColor(Ui.TEXT));
 			text.add(Stats.now(hovered, value).copy().withColor(accent));
 			if (hovered == Stats.Stat.ARCANA) {
 				// (0.7.212) the mana itself: how much now, the most, how fast it comes back
@@ -1095,7 +1151,7 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.POINTS_PER_LEVEL).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.legend").withColor(Ui.HINT));
 		}
-		Ui.detail(graphics, this.font, x, detailY(), w, DETAIL_LINES, name, accent, text);
+		sidePanel(graphics, name, accent, text);
 	}
 
 	// ---- (0.7.220) the Jobs tab --------------------------------------------------------------------------------------
@@ -1110,7 +1166,7 @@ final class SkillScreen extends Screen {
 		}
 		Careers.Job[] all = Careers.Job.values();
 		for (int i = 0; i < all.length; i++) {
-			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, jobY(i), panelW() - 16, JOB_ROW)) {
+			if (Ui.over((int)mouseX, (int)mouseY, contentX() + 8, jobY(i), contentW() - 16, JOB_ROW)) {
 				return all[i];
 			}
 		}
@@ -1119,9 +1175,9 @@ final class SkillScreen extends Screen {
 
 	/** The header (jobs held, your stall), a row per job (rank, where, its experience, orders open) and the detail box. */
 	private void jobs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = left(), y = top(), w = panelW();
+		int x = contentX(), y = WEB_HEADER, w = contentW();
 		int accent = JOB_ACCENT;
-		Ui.window(graphics, x, y, w, panelH());
+		mainFrame(graphics);
 		Careers.Career c = this.minecraft.player == null ? Careers.Career.EMPTY : Careers.of(this.minecraft.player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.title"), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.held", c.posts().size()), x + 9, y + 19, w / 2 - 12,
@@ -1136,7 +1192,7 @@ final class SkillScreen extends Screen {
 		Careers.Job hovered = jobAt(mouseX, mouseY);
 		Careers.Job[] all = Careers.Job.values();
 		int rowRight = x + w - (maxScroll() > 0 ? 10 : 8);
-		int barW = 50, townX = x + 130, barX = rowRight - 42 - barW;
+		int barW = 50, townX = x + w * 38 / 100, barX = rowRight - 42 - barW;
 		graphics.enableScissor(x + 1, listTop(), x + w - 1, listBottom());
 		for (int i = 0; i < all.length; i++) {
 			Careers.Job job = all[i];
@@ -1151,8 +1207,10 @@ final class SkillScreen extends Screen {
 			}
 			Component name = xp > 0 || post != null ? Careers.title(job, rank) : job.title();
 			Ui.line(graphics, this.font, name, x + 13, ry + 2, townX - x - 18, post != null ? Ui.TEXT : xp > 0 ? Ui.DIM : Ui.HINT);
-			Ui.line(graphics, this.font, post == null ? Component.translatable("gui.jaymoskingdoms.jobs.not_held") : Component.literal(post.town()), townX, ry + 2,
-				barX - townX - 6, post == null ? Ui.HINT : Ui.TEXT);
+			if (barX - townX - 6 >= 20) {
+				Ui.line(graphics, this.font, post == null ? Component.translatable("gui.jaymoskingdoms.jobs.not_held") : Component.literal(post.town()), townX,
+					ry + 2, barX - townX - 6, post == null ? Ui.HINT : Ui.TEXT);
+			}
 			int next = Careers.nextRankXp(rank), from = rank == Careers.MASTER ? Careers.MASTER_XP : rank == Careers.JOURNEYMAN ? Careers.JOURNEYMAN_XP : 0;
 			float share = next < 0 ? 1.0F : (xp - from) / (float)Math.max(1, next - from);
 			Ui.bar(graphics, barX, ry + 5, barW, 2, share, rank == Careers.MASTER ? Ui.GOLD : accent);
@@ -1169,7 +1227,7 @@ final class SkillScreen extends Screen {
 		if (hovered != null) {
 			int rank = c.rank(hovered.key), xp = c.xpIn(hovered.key), next = Careers.nextRankXp(rank);
 			title = Careers.title(hovered, rank).copy().append("  " + (next < 0 ? xp : xp + "/" + next));
-			text.add(Component.translatable("job.jaymoskingdoms." + hovered.key + ".desc"));
+			text.add(Component.translatable("job.jaymoskingdoms." + hovered.key + ".desc").withColor(Ui.TEXT));
 			for (int r = Careers.JOURNEYMAN; r <= Careers.MASTER; r++) {
 				text.add(Component.translatable("gui.jaymoskingdoms.jobs.perk", Component.translatable("job.jaymoskingdoms.rank." + r),
 					Component.translatable("job.jaymoskingdoms." + hovered.key + ".perk." + r)).withColor(rank >= r ? Ui.GOOD : Ui.DIM));
@@ -1185,33 +1243,136 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.jobs.about").withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.jobs.ranks", Careers.JOURNEYMAN_XP, Careers.MASTER_XP).withColor(Ui.HINT));
 		}
-		Ui.detail(graphics, this.font, x, detailY(), w, DETAIL_LINES, title, accent, text);
+		sidePanel(graphics, title, accent, text);
+	}
+
+	// ---- Standing, on the Jobs tab ----------------------------------------------------------------------------------
+
+	/** Friends near enough to be given your spark. */
+	private List<Player> friends() {
+		List<Player> out = new ArrayList<>();
+		if (this.minecraft.player != null && this.minecraft.level != null) {
+			for (AbstractClientPlayer p : this.minecraft.level.players()) {
+				if (p != this.minecraft.player && p.distanceTo(this.minecraft.player) <= GIVE_RANGE && !p.isSpectator()) {
+					out.add(p);
+				}
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * Standing: the social side of a character. Their start's lasting perk, the ideal, bond and flaw they chose and the
+	 * spark they hold, how they live, the course they are taking, what the nights out left them (a debt, rivals, a
+	 * betrothal) and the chalk marks they read. Headings are the lines whose key has {@code .head.} in it.
+	 */
+	private static List<Component> standingLines(Player me) {
+		List<Component> out = new ArrayList<>();
+		StartPerks.Perk perk = StartPerks.of(me);
+		out.add(Component.translatable("standing.jaymoskingdoms.head.start"));
+		if (perk == null) {
+			out.add(Component.translatable("standing.jaymoskingdoms.nostart"));
+		} else {
+			out.add(Component.translatable("standing.jaymoskingdoms.circle." + perk.circle().name().toLowerCase(java.util.Locale.ROOT)));
+			for (StartPerks.Boon b : perk.boons()) {
+				out.add(Component.translatable("standing.jaymoskingdoms.boon." + b.name().toLowerCase(java.util.Locale.ROOT)));
+			}
+		}
+		out.add(Component.translatable("standing.jaymoskingdoms.head.sparks"));
+		String ideal = Sparks.pick(me, 0), bond = Sparks.pick(me, 1), flaw = Sparks.pick(me, 2);
+		if (ideal == null) {
+			out.add(Component.translatable("standing.jaymoskingdoms.nopicks"));
+		} else {
+			out.add(Component.translatable("standing.jaymoskingdoms.ideal", Component.translatable("spark.ideal." + ideal)));
+			out.add(Component.translatable("standing.jaymoskingdoms.bond", Component.translatable("spark.bond." + bond)));
+			out.add(Component.translatable("standing.jaymoskingdoms.flaw", Component.translatable("spark.flaw." + flaw)));
+		}
+		out.add(Component.translatable(Sparks.held(me) ? "standing.jaymoskingdoms.spark.held" : "standing.jaymoskingdoms.spark.none"));
+		out.add(Component.translatable("standing.jaymoskingdoms.head.life"));
+		Lifestyle.Living l = Lifestyle.of(me);
+		out.add(Component.translatable("standing.jaymoskingdoms.life." + Lifestyle.tier(me).name().toLowerCase(java.util.Locale.ROOT), l.score()));
+		long day = me.level().getGameTime() / 24000L;
+		out.add(Component.translatable("standing.jaymoskingdoms.life.clothes." + (l.dressedTo() > day ? "good" : "poor")));
+		out.add(Component.translatable("standing.jaymoskingdoms.life.bath." + (l.bathedTo() > day ? "good" : "poor")));
+		Lessons.Course course = me.getAttached(Lessons.COURSE);
+		if (course != null) {
+			out.add(Component.translatable("standing.jaymoskingdoms.head.course"));
+			out.add(Component.translatable("standing.jaymoskingdoms.course", course.name(), course.done(), course.needed()));
+		}
+		Carousing.Debt debt = me.getAttached(Carousing.DEBT);
+		String betrothed = me.getAttachedOrElse(Carousing.BETROTHED, "");
+		List<String> rivals = me.getAttachedOrElse(Carousing.RIVALS, List.of());
+		if (debt != null || !betrothed.isEmpty() || !rivals.isEmpty()) {
+			out.add(Component.translatable("standing.jaymoskingdoms.head.nights"));
+			if (debt != null) {
+				out.add(Component.translatable("standing.jaymoskingdoms.debt", debt.creditor(), Math.max(1, debt.owed() / 1000L)));
+			}
+			if (!betrothed.isEmpty()) {
+				out.add(Component.translatable("standing.jaymoskingdoms.betrothed", betrothed));
+			}
+			for (String r : rivals) {
+				out.add(Component.translatable("standing.jaymoskingdoms.rival", r));
+			}
+		}
+		if (ChalkMarks.reads(me)) {
+			out.add(Component.translatable("standing.jaymoskingdoms.head.chalk"));
+			for (String n : ChalkMarks.NAMES.subList(0, ChalkMarks.SCRIBBLE)) {
+				out.add(Component.translatable("chalk.jaymoskingdoms.meaning." + n));
+			}
+		}
+		return out;
+	}
+
+	private static boolean heading(Component line) {
+		return line.getContents() instanceof TranslatableContents t && t.getKey().contains(".head.");
+	}
+
+	/** The Standing panel, framed on the Jobs tab's left: its lines wrapped, headings in gold; the wheel scrolls it. */
+	private void standing(GuiGraphicsExtractor graphics) {
+		int w = standW(), top = WEB_HEADER, h = this.height - WEB_HEADER - WEB_FOOTER, tx = 8, tw = w - 18;
+		frame(graphics, 0, top, w, h);
+		Ui.line(graphics, this.font, Component.translatable("standing.jaymoskingdoms.title"), tx, top + 8, tw, Ui.GOLD);
+		graphics.fill(6, top + 19, w - 6, top + 20, COLOR_FRAME_LINE);
+		if (this.minecraft.player == null) {
+			return;
+		}
+		List<FormattedCharSequence> rows = new ArrayList<>();
+		List<Boolean> heads = new ArrayList<>();
+		for (Component line : standingLines(this.minecraft.player)) {
+			boolean head = heading(line);
+			if (head && !rows.isEmpty()) {
+				// a little room above each heading
+				rows.add(null);
+				heads.add(false);
+			}
+			for (FormattedCharSequence part : this.font.split(line, tw)) {
+				rows.add(part);
+				heads.add(head);
+			}
+		}
+		int areaTop = top + 24, areaBottom = top + h - 6, view = areaBottom - areaTop, content = rows.size() * STAND_LINE;
+		standScroll = Math.clamp(standScroll, 0, Math.max(0, content - view));
+		graphics.enableScissor(3, areaTop, w - 3, areaBottom);
+		for (int i = 0; i < rows.size(); i++) {
+			int y = areaTop + i * STAND_LINE - standScroll;
+			if (rows.get(i) != null && y > areaTop - STAND_LINE && y < areaBottom) {
+				graphics.text(this.font, rows.get(i), tx, y, heads.get(i) ? Ui.GOLD : Ui.TEXT);
+			}
+		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, w - 7, areaTop, view, view, content, standScroll);
 	}
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		// when the panel is collapsed away, the strip on the left brings it back
-		if (panelCollapsed && (stats || jobs)) {
-			int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
-			if (event.x() >= tabX && event.x() < tabX + tabW && event.y() >= tabY && event.y() < tabY + tabH) {
-				panelCollapsed = false;
-				rebuildWidgets();
+		Stats.Stat stat = statAt(event.x(), event.y());
+		if (stat != null) {
+			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
+				// (0.7.540) shift-click: ten at once
+				ClientPlayNetworking.send(new Stats.Raise(stat.ordinal(), event.hasShiftDown() ? Stats.SHIFT_STEP : 1));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-				return true;
 			}
-		}
-
-		// a collapsed panel must not take clicks: the rows behind it are invisible, so a click would spend unseen
-		if (!panelCollapsed) {
-			Stats.Stat stat = statAt(event.x(), event.y());
-			if (stat != null) {
-				if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
-					// (0.7.540) shift-click: ten at once
-					ClientPlayNetworking.send(new Stats.Raise(stat.ordinal(), event.hasShiftDown() ? Stats.SHIFT_STEP : 1));
-					this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-				}
-				return true;
-			}
+			return true;
 		}
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
@@ -1238,14 +1399,12 @@ final class SkillScreen extends Screen {
 				return true;
 			}
 			if (mx < railL() && my >= Math.max(WEB_HEADER, railStatsY()) && my < this.height - WEB_FOOTER) {
-				listScroll = 0;
-				stats = true;
-				rebuildWidgets();
+				page(1);
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 				return true;
 			}
 		}
-		if (webOnScreen() && inWebArea(event.x(), event.y())) {
+		if (onWeb() && inWebArea(event.x(), event.y())) {
 			// a press on the web: a drag moves it, a click (hardly moved) on a perk learns it
 			pressed = true;
 			pressX = event.x();
@@ -1258,7 +1417,7 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-		if (pressed && webOnScreen()) {
+		if (pressed && onWeb()) {
 			panX += dx;
 			panY += dy;
 			targetX += dx;
@@ -1310,7 +1469,7 @@ final class SkillScreen extends Screen {
 			railScroll = Math.clamp(railScroll - (int)Math.signum(scrollY) * RAIL_STAT_ROW, 0, railMaxScroll());
 			return true;
 		}
-		if (webOnScreen() && scrollY != 0.0) {
+		if (onWeb() && scrollY != 0.0) {
 			// zoom about the mouse: the point under it stays put
 			double before = targetZoom;
 			targetZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, targetZoom * (scrollY > 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP)));
@@ -1319,7 +1478,12 @@ final class SkillScreen extends Screen {
 			targetY += uy * (before - targetZoom);
 			return true;
 		}
-		if (!panelCollapsed && (stats || jobs) && scrollY != 0.0 && maxScroll() > 0) {
+		if (jobs && scrollY != 0.0 && mouseX < standW()) {
+			// Standing's lines, a line a notch
+			standScroll = Math.max(0, standScroll - (int)Math.signum(scrollY) * STAND_LINE);
+			return true;
+		}
+		if ((stats || jobs) && scrollY != 0.0 && maxScroll() > 0) {
 			// the Attributes or Jobs rows, a row a notch
 			listScroll = Math.clamp(listScroll - (int)Math.signum(scrollY) * (jobs ? JOB_ROW : STAT_ROW), 0, maxScroll());
 			return true;
@@ -1330,8 +1494,12 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
-		if ((jobs || stats) && !panelCollapsed) {
+		if (jobs || stats) {
+			sky(graphics);
+			topBar(graphics, Component.translatable(jobs ? "gui.jaymoskingdoms.jobs.tab" : "gui.jaymoskingdoms.stats.tab"), (mainL() + mainR()) / 2);
+			bottomBar(graphics);
 			if (jobs) {
+				standing(graphics);
 				jobs(graphics, mouseX, mouseY);
 			} else {
 				attributes(graphics, shown, mouseX, mouseY);
@@ -1342,20 +1510,10 @@ final class SkillScreen extends Screen {
 		glide();
 		Skills.Perk hovered = pressed && Math.abs(mouseX - pressX) + Math.abs(mouseY - pressY) >= 4.0 ? null : perkAt(mouseX, mouseY);
 		web(graphics, shown, mouseX, mouseY, hovered);
-		topBar(graphics);
+		topBar(graphics, this.title, (int)areaX());
 		bottomBar(graphics);
 		rightRail(graphics, shown, hovered, hovered == null ? crestAt(mouseX, mouseY) : null, mouseX, mouseY);
-		if (onWeb()) {
-			leftRail(graphics, shown, mouseX, mouseY);
-		} else {
-			// the Attributes or Jobs panel is collapsed away: the strip on the left brings it back
-			int tabX = 4, tabY = 4, tabW = 24, tabH = this.height - 8;
-			graphics.fill(tabX, tabY, tabX + tabW, tabY + tabH, 0x80101018);
-			graphics.fill(tabX, tabY, tabX + 2, tabY + tabH, 0xFFFFC21A);
-			int cx = tabX + tabW - 8, cy = tabY + tabH / 2;
-			graphics.fill(cx - 4, cy - 4, cx, cy, 0xFFFFC21A);
-			graphics.fill(cx - 4, cy, cx, cy + 4, 0xFFFFC21A);
-		}
+		leftRail(graphics, shown, mouseX, mouseY);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 

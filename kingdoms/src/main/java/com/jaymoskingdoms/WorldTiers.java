@@ -382,6 +382,14 @@ public final class WorldTiers {
 		}
 	}
 
+	/**
+	 * Whether {@code player} has the world tiers at all: a tier past Hearth is open to them, they stand in one, or they're in
+	 * creative. Until then their screens don't show the tiers.
+	 */
+	public static boolean unlocked(Player player) {
+		return player.isCreative() || of(player).ordinal() > 0 || progress(player).open() > 0;
+	}
+
 	/** Whether {@code player} may enter {@code tier}: it's open to them, or they're in creative. */
 	public static boolean open(Player player, Tier tier) {
 		return player.isCreative() || tier.ordinal() <= progress(player).open();

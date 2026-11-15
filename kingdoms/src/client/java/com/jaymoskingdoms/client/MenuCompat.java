@@ -157,7 +157,10 @@ public final class MenuCompat {
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			rows.add(row("skill.jaymoskingdoms." + p.key(), Component.translatable("menu.jaymoskingdoms.character.level", skills.level(p))));
 		}
-		rows.add(row("menu.jaymoskingdoms.character.tier", WorldTiers.of(player).title()));
+		if (WorldTiers.unlocked(player)) {
+			// (the world tiers, once one past Hearth is open to you)
+			rows.add(row("menu.jaymoskingdoms.character.tier", WorldTiers.of(player).title()));
+		}
 		Patron patron = Patrons.of(player);
 		rows.add(row("menu.jaymoskingdoms.character.patron", patron == null ? none : Component.translatable("patron.jaymoskingdoms." + patron.key)));
 		// what you have seen of the other side (Exposure), and a sleep the living nightmare haunts (LivingNightmare)
