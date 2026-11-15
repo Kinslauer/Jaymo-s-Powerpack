@@ -710,7 +710,7 @@ rise as one of his, light, "with very little left of you to feel". Gold burns it
 realms openly. Those with the forbidden Death element raise a thrall of their own. (The dead who come back on their own
 for one person are the Banes, under *The dark*.)
 
-(new) **The crowd remembers its work** (Andy's horde picks, 2026-11-15). The old dead keep the shapes of the lives they
+**The crowd remembers its work** (Andy's horde picks, 2026-11-15). The old dead keep the shapes of the lives they
 had, worn down to a single habit. Those who were builders and hedgers still carry a few stones or planks and lay them
 without thinking, a step here, a span there, until they stand where the living hide. The young who died running still run
 when they see the living, and those who were the village's strong backs walk as brutes who shoulder doors in. Ahead of
@@ -718,7 +718,7 @@ the crowd go its scouts: thin, quick dead who were once the herders and messenge
 they find someone, and the rest come. Settle in one place through the night and they keep coming, a bigger crowd each
 time, as if the whole graveyard had remembered where the village used to be.
 
-(new) **Where the dead rose** (Andy's looks picks, 2026-11-15). The old dead keep the mark of the ground that held
+**Where the dead rose** (Andy's looks picks, 2026-11-15). The old dead keep the mark of the ground that held
 them. Those that lay in the sands and the red badlands come up dried to leather and split along the creases; those from
 the swamps, the river mud and the shore come up swollen and sodden, trailing weed. Those that lay deep, where no sky
 reaches, in the caves and the deep dark, come up bloodless and chalk-white, strung with cobweb, and the ones from the snows
@@ -1161,7 +1161,7 @@ grey hands, a slow heart. The zombies leave the blighted alone and talk to them 
 *"There's no hunger where we go. Only the one."* It is cured with weakness first, then a golden apple before it
 finishes; "the gold burns going down".
 
-(new) **How the blight shows, and how it's fought** (Andy's picks, 2026-11-15, from Contagion's ideas). Armour keeps
+**How the blight shows, and how it's fought** (Andy's picks, 2026-11-15, from Contagion's ideas). Armour keeps
 most of it out, and it gets in easiest through a wound that bleeds; a wound bound in the first hours often never lets it
 settle. Once it takes hold the skin greys toward the Hollow it is making, a wet cough comes now and then, and at the end
 flies gather. Townsfolk know that cough ("That's no regular cough") and keep away. Those who know wounds (any healer's
@@ -1173,7 +1173,7 @@ and they raise the dead out of the mud as **thralls** to guard them, beside thei
 out of you for coin, though a righteous temple turns the Hollow away. A totem spends itself to save you. Whoever is cured
 of it once can never take it again.
 
-(new) **How the blight spreads** (Andy's picks, 2026-11-15). Near the end a carrier's cough can pass it to whoever stands
+**How the blight spreads** (Andy's picks, 2026-11-15). Near the end a carrier's cough can pass it to whoever stands
 close before them, and a carrier's own blows pass it once it has hold. The dead's rotten blood carries it too: on your skin
 or your armour it can get in, the more so through an open wound, until it is scrubbed off or washed away in a soaking.
 Villagers catch it like anyone: they sicken for a day and rise as one of the dead unless someone cures them, and their
