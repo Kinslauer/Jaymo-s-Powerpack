@@ -17,7 +17,8 @@ import net.minecraft.world.phys.Vec3;
  * head (raised high for a choke). A slam throws the arm up overhead as the creature is hauled up, then brings it down
  * hard as it plummets. Everyone's, from the synced grip and slam pose. (0.15.42) The grip's reach eases in and out and
  * follows its target on springs ({@link PoseBlend}), with the body behind it: the chest turned toward it, leaning into
- * the hold, the free arm out for balance and the feet set.
+ * the hold, the free arm out for balance and the feet set. Overturn (GravityOverturn#AIM) is drawn the same way with both
+ * hands on its target.
  */
 public final class GravityArmPose {
 	/** How much of the reach's turn the chest takes (and the most, radians), and the lean into the hold. */
@@ -26,6 +27,8 @@ public final class GravityArmPose {
 	static final float FREE_ARM = -0.35F, FREE_OUT = 0.25F, STANCE = 0.2F, STANCE_WALK = 0.6F;
 	/** The strain in the reaching arm (radians) and its beat (per tick). */
 	static final float STRAIN = 0.02F, STRAIN_BEAT = 1.7F;
+	/** Overturn's second hand: how far its aim sits in from the first (radians, toward the body's middle). */
+	static final float BOTH_SPREAD = 0.18F;
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("gravity_grip");
 
 	private GravityArmPose() {
@@ -46,7 +49,10 @@ public final class GravityArmPose {
 			return;
 		}
 		Integer grip = self == null ? null : self.getAttached(GravityPower.GRIP);
-		Entity held = grip == null ? null : minecraft.level.getEntity(grip);
+		// Overturn (GravityOverturn): both hands aimed at the one it holds
+		Integer aim = grip != null || self == null ? null : self.getAttached(com.jaymospowers.power.gravity.GravityOverturn.AIM);
+		boolean both = aim != null;
+		Entity held = grip != null ? minecraft.level.getEntity(grip) : aim != null ? minecraft.level.getEntity(aim) : null;
 		boolean on = held != null && avatar.deathTime <= 0.0F;
 		PoseBlend.Track track = BLEND.track(avatar.id, on);
 		if (track == null || avatar.deathTime > 0.0F) {
@@ -75,8 +81,14 @@ public final class GravityArmPose {
 		// the arm still on its target (the body's turn and lean taken back out of it), straining
 		f.set(right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, -Mth.HALF_PI + pitchDown - lean, aimY - turn, 0.0F);
 		f.shake(right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, Mth.sin(avatar.ageInTicks * STRAIN_BEAT) * STRAIN);
-		// the free arm out for balance
-		f.set(right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM, FREE_ARM, 0.0F, -side * FREE_OUT);
+		if (both) {
+			// the other hand on it too, a little apart, straining
+			f.set(right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM, -Mth.HALF_PI + pitchDown - lean, aimY - turn + side * BOTH_SPREAD, 0.0F);
+			f.shake(right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM, -Mth.sin(avatar.ageInTicks * STRAIN_BEAT) * STRAIN);
+		} else {
+			// the free arm out for balance
+			f.set(right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM, FREE_ARM, 0.0F, -side * FREE_OUT);
+		}
 		// the head stays on its look
 		f.add(PoseBlend.HEAD, -lean);
 		f.add(PoseBlend.HEAD + 1, -turn);

@@ -1,8 +1,11 @@
 package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
+import com.jaymospowers.core.PowerInput;
+import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.zfighter.ZFighterScouter;
 import java.util.ArrayList;
@@ -34,26 +37,28 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Overturn (hold B, tap V at a creature; Andy, 2026-11-15: "Can gravity users directly reverse an enemies' gravity?
- * ... only for enemies he is stronger or larger than, stronger enemies will animate a struggle, dropping their weapon
- * and grabbing the ground, resisting the gravity for the duration"). The creature under the crosshair, up to
- * {@link #RANGE} blocks off:
+ * Overturn (hold B, press V at a creature, and keep V held; Andy, 2026-11-15: "Can gravity users directly reverse an
+ * enemies' gravity? ... only for enemies he is stronger or larger than, stronger enemies will animate a struggle,
+ * dropping their weapon and grabbing the ground, resisting the gravity for the duration", then: "the gravity user can
+ * hold the input and focus on the attack, giving it an indefinite duration, as long as he holds"). The creature under
+ * the crosshair, up to {@link #RANGE} blocks off, for as long as V stays held, the user's hands aimed at it
+ * ({@link #AIM}):
  * <ul>
  * <li>if you are stronger ({@link #might}: the scouter's power level, raised by how much of Gravity you have mastered
- * and by your fate) or bigger (height plus width), its gravity turns over for {@link #TICKS}: it falls up, drawn
- * upside down, rising no faster than {@link #MAX_RISE}. A ceiling it hits takes the fall like a floor would
- * ({@link #SAFE}, {@link #DAMAGE_PER_BLOCK}); when its weight comes back the right way it falls down again, and a death
- * from either counts as one by weight.</li>
+ * and by your fate) or bigger (height plus width), its gravity turns over: it falls up, drawn upside down, rising no
+ * faster than {@link #MAX_RISE}. A ceiling it hits takes the fall like a floor would ({@link #SAFE},
+ * {@link #DAMAGE_PER_BLOCK}); with open sky above it keeps on rising. Let go and its weight comes back the right way:
+ * it falls from however high it got, and a death from either counts as one by weight.</li>
  * <li>otherwise it resists: its weapon drops from its hand, it goes down and digs its hands into the ground
- * ({@link #GRASP}, drawn by GravityGraspPose), and holds there, unable to move, until the pull gives up.</li>
+ * ({@link #GRASP}, drawn by GravityGraspPose), and holds there, unable to move, until you let go.</li>
  * </ul>
- * Uses B's cooldown ({@link #COOLDOWN}, shorter when resisted: {@link #RESISTED_COOLDOWN}).
+ * It ends when V is let go, or the user goes out of reach ({@link #RANGE} plus {@link #SLACK}), dies or loses Gravity;
+ * then B's cooldown starts ({@link #COOLDOWN}, shorter when resisted: {@link #RESISTED_COOLDOWN}). Holding it costs
+ * hunger like Lift ({@link #EXHAUSTION}).
  */
 public final class GravityOverturn {
-	/** Reach (blocks). */
-	static final double RANGE = 32.0;
-	/** How long its gravity stays turned over, or how long it holds on (ticks). */
-	static final int TICKS = 60;
+	/** Reach (blocks), and how much further off the user can get before it lets go. */
+	static final double RANGE = 32.0, SLACK = 16.0;
 	/** Its gravity while overturned (as a multiplier taken off: -2 turns 0.08 down into 0.08 up), and its top speed up (b/t). */
 	static final double FLIP = -2.0, MAX_RISE = 0.5;
 	/** A ceiling hit: the first {@code SAFE} blocks risen are free, then {@code DAMAGE_PER_BLOCK} for each, up to {@code DAMAGE_MAX}. */
@@ -61,35 +66,43 @@ public final class GravityOverturn {
 	static final float DAMAGE_PER_BLOCK = 1.0F, DAMAGE_MAX = 20.0F;
 	/** Your might: the power level times (1 + this x the share of Gravity mastered), times {@code FATE_BONUS} once ascended or corrupted. */
 	static final double MASTERY_BONUS = 1.0, FATE_BONUS = 1.5;
-	/** B's cooldown after it (ticks), and after a resisted one. */
+	/** B's cooldown once it lets go (ticks), and after a resisted one. */
 	static final int COOLDOWN = 300, RESISTED_COOLDOWN = 160;
+	/** What holding it costs the user each tick (Lift's rate). */
+	static final float EXHAUSTION = 0.012F;
 	/** A dropped weapon can't be picked back up for this long (ticks). */
 	static final int PICKUP_DELAY = 40;
+	/** A held player's keys are refused this far ahead (ticks), topped up every tick while it lasts. */
+	static final int STUN_AHEAD = 5;
 
 	private static final Identifier FLIP_ID = JaymosPowers.id("gravity_overturn");
 
-	/** On an overturned creature: until when (game time). Synced to everyone, who draw it upside down. */
+	/** On an overturned creature (since when, game time). Synced to everyone, who draw it upside down. */
 	public static final AttachmentType<Long> FLIPPED = AttachmentRegistry.create(JaymosPowers.id("gravity_overturned"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
-	/** On one holding on against it: since when (game time). Synced to everyone, who draw it clutching the ground. */
+	/**
+	 * On one holding on to the ground against Gravity, here or for Lift's first moments on a person (since when, game
+	 * time). Synced to everyone, who draw it clutching the ground.
+	 */
 	public static final AttachmentType<Long> GRASP = AttachmentRegistry.create(JaymosPowers.id("gravity_grasp"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** On the user while it lasts: the creature's entity id. Synced to everyone, who draw both hands aimed at it. */
+	public static final AttachmentType<Integer> AIM = AttachmentRegistry.create(JaymosPowers.id("gravity_overturn_aim"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	private static final class Turn {
 		final ResourceKey<Level> dimension;
-		final UUID entity;
+		final UUID entity, owner;
 		final boolean resisting;
-		final long until;
-		final long stunUntil;
+		long stunUntil = -1;
 		double risen;
 		double lastY;
 
-		Turn(ResourceKey<Level> dimension, LivingEntity entity, boolean resisting, long until, long stunUntil) {
+		Turn(ResourceKey<Level> dimension, LivingEntity entity, ServerPlayer owner, boolean resisting) {
 			this.dimension = dimension;
 			this.entity = entity.getUUID();
+			this.owner = owner.getUUID();
 			this.resisting = resisting;
-			this.until = until;
-			this.stunUntil = stunUntil;
 			this.lastY = entity.getY();
 		}
 	}
@@ -99,33 +112,25 @@ public final class GravityOverturn {
 	private GravityOverturn() {
 	}
 
-	/**
-	 * Aimed at a creature: overturned or resisting. Returns the cooldown to put on B, or -1 with nothing to aim at
-	 * (nothing happens then).
-	 */
-	static int start(ServerPlayer player) {
+	/** Aimed at a creature: overturned, or holding on, until V is let go. False with nothing to aim at (nothing happens). */
+	static boolean start(ServerPlayer player) {
 		Entity seen = GravityPower.liftableInSight(player, RANGE);
-		if (!(seen instanceof LivingEntity target) || !target.isAlive() || seen instanceof ArmorStand || busy(target)) {
-			return -1;
+		if (!(seen instanceof LivingEntity target) || !target.isAlive() || seen instanceof ArmorStand || busy(target) || holding(player)) {
+			return false;
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		GravityPower.touch(target, player);
 		boolean resists = !overpowers(player, target);
-		long stun = -1;
+		Turn turn = new Turn(level.dimension(), target, player, resists);
 		if (resists) {
 			disarm(level, target);
 			target.setAttached(GRASP, now);
-			if (target instanceof ServerPlayer held) {
-				// no keys answer while they hold on
-				stun = now + TICKS;
-				held.setAttached(GravityPower.HELD, new GravityPower.Held(stun, false));
-			}
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5F, 0.5F);
 			com.jaymospowers.core.Debris.ring(level, target.blockPosition().below(), 1, 0.6F);
 		} else {
 			GravityPower.modifier(target, Attributes.GRAVITY, FLIP_ID, FLIP, true);
-			target.setAttached(FLIPPED, now + TICKS);
+			target.setAttached(FLIPPED, now);
 			target.resetFallDistance();
 			// a little hop off the ground to start it rising
 			target.setDeltaMovement(target.getDeltaMovement().add(0.0, 0.2, 0.0));
@@ -133,10 +138,13 @@ public final class GravityOverturn {
 			target.syncVelocity = true;
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 0.5F);
 		}
+		player.setAttached(AIM, target.getId());
+		// B waits while it's held (no Crush mid-hold); the cooldown starts over once it lets go
+		GravityPower.coolCrush(player, resists ? RESISTED_COOLDOWN : COOLDOWN);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.9F);
 		level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + 0.1, target.getZ(), 24, 0.4, 0.05, 0.4, 0.06);
-		TURNS.add(new Turn(level.dimension(), target, resists, now + TICKS, stun));
-		return resists ? RESISTED_COOLDOWN : COOLDOWN;
+		TURNS.add(turn);
+		return true;
 	}
 
 	/** Whether {@code player} can turn {@code target} over: stronger than it, or bigger. */
@@ -188,6 +196,15 @@ public final class GravityOverturn {
 		return false;
 	}
 
+	private static boolean holding(ServerPlayer player) {
+		for (Turn turn : TURNS) {
+			if (turn.owner.equals(player.getUUID())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static void tick(MinecraftServer server) {
 		if (TURNS.isEmpty()) {
 			return;
@@ -196,25 +213,32 @@ public final class GravityOverturn {
 			Turn turn = it.next();
 			ServerLevel level = server.getLevel(turn.dimension);
 			Entity entity = level == null ? null : level.getEntity(turn.entity);
-			if (!(entity instanceof LivingEntity living) || !living.isAlive()) {
+			ServerPlayer owner = server.getPlayerList().getPlayer(turn.owner);
+			LivingEntity living = entity instanceof LivingEntity l && l.isAlive() ? l : null;
+			boolean kept = living != null && owner != null && owner.isAlive() && owner.level() == level && Powers.has(owner, GravityPower.INSTANCE)
+				&& PowerInput.isDown(owner, PowerKey.ABILITY_3) && owner.distanceToSqr(living) <= (RANGE + SLACK) * (RANGE + SLACK);
+			if (!kept) {
 				it.remove();
+				end(living, owner, turn);
 				continue;
 			}
-			if (level.getGameTime() >= turn.until) {
-				it.remove();
-				end(living, turn);
-				continue;
-			}
+			owner.causeFoodExhaustion(EXHAUSTION);
+			GravityPower.touch(living, owner);
 			if (turn.resisting) {
-				hold(level, living);
+				holdOn(level, living);
+				if (living instanceof ServerPlayer held) {
+					// no keys answer while they hold on
+					turn.stunUntil = level.getGameTime() + STUN_AHEAD;
+					held.setAttached(GravityPower.HELD, new GravityPower.Held(turn.stunUntil, false));
+				}
 			} else {
 				rise(level, living, turn);
 			}
 		}
 	}
 
-	/** Holding on: rooted where it is, shaking against the pull. */
-	private static void hold(ServerLevel level, LivingEntity living) {
+	/** Holding on to the ground (here, or a person Lift has just taken): rooted where it is, shaking against the pull. */
+	static void holdOn(ServerLevel level, LivingEntity living) {
 		Vec3 v = living.getDeltaMovement();
 		living.setDeltaMovement(0.0, Math.min(0.0, v.y), 0.0);
 		living.needsSync = true;
@@ -260,8 +284,17 @@ public final class GravityOverturn {
 		}
 	}
 
-	/** The pull gives up: weight the right way again (it falls), or it lets go of the ground. */
-	private static void end(LivingEntity living, Turn turn) {
+	/** Let go: its weight the right way again (it falls from wherever it got to), or it lets go of the ground; B cools down. */
+	private static void end(LivingEntity living, ServerPlayer owner, Turn turn) {
+		if (owner != null) {
+			owner.removeAttached(AIM);
+			if (Powers.has(owner, GravityPower.INSTANCE)) {
+				GravityPower.coolCrush(owner, turn.resisting ? RESISTED_COOLDOWN : COOLDOWN);
+			}
+		}
+		if (living == null) {
+			return;
+		}
 		if (turn.resisting) {
 			living.removeAttached(GRASP);
 			if (living instanceof ServerPlayer player) {
@@ -274,7 +307,7 @@ public final class GravityOverturn {
 		}
 		GravityPower.modifier(living, Attributes.GRAVITY, FLIP_ID, 0.0, false);
 		living.removeAttached(FLIPPED);
-		// it falls from where it is now, so the fall counts only from here
+		// the fall counts from here, where it turns back over
 		living.resetFallDistance();
 	}
 
