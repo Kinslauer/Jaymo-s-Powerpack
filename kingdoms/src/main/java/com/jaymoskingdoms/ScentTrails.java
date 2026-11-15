@@ -48,6 +48,8 @@ public final class ScentTrails {
 	/** How long they must sneak to take a scent (ticks), how near the one they scent must be (blocks), and the wait before the next (ticks). */
 	static final int SNEAK_TICKS = 40, SNIFF_COOLDOWN = 100;
 	static final double SNIFF_RANGE = 16.0;
+	/** (Hearing's blood trails) A bleeding mortal ({@link Awareness#bleeding}) is scented first, from this many times as far. */
+	static final double BLOOD_REACH = 2.0;
 	/** How long they see the trail (ticks), how often it is sent again, and how far from them its points are sent (blocks). */
 	static final int FOLLOW_TICKS = 1200, RESEND_EVERY = 40;
 	static final double SEND_RANGE = 96.0;
@@ -181,16 +183,26 @@ public final class ScentTrails {
 		wolf.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.feral.scent.taken").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
 	}
 
-	/** Whose scent: the nearest mortal player in range, else whoever left the freshest footstep in range. */
+	/** Whose scent: the nearest bleeding mortal player in blood's range, else the nearest in range, else whoever left the freshest footstep in range. */
 	private static @Nullable UUID pick(ServerPlayer wolf) {
-		ServerPlayer nearest = null;
-		double best = SNIFF_RANGE * SNIFF_RANGE;
+		ServerPlayer nearest = null, bleeding = null;
+		double best = SNIFF_RANGE * SNIFF_RANGE, bestBlood = SNIFF_RANGE * BLOOD_REACH * SNIFF_RANGE * BLOOD_REACH;
 		for (ServerPlayer other : wolf.level().players()) {
 			double d = other.distanceToSqr(wolf);
-			if (other != wolf && Vampires.mortal(other) && d < best) {
+			if (other == wolf || !Vampires.mortal(other)) {
+				continue;
+			}
+			if (Awareness.bleeding(other) && d < bestBlood) {
+				bestBlood = d;
+				bleeding = other;
+			}
+			if (d < best) {
 				best = d;
 				nearest = other;
 			}
+		}
+		if (bleeding != null) {
+			return bleeding.getUUID();
 		}
 		if (nearest != null) {
 			return nearest.getUUID();

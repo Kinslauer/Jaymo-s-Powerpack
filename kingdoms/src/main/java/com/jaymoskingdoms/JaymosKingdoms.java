@@ -78,6 +78,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		SmogFolk.register();
 		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
 		Awareness.register();
+		// (medieval picks) every monster hears, through walls, under cover; decoys, guns and voices (Hearing)
+		Hearing.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		// (0.7.498) the emeralds in chests, mob drops and hero gifts become silver coins
