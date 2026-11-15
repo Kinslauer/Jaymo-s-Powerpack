@@ -1,5 +1,6 @@
 package com.jaymospowers.tinkering.smithing;
 
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import com.jaymospowers.tinkering.forge.ForgeHearthBlock;
 import com.jaymospowers.tinkering.kiln.Heat;
 import net.minecraft.core.BlockPos;
@@ -33,6 +34,9 @@ public class HearthEntity extends BlockEntity {
 
 	private ItemStack held = ItemStack.EMPTY;
 	private int progress;
+	/** (the forge's dangers) Rain falling on it, as last looked; and the counters for that look and for its half speed. */
+	private boolean wet;
+	private int weatherTicks, wetTicks;
 
 	public HearthEntity(BlockPos pos, BlockState state) {
 		super(Smithing.HEARTH_ENTITY, pos, state);
@@ -75,7 +79,24 @@ public class HearthEntity extends BlockEntity {
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, HearthEntity hearth) {
-		if (hearth.held.isEmpty() || !state.getValue(ForgeHearthBlock.LIT)) {
+		if (!state.getValue(ForgeHearthBlock.LIT)) {
+			hearth.wet = false;
+			return;
+		}
+		// (GTNH picks, the forge's dangers) rain on an open hearth: it heats at half speed; a thunderstorm puts it out
+		if (++hearth.weatherTicks >= ForgeDangers.RAIN_CHECK_TICKS) {
+			hearth.weatherTicks = 0;
+			if (ForgeDangers.storm(level, pos.above())) {
+				ForgeDangers.douse((ServerLevel) level, pos);
+				hearth.wet = false;
+				return;
+			}
+			hearth.wet = ForgeDangers.wet(level, pos.above());
+			if (hearth.wet) {
+				ForgeDangers.hiss((ServerLevel) level, pos.above(), false);
+			}
+		}
+		if (hearth.held.isEmpty()) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -83,6 +104,9 @@ public class HearthEntity extends BlockEntity {
 			if (now % KEEP_HOT_TICKS == 0) {
 				hearth.held.set(Smithing.HEATED_AT, now);
 			}
+			return;
+		}
+		if (hearth.wet && (++hearth.wetTicks & 1) == 0) {
 			return;
 		}
 		int heat = Math.max(1, Heat.at(level, pos));

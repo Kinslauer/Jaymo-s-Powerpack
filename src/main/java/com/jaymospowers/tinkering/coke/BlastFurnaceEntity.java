@@ -1,6 +1,7 @@
 package com.jaymospowers.tinkering.coke;
 
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -27,7 +28,9 @@ import org.jspecify.annotations.Nullable;
  * and three deep, its middle hollow from the second layer up and open at the top, its mouth ({@link BlastFurnaceBlock}) in
  * the middle of one side on the second layer. Formed and loaded with iron ingots and coal coke, it slowly burns the coke
  * into the iron: {@link #COKE_PER_STEEL} coke and an ingot make a steel ingot every {@link #STEEL_TICKS} ticks, leaving
- * {@link #ASH_PER_STEEL} ash. The second road to steel, beside the smeltery's iron and pig iron.
+ * {@link #ASH_PER_STEEL} ash. The second road to steel, beside the smeltery's iron and pig iron. (GTNH picks, the
+ * forge's dangers) Rain down its open top slows it to half speed, a thunderstorm stops it and loses the steel under way,
+ * and its walls burn while it works.
  */
 public class BlastFurnaceEntity extends BlockEntity {
 	/** Ticks for one steel ingot (two minutes), the coke it burns and the ash it leaves. */
@@ -39,6 +42,9 @@ public class BlastFurnaceEntity extends BlockEntity {
 	private ItemStack iron = ItemStack.EMPTY, coke = ItemStack.EMPTY, steel = ItemStack.EMPTY, ash = ItemStack.EMPTY;
 	private int progress;
 	private boolean formed;
+	/** (the forge's dangers) Rain, and a thunderstorm, down its top as last looked; the counter for working at half speed. */
+	private boolean wet, storm;
+	private int wetTicks;
 
 	public BlastFurnaceEntity(BlockPos pos, BlockState state) {
 		super(CokeAndSteel.BLAST_FURNACE_ENTITY, pos, state);
@@ -127,12 +133,37 @@ public class BlastFurnaceEntity extends BlockEntity {
 
 	private void tick(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction out = state.getValue(BlastFurnaceBlock.FACING);
-		if (level.getGameTime() % CHECK_TICKS == Math.floorMod(pos.asLong(), CHECK_TICKS)) {
+		BlockPos base = base(pos, out);
+		boolean check = level.getGameTime() % CHECK_TICKS == Math.floorMod(pos.asLong(), CHECK_TICKS);
+		if (check) {
 			formed = formed(level, pos, out);
+			// (GTNH picks, the forge's dangers) rain down its open top
+			wet = ForgeDangers.wet(level, base.above(HEIGHT - 1));
+			storm = ForgeDangers.storm(level, base.above(HEIGHT - 1));
 		}
 		boolean working = formed && !iron.isEmpty() && coke.getCount() >= COKE_PER_STEEL && room(steel, Tinkering.STEEL_INGOT, 1)
 			&& room(ash, CokeAndSteel.ASH, ASH_PER_STEEL);
-		if (working) {
+		if (working && storm) {
+			// a thunderstorm's downpour down the stack puts it out: the steel under way is lost to it
+			if (progress > 0) {
+				progress = 0;
+				ForgeDangers.hiss(level, base.above(HEIGHT - 1), true);
+				setChanged();
+			}
+			working = false;
+		}
+		if (check) {
+			if (working) {
+				ForgeDangers.working(level, pos, base.offset(-1, 0, -1), base.offset(1, HEIGHT - 1, 1));
+				if (wet) {
+					ForgeDangers.hiss(level, base.above(HEIGHT - 1), false);
+				}
+			} else {
+				ForgeDangers.cooled(level, pos);
+			}
+		}
+		// rain down it works at half speed
+		if (working && (!wet || (++wetTicks & 1) == 0)) {
 			if (++progress >= STEEL_TICKS) {
 				progress = 0;
 				iron.shrink(1);

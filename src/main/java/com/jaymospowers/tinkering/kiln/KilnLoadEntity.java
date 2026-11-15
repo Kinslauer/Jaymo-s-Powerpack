@@ -1,5 +1,7 @@
 package com.jaymospowers.tinkering.kiln;
 
+import com.jaymospowers.tinkering.dangers.Cracks;
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
@@ -99,6 +101,12 @@ public class KilnLoadEntity extends BlockEntity {
 		if (--wait > 0) {
 			return;
 		}
+		// (GTNH picks, the forge's dangers) a thunderstorm's downpour into an open kiln puts its fire out
+		if (ForgeDangers.storm(level, pos) && ForgeDangers.douse(level, pos.below())) {
+			wait = IDLE_DELAY;
+			firing = false;
+			return;
+		}
 		boolean hot = Kiln.walled(level, pos) && Kiln.heat(level, pos) >= recipe.heat();
 		if (!hot) {
 			wait = IDLE_DELAY;
@@ -113,8 +121,15 @@ public class KilnLoadEntity extends BlockEntity {
 			clearCracks();
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.6F);
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.2, 0.15, 0.2, 0.01);
+			// (the forge's dangers) the heat of each firing now and then cracks one of the kiln's bricks
+			if (level.getRandom().nextFloat() < Kiln.CRACK_CHANCE) {
+				Cracks.crackKiln(level, pos);
+			}
 			changed();
 			return;
+		}
+		if (ForgeDangers.wet(level, pos)) {
+			ForgeDangers.hiss(level, pos, false);
 		}
 		level.destroyBlockProgress(crackId(), pos, step + 1);
 		level.playSound(null, pos, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 0.6F, 0.9F + level.getRandom().nextFloat() * 0.2F);

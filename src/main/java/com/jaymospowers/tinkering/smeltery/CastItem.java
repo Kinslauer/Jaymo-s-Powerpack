@@ -37,7 +37,11 @@ public class CastItem extends Item {
 		/** (0.11.77) A weapon head of the kind it was made from ({@link WeaponParts}). */
 		WEAPON("weapon", null),
 		/** (GTNH picks) A glass pane, cast from molten glass. */
-		PANE("pane", null);
+		PANE("pane", null),
+		/** (GTNH picks, the forge's dangers) A round hollow: molten ender casts an ender pearl in it, molten slime a slime ball. */
+		ORB("orb", null),
+		/** A rod's hollow: molten blaze casts a blaze rod in it. */
+		ROD("rod", null);
 
 		public final String id;
 		public final @Nullable PartType part;
@@ -72,6 +76,12 @@ public class CastItem extends Item {
 			}
 			if (stack.is(Items.GLASS_PANE)) {
 				return PANE;
+			}
+			if (stack.is(Items.ENDER_PEARL) || stack.is(Items.SLIME_BALL)) {
+				return ORB;
+			}
+			if (stack.is(Items.BLAZE_ROD) || stack.is(Items.STICK)) {
+				return ROD;
 			}
 			return null;
 		}

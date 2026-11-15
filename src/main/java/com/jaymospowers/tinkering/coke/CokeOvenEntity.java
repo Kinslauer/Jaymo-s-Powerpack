@@ -1,6 +1,7 @@
 package com.jaymospowers.tinkering.coke;
 
 import com.jaymospowers.ground.StoneAge;
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -31,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link CokeOvenBlock}) in the middle of one wall and the middle of it empty. Formed, it bakes what it's loaded with
  * one at a time, with no fuel: a log into charcoal, coal into coal coke, a block of coal into a block of coal coke
  * ({@link #bakes}). Each bake sweats creosote into its tank ({@link #TANK} mB); a full tank stops it until some is drawn
- * off into a bucket or a clay bucket ({@link #BUCKET} mB each).
+ * off into a bucket or a clay bucket ({@link #BUCKET} mB each). (GTNH picks, the forge's dangers) Rain on an open roof
+ * bakes it at half speed, a thunderstorm stops it and spoils the bake under way, and its walls burn while it bakes.
  */
 public class CokeOvenEntity extends BlockEntity {
 	/** Ticks to bake a log, a coal, a block of coal; creosote each leaves (mB). */
@@ -51,6 +53,9 @@ public class CokeOvenEntity extends BlockEntity {
 	private ItemStack input = ItemStack.EMPTY, output = ItemStack.EMPTY;
 	private int tank, progress;
 	private boolean formed;
+	/** (the forge's dangers) Rain, and a thunderstorm, on its roof as last looked; the counter for baking at half speed. */
+	private boolean wet, storm;
+	private int wetTicks;
 
 	public CokeOvenEntity(BlockPos pos, BlockState state) {
 		super(CokeAndSteel.COKE_OVEN_ENTITY, pos, state);
@@ -158,13 +163,39 @@ public class CokeOvenEntity extends BlockEntity {
 	}
 
 	private void tick(ServerLevel level, BlockPos pos, BlockState state) {
-		if (level.getGameTime() % CHECK_TICKS == Math.floorMod(pos.asLong(), CHECK_TICKS)) {
+		BlockPos middle = pos.relative(state.getValue(CokeOvenBlock.FACING).getOpposite());
+		boolean check = level.getGameTime() % CHECK_TICKS == Math.floorMod(pos.asLong(), CHECK_TICKS);
+		if (check) {
 			formed = formed(level, pos, state.getValue(CokeOvenBlock.FACING));
+			// (GTNH picks, the forge's dangers) rain on its roof
+			BlockPos roof = middle.above(2);
+			wet = ForgeDangers.wet(level, roof);
+			storm = ForgeDangers.storm(level, roof);
 		}
 		Bake bake = bake(input);
 		boolean baking = formed && bake != null && tank + bake.creosote() <= TANK
 			&& (output.isEmpty() || output.is(bake.output()) && output.getCount() < output.getMaxStackSize());
-		if (baking) {
+		if (baking && storm) {
+			// a thunderstorm's downpour on an open roof puts it out: the bake under way is spoilt
+			if (progress > 0) {
+				progress = 0;
+				ForgeDangers.hiss(level, middle.above(2), true);
+				setChanged();
+			}
+			baking = false;
+		}
+		if (check) {
+			if (baking) {
+				ForgeDangers.working(level, pos, middle.offset(-1, -1, -1), middle.offset(1, 1, 1));
+				if (wet) {
+					ForgeDangers.hiss(level, middle.above(2), false);
+				}
+			} else {
+				ForgeDangers.cooled(level, pos);
+			}
+		}
+		// rain on it bakes at half speed
+		if (baking && (!wet || (++wetTicks & 1) == 0)) {
 			if (++progress >= bake.ticks()) {
 				progress = 0;
 				input.shrink(1);

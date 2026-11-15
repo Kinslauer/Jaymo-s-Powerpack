@@ -1,6 +1,8 @@
 package com.jaymospowers.tinkering.smithing;
 
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
+import com.jaymospowers.tinkering.dangers.SmithingGloves;
 import com.jaymospowers.tinkering.forge.ForgeHearthBlock;
 import com.jaymospowers.tinkering.smeltery.Molten;
 import java.util.ArrayList;
@@ -26,7 +28,9 @@ import org.jspecify.annotations.Nullable;
  * Hearth come off as Hot Ingots; work on the anvil and freshly hammered heads are hot too. Anything hot carries the
  * game time it was last in the fire ({@link Smithing#HEATED_AT}) and goes cold {@link #COOL_TICKS} later. Carrying hot
  * metal without tongs in either hand sets you alight; with tongs, they wear instead. Fire Resistance, creative and the
- * Emberborn's bare hands are spared.
+ * Emberborn's bare hands are spared. (GTNH picks, the forge's dangers) A lava bucket or a blaze rod in either hand
+ * ({@link ForgeDangers#HOT_TO_HOLD}) burns the same way, as does a Kitchen pot taken straight off the fire (it comes off
+ * hot, {@code dangers/HotPots}); worn smithing gloves ({@link SmithingGloves}) take the heat as tongs do.
  */
 public final class HotMetal {
 	/** Ticks hot metal stays hot out of the fire (Overgeared's 60 s). */
@@ -204,18 +208,29 @@ public final class HotMetal {
 				hot = true;
 			}
 		}
-		if (!hot || spared(player)) {
+		boolean held = player.getMainHandItem().is(ForgeDangers.HOT_TO_HOLD) || player.getOffhandItem().is(ForgeDangers.HOT_TO_HOLD);
+		if (!hot && !held || spared(player)) {
 			return;
 		}
 		ItemStack tongs = tongs(player);
-		if (tongs.isEmpty()) {
-			if (player.getRemainingFireTicks() < BURN_TICKS) {
-				player.setRemainingFireTicks(BURN_TICKS);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.smithing.burns"));
+		ItemStack gloves = tongs.isEmpty() ? SmithingGloves.worn(player) : ItemStack.EMPTY;
+		boolean wears = (now + player.getId()) % TONGS_WEAR_TICKS < CHECK_TICKS;
+		if (!tongs.isEmpty()) {
+			if (wears) {
+				InteractionHand hand = player.getMainHandItem() == tongs ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+				tongs.hurtAndBreak(1, player, hand);
 			}
-		} else if ((now + player.getId()) % TONGS_WEAR_TICKS < CHECK_TICKS) {
-			InteractionHand hand = player.getMainHandItem() == tongs ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-			tongs.hurtAndBreak(1, player, hand);
+		} else if (!gloves.isEmpty()) {
+			if (wears) {
+				SmithingGloves.wear(player, gloves);
+			}
+		} else if (player.getRemainingFireTicks() < BURN_TICKS) {
+			player.setRemainingFireTicks(BURN_TICKS);
+			if (hot) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.smithing.burns"));
+			} else {
+				level.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.3F, 1.8F);
+			}
 		}
 	}
 

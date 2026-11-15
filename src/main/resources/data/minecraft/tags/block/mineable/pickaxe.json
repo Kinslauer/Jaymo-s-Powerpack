@@ -177,6 +177,9 @@
     "jaymospowers:coke_oven",
     "jaymospowers:firebricks",
     "jaymospowers:brick_blast_furnace",
-    "jaymospowers:coal_coke_block"
+    "jaymospowers:coal_coke_block",
+    "jaymospowers:cracked_bricks",
+    "jaymospowers:cracked_mud_bricks",
+    "jaymospowers:cracked_red_nether_bricks"
   ]
 }

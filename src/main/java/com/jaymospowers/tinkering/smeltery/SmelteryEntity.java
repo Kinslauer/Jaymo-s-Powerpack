@@ -1,6 +1,8 @@
 package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.dangers.Cracks;
+import com.jaymospowers.tinkering.dangers.ForgeDangers;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -9,8 +11,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -35,7 +41,9 @@ import org.jspecify.annotations.Nullable;
  * The smeltery's brain, in its controller. It checks the structure behind it (a seared floor and walls around an open
  * space up to {@link #MAX_SIZE} across and {@link #MAX_HEIGHT} high), melts what's put in (one item a slot, a slot a
  * block of space up to {@link #MAX_SLOTS}), burns lava for heat, alloys what it can, and holds the molten pool for the
- * drains' faucets. Things that fall in get melted too: items go into free slots, creatures cook into blood.
+ * drains' faucets. Things that fall in get melted too: items go into free slots, creatures cook into blood (and those
+ * made of something into that too, {@link Melting#CREATURES}). (GTNH picks, the forge's dangers) Rain falling in wastes
+ * its fuel and a thunderstorm puts it out; its seared bricks crack with use, and cracked ones leak.
  */
 public class SmelteryEntity extends BlockEntity implements Container, MoltenHolder {
 	/** Interior size across (each way) and up. */
@@ -53,7 +61,15 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	static final int CHECK_TICKS = 20, SYNC_TICKS = 5;
 	/** Creatures inside: damage every second, and the blood each hit cooks out of them. */
 	static final float COOK_DAMAGE = 2.0F;
-	static final int COOK_BLOOD = 20;
+	public static final int COOK_BLOOD = 20;
+	/**
+	 * (GTNH picks, the forge's dangers) Lava fuel (mB) lost each check while rain falls into it (it burns 1 mB every
+	 * {@link #TICKS_PER_FUEL} melting ticks), the chance each finished melt cracks a seared brick, and each cracked brick's
+	 * chance each check to leak {@link #LEAK_MB} of the bottom liquid.
+	 */
+	public static final int RAIN_FUEL_LOSS = 5;
+	public static final float CRACK_CHANCE = 1 / 400F, LEAK_CHANCE = 1 / 40F;
+	public static final int LEAK_MB = Molten.NUGGET;
 
 	private final NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
 	private final int[] progress = new int[MAX_SLOTS];
@@ -68,6 +84,8 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	private boolean dirty;
 	/** (bellows) Melts faster until this game time. */
 	private long blownUntil;
+	/** (the forge's dangers) The seared bricks of its floor and walls, whole and cracked, as last checked. */
+	private final List<BlockPos> whole = new ArrayList<>(), cracked = new ArrayList<>();
 
 	/** What the screen shows: each slot's melting progress (0-100, or -1 when it can't melt), fuel, slots in use. */
 	public final ContainerData data = new ContainerData() {
@@ -129,6 +147,17 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 	private void tick(ServerLevel level, BlockState state) {
 		if (ticks++ % CHECK_TICKS == 0) {
 			checkStructure(level, state);
+			if (formed) {
+				leak(level);
+			}
+			if (formed && fuel > 0) {
+				weather(level);
+			}
+			if (formed && fuel > 0) {
+				ForgeDangers.working(level, worldPosition, low.offset(-1, -1, -1), high.offset(1, 0, 1));
+			} else {
+				ForgeDangers.cooled(level, worldPosition);
+			}
 		}
 		takeFuel();
 		boolean melting = false;
@@ -202,8 +231,64 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			stack.shrink(1);
 			progress[slot] = 0;
 			dirty = true;
+			if (level instanceof ServerLevel server && server.getRandom().nextFloat() < CRACK_CHANCE) {
+				crackOne(server);
+			}
 		}
 		return false;
+	}
+
+	// --- (GTNH picks, the forge's dangers) rain, cracks and leaks ---
+
+	/**
+	 * Rain falling in at the top: the lava fuel hisses away ({@link #RAIN_FUEL_LOSS} each check). A thunderstorm's
+	 * downpour puts it out (the fuel is gone) and the shock of it cracks a seared brick.
+	 */
+	private void weather(ServerLevel level) {
+		BlockPos open = new BlockPos((low.getX() + high.getX()) / 2, high.getY(), (low.getZ() + high.getZ()) / 2);
+		if (ForgeDangers.storm(level, open)) {
+			fuel = 0;
+			dirty = true;
+			ForgeDangers.hiss(level, open, true);
+			crackOne(level);
+		} else if (ForgeDangers.wet(level, open)) {
+			fuel = Math.max(0, fuel - RAIN_FUEL_LOSS);
+			dirty = true;
+			ForgeDangers.hiss(level, open, false);
+		}
+	}
+
+	/** One of its whole seared bricks, at random, cracks. */
+	private void crackOne(ServerLevel level) {
+		if (!whole.isEmpty()) {
+			BlockPos pos = whole.remove(level.getRandom().nextInt(whole.size()));
+			if (Cracks.crack(level, pos)) {
+				cracked.add(pos);
+			}
+		}
+	}
+
+	/** Each cracked brick now and then lets a little of the bottom liquid out: it drips down the outside and is lost. */
+	private void leak(ServerLevel level) {
+		for (BlockPos pos : cracked) {
+			Tank.Layer bottom = tank.bottom();
+			if (bottom == null) {
+				return;
+			}
+			if (level.getRandom().nextFloat() < LEAK_CHANCE && tank.drain(bottom.molten, LEAK_MB, false) > 0) {
+				dirty = true;
+				level.sendParticles(ParticleTypes.DRIPPING_LAVA, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 4, 0.52, 0.3, 0.52, 0.0);
+				level.sendParticles(ParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0.4, 0.2, 0.4, 0.0);
+				level.playSound(null, pos, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.4F, 0.8F + level.getRandom().nextFloat() * 0.3F);
+			}
+		}
+	}
+
+	/** A seared brick of the floor or walls, noted whole or cracked. */
+	private void note(BlockPos pos, BlockState state) {
+		if (state.is(Tinkering.SEARED_BRICKS)) {
+			(state.getValue(SearedBricksBlock.CRACKED) ? cracked : whole).add(pos.immutable());
+		}
 	}
 
 	/** A foundry: built of scorched bricks, and it never alloys what it melts. */
@@ -248,11 +333,17 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			}
 		}
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, inside, LivingEntity::isAlive)) {
-			if (living.fireImmune()) {
+			// (GTNH picks, the forge's dangers) creatures made of something melt into it too, a blaze in spite of the fire
+			Melting.Creature made = Melting.creature(living);
+			if (living.fireImmune() && made == null) {
 				continue;
 			}
-			if (living.hurtServer(level, level.damageSources().lava(), COOK_DAMAGE) && !(living instanceof Player)) {
+			DamageSource heat = living.fireImmune() ? level.damageSources().generic() : level.damageSources().lava();
+			if (living.hurtServer(level, heat, COOK_DAMAGE) && !(living instanceof Player)) {
 				tank.fill(Molten.BLOOD, COOK_BLOOD, false);
+				if (made != null) {
+					tank.fill(made.molten(), made.perBurn(), false);
+				}
 				dirty = true;
 			}
 		}
@@ -274,12 +365,16 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 		}
 		int height = 0;
 		List<BlockPos> drains = new ArrayList<>();
+		whole.clear();
+		cracked.clear();
 		if (ok) {
 			// the floor under the bottom layer
 			for (int d = 0; d < depth && ok; d++) {
 				for (int s = -left; s <= right && ok; s++) {
-					ok = level.getBlockState(start.relative(inward, d).relative(side, s).below())
-						.is(foundry() ? SmelteryExtras.SCORCHED_BRICKS : Tinkering.SEARED_BRICKS);
+					BlockPos floor = start.relative(inward, d).relative(side, s).below();
+					BlockState under = level.getBlockState(floor);
+					ok = under.is(foundry() ? SmelteryExtras.SCORCHED_BRICKS : Tinkering.SEARED_BRICKS);
+					note(floor, under);
 				}
 			}
 			while (ok && height < MAX_HEIGHT && layer(level, start.above(height), inward, side, left, right, depth, drains)) {
@@ -350,6 +445,9 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 		if (state.is(foundry ? SmelteryExtras.SCORCHED_DRAIN : Tinkering.DRAIN)) {
 			drains.add(pos);
 			return true;
+		}
+		if (!foundry) {
+			note(pos, state);
 		}
 		return foundry ? state.is(SmelteryExtras.SCORCHED_BRICKS) || state.is(SmelteryExtras.SCORCHED_GLASS)
 			: state.is(Tinkering.SEARED_BRICKS) || state.is(Tinkering.SEARED_GLASS);

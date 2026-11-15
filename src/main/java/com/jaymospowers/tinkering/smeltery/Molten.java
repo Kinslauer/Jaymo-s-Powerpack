@@ -43,7 +43,10 @@ public enum Molten {
 	GLASS("glass", 0xFFC8E6EE, null),
 	// ---- (GTNH picks, coke and steel) tin from the mountain veins and the river sand, and bronze alloyed from it (3 copper : 1 tin) ----
 	TIN("tin", 0xFFD9DCE0, null),
-	BRONZE("bronze", 0xFFD08A3C, TinkerMaterial.BRONZE);
+	BRONZE("bronze", 0xFFD08A3C, TinkerMaterial.BRONZE),
+	// ---- (GTNH picks, the forge's dangers) what endermen and blazes melt into (Melting#CREATURES): cast into pearls, rods, powder ----
+	ENDER("ender", 0xFF1E7A6C, null),
+	BLAZE("blaze", 0xFFF2A21C, null);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;
@@ -92,8 +95,8 @@ public enum Molten {
 		return rest == 0 ? ing : Component.translatable("molten.jaymospowers.and", ing, Component.translatable("molten.jaymospowers.mb", rest));
 	}
 
-	/** Measured in ingots (not slime, honey, blood, amethyst or glass). */
+	/** Measured in ingots (not slime, honey, blood, amethyst, glass, ender or blaze). */
 	public boolean metal() {
-		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST && this != GLASS;
+		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST && this != GLASS && this != ENDER && this != BLAZE;
 	}
 }

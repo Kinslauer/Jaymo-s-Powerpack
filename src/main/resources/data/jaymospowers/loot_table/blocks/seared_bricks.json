@@ -7,7 +7,23 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jaymospowers:seared_bricks"
+          "name": "jaymospowers:seared_bricks",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:seared_bricks",
+              "properties": [
+                "cracked"
+              ],
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:seared_bricks",
+                "state": {
+                  "cracked": "true"
+                }
+              }
+            }
+          ]
         }
       ],
       "condition": {

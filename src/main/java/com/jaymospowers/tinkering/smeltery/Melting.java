@@ -19,6 +19,9 @@ import java.util.Map;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,6 +37,38 @@ public final class Melting {
 	 * cast into a pane. A block's worth is under what the smallest smeltery holds ({@link Molten#BLOCK}), so it never stalls.
 	 */
 	public static final int GLASS_BLOCK_MB = 500, PANE_MB = 125;
+	/**
+	 * (GTNH picks, the forge's dangers) What a pearl, a slime ball and a blaze rod take on the table (orb and rod casts),
+	 * and blaze powder (half a rod, in a nugget cast).
+	 */
+	public static final int PEARL_MB = 250, SLIME_BALL_MB = 250, BLAZE_ROD_MB = 250, BLAZE_POWDER_MB = 125;
+	/**
+	 * What each creature that's made of something gives at each burn in the smeltery, besides its blood
+	 * ({@code SmelteryEntity#COOK_BLOOD}): an enderman 40 health, a golem 100, a big slime 16, a blaze 20, two a burn.
+	 */
+	public static final int ENDER_PER_BURN = 25, IRON_PER_BURN = 10, SLIME_PER_BURN = 25, BLAZE_PER_BURN = 25;
+
+	/** A creature that melts into what it's made of, on top of its blood. */
+	public record Creature(EntityType<?> type, Molten molten, int perBurn) {
+	}
+
+	/** Endermen into molten ender, iron golems into iron, slimes into slime, blazes into molten blaze. */
+	public static final List<Creature> CREATURES = List.of(
+		new Creature(EntityTypes.ENDERMAN, Molten.ENDER, ENDER_PER_BURN),
+		new Creature(EntityTypes.IRON_GOLEM, Molten.IRON, IRON_PER_BURN),
+		new Creature(EntityTypes.SLIME, Molten.SLIME, SLIME_PER_BURN),
+		new Creature(EntityTypes.BLAZE, Molten.BLAZE, BLAZE_PER_BURN));
+
+	/** What this creature melts into besides blood, or null. */
+	public static @Nullable Creature creature(Entity entity) {
+		for (Creature creature : CREATURES) {
+			if (entity.getType() == creature.type()) {
+				return creature;
+			}
+		}
+		return null;
+	}
+
 	/** (0.8.115) Molten gold to gild Sora's Dagger: a block's worth, as the gold block it took before. */
 	static final int DAGGER_GILDING = Molten.BLOCK;
 
@@ -374,6 +409,9 @@ public final class Melting {
 				case NUGGET -> nugget(molten);
 				// (GTNH picks) molten glass over a pane cast
 				case PANE -> molten == Molten.GLASS ? new ItemStack(Items.GLASS_PANE) : null;
+				// (GTNH picks, the forge's dangers) molten ender and slime in an orb cast, molten blaze in a rod cast
+				case ORB -> molten == Molten.ENDER ? new ItemStack(Items.ENDER_PEARL) : molten == Molten.SLIME ? new ItemStack(Items.SLIME_BALL) : null;
+				case ROD -> molten == Molten.BLAZE ? new ItemStack(Items.BLAZE_ROD) : null;
 				case WEAPON -> {
 					WeaponParts.Kind kind = WeaponParts.ofCast(cast);
 					ItemStack head = kind == null ? null : WeaponParts.castResult(kind, molten);
@@ -420,8 +458,10 @@ public final class Melting {
 		}
 		return switch (castItem.shape) {
 			case INGOT -> Molten.INGOT;
-			case NUGGET -> Molten.NUGGET;
+			case NUGGET -> molten == Molten.BLAZE ? BLAZE_POWDER_MB : Molten.NUGGET;
 			case PANE -> PANE_MB;
+			case ORB -> molten == Molten.ENDER ? PEARL_MB : SLIME_BALL_MB;
+			case ROD -> BLAZE_ROD_MB;
 			case WEAPON -> WeaponParts.ofCast(cast).mb();
 			default -> castItem.shape.part.cost * Molten.INGOT;
 		};
@@ -463,6 +503,8 @@ public final class Melting {
 			case STEEL -> new ItemStack(Tinkering.STEEL_NUGGET);
 			case TIN -> new ItemStack(com.jaymospowers.tinkering.Tin.TIN_NUGGET);
 			case BRONZE -> new ItemStack(com.jaymospowers.tinkering.Tin.BRONZE_NUGGET);
+			// (GTNH picks, the forge's dangers) blaze powder, half a rod's worth (tableAmount)
+			case BLAZE -> new ItemStack(Items.BLAZE_POWDER);
 			default -> null;
 		};
 	}

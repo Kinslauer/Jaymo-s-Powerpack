@@ -172,6 +172,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.StoneAge.init();
 		// Andy's GT New Horizons picks, patch 4: the coke oven, creosote, the charcoal pit and the brick blast furnace
 		com.jaymospowers.tinkering.coke.CokeAndSteel.init();
+		// Andy's GT New Horizons picks, patch 5: the forge's dangers (hot walls, rain on the fire, cracked bricks, hot to hold)
+		com.jaymospowers.tinkering.dangers.ForgeDangers.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();
 		com.jaymospowers.core.collide.Collisions.init();

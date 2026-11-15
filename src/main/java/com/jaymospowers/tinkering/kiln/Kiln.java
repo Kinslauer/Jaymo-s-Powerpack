@@ -65,6 +65,13 @@ public final class Kiln {
 	/** (Furnaces) Raw ore and ores (this item tag) take this many times as long in a plain furnace (SlowOreSmeltMixin). */
 	public static final int FURNACE_ORE_SLOWDOWN = 4;
 	public static final TagKey<Item> SLOW_SMELT = TagKey.create(Registries.ITEM, JaymosPowers.id("slow_smelt"));
+	/**
+	 * (GTNH picks, the forge's dangers) Heat a kiln open to falling rain loses (and its firing is slowed as if its fire
+	 * had that much less, twice over), what each cracked wall lets out of a firing's speed, and the chance each finished
+	 * firing cracks one of its bricks. A thunderstorm puts the fire under an open kiln out.
+	 */
+	public static final int RAIN_HEAT_LOSS = 1, RAIN_SPEED_LOSS = 2, CRACK_SPEED_LOSS = 1;
+	public static final float CRACK_CHANCE = 0.05F;
 	/** Bricks a kiln is built of. */
 	public static final TagKey<Block> KILN_WALLS = TagKey.create(Registries.BLOCK, JaymosPowers.id("kiln_walls"));
 
@@ -171,16 +178,22 @@ public final class Kiln {
 	/** The heat right under the kiln (what a recipe needs), counting bellows blowing into the kiln itself. */
 	public static int heat(Level level, BlockPos space) {
 		int heat = Heat.at(level, space.below());
-		return heat > 0 && BellowsBlock.blowing(level, space) ? heat + BellowsBlock.HEAT_BONUS : heat;
+		heat = heat > 0 && BellowsBlock.blowing(level, space) ? heat + BellowsBlock.HEAT_BONUS : heat;
+		// (the forge's dangers) rain falling into an open kiln
+		return heat > 0 && com.jaymospowers.tinkering.dangers.ForgeDangers.wet(level, space) ? Math.max(0, heat - RAIN_HEAT_LOSS) : heat;
 	}
 
-	/** Ticks one firing step takes: everything burning in the 3x3 under it adds up. */
+	/** Ticks one firing step takes: everything burning in the 3x3 under it adds up (less for rain and cracked walls). */
 	public static int stepDelay(Level level, BlockPos space) {
 		int sum = BellowsBlock.blowing(level, space) ? BellowsBlock.HEAT_BONUS : 0;
 		BlockPos below = space.below();
 		for (BlockPos pos : BlockPos.betweenClosed(below.offset(-1, 0, -1), below.offset(1, 0, 1))) {
 			sum += Heat.at(level, pos);
 		}
+		if (com.jaymospowers.tinkering.dangers.ForgeDangers.wet(level, space)) {
+			sum -= RAIN_SPEED_LOSS;
+		}
+		sum -= CRACK_SPEED_LOSS * com.jaymospowers.tinkering.dangers.Cracks.crackedWalls(level, space);
 		return Math.max(MIN_DELAY, BASE_DELAY + HEAT_DELAY * (STEPS - sum) / STEPS);
 	}
 

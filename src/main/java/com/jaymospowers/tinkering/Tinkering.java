@@ -297,7 +297,7 @@ public final class Tinkering {
 		Supplier<BlockBehaviour.Properties> seared = () -> BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_GRAY)
 			.strength(3.0F, 9.0F).sound(SoundType.METAL).requiresCorrectToolForDrops();
 		GROUT = block("grout", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.CLAY).strength(0.6F).sound(SoundType.GRAVEL));
-		SEARED_BRICKS = block("seared_bricks", Block::new, seared.get());
+		SEARED_BRICKS = block("seared_bricks", com.jaymospowers.tinkering.smeltery.SearedBricksBlock::new, seared.get());
 		SEARED_GLASS = block("seared_glass", TransparentBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_GRAY)
 			.strength(3.0F, 9.0F).sound(SoundType.GLASS).noOcclusion().requiresCorrectToolForDrops()
 			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never));
