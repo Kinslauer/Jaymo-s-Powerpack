@@ -634,3 +634,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (shipwright thread): Andy approved "The yards" lore; shipwrights may keep any patron (launch offering is from their own patron). Asked for a dedicated large whaleship with lots of storage and tryworks for the far oceans.
 
 - 2026-11-15 (Andy, future-Mosslorn thread): asked to change the Chrono future's Los Perrito map to Mosslorn (milkshake_mp3, linked via the Petrichor Mosslorn Official modpack). Map is ARR and asks to be contacted before modpack use, so the swap PR waits on the author's OK.
+
+- 2026-11-15 (shipwright thread): Andy asked for warship fleets: the largest ship for the richer kingdoms, every vassal's ships in its overlord's fleet, "only pirates raze ships and enslave their victims". On the card he chose "Spare and take prisoners": navies still sink pirates but pull survivors out and jail them at their port; pirates sink ships and drag survivors to their cove in chains.
