@@ -8,6 +8,8 @@ import de.maxhenkel.voicechat.api.ServerPlayer;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.events.EntitySoundPacketEvent;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
+import de.maxhenkel.voicechat.api.events.PlayerDisconnectedEvent;
+import de.maxhenkel.voicechat.api.opus.OpusDecoder;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.SoundPacketEvent;
 import de.maxhenkel.voicechat.api.events.VoiceDistanceEvent;
@@ -18,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -40,6 +43,13 @@ import net.minecraft.world.phys.Vec3;
  * body and sent from the ghost's place to whoever is near that, and whatever is said near the ghost reaches them though
  * their body lies out of earshot. A ghost whose client has no voice changer isn't heard at all: Andy, "the voice changer
  * automatically makes you sound like a ghost if you speak otherwise it is muted". Group calls are left as they are.</li>
+ * <li><b>Mobs hear you talk</b> ({@link #overheard}, the medieval picks' Hearing). Every word spoken by proximity is
+ * decoded and its loudness measured (RMS, in dB) against that player's own normal voice: the median of their last
+ * {@link #WINDOW} spoken frames, so a quiet microphone is no free stealth. At their normal level a voice carries
+ * {@link #VOICE_REACH} blocks, twice that for every {@link #DOUBLING_DB} dB louder (between {@link #SOFTEST} and
+ * {@link #LOUDEST} times), a whisper {@link #WHISPER_SHARE} of that; {@link Hearing} sends it out from their head, through
+ * the walls, to the monsters and (at night, a trespasser's) the guards. After Mob Senses' voice tracking (Shamanalle, MIT;
+ * its {@code VoiceTracker}'s way of it, our own code).</li>
  * </ul>
  */
 public final class VoiceRange implements VoicechatPlugin {
@@ -52,6 +62,41 @@ public final class VoiceRange implements VoicechatPlugin {
 	static final float GHOST_WHISPER = 0.5F;
 	static final double GHOST_MOUTH = 1.5;
 
+	/** Mobs hearing voices: how far normal speech carries (blocks), the share a whisper keeps, and the least and most a voice is scaled by. */
+	static final double VOICE_REACH = 16.0, WHISPER_SHARE = 0.3, SOFTEST = 0.35, LOUDEST = 2.25;
+	/** This many dB over a player's normal voice doubles its reach; at this scale or more it's a shout. */
+	static final double DOUBLING_DB = 10.0, SHOUT_FROM = 1.6;
+	/** Quieter than this (dBFS) is silence; a player's normal level before they've said enough, and the bounds it's kept within. */
+	static final double SILENCE_DB = -52.0, START_DB = -24.0, NORMAL_MIN_DB = -44.0, NORMAL_MAX_DB = -8.0;
+	/** Spoken frames (20 ms each) a player's normal level is taken over, and the fewest before it's theirs. */
+	static final int WINDOW = 64, CALIBRATED = 6;
+
+	/** A player's microphone: their recent spoken levels and its median, their normal voice. */
+	private static final class Mic {
+		private final double[] window = new double[WINDOW];
+		private int count, next;
+		private double normal = START_DB;
+
+		/** A frame at {@code db}: how much further than their normal voice it carries. A whisper doesn't move the normal. */
+		synchronized double scale(double db, boolean whisper) {
+			if (!whisper) {
+				this.window[this.next] = db;
+				this.next = (this.next + 1) % WINDOW;
+				this.count = Math.min(WINDOW, this.count + 1);
+				if (this.count >= CALIBRATED) {
+					double[] sorted = java.util.Arrays.copyOf(this.window, this.count);
+					java.util.Arrays.sort(sorted);
+					double median = (this.count & 1) == 1 ? sorted[this.count / 2] : (sorted[this.count / 2 - 1] + sorted[this.count / 2]) / 2.0;
+					this.normal = Math.max(NORMAL_MIN_DB, Math.min(NORMAL_MAX_DB, median));
+				}
+			}
+			return Math.max(SOFTEST, Math.min(LOUDEST, Math.pow(2.0, (db - this.normal) / DOUBLING_DB)));
+		}
+	}
+
+	private static final Map<UUID, OpusDecoder> DECODERS = new ConcurrentHashMap<>();
+	private static final Map<UUID, Mic> MICS = new ConcurrentHashMap<>();
+
 	@Override
 	public String getPluginId() {
 		return JaymosKingdoms.MOD_ID;
@@ -62,6 +107,15 @@ public final class VoiceRange implements VoicechatPlugin {
 		registration.registerEvent(VoiceDistanceEvent.class, VoiceRange::speaking);
 		registration.registerEvent(EntitySoundPacketEvent.class, VoiceRange::heard);
 		registration.registerEvent(MicrophonePacketEvent.class, VoiceRange::spoken);
+		registration.registerEvent(PlayerDisconnectedEvent.class, event -> {
+			MICS.remove(event.getPlayerUuid());
+			OpusDecoder decoder = DECODERS.remove(event.getPlayerUuid());
+			if (decoder != null) {
+				synchronized (decoder) {
+					decoder.close();
+				}
+			}
+		});
 	}
 
 	/** A titan speaks: further. */
@@ -86,6 +140,9 @@ public final class VoiceRange implements VoicechatPlugin {
 		VoicechatServerApi api = event.getVoicechat();
 		ServerPlayer speaker = from.getPlayer();
 		UUID who = speaker.getUuid();
+		if (PowersCompat.ghostOf(who) == null) {
+			overheard(api, who, packet);
+		}
 		ServerLevel level = speaker.getServerLevel();
 		Map<UUID, Vec3> ghosts = VoiceMasks.ghosts();
 		float range = (float)api.getVoiceChatDistance() * (packet.isWhispering() ? GHOST_WHISPER : 1.0F);
@@ -132,6 +189,55 @@ public final class VoiceRange implements VoicechatPlugin {
 				api.sendLocationalSoundPacketTo(to, sound);
 			}
 		}
+	}
+
+	/** What {@code who} said ({@code packet}), measured against their own normal voice, is a noise mobs hear ({@link Hearing#spoke}). */
+	private static void overheard(VoicechatServerApi api, UUID who, MicrophonePacket packet) {
+		byte[] opus = packet.getOpusEncodedData();
+		if (opus == null || opus.length == 0) {
+			// (the end of what they said: the next words start the decoder afresh)
+			OpusDecoder decoder = DECODERS.get(who);
+			if (decoder != null) {
+				synchronized (decoder) {
+					decoder.resetState();
+				}
+			}
+			return;
+		}
+		OpusDecoder decoder = DECODERS.computeIfAbsent(who, id -> api.createDecoder());
+		if (decoder == null) {
+			return;
+		}
+		short[] pcm;
+		synchronized (decoder) {
+			if (decoder.isClosed()) {
+				DECODERS.remove(who);
+				return;
+			}
+			pcm = decoder.decode(opus);
+		}
+		double db = loudness(pcm);
+		if (db < SILENCE_DB) {
+			return;
+		}
+		boolean whisper = packet.isWhispering();
+		double scale = MICS.computeIfAbsent(who, id -> new Mic()).scale(db, whisper);
+		int how = whisper ? Hearing.WHISPER : scale >= SHOUT_FROM ? Hearing.SHOUT : Hearing.TALK;
+		Hearing.spoke(who, VOICE_REACH * scale * (whisper ? WHISPER_SHARE : 1.0), how);
+	}
+
+	/** The RMS level of a frame of 16-bit audio, in dBFS (-96 to 0). */
+	private static double loudness(short @org.jspecify.annotations.Nullable [] pcm) {
+		if (pcm == null || pcm.length == 0) {
+			return -96.0;
+		}
+		double sum = 0.0;
+		for (short s : pcm) {
+			double v = s / 32768.0;
+			sum += v * v;
+		}
+		double rms = Math.sqrt(sum / pcm.length);
+		return rms <= 1.0E-5 ? -96.0 : Math.max(-96.0, Math.min(0.0, 20.0 * Math.log10(rms)));
 	}
 
 	private static boolean near(Vec3 a, Position b, float range) {

@@ -69,7 +69,12 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
  * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
- * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes.</li>
+ * <li><b>Hearing</b> ({@link #hear}, from {@link Hearing}): a faint sound at the edge of hearing makes a mob stop and turn
+ * its head toward it for {@link #HEED_TICKS} ({@link HeedGoal}); a second near it within {@link #HEED_MEMORY} brings it over,
+ * as a loud one does at once. Lured, it searches the spot, then walks back to where it was ({@link #RETURN_SPEED}). A camp's
+ * outlaws ({@link Folk}) hear and search too, but never lose a foe they are after.</li>
+ * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes; and the
+ * stealth meter beside it ({@link Meter}): how far your noise carries, how lit you are, whether you bleed, whether you talk.</li>
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
  * it is searching) is a sneak attack, {@link #SNEAK_ATTACK_MULT}; Sneak Attack's ranks make it more. The hidden blade's
  * full-strength stab on an unaware one is an assassination ({@link HiddenBlade}, Assassinate).</li>
@@ -130,6 +135,14 @@ public final class Senses {
 	/** The gauge's states. */
 	public static final int IDLE = 0, NOTICING = 1, SEARCHING = 2, SPOTTED = 3;
 
+	/** Heeding (Hearing): how long a mob stands and looks toward a faint sound (ticks), and how long and how near (blocks) a second one there brings it over. */
+	static final int HEED_TICKS = 60, HEED_MEMORY = 200;
+	static final double HEED_NEAR = 8.0;
+	/** After a search, a lured mob walks back to where it was, at this speed, if it is further than this (blocks). */
+	static final double RETURN_SPEED = 0.8, RETURN_MIN = 4.0;
+	/** What {@link #hear} did: nothing, stopped to listen, came to look. */
+	static final int UNHEARD = 0, HEEDED = 1, LURED = 2;
+
 	/**
 	 * (0.7.136) Sneaking past: a sneaking, moving player with a monster in sight within {@link #SNEAK_PAST_RANGE} blocks
 	 * (that isn't after them or hunting them) counts the time; every {@link #SNEAK_PAST_TICKS} of it is Stealth
@@ -153,10 +166,47 @@ public final class Senses {
 		int walkLeft, lookLeft;
 		/** (0.7.155) How loud what it is searching for was where it stood ({@link Awareness}); a fainter lure doesn't turn it. */
 		double lure;
+		/** Whether it drops a foe it can't see (a camp's outlaws keep after theirs). */
+		boolean losesTrack = true;
+		/** Heeding a faint sound: where, ticks left looking, until when a second there brings it, whose. */
+		@Nullable Vec3 heedAt;
+		int heedLeft;
+		long heedUntil;
+		@Nullable UUID heedWho;
+		/** Where it was when a sound drew it off, and whether it is walking back there. */
+		@Nullable Vec3 home;
+		boolean returning;
 	}
 
 	/** Every hostile or neutral mob's, made when it loads together with its goals. */
 	private static final Map<Mob, Track> TRACKS = new WeakHashMap<>();
+
+	/**
+	 * Server → player: the stealth meter beside the gauge: how far their noise carries (blocks, to 63), how lit they are
+	 * (0 to 15), whether they're bleeding, and how they're speaking ({@link Hearing#QUIET} to {@link Hearing#SHOUT}).
+	 */
+	public record Meter(int noise, int light, boolean bleeding, int voice) implements CustomPacketPayload {
+		public static final Type<Meter> TYPE = new Type<>(JaymosKingdoms.id("stealth_meter"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Meter> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeByte(p.noise);
+				buf.writeByte(p.light << 4 | (p.bleeding ? 8 : 0) | p.voice);
+			},
+			buf -> {
+				int noise = buf.readByte() & 0xFF;
+				int b = buf.readByte() & 0xFF;
+				return new Meter(noise, b >> 4, (b & 8) != 0, b & 7);
+			});
+
+		int packed() {
+			return this.noise << 16 | this.light << 8 | (this.bleeding ? 8 : 0) | this.voice;
+		}
+
+		@Override
+		public Type<Meter> type() {
+			return TYPE;
+		}
+	}
 
 	/** Server → player: what to show on the awareness gauge (state, and for {@link #NOTICING} how full, in {@link #FILL_STEPS}). */
 	public record Gauge(int state, int fill) implements CustomPacketPayload {
@@ -177,8 +227,9 @@ public final class Senses {
 	/** Player → where they were last tick, and whether they moved. */
 	private static final Map<UUID, Vec3> LAST_POS = new HashMap<>();
 	private static final Map<UUID, Boolean> MOVING = new HashMap<>();
-	/** Player → the gauge last sent. */
+	/** Player → the gauge last sent, and the meter. */
 	private static final Map<UUID, Integer> SENT = new HashMap<>();
+	private static final Map<UUID, Integer> METERED = new HashMap<>();
 	/** Player → {target entity id, game time} of their last sneak attack (one blow, hurt twice, counts once). */
 	private static final Map<UUID, long[]> STRUCK = new HashMap<>();
 	/** (0.7.136) Player → ticks spent sneaking past monsters toward the next Stealth experience. */
@@ -189,14 +240,19 @@ public final class Senses {
 
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Gauge.TYPE, Gauge.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Meter.TYPE, Meter.CODEC);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Mob mob && minded(mob) && !(mob instanceof Spider) && !TRACKS.containsKey(mob)) {
+			boolean folk = entity instanceof Folk;
+			if (entity instanceof Mob mob && (minded(mob) && !(mob instanceof Spider) || folk) && !TRACKS.containsKey(mob)) {
 				Track track = new Track();
+				// (the folk hear and search, Hearing: only its outlaws are ever lured; none of them gives up a foe)
+				track.losesTrack = !folk;
 				TRACKS.put(mob, track);
 				var goals = ((MobAccessor) mob).jaymoskingdoms$goals();
-				// no flags: counts beside everything else; the search wants the legs and the eyes
+				// no flags: counts beside everything else; the search and the heeding want the legs and the eyes
 				goals.addGoal(0, new WatchGoal(mob, track));
-				goals.addGoal(1, new SearchGoal(mob, track));
+				goals.addGoal(folk ? 2 : 1, new SearchGoal(mob, track));
+				goals.addGoal(folk ? 2 : 1, new HeedGoal(mob, track));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Senses::tick);
@@ -205,6 +261,7 @@ public final class Senses {
 			LAST_POS.clear();
 			MOVING.clear();
 			SENT.clear();
+			METERED.clear();
 			STRUCK.clear();
 			SNEAKING_PAST.clear();
 			TRACKS.clear();
@@ -215,6 +272,7 @@ public final class Senses {
 		LAST_POS.remove(id);
 		MOVING.remove(id);
 		SENT.remove(id);
+		METERED.remove(id);
 		STRUCK.remove(id);
 		SNEAKING_PAST.remove(id);
 	}
@@ -309,7 +367,8 @@ public final class Senses {
 		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
 			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
 			if (range > 0.0) {
-				f = Math.max(f, HEARD * Rangers.quiet(player) / range);
+				// (Hearing) the ground underfoot and the boots and leggings worn carry it further or less
+				f = Math.max(f, HEARD * Rangers.quiet(player) * Footsteps.underfoot(level, player) / range);
 			}
 		}
 		return f;
@@ -345,6 +404,21 @@ public final class Senses {
 		@Override
 		public void tick() {
 			LivingEntity target = this.mob.getTarget();
+			if (target != null) {
+				this.track.heedLeft = 0;
+				this.track.returning = false;
+			} else if (this.track.heedLeft > 0) {
+				this.track.heedLeft--;
+			}
+			if (!this.track.losesTrack) {
+				// (a camp's outlaw: it hears and searches, but keeps after its foe)
+				if (target != null) {
+					this.track.searching = false;
+				} else if (this.track.searching || this.track.returning) {
+					search();
+				}
+				return;
+			}
 			if (target instanceof ServerPlayer player && !touched(player)) {
 				this.track.searching = false;
 				this.track.lure = 0.0;
@@ -375,7 +449,7 @@ public final class Senses {
 			if (target != null) {
 				this.track.searching = false;
 			}
-			if (this.track.searching) {
+			if (this.track.searching || this.track.returning) {
 				search();
 			}
 		}
@@ -395,10 +469,20 @@ public final class Senses {
 			this.track.walkLeft = WALK_TICKS;
 			this.track.lookLeft = -1;
 			this.track.lure = LOST_LURE;
+			this.track.home = null;
+			this.track.returning = false;
 		}
 
 		/** The walk and the looking round count down here, so that a goal that outranks the search can't make it last for ever. */
 		private void search() {
+			if (this.track.returning) {
+				Vec3 home = this.track.home;
+				if (home == null || --this.track.walkLeft <= 0 || this.mob.position().distanceToSqr(home) < ARRIVED * ARRIVED) {
+					this.track.returning = false;
+					this.track.home = null;
+				}
+				return;
+			}
 			if (this.track.lookLeft < 0) {
 				boolean near = this.track.spot == null || this.mob.position().distanceToSqr(this.track.spot) < ARRIVED * ARRIVED;
 				if (--this.track.walkLeft <= 0 || near || this.track.started && this.mob.getNavigation().isDone() && this.mob.tickCount % 10 == 0) {
@@ -408,6 +492,14 @@ public final class Senses {
 				this.track.searching = false;
 				this.track.spot = null;
 				this.track.lure = 0.0;
+				// (Hearing) drawn off by a sound, it goes back to where it was
+				Vec3 home = this.track.home;
+				if (home != null && this.mob.position().distanceToSqr(home) > RETURN_MIN * RETURN_MIN) {
+					this.track.returning = true;
+					this.track.walkLeft = WALK_TICKS;
+				} else {
+					this.track.home = null;
+				}
 			}
 		}
 	}
@@ -425,7 +517,7 @@ public final class Senses {
 
 		@Override
 		public boolean canUse() {
-			return this.track.searching && this.track.spot != null && this.mob.getTarget() == null;
+			return (this.track.searching && this.track.spot != null || this.track.returning && this.track.home != null) && this.mob.getTarget() == null;
 		}
 
 		@Override
@@ -436,9 +528,9 @@ public final class Senses {
 		@Override
 		public void start() {
 			this.track.started = true;
-			Vec3 s = this.track.spot;
-			if (this.track.lookLeft < 0 && s != null) {
-				this.mob.getNavigation().moveTo(s.x, s.y, s.z, SEARCH_SPEED);
+			Vec3 s = this.track.returning ? this.track.home : this.track.spot;
+			if ((this.track.returning || this.track.lookLeft < 0) && s != null) {
+				this.mob.getNavigation().moveTo(s.x, s.y, s.z, this.track.returning ? RETURN_SPEED : SEARCH_SPEED);
 			}
 		}
 
@@ -449,6 +541,13 @@ public final class Senses {
 
 		@Override
 		public void tick() {
+			if (this.track.returning) {
+				Vec3 home = this.track.home;
+				if (home != null && this.mob.tickCount % 20 == 0 && this.mob.getNavigation().isDone()) {
+					this.mob.getNavigation().moveTo(home.x, home.y, home.z, RETURN_SPEED);
+				}
+				return;
+			}
 			Vec3 s = this.track.spot;
 			if (s == null) {
 				return;
@@ -469,6 +568,73 @@ public final class Senses {
 		}
 	}
 
+	/** Stands still and looks toward a faint sound it heard (head turned to it, the body coming round), till it hears more or the moment passes. */
+	static final class HeedGoal extends Goal {
+		private final Mob mob;
+		private final Track track;
+
+		HeedGoal(Mob mob, Track track) {
+			this.mob = mob;
+			this.track = track;
+			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			return this.track.heedLeft > 0 && this.track.heedAt != null && !this.track.searching && this.mob.getTarget() == null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return canUse();
+		}
+
+		@Override
+		public void start() {
+			this.mob.getNavigation().stop();
+		}
+
+		@Override
+		public void tick() {
+			Vec3 at = this.track.heedAt;
+			if (at == null) {
+				return;
+			}
+			this.mob.getNavigation().stop();
+			this.mob.getLookControl().setLookAt(at.x, at.y + 1.0, at.z);
+			// the body comes round to face it too
+			this.mob.setYBodyRot(Mth.rotLerp(0.2F, this.mob.yBodyRot, this.mob.getYHeadRot()));
+		}
+	}
+
+	/**
+	 * {@code mob} heard something at {@code spot} ({@link Hearing}) as loud as {@code loudness}. A {@code faint} one (at the
+	 * edge of its hearing) only makes it stop and look, unless it heard another near there a moment ago; anything else
+	 * draws it there ({@link #lure}). Returns {@link #UNHEARD}, {@link #HEEDED} or {@link #LURED}.
+	 */
+	static int hear(Mob mob, Vec3 spot, @Nullable UUID who, double loudness, boolean faint) {
+		Track t = TRACKS.get(mob);
+		if (t == null || !mob.isAlive() || mob.getTarget() != null) {
+			return UNHEARD;
+		}
+		long now = mob.level().getGameTime();
+		boolean again = t.heedAt != null && now < t.heedUntil && t.heedAt.distanceToSqr(spot) < HEED_NEAR * HEED_NEAR;
+		if (faint && !again && !t.searching) {
+			t.heedAt = spot;
+			t.heedWho = who;
+			t.heedLeft = HEED_TICKS;
+			t.heedUntil = now + HEED_MEMORY;
+			return HEEDED;
+		}
+		return lure(mob, spot, who, loudness) ? LURED : UNHEARD;
+	}
+
+	/** {@code mob} has stopped to listen for a sound {@code player} made. */
+	static boolean heeding(Mob mob, Player player) {
+		Track t = TRACKS.get(mob);
+		return t != null && t.heedLeft > 0 && player.getUUID().equals(t.heedWho);
+	}
+
 	/**
 	 * (0.7.155) {@code mob} heard, saw or smelled something at {@code spot} ({@link Awareness}) as loud as {@code loudness}, and
 	 * goes to look, the same search as for a player it lost. Only when it is after no one, and only if it isn't already
@@ -480,6 +646,13 @@ public final class Senses {
 		if (t == null || !mob.isAlive() || mob.getTarget() != null || t.searching && t.lure > loudness) {
 			return false;
 		}
+		if (!t.searching && !t.returning) {
+			// (where it was, to go back to after: Hearing)
+			t.home = mob.position();
+		}
+		t.returning = false;
+		t.heedLeft = 0;
+		t.heedAt = null;
 		t.searching = true;
 		t.started = false;
 		t.who = who;
@@ -527,6 +700,10 @@ public final class Senses {
 				}
 				if (searchingFor(mob, player)) {
 					state = Math.max(state, SEARCHING);
+				} else if (state <= NOTICING && heeding(mob, player)) {
+					// (stopped to listen for you: the eye half fills)
+					state = NOTICING;
+					fill = Math.max(fill, FILL_STEPS / 2);
 				} else if (mob instanceof Enemy) {
 					if (state <= NOTICING) {
 						int f = noticing(level, mob, player);
@@ -552,6 +729,24 @@ public final class Senses {
 		Integer last = SENT.put(player.getUUID(), packed);
 		if ((last == null ? 0 : last) != packed) {
 			ServerPlayNetworking.send(player, new Gauge(state, fill));
+		}
+		meter(player);
+	}
+
+	/** The stealth meter: how far {@code player}'s noise carries, how lit they are, whether they bleed or talk; sent when it changes. */
+	private static void meter(ServerPlayer player) {
+		Meter m;
+		if (touched(player) || !player.isAlive()) {
+			m = new Meter(0, 0, false, Hearing.QUIET);
+		} else {
+			BlockPos eyes = BlockPos.containing(player.getEyePosition());
+			int light = Math.max(player.level().getMaxLocalRawBrightness(eyes), Awareness.heldLight(player));
+			int noise = (int) Math.min(63L, Math.round(Hearing.noiseOf(player)));
+			m = new Meter(noise, Mth.clamp(light, 0, 15), Awareness.bleeding(player), Hearing.voiceOf(player.getUUID()));
+		}
+		Integer last = METERED.put(player.getUUID(), m.packed());
+		if (last == null || last != m.packed()) {
+			ServerPlayNetworking.send(player, m);
 		}
 	}
 

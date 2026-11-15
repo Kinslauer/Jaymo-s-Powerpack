@@ -28,13 +28,18 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.monster.spider.Spider;
+import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.BellBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import com.jaymoskingdoms.wild.SpiderMinds;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -57,6 +62,11 @@ import org.jspecify.annotations.Nullable;
  * {@link #HORDE_RANGE} come to where they are, again every {@link #HORDE_TICKS} of the chase.</li>
  * </ul>
  * Creative and spectator players make no noise, light or blood. The mod's optional wandering hordes are not made.
+ * <p>(Medieval picks, Hearing) The sounds are no longer the zombies' alone: every noise goes through {@link Hearing}, so
+ * every monster hears it with its own ears, through the walls, under the weather's cover. Bells ring far ({@link #BELL}),
+ * a thrown thing is heard where it lands, and the sprinting player's footsteps are {@link Footsteps}' now (by the ground,
+ * for everyone). Blood is smelled by every hunter in {@link #SMELLS_BLOOD} (the zombies, spiders, wolves, werewolves), and
+ * a player bleeds below half their health ({@link #BLEED_HEALTH}). A horde's call spreads them round the spot.
  */
 public final class Awareness {
 	// ---- tuning ----
@@ -87,14 +97,15 @@ public final class Awareness {
 		SOUNDS.put(GameEvent.EAT, 8.0);
 		SOUNDS.put(GameEvent.DRINK, 8.0);
 	}
-	/** A sprinting player's footsteps carry this far, checked every {@link #STEP_TICKS}. */
-	static final double SPRINT_NOISE = 12.0;
+	/** A bell rung (blocks); a thrown thing landing (blocks, unless {@link Hearing#decoy} says how far its item carries). */
+	static final double BELL = 40.0, LANDED = 8.0;
+	/** The hunters that follow blood: {@code jaymoskingdoms:smells_blood}. */
+	public static final TagKey<EntityType<?>> SMELLS_BLOOD = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("smells_blood"));
+	/** Hooves at a gallop are heard every this many ticks. */
 	static final int STEP_TICKS = 10;
 	/** A sneaking player's own noise carries this share as far; Quiet Step rank 1 and 2 these instead. */
 	static final double SNEAK_NOISE = 0.5;
 	static final double[] QUIET_STEP_NOISE = {0.35, 0.2};
-	/** Too faint to turn a mob (what is left of the reach at its distance, in blocks). */
-	static final double FAINTEST = 1.0;
 
 	/** Light: seen this far (blocks), Shadowed's ranks this much less each; how often it is looked for (ticks). */
 	static final double LIGHT_RANGE = 40.0, SHADOWED_LIGHT_PER_RANK = 0.2;
@@ -105,7 +116,7 @@ public final class Awareness {
 	static final double LIGHT_LOUDNESS = 6.0;
 
 	/** Blood: hits under this much spill none; at or below this share of health, a drip every {@link #DRIP_TICKS} or so. */
-	static final float BLEED_MIN = 1.0F, BLEED_HEALTH = 0.3F;
+	static final float BLEED_MIN = 1.0F, BLEED_HEALTH = 0.5F;
 	static final int DRIP_TICKS = 60;
 	/** Blood: how long it smells (ticks; Slip the Net divides by {@link Senses#SLIP_THE_NET_DIVISOR}), how far, how often zombies sniff (ticks). */
 	static final int SCENT_TICKS = 1200, SNIFF_TICKS = 40;
@@ -169,14 +180,9 @@ public final class Awareness {
 		return level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(range), m -> aware(m) && m.distanceToSqr(at) < range * range);
 	}
 
-	/** Lures the aware mobs within {@code reach} of {@code at}, each as loud as what is left of the reach where it stands. */
-	private static void sound(ServerLevel level, Vec3 at, double reach, @Nullable UUID who) {
-		for (Mob mob : near(level, at, reach)) {
-			double loudness = reach - mob.position().distanceTo(at);
-			if (loudness >= FAINTEST) {
-				Senses.lure(mob, at, who, loudness);
-			}
-		}
+	/** A noise of {@code reach} at {@code at}: everyone who hears it hears it through the walls ({@link Hearing}). */
+	private static void sound(ServerLevel level, Vec3 at, double reach, @Nullable UUID who, Hearing.Kind kind) {
+		Hearing.noise(level, at, reach, who, kind);
 	}
 
 	/** How far {@code player}'s own noise carries, as a share: less sneaking, and less with Quiet Step. */
@@ -197,10 +203,23 @@ public final class Awareness {
 	/** A game event happened at {@code at}: if it is one that makes noise, the aware mobs that hear it go to look. */
 	public static void heard(ServerLevel level, Holder<GameEvent> event, Vec3 at, GameEvent.@Nullable Context context) {
 		Double reach = SOUNDS.get(event);
+		Entity source = context == null ? null : context.sourceEntity();
+		Hearing.Kind kind = event == GameEvent.EXPLODE || event == GameEvent.LIGHTNING_STRIKE ? Hearing.Kind.BLAST : Hearing.Kind.ACTION;
+		if (event == GameEvent.BLOCK_CHANGE && level.getBlockState(BlockPos.containing(at)).getBlock() instanceof BellBlock) {
+			// a bell rung
+			reach = BELL;
+			kind = Hearing.Kind.BLAST;
+		} else if (event == GameEvent.PROJECTILE_LAND) {
+			// a gun's ball strikes in Hearing; a thrown thing is as loud as what it is
+			if (source == null || Hearing.gun(source)) {
+				return;
+			}
+			reach = source instanceof ItemSupplier thrown ? Hearing.decoy(thrown.getItem()) : LANDED;
+			kind = Hearing.Kind.DECOY;
+		}
 		if (reach == null) {
 			return;
 		}
-		Entity source = context == null ? null : context.sourceEntity();
 		if (source instanceof Projectile projectile && projectile.getOwner() != null) {
 			source = projectile.getOwner();
 		}
@@ -211,11 +230,12 @@ public final class Awareness {
 				return;
 			}
 			who = player.getUUID();
-			if (event != GameEvent.EXPLODE) {
+			// (how quietly you move doesn't quieten a blast, a bell, or a thing landing over there)
+			if (kind == Hearing.Kind.ACTION) {
 				r *= noise(player);
 			}
 		}
-		sound(level, at, r, who);
+		sound(level, at, r, who, kind);
 	}
 
 	// ---- the tick: footsteps, light, blood ---------------------------------------------------------------------------
@@ -226,11 +246,10 @@ public final class Awareness {
 			if (silent(player) || !(player.level() instanceof ServerLevel level)) {
 				continue;
 			}
-			if (tick % STEP_TICKS == 0 && player.isSprinting() && player.onGround()) {
-				sound(level, player.position(), SPRINT_NOISE * noise(player), player.getUUID());
-			} else if (tick % STEP_TICKS == 0 && Pace.ridingHard(player)) {
+			// (a sprinting player's footsteps are Footsteps' now, by the ground underfoot, and heard by everyone)
+			if (tick % STEP_TICKS == 0 && Pace.ridingHard(player)) {
 				// hooves at a gallop carry as far as a sprinting player's feet
-				sound(level, player.position(), Pace.HOOVES, player.getUUID());
+				sound(level, player.position(), Pace.HOOVES, player.getUUID(), Hearing.Kind.STEP);
 			}
 			if ((tick + player.getId()) % LIGHT_TICKS == 0) {
 				light(level, player);
@@ -283,6 +302,18 @@ public final class Awareness {
 		return !stack.isEmpty() && Block.byItem(stack.getItem()).defaultBlockState().getLightEmission() >= HELD_LIGHT_MIN;
 	}
 
+	/** The brightest light {@code player} holds in either hand (0 to 15), for the stealth meter. */
+	static int heldLight(ServerPlayer player) {
+		int main = player.getMainHandItem().isEmpty() ? 0 : Block.byItem(player.getMainHandItem().getItem()).defaultBlockState().getLightEmission();
+		int off = player.getOffhandItem().isEmpty() ? 0 : Block.byItem(player.getOffhandItem().getItem()).defaultBlockState().getLightEmission();
+		return Math.max(main, off);
+	}
+
+	/** {@code player} is hurt enough to leave a blood trail. */
+	static boolean bleeding(ServerPlayer player) {
+		return !silent(player) && player.getHealth() <= player.getMaxHealth() * BLEED_HEALTH;
+	}
+
 	/** {@code player} was hurt for {@code taken}: unless by fire, water, cold, hunger, magic or the like, they bleed. */
 	static void bled(ServerPlayer player, DamageSource source, float taken) {
 		if (taken < BLEED_MIN || silent(player) || !(player.level() instanceof ServerLevel level) || source.is(DamageTypeTags.IS_FIRE)
@@ -311,23 +342,34 @@ public final class Awareness {
 		PowersCompat.trailDrop(level, player, stain);
 	}
 
-	/** Each idle zombie near blood goes to the freshest spot it smells that is fresher than the last it followed and not underfoot. */
+	/**
+	 * Each idle hunter near blood ({@link #SMELLS_BLOOD}: the zombies, spiders, wolves, werewolves) goes to the freshest spot
+	 * it smells that is fresher than the last it followed and not underfoot. A tame wolf doesn't.
+	 */
 	private static void smell(ServerLevel level, Deque<Scent> scents, long now) {
 		Map<Mob, Boolean> done = new IdentityHashMap<>();
 		for (Iterator<Scent> it = scents.descendingIterator(); it.hasNext();) {
 			Scent s = it.next();
 			double fresh = (double) (s.dries - now) / Math.max(1L, s.dries - s.spilled);
 			double range = SCENT_RANGE * (0.4 + 0.6 * fresh);
-			for (Mob mob : near(level, s.at, range)) {
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(s.at, s.at).inflate(range), m -> smells(m) && m.distanceToSqr(s.at) < range * range)) {
 				if (done.containsKey(mob) || FOLLOWED.getOrDefault(mob, Long.MIN_VALUE) >= s.spilled || mob.distanceToSqr(s.at) < Senses.ARRIVED * Senses.ARRIVED) {
 					continue;
 				}
 				done.put(mob, Boolean.TRUE);
-				if (Senses.lure(mob, s.at, s.who, SCENT_LOUDNESS * (1.0 + 2.0 * fresh) / 3.0)) {
+				boolean followed = mob instanceof Spider spider ? SpiderMinds.heard(spider, s.at)
+					: Senses.lure(mob, s.at, s.who, SCENT_LOUDNESS * (1.0 + 2.0 * fresh) / 3.0);
+				if (followed) {
 					FOLLOWED.put(mob, s.spilled);
 				}
 			}
 		}
+	}
+
+	/** {@code mob} hunts by the smell of blood, and is free to. */
+	private static boolean smells(Mob mob) {
+		return mob.isAlive() && mob.getTarget() == null && mob.getType().builtInRegistryHolder().is(SMELLS_BLOOD)
+			&& !(mob instanceof TamableAnimal tame && tame.isTame());
 	}
 
 	// ---- the horde ---------------------------------------------------------------------------------------------------
@@ -345,10 +387,12 @@ public final class Awareness {
 		CALLED.put(mob, now);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.HOSTILE, 1.5F, 0.8F);
 		Vec3 at = player.position();
-		for (Mob other : near(level, mob.position(), HORDE_RANGE)) {
-			if (other != mob) {
-				Senses.lure(other, at, player.getUUID(), HORDE_LOUDNESS);
-			}
+		List<Mob> horde = near(level, mob.position(), HORDE_RANGE);
+		horde.remove(mob);
+		// (Hearing) they spread round where the player is instead of all making for the one block
+		double base = Math.atan2(mob.getZ() - at.z, mob.getX() - at.x);
+		for (int i = 0; i < horde.size(); i++) {
+			Senses.lure(horde.get(i), Hearing.ringSpot(at, base, i + 1, horde.size() + 1), player.getUUID(), HORDE_LOUDNESS);
 		}
 	}
 }
