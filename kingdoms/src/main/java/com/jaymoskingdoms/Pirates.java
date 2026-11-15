@@ -331,6 +331,8 @@ public final class Pirates {
 		double flat = Math.sqrt(dx * dx + dz * dz);
 		folk.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		Projectile.spawnProjectileUsingShoot(ball, level, ItemStack.EMPTY, dx, dy + flat * 0.03, dz, PISTOL_SPEED, PISTOL_SPREAD);
+		// black powder: heard far, even when the ball is an arrow without WeaponMod (Hearing)
+		Hearing.fired(level, ball);
 		Vec3 muzzle = folk.getEyePosition().add(new Vec3(dx, dy, dz).normalize().scale(0.9));
 		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 6, 0.08, 0.08, 0.08, 0.02);
 		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 1, 0.03, 0.03, 0.03, 0.01);

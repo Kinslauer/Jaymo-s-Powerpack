@@ -2,6 +2,7 @@ package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Loaded;
+import com.jaymoskingdoms.PowersCompat;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +61,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Swamp</b>: floats still as a lily pad, never drowns, swims fast at its prey, and its bite leaves you
  * <i>bogged</i>: you sink and can't swim up for a while.</li>
  * <li><b>Cavern</b> (deep underground): carries gems on its back (dropped when it dies) and spits web over its prey,
- * holding it in a cobweb until it's cut free or wears off.</li>
+ * webbing it up (medieval picks: Jaymo's Powers' Webbed, a layer of web wrapped round it, {@link PowersCompat#web};
+ * without Powers, a cobweb at its feet) until it's cut free or wears off.</li>
  * <li><b>Jungle</b>: quick and agile, pounces, and its bite poisons; dying, it spills a cloud of choking pollen.</li>
  * <li><b>Ice</b>: its icy venom freezes you, slowing you as powder snow does.</li>
  * <li><b>Mother</b> (GTNH patch 6; Andy: "only mother and flying spider"), a wolf spider's way: now and then a temperate
@@ -87,8 +89,10 @@ public final class SpiderKinds {
 	/** A cavern spider spits web at a target within this range (blocks) once per {@link #WEB_COOLDOWN} ticks. */
 	static final double WEB_RANGE = 10.0;
 	static final int WEB_COOLDOWN = 160;
-	/** How long a spat cobweb holds (ticks) before it falls apart. */
+	/** How long a spat web holds (ticks) before it falls apart (a cobweb without Powers). */
 	static final int WEB_HOLD = 100;
+	/** (medieval picks, de-spiders) How long a mother's bite and a flyer's dragline web their prey up (ticks; Powers' Webbed). */
+	static final int MOTHER_WEB = 60, DRAGLINE_WEB = 60;
 	/** Bogged (swamp bite): how long (ticks), and how hard it pulls you down in water each tick. */
 	static final int BOGGED_TICKS = 120;
 	static final double BOGGED_PULL = 0.06;
@@ -247,6 +251,8 @@ public final class SpiderKinds {
 		switch (of(spider)) {
 			case SWAMP -> BOGGED.put(bitten, level.getGameTime() + BOGGED_TICKS);
 			case JUNGLE -> bitten.addEffect(new MobEffectInstance(MobEffects.POISON, JUNGLE_POISON, 0), spider);
+			// (medieval picks) a mother wraps what she bites, for her brood
+			case MOTHER -> PowersCompat.web(bitten, MOTHER_WEB, spider);
 			case ICE -> {
 				bitten.setTicksFrozen(Math.min(bitten.getTicksRequiredToFreeze() + 40, bitten.getTicksFrozen() + ICE_FREEZE));
 				bitten.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ICE_SLOW_TICKS, 1), spider);
@@ -459,6 +465,8 @@ public final class SpiderKinds {
 				flight.fromY = prey.getY();
 				flight.until = now + LIFT_TICKS;
 				level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.HOSTILE, 1.0F, 0.7F);
+				// (medieval picks) its dragline round them as it hauls
+				PowersCompat.web(prey, DRAGLINE_WEB, spider);
 			}
 			return;
 		}
@@ -499,7 +507,7 @@ public final class SpiderKinds {
 		}
 	}
 
-	/** A cavern spider spits a strand of web; its prey is held in a cobweb where it stands. */
+	/** A cavern spider spits a strand of web; its prey is webbed up (Powers' Webbed), or without Powers held in a cobweb where it stands. */
 	private static void spit(Spider spider, LivingEntity target, ServerLevel level) {
 		Vec3 from = spider.getEyePosition();
 		Vec3 to = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
@@ -509,6 +517,9 @@ public final class SpiderKinds {
 			level.sendParticles(ParticleTypes.ITEM_SNOWBALL, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		level.playSound(null, spider.blockPosition(), SoundEvents.LLAMA_SPIT, SoundSource.HOSTILE, 1.0F, 0.6F);
+		if (PowersCompat.web(target, WEB_HOLD, spider)) {
+			return;
+		}
 		BlockPos feet = target.blockPosition();
 		if (level.getBlockState(feet).isAir()) {
 			level.setBlockAndUpdate(feet, Blocks.COBWEB.defaultBlockState());

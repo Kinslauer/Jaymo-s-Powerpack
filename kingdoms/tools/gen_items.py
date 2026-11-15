@@ -2,6 +2,7 @@
 
 plot_stake: a pointed wooden stake with a little red pennant tied on near the top.
 awareness_eye (0.7.111): the stealth gauge's eye, four frames.
+stealth_meter (medieval picks, Hearing): the stealth meter's six 8x8 icons beside the eye.
 hidden_blade (0.7.101): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
 top-right, no black outlines, light from the top-left, vanilla's own iron ramp).
 horse_handbook (0.7.305): the Horsekeeper's Handbook, a brown leather book with a gold horseshoe on its cover and the
@@ -193,6 +194,83 @@ def awareness_eye():
     img.save(os.path.join(GUI, "awareness_eye.png"))
 
 
+# the stealth meter's icons, 8x8 each: o outline, w pale, y gold, r red, d dark red, p lip, m mouth
+METER_ICONS = [
+    # 0: noise, sound waves coming off a point
+    ["........",
+     "..o..o..",
+     ".o.w..o.",
+     "o.w.ww.o",
+     "o.w.ww.o",
+     ".o.w..o.",
+     "..o..o..",
+     "........"],
+    # 1: light, a small sun
+    ["...y....",
+     ".y...y..",
+     "...oo...",
+     "y.oyyo.y",
+     "..oyyo..",
+     "...oo...",
+     ".y...y..",
+     "...y...."],
+    # 2: blood, a drop
+    ["...o....",
+     "...o....",
+     "..oro...",
+     "..oro...",
+     ".orrro..",
+     ".orrdo..",
+     ".odddo..",
+     "..ooo..."],
+    # 3: a whisper, lips nearly shut
+    ["........",
+     "........",
+     "........",
+     ".oppppo.",
+     "oppmmppo",
+     ".oppppo.",
+     "........",
+     "........"],
+    # 4: talking, the mouth open
+    ["........",
+     "........",
+     ".oppppo.",
+     "opmmmmpo",
+     "opmmmmpo",
+     ".oppppo.",
+     "........",
+     "........"],
+    # 5: a shout, the mouth wide, lines off it
+    ["w......w",
+     ".oppppo.",
+     "opmmmmpo",
+     "opmmmmpo",
+     "opmmmmpo",
+     ".oppppo.",
+     "w......w",
+     "........"],
+]
+METER_COLOURS = {
+    "o": (0x1a, 0x14, 0x14, 255), "w": (0xe8, 0xe8, 0xe0, 255), "y": (0xf2, 0xd2, 0x7a, 255),
+    "r": (0xc0, 0x1e, 0x1e, 255), "d": (0x7a, 0x0e, 0x0e, 255), "p": (0xd8, 0x8a, 0x7a, 255), "m": (0x3a, 0x10, 0x14, 255),
+}
+
+
+def stealth_meter():
+    """stealth_meter (medieval picks, Hearing): an 8x48 sheet of the stealth meter's icons (original art): noise, light,
+    blood, whisper, talk, shout."""
+    img = Image.new("RGBA", (8, 8 * len(METER_ICONS)), (0, 0, 0, 0))
+    px = img.load()
+    for i, rows in enumerate(METER_ICONS):
+        for y, row in enumerate(rows):
+            for x, c in enumerate(row):
+                if c in METER_COLOURS:
+                    px[x, i * 8 + y] = METER_COLOURS[c]
+    os.makedirs(GUI, exist_ok=True)
+    img.save(os.path.join(GUI, "stealth_meter.png"))
+
+
 def horse_handbook():
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     px = img.load()
@@ -239,4 +317,5 @@ if __name__ == "__main__":
     hidden_blade()
     dynamite()
     awareness_eye()
+    stealth_meter()
     print("drew", OUT, GUI)

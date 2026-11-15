@@ -113,6 +113,8 @@ public final class SpiderMinds {
 	/** The spiders already given these goals (goals aren't saved; a reload gives them again to the new spider). Only the
 	 * spider's own goals hold its Mind, so nothing here keeps a spider alive. */
 	private static final Set<Spider> GIVEN = Collections.newSetFromMap(new WeakHashMap<>());
+	/** (Hearing) Every spider's mind, for what it hears and smells. */
+	private static final java.util.Map<Spider, Mind> MINDS = new WeakHashMap<>();
 
 	private SpiderMinds() {
 	}
@@ -123,6 +125,7 @@ public final class SpiderMinds {
 				size(spider);
 				if (GIVEN.add(spider)) {
 					Mind mind = new Mind(spider);
+					MINDS.put(spider, mind);
 					GoalSelector goals = ((MobAccessor) spider).jaymoskingdoms$goals();
 					// no flags: runs beside everything else
 					goals.addGoal(0, new PerceiveGoal(mind));
@@ -138,6 +141,21 @@ public final class SpiderMinds {
 				}
 			}
 		});
+	}
+
+	/**
+	 * (Hearing) {@code spider} heard or smelled something at {@code at}: in the dark, idle, it casts about there as for prey
+	 * it lost (its own search). In daylight it keeps the game's temper and lets it be. True if it goes.
+	 */
+	public static boolean heard(Spider spider, Vec3 at) {
+		Mind mind = MINDS.get(spider);
+		if (mind == null || !mind.idle() || !dark(spider)) {
+			return false;
+		}
+		mind.lastSeen = at;
+		mind.lastHeading = Vec3.ZERO;
+		mind.seenAt = mind.now();
+		return true;
 	}
 
 	/** Shrinks a spider to its size (idempotent: the modifier replaces itself). */

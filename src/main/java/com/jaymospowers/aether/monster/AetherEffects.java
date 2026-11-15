@@ -4,7 +4,6 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -17,13 +16,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
  * The four afflictions the Aether's monsters deal (Aether II calls them Webbed, Venom, Toxin and Electric Shock; here
- * they are plain mob effects, no buildup meter): webbed holds you in place, venom is a slow poison that can kill, toxin
+ * they are plain mob effects, no buildup meter): webbed holds you in place (it is the web power's own layered
+ * {@link com.jaymospowers.power.web.Webbed}, the same look and the same ways out), venom is a slow poison that can kill, toxin
  * is a fast poison that stops at half a heart, electric shock saps your strength and stings.
  */
 public final class AetherEffects {
 	// ---- tuning ----
-	/** Webbed: movement and jump cut by this much (0.85 = 85 percent). */
-	public static final double WEBBED_SLOW = 0.85;
 	/** Venom hurts for 1 every this many ticks (halved per level); toxin the same, but it can't kill. */
 	public static final int VENOM_INTERVAL = 30, TOXIN_INTERVAL = 12, SHOCK_INTERVAL = 25;
 	/** Electric shock takes this much off your attack damage. */
@@ -35,7 +33,7 @@ public final class AetherEffects {
 	}
 
 	static void init() {
-		WEBBED = register("webbed", new Webbed());
+		WEBBED = com.jaymospowers.power.web.Webbed.register();
 		VENOM = register("venom", new Hurting(0x8fd04a, VENOM_INTERVAL, false));
 		TOXIN = register("toxin", new Hurting(0xb04ad0, TOXIN_INTERVAL, true));
 		ELECTRIC_SHOCK = register("electric_shock", new Shock());
@@ -44,17 +42,6 @@ public final class AetherEffects {
 	private static Holder<MobEffect> register(String id, MobEffect effect) {
 		ResourceKey<MobEffect> key = ResourceKey.create(Registries.MOB_EFFECT, JaymosPowers.id(id));
 		return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, key, effect);
-	}
-
-	/** Cobweb-grey: nearly rooted, no jumping. */
-	private static final class Webbed extends MobEffect {
-		Webbed() {
-			super(MobEffectCategory.HARMFUL, 0xdcdce4, ParticleTypes.ITEM_COBWEB);
-			this.addAttributeModifier(Attributes.MOVEMENT_SPEED, JaymosPowers.id("effect.webbed.speed"), -WEBBED_SLOW,
-				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-			this.addAttributeModifier(Attributes.JUMP_STRENGTH, JaymosPowers.id("effect.webbed.jump"), -1.0,
-				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		}
 	}
 
 	/** Venom (can kill) and toxin (never below half a heart): magic damage on a timer. */

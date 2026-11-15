@@ -1,53 +1,39 @@
 package com.jaymospowers.power.web;
 
-import com.jaymospowers.JaymosPowers;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * What a Web Shot does to whoever it hits: heavy Slowness, no jumping, and a temporary cobweb at their feet.
- * The cobweb is only ever placed in air, removed when it expires (or when the server stops), and breaking it drops
- * nothing, so it can't be farmed for string.
+ * What a Web Shot does to whoever it hits: it's webbed up, a layer more ({@link Webbed}: no walking, only a hop, and
+ * drawn wrapped in web), where it was once Slowness, no jumping and a cobweb at its feet. The temporary cobwebs a splash
+ * strews about ({@link #scatter}) and the webbing round something hung ({@link #cling}) are only ever placed in air,
+ * removed when they expire (or when the server stops), and breaking one drops nothing, so they can't be farmed for string.
  */
 public final class WebTraps {
-	/** How long a web shot holds its target. */
+	/** How long a web shot's layer holds its target. */
 	public static final int ENSNARE_TICKS = 80;
-	/** Slowness level (0 = I): IV slows to a crawl. */
+	/** The strength a shot passes on (it no longer slows: the shots web you up, {@link Webbed}). */
 	public static final int ENSNARE_SLOWNESS = 3;
-	/** How long the cobweb at their feet lasts. */
+	/** How long a strewn cobweb lasts. */
 	public static final int COBWEB_TICKS = 100;
-
-	private static final Identifier NO_JUMP = JaymosPowers.id("web_no_jump");
-
-	private record JumpLock(ResourceKey<Level> dimension, UUID entity, long until) {
-	}
 
 	private record TempWeb(ResourceKey<Level> dimension, BlockPos pos, long until) {
 	}
 
-	private static final List<JumpLock> JUMP_LOCKS = new ArrayList<>();
 	private static final List<TempWeb> WEBS = new ArrayList<>();
 	private static long clock;
 
@@ -61,7 +47,6 @@ public final class WebTraps {
 				removeWeb(server, web);
 			}
 			WEBS.clear();
-			JUMP_LOCKS.clear();
 		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
 			if (!(level instanceof ServerLevel serverLevel)) {
@@ -89,7 +74,7 @@ public final class WebTraps {
 		ensnare(level, target, ENSNARE_SLOWNESS, ENSNARE_TICKS);
 	}
 
-	/** {@code target} was caught in a web blast: Slowness {@code amplifier} (0 = I) for {@code ticks}, no jumping, a cobweb. */
+	/** {@code target} was caught in a web blast: a layer more web on it, holding {@code ticks} ({@code amplifier} is no longer used). */
 	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks) {
 		ensnare(level, target, amplifier, ticks, false);
 	}
@@ -101,15 +86,8 @@ public final class WebTraps {
 
 	/** The same; {@code quiet}: no sound at all (a silent takedown). */
 	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks, boolean dark, boolean quiet) {
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, amplifier));
-		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
-		if (jump != null) {
-			jump.addOrUpdateTransientModifier(new AttributeModifier(NO_JUMP, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-			JUMP_LOCKS.removeIf(lock -> lock.entity().equals(target.getUUID()));
-			JUMP_LOCKS.add(new JumpLock(level.dimension(), target.getUUID(), clock + Math.min(ticks, ENSNARE_TICKS)));
-		}
-		BlockPos feet = target.blockPosition();
-		place(level, feet, dark);
+		// (an Emberborn, or anything alight, burns it off: no layer)
+		Webbed.wrap(target, ticks);
 		level.sendParticles(dark ? WebSymbiote.dust(1.2F) : ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			14, target.getBbWidth() * 0.5, target.getBbHeight() * 0.4, target.getBbWidth() * 0.5, 0.02);
 		if (!quiet) {
@@ -152,21 +130,6 @@ public final class WebTraps {
 
 	private static void tick(MinecraftServer server) {
 		clock++;
-		for (Iterator<JumpLock> it = JUMP_LOCKS.iterator(); it.hasNext(); ) {
-			JumpLock lock = it.next();
-			if (clock < lock.until()) {
-				continue;
-			}
-			it.remove();
-			ServerLevel level = server.getLevel(lock.dimension());
-			Entity entity = level == null ? null : level.getEntity(lock.entity());
-			if (entity instanceof LivingEntity living) {
-				AttributeInstance jump = living.getAttribute(Attributes.JUMP_STRENGTH);
-				if (jump != null) {
-					jump.removeModifier(NO_JUMP);
-				}
-			}
-		}
 		for (Iterator<TempWeb> it = WEBS.iterator(); it.hasNext(); ) {
 			TempWeb web = it.next();
 			if (clock < web.until()) {
