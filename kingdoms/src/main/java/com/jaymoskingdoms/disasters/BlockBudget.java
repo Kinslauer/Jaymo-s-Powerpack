@@ -19,7 +19,7 @@ public final class BlockBudget {
 	static final int ONE_MOST = 500;
 
 	/** Who is spending: each has its own {@link #ONE_MOST} a tick out of the shared {@link #PER_TICK}. */
-	enum Of {
+	public enum Of {
 		VOLCANO, TSUNAMI, HURRICANE, SLIDE, STONE, QUAKE, RODS
 	}
 
@@ -36,12 +36,12 @@ public final class BlockBudget {
 	}
 
 	/** How many changes {@code who} may still make this tick. */
-	static int share(Of who) {
+	public static int share(Of who) {
 		return Math.max(0, Math.min(left, ONE_MOST - USED[who.ordinal()]));
 	}
 
 	/** Whether there's room for one more change by {@code who} this tick (and takes it). */
-	static boolean spend(Of who) {
+	public static boolean spend(Of who) {
 		if (share(who) <= 0) {
 			return false;
 		}
@@ -51,12 +51,12 @@ public final class BlockBudget {
 	}
 
 	/** Whether {@code who} has spent all it may this tick. */
-	static boolean empty(Of who) {
+	public static boolean empty(Of who) {
 		return share(who) <= 0;
 	}
 
 	/** Sets {@code state} at {@code pos} if it's loaded and the budget allows; whether it did. */
-	static boolean set(Of who, ServerLevel level, BlockPos pos, BlockState state) {
+	public static boolean set(Of who, ServerLevel level, BlockPos pos, BlockState state) {
 		if (!Loaded.made(level, pos) || !spend(who)) {
 			return false;
 		}
@@ -65,7 +65,7 @@ public final class BlockBudget {
 	}
 
 	/** Breaks the block at {@code pos} (dropping it or not) if it's loaded and the budget allows; whether it did. */
-	static boolean destroy(Of who, ServerLevel level, BlockPos pos, boolean drop) {
+	public static boolean destroy(Of who, ServerLevel level, BlockPos pos, boolean drop) {
 		if (!Loaded.made(level, pos) || !spend(who)) {
 			return false;
 		}

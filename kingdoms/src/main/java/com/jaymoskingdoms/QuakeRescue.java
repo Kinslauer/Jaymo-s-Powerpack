@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import com.jaymoskingdoms.disasters.BlockBudget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -135,7 +136,8 @@ public final class QuakeRescue {
 
 	/** Fallen stone round {@code feet} (where it's open), and over the head. Whether it shut them in. */
 	private static boolean wall(ServerLevel level, BlockPos feet, RandomSource random) {
-		if (!open(level, feet) || !open(level, feet.above())) {
+		// (medieval picks) laid out of the quakes' share of the block budget, all of it or none (another tick, another fall)
+		if (!open(level, feet) || !open(level, feet.above()) || BlockBudget.share(BlockBudget.Of.QUAKE) < WALL_BLOCKS) {
 			return false;
 		}
 		for (int dx = -1; dx <= 1; dx++) {
@@ -146,7 +148,7 @@ public final class QuakeRescue {
 					}
 					BlockPos p = feet.offset(dx, dy, dz);
 					if (level.getBlockState(p).canBeReplaced()) {
-						level.setBlockAndUpdate(p, stone(random));
+						BlockBudget.set(BlockBudget.Of.QUAKE, level, p, stone(random));
 					}
 				}
 			}
@@ -154,6 +156,9 @@ public final class QuakeRescue {
 		level.playSound(null, feet, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
 		return !free(level, feet);
 	}
+
+	/** The most blocks one fallen wall lays (3 by 3 by 3, less the two the trapped one stands in). */
+	private static final int WALL_BLOCKS = 25;
 
 	private static BlockState stone(RandomSource random) {
 		return switch (random.nextInt(5)) {

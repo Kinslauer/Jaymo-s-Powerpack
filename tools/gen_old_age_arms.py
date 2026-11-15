@@ -284,9 +284,9 @@ def main():
 	war.merge_tag(os.path.join(MCDATA, "tags", "item", "enchantable", "durability.json"), ["jaymospowers:tall_shield", "jaymospowers:old_round_shield"])
 	war.merge_tag(os.path.join(DATA, "tags", "item", "enchantable", "shield.json"), ["jaymospowers:tall_shield", "jaymospowers:old_round_shield"])
 	lang = {"message.jaymospowers.smithing.needs_pattern": "No pattern for the %s."}
-	for item, (name, hint) in NAMES.items():
+	# (the names only: no line under them explaining how they work)
+	for item, (name, _hint) in NAMES.items():
 		lang["item.jaymospowers." + item] = name
-		lang["item.jaymospowers." + item + ".hint"] = hint
 	for part, (name, rows) in PARTS.items():
 		rows = rows()
 		stone = gear.part_model(part, "stone", rows)

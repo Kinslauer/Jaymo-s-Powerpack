@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -37,6 +36,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -57,10 +57,15 @@ public final class RuinFolk {
 	static final double STOCK_RANGE = 48.0;
 	/** How far they keep from their hut (blocks). */
 	static final int HOME = 14;
-	/** Their prices (emeralds), how many of each before the stall runs out (restocked each day), the price rise. */
-	static final int RELIC_PRICE = 6, WEAPON_PRICE = 10, SHIELD_PRICE = 8, MAP_PRICE = 7, STONE_PRICE = 1, STONE_COUNT = 8;
+	/**
+	 * Their prices (emeralds), how many of each before the stall runs out (restocked each day), the price rise. A relic
+	 * and arms cost more than a rich town's changer pays for them ({@code Currencies.RELIC_WORTH}, {@code ARMS_WORTH}, at
+	 * {@code EMERALD_BUY_RICH}) and its emeralds cost back ({@code EMERALD_SELL}), even at a Hero of the Village V's
+	 * discount, and their price doesn't fall with a good name ({@link #COLLECTED_MULT}), so going round never makes money.
+	 */
+	static final int RELIC_PRICE = 16, WEAPON_PRICE = 12, SHIELD_PRICE = 12, MAP_PRICE = 7, STONE_PRICE = 1, STONE_COUNT = 8;
 	static final int USES = 6, XP = 2;
-	static final float PRICE_MULT = 0.05F;
+	static final float PRICE_MULT = 0.05F, COLLECTED_MULT = 0.0F;
 	/** What they pay an emerald for. */
 	static final int BREAD = 6, IRON = 4, WOOL = 10;
 	/** How far a map looks for another city (chunks). */
@@ -70,9 +75,13 @@ public final class RuinFolk {
 	static final AttachmentType<String> FOLK = AttachmentRegistry.create(JaymosKingdoms.id("ruin_folk"), b -> b.persistent(Codec.STRING));
 	/** On a level: the cities whose descendants have come (their start chunks). Saved. */
 	static final AttachmentType<List<Long>> PEOPLED = AttachmentRegistry.create(JaymosKingdoms.id("ruins_peopled"), b -> b.persistent(Codec.LONG.listOf()));
+	/** On a descendant: the day their stall was last stocked. Saved. */
+	static final AttachmentType<Long> STOCKED = AttachmentRegistry.create(JaymosKingdoms.id("ruin_folk_stocked"), b -> b.persistent(Codec.LONG));
+	/** On a level: the one map each city's stall sells to each other city ("city chunk>target"), by map id. Saved. */
+	static final AttachmentType<Map<String, Integer>> MAPS = AttachmentRegistry.create(JaymosKingdoms.id("ruin_maps"),
+		b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)));
 
-	/** The day each stall was last stocked; the nearest other city each city's map leads to (its start chunk → place). */
-	private static final Map<UUID, Long> STOCKED = new HashMap<>();
+	/** The nearest other city each city's map leads to (its start chunk → place). */
 	private static final Map<Long, BlockPos> MAPPED = new HashMap<>();
 
 	private RuinFolk() {
@@ -85,7 +94,6 @@ public final class RuinFolk {
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			STOCKED.clear();
 			MAPPED.clear();
 		});
 	}
@@ -113,9 +121,8 @@ public final class RuinFolk {
 				}
 			}
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(player.blockPosition()).inflate(STOCK_RANGE), RuinFolk::is)) {
-				if (STOCKED.getOrDefault(v.getUUID(), -1L) != day) {
-					STOCKED.put(v.getUUID(), day);
-					v.setOffers(wares(level, v));
+				if (v.getAttachedOrElse(STOCKED, -1L) != day) {
+					stock(level, v, day);
 				}
 			}
 		}
@@ -140,7 +147,7 @@ public final class RuinFolk {
 			v.setVillagerXp(Math.max(1, v.getVillagerXp()));
 			v.setPersistenceRequired();
 			v.setHomeTo(hut.at(), HOME);
-			v.setOffers(wares(level, v));
+			stock(level, v, level.getGameTime() / 24000L);
 			level.addFreshEntity(v);
 		}
 	}
@@ -149,32 +156,37 @@ public final class RuinFolk {
 		return People.byName(e.getAttachedOrElse(FOLK, People.SUNSTEP.id));
 	}
 
+	private static void stock(ServerLevel level, Villager v, long day) {
+		v.setAttached(STOCKED, day);
+		v.setOffers(wares(level, v));
+	}
+
 	/** A descendant's stall, in emeralds. */
 	static MerchantOffers wares(ServerLevel level, Villager v) {
 		People p = people(v);
 		MerchantOffers offers = new MerchantOffers();
-		sell(offers, RELIC_PRICE, new ItemStack(OldAge.relic(p)));
-		sell(offers, WEAPON_PRICE, com.jaymoskingdoms.Spoils.powers(p.weapon));
+		sell(offers, RELIC_PRICE, new ItemStack(OldAge.relic(p)), COLLECTED_MULT);
+		sell(offers, WEAPON_PRICE, com.jaymoskingdoms.Spoils.powers(p.weapon), COLLECTED_MULT);
 		if (!p.weapon2.equals(p.weapon)) {
-			sell(offers, WEAPON_PRICE, com.jaymoskingdoms.Spoils.powers(p.weapon2));
+			sell(offers, WEAPON_PRICE, com.jaymoskingdoms.Spoils.powers(p.weapon2), COLLECTED_MULT);
 		}
 		if (!p.shield.isEmpty()) {
-			sell(offers, SHIELD_PRICE, com.jaymoskingdoms.Spoils.powers(p.shield));
+			sell(offers, SHIELD_PRICE, com.jaymoskingdoms.Spoils.powers(p.shield), COLLECTED_MULT);
 		}
 		if (!p.shield2.isEmpty()) {
-			sell(offers, SHIELD_PRICE, com.jaymoskingdoms.Spoils.powers(p.shield2));
+			sell(offers, SHIELD_PRICE, com.jaymoskingdoms.Spoils.powers(p.shield2), COLLECTED_MULT);
 		}
-		sell(offers, STONE_PRICE, new ItemStack(p.trim().getBlock().asItem(), STONE_COUNT));
-		sell(offers, MAP_PRICE, map(level, v, p));
+		sell(offers, STONE_PRICE, new ItemStack(p.trim().getBlock().asItem(), STONE_COUNT), PRICE_MULT);
+		sell(offers, MAP_PRICE, map(level, v, p), PRICE_MULT);
 		buy(offers, Items.BREAD, BREAD);
 		buy(offers, Items.IRON_INGOT, IRON);
 		buy(offers, Items.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), WOOL);
 		return offers;
 	}
 
-	private static void sell(MerchantOffers offers, int emeralds, ItemStack stack) {
+	private static void sell(MerchantOffers offers, int emeralds, ItemStack stack, float mult) {
 		if (!stack.isEmpty() && stack.getItem() != Items.AIR) {
-			offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), stack, USES, XP, PRICE_MULT));
+			offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), stack, USES, XP, mult));
 		}
 	}
 
@@ -182,7 +194,10 @@ public final class RuinFolk {
 		offers.add(new MerchantOffer(new ItemCost(item, count), new ItemStack(Items.EMERALD), USES * 2, XP, PRICE_MULT));
 	}
 
-	/** A map to the nearest city of another people than {@code p}'s, or empty if there's none near enough. */
+	/**
+	 * A map to the nearest city of another people than {@code p}'s, or empty if there's none near enough: the same map
+	 * (one saved map) each time for each city and its target.
+	 */
 	private static ItemStack map(ServerLevel level, Villager v, People p) {
 		StructureStart here = level.structureManager().getStructureWithPieceAt(v.blockPosition(), OldRuins.RUINS);
 		long key = here.isValid() ? here.getChunkPos().pack() : v.blockPosition().asLong();
@@ -201,8 +216,23 @@ public final class RuinFolk {
 		if (found == null) {
 			return ItemStack.EMPTY;
 		}
-		ItemStack map = MapItem.create(level, found.getX(), found.getZ(), (byte) 2, true, true);
-		MapItem.renderBiomePreviewMap(level, map);
+		String pair = key + ">" + found.asLong();
+		Map<String, Integer> maps = level.getAttachedOrElse(MAPS, Map.<String, Integer>of());
+		Integer id = maps.get(pair);
+		ItemStack map;
+		if (id != null && level.getMapData(new MapId(id)) != null) {
+			map = new ItemStack(Items.FILLED_MAP);
+			map.set(DataComponents.MAP_ID, new MapId(id));
+		} else {
+			map = MapItem.create(level, found.getX(), found.getZ(), (byte) 2, true, true);
+			MapItem.renderBiomePreviewMap(level, map);
+			MapId made = map.get(DataComponents.MAP_ID);
+			if (made != null) {
+				Map<String, Integer> next = new HashMap<>(maps);
+				next.put(pair, made.id());
+				level.setAttached(MAPS, next);
+			}
+		}
 		MapItemSavedData.addTargetDecoration(map, found, "+", MapDecorationTypes.RED_X);
 		map.set(DataComponents.ITEM_NAME, Component.translatable("filled_map.jaymoskingdoms.old_ruins"));
 		return map;

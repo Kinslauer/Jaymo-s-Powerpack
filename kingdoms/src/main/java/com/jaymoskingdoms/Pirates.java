@@ -344,7 +344,7 @@ public final class Pirates {
 	 * {@code folk} is a pirate captain who leads his cove (his death clears it; another captain's doesn't): a folk, or
 	 * (0.7.242) one of MCA's villagers at his ship's wheel ({@link Crewmen}).
 	 */
-	static boolean isCoveCaptain(LivingEntity folk) {
+	public static boolean isCoveCaptain(LivingEntity folk) {
 		if (!(folk instanceof Worker w) || w.role() != CAPTAIN || folk.level().getServer() == null) {
 			return false;
 		}

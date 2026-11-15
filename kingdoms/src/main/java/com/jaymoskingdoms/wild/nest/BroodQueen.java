@@ -707,10 +707,11 @@ public class BroodQueen extends Monster implements GeoEntity {
 		return false;
 	}
 
+	/** Killed, discarded or unloaded with her chunk: the bar goes from every screen. */
 	@Override
-	public void remove(RemovalReason reason) {
+	public void onRemoval(RemovalReason reason) {
 		this.bar.removeAllPlayers();
-		super.remove(reason);
+		super.onRemoval(reason);
 	}
 
 	@Override

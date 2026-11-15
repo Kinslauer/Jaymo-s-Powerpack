@@ -18,6 +18,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -352,7 +353,7 @@ public final class OldRuins extends Structure {
 		/** {@code state} at local ({@code lx}, {@code y} over the floor, {@code lz}), turned with the piece. */
 		void set(int lx, int y, int lz, BlockState state) {
 			BlockPos at = this.pos(lx, y, lz);
-			if (this.box.isInside(at) && !this.level.getBlockState(at).is(Blocks.BEDROCK)) {
+			if (this.box.isInside(at) && !this.level.getBlockState(at).is(Blocks.BEDROCK) && !built(this.level.getBlockState(at))) {
 				this.level.setBlock(at, state.rotate(this.rotation), 2);
 			}
 		}
@@ -369,7 +370,7 @@ public final class OldRuins extends Structure {
 			BlockPos at = this.pos(lx, y, lz);
 			if (this.box.isInside(at)) {
 				BlockState s = this.level.getBlockState(at);
-				if (!s.is(Blocks.BEDROCK) && !s.isAir()) {
+				if (!s.is(Blocks.BEDROCK) && !s.isAir() && !built(s)) {
 					this.level.setBlock(at, Blocks.AIR.defaultBlockState(), 2);
 				}
 			}
@@ -395,7 +396,7 @@ public final class OldRuins extends Structure {
 							break;
 						}
 						BlockState s = this.level.getBlockState(at);
-						if (s.isSolid() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES)) {
+						if (s.isSolid() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES) || built(s)) {
 							break;
 						}
 						this.level.setBlock(at, this.p.rubble().is(Blocks.SAND) ? Blocks.SANDSTONE.defaultBlockState() : this.p.wall(), 2);
@@ -474,6 +475,16 @@ public final class OldRuins extends Structure {
 					}
 				}
 			}
+		}
+
+		/**
+		 * Someone else's building (a village's, or a player's): what holds things, a door, a bed, a job site, a field or
+		 * path, wool, glass, a fence, a torch. The ruins never overwrite it, and fall short where they meet it.
+		 */
+		static boolean built(BlockState s) {
+			return s.hasBlockEntity() || PoiTypes.forState(s).isPresent() || s.is(BlockTags.DOORS) || s.is(BlockTags.TRAPDOORS) || s.is(BlockTags.BEDS)
+				|| s.is(BlockTags.WOOL) || s.is(BlockTags.WOOL_CARPETS) || s.is(BlockTags.FENCES) || s.is(Blocks.FARMLAND) || s.is(Blocks.DIRT_PATH)
+				|| s.is(Blocks.HAY_BLOCK) || s.is(Blocks.GLASS) || s.is(Blocks.GLASS_PANE) || s.is(Blocks.TORCH) || s.is(Blocks.WALL_TORCH);
 		}
 
 		static boolean natural(BlockState s) {

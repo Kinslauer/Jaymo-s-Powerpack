@@ -303,13 +303,14 @@ public class OldRuler extends Monster {
 		}
 	}
 
+	/** Killed, discarded or unloaded with their chunk: the bar goes from every screen. */
 	@Override
-	public void remove(RemovalReason reason) {
+	public void onRemoval(RemovalReason reason) {
 		if (this.bar != null) {
 			this.bar.removeAllPlayers();
 			this.bar = null;
 		}
-		super.remove(reason);
+		super.onRemoval(reason);
 	}
 
 	@Override

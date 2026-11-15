@@ -5,8 +5,6 @@ import com.jaymospowers.tinkering.smithing.Blueprints;
 import com.jaymospowers.tinkering.smithing.Forging;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -16,7 +14,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.BlocksAttacks;
-import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Weapon;
 
 /**
@@ -57,15 +54,15 @@ public final class OldAgeArms {
 	}
 
 	static void init() {
-		SICKLE_SWORD = Armory.item("sickle_sword", Item::new, hint("sickle_sword", p -> p.sword(ToolMaterial.IRON, SICKLE_DAMAGE, SICKLE_SPEED)
-			.component(DataComponents.WEAPON, new Weapon(1, SICKLE_SHIELD_BREAK))));
-		LEGION_SWORD = Armory.item("legion_sword", Item::new, hint("legion_sword", p -> p.sword(ToolMaterial.IRON, LEGION_DAMAGE, LEGION_SPEED)));
-		LEAF_SPEAR = Armory.item("leaf_spear", Item::new, hint("leaf_spear", p -> p.sword(ToolMaterial.IRON, SPEAR_DAMAGE, SPEAR_SPEED)));
-		BROAD_SABRE = Armory.item("broad_sabre", Item::new, hint("broad_sabre", p -> p.sword(ToolMaterial.IRON, SABRE_DAMAGE, SABRE_SPEED)));
-		BEARDED_AXE = Armory.item("bearded_axe", Item::new, hint("bearded_axe", p -> p.axe(ToolMaterial.IRON, AXE_DAMAGE, AXE_SPEED)
-			.component(DataComponents.WEAPON, new Weapon(1, AXE_SHIELD_BREAK))));
-		TALL_SHIELD = Armory.item("tall_shield", Item::new, hint("tall_shield", p -> shield(p, TALL_DURABILITY, TALL_RAISE, TALL_ARC)));
-		OLD_ROUND_SHIELD = Armory.item("old_round_shield", Item::new, hint("old_round_shield", p -> shield(p, ROUND_DURABILITY, ROUND_RAISE, ROUND_ARC)));
+		SICKLE_SWORD = Armory.item("sickle_sword", Item::new, p -> p.sword(ToolMaterial.IRON, SICKLE_DAMAGE, SICKLE_SPEED)
+			.component(DataComponents.WEAPON, new Weapon(1, SICKLE_SHIELD_BREAK)));
+		LEGION_SWORD = Armory.item("legion_sword", Item::new, p -> p.sword(ToolMaterial.IRON, LEGION_DAMAGE, LEGION_SPEED));
+		LEAF_SPEAR = Armory.item("leaf_spear", Item::new, p -> p.sword(ToolMaterial.IRON, SPEAR_DAMAGE, SPEAR_SPEED));
+		BROAD_SABRE = Armory.item("broad_sabre", Item::new, p -> p.sword(ToolMaterial.IRON, SABRE_DAMAGE, SABRE_SPEED));
+		BEARDED_AXE = Armory.item("bearded_axe", Item::new, p -> p.axe(ToolMaterial.IRON, AXE_DAMAGE, AXE_SPEED)
+			.component(DataComponents.WEAPON, new Weapon(1, AXE_SHIELD_BREAK)));
+		TALL_SHIELD = Armory.item("tall_shield", Item::new, p -> shield(p, TALL_DURABILITY, TALL_RAISE, TALL_ARC));
+		OLD_ROUND_SHIELD = Armory.item("old_round_shield", Item::new, p -> shield(p, ROUND_DURABILITY, ROUND_RAISE, ROUND_ARC));
 		// an old age's head is forged only from its pattern
 		Forging.CHECKS.add((smith, anvil, option) -> oldAge(option) && Blueprints.find(smith, option) == null
 			? Component.translatable("message.jaymospowers.smithing.needs_pattern", Blueprints.shapeName(Blueprints.shape(option))) : null);
@@ -94,9 +91,4 @@ public final class OldAgeArms {
 			.component(DataComponents.BREAK_SOUND, SoundEvents.SHIELD_BREAK);
 	}
 
-	/** Its properties, and the grey line under its name. */
-	private static Function<Item.Properties, Item.Properties> hint(String id, Function<Item.Properties, Item.Properties> props) {
-		return props.andThen(p -> p.component(DataComponents.LORE, new ItemLore(List.of(
-			Component.translatable("item.jaymospowers." + id + ".hint").withStyle(ChatFormatting.GRAY)))));
-	}
 }

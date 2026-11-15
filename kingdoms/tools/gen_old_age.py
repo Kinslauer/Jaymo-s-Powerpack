@@ -459,7 +459,9 @@ def main():
         write(os.path.join(d, "tags", "worldgen", "biome", "has_structure", p + "_ruins.json"), {"replace": False, "values": BIOMES[p]})
     write(os.path.join(d, "worldgen", "structure_set", "old_ruins.json"), {
         "structures": [{"structure": "%s:%s_ruins" % (NS, p), "weight": 1} for p in PEOPLES],
-        "placement": {"type": "minecraft:random_spread", "spacing": 40, "separation": 14, "salt": 731905117}})
+        # kept off the villages (a structure set has only one exclusion zone; the isle villages are at sea, where no city stands)
+        "placement": {"type": "minecraft:random_spread", "spacing": 40, "separation": 14, "salt": 731905117,
+                      "exclusion_zone": {"other_set": "minecraft:villages", "chunk_count": 10}}})
     write(os.path.join(d, "tags", "worldgen", "structure", "old_ruins.json"), {"replace": False, "values": ["%s:%s_ruins" % (NS, p) for p in PEOPLES]})
     shafts = ["minecraft:mineshaft", "minecraft:mineshaft_mesa"]
     for s in ("mineshaft", "dark_oak_mineshaft", "desert_mineshaft", "jungle_mineshaft", "mesa_mineshaft", "mushroom_mineshaft", "snowy_mineshaft"):

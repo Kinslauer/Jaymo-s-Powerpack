@@ -6,8 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (medieval picks: Mineshafts) Moog's Mineshafts Reimagined's shafts (mod id {@value #MOD}, shipped unchanged) tied into
@@ -42,5 +45,23 @@ public final class Mineshafts {
 	/** Whether {@code pos} is in one of a mineshaft's pieces. */
 	public static boolean in(ServerLevel level, BlockPos pos) {
 		return at(level, pos).isValid();
+	}
+
+	/** Whether {@code pos} is in a mineshaft's piece or is the rock just over one (its ceiling: a corridor's box stops under it). */
+	static boolean inOrOver(ServerLevel level, BlockPos pos) {
+		return in(level, pos) || in(level, pos.below());
+	}
+
+	/** The box of the mineshaft piece {@code pos} is in, or null. */
+	static @Nullable BoundingBox piece(ServerLevel level, BlockPos pos) {
+		StructureStart start = at(level, pos);
+		if (start.isValid()) {
+			for (StructurePiece p : start.getPieces()) {
+				if (p.getBoundingBox().isInside(pos)) {
+					return p.getBoundingBox();
+				}
+			}
+		}
+		return null;
 	}
 }

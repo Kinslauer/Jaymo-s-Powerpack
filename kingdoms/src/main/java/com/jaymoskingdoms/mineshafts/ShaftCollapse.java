@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mineshafts;
 
+import com.jaymoskingdoms.disasters.BlockBudget;
 import com.jaymoskingdoms.disasters.Calamity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -14,12 +15,15 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (medieval picks, mm-collapse) Cave-ins: a quake ({@code disasters/Earthquakes}) brings a mineshaft's ceiling down
- * round whoever is in it, unless timber holds it up: a post or beam (logs, fences, planks) within {@link #SUPPORT_REACH}
- * of the stretch of ceiling that shakes only creaks and drops dust. So a shaft shored by its miners, or by a player, keeps
+ * round whoever is in it, unless timber holds it up: a post or beam (logs, fences, planks) within {@link #SUPPORT_ALONG}
+ * along the corridor (and {@link #SUPPORT_ACROSS} across it) of the stretch of ceiling that shakes only creaks and drops
+ * dust, so the stretches between a shaft's frames can fall. Every block that falls comes out of the quakes' share of the
+ * disasters' block budget ({@code BlockBudget}). So a shaft shored by its miners, or by a player, keeps
  * its roof. A shaft's miners ({@link ShaftMiners}) under unshored rock may be shut in by the fall: their settlement asks
  * for them to be dug out ({@code QuakeRescue}).
  */
@@ -32,8 +36,12 @@ public final class ShaftCollapse {
 	static final float[] TRAP = {0.0F, 0.0F, 0.01F, 0.03F, 0.05F, 0.08F};
 	/** How far from the player the ceiling may give (blocks); how high over them it is looked for. */
 	static final int CAVE_REACH = 6, CEILING_UP = 6;
-	/** How far round a stretch of ceiling a timber post or beam holds it (blocks). */
-	static final int SUPPORT_REACH = 2;
+	/**
+	 * How far along a corridor, and across it, a timber frame holds a stretch of ceiling (blocks); in a crossing or a room,
+	 * the across reach both ways. A vanilla shaft has a frame every fifth block, so one block either side of it is held and
+	 * the two between frames are not.
+	 */
+	static final int SUPPORT_ALONG = 1, SUPPORT_ACROSS = 2;
 	/** The share of each block in the fallen stretch that comes down; how hard the rock hurts. */
 	static final float FALL_SHARE = 0.7F, FALL_HURT = 1.0F;
 	static final int FALL_HURT_MOST = 6;
@@ -85,9 +93,19 @@ public final class ShaftCollapse {
 		return null;
 	}
 
-	/** Whether timber holds up the ceiling at {@code ceiling}: a log, fence or plank within {@link #SUPPORT_REACH}, from the floor up to it. */
+	/**
+	 * Whether timber holds up the ceiling at {@code ceiling}: a log, fence or plank from the floor up to it, within
+	 * {@link #SUPPORT_ALONG} along the corridor it's over (the longer side of its piece) and {@link #SUPPORT_ACROSS} across.
+	 */
 	static boolean supported(ServerLevel level, BlockPos ceiling) {
-		for (BlockPos at : BlockPos.betweenClosed(ceiling.offset(-SUPPORT_REACH, -3, -SUPPORT_REACH), ceiling.offset(SUPPORT_REACH, 0, SUPPORT_REACH))) {
+		BoundingBox piece = Mineshafts.piece(level, ceiling.below());
+		int rx = SUPPORT_ACROSS, rz = SUPPORT_ACROSS;
+		if (piece != null && piece.getXSpan() > piece.getZSpan()) {
+			rx = SUPPORT_ALONG;
+		} else if (piece != null && piece.getZSpan() > piece.getXSpan()) {
+			rz = SUPPORT_ALONG;
+		}
+		for (BlockPos at : BlockPos.betweenClosed(ceiling.offset(-rx, -3, -rz), ceiling.offset(rx, 0, rz))) {
 			BlockState s = level.getBlockState(at);
 			if (s.is(BlockTags.LOGS) || s.is(BlockTags.FENCES) || s.is(BlockTags.PLANKS) || s.is(BlockTags.WOODEN_SLABS)) {
 				return true;
@@ -99,7 +117,7 @@ public final class ShaftCollapse {
 	/** The ceiling over {@code near} comes down, or (shored) creaks. */
 	static void caveIn(ServerLevel level, BlockPos near, RandomSource random) {
 		BlockPos ceiling = ceiling(level, near);
-		if (ceiling == null || !Mineshafts.in(level, ceiling)) {
+		if (ceiling == null || !Mineshafts.inOrOver(level, ceiling)) {
 			return;
 		}
 		if (supported(level, ceiling)) {
@@ -115,7 +133,7 @@ public final class ShaftCollapse {
 				}
 				BlockPos at = ceiling.offset(dx, 0, dz);
 				BlockState s = level.getBlockState(at);
-				if (!loose(level, at, s) || !level.getBlockState(at.below()).isAir()) {
+				if (!loose(level, at, s) || !level.getBlockState(at.below()).isAir() || !BlockBudget.spend(BlockBudget.Of.QUAKE)) {
 					continue;
 				}
 				FallingBlockEntity falling = FallingBlockEntity.fall(level, at, s);

@@ -63,6 +63,28 @@ THEMES = {
     "champion_crowned_sun": dict(root=45, mode="lydian", bpm=90, drone="open", drum="stomp", lead="horn", unit=1.0),
     "champion_ash_whisperer": dict(root=35, mode="locrian", bpm=68, drone="breath", drum="bone", lead="wail", unit=1.5),
     "champion_truth": dict(root=47, mode="dorian", bpm=80, drone="choir", drum="soft", lead="bell", unit=1.0),
+    # every other boss with a bar (BossBars.boss and the rest), each its own
+    "brood_queen": dict(root=34, mode="locrian", bpm=112, drone="breath", drum="tick", lead="saw", unit=0.5),
+    "snow_widow": dict(root=45, mode="harmonic", bpm=62, drone="glass", drum="soft", lead="wail", unit=1.5),
+    "unburied": dict(root=32, mode="dim", bpm=54, drone="choir", drum="bone", lead="bell", unit=2.0),
+    "necromancer": dict(root=36, mode="harmonic", bpm=70, drone="choir", drum="bone", lead="wail", unit=1.0),
+    "fortress_knight": dict(root=40, mode="phrygian", bpm=88, drone="sub", drum="clang", lead="metal", unit=0.75),
+    "kingdom_ruler": dict(root=43, mode="mixolydian", bpm=82, drone="open", drum="stomp", lead="horn", unit=1.0),
+    "grave_captain": dict(root=33, mode="minor", bpm=74, drone="breath", drum="bone", lead="horn", unit=1.0),
+    "illager_warlord": dict(root=39, mode="harmonic", bpm=104, drone="beat", drum="tom", lead="saw", unit=0.5),
+    "quest_champion": dict(root=41, mode="lydian", bpm=96, drone="open", drum="tom", lead="bell", unit=0.75),
+    "warchief": dict(root=35, mode="pentatonic", bpm=116, drone="sub", drum="stomp", lead="horn", unit=0.5),
+    "outlaw": dict(root=42, mode="dorian", bpm=100, drone="beat", drum="tick", lead="wail", unit=0.75),
+    "skeleton_lord": dict(root=38, mode="dim", bpm=86, drone="sub", drum="bone", lead="metal", unit=0.75),
+    "grue": dict(root=31, mode="locrian", bpm=50, drone="breath", drum="soft", lead="wail", unit=2.0),
+    "pirate_captain": dict(root=44, mode="dorian", bpm=108, drone="open", drum="tom", lead="horn", unit=0.5),
+    "death_knight": dict(root=37, mode="phrygian", bpm=64, drone="choir", drum="clang", lead="metal", unit=1.5),
+    "raid_king": dict(root=40, mode="minor", bpm=98, drone="beat", drum="stomp", lead="saw", unit=0.75),
+    "clockwork": dict(root=46, mode="lydian", bpm=120, drone="beat", drum="tick", lead="metal", unit=0.5),
+    "piglin_king": dict(root=34, mode="phrygian", bpm=92, drone="sub", drum="stomp", lead="horn", unit=1.0),
+    "wreck_thing": dict(root=30, mode="dim", bpm=58, drone="sub", drum="clang", lead="saw", unit=1.5),
+    "sand_worm": dict(root=29, mode="harmonic", bpm=68, drone="breath", drum="stomp", lead="wail", unit=1.5),
+    "made_brute": dict(root=32, mode="locrian", bpm=90, drone="open", drum="clang", lead="metal", unit=1.0),
 }
 STEMS = ["drone_a", "drone_b", "pulse_a", "pulse_b", "motif_a", "motif_b", "motif_c", "stab"]
 
