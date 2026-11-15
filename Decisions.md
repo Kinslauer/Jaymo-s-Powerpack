@@ -610,3 +610,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-14 (Andy, druid reincarnation thread): the old druid hermit must be able to tell a Druid player about the rite of rebirth (built: the telling teaches the Rebirth spell); a reborn player keeps their power affinity (built: no affinity of their own -> the lost power becomes it). Branch claude/project-thread-fi8ahr.
 - 2026-11-15 (Andy, druid reincarnation thread): approved the Lore paragraph "What the old druids teach" (PR #1575).
 - 2026-11-14 (Andy): "add it": kidnapping (rescue/capture) as story-quest steps too; new tale The Asking Price.
+- 2026-11-15 (Andy, GTNH hardcore thread): approved all eight GTNH lore paragraphs (hard ground, water that comes back, tin and bronze, the forge's dangers, the marked/mothers/turned, mixed seams and the dowser's fork, sails and boilers, the steam towns); chose flying airships between steam towns; merged PR #1586.
