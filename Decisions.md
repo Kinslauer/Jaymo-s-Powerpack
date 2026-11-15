@@ -615,3 +615,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Fantasy Armor thread): decision card: diamond armour, tools AND weapons are all removed; steel replaces them, netherite goes over steel.
 - 2026-11-15 (Andy, Fantasy Armor thread): "the grave sentinel helmet should be removed" (Fantasy Armor trim datapack drops its recipe; compat never dresses anyone in it).
 - 2026-11-15 (Andy, Fantasy Armor thread): Long Defence film cast in Fantasy Armor: Quiet One = Redeemer, Thessaly = Lady Maria, Varro = Golden Horns no helm, Grimsby = Thief, Ambrose = Wandering Wizard, the Grue = Dark Lord, summoning a few orcs in Dark Cover.
+- 2026-11-15 (Andy, Fantasy Armor thread): "lore looks good": the "What the armourers make" entry and its eight paragraphs are canon. Also: the Quiet One's Redeemer plate should weave onto his body like the symbiote suit does.
