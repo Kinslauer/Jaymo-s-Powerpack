@@ -524,10 +524,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
+		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
+		GutteringLamps.register();
+		MoteLanterns.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
 		com.jaymoskingdoms.wild.SpiderMinds.register();
+		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
+		com.jaymoskingdoms.wild.SpiderLairs.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
 		TurnedVillagers.register();

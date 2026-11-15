@@ -48,6 +48,28 @@ public final class PowersCompat {
 		return soakedEffect != null && body.hasEffect(soakedEffect);
 	}
 
+	/** (medieval picks) Powers' Webbed effect (or null before it's looked up, or without Powers). */
+	private static net.minecraft.core.@Nullable Holder<net.minecraft.world.effect.MobEffect> webbedEffect;
+	private static boolean lookedForWebbed;
+
+	/**
+	 * (medieval picks, de-spiders) Spider web on {@code body}: Jaymo's Powers' Webbed ({@code jaymospowers:webbed}, by its
+	 * id), one layer more, the top one holding {@code ticks}. Powers turns adding it into a layer (and burns it off an
+	 * Emberborn), and draws it wrapped round them. False without Powers: the caller holds them its old way (a cobweb).
+	 */
+	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by) {
+		if (!lookedForWebbed) {
+			lookedForWebbed = true;
+			webbedEffect = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(Identifier.fromNamespaceAndPath("jaymospowers", "webbed"))
+				.orElse(null);
+		}
+		if (webbedEffect == null) {
+			return false;
+		}
+		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, 0), by);
+		return true;
+	}
+
 	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
 	private static boolean lookedForGlint;
@@ -3596,6 +3618,25 @@ public final class PowersCompat {
 				net.minecraft.core.GlobalPos>>)list).add(shelter);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality shelters (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (medieval picks) Tells Powers' death by cause ({@code Mortality.LAIRS}) where spiders carry one left for dead
+	 * ({@link com.jaymoskingdoms.wild.SpiderLairs#take}). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void tellLairs(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.@Nullable Entity,
+		net.minecraft.core.@Nullable GlobalPos> lair) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("LAIRS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				net.minecraft.core.GlobalPos>>)list).add(lair);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality lairs (older Powers?)", e);
 		}
 	}
 

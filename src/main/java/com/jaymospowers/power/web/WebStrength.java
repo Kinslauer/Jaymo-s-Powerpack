@@ -226,7 +226,7 @@ public final class WebStrength {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
-	/** Spun up where it stands: it can't move or jump for {@code ticks}. */
+	/** Spun up where it stands: a layer of web on it ({@link Webbed}), held fast for {@code ticks} or till it's out of the web. */
 	static void cocoon(ServerLevel level, LivingEntity target, int ticks, boolean dark) {
 		bind(level, target, target.position(), ticks, false, dark);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -256,7 +256,8 @@ public final class WebStrength {
 				Bind bind = entry.getValue();
 				ServerLevel level = server.getLevel(bind.dimension());
 				Entity entity = level == null ? null : level.getEntity(entry.getKey());
-				if (clock >= bind.until() || !(entity instanceof LivingEntity living) || !living.isAlive()) {
+				// (struggled, cut or burnt out of its web: free)
+				if (clock >= bind.until() || !(entity instanceof LivingEntity living) || !living.isAlive() || Webbed.layers(living) == 0) {
 					it.remove();
 					continue;
 				}
