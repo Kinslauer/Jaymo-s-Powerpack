@@ -72,8 +72,10 @@ public final class ArmourWear {
 	private static boolean armourItem(net.minecraft.world.item.Item item) {
 		var components = item.components();
 		Equippable equippable = components.get(DataComponents.EQUIPPABLE);
+		// (Fantasy Armor sets each piece's durability itself; FantasyArmorPreset gives it this cut in its own config)
 		return equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR && components.has(DataComponents.MAX_DAMAGE)
-			&& !components.has(DataComponents.GLIDER);
+			&& !components.has(DataComponents.GLIDER)
+			&& !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getNamespace().equals("fantasy_armor");
 	}
 
 	/** A worn-armour piece (helmet, chest, legs, boots) that can wear out; not an elytra. */
