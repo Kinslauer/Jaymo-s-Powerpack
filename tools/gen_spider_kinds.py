@@ -1,4 +1,5 @@
-"""Jaymo's Kingdoms: the spider kinds' skins (wild/SpiderKinds; the mother, her spiderlings and the flyer since GTNH patch 6), drawn from scratch on the spider model's 64x32
+"""Jaymo's Kingdoms: the spider kinds' skins (wild/SpiderKinds; the mother, her spiderlings and the flyer since GTNH patch 6; the
+netcaster and the spiny since the medieval spider nests), drawn from scratch on the spider model's 64x32
 box layout (head 32,4 8x8x8; neck 0,0 6x6x6; abdomen 0,12 10x8x12; legs 18,0 16x2x2). Our own pixels, no game art.
 Run: python3 tools/gen_spider_kinds.py"""
 import random
@@ -179,6 +180,35 @@ def flyer(img, rnd):
                         img.putpixel((x0 + x, y0 + y), (52, 112, 96, 255))
 
 
+def netcaster(img, rnd):
+    # an ogre-faced net-caster: twig-brown, a pale line down the back, and two great dark eyes on its face
+    def f(n, x, y, w, h):
+        if n == "top" and x in (4, 5):
+            return (190, 166, 128)
+        if n in ("left", "right") and (y + x) % 5 == 0:
+            return (92, 70, 48)
+        return None
+    top_and_back(img, f)
+    _, x0, y0, w, h = faces(*HEAD)[3]
+    for ex in (1, 5):
+        for y in range(4, 7):
+            for x in range(ex, ex + 2):
+                img.putpixel((x0 + x, y0 + y), (24, 18, 14, 255))
+
+
+def spiny(img, rnd):
+    # a spiny orb weaver of the Nether woods: a hard pale shell, black pits in rows, and red spines along its rim
+    def f(n, x, y, w, h):
+        if n == "top" and x % 3 == 1 and y % 3 == 1:
+            return (28, 22, 24)
+        if n in ("left", "right", "back") and y in (0, 1) and x % 3 == 0:
+            return (178, 36, 30)
+        if n == "top" and (x in (0, w - 1) or y in (0, h - 1)) and (x + y) % 3 == 0:
+            return (178, 36, 30)
+        return None
+    top_and_back(img, f)
+
+
 make("birch", 1, (214, 208, 190), (160, 154, 140), (236, 232, 220), (60, 56, 50), birch)
 make("desert", 2, (196, 160, 98), (150, 116, 66), (222, 196, 140), (110, 78, 42), desert)
 make("swamp", 3, (66, 90, 50), (44, 62, 34), (86, 116, 62), (34, 48, 28), swamp)
@@ -188,3 +218,5 @@ make("ice", 6, (170, 210, 230), (124, 168, 196), (214, 238, 248), (90, 130, 160)
 make("mother", 7, (120, 92, 62), (86, 64, 42), (150, 118, 84), (70, 52, 34), mother)
 make("spiderling", 8, (204, 184, 148), (170, 150, 116), (226, 210, 180), (150, 130, 100), spiderling)
 make("flyer", 9, (34, 32, 34), (20, 20, 22), (58, 56, 58), (200, 200, 196), flyer)
+make("netcaster", 10, (128, 98, 66), (94, 70, 46), (158, 128, 92), (70, 52, 34), netcaster)
+make("spiny", 11, (226, 214, 188), (190, 176, 150), (244, 236, 216), (40, 30, 30), spiny)

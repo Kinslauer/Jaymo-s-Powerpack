@@ -329,6 +329,7 @@ public final class WebPower implements Power {
 		WebParkour.register();
 		WebStrain.register();
 		WebTraps.register();
+		Webbed.register();
 		WebHitches.register();
 		WebBridges.register();
 		WebTendrils.register();

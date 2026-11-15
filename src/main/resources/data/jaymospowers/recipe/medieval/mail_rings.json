@@ -1,0 +1,14 @@
+{
+  "type": "jaymospowers:hammer_crafting",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:mail_ring",
+    "count": 3
+  }
+}

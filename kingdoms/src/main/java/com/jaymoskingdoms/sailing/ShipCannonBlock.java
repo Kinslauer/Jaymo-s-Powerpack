@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -23,12 +24,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -40,6 +43,10 @@ import org.jspecify.annotations.Nullable;
  * cannonball), and touch it off with flint and steel or a fire charge: it fires a {@link ShipShot} that holes ships.
  * Works ashore and aboard, laid as high as its gunner looks; at the helm, a left click fires every loaded gun on the
  * side you look to, a broadside.
+ * <p>On land it is also a redstone cannon for your walls (the medieval picks' vp-redstonecannon; Andy: "the cannons should
+ * all look real, no dispenser type blocks"): the same cast gun on its carriage, with a chest, barrel or hopper set against its
+ * breech. A redstone pulse loads it from there (a gunpowder, then a ball: real ones, spent) if it isn't loaded, and fires it.
+ * Nothing behind it, or nothing in that, and it only clicks.
  * (AlekiShips, MIT, has ship cannons loaded by hand; ours are our own.)
  */
 public final class ShipCannonBlock extends Block {
@@ -79,16 +86,18 @@ public final class ShipCannonBlock extends Block {
 	public static final EnumProperty<Load> LOAD = EnumProperty.create("load", Load.class);
 	/** (0.7.490) Just fired: run back on its carriage by the recoil (a model slid back), for {@link #RECOIL_TICKS}. */
 	public static final BooleanProperty RECOILED = BooleanProperty.create("recoiled");
+	/** A redstone signal on it now (it fires as one comes on, as a dispenser does). */
+	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 10, 14);
 
 	public ShipCannonBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, Load.EMPTY).setValue(RECOILED, false));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, Load.EMPTY).setValue(RECOILED, false).setValue(POWERED, false));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, LOAD, RECOILED);
+		builder.add(FACING, LOAD, RECOILED, POWERED);
 	}
 
 	@Override
@@ -114,6 +123,11 @@ public final class ShipCannonBlock extends Block {
 	/** Whether this is something it fires: our shot of any kind, or WeaponMod's cannonball. */
 	static boolean shot(ItemStack stack) {
 		return ShotKind.of(stack) != null;
+	}
+
+	/** The same, for those outside (an airship's hold looked through for balls). */
+	public static boolean isShot(ItemStack stack) {
+		return shot(stack);
 	}
 
 	/** What {@code player} does to a gun in this state with {@code stack}: the gun's next state, and whether it fires. */
@@ -240,6 +254,61 @@ public final class ShipCannonBlock extends Block {
 		if (state.getValue(RECOILED)) {
 			level.setBlock(pos, state.setValue(RECOILED, false), Block.UPDATE_ALL);
 		}
+	}
+
+	/** A redstone signal comes on: loaded from what's behind its breech if it isn't, and fired. */
+	@Override
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moved) {
+		if (!(level instanceof ServerLevel server)) {
+			return;
+		}
+		boolean powered = level.hasNeighborSignal(pos);
+		if (powered == state.getValue(POWERED)) {
+			return;
+		}
+		BlockState next = state.setValue(POWERED, powered);
+		if (powered && !state.getValue(RECOILED)) {
+			next = this.pulse(server, pos, next);
+		}
+		level.setBlock(pos, next, Block.UPDATE_CLIENTS);
+	}
+
+	/** What a pulse does: powder, then a ball, out of the store behind the breech if it isn't loaded; then it fires. Its next state. */
+	private BlockState pulse(ServerLevel level, BlockPos pos, BlockState state) {
+		Direction f = state.getValue(FACING);
+		Container store = HopperBlockEntity.getContainerAt(level, pos.relative(f.getOpposite()));
+		Load load = state.getValue(LOAD);
+		if (load == Load.EMPTY && store != null && !spend(store, s -> s.is(Items.GUNPOWDER)).isEmpty()) {
+			load = Load.POWDER;
+		}
+		if (load == Load.POWDER && store != null) {
+			ItemStack ball = spend(store, ShipCannonBlock::shot);
+			ShotKind kind = ball.isEmpty() ? null : ShotKind.of(ball);
+			if (!ball.isEmpty()) {
+				load = kind == null ? Load.SHOT : kind.load();
+			}
+		}
+		if (!load.loaded()) {
+			level.playSound(null, pos, SoundEvents.DISPENSER_FAIL, SoundSource.BLOCKS, 1.0F, 0.8F);
+			return state.setValue(LOAD, load);
+		}
+		ShotKind kind = ShotKind.of(load);
+		level.scheduleTick(pos, this, RECOIL_TICKS);
+		fire(level, Vec3.atCenterOf(pos), f.getStepX(), f.getStepZ(), null, null, kind == null ? ShotKind.ROUND : kind);
+		return state.setValue(LOAD, Load.EMPTY).setValue(RECOILED, true);
+	}
+
+	/** One of what {@code what} takes, out of {@code store} (empty: it has none). */
+	private static ItemStack spend(Container store, java.util.function.Predicate<ItemStack> what) {
+		for (int slot = 0; slot < store.getContainerSize(); slot++) {
+			ItemStack there = store.getItem(slot);
+			if (!there.isEmpty() && what.test(there)) {
+				ItemStack one = store.removeItem(slot, 1);
+				store.setChanged();
+				return one;
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	@Override

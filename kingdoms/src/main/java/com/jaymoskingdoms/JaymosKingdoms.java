@@ -81,6 +81,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		SmogFolk.register();
 		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
 		Awareness.register();
+		// (medieval picks) every monster hears, through walls, under cover; decoys, guns and voices (Hearing)
+		Hearing.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		// (0.7.498) the emeralds in chests, mob drops and hero gifts become silver coins
@@ -525,10 +527,17 @@ public final class JaymosKingdoms implements ModInitializer {
 		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
+		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
+		GutteringLamps.register();
+		MoteLanterns.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
+		// medieval picks: spider nests (the silk deeps, their egg sacs and the brood queen)
+		com.jaymoskingdoms.wild.nest.SpiderNests.register();
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
 		com.jaymoskingdoms.wild.SpiderMinds.register();
+		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
+		com.jaymoskingdoms.wild.SpiderLairs.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
 		TurnedVillagers.register();
@@ -796,6 +805,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		SteamTowns.register();
 		SteamTrades.register();
 		SteamAirships.register();
+		// (medieval picks) the sky: sky pirates' coves, realms' patrol airships, the bands' war drums, downed airships
+		SkyPirates.register();
+		AirPatrols.register();
+		WarDrums.register();
+		SkyWrecks.register();
 		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)

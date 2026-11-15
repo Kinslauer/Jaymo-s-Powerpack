@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABA",
+    "SSS",
+    " S "
+  ],
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:book",
+    "S": "minecraft:smooth_stone"
+  },
+  "result": {
+    "id": "jaymospowers:inscription_table",
+    "count": 1
+  }
+}

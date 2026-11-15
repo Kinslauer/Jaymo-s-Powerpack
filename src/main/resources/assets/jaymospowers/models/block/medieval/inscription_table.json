@@ -1,0 +1,75 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jaymospowers:block/medieval/inscription_table_side",
+    "top": "jaymospowers:block/medieval/inscription_table_top",
+    "side": "jaymospowers:block/medieval/inscription_table_side",
+    "foot": "jaymospowers:block/medieval/inscription_table_foot"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        10,
+        0
+      ],
+      "to": [
+        16,
+        14,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        10,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#foot"
+        },
+        "down": {
+          "texture": "#foot"
+        },
+        "north": {
+          "texture": "#foot"
+        },
+        "south": {
+          "texture": "#foot"
+        },
+        "east": {
+          "texture": "#foot"
+        },
+        "west": {
+          "texture": "#foot"
+        }
+      }
+    }
+  ]
+}

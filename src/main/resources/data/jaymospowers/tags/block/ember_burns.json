@@ -1,0 +1,25 @@
+{
+  "values": [
+    "minecraft:cobweb",
+    {
+      "id": "jaymospowers:web_bridge",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:web_goo_wall",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:web_symbiote_web",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:web_symbiote_goo",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:web_symbiote_red_goo",
+      "required": false
+    }
+  ]
+}

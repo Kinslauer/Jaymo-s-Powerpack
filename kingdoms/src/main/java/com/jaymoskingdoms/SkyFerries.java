@@ -171,8 +171,15 @@ public final class SkyFerries implements Ship.Skyfaring {
 		}
 		List<LivingEntity> crew = ship.crewAboard();
 		long out = level.getGameTime() - trip.began();
-		if (crew.isEmpty() || out > LONGEST_TRIP * 2) {
-			// nobody left to fly her (or she can't get home): she is let go, and moors herself where she lies
+		if (!crew.isEmpty() && out <= LONGEST_TRIP * 2 && Fleet.helmsmanDown(ship)) {
+			// her helmsman downed at her wheel: she drifts while he's down, and flies on when he's up at it again
+			ship.letDrift();
+			return null;
+		}
+		if (crew.isEmpty() || out > LONGEST_TRIP * 2 || !Fleet.wheelManned(ship)) {
+			// nobody left to fly her, or nobody at her wheel (or she can't get home): she is let go, drifts and comes down,
+			// and moors herself where she lies
+			ship.letDrift();
 			end(ship);
 			return null;
 		}

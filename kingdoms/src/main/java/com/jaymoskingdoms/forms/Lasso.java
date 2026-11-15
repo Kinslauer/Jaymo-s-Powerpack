@@ -99,6 +99,10 @@ import org.jspecify.annotations.Nullable;
  * press counting once in {@link #PRESS_GAP} ticks however fast it's mashed, {@link #PLAYER_HOLD_PRESSES} on the rope and
  * {@link #PLAYER_TIE_PRESSES} tied. A bare-fisted punch on anyone roped deals no damage: it knocks their struggle back
  * ({@link #STALL_SHARE}) and stalls it for {@link #STALL_TICKS}.</li>
+ * <li><b>Boarding by hook</b> (the medieval picks' vp-boarding). Thrown up at an airship, the loop catches on the first of her
+ * that it meets, her rail or her side, and holds there, going with her. You hang on the rope below her; hold jump to climb
+ * it hand over hand, and at the top you're over her rail onto her deck, where her crew come for you ({@code Corsairs}).
+ * Sneak, or sneak and use, lets go (mind the fall).</li>
  * </ul>
  * Fighting players must be allowed on the server, and party members are never roped. The rope is drawn by every client from
  * the synced {@link #HOLDER} attachment on the held one ({@code LassoRope}), the spin from the holder's use of the lasso, and the
@@ -141,6 +145,8 @@ public final class Lasso {
 	static final float GREAT_HEALTH = 100.0F;
 	/** Ticks between checks that you still carry a lasso, and how long a pinned mob's slowness is topped up for. */
 	static final int PACK_CHECK = 20, BOUND_SLOW_TICKS = 12;
+	/** Hooked on an airship: climbing speed up the rope (blocks a tick), how hard the taut rope holds you, and how near the top you're over her rail. */
+	static final double CLIMB_SPEED = 0.22, HANG_PULL = 0.35, OVER_RAIL = 1.6;
 
 	/** On a held one: the entity id of whoever holds the rope. Synced to everyone (they draw the rope), not saved. */
 	public static final AttachmentType<Integer> HOLDER = AttachmentRegistry.create(JaymosKingdoms.id("lasso_holder"),
@@ -215,6 +221,8 @@ public final class Lasso {
 	private static final Map<UUID, Hold> BY_HOLDER = new HashMap<>();
 	private static final Map<UUID, Hold> BY_HELD = new HashMap<>();
 	private static final Map<UUID, Tie> TIES = new HashMap<>();
+	/** Thrower → their loop hooked on an airship. */
+	private static final Map<UUID, Loop> HOOKS = new HashMap<>();
 
 	private Lasso() {
 	}
@@ -238,6 +246,7 @@ public final class Lasso {
 			BY_HOLDER.clear();
 			BY_HELD.clear();
 			TIES.clear();
+			HOOKS.clear();
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Hold hold = BY_HOLDER.get(handler.getPlayer().getUUID());
@@ -278,6 +287,10 @@ public final class Lasso {
 	/** The loop of rope in flight: it settles on the first living thing it meets, and is gone if it meets none. */
 	public static final class Loop extends Projectile implements ItemSupplier {
 		private int flight;
+		/** Hooked on a ship: which, where on her (her frame), and how much rope is out below it. */
+		private @Nullable UUID hooked;
+		private Vec3 anchor = Vec3.ZERO;
+		private double rope;
 
 		public Loop(EntityType<? extends Loop> type, Level level) {
 			super(type, level);
@@ -302,6 +315,10 @@ public final class Lasso {
 			}
 			Vec3 pos = this.position();
 			Entity owner = this.getOwner();
+			if (this.hooked != null) {
+				this.hang(level, owner);
+				return;
+			}
 			if (++this.flight > LOOP_FLIGHT || !level.getFluidState(BlockPos.containing(pos)).isEmpty()
 				|| owner == null || owner.level() != level || owner.distanceToSqr(pos) > ROPE_LENGTH * ROPE_LENGTH) {
 				// (fallen short, in water, or the rope has run out)
@@ -318,6 +335,9 @@ public final class Lasso {
 				this.discard();
 				return;
 			}
+			if (owner instanceof ServerPlayer thrower && this.hook(level, thrower, next)) {
+				return;
+			}
 			if (hit instanceof BlockHitResult && hit.getType() == HitResult.Type.BLOCK) {
 				this.discard();
 				return;
@@ -325,6 +345,125 @@ public final class Lasso {
 			this.setPos(next);
 			this.setDeltaMovement(move);
 			Fx.burst(level, next.x, next.y, next.z, 0xC4A56A, 0.5F, 1, 0.0, 0.0, 0.0);
+		}
+
+		/** The loop meets a flying ship at {@code at}: it catches on the part of her there. True if it caught. */
+		private boolean hook(ServerLevel level, ServerPlayer thrower, Vec3 at) {
+			for (com.jaymoskingdoms.sailing.Ship ship : com.jaymoskingdoms.sailing.Ships.in(level)) {
+				com.jaymoskingdoms.sailing.Hull h = ship.hull();
+				if (h == null || !ship.flying() || ship.isRemoved() || !ship.getBoundingBox().inflate(0.5).contains(at)) {
+					continue;
+				}
+				Vec3 l = ship.toLocal(at);
+				if (h.at(Mth.floor(l.x + 0.5), Mth.floor(l.y), Mth.floor(l.z + 0.5)) < 0) {
+					continue;
+				}
+				Loop old = HOOKS.put(thrower.getUUID(), this);
+				if (old != null && old != this) {
+					old.discard();
+				}
+				this.hooked = ship.getUUID();
+				this.anchor = l;
+				this.rope = thrower.position().distanceTo(at);
+				this.setDeltaMovement(Vec3.ZERO);
+				this.setPos(at);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.8F);
+				return true;
+			}
+			return false;
+		}
+
+		/** Hooked: the loop goes with her, and {@code owner} hangs on the rope below, climbing it while they hold jump. */
+		private void hang(ServerLevel level, @Nullable Entity owner) {
+			com.jaymoskingdoms.sailing.Ship ship = null;
+			for (com.jaymoskingdoms.sailing.Ship s : com.jaymoskingdoms.sailing.Ships.in(level)) {
+				if (s.getUUID().equals(this.hooked)) {
+					ship = s;
+				}
+			}
+			if (ship == null || ship.isRemoved() || !ship.flying() || !(owner instanceof ServerPlayer climber) || !climber.isAlive() || climber.level() != level
+				|| climber.isSpectator() || climber.isPassenger() || climber.distanceTo(this) > ROPE_LENGTH + SNAP_OVER) {
+				// (the rope snaps, or she's gone: they fall from where they hang, no further)
+				if (owner instanceof LivingEntity fell) {
+					fell.resetFallDistance();
+				}
+				if (ship != null && owner != null && owner.distanceTo(this) > ROPE_LENGTH + SNAP_OVER) {
+					level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.9F);
+				}
+				this.letGo();
+				return;
+			}
+			Vec3 top = ship.toWorld(this.anchor.x, this.anchor.y, this.anchor.z);
+			this.setPos(top);
+			this.setDeltaMovement(Vec3.ZERO);
+			Input input = climber.getLastClientInput();
+			if (input.shift()) {
+				this.letGo();
+				return;
+			}
+			Vec3 to = top.subtract(climber.position());
+			double d = to.length();
+			if (d < OVER_RAIL) {
+				// over her rail and onto her deck
+				Vec3 deck = this.deck(ship);
+				if (deck == null) {
+					// (nowhere to stand inboard of the hook: they hang on at the top of the rope)
+					climber.setDeltaMovement(ship.drift());
+					climber.syncVelocity = true;
+					climber.resetFallDistance();
+					return;
+				}
+				climber.teleportTo(level, deck.x, deck.y, deck.z, java.util.Set.of(), climber.getYRot(), climber.getXRot(), false);
+				climber.resetFallDistance();
+				level.playSound(null, deck.x, deck.y, deck.z, SoundEvents.LADDER_STEP, SoundSource.PLAYERS, 1.0F, 0.9F);
+				this.letGo();
+				return;
+			}
+			Vec3 way = to.scale(1.0 / Math.max(1.0E-4, d));
+			Vec3 drift = ship.drift();
+			if (input.jump()) {
+				// hand over hand up the rope (it's wound in as they go)
+				climber.setDeltaMovement(way.scale(CLIMB_SPEED).add(drift));
+				this.rope = Math.min(this.rope, d);
+				if (climber.tickCount % 6 == 0) {
+					level.playSound(null, climber.getX(), climber.getY(), climber.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.5F, 0.8F);
+				}
+			} else if (d > this.rope) {
+				// the rope's taut: they swing on it, borne along with her
+				climber.setDeltaMovement(climber.getDeltaMovement().add(way.scale(Math.min(PULL_MOST, (d - this.rope) * HANG_PULL))).add(drift.scale(0.2)));
+			}
+			climber.syncVelocity = true;
+			climber.resetFallDistance();
+		}
+
+		/** Inboard of where she's hooked: the deck nearest, as a place to stand (world), or null if there's none. */
+		private @Nullable Vec3 deck(com.jaymoskingdoms.sailing.Ship ship) {
+			com.jaymoskingdoms.sailing.Hull h = ship.hull();
+			if (h == null) {
+				return null;
+			}
+			double cx = (h.minX + h.maxX) * 0.5 - this.anchor.x, cz = (h.minZ + h.maxZ) * 0.5 - this.anchor.z;
+			double len = Math.max(1.0E-4, Math.sqrt(cx * cx + cz * cz));
+			for (double in = 1.0; in <= 3.0; in += 1.0) {
+				int x = Mth.floor(this.anchor.x + cx / len * in + 0.5), z = Mth.floor(this.anchor.z + cz / len * in + 0.5);
+				for (int y = Mth.floor(this.anchor.y) + 1; y > h.minY; y--) {
+					if (h.at(x, y - 1, z) >= 0 && h.at(x, y, z) < 0 && h.at(x, y + 1, z) < 0) {
+						return ship.toWorld(x, y, z);
+					}
+				}
+			}
+			return null;
+		}
+
+		private void letGo() {
+			this.discard();
+		}
+
+		/** Gone (let go, or unloaded with its chunk): it's no longer anyone's hook. */
+		@Override
+		public void onRemoval(Entity.RemovalReason reason) {
+			super.onRemoval(reason);
+			HOOKS.values().removeIf(loop -> loop == this);
 		}
 
 		@Override
@@ -357,6 +496,13 @@ public final class Lasso {
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
 			boolean holding = player.getAttached(HOLDING) != null;
+			if (player.isShiftKeyDown() && HOOKS.containsKey(player.getUUID())) {
+				// (hooked on an airship: let go of the rope)
+				if (!level.isClientSide()) {
+					HOOKS.get(player.getUUID()).letGo();
+				}
+				return InteractionResult.SUCCESS;
+			}
 			if (holding && player.isShiftKeyDown()) {
 				if (level instanceof ServerLevel && player instanceof ServerPlayer holder) {
 					Hold hold = BY_HOLDER.get(holder.getUUID());

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymoskingdoms:block/mote_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymoskingdoms:block/mote_lantern_hanging"
+    }
+  }
+}
