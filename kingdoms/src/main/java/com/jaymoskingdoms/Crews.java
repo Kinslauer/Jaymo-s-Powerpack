@@ -107,7 +107,7 @@ public final class Crews {
 
 	/** A boss's fighting style: what he carries, and the titles he may go by. */
 	enum Style {
-		KNIFE(Items.DIAMOND_SWORD, "the Quick", "Thin Smile", "Cutpurse", "the Whisper"),
+		KNIFE(Items.IRON_SWORD, "the Quick", "Thin Smile", "Cutpurse", "the Whisper"),
 		HAMMER(Items.MACE, "Skullfall", "the Anvil", "Ironwrist", "the Mountain"),
 		ARCHER(Items.BOW, "Farsight", "the Crow", "Hollow-Eye", "the Hawk"),
 		POISONER(Items.IRON_SWORD, "the Pale", "Greenhand", "Sicklebrew", "the Gentle");

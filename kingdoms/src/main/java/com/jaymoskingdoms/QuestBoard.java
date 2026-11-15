@@ -202,7 +202,7 @@ final class QuestBoard {
 				T.gather("weaponsmith.iron", "minecraft:iron_ingot", 8, 16),
 				T.gather("weaponsmith.ring", "jaymospowers:gem_ring@expert", 1, 2),
 				T.fetch("weaponsmith.blade", "minecraft:iron_sword|broken_blade", WAR)),
-			List.of("minecraft:iron_sword*1-1", "minecraft:iron_axe*1-1", "minecraft:diamond_sword*1-1", "minecraft:iron_ingot*6-12"))),
+			List.of("minecraft:iron_sword*1-1", "minecraft:iron_axe*1-1", "minecraft:diamond*1-2", "minecraft:iron_ingot*6-12"))),
 		Map.entry("toolsmith", new Trade(List.of(
 				T.gather("toolsmith.copper", "minecraft:copper_ingot", 12, 24),
 				T.gather("toolsmith.sticks", "minecraft:stick", 24, 48),
@@ -210,7 +210,7 @@ final class QuestBoard {
 				T.gather("toolsmith.coal", "minecraft:coal", 16, 32),
 				T.gather("toolsmith.bracelet", "jaymospowers:gem_bracelet@well", 1, 1),
 				T.fetch("toolsmith.pick", "minecraft:iron_pickaxe|old_pick", MINES)),
-			List.of("minecraft:iron_pickaxe*1-1", "minecraft:iron_shovel*1-1", "minecraft:diamond_pickaxe*1-1", "minecraft:iron_ingot*6-12", "minecraft:anvil*1-1"))),
+			List.of("minecraft:iron_pickaxe*1-1", "minecraft:iron_shovel*1-1", "minecraft:diamond*1-2", "minecraft:iron_ingot*6-12", "minecraft:anvil*1-1"))),
 		Map.entry("librarian", new Trade(List.of(
 				T.gather("librarian.leather", "minecraft:leather", 6, 12),
 				T.gather("librarian.glow", "minecraft:glow_ink_sac", 4, 8),

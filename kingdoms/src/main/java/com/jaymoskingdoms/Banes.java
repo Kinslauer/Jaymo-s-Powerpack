@@ -203,9 +203,9 @@ public final class Banes {
 		"the Kindled", "Soul-Taker"};
 
 	/** Its weapon at each rank (1 to 5), by kind. */
-	private static final Item[] KNIGHT_ARMS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD};
-	private static final Item[] WARLORD_ARMS = {Items.STONE_AXE, Items.IRON_AXE, Items.IRON_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE};
-	private static final Item[] DEMON_ARMS = {Items.STONE_AXE, Items.GOLDEN_AXE, Items.IRON_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE};
+	private static final Item[] KNIGHT_ARMS = {Items.STONE_SWORD, Items.IRON_SWORD, Items.IRON_SWORD, Items.IRON_SWORD, Items.NETHERITE_SWORD};
+	private static final Item[] WARLORD_ARMS = {Items.STONE_AXE, Items.IRON_AXE, Items.IRON_AXE, Items.IRON_AXE, Items.NETHERITE_AXE};
+	private static final Item[] DEMON_ARMS = {Items.STONE_AXE, Items.GOLDEN_AXE, Items.IRON_AXE, Items.IRON_AXE, Items.NETHERITE_AXE};
 
 	private Banes() {
 	}

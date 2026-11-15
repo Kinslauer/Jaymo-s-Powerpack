@@ -24,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.equipment.trim.ArmorTrim;
@@ -56,7 +57,7 @@ public final class Regalia {
 	}
 	/**
 	 * The attire a ruler without royal clothes wears: gilded plate, a robe of their colour, a trimmed breastplate. (0.7.631)
-	 * The plate is of their rank ({@link #plate}): only a king wears netherite, only a rich realm's queen diamond.
+	 * The plate is of their rank ({@link #plate}): only a king wears netherite, only a rich realm's queen steel plate.
 	 */
 	static final int GILDED = 0, ROBED = 1, DIAMOND = 2, ATTIRE = 3;
 	/** Royal colours for robes (one realm in two wears its own instead). */
@@ -229,19 +230,36 @@ public final class Regalia {
 	private static final Map<EquipmentSlot, Item> IRON = Map.of(EquipmentSlot.HEAD, Items.IRON_HELMET,
 		EquipmentSlot.CHEST, Items.IRON_CHESTPLATE, EquipmentSlot.LEGS, Items.IRON_LEGGINGS, EquipmentSlot.FEET, Items.IRON_BOOTS);
 
-	/** {@code stack} is netherite or diamond armour: a king's, or a rich queen's. */
+	/**
+	 * {@code stack} is netherite, steel plate or diamond armour: a king's, or a rich queen's. Andy (2026-11-15): "diamond
+	 * gear should be removed ... netherite should remain as plating but for steel armor", so a rich queen now wears the
+	 * Armory's steel plate; diamond left over from older worlds still counts as the crown's, and is changed on sight.
+	 */
 	public static boolean reserved(ItemStack stack) {
-		return !stack.isEmpty() && (NETHERITE.containsValue(stack.getItem()) || DIAMOND_PLATE.containsValue(stack.getItem()));
+		return !stack.isEmpty() && (NETHERITE.containsValue(stack.getItem()) || DIAMOND_PLATE.containsValue(stack.getItem())
+			|| Armory.STEEL_PLATE_PIECES.containsValue(stack.getItem()));
 	}
 
-	/** {@code f} is a rich kingdom ({@link Wealth.Tier#WEALTHY}): its queen may wear diamond. */
+	/** The Armory's steel plate piece for {@code slot}, or gold's if it's missing. */
+	private static Item steel(EquipmentSlot slot) {
+		ArmorType type = switch (slot) {
+			case HEAD -> ArmorType.HELMET;
+			case CHEST -> ArmorType.CHESTPLATE;
+			case LEGS -> ArmorType.LEGGINGS;
+			default -> ArmorType.BOOTS;
+		};
+		Item piece = Armory.STEEL_PLATE_PIECES.get(type);
+		return piece != null ? piece : GOLD.get(slot);
+	}
+
+	/** {@code f} is a rich kingdom ({@link Wealth.Tier#WEALTHY}): its queen may wear steel plate. */
 	static boolean rich(PathfinderMob mob, @Nullable Faction f) {
 		MinecraftServer server = mob.level().getServer();
 		return f != null && server != null && Wealth.of(server, f) == Wealth.Tier.WEALTHY;
 	}
 
 	/**
-	 * A ruler's plate for {@code slot}: netherite for a king, diamond for the queen of a rich kingdom, gold for a poorer
+	 * A ruler's plate for {@code slot}: netherite for a king, steel plate for the queen of a rich kingdom, gold for a poorer
 	 * one's, iron for a lord or lady.
 	 */
 	static Item plate(PathfinderMob mob, int role, @Nullable Faction f, boolean female, EquipmentSlot slot) {
@@ -251,7 +269,7 @@ public final class Regalia {
 		if (!female) {
 			return NETHERITE.get(slot);
 		}
-		return rich(mob, f) ? DIAMOND_PLATE.get(slot) : GOLD.get(slot);
+		return rich(mob, f) ? steel(slot) : GOLD.get(slot);
 	}
 
 	/** {@code stack} (top-tier armour) as iron for {@code slot}, keeping its trim and marks; anything else as it is. */
@@ -263,7 +281,7 @@ public final class Regalia {
 	/**
 	 * {@code stack}, worn by a {@code role} ruler of {@code f} in {@code slot}: top-tier armour they may not wear becomes
 	 * the plate they may ({@link #plate}), trim and marks kept. A king's netherite stays; a queen whose realm has grown poor
-	 * changes her diamond for gold; a lord's diamond becomes iron.
+	 * changes her steel for gold; a lord's diamond or steel becomes iron, and a rich queen's old diamond steel.
 	 */
 	static ItemStack conform(PathfinderMob mob, int role, @Nullable Faction f, boolean female, EquipmentSlot slot, ItemStack stack) {
 		if (!reserved(stack) || !List.of(ARMOUR).contains(slot)) {
