@@ -1,0 +1,6 @@
+{
+  "values": [
+    "minecraft:bucket",
+    { "id": "jaymospowers:clay_bucket", "required": false }
+  ]
+}

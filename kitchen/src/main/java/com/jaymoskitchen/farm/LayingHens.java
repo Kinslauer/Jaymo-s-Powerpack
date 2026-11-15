@@ -46,7 +46,10 @@ public final class LayingHens {
 		if (fedOn != null && fedOn != day(level)) {
 			// a new day (or the clock was turned back): the egg comes now, vanilla's own laying (sound, variant egg)
 			hen.removeAttached(FED_DAY);
-			hen.eggTime = Math.min(hen.eggTime, 1);
+			// (GTNH picks) hens lay half as often, the fed hen's dawn egg too
+			if (hen.getRandom().nextFloat() < Herds.HENS) {
+				hen.eggTime = Math.min(hen.eggTime, 1);
+			}
 			return;
 		}
 		// (Hardrock picks) a familiar hen lays faster

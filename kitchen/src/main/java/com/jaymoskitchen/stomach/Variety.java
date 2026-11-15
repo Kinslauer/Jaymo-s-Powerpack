@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -36,7 +37,10 @@ public final class Variety {
 	/** The kinds of food eaten, in the order they were first eaten, and the points they came to. */
 	public record Eaten(List<Item> foods, int points) {
 		static final Codec<Eaten> CODEC = RecordCodecBuilder.create(i -> i.group(
-			BuiltInRegistries.ITEM.byNameCodec().listOf().fieldOf("foods").forGetter(Eaten::foods),
+			// ids, not items: a food whose mod was taken out is dropped from the list, not the whole list lost
+			Identifier.CODEC.listOf().xmap(
+				ids -> ids.stream().flatMap(id -> BuiltInRegistries.ITEM.getOptional(id).stream()).toList(),
+				items -> items.stream().map(BuiltInRegistries.ITEM::getKey).toList()).fieldOf("foods").forGetter(Eaten::foods),
 			Codec.INT.fieldOf("points").forGetter(Eaten::points)
 		).apply(i, Eaten::new));
 		static final StreamCodec<RegistryFriendlyByteBuf, Eaten> STREAM_CODEC = StreamCodec.composite(

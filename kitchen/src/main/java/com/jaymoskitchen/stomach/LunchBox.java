@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
@@ -51,6 +52,9 @@ public final class LunchBox {
 		ServerTickEvents.END_SERVER_TICK.register(LunchBox::tick);
 	}
 
+	/** Foods a lunch box never feeds you by itself (chorus fruit, pufferfish, rotten flesh...): you eat those by hand. */
+	static final TagKey<Item> REFUSES = TagKey.create(Registries.ITEM, JaymosKitchen.id("lunch_box_refuses"));
+
 	/** What may go in a lunch box: food, and no box in a box. */
 	static boolean fits(ItemStack stack) {
 		return stack.has(DataComponents.FOOD) && !stack.is(LUNCH_BOX);
@@ -85,7 +89,7 @@ public final class LunchBox {
 		int best = -1, bestFills = -1, least = -1, leastFills = Integer.MAX_VALUE;
 		for (int i = 0; i < items.size(); i++) {
 			FoodProperties food = items.get(i).get(DataComponents.FOOD);
-			if (food == null) {
+			if (food == null || items.get(i).is(REFUSES)) {
 				continue;
 			}
 			int fills = food.nutrition();

@@ -1,5 +1,8 @@
 package com.jaymoskitchen.farm;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Item;
+import net.minecraft.tags.TagKey;
 import com.jaymoskitchen.JaymosKitchen;
 import com.mojang.serialization.Codec;
 import java.util.List;
@@ -16,7 +19,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.cow.AbstractCow;
 import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -49,13 +51,16 @@ public final class Herds {
 	public static final AttachmentType<Long> MILK_READY = AttachmentRegistry.create(JaymosKitchen.id("milk_ready"),
 		b -> b.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
+	/** Buckets that milk: vanilla's, and Jaymo's Powers' fired clay bucket. */
+	static final TagKey<Item> MILKING_BUCKETS = TagKey.create(Registries.ITEM, JaymosKitchen.id("milking_buckets"));
+
 	private Herds() {
 	}
 
 	/** Before {@link Familiarity}, so a milked cow lets down no extra bucket either. */
 	public static void register() {
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (player.isSpectator() || !player.getItemInHand(hand).is(Items.BUCKET)
+			if (player.isSpectator() || !player.getItemInHand(hand).is(MILKING_BUCKETS)
 				|| !(entity instanceof AbstractCow || entity instanceof Goat) || ((Animal) entity).isBaby()) {
 				return InteractionResult.PASS;
 			}
