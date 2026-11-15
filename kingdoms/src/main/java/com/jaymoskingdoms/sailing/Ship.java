@@ -245,6 +245,13 @@ public final class Ship extends Entity {
 	private int adrift;
 	/** Server: a balloon come to rest on something under her (she can sink no further). */
 	private boolean settled;
+	/**
+	 * Server: her helmsman fell at her wheel (a player pilot killed or downed there, or her own fliers' captain): she drifts on
+	 * the wind, a balloon sinking, till someone takes her wheel. A ship simply stepped off isn't let go: she anchors as before.
+	 */
+	private boolean letGo;
+	/** Server: the player at her wheel last tick (to tell a helmsman fallen from one stepping off). */
+	private java.util.@Nullable UUID lastPilot;
 	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
 	private int kedging;
 	/** (0.7.307) Server: ticks still to ride at anchor out at sea ({@link #rideAtAnchor}). */
@@ -652,6 +659,21 @@ public final class Ship extends Entity {
 		}
 		Input input = pilot != null ? pilot.getLastClientInput() : steered != null ? steered : Input.EMPTY;
 		boolean helmed = pilot != null || steered != null;
+		if (pilot != null) {
+			this.lastPilot = pilot.getUUID();
+		} else if (this.lastPilot != null) {
+			// (her pilot gone from her wheel: fallen there, or only stepped off?)
+			Player was = level.getPlayerByUUID(this.lastPilot);
+			if (was != null && (!was.isAlive() || com.jaymoskingdoms.Downed.isDowned(was))) {
+				this.letGo = true;
+			}
+			this.lastPilot = null;
+		}
+		if (helmed) {
+			this.letGo = false;
+		}
+		// nobody steering a crewed ship (her captain fallen), or one whose helmsman fell: she drifts
+		boolean drifting = !helmed && (this.crew != null || this.letGo);
 		boolean sails = h.sails > 0, oars = h.oars > 0;
 		// a balloon: Space lets her up (off the water too, if she has no oars to row with it), Sprint brings her down
 		if (h.airworthy && helmed) {
@@ -743,7 +765,7 @@ public final class Ship extends Entity {
 			gather = HELD_GATHER;
 			this.towed = Vec3.ZERO;
 		}
-		if (!helmed && this.riding <= 0 && this.heldFast <= 0) {
+		if (drifting && this.riding <= 0 && this.heldFast <= 0) {
 			// nobody at her wheel: she drifts on the wind, and a balloon lets down slowly till she lies on the ground
 			this.towed = this.towed.add(Winds.way().scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
 			if (flying) {
@@ -818,7 +840,7 @@ public final class Ship extends Entity {
 			manned |= this.aboard(this.toLocal(p.position()), 1.0);
 		}
 		// (a balloon let go comes down first, and only then lies where she is)
-		this.adrift = manned || flying && !helmed && !this.settled ? 0 : this.adrift + 1;
+		this.adrift = manned || flying && drifting && !this.settled ? 0 : this.adrift + 1;
 		if (this.adrift > ADRIFT && this.adrift % 40 == 1) {
 			this.anchor(null);
 		}
@@ -842,6 +864,11 @@ public final class Ship extends Entity {
 		double push = PER_SAIL * Math.sqrt(Math.max(1, h.sails)) * Math.max(AIR_CATCH, Winds.catches(this.getYRot()))
 			* Winds.strength(this.level(), this.getX(), this.getZ());
 		return Math.min(FASTEST, Math.min(AIR_PER_LENGTH * (h.maxZ - h.minZ + 1), push));
+	}
+
+	/** Her helmsman fell at her wheel (her fliers' captain downed or dead): she drifts on the wind, and a balloon sinks, till someone steers her. */
+	public void letDrift() {
+		this.letGo = true;
 	}
 
 	/** Whether she's a balloon ship in the air (not afloat). */
@@ -1475,8 +1502,8 @@ public final class Ship extends Entity {
 			}
 			return;
 		}
-		if (state.getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock && this.flying() && this.level() instanceof ServerLevel level) {
-			// a hatch in a balloon's deck: a powder keg from her hold let fall through it on what's below
+		if (state.getBlock() instanceof BombHatchBlock && this.flying() && this.level() instanceof ServerLevel level) {
+			// a bomb hatch in a balloon's deck: a powder keg from her hold let fall through it on what's below
 			com.jaymoskingdoms.SkyShips.hatch(level, this, x, y, z, player);
 			return;
 		}

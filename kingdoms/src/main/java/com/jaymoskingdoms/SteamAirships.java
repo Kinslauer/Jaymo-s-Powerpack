@@ -674,7 +674,12 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 		long now = level.getGameTime();
 		if (!Fleet.wheelManned(ship)) {
-			// her captain fallen at her wheel: she is let go, drifts on the wind and comes down; her town builds another in time
+			ship.letDrift();
+			if (Fleet.helmsmanDown(ship)) {
+				// her captain downed at her wheel: she drifts on the wind while he's down, and flies on when he's up at it again
+				return null;
+			}
+			// her captain dead: she is let go, drifts on the wind and comes down; her town builds another in time
 			ship.removeAttached(TRIP);
 			FLIGHTS.remove(ship.getUUID());
 			wrecked(level, trip);

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.sailing.Crew;
+import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Sailing;
 import com.jaymoskingdoms.sailing.Ship;
@@ -45,17 +46,27 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Realm air patrols (the medieval picks' vp-patrols; Lore: "Sky pirates"): a rich realm keeps an airship of its own, lent by
- * the steam towns for a fee out of its treasury, that circles its lands, spots war parties, raiders and bandits, and calls
+ * the nearest steam town for a fee out of its treasury (with no steam town standing, its own carpenters build her, dearer),
+ * that circles its lands, spots war parties, raiders and bandits, and calls
  * the alarm. Andy: "little to no chat indicators, fireworks and horns should be heard": nothing is said in chat. Over a war
  * band she fires a rocket out of her hold (real rockets, in the realm's colours) and blows her horn, heard far over the
  * realm's land, and the seat's bell rings and its people run in ({@link WarAlert#sighted}). She engages any sky pirate's
- * airship in reach with her gun. She is the realm's navy in the air ({@link Crew.Side#NAVY}), crewed by {@link Corsairs}; kill
+ * airship in reach with her gun. Short of rockets, powder or shot, she comes in over the seat and the realm buys her more out
+ * of its treasury. She is the realm's navy in the air ({@link Crew.Side#NAVY}), crewed by {@link Corsairs}; kill
  * her captain and she drifts down ({@link Ship}); lost, the realm pays the steam towns for another in time.
  */
 final class AirPatrols {
 	// ---- tuning ----
-	/** A realm keeps a patrol while its treasury holds this much; another costs this (paid to the steam town that lends her). */
-	static final long RICH = Wealth.WEALTHY, FEE = 300L;
+	/**
+	 * A realm keeps a patrol while its treasury holds this much; another costs this (paid to the steam town that lends her), or
+	 * this built by its own carpenters when no steam town stands.
+	 */
+	static final long RICH = Wealth.WEALTHY, FEE = 300L, OWN_BUILD = 600L;
+	/** Her stores bought from the treasury when she comes in: each rocket, powder and ball costs this. */
+	static final long ROCKET_COST = 3L, POWDER_COST = 2L, SHOT_COST = 2L;
+	/** She comes in for stores when down to this many rockets, powder or balls; she's in over the seat this near it. */
+	static final int LOW = 2;
+	static final double IN_OVER = 12.0;
 	/** How often patrols are seen to (ticks); she's put out only with a player this near the seat and none this near where she rises. */
 	static final int UPKEEP_EVERY = 600;
 	static final double PLAYER_NEAR = 192.0, LAUNCH_HIDE = 48.0;
@@ -99,10 +110,14 @@ final class AirPatrols {
 	private static final class Watch {
 		@Nullable Vec3 band;
 		long seen, lastRocket = Long.MIN_VALUE / 2, lastHorn = Long.MIN_VALUE / 2;
+		/** She's coming in over the seat for stores. */
+		boolean coming;
 	}
 
 	private static final Map<UUID, Watch> WATCHES = new HashMap<>();
 	private static final Map<Integer, Long> MISSING = new HashMap<>();
+	/** Old patrols come back after their realm took on another: put away next tick. */
+	private static final java.util.Set<UUID> STOW = new java.util.HashSet<>();
 
 	private AirPatrols() {
 	}
@@ -114,15 +129,47 @@ final class AirPatrols {
 			if (level.getGameTime() % UPKEEP_EVERY == 7) {
 				upkeep(level);
 			}
+			if (!STOW.isEmpty()) {
+				for (UUID id : List.copyOf(STOW)) {
+					if (level.getEntity(id) instanceof Ship ship) {
+						Navies.stow(ship);
+					}
+				}
+				STOW.clear();
+			}
+		});
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Ship ship && ship.crew != null && SkyShips.PATROL.equals(ship.crew.flag)) {
+				Patrol p = patrol(level.getServer(), ship.crew.faction);
+				if (p == null || p.ship().isEmpty()) {
+					// (given up while she lay unloaded: she's the realm's again, and no other is taken on)
+					put(level.getServer(), ship.crew.faction, new Patrol(Optional.of(ship.getUUID()), Optional.of(ship.blockPosition()), -1L));
+				} else if (!p.ship().get().equals(ship.getUUID())) {
+					// (an old patrol of a realm that has taken on another since: she's put away)
+					STOW.add(ship.getUUID());
+				}
+			}
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
-			if (entity instanceof Ship ship) {
-				WATCHES.remove(ship.getUUID());
+			if (!(entity instanceof Ship ship)) {
+				return;
+			}
+			WATCHES.remove(ship.getUUID());
+			if (ship.crew == null || !SkyShips.PATROL.equals(ship.crew.flag)) {
+				return;
+			}
+			Patrol p = patrol(level.getServer(), ship.crew.faction);
+			if (p != null && p.ship().isPresent() && p.ship().get().equals(ship.getUUID())) {
+				// destroyed (moored, broken up): she's lost; unloaded with her chunk: where she lies is known exactly
+				boolean gone = ship.getRemovalReason() != null && ship.getRemovalReason().shouldDestroy();
+				put(level.getServer(), ship.crew.faction, gone ? new Patrol(Optional.empty(), Optional.empty(), level.getGameTime())
+					: new Patrol(p.ship(), Optional.of(ship.blockPosition()), -1L));
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WATCHES.clear();
 			MISSING.clear();
+			STOW.clear();
 		});
 	}
 
@@ -139,7 +186,7 @@ final class AirPatrols {
 
 	// ---- keeping one -----------------------------------------------------------------------------------------------
 
-	/** Every rich realm with a player about keeps track of its patrol, and has the steam towns lend it one when it has none. */
+	/** Every rich realm with a player about keeps track of its patrol, and takes on another when it has none (lent, or its own built). */
 	private static void upkeep(ServerLevel level) {
 		MinecraftServer server = level.getServer();
 		List<SteamTowns.Town> towns = SteamTowns.all(level);
@@ -162,11 +209,12 @@ final class AirPatrols {
 				MISSING.remove(realm.id());
 				put(server, realm.id(), p = new Patrol(Optional.empty(), Optional.empty(), now));
 			}
-			if (towns.isEmpty() || realm.treasury() < RICH + FEE || p != null && p.lostAt() >= 0 && now - p.lostAt() < RELEND_TICKS
+			long cost = towns.isEmpty() ? OWN_BUILD : FEE;
+			if (realm.treasury() < RICH + cost || p != null && p.lostAt() >= 0 && now - p.lostAt() < RELEND_TICKS
 				|| !Raids.playerNear(level, realm.seat(), PLAYER_NEAR)) {
 				continue;
 			}
-			// (the steam town nearest lends her, and is paid for her)
+			// (the steam town nearest lends her, and is paid for her; with none standing, the realm's own carpenters build her)
 			SteamTowns.Town lender = null;
 			double best = Double.MAX_VALUE;
 			for (SteamTowns.Town t : towns) {
@@ -177,11 +225,10 @@ final class AirPatrols {
 					lender = t;
 				}
 			}
-			if (lender != null && launch(level, realm) != null) {
-				int to = lender.id();
-				Factions.update(server, realm.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - FEE)));
-				if (to != realm.id()) {
-					Factions.update(server, to, f -> f.withTreasury(f.treasury() + FEE));
+			if (launch(level, realm) != null) {
+				Factions.update(server, realm.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - cost)));
+				if (lender != null && lender.id() != realm.id()) {
+					Factions.update(server, lender.id(), f -> f.withTreasury(f.treasury() + cost));
 				}
 			}
 		}
@@ -253,6 +300,15 @@ final class AirPatrols {
 			think(level, ship, crew, realm, w, now);
 		}
 		Vec3 seat = Vec3.atCenterOf(realm != null ? realm.seat() : crew.home);
+		if (w.coming && w.band == null) {
+			// in over the seat for stores
+			double d = SkyShips.flat(ship, seat);
+			if (d < IN_OVER) {
+				restock(level, ship, realm);
+				w.coming = false;
+			}
+			return SkyShips.fly(level, ship, Fleet.bearing(ship, seat.x, seat.z), d < IN_OVER * 2 ? 0.15 : PATROL_CLOTH, seat.y + ROUND_UP);
+		}
 		if (w.band != null) {
 			if (SkyShips.flat(ship, w.band) < OVER) {
 				signal(level, ship, crew, realm, w, now);
@@ -312,6 +368,34 @@ final class AirPatrols {
 			}
 		}
 		crew.target = pirate != null ? pirate.getId() : -1;
+		if (ship.inHold(s -> s.is(Items.FIREWORK_ROCKET)) <= LOW || ship.inHold(s -> s.is(Items.GUNPOWDER)) <= LOW
+			|| ship.inHold(com.jaymoskingdoms.sailing.ShipCannonBlock::isShot) <= LOW) {
+			w.coming = true;
+		}
+	}
+
+	/** In over the seat: her rockets, powder and shot made up out of {@code realm}'s treasury, as much as it can pay for. */
+	private static void restock(ServerLevel level, Ship ship, @Nullable Faction realm) {
+		if (realm == null || realm.fallen()) {
+			return;
+		}
+		buy(level, ship, realm, rockets(realm.color(), 1), ROCKETS - ship.inHold(s -> s.is(Items.FIREWORK_ROCKET)), ROCKET_COST);
+		buy(level, ship, realm, new ItemStack(Items.GUNPOWDER), POWDER - ship.inHold(s -> s.is(Items.GUNPOWDER)), POWDER_COST);
+		buy(level, ship, realm, new ItemStack(Sailing.ROUND_SHOT), SHOT - ship.inHold(com.jaymoskingdoms.sailing.ShipCannonBlock::isShot), SHOT_COST);
+	}
+
+	private static void buy(ServerLevel level, Ship ship, Faction realm, ItemStack one, int want, long each) {
+		Faction now = Factions.get(level.getServer(), realm.id());
+		if (now == null || want <= 0) {
+			return;
+		}
+		int n = (int)Math.min(want, now.treasury() / each);
+		if (n <= 0) {
+			return;
+		}
+		ItemStack left = ship.intoHold(one.copyWithCount(n));
+		long paid = (n - left.getCount()) * each;
+		Factions.update(level.getServer(), realm.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - paid)));
 	}
 
 	/** A raider, an outlaw or a bandit, or a soldier of a realm at war with {@code realm}. */

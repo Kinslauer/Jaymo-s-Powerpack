@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Downed airship wrecks (the medieval picks' vp-wrecks): now and then a player in the mountains or a forest happens on a
@@ -43,7 +44,8 @@ import net.minecraft.world.phys.Vec3;
  * Her deck lies broken over the ground, timbers lost, her bag slack and torn across it; her stores are scattered round her,
  * barrels burst open; her crew lie dead by her (Kitchen's bodies, with Jaymo's Kitchen; bones and a skull without). In her
  * chest is her log, which names the town she was out of and the one she was bound for, and which way it lies from here and
- * how far. Only once a steam town stands (there are airships up to come down).
+ * how far. They lie anywhere wild; with steam towns standing, likelier near the way their airships fly between them (and
+ * then she was one of theirs, bound from one to another).
  */
 final class SkyWrecks {
 	// ---- tuning ----
@@ -56,6 +58,9 @@ final class SkyWrecks {
 	/** Her timbers lost (the chance each), her bag's cloth left (the chance each), her posts left standing (blocks at most). */
 	static final float TIMBER_LOST = 0.25F, CLOTH_LEFT = 0.45F;
 	static final int POST_LEFT = 1;
+	/** Near the steam towns' routes (this near a town or the line between two), a wreck is this many times likelier. */
+	static final double ROUTE_NEAR = 256.0;
+	static final float ROUTE_FAVOUR = 3.0F;
 	/** Her dead, her stores barrels thrown this far at most. */
 	static final int DEAD_LEAST = 2, DEAD_MOST = 3, THROWN = 6;
 
@@ -77,12 +82,54 @@ final class SkyWrecks {
 			return;
 		}
 		RandomSource random = level.getRandom();
+		List<Faction> towns = steamTowns(level);
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator() || random.nextFloat() >= WRECK_CHANCE || !wild(level.getBiome(player.blockPosition()))) {
+			float chance = WRECK_CHANCE * (nearRoute(towns, Vec3.atCenterOf(player.blockPosition())) ? ROUTE_FAVOUR : 1.0F);
+			if (player.isSpectator() || random.nextFloat() >= chance || !wild(level.getBiome(player.blockPosition()))) {
 				continue;
 			}
 			happenOn(level, player, random);
 		}
+	}
+
+	/** The steam towns standing (their settlements). */
+	private static List<Faction> steamTowns(ServerLevel level) {
+		List<Faction> out = new ArrayList<>();
+		for (SteamTowns.Town t : SteamTowns.all(level)) {
+			Faction f = Factions.get(level.getServer(), t.id());
+			if (f != null) {
+				out.add(f);
+			}
+		}
+		return out;
+	}
+
+	/** {@code at} lies near a steam town, or near the line its airships fly to another. */
+	private static boolean nearRoute(List<Faction> towns, Vec3 at) {
+		for (int i = 0; i < towns.size(); i++) {
+			Vec3 a = Vec3.atCenterOf(towns.get(i).seat());
+			if (flat(a, at) < ROUTE_NEAR) {
+				return true;
+			}
+			for (int j = i + 1; j < towns.size(); j++) {
+				if (offLine(a, Vec3.atCenterOf(towns.get(j).seat()), at) < ROUTE_NEAR) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static double flat(Vec3 a, Vec3 b) {
+		double dx = a.x - b.x, dz = a.z - b.z;
+		return Math.sqrt(dx * dx + dz * dz);
+	}
+
+	/** How far {@code p} lies from the line from {@code a} to {@code b} (across the ground). */
+	private static double offLine(Vec3 a, Vec3 b, Vec3 p) {
+		double vx = b.x - a.x, vz = b.z - a.z, len = vx * vx + vz * vz;
+		double k = len < 1.0E-6 ? 0.0 : Mth.clamp(((p.x - a.x) * vx + (p.z - a.z) * vz) / len, 0.0, 1.0);
+		return flat(new Vec3(a.x + vx * k, 0.0, a.z + vz * k), p);
 	}
 
 	private static boolean wild(Holder<Biome> biome) {
@@ -91,10 +138,6 @@ final class SkyWrecks {
 
 	/** {@code player} happens on a downed airship some way off (none other near). */
 	private static void happenOn(ServerLevel level, ServerPlayer player, RandomSource random) {
-		List<SteamTowns.Town> towns = SteamTowns.all(level);
-		if (towns.isEmpty()) {
-			return;
-		}
 		for (long packed : level.getAttachedOrElse(LAID, List.of())) {
 			if (Raids.horizontal(BlockPos.of(packed), player.blockPosition()) < (double)SPACING * SPACING) {
 				return;
@@ -111,7 +154,7 @@ final class SkyWrecks {
 			if (!level.getFluidState(ground.below()).isEmpty() || Raids.playerNear(level, ground, HIDE) || Factions.at(level.getServer(), level, ground) != null) {
 				continue;
 			}
-			lay(level, ground, towns, random);
+			lay(level, ground, random);
 			return;
 		}
 	}
@@ -122,17 +165,11 @@ final class SkyWrecks {
 	}
 
 	/** A downed airship at {@code ground}: broken, her stores thrown about, her dead by her, her log in her chest. */
-	private static void lay(ServerLevel level, BlockPos ground, List<SteamTowns.Town> towns, RandomSource random) {
-		MinecraftServer server = level.getServer();
-		// where she was out of and bound for: the nearest steam town she was making for, and another she'd left (or the same)
+	private static void lay(ServerLevel level, BlockPos ground, RandomSource random) {
 		Vec3 here = Vec3.atCenterOf(ground);
-		SteamTowns.Town to = towns.get(random.nextInt(towns.size()));
-		SteamTowns.Town from = towns.get(random.nextInt(towns.size()));
-		Faction toF = Factions.get(server, to.id()), fromF = Factions.get(server, from.id());
-		if (toF == null || fromF == null) {
-			return;
-		}
-		DyeColor colour = fromF.color();
+		Faction[] way = bound(level, here, random);
+		Faction fromF = way[0], toF = way[1];
+		DyeColor colour = fromF != null ? fromF.color() : DyeColor.GRAY;
 		List<SkyShips.Placed> design = SkyShips.design(Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_FENCE.defaultBlockState(),
 			SteamTowns.wool(colour), SteamTowns.wool(DyeColor.WHITE), 0);
 		Direction bow = Direction.Plane.HORIZONTAL.getRandomDirection(random);
@@ -189,7 +226,7 @@ final class SkyWrecks {
 		String name = Pirates.navyShip(random);
 		for (BlockPos c : chests) {
 			if (level.getBlockEntity(c) instanceof Container box) {
-				box.setItem(0, log(name, fromF, toF, here, Vec3.atCenterOf(toF.seat())));
+				box.setItem(0, log(name, fromF, toF, here));
 				box.setItem(1 + random.nextInt(box.getContainerSize() - 1), new ItemStack(Items.GOLD_NUGGET, 6 + random.nextInt(12)));
 				if (box instanceof BlockEntity be) {
 					be.setChanged();
@@ -210,6 +247,42 @@ final class SkyWrecks {
 		}
 		level.setAttached(LAID, List.copyOf(laid));
 		JaymosKingdoms.LOGGER.info("A downed airship, the {}, lies at {} (bound for {})", name, ground, toF.name());
+	}
+
+	/**
+	 * Where she was out of and bound for: of the steam towns, the two whose route passes nearest {@code here} (one standing:
+	 * out of it, bound for the settlement nearest here); none, two settlements of any kind; none at all, nulls.
+	 */
+	private static @Nullable Faction[] bound(ServerLevel level, Vec3 here, RandomSource random) {
+		List<Faction> towns = steamTowns(level);
+		if (towns.size() >= 2) {
+			Faction[] best = null;
+			double bestD = Double.MAX_VALUE;
+			for (Faction a : towns) {
+				for (Faction b : towns) {
+					double d = a == b ? Double.MAX_VALUE : offLine(Vec3.atCenterOf(a.seat()), Vec3.atCenterOf(b.seat()), here);
+					if (d < bestD) {
+						bestD = d;
+						best = random.nextBoolean() ? new Faction[] {a, b} : new Faction[] {b, a};
+					}
+				}
+			}
+			return best;
+		}
+		List<Faction> settlements = new ArrayList<>();
+		for (Faction f : Factions.all(level.getServer())) {
+			if (!f.fallen() && f.type() != FactionType.BARBARIAN && !towns.contains(f)) {
+				settlements.add(f);
+			}
+		}
+		settlements.sort(java.util.Comparator.comparingDouble(f -> flat(Vec3.atCenterOf(f.seat()), here)));
+		if (towns.size() == 1) {
+			return new Faction[] {towns.getFirst(), settlements.isEmpty() ? towns.getFirst() : settlements.getFirst()};
+		}
+		if (settlements.size() >= 2) {
+			return new Faction[] {settlements.get(1 + random.nextInt(settlements.size() - 1)), settlements.getFirst()};
+		}
+		return new Faction[] {null, null};
 	}
 
 	/** One of her dead at {@code at}: the body a crewman would leave (Kitchen's), or his bones and skull without. */
@@ -262,13 +335,20 @@ final class SkyWrecks {
 	}
 
 	/** Her log: out of {@code from}, bound for {@code to}; where that lies from {@code here}; her last entries. */
-	private static ItemStack log(String name, Faction from, Faction to, Vec3 here, Vec3 there) {
-		double d = Math.sqrt((there.x - here.x) * (there.x - here.x) + (there.z - here.z) * (there.z - here.z));
-		List<Filterable<Component>> pages = List.of(
-			Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page1", name, from.name(), to.name())),
-			Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page2", to.name(), Directions.heading(here, there),
-				Directions.distance(d))),
-			Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page3")));
+	private static ItemStack log(String name, @Nullable Faction from, @Nullable Faction to, Vec3 here) {
+		List<Filterable<Component>> pages;
+		if (from == null || to == null) {
+			// (nowhere standing to have been bound for: the steam towns she flew between are gone)
+			pages = List.of(Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.lost", name)),
+				Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page3")));
+		} else {
+			Vec3 there = Vec3.atCenterOf(to.seat());
+			pages = List.of(
+				Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page1", name, from.name(), to.name())),
+				Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page2", to.name(), Directions.heading(here, there),
+					Directions.distance(flat(here, there)))),
+				Filterable.passThrough(Component.translatable("book.jaymoskingdoms.sky_wreck.page3")));
+		}
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough("Log of the " + name), name, 0, pages, true));
 		return book;

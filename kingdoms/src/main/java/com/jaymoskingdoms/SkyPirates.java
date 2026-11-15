@@ -15,6 +15,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -46,13 +47,13 @@ import org.jspecify.annotations.Nullable;
 /**
  * Sky pirates (the medieval picks' vp-skypirates; Lore: "Sky pirates"): when the steam towns first put balloon ships in the
  * air some were taken, and their takers stayed up there. A sky cove is a sixth kind of camp ({@link FactionType#BARBARIAN},
- * {@link Camps.CampData#kind} {@link #KIND}) on a high peak near a kingdom, rising only once a steam town stands somewhere:
+ * {@link Camps.CampData#kind} {@link #KIND}) on a high peak near a kingdom (the steam towns lost those ships long ago):
  * a tarred shack over their hoard of kegs, powder and shot, a fire, a mast with a black flag, and moored in the open sky
  * beside it their airship ({@link SkyShips}), crewed by {@link Corsairs} and flown by her captain here, the cove's leader.
  * <p>She roams the sky round her cove. What her lookout spots she marks, and circles a while out of reach (Valkyrien
  * Pirates' "circle" pattern), then comes down on it: a ship or another airship she circles close and fires broadsides into;
  * a caravan, a player or a town on the ground she makes bombing runs over, letting kegs fall through her hatch. Spent
- * (no kegs, no powder), or too far from home, she goes back to her cove and takes on stores from its hoard. Kill her captain
+ * (no kegs, and no powder or no balls), or too far from home, she goes back to her cove and takes on stores from its hoard. Kill her captain
  * and the cove is cleared ({@link Camps#chiefSlain}); she drifts and sinks with nobody at her wheel ({@link Ship}). A cove
  * whose airship was lost without him builds another.
  */
@@ -60,7 +61,7 @@ final class SkyPirates {
 	// ---- tuning ----
 	/** {@link Camps.CampData#kind} of a sky cove. */
 	static final String KIND = "skycove";
-	/** At most this many near a kingdom; the chance one rises each spawn check (with a steam town standing). */
+	/** At most this many near a kingdom; the chance one rises each spawn check. */
 	static final int COVES_PER_KINGDOM = 1;
 	static final float COVE_CHANCE = 0.05F;
 	/** A peak: its top at least this far over the sea; looked for over a grid this many blocks a step round each guess. */
@@ -151,15 +152,55 @@ final class SkyPirates {
 	private static final Map<UUID, Hunt> HUNTS = new HashMap<>();
 	/** Camp id → ticks its airship has been missing where she should be. */
 	private static final Map<Integer, Long> MISSING = new HashMap<>();
+	/** Old airships come back after their cove built another: put away next tick. */
+	private static final java.util.Set<UUID> STOW = new java.util.HashSet<>();
 
 	private SkyPirates() {
 	}
 
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("sky cove attachment: {}", COVES);
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Ship ship && ship.crew != null && SkyShips.PIRATE.equals(ship.crew.flag)) {
+				MinecraftServer server = level.getServer();
+				Cove cove = cove(server, ship.crew.faction);
+				if (cove == null) {
+					return;
+				}
+				if (cove.ship().isEmpty()) {
+					// (her cove had given her up while she lay unloaded: she's its own again, and no other is built)
+					putCove(server, ship.crew.faction, cove.withShip(ship.getUUID(), ship.blockPosition(), -1L));
+				} else if (!cove.ship().get().equals(ship.getUUID())) {
+					// (an old airship of a cove that has built another since: she's put away)
+					STOW.add(ship.getUUID());
+				}
+			}
+		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
-			if (entity instanceof Ship ship) {
-				HUNTS.remove(ship.getUUID());
+			if (!(entity instanceof Ship ship)) {
+				return;
+			}
+			HUNTS.remove(ship.getUUID());
+			if (ship.crew == null || !SkyShips.PIRATE.equals(ship.crew.flag)) {
+				return;
+			}
+			MinecraftServer server = level.getServer();
+			Cove cove = cove(server, ship.crew.faction);
+			if (cove != null && cove.ship().isPresent() && cove.ship().get().equals(ship.getUUID())) {
+				// destroyed (moored, broken up): she's lost; unloaded with her chunk: where she lies is known exactly
+				boolean gone = ship.getRemovalReason() != null && ship.getRemovalReason().shouldDestroy();
+				putCove(server, ship.crew.faction, gone ? cove.withShip(null, null, level.getGameTime())
+					: cove.withShip(ship.getUUID(), ship.blockPosition(), cove.lostAt()));
+			}
+		});
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (!STOW.isEmpty()) {
+				for (UUID id : List.copyOf(STOW)) {
+					if (Factions.level(server).getEntity(id) instanceof Ship ship) {
+						Navies.stow(ship);
+					}
+				}
+				STOW.clear();
 			}
 		});
 	}
@@ -183,10 +224,6 @@ final class SkyPirates {
 
 	/** A sky cove near {@code realm} (whose players are {@code players}): on the highest ground round a guess out of their sight. */
 	static boolean trySite(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players) {
-		if (SteamTowns.all(level).isEmpty()) {
-			// (no steam town has put an airship up yet: there is nothing to have been taken)
-			return false;
-		}
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < Camps.SITE_TRIES; tries++) {
 			ServerPlayer player = players.get(random.nextInt(players.size()));
@@ -559,7 +596,9 @@ final class SkyPirates {
 		Cove cove = cove(level.getServer(), crew.faction);
 		Vec3 home = Vec3.atCenterOf(cove != null ? cove.berth() : crew.home);
 		h.spared.values().removeIf(until -> until < now);
-		boolean spent = ship.inHold(SkyShips::keg) <= 0 && ship.inHold(s -> s.is(Items.GUNPOWDER)) <= 0;
+		// (spent: no kegs, and no charge for her guns either, powder or ball)
+		boolean spent = ship.inHold(SkyShips::keg) <= 0 && (ship.inHold(s -> s.is(Items.GUNPOWDER)) <= 0
+			|| ship.inHold(com.jaymoskingdoms.sailing.ShipCannonBlock::isShot) <= 0);
 		if (h.phase != Phase.ROAM && h.phase != Phase.HOME) {
 			// her mark: where it is now, or lost
 			Vec3 at = markAt(level, h);
@@ -693,5 +732,6 @@ final class SkyPirates {
 	static void clear() {
 		HUNTS.clear();
 		MISSING.clear();
+		STOW.clear();
 	}
 }

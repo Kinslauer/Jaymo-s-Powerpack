@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.sailing.BombHatchBlock;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.HelmBlock;
@@ -101,14 +102,14 @@ public final class SkyShips {
 					continue;
 				}
 				boolean hatch = x == mid && z == LENGTH / 2;
-				out.add(new Placed(new BlockPos(x, 0, z), hatch ? Blocks.SPRUCE_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
+				out.add(new Placed(new BlockPos(x, 0, z), hatch ? Sailing.BOMB_HATCH.defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
 					: planks));
 				if (z != 0 && z != last && x != 0 && x != right) {
 					continue;
 				}
 				if ((x == 0 || x == right) && gunZ.contains(z)) {
 					out.add(new Placed(new BlockPos(x, 1, z), Sailing.CANNON.defaultBlockState()
-						.setValue(ShipCannonBlock.FACING, x == 0 ? Direction.WEST : Direction.EAST).setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.SHOT)));
+						.setValue(ShipCannonBlock.FACING, x == 0 ? Direction.WEST : Direction.EAST)));
 				} else {
 					out.add(new Placed(new BlockPos(x, 1, z), rail));
 				}
@@ -256,14 +257,14 @@ public final class SkyShips {
 		return stack.is(Items.TNT);
 	}
 
-	/** Where her hatch is, in her frame: the trapdoor in her deck (null: she has none). */
+	/** Where her hatch is, in her frame: the bomb hatch in her deck (null: she has none). */
 	static @Nullable Vec3 hatchOf(Ship ship) {
 		Hull h = ship.hull();
 		if (h == null) {
 			return null;
 		}
 		for (Ship.Piece p : h.pieces) {
-			if (p.blockState().getBlock() instanceof TrapDoorBlock) {
+			if (p.blockState().getBlock() instanceof BombHatchBlock) {
 				return new Vec3(p.x(), p.y(), p.z());
 			}
 		}
@@ -296,7 +297,7 @@ public final class SkyShips {
 		return true;
 	}
 
-	/** {@code player} uses the hatch at (x, y, z) in a balloon's deck: a keg from her hold let fall through it. */
+	/** {@code player} uses the bomb hatch at (x, y, z) in a balloon's deck ({@link BombHatchBlock}): a keg from her hold let fall through it. */
 	public static void hatch(ServerLevel level, Ship ship, int x, int y, int z, ServerPlayer player) {
 		dropKeg(level, ship, new Vec3(x, y, z), player);
 	}

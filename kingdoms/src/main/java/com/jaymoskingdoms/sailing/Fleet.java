@@ -225,6 +225,21 @@ public final class Fleet {
 		return ship;
 	}
 
+	/** Whether the one at her wheel is down there, hurt but alive (he may get up and take it again). */
+	public static boolean helmsmanDown(Ship ship) {
+		Vec3 helm = stations(ship).helm();
+		if (helm == null) {
+			return false;
+		}
+		for (net.minecraft.world.entity.LivingEntity e : ship.crewAboard()) {
+			Vec3 seat = e.getAttached(Ship.SEAT);
+			if (seat != null && seat.distanceToSqr(helm) < 0.75 * 0.75 && e.isAlive() && com.jaymoskingdoms.Downed.isDowned(e)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether one of her crew stands at her wheel (a balloon's: let go of it, she drifts and comes down). */
 	public static boolean wheelManned(Ship ship) {
 		Vec3 helm = stations(ship).helm();

@@ -383,6 +383,13 @@ public final class Lasso {
 			}
 			if (ship == null || ship.isRemoved() || !ship.flying() || !(owner instanceof ServerPlayer climber) || !climber.isAlive() || climber.level() != level
 				|| climber.isSpectator() || climber.isPassenger() || climber.distanceTo(this) > ROPE_LENGTH + SNAP_OVER) {
+				// (the rope snaps, or she's gone: they fall from where they hang, no further)
+				if (owner instanceof LivingEntity fell) {
+					fell.resetFallDistance();
+				}
+				if (ship != null && owner != null && owner.distanceTo(this) > ROPE_LENGTH + SNAP_OVER) {
+					level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.9F);
+				}
 				this.letGo();
 				return;
 			}
@@ -399,10 +406,16 @@ public final class Lasso {
 			if (d < OVER_RAIL) {
 				// over her rail and onto her deck
 				Vec3 deck = this.deck(ship);
-				if (deck != null) {
-					climber.teleportTo(level, deck.x, deck.y, deck.z, java.util.Set.of(), climber.getYRot(), climber.getXRot(), false);
-					level.playSound(null, deck.x, deck.y, deck.z, SoundEvents.LADDER_STEP, SoundSource.PLAYERS, 1.0F, 0.9F);
+				if (deck == null) {
+					// (nowhere to stand inboard of the hook: they hang on at the top of the rope)
+					climber.setDeltaMovement(ship.drift());
+					climber.syncVelocity = true;
+					climber.resetFallDistance();
+					return;
 				}
+				climber.teleportTo(level, deck.x, deck.y, deck.z, java.util.Set.of(), climber.getYRot(), climber.getXRot(), false);
+				climber.resetFallDistance();
+				level.playSound(null, deck.x, deck.y, deck.z, SoundEvents.LADDER_STEP, SoundSource.PLAYERS, 1.0F, 0.9F);
 				this.letGo();
 				return;
 			}
@@ -443,11 +456,14 @@ public final class Lasso {
 		}
 
 		private void letGo() {
-			Entity owner = this.getOwner();
-			if (owner != null) {
-				HOOKS.remove(owner.getUUID(), this);
-			}
 			this.discard();
+		}
+
+		/** Gone (let go, or unloaded with its chunk): it's no longer anyone's hook. */
+		@Override
+		public void onRemoval(Entity.RemovalReason reason) {
+			super.onRemoval(reason);
+			HOOKS.values().removeIf(loop -> loop == this);
 		}
 
 		@Override

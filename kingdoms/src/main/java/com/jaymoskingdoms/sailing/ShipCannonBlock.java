@@ -125,6 +125,11 @@ public final class ShipCannonBlock extends Block {
 		return ShotKind.of(stack) != null;
 	}
 
+	/** The same, for those outside (an airship's hold looked through for balls). */
+	public static boolean isShot(ItemStack stack) {
+		return shot(stack);
+	}
+
 	/** What {@code player} does to a gun in this state with {@code stack}: the gun's next state, and whether it fires. */
 	record Handled(BlockState next, boolean fires) {
 	}
