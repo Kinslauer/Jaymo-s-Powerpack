@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/tin_sand",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:tin_sand"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

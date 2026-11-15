@@ -223,6 +223,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/battlesign/handle_deep_tooth"
             }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_bronze"
+            }
           }
         ],
         "fallback": {
@@ -455,6 +462,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_broken_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_bronze"
+              }
             }
           ],
           "fallback": {
@@ -682,6 +696,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_bronze"
               }
             }
           ],

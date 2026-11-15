@@ -109,6 +109,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_steel"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -211,6 +218,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_steel"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -305,6 +319,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_steel"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_broken_bronze"
                 }
               }
             ],
@@ -422,6 +443,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_steel"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinker_armour/helmet/travelers_metal_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -524,6 +552,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinker_armour/helmet/plating_steel"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/plating_bronze"
+                }
               }
             ],
             "fallback": {
@@ -618,6 +653,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinker_armour/helmet/maille_steel"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinker_armour/helmet/maille_bronze"
                 }
               }
             ],

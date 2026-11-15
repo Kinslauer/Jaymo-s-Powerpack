@@ -167,6 +167,16 @@
     "jaymospowers:scorched_glass",
     "jaymospowers:foundry_controller",
     "jaymospowers:scorched_drain",
-    "jaymospowers:scorched_alloyer"
+    "jaymospowers:scorched_alloyer",
+    "jaymospowers:tin_ore",
+    "jaymospowers:deepslate_tin_ore",
+    "jaymospowers:raw_tin_block",
+    "jaymospowers:tin_block",
+    "jaymospowers:bronze_block",
+    "jaymospowers:coke_oven_bricks",
+    "jaymospowers:coke_oven",
+    "jaymospowers:firebricks",
+    "jaymospowers:brick_blast_furnace",
+    "jaymospowers:coal_coke_block"
   ]
 }

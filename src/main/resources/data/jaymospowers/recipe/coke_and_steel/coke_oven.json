@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "B B",
+    "BBB"
+  ],
+  "key": {
+    "B": "jaymospowers:coke_oven_brick"
+  },
+  "result": {
+    "id": "jaymospowers:coke_oven",
+    "count": 1
+  }
+}

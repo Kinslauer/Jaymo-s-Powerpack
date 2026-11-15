@@ -42,7 +42,7 @@ public class PanItem extends Item {
 		}
 		server.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.6F, 1.3F);
 		server.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 10, 0.3, 0.1, 0.3, 0.0);
-		ItemStack found = Panning.wash(server.getRandom(), 1.0F);
+		ItemStack found = Panning.wash(server.getRandom(), 1.0F, Panning.tinSand(level.getBlockState(pos)));
 		if (!found.isEmpty()) {
 			player.getInventory().placeItemBackInInventory(found, Prediction.SERVER_ONLY);
 		}

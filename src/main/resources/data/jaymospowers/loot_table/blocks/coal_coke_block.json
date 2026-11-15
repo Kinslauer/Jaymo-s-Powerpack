@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/coal_coke_block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:coal_coke_block"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

@@ -170,6 +170,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.FirstTools.init();
 		// Andy's GT New Horizons picks, patch 1: the Stone Age recipes (the sieve, the mortar's grinds, brick forms, clay buckets, glass)
 		com.jaymospowers.ground.StoneAge.init();
+		// Andy's GT New Horizons picks, patch 4: the coke oven, creosote, the charcoal pit and the brick blast furnace
+		com.jaymospowers.tinkering.coke.CokeAndSteel.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();
 		com.jaymospowers.core.collide.Collisions.init();

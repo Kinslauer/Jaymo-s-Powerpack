@@ -313,7 +313,9 @@ public final class Tinkering {
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
 		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL,
 			// (0.18.55) the six first metals of the far worlds
-			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE)) {
+			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE,
+			// (GTNH picks) bronze, alloyed from copper and tin (Tin)
+			Molten.BRONZE)) {
 			com.jaymospowers.power.zfighter.farworld.FarWorld firstOf = com.jaymospowers.power.zfighter.farworld.FarWorld.ofMolten(alloy);
 			// (0.18.55) a far world's first metal tells the Prospecting career when it is first knapped
 			Item ingot = item(alloy.id + "_ingot", firstOf == null ? Item::new : p -> new com.jaymospowers.power.zfighter.farworld.FirstMetalIngot(p, firstOf),
@@ -324,6 +326,7 @@ public final class Tinkering {
 		registerSteel();
 		registerStarMetal();
 		registerBogIron();
+		Tin.register();
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}

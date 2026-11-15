@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:raw_tin_block"
+  ],
+  "result": {
+    "id": "jaymospowers:raw_tin",
+    "count": 9
+  }
+}

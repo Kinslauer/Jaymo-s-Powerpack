@@ -40,7 +40,10 @@ public enum Molten {
 	QUEEN_SLIME("queen_slime", 0xFF4FC07A, null),
 	HEPATIZON("hepatizon", 0xFF6A5A8A, null),
 	// ---- (GTNH picks) glass dust melts into it, cast into blocks (basin) and panes (a pane cast) ----
-	GLASS("glass", 0xFFC8E6EE, null);
+	GLASS("glass", 0xFFC8E6EE, null),
+	// ---- (GTNH picks, coke and steel) tin from the mountain veins and the river sand, and bronze alloyed from it (3 copper : 1 tin) ----
+	TIN("tin", 0xFFD9DCE0, null),
+	BRONZE("bronze", 0xFFD08A3C, TinkerMaterial.BRONZE);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;

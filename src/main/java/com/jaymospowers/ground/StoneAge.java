@@ -95,10 +95,15 @@ public final class StoneAge {
 		GRINDS.put(Items.GOLD_INGOT, XenoFinds.GOLD_DUST);
 		GRINDS.put(Items.SUGAR_CANE, CANE_CHAD);
 		GRINDS.put(Items.STICK, SAWDUST);
+		// (GTNH picks, patch 4) tin and bronze grind like the other metals (tinkering/Tin)
+		GRINDS.put(com.jaymospowers.tinkering.Tin.TIN_INGOT, com.jaymospowers.tinkering.Tin.TIN_DUST);
+		GRINDS.put(com.jaymospowers.tinkering.Tin.BRONZE_INGOT, BRONZE_DUST);
 
 		Melting.dusts(Molten.IRON, Molten.INGOT, XenoFinds.IRON_DUST);
 		Melting.dusts(Molten.COPPER, Molten.INGOT, XenoFinds.COPPER_DUST);
 		Melting.dusts(Molten.GOLD, Molten.INGOT, XenoFinds.GOLD_DUST);
+		Melting.dusts(Molten.TIN, Molten.INGOT, com.jaymospowers.tinkering.Tin.TIN_DUST);
+		Melting.dusts(Molten.BRONZE, Molten.INGOT, BRONZE_DUST);
 		// a glass dust is a block of glass's worth
 		Melting.dusts(Molten.GLASS, Melting.GLASS_BLOCK_MB, GLASS_DUST);
 		Melting.glass();

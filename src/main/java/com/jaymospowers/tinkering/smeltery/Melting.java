@@ -118,6 +118,8 @@ public final class Melting {
 		new Alloy(Molten.PIG_IRON, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.BLOOD, 5), new Input(Molten.HONEY, 5))),
 		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))),
 		new Alloy(Molten.STEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.PIG_IRON, 9))),
+		// (GTNH picks) bronze: three of copper to one of tin
+		new Alloy(Molten.BRONZE, 36, List.of(new Input(Molten.COPPER, 27), new Input(Molten.TIN, 9))),
 		// the knife metals, all from cobalt: three of cobalt hardened with one of steel, cobalt and gold in slime,
 		// two of copper to one of cobalt with amethyst
 		new Alloy(Molten.MANYULLYN, 36, List.of(new Input(Molten.COBALT, 27), new Input(Molten.STEEL, 9))),
@@ -155,7 +157,8 @@ public final class Melting {
 		for (int i = 0; i < chainmail.length; i++) {
 			add(Molten.IRON, ingot * CHAINMAIL_INGOTS[i], chainmail[i]);
 		}
-		add(Molten.GOLD, ingot * BELL_INGOTS, Items.BELL);
+		// (GTNH picks) a bell is cast in bronze, bell metal
+		add(Molten.BRONZE, ingot * BELL_INGOTS, Items.BELL);
 		// a worn anvil gives back less than a new one (which melts by its recipe)
 		add(Molten.IRON, ingot * WORN_ANVIL_INGOTS[0], Items.CHIPPED_ANVIL);
 		add(Molten.IRON, ingot * WORN_ANVIL_INGOTS[1], Items.DAMAGED_ANVIL);
@@ -185,6 +188,12 @@ public final class Melting {
 	public static void silver(Item ingot, Item nugget, Item block, Item raw, Item rawBlock, Item... ores) {
 		metal(Molten.SILVER, ingot, nugget, block, raw, rawBlock);
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
+	}
+
+	/** (GTNH picks) Tin, from the mountain veins: its ingot, nugget, block, raw ore (doubled) and ore blocks. */
+	public static void tin(Item ingot, Item nugget, Item block, Item raw, Item rawBlock, Item... ores) {
+		metal(Molten.TIN, ingot, nugget, block, raw, rawBlock);
+		add(Molten.TIN, Molten.INGOT * ORE_INGOTS, ores);
 	}
 
 	/** Cobalt ore melts doubled, as the other ores do (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
@@ -452,6 +461,8 @@ public final class Melting {
 			case COPPER -> new ItemStack(Items.COPPER_NUGGET);
 			case SILVER -> new ItemStack(Tinkering.SILVER_NUGGET);
 			case STEEL -> new ItemStack(Tinkering.STEEL_NUGGET);
+			case TIN -> new ItemStack(com.jaymospowers.tinkering.Tin.TIN_NUGGET);
+			case BRONZE -> new ItemStack(com.jaymospowers.tinkering.Tin.BRONZE_NUGGET);
 			default -> null;
 		};
 	}
@@ -467,6 +478,8 @@ public final class Melting {
 			case COPPER -> new BasinResult(new ItemStack(Items.COPPER_BLOCK.weathering().unaffected()), Molten.BLOCK);
 			case SILVER -> new BasinResult(new ItemStack(Tinkering.SILVER_BLOCK), Molten.BLOCK);
 			case STEEL -> new BasinResult(new ItemStack(Tinkering.STEEL_BLOCK), Molten.BLOCK);
+			case TIN -> new BasinResult(new ItemStack(com.jaymospowers.tinkering.Tin.TIN_BLOCK), Molten.BLOCK);
+			case BRONZE -> new BasinResult(new ItemStack(com.jaymospowers.tinkering.Tin.BRONZE_BLOCK), Molten.BLOCK);
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);

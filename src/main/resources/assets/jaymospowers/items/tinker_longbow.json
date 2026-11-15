@@ -185,6 +185,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_bottom_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bronze"
+              }
             }
           ],
           "fallback": {
@@ -370,6 +377,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_top_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_bronze"
               }
             }
           ],
@@ -589,6 +603,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_bronze"
+              }
             }
           ],
           "fallback": {
@@ -783,6 +804,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_bottom_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bronze"
+                }
               }
             ],
             "fallback": {
@@ -968,6 +996,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_top_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_bronze"
                 }
               }
             ],
@@ -1187,6 +1222,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1384,6 +1426,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_deep_tooth"
                       }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_bronze"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1569,6 +1618,13 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_2_deep_tooth"
+                      }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_bronze"
                       }
                     }
                   ],
@@ -1788,6 +1844,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
                       }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_bronze"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1982,6 +2045,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_deep_tooth"
                       }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_bronze"
+                      }
                     }
                   ],
                   "fallback": {
@@ -2167,6 +2237,13 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_3_deep_tooth"
+                      }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_bronze"
                       }
                     }
                   ],
@@ -2386,6 +2463,13 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
                       }
+                    },
+                    {
+                      "when": "bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_bronze"
+                      }
                     }
                   ],
                   "fallback": {
@@ -2579,6 +2663,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -2764,6 +2855,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_top_1_deep_tooth"
+                  }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_bronze"
                   }
                 }
               ],
@@ -2982,6 +3080,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
+                  }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_bronze"
                   }
                 }
               ],

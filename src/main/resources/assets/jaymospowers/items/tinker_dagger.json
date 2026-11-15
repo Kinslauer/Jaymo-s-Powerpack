@@ -227,6 +227,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/dagger/head_broken_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/dagger/head_broken_bronze"
+              }
             }
           ],
           "fallback": {
@@ -454,6 +461,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/dagger/head_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/dagger/head_bronze"
               }
             }
           ],
@@ -683,6 +697,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/dagger/crossguard_deep_tooth"
+            }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/dagger/crossguard_bronze"
             }
           }
         ],

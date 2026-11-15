@@ -26,8 +26,8 @@ DATA = os.path.join(RES, "data")
 NS = "jaymospowers"
 
 # ---- tuning ----
-# torch yield by fuel (vanilla: 4 from either). Patch 4 adds coal coke (5) and the creosote-soaked rag (3) here.
-TORCH_YIELDS = {"minecraft:coal": 2, "minecraft:charcoal": 2}
+# torch yield by fuel (vanilla: 4 from either); coal coke and the creosote-soaked rag (patch 4) burn longer
+TORCH_YIELDS = {"minecraft:coal": 2, "minecraft:charcoal": 2, "jaymospowers:coal_coke": 5, "jaymospowers:creosote_rag": 3}
 # wooden doors: 6 planks and a fitting make one (vanilla: 6 planks, 3 doors); iron doors want a steel ingot
 WOOD_DOORS = 1
 IRON_DOORS = 3
@@ -226,8 +226,8 @@ def data(jar):
     unmendable += [{"id": NS + ":" + i, "required": False} for i in ("hand_axe", "primitive_knife", "primitive_spear", "throwing_stick")]
     unmendable += [{"id": i, "required": False} for i in ("jaymoskitchen:flint_knife", "rogues:flint_dagger")]
     write(os.path.join(tags, "unmendable.json"), {"values": unmendable})
-    # tin arrives in patch 4: bronze dust is mixed from whatever joins this tag
-    write(os.path.join(DATA, "c", "tags", "item", "dusts", "tin.json"), {"replace": False, "values": []})
+    # bronze dust is mixed from whatever joins this tag (tin dust, ground in the mortar: tools/gen_coke_and_steel.py)
+    write(os.path.join(DATA, "c", "tags", "item", "dusts", "tin.json"), {"replace": False, "values": [NS + ":tin_dust"]})
 
 
 # ---------------------------------------------------------------- art

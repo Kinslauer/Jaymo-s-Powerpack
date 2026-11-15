@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C",
+    "X",
+    "#"
+  ],
+  "key": {
+    "C": "minecraft:copper_nugget",
+    "X": "jaymospowers:creosote_rag",
+    "#": "minecraft:stick"
+  },
+  "result": {
+    "id": "minecraft:copper_torch",
+    "count": 3
+  }
+}

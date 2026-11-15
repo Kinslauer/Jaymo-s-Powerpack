@@ -223,6 +223,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/war_pick/body_deep_tooth"
             }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_bronze"
+            }
           }
         ],
         "fallback": {
@@ -450,6 +457,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/war_pick/limb_deep_tooth"
+            }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_bronze"
             }
           }
         ],

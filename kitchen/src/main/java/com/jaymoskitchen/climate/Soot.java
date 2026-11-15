@@ -43,13 +43,18 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * day's: it turns a quarter each day and swings to the rain's side when it rains. A town of short chimneys keeps its
  * smog at home; a tall stack gives it to the next valley.
  * <p>
- * It starts gentle: one furnace never reaches the ashy line; a town of forges does.
+ * It starts gentle: one furnace never reaches the ashy line; a town of forges does. Heavy sources (block tag
+ * {@code jaymoskitchen:heavy_soot}: Jaymo's Powers' charcoal pits and brick blast furnaces) count {@link #HEAVY} times over.
  */
 public final class Soot {
 	public static final float MAX = 100.0F;
 	/** Soot each lit source adds a check, and the most sources a chunk counts. */
 	static final float PER_SOURCE = 0.6F;
 	static final int MAX_SOURCES = 16;
+	/** What one heavy source counts as. */
+	static final float HEAVY = 4.0F;
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> HEAVY_SOOT = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.BLOCK, JaymosKitchen.id("heavy_soot"));
 	/** Soot that clears each check (times {@link #RAIN_CLEAR} in rain) and the share of a difference that drifts next door. */
 	static final float CLEAR = 1.0F, RAIN_CLEAR = 3.0F, SPREAD = 0.05F;
 	/** Where ash shows and rain turns dirty, where you cough, where crops wilt. */
@@ -117,14 +122,15 @@ public final class Soot {
 		for (BlockEntity be : chunk.getBlockEntities().values()) {
 			BlockState state = be.getBlockState();
 			if (state.getValueOrElse(BlockStateProperties.LIT, false)) {
+				float weight = state.is(HEAVY_SOOT) ? HEAVY : 1.0F;
 				int flue = flue(level, be.getBlockPos());
 				if (flue > 0) {
 					// the chimney keeps some of it at home and gives the rest to the wind
-					sources += FLUE_LOCAL;
-					carried += 1.0F - FLUE_LOCAL;
+					sources += FLUE_LOCAL * weight;
+					carried += (1.0F - FLUE_LOCAL) * weight;
 					tallest = Math.max(tallest, flue);
 				} else {
-					sources += 1.0F;
+					sources += weight;
 				}
 				if (++counted >= MAX_SOURCES) {
 					break;

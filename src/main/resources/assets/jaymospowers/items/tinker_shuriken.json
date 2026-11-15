@@ -223,6 +223,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/shuriken/bottom_deep_tooth"
             }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_bronze"
+            }
           }
         ],
         "fallback": {
@@ -450,6 +457,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/shuriken/top_deep_tooth"
+            }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_bronze"
             }
           }
         ],

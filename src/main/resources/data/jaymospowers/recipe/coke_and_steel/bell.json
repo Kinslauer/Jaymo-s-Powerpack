@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "BBB",
+    "B B"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "B": "jaymospowers:bronze_ingot"
+  },
+  "result": {
+    "id": "minecraft:bell",
+    "count": 1
+  }
+}

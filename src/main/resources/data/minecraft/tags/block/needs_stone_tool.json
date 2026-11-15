@@ -26,6 +26,11 @@
     "jaymospowers:altar",
     "jaymospowers:smithing_anvil",
     "jaymospowers:field_anvil",
-    "jaymospowers:banded_iron_ore"
+    "jaymospowers:banded_iron_ore",
+    "jaymospowers:tin_ore",
+    "jaymospowers:deepslate_tin_ore",
+    "jaymospowers:raw_tin_block",
+    "jaymospowers:tin_block",
+    "jaymospowers:bronze_block"
   ]
 }

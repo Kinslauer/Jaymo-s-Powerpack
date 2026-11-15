@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "X",
+    "#"
+  ],
+  "key": {
+    "X": "jaymospowers:creosote_rag",
+    "#": "minecraft:stick"
+  },
+  "result": {
+    "id": "minecraft:torch",
+    "count": 3
+  }
+}

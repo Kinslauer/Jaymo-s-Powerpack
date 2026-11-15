@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:disk",
+  "half_height": 1,
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 4
+  },
+  "state_provider": {
+    "id": "jaymospowers:tin_sand"
+  },
+  "target": {
+    "type": "minecraft:matching_blocks",
+    "blocks": [
+      "minecraft:sand",
+      "minecraft:gravel",
+      "minecraft:dirt",
+      "minecraft:clay"
+    ]
+  }
+}

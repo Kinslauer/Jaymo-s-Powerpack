@@ -449,6 +449,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tough_binding_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -703,6 +716,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/tough_binding_deep_tooth"
+          }
+        },
+        {
+          "when": "bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tough_binding_bronze"
           }
         }
       ],

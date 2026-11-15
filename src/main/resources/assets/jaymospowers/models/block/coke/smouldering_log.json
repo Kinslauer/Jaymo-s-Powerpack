@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymospowers:block/coke/smouldering_log_top",
+    "side": "jaymospowers:block/coke/smouldering_log"
+  }
+}

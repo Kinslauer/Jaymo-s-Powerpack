@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "jaymospowers:block/coke/coke_oven_front_4",
+    "side": "jaymospowers:block/coke/coke_oven_bricks",
+    "top": "jaymospowers:block/coke/coke_oven_bricks"
+  }
+}

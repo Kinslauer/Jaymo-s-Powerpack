@@ -29,6 +29,8 @@ import net.minecraft.world.level.material.MapColor;
 public final class Panning {
 	/** What a panful turns up (before a sluice's boost): gold, copper and iron nuggets, and flint. Iron is scarce on purpose. */
 	public static final float GOLD = 0.06F, COPPER = 0.14F, IRON = 0.02F, FLINT = 0.12F;
+	/** (GTNH picks) A panful of the rivers' tin sand turns up tin nuggets this often (one or two), before anything else. */
+	public static final float TIN = 0.3F;
 	static final int PICK_DURABILITY = 180, PAN_DURABILITY = 120;
 
 	public static Item PROSPECTOR_PICK, PAN;
@@ -59,6 +61,19 @@ public final class Panning {
 	/** Gravel or sand: what a pan or a sluice washes. */
 	static boolean pannable(BlockState state) {
 		return state.is(Blocks.GRAVEL) || state.is(BlockTags.SAND);
+	}
+
+	/** One panful of {@code washed}: tin sand gives up tin first ({@link #TIN}), then whatever any sand might. */
+	static ItemStack wash(RandomSource random, float boost, boolean tinSand) {
+		if (tinSand && random.nextFloat() < TIN * boost) {
+			return new ItemStack(com.jaymospowers.tinkering.Tin.TIN_NUGGET, 1 + random.nextInt(2));
+		}
+		return wash(random, boost);
+	}
+
+	/** Tin sand, the rivers' dark sand ({@code tinkering/Tin}). */
+	static boolean tinSand(BlockState state) {
+		return state.is(com.jaymospowers.tinkering.Tin.TIN_SAND);
 	}
 
 	/** One panful's find (empty most times); {@code boost} scales every chance. */

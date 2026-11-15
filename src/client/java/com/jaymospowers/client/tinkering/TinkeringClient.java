@@ -1,17 +1,22 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.Armory;
 import com.jaymospowers.tinkering.Modifier;
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.coke.CokeAndSteel;
 import com.jaymospowers.tinkering.smeltery.Melting;
 import com.jaymospowers.tinkering.smeltery.MeltingRecipes;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.resources.model.sprite.Material;
 
 /** The Part Builder's, Tool Station's, Tool Forge's and Crafting Station's screens, and what's left lying on them. */
 public final class TinkeringClient {
@@ -51,5 +56,8 @@ public final class TinkeringClient {
 		Tinkering.traitDetails = () -> Minecraft.getInstance().hasShiftDown();
 		com.jaymospowers.client.tinkering.smithing.SmithingClient.init();
 		HandcraftClient.init();
+		// the coke oven's creosote, lying where a bucket was poured
+		FluidRenderingRegistry.register(CokeAndSteel.CREOSOTE, CokeAndSteel.FLOWING_CREOSOTE, new FluidModel.Unbaked(
+			new Material(JaymosPowers.id("block/creosote_still")), new Material(JaymosPowers.id("block/creosote_flow")), null, null));
 	}
 }

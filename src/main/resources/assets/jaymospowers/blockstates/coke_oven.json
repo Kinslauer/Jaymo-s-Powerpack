@@ -1,0 +1,154 @@
+{
+  "variants": {
+    "facing=north,fill=0,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_0"
+    },
+    "facing=east,fill=0,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_0",
+      "y": 90
+    },
+    "facing=south,fill=0,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_0",
+      "y": 180
+    },
+    "facing=west,fill=0,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_0",
+      "y": 270
+    },
+    "facing=north,fill=1,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_1"
+    },
+    "facing=east,fill=1,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_1",
+      "y": 90
+    },
+    "facing=south,fill=1,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_1",
+      "y": 180
+    },
+    "facing=west,fill=1,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_1",
+      "y": 270
+    },
+    "facing=north,fill=2,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_2"
+    },
+    "facing=east,fill=2,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_2",
+      "y": 90
+    },
+    "facing=south,fill=2,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_2",
+      "y": 180
+    },
+    "facing=west,fill=2,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_2",
+      "y": 270
+    },
+    "facing=north,fill=3,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_3"
+    },
+    "facing=east,fill=3,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_3",
+      "y": 90
+    },
+    "facing=south,fill=3,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_3",
+      "y": 180
+    },
+    "facing=west,fill=3,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_3",
+      "y": 270
+    },
+    "facing=north,fill=4,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_4"
+    },
+    "facing=east,fill=4,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_4",
+      "y": 90
+    },
+    "facing=south,fill=4,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_4",
+      "y": 180
+    },
+    "facing=west,fill=4,lit=false": {
+      "model": "jaymospowers:block/coke/coke_oven_4",
+      "y": 270
+    },
+    "facing=north,fill=0,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_0"
+    },
+    "facing=east,fill=0,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_0",
+      "y": 90
+    },
+    "facing=south,fill=0,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_0",
+      "y": 180
+    },
+    "facing=west,fill=0,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_0",
+      "y": 270
+    },
+    "facing=north,fill=1,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_1"
+    },
+    "facing=east,fill=1,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_1",
+      "y": 90
+    },
+    "facing=south,fill=1,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_1",
+      "y": 180
+    },
+    "facing=west,fill=1,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_1",
+      "y": 270
+    },
+    "facing=north,fill=2,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_2"
+    },
+    "facing=east,fill=2,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_2",
+      "y": 90
+    },
+    "facing=south,fill=2,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_2",
+      "y": 180
+    },
+    "facing=west,fill=2,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_2",
+      "y": 270
+    },
+    "facing=north,fill=3,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_3"
+    },
+    "facing=east,fill=3,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_3",
+      "y": 90
+    },
+    "facing=south,fill=3,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_3",
+      "y": 180
+    },
+    "facing=west,fill=3,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_3",
+      "y": 270
+    },
+    "facing=north,fill=4,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_4"
+    },
+    "facing=east,fill=4,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_4",
+      "y": 90
+    },
+    "facing=south,fill=4,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_4",
+      "y": 180
+    },
+    "facing=west,fill=4,lit=true": {
+      "model": "jaymospowers:block/coke/coke_oven_on_4",
+      "y": 270
+    }
+  }
+}

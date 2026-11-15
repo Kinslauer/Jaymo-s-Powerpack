@@ -157,6 +157,9 @@
     "jaymospowers:rod_pod",
     "jaymospowers:crab_pot",
     "jaymospowers:keepnet",
-    "jaymospowers:trophy_plaque"
+    "jaymospowers:trophy_plaque",
+    "jaymospowers:treated_planks",
+    "jaymospowers:charred_log",
+    "jaymospowers:smouldering_log"
   ]
 }

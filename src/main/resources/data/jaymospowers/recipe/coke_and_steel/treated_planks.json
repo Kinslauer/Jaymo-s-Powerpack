@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "PCP",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "C": [
+      "jaymospowers:creosote_bucket",
+      "jaymospowers:clay_creosote_bucket"
+    ]
+  },
+  "result": {
+    "id": "jaymospowers:treated_planks",
+    "count": 8
+  }
+}

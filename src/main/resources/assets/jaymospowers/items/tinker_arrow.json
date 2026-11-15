@@ -304,6 +304,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/arrow/head_deep_tooth"
             }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/arrow/head_bronze"
+            }
           }
         ],
         "fallback": {

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "jaymospowers:tin_ingot"
+  },
+  "result": {
+    "id": "jaymospowers:tin_block",
+    "count": 1
+  }
+}

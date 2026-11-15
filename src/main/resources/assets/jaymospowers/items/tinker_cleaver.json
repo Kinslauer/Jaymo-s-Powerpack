@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/handle_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -465,6 +472,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -692,6 +706,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_bronze"
                     }
                   }
                 ],
@@ -926,6 +947,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1153,6 +1181,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_bronze"
                     }
                   }
                 ],
@@ -1382,6 +1417,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_deep_tooth"
+                  }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_bronze"
                   }
                 }
               ],
@@ -1618,6 +1660,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/handle_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_bronze"
+              }
             }
           ],
           "fallback": {
@@ -1850,6 +1899,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2077,6 +2133,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_bronze"
                 }
               }
             ],
@@ -2311,6 +2374,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2538,6 +2608,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_bronze"
                 }
               }
             ],
@@ -2767,6 +2844,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_bronze"
               }
             }
           ],

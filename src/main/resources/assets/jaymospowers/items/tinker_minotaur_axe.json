@@ -223,6 +223,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/handle_deep_tooth"
             }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_bronze"
+            }
           }
         ],
         "fallback": {
@@ -455,6 +462,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_bronze"
+              }
             }
           ],
           "fallback": {
@@ -682,6 +696,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_bronze"
               }
             }
           ],
@@ -911,6 +932,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/back_deep_tooth"
+            }
+          },
+          {
+            "when": "bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_bronze"
             }
           }
         ],

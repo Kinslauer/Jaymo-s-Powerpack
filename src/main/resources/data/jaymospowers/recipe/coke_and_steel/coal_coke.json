@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:coal_coke_block"
+  ],
+  "result": {
+    "id": "jaymospowers:coal_coke",
+    "count": 9
+  }
+}

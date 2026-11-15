@@ -35,6 +35,8 @@ public enum TinkerMaterial {
 	BONE("bone", Stats.BONE, Trait.PIERCE),
 	SEARED_STONE("seared_stone", Stats.SEARED_STONE, Trait.SEARING),
 	COPPER("copper", Stats.COPPER, Trait.DWARVEN, true),
+	/** (GTNH picks) Three of copper to one of tin, alloyed in the smeltery: between flint and iron, the first metal worth a tool. */
+	BRONZE("bronze", Stats.BRONZE, Trait.DWARVEN, true),
 	IRON("iron", Stats.IRON, Trait.MAGNETIC, true),
 	SILVER("silver", Stats.SILVER, Trait.SMITE, true),
 	ROSE_GOLD("rose_gold", Stats.ROSE_GOLD, Trait.ENHANCED, true),
@@ -108,6 +110,8 @@ public enum TinkerMaterial {
 		static final Stats FLINT = new Stats(85, 3.5F, 1.25F, Tier.STONE, -0.15F, 0.0F, 0.1F, 0.0F);
 		static final Stats BONE = new Stats(100, 2.5F, 1.25F, Tier.STONE, -0.25F, 0.0F, 0.0F, 0.1F);
 		static final Stats COPPER = new Stats(210, 5.0F, 0.5F, Tier.IRON, -0.2F, 0.1F, 0.05F, 0.0F);
+		/** (GTNH picks) Bronze: harder than copper, short of iron in everything. */
+		static final Stats BRONZE = new Stats(230, 5.5F, 1.5F, Tier.IRON, 0.0F, 0.05F, 0.05F, 0.0F);
 		static final Stats IRON = new Stats(250, 6.0F, 2.0F, Tier.IRON, 0.1F, 0.0F, 0.0F, 0.0F);
 		static final Stats SILVER = new Stats(300, 5.5F, 2.25F, Tier.IRON, -0.1F, 0.05F, 0.0F, 0.1F);
 		static final Stats SEARED_STONE = new Stats(225, 6.5F, 1.5F, Tier.IRON, -0.15F, 0.1F, 0.05F, 0.0F);
@@ -154,6 +158,7 @@ public enum TinkerMaterial {
 		limb(Stats.WOOD, new Limb(60, 0.0F, 0.0F, 0.0F), new Grip(0.0F, 0.0F, 0.0F));
 		limb(Stats.BONE, new Limb(100, 0.05F, -0.05F, 0.05F), new Grip(-0.25F, 0.05F, 1.25F));
 		limb(Stats.COPPER, new Limb(210, -0.1F, 0.05F, 0.0F), new Grip(-0.2F, 0.0F, 0.5F));
+		limb(Stats.BRONZE, new Limb(230, -0.15F, 0.05F, 0.05F), new Grip(0.0F, 0.0F, 1.5F));
 		limb(Stats.IRON, new Limb(250, -0.2F, 0.1F, 0.0F), new Grip(0.1F, 0.0F, 2.0F));
 		limb(Stats.SILVER, new Limb(300, -0.05F, 0.0F, 0.1F), new Grip(-0.1F, -0.05F, 2.25F));
 		limb(Stats.ROSE_GOLD, new Limb(175, 0.15F, -0.25F, 0.15F), new Grip(-0.3F, 0.25F, 1.0F));
@@ -190,6 +195,7 @@ public enum TinkerMaterial {
 
 	static {
 		plating(Stats.COPPER, 143, 208, 195, 169, 1, 3, 2, 1, 0.0F, 0.0F);
+		plating(Stats.BRONZE, 154, 224, 210, 182, 2, 4, 3, 1, 0.0F, 0.0F);
 		plating(Stats.IRON, 165, 240, 225, 195, 2, 5, 4, 2, 0.0F, 0.0F);
 		plating(Stats.SILVER, 198, 288, 270, 234, 2, 5, 4, 1, 0.0F, 0.05F);
 		plating(Stats.ROSE_GOLD, 99, 144, 135, 117, 2, 5, 3, 1, 0.0F, 0.0F);

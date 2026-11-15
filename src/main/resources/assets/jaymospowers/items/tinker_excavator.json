@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/handle_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -465,6 +472,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -692,6 +706,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_bronze"
                     }
                   }
                 ],
@@ -921,6 +942,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/grip_deep_tooth"
+                  }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_bronze"
                   }
                 }
               ],
@@ -1171,6 +1199,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/binding_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -1406,6 +1441,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/handle_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_bronze"
+              }
             }
           ],
           "fallback": {
@@ -1638,6 +1680,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1865,6 +1914,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_bronze"
                 }
               }
             ],
@@ -2094,6 +2150,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/grip_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_bronze"
               }
             }
           ],
@@ -2343,6 +2406,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/binding_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_bronze"
               }
             }
           ],

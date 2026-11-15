@@ -21,6 +21,8 @@
     "minecraft:ancient_debris",
     "jaymospowers:silver_ore",
     "jaymospowers:deepslate_silver_ore",
-    "jaymospowers:veiled_ore"
+    "jaymospowers:veiled_ore",
+    "jaymospowers:tin_ore",
+    "jaymospowers:deepslate_tin_ore"
   ]
 }

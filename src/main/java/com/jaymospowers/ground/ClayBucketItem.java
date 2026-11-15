@@ -62,15 +62,17 @@ public class ClayBucketItem extends BucketItem {
 				}
 				return InteractionResult.SUCCESS;
 			}
-			if (!fluid.is(FluidTags.WATER) || !fluid.isSource() || !(state.getBlock() instanceof BucketPickup pickup)
+			// water, or (GTNH picks, patch 4) a coke oven's creosote poured out in the world
+			boolean creosote = fluid.getType() == com.jaymospowers.tinkering.coke.CokeAndSteel.CREOSOTE;
+			if (!fluid.is(FluidTags.WATER) && !creosote || !fluid.isSource() || !(state.getBlock() instanceof BucketPickup pickup)
 				|| pickup.pickupBlock(player, level, pos, state).isEmpty()) {
 				return InteractionResult.PASS;
 			}
 			player.awardStat(Stats.ITEM_USED.get(this));
 			pickup.getPickupSound().ifPresent(sound -> player.playSound(sound, 1.0F, 1.0F));
 			level.gameEvent(player, GameEvent.FLUID_PICKUP, pos);
-			return InteractionResult.SUCCESS.heldItemTransformedTo(
-				ItemUtils.createFilledResult(held, player, held.transmuteCopy(StoneAge.CLAY_WATER_BUCKET, 1)));
+			return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(held, player,
+				held.transmuteCopy(creosote ? com.jaymospowers.tinkering.coke.CokeAndSteel.CLAY_CREOSOTE_BUCKET : StoneAge.CLAY_WATER_BUCKET, 1)));
 		}
 		BlockPos place = state.getBlock() instanceof LiquidBlockContainer ? pos : pos.relative(side);
 		if (!emptyContents(player, level, place, hit)) {
