@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 branch: claude/project-thread-c00opi
 pr: 1605
 owns: kingdoms Navies.java, Corsairs.java (fleet + foundering), SeaPrisoners.java, sailing/Fleet.java (MAN_OF_WAR), Shipyards.java (CONSORT), Arrests.jail, Captives.take(home), Crewmen.release, lang/parts/warship_fleets.json
