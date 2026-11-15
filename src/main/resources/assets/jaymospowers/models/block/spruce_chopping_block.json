@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/chopping_block",
+  "textures": {
+    "side": "minecraft:block/spruce_log",
+    "end": "minecraft:block/spruce_log_top"
+  }
+}

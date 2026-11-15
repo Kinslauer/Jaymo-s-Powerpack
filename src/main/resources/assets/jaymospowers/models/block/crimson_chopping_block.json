@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/chopping_block",
+  "textures": {
+    "side": "minecraft:block/crimson_stem",
+    "end": "minecraft:block/crimson_stem_top"
+  }
+}
