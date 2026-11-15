@@ -1,6 +1,0 @@
-# chopping block - stand logs on it and split them into planks with an axe
-- **Chopping block** (Andy: "a chopping block like SevTech and GTNH so you can place wood and chop into planks easier"; our own code, after Pyrotech's idea): set a log down, sneak and use an axe on its top, and it is cut down into a chopping block of that wood (eleven vanilla woods, each drawn from its own log textures; other mods' logs carve the oak one). Use logs on it to stand them up (one a click, sneak for all you hold, up to 16), then use an axe on it, or hold use: a log takes 4 blows with flint or stone, 3 with copper, 2 with iron or better, and splits into a plank more than on the ground (3/4/5), a quarter of the time with sawdust. Logs stay loaded, so you just keep swinging. An empty hand takes the logs back; breaking it drops them.
-- Logs still don't craft into planks in the grid, and the plain axe-on-a-set-down-log split stays as it was.
-- JEI: a Chopping Block page (every log with planks, blows and planks by axe) and an info page on each block.
-- Classes: `ground/Chopping`, `ChoppingBlock`, `ChoppingBlockEntity`, client `ground/ChoppingBlockRenderer`, `jei/ChoppingJei`; `FirstTools` routes the sneak click. Assets from `tools/gen_chopping_block.py`.
-- Built; not played.
