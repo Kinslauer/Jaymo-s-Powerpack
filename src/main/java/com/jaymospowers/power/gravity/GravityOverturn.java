@@ -35,6 +35,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Overturn (hold B, press V at a creature, and keep V held; Andy, 2026-11-15: "Can gravity users directly reverse an
@@ -52,7 +53,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>otherwise it resists: its weapon drops from its hand, it goes down and digs its hands into the ground
  * ({@link #GRASP}, drawn by GravityGraspPose), and holds there, unable to move, until you let go.</li>
  * </ul>
- * It ends when V is let go, or the user goes out of reach ({@link #RANGE} plus {@link #SLACK}), dies or loses Gravity;
+ * Let go of V within {@link #TAP_TICKS} and it carries on by itself for {@link #TAP_LASTS} (longer with mastery). Held
+ * longer, it ends when V is let go, or the user goes out of reach ({@link #RANGE} plus {@link #SLACK}), dies or loses Gravity;
  * then B's cooldown starts ({@link #COOLDOWN}, shorter when resisted: {@link #RESISTED_COOLDOWN}). Holding it costs
  * hunger like Lift ({@link #EXHAUSTION}).
  */
@@ -72,6 +74,12 @@ public final class GravityOverturn {
 	static final float EXHAUSTION = 0.012F;
 	/** A dropped weapon can't be picked back up for this long (ticks). */
 	static final int PICKUP_DELAY = 40;
+	/**
+	 * Let go of V within {@code TAP_TICKS} and it carries on by itself for {@code TAP_LASTS}, plus {@code TAP_PER_MASTERY}
+	 * for each ability mastered (Andy: "if the user lets go before holding for 1.5s then the affected will rise for 4s
+	 * and rise with mastery").
+	 */
+	static final int TAP_TICKS = 30, TAP_LASTS = 80, TAP_PER_MASTERY = 20;
 	/** A held player's keys are refused this far ahead (ticks), topped up every tick while it lasts. */
 	static final int STUN_AHEAD = 5;
 
@@ -94,6 +102,9 @@ public final class GravityOverturn {
 		final ResourceKey<Level> dimension;
 		final UUID entity, owner;
 		final boolean resisting;
+		final long since;
+		/** Once a quick tap has let go: when it ends by itself (game time), or -1 while V still holds it. */
+		long tailUntil = -1;
 		long stunUntil = -1;
 		double risen;
 		double lastY;
@@ -103,6 +114,7 @@ public final class GravityOverturn {
 			this.entity = entity.getUUID();
 			this.owner = owner.getUUID();
 			this.resisting = resisting;
+			this.since = entity.level().getGameTime();
 			this.lastY = entity.getY();
 		}
 	}
@@ -215,15 +227,30 @@ public final class GravityOverturn {
 			Entity entity = level == null ? null : level.getEntity(turn.entity);
 			ServerPlayer owner = server.getPlayerList().getPlayer(turn.owner);
 			LivingEntity living = entity instanceof LivingEntity l && l.isAlive() ? l : null;
-			boolean kept = living != null && owner != null && owner.isAlive() && owner.level() == level && Powers.has(owner, GravityPower.INSTANCE)
-				&& PowerInput.isDown(owner, PowerKey.ABILITY_3) && owner.distanceToSqr(living) <= (RANGE + SLACK) * (RANGE + SLACK);
+			long now = level == null ? 0L : level.getGameTime();
+			boolean kept;
+			if (turn.tailUntil >= 0) {
+				// let go after a quick tap: it carries on by itself
+				kept = living != null && now < turn.tailUntil;
+			} else {
+				boolean owned = living != null && owner != null && owner.isAlive() && owner.level() == level && Powers.has(owner, GravityPower.INSTANCE)
+					&& owner.distanceToSqr(living) <= (RANGE + SLACK) * (RANGE + SLACK);
+				kept = owned && PowerInput.isDown(owner, PowerKey.ABILITY_3);
+				if (owned && !kept && now - turn.since < TAP_TICKS) {
+					turn.tailUntil = now + TAP_LASTS + TAP_PER_MASTERY * Mastery.unlocked(owner);
+					owner.removeAttached(AIM);
+					kept = true;
+				}
+				if (kept && turn.tailUntil < 0) {
+					owner.causeFoodExhaustion(EXHAUSTION);
+					GravityPower.touch(living, owner);
+				}
+			}
 			if (!kept) {
 				it.remove();
 				end(living, owner, turn);
 				continue;
 			}
-			owner.causeFoodExhaustion(EXHAUSTION);
-			GravityPower.touch(living, owner);
 			if (turn.resisting) {
 				holdOn(level, living);
 				if (living instanceof ServerPlayer held) {
@@ -285,9 +312,11 @@ public final class GravityOverturn {
 	}
 
 	/** Let go: its weight the right way again (it falls from wherever it got to), or it lets go of the ground; B cools down. */
-	private static void end(LivingEntity living, ServerPlayer owner, Turn turn) {
+	private static void end(@Nullable LivingEntity living, @Nullable ServerPlayer owner, Turn turn) {
 		if (owner != null) {
-			owner.removeAttached(AIM);
+			if (turn.tailUntil < 0) {
+				owner.removeAttached(AIM);
+			}
 			if (Powers.has(owner, GravityPower.INSTANCE)) {
 				GravityPower.coolCrush(owner, turn.resisting ? RESISTED_COOLDOWN : COOLDOWN);
 			}

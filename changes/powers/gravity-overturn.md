@@ -4,6 +4,7 @@
   (height plus width), its gravity turns over for as long as you hold V. It falls up, drawn upside down, no faster than
   0.5 blocks a tick; a ceiling it hits hurts like a floor (3 blocks free, then 1 a block, up to 20). With open sky above
   it keeps rising, so letting go drops it from however high it got. Deaths from either count as deaths by weight.
+- Let go of V within 1.5 s and it carries on by itself for 4 s, plus 1 s for each ability mastered (up to 8 s).
 - A stronger creature that isn't smaller resists for as long as you hold: its weapon drops from its hand, it throws
   itself on its knees with both hands dug into the ground, straining and shaking as the pull tugs at it, and can't move
   (players' keys stop answering).
