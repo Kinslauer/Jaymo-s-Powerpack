@@ -607,3 +607,41 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-14 (Andy, story quests PR #1569): companions leave for good if a tale choice goes against what they truly believe, or if a failed quest drops their bond below the minimum; who comes back is decided by choices inside a tale; more tales start from found books; runners come by night and indoors, and letters by pigeon to those with a roost. Andy approved the Lore paragraph "Troubles, runners and starred work".
 - 2026-11-14 (Andy, via coordinator): with the lasso rework, add kidnapping quests (save a hogtied captive, or capture a criminal), and anyone with a bounty can be brought back alive, with extra interactions by temperament. Built as board work Taken by outlaws + Wanted alive and Captures.java (branch claude/project-thread-bqvg9c).
+- 2026-11-14 (Andy, druid reincarnation thread): the old druid hermit must be able to tell a Druid player about the rite of rebirth (built: the telling teaches the Rebirth spell); a reborn player keeps their power affinity (built: no affinity of their own -> the lost power becomes it). Branch claude/project-thread-fi8ahr.
+- 2026-11-15 (Andy, druid reincarnation thread): approved the Lore paragraph "What the old druids teach" (PR #1575).
+- 2026-11-14 (Andy): "add it": kidnapping (rescue/capture) as story-quest steps too; new tale The Asking Price.
+- 2026-11-15 (Andy, GTNH hardcore thread): approved all eight GTNH lore paragraphs (hard ground, water that comes back, tin and bronze, the forge's dangers, the marked/mothers/turned, mixed seams and the dowser's fork, sails and boilers, the steam towns); chose flying airships between steam towns; merged PR #1586.
+- 2026-11-15 (Andy, Fantasy Armor thread): picked all 20 rows of the Fantasy Armor pick list (ship + trim + dress compat, repaint only after seeing the models; set framework; 10 new sets). Note on the upgrade row: "diamond gear should be removed, and replaced with something like this, netherite should remain as plating but for steel armor". Scope (armour only or tools too) asked on a decision card.
+- 2026-11-15 (Andy, Fantasy Armor thread): decision card: diamond armour, tools AND weapons are all removed; steel replaces them, netherite goes over steel.
+- 2026-11-15 (Andy, Fantasy Armor thread): "the grave sentinel helmet should be removed" (Fantasy Armor trim datapack drops its recipe; compat never dresses anyone in it).
+- 2026-11-15 (Andy, Fantasy Armor thread): Long Defence film cast in Fantasy Armor: Quiet One = Redeemer, Thessaly = Lady Maria, Varro = Golden Horns no helm, Grimsby = Thief, Ambrose = Wandering Wizard, the Grue = Dark Lord, summoning a few orcs in Dark Cover.
+- 2026-11-15 (Andy, Fantasy Armor thread): "lore looks good": the "What the armourers make" entry and its eight paragraphs are canon. Also: the Quiet One's Redeemer plate should weave onto his body like the symbiote suit does.
+- 2026-11-15 (Andy, Fantasy Armor thread): "merge" then "approved.": PR #1587 merged (no diamond gear, netherite over steel, film cast in Fantasy Armor).
+
+- 2026-11-15 Andy approved the medieval picks lore (silk deeps, everburning mote, sky pirates, childhood faith, realm ways, realm steels, old-age peoples who traded in emeralds, great disasters, the Last Bell). Plan docs/Medieval-Plan.md.
+- 2026-11-15 (Andy, Fantasy Armor thread): "merge": PR #1587 merged; "approved." was for the lore (already marked canon) (no diamond gear, netherite over steel, film cast in Fantasy Armor).
+- 2026-11-15 (Andy, Fantasy Armor thread, decision card): the lore sets reuse Fantasy Armor's models (no new art); our code adds who wears, drops and sells them and the whole-set effects. Mapping in docs/FantasyArmor-Plan.md.
+- 2026-11-15 (Andy, Fantasy Armor thread): "kings can wear whatever they want, except dawncrest" (Fantasy Armor sets on kings).
+
+- 2026-11-15 (Andy, Fantasy Armor): no repaint of the Fantasy Armor sets. Turn its durability on, but nothing breaks: a worn-out piece becomes useless and needs repair.
+- 2026-11-15 (ring thread): the Verdant World's blue giant is reachable by pod; Andy picked landing on its ring (drifts of ice and rock, gravilite, half gravity, airless), not the cloud tops. A pod destination, no portal.
+- 2026-11-15 (Andy, ring thread): "lore approved. merge": The giant's ring paragraph is canon; PR #1595 merged.
+- 2026-11-15 (Andy, chopping block thread): a chopping block like SevTech/GTNH to split logs into planks; built as our own (sneak+axe carves a set-down log into one), PR #1599. Grid log->plank stays removed.
+- 2026-11-15 (Andy, chopping block thread): "Lore looks great merge": the chopping block paragraph is canon; PR #1599 merged.
+- 2026-11-15 (Andy): approved the lore "Who the well-wardens are" (well-wardens = sky lord's wardens, a village elder each, dawnwatch = Sun-Marshal's sun-guard).
+- 2026-11-15 (Andy, Civilizations thread): old-age temple patrons: Hearthkeeper = plains columned temples, Anvil-Father = mountain/mine halls, Deep Mother = sunken colonnades, Green Huntsman = wooded grove shrine, Lantern Warden = sand stepped tombs, Crowned Sun = northern long halls/mounds, Ash Whisperer = Blossom walled palace, the Truth = the Aether. For Medieval patch 10 (cv-avatars). Lore paragraph "Whose the old temples were" approved ("confirm lore.").
+
+- 2026-11-15 (shipwright thread): Andy approved "The yards" lore; shipwrights may keep any patron (launch offering is from their own patron). Asked for a dedicated large whaleship with lots of storage and tryworks for the far oceans.
+
+- 2026-11-15 (Andy, future-Mosslorn thread): asked to change the Chrono future's Los Perrito map to Mosslorn (milkshake_mp3, linked via the Petrichor Mosslorn Official modpack). Map is ARR and asks to be contacted before modpack use, so the swap PR waits on the author's OK.
+
+- 2026-11-15 (shipwright thread): Andy asked for warship fleets: the largest ship for the richer kingdoms, every vassal's ships in its overlord's fleet, "only pirates raze ships and enslave their victims". On the card he chose "Spare and take prisoners": navies still sink pirates but pull survivors out and jail them at their port; pirates sink ships and drag survivors to their cove in chains.
+- 2026-11-15 (Andy, future-Mosslorn thread): chose Both: our own moss overgrowth on Los Perrito now, Mosslorn swap later if the author agrees. Approved the lore paragraph "The moss".
+
+- 2026-11-15 (shipwright thread): Andy approved the lore "The fleets" and the change to "the deepest hull" in The yards (PR #1605).
+- 2026-11-15 (Andy, wall-slump thread, PR #1601): ragdolls knocked into walls slide down and sit against them instead of all lying flat; downed players and mobs sit against walls too. For downed players: "the view needs to move to the exact height on the model", "other players should be able to place them on the wall", and a smooth animation for the 1.5 s getting onto it. Claude's calls, unconfirmed: 85% of wall hits slump; a carrier sets someone against a wall by letting go while looking at it within 3 blocks (or letting go of a drag beside it); out-cold players sit only when someone props them.
+- 2026-11-15 (Andy, wall-slump thread, PR #1601): getting up against a wall must use the arms that work ("that's fine if they dont have any or if they are broken, but they should use what they can"). Claude's calls, unconfirmed: out cold, or set against the wall by someone else, both arms just hang; a one-armed player does all of it with the good arm.
+- 2026-11-15 (blight and horde picks, PR #1610): Andy approved the lore paragraphs and the readings (witch's cure in her hut cauldron, one per hut; players who die blighted still rise at once; next-night rising is for villagers' bodies). Tissou's groans kept on every zombie.
+
+- 2026-11-15 (tinker-gadget-icons, Claude cloud session): Andy handed the Inbox task tinker-gadget-icons (was for hermes-modeller) to Claude: "Can you take this over?" Applies to PR #1611.
+- 2026-11-15 (tinker-gadget-icons, PR #1611): Andy: "The rewind watch can be more of a steampunk looking regular watch with gold, because that will be required in the recipe." Redrawn as a gold pocket watch with a gear in the dial; no open lid or backwards arrow.

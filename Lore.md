@@ -85,6 +85,10 @@ King, the spirits, the Banes, the demons' country, the Judge's weighing, the Gru
 the Grue's legion raised again at the ford: the Second Defence). Each power, class and faith has its own road into the
 same acts. The story says what was done, never what it means: that still comes from people, books and wordless films.
 
+**The old age's peoples** (Andy approved, 2026-11-15; medieval picks; Andy: "old age money was emeralds"). Before the long defence, every land had a people of its own who are gone now: stepped tombs in the sands, columned temples on the plains, barrows and long halls in the north, a walled palace in Blossom. They traded in **emeralds**, which is why villagers still prize them and money changers buy them. Their rulers lie in their tombs with their guard and wake when the tomb is broken. Their temples were the patrons' before the realms', and an offering there still calls the patron's champion down to test the one who made it. A few of their descendants live on hidden in the ruins, speaking the old tongue and trading old goods and maps.
+
+**Whose the old temples were** (Andy approved, 2026-11-15; Civilizations thread; Andy paired each patron with a site). Each of the old peoples held one patron above the rest, and their temples still answer to that one. The Hearthkeeper's are the columned temples on the plains, open on every side so no traveller was ever turned away. The Anvil-Father's are cut into the mountains, halls down in the mines where the first seams were opened. The Deep Mother's stand on the sea floor among the drowned colonnades, their sea-stone lamps still lit. The Green Huntsman's are groves in the deep woods, a ring of stones round a shrine of antler and bone. The Lantern Warden's are the stepped tombs in the sands, where the rulers lie with their guard and his light was kept over them. The Crowned Sun's are the long halls and burial mounds of the north, where the old kings were crowned and laid down; they are not the moor's barrows, which keep the Warden's light. The Ash Whisperer's is the walled palace in Blossom, all hidden rooms and doors that open the wrong way. The Truth kept no temple on the ground. Its old house is in the Aether, among the sky's remnants, bare of any idol. An offering at any of them still calls that patron's champion down.
+
 ## Ki and mana are the same thing
 
 There is one energy in the world, and two words for it. **Ki** is what a Z Fighter calls it and **mana** is what
@@ -320,6 +324,8 @@ living things the fire did not consume. A burning steed is faster than any horse
 crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
 kin to the fire; anyone else is burned and thrown.
 
+**The Last Bell** (Andy approved, 2026-11-15; Andy: "doomsday should be tied to the arsenal ... his activation will bring upon the end of the world"; Claude's name and shape). Late in its mastery the Arsenal's reach pulls through a thing it should not: a cracked bronze bell from a world that ended. Rung over a map, it brings a disaster down where it is pointed; each ringing shows its holder more of what it did to its own world. Rung to the end, it does it again: the sky goes red, stars fall to the bedrock, the sea comes in, the mountains open. Very rarely the world comes to that end without anyone ringing anything.
+
 ## The Z Fighters
 
 **The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
@@ -485,6 +491,8 @@ and flame wraiths that you can see through, silver skeletons that rise and sprin
 chest mimics, the bull-headed **minotaur** with his hammer, the snake-haired **gorgon** archer of the jungles and
 swamps, the **redstone golem** of the deep mines, the **skulk golem** that guards the deep dark, and haunted armour
 stands.
+
+**The great disasters** (Andy approved, 2026-11-15; medieval picks). The world is not quiet under the realms: mountains in the hot lands wake as volcanoes, quakes under the sea send waves inland, hurricanes come off the sea, a star sometimes falls far bigger than the rest and leaves a crater with a heart of meteoric iron, and slopes let go their snow and earth. Each comes in its strength, from minor to catastrophic, and one sets off the next. Animals know first.
 
 ## The sky: the Aether and the remnants
 
@@ -702,6 +710,23 @@ rise as one of his, light, "with very little left of you to feel". Gold burns it
 realms openly. Those with the forbidden Death element raise a thrall of their own. (The dead who come back on their own
 for one person are the Banes, under *The dark*.)
 
+**The crowd remembers its work** (Andy's horde picks, 2026-11-15). The old dead keep the shapes of the lives they
+had, worn down to a single habit. Those who were builders and hedgers still carry a few stones or planks and lay them
+without thinking, a step here, a span there, until they stand where the living hide. The young who died running still run
+when they see the living, and those who were the village's strong backs walk as brutes who shoulder doors in. Ahead of
+the crowd go its scouts: thin, quick dead who were once the herders and messengers. They raise the old village call when
+they find someone, and the rest come. Settle in one place through the night and they keep coming, a bigger crowd each
+time, as if the whole graveyard had remembered where the village used to be.
+
+**Where the dead rose** (Andy's looks picks, 2026-11-15). The old dead keep the mark of the ground that held
+them. Those that lay in the sands and the red badlands come up dried to leather and split along the creases; those from
+the swamps, the river mud and the shore come up swollen and sodden, trailing weed. Those that lay deep, where no sky
+reaches, in the caves and the deep dark, come up bloodless and chalk-white, strung with cobweb, and the ones from the snows
+come up rimed, with black fingers. They still wear their land's robes, and some are further gone than others: one still
+has its face, another is a skull in rags. At night a cold light wakes in their empty sockets, the light of the one hunger
+left to them, and under a blood moon it burns red like the moon. In Chrono's ruined future the dead wear the clothes of a
+city nobody here has seen.
+
 **The bodies that stay.** The dead lie where they fall, and the living treat them as people would: blasts tear
 them apart, spiders are crushed to legs, looters rob them, and kin carry their fallen home. A fallen ruler is stripped
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
@@ -771,6 +796,15 @@ Compressor** turns weight upside down in the air above it, higher the harder it 
 lifts and to keep stores off the ground. It is a craft of theirs, not a power, and it has nothing to do with the
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
+
+**The giant's ring** (ring thread, 2026-11-15; Andy: "you should be able to travel to that planet", picked the ring).
+Nobody comes down on the blue giant itself: it is cloud all the way down. But a pod can make the short hop up from the
+Verdant World to its ring, which close to is no band at all but a field of drifts, slabs of old ice and dark rock hanging
+in the sun with no air between them. Gravilite runs through the drifts in veins and stands on them in shards; it is what
+holds them up, and why everything on the ring weighs half what it should. Nothing lives there. A traveller who steps off a
+drift falls toward the giant's clouds until the wind coming up off them throws them back onto the ice, bruised. The
+Verdant say the gravilite in their fields fell from here, and pod crews who have been agree: it is the same stuff, only
+more of it.
 
 (new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
 its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
@@ -928,6 +962,11 @@ burning"). Now, folk say the Overworld. Only future voices use the word.
 
 **Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
 
+**The moss** (Andy, 2026-11-15). Los Perrito is the same city, only greener: in the years since the
+last stand on the east bridge, moss has climbed the towers, filled the streets and grown over the cars, and trees push
+up through the roofs. Where the three-sided war still goes on, the wreckage stays fresh and the neon still sputters;
+the moss has only taken what nobody fights over any more. Nobody in the city says where it came from.
+
 ## The eight faiths
 
 Seven patrons, and the Truth that denies them. A player swears to one at a shrine; villagers and realms keep to one
@@ -991,6 +1030,8 @@ falls to whoever beats them three times: the **Hearth-Warden** (Hearthkeeper, in
 Warden, in a crypt or the Nether's soul valleys), the **Sun-Marshal** (Crowned Sun), the **Cinder-Shade** (Ash
 Whisperer) and the **Inquisitor** (the Truth, in a Faith realm's great temple or a ruined cathedral). A patron's wrath
 falls on those who break faith badly.
+
+**The faith you were raised in** (Andy approved, 2026-11-15; medieval picks). Everyone grew up praying to someone. A life story now names the patron of your childhood, which a person may later keep or leave.
 
 ## The dark
 
@@ -1119,6 +1160,28 @@ cleric's restoration lifts the curse, as it lifts any.
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
 *"There's no hunger where we go. Only the one."* It is cured with weakness first, then a golden apple before it
 finishes; "the gold burns going down".
+
+**How the blight shows, and how it's fought** (Andy's picks, 2026-11-15, from Contagion's ideas). Armour keeps
+most of it out, and it gets in easiest through a wound that bleeds; a wound bound in the first hours often never lets it
+settle. Once it takes hold the skin greys toward the Hollow it is making, a wet cough comes now and then, and at the end
+flies gather. Townsfolk know that cough ("That's no regular cough") and keep away. Those who know wounds (any healer's
+training) see the sickness in a body from the start, and a town's clerics say so. The cures are old. Rotten flesh eaten
+raw can give it you, but seared and worked through with gold it is the **old druid remedy**: it holds the blight back a
+while, and most folk sneer at it. The true cure, the **Hollow's Cure**, is brewed only by the druids of the groves and
+those trained in their way, from gilded flesh over a fire. The swamp witches have it too and keep it hidden in their huts,
+and they raise the dead out of the mud as **thralls** to guard them, beside their mud golems. A temple healer will burn it
+out of you for coin, though a righteous temple turns the Hollow away. A totem spends itself to save you. Whoever is cured
+of it once can never take it again.
+
+**How the blight spreads** (Andy's picks, 2026-11-15). Near the end a carrier's cough can pass it to whoever stands
+close before them, and a carrier's own blows pass it once it has hold. The dead's rotten blood carries it too: on your skin
+or your armour it can get in, the more so through an open wound, until it is scrubbed off or washed away in a soaking.
+Villagers catch it like anyone: they sicken for a day and rise as one of the dead unless someone cures them, and their
+kin grieve; one who is cured remembers who saved them. A town's guards order a coughing carrier out; one who stays is
+taken and shut in the cells until it leaves them, cured or turned, and the hot-tempered guards don't bother with words.
+Now and then a town falls sick and the sick spread it among their neighbours, and then the board posts work to cure the
+sick and burn the blighted dead, for anyone who dies with it in them gets up the next night unless the body is burned or
+buried.
 
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
@@ -1533,6 +1596,10 @@ way up". Pod crews trade a rumour that **somebody lives on the Pale Moon**, and 
 escapee is "somebody's unfinished work". The spider's bite leaves a person quieter. None of it names the old war, the
 Quiet One, the Tinkerer's labs or the elder.
 
+**The realms' ways** (Andy approved, 2026-11-15; medieval picks). Each land's realms keep their own manners and laws: the north allows the duel, the sands charge for water, Blossom bows on greeting, the plains keep market days, and what is a crime in one is nothing in the next. Their soldiers come in five ranks (militia, soldier, knight, veteran, leader), and the militia lock shields in a wall with the archers behind. Keeps change hands in war and fly the winner's colours. A war on a seat comes in waves, with a lull between, and the realm's war chest pays for its defence; its court casters march with its war bands.
+
+**The realm steels** (Andy approved, 2026-11-15; medieval picks). Each people keeps its own steel: the Stoneborn a deep steel worked with lead, the forest folk a bright steel with silver in it, the orcs a crude bronze with ash. A realm's armour and weapon patterns are its own, forged only by its sworn smiths or from a captured pattern. The Stoneborn ride the big mountain goats no one else can tame, and the mountain goblins come down from the north in hordes.
+
 ## The sea
 
 A page found on drowned men, unsigned, called "A Wet Page": the tide brought the same stone up three times, and a stone
@@ -1542,6 +1609,10 @@ turning over to listen back. The writer stopped going to the shore.
 **Who sails.** Pirates, navies, merchants and whalers crew their ships, each with a sea captain, gunners, powder
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
+
+**The yards** (Andy approved, 2026-11-15, shipwright thread; "they can be of any patron"). A realm's ships are its own shipwright's work. He lays each one down beside its pier, keel first, the planking and decks rising over the days and the masts stepped last, so the whole harbour watches her grow. A realm goes whaling only once its yard has launched a whaleship, the deepest hull a shipwright builds: deep holds and two tryworks, so she can stay out on the far grounds for four whales before turning home. A ship lost at sea is laid down again the same way. Each shipwright keeps a patron of his own, and no ship of his goes afloat until something that patron wants has gone over her bow: a fish for the Deep Mother, an ingot for the Anvil-Father, a page for the Truth. Whoever brings the yard timber hurries the work and is remembered for it.
+
+**The fleets** (Andy approved, 2026-11-15, shipwright thread; with "the deepest hull" in The yards). A realm's warships are its fleet, and the richest realms build the biggest ship afloat to lead it: the man-of-war, three tall masts and a broadside of guns down each side, with frigates or war triremes sailing in pairs astern of her. A fief's warships belong to its overlord's fleet as well. They already fly his colours, and when his flagship comes near they fall in behind her, and every ship of a fleet goes to the help of one in a fight. Only pirates burn ships for what is in them, and they carry the crews off in chains to their coves, to be worked or ransomed until someone comes for them. A realm's navy sinks pirates too, but it pulls the survivors out of the sea and brings them in irons before the ruler, who sends them to the cells for piracy.
 
 (new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
 banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
@@ -1619,6 +1690,8 @@ a reason to go to mohknee"; approved by Andy 2026-11-14). Folded steel does ever
 steel does, and one thing it cannot: it takes the thin hard edge of Mohknee's swords, the long curved one and the short straight one. Dug iron and poured steel crack
 under that edge, so no smith on the home continent has ever made one, and whoever wants one sails east for the black sand.
 
+**Sky pirates** (Andy approved, 2026-11-15; medieval picks). When the steam towns first put balloon ships in the air, some were taken, and their takers stayed up there. Sky pirates keep a cove on a high peak, circle what they've marked, and come down on caravans, ships and towns with broadsides and powder kegs. A ship whose helmsman falls drifts on the wind and sinks. Rich realms keep a patrol airship of their own, lent by the steam towns, that fires a signal over a war band and blows a horn; the orc and barbarian bands beat war drums as they come.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -1694,6 +1767,8 @@ a fire and the eldest plays the old tunes while the rest dance or sit and listen
 nobody's enemy, but strike one and the whole grove comes at you with horns and hooves. Bring them honey, berries or wine
 and you are welcome at the fire, and a night there mends you and brings you luck.
 
+**The silk deeps** (Andy approved, 2026-11-15; medieval picks). Under the old hills some caves have gone to the spiders: silk over the walls, shed skins underfoot, egg sacs hung like fruit, the stone itself dark with them. At the deepest lies a **brood queen**, a spider grown huge on the cave's life, sleeping on her egg; strike the egg and she wakes. Above, a web-hung hut where someone once watched the nest keeps a map down. Spiders that take a living thing alive carry it home wrapped, which is how the dead sometimes wake there. Deep below the nests the **netcasters** hunt with thrown silk, and in the crimson and warped woods of the Nether a small spined spider bursts into web.
+
 ## Daily life
 
 **Kitchen and table.** Food is cooked at hob, grill and oven, in pot, skillet and saucepan, and a cook can get a
@@ -1713,6 +1788,8 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+**The chopping block** (Andy approved, 2026-11-15). Wherever folk split their own wood there is a chopping block: a round sawn off a log of the same tree, set on its end and scarred with old cuts. A log stood on it splits cleaner than one hacked on the bare ground, a plank more for the same work, and the better the axe the fewer the blows. The chips swept up round it are the sawdust the paper-pressers want. (In game: Powers PR #1599.)
+
 **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
 gear; approved 2026-11-14). A smith makes armour the way he makes tools: each piece is a plating cast
 in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the
@@ -1727,6 +1804,14 @@ belly until something holds them up. A cane or a crutch is a carpenter's work, o
 scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
 a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
 answer, and no stick helps the one who has lost both.
+
+(new) **Wet, washing and rust** (Claude's placement, 2026-11-15, for Andy to approve). Everyone knows the wet: a
+soaked man feels the cold twice over, his padding hangs heavy, his powder won't take, fire takes him slowly, and
+lightning runs through him into whoever stands beside him. Farm folk twist two sheaves' straw into a wisp and scrub pots, horses and themselves with it at
+the river, and that is how old blood comes off, the black stuff no rain will shift. Sand scours harder. Iron left wet
+rusts, and nothing takes rust off again: a soldier who lets his mail soak wears the stain until it falls apart. The Anvil-Father's iron has never liked the Deep Mother's water:
+sea spray rusts it twice as fast as rain, which the sailors say is the old quarrel showing. Gold, copper and bronze
+don't rust; that's why the rich wear them.
 
 (new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
 rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
@@ -1761,6 +1846,28 @@ wants no names, a traveller who will not walk alone, a night watch kept beside w
 lets run. A town talks about how its troubles ended, to your face, for a week or two. And villagers talk to each
 other whether anyone listens or not: the dog that dug up the Lantern Warden's bone, the price of salt, whose turn it
 is on the wall.
+
+**What the armourers make** (Fantasy Armor thread, 2026-11-15; Andy: "diamond gear should be removed, and replaced with something like this, netherite should remain as plating but for steel armor"; the rest is Claude's placement, approved by Andy 2026-11-15). No smith hammers armour out of diamond; diamond is too dear to beat flat and too brittle to take a blow. The best a smith makes is steel plate, and the best a rich man buys is netherite laid over it. A diamond goes into the **temper-stone** instead: a cut diamond set in amethyst and glow ink, which a smith works into a finished piece with one token of the order or the deed the armour is made for. The armour then is that order's, and anyone who has met the order knows it on sight. Villagers say so when they see it; nothing else does.
+
+**The barrow wardens' mail** (same thread). The barrow knights' own harness: kettle helm, long mail and a Warden-blue cloth. It falls rusted from them and stays rusted. Whoever wears all of it walks in the barrows as the knights' own, and the lantern rule still holds.
+
+**The dawnwatch and the headsmen** (same thread). The Crowned Sun keeps two orders in his realms. The **dawnwatch** are the Sun-Marshal's sworn knights in gilded plate with the rising sun on the breast; they stand the last watch of the night and are let go at sunrise. The **headsmen** carry out the crown's sentences, the thieves' hangings among them, in black plate edged with gold; a headsman's plate goes dull if he goes too long without his work. The Ash Whisperer's people spit at both.
+
+**The Giant-slayers** (same thread). When a Giant falls, its plates lie where it fell. A smith of the Anvil-Father can work them into a harness, each in the colour and weight of the highland its Giant kept (Highfield, Magnetic, Arctic, Irradiated). Only those who were there for the fall are ever seen in one.
+
+**The sky folk's robes and the well-wardens** (same thread). The sky folk's elders wear light, wind-cut robes and walk off island edges as if the overcast were a step down. Their **well-wardens** keep watch over the open wells in the Cloud Sea in grey, cloud-coloured plate, so that no skiff goes down one by mistake; in fog they are hard to see at all.
+
+**Who the well-wardens are** (Fantasy Armor thread; Andy approved, 2026-11-15). The well-wardens are the sky lord's wardens. They hold his castle, and they take turns going down to stand over the wells. Each sky village's elder is the one the village goes to first. The dawnwatch is the Sun-Marshal's sun-guard, and they stand with him when a group comes to try him.
+
+**The demons' ashen plate** (same thread). The demon captains of the Ash wear black spiked plate, forged down there in the dark. It falls from them and is the Nether's own make, not the war forts' Primal Visage.
+
+**The Warden's hunters** (same thread). In the Nightfall years the Lantern Warden's faithful hunted the blood-drinkers in long coats with silvered trim and a lantern at the belt. A few still do, and their coats can still be bought from the Warden's own.
+
+**Folded lamellar and the pit harness** (same thread). The blossom lords' guards wear the ronin's lamellar remade in folded steel, which only Mohknee's black sand gives. The fighting pits' champions wear the gladiator's harness, remade with the pit's own trophies; it is taken from a pit's warlord, never bought.
+
+**Back to back** (same thread). The four fought the long defence in pairs, back to back. Smiths still make paired harness for two who swear it at a shrine: each wears half, and a blow that lands on one is partly borne by the other.
+
+**The everburning mote** (Andy approved, 2026-11-15; Andy: "court wizards have developed a spell that lets a light mote inside a lantern burn indefinitely"). It is a court wizard's working, sold to those who can pay: a mote of their light shut in a lantern, which never needs oil and never gutters. Abandoned places have no one to tend their lamps, which is why the lamps of ruins flicker.
 
 ## Rules for writing against this
 
@@ -1978,6 +2085,10 @@ they keep their name and memory and lose what the old blood gave them. In the ca
 a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
 and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
 
+**What the old druids teach** (Andy approved, 2026-11-15; under "The body kept and the body given"). The old druids keep the rite of the new body to themselves, but not from
+their own: one who carries the sprig and sits with a hermit in his grove is told it, as the wood once told him. The
+new body keeps what its owner leaned to: a power that would have woken in the old life wakes in the new one, in time.
+
 (new) **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, for Andy to
 approve). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
 Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
@@ -2097,3 +2208,19 @@ already loose on the hilt, and the camps say the first blow of any battle is str
 (new) **Match and powder, the smiths' heads, the old fields** (Claude's placement for Andy's Knights & Heraldry picks, patch 6, 2026-11-14, for Andy to approve). The realms' first guns were the handgonne, an iron tube on a pole touched off with a burning match, and after it the arquebus, whose lever drops the match into the pan; the flintlock came last, and only the richest realms can keep a garrison in muskets. A realm arms its gunners by its purse: a poor kingdom or a fiefdom hands its picked men handgonnes, a prosperous one arquebuses, and every gunner knows a wet match is a club. The Anvil-Father's smiths forge two arrowheads for the wars of armour, the narrow bodkin that finds the rings of mail and the broad forked swallowtail that opens a man who wears none, and the hedge archers still loose pitch-soaked rags from the fire. Out on the old fields, where the line gave ground in the long defence and in the wars after it, the earth is still scuffed, and a brush turns up bones, heads and the wreck of old harness; now and then it is the heavy horned plate nobody forges any more, until a smith takes a broken piece apart at the drafting table and draws out how it was made.
 
 (new) **Taken, and taken alive** (Claude's placement for Andy's kidnapping work, 2026-11-14, for Andy to approve). The roads' outlaws are the same masked common folk who hold the bandit camps, and where a realm's patrols thin out they take people as well as goods: a farmer's daughter or a smith's apprentice carried off and kept trussed at a camp until somebody pays. Their knots are a road trick the bandits teach each other, worked so that struggling only pulls them tighter; a knife, an axe or a patient pair of hands undoes them, and a town that wants its own back pins it to the board. The courts post the other side of it too. A realm's justice wants its worst brought in breathing, to be heard and sentenced, and pays the same for one hogtied as for one beaten to the ground. What a captive says on the road depends on who they are: the kind beg to make amends, the greedy try to buy their way out, the devout confess, the proud want a fair fight, the spiteful promise that friends will come, and the brave would sooner serve the one who caught them. Letting a wanted one go is a crime of its own in every realm, and companions who keep the law walk away from whoever does it.
+
+**Hard ground** (Andy approved, 2026-11-15; GT New Horizons picks, patches 1 and 2). The land gives nothing for free since the sorcerer's fall: flint must be sifted from gravel, a table and a chest are bound with flint, and the first bricks are fired in a campfire pit before anyone has a kiln. Fields die away from water, crops and herds grow at half the old pace, and a beast clubbed to death is bruised meat. Folk eat widely or sicken of sameness, which is why a field hand carries a lunch box.
+
+**Water that comes back** (Andy approved, 2026-11-15; GT New Horizons picks, patch 3). Rivers, the sea and the marshes are the Deep Mother's, and whatever is taken from them she fills again; rain is her gift and fills what lies open under it. A pond pooled by hand in dry country holds what it was given and no more. Where there is no water at all, desert travellers press cactus round a bucket for a bitter drink that turns the stomach unless it is boiled first. The Tideborn call it "the Mother's thin milk" and won't touch it unboiled.
+
+**Tin and bronze, coke and steel** (Andy approved, 2026-11-15; GT New Horizons picks, patch 4). Tin is the Stoneborn's metal: its dark tinstone runs in great veins under the mountains, and the rivers coming down from them carry it out as tin sand for lowland panners. Bronze, three of copper to one of tin, is told as the Anvil-Father's first gift to smiths, and the metal bells are cast in. Coke ovens and brick blast furnaces are the smoky craft of the Mad Tinkerer's old workmen; charcoal pits, logs buried under earth to smoulder for days, are the older woodland way.
+
+**The forge's dangers** (Andy approved, 2026-11-15; GT New Horizons picks, patch 5). Smiths of the Anvil-Father say his fire and the sky's water never marry: a forge is roofed or it is doused, and a thunderstorm over an open smeltery cracks its brick. Cracked seared brick weeps its melt until a mason presses grout in with a hammer. Tanners cut thick smithing gloves for anyone who handles hot iron, lava or blaze rods. What a thing was made of (the ender's dark, the golem's iron, the slime's jelly, the blaze's ember) the smeltery gives back to the smith.
+
+**The marked, the mothers and the turned** (Andy approved, 2026-11-15; GT New Horizons picks, patch 6). The sorcerer's mana that went into the ground lies in seams; a thing of the dark that rises over one drinks some of it and carries it as a faint aura: the marked. The older the world grows, the more rise marked, and orc and goblin captains sleep on the seams to take the marks too. Mother spiders carry their brood on their backs; in the woods, flyers drop from the canopy on a line. The recently dead remember their trade (the fisher casts, the hunter shoots, the farmer throws his hoe); the old dead and the skeletons have forgotten. Punji stakes are the oldest trap of anyone holding a line: diggers line their pits with them and barbarians ring their palisades.
+
+**Mixed seams, float stones and the dowser's fork** (Andy approved, 2026-11-15; GT New Horizons picks, patch 7). The Anvil-Father's miners say no metal lies alone: iron keeps a thread of copper, copper keeps tin, gold keeps iron, and a patient washer finds the companion's grains. Over a great seam the ground is shot with lone stones of its ore, which miners call float and follow down. The dowser's fork, a forked rod with a pinch of the wanted ore bound in its crotch, knocks in the hand quicker the nearer its kind lies; the Anvil-Father's priests call it his pulse.
+
+**Sails, windsocks and the little boilers** (Andy approved, 2026-11-15; GT New Horizons picks, patch 8). Millers sew their own sails (hemp, wool, leather, and paper only as a stopgap) and read the wind, the same wind Aeolus keeps, off a striped windsock by the mill. The small steam boiler came out of the Mad Tinkerer's workshops; the craftsmen who worked there kept the trick when he vanished, and all of them warn: never fill a boiler that has boiled dry over the fire.
+
+**The steam towns** (Andy approved, 2026-11-15; GT New Horizons picks, patch 9). When the Mad Tinkerer vanished, the craftsmen who had built for him kept together and went on building steam from memory. Their towns are smoky places of brick, iron and creosoted timber, the only ones where a tinker or an engineer can still be found at the bench. They never had his drawings, so they could not build his pods; instead they hung railed decks under bags of wool with a boiler aboard, and each town keeps one such airship on its mast, flying travellers between the towns on the wind.
