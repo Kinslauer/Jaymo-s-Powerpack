@@ -63,6 +63,11 @@ final class CampChiefs {
 		}
 	}
 
+	/** Whether {@code mob} is a camp chief showing his bar. */
+	static boolean barred(net.minecraft.world.entity.Entity mob) {
+		return BARS.containsKey(mob.getUUID());
+	}
+
 	/** A camp's leader: a barbarian chief, a goblin king, an orc warchief. */
 	static boolean isRole(int role) {
 		return role == Folk.CHIEF || role == Goblins.KING || role == Orcs.WARCHIEF;

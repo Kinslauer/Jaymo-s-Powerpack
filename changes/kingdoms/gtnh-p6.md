@@ -7,7 +7,8 @@
   under open sky, after a crackle of warning). No words name a mark: each shows by a faint aura of its own typed
   `Fx` mote, haze or spark and its own sound; three or more marks bring a boss bar (`BossBars`, only for those who
   struck it). A little more loot and experience for each mark. Never on bosses, captains, villagers and folk, thralls,
-  or anyone's own beast.
+  or anyone's own beast, and never on a spawner's mobs (no marked farms). Storm and Ghastly marks only turn on players,
+  and a Ninja steps behind only a foe it can see.
 - **Captains** (Andy: "give these to captains"): the ten marks are also `Captains.Trait` strengths, rolled with the
   others (a heavy-footed or iron-clad one is never a Ninja, one who fears fire never Ghastly), named in the journal and
   told under questioning in each dialect; they act through the same code from `CaptainWays.step`.
@@ -25,5 +26,5 @@
   handed back worn (`creatures/WhittlingRecipe`, JEI's crafting page). Whatever walks into them is slowed and stabbed at
   each step, a fall onto them hurts as a stalagmite does, and mobs go round them when they can. Diggers set them in
   their pits (in place of pointed dripstone) and along a new bolt-hole tunnel out of each warren's chamber, and are
-  never stabbed by them; barbarian camps are founded with patches of them round the outside of the palisade.
+  never stabbed by them (the bolt-hole is dug only where it breaks into no water and takes no chest); barbarian camps are founded with patches of them round the outside of the palisade.
 - Built; not played.

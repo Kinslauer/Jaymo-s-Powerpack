@@ -3,6 +3,7 @@
 	"package": "com.jaymoskingdoms.mixin.wild",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"MarkedSpawnMixin",
 		"PredatorTargetMixin"
 	],
 	"injectors": {

@@ -37,6 +37,8 @@ public class PunjiBlock extends Block {
 	/** Moving at least this much (blocks a tick, sideways) counts as a step. */
 	static final double STEP = 0.003;
 
+	/** A body that has fallen this far (blocks) isn't caught by the stakes until it lands. */
+	static final double FALLING = 1.0;
 	public static final ResourceKey<DamageType> PUNJI = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKingdoms.id("punji"));
 	/** What a body stands on among the stakes (low enough to step onto, high enough that a fall lands on the stakes and not the
 	 * ground under them), and what's drawn and picked. */
@@ -56,7 +58,10 @@ public class PunjiBlock extends Block {
 		if (!(entity instanceof LivingEntity) || entity.isSpectator() || entity instanceof Digger) {
 			return;
 		}
-		entity.makeStuckInBlock(state, new Vec3(CRAWL, 0.75, CRAWL));
+		// a body still falling lands on the stakes first (being caught resets the fall, and the fall is what hurts)
+		if (entity.fallDistance < FALLING) {
+			entity.makeStuckInBlock(state, new Vec3(CRAWL, 0.75, CRAWL));
+		}
 		if (level instanceof ServerLevel server) {
 			Vec3 moved = entity.isClientAuthoritative() ? entity.getKnownMovement() : entity.oldPosition().subtract(entity.position());
 			if (Math.abs(moved.x) >= STEP || Math.abs(moved.z) >= STEP) {

@@ -236,6 +236,15 @@ public final class MarkedMonsters {
 			drops.addAll(extra);
 		});
 		ServerTickEvents.END_SERVER_TICK.register(MarkedMonsters::tick);
+		// webs still standing go before the world is saved, so none outlast their hold
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			for (Web web : WEBS) {
+				if (Loaded.made(web.level(), web.pos()) && web.level().getBlockState(web.pos()).is(Blocks.COBWEB)) {
+					web.level().removeBlock(web.pos(), false);
+				}
+			}
+			WEBS.clear();
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			for (ServerBossEvent bar : BARS.values()) {
 				bar.removeAllPlayers();
@@ -271,6 +280,13 @@ public final class MarkedMonsters {
 	}
 
 	/** A wild monster, nobody's, no boss, no captain, no villager or folk. */
+	/** A spawner's or trial spawner's mob is never marked ({@code MarkedSpawnMixin}): no marked farms. */
+	public static void spawned(Mob mob, EntitySpawnReason reason) {
+		if (reason == EntitySpawnReason.SPAWNER || reason == EntitySpawnReason.TRIAL_SPAWNER) {
+			mob.setAttached(MARKS, 0);
+		}
+	}
+
 	private static boolean markable(Mob mob) {
 		return WorldTiers.hostile(mob) && !(mob instanceof Folk) && !(mob instanceof AbstractVillager) && !Orcs.isOrc(mob) && !Goblins.isGoblin(mob)
 			&& !Captains.is(mob) && !Senses.boss(mob) && !TurnedVillagers.turned(mob)
@@ -371,7 +387,13 @@ public final class MarkedMonsters {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), m.sound, SoundSource.HOSTILE, SOUND_VOLUME * (m == Mark.STORM ? 0.4F : 1.0F),
 				0.8F + random.nextFloat() * 0.4F);
 		}
-		if (marks.size() >= BAR_AT && mob.tickCount % 5 == 0) {
+		if (BossBars.boss(mob) || CampChiefs.barred(mob)) {
+			// a chief or a lord already has his own bar
+			ServerBossEvent own = BARS.remove(mob.getUUID());
+			if (own != null) {
+				own.removeAllPlayers();
+			}
+		} else if (marks.size() >= BAR_AT && mob.tickCount % 5 == 0) {
 			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(), BossEvent.BossBarColor.PURPLE,
 				BossEvent.BossBarOverlay.NOTCHED_6));
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
@@ -386,7 +408,7 @@ public final class MarkedMonsters {
 		long now = level.getGameTime();
 		UUID id = mob.getUUID();
 		double d = mob.distanceTo(target);
-		if (marks.contains(Mark.GHASTLY) && now >= NEXT_GHAST.getOrDefault(id, 0L) && d >= GHAST_MIN && d <= GHAST_MAX && mob.hasLineOfSight(target)) {
+		if (marks.contains(Mark.GHASTLY) && target instanceof Player && now >= NEXT_GHAST.getOrDefault(id, 0L) && d >= GHAST_MIN && d <= GHAST_MAX && mob.hasLineOfSight(target)) {
 			NEXT_GHAST.put(id, now + GHAST_EVERY + random.nextInt(GHAST_EVERY / 2));
 			Vec3 to = new Vec3(target.getX() - mob.getX(), target.getY(0.5) - mob.getY(0.5), target.getZ() - mob.getZ());
 			SmallFireball ball = new SmallFireball(level, mob, to.normalize());
@@ -394,11 +416,11 @@ public final class MarkedMonsters {
 			level.addFreshEntity(ball);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GHAST_SHOOT, SoundSource.HOSTILE, 0.6F, 1.4F);
 		}
-		if (marks.contains(Mark.NINJA) && now >= NEXT_NINJA.getOrDefault(id, 0L) && d <= NINJA_RANGE && d > NINJA_BEHIND + 1.0) {
+		if (marks.contains(Mark.NINJA) && now >= NEXT_NINJA.getOrDefault(id, 0L) && d <= NINJA_RANGE && d > NINJA_BEHIND + 1.0 && mob.hasLineOfSight(target)) {
 			NEXT_NINJA.put(id, now + NINJA_EVERY + random.nextInt(NINJA_EVERY));
 			behind(level, mob, target);
 		}
-		if (marks.contains(Mark.STORM) && now >= NEXT_STORM.getOrDefault(id, 0L) && d >= STORM_MIN && d <= STORM_RANGE) {
+		if (marks.contains(Mark.STORM) && target instanceof Player && now >= NEXT_STORM.getOrDefault(id, 0L) && d >= STORM_MIN && d <= STORM_RANGE) {
 			NEXT_STORM.put(id, now + STORM_EVERY + random.nextInt(STORM_EVERY));
 			if (level.canSeeSky(target.blockPosition())) {
 				double angle = random.nextDouble() * Math.PI * 2.0, off = STORM_OFF_MIN + random.nextDouble() * (STORM_OFF_MAX - STORM_OFF_MIN);

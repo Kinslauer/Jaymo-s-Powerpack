@@ -90,6 +90,17 @@ final class Warrens {
 			if (!sound(level, roof) || level.getBlockState(roof).getBlock() instanceof FallingBlock || !sound(level, at.below())) {
 				return;
 			}
+			// nothing kept is dug out, and no water or lava waits beside the way
+			for (BlockPos cell : new BlockPos[] {at, at.above()}) {
+				if (level.getBlockEntity(cell) != null || !level.getFluidState(cell).isEmpty()) {
+					return;
+				}
+				for (Direction side : Direction.values()) {
+					if (!level.getFluidState(cell.relative(side)).isEmpty()) {
+						return;
+					}
+				}
+			}
 		}
 		for (int i = 2; i <= TUNNEL; i++) {
 			BlockPos at = floor.relative(way, i);

@@ -143,6 +143,8 @@ public final class TurnedVillagers {
 				zombie.spawnAtLocation(level, hand);
 			}
 			zombie.setItemSlot(EquipmentSlot.MAINHAND, tool);
+			// the tool came with the turning, not off a shelf: it isn't loot
+			zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		}
 	}
 
