@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: quill
 from: coordinator (for the "Find parts left out of PRs" thread, 2026-11-12)
 asked: 2026-11-12
@@ -23,3 +23,4 @@ PR #1377 (branch `claude/project-thread-m1adlf`) fixes parts that earlier PRs le
 - Andy merges only on "merge".
 - When done, `--note` what you changed and set `text_pass: done`.
 - 2026-11-12 19:06 Text pass: kingdoms lang parts reviewed (captain-ways, dialogue, form_skills, inhabitants, retaking, style, tidings, left_out_misc/older/sky/tundra, retaking_left_out, swordplay_left_out, twinblade_smiths) - values read plainly in speaker voice, keys unchanged; dialogues/main.json new menu keys match their lang values; powers lang parts reviewed (armory, blood_settings, divine, pack_advancements, left_out_eden/hardrock/misc/older/tundra, retaking_left_out, spot_sounds, swordplay_left_out) - keys unchanged; all 28 change notes read - fixed one garbled sentence in changes/kingdoms/left-out-misc.md ('game a Hunter's bullseye kills' -> 'when a Hunter's bullseye kills'); kingdoms/lore/the_long_defence.json aligned with Lore.md canon ('men and orcs' -> 'orcs and Warrior-born'; rising dark now names dead orcs and zombified piglins; swordsman now 'cast as he cut'; fifth already says little); kingdoms/lang/parts/lore-films.json checked - spoken demon-master offer lines, films themselves wordless per canon, no change needed; Java screens use only existing lang keys. Build: sh ./gradlew build in kingdoms/ BUILD SUCCESSFUL; python tools/pr_checks.py passed. Committed 083f4a221 and pushed to HEAD:claude/project-thread-m1adlf.
+- 2026-11-12 21:34 PR #1377 is merged into master; moved to Inbox/Done.
