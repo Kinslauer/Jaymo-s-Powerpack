@@ -5304,3 +5304,7 @@ Built; not played.
 
 - The vanilla recipes the Stone Age patch replaces (wooden doors, fences and gates, the iron door, torches, chest, crafting table, glass, paper, brick) also lose their vanilla unlock advancements, which still pointed at them and stopped the server from starting.
 - The future scrap chests give an iron chain (26.3's name for the chain), which also stopped the server from starting.
+
+## 0.24.18 (2026-11-15): Dynamic Waters: no more chunks without terrain from crossing streams
+
+- When two mountain streams' mouths landed on each other, Dynamic Waters' check for streams left dry by ravines asked each one about the other forever. The worker thread ran out of stack and the chunk was left without terrain (seen during a new world's pregen). A stream met again in the same check now counts as not left dry.
