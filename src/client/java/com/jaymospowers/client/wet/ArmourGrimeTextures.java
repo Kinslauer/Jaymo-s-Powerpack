@@ -36,6 +36,14 @@ import org.jspecify.annotations.Nullable;
  * whatever resource pack is drawing it, so the grime always sits on the armour's pixels and nowhere else. Its dark
  * outline pixels are left clean so the shape still reads.
  * <p>
+ * Each kind of armour wears its grime its own way ({@link Material}): leather and cloth soak it up as dark stains, iron and
+ * chain are caked over, gold sheds it from its polish and keeps it in its engraving, diamond packs it into its facets'
+ * cracks, and netherite takes a pale film of dust. A body's own clothes and skin ({@link ArmourGrime#BODY}) are painted
+ * over like a coat of blood ({@link #body}), from their own masks, as cloth.
+ * <p>
+ * Dust takes the colour of the ground it came off ({@link ArmourGrime.Grime#tint}). Grime shows early: a lightly dirty
+ * piece already has splotches on every part, and a filthy one is caked nearly all over, so a wash has a lot to take away.
+ * <p>
  * The colours suit the normal textures. With the optional Excalibur pack switched on, the grime takes Excalibur's grade
  * (darker, less saturated; {@code tools/excalibur_style/grade.py} on the default colours).
  * <p>
@@ -49,10 +57,10 @@ public final class ArmourGrimeTextures {
 	static final int EXCALIBUR_DUST = 0x94836B, EXCALIBUR_MUD = 0x41382E;
 	/** How many steps of dirtiness, and of muddiness, get their own picture. */
 	static final int STAGES = 10, MUD_STEPS = 3;
-	/** Even filthy, this share of the mask's order is never reached, so some armour always shows through. */
-	static final float MOST_COVER = 0.8F;
-	/** How far a grimy pixel goes toward the grime colour: at its edge, and at its heart. */
-	static final float EDGE_STRENGTH = 0.45F, HEART_STRENGTH = 0.85F;
+	/** How quickly the cover grows with dirtiness: below 1, a little dirt already shows a lot (cover = level to this power). */
+	static final float COVER_CURVE = 0.6F;
+	/** How far a stain soaked into cloth goes from the cloth's own (grime-dyed) colour toward the grime's colour. */
+	static final float SOAK_TINT = 0.45F;
 	/** Pixels darker than this (0..255 luminance) are outlines and stay clean. */
 	static final int OUTLINE = 40;
 	/** Painted pictures kept before all are thrown away and painted again as needed. */
@@ -60,7 +68,7 @@ public final class ArmourGrimeTextures {
 
 	private static final Map<String, Identifier> MADE = new HashMap<>();
 	private static final Set<Identifier> UNREADABLE = new HashSet<>();
-	private static @Nullable Mask armourDust, armourMud, itemDust, itemMud;
+	private static @Nullable Mask armourDust, armourMud, itemDust, itemMud, bodyDust, bodyMud;
 	/** (0.20.41) The blood masks: armour sheet, item icon, body skin. */
 	private static @Nullable Mask armourBlood, itemBlood, bodyBlood;
 	/** (0.20.41) Blood's steps of wetness (fresh to dried), how much of the mask's order soaked blood reaches, and how strong it is. */
@@ -94,7 +102,7 @@ public final class ArmourGrimeTextures {
 		MADE.clear();
 		UNREADABLE.clear();
 		masksRead = false;
-		armourDust = armourMud = itemDust = itemMud = null;
+		armourDust = armourMud = itemDust = itemMud = bodyDust = bodyMud = null;
 		armourBlood = itemBlood = bodyBlood = null;
 		excalibur = false;
 		for (String id : minecraft.getResourcePackRepository().getSelectedIds()) {
@@ -216,6 +224,81 @@ public final class ArmourGrimeTextures {
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
 
+	/**
+	 * Just the grime to lay over a body drawn from the skin {@code base}: splotches on its clothes and skin, legs first,
+	 * soaked in as stains; over the outer layer too when {@code layered} (as {@link #skin} does blood). Null for none.
+	 */
+	public static @Nullable Identifier body(Identifier base, ArmourGrime.@Nullable Grime grime, boolean layered) {
+		if (grime == null || grime.amount() <= 0) {
+			return null;
+		}
+		readMasks();
+		if (bodyDust == null || bodyMud == null) {
+			return null;
+		}
+		Identifier painted = paint(base, grime, bodyDust, bodyMud, null, null, true, false, layered);
+		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), grime, bodyDust, bodyMud, null, null, true, true);
+	}
+
+	/**
+	 * How a kind of armour wears its grime, from its texture's name: how much of the mask filthy armour reaches, how strong
+	 * a splotch is at its edge and heart, how much sooner its dark creases get dirty than its bright faces ({@code crevice}),
+	 * whether it soaks grime in as a stain (darkening its own colour) instead of being caked over, and how pale a film of
+	 * dust it takes ({@code film}, for dark armour).
+	 */
+	enum Material {
+		METAL(0.9F, 0.55F, 0.9F, 0.3F, false, 0.0F),
+		CLOTH(0.95F, 0.5F, 0.85F, 0.0F, true, 0.0F),
+		GOLD(0.75F, 0.45F, 0.8F, 0.6F, false, 0.0F),
+		GEM(0.8F, 0.5F, 0.85F, 1.0F, false, 0.0F),
+		DARK(0.9F, 0.4F, 0.7F, 0.2F, false, 0.45F),
+		SHELL(0.85F, 0.5F, 0.85F, 0.5F, false, 0.0F);
+
+		/** The pale dust dark armour's film goes toward. */
+		static final int FILM = 0xD2C6B2;
+
+		final float cover, edge, heart, crevice, film;
+		final boolean soak;
+
+		Material(float cover, float edge, float heart, float crevice, boolean soak, float film) {
+			this.cover = cover;
+			this.edge = edge;
+			this.heart = heart;
+			this.crevice = crevice;
+			this.soak = soak;
+			this.film = film;
+		}
+
+		static Material of(Identifier texture) {
+			String path = texture.getPath().toLowerCase(Locale.ROOT);
+			if (has(path, "leather", "cloth", "wool", "robe", "hide", "fur", "linen", "silk", "padded", "gambeson")) {
+				return CLOTH;
+			}
+			if (has(path, "netherite", "obsidian", "blackened", "onyx")) {
+				return DARK;
+			}
+			if (has(path, "gold", "gilded", "brass")) {
+				return GOLD;
+			}
+			if (has(path, "diamond", "emerald", "amethyst", "crystal", "gem", "quartz")) {
+				return GEM;
+			}
+			if (has(path, "turtle", "scute", "shell", "carapace", "bone")) {
+				return SHELL;
+			}
+			return METAL;
+		}
+
+		private static boolean has(String path, String... words) {
+			for (String word : words) {
+				if (path.contains(word)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	/** (0.20.41) Blood to paint: how soaked (a stage, 1 to {@link #STAGES}) and its colour as it looks now (drying darker). */
 	record Smear(int stage, int colour) {
 	}
@@ -263,17 +346,22 @@ public final class ArmourGrimeTextures {
 		}
 		int stage = grime == null ? 0 : Mth.clamp(Mth.ceil(grime.level() * STAGES), 1, STAGES);
 		int mudStep = grime == null ? 0 : Math.round(grime.muddiness() * MUD_STEPS);
-		String key = base + "|" + stage + "|" + mudStep + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
+		// rounded to steps, so a slowly changing colour doesn't paint a new picture every time
+		int tint = grime == null || grime.tint() == 0 ? 0 : grime.tint() & 0xF0F0F0 | 0x080808;
+		boolean onBody = dust != null && dust == bodyDust;
+		Material material = onBody ? Material.CLOTH : Material.of(base);
+		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (onBody ? "|s" : "") + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
 		}
 		NativeImage image;
-		if (whole && bloodMask != null) {
+		Mask wholeMask = bloodMask != null ? bloodMask : dust;
+		if (whole && wholeMask != null) {
 			// (0.20.41) a skin we can't read: paint over a whole, plain one the mask's size
-			image = new NativeImage(bloodMask.width(), bloodMask.height(), false);
-			for (int y = 0; y < bloodMask.height(); y++) {
-				for (int x = 0; x < bloodMask.width(); x++) {
+			image = new NativeImage(wholeMask.width(), wholeMask.height(), false);
+			for (int y = 0; y < wholeMask.height(); y++) {
+				for (int x = 0; x < wholeMask.width(); x++) {
 					image.setPixel(x, y, 0xFFFFFFFF);
 				}
 			}
@@ -287,10 +375,10 @@ public final class ArmourGrimeTextures {
 		if (MADE.size() >= MOST_KEPT) {
 			reset();
 		}
-		float level = stage / (float) STAGES;
+		float level = (float) Math.pow(stage / (float) STAGES, COVER_CURVE);
 		float muddy = mudStep / (float) MUD_STEPS;
-		int colour = lerpRgb(muddy, excalibur ? EXCALIBUR_DUST : DUST, excalibur ? EXCALIBUR_MUD : MUD);
-		float threshold = 1.0F - MOST_COVER * level;
+		int colour = lerpRgb(muddy, dust(tint), excalibur ? EXCALIBUR_MUD : MUD);
+		float threshold = 1.0F - material.cover * level;
 		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
 		int w = image.getWidth(), h = image.getHeight();
 		// (0.20.66) only a square skin has the outer layer's layout (an old 64 by 32 one is made square before it's drawn)
@@ -322,15 +410,33 @@ public final class ArmourGrimeTextures {
 						}
 					}
 				}
-				if (grime != null && dust != null && mud != null && a != 0 && lum >= OUTLINE) {
-					int dm = dust.at(x, y, w, h), mm = mud.at(x, y, w, h);
+				if (grime != null && dust != null && mud != null && a != 0 && (onBody || lum >= OUTLINE)) {
+					int dm = outer ? dust.at(under(x, y, w), w, h) : dust.at(x, y, w, h);
+					int mm = outer ? mud.at(under(x, y, w), w, h) : mud.at(x, y, w, h);
 					float order = ((1.0F - muddy) * (dm >>> 24) + muddy * (mm >>> 24)) / 255.0F;
+					if (order > 0.0F) {
+						// dark creases fill first, bright faces last
+						order += material.crevice * (0.5F - lum / 255.0F) * 0.6F;
+					}
 					if (order > 0.0F && order > threshold) {
 						float shade = ((1.0F - muddy) * (dm & 0xFF) + muddy * (mm & 0xFF)) / 255.0F;
-						float strength = EDGE_STRENGTH + (HEART_STRENGTH - EDGE_STRENGTH) * Math.min(1.0F, (order - threshold) * 4.0F);
-						// the grime keeps a little of the armour's own light and shadow
-						float k = shade * (0.7F + 0.3F * lum / 255.0F);
-						int gr = Math.round((colour >> 16 & 0xFF) * k), gg = Math.round((colour >> 8 & 0xFF) * k), gb = Math.round((colour & 0xFF) * k);
+						float strength = material.edge + (material.heart - material.edge) * Math.min(1.0F, (order - threshold) * 4.0F);
+						int gr, gg, gb;
+						if (material.soak) {
+							// soaked in: the cloth's own colour dyed by the grime, part way to the grime's own (dust dulls dark
+							// cloth paler, mud stains light cloth darker), the weave still showing through
+							float k = 0.55F + 0.45F * shade;
+							gr = mix(Math.min(255, Math.round(r * (colour >> 16 & 0xFF) / 210.0F * k)), Math.round((colour >> 16 & 0xFF) * k), SOAK_TINT);
+							gg = mix(Math.min(255, Math.round(g * (colour >> 8 & 0xFF) / 210.0F * k)), Math.round((colour >> 8 & 0xFF) * k), SOAK_TINT);
+							gb = mix(Math.min(255, Math.round(b * (colour & 0xFF) / 210.0F * k)), Math.round((colour & 0xFF) * k), SOAK_TINT);
+						} else {
+							// caked on: the grime keeps a little of the armour's own light and shadow
+							int c = material.film > 0.0F ? lerpRgb(material.film, colour, Material.FILM) : colour;
+							float k = shade * (0.7F + 0.3F * lum / 255.0F);
+							gr = Math.round((c >> 16 & 0xFF) * k);
+							gg = Math.round((c >> 8 & 0xFF) * k);
+							gb = Math.round((c & 0xFF) * k);
+						}
 						if (overlay) {
 							int over = Math.round(strength * a);
 							if ((out >>> 24) < over) {
@@ -375,6 +481,20 @@ public final class ArmourGrimeTextures {
 		return (y + dy * u) * w + x + dx * u;
 	}
 
+	/** The dust colour for a grime's {@code tint} (0: plain tan), graded like the plain tan when Excalibur is on. */
+	private static int dust(int tint) {
+		if (tint == 0) {
+			return excalibur ? EXCALIBUR_DUST : DUST;
+		}
+		if (!excalibur) {
+			return tint;
+		}
+		int r = (tint >> 16 & 0xFF) * (EXCALIBUR_DUST >> 16 & 0xFF) / (DUST >> 16 & 0xFF);
+		int g = (tint >> 8 & 0xFF) * (EXCALIBUR_DUST >> 8 & 0xFF) / (DUST >> 8 & 0xFF);
+		int b = (tint & 0xFF) * (EXCALIBUR_DUST & 0xFF) / (DUST & 0xFF);
+		return Math.min(255, r) << 16 | Math.min(255, g) << 8 | Math.min(255, b);
+	}
+
 	private static int mix(int from, int to, float t) {
 		return Mth.clamp(Math.round(from + (to - from) * t), 0, 255);
 	}
@@ -392,6 +512,8 @@ public final class ArmourGrimeTextures {
 		armourMud = Mask.read(JaymosPowers.id("textures/grime/armour_mud.png"));
 		itemDust = Mask.read(JaymosPowers.id("textures/grime/item_dust.png"));
 		itemMud = Mask.read(JaymosPowers.id("textures/grime/item_mud.png"));
+		bodyDust = Mask.read(JaymosPowers.id("textures/grime/body_dust.png"));
+		bodyMud = Mask.read(JaymosPowers.id("textures/grime/body_mud.png"));
 		armourBlood = Mask.read(JaymosPowers.id("textures/blood/armour_blood.png"));
 		itemBlood = Mask.read(JaymosPowers.id("textures/blood/item_blood.png"));
 		bodyBlood = Mask.read(JaymosPowers.id("textures/blood/body_blood.png"));

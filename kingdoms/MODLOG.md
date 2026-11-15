@@ -13679,3 +13679,20 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - Andy: "What if we played a loud whale breech". In the aerwhale's entrance film its call (a dolphin chirp) is now a breach: a rush of air as it surges up, a deep crash as it bursts through, a long rising and falling whale call, then spray falling back. It plays at full loudness on the watcher's own game, from where the whale is, timed so the crash lands where the call used to (BossIntroClient.BREACHERS; the server leaves the old call out, BossIntros.BREACHERS). Friendly Creatures slider; subtitle "Whale breaches".
 - The sound is our own, synthesised from nothing by `tools/gen_whale_breach.py` (sounds/film/whale_breach.ogg, about 5 s).
 - Built; not played.
+
+## 0.9.6 (2026-11-14): folk notice dirt: remarks and slower hearts (#1573)
+
+- **People notice dirt** (Andy: "MCA should take note of their cleanliness and so will others"): dirt a player wears where it can be seen (Powers' `ArmourGrime.noticed`: their armour or their own clothes) is remarked on like blood, after blood and before smell, by every villager and other folk in sight, one at a time, each once in 8 minutes: dust gets a word, mud a frown, a filthy, caked player a recoil. Goblins and orcs approve, with their own lines (`lang/parts/dirt_remarks.json`).
+- **MCA folk warm slower to the muddy**: a chat, joke, story or flirt with a muddy player loses a quarter of the hearts it won, a filthy one half (at least one); dust costs nothing, and goblins and orcs don't mind (`Stench.hearts`, from `McaDialogueMixin`). Being clean is never punished.
+- Classes: `Stench`, `PowersCompat.grimeSeen`, `McaDialogueMixin`. Needs Powers with `ArmourGrime.noticed` (does nothing without it).
+- Built; not played.
+
+## 0.9.7 (2026-11-14): Life tab arrows work (#1574)
+
+- The < and > arrows beside the picture on the Life tab's cards (and on the Nature page's) now change the pick. The card's text box was laid over them and took their clicks.
+
+## 0.9.8 (2026-11-15): Skipping the story no longer stops you spawning (#1576)
+
+- "Skip the story" no longer asks the server to send MCA's creator again. That request reset MCA's mark that your body was made, and if the creator then didn't come, the game waited for it forever and never set you down at your start.
+- "< The story" on the Life tab still takes you back to the life story; MCA's creator now comes back as soon as the story is lived or skipped again, without asking the server.
+- "Live this life" on a skipped story's own page tidies the picks first (the start is left to fate), so the server always accepts them.
