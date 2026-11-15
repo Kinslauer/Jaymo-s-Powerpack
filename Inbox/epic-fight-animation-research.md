@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -7,6 +7,7 @@ thread: 1571606079198986321
 claimed_by: hermes-b
 pr:
 suggested_owns: []
+writer: hermes-writer
 ---
 
 # Research Epic Fight animation system
