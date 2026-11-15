@@ -517,6 +517,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Roost.register();
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
+		// coins tossed from the hand draw the villagers near to scramble for them
+		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)

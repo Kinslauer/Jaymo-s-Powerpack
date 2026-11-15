@@ -145,6 +145,11 @@ final class CreeperFlight {
 		return t.creeper();
 	}
 
+	/** Whether {@code mob} is running from a hissing creeper just now ({@link CoinToss} leaves its legs alone). */
+	static boolean fleeing(PathfinderMob mob) {
+		return !THREATS.isEmpty() && threat(mob) != null;
+	}
+
 	/** The run: it takes the mob's legs while a creeper near it hisses. */
 	private static final class Run extends Goal {
 		private final PathfinderMob mob;
