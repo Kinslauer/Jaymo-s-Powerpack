@@ -126,15 +126,43 @@ public final class Hearing {
 	/** The meter shows a player's loudest own noise of the last this many ticks. */
 	static final int NOISE_SHOWN = 20;
 
-	/** The ring: how far a mob's call carries to its friends (blocks; a leader's: {@link BandLeaders#BAND}), how many come, how wide they spread round the spot, how often one calls (ticks). */
-	static final double RING_RANGE = 12.0, RING_RADIUS = 3.0, RING_LOUDNESS = 0.9;
-	static final int RING_MAX = 6, RING_GAP = 200;
+	/**
+	 * The ring: how far a mob's call carries to its friends (blocks; a leader's: {@link BandLeaders#BAND}), how many come, how
+	 * wide they spread round the spot (growing a little with their number, never past {@link #RING_RADIUS_MAX}), how often
+	 * one calls (ticks), and how long (ticks) one sent to its place in a ring keeps it against the same player's noises.
+	 */
+	static final double RING_RANGE = 12.0, RING_RADIUS = 2.5, RING_RADIUS_PER = 0.2, RING_RADIUS_MAX = 4.0, RING_LOUDNESS = 0.9;
+	static final int RING_MAX = 6, RING_GAP = 200, RING_HOLD = 100;
+	/** A band's "spread out" is shouted by its leader only, at most once a band in this long (ticks). */
+	static final int SPREAD_GAP = 100;
+	/** A ring place is moved to standable ground within this many blocks up or down, or else it is the spot itself. */
+	static final int STAND_UP = 2, STAND_DOWN = 4;
 
 	/** How a voice sounds, for the meter. */
 	public static final int QUIET = 0, WHISPER = 1, TALK = 2, SHOUT = 3;
 
-	/** A noise: where, how far it carries, whose (if anyone's), what kind, when (game time). */
-	record Sound(ServerLevel level, Vec3 at, double reach, @Nullable UUID who, Kind kind, long made) {
+	/** A noise: where, how far it carries, whose (if anyone's), what kind, when (game time); and whether a ring was called on it. */
+	static final class Sound {
+		final ServerLevel level;
+		final Vec3 at;
+		final double reach;
+		final @Nullable UUID who;
+		final Kind kind;
+		final long made;
+		boolean rung;
+
+		Sound(ServerLevel level, Vec3 at, double reach, @Nullable UUID who, Kind kind, long made) {
+			this.level = level;
+			this.at = at;
+			this.reach = reach;
+			this.who = who;
+			this.kind = kind;
+			this.made = made;
+		}
+	}
+
+	/** A mob sent to its place in a ring: whose noise it was, and until when it keeps the place. */
+	private record Held(UUID who, long until) {
 	}
 
 	private record Pending(Mob mob, Sound sound) {
@@ -155,6 +183,9 @@ public final class Hearing {
 	/** Strikes noted as their shot is taken out of the world, made into noise on the next tick. */
 	private static final List<Sound> STRUCK = new ArrayList<>();
 	private static final Map<Mob, Long> RANG = new WeakHashMap<>();
+	private static final Map<Mob, Held> HELD = new WeakHashMap<>();
+	/** A band's side → when its leader last shouted to spread out. */
+	private static final Map<String, Long> SPREAD = new HashMap<>();
 	/** Player → {reach x 10, game time} of their loudest recent noise. */
 	private static final Map<UUID, long[]> NOISE = new HashMap<>();
 	/** From Simple Voice Chat's thread: player → the farthest their voice carried since the last send (blocks). */
@@ -182,6 +213,8 @@ public final class Hearing {
 			SHOTS.clear();
 			STRUCK.clear();
 			RANG.clear();
+			HELD.clear();
+			SPREAD.clear();
 			NOISE.clear();
 			VOICES.clear();
 			SPOKE.clear();
@@ -321,6 +354,16 @@ public final class Hearing {
 	/** {@code mob} heard {@code s} as loud as {@code loudness} (blocks of its reach left where it stands). */
 	private static void heard(Mob mob, Sound s, double loudness) {
 		ServerLevel level = s.level;
+		Held held = HELD.get(mob);
+		if (held != null) {
+			if (s.made < held.until && s.who != null && s.who.equals(held.who)) {
+				// sent to its place in a ring round this player's noise: it keeps it, and calls no ring of its own
+				return;
+			}
+			if (s.made >= held.until) {
+				HELD.remove(mob);
+			}
+		}
 		ServerPlayer player = s.who == null ? null : level.getServer().getPlayerList().getPlayer(s.who);
 		boolean animal = mob.getType().builtInRegistryHolder().is(Footsteps.HEARS);
 		if (Footsteps.guard(mob) || animal && mob instanceof TamableAnimal tame && tame.isTame()) {
@@ -329,7 +372,7 @@ public final class Hearing {
 		}
 		if (mob instanceof Spider spider) {
 			if (SpiderMinds.heard(spider, s.at) && s.who != null) {
-				ring(level, mob, s.at, s.who, loudness);
+				ring(level, mob, s, loudness);
 			}
 			return;
 		}
@@ -338,22 +381,25 @@ public final class Hearing {
 		}
 		boolean faint = !s.kind.urgent && loudness < s.reach * EDGE_SHARE;
 		if (Senses.hear(mob, s.at, s.who, loudness, faint) == Senses.LURED && s.who != null) {
-			ring(level, mob, s.at, s.who, loudness);
+			ring(level, mob, s, loudness);
 		}
 	}
 
 	// ---- the ring ------------------------------------------------------------------------------------------------------
 
 	/**
-	 * {@code caller} heard {@code who} at {@code spot} and goes to look: it calls (its own cry, or a band's shout) and the
-	 * idle friends near it come too, spread round the spot in a ring instead of all on the one block.
+	 * {@code caller} heard {@code s} (a player's) and goes to look: it calls (its own cry, or a band leader's shout) and the
+	 * idle friends near it come too, spread round the spot in a ring instead of all on the one block. One ring a sound: the
+	 * first to hear it calls, and those it sends keep their places ({@link #HELD}) against what they hear of it themselves.
 	 */
-	static void ring(ServerLevel level, Mob caller, Vec3 spot, UUID who, double loudness) {
+	static void ring(ServerLevel level, Mob caller, Sound s, double loudness) {
 		long now = level.getGameTime();
 		Long last = RANG.get(caller);
-		if (last != null && now - last < RING_GAP) {
+		UUID who = s.who;
+		if (s.rung || who == null || last != null && now - last < RING_GAP) {
 			return;
 		}
+		Vec3 spot = s.at;
 		RANG.put(caller, now);
 		double range = BandLeaders.isLeader(caller) ? BandLeaders.BAND : RING_RANGE;
 		String side = Comrades.side(caller);
@@ -366,28 +412,62 @@ public final class Hearing {
 		if (friends.size() > RING_MAX) {
 			friends = friends.subList(0, RING_MAX);
 		}
-		// a band's shout, or the mob's own cry
-		if (!Callouts.say(caller, "lead.spread", null, true)) {
+		s.rung = true;
+		// a band leader's shout (once a band in a while), or the mob's own cry
+		Long spread = SPREAD.get(side);
+		if (BandLeaders.isLeader(caller) && (spread == null || now - spread >= SPREAD_GAP) && Callouts.say(caller, "lead.spread", null, true)) {
+			SPREAD.put(side, now);
+		} else {
 			caller.playAmbientSound();
 		}
 		int n = friends.size() + 1;
 		double base = Math.atan2(caller.getZ() - spot.z, caller.getX() - spot.x);
 		for (int i = 0; i < friends.size(); i++) {
 			Mob friend = friends.get(i);
-			Vec3 at = ringSpot(spot, base, i + 1, n);
-			if (friend instanceof Spider spider) {
-				SpiderMinds.heard(spider, at);
-			} else {
-				Senses.lure(friend, at, who, loudness * RING_LOUDNESS);
+			Vec3 at = ringSpot(level, spot, base, i + 1, n, RING_RADIUS_MAX);
+			boolean went = friend instanceof Spider spider ? SpiderMinds.heard(spider, at) : Senses.lure(friend, at, who, loudness * RING_LOUDNESS);
+			if (went) {
+				hold(friend, who, now);
 			}
 		}
 	}
 
-	/** The {@code i}th of {@code n} places round {@code spot}, the first ({@code i} 0) at angle {@code base}. */
-	static Vec3 ringSpot(Vec3 spot, double base, int i, int n) {
+	/** {@code mob} was sent to its place in a ring round {@code who}'s noise: it keeps it a while. */
+	static void hold(Mob mob, UUID who, long now) {
+		HELD.put(mob, new Held(who, now + RING_HOLD));
+	}
+
+	/**
+	 * The {@code i}th of {@code n} places round {@code spot}, the first ({@code i} 0) at angle {@code base}, no further out
+	 * than {@code most}, on standable ground near it (else the spot itself).
+	 */
+	static Vec3 ringSpot(ServerLevel level, Vec3 spot, double base, int i, int n, double most) {
 		double a = base + Mth.TWO_PI * i / n;
-		double r = RING_RADIUS + 0.25 * n;
-		return new Vec3(spot.x + Math.cos(a) * r, spot.y, spot.z + Math.sin(a) * r);
+		double r = Math.min(most, RING_RADIUS + RING_RADIUS_PER * n);
+		double x = spot.x + Math.cos(a) * r, z = spot.z + Math.sin(a) * r;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		int y0 = Mth.floor(spot.y);
+		for (int k = 0; k <= STAND_UP + STAND_DOWN; k++) {
+			// (0, +1, -1, +2, -2, ...: the nearest height first)
+			int dy = (k & 1) == 1 ? (k + 1) / 2 : -(k / 2);
+			if (dy > STAND_UP || -dy > STAND_DOWN) {
+				continue;
+			}
+			pos.set(Mth.floor(x), y0 + dy, Mth.floor(z));
+			if (standable(level, pos)) {
+				return new Vec3(x, pos.getY(), z);
+			}
+		}
+		return spot;
+	}
+
+	/** A mob can stand at {@code pos}: open there and above, solid ground below, no fire or lava. */
+	private static boolean standable(ServerLevel level, BlockPos pos) {
+		BlockPos below = pos.below();
+		net.minecraft.world.level.block.state.BlockState floor = level.getBlockState(below);
+		return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty()
+			&& level.getFluidState(pos).isEmpty() && !floor.getCollisionShape(level, below).isEmpty()
+			&& !floor.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK) && !level.getBlockState(pos).is(net.minecraft.tags.BlockTags.FIRE);
 	}
 
 	/** {@code m} is {@code caller}'s friend: of its side, or both plain monsters. */
@@ -405,26 +485,52 @@ public final class Hearing {
 			return;
 		}
 		if (entity instanceof Projectile shot && gun(shot)) {
-			Entity owner = shot.getOwner();
-			if (owner instanceof ServerPlayer player && silent(player)) {
-				return;
-			}
-			Vec3 from = owner != null ? owner.getEyePosition() : shot.position();
-			UUID who = owner instanceof ServerPlayer ? owner.getUUID() : null;
-			SHOTS.put(shot, new Shot(from, who));
-			noise(level, from, owner instanceof LivingEntity shooter && suppressed(shooter.getMainHandItem()) ? SUPPRESSED : SHOT, who, Kind.SHOT);
+			fired(level, shot);
 		}
 	}
 
-	private static void unloaded(Entity entity, ServerLevel level) {
-		if (SHOTS.isEmpty()) {
+	/**
+	 * {@code shot} (a ball, a bullet, cannon shot) has just left the muzzle, where it is now: the bang, heard far ({@link #SHOT},
+	 * a suppressed TaCZ gun's {@link #SUPPRESSED}), and the shot watched for where it strikes. Once a shot: a gun that fires
+	 * something not tagged ({@link #GUNSHOTS}), such as a musket's arrow without WeaponMod, calls this itself.
+	 */
+	public static void fired(ServerLevel level, Entity shot) {
+		if (SHOTS.containsKey(shot)) {
 			return;
 		}
-		Shot shot = SHOTS.remove(entity);
+		Entity owner = shot instanceof Projectile p ? p.getOwner() : null;
+		if (owner instanceof ServerPlayer player && silent(player)) {
+			return;
+		}
+		Vec3 from = shot.position();
+		UUID who = owner instanceof ServerPlayer ? owner.getUUID() : null;
+		SHOTS.put(shot, new Shot(from, who));
+		noise(level, from, owner instanceof LivingEntity shooter && suppressed(shooter.getMainHandItem()) ? SUPPRESSED : SHOT, who, Kind.SHOT);
+	}
+
+	/** {@code shot} struck at {@code at}: if far enough from the muzzle, a noise there (next tick). */
+	public static void struck(Entity shot, Vec3 at) {
+		Shot s = SHOTS.remove(shot);
+		if (s != null && shot.level() instanceof ServerLevel level && at.distanceToSqr(s.from) >= IMPACT_MIN * IMPACT_MIN) {
+			STRUCK.add(new Sound(level, at, IMPACT, s.who, Kind.IMPACT, level.getGameTime()));
+		}
+	}
+
+	/** {@code shot} spent itself in the air (flew its full way): no strike. */
+	public static void spent(Entity shot) {
+		SHOTS.remove(shot);
+	}
+
+	private static void unloaded(Entity entity, ServerLevel level) {
+		if (SHOTS.isEmpty() || !SHOTS.containsKey(entity)) {
+			return;
+		}
 		Entity.RemovalReason why = entity.getRemovalReason();
-		if (shot != null && why != null && why.shouldDestroy() && entity.position().distanceToSqr(shot.from) >= IMPACT_MIN * IMPACT_MIN) {
+		if (why != null && why.shouldDestroy()) {
 			// where the ball or bullet struck (heard next tick, out of the middle of the world taking it away)
-			STRUCK.add(new Sound(level, entity.position(), IMPACT, shot.who, Kind.IMPACT, level.getGameTime()));
+			struck(entity, entity.position());
+		} else {
+			SHOTS.remove(entity);
 		}
 	}
 
@@ -481,7 +587,7 @@ public final class Hearing {
 
 	/** A gun's ball or bullet, or cannon shot. */
 	static boolean gun(Entity e) {
-		if (e.getType().builtInRegistryHolder().is(GUNSHOTS)) {
+		if (e.getType().builtInRegistryHolder().is(GUNSHOTS) || SHOTS.containsKey(e)) {
 			return true;
 		}
 		Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());

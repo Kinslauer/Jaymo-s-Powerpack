@@ -45,7 +45,8 @@ import net.minecraft.world.phys.Vec3;
  * automatically makes you sound like a ghost if you speak otherwise it is muted". Group calls are left as they are.</li>
  * <li><b>Mobs hear you talk</b> ({@link #overheard}, the medieval picks' Hearing). Every word spoken by proximity is
  * decoded and its loudness measured (RMS, in dB) against that player's own normal voice: the median of their last
- * {@link #WINDOW} spoken frames, so a quiet microphone is no free stealth. At their normal level a voice carries
+ * {@link #WINDOW} spoken frames (a minute of talk), learned slowly and leaving out frames more than {@link #BASELINE_ABOVE_DB}
+ * dB over it, so a yell never becomes the normal and a quiet microphone is no free stealth. At their normal level a voice carries
  * {@link #VOICE_REACH} blocks, twice that for every {@link #DOUBLING_DB} dB louder (between {@link #SOFTEST} and
  * {@link #LOUDEST} times), a whisper {@link #WHISPER_SHARE} of that; {@link Hearing} sends it out from their head, through
  * the walls, to the monsters and (at night, a trespasser's) the guards. After Mob Senses' voice tracking (Shamanalle, MIT;
@@ -68,22 +69,31 @@ public final class VoiceRange implements VoicechatPlugin {
 	static final double DOUBLING_DB = 10.0, SHOUT_FROM = 1.6;
 	/** Quieter than this (dBFS) is silence; a player's normal level before they've said enough, and the bounds it's kept within. */
 	static final double SILENCE_DB = -52.0, START_DB = -24.0, NORMAL_MIN_DB = -44.0, NORMAL_MAX_DB = -8.0;
-	/** Spoken frames (20 ms each) a player's normal level is taken over, and the fewest before it's theirs. */
-	static final int WINDOW = 64, CALIBRATED = 6;
+	/**
+	 * Spoken frames (20 ms each) a player's normal level is taken over (a minute of talk), the fewest before it's theirs, and
+	 * how often (frames) the normal is worked out again. Once it is theirs, frames more than {@link #BASELINE_ABOVE_DB} over it
+	 * (shouting) are left out of it, so a yell carries far however long it lasts.
+	 */
+	static final int WINDOW = 3000, CALIBRATED = 100, RECOUNT = 50;
+	static final double BASELINE_ABOVE_DB = 5.0;
+	/** One in this many frames left out still goes in, so a microphone turned up for good is learned in a few minutes. */
+	static final int LOUD_KEPT = 10;
 
 	/** A player's microphone: their recent spoken levels and its median, their normal voice. */
 	private static final class Mic {
 		private final double[] window = new double[WINDOW];
-		private int count, next;
+		private int count, next, since, loud;
 		private double normal = START_DB;
 
 		/** A frame at {@code db}: how much further than their normal voice it carries. A whisper doesn't move the normal. */
 		synchronized double scale(double db, boolean whisper) {
-			if (!whisper) {
+			boolean kept = this.count < CALIBRATED || db <= this.normal + BASELINE_ABOVE_DB || ++this.loud % LOUD_KEPT == 0;
+			if (!whisper && kept) {
 				this.window[this.next] = db;
 				this.next = (this.next + 1) % WINDOW;
 				this.count = Math.min(WINDOW, this.count + 1);
-				if (this.count >= CALIBRATED) {
+				if (this.count >= CALIBRATED && (++this.since >= RECOUNT || this.count == CALIBRATED)) {
+					this.since = 0;
 					double[] sorted = java.util.Arrays.copyOf(this.window, this.count);
 					java.util.Arrays.sort(sorted);
 					double median = (this.count & 1) == 1 ? sorted[this.count / 2] : (sorted[this.count / 2 - 1] + sorted[this.count / 2]) / 2.0;
