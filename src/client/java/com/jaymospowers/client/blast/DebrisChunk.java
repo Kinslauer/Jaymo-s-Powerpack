@@ -59,6 +59,11 @@ final class DebrisChunk extends TerrainParticle {
 		if (this.lying) {
 			return;
 		}
+		if (this.age > CLEAR + 1 && solidAt(this.x, this.y, this.z) >= 0.0) {
+			// buried in rock the blast didn't break: gone, rather than climbing up through it
+			this.remove();
+			return;
+		}
 		this.yd -= GRAVITY;
 		double nx = this.x + this.xd, ny = this.y + this.yd, nz = this.z + this.zd;
 		if (this.age <= CLEAR) {
