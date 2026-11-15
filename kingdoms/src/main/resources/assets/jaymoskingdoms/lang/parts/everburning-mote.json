@@ -4,5 +4,13 @@
 	"block.jaymoskingdoms.mote_lantern": "Mote Lantern",
 	"message.jaymoskingdoms.mote.offer": "A mote of the court's light, shut in your lantern? It never wants oil, never gutters. %s, and it's yours.",
 	"message.jaymoskingdoms.mote.poor": "%s, friend. Come back when your purse is heavier.",
-	"message.jaymoskingdoms.mote.done": "There. It will burn when we are both long gone."
+	"message.jaymoskingdoms.mote.done": "There. It will burn when we are both long gone.",
+	"block.jaymoskingdoms.guttering_copper_lantern": "Guttering Copper Lantern",
+	"block.jaymoskingdoms.guttering_waxed_copper_lantern": "Guttering Waxed Copper Lantern",
+	"block.jaymoskingdoms.guttering_exposed_copper_lantern": "Guttering Exposed Copper Lantern",
+	"block.jaymoskingdoms.guttering_waxed_exposed_copper_lantern": "Guttering Waxed Exposed Copper Lantern",
+	"block.jaymoskingdoms.guttering_weathered_copper_lantern": "Guttering Weathered Copper Lantern",
+	"block.jaymoskingdoms.guttering_waxed_weathered_copper_lantern": "Guttering Waxed Weathered Copper Lantern",
+	"block.jaymoskingdoms.guttering_oxidized_copper_lantern": "Guttering Oxidized Copper Lantern",
+	"block.jaymoskingdoms.guttering_waxed_oxidized_copper_lantern": "Guttering Waxed Oxidized Copper Lantern"
 }

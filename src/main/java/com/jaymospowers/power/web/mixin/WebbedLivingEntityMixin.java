@@ -32,6 +32,30 @@ abstract class WebbedLivingEntityMixin {
 		return new Vec3(0.0, Math.min(0.0, input.y), 0.0);
 	}
 
+	/**
+	 * The same for anything that moves itself its own way (flyers and swimmers whose travel never comes here: phantoms,
+	 * ghasts, allays, squid and the like): just before it travels, it loses all way across, and one that flies
+	 * sinks slowly, a caught moth ({@link Webbed#SINK}).
+	 */
+	@Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V"))
+	private void jaymospowers$webbedAdrift(CallbackInfo ci) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (!Webbed.held(self)) {
+			return;
+		}
+		Vec3 v = self.getDeltaMovement();
+		self.setDeltaMovement(0.0, self.isNoGravity() ? -Webbed.SINK : self.isInWater() ? Math.min(v.y, 0.0) : v.y, 0.0);
+	}
+
+	/** (Andy) An Emberborn burns any web they touch ({@link Webbed#emberTouch}). */
+	@Inject(method = "tick", at = @At("TAIL"))
+	private void jaymospowers$emberTouch(CallbackInfo ci) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if ((self.tickCount & 1) == 0 && self.isAlive() && self.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			Webbed.emberTouch(level, self);
+		}
+	}
+
 	@Inject(method = "jumpFromGround", at = @At("HEAD"))
 	private void jaymospowers$webbedHop(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;

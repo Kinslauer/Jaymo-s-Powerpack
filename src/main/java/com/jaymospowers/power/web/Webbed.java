@@ -72,6 +72,8 @@ public final class Webbed {
 	public static final int UNDER_TICKS = 60, UNDER_TICKS_MOB = 40;
 	/** A hop is this much less than a jump (0.5 = half as high). */
 	public static final double HOP = 0.5;
+	/** A webbed flyer (anything without gravity) sinks this fast (blocks a tick). */
+	public static final double SINK = 0.04;
 	/** Struggling: this many fresh presses tear a layer off; a press this long (ticks) after the last starts the count again. */
 	public static final int STRUGGLE_PRESSES = 6;
 	public static final int STRUGGLE_FORGET = 40;
@@ -256,6 +258,30 @@ public final class Webbed {
 		level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.01);
 		level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 6, 0.25, 0.25, 0.25, 0.01);
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.6F);
+	}
+
+	/**
+	 * Webs an Emberborn burns at a touch (Andy: "emberborn burn any webs they contact"), beyond any cobweb-like
+	 * {@code WebBlock}: Web's own weblines, goo walls and symbiote webs and goo. Other mods (Kingdoms) add theirs to the tag.
+	 */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> EMBER_BURNS = net.minecraft.tags.TagKey.create(
+		Registries.BLOCK, JaymosPowers.id("ember_burns"));
+
+	/**
+	 * (from {@code WebbedLivingEntityMixin}, every other tick) An Emberborn burns away every web touching them: in their
+	 * body, under their feet or against their sides.
+	 */
+	public static void emberTouch(ServerLevel level, LivingEntity body) {
+		if (!emberborn(body)) {
+			return;
+		}
+		net.minecraft.world.phys.AABB box = body.getBoundingBox().inflate(0.05, 0.1, 0.05);
+		for (BlockPos p : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(p);
+			if (state.is(EMBER_BURNS) || state.getBlock() instanceof net.minecraft.world.level.block.WebBlock) {
+				burnBlock(level, p.immutable());
+			}
+		}
 	}
 
 	/** Milk was drunk: everything else went, the web stays on ({@code WebbedMilkMixin}). */

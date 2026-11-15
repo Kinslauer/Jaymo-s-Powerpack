@@ -3,7 +3,9 @@ package com.jaymoskingdoms.wild;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -25,6 +27,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -46,8 +49,10 @@ import org.jspecify.annotations.Nullable;
  */
 public final class SpiderLairs {
 	// ---- tuning ----
-	/** Underground (no sky over you, below the sea), a spider this near (blocks) is enough for them to take you. */
+	/** Underground (at least {@link #UNDER} blocks below the ground's top), a spider this near (blocks) is enough for them to take you. */
 	static final double SPIDERS_NEAR = 16.0;
+	/** This far (blocks) below the top of the ground over you (leaves and canopy aside) is underground. */
+	static final int UNDER = 4;
 	/** A nest cave's spawner is looked for this many chunks round where you fell; one counts with this many cobwebs round it. */
 	static final int NEST_CHUNKS = 3, NEST_WEBS = 3, NEST_WEB_REACH = 4;
 	/** In a nest cave you wake between these distances (blocks) from its spawner. */
@@ -70,7 +75,8 @@ public final class SpiderLairs {
 	public static @Nullable GlobalPos take(ServerPlayer player, @Nullable Entity by) {
 		ServerLevel level = player.level();
 		BlockPos fell = player.blockPosition();
-		boolean underground = !level.canSeeSky(fell) && fell.getY() < level.getSeaLevel();
+		int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, fell.getX(), fell.getZ());
+		boolean underground = fell.getY() <= surface - UNDER;
 		if (!(by instanceof Spider) && !(underground && !level.getEntitiesOfClass(Spider.class, new AABB(fell).inflate(SPIDERS_NEAR),
 			Entity::isAlive).isEmpty())) {
 			return null;
@@ -79,7 +85,7 @@ public final class SpiderLairs {
 		BlockPos at = nest(level, fell, random);
 		BlockPos cache = at == null ? null : cacheSpot(level, at, 3);
 		if (at == null || cache == null) {
-			at = hollow(level, fell, !underground && level.canSeeSky(fell), random);
+			at = hollow(level, underground ? fell : new BlockPos(fell.getX(), surface - DEPTH, fell.getZ()), !underground, random);
 			cache = at == null ? null : cacheSpot(level, at, HALF);
 		}
 		if (at == null) {
@@ -144,11 +150,12 @@ public final class SpiderLairs {
 	// ---- a hollow they dug ----
 
 	/**
-	 * A round hollow dug in natural ground: under {@code fell} with a burrow up to the air ({@code open}), or about it
-	 * (underground). Its floor's middle (where they lie), or null if the ground there can't be dug.
+	 * A round hollow dug in natural ground with its floor's middle at {@code floor}: under where they fell on the surface,
+	 * with a burrow up to the air ({@code open}), or about where they fell underground. Anything wet beside what's dug is
+	 * walled off with cobblestone, so it never floods. The floor's middle (where they lie), or null if the ground there
+	 * can't be dug.
 	 */
-	private static @Nullable BlockPos hollow(ServerLevel level, BlockPos fell, boolean open, RandomSource random) {
-		BlockPos floor = open ? fell.below(DEPTH) : fell;
+	private static @Nullable BlockPos hollow(ServerLevel level, BlockPos floor, boolean open, RandomSource random) {
 		if (floor.getY() - 1 <= level.getMinY() + 2) {
 			return null;
 		}
@@ -166,7 +173,7 @@ public final class SpiderLairs {
 			Direction[] ways = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 			int start = random.nextInt(4);
 			for (int i = 0; i < 4 && burrow.isEmpty(); i++) {
-				List<BlockPos> path = burrow(level, floor, fell, ways[(start + i) % 4]);
+				List<BlockPos> path = burrow(level, floor, ways[(start + i) % 4]);
 				if (path != null) {
 					burrow.addAll(path);
 				}
@@ -189,6 +196,9 @@ public final class SpiderLairs {
 		for (BlockPos p : burrow) {
 			level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 		}
+		Set<BlockPos> dug = new HashSet<>(room);
+		dug.addAll(burrow);
+		seal(level, dug);
 		// silk strung across the roof and the corners, never where they lie
 		for (int i = 0, placed = 0; i < WEBS * 4 && placed < WEBS; i++) {
 			BlockPos p = room.get(random.nextInt(room.size()));
@@ -207,24 +217,39 @@ public final class SpiderLairs {
 		return floor;
 	}
 
-	/** The burrow from the hollow's edge toward {@code way}, up a block a step to the air over {@code fell}'s height, or null. */
-	private static @Nullable List<BlockPos> burrow(ServerLevel level, BlockPos floor, BlockPos fell, Direction way) {
+	/**
+	 * The burrow from the hollow's edge toward {@code way}: a stair up a block a step, dug three high so there's headroom to
+	 * climb each step, till it comes out at the top of the ground (open air over its last step), or null.
+	 */
+	private static @Nullable List<BlockPos> burrow(ServerLevel level, BlockPos floor, Direction way) {
 		List<BlockPos> path = new ArrayList<>();
 		BlockPos at = floor.relative(way, HALF);
-		for (int step = 0; step <= DEPTH + 2; step++) {
+		for (int step = 0; step <= DEPTH + 4; step++) {
 			at = at.relative(way).above();
-			for (BlockPos p : new BlockPos[] {at, at.above()}) {
+			for (BlockPos p : new BlockPos[] {at, at.above(), at.above(2)}) {
 				BlockState s = level.getBlockState(p);
 				if (!s.isAir() && !diggable(s)) {
 					return null;
 				}
 				path.add(p);
 			}
-			if (at.getY() >= fell.getY() && level.canSeeSky(at.above())) {
+			if (at.getY() >= level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ())) {
 				return path;
 			}
 		}
 		return null;
+	}
+
+	/** Every fluid beside what was dug ({@code dug}) walled off with cobblestone, so the lair never floods. */
+	private static void seal(ServerLevel level, Set<BlockPos> dug) {
+		for (BlockPos p : dug) {
+			for (Direction d : Direction.values()) {
+				BlockPos side = p.relative(d);
+				if (!dug.contains(side) && !level.getFluidState(side).isEmpty()) {
+					level.setBlock(side, Blocks.COBBLESTONE.defaultBlockState(), Block.UPDATE_ALL);
+				}
+			}
+		}
 	}
 
 	/** A floor spot by the wall about {@code centre} ({@code reach} out) for the cache, or null. */
