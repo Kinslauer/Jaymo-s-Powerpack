@@ -286,7 +286,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Homesteads.register();
 		LOGGER.debug("homestead attachment: {}", Homesteads.HOMESTEADS);
 		// (gb-haggle) the jobs haggled over
-		LOGGER.debug("haggle attachment: {}", Haggle.HAGGLED);
+		LOGGER.debug("haggle attachments: {} {}", Haggle.HAGGLED, Haggle.OFFER_HAGGLED);
 		HeldBack.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.130: the downed state itself is

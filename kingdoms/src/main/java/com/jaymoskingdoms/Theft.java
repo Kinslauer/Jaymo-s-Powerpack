@@ -445,8 +445,8 @@ public final class Theft {
 	}
 
 	private static void broke(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
-		// (gb-tent) and anything in your own homestead is yours
-		boolean own = Placed.byPlayer(player, level, pos, state) || Homesteads.owns(player, level, pos);
+		// (gb-tent) and the land's own blocks in your own homestead are yours (never anyone's goods there)
+		boolean own = Placed.byPlayer(player, level, pos, state) || Homesteads.mayBreak(player, level, pos, state, entity);
 		Placed.forget(level, pos);
 		if (own) {
 			// (0.5.46) breaking a block you placed yourself is no crime

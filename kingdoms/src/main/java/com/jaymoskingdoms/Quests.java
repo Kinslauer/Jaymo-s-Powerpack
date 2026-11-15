@@ -410,7 +410,7 @@ public final class Quests {
 			if (q.giver().uuid().equals(giver.getUUID()) && !Tales.ofTale(q)) {
 				QuestNet.View v = view(level, player, q, ready(player, q) ? QuestNet.READY : QuestNet.ACTIVE);
 				// (gb-haggle) board work just pulled off the board: its poster may yet be asked for more
-				views.add(Haggle.may(level, player, q, false) ? v.haggling() : v);
+				views.add(Haggle.may(level, player, giver, q, false) ? v.haggling() : v);
 			}
 		}
 		if (views.isEmpty()) {
@@ -433,7 +433,7 @@ public final class Quests {
 			if (q != null) {
 				QuestNet.View v = view(level, player, q, QuestNet.OFFER);
 				// (gb-haggle) before taking it, the player may ask for more
-				views.add(Haggle.may(level, player, q, true) ? v.haggling() : v);
+				views.add(Haggle.may(level, player, giver, q, true) ? v.haggling() : v);
 			}
 		}
 		Component note = views.isEmpty() ? Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.nothing.king" : "quest.jaymoskingdoms.nothing")

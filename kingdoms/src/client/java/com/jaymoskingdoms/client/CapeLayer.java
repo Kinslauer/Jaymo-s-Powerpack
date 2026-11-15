@@ -77,6 +77,9 @@ public final class CapeLayer<S extends HumanoidRenderState> extends RenderLayer<
 	}
 
 	private static final Map<Integer, Sim> SIMS = new HashMap<>();
+	/** Each chest stack's cape colours, read once (ItemStack is compared by identity); {@link #NONE} for none. */
+	private static final Map<net.minecraft.world.item.ItemStack, int[]> COLOURS = new java.util.WeakHashMap<>();
+	private static final int[] NONE = new int[0];
 
 	private CapeLayer(RenderLayerParent<S, HumanoidModel<S>> renderer) {
 		super(renderer);
@@ -98,9 +101,13 @@ public final class CapeLayer<S extends HumanoidRenderState> extends RenderLayer<
 
 	/** From the living renderer's extractRenderState: {@code entity}'s cape, if its chest armour carries one, stepped and sampled. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		int[] colours = Capes.of(entity.getItemBySlot(EquipmentSlot.CHEST));
+		net.minecraft.world.item.ItemStack chest = entity.getItemBySlot(EquipmentSlot.CHEST);
+		int[] colours = chest.isEmpty() ? NONE : COLOURS.computeIfAbsent(chest, s -> {
+			int[] read = Capes.of(s);
+			return read == null ? NONE : read;
+		});
 		Minecraft minecraft = Minecraft.getInstance();
-		if (colours == null || minecraft.level == null || entity.isInvisible()) {
+		if (colours == NONE || minecraft.level == null || entity.isInvisible()) {
 			state.setData(CAPE, null);
 			return;
 		}

@@ -183,6 +183,8 @@ public final class HeraldryWear {
 	/** {@code mob} rules {@code faction} (a king, a lord; from {@link Rulers#fit} too): the realm's crest, and gilded spaulders. */
 	static void ruler(Mob mob, Faction faction) {
 		Harness.dress(mob, crest(mob.level().getServer(), faction), HeraldryArmour.stack("plate_spaulders", HeraldryArmour.GILDED));
+		// (gb-capes) and the realm's cape on whatever chest piece they wear
+		Capes.ensure(mob, faction, true);
 	}
 
 	/** Off the throne ({@link Rulers#unfit}): the crest and the gilt go. */

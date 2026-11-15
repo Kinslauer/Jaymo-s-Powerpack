@@ -723,19 +723,22 @@ public final class LifeStory {
 	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress) {
 	}
 
-	/** (gb-realmcards) A realm's person as last dressed, by faction id: dressed once a server run (it draws gear at random). */
-	private static final java.util.Map<Integer, Realm> DRESSED = new java.util.HashMap<>();
+	/** (gb-realmcards) A realm's person as last dressed, by the realm's look (id, name, colour, kind, overlord): dressed again only when that changes (it draws gear at random). */
+	private static final java.util.Map<String, Realm> DRESSED = new java.util.HashMap<>();
 	private static final EquipmentSlot[] DRESS_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET,
 		EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
 
 	/** (gb-realmcards) {@code f} as the realm page shows it: one of its guards dressed as its folk are (never put in the world). */
 	private static Realm dressed(ServerLevel level, Faction f) {
-		Realm known = DRESSED.get(f.id());
-		if (known != null && known.name().equals(f.name())) {
+		int colour = f.styleColor(level.getServer()).getId();
+		// (kept by its look: its name, colour, kind and overlord, so a realm restyled is dressed afresh)
+		String key = f.id() + "|" + f.name() + "|" + colour + "|" + f.type() + "|" + f.overlord();
+		Realm known = DRESSED.get(key);
+		if (known != null) {
 			return known;
 		}
+		DRESSED.keySet().removeIf(k -> k.startsWith(f.id() + "|"));
 		Climate climate = Climate.at(level, f.seat());
-		int colour = f.styleColor(level.getServer()).getId();
 		List<ItemStack> dress = new ArrayList<>();
 		try {
 			Folk folk = JaymosKingdoms.FOLK.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
@@ -751,7 +754,7 @@ public final class LifeStory {
 			dress.clear();
 		}
 		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress));
-		DRESSED.put(f.id(), r);
+		DRESSED.put(key, r);
 		return r;
 	}
 

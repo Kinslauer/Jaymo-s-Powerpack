@@ -71,8 +71,10 @@ public final class Customs {
 	static final double ANSWER_COS = 0.8;
 	/** What a bow back, and a snub, do to your name there; at most this many of each count a day per realm. */
 	static final int BOW_REP = 1, SNUB_REP = -1, BOW_DAILY = 3;
-	/** A duel won in the north: this much more thought of you there, once a day per realm. */
+	/** A duel won in the north: this much more thought of you there, once a day per realm, and never twice from one opponent. */
 	static final int DUEL_REP = 2;
+	/** An opponent beaten in a duel carries this tag with the winner's id: they've nothing more to prove to each other. */
+	static final String BEATEN_TAG = "jaymoskingdoms.duel_lost:";
 	/** Lines each sign has. */
 	static final int LINES = 3;
 	static final double SPEECH_RANGE = 12.0;
@@ -169,6 +171,15 @@ public final class Customs {
 
 	// ---- the north's duels --------------------------------------------------------------------------------------
 
+	/** (From {@link Retaliation}) {@code victim}, struck, takes it as a challenge: a grown, armed townsman of a northern realm. */
+	static boolean duelAccepted(ServerLevel level, @Nullable Faction f, LivingEntity victim) {
+		if (!duels(level, f) || victim.isBaby() || victim instanceof Aging aging && CourtWizards.isElder(level, aging)) {
+			return false;
+		}
+		net.minecraft.world.item.ItemStack held = victim.getMainHandItem();
+		return held.is(net.minecraft.tags.ItemTags.SWORDS) || held.is(net.minecraft.tags.ItemTags.AXES) || held.is(net.minecraft.tags.ItemTags.SPEARS);
+	}
+
 	/** (From {@link Retaliation}) a duel's opening: the one struck takes it up. */
 	static void duelTaken(ServerLevel level, LivingEntity who) {
 		say(level, who, "duel", Speech.YELLOW);
@@ -177,6 +188,11 @@ public final class Customs {
 	/** (From {@link Retaliation}) {@code who} backed off hurt from {@code player} in a duel: beaten fair, and they own it. */
 	static void yielded(ServerPlayer player, ServerLevel level, @Nullable Faction f, LivingEntity who) {
 		say(level, who, "yield", Speech.WHITE);
+		String beaten = BEATEN_TAG + player.getUUID();
+		if (who.entityTags().contains(beaten)) {
+			return;
+		}
+		who.addTag(beaten);
 		if (f != null && countToday(level.getServer(), player, f, "duel", 1)) {
 			Reputation.change(player, f, DUEL_REP);
 		}

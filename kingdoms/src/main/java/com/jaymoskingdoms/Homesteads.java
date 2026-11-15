@@ -82,13 +82,37 @@ public final class Homesteads {
 		return Math.abs(pos.getX() - home.getX()) <= RADIUS && Math.abs(pos.getZ() - home.getZ()) <= RADIUS && Math.abs(pos.getY() - home.getY()) <= HEIGHT;
 	}
 
+	/**
+	 * Breaking {@code state} at {@code pos} is {@code player}'s own business: it's in their homestead and is the land's own
+	 * (nobody placed it) and nobody's goods (no container, bed, door, workstation or bell). What they placed there
+	 * themselves is theirs anyway ({@link Placed}).
+	 */
+	static boolean mayBreak(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity entity) {
+		if (!owns(player, level, pos) || Placed.any(level, pos) || entity != null || state.is(net.minecraft.tags.BlockTags.BEDS)
+			|| state.is(net.minecraft.tags.BlockTags.DOORS) || state.is(net.minecraft.tags.BlockTags.TRAPDOORS) || state.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+			|| state.is(Blocks.BELL)) {
+			return false;
+		}
+		return net.minecraft.world.entity.ai.village.poi.PoiTypes.forState(state).isEmpty();
+	}
+
 	/** {@code pos} is in {@code player}'s own homestead. */
 	static boolean owns(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		if (level != Factions.level(level.getServer())) {
 			return false;
 		}
 		BlockPos home = of(level, player.getUUID());
-		return home != null && within(home, pos);
+		if (home == null || !within(home, pos)) {
+			return false;
+		}
+		// (never over another's patch, should two ever touch)
+		String me = player.getUUID().toString();
+		for (var e : all(level).entrySet()) {
+			if (!e.getKey().equals(me) && within(e.getValue(), pos)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Whose homestead {@code pos} is in (null if nobody's). */
@@ -133,6 +157,11 @@ public final class Homesteads {
 	 * it falls short shown in smoke) if the foundation isn't all laid by them, or there's no room above it.
 	 */
 	private static boolean pitch(ServerLevel level, ServerPlayer player, BlockPos middle, Direction front) {
+		if (!free(level, player, middle)) {
+			// on or near a settlement's land, or over someone else's patch: no claim here
+			level.sendParticles(player, ParticleTypes.LARGE_SMOKE, true, false, middle.getX() + 0.5, middle.getY() + 1.2, middle.getZ() + 0.5, 12, 0.6, 0.3, 0.6, 0.0);
+			return false;
+		}
 		boolean ok = true;
 		for (int dx = -FOOT; dx <= FOOT; dx++) {
 			for (int dz = -FOOT; dz <= FOOT; dz++) {
@@ -179,6 +208,34 @@ public final class Homesteads {
 		return true;
 	}
 
+	/**
+	 * A patch round {@code middle} may be claimed by {@code player}: it lies clear of every settlement (its village and
+	 * the land it claims, and a village not yet anyone's) and overlaps no one else's homestead.
+	 */
+	private static boolean free(ServerLevel level, ServerPlayer player, BlockPos middle) {
+		net.minecraft.server.MinecraftServer server = level.getServer();
+		if (Factions.around(server, level, middle, Villages.VILLAGE_RADIUS + RADIUS) != null
+			|| Seats.structureAt(level, middle, Seats::village).status() != Seats.Status.NONE) {
+			return false;
+		}
+		for (int sx = -1; sx <= 1; sx++) {
+			for (int sz = -1; sz <= 1; sz++) {
+				if (Factions.at(server, level, middle.offset(sx * RADIUS, 0, sz * RADIUS)) != null) {
+					return false;
+				}
+			}
+		}
+		String me = player.getUUID().toString();
+		for (var e : all(level).entrySet()) {
+			BlockPos other = e.getValue();
+			if (!e.getKey().equals(me) && Math.abs(other.getX() - middle.getX()) <= 2 * RADIUS && Math.abs(other.getZ() - middle.getZ()) <= 2 * RADIUS
+				&& Math.abs(other.getY() - middle.getY()) <= 2 * HEIGHT) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** The tent's blocks over the foundation at {@code middle}: wool walls each side, a ridge, a closed back and a bedroll. */
 	private static Map<BlockPos, BlockState> tent(BlockPos middle, Direction front) {
 		Direction side = front.getClockWise();
@@ -210,7 +267,9 @@ public final class Homesteads {
 		Component refused = Crowns.found(player, null, home.above());
 		level.playSound(null, bell, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0F, refused == null ? 0.8F : 1.4F);
 		if (refused != null) {
-			player.sendOverlayMessage(refused);
+			// not here, or not yet: a cracked note and smoke, nothing said
+			level.playSound(null, bell, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.6F, 0.8F);
+			level.sendParticles(player, ParticleTypes.SMOKE, true, false, bell.getX() + 0.5, bell.getY() + 0.8, bell.getZ() + 0.5, 10, 0.3, 0.3, 0.3, 0.0);
 		}
 	}
 }

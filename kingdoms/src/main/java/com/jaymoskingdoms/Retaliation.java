@@ -164,16 +164,19 @@ final class Retaliation {
 			say(level, victim, "flee");
 			return;
 		}
+		// (gb-customs) in the north an armed townsman struck takes it as a challenge: a duel, nobody else's business, and no crime
+		boolean duel = brawl == null && Customs.duelAccepted(level, f, victim);
 		if (brawl == null) {
 			brawl = new Brawl(f, victim.getUUID(), now);
 			BRAWLS.put(player.getUUID(), brawl);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.start").withStyle(ChatFormatting.RED));
+			if (!duel) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.start").withStyle(ChatFormatting.RED));
+			}
 		}
 		brawl.lastBlow = now;
 		brawl.blows++;
 		brawl.brawlers.put(victim.getUUID(), now + PUNCH_TICKS / 2);
-		if (Customs.duels(level, f)) {
-			// (gb-customs) the north settles it with fists: a duel, nobody else's business, and no crime
+		if (duel) {
 			brawl.duel = true;
 			Customs.duelTaken(level, victim);
 			return;
@@ -312,7 +315,7 @@ final class Retaliation {
 					// ((0.7.490) a haven's sworn fights on)
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
-					if (brawl.duel) {
+					if (brawl.duel && mob.getUUID().equals(brawl.first)) {
 						// (gb-customs) beaten fair in a northern duel
 						Customs.yielded(player, level, brawl.faction, mob);
 					} else {

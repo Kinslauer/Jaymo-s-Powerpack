@@ -65,15 +65,20 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	 * (gb-sails) The sails' belly, as a share of the model's: hanging slack in a calm, full in a good wind (a strong one fills
 	 * them a little past it). It eases toward what the wind gives by this share a tick.
 	 */
-	static final float SLACK = 0.22F, FULL_MOST = 1.15F, FILL_EASE = 0.12F;
+	static final float SLACK = 0.7F, FULL_MOST = 1.15F, FILL_EASE = 0.12F;
 	/** Gusts swell and ease the belly by this share (at a full wind), slowly; a ripple runs up the cloth by this share. */
 	static final float GUST = 0.18F, GUST_SPEED = 0.11F, RIPPLE = 0.06F, RIPPLE_SPEED = 0.35F;
-	/** Flapping: how far the cloth flogs either way (a share of the belly), and how fast. */
-	static final float FLAP = 0.85F, FLAP_SPEED = 1.6F;
+	/** Flapping: how much of the belly the cloth flogs away (it snaps between that and full), and how fast. */
+	static final float FLAP = 0.4F, FLAP_SPEED = 1.6F;
 	/** Turning this many degrees a tick across the wind sets them flapping hard; in irons they flog with the wind's strength. */
 	static final float FLAP_TURN = 2.5F, IRONS_FROM = 125.0F;
-	/** The belly is never drawn thinner than this (either way), so the cloth keeps its faces. */
-	static final float THINNEST = 0.05F;
+	/**
+	 * The belly is never drawn shallower than this. The sail's block model holds its yard and the ropes to the mast too, which
+	 * the scale takes with it: this keeps the yard round and the ropes all but reaching the mast.
+	 */
+	static final float THINNEST = 0.7F;
+	/** The yard's middle, in front of the sail block's face (pixels): the cloth stands out from it and the yard stays put. */
+	static final float YARD = 0.5F;
 
 	public static final class State extends EntityRenderState {
 		final List<MovingBlockRenderState> blocks = new ArrayList<>();
@@ -244,10 +249,11 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		// slack in a calm, the cloth sags and stirs a little
 		b += (1.0F - Math.min(1.0F, fill)) * 0.06F * Mth.sin(time * 0.05F + piece.z() * 0.7F);
 		if (sea[2] > 0.0F) {
-			float flog = Mth.sin(time * FLAP_SPEED + piece.y() * 1.3F + piece.x() * 0.7F + piece.z() * 0.5F);
-			b = Mth.lerp(sea[2], b, b * (1.0F - FLAP) + FLAP * flog);
+			// it snaps between spilled and full, never inside out
+			float flog = 0.5F + 0.5F * Mth.sin(time * FLAP_SPEED + piece.y() * 1.3F + piece.x() * 0.7F + piece.z() * 0.5F);
+			b = Mth.lerp(sea[2], b, b * (1.0F - FLAP * flog));
 		}
-		return Math.abs(b) < THINNEST ? Math.copySign(THINNEST, b == 0.0F ? 1.0F : b) : b;
+		return Mth.clamp(b, THINNEST, FULL_MOST + GUST);
 	}
 
 	/** Her chests, signs, banners and the like, drawn by their own renderers from the client's copies of them. */
@@ -369,7 +375,10 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			if (!Float.isNaN(belly)) {
 				// (gb-sails) the cloth stands out from where it hangs (its block's face the way it faces) as far as the wind fills it
 				Direction facing = state.blocks.get(i).blockState.getValue(SailBlock.FACING);
-				float hx = facing == Direction.EAST ? 1.0F : 0.0F, hz = facing == Direction.SOUTH ? 1.0F : 0.0F;
+				// about the yard's line, so the yard stays where it hangs
+				float yard = YARD / 16.0F;
+				float hx = facing == Direction.EAST ? 1.0F + yard : facing == Direction.WEST ? -yard : 0.0F;
+				float hz = facing == Direction.SOUTH ? 1.0F + yard : facing == Direction.NORTH ? -yard : 0.0F;
 				poseStack.translate(hx, 0.0F, hz);
 				poseStack.scale(facing.getAxis() == Direction.Axis.X ? belly : 1.0F, 1.0F, facing.getAxis() == Direction.Axis.Z ? belly : 1.0F);
 				poseStack.translate(-hx, 0.0F, -hz);

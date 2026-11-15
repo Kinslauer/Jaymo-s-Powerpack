@@ -25,6 +25,34 @@ public final class Capes {
 		return chest;
 	}
 
+	/**
+	 * {@code mob}, of {@code f}, wears a cape if it should (a king, a lord or a knight) and doesn't yet: put on after all its
+	 * dressing (Epic Knights' pieces too), on folk already in the world as well ({@link Folk}), and on a ruler fitted
+	 * ({@link HeraldryWear#ruler}). Only the cape is added; nothing else it wears changes.
+	 */
+	static void ensure(net.minecraft.world.entity.Mob mob, Faction f) {
+		ensure(mob, f, false);
+	}
+
+	/** {@link #ensure}; {@code ruler}: {@code mob} has just been fitted as one (an MCA villager on the throne). */
+	static void ensure(net.minecraft.world.entity.Mob mob, Faction f, boolean ruler) {
+		net.minecraft.server.MinecraftServer server = mob.level().getServer();
+		ItemStack chest = mob.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+		if (server == null || chest.isEmpty() || of(chest) != null || !caped(mob, ruler)) {
+			return;
+		}
+		mob.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, cape(chest.copy(), Outfits.heraldry(f, server)));
+	}
+
+	/** {@code mob} is one who wears the realm's cape: a ruler, or a knight in the realm's cuirass. */
+	private static boolean caped(net.minecraft.world.entity.Mob mob, boolean ruler) {
+		if (ruler || mob instanceof Folk folk && (folk.role() == Folk.KING || folk.role() == Folk.LORD)) {
+			return true;
+		}
+		HeraldryArmour.Piece piece = HeraldryArmour.of(mob.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST));
+		return piece != null && piece.name().equals("plate_cuirass");
+	}
+
 	/** The cape's colours on {@code chest} ({field, edge} RGB), or null for none. */
 	public static int @org.jspecify.annotations.Nullable [] of(ItemStack chest) {
 		CustomData data = chest.get(DataComponents.CUSTOM_DATA);

@@ -1474,7 +1474,8 @@ public final class Tales {
 					}
 				}));
 			}
-			if (!run.taken && is(run, "giver", who) && !run.vars.containsKey(Haggle.TALE_VAR) && !Haggle.haggled(player, run.quest())) {
+			if (!run.taken && is(run, "giver", who) && !run.vars.containsKey(Haggle.TALE_VAR) && !Haggle.haggled(player, run.quest())
+				&& Haggle.mayTale(who)) {
 				// (gb-haggle) the tale's still being put to them: they may ask for more before they take it on
 				choices.add(Menus.Choice.of(Component.translatable("tale.jaymoskingdoms.haggle"), p -> {
 					if (open(p, run, at)) {

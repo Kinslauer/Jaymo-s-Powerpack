@@ -52,6 +52,10 @@ public final class Haggle {
 	static final AttachmentType<List<String>> HAGGLED = AttachmentRegistry.create(JaymosKingdoms.id("haggled"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
+	/** The offer a giver has been haggled over (its quest id), by anyone: an offer is haggled once, not once a player. Saved. */
+	static final AttachmentType<String> OFFER_HAGGLED = AttachmentRegistry.create(JaymosKingdoms.id("offer_haggled"),
+		builder -> builder.persistent(Codec.STRING));
+
 	private Haggle() {
 	}
 
@@ -70,9 +74,9 @@ public final class Haggle {
 		player.setAttached(HAGGLED, List.copyOf(list));
 	}
 
-	/** {@code q}, on {@code giver}'s screen, may be haggled over: on offer, or board work of theirs just taken. */
-	static boolean may(ServerLevel level, ServerPlayer player, Quest q, boolean offered) {
-		if (haggled(player, q.id()) || Tales.ofTale(q) || q.reward().milli() <= 0) {
+	/** {@code q}, on {@code giver}'s screen, may be haggled over: on offer (and not yet haggled by anyone), or board work of theirs just taken. */
+	static boolean may(ServerLevel level, ServerPlayer player, LivingEntity giver, Quest q, boolean offered) {
+		if (haggled(player, q.id()) || Tales.ofTale(q) || q.reward().milli() <= 0 || offered && q.id().equals(giver.getAttached(OFFER_HAGGLED))) {
 			return false;
 		}
 		return offered || q.kind() >= Quest.PACK && level.getGameTime() - q.givenAt() <= BOARD_TICKS;
@@ -86,10 +90,13 @@ public final class Haggle {
 		Quest on = offer.has() ? offer.quest().filter(q -> q.id().equals(id)).orElse(null) : null;
 		Quest taken = on == null ? Quests.quest(player, id) : null;
 		Quest q = on != null ? on : taken;
-		if (q == null || !may(level, player, q, on != null) || on == null && !q.giver().uuid().equals(giver.getUUID())) {
+		if (q == null || !may(level, player, giver, q, on != null) || on == null && !q.giver().uuid().equals(giver.getUUID())) {
 			return;
 		}
 		remember(player, id);
+		if (on != null) {
+			giver.setAttached(OFFER_HAGGLED, id);
+		}
 		Outcome o = judge(level, player, giver);
 		if (o == Outcome.OFFENCE) {
 			offended(level, player, giver, f);
@@ -114,10 +121,14 @@ public final class Haggle {
 	 * raised in its {@code vars}; null if they took offence (the tale is off).
 	 */
 	static @Nullable Outcome tale(ServerPlayer player, LivingEntity giver, Map<String, String> vars, String id) {
-		if (!(player.level() instanceof ServerLevel level) || vars.containsKey(TALE_VAR)) {
+		if (!(player.level() instanceof ServerLevel level) || vars.containsKey(TALE_VAR) || !mayTale(giver)) {
 			return null;
 		}
 		remember(player, id);
+		String offered = taleOffer(giver);
+		if (offered != null) {
+			giver.setAttached(OFFER_HAGGLED, offered);
+		}
 		Outcome o = judge(level, player, giver);
 		if (o == Outcome.OFFENCE) {
 			Faction f = Theft.lawAt(level, giver.blockPosition());
@@ -127,6 +138,18 @@ public final class Haggle {
 		vars.put(TALE_VAR, Float.toString(multiplier(o)));
 		pleased(level, giver, o);
 		return o;
+	}
+
+	/** The tale {@code giver} has on offer (its quest id), if any. */
+	private static @Nullable String taleOffer(LivingEntity giver) {
+		Quests.Offer offer = giver.getAttached(Quests.OFFER);
+		return offer == null ? null : offer.quest().filter(Tales::ofTale).map(Quest::id).orElse(null);
+	}
+
+	/** The tale {@code giver} is putting about hasn't been haggled over yet, by anyone. */
+	static boolean mayTale(LivingEntity giver) {
+		String offered = taleOffer(giver);
+		return offered == null || !offered.equals(giver.getAttached(OFFER_HAGGLED));
 	}
 
 	/** A tale's {@code pay} as haggled in its {@code vars}. */
