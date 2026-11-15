@@ -237,6 +237,7 @@ final class LifeStoryScreen extends Screen {
 			unlockedRoads = List.of();
 			shutRoads = List.of();
 			draft = new Draft();
+			creatorScreen = null;
 			presetAt = -1;
 			narrated = null;
 			toRead.clear();
@@ -690,7 +691,6 @@ final class LifeStoryScreen extends Screen {
 				Arrays.fill(draft.sparks, 1);
 			}
 			this.asking = false;
-			callCreator();
 			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
 			if (tabbed()) {
 				hush();
@@ -868,6 +868,10 @@ final class LifeStoryScreen extends Screen {
 			this.scroll = 0;
 			return;
 		}
+		// (a skipped story's picks made whole first: its road is fate's, and every pick one this character can have)
+		if (draft.explicit) {
+			settle();
+		}
 		ClientPlayNetworking.send(life(draft.gender));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
@@ -886,31 +890,36 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * Andy: "you should be able to go back to the MCA menu with the on second thought button... they run alongside one
-	 * another not separate". MCA's creator is asked for, for one whose story is untold: it opens once of its own accord,
-	 * so after a turn back to the story (or a rejoin partway through it) the server sends it again. Should it not come,
-	 * the creator's page here takes over as ever ({@link #TAB_WAIT_MS}).
+	 * MCA's creator, set aside while the story is told from its Life tab ({@link #tellInstead}): this screen gives way to it
+	 * again once the story is lived or skipped again. Kept on the client: the server is never asked for the creator anew
+	 * (asking reset MCA's "body made" mark, and a player whose creator then never came was never set down).
 	 */
-	private static void callCreator() {
-		Minecraft minecraft = Minecraft.getInstance();
-		if (McaCompat.LOADED && minecraft.player != null && LifeStory.of(minecraft.player) == null && !roadOnly()
-			&& ClientPlayNetworking.canSend(LifeStory.Creator.TYPE)) {
-			ClientPlayNetworking.send(new LifeStory.Creator());
-			creatorAhead = true;
-		}
-	}
+	private static @Nullable Screen creatorScreen;
 
 	/**
 	 * From the tab in MCA's creator: the story told after all. The creator steps aside for this screen at the story's first
-	 * page (the gender stays as picked), and is asked for again so it follows the story, as for one who never skipped.
+	 * page (the gender stays as picked), and comes back when this screen closes.
 	 */
 	static void tellInstead() {
 		if (tabbed()) {
+			Minecraft minecraft = Minecraft.getInstance();
+			creatorScreen = minecraft.gui.screen();
 			draft.explicit = false;
 			draft.step = 0;
-			callCreator();
-			Minecraft.getInstance().gui.setScreen(new LifeStoryScreen(true));
+			minecraft.gui.setScreen(new LifeStoryScreen(true));
 		}
+	}
+
+	/** Back to MCA's creator if the story was told from its Life tab, otherwise closed as ever. */
+	@Override
+	public void onClose() {
+		Screen back = creatorScreen;
+		creatorScreen = null;
+		if (back != null && this.minecraft != null) {
+			this.minecraft.gui.setScreen(back);
+			return;
+		}
+		super.onClose();
 	}
 
 	/** From the tab in MCA's creator, as the creator is finished: the skipped story is sealed, as the gender the creator made. */
