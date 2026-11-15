@@ -40,6 +40,8 @@ public class SmithingAnvilEntity extends BlockEntity {
 	static final double LEAVE_SQ = 10 * 10;
 	/** A smith who hasn't struck in this long gets the game sent again on their next swing (a dropped packet, a relog). */
 	static final int RESEND_TICKS = 40;
+	/** (medieval picks) The heat each blow takes out of the work (ticks off its {@link HotMetal#COOL_TICKS}): a heat lasts this many fewer. */
+	static final int BLOW_COOL_TICKS = 80;
 
 	private ItemStack work = ItemStack.EMPTY;
 	private ItemStack result = ItemStack.EMPTY;
@@ -184,12 +186,13 @@ public class SmithingAnvilEntity extends BlockEntity {
 		}
 		List<SmithingNet.Choice> choices = new ArrayList<>();
 		Component refusal = null;
-		for (Forging.Option option : Forging.forMetal(metal, work.getCount())) {
+		// (medieval picks) a realm steel forges what steel does (RealmSteels)
+		for (Forging.Option option : Forging.forMetal(RealmSteels.forgesAs(metal), work.getCount())) {
 			Component why = refuse(player, option);
 			if (why == null) {
 				choices.add(new SmithingNet.Choice(option.id(), option.result(), option.ingots()));
-			} else if (refusal == null && !FrontierForging.is(option)) {
-				// (a set whose schematic the smith hasn't got is simply not on offer)
+			} else if (refusal == null && !FrontierForging.is(option) && !RealmPatterns.claimable(option)) {
+				// (a set whose schematic the smith hasn't got, or another realm's design, is simply not on offer)
 				refusal = why;
 			}
 		}
@@ -214,7 +217,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 	public void choose(ServerPlayer player, String id) {
 		Forging.Option option = Forging.byId(id);
 		long now = now();
-		if (option == null || !work.is(Smithing.HOT_INGOT) || !HotMetal.hot(work, now) || HotMetal.metal(work) != option.metal()
+		if (option == null || !work.is(Smithing.HOT_INGOT) || !HotMetal.hot(work, now) || RealmSteels.forgesAs(HotMetal.metal(work)) != option.metal()
 			|| work.getCount() < option.ingots() || refuse(player, option) != null || !result.isEmpty()) {
 			return;
 		}
@@ -228,6 +231,10 @@ public class SmithingAnvilEntity extends BlockEntity {
 		Smithing.Work progress = new Smithing.Work(option.id(), 0, 0.0F, 0, level.getRandom().nextLong());
 		blank.set(Smithing.FORGE_WORK, progress);
 		blank.set(Smithing.HEATED_AT, heatedAt);
+		Molten realm = RealmSteels.of(work);
+		if (realm != null) {
+			blank.set(RealmSteels.REALM_STEEL, realm.id);
+		}
 		work = blank;
 		smith = player.getUUID();
 		lastBlow = now;
@@ -273,6 +280,17 @@ public class SmithingAnvilEntity extends BlockEntity {
 			return;
 		}
 		work.set(Smithing.FORGE_WORK, progress);
+		// (medieval picks) every blow takes heat out of the piece: once it's cold it goes back in the hearth to be worked on
+		work.set(Smithing.HEATED_AT, work.getOrDefault(Smithing.HEATED_AT, now) - BLOW_COOL_TICKS);
+		if (!HotMetal.hot(work, now)) {
+			work = HotMetal.cooled(work, (ServerLevel) level);
+			level.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.3F);
+			((ServerLevel) level).sendParticles(ParticleTypes.WHITE_SMOKE, worldPosition.getX() + 0.5, worldPosition.getY() + 1.05,
+				worldPosition.getZ() + 0.5, 5, 0.15, 0.02, 0.15, 0.01);
+			endSession();
+			changed();
+			return;
+		}
 		changed();
 		sendSession(player, progress, option);
 	}
@@ -347,7 +365,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 
 	private void sendSession(ServerPlayer player, Smithing.Work progress, Forging.Option option) {
 		ServerPlayNetworking.send(player, new SmithingNet.Session(worldPosition, true, option.hits(), progress.hits(),
-			Forging.difficulty(option.metal()), Forging.bonus(player), progress.seed()));
+			Forging.difficulty(RealmSteels.working(work, option.metal())), Forging.bonus(player), progress.seed()));
 	}
 
 	private void endSession() {

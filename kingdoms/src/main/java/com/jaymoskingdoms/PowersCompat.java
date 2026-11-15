@@ -2902,6 +2902,38 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the harness (older Powers?)", e);
 		}
+		// (medieval picks) whose a realm's designs are (RealmPatterns.sworn), and who knows each people's steel (RealmSteels.knows)
+		try {
+			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> sworn =
+				(p, shape) -> HeraldryWear.mayForge(p.level().getServer(), p.getUUID(), shape);
+			Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns").getField("sworn").set(null, sworn);
+			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> knows = PowersCompat::knowsSteel;
+			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("knows").set(null, knows);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the realm designs and steels (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * Whether {@code smith} knows the working of a people's steel (a Powers {@code Molten} id): deep steel is the
+	 * Stoneborn's, bright steel the Sylvan's (the forest folk), each known to one of that blood or one sworn to a haven of
+	 * it (or of all four); the orcs' ash bronze is known to those sworn to a haven that lives alongside the tribes.
+	 */
+	static boolean knowsSteel(net.minecraft.server.level.ServerPlayer smith, String metal) {
+		net.minecraft.server.MinecraftServer server = smith.level().getServer();
+		Faction f = Factions.of(server, smith.getUUID());
+		if ("ash_bronze".equals(metal)) {
+			return Havens.greenskin(server, f);
+		}
+		Heritage.Kind people = "deep_steel".equals(metal) ? Heritage.Kind.STONEBORN : "bright_steel".equals(metal) ? Heritage.Kind.SYLVAN : null;
+		if (people == null) {
+			return true;
+		}
+		if (Heritage.is(smith, people)) {
+			return true;
+		}
+		String haven = Havens.of(server, f);
+		return haven.equals(people.key()) || haven.equals(Havens.MIXED);
 	}
 
 	/** Powers' {@code LockOnClient}: its private {@code pick(Minecraft, LocalPlayer)} and {@code locked}/{@code blind} fields, and the {@code LockOn.Packet(int)} record. */

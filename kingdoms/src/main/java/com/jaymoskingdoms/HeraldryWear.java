@@ -218,6 +218,36 @@ public final class HeraldryWear {
 		return f != null && (Crowns.rules(server, f, player) || Wars.isLord(f, player));
 	}
 
+	// ---- (medieval picks) a realm's own designs ------------------------------------------------------------------------
+
+	/** The war arms a realm's smiths may keep as their own (weapon head shapes): each kingdom keeps one, by its hash. */
+	static final List<String> REALM_ARMS = List.of("halberd_head", "glaive_blade", "bec_de_corbin_head", "war_scythe_blade", "claymore_blade");
+
+	/** The forging shapes (Powers' {@code Blueprints.shape}) {@code realm} keeps as its own: its knights' helm and its war arm. */
+	private static List<String> designs(int realm) {
+		long h = hash(realm);
+		return List.of("heraldry/" + pick(HeraldryArmour.HELMS, h >>> 8), "weapon/" + pick(REALM_ARMS, h >>> 40));
+	}
+
+	/**
+	 * Whether {@code smith} may forge {@code shape} without a captured pattern (Powers' {@code RealmPatterns.sworn}): no
+	 * standing kingdom keeps it, or the smith is sworn to one that does (a fiefdom's people to their overlord's).
+	 */
+	public static boolean mayForge(MinecraftServer server, UUID smith, String shape) {
+		Faction mine = Factions.of(server, smith);
+		int own = mine == null ? -1 : realm(mine);
+		boolean kept = false;
+		for (Faction f : Factions.all(server, FactionType.KINGDOM)) {
+			if (!f.fallen() && designs(f.id()).contains(shape)) {
+				if (f.id() == own) {
+					return true;
+				}
+				kept = true;
+			}
+		}
+		return !kept;
+	}
+
 	/** Whether {@code player} may wear {@code stack}: anything but gilded plate, which is a royal's or a lord's. (Always true on the client: the server decides.) */
 	public static boolean mayWear(Player player, ItemStack stack) {
 		MinecraftServer server = player.level().getServer();

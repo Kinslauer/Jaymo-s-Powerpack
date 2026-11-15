@@ -60,6 +60,8 @@
 		"SunShelterSkeletonMixin",
 		"SunShelterZombieMixin",
 		"GuardOverTalkMixin",
+		"ShieldReflectMixin",
+		"ShieldBlockMixin",
 		"GuardRiposteMixin",
 		"DivineCounterMixin",
 		"AlchemyPicksHurtMixin",

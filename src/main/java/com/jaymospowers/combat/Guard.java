@@ -230,6 +230,7 @@ public final class Guard {
 		com.jaymospowers.armory.Twinblade.init();
 		UseItemCallback.EVENT.register(Guard::use);
 		Swat.init();
+		ShieldCraft.init();
 		BladeStyle.init();
 		TwoBlades.init();
 		Stances.init();
@@ -452,6 +453,8 @@ public final class Guard {
 			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
 			if (melee) {
 				Stances.handBack(player, attacker, amount, timing == Timing.PERFECT);
+				// a Barbed shield bites whoever struck it, parried or not (ShieldCraft)
+				ShieldCraft.barbs(player, attacker);
 			}
 			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
 			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
@@ -513,7 +516,8 @@ public final class Guard {
 		}
 		Vec3 away = attacker.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 		if (away.lengthSqr() > 1.0E-4) {
-			double shove = perfect ? PERFECT_SHOVE : PARRY_SHOVE;
+			// (a raised shield's Pummelling shoves much harder: ShieldCraft)
+			double shove = ShieldCraft.shove(player, perfect ? PERFECT_SHOVE : PARRY_SHOVE);
 			away = away.normalize();
 			attacker.push(away.x * shove, 0.15, away.z * shove);
 		}
