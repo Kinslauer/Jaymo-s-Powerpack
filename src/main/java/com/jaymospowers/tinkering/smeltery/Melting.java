@@ -160,7 +160,12 @@ public final class Melting {
 		// two of copper to one of cobalt with amethyst
 		new Alloy(Molten.MANYULLYN, 36, List.of(new Input(Molten.COBALT, 27), new Input(Molten.STEEL, 9))),
 		new Alloy(Molten.QUEEN_SLIME, 18, List.of(new Input(Molten.COBALT, 9), new Input(Molten.GOLD, 9), new Input(Molten.SLIME, 25))),
-		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))));
+		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))),
+		// (medieval picks) the realm steels (smithing/RealmSteels): the Stoneborn's deep steel, three of steel to one of lead;
+		// the forest folk's bright steel, three of steel to one of silver; the orcs' crude bronze, bronze run with ash
+		new Alloy(Molten.DEEP_STEEL, 36, List.of(new Input(Molten.STEEL, 27), new Input(Molten.LEAD, 9))),
+		new Alloy(Molten.BRIGHT_STEEL, 36, List.of(new Input(Molten.STEEL, 27), new Input(Molten.SILVER, 9))),
+		new Alloy(Molten.ASH_BRONZE, 36, List.of(new Input(Molten.BRONZE, 27), new Input(Molten.ASH, 25))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/** (GTNH picks) The dusts, which melt faster ({@link #DUST_SPEEDUP}). */

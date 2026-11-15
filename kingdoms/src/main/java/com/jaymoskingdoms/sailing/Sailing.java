@@ -24,10 +24,12 @@ import net.minecraft.world.level.material.MapColor;
  * {@link ShipKits build kits}, after AlekiShips' ideas (MIT; no code or art of it is used).
  */
 public final class Sailing {
-	public static Block HELM, SAIL, OAR, CANNON, FRAME;
+	public static Block HELM, SAIL, OAR, CANNON, FRAME, BOMB_HATCH;
 	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, HEAVY_SHOT, SHELL, CHAIN_SHOT, GRAPE_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT, SHIP_PLANS;
 	/** More blueprints: the cog, frigate, fishing smack and galley kits. */
 	public static Item COG_KIT, FRIGATE_KIT, SMACK_KIT, GALLEY_KIT;
+	/** (medieval picks) A bomb hatch for a balloon's deck. */
+	public static Item BOMB_HATCH_ITEM;
 
 	private Sailing() {
 	}
@@ -51,6 +53,10 @@ public final class Sailing {
 			.strength(3.0F, 6.0F).sound(SoundType.METAL).noOcclusion());
 		FRAME = block("ship_frame", ShipFrameBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 			.strength(0.3F).sound(SoundType.SCAFFOLDING).noOcclusion().noLootTable().ignitedByLava());
+		// (medieval picks) a balloon's bomb hatch
+		BOMB_HATCH = block("bomb_hatch", BombHatchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).instrument(NoteBlockInstrument.BASS)
+			.strength(3.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		BOMB_HATCH_ITEM = blockItem("bomb_hatch", BOMB_HATCH);
 		HELM_ITEM = blockItem("ship_helm", HELM);
 		SAIL_ITEM = blockItem("sail", SAIL);
 		OAR_ITEM = blockItem("oar", OAR);
@@ -90,6 +96,7 @@ public final class Sailing {
 			output.insertAfter(FRIGATE_KIT, SMACK_KIT);
 			output.insertAfter(SMACK_KIT, GALLEY_KIT);
 			output.insertAfter(GALLEY_KIT, SHIP_PLANS);
+			output.insertAfter(SHIP_PLANS, BOMB_HATCH_ITEM);
 		});
 		ShipNet.register();
 	}

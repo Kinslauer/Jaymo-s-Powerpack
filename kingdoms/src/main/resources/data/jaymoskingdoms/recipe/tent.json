@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " | ",
+    "W|W",
+    "W W"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "|": "minecraft:stick"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:tent"
+  }
+}

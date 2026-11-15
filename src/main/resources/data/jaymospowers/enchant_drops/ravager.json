@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:ravager"
+  ],
+  "enchantment": "jaymospowers:pummelling",
+  "chance": 0.05
+}

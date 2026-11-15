@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskingdoms:aware",
+    "minecraft:spider",
+    "minecraft:cave_spider",
+    "minecraft:wolf",
+    { "id": "jaymoskingdoms:werewolf", "required": false },
+    { "id": "jaymoskingdoms:tarantula", "required": false }
+  ]
+}

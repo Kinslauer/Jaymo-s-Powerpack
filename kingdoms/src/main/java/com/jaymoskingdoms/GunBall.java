@@ -98,6 +98,8 @@ public final class GunBall extends Projectile implements ItemSupplier {
 		}
 		Entity owner = this.getOwner();
 		if (!(owner instanceof LivingEntity shooter) || ++this.life > MAX_LIFE) {
+			// (spent in the air: no strike to be heard, Hearing)
+			Hearing.spent(this);
 			this.discard();
 			return;
 		}
@@ -114,6 +116,7 @@ public final class GunBall extends Projectile implements ItemSupplier {
 		if (struck != null) {
 			DamageSource source = this.damageSources().mobProjectile(this, shooter);
 			struck.getEntity().hurtServer(level, source, this.damage);
+			Hearing.struck(this, struck.getLocation());
 			this.discard();
 			return;
 		}
@@ -121,6 +124,8 @@ public final class GunBall extends Projectile implements ItemSupplier {
 			BlockState state = level.getBlockState(((BlockHitResult) hit).getBlockPos());
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), next.x, next.y, next.z, 6, 0.05, 0.05, 0.05, 0.05);
 			level.playSound(null, next.x, next.y, next.z, state.getSoundType().getHitSound(), net.minecraft.sounds.SoundSource.NEUTRAL, 0.8F, 1.4F);
+			// where it strikes far off, the monsters hear it there (Hearing)
+			Hearing.struck(this, next);
 			this.discard();
 			return;
 		}

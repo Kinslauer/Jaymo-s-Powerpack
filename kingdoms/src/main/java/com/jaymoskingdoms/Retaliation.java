@@ -73,6 +73,8 @@ final class Retaliation {
 		long lastBlow;
 		int blows;
 		long nextPunch;
+		/** (gb-customs) a northern duel: one on one, and no crime. */
+		boolean duel;
 		/** Brawler → when they may next punch. */
 		final Map<UUID, Long> brawlers = new HashMap<>();
 
@@ -170,6 +172,12 @@ final class Retaliation {
 		brawl.lastBlow = now;
 		brawl.blows++;
 		brawl.brawlers.put(victim.getUUID(), now + PUNCH_TICKS / 2);
+		if (Customs.duels(level, f)) {
+			// (gb-customs) the north settles it with fists: a duel, nobody else's business, and no crime
+			brawl.duel = true;
+			Customs.duelTaken(level, victim);
+			return;
+		}
 		say(level, victim, "square");
 		int joined = 0;
 		for (LivingEntity w : seen) {
@@ -304,7 +312,12 @@ final class Retaliation {
 					// ((0.7.490) a haven's sworn fights on)
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
-					say(level, mob, "flee");
+					if (brawl.duel) {
+						// (gb-customs) beaten fair in a northern duel
+						Customs.yielded(player, level, brawl.faction, mob);
+					} else {
+						say(level, mob, "flee");
+					}
 					continue;
 				}
 				if (mob instanceof Villager v) {

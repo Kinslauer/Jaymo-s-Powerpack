@@ -408,7 +408,9 @@ public final class Quests {
 		List<QuestNet.View> views = new ArrayList<>();
 		for (Quest q : log(player)) {
 			if (q.giver().uuid().equals(giver.getUUID()) && !Tales.ofTale(q)) {
-				views.add(view(level, player, q, ready(player, q) ? QuestNet.READY : QuestNet.ACTIVE));
+				QuestNet.View v = view(level, player, q, ready(player, q) ? QuestNet.READY : QuestNet.ACTIVE);
+				// (gb-haggle) board work just pulled off the board: its poster may yet be asked for more
+				views.add(Haggle.may(level, player, q, false) ? v.haggling() : v);
 			}
 		}
 		if (views.isEmpty()) {
@@ -429,7 +431,9 @@ public final class Quests {
 				q = null;
 			}
 			if (q != null) {
-				views.add(view(level, player, q, QuestNet.OFFER));
+				QuestNet.View v = view(level, player, q, QuestNet.OFFER);
+				// (gb-haggle) before taking it, the player may ask for more
+				views.add(Haggle.may(level, player, q, true) ? v.haggling() : v);
 			}
 		}
 		Component note = views.isEmpty() ? Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.nothing.king" : "quest.jaymoskingdoms.nothing")
@@ -498,6 +502,7 @@ public final class Quests {
 			case QuestNet.ACCEPT -> accept(level, player, giver, f, act.questId());
 			case QuestNet.TURN_IN -> turnIn(level, player, giver, f, act.questId());
 			case QuestNet.ABANDON -> abandon(level, player, giver, act.questId());
+			case QuestNet.HAGGLE -> Haggle.quest(level, player, giver, f, act.questId());
 			default -> {
 			}
 		}

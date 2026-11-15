@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/inscription_table",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:inscription_table"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

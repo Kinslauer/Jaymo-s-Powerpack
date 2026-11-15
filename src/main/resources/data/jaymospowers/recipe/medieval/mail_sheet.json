@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "jaymospowers:mail_ring"
+  },
+  "result": {
+    "id": "jaymospowers:mail_sheet",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "jaymoskingdoms:ship_shot", "required": false },
+    { "id": "jaymoskingdoms:cannonball", "required": false },
+    { "id": "jaymoskingdoms:gun_ball", "required": false },
+    { "id": "weaponmod:bullet", "required": false },
+    { "id": "weaponmod:shot", "required": false },
+    { "id": "weaponmod:cannonball", "required": false },
+    { "id": "jaymospowers:arsenal_cannonball", "required": false }
+  ]
+}

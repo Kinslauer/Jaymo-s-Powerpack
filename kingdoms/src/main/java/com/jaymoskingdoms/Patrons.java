@@ -649,6 +649,23 @@ public final class Patrons {
 		set(sp, s.withSeeded());
 		Patron mine = Faiths.startOf(kind);
 		learn(sp, mine);
+		// (gb-faith) the patron they grew up praying to, from the story's faith page: sworn to it from the start (more
+		// favour for a devout upbringing), which they may later keep or leave (Turning)
+		Patron raised = LifeStory.faithOf(sp);
+		if (raised != null) {
+			mine = raised;
+			if (!state(sp).sworn()) {
+				boolean devout = PlayerTemperaments.of(sp) == Temperaments.Temperament.DEVOUT;
+				swear(sp, mine, devout ? FAVOUR_DEVOUT : FAVOUR_SWORN, today(sp.level().getServer()));
+				if (devout) {
+					ItemStack book = LoreBooks.book("patron_" + mine.key);
+					if (!book.isEmpty() && !sp.getInventory().add(book) && sp.level() instanceof ServerLevel level) {
+						sp.spawnAtLocation(level, book);
+					}
+				}
+			}
+			return;
+		}
 		if (PlayerTemperaments.of(sp) == Temperaments.Temperament.DEVOUT && !state(sp).sworn()) {
 			swear(sp, mine, FAVOUR_DEVOUT, today(sp.level().getServer()));
 			ItemStack book = LoreBooks.book("patron_" + mine.key);

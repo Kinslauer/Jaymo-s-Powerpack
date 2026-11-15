@@ -225,6 +225,19 @@ final class WarAlert {
 		level.playSound(null, at, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, alarm ? 2.0F : 3.0F, alarm ? 1.0F : 0.85F);
 	}
 
+	/**
+	 * {@code f}'s patrol airship has sighted a war band at {@code band} ({@link AirPatrols}): the seat's bell rings the alarm
+	 * and its people run in, at war or not. (A realm at war keeps its own alert; one at peace has a bell rung for this once.)
+	 */
+	static void sighted(ServerLevel level, Faction f, BlockPos band, long now) {
+		Alert a = ALERTS.get(f.id());
+		ring(level, f, a != null ? a : new Alert(), true);
+		if (a != null) {
+			a.alarmed = now;
+		}
+		hide(level, f, band, now);
+	}
+
 	private static @Nullable BlockPos findBell(ServerLevel level, BlockPos seat) {
 		BlockPos best = null;
 		for (BlockPos p : BlockPos.betweenClosed(seat.offset(-BELL_SEARCH, -BELL_SEARCH, -BELL_SEARCH), seat.offset(BELL_SEARCH, BELL_SEARCH, BELL_SEARCH))) {
