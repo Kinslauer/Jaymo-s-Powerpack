@@ -171,3 +171,48 @@ independent verifier. Batches go up as one PR each (patches as separate commits)
 ## Open questions
 - Airship scope (decision card in the thread).
 - The exact numbers (torch yields, herd waits, crowding count) are starting values, to be tuned after a playtest.
+
+## Lore placements, for Andy to approve
+These are the `(new)` paragraphs proposed for `Lore.md` (the vault is edited only through the live folder, so they wait
+here until Andy approves them).
+
+- **(new) Hard ground** (patches 1 and 2). The land gives nothing for free since the sorcerer's fall: flint must be
+  sifted from gravel, a table and a chest are bound with flint, and the first bricks are fired in a campfire pit before
+  anyone has a kiln. Fields die away from water, crops and herds grow at half the old pace, and a beast clubbed to
+  death is bruised meat. Folk eat widely or sicken of sameness, which is why a field hand carries a lunch box.
+- **(new) Water that comes back** (patch 3). Rivers, the sea and the marshes are the Deep Mother's, and whatever is
+  taken from them she fills again; rain is her gift and fills what lies open under it. A pond pooled by hand in dry
+  country holds what it was given and no more. Where there is no water at all, desert travellers press cactus round a
+  bucket for a bitter drink that turns the stomach unless it is boiled first. The Tideborn call it "the Mother's thin
+  milk" and won't touch it unboiled.
+- **(new) Tin and bronze, coke and steel** (patch 4). Tin is the Stoneborn's metal: its dark tinstone runs in great
+  veins under the mountains, and the rivers coming down from them carry it out as tin sand for lowland panners.
+  Bronze, three of copper to one of tin, is told as the Anvil-Father's first gift to smiths, and the metal bells are
+  cast in. Coke ovens and brick blast furnaces are the smoky craft of the Mad Tinkerer's old workmen; charcoal pits,
+  logs buried under earth to smoulder for days, are the older woodland way.
+- **(new) The forge's dangers** (patch 5). Smiths of the Anvil-Father say his fire and the sky's water never marry: a
+  forge is roofed or it is doused, and a thunderstorm over an open smeltery cracks its brick. Cracked seared brick
+  weeps its melt until a mason presses grout in with a hammer. Tanners cut thick smithing gloves for anyone who
+  handles hot iron, lava or blaze rods. What a thing was made of (the ender's dark, the golem's iron, the slime's
+  jelly, the blaze's ember) the smeltery gives back to the smith.
+- **(new) The marked, the mothers and the turned** (patch 6). The sorcerer's mana that went into the ground lies in
+  seams; a thing of the dark that rises over one drinks some of it and carries it as a faint aura: the marked. The
+  older the world grows, the more rise marked, and orc and goblin captains sleep on the seams to take the marks too.
+  Mother spiders carry their brood on their backs; in the woods, flyers drop from the canopy on a line. The recently
+  dead remember their trade (the fisher casts, the hunter shoots, the farmer throws his hoe); the old dead and the
+  skeletons have forgotten. Punji stakes are the oldest trap of anyone holding a line: diggers line their pits with
+  them and barbarians ring their palisades.
+- **(new) Mixed seams, float stones and the dowser's fork** (patch 7). The Anvil-Father's miners say no metal lies
+  alone: iron keeps a thread of copper, copper keeps tin, gold keeps iron, and a patient washer finds the companion's
+  grains. Over a great seam the ground is shot with lone stones of its ore, which miners call float and follow down.
+  The dowser's fork, a forked rod with a pinch of the wanted ore bound in its crotch, knocks in the hand quicker the
+  nearer its kind lies; the Anvil-Father's priests call it his pulse.
+- **(new) Sails, windsocks and the little boilers** (patch 8). Millers sew their own sails (hemp, wool, leather, and
+  paper only as a stopgap) and read the wind, the same wind Aeolus keeps, off a striped windsock by the mill. The small
+  steam boiler came out of the Mad Tinkerer's workshops; the craftsmen who worked there kept the trick when he
+  vanished, and all of them warn: never fill a boiler that has boiled dry over the fire.
+- **(new) The steam towns** (patch 9). When the Mad Tinkerer vanished, the craftsmen who had built for him kept
+  together and went on building steam from memory. Their towns are smoky places of brick, iron and creosoted timber,
+  the only ones where a tinker or an engineer can still be found at the bench. They never had his drawings, so they
+  could not build his pods; instead they hung railed decks under bags of wool with a boiler aboard, and each town
+  keeps one such airship on its mast, flying travellers between the towns on the wind.
