@@ -1738,6 +1738,8 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+(new) **The chopping block** (Andy, 2026-11-15; Claude's placement for him to approve). Wherever folk split their own wood there is a chopping block: a round sawn off a log of the same tree, set on its end and scarred with old cuts. A log stood on it splits cleaner than one hacked on the bare ground, a plank more for the same work, and the better the axe the fewer the blows. The chips swept up round it are the sawdust the paper-pressers want. (In game: Powers PR #1599.)
+
 **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
 gear; approved 2026-11-14). A smith makes armour the way he makes tools: each piece is a plating cast
 in metal over a maille, put together at the Tool Station. The first mould for a plating is a stone one shaped at the

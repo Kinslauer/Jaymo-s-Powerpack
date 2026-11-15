@@ -626,3 +626,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Fantasy Armor): no repaint of the Fantasy Armor sets. Turn its durability on, but nothing breaks: a worn-out piece becomes useless and needs repair.
 - 2026-11-15 (ring thread): the Verdant World's blue giant is reachable by pod; Andy picked landing on its ring (drifts of ice and rock, gravilite, half gravity, airless), not the cloud tops. A pod destination, no portal.
 - 2026-11-15 (Andy, ring thread): "lore approved. merge": The giant's ring paragraph is canon; PR #1595 merged.
+- 2026-11-15 (Andy, chopping block thread): a chopping block like SevTech/GTNH to split logs into planks; built as our own (sneak+axe carves a set-down log into one), PR #1599. Grid log->plank stays removed.
