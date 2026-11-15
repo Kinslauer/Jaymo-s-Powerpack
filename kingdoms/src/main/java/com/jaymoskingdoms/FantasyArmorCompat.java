@@ -92,13 +92,18 @@ public final class FantasyArmorCompat {
 		if (!LOADED) {
 			return false;
 		}
+		boolean any = false;
 		for (int i = 0; i < SLOTS.length; i++) {
 			Optional<Item> piece = piece(set, i);
-			if (piece.isPresent() && !e.getItemBySlot(SLOTS[i]).is(piece.get())) {
-				return false;
+			if (piece.isPresent()) {
+				if (!e.getItemBySlot(SLOTS[i]).is(piece.get())) {
+					return false;
+				}
+				any = true;
 			}
 		}
-		return true;
+		// (a set this build of the mod hasn't got is worn by nobody)
+		return any;
 	}
 
 	/** {@code e} in every piece of {@code set}; false (nothing changed) where the mod or the set isn't there. */

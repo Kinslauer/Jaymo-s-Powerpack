@@ -341,7 +341,7 @@ public final class Outfits {
 		folk.setItemSlot(EquipmentSlot.CHEST, chest);
 		folk.setItemSlot(EquipmentSlot.LEGS, legs);
 		folk.setItemSlot(EquipmentSlot.FEET, feet);
-		if (climate == Climate.CHERRY && random.nextFloat() < FantasyArmorCompat.FOLDED_CHANCE) {
+		if (climate == Climate.CHERRY && FantasyArmorCompat.LOADED && random.nextFloat() < FantasyArmorCompat.FOLDED_CHANCE) {
 			// some of the Blossom land's guards in folded lamellar instead, where Fantasy Armor is loaded
 			FantasyArmorCompat.dress(folk, FantasyArmorCompat.FOLDED);
 		}
@@ -491,7 +491,7 @@ public final class Outfits {
 	 */
 	static void ronin(LivingEntity mob, DyeColor color) {
 		// some of them in the folded lamellar instead, where Fantasy Armor is loaded (FantasyArmorCompat)
-		if (mob.getRandom().nextFloat() < FantasyArmorCompat.FOLDED_CHANCE && FantasyArmorCompat.dress(mob, FantasyArmorCompat.FOLDED)) {
+		if (FantasyArmorCompat.LOADED && mob.getRandom().nextFloat() < FantasyArmorCompat.FOLDED_CHANCE && FantasyArmorCompat.dress(mob, FantasyArmorCompat.FOLDED)) {
 			return;
 		}
 		for (ArmorType type : new ArmorType[] {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
