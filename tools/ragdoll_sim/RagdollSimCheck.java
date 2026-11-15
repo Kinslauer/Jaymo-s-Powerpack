@@ -1,3 +1,4 @@
+import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import com.jaymoskitchen.ragdoll.RagdollWorld;
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * Checks Jaymo's Kitchen's ragdoll physics on its own, without the game: bodies dropped, flung and laid over edges in
  * a little world of boxes. Run from the repository root (JDK 21+):
- *   javac -d build/ragdoll_sim kitchen/src/main/java/com/jaymoskitchen/ragdoll/Ragdoll{Rig,Body,World}.java tools/ragdoll_sim/RagdollSimCheck.java
+ *   javac -d build/ragdoll_sim kitchen/src/main/java/com/jaymoskitchen/ragdoll/{Ragdoll{Rig,Body,World},KeelOver}.java tools/ragdoll_sim/RagdollSimCheck.java
  *   java -cp build/ragdoll_sim RagdollSimCheck
  */
 public final class RagdollSimCheck {
@@ -406,6 +407,58 @@ public final class RagdollSimCheck {
 				int t = run(b, w, 800);
 				check(name + ": lands and settles", t >= 0 && t < 800, "ticks " + t);
 				check(name + ": nothing in the ground", worstDepth(b, w) < 0.05, "depth " + f(worstDepth(b, w)));
+			}
+		}
+
+		System.out.println("Dying on its feet, it sways, keels over onto its side, then goes limp (KeelOver)");
+		{
+			Object[][] cases = {{"cow", cow, 0.0, 0.0}, {"chicken", chicken, 0.0, 0.0}, {"player pushed east", player, 0.2, 0.0},
+				{"player any way", player, 0.0, 0.0}, {"giant", giant, 0.0, 0.1},
+				{"cube animal", RagdollRig.of(RagdollRig.Shape.BOX, 0.9F, 0.9F), 0.0, 0.0},
+				{"wolf", RagdollRig.of(RagdollRig.Shape.QUADRUPED, 0.6F, 0.85F), 0.0, 0.0}};
+			for (Object[] c : cases) {
+				RagdollRig rig = (RagdollRig) c[1];
+				World w = ground();
+				RagdollBody b = RagdollBody.standing(rig, 0.5, 64, 0.5, 40);
+				KeelOver keel = new KeelOver(rig, 0.5, 64, 0.5, 40, (double) c[2], (double) c[3], 7L);
+				double worst = 0, lowest = Double.MAX_VALUE;
+				int t = 0;
+				while (keel.steer(b)) {
+					b.step(w, 0.0F);
+					t++;
+					worst = Math.max(worst, worstStretch(b));
+					lowest = Math.min(lowest, b.bottom());
+					if (!b.sane()) {
+						break;
+					}
+				}
+				float[] mid = b.frame().clone();
+				double[] v = b.speed();
+				double handSpeed = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+				String name = (String) c[0];
+				check(name + ": keels over for its whole time", b.sane() && t == keel.ticks(), "ticks " + t);
+				check(name + ": bones keep their length as it sways", worst < 0.08, "stretch " + f(worst));
+				check(name + ": stays on the ground", lowest > 63.95, "lowest " + f(lowest));
+				int rest = run(b, w, 800);
+				float[] fr = b.frame();
+				check(name + ": goes limp and settles", rest >= 0 && rest < 800, "ticks " + rest);
+				check(name + ": nothing in the ground", worstDepth(b, w) < 0.05, "depth " + f(worstDepth(b, w)));
+				if (rig.shape == RagdollRig.Shape.HUMANOID) {
+					check(name + ": let go of partway over", mid[4] > 0.2 && mid[4] < 0.8, "up y " + f(mid[4]));
+					check(name + ": ends up lying down", Math.abs(fr[4]) < 0.5, "up y " + f(fr[4]));
+				} else {
+					// on its side: its right (or left) points at the sky or the ground. (A four-legged body's physics then
+					// rolls it onto its legs; clients keep drawing it on its side, see ClientRagdolls.)
+					check(name + ": let go of lying on its side", Math.abs(mid[1]) > 0.95, "right y " + f(mid[1]));
+					check(name + ": let go of nearly still", handSpeed < 0.03, "speed " + f(handSpeed));
+					if (rig.shape == RagdollRig.Shape.BOX) {
+						check(name + ": stays on its side", Math.abs(fr[1]) > 0.95, "right y " + f(fr[1]));
+					}
+				}
+				if ((double) c[2] > 0.0) {
+					double[] m = b.middle();
+					check(name + ": falls the way it was pushed", m[0] > 0.8, "middle x " + f(m[0]));
+				}
 			}
 		}
 
