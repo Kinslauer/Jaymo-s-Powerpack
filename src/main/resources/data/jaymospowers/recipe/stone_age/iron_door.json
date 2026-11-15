@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IIS",
+    "II ",
+    "II "
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "jaymospowers:steel_ingot"
+  },
+  "result": {
+    "id": "minecraft:iron_door",
+    "count": 3
+  }
+}

@@ -55,7 +55,7 @@ public class TinkerRodItem extends MetalFishingRodItem implements TinkerTool {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
-		TinkerTool.tick(stack, level);
+		TinkerTool.tick(stack, level, owner);
 	}
 
 	/** A broken rod can't be cast until it's mended (a hook already out can still be brought in). */

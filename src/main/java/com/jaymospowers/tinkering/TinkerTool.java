@@ -22,8 +22,11 @@ public interface TinkerTool {
 
 	ToolType type();
 
-	/** A raw /give gets its defaults (or its given materials) built in; mending a broken tool brings it back to life; Overslime mends. */
-	static void tick(ItemStack stack, ServerLevel level) {
+	/**
+	 * A raw /give gets its defaults (or its given materials) built in; mending a broken tool brings it back to life; Overslime
+	 * mends, once its holder may self-mend ({@link Mending#selfMends}).
+	 */
+	static void tick(ItemStack stack, ServerLevel level, net.minecraft.world.entity.Entity owner) {
 		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
 		boolean shownBroken = look != null && !look.flags().isEmpty() && look.flags().getFirst();
 		// (0.20.76) one forged before melee kinds had the weapon guard gets it the first time it's carried
@@ -33,7 +36,7 @@ public interface TinkerTool {
 			ToolStats.apply(stack);
 			Modifier.enchant(stack, level.registryAccess());
 		}
-		if (level.getGameTime() % OVERSLIME_TICKS == 0 && stack.isDamaged() && !ToolStats.isBroken(stack)) {
+		if (level.getGameTime() % OVERSLIME_TICKS == 0 && stack.isDamaged() && !ToolStats.isBroken(stack) && Mending.selfMends(owner)) {
 			ToolStats.Stats stats = ToolStats.stats(stack);
 			int overslime = stats == null ? 0 : stats.level(Trait.OVERSLIME);
 			if (overslime > 0) {

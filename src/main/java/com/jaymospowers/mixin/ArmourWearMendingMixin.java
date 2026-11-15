@@ -8,12 +8,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.20.68) Mending mends nothing mid-fight; the XP goes to you as plain XP ({@link ArmourWear#refuseMending}). */
+/**
+ * (0.20.68) Mending mends nothing mid-fight; the XP goes to you as plain XP ({@link ArmourWear#refuseMending}). Nor before
+ * you have the Knowledge for it ({@link com.jaymospowers.tinkering.Mending#selfMends}).
+ */
 @Mixin(ExperienceOrb.class)
 abstract class ArmourWearMendingMixin {
 	@Inject(method = "repairPlayerItems", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$notInAFight(ServerPlayer player, int amount, CallbackInfoReturnable<Integer> cir) {
-		if (ArmourWear.refuseMending(player)) {
+		if (ArmourWear.refuseMending(player) || !com.jaymospowers.tinkering.Mending.selfMends(player)) {
 			cir.setReturnValue(amount);
 		}
 	}

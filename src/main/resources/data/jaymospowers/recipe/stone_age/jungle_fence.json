@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "wooden_fence",
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "key": {
+    "W": "minecraft:jungle_planks",
+    "#": "jaymospowers:fence_rail"
+  },
+  "result": {
+    "id": "minecraft:jungle_fence",
+    "count": 3
+  }
+}

@@ -27,7 +27,33 @@ public final class KingdomsCompat {
 	private static Method formsKnown, formsPerk;
 	private static boolean formsLooked;
 
+	private static Method knowledgeLevel;
+	private static boolean knowledgeLooked;
+
 	private KingdomsCompat() {
+	}
+
+	/**
+	 * {@code player}'s Knowledge level (Kingdoms' boss ladder, {@code Knowledge.level}, 0 to 5; server side). Without
+	 * Kingdoms (or if it can't be read) {@link Integer#MAX_VALUE}: there is nothing to earn, so nothing is held back.
+	 */
+	public static int knowledge(Player player) {
+		if (!LOADED || player == null) {
+			return Integer.MAX_VALUE;
+		}
+		if (!knowledgeLooked) {
+			knowledgeLooked = true;
+			try {
+				knowledgeLevel = Class.forName("com.jaymoskingdoms.Knowledge").getMethod("level", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				knowledgeLevel = null;
+			}
+		}
+		try {
+			return knowledgeLevel != null && knowledgeLevel.invoke(null, player) instanceof Integer level ? level : Integer.MAX_VALUE;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return Integer.MAX_VALUE;
+		}
 	}
 
 	/**

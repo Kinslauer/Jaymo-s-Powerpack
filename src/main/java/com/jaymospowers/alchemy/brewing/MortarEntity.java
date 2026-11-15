@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.brewing;
 
+import com.jaymospowers.ground.StoneAge;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import net.minecraft.util.Prediction;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
@@ -32,7 +34,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.20.13) A Mortar and Pestle: up to {@link #HOLDS} of one ingredient ({@link #contents}), the grinding game
+ * (0.20.13) A Mortar and Pestle: up to {@link #HOLDS} of one ingredient ({@link #contents}; a brewing ingredient, or one
+ * of the Stone Age grinds, {@link StoneAge#groundInto}), the grinding game
  * ({@link Grinding}, strokes judged by the server) and the ground batch left in the bowl ({@link #result}).
  * Walking away pauses the grinding.
  */
@@ -117,7 +120,7 @@ public class MortarEntity extends BlockEntity {
 		if (!held.isEmpty()) {
 			if (BrewGrades.ground(held) >= 3 && held.is(Brewing.GRINDABLE)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortar.already_ground"));
-			} else if (!held.is(Brewing.GRINDABLE)) {
+			} else if (!held.is(Brewing.GRINDABLE) && StoneAge.groundInto(held) == null) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortar.cant_grind"));
 			} else if (grinding != null || (!contents.isEmpty() && !ItemStack.isSameItemSameComponents(held, contents))) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortar.other"));
@@ -182,6 +185,20 @@ public class MortarEntity extends BlockEntity {
 	}
 
 	private void finish(ServerPlayer player) {
+		// (GTNH picks) flint, clay, ingots, cane and sticks grind into something else, one for one ({@link StoneAge#groundInto})
+		Item into = StoneAge.groundInto(contents);
+		if (into != null) {
+			result = new ItemStack(into, contents.getCount());
+			contents = ItemStack.EMPTY;
+			grinding = null;
+			grinder = null;
+			finishedBy = player.getUUID();
+			finishedAt = now();
+			changed();
+			ServerPlayNetworking.send(player, BrewingNet.BrewBar.off(worldPosition));
+			level.playSound(null, worldPosition, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.1F);
+			return;
+		}
 		int strokes = BrewQuality.GRIND.strokes();
 		int ground = Math.max(BrewGrades.ground(contents), BrewQuality.groundLevel(grinding.score() / strokes));
 		result = contents.copy();

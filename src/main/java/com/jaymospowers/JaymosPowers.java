@@ -168,6 +168,8 @@ public class JaymosPowers implements ModInitializer {
 		// sulphur and saltpetre: ores, loose crust, and the true black powder
 		com.jaymospowers.ground.PowderMinerals.init();
 		com.jaymospowers.ground.FirstTools.init();
+		// Andy's GT New Horizons picks, patch 1: the Stone Age recipes (the sieve, the mortar's grinds, brick forms, clay buckets, glass)
+		com.jaymospowers.ground.StoneAge.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();
 		com.jaymospowers.core.collide.Collisions.init();

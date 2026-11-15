@@ -429,7 +429,8 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 	/** A damaged tool and its head material: as much repair as the material covers. */
 	private ItemStack repair(int toolSlot) {
 		ItemStack tool = inputs.getItem(toolSlot);
-		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerTool item)) {
+		// wood and flint tools can't be mended (Mending)
+		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerTool item) || Mending.unmendable(tool)) {
 			return ItemStack.EMPTY;
 		}
 		List<TinkerMaterial> materials = ToolStats.materials(tool);

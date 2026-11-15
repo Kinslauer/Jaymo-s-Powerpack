@@ -90,7 +90,7 @@ public final class Kiln {
 		}
 	}
 
-	private static List<Recipe> recipes = List.of();
+	private static final List<Recipe> recipes = new java.util.ArrayList<>();
 
 	private Kiln() {
 	}
@@ -102,8 +102,8 @@ public final class Kiln {
 			.sound(SoundType.GRAVEL).noOcclusion().pushReaction(PushReaction.POPPED), true);
 		KILN_LOAD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("kiln_load"),
 			new BlockEntityType<>(KilnLoadEntity::new, Set.of(KILN_LOAD)));
-		recipes = List.of(
-			new Recipe(s -> s.is(Items.CLAY_BALL), 1, Items.BRICK, 0),
+		// (GTNH picks) a clay ball no longer fires into a brick: bricks are pressed in a brick form first (ground/StoneAge adds them)
+		recipes.addAll(List.of(
 			new Recipe(s -> s.is(Items.CLAY), 1, Items.TERRACOTTA, 0),
 			new Recipe(s -> s.is(UNFIRED_POT.asItem()), 1, Items.DECORATED_POT, 0),
 			new Recipe(s -> s.is(ItemTags.LOGS_THAT_BURN), 1, Items.CHARCOAL, KILN_CHARCOAL_BONUS),
@@ -112,7 +112,7 @@ public final class Kiln {
 			new Recipe(s -> s.is(Tinkering.STEEL_BLEND), STEEL_HEAT, Tinkering.STEEL_INGOT, 0),
 			// (0.18.49) a copper block fired as hot as the kiln gets (a soul fire or hearth with the bellows on it) is a pod's thruster bell
 			new Recipe(s -> s.is(Items.COPPER_BLOCK.weathering().unaffected()) || s.is(Items.COPPER_BLOCK.waxed().unaffected()), BELL_HEAT,
-				PodParts.item(PodPart.BELL), 0));
+				PodParts.item(PodPart.BELL), 0)));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack stack = player.getItemInHand(hand);
 			if (player.isSpectator() || stack.isEmpty() || recipe(stack) == null || level.getBlockState(hit.getBlockPos()).is(KILN_LOAD)) {
@@ -137,6 +137,11 @@ public final class Kiln {
 	/** (0.18.49) Every firing, for JEI. */
 	public static List<Recipe> recipes() {
 		return recipes;
+	}
+
+	/** Another firing, from elsewhere (after {@link #register}). */
+	public static void add(Recipe recipe) {
+		recipes.add(recipe);
 	}
 
 	/** What firing {@code stack} makes, or null if the kiln can't fire it. */

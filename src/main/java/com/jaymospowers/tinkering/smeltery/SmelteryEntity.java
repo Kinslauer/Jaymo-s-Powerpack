@@ -119,7 +119,7 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 		if (result == null) {
 			return stack.isEmpty() ? 0 : -1;
 		}
-		return Math.min(100, progress[slot] * 100 / result.ticks());
+		return Math.min(100, progress[slot] * 100 / result.ticks(stack));
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, SmelteryEntity smeltery) {
@@ -190,8 +190,8 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 			progress[slot] = 0;
 			return false;
 		}
-		if (progress[slot] < result.ticks()) {
-			progress[slot] = Math.min(result.ticks(), progress[slot] + speed);
+		if (progress[slot] < result.ticks(stack)) {
+			progress[slot] = Math.min(result.ticks(stack), progress[slot] + speed);
 			return true;
 		}
 		// (0.13) every liquid it holds (iron and gold for a paladin's helmet) goes in at once, or it waits for room

@@ -1,0 +1,12 @@
+{
+  "type": "jaymospowers:tool_crafting",
+  "category": "misc",
+  "ingredients": [
+    "#jaymospowers:fiber_knives",
+    "#minecraft:planks"
+  ],
+  "result": {
+    "id": "jaymospowers:brick_form",
+    "count": 1
+  }
+}

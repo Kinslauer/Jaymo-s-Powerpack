@@ -78,8 +78,8 @@ public class MelterEntity extends MoltenEntity {
 				continue;
 			}
 			melting |= heat > 0;
-			if (progress[i] < result.ticks()) {
-				progress[i] = Math.min(result.ticks(), progress[i] + speed);
+			if (progress[i] < result.ticks(stack)) {
+				progress[i] = Math.min(result.ticks(stack), progress[i] + speed);
 			} else if (tank.space() >= result.total()) {
 				for (Melting.Input part : result.parts()) {
 					tank.fill(part.molten(), part.amount(), false);

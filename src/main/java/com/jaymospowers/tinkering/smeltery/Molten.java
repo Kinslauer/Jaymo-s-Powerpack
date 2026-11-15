@@ -38,7 +38,9 @@ public enum Molten {
 	COBALT("cobalt", 0xFF2E6FD9, null),
 	MANYULLYN("manyullyn", 0xFF9B45C9, null),
 	QUEEN_SLIME("queen_slime", 0xFF4FC07A, null),
-	HEPATIZON("hepatizon", 0xFF6A5A8A, null);
+	HEPATIZON("hepatizon", 0xFF6A5A8A, null),
+	// ---- (GTNH picks) glass dust melts into it, cast into blocks (basin) and panes (a pane cast) ----
+	GLASS("glass", 0xFFC8E6EE, null);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;
@@ -87,8 +89,8 @@ public enum Molten {
 		return rest == 0 ? ing : Component.translatable("molten.jaymospowers.and", ing, Component.translatable("molten.jaymospowers.mb", rest));
 	}
 
-	/** Measured in ingots (not slime, honey, blood or amethyst). */
+	/** Measured in ingots (not slime, honey, blood, amethyst or glass). */
 	public boolean metal() {
-		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST;
+		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST && this != GLASS;
 	}
 }

@@ -29,11 +29,15 @@ import org.jspecify.annotations.Nullable;
  * ingots' worth (Tinkers' ore doubling); metal gear melts back into the ingots it took.
  */
 public final class Melting {
+	/** (GTNH picks) Molten glass a basin casts into a block of glass, and a pane cast into a pane. */
+	public static final int GLASS_BLOCK_MB = 1000, PANE_MB = 250;
 	/** (0.8.115) Molten gold to gild Sora's Dagger: a block's worth, as the gold block it took before. */
 	static final int DAGGER_GILDING = Molten.BLOCK;
 
 	/** Ticks to melt: a base plus one per this many mB (an ingot about 2.5 s, a block about 15 s). */
 	static final int MELT_BASE_TICKS = 20, MELT_MB_PER_TICK = 3;
+	/** (GTNH picks) Dust from the mortar ({@code ground/StoneAge}) melts this many times as fast as the same metal whole. */
+	static final int DUST_SPEEDUP = 2;
 	/** Ores and raw ore give this many ingots' worth. */
 	static final int ORE_INGOTS = 2;
 	/** (0.13) Ingots in uncraftable metal: horse and nautilus armour, a bell, chainmail (helmet, chest, legs, boots). */
@@ -70,6 +74,11 @@ public final class Melting {
 
 		public int ticks() {
 			return MELT_BASE_TICKS + total() / MELT_MB_PER_TICK;
+		}
+
+		/** Ticks this result takes when it melts out of {@code stack} (dust goes faster). */
+		public int ticks(ItemStack stack) {
+			return DUSTS.contains(stack.getItem()) ? Math.max(1, ticks() / DUST_SPEEDUP) : ticks();
 		}
 
 		/** Several liquids, largest first; null if there's nothing. */
@@ -113,6 +122,8 @@ public final class Melting {
 		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
+	/** (GTNH picks) The dusts, which melt faster ({@link #DUST_SPEEDUP}). */
+	private static final java.util.Set<Item> DUSTS = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 	/**
 	 * (0.13) Melting worked out once the game is up ({@link MeltingRecipes}): data files, forged weapons, and anything
 	 * made from metal by a recipe. The server sends it to players, so both sides agree.
@@ -186,6 +197,18 @@ public final class Melting {
 	/** (0.18.56) Star metal ore melts in the smeltery, one ore for one ingot's worth. */
 	public static void starMetal(Item ore) {
 		add(Molten.STAR_METAL, Molten.INGOT, ore);
+	}
+
+	/** (GTNH picks) A dust ground in the mortar ({@code ground/StoneAge}): {@code amount} of the liquid, melting fast. */
+	public static void dusts(Molten molten, int amount, Item... dusts) {
+		add(molten, amount, dusts);
+		DUSTS.addAll(java.util.List.of(dusts));
+	}
+
+	/** (GTNH picks) Glass and glass panes melt back into molten glass, a block's worth and a pane's. */
+	public static void glass() {
+		add(Molten.GLASS, GLASS_BLOCK_MB, Items.GLASS);
+		add(Molten.GLASS, PANE_MB, Items.GLASS_PANE);
 	}
 
 	/** (Smithing) An alloy's nugget and block (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
@@ -337,6 +360,8 @@ public final class Melting {
 			return switch (castItem.shape) {
 				case INGOT -> ingot(molten);
 				case NUGGET -> nugget(molten);
+				// (GTNH picks) molten glass over a pane cast
+				case PANE -> molten == Molten.GLASS ? new ItemStack(Items.GLASS_PANE) : null;
 				case WEAPON -> {
 					WeaponParts.Kind kind = WeaponParts.ofCast(cast);
 					ItemStack head = kind == null ? null : WeaponParts.castResult(kind, molten);
@@ -384,6 +409,7 @@ public final class Melting {
 		return switch (castItem.shape) {
 			case INGOT -> Molten.INGOT;
 			case NUGGET -> Molten.NUGGET;
+			case PANE -> PANE_MB;
 			case WEAPON -> WeaponParts.ofCast(cast).mb();
 			default -> castItem.shape.part.cost * Molten.INGOT;
 		};
@@ -441,6 +467,7 @@ public final class Melting {
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);
+			case GLASS -> new BasinResult(new ItemStack(Items.GLASS), GLASS_BLOCK_MB);
 			default -> null;
 		};
 	}

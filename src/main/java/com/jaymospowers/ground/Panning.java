@@ -28,7 +28,7 @@ import net.minecraft.world.level.material.MapColor;
  */
 public final class Panning {
 	/** What a panful turns up (before a sluice's boost): gold, copper and iron nuggets, and flint. Iron is scarce on purpose. */
-	static final float GOLD = 0.06F, COPPER = 0.14F, IRON = 0.02F, FLINT = 0.12F;
+	public static final float GOLD = 0.06F, COPPER = 0.14F, IRON = 0.02F, FLINT = 0.12F;
 	static final int PICK_DURABILITY = 180, PAN_DURABILITY = 120;
 
 	public static Item PROSPECTOR_PICK, PAN;

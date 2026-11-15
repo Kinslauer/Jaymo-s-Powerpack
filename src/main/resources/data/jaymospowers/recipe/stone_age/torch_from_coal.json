@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "X",
+    "#"
+  ],
+  "key": {
+    "X": "minecraft:coal",
+    "#": "minecraft:stick"
+  },
+  "result": {
+    "id": "minecraft:torch",
+    "count": 2
+  }
+}

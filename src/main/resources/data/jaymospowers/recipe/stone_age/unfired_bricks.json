@@ -1,0 +1,12 @@
+{
+  "type": "jaymospowers:tool_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:brick_form",
+    "minecraft:clay"
+  ],
+  "result": {
+    "id": "jaymospowers:unfired_brick",
+    "count": 4
+  }
+}
