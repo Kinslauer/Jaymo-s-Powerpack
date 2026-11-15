@@ -21,15 +21,17 @@ abstract class CalamityFogMixin {
 	@Inject(method = "setupFog", at = @At("RETURN"))
 	private void jaymoskingdoms$calamityFog(Camera camera, int renderDistanceInChunks, DeltaTracker deltaTracker, float darkenWorldAmount,
 		ClientLevel level, CallbackInfoReturnable<FogData> cir) {
-		float sand = CalamitiesClient.sand, snow = CalamitiesClient.snow;
-		float thick = Math.max(sand, snow);
+		float sand = CalamitiesClient.sand, snow = CalamitiesClient.snow, ash = CalamitiesClient.ash;
+		float thick = Math.max(Math.max(sand, snow), ash);
 		if (thick <= 0.001F) {
 			return;
 		}
 		FogData fog = cir.getReturnValue();
-		boolean sandy = sand >= snow;
-		float sight = sandy ? CalamitiesClient.SAND_SIGHT : CalamitiesClient.SNOW_SIGHT;
-		float[] colour = sandy ? CalamitiesClient.SAND_COLOUR : CalamitiesClient.SNOW_COLOUR;
+		// a volcano's ash, grey, where it's thickest of the three
+		boolean ashen = ash >= sand && ash >= snow;
+		boolean sandy = !ashen && sand >= snow;
+		float sight = ashen ? CalamitiesClient.ASH_SIGHT : sandy ? CalamitiesClient.SAND_SIGHT : CalamitiesClient.SNOW_SIGHT;
+		float[] colour = ashen ? CalamitiesClient.ASH_COLOUR : sandy ? CalamitiesClient.SAND_COLOUR : CalamitiesClient.SNOW_COLOUR;
 		// eased in: a little thickening reads as haze, the full storm a wall
 		float t = thick * thick * (3.0F - 2.0F * thick);
 		fog.environmentalStart = Mth.lerp(t, fog.environmentalStart, 0.0F);

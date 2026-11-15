@@ -105,6 +105,9 @@ public final class Tinkering {
 	/** (0.18.56) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
 	public static Block STAR_METAL_ORE;
 	public static Item STAR_METAL_INGOT;
+	/** The iron heart a great falling star leaves in its crater ({@code xenoform.FallingStars}), and the lumps it mines into. */
+	public static Block METEORIC_IRON_HEART;
+	public static Item METEORIC_IRON;
 	/** (0.18.102) Bog iron: its ingot (cast from Kingdoms' raw bog iron, melted) and the armour forged from it (helmet, chestplate, leggings, boots). */
 	public static Item BOG_IRON_INGOT;
 	public static final Item[] BOG_IRON_ARMOUR = new Item[4];
@@ -236,6 +239,8 @@ public final class Tinkering {
 			output.accept(STEEL_BLOCK);
 			output.accept(STEEL_BLEND);
 			output.accept(STAR_METAL_ORE);
+			output.accept(METEORIC_IRON_HEART);
+			output.accept(METEORIC_IRON);
 			output.accept(BOG_IRON_INGOT);
 			for (Item piece : BOG_IRON_ARMOUR) {
 				output.accept(piece);
@@ -366,6 +371,12 @@ public final class Tinkering {
 		ALLOY_INGOTS.put(Molten.STAR_METAL, STAR_METAL_INGOT);
 		TinkerMaterial.own(TinkerMaterial.STAR_METAL, 1, STAR_METAL_INGOT);
 		Melting.starMetal(STAR_METAL_ORE.asItem());
+		// (medieval picks, nd-meteor) a great star's iron heart: it mines into lumps, each melting to two ingots of star metal
+		METEORIC_IRON_HEART = block("meteoric_iron_heart", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(8.0F, 1200.0F).sound(SoundType.ANCIENT_DEBRIS).lightLevel(state -> 6)
+			.requiresCorrectToolForDrops());
+		METEORIC_IRON = item("meteoric_iron", Item::new, p -> p.rarity(net.minecraft.world.item.Rarity.RARE).fireResistant());
+		Melting.meteoricIron(METEORIC_IRON);
 	}
 
 	/**

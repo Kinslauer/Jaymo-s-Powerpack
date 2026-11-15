@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.disasters;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,9 +28,14 @@ import org.jspecify.annotations.Nullable;
  * waits on {@link Disasters#DISASTER_DAMAGE}; a settlement puts its buildings back up in time ({@code Rebuilds}).
  */
 public final class Earthquakes {
-	/** By magnitude (1..3): how far it's felt, blocks shaken loose a tick round each player, cracks opened in all. */
-	static final float[] RADIUS = {0.0F, 60.0F, 100.0F, 150.0F};
-	static final int[] LOOSE = {0, 1, 3, 6}, CRACKS = {0, 0, 2, 4};
+	/** By magnitude (1..5, {@link Magnitude}): how far it's felt, blocks shaken loose a tick round each player, cracks
+	 * opened in all. */
+	static final float[] RADIUS = {0.0F, 50.0F, 75.0F, 105.0F, 145.0F, 200.0F};
+	static final int[] LOOSE = {0, 1, 2, 4, 6, 9}, CRACKS = {0, 0, 1, 2, 4, 6};
+	/** (nd-chains) A quake this strong under the sea sends a wave inland ({@link Tsunamis}); one this strong may shake a
+	 * slope loose ({@link Avalanches}), with these odds. */
+	static final int TSUNAMI_FROM = 3, SLIDE_FROM = 3;
+	static final float SLIDE_CHANCE = 0.5F;
 	/** The odds the strongest swallows a patch of ground (once); a sinkhole's radius and depth. */
 	static final float SINKHOLE = 0.35F;
 	static final int SINK_RADIUS_MIN = 3, SINK_RADIUS_MAX = 5, SINK_DEPTH_MIN = 6, SINK_DEPTH_MAX = 10;
@@ -53,9 +59,9 @@ public final class Earthquakes {
 	private Earthquakes() {
 	}
 
-	/** The magnitude of a quake (by its radius). */
+	/** The magnitude of a quake ({@link Magnitude}). */
 	static int magnitude(Calamity c) {
-		return c.radius >= RADIUS[3] ? 3 : c.radius >= RADIUS[2] ? 2 : 1;
+		return c.magnitude;
 	}
 
 	/** Whether {@code pos} is in or by the mountains. */
@@ -68,22 +74,33 @@ public final class Earthquakes {
 
 	/** A quake of {@code magnitude} (0: by chance, stronger in the mountains) somewhere near {@code near}. */
 	static @Nullable Calamity start(ServerLevel level, Vec3 near, int magnitude, RandomSource random) {
+		return start(level, near, magnitude, random, false);
+	}
+
+	/** (Medieval picks) The same, {@code quiet}: no word of it (a volcano's tremors, the world's ending: the ground speaks
+	 * for itself). */
+	static @Nullable Calamity start(ServerLevel level, Vec3 near, int magnitude, RandomSource random, boolean quiet) {
 		if (magnitude <= 0) {
+			// stronger in the mountains (nd-tiers: the Blood Moon's step is in the roll)
 			boolean hills = mountainous(level, BlockPos.containing(near));
-			float roll = random.nextFloat();
-			magnitude = roll < (hills ? 0.25F : 0.1F) ? 3 : roll < (hills ? 0.65F : 0.45F) ? 2 : 1;
-		}
-		if (Calamities.bloodMoon(level)) {
-			magnitude = Math.min(3, magnitude + 1);
+			magnitude = Magnitude.clamp(Magnitude.roll(level, random, Magnitude.MINOR) + (hills ? 1 : 0));
+		} else if (Calamities.bloodMoon(level)) {
+			magnitude = Magnitude.clamp(magnitude + 1);
 		}
 		double a = random.nextDouble() * Math.PI * 2.0, d = random.nextDouble() * 30.0;
 		Calamity c = new Calamity(Storms.nextId(), Calamity.QUAKE, near.x + Math.cos(a) * d, near.z + Math.sin(a) * d, 0.0, 0.0,
-			RADIUS[magnitude], 0, Mth.nextInt(random, LIFE_MIN, LIFE_MAX), -1);
+			RADIUS[magnitude], 0, Math.round(Mth.nextInt(random, LIFE_MIN, LIFE_MAX) * Magnitude.length(magnitude)), -1).magnitude(magnitude);
 		Calamities.SERVER.add(c);
-		for (ServerPlayer p : level.players()) {
+		// the old three warnings, by how bad it is
+		int said = magnitude <= Magnitude.MODERATE ? 1 : magnitude == Magnitude.SEVERE ? 2 : 3;
+		for (ServerPlayer p : quiet ? List.<ServerPlayer>of() : level.players()) {
 			if (c.over(p.getX(), p.getZ()) > 0.0F || p.position().distanceToSqr(c.x, p.getY(), c.z) < Calamities.NEWS_RANGE * Calamities.NEWS_RANGE) {
-				p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("disaster.jaymoskingdoms.quake." + magnitude));
+				p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("disaster.jaymoskingdoms.quake." + said));
 			}
+		}
+		// (nd-chains) a strong one under the sea sends a wave inland
+		if (magnitude >= TSUNAMI_FROM && Tsunamis.atSea(level, c.x, c.z)) {
+			Tsunamis.start(level, new Vec3(c.x, level.getSeaLevel(), c.z), magnitude, 1);
 		}
 		return c;
 	}
@@ -117,9 +134,13 @@ public final class Earthquakes {
 		if (CRACKS[m] > 0 && random.nextFloat() < CRACKS[m] / (float)c.life) {
 			crack(level, shaken.blockPosition(), random);
 		}
-		if (m >= 3 && c.age == c.life / 2 && random.nextFloat() < SINKHOLE) {
+		if (m >= Magnitude.GREAT && (c.age == c.life / 2 || m >= Magnitude.CATASTROPHIC && c.age == c.life / 3) && random.nextFloat() < SINKHOLE) {
 			double a = random.nextDouble() * Math.PI * 2.0, d = 8.0 + random.nextDouble() * 14.0;
 			sinkhole(level, shaken.blockPosition().offset((int)(Math.cos(a) * d), 0, (int)(Math.sin(a) * d)), random);
+		}
+		// (nd-slides, nd-chains) a strong one shakes a slope loose above someone
+		if (m >= SLIDE_FROM && c.age == c.life / 3 && random.nextFloat() < SLIDE_CHANCE) {
+			Avalanches.near(level, shaken, m - 1, random);
 		}
 	}
 

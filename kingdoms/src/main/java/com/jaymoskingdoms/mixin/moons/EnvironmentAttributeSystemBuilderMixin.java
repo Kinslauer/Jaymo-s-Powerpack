@@ -18,5 +18,7 @@ abstract class EnvironmentAttributeSystemBuilderMixin {
 		com.jaymoskingdoms.astronomy.SunMoon.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
 		// a horde day's grey sky (and no burning under it)
 		com.jaymoskingdoms.HordeDays.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
+		// the great disasters': the world's ending's red, a great star's dust, the signs' dark
+		com.jaymoskingdoms.disasters.RedSky.addLayers((EnvironmentAttributeSystem.Builder)(Object)this, level);
 	}
 }
