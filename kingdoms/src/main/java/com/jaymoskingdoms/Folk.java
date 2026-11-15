@@ -514,7 +514,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 					// (0.7.0) a vampire player seen hunting tonight
 					|| Vampires.exposed(player)
 					// (0.7.332) and a werewolf player a priest has named, till dawn (Accusations)
-					|| Accusations.wolfExposed(player))));
+					|| Accusations.wolfExposed(player)
+					// (am-sieges) and one who threw in with a siege against their seat, or stood with one the party's after
+					|| Sieges.foe(this, player) == Boolean.TRUE)));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
 			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)

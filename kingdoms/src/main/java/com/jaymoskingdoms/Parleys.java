@@ -175,6 +175,37 @@ public final class Parleys {
 		}
 	}
 
+	/**
+	 * (am-whiteflag) {@code player} raised a white flag to {@code m}'s band ({@link WhiteFlags}): its tongue-speaker near
+	 * (else {@code m}) comes to name a toll at once, asked today or not. False if it's no band, or one they struck lately.
+	 */
+	static boolean hail(ServerLevel level, ServerPlayer player, Mob m) {
+		String side = Comrades.side(m);
+		long now = level.getGameTime();
+		String key = player.getUUID() + "|" + side;
+		if (!band(level.getServer(), side) || now - STRUCK.getOrDefault(key, -STRUCK_GAP * 2L) < STRUCK_GAP) {
+			return false;
+		}
+		if (spares(m, player)) {
+			return true;
+		}
+		Mob speaker = m;
+		for (Mob mate : level.getEntitiesOfClass(Mob.class, m.getBoundingBox().inflate(BAND_NEAR), e -> e.isAlive() && !Downed.isDowned(e)
+			&& Comrades.side(e).equals(side) && Temperaments.humanoid(e))) {
+			Specialties.roll(mate);
+			if (Specialties.is(mate, Specialties.Specialty.TONGUE)) {
+				speaker = mate;
+				break;
+			}
+		}
+		if (OFFERS.containsKey(speaker)) {
+			return true;
+		}
+		ASKED.remove(key);
+		offer(level, player, speaker, now);
+		return true;
+	}
+
 	/** A camp's band (or loose illagers): not a town's folk, nor a rival party. */
 	private static boolean band(MinecraftServer server, String side) {
 		if (side.equals("illager")) {

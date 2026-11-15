@@ -62,7 +62,7 @@ final class SiegeTrain {
 	// ---- mustering ---------------------------------------------------------------------------------------------------
 
 	/** {@code party}'s engines, set down behind its soldiers at {@code muster} with their crews. */
-	static void muster(ServerLevel level, WarParties.Party party, Faction from, Faction target, BlockPos muster, boolean great) {
+	static void muster(ServerLevel level, WarParties.Party party, Faction from, BlockPos goal, BlockPos muster, boolean great) {
 		if (!from.type().isRealm()) {
 			return;
 		}
@@ -75,7 +75,7 @@ final class SiegeTrain {
 		boolean guns = Muskets.afford(from, Muskets.ARM_TREASURY);
 		// 'c' a field gun, 'm' a mangonel, 'o' a mortar: guns bring a mortar beside them
 		char[] train = guns && great ? new char[] {'c', 'm', 'o'} : guns ? new char[] {'c', 'o'} : new char[] {'m'};
-		double dx = muster.getX() - target.seat().getX(), dz = muster.getZ() - target.seat().getZ();
+		double dx = muster.getX() - goal.getX(), dz = muster.getZ() - goal.getZ();
 		double len = Math.max(1.0, Math.sqrt(dx * dx + dz * dz));
 		float yaw = (float) (Mth.atan2(dx, -dz) * Mth.RAD_TO_DEG);
 		for (int i = 0; i < train.length; i++) {
@@ -118,8 +118,11 @@ final class SiegeTrain {
 
 	// ---- driving -----------------------------------------------------------------------------------------------------
 
-	/** Each of {@code party}'s engines pushed on toward the siege (or home), or worked where it's set down. */
-	static void drive(ServerLevel level, WarParties.Party party, @Nullable Faction from, @Nullable Faction target) {
+	/**
+	 * Each of {@code party}'s engines pushed on toward the siege before {@code target} (or home, with none), or worked where
+	 * it's set down; (am-sieges) silent in a lull, its crew stood off it.
+	 */
+	static void drive(ServerLevel level, WarParties.Party party, @Nullable Faction from, @Nullable BlockPos target) {
 		boolean home = party.phase == WarParties.Phase.RETURN || target == null;
 		for (UUID id : List.copyOf(party.engines)) {
 			Entity engine = level.getEntity(id);
@@ -138,7 +141,8 @@ final class SiegeTrain {
 				}
 				continue;
 			}
-			BlockPos goal = home ? from == null ? null : from.seat() : target.seat();
+			BlockPos goal = home ? from == null ? null : from.seat() : target;
+			haul.quiet = !home && party.lull;
 			if (goal == null) {
 				haul.to = null;
 				continue;
@@ -154,7 +158,10 @@ final class SiegeTrain {
 				} else if (engine instanceof FieldMortar f) {
 					f.seat = home ? null : goal;
 				}
-				if (!home) {
+				if (haul.quiet) {
+					// (the lull: the gun left unmanned)
+					engine.ejectPassengers();
+				} else if (!home) {
 					work(engine, crew);
 				}
 				continue;

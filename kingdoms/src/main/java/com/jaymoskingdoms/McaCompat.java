@@ -785,6 +785,11 @@ public final class McaCompat {
 			// a tale's people fight the players of their tale once it comes to that, and nobody's guard goes for them
 			return tale;
 		}
+		Boolean siege = Sieges.foe(guard, target);
+		if (siege != null) {
+			// (am-sieges) a siege's sides: the attackers go for those who stand with the seat, the seat's guards for those who joined them
+			return siege;
+		}
 		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);

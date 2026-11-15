@@ -332,6 +332,20 @@ public final class Busts {
 		}
 	}
 
+	/**
+	 * (am-whiteflag) {@code player}, under a white flag ({@link WhiteFlags}), gives themselves up to {@code guard} of
+	 * {@code f}: sentenced as one who yielded. False if they stand charged with nothing there.
+	 */
+	static boolean giveUp(ServerLevel level, ServerPlayer player, Faction f, PathfinderMob guard) {
+		String crime = player.getAttachedOrElse(CHARGES, Map.of()).get(Integer.toString(f.id()));
+		if (crime == null || jailed(player)) {
+			return false;
+		}
+		YIELDING.remove(player.getUUID());
+		sentence(level, player, f, crime, guard, true);
+		return true;
+	}
+
 	/** Shuts {@code player} in {@code f}'s cells (dug if they are not yet) until game time {@code until}. */
 	static void lockUp(ServerLevel level, ServerPlayer player, Faction f, long until, Component name) {
 		long now = level.getGameTime();
