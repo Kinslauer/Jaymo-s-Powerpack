@@ -43,9 +43,9 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
   steel plate or netherite piece + one token item = that set's piece. One table of set -> token.
 - **Per-piece bonuses** (`piece-spread`): each set's pieces carry their own small modifiers (speed on boots, attack speed
   on the chest, health on the helm, luck on hoods), constants at the top of the set class.
-- **Whole-set sign** (`set-motes`): faint MagicFx motes in the set's colour while the whole set is worn.
-- **Set capes** (`set-capes`): `ClothCape` hung from chosen chestpieces, in the set's colour.
-- **Villager remarks** (`set-remarks`): MCA villagers make one oblique remark on a known set (like the grime remarks),
+- **Whole-set sign** (`set-motes`, built as `SetSigns`): faint MagicFx motes in the set's colour while the whole set is worn.
+- **Set capes** (`set-capes`, dropped: Fantasy Armor's sets hang their own): `ClothCape` hung from chosen chestpieces, in the set's colour.
+- **Villager remarks** (`set-remarks`, built as `SetSigns`): MCA villagers make one oblique remark on a known set (like the grime remarks),
   never a tooltip paragraph.
 - **Twinned** (`twinned`): paired harness sworn at a shrine; while both halves are worn within 16 blocks, 25% of a hit on
   one goes to the other.
@@ -117,9 +117,8 @@ whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they 
 - Warden hunter's coat = Evening Ghost (Gilded Hunt is the kings'); folded lamellar = Ronin; pit harness = Dead Gladiator.
 - Back to back (twinned) = Twinned.
 Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
-guards. Still to place (their wearers don't exist in code yet, or MCA re-arms them): sky elders and well-wardens (the sky
-castle's wardens are MCA guards), dawnwatch wearers (Sun-Marshal's guard), headsmen, demon captains of the Ash, pit
-warlords. Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
+guards. All placed: headsmen (`Headsmen`); sky elders (`SkyCourt#ELDER_TAG`), well-wardens = the sky lord's wardens and the
+dawnwatch = the Sun-Marshal's sun-guard (`FantasyArmorCompat#issue`, `SunMarshalMoves#hand`); demon captains and pit warlords (#1594). Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)

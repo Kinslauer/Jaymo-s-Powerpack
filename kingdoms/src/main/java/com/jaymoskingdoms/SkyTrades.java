@@ -123,6 +123,8 @@ public final class SkyTrades {
 		buy(list, "golden_aercloud", 6, 2);
 		MerchantOffers offers = new MerchantOffers();
 		offers.addAll(list);
+		// and the wind-faith robes the elders wear, where Fantasy Armor is loaded
+		FantasyArmorCompat.robes(offers);
 		return offers;
 	}
 
@@ -188,6 +190,10 @@ public final class SkyTrades {
 						v.setOffers(job.wares().get());
 					} else {
 						v.getOffers().forEach(MerchantOffer::resetUses);
+						if (job.profession().get() == Professions.CLOUDWRIGHT) {
+							// (a stall set up before the robes were sold gets them too)
+							FantasyArmorCompat.robes(v.getOffers());
+						}
 					}
 				}
 			}
@@ -224,11 +230,11 @@ public final class SkyTrades {
 		}
 	}
 
-	/** An idle grown villager of the sky (not the lord, a warden, a worker, a ruler or someone's family) who might take up the stall. */
-	private static boolean hirable(Villager v) {
+	/** An idle grown villager of the sky (not the lord, a warden, an elder, a worker, a ruler or someone's family) who might take up the stall. */
+	static boolean hirable(Villager v) {
 		return SkyFolk.in(v) && McaBridge.adult(v) && v.getVillagerData().profession().is(VillagerProfession.NONE)
 			&& !(v instanceof Worker w && w.role() >= 0) && !Rulers.is(v) && !v.entityTags().contains(SkyCourt.LORD_TAG)
-			&& !v.entityTags().contains(SkyCourt.WARDEN_TAG) && !McaCompat.playerFamily(v) && McaCompat.following(v) == null
+			&& !v.entityTags().contains(SkyCourt.WARDEN_TAG) && !v.entityTags().contains(SkyCourt.ELDER_TAG) && !McaCompat.playerFamily(v) && McaCompat.following(v) == null
 			&& !v.hasAttached(Emigrants.MOVE);
 	}
 }

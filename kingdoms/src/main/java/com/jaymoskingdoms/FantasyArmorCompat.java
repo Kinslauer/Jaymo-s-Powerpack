@@ -28,6 +28,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Fantasy Armor (mod id {@value #MOD}, kenddie's Medieval Series; all rights reserved, nothing of it copied here) puts its
@@ -51,7 +52,12 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * <li><b>The Warden's hunters' coats</b> ({@link #HUNTER}): "can still be bought from the Warden's own", at the
  * armourer of a realm that keeps the Lantern Warden, by one sworn to him.</li>
  * <li><b>Dawnwatch plate</b> ({@link #DAWNWATCH}): the Crowned Sun's realms' armourers sell it to his sworn at high favour
- * ({@link #DAWNWATCH_TIER}).</li>
+ * ({@link #DAWNWATCH_TIER}), and the Sun-Marshal's sun-guard wear it.</li>
+ * <li><b>The headsmen's plate</b> ({@link #HEADSMAN}): {@link Headsmen}.</li>
+ * <li><b>The sky folk's robes</b> ({@link #SKY_ROBES}): each sky village's elder wears them ({@link SkyCourt#ELDER_TAG}), and
+ * the cloudwrights sell them ({@link #SKY_ROBES_PRICE}).</li>
+ * <li><b>Well-warden plate</b> ({@link #WELL_WARDEN}): the sky lord's wardens ({@link SkyCourt#WARDEN_TAG}) wear it on duty,
+ * and take it off with the rest of their arms.</li>
  * <li><b>Back to back</b> ({@link #TWINNED}): two who each wear at least {@link #TWIN_HALF} of its pieces and each use a
  * shrine they both stand at ({@link #TWIN_SWEAR} blocks of it), one after the other, are sworn to each other ({@link #SWORN}); while both have their half on
  * and are within {@link #TWIN_RANGE} blocks, {@link #TWIN_SHARE} of each hit that lands on one is borne by the other.
@@ -89,6 +95,8 @@ public final class FantasyArmorCompat {
 	static final double GIANT_WITNESS = 48.0;
 	/** Prices of a set's pieces (emeralds: helm, breastplate, leggings, boots): made over netherite, the dearest on any counter. */
 	static final int[] HUNTER_PRICE = {28, 44, 36, 24}, DAWNWATCH_PRICE = {34, 52, 44, 30};
+	/** The robes are cloth, not plate (emeralds, as above). */
+	static final int[] SKY_ROBES_PRICE = {16, 26, 22, 14};
 	/** The favour tier one sworn to the Crowned Sun needs before his realms' armourers sell them the dawnwatch's plate. */
 	static final int DAWNWATCH_TIER = 3;
 	static final int USES = 2, XP = 10;
@@ -239,6 +247,42 @@ public final class FantasyArmorCompat {
 		counter(offers, DAWNWATCH, DAWNWATCH_PRICE, realm == Patron.CROWNED_SUN && Patrons.blessed(player, Patron.CROWNED_SUN, DAWNWATCH_TIER));
 	}
 
+	/** (from {@link SkyTrades#wares}) A cloudwright's stall carries the sky folk's robes. */
+	static void robes(MerchantOffers offers) {
+		counter(offers, SKY_ROBES, SKY_ROBES_PRICE, true);
+	}
+
+	/** The order whose set {@code e} wears by its tag (a headsman, a sky village's elder, a sky lord's warden), or null. */
+	private static @Nullable String order(LivingEntity e) {
+		if (!LOADED) {
+			return null;
+		}
+		var tags = e.entityTags();
+		return tags.contains(Headsmen.TAG) ? HEADSMAN : tags.contains(SkyCourt.ELDER_TAG) ? SKY_ROBES
+			: tags.contains(SkyCourt.WARDEN_TAG) ? WELL_WARDEN : null;
+	}
+
+	/** From {@code McaEquipmentMixin} by way of {@link FrontierWear#issue}: an order's own piece for {@code slot}, or null. */
+	static @Nullable ItemStack issue(LivingEntity villager, EquipmentSlot slot) {
+		String set = order(villager);
+		for (int i = 0; set != null && i < SLOTS.length; i++) {
+			if (SLOTS[i] == slot) {
+				return piece(set, i).map(ItemStack::new).orElse(null);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * By way of {@link FrontierWear#keeps}: a headsman keeps his plate on and an elder their robes, off duty too (a warden
+	 * takes his off with the rest of his arms, as every guard does).
+	 */
+	static boolean keeps(LivingEntity villager, EquipmentSlot slot) {
+		String set = order(villager);
+		return (HEADSMAN.equals(set) || SKY_ROBES.equals(set)) && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR
+			&& issue(villager, slot) instanceof ItemStack piece && villager.getItemBySlot(slot).is(piece.getItem());
+	}
+
 	/** {@code set}'s pieces at {@code prices} on the counter if {@code sold}; else off it. */
 	private static void counter(MerchantOffers offers, String set, int[] prices, boolean sold) {
 		for (int i = 0; i < SLOTS.length; i++) {
@@ -277,7 +321,7 @@ public final class FantasyArmorCompat {
 	}
 
 	/** {@code e} in every piece of {@code set}; false (nothing changed) where the mod or the set isn't there. */
-	static boolean dress(LivingEntity e, String set) {
+	public static boolean dress(LivingEntity e, String set) {
 		boolean any = false;
 		for (int i = 0; i < SLOTS.length; i++) {
 			Optional<Item> piece = piece(set, i);
