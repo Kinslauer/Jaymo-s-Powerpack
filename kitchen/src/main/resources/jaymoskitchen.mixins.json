@@ -21,6 +21,7 @@
 		"CropSeasonMixin",
 		"EntityMixin",
 		"FiniteWaterMixin",
+		"RainRefillMixin",
 		"FishingHookMixin",
 		"FreshBarMixin",
 		"HerdAgeMixin",
