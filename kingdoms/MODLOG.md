@@ -13711,3 +13711,8 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   the rite of rebirth in three lines, a few seconds apart, and knows the Rebirth spell after. Walking more than 8 blocks
   off ends the telling. A Druid who knows it already gets a one-line reminder. `Rebirths.use`/`tell`, lang part `druid_tells`.
 - Compile-checked; not played.
+
+## 0.9.11 (2026-11-15): Kidnapping in the story quests
+
+- Story quests can now have rescue and capture steps, like the board's Taken by outlaws and Wanted alive work. A captive you bring home stays part of the tale, and a criminal brought in alive is handed over on the spot. Letting the criminal go, or taking them into your service, can lead the tale somewhere else.
+- New tale, The Asking Price: an asker's daughter is taken on the market road and held for ransom. Find the takers' camp, cut her free and bring her home, then go after the one who leads them and bring him in alive. Sometimes someone in the household sold her to them.
