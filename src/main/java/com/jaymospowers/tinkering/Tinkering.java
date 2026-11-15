@@ -251,7 +251,7 @@ public final class Tinkering {
 				}
 			});
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
-				if (!WeaponParts.king(kind)) {
+				if (!WeaponParts.king(kind) && !WeaponParts.patternOnly(kind)) {
 					output.accept(WeaponParts.cast(kind));
 				}
 			}

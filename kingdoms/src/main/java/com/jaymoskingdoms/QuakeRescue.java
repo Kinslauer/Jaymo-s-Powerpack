@@ -110,6 +110,29 @@ public final class QuakeRescue {
 		}
 	}
 
+	/**
+	 * (medieval picks, mm-collapse) A mineshaft's ceiling came down on {@code v}, one of {@code f}'s miners working it
+	 * ({@code mineshafts/ShaftMiners}): shut in where they stand, and a neighbour at home asks for them to be dug out.
+	 */
+	public static void shutIn(ServerLevel level, Faction f, Villager v) {
+		if (v.hasAttached(TRAPPED) || !v.isAlive() || !wall(level, v.blockPosition(), level.getRandom())) {
+			return;
+		}
+		Villager asker = null;
+		for (Villager n : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(TRAP_RANGE),
+				n -> n != v && n.isAlive() && !n.isBaby() && !Quests.offering(n) && !n.hasAttached(TRAPPED))) {
+			asker = n;
+			break;
+		}
+		v.setAttached(TRAPPED, new Trapped(level.getGameTime(), asker == null ? v.getUUID() : asker.getUUID()));
+		TRAPPED_NOW.put(v.getUUID(), level);
+		v.getNavigation().stop();
+		Speech.say(level, v, Component.translatable("relief.jaymoskingdoms.trapped.call"), Speech.RED, HEAR_RANGE);
+		if (asker != null) {
+			ask(level, f, asker, v);
+		}
+	}
+
 	/** Fallen stone round {@code feet} (where it's open), and over the head. Whether it shut them in. */
 	private static boolean wall(ServerLevel level, BlockPos feet, RandomSource random) {
 		if (!open(level, feet) || !open(level, feet.above())) {

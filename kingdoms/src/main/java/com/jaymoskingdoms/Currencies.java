@@ -117,6 +117,18 @@ public final class Currencies {
 	public static final boolean FOREIGN_TAKEN = true;
 	/** (0.7.498) A money-changer buys an emerald (a gem now) at this share of its worth, and sells one at this much of it. */
 	public static final double EMERALD_BUY = 0.90, EMERALD_SELL = 1.12;
+	/**
+	 * (medieval picks, cv-coins; Andy: "old age money was emeralds") In a rich town ({@link #rich}) the changer pays this
+	 * share of an emerald's worth (still under {@link #EMERALD_SELL}, so nobody makes coin going round), and a collector's
+	 * price for the old age's relics and arms: this many emeralds' worth each, paid at that share.
+	 */
+	public static final double EMERALD_BUY_RICH = 1.05;
+	static final int RELIC_WORTH = 8, ARMS_WORTH = 5;
+	/** (medieval picks) A town is rich with its realm's treasury full ({@code Cabs.rich}) or this many people. */
+	static final int RICH_POPULATION = 40;
+	/** (medieval picks) The old age's arms a collector buys (Jaymo's Powers' ids). */
+	static final List<String> OLD_ARMS = List.of("sickle_sword", "legion_sword", "tall_shield", "leaf_spear", "old_round_shield", "broad_sabre",
+		"bearded_axe");
 	/** (0.7.498) A diamond is worth this many emeralds to a changer, who buys it but doesn't sell it. */
 	public static final int DIAMOND_WORTH = 4;
 	/** (0.7.498) A price over a stack of the town's coin is asked in this coin (more by worth) in the first slot, the rest in the town's coin. */
@@ -575,7 +587,7 @@ public final class Currencies {
 		MinecraftServer server = level.getServer();
 		Currency c = keeper(villager) ? Currency.EMERALD : f != null ? of(server, f) : at(level, villager.blockPosition());
 		if (villager instanceof Villager v && changer(v)) {
-			counter(level, v, c);
+			counter(level, v, c, rich(f));
 			return;
 		}
 		// (0.7.498) a den's fence is priced in coin too now: emeralds are a gem, and only the keepers deal in them
@@ -924,6 +936,10 @@ public final class Currencies {
 	 * mercenaries, our workers), no pedlar, no Ignis Vael.
 	 */
 	public static boolean keeper(@Nullable Entity e) {
+		if (com.jaymoskingdoms.oldage.RuinFolk.is(e)) {
+			// (medieval picks) the old age's descendants: emeralds were their money
+			return true;
+		}
 		return e instanceof AbstractVillager t && !t.isBaby() && trades(t) && !(t instanceof Villager v && changer(v)) && lot(t);
 	}
 
@@ -948,7 +964,7 @@ public final class Currencies {
 	 * (0.7.490) A changer's counter set at today's rates in town coin {@code local}, each trade keeping the uses it has had
 	 * since it last restocked (once every {@link #CHANGE_RESTOCK_DAYS}), so opening the trade again doesn't restock it.
 	 */
-	private static void counter(ServerLevel level, Villager v, Currency local) {
+	private static void counter(ServerLevel level, Villager v, Currency local, boolean rich) {
 		// (0.7.498) a realm's coin only: a camp's, or a keeper's emeralds, has no counter
 		if (!local.coin()) {
 			return;
@@ -956,7 +972,7 @@ public final class Currencies {
 		long day = Quests.day(level);
 		Long last = v.getAttached(CHANGER_DAY);
 		boolean restock = last == null || day - last >= CHANGE_RESTOCK_DAYS;
-		MerchantOffers fresh = changes(level.getServer(), local);
+		MerchantOffers fresh = changes(level.getServer(), local, rich);
 		if (!restock) {
 			for (int i = 0; i < fresh.size(); i++) {
 				MerchantOffer o = fresh.get(i);
@@ -980,6 +996,16 @@ public final class Currencies {
 	 * {@link #EMERALD_SELL}), emerald blocks (nine emeralds), diamonds ({@link #DIAMOND_WORTH}, bought only).
 	 */
 	static MerchantOffers changes(MinecraftServer server, Currency local) {
+		return changes(server, local, false);
+	}
+
+	/** (medieval picks) {@code f} is a rich town: its treasury full, or a great many people. */
+	static boolean rich(@Nullable Faction f) {
+		return f != null && !f.fallen() && (Cabs.rich(f) || f.holdings().population() >= RICH_POPULATION);
+	}
+
+	/** {@link #changes(MinecraftServer, Currency)}, in a {@code rich} town: emeralds bought dearer, and the collector's offers. */
+	static MerchantOffers changes(MinecraftServer server, Currency local, boolean rich) {
 		MerchantOffers offers = new MerchantOffers();
 		for (Currency other : Currency.values()) {
 			// (0.7.490) only the realms' coins: no gold or bent copper over a town's counter (0.7.498) nor the bit or the emerald, which have rows of their own
@@ -999,12 +1025,30 @@ public final class Currencies {
 			}
 		}
 		// the gems
-		add(offers, buys(local, Items.EMERALD, 1000));
+		add(offers, buys(local, Items.EMERALD, 1000, rich ? EMERALD_BUY_RICH : EMERALD_BUY));
 		add(offers, sells(local, Items.EMERALD, 1000));
 		add(offers, buys(local, Items.EMERALD_BLOCK, 9000));
 		add(offers, sells(local, Items.EMERALD_BLOCK, 9000));
 		add(offers, buys(local, Items.DIAMOND, DIAMOND_WORTH * 1000));
+		if (rich) {
+			// (medieval picks) a collector's: the old age's relics and arms, dear
+			for (Item relic : com.jaymoskingdoms.oldage.OldAge.relics()) {
+				add(offers, collects(local, relic, RELIC_WORTH));
+			}
+			for (String id : OLD_ARMS) {
+				Item arm = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("jaymospowers", id));
+				if (arm != Items.AIR) {
+					add(offers, collects(local, arm, ARMS_WORTH));
+				}
+			}
+		}
 		return offers;
+	}
+
+	/** (medieval picks) One {@code item} in, {@code worth} emeralds' worth of {@code local} coins out at {@link #EMERALD_BUY_RICH}. */
+	private static @Nullable MerchantOffer collects(Currency local, Item item, int worth) {
+		int out = (int) Math.min(64L, (long) Math.floor(worth * 1000.0 * EMERALD_BUY_RICH / local.base + 1.0E-9));
+		return out < 1 ? null : new MerchantOffer(new ItemCost(item, 1), new ItemStack(local.item(), out), CHANGE_USES, 0, 0.0F);
 	}
 
 	/**
@@ -1013,15 +1057,20 @@ public final class Currencies {
 	 * share of the worth the coins can make, so the whole coins lose little to rounding.
 	 */
 	private static @Nullable MerchantOffer buys(Currency local, Item gem, int unit) {
+		return buys(local, gem, unit, EMERALD_BUY);
+	}
+
+	/** {@link #buys(Currency, Item, int)} at the share {@code rate} of the gem's worth. */
+	private static @Nullable MerchantOffer buys(Currency local, Item gem, int unit, double rate) {
 		double best = -1.0;
 		for (int in = 1; in <= 64; in++) {
-			int out = buyOut(local, in, unit);
+			int out = buyOut(local, in, unit, rate);
 			if (out >= 1 && out <= 64) {
 				best = Math.max(best, out * local.base / (double)(in * unit));
 			}
 		}
 		for (int in = 1; in <= 64; in++) {
-			int out = buyOut(local, in, unit);
+			int out = buyOut(local, in, unit, rate);
 			if (out >= 1 && out <= 64 && out * local.base / (double)(in * unit) >= best - LOT_SLACK) {
 				return new MerchantOffer(new ItemCost(gem, in), new ItemStack(local.item(), out), CHANGE_USES, 0, 0.0F);
 			}
@@ -1030,8 +1079,8 @@ public final class Currencies {
 	}
 
 	/** (0.7.498) How many of {@code local}'s coins {@code in} gems of {@code unit} worth fetch at {@link #EMERALD_BUY}, rounded down. */
-	private static int buyOut(Currency local, int in, int unit) {
-		return (int)Math.min(1000L, (long)Math.floor(in * (double)unit * EMERALD_BUY / local.base + 1.0E-9));
+	private static int buyOut(Currency local, int in, int unit, double rate) {
+		return (int)Math.min(1000L, (long)Math.floor(in * (double)unit * rate / local.base + 1.0E-9));
 	}
 
 	/**
@@ -1110,7 +1159,7 @@ public final class Currencies {
 				// (a little experience, so the game doesn't take the trade off them for want of a job site)
 				v.setVillagerXp(Math.max(1, v.getVillagerXp()));
 				v.setPersistenceRequired();
-				v.setOffers(changes(level.getServer(), of(level.getServer(), f)));
+				v.setOffers(changes(level.getServer(), of(level.getServer(), f), rich(f)));
 				v.setAttached(CHANGER_DAY, Quests.day(level));
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 2.1, v.getZ(), 5, 0.3, 0.2, 0.3, 0.0);
 				return;

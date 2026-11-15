@@ -128,6 +128,10 @@ public final class Earthquakes {
 				}
 			}
 		}
+		if (damage) {
+			// (medieval picks, mm-collapse) the mineshafts' unshored ceilings
+			com.jaymoskingdoms.mineshafts.ShaftCollapse.quake(level, c, m, random, now);
+		}
 		if (!damage || shaken == null || s < 0.8F) {
 			return;
 		}

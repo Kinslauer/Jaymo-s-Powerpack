@@ -207,6 +207,10 @@ public final class BossIntros {
 		if (com.jaymoskingdoms.nether.FortressKnight.is(entity)) {
 			return "jaymoskingdoms:fortress_knight";
 		}
+		if (entity instanceof com.jaymoskingdoms.oldage.OldRuler ruler) {
+			// (medieval picks) an old age's ruler, once woken: each people's their own
+			return ruler.awake() ? type + "/" + ruler.people().id : null;
+		}
 		if (entity instanceof com.jaymoskingdoms.wild.nest.BroodQueen queen) {
 			// (medieval picks) the brood queen, once woken off her egg
 			return queen.sleeping() ? null : type;

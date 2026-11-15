@@ -544,6 +544,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderMinds.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
+		// medieval picks: the old age's peoples (their ruined cities, sleeping rulers, temples and descendants)
+		com.jaymoskingdoms.oldage.OldAge.register();
+		// medieval picks: the mineshafts (Moog's Mineshafts Reimagined's, and the game's) worked, looted, shaken and haunted
+		com.jaymoskingdoms.mineshafts.Mineshafts.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
 		TurnedVillagers.register();
