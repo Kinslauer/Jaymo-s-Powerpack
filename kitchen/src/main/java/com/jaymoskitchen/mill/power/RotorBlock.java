@@ -100,17 +100,13 @@ public class RotorBlock extends BaseEntityBlock {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		for (SailKind kind : SailKind.values()) {
-			if (stack.is(kind.patch)) {
-				if (!level.isClientSide()) {
-					if (!entity.patch(stack)) {
-						return InteractionResult.FAIL;
-					}
-					stack.consume(1, player);
-					level.playSound(null, pos, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1.0F, 1.2F);
-				}
-				return InteractionResult.SUCCESS;
+		// nothing to patch: the wool block (or paper, or leather) does what it would anywhere else
+		if (entity.needsPatch(stack)) {
+			if (!level.isClientSide() && entity.patch(stack)) {
+				stack.consume(1, player);
+				level.playSound(null, pos, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1.0F, 1.2F);
 			}
+			return InteractionResult.SUCCESS;
 		}
 		DyeColor colour = stack.getItem() instanceof DyeItem ? stack.get(DataComponents.DYE) : null;
 		if (colour == null) {

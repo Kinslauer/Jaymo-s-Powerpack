@@ -47,8 +47,10 @@ public class RotorEntity extends BlockEntity {
 	static final float GALE = 1.15F, GALE_TEAR = 2.0F;
 	/** A sail with less than this share of its life left tears this many times as easily. */
 	static final float WORN = 0.5F, WORN_TEAR = 2.0F;
-	/** A patch puts back this share of the sail's life. */
-	static final float PATCH = 0.25F;
+	/** A patch puts back this share of the sail's life; a sail takes one once it's below this share of it. */
+	static final float PATCH = 0.25F, PATCH_BELOW = 0.95F;
+	/** Clients hear of a sail's wear in steps of this share of its life (so they know when it can take a patch). */
+	static final int WEAR_STEPS = 20;
 	public static final int SAILS = 4;
 
 	/** One spar's sail: its kind (null: bare), its life left (seconds of turning), and whether it's torn. */
@@ -65,6 +67,15 @@ public class RotorEntity extends BlockEntity {
 
 		boolean pulling() {
 			return kind != null && !torn;
+		}
+
+		boolean patchable(ItemStack material) {
+			return pulling() && material.is(kind.patch) && life < kind.life * PATCH_BELOW;
+		}
+
+		/** Its wear in {@link #WEAR_STEPS} steps, as clients hear of it. */
+		int step() {
+			return kind == null ? -1 : (int) (life / kind.life * WEAR_STEPS);
 		}
 
 		/** What the renderer shows: -1 bare, else kind * 3 + (0 whole, 1 worn, 2 in rags). */
@@ -84,8 +95,6 @@ public class RotorEntity extends BlockEntity {
 	private int nextSail;
 	/** The four sails (a windmill from before sails had kinds keeps these: hemp, as good as new). */
 	private final Sail[] fitted = {Sail.fresh(SailKind.CLOTH), Sail.fresh(SailKind.CLOTH), Sail.fresh(SailKind.CLOTH), Sail.fresh(SailKind.CLOTH)};
-	/** Client side: each sail's look ({@link Sail#look}). */
-	private final int[] looks = {0, 0, 0, 0};
 
 	/** Client side: the angle shown, now and last tick. */
 	public float angle, lastAngle;
@@ -113,9 +122,9 @@ public class RotorEntity extends BlockEntity {
 		return sails[sail];
 	}
 
-	/** Client side: sail {@code sail}'s look: -1 bare, else its kind's ordinal times 3 plus 0 whole, 1 worn, 2 in rags. */
+	/** Sail {@code sail}'s look: -1 bare, else its kind's ordinal times 3 plus 0 whole, 1 worn, 2 in rags. */
 	public int look(int sail) {
-		return looks[sail];
+		return fitted[sail].look();
 	}
 
 	/** Dyes the next sail in turn; false (and no dye used) when that one is already this colour. */
@@ -155,16 +164,25 @@ public class RotorEntity extends BlockEntity {
 		return false;
 	}
 
-	/** Patches the most worn whole sail that {@code material} mends; false if none needs it. */
-	public boolean patch(ItemStack material) {
+	/** Whether {@code material} would patch one of its sails (both sides: the wear is synced in steps). */
+	public boolean needsPatch(ItemStack material) {
+		return mostWorn(material) >= 0;
+	}
+
+	private int mostWorn(ItemStack material) {
 		int best = -1;
 		for (int i = 0; i < SAILS; i++) {
 			Sail sail = fitted[i];
-			if (sail.pulling() && material.is(sail.kind.patch) && sail.life < sail.kind.life
-				&& (best < 0 || sail.life / sail.kind.life < fitted[best].life / fitted[best].kind.life)) {
+			if (sail.patchable(material) && (best < 0 || sail.life / sail.kind.life < fitted[best].life / fitted[best].kind.life)) {
 				best = i;
 			}
 		}
+		return best;
+	}
+
+	/** Patches the most worn whole sail that {@code material} mends; false if none needs it. */
+	public boolean patch(ItemStack material) {
+		int best = mostWorn(material);
 		if (best < 0) {
 			return false;
 		}
@@ -246,11 +264,13 @@ public class RotorEntity extends BlockEntity {
 		boolean windmill = rotor() == Rotor.WINDMILL;
 		float now = rotor().speed(level, worldPosition, facing());
 		if (windmill) {
-			weather(level, now);
+			float wind = now;
 			now *= pull();
 			if (now < MIN_TURN) {
 				now = 0.0F;
 			}
+			// the sails wear only while they turn; a storm can tear them still
+			weather(level, now != 0.0F ? wind : 0.0F);
 		}
 		List<BlockPos> run = new ArrayList<>();
 		ShaftDriven machine = Shafts.follow(level, worldPosition, facing(), run);
@@ -289,13 +309,13 @@ public class RotorEntity extends BlockEntity {
 			return;
 		}
 		float storm = Wind.storm(level, worldPosition) + Math.max(0.0F, Wind.strength(level, worldPosition) - GALE) * GALE_TEAR;
-		boolean changed = false;
+		boolean changed = false, worn = false;
 		for (int i = 0; i < SAILS; i++) {
 			Sail sail = fitted[i];
 			if (!sail.pulling()) {
 				continue;
 			}
-			int lookWas = sail.look();
+			int lookWas = sail.look(), stepWas = sail.step();
 			float life = sail.life - wind;
 			float tear = sail.kind.tear * storm * (life < sail.kind.life * WORN ? WORN_TEAR : 1.0F);
 			boolean torn = life <= 0.0F || tear > 0.0F && level.getRandom().nextFloat() < tear;
@@ -306,11 +326,12 @@ public class RotorEntity extends BlockEntity {
 				level.sendParticles(ParticleTypes.POOF, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5,
 					6, Rotor.WINDMILL.radius / 2.0, Rotor.WINDMILL.radius / 2.0, Rotor.WINDMILL.radius / 2.0, 0.02);
 			}
-			changed |= fitted[i].look() != lookWas;
+			changed |= fitted[i].look() != lookWas || fitted[i].step() != stepWas;
+			worn |= life != sail.life;
 		}
 		if (changed) {
 			changed();
-		} else {
+		} else if (worn) {
 			setChanged();
 		}
 	}
@@ -347,11 +368,6 @@ public class RotorEntity extends BlockEntity {
 				fitted[i] = i < saved.size() ? saved.get(i) : Sail.BARE;
 			}
 		});
-		input.read("Looks", Codec.INT.listOf()).ifPresent(saved -> {
-			for (int i = 0; i < SAILS; i++) {
-				looks[i] = i < saved.size() ? saved.get(i) : -1;
-			}
-		});
 	}
 
 	private void loadSails(ValueInput input) {
@@ -381,11 +397,7 @@ public class RotorEntity extends BlockEntity {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
 		output.putFloat("Speed", speed);
 		output.store("Sails", DyeColor.CODEC.listOf(), List.of(sails));
-		List<Integer> look = new ArrayList<>();
-		for (Sail sail : fitted) {
-			look.add(sail.look());
-		}
-		output.store("Looks", Codec.INT.listOf(), look);
+		output.store("Fitted", Sail.CODEC.listOf(), List.of(fitted));
 		return output.buildResult();
 	}
 }

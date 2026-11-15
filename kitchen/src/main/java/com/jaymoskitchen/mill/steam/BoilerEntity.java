@@ -42,6 +42,8 @@ public class BoilerEntity extends BlockEntity {
 	static final float HEAT_PER_MB = 1.0F;
 	/** Without a fire, the share of its steam that's left after a tick (it condenses). */
 	static final float CONDENSE = 0.999F;
+	/** Less steam than this (mB) is none. */
+	static final float STEAM_GONE = 0.01F;
 	/** When the safety valve lifts it lets the steam down to this share of full. */
 	static final float VALVE_TO = 0.8F;
 
@@ -130,12 +132,14 @@ public class BoilerEntity extends BlockEntity {
 			return;
 		}
 		BoilerMetal metal = boiler.metal();
+		float heatWas = boiler.heat, steamWas = boiler.steam;
+		long waterWas = boiler.water.amount;
 		boolean fire = level.getBlockEntity(pos.below()) instanceof FireboxEntity firebox && firebox.burning();
 		if (fire) {
 			boiler.heat = Math.min(HEAT_MOST, boiler.heat + FIRE_HEAT * metal.conducts);
 		} else {
 			boiler.heat = Math.max(0.0F, boiler.heat - COOLING);
-			boiler.steam *= CONDENSE;
+			boiler.steam = boiler.steam < STEAM_GONE ? 0.0F : boiler.steam * CONDENSE;
 		}
 		if (boiler.heat > BOIL && boiler.water.amount > 0) {
 			// the heat over boiling goes into steam
@@ -149,7 +153,10 @@ public class BoilerEntity extends BlockEntity {
 			level.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 0.5F);
 			server.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 12, 0.1, 0.05, 0.1, 0.12);
 		}
-		boiler.setChanged();
+		// a cold, idle boiler doesn't mark its chunk (nor wake comparators) every tick
+		if (boiler.heat != heatWas || boiler.steam != steamWas || boiler.water.amount != waterWas) {
+			boiler.setChanged();
+		}
 		boiler.show(state);
 	}
 
