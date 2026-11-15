@@ -13716,3 +13716,9 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 
 - Story quests can now have rescue and capture steps, like the board's Taken by outlaws and Wanted alive work. A captive you bring home stays part of the tale, and a criminal brought in alive is handed over on the spot. Letting the criminal go, or taking them into your service, can lead the tale somewhere else.
 - New tale, The Asking Price: an asker's daughter is taken on the market road and held for ransom. Find the takers' camp, cut her free and bring her home, then go after the one who leads them and bring him in alive. Sometimes someone in the household sold her to them.
+
+## 0.9.12 (2026-11-15): skeleton quiver off severed parts; worn gear from disarmed mobs
+
+- **Skeleton quivers**: a dead skeleton's tattered quiver was drawn again on its severed head, both arms and both legs. The quiver layer now skips the severed-part copies Jaymo's Powers draws (its `Dismembered.ONLY` render key, read by reflection), so it stays only on the body (`QuiverLayer`).
+- **Worn pickups**: Andy: "pickups in general should have low durability". Weapons taken off a downed guard or illager, or knocked out of a mob's hand by a mind or blood spell, now come away with 3-25% of their durability left; 8% of the time it's a good piece (55-90%). A weapon the mob had picked up (a player's own) stays as it was (`WornGear`, used by `Downed`, `MindSpells`, `Hemomancy`).
+- Built; not played.
