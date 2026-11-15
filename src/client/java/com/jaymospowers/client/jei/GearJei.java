@@ -50,7 +50,7 @@ public final class GearJei implements IModPlugin {
 				List.of(HeadedArrowItem.of(head, Fitting.ARROWS_PER_HEAD)),
 				List.of(Component.translatable("jei.jaymospowers.arrowhead_fitting.how"), Component.translatable("tooltip.jaymospowers.head." + head.id))));
 		}
-		registration.addRecipes(FITTING, recipes);
+		SimpleCategory.addRecipes(registration, FITTING, recipes);
 		registration.addIngredientInfo(GearPicks.LEATHER_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 		registration.addIngredientInfo(GearPicks.IRON_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 		registration.addIngredientInfo(com.jaymospowers.baubles.TickingCharm.CHARM, Component.translatable("jei.jaymospowers.ticking_charm"));

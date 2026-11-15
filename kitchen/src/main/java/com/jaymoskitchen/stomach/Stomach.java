@@ -121,6 +121,9 @@ public final class Stomach {
 	static final float GOLDEN_REGEN = 1.5F;
 	/** Drinks without food in them (potions, milk) count as this much nutrition. */
 	static final int POTION_NUTRITION = 4;
+	/** Drinks that quench thirst and nothing else: they never take a stomach slot. */
+	static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> NOT_MEALS = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ITEM, JaymosKitchen.id("not_meals"));
 	static final int MILK_NUTRITION = 6;
 
 	private static final Identifier HEALTH_ID = JaymosKitchen.id("stomach_health");
@@ -212,6 +215,10 @@ public final class Stomach {
 
 	/** The meal this stack would make, or null if it isn't food or drink. */
 	public static @Nullable Meal mealOf(ItemStack stack, boolean drink) {
+		// water drunk for thirst only (a bucket of cactus water): no meal in it
+		if (stack.is(NOT_MEALS)) {
+			return null;
+		}
 		FoodProperties food = stack.get(DataComponents.FOOD);
 		int nutrition;
 		float regenMod = 1.0F;

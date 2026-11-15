@@ -64,14 +64,14 @@ public final class StoneAgeJei implements IModPlugin {
 		// (patch 4) the rivers' tin sand, in a pan or a sluice
 		sieve.add(panned(List.of(new ItemStack(Panning.PAN), new ItemStack(Panning.SLUICE)), List.of(new ItemStack(com.jaymospowers.tinkering.Tin.TIN_SAND)),
 			com.jaymospowers.tinkering.Tin.TIN_NUGGET, Panning.TIN));
-		registration.addRecipes(SIEVE, sieve);
+		SimpleCategory.addRecipes(registration, SIEVE, sieve);
 
 		List<SimpleCategory.Recipe> mortar = new ArrayList<>();
 		for (Map.Entry<Item, Item> grind : StoneAge.grinds().entrySet()) {
 			mortar.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(grind.getKey()))), List.of(new ItemStack(grind.getValue())),
 				List.of(Component.translatable("jei.jaymospowers.mortar_grinding.how"))));
 		}
-		registration.addRecipes(MORTAR, mortar);
+		SimpleCategory.addRecipes(registration, MORTAR, mortar);
 
 		registration.addIngredientInfo(StoneAge.CLAY_BUCKET, Component.translatable("jei.jaymospowers.clay_bucket"));
 		registration.addIngredientInfo(StoneAge.BRICK_FORM, Component.translatable("jei.jaymospowers.brick_form"));
