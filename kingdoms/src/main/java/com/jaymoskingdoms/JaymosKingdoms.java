@@ -800,6 +800,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		SteamTowns.register();
 		SteamTrades.register();
 		SteamAirships.register();
+		// (medieval picks) the sky: sky pirates' coves, realms' patrol airships, the bands' war drums, downed airships
+		SkyPirates.register();
+		AirPatrols.register();
+		WarDrums.register();
+		SkyWrecks.register();
 		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
