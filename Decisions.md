@@ -611,3 +611,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, druid reincarnation thread): approved the Lore paragraph "What the old druids teach" (PR #1575).
 - 2026-11-14 (Andy): "add it": kidnapping (rescue/capture) as story-quest steps too; new tale The Asking Price.
 - 2026-11-15 (Andy, Fantasy Armor thread): picked all 20 rows of the Fantasy Armor pick list (ship + trim + dress compat, repaint only after seeing the models; set framework; 10 new sets). Note on the upgrade row: "diamond gear should be removed, and replaced with something like this, netherite should remain as plating but for steel armor". Scope (armour only or tools too) asked on a decision card.
+- 2026-11-15 (Andy, Fantasy Armor thread): decision card: diamond armour, tools AND weapons are all removed; steel replaces them, netherite goes over steel.
