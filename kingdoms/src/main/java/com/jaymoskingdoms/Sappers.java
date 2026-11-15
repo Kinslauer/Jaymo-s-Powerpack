@@ -38,6 +38,12 @@ final class Sappers {
 	/** Rammers in a party, and how many kegs its keg man carries (if his realm can pay this much each, emeralds). */
 	static final int RAMMERS = 2, KEGS = 2;
 	static final long KEG_COST = 6;
+	/**
+	 * (Andy: "it should vary by the attacking seat's wealth") What a march brings by its realm's treasury at the muster
+	 * (emeralds): a poor one only its rammers, from {@link #KEG_TREASURY} a keg man too, and from
+	 * {@link SiegeTrain#ENGINE_TREASURY} siege engines as well (and guns from {@link Muskets#ARM_TREASURY}).
+	 */
+	static final long KEG_TREASURY = 150L;
 	/** A swing of the ram every this many ticks; swings to break a plain gate or door, and an iron one. */
 	static final int RAM_SWING = 20, RAM_HITS = 12, RAM_HITS_STRONG = 30;
 	/** How near (blocks) a sapper works from, and how far round its goal he looks for a door. */
@@ -88,7 +94,7 @@ final class Sappers {
 				picked.add(m);
 			}
 		}
-		int kegs = (int)Math.min(KEGS, from.treasury() / KEG_COST);
+		int kegs = from.treasury() < KEG_TREASURY ? 0 : (int)Math.min(KEGS, from.treasury() / KEG_COST);
 		for (int i = 0; i < picked.size() && i < RAMMERS + (kegs > 0 ? 1 : 0); i++) {
 			PathfinderMob m = picked.get(picked.size() - 1 - i);
 			boolean ram = i < RAMMERS;

@@ -34,6 +34,8 @@ import org.jspecify.annotations.Nullable;
 final class SiegeTrain {
 	/** Soldiers pushing each engine, and how many the party keeps marching beside them. */
 	static final int CREW = 2, MARCHERS_KEPT = 3;
+	/** A realm brings siege engines only with at least this in its treasury at the muster (emeralds; see {@link Sappers#KEG_TREASURY}). */
+	static final long ENGINE_TREASURY = 400L;
 	/** How far short of the enemy's seat each engine is set down (blocks). */
 	static final double MANGONEL_STANDOFF = 34.0, CANNON_STANDOFF = 20.0, MORTAR_STANDOFF = 28.0;
 	/** Where engines muster: this far behind the soldiers, this far apart. */
@@ -63,7 +65,7 @@ final class SiegeTrain {
 
 	/** {@code party}'s engines, set down behind its soldiers at {@code muster} with their crews. */
 	static void muster(ServerLevel level, WarParties.Party party, Faction from, BlockPos goal, BlockPos muster, boolean great) {
-		if (!from.type().isRealm()) {
+		if (!from.type().isRealm() || from.treasury() < ENGINE_TREASURY) {
 			return;
 		}
 		List<PathfinderMob> hands = new ArrayList<>();

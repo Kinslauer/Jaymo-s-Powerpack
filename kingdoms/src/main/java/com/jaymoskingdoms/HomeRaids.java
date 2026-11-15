@@ -18,8 +18,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (am-homeraid, medieval picks; Armed Mobs' raids on the player's base, an idea only) At war, your own homestead
- * ({@link Homesteads}) can be marched on: a realm at war with yours sends a war party against it with its siege
- * engines (no rammers or keg men) ({@link WarParties#startHome}), mustered a way off on the road from its seat. It lays siege in one wave
+ * ({@link Homesteads}) can be marched on: a realm at war with yours sends a war party against it, rammers,
+ * keg men and siege engines by how rich that realm is ({@link WarParties#startHome}), mustered a way off on the road from its seat. It lays siege in one wave
  * ({@link Sieges#HOME_WAVES}); if it's still standing at the end it breaks open what's stored there and carries it off
  * ({@link #sack}). Only while you're about (so you can hold it), at most once in {@link #GAP_TICKS}, and not a homestead
  * at your own realm's seat (its siege is the seat's). Your own settlement, crowned, is a seat like any other.
