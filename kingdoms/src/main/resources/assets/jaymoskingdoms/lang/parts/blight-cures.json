@@ -1,0 +1,17 @@
+{
+  "item.jaymoskingdoms.seared_flesh": "Seared Flesh",
+  "item.jaymoskingdoms.gilded_flesh": "Gilded Flesh",
+  "item.jaymoskingdoms.hollows_cure": "Hollow's Cure",
+  "talk.jaymoskingdoms.healer.blight": "Burn the grey cold out of me (%s)",
+  "talk.jaymoskingdoms.healer.blight_done": "There. Hold still while it goes. You'll feel the cold leave you.",
+  "talk.jaymoskingdoms.healer.refuse_hollow": "I won't lay hands on one of the Hollow. Find your own kind's healers.",
+  "blight_cures.jaymoskingdoms.gilded.0": "Gold in dead meat? Are you mad?",
+  "blight_cures.jaymoskingdoms.gilded.1": "You're never eating that.",
+  "blight_cures.jaymoskingdoms.gilded.2": "That's good gold wasted on rot.",
+  "blight_cures.jaymoskingdoms.gilded.3": "My grandmother swore by that. Didn't save her, mind.",
+  "blight_cures.jaymoskingdoms.gilded.4": "Ugh. Keep that away from me.",
+  "blight_cures.jaymoskingdoms.druid.bottle": "Bring me a bottle and I'll draw the cure from that.",
+  "blight_cures.jaymoskingdoms.druid.brew.0": "Gold and fire. The old way. Drink it before the cold sets in.",
+  "blight_cures.jaymoskingdoms.druid.brew.1": "The witches keep this from the villages. I never would.",
+  "blight_cures.jaymoskingdoms.druid.brew.2": "There. Carry it to whoever has the grey on them."
+}

@@ -128,6 +128,7 @@ public final class HollowBlight {
 			}
 		});
 		BlightSigns.init();
+		BlightCures.register();
 		ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
 		PowersCompat.tellMidTurns(HollowBlight::midTurn);
 		PowersCompat.<net.minecraft.world.entity.LivingEntity>listen("com.jaymospowers.core.wounds.Treatment", "ANY_TENDED_LISTENERS",
@@ -155,7 +156,8 @@ public final class HollowBlight {
 
 	private static boolean immune(ServerPlayer player) {
 		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
-			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player);
+			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player)
+			|| BlightCures.proof(player);
 	}
 
 	/** A skeleton's blight, taken before only the Skeleton Lord's curse made skeletons ({@link SkeletonCurse}): it fades. */
@@ -200,6 +202,47 @@ public final class HollowBlight {
 		}
 		JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look,
 			by == null ? "nothing living" : by.getType().getDescriptionId());
+	}
+
+	/** Raw rotten flesh eaten by {@code player} gave them the blight ({@link BlightCures#ate}): the zombie Hollow's. */
+	static void fromFlesh(ServerPlayer player) {
+		if (blighted(player) || immune(player)) {
+			return;
+		}
+		take(player, new Hollows.Turn(HeritageVariants.Variant.ZOMBIE, 1.0F, "zombie"), null);
+	}
+
+	/** Gilded flesh eaten: the blight in {@code player} goes back {@code share} of its course (never past its start). */
+	static void setBack(ServerPlayer player, float share) {
+		Blight blight = player.getAttached(BLIGHT);
+		if (blight == null || blight.passedOut()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		long since = Math.min(now, blight.since() + (long) (TURN_TICKS * share));
+		float done = (now - since) / (float) TURN_TICKS;
+		int stage = done >= STAGE_WEAK ? 2 : done >= STAGE_HUNGRY ? 1 : 0;
+		player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), since, Math.min(stage, blight.told()), false, 0L, blight.settles()));
+		WITHERED.remove(player.getUUID());
+	}
+
+	/**
+	 * A cure (the Hollow's Cure, a golden apple while weakened, a healer, a totem): the blight in {@code body} is burned out,
+	 * and (Andy: "You gain immunity forever after a cure") it can never take them again. True if there was one to cure.
+	 */
+	static boolean cure(net.minecraft.world.entity.LivingEntity body) {
+		if (!blighted(body) || body.getAttached(BLIGHT).passedOut()) {
+			return false;
+		}
+		BlightCures.proofAgainst(body);
+		if (body instanceof ServerPlayer player) {
+			clear(player);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
+		} else {
+			body.removeAttached(BLIGHT);
+		}
+		body.level().playSound(null, body.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
+		return true;
 	}
 
 	/** A treatment finished on {@code body}: a blight still settling in is cleared, most times. */
@@ -328,6 +371,16 @@ public final class HollowBlight {
 
 	/** The blight has run its course while they lived: they pass out first, then rise turned. */
 	private static void turnNow(ServerPlayer player, Blight blight) {
+		// a totem held: it's spent instead, and that is a cure (Andy's pick)
+		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
+			net.minecraft.world.item.ItemStack held = player.getItemInHand(hand);
+			if (held.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING)) {
+				held.shrink(1);
+				player.level().broadcastEntityEvent(player, (byte) 35);
+				cure(player);
+				return;
+			}
+		}
 		player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), blight.told(), true,
 				player.level().getGameTime() + TURN_DARK, 0L));
 		BlightSigns.clear(player);
@@ -367,10 +420,8 @@ public final class HollowBlight {
 	/** A golden apple eaten while the blight spreads burns it out -- but only while the player is Weakened
 	 * (a drunk, splash or lingering weakness potion all apply it), like curing a zombie villager. */
 	public static void ateGold(ServerPlayer player) {
-		if (player.hasEffect(MobEffects.WEAKNESS) && blighted(player)) {
-			clear(player);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
-			player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
+		if (player.hasEffect(MobEffects.WEAKNESS)) {
+			cure(player);
 		}
 	}
 }
