@@ -200,13 +200,28 @@ public final class LoreFilmClient {
 	/**
 	 * What the heroes wear. Andy: "ichorcloth robes on thessaly, steel armor on varro, no helmet, ambrose in the wizard
 	 * robes, grimsby with the ranger hood and armor". Thessaly, Varro, Ambrose, Grimsby; head, chest, legs, feet.
+	 * Then (2026-11-15), where Fantasy Armor is loaded: "thellassy in lady maria, Varro in the golden horns w/ no helm,
+	 * Grimsby in the thief gear, Ambrose the wandering wizard" (drawn by FantasyArmourLayer); the first is worn where the
+	 * game has it, else the next.
 	 */
 	static final EquipmentSlot[] GEAR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 	static final String[][] HERO_GEAR = {
-		{"", "jaymospowers:ichorcloth_robe", "jaymospowers:ichorcloth_leggings", "jaymospowers:ichorcloth_boots"},
-		{"", "jaymoskingdoms:steel_plate_chestplate", "jaymoskingdoms:steel_plate_leggings", "jaymoskingdoms:steel_plate_boots"},
-		{"wizards:wizard_robe_head", "wizards:wizard_robe_chest", "wizards:wizard_robe_legs", "wizards:wizard_robe_feet"},
-		{"archers:ranger_armor_head", "archers:ranger_armor_chest", "archers:ranger_armor_legs", "archers:ranger_armor_feet"}};
+		{"fantasy_armor:lady_maria_helmet", "fantasy_armor:lady_maria_chestplate|jaymospowers:ichorcloth_robe",
+			"fantasy_armor:lady_maria_leggings|jaymospowers:ichorcloth_leggings", "fantasy_armor:lady_maria_boots|jaymospowers:ichorcloth_boots"},
+		{"", "fantasy_armor:golden_horns_chestplate|jaymoskingdoms:steel_plate_chestplate",
+			"fantasy_armor:golden_horns_leggings|jaymoskingdoms:steel_plate_leggings", "fantasy_armor:golden_horns_boots|jaymoskingdoms:steel_plate_boots"},
+		{"fantasy_armor:wandering_wizard_helmet|wizards:wizard_robe_head", "fantasy_armor:wandering_wizard_chestplate|wizards:wizard_robe_chest",
+			"fantasy_armor:wandering_wizard_leggings|wizards:wizard_robe_legs", "fantasy_armor:wandering_wizard_boots|wizards:wizard_robe_feet"},
+		{"fantasy_armor:thief_helmet|archers:ranger_armor_head", "fantasy_armor:thief_chestplate|archers:ranger_armor_chest",
+			"fantasy_armor:thief_leggings|archers:ranger_armor_legs", "fantasy_armor:thief_boots|archers:ranger_armor_feet"}};
+	/**
+	 * Andy (2026-11-15), where Fantasy Armor is loaded: "the quiet one should wear that redeemer plate in the film" (it
+	 * comes up over him with the white, the legs at DON_HALF and the rest at DON_WHOLE), and "The grue should wear the dark
+	 * lord plate, while summoning a few dark covered orc" (the first DARK_COVER orcs to rise).
+	 */
+	static final String QUIET_PLATE = "redeemer", GRUE_PLATE = "dark_lord", RISEN_PLATE = "dark_cover";
+	static final int DARK_COVER = 4;
+	static final String[] FANTASY_PIECES = {"_helmet", "_chestplate", "_leggings", "_boots"};
 	/**
 	 * What the hearthlanders of the line wear. Andy: "they should all have different combinations of leather and iron or
 	 * chainmail". What there is for the head, the chest, the legs and the feet; each man has his own pick of them, never a
@@ -1426,6 +1441,9 @@ public final class LoreFilmClient {
 				if (a == null) {
 					continue;
 				}
+				if (i % 2 == 0 && i / 2 < DARK_COVER) {
+					fantasy(f, a, RISEN_PLATE, 0, 4);
+				}
 				a.team = 1;
 				a.speed = DEAD_WALK;
 				a.sinkRate = RISE_RATE + f.rnd.nextDouble() * RISE_SPREAD;
@@ -1446,6 +1464,7 @@ public final class LoreFilmClient {
 			new float[] {(float)SORCERER_F, 0.0F, 0.0F, facingBack, 1.0F}));
 		if (f.sorcerer != null) {
 			f.sorcerer.restYaw = f.yaw + facingBack;
+			fantasy(f, f.sorcerer, GRUE_PLATE, 0, 4);
 		}
 		// his guard: two orcs who stand by him until the fifth comes
 		for (int i = 0; i < GUARDS.length; i++) {
@@ -1743,6 +1762,19 @@ public final class LoreFilmClient {
 			actor.moving = moving;
 		} else if (a.e instanceof Draugr draugr) {
 			draugr.stageGait(still, moving);
+		}
+	}
+
+	/**
+	 * {@code a} in Fantasy Armor's {@code set}, the pieces from {@code from} (0 the helm) up to {@code to} (4: through the
+	 * boots), where that mod is loaded; elsewhere they keep what they had.
+	 */
+	private static void fantasy(Film f, Actor a, String set, int from, int to) {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(FantasyArmourLayer.MOD)) {
+			return;
+		}
+		for (int j = from; j < to; j++) {
+			hold(f, a, GEAR_SLOTS[j], FantasyArmourLayer.MOD + ":" + set + FANTASY_PIECES[j]);
 		}
 	}
 
@@ -3415,10 +3447,12 @@ public final class LoreFilmClient {
 			}
 			if (don == DON_HALF) {
 				dress(f, quiet, QUIET_HALF, false);
+				fantasy(f, quiet, QUIET_PLATE, 2, 4);
 				sound(f, SoundEvents.WOOL_PLACE, 0.8F, 0.7F);
 			}
 			if (don == DON_WHOLE) {
 				dress(f, quiet, QUIET_SUIT, true);
+				fantasy(f, quiet, QUIET_PLATE, 0, 2);
 				cloak(f, quiet, true);
 				hold(f, quiet, EquipmentSlot.MAINHAND, QUIET_BLADE);
 				rest(f, quiet);
