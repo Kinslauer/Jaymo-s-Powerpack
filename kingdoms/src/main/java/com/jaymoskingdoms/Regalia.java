@@ -141,18 +141,23 @@ public final class Regalia {
 
 	/**
 	 * A king in a gilded set of Fantasy Armor's ({@link FantasyArmorCompat}) from the breastplate down, where that mod is
-	 * loaded: false (nothing put on) where it isn't.
+	 * loaded: false (nothing put on) where it isn't, or none of the set's pieces is there.
 	 */
 	private static boolean king(PathfinderMob mob, RandomSource random) {
 		String set = FantasyArmorCompat.pick(FantasyArmorCompat.KING_SETS, random);
 		if (set == null) {
 			return false;
 		}
+		boolean any = false;
 		for (int i = 1; i < FantasyArmorCompat.SLOTS.length; i++) {
-			int slot = i;
-			FantasyArmorCompat.piece(set, i).ifPresent(item -> put(mob, FantasyArmorCompat.SLOTS[slot], new ItemStack(item)));
+			java.util.Optional<Item> piece = FantasyArmorCompat.piece(set, i);
+			if (piece.isPresent()) {
+				put(mob, FantasyArmorCompat.SLOTS[i], new ItemStack(piece.get()));
+				any = true;
+			}
 		}
-		return true;
+		// (none of its pieces found, a renamed id in a later build: his netherite as before)
+		return any;
 	}
 
 	/** The same draws each time for the same ruler and rank (their crown first, then their attire). */
