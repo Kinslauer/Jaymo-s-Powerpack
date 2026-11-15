@@ -28,3 +28,4 @@ owns:
 
 ## Done
 PR #1601. Humanoid corpses flung into a wall (or killed beside it) slide down and sit, back to the wall, until disturbed; blood smear down the wall. Kitchen + Powers compile with Gradle; ragdoll_sim passes; not played.
+PR #1601 now also: downed players/mobs sit against walls (WallSit, DownedPose WALL), corpse stays sat.
