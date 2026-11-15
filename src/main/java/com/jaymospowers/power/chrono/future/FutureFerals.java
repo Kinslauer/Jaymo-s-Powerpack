@@ -221,6 +221,9 @@ public final class FutureFerals {
 				feral.discard();
 				continue;
 			}
+			if (corpse) {
+				FutureFlashlights.carry(feral, random);
+			}
 			level.addFreshEntity(feral);
 		}
 	}

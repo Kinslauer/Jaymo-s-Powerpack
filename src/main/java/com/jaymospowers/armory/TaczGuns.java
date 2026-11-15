@@ -202,6 +202,14 @@ public final class TaczGuns {
 		return true;
 	}
 
+	/** Puts {@code rounds} more into a TaCZ gun's magazine (a mob's reload, power/chrono/future/FutureGuns). */
+	public static void loadRounds(ItemStack stack, int rounds) {
+		if (rounds > 0 && stack.has(DataComponents.CUSTOM_DATA)) {
+			CustomData.update(DataComponents.CUSTOM_DATA, stack,
+				tag -> tag.putInt("GunCurrentAmmoCount", tag.getIntOr("GunCurrentAmmoCount", 0) + rounds));
+		}
+	}
+
 	private static boolean soundLooked;
 	private static @org.jspecify.annotations.Nullable Method sendSound;
 
