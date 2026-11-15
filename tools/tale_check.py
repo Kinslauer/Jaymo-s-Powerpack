@@ -31,6 +31,8 @@ STEP_FIELDS = {
     "blast": {"at"},
     "stash": {"at", "item", "count"},
     "lamps": {"at", "count", "failed"},
+    "rescue": {"who", "at", "kin", "stars", "failed"},
+    "capture": {"who", "at", "crime", "stars", "failed", "let_go"},
 }
 COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden"}
 REQUIRED = {
@@ -38,7 +40,11 @@ REQUIRED = {
     "bring": {"who", "item", "count"}, "slay": {"target", "count"}, "wait": {"days"}, "defend": {"at"},
     "escort": {"who", "to"}, "pack": {"at", "foes", "count"}, "build": {"at", "blocks", "count"}, "blast": {"at"},
     "stash": {"at", "item", "count"}, "lamps": {"at", "count"},
+    "rescue": {"who", "at"}, "capture": {"who", "at"},
 }
+# Whose kin a captive is, and what a criminal is wanted for (work.jaymoskingdoms.kin.* / crime.* in lang/parts/captures.json).
+KIN = {"daughter", "son", "sister", "brother", "wife", "husband", "mother", "father", "apprentice", "neighbour"}
+CRIMES = {"theft", "murder", "arson", "smuggling", "poaching", "desertion", "kidnapping", "forgery"}
 ENDING_FIELDS = {"text", "reward", "marks", "failed", "town", "returns", "joins", "against"}
 REWARD_FIELDS = {"coins", "items", "relic", "book", "hearts", "reputation"}
 RETURNS = {"thanks", "warning", "recruit", "revenge"}
@@ -322,6 +328,8 @@ def check_tale(path):
             check_then(c, where, step["then"], tale, edges)
         if "failed" in step:
             check_then(c, where + ".failed", step["failed"], tale, edges)
+        if "let_go" in step:
+            check_then(c, where + ".let_go", step["let_go"], tale, edges)
         if "goal" not in step and do not in ("talk", "wait") and not step.get("hidden"):
             c.err(where, "missing 'goal' (the tracker line)")
         for give in step.get("give", []):
@@ -422,6 +430,23 @@ def check_tale(path):
         elif do == "escort":
             check_role(c, where, step["who"], tale)
             check_place(c, where, step["to"], tale)
+        elif do in ("rescue", "capture"):
+            # (set out by the job at its camp: bound, or armed; they're the tale's own once a captive is brought home)
+            check_role(c, where, step["who"], tale)
+            check_place(c, where, step["at"], tale)
+            for w in branches(step["who"]):
+                role = tale.get("cast", {}).get(w, {})
+                body = role.get("body", "villager")
+                if do == "rescue" and body != "villager":
+                    c.err(where, f"'{w}' is {body}; a captive is a villager")
+                if do == "capture" and body != "fighter":
+                    c.err(where, f"'{w}' is {body}; a criminal taken alive is a fighter")
+                if "at" in role and not role.get("late"):
+                    c.err(where, f"cast.{w} would be set out at its 'at' before the job: make it 'late'")
+            if "kin" in step and step["kin"] not in KIN:
+                c.err(where, f"kin must be one of {sorted(KIN)}")
+            if "crime" in step and step["crime"] not in CRIMES:
+                c.err(where, f"crime must be one of {sorted(CRIMES)}")
         elif do in ("defend", "pack", "build", "blast", "stash", "lamps"):
             check_place(c, where, step["at"], tale)
             if do == "stash":
@@ -458,7 +483,7 @@ def check_tale(path):
 
     used = set()
     for sid, step in steps.items():
-        for field in ("then", "slain", "spared", "failed"):
+        for field in ("then", "slain", "spared", "failed", "let_go"):
             for t in branches(step.get(field, [])) if field in step else []:
                 if isinstance(t, str) and t.startswith("end:"):
                     used.add(t[4:])

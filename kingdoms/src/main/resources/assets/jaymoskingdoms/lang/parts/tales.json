@@ -22,6 +22,8 @@
   "tale.jaymoskingdoms.goal.wait": "Wait for word",
   "tale.jaymoskingdoms.goal.defend": "Hold %2$s through the night",
   "tale.jaymoskingdoms.goal.escort": "See %1$s safely to %2$s",
+  "tale.jaymoskingdoms.goal.rescue": "Free %1$s and bring them home",
+  "tale.jaymoskingdoms.goal.capture": "Bring %1$s back alive",
   "tale.jaymoskingdoms.goal.pack": "Clear them out at %2$s",
   "tale.jaymoskingdoms.goal.build": "Build at %2$s",
   "tale.jaymoskingdoms.goal.blast": "Blast the way open at %2$s",

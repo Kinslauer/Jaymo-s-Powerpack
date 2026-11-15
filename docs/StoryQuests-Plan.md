@@ -135,6 +135,8 @@ Every step has `do`, and may have:
 | `blast` | `at` | A cave-in or a ruined wall at the place; blow it open. |
 | `stash` | `at`, `item`, `count` | A chest stands at the place; leave so many of an item in it. |
 | `lamps` | `at`, `count` | Light so many dark spots in the town. |
+| `rescue` | `who`, `at` | Free `who` (a late villager role), held bound at the place by outlaws, and bring them home. `kin`, `stars`, `failed`. |
+| `capture` | `who`, `at` | Bring `who` (a late fighter role) back alive, tied or downed, to the asker. `crime`, `stars`, `failed`, `let_go`. |
 
 ### endings
 
@@ -207,7 +209,7 @@ lines. The speakers stop, face each other and say them in turn.
 All 29 picked rows are built, in one PR. Built and compiled; `tools/tale_check.py` passes on every file and runs in
 `tools/pr_checks.py`. **Nothing has been played.**
 
-**What ships:** 17 tales (`data/jaymoskingdoms/tales/`), 20 to 34 steps and 5 to 10 endings each, every one resting
+**What ships:** 18 tales (`data/jaymoskingdoms/tales/`), 20 to 34 steps and 5 to 10 endings each, every one resting
 for days between its parts (three to five waits in each, 1 to 10 days long), and 40 overheard scenes
 (`data/jaymoskingdoms/scenes/`).
 
@@ -230,6 +232,7 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
 | The Wrong Light | a ship's log on a drowned body | A wreck by a false light, the temple's bell-metal, wreckers who are starving; who sold the ship changes each time. |
 | The Fourth Measure | a ledger on a dead witch | Someone buys slow poison for an old man, a measure each new moon; who it is changes each time. |
 | The Cold Hearth | a pilgrim's journal on a risen villager | A burned village's hearth-coal and its 22 names, carried to the Hearthkeeper's hall; the daughter's fate changes each time. |
+| The Asking Price | an asker (farmer, fletcher, mason, mapmaker, shepherd, fisher) | A daughter taken on the market road for ransom: cut her free at the takers' camp, then bring their leader in alive; sometimes the household's own driver sold her. |
 
 **How each row was built, and where it differs from the pick list**
 
@@ -326,6 +329,11 @@ as two more kinds of board work and a new class, `Captures.java`. **Not played.*
   with a sword never frees one by accident. Handed over, each says a last word for their temper.
 - Temper also sets how hard a mob works at any hogtie: hotheaded 0.6x as long, brave 0.8x, proud 0.9x, dutiful 1.4x,
   gloomy 1.5x, timid 1.6x.
-- **Not in this:** kidnapping as a tale's step (the tale steps still use the older job kinds); outlaws who come to a town
-  to carry someone off.
+- **As tale steps** (Andy, 2026-11-14, "add it"): `rescue` (`who`: a villager role, `at`, `kin`, `stars`, `failed`) and
+  `capture` (`who`: a fighter role, `at`, `crime`, `stars`, `failed`, `let_go`). The job sets the role out itself at
+  its camp, bound or armed, so the role must be `late`. A rescued captive is the tale's own from then on, standing
+  where they were brought (the tale's home). A capture is handed over there and then, to the asker (or at the tale's
+  home if nobody asked); `let_go` is where the tale goes if you let them go or take them into your service.
+  The Asking Price uses both.
+- **Not in this:** outlaws who come to a town to carry someone off.
 

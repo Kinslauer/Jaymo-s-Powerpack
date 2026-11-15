@@ -434,10 +434,10 @@ final class Captures {
 	}
 
 	/**
-	 * {@code body}, wanted, is handed over by {@code player} to {@code receiver} ({@code court}'s): a quiet one or a fair
+	 * {@code body}, wanted, is handed over by {@code player} to {@code court}: a quiet one or a fair
 	 * fight won does them credit, a last word, and the spiteful (unless sworn off it) send someone after them.
 	 */
-	static void handedOver(ServerLevel level, ServerPlayer player, LivingEntity receiver, LivingEntity body, @Nullable Faction court) {
+	static void handedOver(ServerLevel level, ServerPlayer player, LivingEntity body, @Nullable Faction court) {
 		String mood = mood(body);
 		if (court != null && (mood.equals("quiet") || mood.equals("hope"))) {
 			Reputation.change(player, court, QUIET_NAME);

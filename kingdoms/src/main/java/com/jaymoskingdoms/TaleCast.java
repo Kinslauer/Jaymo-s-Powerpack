@@ -371,6 +371,10 @@ final class TaleCast {
 			if (!e.getKey().equals(who) && (Tale.flag(body, "late") || !only.isEmpty() && !Tales.holds(player, run, only))) {
 				continue;
 			}
+			// (a captive or a criminal is set out by their kidnapping job, bound or armed at its camp: QuestJobs)
+			if (e.getKey().equals(who) && (kind.equals("rescue") || kind.equals("capture"))) {
+				continue;
+			}
 			BlockPos ground = Tales.ground(level, run, tale, key);
 			if (ground != null) {
 				setOut(level, player, run, e.getKey(), body, ground);
@@ -540,6 +544,15 @@ final class TaleCast {
 				mob.setAttached(CAST, c.done(level.getGameTime()));
 				calm(mob);
 			}
+		}
+	}
+
+	/** ({@link QuestJobs}) {@code instance} is set out again (a tale's later job can share an earlier one's id): it isn't over. */
+	static void reopen(ServerLevel level, String instance) {
+		ServerLevel world = Factions.level(level.getServer());
+		List<String> ended = new ArrayList<>(world.getAttachedOrElse(ENDED, List.of()));
+		if (ended.remove(instance)) {
+			world.setAttached(ENDED, List.copyOf(ended));
 		}
 	}
 

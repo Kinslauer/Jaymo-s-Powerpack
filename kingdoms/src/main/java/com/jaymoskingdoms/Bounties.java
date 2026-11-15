@@ -910,7 +910,7 @@ public final class Bounties {
 				com.jaymoskingdoms.forms.Lasso.drop(target);
 				sentence(level, target, court, b);
 			} else {
-				Captures.handedOver(level, player, ruler, body, court);
+				Captures.handedOver(level, player, body, court);
 				// the relic a miniboss fought with is the hunter's
 				if (Boolean.TRUE.equals(body.getAttached(ARMED)) && !body.getMainHandItem().isEmpty()) {
 					give(player, body.getMainHandItem().copy());

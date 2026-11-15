@@ -294,7 +294,7 @@ public final class QuestJobs {
 		player.sendOverlayMessage(Component.translatable("work.jaymoskingdoms.failed." + why).withStyle(ChatFormatting.RED));
 		if (Tales.ofTale(q)) {
 			over(level, player, q);
-			Tales.jobFailed(player, q);
+			Tales.jobFailed(player, q, why);
 			return;
 		}
 		over(level, player, q);
@@ -822,6 +822,7 @@ public final class QuestJobs {
 			}
 			BlockPos site = ground(level, at, 0);
 			den(level, site, "camp");
+			TaleCast.reopen(level, "work:" + q.id());
 			String name = o.otherName();
 			Villager captive = McaCompat.talePerson(level, Vec3.atBottomCenterOf(ground(level, site, 2)), null,
 				female(name.contains("|") ? name.substring(name.indexOf('|') + 1) : ""), variant(q), false);
@@ -851,11 +852,11 @@ public final class QuestJobs {
 			return;
 		}
 		TaleCast.moved(captive);
-		Faction home = Factions.get(level.getServer(), q.giver().faction());
+		BlockPos home = home(level, player, q);
 		if (o.progress() == 0 && !Lasso.hogtied(captive)) {
 			Lasso.bind(level, captive, true);
 		}
-		if (home != null && flat(captive, home.seat()) <= TREK_ARRIVED) {
+		if (home != null && flat(captive, home) <= TREK_ARRIVED) {
 			Lasso.drop(captive);
 			if (captive.getVehicle() != null) {
 				captive.stopRiding();
@@ -888,6 +889,7 @@ public final class QuestJobs {
 			}
 			BlockPos site = ground(level, at, 0);
 			den(level, site, "camp");
+			TaleCast.reopen(level, "work:" + q.id());
 			Mob criminal = outlaw(level, player, q, ground(level, site, 3), stars, true, Component.literal(variant(q)), EntityTypes.VINDICATOR);
 			if (criminal == null) {
 				return;
@@ -912,12 +914,29 @@ public final class QuestJobs {
 			fightFor(level, criminal, player, stars);
 		}
 		LivingEntity poster = level.getEntity(q.giver().uuid()) instanceof LivingEntity l && l.isAlive() ? l : null;
-		if (poster != null && (Lasso.hogtied(criminal) || Downed.isDowned(criminal)) && criminal.distanceTo(poster) <= BROUGHT_IN) {
-			Speech.tell(level, poster, player, Component.translatable("work.jaymoskingdoms.capture.brought", criminal.getDisplayName()), Speech.GOLD);
+		// (a tale nobody handed you is brought home to its town instead)
+		BlockPos to = poster == null && Tales.ofTale(q) && q.giver().uuid().equals(new UUID(0L, 0L)) ? Tales.home(player, q) : null;
+		boolean there = poster != null ? criminal.distanceTo(poster) <= BROUGHT_IN : to != null && flat(criminal, to) <= TREK_ARRIVED;
+		if (there && (Lasso.hogtied(criminal) || Downed.isDowned(criminal))) {
 			Quest next = progress(q, o.count());
 			save(player, next);
+			if (Tales.ofTale(q)) {
+				// (a tale's step has no turning in: they're handed over there and then)
+				handIn(level, player, poster, next);
+			} else {
+				Speech.tell(level, poster, player, Component.translatable("work.jaymoskingdoms.capture.brought", criminal.getDisplayName()), Speech.GOLD);
+			}
 			done(level, player, next);
 		}
+	}
+
+	/** Where a captive is brought home to: a tale's home, or the poster's town. */
+	private static @Nullable BlockPos home(ServerLevel level, ServerPlayer player, Quest q) {
+		if (Tales.ofTale(q)) {
+			return Tales.home(player, q);
+		}
+		Faction f = Factions.get(level.getServer(), q.giver().faction());
+		return f == null ? null : f.seat();
 	}
 
 	/** ({@link Captures}) {@code body} was cut or untied by {@code by}: a captive held for someone's work is free to be walked home. */
@@ -927,8 +946,8 @@ public final class QuestJobs {
 				if (q.kind() != Quest.HOSTAGE || q.counted() || q.objective().progress() != 0 || !q.objective().other().map(body.getUUID()::equals).orElse(false)) {
 					continue;
 				}
-				Faction home = Factions.get(level.getServer(), q.giver().faction());
-				Quest next = with(q, 1, q.objective().otherName(), true, home == null ? q.objective().pos() : Optional.of(home.seat()), q.objective().other());
+				BlockPos home = home(level, p, q);
+				Quest next = with(q, 1, q.objective().otherName(), true, home == null ? q.objective().pos() : Optional.of(home), q.objective().other());
 				save(p, next);
 				body.setPermanentlyInvulnerable(false);
 				Speech.tell(level, body, by, Component.translatable("work.jaymoskingdoms.hostage.freed." + level.getRandom().nextInt(3)), Speech.GOLD);
@@ -967,18 +986,20 @@ public final class QuestJobs {
 	}
 
 	/** ({@link Quests}) A capture job brought back: the criminal is handed over and taken to the cells. */
-	static void handIn(ServerLevel level, ServerPlayer player, LivingEntity giver, Quest q) {
+	static void handIn(ServerLevel level, ServerPlayer player, @Nullable LivingEntity giver, Quest q) {
 		Mob c = held(level, q);
 		if (c == null) {
 			return;
 		}
 		Faction f = Factions.get(level.getServer(), q.giver().faction());
-		Captures.handedOver(level, player, giver, c, f);
+		Captures.handedOver(level, player, c, f);
 		long more = Math.round(q.reward().milli() * (Captures.bonus(c) - 1.0));
 		if (more > 0) {
 			com.jaymoskingdoms.money.Money.pay(player, f, more);
 		}
-		Speech.say(level, giver, Component.translatable("talk.jaymoskingdoms.bounty.cells." + level.getRandom().nextInt(3), c.getDisplayName()), Speech.GOLD, 16.0);
+		if (giver != null) {
+			Speech.say(level, giver, Component.translatable("talk.jaymoskingdoms.bounty.cells." + level.getRandom().nextInt(3), c.getDisplayName()), Speech.GOLD, 16.0);
+		}
 		c.discard();
 	}
 
