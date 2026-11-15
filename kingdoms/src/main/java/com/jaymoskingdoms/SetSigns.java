@@ -8,7 +8,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -24,11 +27,13 @@ import org.jspecify.annotations.Nullable;
  */
 public final class SetSigns {
 	/** Each order's set and the colour of its motes. */
-	static final Map<String, Integer> COLOUR = Map.of(
-		FantasyArmorCompat.DAWNWATCH, 0xF2C14E, FantasyArmorCompat.HEADSMAN, 0xB8912A, FantasyArmorCompat.SKY_ROBES, 0xE4EEFA,
-		FantasyArmorCompat.WELL_WARDEN, 0xB4BEC8, FantasyArmorCompat.ASHEN, 0xD9542B, FantasyArmorCompat.HUNTER, 0xC8D0E0,
-		FantasyArmorCompat.BARROW, 0x8A6A4B, FantasyArmorCompat.GIANT_SLAYER, 0x9FB1A0, FantasyArmorCompat.PIT, 0xA33B2B,
-		FantasyArmorCompat.TWINNED, 0x8FB8E0);
+	static final Map<String, Integer> COLOUR = Map.ofEntries(
+		Map.entry(FantasyArmorCompat.DAWNWATCH, 0xF2C14E), Map.entry(FantasyArmorCompat.HEADSMAN, 0xB8912A),
+		Map.entry(FantasyArmorCompat.SKY_ROBES, 0xE4EEFA), Map.entry(FantasyArmorCompat.WELL_WARDEN, 0xB4BEC8),
+		Map.entry(FantasyArmorCompat.ASHEN, 0xD9542B), Map.entry(FantasyArmorCompat.HUNTER, 0xC8D0E0),
+		Map.entry(FantasyArmorCompat.BARROW, 0x8A6A4B), Map.entry(FantasyArmorCompat.GIANT_SLAYER, 0x9FB1A0),
+		Map.entry(FantasyArmorCompat.PIT, 0xA33B2B), Map.entry(FantasyArmorCompat.TWINNED, 0x8FB8E0),
+		Map.entry(FantasyArmorCompat.FOLDED, 0xF0A8C0));
 	/** How often the motes and remarks are looked at (ticks), and how far round each player for motes (blocks). */
 	static final int EVERY = 40;
 	static final double MOTE_RANGE = 32.0;
@@ -58,6 +63,10 @@ public final class SetSigns {
 
 	/** The order's set {@code e} wears whole, or null. */
 	static @Nullable String worn(LivingEntity e) {
+		// (every order's set has a breastplate: no Fantasy Armor one, no set)
+		if (!BuiltInRegistries.ITEM.getKey(e.getItemBySlot(EquipmentSlot.CHEST).getItem()).getNamespace().equals(FantasyArmorCompat.MOD)) {
+			return null;
+		}
 		for (String set : COLOUR.keySet()) {
 			if (FantasyArmorCompat.whole(e, set)) {
 				return set;
@@ -70,19 +79,19 @@ public final class SetSigns {
 		long now = server.overworld().getGameTime();
 		java.util.Set<LivingEntity> seen = new java.util.HashSet<>();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (player.isSpectator()) {
+			if (player.isSpectator() || player.isInvisible()) {
 				continue;
 			}
 			ServerLevel level = player.level();
 			List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(MOTE_RANGE),
-				e -> e.isAlive() && !e.isInvisible() && seen.add(e));
+				e -> e.isAlive() && !e.isInvisible() && !e.isSpectator() && !(e instanceof ArmorStand) && seen.add(e));
 			for (LivingEntity e : near) {
 				String set = worn(e);
 				if (set != null) {
 					level.sendParticles(Fx.mote(COLOUR.get(set), MOTE_SIZE), e.getX(), e.getY(0.6), e.getZ(), MOTES, 0.3, 0.4, 0.3, 0.0);
 				}
 			}
-			String set = player.isInvisible() ? null : worn(player);
+			String set = worn(player);
 			if (set != null) {
 				Stench.remark(player, SAID, COOLDOWN, "speech.jaymoskingdoms.set." + set, LINES, GREEN_LINES, now);
 			}
