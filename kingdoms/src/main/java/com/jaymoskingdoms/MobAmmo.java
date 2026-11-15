@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -54,7 +55,14 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Getting them back</b>: what they shoot and throw can be picked up now, by anyone. A mob short of something
  * picks up what it walks over (its own arrows, a player's, a dropped stack), and one that's run dry goes looking for
  * them within {@link #FETCH_RANGE} once it has no foe ({@link #tick}). The folk and the villages' guards also restock
- * from their stores, one every {@link #RESTOCK_TICKS} while nothing is after them; shot only comes back that way.</li>
+ * from their stores, one every {@link #RESTOCK_TICKS} while nothing is after them.</li>
+ * <li><b>Powder</b> (Andy, 2026-11-15: "There should be ways for them to resupply, either from powder garrisons in
+ * kingdoms or looting"): shot and musketoon balls are made from gunpowder, {@link #SHOT_PER_POWDER} and
+ * {@link #BALLS_PER_POWDER} to a measure, never from nothing. A gunman of a realm draws it from his realm's storehouse
+ * (its powder garrison, filled by trade and by anyone who stocks it) while he's within {@link #GARRISON_RANGE} of it and
+ * nothing is after him, a measure every {@link #RESTOCK_TICKS}, and one who's run dry walks back to it
+ * ({@link #garrison}); an empty storehouse gives nothing. Anyone short of shot also picks up gunpowder lying about
+ * (a fallen gunman's pouch, a creeper's leavings) and goes looking for it once dry, like arrows.</li>
  * <li><b>Thrown weapons</b>: a drowned's trident and an orc captain's axe leave their hands ({@link #lost}) and lie where
  * they land, until the mob (or someone else) picks them up.</li>
  * <li><b>Thrown things that aren't arrows</b>: a witch carries a few splash potions ({@link Kind#POTIONS}) and brews one
@@ -106,6 +114,10 @@ public final class MobAmmo {
 	static final double PICKUP_RANGE = 1.6, FETCH_RANGE = 16.0, FETCH_SPEED = 1.0;
 	/** Folk and guards restock one of each kind short this often (ticks) while nothing is after them. */
 	static final int RESTOCK_TICKS = 600;
+	/** Shot and musketoon balls a measure of gunpowder makes. */
+	public static final int SHOT_PER_POWDER = 4, BALLS_PER_POWDER = 2;
+	/** A realm's gunman draws powder from its storehouse within this far of its depot (blocks). */
+	static final double GARRISON_RANGE = 48.0;
 	/** A resting arrow or javelin (one this slow) can be picked up. */
 	static final double RESTING = 0.01;
 
@@ -148,6 +160,12 @@ public final class MobAmmo {
 		int full = full(mob, kind, mob.getRandom());
 		set(mob, kind, full, full);
 		return full;
+	}
+
+	/** Whether {@code mob} carries {@code kind} at all (has been filled with it), without filling it. */
+	public static boolean carries(Mob mob, Kind kind) {
+		Map<String, Integer> ammo = mob.getAttached(AMMO);
+		return ammo != null && ammo.containsKey(kind.key);
 	}
 
 	/** Whether {@code mob} has any of {@code kind} left. */
@@ -225,7 +243,10 @@ public final class MobAmmo {
 		return range[0] + random.nextInt(range[1] - range[0] + 1);
 	}
 
-	/** Whether a stack is {@code kind}: arrows are any arrow, javelins any javelin, trident or rock; shot is never found. */
+	/**
+	 * Whether a stack is {@code kind}: arrows are any arrow, javelins any javelin, trident or rock; shot and balls are
+	 * gunpowder ({@link #perItem}).
+	 */
 	static boolean is(ItemStack stack, Kind kind) {
 		return switch (kind) {
 			case ARROWS -> stack.is(ItemTags.ARROWS);
@@ -234,7 +255,17 @@ public final class MobAmmo {
 			case POTIONS -> stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION);
 			case ROCKS -> stack.is(Items.COBBLESTONE) || stack.is(Items.MOSSY_COBBLESTONE) || stack.is(Items.COBBLED_DEEPSLATE);
 			case KNIVES -> knife(stack);
-			case SHOT, BOMBS, BALLS, BLAZE -> false;
+			case SHOT, BALLS -> stack.is(Items.GUNPOWDER);
+			case BOMBS, BLAZE -> false;
+		};
+	}
+
+	/** How many of {@code kind} one item of it makes: a measure of gunpowder makes several shot or balls. */
+	static int perItem(Kind kind) {
+		return switch (kind) {
+			case SHOT -> SHOT_PER_POWDER;
+			case BALLS -> BALLS_PER_POWDER;
+			default -> 1;
 		};
 	}
 
@@ -379,7 +410,7 @@ public final class MobAmmo {
 			Integer left = ammo.get(kind.key);
 			if (left != null && left < fullOf(mob, kind)) {
 				wants = true;
-				dry |= left == 0 && kind != Kind.SHOT && kind != Kind.BOMBS && kind != Kind.BALLS && kind != Kind.BLAZE;
+				dry |= left == 0 && kind != Kind.BOMBS && kind != Kind.BLAZE;
 			}
 		}
 		if (!wants) {
@@ -450,9 +481,10 @@ public final class MobAmmo {
 					continue;
 				}
 				int room = fullOf(mob, kind) - left;
-				int count = Math.min(room, e instanceof ItemEntity ? stack.getCount() : 1);
+				int per = perItem(kind);
+				int count = Math.min((room + per - 1) / per, e instanceof ItemEntity ? stack.getCount() : 1);
 				if (count > 0) {
-					give(mob, kind, count);
+					give(mob, kind, count * per);
 					used(e, stack, count);
 				}
 				break;
@@ -496,10 +528,40 @@ public final class MobAmmo {
 				// rocks and knives are only ever picked up again
 				continue;
 			}
+			if (kind == Kind.SHOT || kind == Kind.BALLS) {
+				// powder only from the realm's storehouse
+				Integer short_ = ammo.get(kind.key);
+				if (short_ != null && short_ < fullOf(mob, kind)) {
+					garrison(level, mob, kind, short_ == 0);
+				}
+				continue;
+			}
 			Integer left = ammo.get(kind.key);
 			if (left != null && left < fullOf(mob, kind)) {
 				give(mob, kind, 1);
 			}
+		}
+	}
+
+	/**
+	 * A realm's gunman short of {@code kind}: near his realm's storehouse he draws a measure of gunpowder from it (none
+	 * there, none had); further off, one that's run {@code dry} heads back to it.
+	 */
+	private static void garrison(ServerLevel level, Mob mob, Kind kind, boolean dry) {
+		if (!(mob instanceof Worker worker) || worker.factionId() < 0) {
+			return;
+		}
+		Faction f = Factions.get(level.getServer(), worker.factionId());
+		if (f == null || f.fallen() || f.holdings().depot().isEmpty() || Factions.level(level.getServer()) != level) {
+			return;
+		}
+		BlockPos depot = f.holdings().depot().get();
+		if (mob.blockPosition().closerThan(depot, GARRISON_RANGE)) {
+			if (!Storage.take(level, f, Items.GUNPOWDER, 1).isEmpty()) {
+				give(mob, kind, perItem(kind));
+			}
+		} else if (dry && mob instanceof net.minecraft.world.entity.PathfinderMob walker && walker.getNavigation().isDone()) {
+			walker.getNavigation().moveTo(depot.getX() + 0.5, depot.getY(), depot.getZ() + 0.5, FETCH_SPEED);
 		}
 	}
 }

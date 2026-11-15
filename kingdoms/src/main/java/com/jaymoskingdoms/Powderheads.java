@@ -280,7 +280,7 @@ public final class Powderheads {
 			return false;
 		}
 		for (Mob mate : Bonds.companions(player, 16.0)) {
-			if (mate != v && MobAmmo.is(mate.getMainHandItem(), MobAmmo.Kind.SHOT) && MobAmmo.left(mate, MobAmmo.Kind.SHOT) == 0) {
+			if (mate != v && MobAmmo.carries(mate, MobAmmo.Kind.SHOT) && MobAmmo.left(mate, MobAmmo.Kind.SHOT) == 0) {
 				take(pack, Items.GUNPOWDER, 1);
 				MobAmmo.give(mate, MobAmmo.Kind.SHOT, SHOT_PER_POWDER);
 				Callouts.say(v, "powder.mate", mate, true, mate.getDisplayName());
@@ -298,7 +298,7 @@ public final class Powderheads {
 		}
 		String side = Comrades.side(m);
 		for (Mob mate : level.getEntitiesOfClass(Mob.class, m.getBoundingBox().inflate(16.0), e -> e != m && e.isAlive() && !Downed.isDowned(e)
-			&& Comrades.side(e).equals(side) && MobAmmo.is(e.getMainHandItem(), MobAmmo.Kind.SHOT) && MobAmmo.left(e, MobAmmo.Kind.SHOT) == 0)) {
+			&& Comrades.side(e).equals(side) && MobAmmo.carries(e, MobAmmo.Kind.SHOT) && MobAmmo.left(e, MobAmmo.Kind.SHOT) == 0)) {
 			MobAmmo.give(mate, MobAmmo.Kind.SHOT, SHOT_PER_POWDER);
 			m.setAttached(FOE_STOCK, java.util.List.of(stock.get(0), stock.get(1) - 1));
 			Callouts.say(m, "powder.mate", mate, false, mate.getDisplayName());

@@ -9,4 +9,8 @@
   carry 0 to half a magazine of spare rounds to reload from (a slower reload, with a click). Out of both, they sling the
   gun and rush you hand to hand. A dead gunner drops the spare rounds it never fired, instead of a random handful up to a
   stack. The mechs' and Omens' built-in cannons don't run dry (`power/chrono/future/FutureGuns`, `armory/TaczGuns.loadRounds`).
+- **Gunners loot the fallen** (Andy: "ways for them to resupply... looting other undead"): a gunner short of spare
+  rounds picks up rounds its gun takes within 16 blocks, whether a fallen gunner's dropped rounds or what's left in a
+  dropped gun that takes the same rounds, and walks over to them when it isn't fighting or has nothing left to shoot.
+  It carries up to one magazine of spares that way (`FutureGuns.scavenge`).
 - Built (Powers and Kingdoms compile); not played. A dev server boot here stopped on an unrelated recipe registry error, so it isn't boot-checked.

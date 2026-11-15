@@ -303,7 +303,8 @@ final class TradeRoutes {
 				int carts = REALM_CARTS + tier.ordinal();
 				yield new Profile(CART, carts, Caravans.CART_LOAD, 1 + carts / 2, tier != Wealth.Tier.POOR,
 					EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE, Ware.METAL, Ware.CLOTH, Ware.HIDE),
-					EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE, Ware.METAL, Ware.CLOTH, Ware.HIDE),
+					// (powder for its gunmen's garrison, MobAmmo)
+					EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE, Ware.METAL, Ware.CLOTH, Ware.HIDE, Ware.POWDER),
 					new Item[] {Items.WHEAT, Items.BREAD, Items.COBBLESTONE, Items.OAK_LOG, Items.IRON_INGOT, Items.STRING, Items.LEATHER});
 			}
 			case TOWN -> {

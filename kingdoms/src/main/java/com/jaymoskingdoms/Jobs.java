@@ -49,6 +49,11 @@ final class Jobs {
 	static final int SMELT = 8, COOK = 8, CUT = 8, FISH = 2;
 	/** The mason cuts only cobblestone over this (the builders' share is kept). */
 	static final int MASON_KEEP = 256;
+	/**
+	 * A realm's weaponsmith mills gunpowder for its powder garrison ({@link MobAmmo}) while the storehouse holds less than
+	 * this: a coal or charcoal and a bone (for the saltpetre) make this many measures.
+	 */
+	static final int POWDER_KEEP = 24, POWDER_BATCH = 2;
 	/** A farmer keeps this many of each crop for sowing and bread; the rest goes to storage. */
 	static final int FARMER_KEEPS = 12;
 
@@ -154,6 +159,14 @@ final class Jobs {
 
 	/** Its trade's batch of goods (true if it made any). */
 	private static boolean batch(ServerLevel level, Faction f, Villager v, Holder<VillagerProfession> trade) {
+		if (trade.is(VillagerProfession.WEAPONSMITH) && f.type().isRealm() && Storage.count(level, f, Items.GUNPOWDER) < POWDER_KEEP
+			&& Storage.count(level, f, Items.BONE) > 0 && Storage.count(level, f, s -> s.is(Items.COAL) || s.is(Items.CHARCOAL)) > 0) {
+			// powder for the realm's gunmen (MobAmmo's powder garrison)
+			Storage.take(level, f, Items.BONE, 1);
+			Storage.take(level, f, s -> s.is(Items.COAL) || s.is(Items.CHARCOAL), 1);
+			Storage.put(level, f, Items.GUNPOWDER, POWDER_BATCH);
+			return true;
+		}
 		if (trade.is(VillagerProfession.ARMORER) || trade.is(VillagerProfession.TOOLSMITH) || trade.is(VillagerProfession.WEAPONSMITH)) {
 			// raw ore smelted, a coal a batch
 			for (Item[] smelt : SMELTS) {
