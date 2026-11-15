@@ -130,6 +130,8 @@ public final class Whalers {
 	static final double WORKS_FORWARD = 0.25;
 	/** Her complement besides her captain. */
 	static final int HANDS = 5;
+	/** What a whaler is: a big cargo hull, with room to haul and cut in. */
+	static final Fleet.Rig RIG = Fleet.Rig.CARGO_SHIP;
 	/** A whaler not seen (out of any player's reach) this long has made her voyage unseen; given up for lost after this long out. */
 	static final long UNSEEN = 48000L, FORGET = 24000L * 6;
 	/** A catch's worth to her realm (silver): each bottle of oil, lump of ambergris, bone, and stack of meat. */
@@ -356,11 +358,24 @@ public final class Whalers {
 					} else if (now - v.launched > FORGET) {
 						put(server, f.id(), null);
 						FarGrounds.lost(server, f.id());
+						Shipyards.whaler(server, f.id(), false);
 					}
 				}
 				continue;
 			}
 			Navies.Harbour h = Navies.harbour(server, f.id());
+			if (h != null && McaCompat.LOADED && !Shipyards.hasWhaler(server, f.id())) {
+				// (with MCA) no whaling till its own shipwright has built it a whaler (Shipyards)
+				if (f.treasury() >= TREASURY && level.isPositionEntityTicking(h.mooring())) {
+					Shipyards.lay(level, f, h, Shipyards.WHALER, RIG);
+				}
+				continue;
+			}
+			Shipyards.Yard slip = Shipyards.yard(server, f.id());
+			if (slip != null && slip.purpose().equals(Shipyards.WHALER)) {
+				// a whaler of its own on the slip: her voyage waits for her launch
+				continue;
+			}
 			long last = level.getAttachedOrElse(LAST, Map.of()).getOrDefault(Integer.toString(f.id()), -GAP);
 			if (h == null || f.treasury() < TREASURY || now - last < GAP || !level.isPositionEntityTicking(h.mooring())
 				|| level.getRandom().nextFloat() > CHANCE) {
@@ -370,8 +385,18 @@ public final class Whalers {
 		}
 	}
 
+	/** What a realm's whaler is built of: dark oak, spruce masts, its colours. */
+	static Fleet.Look look(Faction f) {
+		return new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.SPRUCE_LOG, Fleet.block(f.color().getName() + "_wool"), null);
+	}
+
 	/** {@code f}'s whaler put in at its harbour to fit out for a voyage. */
 	static @Nullable Ship fitOut(ServerLevel level, Faction f, Navies.Harbour h) {
+		return fitOut(level, f, h, null);
+	}
+
+	/** (2026-11-15) The same, in the whaler its shipwright has just built on {@code built} (null: she's put in from her last voyage). */
+	static @Nullable Ship fitOut(ServerLevel level, Faction f, Navies.Harbour h, Fleet.@Nullable Slip built) {
 		RandomSource random = level.getRandom();
 		// (0.7.437) the further out the more voyages it's had home with whales
 		int far = FarGrounds.far(level.getServer(), f.id());
@@ -381,12 +406,12 @@ public final class Whalers {
 		}
 		Crew crew = new Crew(Crew.Side.WHALER, f.id(), "the " + NAMES[random.nextInt(NAMES.length)], h.mooring());
 		crew.mode = "fitting";
-		Fleet.Look look = new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.SPRUCE_LOG, Fleet.block(f.color().getName() + "_wool"), null);
-		Ship ship = Navies.launch(level, f, h, Fleet.Rig.CARGO_SHIP, look, crew,
-			new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, HANDS, 0));
+		Corsairs.Complement complement = new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, HANDS, 0);
+		Ship ship = built != null ? Shipyards.launch(level, f, built, crew, complement) : Navies.launch(level, f, h, RIG, look(f), crew, complement);
 		if (ship == null) {
 			return null;
 		}
+		Shipyards.whaler(level.getServer(), f.id(), true);
 		// (0.7.437) her far ground's rovers need a cove to sail out of: founded now if there's none
 		FarGrounds.coveFor(level, h, far);
 		Voyage voyage = new Voyage(ship.getUUID(), level.getGameTime(), ground);
@@ -500,6 +525,7 @@ public final class Whalers {
 			// (0.7.437) the far grounds took her: never heard of again
 			put(level.getServer(), f.id(), null);
 			FarGrounds.lost(level.getServer(), f.id());
+			Shipyards.whaler(level.getServer(), f.id(), false);
 			Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
 			if (h != null) {
 				Raids.tell(level, h.shore(), Component.translatable("message.jaymoskingdoms.whaler.never_home", f.name()).withStyle(ChatFormatting.GRAY));
@@ -1233,6 +1259,8 @@ public final class Whalers {
 			put(level.getServer(), crew.faction, null);
 			// (0.7.437) the grounds that took her are shunned
 			FarGrounds.lost(level.getServer(), crew.faction);
+			// (2026-11-15) and her realm has no whaler till its shipwright builds another
+			Shipyards.whaler(level.getServer(), crew.faction, false);
 		}
 	}
 

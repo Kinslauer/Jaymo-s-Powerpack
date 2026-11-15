@@ -180,6 +180,15 @@ public final class Fleet {
 		if (helm == null) {
 			return null;
 		}
+		return launchLaid(level, helm, where, crew);
+	}
+
+	/**
+	 * A ship already standing in the world (her blocks at {@code where}, laid by {@link #lay} or built up in a yard,
+	 * {@link Slip}), her hold bailed dry and cast off with {@code crew}: the ship, or null if she wouldn't go (her blocks
+	 * taken up again).
+	 */
+	public static @Nullable Ship launchLaid(ServerLevel level, BlockPos helm, List<BlockPos> where, Crew crew) {
 		// her hold bailed dry, then away
 		ShipKits.placed(level, helm, null);
 		crew.born = level.getGameTime();
@@ -215,8 +224,120 @@ public final class Fleet {
 	 * in the world (where they went added to {@code where}): her helm, or null if there's no room or water deep enough there.
 	 */
 	public static @Nullable BlockPos lay(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, List<BlockPos> where) {
-		// (0.7.285) her boarding ladders, and sweeps if she was drawn with no oars
-		List<Part> parts = ShipFittings.fit(parts(level, rig, look));
+		Slip slip = slip(level, rig, look, water, bow);
+		if (slip == null) {
+			return null;
+		}
+		where.addAll(slip.where);
+		for (int i = 0; i < slip.size(); i++) {
+			slip.place(level, i);
+		}
+		return slip.join(level);
+	}
+
+	/**
+	 * A ship to be built where she'll float: her blocks (her boarding ladders and sweeps fitted, {@link ShipFittings}) and
+	 * where each goes, in the order a shipwright lays them: her keel first, then up through her hull and decks layer by
+	 * layer from amidships out, her masts and rigging as they come, her helm last of all (nobody casts her off half built).
+	 */
+	public static final class Slip {
+		final List<Part> parts;
+		final List<BlockPos> where;
+		final Rotation turn;
+		/** Where her frame's (0, 0, 0) is in the world, and her bow; with her rig and look, all that's needed to find her again. */
+		public final BlockPos origin;
+		public final Direction bow;
+
+		private Slip(List<Part> parts, BlockPos origin, Direction bow) {
+			this.parts = parts;
+			this.origin = origin;
+			this.bow = bow;
+			this.turn = ShipKits.turn(bow);
+			List<BlockPos> at = new ArrayList<>(parts.size());
+			for (Part p : parts) {
+				at.add(origin.offset(p.at().rotate(this.turn)));
+			}
+			this.where = at;
+		}
+
+		public int size() {
+			return this.parts.size();
+		}
+
+		public BlockPos at(int i) {
+			return this.where.get(i);
+		}
+
+		public List<BlockPos> where() {
+			return List.copyOf(this.where);
+		}
+
+		/** Block {@code i} as it goes in (turned her way, dry). */
+		public BlockState state(int i) {
+			BlockState state = this.parts.get(i).state().rotate(this.turn);
+			return state.hasProperty(BlockStateProperties.WATERLOGGED) ? state.setValue(BlockStateProperties.WATERLOGGED, false) : state;
+		}
+
+		/** Whether block {@code i} is in already (its block there, however it's joined to its neighbours). */
+		public boolean laid(ServerLevel level, int i) {
+			return level.getBlockState(this.at(i)).is(this.state(i).getBlock());
+		}
+
+		/** Puts block {@code i} in (its barrel filled, if it has loot). */
+		public void place(ServerLevel level, int i) {
+			BlockPos at = this.at(i);
+			level.setBlock(at, this.state(i), Block.UPDATE_CLIENTS);
+			if (this.parts.get(i).loot() != null && level.getBlockEntity(at) instanceof RandomizableContainer box) {
+				box.setLootTable(this.parts.get(i).loot(), level.getRandom().nextLong());
+			}
+		}
+
+		/** All of her in (whatever's missing put back), joined up: fences to their neighbours, sails into one sheet. Her helm, or null if she has none. */
+		public @Nullable BlockPos join(ServerLevel level) {
+			BlockPos helm = null;
+			for (int i = 0; i < this.size(); i++) {
+				if (!this.laid(level, i)) {
+					this.place(level, i);
+				}
+				if (this.state(i).getBlock() instanceof HelmBlock) {
+					helm = this.at(i);
+				}
+			}
+			for (BlockPos at : this.where) {
+				BlockState state = level.getBlockState(at);
+				BlockState next = Block.updateFromNeighbourShapes(state, level, at);
+				if (next.getBlock() instanceof SailBlock) {
+					next = SailBlock.connect(next, level, at);
+				}
+				if (next.hasProperty(BlockStateProperties.WATERLOGGED)) {
+					next = next.setValue(BlockStateProperties.WATERLOGGED, false);
+				}
+				if (next != state) {
+					level.setBlock(at, next, Block.UPDATE_CLIENTS);
+				}
+			}
+			return helm;
+		}
+	}
+
+	/** Her blocks in the order she's built (see {@link Slip}). */
+	private static List<Part> building(ServerLevel level, Rig rig, Look look) {
+		List<Part> parts = new ArrayList<>(ShipFittings.fit(parts(level, rig, look)));
+		parts.sort(java.util.Comparator.<Part>comparingInt(p -> p.state().getBlock() instanceof HelmBlock ? 1 : 0)
+			.thenComparingInt(p -> p.at().getY())
+			.thenComparingInt(p -> Math.abs(p.at().getZ()))
+			.thenComparingInt(p -> Math.abs(p.at().getX()))
+			.thenComparingInt(p -> p.at().getZ())
+			.thenComparingInt(p -> p.at().getX()));
+		return parts;
+	}
+
+	/**
+	 * A {@code rig} in {@code look} to build on the water at {@code water} (her stern just beyond it, her bow toward
+	 * {@code bow}), nothing of her laid yet: null if there's no room or water deep enough there.
+	 */
+	public static @Nullable Slip slip(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow) {
+		List<Part> parts = building(level, rig, look);
 		if (parts.isEmpty()) {
 			return null;
 		}
@@ -230,37 +351,12 @@ public final class Fleet {
 				return null;
 			}
 		}
-		where.addAll(room);
-		Rotation turn = ShipKits.turn(bow);
-		BlockPos helm = null;
-		for (int i = 0; i < parts.size(); i++) {
-			BlockState state = parts.get(i).state().rotate(turn);
-			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
-				state = state.setValue(BlockStateProperties.WATERLOGGED, false);
-			}
-			level.setBlock(where.get(i), state, Block.UPDATE_CLIENTS);
-			if (parts.get(i).loot() != null && level.getBlockEntity(where.get(i)) instanceof RandomizableContainer box) {
-				box.setLootTable(parts.get(i).loot(), level.getRandom().nextLong());
-			}
-			if (state.getBlock() instanceof HelmBlock) {
-				helm = where.get(i);
-			}
-		}
-		// joined up: fences to their neighbours, sails into one sheet
-		for (BlockPos at : where) {
-			BlockState state = level.getBlockState(at);
-			BlockState next = Block.updateFromNeighbourShapes(state, level, at);
-			if (next.getBlock() instanceof SailBlock) {
-				next = SailBlock.connect(next, level, at);
-			}
-			if (next.hasProperty(BlockStateProperties.WATERLOGGED)) {
-				next = next.setValue(BlockStateProperties.WATERLOGGED, false);
-			}
-			if (next != state) {
-				level.setBlock(at, next, Block.UPDATE_CLIENTS);
-			}
-		}
-		return helm;
+		return new Slip(parts, room.get(0).subtract(parts.get(0).at().rotate(ShipKits.turn(bow))), bow);
+	}
+
+	/** The {@link Slip} of a {@code rig} in {@code look} already begun at {@code origin}, bow toward {@code bow} (as it was saved). */
+	public static Slip slipAt(ServerLevel level, Rig rig, Look look, BlockPos origin, Direction bow) {
+		return new Slip(building(level, rig, look), origin, bow);
 	}
 
 	/** (0.7.112) The ship {@link #lay laid} with her helm at {@code helm}, her hold bailed and cast off with no crew (null: she wouldn't go). */

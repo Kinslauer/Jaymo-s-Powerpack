@@ -1,0 +1,13 @@
+{
+  "message.jaymoskingdoms.shipyard.laid.whaler": "%s's shipwright has laid down a whaler by the pier.",
+  "message.jaymoskingdoms.shipyard.laid.warship": "%s's shipwright has laid down a warship by the pier.",
+  "message.jaymoskingdoms.shipyard.launched.whaler": "The whaler %s is launched from %s's yard.",
+  "message.jaymoskingdoms.shipyard.launched.warship": "The warship %s is launched from %s's yard.",
+  "talk.jaymoskingdoms.shipwright.idle": "Nothing on the slip just now. When the realm wants a ship, I'll lay her down right there by the pier.",
+  "talk.jaymoskingdoms.shipwright.building.whaler": "That's %1$s's whaler on the slip, the biggest hull I build. About %2$s%% of her is in. Timber's always short.",
+  "talk.jaymoskingdoms.shipwright.building.warship": "%1$s's new warship. About %2$s%% of her is in, and she'll keep the pirates off this harbour soon enough.",
+  "talk.jaymoskingdoms.shipwright.ready.whaler": "She's all in. A word over her bow and she goes in the water.",
+  "talk.jaymoskingdoms.shipwright.ready.warship": "She's all in. A word over her bow and she goes in the water.",
+  "talk.jaymoskingdoms.shipwright.timber": "Lend a hand (give him your planks and logs)",
+  "talk.jaymoskingdoms.shipwright.thanks": "Good timber. That'll put her in the water sooner. I won't forget it, and nor will the realm."
+}

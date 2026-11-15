@@ -135,6 +135,12 @@ final class Corsairs implements Ship.Captaincy {
 		if (ship == null) {
 			return null;
 		}
+		man(level, ship, crew, faction, complement);
+		return ship;
+	}
+
+	/** {@code ship}'s company mustered aboard her: her captain at the helm, gunners to her guns, her boys and hands about her deck. */
+	static void man(ServerLevel level, Ship ship, Crew crew, Faction faction, Complement complement) {
 		Fleet.Stations stations = Fleet.stations(ship);
 		BlockPos home = crew.home;
 		if (stations.helm() != null) {
@@ -168,7 +174,6 @@ final class Corsairs implements Ship.Captaincy {
 		for (int i = 0; i < complement.hands() && k < deck.size(); i++) {
 			hand(level, ship, faction, complement.hand(), deck.get(k++), home, crew.side);
 		}
-		return ship;
 	}
 
 	/**
