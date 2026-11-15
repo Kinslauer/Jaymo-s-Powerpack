@@ -17,9 +17,12 @@ import net.minecraft.world.level.storage.LevelResource;
 
 /**
  * The higher sea (Andy's ocean pick-list, "A higher, wavy sea"; he chose "waves and a higher sea", new worlds only):
- * in a world made since, the Overworld's sea stands {@link #RISE} blocks higher than the land was shaped for. Low
- * coasts and river flats go under, headlands become islands, and caves under the new sea fill (the game's own aquifers
- * flood caves below the sea's level where the ground over them is under it). The land isn't raised with it.
+ * in a world made since, the Overworld's sea stands {@link #RISE} blocks higher, and caves under it fill (the game's
+ * own aquifers flood caves below the sea's level where the ground over them is under it). The land is lifted the same
+ * {@link #RISE} blocks with it (the game's own offset files, written by {@code tools/gen_continents.py}), so coasts,
+ * beaches and plains stand where the game meant them: unlifted, every low plain and river flat went under in thousands
+ * of islets and pools. The oceans are wide because the continents are ({@code jaymoskingdoms:continents/shape}). The
+ * lift is world data, so it is in every world's new chunks, the sea only in a world made with it.
  * <p>
  * Only for the Overworld's own shapes (overworld, large biomes, amplified, as the registry has them when the server
  * starts), and only in a world made with it: a world's first start leaves a marker file in its folder, and a world

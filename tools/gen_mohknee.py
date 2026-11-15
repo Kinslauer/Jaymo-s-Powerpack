@@ -85,10 +85,8 @@ def mohknee(name, obj):
     write('jaymoskingdoms/worldgen/density_function/mohknee/' + name + '.json', obj)
 
 
-# the home world's own shape, as these three files were before the far land
-mohknee('home_continents', add(noise('minecraft:continentalness_large', 0.25), -0.06))
-mohknee('home_temperature', noise('minecraft:temperature_large', 0.25))
-mohknee('home_vegetation', noise('minecraft:vegetation_large', 0.25))
+# the home world: its continents and climate are tools/gen_continents.py's; its erosion and ridges as before the far land
+HOME_CONTINENTS = 'jaymoskingdoms:continents/shape'
 mohknee('home_erosion', noise('minecraft:erosion_large', 0.25))
 mohknee('home_ridges', noise('minecraft:ridge', 0.25))   # the game's own: Kingdoms never changed it before
 
@@ -106,7 +104,7 @@ mohknee('islands', {'type': 'minecraft:cache', 'input': islands})
 # an island's own weather: mild, level grassland whatever the sea round it is like, so a village can stand on it
 mohknee('island_climate', {'type': 'minecraft:cache', 'input': clamp(mul(3.0, ref('islands')), 0.0, 1.0)})
 
-home = ref('home_continents')
+home = HOME_CONTINENTS
 crossing = lerp(ref('sea'), home, add(DEEP, mul(0.08, home)))
 crossing = lerp(ref('islands'), crossing, SHORE_LAND)
 shore = lerp(ref('land'), crossing, clamp(add(INLAND[2], mul(INLAND[3], home)), INLAND[0], INLAND[1]))
@@ -116,13 +114,14 @@ write('minecraft/worldgen/density_function/overworld/continents.json', {'type': 
 def band(home_name, own_noise, island, lo, hi, mid, swing):
     """The home world's value off the land; on it, a band of the land's own (finer) noise, so the land has variety of its own."""
     own = clamp(add(mid, mul(swing, noise(own_noise, 1.0))), lo, hi)
-    return lerp(ref('island_climate'), lerp(ref('climate'), ref(home_name), own), island)
+    home = home_name if ':' in home_name else ref(home_name)
+    return lerp(ref('island_climate'), lerp(ref('climate'), home, own), island)
 
 
 write('minecraft/worldgen/density_function/overworld/temperature.json',
-      band('home_temperature', 'minecraft:temperature', ISLAND_CLIMATE[0], *TEMPERATURE))
+      band('jaymoskingdoms:continents/temperature', 'minecraft:temperature', ISLAND_CLIMATE[0], *TEMPERATURE))
 write('minecraft/worldgen/density_function/overworld/vegetation.json',
-      band('home_vegetation', 'minecraft:vegetation', ISLAND_CLIMATE[1], *VEGETATION))
+      band('jaymoskingdoms:continents/vegetation', 'minecraft:vegetation', ISLAND_CLIMATE[1], *VEGETATION))
 write('minecraft/worldgen/density_function/overworld/erosion.json',
       {'type': 'minecraft:cache', 'input': band('home_erosion', 'minecraft:erosion', ISLAND_CLIMATE[2], *EROSION)})
 # an island has no river valley through it (the higher sea would drown half of it): its ridges noise is held high

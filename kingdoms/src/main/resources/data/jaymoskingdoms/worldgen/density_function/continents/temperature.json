@@ -1,0 +1,60 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:clamp",
+    "input": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:mul",
+          "left": 0.8,
+          "right": {
+            "type": "minecraft:mul",
+            "left": "jaymoskingdoms:continents/latitude",
+            "right": {
+              "type": "minecraft:add",
+              "left": 1.0,
+              "right": {
+                "type": "minecraft:mul",
+                "left": 0.35,
+                "right": {
+                  "type": "minecraft:clamp",
+                  "input": "jaymoskingdoms:continents/shape",
+                  "min": 0.0,
+                  "max": 1.0
+                }
+              }
+            }
+          }
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": 0.5,
+          "right": {
+            "type": "minecraft:noise",
+            "noise": "minecraft:temperature_large",
+            "shift_x": "minecraft:shift_x",
+            "shift_z": "minecraft:shift_z",
+            "xz_scale": 0.25,
+            "y_scale": 0.0
+          }
+        }
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": 0.15,
+        "right": {
+          "type": "minecraft:noise",
+          "noise": "minecraft:temperature",
+          "shift_x": "minecraft:shift_x",
+          "shift_z": "minecraft:shift_z",
+          "xz_scale": 0.25,
+          "y_scale": 0.0
+        }
+      }
+    },
+    "min": -1.0,
+    "max": 1.0
+  }
+}
