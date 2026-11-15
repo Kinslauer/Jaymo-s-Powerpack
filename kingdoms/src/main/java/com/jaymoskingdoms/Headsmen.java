@@ -36,8 +36,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>His work.</b> In his realm a sentence of death at an audience ({@link Arrests}) is his when he is within
  * {@link #CALL} blocks: he walks to the one sentenced and the blow is his ({@link #strike}).</li>
  * <li><b>The dull plate.</b> {@link #DULL_DAYS} days after his last execution his plate is dull: its Strength is gone and he
- * is slower. A player in the whole set is the same unless they have killed a person (a villager, an illager, a player)
- * in the last {@link #DULL_DAYS} days. Nothing on screen says so.</li>
+ * is slower. A player in the whole set is the same unless they have killed a person (a villager, an illager, a player,
+ * or one of the kingdoms' own folk) in the last {@link #DULL_DAYS} days. Nothing on screen says so.</li>
  * <li><b>The thief's faith.</b> One sworn to the Ash Whisperer who comes near a headsman is spat at
  * ({@link #SPIT_RANGE}): the Crowned Sun's people hang hers when they are caught.</li>
  * <li><b>Never sold.</b> A headsman lets one piece of his plate fall when he dies.</li>
@@ -48,6 +48,8 @@ public final class Headsmen {
 	/** How often the Sun's seats near players are looked over (ticks), how near a player has to be, and how near the seat a guard must be to be named. */
 	static final int SWEEP = 200;
 	static final double PLAYER_NEAR = 96.0, SEAT_RANGE = 48.0;
+	/** How far from the seat a named headsman is still looked for (out on rounds), so a second one isn't named. */
+	static final double HEADSMAN_RANGE = 128.0;
 	/** How near the sentenced one he has to be to be called to it, how near he strikes from, and how long he's waited for (ticks). */
 	static final double CALL = 32.0, STRIKE_REACH = 2.5;
 	static final int CALL_WAIT = 200, CALL_STEP = 10;
@@ -129,14 +131,17 @@ public final class Headsmen {
 			if (level.getNearestPlayer(at.x, at.y, at.z, PLAYER_NEAR, false) == null) {
 				continue;
 			}
-			AABB box = new AABB(seat).inflate(SEAT_RANGE);
-			List<Worker> guards = Workers.near(level, box, g -> g.mob().isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD);
 			PathfinderMob headsman = null;
-			for (Worker g : guards) {
-				if (g.mob().entityTags().contains(TAG)) {
+			for (Worker g : Workers.near(level, new AABB(seat).inflate(HEADSMAN_RANGE),
+					g -> g.mob().isAlive() && g.factionId() == f.id() && g.mob().entityTags().contains(TAG))) {
+				if (headsman == null) {
 					headsman = g.mob();
+				} else {
+					g.mob().removeTag(TAG); // one headsman to a seat
 				}
 			}
+			List<Worker> guards = Workers.near(level, new AABB(seat).inflate(SEAT_RANGE),
+				g -> g.mob().isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD);
 			if (headsman == null && !guards.isEmpty()) {
 				guards.sort(java.util.Comparator.comparingDouble(g -> g.mob().distanceToSqr(at)));
 				headsman = guards.get(0).mob();
@@ -149,7 +154,8 @@ public final class Headsmen {
 			if (headsman == null) {
 				continue;
 			}
-			if (dull(headsman)) {
+			// (without the whole plate on he is a guard like the rest)
+			if (FantasyArmorCompat.whole(headsman, FantasyArmorCompat.HEADSMAN) && dull(headsman)) {
 				blunt(headsman);
 				headsman.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SWEEP + 20, 0, true, false));
 			}
@@ -218,6 +224,6 @@ public final class Headsmen {
 	/** By way of {@link FrontierWear#keeps}: a headsman keeps his plate on, off duty too. */
 	static boolean keeps(LivingEntity villager, EquipmentSlot slot) {
 		return villager.entityTags().contains(TAG) && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR
-			&& !villager.getItemBySlot(slot).isEmpty() && issue(villager, slot) != null;
+			&& issue(villager, slot) instanceof ItemStack piece && villager.getItemBySlot(slot).is(piece.getItem());
 	}
 }
