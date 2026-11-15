@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
-/** The alloyer ({@link AlloyerEntity}). An empty hand reads its pool; whoever sets it down or tends it is its keeper. */
+/** The alloyer ({@link AlloyerEntity}). An empty hand reads its pool; whoever sets it down is its keeper (or whoever first tends one nobody keeps). */
 public class AlloyerBlock extends MoltenBlock {
 	public AlloyerBlock(Block.Properties properties) {
 		super(properties);

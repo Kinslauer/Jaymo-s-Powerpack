@@ -71,6 +71,11 @@ public final class ShieldCraft {
 	/** The netherite shield: durability, knockback resistance while held, enchantability; the plain shield's enchantability. */
 	public static final int NETHERITE_DURABILITY = 672, NETHERITE_ENCHANTABILITY = 15, SHIELD_ENCHANTABILITY = 10;
 	public static final double NETHERITE_KNOCKBACK_RESISTANCE = 0.1;
+	/** A shot just sent back can't be parried again for this many ticks (an ender pearl stays its thrower's, so it would). */
+	static final long REFLECT_GRACE_TICKS = 10L;
+
+	/** Shots sent back, and the game time each was. */
+	private static final java.util.Map<Projectile, Long> SENT_BACK = new java.util.WeakHashMap<>();
 
 	public static final ResourceKey<Enchantment> PUMMELLING = ResourceKey.create(Registries.ENCHANTMENT, JaymosPowers.id("pummelling"));
 	public static final ResourceKey<Enchantment> BARBED = ResourceKey.create(Registries.ENCHANTMENT, JaymosPowers.id("barbed"));
@@ -135,7 +140,9 @@ public final class ShieldCraft {
 	 * whoever loosed it (it becomes the player's shot), and the parry lands. True if it was sent back.
 	 */
 	public static boolean reflect(ServerPlayer player, Projectile projectile) {
-		if (!Guard.raised(player) || !isShield(player.getUseItem()) || Guard.shot(projectile) || projectile.getOwner() == player) {
+		Long sentBack = SENT_BACK.get(projectile);
+		if (!Guard.raised(player) || !isShield(player.getUseItem()) || Guard.shot(projectile) || projectile.getOwner() == player
+			|| sentBack != null && player.level().getGameTime() - sentBack < REFLECT_GRACE_TICKS) {
 			return false;
 		}
 		Vec3 motion = projectile.getDeltaMovement();
@@ -172,6 +179,7 @@ public final class ShieldCraft {
 			projectile.setOwner(player);
 		}
 		projectile.needsSync = true;
+		SENT_BACK.put(projectile, player.level().getGameTime());
 		ServerLevel level = player.level();
 		level.playSound(null, projectile.getX(), projectile.getY(), projectile.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 1.4F);
 		Guard.parried(player, null, from, true);
