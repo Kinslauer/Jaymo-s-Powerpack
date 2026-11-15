@@ -88,7 +88,8 @@ import org.jspecify.annotations.Nullable;
  * squads sent after a player who's become a threat; and the Reaper's host, {@link Reaped}, dead illagers who march on the
  * nearest settlement or camp and take the living illagers they kill into their ranks); grave-captains with a boss bar, undead pirate lobbers with powder
  * kegs, one member now and then carrying loot that's sure to drop, and more health and harm as the danger climbs
- * ({@link #special}); climbing over each other, crossing water and breaking through ({@link HordeMoves}); bell wards
+ * ({@link #special}); builders, runners, brutes and scouts among the dead, and how they move ({@link HordeKinds}); climbing
+ * over each other, crossing water and breaking through ({@link HordeMoves}); bell wards
  * ({@link HordeWards}); the grave scent and the grave lure ({@link HordeLure}); the danger hinted at in the Rung Journal.
  * <p>
  * A horde keeps together: every {@link #MARCH_EVERY} ticks its idle members are led ({@link Senses#lure}, quietly, so a
@@ -99,6 +100,10 @@ import org.jspecify.annotations.Nullable;
  * weapons of the world tier's grades above it ({@link MonsterGear}); their tier's strength and armour still come from
  * {@link WorldTiers}. Lit ground keeps them from coming up there. At sunrise (for a surface horde of the dead), or after
  * {@link #MAX_AGE}, a horde breaks up.
+ * <p>
+ * <b>Sieges</b> ({@link #siege}): a player who keeps within {@link #SIEGE_RADIUS} of one spot after dark is dug in, and
+ * once they have been for {@link #SIEGE_AFTER}, the dead come in waves: one every {@link #SIEGE_EVERY} whatever the roll,
+ * each {@link #SIEGE_GROWTH} bigger than the last (up to {@link #SIEGE_MAX} times a horde's size), until dawn.
  * <p>
  * Operators: {@code /kingdom horde} sends one at once.
  */
@@ -159,6 +164,11 @@ public final class ZombieHordes {
 	/** By the water, how often a host of the Reaper's comes by long ship. */
 	static final float LONGSHIP_CHANCE = 0.5F;
 	static final int CALL_SIZE = 6, CALL_AGE = 20 * 120, CALL_FIGHT_TICKS = 200;
+	/** A siege: a player within this of one spot (blocks) after dark this long (ticks) is dug in; a wave every this many ticks. */
+	static final double SIEGE_RADIUS = 16.0;
+	static final int SIEGE_AFTER = 2400, SIEGE_EVERY = 3600;
+	/** Each wave of a siege is this share bigger than a horde, more for each wave before it, up to this many times; the crowd it may bring, up to this many times. */
+	static final float SIEGE_GROWTH = 0.25F, SIEGE_MAX = 2.0F, SIEGE_CAP_MAX = 1.5F;
 	/** How far its groan carries (volume: 16 blocks per). */
 	static final float GROAN_VOLUME = 4.0F;
 
@@ -241,6 +251,8 @@ public final class ZombieHordes {
 		boolean horn;
 		/** A host its keeper called ({@link #call}): it keeps to them, fights what they fight, and is soon taken back. */
 		boolean called;
+		/** When one of its scouts last howled ({@link HordeKinds}): it keeps after who they saw for {@link HordeKinds#HOWL_TRACK}. */
+		long howled = Long.MIN_VALUE / 2;
 
 		Horde(ServerLevel level, UUID hunted, Kind kind, boolean blood, boolean cave, float danger, Vec3 goal) {
 			this.level = level;
@@ -271,6 +283,20 @@ public final class ZombieHordes {
 	/** Lobbers loaded, and when each last threw. */
 	private static final Map<Mob, Long> LOBBERS = new WeakHashMap<>();
 
+	/** Where a player has kept to ({@link #siege}): the spot, since when after dark, how many waves have come, and when the next may. */
+	private static final class Siege {
+		Vec3 anchor;
+		long since, next;
+		int waves;
+
+		Siege(Vec3 anchor, long since) {
+			this.anchor = anchor;
+			this.since = since;
+		}
+	}
+
+	private static final Map<UUID, Siege> SIEGES = new HashMap<>();
+
 	/** The kind the next horde sent is, whatever would have come ({@code /kingdom horde reaped}). */
 	private static @Nullable Kind forced;
 
@@ -279,9 +305,11 @@ public final class ZombieHordes {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(ZombieHordes::tick);
+		HordeKinds.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			HORDES.clear();
 			NEXT.clear();
+			SIEGES.clear();
 			CAPTAINS.values().forEach(ServerBossEvent::removeAllPlayers);
 			CAPTAINS.clear();
 			LOBBERS.clear();
@@ -373,6 +401,9 @@ public final class ZombieHordes {
 					SquadMounts.row(horde.members, horde.goal);
 				}
 				HordeMoves.tick(horde.level, horde.members, horde.goal, horde.danger, horde.kind.dead() || horde.kind == Kind.SQUAD || horde.kind == Kind.NETHER || horde.kind == Kind.REAPED);
+				if (horde.kind.dead()) {
+					HordeKinds.tick(horde);
+				}
 			}
 			if (ticks % MARCH_EVERY == 0) {
 				march();
@@ -394,6 +425,9 @@ public final class ZombieHordes {
 		long now = overworld.getGameTime();
 		RandomSource random = overworld.getRandom();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (siege(player, overworld, moon, night, now)) {
+				continue;
+			}
 			if (player.isSpectator() || player.isCreative() || !player.isAlive() || now < NEXT.getOrDefault(player.getUUID(), 0L)) {
 				continue;
 			}
@@ -433,6 +467,37 @@ public final class ZombieHordes {
 				NEXT.put(player.getUUID(), now + Math.round(wait / HordeLure.scentFactor(player)));
 			}
 		}
+	}
+
+	/**
+	 * Keeps count of how long {@code player} has kept to one spot after dark, and once they're dug in sends the siege's
+	 * next wave when it's due. True if a wave came.
+	 */
+	private static boolean siege(ServerPlayer player, ServerLevel overworld, Moons.Moon moon, boolean night, long now) {
+		if (player.isSpectator() || player.isCreative() || !player.isAlive() || player.level() != overworld) {
+			SIEGES.remove(player.getUUID());
+			return false;
+		}
+		Siege s = SIEGES.computeIfAbsent(player.getUUID(), k -> new Siege(player.position(), now));
+		if (!night || player.position().distanceTo(s.anchor) > SIEGE_RADIUS) {
+			// moved on, or it's day: the count starts again from here
+			s.anchor = player.position();
+			s.since = now;
+			s.waves = 0;
+			s.next = 0L;
+			return false;
+		}
+		if (now - s.since < SIEGE_AFTER || now < s.next) {
+			return false;
+		}
+		float grow = Math.min(SIEGE_MAX, 1.0F + SIEGE_GROWTH * (s.waves + 1));
+		if (send(player, moon, grow) <= 0) {
+			return false;
+		}
+		s.waves++;
+		s.next = now + SIEGE_EVERY;
+		NEXT.put(player.getUUID(), now + (moon.blood() ? BLOOD_COOLDOWN : COOLDOWN));
+		return true;
 	}
 
 	// ---- a horde comes --------------------------------------------------------------------------------------------------
@@ -505,6 +570,11 @@ public final class ZombieHordes {
 
 	/** Sends a horde {@code player}'s way, out of their sight. How many came (0 if there was no room or no place). */
 	static int send(ServerPlayer player, Moons.Moon moon) {
+		return send(player, moon, 1.0F);
+	}
+
+	/** The same, {@code grow} times the size (a siege's wave), and the crowd near them allowed to grow with it (up to {@link #SIEGE_CAP_MAX}). */
+	static int send(ServerPlayer player, Moons.Moon moon, float grow) {
 		ServerLevel level = (ServerLevel) player.level();
 		boolean nether = level.dimension() == Level.NETHER;
 		if (level != level.getServer().overworld() && !nether) {
@@ -520,7 +590,8 @@ public final class ZombieHordes {
 			size *= moon == Moons.Moon.SUPER_BLOOD ? SUPER_SIZE : BLOOD_SIZE;
 			capFactor = moon == Moons.Moon.SUPER_BLOOD ? SUPER_CAP : BLOOD_CAP;
 		}
-		int cap = Math.round((NEAR_CAP + NEAR_CAP_DANGER * danger) * capFactor);
+		size = Math.round(size * grow);
+		int cap = Math.round((NEAR_CAP + NEAR_CAP_DANGER * danger) * capFactor * Math.min(grow, SIEGE_CAP_MAX));
 		int near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(COUNT_RADIUS), m -> m.isAlive() && m instanceof net.minecraft.world.entity.monster.Enemy).size();
 		int tier = WorldTiers.of(player).ordinal();
 		for (int attempt = 0; attempt < 6; attempt++) {
@@ -700,8 +771,9 @@ public final class ZombieHordes {
 
 	/** A dead villager's old tools: what the armed few carry at Hearth. */
 	private static ItemStack oldTool(RandomSource random) {
-		return new ItemStack(switch (random.nextInt(5)) {
+		return new ItemStack(switch (random.nextInt(6)) {
 			case 0 -> Items.STONE_HOE;
+			case 5 -> Items.WOODEN_PICKAXE;
 			case 1 -> Items.STONE_SHOVEL;
 			case 2 -> Items.WOODEN_AXE;
 			case 3 -> Items.STONE_AXE;
@@ -712,6 +784,7 @@ public final class ZombieHordes {
 	/** {@code mob} becomes one of a horde: the tag, the danger's extra health and harm, and it'll swim. */
 	private static void join(Mob mob, float danger) {
 		mob.addTag(TAG);
+		HordeKinds.marching(mob, true);
 		mob.getNavigation().setCanFloat(true);
 		DoorPounding.enlist(mob);
 		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, DANGER_HEALTH * danger);
@@ -759,6 +832,7 @@ public final class ZombieHordes {
 				loot(level, m, tier, random);
 			}
 		}
+		HordeKinds.assign(horde, random);
 	}
 
 	private static @Nullable Mob nextOf(Iterator<Mob> it, Class<?> kind) {
@@ -903,7 +977,10 @@ public final class ZombieHordes {
 			}
 			if (over) {
 				// sunrise, or it's had its night: ordinary monsters again (the Reaper's host is taken back)
-				horde.members.forEach(m -> m.removeTag(TAG));
+				horde.members.forEach(m -> {
+					m.removeTag(TAG);
+					HordeKinds.marching(m, false);
+				});
 				if (horde.kind == Kind.REAPED) {
 					horde.members.forEach(m -> takeBack(level, m));
 					ReapedHost.scrap(level, horde.engine);
@@ -937,7 +1014,7 @@ public final class ZombieHordes {
 			if (fight != null) {
 				UUID who = fight instanceof ServerPlayer p ? p.getUUID() : null;
 				for (Mob m : horde.members) {
-					if (m.getTarget() == null) {
+					if (m.getTarget() == null && !HordeKinds.scout(m)) {
 						steer(m, fight.position(), who, FIGHT_LOUDNESS);
 					}
 				}
@@ -948,7 +1025,8 @@ public final class ZombieHordes {
 				horde.goal = horde.war;
 			} else
 			// the one they came for, while they're near enough (a hit squad: anywhere here); lost, it wanders on
-			if (hunted != null && (horde.kind == Kind.SQUAD || hunted.position().distanceTo(centre) < TRACK_RANGE)) {
+			if (hunted != null && (horde.kind == Kind.SQUAD || hunted.position().distanceTo(centre) < TRACK_RANGE
+				|| level.getGameTime() - horde.howled < HordeKinds.HOWL_TRACK)) {
 				horde.goal = hunted.position();
 			} else if (horde.goal.distanceTo(centre) < 6.0) {
 				RandomSource random = level.getRandom();
@@ -963,6 +1041,7 @@ public final class ZombieHordes {
 						break;
 					}
 					stray.addTag(TAG);
+					HordeKinds.marching(stray, true);
 					stray.getNavigation().setCanFloat(true);
 					horde.members.add(stray);
 				}
@@ -972,9 +1051,12 @@ public final class ZombieHordes {
 			}
 			for (Mob m : horde.members) {
 				if (m.getTarget() == null && !ReapedHost.crews(horde.engine, m)) {
-					// each keeps its own place in the crowd
+					// each keeps its own place in the crowd; a scout ranges ahead
 					int h = m.getUUID().hashCode();
-					Vec3 spot = horde.goal.add(((h & 7) - 3.5) * 0.8, 0.0, (((h >> 3) & 7) - 3.5) * 0.8);
+					Vec3 spot = HordeKinds.scoutSpot(m, hunted);
+					if (spot == null) {
+						spot = horde.goal.add(((h & 7) - 3.5) * 0.8, 0.0, (((h >> 3) & 7) - 3.5) * 0.8);
+					}
 					steer(m, spot, null, MARCH_LOUDNESS);
 				}
 			}

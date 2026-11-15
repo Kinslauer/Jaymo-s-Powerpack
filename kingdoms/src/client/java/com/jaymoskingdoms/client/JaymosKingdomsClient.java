@@ -118,6 +118,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HandshakePose.register();
 		// a caster's hands at their work
 		CastPose.register();
+		// a horde's dead: how they move (HordeKinds)
+		HordePoses.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
 		ShackleTether.register();

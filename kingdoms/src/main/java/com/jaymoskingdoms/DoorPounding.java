@@ -50,7 +50,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * A horde ({@link ZombieHordes}) goes through doors easily (Andy): every blow any of it lands counts, a wooden door gives
  * after {@link #HORDE_WOOD_HITS} and an iron or copper one after {@link #HORDE_STURDY_HITS}; locked, after
- * {@link #HORDE_LOCKED_WOOD_HITS} and {@link #HORDE_LOCKED_STURDY_HITS}. Its skeletons and illagers pound too, and it beats on a door in the way of where it's
+ * {@link #HORDE_LOCKED_WOOD_HITS} and {@link #HORDE_LOCKED_STURDY_HITS} (a brute's blow counts as several,
+ * {@link HordeKinds#BRUTE_DOOR}). Its skeletons and illagers pound too, and it beats on a door in the way of where it's
  * marching, not only of someone it's already after.
  */
 final class DoorPounding {
@@ -225,10 +226,14 @@ final class DoorPounding {
 		if (horde && blow) {
 			// a horde's every blow counts: so many hits and it gives
 			int hits = locked ? (sturdy ? HORDE_LOCKED_STURDY_HITS : HORDE_LOCKED_WOOD_HITS) : (sturdy ? HORDE_STURDY_HITS : HORDE_WOOD_HITS);
-			d.progress += need / hits;
+			d.progress += need / hits * HordeKinds.doorBlows(mob);
 		}
 		if (blow) {
 			mob.swingForAttack(mob.getUsedItemHand());
+			if (horde) {
+				// it puts its shoulder into it (HordePoses)
+				HordeKinds.act(mob, HordeKinds.SHOULDER);
+			}
 			level.levelEvent(sturdy ? 1020 : 1019, lower, 0);
 			Vec3 face = Vec3.atCenterOf(lower).add(mob.position().subtract(Vec3.atCenterOf(lower)).multiply(0.4, 0.0, 0.4));
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), face.x, lower.getY() + 1.0, face.z, 8, 0.2, 0.6, 0.2, 0.05);
