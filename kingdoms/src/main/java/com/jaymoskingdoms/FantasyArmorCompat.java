@@ -49,8 +49,8 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * armourer of a realm that keeps the Lantern Warden, by one sworn to him.</li>
  * <li><b>Dawnwatch plate</b> ({@link #DAWNWATCH}): the Crowned Sun's realms' armourers sell it to his sworn at high favour
  * ({@link #DAWNWATCH_TIER}).</li>
- * <li><b>Back to back</b> ({@link #TWINNED}): two who each wear at least {@link #TWIN_HALF} of its pieces and use a shrine
- * side by side ({@link #TWIN_SWEAR} blocks apart) are sworn to each other ({@link #SWORN}); while both have their half on
+ * <li><b>Back to back</b> ({@link #TWINNED}): two who each wear at least {@link #TWIN_HALF} of its pieces and each use a
+ * shrine they both stand at ({@link #TWIN_SWEAR} blocks of it), one after the other, are sworn to each other ({@link #SWORN}); while both have their half on
  * and are within {@link #TWIN_RANGE} blocks, {@link #TWIN_SHARE} of each hit that lands on one is borne by the other.
  * One who swears another breaks the old oath. (A blow that kills outright isn't shared.)</li>
  * </ul>
@@ -89,6 +89,8 @@ public final class FantasyArmorCompat {
 	/** Back to back: the pieces each must wear, how near the two must stand at the shrine and stay, and the share of a hit the other bears. */
 	static final int TWIN_HALF = 2;
 	static final double TWIN_SWEAR = 4.0, TWIN_RANGE = 16.0;
+	/** How long the first to use the shrine waits for the other's hand (ticks). */
+	static final long TWIN_WAIT = 200;
 	static final float TWIN_SHARE = 0.25F;
 	/** On a player: the one they swore back to back with at a shrine. Saved, kept through death. */
 	static final AttachmentType<UUID> SWORN = AttachmentRegistry.create(JaymosKingdoms.id("twinned_sworn"),
@@ -143,25 +145,51 @@ public final class FantasyArmorCompat {
 	}
 
 	/**
-	 * (from {@link Shrine}, {@code player} using one with an empty hand) Back to back: in their half of the paired harness,
-	 * beside another in theirs, the two are sworn to each other. True if they were (the shrine does nothing else then).
+	 * (from {@link Shrine}, {@code player} using one with an empty hand) Back to back: one in their half of the paired
+	 * harness uses the shrine with another in theirs at it too ({@link #TWIN_SWEAR} blocks of it), and that one uses it
+	 * after them within {@link #TWIN_WAIT} ticks: the two are sworn to each other. True if this use was part of the oath
+	 * (the shrine does nothing else then); alone at it, they pray as anyone does.
 	 */
 	static boolean swear(ServerPlayer player, BlockPos shrine) {
-		if (!LOADED || worn(player, TWINNED) < TWIN_HALF) {
+		if (!LOADED || worn(player, TWINNED) < TWIN_HALF || player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(shrine)) > TWIN_SWEAR * TWIN_SWEAR) {
 			return false;
 		}
+		long now = player.level().getGameTime();
+		ServerPlayer first = null, beside = null;
 		for (ServerPlayer other : player.level().players()) {
-			if (other != player && !other.isSpectator() && worn(other, TWINNED) >= TWIN_HALF
-				&& other.distanceToSqr(player) < TWIN_SWEAR * TWIN_SWEAR && !player.getUUID().equals(other.getAttached(SWORN))) {
-				player.setAttached(SWORN, other.getUUID());
-				other.setAttached(SWORN, player.getUUID());
-				player.level().playSound(null, shrine, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
-				player.level().playSound(null, shrine, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.6F, 1.2F);
-				return true;
+			if (other == player || other.isSpectator() || worn(other, TWINNED) < TWIN_HALF
+				|| other.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(shrine)) > TWIN_SWEAR * TWIN_SWEAR) {
+				continue;
 			}
+			Offer offer = OFFERS.get(other.getUUID());
+			if (offer != null && offer.shrine().equals(shrine) && now - offer.at() <= TWIN_WAIT) {
+				first = other;
+			}
+			beside = beside == null || other.distanceToSqr(player) < beside.distanceToSqr(player) ? other : beside;
 		}
-		return false;
+		if (first != null) {
+			// the second of the two: sworn
+			OFFERS.remove(first.getUUID());
+			player.setAttached(SWORN, first.getUUID());
+			first.setAttached(SWORN, player.getUUID());
+			player.level().playSound(null, shrine, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
+			player.level().playSound(null, shrine, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.6F, 1.2F);
+			return true;
+		}
+		if (beside == null) {
+			return false;
+		}
+		// the first of the two: it waits on the other's hand
+		OFFERS.put(player.getUUID(), new Offer(shrine.immutable(), now));
+		player.level().playSound(null, shrine, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 0.9F);
+		return true;
 	}
+
+	/** One who has used a shrine to swear back to back, waiting on the other. */
+	private record Offer(BlockPos shrine, long at) {
+	}
+
+	private static final java.util.Map<UUID, Offer> OFFERS = new java.util.HashMap<>();
 
 	/** {@code e} took {@code taken}: if they're sworn back to back and both have their half on, near, the other bears a share. */
 	private static void bear(LivingEntity e, float taken) {
