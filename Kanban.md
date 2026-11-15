@@ -8,11 +8,11 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · ☀️ Apollo · claimed
 
 
 ## In review
