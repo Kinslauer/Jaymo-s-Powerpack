@@ -102,8 +102,8 @@ public final class Whalers {
 	/** Cutting in: a stroke every this many ticks, the carcass found within this of her. */
 	static final int STROKE_EVERY = 24;
 	static final double CARCASS_NEAR = 36.0;
-	/** Whales to a voyage. */
-	static final int WHALES = 2;
+	/** Whales to a voyage; (Andy, 2026-11-15) a whaleship, with her hold and her second tryworks, takes this many. */
+	static final int WHALES = 2, WHALESHIP_WHALES = 4;
 	/** Her tryworks: this many blubber to a bottle of oil, every this many ticks. */
 	static final int TRY_BLUBBER = 2, TRY_EVERY = 160;
 	/** Her whaleboats: lowered for a whale this near (blocks), this many, each pulling this hard (a tick) and turning this fast (degrees a tick). */
@@ -130,8 +130,8 @@ public final class Whalers {
 	static final double WORKS_FORWARD = 0.25;
 	/** Her complement besides her captain. */
 	static final int HANDS = 5;
-	/** What a whaler is: a big cargo hull, with room to haul and cut in. */
-	static final Fleet.Rig RIG = Fleet.Rig.CARGO_SHIP;
+	/** What a whaler is: our whaleship, with room to haul, cut in and try out for the far grounds. */
+	static final Fleet.Rig RIG = Fleet.Rig.WHALESHIP;
 	/** A whaler not seen (out of any player's reach) this long has made her voyage unseen; given up for lost after this long out. */
 	static final long UNSEEN = 48000L, FORGET = 24000L * 6;
 	/** A catch's worth to her realm (silver): each bottle of oil, lump of ambergris, bone, and stack of meat. */
@@ -533,7 +533,7 @@ public final class Whalers {
 			JaymosKingdoms.LOGGER.info("{}'s whaler was lost unseen {} steps out", f.name(), v.far);
 			return;
 		}
-		int whales = Math.max(v.whales, 1 + random.nextInt(WHALES));
+		int whales = Math.max(v.whales, 1 + random.nextInt(RIG == Fleet.Rig.WHALESHIP ? WHALESHIP_WHALES : WHALES));
 		v.add("oil", UNSEEN_OIL * whales);
 		v.add("meat", UNSEEN_MEAT * whales);
 		v.add("bone", UNSEEN_BONE * whales);
@@ -776,8 +776,8 @@ public final class Whalers {
 			// stripped and sunk (or lost): her anchor weighed, and her tryworks burn on as she hunts the next or sails home
 			v.whales++;
 			v.huntFrom = level.getGameTime();
-			crew.mode = v.whales >= WHALES ? "homeward" : "hunting";
-			crew.bound = v.whales >= WHALES ? crew.home : null;
+			crew.mode = v.whales >= room(ship, crew) ? "homeward" : "hunting";
+			crew.bound = v.whales >= room(ship, crew) ? crew.home : null;
 			done(level, ship, crew, v);
 			return hold(ship);
 		}
@@ -1193,15 +1193,27 @@ public final class Whalers {
 		if (level.getGameTime() % 10 != 0) {
 			return;
 		}
-		int i = works(ship, crew);
-		Hull hull = ship.hull();
-		if (i < 0 || hull == null) {
+		List<BlockPos> all = allWorks(ship, crew);
+		if (all.isEmpty()) {
 			// (no deck for them: rendered in her hold, as before)
 			if (v.get("blubber") >= TRY_BLUBBER && level.getGameTime() % TRY_EVERY == 0) {
 				v.add("blubber", -TRY_BLUBBER);
 				v.add("oil", 1);
 				put(level.getServer(), crew.faction, v);
 			}
+			return;
+		}
+		// (a whaleship's two try-pots both burn)
+		for (BlockPos at : all) {
+			tryOut(level, ship, crew, v, at);
+		}
+	}
+
+	/** One of her tryworks (at {@code pos} in her frame) at work. */
+	private static void tryOut(ServerLevel level, Ship ship, Crew crew, Voyage v, BlockPos pos) {
+		Hull hull = ship.hull();
+		int i = hull == null ? -1 : hull.at(pos.getX(), pos.getY(), pos.getZ());
+		if (i < 0 || !hull.pieces.get(i).blockState().is(Whaling.TRYWORKS)) {
 			return;
 		}
 		Ship.Piece p = hull.pieces.get(i);
@@ -1239,16 +1251,41 @@ public final class Whalers {
 		}
 	}
 
+	/** Where every tryworks aboard her is, in her frame (one put on her deck if she has none). */
+	private static List<BlockPos> allWorks(Ship ship, Crew crew) {
+		if (works(ship, crew) < 0) {
+			return List.of();
+		}
+		Hull h = ship.hull();
+		List<BlockPos> all = new ArrayList<>();
+		if (h != null) {
+			for (Ship.Piece p : h.pieces) {
+				if (p.blockState().is(Whaling.TRYWORKS)) {
+					all.add(new BlockPos(p.x(), p.y(), p.z()));
+				}
+			}
+		}
+		return all;
+	}
+
+	/** How many whales she takes before she turns for home: more with a second tryworks (a whaleship). */
+	static int room(Ship ship, Crew crew) {
+		return allWorks(ship, crew).size() >= 2 ? WHALESHIP_WHALES : WHALES;
+	}
+
 	/** (0.7.307) What's still in her tryworks' pots (blubber), taken out (she's home). */
 	private static int emptyWorks(Ship ship, Crew crew) {
-		int i = works(ship, crew);
-		Hull h = ship.hull();
-		if (i < 0 || h == null) {
-			return 0;
+		int in = 0;
+		for (BlockPos at : allWorks(ship, crew)) {
+			Hull h = ship.hull();
+			int i = h == null ? -1 : h.at(at.getX(), at.getY(), at.getZ());
+			if (i < 0) {
+				continue;
+			}
+			Ship.Piece p = h.pieces.get(i);
+			in += p.blockState().getValue(TryworksBlock.BLUBBER);
+			ship.setPieceAt(p.x(), p.y(), p.z(), p.blockState().setValue(TryworksBlock.BLUBBER, 0).setValue(TryworksBlock.LIT, false));
 		}
-		Ship.Piece p = h.pieces.get(i);
-		int in = p.blockState().getValue(TryworksBlock.BLUBBER);
-		ship.setPieceAt(p.x(), p.y(), p.z(), p.blockState().setValue(TryworksBlock.BLUBBER, 0).setValue(TryworksBlock.LIT, false));
 		return in;
 	}
 

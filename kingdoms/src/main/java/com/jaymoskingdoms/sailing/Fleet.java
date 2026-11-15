@@ -45,7 +45,13 @@ public final class Fleet {
 		GALLEON(JakiShips.Design.GALLEON), DRAKKAR(JakiShips.Design.DRAKKAR), WAR_TRIREME(JakiShips.Design.WAR_TRIREME),
 		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER),
 		/** A realm's fishing smack ({@code Fishers}), drawn as her kit is ({@link ShipKits.Kind#FISHING_SMACK}). */
-		SMACK;
+		SMACK,
+		/**
+		 * A realm's whaleship (Andy, 2026-11-15: "a dedicated large whaleship ... lots of room for storage and tryworks for
+		 * the larger oceans"): our own, long and beamy, three masts, a hold lined with chests below her deck, and two
+		 * tryworks amidships ({@link #WHALESHIP_WORKS}).
+		 */
+		WHALESHIP;
 
 		/** Her design, if she's one of Jaki's (null: one of ours, drawn as the kits are). */
 		final JakiShips.@Nullable Design jaki;
@@ -85,6 +91,11 @@ public final class Fleet {
 
 	// ---- the designs ----
 
+	/** The whaleship: her hull (half length, half beam), her deck's layer, her masts (row, height), her tryworks' rows, her hold's chests every this many rows. */
+	static final int WHALESHIP_HALF_LENGTH = 21, WHALESHIP_HALF_BEAM = 5, WHALESHIP_DECK = 5, WHALESHIP_CHEST_EVERY = 2;
+	static final int[][] WHALESHIP_MASTS = {{13, 16}, {1, 19}, {-11, 14}};
+	public static final int[] WHALESHIP_WORKS = {5, 8};
+
 	/** A design's cells, as the kits draw them (x across, y up from her keel, z along her, bow +z). */
 	static List<ShipKits.Cell> cells(Rig rig) {
 		List<ShipKits.Cell> cells = new ArrayList<>();
@@ -99,6 +110,7 @@ public final class Fleet {
 				}
 				cells.add(new ShipKits.Cell(-1, 1, 2, ShipFrameBlock.Want.CHEST, Direction.NORTH));
 			}
+			case WHALESHIP -> whaleship(cells);
 			case FRIGATE -> {
 				ShipKits.Shape s = new ShipKits.Shape(11, 3, 3, 3, 3, true);
 				LongOpenHashSet holes = new LongOpenHashSet();
@@ -118,6 +130,51 @@ public final class Fleet {
 			}
 		}
 		return cells;
+	}
+
+	/**
+	 * The whaleship's cells: a deep hull with two hatches down to her hold (steps of planking and a chest), the hold
+	 * lined both sides with chests, sweeps fore and aft, three masts, the helm aft. Her tryworks are added with her
+	 * blocks ({@link #parts}).
+	 */
+	private static void whaleship(List<ShipKits.Cell> cells) {
+		int deck = WHALESHIP_DECK;
+		ShipKits.Shape s = new ShipKits.Shape(WHALESHIP_HALF_LENGTH, WHALESHIP_HALF_BEAM, 5, deck, deck, true);
+		LongOpenHashSet holes = new LongOpenHashSet();
+		int[] hatches = {-8, WHALESHIP_HALF_LENGTH - 6};
+		for (int z : hatches) {
+			for (int x : new int[] {-1, 1}) {
+				holes.add(BlockPos.asLong(x, deck, z));
+				holes.add(BlockPos.asLong(x, deck, z + 1));
+			}
+		}
+		ShipKits.hull(cells, s, holes);
+		// each hatch's steps up from her hold, forward: planks one up and one on, a chest last, then her deck
+		for (int z : hatches) {
+			for (int x : new int[] {-1, 1}) {
+				for (int k = 1; k <= deck - 2; k++) {
+					cells.add(new ShipKits.Cell(x, k, z - (deck - 2) + k, ShipFrameBlock.Want.HULL, Direction.NORTH));
+				}
+				cells.add(new ShipKits.Cell(x, deck - 1, z + 1, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+			}
+		}
+		// her hold: chests down both sides, a row apart so none join
+		for (int z = -WHALESHIP_HALF_LENGTH + 4; z <= WHALESHIP_HALF_LENGTH - 7; z += WHALESHIP_CHEST_EVERY) {
+			if (Math.abs(z - hatches[0]) <= 2 || Math.abs(z - hatches[1]) <= 2) {
+				continue;
+			}
+			int w = s.width(1, z) - 1;
+			if (w >= 2) {
+				cells.add(new ShipKits.Cell(w, 1, z, ShipFrameBlock.Want.CHEST, Direction.WEST));
+				cells.add(new ShipKits.Cell(-w, 1, z, ShipFrameBlock.Want.CHEST, Direction.EAST));
+			}
+		}
+		int sweeps = WHALESHIP_HALF_LENGTH - 4;
+		ShipKits.rail(cells, s, Map.of(-sweeps, ShipFrameBlock.Want.OAR, sweeps, ShipFrameBlock.Want.OAR));
+		for (int[] m : WHALESHIP_MASTS) {
+			ShipKits.mast(cells, s, m[0], m[1]);
+		}
+		cells.add(new ShipKits.Cell(0, deck + 1, -WHALESHIP_HALF_LENGTH + 2, ShipFrameBlock.Want.HELM, Direction.SOUTH));
 	}
 
 	/** One block of a ship as she's built: where (in her frame), what, and (0.7.112) the loot her barrel's filled with (null: none). */
@@ -152,6 +209,13 @@ public final class Fleet {
 				mastZ = c.z();
 			}
 			parts.add(new Part(new BlockPos(c.x(), c.y(), c.z()), state));
+		}
+		if (rig == Rig.WHALESHIP) {
+			// her tryworks, amidships on her centreline
+			for (int z : WHALESHIP_WORKS) {
+				parts.add(new Part(new BlockPos(0, WHALESHIP_DECK + 1, z),
+					com.jaymoskingdoms.whaling.Whaling.TRYWORKS.defaultBlockState().setValue(com.jaymoskingdoms.whaling.TryworksBlock.FACING, Direction.SOUTH)));
+			}
 		}
 		// her colours: three cells aft of the masthead, two deep, the emblem in the middle of the upper row
 		for (int dz = 1; dz <= 3; dz++) {

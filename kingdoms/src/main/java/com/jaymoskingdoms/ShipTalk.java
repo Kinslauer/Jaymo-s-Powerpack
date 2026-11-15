@@ -192,7 +192,7 @@ public final class ShipTalk {
 		}
 		return switch (ship.crew.mode) {
 			case "outward" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.outward");
-			case "hunting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.hunting", v.whales, Whalers.WHALES);
+			case "hunting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.hunting", v.whales, Whalers.room(ship, ship.crew));
 			case "cutting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.cutting");
 			default -> Component.translatable("talk.jaymoskingdoms.whaler.stands.homeward", v.whales);
 		};

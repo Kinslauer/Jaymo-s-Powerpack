@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * warship or a whaler, he lays her down on the water by the pier end ({@link Fleet.Slip}): her keel first, then up
  * through her hull and decks, her masts and rigging as they come, her helm last. He walks the work with his axe and puts
  * each block in by hand, a few to a beat, in daylight and at peace, so the whole harbour watches her grow over the days.
- * Done, he gives the sea a fish over her bow and she's launched with her crew aboard, the realm's own.
+ * Done, he tosses an offering to his patron over her bow and she's launched with her crew aboard, the realm's own.
  * <ul>
  * <li>A realm goes whaling ({@link Whalers}) only once its yard has launched a whaler; one lost (sunk, or never home)
  * is laid down again. A life story's whaling start still finds its whaler afloat.</li>
@@ -460,16 +460,32 @@ public final class Shipyards {
 			level.getGameTime() - y.begun());
 	}
 
-	/** (Shipwrights keep the Deep Mother: nothing of theirs goes afloat till something's gone back to her.) A fish over the side. */
+	/**
+	 * (Every shipwright keeps a patron of his own, and nothing of his goes afloat till something it wants has gone over her
+	 * bow.) One of his patron's offerings tossed over the side: a fish for the Deep Mother, an ingot for the Anvil-Father,
+	 * and so on; a cod from one who keeps none.
+	 */
 	private static void offering(ServerLevel level, PathfinderMob wright, Entity ship) {
 		Vec3 from = wright.getEyePosition();
 		Vec3 to = ship.position();
 		Vec3 toss = to.subtract(from).normalize().scale(0.45).add(0.0, 0.3, 0.0);
-		ItemEntity fish = new ItemEntity(level, from.x, from.y, from.z, new ItemStack(Items.COD), toss.x, toss.y, toss.z);
+		ItemEntity fish = new ItemEntity(level, from.x, from.y, from.z, gift(level, wright), toss.x, toss.y, toss.z);
 		fish.makeFakeItem();
 		level.addFreshEntity(fish);
 		wright.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, wright.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, 1.2F, 0.7F);
+	}
+
+	private static ItemStack gift(ServerLevel level, PathfinderMob wright) {
+		Patron p = Faiths.of(wright);
+		if (p != null) {
+			java.util.List<net.minecraft.world.item.Item> wants = new java.util.ArrayList<>();
+			net.minecraft.core.registries.BuiltInRegistries.ITEM.getTagOrEmpty(p.offerings).forEach(h -> wants.add(h.value()));
+			if (!wants.isEmpty()) {
+				return new ItemStack(wants.get(level.getRandom().nextInt(wants.size())));
+			}
+		}
+		return new ItemStack(Items.COD);
 	}
 
 	// ---- for the crews' launch ---------------------------------------------------------------------------------------
