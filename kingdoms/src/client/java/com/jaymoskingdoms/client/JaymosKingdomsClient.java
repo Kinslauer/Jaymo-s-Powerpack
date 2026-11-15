@@ -315,6 +315,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SeaSwell.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
+		// the Last Bell's map and visions, and the great disasters' sky
+		com.jaymoskingdoms.client.disasters.LastBellClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();

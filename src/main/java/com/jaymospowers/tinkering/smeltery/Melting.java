@@ -252,6 +252,11 @@ public final class Melting {
 		add(Molten.STAR_METAL, Molten.INGOT, ore);
 	}
 
+	/** (medieval picks, nd-meteor) A lump of a great star's iron heart: two ingots' worth of star metal. */
+	public static void meteoricIron(Item lump) {
+		add(Molten.STAR_METAL, Molten.INGOT * 2, lump);
+	}
+
 	/** (GTNH picks) A dust ground in the mortar ({@code ground/StoneAge}): {@code amount} of the liquid, melting fast. */
 	public static void dusts(Molten molten, int amount, Item... dusts) {
 		add(molten, amount, dusts);

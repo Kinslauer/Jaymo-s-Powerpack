@@ -119,7 +119,7 @@ public final class Instruments {
 
 		@Override
 		protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-			boolean near = near(pos);
+			boolean near = near(level, pos);
 			if (near != state.getValue(POWERED)) {
 				level.setBlock(pos, state.setValue(POWERED, near), Block.UPDATE_ALL);
 			}
@@ -130,14 +130,18 @@ public final class Instruments {
 			level.scheduleTick(pos, this, BELL_EVERY);
 		}
 
-		private static boolean near(BlockPos pos) {
+		/** A tornado near; or the great disasters (nd-signs): their signs on the land, a mountain burning, a wave coming
+		 * in, a hurricane overhead, the world's ending. */
+		private static boolean near(ServerLevel level, BlockPos pos) {
 			for (Tornado t : Tornadoes.SERVER) {
 				double dx = t.x - pos.getX(), dz = t.z - pos.getZ();
 				if (t.size > Tornado.DUST_DEVIL && dx * dx + dz * dz < BELL_RANGE * BELL_RANGE) {
 					return true;
 				}
 			}
-			return false;
+			double x = pos.getX() + 0.5, z = pos.getZ() + 0.5;
+			return level.dimension() == Level.OVERWORLD && (Signs.at(x, z) || Volcanoes.erupting(x, z, BELL_RANGE)
+				|| Tsunamis.coming(x, z, BELL_RANGE) || Hurricanes.over(x, z) || Doomsday.active(level));
 		}
 
 		@Override
