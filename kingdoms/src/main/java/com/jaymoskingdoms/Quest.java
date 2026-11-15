@@ -75,6 +75,11 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * pos (other: them, otherName: their name and crime) to be brought back alive, hogtied or downed, to whoever posted it.
 	 */
 	public static final int HOSTAGE = 28, CAPTURE = 29;
+	/**
+	 * Outbreak work ({@link QuestJobs}, {@link BlightSpread}): count of the town at pos's sick to cure of the Hollow's blight;
+	 * the town's blighted dead to burn before they rise (count: how many, otherName: their bodies' ids).
+	 */
+	public static final int CURE_SICK = 30, BURN_DEAD = 31;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

@@ -96,7 +96,14 @@ final class PackResourcePacks {
 		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
-			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
+			"fea54f680dc959e122189b2005d11adebcd18b5b", true),
+		// "Tissou's Zombie Pack" (by Tissou, CurseForge 312822, file 4750306; free to use with credit, so fetched unchanged,
+		// never copied): over 1600 modern-dress zombie skins through Entity Texture Features. Andy (2026-11-15): "All can go
+		// into the future". Jaymo's Kingdoms keeps it on Chrono's future dead only (TissouPack): the present's dead wear our
+		// own skins, and the textures it repaints outright are read back from the game's own. Format 15 (1.20.1).
+		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies-v1", "TZP_", "TZP_1.20.1_2.7.zip",
+			"https://mediafilez.forgecdn.net/files/4750/306/TZP_1.20.1_2.7.zip",
+			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true));
 
 	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
 	static final List<Pack> OPTIONAL = List.of(

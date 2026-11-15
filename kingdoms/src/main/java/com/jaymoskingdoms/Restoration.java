@@ -100,6 +100,8 @@ public final class Restoration {
 	// ---- the healers ----
 	/** (0.7.498) A healer's prices (emeralds' worth, asked in the town's coin: {@link Money#text}): mending your wounds, a Scroll of Mending, a Scroll of Restoration. */
 	static final int HEAL_EMERALDS = 3, MENDING_SCROLL_EMERALDS = 4, RESTORATION_SCROLL_EMERALDS = 24;
+	/** Burning the Hollow's blight out of someone (Andy's pick "Temple healers treat it"). */
+	static final int BLIGHT_CURE_EMERALDS = 12;
 	/** At or over this a court wizard's realm mends you free and sets your bones; at or over the next he'll sell a Restoration. */
 	static final int FRIEND_REP = 100, HONOURED_REP = 400;
 	/** One Scroll of Restoration a week from a court wizard (ticks). */
@@ -630,7 +632,15 @@ public final class Restoration {
 		if (ForbiddenArts.known(player)) {
 			return out;
 		}
+		// one who minds the Hollow turns the Hollow away (Andy's pick: the righteous temples)
+		if (Heritage.is(player, Heritage.Kind.HOLLOW) && !Prejudice.masked(player) && Prejudice.minds(healer, player) > 0.0F) {
+			return out;
+		}
 		out.add(wizard && friendOfRealm(player, healer) ? "heal_free" : "heal");
+		// the Hollow's blight burned out, for those who carry it
+		if (HollowBlight.blighted(player)) {
+			out.add("blight");
+		}
 		// (0.7.462) and the full treatment, for a price that grows with the injuries (Healing)
 		out.add("treatment");
 		out.add("scroll_mending");
@@ -646,6 +656,7 @@ public final class Restoration {
 	static Component optionLine(ServerPlayer player, String kind) {
 		return switch (kind) {
 			case "treatment" -> Component.translatable("talk.jaymoskingdoms.healer.treatment", Money.text(player, Money.worth(Healing.treatmentPrice(player))));
+			case "blight" -> Component.translatable("talk.jaymoskingdoms.healer.blight", Money.text(player, Money.worth(BLIGHT_CURE_EMERALDS)));
 			case "heal" -> Component.translatable("talk.jaymoskingdoms.healer.heal", Money.text(player, Money.worth(HEAL_EMERALDS)));
 			case "heal_free" -> Component.translatable("talk.jaymoskingdoms.healer.heal_free");
 			case "scroll_mending" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_mending", Money.text(player, Money.worth(MENDING_SCROLL_EMERALDS)));
@@ -660,6 +671,7 @@ public final class Restoration {
 			case "heal" -> Money.canPay(player, Money.worth(HEAL_EMERALDS)) && hurt(player);
 			case "treatment" -> Healing.needsTreatment(player) && Money.canPay(player, Money.worth(Healing.treatmentPrice(player)));
 			case "heal_free" -> hurt(player);
+			case "blight" -> HollowBlight.blighted(player) && Money.canPay(player, Money.worth(BLIGHT_CURE_EMERALDS));
 			case "scroll_mending" -> Money.canPay(player, Money.worth(MENDING_SCROLL_EMERALDS));
 			case "scroll_restoration" -> Money.canPay(player, Money.worth(RESTORATION_SCROLL_EMERALDS)) && restorationDue(player);
 			default -> !ClassTeachers.handles(kind) || ClassTeachers.open(player, kind);
@@ -681,7 +693,8 @@ public final class Restoration {
 		}
 		OFFERS.put(player.getUUID(), new Offer(healer.getId(), kinds));
 		ServerPlayNetworking.send(player, new TalkNet.Ask(healer.getId(), healer.getDisplayName(),
-			Component.translatable(ForbiddenArts.known(player) ? "talk.jaymoskingdoms.healer.refuse" : "talk.jaymoskingdoms.healer.ask"), options, enabled));
+			Component.translatable(ForbiddenArts.known(player) ? "talk.jaymoskingdoms.healer.refuse"
+				: kinds.size() == 1 ? "talk.jaymoskingdoms.healer.refuse_hollow" : "talk.jaymoskingdoms.healer.ask"), options, enabled));
 	}
 
 	/** An answer to a cleric's offer; false when it wasn't one. */
@@ -706,7 +719,7 @@ public final class Restoration {
 			return ClassTeachers.serve(player, healer, kind);
 		}
 		if (!optionOpen(player, kind)) {
-			return kind.startsWith("heal") || kind.startsWith("scroll_") || kind.equals("treatment");
+			return kind.startsWith("heal") || kind.startsWith("scroll_") || kind.equals("treatment") || kind.equals("blight");
 		}
 		switch (kind) {
 			case "heal", "heal_free" -> {
@@ -735,6 +748,13 @@ public final class Restoration {
 				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 1.3F);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.treated"), Speech.GOLD);
+			}
+			case "blight" -> {
+				Money.charge(player, Money.worth(BLIGHT_CURE_EMERALDS));
+				HollowBlight.cure(player);
+				beam(level, healer, player, GOLD);
+				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD);
+				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.blight_done"), Speech.GOLD);
 			}
 			case "scroll_mending" -> {
 				Money.charge(player, Money.worth(MENDING_SCROLL_EMERALDS));

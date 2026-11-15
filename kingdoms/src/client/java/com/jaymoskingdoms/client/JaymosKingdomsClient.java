@@ -121,6 +121,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HandshakePose.register();
 		// a caster's hands at their work
 		CastPose.register();
+		// a horde's dead: how they move (HordeKinds)
+		HordePoses.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
 		ShackleTether.register();
@@ -271,6 +273,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VerdantLook.register();
 		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands
 		EmberLook.register();
+		BlightLook.register();
 		ValorLook.register();
 		ValorWingsLook.register();
 		// 0.7.79: every other heritage's look (Heartlander and Warrior-born aside)
@@ -291,6 +294,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
 		DarkEyes.register();
+		// the old dead's eyes that glow at night, and Tissou's Zombie Pack kept to the future
+		DeadEyes.register();
+		TissouPack.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
 		FrostTechLayer.register();

@@ -619,6 +619,12 @@ def packResourcePacks = [
 	// Canoe Boats (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): every boat becomes a canoe,
 	// through Entity Model Features and Entity Texture Features (both already in the pack). Made for 26.3.
 	[cf: [1086847, 8944107], file: "Canoe boats 26.3.zip"],
+	// Tissou's Zombie Pack (by Tissou; free to use with credit, so shipped by id only, credit to its author): over 1600
+	// modern zombie skins (and husks' and drowned's) through Entity Texture Features' random textures, plus its own zombie
+	// sounds. Its file says 1.20.1. For Chrono's future only (Andy: "All can go into the future"): Kingdoms draws only a
+	// share of the future's grown zombies with the game's zombie texture for it to dress, and keeps it off the present's
+	// dead (client/TissouPack, client/OldDeadSkins).
+	[cf: [312822, 4750306], file: "TZP_1.20.1_2.7.zip"],
 	// (Motion patch 6) Fresh Animations itself (by FreshLX; modpacks may include it, never redistribute it) isn't listed
 	// here yet: its CurseForge file id couldn't be looked up from the cloud, so client/PackResourcePacks fetches it from
 	// Modrinth on first launch. Add [cf: [<project>, <file>], file: "FreshAnimations_v1.11.1_26.1+.zip"] once known.

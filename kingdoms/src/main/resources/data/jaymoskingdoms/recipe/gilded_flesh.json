@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ggg",
+    "gfg",
+    "ggg"
+  ],
+  "key": {
+    "g": "minecraft:gold_nugget",
+    "f": "jaymoskingdoms:seared_flesh"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:gilded_flesh"
+  }
+}

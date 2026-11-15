@@ -131,6 +131,7 @@ public final class Monsters {
 		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 		// the witches' mud golems at their huts
 		WitchHuts.register();
+		WitchThralls.register();
 		// the Gaunt of the snowy woods, its heart and the curse of the hungry
 		com.jaymoskingdoms.hunger.Hunger.register();
 

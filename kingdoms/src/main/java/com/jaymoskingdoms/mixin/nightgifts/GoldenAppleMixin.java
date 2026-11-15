@@ -21,6 +21,7 @@ abstract class GoldenAppleMixin {
 		if (!(entity instanceof ServerPlayer player)) {
 			return;
 		}
+		com.jaymoskingdoms.BlightCures.ate(player, self); // raw rotten flesh may carry the Hollow's blight
 		if (self.is(Items.GOLDEN_APPLE) || self.is(Items.ENCHANTED_GOLDEN_APPLE)) {
 			VampirePlayers.ateGold(player);
 			if (player.hasEffect(MobEffects.WEAKNESS)) {

@@ -120,7 +120,10 @@ public final class Recollections {
 		MERCY(3, 120, true, true, "%1$s had %2$s beaten, while about your trouble, and let them go.", "%3$s says %1$s had %2$s beaten and let them go."),
 		/** {@link HollowSighting}: saw them walking after death, one of the Hollow. */
 		SAW_TURNED(-3, 0, true, true, "You saw that %1$s had died and got up again, one of the Hollow: the walking dead.",
-			"%3$s saw that %1$s had died and got up again, one of the Hollow.");
+			"%3$s saw that %1$s had died and got up again, one of the Hollow."),
+		/** {@link BlightSpread}: cured them of the Hollow's blight before it turned them. */
+		CURED_BLIGHT(6, 240, true, true, "%1$s cured you of the Hollow's blight when it would have made you one of the dead.",
+			"%1$s cured %3$s of the Hollow's blight before it turned them.");
 
 		final int weight, days;
 		final boolean remark, tellable;

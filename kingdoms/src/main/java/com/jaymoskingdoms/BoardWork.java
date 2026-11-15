@@ -44,12 +44,12 @@ final class BoardWork {
 	/** What a job pays for each star, by kind (an emerald's worth each); hearts with the poster and the town's good name, for each star. */
 	private static final Map<String, Integer> PAY = Map.ofEntries(Map.entry("pack", 4), Map.entry("elite", 8), Map.entry("defend", 7), Map.entry("trek", 5),
 		Map.entry("incursion", 6), Map.entry("lamps", 3), Map.entry("build", 4), Map.entry("blast", 5), Map.entry("stash", 3), Map.entry("hostage", 7),
-		Map.entry("capture", 8));
+		Map.entry("capture", 8), Map.entry("cure_sick", 6), Map.entry("burn_dead", 4));
 	static final int HEARTS = 2, REPUTATION = 3;
 	/** The board level a kind is first posted at. */
 	private static final Map<String, Integer> FROM = Map.ofEntries(Map.entry("pack", 1), Map.entry("lamps", 1), Map.entry("build", 1), Map.entry("stash", 1),
 		Map.entry("trek", 1), Map.entry("blast", 2), Map.entry("incursion", 2), Map.entry("hostage", 2), Map.entry("capture", 2), Map.entry("elite", 3),
-		Map.entry("defend", 3));
+		Map.entry("defend", 3), Map.entry("cure_sick", 1), Map.entry("burn_dead", 1));
 	/** How far from the town its work lies: hunts and dens, cave-ins, stashes, building. */
 	static final int HUNT_NEAR = 140, HUNT_FAR = 320, BUILD_NEAR = 44, BUILD_FAR = 70;
 	/** An escort goes to a town at least this far off. */
@@ -57,7 +57,13 @@ final class BoardWork {
 	/** How many things a town held through the night has to say to the one who held it. */
 	static final int DEFEND_THANKS = 3;
 
-	private static final List<String> KINDS = List.of("pack", "elite", "defend", "trek", "incursion", "lamps", "build", "blast", "stash", "hostage", "capture");
+	private static final List<String> KINDS = List.of("pack", "elite", "defend", "trek", "incursion", "lamps", "build", "blast", "stash", "hostage", "capture",
+		"cure_sick", "burn_dead");
+	/** Outbreak work ({@link BlightSpread}): posted only while the town has sick, or blighted dead, and then before other work this often. */
+	private static final List<String> OUTBREAK = List.of("cure_sick", "burn_dead");
+	static final float OUTBREAK_FIRST = 0.7F;
+	/** The most sick (or dead) one outbreak job asks for. */
+	static final int OUTBREAK_MOST = 4;
 	/** What packs are made of; what an elite is; who comes at a town in the night. */
 	private static final List<String> PACKS = List.of("minecraft:wolf", "minecraft:spider", "minecraft:zombie", "minecraft:skeleton", "minecraft:pillager", "minecraft:husk", "minecraft:stray");
 	private static final List<String> ELITES = List.of("minecraft:vindicator", "minecraft:pillager", "minecraft:skeleton", "minecraft:zombie", "minecraft:spider", "minecraft:wolf", "minecraft:stray");
@@ -150,10 +156,19 @@ final class BoardWork {
 			return null;
 		}
 		int board = level(level, f);
+		// (an outbreak: the sick to cure, the dead to burn, ahead of anything else)
+		int sick = BlightSpread.sickIn(level, f).size(), dead = BlightSpread.deadIn(level, f).size();
+		for (String kind : OUTBREAK) {
+			int many = kind.equals("cure_sick") ? sick : dead;
+			if (many > 0 && up.stream().noneMatch(k -> TownNotices.is(k) && k.startsWith("town|work." + kind + ".")) && random.nextFloat() < OUTBREAK_FIRST) {
+				int stars = Math.clamp(1 + (many - 1) / 2 + (board >= ROOM_LEVEL ? 1 : 0), 1, 5);
+				return "town|work." + kind + "." + stars + "|" + poster.getStringUUID() + "|" + now;
+			}
+		}
 		List<String> free = new ArrayList<>();
 		for (String kind : KINDS) {
 			long same = up.stream().filter(k -> TownNotices.is(k) && k.startsWith("town|work." + kind + ".")).count();
-			if (FROM.get(kind) <= board && same < SAME_KIND
+			if (FROM.get(kind) <= board && same < SAME_KIND && !OUTBREAK.contains(kind)
 				&& (!kind.equals("trek") || Tales.nearest(level.getServer(), f.seat(), f, false) != null
 					&& Tales.nearest(level.getServer(), f.seat(), f, false).seat().distSqr(f.seat()) >= TREK_LEAST * TREK_LEAST)) {
 				free.add(kind);
@@ -288,6 +303,27 @@ final class BoardWork {
 				otherName = any(woman ? WOMEN : MEN, random) + "|" + kin;
 				count = 2;
 				pos = Tales.wild(level, seat, HUNT_NEAR + random.nextInt(HUNT_FAR - HUNT_NEAR), random);
+			}
+			case "cure_sick" -> {
+				// (the town's sick, as many as there are now, to be cured before they turn)
+				questKind = Quest.CURE_SICK;
+				target = "jaymoskingdoms:hollows_cure";
+				count = Math.clamp(BlightSpread.sickIn(level, f).size(), 1, OUTBREAK_MOST);
+			}
+			case "burn_dead" -> {
+				// (the town's blighted dead, lying where they fell: burned before the night they rise)
+				questKind = Quest.BURN_DEAD;
+				List<net.minecraft.world.entity.Entity> dead = BlightSpread.deadIn(level, f);
+				if (dead.isEmpty()) {
+					return false;
+				}
+				StringBuilder ids = new StringBuilder();
+				for (int i = 0; i < Math.min(dead.size(), OUTBREAK_MOST); i++) {
+					net.minecraft.core.BlockPos at = dead.get(i).blockPosition();
+					ids.append(dead.get(i).getStringUUID()).append('@').append(at.getX()).append(',').append(at.getY()).append(',').append(at.getZ()).append(';');
+				}
+				otherName = ids.toString();
+				count = Math.min(dead.size(), OUTBREAK_MOST);
 			}
 			case "capture" -> {
 				// (a named criminal, wanted alive)

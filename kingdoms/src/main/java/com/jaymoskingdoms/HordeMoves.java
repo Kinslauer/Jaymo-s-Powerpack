@@ -30,7 +30,9 @@ import net.minecraft.world.phys.Vec3;
  * water, and the dead in a horde never turn into drowned: {@code HordeZombieWaterMixin}).</li>
  * <li><b>Breaking through</b> ({@link #dig}): one that's stuck with somewhere to be beats at the block in its way and,
  * in time, breaks it (more of them at it, quicker). How hard a block the horde can break follows the danger, from
- * dirt and glass at first to obsidian at the very end ({@link #HARDNESS}). Doors are left to {@code DoorPounding};
+ * dirt and glass at first to obsidian at the very end ({@link #HARDNESS}). One holding the right tool for the block (a
+ * pick for stone, an axe for wood, a shovel for dirt) breaks it much quicker, the better the tool the quicker
+ * ({@link #TOOL_BASE}, {@link #TOOL_PER_SPEED}). Doors are left to {@code DoorPounding};
  * nothing that can't be broken by hand is touched; only with mob griefing on.</li>
  * </ul>
  */
@@ -47,6 +49,8 @@ final class HordeMoves {
 	static final int DIG_BASE = 40, DIG_PER_HARDNESS = 60;
 	/** The hardest block it can break by danger: below 0.2, 0.4, 0.6, 0.8, and above (dirt and glass ... obsidian). */
 	static final float[] HARDNESS = {0.6F, 2.0F, 3.0F, 6.0F, 50.0F};
+	/** With the right tool in hand the beating goes this many times quicker, plus this for each point of the tool's speed on the block, at most this. */
+	static final float TOOL_BASE = 1.5F, TOOL_PER_SPEED = 0.35F, TOOL_MAX = 4.5F;
 
 	/** Each member's place when it was last looked at, and when. */
 	private static final Map<Mob, Vec3> LAST = new WeakHashMap<>();
@@ -161,6 +165,11 @@ final class HordeMoves {
 		Map<BlockPos, Integer> work = WORK.computeIfAbsent(level, l -> new HashMap<>());
 		int done = work.merge(pick, DIG_EVERY, Integer::sum);
 		int need = DIG_BASE + (int) (state.getDestroySpeed(level, pick) * DIG_PER_HARDNESS);
+		float tool = mob.getMainHandItem().getDestroySpeed(state);
+		if (tool > 1.0F) {
+			// the right tool for it: a pick on stone, an axe on wood, a shovel on dirt
+			need = Math.max(DIG_EVERY, Math.round(need / Math.min(TOOL_MAX, TOOL_BASE + tool * TOOL_PER_SPEED)));
+		}
 		mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		mob.getLookControl().setLookAt(Vec3.atCenterOf(pick));
 		if (done % 20 < DIG_EVERY) {

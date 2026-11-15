@@ -39,6 +39,22 @@ import org.jspecify.annotations.Nullable;
 public final class HollowBlight {
 	/** A turner's blow lands the blight at its {@link Hollows.Turn#chance} times this (a zombie: one blow in sixteen). */
 	static final float BLIGHT_SHARE = 0.25F;
+	/**
+	 * Armour wards it off (Andy's pick from Contagion): the chance falls by the armour worn's share of {@link #FULL_ARMOUR}
+	 * points times this, so full plate cuts it most of the way but never to nothing. Broken armour gives no points, so it
+	 * wards nothing.
+	 */
+	static final float ARMOUR_WARD_MAX = 0.7F, FULL_ARMOUR = 30.0F;
+	/** It gets in through the wound: a blow that leaves a part bleeding is this much likelier, one that doesn't this much. */
+	static final float WOUND_TIMES = 2.0F, NO_WOUND_TIMES = 1.0F;
+	/** A blight just taken settles in over this long (ticks); a treatment on the wound in that time clears it this often. */
+	static final int SETTLE_TICKS = 20 * 120;
+	static final float TEND_CLEARS = 0.75F;
+	/** Between bouts of symptoms the body rests at least this long (ticks). */
+	static final int REST_TICKS = 20 * 30;
+	/** In the blight's last this-many ticks a bout can wither you a little (once), for this long. */
+	static final long LAST_HOUR = 1000L;
+	static final int WITHER_TICKS = 20 * 4;
 	/** How long the blight takes to turn one (ticks of game time: a Minecraft day). */
 	static final long TURN_TICKS = 24000L;
 	/** The stages (shares of {@link #TURN_TICKS}) at which it shows: hunger, then weakness and sickness. */
@@ -58,6 +74,10 @@ public final class HollowBlight {
 	/** (0.7.654) Their words to you (lines {@code hollow_blight.kin.0..}), in this colour, at most once every this many ticks. */
 	static final int KIN_LINES = 10, KIN_COLOR = 0xFF9FB58A, KIN_GAP = 20 * 15;
 
+	/** Until when each blighted player's body rests from its last bout (game time), and who has withered already. Not kept. */
+	private static final Map<java.util.UUID, Long> REST = new java.util.HashMap<>();
+	private static final java.util.Set<java.util.UUID> WITHERED = new java.util.HashSet<>();
+
 	/** (0.7.654) When a zombie last spoke to each blighted player (game time). Not kept. */
 	private static final Map<java.util.UUID, Long> SPOKE = new java.util.HashMap<>();
 
@@ -67,14 +87,15 @@ public final class HollowBlight {
 	/** A blight in someone: the Hollow it's making (a variant key, or "pallid"), its wake line, when it took,
 	 * whether they have passed out waiting to rise turned, and the game time they should wake at. Persistent: logging out while
 	 * passed out keeps the pending turn. */
-	record Blight(String look, String line, long since, int told, boolean passedOut, long wakeAt) {
+	record Blight(String look, String line, long since, int told, boolean passedOut, long wakeAt, long settles) {
 		static final Codec<Blight> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.STRING.fieldOf("look").forGetter(Blight::look),
 			Codec.STRING.fieldOf("line").forGetter(Blight::line),
 			Codec.LONG.fieldOf("since").forGetter(Blight::since),
 			Codec.INT.optionalFieldOf("told", 0).forGetter(Blight::told),
 			Codec.BOOL.optionalFieldOf("passedOut", false).forGetter(Blight::passedOut),
-			Codec.LONG.optionalFieldOf("wakeAt", 0L).forGetter(Blight::wakeAt)).apply(i, Blight::new));
+			Codec.LONG.optionalFieldOf("wakeAt", 0L).forGetter(Blight::wakeAt),
+			Codec.LONG.optionalFieldOf("settles", 0L).forGetter(Blight::settles)).apply(i, Blight::new));
 
 		HeritageVariants.@Nullable Variant variant() {
 			return HeritageVariants.Variant.byKey(this.look);
@@ -82,6 +103,15 @@ public final class HollowBlight {
 
 		Hollows.Turn turn() {
 			return new Hollows.Turn(variant(), 1.0F, this.line);
+		}
+
+		/** Whether it's still settling in at {@code now} (a treatment on the wound may yet clear it). */
+		boolean settling(long now) {
+			return now < this.settles;
+		}
+
+		Blight stage(int stage) {
+			return new Blight(this.look, this.line, this.since, stage, false, 0L, this.settles);
 		}
 	}
 
@@ -97,18 +127,39 @@ public final class HollowBlight {
 				struck(player, source);
 			}
 		});
+		BlightSigns.init();
+		BlightCures.register();
+		BlightSpread.register();
+		BlightQuarantine.register();
 		ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
 		PowersCompat.tellMidTurns(HollowBlight::midTurn);
+		PowersCompat.<net.minecraft.world.entity.LivingEntity>listen("com.jaymospowers.core.wounds.Treatment", "ANY_TENDED_LISTENERS",
+			(by, body) -> tended(body));
 	}
 
 	/** Whether {@code player} carries the blight. */
-	public static boolean blighted(ServerPlayer player) {
-		return player.hasAttached(BLIGHT);
+	public static boolean blighted(net.minecraft.world.entity.LivingEntity body) {
+		return body.hasAttached(BLIGHT);
 	}
 
-	private static boolean immune(ServerPlayer player) {
+	/** Hearts a villager loses with one they hear cough the blight's cough. */
+	static final int COUGH_HEARTS = 2;
+
+	/**
+	 * {@code by}, who remarked on {@code cougher}'s cough (Andy: "This happening is why people avoid those that cough"), backs
+	 * off and thinks a little less of a player they heard.
+	 */
+	static void heardCough(net.minecraft.world.entity.LivingEntity by, net.minecraft.world.entity.LivingEntity cougher) {
+		HollowSighting.flee(by, cougher);
+		if (cougher instanceof ServerPlayer player && by instanceof net.minecraft.world.entity.npc.villager.Villager) {
+			McaCompat.hearts(by, player, -COUGH_HEARTS);
+		}
+	}
+
+	static boolean immune(ServerPlayer player) {
 		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
-			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player);
+			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player)
+			|| BlightCures.proof(player);
 	}
 
 	/** A skeleton's blight, taken before only the Skeleton Lord's curse made skeletons ({@link SkeletonCurse}): it fades. */
@@ -124,14 +175,97 @@ public final class HollowBlight {
 			return;
 		}
 		Hollows.Turn turn = Hollows.turnOf(by);
-		if (turn == null || player.getRandom().nextFloat() >= turn.chance() * BLIGHT_SHARE) {
+		if (turn == null) {
 			return;
 		}
+		float chance = turn.chance() * BLIGHT_SHARE * (1.0F - ward(player)) * (PowersCompat.cuts(player) > 0 ? WOUND_TIMES : NO_WOUND_TIMES);
+		if (player.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		take(player, turn, by);
+	}
+
+	/** How much of a turner's blow {@code body}'s armour wards off (0 to {@link #ARMOUR_WARD_MAX}). */
+	static float ward(net.minecraft.world.entity.LivingEntity body) {
+		return Math.min(1.0F, body.getArmorValue() / FULL_ARMOUR) * ARMOUR_WARD_MAX;
+	}
+
+	/**
+	 * The blight gets into {@code player}, the {@code turn}'s Hollow. It settles in first ({@link #SETTLE_TICKS}). Andy's pick:
+	 * only one who knows wounds (a Medicine perk) feels it go in; anyone else finds out when the hunger starts.
+	 */
+	static void take(ServerPlayer player, Hollows.Turn turn, @Nullable Entity by) {
 		String look = turn.look() == null ? "pallid" : turn.look().key();
-		player.setAttached(BLIGHT, new Blight(look, turn.line(), player.level().getGameTime(), 0, false, 0L));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.took").withStyle(ChatFormatting.DARK_GRAY,
-			ChatFormatting.ITALIC));
-		JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look, by.getType().getDescriptionId());
+		long now = player.level().getGameTime();
+		player.setAttached(BLIGHT, new Blight(look, turn.line(), now, 0, false, 0L, now + SETTLE_TICKS));
+		if (BlightSigns.knowsWounds(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.took").withStyle(ChatFormatting.DARK_GRAY,
+				ChatFormatting.ITALIC));
+		}
+		JaymosKingdoms.LOGGER.info("{} took the Hollow's blight ({}) from {}", player.getScoreboardName(), look,
+			by == null ? "nothing living" : by.getType().getDescriptionId());
+	}
+
+	/** Raw rotten flesh eaten by {@code player} gave them the blight ({@link BlightCures#ate}): the zombie Hollow's. */
+	static void fromFlesh(ServerPlayer player) {
+		if (blighted(player) || immune(player)) {
+			return;
+		}
+		take(player, new Hollows.Turn(HeritageVariants.Variant.ZOMBIE, 1.0F, "zombie"), null);
+	}
+
+	/** Gilded flesh eaten: the blight in {@code player} goes back {@code share} of its course (never past its start). */
+	static void setBack(ServerPlayer player, float share) {
+		Blight blight = player.getAttached(BLIGHT);
+		if (blight == null || blight.passedOut()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		long since = Math.min(now, blight.since() + (long) (TURN_TICKS * share));
+		float done = (now - since) / (float) TURN_TICKS;
+		int stage = done >= STAGE_WEAK ? 2 : done >= STAGE_HUNGRY ? 1 : 0;
+		player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), since, Math.min(stage, blight.told()), false, 0L, blight.settles()));
+		WITHERED.remove(player.getUUID());
+	}
+
+	/**
+	 * A cure (the Hollow's Cure, a golden apple while weakened, a healer, a totem): the blight in {@code body} is burned out,
+	 * and (Andy: "You gain immunity forever after a cure") it can never take them again. True if there was one to cure.
+	 */
+	static boolean cure(net.minecraft.world.entity.LivingEntity body) {
+		if (!blighted(body) || body.getAttached(BLIGHT).passedOut()) {
+			return false;
+		}
+		BlightCures.proofAgainst(body);
+		if (body instanceof ServerPlayer player) {
+			clear(player);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
+		} else {
+			body.removeAttached(BLIGHT);
+		}
+		body.level().playSound(null, body.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
+		return true;
+	}
+
+	/** A treatment finished on {@code body}: a blight still settling in is cleared, most times. */
+	private static void tended(net.minecraft.world.entity.LivingEntity body) {
+		if (!(body instanceof ServerPlayer player)) {
+			return;
+		}
+		Blight blight = player.getAttached(BLIGHT);
+		if (blight != null && !blight.passedOut() && blight.settling(player.level().getGameTime()) && player.getRandom().nextFloat() < TEND_CLEARS) {
+			clear(player);
+			JaymosKingdoms.LOGGER.info("{} had a wound tended in time: the Hollow's blight never settled", player.getScoreboardName());
+		}
+	}
+
+	/** Takes the blight out of {@code player} (cured, turned or faded), and its signs with it. */
+	static void clear(ServerPlayer player) {
+		player.removeAttached(BLIGHT);
+		BlightSigns.clear(player);
+		REST.remove(player.getUUID());
+		WITHERED.remove(player.getUUID());
+		BlightQuarantine.cleared(player);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -151,14 +285,14 @@ public final class HollowBlight {
 					if (!stale(blight)) {
 						Hollows.turn(player, blight.turn());
 					}
-					player.removeAttached(BLIGHT);
+					clear(player);
 				}
 				continue;
 			}
 
 			if (immune(player) && !player.isCreative() && !player.isSpectator() || stale(blight)) {
 				// turned some other way meanwhile (or already Hollow): nothing left for it to make
-				player.removeAttached(BLIGHT);
+				clear(player);
 				continue;
 			}
 			if (PowersCompat.waking(player)) {
@@ -171,17 +305,13 @@ public final class HollowBlight {
 			}
 			int stage = done >= STAGE_WEAK ? 2 : done >= STAGE_HUNGRY ? 1 : 0;
 			if (stage > blight.told()) {
-				player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), stage, false, 0L));
+				blight = blight.stage(stage);
+				player.setAttached(BLIGHT, blight);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.stage." + stage)
 					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			}
-			if (stage > 0 && player.getRandom().nextInt(SYMPTOM_EVERY) == 0) {
-				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SYMPTOM_TICKS, 0, true, false, true));
-				if (stage > 1) {
-					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SYMPTOM_TICKS, 0, true, false, true));
-					player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SYMPTOM_TICKS / 2, 0, true, false, true));
-				}
-			}
+			symptoms(player, stage, done);
+			BlightSigns.show(player, blight, stage);
 			// While the blight spreads, zombies don't attack you: they stand down and speak instead,
 			// for the whole blight from stage 0; their target choice is hooked so they don't re-target you.
 			standDownAndSpeak(player);
@@ -220,10 +350,44 @@ public final class HollowBlight {
 		}
 	}
 
+	/**
+	 * A stage's symptoms, now and then, with the body resting between bouts (Andy's pick from Contagion): hunger or slowness
+	 * once it's taken hold; weakness and nausea too near the end; and in its last hour one bout withers them a little.
+	 */
+	private static void symptoms(ServerPlayer player, int stage, float done) {
+		long now = player.level().getGameTime();
+		Long rest = REST.get(player.getUUID());
+		if (stage == 0 || rest != null && now < rest || player.getRandom().nextInt(SYMPTOM_EVERY) != 0) {
+			return;
+		}
+		REST.put(player.getUUID(), now + SYMPTOM_TICKS + REST_TICKS);
+		player.addEffect(new MobEffectInstance(player.getRandom().nextBoolean() ? MobEffects.HUNGER : MobEffects.SLOWNESS, SYMPTOM_TICKS, 0, true, false,
+			true));
+		if (stage > 1) {
+			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SYMPTOM_TICKS, 0, true, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SYMPTOM_TICKS / 2, 0, true, false, true));
+			if ((1.0F - done) * TURN_TICKS <= LAST_HOUR && WITHERED.add(player.getUUID())) {
+				player.addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_TICKS, 0, true, false, true));
+			}
+		}
+	}
+
 	/** The blight has run its course while they lived: they pass out first, then rise turned. */
 	private static void turnNow(ServerPlayer player, Blight blight) {
+		// a totem held: it's spent instead, and that is a cure (Andy's pick)
+		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
+			net.minecraft.world.item.ItemStack held = player.getItemInHand(hand);
+			if (held.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING)) {
+				held.shrink(1);
+				player.level().broadcastEntityEvent(player, (byte) 35);
+				cure(player);
+				return;
+			}
+		}
 		player.setAttached(BLIGHT, new Blight(blight.look(), blight.line(), blight.since(), blight.told(), true,
-				player.level().getGameTime() + TURN_DARK));
+				player.level().getGameTime() + TURN_DARK, 0L));
+		BlightSigns.clear(player);
+		BlightQuarantine.cleared(player);
 		player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		// Pass out via Powers' downing (eyes closed, black screen) instead of a scoreboard tag: Powers owns
 		// the downed state and wakes them itself. Kingdoms rises the turn at wakeAt, the same moment.
@@ -238,7 +402,7 @@ public final class HollowBlight {
 			return null;
 		}
 		return Map.entry(tint(blight.variant()), () -> {
-			player.removeAttached(BLIGHT);
+			clear(player);
 			Hollows.turn(player, blight.turn());
 		});
 	}
@@ -260,9 +424,8 @@ public final class HollowBlight {
 	/** A golden apple eaten while the blight spreads burns it out -- but only while the player is Weakened
 	 * (a drunk, splash or lingering weakness potion all apply it), like curing a zombie villager. */
 	public static void ateGold(ServerPlayer player) {
-		if (player.hasEffect(MobEffects.WEAKNESS) && player.removeAttached(BLIGHT) != null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hollow_blight.cured").withStyle(ChatFormatting.GOLD));
-			player.level().playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.2F);
+		if (player.hasEffect(MobEffects.WEAKNESS)) {
+			cure(player);
 		}
 	}
 }

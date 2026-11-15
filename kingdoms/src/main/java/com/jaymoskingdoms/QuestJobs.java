@@ -169,6 +169,8 @@ public final class QuestJobs {
 			case Quest.BLAST -> "blast";
 			case Quest.HOSTAGE -> "hostage";
 			case Quest.CAPTURE -> "capture";
+			case Quest.CURE_SICK -> "cure_sick";
+			case Quest.BURN_DEAD -> "burn_dead";
 			default -> "stash";
 		};
 	}
@@ -505,7 +507,7 @@ public final class QuestJobs {
 				continue;
 			}
 			for (Quest q : new ArrayList<>(Quests.log(player))) {
-				if (q.kind() >= Quest.PACK && q.kind() <= Quest.CAPTURE && !q.counted() && q.objective().pos().isPresent()) {
+				if (q.kind() >= Quest.PACK && q.kind() <= Quest.BURN_DEAD && !q.counted() && q.objective().pos().isPresent()) {
 					ServerPlayer best = nearest.get(q.id());
 					if (best == null || flat(player, q.objective().pos().get()) < flat(best, q.objective().pos().get())) {
 						nearest.put(q.id(), player);
@@ -543,6 +545,10 @@ public final class QuestJobs {
 		}
 		if (q.kind() == Quest.CAPTURE) {
 			capture(level, player, q, at, far);
+			return;
+		}
+		if (q.kind() == Quest.CURE_SICK || q.kind() == Quest.BURN_DEAD) {
+			outbreak(level, player, q, at);
 			return;
 		}
 		if (far > SET_OUT || !level.isLoaded(at) || !level.isPositionEntityTicking(at)) {
@@ -1029,6 +1035,87 @@ public final class QuestJobs {
 	}
 
 	/** Lamps: the town's dark spots are picked (on its own land, so its people keep the lights after), shown, and counted as they're lit; due by nightfall. */
+	/**
+	 * Outbreak work ({@link BlightSpread}): the sick are counted as they're cured ({@link #curedSick}); the town's sick all gone
+	 * another way (turned, or cured by others) ends it with what was done, or fails it if nothing was. The blighted dead count
+	 * once gone (burned to ash, or taken to the grave) where their ground is loaded; one that rose fails it.
+	 */
+	private static void outbreak(ServerLevel level, ServerPlayer player, Quest q, BlockPos at) {
+		Quest.Objective o = q.objective();
+		Faction f = Factions.get(level.getServer(), q.giver().faction());
+		if (f == null || flat(player, at) > SET_OUT || !level.isLoaded(at)) {
+			return;
+		}
+		if (q.kind() == Quest.CURE_SICK) {
+			if (!BlightSpread.sickIn(level, f).isEmpty()) {
+				return;
+			}
+			if (o.progress() <= 0) {
+				fail(level, player, q, "sick_gone");
+				return;
+			}
+			Quest next = q.withObjective(new Quest.Objective(o.target(), o.progress(), o.progress(), o.pos(), o.other(), o.otherName(), o.place(), true));
+			save(player, next);
+			done(level, player, next);
+			return;
+		}
+		int burned = 0;
+		for (String entry : o.otherName().split(";")) {
+			int atSign = entry.indexOf('@');
+			if (atSign < 0) {
+				continue;
+			}
+			UUID uuid;
+			BlockPos where;
+			try {
+				uuid = UUID.fromString(entry.substring(0, atSign));
+				String[] xyz = entry.substring(atSign + 1).split(",");
+				where = new BlockPos(Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2]));
+			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+				continue;
+			}
+			if (BlightSpread.rose(level, uuid)) {
+				fail(level, player, q, "dead_rose");
+				return;
+			}
+			Entity body = level.getEntity(uuid);
+			if (body == null || body.isRemoved()) {
+				// (gone: burned to ash or carried to the grave; only counted where the ground it lay on is loaded)
+				// (progress never goes back, so one whose ground isn't loaded just waits to be counted)
+				if (level.isLoaded(where) && level.isPositionEntityTicking(where)) {
+					burned++;
+				}
+			} else if (level.getGameTime() % 40 == 0) {
+				level.sendParticles(player, ParticleTypes.END_ROD, true, false, body.getX(), body.getY() + 1.0, body.getZ(), 3, 0.1, 0.5, 0.1, 0.0);
+			}
+		}
+		if (burned > o.progress()) {
+			Quest next = progress(q, burned);
+			save(player, next);
+			if (next.counted()) {
+				done(level, player, next);
+			}
+		}
+	}
+
+	/** {@code player} cured one of the sick {@code v}: it counts toward their work curing that town's sick. */
+	static void curedSick(ServerLevel level, ServerPlayer player, Villager v) {
+		Faction f = Theft.lawAt(level, v.blockPosition());
+		if (f == null) {
+			return;
+		}
+		for (Quest q : new ArrayList<>(Quests.log(player))) {
+			if (q.kind() == Quest.CURE_SICK && !q.counted() && q.giver().faction() == f.id()) {
+				Quest next = progress(q, q.objective().progress() + 1);
+				save(player, next);
+				if (next.counted()) {
+					done(level, player, next);
+				}
+				return;
+			}
+		}
+	}
+
 	private static void lamps(ServerLevel level, ServerPlayer player, Quest q, BlockPos at, int tick) {
 		Quest.Objective o = q.objective();
 		long clock = level.getOverworldClockTime();

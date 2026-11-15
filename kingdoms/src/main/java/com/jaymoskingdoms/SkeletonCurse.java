@@ -67,7 +67,7 @@ public final class SkeletonCurse {
 		}
 		player.setAttached(CURSED, true);
 		// (the curse is the only turning they're on the way to now)
-		player.removeAttached(HollowBlight.BLIGHT);
+		HollowBlight.clear(player);
 		player.addEffect(icon());
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skeleton_curse.took").withStyle(ChatFormatting.DARK_GRAY,
 			ChatFormatting.ITALIC));
