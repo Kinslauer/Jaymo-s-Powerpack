@@ -13,7 +13,6 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -41,13 +40,13 @@ import org.jspecify.annotations.Nullable;
  * something in the other hand to scrub that instead (a blade, a piece of armour).
  * <p>
  * Something rough takes blood off however old it is ({@link Bloodied#scour}): rotten blood, which water and rain never
- * get the last of and a bare-hand scrub only slowly, comes off in a few scrubs. Sand scours harder and takes rust off
- * metal too ({@link Rust}); straw doesn't touch rust. At a cauldron each scrub uses a level of water.
+ * get the last of and a bare-hand scrub only slowly, comes off in a few scrubs. Sand scours harder. Nothing takes
+ * rust off (Andy: "nothing removes rust", {@link Rust}). At a cauldron each scrub uses a level of water.
  */
 public final class Scrubbing {
 	// ---- tuning ----
-	/** What one scrub takes off: blood and grime with a wisp, with sand; rust with sand. */
-	static final int WISP_SCRUB = 40, SAND_SCRUB = 50, SAND_RUST = 25;
+	/** What one scrub takes off: blood and grime with a wisp, and with sand. */
+	static final int WISP_SCRUB = 40, SAND_SCRUB = 50;
 	/** Scrubs in one wisp. */
 	static final int WISP_USES = 24;
 	/** A scrub at most every this many ticks. */
@@ -97,7 +96,7 @@ public final class Scrubbing {
 		}
 		ItemStack held = player.getOffhandItem();
 		// (the smell isn't known on the client, so sand, which would otherwise be placed, scrubs only what can be seen)
-		if (!held.isEmpty() ? !dirty(held, sand) : !dirty(player, sand) && (sand || Smell.stink(player) <= 0.0F)) {
+		if (!held.isEmpty() ? !dirty(held) : !ArmourGrime.anyDirt(player) && (sand || Smell.stink(player) <= 0.0F)) {
 			return InteractionResult.PASS;
 		}
 		long now = level.getGameTime();
@@ -108,15 +107,13 @@ public final class Scrubbing {
 		LAST.put(player, now);
 		if (level instanceof ServerLevel server) {
 			int scrub = sand ? SAND_SCRUB : WISP_SCRUB;
-			boolean rust;
 			if (!held.isEmpty()) {
-				rust = scrubItem(held, scrub, sand);
+				scrubItem(held, scrub);
 			} else {
-				rust = false;
 				Bloodied.scourCoat(player, scrub);
 				ArmourGrime.washBody(player, scrub);
 				for (EquipmentSlot slot : ArmourGrime.SLOTS) {
-					rust |= scrubItem(player.getItemBySlot(slot), scrub, sand);
+					scrubItem(player.getItemBySlot(slot), scrub);
 				}
 				if (Smell.stink(player) > 0.0F) {
 					Smell.scrub(player);
@@ -138,38 +135,20 @@ public final class Scrubbing {
 			level.playSound(null, at.x, at.y, at.z, sand ? SoundEvents.SAND_HIT : SoundEvents.GRASS_HIT, SoundSource.PLAYERS, 0.7F,
 				0.9F + level.getRandom().nextFloat() * 0.2F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.3F, 1.3F);
-			if (rust) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.scrub.rust"));
-			}
 		}
 		return InteractionResult.SUCCESS;
 	}
 
-	/** Scrubs {@code stack}: blood (any age) and grime, and with sand its rust. True if rust came off. */
-	private static boolean scrubItem(ItemStack stack, int scrub, boolean sand) {
+	/** Scrubs {@code stack}: blood (any age) and grime. Rust stays. */
+	private static void scrubItem(ItemStack stack, int scrub) {
 		if (stack.isEmpty()) {
-			return false;
+			return;
 		}
 		Bloodied.scour(stack, scrub);
 		ArmourGrime.clean(stack, scrub);
-		return sand && Rust.scour(stack, SAND_RUST);
 	}
 
-	private static boolean dirty(ItemStack stack, boolean sand) {
-		return Bloodied.blood(stack) != null || ArmourGrime.grime(stack) != null || sand && Rust.rust(stack) > 0;
-	}
-
-	private static boolean dirty(Player player, boolean sand) {
-		if (ArmourGrime.anyDirt(player)) {
-			return true;
-		}
-		if (sand) {
-			for (EquipmentSlot slot : ArmourGrime.SLOTS) {
-				if (Rust.rust(player.getItemBySlot(slot)) > 0) {
-					return true;
-				}
-			}
-		}
-		return false;
+	private static boolean dirty(ItemStack stack) {
+		return Bloodied.blood(stack) != null || ArmourGrime.grime(stack) != null;
 	}
 }

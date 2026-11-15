@@ -38,8 +38,8 @@ import net.minecraft.world.phys.AABB;
  * {@code ArmourGrimeTextures}), and is named on the tooltip. Past {@link #EATS} it eats the metal: each check it grows
  * it may take a point of durability (likelier the worse it is), never the last one, as soaked leather wears.
  * <p>
- * Rust doesn't wash off. It's scoured off with sand in water ({@link Scrubbing}). Guards and other folk keep their own kit,
- * so their rust fades while they're dry; a player's stays until it's scoured.
+ * Andy: "nothing removes rust". It stays on the piece for good, on players' and folk's armour alike: no wash, scrub or
+ * repair takes it off.
  */
 public final class Rust {
 	// ---- tuning ----
@@ -51,8 +51,6 @@ public final class Rust {
 	static final float IN_WATER = 1.0F, SOAKED = 0.6F, WET = 0.25F, SEA = 2.0F;
 	/** From this much rust it eats the metal: a point of durability a check it grows, at a chance of rust / MAX. */
 	public static final int EATS = 30;
-	/** Folk out of the wet clean this much off a check. */
-	static final int FOLK_CLEAN = 1;
 	/** Rust worth a word on the tooltip, and the worse grades. */
 	public static final int SPOTTED = 10, RUSTY = 35, CORRODED = 70;
 	/** Armour that never rusts, by tag, and by words in its id. */
@@ -95,22 +93,8 @@ public final class Rust {
 		return true;
 	}
 
-	/** Scours {@code amount} of rust off {@code stack}; true if it had any. */
-	public static boolean scour(ItemStack stack, int amount) {
-		int was = rust(stack);
-		if (was <= 0) {
-			return false;
-		}
-		set(stack, was - amount);
-		return true;
-	}
-
 	private static void set(ItemStack stack, int rust) {
-		if (rust <= 0) {
-			stack.remove(RUST);
-		} else {
-			stack.set(RUST, Math.min(MAX, rust));
-		}
+		stack.set(RUST, Math.min(MAX, rust));
 	}
 
 	// ---- every check ----
@@ -144,18 +128,13 @@ public final class Rust {
 
 	private static void weather(ServerLevel level, LivingEntity body) {
 		float rate = body.isInWater() ? IN_WATER * sea(level, body) : Wet.soaked(body) ? SOAKED : Wet.wet(body) ? WET : 0.0F;
-		boolean player = body instanceof Player;
+		if (rate <= 0.0F || body instanceof Player p && p.isCreative()) {
+			return;
+		}
 		for (EquipmentSlot slot : ArmourGrime.SLOTS) {
 			ItemStack piece = body.getItemBySlot(slot);
-			if (piece.isEmpty()) {
-				continue;
-			}
-			if (rate > 0.0F) {
-				if (rusts(piece) && !(player && ((Player) body).isCreative())) {
-					grow(piece, rate, level.getRandom());
-				}
-			} else if (!player) {
-				scour(piece, FOLK_CLEAN);
+			if (rusts(piece)) {
+				grow(piece, rate, level.getRandom());
 			}
 		}
 	}
