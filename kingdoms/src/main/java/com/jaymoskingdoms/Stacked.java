@@ -14,7 +14,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.RandomState;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.528) One Dimension worlds (One Dimension + CustomChunks, CodxIO; shipped unchanged): the Aether, the Overworld and
@@ -30,7 +32,9 @@ import net.minecraft.world.level.levelgen.RandomState;
 public final class Stacked {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("customchunks");
 	private static boolean ready;
-	private static Method dimensionAt, stacksOf, bandOf, bandShift, bandMin, bandMax, enter, leave, bandGenerator, bandRandomState, bandHeight;
+	private static Method dimensionAt, stacksOf, bandOf, bandShift, bandMin, bandMax, enter, leave, bandGenerator, bandRandomState, bandHeight, bandStructures;
+	/** CustomChunks' own "searching this band" mark ({@code StackedChunkGenerator.SEARCHING}), or null if it can't be read. */
+	private static @Nullable ThreadLocal<Object> searching;
 
 	private Stacked() {
 	}
@@ -58,6 +62,16 @@ public final class Stacked {
 				bandGenerator = band.getMethod("generator");
 				bandRandomState = band.getMethod("randomState");
 				bandHeight = band.getMethod("localHeight");
+				bandStructures = band.getMethod("structureState");
+				try {
+					java.lang.reflect.Field mark = Class.forName("codx.customchunks.gen.StackedChunkGenerator").getDeclaredField("SEARCHING");
+					mark.setAccessible(true);
+					@SuppressWarnings("unchecked")
+					ThreadLocal<Object> local = (ThreadLocal<Object>) mark.get(null);
+					searching = local;
+				} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+					searching = null;
+				}
 			} catch (ReflectiveOperationException | LinkageError e) {
 				dimensionAt = null;
 			}
@@ -174,9 +188,10 @@ public final class Stacked {
 
 	/**
 	 * How the ground of a realm is made: its generator, the random state it reads, the heights it works in, and what to
-	 * add to one of its heights to get the height in the level ({@link #shift}).
+	 * add to one of its heights to get the height in the level ({@link #shift}), and where its structures may start.
 	 */
-	public record Ground(ChunkGenerator generator, RandomState randomState, LevelHeightAccessor heights, int shift) {
+	public record Ground(ChunkGenerator generator, RandomState randomState, LevelHeightAccessor heights, int shift,
+		ChunkGeneratorStructureState structures) {
 	}
 
 	/**
@@ -190,12 +205,34 @@ public final class Stacked {
 		if (band != null) {
 			try {
 				return new Ground((ChunkGenerator) bandGenerator.invoke(band), (RandomState) bandRandomState.invoke(band),
-					(LevelHeightAccessor) bandHeight.invoke(band), read(band, bandShift, 0));
+					(LevelHeightAccessor) bandHeight.invoke(band), read(band, bandShift, 0), (ChunkGeneratorStructureState) bandStructures.invoke(band));
 			} catch (ReflectiveOperationException | RuntimeException e) {
 				// fall through to the level's own
 			}
 		}
-		return new Ground(level.getChunkSource().getGenerator(), level.getChunkSource().randomState(), level, 0);
+		return new Ground(level.getChunkSource().getGenerator(), level.getChunkSource().randomState(), level, 0,
+			level.getChunkSource().getGeneratorState());
+	}
+
+	/**
+	 * Runs {@code body} the way CustomChunks runs its own structure search (/locate) for the Overworld's band: while it
+	 * runs, the level's structure checks ("can a village start in this chunk?") are worked out by that band's generator.
+	 * Outside it they use the stacked level's, which has no ground under the clouds and so finds no structure anywhere.
+	 * An ordinary world just runs it.
+	 */
+	public static <T> T searchingOverworld(ServerLevel level, java.util.function.Supplier<T> body) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		ThreadLocal<Object> mark = searching;
+		if (band == null || mark == null) {
+			return body.get();
+		}
+		Object was = mark.get();
+		mark.set(band);
+		try {
+			return body.get();
+		} finally {
+			mark.set(was);
+		}
 	}
 
 	/**
