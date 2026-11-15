@@ -96,7 +96,7 @@ public final class AlchemyJei implements IModPlugin {
 			notes.add(Component.translatable("jei.jaymospowers.infusion.unstable", recipe.instability(), recipe.flux()));
 			recipes.add(new SimpleCategory.Recipe(inputs, output, notes));
 		}
-		registration.addRecipes(INFUSION, recipes);
+		SimpleCategory.addRecipes(registration, INFUSION, recipes);
 
 		List<SimpleCategory.Recipe> pot = new ArrayList<>();
 		for (Crucibles.Recipe recipe : Crucibles.recipes()) {
@@ -118,7 +118,7 @@ public final class AlchemyJei implements IModPlugin {
 				Component.translatable("jei.jaymospowers.crucible.research",
 					research == null ? Component.literal(recipe.research()) : Component.translatable(research.key())))));
 		}
-		registration.addRecipes(CRUCIBLE, pot);
+		SimpleCategory.addRecipes(registration, CRUCIBLE, pot);
 	}
 
 	/** Every item {@code spec} (an id or {@code #tag}) names, {@code count} of each. */

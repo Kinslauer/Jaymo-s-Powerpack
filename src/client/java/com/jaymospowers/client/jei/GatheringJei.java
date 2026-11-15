@@ -65,7 +65,7 @@ public final class GatheringJei implements IModPlugin {
 		if (!tallPlants.isEmpty()) {
 			recipes.add(fibre(knives, tallPlants, FirstTools.FIBRE_PER_GRASS * 2));
 		}
-		registration.addRecipes(GATHERING, recipes);
+		SimpleCategory.addRecipes(registration, GATHERING, recipes);
 	}
 
 	private static SimpleCategory.Recipe fibre(List<ItemStack> knives, List<ItemStack> plants, int count) {
