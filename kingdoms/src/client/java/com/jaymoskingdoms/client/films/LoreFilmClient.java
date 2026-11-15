@@ -216,7 +216,7 @@ public final class LoreFilmClient {
 			"fantasy_armor:thief_leggings|archers:ranger_armor_legs", "fantasy_armor:thief_boots|archers:ranger_armor_feet"}};
 	/**
 	 * Andy (2026-11-15), where Fantasy Armor is loaded: "the quiet one should wear that redeemer plate in the film" (it
-	 * comes up over him with the white, the legs at DON_HALF and the rest at DON_WHOLE), and "The grue should wear the dark
+	 * goes on as the white comes up and "should weave onto his body like the symbiote usually does": FantasyArmourLayer), and "The grue should wear the dark
 	 * lord plate, while summoning a few dark covered orc" (the first DARK_COVER orcs to rise).
 	 */
 	static final String QUIET_PLATE = "redeemer", GRUE_PLATE = "dark_lord", RISEN_PLATE = "dark_cover";
@@ -1767,14 +1767,14 @@ public final class LoreFilmClient {
 
 	/**
 	 * {@code a} in Fantasy Armor's {@code set}, the pieces from {@code from} (0 the helm) up to {@code to} (4: through the
-	 * boots), where that mod is loaded; elsewhere they keep what they had.
+	 * boots), where that mod is loaded; elsewhere they keep what they had (the tape holds both, so a tape recorded in
+	 * either kind of game plays right in the other).
 	 */
 	private static void fantasy(Film f, Actor a, String set, int from, int to) {
-		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(FantasyArmourLayer.MOD)) {
-			return;
-		}
 		for (int j = from; j < to; j++) {
-			hold(f, a, GEAR_SLOTS[j], FantasyArmourLayer.MOD + ":" + set + FANTASY_PIECES[j]);
+			ItemStack had = a.e.getItemBySlot(GEAR_SLOTS[j]);
+			String kept = had.isEmpty() ? "" : BuiltInRegistries.ITEM.getKey(had.getItem()).toString();
+			hold(f, a, GEAR_SLOTS[j], FantasyArmourLayer.MOD + ":" + set + FANTASY_PIECES[j] + "|" + kept);
 		}
 	}
 
@@ -3442,17 +3442,17 @@ public final class LoreFilmClient {
 			}
 			if (don == 0) {
 				act(f, quiet, "cast_high");
+				// the Redeemer plate weaves on over him with the white (FantasyArmourLayer), chest first, as the symbiote's suit does
+				fantasy(f, quiet, QUIET_PLATE, 0, 4);
 				sound(f, SoundEvents.HONEY_BLOCK_SLIDE, 0.7F, 0.8F);
 				sound(f, SoundEvents.BEACON_AMBIENT, 1.6F, 0.6F);
 			}
 			if (don == DON_HALF) {
 				dress(f, quiet, QUIET_HALF, false);
-				fantasy(f, quiet, QUIET_PLATE, 2, 4);
 				sound(f, SoundEvents.WOOL_PLACE, 0.8F, 0.7F);
 			}
 			if (don == DON_WHOLE) {
 				dress(f, quiet, QUIET_SUIT, true);
-				fantasy(f, quiet, QUIET_PLATE, 0, 2);
 				cloak(f, quiet, true);
 				hold(f, quiet, EquipmentSlot.MAINHAND, QUIET_BLADE);
 				rest(f, quiet);

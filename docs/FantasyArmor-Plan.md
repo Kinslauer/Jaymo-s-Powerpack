@@ -13,7 +13,7 @@ something like this, netherite should remain as plating but for steel armor." Ar
 card; Andy chose armour, tools and weapons (2026-11-15).
 
 **Lore.** One grouped `(new)` entry, "What the armourers make" and the eight paragraphs after it, sits before "Rules for
-writing against this" in Lore.md, for Andy's approval. Nothing is built before he approves it.
+writing against this" in Lore.md, approved by Andy 2026-11-15.
 
 **Overlaps found while planning.** Armory already has a Ronin lamellar, a Gladiator set and steel plate, and the Nether
 war forts' warlords wear the Primal Visage. So blossom lamellar and the pit harness are upgrades of Ronin and Gladiator,
@@ -92,4 +92,4 @@ Lady Maria is used here, so the trim datapack keeps her set.
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)
 2. Repaint Fantasy Armor's textures in our style, or leave its art as it is?
-3. Approve the lore paragraphs.
+3. (Answered: Andy approved the lore, 2026-11-15.)
