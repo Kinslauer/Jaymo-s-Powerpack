@@ -397,7 +397,7 @@ final class SkillScreen extends Screen {
 		Skills.Perk best = null;
 		double bestD = Double.MAX_VALUE;
 		for (Skills.Perk perk : Skills.Perk.values()) {
-			SkillWeb.Spot spot = SkillWeb.SPOTS.get(perk);
+			SkillWeb.Spot spot = spot(perk);
 			if (spot == null) {
 				continue;
 			}
@@ -428,6 +428,18 @@ final class SkillScreen extends Screen {
 		return null;
 	}
 
+	/** Where {@code perk} sits on the web, or null if it isn't drawn: the Night page, before you're turned (Andy's skill-tree locks). */
+	private SkillWeb.@Nullable Spot spot(Skills.Perk perk) {
+		var player = this.minecraft == null ? null : this.minecraft.player;
+		return player != null && com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+	}
+
+	/** Whether {@code branch} isn't drawn (its gate and its name): the Night page, before you're turned. */
+	private boolean hiddenBranch(SkillWeb.Branch branch) {
+		var player = this.minecraft == null ? null : this.minecraft.player;
+		return branch == SkillWeb.Branch.NIGHT && player != null && com.jaymoskingdoms.TreeLocks.hidden(player, Skills.Perk.LIFELEECH);
+	}
+
 	/** Whether {@code perk} can be learnt (or raised) right now. */
 	private boolean canLearn(Skills.Progress shown, Skills.Perk perk) {
 		var player = this.minecraft.player;
@@ -439,7 +451,7 @@ final class SkillScreen extends Screen {
 	private void select(Skills.Perk perk) {
 		selected = perk;
 		this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		SkillWeb.Spot spot = SkillWeb.SPOTS.get(perk);
+		SkillWeb.Spot spot = spot(perk);
 		if (spot == null) {
 			return;
 		}
@@ -607,12 +619,15 @@ final class SkillScreen extends Screen {
 			segment(graphics, cx, cy, sx(crest), sy(crest), thick, Ui.GOLD);
 		}
 		for (java.util.Map.Entry<SkillWeb.Branch, SkillWeb.Spot> e : SkillWeb.GATES.entrySet()) {
+			if (hiddenBranch(e.getKey())) {
+				continue;
+			}
 			SkillWeb.Spot crest = SkillWeb.CRESTS.get(e.getKey().pillar);
 			segment(graphics, sx(crest), sy(crest), sx(e.getValue()), sy(e.getValue()), thick, accent(e.getKey().pillar));
 		}
 		// the ties: from what a perk needs to it (a root from its branch's gate)
 		for (Skills.Perk perk : Skills.Perk.values()) {
-			SkillWeb.Spot to = SkillWeb.SPOTS.get(perk);
+			SkillWeb.Spot to = spot(perk);
 			if (to == null) {
 				continue;
 			}
@@ -626,7 +641,7 @@ final class SkillScreen extends Screen {
 				}
 			}
 			for (Skills.Perk need : perk.requires) {
-				SkillWeb.Spot from = SkillWeb.SPOTS.get(need);
+				SkillWeb.Spot from = spot(need);
 				if (from == null) {
 					continue;
 				}
@@ -642,7 +657,7 @@ final class SkillScreen extends Screen {
 		}
 		// the perks
 		for (Skills.Perk perk : Skills.Perk.values()) {
-			SkillWeb.Spot spot = SkillWeb.SPOTS.get(perk);
+			SkillWeb.Spot spot = spot(perk);
 			if (spot == null) {
 				continue;
 			}
@@ -713,6 +728,9 @@ final class SkillScreen extends Screen {
 			}
 		}
 		for (java.util.Map.Entry<SkillWeb.Branch, SkillWeb.Spot> e : SkillWeb.GATES.entrySet()) {
+			if (hiddenBranch(e.getKey())) {
+				continue;
+			}
 			int x = (int)Math.round(sx(e.getValue())), y = (int)Math.round(sy(e.getValue())), r = (int)Math.max(1, Math.round(4 * zoom));
 			graphics.fill(x - r - 1, y - r - 1, x + r + 1, y + r + 1, 0xFF000000);
 			graphics.fill(x - r, y - r, x + r, y + r, accent(e.getKey().pillar));
@@ -723,6 +741,9 @@ final class SkillScreen extends Screen {
 		}
 		// the branches' names, past their last ring
 		for (SkillWeb.Label label : SkillWeb.LABELS) {
+			if (label.key().equals(SkillWeb.Branch.NIGHT.key()) && hiddenBranch(SkillWeb.Branch.NIGHT)) {
+				continue;
+			}
 			Component name = Component.translatable("gui.jaymoskingdoms.skills.branch." + label.key());
 			int tw = this.font.width(name), x = (int)Math.round(sx(label.at())), y = (int)Math.round(sy(label.at()));
 			graphics.text(this.font, name, x - tw / 2, y - 4, accent(label.pillar()));
@@ -924,6 +945,14 @@ final class SkillScreen extends Screen {
 		var player = this.minecraft.player;
 		int accent = perk.bridge() ? Ui.GOLD : accent(perk.pillar);
 		text.add(Component.translatable("skill.jaymoskingdoms.perk." + perk.key() + ".desc").withColor(Ui.TEXT));
+		if (perk == Skills.Perk.BLOOD_AWAKENING && player != null) {
+			// your own blood's move, and only yours (Andy: the Heritage page shows only your own blood's perk)
+			com.jaymoskingdoms.HeritageKits.Kit kit = com.jaymoskingdoms.HeritageKits.kit(player);
+			text.add((kit == null || kit.move() == com.jaymoskingdoms.HeritageKits.Move.NONE
+				? Component.translatable("gui.jaymoskingdoms.skills.blood.none")
+				: Component.translatable("gui.jaymoskingdoms.skills.blood.yours", Component.translatable("kit.jaymoskingdoms.move." + kit.move().key()),
+					Component.translatable("kit.jaymoskingdoms.move." + kit.move().key() + ".desc"))).withColor(Ui.GOLD));
+		}
 		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
 		if (perk.minLevel > 0) {
 			cost = Component.empty().append(cost).append("  ·  ").append(Component.translatable("gui.jaymoskingdoms.skills.needs_level", perk.minLevel));

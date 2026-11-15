@@ -215,9 +215,14 @@ final class GrowthScreen extends Screen {
 			int below = y + HEADER + 16 + rows.size() * 17 + 4;
 			if (this.pickedPath >= 0) {
 				String p = paths.get(this.pickedPath);
+				// (Andy's skill-tree locks) walking a path is learned: a path perk in the tree
+				boolean may = Paths.mayWalk(player);
+				List<Component> about = may ? List.of(Component.translatable("path.jaymoskingdoms." + c.key() + "." + p + ".desc"))
+					: List.of(Component.translatable("path.jaymoskingdoms." + c.key() + "." + p + ".desc"),
+						Component.translatable("gui.jaymoskingdoms.growth.path_locked").withColor(Ui.BAD));
 				Ui.detail(graphics, this.font, px, below, pw, Math.max(3, (y + h - FOOTER - below - 6) / Ui.LINE), Component.translatable("path.jaymoskingdoms." + c.key() + "." + p),
-					Ui.GOLD, List.of(Component.translatable("path.jaymoskingdoms." + c.key() + "." + p + ".desc")));
-				ready = have.isEmpty();
+					Ui.GOLD, about);
+				ready = have.isEmpty() && may;
 			}
 		} else {
 			Ui.detail(graphics, this.font, px, y + HEADER, pw, 5, this.title, Ui.GOLD, List.of(Component.translatable("gui.jaymoskingdoms.growth.paths_help")));

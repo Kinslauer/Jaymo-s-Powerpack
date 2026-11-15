@@ -102,6 +102,10 @@ public final class FrostPrison {
 		if (!Heritage.is(player, Heritage.Kind.FROSTBORN) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
+			// (Andy's skill-tree locks) Frostbind is learned: Blood Awakening
+			return;
+		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long last = player.getAttached(LAST);

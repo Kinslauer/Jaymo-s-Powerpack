@@ -56,7 +56,9 @@ public final class Breach {
 	static void leap(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < GAP_TICKS || !player.isInWater() || player.isUnderWater() || player.isPassenger() || !Freerun.canMove(player)) {
+		// (Andy's skill-tree locks) learned: Strong Swimmer
+		if (last != null && now - last < GAP_TICKS || !player.isInWater() || player.isUnderWater() || player.isPassenger() || !Freerun.canMove(player)
+			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BREACH)) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {

@@ -84,6 +84,10 @@ public final class Throwables {
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
 			ItemStack stack = player.getItemInHand(hand);
+			if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.THROWER)) {
+				// (Andy's skill-tree locks) throwing is learned: Thrower
+				return InteractionResult.FAIL;
+			}
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer thrower) {
 				lob(server, thrower, stack.consumeAndReturn(1, player));
 			}

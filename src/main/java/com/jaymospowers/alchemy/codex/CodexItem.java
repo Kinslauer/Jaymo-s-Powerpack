@@ -16,6 +16,10 @@ public class CodexItem extends Item {
 
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.ALCHEMIST)) {
+			// (Andy's skill-tree locks) the codex reads only for an alchemist (the Trades page)
+			return InteractionResult.FAIL;
+		}
 		if (player instanceof ServerPlayer server && ServerPlayNetworking.canSend(server, CodexNet.Open.TYPE)) {
 			ServerPlayNetworking.send(server, new CodexNet.Open());
 		}

@@ -121,6 +121,10 @@ public final class QuickOrders {
 		if (kind < GO || kind > HELP || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.ORDERS)) {
+			// (Andy's skill-tree locks) giving orders is learned: Command
+			return;
+		}
 		ServerLevel level = player.level();
 		List<Villager> yours = new ArrayList<>();
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Followers.ALL_RANGE),

@@ -605,6 +605,10 @@ public final class Bonding {
 	// ---- whistle and tricks ----------------------------------------------------------------------------------------------
 
 	private static void whistle(ServerPlayer player) {
+		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
+			// (Andy's skill-tree locks) the whistle is learned: Horseman (a Rider knows it)
+			return;
+		}
 		ServerLevel level = player.level();
 		level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_FLUTE.value(), SoundSource.PLAYERS, 1.2F, 1.9F);
 		AbstractHorse best = null;
@@ -636,6 +640,10 @@ public final class Bonding {
 
 	private static void trick(ServerPlayer player, boolean back) {
 		if (!(player.getVehicle() instanceof AbstractHorse horse) || !Equestrian.covered(horse) || horse.getControllingPassenger() != player) {
+			return;
+		}
+		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.TRICKS)) {
+			// (Andy's skill-tree locks) tricks are learned: Horseman's second rank (a Rider knows them)
 			return;
 		}
 		ServerLevel level = player.level();

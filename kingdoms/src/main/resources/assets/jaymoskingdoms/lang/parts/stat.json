@@ -9,7 +9,7 @@
   "stat.jaymoskingdoms.might.now": "+%s%% damage",
   "stat.jaymoskingdoms.agility": "Agility",
   "stat.jaymoskingdoms.agility.desc": "Quicker on your feet.",
-  "stat.jaymoskingdoms.agility.now": "+%s%% movement speed",
+  "stat.jaymoskingdoms.agility.now": "+%s%% movement speed, and as much faster climbing, swimming, ledge shimmies and climbing over ledges",
   "stat.jaymoskingdoms.finesse": "Finesse",
   "stat.jaymoskingdoms.finesse.desc": "Quicker swings with any weapon, and a steadier aim at the head when locked on.",
   "stat.jaymoskingdoms.finesse.now": "+%s%% attack speed",

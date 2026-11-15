@@ -26,8 +26,8 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 
 /**
- * A second class, learned late (fifth edition's multiclassing). Once a player has a first class and has slain the great foe
- * that opens {@link #KNOWLEDGE_NEEDED} (the Skeleton Lord, knowledge level 3), a <b>master</b> of a class (a villager of the trade
+ * A second class, learned late (fifth edition's multiclassing). Once a player has a first class and has learned a second-class
+ * perk in the skill tree (any pillar's, at level 15: Andy swapped it in for the Skeleton Lord), a <b>master</b> of a class (a villager of the trade
  * the class grows from, at profession level {@link #MASTER_LEVEL}, the top rung) will teach it for {@link #FEE_SILVER} silver:
  * sneak and use the master with an empty hand ({@link ClassTeachers}). A class with something to pick (a patron, an oath, a
  * foe, a first spell) opens the class screen on that class alone, and the lesson is paid when the pick is sealed.
@@ -39,8 +39,6 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
  * feats with them).
  */
 public final class SecondClass {
-	/** The knowledge level a player needs before a master will take them on (3: the Skeleton Lord has fallen). */
-	public static final int KNOWLEDGE_NEEDED = 3;
 	/** The profession level of a master (the top rung of the villager ladder). */
 	static final int MASTER_LEVEL = 5;
 	/** What the lesson costs. */
@@ -105,8 +103,10 @@ public final class SecondClass {
 	/** Whether {@code player} may take {@code cls} as a second class now. */
 	public static boolean may(ServerPlayer player, PlayerClass cls) {
 		PlayerClass first = Classes.classOf(player);
-		return first != null && first != cls && Classes.second(player) == null
-			&& (player.isCreative() || Knowledge.level(player) >= KNOWLEDGE_NEEDED);
+		// (Andy's skill-tree locks) a second-class perk (any pillar's, at level 15) stands in for the Skeleton Lord
+		return first != null && first != cls && Classes.second(player) == null && (player.isCreative()
+			|| Skills.of(player).rank(Skills.Perk.SECOND_SURVIVAL) > 0 || Skills.of(player).rank(Skills.Perk.SECOND_STEALTH) > 0
+			|| Skills.of(player).rank(Skills.Perk.SECOND_STRENGTH) > 0);
 	}
 
 	/** The option kinds ("learn:cleric") {@code master} offers {@code player} now. */

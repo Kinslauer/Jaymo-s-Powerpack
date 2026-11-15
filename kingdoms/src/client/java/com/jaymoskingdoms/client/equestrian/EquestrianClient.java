@@ -178,7 +178,10 @@ public final class EquestrianClient {
 		if (whistling && whistleHeld > 0) {
 			if (++whistleHeld > WHEEL_HOLD && minecraft.player != null && minecraft.gui.screen() == null) {
 				whistleHeld = -1;
-				minecraft.gui.setScreen(new HorseWheelScreen(whistleKey, commanded(minecraft.player)));
+				// (Andy's skill-tree locks) the wheel is learned: Horseman (the server refuses its commands too)
+				if (com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
+					minecraft.gui.setScreen(new HorseWheelScreen(whistleKey, commanded(minecraft.player)));
+				}
 			}
 		} else if (!whistling) {
 			if (whistleHeld > 0 && minecraft.player != null) {

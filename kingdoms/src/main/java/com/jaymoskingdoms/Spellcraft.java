@@ -410,6 +410,12 @@ public final class Spellcraft {
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// (Andy's skill-tree locks) the imbue, the bolt and the element's spells are learned: Sorcery, and Death and Blood
+		// the Forbidden Arts after it
+		if (!TreeLocks.check(player, TreeLocks.Lock.SORCERY)
+			|| ForbiddenArts.forbidden(element) && !TreeLocks.check(player, TreeLocks.Lock.FORBIDDEN)) {
+			return;
+		}
 		// a cast in the window is answered first, if they know counterspell
 		if (Counterspell.key(player, level)) {
 			return;

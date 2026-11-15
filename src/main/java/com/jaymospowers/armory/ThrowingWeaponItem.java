@@ -52,6 +52,10 @@ public class ThrowingWeaponItem extends Item {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.THROWER)) {
+			// (Andy's skill-tree locks) throwing weapons is learned: Thrower
+			return InteractionResult.FAIL;
+		}
 		if (!this.held) {
 			if (level instanceof ServerLevel serverLevel) {
 				ItemStack thrown = stack.consumeAndReturn(1, player);

@@ -218,7 +218,8 @@ public final class EmberKindle {
 			return;
 		}
 		live.heard = now;
-		if (!live.on && usable(player)) {
+		// (Andy's skill-tree locks) a blood's hold is learned: Blood Awakening
+		if (!live.on && usable(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
 			live.on = true;
 			live.since = now;
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8F, 0.7F);

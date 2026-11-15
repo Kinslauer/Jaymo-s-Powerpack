@@ -128,7 +128,8 @@ public final class Leaves {
 		Vec3 v = entity.getDeltaMovement();
 		double y = v.y * (v.y < 0.0 ? FALL_DRAG : RISE_DRAG);
 		if (entity instanceof LivingEntity && ((Jumper)entity).jaymospowers$jumping()) {
-			y = Math.max(y, CLIMB_SPEED);
+			// (a player climbs faster by their Agility)
+			y = Math.max(y, entity instanceof net.minecraft.world.entity.player.Player player ? CLIMB_SPEED * Agility.factor(player) : CLIMB_SPEED);
 		} else if (entity instanceof Spider spider && spider.getTarget() == null && y < 0.0) {
 			// a spider clings in the leaves instead of sinking through them (it drops when it has prey below)
 			y = 0.0;
