@@ -181,7 +181,17 @@ public final class SteamTrades {
 				if (job == null) {
 					continue;
 				}
-				working.merge(job, 1, Integer::sum);
+				if (job.profession().get() == Professions.AERONAUT) {
+					// a captain is his own airship's: one here from another town's is not this town's
+					if (!v.hasAttached(SteamAirships.CAPTAIN)) {
+						v.setAttached(SteamAirships.CAPTAIN, town.id());
+					}
+					if (Integer.valueOf(town.id()).equals(v.getAttached(SteamAirships.CAPTAIN))) {
+						working.merge(job, 1, Integer::sum);
+					}
+				} else {
+					working.merge(job, 1, Integer::sum);
+				}
 				if (STOCKED.getOrDefault(v.getUUID(), -1L) != day) {
 					STOCKED.put(v.getUUID(), day);
 					if (v.getOffers().isEmpty()) {
@@ -191,12 +201,14 @@ public final class SteamTrades {
 					}
 				}
 			}
+			// while her airship is away her captain is aboard her: none taken on in his place
+			boolean shipHome = SteamAirships.home(level, town);
 			for (Villager v : folk) {
-				if (!hirable(v)) {
+				if (!hirable(f, v)) {
 					continue;
 				}
 				for (Job job : JOBS) {
-					if (working.getOrDefault(job, 0) >= job.perTown()) {
+					if (working.getOrDefault(job, 0) >= job.perTown() || job.profession().get() == Professions.AERONAUT && !shipHome) {
 						continue;
 					}
 					v.setVillagerData(v.getVillagerData().withProfession(BuiltInRegistries.VILLAGER_PROFESSION.wrapAsHolder(job.profession().get())));
@@ -204,6 +216,9 @@ public final class SteamTrades {
 					v.setVillagerXp(Math.max(1, v.getVillagerXp()));
 					v.setPersistenceRequired();
 					v.setOffers(job.wares().get());
+					if (job.profession().get() == Professions.AERONAUT) {
+						v.setAttached(SteamAirships.CAPTAIN, town.id());
+					}
 					if (v.getMainHandItem().isEmpty()) {
 						v.setItemSlot(EquipmentSlot.MAINHAND, job.tool().get());
 					}
@@ -225,10 +240,11 @@ public final class SteamTrades {
 		return false;
 	}
 
-	/** An idle grown villager (not a worker, a ruler, a guard or someone's family) who might take up a stall. */
-	private static boolean hirable(Villager v) {
+	/** An idle grown villager of {@code f} (not its elder, a worker, a ruler, a guard, a visitor, downed or someone's family) who might take up a stall. */
+	private static boolean hirable(Faction f, Villager v) {
 		boolean grown = McaCompat.LOADED ? McaCompat.adult(v) : !v.isBaby();
 		return grown && v.getVillagerData().profession().is(VillagerProfession.NONE) && !(v instanceof Worker w && w.role() >= 0) && !Rulers.is(v)
+			&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())) && !Visitors.is(v) && !Downed.isDowned(v)
 			&& !(McaCompat.LOADED && (McaCompat.isGuard(v) || McaCompat.playerFamily(v) || McaCompat.following(v) != null))
 			&& !v.hasAttached(Emigrants.MOVE);
 	}

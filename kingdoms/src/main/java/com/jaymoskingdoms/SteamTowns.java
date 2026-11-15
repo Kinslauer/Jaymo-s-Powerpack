@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,9 +70,12 @@ public final class SteamTowns {
 	/**
 	 * A steam town: its settlement, its airfield's frame (the corner its blueprint is laid from, and the way it faces),
 	 * and its airship's state: the town she lies at away from home and since when, when she last left a berth
-	 * (-1: not flying), and since when her home berth has stood empty with nothing to account for it (-1: it hasn't).
+	 * (-1: not flying), since when her home berth has stood empty with nothing to account for it (-1: it hasn't), where
+	 * her wheel stands if she came down short of any berth and since when, and her captain while he is stowed aboard her
+	 * as she goes home unseen ({@link SteamAirships#upkeep}).
 	 */
-	record Town(int id, BlockPos field, Direction facing, Optional<Integer> awayAt, long awaySince, long left, long gone) {
+	record Town(int id, BlockPos field, Direction facing, Optional<Integer> awayAt, long awaySince, long left, long gone, Optional<BlockPos> lost,
+		long lostSince, Optional<CompoundTag> captain) {
 		static final Codec<Town> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("id").forGetter(Town::id),
 				BlockPos.CODEC.fieldOf("field").forGetter(Town::field),
@@ -79,7 +83,10 @@ public final class SteamTowns {
 				Codec.INT.optionalFieldOf("away_at").forGetter(Town::awayAt),
 				Codec.LONG.optionalFieldOf("away_since", -1L).forGetter(Town::awaySince),
 				Codec.LONG.optionalFieldOf("left", -1L).forGetter(Town::left),
-				Codec.LONG.optionalFieldOf("gone", -1L).forGetter(Town::gone))
+				Codec.LONG.optionalFieldOf("gone", -1L).forGetter(Town::gone),
+				BlockPos.CODEC.optionalFieldOf("lost").forGetter(Town::lost),
+				Codec.LONG.optionalFieldOf("lost_since", -1L).forGetter(Town::lostSince),
+				CompoundTag.CODEC.optionalFieldOf("captain").forGetter(Town::captain))
 			.apply(i, Town::new));
 
 		CampBuildings.Placer placer() {
@@ -87,15 +94,29 @@ public final class SteamTowns {
 		}
 
 		Town away(Optional<Integer> at, long since) {
-			return new Town(this.id, this.field, this.facing, at, since, this.left, this.gone);
+			return new Town(this.id, this.field, this.facing, at, since, this.left, this.gone, this.lost, this.lostSince, this.captain);
 		}
 
 		Town leaving(long left) {
-			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, left, this.gone);
+			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, left, this.gone, this.lost, this.lostSince, this.captain);
 		}
 
 		Town missing(long gone) {
-			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, this.left, gone);
+			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, this.left, gone, this.lost, this.lostSince, this.captain);
+		}
+
+		/** She came down at {@code wheel} (her helm), short of any berth, at {@code since}; empty: she isn't lying anywhere but a berth. */
+		Town stranded(Optional<BlockPos> wheel, long since) {
+			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, this.left, this.gone, wheel, since, this.captain);
+		}
+
+		Town stowed(Optional<CompoundTag> body) {
+			return new Town(this.id, this.field, this.facing, this.awayAt, this.awaySince, this.left, this.gone, this.lost, this.lostSince, body);
+		}
+
+		/** She is accounted for nowhere but her home berth: no flight, no stay, no stranding, no empty berth. */
+		Town home() {
+			return new Town(this.id, this.field, this.facing, Optional.empty(), -1L, -1L, -1L, Optional.empty(), -1L, this.captain);
 		}
 	}
 
@@ -233,10 +254,34 @@ public final class SteamTowns {
 				return false;
 			}
 		}
-		if (Raids.playerNear(level, at, HIDE_RANGE) || com.jaymoskingdoms.seas.Offshore.island(level, at.getX(), at.getZ())) {
+		if (Raids.playerNear(level, at, HIDE_RANGE) || com.jaymoskingdoms.seas.Offshore.island(level, at.getX(), at.getZ()) || built(level, at)) {
 			return false;
 		}
 		return level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), at, BELL_CLEARANCE, PoiManager.Occupancy.ANY).isEmpty();
+	}
+
+	/** Some player has set a block anywhere on the town's ground, at any height ({@link Placed}): somebody's, not ours to level. */
+	private static boolean built(ServerLevel level, BlockPos at) {
+		int x0 = at.getX() - RADIUS, x1 = at.getX() + RADIUS, z0 = at.getZ() - RADIUS, z1 = at.getZ() + RADIUS;
+		for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
+			for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
+				net.minecraft.world.level.chunk.LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+				if (chunk == null) {
+					return true;
+				}
+				java.util.Map<String, Placed.Mark> marks = chunk.getAttached(Placed.MARKS);
+				if (marks == null) {
+					continue;
+				}
+				for (String key : marks.keySet()) {
+					BlockPos p = BlockPos.of(Long.parseLong(key));
+					if (p.getX() >= x0 && p.getX() <= x1 && p.getZ() >= z0 && p.getZ() <= z1) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/** A new steam town round {@code center} on {@code floor}, its gate toward {@code gate}: built, named, peopled, its airship on her berth. */
@@ -284,7 +329,7 @@ public final class SteamTowns {
 		});
 		// the airfield's frame, as place() laid it, and the town's airship on her berth
 		Direction fieldFacing = turned(gate, AIRFIELD.turns());
-		Town record = new Town(id, frame.at(AIRFIELD.x(), -1, AIRFIELD.z()), fieldFacing, Optional.empty(), -1L, -1L, -1L);
+		Town record = new Town(id, frame.at(AIRFIELD.x(), -1, AIRFIELD.z()), fieldFacing, Optional.empty(), -1L, -1L, -1L, Optional.empty(), -1L, Optional.empty());
 		put(level, record);
 		SteamAirships.lay(level, record);
 		Storehouse.build(level, Factions.get(server, id));

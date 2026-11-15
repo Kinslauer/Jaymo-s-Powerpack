@@ -17,6 +17,8 @@ final class SteamBuildings {
 	/** The airfield's size, and where on it the town's own airship lies and where a visiting one comes down (her corner, y her keel). */
 	static final int FIELD_WIDTH = 17, FIELD_DEPTH = 15;
 	static final int[] HOME_BERTH = {1, 2, 2}, VISITOR_BERTH = {11, 2, 2};
+	/** Where on the landing stage each berth's captain waits for passengers, beside her gangway. */
+	static final int[] HOME_STAGE = {7, 3, 8}, VISITOR_STAGE = {9, 3, 8};
 	/** The airship: her deck's width and length, and how high she stands from her keel to the top of her bag. */
 	static final int SHIP_WIDTH = 5, SHIP_LENGTH = 11, SHIP_HEIGHT = 7;
 	/** The windmill's hub, above the tower's floor. */

@@ -19,6 +19,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -26,40 +27,54 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * The steam towns' airships (GT New Horizons picks, patch 9; Andy: "maybe they have airships?"). Each steam town
  * ({@link SteamTowns}) keeps one on its berth at the airfield: a railed deck under a bag of wool, a balloon {@link Ship}
- * of the sailing code's kind. Standing on her deck, a player buys passage from her captain (the town's aeronaut,
- * {@link SteamTrades}) on MCA's Interact page ("Buy Passage"): to another steam town, or home if she lies away. She casts
- * off with her captain at the wheel, climbs, and flies there on the wind with her boiler pushing her along
+ * of the sailing code's kind, and her captain (the town's aeronaut, {@link SteamTrades}, marked {@link #CAPTAIN}) waits
+ * on the landing stage beside her. Standing on her deck, a player buys passage from him on MCA's Interact page ("Buy
+ * Passage"): to another steam town, or home if she lies away. She casts off with her captain at the wheel (hers while
+ * she flies: no player may take it), climbs, and flies there on the wind with her boiler pushing her along
  * ({@link #STEAM_CRUISE}), going up over high ground ahead of her, then comes down onto that town's visitor berth (or her
- * own) and is blocks again. With no other steam town in the world, her captain shakes his head.
+ * own) and is blocks again. A flight that can't be finished, or a berth found blocked, brings her down onto the ground
+ * wherever she is ({@link #SETTLE}). With no other steam town in the world, her captain shakes his head.
  * <p>
- * <b>The passenger</b> ({@link #PASSENGER}): everyone on her deck when she casts off is kept from harm until they are
- * standing on the ground again: no damage, no fall, and one who goes over the rail is caught and set back on her deck.
+ * <b>The passenger</b> ({@link #PASSENGER}): everyone aboard her in flight is kept from harm while they are aboard and
+ * for {@link #GRACE} after: no damage, no fall, and one who goes over the rail is caught and set back on her deck. It
+ * ends at death and on leaving the Overworld.
  * <p>
  * <b>The way home.</b> Lying at another town, she waits there a day ({@link #AWAY_STAY}) for anyone wanting to fly back.
- * Then, the next time that berth is loaded and nobody is near, she is gone from it, and her own berth at home has her
- * again the next time it is loaded with nobody near ({@link #upkeep}): an empty flight never loads a chunk.
+ * Then, the next time that berth is loaded and nobody is near, she is gone from it with her captain aboard, and her own
+ * berth at home has them both again the next time it is loaded with nobody near ({@link #upkeep}): an empty flight never
+ * loads a chunk. One brought down short of a berth is taken home the same way from where she lies.
  * <p>
  * <b>Chunks.</b> She flies only where a player is: a passenger aboard loads the way ahead as anyone travelling does, and
  * nothing more is held loaded. If every passenger leaves the game she waits where she is, her course kept on her
@@ -86,26 +101,35 @@ public final class SteamAirships implements Ship.Skyfaring {
 	static final double STEAM_CRUISE = 0.35, STEAM_MOST = 0.35;
 	/** Making no way for this long (ticks), she goes this much higher. */
 	static final int STUCK_TICKS = 60, OVER_STUCK = 6;
-	/** A flight that has taken this long (ticks) is given up and she is moored where she hangs; coming down that long, the same. */
+	/** A flight that has taken this long (ticks) is given up and she comes down where she is; coming down onto her berth that long, the same. */
 	static final long LONGEST_FLIGHT = 24000L;
 	static final int DOWN_MOST = 1200;
-	/** Passage: the captain this near her wheel, the player this near it (on her deck); the fare (emeralds' worth) and how it grows with distance. */
-	static final double CAPTAIN_REACH = 32.0, ABOARD_REACH = 9.0;
+	/** Coming down onto open ground: the longest it may take (ticks), and how long she may hang without sinking before she lies where she is. */
+	static final int SETTLE_MOST = 1200, SETTLE_STALL = 40;
+	/** Passage: her captain this near her wheel; the fare (emeralds' worth) and how it grows with distance; how many towns he names. */
+	static final double CAPTAIN_REACH = 32.0;
 	static final int FARE_BASE = 3, FARE_PER = 250, FARE_MOST = 20, DESTINATIONS = 3;
+	/** A captain farther than this (blocks) from his place on the stage walks back to it, at this pace. */
+	static final double CAPTAIN_STAY = 8.0;
+	static final float CAPTAIN_WALK = 0.5F;
 	/** How often the berths are seen to (ticks), and how near no player may be for a ship to come or go unseen. */
 	static final int UPKEEP_EVERY = 200;
 	static final double HIDE_RANGE = 64.0;
-	/** She lies at another town this long before she goes home; a flight unheard of this long is lost; a berth found empty is laid again after this. */
-	static final long AWAY_STAY = 24000L, LOST_AFTER = 48000L, REBUILD_TICKS = 48000L;
-	/** How often (ticks) the passengers are looked after. */
-	static final int SAFE_EVERY = 5;
+	/** She lies at another town this long before she goes home; a flight or a stay unheard of this long is given up; a berth found empty is laid again after this. */
+	static final long AWAY_STAY = 24000L, LOST_AFTER = 120000L, REBUILD_TICKS = 48000L;
+	/** How often (ticks) the passengers are looked after; how long their care outlasts their last tick aboard her in flight; how far off one is caught back. */
+	static final int SAFE_EVERY = 5, GRACE = 200;
+	static final double CATCH_REACH = 64.0;
+	/** How far round where her wheel should be (blocks) it is looked for once she is moored. */
+	static final int FIND_HELM = 4;
 
-	/** The legs of a flight: up from her berth, across, down onto the berth she is bound for. */
-	static final int UP = 0, OUT = 1, DOWN = 2;
+	/** The legs of a flight: up from her berth, across, down onto the berth she is bound for, down onto open ground. */
+	static final int UP = 0, OUT = 1, DOWN = 2, SETTLE = 3;
 
 	/**
 	 * A flight: the town she belongs to (-1: none's), the town she is bound for, where her keel will lie there and how
-	 * she will lie, the height she cruises at, the leg she is on, when she cast off.
+	 * she will lie, the height she cruises at, the leg she is on, when she cast off (coming down on open ground: when she
+	 * began to).
 	 */
 	record Trip(int owner, int to, Vec3 target, float yaw, double cruise, int leg, long began) {
 		static final Codec<Trip> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -123,7 +147,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 	}
 
-	/** A passenger: the airship they flew on, and when their care runs out at the latest (they are on the ground by then). */
+	/** A passenger: the airship they fly on, and when their care runs out (it is put off while they are aboard her in flight). */
 	record Passage(UUID ship, long until) {
 		static final Codec<Passage> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.CODEC.fieldOf("ship").forGetter(Passage::ship),
@@ -134,9 +158,18 @@ public final class SteamAirships implements Ship.Skyfaring {
 	public static final AttachmentType<Trip> TRIP = AttachmentRegistry.create(JaymosKingdoms.id("steam_airship_trip"), builder -> builder.persistent(Trip.CODEC));
 	public static final AttachmentType<Passage> PASSENGER = AttachmentRegistry.create(JaymosKingdoms.id("steam_airship_passenger"),
 		builder -> builder.persistent(Passage.CODEC));
+	/** An aeronaut's town, whose airship he captains wherever she lies. */
+	public static final AttachmentType<Integer> CAPTAIN = AttachmentRegistry.create(JaymosKingdoms.id("steam_airship_captain"),
+		builder -> builder.persistent(Codec.INT));
 
-	/** One of a town's two berths: where her wheel stands, where her keel lies and how she lies, and every block of her there. */
-	record Berth(BlockPos helm, Vec3 keel, float yaw, List<BlockPos> blocks) {
+	/** One of a town's two berths: where her wheel stands, where her keel lies and how she lies, every block of her there, its corners, her captain's place. */
+	record Berth(BlockPos helm, Vec3 keel, float yaw, List<BlockPos> blocks, BlockPos min, BlockPos max, BlockPos stage) {
+		/** {@code player} stands on her deck (under her bag, inside her rails' square). */
+		boolean holds(ServerPlayer player) {
+			BlockPos at = player.blockPosition();
+			return at.getX() >= this.min.getX() && at.getX() <= this.max.getX() && at.getZ() >= this.min.getZ() && at.getZ() <= this.max.getZ()
+				&& player.getY() >= this.min.getY() + 0.9 && player.getY() < this.min.getY() + 4.0;
+		}
 	}
 
 	/** Where a captain will fly: the town, her keel's place and heading there, the fare. */
@@ -147,10 +180,14 @@ public final class SteamAirships implements Ship.Skyfaring {
 	private record Asked(int captain, BlockPos helm, int owner, List<Dest> dests) {
 	}
 
-	/** Each flight under way: how long she has made no way (ticks), how much higher she has gone for it, how high the ground ahead wants her, how long she has been coming down. */
+	/**
+	 * Each flight under way: how long she has made no way (ticks), how much higher she has gone for it, how high the
+	 * ground ahead wants her, how long she has been coming down; coming down on open ground, where she will lie and how
+	 * long she has hung without sinking.
+	 */
 	private static final class Flight {
-		int stuck, extra, down;
-		double ahead = Double.NEGATIVE_INFINITY;
+		int stuck, extra, down, stall;
+		double ahead = Double.NEGATIVE_INFINITY, land = Double.NaN, lastY = Double.NaN;
 	}
 
 	private static final Map<UUID, Flight> FLIGHTS = new HashMap<>();
@@ -162,11 +199,12 @@ public final class SteamAirships implements Ship.Skyfaring {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("airship attachments: {} {}", TRIP, PASSENGER);
+		JaymosKingdoms.LOGGER.debug("airship attachments: {} {} {}", TRIP, PASSENGER, CAPTAIN);
 		SteamAirships pilot = new SteamAirships();
 		pilot.before = Ship.skyfaring;
 		Ship.skyfaring = pilot;
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer p && p.hasAttached(PASSENGER)));
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(entity instanceof ServerPlayer p && guarded(p) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			ServerLevel level = Factions.level(server);
 			long now = level.getGameTime();
@@ -177,10 +215,25 @@ public final class SteamAirships implements Ship.Skyfaring {
 				upkeep(level, now);
 			}
 		});
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity instanceof Ship ship) {
+				FLIGHTS.remove(ship.getUUID());
+				Trip trip = ship.getAttached(TRIP);
+				if (trip != null && ship.getRemovalReason() != null && ship.getRemovalReason().shouldDestroy()) {
+					// wrecked in flight: her town builds another in time
+					wrecked(Factions.level(level.getServer()), trip);
+				}
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIGHTS.clear();
 			ASKED.clear();
 		});
+	}
+
+	@Override
+	public boolean keepsWheel(Ship ship) {
+		return ship.hasAttached(TRIP) || this.before != null && this.before.keepsWheel(ship);
 	}
 
 	// ---- the berths ----------------------------------------------------------------------------------------------------
@@ -193,6 +246,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 	static Berth berth(SteamTowns.Town town, boolean home) {
 		CampBuildings.Placer field = town.placer();
 		int[] b = home ? SteamBuildings.HOME_BERTH : SteamBuildings.VISITOR_BERTH;
+		int[] stage = home ? SteamBuildings.HOME_STAGE : SteamBuildings.VISITOR_STAGE;
 		List<BlockPos> blocks = new ArrayList<>();
 		BlockPos helm = null;
 		Direction facing = Direction.NORTH;
@@ -215,8 +269,14 @@ public final class SteamAirships implements Ship.Skyfaring {
 			}
 		}
 		int y0 = Integer.MAX_VALUE, ax = Integer.MAX_VALUE, bx = Integer.MIN_VALUE, az = Integer.MAX_VALUE, bz = Integer.MIN_VALUE;
+		int wx0 = Integer.MAX_VALUE, wx1 = Integer.MIN_VALUE, wz0 = Integer.MAX_VALUE, wz1 = Integer.MIN_VALUE, wy1 = Integer.MIN_VALUE;
 		for (BlockPos p : blocks) {
 			y0 = Math.min(y0, p.getY());
+			wy1 = Math.max(wy1, p.getY());
+			wx0 = Math.min(wx0, p.getX());
+			wx1 = Math.max(wx1, p.getX());
+			wz0 = Math.min(wz0, p.getZ());
+			wz1 = Math.max(wz1, p.getZ());
 			BlockPos local = p.subtract(helm).rotate(turn);
 			ax = Math.min(ax, local.getX());
 			bx = Math.max(bx, local.getX());
@@ -227,7 +287,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		Rotation back = turn.getRotated(turn).getRotated(turn);
 		BlockPos origin = helm.offset(middle.rotate(back));
 		Vec3 keel = new Vec3(origin.getX() + 0.5, origin.getY() + (y0 - helm.getY()), origin.getZ() + 0.5);
-		return new Berth(helm, keel, facing.toYRot(), blocks);
+		return new Berth(helm, keel, facing.toYRot(), blocks, new BlockPos(wx0, y0, wz0), new BlockPos(wx1, wy1, wz1), field.at(stage[0], stage[1], stage[2]));
 	}
 
 	/** {@code town}'s airship laid on her home berth, her bag in the town's colour. */
@@ -241,8 +301,21 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 	}
 
+	/** {@code town}'s airship lies on her home berth (loaded) with her captain about, not stowed aboard: no aeronaut is wanted in his place. */
+	static boolean home(ServerLevel level, SteamTowns.Town town) {
+		Berth b = berth(town, true);
+		return town.captain().isEmpty() && Loaded.made(level, b.helm()) && moored(level, b);
+	}
+
 	private static boolean moored(ServerLevel level, Berth berth) {
 		return level.getBlockState(berth.helm()).getBlock() instanceof HelmBlock;
+	}
+
+	/** Every chunk under the berth is made and loaded, so reading it waits on nothing. */
+	private static boolean loaded(ServerLevel level, Berth berth) {
+		BlockPos a = berth.min(), b = berth.max();
+		return Loaded.made(level, a.getX(), a.getZ()) && Loaded.made(level, b.getX(), b.getZ()) && Loaded.made(level, a.getX(), b.getZ())
+			&& Loaded.made(level, b.getX(), a.getZ());
 	}
 
 	private static boolean clear(ServerLevel level, Berth berth) {
@@ -255,12 +328,14 @@ public final class SteamAirships implements Ship.Skyfaring {
 		return true;
 	}
 
-	/** A moored airship taken off her berth unseen (she has flown home): her blocks lifted out of the world and gone. */
-	private static void putAway(ServerLevel level, BlockPos helm) {
+	/** A moored airship taken off where she lies unseen (she has gone home): her blocks lifted out of the world and gone; false if they wouldn't come away. */
+	private static boolean putAway(ServerLevel level, BlockPos helm) {
 		Ship ship = Fleet.castOff(level, helm);
-		if (ship != null) {
-			ship.discard();
+		if (ship == null) {
+			return false;
 		}
+		ship.discard();
+		return true;
 	}
 
 	/** The town whose airship lies away at {@code town} (on its visitor berth), or null. */
@@ -273,26 +348,96 @@ public final class SteamAirships implements Ship.Skyfaring {
 		return null;
 	}
 
+	// ---- her captain ---------------------------------------------------------------------------------------------------
+
+	/** {@code town}'s airship captain within {@code reach} of {@code near}, nearest first, or null. */
+	private static @Nullable Villager captain(ServerLevel level, int town, BlockPos near, double reach) {
+		Integer id = town;
+		List<Villager> found = level.getEntitiesOfClass(Villager.class, new AABB(near).inflate(reach),
+			v -> v.isAlive() && id.equals(v.getAttached(CAPTAIN)) && SteamTrades.aeronaut(v));
+		return found.stream().min(Comparator.comparingDouble(v -> v.distanceToSqr(Vec3.atCenterOf(near)))).orElse(null);
+	}
+
+	/** {@code town}'s captain near {@code near} taken aboard her as she goes home unseen: his body, kept on the town until her berth has her again. */
+	private static Optional<CompoundTag> stow(ServerLevel level, int town, BlockPos near, double reach) {
+		Villager v = captain(level, town, near, reach);
+		if (v == null) {
+			return Optional.empty();
+		}
+		v.stopRiding();
+		v.ejectPassengers();
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		if (!v.saveAsPassenger(out)) {
+			return Optional.empty();
+		}
+		CompoundTag body = out.buildResult();
+		v.discard();
+		return Optional.of(body);
+	}
+
+	/** {@code town}'s stowed captain back on his stage beside her, home again. */
+	private static void restore(ServerLevel level, SteamTowns.Town town, Berth berth) {
+		if (town.captain().isEmpty()) {
+			return;
+		}
+		Vec3 at = Vec3.atBottomCenterOf(berth.stage());
+		Entity loaded = EntityType.loadEntityRecursive(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), town.captain().get()), level,
+			EntitySpawnReason.LOAD, e -> {
+				e.snapTo(at.x, at.y, at.z, e.getYRot(), e.getXRot());
+				return e;
+			});
+		if (loaded instanceof Villager v && level.getEntity(v.getUUID()) == null) {
+			level.addFreshEntity(v);
+		}
+	}
+
+	/** {@code town}'s captain, wandered off from his place by {@code berth}, walks back to it. */
+	private static void standBy(ServerLevel level, int town, Berth berth, BlockPos seat) {
+		Villager v = captain(level, town, seat, SteamTowns.TOWN_REACH);
+		if (v != null && !v.isSleeping() && !v.isPassenger() && v.getTradingPlayer() == null
+			&& v.distanceToSqr(Vec3.atBottomCenterOf(berth.stage())) > CAPTAIN_STAY * CAPTAIN_STAY) {
+			v.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(berth.stage(), CAPTAIN_WALK, 1));
+		}
+	}
+
+	// ---- upkeep ----------------------------------------------------------------------------------------------------------
+
 	/**
-	 * Every loaded airfield: a visitor whose stay is over (or who belongs to nobody) is put away unseen and her own town
-	 * told she is coming home; an empty home berth is laid again unseen once its ship is home, overdue, or (stolen,
-	 * burnt) after {@link #REBUILD_TICKS}.
+	 * Every loaded airfield and every airship brought down short of a berth: a visitor whose stay is over, or one lying
+	 * out in the country, is put away unseen with her captain aboard and her own town told she is coming home; an empty
+	 * home berth is laid again unseen (her captain back on his stage) once its ship is home, or (wrecked, stolen, burnt,
+	 * or unheard of for {@link #LOST_AFTER}) after {@link #REBUILD_TICKS}. Records are cleared only for what has really
+	 * happened.
 	 */
-	private static void upkeep(ServerLevel level, long now) {
-		List<SteamTowns.Town> towns = SteamTowns.all(level);
-		for (SteamTowns.Town t : towns) {
+	static void upkeep(ServerLevel level, long now) {
+		for (SteamTowns.Town t : SteamTowns.all(level)) {
+			if (t.lost().isPresent()) {
+				stranded(level, t, now);
+			}
+		}
+		for (SteamTowns.Town listed : SteamTowns.all(level)) {
+			SteamTowns.Town t = SteamTowns.get(level, listed.id());
+			Faction f = Factions.get(level.getServer(), listed.id());
+			if (t == null || f == null) {
+				continue;
+			}
 			Berth home = berth(t, true), visitor = berth(t, false);
-			if (!level.isPositionEntityTicking(home.helm()) || !level.isPositionEntityTicking(visitor.helm())) {
+			if (!level.isPositionEntityTicking(home.helm()) || !level.isPositionEntityTicking(visitor.helm()) || !loaded(level, home) || !loaded(level, visitor)) {
 				continue;
 			}
 			boolean seen = Raids.playerNear(level, home.helm(), HIDE_RANGE);
-			if (!seen && moored(level, visitor)) {
-				SteamTowns.Town owner = visiting(towns, t.id());
-				if (owner == null || now - owner.awaySince() > AWAY_STAY) {
-					putAway(level, visitor.helm());
-					if (owner != null) {
-						SteamTowns.put(level, owner.away(Optional.empty(), -1L).leaving(-1L).missing(now - REBUILD_TICKS));
+			SteamTowns.Town owner = visiting(SteamTowns.all(level), t.id());
+			if (owner != null) {
+				if (!moored(level, visitor)) {
+					// she isn't where she was left (taken, or broken up): her town builds another in time
+					SteamTowns.put(level, owner.home().missing(now));
+				} else if (!seen && now - owner.awaySince() > AWAY_STAY) {
+					if (putAway(level, visitor.helm())) {
+						Optional<CompoundTag> body = stow(level, owner.id(), f.seat(), SteamTowns.TOWN_REACH);
+						SteamTowns.put(level, owner.home().missing(now - REBUILD_TICKS).stowed(body.isPresent() ? body : owner.captain()));
 					}
+				} else {
+					standBy(level, owner.id(), visitor, f.seat());
 				}
 			}
 			t = SteamTowns.get(level, t.id());
@@ -300,34 +445,74 @@ public final class SteamAirships implements Ship.Skyfaring {
 				continue;
 			}
 			if (moored(level, home)) {
-				if (t.gone() >= 0 || t.left() >= 0 || t.awayAt().isPresent()) {
-					SteamTowns.put(level, t.away(Optional.empty(), -1L).leaving(-1L).missing(-1L));
+				SteamTowns.Town next = t.home();
+				if (t.captain().isPresent() && !seen) {
+					restore(level, t, home);
+					next = next.stowed(Optional.empty());
 				}
+				if (!next.equals(t)) {
+					SteamTowns.put(level, next);
+				}
+				standBy(level, t.id(), home, f.seat());
 				continue;
 			}
 			boolean flying = t.left() >= 0 && now - t.left() < LOST_AFTER;
-			boolean away = t.awayAt().isPresent() && now - t.awaySince() < AWAY_STAY * 2;
-			if (flying || away) {
+			boolean away = t.awayAt().isPresent() && now - t.awaySince() < LOST_AFTER;
+			if (flying || away || t.lost().isPresent()) {
 				continue;
 			}
-			// overdue from a flight or a stay: she comes home; gone with no word of her: she is built again in time
+			// unheard of from a flight or a stay this long: given up, and built again; gone with no word of her: built again in time
 			boolean accounted = t.left() >= 0 || t.awayAt().isPresent();
-			long gone = t.gone() >= 0 ? t.gone() : accounted ? now - REBUILD_TICKS : now;
+			long gone = accounted ? now - REBUILD_TICKS : t.gone() >= 0 ? t.gone() : now;
 			if (t.gone() != gone || accounted) {
-				t = t.away(Optional.empty(), -1L).leaving(-1L).missing(gone);
+				t = t.home().missing(gone);
 				SteamTowns.put(level, t);
 			}
 			if (now - gone >= REBUILD_TICKS && !seen && clear(level, home)) {
 				lay(level, t);
-				SteamTowns.put(level, t.missing(-1L));
+				restore(level, t, home);
+				SteamTowns.put(level, t.home().stowed(Optional.empty()));
 			}
+		}
+	}
+
+	/** {@code t}'s airship lying out in the country: put away unseen and her captain with her, or, gone from there, built again in time. */
+	private static void stranded(ServerLevel level, SteamTowns.Town t, long now) {
+		BlockPos wheel = t.lost().orElseThrow();
+		if (!level.isPositionEntityTicking(wheel)) {
+			if (now - t.lostSince() > LOST_AFTER) {
+				SteamTowns.put(level, t.stranded(Optional.empty(), -1L).missing(now));
+			}
+			return;
+		}
+		if (Raids.playerNear(level, wheel, HIDE_RANGE)) {
+			return;
+		}
+		if (level.getBlockState(wheel).getBlock() instanceof HelmBlock) {
+			if (!putAway(level, wheel)) {
+				// built onto, or grown into: left where she lies until she comes away
+				return;
+			}
+			Optional<CompoundTag> body = stow(level, t.id(), wheel, CAPTAIN_REACH);
+			SteamTowns.put(level, t.stranded(Optional.empty(), -1L).missing(now - REBUILD_TICKS).stowed(body.isPresent() ? body : t.captain()));
+		} else {
+			Optional<CompoundTag> body = stow(level, t.id(), wheel, CAPTAIN_REACH);
+			SteamTowns.put(level, t.stranded(Optional.empty(), -1L).missing(now).stowed(body.isPresent() ? body : t.captain()));
+		}
+	}
+
+	/** Her flight ended with her wrecked: her town builds another in time. */
+	private static void wrecked(ServerLevel level, Trip trip) {
+		SteamTowns.Town o = trip.owner() >= 0 ? SteamTowns.get(level, trip.owner()) : null;
+		if (o != null) {
+			SteamTowns.put(level, o.home().missing(level.getGameTime()));
 		}
 	}
 
 	// ---- passage -------------------------------------------------------------------------------------------------------
 
-	/** A moored airship {@code player} stands aboard with {@code captain} near her wheel: her town, whether it's her home berth, the berth. */
-	private record Mooring(SteamTowns.Town town, boolean home, Berth berth) {
+	/** A moored airship {@code player} stands on the deck of with her own captain near her wheel: her town's berth, whether it's her home, the berth, the town she belongs to. */
+	private record Mooring(SteamTowns.Town town, boolean home, Berth berth, int owner) {
 	}
 
 	private static @Nullable Mooring mooring(ServerLevel level, ServerPlayer player, LivingEntity captain) {
@@ -337,31 +522,26 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 		for (boolean home : new boolean[] {true, false}) {
 			Berth b = berth(town, home);
-			Vec3 wheel = Vec3.atCenterOf(b.helm());
-			if (player.position().distanceToSqr(wheel) <= ABOARD_REACH * ABOARD_REACH && player.getY() >= b.helm().getY() - 0.5
-				&& captain.position().distanceToSqr(wheel) <= CAPTAIN_REACH * CAPTAIN_REACH && moored(level, b)) {
-				return new Mooring(town, home, b);
+			if (!b.holds(player) || !moored(level, b)) {
+				continue;
+			}
+			SteamTowns.Town visitor = home ? null : visiting(SteamTowns.all(level), town.id());
+			int owner = home ? town.id() : visitor == null ? -1 : visitor.id();
+			Integer his = captain.getAttached(CAPTAIN);
+			if (owner >= 0 && his != null && his == owner && captain.position().distanceToSqr(Vec3.atCenterOf(b.helm())) <= CAPTAIN_REACH * CAPTAIN_REACH) {
+				return new Mooring(town, home, b, owner);
 			}
 		}
 		return null;
 	}
 
-	/** "Buy Passage" shows on {@code v}'s Interact page: a steam town's aeronaut, with {@code player} aboard a moored airship near him. */
+	/** "Buy Passage" shows on {@code v}'s Interact page: a steam town's aeronaut, with {@code player} on the deck of his moored airship. */
 	static boolean offers(ServerPlayer player, LivingEntity v) {
 		return v instanceof Villager villager && SteamTrades.aeronaut(villager) && !villager.isBaby() && mooring(player.level(), player, v) != null;
 	}
 
-	/** The town that ship belongs to: the berth's own if she lies at home, else the town whose ship is away here (-1: nobody's). */
-	private static int owner(List<SteamTowns.Town> towns, Mooring m) {
-		if (m.home()) {
-			return m.town().id();
-		}
-		SteamTowns.Town o = visiting(towns, m.town().id());
-		return o == null ? -1 : o.id();
-	}
-
-	/** Where she can fly from {@code m}: home if she lies away, else every other steam town's visitor berth not taken, nearest first. */
-	private static List<Dest> destinations(ServerLevel level, Mooring m, int owner) {
+	/** Where she can fly from {@code m}: home if she lies away, else every other steam town's visitor berth not taken or blocked, nearest first. */
+	private static List<Dest> destinations(ServerLevel level, Mooring m) {
 		List<SteamTowns.Town> towns = SteamTowns.all(level);
 		List<Integer> bound = new ArrayList<>();
 		for (Ship s : Ships.in(level)) {
@@ -376,11 +556,15 @@ public final class SteamAirships implements Ship.Skyfaring {
 			if (t.id() == m.town().id()) {
 				continue;
 			}
-			boolean home = t.id() == owner;
+			boolean home = t.id() == m.owner();
 			if (!home && (visiting(towns, t.id()) != null || bound.contains(t.id()))) {
 				continue;
 			}
 			Berth b = berth(t, home);
+			// a berth seen to be built over is no place to come down (one out of sight is found out on the way)
+			if (loaded(level, b) && !clear(level, b)) {
+				continue;
+			}
 			double far = Math.sqrt(Raids.horizontal(from, b.helm()));
 			int fare = Math.min(FARE_MOST, FARE_BASE + (int)(far / FARE_PER));
 			out.add(new Dest(t.id(), SteamTowns.name(level, t), b.keel(), b.yaw(), fare));
@@ -396,8 +580,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		if (m == null) {
 			return;
 		}
-		int owner = owner(SteamTowns.all(level), m);
-		List<Dest> dests = destinations(level, m, owner);
+		List<Dest> dests = destinations(level, m);
 		if (dests.isEmpty()) {
 			Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.steam_captain.nowhere"), Speech.WHITE, 16.0);
 			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.0F);
@@ -417,7 +600,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 		options.add(Component.translatable("talk.jaymoskingdoms.work.close"));
 		enabled.add(true);
-		ASKED.put(player.getUUID(), new Asked(v.getId(), m.berth().helm(), owner, dests));
+		ASKED.put(player.getUUID(), new Asked(v.getId(), m.berth().helm(), m.owner(), dests));
 		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words, options, enabled));
 	}
 
@@ -430,17 +613,17 @@ public final class SteamAirships implements Ship.Skyfaring {
 		ASKED.remove(player.getUUID());
 		ServerLevel level = player.level();
 		if (answer.option() < 0 || answer.option() >= asked.dests().size() || !(level.getEntity(answer.entityId()) instanceof Villager captain)
-			|| !offers(player, captain)) {
+			|| !SteamTrades.aeronaut(captain)) {
 			return true;
 		}
+		// still on her deck, she still on that berth, and still his
 		Mooring m = mooring(level, player, captain);
-		if (m == null || !m.berth().helm().equals(asked.helm())) {
+		if (m == null || !m.berth().helm().equals(asked.helm()) || m.owner() != asked.owner()) {
 			return true;
 		}
 		Dest dest = asked.dests().get(answer.option());
 		// the berth she'd make for may have been taken while he was asked
-		List<Dest> now = destinations(level, m, asked.owner());
-		if (now.stream().noneMatch(d -> d.town() == dest.town())) {
+		if (destinations(level, m).stream().noneMatch(d -> d.town() == dest.town())) {
 			Speech.tell(level, captain, player, Component.translatable("talk.jaymoskingdoms.steam_captain.taken"), Speech.WHITE);
 			return true;
 		}
@@ -448,7 +631,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		if (!Money.charge(player, f, Money.worth(dest.fare()))) {
 			return true;
 		}
-		if (!launch(level, m, asked.owner(), captain, dest)) {
+		if (!launch(level, m, captain, dest)) {
 			// she wouldn't go (something's built against her): his fare back
 			Money.pay(player, f, Money.worth(dest.fare()));
 			Speech.tell(level, captain, player, Component.translatable("talk.jaymoskingdoms.steam_captain.fouled"), Speech.WHITE);
@@ -457,31 +640,23 @@ public final class SteamAirships implements Ship.Skyfaring {
 	}
 
 	/** She casts off from {@code m} with {@code captain} at her wheel and everyone on her deck as her passengers, bound for {@code dest}. */
-	private static boolean launch(ServerLevel level, Mooring m, int owner, Villager captain, Dest dest) {
+	private static boolean launch(ServerLevel level, Mooring m, Villager captain, Dest dest) {
 		Ship ship = Fleet.castOff(level, m.berth().helm());
 		if (ship == null) {
 			return false;
 		}
 		Fleet.Stations stations = Fleet.stations(ship);
-		if (!ship.flying() || stations.helm() == null) {
+		if (!ship.flying() || stations.helm() == null || !ship.takeAboard(captain, stations.helm())) {
 			ship.moor();
 			return false;
 		}
-		ship.takeAboard(captain, stations.helm());
 		long now = level.getGameTime();
 		double cruise = Math.max(ship.getY(), dest.keel().y) + CRUISE_UP;
-		ship.setAttached(TRIP, new Trip(owner, dest.town(), dest.keel(), dest.yaw(), cruise, UP, now));
-		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, ship.getBoundingBox().inflate(2.0))) {
-			if (Ships.aboard(p) == ship) {
-				p.setAttached(PASSENGER, new Passage(ship.getUUID(), now + LONGEST_FLIGHT * 2));
-				p.resetFallDistance();
-			}
-		}
-		if (owner >= 0) {
-			SteamTowns.Town o = SteamTowns.get(level, owner);
-			if (o != null) {
-				SteamTowns.put(level, o.away(Optional.empty(), -1L).leaving(now).missing(-1L));
-			}
+		ship.setAttached(TRIP, new Trip(m.owner(), dest.town(), dest.keel(), dest.yaw(), cruise, UP, now));
+		care(level, ship, now);
+		SteamTowns.Town o = SteamTowns.get(level, m.owner());
+		if (o != null) {
+			SteamTowns.put(level, o.home().leaving(now));
 		}
 		Speech.say(level, captain, Component.translatable("talk.jaymoskingdoms.steam_captain.off"), Speech.WHITE, 24.0);
 		level.playSound(null, ship.getX(), ship.getY() + 2.0, ship.getZ(), SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, 1.0F, 1.2F);
@@ -499,14 +674,25 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 		long now = level.getGameTime();
 		Flight flight = FLIGHTS.computeIfAbsent(ship.getUUID(), id -> new Flight());
+		if (now % SAFE_EVERY == 0) {
+			care(level, ship, now);
+		}
+		if (trip.leg() == SETTLE) {
+			return settle(level, ship, trip, flight, now);
+		}
 		if (now - trip.began() > LONGEST_FLIGHT || flight.down > DOWN_MOST) {
-			// she can't get there: moored where she hangs, and her town told where she is
-			arrived(level, ship, trip, false);
+			// she can't get there: down onto the ground where she is
+			giveUp(ship, trip, flight, now);
 			return Input.EMPTY;
 		}
 		double dx = trip.target().x - ship.getX(), dz = trip.target().z - ship.getZ(), far = Math.sqrt(dx * dx + dz * dz);
 		if (trip.leg() < DOWN && now % LOOK_EVERY == 0) {
 			flight.ahead = groundAhead(level, ship) + CLEAR;
+			if (far < APPROACH && blocked(level, trip)) {
+				// her berth built over: she comes down short of it
+				giveUp(ship, trip, flight, now);
+				return Input.EMPTY;
+			}
 		}
 		double cruise = Math.max(trip.cruise(), flight.ahead) + flight.extra;
 		double want = cruise, cloth = 0.0;
@@ -540,7 +726,10 @@ public final class SteamAirships implements Ship.Skyfaring {
 					ship.tow(new Vec3(dx / far * pull, 0.0, dz / far * pull));
 				}
 				if (Math.abs(ship.getY() - trip.target().y) < 0.2 && far < 0.3 && Math.abs(ship.way()) < 0.02 && square) {
-					arrived(level, ship, trip, true);
+					if (!lie(level, ship, trip, berthOf(level, trip))) {
+						// no room for her there after all
+						giveUp(ship, trip, flight, now);
+					}
 					return Input.EMPTY;
 				}
 			}
@@ -566,6 +755,72 @@ public final class SteamAirships implements Ship.Skyfaring {
 		Input rudder = Fleet.steer(ship, yaw, cloth, false, false);
 		boolean up = ship.aloft() < want - 0.15, down = ship.aloft() > want + 0.15;
 		return new Input(rudder.forward(), rudder.backward(), rudder.left(), rudder.right(), up, false, down);
+	}
+
+	/** The berth {@code trip} is bound for, or null if its town is no more. */
+	private static @Nullable Berth berthOf(ServerLevel level, Trip trip) {
+		SteamTowns.Town t = SteamTowns.get(level, trip.to());
+		return t == null ? null : berth(t, trip.to() == trip.owner());
+	}
+
+	/** The berth she is bound for is in sight and built over. */
+	private static boolean blocked(ServerLevel level, Trip trip) {
+		Berth b = berthOf(level, trip);
+		return b == null || loaded(level, b) && !clear(level, b);
+	}
+
+	/** She gives up on her berth and comes down onto the ground where she is. */
+	private static void giveUp(Ship ship, Trip trip, Flight flight, long now) {
+		ship.setAttached(TRIP, new Trip(trip.owner(), trip.to(), ship.position(), ship.getYRot(), trip.cruise(), SETTLE, now));
+		flight.down = 0;
+		flight.extra = 0;
+		flight.stall = 0;
+		flight.land = Double.NaN;
+		flight.lastY = Double.NaN;
+	}
+
+	/** Coming down on open ground: sinking onto it (a block of air under her keel, so she comes away again), then moored there. */
+	private static Input settle(ServerLevel level, Ship ship, Trip trip, Flight flight, long now) {
+		Hull h = ship.hull();
+		if (h == null) {
+			return Input.EMPTY;
+		}
+		if (now - trip.began() > SETTLE_MOST) {
+			// nowhere she will lie: let go to the wind (she moors herself where she drifts), and her town builds another in time
+			ship.removeAttached(TRIP);
+			FLIGHTS.remove(ship.getUUID());
+			wrecked(level, trip);
+			return Input.EMPTY;
+		}
+		if (Double.isNaN(flight.land) || now % LOOK_EVERY == 0) {
+			flight.land = landing(level, ship, h) + flight.extra;
+		}
+		flight.stall = Math.abs(ship.getY() - flight.lastY) < 0.01 ? flight.stall + 1 : 0;
+		flight.lastY = ship.getY();
+		if (ship.getY() - flight.land < 0.3 && Math.abs(ship.way()) < 0.05 || flight.stall > SETTLE_STALL) {
+			if (!lie(level, ship, trip, berthOf(level, trip))) {
+				// no room for her here: a block higher
+				flight.extra++;
+				flight.stall = 0;
+			}
+			return Input.EMPTY;
+		}
+		Input rudder = Fleet.steer(ship, ship.getYRot(), 0.0, false, false);
+		boolean up = ship.aloft() < flight.land - 0.15, down = ship.aloft() > flight.land + 0.15;
+		return new Input(rudder.forward(), rudder.backward(), rudder.left(), rudder.right(), up, false, down);
+	}
+
+	/** Where her keel lies coming down here: a block over the highest ground under any corner of her or her middle. */
+	private static double landing(ServerLevel level, Ship ship, Hull h) {
+		int top = level.getMinY();
+		for (double[] c : new double[][] {{h.minX, h.minZ}, {h.maxX, h.minZ}, {h.minX, h.maxZ}, {h.maxX, h.maxZ}, {0.0, 0.0}, {0.0, h.minZ}, {0.0, h.maxZ}}) {
+			Vec3 at = ship.toWorld(c[0], 0.0, c[1]);
+			int x = Mth.floor(at.x), z = Mth.floor(at.z);
+			if (Loaded.made(level, x, z)) {
+				top = Math.max(top, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z));
+			}
+		}
+		return top + 1 - h.minY;
 	}
 
 	/** The highest ground (its top block's height) under her and at {@link #LOOK_AHEAD} along her heading, where it is loaded. */
@@ -597,50 +852,104 @@ public final class SteamAirships implements Ship.Skyfaring {
 		}
 	}
 
-	/** Her flight is over: moored ({@code atBerth}: on the berth she was bound for), her captain calls the town, her town told where she lies. */
-	private static void arrived(ServerLevel level, Ship ship, Trip trip, boolean atBerth) {
-		List<LivingEntity> crew = ship.crewAboard();
-		ship.removeAttached(TRIP);
-		FLIGHTS.remove(ship.getUUID());
-		ship.moor();
-		long now = level.getGameTime();
-		if (trip.owner() >= 0) {
-			SteamTowns.Town o = SteamTowns.get(level, trip.owner());
-			if (o != null) {
-				SteamTowns.put(level, trip.to() == trip.owner() && atBerth ? o.away(Optional.empty(), -1L).leaving(-1L).missing(-1L)
-					: o.away(Optional.of(trip.to()), now).leaving(-1L));
+	/** Where her wheel is in the world now, or null if she has none. */
+	private static @Nullable BlockPos wheel(Ship ship) {
+		Hull h = ship.hull();
+		if (h == null || h.helm < 0) {
+			return null;
+		}
+		Ship.Piece p = h.pieces.get(h.helm);
+		return BlockPos.containing(ship.toWorld(p.x(), p.y(), p.z()));
+	}
+
+	/** The helm nearest {@code guess} once she is moored (she may lie a block or two off where she hung), or null. */
+	private static @Nullable BlockPos findHelm(ServerLevel level, @Nullable BlockPos guess) {
+		if (guess == null) {
+			return null;
+		}
+		BlockPos best = null;
+		for (BlockPos p : BlockPos.betweenClosed(guess.offset(-FIND_HELM, -1, -FIND_HELM), guess.offset(FIND_HELM, 1, FIND_HELM))) {
+			if (level.getBlockState(p).getBlock() instanceof HelmBlock && (best == null || p.distSqr(guess) < best.distSqr(guess))) {
+				best = p.immutable();
 			}
+		}
+		return best;
+	}
+
+	/**
+	 * Her flight is over: moored where she is, and her town told where she really lies: on the berth she was bound for
+	 * ({@code berth}, if she lies exactly on it), else out in the country at her wheel. False (and her course kept) if
+	 * there was no room for her.
+	 */
+	private static boolean lie(ServerLevel level, Ship ship, Trip trip, @Nullable Berth berth) {
+		List<LivingEntity> crew = ship.crewAboard();
+		BlockPos guess = wheel(ship);
+		Vec3 at = ship.position();
+		ship.removeAttached(TRIP);
+		if (!ship.moor()) {
+			ship.setAttached(TRIP, trip);
+			return false;
+		}
+		FLIGHTS.remove(ship.getUUID());
+		BlockPos helm = findHelm(level, guess);
+		boolean atBerth = berth != null && berth.helm().equals(helm);
+		long now = level.getGameTime();
+		SteamTowns.Town o = trip.owner() >= 0 ? SteamTowns.get(level, trip.owner()) : null;
+		if (o != null) {
+			SteamTowns.Town next = o.home();
+			if (atBerth && trip.to() != trip.owner()) {
+				next = next.away(Optional.of(trip.to()), now);
+			} else if (!atBerth) {
+				next = helm != null ? next.stranded(Optional.of(helm), now) : next.missing(now);
+			}
+			SteamTowns.put(level, next);
 		}
 		SteamTowns.Town to = SteamTowns.get(level, trip.to());
 		if (atBerth && to != null && !crew.isEmpty()) {
 			Speech.say(level, crew.getFirst(), Component.translatable("talk.jaymoskingdoms.steam_captain.arrived", SteamTowns.name(level, to)), Speech.WHITE, 24.0);
 		}
-		level.playSound(null, ship.getX(), ship.getY() + 2.0, ship.getZ(), SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, 1.0F, 0.9F);
+		level.playSound(null, at.x, at.y + 2.0, at.z, SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, 1.0F, 0.9F);
+		return true;
 	}
 
 	// ---- the passengers --------------------------------------------------------------------------------------------------
 
+	/** {@code player}'s care as a passenger holds now. */
+	private static boolean guarded(ServerPlayer player) {
+		Passage passage = player.getAttached(PASSENGER);
+		return passage != null && player.level().getGameTime() <= passage.until();
+	}
+
+	/** Everyone aboard her in flight is a passenger, cared for until {@link #GRACE} from now. */
+	private static void care(ServerLevel level, Ship ship, long now) {
+		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, ship.getBoundingBox().inflate(2.0))) {
+			if (p.isAlive() && !p.isSpectator() && Ships.aboard(p) == ship) {
+				p.setAttached(PASSENGER, new Passage(ship.getUUID(), now + GRACE));
+				p.resetFallDistance();
+			}
+		}
+	}
+
 	/**
-	 * Every passenger: kept from falling, set back on her deck if they went over the rail while she flies, and let go
-	 * once she has landed (or is lost) and they stand on the ground.
+	 * Every passenger: kept from falling, and set back on her deck if they went over the rail while she flies; their
+	 * care ends {@link #GRACE} after they were last aboard her in flight, at death, or on leaving the Overworld.
 	 */
 	private static void passengers(MinecraftServer server, long now) {
+		ServerLevel level = Factions.level(server);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			Passage passage = p.getAttached(PASSENGER);
 			if (passage == null) {
 				continue;
 			}
-			p.resetFallDistance();
-			Entity e = p.level().getEntity(passage.ship());
-			if (e instanceof Ship ship && !ship.isRemoved() && ship.hasAttached(TRIP)) {
-				if (Ships.aboard(p) != ship && !p.isPassenger()) {
-					Vec3 deck = ship.helmStand();
-					p.teleportTo(p.level(), deck.x, deck.y + 0.1, deck.z, Set.of(), p.getYRot(), p.getXRot(), false);
-				}
+			if (now > passage.until() || !p.isAlive() || p.level() != level) {
+				p.removeAttached(PASSENGER);
 				continue;
 			}
-			if ((p.onGround() || p.isInWater()) && Ships.aboard(p) == null || now > passage.until()) {
-				p.removeAttached(PASSENGER);
+			p.resetFallDistance();
+			if (level.getEntity(passage.ship()) instanceof Ship ship && !ship.isRemoved() && ship.hasAttached(TRIP) && Ships.aboard(p) != ship
+				&& !p.isPassenger() && p.distanceToSqr(ship) < CATCH_REACH * CATCH_REACH) {
+				Vec3 deck = ship.helmStand();
+				p.teleportTo(level, deck.x, deck.y + 0.1, deck.z, Set.of(), p.getYRot(), p.getXRot(), false);
 			}
 		}
 	}
