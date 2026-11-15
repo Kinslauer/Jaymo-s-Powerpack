@@ -4,10 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 17:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 18:03). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/tinker-gadget-icons|tinker-gadget-icons]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -27,14 +28,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
+- [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
+- [x] [[Inbox/Done/pr1377-text-pass|pr1377-text-pass]]
+- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
+- [x] [[Inbox/Done/pirateface-worth-rescuing-experiment|pirateface-worth-rescuing-experiment]]
+- [x] [[Inbox/Done/minecraft-server-bot-experiment|minecraft-server-bot-experiment]]
+- [x] [[Inbox/Done/frostborn-tech-villagers|frostborn-tech-villagers]]
+- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
 
 
 %% kanban:settings
