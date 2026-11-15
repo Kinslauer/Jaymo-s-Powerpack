@@ -102,8 +102,8 @@ whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they 
 - Back to back (twinned) = Twinned.
 Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
 guards. Still to place (their wearers don't exist in code yet, or MCA re-arms them): sky elders and well-wardens (the sky
-castle's wardens are MCA guards), dawnwatch (Sun-Marshal's guard), headsmen, demon captains of the Ash, Warden's hunters'
-sellers, pit warlords, twinned shrine oath.
+castle's wardens are MCA guards), dawnwatch wearers (Sun-Marshal's guard), headsmen, demon captains of the Ash, pit
+warlords. Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)

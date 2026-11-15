@@ -5,6 +5,14 @@ import com.jaymoskingdoms.barrow.ZombieKnight;
 import com.jaymoskingdoms.remnants.Monoliths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,6 +24,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 
 /**
  * Fantasy Armor (mod id {@value #MOD}, kenddie's Medieval Series; all rights reserved, nothing of it copied here) puts its
@@ -33,6 +45,14 @@ import net.minecraft.world.item.ItemStack;
  * <li><b>Giant-slayers' harness</b> ({@link #GIANT_SLAYER}): when a Giant falls, a plate of it lies where it fell for
  * each who was there ({@link #GIANT_WITNESS} blocks).</li>
  * <li><b>Folded lamellar</b> ({@link #FOLDED}): some of the blossom lords' guards wear it ({@link Outfits#ronin}).</li>
+ * <li><b>The Warden's hunters' coats</b> ({@link #HUNTER}): "can still be bought from the Warden's own", at the
+ * armourer of a realm that keeps the Lantern Warden, by one sworn to him.</li>
+ * <li><b>Dawnwatch plate</b> ({@link #DAWNWATCH}): the Crowned Sun's realms' armourers sell it to his sworn at high favour
+ * ({@link #DAWNWATCH_TIER}).</li>
+ * <li><b>Back to back</b> ({@link #TWINNED}): two who each wear at least {@link #TWIN_HALF} of its pieces and use a shrine
+ * side by side ({@link #TWIN_SWEAR} blocks apart) are sworn to each other ({@link #SWORN}); while both have their half on
+ * and are within {@link #TWIN_RANGE} blocks, {@link #TWIN_SHARE} of each hit that lands on one is borne by the other.
+ * One who swears another breaks the old oath. (A blow that kills outright isn't shared.)</li>
  * </ul>
  */
 public final class FantasyArmorCompat {
@@ -60,6 +80,21 @@ public final class FantasyArmorCompat {
 	static final float[] BARROW_DROP = {0.08F, 0.6F};
 	/** How near a falling Giant one has to be to have been there for its fall (blocks). */
 	static final double GIANT_WITNESS = 48.0;
+	/** Prices of a set's pieces (emeralds: helm, breastplate, leggings, boots): made over netherite, the dearest on any counter. */
+	static final int[] HUNTER_PRICE = {28, 44, 36, 24}, DAWNWATCH_PRICE = {34, 52, 44, 30};
+	/** The favour tier one sworn to the Crowned Sun needs before his realms' armourers sell them the dawnwatch's plate. */
+	static final int DAWNWATCH_TIER = 3;
+	static final int USES = 2, XP = 10;
+	static final float PRICE_MULT = 0.05F;
+	/** Back to back: the pieces each must wear, how near the two must stand at the shrine and stay, and the share of a hit the other bears. */
+	static final int TWIN_HALF = 2;
+	static final double TWIN_SWEAR = 4.0, TWIN_RANGE = 16.0;
+	static final float TWIN_SHARE = 0.25F;
+	/** On a player: the one they swore back to back with at a shrine. Saved, kept through death. */
+	static final AttachmentType<UUID> SWORN = AttachmentRegistry.create(JaymosKingdoms.id("twinned_sworn"),
+		builder -> builder.persistent(UUIDUtil.CODEC).copyOnDeath());
+	/** Set while a share is being dealt, so the share isn't shared back. */
+	private static boolean sharing;
 	/** The share of the blossom guards in folded lamellar (the rest in the Armory's ronin harness). */
 	static final float FOLDED_CHANCE = 0.35F;
 	/** A set whose helm nobody wears (its slot is left as it was). */
@@ -74,6 +109,7 @@ public final class FantasyArmorCompat {
 		if (!LOADED) {
 			return;
 		}
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> bear(entity, taken));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (!(entity.level() instanceof ServerLevel level)) {
 				return;
@@ -92,6 +128,90 @@ public final class FantasyArmorCompat {
 				}
 			}
 		});
+	}
+
+	/** How many of {@code set}'s pieces {@code e} has on. */
+	static int worn(LivingEntity e, String set) {
+		int n = 0;
+		for (int i = 0; i < SLOTS.length; i++) {
+			Optional<Item> piece = piece(set, i);
+			if (piece.isPresent() && e.getItemBySlot(SLOTS[i]).is(piece.get())) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	/**
+	 * (from {@link Shrine}, {@code player} using one with an empty hand) Back to back: in their half of the paired harness,
+	 * beside another in theirs, the two are sworn to each other. True if they were (the shrine does nothing else then).
+	 */
+	static boolean swear(ServerPlayer player, BlockPos shrine) {
+		if (!LOADED || worn(player, TWINNED) < TWIN_HALF) {
+			return false;
+		}
+		for (ServerPlayer other : player.level().players()) {
+			if (other != player && !other.isSpectator() && worn(other, TWINNED) >= TWIN_HALF
+				&& other.distanceToSqr(player) < TWIN_SWEAR * TWIN_SWEAR && !player.getUUID().equals(other.getAttached(SWORN))) {
+				player.setAttached(SWORN, other.getUUID());
+				other.setAttached(SWORN, player.getUUID());
+				player.level().playSound(null, shrine, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
+				player.level().playSound(null, shrine, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.6F, 1.2F);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** {@code e} took {@code taken}: if they're sworn back to back and both have their half on, near, the other bears a share. */
+	private static void bear(LivingEntity e, float taken) {
+		if (sharing || taken <= 0.0F || !e.isAlive() || !(e instanceof ServerPlayer player) || worn(player, TWINNED) < TWIN_HALF) {
+			return;
+		}
+		UUID sworn = player.getAttached(SWORN);
+		ServerPlayer other = sworn == null ? null : player.level().getServer().getPlayerList().getPlayer(sworn);
+		if (other == null || !other.isAlive() || other.level() != player.level() || !player.getUUID().equals(other.getAttached(SWORN))
+			|| worn(other, TWINNED) < TWIN_HALF || other.distanceToSqr(player) > TWIN_RANGE * TWIN_RANGE) {
+			return;
+		}
+		float share = taken * TWIN_SHARE;
+		player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + share));
+		sharing = true;
+		try {
+			other.hurtServer(other.level(), other.damageSources().generic(), share);
+		} finally {
+			sharing = false;
+		}
+	}
+
+	/**
+	 * (from {@link FrontierWear#offers}, an armourer of {@code f}) the orders' sets on the counter for {@code player}, or
+	 * taken off it for anyone else.
+	 */
+	static void armourer(net.minecraft.server.MinecraftServer server, Faction f, Player player, MerchantOffers offers) {
+		if (!LOADED) {
+			return;
+		}
+		Patron realm = f.type().isRealm() ? RealmFaiths.patron(server, f) : null;
+		counter(offers, HUNTER, HUNTER_PRICE, realm == Patron.LANTERN_WARDEN && Patrons.of(player) == Patron.LANTERN_WARDEN);
+		counter(offers, DAWNWATCH, DAWNWATCH_PRICE, realm == Patron.CROWNED_SUN && Patrons.blessed(player, Patron.CROWNED_SUN, DAWNWATCH_TIER));
+	}
+
+	/** {@code set}'s pieces at {@code prices} on the counter if {@code sold}; else off it. */
+	private static void counter(MerchantOffers offers, String set, int[] prices, boolean sold) {
+		for (int i = 0; i < SLOTS.length; i++) {
+			Optional<Item> piece = piece(set, i);
+			if (piece.isEmpty()) {
+				continue;
+			}
+			Item item = piece.get();
+			boolean there = offers.stream().anyMatch(o -> o.getResult().is(item));
+			if (sold && !there) {
+				offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, prices[i]), new ItemStack(item), USES, XP, PRICE_MULT));
+			} else if (!sold && there) {
+				offers.removeIf(o -> o.getResult().is(item));
+			}
+		}
 	}
 
 	/** {@code e} has on every piece of {@code set} anyone wears (the barrow wardens' mail: all but the helm). */
