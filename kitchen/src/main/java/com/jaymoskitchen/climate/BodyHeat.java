@@ -92,6 +92,10 @@ public final class BodyHeat {
 	/** Jaymo's Powers' Aether (its own dimension, or its band of a One Dimension world): no thin-air cold there. */
 	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
 	static final float RAIN = -15.0F, SNOW = -20.0F, IN_WATER = -25.0F, WET = -10.0F, POWDER_SNOW = -40.0F;
+	/** Soaked through (Jaymo's Powers): this many times the wet chill, and this many times that again on cold land. */
+	static final float SOAKED_CHILL = 2.0F, COLD_SOAK = 1.5F;
+	/** Soaked clothes keep this share of their warmth; wool keeps all of it. */
+	static final float SOAKED_WARMTH = 0.5F;
 	/** Ticks you stay wet after getting out of the water or the rain. */
 	static final int WET_TICKS = 1200;
 	/** Warmth from what's burning close by (at the source; nothing {@link #FIRE_RANGE} blocks off). */
@@ -400,6 +404,13 @@ public final class BodyHeat {
 		}
 		if (player.isInWater()) {
 			air += IN_WATER;
+		} else if (Wetness.known()) {
+			// Jaymo's Powers' Wet and Soaked: soaked through is twice the chill, and worse again on cold land
+			if (Wetness.soaked(player)) {
+				air += WET * SOAKED_CHILL * (land < 0.0F ? COLD_SOAK : 1.0F);
+			} else if (Wetness.wet(player)) {
+				air += WET;
+			}
 		} else if (WET_UNTIL.getOrDefault(player.getUUID(), 0L) > level.getGameTime()) {
 			air += WET;
 		}
@@ -468,7 +479,25 @@ public final class BodyHeat {
 
 	/** Warm clothes worn, warm linings sewn into what's worn ({@link Lining}), and llama leather (half a piece each). */
 	static float warmPieces(Player player) {
-		return pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player);
+		float warm = pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player);
+		if (Wetness.soaked(player)) {
+			// wet wool still keeps you warm; soaked leather, linings and the rest keep half
+			int wool = woolPieces(player);
+			warm = wool + Math.max(0.0F, warm - wool) * SOAKED_WARMTH;
+		}
+		return warm;
+	}
+
+	/** Warm pieces worn that are wool. */
+	static int woolPieces(Player player) {
+		int n = 0;
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			var piece = player.getItemBySlot(slot);
+			if (piece.is(WinterCold.WARM_CLOTHING) && net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(piece.getItem()).getPath().contains("wool")) {
+				n++;
+			}
+		}
+		return n;
 	}
 
 	static int pieces(Player player, TagKey<Item> tag) {

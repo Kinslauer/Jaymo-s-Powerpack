@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.Bloodied;
 import com.jaymospowers.core.wet.ArmourGrime;
+import com.jaymospowers.core.wet.Rust;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -80,6 +81,10 @@ public final class ArmourGrimeTextures {
 	/** Rotten blood turns toward this brown-green, this far at its worst (Bloodied.rot, in {@link #DRY_STEPS} steps). */
 	static final int ROTTEN_TOWARD = 0x34301A;
 	static final float ROTTEN_SHARE = 0.55F;
+	/** Rust: its light and dark orange-browns, how much of the metal it reaches at its worst, how strong it is at a
+	 * pit's edge and heart, how much sooner the creases rust, and how much the speckle breaks it up. */
+	static final int RUST_LIGHT = 0xA65A2A, RUST_DARK = 0x5A2A14;
+	static final float RUST_COVER = 0.95F, RUST_EDGE = 0.5F, RUST_HEART = 0.9F, RUST_CREVICE = 0.35F, RUST_PIT = 0.5F;
 	private static boolean masksRead;
 	private static boolean excalibur;
 	private static int made;
@@ -120,17 +125,28 @@ public final class ArmourGrimeTextures {
 
 	/** (0.20.41) The worn texture {@code base} with {@code grime} and {@code blood} painted in, or {@code base} when it's clean. */
 	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood) {
+		return armour(base, grime, blood, 0);
+	}
+
+	/** The same with {@code rust} ({@link Rust}) pitted into the metal under the blood and grime. */
+	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood, int rust) {
 		boolean dirty = grime != null && grime.amount() > 0;
 		Smear smear = smear(blood);
-		if (!dirty && smear == null) {
+		int rusted = rustStage(rust);
+		if (!dirty && smear == null && rusted == 0) {
 			return base;
 		}
 		readMasks();
 		if (armourDust == null || armourMud == null || armourBlood == null) {
 			return base;
 		}
-		Identifier painted = paint(base, dirty ? grime : null, armourDust, armourMud, smear, armourBlood, false, false);
+		Identifier painted = paint(base, dirty ? grime : null, armourDust, armourMud, smear, armourBlood, false, false, false, rusted);
 		return painted == null ? base : painted;
+	}
+
+	/** How rusty a piece looks, a stage {@code 0..}{@link #STAGES} (none below {@link Rust#SPOTTED}). */
+	static int rustStage(int rust) {
+		return rust < Rust.SPOTTED ? 0 : Mth.clamp(Mth.ceil(rust / (float) Rust.MAX * STAGES), 1, STAGES);
 	}
 
 	/** Just the grime splotches to lay over {@code stack}'s inventory icon, or null for none. */
@@ -139,7 +155,8 @@ public final class ArmourGrimeTextures {
 		boolean dirty = grime != null && grime.amount() > 0;
 		// (0.20.41) and blood, on any item
 		Smear smear = com.jaymospowers.client.blood.BloodSettings.off() ? null : smear(Bloodied.blood(stack));
-		if (!dirty && smear == null) {
+		int rusted = rustStage(Rust.rust(stack));
+		if (!dirty && smear == null && rusted == 0) {
 			return null;
 		}
 		Identifier model = stack.get(DataComponents.ITEM_MODEL);
@@ -151,7 +168,7 @@ public final class ArmourGrimeTextures {
 			return null;
 		}
 		return paint(model.withPath("textures/item/" + model.getPath() + ".png"), dirty ? grime : null, itemDust, itemMud, smear, itemBlood, true,
-			false);
+			false, false, rusted);
 	}
 
 	/**
@@ -341,6 +358,12 @@ public final class ArmourGrimeTextures {
 	 */
 	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
 		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole, boolean layered) {
+		return paint(base, grime, dust, mud, smear, bloodMask, overlay, whole, layered, 0);
+	}
+
+	/** {@code rust}: a rust stage ({@link #rustStage}, 0 for none), pitted into the metal first, under blood and grime. */
+	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
+		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole, boolean layered, int rust) {
 		if (UNREADABLE.contains(base)) {
 			return null;
 		}
@@ -350,7 +373,7 @@ public final class ArmourGrimeTextures {
 		int tint = grime == null || grime.tint() == 0 ? 0 : grime.tint() & 0xF0F0F0 | 0x080808;
 		boolean onBody = dust != null && dust == bodyDust;
 		Material material = onBody ? Material.CLOTH : Material.of(base);
-		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (onBody ? "|s" : "") + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "");
+		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (onBody ? "|s" : "") + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "") + (rust > 0 ? "|r" + rust : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
@@ -380,6 +403,7 @@ public final class ArmourGrimeTextures {
 		int colour = lerpRgb(muddy, dust(tint), excalibur ? EXCALIBUR_MUD : MUD);
 		float threshold = 1.0F - material.cover * level;
 		float bloodThreshold = smear == null ? 2.0F : 1.0F - MOST_BLOOD * smear.stage() / (float) STAGES;
+		float rustThreshold = rust == 0 ? 2.0F : 1.0F - RUST_COVER * (float) Math.pow(rust / (float) STAGES, COVER_CURVE);
 		int w = image.getWidth(), h = image.getHeight();
 		// (0.20.66) only a square skin has the outer layer's layout (an old 64 by 32 one is made square before it's drawn)
 		boolean outer = layered && !whole && w == h && w >= 64;
@@ -390,6 +414,27 @@ public final class ArmourGrimeTextures {
 				int r = argb >> 16 & 0xFF, g = argb >> 8 & 0xFF, b = argb & 0xFF;
 				float lum = r * 0.3F + g * 0.59F + b * 0.11F;
 				int out = overlay ? 0 : argb;
+				if (rust > 0 && mud != null && a != 0 && lum >= OUTLINE) {
+					// rust first, on the metal itself: where water sits (the mud's order: lower edges first) and in the dark
+					// creases, pitted by a speckle of its own
+					int mm = mud.at(x, y, w, h);
+					float pit = pit(x, y);
+					float order = (mm >>> 24) / 255.0F + RUST_CREVICE * (0.5F - lum / 255.0F) + (pit - 0.5F) * RUST_PIT;
+					if ((mm >>> 24) > 0 && order > rustThreshold) {
+						float strength = RUST_EDGE + (RUST_HEART - RUST_EDGE) * Math.min(1.0F, (order - rustThreshold) * 4.0F);
+						int c = lerpRgb(pit, RUST_LIGHT, RUST_DARK);
+						float k = 0.65F + 0.35F * lum / 255.0F;
+						int rr = Math.round((c >> 16 & 0xFF) * k), rg = Math.round((c >> 8 & 0xFF) * k), rb = Math.round((c & 0xFF) * k);
+						if (overlay) {
+							out = Math.round(strength * a) << 24 | rr << 16 | rg << 8 | rb;
+						} else {
+							r = mix(r, rr, strength);
+							g = mix(g, rg, strength);
+							b = mix(b, rb, strength);
+							out = a << 24 | r << 16 | g << 8 | b;
+						}
+					}
+				}
 				if (smear != null && bloodMask != null && a != 0 && (whole || lum >= OUTLINE || bloodMask == bodyBlood)) {
 					// (0.20.41) blood first, so grime over it reads as grime and the blood's own pixels below it as blood
 					int bm = outer ? bloodMask.at(under(x, y, w), w, h) : bloodMask.at(x, y, w, h);
@@ -479,6 +524,13 @@ public final class ArmourGrimeTextures {
 			dx = -16;
 		}
 		return (y + dy * u) * w + x + dx * u;
+	}
+
+	/** A fixed speckle (0..1) for pixel ({@code x}, {@code y}): where rust pits first and how dark it is there. */
+	static float pit(int x, int y) {
+		int n = x * 374761393 + y * 668265263;
+		n = (n ^ (n >>> 13)) * 1274126177;
+		return ((n ^ (n >>> 16)) & 0xFFFF) / 65535.0F;
 	}
 
 	/** The dust colour for a grime's {@code tint} (0: plain tan), graded like the plain tan when Excalibur is on. */

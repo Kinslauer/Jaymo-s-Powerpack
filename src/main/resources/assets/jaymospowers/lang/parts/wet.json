@@ -4,5 +4,12 @@
   "tooltip.jaymospowers.grime.filthy.dust": "Caked in dust",
   "tooltip.jaymospowers.grime.grubby.mud": "Mud-spattered",
   "tooltip.jaymospowers.grime.dirty.mud": "Muddy",
-  "tooltip.jaymospowers.grime.filthy.mud": "Caked in mud"
+  "tooltip.jaymospowers.grime.filthy.mud": "Caked in mud",
+  "effect.jaymospowers.wet": "Wet",
+  "effect.jaymospowers.soaked": "Soaked",
+  "item.jaymospowers.straw_wisp": "Straw Wisp",
+  "tooltip.jaymospowers.rust.spotted": "Spotted with rust",
+  "tooltip.jaymospowers.rust.rusty": "Rusty",
+  "tooltip.jaymospowers.rust.corroded": "Corroded with rust",
+  "jei.jaymospowers.straw_wisp": "Stand in water (or at a water cauldron), sneak and use it to scrub blood and dirt off yourself and your armour, rotten blood too. Hold something in your other hand to scrub that instead. A handful of sand does the same, used up each scrub. Nothing takes rust off."
 }

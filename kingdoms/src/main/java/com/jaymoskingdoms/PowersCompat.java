@@ -34,6 +34,20 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
+	/** Powers' Soaked effect (or null before it's looked up, or without Powers). */
+	private static net.minecraft.core.@Nullable Holder<net.minecraft.world.effect.MobEffect> soakedEffect;
+	private static boolean lookedForSoaked;
+
+	/** Whether {@code body} is soaked through (Jaymo's Powers' {@code Wet}); false without Powers. */
+	public static boolean soaked(net.minecraft.world.entity.LivingEntity body) {
+		if (!lookedForSoaked) {
+			lookedForSoaked = true;
+			soakedEffect = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(Identifier.fromNamespaceAndPath("jaymospowers", "soaked"))
+				.orElse(null);
+		}
+		return soakedEffect != null && body.hasEffect(soakedEffect);
+	}
+
 	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
 	private static boolean lookedForGlint;

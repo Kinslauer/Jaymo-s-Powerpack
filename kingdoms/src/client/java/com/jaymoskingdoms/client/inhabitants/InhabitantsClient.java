@@ -56,6 +56,8 @@ public final class InhabitantsClient {
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
 	static final DataTicket<Integer> DRAUGR_MAIMED = DataTicket.create("jaymoskingdoms_draugr_maimed", Integer.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
+	/** An inhabitant's id hash, for how rusted its iron is ({@link RustedTextures}). */
+	static final DataTicket<Integer> RUST_ROLL = DataTicket.create("jaymoskingdoms_rust_roll", Integer.class);
 	static final DataTicket<Boolean> IMPALER_SPIKES = DataTicket.create("jaymoskingdoms_impaler_spikes", Boolean.class);
 	static final DataTicket<Integer> IMPALER_COAT = DataTicket.create("jaymoskingdoms_impaler_coat", Integer.class);
 	static final DataTicket<Boolean> CLAM_PEARL = DataTicket.create("jaymoskingdoms_clam_pearl", Boolean.class);
@@ -76,8 +78,8 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.IMPALER_SPIKE, ThrownItemRenderer::new);
 		EntityRenderers.register(ImpalerGear.CONCUSSIVE_ARROW_ENTITY, ConcussiveArrowRenderer::new);
 		Concussed.register();
-		EntityRenderers.register(Monsters.SILVER_SKELETON,
-			context -> new InhabitantRenderer<SilverSkeleton>(context, "silver_skeleton", 1.0F, SILVER_SHADOW, "head"));
+		EntityRenderers.register(Monsters.SILVER_SKELETON, SilverSkeletonRenderer::new);
+		RustedTextures.register();
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
 		EntityRenderers.register(Inhabitants.YOUTH_WISP, YouthWispRenderer::new);
 		YouthWispRenderer.registerFlash();
@@ -88,7 +90,29 @@ public final class InhabitantsClient {
 	 * ({@link Draugr#stageLiving}) wears its look's {@code draugr_living_<n>.png} (the same gear in better condition) and a
 	 * whole tail.
 	 */
+	/** The Dead Traveler, its buckler's rim and its helm rusted as much as its id says. */
+	static final class SilverSkeletonRenderer extends InhabitantRenderer<SilverSkeleton> {
+		static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/silver_skeleton.png");
+
+		SilverSkeletonRenderer(EntityRendererProvider.Context context) {
+			super(context, new DefaultedEntityGeoModel<SilverSkeleton>(JaymosKingdoms.id("silver_skeleton")) {
+				@Override
+				public Identifier getTextureResource(GeoRenderState state) {
+					return RustedTextures.rusted(TEXTURE, RustedTextures.stage(state.getOrDefaultGeckolibData(RUST_ROLL, 0), 1));
+				}
+			}, 1.0F, SILVER_SHADOW, "head");
+		}
+
+		@Override
+		public void addRenderData(SilverSkeleton skeleton, Void related, LivingEntityRenderState state, float partialTick) {
+			super.addRenderData(skeleton, related, state, partialTick);
+			state.addGeckolibData(RUST_ROLL, skeleton.getUUID().hashCode());
+		}
+	}
+
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
+		/** The least rust a draugr's iron has (of {@link RustedTextures#STAGES}): they are all long in the tomb. */
+		static final int DRAUGR_LEAST_RUST = 2;
 		/** Its three looks (tools/gen_tomb_undead.py DRAUGR_LOOKS), dead and alive, picked by its id. */
 		static final int LOOKS = 3;
 		/** Jaymo's Kitchen's missing-part bits, lowest first. */
@@ -106,8 +130,13 @@ public final class InhabitantsClient {
 			super(context, new DefaultedEntityGeoModel<Draugr>(JaymosKingdoms.id("draugr")) {
 				@Override
 				public Identifier getTextureResource(GeoRenderState state) {
-					int look = look(state.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0));
-					return (state.getOrDefaultGeckolibData(DRAUGR_LIVING, false) ? LIVING : DEAD)[look];
+					int roll = state.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0);
+					int look = look(roll);
+					if (state.getOrDefaultGeckolibData(DRAUGR_LIVING, false)) {
+						return LIVING[look];
+					}
+					// the dead's iron rusted, each one its own way (a chieftain's bronze is left alone)
+					return RustedTextures.rusted(DEAD[look], RustedTextures.stage(roll, DRAUGR_LEAST_RUST));
 				}
 			}, 1.0F, DRAUGR_SHADOW, "head");
 		}

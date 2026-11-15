@@ -63,6 +63,8 @@
 		"GuardRiposteMixin",
 		"DivineCounterMixin",
 		"AlchemyPicksHurtMixin",
+		"WetHurtMixin",
+		"WetIgniteMixin",
 		"PvpCapMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
