@@ -13770,3 +13770,10 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 - **Agility** is traversal speed now: its share goes on swimming strokes and ladders, vines and scaffolding too (`AgilityTravelMixin`), and Powers puts it on wall climbing, leaf climbing, shimmies and climbing over ledges. Its K-screen line says so.
 - New hint 188. Text in `lang/parts/skill-locks.json`.
 - Built; not played.
+
+## 0.9.19 (2026-11-15): camp folk hold, crocodiles hunt, illagers come at you (#1584)
+
+- **Camp folk don't run screaming from monsters**: the village fright (run home, cry out) took every villager near any seat, barbarian raiders and camp crews included. Now a camp's people (barbarian, orc, goblin and pirate camps) stand their ground unless they're timid, and so does anyone keeping a post or already fighting, anywhere; nobody takes fright at their own side's raiders (`Frights.standsFirm`, `Frights.sameSide`). Tested on a dev server: the crew stayed put while the camp's guards killed a cave spider.
+- **Crocodiles hunt like crocodiles**: Cube Animals' crocodile only notices prey within 6 blocks, so it ignored a player walking past. In water or at night it now notices you out to 16 blocks (an ambush hunter in the river, a night hunter on land); basking on the bank by day it keeps its 6 (`wild/Crocodiles`). Dev server: at night a crocodile 12 blocks off came for the player; by day on land it didn't.
+- **Illagers on the march come at you**: a patrol or pillager caravan that saw you only stood and stared while you stayed more than 10 blocks off. Now they size you up for 3 seconds, then all of them attack (`mixin/HoldGroundStareMixin`, also the Night Bleeder). Dev server: a caravan 14-20 blocks off opened fire after the stare.
+- Built and dev-server tested; not played.
