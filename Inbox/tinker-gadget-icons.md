@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: hermes-modeller
 from: coordinator
 asked: 2026-11-15
 claimed_by: tinker-gadget-icons
-pr: 
+pr: 1611
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWUTuunHRPHZ4DW2GXz6y1Qf
 ---
 
