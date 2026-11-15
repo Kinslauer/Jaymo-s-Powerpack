@@ -285,6 +285,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (gb-tent) the tent, and the homestead it claims
 		Homesteads.register();
 		LOGGER.debug("homestead attachment: {}", Homesteads.HOMESTEADS);
+		// (medieval patch 7, sieges and war) sieges in waves and the sides taken; raids on homesteads; hunting parties;
+		// the white flag; enemy colours; the speakeasy's fixer; the monster families' feuds
+		Sieges.register();
+		HomeRaids.register();
+		Hunts.register();
+		LOGGER.debug("hunt attachment: {}", Hunts.HUNTED_AT);
+		WhiteFlags.register();
+		Colours.register();
+		Fixers.register();
+		Feuds.register();
 		// (gb-haggle) the jobs haggled over
 		LOGGER.debug("haggle attachments: {} {}", Haggle.HAGGLED, Haggle.OFFER_HAGGLED);
 		HeldBack.register();

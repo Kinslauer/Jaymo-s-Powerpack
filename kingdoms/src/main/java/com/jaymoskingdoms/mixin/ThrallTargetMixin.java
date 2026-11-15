@@ -23,6 +23,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link com.jaymoskingdoms.Parleys#spares}). Nor a masterless bandit's men their leader, or each other
  * ({@link com.jaymoskingdoms.Masterless#sameBand}). Nor an illager at someone it is hearing out or keeping a truce with
  * ({@link com.jaymoskingdoms.IllagerTalk#spares}). Nor the dead at one who wears the Reaper's shroud ({@link com.jaymoskingdoms.Reaper#spares}).
+ * Nor a siege's side at one it leaves be ({@link com.jaymoskingdoms.Sieges#spares}), anyone at one standing under a white
+ * flag ({@link com.jaymoskingdoms.WhiteFlags#spares}), nor a realm's guards at one passing in its colours
+ * ({@link com.jaymoskingdoms.Colours#spares}).
  * Nor anyone hogtied or grabbed on a lasso ({@link com.jaymoskingdoms.forms.Lasso#pinned}) at anybody.
  */
 @Mixin(LivingEntity.class)
@@ -40,6 +43,9 @@ public abstract class ThrallTargetMixin {
 			|| com.jaymoskingdoms.Masterless.sameBand((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.IllagerTalk.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Reaper.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Sieges.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.WhiteFlags.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Colours.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.forms.Lasso.pinned((LivingEntity)(Object)this)) {
 			cir.setReturnValue(false);
 		}

@@ -295,7 +295,8 @@ public final class Underworld {
 	/** Player → when they were last whispered to; when a guard last called their open carry. */
 	private static final Map<UUID, Long> WHISPERED = new HashMap<>(), CARRY_CALLED = new HashMap<>();
 	/** Realm → when its den last lost its fence (or dice-thrower). */
-	private static final Map<String, Long> MISSING_FENCE = new HashMap<>(), MISSING_DICER = new HashMap<>(), MISSING_BOOKIE = new HashMap<>();
+	private static final Map<String, Long> MISSING_FENCE = new HashMap<>(), MISSING_DICER = new HashMap<>(), MISSING_BOOKIE = new HashMap<>(),
+		MISSING_FIXER = new HashMap<>();
 	/** Fence or street buyer → the day their stock was last laid out. */
 	private static final Map<UUID, Long> STOCKED = new HashMap<>();
 	/** Player → when they may throw dice again; games thrown (to warm the city). */
@@ -322,6 +323,11 @@ public final class Underworld {
 			// (0.7.224) the bookie keeps the book on wars and pit fights
 			if (v.entityTags().contains(Bookies.TAG)) {
 				Bookies.open(level, sp, v);
+				return InteractionResult.SUCCESS;
+			}
+			if (v.entityTags().contains(Fixers.TAG)) {
+				// (am-fixer) the fixer mends your name with a realm, for a price
+				Fixers.open(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
 			if (v.entityTags().contains(FightPit.FIGHTER_TAG) && FightPit.onCard(v.getUUID())) {
@@ -352,6 +358,7 @@ public final class Underworld {
 			MISSING_FENCE.clear();
 			MISSING_DICER.clear();
 			MISSING_BOOKIE.clear();
+			MISSING_FIXER.clear();
 			STOCKED.clear();
 			PITCHED.clear();
 			DICE_NEXT.clear();
@@ -575,6 +582,18 @@ public final class Underworld {
 		} else {
 			MISSING_BOOKIE.remove(key);
 		}
+		// (am-fixer) and the fixer, beside him
+		if (level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && v.entityTags().contains(Fixers.TAG)).isEmpty()) {
+			Long since = MISSING_FIXER.get(key);
+			if (since == null) {
+				MISSING_FIXER.put(key, now - REPLACE_TICKS);
+			} else if (now - since >= REPLACE_TICKS) {
+				hire(level, Fixers.spot(d.hatch()), Fixers.TAG);
+				MISSING_FIXER.remove(key);
+			}
+		} else {
+			MISSING_FIXER.remove(key);
+		}
 		FightPit.ensure(level, f, d);
 		if (d.heat() < DICE_HEAT) {
 			return;
@@ -633,7 +652,7 @@ public final class Underworld {
 
 	/** Which of the den's hands {@code v} is (his tag), or null. */
 	static @Nullable String hand(Villager v) {
-		for (String tag : new String[] {FENCE_TAG, DICER_TAG, Bookies.TAG, FightPit.ATTENDANT_TAG, FightPit.FIGHTER_TAG}) {
+		for (String tag : new String[] {FENCE_TAG, DICER_TAG, Bookies.TAG, Fixers.TAG, FightPit.ATTENDANT_TAG, FightPit.FIGHTER_TAG}) {
 			if (v.entityTags().contains(tag)) {
 				return tag;
 			}
@@ -710,6 +729,7 @@ public final class Underworld {
 						case FENCE_TAG -> Speakeasy.fenceSpot(hatch);
 						case DICER_TAG -> Speakeasy.diceSpot(hatch);
 						case Bookies.TAG -> Speakeasy.bookieSpot(hatch);
+						case Fixers.TAG -> Fixers.spot(hatch);
 						default -> pit != null ? Vec3.atBottomCenterOf(pit.center()) : Speakeasy.wakeSpot(hatch);
 					};
 					if (tag.equals(FightPit.ATTENDANT_TAG) && pit != null) {

@@ -675,6 +675,11 @@ final class Raids {
 		ACTIVE.remove(raid.camp);
 		// (0.7.530) the town is left to pick up the pieces
 		TownTroubles.event(level.getServer(), raid.target, TownTroubles.RAID, Integer.toString(raid.camp));
+		// (am-upgrades) and its lord, threatened, minded to build
+		Faction threatened = Factions.get(level.getServer(), raid.target);
+		if (threatened != null) {
+			Defences.afterThreat(level, threatened);
+		}
 		for (Mob raider : party) {
 			goHome(level, camp, raider);
 		}
