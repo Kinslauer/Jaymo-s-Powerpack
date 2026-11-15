@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "jaymospowers:block/coke/brick_blast_furnace_front",
+    "side": "jaymospowers:block/coke/firebricks",
+    "top": "jaymospowers:block/coke/firebricks"
+  }
+}

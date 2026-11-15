@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:rag",
+    "jaymospowers:rag",
+    "jaymospowers:rag",
+    "jaymospowers:rag",
+    [
+      "jaymospowers:creosote_bucket",
+      "jaymospowers:clay_creosote_bucket"
+    ]
+  ],
+  "result": {
+    "id": "jaymospowers:creosote_rag",
+    "count": 4
+  }
+}

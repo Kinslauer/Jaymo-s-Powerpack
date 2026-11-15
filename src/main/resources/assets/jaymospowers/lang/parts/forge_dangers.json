@@ -1,0 +1,16 @@
+{
+  "block.jaymospowers.cracked_bricks": "Cracked Bricks",
+  "block.jaymospowers.cracked_mud_bricks": "Cracked Mud Bricks",
+  "block.jaymospowers.cracked_red_nether_bricks": "Cracked Red Nether Bricks",
+  "item.jaymospowers.smithing_gloves": "Smithing Gloves",
+  "item.jaymospowers.orb_cast": "Orb Cast",
+  "item.jaymospowers.rod_cast": "Rod Cast",
+  "molten.jaymospowers.ender": "Molten Ender",
+  "molten.jaymospowers.blaze": "Molten Blaze",
+  "jei.jaymospowers.creature_melting": "Creature Melting",
+  "jei.jaymospowers.creature_melting.burn": "%s %s a burn",
+  "jei.jaymospowers.brick_mending": "Mending Bricks",
+  "jei.jaymospowers.brick_mending.how": "Hammer on the cracked brick, grout in hand or pack",
+  "jei.jaymospowers.smithing_gloves": "Thick leather for the wrist slot. Worn, they take the heat of hot metal, a pot straight off the fire, a lava bucket or a blaze rod for your hands, as tongs do, and wear a little for it.",
+  "jei.jaymospowers.grout.mends": "Mends a cracked seared brick or kiln brick: use a hammer on the brick with grout in your other hand or your pack, one grout a brick."
+}

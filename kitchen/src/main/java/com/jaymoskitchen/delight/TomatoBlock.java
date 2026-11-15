@@ -159,7 +159,7 @@ public class TomatoBlock extends CropBlock {
 
 	@Override
 	protected int getBonemealAgeIncrease(Level level) {
-		return super.getBonemealAgeIncrease(level) / 2;
+		return com.jaymoskitchen.farm.SlowFarms.BONE_MEAL_STAGES;
 	}
 
 	@Override

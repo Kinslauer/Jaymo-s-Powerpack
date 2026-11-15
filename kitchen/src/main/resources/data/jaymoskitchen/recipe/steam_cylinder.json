@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " C ",
+    "CPC",
+    " C "
+  ],
+  "key": {
+    "C": "#c:ingots/copper",
+    "P": "minecraft:piston"
+  },
+  "result": {
+    "id": "jaymoskitchen:steam_cylinder",
+    "count": 1
+  }
+}

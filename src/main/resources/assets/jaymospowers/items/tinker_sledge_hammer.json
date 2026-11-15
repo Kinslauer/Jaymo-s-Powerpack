@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/sledge_hammer/handle_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -465,6 +472,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -692,6 +706,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_bronze"
                     }
                   }
                 ],
@@ -926,6 +947,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1153,6 +1181,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_bronze"
                     }
                   }
                 ],
@@ -1387,6 +1422,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1614,6 +1656,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_bronze"
                     }
                   }
                 ],
@@ -1851,6 +1900,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_bronze"
+              }
             }
           ],
           "fallback": {
@@ -2083,6 +2139,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2310,6 +2373,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_bronze"
                 }
               }
             ],
@@ -2544,6 +2614,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2771,6 +2848,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_bronze"
                 }
               }
             ],
@@ -3005,6 +3089,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -3232,6 +3323,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_bronze"
                 }
               }
             ],

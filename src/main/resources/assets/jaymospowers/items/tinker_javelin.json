@@ -237,6 +237,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -422,6 +429,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bronze"
                     }
                   }
                 ],
@@ -651,6 +665,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -836,6 +857,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bronze"
                     }
                   }
                 ],
@@ -1070,6 +1098,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1255,6 +1290,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bronze"
                     }
                   }
                 ],
@@ -1484,6 +1526,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1669,6 +1718,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bronze"
                     }
                   }
                 ],
@@ -1910,6 +1966,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2095,6 +2158,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bronze"
                 }
               }
             ],
@@ -2324,6 +2394,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_broken_large_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2509,6 +2586,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bronze"
                 }
               }
             ],
@@ -2743,6 +2827,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2928,6 +3019,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bronze"
                 }
               }
             ],
@@ -3157,6 +3255,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_large_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_bronze"
+                }
               }
             ],
             "fallback": {
@@ -3342,6 +3447,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bronze"
                 }
               }
             ],

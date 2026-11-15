@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "jaymospowers:smouldering_log",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:brick_blast_furnace",
+      "required": false
+    }
+  ]
+}

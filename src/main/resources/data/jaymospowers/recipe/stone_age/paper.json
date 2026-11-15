@@ -1,0 +1,19 @@
+{
+  "type": "jaymospowers:tool_crafting",
+  "category": "misc",
+  "ingredients": [
+    "#jaymospowers:press_slabs",
+    "#jaymospowers:press_slabs",
+    "#jaymospowers:paper_pulp",
+    "#jaymospowers:paper_pulp",
+    "#jaymospowers:paper_pulp",
+    [
+      "minecraft:water_bucket",
+      "jaymospowers:clay_water_bucket"
+    ]
+  ],
+  "result": {
+    "id": "minecraft:paper",
+    "count": 3
+  }
+}

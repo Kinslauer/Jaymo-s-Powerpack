@@ -53,7 +53,8 @@ public final class VeinRumours {
 		Map.entry(ConventionalBlockTags.IRON_ORES, "iron"),
 		Map.entry(ConventionalBlockTags.COPPER_ORES, "copper"),
 		Map.entry(ConventionalBlockTags.GOLD_ORES, "gold"),
-		Map.entry(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores/silver")), "silver"));
+		Map.entry(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores/silver")), "silver"),
+		Map.entry(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores/tin")), "tin"));
 
 	/** A vein found: its metal, and the middle of the ore. */
 	record Vein(String metal, BlockPos at) {

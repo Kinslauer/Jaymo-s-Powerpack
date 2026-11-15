@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:saw",
+    "#minecraft:wooden_slabs"
+  ],
+  "result": {
+    "id": "jaymospowers:fence_rail",
+    "count": 2
+  }
+}

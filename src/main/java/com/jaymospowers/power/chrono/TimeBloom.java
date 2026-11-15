@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.IceBlock;
@@ -34,12 +35,16 @@ import net.minecraft.world.level.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.vault.VaultBlockEntity;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * Speeds up time in a sphere around where it was cast: extra random ticks (crops, saplings, cane, berries...) and
  * extra ticks for every block entity that has a ticker (furnaces, smokers, campfires, brewing stands, and modded
- * machines such as Cooking for Blockheads ovens, through the block's own {@link EntityBlock#getTicker}).
+ * machines such as Cooking for Blockheads ovens, through the block's own {@link EntityBlock#getTicker}). Andy, on the
+ * GT New Horizons slow farms: "bloom affects all of them": its random ticks aren't slowed by Kitchen's slow farms, the
+ * animals in it grow up, come back into breeding, lay and give milk {@link #CREATURE_EXTRA_TICKS} faster
+ * ({@link BloomFarms}), and Kingdoms' growing trees in it grow on as fast.
  *
  * <p>Both kinds of work are capped per server tick, and the area is rescanned once a second, so it can't lag.
  */
@@ -57,6 +62,11 @@ final class TimeBloom {
 	private static final int EXTRA_BLOCK_ENTITY_TICKS = 3;
 	private static final int MAX_BLOCK_ENTITY_TICKS_PER_TICK = 60;
 	private static final int RESCAN_INTERVAL = 20;
+	/**
+	 * Each tick in the bloom, the slowed clocks of the creatures in it (growing up, the wait to breed again, laying,
+	 * milking) and of Kingdoms' growing trees run on this many ticks more (given a second's worth at each rescan).
+	 */
+	static final int CREATURE_EXTRA_TICKS = 20;
 	private static final ParticleOptions BLOOM_DUST = MagicFx.wisp(0xC8E05A, 1.0F);
 	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 0.9F);
 
@@ -97,6 +107,7 @@ final class TimeBloom {
 		}
 		if (age % RESCAN_INTERVAL == 0) {
 			scan();
+			ageCreatures();
 		}
 		randomTicks();
 		blockEntityTicks();
@@ -162,7 +173,7 @@ final class TimeBloom {
 				continue;
 			}
 			budget--;
-			state.randomTick(level, pos, random);
+			BloomFarms.hurry(() -> state.randomTick(level, pos, random));
 			if (level.getBlockState(pos) != state) {
 				// it grew (or otherwise changed): a little green-gold puff
 				ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
@@ -171,6 +182,18 @@ final class TimeBloom {
 				}
 			}
 		}
+	}
+
+	/** The creatures in the bloom (and Kingdoms' growing trees) have a second's worth of quickened time. */
+	private void ageCreatures() {
+		int ticks = CREATURE_EXTRA_TICKS * RESCAN_INTERVAL;
+		AABB box = new AABB(center).inflate(RADIUS);
+		for (Animal animal : level.getEntitiesOfClass(Animal.class, box, a -> a.isAlive() && a.position().closerThan(Vec3.atCenterOf(center), RADIUS))) {
+			BloomFarms.bloom(animal, ticks);
+			ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, animal.getX(), animal.getY() + animal.getBbHeight() * 0.7, animal.getZ(),
+				2, 0.3, 0.3, 0.3, 0.0);
+		}
+		com.jaymospowers.compat.KingdomsCompat.hurryTrees(level, center, RADIUS, ticks);
 	}
 
 	private void blockEntityTicks() {

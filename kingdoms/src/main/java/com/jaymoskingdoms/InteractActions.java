@@ -124,7 +124,7 @@ public final class InteractActions {
 				&& !ForgedPapers.householder(player, guardRealm(player, v));
 			case HELM -> Helmsmen.offersHelm(player, v);
 			case HIRE_HELM -> Helmsmen.offersHire(player, v);
-			case PASSAGE -> BlossomTraders.offers(player, v);
+			case PASSAGE -> BlossomTraders.offers(player, v) || SteamAirships.offers(player, v);
 			case STEEL -> BlossomSteel.offers(player, v);
 			default -> false;
 		};
@@ -237,6 +237,10 @@ public final class InteractActions {
 				return null;
 			}
 			case PASSAGE -> {
+				if (SteamAirships.offers(player, v)) {
+					SteamAirships.talk(player, v);
+					return null;
+				}
 				BlossomTraders.talk(player, v);
 				return null;
 			}

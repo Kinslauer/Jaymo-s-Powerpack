@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SMM",
+    "SMM"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "M": "minecraft:leather"
+  },
+  "result": {
+    "id": "jaymoskitchen:leather_sail",
+    "count": 1
+  }
+}

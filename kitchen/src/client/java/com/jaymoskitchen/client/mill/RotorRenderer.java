@@ -4,6 +4,7 @@ import com.jaymoskitchen.mill.power.PowerPartBlock.Part;
 import com.jaymoskitchen.mill.power.Power;
 import com.jaymoskitchen.mill.power.Rotor;
 import com.jaymoskitchen.mill.power.RotorEntity;
+import com.jaymoskitchen.mill.power.SailKind;
 import com.jaymoskitchen.JaymosKitchen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -48,6 +49,8 @@ public class RotorRenderer implements BlockEntityRenderer<RotorEntity, RotorRend
 		final BlockModelRenderState blade = new BlockModelRenderState();
 		/** Each sail's cloth colour (ARGB). */
 		final int[] cloth = new int[SAILS];
+		/** Each sail's look (RotorEntity#look): -1 bare spar, else its kind's ordinal times 3 plus whole, worn or rags. */
+		final int[] look = new int[SAILS];
 	}
 
 	/** A sail's pitch about its spar (degrees, Better With Mods' 0.26 rad) and its cloth's thickness (blocks). */
@@ -81,6 +84,7 @@ public class RotorRenderer implements BlockEntityRenderer<RotorEntity, RotorRend
 		blocks.update(state.blade, Power.PART.part(windmill ? Part.WINDMILL_SAIL : Part.WATERWHEEL_PADDLE), DISPLAY);
 		for (int sail = 0; sail < SAILS; sail++) {
 			state.cloth[sail] = 0xFF000000 | rotor.sail(sail).getTextureDiffuseColor();
+			state.look[sail] = rotor.look(sail);
 		}
 	}
 
@@ -100,7 +104,9 @@ public class RotorRenderer implements BlockEntityRenderer<RotorEntity, RotorRend
 				for (int length = 0; length < Rotor.WINDMILL.radius; length++) {
 					block(state.spar, poseStack, collector, light, 0.5F + length);
 				}
-				cloth(poseStack, collector, light, state.cloth[sail]);
+				if (state.look[sail] >= 0) {
+					cloth(poseStack, collector, light, state.cloth[sail], state.look[sail]);
+				}
 				poseStack.popPose();
 			}
 		} else {
@@ -115,9 +121,19 @@ public class RotorRenderer implements BlockEntityRenderer<RotorEntity, RotorRend
 		poseStack.popPose();
 	}
 
-	/** A sail's cloth: a thin blade one block wide along the spar (up this spoke), turned about it into the wind. */
-	private void cloth(PoseStack poseStack, SubmitNodeCollector collector, int light, int colour) {
-		TextureAtlasSprite sprite = sprites.get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, JaymosKitchen.id("block/windmill_cloth")));
+	/**
+	 * A sail's cloth: a thin blade one block wide along the spar (up this spoke), turned about it into the wind. Its
+	 * texture is its kind's (hemp keeps Better With Mods' sailcloth), whole, worn into holes, or hanging in rags.
+	 */
+	private void cloth(PoseStack poseStack, SubmitNodeCollector collector, int light, int colour, int look) {
+		SailKind kind = SailKind.values()[Math.min(look / 3, SailKind.values().length - 1)];
+		String stage = switch (look % 3) {
+			case 1 -> "_worn";
+			case 2 -> "_torn";
+			default -> "";
+		};
+		String name = kind == SailKind.CLOTH && stage.isEmpty() ? "block/windmill_cloth" : "block/windmill_sail_" + kind.id() + stage;
+		TextureAtlasSprite sprite = sprites.get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, JaymosKitchen.id(name)));
 		float y0 = 1.0F, y1 = Rotor.WINDMILL.radius + 0.5F, x0 = 1.0F / 16.0F, x1 = x0 + 1.0F, z0 = -CLOTH / 2.0F, z1 = CLOTH / 2.0F;
 		poseStack.pushPose();
 		poseStack.rotateDegrees(Axis.YP, PITCH);

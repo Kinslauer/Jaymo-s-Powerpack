@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "wooden_fence",
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "key": {
+    "W": "minecraft:spruce_planks",
+    "#": "jaymospowers:fence_rail"
+  },
+  "result": {
+    "id": "minecraft:spruce_fence",
+    "count": 3
+  }
+}

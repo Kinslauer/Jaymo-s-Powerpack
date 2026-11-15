@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "jaymoskitchen:cooking_pot"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:bowl",
+    "#c:ingots/bronze",
+    "#c:ingots/bronze",
+    "#c:ingots/bronze"
+  ],
+  "result": {
+    "id": "jaymoskitchen:cooking_pot",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    "CBC",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:cactus",
+    "B": "minecraft:bucket"
+  },
+  "result": {
+    "id": "jaymoskitchen:cactus_water_bucket"
+  }
+}

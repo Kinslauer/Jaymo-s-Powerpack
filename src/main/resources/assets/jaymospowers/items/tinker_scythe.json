@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/accessory_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -460,6 +467,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/handle_deep_tooth"
+                  }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_bronze"
                   }
                 }
               ],
@@ -693,6 +707,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -920,6 +941,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_bronze"
                     }
                   }
                 ],
@@ -1171,6 +1199,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/binding_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -1406,6 +1441,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/accessory_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_bronze"
+              }
             }
           ],
           "fallback": {
@@ -1633,6 +1675,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/handle_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_bronze"
               }
             }
           ],
@@ -1866,6 +1915,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2093,6 +2149,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_bronze"
                 }
               }
             ],
@@ -2343,6 +2406,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/binding_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_bronze"
               }
             }
           ],

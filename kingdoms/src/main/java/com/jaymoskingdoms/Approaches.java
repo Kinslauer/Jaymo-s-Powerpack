@@ -1218,6 +1218,10 @@ public final class Approaches {
 			// (0.7.270) a talk about work aboard ship: your berth, your lay
 			return;
 		}
+		if (SteamAirships.answer(player, answer)) {
+			// a steam town's airship captain named his price for a flight
+			return;
+		}
 		if (BlossomTraders.answer(player, answer)) {
 			// a blossom trader's captain named his price for the crossing
 			return;

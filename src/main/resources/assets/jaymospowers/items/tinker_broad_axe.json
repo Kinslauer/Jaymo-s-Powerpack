@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/handle_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -465,6 +472,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -692,6 +706,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_bronze"
                     }
                   }
                 ],
@@ -926,6 +947,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1153,6 +1181,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_bronze"
                     }
                   }
                 ],
@@ -1404,6 +1439,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/binding_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -1639,6 +1681,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/handle_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_bronze"
+              }
             }
           ],
           "fallback": {
@@ -1871,6 +1920,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2098,6 +2154,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_bronze"
                 }
               }
             ],
@@ -2332,6 +2395,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2559,6 +2629,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_bronze"
                 }
               }
             ],
@@ -2809,6 +2886,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/binding_deep_tooth"
+              }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_bronze"
               }
             }
           ],

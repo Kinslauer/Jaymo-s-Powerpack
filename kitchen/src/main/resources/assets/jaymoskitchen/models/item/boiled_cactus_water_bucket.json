@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskitchen:item/boiled_cactus_water_bucket"
+  }
+}

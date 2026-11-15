@@ -233,6 +233,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/vein_hammer/handle_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/vein_hammer/handle_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -465,6 +472,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/head_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/head_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -692,6 +706,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/head_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/head_bronze"
                     }
                   }
                 ],
@@ -943,6 +964,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/vein_hammer/grip_deep_tooth"
                   }
+                },
+                {
+                  "when": "bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/vein_hammer/grip_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -1175,6 +1203,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/front_broken_deep_tooth"
                     }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/front_broken_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1402,6 +1437,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/front_deep_tooth"
+                    }
+                  },
+                  {
+                    "when": "bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/front_bronze"
                     }
                   }
                 ],
@@ -1639,6 +1681,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/vein_hammer/large/handle_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/vein_hammer/large/handle_bronze"
+              }
             }
           ],
           "fallback": {
@@ -1871,6 +1920,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/head_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/head_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2098,6 +2154,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/head_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/head_bronze"
                 }
               }
             ],
@@ -2349,6 +2412,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/vein_hammer/large/grip_deep_tooth"
               }
+            },
+            {
+              "when": "bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/vein_hammer/large/grip_bronze"
+              }
             }
           ],
           "fallback": {
@@ -2581,6 +2651,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/front_broken_deep_tooth"
                 }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/front_broken_bronze"
+                }
               }
             ],
             "fallback": {
@@ -2808,6 +2885,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/front_deep_tooth"
+                }
+              },
+              {
+                "when": "bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/front_bronze"
                 }
               }
             ],

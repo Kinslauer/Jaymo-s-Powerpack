@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SCC",
+    "S  ",
+    "S  "
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "C": "#jaymoskitchen:sail_cloth"
+  },
+  "result": {
+    "id": "jaymoskitchen:windsock",
+    "count": 1
+  }
+}

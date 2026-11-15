@@ -40,6 +40,12 @@ import org.jspecify.annotations.Nullable;
  * surroundings are walked a few chunks at a time ({@link #LOOKS_PER_WALK}), and at most {@link #SEEDS_PER_WALK} chunks are
  * seeded in a walk, so a tier opening never stalls a tick. A world tier floor raise ({@link WorldTiers#raiseFloor}) lifts
  * every player's tier, so it seeds the ground round everyone.
+ * <p>
+ * Andy's GT New Horizons picks, patch 7 (Powers' {@code ground/Ores}): a grown vein is mixed like a worldgen one, now and
+ * then a short streak ({@link #STREAK_CHANCE}, {@link #STREAK_LENGTH}) of its partner ore through it ({@link #PARTNERS}:
+ * iron with copper, copper with Powers' tin, gold with iron), and leaves a few of Powers' lone small ores
+ * ({@link #HINT_TRIES}) in the near-surface stone over it, mostly its own and some ({@link #HINT_PARTNER_SHARE}) its
+ * partner's. Both are looked up by id: without Powers there's no tin streak and no small ore.
  */
 public final class GroundChanges {
 	// ---- tuning ----
@@ -50,6 +56,20 @@ public final class GroundChanges {
 	/** (0.7.591) A grown vein's pebble: how deep under the ground its top may be, the chance of one, and how many are hidden nuggets (as Powers' OreTells). */
 	static final int TELL_MIN = 2, TELL_MOST = 12;
 	static final float TELL_CHANCE = 0.4F, TELL_NUGGET_SHARE = 0.5F;
+	/** (GTNH picks, patch 7) The chance each step of a grown vein starts a streak of its partner, and how many steps a streak runs. */
+	static final float STREAK_CHANCE = 0.02F;
+	static final int STREAK_LENGTH = 4;
+	/** (GTNH picks, patch 7) Small ores tried over a grown vein, how far under the top of the ground (blocks), and the share that are its partner's. */
+	static final int HINT_TRIES = 6, HINT_SHALLOW_MIN = 3, HINT_SHALLOW_MOST = 20;
+	static final float HINT_PARTNER_SHARE = 0.25F;
+	/** (GTNH picks, patch 7) A vein's ore (stone) by id: its metal, its partner's stone and deepslate ore, and the partner's metal. */
+	record Partner(String metal, String stone, String deep, String partnerMetal) {
+	}
+
+	static final Map<Block, Partner> PARTNERS = Map.of(
+		Blocks.IRON_ORE, new Partner("iron", "minecraft:copper_ore", "minecraft:deepslate_copper_ore", "copper"),
+		Blocks.COPPER_ORE, new Partner("copper", "jaymospowers:tin_ore", "jaymospowers:deepslate_tin_ore", "tin"),
+		Blocks.GOLD_ORE, new Partner("gold", "minecraft:iron_ore", "minecraft:deepslate_iron_ore", "iron"));
 
 	/**
 	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), one chunk in how many gets
@@ -170,18 +190,28 @@ public final class GroundChanges {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		boolean laid = false;
 		int topX = 0, topY = Integer.MIN_VALUE, topZ = 0;
+		Partner partner = PARTNERS.get(vein.stone());
+		Block partnerStone = partner == null ? null : block(partner.stone()), partnerDeep = partner == null ? null : block(partner.deep());
+		int streak = 0;
 		for (int i = 0; i < vein.size(); i++) {
 			pos.set(x, y, z);
+			if (streak > 0) {
+				streak--;
+			} else if (partnerStone != null && random.nextFloat() < STREAK_CHANCE) {
+				streak = STREAK_LENGTH;
+			}
+			Block stoneOre = streak > 0 ? partnerStone : vein.stone();
+			Block deepOre = streak > 0 && partnerDeep != null ? partnerDeep : vein.deep();
 			BlockState state = chunk.getBlockState(pos);
 			Block ore = null;
 			if (state.is(BlockTags.STONE_ORE_REPLACEABLES) || vein.deep() == null && state.is(BlockTags.BASE_STONE_NETHER)) {
-				ore = vein.stone();
+				ore = stoneOre;
 			} else if (state.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES)) {
-				ore = vein.deep();
+				ore = deepOre;
 			}
 			boolean inIce = ore == null && vein.deep() != null && iceCaveRock(level, pos, state);
 			if (inIce) {
-				ore = pos.getY() < ICE_POCKET_DEEPSLATE_BELOW ? vein.deep() : vein.stone();
+				ore = pos.getY() < ICE_POCKET_DEEPSLATE_BELOW ? deepOre : stoneOre;
 			}
 			if (ore != null && !(vein.buried() && exposed(chunk, pos))) {
 				level.setBlock(pos, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
@@ -204,8 +234,63 @@ public final class GroundChanges {
 		}
 		if (laid && shift == 0) {
 			tell(level, vein.stone(), topX, topY, topZ, random);
+			if (partner != null) {
+				for (int i = 0; i < HINT_TRIES; i++) {
+					small(level, random.nextFloat() < HINT_PARTNER_SHARE ? partner.partnerMetal() : partner.metal(), x0 + random.nextInt(16),
+						z0 + random.nextInt(16), random);
+				}
+			}
 		}
 		return laid;
+	}
+
+	/** A block of another mod by id (Powers' tin ore, its small ores), or null without it. */
+	private static @Nullable Block block(String id) {
+		Identifier key = Identifier.tryParse(id);
+		return key == null ? null : net.minecraft.core.registries.BuiltInRegistries.BLOCK.getOptional(key).orElse(null);
+	}
+
+	/**
+	 * (GTNH picks, patch 7) One of Powers' lone small ores of {@code metal} in the column at {@code x, z}, a few blocks
+	 * under the top of the ground, if the block there is stone or deepslate. Nothing without Powers. The chunk is loaded
+	 * and may be lived in, so only natural ground: never in a village's or kingdom's land, only where the column's top is
+	 * bare terrain and every block from it down is natural, and only buried, with natural rock or soil on all six sides
+	 * (so never in a wall, floor or roof of a base, nor in sight).
+	 */
+	private static void small(ServerLevel level, String metal, int x, int z, RandomSource random) {
+		Block stone = block("jaymospowers:small_" + metal + "_ore"), deep = block("jaymospowers:deepslate_small_" + metal + "_ore");
+		if (stone == null || deep == null) {
+			return;
+		}
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+		BlockPos at = new BlockPos(x, top - HINT_SHALLOW_MIN - random.nextInt(HINT_SHALLOW_MOST - HINT_SHALLOW_MIN + 1), z);
+		if (at.getY() <= level.getMinY() || level.isOutsideBuildHeight(at) || Factions.at(level.getServer(), level, at) != null
+			|| Factions.around(level.getServer(), level, at, Villages.VILLAGE_RADIUS) != null) {
+			return;
+		}
+		BlockPos.MutableBlockPos column = new BlockPos.MutableBlockPos(x, top, z);
+		for (; column.getY() > at.getY(); column.move(Direction.DOWN)) {
+			if (!bare(level.getBlockState(column))) {
+				return;
+			}
+		}
+		for (Direction d : Direction.values()) {
+			if (!bare(level.getBlockState(at.relative(d)))) {
+				return;
+			}
+		}
+		BlockState there = level.getBlockState(at);
+		Block ore = there.is(BlockTags.STONE_ORE_REPLACEABLES) ? stone : there.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES) ? deep : null;
+		if (ore != null) {
+			level.setBlock(at, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+	}
+
+	/** Untouched ground: soil, sand, gravel, snow, terracotta, the world's own rock and its ores. Not air, water, wood or anything laid. */
+	private static boolean bare(BlockState state) {
+		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.GRAVEL)
+			|| state.is(Blocks.SNOW_BLOCK) || state.is(BlockTags.TERRACOTTA) || state.is(Blocks.CLAY)
+			|| state.is(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags.ORES);
 	}
 
 	/**

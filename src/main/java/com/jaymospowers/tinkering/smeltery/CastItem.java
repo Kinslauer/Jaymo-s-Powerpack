@@ -35,7 +35,13 @@ public class CastItem extends Item {
 		HELMET_PLATING(PartType.HELMET_PLATING), CHESTPLATE_PLATING(PartType.CHESTPLATE_PLATING), LEGGINGS_PLATING(PartType.LEGGINGS_PLATING),
 		BOOTS_PLATING(PartType.BOOTS_PLATING), MAILLE(PartType.MAILLE),
 		/** (0.11.77) A weapon head of the kind it was made from ({@link WeaponParts}). */
-		WEAPON("weapon", null);
+		WEAPON("weapon", null),
+		/** (GTNH picks) A glass pane, cast from molten glass. */
+		PANE("pane", null),
+		/** (GTNH picks, the forge's dangers) A round hollow: molten ender casts an ender pearl in it, molten slime a slime ball. */
+		ORB("orb", null),
+		/** A rod's hollow: molten blaze casts a blaze rod in it. */
+		ROD("rod", null);
 
 		public final String id;
 		public final @Nullable PartType part;
@@ -67,6 +73,15 @@ public class CastItem extends Item {
 			}
 			if (stack.getItem() instanceof WeaponPartItem) {
 				return WEAPON;
+			}
+			if (stack.is(Items.GLASS_PANE)) {
+				return PANE;
+			}
+			if (stack.is(Items.ENDER_PEARL) || stack.is(Items.SLIME_BALL)) {
+				return ORB;
+			}
+			if (stack.is(Items.BLAZE_ROD) || stack.is(Items.STICK)) {
+				return ROD;
 			}
 			return null;
 		}

@@ -15,6 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -55,6 +57,9 @@ import net.minecraft.world.level.gamerules.GameRuleCategory;
  * {@link WaterFilterItem}.
  * <p>
  * (0.5.80) Waterskins come in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
+ * <p>
+ * Cactus water (Andy's GT New Horizons picks, patch 3): eight cacti round an empty bucket give a bucket of bitter water,
+ * drunk straight from the bucket. It's unpurified until it's boiled on the same fires as a bottle ({@link #BOILED}).
  */
 public final class Climate {
 	public static Item CLEAN_WATER;
@@ -62,6 +67,9 @@ public final class Climate {
 	public static Item WATERSKIN_IRON;
 	public static Item WATERSKIN_DRAGON;
 	public static Item WATER_FILTER;
+	public static Item CACTUS_WATER;
+	/** On a bucket of cactus water: it has been boiled clean. */
+	public static DataComponentType<Unit> BOILED;
 	public static DataComponentType<WaterskinItem.Water> WATERSKIN_WATER;
 	public static GameRule<Boolean> THIRST;
 	public static GameRule<Boolean> BODY_HEAT;
@@ -86,6 +94,10 @@ public final class Climate {
 		WATERSKIN_DRAGON = item("waterskin_dragon", p -> new WaterskinItem(WaterskinItem.Tier.DRAGON, p), new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		WATER_FILTER = item("water_filter", WaterFilterItem::new, new Item.Properties().durability(WaterFilterItem.USES));
+		BOILED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("boiled"),
+			DataComponentType.<Unit>builder().persistent(Unit.CODEC).networkSynchronized(Unit.STREAM_CODEC).build());
+		CACTUS_WATER = item("cactus_water_bucket", Item::new, new Item.Properties().stacksTo(1)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK).usingConvertsTo(Items.BUCKET));
 		ParasiteEffect.register();
 		Warmth.register();
 		Soot.register();
@@ -95,6 +107,7 @@ public final class Climate {
 			output.accept(WATERSKIN_IRON);
 			output.accept(WATERSKIN_DRAGON);
 			output.accept(WATER_FILTER);
+			output.accept(CACTUS_WATER);
 		});
 
 		// class-load the synced attachments on both sides (a dedicated server's clients must know them)
@@ -169,9 +182,12 @@ public final class Climate {
 
 	/**
 	 * A bottle of water, or a waterskin with water in it: what a lit campfire boils clean. (Hardrock picks) a waterskin
-	 * comes off the fire hot as well, so clean water can go back on to warm up.
+	 * comes off the fire hot as well, so clean water can go back on to warm up. A bucket of cactus water not yet boiled.
 	 */
 	static boolean boils(ItemStack held) {
+		if (held.is(CACTUS_WATER)) {
+			return !held.has(BOILED);
+		}
 		if (held.is(Items.POTION)) {
 			PotionContents contents = held.get(DataComponents.POTION_CONTENTS);
 			return contents != null && contents.is(Potions.WATER);
@@ -224,6 +240,9 @@ public final class Climate {
 		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
 			held.set(WATERSKIN_WATER, new WaterskinItem.Water(WaterskinItem.water(held).sips(), true, 1,
 				player.level().getGameTime() + Warmth.SKIN_KEEPS));
+		} else if (held.is(CACTUS_WATER)) {
+			held.set(BOILED, Unit.INSTANCE);
+			held.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskitchen.cactus_water_bucket.boiled"));
 		} else {
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemUtils.createFilledResult(held, player, new ItemStack(CLEAN_WATER)));
 		}

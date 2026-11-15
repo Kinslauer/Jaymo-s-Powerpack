@@ -19,8 +19,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * (Better With Mods' hemp, MIT; our own code and art.) A two-block-tall crop: hemp seeds turn up now and then when you
- * break grass (not shearing it), and grow on farmland like wheat (they can be scattered, {@link Sowing}). Grown, it puts
+ * (Better With Mods' hemp, MIT; our own code and art.) A two-block-tall crop: hemp seeds turn up now and then when a hoe
+ * scratches through dry grass ({@link DryFields}), and grow on farmland like wheat (they can be scattered, {@link Sowing}). Grown, it puts
  * up a top half; both halves give hemp fibre. Fibre twists into string, or weaves into hemp cloth (which makes
  * bandages, if Jaymo's Powers is there).
  */

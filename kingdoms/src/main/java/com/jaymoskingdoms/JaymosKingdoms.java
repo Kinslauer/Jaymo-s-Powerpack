@@ -526,6 +526,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
 		com.jaymoskingdoms.wild.SpiderMinds.register();
+		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
+		MarkedMonsters.register();
+		TurnedVillagers.register();
+		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();
 		com.jaymoskingdoms.wild.Thinning.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
@@ -785,6 +789,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		SkyCourt.register();
 		SkyUsurpers.register();
 		SkyFerries.register();
+		// the steam towns, their stalls and their airships (after SkyFerries: the airships chain its sky helm)
+		SteamTowns.register();
+		SteamTrades.register();
+		SteamAirships.register();
 		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)

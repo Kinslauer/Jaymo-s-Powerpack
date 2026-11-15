@@ -1,0 +1,106 @@
+{
+  "values": [
+    "minecraft:wooden_sword",
+    "minecraft:wooden_shovel",
+    "minecraft:wooden_pickaxe",
+    "minecraft:wooden_axe",
+    "minecraft:wooden_hoe",
+    "minecraft:wooden_spear",
+    {
+      "id": "jaymospowers:wooden_broadsword",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_cudgel",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_longsword",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_machete",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_rapier",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_saber",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_skewer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:hand_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:primitive_knife",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:primitive_spear",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:throwing_stick",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:flint_knife",
+      "required": false
+    },
+    {
+      "id": "rogues:flint_dagger",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "wooden_fence",
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "key": {
+    "W": "minecraft:mangrove_planks",
+    "#": "jaymospowers:fence_rail"
+  },
+  "result": {
+    "id": "minecraft:mangrove_fence",
+    "count": 3
+  }
+}

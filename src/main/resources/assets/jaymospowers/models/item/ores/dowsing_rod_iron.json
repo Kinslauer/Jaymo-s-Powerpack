@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/ores/dowsing_rod",
+    "layer1": "jaymospowers:item/ores/dowsing_sample_iron"
+  }
+}

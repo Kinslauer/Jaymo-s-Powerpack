@@ -1,0 +1,23 @@
+{
+  "item.jaymospowers.flint_dust": "Flint Dust",
+  "item.jaymospowers.clay_dust": "Clay Dust",
+  "item.jaymospowers.bronze_dust": "Bronze Dust",
+  "item.jaymospowers.glass_dust": "Glass Dust",
+  "item.jaymospowers.sawdust": "Sawdust",
+  "item.jaymospowers.cane_chad": "Cane Chad",
+  "item.jaymospowers.fence_rail": "Fence Rail",
+  "item.jaymospowers.brick_form": "Brick Form",
+  "item.jaymospowers.unfired_brick": "Unfired Brick",
+  "item.jaymospowers.unfired_clay_bucket": "Unfired Clay Bucket",
+  "item.jaymospowers.clay_bucket": "Clay Bucket",
+  "item.jaymospowers.clay_water_bucket": "Clay Bucket of Water",
+  "item.jaymospowers.clay_milk_bucket": "Clay Bucket of Milk",
+  "item.jaymospowers.pane_cast": "Pane Cast",
+  "molten.jaymospowers.glass": "Molten Glass",
+  "jei.jaymospowers.sieve": "Sifting",
+  "jei.jaymospowers.sieve.chance": "%s%% a time",
+  "jei.jaymospowers.mortar_grinding": "Mortar Grinding",
+  "jei.jaymospowers.mortar_grinding.how": "Up to four at a time, ground with the pestle",
+  "jei.jaymospowers.clay_bucket": "Scoops water and milks a cow or goat like a bucket. It wears a little every time it's emptied and cracks in the end. Dip it in lava and it shatters.",
+  "jei.jaymospowers.brick_form": "Carved from a plank with a knife. Clay pressed into it in the grid makes unfired bricks, for the brick kiln; the form wears a little each time."
+}

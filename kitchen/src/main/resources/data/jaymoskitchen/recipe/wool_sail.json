@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SMM",
+    "SMM"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "M": "#minecraft:wool"
+  },
+  "result": {
+    "id": "jaymoskitchen:wool_sail",
+    "count": 1
+  }
+}

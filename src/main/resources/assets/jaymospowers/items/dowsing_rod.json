@@ -1,0 +1,73 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymospowers:dowsing_sample",
+    "cases": [
+      {
+        "when": [
+          "minecraft:raw_iron",
+          "jaymospowers:crushed_iron_ore",
+          "jaymospowers:small_iron_ore",
+          "jaymospowers:deepslate_small_iron_ore"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/ores/dowsing_rod_iron"
+        }
+      },
+      {
+        "when": [
+          "minecraft:raw_copper",
+          "jaymospowers:crushed_copper_ore",
+          "jaymospowers:small_copper_ore",
+          "jaymospowers:deepslate_small_copper_ore"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/ores/dowsing_rod_copper"
+        }
+      },
+      {
+        "when": [
+          "jaymospowers:raw_tin",
+          "jaymospowers:crushed_tin_ore",
+          "jaymospowers:small_tin_ore",
+          "jaymospowers:deepslate_small_tin_ore"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/ores/dowsing_rod_tin"
+        }
+      },
+      {
+        "when": [
+          "minecraft:raw_gold",
+          "jaymospowers:crushed_gold_ore",
+          "jaymospowers:small_gold_ore",
+          "jaymospowers:deepslate_small_gold_ore"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/ores/dowsing_rod_gold"
+        }
+      },
+      {
+        "when": [
+          "jaymospowers:raw_silver",
+          "jaymospowers:crushed_silver_ore",
+          "jaymospowers:small_silver_ore",
+          "jaymospowers:deepslate_small_silver_ore"
+        ],
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/ores/dowsing_rod_silver"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/ores/dowsing_rod"
+    }
+  }
+}

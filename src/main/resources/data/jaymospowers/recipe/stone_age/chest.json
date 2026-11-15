@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LPL",
+    "PFP",
+    "LPL"
+  ],
+  "key": {
+    "L": "#minecraft:logs",
+    "P": "#minecraft:planks",
+    "F": "minecraft:flint"
+  },
+  "result": {
+    "id": "minecraft:chest",
+    "count": 1
+  }
+}

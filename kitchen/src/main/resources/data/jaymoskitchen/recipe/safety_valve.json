@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " N ",
+    "CLC"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "L": "minecraft:lever",
+    "C": "#c:ingots/copper"
+  },
+  "result": {
+    "id": "jaymoskitchen:safety_valve",
+    "count": 1
+  }
+}

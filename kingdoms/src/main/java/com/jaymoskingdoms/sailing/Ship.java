@@ -190,6 +190,11 @@ public final class Ship extends Entity {
 	public interface Skyfaring {
 		/** Her helm this tick, or null if she isn't one of theirs (she drifts, then moors herself where she is). */
 		@Nullable Input helm(ServerLevel level, Ship ship);
+
+		/** Her wheel is theirs while she flies (no player may take it), as a steam town's airship's is. */
+		default boolean keepsWheel(Ship ship) {
+			return false;
+		}
 	}
 
 	public static @Nullable Skyfaring skyfaring;
@@ -1076,7 +1081,7 @@ public final class Ship extends Entity {
 	protected boolean canAddPassenger(Entity passenger) {
 		if (passenger instanceof Player) {
 			// one at her wheel, and (a crewed ship's) not while her captain still has it
-			return this.helmsman() == null && (this.crew == null || !this.crew.captained(this));
+			return this.helmsman() == null && (this.crew == null || !this.crew.captained(this)) && (skyfaring == null || !skyfaring.keepsWheel(this));
 		}
 		// (0.7.42) her crew, at their stations
 		return passenger.hasAttached(SEAT) && this.getPassengers().size() < MOST_CREW;

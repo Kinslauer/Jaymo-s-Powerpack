@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SMM",
+    "SMM"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "M": "minecraft:paper"
+  },
+  "result": {
+    "id": "jaymoskitchen:paper_sail",
+    "count": 1
+  }
+}

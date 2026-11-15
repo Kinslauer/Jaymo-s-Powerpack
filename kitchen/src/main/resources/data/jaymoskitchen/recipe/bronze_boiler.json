@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:tags_populated",
+      "registry": "minecraft:item",
+      "values": [
+        "c:ingots/bronze"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    "CVC",
+    "CCC"
+  ],
+  "key": {
+    "C": "#c:ingots/bronze",
+    "V": "jaymoskitchen:safety_valve"
+  },
+  "result": {
+    "id": "jaymoskitchen:bronze_boiler",
+    "count": 1
+  }
+}

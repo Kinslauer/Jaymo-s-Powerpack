@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "group": "wooden_fence_gate",
-  "key": {
-    "#": "minecraft:stick",
-    "W": "jaymospowers:brain_tree_planks"
-  },
   "pattern": [
     "#W#",
     "#W#"
   ],
+  "key": {
+    "W": "jaymospowers:brain_tree_planks",
+    "#": "jaymospowers:fence_rail"
+  },
   "result": {
-    "id": "jaymospowers:brain_tree_fence_gate"
+    "id": "jaymospowers:brain_tree_fence_gate",
+    "count": 1
   }
 }

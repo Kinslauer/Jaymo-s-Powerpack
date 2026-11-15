@@ -35,6 +35,7 @@ public class ProspectorPickItem extends Item {
 		Map.entry(ConventionalBlockTags.COPPER_ORES, "copper"),
 		Map.entry(ConventionalBlockTags.GOLD_ORES, "gold"),
 		Map.entry(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores/silver")), "silver"),
+		Map.entry(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores/tin")), "tin"),
 		Map.entry(ConventionalBlockTags.COAL_ORES, "coal"),
 		Map.entry(ConventionalBlockTags.REDSTONE_ORES, "redstone"),
 		Map.entry(ConventionalBlockTags.LAPIS_ORES, "lapis"),

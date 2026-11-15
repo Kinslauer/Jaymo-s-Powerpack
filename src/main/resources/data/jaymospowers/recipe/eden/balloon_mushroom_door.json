@@ -2,16 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "group": "wooden_door",
-  "key": {
-    "#": "jaymospowers:balloon_mushroom_planks"
-  },
   "pattern": [
-    "##",
-    "##",
-    "##"
+    "PPN",
+    "PP ",
+    "PP "
   ],
+  "key": {
+    "P": "jaymospowers:balloon_mushroom_planks",
+    "N": "#jaymospowers:door_fittings"
+  },
   "result": {
     "id": "jaymospowers:balloon_mushroom_door",
-    "count": 3
+    "count": 1
   }
 }

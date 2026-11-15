@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:copper_dust",
+    "jaymospowers:copper_dust",
+    "jaymospowers:copper_dust",
+    "#c:dusts/tin"
+  ],
+  "result": {
+    "id": "jaymospowers:bronze_dust",
+    "count": 4
+  }
+}

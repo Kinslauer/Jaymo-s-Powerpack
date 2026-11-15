@@ -298,6 +298,8 @@ public final class Stomach {
 		com.jaymoskitchen.brewing.Drunk.onDrink(player, stack);
 		// (0.5.28) Comfort from a hot bowl, Nourishment from a rich meal
 		com.jaymoskitchen.delight.Delight.onEat(player, stack);
+		// (GT New Horizons picks) a kind of food never eaten before counts toward a heart more
+		Variety.eaten(player, stack);
 		Meal meal = mealOf(stack, drink);
 		if (meal == null) {
 			return;
@@ -387,7 +389,9 @@ public final class Stomach {
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			// Andy's TFC Hardrock picks: a balanced diet adds up to two hearts, one food group alone takes one off (FoodGroups)
-			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) * mealBoost(player) + leftover(player), foodCap(player)) + FoodGroups.bonus(meals);
+			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) * mealBoost(player) + leftover(player), foodCap(player)) + FoodGroups.bonus(meals)
+				// (GT New Horizons picks) a heart for every so much variety eaten, for good
+				+ Variety.hearts(player) * 2.0F;
 			AttributeModifier current = health.getModifier(HEALTH_ID);
 			if (current == null || current.amount() != bonus) {
 				health.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, bonus, AttributeModifier.Operation.ADD_VALUE));

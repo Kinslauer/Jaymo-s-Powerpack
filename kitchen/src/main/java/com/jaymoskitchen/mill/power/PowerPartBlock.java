@@ -9,11 +9,12 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 /**
  * Never placed: its states hold the windmill's and waterwheel's pieces as block models (the hub, a length of bare
- * spar, a length of spar with its sail, a paddle on its spokes), for the rotor renderer to draw round and round.
+ * spar, a length of spar with its sail, a paddle on its spokes, a steam engine's flywheel), for the rotor and engine
+ * renderers to draw round and round.
  */
 public class PowerPartBlock extends Block {
 	public enum Part implements StringRepresentable {
-		WINDMILL_HUB, WINDMILL_SPAR, WINDMILL_SAIL, WATERWHEEL_HUB, WATERWHEEL_PADDLE;
+		WINDMILL_HUB, WINDMILL_SPAR, WINDMILL_SAIL, WATERWHEEL_HUB, WATERWHEEL_PADDLE, ENGINE_FLYWHEEL;
 
 		@Override
 		public String getSerializedName() {

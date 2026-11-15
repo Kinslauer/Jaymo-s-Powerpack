@@ -15,7 +15,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Difficulty;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
@@ -85,6 +88,17 @@ final class TradeRoutes {
 		}
 	}
 
+	/**
+	 * (GTNH picks) Jaymo's Powers' tin (ingots and raw) and bronze, by their common tags so Powers needn't be loaded: metal
+	 * goods, tin at copper's worth and bronze (three of copper to one of tin, and the work) a little dearer.
+	 */
+	static final TagKey<Item> TIN_INGOTS = common("ingots/tin"), RAW_TIN = common("raw_materials/tin"), BRONZE_INGOTS = common("ingots/bronze");
+	static final int BRONZE_WORTH = 4;
+
+	private static TagKey<Item> common(String path) {
+		return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", path));
+	}
+
 	/** What they trade in. */
 	enum Ware {
 		FOOD(1), TIMBER(1), STONE(1), METAL(5), CLOTH(3), HIDE(3), POWDER(4);
@@ -104,7 +118,8 @@ final class TradeRoutes {
 				case STONE -> i == Items.COBBLESTONE || i == Items.STONE || i == Items.COBBLED_DEEPSLATE || i == Items.ANDESITE || i == Items.DIORITE
 					|| i == Items.GRANITE || i == Items.TUFF || i == Items.GRAVEL || i == Items.FLINT || i == Items.CLAY_BALL || i == Items.BRICK;
 				case METAL -> i == Items.IRON_INGOT || i == Items.COPPER_INGOT || i == Items.GOLD_INGOT || i == Items.RAW_IRON || i == Items.RAW_COPPER
-					|| i == Items.RAW_GOLD || i == Items.COAL || i == Items.REDSTONE || i == Items.LAPIS_LAZULI || i == Items.DIAMOND;
+					|| i == Items.RAW_GOLD || i == Items.COAL || i == Items.REDSTONE || i == Items.LAPIS_LAZULI || i == Items.DIAMOND
+					|| x.is(TIN_INGOTS) || x.is(RAW_TIN) || x.is(BRONZE_INGOTS);
 				case CLOTH -> x.is(ItemTags.WOOL) || i == Items.STRING || i == Items.PAPER;
 				case HIDE -> i == Items.LEATHER || i == Items.BONE || i == Items.FEATHER || i == Items.RABBIT_HIDE;
 				case POWDER -> i == Items.GUNPOWDER;
@@ -133,8 +148,10 @@ final class TradeRoutes {
 			} else if (i == Items.RAW_IRON) {
 				return 8;
 			} else if (i == Items.COAL || i == Items.COPPER_INGOT || i == Items.RAW_COPPER || i == Items.RAW_GOLD || i == Items.REDSTONE
-				|| i == Items.LAPIS_LAZULI) {
+				|| i == Items.LAPIS_LAZULI || x.is(TIN_INGOTS) || x.is(RAW_TIN)) {
 				return 3;
+			} else if (x.is(BRONZE_INGOTS)) {
+				return BRONZE_WORTH;
 			}
 			Ware w = of(x);
 			return w == null ? 1 : w.worth;

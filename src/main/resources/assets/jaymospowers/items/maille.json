@@ -176,6 +176,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -283,6 +296,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinker_armour/part/maille_leather"
+          }
+        },
+        {
+          "when": "bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinker_armour/part/maille_bronze"
           }
         }
       ],

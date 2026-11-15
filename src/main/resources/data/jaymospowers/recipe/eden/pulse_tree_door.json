@@ -2,16 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "group": "wooden_door",
-  "key": {
-    "#": "jaymospowers:pulse_tree_planks"
-  },
   "pattern": [
-    "##",
-    "##",
-    "##"
+    "PPN",
+    "PP ",
+    "PP "
   ],
+  "key": {
+    "P": "jaymospowers:pulse_tree_planks",
+    "N": "#jaymospowers:door_fittings"
+  },
   "result": {
     "id": "jaymospowers:pulse_tree_door",
-    "count": 3
+    "count": 1
   }
 }

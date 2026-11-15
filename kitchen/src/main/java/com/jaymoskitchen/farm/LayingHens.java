@@ -10,7 +10,8 @@ import net.minecraft.world.entity.animal.chicken.Chicken;
 /**
  * Laying hens (after Better With Mods): a chicken that pecks a seed off the ground ({@link EatGroundFoodGoal}) is fed,
  * and lays an egg at the next dawn. Fed or not, its own egg timer still runs, an unfed hen's slower
- * ({@link #UNFED_RATE}). Hand-feeding seeds to breed them is untouched. Ticked from {@code ChickenMixin}.
+ * ({@link #UNFED_RATE}), and every hen's at {@link Herds#HENS} (slow herds). Hand-feeding seeds to breed them is untouched.
+ * Ticked from {@code ChickenMixin}.
  */
 public final class LayingHens {
 	/** How fast a hen's own egg timer runs (1 = vanilla), fed and unfed. */
@@ -45,11 +46,14 @@ public final class LayingHens {
 		if (fedOn != null && fedOn != day(level)) {
 			// a new day (or the clock was turned back): the egg comes now, vanilla's own laying (sound, variant egg)
 			hen.removeAttached(FED_DAY);
-			hen.eggTime = Math.min(hen.eggTime, 1);
+			// (GTNH picks) hens lay half as often, the fed hen's dawn egg too
+			if (hen.getRandom().nextFloat() < Herds.HENS) {
+				hen.eggTime = Math.min(hen.eggTime, 1);
+			}
 			return;
 		}
 		// (Hardrock picks) a familiar hen lays faster
-		float rate = (fedOn != null ? FED_RATE : UNFED_RATE) * (1.0F + Familiarity.HEN_BONUS * Familiarity.of(hen));
+		float rate = (fedOn != null ? FED_RATE : UNFED_RATE) * (1.0F + Familiarity.HEN_BONUS * Familiarity.of(hen)) * Herds.HENS;
 		if (rate < 1.0F && hen.getRandom().nextFloat() >= rate) {
 			hen.eggTime++;
 		} else if (rate > 1.0F && hen.getRandom().nextFloat() < rate - 1.0F) {

@@ -237,6 +237,12 @@ public final class Feathers {
 		return s != null && s.exhausted && s.loose && !player.isCreative() && !player.isSpectator();
 	}
 
+	/** The game time {@code player} last spent feathers on a move (a dodge, a vault, a wall jump), or long ago. */
+	public static long lastSpend(ServerPlayer player) {
+		State s = STATES.get(player.getUUID());
+		return s != null ? s.lastSpend : Long.MIN_VALUE / 2;
+	}
+
 	/** {@code player}'s weapon has been knocked away for running dry: not again until they have recovered and run dry anew. */
 	public static void gripLost(ServerPlayer player) {
 		state(player).loose = false;

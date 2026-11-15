@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -61,6 +62,7 @@ import net.minecraft.world.entity.monster.zombie.Drowned;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
@@ -87,6 +89,7 @@ import org.jspecify.annotations.Nullable;
  * <li>A boss spares one far too weak to matter ({@link #beneath}): they are dumped far off ({@link #SPARED_MIN}).</li>
  * <li>Server setting: {@code death_by_cause} and {@code final_odds} in {@code config/jaymospowers-server.properties}
  * ({@link ZFighterRealism}); off, deaths are as they were.</li>
+ * <li>Every survivor wakes, and every death respawns, on no more than half a stomach ({@link #WAKE_FOOD}).</li>
  * </ul>
  * Survival only (creative never dies here), not one of the dead in the Other World (it holds its own), and a totem in hand is
  * left to do its work.
@@ -106,6 +109,8 @@ public final class Mortality {
 	static final int OUT_BEFORE = 60, OUT_AFTER = 100;
 	/** The share of their health a survivor wakes with. */
 	static final float WAKE_HEALTH = 0.3F;
+	/** The share of a full stomach (20) a survivor wakes with, or one whose life ended respawns with: no more than this. */
+	static final float WAKE_FOOD = 0.5F;
 	/**
 	 * How long after being put down where they wake (ticks) a death is still turned away: the out-cold spell
 	 * ({@link #OUT_AFTER}) and a little while on their feet. Andy's risen Hollow lay in the sun and died again two seconds
@@ -321,6 +326,12 @@ public final class Mortality {
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, (entity, source, amount) ->
 			!(entity instanceof ServerPlayer player) || decide(player, source));
 		ServerTickEvents.END_SERVER_TICK.register(Mortality::tick);
+		// one whose life ended comes back hungry too
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (!alive) {
+				wakeHungry(newPlayer);
+			}
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			REBIRTHS.remove(handler.player.getUUID());
 			// (0.21.7) logging out while lying left for dead: they come to where they lie
@@ -1257,6 +1268,7 @@ public final class Mortality {
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
+		wakeHungry(player);
 		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
@@ -1270,6 +1282,16 @@ public final class Mortality {
 				JaymosPowers.LOGGER.warn("{} couldn't be turned", player.getScoreboardName(), e);
 			}
 		}
+	}
+
+	/** {@code player} comes round with no more than {@link #WAKE_FOOD} of a full stomach, and no more saturation than food. */
+	private static void wakeHungry(ServerPlayer player) {
+		if (player.isCreative() || player.isSpectator()) {
+			return;
+		}
+		FoodData food = player.getFoodData();
+		food.setFoodLevel(Math.min(food.getFoodLevel(), Math.round(20 * WAKE_FOOD)));
+		food.setSaturation(Math.min(food.getSaturationLevel(), food.getFoodLevel()));
 	}
 
 	/** The injury {@code cause} leaves on one who lived. */

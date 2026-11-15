@@ -7,7 +7,8 @@ import net.minecraft.world.item.ItemStackTemplate;
 /**
  * (0.17.116) The saw (forged at the Tool Station from a Saw Blade, a Tool Handle and a Tool Binding,
  * {@code tinkering/WeaponParts}): set in a crafting grid with a wooden block, it cuts the block into {@link LayerBlock#MAX_LAYERS}
- * layers and stays in the grid, worn by one cut, until it wears out.
+ * layers and stays in the grid, worn by one cut, until it wears out. (GTNH picks) It also cuts two planks into eight sticks,
+ * three planks into eight slabs and a wooden slab into two fence rails (data, tools/gen_stone_age.py).
  */
 public class SawItem extends Item {
 	public SawItem(Properties properties) {

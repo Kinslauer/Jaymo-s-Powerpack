@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "wooden_door",
+  "pattern": [
+    "PPN",
+    "PP ",
+    "PP "
+  ],
+  "key": {
+    "P": "minecraft:warped_planks",
+    "N": "#jaymospowers:door_fittings"
+  },
+  "result": {
+    "id": "minecraft:warped_door",
+    "count": 1
+  }
+}

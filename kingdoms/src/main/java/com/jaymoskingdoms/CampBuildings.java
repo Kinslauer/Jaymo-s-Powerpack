@@ -43,6 +43,8 @@ final class CampBuildings {
 	static final int PALISADE_RADIUS = 14, CLEAR_RADIUS = PALISADE_RADIUS + 2, CLEAR_HEIGHT = 12;
 	/** The palisade's height (logs), with every other one this much taller; the gate's half-width and its posts' height. */
 	static final int PALISADE_HIGH = 3, PALISADE_JAG = 1, GATE_HALF = 1, GATE_POST_HIGH = 5;
+	/** (GTNH patch 6) Patches of punji stakes set round the outside of the palisade (never across the gate's way), and stakes in each. */
+	static final int STAKE_PATCHES = 6, STAKES_EACH = 3;
 	/** Growth: how many of each the builders may add. */
 	static final int MAX_TENTS = 5, MAX_PALISADE = 8, MAX_WATCH_POSTS = 2, MAX_TOTEMS = 1, MAX_PENS = 2;
 
@@ -413,6 +415,7 @@ final class CampBuildings {
 				}
 			}
 		}
+		stakes(level, camp, random);
 		// the fire and its benches (logs laid on their sides)
 		level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_CLIENTS);
 		BlockState alongZ = log.trySetValue(RotatedPillarBlock.AXIS, gate.getAxis());
@@ -443,6 +446,25 @@ final class CampBuildings {
 		BlockPos chest = chief.at(CHIEF_CHEST);
 		stockChiefChest(level, chest, random);
 		return new Layout(fire, storage, loot.at(LOOT_DEPOT), chief.at(CHIEF_SPOT), chest);
+	}
+
+	/** (GTNH patch 6) Punji stakes in patches just outside the palisade, on the levelled ground, clear of the way to the gate. */
+	private static void stakes(ServerLevel level, Placer camp, RandomSource random) {
+		double ring = PALISADE_RADIUS + 1.5;
+		for (int i = 0; i < STAKE_PATCHES; i++) {
+			double start = (i + random.nextDouble() * 0.5) * Math.PI * 2.0 / STAKE_PATCHES;
+			for (int j = 0; j < STAKES_EACH; j++) {
+				double angle = start + j / ring;
+				int x = (int) Math.round(Math.cos(angle) * ring), z = (int) Math.round(Math.sin(angle) * ring);
+				if (z < 0 && Math.abs(x) <= GATE_HALF + 3) {
+					continue;
+				}
+				BlockPos at = camp.at(x, 0, z);
+				if (level.getBlockState(at).isAir() && level.getBlockState(at.below()).isFaceSturdy(level, at.below(), Direction.UP)) {
+					level.setBlock(at, com.jaymoskingdoms.creatures.Creatures.PUNJI.defaultBlockState(), Block.UPDATE_CLIENTS);
+				}
+			}
+		}
 	}
 
 	/** (0.5.6) A camp beside a ruin: its ground levelled this far round its fire, and how uneven that ground may be. */

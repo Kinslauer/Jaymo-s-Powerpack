@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "cracked=false": {
       "model": "jaymospowers:block/tinkering/seared_bricks"
+    },
+    "cracked=true": {
+      "model": "jaymospowers:block/tinkering/cracked_seared_bricks"
     }
   }
 }

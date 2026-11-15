@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "jaymoskitchen:block/bronze_boiler_top",
+    "bottom": "jaymoskitchen:block/bronze_boiler_top",
+    "side": "jaymoskitchen:block/bronze_boiler_side",
+    "front": "jaymoskitchen:block/bronze_boiler_front_2"
+  }
+}

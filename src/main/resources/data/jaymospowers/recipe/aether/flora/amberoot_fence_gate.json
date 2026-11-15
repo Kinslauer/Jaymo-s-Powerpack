@@ -1,16 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
-  "key": {
-    "#": "minecraft:stick",
-    "W": "jaymospowers:amberoot_planks"
-  },
+  "group": "wooden_fence_gate",
   "pattern": [
     "#W#",
     "#W#"
   ],
-  "result": {
-    "id": "jaymospowers:amberoot_fence_gate"
+  "key": {
+    "W": "jaymospowers:amberoot_planks",
+    "#": "jaymospowers:fence_rail"
   },
-  "group": "wooden_fence_gate"
+  "result": {
+    "id": "jaymospowers:amberoot_fence_gate",
+    "count": 1
+  }
 }

@@ -27,7 +27,33 @@ public final class KingdomsCompat {
 	private static Method formsKnown, formsPerk;
 	private static boolean formsLooked;
 
+	private static Method knowledgeLevel;
+	private static boolean knowledgeLooked;
+
 	private KingdomsCompat() {
+	}
+
+	/**
+	 * {@code player}'s Knowledge level (Kingdoms' boss ladder, {@code Knowledge.level}, 0 to 5; server side). Without
+	 * Kingdoms (or if it can't be read) {@link Integer#MAX_VALUE}: there is nothing to earn, so nothing is held back.
+	 */
+	public static int knowledge(Player player) {
+		if (!LOADED || player == null) {
+			return Integer.MAX_VALUE;
+		}
+		if (!knowledgeLooked) {
+			knowledgeLooked = true;
+			try {
+				knowledgeLevel = Class.forName("com.jaymoskingdoms.Knowledge").getMethod("level", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				knowledgeLevel = null;
+			}
+		}
+		try {
+			return knowledgeLevel != null && knowledgeLevel.invoke(null, player) instanceof Integer level ? level : Integer.MAX_VALUE;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return Integer.MAX_VALUE;
+		}
 	}
 
 	/**
@@ -519,6 +545,35 @@ public final class KingdomsCompat {
 			}
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			// (an older Kingdoms: no guns to meld into)
+		}
+	}
+
+	private static Method treesHurry;
+	private static boolean treesLooked;
+
+	/**
+	 * Chrono's Time Bloom (GT New Horizons picks: "bloom affects all of them"): Kingdoms' growing trees within {@code radius}
+	 * of {@code centre} come {@code ticks} nearer their next step ({@code Trees.hurry}). Nothing without Kingdoms.
+	 */
+	public static void hurryTrees(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos centre, double radius, long ticks) {
+		if (!LOADED) {
+			return;
+		}
+		if (!treesLooked) {
+			treesLooked = true;
+			try {
+				treesHurry = Class.forName("com.jaymoskingdoms.Trees").getMethod("hurry", net.minecraft.server.level.ServerLevel.class,
+					net.minecraft.core.BlockPos.class, double.class, long.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				treesHurry = null;
+			}
+		}
+		try {
+			if (treesHurry != null) {
+				treesHurry.invoke(null, level, centre, radius, ticks);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms: its trees grow as they will)
 		}
 	}
 }

@@ -28,7 +28,7 @@ import net.minecraft.world.level.material.MapColor;
  * {@link GearboxBlock gearbox} on the run, sharing the turn among up to five machines.
  */
 public final class Power {
-	/** What a windmill's sails can be sewn from: any wool, or hemp cloth. */
+	/** Any wool, or hemp cloth: what a windsock's sock is sewn from (a windmill's sails are SailKind's). */
 	public static final TagKey<Item> SAIL_CLOTH = TagKey.create(Registries.ITEM, JaymosKitchen.id("sail_cloth"));
 
 	public static ShaftBlock SHAFT;
@@ -44,6 +44,10 @@ public final class Power {
 	public static Item CORNER_ITEM;
 	public static Item WINDMILL_ITEM;
 	public static Item WATERWHEEL_ITEM;
+	/** (GT New Horizons picks, patch 8) The windsock; the windmill's sails are {@link SailKind#item()}. */
+	public static WindsockBlock WINDSOCK;
+	public static BlockEntityType<WindsockEntity> WINDSOCK_ENTITY;
+	public static Item WINDSOCK_ITEM;
 
 	private Power() {
 	}
@@ -65,12 +69,24 @@ public final class Power {
 		GEARBOX_ITEM = blockItem("gearbox", GEARBOX);
 		WINDMILL_ITEM = item("windmill", props -> new RotorItem(Rotor.WINDMILL, props), new Item.Properties().stacksTo(1));
 		WATERWHEEL_ITEM = item("waterwheel", props -> new RotorItem(Rotor.WATERWHEEL, props), new Item.Properties().stacksTo(1));
+		for (SailKind kind : SailKind.values()) {
+			kind.item = item(kind.id() + "_sail", props -> new SailItem(kind, props),
+				new Item.Properties().durability(kind.life).repairable(kind.patch));
+		}
+		WINDSOCK = block("windsock", WindsockBlock::new, wood().noOcclusion());
+		WINDSOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("windsock"),
+			new BlockEntityType<>(WindsockEntity::new, java.util.Set.of(WINDSOCK)));
+		WINDSOCK_ITEM = blockItem("windsock", WINDSOCK);
 
 		VillageWindmills.register();
+		com.jaymoskitchen.mill.steam.Steam.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
-			for (Item item : List.of(SHAFT_ITEM, CORNER_ITEM, GEARBOX_ITEM, WINDMILL_ITEM, WATERWHEEL_ITEM)) {
+			for (Item item : List.of(SHAFT_ITEM, CORNER_ITEM, GEARBOX_ITEM, WINDMILL_ITEM, WATERWHEEL_ITEM, WINDSOCK_ITEM)) {
 				output.accept(new ItemStack(item));
+			}
+			for (SailKind kind : SailKind.values()) {
+				output.accept(new ItemStack(kind.item()));
 			}
 		});
 	}

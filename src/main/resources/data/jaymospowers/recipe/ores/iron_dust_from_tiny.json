@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust",
+    "jaymospowers:tiny_iron_dust"
+  ],
+  "result": {
+    "id": "jaymospowers:iron_dust",
+    "count": 1
+  }
+}

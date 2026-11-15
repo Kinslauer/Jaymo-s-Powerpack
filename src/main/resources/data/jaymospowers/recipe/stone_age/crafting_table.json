@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LF",
+    "LL"
+  ],
+  "key": {
+    "L": "#minecraft:logs",
+    "F": "minecraft:flint"
+  },
+  "result": {
+    "id": "minecraft:crafting_table",
+    "count": 1
+  }
+}

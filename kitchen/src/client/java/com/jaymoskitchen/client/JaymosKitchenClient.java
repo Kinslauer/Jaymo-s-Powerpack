@@ -74,10 +74,17 @@ public class JaymosKitchenClient implements ClientModInitializer {
 
 		// the horse drop: wagons and carriages, and saddlebags drawn on horses wearing them
 		CartClient.register();
+		// (GT New Horizons picks) the food journal and the lunch box
+		com.jaymoskitchen.stomach.FoodJournalItem.openScreen = com.jaymoskitchen.client.stomach.FoodJournalScreen::open;
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.stomach.LunchBox.MENU,
+			com.jaymoskitchen.client.stomach.LunchBoxScreen::new);
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.ROTOR_ENTITY, com.jaymoskitchen.client.mill.RotorRenderer::new);
+		// (GT New Horizons picks, patch 8) the windsock's sock, and the steam engine's flywheel
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.WINDSOCK_ENTITY, com.jaymoskitchen.client.mill.WindsockRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.steam.Steam.ENGINE_ENTITY, com.jaymoskitchen.client.mill.SteamEngineRenderer::new);
 		// the potter's wheel turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
 		// the spit: what's roasting on it, turning over the fire

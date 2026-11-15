@@ -1,0 +1,15 @@
+{
+  "type": "jaymospowers:tool_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:brick_form",
+    "#jaymospowers:bucket_clay",
+    "#jaymospowers:bucket_clay",
+    "jaymospowers:flint_dust",
+    "jaymospowers:flint_dust"
+  ],
+  "result": {
+    "id": "jaymospowers:unfired_firebrick",
+    "count": 4
+  }
+}

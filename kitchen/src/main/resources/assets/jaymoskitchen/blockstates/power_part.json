@@ -14,6 +14,9 @@
     },
     "part=waterwheel_paddle": {
       "model": "jaymoskitchen:block/waterwheel_paddle"
+    },
+    "part=engine_flywheel": {
+      "model": "jaymoskitchen:block/engine_flywheel"
     }
   }
 }

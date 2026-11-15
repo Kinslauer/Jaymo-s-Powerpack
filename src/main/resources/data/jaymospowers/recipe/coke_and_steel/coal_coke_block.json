@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "jaymospowers:coal_coke"
+  },
+  "result": {
+    "id": "jaymospowers:coal_coke_block",
+    "count": 1
+  }
+}

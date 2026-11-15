@@ -112,6 +112,11 @@ final class RoamingCaravans {
 	static final int CARGO_ROLLS = 6, STRONGBOX_ROLLS = 5;
 	/** Extra trades the merchant offers from his goods. */
 	static final int MERCHANT_TRADES = 3;
+	/**
+	 * (GTNH picks) A merchant caravan's tin, when Jaymo's Powers is loaded: one roll in this many of its pack goods is tin
+	 * ingots, and one merchant in this many also sells tin, this many ingots to an emerald (copper's worth on the trade roads).
+	 */
+	static final int TIN_ROLL = 6, TIN_MERCHANT = 2, TIN_PER_EMERALD = 4;
 	/** Reputation: breaking a pillager caravan (with every realm within {@link #REWARD_RANGE}); striking a merchant's caravan. */
 	static final int REP_BREAK = 15, REP_ROB = -40;
 	static final double REWARD_RANGE = 320.0;
@@ -549,7 +554,12 @@ final class RoamingCaravans {
 		List<ItemStack> load = new ArrayList<>();
 		Good[] land = land(climate);
 		Good[] general = kind.hostile() ? PLUNDER : TRADE;
+		Item tin = kind.hostile() ? null : powers("tin_ingot");
 		for (int i = 0; i < CARGO_ROLLS; i++) {
+			if (tin != null && random.nextInt(TIN_ROLL) == 0) {
+				load.add(new ItemStack(tin, 2 + random.nextInt(5)));
+				continue;
+			}
 			load.add(roll(random, random.nextInt(5) < 2 ? land : general));
 		}
 		if (strongbox) {
@@ -584,6 +594,16 @@ final class RoamingCaravans {
 			trader.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD, 1 + random.nextInt(3)), new ItemStack(g.item(), g.most()),
 				8, 1, 0.05F));
 		}
+		Item tin = powers("tin_ingot");
+		if (tin != null && random.nextInt(TIN_MERCHANT) == 0) {
+			trader.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD, 1), new ItemStack(tin, TIN_PER_EMERALD), 8, 1, 0.05F));
+		}
+	}
+
+	/** One of Jaymo's Powers' items, or null without it. */
+	private static @Nullable Item powers(String id) {
+		return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", id))
+			.orElse(null);
 	}
 
 	// ---- on the way -------------------------------------------------------------------------------------------------

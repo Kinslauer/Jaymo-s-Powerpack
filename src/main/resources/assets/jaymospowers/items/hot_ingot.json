@@ -276,6 +276,32 @@
             }
           ]
         }
+      },
+      {
+        "when": "tin",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tin/tin_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/bronze_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
       }
     ],
     "fallback": {

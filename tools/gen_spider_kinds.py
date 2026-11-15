@@ -1,4 +1,4 @@
-"""Jaymo's Kingdoms: the six spider kinds' skins (wild/SpiderKinds), drawn from scratch on the spider model's 64x32
+"""Jaymo's Kingdoms: the spider kinds' skins (wild/SpiderKinds; the mother, her spiderlings and the flyer since GTNH patch 6), drawn from scratch on the spider model's 64x32
 box layout (head 32,4 8x8x8; neck 0,0 6x6x6; abdomen 0,12 10x8x12; legs 18,0 16x2x2). Our own pixels, no game art.
 Run: python3 tools/gen_spider_kinds.py"""
 import random
@@ -137,9 +137,54 @@ def ice(img, rnd):
     top_and_back(img, f)
 
 
+def mother(img, rnd):
+    # a wolf spider: a pale stripe down the back, and her brood riding on it (pale round bumps)
+    def f(n, x, y, w, h):
+        if n == "top":
+            if rnd.random() < 0.2:
+                return (226, 206, 168) if rnd.random() < 0.7 else (250, 238, 214)
+            if x in (4, 5):
+                return (176, 146, 104)
+        if n == "back" and x in (4, 5):
+            return (176, 146, 104)
+        return None
+    top_and_back(img, f)
+
+
+def spiderling(img, rnd):
+    # pale and soft, a faint darker saddle
+    def f(n, x, y, w, h):
+        if n == "top" and 2 <= x <= 7 and 3 <= y <= 8 and rnd.random() < 0.5:
+            return (176, 150, 112)
+        return None
+    top_and_back(img, f)
+
+
+def flyer(img, rnd):
+    # a jumping spider: black with white bands across the back, a green sheen on the head
+    def f(n, x, y, w, h):
+        if n == "top" and y in (3, 7) and 1 <= x <= w - 2:
+            return (236, 236, 230)
+        if n in ("left", "right") and y == 2:
+            return (236, 236, 230)
+        if rnd.random() < 0.06:
+            return (70, 130, 110)
+        return None
+    top_and_back(img, f)
+    for name, x0, y0, w, h in faces(*HEAD):
+        if name in ("top", "front"):
+            for y in range(h):
+                for x in range(w):
+                    if rnd.random() < 0.25:
+                        img.putpixel((x0 + x, y0 + y), (52, 112, 96, 255))
+
+
 make("birch", 1, (214, 208, 190), (160, 154, 140), (236, 232, 220), (60, 56, 50), birch)
 make("desert", 2, (196, 160, 98), (150, 116, 66), (222, 196, 140), (110, 78, 42), desert)
 make("swamp", 3, (66, 90, 50), (44, 62, 34), (86, 116, 62), (34, 48, 28), swamp)
 make("cavern", 4, (66, 62, 74), (44, 42, 52), (88, 84, 98), (34, 32, 40), cavern)
 make("jungle", 5, (60, 112, 40), (40, 80, 28), (84, 140, 56), (180, 160, 40), jungle)
 make("ice", 6, (170, 210, 230), (124, 168, 196), (214, 238, 248), (90, 130, 160), ice)
+make("mother", 7, (120, 92, 62), (86, 64, 42), (150, 118, 84), (70, 52, 34), mother)
+make("spiderling", 8, (204, 184, 148), (170, 150, 116), (226, 210, 180), (150, 130, 100), spiderling)
+make("flyer", 9, (34, 32, 34), (20, 20, 22), (58, 56, 58), (200, 200, 196), flyer)

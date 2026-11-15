@@ -74,7 +74,8 @@ public class MortarBlock extends Block implements EntityBlock {
 			if (clientStroke.test(player, pos)) {
 				return InteractionResult.SUCCESS;
 			}
-			return !withItem || stack.is(Brewing.GRINDABLE) || !mortar.isEmpty() ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
+			return !withItem || stack.is(Brewing.GRINDABLE) || com.jaymospowers.ground.StoneAge.groundInto(stack) != null || !mortar.isEmpty()
+				? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		ServerPlayer server = (ServerPlayer) player;
 		if (mortar.grinding(server) || mortar.justFinished(server)) {

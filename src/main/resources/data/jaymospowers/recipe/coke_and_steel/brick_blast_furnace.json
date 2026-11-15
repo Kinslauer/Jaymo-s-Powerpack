@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "B B",
+    "BBB"
+  ],
+  "key": {
+    "B": "jaymospowers:firebrick"
+  },
+  "result": {
+    "id": "jaymospowers:brick_blast_furnace",
+    "count": 1
+  }
+}

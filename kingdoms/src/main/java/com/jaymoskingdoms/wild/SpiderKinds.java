@@ -15,8 +15,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
@@ -28,18 +30,24 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.spider.Spider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.17) Spiders take after where they live: Spider Overhaul's ideas (all rights reserved, by Chybx; remade here, none
@@ -55,11 +63,20 @@ import net.minecraft.world.phys.Vec3;
  * holding it in a cobweb until it's cut free or wears off.</li>
  * <li><b>Jungle</b>: quick and agile, pounces, and its bite poisons; dying, it spills a cloud of choking pollen.</li>
  * <li><b>Ice</b>: its icy venom freezes you, slowing you as powder snow does.</li>
+ * <li><b>Mother</b> (GTNH patch 6; Andy: "only mother and flying spider"), a wolf spider's way: now and then a temperate
+ * spider is a mother, full grown (twice the others' size) and slower, her brood riding on her back. Kill her and the
+ * brood scatters off her, {@link #BROOD_LEAST}-{@link #BROOD_MOST} <b>spiderlings</b>: tiny, weak, quick, and they come
+ * for whoever killed her. They carry nothing worth taking.</li>
+ * <li><b>Flyer</b> (GTNH patch 6), in the woods: a jumping spider's sight and the lifting spiders' silk. It waits up in
+ * the canopy or on a ledge, leaps down on prey below on a dragline, and its line hauls the prey up a few blocks off the
+ * ground before it lets go: the fall is the bite.</li>
  * </ul>
  */
 public final class SpiderKinds {
 	public enum Kind {
-		PLAIN, BIRCH, DESERT, SWAMP, CAVERN, JUNGLE, ICE
+		PLAIN, BIRCH, DESERT, SWAMP, CAVERN, JUNGLE, ICE,
+		/** (GTNH patch 6) A mother, her brood, and the woods' leaping, lifting spider. */
+		MOTHER, SPIDERLING, FLYER
 	}
 
 	/** Below this height a spider is a cavern spider, whatever the biome. */
@@ -85,6 +102,24 @@ public final class SpiderKinds {
 	static final float SPINE_DAMAGE = 4.0F;
 	/** Swamp spiders swim at their prey this fast (blocks a tick). */
 	static final double SWIM_SPEED = 0.12;
+	/** (GTNH patch 6) A temperate spider is a mother at this chance: health more, speed times (less). */
+	static final float MOTHER_CHANCE = 0.08F;
+	static final double MOTHER_HEALTH = 10.0, MOTHER_SLOW = -0.25;
+	/** Her brood: how many, how hard they scatter off her (blocks a tick), and what they are (health and bite times theirs, speed more). */
+	static final int BROOD_LEAST = 3, BROOD_MOST = 6;
+	static final double BROOD_SCATTER = 0.35, SPIDERLING_HEALTH = -0.8, SPIDERLING_BITE = -0.6, SPIDERLING_SPEED = 0.25;
+	/** (GTNH patch 6) A woodland spider is a flyer at this chance. It leaps at prey at least LEAP_ABOVE below it and at most
+	 * LEAP_REACH off sideways (blocks), at most once per FLY_COOLDOWN ticks; a leap that hasn't landed on them in LEAP_TICKS misses. */
+	static final float FLYER_CHANCE = 0.25F;
+	static final double LEAP_ABOVE = 2.5, LEAP_REACH = 7.0, LEAP_PULL = 0.08, LEAP_UP = 0.2, GRAB_REACH = 1.6;
+	static final int FLY_COOLDOWN = 200, LEAP_TICKS = 30;
+	/** Its line hauls the prey up this far (blocks) or for this long (ticks), this fast (blocks a tick), then lets go. */
+	static final double LIFT_HEIGHT = 4.0, LIFT_SPEED = 0.32;
+	static final int LIFT_TICKS = 25;
+	/** Perched in a canopy it watches this far below and round it (blocks); idle on the ground it looks for a tree to go up, at this chance a tick. */
+	static final double PERCH_WATCH = 8.0;
+	static final float PERCH_CHANCE = 1.0F / 300.0F;
+	static final int PERCH_SEARCH = 6;
 
 	public static final AttachmentType<Integer> KIND = AttachmentRegistry.create(JaymosKingdoms.id("spider_kind"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
@@ -98,6 +133,23 @@ public final class SpiderKinds {
 	}
 
 	private static final List<SpatWeb> WEBS = new ArrayList<>();
+
+	/** A flyer's leap on its dragline: from where, at whom, until when it must land, and once it has them, how high it lifts. */
+	private static final class Flight {
+		final Vec3 anchor;
+		final LivingEntity prey;
+		long until;
+		boolean lifting;
+		double fromY;
+
+		Flight(Vec3 anchor, LivingEntity prey, long until) {
+			this.anchor = anchor;
+			this.prey = prey;
+			this.until = until;
+		}
+	}
+
+	private static final Map<Spider, Flight> FLIGHTS = new IdentityHashMap<>();
 
 	private SpiderKinds() {
 	}
@@ -122,6 +174,7 @@ public final class SpiderKinds {
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof Spider spider) {
 				LOADED.remove(spider);
+				FLIGHTS.remove(spider);
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -135,6 +188,12 @@ public final class SpiderKinds {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(SpiderKinds::tick);
+		// a mother's spiderlings carry nothing worth taking
+		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
+			if (context.getOptional(LootContextParams.THIS_ENTITY) instanceof Spider spider && of(spider) == Kind.SPIDERLING) {
+				drops.clear();
+			}
+		});
 	}
 
 	private static void assign(Spider spider, ServerLevel level) {
@@ -153,6 +212,10 @@ public final class SpiderKinds {
 			kind = Kind.JUNGLE;
 		} else if (biome.value().coldEnoughToSnow(pos, level.getSeaLevel())) {
 			kind = Kind.ICE;
+		} else if ((biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA)) && spider.getRandom().nextFloat() < FLYER_CHANCE) {
+			kind = Kind.FLYER;
+		} else if (biome.is(BiomeTags.IS_OVERWORLD) && spider.getRandom().nextFloat() < MOTHER_CHANCE) {
+			kind = Kind.MOTHER;
 		} else {
 			kind = Kind.PLAIN;
 		}
@@ -160,9 +223,15 @@ public final class SpiderKinds {
 		switch (kind) {
 			case DESERT -> modify(spider, Attributes.MAX_HEALTH, "desert_hide", 4.0, AttributeModifier.Operation.ADD_VALUE);
 			case JUNGLE -> modify(spider, Attributes.MOVEMENT_SPEED, "jungle_legs", 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			case MOTHER -> {
+				modify(spider, Attributes.MAX_HEALTH, "mother_body", MOTHER_HEALTH, AttributeModifier.Operation.ADD_VALUE);
+				modify(spider, Attributes.MOVEMENT_SPEED, "mother_slow", MOTHER_SLOW, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			}
 			default -> {
 			}
 		}
+		// her size (and the flyer's) by kind
+		SpiderMinds.size(spider);
 		spider.setHealth(spider.getMaxHealth());
 	}
 
@@ -207,6 +276,7 @@ public final class SpiderKinds {
 					near.addEffect(new MobEffectInstance(MobEffects.POISON, POLLEN_POISON, 0));
 				}
 			}
+			case MOTHER -> brood(spider, level);
 			case CAVERN -> {
 				float roll = spider.getRandom().nextFloat();
 				ItemStack gem = roll < 0.03F ? new ItemStack(Items.DIAMOND) : roll < 0.13F ? new ItemStack(Items.EMERALD)
@@ -228,6 +298,7 @@ public final class SpiderKinds {
 		for (Spider spider : spiders) {
 			if (!spider.isAlive() || !(spider.level() instanceof ServerLevel level)) {
 				LOADED.remove(spider);
+				FLIGHTS.remove(spider);
 				continue;
 			}
 			act(spider, level, level.getGameTime());
@@ -300,8 +371,131 @@ public final class SpiderKinds {
 					LOADED.put(spider, now + WEB_COOLDOWN);
 				}
 			}
+			case FLYER -> fly(spider, target, level, now, ready);
 			default -> {
 			}
+		}
+	}
+
+	/** The mother's brood scatters off her back as she dies, and comes for whoever killed her. */
+	private static void brood(Spider mother, ServerLevel level) {
+		int n = BROOD_LEAST + mother.getRandom().nextInt(BROOD_MOST - BROOD_LEAST + 1);
+		LivingEntity killer = mother.getLastHurtByMob();
+		for (int i = 0; i < n; i++) {
+			Spider young = EntityTypes.SPIDER.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (young == null) {
+				return;
+			}
+			young.setAttached(KIND, Kind.SPIDERLING.ordinal());
+			modify(young, Attributes.MAX_HEALTH, "spiderling_body", SPIDERLING_HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			modify(young, Attributes.ATTACK_DAMAGE, "spiderling_bite", SPIDERLING_BITE, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			modify(young, Attributes.MOVEMENT_SPEED, "spiderling_legs", SPIDERLING_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			SpiderMinds.size(young);
+			young.setHealth(young.getMaxHealth());
+			double angle = Math.PI * 2.0 * (i + mother.getRandom().nextDouble() * 0.5) / n;
+			young.snapTo(mother.getX(), mother.getY() + mother.getBbHeight() * 0.6, mother.getZ(), (float) Math.toDegrees(angle), 0.0F);
+			young.setDeltaMovement(Math.cos(angle) * BROOD_SCATTER, 0.25, Math.sin(angle) * BROOD_SCATTER);
+			level.addFreshEntity(young);
+			if (killer != null && killer.isAlive()) {
+				young.setTarget(killer);
+			}
+		}
+		level.playSound(null, mother.getX(), mother.getY(), mother.getZ(), SoundEvents.FROGSPAWN_HATCH, SoundSource.HOSTILE, 1.2F, 0.7F);
+		level.sendParticles(ParticleTypes.POOF, mother.getX(), mother.getY(0.6), mother.getZ(), 10, 0.4, 0.2, 0.4, 0.02);
+	}
+
+	/**
+	 * A flyer: up a tree when idle, watching from the canopy; prey below and near, it leaps down on its dragline, and once on
+	 * them the line hauls them up a few blocks, then lets go.
+	 */
+	private static void fly(Spider spider, @Nullable LivingEntity target, ServerLevel level, long now, long ready) {
+		Flight flight = FLIGHTS.get(spider);
+		if (flight != null) {
+			carry(spider, flight, level, now);
+			return;
+		}
+		boolean perched = level.getBlockState(spider.blockPosition().below()).getBlock() instanceof LeavesBlock;
+		if (target == null) {
+			if (perched) {
+				// lying in wait up there; a jumping spider hunts by sight, day or night
+				spider.getNavigation().stop();
+				if (spider.tickCount % 10 == 0) {
+					Player below = level.getNearestPlayer(spider.getX(), spider.getY() - PERCH_WATCH * 0.5, spider.getZ(), PERCH_WATCH,
+						p -> p instanceof Player pl && !pl.isCreative() && !pl.isSpectator() && spider.getY() - pl.getY() >= LEAP_ABOVE && spider.hasLineOfSight(pl));
+					if (below != null) {
+						spider.setTarget(below);
+					}
+				}
+			} else if (spider.onGround() && spider.getRandom().nextFloat() < PERCH_CHANCE) {
+				perch(spider, level);
+			}
+			return;
+		}
+		double dx = target.getX() - spider.getX(), dz = target.getZ() - spider.getZ();
+		if (now < ready || spider.getY() - target.getY() < LEAP_ABOVE || dx * dx + dz * dz > LEAP_REACH * LEAP_REACH || !spider.hasLineOfSight(target)) {
+			return;
+		}
+		FLIGHTS.put(spider, new Flight(spider.position(), target, now + LEAP_TICKS));
+		LOADED.put(spider, now + FLY_COOLDOWN);
+		spider.setDeltaMovement(dx * LEAP_PULL, LEAP_UP, dz * LEAP_PULL);
+		spider.needsSync = true;
+		level.playSound(null, spider.blockPosition(), SoundEvents.SPIDER_AMBIENT, SoundSource.HOSTILE, 1.0F, 1.7F);
+	}
+
+	/** On its way down to them, or hauling them up on its line. */
+	private static void carry(Spider spider, Flight flight, ServerLevel level, long now) {
+		LivingEntity prey = flight.prey;
+		if (!prey.isAlive() || prey.level() != level || now > flight.until) {
+			FLIGHTS.remove(spider);
+			spider.resetFallDistance();
+			return;
+		}
+		if (spider.tickCount % 3 == 0) {
+			silk(level, flight.anchor, spider.position().add(0.0, spider.getBbHeight(), 0.0));
+		}
+		if (!flight.lifting) {
+			if (spider.distanceTo(prey) <= GRAB_REACH) {
+				flight.lifting = true;
+				flight.fromY = prey.getY();
+				flight.until = now + LIFT_TICKS;
+				level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.HOSTILE, 1.0F, 0.7F);
+			}
+			return;
+		}
+		if (prey.getY() - flight.fromY >= LIFT_HEIGHT) {
+			// high enough: it lets go, and keeps its own hold on the line
+			flight.until = now - 1;
+			return;
+		}
+		Vec3 v = prey.getDeltaMovement();
+		prey.setDeltaMovement(v.x * 0.5, LIFT_SPEED, v.z * 0.5);
+		prey.needsSync = true;
+		spider.snapTo(prey.getX(), prey.getY() + prey.getBbHeight(), prey.getZ());
+		spider.setDeltaMovement(Vec3.ZERO);
+		spider.resetFallDistance();
+	}
+
+	/** Up the trunk of a tree near by, to sit in its canopy. */
+	private static void perch(Spider spider, ServerLevel level) {
+		BlockPos from = spider.blockPosition();
+		for (int tries = 0; tries < 8; tries++) {
+			BlockPos column = from.offset(spider.getRandom().nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH, 0,
+				spider.getRandom().nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH);
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column);
+			if (level.getBlockState(top.below()).getBlock() instanceof LeavesBlock && top.getY() - from.getY() >= LEAP_ABOVE + 1) {
+				spider.getNavigation().moveTo(top.getX() + 0.5, top.getY(), top.getZ() + 0.5, 1.0);
+				return;
+			}
+		}
+	}
+
+	/** Its dragline, from where it leapt to where it is. */
+	private static void silk(ServerLevel level, Vec3 from, Vec3 to) {
+		ItemParticleOption thread = new ItemParticleOption(ParticleTypes.ITEM, Items.STRING);
+		int steps = Math.max(2, Mth.ceil(from.distanceTo(to) * 2.0));
+		for (int i = 0; i <= steps; i++) {
+			Vec3 p = from.lerp(to, i / (double) steps);
+			level.sendParticles(thread, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 

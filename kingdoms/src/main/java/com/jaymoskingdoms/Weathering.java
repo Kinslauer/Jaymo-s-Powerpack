@@ -37,7 +37,8 @@ import org.jspecify.annotations.Nullable;
  * of autumn.</li>
  * <li>Grass in the open grows tufts in spring and summer.</li>
  * </ul>
- * Copper already weathers by itself. Ops switch it off with {@code jaymoskingdoms:weathering}.
+ * Copper already weathers by itself. Ops switch it off with {@code jaymoskingdoms:weathering}. Blocks in
+ * {@code jaymospowers:weather_proof} (Jaymo's Powers' creosote-treated planks) never weather.
  */
 public final class Weathering {
 	/** Blocks looked at a second for each player, how far out (blocks), and how far below the surface. */
@@ -57,6 +58,9 @@ public final class Weathering {
 	static final int TUFT_LIGHT = 9;
 
 	public static GameRule<Boolean> WEATHERING;
+	/** (GTNH picks) Jaymo's Powers' blocks that never weather or rot, by the tag's id so Powers needn't be loaded. */
+	static final net.minecraft.tags.TagKey<Block> WEATHER_PROOF = net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "weather_proof"));
 
 	/** What moss turns each block into. */
 	private static final Map<Block, Block> MOSSY = Map.of(
@@ -133,7 +137,7 @@ public final class Weathering {
 	/** One looked-at block: maybe it ages. */
 	static void weather(ServerLevel level, BlockPos at, RandomSource random) {
 		BlockState state = level.getBlockState(at);
-		if (state.isAir() || !exposed(level, at)) {
+		if (state.isAir() || state.is(WEATHER_PROOF) || !exposed(level, at)) {
 			return;
 		}
 		Holder<Biome> biome = level.getBiome(at);

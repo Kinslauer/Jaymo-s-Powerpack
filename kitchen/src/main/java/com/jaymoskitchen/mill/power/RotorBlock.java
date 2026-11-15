@@ -80,17 +80,58 @@ public class RotorBlock extends BaseEntityBlock {
 		return state.rotate(mirror.getRotation(state.getValue(FACING)));
 	}
 
-	/** A dye on a windmill colours its next sail (Better With Mods' way), using up the dye. */
+	/**
+	 * On a windmill: a dye colours its next sail (Better With Mods' way), using up the dye; a sail goes on the first bare
+	 * or torn spar; a sail's own stuff (hemp cloth, wool, leather, paper) patches its most worn sail.
+	 */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
 		InteractionHand hand, BlockHitResult hit) {
+		if (rotor != Rotor.WINDMILL || !(level.getBlockEntity(pos) instanceof RotorEntity entity)) {
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
+		if (stack.getItem() instanceof SailItem) {
+			if (!level.isClientSide()) {
+				if (!entity.fit(stack)) {
+					return InteractionResult.FAIL;
+				}
+				stack.consume(1, player);
+				level.playSound(null, pos, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		// nothing to patch: the wool block (or paper, or leather) does what it would anywhere else
+		if (entity.needsPatch(stack)) {
+			if (!level.isClientSide() && entity.patch(stack)) {
+				stack.consume(1, player);
+				level.playSound(null, pos, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1.0F, 1.2F);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		DyeColor colour = stack.getItem() instanceof DyeItem ? stack.get(DataComponents.DYE) : null;
-		if (rotor != Rotor.WINDMILL || colour == null || !(level.getBlockEntity(pos) instanceof RotorEntity entity)) {
+		if (colour == null) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (!level.isClientSide() && entity.dye(colour)) {
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Sneaking with an empty hand on a windmill takes down its last sail (or cuts away a torn one's rags). */
+	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (rotor != Rotor.WINDMILL || !player.isSecondaryUseActive() || !(level.getBlockEntity(pos) instanceof RotorEntity entity)
+			|| !entity.hasSail()) {
+			return InteractionResult.PASS;
+		}
+		if (!level.isClientSide()) {
+			ItemStack sail = entity.takeDown();
+			if (!sail.isEmpty()) {
+				player.getInventory().placeItemBackInInventory(sail, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
 		}
 		return InteractionResult.SUCCESS;
 	}

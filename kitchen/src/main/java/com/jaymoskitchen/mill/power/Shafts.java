@@ -63,7 +63,7 @@ public final class Shafts {
 	}
 
 	/** Sets a shaft piece turning or still (just for the look), if it is one and isn't already. */
-	static void setTurning(Level level, BlockPos pos, boolean turning) {
+	public static void setTurning(Level level, BlockPos pos, boolean turning) {
 		if (!com.jaymoskitchen.Loaded.made(level, pos)) {
 			return;
 		}

@@ -42,7 +42,7 @@ public class TinkerBowItem extends BowItem implements TinkerTool {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
-		TinkerTool.tick(stack, level);
+		TinkerTool.tick(stack, level, owner);
 	}
 
 	@Override

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "wooden_slab",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:cherry_planks",
+    "minecraft:cherry_planks",
+    "minecraft:cherry_planks"
+  ],
+  "result": {
+    "id": "minecraft:cherry_slab",
+    "count": 8
+  }
+}
