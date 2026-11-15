@@ -282,6 +282,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return this.entityData.get(COLOR);
 	}
 
+	/**
+	 * (gb-realmcards) A figure drawn on a screen, never put in the world (the life story's realm page): the look of a
+	 * {@code role} in dye {@code color} (a {@link net.minecraft.world.item.DyeColor} id) of {@code climate}'s land.
+	 */
+	public void preview(int role, int color, int climate) {
+		this.entityData.set(ROLE, role);
+		this.entityData.set(COLOR, color);
+		this.entityData.set(CLIMATE, climate);
+	}
+
 	/** The land its faction's seat is in. */
 	public Climate climate() {
 		return Climate.byId(this.entityData.get(CLIMATE));
@@ -426,6 +436,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// and the sets its faith, its trade or its camp's country puts on it (FrontierWear)
 		FrontierWear.folk(this, faction, climate);
 		HeraldryWear.folk(this, faction, climate);
+		// (gb-capes) a ruler's or knight's cape, over whatever chest piece they ended up in
+		Capes.ensure(this, faction);
 		this.outfit = Outfits.VERSION;
 		// townsfolk are born to a heritage (VillagerHeritage)
 		VillagerHeritage.folkSetup(this);
@@ -595,6 +607,13 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.7.72) its realm bent the knee (or came out from under) since it was dressed
 			this.reform(level);
 		}
+		if (this.tickCount % 200 == 7 && (this.leader() || this.role() == GUARD)) {
+			// (gb-capes) rulers and knights dressed before capes get theirs (only the cape: nothing else they wear changes)
+			Faction caped = Factions.get(level.getServer(), this.factionId());
+			if (caped != null) {
+				Capes.ensure(this, caped);
+			}
+		}
 		if (this.tickCount % 20 == 0 && Worker.isWork(this.role()) && McaCompat.becomeVillager(level, this)) {
 			// (0.5.21) with MCA, a realm's workers are its villagers: this one is one now
 			return;
@@ -744,6 +763,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		KnightsCompat.dress(this, faction, climate);
 		FrontierWear.folk(this, faction, climate);
 		HeraldryWear.folk(this, faction, climate);
+		Capes.ensure(this, faction);
 		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF || Orcs.isOrc(this)) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
 		}

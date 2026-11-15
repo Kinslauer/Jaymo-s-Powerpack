@@ -11,7 +11,8 @@
 		"WebModelFeatureRendererMixin",
 		"WebSprintMixin",
 		"WebTakeoverInputMixin",
-		"WebWallLookMixin"
+		"WebWallLookMixin",
+		"WebbedGeoRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

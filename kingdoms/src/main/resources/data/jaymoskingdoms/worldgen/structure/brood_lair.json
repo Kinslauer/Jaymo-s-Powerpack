@@ -1,0 +1,7 @@
+{
+  "type": "jaymoskingdoms:brood_lair",
+  "biomes": "#jaymoskingdoms:has_structure/brood_lair",
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

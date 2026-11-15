@@ -61,6 +61,24 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	static final float OAR_SWEEP = 28.0F, OAR_DIP = 36.0F, OAR_BITE = 12.0F, OAR_LENGTH = 2.5F;
 	/** Where an oar turns in its lock, in its (north-facing) model's pixels. */
 	static final float PIVOT_X = 8.0F, PIVOT_Y = 5.5F, PIVOT_Z = 1.0F;
+	/**
+	 * (gb-sails) The sails' belly, as a share of the model's: hanging slack in a calm, full in a good wind (a strong one fills
+	 * them a little past it). It eases toward what the wind gives by this share a tick.
+	 */
+	static final float SLACK = 0.7F, FULL_MOST = 1.15F, FILL_EASE = 0.12F;
+	/** Gusts swell and ease the belly by this share (at a full wind), slowly; a ripple runs up the cloth by this share. */
+	static final float GUST = 0.18F, GUST_SPEED = 0.11F, RIPPLE = 0.06F, RIPPLE_SPEED = 0.35F;
+	/** Flapping: how much of the belly the cloth flogs away (it snaps between that and full), and how fast. */
+	static final float FLAP = 0.4F, FLAP_SPEED = 1.6F;
+	/** Turning this many degrees a tick across the wind sets them flapping hard; in irons they flog with the wind's strength. */
+	static final float FLAP_TURN = 2.5F, IRONS_FROM = 125.0F;
+	/**
+	 * The belly is never drawn shallower than this. The sail's block model holds its yard and the ropes to the mast too, which
+	 * the scale takes with it: this keeps the yard round and the ropes all but reaching the mast.
+	 */
+	static final float THINNEST = 0.7F;
+	/** The yard's middle, in front of the sail block's face (pixels): the cloth stands out from it and the yard stays put. */
+	static final float YARD = 0.5F;
 
 	public static final class State extends EntityRenderState {
 		final List<MovingBlockRenderState> blocks = new ArrayList<>();
@@ -74,7 +92,12 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		/** Her block entities with renderers of their own: each one's piece and its render state. */
 		final List<Ship.Piece> shownPieces = new ArrayList<>();
 		final List<BlockEntityRenderState> shown = new ArrayList<>();
+		/** (gb-sails) Each block's belly (sails only, else NaN): how far its cloth stands out from where it hangs. */
+		final List<Float> belly = new ArrayList<>();
 	}
+
+	/** (gb-sails) Each ship's sails as the wind has them: {the tick last eased, how full}. */
+	private static final Map<Ship, float[]> FILL = new WeakHashMap<>();
 
 	/**
 	 * The client's copies of a ship's block entities, made from her pieces and what the server sent of them, made again
@@ -120,6 +143,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		super.extractRenderState(ship, state, partialTicks);
 		state.blocks.clear();
 		state.pieces.clear();
+		state.belly.clear();
 		state.oars.clear();
 		state.oarAngles.clear();
 		state.oarBlocks.clear();
@@ -131,6 +155,9 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		}
 		// sails all but furled are drawn rolled up on their yards
 		boolean furled = ship.sailSet() < FURLED_BELOW;
+		// (gb-sails) set, they billow with the gusts, flap turning across the wind, and hang slack in a calm
+		float time = ship.tickCount + partialTicks;
+		float[] sea = furled ? null : sailing(ship, level, time);
 		int rowing = ship.rowing();
 		// the stroke: the blade sweeps aft through the water on the pull and comes forward lifted on the return
 		float phase = (ship.tickCount + partialTicks) % Ship.STROKE / Ship.STROKE * Mth.TWO_PI;
@@ -170,6 +197,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			block.lightEngine = level.getLightEngine();
 			state.blocks.add(block);
 			state.pieces.add(piece);
+			state.belly.add(sea != null && shown.getBlock() instanceof SailBlock ? belly(sea, piece, time) : Float.NaN);
 		}
 		this.extractShown(ship, h, level, state, partialTicks);
 		int water = ship.flooded();
@@ -191,6 +219,41 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		float size = 10.0F / Math.max(10.0F, h.waterline);
 		state.heel = Mth.lerp(partialTicks, ship.heelO, ship.heel) + Mth.sin(t) * Mth.lerp(storm, ROLL_FAIR, ROLL_STORM) * size;
 		state.pitch = Mth.sin(t * 0.73F + 1.3F) * Mth.lerp(storm, PITCH_FAIR, PITCH_STORM) * size;
+	}
+
+	/** (gb-sails) Her sails this frame: {how full (eased), the gust's share, how hard they flap}. */
+	private static float[] sailing(Ship ship, ClientLevel level, float time) {
+		float yaw = ship.getYRot();
+		float wind = com.jaymoskingdoms.sailing.Winds.clientStrength(level, ship.getX(), ship.getZ());
+		float off = com.jaymoskingdoms.sailing.Winds.clientOffWind(yaw);
+		float target = Mth.clamp(ship.sailSet() * com.jaymoskingdoms.sailing.Winds.clientCatches(yaw) * wind, 0.0F, FULL_MOST);
+		float[] fill = FILL.computeIfAbsent(ship, s -> new float[] {s.tickCount, target});
+		while (fill[0] < ship.tickCount) {
+			fill[0]++;
+			fill[1] += (target - fill[1]) * FILL_EASE;
+		}
+		// turning across the wind (her bow through it, or her stern) they spill it and flog; head to it, they flog anyway
+		float turn = Math.abs(Mth.wrapDegrees(ship.getYRot() - ship.yRotO));
+		float across = 1.0F - Math.abs(off - 90.0F) / 90.0F;
+		float flap = Math.max(Mth.clamp(turn / FLAP_TURN, 0.0F, 1.0F) * (0.4F + 0.6F * across),
+			off > IRONS_FROM ? Mth.clamp((off - IRONS_FROM) / (180.0F - IRONS_FROM) * 2.0F, 0.0F, 1.0F) * Mth.clamp(wind, 0.0F, 1.0F) : 0.0F);
+		float gust = GUST * Mth.clamp(wind, 0.0F, 1.2F) * (0.6F * Mth.sin(time * GUST_SPEED) + 0.4F * Mth.sin(time * GUST_SPEED * 2.7F + 1.3F));
+		return new float[] {fill[1], gust, flap};
+	}
+
+	/** (gb-sails) The belly of the sail at {@code piece}: the wind's fill, its gust and a ripple up the sheet, and any flogging. */
+	private static float belly(float[] sea, Ship.Piece piece, float time) {
+		float fill = sea[0];
+		float b = SLACK + (1.0F - SLACK) * Math.min(1.0F, fill) + Math.max(0.0F, fill - 1.0F);
+		b *= 1.0F + sea[1] * fill + RIPPLE * fill * Mth.sin(time * RIPPLE_SPEED - piece.y() * 0.9F + piece.x() * 0.4F);
+		// slack in a calm, the cloth sags and stirs a little
+		b += (1.0F - Math.min(1.0F, fill)) * 0.06F * Mth.sin(time * 0.05F + piece.z() * 0.7F);
+		if (sea[2] > 0.0F) {
+			// it snaps between spilled and full, never inside out
+			float flog = 0.5F + 0.5F * Mth.sin(time * FLAP_SPEED + piece.y() * 1.3F + piece.x() * 0.7F + piece.z() * 0.5F);
+			b = Mth.lerp(sea[2], b, b * (1.0F - FLAP * flog));
+		}
+		return Mth.clamp(b, THINNEST, FULL_MOST + GUST);
 	}
 
 	/** Her chests, signs, banners and the like, drawn by their own renderers from the client's copies of them. */
@@ -308,6 +371,18 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			poseStack.pushPose();
 			// a piece's place is its column's middle; a block is drawn from its corner
 			poseStack.translate(p.x() - 0.5F, p.y(), p.z() - 0.5F);
+			float belly = state.belly.get(i);
+			if (!Float.isNaN(belly)) {
+				// (gb-sails) the cloth stands out from where it hangs (its block's face the way it faces) as far as the wind fills it
+				Direction facing = state.blocks.get(i).blockState.getValue(SailBlock.FACING);
+				// about the yard's line, so the yard stays where it hangs
+				float yard = YARD / 16.0F;
+				float hx = facing == Direction.EAST ? 1.0F + yard : facing == Direction.WEST ? -yard : 0.0F;
+				float hz = facing == Direction.SOUTH ? 1.0F + yard : facing == Direction.NORTH ? -yard : 0.0F;
+				poseStack.translate(hx, 0.0F, hz);
+				poseStack.scale(facing.getAxis() == Direction.Axis.X ? belly : 1.0F, 1.0F, facing.getAxis() == Direction.Axis.Z ? belly : 1.0F);
+				poseStack.translate(-hx, 0.0F, -hz);
+			}
 			collector.submitMovingBlock(poseStack, state.blocks.get(i), state.outlineColor);
 			poseStack.popPose();
 		}

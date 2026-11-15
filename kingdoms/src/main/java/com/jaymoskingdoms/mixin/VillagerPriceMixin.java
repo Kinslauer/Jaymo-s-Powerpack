@@ -39,6 +39,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.StartPerks.prices((Villager)(Object)this, player);
 		com.jaymoskingdoms.Persuasion.prices((Villager)(Object)this, player);
 		com.jaymoskingdoms.Liars.prices((Villager)(Object)this, player);
+		// (gb-customs) a plains realm's market day
+		com.jaymoskingdoms.Customs.prices((Villager)(Object)this, player);
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}
 }

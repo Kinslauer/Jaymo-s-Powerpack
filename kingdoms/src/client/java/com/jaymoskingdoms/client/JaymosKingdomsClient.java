@@ -32,6 +32,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		// the pale grove joins the Nether's biomes once every mod's main entrypoint has run
 		com.jaymoskingdoms.blossomland.BlossomWilds.addBiomes();
+		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		// great foes' themes, and the trophy stand's item
@@ -167,6 +168,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		FollowersScreen.register();
 		QuickOrderKeys.register();
+		// (medieval picks) who holds what, on Xaero's Minimap when it's loaded
+		XaeroRealms.register();
 		TableTalkScreen.register();
 		LoanScreen.register();
 		ClassKeys.register();
@@ -257,6 +260,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ReverentLayer.register();
 		// the late-medieval harness: its layer, its screen and tab, the visor key and the view through a lowered visor
 		HeraldryLayer.register();
+		CapeLayer.register();
 		HeraldryClient.register();
 		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
 		TinkererOutfit.register();
@@ -311,6 +315,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SeaSwell.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
+		// the Last Bell's map and visions, and the great disasters' sky
+		com.jaymoskingdoms.client.disasters.LastBellClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();

@@ -218,6 +218,8 @@ public final class Camps {
 			Orcs.clear();
 			PirateCoves.clear();
 			Pirates.clear();
+			SkyPirates.clear();
+			WarDrums.clear();
 		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> Raids.loaded(entity));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -394,6 +396,11 @@ public final class Camps {
 				&& trySite(server, level, realm, players, PirateCoves.KIND)) {
 				return;
 			}
+			// (medieval picks) a sky cove, on a high peak, once the steam towns have put airships up
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, SkyPirates.KIND) < SkyPirates.COVES_PER_KINGDOM
+				&& random.nextFloat() < SkyPirates.COVE_CHANCE && SkyPirates.trySite(server, level, realm, players)) {
+				return;
+			}
 		}
 	}
 
@@ -537,6 +544,12 @@ public final class Camps {
 				if (grown != null && fresh != null) {
 					PirateCoves.tick(level, grown, fresh, false);
 				}
+			} else if (SkyPirates.KIND.equals(data.kind())) {
+				Faction grown = Factions.get(server, id);
+				CampData fresh = data(server, id);
+				if (grown != null && fresh != null) {
+					SkyPirates.tick(level, grown, fresh, false);
+				}
 			}
 		}
 	}
@@ -569,6 +582,10 @@ public final class Camps {
 		}
 		if (pirate(server, camp.id())) {
 			PirateCoves.grow(level, camp, days);
+			return;
+		}
+		if (SkyPirates.KIND.equals(kind(server, camp.id()))) {
+			SkyPirates.grow(level, camp, days);
 			return;
 		}
 		Palette p = CampBuildings.palette(level, camp);
@@ -665,9 +682,9 @@ public final class Camps {
 			return;
 		}
 		boolean illagers = illager(server, camp.id()), goblins = goblin(server, camp.id()), orcs = orc(server, camp.id());
-		boolean pirates = pirate(server, camp.id());
+		boolean pirates = pirate(server, camp.id()), sky = SkyPirates.KIND.equals(kind(server, camp.id()));
 		String site = IllagerSites.clearedKey(server, camp.id());
-		String cleared = site != null ? site : pirates ? "pirate_cove" : orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
+		String cleared = site != null ? site : sky ? "sky_cove" : pirates ? "pirate_cove" : orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms." + cleared + ".cleared",
 			camp.name(),
@@ -717,12 +734,12 @@ public final class Camps {
 		CampData data = data(server, camp.id());
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
-		int reach = pirates ? PirateCoves.RADIUS + 1 : orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		int reach = sky ? SkyPirates.RADIUS + 1 : pirates ? PirateCoves.RADIUS + 1 : orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
 		if (orcs || goblins) {
 			// (0.7.475) and its outer walls and band, as far as it grew
 			reach = Math.max(reach, Hordes.radius(server, camp.id()) + 2);
 		}
-		int high = pirates ? PirateCoves.CLEAR_HEIGHT : orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
+		int high = sky ? SkyPirates.CLEAR_HEIGHT + SkyPirates.MAST : pirates ? PirateCoves.CLEAR_HEIGHT : orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
 		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
 		Holds.Hold held = Holds.get(server, camp.id());
 		boolean grim = held != null && held.isGrim();

@@ -94,9 +94,12 @@ public final class Voices {
 	static List<String> voiced() {
 		List<String> out = new ArrayList<>(SPIRIT_LINES);
 		for (LifeStory.Question q : LifeStory.Question.values()) {
-			out.add("story.jaymoskingdoms." + q.key() + ".title");
+			// (gb-faith) the faith page has no clips yet: its title and line are read in silence (its tales are checked below)
+			if (q != LifeStory.Question.FAITH) {
+				out.add("story.jaymoskingdoms." + q.key() + ".title");
+			}
 			// (0.7.360) a question's title and the line under it are read apart (the line only if the page waits)
-			if (q != LifeStory.Question.ROAD) {
+			if (q != LifeStory.Question.ROAD && q != LifeStory.Question.FAITH) {
 				out.add("story.jaymoskingdoms." + q.key() + ".sub");
 			}
 			for (LifeStory.Answer a : q.answers()) {

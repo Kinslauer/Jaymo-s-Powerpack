@@ -23,6 +23,8 @@ abstract class DismemberGeoEntityRendererMixin {
 	private void jaymospowers$lostParts(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
 		if (entity instanceof LivingEntity living) {
 			Dismembered.extract(living, state);
+			// (and the web it's wrapped in, WebbedGeoLayer)
+			com.jaymospowers.client.power.web.WebbedLook.extract(living, state);
 		}
 	}
 

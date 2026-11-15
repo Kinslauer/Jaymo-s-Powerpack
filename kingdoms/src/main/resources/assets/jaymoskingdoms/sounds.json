@@ -2027,5 +2027,11 @@
 		"sounds": [
 			"jaymoskingdoms:film/whale_breach"
 		]
+	},
+	"war_drum": {
+		"subtitle": "subtitles.jaymoskingdoms.war_drum",
+		"sounds": [
+			"jaymoskingdoms:war_drum"
+		]
 	}
 }

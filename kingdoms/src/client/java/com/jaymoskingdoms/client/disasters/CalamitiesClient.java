@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.disasters;
 import com.jaymoskingdoms.disasters.Calamities;
 import com.jaymoskingdoms.disasters.Calamity;
 import com.jaymoskingdoms.disasters.Disasters;
+import com.jaymoskingdoms.disasters.Magnitude;
 import com.jaymoskingdoms.disasters.Storms;
 import com.jaymoskingdoms.client.WorldLoop;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import net.minecraft.world.phys.Vec3;
 public final class CalamitiesClient {
 	/** How thick the sand, snow and hail are at the camera, 0..1 (eased). The fog mixin reads the first two. */
 	public static float sand, snow, hail;
+	/** How thick a volcano's ash is at the camera, 0..1 (eased; the fog mixin reads it), and how strong the signs are. */
+	public static float ash, sign;
 	/** (Stage 3) How hard the ground shakes at the camera, in degrees of rattle (eased); {@code CalamityShakeMixin}. */
 	public static float quake;
 	/** A quake's rattle per magnitude (degrees), and how fast it rattles. */
@@ -48,9 +51,13 @@ public final class CalamitiesClient {
 	static final int[] SPECKS = {14, 16, 10};
 	static final double SPECK_RANGE = 14.0;
 	/** The fog at full strength: how far you can see in a sandstorm and a blizzard (blocks). */
-	public static final float SAND_SIGHT = 20.0F, SNOW_SIGHT = 14.0F;
+	public static final float SAND_SIGHT = 20.0F, SNOW_SIGHT = 14.0F, ASH_SIGHT = 26.0F;
+	/** The signs' tremble at full strength (degrees), and how often a far-off rumble comes in them (the odds a tick). */
+	static final float SIGN_DEGREES = 0.35F, SIGN_RUMBLE = 0.01F;
+	/** Ash specks a tick at full strength. */
+	static final int ASH_SPECKS = 12;
 	/** The fog's colour (by day) in a sandstorm and a blizzard. */
-	public static final float[] SAND_COLOUR = {0.80F, 0.62F, 0.40F}, SNOW_COLOUR = {0.86F, 0.89F, 0.93F};
+	public static final float[] SAND_COLOUR = {0.80F, 0.62F, 0.40F}, SNOW_COLOUR = {0.86F, 0.89F, 0.93F}, ASH_COLOUR = {0.36F, 0.34F, 0.33F};
 
 	static SpriteSet sprites;
 
@@ -67,7 +74,7 @@ public final class CalamitiesClient {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			Calamities.CLIENT = List.of();
-			sand = snow = hail = quake = 0.0F;
+			sand = snow = hail = quake = ash = sign = 0.0F;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(CalamitiesClient::tick);
 	}
@@ -81,7 +88,9 @@ public final class CalamitiesClient {
 			sand = ease(sand, 0.0F);
 			snow = ease(snow, 0.0F);
 			hail = ease(hail, 0.0F);
-			quake = Math.max(0.0F, quake - 0.1F);
+			ash = ease(ash, 0.0F);
+			sign = ease(sign, 0.0F);
+			quake = Math.max(LastBellClient.shake, quake - 0.1F);
 			around = ease(around, 0.0F);
 			gust = Math.max(0.0F, gust - 0.02F);
 			if (Calamities.CLIENT.isEmpty() || level.dimension() != Level.OVERWORLD) {
@@ -96,15 +105,26 @@ public final class CalamitiesClient {
 		sand = ease(sand, Calamities.cover(level, Calamity.SANDSTORM, eye.x, eye.z) * open);
 		snow = ease(snow, Calamities.cover(level, Calamity.BLIZZARD, eye.x, eye.z) * open);
 		hail = ease(hail, Calamities.cover(level, Calamity.HAIL, eye.x, eye.z));
+		ash = ease(ash, Calamities.cover(level, Calamity.ASH, eye.x, eye.z) * open);
+		sign = ease(sign, Calamities.cover(level, Calamity.SIGN, eye.x, eye.z));
 		clock++;
-		float shaking = 0.0F;
+		float shaking = LastBellClient.shake;
+		int hailMagnitude = Magnitude.MODERATE;
 		for (Calamity c : Calamities.CLIENT) {
 			if (c.kind == Calamity.QUAKE) {
-				int magnitude = c.radius >= 150.0F ? 3 : c.radius >= 100.0F ? 2 : 1;
-				shaking = Math.max(shaking, c.over(eye.x, eye.z) * magnitude * QUAKE_DEGREES);
+				shaking = Math.max(shaking, c.over(eye.x, eye.z) * (0.5F + 0.5F * c.magnitude) * QUAKE_DEGREES);
+			} else if (c.kind == Calamity.HAIL && c.over(eye.x, eye.z) > 0.05F) {
+				hailMagnitude = Math.max(hailMagnitude, c.magnitude);
 			}
 		}
+		// the ground trembles in the signs before a great one
+		shaking = Math.max(shaking, sign * SIGN_DEGREES);
 		quake += (shaking - quake) * 0.2F;
+		if (sign > 0.2F && level.getRandom().nextFloat() < SIGN_RUMBLE * sign) {
+			RandomSource r = level.getRandom();
+			level.playLocalSound(eye.x + r.nextGaussian() * 40.0, eye.y - 10.0, eye.z + r.nextGaussian() * 40.0, SoundEvents.GENERIC_EXPLODE.value(),
+				SoundSource.AMBIENT, 0.25F * sign, 0.15F + r.nextFloat() * 0.1F, false);
+		}
 		if (quake > 0.1F) {
 			rumble(level, eye, level.getRandom());
 		}
@@ -117,6 +137,11 @@ public final class CalamitiesClient {
 		specks(minecraft, level, eye, random, GustParticle.SAND, sandHere);
 		specks(minecraft, level, eye, random, GustParticle.SNOW, snowHere);
 		specks(minecraft, level, eye, random, GustParticle.HAIL, hail);
+		if (hailMagnitude >= Magnitude.GREAT) {
+			// stones the size of a fist among the hail
+			giantHail(minecraft, level, eye, random, hail);
+		}
+		ashFall(minecraft, level, eye, random, Calamities.cover(level, Calamity.ASH, eye.x, eye.z));
 		sounds(level, eye, random, sandHere, snowHere);
 	}
 
@@ -156,6 +181,39 @@ public final class CalamitiesClient {
 					40, 0.88F + tone, 0.92F + tone, 0.98F, 0.95F);
 			}
 			minecraft.particleEngine.add(p);
+		}
+	}
+
+	/** A great hailstorm's fist-sized stones, a few, falling hard. */
+	private static void giantHail(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random, float strength) {
+		if (strength <= 0.1F || random.nextFloat() > strength * 0.5F) {
+			return;
+		}
+		double x = eye.x + (random.nextDouble() - 0.5) * 2.0 * SPECK_RANGE, z = eye.z + (random.nextDouble() - 0.5) * 2.0 * SPECK_RANGE;
+		double y = eye.y + 10.0 + random.nextDouble() * 6.0;
+		if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(x), Mth.floor(z)) > y) {
+			return;
+		}
+		minecraft.particleEngine.add(new GustParticle(level, x, y, z, 0.0, -1.3, 0.0, sprites.get(random), GustParticle.HAIL,
+			0.18F + random.nextFloat() * 0.1F, 30, 0.84F, 0.9F, 0.97F, 1.0F));
+	}
+
+	/** A volcano's ash, drifting down grey round the camera. */
+	private static void ashFall(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random, float strength) {
+		if (strength <= 0.02F) {
+			return;
+		}
+		int n = Math.round(ASH_SPECKS * strength);
+		for (int i = 0; i < n; i++) {
+			double x = eye.x + (random.nextDouble() - 0.5) * 2.0 * SPECK_RANGE, z = eye.z + (random.nextDouble() - 0.5) * 2.0 * SPECK_RANGE;
+			double y = eye.y + (random.nextDouble() - 0.2) * 10.0;
+			if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(x), Mth.floor(z)) > y) {
+				continue;
+			}
+			float tone = random.nextFloat() * 0.1F;
+			minecraft.particleEngine.add(new GustParticle(level, x, y, z, (random.nextDouble() - 0.5) * 0.05, -0.04, (random.nextDouble() - 0.5) * 0.05,
+				sprites.get(random), GustParticle.SNOW, 0.05F + random.nextFloat() * 0.07F, 50 + random.nextInt(30), 0.30F + tone, 0.29F + tone,
+				0.28F + tone, 0.85F));
 		}
 	}
 

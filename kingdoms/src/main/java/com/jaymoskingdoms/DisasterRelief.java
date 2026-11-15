@@ -33,6 +33,8 @@ public final class DisasterRelief {
 	static final double STRUCK_MARGIN = 24.0;
 	/** What repairs cost the treasury, by disaster (emeralds, times the quake's magnitude); a noble king's share more. */
 	static final int COST_STORM = 10, COST_FIRE = 25, COST_FLOOD = 20, COST_QUAKE = 25;
+	/** The great disasters' repairs (a volcano, a wave, a hurricane, a slide, a star): this, times the magnitude. */
+	static final int COST_GREAT = 30;
 	static final float NOBLE_PAYS = 1.5F;
 	/** A tyrant's storm tax: this many times the repairs, wrung from the folk. */
 	static final float TYRANT_TAX = 2.0F;
@@ -57,6 +59,7 @@ public final class DisasterRelief {
 
 	static void register() {
 		QuakeRescue.register();
+		DisasterMemory.register();
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
 				cleared(level, sp, pos, state);
@@ -98,8 +101,10 @@ public final class DisasterRelief {
 			case "wildfire" -> COST_FIRE;
 			case "flood" -> COST_FLOOD;
 			case "quake" -> COST_QUAKE * magnitude;
+			case "volcano", "tsunami", "hurricane", "avalanche", "landslide", "meteor" -> COST_GREAT * magnitude;
 			default -> COST_STORM;
 		};
+		DisasterMemory.struck(level, f, kind, magnitude);
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper == Tempers.Temper.NOBLE) {
 			cost = Math.round(cost * NOBLE_PAYS);

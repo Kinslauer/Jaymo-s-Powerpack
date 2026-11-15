@@ -33,5 +33,7 @@ abstract class DismemberLivingEntityRendererMixin {
 		com.jaymospowers.client.wounds.WoundMarksLayer.extract(entity, state);
 		// (0.21.10) and a gravity user's rock ball or orbiting rocks
 		com.jaymospowers.client.power.gravity.GravityRocksLayer.extract(entity, state, partialTicks);
+		// and the web it's wrapped in
+		com.jaymospowers.client.power.web.WebbedLook.extract(entity, state);
 	}
 }

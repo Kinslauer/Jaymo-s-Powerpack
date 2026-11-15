@@ -7,7 +7,10 @@
 		"WebHostZombieMixin",
 		"WebLivingEntityMixin",
 		"WebPuddleDimensionsMixin",
-		"WebServerLevelMixin"
+		"WebServerLevelMixin",
+		"WebbedLivingEntityMixin",
+		"WebbedMilkMixin",
+		"WebbedWebBlockMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

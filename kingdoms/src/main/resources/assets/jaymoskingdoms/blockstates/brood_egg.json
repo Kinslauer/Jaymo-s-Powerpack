@@ -1,0 +1,16 @@
+{
+	"variants": {
+		"cracks=0": {
+			"model": "jaymoskingdoms:block/brood_egg"
+		},
+		"cracks=1": {
+			"model": "jaymoskingdoms:block/brood_egg_cracked_1"
+		},
+		"cracks=2": {
+			"model": "jaymoskingdoms:block/brood_egg_cracked_2"
+		},
+		"cracks=3": {
+			"model": "jaymoskingdoms:block/brood_egg_split"
+		}
+	}
+}

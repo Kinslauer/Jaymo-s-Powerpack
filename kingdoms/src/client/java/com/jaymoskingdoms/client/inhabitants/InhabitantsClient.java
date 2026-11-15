@@ -38,6 +38,8 @@ public final class InhabitantsClient {
 	static final float IMPALER_SHADOW = 0.9F, CLAM_SHADOW = 0.7F;
 	/** The Skeleton Lord's model stands 5 blocks to its crown (8 to the staff's tip): drawn to his 2.9-block height. */
 	static final float LORD_SCALE = 0.55F, LORD_SHADOW = 0.9F;
+	/** The brood queen is drawn at her model's size (she grows by her own scale as she's hurt). */
+	static final float QUEEN_SHADOW = 1.6F;
 	/** The Skeleton Lord's crystal bones, shown only while he sleeps as a statue. */
 	static final String[] CRYSTALS = {"head_crystals", "crystal_brow", "crystal_hand", "crystal_fingerbase", "crystal_fingertips", "crystal_thumbbase",
 		"crystal_thumbtip", "crystal_arm", "crystal_chest", "crystal_waist", "crystal_leg", "crystalized_pauldron", "R_crystalized_pauldron"};
@@ -71,6 +73,8 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.BARROW_BEETLE,
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.wild.nest.SpiderNests.BROOD_QUEEN,
+			context -> new InhabitantRenderer<com.jaymoskingdoms.wild.nest.BroodQueen>(context, "brood_queen", 1.0F, QUEEN_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.RAID_KING, RaidKingRenderer::new);
 		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
 		EntityRenderers.register(Inhabitants.IMPALER, ImpalerRenderer::new);

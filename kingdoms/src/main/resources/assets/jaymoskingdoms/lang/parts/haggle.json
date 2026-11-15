@@ -1,0 +1,13 @@
+{
+  "quest.jaymoskingdoms.button.haggle": "Ask for more",
+  "tale.jaymoskingdoms.haggle": "Could you pay a little more for it?",
+  "message.jaymoskingdoms.haggle.agree.0": "Fair enough. You'll have it.",
+  "message.jaymoskingdoms.haggle.agree.1": "Hah, you drive a hard bargain. Done.",
+  "message.jaymoskingdoms.haggle.agree.2": "You're worth it, I suppose. Agreed.",
+  "message.jaymoskingdoms.haggle.half.0": "I'll meet you halfway, no more.",
+  "message.jaymoskingdoms.haggle.half.1": "A little more, then. Don't push it.",
+  "message.jaymoskingdoms.haggle.half.2": "Split the difference?",
+  "message.jaymoskingdoms.haggle.offence.0": "More? Forget it. Find your own work.",
+  "message.jaymoskingdoms.haggle.offence.1": "The nerve of you!",
+  "message.jaymoskingdoms.haggle.offence.2": "I'll ask someone less greedy."
+}

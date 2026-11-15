@@ -320,6 +320,11 @@ public final class Storms {
 		if (drawn != null) {
 			top = drawn;
 		}
+		// (nd-lightning) in the worst storms it picks the tallest thing about: a tower, a tree, a rider on a hill
+		boolean worst = s.kind == Storm.SUPERCELL;
+		if (worst && drawn == null) {
+			top = HighGround.seek(level, top, random);
+		}
 		if (level.getBiome(top).value().getPrecipitationAt(top, level.getSeaLevel()) != Biome.Precipitation.RAIN) {
 			return;
 		}
@@ -327,9 +332,13 @@ public final class Storms {
 		if (com.jaymoskingdoms.Blessings.calmsSea(level, top)) {
 			return;
 		}
-		// a lightning rod nearby takes it
-		BlockPos rod = BlockPos.betweenClosedStream(top.offset(-8, -6, -8), top.offset(8, 10, 8))
-			.filter(p -> level.getBlockState(p).is(BlockTags.LIGHTNING_RODS)).findFirst().map(BlockPos::immutable).orElse(null);
+		// a lightning rod nearby takes it ((nd-lightning) in the worst storms, one from further off)
+		BlockPos seekFrom = top;
+		BlockPos rod = worst ? HighGround.rod(level, top) : null;
+		if (rod == null) {
+			rod = BlockPos.betweenClosedStream(seekFrom.offset(-8, -6, -8), seekFrom.offset(8, 10, 8))
+				.filter(p -> level.getBlockState(p).is(BlockTags.LIGHTNING_RODS)).findFirst().map(BlockPos::immutable).orElse(null);
+		}
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.EVENT);
 		if (bolt != null) {
 			bolt.addTag(BOLT_TAG);

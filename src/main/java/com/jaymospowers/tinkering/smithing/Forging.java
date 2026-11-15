@@ -69,6 +69,10 @@ public final class Forging {
 			case AMETHYST_BRONZE, PIG_IRON -> 1.1F;
 			case SLIMESTEEL -> 1.25F;
 			case STEEL -> 1.3F;
+			// (medieval picks) the realm steels: deep steel is the stubbornest, the orcs' ash bronze the kindest
+			case DEEP_STEEL -> 1.4F;
+			case BRIGHT_STEEL -> 1.35F;
+			case ASH_BRONZE -> 0.9F;
 			default -> 1.0F;
 		};
 	}
@@ -183,6 +187,9 @@ public final class Forging {
 	}
 
 	// --- hooks for the rest of the patch ---
+
+	/** (medieval picks) A refusal with no words: the anvil only gives a dull clank and a puff of smoke (a realm's steel or design). */
+	public static final Component DULL = Component.empty();
 
 	/** Why this smith can't work this forging on this anvil (a stone anvil, the wrong hammer), or null. */
 	public interface Check {
