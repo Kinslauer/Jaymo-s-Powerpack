@@ -945,6 +945,11 @@ burning"). Now, folk say the Overworld. Only future voices use the word.
 
 **Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
 
+**The moss** (Andy, 2026-11-15). Los Perrito is the same city, only greener: in the years since the
+last stand on the east bridge, moss has climbed the towers, filled the streets and grown over the cars, and trees push
+up through the roofs. Where the three-sided war still goes on, the wreckage stays fresh and the neon still sputters;
+the moss has only taken what nobody fights over any more. Nobody in the city says where it came from.
+
 ## The eight faiths
 
 Seven patrons, and the Truth that denies them. A player swears to one at a shrine; villagers and realms keep to one
@@ -1566,7 +1571,9 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
-(new) **The yards** (shipwright thread, 2026-11-15; Claude's placement for Andy to approve). A realm's ships are its own shipwright's work. He lays each one down beside its pier, keel first, the planking and decks rising over the days and the masts stepped last, so the whole harbour watches her grow. A realm goes whaling only once its yard has launched a whaler, the biggest hull a shipwright builds, and a ship lost at sea is laid down again the same way. Shipwrights keep the Deep Mother: no ship of theirs goes afloat until something has gone back to her over the bow. Whoever brings the yard timber hurries the work and is remembered for it.
+**The yards** (Andy approved, 2026-11-15, shipwright thread; "they can be of any patron"). A realm's ships are its own shipwright's work. He lays each one down beside its pier, keel first, the planking and decks rising over the days and the masts stepped last, so the whole harbour watches her grow. A realm goes whaling only once its yard has launched a whaleship, the deepest hull a shipwright builds: deep holds and two tryworks, so she can stay out on the far grounds for four whales before turning home. A ship lost at sea is laid down again the same way. Each shipwright keeps a patron of his own, and no ship of his goes afloat until something that patron wants has gone over her bow: a fish for the Deep Mother, an ingot for the Anvil-Father, a page for the Truth. Whoever brings the yard timber hurries the work and is remembered for it.
+
+**The fleets** (Andy approved, 2026-11-15, shipwright thread; with "the deepest hull" in The yards). A realm's warships are its fleet, and the richest realms build the biggest ship afloat to lead it: the man-of-war, three tall masts and a broadside of guns down each side, with frigates or war triremes sailing in pairs astern of her. A fief's warships belong to its overlord's fleet as well. They already fly his colours, and when his flagship comes near they fall in behind her, and every ship of a fleet goes to the help of one in a fight. Only pirates burn ships for what is in them, and they carry the crews off in chains to their coves, to be worked or ransomed until someone comes for them. A realm's navy sinks pirates too, but it pulls the survivors out of the sea and brings them in irons before the ruler, who sends them to the cells for piracy.
 
 (new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
 banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
