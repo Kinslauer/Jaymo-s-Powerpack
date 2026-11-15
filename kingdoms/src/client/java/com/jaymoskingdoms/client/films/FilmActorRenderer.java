@@ -47,6 +47,8 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 		this.shadowRadius = SHADOW;
 		FilmGear.assets = context.getEquipmentAssets();
 		this.withRenderLayer(new ItemInHandGeoLayer<>(context, this, "right_hand", "left_hand"));
+		// Fantasy Armor's sets, where the cast wears them (its own GeckoLib models; FilmGear can't paint those)
+		this.withRenderLayer(new FantasyArmourLayer(this));
 	}
 
 	/** One set of animations; the body and the skin are the actor's own. */

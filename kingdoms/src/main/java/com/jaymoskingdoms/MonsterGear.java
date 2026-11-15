@@ -27,7 +27,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
  * <li>Common: copper</li>
  * <li>Fine: chainmail, iron blades</li>
  * <li>Rare: iron, a rapier or longsword when Jaymo's Powers is there</li>
- * <li>Legendary: diamond, always enchanted</li>
+ * <li>Legendary: steel plate and heavy iron blades, always enchanted (no diamond gear: Andy, 2026-11-15)</li>
  * </ol>
  * They drop it as vanilla's mobs do (now and then, worn). Gear a monster already had is kept.
  */
@@ -58,8 +58,10 @@ public final class MonsterGear {
 		{Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS},
 		{Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS},
 		{Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS},
-		{Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS},
-		{Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS}};
+		{Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS}};
+	/** Legendary armour: the Armory's steel plate (iron if it's missing), helmet to boots. */
+	private static final String[] LEGENDARY_ARMOR = {"jaymoskingdoms:steel_plate_helmet", "jaymoskingdoms:steel_plate_chestplate",
+		"jaymoskingdoms:steel_plate_leggings", "jaymoskingdoms:steel_plate_boots"};
 	private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 	/** Per grade, the weapons (Jaymo's Powers' ids are used when it's there, the vanilla one after each otherwise). */
 	private static final String[][] WEAPONS = {
@@ -67,11 +69,11 @@ public final class MonsterGear {
 		{"minecraft:copper_sword", "minecraft:copper_axe", "jaymospowers:iron_dagger"},
 		{"minecraft:iron_sword", "jaymospowers:iron_saber", "jaymospowers:iron_rapier"},
 		{"jaymospowers:iron_rapier", "jaymospowers:iron_longsword", "minecraft:iron_axe"},
-		{"minecraft:diamond_sword", "jaymospowers:diamond_rapier", "minecraft:diamond_axe"}};
-	private static final Item[] FALLBACK = {Items.STONE_SWORD, Items.COPPER_SWORD, Items.IRON_SWORD, Items.IRON_AXE, Items.DIAMOND_SWORD};
+		{"jaymospowers:iron_claymore", "jaymospowers:iron_broadsword", "jaymospowers:iron_war_axe"}};
+	private static final Item[] FALLBACK = {Items.STONE_SWORD, Items.COPPER_SWORD, Items.IRON_SWORD, Items.IRON_AXE, Items.IRON_SWORD};
 	/** Per grade, the shield (a round shield from Jaymo's Powers above common). */
 	private static final String[] SHIELDS = {"minecraft:shield", "minecraft:shield", "jaymospowers:iron_round_shield",
-		"jaymospowers:iron_round_shield", "jaymospowers:diamond_round_shield"};
+		"jaymospowers:iron_round_shield", "jaymospowers:iron_round_shield"};
 
 	private MonsterGear() {
 	}
@@ -91,7 +93,8 @@ public final class MonsterGear {
 			EquipmentSlot slot = ARMOR_SLOTS[i];
 			if (mob.getItemBySlot(slot).isEmpty() && random.nextFloat() < ARMOR_CHANCE[tier]) {
 				int grade = grade(random, tier);
-				mob.setItemSlot(slot, finish(level, random, new ItemStack(ARMOR[grade][i]), grade));
+				Item piece = grade < ARMOR.length ? ARMOR[grade][i] : item(LEGENDARY_ARMOR[i]).orElse(ARMOR[ARMOR.length - 1][i]);
+				mob.setItemSlot(slot, finish(level, random, new ItemStack(piece), grade));
 			}
 		}
 		boolean zombie = mob instanceof Zombie;

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:netherite_upgrade_smithing_template",
+  "base": "jaymoskingdoms:steel_plate_helmet",
+  "addition": "#minecraft:netherite_tool_materials",
+  "result": {
+    "id": "minecraft:netherite_helmet"
+  }
+}

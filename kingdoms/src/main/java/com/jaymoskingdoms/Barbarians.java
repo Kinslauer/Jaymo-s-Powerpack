@@ -110,7 +110,7 @@ public final class Barbarians {
 			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(CHIEF_KNOCKBACK_RESIST);
 			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(CHIEF_TOUGHNESS);
 			folk.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(SIGHT + 8.0);
-			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
 			folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, DARK_FUR));
 			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.CHAINMAIL_CHESTPLATE));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, faction.color().getTextureDiffuseColor() & 0xFFFFFF));
