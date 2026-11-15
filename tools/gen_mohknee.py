@@ -85,8 +85,8 @@ def mohknee(name, obj):
     write('jaymoskingdoms/worldgen/density_function/mohknee/' + name + '.json', obj)
 
 
-# the home world's own shape, as these three files were before the far land
-mohknee('home_continents', add(noise('minecraft:continentalness_large', 0.25), -0.06))
+# the home world's own shape: its continents are tools/gen_continents.py's; its weather as these files were before the far land
+HOME_CONTINENTS = 'jaymoskingdoms:continents/shape'
 mohknee('home_temperature', noise('minecraft:temperature_large', 0.25))
 mohknee('home_vegetation', noise('minecraft:vegetation_large', 0.25))
 mohknee('home_erosion', noise('minecraft:erosion_large', 0.25))
@@ -106,7 +106,7 @@ mohknee('islands', {'type': 'minecraft:cache', 'input': islands})
 # an island's own weather: mild, level grassland whatever the sea round it is like, so a village can stand on it
 mohknee('island_climate', {'type': 'minecraft:cache', 'input': clamp(mul(3.0, ref('islands')), 0.0, 1.0)})
 
-home = ref('home_continents')
+home = HOME_CONTINENTS
 crossing = lerp(ref('sea'), home, add(DEEP, mul(0.08, home)))
 crossing = lerp(ref('islands'), crossing, SHORE_LAND)
 shore = lerp(ref('land'), crossing, clamp(add(INLAND[2], mul(INLAND[3], home)), INLAND[0], INLAND[1]))
