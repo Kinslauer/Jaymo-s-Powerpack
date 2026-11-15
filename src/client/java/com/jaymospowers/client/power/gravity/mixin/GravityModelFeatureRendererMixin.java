@@ -19,6 +19,7 @@ abstract class GravityModelFeatureRendererMixin {
 	private void jaymospowers$gravityReach(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.power.gravity.GravityBoardPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.gravity.GravityKneelPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.power.gravity.GravityGraspPose.applyModel(submit.model(), submit.state());
 		GravityArmPose.applyModel(submit.model(), submit.state());
 	}
 }

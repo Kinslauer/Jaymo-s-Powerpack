@@ -57,7 +57,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Shipyards {
 	/** What's on the slip. */
-	static final String WARSHIP = "warship", WHALER = "whaler";
+	static final String WARSHIP = "warship", WHALER = "whaler", CONSORT = "consort";
 	/** A beat: this many ticks between his blocks, and up to this many more; this many blocks a beat (more for timber brought). */
 	static final int BEAT_TICKS = 24, BEAT_JITTER = 12, BLOCKS_A_BEAT = 3, HELP_EXTRA = 3;
 	/** Blocks already in skipped in one go. */
@@ -442,6 +442,7 @@ public final class Shipyards {
 		Ship ship = switch (y.purpose()) {
 			// (one whaler to a realm at a time: one fitted out for a life story, say, sails first and she waits)
 			case WHALER -> Whalers.voyage(server, f.id()) != null ? null : Whalers.fitOut(level, f, h, slip);
+			case CONSORT -> Navies.commissionConsort(level, f, h, slip, y.kind());
 			default -> Navies.commission(level, f, h, slip, y.kind());
 		};
 		if (ship == null) {

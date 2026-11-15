@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Chronokinesis's leap into the future: a lifetime on, the world is a ruined city overrun by feral dead
- * ({@code jaymospowers:future}, built from Los Perrito City by Uospag; see {@link LosPerrito}).
+ * ({@code jaymospowers:future}, Los Perrito, built from a downloaded city map; see {@link LosPerrito}).
  * <ul>
  * <li>Sneak+B (Fast Forward), for any Chrono user past the starter who has killed their echo for good (in the Nether,
  * since 0.10.111; {@link #ECHO_SLAIN}): you, and every player within
@@ -133,6 +133,7 @@ public final class Future {
 	}
 
 	public static void init() {
+		ServerLifecycleEvents.SERVER_STARTING.register(LosPerrito::swapIfAsked);
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			LosPerrito.load(server);
 		});
@@ -255,7 +256,7 @@ public final class Future {
 		for (int r = ARRIVAL_FREE_STEP; r <= ARRIVAL_FREE_MAX; r += ARRIVAL_FREE_STEP) {
 			for (int k = 0; k < ARRIVAL_FREE_POINTS; k++) {
 				double angle = Math.PI * 2.0 * k / ARRIVAL_FREE_POINTS;
-				int x = LosPerrito.SPAWN_X + (int) Math.round(Math.cos(angle) * r), z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * r);
+				int x = LosPerrito.spawnX() + (int) Math.round(Math.cos(angle) * r), z = LosPerrito.spawnZ() + (int) Math.round(Math.sin(angle) * r);
 				if (!free.test(future, new net.minecraft.core.BlockPos(x, 0, z))) {
 					continue;
 				}
@@ -275,8 +276,8 @@ public final class Future {
 	private static Vec3 arrival(ServerLevel future, int index, int of) {
 		double angle = of <= 1 ? 0.0 : Math.PI * 2.0 * index / of;
 		double radius = of <= 1 ? 0.0 : 1.5;
-		int x = LosPerrito.SPAWN_X + (int) Math.round(Math.cos(angle) * radius);
-		int z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * radius);
+		int x = LosPerrito.spawnX() + (int) Math.round(Math.cos(angle) * radius);
+		int z = LosPerrito.spawnZ() + (int) Math.round(Math.sin(angle) * radius);
 		future.getChunk(x >> 4, z >> 4);
 		int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 		return new Vec3(x + 0.5, y, z + 0.5);
@@ -421,8 +422,9 @@ public final class Future {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.arrived").withStyle(ChatFormatting.GOLD));
 		if (!Boolean.TRUE.equals(player.getAttached(CREDITED))) {
 			player.setAttached(CREDITED, true);
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.future.credit")
-				.withStyle(style -> style.withColor(ChatFormatting.GRAY).withClickEvent(new ClickEvent.OpenUrl(java.net.URI.create(LosPerrito.CREDIT_URL)))));
+			LosPerrito.CityMap city = LosPerrito.map();
+			player.sendSystemMessage(Component.translatable(city.creditKey())
+				.withStyle(style -> style.withColor(ChatFormatting.GRAY).withClickEvent(new ClickEvent.OpenUrl(java.net.URI.create(city.creditUrl())))));
 		}
 	}
 
@@ -527,8 +529,21 @@ public final class Future {
 			.then(Commands.literal("fetch").executes(c -> {
 				// from the console too: get the city in place before anyone leaps
 				LosPerrito.begin(c.getSource().getServer());
-				c.getSource().sendSuccess(() -> Component.literal("Los Perrito: " + LosPerrito.stage()), false);
+				c.getSource().sendSuccess(() -> Component.literal(LosPerrito.map().name() + ": " + LosPerrito.stage()), false);
 				return 1;
+			}))
+			.then(Commands.literal("swap").executes(c -> {
+				// an old world's future, built from an earlier map, is rebuilt from the newest at the next start
+				try {
+					boolean asked = LosPerrito.requestSwap(c.getSource().getServer());
+					c.getSource().sendSuccess(() -> Component.literal(asked
+						? "The future will be rebuilt from " + LosPerrito.NEWEST.name() + " at the next server start. Everything built or left there goes."
+						: "The future is already built from " + LosPerrito.NEWEST.name() + "."), true);
+					return asked ? 1 : 0;
+				} catch (java.io.IOException e) {
+					c.getSource().sendFailure(Component.literal("Couldn't ask for it: " + e.getMessage()));
+					return 0;
+				}
 			}))
 			.then(Commands.literal("start")
 				.then(Commands.literal("save")
@@ -548,7 +563,7 @@ public final class Future {
 				})))
 			.then(Commands.literal("status").executes(c -> {
 				String failure = LosPerrito.failure();
-				c.getSource().sendSuccess(() -> Component.literal("Los Perrito: " + LosPerrito.stage() + " " + LosPerrito.percent() + "%"
+				c.getSource().sendSuccess(() -> Component.literal(LosPerrito.map().name() + ": " + LosPerrito.stage() + " " + LosPerrito.percent() + "%"
 					+ (failure.isEmpty() ? "" : " (" + failure + ")") + ", map offset " + LosPerrito.mapOffset()), false);
 				return 1;
 			})));
