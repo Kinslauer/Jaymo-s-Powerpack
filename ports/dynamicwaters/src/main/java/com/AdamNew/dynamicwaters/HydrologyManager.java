@@ -2308,12 +2308,24 @@ public class HydrologyManager {
 
     private static final int GORGE_ENTRY_HOPS = 4;
 
+    // Paths whose leftDry is being worked out on this thread. Two streams whose mouths land on each other would
+    // otherwise ask each other forever (a StackOverflowError that left the chunk without terrain); a path met again
+    // counts as not left dry, so every stream in such a loop keeps its water.
+    private static final ThreadLocal<java.util.Set<WatershedPath>> LEFT_DRY_ASKING =
+            ThreadLocal.withInitial(() -> java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+
     private static boolean leftDry(WatershedPath path, int seaLevel,
             net.minecraft.world.level.chunk.ChunkGenerator generator,
             net.minecraft.world.level.LevelHeightAccessor level,
             net.minecraft.world.level.levelgen.RandomState randomState) {
         if (path.leftDry == 0) {
-            path.leftDry = (byte) (drainedByRavines(path, seaLevel, generator, level, randomState) ? 2 : 1);
+            final java.util.Set<WatershedPath> asking = LEFT_DRY_ASKING.get();
+            if (!asking.add(path)) return false;
+            try {
+                path.leftDry = (byte) (drainedByRavines(path, seaLevel, generator, level, randomState) ? 2 : 1);
+            } finally {
+                asking.remove(path);
+            }
         }
         return path.leftDry == 2;
     }
