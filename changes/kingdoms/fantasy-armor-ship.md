@@ -1,7 +1,8 @@
 # Fantasy Armor on monsters and kings
 - Where Fantasy Armor is loaded (`FantasyArmorCompat`, by registry id, no dependency): at the higher world tiers one of
   the risen dead now and then comes up in a whole dark set (dark cover, grave sentinel), enchanted as legendary gear;
-  a king in gilded attire wears the gilded hunt set under his crown
+  a king in gilded attire wears one of its sets under his crown (Andy: "kings can wear whatever they want, except
+  dawncrest"; the trimmed sets are out too)
   instead of trimmed netherite. Nobody below a king wears it, so the royal tiers hold. The Grave Sentinel helmet is
   never put on anyone.
 - The armourers' orders (Lore.md, "What the armourers make") wear Fantasy Armor's sets (Andy chose its models over new

@@ -46,9 +46,16 @@ public final class FantasyArmorCompat {
 	public static final String BARROW = "grave_sentinel", DAWNWATCH = "dawncrest", HEADSMAN = "golden_execution", GIANT_SLAYER = "dragonslayer",
 		SKY_ROBES = "wind_worshipper", WELL_WARDEN = "fog_guard", ASHEN = "dark_lord", HUNTER = "evening_ghost", FOLDED = "ronin",
 		PIT = "dead_gladiator", TWINNED = "twinned";
-	/** The sets the risen dead come up in, and the one a king wears (none of them another order's). */
+	/** The sets the risen dead come up in. */
 	static final List<String> UNDEAD_SETS = List.of("dark_cover", BARROW);
-	static final List<String> KING_SETS = List.of("gilded_hunt");
+	/**
+	 * The sets a king may wear. Andy (2026-11-15): "kings can wear whatever they want, except dawncrest" (the dawnwatch's):
+	 * every set but that one and those taken out of the pack (the ones named after other games' characters).
+	 */
+	static final List<String> KING_SETS = List.of("chess_board_knight", "dark_cover", "dark_lord", "dead_gladiator", "dragonslayer",
+		"eclipse_soldier", "evening_ghost", "flesh_of_the_feaster", "fog_guard", "forgotten_trace", "gilded_hunt", "golden_execution",
+		"golden_horns", "grave_sentinel", "hero", "lady_maria", "redeemer", "ronin", "spark_of_dawn", "sunset_wings", "thief", "twinned",
+		"wandering_wizard", "wind_worshipper");
 	/** The chance a barrow's dead drop a piece of the wardens' mail: a household knight, and the revenant his lord. */
 	static final float[] BARROW_DROP = {0.08F, 0.6F};
 	/** How near a falling Giant one has to be to have been there for its fall (blocks). */
