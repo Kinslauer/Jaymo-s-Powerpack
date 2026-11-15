@@ -32,4 +32,4 @@ Remake the mod's armor textures in pure vanilla Minecraft style — solid 1-pixe
 - Worn equipment textures (textures/entity/equipment/humanoid/bog_iron.png etc., 64x32) left untouched — out of the task's item-texture scope.
 - No bbmodel: flat item textures, verified with vision_analyze instead of bbrender.
 - 2026-11-12 05:20 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-15 18:02 PR #1313 is merged into master; moved to Agents/Done.
+- 2026-11-15 14:22 PR #1313 is merged into master; moved to Agents/Done.
