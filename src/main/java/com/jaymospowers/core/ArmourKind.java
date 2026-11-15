@@ -176,12 +176,20 @@ public enum ArmourKind {
 	 * {@link #HARNESS_SHARE}, up to {@link #MAX_LOAD} in all.
 	 */
 	public static float load(LivingEntity body) {
-		float load = of(body.getItemBySlot(EquipmentSlot.HEAD)).weight * HEAD_SHARE + of(body.getItemBySlot(EquipmentSlot.CHEST)).weight * CHEST_SHARE
-			+ of(body.getItemBySlot(EquipmentSlot.LEGS)).weight * LEGS_SHARE + of(body.getItemBySlot(EquipmentSlot.FEET)).weight * FEET_SHARE;
+		boolean soaked = com.jaymospowers.core.wet.Wet.soaked(body);
+		float load = weight(of(body.getItemBySlot(EquipmentSlot.HEAD)), soaked) * HEAD_SHARE + weight(of(body.getItemBySlot(EquipmentSlot.CHEST)), soaked) * CHEST_SHARE
+			+ weight(of(body.getItemBySlot(EquipmentSlot.LEGS)), soaked) * LEGS_SHARE + weight(of(body.getItemBySlot(EquipmentSlot.FEET)), soaked) * FEET_SHARE;
 		for (ItemStack piece : harness.apply(body, "all")) {
-			load += kind(piece).weight * HARNESS_SHARE;
+			load += weight(kind(piece), soaked) * HARNESS_SHARE;
 		}
 		return Math.min(MAX_LOAD, load);
+	}
+
+	/** Soaked padding holds its weight again in water ({@code Wet}). */
+	static final float SOAKED_CLOTH = 2.0F;
+
+	private static float weight(ArmourKind kind, boolean soaked) {
+		return soaked && kind == CLOTH ? kind.weight * SOAKED_CLOTH : kind.weight;
 	}
 
 	/** A harness piece's kind, broken or not (it weighs the same). */

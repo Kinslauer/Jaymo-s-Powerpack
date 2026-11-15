@@ -32,6 +32,8 @@ public final class Downpours {
 
 	private static final Identifier SLOW_ID = JaymosKingdoms.id("downpour");
 	private static Method soak;
+	/** Jaymo's Powers' own wetness ({@code core.wet.Wet.soak}): a downpour soaks you through there too. */
+	private static Method soakWet;
 	private static boolean looked;
 
 	private Downpours() {
@@ -79,6 +81,18 @@ public final class Downpours {
 				soak = Class.forName("com.jaymoskitchen.climate.BodyHeat").getMethod("soak", ServerPlayer.class, int.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				JaymosKingdoms.LOGGER.info("No Jaymo's Kitchen soaking for downpours: {}", e.toString());
+			}
+			try {
+				soakWet = Class.forName("com.jaymospowers.core.wet.Wet").getMethod("soak", net.minecraft.world.entity.LivingEntity.class, int.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.info("No Jaymo's Powers wetness for downpours: {}", e.toString());
+			}
+		}
+		if (soakWet != null) {
+			try {
+				soakWet.invoke(null, p, SOAK_TICKS);
+			} catch (ReflectiveOperationException e) {
+				soakWet = null;
 			}
 		}
 		if (soak != null) {
