@@ -15,11 +15,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * (0.7.518) a patron's champion (it keeps its own bar, but counts as a boss everywhere else).
  * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion, (0.7.145) an Aether Giant) shows only to the players who've hit it: by hand, with an
- * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
+ * arrow or javelin, or with a power, or that it has turned on (its target). It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
  */
 public final class BossBars {
@@ -86,15 +88,35 @@ public final class BossBars {
 		}
 	}
 
-	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
+	/** {@code boss} (one with a bar) is after {@code player}: its bar shows to them as if they had struck it. */
+	public static void hunting(LivingEntity boss, ServerPlayer player) {
+		if (!player.isSpectator() && player.isAlive()) {
+			HITTERS.computeIfAbsent(boss.getUUID(), id -> new HashSet<>()).add(player.getUUID());
+		}
+	}
+
+	/** Who {@code boss} is after: its own target, or (a brain-driven mob's) its attack target. */
+	private static LivingEntity target(LivingEntity boss) {
+		if (boss instanceof Mob mob && mob.getTarget() != null) {
+			return mob.getTarget();
+		}
+		return boss.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET) ? boss.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) : null;
+	}
+
+	/** The boss's bar goes to the players who've hit it or that it is after, while they're near; anyone else loses it. */
 	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
 		show(level, boss, bar, p -> true);
 	}
 
 	/** As {@link #show(ServerLevel, LivingEntity, ServerBossEvent)}, only to those of them {@code to} lets see this bar. */
 	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar, java.util.function.Predicate<ServerPlayer> to) {
-		Set<UUID> hitters = HITTERS.get(boss.getUUID());
 		double r2 = RANGE * RANGE;
+		// a boss that has turned on a player shows them its bar too, as if they had struck it
+		if (target(boss) instanceof ServerPlayer hunted && hunted.level() == level && hunted.isAlive() && !hunted.isSpectator()
+			&& hunted.distanceToSqr(boss) <= r2) {
+			HITTERS.computeIfAbsent(boss.getUUID(), id -> new HashSet<>()).add(hunted.getUUID());
+		}
+		Set<UUID> hitters = HITTERS.get(boss.getUUID());
 		if (hitters != null) {
 			hitters.removeIf(id -> {
 				ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);

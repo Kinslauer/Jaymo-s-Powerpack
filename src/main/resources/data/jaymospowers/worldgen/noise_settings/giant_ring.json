@@ -1,0 +1,91 @@
+{
+  "default_block": "minecraft:packed_ice",
+  "default_fluid": "minecraft:air",
+  "disable_mob_generation": true,
+  "legacy_random_source": false,
+  "material_rule": "jaymospowers:giant_ring",
+  "noise": {
+    "height": 384,
+    "min_y": -64
+  },
+  "noise_router": {
+    "chunk_surface_level": 0.0,
+    "continents": 0.0,
+    "depth": 0.0,
+    "erosion": 0.0,
+    "final_density": {
+      "type": "minecraft:interpolated",
+      "cell_size_xz": 4,
+      "cell_size_y": 4,
+      "input": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:sub",
+          "left": {
+            "type": "minecraft:noise",
+            "noise": "jaymospowers:giant_ring/drift",
+            "xz_scale": 1.0,
+            "y_scale": 2.4
+          },
+          "right": 0.22
+        },
+        "right": {
+          "type": "minecraft:min",
+          "left": 0.0,
+          "right": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:sub",
+              "left": 26.0,
+              "right": {
+                "type": "minecraft:max",
+                "left": {
+                  "type": "minecraft:sub",
+                  "left": "minecraft:y",
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": 96.0,
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:noise",
+                        "noise": "jaymospowers:giant_ring/wander",
+                        "xz_scale": 1.0,
+                        "y_scale": 0.0
+                      },
+                      "right": 10.0
+                    }
+                  }
+                },
+                "right": {
+                  "type": "minecraft:sub",
+                  "left": {
+                    "type": "minecraft:add",
+                    "left": 96.0,
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:noise",
+                        "noise": "jaymospowers:giant_ring/wander",
+                        "xz_scale": 1.0,
+                        "y_scale": 0.0
+                      },
+                      "right": 10.0
+                    }
+                  },
+                  "right": "minecraft:y"
+                }
+              }
+            },
+            "right": 0.05
+          }
+        }
+      }
+    },
+    "ridges": 0.0,
+    "temperature": 0.0,
+    "vegetation": 0.0
+  },
+  "sea_level": -64,
+  "spawn_target": []
+}

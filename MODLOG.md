@@ -5121,3 +5121,50 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - **JEI**: an **Ore Washing** page (each crushed ore: washed ore, its nugget and its partner's tiny dust, with their chances), a **Small Ores** page (each small ore and its crushed ore), info pages for the dowsing rod, the small ores and the tiny dusts; the rod's, tiny dusts' and tin crushing's recipes on the crafting page. the small ores' smelting and melting on the furnace and melting pages. JEI's simple pages can show two byproducts.
 - Classes: `ground/Ores` (tiny dusts, small ores, the scatter feature `jaymospowers:small_ores`), `ground/DowsingRodItem`, `client/jei/OresJei`; changed `ground/BigVeinFeature` (partner and small-ore fields), `tinkering/ore/OreWashing` (tin, partner tiny dust; the washing lives in tinkering), `client/jei/SimpleCategory`. Data, art and lang from `tools/gen_ores.py`.
 - Built; not played.
+
+## 0.23.98 (2026-11-15): No diamond gear: loot and trades give steel or iron (#1587)
+
+- Andy: "diamond gear should be removed ... netherite should remain as plating but for steel armor". Diamond gear was
+  already uncraftable; now none is handed out either. Any diamond armour, tool or weapon (vanilla's, the Armory's,
+  WeaponMod's) that comes from a loot table (chests, mob drops, bartering) or is on a villager's or trader's offers
+  becomes its plainer kin: armour Kingdoms' steel plate (iron if Kingdoms is missing), everything else the iron one of
+  the same kind, enchantments and name kept (`tinkering/smithing/NoDiamondGear`). Diamond gear already in a world stays.
+- Built; not played.
+
+## 0.23.99 (2026-11-15): Fantasy Armor in the pack (#1590)
+
+- Andy picked it (2026-11-15): Fantasy Armor (Medieval Series, kenddie) 1.3 for 26.3 is in the pack as a CurseForge /
+  Modrinth reference (all rights reserved in effect; linked, never bundled or edited). It needs GeckoLib and Cloth
+  Config, both already in.
+- Its tooltip descriptions are switched off once per install (`FantasyArmorPreset`), since no screen text tells lore.
+- A datapack takes out the recipes for the sets named after other games' characters (Malenia, Ornstein, Crucible
+  Knight, Silver Knight, Old Knight) and for the Grave Sentinel helmet (Andy: "the grave sentinel helmet should be
+  removed"). Lady Maria stays: Thessaly wears it in the Long Defence.
+- Its sets are still made over netherite, which is now smithed over steel plate.
+- Built; not played.
+
+## 0.24.0 (2026-11-15): JEI notes no longer cut off (#1591)
+
+- Long notes under our JEI pages (ore washing, small ores, tin ore, brick mending, salvage, quenching, xeno and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
+- Built; not played.
+
+## 0.24.1 (2026-11-15): the blue giant's ring - fly to the planet over the Verdant World
+
+- **The Blue Giant's Ring**: the ringed blue giant in the Verdant World's sky is now a pod stop (Andy picked its ring). On the star map it sits on the Verdant World's orbit with the Verdant World going round it, and is there whenever the Verdant World's chart is read. The hop between the two burns 1 fuel; from anywhere else 3 (grade II).
+- **The ring itself** (new dimension `jaymospowers:giant_ring`, made by `tools/gen_giant_ring.py`): no ground, just flat drifts of packed ice and tuff, topped with snow, calcite and blue ice, hanging between about y 60 and 130, veined with gravilite blocks and set with gravilite shards. Nothing spawns. Black sky, and the giant itself fills a quarter of it, rising off the horizon (VerdantSkyClient).
+- Half gravity and 6 extra blocks of safe fall; no air (Breath counts it airless like the Pale Moon and the Maw). Fall off a drift below y -24 and the giant's winds throw you back onto the nearest drift (or beside the ring's pod) for 6 damage.
+- Left out of the One Dimension stack (OneDimensionDefaults). Missions, warrants and charts of their own: none.
+- Compiled; the worldgen generated on a plain 26.3 server (drifts fill about a fifth of the band, 88% of columns have one); not played in the pack.
+
+## 0.24.2 (2026-11-15): Demon captains carry their layer (#1594)
+
+- A demon captain of the demon realm now carries a tag naming its layer (Gloam, Ash, Abyss), so Jaymo's Kingdoms can have
+  the Ash's captains drop the demons' ashen plate where Fantasy Armor is loaded. Nothing else changes.
+- Built; not played.
+
+## 0.24.3 (2026-11-15): The Maw's ruins cover the ground
+
+- **Ruined cities nearly everywhere under the Maw.** The Lost Cities ruins only covered about a quarter of the Maw's wasteland, in patches with up to 1000 blocks of bare ground between them, so you could land and see nothing but dirt and rock. Now about nine chunks in ten are ruined city, with scattered open ground between the districts. Buildings still top out well under the broken world.
+- Only ground that hasn't been visited yet changes: Maw chunks already generated stay as they are, so in an existing world the ruins show up past the parts you've explored (or everywhere once the Maw is reset).
+- Code: `power/zfighter/MawCities.SPREAD` (Lost Cities' `CITY_PERLIN_OFFSET` for the Maw's profile, was 0.2, now -0.6).
+- Checked on a dev server: the 16x16 chunks under (519, -156) went from no buildings to 238 of 256 chunks built, nothing above y 111. Not played.

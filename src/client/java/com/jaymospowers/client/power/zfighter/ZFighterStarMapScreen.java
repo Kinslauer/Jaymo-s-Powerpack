@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
  * card of the world you are on also begins or gives up the mission. The future is not on the map, and a pod in the future shows
  * the map dark. The whole panel shrinks to fit small screens. Escape closes it.
  * (0.18.53) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
+ * The blue giant sits on the Verdant World's orbit with the Verdant World going round it (its moon), on the map whenever the
+ * Verdant World is.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int MAP = 200;
@@ -45,9 +47,11 @@ public class ZFighterStarMapScreen extends Screen {
 	};
 	private static final float[] HOME_ORBIT = {46, 7, 0.42F, 0.70F};
 	private static final float MOON_ORBIT = 11.0F;
+	/** The blue giant's size on the map, and the Verdant World's orbit round it (pixels) and speed (turns a minute). */
+	private static final float GIANT_SIZE = 9.0F, GIANT_MOON_ORBIT = 15.0F, GIANT_MOON_SPEED = 1.5F;
 	/** The map's order of worlds: Home first, then the destinations (the future left off). */
 	private static final int[] BODIES = {ZFighterSpace.HOME_INDEX, ZFighterSpace.CINDER, ZFighterSpace.MOON, ZFighterSpace.RUSTFALL, ZFighterSpace.GLACIA,
-		ZFighterSpace.VERDANT, ZFighterSpace.MAW};
+		ZFighterSpace.GIANT, ZFighterSpace.VERDANT, ZFighterSpace.MAW};
 
 	private final int fuel;
 	/** (0.18.50) The grade of the fuel in the tank (0: empty). */
@@ -102,7 +106,7 @@ public class ZFighterStarMapScreen extends Screen {
 
 	/** (0.18.53) Whether {@code index} is on the map: Home, or a world whose chart is read. */
 	private boolean shown(int index) {
-		return index == ZFighterSpace.HOME_INDEX || (this.read & 1 << index) != 0;
+		return index == ZFighterSpace.HOME_INDEX || ZFighterSpace.charted(this.read, index);
 	}
 
 	private float time() {
@@ -117,6 +121,14 @@ public class ZFighterStarMapScreen extends Screen {
 		float[] home = place(HOME_ORBIT, cx, cy);
 		if (index == ZFighterSpace.HOME_INDEX) {
 			return home;
+		}
+		if (index == ZFighterSpace.GIANT || index == ZFighterSpace.VERDANT) {
+			float[] giant = place(ORBITS[ZFighterSpace.VERDANT], cx, cy);
+			if (index == ZFighterSpace.GIANT) {
+				return new float[] {giant[0], giant[1], GIANT_SIZE};
+			}
+			double a = Math.PI * 2.0 * (ORBITS[ZFighterSpace.VERDANT][3] + time() * GIANT_MOON_SPEED);
+			return new float[] {giant[0] + (float)Math.cos(a) * GIANT_MOON_ORBIT, giant[1] + (float)Math.sin(a) * GIANT_MOON_ORBIT, 4.0F};
 		}
 		if (index == ZFighterSpace.MOON) {
 			double a = Math.PI * 2.0 * (ORBITS[ZFighterSpace.MOON][3] + time() * ORBITS[ZFighterSpace.MOON][2]);

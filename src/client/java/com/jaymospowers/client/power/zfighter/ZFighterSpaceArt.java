@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
  * (0.18.6) The pixel-art bodies of the star map and the flight screen: the sun, Home, the worlds the pod flies to and the Maw. A
  * world is drawn as a grid of square cells (bigger cells for a bigger world, so it keeps the blocky look), lit from the sun's side,
  * each with its own surface: Home's seas and land, the moon's craters, Rustfall's rust bands, Glacia's ice cracks, Cinder's lava,
- * the Verdant World's forests. The Maw is a world broken into pieces that have drifted apart round a smouldering heart, one piece
+ * the Verdant World's forests, the blue giant's cloud bands and its ring. The Maw is a world broken into pieces that have drifted apart round a smouldering heart, one piece
  * gone, its rubble hanging round it.
  */
 final class ZFighterSpaceArt {
@@ -31,6 +31,7 @@ final class ZFighterSpaceArt {
 			case ZFighterSpace.GLACIA -> new Look(0xFFD8ECF6, 0xFF8FBFDC, 22, 0xFF26384A);
 			case ZFighterSpace.CINDER -> new Look(0xFF3A2A26, 0xFFFF7A1E, 30, 0xFF120A08);
 			case ZFighterSpace.VERDANT -> new Look(0xFF4FB84A, 0xFF2D7A2E, 45, 0xFF0E2A10);
+			case ZFighterSpace.GIANT -> new Look(0xFF5A8FDA, 0xFF3563B0, 50, 0xFF0C1A38);
 			default -> new Look(0xFF606060, 0xFF404040, 20, 0xFF101010);
 		};
 	}
@@ -40,6 +41,10 @@ final class ZFighterSpaceArt {
 		if (index == ZFighterSpace.MAW) {
 			maw(graphics, cx, cy, r, lightX, lightY, System.currentTimeMillis() / 1000.0F);
 			return;
+		}
+		if (index == ZFighterSpace.GIANT) {
+			// the far half of the ring goes behind the giant
+			giantRing(graphics, cx, cy, r, false);
 		}
 		Look look = look(index);
 		int cells = Math.max(3, Math.min(CELLS, Math.round(r * 2.0F)));
@@ -78,6 +83,29 @@ final class ZFighterSpaceArt {
 			// a thin air glow
 			ring(graphics, cx, cy, r + Math.max(1.0F, cell * 0.6F), 0x553F9FFF, Math.max(1, Math.round(cell * 0.6F)));
 		}
+		if (index == ZFighterSpace.GIANT) {
+			giantRing(graphics, cx, cy, r, true);
+		}
+	}
+
+	/** How wide and how open the blue giant's ring is (shares of its radius), and how far it leans (radians). */
+	static final float GIANT_RING_WIDE = 1.45F, GIANT_RING_OPEN = 0.36F, GIANT_RING_LEAN = -0.35F;
+
+	/** One half of the blue giant's ring: the near half (in front of the giant) or the far half (behind it). */
+	private static void giantRing(GuiGraphicsExtractor graphics, float cx, float cy, float r, boolean near) {
+		int steps = Math.max(32, Math.round(r * 12.0F));
+		int width = Math.max(1, Math.round(r / 9.0F));
+		float c = (float)Math.cos(GIANT_RING_LEAN), s = (float)Math.sin(GIANT_RING_LEAN);
+		for (int k = 0; k < steps; k++) {
+			double a = Math.PI * 2.0 * k / steps;
+			float sin = (float)Math.sin(a);
+			if (sin > 0.0F != near) {
+				continue;
+			}
+			float x = (float)Math.cos(a) * r * GIANT_RING_WIDE, y = sin * r * GIANT_RING_OPEN;
+			int px = Math.round(cx + x * c - y * s), py = Math.round(cy + x * s + y * c);
+			graphics.fill(px, py, px + width, py + width, k % 5 == 0 ? 0xFF9FB0C4 : 0xFFD6E2EE);
+		}
 	}
 
 	/** Whether cell (i, j) of a world shows its second colour. */
@@ -89,6 +117,8 @@ final class ZFighterSpaceArt {
 			case ZFighterSpace.GLACIA -> (i + j * 2 + seed) % 9 == 0 || (i * 3 - j + seed) % 11 == 0;
 			// craters: small round clusters
 			case ZFighterSpace.MOON -> hash(i / 3, j / 3, seed) % 100 < 26 && hash(i, j, seed) % 3 != 0;
+			// cloud bands across the giant, wavering
+			case ZFighterSpace.GIANT -> ((j + (hash(i / 5, j / 4, seed) % 3)) / 3) % 2 == 0;
 			// blobs of land, lava or forest at a coarse scale
 			default -> smooth(i, j, seed) < look(index).share();
 		};

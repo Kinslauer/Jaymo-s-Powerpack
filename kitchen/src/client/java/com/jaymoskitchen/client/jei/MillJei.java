@@ -104,9 +104,9 @@ public final class MillJei implements IModPlugin {
 							: note(oil ? "pressing.oil" : "pressing.water", pressed.amount()))));
 			}
 		}
-		registration.addRecipes(GRINDING, grinding);
-		registration.addRecipes(CHOPPING, chopping);
-		registration.addRecipes(PRESSING, pressing);
+		SimpleCategory.addRecipes(registration, GRINDING, grinding);
+		SimpleCategory.addRecipes(registration, CHOPPING, chopping);
+		SimpleCategory.addRecipes(registration, PRESSING, pressing);
 		// (0.5.27) the drying rack: salted hides to dried, wet tanned hides to leather
 		List<SimpleCategory.Recipe> drying = new ArrayList<>();
 		for (Item item : List.of(com.jaymoskitchen.tanning.Hides.SALTED_HIDE, com.jaymoskitchen.tanning.Hides.WET_TANNED_HIDE)) {
@@ -114,7 +114,7 @@ public final class MillJei implements IModPlugin {
 			drying.add(new SimpleCategory.Recipe(List.of(List.of(stack)), List.of(com.jaymoskitchen.tanning.Hides.dried(stack)),
 				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
 		}
-		registration.addRecipes(DRYING, drying);
+		SimpleCategory.addRecipes(registration, DRYING, drying);
 		// (GT New Horizons picks) seeds a hoe scratches from grass too far from water for farmland, land by land
 		List<ItemStack> hoes = hoes();
 		List<SimpleCategory.Recipe> foraging = new ArrayList<>();
@@ -122,7 +122,7 @@ public final class MillJei implements IModPlugin {
 			foraging.add(new SimpleCategory.Recipe(List.of(hoes, List.of(new ItemStack(Items.GRASS_BLOCK))), List.of(new ItemStack(forage.seed().get())),
 				List.of(note("foraging.where." + forage.where()), note("foraging.odds", com.jaymoskitchen.farm.DryFields.FORAGE_ODDS))));
 		}
-		registration.addRecipes(FORAGING, foraging);
+		SimpleCategory.addRecipes(registration, FORAGING, foraging);
 		powerPages(registration);
 		// (Hardrock picks) warmth you build: how the hearth, icebox, thermometer, linings and warm or cold water work
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
@@ -177,7 +177,7 @@ public final class MillJei implements IModPlugin {
 		}
 		wind.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Power.WINDSOCK_ITEM))), List.of(),
 			List.of(note("wind.windsock"), Component.empty())));
-		registration.addRecipes(WIND, wind);
+		SimpleCategory.addRecipes(registration, WIND, wind);
 
 		List<ItemStack> fuels = new ArrayList<>();
 		for (Item item : BuiltInRegistries.ITEM) {
@@ -194,11 +194,11 @@ public final class MillJei implements IModPlugin {
 				List.of(new ItemStack(Steam.ENGINE_ITEM)),
 				List.of(note("steam.holds", metal.water / 1000), note("steam.drives", metal.conducts))));
 		}
-		registration.addRecipes(STEAM, steam);
+		SimpleCategory.addRecipes(registration, STEAM, steam);
 
 		ItemStack mill = new ItemStack(Mill.MACHINES.get(MachineKind.GRINDSTONE));
 		List<ItemStack> boilers = List.of(new ItemStack(Steam.COPPER_BOILER_ITEM), new ItemStack(Steam.BRONZE_BOILER_ITEM));
-		registration.addRecipes(POWER_BUILD, List.of(
+		SimpleCategory.addRecipes(registration, POWER_BUILD, List.of(
 			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Power.SHAFT_ITEM)), List.of(new ItemStack(Power.WINDMILL_ITEM)), sails,
 				List.of(new ItemStack(Power.WINDSOCK_ITEM))), List.of(mill),
 				List.of(note("power_build.windmill.1"), note("power_build.windmill.2"), note("power_build.windmill.3"))),

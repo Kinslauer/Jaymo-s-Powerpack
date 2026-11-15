@@ -397,6 +397,10 @@ public final class MarkedMonsters {
 			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(), BossEvent.BossBarColor.PURPLE,
 				BossEvent.BossBarOverlay.NOTCHED_6));
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
+			// a captain hunts by his own target, not the vanilla one: whoever he's after sees his bar too
+			if (target instanceof ServerPlayer hunted) {
+				BossBars.hunting(mob, hunted);
+			}
 			BossBars.show(level, mob, bar);
 		}
 		if (marks.contains(Mark.REGEN) && mob.tickCount % REGEN_EVERY == 0 && mob.getHealth() < mob.getMaxHealth()) {

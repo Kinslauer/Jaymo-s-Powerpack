@@ -47,7 +47,7 @@ public final class XenoJei implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		registration.addRecipes(GREMLIN, List.of(new SimpleCategory.Recipe(
+		SimpleCategory.addRecipes(registration, GREMLIN, List.of(new SimpleCategory.Recipe(
 			List.of(List.of(new ItemStack(XenoFinds.CIRCUIT, XenoFinds.TABLET_CIRCUITS)), List.of(new ItemStack(Items.AMETHYST_SHARD))),
 			List.of(new ItemStack(XenoFinds.TABLET)),
 			List.of(Component.translatable("jei.jaymospowers.xeno_gremlin.how"), Component.translatable("jei.jaymospowers.xeno_tablet.read")))));
@@ -57,7 +57,7 @@ public final class XenoJei implements IModPlugin {
 			grind.add(new SimpleCategory.Recipe(List.of(List.of(ore)), List.of(new ItemStack(dust, XenoFinds.DUSTS_PER_ORE)),
 				List.of(Component.translatable("jei.jaymospowers.xeno_bulwark.how"), Component.translatable("jei.jaymospowers.xeno_bulwark.smelt"))));
 		}
-		registration.addRecipes(BULWARK, grind);
+		SimpleCategory.addRecipes(registration, BULWARK, grind);
 		List<SimpleCategory.Recipe> pyre = new ArrayList<>();
 		for (Item[] pair : new Item[][] {{Items.RAW_IRON, Items.IRON_INGOT}, {Items.RAW_COPPER, Items.COPPER_INGOT}, {Items.RAW_GOLD, Items.GOLD_INGOT},
 			{Items.COBBLESTONE, Items.STONE}, {Items.BEEF, Items.COOKED_BEEF}}) {
@@ -65,7 +65,7 @@ public final class XenoJei implements IModPlugin {
 				List.of(new ItemStack(pair[1], XenoFinds.PYRE_BATCH)),
 				List.of(Component.translatable("jei.jaymospowers.xeno_pyre.how"), Component.translatable("jei.jaymospowers.xeno_pyre.any"))));
 		}
-		registration.addRecipes(PYRE, pyre);
+		SimpleCategory.addRecipes(registration, PYRE, pyre);
 		registration.addIngredientInfo(XenoFinds.TABLET, Component.translatable("jei.jaymospowers.found.star_tablet"));
 		registration.addIngredientInfo(XenoFinds.CIRCUIT, Component.translatable("jei.jaymospowers.found.probe_circuit"));
 		registration.addIngredientInfo(XenoFinds.WRECK_CORE, Component.translatable("jei.jaymospowers.found.wreck_core"));

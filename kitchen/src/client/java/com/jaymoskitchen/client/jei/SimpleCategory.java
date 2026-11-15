@@ -1,6 +1,8 @@
 package com.jaymoskitchen.client.jei;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
@@ -8,7 +10,11 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
+import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
@@ -23,6 +29,9 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 
 	static final int MAX_INPUTS = 4;
 	private static final int SLOT = 18, ARROW = 24, TEXT_LINE = 10, WIDTH = SLOT * MAX_INPUTS + 4 + ARROW + 4 + SLOT + 40;
+
+	/** Lines of notes each page needs, from its recipes as registered: a long note wraps onto more than one. */
+	private static final Map<IRecipeType<?>, Integer> LINES = new HashMap<>();
 
 	private final IRecipeType<Recipe> type;
 	private final Component title;
@@ -53,7 +62,7 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 
 	@Override
 	public int getHeight() {
-		return SLOT + 4 + notes * TEXT_LINE;
+		return SLOT + 4 + Math.max(notes, LINES.getOrDefault(type, 0)) * TEXT_LINE;
 	}
 
 	@Override
@@ -77,9 +86,30 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 		builder.addRecipeArrow().setPosition(arrowX(), 1);
 		int y = SLOT + 4;
 		for (Component note : recipe.notes()) {
-			builder.addText(note, WIDTH, TEXT_LINE).setPosition(0, y).setColor(0xFF404040);
-			y += TEXT_LINE;
+			// one text line each, so JEI never cuts a long note short
+			for (FormattedText line : lines(note)) {
+				builder.addText(line, WIDTH, TEXT_LINE).setPosition(0, y).setColor(0xFF404040);
+				y += TEXT_LINE;
+			}
 		}
+	}
+
+	/** Registers a page's recipes, leaving room on it for every line their notes wrap onto. */
+	static void addRecipes(IRecipeRegistration registration, IRecipeType<Recipe> type, List<Recipe> recipes) {
+		for (Recipe recipe : recipes) {
+			int lines = 0;
+			for (Component note : recipe.notes()) {
+				lines += lines(note).size();
+			}
+			LINES.merge(type, lines, Math::max);
+		}
+		registration.addRecipes(type, recipes);
+	}
+
+	/** A note split into the lines it takes across the page (an empty note still takes one). */
+	private static List<FormattedText> lines(Component note) {
+		List<FormattedText> lines = Minecraft.getInstance().font.getSplitter().splitLines(note, WIDTH, Style.EMPTY);
+		return lines.isEmpty() ? List.of(FormattedText.EMPTY) : lines;
 	}
 
 	private static int arrowX() {

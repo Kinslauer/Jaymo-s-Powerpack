@@ -197,7 +197,7 @@ public final class Illagers {
 		mob.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(WARLORD_TOUGHNESS);
 		mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(WARLORD_KNOCKBACK_RESIST);
 		mob.setHealth(mob.getMaxHealth());
-		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
 		mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		mob.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 		mob.setDropChance(EquipmentSlot.HEAD, LOAD_DROP);

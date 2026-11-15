@@ -64,13 +64,13 @@ public final class BackHomeJei implements IModPlugin {
 			quench.add(new SimpleCategory.Recipe(List.of(List.of(hot), List.of(new ItemStack(Edges.giver(edge))), List.of(new ItemStack(Items.WATER_BUCKET))),
 				List.of(edged), notes));
 		}
-		registration.addRecipes(QUENCH, quench);
+		SimpleCategory.addRecipes(registration, QUENCH, quench);
 		// where the finds come from (a short line each, on the item's own page)
 		registration.addIngredientInfo(BackHome.MAW_DUST, Component.translatable("jei.jaymospowers.found.maw_dust"));
 		registration.addIngredientInfo(BackHome.VERDANT_FRUIT, Component.translatable("jei.jaymospowers.found.verdant_fruit"));
 		registration.addIngredientInfo(BackHome.GLACIA_SALT, Component.translatable("jei.jaymospowers.found.glacia_salt"));
 		registration.addIngredientInfo(Tinkering.STAR_METAL_ORE, Component.translatable("jei.jaymospowers.found.star_metal_ore"));
-		registration.addRecipes(LENS, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(BackHome.STARLIT_LENS)), List.of(PodParts.itemOf(PodPart.MAST, false))),
+		SimpleCategory.addRecipes(registration, LENS, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(BackHome.STARLIT_LENS)), List.of(PodParts.itemOf(PodPart.MAST, false))),
 			List.of(PodParts.itemOf(PodPart.MAST, false)), List.of(Component.translatable("jei.jaymospowers.star_lens.how"), Component.translatable("jei.jaymospowers.star_lens.shows")))));
 	}
 }

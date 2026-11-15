@@ -4,6 +4,7 @@ import com.jaymoskitchen.JaymosKitchen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import com.jaymoskitchen.ragdoll.RagdollShapes;
@@ -352,12 +353,60 @@ public final class Corpses {
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
 		}
 		corpse.markJustDied();
-		corpse.startRagdoll(deathBody(mob));
+		// on its feet, it sways and keels over first, then goes limp; anything else falls as it dies
+		KeelOver keel = keelFor(mob);
+		if (keel != null) {
+			net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
+			RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
+			corpse.startRagdoll(RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot), keel);
+		} else {
+			corpse.startRagdoll(deathBody(mob));
+		}
 		pinFrom(mob, corpse);
 		// a skeleton drops in pieces: skull and arms loose, ribs and legs together
 		corpse.fallToPieces(level);
 		tellBody(mob, corpse);
 		level.addFreshEntity(corpse);
+	}
+
+	/** Knocked back faster than this (blocks a tick) by the killing blow, a body is thrown down, not keeled over. */
+	private static final double KEEL_MAX_KNOCK = 0.3;
+	/** A humanoid falls along the killing blow's knockback when it had at least this much (blocks a tick). */
+	private static final double KEEL_KNOCK_WAY = 0.01;
+
+	/**
+	 * How a mob dying on its feet keels over before it goes limp ({@link KeelOver}): every mob standing on the ground,
+	 * not one thrown by the blow that killed it, already down (limp, crawling, lying, swimming), nailed to a wall,
+	 * riding, flying or in water, and not a snake (it's already on the ground). Null for those, which fall as before.
+	 */
+	static @org.jspecify.annotations.Nullable KeelOver keelFor(LivingEntity mob) {
+		if (!mob.onGround() || mob.isInWater() || mob.isInLava() || mob.isPassenger()
+			|| com.jaymoskitchen.ragdoll.MobRagdolls.body(mob) != null
+			|| com.jaymoskitchen.archery.LegShots.isCrawling(mob)) {
+			return null;
+		}
+		// (its pose is already DYING by now, so lying asleep is asked of it directly)
+		if (mob.isSleeping() || mob.isFallFlying() || mob.isSwimming()) {
+			return null;
+		}
+		for (String tag : mob.entityTags()) {
+			if (tag.startsWith(LYING_TAG) || tag.startsWith(PINNED_TAG)) {
+				return null;
+			}
+		}
+		Vec3 v = mob.getDeltaMovement();
+		double knock = Math.sqrt(v.x * v.x + v.z * v.z);
+		if (knock > KEEL_MAX_KNOCK) {
+			return null;
+		}
+		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
+		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
+		if (rig.chain()) {
+			return null;
+		}
+		boolean way = knock >= KEEL_KNOCK_WAY;
+		return new KeelOver(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, way ? v.x : 0.0, way ? v.z : 0.0,
+			mob.getRandom().nextLong());
 	}
 
 	/** (0.5.1) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */

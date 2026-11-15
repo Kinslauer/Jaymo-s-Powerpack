@@ -137,10 +137,10 @@ public final class Relics {
 		}
 		Passive passive = passives.get(random.nextInt(passives.size()));
 		Item[] bases = weapon
-			? (royal ? new Item[] {Items.NETHERITE_SWORD, Items.NETHERITE_AXE, Items.BOW, Items.CROSSBOW, Items.DIAMOND_SWORD}
-				: new Item[] {Items.IRON_SWORD, Items.IRON_AXE, Items.BOW, Items.CROSSBOW, Items.DIAMOND_SWORD})
-			: (royal ? new Item[] {Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS, Items.DIAMOND_CHESTPLATE}
-				: new Item[] {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.DIAMOND_HELMET});
+			? (royal ? new Item[] {Items.NETHERITE_SWORD, Items.NETHERITE_AXE, Items.BOW, Items.CROSSBOW}
+				: new Item[] {Items.IRON_SWORD, Items.IRON_AXE, Items.BOW, Items.CROSSBOW})
+			: (royal ? new Item[] {Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS}
+				: new Item[] {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS});
 		Item base = bases[random.nextInt(bases.length)];
 		// (Fleetfoot only makes sense on the legs or feet)
 		if (passive == Passive.FLEETFOOT) {

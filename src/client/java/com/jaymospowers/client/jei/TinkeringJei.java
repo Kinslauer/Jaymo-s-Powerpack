@@ -130,15 +130,15 @@ public final class TinkeringJei implements IModPlugin {
 
 		List<SimpleCategory.Recipe> parts = partBuilder(materials);
 		weaponHeads(parts, materials);
-		registration.addRecipes(PART_BUILDER, parts);
+		SimpleCategory.addRecipes(registration, PART_BUILDER, parts);
 		List<SimpleCategory.Recipe> tools = toolStation();
 		weaponAssembly(tools);
 		kitBuilds(tools);
-		registration.addRecipes(TOOL_STATION, tools);
-		registration.addRecipes(CASTING, casting());
-		registration.addRecipes(CASTING_BASIN, basin());
-		registration.addRecipes(MELTING, melting);
-		registration.addRecipes(ALLOYING, alloying(melts));
+		SimpleCategory.addRecipes(registration, TOOL_STATION, tools);
+		SimpleCategory.addRecipes(registration, CASTING, casting());
+		SimpleCategory.addRecipes(registration, CASTING_BASIN, basin());
+		SimpleCategory.addRecipes(registration, MELTING, melting);
+		SimpleCategory.addRecipes(registration, ALLOYING, alloying(melts));
 		// (0.18.55) the far worlds' routes: the field anvil, and each world's first metal
 		registration.addIngredientInfo(com.jaymospowers.power.zfighter.farworld.FarWorlds.FIELD_ANVIL, Component.translatable("jei.jaymospowers.field_anvil"));
 		for (com.jaymospowers.power.zfighter.farworld.FarWorld world : com.jaymospowers.power.zfighter.farworld.FarWorld.values()) {

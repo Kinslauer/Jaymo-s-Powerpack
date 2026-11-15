@@ -43,7 +43,7 @@ import net.minecraft.world.level.block.Blocks;
 public final class PodFuel {
 	// ---- tuning ----
 	/** The grade each world needs, by destination index (moon, Rustfall, Glacia, Cinder, Maw, Verdant, future). */
-	public static final int[] NEEDED = {1, 2, 2, 2, 3, 2, 3};
+	public static final int[] NEEDED = {1, 2, 2, 2, 3, 2, 3, 2};
 	/** Home needs only this, so nobody is stranded by a poor tank. */
 	public static final int HOME_GRADE = 1;
 	/** A tank filled before grades existed (a Patrol's, a raider's, an old pod block): counts as this. */

@@ -50,7 +50,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.18.50, SevTech picks) Breath. The Pale Moon and the Maw ({@link #AIRLESS}) have no air to breathe. Out of the pod, with no
+ * (0.18.50, SevTech picks) Breath. The Pale Moon, the Maw and the blue giant's ring ({@link #AIRLESS}) have no air to breathe. Out of the pod, with no
  * air to draw on, a player takes <b>thin air</b>: slowness after {@link #THIN_AFTER} seconds and a point of damage every
  * {@link #THIN_EVERY} seconds. Two things carry air with them, each a reserve of seconds spent one a second while on an airless
  * world, shown as the item's bar:
@@ -66,7 +66,7 @@ import net.minecraft.world.phys.AABB;
 public final class Breath {
 	// ---- tuning ----
 	/** The worlds with no air (destination indices). */
-	public static final int[] AIRLESS = {ZFighterSpace.MOON, ZFighterSpace.MAW};
+	public static final int[] AIRLESS = {ZFighterSpace.MOON, ZFighterSpace.MAW, ZFighterSpace.GIANT};
 	/** Seconds out of the pod with no air before thin air bites, and the seconds between its hurts once it does. */
 	public static final int THIN_AFTER = 20, THIN_EVERY = 5;
 	public static final float THIN_DAMAGE = 1.0F;

@@ -90,9 +90,13 @@ public class Revenant extends ActingMonster {
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) -> !keeper(target)));
 	}
 
-	/** Whether {@code e} comes as the lantern-keepers do, a lit lantern in hand: the barrow's dead let such a one pass. */
+	/**
+	 * Whether {@code e} comes as the lantern-keepers do, a lit lantern in hand, or in the whole of the barrow wardens'
+	 * mail as the knights' own ({@link com.jaymoskingdoms.FantasyArmorCompat}): the barrow's dead let such a one pass.
+	 */
 	static boolean keeper(LivingEntity e) {
-		return lantern(e.getMainHandItem().getItem()) || lantern(e.getOffhandItem().getItem());
+		return lantern(e.getMainHandItem().getItem()) || lantern(e.getOffhandItem().getItem())
+			|| com.jaymoskingdoms.FantasyArmorCompat.whole(e, com.jaymoskingdoms.FantasyArmorCompat.BARROW);
 	}
 
 	private static boolean lantern(net.minecraft.world.item.Item item) {

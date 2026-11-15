@@ -13863,3 +13863,94 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   each is loaded with nobody near; one come down in the country goes home the same way. An empty flight home loads no
   chunks. A wrecked or stolen one is built again after two days.
 - Built; not played.
+
+## 0.9.25 (2026-11-15): The Long Defence's cast in Fantasy Armor (#1587)
+
+- Andy: where Fantasy Armor is loaded, the Long Defence film dresses its cast in its sets: Thessaly in Lady Maria,
+  Varro in Golden Horns with no helm, Grimsby in the Thief gear, Ambrose in the Wandering Wizard, the Grue in the Dark
+  Lord plate, the first four orcs it raises in Dark Cover, and the Quiet One in the Redeemer plate. Without the mod
+  everyone wears what they did.
+- Andy: the Redeemer plate "should weave onto his body like the symbiote usually does". It goes on with the white and
+  winds out over him in the symbiote suit's order (chest, then arms, head, legs, boots last), each piece growing out
+  from its joint, twisting and swollen at first, then settling flat (`FantasyArmourLayer.WEAVE_*`).
+- Film actors are jointed, so `FilmGear` can't paint GeckoLib armour on them: `FantasyArmourLayer` draws each worn
+  piece from Fantasy Armor's own model and texture (read at run time, nothing copied), riding the actor's head, body,
+  upper arms, thighs and shins.
+- The tape holds each Fantasy Armor piece with what the actor had as its fallback, so one tape plays in games with or
+  without the mod. The shipped tape predates this: re-record it once (`/kingdomfilm record long_defence`).
+- Built; not played. Fantasy Armor itself isn't in the pack yet (its own patch).
+
+## 0.9.26 (2026-11-15): Netherite over steel; diamond gear gone from people's kits (#1587)
+
+- Netherite armour is made at the smithing table from the Armory's steel plate (upgrade template + a netherite ingot),
+  so it is no longer loot-only.
+- A rich realm's queen wears trimmed steel plate where she wore diamond; steel plate is the crown's like diamond and
+  netherite were, so nobody below a queen keeps it (`Regalia`), and a queen's old diamond turns to steel on sight.
+- Diamond gear is gone from the kits: legendary monster gear is steel plate with an iron claymore, broadsword or war
+  axe and an iron round shield (`MonsterGear`); lords, the knife captain, rank-four Banes, the illager warlord and the
+  barbarian chief carry iron; relics no longer roll diamond bases; the smiths' quest-board rewards give 1-2 diamonds
+  instead of a diamond sword or pickaxe.
+- Built; not played.
+
+## 0.9.27 (2026-11-15): Boss bars show when a boss turns on you
+
+- A boss's health bar (`BossBars`: kings, lords, chiefs, warlords, champions, giants, grizzlies, grave-captains, and
+  monsters with three or more marks) now also shows to the player it is after, not only to those who have hit it
+  (Andy, 2026-11-15). It reads the boss's own target, or a brain-driven mob's attack target; a marked captain passes
+  whoever he is hunting. As before, the bar stays while they're within 48 blocks. Boss music and anything else that
+  asks whether a player is in a boss's fight count them in too.
+- Built; not played.
+
+## 0.9.28 (2026-11-15): Fantasy Armor on monsters and kings (#1590)
+
+- Where Fantasy Armor is loaded (`FantasyArmorCompat`, by registry id, no dependency): at the higher world tiers one of
+  the risen dead now and then comes up in a whole dark set (dark cover, grave sentinel), enchanted as legendary gear;
+  a king in gilded attire wears one of its sets under his crown (Andy: "kings can wear whatever they want, except
+  dawncrest"; the trimmed sets are out too) instead of trimmed netherite. Nobody below a king wears it, so the royal tiers hold. The Grave Sentinel helmet is
+  never put on anyone.
+- The armourers' orders (Lore.md, "What the armourers make") wear Fantasy Armor's sets (Andy chose its models over new
+  art): barrow wardens' mail = Grave Sentinel, dawnwatch = Dawncrest, headsmen = Golden Execution, Giant-slayers =
+  Dragonslayer, sky elders = Wind Worshipper, well-wardens = Fog Guard, ashen plate = Dark Lord, the Warden's hunters =
+  Evening Ghost, folded lamellar = Ronin, pit harness = Dead Gladiator, back to back = Twinned. In this patch:
+  - Barrow wardens' mail falls from the barrow's dead (a knight 8%, the revenant 60%; never the helm), and whoever wears
+    all of it is let pass by them as a lantern-bearer is.
+  - When a Giant falls, a Dragonslayer plate lies where it fell for each player within 48 blocks.
+  - About a third of the Blossom land's guards wear folded lamellar instead of the Armory's ronin harness.
+- With the mod in, the Long Defence's cast now shows in its sets (after re-recording the film once).
+- Built; not played.
+
+## 0.9.29 (2026-11-15): Blossom villages across all of Mohknee; no sunken palace on dry land
+
+- **Blossom villages** now rise on any of Mohknee's dry land (meadow, plains, forest, flower forest, cherry grove...), not only in cherry groves. Cherry groves are about an eighth of Mohknee and mostly steep, and the home continent's villages are kept off Mohknee, so the land stayed nearly empty. Everything else holds: by the water, never on an island, 384 blocks from any other seat, out of sight; the first one with no kingdom near is the castle town. Every settlement on Mohknee is Blossom by its place (`Palette.at`), whatever its biome (`BlossomVillages.dryLand`).
+- **`/kingdom mohknee palace build`** refuses on dry land: the sunken palace belongs on the seabed, and built on land its halls' water ran out over the country round it.
+- Not built or seen in game here; CI compiles it.
+
+## 0.9.30 (2026-11-15): Armourers' orders: hunters' coats, dawnwatch plate, ashen plate, pit harness, back to back (#1594)
+
+- Where Fantasy Armor is loaded (`FantasyArmorCompat`), more of the orders in Lore.md wear its sets:
+  - **The Warden's hunters' coats** (Evening Ghost): an armourer of a realm that keeps the Lantern Warden sells them to
+    those sworn to him; anyone else never sees them on the counter.
+  - **Dawnwatch plate** (Dawncrest): the Crowned Sun's realms' armourers sell it to his sworn at favour tier 3 or more.
+  - **Back to back** (Twinned): two players, each in at least two of its pieces, both at a shrine (within 4 blocks of it), who use it one after the other (within 10 s) are sworn to each other; alone at a shrine its wearer prays as anyone
+    does. While both have their half on and are within 16 blocks, a quarter of each hit on
+    one is borne by the other. Swearing someone new ends the old oath. A blow that kills outright isn't shared.
+  - **The demons' ashen plate** (Dark Lord): a demon captain of the Ash (Jaymo's Powers' demon realm) drops a piece 35%
+    of the time.
+  - **The pit harness** (Dead Gladiator): the warlord of a fighting pit's camp (our desert arena or Illager Arena's)
+    always drops a piece; it is never sold.
+- Built; not played.
+
+## 0.9.31 (2026-11-15): The Crowned Sun's headsmen (#1597)
+
+- Andy asked for them (2026-11-15; Lore.md, "The dawnwatch and the headsmen"). Each realm whose state patron is the
+  Crowned Sun keeps a headsman at its seat: when a player is about and there's none, the guard nearest the seat is named
+  (`Headsmen`), and another when he dies. Where Fantasy Armor is loaded he wears the whole Golden Execution set, on duty
+  and off; without it he is a guard like the rest.
+- His work: in his realm a sentence of death at an audience is his when he's within 32 blocks. He walks to the one
+  sentenced (waiting up to 10 s for him) and the blow is his.
+- The dull plate: three days after his last execution his plate is dull, its Strength gone and he is slower. A player in
+  the whole set is the same unless they have killed a person (a villager, an illager, a player) in the last three days.
+  Nothing on screen says so.
+- He spits at anyone sworn to the Ash Whisperer who comes within 6 blocks (now and then).
+- Never sold: a headsman lets one piece of his plate fall when he dies.
+- Built; not played.

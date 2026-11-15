@@ -27,9 +27,17 @@ final class MawCities {
 	/** The profile's name in Lost Cities' list. */
 	static final String PROFILE = "jaymospowers_maw";
 	/**
+	 * How much of the Maw the ruins cover. A chunk is city where Lost Cities' city noise (roughly -12 to 12, half of it below 0)
+	 * times {@code CITY_PERLIN_INNERSCALE} minus this offset passes {@code CITY_THRESHOLD}. Lost Cities' own "largecities" has
+	 * 0.2: noise over 3, a quarter of the land, in patches with up to 1000 blocks of bare ground between them. -0.6 takes
+	 * noise over -5: about 90% city, the rest scattered open ground between the districts.
+	 */
+	static final double SPREAD = -0.6;
+	/**
 	 * How the ruins are made, as Lost Cities profile fields (each boxed as the field's own type): nearly every building broken off
 	 * low, rubble in the streets and no green anywhere, the water gone from fountains, bomb craters in and out of the cities, the
-	 * cities large and running into each other (its "largecities" noise), buildings no taller than {@code BUILDING_MAXFLOORS}
+	 * cities large and running into each other over nearly all of it (its "largecities" noise, pushed up by {@link #SPREAD} so
+	 * only about one chunk in ten is open ground between them), buildings no taller than {@code BUILDING_MAXFLOORS}
 	 * floors so they stay well under the broken world, and nothing left in them: no spawners, no loot, no lights.
 	 */
 	static final Map<String, Object> RUINS = Map.ofEntries(
@@ -53,7 +61,7 @@ final class MawCities {
 		Map.entry("EXPLOSIONS_IN_CITIES_ONLY", false),
 		Map.entry("CITY_CHANCE", -1.0),
 		Map.entry("CITY_PERLIN_SCALE", 7.0),
-		Map.entry("CITY_PERLIN_OFFSET", 0.2),
+		Map.entry("CITY_PERLIN_OFFSET", SPREAD),
 		Map.entry("CITY_PERLIN_INNERSCALE", 0.1),
 		Map.entry("CITY_THRESHOLD", 0.1F),
 		Map.entry("BUILDING_CHANCE", 0.4F),

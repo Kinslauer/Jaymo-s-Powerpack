@@ -63,7 +63,7 @@ public final class KilnJei implements IModPlugin {
 			notes.add(Component.translatable("jei.jaymospowers.kiln.how"));
 			recipes.add(new SimpleCategory.Recipe(List.of(inputs), List.of(new ItemStack(recipe.output())), notes));
 		}
-		registration.addRecipes(KILN, recipes);
+		SimpleCategory.addRecipes(registration, KILN, recipes);
 	}
 
 	private static Component heat(int heat) {

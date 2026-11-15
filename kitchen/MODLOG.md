@@ -2302,3 +2302,18 @@ corpse' model that it came from".
 - JEI: a Wind page (each sail with its patch, pull, life and how often storms tear it; the windsock), a Steam page (each boiler with its fuels, its water and the engine, what it holds and how hard it drives), and a Building a Mill page (windmill: shaft, windmill, sails, windsock; steam: firebox, boiler, engine, shaft; both to a horse mill). Every new recipe shows in crafting.
 - Art: `kitchen/tools/gen_gtnh_steam.py` (vanilla textures recoloured; the hemp sail's worn and torn looks from Kitchen's sailcloth).
 - Built; not played.
+
+## 0.6.28 (2026-11-15): mobs keel over before they ragdoll
+
+- **Keel-over**: a mob that dies standing on the ground no longer drops straight into a ragdoll. It sways (leans away, back through upright, toward the fall), its legs give and splay out under it, its head drops, then it tips over and goes limp. Andy asked for the Promenade fall-asleep look on every mob; this is our own animation of it (Promenade is Polyform Shield, so none of its code or keyframes are used).
+- **By body**: four-legged animals, box-bodied ones (chickens, cube-shaped animals, slimes, spiders) and any other non-humanoid go over onto a side, land with a small bounce, and lie still on it. Humanoids sag at the knees, drop their chin, and topple the way the killing blow pushed them (any way if it didn't), and the ragdoll takes over partway down so their limbs flop. Bigger bodies tip slower. Each body's timing varies by up to 20% so a herd doesn't fall as one.
+- Skipped (falls as before): mobs thrown by the killing blow (over 0.3 blocks a tick), already limp from a heavy hit, crawling from a leg shot, asleep, flying, swimming, in water or lava, riding, nailed to a wall, marked as lying, and snakes. A blow, a jolt, a grab or a shove during the keel ends it, and the body falls with the push. So does keeling over a ledge (3 ticks touching nothing).
+- Code: `ragdoll/KeelOver` (pure, steers the ragdoll's points through its physics, so ground and walls still hold it), `Corpses.keelFor` / `spawnCorpse`, `CorpseRagdoll` (steering, ending the keel), synced `CorpseEntity.keeling()`; client `ClientRagdolls.Track.settle` doesn't ease a keeling animal onto its side, then keeps it drawn on that side for 2 s afterwards (its physics rolls it back onto its legs). Player deaths are unchanged.
+- `tools/ragdoll_sim` checks cows, wolves, chickens, a cube animal, players and a giant: bones keep their length, nothing goes into the ground, animals end on their side nearly still, humanoids let go of partway over and end lying down.
+- Built; not played.
+
+## 0.6.29 (2026-11-15): Cactus water and JEI notes (#1591)
+
+- A bucket of cactus water only quenches thirst: it no longer shows meal hearts or takes the stomach's drink slot.
+- Long notes under the Mill pages in JEI (sails, building a mill or steam engine, pressing, foraging and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
+- Built; not played.

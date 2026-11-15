@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:ore",
+  "discard_chance_on_air_exposure": 0.0,
+  "size": 7,
+  "targets": [
+    {
+      "state": "jaymospowers:gravilite_block",
+      "target": {
+        "block": "minecraft:packed_ice",
+        "predicate_type": "minecraft:block_match"
+      }
+    },
+    {
+      "state": "jaymospowers:gravilite_block",
+      "target": {
+        "block": "minecraft:tuff",
+        "predicate_type": "minecraft:block_match"
+      }
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.horse.CartEntity;
+import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import com.jaymoskitchen.ragdoll.RagdollNet;
@@ -77,6 +78,9 @@ public class CorpseEntity extends Entity {
 	/** How the body lies (clients sprawl it from this); rolled again each time it's set down. */
 	/** Dropped from someone's arms and not landed yet: it tumbles limp through the air (see CorpseRenderer). */
 	private static final EntityDataAccessor<Boolean> TUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.BOOLEAN);
+	/** Just died and still keeling over (see KeelOver): clients leave its drawn pose to the points until it's down. */
+	private static final EntityDataAccessor<Boolean> KEELING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
 	/** (0.5.23) Nailed to a wall by an arrow: the way it faces out from the wall (degrees, 0-359), or -1 when it isn't. */
 	private static final EntityDataAccessor<Integer> PINNED = SynchedEntityData.defineId(CorpseEntity.class,
@@ -615,11 +619,27 @@ public class CorpseEntity extends Entity {
 
 	/** Server: starts the body from one already made (a dying mob's, a limp player's). The corpse moves to it. */
 	void startRagdoll(RagdollBody body) {
+		startRagdoll(body, null);
+	}
+
+	/** Server: as above, the body first keeling over as {@code keel} has it (a mob dying on its feet), then falling free. */
+	void startRagdoll(RagdollBody body, @Nullable KeelOver keel) {
 		this.rigCache = body.rig;
 		this.rigShape = body.rig.shape.ordinal();
 		this.rigWidth = body.rig.width;
 		this.rigHeight = body.rig.height;
-		this.ragdoll = new CorpseRagdoll(this, body);
+		this.ragdoll = new CorpseRagdoll(this, body, keel);
+	}
+
+	/** Still keeling over after dying (synced): its sway and tip are in its points, so nothing eases it onto its side yet. */
+	public boolean keeling() {
+		return this.entityData.get(KEELING);
+	}
+
+	void setKeeling(boolean keeling) {
+		if (keeling() != keeling) {
+			this.entityData.set(KEELING, keeling);
+		}
 	}
 
 	/** A body lying where the corpse is, its limbs splayed (face up or down, and how, from its pose seed). */
@@ -905,6 +925,7 @@ public class CorpseEntity extends Entity {
 		builder.define(OWNER, "");
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
+		builder.define(KEELING, false);
 		builder.define(OWNER_NAME, "");
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);

@@ -195,6 +195,10 @@ public final class Shrine extends Block {
 			Patrons.openShrine(sp, pos, state);
 			return InteractionResult.SUCCESS;
 		}
+		if (FantasyArmorCompat.swear(sp, pos)) {
+			// two in the paired harness, side by side: sworn back to back (FantasyArmorCompat)
+			return InteractionResult.SUCCESS;
+		}
 		long today = Math.floorDiv(server.getOverworldClockTime(), DAY);
 		Long last = sp.getAttached(PRAYED);
 		if (last != null && last == today) {

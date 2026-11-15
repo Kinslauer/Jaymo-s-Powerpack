@@ -32,6 +32,12 @@ public final class ClientRagdolls {
 	private static final float SIDE_EASE = 0.12F;
 	/** (0.5.72) Added around each part for the crosshair: the drawn limbs are a little thicker than the physics'. */
 	private static final double BOUNDS_PAD = 0.08;
+	/**
+	 * A four-legged body that has just keeled over onto its side (see KeelOver) is drawn easing on onto it for this
+	 * long (ticks) whether it's still or not: its physics then rolls it back onto its legs, and it would be drawn
+	 * rolling belly down and back over onto its side again.
+	 */
+	private static final int KEEL_REST_TICKS = 40;
 
 	/** One body: its rig, and its points a tick ago and now (x, y, z each). */
 	public static final class Track {
@@ -42,6 +48,9 @@ public final class ClientRagdolls {
 		/** (0.5.16) How far onto its side it's drawn (0 as the physics has it, 1 on its side), and which side is up. */
 		float side, sideBefore;
 		int sideUp;
+		/** Seen keeling over, and how long it's still drawn settling onto its side since it went down. */
+		boolean keeled;
+		int keelRest;
 
 		Track(RagdollRig rig) {
 			this.rig = rig;
@@ -121,17 +130,31 @@ public final class ClientRagdolls {
 		 * still, so the body was drawn flat on its side on the ground and the leg left your hand. Andy: "dragging isnt
 		 * tethered hand to animal, it still floats in space oddly".
 		 */
-		void settle(boolean held) {
+		void settle(boolean held, boolean keeling) {
 			sideBefore = side;
 			if (rig.shape == RagdollRig.Shape.HUMANOID) {
 				return;
+			}
+			if (keeling) {
+				// its sway and tip onto its side are in its points: drawn as they are
+				keeled = true;
+				return;
+			}
+			if (keeled) {
+				// down on its side: it stays drawn on that side, whichever way its physics rolls it now
+				keeled = false;
+				keelRest = KEEL_REST_TICKS;
+				pickSide();
 			}
 			double fastest = 0;
 			for (int i = 0; i < rig.count; i++) {
 				double dx = now[i * 3] - before[i * 3], dy = now[i * 3 + 1] - before[i * 3 + 1], dz = now[i * 3 + 2] - before[i * 3 + 2];
 				fastest = Math.max(fastest, dx * dx + dy * dy + dz * dz);
 			}
-			boolean still = !held && Math.sqrt(fastest) < SIDE_SPEED;
+			boolean still = !held && (Math.sqrt(fastest) < SIDE_SPEED || keelRest > 0);
+			if (keelRest > 0) {
+				keelRest--;
+			}
 			if (still && sideUp == 0) {
 				pickSide();
 			}
@@ -245,7 +268,8 @@ public final class ClientRagdolls {
 		while (it.hasNext()) {
 			Int2ObjectMap.Entry<Track> entry = it.next();
 			Track track = entry.getValue();
-			track.settle(DragSim.active(entry.getIntKey()));
+			track.settle(DragSim.active(entry.getIntKey()),
+				minecraft.level.getEntity(entry.getIntKey()) instanceof CorpseEntity corpse && corpse.keeling());
 			if (!track.fresh) {
 				System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 				if (++track.unseen > FORGET_TICKS && minecraft.level.getEntity(entry.getIntKey()) == null) {

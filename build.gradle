@@ -430,6 +430,11 @@ def packMods = [
 	[dep: "maven.modrinth:shatterbyte-lib:yGChlg17", cf: [916747, 9573422]],
 	// JamLib (MIT, JamCoreModding): the library RightClickHarvest (packModsNoCf, below) needs. 2.3.1.
 	[dep: "maven.modrinth:jamlib:EbhilCj8", cf: [623764, 8914234]],
+	// Fantasy Armor (Medieval Series, kenddie; DSMSLv2, all rights reserved in effect; linked, never edited or bundled):
+	// GeckoLib armour sets. Jaymo's Powers switches its tooltip descriptions off (FantasyArmorPreset), a datapack takes
+	// out the sets named after other games' characters, and Jaymo's Kingdoms dresses monsters, undead and the Long
+	// Defence's cast in it. Client and server. 1.3 for 26.3. Needs GeckoLib and Cloth Config (above).
+	[dep: "maven.modrinth:fantasy_armor:4VFDvfvz", cf: [1083998, 9332829]],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import

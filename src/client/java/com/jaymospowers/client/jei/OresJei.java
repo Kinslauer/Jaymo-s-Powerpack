@@ -64,7 +64,7 @@ public final class OresJei implements IModPlugin {
 				List.of(Component.translatable("jei.jaymospowers.ore_washing.chances", percent(OreWashing.BYPRODUCT_CHANCE),
 					percent(OreWashing.PARTNER_CHANCE)), Component.translatable("jei.jaymospowers.ore_washing.where")), byproducts));
 		}
-		registration.addRecipes(WASHING, washing);
+		SimpleCategory.addRecipes(registration, WASHING, washing);
 
 		List<SimpleCategory.Recipe> small = new ArrayList<>();
 		for (Ores.Metal metal : Ores.Metal.values()) {
@@ -74,7 +74,7 @@ public final class OresJei implements IModPlugin {
 			registration.addIngredientInfo(metal.small, Component.translatable("jei.jaymospowers.small_ore"));
 			registration.addIngredientInfo(metal.smallDeep, Component.translatable("jei.jaymospowers.small_ore"));
 		}
-		registration.addRecipes(SMALL_ORES, small);
+		SimpleCategory.addRecipes(registration, SMALL_ORES, small);
 
 		registration.addIngredientInfo(Ores.DOWSING_ROD, Component.translatable("jei.jaymospowers.dowsing_rod.1"),
 			Component.translatable("jei.jaymospowers.dowsing_rod.2", com.jaymospowers.ground.DowsingRodItem.REACH));
