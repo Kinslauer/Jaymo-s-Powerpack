@@ -56,6 +56,8 @@ public final class SkyCourt {
 	static final int LORD_ROAM = 6;
 	/** The castle's people are looked for this far past its walls (blocks). */
 	static final double COURT_REACH = 4.0;
+	/** A village's elder still counts as its own this far past its walls (out at the farms or the mast). */
+	static final double ELDER_REACH = 48.0;
 
 	private static final String BUILDER = "jaymospowers", CASTLE = "sky_castle", VILLAGE = "sky_village_", TOWN = "sky_town_", RUIN = "ruin";
 
@@ -136,12 +138,14 @@ public final class SkyCourt {
 			return;
 		}
 		net.minecraft.world.phys.Vec3 at = net.minecraft.world.phys.Vec3.atCenterOf(box.getCenter());
+		if (!level.getEntitiesOfClass(Villager.class, AABB.of(box).inflate(ELDER_REACH),
+				v -> v.isAlive() && v.entityTags().contains(ELDER_TAG)).isEmpty()) {
+			return;
+		}
 		Villager elder = null;
 		for (Villager v : people(level, box)) {
-			if (v.entityTags().contains(ELDER_TAG)) {
-				return;
-			}
-			if (SkyUsurpers.party(v) || v.entityTags().contains(LORD_TAG) || v.entityTags().contains(WARDEN_TAG) || McaBridge.isGuard(v)) {
+			// (one who holds no other post: no trade, no guard's, nobody's family; SkyTrades#hirable)
+			if (SkyUsurpers.party(v) || !SkyTrades.hirable(v) || McaBridge.isGuard(v)) {
 				continue;
 			}
 			if (elder == null || v.distanceToSqr(at) < elder.distanceToSqr(at)) {
@@ -170,7 +174,7 @@ public final class SkyCourt {
 				lord = v;
 			} else if (v.entityTags().contains(WARDEN_TAG)) {
 				wardens++;
-			} else {
+			} else if (!v.entityTags().contains(ELDER_TAG)) {
 				free.add(v);
 			}
 		}
