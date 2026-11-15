@@ -284,21 +284,43 @@ final class Navies {
 			MISSING.remove(f.id());
 			put(server, f.id(), h = h.withWarship(null, null, now));
 		}
-		if (!force && (h.lostAt() >= 0 && now - h.lostAt() < REBUILD_TICKS || !level.isPositionEntityTicking(h.mooring())
-			|| Raids.playerNear(level, h.mooring(), LAUNCH_HIDE))) {
+		if (!force && (h.lostAt() >= 0 && now - h.lostAt() < REBUILD_TICKS || !level.isPositionEntityTicking(h.mooring()))) {
 			return null;
 		}
-		RandomSource random = level.getRandom();
-		boolean frigate = f.treasury() >= FRIGATE_TREASURY;
-		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(random), h.mooring());
-		Block colour = Fleet.block(f.color().getName() + "_wool");
-		Fleet.Look look = new Fleet.Look(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.SPRUCE_LOG, colour,
-			f.color() == net.minecraft.world.item.DyeColor.WHITE ? Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.RED) : Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
-		Ship ship = launch(level, f, h, frigate ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME, look, crew,
-			new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, NAVY_HANDS, 0));
+		Fleet.Rig rig = f.treasury() >= FRIGATE_TREASURY ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME;
+		if (!force && McaCompat.LOADED) {
+			// (with MCA, whose villager shipwright does the work) her shipwright lays her down by the pier and builds her where the harbour can watch (Shipyards)
+			Shipyards.lay(level, f, h, Shipyards.WARSHIP, rig);
+			return null;
+		}
+		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
+		Ship ship = launch(level, f, h, rig, warshipLook(f), crew, warshipComplement());
 		if (ship != null) {
 			put(server, f.id(), h.withWarship(ship.getUUID(), ship.blockPosition(), -1L));
 			JaymosKingdoms.LOGGER.info("{} put out its warship {}", f.name(), crew.name);
+		}
+		return ship;
+	}
+
+	/** What {@code f}'s warship is built of: oak, spruce masts, its colours with a white (or red) emblem. */
+	static Fleet.Look warshipLook(Faction f) {
+		Block colour = Fleet.block(f.color().getName() + "_wool");
+		return new Fleet.Look(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.SPRUCE_LOG, colour,
+			f.color() == net.minecraft.world.item.DyeColor.WHITE ? Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.RED) : Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
+	}
+
+	private static Corsairs.Complement warshipComplement() {
+		return new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, NAVY_HANDS, 0);
+	}
+
+	/** (2026-11-15) The warship its shipwright built on {@code slip} launched with her crew, and the harbour's own (null: she wouldn't go). */
+	static @Nullable Ship commission(ServerLevel level, Faction f, Harbour h, Fleet.Slip slip, Fleet.Rig rig) {
+		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
+		Ship ship = Shipyards.launch(level, f, slip, crew, warshipComplement());
+		if (ship != null) {
+			Harbour now = harbour(level.getServer(), f.id());
+			put(level.getServer(), f.id(), (now != null ? now : h).withWarship(ship.getUUID(), ship.blockPosition(), -1L));
+			JaymosKingdoms.LOGGER.info("{} launched its warship {} ({})", f.name(), crew.name, rig.id());
 		}
 		return ship;
 	}

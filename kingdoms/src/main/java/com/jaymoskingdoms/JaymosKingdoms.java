@@ -917,6 +917,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Fishers.register();
 		SeaTrade.register();
 		Whalers.register();
+		// the harbours' yards: ships built block by block by their shipwrights (and their attachments)
+		Shipyards.register();
+		LOGGER.debug("shipyard attachments: {} {}", Shipyards.YARDS, Shipyards.WHALERS);
 		// 0.7.437: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
 		LOGGER.debug("far ground attachments: {} {}", FarGrounds.REACH, FarGrounds.ROVERS);
 		TreasureWrecks.register();

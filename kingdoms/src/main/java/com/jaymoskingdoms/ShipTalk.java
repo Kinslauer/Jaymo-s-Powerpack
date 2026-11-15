@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -63,12 +64,16 @@ public final class ShipTalk {
 
 	/** {@code villager} talks work as one of a ship's crew (aboard or waiting in port), not as one of a town. */
 	public static boolean offersWork(LivingEntity villager) {
-		return Crewmen.tagged(villager) && !villager.isBaby();
+		return Crewmen.tagged(villager) && !villager.isBaby() || Shipyards.isWright(villager);
 	}
 
 	/** "Talk about work" with one of a ship's crew (MCA's menu). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
 		ServerLevel level = player.level();
+		if (Shipyards.isWright(speaker)) {
+			wright(level, player, speaker);
+			return;
+		}
 		Ship ship = speaker.getVehicle() instanceof Ship s && s.crew != null ? s : null;
 		Crew.Side side = ship != null ? ship.crew.side : side(speaker);
 		if (side == Crew.Side.WHALER) {
@@ -187,7 +192,7 @@ public final class ShipTalk {
 		}
 		return switch (ship.crew.mode) {
 			case "outward" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.outward");
-			case "hunting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.hunting", v.whales, Whalers.WHALES);
+			case "hunting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.hunting", v.whales, Whalers.room(ship, ship.crew));
 			case "cutting" -> Component.translatable("talk.jaymoskingdoms.whaler.stands.cutting");
 			default -> Component.translatable("talk.jaymoskingdoms.whaler.stands.homeward", v.whales);
 		};
@@ -201,6 +206,14 @@ public final class ShipTalk {
 		}
 		MENUS.remove(player.getUUID());
 		ServerLevel level = player.level();
+		if (answer.option() >= 0 && answer.option() < menu.actions().size() && menu.actions().get(answer.option()).equals("timber")) {
+			// timber for a harbour's slip
+			if (level.getEntity(answer.entityId()) instanceof LivingEntity speaker && speaker.isAlive()
+				&& speaker.distanceTo(player) <= Careers.TALK_RANGE && Shipyards.isWright(speaker)) {
+				timber(level, player, speaker);
+			}
+			return true;
+		}
 		if (answer.option() < 0 || answer.option() >= menu.actions().size() || !(level.getEntity(answer.entityId()) instanceof LivingEntity speaker)
 			|| !speaker.isAlive() || speaker.distanceTo(player) > Careers.TALK_RANGE || !(speaker.getVehicle() instanceof Ship ship) || ship.crew == null
 			|| !speaker.getUUID().equals(ship.crew.captain)) {
@@ -250,6 +263,73 @@ public final class ShipTalk {
 			}
 		}
 		return true;
+	}
+
+	// ---- a harbour's shipwright ------------------------------------------------------------------------------------------
+
+	/** A harbour's shipwright: what's on his slip and how far along she is, and timber gladly taken. */
+	private static void wright(ServerLevel level, ServerPlayer player, LivingEntity speaker) {
+		Faction f = Factions.get(level.getServer(), ((Worker)speaker).factionId());
+		Shipyards.Yard y = f == null ? null : Shipyards.yard(level.getServer(), f.id());
+		if (f == null || y == null) {
+			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.shipwright.idle"), Speech.WHITE);
+			return;
+		}
+		int done = Shipyards.progress(level, f);
+		Component words = Component.translatable(done >= 100 ? "talk.jaymoskingdoms.shipwright.ready." + y.purpose()
+			: "talk.jaymoskingdoms.shipwright.building." + y.purpose(), f.name(), done);
+		List<String> actions = new ArrayList<>();
+		List<Component> options = new ArrayList<>();
+		List<Boolean> enabled = new ArrayList<>();
+		if (done < 100) {
+			actions.add("timber");
+			options.add(Component.translatable("talk.jaymoskingdoms.shipwright.timber"));
+			enabled.add(timberWorth(player) > 0);
+		}
+		actions.add("close");
+		options.add(Component.translatable("talk.jaymoskingdoms.work.close"));
+		enabled.add(true);
+		send(player, speaker, words, actions, options, enabled);
+	}
+
+	/** Timber handed over for the slip (planks, and logs at {@link Shipyards#LOG} planks' worth), up to {@link Shipyards#TIMBER_MOST}'s worth. */
+	private static void timber(ServerLevel level, ServerPlayer player, LivingEntity speaker) {
+		Faction f = Factions.get(level.getServer(), ((Worker)speaker).factionId());
+		if (f == null || Shipyards.yard(level.getServer(), f.id()) == null) {
+			return;
+		}
+		Inventory inv = player.getInventory();
+		int worth = 0;
+		for (int i = 0; i < inv.getContainerSize() && worth < Shipyards.TIMBER_MOST; i++) {
+			ItemStack stack = inv.getItem(i);
+			int each = timberEach(stack);
+			if (each <= 0) {
+				continue;
+			}
+			int take = Math.min(stack.getCount(), (Shipyards.TIMBER_MOST - worth + each - 1) / each);
+			stack.shrink(take);
+			worth += take * each;
+		}
+		if (worth <= 0) {
+			return;
+		}
+		Shipyards.help(level.getServer(), f, worth);
+		Reputation.change(player, f, Math.max(1, Math.min(Shipyards.REP_MOST, worth / Shipyards.TIMBER_PER_REP)));
+		Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.shipwright.thanks"), Speech.WHITE);
+	}
+
+	private static int timberWorth(ServerPlayer player) {
+		Inventory inv = player.getInventory();
+		int n = 0;
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			n += timberEach(stack) * stack.getCount();
+		}
+		return n;
+	}
+
+	private static int timberEach(ItemStack stack) {
+		return stack.is(ItemTags.PLANKS) ? Shipyards.PLANK : stack.is(ItemTags.LOGS) ? Shipyards.LOG : 0;
 	}
 
 	// ---- helpers --------------------------------------------------------------------------------------------------------
