@@ -630,3 +630,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, chopping block thread): "Lore looks great merge": the chopping block paragraph is canon; PR #1599 merged.
 - 2026-11-15 (Andy): approved the lore "Who the well-wardens are" (well-wardens = sky lord's wardens, a village elder each, dawnwatch = Sun-Marshal's sun-guard).
 - 2026-11-15 (Andy, Civilizations thread): old-age temple patrons: Hearthkeeper = plains columned temples, Anvil-Father = mountain/mine halls, Deep Mother = sunken colonnades, Green Huntsman = wooded grove shrine, Lantern Warden = sand stepped tombs, Crowned Sun = northern long halls/mounds, Ash Whisperer = Blossom walled palace, the Truth = the Aether. For Medieval patch 10 (cv-avatars). Lore paragraph "Whose the old temples were" approved ("confirm lore.").
+
+- 2026-11-15 (shipwright thread): Andy approved "The yards" lore; shipwrights may keep any patron (launch offering is from their own patron). Asked for a dedicated large whaleship with lots of storage and tryworks for the far oceans.
