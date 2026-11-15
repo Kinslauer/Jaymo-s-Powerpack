@@ -632,3 +632,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Civilizations thread): old-age temple patrons: Hearthkeeper = plains columned temples, Anvil-Father = mountain/mine halls, Deep Mother = sunken colonnades, Green Huntsman = wooded grove shrine, Lantern Warden = sand stepped tombs, Crowned Sun = northern long halls/mounds, Ash Whisperer = Blossom walled palace, the Truth = the Aether. For Medieval patch 10 (cv-avatars). Lore paragraph "Whose the old temples were" approved ("confirm lore.").
 
 - 2026-11-15 (shipwright thread): Andy approved "The yards" lore; shipwrights may keep any patron (launch offering is from their own patron). Asked for a dedicated large whaleship with lots of storage and tryworks for the far oceans.
+
+- 2026-11-15 (Andy, future-Mosslorn thread): asked to change the Chrono future's Los Perrito map to Mosslorn (milkshake_mp3, linked via the Petrichor Mosslorn Official modpack). Map is ARR and asks to be contacted before modpack use, so the swap PR waits on the author's OK.

@@ -945,6 +945,11 @@ burning"). Now, folk say the Overworld. Only future voices use the word.
 
 **Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
 
+(new) **The moss** (future-mosslorn, 2026-11-15). Los Perrito is the same city, only greener: in the years since the
+last stand on the east bridge, moss has climbed the towers, filled the streets and grown over the cars, and trees push
+up through the roofs. Where the three-sided war still goes on, the wreckage stays fresh and the neon still sputters;
+the moss has only taken what nobody fights over any more. Nobody in the city says where it came from.
+
 ## The eight faiths
 
 Seven patrons, and the Truth that denies them. A player swears to one at a shrine; villagers and realms keep to one
