@@ -5142,3 +5142,8 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   removed"). Lady Maria stays: Thessaly wears it in the Long Defence.
 - Its sets are still made over netherite, which is now smithed over steel plate.
 - Built; not played.
+
+## 0.24.0 (2026-11-15): JEI notes no longer cut off (#1591)
+
+- Long notes under our JEI pages (ore washing, small ores, tin ore, brick mending, salvage, quenching, xeno and others) wrap onto as many lines as they need instead of ending in "…", and each page grows to fit them.
+- Built; not played.
