@@ -272,7 +272,8 @@ public final class EmberKindle {
 			stop(player, live, false);
 		}
 		boolean chilled = chilled(player);
-		boolean wet = player.isInWaterOrRain();
+		// (soaked through counts as the rain)
+		boolean wet = player.isInWaterOrRain() || com.jaymospowers.core.wet.Wet.soaked(player);
 		if (live.on) {
 			if (!wet) {
 				live.heat = Math.min(1.0F, live.heat + (chilled ? CHILL_HEAT : 1.0F) / STAGE_HEAT_TICKS[stage(player)]);

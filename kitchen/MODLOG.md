@@ -2227,3 +2227,9 @@ corpse' model that it came from".
 
 - Andy got far too many near-new crossbows off illager bodies. Gear taken off a body now has 3-25% of its durability left nearly every time; 8% of the time it's a good piece (55-90%). A skeleton's weapon still never has more than half. Was 15-90% for everything but skeleton weapons (`CorpseEntity.wear`).
 - Built; not played.
+
+## 0.6.23 (2026-11-15): soaked through chills and wears leather (#1578)
+
+- With Jaymo's Powers' Wet and Soaked (`climate/Wetness`, read by id): Wet chills as before (-10); Soaked chills twice that, and half as much again on cold land; soaked clothes keep half their warmth, wool all of it (`BodyHeat.warmPieces`). Without Powers the old wet timer is kept.
+- Leather worn soaked through (out of water) wears at half the in-water rate (`HideTraits.soakWear`).
+- Built; not played.

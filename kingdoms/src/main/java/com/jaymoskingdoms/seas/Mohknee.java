@@ -173,13 +173,15 @@ public final class Mohknee {
 			return 0;
 		}
 		ServerLevel level = c.getSource().getServer().overworld();
-		RandomState state = level.getChunkSource().randomState();
-		ChunkGenerator generator = level.getChunkSource().getGenerator();
+		// (the Overworld's own ground in a One Dimension world: the level's generator reads the clouds overhead)
+		com.jaymoskingdoms.Stacked.Ground ground = com.jaymoskingdoms.Stacked.overworldGround(level);
+		RandomState state = ground.randomState();
+		ChunkGenerator generator = ground.generator();
 		int x = CENTRE_X - LAND - WOBBLE, dry = generator.getSeaLevel() + GO_DRY;
-		while (x < CENTRE_X && generator.getBaseHeight(x, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) < dry) {
+		while (x < CENTRE_X && generator.getBaseHeight(x, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) < dry) {
 			x += GO_STEP;
 		}
-		for (int more = 0; more < GO_INLAND && generator.getBaseHeight(x + GO_STEP, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= dry;
+		for (int more = 0; more < GO_INLAND && generator.getBaseHeight(x + GO_STEP, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) >= dry;
 			more += GO_STEP) {
 			x += GO_STEP;
 		}
@@ -252,10 +254,12 @@ public final class Mohknee {
 	 */
 	private static int map(CommandContext<CommandSourceStack> c, int scale, int reach, int midX, int midZ) {
 		ServerLevel level = c.getSource().getServer().overworld();
-		RandomState state = level.getChunkSource().randomState();
+		// (the Overworld band's own generator in a One Dimension world, so the map is the Overworld's, not the clouds')
+		com.jaymoskingdoms.Stacked.Ground ground = com.jaymoskingdoms.Stacked.overworldGround(level);
+		RandomState state = ground.randomState();
 		Climate.Sampler sampler = state.createClimateSampler(SamplerContext.EMPTY_UNCACHED);
-		BiomeResolver biomes = level.getChunkSource().getGenerator().getBiomeSource().createUncachedResolver(state);
-		ChunkGenerator generator = level.getChunkSource().getGenerator();
+		BiomeResolver biomes = ground.generator().getBiomeSource().createUncachedResolver(state);
+		ChunkGenerator generator = ground.generator();
 		// a close look also reads the ground's height (slow): land the sea has drowned is shown as shallows
 		boolean close = reach <= MAP_CLOSE;
 		int size = reach * 2 / scale;
@@ -273,7 +277,7 @@ public final class Mohknee {
 				int colour;
 				if (continent < Offshore.SEA) {
 					colour = continent < Offshore.DEEP ? 0x10244A : 0x2A5C9A;
-				} else if (close && generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) < generator.getSeaLevel()) {
+				} else if (close && generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) < generator.getSeaLevel()) {
 					// land by the continent noise, but its ground is under the sea (the higher sea drowns low shores)
 					colour = 0x3A8FA0;
 				} else {

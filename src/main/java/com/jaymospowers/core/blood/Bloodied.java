@@ -429,6 +429,34 @@ public final class Bloodied {
 		return true;
 	}
 
+	/**
+	 * Scrubbed with something rough in water ({@code Scrubbing}: a straw wisp, sand): {@code amount} of blood comes off
+	 * {@code stack} however old it is, rotten too. True if it had any.
+	 */
+	public static boolean scour(ItemStack stack, int amount) {
+		Blood was = blood(stack);
+		if (was == null) {
+			return false;
+		}
+		int left = was.amount() - amount;
+		if (left <= 0) {
+			stack.remove(BLOOD);
+		} else {
+			stack.set(BLOOD, new Blood(left, was.color(), was.laid()));
+		}
+		return true;
+	}
+
+	/** The same for {@code body}'s own coat. */
+	public static boolean scourCoat(LivingEntity body, int amount) {
+		Coat was = coat(body);
+		if (was == null) {
+			return false;
+		}
+		setCoat(body, was, was.amount() - amount);
+		return true;
+	}
+
 	/** Water or rain on {@code body}'s coat: as a scrub, but rotten blood keeps its last {@link #ROT_RESIDUE}. */
 	private static void soakCoat(LivingEntity body, int amount) {
 		Coat was = coat(body);
