@@ -49,6 +49,16 @@ import org.jspecify.annotations.Nullable;
 final class Navies {
 	/** A realm keeps a harbour and a warship from this treasury; a frigate from this. */
 	static final long HARBOUR_TREASURY = 1000L, FRIGATE_TREASURY = 2000L;
+	/** A realm this rich keeps a man-of-war for its flagship, and frigates for her consorts (war triremes below it). */
+	static final long MAN_OF_WAR_TREASURY = 5000L;
+	/** A consort to its flagship for each of these its treasury reaches. */
+	static final long[] SQUADRON_TREASURY = {3000L, 5000L, 8000L};
+	/** Without MCA (no shipwright at work), a consort is put out at most this often (ticks: a day). */
+	static final long CONSORT_GAP = 24000L;
+	/** A consort not seen this long while her harbour is in reach is struck off (ticks). */
+	static final long CONSORT_MISSING = 20 * 1800;
+	/** A man-of-war's crew besides her gunners. */
+	static final int MAN_OF_WAR_HANDS = 6;
 	/** How often harbours are seen to (ticks), and escort quests watched. */
 	static final int CHECK_TICKS = 400, WATCH_TICKS = 40;
 	/** A lost warship is built again after this long (ticks: two days); she's missing (not where last seen) after this long. */
@@ -75,7 +85,7 @@ final class Navies {
 
 	/** A realm's harbour: its pier's land end and sea end, its mooring, its warship and merchantman, its shipwright. */
 	record Harbour(BlockPos shore, BlockPos pier, BlockPos mooring, Optional<UUID> warship, Optional<BlockPos> seen, long lostAt,
-		Optional<UUID> merchant, long merchantAt, Optional<UUID> wright) {
+		Optional<UUID> merchant, long merchantAt, Optional<UUID> wright, List<UUID> squadron) {
 		static final Codec<Harbour> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("shore").forGetter(Harbour::shore),
 				BlockPos.CODEC.fieldOf("pier").forGetter(Harbour::pier),
@@ -85,21 +95,29 @@ final class Navies {
 				Codec.LONG.optionalFieldOf("lost_at", -1L).forGetter(Harbour::lostAt),
 				UUIDUtil.CODEC.optionalFieldOf("merchant").forGetter(Harbour::merchant),
 				Codec.LONG.optionalFieldOf("merchant_at", -1L).forGetter(Harbour::merchantAt),
-				UUIDUtil.CODEC.optionalFieldOf("wright").forGetter(Harbour::wright))
+				UUIDUtil.CODEC.optionalFieldOf("wright").forGetter(Harbour::wright),
+				UUIDUtil.CODEC.listOf().optionalFieldOf("squadron", List.of()).forGetter(Harbour::squadron))
 			.apply(i, Harbour::new));
 
 		Harbour withWarship(@Nullable UUID ship, @Nullable BlockPos seen, long lostAt) {
 			return new Harbour(this.shore, this.pier, this.mooring, Optional.ofNullable(ship), Optional.ofNullable(seen), lostAt, this.merchant,
-				this.merchantAt, this.wright);
+				this.merchantAt, this.wright, this.squadron);
 		}
 
 		Harbour withMerchant(@Nullable UUID ship, long at) {
-			return new Harbour(this.shore, this.pier, this.mooring, this.warship, this.seen, this.lostAt, Optional.ofNullable(ship), at, this.wright);
+			return new Harbour(this.shore, this.pier, this.mooring, this.warship, this.seen, this.lostAt, Optional.ofNullable(ship), at, this.wright,
+				this.squadron);
 		}
 
 		Harbour withWright(@Nullable UUID wright) {
 			return new Harbour(this.shore, this.pier, this.mooring, this.warship, this.seen, this.lostAt, this.merchant, this.merchantAt,
-				Optional.ofNullable(wright));
+				Optional.ofNullable(wright), this.squadron);
+		}
+
+		/** Its warships besides its flagship ({@link #warship}). */
+		Harbour withSquadron(List<UUID> squadron) {
+			return new Harbour(this.shore, this.pier, this.mooring, this.warship, this.seen, this.lostAt, this.merchant, this.merchantAt,
+				this.wright, List.copyOf(squadron));
 		}
 	}
 
@@ -108,7 +126,9 @@ final class Navies {
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Harbour.CODEC)));
 
 	/** Realm id → ticks its warship has been missing; its shipwright. */
-	private static final Map<Integer, Long> MISSING = new HashMap<>(), WRIGHT_GONE = new HashMap<>();
+	private static final Map<Integer, Long> MISSING = new HashMap<>(), WRIGHT_GONE = new HashMap<>(), CONSORT_AT = new HashMap<>();
+	/** A consort → ticks she's been missing. */
+	private static final Map<UUID, Long> CONSORT_GONE = new HashMap<>();
 
 	private Navies() {
 	}
@@ -118,6 +138,8 @@ final class Navies {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			MISSING.clear();
 			WRIGHT_GONE.clear();
+			CONSORT_AT.clear();
+			CONSORT_GONE.clear();
 			PirateCoves.clear();
 			Pirates.clear();
 		});
@@ -168,6 +190,7 @@ final class Navies {
 			wright(level, f, h);
 			if (f.treasury() >= HARBOUR_TREASURY) {
 				warship(level, f, harbour(server, f.id()), now, false);
+				squadron(level, f, harbour(server, f.id()), now);
 			}
 			trade(level, f, harbour(server, f.id()), now);
 		}
@@ -200,7 +223,7 @@ final class Navies {
 		}
 		Direction seaward = Direction.getApproximateNearest(-dx, 0, -dz);
 		BlockPos pier = PirateCoves.jetty(level, shore, seaward, seaward.getClockWise());
-		Harbour h = new Harbour(shore, pier, water, Optional.empty(), Optional.empty(), -1L, Optional.empty(), -1L, Optional.empty());
+		Harbour h = new Harbour(shore, pier, water, Optional.empty(), Optional.empty(), -1L, Optional.empty(), -1L, Optional.empty(), List.of());
 		put(level.getServer(), f.id(), h);
 		wright(level, f, h);
 		JaymosKingdoms.LOGGER.info("{} built a harbour at {} (mooring {})", f.name(), shore, water);
@@ -287,14 +310,14 @@ final class Navies {
 		if (!force && (h.lostAt() >= 0 && now - h.lostAt() < REBUILD_TICKS || !level.isPositionEntityTicking(h.mooring()))) {
 			return null;
 		}
-		Fleet.Rig rig = f.treasury() >= FRIGATE_TREASURY ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME;
+		Fleet.Rig rig = flagship(f);
 		if (!force && McaCompat.LOADED) {
 			// (with MCA, whose villager shipwright does the work) her shipwright lays her down by the pier and builds her where the harbour can watch (Shipyards)
 			Shipyards.lay(level, f, h, Shipyards.WARSHIP, rig);
 			return null;
 		}
 		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
-		Ship ship = launch(level, f, h, rig, warshipLook(f), crew, warshipComplement());
+		Ship ship = launch(level, f, h, rig, warshipLook(f), crew, warshipComplement(rig));
 		if (ship != null) {
 			put(server, f.id(), h.withWarship(ship.getUUID(), ship.blockPosition(), -1L));
 			JaymosKingdoms.LOGGER.info("{} put out its warship {}", f.name(), crew.name);
@@ -309,14 +332,129 @@ final class Navies {
 			f.color() == net.minecraft.world.item.DyeColor.WHITE ? Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.RED) : Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
 	}
 
-	private static Corsairs.Complement warshipComplement() {
-		return new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, NAVY_HANDS, 0);
+	private static Corsairs.Complement warshipComplement(Fleet.Rig rig) {
+		return new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, rig == Fleet.Rig.MAN_OF_WAR ? MAN_OF_WAR_HANDS : NAVY_HANDS, 0);
+	}
+
+	/** (Andy, 2026-11-15: "the largest for the richer kingdoms") {@code f}'s flagship: a man-of-war, a frigate, or a war trireme, by its treasury. */
+	static Fleet.Rig flagship(Faction f) {
+		return f.treasury() >= MAN_OF_WAR_TREASURY ? Fleet.Rig.MAN_OF_WAR : f.treasury() >= FRIGATE_TREASURY ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME;
+	}
+
+	/** What its flagship's consorts are: frigates for a realm with a man-of-war, war triremes below that. */
+	static Fleet.Rig consort(Faction f) {
+		return f.treasury() >= MAN_OF_WAR_TREASURY ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME;
+	}
+
+	/** How many consorts {@code f}'s treasury keeps its flagship. */
+	static int consorts(Faction f) {
+		int n = 0;
+		for (long step : SQUADRON_TREASURY) {
+			if (f.treasury() >= step) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	/**
+	 * Its squadron kept up: consorts lost track of struck off, and (its flagship afloat, its shipwright's slip free) another
+	 * laid down while it has fewer than its treasury keeps. Without MCA she's put out at once, a day at most between them.
+	 */
+	private static void squadron(ServerLevel level, Faction f, @Nullable Harbour h, long now) {
+		if (h == null) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		List<UUID> kept = new java.util.ArrayList<>();
+		for (UUID id : h.squadron()) {
+			if (level.getEntity(id) instanceof Ship s && !s.isRemoved()) {
+				CONSORT_GONE.remove(id);
+				kept.add(id);
+			} else if (!level.isPositionEntityTicking(h.mooring()) || CONSORT_GONE.merge(id, (long)CHECK_TICKS, Long::sum) < CONSORT_MISSING) {
+				kept.add(id);
+			} else {
+				CONSORT_GONE.remove(id);
+			}
+		}
+		if (kept.size() != h.squadron().size()) {
+			put(server, f.id(), h = h.withSquadron(kept));
+		}
+		if (kept.size() >= consorts(f) || h.warship().isEmpty() || !level.isPositionEntityTicking(h.mooring())) {
+			return;
+		}
+		Fleet.Rig rig = consort(f);
+		if (McaCompat.LOADED) {
+			if (Shipyards.yard(server, f.id()) == null) {
+				Shipyards.lay(level, f, h, Shipyards.CONSORT, rig);
+			}
+			return;
+		}
+		Long last = CONSORT_AT.get(f.id());
+		if (last != null && now - last < CONSORT_GAP) {
+			return;
+		}
+		CONSORT_AT.put(f.id(), now);
+		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
+		Ship ship = launch(level, f, h, rig, warshipLook(f), crew, warshipComplement(rig));
+		if (ship != null) {
+			joinSquadron(server, f, ship);
+			JaymosKingdoms.LOGGER.info("{} put out a consort {} ({})", f.name(), crew.name, rig.id());
+		}
+	}
+
+	private static void joinSquadron(MinecraftServer server, Faction f, Ship ship) {
+		Harbour h = harbour(server, f.id());
+		if (h != null) {
+			List<UUID> squadron = new java.util.ArrayList<>(h.squadron());
+			squadron.add(ship.getUUID());
+			put(server, f.id(), h.withSquadron(squadron));
+		}
+	}
+
+	/** A consort its shipwright built on {@code slip} launched with her crew, and one of its squadron (null: she wouldn't go). */
+	static @Nullable Ship commissionConsort(ServerLevel level, Faction f, Harbour h, Fleet.Slip slip, Fleet.Rig rig) {
+		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
+		Ship ship = Shipyards.launch(level, f, slip, crew, warshipComplement(rig));
+		if (ship != null) {
+			joinSquadron(level.getServer(), f, ship);
+			JaymosKingdoms.LOGGER.info("{} launched a consort {} ({})", f.name(), crew.name, rig.id());
+		}
+		return ship;
+	}
+
+	/**
+	 * (Andy, 2026-11-15: "it adds any kingdom underneath's ships to their fleet") The realm whose fleet {@code realm}'s
+	 * warships sail in: its overlord's overlord's, and so on up (itself, if it's sworn to none).
+	 */
+	static int fleetOf(MinecraftServer server, int realm) {
+		int at = realm;
+		for (int i = 0; i < 8; i++) {
+			Faction f = Factions.get(server, at);
+			if (f == null || f.overlord() < 0 || f.overlord() == realm) {
+				break;
+			}
+			at = f.overlord();
+		}
+		return at;
+	}
+
+	/** {@code ship} is the flagship of {@code realm}'s harbour (not one of her consorts). */
+	static boolean isFlagship(MinecraftServer server, int realm, Ship ship) {
+		Harbour h = harbour(server, realm);
+		return h != null && h.warship().map(ship.getUUID()::equals).orElse(false);
+	}
+
+	/** The flagship of {@code realm}'s fleet, if she's afloat in reach (null: none). */
+	static @Nullable Ship admiral(ServerLevel level, int realm) {
+		Harbour h = harbour(level.getServer(), fleetOf(level.getServer(), realm));
+		return h == null ? null : h.warship().map(level::getEntity).orElse(null) instanceof Ship s && !s.isRemoved() && !s.foundering() ? s : null;
 	}
 
 	/** (2026-11-15) The warship its shipwright built on {@code slip} launched with her crew, and the harbour's own (null: she wouldn't go). */
 	static @Nullable Ship commission(ServerLevel level, Faction f, Harbour h, Fleet.Slip slip, Fleet.Rig rig) {
 		Crew crew = new Crew(Crew.Side.NAVY, f.id(), Pirates.navyShip(level.getRandom()), h.mooring());
-		Ship ship = Shipyards.launch(level, f, slip, crew, warshipComplement());
+		Ship ship = Shipyards.launch(level, f, slip, crew, warshipComplement(rig));
 		if (ship != null) {
 			Harbour now = harbour(level.getServer(), f.id());
 			put(level.getServer(), f.id(), (now != null ? now : h).withWarship(ship.getUUID(), ship.blockPosition(), -1L));
@@ -456,12 +594,17 @@ final class Navies {
 	}
 
 	/** {@code crew}'s ship went down: a warship is built again in a while; a merchantman's escort has failed; her sinker is hated for it. */
-	static void shipLost(ServerLevel level, Crew crew, @Nullable ServerPlayer player) {
+	static void shipLost(ServerLevel level, Ship ship, Crew crew, @Nullable ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		Harbour h = harbour(server, crew.faction);
 		long now = level.getGameTime();
 		if (h != null) {
-			if (crew.side == Crew.Side.NAVY) {
+			if (crew.side == Crew.Side.NAVY && h.squadron().contains(ship.getUUID())) {
+				// one of her consorts: another is laid down in time
+				List<UUID> squadron = new java.util.ArrayList<>(h.squadron());
+				squadron.remove(ship.getUUID());
+				put(server, crew.faction, h.withSquadron(squadron));
+			} else if (crew.side == Crew.Side.NAVY) {
 				put(server, crew.faction, h.withWarship(null, null, now));
 			} else if (h.merchant().isPresent()) {
 				put(server, crew.faction, h.withMerchant(null, now));

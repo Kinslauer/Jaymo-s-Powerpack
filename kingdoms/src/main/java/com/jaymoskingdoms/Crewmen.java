@@ -153,6 +153,19 @@ public final class Crewmen {
 		return !(e instanceof Folk) && e.entityTags().contains(TAG);
 	}
 
+	/** {@code mob} taken off {@code crew}'s ship for good (a prisoner): off her, no longer her crew, nor anyone's worker. */
+	static void release(PathfinderMob mob, Crew crew) {
+		mob.stopRiding();
+		mob.removeAttached(Ship.SEAT);
+		crew.walks.remove(mob.getUUID());
+		mob.removeTag(TAG);
+		mob.removeTag(sideTag(crew.side));
+		if (mob instanceof Enlisted enlisted) {
+			enlisted.discharge();
+		}
+		mob.getNavigation().stop();
+	}
+
 	/** {@code e}'s role and side as one of a ship's crew ({@link Worker}), or -1. */
 	static int role(Entity e) {
 		return e instanceof Worker w ? w.role() : -1;
