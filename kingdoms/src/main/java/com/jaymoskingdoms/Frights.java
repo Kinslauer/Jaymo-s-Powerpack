@@ -31,6 +31,10 @@ import org.jspecify.annotations.Nullable;
  * enderman, a zombie, a skeleton, a creeper, a spider or any other monster nearby runs, home to its bed if that's
  * near and away from the monster, else simply away; some grown ones fetch the nearest child first and take it along.
  * They stay hidden a while after the monster's gone. A raider or a barbarian counts as a monster too.
+ * <p>Andy (2026-11-14), at a barbarian camp at night: "barbarians were running screaming from mobs? i can understand
+ * someone timid but they were all doing it". Not everyone runs ({@link #standsFirm}): whoever keeps a post or is already
+ * in a fight ({@link BlastFright#standsGround}), and the people of a camp (barbarians, orcs, goblins, pirates), who
+ * aren't village folk, unless they're timid. Nor does anyone take fright at their own side's people.
  */
 final class Frights {
 	/** How often villagers look about them (ticks); how close a monster frightens them; how close to a seat they're watched. */
@@ -72,6 +76,10 @@ final class Frights {
 				continue;
 			}
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED), v -> v.isAlive() && !Vampires.exposed(v))) {
+				if (standsFirm(server, v)) {
+					FRIGHTS.remove(v.getUUID());
+					continue;
+				}
 				LivingEntity monster = monster(level, v, f);
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
@@ -90,6 +98,18 @@ final class Frights {
 		}
 	}
 
+	/** {@code v} doesn't run from monsters: it keeps a post or is fighting, or it's one of a camp's people and not timid. */
+	static boolean standsFirm(MinecraftServer server, Villager v) {
+		if (BlastFright.standsGround(v)) {
+			return true;
+		}
+		if (!(v instanceof Worker w) || w.factionId() < 0 || Temperaments.runs(v)) {
+			return false;
+		}
+		Faction own = Factions.get(server, w.factionId());
+		return own != null && own.is(FactionType.BARBARIAN);
+	}
+
 	/**
 	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
 	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}); (0.6.11) so does one in
@@ -102,7 +122,7 @@ final class Frights {
 		double range = Temperaments.frightRange(v, FRIGHT);
 		double bestD = range * range;
 		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(range),
-			m -> m != v && m.isAlive() && (m instanceof Mob mob && (frightful(mob) || Oddities.monstrous(mob))
+			m -> m != v && m.isAlive() && !sameSide(v, m) && (m instanceof Mob mob && (frightful(mob) || Oddities.monstrous(mob))
 				|| m instanceof ServerPlayer p && (Aliens.feared(p, f.id()) || Tails.feared(p, v))))) {
 			double d = m.distanceToSqr(v);
 			if (d < bestD && v.hasLineOfSight(m)) {
@@ -111,6 +131,11 @@ final class Frights {
 			}
 		}
 		return best;
+	}
+
+	/** {@code m} is one of {@code v}'s own faction's people (a camp's raiders don't frighten its crew). */
+	private static boolean sameSide(Villager v, LivingEntity m) {
+		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId();
 	}
 
 	private static boolean frightful(Mob m) {

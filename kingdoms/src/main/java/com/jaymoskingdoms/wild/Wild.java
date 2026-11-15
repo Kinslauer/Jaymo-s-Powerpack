@@ -70,6 +70,7 @@ public final class Wild {
 		HerdPull.register();
 		MooseHerds.register();
 		FedPredators.register();
+		Crocodiles.register();
 	}
 
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {
