@@ -134,6 +134,8 @@ public final class Awareness {
 
 	/** The horde: how far a groan carries (blocks), how loud it counts as, and how often a chasing zombie calls again (ticks). */
 	static final double HORDE_RANGE = 16.0, HORDE_LOUDNESS = 9.0;
+	/** The horde closes on the player: its ring round them is no wider than this (blocks). */
+	static final double HORDE_RING = 1.5;
 	static final int HORDE_TICKS = 300;
 
 	/** A spot of blood: where, whose, when it was spilled, and when it dries. */
@@ -211,7 +213,12 @@ public final class Awareness {
 			kind = Hearing.Kind.BLAST;
 		} else if (event == GameEvent.PROJECTILE_LAND) {
 			// a gun's ball strikes in Hearing; a thrown thing is as loud as what it is
-			if (source == null || Hearing.gun(source)) {
+			if (source == null) {
+				return;
+			}
+			if (Hearing.gun(source)) {
+				// a gun's ball strikes: heard there (Hearing), if it's far from the muzzle
+				Hearing.struck(source, at);
 				return;
 			}
 			reach = source instanceof ItemSupplier thrown ? Hearing.decoy(thrown.getItem()) : LANDED;
@@ -389,10 +396,13 @@ public final class Awareness {
 		Vec3 at = player.position();
 		List<Mob> horde = near(level, mob.position(), HORDE_RANGE);
 		horde.remove(mob);
-		// (Hearing) they spread round where the player is instead of all making for the one block
+		// (Hearing) they close in round where the player is, on ground they can stand on, instead of all making for the one block
 		double base = Math.atan2(mob.getZ() - at.z, mob.getX() - at.x);
 		for (int i = 0; i < horde.size(); i++) {
-			Senses.lure(horde.get(i), Hearing.ringSpot(at, base, i + 1, horde.size() + 1), player.getUUID(), HORDE_LOUDNESS);
+			Mob other = horde.get(i);
+			if (Senses.lure(other, Hearing.ringSpot(level, at, base, i + 1, horde.size() + 1, HORDE_RING), player.getUUID(), HORDE_LOUDNESS)) {
+				Hearing.hold(other, player.getUUID(), now);
+			}
 		}
 	}
 }

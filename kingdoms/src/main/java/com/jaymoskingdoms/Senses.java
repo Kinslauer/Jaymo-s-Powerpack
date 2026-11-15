@@ -70,7 +70,8 @@ import org.jspecify.annotations.Nullable;
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
  * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
  * <li><b>Hearing</b> ({@link #hear}, from {@link Hearing}): a faint sound at the edge of hearing makes a mob stop and turn
- * its head toward it for {@link #HEED_TICKS} ({@link HeedGoal}); a second near it within {@link #HEED_MEMORY} brings it over,
+ * its head toward it for {@link #HEED_TICKS} ({@link HeedGoal}); a second near it, {@link #HEED_SECOND} or more after the
+ * first and within {@link #HEED_MEMORY}, brings it over,
  * as a loud one does at once. Lured, it searches the spot, then walks back to where it was ({@link #RETURN_SPEED}). A camp's
  * outlaws ({@link Folk}) hear and search too, but never lose a foe they are after.</li>
  * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes; and the
@@ -137,6 +138,8 @@ public final class Senses {
 
 	/** Heeding (Hearing): how long a mob stands and looks toward a faint sound (ticks), and how long and how near (blocks) a second one there brings it over. */
 	static final int HEED_TICKS = 60, HEED_MEMORY = 200;
+	/** Only a sound this long (ticks) or more after the first it stopped for brings it over: it looks first. */
+	static final int HEED_SECOND = 40;
 	static final double HEED_NEAR = 8.0;
 	/** After a search, a lured mob walks back to where it was, at this speed, if it is further than this (blocks). */
 	static final double RETURN_SPEED = 0.8, RETURN_MIN = 4.0;
@@ -171,7 +174,7 @@ public final class Senses {
 		/** Heeding a faint sound: where, ticks left looking, until when a second there brings it, whose. */
 		@Nullable Vec3 heedAt;
 		int heedLeft;
-		long heedUntil;
+		long heedSince, heedUntil;
 		@Nullable UUID heedWho;
 		/** Where it was when a sound drew it off, and whether it is walking back there. */
 		@Nullable Vec3 home;
@@ -367,8 +370,8 @@ public final class Senses {
 		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
 			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
 			if (range > 0.0) {
-				// (Hearing) the ground underfoot and the boots and leggings worn carry it further or less
-				f = Math.max(f, HEARD * Rangers.quiet(player) * Footsteps.underfoot(level, player) / range);
+				// (Hearing) quiet or loud ground, wet ground, and soft boots and leggings carry it less or further (ordinary ground as before)
+				f = Math.max(f, HEARD * Rangers.quiet(player) * Footsteps.heardFloor(level, player) / range);
 			}
 		}
 		return f;
@@ -618,10 +621,17 @@ public final class Senses {
 			return UNHEARD;
 		}
 		long now = mob.level().getGameTime();
-		boolean again = t.heedAt != null && now < t.heedUntil && t.heedAt.distanceToSqr(spot) < HEED_NEAR * HEED_NEAR;
-		if (faint && !again && !t.searching) {
+		boolean near = t.heedAt != null && now < t.heedUntil && t.heedAt.distanceToSqr(spot) < HEED_NEAR * HEED_NEAR;
+		if (faint && !t.searching && near && now < t.heedSince + HEED_SECOND) {
+			// (still listening: the steps it hears meanwhile only keep it listening, and it looks to the latest)
+			t.heedAt = spot;
+			t.heedLeft = Math.max(t.heedLeft, HEED_SECOND - (int) (now - t.heedSince));
+			return HEEDED;
+		}
+		if (faint && !near && !t.searching) {
 			t.heedAt = spot;
 			t.heedWho = who;
+			t.heedSince = now;
 			t.heedLeft = HEED_TICKS;
 			t.heedUntil = now + HEED_MEMORY;
 			return HEEDED;

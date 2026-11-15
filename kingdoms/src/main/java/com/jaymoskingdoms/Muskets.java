@@ -154,6 +154,8 @@ final class Muskets {
 			folk.getNavigation().stop();
 		}
 		Projectile.spawnProjectileUsingShoot(ball, level, ItemStack.EMPTY, dx, dy + flat * 0.02, dz, SPEED, SPREAD);
+		// black powder: heard far, even when the ball is an arrow without WeaponMod (Hearing)
+		Hearing.fired(level, ball);
 		Vec3 muzzle = folk.getEyePosition().add(new Vec3(dx, dy, dz).normalize().scale(1.1));
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 6, 0.1, 0.1, 0.1, 0.02);
 		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 2, 0.05, 0.05, 0.05, 0.01);

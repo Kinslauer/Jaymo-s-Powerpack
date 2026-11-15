@@ -64,6 +64,8 @@ public final class Footsteps {
 	static final double LOW = 0.7, PRONE = 0.4;
 	/** Wet ground carries this much further; Feather Falling boots and Swift Sneak leggings each leave this share. */
 	static final double WET = 1.25, SOFT_GEAR = 0.8;
+	/** The "heard walking" floor ({@link #heardFloor}): quiet ground is at most this; ground this loud or more ({@link #ground}: gravel, metal) is loud. */
+	static final double QUIET_FLOOR = 0.7, LOUD_FLOOR = 1.3;
 	/** Too faint to notice (what's left of the reach, blocks). */
 	static final double FAINTEST = 1.0;
 	/** Guards: how long they look; the reach that can wake one, and the chance at arm's length. */
@@ -137,9 +139,32 @@ public final class Footsteps {
 	 * they stand in counts, not the floor under it), wet ground, and Feather Falling boots and Swift Sneak leggings.
 	 */
 	static double underfoot(ServerLevel level, ServerPlayer player) {
+		return ground(standing(level, player)) * wetAndShod(level, player);
+	}
+
+	/**
+	 * What the 8-block "heard walking" of {@link Senses} is multiplied by: ordinary ground (grass, dirt, sand, stone, wood) is
+	 * 1, so a walk on it is heard as far as ever; only quiet ground (wool, carpet, snow, moss) is less, at most
+	 * {@link #QUIET_FLOOR}, and loud ground (gravel, metal) more; then wet ground and soft boots and leggings as for steps.
+	 */
+	static double heardFloor(ServerLevel level, ServerPlayer player) {
+		SoundType s = standing(level, player);
+		double g = ground(s);
+		boolean quiet = s == SoundType.WOOL || s == SoundType.MOSS_CARPET || s == SoundType.MOSS || s == SoundType.SNOW || s == SoundType.POWDER_SNOW;
+		double base = quiet ? Math.min(g, QUIET_FLOOR) : g >= LOUD_FLOOR ? g : 1.0;
+		return base * wetAndShod(level, player);
+	}
+
+	/** The ground's sound where {@code player} stands: a carpet or a snow layer they stand in, else the floor under them. */
+	private static SoundType standing(ServerLevel level, ServerPlayer player) {
 		SoundType in = level.getBlockState(player.blockPosition()).getSoundType();
 		boolean layer = in == SoundType.WOOL || in == SoundType.MOSS_CARPET || in == SoundType.SNOW;
-		double f = ground(layer ? in : level.getBlockState(player.getOnPosLegacy()).getSoundType());
+		return layer ? in : level.getBlockState(player.getOnPosLegacy()).getSoundType();
+	}
+
+	/** Wet ground louder, Feather Falling boots and Swift Sneak leggings quieter. */
+	private static double wetAndShod(ServerLevel level, ServerPlayer player) {
+		double f = 1.0;
 		if (player.isInWater() || level.isRainingAt(player.blockPosition())) {
 			f *= WET;
 		}
