@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#c:buckets/water",
+    {
+      "id": "jaymospowers:clay_water_bucket",
+      "required": false
+    }
+  ]
+}

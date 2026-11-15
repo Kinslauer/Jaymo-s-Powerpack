@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "jaymoskitchen:block/firebox_top",
+    "bottom": "jaymoskitchen:block/firebox_side",
+    "side": "jaymoskitchen:block/firebox_side",
+    "front": "jaymoskitchen:block/firebox_front"
+  }
+}

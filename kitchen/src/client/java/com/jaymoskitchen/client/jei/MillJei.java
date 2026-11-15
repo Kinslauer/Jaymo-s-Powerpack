@@ -5,6 +5,11 @@ import com.jaymoskitchen.mill.MachineFluid;
 import com.jaymoskitchen.mill.MachineKind;
 import com.jaymoskitchen.mill.MachineRecipes;
 import com.jaymoskitchen.mill.Mill;
+import com.jaymoskitchen.mill.power.Power;
+import com.jaymoskitchen.mill.power.SailKind;
+import com.jaymoskitchen.mill.steam.BoilerMetal;
+import com.jaymoskitchen.mill.steam.Steam;
+import net.minecraft.core.component.DataComponents;
 import java.util.ArrayList;
 import java.util.List;
 import mezz.jei.api.IModPlugin;
@@ -27,7 +32,7 @@ import net.minecraft.world.item.Items;
  */
 public final class MillJei implements IModPlugin {
 	static final IRecipeType<SimpleCategory.Recipe> GRINDING = type("grinding"), CHOPPING = type("chopping"), PRESSING = type("pressing"),
-		DRYING = type("drying"), FORAGING = type("foraging");
+		DRYING = type("drying"), FORAGING = type("foraging"), WIND = type("wind"), STEAM = type("steam"), POWER_BUILD = type("power_build");
 
 	private static IRecipeType<SimpleCategory.Recipe> type(String id) {
 		return IRecipeType.create(JaymosKitchen.MOD_ID, id, SimpleCategory.Recipe.class);
@@ -46,7 +51,11 @@ public final class MillJei implements IModPlugin {
 			new SimpleCategory(gui, CHOPPING, title("chopping"), Mill.MACHINES.get(MachineKind.CHOPPING_BLOCK), 2),
 			new SimpleCategory(gui, PRESSING, title("pressing"), Mill.MACHINES.get(MachineKind.PRESS), 2),
 			new SimpleCategory(gui, DRYING, title("drying"), com.jaymoskitchen.tanning.Hides.DRYING_RACK, 1),
-			new SimpleCategory(gui, FORAGING, title("foraging"), Items.WOODEN_HOE, 2));
+			new SimpleCategory(gui, FORAGING, title("foraging"), Items.WOODEN_HOE, 2),
+			// (GT New Horizons picks, patch 8) sails and the windsock, the boiler's fuel and water, and how each is built
+			new SimpleCategory(gui, WIND, title("wind"), Power.WINDMILL_ITEM, 2),
+			new SimpleCategory(gui, STEAM, title("steam"), Steam.COPPER_BOILER, 2),
+			new SimpleCategory(gui, POWER_BUILD, title("power_build"), Power.GEARBOX, 3));
 	}
 
 	@Override
@@ -63,6 +72,9 @@ public final class MillJei implements IModPlugin {
 		for (ItemStack hoe : hoes()) {
 			registration.addCraftingStation(FORAGING, hoe);
 		}
+		registration.addCraftingStation(WIND, Power.WINDMILL_ITEM, Power.WINDSOCK_ITEM);
+		registration.addCraftingStation(STEAM, Steam.FIREBOX_ITEM, Steam.COPPER_BOILER_ITEM, Steam.BRONZE_BOILER_ITEM, Steam.ENGINE_ITEM);
+		registration.addCraftingStation(POWER_BUILD, Power.SHAFT_ITEM);
 	}
 
 	@Override
@@ -111,6 +123,7 @@ public final class MillJei implements IModPlugin {
 				List.of(note("foraging.where." + forage.where()), note("foraging.odds", com.jaymoskitchen.farm.DryFields.FORAGE_ODDS))));
 		}
 		registration.addRecipes(FORAGING, foraging);
+		powerPages(registration);
 		// (Hardrock picks) warmth you build: how the hearth, icebox, thermometer, linings and warm or cold water work
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
@@ -143,6 +156,67 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(Items.BLAST_FURNACE, note("soot"));
 		registration.addIngredientInfo(Items.BONE_MEAL, note("tired_fields"));
 		registration.addIngredientInfo(com.jaymoskitchen.delight.DelightFarm.ORGANIC_COMPOST, note("tired_fields"));
+	}
+
+	/**
+	 * (GT New Horizons picks, patch 8) Each sail with what patches it and the windmill it goes on (how hard it pulls,
+	 * how long it lasts, how it stands a storm); the windsock; each boiler with the fuel and water it takes and the
+	 * engine it runs (what it holds, how hard it drives); and the two builds, wind and steam, down to a horse mill.
+	 */
+	private static void powerPages(IRecipeRegistration registration) {
+		List<SimpleCategory.Recipe> wind = new ArrayList<>();
+		List<ItemStack> sails = new ArrayList<>();
+		for (SailKind kind : SailKind.values()) {
+			ItemStack sail = new ItemStack(kind.item());
+			sails.add(sail);
+			String storms = kind.tear >= 1.0F / 400.0F ? "often" : kind.tear >= 1.0F / 1500.0F ? "sometimes" : kind.tear >= 1.0F / 2500.0F
+				? "rarely" : "seldom";
+			wind.add(new SimpleCategory.Recipe(List.of(List.of(sail), tagged(kind.patch), List.of(new ItemStack(Power.WINDMILL_ITEM))), List.of(),
+				List.of(note("wind.sail", Math.round(kind.pull * 100.0F), Math.round(kind.life / 1200.0F * 10.0F) / 10.0F),
+					note("wind.storms." + storms))));
+		}
+		wind.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Power.WINDSOCK_ITEM))), List.of(),
+			List.of(note("wind.windsock"), Component.empty())));
+		registration.addRecipes(WIND, wind);
+
+		List<ItemStack> fuels = new ArrayList<>();
+		for (Item item : BuiltInRegistries.ITEM) {
+			ItemStack stack = new ItemStack(item);
+			if (stack.has(DataComponents.COOKING_FUEL)) {
+				fuels.add(stack);
+			}
+		}
+		List<ItemStack> water = tagged(Steam.BOILER_WATER);
+		List<SimpleCategory.Recipe> steam = new ArrayList<>();
+		for (BoilerMetal metal : BoilerMetal.values()) {
+			Item boiler = metal == BoilerMetal.COPPER ? Steam.COPPER_BOILER_ITEM : Steam.BRONZE_BOILER_ITEM;
+			steam.add(new SimpleCategory.Recipe(List.of(fuels, water, List.of(new ItemStack(Steam.FIREBOX_ITEM)), List.of(new ItemStack(boiler))),
+				List.of(new ItemStack(Steam.ENGINE_ITEM)),
+				List.of(note("steam.holds", metal.water / 1000), note("steam.drives", metal.conducts))));
+		}
+		registration.addRecipes(STEAM, steam);
+
+		ItemStack mill = new ItemStack(Mill.MACHINES.get(MachineKind.GRINDSTONE));
+		List<ItemStack> boilers = List.of(new ItemStack(Steam.COPPER_BOILER_ITEM), new ItemStack(Steam.BRONZE_BOILER_ITEM));
+		registration.addRecipes(POWER_BUILD, List.of(
+			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Power.SHAFT_ITEM)), List.of(new ItemStack(Power.WINDMILL_ITEM)), sails,
+				List.of(new ItemStack(Power.WINDSOCK_ITEM))), List.of(mill),
+				List.of(note("power_build.windmill.1"), note("power_build.windmill.2"), note("power_build.windmill.3"))),
+			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Steam.FIREBOX_ITEM)), boilers, List.of(new ItemStack(Steam.ENGINE_ITEM)),
+				List.of(new ItemStack(Power.SHAFT_ITEM))), List.of(mill),
+				List.of(note("power_build.steam.1"), note("power_build.steam.2"), note("power_build.steam.3")))));
+	}
+
+	/** Everything in an item tag, for a slot to cycle through. */
+	private static List<ItemStack> tagged(net.minecraft.tags.TagKey<Item> tag) {
+		List<ItemStack> out = new ArrayList<>();
+		for (Item item : BuiltInRegistries.ITEM) {
+			ItemStack stack = new ItemStack(item);
+			if (stack.is(tag)) {
+				out.add(stack);
+			}
+		}
+		return out;
 	}
 
 	/** Everything that works the ground as a hoe. */

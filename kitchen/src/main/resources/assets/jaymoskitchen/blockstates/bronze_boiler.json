@@ -1,0 +1,184 @@
+{
+  "variants": {
+    "facing=north,heat=0,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0"
+    },
+    "facing=north,heat=1,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0"
+    },
+    "facing=north,heat=2,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0_hot"
+    },
+    "facing=north,heat=0,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1"
+    },
+    "facing=north,heat=1,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1"
+    },
+    "facing=north,heat=2,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1_hot"
+    },
+    "facing=north,heat=0,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2"
+    },
+    "facing=north,heat=1,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2"
+    },
+    "facing=north,heat=2,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2_hot"
+    },
+    "facing=north,heat=0,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3"
+    },
+    "facing=north,heat=1,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3"
+    },
+    "facing=north,heat=2,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3_hot"
+    },
+    "facing=east,heat=0,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 90
+    },
+    "facing=east,heat=1,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 90
+    },
+    "facing=east,heat=2,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0_hot",
+      "y": 90
+    },
+    "facing=east,heat=0,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 90
+    },
+    "facing=east,heat=1,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 90
+    },
+    "facing=east,heat=2,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1_hot",
+      "y": 90
+    },
+    "facing=east,heat=0,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 90
+    },
+    "facing=east,heat=1,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 90
+    },
+    "facing=east,heat=2,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2_hot",
+      "y": 90
+    },
+    "facing=east,heat=0,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 90
+    },
+    "facing=east,heat=1,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 90
+    },
+    "facing=east,heat=2,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3_hot",
+      "y": 90
+    },
+    "facing=south,heat=0,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 180
+    },
+    "facing=south,heat=1,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 180
+    },
+    "facing=south,heat=2,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0_hot",
+      "y": 180
+    },
+    "facing=south,heat=0,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 180
+    },
+    "facing=south,heat=1,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 180
+    },
+    "facing=south,heat=2,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1_hot",
+      "y": 180
+    },
+    "facing=south,heat=0,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 180
+    },
+    "facing=south,heat=1,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 180
+    },
+    "facing=south,heat=2,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2_hot",
+      "y": 180
+    },
+    "facing=south,heat=0,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 180
+    },
+    "facing=south,heat=1,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 180
+    },
+    "facing=south,heat=2,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3_hot",
+      "y": 180
+    },
+    "facing=west,heat=0,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 270
+    },
+    "facing=west,heat=1,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0",
+      "y": 270
+    },
+    "facing=west,heat=2,water=0": {
+      "model": "jaymoskitchen:block/bronze_boiler_0_hot",
+      "y": 270
+    },
+    "facing=west,heat=0,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 270
+    },
+    "facing=west,heat=1,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1",
+      "y": 270
+    },
+    "facing=west,heat=2,water=1": {
+      "model": "jaymoskitchen:block/bronze_boiler_1_hot",
+      "y": 270
+    },
+    "facing=west,heat=0,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 270
+    },
+    "facing=west,heat=1,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2",
+      "y": 270
+    },
+    "facing=west,heat=2,water=2": {
+      "model": "jaymoskitchen:block/bronze_boiler_2_hot",
+      "y": 270
+    },
+    "facing=west,heat=0,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 270
+    },
+    "facing=west,heat=1,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3",
+      "y": 270
+    },
+    "facing=west,heat=2,water=3": {
+      "model": "jaymoskitchen:block/bronze_boiler_3_hot",
+      "y": 270
+    }
+  }
+}

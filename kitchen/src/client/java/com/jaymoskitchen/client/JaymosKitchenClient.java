@@ -82,6 +82,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.ROTOR_ENTITY, com.jaymoskitchen.client.mill.RotorRenderer::new);
+		// (GT New Horizons picks, patch 8) the windsock's sock, and the steam engine's flywheel
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.WINDSOCK_ENTITY, com.jaymoskitchen.client.mill.WindsockRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.steam.Steam.ENGINE_ENTITY, com.jaymoskitchen.client.mill.SteamEngineRenderer::new);
 		// the potter's wheel turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
 		// the spit: what's roasting on it, turning over the fire

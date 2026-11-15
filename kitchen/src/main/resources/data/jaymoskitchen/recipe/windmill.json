@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "CSC",
+    "SSS",
     "SLS",
-    "CSC"
+    "SSS"
   ],
   "key": {
-    "C": "#jaymoskitchen:sail_cloth",
     "S": "minecraft:stick",
     "L": "#minecraft:logs"
   },
   "result": {
-    "id": "jaymoskitchen:windmill"
+    "id": "jaymoskitchen:windmill",
+    "count": 1
   }
 }

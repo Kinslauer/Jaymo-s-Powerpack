@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    "CVC",
+    "CCC"
+  ],
+  "key": {
+    "C": "#c:ingots/copper",
+    "V": "jaymoskitchen:safety_valve"
+  },
+  "result": {
+    "id": "jaymoskitchen:copper_boiler",
+    "count": 1
+  }
+}

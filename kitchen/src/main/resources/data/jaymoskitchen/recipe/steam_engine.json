@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " Y ",
+    "PHP",
+    "SSS"
+  ],
+  "key": {
+    "Y": "jaymoskitchen:steam_cylinder",
+    "P": "#minecraft:planks",
+    "H": "jaymoskitchen:shaft",
+    "S": "minecraft:cobblestone"
+  },
+  "result": {
+    "id": "jaymoskitchen:steam_engine",
+    "count": 1
+  }
+}

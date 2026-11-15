@@ -16,7 +16,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 /**
  * A windmill or waterwheel, folded up: used on the end of a level shaft, it's set up there, turning across the
- * shaft. It needs its whole sweep open.
+ * shaft. It needs its whole sweep open. A windmill goes up bare: its sails ({@link SailItem}) are fitted one by one.
  */
 public class RotorItem extends Item {
 	public final Rotor rotor;
@@ -50,6 +50,10 @@ public class RotorItem extends Item {
 		if (!level.isClientSide()) {
 			BlockState placed = (rotor == Rotor.WINDMILL ? Power.WINDMILL : Power.WATERWHEEL).defaultBlockState().setValue(RotorBlock.FACING, facing);
 			level.setBlock(hub, placed, Block.UPDATE_ALL);
+			// (GT New Horizons picks, patch 8) a windmill goes up as bare spars: its sails are fitted by hand
+			if (rotor == Rotor.WINDMILL && level.getBlockEntity(hub) instanceof RotorEntity entity) {
+				entity.bare();
+			}
 			level.gameEvent(player, GameEvent.BLOCK_PLACE, hub);
 			level.playSound(null, hub, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
 			context.getItemInHand().consume(1, player);
