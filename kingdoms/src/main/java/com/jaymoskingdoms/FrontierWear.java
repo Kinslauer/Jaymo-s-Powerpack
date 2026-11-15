@@ -320,6 +320,8 @@ public final class FrontierWear {
 			if (f.type() == FactionType.KINGDOM && f.treasury() >= RANGER_TREASURY) {
 				schematic(offers, "ranger");
 			}
+			// and the armourers' orders' sets, to their own (FantasyArmorCompat)
+			FantasyArmorCompat.armourer(server, f, player, offers);
 		} else if (job.equals("shepherd")) {
 			sell(offers, SANGUINE[Math.floorMod(v.getUUID().hashCode(), SANGUINE.length)], SANGUINE_PRICE, TYPES);
 			sell(offers, "hedge", HEDGE_PRICE, TYPES);

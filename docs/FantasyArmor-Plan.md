@@ -91,6 +91,22 @@ these GeckoLib sets: a new render layer draws each worn Fantasy Armor piece's ow
 run time, nothing copied) on the actor's head, body, arm and leg bones. Without the mod the cast looks as it does now.
 Lady Maria is used here, so the trim datapack keeps her set.
 
+### 9. The headsmen (Kingdoms; Andy asked for it to be planned, 2026-11-15)
+Lore (approved): the Crowned Sun's headsmen carry out the crown's sentences, the thieves' hangings among them, in black
+plate edged with gold (Golden Execution); a headsman's plate goes dull if he goes too long without his work; the Ash
+Whisperer's people spit at both orders.
+- **Who.** Each realm whose state patron is the Crowned Sun keeps one headsman at its seat: a guard picked and tagged
+  like the sky castle's wardens (`jaymoskingdoms.headsman`), in the whole Golden Execution set where Fantasy Armor is
+  loaded (plain blackened iron and a gold-trimmed helm without it), an axe in hand. A new one is picked when he dies.
+- **His work.** An audience's execution sentence (`Arrests`, today carried out by the guard where the crook stands) is
+  his in those realms: he walks to the crook and the beheading is his. A thief taken in his realm is the one sentence he
+  always gets.
+- **The dull plate.** Each execution sets the realm's last-execution day. After 3 days without one his plate is dull:
+  he loses its bonus (no Strength, slower), and a player who wears the whole set is the same unless they have carried out
+  a sentence or finished a downed foe in the last 3 days (finishers). Nothing on screen says so; villagers may remark.
+- **Others.** The Ash Whisperer's sworn are spat at (a gesture and a growl from his and from the dawnwatch) and pay more
+  at his realm's counters. The set is never sold; it falls from a headsman (one piece) when he dies.
+
 ## If the lore sets reuse Fantasy Armor's models (Andy chose this on a decision card, 2026-11-15)
 Each lore set becomes the Fantasy Armor set that matches it; our code adds who wears, drops and sells it and the
 whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they are unless they clash):
@@ -102,8 +118,8 @@ whole-set effects in Lore.md (Fantasy Armor's own full-set potions stay as they 
 - Back to back (twinned) = Twinned.
 Built in #1590: barrow mail drops + lantern rule, Giant-slayer plates at a Giant's fall, folded lamellar on blossom
 guards. Still to place (their wearers don't exist in code yet, or MCA re-arms them): sky elders and well-wardens (the sky
-castle's wardens are MCA guards), dawnwatch (Sun-Marshal's guard), headsmen, demon captains of the Ash, Warden's hunters'
-sellers, pit warlords, twinned shrine oath.
+castle's wardens are MCA guards), dawnwatch wearers (Sun-Marshal's guard), headsmen, demon captains of the Ash, pit
+warlords. Built next: hunters' coats and dawnwatch plate on armourers' counters for the faithful, the twinned shrine oath.
 
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)
