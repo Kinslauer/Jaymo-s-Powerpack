@@ -1,5 +1,6 @@
 package com.jaymoskitchen.corpse;
 
+import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.LevelRagdollWorld;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollNet;
@@ -34,6 +35,12 @@ final class CorpseRagdoll {
 	private static final double UNPIN_MOVE = 0.5, UNPIN_SHOVE = 0.4;
 	/** (0.5.24) How often (ticks) a body lying loose looks for a table under it, and a pinned one that it's still there. */
 	private static final int TABLE_EVERY = 5;
+	/**
+	 * Keeling over, a shove harder than this (blocks a tick) or a move further than this (blocks) by something else ends
+	 * it there: the body falls free from where it was. So does this many ticks in a row touching nothing (a ledge).
+	 */
+	private static final double KEEL_BREAK = 0.05;
+	private static final int KEEL_AIR_TICKS = 3;
 
 	RagdollBody body;
 	private final LevelRagdollWorld world;
@@ -44,19 +51,46 @@ final class CorpseRagdoll {
 	private int sinceTable;
 	/** The game tick of the last impact told ({@link CorpseImpacts}). */
 	private long lastImpact = Long.MIN_VALUE / 2;
+	/** A mob just dead on its feet: its sway and tip onto its side, steering the body until the physics takes it. */
+	private @org.jspecify.annotations.Nullable KeelOver keel;
+	private int keelAir;
 
 	CorpseRagdoll(CorpseEntity corpse, RagdollBody body) {
+		this(corpse, body, null);
+	}
+
+	CorpseRagdoll(CorpseEntity corpse, RagdollBody body, @org.jspecify.annotations.Nullable KeelOver keel) {
 		this.body = body;
 		this.world = new LevelRagdollWorld(corpse.level(), corpse);
+		this.keel = keel;
+		corpse.setKeeling(keel != null);
 		write(corpse);
 		this.wasAsleep = body.asleep();
 		this.sinceSent = RESEND_EVERY;
 	}
 
+	/** It stops keeling over and falls the rest of the way however it falls. */
+	private void endKeel(CorpseEntity corpse) {
+		if (keel != null) {
+			keel = null;
+			corpse.setKeeling(false);
+		}
+	}
+
 	/** One tick: take in what pushed the entity, step the body, put the entity where it ended up, tell the watchers. */
 	void tick(CorpseEntity corpse, net.minecraft.server.level.ServerLevel level) {
+		if (keel == null) {
+			// (ended by a blow or a jolt since last tick)
+			corpse.setKeeling(false);
+		}
 		Vec3 pos = corpse.position();
 		Vec3 moved = pos.subtract(wrotePos);
+		Vec3 pushed = corpse.getDeltaMovement().subtract(wroteVel);
+		if (keel != null && (moved.lengthSqr() > KEEL_BREAK * KEEL_BREAK || pushed.lengthSqr() > KEEL_BREAK * KEEL_BREAK
+			|| body.gripped() || body.pinned())) {
+			// shoved, struck, grabbed: no more swaying, it goes down as it's pushed
+			endKeel(corpse);
+		}
 		if (moved.lengthSqr() > REBUILD_DISTANCE * REBUILD_DISTANCE) {
 			// teleported: lie down where it is now
 			body = corpse.lyingBody();
@@ -70,18 +104,27 @@ final class CorpseRagdoll {
 			body.translate(moved.x, moved.y, moved.z);
 			body.wake();
 		}
-		Vec3 pushed = corpse.getDeltaMovement().subtract(wroteVel);
 		if (pushed.lengthSqr() > SYNC_EPSILON * SYNC_EPSILON) {
 			if (pushed.lengthSqr() > UNPIN_SHOVE * UNPIN_SHOVE) {
 				body.unpin();
 			}
 			body.shove(pushed.x, pushed.y, pushed.z);
 		}
+		boolean keeling = keel != null && keel.steer(body);
 		double[] before = body.speed();
-		body.step(world, corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
+		// keeling over, it's steered where it goes (gravity is in the tip), only held off the ground and out of walls
+		body.step(world, keeling || corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
+		if (keel != null) {
+			keelAir = body.grounded() ? 0 : keelAir + 1;
+			if (!keeling || keelAir >= KEEL_AIR_TICKS) {
+				// down (or nothing under it): the physics has it from here, still falling as it was
+				endKeel(corpse);
+			}
+		}
 		if (!body.sane()) {
 			body = corpse.lyingBody();
-		} else if (!body.gripped() && !body.pinned()) {
+			endKeel(corpse);
+		} else if (!keeling && !body.gripped() && !body.pinned()) {
 			// a hard hit on the ground or a wall: the speed it lost this step, less what gravity took
 			double[] after = body.speed();
 			double lx = before[0] - after[0], ly = before[1] - after[1] - (corpse.isNoGravity() ? 0.0 : RagdollBody.GRAVITY), lz = before[2] - after[2];
@@ -98,7 +141,7 @@ final class CorpseRagdoll {
 			sinceTable = 0;
 			if (!body.pinned()) {
 				// ((0.5.39) not while it's held: dragged over a table, it goes on over it)
-				if (body.grounded() && !body.gripped()) {
+				if (body.grounded() && !body.gripped() && keel == null) {
 					pinOnTable(corpse);
 				}
 			} else if (corpse.tableUnder(body) == null) {
@@ -148,12 +191,15 @@ final class CorpseRagdoll {
 
 	/** A blow at {@code at} along {@code direction}: {@code strength} blocks a tick at the nearest part, a little lift too. */
 	void smack(Vec3 at, Vec3 direction, double strength) {
+		// struck as it keels over: it goes down with the blow
+		keel = null;
 		Vec3 d = direction.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 0.0, 0.0) : direction.normalize();
 		body.hit(at.x, at.y, at.z, d.x * strength, d.y * strength + SMACK_LIFT, d.z * strength, HIT_SHARE);
 	}
 
 	/** A knock at a random part (an axe blow, rummaging, a bite), mostly upward. */
 	void jolt(boolean hard, RandomSource random) {
+		keel = null;
 		int i = random.nextInt(body.rig.count);
 		double strength = hard ? JOLT_HARD : JOLT_LIGHT;
 		double angle = random.nextDouble() * Math.PI * 2.0;
