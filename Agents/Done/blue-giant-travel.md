@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Travel to the Verdant World's ringed blue giant
 branch: claude/project-thread-kx4q9p
 with: 
@@ -25,3 +25,4 @@ owns:
 
 ## Done
 PR #1595: pod stop GIANT (index 7), dimension jaymospowers:giant_ring (tools/gen_giant_ring.py), half gravity, airless, winds throw fallers back. Compiled + worldgen generated on plain 26.3 server; not played. Lore paragraph awaiting Andy.
+- 2026-11-15 12:43 PR #1595 is merged into master; moved to Agents/Done.
