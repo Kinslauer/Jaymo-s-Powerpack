@@ -54,7 +54,8 @@ public final class TwoBlades {
 	}
 
 	private static void landed(ServerPlayer player, LivingEntity target) {
-		if (CUTTING.contains(player.getUUID()) || !Armed.dual(player)) {
+		// (Andy's skill-tree locks) learned: Two Blades (without it the off hand's blade only rides along)
+		if (CUTTING.contains(player.getUUID()) || !Armed.dual(player) || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.TWO_BLADES)) {
 			return;
 		}
 		ServerLevel level = player.level();

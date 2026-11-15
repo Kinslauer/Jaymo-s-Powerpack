@@ -133,6 +133,10 @@ public class HotAirBalloon extends Entity {
 		if (!level.isClientSide() && getFirstPassenger() instanceof ServerPlayer rider) {
 			Input input = rider.getLastClientInput();
 			burn = input.jump() && fuel() > 0 && getY() < level.getMaxY() - CEILING_GAP;
+			if (burn && !com.jaymospowers.core.TreeLocks.check(rider, com.jaymospowers.core.TreeLocks.BALLOON)) {
+				// (Andy's skill-tree locks) flying it is learned: Skyfarer's second rank (riding in one, or making one, isn't)
+				burn = false;
+			}
 			vent = input.backward();
 		}
 		if (!level.isClientSide()) {

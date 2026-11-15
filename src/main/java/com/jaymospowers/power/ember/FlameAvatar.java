@@ -372,7 +372,8 @@ public final class FlameAvatar {
 					passing = false;
 				}
 			}
-		} else if (player.isInWaterOrRain()) {
+		} else if (player.isInWaterOrRain() || com.jaymospowers.core.wet.Wet.soaked(player)) {
+			// (soaked through counts as the rain)
 			live.flame -= RAIN_DRAIN;
 			if (player.tickCount % 20 == 0) {
 				level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.8, player.getZ(), 1, 0.2, 0.1, 0.2, 0.01);

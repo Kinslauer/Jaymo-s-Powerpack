@@ -77,6 +77,10 @@ public class ParagliderItem extends Item {
 			|| player.getCooldowns().isOnCooldown(stack) || !Feathers.canSpend(player, 1)) {
 			return InteractionResult.PASS;
 		}
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.PARAGLIDER)) {
+			// (Andy's skill-tree locks) gliding is learned: Skyfarer (anyone may still make and trade one)
+			return InteractionResult.FAIL;
+		}
 		if (!com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)) {
 			if (level.isClientSide()) {
 				com.jaymospowers.core.wounds.LimbUse.refuse(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS);

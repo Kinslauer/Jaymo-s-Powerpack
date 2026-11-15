@@ -301,6 +301,15 @@ public final class Stats {
 
 	// ---- effects -----------------------------------------------------------------------------------------------
 
+	/**
+	 * Agility's share for {@code player} (100 points: 0.15), the same one it puts on walking speed: climbing, swimming,
+	 * ledge shimmies and climb-overs go this much faster too ({@code AgilityTravelMixin}; Jaymo's Powers asks by reflection
+	 * for its own climbs). Either side: the points are synced to their own player.
+	 */
+	public static double agility(Player player) {
+		return AGILITY * value(player, Stat.AGILITY);
+	}
+
 	/** The factor on {@code player}'s hunger drain (Endurance). */
 	static float exhaustion(ServerPlayer player) {
 		return 1.0F - ENDURANCE * value(player, Stat.ENDURANCE);

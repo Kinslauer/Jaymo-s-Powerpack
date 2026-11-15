@@ -297,6 +297,10 @@ public final class Herding {
 	// ---- orders ------------------------------------------------------------------------------------------------------
 
 	private static void command(ServerPlayer player, Command payload) {
+		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
+			// (Andy's skill-tree locks) the whistle wheel's commands are learned: Horseman (a Rider knows them)
+			return;
+		}
 		ServerLevel level = player.level();
 		if (!(level.getEntity(payload.horse()) instanceof AbstractHorse horse) || !Equestrian.covered(horse) || !horse.isAlive()
 			|| !horse.isTamed() || horse.distanceTo(player) > ORDER_RANGE && player.getVehicle() != horse) {

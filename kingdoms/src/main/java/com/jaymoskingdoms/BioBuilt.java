@@ -255,6 +255,10 @@ public final class BioBuilt {
 	 * a downed or crippled foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
 	 */
 	static void press(ServerPlayer player) {
+		if (HeritageHold.channel(player) == null && !TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
+			// (Andy's skill-tree locks) absorbing and budding are learned: Blood Awakening (letting go never is)
+			return;
+		}
 		if (!HeritageHold.press(player, e -> absorbable(player, e), ABSORB_REACH, "message.jaymoskingdoms.bio.absorbing")) {
 			bud(player);
 		}

@@ -275,6 +275,9 @@ public final class Hemomancy {
 		} else if (target instanceof Mob mob && !(mob instanceof PatronChampion)) {
 			ItemStack held = mob.getMainHandItem();
 			if (!held.isEmpty()) {
+				if (!WornGear.pickedUp(mob, EquipmentSlot.MAINHAND)) {
+					WornGear.wear(held, mob.getRandom());
+				}
 				mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 				mob.spawnAtLocation(level, held);
 			}

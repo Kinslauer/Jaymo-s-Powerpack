@@ -46,7 +46,9 @@ public final class SwimBurst {
 	static void burst(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < GAP_TICKS || !player.isInWater() || player.isPassenger() || !Freerun.canMove(player) || !hasAir(player)) {
+		// (Andy's skill-tree locks) learned: Strong Swimmer
+		if (last != null && now - last < GAP_TICKS || !player.isInWater() || player.isPassenger() || !Freerun.canMove(player) || !hasAir(player)
+			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SWIM_BURST)) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {

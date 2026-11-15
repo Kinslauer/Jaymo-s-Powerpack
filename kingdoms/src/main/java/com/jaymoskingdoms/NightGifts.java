@@ -327,7 +327,8 @@ public final class NightGifts {
 	/** Bat wings to glide on now (read on both sides, from {@link #GIFT}). */
 	public static boolean batWings(Player player) {
 		Gift g = player.getAttached(GIFT);
-		return g != null && g.blood() && g.wings() > 0 && !player.onGround() && !player.isPassenger()
+		// (Andy's skill-tree locks) the wings are learned: Bat Wings, on Stealth's Night page
+		return g != null && g.blood() && g.wings() > 0 && TreeLocks.has(player, TreeLocks.Lock.BAT_WINGS) && !player.onGround() && !player.isPassenger()
 			&& !player.hasEffect(MobEffects.LEVITATION) && !player.getAbilities().flying;
 	}
 
@@ -459,6 +460,11 @@ public final class NightGifts {
 
 	/** Kin-sense / pack-sense: the nearest of their kind. */
 	private static void sense(MinecraftServer server, ServerPlayer player, Gift gift) {
+		if (!TreeLocks.has(player, TreeLocks.Lock.NIGHT_SENSE)) {
+			// (Andy's skill-tree locks) kin and pack sense are learned: Night Sense (an empty sense, so nothing old stays drawn)
+			ServerPlayNetworking.send(player, new Sense(List.of(), List.of(), 0, List.of(), List.of()));
+			return;
+		}
 		ServerLevel level = player.level();
 		List<Entity> kin = new ArrayList<>();
 		for (ServerPlayer other : server.getPlayerList().getPlayers()) {
@@ -512,7 +518,7 @@ public final class NightGifts {
 			if (which == 0 && dash(level, player)) {
 				ready[0] = now + DASH_COOLDOWN;
 				return true;
-			} else if (which == 1 && pound(level, player)) {
+			} else if (which == 1 && TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND) && pound(level, player)) {
 				ready[1] = now + POUND_COOLDOWN;
 				return true;
 			} else if (which == 2 && net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
@@ -529,7 +535,8 @@ public final class NightGifts {
 			if (which == 0 && leap(level, player, beast)) {
 				ready[0] = now + LEAP_COOLDOWN;
 				return true;
-			} else if (which == 1) {
+			} else if (which == 1 && TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND)) {
+				// (Andy's skill-tree locks) the Groundpound and the Howl are learned: Night Pound
 				howl(level, player, beast);
 				ready[1] = now + HOWL_COOLDOWN;
 				return true;
@@ -702,7 +709,10 @@ public final class NightGifts {
 			if (victim.is(EntityTypeTags.UNDEAD)) {
 				return;
 			}
-			// Lifeleech
+			// Lifeleech ((Andy's skill-tree locks) learned: Lifeleech, on the Night page)
+			if (!TreeLocks.has(killer, TreeLocks.Lock.LIFELEECH)) {
+				return;
+			}
 			killer.heal(KILL_HEAL);
 			Long last = LAST_KILL.put(killer.getUUID(), now);
 			MobEffectInstance had = killer.getEffect(MobEffects.ABSORPTION);

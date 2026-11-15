@@ -134,6 +134,10 @@ public final class DodgeClient {
 		if (foe == null) {
 			return false;
 		}
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.SHIELD_VAULT)) {
+			// (Andy's skill-tree locks) learned: Shield Vault, on Strength's Combat Arts (the press goes to a plain dodge)
+			return false;
+		}
 		if (!com.jaymospowers.combat.ShieldVault.tooBig(player, foe)) {
 			Vec3 push = com.jaymospowers.combat.ShieldVault.push(player, foe);
 			player.setDeltaMovement(push);

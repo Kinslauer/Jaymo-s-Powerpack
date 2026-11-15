@@ -151,7 +151,8 @@ public final class HeritageMoves {
 			return;
 		}
 		live.heard = now;
-		if (live.on || !usable(player)) {
+		// (Andy's skill-tree locks) a blood's hold is learned: Blood Awakening
+		if (live.on || !usable(player) || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
 			return;
 		}
 		long ready = READY.getOrDefault(player.getUUID(), 0L);

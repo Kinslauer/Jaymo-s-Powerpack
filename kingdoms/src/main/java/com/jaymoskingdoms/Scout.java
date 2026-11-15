@@ -61,11 +61,18 @@ public final class Scout {
 
 	/** {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} with which structure it is, as findNearestMapStructure gives. */
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
+		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
+		// have no placements at all and read the clouds as ground, so nothing was ever found)
+		return Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings));
+	}
+
+	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
 		StructureManager structures = level.structureManager();
 		if (!structures.shouldGenerateStructures()) {
 			return null;
 		}
-		ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		ChunkGeneratorStructureState state = ground.structures();
 		// the structures that share a placement are looked at together, as vanilla does
 		Map<StructurePlacement, Set<Holder<Structure>>> byPlacement = new LinkedHashMap<>();
 		for (Holder<Structure> structure : wanted) {
@@ -93,14 +100,14 @@ public final class Scout {
 			}
 		}
 		spots.sort(Comparator.comparingInt(Spot::distance));
-		ChunkGenerator generator = level.getChunkSource().getGenerator();
-		RandomState random = level.getChunkSource().randomState();
+		ChunkGenerator generator = ground.generator();
+		RandomState random = ground.randomState();
 		for (Spot spot : spots) {
 			int x = spot.chunk().getMinBlockX() + 8, z = spot.chunk().getMinBlockZ() + 8;
 			Holder<Biome> biome = null;
 			for (Holder<Structure> structure : spot.structures()) {
 				if (biome == null) {
-					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, random);
+					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random) + ground.shift();
 					biome = level.getBiome(new BlockPos(x, y, z));
 				}
 				if (!structure.value().biomes().contains(biome)) {

@@ -92,6 +92,10 @@ public final class Learnables {
 		if (perk == Perk.ENCHANTED_STORAGE) {
 			return Set.of(PlayerClass.MAGE);
 		}
+		if (perk == Perk.SORCERY || perk == Perk.FORBIDDEN_ARTS) {
+			// the Sorcerer's imbue, absorbing and barrage, and Death and Blood (TreeLocks)
+			return Set.of(PlayerClass.SORCERER);
+		}
 		String spell = SPELLS.get(perk);
 		return spell == null ? null : RpgSeriesGate.casters(Identifier.parse(spell));
 	}

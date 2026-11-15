@@ -105,7 +105,9 @@ public final class Offshore {
 	}
 
 	public static boolean island(ServerLevel level, int x, int z) {
-		return island(level.getChunkSource().getGenerator(), level, level.getChunkSource().randomState(), x, z);
+		// (the Overworld's own ground in a One Dimension world, not the clouds over it)
+		com.jaymoskingdoms.Stacked.Ground ground = com.jaymoskingdoms.Stacked.overworldGround(level);
+		return island(ground.generator(), ground.heights(), ground.randomState(), x, z);
 	}
 
 	public static boolean island(RandomState state, int x, int z) {

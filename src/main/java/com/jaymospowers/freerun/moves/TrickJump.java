@@ -30,7 +30,8 @@ public final class TrickJump {
 
 	static void flip(ServerPlayer player, int kind) {
 		if (kind != WebPose.FRONT_FLIP && kind != WebPose.BACK_FLIP || player.onGround() || !FastRun.active(player) || !Ledge.canHang(player)
-			|| WebPower.ragdolled(player)) {
+			|| WebPower.ragdolled(player) || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.TRICK_JUMP)) {
+			// ((Andy's skill-tree locks) learned: Freerunner)
 			return;
 		}
 		long now = player.level().getGameTime();

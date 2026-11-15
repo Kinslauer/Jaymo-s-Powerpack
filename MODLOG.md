@@ -5030,3 +5030,23 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   had none of their own (or left it to fate), the power they lost becomes their affinity, so the same power wakes in them
   again after the usual 3-5 days. `Mortality.shedGifts`, `Affinity.keepLeaning`.
 - Compile-checked; not played.
+
+## 0.23.90 (2026-11-15): One Dimension worlds: Scout finds Overworld structures
+
+- `core.Scout` (the Z Fighter chapel's pull) found nothing in a One Dimension world: the stacked level's structure state has no placements and its generator reads the clouds as ground. It now uses the Overworld band's own placements, ground and structure checks (`compat.Stacked.overworldGround`, `searchingOverworld`). An ordinary world is unchanged.
+- Built; not played.
+
+## 0.23.91 (2026-11-15): wet and soaked, scrubbing in water, rusting armour (#1578)
+
+- **Wet and Soaked** (`core/wet/Wet`, mixins `WetHurtMixin`, `WetIgniteMixin`): everyone near a player keeps a wetness (saved `jaymospowers:wetness`, ticks of drying left, up to 3 min) shown as the status effect Wet (rain, wading to the knees) or Soaked (swum, waded deep, or about 30 s out in the rain). Drying is faster in hot lands by day, beside a fire (players), for fire users and fire-proof mobs, very fast in the Nether or while burning (it hisses); slower in cold lands. Kingdoms' downpours soak you through.
+- What it does: a wet body catches fire for half as long, a soaked one a quarter, and takes 25% / 50% less from fire (not lava); lightning hurts it 25% / 50% more and arcs to wet bodies within 3 blocks at half; soaked padding (cloth, leather, furs) weighs double for stamina (`ArmourKind.load`); wet gear on bare earth picks up mud, not dust (`ArmourGrime`); Soaked counts as the rain for Ember's flame, Running Hot and Kindle.
+- **Scrubbing** (`core/wet/Scrubbing`): in water or at a water cauldron, sneak + use a **Straw Wisp** (2 wheat, 24 scrubs) or any **sand** (one used a scrub) to scrub yourself (coat, clothes, worn armour, smell), or the item in your other hand. Takes blood off at full strength whatever its age, rotten blood included (`Bloodied.scour`, `scourCoat`). A cauldron loses a level a scrub.
+- **Rust** (`core/wet/Rust`, component `jaymospowers:rust`, 0-100): mail and plate (not gold, copper, bronze, netherite, gems, tag `jaymospowers:rustproof`) rust while worn wet (0.25 a 10 s check), soaked (0.6), in water (1) or lying in water or rain as an item; sea water doubles it. From 30 rust, each growth may eat a point of durability (chance rust/100), never the last. Painted on the piece and its icon as orange-brown pitting, lower edges and creases first (`ArmourGrimeTextures`), and named on the tooltip (spotted, rusty, corroded). Nothing removes rust (Andy), on players' or folk's armour. Mobs come with rusty armour (Andy): each iron piece a mob spawns in is rolled once, the undead's 15-100 (mostly bad), the living's clean half the time, else up to 45; armour picked up later isn't rolled (`Rust.rollSpawned`, tag `jaymospowers_rust_rolled`).
+- Icons for Wet and Soaked and the wisp are ours (drawn in Python). Built; not played.
+
+## 0.23.92 (2026-11-15): skill-tree locks - abilities learned in Kingdoms' tree, slower balancing, Agility climbs
+
+- **Andy's skill-tree locks**: `core.TreeLocks` asks Kingdoms' `TreeLocks` (by reflection; everything stays open without Kingdoms) before the slide, long jump, charge jump, run up a wall, trick jumps, swim burst, breach, shield vault, paraglider, balloon burner, lock-on body parts (without it every blow goes at the torso), shield throw and shield moves, swat, two blades, every throw (blade throw, belt, throwing weapons, throwables), the no-power Sweep Kick, Second Wind and Battle Cry (Power Strike stays free), boxing lessons (new teacher answer "untaught"; a Monk's first style stays free), lifting the hogtied and downed, the meditate key, real fishing (special rods, the journal, the fisherman; a plain rod still fishes), the alchemy codex, and the bloods' held moves (Kindle, the heritage holds, the race holds). Moves you'd do by accident (trick flips, Two Blades) fail quietly; the rest name the perk on the action bar.
+- **Balancing on a narrow top** is a third of the speed, for everyone (`Freerun.BALANCE_SLOW`); Freerunner wins none of it back, only Agility does.
+- **Agility** (`core.Agility`, Kingdoms' stat by reflection) speeds wall climbing, leaf climbing, wall and ledge shimmies and climbing over a ledge (the climb's length rides on the ledge hold, so everyone sees it at its pace).
+- Built; not played.

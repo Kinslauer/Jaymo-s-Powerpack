@@ -372,8 +372,8 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Takes one piece of armour (or a held item) off the body and hands it over; it's gone from the body too, since
-	 * clients draw the body from its look. Its gear has seen use: a skeleton's weapon comes off at under half its
-	 * durability, anything else that wears out somewhere between well-worn and nearly new (see {@link #wear}). False
+	 * clients draw the body from its look. Its gear has seen hard use: nearly always badly worn, now and then a good
+	 * piece (see {@link #wear}). False
 	 * if it has nothing on.
 	 */
 	private boolean takeGear(ServerLevel level, Player player) {
@@ -506,18 +506,24 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * Wears a piece of the body's gear: a skeleton's weapon is left with 10-49% of its durability, anything else with
-	 * 15-90%. Never repairs what was already more worn than that.
+	 * Wears a piece of the body's gear. Andy: "pickups in general should have low durability", so most of it comes off
+	 * with {@link #WORN_MIN}-{@link #WORN_MAX} of its durability left and only {@link #GOOD_CHANCE} of the time is it a good
+	 * piece ({@link #GOOD_MIN}-{@link #GOOD_MAX}); a skeleton's weapon never has more than half. Jaymo's Kingdoms wears
+	 * a disarmed mob's weapons by the same numbers ({@code WornGear}). Never repairs what was already more worn.
 	 */
 	private void wear(ItemStack stack, boolean skeletonWeapon) {
 		int max = stack.getMaxDamage();
-		float left = skeletonWeapon ? 0.10F + random.nextFloat() * 0.39F : 0.15F + random.nextFloat() * 0.75F;
+		float left = random.nextFloat() < GOOD_CHANCE ? GOOD_MIN + random.nextFloat() * (GOOD_MAX - GOOD_MIN)
+			: WORN_MIN + random.nextFloat() * (WORN_MAX - WORN_MIN);
 		int remaining = Math.max(1, Math.round(max * left));
 		if (skeletonWeapon) {
 			remaining = Math.min(remaining, Math.max(1, (max - 1) / 2));
 		}
 		stack.setDamageValue(Math.max(stack.getDamageValue(), max - remaining));
 	}
+
+	/** How often a piece of a body's gear comes off in good shape, and how much durability is left either way (see {@link #wear}). */
+	private static final float GOOD_CHANCE = 0.08F, WORN_MIN = 0.03F, WORN_MAX = 0.25F, GOOD_MIN = 0.55F, GOOD_MAX = 0.90F;
 
 	/** (0.5.79) The armour slots a body's gear is kept under, boots first (the way {@link #reworkArmour} hands them over). */
 	private static final String[] ARMOUR = {"feet", "legs", "chest", "head"};

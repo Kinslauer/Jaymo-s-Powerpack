@@ -461,6 +461,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		BeastLairs.register();
 		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
 		Knowledge.register();
+		TreeLocks.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
@@ -517,6 +518,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Roost.register();
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
+		// coins tossed from the hand draw the villagers near to scramble for them
+		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)

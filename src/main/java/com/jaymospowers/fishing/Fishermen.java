@@ -195,7 +195,7 @@ public final class Fishermen {
 	}
 
 	private static void sell(ServerPlayer player, Entity villager, int slot) {
-		if (slot < 0 || slot >= player.getInventory().getContainerSize()) {
+		if (slot < 0 || slot >= player.getInventory().getContainerSize() || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.ANGLER)) {
 			return;
 		}
 		ServerLevel level = (ServerLevel) player.level();
@@ -354,6 +354,10 @@ public final class Fishermen {
 
 	/** Open the fisherman screen for {@code player} with {@code villager} (also called by Kingdoms' "Talk about fishing"). */
 	public static void open(ServerPlayer player, Entity villager) {
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.ANGLER)) {
+			// (Andy's skill-tree locks) selling by weight is learned: Angler
+			return;
+		}
 		ServerLevel level = (ServerLevel) player.level();
 		List<Offer> offers = new ArrayList<>();
 		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {

@@ -5,6 +5,7 @@
   "item.jaymoskingdoms.arquebus.hint": "Hold use to load (gunpowder and a ball). Loaded, use it to fire. The match won't burn in the rain.",
   "entity.jaymoskingdoms.gun_ball": "Lead Ball",
   "message.jaymoskingdoms.early_gun.wet": "The match is wet. It won't fire.",
+  "message.jaymoskingdoms.early_gun.damp": "Your powder is damp. It didn't take.",
   "message.jaymoskingdoms.early_gun.tier.handgonne": "A handgonne's barrel is past you yet. (World tier: Borderlands)",
   "message.jaymoskingdoms.early_gun.tier.arquebus": "An arquebus's barrel is past you yet. (World tier: Wildlands)",
   "message.jaymoskingdoms.knowledge.locked.pattern": "You can't read an old piece's making yet. (Knowledge 2: an Ogre King)",

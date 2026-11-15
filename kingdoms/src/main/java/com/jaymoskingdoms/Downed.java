@@ -504,6 +504,9 @@ public final class Downed {
 			if (held.isEmpty()) {
 				continue;
 			}
+			if (!WornGear.pickedUp(body, slot)) {
+				WornGear.wear(held, body.getRandom());
+			}
 			body.setItemSlot(slot, ItemStack.EMPTY);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);

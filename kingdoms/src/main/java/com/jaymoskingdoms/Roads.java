@@ -369,11 +369,15 @@ public final class Roads {
 
 	private static void start(ServerLevel level, Faction a, Faction b) {
 		BlockPos from = Caravans.start(a), to = Caravans.start(b);
-		ChunkGenerator gen = level.getChunkSource().getGenerator();
-		RandomState random = level.getChunkSource().randomState();
+		// (the Overworld's own ground in a One Dimension world, its heights moved into the level's: the level's generator
+		// reads the clouds, so a road was planned flat and dry across sea and hill alike)
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		ChunkGenerator gen = ground.generator();
+		RandomState random = ground.randomState();
 		int ida = a.id(), idb = b.id();
-		LevelHeightAccessor heights = LevelHeightAccessor.create(level.getMinY(), level.getHeight());
-		planning = CompletableFuture.supplyAsync(() -> new Road(ida, idb, route(gen, random, heights, from, to), List.of(), NONE, NONE), PLANNER);
+		LevelHeightAccessor heights = LevelHeightAccessor.create(ground.heights().getMinY(), ground.heights().getHeight());
+		int shift = ground.shift();
+		planning = CompletableFuture.supplyAsync(() -> new Road(ida, idb, route(gen, random, heights, shift, from, to), List.of(), NONE, NONE), PLANNER);
 		JaymosKingdoms.LOGGER.debug("planning a road between {} and {}", a.name(), b.name());
 	}
 
@@ -412,13 +416,13 @@ public final class Roads {
 	}
 
 	/** The route from {@code from} to {@code to} as packed positions {@link #STEP} apart, each at its graded height. */
-	static List<Long> route(ChunkGenerator gen, RandomState random, LevelHeightAccessor heights, BlockPos from, BlockPos to) {
+	static List<Long> route(ChunkGenerator gen, RandomState random, LevelHeightAccessor heights, int shift, BlockPos from, BlockPos to) {
 		Map<Long, Ground> seen = new HashMap<>();
 		java.util.function.LongFunction<Ground> ground = key -> seen.computeIfAbsent(key, k -> {
 			int x = (int)(k >> 32), z = (int)(long)k;
 			int surface = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, heights, random);
 			int floor = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, random);
-			return new Ground(surface, Math.max(0, surface - floor));
+			return new Ground(surface + shift, Math.max(0, surface - floor));
 		});
 		List<int[]> cells = search(ground, from, to);
 		// the cells as a line (from its true ends), its corners rounded twice

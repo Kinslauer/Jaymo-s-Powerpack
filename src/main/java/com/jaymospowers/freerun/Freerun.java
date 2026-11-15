@@ -72,7 +72,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link #KICK_UP} up, {@link #KICK_OUT} out), each wall face once until you land.</li>
  * <li><b>Landing roll</b> (Sure Footing's until Motion patch 0, everyone's now; the perk left the tree): a dodge made
  * as you land rolls the fall off: no fall damage ({@link LandingRoll}, with a forgiving window either side of
- * touchdown); a hard fall you don't roll lands in the hero landing. Anyone walks and runs narrow tops
+ * touchdown); a hard fall you don't roll lands in the hero landing. Anyone walks and runs narrow tops, at a third of the speed ({@link #BALANCE_SLOW})
  * ({@link #NARROW}), arms out to balance. Freerunner 1 also opens the air flip ({@link AirFlip}).</li>
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
@@ -122,6 +122,13 @@ public final class Freerun {
 	public static final int VAULT_COOLDOWN = 10;
 	/** Freerunner 2: the wall kick, up and out from the wall (blocks/tick), and the share of your speed along the wall it keeps. */
 	public static final double KICK_UP = 0.5, KICK_OUT = 0.45, KICK_KEEP = 0.5;
+
+	/**
+	 * Balancing on a narrow top (Andy's skill-tree locks): this share off your speed, a third of it left, for everyone;
+	 * Freerunner wins none of it back, only Agility does (it is in the walking speed this multiplies).
+	 */
+	public static final double BALANCE_SLOW = -2.0 / 3.0;
+	private static final Identifier BALANCE_ID = JaymosPowers.id("freerun_balance");
 
 	/** Narrow tops: balancing on these. */
 	public static final TagKey<Block> NARROW = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_narrow"));
@@ -504,6 +511,20 @@ public final class Freerun {
 		return onNarrowTop(player) && !player.isShiftKeyDown();
 	}
 
+	/** Slowed to a third while {@link #balancing} (each side every tick: the client at once, the server so it holds). */
+	public static void balanceSlow(Player player) {
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
+		}
+		boolean on = balancing(player);
+		if (on && !speed.hasModifier(BALANCE_ID)) {
+			speed.addTransientModifier(new AttributeModifier(BALANCE_ID, BALANCE_SLOW, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		} else if (!on && speed.hasModifier(BALANCE_ID)) {
+			speed.removeModifier(BALANCE_ID);
+		}
+	}
+
 	/** Leap of Faith: falling looking down, head first (any side, any player). */
 	public static boolean dives(Player player) {
 		return perk(player, Perk.LEAP_OF_FAITH) > 0 && player.getXRot() >= DIVE_PITCH;
@@ -545,7 +566,8 @@ public final class Freerun {
 			return;
 		}
 		if (kind == SLIDE) {
-			if (Slide.valid(player) && !Ledge.powerMoving(player)) {
+			// (Andy's skill-tree locks) learned: Slide
+			if (Slide.valid(player) && !Ledge.powerMoving(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE)) {
 				stop(player);
 				Slide.start(player);
 			} else {
@@ -576,7 +598,8 @@ public final class Freerun {
 		}
 		Direction side = move.face() >= 0 && move.face() < Direction.values().length ? Direction.from3DDataValue(move.face()) : null;
 		boolean wall = side != null && side.getAxis().isHorizontal();
-		if (!canMove(player, kind) || Ledge.powerMoving(player) || !valid(level, player, kind, wall ? side : null, move.pos(), current)) {
+		if (!canMove(player, kind) || Ledge.powerMoving(player) || !valid(level, player, kind, wall ? side : null, move.pos(), current)
+			|| kind == UP_RUN && !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.UP_RUN)) {
 			stop(player);
 			return;
 		}
@@ -685,9 +708,9 @@ public final class Freerun {
 		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
 	}
 
-	/** {@code player}'s climbing speed up a wall (blocks/tick), by Climber's rank (0 for anyone). */
+	/** {@code player}'s climbing speed up a wall (blocks/tick), by Climber's rank (0 for anyone), and their Agility. */
 	public static double climbSpeed(Player player) {
-		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)];
+		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)] * com.jaymospowers.core.Agility.factor(player);
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */
@@ -784,6 +807,7 @@ public final class Freerun {
 			if (refresh) {
 				refreshPerks(player);
 			}
+			balanceSlow(player);
 			if (player.onGround() || player.isInWater() || player.onClimbable()) {
 				KICKED.remove(player.getUUID());
 				RAN.remove(player.getUUID());

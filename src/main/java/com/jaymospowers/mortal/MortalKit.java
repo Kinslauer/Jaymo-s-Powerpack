@@ -74,6 +74,12 @@ public final class MortalKit {
 			return;
 		}
 		int move = key.ordinal();
+		// (Andy's skill-tree locks) Sweep Kick, Second Wind and Battle Cry are learned (Sweep Kick; Survival's Second Wind;
+		// War Cry); Power Strike stays everyone's
+		String lock = move == 1 ? com.jaymospowers.core.TreeLocks.SWEEP_KICK : move == 2 ? com.jaymospowers.core.TreeLocks.SECOND_WIND : move == 3 ? com.jaymospowers.core.TreeLocks.BATTLE_CRY : null;
+		if (lock != null && !com.jaymospowers.core.TreeLocks.check(player, lock)) {
+			return;
+		}
 		long now = level.getGameTime();
 		long[] ready = READY.computeIfAbsent(player.getUUID(), id -> new long[4]);
 		if (now < ready[move]) {
