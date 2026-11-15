@@ -228,13 +228,46 @@ public final class ChronoCheatDeath {
 
 	// ---- who has it --------------------------------------------------------------------------------------------------
 
-	/** Whether {@code player} can cheat death: a Chrono who has learned Rewind. */
+	/** Whether {@code player} can cheat death: a Chrono who has learned Rewind, or anyone carrying a rewind watch. */
 	public static boolean has(ServerPlayer player) {
+		return chrono(player) || carriesWatch(player);
+	}
+
+	private static boolean chrono(ServerPlayer player) {
 		return Powers.has(player, ChronoPower.INSTANCE) && !Mastery.starterOnly(player) && Mastery.isUnlocked(player, PowerKey.ABILITY_1);
 	}
 
-	/** How far back (ticks) {@code player}'s rewind reaches, by how far their power has come. */
+	/** Kingdoms' rewind watch, the Tinkerer's copy of Rewind (looked up by id: Powers never loads Kingdoms' classes). */
+	static final Identifier WATCH = Identifier.fromNamespaceAndPath("jaymoskingdoms", "rewind_watch");
+	private static @Nullable Item watch;
+	private static boolean lookedForWatch;
+
+	/**
+	 * (Andy, 2026-11-15: "The rewind watch should let you cheat death in the same way if you have one in your inventory on death
+	 * and hit r, unprompted still.") Whether {@code player} carries a rewind watch anywhere on them. False without Kingdoms.
+	 */
+	static boolean carriesWatch(ServerPlayer player) {
+		if (!lookedForWatch) {
+			lookedForWatch = true;
+			watch = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(WATCH).orElse(null);
+		}
+		if (watch == null) {
+			return false;
+		}
+		Inventory inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			if (inv.getItem(i).is(watch)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** How far back (ticks) {@code player}'s rewind reaches, by how far their power has come (a watch alone: the first minute). */
 	public static int window(ServerPlayer player) {
+		if (!chrono(player)) {
+			return BASE_WINDOW;
+		}
 		int window = BASE_WINDOW + PER_ABILITY * Math.max(0, Mastery.unlocked(player) - 1) + PER_RANK * Mastery.rank(player);
 		if (Fate.isAscended(player)) {
 			window += TIMELESS_BONUS;
@@ -602,7 +635,10 @@ public final class ChronoCheatDeath {
 		ArrayDeque<Checkpoint> points = CHECKPOINTS.computeIfAbsent(player.getUUID(), id -> new ArrayDeque<>());
 		points.clear();
 		points.addLast(checkpoint(player, to.getServer().overworld().getGameTime()));
-		ChronoMemory.of(player).stoppedTime += (int) Math.min(Integer.MAX_VALUE / 2, Math.max(0, held.since - point.time()));
+		if (chrono(player)) {
+			// (a watch's rewind is no part of a Chrono's own road)
+			ChronoMemory.of(player).stoppedTime += (int) Math.min(Integer.MAX_VALUE / 2, Math.max(0, held.since - point.time()));
+		}
 
 		to.playSound(null, point.pos().x, point.pos().y, point.pos().z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.9F);
 		ChronoFx.particles(to, player, MagicFx.LIGHT, point.pos().x, point.pos().y + 1.0, point.pos().z, 30, 0.4, 0.8, 0.4, 0.02);
