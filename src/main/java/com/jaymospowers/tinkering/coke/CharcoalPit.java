@@ -46,13 +46,21 @@ public final class CharcoalPit {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack held = player.getItemInHand(hand);
 			BlockPos pos = hit.getBlockPos();
-			if (player.isSpectator() || !(held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE)) || !isLog(level.getBlockState(pos))) {
+			BlockState clicked = level.getBlockState(pos);
+			if (player.isSpectator() || !(held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE)) || !isLog(clicked)
+				|| clicked.is(CokeAndSteel.SMOULDERING_LOG)) {
 				return InteractionResult.PASS;
 			}
 			BlockPos gap = pos.relative(hit.getDirection());
 			Set<BlockPos> heap = heap(level, pos);
-			if (heap == null || !level.mayInteract(player, pos) || !player.mayUseItemAt(gap, hit.getDirection(), held)) {
+			if (heap == null || heap.isEmpty() || !level.mayInteract(player, pos) || !player.mayUseItemAt(gap, hit.getDirection(), held)) {
 				return InteractionResult.PASS;
+			}
+			for (BlockPos at : heap) {
+				if (level.getBlockState(at).is(CokeAndSteel.SMOULDERING_LOG)) {
+					// already lit
+					return InteractionResult.PASS;
+				}
 			}
 			List<BlockPos> open = openings(level, heap);
 			if (open.size() != 1 || !open.getFirst().equals(gap)) {
@@ -63,7 +71,7 @@ public final class CharcoalPit {
 				BlockState log = server.getBlockState(pos);
 				server.setBlock(pos, CokeAndSteel.SMOULDERING_LOG.defaultBlockState(), Block.UPDATE_ALL);
 				if (server.getBlockEntity(pos) instanceof SmoulderingLogEntity core) {
-					core.light(log, server.getGameTime());
+					core.light(log, server);
 				}
 				server.playSound(null, pos, held.is(Items.FIRE_CHARGE) ? SoundEvents.FIRECHARGE_USE : SoundEvents.FLINTANDSTEEL_USE,
 					SoundSource.BLOCKS, 1.0F, 0.9F);
@@ -81,7 +89,10 @@ public final class CharcoalPit {
 		return state.is(net.minecraft.tags.BlockItemTags.LOGS_THAT_BURN.block()) || state.is(CokeAndSteel.SMOULDERING_LOG);
 	}
 
-	/** Every log joined to {@code start} face to face, or null if there are too many or some lie where the world isn't loaded. */
+	/**
+	 * Every log joined to {@code start} face to face; null if some lie where the world isn't loaded (wait and look again),
+	 * empty if there are more than {@link #MAX_LOGS} (no pit, or a broken one).
+	 */
 	static @Nullable Set<BlockPos> heap(Level level, BlockPos start) {
 		Set<BlockPos> heap = new HashSet<>();
 		ArrayDeque<BlockPos> todo = new ArrayDeque<>();
@@ -96,7 +107,7 @@ public final class CharcoalPit {
 				}
 				if (!heap.contains(next) && isLog(level.getBlockState(next))) {
 					if (heap.size() >= MAX_LOGS) {
-						return null;
+						return Set.of();
 					}
 					heap.add(next);
 					todo.add(next);

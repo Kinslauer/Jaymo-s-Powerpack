@@ -138,10 +138,10 @@ public class CokeOvenEntity extends BlockEntity {
 		changed();
 	}
 
-	/** What's baked (or, {@code waiting}, what's still to bake) taken out. */
+	/** What's baked (or, {@code waiting}, what's still to bake) taken out; nothing if that's empty. */
 	ItemStack take(boolean waiting) {
 		ItemStack out;
-		if (waiting || output.isEmpty()) {
+		if (waiting) {
 			out = input;
 			input = ItemStack.EMPTY;
 			progress = 0;

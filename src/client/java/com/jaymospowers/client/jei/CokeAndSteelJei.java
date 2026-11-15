@@ -96,7 +96,7 @@ public final class CokeAndSteelJei implements IModPlugin {
 		registration.addRecipes(BLAST_FURNACE, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Items.IRON_INGOT)),
 			List.of(new ItemStack(CokeAndSteel.COAL_COKE, BlastFurnaceEntity.COKE_PER_STEEL))), List.of(new ItemStack(Tinkering.STEEL_INGOT)),
 			List.of(Component.translatable("jei.jaymospowers.brick_blast_furnace.time", BlastFurnaceEntity.STEEL_TICKS / TICKS_PER_SECOND / 60),
-				Component.translatable("jei.jaymospowers.brick_blast_furnace.ash", BlastFurnaceEntity.ASH_PER_STEEL)))));
+				Component.empty()), List.of(new ItemStack(CokeAndSteel.ASH, BlastFurnaceEntity.ASH_PER_STEEL)))));
 
 		registration.addRecipes(TIN_ORE, List.of(
 			new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tin.TIN_ORE), new ItemStack(Tin.DEEPSLATE_TIN_ORE))), List.of(new ItemStack(Tin.RAW_TIN)),
@@ -110,6 +110,7 @@ public final class CokeAndSteelJei implements IModPlugin {
 		registration.addIngredientInfo(CokeAndSteel.FIREBRICKS, layers("brick_blast_furnace", 5));
 		registration.addIngredientInfo(CokeAndSteel.CHARRED_LOG, layers("charcoal_pit", 4));
 		registration.addIngredientInfo(CokeAndSteel.TREATED_PLANKS, Component.translatable("jei.jaymospowers.treated_planks"));
+		registration.addIngredientInfo(CokeAndSteel.ASH, Component.translatable("jei.jaymospowers.ash"));
 		registration.addIngredientInfo(CokeAndSteel.CREOSOTE_BUCKET, Component.translatable("jei.jaymospowers.creosote"));
 		registration.addIngredientInfo(CokeAndSteel.CLAY_CREOSOTE_BUCKET, Component.translatable("jei.jaymospowers.creosote"));
 	}

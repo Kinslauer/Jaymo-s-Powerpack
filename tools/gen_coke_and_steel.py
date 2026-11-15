@@ -50,6 +50,8 @@ CHARCOAL_PER_LOG, CHARCOAL_SMOULDERING = 2, 1
 SOAKED_RAGS, TREATED_PLANKS = 4, 8
 # tin's great veins: blocks in one, one chunk in RARITY (copper 20, iron 24, gold 48), and how high (mountains only)
 TIN_VEIN_SIZE, TIN_RARITY, TIN_LOW, TIN_HIGH = 70, 24, 48, 200
+# and, rarer, deep under the mountains where it runs into the deepslate (deepslate tin ore)
+TIN_DEEP_RARITY, TIN_DEEP_LOW, TIN_DEEP_HIGH = 48, -56, 8
 # tin sand in river beds: one patch in RARITY chunks, its radius
 SAND_RARITY, SAND_RADIUS_MIN, SAND_RADIUS_MAX = 3, 2, 4
 # smiths: tin ingots bought for an emerald (level 2), and tin ingots sold for one (level 3)
@@ -117,16 +119,16 @@ LANG = {
     "jei.jaymospowers.charcoal_pit.build.4": "Leave it buried until every log is charred. Opened early, it flares up and burns.",
     "jei.jaymospowers.brick_blast_furnace": "Brick Blast Furnace",
     "jei.jaymospowers.brick_blast_furnace.time": "%s minutes",
-    "jei.jaymospowers.brick_blast_furnace.ash": "+%s ash",
     "jei.jaymospowers.brick_blast_furnace.build.1": "Brick blast furnace: 32 firebricks and the brick blast furnace, 3 wide, 3 deep and 4 tall, hollow and open at the top.",
     "jei.jaymospowers.brick_blast_furnace.build.2": "Layer 1 (bottom): 9 firebricks.",
     "jei.jaymospowers.brick_blast_furnace.build.3": "Layer 2: 8 round an empty middle. The brick blast furnace is the middle of one side, facing out; the other 7 are firebricks.",
     "jei.jaymospowers.brick_blast_furnace.build.4": "Layer 3: 8 firebricks round an empty middle.",
     "jei.jaymospowers.brick_blast_furnace.build.5": "Layer 4: 8 firebricks round an empty middle, open to the sky.",
     "jei.jaymospowers.tin_ore": "Tin Ore",
-    "jei.jaymospowers.tin_ore.where": "Great veins high in the mountains",
+    "jei.jaymospowers.tin_ore.where": "Great veins in the mountains, high up and (rarer) deep down",
     "jei.jaymospowers.tin_sand.where": "River beds; pan it for tin",
-    "jei.jaymospowers.treated_planks": "Planks soaked in creosote. They never weather, rot or grow moss.",
+    "jei.jaymospowers.ash": "Left by the brick blast furnace with every steel ingot. Potash: a flux for glass, mixed with four sand into glass dust in place of flint dust.",
+    "jei.jaymospowers.treated_planks":"Planks soaked in creosote. They never weather, rot or grow moss.",
     "jei.jaymospowers.creosote": "Drawn from a coke oven. It soaks planks and rags, and an iron bucket of it burns in a furnace.",
 }
 
@@ -575,6 +577,9 @@ def data():
         recipe(controller, sa.shaped("misc", ["BBB", "B B", "BBB"], {"B": NS + ":" + brick}, NS + ":" + controller))
     recipe("coal_coke_block", sa.shaped("building", ["###", "###", "###"], {"#": NS + ":coal_coke"}, NS + ":coal_coke_block"))
     recipe("coal_coke", sa.shapeless("misc", [NS + ":coal_coke_block"], NS + ":coal_coke", 9))
+    # the blast furnace's ash is potash, a flux for glass: it stands in for flint dust in glass dust (gen_stone_age's recipe)
+    recipe("glass_dust_from_ash", sa.shapeless("misc", ["#minecraft:smelts_to_glass"] * sa.GLASS_SAND + [NS + ":ash"], NS + ":glass_dust",
+                                               sa.GLASS_DUST))
     # creosote soaks rags (torches) and planks
     recipe("creosote_rag", sa.shapeless("misc", [NS + ":rag"] * SOAKED_RAGS + [creosote], NS + ":creosote_rag", SOAKED_RAGS))
     recipe("treated_planks", sa.shaped("building", ["PPP", "PCP", "PPP"], {"P": "#minecraft:planks", "C": creosote}, NS + ":treated_planks",
@@ -683,11 +688,12 @@ def worldgen():
     wg = os.path.join(DATA, NS, "worldgen")
     write(os.path.join(wg, "feature", "big_vein_tin.json"), {
         "type": NS + ":big_vein", "ore": NS + ":tin_ore", "size": TIN_VEIN_SIZE, "deep": NS + ":deepslate_tin_ore"})
-    write(os.path.join(wg, "placed_feature", "big_vein_tin.json"), {"feature": NS + ":big_vein_tin", "placement": [
-        {"type": "minecraft:rarity_filter", "chance": TIN_RARITY}, {"type": "minecraft:in_square"},
-        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": TIN_LOW},
-                                                      "max_inclusive": {"absolute": TIN_HIGH}}},
-        {"type": "minecraft:biome"}]})
+    for name, rarity, low, high in (("big_vein_tin", TIN_RARITY, TIN_LOW, TIN_HIGH), ("big_vein_tin_deep", TIN_DEEP_RARITY, TIN_DEEP_LOW, TIN_DEEP_HIGH)):
+        write(os.path.join(wg, "placed_feature", name + ".json"), {"feature": NS + ":big_vein_tin", "placement": [
+            {"type": "minecraft:rarity_filter", "chance": rarity}, {"type": "minecraft:in_square"},
+            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": low},
+                                                          "max_inclusive": {"absolute": high}}},
+            {"type": "minecraft:biome"}]})
     write(os.path.join(wg, "feature", "tin_sand.json"), {
         "type": "minecraft:disk", "half_height": 1,
         "radius": {"type": "minecraft:uniform", "min_inclusive": SAND_RADIUS_MIN, "max_inclusive": SAND_RADIUS_MAX},

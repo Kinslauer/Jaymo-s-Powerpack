@@ -98,10 +98,10 @@ public class BlastFurnaceEntity extends BlockEntity {
 		changed();
 	}
 
-	/** The steel, then the ash; or ({@code waiting}) the iron, then the coke. */
+	/** The steel, then the ash; or ({@code waiting}) the iron, then the coke; nothing if those are empty. */
 	ItemStack take(boolean waiting) {
 		ItemStack out;
-		if (waiting || steel.isEmpty() && ash.isEmpty()) {
+		if (waiting) {
 			if (!iron.isEmpty()) {
 				out = iron;
 				iron = ItemStack.EMPTY;

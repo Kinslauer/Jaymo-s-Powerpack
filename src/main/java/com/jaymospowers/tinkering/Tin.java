@@ -27,8 +27,9 @@ import net.minecraft.world.level.material.MapColor;
 
 /**
  * Andy's GT New Horizons picks, patch 4 (docs/GTNH-Plan.md, ss-tin): tin and a real bronze age. Tin ore (stone and
- * deepslate) lies in great veins high in the mountains, laid by the same {@code ground/BigVeinFeature} as iron and copper
- * (worldgen/placed_feature/big_vein_tin.json: rarer than copper, smaller than iron), and dark tin sand lies in the river
+ * deepslate) lies in great veins in the mountains, laid by the same {@code ground/BigVeinFeature} as iron and copper
+ * (worldgen/placed_feature/big_vein_tin.json: high up, rarer than copper, smaller than iron; big_vein_tin_deep.json: rarer
+ * still, deep down in the deepslate), and dark tin sand lies in the river
  * beds (worldgen/placed_feature/tin_sand.json), where a pan turns up tin nuggets ({@code ground/Panning#TIN}). Tin melts
  * like any ore (doubled), and three of copper to one of tin alloy into bronze in the smeltery ({@link Melting#ALLOYS});
  * bronze is a Tinkering material between flint and iron ({@link TinkerMaterial#BRONZE}), cast into parts and plating.
@@ -66,6 +67,7 @@ public final class Tin {
 		Melting.tin(TIN_INGOT, TIN_NUGGET, TIN_BLOCK.asItem(), RAW_TIN, RAW_TIN_BLOCK.asItem(), TIN_ORE.asItem(), DEEPSLATE_TIN_ORE.asItem());
 		Melting.alloyForms(Molten.BRONZE, BRONZE_NUGGET, BRONZE_BLOCK.asItem());
 		BiomeModifications.addFeature(BiomeSelectors.tag(BiomeTags.IS_MOUNTAIN), GenerationStep.Decoration.UNDERGROUND_ORES, placed("big_vein_tin"));
+		BiomeModifications.addFeature(BiomeSelectors.tag(BiomeTags.IS_MOUNTAIN), GenerationStep.Decoration.UNDERGROUND_ORES, placed("big_vein_tin_deep"));
 		BiomeModifications.addFeature(BiomeSelectors.tag(BiomeTags.IS_RIVER), GenerationStep.Decoration.UNDERGROUND_ORES, placed("tin_sand"));
 		CreativeModeTabEvents.modifyOutputEvent(ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("tinkering"))).register(output -> {
 			for (Block block : List.of(TIN_ORE, DEEPSLATE_TIN_ORE, RAW_TIN_BLOCK, TIN_BLOCK, BRONZE_BLOCK, TIN_SAND)) {

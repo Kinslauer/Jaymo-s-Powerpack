@@ -35,9 +35,8 @@ public class SluiceBlock extends Block {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final int MOST = 8;
 	public static final IntegerProperty LOAD = IntegerProperty.create("load", 0, MOST);
-	/** (GTNH picks) Tin sand is in the load: its washes may turn up tin ({@link Panning#TIN}) until the trough is empty. */
-	public static final net.minecraft.world.level.block.state.properties.BooleanProperty TIN =
-		net.minecraft.world.level.block.state.properties.BooleanProperty.create("tin");
+	/** (GTNH picks) How much of the load is tin sand: a wash of tin sand may turn up tin ({@link Panning#TIN}) and spends one. */
+	public static final IntegerProperty TIN = IntegerProperty.create("tin", 0, MOST);
 	/** Ticks a load takes, and how much better a sluice finds than a pan. */
 	static final int WASH_TICKS = 100;
 	static final float BETTER = 1.5F;
@@ -45,7 +44,7 @@ public class SluiceBlock extends Block {
 
 	public SluiceBlock(Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, 0).setValue(TIN, false));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, 0).setValue(TIN, 0));
 	}
 
 	@Override
@@ -74,7 +73,7 @@ public class SluiceBlock extends Block {
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server) {
-			boolean tin = state.getValue(TIN) || Panning.tinSand(item.getBlock().defaultBlockState());
+			int tin = state.getValue(TIN) + (Panning.tinSand(item.getBlock().defaultBlockState()) ? 1 : 0);
 			server.setBlock(pos, state.setValue(LOAD, load + 1).setValue(TIN, tin), Block.UPDATE_ALL);
 			server.playSound(null, pos, SoundEvents.GRAVEL_PLACE, SoundSource.BLOCKS, 0.8F, 1.0F);
 			server.scheduleTick(pos, this, WASH_TICKS);
@@ -92,10 +91,13 @@ public class SluiceBlock extends Block {
 			return;
 		}
 		if (running(level, pos)) {
-			level.setBlock(pos, state.setValue(LOAD, load - 1).setValue(TIN, load - 1 > 0 && state.getValue(TIN)), Block.UPDATE_ALL);
+			// the load washed this time is tin sand as often as tin sand is in the load
+			int tin = state.getValue(TIN);
+			boolean tinSand = tin > 0 && random.nextInt(load) < tin;
+			level.setBlock(pos, state.setValue(LOAD, load - 1).setValue(TIN, Math.min(load - 1, tinSand ? tin - 1 : tin)), Block.UPDATE_ALL);
 			level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.4F, 1.4F);
 			level.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.1, 0.3, 0.0);
-			ItemStack found = Panning.wash(random, BETTER, state.getValue(TIN));
+			ItemStack found = Panning.wash(random, BETTER, tinSand);
 			if (!found.isEmpty()) {
 				Direction out = state.getValue(FACING);
 				Block.popResource(level, pos.relative(out), found);

@@ -58,6 +58,6 @@ public final class TinkeringClient {
 		HandcraftClient.init();
 		// the coke oven's creosote, lying where a bucket was poured
 		FluidRenderingRegistry.register(CokeAndSteel.CREOSOTE, CokeAndSteel.FLOWING_CREOSOTE, new FluidModel.Unbaked(
-			new Material(JaymosPowers.id("block/creosote_still")), new Material(JaymosPowers.id("block/creosote_flow")), null, null));
+			new Material(JaymosPowers.id("block/coke/creosote_still")), new Material(JaymosPowers.id("block/coke/creosote_flow")), null, null));
 	}
 }

@@ -17,8 +17,14 @@ import net.minecraft.world.level.ItemLike;
  * through what may go there), an arrow, the result, and a line or two of how it's done underneath.
  */
 final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
-	/** A recipe as JEI shows it: each input slot's choices, the result's (empty for none), and the notes below. */
-	record Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes) {
+	/**
+	 * A recipe as JEI shows it: each input slot's choices, the result's (empty for none), the notes below, and (GTNH picks)
+	 * a byproduct beside the result (empty for none).
+	 */
+	record Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes, List<ItemStack> byproduct) {
+		Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes) {
+			this(inputs, output, notes, List.of());
+		}
 	}
 
 	static final int MAX_INPUTS = 5;
@@ -69,6 +75,9 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 		}
 		if (!recipe.output().isEmpty()) {
 			builder.addOutputSlot(outputX(), 1).setOutputSlotBackground().addItemStacks(recipe.output());
+		}
+		if (!recipe.byproduct().isEmpty()) {
+			builder.addOutputSlot(outputX() + SLOT + 2, 1).setOutputSlotBackground().addItemStacks(recipe.byproduct());
 		}
 	}
 
