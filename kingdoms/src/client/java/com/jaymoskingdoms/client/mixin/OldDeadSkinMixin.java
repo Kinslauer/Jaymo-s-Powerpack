@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** The Overworld's zombies wear their old-villager skins ({@link OldDeadSkins}); the husks' go on in OldDeadHuskSkinMixin. */
+/** The present-day dead wear their old-villager skins ({@link OldDeadSkins}); the husks' go on in OldDeadHuskSkinMixin. */
 @Mixin(AbstractZombieRenderer.class)
 abstract class OldDeadSkinMixin {
 	@Inject(

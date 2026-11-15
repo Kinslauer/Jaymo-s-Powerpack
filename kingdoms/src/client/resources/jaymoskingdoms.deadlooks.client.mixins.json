@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.deadlooks",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["TissouFutureDeadMixin", "TissouDrownedMixin", "TissouTextureManagerMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** The Overworld's husks wear their old-villager skins ({@link OldDeadSkins}; picked in OldDeadSkinMixin). */
+/** The present-day husks wear their old-villager skins ({@link OldDeadSkins}; picked in OldDeadSkinMixin). */
 @Mixin(HuskRenderer.class)
 abstract class OldDeadHuskSkinMixin {
 	@Inject(

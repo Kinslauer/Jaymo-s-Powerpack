@@ -287,6 +287,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
 		DarkEyes.register();
+		// the old dead's eyes that glow at night, and Tissou's Zombie Pack kept to the future
+		DeadEyes.register();
+		TissouPack.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
 		FrostTechLayer.register();
