@@ -1,0 +1,12 @@
+{
+  "entity.minecraft.villager.jaymoskingdoms.tinker": "Tinker",
+  "entity.minecraft.villager.jaymoskingdoms.engineer": "Engineer",
+  "entity.minecraft.villager.jaymoskingdoms.aeronaut": "Aeronaut",
+  "talk.jaymoskingdoms.steam_captain.ask": "She's fired up and the wind's fair. Where to?",
+  "talk.jaymoskingdoms.steam_captain.option": "To %s (%s)",
+  "talk.jaymoskingdoms.steam_captain.nowhere": "Nowhere to fly her. There's no other town of ours to land at.",
+  "talk.jaymoskingdoms.steam_captain.taken": "Another ship's in that berth now. Another time.",
+  "talk.jaymoskingdoms.steam_captain.fouled": "Her lines are fouled. Here's your money back.",
+  "talk.jaymoskingdoms.steam_captain.off": "Cast off! Hold the rail.",
+  "talk.jaymoskingdoms.steam_captain.arrived": "%s. Mind the step down."
+}

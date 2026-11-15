@@ -786,6 +786,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		SkyCourt.register();
 		SkyUsurpers.register();
 		SkyFerries.register();
+		// the steam towns, their stalls and their airships (after SkyFerries: the airships chain its sky helm)
+		SteamTowns.register();
+		SteamTrades.register();
+		SteamAirships.register();
 		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)

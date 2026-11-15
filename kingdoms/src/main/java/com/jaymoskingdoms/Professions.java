@@ -36,6 +36,8 @@ public final class Professions {
 	public static VillagerProfession CLOUDWRIGHT;
 	/** The sky folk's whaler and orchard keeper ({@link SkyTrades}): taken on by the village, never a player's pick. */
 	public static VillagerProfession SKY_WHALER, AMBROSIA_FARMER;
+	/** A steam town's tinker, engineer and airship captain ({@link SteamTrades}): taken on by the town, never a player's pick. */
+	public static VillagerProfession TINKER, ENGINEER, AERONAUT;
 
 	private Professions() {
 	}
@@ -63,6 +65,9 @@ public final class Professions {
 		CLOUDWRIGHT = register("cloudwright", SoundEvents.VILLAGER_WORK_SHEPHERD);
 		SKY_WHALER = register("sky_whaler", SoundEvents.VILLAGER_WORK_FISHERMAN);
 		AMBROSIA_FARMER = register("ambrosia_farmer", SoundEvents.VILLAGER_WORK_FARMER);
+		TINKER = register("tinker", SoundEvents.VILLAGER_WORK_TOOLSMITH);
+		ENGINEER = register("engineer", SoundEvents.VILLAGER_WORK_ARMORER);
+		AERONAUT = register("aeronaut", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -123,6 +128,9 @@ public final class Professions {
 			case "jaymoskingdoms:farrier" -> "minecraft:armorer";
 			case "jaymoskingdoms:wizard" -> "minecraft:cleric";
 			case "jaymoskingdoms:cook" -> "minecraft:butcher";
+			case "jaymoskingdoms:tinker" -> "minecraft:toolsmith";
+			case "jaymoskingdoms:engineer" -> "minecraft:armorer";
+			case "jaymoskingdoms:aeronaut" -> "minecraft:cartographer";
 			default -> null;
 		};
 	}
