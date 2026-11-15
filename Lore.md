@@ -778,7 +778,7 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
-(new) **The giant's ring** (ring thread, 2026-11-15; Andy: "you should be able to travel to that planet", picked the ring).
+**The giant's ring** (ring thread, 2026-11-15; Andy: "you should be able to travel to that planet", picked the ring).
 Nobody comes down on the blue giant itself: it is cloud all the way down. But a pod can make the short hop up from the
 Verdant World to its ring, which close to is no band at all but a field of drifts, slabs of old ice and dark rock hanging
 in the sun with no air between them. Gravilite runs through the drifts in veins and stands on them in shards; it is what
