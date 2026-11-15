@@ -41,6 +41,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorWingsLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
+		// (gb-capes) a realm cape's cloth
+		com.jaymoskingdoms.client.CapeLayer.extract(entity, state, partialTicks);
 		// (0.7.641) a stake in a vampire
 		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
 		com.jaymoskingdoms.client.StakeStruggle.extract(entity, state, partialTicks);

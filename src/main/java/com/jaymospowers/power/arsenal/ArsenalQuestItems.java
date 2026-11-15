@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import com.jaymospowers.compat.KingdomsCompat;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -66,12 +68,16 @@ public final class ArsenalQuestItems {
 	 * One special quest item. {@code isOut}: the item's own rule says it's in the world already (a copy exists
 	 * somewhere, loaded or not). {@code create}: a new one. {@code made}: told when a new one (or a taken one) has
 	 * reached the player, so the item's own tracking counts it. {@code matches}: whether a stack is the copy.
-	 * {@code progress}: 0 for the first form of the item, up for each form further along (a rarer pull).
+	 * {@code progress}: 0 for the first form of the item, up for each form further along (a rarer pull). {@code may}:
+	 * whether this player's rift can reach for it at all (some come only late in the Arsenal's mastery).
 	 */
 	record Entry(String id, String reason, float weight, Function<MinecraftServer, Boolean> isOut,
 		Function<MinecraftServer, ItemStack> create, java.util.function.Consumer<MinecraftServer> made,
-		BiPredicate<MinecraftServer, ItemStack> matches, ToIntFunction<ItemStack> progress) {
+		BiPredicate<MinecraftServer, ItemStack> matches, ToIntFunction<ItemStack> progress, Predicate<ServerPlayer> may) {
 	}
+
+	/** (medieval picks, nd-harbinger) The Last Bell's id in Jaymo's Kingdoms. */
+	static final String LAST_BELL = "jaymoskingdoms:last_bell";
 
 	/** The special quest items. Add a row to add one (an optional mod's item only through a registry lookup in its {@code create}). */
 	static final List<Entry> ENTRIES = List.of(
@@ -85,7 +91,18 @@ public final class ArsenalQuestItems {
 				int serial = SorasLineage.serial(stack);
 				return serial != 0 && serial == SorasLineage.currentSerial(server);
 			},
-			stack -> stack.getItem() instanceof SorasDagger dagger ? 1 + dagger.stage : 0));
+			stack -> stack.getItem() instanceof SorasDagger dagger ? 1 + dagger.stage : 0,
+			player -> true),
+		new Entry("last_bell",
+			"The Last Bell (Jaymo's Kingdoms, disasters.LastBell): one in the world at a time; it warns as it rings, and rung to its end it brings "
+				+ "the world's ending. Only a rift at the Arsenal's full mastery reaches it",
+			0.5F,
+			server -> !KingdomsCompat.lastBellFree(server),
+			KingdomsCompat::newLastBell,
+			KingdomsCompat::lastBellMade,
+			(server, stack) -> LAST_BELL.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()),
+			stack -> 0,
+			player -> KingdomsCompat.hasLastBell() && ArsenalRide.mastered(player)));
 
 	/** Where a copy was found, and how to take it from there. */
 	private record Found(ServerLevel level, Vec3 at, ItemStack stack, Runnable remove) {
@@ -94,23 +111,25 @@ public final class ArsenalQuestItems {
 	private ArsenalQuestItems() {
 	}
 
-	/** Rolled when a Reach opens: the quest item it goes for, or null (nearly always). */
-	static @Nullable Entry roll(RandomSource random) {
+	/** Rolled when {@code player}'s Reach opens: the quest item it goes for, or null (nearly always). */
+	static @Nullable Entry roll(ServerPlayer player) {
+		RandomSource random = player.getRandom();
+		List<Entry> open = ENTRIES.stream().filter(e -> e.may().test(player)).toList();
 		float total = 0.0F;
-		for (Entry entry : ENTRIES) {
+		for (Entry entry : open) {
 			total += entry.weight();
 		}
 		if (total <= 0.0F || random.nextFloat() >= CHANCE * total) {
 			return null;
 		}
 		float pick = random.nextFloat() * total;
-		for (Entry entry : ENTRIES) {
+		for (Entry entry : open) {
 			pick -= entry.weight();
 			if (pick < 0.0F) {
 				return entry;
 			}
 		}
-		return ENTRIES.getLast();
+		return open.getLast();
 	}
 
 	/** What the portal shows coming out while it opens (for show only). */

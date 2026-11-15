@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,lit=true": {
+      "model": "minecraft:block/lantern"
+    },
+    "hanging=false,lit=false": {
+      "model": "jaymoskingdoms:block/burnt_lantern"
+    },
+    "hanging=true,lit=true": {
+      "model": "minecraft:block/lantern_hanging"
+    },
+    "hanging=true,lit=false": {
+      "model": "jaymoskingdoms:block/burnt_lantern_hanging"
+    }
+  }
+}

@@ -32,9 +32,21 @@ public final class QuestNet {
 	public static final int PROJECTS = -9;
 	/** (0.7.530) What a player chose on the town works screen (in {@link Act#action}): give goods, give a coin, give five coins. */
 	public static final int GIVE_GOODS = 4, GIVE_COIN = 5, GIVE_COINS = 6;
+	/** (gb-haggle) The player asked for more ({@link Haggle}). */
+	public static final int HAGGLE = 7;
 
-	/** One quest as the giver's screen shows it. */
-	public record View(String id, int state, boolean royal, Component title, Component text, Component objective, List<ItemStack> rewards, List<Component> extras) {
+	/** One quest as the giver's screen shows it; {@code haggle}: the player may ask for more pay ({@link Haggle}). */
+	public record View(String id, int state, boolean royal, Component title, Component text, Component objective, List<ItemStack> rewards, List<Component> extras,
+		boolean haggle) {
+		public View(String id, int state, boolean royal, Component title, Component text, Component objective, List<ItemStack> rewards, List<Component> extras) {
+			this(id, state, royal, title, text, objective, rewards, extras, false);
+		}
+
+		/** This view, with asking for more offered. */
+		View haggling() {
+			return new View(this.id, this.state, this.royal, this.title, this.text, this.objective, this.rewards, this.extras, true);
+		}
+
 		static void write(RegistryFriendlyByteBuf buf, View v) {
 			buf.writeUtf(v.id);
 			buf.writeVarInt(v.state);
@@ -47,6 +59,7 @@ public final class QuestNet {
 				ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
 			}
 			components(buf, v.extras);
+			buf.writeBoolean(v.haggle);
 		}
 
 		static View read(RegistryFriendlyByteBuf buf) {
@@ -61,7 +74,8 @@ public final class QuestNet {
 			for (int i = 0; i < n; i++) {
 				rewards.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
 			}
-			return new View(id, state, royal, title, text, objective, rewards, components(buf));
+			List<Component> extras = components(buf);
+			return new View(id, state, royal, title, text, objective, rewards, extras, buf.readBoolean());
 		}
 	}
 

@@ -219,7 +219,7 @@ public final class Relics {
 	}
 
 	/** An old relic out of a chest: a random one, its passive hidden, now and then cursed or with a mind of its own. */
-	static ItemStack found(ServerLevel level, RandomSource random) {
+	public static ItemStack found(ServerLevel level, RandomSource random) {
 		boolean royal = random.nextFloat() < FOUND_ROYAL;
 		ItemStack stack = make(level, roll(random, random.nextBoolean(), royal), "", true);
 		if (stack.isEmpty()) {

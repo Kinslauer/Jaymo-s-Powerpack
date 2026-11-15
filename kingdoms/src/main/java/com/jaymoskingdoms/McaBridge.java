@@ -548,6 +548,8 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CLOUDWRIGHT).orElseThrow());
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.SKY_WHALER).orElseThrow());
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.AMBROSIA_FARMER).orElseThrow());
+		// (medieval picks) and an old age's descendant (RuinFolk sets their stall)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.RUIN_KEEPER).orElseThrow());
 		// a villager that was unloaded when a player was reborn forgets them as it loads
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof VillagerEntityMCA v) {

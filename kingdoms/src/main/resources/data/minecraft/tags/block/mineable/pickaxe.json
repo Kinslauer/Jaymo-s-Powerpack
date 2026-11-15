@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jaymoskingdoms:storm_bell",
+    "jaymoskingdoms:spider_stone",
     "jaymoskingdoms:weathervane",
     "#jaymoskingdoms:carpentry_stone",
     "jaymoskingdoms:anchor",
@@ -14,6 +15,7 @@
     "jaymoskingdoms:shrine",
     "jaymoskingdoms:trophy_stand_stone",
     "jaymoskingdoms:plaster",
-    "jaymoskingdoms:stone_lantern"
+    "jaymoskingdoms:stone_lantern",
+    "jaymoskingdoms:tomb_seal"
   ]
 }

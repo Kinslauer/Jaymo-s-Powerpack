@@ -720,6 +720,10 @@ public final class KingdomEvents {
 			// (0.7.523) an audience with the ruler keeps a promise to speak for someone
 			Promises.audience(player, factionId);
 		}
+		// (am-warchest) a besieged seat's ruler opens its war chest to those who defend it
+		if (WarChest.audience(player, folk, faction)) {
+			return true;
+		}
 		// (0.7.519) a sovereign's own steward opens the ruler's desk (the old audience stays if their game can't show it)
 		if (Rulers.is(folk) && Crowns.rules(server, faction, player.getUUID()) && RulersDesk.open(player, faction)) {
 			return true;

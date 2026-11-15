@@ -27,6 +27,8 @@ public class SmithingAnvilRenderer implements BlockEntityRenderer<SmithingAnvilE
 		final ItemStackRenderState work = new ItemStackRenderState();
 		final ItemStackRenderState result = new ItemStackRenderState();
 		boolean hasWork, hasResult, workHot, resultHot, alongX;
+		/** (medieval picks) The work's heat left, 0 to 1: its glow dims as the blows cool it. */
+		float workHeat;
 	}
 
 	private final ItemModelResolver itemModels;
@@ -49,6 +51,8 @@ public class SmithingAnvilRenderer implements BlockEntityRenderer<SmithingAnvilE
 		state.hasWork = !work.isEmpty();
 		state.hasResult = !result.isEmpty();
 		state.workHot = HotMetal.hot(work, now);
+		Long at = work.get(com.jaymospowers.tinkering.smithing.Smithing.HEATED_AT);
+		state.workHeat = at == null ? 0.0F : Math.max(0.0F, 1.0F - (now - at) / (float) HotMetal.COOL_TICKS);
 		state.resultHot = HotMetal.hot(result, now);
 		state.alongX = anvil.getBlockState().getValue(SmithingAnvilBlock.FACING).getAxis() == Direction.Axis.X;
 		if (state.hasWork) {
@@ -62,7 +66,8 @@ public class SmithingAnvilRenderer implements BlockEntityRenderer<SmithingAnvilE
 	@Override
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		if (state.hasWork) {
-			flat(state, state.work, poseStack, collector, state.workHot ? LightCoordsUtil.FULL_BRIGHT : state.lightCoords, 1.0F + 1 / 64.0F);
+			flat(state, state.work, poseStack, collector, state.workHot ? LightCoordsUtil.withBlock(state.lightCoords,
+				Math.max(LightCoordsUtil.block(state.lightCoords), Math.round(6 + 9 * state.workHeat))) : state.lightCoords, 1.0F + 1 / 64.0F);
 		}
 		if (state.hasResult) {
 			flat(state, state.result, poseStack, collector, state.resultHot ? LightCoordsUtil.FULL_BRIGHT : state.lightCoords, 1.0F + 2 / 64.0F);

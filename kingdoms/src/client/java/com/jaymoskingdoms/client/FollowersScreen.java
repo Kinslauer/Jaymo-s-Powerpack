@@ -1,7 +1,9 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Followers;
+import com.jaymoskingdoms.Formations;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Ranks;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -21,12 +23,16 @@ import org.jspecify.annotations.Nullable;
 /**
  * The orders screen ({@link Followers}): the Orders key (comma) with a villager of yours under the crosshair opens
  * theirs; with nobody there it speaks to everyone of yours near. Seven buttons, one an order; the server decides who
- * listens.
+ * listens. (medieval picks) Beside them, the formation's ({@link Formations}): the four shapes, go where I look, hold,
+ * follow, charge, set on my mark, break ranks. A ranked recruit's rank shows by their name ({@link Ranks}).
  */
 public final class FollowersScreen extends Screen {
-	private static final int W = 176, ROW = 20, TOP = 24;
+	private static final int W = 176, ROW = 20, TOP = 24, GAP = 8;
 	/** The buttons, top to bottom. */
 	private static final int[] ORDERS = {Followers.FOLLOW, Followers.FIGHT, Followers.HOLD, Followers.STAND, Followers.PATROL, Followers.CLEAR, Followers.FREE};
+	/** The formation's buttons, top to bottom. */
+	private static final int[] FORMATION = {Formations.LINE, Formations.WEDGE, Formations.SQUARE, Formations.COLUMN, Formations.PLACE, Formations.HOLD,
+		Formations.FOLLOW, Formations.CHARGE, Formations.SET_ON, Formations.BREAK};
 	private static @Nullable KeyMapping key;
 
 	private final int target;
@@ -50,7 +56,7 @@ public final class FollowersScreen extends Screen {
 					}
 					Villager aimed = aimed(minecraft);
 					minecraft.gui.setScreen(aimed == null ? new FollowersScreen(-1, Component.translatable("gui.jaymoskingdoms.followers.all"))
-						: new FollowersScreen(aimed.getId(), aimed.getDisplayName()));
+						: new FollowersScreen(aimed.getId(), named(aimed)));
 				}
 			}
 		});
@@ -61,8 +67,19 @@ public final class FollowersScreen extends Screen {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)
 			&& com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.ORDERS)) {
-			minecraft.gui.setScreen(new FollowersScreen(villager.getId(), villager.getDisplayName()));
+			minecraft.gui.setScreen(new FollowersScreen(villager.getId(), named(villager)));
 		}
+	}
+
+	/** {@code e}'s name, with their rank when they have one. */
+	private static Component named(Entity e) {
+		Integer rank = e.getAttached(Ranks.RANK);
+		if (rank == null) {
+			return e.getDisplayName();
+		}
+		String step = new String[] {"militia", "soldier", "knight", "veteran", "leader"}[Math.min(4, Ranks.step(rank))];
+		return Component.translatable("gui.jaymoskingdoms.followers.ranked", e.getDisplayName(),
+			Component.translatable("gui.jaymoskingdoms.rank." + (Ranks.bow(rank) ? "bow." : "") + step));
 	}
 
 	/** The villager under the crosshair within {@link Followers#ONE_RANGE} blocks, or null. */
@@ -85,12 +102,16 @@ public final class FollowersScreen extends Screen {
 	}
 
 	private int height0() {
-		return TOP + ORDERS.length * ROW + 8;
+		return TOP + Math.max(ORDERS.length, FORMATION.length) * ROW + 8;
+	}
+
+	private int width0() {
+		return W * 2 + GAP;
 	}
 
 	@Override
 	protected void init() {
-		int x = (this.width - W) / 2, y = (this.height - height0()) / 2 + TOP;
+		int x = (this.width - width0()) / 2, y = (this.height - height0()) / 2 + TOP;
 		for (int i = 0; i < ORDERS.length; i++) {
 			int kind = ORDERS[i];
 			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.followers.order." + kind), b -> {
@@ -99,13 +120,29 @@ public final class FollowersScreen extends Screen {
 			}).bounds(x + 8, y + i * ROW, W - 16, 18)
 				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.followers.order." + kind + ".desc"))).build());
 		}
+		if (!ClientPlayNetworking.canSend(Formations.Give.TYPE)) {
+			return;
+		}
+		int fx = x + W + GAP;
+		for (int i = 0; i < FORMATION.length; i++) {
+			int kind = FORMATION[i];
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.formation." + kind), b -> {
+				ClientPlayNetworking.send(new Formations.Give(kind, this.target));
+				onClose();
+			}).bounds(fx + 8, y + i * ROW, W - 16, 18)
+				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.formation." + kind + ".desc"))).build());
+		}
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		int x = (this.width - W) / 2, y = (this.height - height0()) / 2;
+		int x = (this.width - width0()) / 2, y = (this.height - height0()) / 2;
 		Ui.panel(graphics, x, y, W, height0(), Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.followers.for", this.who), x + 10, y + 8, W - 20, Ui.TEXT);
+		if (ClientPlayNetworking.canSend(Formations.Give.TYPE)) {
+			Ui.panel(graphics, x + W + GAP, y, W, height0(), Ui.GOLD);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.formation.title"), x + W + GAP + 10, y + 8, W - 20, Ui.TEXT);
+		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 }

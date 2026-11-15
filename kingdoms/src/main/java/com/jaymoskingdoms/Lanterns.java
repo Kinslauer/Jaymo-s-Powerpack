@@ -155,9 +155,9 @@ public final class Lanterns {
 		return stack.is(ItemTags.COALS) ? COAL_TICKS : 0;
 	}
 
-	/** Plain lanterns burn down (not soul or copper lanterns, oil lamps, or our burnt ones). */
+	/** Plain lanterns burn down, guttering ones too ({@link GutteringLamps}; not soul or copper lanterns, oil lamps, our burnt or mote ones). */
 	public static boolean burns(BlockState state) {
-		return state.is(Blocks.LANTERN);
+		return state.is(Blocks.LANTERN) || state.is(GutteringLamps.LANTERN);
 	}
 
 	/**

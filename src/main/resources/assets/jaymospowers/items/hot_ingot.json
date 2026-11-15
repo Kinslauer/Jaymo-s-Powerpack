@@ -302,6 +302,58 @@
             }
           ]
         }
+      },
+      {
+        "when": "lead",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/medieval/lead_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "deep_steel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/medieval/deep_steel_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "bright_steel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/medieval/bright_steel_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "ash_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/medieval/ash_bronze_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
       }
     ],
     "fallback": {

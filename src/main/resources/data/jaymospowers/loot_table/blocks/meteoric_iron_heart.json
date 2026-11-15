@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/meteoric_iron_heart",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:meteoric_iron",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 3
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

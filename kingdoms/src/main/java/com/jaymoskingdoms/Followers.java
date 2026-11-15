@@ -212,6 +212,8 @@ public final class Followers {
 	/** {@code v} takes the order, at the spot they stand on. */
 	static void take(Villager v, ServerPlayer player, int kind) {
 		Attention.heed(v);
+		// (out of a formation's ranks, if they were in one: Formations)
+		Formations.leave(v);
 		PROGRESS.remove(v.getUUID());
 		if (kind == FOLLOW || kind == FREE) {
 			v.removeAttached(ORDER);

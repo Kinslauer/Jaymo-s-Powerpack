@@ -243,6 +243,11 @@ public final class Bounties {
 	private Bounties() {
 	}
 
+	/** Whether {@code mob} is a bounty's miniboss showing its bar. */
+	public static boolean barred(Entity mob) {
+		return BARS.containsKey(mob.getUUID());
+	}
+
 	static void register() {
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("bounty_board"));
 		BOARD = Registry.register(BuiltInRegistries.BLOCK, key, new BountyBoard(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
