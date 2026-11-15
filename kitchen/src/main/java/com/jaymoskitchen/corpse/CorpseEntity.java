@@ -2814,6 +2814,36 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
+	 * Server: a body that died sat against the wall facing {@code face} (downed there: see {@link Corpses#PROPPED_TAG})
+	 * starts sat against it, as one that slid down it ends up, if the wall's still there at its back. A body that isn't
+	 * built like a person, or has no wall there, lies as it was made.
+	 */
+	void sitAgainst(Direction face) {
+		if (ragdoll == null || !com.jaymoskitchen.ragdoll.WallSlump.fits(ragdoll.body.rig)) {
+			return;
+		}
+		Direction toward = face.getOpposite();
+		boolean alongX = toward.getAxis() == Direction.Axis.X;
+		// the wall: the first block that way from its feet (a downed body lies within a block of it)
+		BlockPos feet = BlockPos.containing(getX(), getY() + 0.3, getZ());
+		Level level = level();
+		for (int i = 1; i <= 2; i++) {
+			BlockPos wall = feet.relative(toward, i);
+			if (!level.getBlockState(wall).isFaceSturdy(level, wall, face)) {
+				continue;
+			}
+			double coord = alongX ? wall.getX() : wall.getZ();
+			double plane = toward.getAxisDirection() == Direction.AxisDirection.POSITIVE ? coord : coord + 1.0;
+			com.jaymoskitchen.ragdoll.WallSlump slump = new com.jaymoskitchen.ragdoll.WallSlump(ragdoll.body, face.getStepX(),
+				face.getStepZ(), plane * (face.getStepX() + face.getStepZ()), getY(), random.nextLong());
+			slump.sit(ragdoll.body);
+			ragdoll.prop(face);
+			ragdoll.send(this);
+			return;
+		}
+	}
+
+	/**
 	 * Whether a body sitting against the wall facing {@code face} still has the wall at its back (where it leans on it
 	 * most) and the floor under its hips.
 	 */

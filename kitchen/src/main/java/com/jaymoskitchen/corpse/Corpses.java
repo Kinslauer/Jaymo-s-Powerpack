@@ -226,6 +226,28 @@ public final class Corpses {
 	 */
 	public static final String LYING_TAG = "jaymoskitchen.lying.";
 
+	/**
+	 * Prefix of the tag another mod puts on a body that dies sat against a wall (Jaymo's Powers: someone downed there),
+	 * followed by the wall's face as a 2D direction index (the way out of the wall): its corpse stays sat against it
+	 * ({@link CorpseEntity#sitAgainst}).
+	 */
+	public static final String PROPPED_TAG = "jaymoskitchen.propped.";
+
+	/** (Used up) the wall {@code mob}'s {@link #PROPPED_TAG} says it sat against, or null. */
+	static net.minecraft.core.@org.jspecify.annotations.Nullable Direction proppedFrom(LivingEntity mob) {
+		for (String tag : java.util.List.copyOf(mob.entityTags())) {
+			if (tag.startsWith(PROPPED_TAG)) {
+				mob.removeTag(tag);
+				try {
+					return net.minecraft.core.Direction.from2DDataValue(Integer.parseInt(tag.substring(PROPPED_TAG.length())));
+				} catch (NumberFormatException ignored) {
+					return null;
+				}
+			}
+		}
+		return null;
+	}
+
 	/** The body {@code mob}'s {@link #LYING_TAG} asks for (the tag used up), or null if it carries none or it can't be read. */
 	private static @org.jspecify.annotations.Nullable RagdollBody lyingFrom(LivingEntity mob, RagdollRig rig) {
 		for (String tag : java.util.List.copyOf(mob.entityTags())) {
@@ -362,6 +384,11 @@ public final class Corpses {
 		} else {
 			corpse.startRagdoll(deathBody(mob));
 		}
+		net.minecraft.core.Direction propped = proppedFrom(mob);
+		if (propped != null) {
+			// died sat against a wall (downed there): it stays sat
+			corpse.sitAgainst(propped);
+		}
 		pinFrom(mob, corpse);
 		// a skeleton drops in pieces: skull and arms loose, ribs and legs together
 		corpse.fallToPieces(level);
@@ -390,7 +417,7 @@ public final class Corpses {
 			return null;
 		}
 		for (String tag : mob.entityTags()) {
-			if (tag.startsWith(LYING_TAG) || tag.startsWith(PINNED_TAG)) {
+			if (tag.startsWith(LYING_TAG) || tag.startsWith(PINNED_TAG) || tag.startsWith(PROPPED_TAG)) {
 				return null;
 			}
 		}

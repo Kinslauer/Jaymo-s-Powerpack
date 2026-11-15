@@ -229,6 +229,7 @@ public final class CrawlPose {
 			state.setData(ProneTransition.KEY, null);
 			state.setData(ProneHaulPose.KEY, null);
 			state.setData(KEY, null);
+			state.setData(com.jaymospowers.client.wounds.WallSit.KEY, null);
 			state.setData(RISEN_KEY, null);
 			return;
 		}
@@ -244,6 +245,7 @@ public final class CrawlPose {
 		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
 			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
 			state.setData(KEY, null);
+			state.setData(com.jaymospowers.client.wounds.WallSit.KEY, null);
 			Long risen = RISEN.get(entity.getId());
 			boolean fresh = risen != null && entity.level().getGameTime() - risen <= RISEN_TICKS;
 			if (risen != null && !fresh) {
@@ -271,6 +273,8 @@ public final class CrawlPose {
 			RISEN.remove(player.getId());
 		}
 		rise = sink(player.getId(), downed, rise, time + partialTicks);
+		// (Andy, 2026-11-15) downed and lying still beside a wall a moment: sat up against it
+		com.jaymospowers.client.wounds.WallSit.extract(player, state, partialTicks, rise >= 0.0F);
 		// (0.19.30) which way they're going along the body: the way they face, or backing up
 		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
@@ -372,6 +376,10 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl == null || !state.isVisuallySwimming) {
+			return;
+		}
+		if (com.jaymospowers.client.wounds.WallSit.rotatePlayer(state, poseStack)) {
+			// (2026-11-15) downed, sat against a wall
 			return;
 		}
 		if (ProneHaulPose.rotate(state, poseStack)) {
@@ -478,6 +486,11 @@ public final class CrawlPose {
 			return;
 		}
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
+		if (com.jaymospowers.client.wounds.WallSit.posePlayer(state, f)) {
+			// (2026-11-15) downed, sat against a wall
+			track.apply(h, f, 1.0F);
+			return;
+		}
 		if (ProneHaulPose.pose(state, f)) {
 			// hauling up a block: the reach, the pull up the face, the knee over the edge
 			track.apply(h, f, 2.0F);
@@ -830,6 +843,7 @@ public final class CrawlPose {
 		}
 		State crawl = state.getData(KEY);
 		if (crawl == null || crawl.roll() != null || crawl.out() || crawl.rise() >= 0.0F
+			|| com.jaymospowers.client.wounds.WallSit.sitting(state)
 			|| state.getData(ProneTransition.KEY) != null && crawl.downed() < 0.0F) {
 			return;
 		}

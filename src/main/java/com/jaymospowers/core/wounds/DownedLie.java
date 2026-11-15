@@ -17,6 +17,13 @@ public final class DownedLie {
 	public static final float SHUFFLE_SHARE = 0.3F, CURL_SHARE = 0.5F;
 	/** Jaymo's Kitchen's {@code Corpses.LYING_TAG}: then {@code u} or {@code d} (face up or down), a dot, and the way the head points (whole degrees). */
 	static final String LYING_TAG = "jaymoskitchen.lying.";
+	/** Jaymo's Kitchen's {@code Corpses.PROPPED_TAG}: then the wall's face (its 2D index, the way out of the wall). */
+	static final String PROPPED_TAG = "jaymoskitchen.propped.";
+	/**
+	 * Andy (2026-11-15): "can we make downed players and mobs sit against a wall?" Someone downed (not crawling off) with a
+	 * wall's face no further than this from their side (blocks, past half their width) sits with their back to it.
+	 */
+	public static final double WALL_REACH = 0.6;
 
 	private DownedLie() {
 	}
@@ -70,12 +77,54 @@ public final class DownedLie {
 		}
 		clearBody(entity);
 		entity.addTag(LYING_TAG + (faceUp ? "u." : "d.") + Math.round(net.minecraft.util.Mth.wrapDegrees(yaw)));
+		double[] wall = !tripped && !Downed.crawls(entity) ? wall(entity) : null;
+		if (wall != null) {
+			// sat against a wall: the body stays sat there (a Kitchen without walls to sit against lies it down as above)
+			entity.addTag(PROPPED_TAG + net.minecraft.core.Direction.getApproximateNearest(wall[0], 0.0, wall[1]).get2DDataValue());
+		}
+	}
+
+	/**
+	 * The wall someone downed at {@code entity}'s spot sits against, if there's one to sit against: a solid face at their
+	 * hips, no further than {@link #WALL_REACH} past their side, with ground under them; the nearest of the four. As
+	 * {nx, nz, distance}: the face's way out of the wall, and how far it is from their middle (blocks). Null if none.
+	 */
+	public static double @org.jspecify.annotations.Nullable [] wall(LivingEntity entity) {
+		if (BodyPlan.of(entity) != BodyPlan.HUMANOID || entity.isInWater() || entity.isPassenger()) {
+			return null;
+		}
+		net.minecraft.world.level.Level level = entity.level();
+		double x = entity.getX(), y = entity.getY() + 0.3, z = entity.getZ();
+		net.minecraft.core.BlockPos under = net.minecraft.core.BlockPos.containing(x, entity.getY() - 0.1, z);
+		if (level.getBlockState(under).getCollisionShape(level, under).isEmpty()) {
+			return null;
+		}
+		double reach = entity.getBbWidth() * 0.5 + WALL_REACH;
+		double[] best = null;
+		for (net.minecraft.core.Direction toward : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+			int sx = toward.getStepX(), sz = toward.getStepZ();
+			net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x + sx * reach, y, z + sz * reach);
+			// (only the block next to theirs: one they stand inside isn't a wall)
+			if (pos.getX() == net.minecraft.util.Mth.floor(x) && pos.getZ() == net.minecraft.util.Mth.floor(z)) {
+				continue;
+			}
+			net.minecraft.core.Direction face = toward.getOpposite();
+			if (!level.getBlockState(pos).isFaceSturdy(level, pos, face)) {
+				continue;
+			}
+			// the face's distance from their middle
+			double distance = sx > 0 ? pos.getX() - x : sx < 0 ? x - (pos.getX() + 1.0) : sz > 0 ? pos.getZ() - z : z - (pos.getZ() + 1.0);
+			if (distance >= 0.0 && (best == null || distance < best[2])) {
+				best = new double[] {face.getStepX(), face.getStepZ(), distance};
+			}
+		}
+		return best;
 	}
 
 	/** Takes the mark off again (the death was turned away, so it may yet die on its feet). */
 	static void clearBody(LivingEntity entity) {
 		for (String tag : java.util.List.copyOf(entity.entityTags())) {
-			if (tag.startsWith(LYING_TAG)) {
+			if (tag.startsWith(LYING_TAG) || tag.startsWith(PROPPED_TAG)) {
 				entity.removeTag(tag);
 			}
 		}

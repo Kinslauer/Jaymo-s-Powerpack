@@ -4,3 +4,4 @@
 - It stays sat there (and still sits after a reload) until something moves it: a hit, an axe, rummaging, someone walking into it, picking it up or dragging it, or the wall or floor being broken. Then it falls over as a normal ragdoll.
 - It needs a solid wall face where it struck that goes down to a floor no more than 3 blocks below it; a body thrown at a wall high over a drop just falls.
 - `ragdoll/WallSlump` (the slide and the pose, tuning at the top), `CorpseRagdoll` (spotting the hit, holding it sat), `CorpseEntity#slumpWall` / `#stillPropped`, `RagdollBody#settle`, `CorpseImpacts#setOnSlump` (tells Jaymo's Powers). Checked in `tools/ragdoll_sim` (new wall-slump section); not played.
+- A body that dies sat against a wall while downed (Jaymo's Powers, `Corpses.PROPPED_TAG`) starts sat there instead of lying down (`CorpseEntity#sitAgainst`, `WallSlump#sit`).

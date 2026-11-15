@@ -106,7 +106,7 @@ public final class DownedPose {
 	 * {@code FACE}. The rest: see {@link DownedBodies}.
 	 */
 	enum Style {
-		CRAWL, SHUFFLE, BACK, CURL, SLUMP, SIDE, SPRAWL, FLIPPED, SPLAYED, FALLEN, SPREAD, FLOP, BELLY_UP, MELT, SHUDDER, TOPPLE, FACE
+		CRAWL, SHUFFLE, BACK, CURL, SLUMP, WALL, SIDE, SPRAWL, FLIPPED, SPLAYED, FALLEN, SPREAD, FLOP, BELLY_UP, MELT, SHUDDER, TOPPLE, FACE
 	}
 
 	/**
@@ -115,7 +115,7 @@ public final class DownedPose {
 	 * and what a finisher is doing to it just now ({@code react}, see {@link ExecutionReact}), if one is.
 	 */
 	record Down(float amount, boolean crawls, boolean person, int broken, float down, int id, boolean out, Kind kind, Style style,
-		ExecutionReact.@org.jspecify.annotations.Nullable React react) {
+		ExecutionReact.@org.jspecify.annotations.Nullable React react, WallSit.@org.jspecify.annotations.Nullable Sit wall) {
 		boolean machine() {
 			return this.kind == Kind.MACHINE;
 		}
@@ -145,7 +145,7 @@ public final class DownedPose {
 		if (legless && !Downed.isDowned(entity)) {
 			// (Andy: legless mobs crawl) still up, but with no legs: it hauls itself along on its arms, as a downed crawler does
 			state.setData(KEY, new Down(1.0F, true, true, Wounds.brokenLimbs(entity), LEGLESS_DOWN, entity.getId(), false, Kind.PERSON,
-				Style.CRAWL, null));
+				Style.CRAWL, null, null));
 			return;
 		}
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);
@@ -153,9 +153,11 @@ public final class DownedPose {
 		boolean machine = com.jaymospowers.core.wounds.Malfunction.is(entity);
 		boolean crawls = Downed.crawls(entity);
 		Kind kind = kind(entity, person, machine);
+		// (Andy, 2026-11-15) down beside a wall, a person (or a machine built like one) that isn't crawling off sits against it
+		WallSit.Sit wall = person && !crawls ? WallSit.of(entity) : null;
 		Down pose = new Down(fall(down), crawls, person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),
-			Downed.passedOut(entity), kind, style(kind, person, crawls, entity.getId(), entity.isInWater()),
-			ExecutionReact.of(entity, partialTicks));
+			Downed.passedOut(entity), kind, wall != null ? Style.WALL : style(kind, person, crawls, entity.getId(), entity.isInWater()),
+			ExecutionReact.of(entity, partialTicks), wall);
 		state.setData(KEY, pose);
 		if (pose.react() != null && !person) {
 			// being finished: an animal, a bug, a bird kicks with its own legs under the blows, however it lies
@@ -302,7 +304,10 @@ public final class DownedPose {
 				}
 			}
 		}
-		if (pose.style() == Style.SLUMP) {
+		if (pose.style() == Style.WALL && pose.wall() != null) {
+			// (2026-11-15) sat against the wall beside it, sliding down it as it goes down
+			WallSit.rotate(poseStack, pose.wall(), state.bodyRot, height, flat);
+		} else if (pose.style() == Style.SLUMP) {
 			// (2026-11-11) sat down where it stood, legs out ahead, folded forward over them
 			poseStack.translate(0.0F, -height * SLUMP_SINK * flat, 0.0F);
 		} else if (pose.style() == Style.CURL) {
@@ -383,6 +388,7 @@ public final class DownedPose {
 	private static void pose(PoseBlend.Frame f, LivingEntityRenderState living, Down pose) {
 		switch (pose.style()) {
 			case SLUMP -> slump(f, living, pose);
+			case WALL -> WallSit.limbs(f, living.ageInTicks, pose.id(), pose.out(), pose.broken());
 			case CRAWL -> CrawlPose.stroke(f, phase(living, pose), moving(living), pose.broken(), true);
 			case SHUFFLE -> shuffle(f, living, pose);
 			case CURL -> curl(f, living, pose);

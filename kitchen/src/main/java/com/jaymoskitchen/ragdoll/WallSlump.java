@@ -256,6 +256,22 @@ public final class WallSlump {
 		return q;
 	}
 
+	/** Whether a body of this rig can sit against a wall (only a humanoid does). */
+	public static boolean fits(RagdollRig rig) {
+		return rig.shape == RagdollRig.Shape.HUMANOID;
+	}
+
+	/** Puts {@code body} straight where it sits, still (no slide: it was already sat there, downed against the wall). */
+	public void sit(RagdollBody body) {
+		for (int i = 0; i < rig.count; i++) {
+			body.x[i] = tx[i];
+			body.y[i] = ty[i];
+			body.z[i] = tz[i];
+		}
+		tick = slide;
+		body.settle();
+	}
+
 	/** Still sliding down the wall. */
 	public boolean sliding() {
 		return tick < slide;
