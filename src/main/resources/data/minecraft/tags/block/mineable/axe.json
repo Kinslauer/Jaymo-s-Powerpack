@@ -160,6 +160,17 @@
     "jaymospowers:trophy_plaque",
     "jaymospowers:treated_planks",
     "jaymospowers:charred_log",
-    "jaymospowers:smouldering_log"
+    "jaymospowers:smouldering_log",
+    "jaymospowers:oak_chopping_block",
+    "jaymospowers:spruce_chopping_block",
+    "jaymospowers:birch_chopping_block",
+    "jaymospowers:jungle_chopping_block",
+    "jaymospowers:acacia_chopping_block",
+    "jaymospowers:dark_oak_chopping_block",
+    "jaymospowers:mangrove_chopping_block",
+    "jaymospowers:cherry_chopping_block",
+    "jaymospowers:pale_oak_chopping_block",
+    "jaymospowers:crimson_chopping_block",
+    "jaymospowers:warped_chopping_block"
   ]
 }

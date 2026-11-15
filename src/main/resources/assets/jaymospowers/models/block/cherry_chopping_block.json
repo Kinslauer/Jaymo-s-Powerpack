@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/chopping_block",
+  "textures": {
+    "side": "minecraft:block/cherry_log",
+    "end": "minecraft:block/cherry_log_top"
+  }
+}
