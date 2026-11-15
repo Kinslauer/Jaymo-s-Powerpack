@@ -135,6 +135,8 @@ public final class Lasso {
 	/** A bare-fisted punch on someone roped: their struggle knocked back this share of the whole, and stalled this long (ticks). */
 	static final double STALL_SHARE = 0.2;
 	static final int STALL_TICKS = 30;
+	/** A captor's knots: struggle this long and they still hold (only a blade or a pair of hands frees them). */
+	static final double FAST_KNOTS = 1.0E12;
 	/** A mob this strong shrugs the loop off. */
 	static final float GREAT_HEALTH = 100.0F;
 	/** Ticks between checks that you still carry a lasso, and how long a pinned mob's slowness is topped up for. */
@@ -154,7 +156,7 @@ public final class Lasso {
 	static final Identifier PINNED = JaymosKingdoms.id("lasso_pinned"), DRAGGING = JaymosKingdoms.id("lasso_dragging");
 
 	/** Runs ahead of the other use-on-entity listeners. */
-	static final Identifier EARLY = JaymosKingdoms.id("lasso_early");
+	public static final Identifier EARLY = JaymosKingdoms.id("lasso_early");
 
 	public static EntityType<Loop> TYPE;
 	public static Item ITEM;
@@ -458,6 +460,54 @@ public final class Lasso {
 		return !entity.level().isClientSide() && wrapped(entity);
 	}
 
+	/**
+	 * (Captures) {@code body} is tied hand and foot with no rope on them: a captive found so, or one a quest sets out.
+	 * {@code fast}: a captor's knots, which they can't work out of by themselves (only cutting or untying frees them).
+	 */
+	public static void bind(ServerLevel level, LivingEntity body, boolean fast) {
+		if (hogtied(body) || !body.isAlive()) {
+			return;
+		}
+		hogtie(level, body);
+		Tie tie = TIES.get(body.getUUID());
+		if (fast && tie != null) {
+			tie.restart(FAST_KNOTS);
+		}
+	}
+
+	/** (Captures) The hogtie on {@code body} comes off: cut or untied by someone. Any rope on them stays, only round them now. */
+	public static void free(LivingEntity body) {
+		Tie tie = TIES.get(body.getUUID());
+		if (tie != null) {
+			untie(tie);
+		}
+	}
+
+	/** (Captures) {@code body} gives up struggling against its hogtie: it lies quiet now, the knots as fast as a captor's. */
+	public static void fasten(LivingEntity body) {
+		Tie tie = TIES.get(body.getUUID());
+		if (tie != null) {
+			tie.restart(FAST_KNOTS);
+		}
+	}
+
+	/** (Captures) The knots on {@code body} pulled tight again: their struggle so far is undone. */
+	public static void tighten(LivingEntity body) {
+		Tie tie = TIES.get(body.getUUID());
+		if (tie != null) {
+			tie.left = tie.total;
+		}
+	}
+
+	/** (Captures) Whose rope {@code entity} is on, or null. */
+	public static @Nullable UUID holderOf(Entity entity) {
+		Hold hold = BY_HELD.get(entity.getUUID());
+		return hold == null ? null : hold.holder;
+	}
+
+	/** (Captures) How much harder (over 1) or easier a mob finds working out of a hogtie: its temper, its will. */
+	public static java.util.function.ToDoubleFunction<LivingEntity> toughness = body -> 1.0;
+
 	/** Takes the rope (and any hogtie) off {@code entity} without a word (it is going elsewhere). */
 	public static void drop(Entity entity) {
 		drop(entity, true);
@@ -607,7 +657,7 @@ public final class Lasso {
 
 	/** {@code body} is tied hand and foot: it lies on its side and can't walk, strike or use anything until it struggles free. */
 	private static void hogtie(ServerLevel level, LivingEntity body) {
-		Tie tie = new Tie(level.getServer(), body.getUUID(), breakTotal(body, Hold.TIED));
+		Tie tie = new Tie(level.getServer(), body.getUUID(), breakTotal(body, Hold.TIED) * (body instanceof Player ? 1.0 : toughness.applyAsDouble(body)));
 		TIES.put(body.getUUID(), tie);
 		body.setAttached(TIED, 0);
 		pin(body, true);

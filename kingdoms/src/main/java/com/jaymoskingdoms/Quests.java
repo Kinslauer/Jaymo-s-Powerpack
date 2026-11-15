@@ -567,6 +567,10 @@ public final class Quests {
 				animal.addTag(HANDED_IN_TAG);
 			}
 		}
+		if (q.kind() == Quest.CAPTURE) {
+			// (the criminal brought in is handed over to the cells)
+			QuestJobs.handIn(level, player, giver, q);
+		}
 		remove(player, q.id());
 		if (q.kind() >= Quest.PACK) {
 			// (board work: what it put in the world is cleared, and the board's name grows)

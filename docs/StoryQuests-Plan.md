@@ -283,3 +283,49 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
   thanks you the same way. A toast at the tavern or a tended grave happens only where a tale's own words say so.
 
 **Left for later (not in the picks):** time-of-day or moon conditions on a step; a cast member whose body changes with the roll; a tale-only item for `stash` and `build`.
+
+## 6. Kidnapping (lasso work)
+
+Andy (2026-11-14): with the reworked lasso, a quest kind about kidnapping, saving a hogtied captive or capturing a
+criminal, and anyone with a bounty on them can be brought back alive, with more to do with them by temperament. Built
+as two more kinds of board work and a new class, `Captures.java`. **Not played.**
+
+- **Taken by outlaws** (`hostage`, `Quest.HOSTAGE`, from board level 2): one of the poster's own (a named daughter, son,
+  wife, neighbour...) is held hogtied at an outlaws' camp out in the wild. Their captors (one, and one more a star; a
+  ringleader from three stars) are armed townsfolk gone bad (with MCA; an illager band without it) and go for you when
+  you're within 20 blocks and in sight. Captors' knots can't be struggled out of. Use held on the captive (not sneaking)
+  cuts them free with a blade, axe or shears (1.5 s) or unties them by hand (3.5 s); sneak and use still lifts them, so
+  you can carry them out tied. Freed, they follow you home like a traveller (into your cart too). Done once they're
+  within 12 blocks of the poster's town, tied or not; failed if they die. Ties don't outlast an unloaded area, so a
+  captive who hasn't been freed is bound again when next seen.
+- **Wanted alive** (`capture`, `Quest.CAPTURE`, from board level 2): a named criminal ("Edda the Fox", wanted for
+  arson) camped out with a man for each star over one. They fight. Bring them back hogtied or downed within 8 blocks of
+  whoever posted it, then speak to the poster: they're handed over to the cells. Failed if they die, if you let them go,
+  or if you take them into your service.
+- **Bounties brought in alive:** a hogtied target now counts as alive for the court's ruler, as a downed one always did.
+- **Talking to the wanted** (`Captures`): use a hogtied bounty target or capture criminal with an empty hand. They plead
+  in their own tongue and make the one offer their temperament makes, once:
+
+| Temperament | Offer | What it does |
+|---|---|---|
+| Kindhearted | let go to make amends | untied, bounty off the board; comes back in 3-7 days with emeralds |
+| Cheerful | let off, owes you | untied, off the board; comes back in 4-9 days asking to ride with you |
+| Greedy | a bribe | pays 1.2x their price in the court's coin and goes free (against honour too) |
+| Brave | your service | joins you (MCA follow), off the board; the court thinks less of you (-6) |
+| Proud | a fair fight | cut loose and fights you; beaten, the court hears of it (+4); if you go down they walk off |
+| Devout | a confession | lies quiet; pays 25% more when handed over |
+| Dutiful | comes quietly | lies quiet; the court thinks better of you (+2) |
+| Suspicious | who sold them out | lies quiet; tells a rumour (now and then the start of a tale) |
+| Timid | where the rest hide | lies quiet; tells where another wanted townsperson was last seen |
+| Hotheaded | gagged | knots pulled tight again (the hotheaded work out of knots fastest) |
+| Spiteful | swear off revenge | half the time they swear; otherwise, as with any spiteful one handed over, their friends come for you in 6-14 days |
+| Gloomy | given hope | lies quiet; the court thinks better of you (+2) |
+
+  Every menu also has "untie them and let them go" (against the law: companions who hold to it leave you; it fails a
+  capture job and takes their bounty down) and "leave them". The wanted aren't cut loose by a blade, so a guard stance
+  with a sword never frees one by accident. Handed over, each says a last word for their temper.
+- Temper also sets how hard a mob works at any hogtie: hotheaded 0.6x as long, brave 0.8x, proud 0.9x, dutiful 1.4x,
+  gloomy 1.5x, timid 1.6x.
+- **Not in this:** kidnapping as a tale's step (the tale steps still use the older job kinds); outlaws who come to a town
+  to carry someone off.
+
