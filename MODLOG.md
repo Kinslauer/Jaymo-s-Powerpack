@@ -5030,3 +5030,8 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   had none of their own (or left it to fate), the power they lost becomes their affinity, so the same power wakes in them
   again after the usual 3-5 days. `Mortality.shedGifts`, `Affinity.keepLeaning`.
 - Compile-checked; not played.
+
+## 0.23.90 (2026-11-15): One Dimension worlds: Scout finds Overworld structures
+
+- `core.Scout` (the Z Fighter chapel's pull) found nothing in a One Dimension world: the stacked level's structure state has no placements and its generator reads the clouds as ground. It now uses the Overworld band's own placements, ground and structure checks (`compat.Stacked.overworldGround`, `searchingOverworld`). An ordinary world is unchanged.
+- Built; not played.
