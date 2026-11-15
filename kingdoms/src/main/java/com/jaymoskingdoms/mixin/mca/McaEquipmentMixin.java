@@ -37,13 +37,16 @@ abstract class McaEquipmentMixin {
 	private void jaymoskingdoms$belowTheCrown(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
 		// (and a guard's issue is their settlement's: Templar plate, the settler's gear, a gunner's harness)
 		// (and a realm's knight puts on its plate and harness)
-		villager.setItemSlot(slot, com.jaymoskingdoms.HeraldryWear.issue(villager, slot, FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot))));
+		// (and a realm's militia wear its levy leather: Ranks)
+		villager.setItemSlot(slot, com.jaymoskingdoms.HeraldryWear.issue(villager, slot, com.jaymoskingdoms.Ranks.issue(villager, slot,
+			FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot)))));
 	}
 
 	/** A caravan guard's musketoon stays in his hands when MCA would arm him with a sword or a bow. */
 	@Redirect(method = {"equipBestWeapon", "equipBestRanged"}, at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$gunStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard())) {
+		// (and a ranked recruit's issue, a soldier's shield or standard: Ranks)
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
 			villager.setItemSlot(slot, stack);
 		}
 	}
@@ -51,14 +54,15 @@ abstract class McaEquipmentMixin {
 	/** Nor is it put away with a guard's off-duty hands, and what a carter, a fence or a wizard was dressed in isn't taken off them. */
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$issueStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard())) {
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
 			villager.setItemSlot(slot, stack);
 		}
 	}
 
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$handStays(VillagerEntityMCA villager, InteractionHand hand, ItemStack stack) {
-		if (!FrontierWear.keeps(villager, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND, villager.isGuard())) {
+		EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot)) {
 			villager.setItemInHand(hand, stack);
 		}
 	}

@@ -141,6 +141,8 @@ public final class Learners {
 		}
 		int wins = v.getAttachedOrElse(WINS, 0) + (behind(v, before) ? CATCH_UP : 1);
 		v.setAttached(WINS, wins);
+		// (medieval picks) the troop ladder: enough wins and they rise a rank in their realm's tree
+		Ranks.rise(v, false);
 		if (steps(wins) > before) {
 			apply(v);
 			if (v.level() instanceof ServerLevel level) {

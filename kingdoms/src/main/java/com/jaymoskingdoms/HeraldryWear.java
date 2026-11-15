@@ -178,6 +178,25 @@ public final class HeraldryWear {
 		}
 	}
 
+	/**
+	 * (medieval picks, troop ladders: {@link Ranks}) {@code mob}, risen to knight in {@code f}'s tree, is put in its knights'
+	 * plate, helm, war arm and harness, as they wear it. False (nothing put on) where the realm fields no knights in harness.
+	 */
+	static boolean knight(Mob mob, Faction f) {
+		if (!(mob.level() instanceof ServerLevel level) || !f.type().isRealm() || f.fallen() || !KNIGHT_LANDS.contains(Climate.at(level, f.seat()))
+			|| !Outfits.ironRich(mob, f) || Outfits.heraldry(f, level.getServer()).armoury()) {
+			return false;
+		}
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
+			ItemStack piece = plate(level.getServer(), f, slot);
+			if (!piece.isEmpty()) {
+				mob.setItemSlot(slot, piece);
+			}
+		}
+		harness(mob, f);
+		return true;
+	}
+
 	/** {@code mob} rules {@code faction} (a king, a lord; from {@link Rulers#fit} too): the realm's crest, and gilded spaulders. */
 	static void ruler(Mob mob, Faction faction) {
 		Harness.dress(mob, crest(mob.level().getServer(), faction), HeraldryArmour.stack("plate_spaulders", HeraldryArmour.GILDED));

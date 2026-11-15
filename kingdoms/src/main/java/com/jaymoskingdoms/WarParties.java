@@ -96,6 +96,11 @@ final class WarParties {
 	static final String CASTER_TAG = "jaymoskingdoms.war_caster";
 	static final double CASTER_RANGE = 128.0;
 	static final int CASTERS_MAX = 2;
+	/** (medieval picks) Soldiers to a squad; a squad's men keep in column behind their leader within this (blocks). */
+	static final int SQUAD_SIZE = 6;
+	static final double COLUMN_NEAR = 24.0;
+	/** At the siege the squads' shield walls stand this far apart, this far out from the banner toward the seat (blocks). */
+	static final double WALL_GAP = 2.0, WALL_AHEAD = 3.0;
 	/** The players' cut of the spoils' silver (percent, shared among them), and the reputation each gains. */
 	static final int PLAYERS_CUT = 25, SPOILS_REPUTATION = 15;
 
@@ -127,6 +132,8 @@ final class WarParties {
 		/** Its siege engines, and the soldiers who push and work them ({@link SiegeTrain}). */
 		final List<UUID> engines = new ArrayList<>();
 		final Set<UUID> crew = new HashSet<>();
+		/** (medieval picks) Its squads, each headed by its first, a leader ({@link Ranks#lead}): a column on the march, a shield wall at the siege. */
+		final List<List<UUID>> squads = new ArrayList<>();
 
 		boolean laden() {
 			return !this.spoils.isEmpty() || this.spoilsSilver > 0;
@@ -265,6 +272,7 @@ final class WarParties {
 			}
 			party.soldiers.add(soldier.getUUID());
 		}
+		squads(level, party);
 		// (Andy, 2026-11-12) its court casters march too, all but one, who stays so the realm is never without
 		if (!party.soldiers.isEmpty()) {
 			for (Worker caster : casters(level, from)) {
@@ -770,6 +778,8 @@ final class WarParties {
 				boolean arrived = now - party.phaseAt > (joined ? JOINED_MARCH_TICKS : MARCH_TICKS);
 				Wagon wagon = cart(level, party);
 				Vec3 seat = Vec3.atCenterOf(target.seat());
+				// (medieval picks) each squad marches in column behind its leader
+				Set<UUID> columned = columns(level, party);
 				for (PathfinderMob soldier : soldiers) {
 					if (party.holders.contains(soldier.getUUID()) || SiegeTrain.serving(level, party, soldier) != null) {
 						continue;
@@ -779,7 +789,7 @@ final class WarParties {
 							&& soldier.distanceToSqr(seat) < wagon.distanceToSqr(seat)) {
 							// (too far ahead of the cart: they wait for it)
 							soldier.getNavigation().stop();
-						} else {
+						} else if (!columned.contains(soldier.getUUID())) {
 							walk(level, soldier, target.seat());
 						}
 					}
@@ -813,6 +823,7 @@ final class WarParties {
 			}
 			case SIEGE -> {
 				Economy.noteAttack(server, target, soldiers.getFirst());
+				shieldWalls(level, party, target);
 				if (now - party.phaseAt > SIEGE_TICKS) {
 					seize(level, party, target);
 					withdraw(party, soldiers, from, now);
@@ -880,6 +891,80 @@ final class WarParties {
 			if (from != null) {
 				soldier.setHomeTo(from.seat(), Folk.HOME_RADIUS);
 			}
+		}
+	}
+
+	// ---- (medieval picks) squads: ranks, columns and shield walls ----------------------------------------------------
+
+	/** {@code party}'s soldiers split into squads of {@link #SQUAD_SIZE}, the first of each made its leader ({@link Ranks#lead}). */
+	private static void squads(ServerLevel level, Party party) {
+		List<UUID> squad = null;
+		for (UUID id : party.soldiers) {
+			if (squad == null || squad.size() >= SQUAD_SIZE) {
+				squad = new ArrayList<>();
+				party.squads.add(squad);
+				if (level.getEntity(id) instanceof net.minecraft.world.entity.Mob leader) {
+					Ranks.lead(leader);
+				}
+			}
+			squad.add(id);
+		}
+	}
+
+	/** The squad's soldiers in the field, its leader first; those holding a banner, working an engine or out of reach left out. */
+	private static List<PathfinderMob> squadIn(ServerLevel level, Party party, List<UUID> squad, boolean fightingToo) {
+		List<PathfinderMob> out = new ArrayList<>();
+		for (UUID id : squad) {
+			if (level.getEntity(id) instanceof PathfinderMob m && m.isAlive() && m instanceof Worker && !party.holders.contains(id)
+				&& !party.crew.contains(id) && SiegeTrain.serving(level, party, m) == null && (fightingToo || Rulers.target(m) == null)) {
+				out.add(m);
+			}
+		}
+		return out;
+	}
+
+	/** On the march, each squad's soldiers fall in two abreast behind their leader (while he's near and not fighting): those who did. */
+	private static Set<UUID> columns(ServerLevel level, Party party) {
+		Set<UUID> done = new HashSet<>();
+		for (List<UUID> squad : party.squads) {
+			if (squad.isEmpty() || !(level.getEntity(squad.getFirst()) instanceof PathfinderMob leader) || !leader.isAlive() || Rulers.target(leader) != null) {
+				continue;
+			}
+			List<PathfinderMob> rest = squadIn(level, party, squad, false);
+			rest.remove(leader);
+			rest.removeIf(m -> m.distanceToSqr(leader) > COLUMN_NEAR * COLUMN_NEAR);
+			if (rest.isEmpty()) {
+				continue;
+			}
+			float yaw = leader.getYRot();
+			Formations.drill(level, rest, Formations.COLUMN, leader.position().subtract(Formations.facing(yaw).scale(Formations.SPACING)), yaw, true);
+			for (PathfinderMob m : rest) {
+				done.add(m.getUUID());
+			}
+		}
+		return done;
+	}
+
+	/**
+	 * At the siege each squad locks a shield wall round the party's banner, side by side, facing the seat (or the foe
+	 * that comes at it): its militia's shields in front, its bows behind ({@link Formations#drill}).
+	 */
+	private static void shieldWalls(ServerLevel level, Party party, Faction target) {
+		if (party.rally == null || party.squads.isEmpty()) {
+			return;
+		}
+		Vec3 rally = Vec3.atBottomCenterOf(party.rally), seat = Vec3.atBottomCenterOf(target.seat());
+		float yaw = rally.distanceToSqr(seat) > 4.0 ? Formations.yawTo(rally, seat) : 0.0F;
+		Vec3 ahead = Formations.facing(yaw), right = new Vec3(-ahead.z, 0.0, ahead.x);
+		int n = party.squads.size();
+		double width = SQUAD_SIZE * Formations.SPACING + WALL_GAP;
+		for (int i = 0; i < n; i++) {
+			List<PathfinderMob> squad = squadIn(level, party, party.squads.get(i), true);
+			if (squad.isEmpty()) {
+				continue;
+			}
+			Vec3 anchor = rally.add(right.scale((i - (n - 1) / 2.0) * width)).add(ahead.scale(WALL_AHEAD));
+			Formations.drill(level, squad, Formations.LINE, anchor, yaw, false);
 		}
 	}
 

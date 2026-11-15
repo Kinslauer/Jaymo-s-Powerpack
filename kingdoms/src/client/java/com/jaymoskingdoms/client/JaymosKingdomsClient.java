@@ -168,6 +168,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		FollowersScreen.register();
 		QuickOrderKeys.register();
+		// (medieval picks) who holds what, on Xaero's Minimap when it's loaded
+		XaeroRealms.register();
 		TableTalkScreen.register();
 		LoanScreen.register();
 		ClassKeys.register();

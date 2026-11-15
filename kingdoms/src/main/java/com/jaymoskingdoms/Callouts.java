@@ -77,6 +77,10 @@ public final class Callouts {
 			LINES.put("order." + o, 2);
 			VOICED.add("order." + o);
 		}
+		// (medieval picks) a formation's orders (Formations; lang/parts/troops.json)
+		for (String o : new String[] {"form", "place", "charge", "seton"}) {
+			LINES.put("order." + o, 2);
+		}
 		// ("spread": Hearing, a band that heard something fans out round it)
 		for (String o : new String[] {"go", "come", "help", "spread"}) {
 			LINES.put("lead." + o, 3);
