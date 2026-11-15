@@ -347,6 +347,17 @@ def animations():
 		"left_fang": {"rotation": [(0, Z), (1.0, (-30, -20, 0)), (1.6, (-34, -24, 0)), (2.0, Z)]},
 		"abdomen": {"rotation": [(0, Z), (1.0, (18, 0, 0)), (1.6, (20, 0, 0)), (2.0, Z)]},
 	})
+	# her entrance film's moment: standing, she rears up on her hind legs, front legs high and fangs wide, and screams
+	rear = anim("rear", 1.8, "once", {
+		**legs(lambda side, i: {"leg": [(0, Z), (0.4, (0, -20, 60) if i < 2 else (0, 0, -10)), (1.3, (0, -26, 66) if i < 2 else (0, 0, -10)), (1.8, Z)],
+								 "shin": [(0, Z), (0.4, (0, 0, 50) if i < 2 else Z), (0.9, (0, 0, 30) if i < 2 else Z), (1.3, (0, 0, 50) if i < 2 else Z), (1.8, Z)]}),
+		"body": {"position": [(0, Z), (0.4, (0, 3, 0)), (1.3, (0, 3, 0)), (1.8, Z)],
+				 "rotation": [(0, Z), (0.4, (-28, 0, 0)), (1.3, (-32, 0, 0)), (1.8, Z)]},
+		"head": {"rotation": [(0, Z), (0.4, (-16, 0, 0)), (0.7, (-24, 0, 0)), (1.8, Z)]},
+		"right_fang": {"rotation": [(0, Z), (0.4, (-30, 20, 0)), (1.3, (-36, 26, 0)), (1.8, Z)]},
+		"left_fang": {"rotation": [(0, Z), (0.4, (-30, -20, 0)), (1.3, (-36, -26, 0)), (1.8, Z)]},
+		"abdomen": {"rotation": [(0, Z), (0.4, (18, 0, 0)), (1.3, (22, 0, 0)), (1.8, Z)]},
+	})
 	# the leap: down into a crouch, then the legs thrown straight as she springs
 	leap = anim("leap", 0.9, "once", {
 		**legs(lambda side, i: {"leg": [(0, Z), (0.55, (0, 0, -16)), (0.7, (0, 10 if i > 1 else -10, 22)), (0.9, (0, 10 if i > 1 else -10, 20))],
@@ -405,7 +416,7 @@ def animations():
 		"right_fang": {"rotation": [(0, Z), (0.3, (-30, 20, 0)), (1.5, Z)]},
 		"left_fang": {"rotation": [(0, Z), (0.3, (-30, -20, 0)), (1.5, Z)]},
 	})
-	return [idle, walk, sleep, hold, stir, wake, leap, land, slam, spit, grab, brood, death]
+	return [idle, walk, sleep, hold, stir, wake, rear, leap, land, slam, spit, grab, brood, death]
 
 
 def eggs():

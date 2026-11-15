@@ -132,7 +132,8 @@ public class BroodQueen extends Monster implements GeoEntity {
 		SLEEP = RawAnimation.begin().thenLoop("sleep"), HOLD = RawAnimation.begin().thenLoop("hold"),
 		STIR = RawAnimation.begin().thenPlay("stir"), WAKE = RawAnimation.begin().thenPlay("wake"), LEAP = RawAnimation.begin().thenPlay("leap"),
 		LAND = RawAnimation.begin().thenPlay("land"), SLAM = RawAnimation.begin().thenPlay("slam"), SPIT = RawAnimation.begin().thenPlay("spit"),
-		GRAB = RawAnimation.begin().thenPlay("grab"), BROOD = RawAnimation.begin().thenPlay("brood"), DEATH = RawAnimation.begin().thenPlayAndHold("death");
+		GRAB = RawAnimation.begin().thenPlay("grab"), BROOD = RawAnimation.begin().thenPlay("brood"), DEATH = RawAnimation.begin().thenPlayAndHold("death"),
+		REAR = RawAnimation.begin().thenPlay("rear");
 
 	private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(BroodQueen.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> HOLDING = SynchedEntityData.defineId(BroodQueen.class, EntityDataSerializers.BOOLEAN);
@@ -272,6 +273,15 @@ public class BroodQueen extends Monster implements GeoEntity {
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.6F, 0.7F);
 		Hearing.noise(level, this.position(), 40.0, null, Hearing.Kind.BLAST);
 		PowersCompat.shakeAround(level, this.position(), 20.0, 0.6F);
+	}
+
+	/** Her moment in her entrance film ({@code BossIntros}): she rears up, front legs high and fangs wide, and screams. */
+	public void rear() {
+		if (this.level() instanceof ServerLevel level) {
+			this.triggerAnim("action", "rear");
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SPIDER_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.3F);
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.4F, 0.75F);
+		}
 	}
 
 	/** Whether she's idle at home long enough to settle back onto her regrown egg. */
@@ -674,6 +684,10 @@ public class BroodQueen extends Monster implements GeoEntity {
 		super.die(source);
 		if (this.level() instanceof ServerLevel level) {
 			this.release(level, false);
+			// her egg knows she's gone, and may lay another when it grows back
+			if (this.home != null && level.getBlockEntity(this.home) instanceof BroodEggBlock.Entity egg) {
+				egg.died(this.getUUID());
+			}
 			this.triggerAnim("action", "death");
 		}
 	}
@@ -756,7 +770,8 @@ public class BroodQueen extends Monster implements GeoEntity {
 		}));
 		controllers.add(new AnimationController<BroodQueen>("action", test -> PlayState.STOP).triggerableAnim("stir", STIR).triggerableAnim("wake", WAKE)
 			.triggerableAnim("leap", LEAP).triggerableAnim("land", LAND).triggerableAnim("slam", SLAM).triggerableAnim("spit", SPIT)
-			.triggerableAnim("grab", GRAB).triggerableAnim("brood", BROOD).triggerableAnim("death", DEATH));
+			.triggerableAnim("grab", GRAB).triggerableAnim("brood", BROOD).triggerableAnim("death", DEATH)
+			.triggerableAnim("rear", REAR));
 	}
 
 	@Override

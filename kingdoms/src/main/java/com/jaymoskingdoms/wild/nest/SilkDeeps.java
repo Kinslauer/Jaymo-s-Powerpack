@@ -37,15 +37,16 @@ import net.minecraft.world.level.levelgen.feature.Feature;
  */
 public final class SilkDeeps {
 	// ---- tuning ----
-	/** Where the biome lies in the climate (each -1 to 1): temperate to warm, middling damp, inland, a narrow band of erosion
-	 * and of weirdness (so it comes in patches). */
-	static final float TEMP_MIN = -0.15F, TEMP_MAX = 0.55F, HUMID_MIN = -0.1F, HUMID_MAX = 0.15F, INLAND_MIN = 0.1F, INLAND_MAX = 0.75F,
-		EROSION_MIN = -0.1F, EROSION_MAX = 0.1F, WEIRD_MIN = 0.35F, WEIRD_MAX = 0.5F;
+	/** Where the biome lies in the climate (each -1 to 1): temperate to warm (the ice caves have the cold), dry to fairly damp
+	 * (the lush caves have the wet), inland short of the far inland (the dripstone caves'), most erosions, any weirdness: about
+	 * as often met as the dripstone caves, in patches as the climate shifts. */
+	static final float TEMP_MIN = -0.15F, TEMP_MAX = 0.55F, HUMID_MIN = -0.35F, HUMID_MAX = 0.4F, INLAND_MIN = 0.03F, INLAND_MAX = 0.78F,
+		EROSION_MIN = -0.78F, EROSION_MAX = 0.45F, WEIRD_MIN = -1.0F, WEIRD_MAX = 1.0F;
 	/** How deep it reaches (the climate's depth: 0 is the surface, about a block per 128th). */
 	static final float DEPTH_MIN = 0.2F, DEPTH_MAX = 0.9F;
-	/** Its offset: large, so it only wins deep in its own patch (the surface biome reaching down wins the rest), and the
-	 * lush, dripstone, sulfur and ice caves all win over it where they lie. */
-	static final float OFFSET = 0.36F;
+	/** Its offset: enough that the surface biome reaching down wins the first stretch under the ground and the lush,
+	 * dripstone, sulfur and ice caves win over it where they lie; below that it holds most of the depth band. */
+	static final float OFFSET = 0.2F;
 	/** The coat: the heights it is laid between. */
 	static final int COAT_MIN_Y = -60, COAT_MAX_Y = 48;
 	/** Of the rock round a cave, the share (in 1) that is nest silk: on the ceiling, on the walls, on the floor (the rest is spider stone). */
