@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
 thread: 1571611384016281601
-claimed_by: hermes-b
+claimed_by: 
 pr:
 suggested_owns: []
 ---
@@ -20,3 +20,4 @@ Research what biomes sky-lands adds and how they're structured, for potential ad
 ## Notes
 
 Research only — no code changes yet.
+- 2026-11-15 18:18 hermes-b's claim had no sign of work for 30 min: handed back as open.
