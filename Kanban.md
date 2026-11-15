@@ -12,6 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · writing
 
 
 ## In review
@@ -19,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]] · 🍇 Bacchus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1616 · in-review
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · ☀️ Apollo · in-review
 
 
 ## Needs Andy
