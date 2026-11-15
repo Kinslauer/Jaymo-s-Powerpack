@@ -109,6 +109,10 @@ public final class EnchantRecipes {
 			"lapis_lazuli*32, quartz*32, breeze_rod*4, diamond*2");
 		add("wind_burst", "lapis_lazuli*12, breeze_rod*2, feather*6", "lapis_lazuli*24, breeze_rod*4, feather*12", "lapis_lazuli*32, breeze_rod*6, feather*24, phantom_membrane*2");
 		add("lunge", "redstone*12, rabbit_foot*1, sugar*6", "redstone*16, rabbit_foot*1, sugar*12, string*6", "redstone*24, rabbit_foot*2, sugar*24, lead*1");
+		// the medieval picks' shield enchantments (combat/ShieldCraft): the ram's weight, the hedgehog's spines
+		RECIPES.put("jaymospowers:pummelling", new String[] {"redstone*12, piston*2, iron_ingot*4", "redstone*16, piston*4, iron_ingot*8",
+			"redstone*24, piston*6, iron_block*1, leather*4"});
+		RECIPES.put("jaymospowers:barbed", new String[] {"lapis_lazuli*16, pufferfish*3, cactus*8, iron_nugget*16"});
 	}
 
 	private EnchantRecipes() {

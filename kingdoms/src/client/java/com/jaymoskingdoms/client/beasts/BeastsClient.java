@@ -39,6 +39,8 @@ public final class BeastsClient {
 		EntityRenderers.register(com.jaymoskingdoms.beasts.Satyrs.CYCLOPS,
 			context -> new InhabitantRenderer<com.jaymoskingdoms.beasts.Cyclops>(context, "cyclops", CYCLOPS_SCALE, 1.3F, "head"));
 		EntityRenderers.register(com.jaymoskingdoms.beasts.Satyrs.SATYR, SatyrRenderer::new);
+		// (medieval picks) the great goat, our own model (tools/gen_great_goat.py)
+		EntityRenderers.register(com.jaymoskingdoms.beasts.GreatGoat.TYPE, GreatGoatRenderer::new);
 		// (0.7.403) Andy: "piglin arm is broken". The file's idle and walk hold a twisted fighting stance with the left arm
 		// thrust out, pushed off its shoulder and missing what it was drawn to hold; it stands and walks in its rest pose
 		// here instead, and its own moves (claw, volley, roar) still play as drawn

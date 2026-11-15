@@ -1,0 +1,25 @@
+{
+  "items": {
+    "jaymospowers:raw_lead": {
+      "lead": 180
+    },
+    "jaymospowers:lead_ore": {
+      "lead": 180
+    },
+    "jaymospowers:deepslate_lead_ore": {
+      "lead": 180
+    },
+    "jaymospowers:lead_nugget": {
+      "lead": 10
+    },
+    "jaymospowers:ash": {
+      "ash": 50
+    },
+    "jaymospowers:mail_ring": {
+      "iron": 10
+    },
+    "jaymospowers:mail_sheet": {
+      "iron": 90
+    }
+  }
+}

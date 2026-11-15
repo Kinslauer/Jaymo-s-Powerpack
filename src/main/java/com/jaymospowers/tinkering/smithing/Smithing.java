@@ -98,6 +98,9 @@ public final class Smithing {
 		Grades.register();
 		SmithingWider.register();
 		Finishing.register();
+		RealmSteels.register();
+		RealmPatterns.register();
+		MailRings.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				HotMetal.tick(player);
