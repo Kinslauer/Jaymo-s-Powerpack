@@ -128,7 +128,7 @@
   "gui.jaymoskingdoms.stats.blocked.unattuned": "Only the attuned have Arcana.",
   "gui.jaymoskingdoms.stats.mana": "Mana: %s / %s, %s back a second",
   "gui.jaymoskingdoms.introduce": "Introduce yourself",
-  "gui.jaymoskingdoms.jobs.tab": "Jobs",
+  "gui.jaymoskingdoms.jobs.tab": "Jobs & Standing",
   "gui.jaymoskingdoms.jobs.title": "Your jobs",
   "gui.jaymoskingdoms.jobs.held": "Held: %s",
   "gui.jaymoskingdoms.jobs.no_stall": "No stall",
