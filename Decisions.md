@@ -622,3 +622,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Fantasy Armor thread): "merge": PR #1587 merged; "approved." was for the lore (already marked canon) (no diamond gear, netherite over steel, film cast in Fantasy Armor).
 - 2026-11-15 (Andy, Fantasy Armor thread, decision card): the lore sets reuse Fantasy Armor's models (no new art); our code adds who wears, drops and sells them and the whole-set effects. Mapping in docs/FantasyArmor-Plan.md.
 - 2026-11-15 (Andy, Fantasy Armor thread): "kings can wear whatever they want, except dawncrest" (Fantasy Armor sets on kings).
+
+- 2026-11-15 (Andy, Fantasy Armor): no repaint of the Fantasy Armor sets. Turn its durability on, but nothing breaks: a worn-out piece becomes useless and needs repair.
