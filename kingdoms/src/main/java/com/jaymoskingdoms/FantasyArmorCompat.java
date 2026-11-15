@@ -44,6 +44,9 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * wears all of it walks in the barrows as the knights' own ({@link Revenant#keeper}).</li>
  * <li><b>Giant-slayers' harness</b> ({@link #GIANT_SLAYER}): when a Giant falls, a plate of it lies where it fell for
  * each who was there ({@link #GIANT_WITNESS} blocks).</li>
+ * <li><b>The demons' ashen plate</b> ({@link #ASHEN}): a captain of the Ash (Jaymo's Powers' demon realm) now and then
+ * drops a piece ({@link #ASHEN_DROP}).</li>
+ * <li><b>The pit harness</b> ({@link #PIT}): a fighting pit's warlord drops a piece of it when he falls; it is never sold.</li>
  * <li><b>Folded lamellar</b> ({@link #FOLDED}): some of the blossom lords' guards wear it ({@link Outfits#ronin}).</li>
  * <li><b>The Warden's hunters' coats</b> ({@link #HUNTER}): "can still be bought from the Warden's own", at the
  * armourer of a realm that keeps the Lantern Warden, by one sworn to him.</li>
@@ -78,6 +81,10 @@ public final class FantasyArmorCompat {
 		"wandering_wizard", "wind_worshipper");
 	/** The chance a barrow's dead drop a piece of the wardens' mail: a household knight, and the revenant his lord. */
 	static final float[] BARROW_DROP = {0.08F, 0.6F};
+	/** Jaymo's Powers' tag on a demon captain of the Ash (its demon realm's middle layer). */
+	static final String ASH_CAPTAIN_TAG = "jaymospowers_demon_captain_1";
+	/** The chance a captain of the Ash drops a piece of the ashen plate, and that a pit's warlord drops one of the pit harness. */
+	static final float ASHEN_DROP = 0.35F, PIT_DROP = 1.0F;
 	/** How near a falling Giant one has to be to have been there for its fall (blocks). */
 	static final double GIANT_WITNESS = 48.0;
 	/** Prices of a set's pieces (emeralds: helm, breastplate, leggings, boots): made over netherite, the dearest on any counter. */
@@ -121,6 +128,13 @@ public final class FantasyArmorCompat {
 			if (barrow > 0.0F && random.nextFloat() < barrow) {
 				// (its helm is never handed out: the body, the legs or the boots)
 				piece(BARROW, 1 + random.nextInt(3)).ifPresent(item -> entity.spawnAtLocation(level, new ItemStack(item)));
+			}
+			float ashen = entity.entityTags().contains(ASH_CAPTAIN_TAG) ? ASHEN_DROP : 0.0F;
+			if (ashen > 0.0F && random.nextFloat() < ashen) {
+				piece(ASHEN, random.nextInt(4)).ifPresent(item -> entity.spawnAtLocation(level, new ItemStack(item)));
+			}
+			if (IllagerSites.pitWarlord(level.getServer(), entity) && random.nextFloat() < PIT_DROP) {
+				piece(PIT, random.nextInt(4)).ifPresent(item -> entity.spawnAtLocation(level, new ItemStack(item)));
 			}
 			if (Monoliths.giant(entity)) {
 				for (Player player : level.players()) {
