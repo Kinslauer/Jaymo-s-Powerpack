@@ -44,7 +44,8 @@ public final class BossBars {
 
 	private static void hit(LivingEntity entity, DamageSource source) {
 		// the player behind the hit: their own blow, their arrow or javelin, or a power that names them
-		if (source.getEntity() instanceof ServerPlayer player && boss(entity)) {
+		// (GTNH patch 6) and a monster with marks enough for a bar (MarkedMonsters), which is no boss anywhere else
+		if (source.getEntity() instanceof ServerPlayer player && (boss(entity) || MarkedMonsters.barred(entity))) {
 			HITTERS.computeIfAbsent(entity.getUUID(), id -> new HashSet<>()).add(player.getUUID());
 		}
 	}

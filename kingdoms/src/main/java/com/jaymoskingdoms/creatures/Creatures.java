@@ -67,6 +67,9 @@ public final class Creatures {
 		HARPY_EGG, DIGGER_EGG, SHADOW_EGG, SHAPESHIFTER_EGG;
 	public static Block QUICKSAND, TRAP_COVER;
 	public static Item QUICKSAND_ITEM, TRAP_COVER_ITEM;
+	/** (GTNH patch 6) Punji stakes ({@link PunjiBlock}). */
+	public static Block PUNJI;
+	public static Item PUNJI_ITEM;
 
 	/** Spawn weights of the ones that wander in on their own. */
 	static final int TROLL_WEIGHT = 3, RUST_WEIGHT = 4, BAT_WEIGHT = 2;
@@ -121,6 +124,14 @@ public final class Creatures {
 			.strength(0.2F).sound(SoundType.GRASS).setId(coverKey)));
 		QUICKSAND_ITEM = blockItem("quicksand", QUICKSAND);
 		TRAP_COVER_ITEM = blockItem("trap_cover", TRAP_COVER);
+		ResourceKey<Block> punjiKey = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("punji_stakes"));
+		PUNJI = Registry.register(BuiltInRegistries.BLOCK, punjiKey, new PunjiBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+			.strength(0.6F).sound(SoundType.WOOD).noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.POPPED).setId(punjiKey)));
+		PUNJI_ITEM = blockItem("punji_stakes", PUNJI);
+		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosKingdoms.id("whittling"), WhittlingRecipe.SERIALIZER);
+		// mobs go round it when they can (a cost, not a wall); standing beside it is no matter
+		net.fabricmc.fabric.api.registry.LandPathTypeRegistry.register(PUNJI, net.minecraft.world.level.pathfinder.PathType.DAMAGING_IN_NEIGHBOR,
+			net.minecraft.world.level.pathfinder.PathType.OPEN);
 
 		TROLL_EGG = egg("troll", TROLL);
 		RUST_BEAST_EGG = egg("rust_beast", RUST_BEAST);
@@ -149,6 +160,7 @@ public final class Creatures {
 			output.accept(QUICKSAND_ITEM);
 			output.accept(TRAP_COVER_ITEM);
 		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(PUNJI_ITEM));
 
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> !(entity instanceof Troll troll) || troll.mayDie((net.minecraft.server.level.ServerLevel) entity.level()));
 		DamageKinds.addKinder(source -> source.typeHolder().is(ClearCube.ACID) ? DamageKinds.Kind.ACID : null);

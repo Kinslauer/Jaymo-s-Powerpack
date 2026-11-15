@@ -537,6 +537,8 @@ public final class CaptainWays {
 
 	/** (From {@link Captains#stepMob}) every tick: what his new traits do, and his move. True while his move holds him. */
 	static boolean step(ServerLevel level, PathfinderMob mob, Captain c, @Nullable LivingEntity target) {
+		// (GTNH patch 6) his marked traits, through the wild marked monsters' own code
+		MarkedMonsters.step(level, mob, target);
 		long now = level.getGameTime();
 		UUID id = mob.getUUID();
 		Long reading = READING.get(id);

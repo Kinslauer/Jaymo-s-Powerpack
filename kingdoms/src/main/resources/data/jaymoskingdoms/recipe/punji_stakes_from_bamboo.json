@@ -1,0 +1,15 @@
+{
+  "type": "jaymoskingdoms:whittling",
+  "category": "building",
+  "ingredients": [
+    "#jaymoskingdoms:whittling_knives",
+    "minecraft:bamboo",
+    "minecraft:bamboo",
+    "minecraft:bamboo",
+    "minecraft:bamboo"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:punji_stakes",
+    "count": 1
+  }
+}

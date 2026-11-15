@@ -17,15 +17,20 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * A digger warren: a chamber under a mound with a couple of diggers in it, and round it, hidden in the ground, pits with
- * stakes (pointed dripstone) at the bottom, each lidded by a trap cover ({@link TrapCoverBlock}) dressed as the ground it
- * replaced. A digger waits in a nook dug into the side of each pit ({@link Digger#lurk}) and is on whoever falls in at once;
- * the lid giving brings the rest. A careful walker sneaks; a watchful one sees the lid is out of place.
+ * stakes at the bottom, each lidded by a trap cover ({@link TrapCoverBlock}) dressed as the ground it replaced. A digger
+ * waits in a nook dug into the side of each pit ({@link Digger#lurk}) and is on whoever falls in at once; the lid giving
+ * brings the rest. A careful walker sneaks; a watchful one sees the lid is out of place. (GTNH patch 6, Andy: "diggers can
+ * use these too") The stakes are whittled punji stakes ({@link PunjiBlock}), and a bolt-hole tunnel runs out of the
+ * chamber with stakes set along it for whoever follows a digger down it.
  */
 final class Warrens {
 	/** Diggers in a warren's chamber (each pit has its own besides), pits round it, how far out the pits ring (blocks), and how deep each is. */
 	static final int DIGGERS_LEAST = 1, DIGGERS_MOST = 2, PITS = 7, RING = 6, DEPTH = 3;
 	/** How far (blocks) the diggers hear a lid give way. */
 	static final double ALARM = 24.0;
+	/** The bolt-hole: how far it runs out of the chamber's side (blocks), and where along it stakes are set. */
+	static final int TUNNEL = 5;
+	static final int[] TUNNEL_STAKES = {3, 5};
 
 	private Warrens() {
 	}
@@ -73,7 +78,27 @@ final class Warrens {
 			int r = RING + random.nextInt(3);
 			pit(level, top.offset((int) Math.round(Math.cos(angle) * r), 0, (int) Math.round(Math.sin(angle) * r)));
 		}
+		boltHole(level, floor, random);
 		return true;
+	}
+
+	/** A short tunnel out of one side of the chamber, two high, stakes set along it; dug only where the ground is sound. */
+	private static void boltHole(ServerLevel level, BlockPos floor, RandomSource random) {
+		Direction way = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		for (int i = 2; i <= TUNNEL; i++) {
+			BlockPos at = floor.relative(way, i), roof = at.above(2);
+			if (!sound(level, roof) || level.getBlockState(roof).getBlock() instanceof FallingBlock || !sound(level, at.below())) {
+				return;
+			}
+		}
+		for (int i = 2; i <= TUNNEL; i++) {
+			BlockPos at = floor.relative(way, i);
+			level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(at.above(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		for (int i : TUNNEL_STAKES) {
+			level.setBlock(floor.relative(way, i), Creatures.PUNJI.defaultBlockState(), Block.UPDATE_ALL);
+		}
 	}
 
 	/** A pit at {@code near}'s column: stakes at the bottom, a digger in a nook beside them, a lid like the ground on top. */
@@ -96,7 +121,10 @@ final class Warrens {
 		for (int d = 1; d < DEPTH; d++) {
 			level.setBlock(top.below(d), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 		}
-		level.setBlock(top.below(DEPTH), Blocks.POINTED_DRIPSTONE.defaultBlockState(), Block.UPDATE_ALL);
+		// punji stakes where the ground under will hold them, else a pointed stone
+		BlockPos stakes = top.below(DEPTH);
+		boolean holds = level.getBlockState(stakes.below()).isFaceSturdy(level, stakes.below(), Direction.UP);
+		level.setBlock(stakes, holds ? Creatures.PUNJI.defaultBlockState() : Blocks.POINTED_DRIPSTONE.defaultBlockState(), Block.UPDATE_ALL);
 		level.setBlock(top, lid, Block.UPDATE_ALL);
 		lurker(level, top);
 	}

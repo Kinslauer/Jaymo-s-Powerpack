@@ -253,6 +253,27 @@ public final class Captains {
 		GROUND_SLAM(Sort.MOVE),
 		AXE_THROW(Sort.MOVE),
 		CRUSHING_GRAB(Sort.MOVE),
+		// ---- (GTNH patch 6, Andy: "give these to captains") the marked monsters' marks: what each does is in MarkedMonsters ----
+		/** A share of every melee blow on him goes back to the striker. */
+		VENGEANCE(Sort.STRENGTH),
+		/** His wounds close as he fights. */
+		REGEN(Sort.STRENGTH),
+		/** His blows leave you hungry. */
+		SAPPER(Sort.STRENGTH),
+		/** His blows web you where you stand. */
+		WEBBER(Sort.STRENGTH),
+		/** Looses fireballs now and then. */
+		GHASTLY(Sort.STRENGTH),
+		/** His blows throw you up in the air. */
+		BLASTOFF(Sort.STRENGTH),
+		/** Now and then he's behind you. */
+		NINJA(Sort.STRENGTH),
+		/** His blows knock your weapon out of your hand. */
+		STICKY(Sort.STRENGTH),
+		/** His blows rust your armour. */
+		RUST(Sort.STRENGTH),
+		/** Calls lightning down near his foe, now and then. */
+		STORM(Sort.STRENGTH),
 		/**
 		 * (Andy) Raised from a death nothing else comes back from, by corrupted magic or a necromancer: no fear left in
 		 * him, tougher and harder-hitting ({@link #DEATHLESS_HEALTH}, {@link #DEATHLESS_DAMAGE}). Never rolled; only the raised have it.
@@ -278,7 +299,9 @@ public final class Captains {
 			return pair(other, ARROW_PROOF, SOFT_TO_ARROWS) || pair(other, FIRE_BORN, BURNS_EASILY) || pair(other, FIRE_BORN, FEARS_FIRE)
 				|| pair(other, WATCHFUL, BLIND_SIDE) || pair(other, IRON_JAW, GLASS_JAW) || pair(other, IRON_CLAD, HEAVY_FOOTED)
 				|| pair(other, PACK_LEADER, FEARS_BEASTS) || pair(other, BOG_IRON, IRON_CLAD) || pair(other, HATES_FIRE_MAGES, FEARS_FIRE)
-				|| pair(other, NEVER_SLEEPS, SOT);
+				|| pair(other, NEVER_SLEEPS, SOT)
+				// a heavy one doesn't slip round behind you; one who fears fire doesn't throw it
+				|| pair(other, NINJA, HEAVY_FOOTED) || pair(other, NINJA, IRON_CLAD) || pair(other, GHASTLY, FEARS_FIRE);
 		}
 
 		private boolean pair(Trait other, Trait a, Trait b) {
