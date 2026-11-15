@@ -72,6 +72,8 @@ public final class BossBars {
 			// the blossom lands' great night things
 			|| entity instanceof com.jaymoskingdoms.blossomland.SnowWidow || entity instanceof com.jaymoskingdoms.blossomland.Unburied
 			// a horde's grave-captain
+			// the brood queen, once woken
+			|| entity instanceof com.jaymoskingdoms.wild.nest.BroodQueen queen && !queen.sleeping()
 			|| ZombieHordes.captain(entity);
 	}
 

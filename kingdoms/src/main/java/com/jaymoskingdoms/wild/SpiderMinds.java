@@ -57,6 +57,8 @@ import org.jspecify.annotations.Nullable;
 public final class SpiderMinds {
 	/** Scale of a spider and of a cave spider (1 = the game's size); (GTNH patch 6) a mother's, full grown, and her spiderlings'. */
 	static final double SPIDER_SCALE = 0.5, CAVE_SPIDER_SCALE = 0.65, MOTHER_SCALE = 1.0, SPIDERLING_SCALE = 0.25;
+	/** (medieval picks) A netcaster's (bigger than most), and a spiny spider's (small). */
+	static final double NETCASTER_SCALE = 0.85, SPINY_SCALE = 0.35;
 	/** (0.7.103) Where hunting small game ({@link Prey#SPIDER_PREY}) sits among its targets: after players (2). */
 	static final int PREY_PRIORITY = 3;
 	/** A spider is hostile below this light value (the game's own spider rule). */
@@ -164,7 +166,8 @@ public final class SpiderMinds {
 		if (scale != null) {
 			SpiderKinds.Kind kind = SpiderKinds.of(spider);
 			double to = spider instanceof CaveSpider ? CAVE_SPIDER_SCALE : kind == SpiderKinds.Kind.MOTHER ? MOTHER_SCALE
-				: kind == SpiderKinds.Kind.SPIDERLING ? SPIDERLING_SCALE : SPIDER_SCALE;
+				: kind == SpiderKinds.Kind.SPIDERLING ? SPIDERLING_SCALE : kind == SpiderKinds.Kind.NETCASTER ? NETCASTER_SCALE
+				: kind == SpiderKinds.Kind.SPINY ? SPINY_SCALE : SPIDER_SCALE;
 			scale.addOrReplacePermanentModifier(new AttributeModifier(JaymosKingdoms.id("spider_size"), to - 1.0,
 				AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 		}

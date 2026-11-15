@@ -72,13 +72,23 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Flyer</b> (GTNH patch 6), in the woods: a jumping spider's sight and the lifting spiders' silk. It waits up in
  * the canopy or on a ledge, leaps down on prey below on a dragline, and its line hauls the prey up a few blocks off the
  * ground before it lets go: the fall is the bite.</li>
+ * <li><b>Netcaster</b> (medieval picks, de-netcaster), deep down and in the spider nests ({@code nest.SilkDeeps}): bigger and
+ * long in the leg, it throws a net of silk at prey from range ({@link SilkShots}; it can be stepped out of), then closes in
+ * fast on what it caught. Sometimes it leaves a silk gland ({@link #GLAND_CHANCE}).</li>
+ * <li><b>Spiny</b> (medieval picks, de-spiny), in the crimson and warped forests of the Nether (spiders spawn there now,
+ * {@link #SPINY_WEIGHT}): small, spiked and quick, it runs at you and bursts, wrapping everyone close in web; killed
+ * first, it bursts where it falls.</li>
  * </ul>
+ * Lore: the silk deeps (Lore.md): deep below the nests the netcasters hunt with thrown silk, and in the crimson and warped
+ * woods of the Nether a small spined spider bursts into web.
  */
 public final class SpiderKinds {
 	public enum Kind {
 		PLAIN, BIRCH, DESERT, SWAMP, CAVERN, JUNGLE, ICE,
 		/** (GTNH patch 6) A mother, her brood, and the woods' leaping, lifting spider. */
-		MOTHER, SPIDERLING, FLYER
+		MOTHER, SPIDERLING, FLYER,
+		/** (medieval picks) The deep caves' net-thrower, and the Nether woods' bursting spined spider. */
+		NETCASTER, SPINY
 	}
 
 	/** Below this height a spider is a cavern spider, whatever the biome. */
@@ -125,6 +135,27 @@ public final class SpiderKinds {
 	static final float PERCH_CHANCE = 1.0F / 300.0F;
 	static final int PERCH_SEARCH = 6;
 
+	/** (medieval picks, de-netcaster) Below this height a spider may be a netcaster, at DEEP_NETCASTER; in a spider nest at
+	 * NEST_NETCASTER (and a mother at NEST_MOTHER). */
+	static final int NETCASTER_BELOW = -24;
+	static final float DEEP_NETCASTER = 0.2F, NEST_NETCASTER = 0.18F, NEST_MOTHER = 0.22F;
+	/** Its body: health more, speed times (more). */
+	static final double NETCASTER_HEALTH = 12.0, NETCASTER_SPEED = 0.1;
+	/** Its net: thrown at prey between NET_MIN and NET_RANGE (blocks), NET_SPEED blocks a tick, catching within NET_CATCH,
+	 * NET_LAYERS layers holding NET_HOLD ticks; once per NET_COOLDOWN ticks. Then it closes in (Speed CLOSE_IN, CLOSE_IN_TICKS). */
+	static final double NET_MIN = 4.0, NET_RANGE = 14.0, NET_SPEED = 0.7, NET_CATCH = 1.3;
+	static final int NET_LAYERS = 2, NET_HOLD = 80, NET_COOLDOWN = 160, CLOSE_IN = 1, CLOSE_IN_TICKS = 80;
+	/** The chance a netcaster leaves a silk gland. */
+	static final float GLAND_CHANCE = 0.35F;
+	/** (medieval picks, de-spiny) Spiders in the crimson and warped forests: their weight among the monsters, and how many come. */
+	static final int SPINY_WEIGHT = 6, SPINY_MIN = 1, SPINY_MAX = 3;
+	/** Its body: health times (less), speed times (more). */
+	static final double SPINY_HEALTH = -0.5, SPINY_SPEED = 0.35;
+	/** It starts to burst with prey this near (blocks), bursts SPINY_FUSE ticks later unless they get SPINY_ESCAPE away, and
+	 * wraps everyone within SPINY_RADIUS in SPINY_LAYERS layers holding SPINY_HOLD ticks. */
+	static final double SPINY_REACH = 1.8, SPINY_ESCAPE = 4.5, SPINY_RADIUS = 3.0;
+	static final int SPINY_FUSE = 20, SPINY_LAYERS = 2, SPINY_HOLD = 80;
+
 	public static final AttachmentType<Integer> KIND = AttachmentRegistry.create(JaymosKingdoms.id("spider_kind"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -154,6 +185,9 @@ public final class SpiderKinds {
 	}
 
 	private static final Map<Spider, Flight> FLIGHTS = new IdentityHashMap<>();
+	/** (medieval picks) Spiny spiders about to burst (ticks left), and those that have. */
+	private static final Map<Spider, Integer> FUSES = new IdentityHashMap<>();
+	private static final java.util.Set<Spider> BURST = Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
 	private SpiderKinds() {
 	}
@@ -179,6 +213,7 @@ public final class SpiderKinds {
 			if (entity instanceof Spider spider) {
 				LOADED.remove(spider);
 				FLIGHTS.remove(spider);
+				FUSES.remove(spider);
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -192,6 +227,11 @@ public final class SpiderKinds {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(SpiderKinds::tick);
+		SilkShots.register();
+		// (medieval picks, de-spiny) spiders in the Nether's crimson and warped woods (each one spiny, by its biome)
+		net.fabricmc.fabric.api.biome.v1.BiomeModifications.addSpawn(
+			net.fabricmc.fabric.api.biome.v1.BiomeSelectors.includeByKey(Biomes.CRIMSON_FOREST, Biomes.WARPED_FOREST),
+			net.minecraft.world.entity.MobCategory.MONSTER, EntityTypes.SPIDER, SPINY_WEIGHT, SPINY_MIN, SPINY_MAX);
 		// a mother's spiderlings carry nothing worth taking
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			if (context.getOptional(LootContextParams.THIS_ENTITY) instanceof Spider spider && of(spider) == Kind.SPIDERLING) {
@@ -204,7 +244,16 @@ public final class SpiderKinds {
 		BlockPos pos = spider.blockPosition();
 		Holder<Biome> biome = level.getBiome(pos);
 		Kind kind;
-		if (pos.getY() < CAVERN_BELOW_Y) {
+		float roll = spider.getRandom().nextFloat();
+		if (biome.is(Biomes.CRIMSON_FOREST) || biome.is(Biomes.WARPED_FOREST)) {
+			kind = Kind.SPINY;
+		} else if (biome.is(com.jaymoskingdoms.wild.nest.SilkDeeps.SILK_DEEPS)) {
+			// (medieval picks) a spider nest's own: netcasters and mothers among the cavern spiders
+			kind = roll < NEST_NETCASTER ? Kind.NETCASTER : roll < NEST_NETCASTER + NEST_MOTHER ? Kind.MOTHER
+				: pos.getY() < CAVERN_BELOW_Y ? Kind.CAVERN : Kind.PLAIN;
+		} else if (pos.getY() < NETCASTER_BELOW && roll < DEEP_NETCASTER) {
+			kind = Kind.NETCASTER;
+		} else if (pos.getY() < CAVERN_BELOW_Y) {
 			kind = Kind.CAVERN;
 		} else if (biome.is(Biomes.BIRCH_FOREST) || biome.is(Biomes.OLD_GROWTH_BIRCH_FOREST)) {
 			kind = Kind.BIRCH;
@@ -230,6 +279,14 @@ public final class SpiderKinds {
 			case MOTHER -> {
 				modify(spider, Attributes.MAX_HEALTH, "mother_body", MOTHER_HEALTH, AttributeModifier.Operation.ADD_VALUE);
 				modify(spider, Attributes.MOVEMENT_SPEED, "mother_slow", MOTHER_SLOW, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			}
+			case NETCASTER -> {
+				modify(spider, Attributes.MAX_HEALTH, "netcaster_body", NETCASTER_HEALTH, AttributeModifier.Operation.ADD_VALUE);
+				modify(spider, Attributes.MOVEMENT_SPEED, "netcaster_legs", NETCASTER_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			}
+			case SPINY -> {
+				modify(spider, Attributes.MAX_HEALTH, "spiny_body", SPINY_HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				modify(spider, Attributes.MOVEMENT_SPEED, "spiny_legs", SPINY_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 			}
 			default -> {
 			}
@@ -283,6 +340,17 @@ public final class SpiderKinds {
 				}
 			}
 			case MOTHER -> brood(spider, level);
+			case NETCASTER -> {
+				if (spider.getRandom().nextFloat() < GLAND_CHANCE) {
+					spider.spawnAtLocation(level, new ItemStack(com.jaymoskingdoms.wild.nest.SpiderNests.SILK_GLAND));
+				}
+			}
+			// killed before it reached them, it bursts where it falls
+			case SPINY -> {
+				if (!BURST.remove(spider)) {
+					burst(spider, level, false);
+				}
+			}
 			case CAVERN -> {
 				float roll = spider.getRandom().nextFloat();
 				ItemStack gem = roll < 0.03F ? new ItemStack(Items.DIAMOND) : roll < 0.13F ? new ItemStack(Items.EMERALD)
@@ -378,15 +446,85 @@ public final class SpiderKinds {
 				}
 			}
 			case FLYER -> fly(spider, target, level, now, ready);
+			case NETCASTER -> {
+				if (target != null && now >= ready && spider.hasLineOfSight(target)) {
+					double d = spider.distanceTo(target);
+					if (d >= NET_MIN && d <= NET_RANGE) {
+						// at about where they'll be when it gets there
+						Vec3 aim = target.position().add(target.getDeltaMovement().scale(d / NET_SPEED * 0.5)).add(0.0, target.getBbHeight() * 0.5, 0.0);
+						SilkShots.loose(level, spider, spider.getEyePosition(), aim, NET_SPEED, NET_CATCH, NET_LAYERS, NET_HOLD, true);
+						LOADED.put(spider, now + NET_COOLDOWN);
+						// and then it closes in
+						spider.addEffect(new MobEffectInstance(MobEffects.SPEED, CLOSE_IN_TICKS, CLOSE_IN));
+					}
+				}
+			}
+			case SPINY -> {
+				Integer fuse = FUSES.get(spider);
+				if (fuse != null) {
+					if (target == null || spider.distanceTo(target) > SPINY_ESCAPE) {
+						FUSES.remove(spider);
+					} else if (fuse <= 0) {
+						FUSES.remove(spider);
+						burst(spider, level, true);
+					} else {
+						FUSES.put(spider, fuse - 1);
+						if (fuse % 4 == 0) {
+							level.sendParticles(ParticleTypes.ITEM_COBWEB, spider.getX(), spider.getY(0.6), spider.getZ(), 3, 0.2, 0.15, 0.2, 0.0);
+						}
+					}
+				} else if (target != null && spider.distanceTo(target) <= SPINY_REACH) {
+					FUSES.put(spider, SPINY_FUSE);
+					level.playSound(null, spider.blockPosition(), SoundEvents.SPIDER_HURT, SoundSource.HOSTILE, 1.0F, 1.9F);
+					level.playSound(null, spider.blockPosition(), SoundEvents.COBWEB_STEP, SoundSource.HOSTILE, 1.2F, 0.6F);
+				}
+			}
 			default -> {
 			}
+		}
+	}
+
+	/**
+	 * (medieval picks, de-spiny) A spiny spider bursts: everyone near (spiders aside) wrapped in web, and the spider's gone.
+	 * {@code alive}: it chose to (and dies of it); otherwise it was killed and bursts as it falls.
+	 */
+	private static void burst(Spider spider, ServerLevel level, boolean alive) {
+		Vec3 at = spider.position().add(0.0, spider.getBbHeight() * 0.5, 0.0);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 60, 1.2, 0.7, 1.2, 0.08);
+		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 20, 0.6, 0.4, 0.6, 0.4);
+		level.playSound(null, spider.blockPosition(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.4F, 0.6F);
+		level.playSound(null, spider.blockPosition(), SoundEvents.COBWEB_BREAK, SoundSource.HOSTILE, 1.4F, 0.5F);
+		com.jaymoskingdoms.Hearing.noise(level, at, 16.0, null, com.jaymoskingdoms.Hearing.Kind.IMPACT);
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, spider.getBoundingBox().inflate(SPINY_RADIUS),
+				e -> e != spider && e.isAlive() && !SilkShots.kin(e))) {
+			SilkShots.web(level, near, SPINY_LAYERS, SPINY_HOLD, spider);
+		}
+		if (alive) {
+			BURST.add(spider);
+			spider.kill(level);
+		}
+	}
+
+	/** A cobweb at {@code pos} (if it's open) that falls apart after {@code ticks}: how spiders hold prey without Powers. */
+	static void cobweb(ServerLevel level, BlockPos pos, int ticks) {
+		if (level.getBlockState(pos).isAir()) {
+			level.setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
+			WEBS.add(new SpatWeb(level, pos, level.getGameTime() + ticks));
 		}
 	}
 
 	/** The mother's brood scatters off her back as she dies, and comes for whoever killed her. */
 	private static void brood(Spider mother, ServerLevel level) {
 		int n = BROOD_LEAST + mother.getRandom().nextInt(BROOD_MOST - BROOD_LEAST + 1);
-		LivingEntity killer = mother.getLastHurtByMob();
+		hatch(level, mother.position().add(0.0, mother.getBbHeight() * 0.6, 0.0), n, mother.getLastHurtByMob());
+	}
+
+	/**
+	 * {@code n} spiderlings scatter out from {@code at} and come for {@code killer} (if anyone): a mother's brood as she dies,
+	 * (medieval picks) an egg sac splitting open on whoever woke it, the brood queen's back.
+	 */
+	public static void hatch(ServerLevel level, Vec3 at, int n, @Nullable LivingEntity killer) {
+		net.minecraft.util.RandomSource random = level.getRandom();
 		for (int i = 0; i < n; i++) {
 			Spider young = EntityTypes.SPIDER.create(level, EntitySpawnReason.MOB_SUMMONED);
 			if (young == null) {
@@ -398,16 +536,16 @@ public final class SpiderKinds {
 			modify(young, Attributes.MOVEMENT_SPEED, "spiderling_legs", SPIDERLING_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 			SpiderMinds.size(young);
 			young.setHealth(young.getMaxHealth());
-			double angle = Math.PI * 2.0 * (i + mother.getRandom().nextDouble() * 0.5) / n;
-			young.snapTo(mother.getX(), mother.getY() + mother.getBbHeight() * 0.6, mother.getZ(), (float) Math.toDegrees(angle), 0.0F);
+			double angle = Math.PI * 2.0 * (i + random.nextDouble() * 0.5) / n;
+			young.snapTo(at.x, at.y, at.z, (float) Math.toDegrees(angle), 0.0F);
 			young.setDeltaMovement(Math.cos(angle) * BROOD_SCATTER, 0.25, Math.sin(angle) * BROOD_SCATTER);
 			level.addFreshEntity(young);
 			if (killer != null && killer.isAlive()) {
 				young.setTarget(killer);
 			}
 		}
-		level.playSound(null, mother.getX(), mother.getY(), mother.getZ(), SoundEvents.FROGSPAWN_HATCH, SoundSource.HOSTILE, 1.2F, 0.7F);
-		level.sendParticles(ParticleTypes.POOF, mother.getX(), mother.getY(0.6), mother.getZ(), 10, 0.4, 0.2, 0.4, 0.02);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FROGSPAWN_HATCH, SoundSource.HOSTILE, 1.2F, 0.7F);
+		level.sendParticles(ParticleTypes.POOF, at.x, at.y, at.z, 10, 0.4, 0.2, 0.4, 0.02);
 	}
 
 	/**

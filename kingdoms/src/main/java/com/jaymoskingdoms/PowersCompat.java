@@ -58,6 +58,11 @@ public final class PowersCompat {
 	 * Emberborn), and draws it wrapped round them. False without Powers: the caller holds them its old way (a cobweb).
 	 */
 	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by) {
+		return web(body, ticks, by, 1);
+	}
+
+	/** (medieval picks, spider nests) As {@link #web(LivingEntity, int, net.minecraft.world.entity.Entity)}, {@code layers} layers at once (a net, a burst, a queen's spit). */
+	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by, int layers) {
 		if (!lookedForWebbed) {
 			lookedForWebbed = true;
 			webbedEffect = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(Identifier.fromNamespaceAndPath("jaymospowers", "webbed"))
@@ -66,7 +71,7 @@ public final class PowersCompat {
 		if (webbedEffect == null) {
 			return false;
 		}
-		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, 0), by);
+		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, Math.max(0, layers - 1)), by);
 		return true;
 	}
 

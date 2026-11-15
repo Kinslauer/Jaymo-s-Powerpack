@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bat",
+    "minecraft:silverfish",
+    "minecraft:endermite",
+    "minecraft:rabbit",
+    "minecraft:chicken",
+    "minecraft:frog",
+    {
+      "id": "jaymoskingdoms:barrow_beetle",
+      "required": false
+    }
+  ]
+}

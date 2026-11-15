@@ -7,5 +7,6 @@ public final class JaymosKingdomsServer implements DedicatedServerModInitializer
 	@Override
 	public void onInitializeServer() {
 		com.jaymoskingdoms.blossomland.BlossomWilds.addBiomes();
+		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 	}
 }
