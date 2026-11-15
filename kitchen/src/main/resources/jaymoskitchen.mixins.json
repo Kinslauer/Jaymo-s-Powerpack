@@ -20,6 +20,7 @@
 		"CrowdedPenMixin",
 		"CropSeasonMixin",
 		"EntityMixin",
+		"FiniteWaterMixin",
 		"FishingHookMixin",
 		"FreshBarMixin",
 		"HerdAgeMixin",

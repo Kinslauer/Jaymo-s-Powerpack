@@ -119,6 +119,8 @@ public final class MillJei implements IModPlugin {
 		// unpurified water and the ways to purify it
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.CLEAN_WATER, note("purifying_water"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.WATER_FILTER, note("purifying_water"));
+		// (GT New Horizons picks) cactus water: its recipe shows as a plain crafting recipe
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.CACTUS_WATER, note("cactus_water"));
 		for (Item skin : List.of(com.jaymoskitchen.climate.Climate.WATERSKIN_LEATHER, com.jaymoskitchen.climate.Climate.WATERSKIN_IRON,
 			com.jaymoskitchen.climate.Climate.WATERSKIN_DRAGON)) {
 			registration.addIngredientInfo(skin, note("waterskin_temp"));
