@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 13:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 13:52). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/tinker-gadget-icons|tinker-gadget-icons]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
+- [ ] [[Inbox/tinker-gadget-icons|tinker-gadget-icons]] · tinker-gadget-icons · claimed
 
 
 ## In review
