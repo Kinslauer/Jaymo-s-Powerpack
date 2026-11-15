@@ -13690,3 +13690,9 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
 ## 0.9.7 (2026-11-14): Life tab arrows work (#1574)
 
 - The < and > arrows beside the picture on the Life tab's cards (and on the Nature page's) now change the pick. The card's text box was laid over them and took their clicks.
+
+## 0.9.8 (2026-11-15): Skipping the story no longer stops you spawning (#1576)
+
+- "Skip the story" no longer asks the server to send MCA's creator again. That request reset MCA's mark that your body was made, and if the creator then didn't come, the game waited for it forever and never set you down at your start.
+- "< The story" on the Life tab still takes you back to the life story; MCA's creator now comes back as soon as the story is lived or skipped again, without asking the server.
+- "Live this life" on a skipped story's own page tidies the picks first (the start is left to fate), so the server always accepts them.
