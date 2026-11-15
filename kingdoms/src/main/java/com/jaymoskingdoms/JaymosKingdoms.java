@@ -693,6 +693,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		GroundSeats.register();
 		Loans.register();
 		Veterans.register();
+		// (medieval picks) the troop ladder, formations and the shield wall, keeps in their holders' colours, the realms' map
+		LOGGER.debug("troop attachments: {} {} {}", Ranks.RANK, Ranks.REALM, KeepColours.FLOWN);
+		Ranks.register();
+		Formations.register();
+		KeepColours.register();
+		RealmMap.register();
 		BandTallies.register();
 		Wayfinding.register();
 		RivalParties.register();

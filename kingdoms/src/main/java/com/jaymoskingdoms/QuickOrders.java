@@ -148,6 +148,10 @@ public final class QuickOrders {
 		Villager first = yours.getFirst();
 		switch (kind) {
 			case GO -> {
+				if (fight) {
+					// (a formation's ranks break to take a foe each, and fall in again after: Formations)
+					Formations.loose(player);
+				}
 				for (Villager v : yours) {
 					STANCES.remove(v.getUUID());
 					Followers.Order order = v.getAttached(Followers.ORDER);

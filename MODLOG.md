@@ -5183,3 +5183,8 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - JEI: a Chopping Block page (every log with planks, blows and planks by axe) and an info page on each block.
 - Classes: `ground/Chopping`, `ChoppingBlock`, `ChoppingBlockEntity`, client `ground/ChoppingBlockRenderer`, `jei/ChoppingJei`; `FirstTools` routes the sneak click. Assets from `tools/gen_chopping_block.py`.
 - Built; not played.
+
+## 0.24.6 (2026-11-15): Armor remade in vanilla style (#1313)
+
+- **Armor textures**: the mod's two player armor sets — bog_iron and caveman (helmet, chestplate, leggings, boots each) — remade in pure vanilla style: solid 1-pixel outlines, flat solid colors per section, crisp pixel art, no gradients or anti-aliasing. Iron-gray for bog_iron, hide-brown for caveman, matching each set's existing palette.
+- Not tested in game.
