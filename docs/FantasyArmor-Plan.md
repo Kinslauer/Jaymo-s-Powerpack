@@ -30,6 +30,11 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - Netherite upgrade: smithing table takes Armory's steel plate (not diamond) with the upgrade template and an ingot.
 - Royal tiers: rich queens wear trimmed steel plate where they wore diamond (`Regalia.plate`, `RoyalDress.conform`);
   `McaEquipmentMixin` swaps any diamond armour for steel plate. Loot tables that give diamond armour give steel plate.
+- Found while starting: diamond tools, armour and weapons are already uncraftable (Powers 0.8.124), and netherite gear
+  is loot-only because its smithing needs diamond gear. So this patch is: netherite armour by smithing over steel plate,
+  steel tools and weapons (Tinkers' steel is already netherite-tier) taking Tinkering's Netherite modifier as the
+  plating, and diamond gear taken out of NPC kits, relics and rewards (MonsterGear, Regalia, Relics, QuestBoard) in
+  favour of steel.
 - Diamond tools and swords go too (Andy's choice): grid recipes removed; steel tools and blades forged through Tinkers
   fill the tier, and netherite tools are made from steel ones (smithing table or Tool Forge) instead of diamond ones.
 
@@ -70,6 +75,8 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
 - `ship-ref`: packMods entry (CurseForge reference); its tooltip descriptions turned off in the shipped config.
 - `ship-trim`: datapack removing recipes for the sets named after other games' characters (Malenia, Ornstein, Lady Maria,
   Crucible Knight, Silver Knight, Old Knight).
+  Also the Grave Sentinel helmet (Andy, 2026-11-15: "the grave sentinel helmet should be removed"): its recipe goes and
+  `FantasyArmorCompat` never puts it on anyone; the rest of the Grave Sentinel set stays.
 - `ship-dress`: `FantasyArmorCompat` (like `KnightsCompat`, by registry id, no dependency): monsters, undead and kings
   only, so royal tiers still hold.
 - `ship-repaint`: waits for Andy's look at the model sheet.
