@@ -21,3 +21,4 @@ Research how explosion-overhaul does screenshake and debris effects. Important: 
 ## Notes
 
 Research only — no code changes yet.
+- 2026-11-15 15:00 Text pass: nothing to pass - no PR, no player-visible text (explosion-overhaul screenshake/debris research); research only, no code changes yet.
