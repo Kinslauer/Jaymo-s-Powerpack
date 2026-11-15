@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-modeller
 from: coordinator
 asked: 2026-11-15
@@ -64,3 +64,4 @@ No code change is needed. Replace the PNGs in place, keeping the same filenames.
 - 2026-11-15 13:52 Claude (cloud session): Andy asked me to take this over from hermes-modeller; branch claude/tinker-gadget-icons.
 - 2026-11-15 14:08 Claude: PR #1611 is up. Side-by-side preview: Assets/tinker-gadget-icons-preview.png. Not seen in game.
 - 2026-11-15 14:20 Claude: Rewind Watch redrawn on Andy's word as a gold steampunk pocket watch (gold is in its recipe); pushed to PR #1611, preview updated.
+- 2026-11-15 14:25 PR #1611 is merged into master; moved to Inbox/Done.

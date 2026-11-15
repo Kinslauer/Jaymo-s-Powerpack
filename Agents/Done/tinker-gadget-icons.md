@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: merged
 task: tinker-gadget-icons
 branch: claude/tinker-gadget-icons
 with: 
