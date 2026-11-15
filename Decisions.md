@@ -628,3 +628,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, ring thread): "lore approved. merge": The giant's ring paragraph is canon; PR #1595 merged.
 - 2026-11-15 (Andy, chopping block thread): a chopping block like SevTech/GTNH to split logs into planks; built as our own (sneak+axe carves a set-down log into one), PR #1599. Grid log->plank stays removed.
 - 2026-11-15 (Andy, chopping block thread): "Lore looks great merge": the chopping block paragraph is canon; PR #1599 merged.
+- 2026-11-15 (Andy): approved the lore "Who the well-wardens are" (well-wardens = sky lord's wardens, a village elder each, dawnwatch = Sun-Marshal's sun-guard).
