@@ -274,7 +274,8 @@ public final class StoryGround {
 			if (villages.isEmpty()) {
 				return;
 			}
-			ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
+			// (a One Dimension world's Overworld band's own placements: the stacked level's has none, "0 of 0 places looked at")
+			ChunkGeneratorStructureState state = Stacked.overworldGround(level).structures();
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
 			for (Holder<Structure> village : villages.get()) {
@@ -307,7 +308,7 @@ public final class StoryGround {
 			long until = System.nanoTime() + budgetNanos;
 			while (this.next < this.spots.size()) {
 				Spot spot = this.spots.get(this.next++);
-				this.found = village(level, spot);
+				this.found = Stacked.searchingOverworld(level, () -> village(level, spot));
 				if (this.found != null) {
 					return true;
 				}

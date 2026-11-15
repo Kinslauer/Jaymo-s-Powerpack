@@ -85,9 +85,12 @@ public final class SunkenPalace {
 			return found;
 		}
 		List<BlockPos> sites = new ArrayList<>();
-		ChunkGenerator generator = level.getChunkSource().getGenerator();
+		// (the Overworld band's own generator in a One Dimension world: the stacked level's isn't the Overworld's, so no
+		// palace was ever sited, and it reads the clouds as ground)
+		com.jaymoskingdoms.Stacked.Ground ground = com.jaymoskingdoms.Stacked.overworldGround(level);
+		ChunkGenerator generator = ground.generator();
 		if (Mohknee.overworld(generator)) {
-			RandomState state = level.getChunkSource().randomState();
+			RandomState state = ground.randomState();
 			double turn = new java.util.Random(level.getSeed() ^ 0x5eaf100dL).nextDouble() * Math.PI * 2.0;
 			int sea = generator.getSeaLevel();
 			for (int i = 0; i < PALACES; i++) {
@@ -95,8 +98,8 @@ public final class SunkenPalace {
 				int from = Mohknee.LAND + Mohknee.WOBBLE + SEARCH_FROM;
 				for (int r = from; r < from + SEARCH_REACH; r += SEARCH_STEP) {
 					int x = Mohknee.CENTRE_X + Mth.floor(Math.cos(angle) * r), z = Mohknee.CENTRE_Z + Mth.floor(Math.sin(angle) * r);
-					if (!Mohknee.island(x, z) && sea - generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= DEPTH) {
-						sites.add(new BlockPos(x, sea, z));
+					if (!Mohknee.island(x, z) && sea - generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) >= DEPTH) {
+						sites.add(new BlockPos(x, sea + ground.shift(), z));
 						break;
 					}
 				}

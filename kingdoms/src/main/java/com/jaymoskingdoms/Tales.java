@@ -589,20 +589,22 @@ public final class Tales {
 
 	/** Open ground about {@code dist} blocks from {@code from}: dry land if any direction has it. Its height is the land's as the world would make it. */
 	static BlockPos wild(ServerLevel level, BlockPos from, int dist, RandomSource random) {
-		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
-		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
+		// (the Overworld's own ground in a One Dimension world: the level's generator reads the clouds overhead)
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		net.minecraft.world.level.chunk.ChunkGenerator generator = ground.generator();
+		net.minecraft.world.level.levelgen.RandomState state = ground.randomState();
 		int dry = generator.getSeaLevel() + 1;
 		double start = random.nextDouble() * Math.PI * 2.0;
 		BlockPos fallback = null;
 		for (int i = 0; i < 12; i++) {
 			double a = start + Math.PI * 2.0 * i / 12.0;
 			int x = from.getX() + (int)Math.round(Math.cos(a) * dist), z = from.getZ() + (int)Math.round(Math.sin(a) * dist);
-			int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, state);
+			int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), state) + ground.shift();
 			BlockPos at = new BlockPos(x, y, z);
 			if (fallback == null) {
 				fallback = at;
 			}
-			if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= dry
+			if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) >= dry
 				&& Factions.around(level.getServer(), level, at, dist < 100 ? 0.0 : 48.0) == null) {
 				return at;
 			}
