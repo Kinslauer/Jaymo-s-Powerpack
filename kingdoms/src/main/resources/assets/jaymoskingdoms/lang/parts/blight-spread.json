@@ -32,5 +32,9 @@
   "work.jaymoskingdoms.burn_dead.text": "%1$s of %3$s's dead had the blight in them when they died. Come nightfall they'll get up. Burn the bodies before then, or see them into the ground.",
   "work.jaymoskingdoms.burn_dead.objective": "Burn or bury the blighted dead of %4$s: %1$s of %2$s",
   "work.jaymoskingdoms.failed.sick_gone": "The sick are gone, and you cured none of them.",
-  "work.jaymoskingdoms.failed.dead_rose": "One of the blighted dead got up before you burned it."
+  "work.jaymoskingdoms.failed.dead_rose": "One of the blighted dead got up before you burned it.",
+  "gui.jaymoskingdoms.story.hint.189": "Armour keeps the Hollow's blight out of most blows from the dead. A wound bound soon after it was taken may never let it settle.",
+  "gui.jaymoskingdoms.story.hint.190": "A wet cough and greying skin mean the Hollow's blight. The druids of the groves brew its cure from gilded flesh, and the swamp witches hide one in their huts.",
+  "gui.jaymoskingdoms.story.hint.191": "Zombie blood left on your skin or armour can give you the blight. Scrub it off, or get soaked through, before it gets into a wound.",
+  "gui.jaymoskingdoms.story.hint.192": "Some of a horde's dead carry blocks and build their way up to you. Their scouts howl to call the rest. Stay put all night and the waves keep coming."
 }
