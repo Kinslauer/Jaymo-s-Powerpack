@@ -785,6 +785,21 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen that doesn't tell of impacts
 		}
+		try {
+			// a body flung into a wall that slides down to sit at its foot smears the wall behind it
+			Class<?> impacts = Class.forName("com.jaymoskitchen.corpse.CorpseImpacts");
+			java.util.function.BiConsumer<Entity, double[]> slump = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && at.length >= 6 && com.jaymospowers.core.BladeBlood.bleeds(corpse, type)
+					&& corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.BladeBlood.wallSmear(level, corpse, com.jaymospowers.core.BladeBlood.color(corpse, type), at[0], at[1],
+						at[2], at[3], at[4], at[5]);
+				}
+			};
+			impacts.getMethod("setOnSlump", java.util.function.BiConsumer.class).invoke(null, slump);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen whose bodies don't slump against walls
+		}
 	}
 
 	/**

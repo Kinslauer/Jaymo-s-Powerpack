@@ -5,6 +5,8 @@ import com.jaymoskitchen.ragdoll.LevelRagdollWorld;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollNet;
 import com.jaymoskitchen.ragdoll.RagdollSnapshot;
+import com.jaymoskitchen.ragdoll.WallSlump;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
@@ -41,6 +43,10 @@ final class CorpseRagdoll {
 	 */
 	private static final double KEEL_BREAK = 0.05;
 	private static final int KEEL_AIR_TICKS = 3;
+	/** A body flung into a wall ({@link WallSlump#struck}) slides down it and sits there this share of the time (the rest crumple as they fall). */
+	private static final float SLUMP_CHANCE = 0.85F;
+	/** Sitting against a wall, a part moving faster than this (blocks a tick: kicked by someone walking into it) tips it over. */
+	private static final double SLUMP_TIP = 0.02;
 
 	RagdollBody body;
 	private final LevelRagdollWorld world;
@@ -54,6 +60,9 @@ final class CorpseRagdoll {
 	/** A mob just dead on its feet: its sway and tip onto its side, steering the body until the physics takes it. */
 	private @org.jspecify.annotations.Nullable KeelOver keel;
 	private int keelAir;
+	/** Sliding down a wall it was flung into, then sitting against it: the slide, and the wall's face (null: not propped). */
+	private @org.jspecify.annotations.Nullable WallSlump slump;
+	private @org.jspecify.annotations.Nullable Direction propped;
 
 	CorpseRagdoll(CorpseEntity corpse, RagdollBody body) {
 		this(corpse, body, null);
@@ -91,6 +100,11 @@ final class CorpseRagdoll {
 			// shoved, struck, grabbed: no more swaying, it goes down as it's pushed
 			endKeel(corpse);
 		}
+		if (propped != null && (moved.lengthSqr() > KEEL_BREAK * KEEL_BREAK || pushed.lengthSqr() > KEEL_BREAK * KEEL_BREAK
+			|| body.gripped() || body.pinned() || corpse.isNoGravity())) {
+			// moved, shoved, picked up: it falls off the wall however it's pushed
+			unprop();
+		}
 		if (moved.lengthSqr() > REBUILD_DISTANCE * REBUILD_DISTANCE) {
 			// teleported: lie down where it is now
 			body = corpse.lyingBody();
@@ -111,9 +125,19 @@ final class CorpseRagdoll {
 			body.shove(pushed.x, pushed.y, pushed.z);
 		}
 		boolean keeling = keel != null && keel.steer(body);
+		boolean sliding = slump != null && slump.steer(body);
 		double[] before = body.speed();
-		// keeling over, it's steered where it goes (gravity is in the tip), only held off the ground and out of walls
-		body.step(world, keeling || corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
+		// keeling over or sliding down a wall, it's steered where it goes (gravity is in the move), only held off the
+		// ground and out of walls; sat against a wall, it rests there (the friction holding it up isn't in the physics)
+		body.step(world, keeling || sliding || propped != null || corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
+		if (slump != null && !slump.sliding()) {
+			// sat down: still from here (asleep at once: held off the floor by nothing, it never feels it under it)
+			slump = null;
+			body.settle();
+		} else if (propped != null && slump == null && !body.asleep() && fastest(body) > SLUMP_TIP) {
+			// kicked over (someone walked into it)
+			unprop();
+		}
 		if (keel != null) {
 			keelAir = body.grounded() ? 0 : keelAir + 1;
 			if (!keeling || keelAir >= KEEL_AIR_TICKS) {
@@ -124,7 +148,8 @@ final class CorpseRagdoll {
 		if (!body.sane()) {
 			body = corpse.lyingBody();
 			endKeel(corpse);
-		} else if (!keeling && !body.gripped() && !body.pinned()) {
+			unprop();
+		} else if (!keeling && !body.gripped() && !body.pinned() && propped == null) {
 			// a hard hit on the ground or a wall: the speed it lost this step, less what gravity took
 			double[] after = body.speed();
 			double lx = before[0] - after[0], ly = before[1] - after[1] - (corpse.isNoGravity() ? 0.0 : RagdollBody.GRAVITY), lz = before[2] - after[2];
@@ -135,10 +160,27 @@ final class CorpseRagdoll {
 				double[] m = body.middle();
 				CorpseImpacts.impact(corpse, m[0], body.bottom(), m[2], lost);
 			}
+			// flung into a wall: a humanoid slides down it and sits there
+			if (!corpse.isNoGravity() && WallSlump.struck(body, lx, lz) && level.getRandom().nextFloat() < SLUMP_CHANCE) {
+				CorpseEntity.SlumpWall wall = corpse.slumpWall(body, lx, lz);
+				if (wall != null) {
+					double[] m = body.middle();
+					double top = body.bounds()[4];
+					int nx = wall.face().getStepX(), nz = wall.face().getStepZ();
+					slump = new WallSlump(body, nx, nz, wall.wall(), wall.floorY(), level.getRandom().nextLong());
+					propped = wall.face();
+					CorpseImpacts.slump(corpse, m[0], top, m[2], nx, nz, wall.floorY());
+				}
+			}
 		}
 		// (0.5.24) a body that lands on a butcher table (set down, thrown, slid onto it) stays on it; the table broken, it falls
 		if (++sinceTable >= TABLE_EVERY) {
 			sinceTable = 0;
+			if (propped != null && slump == null && !corpse.stillPropped(body, propped)) {
+				// the wall or the floor it sat on is gone
+				unprop();
+				body.wake();
+			}
 			if (!body.pinned()) {
 				// ((0.5.39) not while it's held: dragged over a table, it goes on over it)
 				if (body.grounded() && !body.gripped() && keel == null) {
@@ -171,6 +213,34 @@ final class CorpseRagdoll {
 		}
 	}
 
+	/** Sitting against a wall, the wall's face (pointing out of it), else null. */
+	@org.jspecify.annotations.Nullable Direction propped() {
+		return propped;
+	}
+
+	/** Sat against the wall facing {@code face} as it was saved (a reload: no slide, it's already there). */
+	void prop(Direction face) {
+		slump = null;
+		propped = face;
+		body.settle();
+	}
+
+	/** It falls free of the wall, from wherever it is now. */
+	private void unprop() {
+		slump = null;
+		propped = null;
+	}
+
+	/** The fastest any of its points is moving (blocks a tick). */
+	private static double fastest(RagdollBody body) {
+		double most = 0.0;
+		for (int i = 0; i < body.rig.count; i++) {
+			double vx = body.x[i] - body.px[i], vy = body.y[i] - body.py[i], vz = body.z[i] - body.pz[i];
+			most = Math.max(most, vx * vx + vy * vy + vz * vz);
+		}
+		return Math.sqrt(most);
+	}
+
 	/** Puts the entity where the body is, moving as it moves. */
 	private void write(CorpseEntity corpse) {
 		double[] m = body.middle();
@@ -191,8 +261,9 @@ final class CorpseRagdoll {
 
 	/** A blow at {@code at} along {@code direction}: {@code strength} blocks a tick at the nearest part, a little lift too. */
 	void smack(Vec3 at, Vec3 direction, double strength) {
-		// struck as it keels over: it goes down with the blow
+		// struck as it keels over or sits against a wall: it goes down with the blow
 		keel = null;
+		unprop();
 		Vec3 d = direction.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 0.0, 0.0) : direction.normalize();
 		body.hit(at.x, at.y, at.z, d.x * strength, d.y * strength + SMACK_LIFT, d.z * strength, HIT_SHARE);
 	}
@@ -200,6 +271,7 @@ final class CorpseRagdoll {
 	/** A knock at a random part (an axe blow, rummaging, a bite), mostly upward. */
 	void jolt(boolean hard, RandomSource random) {
 		keel = null;
+		unprop();
 		int i = random.nextInt(body.rig.count);
 		double strength = hard ? JOLT_HARD : JOLT_LIGHT;
 		double angle = random.nextDouble() * Math.PI * 2.0;

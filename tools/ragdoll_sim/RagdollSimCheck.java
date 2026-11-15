@@ -2,13 +2,14 @@ import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import com.jaymoskitchen.ragdoll.RagdollWorld;
+import com.jaymoskitchen.ragdoll.WallSlump;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Checks Jaymo's Kitchen's ragdoll physics on its own, without the game: bodies dropped, flung and laid over edges in
  * a little world of boxes. Run from the repository root (JDK 21+):
- *   javac -d build/ragdoll_sim kitchen/src/main/java/com/jaymoskitchen/ragdoll/{Ragdoll{Rig,Body,World},KeelOver}.java tools/ragdoll_sim/RagdollSimCheck.java
+ *   javac -d build/ragdoll_sim kitchen/src/main/java/com/jaymoskitchen/ragdoll/{Ragdoll{Rig,Body,World},KeelOver,WallSlump}.java tools/ragdoll_sim/RagdollSimCheck.java
  *   java -cp build/ragdoll_sim RagdollSimCheck
  */
 public final class RagdollSimCheck {
@@ -460,6 +461,79 @@ public final class RagdollSimCheck {
 					check(name + ": falls the way it was pushed", m[0] > 0.8, "middle x " + f(m[0]));
 				}
 			}
+		}
+
+		System.out.println("Flung into a wall, slides down it and sits (WallSlump)");
+		// name, rig, its speed (sideways, up), how far the wall stands from its feet
+		for (Object[] c : new Object[][] {{"player, thrown", player, 0.9, 0.2, 1.1}, {"player, thrown up", player, 0.9, 0.45, 1.1},
+			{"player, killed by the wall", player, 0.3, 0.03, 0.5}, {"giant", giant, 0.9, 0.2, 4.1}}) {
+			String name = (String) c[0];
+			RagdollRig rig = (RagdollRig) c[1];
+			// the wall's face at x = 3 + rig width, facing -x; a floor at 64
+			double face = (double) c[4];
+			World w = ground().add(face, 64, -20, face + 1, 90, 20);
+			for (long seed = 0; seed < 6; seed++) {
+				RagdollBody b = RagdollBody.standing(rig, 0, 64, 0, -90);
+				b.shove((double) c[2], (double) c[3], 0);
+				WallSlump slump = null;
+				for (int t = 0; t < 200 && slump == null; t++) {
+					double[] before = b.speed();
+					b.step(w);
+					double[] after = b.speed();
+					// (CorpseRagdoll's test: the sideways speed lost in one step)
+					if (WallSlump.struck(b, before[0] - after[0], before[2] - after[2])) {
+						slump = new WallSlump(b, -1, 0, -face, 64, seed);
+					}
+				}
+				check(name + " " + seed + ": strikes the wall", slump != null, "");
+				if (slump == null) {
+					continue;
+				}
+				double worst = 0;
+				while (slump.steer(b)) {
+					b.step(w, 0.0F);
+					worst = Math.max(worst, worstStretch(b));
+				}
+				b.settle();
+				// resting against the wall: stepped without gravity (CorpseRagdoll), it stays as it sat
+				for (int t = 0; t < 100; t++) {
+					b.step(w, 0.0F);
+				}
+				float[] fr = b.frame();
+				// (slumped to one side, the lower hip)
+				double hipY = Math.min(b.y[RagdollRig.R_HIP], b.y[RagdollRig.L_HIP]);
+				double hipX = (b.x[RagdollRig.R_HIP] + b.x[RagdollRig.L_HIP]) * 0.5;
+				double furthest = -99;
+				for (int i = 0; i < rig.count; i++) {
+					furthest = Math.max(furthest, b.x[i] + rig.radius[i]);
+				}
+				check(name + " " + seed + ": sits up (torso near upright)", fr[4] > 0.75, "up y " + f(fr[4]));
+				check(name + " " + seed + ": faces out of the wall", fr[6] < -0.2, "forward x " + f(fr[6]));
+				check(name + " " + seed + ": hips on the floor", hipY - rig.radius[RagdollRig.R_HIP] < 64.1, "hip y " + f(hipY));
+				check(name + " " + seed + ": back to the wall", face - furthest < 0.1 && furthest <= face + 0.01, "gap " + f(face - furthest));
+				check(name + " " + seed + ": legs out in front", b.x[RagdollRig.R_FOOT] < hipX - rig.height * 0.2
+					&& b.x[RagdollRig.L_FOOT] < hipX - rig.height * 0.2, "feet x " + f(b.x[RagdollRig.R_FOOT]) + " " + f(b.x[RagdollRig.L_FOOT]));
+				check(name + " " + seed + ": nothing in a block", worstDepth(b, w) < 0.04, "depth " + f(worstDepth(b, w)));
+				// (its feet catch on the floor for the first ticks of the turn, tugging at it: the drawn model never stretches)
+				check(name + " " + seed + ": bones keep length sliding", worst < 0.12, "stretch " + f(worst));
+				check(name + " " + seed + ": at rest", b.asleep(), "");
+			}
+		}
+
+		System.out.println("A body lying on the floor shoved into a wall stays lying");
+		{
+			World w = ground().add(1.5, 64, -20, 2.5, 90, 20);
+			RagdollBody b = RagdollBody.lying(player, -0.5, 64, 0, -90, true, 3);
+			run(b, w, 200);
+			b.shove(0.4, 0, 0);
+			boolean struck = false;
+			for (int t = 0; t < 60; t++) {
+				double[] before = b.speed();
+				b.step(w);
+				double[] after = b.speed();
+				struck |= WallSlump.struck(b, before[0] - after[0], before[2] - after[2]);
+			}
+			check("not taken for a body flung into the wall", !struck, "");
 		}
 
 		System.out.println(failures == 0 ? "All good." : failures + " failed.");

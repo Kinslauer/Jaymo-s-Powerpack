@@ -529,6 +529,34 @@ public final class BladeBlood {
 		level.sendParticles(spray, true, false, x, y + 0.25, z, drops, 0.25, 0.1, 0.25, 0.15 + 0.15 * k);
 	}
 
+	/** A body sliding down a wall smears this many drops on it, from its shoulders down, flying at it this fast (blocks a tick). */
+	public static final int SLUMP_DROPS = 7;
+	public static final double SLUMP_DROP_SPEED = 0.45, SLUMP_SPREAD = 0.15;
+	/** Each drop's size (as a man's spray), big enough that most start a run down the wall. */
+	public static final float SLUMP_DROP_SIZE = 1.3F;
+
+	/**
+	 * Andy: a body knocked into a wall that slips down to sit at its foot (Jaymo's Kitchen's corpse) leaves a smear down
+	 * the wall behind it and a stain where it sits. It struck at {@code (x, z)}, its top at {@code top}; the wall faces
+	 * {@code (nx, nz)}, and its foot is at {@code floor}. The drops splat where they hit the wall ({@code BloodWallMark}).
+	 */
+	public static void wallSmear(ServerLevel level, Entity body, int color, double x, double top, double z, double nx, double nz,
+		double floor) {
+		if (color == NO_BLOOD) {
+			return;
+		}
+		double from = Math.max(top - 0.35, floor + 0.3), to = floor + 0.2;
+		BloodParticles.Spray spray = new BloodParticles.Spray(color, SLUMP_DROP_SIZE, true);
+		for (int i = 0; i < SLUMP_DROPS; i++) {
+			double y = Mth.lerp(i / (double) (SLUMP_DROPS - 1), from, to);
+			// along the wall a little either way
+			double side = (level.getRandom().nextDouble() * 2.0 - 1.0) * SLUMP_SPREAD;
+			// (count 0: one drop, flying at the wall)
+			level.sendParticles(spray, true, false, x + nz * side, y, z - nx * side, 0, -nx, 0.0, -nz, SLUMP_DROP_SPEED);
+		}
+		BloodTrail.blot(level, body, color, x + nx * 0.3, floor + 0.3, z + nz * 0.3, IMPACT_STAIN_MAX);
+	}
+
 	/**
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all. {@code corpse} is Jaymo's
 	 * Kitchen's body of a {@code type} (Kitchen only asks for one with flesh on it), hit by {@code source} for
