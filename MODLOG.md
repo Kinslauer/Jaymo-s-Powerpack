@@ -5211,3 +5211,10 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
   hooked into `GravityPower` (onKey, Lift's hold and tick), `GravityPowerClient#onKey`, `GravityArmPose` and the two
   Gravity render mixins.
 - Compiled; not played.
+
+## 0.24.8 (2026-11-15): the moss takes Los Perrito (#1604)
+
+- **Overgrowth**: the future's city is now thickly overgrown (`FutureRuins.overgrow`). Moss grows in patches about 12 blocks across over roofs, roads and cars. Inside a patch, open ground gets moss carpet or turns to moss blocks, with ferns, grass and azalea bushes growing on them. Walls get more vines and a little glow lichen, and hanging roots grow under ceilings. Futures that were already ruined get the moss pass on their own the next time each chunk loads (new `future_mossed` chunk attachment). The saved arrival square is still never touched.
+- **Mosslorn ready, switched off**: `LosPerrito` now describes each map the future can be built from (`CityMap`: file, spawn, extent, credit) and reads which map's marker is in place. Mosslorn by milkshake_mp3 is set up but not used: it is All Rights Reserved and its author asks to be asked first. Once they agree, `NEWEST` flips to `MOSSLORN`. Its crates would be refilled from our new `chests/future/food|household|scrap|cache` tables, and its command blocks removed.
+- **`/future swap`** (op): asks for a future built from an older map to be cleared at the next server start, so the next leap fetches the newest one. Until the switch flips, this does nothing.
+- Built; not played.
