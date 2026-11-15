@@ -622,3 +622,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Fantasy Armor thread): "merge": PR #1587 merged; "approved." was for the lore (already marked canon) (no diamond gear, netherite over steel, film cast in Fantasy Armor).
 - 2026-11-15 (Andy, Fantasy Armor thread, decision card): the lore sets reuse Fantasy Armor's models (no new art); our code adds who wears, drops and sells them and the whole-set effects. Mapping in docs/FantasyArmor-Plan.md.
 - 2026-11-15 (Andy, Fantasy Armor thread): "kings can wear whatever they want, except dawncrest" (Fantasy Armor sets on kings).
+- 2026-11-15 (ring thread): the Verdant World's blue giant is reachable by pod; Andy picked landing on its ring (drifts of ice and rock, gravilite, half gravity, airless), not the cloud tops. A pod destination, no portal.
