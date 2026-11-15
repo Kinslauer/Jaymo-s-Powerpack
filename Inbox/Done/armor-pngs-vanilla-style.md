@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -30,3 +30,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots) in a pure 
 - 2026-11-11 19:14 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-11 16:35 Text pass: rewrote changes/powers/armor-pngs-vanilla-style.md - dropped the internal 'PNGs only' and tiered-armor task-text bullets, kept the player-facing armor-textures bullet, closed with 'Not tested in game.' No lang keys or code changed; the PR's other 8 files are PNG textures only.
 - 2026-11-12 01:57 Review (head 153bd3d), Andy 2026-11-11 8:57 PM: 'those textures need work'. Not merged. The new bog_iron and caveman icons are tiny blobs (116-138 bytes each, a few pixels of flat colour), far worse than master's icons from #1269, and the caveman set reuses the bog-iron shapes (master gave caveman its own shapes in d38db1a). Start from master's current PNGs: keep their shapes, full 16x16 silhouettes with vanilla-style shading and outline, caveman distinct from bog iron. Compare side by side before pushing (project file reviews/armor-1313-compare.png shows the problem).
+- 2026-11-15 18:02 PR #1313 is merged into master; moved to Inbox/Done.
