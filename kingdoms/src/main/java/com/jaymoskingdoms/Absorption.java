@@ -275,6 +275,10 @@ public final class Absorption {
 	private static void hold(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
 		if (down) {
+			if (absorber(player) && player.isAlive() && !TreeLocks.check(player, TreeLocks.Lock.SORCERY)) {
+				// (Andy's skill-tree locks) absorbing is learned: Sorcery
+				return;
+			}
 			if (absorber(player) && player.isAlive()) {
 				Long tapped = TAPPED.remove(player.getUUID());
 				boolean quick = tapped != null && now - tapped <= DOUBLE_TAP && player.getMainHandItem().isEmpty();

@@ -37,6 +37,10 @@ public final class FishCast {
         if (player.fishing != null || RELEASING.get()) {
             return null;
         }
+        if (Tackle.rodOf(player.getItemInHand(hand)) != Tackle.Rod.VANILLA && !com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.ANGLER)) {
+            // (Andy's skill-tree locks) the real tackle is learned: Angler (a plain rod still fishes)
+            return InteractionResult.FAIL;
+        }
         if (player.isShiftKeyDown()) {
             if (player instanceof ServerPlayer serverPlayer) {
                 FishRun.turnDrag(serverPlayer, 0);

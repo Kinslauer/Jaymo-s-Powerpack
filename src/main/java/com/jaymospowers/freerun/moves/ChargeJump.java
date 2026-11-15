@@ -38,7 +38,12 @@ public final class ChargeJump {
 
 	/** Whether {@code player} may charge a jump at all (both sides). */
 	public static boolean allowed(Player player) {
-		return !Powers.has(player, WebPower.INSTANCE) && Freerun.canMove(player) && Ledge.canHang(player);
+		return !Powers.has(player, WebPower.INSTANCE) && Freerun.canMove(player) && Ledge.canHang(player) && learned(player);
+	}
+
+	/** (Andy's skill-tree locks) Whether {@code player} has learned it: Charge Jump, on Stealth's Freerunning page (both sides). */
+	public static boolean learned(Player player) {
+		return com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.CHARGE_JUMP);
 	}
 
 	/** The upward speed of a jump wound up for {@code ticks}. */

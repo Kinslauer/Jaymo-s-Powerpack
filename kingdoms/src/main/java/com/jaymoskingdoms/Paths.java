@@ -189,9 +189,21 @@ public final class Paths {
 		return "";
 	}
 
-	/** The classes {@code player} holds that have no path yet. */
+	/**
+	 * (Andy's skill-tree locks) Whether {@code player} may walk a path: a rank of any pillar's path perk (Path of the Wilds,
+	 * of Shadows, of Iron, at pillar level 10). Without one there is no pick to make, and a path already taken lies idle.
+	 */
+	public static boolean mayWalk(Player player) {
+		return player.isCreative() || Skills.of(player).rank(Skills.Perk.PATH_SURVIVAL) > 0 || Skills.of(player).rank(Skills.Perk.PATH_STEALTH) > 0
+			|| Skills.of(player).rank(Skills.Perk.PATH_STRENGTH) > 0;
+	}
+
+	/** The classes {@code player} holds that have no path yet (none until a path perk is learned). */
 	public static List<PlayerClass> owed(Player player) {
 		List<PlayerClass> out = new ArrayList<>();
+		if (!mayWalk(player)) {
+			return out;
+		}
 		for (PlayerClass cls : Classes.both(player)) {
 			if (chosen(player, cls).isEmpty()) {
 				out.add(cls);
@@ -206,6 +218,10 @@ public final class Paths {
 			return;
 		}
 		PlayerClass cls = all[pick.cls()];
+		if (!mayWalk(player)) {
+			TreeLocks.refusePath(player);
+			return;
+		}
 		List<String> paths = of(cls);
 		if (pick.index() < 0 || pick.index() >= paths.size() || !Classes.both(player).contains(cls) || !chosen(player, cls).isEmpty()) {
 			return;
@@ -221,7 +237,7 @@ public final class Paths {
 
 	/** How much of {@code path} {@code player} has: 1 as the first class's, a share as the second's, 0 if not their path. */
 	static float strength(Player player, PlayerClass cls, String path) {
-		return chosen(player, cls).equals(path) ? Classes.share(player, cls) : 0.0F;
+		return chosen(player, cls).equals(path) && mayWalk(player) ? Classes.share(player, cls) : 0.0F;
 	}
 
 	// ---- attributes and the tick ----------------------------------------------------------------------------------

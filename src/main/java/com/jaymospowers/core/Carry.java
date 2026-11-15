@@ -628,6 +628,11 @@ public final class Carry {
 			if (ready != null && server.getGameTime() < ready) {
 				return InteractionResult.FAIL;
 			}
+			if (bound(target) && !TreeLocks.check(carrier, TreeLocks.HAUL_BOUND)) {
+				// (Andy's skill-tree locks) lifting someone hogtied is learned: Haul the Bound (the downed, the living and the
+				// small stay free to carry)
+				return InteractionResult.FAIL;
+			}
 			if (target instanceof SeveredPart || windCarries(player, target)) {
 				// a head or a limb is light, and a Wind user snatches someone up on the fly
 				pickUp(carrier, target);
@@ -686,6 +691,9 @@ public final class Carry {
 
 	/** The lift done: {@code player} takes {@code target} up, if both are still free to. */
 	private static boolean lift(ServerPlayer player, Entity target) {
+		if (bound(target) && !TreeLocks.has(player, TreeLocks.HAUL_BOUND)) {
+			return false;
+		}
 		if (isCarrying(player) || isCarried(player) || Downed.isDowned(player) || KitchenCompat.isCarryingCorpse(player)
 			|| isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle() || !canBeCarriedBy(player, target)) {
 			return false;

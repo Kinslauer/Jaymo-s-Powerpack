@@ -179,13 +179,24 @@ final class GrandSeats {
 
 	/** The structure as {@code /place structure} would start it at {@code chunk} (in any biome), or null if it won't. */
 	static @Nullable StructureStart generate(ServerLevel level, Holder.Reference<Structure> holder, ChunkPos chunk) {
-		ChunkGenerator generator = level.getChunkSource().getGenerator();
-		var randomState = level.getChunkSource().randomState();
+		// (in a One Dimension world, by the Overworld band's own generator and moved into the level's heights: the level's
+		// generator would set it on the Cloud Sea's overcast, hundreds of blocks over the land it was raised for)
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		ChunkGenerator generator = ground.generator();
+		var randomState = ground.randomState();
 		try {
 			StructureStart start = holder.value().generate(holder, level.dimension(), level.registryAccess(), generator, generator.getBiomeSource(),
 				randomState.createClimateSampler(SamplerContext.EMPTY_UNCACHED), randomState, level.getStructureTemplateManager(), level.getSeed(), chunk,
-				0, level, biome -> true);
-			return start.isValid() && !start.getPieces().isEmpty() ? start : null;
+				0, ground.heights(), biome -> true);
+			if (!start.isValid() || start.getPieces().isEmpty()) {
+				return null;
+			}
+			if (ground.shift() != 0) {
+				for (StructurePiece piece : start.getPieces()) {
+					piece.move(0, ground.shift(), 0);
+				}
+			}
+			return start;
 		} catch (RuntimeException e) {
 			JaymosKingdoms.LOGGER.warn("The {} failed to generate", holder.key().identifier(), e);
 			return null;

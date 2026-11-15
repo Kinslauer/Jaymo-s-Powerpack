@@ -207,7 +207,12 @@ public final class Meditate {
 			return;
 		}
 		if (rank(player) <= 0) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.meditate.locked").withStyle(ChatFormatting.GRAY));
+			// (Andy's skill-tree locks) refused as every tree lock is: the perk named, a dull sound (the line below without Kingdoms)
+			if (TreeLocks.has(player, TreeLocks.MEDITATE)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.meditate.locked").withStyle(ChatFormatting.GRAY));
+			} else {
+				TreeLocks.refuse(player, TreeLocks.MEDITATE);
+			}
 			return;
 		}
 		SITTING.remove(player.getUUID());

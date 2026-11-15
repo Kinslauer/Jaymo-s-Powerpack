@@ -198,6 +198,10 @@ public final class Pickpocket {
 			if (rest != null && rest.until() > now) {
 				return InteractionResult.SUCCESS;
 			}
+			if (!TreeLocks.check(sp, TreeLocks.Lock.PICKPOCKET)) {
+				// (Andy's skill-tree locks) picking a pocket is learned: Light Fingers (a Thief knows how)
+				return InteractionResult.PASS;
+			}
 			start(sp, level, mark, now);
 			return InteractionResult.SUCCESS;
 		});

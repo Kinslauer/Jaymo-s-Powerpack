@@ -152,14 +152,16 @@ public final class HideTraits {
 
 	/**
 	 * Leather left soaking wears: each leather piece worn in water loses a point now and then, as wet leather goes stiff and
-	 * cracks. Scaled hide (alligator, crocodile) doesn't.
+	 * cracks, and worn soaked through (Jaymo's Powers' Soaked) at half that. Scaled hide (alligator, crocodile) doesn't.
 	 */
 	private static void soakWear(MinecraftServer server) {
 		if (server.getTickCount() % SOAK_WEAR_EVERY != 0) {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!player.isInWater() || player.isCreative() || player.isSpectator()) {
+			// (soaked through out of the water, by Jaymo's Powers' Soaked, wears it every other time)
+			boolean soaking = player.isInWater() || com.jaymoskitchen.climate.Wetness.soaked(player) && server.getTickCount() % (SOAK_WEAR_EVERY * 2) == 0;
+			if (!soaking || player.isCreative() || player.isSpectator()) {
 				continue;
 			}
 			for (EquipmentSlot slot : ARMOUR) {

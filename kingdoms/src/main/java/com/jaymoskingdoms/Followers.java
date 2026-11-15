@@ -150,6 +150,10 @@ public final class Followers {
 		if (kind < FOLLOW || kind > FREE || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.ORDERS)) {
+			// (Andy's skill-tree locks) giving orders is learned: Command (followers still follow and fight on their own)
+			return;
+		}
 		ServerLevel level = player.level();
 		List<Villager> asked = new ArrayList<>();
 		if (target >= 0) {

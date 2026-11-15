@@ -133,7 +133,9 @@ public final class Knowledge {
 
 	/** Whether {@code perk} is a higher technique {@code player} doesn't have the knowledge for yet. */
 	public static boolean lockedPerk(Player player, Skills.Perk perk) {
-		return perk.minLevel >= TECHNIQUE_LEVEL && !has(player, HIGHER_ARTS);
+		// the second-class perks stand in for the Skeleton Lord (Andy's skill-tree locks), so they want no boss of their own
+		boolean second = perk == Skills.Perk.SECOND_SURVIVAL || perk == Skills.Perk.SECOND_STEALTH || perk == Skills.Perk.SECOND_STRENGTH;
+		return perk.minLevel >= TECHNIQUE_LEVEL && !second && !has(player, HIGHER_ARTS);
 	}
 
 	/** The knowledge bit a great foe's fall earns (0: none). */

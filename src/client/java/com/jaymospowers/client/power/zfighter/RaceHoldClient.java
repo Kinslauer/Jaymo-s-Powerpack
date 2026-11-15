@@ -60,6 +60,8 @@ public final class RaceHoldClient {
 	static final float FROST_ARM_IN = 0.1F;
 
 	private static int held;
+	/** Ticks the hold has been kept without Blood Awakening (Andy's skill-tree locks), for the one refusal. */
+	private static int lockedHeld;
 	private static boolean fired;
 	/** Other powers' left-click holds that a sneaking Verdant or Frost-born can take the click for instead. */
 	private static final java.util.List<java.util.function.Predicate<Player>> POWER_WANTS = new java.util.ArrayList<>();
@@ -80,6 +82,15 @@ public final class RaceHoldClient {
 			&& player.getMainHandItem().isEmpty() && (lineage == ZFighterLineage.VERDANT || lineage == ZFighterLineage.FROST || ember || blood)
 			&& (claims(minecraft, player) || ember && EmberKindleClient.kindling() || blood && HeritageMovesClient.charging()
 			|| lineage == ZFighterLineage.FROST && fired) && !yielded(player);
+		// (Andy's skill-tree locks) the blood's own hold is learned: Blood Awakening. Held a moment without it, you're told so
+		if (down && !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
+			if (++lockedHeld == FROST_HOLD) {
+				com.jaymospowers.core.TreeLocks.refuse(player, com.jaymospowers.core.TreeLocks.BLOOD);
+			}
+			down = false;
+		} else if (!down) {
+			lockedHeld = 0;
+		}
 		// (0.14.0) Kindle times itself; (0.15.72) so do Thunderclap and Sunflare
 		EmberKindleClient.held(ember && down);
 		HeritageMovesClient.held(blood && down);

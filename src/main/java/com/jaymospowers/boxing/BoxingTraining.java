@@ -245,7 +245,8 @@ public final class BoxingTraining {
 	/**
 	 * {@code player} asks a teacher of {@code styleId} ({@link Boxing.Style#id}, or anything else for a teacher of every
 	 * style) about boxing. Does what the visit earns and answers what happened, for the teacher to put into words:
-	 * {@code begin} (the learning task is set), {@code learning} (it isn't done), {@code learned}, {@code one_at_a_time}
+	 * {@code begin} (the learning task is set), {@code learning} (it isn't done), {@code learned}, {@code untaught} (the Boxer
+	 * perk isn't learned yet, Andy's skill-tree locks), {@code one_at_a_time}
 	 * (master what you know first), {@code taken_up} (a known style, boxed in again), {@code task_0}/{@code task_1}/
 	 * {@code task_2} (a task is set), {@code task_wait} (it isn't done), {@code train} (keep fighting), {@code mastered}.
 	 */
@@ -254,6 +255,10 @@ public final class BoxingTraining {
 		if (learning != null) {
 			if (learnKills(player) < LEARN_KILLS) {
 				return "learning";
+			}
+			if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.BOXING)) {
+				// (Andy's skill-tree locks) taking up a style is learned: Boxer, on Strength's first page (the task done stays done)
+				return "untaught";
 			}
 			player.setAttached(LEARNING, 0);
 			return Boxing.learn(player, learning) ? "learned" : "one_at_a_time";
@@ -279,6 +284,10 @@ public final class BoxingTraining {
 		if (level <= 0) {
 			if (!Boxing.canLearn(player, style)) {
 				return "one_at_a_time";
+			}
+			if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.BOXING)) {
+				// (Andy's skill-tree locks) a new style wants Boxer first (a Monk's first is given with the class)
+				return "untaught";
 			}
 			player.setAttached(LEARNING, style.ordinal() + 1);
 			COUNTED.remove(player.getUUID());

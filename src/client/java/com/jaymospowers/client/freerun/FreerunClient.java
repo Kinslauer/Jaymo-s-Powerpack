@@ -136,6 +136,7 @@ public final class FreerunClient {
 			return;
 		}
 		AirFlipClient.tick(minecraft, player);
+		Freerun.balanceSlow(player);
 		Input input = player.input.keyPresses;
 		boolean jumpPressed = input.jump() && !jumpWasDown;
 		jumpWasDown = input.jump();
@@ -211,8 +212,10 @@ public final class FreerunClient {
 		if (input.jump() && vy > -0.4 && Freerun.perk(player, Freerun.Perk.BAR_SWING) >= 1 && Freerun.canMove(player, Freerun.BAR) && tryBar(player)) {
 			return;
 		}
+		// (Andy's skill-tree locks) running up a wall is learned: Wall Runner (refused only when a wall was there to run up)
 		if (jumpPressed && airTicks <= 1 && input.forward() && !input.shift() && player.isSprinting()
-			&& (FastRun.active(player) || Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1) && Freerun.canMove(player, Freerun.UP_RUN) && tryUpRun(player)) {
+			&& (FastRun.active(player) || Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1) && Freerun.canMove(player, Freerun.UP_RUN)
+			&& tryUpRun(player)) {
 			return;
 		}
 		if (tryPole(player, input)) {
@@ -347,7 +350,7 @@ public final class FreerunClient {
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
 		Vec3 into = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(HUG);
-		Vec3 side = new Vec3(left.getStepX(), 0.0, left.getStepZ()).scale(strafe * Freerun.SHIMMY_SPEED);
+		Vec3 side = new Vec3(left.getStepX(), 0.0, left.getStepZ()).scale(strafe * Freerun.SHIMMY_SPEED * com.jaymospowers.core.Agility.factor(player));
 		player.setDeltaMovement(side.add(into).add(0.0, vertical, 0.0));
 		player.resetFallDistance();
 		if (slipping && ticks % 4 == 0) {
@@ -506,8 +509,21 @@ public final class FreerunClient {
 	 * a slide. Out of a fast run it's a head-first dive onto the belly, out of a plain sprint feet first on the back.
 	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
+		boolean sneak = Minecraft.getInstance().options.keyShift.isDown();
+		if (!com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE)) {
+			// (Andy's skill-tree locks) learned: Slide. Without it Sneak in a run is a plain sneak; held as long as a slide
+			// wants, you're told so, once a hold
+			if (running(player) && sneak && !input.jump() && player.onGround() && Freerun.canMove(player, Freerun.SLIDE)) {
+				if (++sneakTicks == Slide.HOLD_TICKS) {
+					com.jaymospowers.core.TreeLocks.refuse(player, com.jaymospowers.core.TreeLocks.SLIDE);
+				}
+			} else {
+				sneakTicks = 0;
+			}
+			return false;
+		}
 		// (0.21.36) the Sneak key itself: while the hold builds, the movement doesn't see it (slideWindup)
-		if (!slideHoldable(player, Minecraft.getInstance().options.keyShift.isDown(), input.jump())) {
+		if (!slideHoldable(player, sneak, input.jump())) {
 			sneakTicks = 0;
 			return false;
 		}
@@ -531,7 +547,7 @@ public final class FreerunClient {
 	 */
 	public static boolean slideOutOf(LocalPlayer player, Vec3 dir, double speed) {
 		if (kind != Freerun.NONE || cooldown > 0 || !player.onGround() || player.isSpectator() || !Freerun.canMove(player, Freerun.SLIDE)
-			|| LedgeClient.active() || com.jaymospowers.client.power.web.WebPowerClient.parkourBusy() || dir.lengthSqr() < 1.0E-4) {
+			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE) || LedgeClient.active() || com.jaymospowers.client.power.web.WebPowerClient.parkourBusy() || dir.lengthSqr() < 1.0E-4) {
 			return false;
 		}
 		sneakTicks = 0;
@@ -546,8 +562,13 @@ public final class FreerunClient {
 
 	/** (0.21.36) Whether Sneak held now counts toward a slide: running on the ground, no move under way, free to slide. */
 	private static boolean slideHoldable(LocalPlayer player, boolean sneak, boolean jump) {
-		boolean running = FastRun.active(player) || player.isSprinting() || sinceSprint <= Slide.SPRINT_GRACE_TICKS;
-		return sneak && !jump && player.onGround() && running && Freerun.canMove(player, Freerun.SLIDE);
+		return sneak && !jump && player.onGround() && running(player) && Freerun.canMove(player, Freerun.SLIDE)
+			&& com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE);
+	}
+
+	/** Running enough to slide: a fast run, a sprint, or a sprint just let go. */
+	private static boolean running(LocalPlayer player) {
+		return FastRun.active(player) || player.isSprinting() || sinceSprint <= Slide.SPRINT_GRACE_TICKS;
 	}
 
 	/**
@@ -669,6 +690,10 @@ public final class FreerunClient {
 		Direction face = Direction.fromYRot(player.getYRot());
 		if (Math.abs(Mth.wrapDegrees(player.getYRot() - face.toYRot())) > Freerun.UP_FACING_DEGREES || (upRan & 1 << face.get3DDataValue()) != 0
 			|| !FreerunWalls.runnableNear(player.level(), player, face)) {
+			return false;
+		}
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.UP_RUN)) {
+			upRan |= 1 << face.get3DDataValue();
 			return false;
 		}
 		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.WALL_RUNNER), 0, Freerun.UP_HEIGHT.length - 1);

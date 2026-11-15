@@ -157,26 +157,32 @@ public final class Ledge {
 	 * A player on a ledge, for everyone's client: the wall's side ({@code face}, a horizontal direction's 2D value),
 	 * when the hang (or the climb, once {@code climbing}) began (game time).
 	 */
-	public record Hold(int face, long start, boolean climbing, boolean prone) {
+	public record Hold(int face, long start, boolean climbing, boolean prone, int ticks) {
 		public static final StreamCodec<ByteBuf, Hold> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Hold::face,
 			ByteBufCodecs.VAR_LONG, Hold::start,
 			ByteBufCodecs.BOOL, Hold::climbing,
 			ByteBufCodecs.BOOL, Hold::prone,
+			ByteBufCodecs.VAR_INT, Hold::ticks,
 			Hold::new);
 
 		public Hold(int face, long start, boolean climbing) {
-			this(face, start, climbing, false);
+			this(face, start, climbing, false, 0);
 		}
 
-		/** How long this climb takes (ticks). */
+		/** How long this climb takes (ticks): {@code ticks}, the climber's own ({@link Ledge#climbTicks}), if it was set. */
 		public int climbTicks() {
-			return this.prone ? PRONE_CLIMB_TICKS : CLIMB_TICKS;
+			return this.ticks > 0 ? this.ticks : this.prone ? PRONE_CLIMB_TICKS : CLIMB_TICKS;
 		}
 
 		public Direction direction() {
 			return Direction.from2DDataValue(this.face);
 		}
+	}
+
+	/** How long {@code player}'s climb over a ledge takes (ticks): quicker by their Agility. */
+	public static int climbTicks(Player player, boolean prone) {
+		return Math.max(1, (int) Math.round((prone ? PRONE_CLIMB_TICKS : CLIMB_TICKS) / Agility.factor(player)));
 	}
 
 	/** On a player hanging from a ledge or climbing over it (synced to everyone, for the pose). */
@@ -699,7 +705,7 @@ public final class Ledge {
 			}
 			player.setAttached(Crawl.CRAWLING, true);
 		}
-		player.setAttached(HOLD, new Hold(hold.face(), level.getGameTime(), true, prone));
+		player.setAttached(HOLD, new Hold(hold.face(), level.getGameTime(), true, prone, climbTicks(player, prone)));
 		player.causeFoodExhaustion(CLIMB_EXHAUSTION);
 		player.resetFallDistance();
 		sound(level, player, pos, 0.8F, 0.7F);

@@ -41,6 +41,10 @@ public final class Belt {
 	}
 
 	public static void cycle(ServerPlayer player) {
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.THROWER)) {
+			// (Andy's skill-tree locks) the belt of throwables is learned: Thrower
+			return;
+		}
 		ItemStack belt = worn(player).copy();
 		if (belt.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.belt.none").withStyle(ChatFormatting.GRAY));
@@ -70,7 +74,7 @@ public final class Belt {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long last = LAST_THROW.get(player.getUUID());
-		if (last != null && now - last < Throwables.THROW_COOLDOWN || player.isSpectator()) {
+		if (last != null && now - last < Throwables.THROW_COOLDOWN || player.isSpectator() || !com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.THROWER)) {
 			return;
 		}
 		ItemStack belt = worn(player).copy();

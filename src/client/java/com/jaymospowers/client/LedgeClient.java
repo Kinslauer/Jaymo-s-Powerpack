@@ -49,6 +49,8 @@ public final class LedgeClient {
 	private static int ticks;
 	/** (0.15.108) The climb under way is the prone one, onto the belly into a low gap. */
 	private static boolean prone;
+	/** How long the climb under way takes (ticks), the player's Agility counted ({@link Ledge#climbTicks}). */
+	private static int climbFor;
 	private static int cooldown;
 	/** (0.21.12) Use was down last tick (a fresh right-click grabs). */
 	private static boolean useWas;
@@ -92,7 +94,7 @@ public final class LedgeClient {
 	}
 
 	private static int climbTicks() {
-		return prone ? Ledge.PRONE_CLIMB_TICKS : Ledge.CLIMB_TICKS;
+		return climbFor > 0 ? climbFor : prone ? Ledge.PRONE_CLIMB_TICKS : Ledge.CLIMB_TICKS;
 	}
 
 	/**
@@ -112,7 +114,8 @@ public final class LedgeClient {
 		phase = Phase.CLIMB;
 		prone = flat;
 		ticks = 0;
-		Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true, flat);
+		climbFor = Ledge.climbTicks(player, flat);
+		Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true, flat, climbFor);
 		ClientPlayNetworking.send(new Ledge.Act(true, flat));
 		if (flat) {
 			CrawlTaps.goProne(player, false);
@@ -353,7 +356,7 @@ public final class LedgeClient {
 	 */
 	private static void shimmy(LocalPlayer player, Ledge.Spot at, boolean left) {
 		Direction side = left ? at.face().getCounterClockWise() : at.face().getClockWise();
-		Ledge.Spot next = Ledge.shimmySpot(player, at, side, Ledge.SHIMMY_SPEED);
+		Ledge.Spot next = Ledge.shimmySpot(player, at, side, Ledge.SHIMMY_SPEED * com.jaymospowers.core.Agility.factor(player));
 		if (next == null) {
 			return;
 		}
@@ -416,9 +419,9 @@ public final class LedgeClient {
 			}
 		} else if (prone) {
 			// (the first tick still has the standing body: it only moves once the crawl has made it 0.6 high)
-			target = ticks < 1 || at.onBelly() == null ? at.hang() : pronePath(at, Math.min(1.0F, (ticks + 1.0F) / Ledge.PRONE_CLIMB_TICKS));
+			target = ticks < 1 || at.onBelly() == null ? at.hang() : pronePath(at, Math.min(1.0F, (ticks + 1.0F) / climbTicks()));
 		} else {
-			float p = Math.min(1.0F, (ticks + 1.0F) / Ledge.CLIMB_TICKS);
+			float p = Math.min(1.0F, (ticks + 1.0F) / climbTicks());
 			target = climbPath(at, p);
 		}
 		player.setDeltaMovement(Vec3.ZERO);

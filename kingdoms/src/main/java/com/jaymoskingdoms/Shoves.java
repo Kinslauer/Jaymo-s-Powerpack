@@ -95,6 +95,10 @@ public final class Shoves {
 			|| PowersCompat.helpless(player) || player.isPassenger()) {
 			return;
 		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.SHOVE)) {
+			// (Andy's skill-tree locks) shoving and tripping are learned: Shove, on Strength's first page
+			return;
+		}
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
 		if (last != null && now - last < (FeatsFight.shieldMaster(player) ? FeatsFight.SHIELD_SHOVE_GAP : COOLDOWN)) {

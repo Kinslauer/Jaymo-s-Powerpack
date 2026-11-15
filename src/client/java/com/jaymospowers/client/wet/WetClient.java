@@ -108,6 +108,11 @@ public final class WetClient {
 				String what = grime.muddiness() > 0.5F ? "mud" : "dust";
 				lines.add(Component.translatable("tooltip.jaymospowers.grime." + how + "." + what).withStyle(ChatFormatting.GOLD));
 			}
+			int rust = com.jaymospowers.core.wet.Rust.rust(stack);
+			if (rust >= com.jaymospowers.core.wet.Rust.SPOTTED) {
+				String how = rust >= com.jaymospowers.core.wet.Rust.CORRODED ? "corroded" : rust >= com.jaymospowers.core.wet.Rust.RUSTY ? "rusty" : "spotted";
+				lines.add(Component.translatable("tooltip.jaymospowers.rust." + how).withStyle(ChatFormatting.RED));
+			}
 		});
 	}
 

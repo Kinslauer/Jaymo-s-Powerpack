@@ -27,6 +27,10 @@ public final class BladeThrow {
 		if (blade.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return false;
 		}
+		if (!com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.THROWER)) {
+			// (Andy's skill-tree locks) hurling a weapon is learned: Thrower (the blade stays in the hand)
+			return false;
+		}
 		ThrownWeapon thrown = Projectile.spawnProjectileFromRotation((l, owner, stack) -> new ThrownWeapon(l, owner, stack), level, blade, player,
 			0.0F, speed, 1.0F);
 		thrown.hurled(damage, comesBack);

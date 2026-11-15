@@ -455,7 +455,8 @@ public final class Guard {
 			}
 			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
 			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
-				&& Armed.kind(player.getUseItem()) != null) {
+				&& Armed.kind(player.getUseItem()) != null && com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.SWAT)) {
+				// ((Andy's skill-tree locks) learned: Bat It Back, on Strength's Will page; the arrow is parried all the same)
 				Swat.back(player, arrow);
 			}
 			return true;

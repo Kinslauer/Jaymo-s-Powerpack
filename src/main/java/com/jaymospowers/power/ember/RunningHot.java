@@ -177,7 +177,7 @@ public final class RunningHot {
 			live.lastEdge = now;
 		}
 		live.sneak = sneak;
-		if (player.isInWaterOrRain() && live.heat > 0.0F) {
+		if ((player.isInWaterOrRain() || com.jaymospowers.core.wet.Wet.soaked(player)) && live.heat > 0.0F) {
 			live.heat = Math.max(0.0F, live.heat - WET_DRAIN);
 			if (player.tickCount % 6 == 0) {
 				level.sendParticles(MagicFx.miasma(STEAM, 1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.3, 0.5, 0.3, 0.01);

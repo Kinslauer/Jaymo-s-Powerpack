@@ -844,6 +844,10 @@ public final class HeritageKits {
 				.withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
+			// (Andy's skill-tree locks) a blood's own move is learned: Blood Awakening, on Survival's Heritage page
+			return;
+		}
 		long now = level.getGameTime();
 		Long ready = READY.get(player.getUUID());
 		if (ready != null && now < ready && ready - now <= move.cooldown * 20L) {

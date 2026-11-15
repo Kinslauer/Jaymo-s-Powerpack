@@ -182,9 +182,13 @@ public final class EarlyGuns {
 		return holds(mob) || mob.entityTags().contains(ISSUED) && mob.getMainHandItem().is(Muskets.musket());
 	}
 
-	/** A match burns in neither rain nor water. */
+	/** A soaked gunner's powder (Jaymo's Powers' Soaked) is damp: this share of his shots fizzle out of the rain too. */
+	static final float DAMP_FIZZLE = 0.5F;
+
+	/** A match burns in neither rain nor water, and damp powder often won't take (decided on the server). */
 	private static boolean wet(LivingEntity shooter) {
-		return shooter.isInWaterOrRain();
+		return shooter.isInWaterOrRain()
+			|| shooter.level() instanceof ServerLevel && PowersCompat.soaked(shooter) && shooter.getRandom().nextFloat() < DAMP_FIZZLE;
 	}
 
 	/** {@code dir}, strayed by up to about {@code degrees}. */
@@ -214,7 +218,8 @@ public final class EarlyGuns {
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y - 0.2, at.z, 5, 0.05, 0.05, 0.05, 0.01);
 		level.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 1.6F);
 		if (shooter instanceof ServerPlayer player) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.early_gun.wet"));
+			player.sendOverlayMessage(Component.translatable(player.isInWaterOrRain() ? "message.jaymoskingdoms.early_gun.wet"
+				: "message.jaymoskingdoms.early_gun.damp"));
 		}
 	}
 

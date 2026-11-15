@@ -276,6 +276,10 @@ public final class Arcana {
 				return InteractionResult.SUCCESS;
 			}
 			ServerPlayer reader = player instanceof ServerPlayer sp ? sp : null;
+			if (reader != null && !TreeLocks.check(reader, TreeLocks.Lock.READ_SCROLL)) {
+				// (Andy's skill-tree locks) reading a scroll is learned: Read Scrolls, at the root of Spellcraft (a Mage knows how)
+				return InteractionResult.FAIL;
+			}
 			if (reader != null && !SpellParts.allow(reader, this.spell, stack)) {
 				return InteractionResult.FAIL;
 			}

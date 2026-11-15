@@ -254,14 +254,16 @@ public final class BlossomVillages {
 
 	/** Water within {@link #WATER_RINGS} of {@code at}, by the ground's shape (its bed under the sea's level): nothing is loaded. */
 	private static boolean waterNear(ServerLevel level, BlockPos at) {
-		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
-		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
+		// (the Overworld's own ground in a One Dimension world: the level's generator reads the clouds, no water anywhere)
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		net.minecraft.world.level.chunk.ChunkGenerator generator = ground.generator();
+		net.minecraft.world.level.levelgen.RandomState state = ground.randomState();
 		int sea = generator.getSeaLevel();
 		for (int r : WATER_RINGS) {
 			for (int i = 0; i < WATER_POINTS; i++) {
 				double a = Math.PI * 2.0 * i / WATER_POINTS;
 				int x = at.getX() + (int)Math.round(Math.cos(a) * r), z = at.getZ() + (int)Math.round(Math.sin(a) * r);
-				if (generator.getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, level, state) < sea) {
+				if (generator.getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, ground.heights(), state) < sea) {
 					return true;
 				}
 			}

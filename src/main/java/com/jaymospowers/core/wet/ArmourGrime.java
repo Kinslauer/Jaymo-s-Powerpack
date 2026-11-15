@@ -227,7 +227,8 @@ public final class ArmourGrime {
 			if (isMud(ground)) {
 				gain = MUD_GAIN;
 				mud = true;
-			} else if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP))) {
+			} else if (isEarth(ground) && (rained || level.isRainingAt(body.blockPosition()) || biome.is(ConventionalBiomeTags.IS_SWAMP) || Wet.wet(body))) {
+				// (wet gear on bare earth picks it up as mud, not dust)
 				gain = WET_GROUND_GAIN;
 				mud = true;
 			} else if (!rained && (ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.SUSPICIOUS_GRAVEL)
