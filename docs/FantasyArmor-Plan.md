@@ -81,6 +81,14 @@ check, see memory cloud-compile-check), an independent verifier agent, one PR, A
   only, so royal tiers still hold.
 - `ship-repaint`: waits for Andy's look at the model sheet.
 
+### 8. The Long Defence's cast in Fantasy Armor (Kingdoms client, only when Fantasy Armor is loaded)
+Andy (2026-11-15): the Quiet One in the Redeemer plate, Thessaly in Lady Maria, Varro in Golden Horns with no helm,
+Grimsby in the Thief gear, Ambrose in the Wandering Wizard, and the Grue in the Dark Lord plate, summoning a few orcs in
+Dark Cover. Film actors are jointed GeckoLib bodies, so `FilmGear` (which paints 64x32 armour onto the skin) can't show
+these GeckoLib sets: a new render layer draws each worn Fantasy Armor piece's own model (read from the mod's assets at
+run time, nothing copied) on the actor's head, body, arm and leg bones. Without the mod the cast looks as it does now.
+Lady Maria is used here, so the trim datapack keeps her set.
+
 ## Open questions
 1. (Answered: armour, tools and weapons all go.)
 2. Repaint Fantasy Armor's textures in our style, or leave its art as it is?
