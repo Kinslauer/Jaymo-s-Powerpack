@@ -150,6 +150,7 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
 		ServerTickEvents.END_SERVER_TICK.register(Future::waiting);
 		FutureGuns.init();
+		FutureFlashlights.init();
 		FutureMachines.init();
 		FutureOmens.init();
 		FutureOmenPilots.init();

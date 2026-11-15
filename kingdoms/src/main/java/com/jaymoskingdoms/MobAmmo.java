@@ -86,10 +86,13 @@ public final class MobAmmo {
 	/** The folk's archers and crewmen, a Scalebane archer, the Gorgon (her volleys come out of it too), anyone else. */
 	static final int[] FOLK_ARROWS = {12, 20}, CREW_ARROWS = {10, 16}, SCALEBANE_ARROWS = {16, 24}, GORGON_ARROWS = {60, 80},
 		OTHER_ARROWS = {8, 14};
-	/** A guard's javelins (or tridents, or rocks), and a gunman's shot. */
-	static final int[] JAVELINS = {2, 3}, SHOT = {6, 10};
-	/** A caravan guard's balls for his musketoon ({@link Musketoon}): heavy, so few. */
-	static final int[] BALLS = {3, 5};
+	/**
+	 * A guard's javelins (or tridents, or rocks), and a gunman's shot (Andy, 2026-11-15: "mobs with guns should spawn
+	 * with less ammo"; was 6 to 10).
+	 */
+	static final int[] JAVELINS = {2, 3}, SHOT = {3, 5};
+	/** A caravan guard's balls for his musketoon ({@link Musketoon}): heavy, so few (was 3 to 5). */
+	static final int[] BALLS = {2, 3};
 	/** A Flame Avatar Tinkerer's blaze rods and powder for the fire cannon ({@link FireCannon}). */
 	static final int[] BLAZE = {5, 8};
 	/** A witch's splash potions, a Hornkin hurler's magma, a rock-throwing captain's rocks. */
