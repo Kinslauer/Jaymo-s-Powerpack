@@ -12,5 +12,6 @@
 - **Gunners loot the fallen** (Andy: "ways for them to resupply... looting other undead"): a gunner short of spare
   rounds picks up rounds its gun takes within 16 blocks, whether a fallen gunner's dropped rounds or what's left in a
   dropped gun that takes the same rounds, and walks over to them when it isn't fighting or has nothing left to shoot.
-  It carries up to one magazine of spares that way (`FutureGuns.scavenge`).
+  It carries up to 6 stacks of spare rounds that way (Andy: "they can carry up to 6 extra stacks of ammo"), and drops
+  them all, in stacks, when it falls (`FutureGuns.scavenge`).
 - Built (Powers and Kingdoms compile); not played. A dev server boot here stopped on an unrelated recipe registry error, so it isn't boot-checked.

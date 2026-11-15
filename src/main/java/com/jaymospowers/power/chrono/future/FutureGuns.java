@@ -125,11 +125,11 @@ public final class FutureGuns {
 	 * Andy (2026-11-15): "There should be ways for them to resupply... looting other undead." A gunner short of spare
 	 * rounds looks this far (blocks) for rounds its gun takes lying on the ground (a fallen gunner's, or what's left in
 	 * a dropped gun that takes the same rounds), every this many ticks, picks up what it reaches and carries up to
-	 * {@link #SPARE_CAP} magazines.
+	 * {@link #SPARE_STACKS} stacks of spare rounds (Andy: "they can carry up to 6 extra stacks of ammo").
 	 */
 	static final double SCAVENGE_RANGE = 16.0, PICKUP_RANGE = 1.6;
 	static final int SCAVENGE_EVERY = 20;
-	static final float SPARE_CAP = 1.0F;
+	static final int SPARE_STACKS = 6;
 	/** Gunners don't rush in: they hang back about this far (a share of the gun's range, within these bounds), backing off if you close. */
 	static final double KEEP_SHARE = 0.45, KEEP_MIN = 6.0, KEEP_MAX = 18.0, BACK_OFF = 0.6;
 	/** How far TaCZ's report of a mob's shot carries. */
@@ -237,9 +237,16 @@ public final class FutureGuns {
 		if (gun == null || gun.ammo.isEmpty() || spare <= 0) {
 			return;
 		}
-		ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, spare);
-		if (!ammo.isEmpty()) {
+		// in stacks: it may carry several
+		while (spare > 0) {
+			ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, 1);
+			if (ammo.isEmpty()) {
+				return;
+			}
+			int n = Math.min(spare, ammo.getMaxStackSize());
+			ammo.setCount(n);
 			mob.spawnAtLocation(level, ammo);
+			spare -= n;
 		}
 	}
 
@@ -278,9 +285,13 @@ public final class FutureGuns {
 	 * ({@code seek}: no fight on, or nothing left to shoot) walks to the nearest it sees.
 	 */
 	private static void scavenge(ServerLevel level, Mob mob, Gun gun, boolean seek) {
-		int cap = Math.max(1, Math.round(gun.magazine * SPARE_CAP));
+		if (gun.ammo.isEmpty()) {
+			return;
+		}
+		ItemStack one = TaczGuns.modernAmmo(gun.ammo, 1);
+		int cap = SPARE_STACKS * (one.isEmpty() ? 64 : one.getMaxStackSize());
 		int spare = mob.getAttachedOrElse(SPARE, 0);
-		if (gun.ammo.isEmpty() || spare >= cap) {
+		if (spare >= cap) {
 			return;
 		}
 		net.minecraft.world.entity.item.ItemEntity nearest = null;

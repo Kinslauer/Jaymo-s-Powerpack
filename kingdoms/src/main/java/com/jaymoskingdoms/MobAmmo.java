@@ -58,10 +58,10 @@ import org.jspecify.annotations.Nullable;
  * from their stores, one every {@link #RESTOCK_TICKS} while nothing is after them.</li>
  * <li><b>Powder</b> (Andy, 2026-11-15: "There should be ways for them to resupply, either from powder garrisons in
  * kingdoms or looting"): shot and musketoon balls are made from gunpowder, {@link #SHOT_PER_POWDER} and
- * {@link #BALLS_PER_POWDER} to a measure, never from nothing. A gunman of a realm draws it from his realm's storehouse
- * (its powder garrison, filled by trade and by anyone who stocks it) while he's within {@link #GARRISON_RANGE} of it and
- * nothing is after him, a measure every {@link #RESTOCK_TICKS}, and one who's run dry walks back to it
- * ({@link #garrison}); an empty storehouse gives nothing. Anyone short of shot also picks up gunpowder lying about
+ * {@link #BALLS_PER_POWDER} to a measure, never from nothing. A gunman of a realm draws it from his realm's powder
+ * garrison ({@link PowderMagazine}, its own building beside the storehouse, which the weaponsmith keeps filled) while
+ * he's within {@link #GARRISON_RANGE} of it and nothing is after him, a measure every {@link #RESTOCK_TICKS}, and one
+ * who's run dry walks back to it ({@link #garrison}); an empty magazine, or none, gives nothing. Anyone short of shot also picks up gunpowder lying about
  * (a fallen gunman's pouch, a creeper's leavings) and goes looking for it once dry, like arrows.</li>
  * <li><b>Thrown weapons</b>: a drowned's trident and an orc captain's axe leave their hands ({@link #lost}) and lie where
  * they land, until the mob (or someone else) picks them up.</li>
@@ -116,7 +116,7 @@ public final class MobAmmo {
 	static final int RESTOCK_TICKS = 600;
 	/** Shot and musketoon balls a measure of gunpowder makes. */
 	public static final int SHOT_PER_POWDER = 4, BALLS_PER_POWDER = 2;
-	/** A realm's gunman draws powder from its storehouse within this far of its depot (blocks). */
+	/** A realm's gunman draws powder from its powder magazine within this far of it (blocks). */
 	static final double GARRISON_RANGE = 48.0;
 	/** A resting arrow or javelin (one this slow) can be picked up. */
 	static final double RESTING = 0.01;
@@ -529,7 +529,7 @@ public final class MobAmmo {
 				continue;
 			}
 			if (kind == Kind.SHOT || kind == Kind.BALLS) {
-				// powder only from the realm's storehouse
+				// powder only from the realm's powder garrison
 				Integer short_ = ammo.get(kind.key);
 				if (short_ != null && short_ < fullOf(mob, kind)) {
 					garrison(level, mob, kind, short_ == 0);
@@ -544,24 +544,24 @@ public final class MobAmmo {
 	}
 
 	/**
-	 * A realm's gunman short of {@code kind}: near his realm's storehouse he draws a measure of gunpowder from it (none
-	 * there, none had); further off, one that's run {@code dry} heads back to it.
+	 * A realm's gunman short of {@code kind}: near his realm's powder magazine he draws a measure of gunpowder from it
+	 * (none there, none had); further off, one that's run {@code dry} heads back to it.
 	 */
 	private static void garrison(ServerLevel level, Mob mob, Kind kind, boolean dry) {
-		if (!(mob instanceof Worker worker) || worker.factionId() < 0) {
+		if (!(mob instanceof Worker worker) || worker.factionId() < 0 || Factions.level(level.getServer()) != level) {
 			return;
 		}
 		Faction f = Factions.get(level.getServer(), worker.factionId());
-		if (f == null || f.fallen() || f.holdings().depot().isEmpty() || Factions.level(level.getServer()) != level) {
+		BlockPos magazine = f == null || f.fallen() ? null : PowderMagazine.nearest(level, f, mob.blockPosition());
+		if (magazine == null) {
 			return;
 		}
-		BlockPos depot = f.holdings().depot().get();
-		if (mob.blockPosition().closerThan(depot, GARRISON_RANGE)) {
-			if (!Storage.take(level, f, Items.GUNPOWDER, 1).isEmpty()) {
+		if (mob.blockPosition().closerThan(magazine, GARRISON_RANGE)) {
+			if (PowderMagazine.take(level, f, 1) > 0) {
 				give(mob, kind, perItem(kind));
 			}
 		} else if (dry && mob instanceof net.minecraft.world.entity.PathfinderMob walker && walker.getNavigation().isDone()) {
-			walker.getNavigation().moveTo(depot.getX() + 0.5, depot.getY(), depot.getZ() + 0.5, FETCH_SPEED);
+			walker.getNavigation().moveTo(magazine.getX() + 0.5, magazine.getY(), magazine.getZ() + 0.5, FETCH_SPEED);
 		}
 	}
 }
