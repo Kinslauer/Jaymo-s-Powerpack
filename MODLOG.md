@@ -5168,3 +5168,10 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - Only ground that hasn't been visited yet changes: Maw chunks already generated stay as they are, so in an existing world the ruins show up past the parts you've explored (or everywhere once the Maw is reset).
 - Code: `power/zfighter/MawCities.SPREAD` (Lost Cities' `CITY_PERLIN_OFFSET` for the Maw's profile, was 0.2, now -0.6).
 - Checked on a dev server: the 16x16 chunks under (519, -156) went from no buildings to 238 of 256 chunks built, nothing above y 111. Not played.
+
+## 0.24.4 (2026-11-15): Fantasy Armor wears out (#1598)
+
+- Fantasy Armor's durability is switched on, once per install, by the same preset that hides its descriptions. Each piece gets 30% of Fantasy Armor's own durability, the same cut every other armour has. A number someone has already changed in `fantasy_armor-attributes.json` is kept.
+- Nothing breaks. A worn-out piece stays on and protects nothing until it is repaired at an anvil (netherite), and not during a fight, as with all armour.
+- A set with a worn-out piece gives no set effects until that piece is repaired.
+- Built; not played.

@@ -13983,3 +13983,8 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   server (land share, landmass and ocean sizes on three seeds, biome map 60,000 blocks across, a new world boots and
   spawns on land in 8-12 s; the biome map by land share and nearest of each to spawn on three seeds; /locate finds every
   village type, snowy at 650 blocks, desert at 6,800); not played.
+
+## 0.9.33 (2026-11-15): Worn-out lore sets do nothing (#1598)
+
+- A Fantasy Armor lore set with a worn-out piece doesn't count until it's repaired. That covers the headsman's dull plate, the twinned oath, the barrow keepers and every other whole-set effect.
+- Built; not played.
