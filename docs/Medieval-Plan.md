@@ -99,7 +99,7 @@ Guarding is CC0, so its reflect and instant-block code may come in directly.
 
 ### Patch 10, Lost peoples and the mineshafts (Kingdoms structures, money, bosses; rows cv-ruins, cv-coins, cv-weapons, cv-rulers, cv-avatars, cv-music, cv-trade, mm-miners, mm-loot, mm-collapse, mm-creatures)
 
-## Lore placements (for Andy to approve; to go into Lore.md as `(new)` paragraphs)
+## Lore placements (Andy approved 2026-11-15; now in Lore.md)
 
 (new) **The silk deeps** (medieval picks, 2026-11-15, Claude's placement). Under the old hills some caves have gone to
 the spiders: silk over the walls, shed skins underfoot, egg sacs hung like fruit, the stone itself dark with them. At
