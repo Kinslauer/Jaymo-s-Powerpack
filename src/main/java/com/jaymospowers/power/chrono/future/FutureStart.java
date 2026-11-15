@@ -49,8 +49,8 @@ public final class FutureStart {
 	}
 
 	static BoundingBox box(int radius) {
-		return new BoundingBox(LosPerrito.SPAWN_X - radius, MIN_Y, LosPerrito.SPAWN_Z - radius,
-			LosPerrito.SPAWN_X + radius, MAX_Y, LosPerrito.SPAWN_Z + radius);
+		return new BoundingBox(LosPerrito.spawnX() - radius, MIN_Y, LosPerrito.spawnZ() - radius,
+			LosPerrito.spawnX() + radius, MAX_Y, LosPerrito.spawnZ() + radius);
 	}
 
 	/** {@code /future start save}: snapshot the square (stray mobs and dropped items aren't kept). */

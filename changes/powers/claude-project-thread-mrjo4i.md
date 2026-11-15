@@ -1,0 +1,5 @@
+# the future is built from Mosslorn
+- **The future's city**: new futures are fetched from Mosslorn by milkshake_mp3 (v4.0, 26.1.2 chunks, 553 MB) instead of Los Perrito City by Uospag. In the world it is still Los Perrito: the moss-overgrown city is decayed by `FutureRuins` as before. Arrival is the street the map's own lobby sends players to (-140, -85). The first-visit credit names the map and its page.
+- **Crates**: the map's barrels and chests point at its own datapack's loot tables, which we don't ship; `FutureRuins.restock` refills them from our four tables (`chests/future/food|household|scrap|cache`) by the kind of crate they were. The map's command blocks (its own story books, gear, game-mode switches) are removed.
+- **Old worlds**: a future already built from Los Perrito stays as it is (`LosPerrito` reads which map's marker is there). `/future swap` (op) clears the old city at the next server start, so the next leap fetches Mosslorn. Everything built or left in the future goes with it.
+- Built; not played.

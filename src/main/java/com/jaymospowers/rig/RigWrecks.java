@@ -117,8 +117,7 @@ public final class RigWrecks {
 	}
 
 	private static boolean onIsland(ChunkPos pos) {
-		return pos.getMaxBlockX() >= LosPerrito.MIN_X && pos.getMinBlockX() <= LosPerrito.MAX_X
-			&& pos.getMaxBlockZ() >= LosPerrito.MIN_Z && pos.getMinBlockZ() <= LosPerrito.MAX_Z;
+		return LosPerrito.covers(pos);
 	}
 
 	static void tick(MinecraftServer server) {

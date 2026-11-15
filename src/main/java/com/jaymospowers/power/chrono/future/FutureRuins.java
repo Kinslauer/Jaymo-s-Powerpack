@@ -52,6 +52,17 @@ public final class FutureRuins {
 	/** Block updates without neighbour shape checks, so vines and carpets hold where they're put. */
 	static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
+	/**
+	 * The map's own crates point at loot tables we don't ship (Mosslorn's are in its own datapack, plus thousands of
+	 * crates left on a placeholder); they're refilled from ours by what kind of crate they were.
+	 */
+	static final java.util.Map<String, String> CRATE_LOOT = java.util.Map.ofEntries(
+		java.util.Map.entry("mosslorn:chests/crate_kitchen", "food"), java.util.Map.entry("mosslorn:chests/crate_fridge", "food"),
+		java.util.Map.entry("mosslorn:chests/crate_fish", "food"), java.util.Map.entry("mosslorn:chests/crate_house", "household"),
+		java.util.Map.entry("mosslorn:chests/crate_bathroom", "household"), java.util.Map.entry("mosslorn:chests/crate_books", "household"),
+		java.util.Map.entry("mosslorn:chests/crate_office", "household"), java.util.Map.entry("minecraft:chests/loot_table_name", "household"),
+		java.util.Map.entry("mosslorn:chests/crate_car", "scrap"), java.util.Map.entry("mosslorn:chests/moss_megastructure", "cache"));
+
 	private static final ArrayDeque<ChunkPos> QUEUE = new ArrayDeque<>();
 	private static final Set<ChunkPos> QUEUED = new HashSet<>();
 
@@ -64,8 +75,7 @@ public final class FutureRuins {
 	}
 
 	static boolean onIsland(ChunkPos pos) {
-		return pos.getMaxBlockX() >= LosPerrito.MIN_X && pos.getMinBlockX() <= LosPerrito.MAX_X
-			&& pos.getMaxBlockZ() >= LosPerrito.MIN_Z && pos.getMinBlockZ() <= LosPerrito.MAX_Z;
+		return LosPerrito.covers(pos);
 	}
 
 	static void onLoad(ServerLevel level, LevelChunk chunk, boolean generated) {
@@ -107,6 +117,7 @@ public final class FutureRuins {
 		LevelChunkSection[] sections = chunk.getSections();
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		int baseX = pos.getMinBlockX(), baseZ = pos.getMinBlockZ();
+		restock(level, chunk);
 		for (int index = sections.length - 1; index >= 0; index--) {
 			LevelChunkSection section = sections[index];
 			if (section == null || section.hasOnlyAir()) {
@@ -134,6 +145,24 @@ public final class FutureRuins {
 		}
 		chunk.setAttached(RUINED, true);
 		chunk.markUnsaved();
+	}
+
+	/**
+	 * The map's command blocks go (they hand out its own story and gear, and switch game modes), and its crates are
+	 * refilled from our tables ({@link #CRATE_LOOT}).
+	 */
+	private static void restock(ServerLevel level, LevelChunk chunk) {
+		for (var entity : List.copyOf(chunk.getBlockEntities().values())) {
+			if (entity instanceof net.minecraft.world.level.block.entity.CommandBlockEntity) {
+				level.setBlock(entity.getBlockPos(), Blocks.AIR.defaultBlockState(), FLAGS);
+			} else if (entity instanceof net.minecraft.world.RandomizableContainer crate && crate.getLootTable() != null) {
+				String ours = CRATE_LOOT.get(crate.getLootTable().identifier().toString());
+				if (ours != null) {
+					crate.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, JaymosPowers.id("chests/future/" + ours)), crate.getLootTableSeed());
+					entity.setChanged();
+				}
+			}
+		}
 	}
 
 	private static void decay(ServerLevel level, LevelChunk chunk, BlockPos.MutableBlockPos at, BlockState state, RandomSource random) {
