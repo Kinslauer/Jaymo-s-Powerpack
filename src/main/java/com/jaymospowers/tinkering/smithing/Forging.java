@@ -188,6 +188,9 @@ public final class Forging {
 
 	// --- hooks for the rest of the patch ---
 
+	/** (medieval picks) A refusal with no words: the anvil only gives a dull clank and a puff of smoke (a realm's steel or design). */
+	public static final Component DULL = Component.empty();
+
 	/** Why this smith can't work this forging on this anvil (a stone anvil, the wrong hammer), or null. */
 	public interface Check {
 		@Nullable Component refuse(ServerPlayer smith, SmithingAnvilEntity anvil, Option option);

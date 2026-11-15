@@ -53,7 +53,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Feedback loops</b>: what it grazes is gone: short grass is eaten and grass is cropped to dirt, which only
  * grows back from the turf round it. A herd that has cropped its slope bare moves on, uphill, to fresh grazing.</li>
  * <li><b>Stewardship</b>: a tamed goat a keeper feeds grows to trust them ({@link #MAX_TRUST}): every point makes it a
- * little surer and quicker under its rider, and one that trusts enough gives milk to its Stoneborn keeper. A goat left
+ * little surer and quicker under its rider, one that trusts enough gives milk to its Stoneborn keeper, and a trusting pair
+ * fed their wheat will breed (readiest in autumn, the goats' rut, with Kitchen's seasons). A goat left
  * alone just goes on grazing: nothing is lost.</li>
  * </ul>
  * Anyone else who tries to mount one, saddle it or open its packs gets reared at. Our own model and coat
@@ -73,7 +74,13 @@ public class GreatGoat extends AbstractHorse {
 	static final int BUTT_COOLDOWN = 40;
 	/** Trust from each feeding of a tamed goat, the most it holds, and what each point adds to its jump and speed. */
 	public static final int TRUST_PER_FEED = 1, MAX_TRUST = 20;
+	/** Ticks between feedings that count toward trust (so a whole stack at once is no quicker than a few handfuls). */
+	static final long TRUST_FEED_TICKS = 100L;
 	static final double TRUST_JUMP = 0.008, TRUST_SPEED = 0.002;
+	/** Ticks a graze takes, head down, before it looks up and moves again. */
+	static final int GRAZE_ANIM_TICKS = 50;
+	/** Trust before a keeper's goat can be brought into season with its food; in autumn (the rut, with Kitchen's seasons), this. */
+	static final int BREED_TRUST = 8, BREED_TRUST_AUTUMN = 4;
 	/** Trust before it gives its keeper milk, and ticks between milkings. */
 	static final int MILK_TRUST = 5;
 	static final long MILK_TICKS = 6000L;
@@ -86,7 +93,8 @@ public class GreatGoat extends AbstractHorse {
 
 	private int trust;
 	private long lastMilked = -MILK_TICKS;
-	private int bareLooks, buttCooldown;
+	private long lastTrustFeed = -TRUST_FEED_TICKS;
+	private int bareLooks, buttCooldown, grazeTicks;
 
 	public GreatGoat(EntityType<? extends GreatGoat> type, Level level) {
 		super(type, level);
@@ -154,7 +162,7 @@ public class GreatGoat extends AbstractHorse {
 		}
 		// anyone may feed one
 		if (this.isFood(stack)) {
-			return this.fedFood(player, stack);
+			return this.feed(player, stack);
 		}
 		// nobody but a Stoneborn gets on its back, saddles it or opens its packs: it rears at them
 		if (!stoneborn(player)) {
@@ -166,14 +174,38 @@ public class GreatGoat extends AbstractHorse {
 		return super.mobInteract(player, hand);
 	}
 
-	@Override
-	protected boolean handleEating(Player player, ItemStack stack) {
-		boolean ate = super.handleEating(player, stack);
-		if (ate && this.isTamed() && !this.level().isClientSide() && this.trust < MAX_TRUST) {
+	/**
+	 * A handful of its food: what a horse takes from it (healing, growing, temper), plus, for a tamed goat, a little trust
+	 * (at most once every {@link #TRUST_FEED_TICKS}), and a keeper's goat that trusts enough comes into season (autumn is
+	 * the rut). Eaten if any of that took.
+	 */
+	private InteractionResult feed(Player player, ItemStack stack) {
+		if (this.level().isClientSide()) {
+			return InteractionResult.SUCCESS;
+		}
+		boolean ate = this.handleEating(player, stack);
+		long now = this.level().getGameTime();
+		if (this.isTamed() && this.trust < MAX_TRUST && now - this.lastTrustFeed >= TRUST_FEED_TICKS) {
+			this.lastTrustFeed = now;
 			this.trust = Math.min(MAX_TRUST, this.trust + TRUST_PER_FEED);
 			this.applyTrust();
+			ate = true;
 		}
-		return ate;
+		if (this.isTamed() && stoneborn(player) && this.getAge() == 0 && !this.isInLove() && this.trust >= this.breedTrust()) {
+			this.setInLove(player);
+			ate = true;
+		}
+		if (!ate) {
+			return InteractionResult.PASS;
+		}
+		stack.consume(1, player);
+		this.playSound(SoundEvents.GOAT_EAT, 1.0F, 0.8F);
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** The trust its keeper needs to bring it into season: less in autumn, when real goats rut. */
+	private int breedTrust() {
+		return "autumn".equals(com.jaymoskingdoms.KitchenCompat.season(this.level())) ? BREED_TRUST_AUTUMN : BREED_TRUST;
 	}
 
 	/** Its trust in its keeper, in its legs. */
@@ -196,6 +228,13 @@ public class GreatGoat extends AbstractHorse {
 		}
 		if (this.buttCooldown > 0) {
 			this.buttCooldown--;
+		}
+		// it grazes itself (canEatGrass is false), so the horse's own reset never runs: lift its head after a graze or a feed
+		if (!this.isEating()) {
+			this.grazeTicks = 0;
+		} else if (++this.grazeTicks > GRAZE_ANIM_TICKS) {
+			this.grazeTicks = 0;
+			this.setEating(false);
 		}
 		// however anyone else got on (a lead, a command), it won't carry them
 		if (this.getFirstPassenger() instanceof Player rider && !stoneborn(rider)) {
@@ -245,6 +284,8 @@ public class GreatGoat extends AbstractHorse {
 		super.readAdditionalSaveData(input);
 		this.trust = input.getIntOr("trust", 0);
 		this.lastMilked = input.getLongOr("last_milked", -MILK_TICKS);
+		// a goat saved mid-graze (or frozen by the old missing reset) gets its head up
+		this.setEating(false);
 		this.applyTrust();
 	}
 

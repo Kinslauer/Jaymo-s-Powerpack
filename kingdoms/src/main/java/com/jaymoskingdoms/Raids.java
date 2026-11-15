@@ -66,6 +66,8 @@ final class Raids {
 	 */
 	static final float HORDE_RAIDS = 1.5F;
 	static final int HORDE_EXTRA = 3, HORDE_MAX = 11;
+	/** A goblin seat at or above this height counts as up in the mountains whatever its biome. */
+	static final int HIGH_GROUND = 110;
 	/** Where it musters: this far from the seat, toward the camp (other distances tried if that ground isn't loaded). */
 	static final int[] MUSTER_DISTANCE = {48, 40, 56, 32, 64};
 	/** The raid is announced to players this near the target's seat. */
@@ -246,7 +248,8 @@ final class Raids {
 	/** (medieval picks) Whether {@code camp} is a goblin village up in the mountains (or the high hills). */
 	static boolean mountainGoblins(ServerLevel level, Faction camp) {
 		var biome = level.getBiome(camp.seat());
-		return Camps.goblin(level.getServer(), camp.id()) && (biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL));
+		return Camps.goblin(level.getServer(), camp.id()) && (biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL)
+			|| biome.is(net.minecraft.world.level.biome.Biomes.GROVE) || camp.seat().getY() >= HIGH_GROUND);
 	}
 
 	/** (medieval picks) Whether {@code f} is one of the north's settlements: in snowy or taiga land. */

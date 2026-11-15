@@ -46,7 +46,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Medieval picks (me-alloys): the realm steels, each its people's. At the Alloyer three of steel to one of lead run into
  * the Stoneborn's <b>deep steel</b>, three of steel to one of silver into the forest folk's <b>bright steel</b>, and bronze
- * with ash into the orcs' crude <b>ash bronze</b> ({@code Melting.ALLOYS}). They cast into ingots, heat like any ingot and
+ * with ash into the orcs' crude <b>ash bronze</b> ({@code Melting.ALLOYS}; only at the Alloyer, and only for a keeper who
+ * knows the steel: anyone else's melt spoils to plain steel or bronze, {@link #spoiled}). They cast into ingots, heat like any ingot and
  * forge everything steel does ({@link #forgesAs}), but only a smith who knows the metal can work it on the anvil
  * ({@link #knows}, which Jaymo's Kingdoms hands over: one of that people, or sworn to a haven of theirs). What is forged
  * of them keeps its metal ({@link #REALM_STEEL}, carried head to tool): deep steel is stubborn to work and heavy, its
@@ -81,6 +82,16 @@ public final class RealmSteels {
 
 	public static boolean realm(@Nullable Molten metal) {
 		return metal == Molten.DEEP_STEEL || metal == Molten.BRIGHT_STEEL || metal == Molten.ASH_BRONZE;
+	}
+
+	/** What a realm steel's melt comes to for one who doesn't know its working (the Alloyer): only the metal it was made from. */
+	public static Molten spoiled(Molten metal) {
+		return metal == Molten.ASH_BRONZE ? Molten.BRONZE : realm(metal) ? Molten.STEEL : metal;
+	}
+
+	/** Whether this player knows the working of this realm steel (a creative player knows them all). */
+	public static boolean knowing(ServerPlayer player, Molten metal) {
+		return !realm(metal) || player.isCreative() || knows.test(player, metal.id);
 	}
 
 	/** The metal whose forgings this one makes: a realm steel makes steel's. */
@@ -120,8 +131,8 @@ public final class RealmSteels {
 
 		Forging.CHECKS.add((smith, anvil, option) -> {
 			Molten metal = of(anvil.work());
-			return metal != null && !smith.isCreative() && !knows.test(smith, metal.id)
-				? Component.translatable("message.jaymospowers.smithing.realm_steel", metal.displayName()) : null;
+			// (no words: the metal just won't take the hammer for one who doesn't know it)
+			return metal != null && !smith.isCreative() && !knows.test(smith, metal.id) ? Forging.DULL : null;
 		});
 		Forging.CAPS.add((smith, anvil, option) -> of(anvil.work()) == Molten.ASH_BRONZE ? ASH_CAP : null);
 		Forging.FINISHES.add((smith, anvil, option, made) -> {
