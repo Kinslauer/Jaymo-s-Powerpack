@@ -616,5 +616,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, Fantasy Armor thread): "the grave sentinel helmet should be removed" (Fantasy Armor trim datapack drops its recipe; compat never dresses anyone in it).
 - 2026-11-15 (Andy, Fantasy Armor thread): Long Defence film cast in Fantasy Armor: Quiet One = Redeemer, Thessaly = Lady Maria, Varro = Golden Horns no helm, Grimsby = Thief, Ambrose = Wandering Wizard, the Grue = Dark Lord, summoning a few orcs in Dark Cover.
 - 2026-11-15 (Andy, Fantasy Armor thread): "lore looks good": the "What the armourers make" entry and its eight paragraphs are canon. Also: the Quiet One's Redeemer plate should weave onto his body like the symbiote suit does.
+- 2026-11-15 (Andy, Fantasy Armor thread): "merge" then "approved.": PR #1587 merged (no diamond gear, netherite over steel, film cast in Fantasy Armor).
+
+- 2026-11-15 Andy approved the medieval picks lore (silk deeps, everburning mote, sky pirates, childhood faith, realm ways, realm steels, old-age peoples who traded in emeralds, great disasters, the Last Bell). Plan docs/Medieval-Plan.md.
 - 2026-11-15 (Andy, Fantasy Armor thread): "merge": PR #1587 merged; "approved." was for the lore (already marked canon) (no diamond gear, netherite over steel, film cast in Fantasy Armor).
 - 2026-11-15 (Andy, Fantasy Armor thread, decision card): the lore sets reuse Fantasy Armor's models (no new art); our code adds who wears, drops and sells them and the whole-set effects. Mapping in docs/FantasyArmor-Plan.md.
