@@ -315,7 +315,12 @@ public final class Fleet {
 			}
 			return null;
 		}
-		// her hold: the first chest aboard ((0.7.112) or barrel, on a ship with no chests)
+		hold(ship, crew);
+		return ship;
+	}
+
+	/** Her hold: the first chest aboard ((0.7.112) or barrel, on a ship with no chests). */
+	private static void hold(Ship ship, Crew crew) {
 		Hull h = ship.hull();
 		if (h != null) {
 			for (Ship.Piece p : h.pieces) {
@@ -328,7 +333,47 @@ public final class Fleet {
 				}
 			}
 		}
+	}
+
+	/** A ship already laid in the world with her helm at {@code helm} (an airship laid in the sky), cast off at once with {@code crew}; null if she wouldn't go. */
+	public static @Nullable Ship castOff(ServerLevel level, BlockPos helm, Crew crew) {
+		ShipKits.placed(level, helm, null);
+		crew.born = level.getGameTime();
+		Ship ship = Ship.castOff(level, helm, null, crew);
+		if (ship != null) {
+			hold(ship, crew);
+		}
 		return ship;
+	}
+
+	/** Whether the one at her wheel is down there, hurt but alive (he may get up and take it again). */
+	public static boolean helmsmanDown(Ship ship) {
+		Vec3 helm = stations(ship).helm();
+		if (helm == null) {
+			return false;
+		}
+		for (net.minecraft.world.entity.LivingEntity e : ship.crewAboard()) {
+			Vec3 seat = e.getAttached(Ship.SEAT);
+			if (seat != null && seat.distanceToSqr(helm) < 0.75 * 0.75 && e.isAlive() && com.jaymoskingdoms.Downed.isDowned(e)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Whether one of her crew stands at her wheel (a balloon's: let go of it, she drifts and comes down). */
+	public static boolean wheelManned(Ship ship) {
+		Vec3 helm = stations(ship).helm();
+		if (helm == null) {
+			return false;
+		}
+		for (net.minecraft.world.entity.LivingEntity e : ship.crewAboard()) {
+			Vec3 seat = e.getAttached(Ship.SEAT);
+			if (seat != null && seat.distanceToSqr(helm) < 0.75 * 0.75 && !com.jaymoskingdoms.Downed.isDowned(e)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

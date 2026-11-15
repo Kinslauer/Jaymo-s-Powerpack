@@ -202,6 +202,8 @@ public final class Drifters {
 		v.setAttached(DRIFTER, now);
 		LOADED.add(v);
 		weaken(v);
+		// (medieval picks) taken on, they are raised in this realm's tree (Ranks)
+		Ranks.enlist(v, f);
 		int grade = Veterans.roll(random, tavern);
 		if (grade > Veterans.GREEN) {
 			Veterans.make(v, grade);
@@ -287,6 +289,8 @@ public final class Drifters {
 		v.setDespawnDelay(HIRED_TICKS);
 		net.conczin.mca.entity.ai.Memories memories = v.getVillagerBrain().getMemoriesForPlayer(sp);
 		memories.setHearts(Math.max(memories.getHearts(), keptHearts()));
+		// (and they join its ladder, a green one as its militia in its levy kit: Ranks)
+		Ranks.rise(v, true);
 		// (hired, they never go back to the drifter pool: no cap, no moving along)
 		v.removeAttached(DRIFTER);
 		LOADED.remove(v);

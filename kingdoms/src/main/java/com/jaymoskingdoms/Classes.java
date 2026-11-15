@@ -503,7 +503,7 @@ public final class Classes {
 
 	/**
 	 * The gear a class is good with, for its card on the screen (the first of them is its portrait); nobody starts with
-	 * any of it. Items of other mods (Armory's dagger, Balkon's musket) are looked up by id, with a vanilla stand-in
+	 * any of it. Items of other mods (Armory's dagger, Balkon's flintlock) are looked up by id, with a vanilla stand-in
 	 * when they're not there.
 	 */
 	public static List<ItemStack> gear(PlayerClass cls, String option) {
@@ -537,7 +537,9 @@ public final class Classes {
 				new ItemStack(Items.GOLDEN_BOOTS), new ItemStack(Items.SHIELD), new ItemStack(Items.REDSTONE));
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD),
 				RpgKit.or("rogues:berserker_armor_chest", "minecraft:chainmail_chestplate"));
-			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
+			// Andy (2026-11-15): "Marksmen should get a flintlock not a musket" (WeaponMod's flintlock pistol; it fires the
+			// same musket rounds)
+			case MARKSMAN -> List.of(any(1, "weaponmod:flintlock", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
 				any(1, "archers:rapid_crossbow"), new ItemStack(Items.ARROW, 16), RpgKit.or("archers:archer_armor_chest", "minecraft:leather_chestplate"));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
 			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),

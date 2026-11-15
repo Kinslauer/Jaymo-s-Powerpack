@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -59,6 +60,14 @@ final class Raids {
 	static final double REACH = 420.0, PLAYER_RANGE = 80.0;
 	/** The party: a base, one more per this many raiders in the camp, at most this many. */
 	static final int PARTY_BASE = 3, PARTY_PER = 2, PARTY_MAX = 8;
+	/**
+	 * (medieval picks) Mountain goblins: a goblin village up in the mountains swarms down on the north's settlements (in
+	 * snowy or taiga land) even when it's fed, this much likelier than a camp's raid, in a horde this much bigger, to at most this.
+	 */
+	static final float HORDE_RAIDS = 1.5F;
+	static final int HORDE_EXTRA = 3, HORDE_MAX = 11;
+	/** A goblin seat at or above this height counts as up in the mountains whatever its biome. */
+	static final int HIGH_GROUND = 110;
 	/** Where it musters: this far from the seat, toward the camp (other distances tried if that ground isn't loaded). */
 	static final int[] MUSTER_DISTANCE = {48, 40, 56, 32, 64};
 	/** The raid is announced to players this near the target's seat. */
@@ -211,16 +220,20 @@ final class Raids {
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
 			// ((0.7.491) a greenskin realm on the warpath: it and its vassals all go for the one target, often)
 			Faction warpath = data == null ? null : warpathTarget(server, level, camp);
-			if (data == null || data.clearedAt() >= 0 || IllagerSites.noRaids(server, camp.id())
+			// (a sky cove's pirates don't go raiding on foot: their airship comes down on what they mark, SkyPirates)
+			// ((medieval picks) a mountain goblin village, fed, still swarms down on the north)
+			boolean horde = data != null && data.goblin() && !hungry && warpath == null && mountainGoblins(level, camp);
+			if (data == null || data.clearedAt() >= 0 || IllagerSites.noRaids(server, camp.id()) || SkyPirates.KIND.equals(data.kind())
 				|| now - data.lastRaid() < (warpath != null ? COOLDOWN_TICKS / 4 : hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
-				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null) {
-				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls)
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null && !horde) {
+				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls, or they're the mountains')
 				continue;
 			}
-			Faction target = warpath != null ? warpath : target(server, level, camp);
+			Faction target = warpath != null ? warpath : target(server, level, camp, horde);
 			// ((0.7.530) a wall and a watchtower put raiders off; a horde on the warpath isn't)
 			float chance = warpath != null ? HordeCity.RAID_CHANCE
-				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F) * TownProjects.raidFactor(server, target);
+				: Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : horde ? HORDE_RAIDS : 1.0F)
+					* TownProjects.raidFactor(server, target);
 			if (target != null && random.nextFloat() < chance) {
 				start(level, camp, target);
 			}
@@ -229,6 +242,24 @@ final class Raids {
 
 	/** The nearest standing settlement within {@link #REACH} of {@code camp} that has a player near it and hasn't been raided lately. */
 	static @Nullable Faction target(MinecraftServer server, ServerLevel level, Faction camp) {
+		return target(server, level, camp, false);
+	}
+
+	/** (medieval picks) Whether {@code camp} is a goblin village up in the mountains (or the high hills). */
+	static boolean mountainGoblins(ServerLevel level, Faction camp) {
+		var biome = level.getBiome(camp.seat());
+		return Camps.goblin(level.getServer(), camp.id()) && (biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL)
+			|| biome.is(net.minecraft.world.level.biome.Biomes.GROVE) || camp.seat().getY() >= HIGH_GROUND);
+	}
+
+	/** (medieval picks) Whether {@code f} is one of the north's settlements: in snowy or taiga land. */
+	static boolean northern(ServerLevel level, Faction f) {
+		Climate climate = Climate.at(level, f.seat());
+		return climate == Climate.SNOWY || climate == Climate.TAIGA;
+	}
+
+	/** {@link #target(MinecraftServer, ServerLevel, Faction)}, only among the north's settlements if {@code north}. */
+	static @Nullable Faction target(MinecraftServer server, ServerLevel level, Faction camp, boolean north) {
 		long now = level.getGameTime();
 		boolean pirates = Camps.pirate(server, camp.id());
 		Faction best = null;
@@ -254,6 +285,9 @@ final class Raids {
 			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
 				// (0.7.42) pirates raid only from the sea
+				continue;
+			}
+			if (north && !northern(level, f)) {
 				continue;
 			}
 			best = f;
@@ -312,7 +346,10 @@ final class Raids {
 		// ((0.7.491) a warpath's bands are bigger)
 		Faction path = HordeCity.warpath(server, camp);
 		boolean warpath = path != null && path.id() == target.id();
-		int size = warpath ? Math.min(HordeCity.PARTY_MAX, PARTY_BASE + HordeCity.PARTY_EXTRA + band / PARTY_PER) : Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
+		// ((medieval picks) and a mountain goblin horde coming down on the north is a swarm)
+		boolean horde = !warpath && mountainGoblins(level, camp) && northern(level, target);
+		int size = warpath ? Math.min(HordeCity.PARTY_MAX, PARTY_BASE + HordeCity.PARTY_EXTRA + band / PARTY_PER)
+			: horde ? Math.min(HORDE_MAX, PARTY_BASE + HORDE_EXTRA + band / PARTY_PER) : Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
 			Mob member = member(level, camp, i, at, target.seat(), RAID_HOME_RADIUS, true);
@@ -464,6 +501,8 @@ final class Raids {
 		switch (raid.phase) {
 			case MARCH -> {
 				boolean arrived = now - raid.phaseAt > MARCH_TICKS;
+				// (an orc or barbarian band beats its war drum as it comes)
+				WarDrums.march(level, raid.camp, party, now);
 				// a camp that has got into this town before comes the same way in (docs/Pawn-Plan.md row B2)
 				BlockPos way = Wayfinding.wayIn(server, raid.camp, raid.target);
 				for (Mob raider : party) {
@@ -636,6 +675,11 @@ final class Raids {
 		ACTIVE.remove(raid.camp);
 		// (0.7.530) the town is left to pick up the pieces
 		TownTroubles.event(level.getServer(), raid.target, TownTroubles.RAID, Integer.toString(raid.camp));
+		// (am-upgrades) and its lord, threatened, minded to build
+		Faction threatened = Factions.get(level.getServer(), raid.target);
+		if (threatened != null) {
+			Defences.afterThreat(level, threatened);
+		}
 		for (Mob raider : party) {
 			goHome(level, camp, raider);
 		}

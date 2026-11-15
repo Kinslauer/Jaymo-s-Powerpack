@@ -469,7 +469,7 @@ public final class ArsenalPower implements Power {
 		}
 		// now and then the rift goes for a special quest item instead (found or made when it arrives; the weapons are the fallback)
 		ArsenalQuestItems.Entry quest = relic.isEmpty() && wild == null && (!first || ArsenalArmory.pinned(player) == null) && level.getServer() != null
-			? ArsenalQuestItems.roll(player.getRandom()) : null;
+			? ArsenalQuestItems.roll(player) : null;
 		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS, quest, wild));
 		ItemStack shown = quest != null ? ArsenalQuestItems.preview(quest, level.getServer())
 			: wild != null ? wild.shown()

@@ -149,7 +149,8 @@ public final class MobShields {
 		long now = level.getGameTime();
 		long[] s = STATE.computeIfAbsent(mob, m -> new long[5]);
 		s[SEEN] = now;
-		if (!guarding(mob)) {
+		// (a shield an axe knocked aside stays down until it's back in hand, snapped or not)
+		if (now >= s[DISABLED] && !guarding(mob)) {
 			raise(mob, hand, s, now, ticks);
 		}
 	}

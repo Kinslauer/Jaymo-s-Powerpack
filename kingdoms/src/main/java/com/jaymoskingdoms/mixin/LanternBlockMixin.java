@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.GutteringLamps;
 import com.jaymoskingdoms.Lanterns;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +13,10 @@ import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** (0.7.541) Lanterns take random ticks, on which they burn through their fuel, and set down from an item burn on what it carried ({@link Lanterns}). */
+/**
+ * (0.7.541) Lanterns take random ticks, on which they burn through their fuel, and set down from an item burn on what it carried ({@link Lanterns}).
+ * (medieval picks) On them too a lantern or soul lantern in an abandoned place starts guttering ({@link GutteringLamps}).
+ */
 @Mixin(LanternBlock.class)
 abstract class LanternBlockMixin extends Block {
 	protected LanternBlockMixin(Properties properties) {
@@ -21,11 +25,14 @@ abstract class LanternBlockMixin extends Block {
 
 	@Override
 	protected boolean isRandomlyTicking(BlockState state) {
-		return Lanterns.burns(state) || super.isRandomlyTicking(state);
+		return Lanterns.burns(state) || GutteringLamps.mayGutter(state) || super.isRandomlyTicking(state);
 	}
 
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		if (GutteringLamps.mayGutter(state) && GutteringLamps.gutter(state, level, pos)) {
+			return;
+		}
 		if (Lanterns.burns(state)) {
 			Lanterns.randomTick(state, level, pos);
 		} else {

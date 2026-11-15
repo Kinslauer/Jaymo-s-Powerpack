@@ -33,6 +33,8 @@ public final class DisasterRelief {
 	static final double STRUCK_MARGIN = 24.0;
 	/** What repairs cost the treasury, by disaster (emeralds, times the quake's magnitude); a noble king's share more. */
 	static final int COST_STORM = 10, COST_FIRE = 25, COST_FLOOD = 20, COST_QUAKE = 25;
+	/** The great disasters' repairs (a volcano, a wave, a hurricane, a slide, a star): this, times the magnitude. */
+	static final int COST_GREAT = 30;
 	static final float NOBLE_PAYS = 1.5F;
 	/** A tyrant's storm tax: this many times the repairs, wrung from the folk. */
 	static final float TYRANT_TAX = 2.0F;
@@ -57,6 +59,7 @@ public final class DisasterRelief {
 
 	static void register() {
 		QuakeRescue.register();
+		DisasterMemory.register();
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
 				cleared(level, sp, pos, state);
@@ -69,6 +72,14 @@ public final class DisasterRelief {
 	 * {@code quake}) has struck round (x, z), {@code radius} across; {@code magnitude} for a quake (else 1).
 	 */
 	public static void struck(ServerLevel level, double x, double z, double radius, String kind, int magnitude) {
+		struck(level, x, z, radius, kind, magnitude, GREAT_KINDS.contains(kind));
+	}
+
+	/** The great disasters (medieval patch 9): their news goes only by the news board and folk's own words, never chat. */
+	static final java.util.Set<String> GREAT_KINDS = java.util.Set.of("volcano", "tsunami", "hurricane", "avalanche", "landslide", "meteor");
+
+	/** The same, {@code quiet}: nothing in chat (the news board carries it; the folk say the rest themselves). */
+	public static void struck(ServerLevel level, double x, double z, double radius, String kind, int magnitude, boolean quiet) {
 		MinecraftServer server = level.getServer();
 		if (level != Factions.level(server)) {
 			return;
@@ -80,16 +91,16 @@ public final class DisasterRelief {
 			}
 			double dx = f.seat().getX() - x, dz = f.seat().getZ() - z;
 			if (dx * dx + dz * dz <= reach * reach) {
-				hit(level, f, kind, magnitude);
+				hit(level, f, kind, magnitude, quiet);
 			}
 		}
 	}
 
-	private static void hit(ServerLevel level, Faction f, String kind, int magnitude) {
+	private static void hit(ServerLevel level, Faction f, String kind, int magnitude, boolean quiet) {
 		MinecraftServer server = level.getServer();
 		Component what = Component.translatable("relief.jaymoskingdoms.kind." + kind);
 		Component headline = Component.translatable("relief.jaymoskingdoms.struck", f.name(), what).withStyle(ChatFormatting.GOLD);
-		if (f.type().isRealm()) {
+		if (f.type().isRealm() || quiet) {
 			KingdomEvents.announce(server, headline);
 		} else {
 			local(level, f, headline);
@@ -98,8 +109,10 @@ public final class DisasterRelief {
 			case "wildfire" -> COST_FIRE;
 			case "flood" -> COST_FLOOD;
 			case "quake" -> COST_QUAKE * magnitude;
+			case "volcano", "tsunami", "hurricane", "avalanche", "landslide", "meteor" -> COST_GREAT * magnitude;
 			default -> COST_STORM;
 		};
+		DisasterMemory.struck(level, f, kind, magnitude);
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper == Tempers.Temper.NOBLE) {
 			cost = Math.round(cost * NOBLE_PAYS);
@@ -107,15 +120,25 @@ public final class DisasterRelief {
 		long paid = Math.min(f.treasury(), cost);
 		if (paid > 0) {
 			Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-			local(level, f, Component.translatable(temper == Tempers.Temper.NOBLE ? "relief.jaymoskingdoms.paid.noble" : "relief.jaymoskingdoms.paid",
-				f.name(), paid).withStyle(ChatFormatting.GRAY));
+			Component note = Component.translatable(temper == Tempers.Temper.NOBLE ? "relief.jaymoskingdoms.paid.noble" : "relief.jaymoskingdoms.paid",
+				f.name(), paid).withStyle(ChatFormatting.GRAY);
+			if (quiet) {
+				KingdomEvents.announce(server, note);
+			} else {
+				local(level, f, note);
+			}
 		}
 		if (temper == Tempers.Temper.TYRANT) {
 			long tax = Math.round(cost * TYRANT_TAX);
 			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + tax));
-			local(level, f, Component.translatable("relief.jaymoskingdoms.tyrant", f.name(), tax).withStyle(ChatFormatting.RED));
+			Component note = Component.translatable("relief.jaymoskingdoms.tyrant", f.name(), tax).withStyle(ChatFormatting.RED);
+			if (quiet) {
+				KingdomEvents.announce(server, note);
+			} else {
+				local(level, f, note);
+			}
 		} else if (temper == Tempers.Temper.PARANOID) {
-			blame(level, f);
+			blame(level, f, quiet);
 		}
 		ask(level, f, kind);
 		if (kind.equals("quake")) {
@@ -134,11 +157,24 @@ public final class DisasterRelief {
 	}
 
 	/** A paranoid king blames the disaster on anyone near with strange powers. */
-	private static void blame(ServerLevel level, Faction f) {
+	private static void blame(ServerLevel level, Faction f, boolean quiet) {
+		Villager speaker = null;
+		if (quiet) {
+			// the folk say it to their face (if there's anyone about to)
+			for (Villager v : level.getEntitiesOfClass(Villager.class, new net.minecraft.world.phys.AABB(f.seat()).inflate(ASK_RANGE), v -> v.isAlive() && !v.isBaby())) {
+				speaker = v;
+				break;
+			}
+		}
 		for (ServerPlayer p : level.players()) {
 			if (p.blockPosition().closerThan(f.seat(), BLAME_RANGE) && Oddities.power(p) != null) {
 				Reputation.change(p, f, BLAME);
-				p.sendSystemMessage(Component.translatable("relief.jaymoskingdoms.blamed", f.name()).withStyle(ChatFormatting.RED));
+				Component words = Component.translatable("relief.jaymoskingdoms.blamed", f.name()).withStyle(ChatFormatting.RED);
+				if (!quiet) {
+					p.sendSystemMessage(words);
+				} else if (speaker != null) {
+					Speech.sayTo(level, speaker, p, words, Speech.RED);
+				}
 			}
 		}
 	}

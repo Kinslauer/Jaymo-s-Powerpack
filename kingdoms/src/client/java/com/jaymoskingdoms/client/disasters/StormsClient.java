@@ -146,6 +146,10 @@ public final class StormsClient {
 					leanZ = s.vz / speed * s.radius * ANVIL_LEAN;
 				}
 				double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * s.radius * spread;
+				if (s.eye > 0.0F && r < s.eye) {
+					// (nd-hurricane) the eye is clear sky
+					continue;
+				}
 				double ox = Math.cos(a) * r + leanX, oz = Math.sin(a) * r + leanZ;
 				float middle = 1.0F - (float)Math.min(1.0, r / s.radius);
 				// darker toward the middle; a supercell's core has a sickly green cast, and hangs lower

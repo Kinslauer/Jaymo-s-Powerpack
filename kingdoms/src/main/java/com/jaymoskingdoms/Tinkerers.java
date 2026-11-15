@@ -38,7 +38,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <li><b>Glowing</b> (a shield): a real light moves with the holder ({@link Cantrips#carried}), and they see by it in the dark.</li>
  * </ul>
  *
- * A Tinkerer keeps up to {@link #MOST} infusions at once on the gear they carry. The class key tells which they have. The Tinkerer also
+ * A Tinkerer keeps up to {@link #MOST} infusions at once on the gear they carry; sneak and the class key tells how many. The class key
+ * opens their notebook: the abilities they have seen and studied, and the gadgets that copy them ({@code tinker/}). The Tinkerer also
  * learns, from the village smiths ({@link ClassTeachers}), to make some of the gadgets that are otherwise found in old chests
  * ({@link #GADGETS}).
  */
@@ -76,6 +77,10 @@ public final class Tinkerers {
 			return InteractionResult.SUCCESS;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Tinkerers::tick);
+		// the gadgets copied from what a Tinkerer has seen: their study, the gadgets, the notebook and the Mad Tinkerer's trade
+		com.jaymoskingdoms.tinker.MimicStudy.register();
+		com.jaymoskingdoms.tinker.MimicGadgets.register();
+		com.jaymoskingdoms.tinker.MimicBench.register();
 	}
 
 	static void clear() {
@@ -189,10 +194,14 @@ public final class Tinkerers {
 		return true;
 	}
 
-	/** The class key: what is infused. */
+	/** The class key: the notebook of abilities studied and gadgets to build ({@link com.jaymoskingdoms.tinker.MimicBench}); with sneak, what is infused. */
 	static void key(ServerPlayer player, boolean sneak) {
-		int n = carried(player);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.infusions", n, most(player)));
+		Component infusions = Component.translatable("message.jaymoskingdoms.tinkerer.infusions", carried(player), most(player));
+		if (sneak) {
+			player.sendOverlayMessage(infusions);
+			return;
+		}
+		com.jaymoskingdoms.tinker.MimicBench.open(player, infusions);
 	}
 
 	private static void tick(MinecraftServer server) {

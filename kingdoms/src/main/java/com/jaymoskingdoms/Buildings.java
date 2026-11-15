@@ -61,6 +61,8 @@ final class Buildings {
 			hall(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
+			// the realm's powder garrison, apart from its storehouse ({@link PowderMagazine}; MobAmmo)
+			realm(type, PowderMagazine.ID, PowderMagazine::design, 1, 20);
 			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
 			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
 			hall(type, "butcher", JobHalls::butcher, 1, 10);

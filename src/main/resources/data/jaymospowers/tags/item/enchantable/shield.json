@@ -1,0 +1,18 @@
+{
+  "values": [
+    "minecraft:shield",
+    "jaymospowers:netherite_shield",
+    "jaymospowers:wooden_round_shield",
+    "jaymospowers:stone_round_shield",
+    "jaymospowers:iron_round_shield",
+    {
+      "id": "jaymospowers:dragonhide_round_shield",
+      "required": false
+    },
+    "jaymospowers:golden_round_shield",
+    "jaymospowers:diamond_round_shield",
+    "jaymospowers:netherite_round_shield",
+    "jaymospowers:tall_shield",
+    "jaymospowers:old_round_shield"
+  ]
+}

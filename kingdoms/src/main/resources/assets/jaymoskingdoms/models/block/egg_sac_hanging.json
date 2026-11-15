@@ -1,0 +1,105 @@
+{
+	"parent": "minecraft:block/block",
+	"textures": {
+		"sac": "jaymoskingdoms:block/egg_sac",
+		"particle": "jaymoskingdoms:block/egg_sac"
+	},
+	"elements": [
+		{
+			"from": [
+				4,
+				5,
+				4
+			],
+			"to": [
+				12,
+				12,
+				12
+			],
+			"faces": {
+				"north": {
+					"texture": "#sac"
+				},
+				"south": {
+					"texture": "#sac"
+				},
+				"east": {
+					"texture": "#sac"
+				},
+				"west": {
+					"texture": "#sac"
+				},
+				"up": {
+					"texture": "#sac"
+				},
+				"down": {
+					"texture": "#sac"
+				}
+			}
+		},
+		{
+			"from": [
+				5,
+				12,
+				5
+			],
+			"to": [
+				11,
+				14,
+				11
+			],
+			"faces": {
+				"north": {
+					"texture": "#sac"
+				},
+				"south": {
+					"texture": "#sac"
+				},
+				"east": {
+					"texture": "#sac"
+				},
+				"west": {
+					"texture": "#sac"
+				},
+				"up": {
+					"texture": "#sac"
+				},
+				"down": {
+					"texture": "#sac"
+				}
+			}
+		},
+		{
+			"from": [
+				7.5,
+				14,
+				7.5
+			],
+			"to": [
+				8.5,
+				16,
+				8.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#sac"
+				},
+				"south": {
+					"texture": "#sac"
+				},
+				"east": {
+					"texture": "#sac"
+				},
+				"west": {
+					"texture": "#sac"
+				},
+				"up": {
+					"texture": "#sac"
+				},
+				"down": {
+					"texture": "#sac"
+				}
+			}
+		}
+	]
+}

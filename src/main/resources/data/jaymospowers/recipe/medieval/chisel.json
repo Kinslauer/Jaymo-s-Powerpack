@@ -1,0 +1,13 @@
+{
+  "type": "jaymospowers:hammer_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:stick",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:chisel",
+    "count": 1
+  }
+}

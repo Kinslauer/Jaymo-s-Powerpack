@@ -385,7 +385,7 @@ public final class Illagers {
 	}
 
 	/** A camp's warlord (he gets a boss bar). */
-	static boolean warlord(Entity entity) {
+	public static boolean warlord(Entity entity) {
 		Tag tag = tag(entity);
 		return tag != null && tag.role() == WARLORD;
 	}

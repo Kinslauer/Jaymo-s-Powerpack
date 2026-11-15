@@ -70,6 +70,10 @@ def packMods = [
 	// YDM's Weapon Master (CC0): hotbar weapons shown on the body; LambDynamicLights (MIT): held torches etc. light the area
 	[dep: "maven.modrinth:weaponmaster:M0qt6sse", cf: [608235, 8905060]],
 	[dep: "maven.modrinth:lambdynamiclights:rylKnJ4M", cf: [393442, 8890400]],
+	// Illuminated (Lambda License, by LambdAurora and Akarys; source github.com/LambdAurora/Illuminated; shipped unchanged,
+	// fetched by CurseForge from its own page): a flashlight that throws a real cone of LambDynamicLights light. Future
+	// tech: no recipe, found only in the Chrono future (power/chrono/future/FutureFlashlights). Needs LambDynamicLights 4.13+.
+	[dep: "maven.modrinth:illuminated:p6rqHbPR", cf: [1152506, 9222752]],
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:gA7nKz5g", cf: [535489, 9280065]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],

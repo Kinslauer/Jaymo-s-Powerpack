@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"hanging=false": {
+			"model": "jaymoskingdoms:block/egg_sac"
+		},
+		"hanging=true": {
+			"model": "jaymoskingdoms:block/egg_sac_hanging"
+		}
+	}
+}

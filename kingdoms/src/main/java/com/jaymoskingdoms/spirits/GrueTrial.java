@@ -175,6 +175,16 @@ public final class GrueTrial {
 	private static final int FINALE_NONE = 0, FINALE_ON = 1, FINALE_WON = 2, FINALE_NO = 3;
 
 	private static final Map<UUID, Trial> TRIALS = new HashMap<>();
+
+	/** Whether {@code e} is a trial's Grue. */
+	public static boolean boss(Entity e) {
+		for (Trial t : TRIALS.values()) {
+			if (e.getUUID().equals(t.boss)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	/** The moves a keeper who subjugated the Grue has ({@link Spirits#moves}). */
 	static final List<Move> MOVES = new ArrayList<>();
 

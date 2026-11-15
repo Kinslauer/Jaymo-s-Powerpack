@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:pufferfish"
+  ],
+  "enchantment": "jaymospowers:barbed",
+  "chance": 0.02
+}

@@ -34,6 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <li>The Aether's Giants: one theme each (highfield, magnetic, arctic, irradiated).</li>
  * <li>The Gaunt; the werewolf; the wraiths and the silver skeleton; the ogres, the minotaur and the grizzly; a wild wind
  * dragon; the Nether forts' warlords.</li>
+ * <li>The old age's rulers and the patrons' champions, and every other boss with a bar, each its own.</li>
  * </ul>
  */
 public final class FoeThemes {
@@ -83,6 +84,77 @@ public final class FoeThemes {
 		}
 		if (entity instanceof AetherGiant giant) {
 			return giant.element().name().toLowerCase(Locale.ROOT);
+		}
+		// (medieval picks, cv-music) an old age's ruler, and a patron's champion, each their own
+		if (entity instanceof com.jaymoskingdoms.oldage.OldRuler ruler) {
+			return ruler.awake() ? ruler.people().theme() : null;
+		}
+		if (entity instanceof com.jaymoskingdoms.PatronChampion champion) {
+			return champion.decoy() || champion.dormant() ? null : "champion_" + champion.patron().key;
+		}
+		// every other boss with a bar, each its own
+		if (entity instanceof com.jaymoskingdoms.wild.nest.BroodQueen queen) {
+			return queen.sleeping() ? null : "brood_queen";
+		}
+		if (entity instanceof com.jaymoskingdoms.blossomland.SnowWidow) {
+			return "snow_widow";
+		}
+		if (entity instanceof com.jaymoskingdoms.blossomland.Unburied) {
+			return "unburied";
+		}
+		if (entity instanceof com.jaymoskingdoms.GreatNecromancer) {
+			return "necromancer";
+		}
+		if (com.jaymoskingdoms.nether.FortressKnight.is(entity)) {
+			return "fortress_knight";
+		}
+		if (com.jaymoskingdoms.Illagers.warlord(entity)) {
+			return "illager_warlord";
+		}
+		if (com.jaymoskingdoms.CampChiefs.barred(entity)) {
+			return "warchief";
+		}
+		if (com.jaymoskingdoms.Rulers.is(entity) || entity instanceof com.jaymoskingdoms.Folk folk && folk.leader()) {
+			return "kingdom_ruler";
+		}
+		if (com.jaymoskingdoms.ZombieHordes.captain(entity)) {
+			return "grave_captain";
+		}
+		if (com.jaymoskingdoms.QuestFoes.champion(entity)) {
+			return "quest_champion";
+		}
+		if (com.jaymoskingdoms.Bounties.barred(entity)) {
+			return "outlaw";
+		}
+		if (entity instanceof com.jaymoskingdoms.SkeletonLord) {
+			return "skeleton_lord";
+		}
+		if (com.jaymoskingdoms.spirits.GrueTrial.boss(entity)) {
+			return "grue";
+		}
+		if (entity instanceof LivingEntity living && com.jaymoskingdoms.Pirates.isCoveCaptain(living)) {
+			return "pirate_captain";
+		}
+		if (entity.entityTags().contains(com.jaymoskingdoms.DeckOfFates.KNIGHT_TAG)) {
+			return "death_knight";
+		}
+		if (entity instanceof com.jaymoskingdoms.inhabitants.RaidKing) {
+			return "raid_king";
+		}
+		if (entity instanceof com.jaymoskingdoms.ClockworkGolem golem) {
+			return golem.rogue() ? "clockwork" : null;
+		}
+		if (entity instanceof com.jaymoskingdoms.beasts.PiglinKing) {
+			return "piglin_king";
+		}
+		if (entity instanceof com.jaymoskingdoms.beasts.WreckThing) {
+			return "wreck_thing";
+		}
+		if (entity instanceof com.jaymoskingdoms.beasts.SandWorm) {
+			return "sand_worm";
+		}
+		if (entity instanceof com.jaymoskingdoms.monsters.MadeBrute) {
+			return "made_brute";
 		}
 		var type = entity.getType();
 		if (type == com.jaymoskingdoms.hunger.Hunger.GAUNT) {

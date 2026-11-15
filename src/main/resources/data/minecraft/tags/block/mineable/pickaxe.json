@@ -140,6 +140,7 @@
     "jaymospowers:smithing_anvil",
     "jaymospowers:stone_anvil",
     "jaymospowers:star_metal_ore",
+    "jaymospowers:meteoric_iron_heart",
     "jaymospowers:field_anvil",
     "jaymospowers:veiled_ore",
     "jaymospowers:seamed_stone",
@@ -190,6 +191,9 @@
     "jaymospowers:small_gold_ore",
     "jaymospowers:deepslate_small_gold_ore",
     "jaymospowers:small_silver_ore",
-    "jaymospowers:deepslate_small_silver_ore"
+    "jaymospowers:deepslate_small_silver_ore",
+    "jaymospowers:lead_ore",
+    "jaymospowers:deepslate_lead_ore",
+    "jaymospowers:inscription_table"
   ]
 }

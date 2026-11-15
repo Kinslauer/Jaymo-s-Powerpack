@@ -30,8 +30,11 @@ import org.jspecify.annotations.Nullable;
  * pull a TaCZ trigger, so the shots are ours: bullets (a shotgun's spread of pellets) traced from the muzzle, stopped by
  * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun and a
  * {@link MuzzleFlash} at the muzzle. Then a
- * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. Nothing here
- * without TaCZ. (0.15.118) The TaCZ flintlocks gunners carried before 0.10.111 are gone from the pack, so they're no
+ * reload. Andy (2026-11-15): "mobs with guns should spawn with less ammo": every shot spends a real round from the gun
+ * it holds, which comes with only a little in it, plus a few spare rounds ({@link #SPARE}) to reload from; with both
+ * gone it slings the gun and comes at you with its hands ({@link #letGo}). A dead gunner may drop its gun (with what's
+ * left in it) and drops whatever spare rounds it hadn't fired, and the living loot them ({@link #scavenge}). Built-in guns (the mechs' and the Omens' cannons) are
+ * fed from inside the machine and never run dry. Nothing here without TaCZ. (0.15.118) The TaCZ flintlocks gunners carried before 0.10.111 are gone from the pack, so they're no
  * longer fired.
  */
 public final class FutureGuns {
@@ -112,12 +115,21 @@ public final class FutureGuns {
 	/** Nobody fires at point blank (they'd rather swing). */
 	static final double NEAREST = 2.5;
 	/**
-	 * The chance a gun drops from a dead gunner (holding at most {@link #MAG_SHARE} of a magazine), and the chance it
-	 * leaves rounds for it: mostly a handful, now and then up to a stack ({@link #AMMO_MAX}, rolled as r^{@link #AMMO_SKEW}).
+	 * The chance a gun drops from a dead gunner; what's loaded in it when it's handed out (1 round up to this share of a
+	 * magazine), and its spare rounds (none up to this share of a magazine).
 	 */
-	static final float DROP_CHANCE = 0.1F, AMMO_CHANCE = 0.2F, MAG_SHARE = 0.25F;
-	static final int AMMO_MAX = 64;
-	static final double AMMO_SKEW = 3.0;
+	static final float DROP_CHANCE = 0.1F, MAG_SHARE = 0.25F, SPARE_SHARE = 0.5F;
+	/** Changing magazines takes this many times the gun's pause between bursts. */
+	static final int RELOAD_SCALE = 2;
+	/**
+	 * Andy (2026-11-15): "There should be ways for them to resupply... looting other undead." A gunner short of spare
+	 * rounds looks this far (blocks) for rounds its gun takes lying on the ground (a fallen gunner's, or what's left in
+	 * a dropped gun that takes the same rounds), every this many ticks, picks up what it reaches and carries up to
+	 * {@link #SPARE_STACKS} stacks of spare rounds (Andy: "they can carry up to 6 extra stacks of ammo").
+	 */
+	static final double SCAVENGE_RANGE = 16.0, PICKUP_RANGE = 1.6;
+	static final int SCAVENGE_EVERY = 20;
+	static final int SPARE_STACKS = 6;
 	/** Gunners don't rush in: they hang back about this far (a share of the gun's range, within these bounds), backing off if you close. */
 	static final double KEEP_SHARE = 0.45, KEEP_MIN = 6.0, KEEP_MAX = 18.0, BACK_OFF = 0.6;
 	/** How far TaCZ's report of a mob's shot carries. */
@@ -135,6 +147,10 @@ public final class FutureGuns {
 	private static final Map<Mob, Gun> ARMED = new WeakHashMap<>();
 	private static @Nullable Method sendSound;
 	private static boolean soundLooked;
+	/** A gunner's spare rounds for the gun it was handed (saved on the mob, so a dry gunner stays dry). */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> SPARE =
+		net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(com.jaymospowers.JaymosPowers.id("gunner_spare_rounds"),
+			builder -> builder.persistent(com.mojang.serialization.Codec.INT));
 
 	private FutureGuns() {
 	}
@@ -156,11 +172,12 @@ public final class FutureGuns {
 	/** Hands a mob a random modern gun, loaded (nothing without TaCZ). Returns whether it's armed. */
 	public static boolean arm(Mob mob, RandomSource random) {
 		Gun pick = MODERN[random.nextInt(MODERN.length)];
-		ItemStack gun = TaczGuns.modernGun(pick.id.substring("tacz:".length()), random.nextInt(Math.max(1, Math.round(pick.magazine * MAG_SHARE)) + 1));
+		ItemStack gun = TaczGuns.modernGun(pick.id.substring("tacz:".length()), 1 + random.nextInt(Math.max(1, Math.round(pick.magazine * MAG_SHARE))));
 		if (gun.isEmpty()) {
 			return false;
 		}
 		mob.setItemSlot(EquipmentSlot.MAINHAND, gun);
+		mob.setAttached(SPARE, random.nextInt(Math.round(pick.magazine * SPARE_SHARE) + 1));
 		mob.setDropChance(EquipmentSlot.MAINHAND, DROP_CHANCE);
 		mob.addTag(TAG);
 		ARMED.put(mob, pick);
@@ -179,27 +196,57 @@ public final class FutureGuns {
 		return TaczGuns.modernGun(pick.id.substring("tacz:".length()), pick.magazine);
 	}
 
-	/** Mobs that have given up their melee rush (redone after a reload, which brings the goals back). */
-	private static final Map<Mob, Boolean> HELD_BACK = new WeakHashMap<>();
+	/**
+	 * Mobs that have given up their melee rush (redone after a reload, which brings the goals back), with the melee goals
+	 * they gave up, for when they run dry ({@link #letGo}).
+	 */
+	private static final Map<Mob, java.util.List<net.minecraft.world.entity.ai.goal.WrappedGoal>> HELD_BACK = new WeakHashMap<>();
 
 	/** A gunner relies on its gun: no melee rush, it keeps its distance ({@link #tick}). */
 	static void holdBack(Mob mob) {
-		if (HELD_BACK.put(mob, true) == null) {
-			((com.jaymospowers.mixin.MobGoalsAccessor) mob).jaymospowers$goals()
-				.removeAllGoals(goal -> goal instanceof net.minecraft.world.entity.ai.goal.MeleeAttackGoal);
+		if (!HELD_BACK.containsKey(mob)) {
+			net.minecraft.world.entity.ai.goal.GoalSelector goals = ((com.jaymospowers.mixin.MobGoalsAccessor) mob).jaymospowers$goals();
+			HELD_BACK.put(mob, goals.getAvailableGoals().stream()
+				.filter(wrapped -> wrapped.getGoal() instanceof net.minecraft.world.entity.ai.goal.MeleeAttackGoal).toList());
+			goals.removeAllGoals(goal -> goal instanceof net.minecraft.world.entity.ai.goal.MeleeAttackGoal);
 		}
 	}
 
-	/** Some rounds for the gun it carried, now and then. */
+	/** Out of rounds, loaded and spare: it gets its melee rush back (once). */
+	static void letGo(Mob mob) {
+		java.util.List<net.minecraft.world.entity.ai.goal.WrappedGoal> gaveUp = HELD_BACK.remove(mob);
+		if (gaveUp != null) {
+			net.minecraft.world.entity.ai.goal.GoalSelector goals = ((com.jaymospowers.mixin.MobGoalsAccessor) mob).jaymospowers$goals();
+			for (net.minecraft.world.entity.ai.goal.WrappedGoal wrapped : gaveUp) {
+				goals.addGoal(wrapped.getPriority(), wrapped.getGoal());
+			}
+		}
+		BURST.remove(mob);
+		AIMING.remove(mob);
+	}
+
+	/** Whether a gunner has nothing left to shoot: its gun empty and no spare rounds. */
+	static boolean dry(Mob mob) {
+		return TaczGuns.ammo(mob.getMainHandItem()) <= 0 && mob.getAttachedOrElse(SPARE, 0) <= 0;
+	}
+
+	/** The spare rounds it never fired. */
 	private static void dropAmmo(ServerLevel level, Mob mob) {
 		Gun gun = ARMED.containsKey(mob) ? ARMED.get(mob) : held(mob);
-		RandomSource random = level.getRandom();
-		if (gun == null || gun.ammo.isEmpty() || random.nextFloat() >= AMMO_CHANCE) {
+		int spare = mob.getAttachedOrElse(SPARE, 0);
+		if (gun == null || gun.ammo.isEmpty() || spare <= 0) {
 			return;
 		}
-		ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, 1 + (int) (Math.pow(random.nextDouble(), AMMO_SKEW) * AMMO_MAX));
-		if (!ammo.isEmpty()) {
+		// in stacks: it may carry several
+		while (spare > 0) {
+			ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, 1);
+			if (ammo.isEmpty()) {
+				return;
+			}
+			int n = Math.min(spare, ammo.getMaxStackSize());
+			ammo.setCount(n);
 			mob.spawnAtLocation(level, ammo);
+			spare -= n;
 		}
 	}
 
@@ -207,8 +254,16 @@ public final class FutureGuns {
 	public static void tick(ServerLevel level, Mob mob) {
 		Gun gun = held(mob);
 		LivingEntity foe = mob.getTarget();
-		if (gun == null || foe == null || !foe.isAlive()) {
+		boolean fighting = foe != null && foe.isAlive();
+		if (gun != null && mob.tickCount % SCAVENGE_EVERY == 0) {
+			scavenge(level, mob, gun, !fighting || dry(mob));
+		}
+		if (gun == null || !fighting) {
 			BURST.remove(mob);
+			return;
+		}
+		if (dry(mob)) {
+			letGo(mob);
 			return;
 		}
 		holdBack(mob);
@@ -216,7 +271,104 @@ public final class FutureGuns {
 		double d = mob.distanceTo(foe);
 		boolean sight = mob.hasLineOfSight(foe);
 		keepDistance(mob, foe, kind, d, sight);
-		shoot(level, mob, foe, gun, d, sight);
+		if (TaczGuns.ammo(mob.getMainHandItem()) <= 0) {
+			reload(level, mob, gun);
+			return;
+		}
+		if (shoot(level, mob, foe, gun, d, sight)) {
+			TaczGuns.spendRound(mob.getMainHandItem());
+		}
+	}
+
+	/**
+	 * Loots rounds for {@code gun} from the fallen: picks up what lies within reach, and if it may go after them
+	 * ({@code seek}: no fight on, or nothing left to shoot) walks to the nearest it sees.
+	 */
+	private static void scavenge(ServerLevel level, Mob mob, Gun gun, boolean seek) {
+		if (gun.ammo.isEmpty()) {
+			return;
+		}
+		ItemStack one = TaczGuns.modernAmmo(gun.ammo, 1);
+		int cap = SPARE_STACKS * (one.isEmpty() ? 64 : one.getMaxStackSize());
+		int spare = mob.getAttachedOrElse(SPARE, 0);
+		if (spare >= cap) {
+			return;
+		}
+		net.minecraft.world.entity.item.ItemEntity nearest = null;
+		double best = Double.MAX_VALUE;
+		for (net.minecraft.world.entity.item.ItemEntity item : level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+			mob.getBoundingBox().inflate(SCAVENGE_RANGE), e -> e.isAlive() && !e.hasPickUpDelay() && rounds(e.getItem(), gun) > 0)) {
+			double d = mob.distanceToSqr(item);
+			if (d <= PICKUP_RANGE * PICKUP_RANGE) {
+				ItemStack stack = item.getItem();
+				int took = loot(stack, gun, cap - spare);
+				if (took > 0) {
+					spare += took;
+					mob.setAttached(SPARE, spare);
+					if (stack.isEmpty()) {
+						item.discard();
+					} else {
+						item.setItem(stack);
+					}
+					mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+					level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.HOSTILE, 0.3F, 0.8F);
+				}
+				if (spare >= cap) {
+					return;
+				}
+			} else if (d < best) {
+				best = d;
+				nearest = item;
+			}
+		}
+		if (seek && nearest != null && mob.getNavigation().isDone()) {
+			mob.getNavigation().moveTo(nearest, 1.0);
+		}
+	}
+
+	/** Rounds for {@code gun} in {@code stack}: its own kind of ammo, or what's loaded in a gun that takes it. */
+	private static int rounds(ItemStack stack, Gun gun) {
+		if (gun.ammo.equals(ammoId(stack))) {
+			return stack.getCount();
+		}
+		Gun other = BY_ID.get(TaczGuns.gunId(stack));
+		return other != null && other.ammo.equals(gun.ammo) ? TaczGuns.ammo(stack) : 0;
+	}
+
+	/** Takes up to {@code max} rounds for {@code gun} out of {@code stack} (shrinking it, or emptying a dropped gun). */
+	private static int loot(ItemStack stack, Gun gun, int max) {
+		if (gun.ammo.equals(ammoId(stack))) {
+			int took = Math.min(max, stack.getCount());
+			stack.shrink(took);
+			return took;
+		}
+		int took = 0;
+		while (took < max && rounds(stack, gun) > 0 && TaczGuns.spendRound(stack)) {
+			took++;
+		}
+		return took;
+	}
+
+	/** The TaCZ ammo id in an ammo stack's custom data, or "". */
+	private static String ammoId(ItemStack stack) {
+		net.minecraft.world.item.component.CustomData data = stack.isEmpty() ? null : stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		return data == null || TaczGuns.gunId(stack).length() > 0 ? "" : data.copyTag().getStringOr("AmmoId", "");
+	}
+
+	/** Its gun is empty: a fresh magazine from its spare rounds, which takes a while ({@link #RELOAD_SCALE}). */
+	private static void reload(ServerLevel level, Mob mob, Gun gun) {
+		long now = level.getGameTime();
+		if (now < NEXT.getOrDefault(mob, 0L)) {
+			return;
+		}
+		int spare = mob.getAttachedOrElse(SPARE, 0);
+		int rounds = Math.min(spare, Math.max(1, gun.magazine));
+		mob.setAttached(SPARE, spare - rounds);
+		TaczGuns.loadRounds(mob.getMainHandItem(), rounds);
+		BURST.remove(mob);
+		AIMING.remove(mob);
+		NEXT.put(mob, now + (long) gun.kind.reload * RELOAD_SCALE);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.HOSTILE, 0.7F, 1.2F);
 	}
 
 	/** A mob with a built-in gun (the mech's cannons): fire at its foe a burst at a time, if in range and in sight. */

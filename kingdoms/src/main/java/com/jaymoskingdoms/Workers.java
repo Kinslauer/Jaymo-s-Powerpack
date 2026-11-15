@@ -200,6 +200,12 @@ public final class Workers {
 			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
 			return Rulers.guardStep(level, e);
 		}
+		if (mob.entityTags().contains(WarParties.CASTER_TAG) && w instanceof Enlisted e && !mob.isSleeping() && !McaCompat.busy(mob)
+			&& (w.role() == Sorcery.WIZARD || Casters.isOffice(w.role()))) {
+			// (am-mages) a court caster out with a war party: his spells at its foes, else on the march with its soldiers
+			boolean fighting = w.role() == Sorcery.WIZARD ? CourtWizards.step(level, e) : Casters.step(level, e);
+			return fighting || WarParties.casterStep(level, w);
+		}
 		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
 			// (0.5.54) a court wizard lives as a villager until a foe comes near
 			if (Hermits.is(e)) {

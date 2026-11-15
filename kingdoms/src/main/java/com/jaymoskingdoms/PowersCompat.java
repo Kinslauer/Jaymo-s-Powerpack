@@ -48,6 +48,33 @@ public final class PowersCompat {
 		return soakedEffect != null && body.hasEffect(soakedEffect);
 	}
 
+	/** (medieval picks) Powers' Webbed effect (or null before it's looked up, or without Powers). */
+	private static net.minecraft.core.@Nullable Holder<net.minecraft.world.effect.MobEffect> webbedEffect;
+	private static boolean lookedForWebbed;
+
+	/**
+	 * (medieval picks, de-spiders) Spider web on {@code body}: Jaymo's Powers' Webbed ({@code jaymospowers:webbed}, by its
+	 * id), one layer more, the top one holding {@code ticks}. Powers turns adding it into a layer (and burns it off an
+	 * Emberborn), and draws it wrapped round them. False without Powers: the caller holds them its old way (a cobweb).
+	 */
+	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by) {
+		return web(body, ticks, by, 1);
+	}
+
+	/** (medieval picks, spider nests) As {@link #web(LivingEntity, int, net.minecraft.world.entity.Entity)}, {@code layers} layers at once (a net, a burst, a queen's spit). */
+	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by, int layers) {
+		if (!lookedForWebbed) {
+			lookedForWebbed = true;
+			webbedEffect = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(Identifier.fromNamespaceAndPath("jaymospowers", "webbed"))
+				.orElse(null);
+		}
+		if (webbedEffect == null) {
+			return false;
+		}
+		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, Math.max(0, layers - 1)), by);
+		return true;
+	}
+
 	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tellGlint;
 	private static boolean lookedForGlint;
@@ -158,6 +185,76 @@ public final class PowersCompat {
 			return (String) blueprintShape.invoke(stack);
 		} catch (Throwable e) {
 			return "";
+		}
+	}
+
+	/** (medieval picks) Powers' {@code RealmPatterns}: {@code mark}, {@code warArm}, {@code warArms} and {@code patternOf}. */
+	private static java.lang.invoke.@Nullable MethodHandle realmMark, realmArm, realmArms, realmPattern;
+	private static boolean lookedForRealms;
+	private static java.util.@Nullable List<String> warArms;
+
+	private static void lookForRealms() {
+		if (lookedForRealms) {
+			return;
+		}
+		lookedForRealms = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> realms = Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns");
+			var lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> stack = net.minecraft.world.item.ItemStack.class;
+			realmMark = lookup.findStatic(realms, "mark", java.lang.invoke.MethodType.methodType(stack, stack, String.class));
+			realmArm = lookup.findStatic(realms, "warArm", java.lang.invoke.MethodType.methodType(stack, String.class, String.class));
+			realmArms = lookup.findStatic(realms, "warArms", java.lang.invoke.MethodType.methodType(java.util.List.class));
+			realmPattern = lookup.findStatic(realms, "patternOf", java.lang.invoke.MethodType.methodType(stack, stack));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' realm designs", e);
+		}
+	}
+
+	/** {@code stack} made the realm's make (a realm tag, {@link HeraldryWear#realmTag}); unchanged without Powers. */
+	static net.minecraft.world.item.ItemStack realmMarked(net.minecraft.world.item.ItemStack stack, String realm) {
+		lookForRealms();
+		try {
+			return realmMark == null ? stack : (net.minecraft.world.item.ItemStack) realmMark.invoke(stack, realm);
+		} catch (Throwable e) {
+			return stack;
+		}
+	}
+
+	/** A finished war arm with this head (a weapon part), the realm's make; empty without Powers or its weapon. */
+	static net.minecraft.world.item.ItemStack realmArm(String part, String realm) {
+		lookForRealms();
+		try {
+			return realmArm == null ? net.minecraft.world.item.ItemStack.EMPTY : (net.minecraft.world.item.ItemStack) realmArm.invoke(part, realm);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** The weapon heads a realm may keep as its war arm (those whose weapons are in the game), or none without Powers. */
+	@SuppressWarnings("unchecked")
+	static java.util.List<String> realmArms() {
+		lookForRealms();
+		if (warArms == null) {
+			try {
+				warArms = realmArms == null ? java.util.List.of() : java.util.List.copyOf((java.util.List<String>) realmArms.invoke());
+			} catch (Throwable e) {
+				warArms = java.util.List.of();
+			}
+		}
+		return warArms;
+	}
+
+	/** The captured pattern a realm's marked piece gives, or empty (not one, or no Powers). */
+	static net.minecraft.world.item.ItemStack realmPattern(net.minecraft.world.item.ItemStack piece) {
+		lookForRealms();
+		try {
+			return realmPattern == null ? net.minecraft.world.item.ItemStack.EMPTY : (net.minecraft.world.item.ItemStack) realmPattern.invoke(piece);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
 		}
 	}
 
@@ -2930,6 +3027,42 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the harness (older Powers?)", e);
 		}
+		// (medieval picks) which realm each smith is sworn to and which designs a realm keeps (RealmPatterns.sworn, .keeps),
+		// and who knows each people's steel (RealmSteels.knows)
+		try {
+			java.util.function.Function<net.minecraft.server.level.ServerPlayer, String> sworn =
+				p -> HeraldryWear.sworn(p.level().getServer(), p.getUUID());
+			java.util.function.BiPredicate<String, String> keeps = HeraldryWear::keeps;
+			Class<?> realms = Class.forName("com.jaymospowers.tinkering.smithing.RealmPatterns");
+			realms.getField("sworn").set(null, sworn);
+			realms.getField("keeps").set(null, keeps);
+			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> knows = PowersCompat::knowsSteel;
+			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("knows").set(null, knows);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the realm designs and steels (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * Whether {@code smith} knows the working of a people's steel (a Powers {@code Molten} id): deep steel is the
+	 * Stoneborn's, bright steel the Sylvan's (the forest folk), each known to one of that blood or one sworn to a haven of
+	 * it (or of all four); the orcs' ash bronze is known to those sworn to a haven that lives alongside the tribes.
+	 */
+	static boolean knowsSteel(net.minecraft.server.level.ServerPlayer smith, String metal) {
+		net.minecraft.server.MinecraftServer server = smith.level().getServer();
+		Faction f = Factions.of(server, smith.getUUID());
+		if ("ash_bronze".equals(metal)) {
+			return Havens.greenskin(server, f);
+		}
+		Heritage.Kind people = "deep_steel".equals(metal) ? Heritage.Kind.STONEBORN : "bright_steel".equals(metal) ? Heritage.Kind.SYLVAN : null;
+		if (people == null) {
+			return true;
+		}
+		if (Heritage.is(smith, people)) {
+			return true;
+		}
+		String haven = Havens.of(server, f);
+		return haven.equals(people.key()) || haven.equals(Havens.MIXED);
 	}
 
 	/** Powers' {@code LockOnClient}: its private {@code pick(Minecraft, LocalPlayer)} and {@code locked}/{@code blind} fields, and the {@code LockOn.Packet(int)} record. */
@@ -3646,6 +3779,25 @@ public final class PowersCompat {
 				net.minecraft.core.GlobalPos>>)list).add(shelter);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality shelters (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (medieval picks) Tells Powers' death by cause ({@code Mortality.LAIRS}) where spiders carry one left for dead
+	 * ({@link com.jaymoskingdoms.wild.SpiderLairs#take}). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void tellLairs(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.@Nullable Entity,
+		net.minecraft.core.@Nullable GlobalPos> lair) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("LAIRS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				net.minecraft.core.GlobalPos>>)list).add(lair);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality lairs (older Powers?)", e);
 		}
 	}
 

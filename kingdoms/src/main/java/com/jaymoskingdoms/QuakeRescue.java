@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import com.jaymoskingdoms.disasters.BlockBudget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -110,9 +111,33 @@ public final class QuakeRescue {
 		}
 	}
 
+	/**
+	 * (medieval picks, mm-collapse) A mineshaft's ceiling came down on {@code v}, one of {@code f}'s miners working it
+	 * ({@code mineshafts/ShaftMiners}): shut in where they stand, and a neighbour at home asks for them to be dug out.
+	 */
+	public static void shutIn(ServerLevel level, Faction f, Villager v) {
+		if (v.hasAttached(TRAPPED) || !v.isAlive() || !wall(level, v.blockPosition(), level.getRandom())) {
+			return;
+		}
+		Villager asker = null;
+		for (Villager n : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(TRAP_RANGE),
+				n -> n != v && n.isAlive() && !n.isBaby() && !Quests.offering(n) && !n.hasAttached(TRAPPED))) {
+			asker = n;
+			break;
+		}
+		v.setAttached(TRAPPED, new Trapped(level.getGameTime(), asker == null ? v.getUUID() : asker.getUUID()));
+		TRAPPED_NOW.put(v.getUUID(), level);
+		v.getNavigation().stop();
+		Speech.say(level, v, Component.translatable("relief.jaymoskingdoms.trapped.call"), Speech.RED, HEAR_RANGE);
+		if (asker != null) {
+			ask(level, f, asker, v);
+		}
+	}
+
 	/** Fallen stone round {@code feet} (where it's open), and over the head. Whether it shut them in. */
 	private static boolean wall(ServerLevel level, BlockPos feet, RandomSource random) {
-		if (!open(level, feet) || !open(level, feet.above())) {
+		// (medieval picks) laid out of the quakes' share of the block budget, all of it or none (another tick, another fall)
+		if (!open(level, feet) || !open(level, feet.above()) || BlockBudget.share(BlockBudget.Of.QUAKE) < WALL_BLOCKS) {
 			return false;
 		}
 		for (int dx = -1; dx <= 1; dx++) {
@@ -123,7 +148,7 @@ public final class QuakeRescue {
 					}
 					BlockPos p = feet.offset(dx, dy, dz);
 					if (level.getBlockState(p).canBeReplaced()) {
-						level.setBlockAndUpdate(p, stone(random));
+						BlockBudget.set(BlockBudget.Of.QUAKE, level, p, stone(random));
 					}
 				}
 			}
@@ -131,6 +156,9 @@ public final class QuakeRescue {
 		level.playSound(null, feet, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
 		return !free(level, feet);
 	}
+
+	/** The most blocks one fallen wall lays (3 by 3 by 3, less the two the trapped one stands in). */
+	private static final int WALL_BLOCKS = 25;
 
 	private static BlockState stone(RandomSource random) {
 		return switch (random.nextInt(5)) {

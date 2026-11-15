@@ -38,6 +38,11 @@ public final class Uncraftable {
 	 * a horse that trusts you, from close by, on its own legs ({@code Bonding}), so the horn has no recipe.
 	 */
 	static final Set<String> HORSEMAN = Set.of("horseman:copper_horn");
+	/**
+	 * Andy (2026-11-15): Illuminated's flashlight "should only be found and available in the Future like all the guns"
+	 * ({@code power/chrono/future/FutureFlashlights}).
+	 */
+	static final Set<String> FUTURE_ONLY = Set.of("illuminated:flashlight");
 
 	/**
 	 * (RPG Series) Rogues &amp; Warriors' and Archers' stone, iron and golden weapons are forged from heads
@@ -131,6 +136,6 @@ public final class Uncraftable {
 		if (made != null && ToolBuilds.MADE.contains(made)) {
 			return false;
 		}
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !HORSEMAN.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !HORSEMAN.contains(id) && !FUTURE_ONLY.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

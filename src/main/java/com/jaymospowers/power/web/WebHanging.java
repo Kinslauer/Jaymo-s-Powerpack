@@ -136,7 +136,12 @@ public final class WebHanging {
 		if (target instanceof Mob mob) {
 			mob.getNavigation().stop();
 		}
-		WebTraps.cling(level, BlockPos.containing(target.getX(), target.getY(), target.getZ()), WebSymbiote.suitShown(player), 40);
+		if (target instanceof LivingEntity living) {
+			// webbed up as it goes (Webbed), where it once left a cobweb at its feet
+			Webbed.wrap(living, 40);
+		} else {
+			WebTraps.cling(level, BlockPos.containing(target.getX(), target.getY(), target.getZ()), WebSymbiote.suitShown(player), 40);
+		}
 		Vec3 from3 = player.getEyePosition();
 		Vec3 to3 = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, to3.x, to3.y, to3.z, 14, 0.3, 0.5, 0.3, 0.03);
@@ -299,8 +304,15 @@ public final class WebHanging {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.7F);
 	}
 
-	/** Cobwebs in every open cell the catch fills, and round it. */
+	/**
+	 * The catch is webbed up: a layer more web on anything living ({@link Webbed}, drawn wrapped round it), holding
+	 * {@code ticks}; anything else, cobwebs in every open cell it fills, and round it.
+	 */
 	static void web(ServerLevel level, Entity target, boolean dark, int ticks) {
+		if (target instanceof LivingEntity living) {
+			Webbed.wrap(living, ticks);
+			return;
+		}
 		AABB box = target.getBoundingBox();
 		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX - 0.3, box.minY, box.minZ - 0.3),
 			BlockPos.containing(box.maxX + 0.3, box.maxY, box.maxZ + 0.3))) {

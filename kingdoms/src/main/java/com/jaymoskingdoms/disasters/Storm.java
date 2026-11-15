@@ -22,6 +22,9 @@ public final class Storm {
 	boolean spawned;
 	/** (0.7.34) Seconds a Smoke cloudshaper has spent calming it ({@link SkyCalm}). Server only. */
 	float calmed;
+	/** (Medieval picks, nd-hurricane) A hurricane's calm eye: no rain or thunder this near its middle (blocks; 0: none).
+	 * {@link Hurricanes}. */
+	public float eye;
 
 	public Storm(int id, int kind, double x, double z, double vx, double vz, float radius, int age, int life) {
 		this.id = id;
@@ -46,6 +49,10 @@ public final class Storm {
 	public float over(double px, double pz) {
 		double d = Math.sqrt((px - x) * (px - x) + (pz - z) * (pz - z));
 		float f = d <= radius ? 1.0F : (float)Math.max(0.0, 1.0 - (d - radius) / Storms.EDGE);
+		if (eye > 0.0F && d < eye) {
+			// the eye: still, nearly dry, the wall closing round it
+			f *= (float)Math.max(0.05, Math.pow(d / eye, 3.0));
+		}
 		return f * strength();
 	}
 
@@ -85,10 +92,13 @@ public final class Storm {
 		buf.writeFloat(radius);
 		buf.writeVarInt(age);
 		buf.writeVarInt(life);
+		buf.writeFloat(eye);
 	}
 
 	static Storm read(RegistryFriendlyByteBuf buf) {
-		return new Storm(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat(),
+		Storm s = new Storm(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat(),
 			buf.readFloat(), buf.readVarInt(), buf.readVarInt());
+		s.eye = buf.readFloat();
+		return s;
 	}
 }

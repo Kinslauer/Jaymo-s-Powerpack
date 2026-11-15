@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:lead_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:lead_nugget",
+    "count": 9
+  }
+}

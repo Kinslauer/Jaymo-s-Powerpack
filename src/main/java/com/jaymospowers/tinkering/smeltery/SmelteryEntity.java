@@ -323,6 +323,10 @@ public class SmelteryEntity extends BlockEntity implements Container, MoltenHold
 
 	private void alloy() {
 		for (Melting.Alloy alloy : Melting.ALLOYS) {
+			if (com.jaymospowers.tinkering.smithing.RealmSteels.realm(alloy.output())) {
+				// (medieval picks) a realm steel is mixed only on purpose, in an alloyer by one who knows it (AlloyerEntity)
+				continue;
+			}
 			for (int batch = 0; batch < ALLOY_BATCHES; batch++) {
 				boolean ready = true;
 				int used = 0;

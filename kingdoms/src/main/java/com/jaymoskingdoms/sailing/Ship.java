@@ -136,6 +136,11 @@ public final class Ship extends Entity {
 	static final int SKY_HEADROOM = 4;
 	/** A balloon shot out of the air: the fastest she falls (blocks a tick), and how quickly she gathers that (a tick). */
 	static final double FALL = 0.45, FALL_GATHER = 0.01;
+	/**
+	 * Nobody at her wheel (her helmsman fallen, or her wheel let go): how fast she drifts on the wind at sea and in the air
+	 * (blocks a tick, at a fresh wind), and how fast a balloon lets down till she lies on the ground or the water (blocks a tick).
+	 */
+	static final double DRIFT_SEA = 0.02, DRIFT_AIR = 0.05, LET_DOWN = 0.008;
 
 	/** One block of the ship, in its own frame. */
 	public record Piece(int state, int x, int y, int z) {
@@ -238,6 +243,15 @@ public final class Ship extends Entity {
 	private final List<long[]> recoiled = new ArrayList<>();
 	private float turn;
 	private int adrift;
+	/** Server: a balloon come to rest on something under her (she can sink no further). */
+	private boolean settled;
+	/**
+	 * Server: her helmsman fell at her wheel (a player pilot killed or downed there, or her own fliers' captain): she drifts on
+	 * the wind, a balloon sinking, till someone takes her wheel. A ship simply stepped off isn't let go: she anchors as before.
+	 */
+	private boolean letGo;
+	/** Server: the player at her wheel last tick (to tell a helmsman fallen from one stepping off). */
+	private java.util.@Nullable UUID lastPilot;
 	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
 	private int kedging;
 	/** (0.7.307) Server: ticks still to ride at anchor out at sea ({@link #rideAtAnchor}). */
@@ -645,6 +659,21 @@ public final class Ship extends Entity {
 		}
 		Input input = pilot != null ? pilot.getLastClientInput() : steered != null ? steered : Input.EMPTY;
 		boolean helmed = pilot != null || steered != null;
+		if (pilot != null) {
+			this.lastPilot = pilot.getUUID();
+		} else if (this.lastPilot != null) {
+			// (her pilot gone from her wheel: fallen there, or only stepped off?)
+			Player was = level.getPlayerByUUID(this.lastPilot);
+			if (was != null && (!was.isAlive() || com.jaymoskingdoms.Downed.isDowned(was))) {
+				this.letGo = true;
+			}
+			this.lastPilot = null;
+		}
+		if (helmed) {
+			this.letGo = false;
+		}
+		// nobody steering a crewed ship (her captain fallen), or one whose helmsman fell: she drifts
+		boolean drifting = !helmed && (this.crew != null || this.letGo);
 		boolean sails = h.sails > 0, oars = h.oars > 0;
 		// a balloon: Space lets her up (off the water too, if she has no oars to row with it), Sprint brings her down
 		if (h.airworthy && helmed) {
@@ -736,6 +765,13 @@ public final class Ship extends Entity {
 			gather = HELD_GATHER;
 			this.towed = Vec3.ZERO;
 		}
+		if (drifting && this.riding <= 0 && this.heldFast <= 0) {
+			// nobody at her wheel: she drifts on the wind, and a balloon lets down slowly till she lies on the ground
+			this.towed = this.towed.add(Winds.way().scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
+			if (flying) {
+				this.aloft = Math.max(level.getMinY() + SKY_HEADROOM, this.aloft - LET_DOWN);
+			}
+		}
 		this.speed += (wanted - this.speed) * gather;
 		if (Math.abs(this.speed) < 1.0E-4) {
 			this.speed = 0.0;
@@ -750,6 +786,7 @@ public final class Ship extends Entity {
 		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
 		Vec3 to = new Vec3(from.x + ahead.x + this.towed.x, y, from.z + ahead.z + this.towed.z);
 		this.towed = Vec3.ZERO;
+		this.settled = false;
 		if (this.strikes(level, h, to, yaw, 0)) {
 			// (0.7.260) lying with some of her in the ground already, any move that drives her no further in is allowed:
 			// before, a ship run up a beach (or wedged where the shore was built up round her) could never come off it
@@ -775,6 +812,7 @@ public final class Ship extends Entity {
 				if (flying) {
 					// set down on something (or under it): she holds the height she has
 					this.aloft = from.y;
+					this.settled = true;
 				}
 			}
 		}
@@ -801,7 +839,8 @@ public final class Ship extends Entity {
 		for (Player p : level.players()) {
 			manned |= this.aboard(this.toLocal(p.position()), 1.0);
 		}
-		this.adrift = manned ? 0 : this.adrift + 1;
+		// (a balloon let go comes down first, and only then lies where she is)
+		this.adrift = manned || flying && drifting && !this.settled ? 0 : this.adrift + 1;
 		if (this.adrift > ADRIFT && this.adrift % 40 == 1) {
 			this.anchor(null);
 		}
@@ -825,6 +864,11 @@ public final class Ship extends Entity {
 		double push = PER_SAIL * Math.sqrt(Math.max(1, h.sails)) * Math.max(AIR_CATCH, Winds.catches(this.getYRot()))
 			* Winds.strength(this.level(), this.getX(), this.getZ());
 		return Math.min(FASTEST, Math.min(AIR_PER_LENGTH * (h.maxZ - h.minZ + 1), push));
+	}
+
+	/** Her helmsman fell at her wheel (her fliers' captain downed or dead): she drifts on the wind, and a balloon sinks, till someone steers her. */
+	public void letDrift() {
+		this.letGo = true;
 	}
 
 	/** Whether she's a balloon ship in the air (not afloat). */
@@ -1342,6 +1386,67 @@ public final class Ship extends Entity {
 		return out;
 	}
 
+	/** How many of what {@code what} matches lie in her chests and barrels. */
+	public int inHold(java.util.function.Predicate<ItemStack> what) {
+		int n = 0;
+		for (BlockEntity be : this.cargo.values()) {
+			if (be instanceof Container chest) {
+				for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+					ItemStack stack = chest.getItem(slot);
+					if (!stack.isEmpty() && what.test(stack)) {
+						n += stack.getCount();
+					}
+				}
+			}
+		}
+		return n;
+	}
+
+	/** Up to {@code most} of what {@code what} matches taken out of her chests and barrels (the first found): what was taken. */
+	public ItemStack fromHold(java.util.function.Predicate<ItemStack> what, int most) {
+		ItemStack out = ItemStack.EMPTY;
+		for (BlockEntity be : this.cargo.values()) {
+			if (!(be instanceof Container chest)) {
+				continue;
+			}
+			for (int slot = 0; slot < chest.getContainerSize() && out.getCount() < most; slot++) {
+				ItemStack stack = chest.getItem(slot);
+				if (stack.isEmpty() || !what.test(stack) || !out.isEmpty() && !ItemStack.isSameItemSameComponents(out, stack)) {
+					continue;
+				}
+				ItemStack taken = stack.split(most - out.getCount());
+				if (out.isEmpty()) {
+					out = taken;
+				} else {
+					out.grow(taken.getCount());
+				}
+				chest.setChanged();
+			}
+		}
+		return out;
+	}
+
+	/** {@code stack} stowed in her chests and barrels, as much as they take: what wouldn't go in. */
+	public ItemStack intoHold(ItemStack stack) {
+		for (BlockEntity be : this.cargo.values()) {
+			if (be instanceof Container chest && !stack.isEmpty()) {
+				for (int slot = 0; slot < chest.getContainerSize() && !stack.isEmpty(); slot++) {
+					ItemStack there = chest.getItem(slot);
+					if (there.isEmpty()) {
+						chest.setItem(slot, stack.copy());
+						stack = ItemStack.EMPTY;
+					} else if (ItemStack.isSameItemSameComponents(there, stack) && there.getCount() < there.getMaxStackSize()) {
+						int n = Math.min(stack.getCount(), there.getMaxStackSize() - there.getCount());
+						there.grow(n);
+						stack.shrink(n);
+					}
+				}
+				chest.setChanged();
+			}
+		}
+		return stack;
+	}
+
 	private void saveCargo(Level level) {
 		for (Map.Entry<Integer, BlockEntity> e : this.cargo.entrySet()) {
 			this.cargoTags.put(e.getKey(), e.getValue().saveWithFullMetadata(level.registryAccess()));
@@ -1395,6 +1500,11 @@ public final class Ship extends Entity {
 					level.playSound(null, at.x, at.y, at.z, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
 				}
 			}
+			return;
+		}
+		if (state.getBlock() instanceof BombHatchBlock && this.flying() && this.level() instanceof ServerLevel level) {
+			// a bomb hatch in a balloon's deck: a powder keg from her hold let fall through it on what's below
+			com.jaymoskingdoms.SkyShips.hatch(level, this, x, y, z, player);
 			return;
 		}
 		BlockEntity be = this.cargo.get(i);

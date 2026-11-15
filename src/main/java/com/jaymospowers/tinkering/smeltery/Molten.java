@@ -46,7 +46,14 @@ public enum Molten {
 	BRONZE("bronze", 0xFFD08A3C, TinkerMaterial.BRONZE),
 	// ---- (GTNH picks, the forge's dangers) what endermen and blazes melt into (Melting#CREATURES): cast into pearls, rods, powder ----
 	ENDER("ender", 0xFF1E7A6C, null),
-	BLAZE("blaze", 0xFFF2A21C, null);
+	BLAZE("blaze", 0xFFF2A21C, null),
+	// ---- (medieval picks) the realm steels (smithing/RealmSteels): lead from the deep veins, and ash (not a metal),
+	// alloy with steel, silver and bronze into the three peoples' metals ----
+	LEAD("lead", 0xFF5D6470, null),
+	ASH("ash", 0xFF8E8780, null),
+	DEEP_STEEL("deep_steel", 0xFF4E5868, null),
+	BRIGHT_STEEL("bright_steel", 0xFFE6EEF6, null),
+	ASH_BRONZE("ash_bronze", 0xFF8A5C34, null);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;
@@ -95,8 +102,8 @@ public enum Molten {
 		return rest == 0 ? ing : Component.translatable("molten.jaymospowers.and", ing, Component.translatable("molten.jaymospowers.mb", rest));
 	}
 
-	/** Measured in ingots (not slime, honey, blood, amethyst, glass, ender or blaze). */
+	/** Measured in ingots (not slime, honey, blood, amethyst, glass, ender, blaze or ash). */
 	public boolean metal() {
-		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST && this != GLASS && this != ENDER && this != BLAZE;
+		return this != SLIME && this != HONEY && this != BLOOD && this != AMETHYST && this != GLASS && this != ENDER && this != BLAZE && this != ASH;
 	}
 }
