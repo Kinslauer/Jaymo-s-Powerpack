@@ -5121,3 +5121,12 @@ Andy's 30 picks from The Awakening's suit power (All Rights Reserved: ideas only
 - **JEI**: an **Ore Washing** page (each crushed ore: washed ore, its nugget and its partner's tiny dust, with their chances), a **Small Ores** page (each small ore and its crushed ore), info pages for the dowsing rod, the small ores and the tiny dusts; the rod's, tiny dusts' and tin crushing's recipes on the crafting page. the small ores' smelting and melting on the furnace and melting pages. JEI's simple pages can show two byproducts.
 - Classes: `ground/Ores` (tiny dusts, small ores, the scatter feature `jaymospowers:small_ores`), `ground/DowsingRodItem`, `client/jei/OresJei`; changed `ground/BigVeinFeature` (partner and small-ore fields), `tinkering/ore/OreWashing` (tin, partner tiny dust; the washing lives in tinkering), `client/jei/SimpleCategory`. Data, art and lang from `tools/gen_ores.py`.
 - Built; not played.
+
+## 0.23.98 (2026-11-15): No diamond gear: loot and trades give steel or iron (#1587)
+
+- Andy: "diamond gear should be removed ... netherite should remain as plating but for steel armor". Diamond gear was
+  already uncraftable; now none is handed out either. Any diamond armour, tool or weapon (vanilla's, the Armory's,
+  WeaponMod's) that comes from a loot table (chests, mob drops, bartering) or is on a villager's or trader's offers
+  becomes its plainer kin: armour Kingdoms' steel plate (iron if Kingdoms is missing), everything else the iron one of
+  the same kind, enchantments and name kept (`tinkering/smithing/NoDiamondGear`). Diamond gear already in a world stays.
+- Built; not played.

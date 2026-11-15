@@ -13863,3 +13863,31 @@ only: the names, looks and numbers are ours. All of it is on the spirit key (L),
   each is loaded with nobody near; one come down in the country goes home the same way. An empty flight home loads no
   chunks. A wrecked or stolen one is built again after two days.
 - Built; not played.
+
+## 0.9.25 (2026-11-15): The Long Defence's cast in Fantasy Armor (#1587)
+
+- Andy: where Fantasy Armor is loaded, the Long Defence film dresses its cast in its sets: Thessaly in Lady Maria,
+  Varro in Golden Horns with no helm, Grimsby in the Thief gear, Ambrose in the Wandering Wizard, the Grue in the Dark
+  Lord plate, the first four orcs it raises in Dark Cover, and the Quiet One in the Redeemer plate. Without the mod
+  everyone wears what they did.
+- Andy: the Redeemer plate "should weave onto his body like the symbiote usually does". It goes on with the white and
+  winds out over him in the symbiote suit's order (chest, then arms, head, legs, boots last), each piece growing out
+  from its joint, twisting and swollen at first, then settling flat (`FantasyArmourLayer.WEAVE_*`).
+- Film actors are jointed, so `FilmGear` can't paint GeckoLib armour on them: `FantasyArmourLayer` draws each worn
+  piece from Fantasy Armor's own model and texture (read at run time, nothing copied), riding the actor's head, body,
+  upper arms, thighs and shins.
+- The tape holds each Fantasy Armor piece with what the actor had as its fallback, so one tape plays in games with or
+  without the mod. The shipped tape predates this: re-record it once (`/kingdomfilm record long_defence`).
+- Built; not played. Fantasy Armor itself isn't in the pack yet (its own patch).
+
+## 0.9.26 (2026-11-15): Netherite over steel; diamond gear gone from people's kits (#1587)
+
+- Netherite armour is made at the smithing table from the Armory's steel plate (upgrade template + a netherite ingot),
+  so it is no longer loot-only.
+- A rich realm's queen wears trimmed steel plate where she wore diamond; steel plate is the crown's like diamond and
+  netherite were, so nobody below a queen keeps it (`Regalia`), and a queen's old diamond turns to steel on sight.
+- Diamond gear is gone from the kits: legendary monster gear is steel plate with an iron claymore, broadsword or war
+  axe and an iron round shield (`MonsterGear`); lords, the knife captain, rank-four Banes, the illager warlord and the
+  barbarian chief carry iron; relics no longer roll diamond bases; the smiths' quest-board rewards give 1-2 diamonds
+  instead of a diamond sword or pickaxe.
+- Built; not played.
