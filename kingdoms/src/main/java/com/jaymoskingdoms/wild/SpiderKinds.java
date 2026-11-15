@@ -138,7 +138,7 @@ public final class SpiderKinds {
 	/** (medieval picks, de-netcaster) Below this height a spider may be a netcaster, at DEEP_NETCASTER; in a spider nest at
 	 * NEST_NETCASTER (and a mother at NEST_MOTHER). */
 	static final int NETCASTER_BELOW = -24;
-	static final float DEEP_NETCASTER = 0.2F, NEST_NETCASTER = 0.18F, NEST_MOTHER = 0.22F;
+	static final float DEEP_NETCASTER = 0.2F, NEST_NETCASTER = 0.45F, NEST_MOTHER = 0.2F;
 	/** Its body: health more, speed times (more). */
 	static final double NETCASTER_HEALTH = 12.0, NETCASTER_SPEED = 0.1;
 	/** Its net: thrown at prey between NET_MIN and NET_RANGE (blocks), NET_SPEED blocks a tick, catching within NET_CATCH,
@@ -248,7 +248,7 @@ public final class SpiderKinds {
 		if (biome.is(Biomes.CRIMSON_FOREST) || biome.is(Biomes.WARPED_FOREST)) {
 			kind = Kind.SPINY;
 		} else if (biome.is(com.jaymoskingdoms.wild.nest.SilkDeeps.SILK_DEEPS)) {
-			// (medieval picks) a spider nest's own: netcasters and mothers among the cavern spiders
+			// (medieval picks) a spider nest's own: netcasters most of all (they hunt its deeps), mothers among the cavern spiders
 			kind = roll < NEST_NETCASTER ? Kind.NETCASTER : roll < NEST_NETCASTER + NEST_MOTHER ? Kind.MOTHER
 				: pos.getY() < CAVERN_BELOW_Y ? Kind.CAVERN : Kind.PLAIN;
 		} else if (pos.getY() < NETCASTER_BELOW && roll < DEEP_NETCASTER) {

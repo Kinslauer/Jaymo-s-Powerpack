@@ -59,6 +59,7 @@ public final class SilkShots {
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> tick());
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> SHOTS.clear());
 	}
 
 	/**

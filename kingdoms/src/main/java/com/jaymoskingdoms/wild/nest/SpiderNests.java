@@ -236,9 +236,9 @@ public final class SpiderNests {
 
 	// ---- fire ----
 
-	/** (From a nest block's removal) If fire took it, its nest is burned out. */
+	/** (From a nest block's removal) If fire took it, or an Emberborn's touch (Jaymo's Powers burns webs so), its nest is burned out. */
 	static void burned(ServerLevel level, BlockPos pos) {
-		boolean fire = level.getBlockState(pos).is(BlockTags.FIRE);
+		boolean fire = level.getBlockState(pos).is(BlockTags.FIRE) || emberAt(level, pos);
 		for (Direction d : Direction.values()) {
 			fire |= level.getBlockState(pos.relative(d)).is(BlockTags.FIRE);
 		}
@@ -247,8 +247,21 @@ public final class SpiderNests {
 		}
 	}
 
-	/** The nest at {@code pos} burned out: its chunk stays dead (no egg grows back, nothing spreads, no queen returns). */
+	/** An Emberborn touching the block at {@code pos} (they carry Kingdoms' heritage tag, which Powers reads). */
+	private static boolean emberAt(ServerLevel level, BlockPos pos) {
+		String ember = com.jaymoskingdoms.Heritage.TAG + com.jaymoskingdoms.Heritage.Kind.EMBERBORN.key();
+		return !level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(0.2), e -> e.entityTags().contains(ember)).isEmpty();
+	}
+
+	/**
+	 * The nest at {@code pos} burned out: its chunk stays dead (no egg grows back, nothing spreads, no queen returns); and in a
+	 * brood queen's lair, the whole lair ({@link BroodEggBlock#lairOf}): her egg never grows back and no queen comes again.
+	 */
 	public static void scar(ServerLevel level, BlockPos pos) {
+		BroodEggBlock.Entity lair = BroodEggBlock.lairOf(level, pos);
+		if (lair != null) {
+			lair.burn(level);
+		}
 		if (inNest(level, pos) && !scarred(level, pos)) {
 			level.getChunkAt(pos).setAttached(SCARRED, true);
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 0.5F);

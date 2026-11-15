@@ -49,6 +49,9 @@ public class EggSacBlock extends Block {
 	static final double HATCH_RANGE = 3.5;
 	/** How often it looks (ticks, plus up to LOOK_JITTER more). */
 	static final int LOOK_EVERY = 20, LOOK_JITTER = 10;
+	/** With no player within PLAYER_NEAR (blocks) it doesn't look about at all, only checks again after LOOK_IDLE (ticks). */
+	static final double PLAYER_NEAR = 24.0;
+	static final int LOOK_IDLE = 100;
 	/** How many spiderlings come out. */
 	static final int BROOD_LEAST = 2, BROOD_MOST = 4;
 
@@ -113,6 +116,11 @@ public class EggSacBlock extends Block {
 
 	@Override
 	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		if (!level.hasNearbyAlivePlayer(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, PLAYER_NEAR)) {
+			// nobody about: a cheap check, and a longer wait
+			level.scheduleTick(pos, this, LOOK_IDLE + random.nextInt(LOOK_JITTER + 1));
+			return;
+		}
 		LivingEntity waker = waker(level, pos);
 		if (waker != null) {
 			hatch(level, pos, waker);
