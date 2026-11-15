@@ -123,6 +123,17 @@ public final class Affinity {
 		}
 	}
 
+	/**
+	 * A body born again by the druid's rite loses {@code lost} but keeps its leaning: an affinity already chosen stays as it
+	 * is, and one left to fate (or never chosen) now leans to {@code lost}, if fate could give it.
+	 */
+	public static void keepLeaning(ServerPlayer player, Power lost) {
+		Identifier id = of(player);
+		if ((id == null || id.equals(FATE)) && lost.fated()) {
+			player.setAttached(AFFINITY, lost.id());
+		}
+	}
+
 	/** For commands: sets (or with null, clears) the affinity directly. */
 	public static void set(ServerPlayer player, @Nullable Identifier id) {
 		if (id == null) {

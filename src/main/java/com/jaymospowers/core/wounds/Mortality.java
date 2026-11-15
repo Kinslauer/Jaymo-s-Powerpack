@@ -1385,7 +1385,9 @@ public final class Mortality {
 	/**
 	 * Coming back in another body (the druid's rite, {@link Limbo#reborn}): what was the old body's goes, and nothing else. The
 	 * power, the breaks, scars, afflictions and wounds of it are gone, as are an arrow lodged in it; the name, the memories
-	 * and the things carried stay.
+	 * and the things carried stay. So does their power affinity (Andy: "the rebirthed player should also keep their power
+	 * affinity"): one who had no leaning of their own now leans to the power they lost, so it is that one that wakes in
+	 * the new body after the usual wait.
 	 */
 	public static void shedGifts(ServerPlayer player) {
 		player.removeAttached(SURVIVOR);
@@ -1394,7 +1396,9 @@ public final class Mortality {
 		Breaks.clearAll(player);
 		Wounds.healAll(player);
 		player.removeAttached(Lodged.LODGED);
-		if (Powers.of(player) != null) {
+		com.jaymospowers.api.Power lost = Powers.of(player);
+		if (lost != null) {
+			com.jaymospowers.core.Affinity.keepLeaning(player, lost);
 			Powers.set(player, null);
 		}
 		player.removeAttached(Powers.AWAKEN_IN);
