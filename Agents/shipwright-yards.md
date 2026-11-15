@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: shipwright-yards
 branch: claude/project-thread-c00opi
 with: 
