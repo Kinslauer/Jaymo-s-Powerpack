@@ -153,9 +153,16 @@ public final class DownedPose {
 		boolean machine = com.jaymospowers.core.wounds.Malfunction.is(entity);
 		boolean crawls = Downed.crawls(entity);
 		Kind kind = kind(entity, person, machine);
-		// (Andy, 2026-11-15) down beside a wall, a person (or a machine built like one) that isn't crawling off sits against it
-		WallSit.Sit wall = person && !crawls ? WallSit.of(entity) : null;
-		Down pose = new Down(fall(down), crawls, person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),
+		// (Andy, 2026-11-15) down beside a wall, a person (or a machine built like one) that isn't crawling off sits against it,
+		// as does one set there by another
+		Long propped = entity.getAttached(com.jaymospowers.core.wounds.DownedLie.PROPPED);
+		WallSit.Sit wall = person && (!crawls || propped != null) ? WallSit.of(entity) : null;
+		float fall = fall(down);
+		if (wall != null) {
+			// set against the wall by whoever carried it: stood there, it slides down it
+			fall = Math.min(fall, WallSit.setDown(propped, entity.level().getGameTime() + partialTicks));
+		}
+		Down pose = new Down(fall, crawls, person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),
 			Downed.passedOut(entity), kind, wall != null ? Style.WALL : style(kind, person, crawls, entity.getId(), entity.isInWater()),
 			ExecutionReact.of(entity, partialTicks), wall);
 		state.setData(KEY, pose);
@@ -366,6 +373,9 @@ public final class DownedPose {
 				PoseBlend.Frame f = new PoseBlend.Frame(parts);
 				pose(f, living, pose);
 				f.put(parts, 1.0F);
+				if (pose.style() == Style.WALL) {
+					parts[0].z -= WallSit.HEAD_FORWARD * Mth.clamp(pose.amount(), 0.0F, 1.0F);
+				}
 			}
 			return;
 		}
@@ -378,6 +388,10 @@ public final class DownedPose {
 		// ((0.15.142) stiffer while it thrashes, so the beats aren't smoothed away; and while a finisher's blows land on it)
 		track.apply(m, f, pose.machine() || pose.react() != null ? 0.8F + FLAIL_STIFFNESS * 2.0F
 			: 0.8F + FLAIL_STIFFNESS * (pose.crawls() ? 0.0F : flail(pose)));
+		if (pose.style() == Style.WALL && !com.jaymospowers.client.PosedCopy.of(m)) {
+			// sat against a wall: the head hung forward off the neck, clear of it
+			m.head.z -= WallSit.HEAD_FORWARD * Mth.clamp(pose.amount(), 0.0F, 1.0F);
+		}
 		if (pose.style() == Style.BACK && !pose.machine() && pose.react() == null) {
 			// now and then it tries to sit up (the upper body lifting at the hips) and sinks back
 			PoseBlend.bend(m, RISE_PITCH * rise(living, pose) * Math.min(1.0F, pose.amount()), 0.0F, 0.0F, 0.0F, 0.0F);

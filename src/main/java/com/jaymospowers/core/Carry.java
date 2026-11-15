@@ -2,6 +2,7 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.DownedLie;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.gravity.GravityWeight;
 import com.jaymospowers.power.web.KitchenCompat;
@@ -285,6 +286,8 @@ public final class Carry {
 		final boolean gravityOnly;
 		/** (0.13.11) Where a carried block is being put ({@link Let#PLACE}). */
 		net.minecraft.core.@Nullable BlockPos placeAt;
+		/** Where someone downed is being set to sit against a wall ({@link Let#PLACE}, {@link DownedLie#propSpot}). */
+		@Nullable Vec3 propAt;
 		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
 		final boolean windOnly;
 		/** (0.19.55) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
@@ -950,6 +953,10 @@ public final class Carry {
 				hoist(carrier, entry);
 			} else {
 				end(carrier, entry, Let.SET_DOWN);
+				if (entry.carried instanceof LivingEntity body) {
+					// (Andy, 2026-11-15) let go beside a wall, they're propped up against it
+					DownedLie.prop(body, true);
+				}
 			}
 			return;
 		}
@@ -986,6 +993,17 @@ public final class Carry {
 				end(carrier, entry, Let.SET_DOWN);
 				head.mountOn(wall.getLocation().add(out.scale(TROPHY_OFF_WALL)), (float) Math.toDegrees(Math.atan2(-out.x, out.z)));
 				carrier.level().playSound(null, head.getX(), head.getY(), head.getZ(), SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.8F, 0.8F);
+				return;
+			}
+		}
+		if (!toss && entry.carried instanceof LivingEntity body) {
+			// (Andy, 2026-11-15: "other players should be able to place them on the wall") someone downed, set down looking
+			// at a wall, is sat against it
+			Vec3 spot = DownedLie.propSpot(carrier, body);
+			if (spot != null) {
+				entry.propAt = spot;
+				end(carrier, entry, Let.PLACE);
+				DownedLie.prop(body, false);
 				return;
 			}
 		}
@@ -1094,6 +1112,10 @@ public final class Carry {
 					at = carrier.position();
 				}
 			}
+		}
+		if (how == Let.PLACE && entry.propAt != null) {
+			// sat against the wall it was set down at (DownedLie#propSpot)
+			at = entry.propAt;
 		}
 		if (how == Let.THROW) {
 			carried.setAttached(THROWN, now);

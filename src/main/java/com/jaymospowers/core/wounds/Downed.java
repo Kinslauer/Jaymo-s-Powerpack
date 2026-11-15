@@ -491,6 +491,7 @@ public final class Downed {
 				limbo(server);
 				players(server);
 				revives(server);
+				DownedLie.tickPropped();
 			});
 			// the body that comes back is whole and on its feet (out of the End, still down if they went in down)
 			ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {

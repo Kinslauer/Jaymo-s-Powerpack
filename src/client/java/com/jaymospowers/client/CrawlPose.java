@@ -486,11 +486,6 @@ public final class CrawlPose {
 			return;
 		}
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
-		if (com.jaymospowers.client.wounds.WallSit.posePlayer(state, f)) {
-			// (2026-11-15) downed, sat against a wall
-			track.apply(h, f, 1.0F);
-			return;
-		}
 		if (ProneHaulPose.pose(state, f)) {
 			// hauling up a block: the reach, the pull up the face, the knee over the edge
 			track.apply(h, f, 2.0F);
@@ -514,14 +509,14 @@ public final class CrawlPose {
 			f.set(PoseBlend.LEFT_LEG, 0.02F, 0.0F, -0.08F);
 			f.set(PoseBlend.HEAD, HEAD_DOWN_REST, OUT_HEAD_TURN, 0.0F);
 			f.set(PoseBlend.BODY + 1, 0.0F);
-			track.apply(h, f, 0.6F);
+			lay(track, h, state, f, 0.6F);
 			return;
 		}
 		int broken = crawl.broken();
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
 		if (crawl.rise() >= 0.0F) {
 			rise(f, crawl, rightArm, leftArm);
-			track.apply(h, f, 1.2F);
+			lay(track, h, state, f, 1.2F);
 			return;
 		}
 		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F, elbow(state, true), elbow(state, false), crawl.strength());
@@ -574,7 +569,25 @@ public final class CrawlPose {
 		if (crawl.held() != 0 && crawl.downed() >= 0.0F) {
 			stem(f, crawl, rightArm, leftArm);
 		}
-		track.apply(h, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
+		lay(track, h, state, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
+	}
+
+	/**
+	 * (Andy, 2026-11-15) Lays a downed player's limbs on, gone over to the sit's as far as they're getting up against a
+	 * wall (WallSit), with what the crawl shook on past the springs going with them.
+	 */
+	private static void lay(PoseBlend.Track track, HumanoidModel<?> h, AvatarRenderState state, PoseBlend.Frame f, float stiffness) {
+		float sat = com.jaymospowers.client.wounds.WallSit.posePlayer(state, f);
+		if (sat > 0.0F) {
+			for (int i = 0; i < f.raw.length; i++) {
+				f.raw[i] *= 1.0F - sat;
+			}
+		}
+		track.apply(h, f, Mth.lerp(sat, stiffness, 1.0F));
+		if (sat > 0.0F && !PosedCopy.of(h)) {
+			// (its head hung forward off the neck, clear of the wall)
+			h.head.z -= com.jaymospowers.client.wounds.WallSit.headForward(state);
+		}
 	}
 
 	/**
