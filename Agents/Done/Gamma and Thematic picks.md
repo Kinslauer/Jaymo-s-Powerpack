@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Build Andy's 100 picks from the Gamma and Thematic picklist, big suit first
 branch: claude/project-thread-akompj
 with: Claude (cloud thread "Pick Gamma and Thematic ideas for powers")
@@ -25,3 +25,4 @@ owns:
 
 ## Done
 - 2026-11-16 07:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-16 07:09 PR #1346 is merged into master; moved to Agents/Done.
