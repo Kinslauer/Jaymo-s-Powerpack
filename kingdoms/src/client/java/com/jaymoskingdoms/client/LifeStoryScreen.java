@@ -2742,6 +2742,9 @@ final class LifeStoryScreen extends Screen {
 		if (folk == null) {
 			return null;
 		}
+		// an id of its own, as a figure never added to the world has none: other mods' render hooks ask for it (Cube
+		// Animals' glow check crashed the story screen)
+		folk.setId(-3000 - REALM_FOLK.size());
 		folk.preview(com.jaymoskingdoms.Folk.GUARD, r.colour(), r.climate());
 		net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
 			net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.MAINHAND,

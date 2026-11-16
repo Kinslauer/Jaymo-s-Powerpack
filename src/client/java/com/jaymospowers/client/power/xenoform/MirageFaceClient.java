@@ -105,6 +105,9 @@ public final class MirageFaceClient {
 			if (!(made instanceof LivingEntity living)) {
 				return state;
 			}
+			// an id of its own, as a stand never added to the world has none: other mods' render hooks ask for it (Cube
+			// Animals' glow check crashed a screen drawing such a figure)
+			living.setId(-5000 - player.getId());
 			proxy = new Proxy(type, living);
 			PROXIES.put(player.getId(), proxy);
 		}

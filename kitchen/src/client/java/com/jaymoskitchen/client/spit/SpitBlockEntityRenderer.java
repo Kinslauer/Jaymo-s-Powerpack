@@ -89,6 +89,9 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 			CorpseData data = stack.get(Corpses.CORPSE_DATA);
 			if (data != null) {
 				CorpseEntity corpse = new CorpseEntity(Corpses.CORPSE, be.getLevel());
+				// an id of its own (never in the world, it has none): clientBody gives the body one from it, and asking
+				// for an unset id throws
+				corpse.setId(-4000 - (int) (be.getBlockPos().asLong() & 0xFFFF));
 				corpse.restore(data);
 				Entity body = corpse.clientBody(0.0F);
 				if (body != null) {
