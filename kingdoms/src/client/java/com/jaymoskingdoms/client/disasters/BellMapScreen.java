@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.disasters;
 
+import com.jaymoskingdoms.client.MapBand;
 import com.jaymoskingdoms.disasters.LastBell;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -17,7 +18,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -53,11 +53,12 @@ final class BellMapScreen extends Screen {
 		this.originX = this.minecraft.player.getBlockX();
 		this.originZ = this.minecraft.player.getBlockZ();
 		MapItemSavedData map = held(level);
+		MapBand.Band band = MapBand.at(level, this.minecraft.player.getY());
 		int step = this.range * 2 / CELLS;
 		for (int cz = 0; cz < CELLS; cz++) {
 			for (int cx = 0; cx < CELLS; cx++) {
 				int x = this.originX - this.range + cx * step + step / 2, z = this.originZ - this.range + cz * step + step / 2;
-				this.colours[cx + cz * CELLS] = colour(level, map, x, z);
+				this.colours[cx + cz * CELLS] = colour(level, band, map, x, z);
 				this.open[cx + cz * CELLS] = level.getChunkSource().hasChunk(x >> 4, z >> 4);
 			}
 		}
@@ -76,8 +77,11 @@ final class BellMapScreen extends Screen {
 		return null;
 	}
 
-	/** What's at (x, z): the map's colour there, else the land's if the eye can see it, else dark. */
-	private static int colour(ClientLevel level, @Nullable MapItemSavedData map, int x, int z) {
+	/**
+	 * What's at (x, z): the map's colour there, else the land's if the eye can see it (the ground of {@code band}: in a
+	 * stacked world the realm the holder stands in, not the Aether over it), else dark.
+	 */
+	private static int colour(ClientLevel level, MapBand.Band band, @Nullable MapItemSavedData map, int x, int z) {
 		if (map != null) {
 			int per = 1 << map.scale;
 			int px = Math.floorDiv(x - map.centerX, per) + 64, pz = Math.floorDiv(z - map.centerZ, per) + 64;
@@ -91,13 +95,17 @@ final class BellMapScreen extends Screen {
 		if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
 			return UNKNOWN;
 		}
-		int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+		int y = MapBand.surface(level, band, x, z);
+		if (y < band.bottom()) {
+			return UNKNOWN;
+		}
 		BlockPos pos = new BlockPos(x, y, z);
 		BlockState state = level.getBlockState(pos);
 		if (state.getFluidState().is(FluidTags.WATER)) {
 			return MapColor.WATER.calculateARGBColor(MapColor.Brightness.NORMAL);
 		}
-		MapColor.Brightness light = y > level.getSeaLevel() + 40 ? MapColor.Brightness.HIGH : y < level.getSeaLevel() + 4 ? MapColor.Brightness.LOW
+		int sea = level.getSeaLevel() + band.shift();
+		MapColor.Brightness light = y > sea + 40 ? MapColor.Brightness.HIGH : y < sea + 4 ? MapColor.Brightness.LOW
 			: MapColor.Brightness.NORMAL;
 		int c = state.getMapColor(level, pos).calculateARGBColor(light);
 		return c == 0 ? UNKNOWN : c;

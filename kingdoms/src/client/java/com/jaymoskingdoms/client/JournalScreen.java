@@ -27,7 +27,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 
 /**
@@ -599,7 +598,7 @@ final class JournalScreen extends Screen {
 		int n = size / CELL;
 		int scale = ZOOMS[zoom];
 		if (cells == null || drawnZoom != zoom || drawnSize != size) {
-			cells = draw(level, player.getBlockX(), player.getBlockZ(), scale, n);
+			cells = draw(level, MapBand.at(level, player.getY()), player.getBlockX(), player.getBlockZ(), scale, n);
 			drawnX = player.getBlockX();
 			drawnZ = player.getBlockZ();
 			drawnZoom = zoom;
@@ -697,8 +696,11 @@ final class JournalScreen extends Screen {
 		return new int[] {x + (int)Mth.clamp(px, 3, size - 3), y + (int)Mth.clamp(pz, 4, size - 4)};
 	}
 
-	/** The land about ({@code cx}, {@code cz}) as a map draws it: one sample per cell, shaded by the slope from the north. */
-	private static int[] draw(ClientLevel level, int cx, int cz, int scale, int n) {
+	/**
+	 * The land about ({@code cx}, {@code cz}) as a map draws it: one sample per cell, shaded by the slope from the north. Only
+	 * the ground of {@code band} (in a stacked world, the realm you stand in, not the Aether's islands over it).
+	 */
+	private static int[] draw(ClientLevel level, MapBand.Band band, int cx, int cz, int scale, int n) {
 		int[] out = new int[n * n];
 		int[] heights = new int[n];
 		for (int row = -1; row < n; row++) {
@@ -712,7 +714,7 @@ final class JournalScreen extends Screen {
 					heights[col] = Integer.MIN_VALUE;
 					continue;
 				}
-				int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+				int top = MapBand.surface(level, band, x, z);
 				BlockPos pos = new BlockPos(x, top, z);
 				BlockState state = level.getBlockState(pos);
 				MapColor color = state.getMapColor(level, pos);
@@ -721,7 +723,7 @@ final class JournalScreen extends Screen {
 				if (row < 0) {
 					continue;
 				}
-				if (color == MapColor.NONE || top <= level.getMinY()) {
+				if (color == MapColor.NONE || top <= band.bottom()) {
 					out[row * n + col] = COLOR_PARCHMENT;
 					continue;
 				}
