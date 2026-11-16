@@ -26,3 +26,4 @@ body (a zombie a good heap, a ghast or giant a big one), instead of only smoke a
   note it in the PR. Lore: none needed beyond "ash", it's a burnt body.
 - Lava burns leave nothing (it falls into the lava), only fire on the ground does.
 - Kitchen change note `changes/kitchen/<branch>.md` (and one per other mod touched); no version or MODLOG edits.
+- 2026-11-16 04:43 Text pass: rewrote changes/kitchen/burnt-corpse-ash-piles.md to be player-facing (dropped code jargon 'the burn branch' / 'Corpses.ASH_PILE' and the internal '(builder's call: say so)' line; kept class refs secondary). Lang key block.jaymoskitchen.ash_pile = 'Ash Pile' kept as-is (matches Kitchen title-case style, validated by build). No other player-visible text in PR #1642 (no chat, hints, advancement, or entity text).
