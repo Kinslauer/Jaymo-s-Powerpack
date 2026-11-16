@@ -2733,6 +2733,14 @@
 			}
 		]
 	},
+	"blast.ring": {
+		"subtitle": "subtitles.jaymospowers.blast.ring",
+		"sounds": [
+			{
+				"name": "jaymospowers:blast/ring"
+			}
+		]
+	},
 	"eden.diskwing.ambient": {
 		"subtitle": "subtitles.jaymospowers.eden.diskwing.ambient",
 		"sounds": [
