@@ -62,6 +62,9 @@ public class OffalPileBlock extends Block {
 
 	/** One piece fewer at {@code pos} (the pile gone with its last). */
 	public static void takeOne(Level level, BlockPos pos, BlockState state) {
+		if (!state.hasProperty(PIECES)) {
+			return;
+		}
 		int left = state.getValue(PIECES) - 1;
 		level.setBlock(pos, left > 0 ? state.setValue(PIECES, left) : Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 	}
