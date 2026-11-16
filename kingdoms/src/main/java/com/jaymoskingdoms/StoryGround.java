@@ -44,7 +44,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -394,7 +393,9 @@ public final class StoryGround {
 			// someone walked up to a bell meanwhile
 			return true;
 		}
-		if (!level.isPositionEntityTicking(village)) {
+		// the bell is looked for in made land only (isPositionEntityTicking, like hasChunksAt, is true of chunks only
+		// scheduled: see Loaded)
+		if (!level.isPositionEntityTicking(village) || !loaded(level, village, BELL_SEARCH / 16 + 1)) {
 			return false;
 		}
 		// the search found the village's chunk at y 0: the bell is looked for round its ground, or a town on high land (a
@@ -412,11 +413,18 @@ public final class StoryGround {
 		if (found.status() != Seats.Status.FOUND || found.start() == null) {
 			return false;
 		}
-		BoundingBox area = found.start().getBoundingBox();
+		// the land round the bell made first, as for a citadel ({@link #CITADEL_RADIUS}): the town takes its buildings, and if
+		// it won't, a castle is raised beside it, its site looked for up to 183 blocks off; the job's ticket is moved to the
+		// bell, so the land loads off the server thread over later tries
 		BlockPos b = bell.get();
-		int reach = KingdomEvents.LOAD_REACH;
-		if (!level.hasChunksAt(Math.max(area.minX(), b.getX() - reach), Math.max(area.minZ(), b.getZ() - reach),
-			Math.min(area.maxX(), b.getX() + reach), Math.min(area.maxZ(), b.getZ() + reach))) {
+		if (!b.equals(job().at)) {
+			job().at = b;
+			job().radius = CITADEL_RADIUS;
+			// (the wider land takes longer: the village keeps its full time from here)
+			job().giveUpAt = Math.max(job().giveUpAt, level.getGameTime() + GIVE_UP_TICKS);
+			return false;
+		}
+		if (!loaded(level, b, CITADEL_RADIUS)) {
 			return false;
 		}
 		if (KingdomEvents.foundIn(level, b, found.start()) == null) {
