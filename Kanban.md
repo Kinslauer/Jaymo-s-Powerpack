@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 13:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 15:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/crash-risk-sweep|crash-risk-sweep]] · 💻 Odysseus · running
 
 
 ## In review
