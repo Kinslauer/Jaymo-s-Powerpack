@@ -19,15 +19,22 @@ Tiv, in the Questions thread: "I want to change dialogue between NPCs and player
 - Every time the speaker changes (player ↔ villager), the POV/perspective swaps — from the player's character to the villager and back.
 - Applies to dialogue between NPCs and players.
 
+Added (same thread): Witcher 3 / Baldur's Gate 3 style conversation system — a list of dialogue options, stemming from a Fallout 4 style wheel with sections based off temperament. The camera cuts back and forth, breaking the 180 most of the time.
+
+- A Fallout 4 style dialogue wheel: options laid out in sections, each section tied to a temperament (kindhearted, cheerful, devout, dutiful, brave, proud, greedy, suspicious, timid, hotheaded, spiteful, gloomy).
+- The camera cuts back and forth between speakers, breaking the 180-degree rule most of the time.
+
 ## What exists
 
 - `HandshakeCinematic` — an existing short-film system: black bars slide in, HUD clears, camera cuts through shots. A model for how a letterbox + camera cutscene is done in this pack.
 - `HandshakeCameraMixin` — moves and turns the camera during a handshake cinematic.
 - `McaDialogueMixin` — mixes into MCA's dialogue for chatting with newcomers/immigrants.
 - `Questioning.java` — may be the NPC questioning/dialogue system.
+- Temperaments already exist: `PlayerTemperaments` sets a player's temperament from their life story; `Temperaments` has the twelve temperaments with colours and hover text. Villagers and mobs also carry temperaments.
 
 ## Notes
 
 - This is mod work (code + possibly assets), routed to hermes (builders). Not a model, art, or writing task itself.
-- "Changes POV every time the speaker changes" needs a decision: does the camera snap to the villager's face, or orbit, or go third-person on the villager? And how long does each speaker's shot hold before cutting back?
-- Ask Tiv whether this should wrap all NPC dialogue or only certain conversations (e.g. masters, quest-givers, court wizards).
+- The dialogue wheel needs a UI design: wheel sections by temperament, how options are selected, how the list stems from the wheel.
+- Camera work: back-and-forth cuts, breaking the 180 — needs specific shot/reverse-shot framing per speaker.
+- Ask Tiv: which NPC conversations get this (all of them, or masters/quest-givers/court wizards only)? Does the wheel replace MCA's existing dialogue UI or sit beside it?
