@@ -443,8 +443,13 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 	public void tick() {
 		super.tick();
 		if (this.throne()) {
-			// a throne doesn't turn or walk
-			this.setYRot(this.yBodyRot);
+			// a throne doesn't turn or walk; the client draws it the way the server set it (its synced yaw), since its own
+			// body turn starts from the spawn packet's head turn and would leave the throne facing elsewhere
+			if (this.level().isClientSide()) {
+				this.yBodyRot = this.yBodyRotO = this.getYRot();
+			} else {
+				this.setYRot(this.yBodyRot);
+			}
 			this.yHeadRot = this.yBodyRot;
 		}
 	}

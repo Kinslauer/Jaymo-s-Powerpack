@@ -14296,3 +14296,17 @@ Built; not played.
 
 - The awareness eye above the crosshair and the noise and light meters beside it now fade out while the view is zoomed in (Ok Zoomer, a spyglass, a drawn bow), the way Powers' aim crosshair shrinks with the zoom: fully shown down to 0.97 of your FOV setting, gone by 0.8 (`SensesClient.ZOOM_SHOWN`, `ZOOM_GONE`). They come back as the zoom eases off.
 - Compiled; not played.
+
+## 0.9.58 (2026-11-16): throne golem faces its realm (#1625)
+
+- **Throne golem facing**: a realm's throne golem now kneels into its throne facing the realm's seat, so whoever sits in it looks over the town. It used to get a random direction, often its back to the town.
+- The client now draws a folded throne the way the server turned it (`TownGolem.tick`), instead of a body turn left over from the spawn packet, so the seat you see is the seat you sit in.
+- `Golemworks.build`, `TownGolem.tick`. Throne golems already standing keep their old facing; only new ones are turned. Not played.
+
+## 0.9.59 (2026-11-16): Savanna seats in mud brick; story capitals find high villages (#1622)
+
+- Savanna kingdoms no longer build in plain terracotta speckled with orange and brown terracotta (Andy: "this looks awful"). Their citadels, keeps, watchtowers and stone buildings are now mud brick weathered with packed mud, with mud brick stairs and slabs, acacia wood as before, and blackstone bricks where the fortified block goes (`Palette.SAVANNA`).
+- Seats already standing keep their old blocks.
+- **A story start's capital takes the village it found again.** The village search gives the village's spot at height 0, and its bell was then looked for within 96 blocks of that point, height included. A town up on high ground (the savanna plateau at y 108 on the Deck server) had its bell out of reach. The start waited two minutes, gave up and raised a new kingdom beside the village instead, which is how the terracotta citadel came about. The bell is now looked for around the village's ground (`StoryGround.foundInVillage`).
+- **Grand seats in a One Dimension world:** when the Overworld band's own generator won't generate a castle, `GrandSeats` now tries the stacked world's generator before falling back to the citadel. Its heights don't matter, because the castle is moved onto the site's floor anyway. The log says which one worked. Why the band's generator refuses (the Epic savanna town and both ATi castles all refused at the same spot) is still unknown; that log line is there to find out.
+- Compiled (Gradle, Kingdoms). Not played.

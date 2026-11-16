@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * What a kingdom's buildings are made of, matched to its village so they blend in: stone and oak on the plains,
- * cobble and spruce in the taiga, stone and spruce in the snow, terracotta and acacia on the savanna, sandstone in
+ * cobble and spruce in the taiga, stone and spruce in the snow, mud brick and acacia on the savanna, sandstone in
  * the desert, red sandstone in the badlands, mossy stone and jungle wood in the jungle, mud brick and mangrove in the
  * swamp, stone and cherry among the cherry trees.
  */
@@ -31,9 +31,10 @@ record Palette(BlockState wall, BlockState mossy, BlockState cracked, BlockState
 		Blocks.STONE_BRICK_STAIRS.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState(), Blocks.POLISHED_DEEPSLATE.defaultBlockState(),
 		Blocks.PACKED_ICE.defaultBlockState(), Blocks.SPRUCE_LOG.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(),
 		Blocks.SPRUCE_SLAB.defaultBlockState(), Blocks.SPRUCE_FENCE.defaultBlockState(), Blocks.SPRUCE_TRAPDOOR.defaultBlockState());
-	static final Palette SAVANNA = new Palette(Blocks.TERRACOTTA.defaultBlockState(), named("orange_terracotta"),
-		named("brown_terracotta"), Blocks.ACACIA_PLANKS.defaultBlockState(), Blocks.STRIPPED_ACACIA_LOG.defaultBlockState(),
-		Blocks.ACACIA_STAIRS.defaultBlockState(), Blocks.ACACIA_SLAB.defaultBlockState(), Blocks.MUD_BRICKS.defaultBlockState(),
+	// mud brick, not terracotta: plain terracotta weathered with orange and brown came out blotchy (Andy: "this looks awful")
+	static final Palette SAVANNA = new Palette(Blocks.MUD_BRICKS.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState(),
+		Blocks.MUD_BRICKS.defaultBlockState(), Blocks.ACACIA_PLANKS.defaultBlockState(), Blocks.STRIPPED_ACACIA_LOG.defaultBlockState(),
+		Blocks.MUD_BRICK_STAIRS.defaultBlockState(), Blocks.MUD_BRICK_SLAB.defaultBlockState(), Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(),
 		Blocks.COARSE_DIRT.defaultBlockState(), Blocks.ACACIA_LOG.defaultBlockState(), Blocks.ACACIA_PLANKS.defaultBlockState(),
 		Blocks.ACACIA_SLAB.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState(), Blocks.ACACIA_TRAPDOOR.defaultBlockState());
 	static final Palette DESERT = new Palette(Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(),
