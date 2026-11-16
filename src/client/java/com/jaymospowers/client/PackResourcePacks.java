@@ -103,7 +103,46 @@ final class PackResourcePacks {
 		// own skins, and the textures it repaints outright are read back from the game's own. Format 15 (1.20.1).
 		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies-v1", "TZP_", "TZP_1.20.1_2.7.zip",
 			"https://mediafilez.forgecdn.net/files/4750/306/TZP_1.20.1_2.7.zip",
-			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true));
+			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true),
+		// Sensible MC picks (Andy, 2026-11-16). Each fetched unchanged from Modrinth, never shipped, edited or copied.
+		// Fresh Animations' own add-ons (by FreshLX, under its terms): extra mob details and a new look for creepers,
+		// just above Fresh Animations. Details 2.4 (project lctgpCsu), Creepers 2.2 (project AhPf2E1u).
+		new Pack("Fresh Animations: Details", "jaymospowers-fa-details-v1", "FA+Details", "FA+Details-v2.4.zip",
+			"https://cdn.modrinth.com/data/lctgpCsu/versions/XM8VyQLk/FA%2BDetails-v2.4.zip",
+			"b98a11e783b79851e6f3c72e4b1eaf9b401d7599", false, "FreshAnimations"),
+		new Pack("Fresh Animations: Creepers", "jaymospowers-fa-creepers-v1", "FA+Creepers", "FA+Creepers-v2.2.zip",
+			"https://cdn.modrinth.com/data/AhPf2E1u/versions/b90eVujh/FA%2BCreepers-v2.2.zip",
+			"c65e34ee299998d39bec9178f6793af1099733fa", false, "FreshAnimations"),
+		// "Armored Legacy" (CC BY-NC-ND 4.0): 3D armour models through Entity Model Features. 1.6.0 (project zwmalH7z).
+		new Pack("Armored Legacy", "jaymospowers-armored-legacy-v1", "Armored Legacy", "Armored Legacy 1.6.0+26.3.zip",
+			"https://cdn.modrinth.com/data/zwmalH7z/versions/bwCz6yGQ/Armored%20Legacy%201.6.0%2B26.3.zip",
+			"b33560a6a80ef09d15e8b9b74c65ff18e6022008", false),
+		// "3D Ladders" (all rights reserved), "Remodeled Doors 3D" (all rights reserved), "Fabulous Fences" (CC BY 4.0) and
+		// "(Bee's) Fancy Crops" (all rights reserved): small model packs (projects ti9eZ3CP, emO4C1kf, KeTozie3, UGEVQ6t9).
+		new Pack("3D ladders", "jaymospowers-3d-ladders-v1", "\u00a7l3D\u00a7f Ladders", "\u00a7l3D\u00a7f Ladders v1.2.2 - 26.3.zip",
+			"https://cdn.modrinth.com/data/ti9eZ3CP/versions/2FzklfBI/%C2%A7l3D%C2%A7f%20Ladders%20v1.2.2%20-%2026.3.zip",
+			"a055c6187bff48e16098b9be9735b69b28f64aab", false),
+		new Pack("3D doors", "jaymospowers-remodeled-doors-v1", "\u00a7aRemodeled-Doors", "\u00a7aRemodeled-Doors\u00a78_\u00a762.3.1.zip",
+			"https://cdn.modrinth.com/data/emO4C1kf/versions/Opp78wgT/%C2%A7aRemodeled-Doors%C2%A78_%C2%A762.3.1.zip",
+			"cb0fa5781cd8b3bbe4e3ef86fb8a98cc7c6f78a9", false),
+		new Pack("Fabulous Fences", "jaymospowers-fabulous-fences-v1", "FabulousFences", "FabulousFences_2026.2a_RP.zip",
+			"https://cdn.modrinth.com/data/KeTozie3/versions/IWewGyev/FabulousFences_2026.2a_RP.zip",
+			"3028b6714a000343d17bb6c2bd76724bbad76383", false),
+		new Pack("Fancy Crops", "jaymospowers-fancy-crops-v1", "Fancy Crops", "Fancy Crops v1.4.zip",
+			"https://cdn.modrinth.com/data/UGEVQ6t9/versions/I3d6FlUX/Fancy%20Crops%20v1.4.zip",
+			"a247188ff93c19045cda4344d80e3cb6e1b00494", false),
+		// "Enchanted Books: Re-covered" (CC BY-NC-ND 4.0): each enchanted book its own cover. 4.0 (project 6gN7YVi7).
+		new Pack("Re-covered enchanted books", "jaymospowers-recovered-books-v1", "Re-covered", "Re-covered.zip",
+			"https://cdn.modrinth.com/data/6gN7YVi7/versions/6JpG9oNx/Re-covered.zip",
+			"59571d3e7f626fe7ef00b39bfa32400fdff4d7e3", false),
+		// "KSPACK" (MIT): the textures Tiered Shields (ks-shields, build.gradle) draws its shields with. 26.3-1.
+		new Pack("Tiered Shields' textures", "jaymospowers-kspack-v1", "KSPACK", "KSPACK_26.3-1.zip",
+			"https://cdn.modrinth.com/data/1NDTwAcs/versions/4gUjKYHi/KSPACK_26.3-1.zip",
+			"ab93778ed41546c8bccd46d518e83a745531235e", false),
+		// "Fluid & Foolish" (all rights reserved): the moves Punchy! Moves (build.gradle) plays. 1.0.1 (project fQdwNxte).
+		new Pack("Fluid & Foolish", "jaymospowers-fluid-foolish-v1", "Fluid & Foolish", "Fluid & Foolish 1.0.1.zip",
+			"https://cdn.modrinth.com/data/fQdwNxte/versions/UAp4jRDk/Fluid%20%26%20Foolish%201.0.1.zip",
+			"45a52f5456bc56686e1587dcc182c3e4601baec8", false));
 
 	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
 	static final List<Pack> OPTIONAL = List.of(
