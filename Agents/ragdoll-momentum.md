@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: ragdoll-momentum - killed and heavy-hit mobs pop into the air instead of falling with the blow
 branch: claude/ragdoll-momentum
 with:
