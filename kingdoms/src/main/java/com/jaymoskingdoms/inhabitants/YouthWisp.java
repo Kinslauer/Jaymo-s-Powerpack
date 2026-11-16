@@ -95,6 +95,24 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** How often (ticks) a mote drifts off it while it waits. */
 	static final int MOTE_EVERY = 12;
 
+	/** How often (ticks) the wisp may switch to a new idle behavior mode. */
+	static final int BEHAVIOR_SWITCH_MIN = 20 * 20; // 20 seconds
+	static final int BEHAVIOR_SWITCH_MAX = 60 * 20; // 60 seconds
+
+	/** Idle behavior modes the wisp can exhibit. */
+	enum BehaviorMode {
+		/** Drifts slowly about its summon spot (original behavior). */
+		DRIFT,
+		/** Stays put at its summon spot with minimal movement. */
+		STAY,
+		/** Follows its asker, staying in front at head height. */
+		FOLLOW,
+		/** Avoids the asker's gaze playfully. */
+		AVOID_GAZE,
+		/** Circles around the asker at a distance. */
+		CIRCLE
+	}
+
 	/** The eight idles, as named in its .animation.json, how long each plays (seconds), and how often each is picked. */
 	static final String[] IDLES = {"hover", "crow", "flip", "sit", "swoop", "lounge", "spin", "laugh"};
 	static final float[] IDLE_SECONDS = {1.2F, 1.3F, 0.7F, 1.8F, 0.8F, 1.8F, 0.6F, 1.2F};
@@ -115,6 +133,10 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** Summoned for a question whose answer hasn't come yet. */
 	private boolean pending;
 	private int vanishing = -1;
+	/** The current idle behavior mode. */
+	private BehaviorMode behaviorMode = BehaviorMode.DRIFT;
+	/** Tick count when the behavior mode may next switch. */
+	private int behaviorSwitchAt;
 
 	// the idle picker's state (client side)
 	private @Nullable RandomSource idleRandom;
@@ -148,6 +170,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		if (wisp != null) {
 			wisp.spot = spot;
 			wisp.lastAsked = wisp.tickCount;
+			wisp.behaviorMode = randomBehaviorMode(player.getRandom());
+			wisp.behaviorSwitchAt = wisp.tickCount + BEHAVIOR_SWITCH_MIN + player.getRandom().nextInt(BEHAVIOR_SWITCH_MAX - BEHAVIOR_SWITCH_MIN);
 			wisp.faceAsker();
 			return wisp;
 		}
@@ -163,6 +187,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		wisp.asker = player.getUUID();
 		wisp.spot = spot;
 		wisp.setPos(spot);
+		wisp.behaviorMode = randomBehaviorMode(player.getRandom());
+		wisp.behaviorSwitchAt = wisp.tickCount + BEHAVIOR_SWITCH_MIN + player.getRandom().nextInt(BEHAVIOR_SWITCH_MAX - BEHAVIOR_SWITCH_MIN);
 		wisp.faceAsker();
 		level.addFreshEntity(wisp);
 		BY_ASKER.put(player.getUUID(), wisp);
@@ -408,6 +434,27 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		this.setXRot(Mth.clamp(pitch, -40.0F, 40.0F));
 	}
 
+	/** Picks a random behavior mode, weighted so DRIFT and STAY are more common. */
+	private static BehaviorMode randomBehaviorMode(RandomSource random) {
+		int roll = random.nextInt(10);
+		if (roll < 3) return BehaviorMode.DRIFT;
+		if (roll < 5) return BehaviorMode.STAY;
+		if (roll < 7) return BehaviorMode.FOLLOW;
+		if (roll < 9) return BehaviorMode.AVOID_GAZE;
+		return BehaviorMode.CIRCLE;
+	}
+
+	/** Whether the given player is currently looking at this wisp (within the HELP_VIEW cone). */
+	private boolean isPlayerLookingAt(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
+		Vec3 toWisp = this.getBoundingBox().getCenter().subtract(eye);
+		double sq = toWisp.lengthSqr();
+		if (sq < 1.0E-4) {
+			return true;
+		}
+		return toWisp.normalize().dot(look) >= HELP_VIEW;
+	}
+
 	// ---------------------------------------------------------------- each tick
 
 	@Override
@@ -432,12 +479,74 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			this.vanish();
 			return;
 		}
-		// drift slowly about its spot, and turn to whoever is nearest (its asker, most often)
+		// switch to a new behavior mode if it's time
+		if (this.tickCount >= this.behaviorSwitchAt) {
+			this.behaviorMode = randomBehaviorMode(this.random);
+			this.behaviorSwitchAt = this.tickCount + BEHAVIOR_SWITCH_MIN + this.random.nextInt(BEHAVIOR_SWITCH_MAX - BEHAVIOR_SWITCH_MIN);
+		}
+
 		double t = this.tickCount + this.getId() * 37;
-		Vec3 target = this.spot.add(Math.sin(t / 47.0) * DRIFT, Math.sin(t / 29.0) * DRIFT * 0.3, Math.cos(t / 53.0) * DRIFT);
-		this.setPos(this.position().add(target.subtract(this.position()).scale(FOLLOW)));
 		Player nearest = level.getNearestPlayer(this, 8.0);
-		this.face(nearest != null ? nearest : player);
+
+		switch (this.behaviorMode) {
+			case STAY:
+				// stay at the summon spot with tiny drift
+				Vec3 stayTarget = this.spot.add(Math.sin(t / 80.0) * DRIFT * 0.2, Math.sin(t / 60.0) * DRIFT * 0.05, Math.cos(t / 80.0) * DRIFT * 0.2);
+				this.setPos(this.position().add(stayTarget.subtract(this.position()).scale(FOLLOW * 0.8)));
+				this.face(nearest != null ? nearest : player);
+				break;
+			case FOLLOW:
+				// drift in front of the asker at head height, moving with them
+				Vec3 look = player.getLookAngle().multiply(1, 0, 1);
+				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
+				Vec3 followSpot = player.position().add(look.scale(AHEAD * 0.9)).add(0, HEIGHT + 0.15, 0);
+				this.spot = followSpot;
+				Vec3 followTarget = followSpot.add(Math.sin(t / 47.0) * 0.3, Math.sin(t / 29.0) * 0.1, Math.cos(t / 53.0) * 0.3);
+				this.setPos(this.position().add(followTarget.subtract(this.position()).scale(0.15)));
+				this.face(player);
+				break;
+			case AVOID_GAZE:
+				// if the asker is looking at the wisp, drift away; otherwise drift back
+				Vec3 toPlayer = player.position().subtract(this.position());
+				toPlayer = toPlayer.multiply(1, 0, 1);
+				double dist = toPlayer.length();
+				toPlayer = dist < 1.0E-4 ? new Vec3(0, 0, 1) : toPlayer.normalize();
+				Vec3 avoidSpot;
+				if (this.isPlayerLookingAt(player)) {
+					// slip out of the asker's gaze to its side (a fixed spot beside the asker, so it can't run off)
+					Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
+					gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
+					Vec3 side = new Vec3(-gaze.z, 0, gaze.x);
+					if (side.dot(toPlayer) > 0) {
+						side = side.scale(-1); // stay on the side it is already on
+					}
+					avoidSpot = player.position().add(side.scale(AHEAD)).add(0, HEIGHT + 0.2, 0);
+				} else {
+					// drift back toward the asker's POV
+					Vec3 lookAway = player.getLookAngle().multiply(1, 0, 1);
+					lookAway = lookAway.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : lookAway.normalize();
+					avoidSpot = player.position().add(lookAway.scale(AHEAD * 0.7)).add(0, HEIGHT, 0);
+				}
+				this.spot = avoidSpot;
+				this.setPos(this.position().add(avoidSpot.subtract(this.position()).scale(0.12)));
+				this.face(nearest != null ? nearest : player);
+				break;
+			case CIRCLE:
+				// circle the asker at a distance
+				double angle = t / 80.0;
+				Vec3 circleSpot = player.position().add(Math.sin(angle) * 3.0, HEIGHT + 0.3, Math.cos(angle) * 3.0);
+				this.spot = circleSpot;
+				this.setPos(this.position().add(circleSpot.subtract(this.position()).scale(0.1)));
+				this.face(player);
+				break;
+			case DRIFT:
+			default:
+				// drift slowly about its spot, and turn to whoever is nearest (its asker, most often)
+				Vec3 target = this.spot.add(Math.sin(t / 47.0) * DRIFT, Math.sin(t / 29.0) * DRIFT * 0.3, Math.cos(t / 53.0) * DRIFT);
+				this.setPos(this.position().add(target.subtract(this.position()).scale(FOLLOW)));
+				this.face(nearest != null ? nearest : player);
+				break;
+		}
 		if (this.tickCount % MOTE_EVERY == 0) {
 			level.sendParticles(Fx.mote(COLOUR, 0.6F), this.getX(), this.getY() + 0.3, this.getZ(), 1, 0.15, 0.1, 0.15, 0.0);
 		}
