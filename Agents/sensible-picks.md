@@ -3,7 +3,7 @@ status: in-review
 task: Add Andy's Sensible MC picks to the pack
 branch: claude/sensible-picks
 with: Claude (cloud)
-pr: 
+pr: 1645
 mods: Powers, Kingdoms
 versions: 
 started: 2026-11-16
