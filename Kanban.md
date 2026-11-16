@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 15:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 17:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Agents/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · 💻 Odysseus · stalled
+- [ ] [[Agents/crash-risk-sweep|crash-risk-sweep]] · 💻 Odysseus · #1653 · stalled
 - [ ] [[Agents/faith-page-champion|faith-page-champion]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-and-fall-hall|forest-fire-and-fall-hall]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
