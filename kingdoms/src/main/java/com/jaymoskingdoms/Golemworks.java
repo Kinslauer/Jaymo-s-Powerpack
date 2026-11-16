@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -219,14 +220,19 @@ public final class Golemworks {
 			if (golem == null) {
 				return false;
 			}
-			golem.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+			// the throne faces its seat, so whoever sits in it looks over the realm; the others look about at random
+			float yaw = throne
+				? (float)(Mth.atan2(seat.getZ() - at.getZ(), seat.getX() - at.getX()) * Mth.RAD_TO_DEG) - 90.0F
+				: level.getRandom().nextFloat() * 360.0F;
+			golem.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+			golem.setYHeadRot(yaw);
+			golem.setYBodyRot(yaw);
 			if (!level.noCollision(golem)) {
 				continue;
 			}
 			level.addFreshEntity(golem);
 			if (throne) {
 				// a realm's throne golem kneels by the seat as its throne, and stays one
-				golem.setYBodyRot(level.getRandom().nextFloat() * 360.0F);
 				golem.setThrone(true);
 			}
 			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.5);
