@@ -13,5 +13,13 @@
   the castle, as a town's seat); near a kingdom with fewer than 2 fiefdoms, that kingdom's fiefdom; else a village allied
   to the nearest kingdom. Its pieces are held from the builders' tearing down, and the barracks and homes count as
   built, so the builders grow the town outward from there. Epic towns still found kingdoms as before.
+- **Epic towns the most common village** (Andy: "can you make epic towns spawn the most often?"): each Epic town may
+  stand on all the dry land of its kind, not just its biome tag (`EpicTowns.lands`, `StructureBiomesMixin`): forests,
+  meadows, jungles and swamps take the plains town, badlands the desert's, snowy groves and taiga the snowy one; no sea,
+  rivers, beaches, peaks and slopes, mushroom islands or caves. In the shared village pool each weighs 30 against the
+  other mods' 1-5, so where their villages also suit the land an Epic town is still drawn about two times in three.
+  Dev server with Epic, Towns and Towers, Repurposed Structures and Dungeons and Taverns, 169 /locate points on one seed:
+  Epic towns were 32 of 85 land villages before, 62 of 84 after. Ocean villages (80, Towns and Towers' and Repurposed
+  Structures') are unchanged.
 - `Buildings.Kit.wild` (a kit before any settlement stands), `GrimSites.foundFief` takes its announcement.
 - New worlds/terrain only. Dev server (with ATi): compounds generate in plains/forest (marble chateau) and desert (Catalonian castle), every piece in place, bell at the square. Founding (needs a player) not tried; not played.

@@ -40,6 +40,11 @@ public final class SharedPools {
 		return Seats.village(s) || s.unwrapKey().map(k -> k.identifier().getPath().toLowerCase(Locale.ROOT).contains("village")).orElse(false);
 	}
 
+	/** One of the five Epic towns, which outweigh every other village in the pool ({@link EpicTowns#POOL_WEIGHT}). */
+	static boolean epicTown(Holder<Structure> s) {
+		return s.unwrapKey().map(k -> EpicTowns.TOWNS.contains(k.identifier().toString())).orElse(false);
+	}
+
 	/**
 	 * A pillager outpost, vanilla's or a structure mod's (by id): Repurposed Structures names its own just
 	 * {@code outpost_badlands} and the like.
@@ -68,7 +73,7 @@ public final class SharedPools {
 		for (Holder<StructureSet> h : group) {
 			for (StructureSet.StructureSelectionEntry e : h.value().structures()) {
 				if (all.stream().noneMatch(a -> a.structure().equals(e.structure()))) {
-					all.add(e);
+					all.add(lead.equals(VILLAGES) && epicTown(e.structure()) ? new StructureSet.StructureSelectionEntry(e.structure(), EpicTowns.POOL_WEIGHT) : e);
 				}
 			}
 		}
