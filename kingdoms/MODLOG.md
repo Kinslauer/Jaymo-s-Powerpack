@@ -14355,3 +14355,9 @@ Built; not played.
 ## 0.9.64 (2026-11-16): A village capital waits for its land to load too
 
 - When the story makes a village near spawn the first capital, it checked that the land round the bell was loaded with a test that is also true of land still only queued to load. Raising the town, or a castle beside it, could then generate ground on the server thread and run into the 60 s watchdog, like the open-ground capital fixed before. The land within 13 chunks of the bell now loads in the background first, and the village keeps its full time to do so.
+
+## 0.9.65 (2026-11-16): journal map shows the land you stand in, not the Aether (#1631)
+
+- **Journal map, Last Bell map**: in a One Dimension world the stacked level's heightmaps see the whole column, so both maps drew the top block of each column: the Aether's islands (and the Cloud Sea) over the Overworld. They now read each column from the top of the band you stand in down to its floor, so the Overworld is mapped under the Aether, and the Aether once you're up in it. An ordinary world draws as before.
+- New `client/MapBand` (band floors from CustomChunks' stack layout by reflection, like Powers' AetherVeil does for Xaero's Minimap); `JournalScreen` and `BellMapScreen` use it.
+- Compile-checked; not played.
