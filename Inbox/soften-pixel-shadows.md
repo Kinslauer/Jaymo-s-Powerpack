@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: any
 from: Andy (four-mods project thread, 2026-11-15)
 asked: 2026-11-16
 claimed_by: hermes-a
 pr: 1644
 writer: hermes-writer
+text_pass: done
 ---
 
 # Soften the pixel shadows' edges
