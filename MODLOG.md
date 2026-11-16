@@ -5380,3 +5380,9 @@ Built; not played.
 - Lava had the same gap (it can wake on a life's first two deaths): "You wake far from the heat, your hair singed short. You don't know how you got out."
 - Every other cause that can wake already had its line; the void and beheading never wake, so they need none.
 - Built; not played.
+
+## 0.24.26 (2026-11-16): ghosts seen only by the attuned, wispy tails (#1633)
+
+- **Who sees the dead**: a player's ghost (out of their body, or waiting in Limbo; `PlayerGhost`) is sent only to its owner and to attuned players and Death Sorcerers (Kingdoms' `Mana.seesGhosts`, through `KingdomsCompat.seesGhosts`), and its motes the same. Without Kingdoms everyone sees it.
+- **Wispy tail**: the ghost has no legs; the same tapering 8-link tail as the grave ghost hangs from its waist, curled and wavering, and streams out behind as it drifts (`PlayerGhostRenderer`).
+- Built; not played.

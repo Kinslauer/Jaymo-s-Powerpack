@@ -83,7 +83,7 @@ public final class BeastsClient {
 		look(Beasts.REVENANT, new BbMobRenderer.Look("cryptbound_revenant", REVENANT_SCALE, 0.7F, "idle", "walk", null, "death", 0.55F, 1.0F, "helm"));
 		look(Beasts.GOBLIN_SCOUT, new BbMobRenderer.Look("goblin_scout", SCOUT_SCALE, 0.3F, "idle", "walk", null, null, 0.8F, 1.0F, "head"));
 		EntityRenderers.register(Beasts.GRAVE_GHOST, context -> new BbMobRenderer<com.jaymoskingdoms.GraveGhost>(context,
-			new BbMobRenderer.Look("grave_ghost", GHOST_SCALE, 0.0F, "Idle", "none", null, null, 0.5F, 1.0F, "Head")) {
+			new BbMobRenderer.Look("grave_ghost", GHOST_SCALE, 0.0F, "Idle", "none", null, null, 0.5F, 1.0F, "Head").withExtra(new GraveGhostTail())) {
 			@Override
 			protected net.minecraft.client.renderer.rendertype.RenderType getRenderType(BbMobRenderer.State state, boolean bodyVisible, boolean translucent,
 				boolean glowing) {

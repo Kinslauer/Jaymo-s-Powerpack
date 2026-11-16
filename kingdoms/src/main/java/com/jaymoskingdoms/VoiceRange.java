@@ -140,7 +140,10 @@ public final class VoiceRange implements VoicechatPlugin {
 		}
 	}
 
-	/** Someone speaks into their microphone: a ghost's words leave from its ghost, and ghosts near a speaker hear them. */
+	/**
+	 * Someone speaks into their microphone: a ghost's words leave from its ghost, heard only by those who can see the dead,
+	 * and ghosts near a speaker hear them.
+	 */
 	private static void spoken(MicrophonePacketEvent event) {
 		VoicechatConnection from = event.getSenderConnection();
 		MicrophonePacket packet = event.getPacket();
@@ -186,14 +189,15 @@ public final class VoiceRange implements VoicechatPlugin {
 		sent.add(who);
 		// those whose ears are near: other ghosts by their ghosts, the rest by their bodies
 		for (Map.Entry<UUID, Vec3> entry : ghosts.entrySet()) {
-			if (sent.add(entry.getKey()) && near(entry.getValue(), at, range)) {
+			if (sent.add(entry.getKey()) && VoiceMasks.hearsGhosts(entry.getKey()) && near(entry.getValue(), at, range)) {
 				VoicechatConnection to = api.getConnectionOf(entry.getKey());
 				if (to != null && to.getPlayer().getServerLevel().getServerLevel() == level.getServerLevel()) {
 					api.sendLocationalSoundPacketTo(to, sound);
 				}
 			}
 		}
-		for (ServerPlayer near : api.getPlayersInRange(level, at, range, player -> !sent.contains(player.getUuid()))) {
+		// (only those who can see the dead hear one)
+		for (ServerPlayer near : api.getPlayersInRange(level, at, range, player -> !sent.contains(player.getUuid()) && VoiceMasks.hearsGhosts(player.getUuid()))) {
 			VoicechatConnection to = api.getConnectionOf(near.getUuid());
 			if (to != null) {
 				api.sendLocationalSoundPacketTo(to, sound);
