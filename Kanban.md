@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:48). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · open
 
 
 ## Being built
 
-- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · claimed
 
 
 ## In review
