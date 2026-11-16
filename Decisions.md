@@ -655,3 +655,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-15 (Andy, proving-grounds PR #1620): "players who fall should enter a spectate mode". A player who falls on a proving ground becomes a spectator there until the fight ends, then goes home with their old game mode.
 
 - 2026-11-15 (Andy): Fall Hall by PaleoTech is CC-BY, so the manor ships cut into Kingdoms as a structure of our own, with credit to PaleoTech, the licence named and our changes noted (fh-cut takes the "shipped in Kingdoms" route; no download on first use).
+- 2026-11-16 (old home cell thread): ATi's old home cell is a blighted smith's keeping cell; lore approved as written. Cure him asleep and he wakes not believing it was you (no reward); break the light first and cure him awake for armour (iron, or diamond if you bring them).
