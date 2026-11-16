@@ -498,7 +498,8 @@ public final class Scavengers {
 		@Override
 		public void tick() {
 			giveUp--;
-			if (pile == null) {
+			// (the AI ticks a goal again before asking canContinueToUse: the pile may be gone, eaten by another or washed away)
+			if (pile == null || !isPile(pile)) {
 				return;
 			}
 			mob.getLookControl().setLookAt(pile.getX() + 0.5, pile.getY() + 0.1, pile.getZ() + 0.5, 60.0F, 60.0F);
