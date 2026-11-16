@@ -15,15 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * In a One Dimension world CustomChunks runs a chunk's natural spawning once for each band (the Aether, the Overworld, the
- * Nether, ...). A band with no player near the chunk is skipped: vanilla spawns mobs only for players within
- * {@link #REACH} blocks, and those it made further off despawned at once. Every band's pass looked up biomes, ground and
- * structures for nothing, and the Deck server froze 34 s behind as a player joined (2026-11-16 5:57 PM, a profile: 61% of
- * the server thread in those passes).
+ * Nether, ...). A band with no player near the chunk is skipped, as separate dimensions would be: hostile mobs made there
+ * despawned at once, and animals piled up in lands nobody was in. Every band's pass looked up biomes, ground and
+ * structures, and the Deck server froze 34 s behind as a player joined (2026-11-16 5:57 PM, a profile: 61% of the server
+ * thread in those passes).
  */
 @Mixin(NaturalSpawner.class)
 abstract class BandSpawnNearPlayersMixin {
-	/** Vanilla's despawn distance: no mob is kept further than this from every player. */
-	private static final int REACH = 128;
+	/** Vanilla's despawn distance (128), plus the chunk's half-width and a spawn group's walk, measured from its middle. */
+	private static final int REACH = 128 + 16;
 
 	@Inject(method = "spawnForChunk", at = @At("HEAD"), cancellable = true)
 	private static void jaymospowers$onlyBandsWithPlayers(ServerLevel level, LevelChunk chunk, NaturalSpawner.SpawnState state,
