@@ -158,7 +158,8 @@
       "goal": "Collect what the smith made you",
       "say": [
         "There. Try it on. If it pinches, it's your fault for growing.",
-        "I keep the old rite over everything I make, the same words that kept me. It won't rust on you."
+        "I keep the old rite over everything I make, the same words that kept me. It won't rust on you.",
+        "The forge is lit again. Come back when you need more. You'll pay like anyone else, but you'll get a master's work."
       ],
       "then": {
         "?mark:keeping_diamond_helmet": "end:diamond_helmet",
@@ -192,7 +193,7 @@
       "text": "{giver} woke well and never believed I was the one who cured him. I got nothing for it but the walk."
     },
     "waived": {
-      "text": "{giver} wanted to make me something for the cure. I told him to get his strength back first.",
+      "text": "{giver} wanted to make me something for the cure. I told him to get his strength back first. His forge is lit again, and he sells a master's work at the old home.",
       "reward": {
         "hearts": 15
       }

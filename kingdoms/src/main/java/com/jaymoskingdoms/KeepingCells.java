@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -24,9 +25,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TrapDoorBlock;
@@ -35,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.mojang.serialization.Codec;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -53,6 +60,10 @@ import org.jspecify.annotations.Nullable;
  * tale goes on to his thanks. Cured asleep (Andy: "whenever he wakes he doesnt know it was you and wont believe you when you
  * say. so you get nothing"), he sleeps on until the light is broken, and wakes well with nobody to thank.</li>
  * <li><b>Turned</b>: nobody cured him in his day; he rises as one of the dead ({@link BlightSpread}) and the tale ends so.</li>
+ * <li><b>Master smith</b> (Andy: "add it", the master smith trader of the tale's draft): he sells nothing while he's kept, sick or
+ * unthanked (an old home's smith comes with a master weaponsmith's stall; it's taken off him). Once a player he knows cured him
+ * has seen the tale through to his thanks ({@link #ended}), he's a master armourer and sells his own stall ({@link #wares}) to
+ * anyone at the old home, stocked fresh each day. Cured in his sleep, he never is: nobody earned it.</li>
  * </ul>
  */
 public final class KeepingCells {
@@ -80,9 +91,22 @@ public final class KeepingCells {
 	/** Set for good on an old home's smith once he has been laid under his keeping. */
 	static final String SMITH_TAG = "jaymoskingdoms.keeping_smith";
 
+	/** The master smith's stall: uses of each piece a day (iron and the rest; diamond), his experience for a sale, the price rise. */
+	static final int USES = 12, DIAMOND_USES = 3, XP = 10;
+	static final float PRICE_MULT = 0.05F;
+	/** What he sells, in emeralds: iron (helmet, chestplate, leggings, boots), chainmail, diamond, a shield. */
+	static final int IRON_HELMET = 5, IRON_CHESTPLATE = 9, IRON_LEGGINGS = 7, IRON_BOOTS = 4;
+	static final int CHAIN_HELMET = 1, CHAIN_CHESTPLATE = 4, CHAIN_LEGGINGS = 3, CHAIN_BOOTS = 1;
+	static final int DIAMOND_HELMET = 13, DIAMOND_CHESTPLATE = 21, DIAMOND_LEGGINGS = 19, DIAMOND_BOOTS = 13, SHIELD = 5;
+	/** What he buys for an emerald: coal, iron ingots, a bucket of lava, a diamond. */
+	static final int BUYS_COAL = 15, BUYS_IRON = 4, BUYS_LAVA = 1, BUYS_DIAMOND = 1;
+
 	/** On a kept smith: where his keeping light burns. Persistent. */
 	static final AttachmentType<BlockPos> KEPT = AttachmentRegistry.create(JaymosKingdoms.id("keeping"),
 		builder -> builder.persistent(BlockPos.CODEC));
+	/** On an old home's smith once he's a master smith: the day his stall was last stocked. Persistent. */
+	static final AttachmentType<Long> MASTER = AttachmentRegistry.create(JaymosKingdoms.id("keeping_master"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** Villagers just loaded, to look at on the next tick. */
 	private static final Set<Villager> FRESH = new HashSet<>();
@@ -95,6 +119,10 @@ public final class KeepingCells {
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Villager v) {
+				if (v.entityTags().contains(SMITH_TAG) && !v.hasAttached(MASTER)) {
+					// (an empty stall isn't saved, and the game would give him one again)
+					v.setOffers(new MerchantOffers());
+				}
 				if (v.hasAttached(KEPT)) {
 					KEEPING.add(v);
 				} else if (!v.entityTags().contains(LOOKED_TAG)) {
@@ -111,7 +139,12 @@ public final class KeepingCells {
 		ServerTickEvents.END_SERVER_TICK.register(KeepingCells::tick);
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp)
-				|| !(world instanceof ServerLevel level) || !(entity instanceof Villager v) || !v.hasAttached(KEPT)) {
+				|| !(world instanceof ServerLevel level) || !(entity instanceof Villager v) || !v.entityTags().contains(SMITH_TAG)) {
+				return InteractionResult.PASS;
+			}
+			if (!v.hasAttached(KEPT)) {
+				// (awake: his stall, if he keeps one now, before his menu opens)
+				stall(level, v);
 				return InteractionResult.PASS;
 			}
 			return used(level, sp, v);
@@ -181,6 +214,7 @@ public final class KeepingCells {
 		v.setAttached(HollowBlight.BLIGHT, new HollowBlight.Blight(blight.look(), blight.line(), since, blight.told(), false, 0L, 0L));
 		v.setAttached(KEPT, light);
 		v.addTag(SMITH_TAG);
+		v.setOffers(new MerchantOffers());
 		v.setPersistenceRequired();
 		v.setNoAi(true);
 		v.startSleeping(bed);
@@ -344,6 +378,75 @@ public final class KeepingCells {
 		}
 		Vec3 at = new Vec3(p.getX() + 0.5, top, p.getZ() + 0.5);
 		return level.noCollision(v, v.getDimensions(Pose.STANDING).makeBoundingBox(at)) ? at : null;
+	}
+
+	// ---- the master smith ----------------------------------------------------------------------------------------------
+
+	/**
+	 * (Tales) {@code player}'s run of a tale about {@code v} ended with {@code ending}. The Keeping seen through to his thanks
+	 * (any ending but the unbelieving one) makes him a master smith.
+	 */
+	static void ended(ServerLevel level, Villager v, String taleId, String ending) {
+		if (!taleId.equals(TALE) || ending.equals("unbelieved") || !v.entityTags().contains(SMITH_TAG) || v.hasAttached(MASTER)
+			|| v.hasAttached(KEPT) || HollowBlight.blighted(v)) {
+			return;
+		}
+		v.setVillagerData(v.getVillagerData().withProfession(BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.ARMORER))
+			.withLevel(net.minecraft.world.entity.npc.villager.VillagerData.MAX_VILLAGER_LEVEL));
+		// (experience, so the game never takes his trade off him for want of a job site)
+		v.setVillagerXp(Math.max(v.getVillagerXp(), net.minecraft.world.entity.npc.villager.VillagerData.getMinXpPerLevel(
+			net.minecraft.world.entity.npc.villager.VillagerData.MAX_VILLAGER_LEVEL)));
+		v.setAttached(MASTER, -1L);
+		stall(level, v);
+		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ANVIL_USE, SoundSource.NEUTRAL, 0.6F, 1.1F);
+		JaymosKingdoms.LOGGER.info("An old home's smith ({}) keeps a master's stall again", v.getName().getString());
+	}
+
+	/** An awake smith's stall: none until he's a master; a master's stocked fresh each day. */
+	private static void stall(ServerLevel level, Villager v) {
+		Long stocked = v.getAttached(MASTER);
+		if (stocked == null) {
+			if (!v.getOffers().isEmpty()) {
+				v.setOffers(new MerchantOffers());
+			}
+			return;
+		}
+		long day = level.getGameTime() / 24000L;
+		if (stocked != day || v.getOffers().isEmpty()) {
+			v.setAttached(MASTER, day);
+			v.setOffers(wares());
+		}
+	}
+
+	/** The master smith's stall, in emeralds: armour in iron, chain and diamond, a shield, and what a forge burns and works. */
+	static MerchantOffers wares() {
+		MerchantOffers offers = new MerchantOffers();
+		buy(offers, Items.COAL, BUYS_COAL);
+		buy(offers, Items.IRON_INGOT, BUYS_IRON);
+		buy(offers, Items.LAVA_BUCKET, BUYS_LAVA);
+		buy(offers, Items.DIAMOND, BUYS_DIAMOND);
+		sell(offers, IRON_HELMET, Items.IRON_HELMET, USES);
+		sell(offers, IRON_CHESTPLATE, Items.IRON_CHESTPLATE, USES);
+		sell(offers, IRON_LEGGINGS, Items.IRON_LEGGINGS, USES);
+		sell(offers, IRON_BOOTS, Items.IRON_BOOTS, USES);
+		sell(offers, CHAIN_HELMET, Items.CHAINMAIL_HELMET, USES);
+		sell(offers, CHAIN_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, USES);
+		sell(offers, CHAIN_LEGGINGS, Items.CHAINMAIL_LEGGINGS, USES);
+		sell(offers, CHAIN_BOOTS, Items.CHAINMAIL_BOOTS, USES);
+		sell(offers, SHIELD, Items.SHIELD, USES);
+		sell(offers, DIAMOND_HELMET, Items.DIAMOND_HELMET, DIAMOND_USES);
+		sell(offers, DIAMOND_CHESTPLATE, Items.DIAMOND_CHESTPLATE, DIAMOND_USES);
+		sell(offers, DIAMOND_LEGGINGS, Items.DIAMOND_LEGGINGS, DIAMOND_USES);
+		sell(offers, DIAMOND_BOOTS, Items.DIAMOND_BOOTS, DIAMOND_USES);
+		return offers;
+	}
+
+	private static void sell(MerchantOffers offers, int emeralds, Item item, int uses) {
+		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), new ItemStack(item), uses, XP, PRICE_MULT));
+	}
+
+	private static void buy(MerchantOffers offers, Item item, int count) {
+		offers.add(new MerchantOffer(new ItemCost(item, count), new ItemStack(Items.EMERALD), USES, XP, PRICE_MULT));
 	}
 
 	// ---- what the blight's code tells us -------------------------------------------------------------------------------

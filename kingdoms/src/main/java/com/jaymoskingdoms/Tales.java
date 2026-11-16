@@ -2076,6 +2076,10 @@ public final class Tales {
 					Convictions.belowMinimum(companion, player);
 				}
 			}
+			if (!failed && giver instanceof Villager smith) {
+				// (The Keeping's smith, thanked, keeps a master's stall)
+				KeepingCells.ended(level, smith, run.tale, id);
+			}
 			// (how it ended is the asker's to tell: who was let go)
 			String spared = run.vars.get("~spared");
 			if (spared != null) {
