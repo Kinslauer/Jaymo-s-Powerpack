@@ -429,160 +429,194 @@ public final class SunShade {
 	// ---- drawing ---------------------------------------------------------------------------------------------------------
 
 	/** Turns what the columns hold into quads: each row's run of shaded squares is one quad, a wholly shaded top is one. */
-	private static void build(int cx, int cz) {
-		float[] shade = new float[Math.max(96, shadeCount * 6 + 384)];
-		float[] wall = new float[Math.max(70, wallCount * 6 + 420)];
-		int walls = 0;
-		float[] caustic = new float[Math.max(64, causticCount * 4 + 160)];
-		int shades = 0, caustics = 0;
-		float cell = 1.0F / CELLS;
-		for (var entry : COLUMNS.long2ObjectEntrySet()) {
-			Column column = entry.getValue();
-			int x = x(entry.getLongKey()) - cx, z = z(entry.getLongKey()) - cz;
-			if (column.bed != NONE) {
-				if (caustics * 4 + 4 > caustic.length) {
-					caustic = Arrays.copyOf(caustic, caustic.length * 2);
-				}
-				int at = caustics++ * 4;
-				caustic[at] = x;
-				caustic[at + 1] = z;
-				caustic[at + 2] = column.bed + 1.0F + LIFT;
-				caustic[at + 3] = Mth.lerp((column.deep - 1) / (float)(CAUSTIC_DEPTH - 1), 1.0F, CAUSTIC_DEEP);
-				continue;
-			}
-			for (int surface = 0; surface < column.surfaces; surface++) {
-				long bits = column.shade[surface];
-				if (bits == 0L) {
+		private static void build(int cx, int cz) {
+			float[] shade = new float[Math.max(96, shadeCount * 10 + 640)];
+			float[] wall = new float[Math.max(70, wallCount * 6 + 420)];
+			int walls = 0;
+			float[] caustic = new float[Math.max(64, causticCount * 4 + 160)];
+			int shades = 0, caustics = 0;
+			float cell = 1.0F / CELLS;
+			for (var entry : COLUMNS.long2ObjectEntrySet()) {
+				Column column = entry.getValue();
+				int x = x(entry.getLongKey()) - cx, z = z(entry.getLongKey()) - cz;
+				if (column.bed != NONE) {
+					if (caustics * 4 + 4 > caustic.length) {
+						caustic = Arrays.copyOf(caustic, caustic.length * 2);
+					}
+					int at = caustics++ * 4;
+					caustic[at] = x;
+					caustic[at + 1] = z;
+					caustic[at + 2] = column.bed + 1.0F + LIFT;
+					caustic[at + 3] = Mth.lerp((column.deep - 1) / (float)(CAUSTIC_DEPTH - 1), 1.0F, CAUSTIC_DEEP);
 					continue;
 				}
-				if (shades * 6 + 6 * CELLS * CELLS / 2 > shade.length) {
-					shade = Arrays.copyOf(shade, shade.length * 2 + 6 * CELLS * CELLS);
-				}
-				float y = column.top[surface] + LIFT, sky = column.sky[surface];
-				if (bits == -1L) {
-					shades = quad(shade, shades, x, z, x + 1.0F, z + 1.0F, y, sky);
-					continue;
-				}
-				for (int row = 0; row < CELLS; row++) {
-					int line = (int)(bits >>> row * CELLS) & (1 << CELLS) - 1;
-					for (int from = 0; from < CELLS; from++) {
-						if ((line >> from & 1) == 0) {
-							continue;
-						}
-						int to = from;
-						while (to + 1 < CELLS && (line >> to + 1 & 1) != 0) {
-							to++;
-						}
-						shades = quad(shade, shades, x + from * cell, z + row * cell, x + (to + 1) * cell, z + (row + 1) * cell, y, sky);
-						from = to;
-					}
-				}
-			}
-			float face = 1.0F / WALL_CELLS;
-			for (int w = 0; w < column.walls; w++) {
-				if (walls * 6 + 6 * WALL_CELLS * WALL_CELLS > wall.length) {
-					wall = Arrays.copyOf(wall, wall.length * 2 + 6 * WALL_CELLS * WALL_CELLS);
-				}
-				float plane = x + (column.way > 0 ? 1.0F : 0.0F) + column.way * LIFT, sky = column.wallSky[w] * column.way;
-				int bits = column.wallBits[w];
-				for (int row = 0; row < WALL_CELLS; row++) {
-					for (int from = 0; from < WALL_CELLS; from++) {
-						if ((bits >> row * WALL_CELLS + from & 1) == 0) {
-							continue;
-						}
-						int to = from;
-						while (to + 1 < WALL_CELLS && (bits >> row * WALL_CELLS + to + 1 & 1) != 0) {
-							to++;
-						}
-						int at = walls++ * 6;
-						wall[at] = plane;
-						wall[at + 1] = z + from * face;
-						wall[at + 2] = z + (to + 1) * face;
-						wall[at + 3] = column.wallY[w] + row * face;
-						wall[at + 4] = column.wallY[w] + (row + 1) * face;
-						wall[at + 5] = sky;
-						from = to;
-					}
-				}
-			}
-		}
-		originX = cx;
-		originZ = cz;
-		shadeQuads = shade;
-		wallQuads = wall;
-		wallCount = walls;
-		causticQuads = caustic;
-		shadeCount = shades;
-		causticCount = caustics;
-	}
-
-	private static int quad(float[] into, int count, float x0, float z0, float x1, float z1, float y, float sky) {
-		int at = count * 6;
-		into[at + 5] = sky;
-		into[at] = x0;
-		into[at + 1] = z0;
-		into[at + 2] = x1;
-		into[at + 3] = z1;
-		into[at + 4] = y;
-		return count + 1;
-	}
-
-	private static void render(LevelRenderContext context) {
-		float show = strength, dark = shadeStrength;
-		if (dark <= 0.01F && show <= 0.01F || shadeCount == 0 && causticCount == 0 && wallCount == 0) {
-			return;
-		}
-		Vec3 camera = context.levelState().cameraRenderState.pos;
-		float bx = (float)(originX - camera.x), by = (float)-camera.y, bz = (float)(originZ - camera.z);
-		PoseStack poseStack = context.poseStack();
-		float[] shade = shadeQuads, caustic = causticQuads;
-		float[] wall = wallQuads;
-		int shades = shadeCount, caustics = causticCount, walls = wallCount;
-		if (walls > 0 && dark > 0.01F) {
-			context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityShadow(WHITE), (pose, buffer) -> {
-				for (int i = 0; i < walls; i++) {
-					int at = i * 6;
-					float x = wall[at] + bx, z0 = wall[at + 1] + bz, z1 = wall[at + 2] + bz, y0 = wall[at + 3] + by, y1 = wall[at + 4] + by;
-					float alpha = SHADE * dark * Math.abs(wall[at + 5]) * edge(x, (z0 + z1) * 0.5F);
-					if (alpha <= 0.004F) {
+				for (int surface = 0; surface < column.surfaces; surface++) {
+					long bits = column.shade[surface];
+					if (bits == 0L) {
 						continue;
 					}
-					int colour = ARGB.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F);
-					// wound so the face shows toward the light, the way it looks
-					if (wall[at + 5] > 0.0F) {
-						vertex(buffer, pose, x, y0, z0, colour, 0.0F, 0.0F);
-						vertex(buffer, pose, x, y1, z0, colour, 0.0F, 1.0F);
-						vertex(buffer, pose, x, y1, z1, colour, 1.0F, 1.0F);
-						vertex(buffer, pose, x, y0, z1, colour, 1.0F, 0.0F);
-					} else {
-						vertex(buffer, pose, x, y0, z1, colour, 1.0F, 0.0F);
-						vertex(buffer, pose, x, y1, z1, colour, 1.0F, 1.0F);
-						vertex(buffer, pose, x, y1, z0, colour, 0.0F, 1.0F);
-						vertex(buffer, pose, x, y0, z0, colour, 0.0F, 0.0F);
+					if (shades * 10 + 10 * CELLS * CELLS / 2 > shade.length) {
+						shade = Arrays.copyOf(shade, shade.length * 2 + 10 * CELLS * CELLS);
+					}
+					float y = column.top[surface] + LIFT, sky = column.sky[surface];
+					if (bits == -1L) {
+						shades = quad(shade, shades, x, z, x + 1.0F, z + 1.0F, y, sky, 1.0F, 1.0F, 1.0F, 1.0F);
+						continue;
+					}
+					for (int row = 0; row < CELLS; row++) {
+						int line = (int)(bits >>> row * CELLS) & (1 << CELLS) - 1;
+						for (int from = 0; from < CELLS; from++) {
+							if ((line >> from & 1) == 0) {
+								continue;
+							}
+							int to = from;
+							while (to + 1 < CELLS && (line >> to + 1 & 1) != 0) {
+								to++;
+							}
+							// Compute per-corner shade factors (average of 4 neighboring cells at each corner)
+							float cBL = cornerShade(bits, from, row);
+							float cTL = cornerShade(bits, from, row + 1);
+							float cTR = cornerShade(bits, to + 1, row + 1);
+							float cBR = cornerShade(bits, to + 1, row);
+							shades = quad(shade, shades, x + from * cell, z + row * cell, x + (to + 1) * cell, z + (row + 1) * cell, y, sky, cBL, cTL, cTR, cBR);
+							from = to;
+						}
 					}
 				}
-			});
-		}
-		if (shades > 0 && dark > 0.01F) {
-			context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityShadow(WHITE), (pose, buffer) -> {
-				for (int i = 0; i < shades; i++) {
-					int at = i * 6;
-					float x0 = shade[at] + bx, z0 = shade[at + 1] + bz, x1 = shade[at + 2] + bx, z1 = shade[at + 3] + bz, y = shade[at + 4] + by;
-					float alpha = SHADE * dark * shade[at + 5] * edge((x0 + x1) * 0.5F, (z0 + z1) * 0.5F);
-					if (alpha > 0.004F) {
-						flat(buffer, pose, x0, z0, x1, z1, y, ARGB.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F), 0.0F, 0.0F, 1.0F, 1.0F);
+				float face = 1.0F / WALL_CELLS;
+				for (int w = 0; w < column.walls; w++) {
+					if (walls * 6 + 6 * WALL_CELLS * WALL_CELLS > wall.length) {
+						wall = Arrays.copyOf(wall, wall.length * 2 + 6 * WALL_CELLS * WALL_CELLS);
+					}
+					float plane = x + (column.way > 0 ? 1.0F : 0.0F) + column.way * LIFT, sky = column.wallSky[w] * column.way;
+					int bits = column.wallBits[w];
+					for (int row = 0; row < WALL_CELLS; row++) {
+						for (int from = 0; from < WALL_CELLS; from++) {
+							if ((bits >> row * WALL_CELLS + from & 1) == 0) {
+								continue;
+							}
+							int to = from;
+							while (to + 1 < WALL_CELLS && (bits >> row * WALL_CELLS + to + 1 & 1) != 0) {
+								to++;
+							}
+							int at = walls++ * 6;
+							wall[at] = plane;
+							wall[at + 1] = z + from * face;
+							wall[at + 2] = z + (to + 1) * face;
+							wall[at + 3] = column.wallY[w] + row * face;
+							wall[at + 4] = column.wallY[w] + (row + 1) * face;
+							wall[at + 5] = sky;
+							from = to;
+						}
 					}
 				}
-			});
+			}
+			originX = cx;
+			originZ = cz;
+			shadeQuads = shade;
+			wallQuads = wall;
+			wallCount = walls;
+			causticQuads = caustic;
+			shadeCount = shades;
+			causticCount = caustics;
 		}
-		if (caustics > 0 && show > 0.01F) {
-			float time = (clock + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) / FRAME_TICKS;
-			int frame = Mth.floor(time);
-			float blend = time - frame;
-			caustics(context, poseStack, caustic, caustics, bx, by, bz, Math.floorMod(frame, FRAMES), CAUSTIC_LIGHT * show * (1.0F - blend));
-			caustics(context, poseStack, caustic, caustics, bx, by, bz, Math.floorMod(frame + 1, FRAMES), CAUSTIC_LIGHT * show * blend);
+
+		/** Average shade (0..1) of the four cells sharing the grid corner at (cell, row). Cells outside 0..CELLS-1 are unshaded. */
+		private static float cornerShade(long bits, int cell, int row) {
+			int count = 0;
+			int shaded = 0;
+			for (int dc = -1; dc <= 0; dc++) {
+				for (int dr = -1; dr <= 0; dr++) {
+					int c = cell + dc, r = row + dr;
+					if (c >= 0 && c < CELLS && r >= 0 && r < CELLS) {
+						count++;
+						if ((bits >> (r * CELLS + c) & 1L) != 0L) {
+							shaded++;
+						}
+					}
+				}
+			}
+			return count == 0 ? 0.0F : (float)shaded / count;
 		}
-	}
+
+		private static int quad(float[] into, int count, float x0, float z0, float x1, float z1, float y, float sky, float cBL, float cTL, float cTR, float cBR) {
+			int at = count * 10;
+			into[at] = x0;
+			into[at + 1] = z0;
+			into[at + 2] = x1;
+			into[at + 3] = z1;
+			into[at + 4] = y;
+			into[at + 5] = sky;
+			into[at + 6] = cBL;
+			into[at + 7] = cTL;
+			into[at + 8] = cTR;
+			into[at + 9] = cBR;
+			return count + 1;
+		}
+
+	private static void render(LevelRenderContext context) {
+			float show = strength, dark = shadeStrength;
+			if (dark <= 0.01F && show <= 0.01F || shadeCount == 0 && causticCount == 0 && wallCount == 0) {
+				return;
+			}
+			Vec3 camera = context.levelState().cameraRenderState.pos;
+			float bx = (float)(originX - camera.x), by = (float)-camera.y, bz = (float)(originZ - camera.z);
+			PoseStack poseStack = context.poseStack();
+			float[] shade = shadeQuads, caustic = causticQuads;
+			float[] wall = wallQuads;
+			int shades = shadeCount, caustics = causticCount, walls = wallCount;
+			if (walls > 0 && dark > 0.01F) {
+				context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityShadow(WHITE), (pose, buffer) -> {
+					for (int i = 0; i < walls; i++) {
+						int at = i * 6;
+						float x = wall[at] + bx, z0 = wall[at + 1] + bz, z1 = wall[at + 2] + bz, y0 = wall[at + 3] + by, y1 = wall[at + 4] + by;
+						float alpha = SHADE * dark * Math.abs(wall[at + 5]) * edge(x, (z0 + z1) * 0.5F);
+						if (alpha <= 0.004F) {
+							continue;
+						}
+						int colour = ARGB.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F);
+						// wound so the face shows toward the light, the way it looks
+						if (wall[at + 5] > 0.0F) {
+							vertex(buffer, pose, x, y0, z0, colour, 0.0F, 0.0F);
+							vertex(buffer, pose, x, y1, z0, colour, 0.0F, 1.0F);
+							vertex(buffer, pose, x, y1, z1, colour, 1.0F, 1.0F);
+							vertex(buffer, pose, x, y0, z1, colour, 1.0F, 0.0F);
+						} else {
+							vertex(buffer, pose, x, y0, z1, colour, 1.0F, 0.0F);
+							vertex(buffer, pose, x, y1, z1, colour, 1.0F, 1.0F);
+							vertex(buffer, pose, x, y1, z0, colour, 0.0F, 1.0F);
+							vertex(buffer, pose, x, y0, z0, colour, 0.0F, 0.0F);
+						}
+					}
+				});
+			}
+			if (shades > 0 && dark > 0.01F) {
+				context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityShadow(WHITE), (pose, buffer) -> {
+					for (int i = 0; i < shades; i++) {
+						int at = i * 10;
+						float x0 = shade[at] + bx, z0 = shade[at + 1] + bz, x1 = shade[at + 2] + bx, z1 = shade[at + 3] + bz, y = shade[at + 4] + by;
+						float sky = shade[at + 5];
+						float cBL = shade[at + 6], cTL = shade[at + 7], cTR = shade[at + 8], cBR = shade[at + 9];
+						float eBL = edge(x0, z0), eTL = edge(x0, z1), eTR = edge(x1, z1), eBR = edge(x1, z0);
+						int colourBL = ARGB.colorFromFloat(SHADE * dark * sky * cBL * eBL, 0.0F, 0.0F, 0.0F);
+						int colourTL = ARGB.colorFromFloat(SHADE * dark * sky * cTL * eTL, 0.0F, 0.0F, 0.0F);
+						int colourTR = ARGB.colorFromFloat(SHADE * dark * sky * cTR * eTR, 0.0F, 0.0F, 0.0F);
+						int colourBR = ARGB.colorFromFloat(SHADE * dark * sky * cBR * eBR, 0.0F, 0.0F, 0.0F);
+						if (colourBL <= 0x00FFFFFF && colourTL <= 0x00FFFFFF && colourTR <= 0x00FFFFFF && colourBR <= 0x00FFFFFF) {
+							continue;
+						}
+						flatSmooth(buffer, pose, x0, z0, x1, z1, y, colourBL, colourTL, colourTR, colourBR, 0.0F, 0.0F, 1.0F, 1.0F);
+					}
+				});
+			}
+			if (caustics > 0 && show > 0.01F) {
+				float time = (clock + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) / FRAME_TICKS;
+				int frame = Mth.floor(time);
+				float blend = time - frame;
+				caustics(context, poseStack, caustic, caustics, bx, by, bz, Math.floorMod(frame, FRAMES), CAUSTIC_LIGHT * show * (1.0F - blend));
+				caustics(context, poseStack, caustic, caustics, bx, by, bz, Math.floorMod(frame + 1, FRAMES), CAUSTIC_LIGHT * show * blend);
+			}
+		}
 
 	/** One frame of the web over every lit bed; it repeats every two blocks. */
 	private static void caustics(LevelRenderContext context, PoseStack poseStack, float[] quads, int count, float bx, float by, float bz, int frame, float light) {
@@ -610,15 +644,24 @@ public final class SunShade {
 	}
 
 	/** A level quad facing up, wound as the game winds an entity's shadow. */
-	private static void flat(VertexConsumer buffer, PoseStack.Pose pose, float x0, float z0, float x1, float z1, float y, int colour, float u0, float v0, float u1,
-		float v1) {
-		vertex(buffer, pose, x0, y, z0, colour, u0, v0);
-		vertex(buffer, pose, x0, y, z1, colour, u0, v1);
-		vertex(buffer, pose, x1, y, z1, colour, u1, v1);
-		vertex(buffer, pose, x1, y, z0, colour, u1, v0);
-	}
+		private static void flat(VertexConsumer buffer, PoseStack.Pose pose, float x0, float z0, float x1, float z1, float y, int colour, float u0, float v0, float u1,
+			float v1) {
+			vertex(buffer, pose, x0, y, z0, colour, u0, v0);
+			vertex(buffer, pose, x0, y, z1, colour, u0, v1);
+			vertex(buffer, pose, x1, y, z1, colour, u1, v1);
+			vertex(buffer, pose, x1, y, z0, colour, u1, v0);
+		}
 
-	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, int colour, float u, float v) {
-		buffer.addVertex(pose, x, y, z).setColor(colour).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+		/** A level quad with per-vertex colours (BL, TL, TR, BR), wound as the game winds an entity's shadow. */
+		private static void flatSmooth(VertexConsumer buffer, PoseStack.Pose pose, float x0, float z0, float x1, float z1, float y,
+			int colourBL, int colourTL, int colourTR, int colourBR, float u0, float v0, float u1, float v1) {
+			vertex(buffer, pose, x0, y, z0, colourBL, u0, v0);
+			vertex(buffer, pose, x0, y, z1, colourTL, u0, v1);
+			vertex(buffer, pose, x1, y, z1, colourTR, u1, v1);
+			vertex(buffer, pose, x1, y, z0, colourBR, u1, v0);
+		}
+
+		private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, int colour, float u, float v) {
+			buffer.addVertex(pose, x, y, z).setColor(colour).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+		}
 	}
-}
