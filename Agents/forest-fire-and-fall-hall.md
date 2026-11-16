@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: forest-fire-and-fall-hall (research only: two integration checklists for Andy)
 branch: none (research; no branch or PR until Andy says go)
 with:

@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Crash-risk review of all three mods (read-only)
 branch: claude/chunk-guard-sweep (worktree .claude/worktrees/chunk-guard-sweep)
 with: Andy

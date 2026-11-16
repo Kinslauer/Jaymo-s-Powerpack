@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: done
 task: faith-page-champion
 branch: claude/faith-page-champion
 with:
-pr:
+pr: 1643
 mods: kingdoms
 versions:
 started: 2026-11-16

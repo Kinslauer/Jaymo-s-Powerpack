@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: done
 task: burnt-corpse-ash-piles
 branch: claude/burnt-corpse-ash-piles
 with:
-pr:
+pr: 1642
 mods: kitchen
 versions: 0.6.31
 started: 2026-11-16
