@@ -14340,3 +14340,7 @@ Built; not played.
 - Old homes already in a world: a villager still alive in the cell becomes the smith when his area loads; cells whose villager already died stay empty.
 - `KeepingCells` (new), `Tales.found`/`Tales.advance`, hooks in `BlightSpread.cured`/`turn`, lang part `keeping.json`, tale `the_keeping.json`.
 - Built; not played.
+
+## 0.9.62 (2026-11-16): The first capital's castle waits for its land to load
+
+- On a new world with no village near spawn, the story raises the first capital's citadel or castle on open ground. Its site was looked for and measured on the server thread across ground that wasn't loaded yet, which was made on the spot and ran into the 60 s watchdog (the server crashed). The spot is now chosen only on loaded land, the land round it (13 chunks) loads in the background, and the castle goes up once it's there.
