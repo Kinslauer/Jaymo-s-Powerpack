@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "kingdoms/src/main/resources/data/jaymoskingdoms"
 
-STARTS = {"giver", "rumour", "book", "letter", "companion"}
+STARTS = {"giver", "rumour", "book", "letter", "companion", "found"}
 BODIES = {"villager", "fighter"}
 PLACES = {"home", "town", "other_town", "wild", "road", "ruin", "camp", "near"}
 STEP_FIELDS = {
@@ -24,6 +24,7 @@ STEP_FIELDS = {
     "bring": {"who", "item", "count", "say"},
     "slay": {"target", "count"},
     "wait": {"days", "wake", "letter"},
+    "await": {"who"},
     "defend": {"at", "waves", "foes", "stars", "failed"},
     "escort": {"who", "to", "failed"},
     "pack": {"at", "foes", "count", "stars"},
@@ -40,7 +41,7 @@ REQUIRED = {
     "bring": {"who", "item", "count"}, "slay": {"target", "count"}, "wait": {"days"}, "defend": {"at"},
     "escort": {"who", "to"}, "pack": {"at", "foes", "count"}, "build": {"at", "blocks", "count"}, "blast": {"at"},
     "stash": {"at", "item", "count"}, "lamps": {"at", "count"},
-    "rescue": {"who", "at"}, "capture": {"who", "at"},
+    "rescue": {"who", "at"}, "capture": {"who", "at"}, "await": {"who"},
 }
 # Whose kin a captive is, and what a criminal is wanted for (work.jaymoskingdoms.kin.* / crime.* in lang/parts/captures.json).
 KIN = {"daughter", "son", "sister", "brother", "wife", "husband", "mother", "father", "apprentice", "neighbour"}
@@ -413,6 +414,9 @@ def check_tale(path):
             for field in ("taunt", "plea", "mercy", "thanks"):
                 if field in step:
                     check_text(c, f"{where}.{field}", step[field], tale)
+        elif do == "await":
+            # (code carries it on: KeepingCells sets a mark and calls Tales.advance)
+            check_role(c, where, step["who"], tale)
         elif do == "bring":
             check_role(c, where, step["who"], tale)
             check_item(c, where, step["item"])
