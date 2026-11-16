@@ -31,7 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link Mask#GHOST}: Andy: "the voice changer automatically makes you sound like a ghost if you speak otherwise it
  * is muted". Out of their body, left for dead (Powers' OutOfBody), a player's voice is a ghost's: thin, hollow and far off
  * (forced). It comes from where the ghost is, not the body ({@link VoiceRange}), and a ghost whose client has no voice
- * changer to turn it ({@link #changer}) isn't heard at all.</li>
+ * changer to turn it ({@link #changer}) isn't heard at all. Only those who can see the dead hear it ({@link #hearsGhosts}).</li>
  * </ul>
  * The disguises follow the player's own on/off switch for the voice changer; the curses and the titans don't.
  * <p>The ape and the xeno forms speak with a titan's voice ({@link #titan}), and how much taller than a man each player
@@ -81,6 +81,8 @@ public final class VoiceMasks {
 	/** As of the last check, for voice chat's own thread: who speaks with a titan's voice, and how far past a man's height each tall player stands. */
 	private static final Set<UUID> TITANS = ConcurrentHashMap.newKeySet();
 	private static final Map<UUID, Float> GROWN = new ConcurrentHashMap<>();
+	/** As of the last check, for voice chat's own thread: who can hear a ghost ({@link Mana#seesGhosts}). */
+	private static final Set<UUID> SEERS = ConcurrentHashMap.newKeySet();
 
 	private VoiceMasks() {
 	}
@@ -96,6 +98,7 @@ public final class VoiceMasks {
 			GROWN.remove(handler.player.getUUID());
 			CHANGERS.remove(handler.player.getUUID());
 			GHOSTS.remove(handler.player.getUUID());
+			SEERS.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SENT.clear();
@@ -103,6 +106,7 @@ public final class VoiceMasks {
 			GROWN.clear();
 			CHANGERS.clear();
 			GHOSTS.clear();
+			SEERS.clear();
 		});
 	}
 
@@ -122,6 +126,11 @@ public final class VoiceMasks {
 				GHOSTS.put(player.getUUID(), ghost);
 			} else {
 				GHOSTS.remove(player.getUUID());
+			}
+			if (Mana.seesGhosts(player)) {
+				SEERS.add(player.getUUID());
+			} else {
+				SEERS.remove(player.getUUID());
 			}
 			float grown = player.getBbHeight() - MAN_HEIGHT;
 			if (grown > 0.0F) {
@@ -173,6 +182,11 @@ public final class VoiceMasks {
 	/** The players out of their bodies and where each one's ghost is, as of the last check. Any thread; not to be changed. */
 	static Map<UUID, net.minecraft.world.phys.Vec3> ghosts() {
 		return GHOSTS;
+	}
+
+	/** Whether {@code player} can hear a ghost speak, as of the last check. Any thread. */
+	static boolean hearsGhosts(UUID player) {
+		return SEERS.contains(player);
 	}
 
 	/** How far past a man's height {@code player} stands (blocks; 0 for anyone a man's size or less), as of the last check. Any thread. */
