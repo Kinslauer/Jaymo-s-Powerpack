@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -8,7 +8,7 @@ claimed_by: hermes-writer
 pr:
 suggested_owns: []
 writer: hermes-writer
-text_pass: 
+text_pass: none
 ---
 
 # Research sky-lands biomes for Aether
