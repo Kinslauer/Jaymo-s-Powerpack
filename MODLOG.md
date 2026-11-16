@@ -5368,3 +5368,8 @@ Built; not played.
 - **Elbows bend in Better Combat animations:** an animation's `bend` folds the arm at the elbow (SwingElbows, read through PalAccess, drawn with KneeBend), and the held item turns with the forearm (SwingElbowsHandMixin). Better Combat's own swings have no bend and look the same as before.
 - Sources: `tools/combat_trial/` (blockbench_route.py, blender_route.py, run headless with `blender -b --python`), `art/combat_trial/` (the .bbmodel, the .blend and a side-by-side sheet of the key frames). The animations were loaded and stepped with Player Animation Library outside the game.
 - Built; not played. Mobs swinging a longsword play the new moves without elbow bends (Kingdoms' PalMobAnimator doesn't read bend yet), so their first cut winds up with the sword raised forward instead of drawn back, and they have no guard pose.
+
+## 0.24.24 (2026-11-16): Ember Soak brace without the orb (#1624)
+
+- **Ember Soak** (Emberborn and Pyre bracing: sneak standing still with empty hands): the big orange ball drawn round your body, which filled your own view every time you sneaked still, is gone. A brace now shows as a heat ring running out from your feet, embers drifting up round you and a glow at each hand, the same for you and for anyone watching (`EmberSoak.bracedLook`, tuning `RING_RADIUS`, `RING_EVERY`, `HAND_SIDE`, `HAND_HEIGHT`). What the brace does is unchanged.
+- Compiled; not played.
