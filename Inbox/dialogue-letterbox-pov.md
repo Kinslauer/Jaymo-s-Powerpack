@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-16)
 asked: 2026-11-16
@@ -8,6 +8,7 @@ claimed_by: hermes-b
 pr: 1649
 suggested_owns: [kingdoms/src/client/java/com/jaymoskingdoms/client/HandshakeCinematic.java, kingdoms/src/main/java/com/jaymoskingdoms/mixin/mca/McaDialogueMixin.java, kingdoms/src/main/java/com/jaymoskingdoms/Questioning.java]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Letterbox cutscene + POV swap on NPC-player dialogue
