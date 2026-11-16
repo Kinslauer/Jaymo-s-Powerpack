@@ -389,8 +389,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/** In front of the player at about head height, in open air (above them if the way ahead is blocked). */
 	static Vec3 spotBeside(ServerPlayer player) {
-		Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
+		Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
+		gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
 		Vec3 ahead = player.position().add(look.scale(AHEAD)).add(0, HEIGHT, 0);
 		ServerLevel level = player.level();
 		if (level.noCollision(Inhabitants.YOUTH_WISP.getSpawnAABB(ahead.x, ahead.y, ahead.z))) {
@@ -497,8 +497,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				break;
 			case FOLLOW:
 				// drift in front of the asker at head height, moving with them
-				Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
+				Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
+				gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
 				Vec3 followSpot = player.position().add(look.scale(AHEAD * 0.9)).add(0, HEIGHT + 0.15, 0);
 				this.spot = followSpot;
 				Vec3 followTarget = followSpot.add(Math.sin(t / 47.0) * 0.3, Math.sin(t / 29.0) * 0.1, Math.cos(t / 53.0) * 0.3);
@@ -514,9 +514,9 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				Vec3 avoidSpot;
 				if (this.isPlayerLookingAt(player)) {
 					// slip out of the asker's gaze to its side (a fixed spot beside the asker, so it can't run off)
-					Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-					look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
-					Vec3 side = new Vec3(-look.z, 0, look.x);
+					Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
+					gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
+					Vec3 side = new Vec3(-gaze.z, 0, gaze.x);
 					if (side.dot(toPlayer) > 0) {
 						side = side.scale(-1); // stay on the side it is already on
 					}
