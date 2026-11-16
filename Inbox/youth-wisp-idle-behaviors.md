@@ -42,3 +42,4 @@ Youth the wood-wisp (a Sylvan GeckoLib mob summoned with `/youth summon`, speaks
 - Ask Tiv: should the player be able to choose a mode (e.g. `/youth summon stay`), or should Youth pick at random each time?
 
 Settled by Tiv: if the player says "youth look" or "what's that" (or similar), Youth instead describes what's on the player's crosshair. In that look mode it always floats in the player's POV instead of drifting about its spot.
+- 2026-11-16 13:43 Text pass: PR #1650 adds no new player-visible strings — YouthWisp.java changes are behavior code only, and every translatable key it references (hold/home/no_bed/bed_gone/joke/how, entity name) already exists in kingdoms/lang/parts/youth_wisp.json. Change note changes/kingdoms/youth-wisp-idle-behaviors.md checked against the code: stay/follow/avoid gaze/circle modes and 20-60 second switches match, and it follows the change-note convention. Nothing rewritten.
