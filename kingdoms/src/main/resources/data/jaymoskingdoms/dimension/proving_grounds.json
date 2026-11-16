@@ -1,0 +1,13 @@
+{
+  "type": "jaymoskingdoms:proving_grounds",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jaymoskingdoms:proving_grounds",
+      "features": false,
+      "lakes": false,
+      "layers": [{"block": "minecraft:air", "height": 1}],
+      "structure_overrides": []
+    }
+  }
+}

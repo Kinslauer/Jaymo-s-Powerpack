@@ -74,6 +74,7 @@ public final class OldAge {
 
 		OldRuins.register();
 		OldTemples.register();
+		ProvingGrounds.register();
 		RuinFolk.register();
 		JaymosKingdoms.LOGGER.debug("ruin folk attachments: {} {}", RuinFolk.FOLK, RuinFolk.PEOPLED);
 		// a broken seal wakes the tomb behind it

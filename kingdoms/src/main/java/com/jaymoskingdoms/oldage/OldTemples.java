@@ -10,6 +10,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -28,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * patron's champion down to test whoever made it: a {@link PatronChampion}, the same multi-phase fight as a temple's,
  * coming down in a beam of the patron's light in front of the altar. The altar goes out until it relights. Beaten, the
  * champion gives what any champion gives ({@code PatronChampions}), and everyone who fought it gets the patron's boon
- * ({@link Blessings#boon}). A wrong offering, or one on a cold altar, just smokes.
+ * ({@link Blessings#boon}). A wrong offering, or one on a cold altar, just smokes. Now the fight is on the
+ * {@link ProvingGrounds} (with emeralds beside the offering); the open-world fight is only for when the grounds can't hold one.
  */
 public final class OldTemples {
 	// ---- tuning ----
@@ -64,6 +66,20 @@ public final class OldTemples {
 	/** {@code sp} lays {@code stack} on the altar at {@code pos}. Whether it was taken. */
 	static boolean offer(ServerLevel level, BlockPos pos, BlockState state, ServerPlayer sp, ItemStack stack) {
 		Patron p = OldAltarBlock.patron(state);
+		if (state.getValue(OldAltarBlock.LIT) && Patrons.offeringFor(stack) == p) {
+			// (Andy: the champion is fought on the proving grounds now, the offering and emeralds its price)
+			if (!ProvingGrounds.pay(sp, false)) {
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.proving_grounds.emeralds", ProvingGrounds.EMERALDS));
+				level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.4F);
+				return false;
+			}
+			if (ProvingGrounds.start(level, pos, sp, p)) {
+				ProvingGrounds.pay(sp, true);
+				stack.consume(1, sp);
+				level.setBlockAndUpdate(pos, state.setValue(OldAltarBlock.LIT, false));
+				return true;
+			}
+		}
 		if (!state.getValue(OldAltarBlock.LIT) || Patrons.offeringFor(stack) != p
 			|| !level.getEntitiesOfClass(PatronChampion.class, new AABB(pos).inflate(40.0), e -> e.entityTags().contains(CALLED)).isEmpty()) {
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.4F);
