@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 04:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 05:01). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · for any · open
 
 
 ## Being built
 
+- [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · ☀️ Apollo · claimed
 
 
 ## In review
