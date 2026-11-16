@@ -63,4 +63,4 @@ owns:
 Compiled research report on Explosion Overhaul (Vinlanx, CurseForge Project 1296203): screenshake/concussion system (dynamic, power/distance/environment-scaled, with audio sync and visual blur), debris effects (falling block entities, dust clouds, sparks, plasma, fire clouds), and cave-in/glass-breaking mechanics. Andy wants screenshake/debris visual effects only, not the realistic explosions. A different same-named mod exists on Modrinth (perxenic-studios) but is not the one linked. No code changes made — research only. Not tested in game (research task).
 
 - 2026-11-15 Built by Claude (project thread) as PR #1616, branch claude/project-thread-kh0o85: debris chunks, ground dust, cave-in grit, flash, ringing ears + muffle + daze, 1.4x shake underground. Build passed, not played.
-- 2026-11-15 19:22 PR #1616 is merged into master; moved to Agents/Done.
+- 2026-11-16 01:06 PR #1616 is merged into master; moved to Agents/Done.
