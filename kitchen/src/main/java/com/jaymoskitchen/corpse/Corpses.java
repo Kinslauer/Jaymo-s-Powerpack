@@ -403,7 +403,7 @@ public final class Corpses {
 
 	/**
 	 * How a mob dying on its feet keels over before it goes limp ({@link KeelOver}): every mob standing on the ground,
-	 * not one thrown by the blow that killed it, already down (limp, crawling, lying, swimming), nailed to a wall,
+	 * not one killed by a blow (it falls with the blow at once), already down (limp, crawling, lying, swimming), nailed to a wall,
 	 * riding, flying or in water, and not a snake (it's already on the ground). Null for those, which fall as before.
 	 */
 	static @org.jspecify.annotations.Nullable KeelOver keelFor(LivingEntity mob) {
@@ -423,7 +423,9 @@ public final class Corpses {
 		}
 		Vec3 v = mob.getDeltaMovement();
 		double knock = Math.sqrt(v.x * v.x + v.z * v.z);
-		if (knock > KEEL_MAX_KNOCK) {
+		if (knock > KEEL_MAX_KNOCK || blowFrom(mob) != null) {
+			// Andy: killed by a blow, "they should instantly be affected by the ragdoll, so the momentum carries them in
+			// the proper direction": only a death from nowhere (fire, poison, hunger, drowning) keels over
 			return null;
 		}
 		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
@@ -434,6 +436,12 @@ public final class Corpses {
 		boolean way = knock >= KEEL_KNOCK_WAY;
 		return new KeelOver(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, way ? v.x : 0.0, way ? v.z : 0.0,
 			mob.getRandom().nextLong());
+	}
+
+	/** Where the blow that killed {@code mob} came from (the attacker, the arrow, the blast), or null for a death from nowhere. */
+	private static @org.jspecify.annotations.Nullable Vec3 blowFrom(LivingEntity mob) {
+		net.minecraft.world.damagesource.DamageSource last = mob.getLastDamageSource();
+		return last == null ? null : last.getSourcePosition();
 	}
 
 	/** (0.5.1) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
@@ -474,6 +482,13 @@ public final class Corpses {
 		if (!down) {
 			double dx = v.x, dz = v.z;
 			double length = Math.sqrt(dx * dx + dz * dz);
+			Vec3 from = blowFrom(mob);
+			if (length < 0.01 && from != null) {
+				// a blow that hardly moved it (it stood its ground, or was charging in): it still falls away from it
+				dx = mob.getX() - from.x;
+				dz = mob.getZ() - from.z;
+				length = Math.sqrt(dx * dx + dz * dz);
+			}
 			if (length < 0.01) {
 				double angle = random.nextDouble() * Math.PI * 2.0;
 				dx = Math.cos(angle);

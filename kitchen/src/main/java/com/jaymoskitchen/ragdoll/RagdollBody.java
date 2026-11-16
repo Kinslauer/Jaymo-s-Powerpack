@@ -25,6 +25,11 @@ public final class RagdollBody {
 	private static final float BOUNCE = 0.25F, BOUNCE_MIN = 0.12F;
 	/** A body lying on something loses this much of its speed each tick besides friction (limp bodies don't roll). */
 	private static final float GROUND_DAMP = 0.82F;
+	/**
+	 * Standing on the ground ({@link #nearGround}): the ground under its middle is no further down than this share of its
+	 * height (a cow's middle stands at about 0.72 of it as it sways).
+	 */
+	private static final float MIDDLE_OVER_GROUND = 1.0F;
 	/** Pulling a limb back into its cone moves the torso as much the other way (so the body never creeps along). */
 	private static final float CONE_RECOIL = 0.5F;
 	/** Passes over the sticks, cones and blocks each step: more is stiffer. */
@@ -92,14 +97,22 @@ public final class RagdollBody {
 
 	// ---------------------------------------------------------------- building
 
-	/** Standing as the living body stood: feet at the given spot, facing {@code yaw} (degrees, as Minecraft's). */
+	/**
+	 * Standing as the living body stood: feet at the given spot, facing {@code yaw} (degrees, as Minecraft's). Its
+	 * feet rest on the ground there, not sunk into it to their middles: pushed out of the ground on the first step, they
+	 * would throw the whole body up into the air.
+	 */
 	public static RagdollBody standing(RagdollRig rig, double fx, double fy, double fz, float yaw) {
 		RagdollBody body = new RagdollBody(rig);
 		float s = (float) Math.sin(Math.toRadians(yaw)), c = (float) Math.cos(Math.toRadians(yaw));
+		float lift = 0.0F;
+		for (int i = 0; i < rig.count; i++) {
+			lift = Math.max(lift, rig.radius[i] - rig.restY[i]);
+		}
 		for (int i = 0; i < rig.count; i++) {
 			float bx = rig.restX[i], bz = rig.restZ[i];
 			body.x[i] = body.px[i] = fx + bx * c - bz * s;
-			body.y[i] = body.py[i] = fy + rig.restY[i];
+			body.y[i] = body.py[i] = fy + rig.restY[i] + lift;
 			body.z[i] = body.pz[i] = fz + bx * s + bz * c;
 		}
 		return body;
@@ -423,6 +436,38 @@ public final class RagdollBody {
 	/** Something of it touched the ground (anything it could lie on) last tick. */
 	public boolean grounded() {
 		return grounded;
+	}
+
+	/**
+	 * It stands on the ground: some part of it is on the top of a block (one it was near last step), or above it by no
+	 * more than {@code share} of its own radius, and its middle is over the ground too, not out over a drop with only
+	 * a foot left on the edge. A body steered without gravity (KeelOver) stands right on the ground without ever
+	 * pressing into it, so it never counts as {@link #grounded}.
+	 */
+	public boolean nearGround(float share) {
+		double[] d = solids.data;
+		double[] m = middle();
+		boolean over = false;
+		for (int b = 0; b < solids.size && !over; b++) {
+			int o = b * 9;
+			over = m[0] >= d[o] && m[0] <= d[o + 3] && m[2] >= d[o + 2] && m[2] <= d[o + 5] && d[o + 4] <= m[1]
+				&& d[o + 4] >= m[1] - rig.height * MIDDLE_OVER_GROUND;
+		}
+		if (!over) {
+			return false;
+		}
+		for (int i = 0; i < rig.count; i++) {
+			float r = rig.radius[i];
+			double under = y[i] - r;
+			for (int b = 0; b < solids.size; b++) {
+				int o = b * 9;
+				if (x[i] >= d[o] && x[i] <= d[o + 3] && z[i] >= d[o + 2] && z[i] <= d[o + 5] && under >= d[o + 4] - r
+					&& under <= d[o + 4] + r * share) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public int nearest(double hx, double hy, double hz) {
