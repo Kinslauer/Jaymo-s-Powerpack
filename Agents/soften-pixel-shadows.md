@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: soften-pixel-shadows
 branch: claude/soften-pixel-shadows
 with:
-pr:
+pr: 1644
 mods: kingdoms
 versions:
 started: 2026-11-16
@@ -27,3 +27,10 @@ owns:
 - Edge fading at camera range (EDGE=4) should remain separate
 
 ## Done
+- Added `cornerShade()` to compute average shade of 4 neighboring cells at each grid corner
+- Expanded shadeQuads from 6 to 10 floats/quad to store 4 per-corner shade factors
+- Added `flatSmooth()` for per-vertex color quads
+- Modified `render()` to compute per-vertex alpha = SHADE * dark * sky * cornerShade * edge(vertex)
+- Change note added at `changes/kingdoms/soften-pixel-shadows.md`
+- Build and PR checks pass
+- PR #1644 opened
