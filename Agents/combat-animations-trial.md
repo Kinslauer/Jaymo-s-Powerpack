@@ -1,14 +1,17 @@
 ---
-status: working
+status: in-review
 task: Andy (Claude app, 2026-11-15): Epic Fight style combat animations for players, humanoid mobs and bosses
-branch: claude/combat-animations-trial
+branch: ccr-b68e2018-5sopgk
 with: 
-pr: 
+pr: 1618
 mods: Powers, Kingdoms
 versions: 
 started: 2026-11-15
 owns:
   - docs/CombatAnimations-Plan.md
+  - tools/combat_trial/, art/combat_trial/
+  - src/main/resources/resourcepacks/longsword_blender/, player_animations/longsword_*.json
+  - client/combat/SwingElbows.java, mixin/SwingElbowsHandMixin.java
 ---
 # combat-animations-trial
 
@@ -38,4 +41,8 @@ and the fuller write-up from source in the Claude project: "Epic Fight animation
   the longsword trial).
 
 ## Done
-Nothing built yet.
+- PR #1618: guard, first cut and heavy overhead for the longsword, keyed both ways from the same right-arm keys.
+  Blockbench (FK, Catmull-Rom) is the default; Blender (IK left hand, Bezier) is the built-in pack "longsword trial,
+  Blender moves". Elbow bends are drawn for Better Combat animations (SwingElbows). Builds and was stepped through PAL
+  outside the game; not played. Mobs get the moves with straight arms and no guard (PalMobAnimator ignores bend).
+- Waiting on Andy: play it, then pick a route.
