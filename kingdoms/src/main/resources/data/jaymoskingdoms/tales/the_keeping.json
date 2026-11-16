@@ -1,0 +1,273 @@
+{
+  "title": "The Keeping",
+  "start": {
+    "by": "found",
+    "weight": 1
+  },
+  "first": "sleeping",
+  "steps": {
+    "sleeping": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Cure the sleeping smith, or break his keeping light",
+      "journal": "Under the floor of an old home I found a smith asleep in a cell, a red light burning on the wall over him. He has the blight in him, and the light holds it.",
+      "then": {
+        "?mark:keeping_cured_asleep": "cured_asleep",
+        "?mark:keeping_woke_cured": "unbelieved",
+        "?": "his_day"
+      }
+    },
+    "cured_asleep": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Wait for the smith to wake",
+      "journal": "I gave {giver} the cure while he slept. He never stirred.",
+      "then": "unbelieved"
+    },
+    "his_day": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Cure the smith before the day is out",
+      "journal": {
+        "?mark:keeping_turned": "The light went out and nobody brought {giver} the cure in time.",
+        "?": "The light went out and {giver} woke coughing. I got the cure into him before his day was out."
+      },
+      "then": {
+        "?mark:keeping_turned": "end:turned",
+        "?": "thanks"
+      }
+    },
+    "thanks": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Speak with the smith",
+      "say": [
+        "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
+        "I'm a smith. It's all I've got that's worth giving. Tell me what you want for it and I'll make it to your measure."
+      ],
+      "replies": [
+        {
+          "say": "Iron will do.",
+          "then": "iron"
+        },
+        {
+          "say": "I've brought diamonds.",
+          "then": "diamond"
+        },
+        {
+          "say": "Nothing. Get your strength back.",
+          "then": "end:waived"
+        }
+      ]
+    },
+    "iron": {
+      "do": "talk",
+      "who": "giver",
+      "say": "Iron, then. Good honest iron, and I've a little put by. Which piece?",
+      "replies": [
+        {
+          "say": "A helmet.",
+          "then": "forging",
+          "mark": "keeping_iron_helmet",
+          "journal": "{giver} is making me a helmet in iron."
+        },
+        {
+          "say": "A chestplate.",
+          "then": "forging",
+          "mark": "keeping_iron_chestplate",
+          "journal": "{giver} is making me a chestplate in iron."
+        },
+        {
+          "say": "Leggings.",
+          "then": "forging",
+          "mark": "keeping_iron_leggings",
+          "journal": "{giver} is making me leggings in iron."
+        },
+        {
+          "say": "Boots.",
+          "then": "forging",
+          "mark": "keeping_iron_boots",
+          "journal": "{giver} is making me boots in iron."
+        }
+      ]
+    },
+    "diamond": {
+      "do": "talk",
+      "who": "giver",
+      "say": "Show me, then. Which piece? A helmet takes five, a chestplate eight, leggings seven and boots four.",
+      "replies": [
+        {
+          "say": "A helmet.",
+          "then": "forging",
+          "mark": "keeping_diamond_helmet",
+          "needs_item": {
+            "item": "minecraft:diamond",
+            "count": 5
+          },
+          "journal": "I gave {giver} 5 diamonds. He is making me a helmet from them."
+        },
+        {
+          "say": "A chestplate.",
+          "then": "forging",
+          "mark": "keeping_diamond_chestplate",
+          "needs_item": {
+            "item": "minecraft:diamond",
+            "count": 8
+          },
+          "journal": "I gave {giver} 8 diamonds. He is making me a chestplate from them."
+        },
+        {
+          "say": "Leggings.",
+          "then": "forging",
+          "mark": "keeping_diamond_leggings",
+          "needs_item": {
+            "item": "minecraft:diamond",
+            "count": 7
+          },
+          "journal": "I gave {giver} 7 diamonds. He is making me leggings from them."
+        },
+        {
+          "say": "Boots.",
+          "then": "forging",
+          "mark": "keeping_diamond_boots",
+          "needs_item": {
+            "item": "minecraft:diamond",
+            "count": 4
+          },
+          "journal": "I gave {giver} 4 diamonds. He is making me boots from them."
+        },
+        {
+          "say": "Make it iron after all.",
+          "then": "iron"
+        }
+      ]
+    },
+    "forging": {
+      "do": "wait",
+      "days": [
+        1,
+        2
+      ],
+      "wake": "giver",
+      "journal": "{giver} is back at his forge. He said to come back in a day or two.",
+      "then": "collect"
+    },
+    "collect": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Collect what the smith made you",
+      "say": [
+        "There. Try it on. If it pinches, it's your fault for growing.",
+        "I keep the old rite over everything I make, the same words that kept me. It won't rust on you."
+      ],
+      "then": {
+        "?mark:keeping_diamond_helmet": "end:diamond_helmet",
+        "?mark:keeping_diamond_chestplate": "end:diamond_chestplate",
+        "?mark:keeping_diamond_leggings": "end:diamond_leggings",
+        "?mark:keeping_diamond_boots": "end:diamond_boots",
+        "?mark:keeping_iron_helmet": "end:iron_helmet",
+        "?mark:keeping_iron_chestplate": "end:iron_chestplate",
+        "?mark:keeping_iron_leggings": "end:iron_leggings",
+        "?mark:keeping_iron_boots": "end:iron_boots",
+        "?": "end:waived"
+      }
+    },
+    "unbelieved": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Speak with the smith",
+      "say": [
+        "I've been sick, they tell me. Asleep under the floor of my own house, and I don't remember a day of it.",
+        "Cured me? In my sleep? Anyone could walk in here and say that. I'll thank you not to tell me tales. Out of my house."
+      ],
+      "then": "end:unbelieved"
+    }
+  },
+  "endings": {
+    "turned": {
+      "text": "Nobody got the cure into {giver} in time. He rose as one of the dead, like his household upstairs. The keeping only ever bought him time.",
+      "failed": true
+    },
+    "unbelieved": {
+      "text": "{giver} woke well and never believed I was the one who cured him. I got nothing for it but the walk."
+    },
+    "waived": {
+      "text": "{giver} wanted to make me something for the cure. I told him to get his strength back first.",
+      "reward": {
+        "hearts": 15
+      }
+    },
+    "diamond_helmet": {
+      "text": "{giver} forged me a helmet in diamond for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:diamond_helmet"
+        ],
+        "hearts": 10
+      }
+    },
+    "diamond_chestplate": {
+      "text": "{giver} forged me a chestplate in diamond for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:diamond_chestplate"
+        ],
+        "hearts": 10
+      }
+    },
+    "diamond_leggings": {
+      "text": "{giver} forged me leggings in diamond for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:diamond_leggings"
+        ],
+        "hearts": 10
+      }
+    },
+    "diamond_boots": {
+      "text": "{giver} forged me boots in diamond for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:diamond_boots"
+        ],
+        "hearts": 10
+      }
+    },
+    "iron_helmet": {
+      "text": "{giver} forged me a helmet in iron for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:iron_helmet"
+        ],
+        "hearts": 10
+      }
+    },
+    "iron_chestplate": {
+      "text": "{giver} forged me a chestplate in iron for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:iron_chestplate"
+        ],
+        "hearts": 10
+      }
+    },
+    "iron_leggings": {
+      "text": "{giver} forged me leggings in iron for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:iron_leggings"
+        ],
+        "hearts": 10
+      }
+    },
+    "iron_boots": {
+      "text": "{giver} forged me boots in iron for the cure, made to my measure.",
+      "reward": {
+        "items": [
+          "minecraft:iron_boots"
+        ],
+        "hearts": 10
+      }
+    }
+  }
+}

@@ -322,6 +322,7 @@ public final class BlightSpread {
 	/** A sick villager nobody cured rises as one of the dead; their kin who see it grieve. */
 	private static void turn(ServerLevel level, Villager v) {
 		SICK.remove(v);
+		KeepingCells.turned(v);
 		v.removeAttached(HollowBlight.BLIGHT);
 		Zombie raiser = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.CONVERSION);
 		if (raiser == null) {
@@ -508,8 +509,11 @@ public final class BlightSpread {
 	/** A sick villager was cured by {@code player}: they remember it, and it counts for any work curing their town's sick. */
 	static void cured(ServerLevel level, Villager v, ServerPlayer player) {
 		SICK.remove(v);
-		Recollections.remember(v, player, Recollections.Kind.CURED_BLIGHT, Component.empty());
-		McaCompat.hearts(v, player, CURED_HEARTS);
+		if (!KeepingCells.cured(level, v, player)) {
+			// (an old home's smith cured in his sleep never knows who did it)
+			Recollections.remember(v, player, Recollections.Kind.CURED_BLIGHT, Component.empty());
+			McaCompat.hearts(v, player, CURED_HEARTS);
+		}
 		QuestJobs.curedSick(level, player, v);
 	}
 }

@@ -768,6 +768,39 @@ public final class Tales {
 		return true;
 	}
 
+	/**
+	 * ({@link KeepingCells}) {@code player} found {@code giver}, the one a tale told by finding them ({@code "by": "found"}) is
+	 * about: it starts, with them as its giver. False if it isn't for this player (running or done already, or barred).
+	 */
+	static boolean found(ServerLevel level, ServerPlayer player, String taleId, LivingEntity giver) {
+		Tale tale = Tale.get(taleId);
+		if (tale == null || !tale.by().equals("found") || !fits(player, tale)) {
+			return false;
+		}
+		start(level, player, tale, giver, factionAt(level, giver.blockPosition()), giver.blockPosition(), null);
+		return true;
+	}
+
+	/**
+	 * ({@link KeepingCells}) What {@code player}'s waiting step ({@code "do": "await"}) in {@code giver}'s tale waits for has
+	 * happened: {@code mark} is set and the step goes on to its {@code then} (a switch on the mark picks the way).
+	 */
+	static void advance(ServerPlayer player, String taleId, LivingEntity giver, String mark, @Nullable LivingEntity speaker) {
+		State s = stateOrNull(player);
+		if (s == null) {
+			return;
+		}
+		String id = giver.getUUID().toString();
+		for (Run run : new ArrayList<>(s.runs)) {
+			Tale tale = run.tale.equals(taleId) && run.giver.equals(id) ? Tale.get(run.tale) : null;
+			JsonObject step = tale == null ? null : tale.step(run.step);
+			if (step != null && Tale.string(step, "do", "").equals("await")) {
+				s.marks.add(mark);
+				go(player, run, step.get("then"), speaker);
+			}
+		}
+	}
+
 	/** A new run of {@code tale} for {@code player}, asked by {@code giver} (or nobody), from {@code home}; its first step is entered. */
 	private static Run start(ServerLevel level, ServerPlayer player, Tale tale, @Nullable LivingEntity giver, int faction, BlockPos home,
 		@Nullable LivingEntity speaker) {

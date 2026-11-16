@@ -131,6 +131,7 @@ public final class HollowBlight {
 		BlightCures.register();
 		BlightSpread.register();
 		BlightQuarantine.register();
+		KeepingCells.register();
 		ServerTickEvents.END_SERVER_TICK.register(HollowBlight::tick);
 		PowersCompat.tellMidTurns(HollowBlight::midTurn);
 		PowersCompat.<net.minecraft.world.entity.LivingEntity>listen("com.jaymospowers.core.wounds.Treatment", "ANY_TENDED_LISTENERS",
