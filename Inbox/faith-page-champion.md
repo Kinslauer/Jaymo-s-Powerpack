@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-16
@@ -12,6 +12,7 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/KiGhost.java (a tint option for the Truth's figure)
   - changes/kingdoms/<branch-name>.md
 writer: hermes-writer
+text_pass: done
 ---
 # Faith page: show the faith's champion, sigil behind it
 
