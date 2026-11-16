@@ -14244,3 +14244,27 @@ Built; not played.
 - `tools/tinker_gadget_icons.py` holds the 19 pixel grids and repaints the PNGs. Don't rerun the texture step of
   `tools/gen_tinker_mimic.py`: it would put the placeholders back.
 - Checked side by side at hotbar size on light and dark backgrounds; not seen in game.
+
+## 0.9.53 (2026-11-16): offline accounts sign in before making their character
+
+- **Sign-in screen**: on a server running EasyAuth, a player on an offline (non-premium) account gets a sign-in screen
+  when they join: the password kept with their name, or a new one typed twice the first time. It sends EasyAuth's own
+  login or register command, so nobody types a slash command, and it comes down once they're in. Typed passwords show
+  as dots; Leave quits the server. Premium players never see it (EasyAuth checks them with Mojang and lets them in).
+- **Character creation waits**: a newcomer's life story, MCA's creator, heritage and class screens open only once they've
+  signed in (EasyAuth drops a client's mod packets until then, so the screens could never be answered and the player was
+  stuck until kicked). Story stasis leaves a player who hasn't signed in alone too.
+- Classes: SignIn (EasyAuth read by reflection, only when it's loaded), client/SignInScreen, mixin/mca/McaJoinDestinyMixin
+  (MCA's first-join creator held back), Classes and StoryStasis gated, McaCompat/McaBridge.launchDestiny. Lang part
+  sign-in.json. Without EasyAuth nothing changes.
+- Built; not played (needs the Deck server with EasyAuth and an offline account to try).
+
+## 0.9.54 (2026-11-16): The first capital's village search no longer stalls the server
+
+- **Fix**: on a new world, the first newcomer's join starts the search for the village the first capital rises in.
+  Where vanilla's check said a village could start, the search made that chunk on the server thread and waited for it.
+  During a Chunky pregen that wait sat behind the pregen's queue, and on the Steam Deck it ran into the 60 s watchdog
+  (8:15 PM, 2026-11-15). The chunk is now made in the background and looked at on a later tick, so the server keeps
+  ticking while it's made. The search still only takes a village that really started there.
+- `StoryGround.VillageSearch` (`step`, `started`).
+- Built; not played. A join on a fresh world wasn't tested.

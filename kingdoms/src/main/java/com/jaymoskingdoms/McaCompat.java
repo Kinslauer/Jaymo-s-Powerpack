@@ -866,4 +866,11 @@ public final class McaCompat {
 	static boolean newDestiny(ServerPlayer player) {
 		return LOADED && McaBridge.newDestiny(player);
 	}
+
+	/** Sends MCA's creator to {@code player}, as MCA does on a first join ({@link SignIn}: once they've signed in). */
+	static void launchDestiny(ServerPlayer player) {
+		if (LOADED) {
+			McaBridge.launchDestiny(player);
+		}
+	}
 }

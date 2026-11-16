@@ -5315,3 +5315,48 @@ Built; not played.
 - **Crates and command blocks**: the map's crates are refilled from our `chests/future/food|household|scrap|cache` tables, and its command blocks are removed.
 - **Old worlds** keep their Los Perrito future until an operator runs `/future swap`: the old city (and everything built or left in the future) is cleared at the next server start, and the next leap fetches Mosslorn.
 - Built; not played.
+
+## 0.24.20 (2026-11-16): Explosions: flying debris, ground dust, cave-in grit, flash, ringing ears (#1616)
+
+- Andy's pick from Explosion Overhaul (custom licence, ideas only, our own code): everything a blast does besides break blocks, for every explosion from any mod. How blocks break is unchanged.
+- **Debris**: chunks of the blocks a blast broke are flung up and out, tumble, bounce where they land and lie a few seconds before shrinking away (`client/blast/DebrisChunk`). Only blasts that broke something throw them, more the more they broke (6 plus one per 2 blocks, at most 110), and never more than 300 in a tick across all blasts.
+- **Dust**: a ring of dust in the colour of the ground (its map colour, mixed toward grey-brown) rolls out along it, and a little dark smoke rises from the middle.
+- **Cave-ins**: underground, the ceiling round a blast (twice its radius) sheds falling dust and loose grit for about 2.5 seconds.
+- **Flash**: a short warm whiteout when a blast goes off in your sight, up to 14 radii away, stronger for bigger blasts, nearer ones and when you look at it. Blocked by walls.
+- **Ringing ears**: within 1.8 radii of a blast your ears ring (new sound `blast.ring`, made by `tools/gen_blast_sounds.py ring`), other sounds start muffled (down to 25%) and come back over 2-7 seconds, and the view sways slowly (`ScreenShake#daze`, turned down with `/shake` like the rest).
+- **Screen shake** from an explosion is 1.4x harder when neither you nor the blast can see the sky.
+- Less of all the particles on Decreased/Minimal particles and in low-end mode. Client only, nothing sent. Tuning at the top of `client/blast/BlastFx`.
+- Built; not played.
+
+## 0.24.21 (2026-11-16): offline accounts can join the server (EasyAuth)
+
+- **EasyAuth 3.4.4** (MIT, NikitaCartes) joins the pack on the server only (modpack/mods, the Deck and Serverfiles; never
+  the CurseForge import or your profile). With online-mode still on, premium players are checked with Mojang as before and
+  keep their UUIDs and inventories; offline accounts join with a password kept for their name (Jaymo's Kingdoms' sign-in
+  screen). build.gradle `serverOnlyMods`.
+- **Whitelist helper** `deck/whitelist.py`: `on` whitelists everyone who has ever joined and switches the whitelist on;
+  `add <name>` adds a premium name by its Mojang UUID or an offline name by its offline UUID (`--offline` for an
+  offline friend whose name a premium account also has); `remove`, `list`. deck/README and the pbdr skill updated.
+- Built; not played.
+
+## 0.24.22 (2026-11-16): Wardrobe - clothes, costume and weapons in one screen (#1617)
+
+- **Wardrobe** (Andy: "a closet or wardrobe block. two blocks tall, like the fridge, and it should allow you to use the
+  /mca editor window, costumes and also the YDM weapon master config. combined into the same screen"). A two-blocks-tall
+  spruce wardrobe, set like a door (it faces you; either half opens it, breaking either drops it once). Crafted from
+  spruce planks round a glass pane and a chest (`PGP / P P / PCP`). Opening it opens one screen with up to three tabs:
+  - **Clothes**: MCA's editor held to its clothing page, so a wardrobe changes clothes and nothing else (Andy: "they
+    should only ever change clothes not the looks or anything else from the editor"). It follows MCA's setting for
+    `/mca editor`: operators, or any player when MCA's config allows the full or limited player editor.
+  - **Costume**: the Costume Table's designer, only once a Costume Table has gone into the wardrobe (Andy: "combine the
+    table with the wardrobe either by craft or right clicking the wardrobe with the table in hand"): use the table on a
+    set wardrobe, or craft a wardrobe with a table (shapeless). The wardrobe keeps it when broken and set again. Only a
+    wardrobe with a table counts as a table for sewing and taking off.
+  - **Weapons**: YDM's Weapon Master settings (where each carried item hangs on you); left out if Weapon Master isn't
+    installed.
+  Each tab is that mod's own screen, whole, with the same tab row over it, so nothing is squeezed; switching tabs keeps
+  what was set (the clothes are sent as MCA's Done does, Weapon Master writes its config). Door sounds on open and close.
+  The door fronts and item sprite are new art (`tools/gen_wardrobe.py`); sides and top are vanilla spruce planks.
+- Classes: `costume/WardrobeBlock` + `WardrobeClothesRule`, `client/wardrobe/WardrobeClient` + `WardrobeClothes`;
+  `CostumeNet` accepts a wardrobe with a table as a table, `CostumeScreen` shows the tabs in its header when opened from one.
+- Compiled; not played. The tab rows over MCA's clothing page and Weapon Master's panel are placed from their code, not seen.

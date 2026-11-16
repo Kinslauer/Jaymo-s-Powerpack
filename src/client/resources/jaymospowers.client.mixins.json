@@ -108,6 +108,7 @@
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
 		"BlastSoundEngineMixin",
+		"BlastDeafMixin",
 		"VariedSoundEngineMixin",
 		"SoundTuningEngineMixin",
 		"BlackoutHushSoundMixin",

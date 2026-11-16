@@ -75,6 +75,8 @@ public final class Costume {
 	/** On a costume item: its design. */
 	public static DataComponentType<CostumeDesign> DESIGN;
 	public static Block TABLE;
+	/** The Wardrobe: your looks, costumes and carried weapons in one screen ({@link WardrobeBlock}). */
+	public static Block WARDROBE;
 	public static Item COSTUME;
 
 	private Costume() {
@@ -88,6 +90,10 @@ public final class Costume {
 		TABLE = Registry.register(BuiltInRegistries.BLOCK, tableKey, new CostumeTableBlock(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).setId(tableKey)));
 		item("costume_table", p -> new BlockItem(TABLE, p.useBlockDescriptionPrefix()));
+		ResourceKey<Block> wardrobeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("wardrobe"));
+		WARDROBE = Registry.register(BuiltInRegistries.BLOCK, wardrobeKey, new WardrobeBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.PODZOL).strength(2.5F).sound(SoundType.WOOD).noOcclusion().setId(wardrobeKey)));
+		item("wardrobe", p -> new BlockItem(WARDROBE, p.useBlockDescriptionPrefix()));
 		COSTUME = item("costume", p -> new CostumeItem(p.stacksTo(1).component(DESIGN, CostumeDesign.DEFAULT)));
 		CostumeNet.init();
 		CostumeTailoring.init();
@@ -97,6 +103,7 @@ public final class Costume {
 		Rally.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);
+			output.accept(WARDROBE);
 			output.accept(CostumeItem.of(CostumeDesign.DEFAULT));
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(Commands.literal("costume")

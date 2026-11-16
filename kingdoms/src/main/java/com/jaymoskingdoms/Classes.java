@@ -242,7 +242,8 @@ public final class Classes {
 			// (0.7.57) the heritage screen ({@link Heritage}) sits between them
 			// (0.7.229) Andy: "can you choose your characters story BEFORE the MCA creator and name choosing?" a newcomer's
 			// life story opens at once; MCA's creator waits for it on their client (McaDestinyWaitMixin) and comes after
-			if (LifeStory.owed(player) || !McaCompat.destinyPending(player)) {
+			// an offline account not signed in yet can't answer any of it: it starts once they have (SignIn)
+			if (!SignIn.waitFor(player) && (LifeStory.owed(player) || !McaCompat.destinyPending(player))) {
 				next(player);
 			}
 		});

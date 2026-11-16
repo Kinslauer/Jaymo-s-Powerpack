@@ -24,6 +24,18 @@ the server stopped, open `~/jaymos-server/config/voicechat/voicechat-server.prop
 the mod) and set `voice_host=` to that tunnel's address with its port (for example `voice_host=something.ply.gg:12345`).
 Start the server again. Without this, everyone still plays, but voice says it can't connect.
 
+**Offline (non-premium) accounts:** the server runs EasyAuth, so friends without a bought Minecraft account can join
+from any launcher. Keep `online-mode=true` in `server.properties`. Premium players join exactly as before, with their
+own skins, UUIDs and inventories. An offline player picks a password for their name the first time they join (a
+sign-in screen asks for it), and gives it again after a day away or from a new address. Nobody can join under a premium
+player's name, and nobody but its owner under an offline one.
+The whitelist keeps strangers out. Once, with the server running, in `~/jaymos-server`: `./whitelist.py on` (it adds
+everyone who has played here before, then switches it on). To let a friend in: `./whitelist.py add TheirName`, typed
+exactly as their launcher spells it (an offline name's UUID depends on its capitals). If an offline friend's name also
+belongs to a premium account, use `./whitelist.py add TheirName --offline`. `./whitelist.py list` shows who's on it and
+`./whitelist.py remove TheirName` takes someone off. A friend who forgot their password: `./rcon.py auth remove TheirName`,
+then they choose a new one on their next join.
+
 **Only run one copy of the world.** Don't start the PC's server again: its world is now older than the Deck's.
 
 **Updates:** on each release, Claude sends `Deck-mods-<version>.tar.gz` in parts (`.part00`, `.part01`, ...).
