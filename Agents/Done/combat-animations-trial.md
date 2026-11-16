@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Andy (Claude app, 2026-11-15): Epic Fight style combat animations for players, humanoid mobs and bosses
 branch: ccr-b68e2018-5sopgk
 with: 
@@ -46,3 +46,4 @@ and the fuller write-up from source in the Claude project: "Epic Fight animation
   Blender moves". Elbow bends are drawn for Better Combat animations (SwingElbows). Builds and was stepped through PAL
   outside the game; not played. Mobs get the moves with straight arms and no guard (PalMobAnimator ignores bend).
 - Waiting on Andy: play it, then pick a route.
+- 2026-11-16 04:03 PR #1618 is merged into master; moved to Agents/Done.
