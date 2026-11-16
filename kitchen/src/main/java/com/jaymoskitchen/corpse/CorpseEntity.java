@@ -1622,7 +1622,6 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-
 	 * A body burned away by fire leaves a pile of ash where it lay (snow-style, 1-8 layers): a zombie a small heap,
 	 * a horse or bear more, a ghast or giant a big pile across several blocks. Lava burns leave nothing - it falls
 	 * into the lava. Only air where the body lay is taken, and the block below has to hold the pile.

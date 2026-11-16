@@ -1,6 +1,3 @@
 {
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "jaymoskitchen:block/ash_pile"
-  }
+  "parent": "jaymoskitchen:block/ash_pile_1"
 }
