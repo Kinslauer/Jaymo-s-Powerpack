@@ -5386,3 +5386,7 @@ Built; not played.
 - **Who sees the dead**: a player's ghost (out of their body, or waiting in Limbo; `PlayerGhost`) is sent only to its owner and to attuned players and Death Sorcerers (Kingdoms' `Mana.seesGhosts`, through `KingdomsCompat.seesGhosts`), and its motes the same. Without Kingdoms everyone sees it.
 - **Wispy tail**: the ghost has no legs; the same tapering 8-link tail as the grave ghost hangs from its waist, curled and wavering, and streams out behind as it drifts (`PlayerGhostRenderer`).
 - Built; not played.
+
+## 0.24.27 (2026-11-16): Mirage face no longer risks a crash with Cube Animals
+
+- The creature a Xenoform's Mirage face shows is a stand-in never in the world, and it had no id; Cube Animals' glow check asks every drawn creature for theirs, which crashed a Kingdoms screen the same way. The stand-in now has an id of its own.

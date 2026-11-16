@@ -14382,3 +14382,7 @@ Built; not played.
 
 - **Hood flood fixed**: a fence, smuggler or night-time pickpocket of a sea-blooded shape that can't wear a helmet (or a chestplate) was put in the Scoundrel's wrappings every 5 seconds by `FrontierWear`'s sweep, and `SeaBodies` shed the piece at their feet every 5 seconds, so a fresh hood (and coat) piled up on the floor each round. New `SeaBodies.fits` is asked first: `FrontierWear.wear` (scoundrel wrappings, a farmer's or carter's hat and coat, a fletcher's mantle, a wizard's garb) and MCA's armour routine (`McaEquipmentMixin`: a guard's or archer's issued helm and breastplate, made fresh each round) no longer put on what the body can't wear. Legs and boots still go on. Hoods already dropped despawn as normal.
 - Built; not played.
+
+## 0.9.69 (2026-11-16): Life story screen no longer crashes drawing a realm's people
+
+- The realm cards in the life story drew a person of each realm who was never in the world and had no id. Cube Animals' glow check asked for it, and the game crashed (Jungxxv, 2026-11-16). The figure now has an id of its own.
