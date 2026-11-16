@@ -14368,3 +14368,12 @@ Built; not played.
 - A ghost's voice (out of the body or in Limbo, Simple Voice Chat) is heard only by those who can see the dead (`VoiceMasks.hearsGhosts`, `VoiceRange`).
 - **Wispy tail** ("the ghosts should have wispy tails like wisp"): the grave ghost's legs are gone; an 8-link tail tapers from the waist, fading toward the tip, curled back a little and wavering (`GraveGhostTail`, model rebuilt by `tools/gen_ghost_tail.py`).
 - Built; not played.
+
+## 0.9.67 (2026-11-16): speakeasy hatch fixed: everyone can climb out (#1634)
+
+- **The hatch is a rung again**: the den's spruce hatch faced away from its ladder, and an open trapdoor over a ladder only counts as the ladder's last rung when it faces the same way. So the ladder stopped a block short of the top and nobody, player or villager, could climb out. New dens face it right, and every den already dug is turned right the next time it loads (`Speakeasy.fitHatch`); the iron hatch a raid nails down faces the same way.
+- **Nothing down there lures townsfolk**: the den's barrels were fishermen's work sites (and a pit bell a meeting place), so villagers in town took them, walked to them, fell down the shaft and stayed. The den's rooms now keep no work sites, and anyone moved out forgets one they had down there (`Speakeasy.clearWorkSites`, `Underworld.forgetDen`).
+- **Strangers are put out**: before, only villagers stuck on the ladder were moved. Now any villager or townsman who isn't one of the den's hands and is found in the room or pit for 6 s, with no player down there, is put out beside the hatch; one on the ladder is put out after 4 s. This also runs while a den is shut after a raid (`Underworld.keepHome`).
+- **The hatch falls shut** once no player is within 6 blocks of it or below, so it isn't left gaping for people to walk into.
+- **Nobody is nailed in**: a den shut after a raid keeps a wooden hatch while a player is down in it or on its ladder, and gets its iron one once they're out (`DenRaids.playerBelow`).
+- Built; not played.
