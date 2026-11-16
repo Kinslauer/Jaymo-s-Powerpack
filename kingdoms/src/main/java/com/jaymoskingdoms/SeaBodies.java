@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -122,6 +123,17 @@ public final class SeaBodies {
 	private static void say(ServerLevel level, Mob mob, String kind, int lines) {
 		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.sea_body." + kind + "." + level.getRandom().nextInt(lines)), Speech.WHITE,
 			SPEECH_RANGE);
+	}
+
+	/**
+	 * Whether {@code wearer} can wear {@code stack} in {@code slot}: false for a helmet or chestplate on a head or back too
+	 * strange for it. Anything that dresses villagers over and over (a fence's wrappings, a guard's issue) asks first, or
+	 * the piece is shed at their feet and put back on again, a fresh one every few seconds.
+	 */
+	public static boolean fits(LivingEntity wearer, EquipmentSlot slot, ItemStack stack) {
+		Variant look = HeritageVariants.of(wearer);
+		Set<Variant> bars = slot == EquipmentSlot.HEAD ? NO_HELMET : slot == EquipmentSlot.CHEST ? NO_CHEST : null;
+		return look == null || bars == null || !bars.contains(look) || stack.isEmpty() || !armour(stack, slot);
 	}
 
 	/** Whether {@code stack} is traditional armour in {@code slot}: it gives armour there (or, on the back, it's an elytra). */
