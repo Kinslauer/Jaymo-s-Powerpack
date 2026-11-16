@@ -4,17 +4,17 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 02:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 03:06). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · for any · open
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · for any · open
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · for any · open
 
 
 ## Being built
 
+- [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · 🍇 Bacchus · claimed
 
 
 ## In review
