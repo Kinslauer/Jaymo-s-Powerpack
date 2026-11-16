@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 23:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 00:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · writing
 
 
 ## In review
