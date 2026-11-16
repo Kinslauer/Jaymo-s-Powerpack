@@ -1,0 +1,199 @@
+{
+ "name": "longsword_guard",
+ "author": "Jaymo's Powers",
+ "description": "Longsword (Still Water): the middle guard, breathing (Blockbench route)",
+ "emote": {
+  "isLoop": "true",
+  "returnTick": 0,
+  "beginTick": 0,
+  "endTick": 40,
+  "stopTick": 40,
+  "degrees": false,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "pitch": -0.4887
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "yaw": -0.2618
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "roll": -0.3316
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "bend": 0.0175
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "pitch": -0.0873
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "yaw": 0.1745
+    }
+   },
+   {
+    "tick": 0,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "roll": 0.6632
+    }
+   },
+   {
+    "tick": 18,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "bend": 0.0686
+    }
+   },
+   {
+    "tick": 18,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "pitch": -0.1384
+    }
+   },
+   {
+    "tick": 18,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "yaw": 0.2257
+    }
+   },
+   {
+    "tick": 19,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "pitch": -0.5234
+    }
+   },
+   {
+    "tick": 22,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "roll": 0.6462
+    }
+   },
+   {
+    "tick": 25,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "bend": 0.0629
+    }
+   },
+   {
+    "tick": 25,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "pitch": -0.1327
+    }
+   },
+   {
+    "tick": 25,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "yaw": 0.2199
+    }
+   },
+   {
+    "tick": 30,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "pitch": -0.5083
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "pitch": -0.4887
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "yaw": -0.2618
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "roll": -0.3316
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "rightArm": {
+     "bend": 0.0175
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "pitch": -0.0873
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "yaw": 0.1745
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "LINEAR",
+    "turn": 0,
+    "leftArm": {
+     "roll": 0.6632
+    }
+   }
+  ]
+ }
+}

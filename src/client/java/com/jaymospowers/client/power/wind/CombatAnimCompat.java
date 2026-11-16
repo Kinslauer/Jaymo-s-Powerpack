@@ -27,6 +27,14 @@ public final class CombatAnimCompat {
 	}
 
 	/**
+	 * How far this player's elbows (right, left; radians, + folds the forearm forward) are folded by the Better Combat
+	 * animation playing (an attack, or the weapon's held pose), or null when they aren't.
+	 */
+	public static float @Nullable [] elbows(Entity entity) {
+		return LOADED ? PalAccess.elbows(entity) : null;
+	}
+
+	/**
 	 * This render state is Player Animation Library's first-person pass: your own body drawn round the camera so the
 	 * swing shows in first person. The flight's body poses stay out of it (they'd tip the arms out of view).
 	 */

@@ -68,6 +68,7 @@
 		"MeditateModelFeatureRendererMixin",
 		"TendAvatarRendererMixin",
 		"TendModelFeatureRendererMixin",
+		"SwingElbowsHandMixin",
 		"DismemberLivingEntityRendererMixin",
 		"DismemberModelFeatureRendererMixin",
 		"DismemberGeoEntityRendererMixin",

@@ -2,7 +2,7 @@
   "attributes": {
     "range_bonus": 0.25,
     "two_handed": true,
-    "pose": "bettercombat:pose_two_handed_sword",
+    "pose": "jaymospowers:longsword_guard",
     "category": "claymore",
     "attacks": [
       {
@@ -10,7 +10,7 @@
         "damage_multiplier": 0.9,
         "angle": 150,
         "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_vertical_right",
+        "animation": "jaymospowers:longsword_first_cut",
         "swing_sound": {
           "id": "bettercombat:claymore_swing"
         }
@@ -39,8 +39,8 @@
         "hitbox": "VERTICAL_PLANE",
         "damage_multiplier": 1.2,
         "angle": 150,
-        "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_vertical_left",
+        "upswing": 0.6,
+        "animation": "jaymospowers:longsword_heavy_overhead",
         "swing_sound": {
           "id": "bettercombat:claymore_slam"
         }
