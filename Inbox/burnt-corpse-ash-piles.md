@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: any
 from: Andy (four-mods project thread, 2026-11-15)
 asked: 2026-11-16
 claimed_by: hermes-b
 pr: 1642
+writer: hermes-writer
 ---
 
 # Burnt corpses leave large ash piles
