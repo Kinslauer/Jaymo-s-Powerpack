@@ -31,3 +31,4 @@ owns:
 - Andy: "Go" on the Kingdoms pass. Branch claude/kingdoms-chunk-guards (worktree .claude/worktrees/kingdoms-chunk-guards): verifying 175 unverified Kingdoms findings in 138 files + the LifeStory/StoryGround known sites, fixing the real ones, reviewing each fix. PR #1653 (Powers) still open.
 - 2026-11-16 17:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 2026-11-16 17:48 PR #1653 is merged into master; moved to Agents/Done.
+- Andy stopped the Kingdoms pass. 13 Kingdoms files have uncommitted, partly unreviewed edits in .claude/worktrees/kingdoms-chunk-guards (branch claude/kingdoms-chunk-guards); nothing committed or pushed. Resume run: wf_738e79f9-69c. PR #1653 (Powers) still open.
