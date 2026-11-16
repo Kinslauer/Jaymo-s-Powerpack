@@ -1546,6 +1546,15 @@ A realm is founded on one creed, and the creed decides how it treats its neighbo
 
 Kingdoms come only from Epic villages. Grim keeps and citadels are fiefs or allied small villages, never kingdoms.
 
+(new) **The castle towns** (sprawling kingdoms thread, 2026-11-16; Andy picked "Seat compounds"). Not every kingdom grew
+out of a great town. Some began as a lord's castle with its first town laid round it in one go: the square with the
+bell, the garden behind the walls, the barracks for the household guard and a handful of homes for the people who
+serve there. The castles are the land's own (a marble chateau in the plains, a woodland keep in the north, a fortress
+in the jungle), and the town is built in the land's stone and wood. Such a place stands empty of monsters and its
+stores are its lord's, not a dungeon's. Far from any realm it is a kingdom's seat; within a kingdom's reach it is that
+kingdom's fiefdom, its lord sworn to the crown; where a kingdom already has its fiefs it is a village allied to it.
+Its builders grow it outward like any other town.
+
 **Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
 elders and foremen, its court wizard and sometimes a court necromancer, and its guards, archers and King's Guard. A
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
