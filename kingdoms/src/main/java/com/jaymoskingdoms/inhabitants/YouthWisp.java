@@ -53,6 +53,13 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** Its name at the front of a line, and what follows it (the question). */
 	static final java.util.regex.Pattern LEAD = java.util.regex.Pattern.compile("^[!*]?\\s*youth\\b[\\s,:!.?-]*(.*)$",
 		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/**
+	 * A follow-up while its wisp is beside you: a line that asks something ("what are these things that show when i
+	 * sneak?") needs no "youth" in it. A question mark anywhere, or one of these words first.
+	 */
+	static final java.util.regex.Pattern QUESTION = java.util.regex.Pattern.compile(
+		"^.*\\?.*$|^(what|whats|what's|how|hows|how's|why|where|when|who|which|can|could|is|are|does|do|did|should|will|would|wheres|where's)\\b.*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
 	/** A cry for help ("HELP", "help me!", "youth, help me"), which carries its crier home if a wisp is in sight. */
 	static final java.util.regex.Pattern HELP = java.util.regex.Pattern.compile("^help(\\s+me)?[\\s!.]*$", java.util.regex.Pattern.CASE_INSENSITIVE);
 	/** A wisp is in sight for a cry for help this near (blocks), in clear view and within this cosine of where they look. */
@@ -179,7 +186,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/**
 	 * A chat line someone said. A cry for help ({@link #HELP}) with a wisp in sight carries them home ({@link #carryHome}).
-	 * Otherwise, if it names Youth anywhere, their wisp comes, and the line goes in the server log as
+	 * Otherwise, if it names Youth anywhere, or it is a question ({@link #QUESTION}) while their own wisp is beside them
+	 * (a follow-up), their wisp comes, and the line goes in the server log as
 	 * {@code [youth-ask] <account name> <question>} (the words after its name when it leads, else the whole line; empty
 	 * when they only said its name). Chat here is proximity chat, which never reaches the log in vanilla's form, and shows
 	 * nicknames ("Stranger"), so this fixed line is what Hermes's listener reads. The account name is what
@@ -195,7 +203,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				return;
 			}
 		}
-		if (CALL.matcher(text).find()) {
+		// its name calls it; with its wisp already beside them, a plain question is asked of it too
+		if (CALL.matcher(text).find() || has(player) && QUESTION.matcher(text.strip()).matches()) {
 			YouthWisp wisp = summon(player);
 			if (wisp != null) {
 				wisp.lastAsked = wisp.tickCount;
