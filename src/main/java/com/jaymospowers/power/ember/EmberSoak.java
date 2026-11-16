@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
@@ -63,6 +64,10 @@ public final class EmberSoak {
 	static final float RETURN_DAMAGE = 14.0F, LAST_ATTACKER_SHARE = 0.5F;
 	static final double LAST_ATTACKER_RANGE = 12.0;
 	static final int COLOR = 0xFF8A1E, WHITE = 0xFFE9B0;
+	/** The brace's look: the heat ring's reach and how often it runs out (ticks); the hands' distance to the side and height (blocks, sneaking). */
+	static final float RING_RADIUS = 1.1F;
+	static final int RING_EVERY = 16;
+	static final double HAND_SIDE = 0.38, HAND_HEIGHT = 0.7;
 
 	/** The store, 0 to {@link #MAX}, synced to its owner for the HUD; absent when empty. */
 	public static final AttachmentType<Integer> STORE = AttachmentRegistry.create(JaymosPowers.id("ember_soak"),
@@ -186,9 +191,7 @@ public final class EmberSoak {
 			if (!live.braced) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.8F, 0.6F);
 			}
-			if (player.tickCount % 5 == 0) {
-				MagicFx.orb(level, player.position().add(0.0, 1.0, 0.0), 1.2F, COLOR, 6);
-			}
+			bracedLook(level, player);
 		} else if (live.braced && live.store >= RETURN_MIN && !player.isShiftKeyDown()) {
 			release(player, live);
 		} else if (now - live.lastBraced > LEAK_AFTER && live.store > 0.0F && player.tickCount % 20 == 0) {
@@ -203,6 +206,25 @@ public final class EmberSoak {
 			} else {
 				player.setAttached(STORE, shown);
 			}
+		}
+	}
+
+	/**
+	 * What a brace looks like: a heat ring running out from the feet, embers drifting up round the body and a glow at each
+	 * hand. Nothing drawn round the head, so the braced player's own view stays clear.
+	 */
+	private static void bracedLook(ServerLevel level, ServerPlayer player) {
+		Vec3 feet = player.position();
+		if (player.tickCount % RING_EVERY == 0) {
+			MagicFx.ring(level, feet.add(0.0, 0.05, 0.0), null, RING_RADIUS, COLOR, RING_EVERY);
+		}
+		if (player.tickCount % 4 == 0) {
+			level.sendParticles(MagicFx.mote(COLOR, 0.6F), feet.x, feet.y + 0.3, feet.z, 2, 0.35, 0.2, 0.35, 0.02);
+			float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+			double sideX = Mth.cos(yaw) * HAND_SIDE, sideZ = Mth.sin(yaw) * HAND_SIDE;
+			double handY = feet.y + HAND_HEIGHT;
+			level.sendParticles(MagicFx.mote(WHITE, 0.45F), feet.x + sideX, handY, feet.z + sideZ, 1, 0.05, 0.08, 0.05, 0.01);
+			level.sendParticles(MagicFx.mote(WHITE, 0.45F), feet.x - sideX, handY, feet.z - sideZ, 1, 0.05, 0.08, 0.05, 0.01);
 		}
 	}
 
