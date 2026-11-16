@@ -31,6 +31,10 @@ final class KiGhost {
 
 	/** The ghost standing in the box {@code x0,y0}-{@code x1,y1}, feet on its foot. */
 	static void draw(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1) {
+		draw(graphics, x0, y0, x1, y1, KI, CORE, EYES);
+	}
+
+	static void draw(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int ki, int core, int eyes) {
 		long now = System.currentTimeMillis();
 		float px = (y1 - y0) * FILL / BODY_H;
 		float cx = (x0 + x1) / 2.0F, foot = y1 - (y1 - y0) * 0.04F, top = foot - BODY_H * px;
@@ -46,7 +50,7 @@ final class KiGhost {
 		};
 		for (int layer = 0; layer < SPREAD.length; layer++) {
 			float spread = SPREAD[layer] * px / 2.0F;
-			int color = layer == SPREAD.length - 1 ? CORE : KI;
+			int color = layer == SPREAD.length - 1 ? core : ki;
 			int alpha = Math.round(255 * Math.min(1.0F, LIGHT[layer] * breath));
 			int c = ARGB.color(alpha, color);
 			for (float[] p : parts) {
@@ -57,7 +61,7 @@ final class KiGhost {
 			graphics.fillGradient(Math.round(lx), Math.round(ly), Math.round(lx + lw), Math.round(ly + lh), c, ARGB.color(0, color));
 		}
 		// the eyes
-		int eye = ARGB.color(Math.round(255 * Math.min(1.0F, 0.75F * breath)), EYES);
+		int eye = ARGB.color(Math.round(255 * Math.min(1.0F, 0.75F * breath)), eyes);
 		box(graphics, cx - 3 * px, top + 4 * px, px * 2, px, eye);
 		box(graphics, cx + 1 * px, top + 4 * px, px * 2, px, eye);
 		// wisps of ki rising off it, each on its own time and place
@@ -69,7 +73,7 @@ final class KiGhost {
 			float size = px * (1.5F - t);
 			int a = Math.round(255 * 0.5F * (1.0F - t) * Math.min(1.0F, t * 4.0F));
 			if (size > 0.5F && a > 4 && sy > y0) {
-				box(graphics, sx, sy, size, size, ARGB.color(a, i % 3 == 0 ? CORE : KI));
+				box(graphics, sx, sy, size, size, ARGB.color(a, i % 3 == 0 ? core : ki));
 			}
 		}
 	}
