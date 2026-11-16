@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-15 22:58
+updated: 2026-11-16 00:03
 ---
 # Open PRs
 
-2 open, as of 2026-11-15 22:58. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-16 00:03. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1613](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1613) Let offline accounts join the server (EasyAuth, sign-in screen, whitelist helper)
@@ -11,7 +11,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1615](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1615) Build new futures from Mosslorn (author's permission given)
-- **Branch:** `claude/project-thread-mrjo4i` · **Updated:** 2026-11-15 (today)
-- **Checks:** ⏳ 4 of 4 running
+## [#1616](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1616) Explosions: flying debris, ground dust, cave-in grit, flash, ringing ears
+- **Branch:** `claude/project-thread-kh0o85` · **Updated:** 2026-11-15 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
