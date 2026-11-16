@@ -17,16 +17,22 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
  * player's or the server's own change is never touched.
  */
 public final class HerdPreset implements PreLaunchEntrypoint {
-	/** Bump to switch neutral mobs off again. */
-	private static final String MARKER = "jaymospowers-herd-preset-v1";
-	/** Herd Mentality's own defaults, with neutral mobs off. */
+	/** Bump to switch neutral mobs off again. (v2: v1 wrote options as bare values, which Prickle refuses.) */
+	private static final String MARKER = "jaymospowers-herd-preset-v2";
+	/** Herd Mentality's own defaults, with neutral mobs off; Prickle keeps each option as {@code {"value": ...}}. */
 	private static final String DEFAULTS = """
 		{
-			"affects_neutral_mobs": false,
-			"range": 8.0
+			"affects_neutral_mobs": {
+				"value": false
+			},
+			"range": {
+				"value": 8.0
+			}
 		}
 		""";
-	private static final Pattern NEUTRAL = Pattern.compile("(\"affects_neutral_mobs\"\\s*:\\s*)true");
+	private static final Pattern NEUTRAL = Pattern.compile("(\"affects_neutral_mobs\"\\s*:\\s*\\{\\s*\"value\"\\s*:\\s*)true");
+	/** v1's file: an option as a bare value, which stopped the game starting. */
+	private static final Pattern BARE = Pattern.compile("\"affects_neutral_mobs\"\\s*:\\s*(true|false)");
 
 	@Override
 	public void onPreLaunch() {
@@ -40,7 +46,9 @@ public final class HerdPreset implements PreLaunchEntrypoint {
 		}
 		Path config = loader.getConfigDir().resolve("herdmentality.json");
 		try {
-			if (Files.exists(config)) {
+			if (Files.exists(config) && BARE.matcher(Files.readString(config)).find()) {
+				Files.writeString(config, DEFAULTS);
+			} else if (Files.exists(config)) {
 				Matcher matcher = NEUTRAL.matcher(Files.readString(config));
 				if (matcher.find()) {
 					Files.writeString(config, matcher.replaceFirst("$1false"));
