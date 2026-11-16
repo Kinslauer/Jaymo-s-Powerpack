@@ -4,10 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:55). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
