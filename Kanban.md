@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 08:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 08:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,7 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · 🍇 Bacchus · #1643 · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · ☀️ Apollo · #1644 · in-review
-- [ ] [[Agents/sensible-picks|sensible-picks]] · 💻 Odysseus · in-review
+- [ ] [[Agents/sensible-picks|sensible-picks]] · 💻 Odysseus · #1645 · in-review
 
 
 ## Needs Andy
