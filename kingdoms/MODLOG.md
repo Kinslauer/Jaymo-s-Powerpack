@@ -14296,3 +14296,9 @@ Built; not played.
 
 - The awareness eye above the crosshair and the noise and light meters beside it now fade out while the view is zoomed in (Ok Zoomer, a spyglass, a drawn bow), the way Powers' aim crosshair shrinks with the zoom: fully shown down to 0.97 of your FOV setting, gone by 0.8 (`SensesClient.ZOOM_SHOWN`, `ZOOM_GONE`). They come back as the zoom eases off.
 - Compiled; not played.
+
+## 0.9.58 (2026-11-16): throne golem faces its realm (#1625)
+
+- **Throne golem facing**: a realm's throne golem now kneels into its throne facing the realm's seat, so whoever sits in it looks over the town. It used to get a random direction, often its back to the town.
+- The client now draws a folded throne the way the server turned it (`TownGolem.tick`), instead of a body turn left over from the spawn packet, so the seat you see is the seat you sit in.
+- `Golemworks.build`, `TownGolem.tick`. Throne golems already standing keep their old facing; only new ones are turned. Not played.
