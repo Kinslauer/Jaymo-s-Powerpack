@@ -1,2 +1,0 @@
-# A capital's land loads a ring at a time
-- Raising the first capital asked for 729 chunks round it at once, all of them run as well as loaded. On a new world that was not pregenerated, the Deck fell 60 s behind and the watchdog stopped it (2026-11-16, 2:31 AM; Hedmere's founding came within a few seconds of it earlier). The usual 10 chunks round it run as before; the land past that is loaded but not run, one ring more each try once the last is there.
