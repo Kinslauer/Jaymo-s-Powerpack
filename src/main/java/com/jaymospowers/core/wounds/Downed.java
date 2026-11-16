@@ -107,6 +107,11 @@ import org.jspecify.annotations.Nullable;
  * ({@link #RISING}, drawn by {@code CrawlPose}), at {@link #RISE_HEALTH}; the {@link #HOLD_HITS}th hit meanwhile knocks
  * them back down (Kingdoms' Unflinching: more, {@link WillSkill#holdHits}), as it breaks off a revive or Second Wind's
  * eating. Too wounded, or passed out, sneak gives up as before. The crippled (off their feet, not downed) are as they were.
+ * <p>
+ * Andy (2026-11-16): "players should also stay seated when recovering to their feet, and they can recover with blacked
+ * limbs this way, it just takes longer." Sat against a wall ({@link DownedLie#satAgainst}), the wall lets even the too
+ * wounded rise, over {@link #WALL_RISE_SLOW} times as long ({@link #RISE_LENGTH}); {@code WallSit} draws them pushing up
+ * the wall to their feet, and sliding back down it if they let go.
  */
 public final class Downed {
 	/** On someone for the moment their wounds' death is let through (they gave up, or bled out): no save may turn it away. */
@@ -157,6 +162,8 @@ public final class Downed {
 	public static final float KILL_BLOW = 6.0F;
 	/** (0.18.5) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
 	public static final int RISE_TICKS = 160;
+	/** Sat against a wall too wounded to rise otherwise, the rise takes this many times as long. */
+	public static final float WALL_RISE_SLOW = 2.0F;
 	public static final float RISE_HEALTH = 0.3F;
 	/** (0.18.5) The head, body or an arm (0.18.68: not legs or feet) this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
 	public static final float TOO_HURT_FRACTION = 0.25F;
@@ -228,6 +235,9 @@ public final class Downed {
 	 */
 	public static final AttachmentType<Long> RISING = AttachmentRegistry.create(JaymosPowers.id("downed_rising"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
+	/** How long this rise takes (ticks), when it isn't {@link #RISE_TICKS} (up a wall, too wounded otherwise). Synced; not saved. */
+	public static final AttachmentType<Integer> RISE_LENGTH = AttachmentRegistry.create(JaymosPowers.id("downed_rise_ticks"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT.cast(), AttachmentSyncPredicate.all()));
 	/**
 	 * (0.18.5) Downed with an arm, leg or foot at red or worse as they fell. (0.18.68) No longer set or read (the downed
 	 * health fills every part back up to the bruise line, so the wounds screen showed yellow while this said red); only
@@ -319,7 +329,7 @@ public final class Downed {
 
 	/** (0.18.5) A downed player getting up by themselves: how far along, the hits taken, and knocked back (sneak let go first). */
 	private static final class Rise {
-		int ticks, hits;
+		int ticks, hits, length = RISE_TICKS;
 		boolean knocked;
 	}
 
@@ -635,6 +645,11 @@ public final class Downed {
 			}
 		}
 		return null;
+	}
+
+	/** How long {@code entity}'s rise takes (ticks): {@link #RISE_TICKS}, or longer up a wall ({@link #RISE_LENGTH}). */
+	public static int riseTicks(Entity entity) {
+		return entity.getAttachedOrElse(RISE_LENGTH, RISE_TICKS);
 	}
 
 	/** (0.18.5) Whether this downed player is too wounded to get up by themselves ({@link #blocksRise}). */
@@ -1264,7 +1279,8 @@ public final class Downed {
 		MASH_HELD.remove(player.getUUID());
 		MASH_LENGTH.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
-		if (!out && !tooHurt(player) && !Dismember.halved(player) && !Carry.isCarried(player) && !adrift(player)) {
+		// (Andy, 2026-11-16) sat against a wall, the wall gets even the too wounded up, slower
+		if (!out && (!tooHurt(player) || DownedLie.satAgainst(player)) && !Dismember.halved(player) && !Carry.isCarried(player) && !adrift(player)) {
 			rise(level, player, now);
 			return;
 		}
@@ -1301,8 +1317,8 @@ public final class Downed {
 	private static void rise(ServerLevel level, ServerPlayer player, long now) {
 		Rise r = RISES.get(player.getUUID());
 		if (!player.isShiftKeyDown()) {
-			if (r != null && r.ticks > 0 && !r.knocked) {
-				// (0.21.39) the body drops back down; it lands (the thud and the dust) as the drawing does
+			if (r != null && r.ticks > 0 && !r.knocked && !DownedLie.satAgainst(player)) {
+				// (0.21.39) the body drops back down (up a wall, it slides back down it instead); it lands (the thud and the dust) as the drawing does
 				SINKING.put(player.getUUID(), now + SINK_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
 			}
@@ -1332,6 +1348,12 @@ public final class Downed {
 			return;
 		}
 		if (r.ticks++ == 0) {
+			r.length = tooHurt(player) ? Math.round(RISE_TICKS * WALL_RISE_SLOW) : RISE_TICKS;
+			if (r.length != RISE_TICKS) {
+				player.setAttached(RISE_LENGTH, r.length);
+			} else if (player.hasAttached(RISE_LENGTH)) {
+				player.removeAttached(RISE_LENGTH);
+			}
 			player.setAttached(RISING, now);
 		}
 		if (r.ticks % 20 == 10) {
@@ -1339,9 +1361,9 @@ public final class Downed {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
 				0.7F + level.getRandom().nextFloat() * 0.3F);
 		}
-		if (r.ticks < RISE_TICKS) {
+		if (r.ticks < r.length) {
 			if (r.ticks % 2 == 0) {
-				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) RISE_TICKS);
+				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) r.length);
 				player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.rising"), "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
 					.withStyle(ChatFormatting.YELLOW));
 			}

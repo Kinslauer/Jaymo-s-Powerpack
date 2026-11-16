@@ -56,6 +56,8 @@ public final class DownedLie {
 	static final double PROP_REACH = 3.0, PROP_GAP = 0.02, PROP_DROP = 1.5;
 	/** Moved further than this from where they were set (blocks), they're off the wall. */
 	static final double PROP_SLIP = 0.3;
+	/** Propped this long (ticks), they are sat there: past the get-up from the floor ({@code WallSit.IN_TICKS}, 30) and the slide down (16). */
+	static final long SAT_TICKS = 34;
 
 	/**
 	 * On someone downed whom another set against a wall (carried there and set down looking at it, or dragged there and
@@ -242,6 +244,33 @@ public final class DownedLie {
 		}
 		body.setAttached(PROPPED, level.getGameTime() << 1 | (fromFloor ? 1L : 0L));
 		PROPPED_AT.put(body, body.position());
+	}
+
+	/**
+	 * The Sit key, pressed by a downed {@code player} (Andy: "the sit key should start the animation for players"): sat
+	 * against the wall beside them, they lie back down off it; otherwise, awake beside one, they get up against it from
+	 * the floor. Nothing if there's no wall.
+	 */
+	public static void sitKey(ServerPlayer player) {
+		if (player.hasAttached(Downed.RISING)) {
+			// (getting up the wall: the Sit key doesn't drop them off it)
+			return;
+		}
+		if (player.hasAttached(PROPPED)) {
+			player.removeAttached(PROPPED);
+			PROPPED_AT.remove(player);
+		} else if (!Downed.passedOut(player)) {
+			prop(player, true);
+		}
+	}
+
+	/**
+	 * Whether {@code entity} is sat against a wall by now ({@link #PROPPED}, the getting up against it or the slide down it
+	 * done, {@link #SAT_TICKS}): up it, even the too wounded can rise ({@code Downed}).
+	 */
+	public static boolean satAgainst(LivingEntity entity) {
+		Long propped = entity.getAttached(PROPPED);
+		return propped != null && entity.level().getGameTime() - (propped >> 1) >= SAT_TICKS;
 	}
 
 	/** Each server tick: a propped body that's moved off its spot, been picked up or isn't down any more is off the wall. */

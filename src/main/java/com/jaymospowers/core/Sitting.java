@@ -1,6 +1,8 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.DownedLie;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
@@ -55,7 +57,8 @@ import org.jspecify.annotations.Nullable;
  * ({@code #jaymospowers:seats}, for chairs and benches from other mods) works too, facing its own way. A seat needs two
  * blocks of room above, and holds one sitter.</li>
  * <li><b>The Sit key</b> (] by default): sits you on the seat under you or the one you look at, else on the ground, at
- * once. Pressed again while sat, it goes round the ways of sitting ({@link Meditate#POSES}).</li>
+ * once. Pressed again while sat, it goes round the ways of sitting ({@link Meditate#POSES}). Downed beside a wall, it
+ * sits you up against it ({@code DownedLie#sitKey}), and pressed again lays you back down.</li>
  * <li><b>In midair</b> (Andy: "the sit key in midair should swap the falling pose and it should remember the last you
  * chose next fall"): the Sit key goes round the falling poses instead ({@link #FALL_POSES} of them: FreefallPose's
  * styles, all but the brace for the ground, which still comes before landing). The one you land on is kept
@@ -203,6 +206,11 @@ public final class Sitting {
 
 	/** The Sit key: the next pose while sat; otherwise the seat under you or the one you look at, else the ground. */
 	private static void key(ServerPlayer player) {
+		if (Downed.isDowned(player)) {
+			// downed: up against the wall beside them, or back down off it
+			DownedLie.sitKey(player);
+			return;
+		}
 		if (Meditate.sitting(player)) {
 			Meditate.nextPose(player);
 			Meditate.State state = Meditate.of(player);
