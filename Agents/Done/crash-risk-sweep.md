@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Crash-risk review of all three mods (read-only)
 branch: claude/chunk-guard-sweep (worktree .claude/worktrees/chunk-guard-sweep)
 with: Andy
@@ -30,3 +30,4 @@ owns:
 - PR #1653 open: 25 Powers files (24 fixed + WildRoom). Built, pr_checks pass, not tested in game. Left: Karma portal search, GroundFx light, FutureStart, fireball burst reads. Still unverified: 141 sweep findings (all Kingdoms/Kitchen, some Powers); the known-sites check also flagged LifeStory.reach (no WANTED path), burningVillage box read, and StoryGround checkStructurePresence.
 - Andy: "Go" on the Kingdoms pass. Branch claude/kingdoms-chunk-guards (worktree .claude/worktrees/kingdoms-chunk-guards): verifying 175 unverified Kingdoms findings in 138 files + the LifeStory/StoryGround known sites, fixing the real ones, reviewing each fix. PR #1653 (Powers) still open.
 - 2026-11-16 17:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-16 17:48 PR #1653 is merged into master; moved to Agents/Done.

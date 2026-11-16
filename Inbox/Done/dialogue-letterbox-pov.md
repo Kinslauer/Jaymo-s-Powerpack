@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-16)
 asked: 2026-11-16
@@ -44,3 +44,4 @@ Settled by Tiv: the new system replaces MCA's dialogue UI completely. Design phi
 - 2026-11-16 12:47 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-16 12:58 Text pass: removed code-internals line from changes/kingdoms/dialogue-letterbox-pov.md (mentioned payload id, DialogueCue and HandshakeCameraMixin class names; lines 2-3 already describe what the player sees: letterbox bars, HUD clear, camera/POV swap per speaker)
 - 2026-11-16 13:01 Text pass: removed code-internals line from changes/kingdoms/dialogue-letterbox-pov.md (mentioned payload id, DialogueCue and HandshakeCameraMixin class names; lines 2-3 already describe what the player sees: letterbox bars, HUD clear, camera/POV swap per speaker)
+- 2026-11-16 17:48 PR #1649 is merged into master; moved to Inbox/Done.
