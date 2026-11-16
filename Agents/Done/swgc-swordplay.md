@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: SWGC swordplay picks (23 rows), patch 1 of 6: the armed body
 branch: claude/project-thread-4d9bz2
 with: Claude (cloud)
@@ -37,3 +37,4 @@ first pass. Patches 2-6 not started.
   in `ArmedPose`, Darktide swat; Kingdoms `forms/SpecialCuts` (wheel_cut, figure_eight, hurled_blade), bridge methods in
   `PowersCompat`, blade school arts + `ART_STANDING`. Flip lift gated by `Dodge.flipLift`. Compiled, not played.
 - 2026-11-12: patch 3 pushed (same PR): Powers `combat/BladeStyle`; Kingdoms `forms/Styles`, hooks in `Duels`, `SchooledGuards`, `FormsClient` belt HUD, lang part `style.json`.
+- 2026-11-16 07:08 PR #1341 is merged into master; moved to Agents/Done.
