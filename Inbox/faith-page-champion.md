@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-16
 thread: Reason Art project thread "Show faith champions in the life-story creator"
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/LifeStoryScreen.java (faith page preview + sigil backdrop only)
