@@ -391,6 +391,11 @@ public final class StoryGround {
 		if (!level.isPositionEntityTicking(village)) {
 			return false;
 		}
+		// the search found the village's chunk at y 0: the bell is looked for round its ground, or a town on high land (a
+		// savanna plateau at y 108) has its bell out of reach of a search that measures height too, and is never found
+		Stacked.Ground ground = Stacked.overworldGround(level);
+		village = village.atY(ground.generator().getBaseHeight(village.getX(), village.getZ(), Heightmap.Types.WORLD_SURFACE_WG, ground.heights(),
+			ground.randomState()) + ground.shift());
 		PoiManager poi = level.getPoiManager();
 		poi.ensureLoadedAndValid(level, village, BELL_SEARCH);
 		Optional<BlockPos> bell = poi.findClosest(holder -> holder.is(PoiTypes.MEETING), village, BELL_SEARCH, PoiManager.Occupancy.ANY);

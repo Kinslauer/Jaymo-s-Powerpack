@@ -125,6 +125,14 @@ final class GrandSeats {
 	private static Castle.@Nullable Keep raise(ServerLevel level, Faction kingdom, BlockPos bell, Holder.Reference<Structure> holder) {
 		String id = holder.key().identifier().toString();
 		StructureStart start = generate(level, holder, ChunkPos.containing(bell));
+		if (start == null && Stacked.overworldGround(level).generator() != level.getChunkSource().getGenerator()) {
+			// (a One Dimension world) the Overworld band's generator refused it: the level's own may not, and its heights
+			// don't matter here, since the castle is moved onto the site's floor below anyway
+			start = generate(level, holder, ChunkPos.containing(bell), new Stacked.Ground(level.getChunkSource().getGenerator(),
+				level.getChunkSource().randomState(), level, 0, level.getChunkSource().getGeneratorState()));
+			JaymosKingdoms.LOGGER.info("The {} wouldn't generate on the Overworld's own ground by {}; by the stacked world's: {}", id, bell,
+				start != null ? "yes" : "no");
+		}
 		if (start == null) {
 			JaymosKingdoms.LOGGER.info("The {} wouldn't generate by {}", id, bell);
 			return null;
@@ -181,7 +189,11 @@ final class GrandSeats {
 	static @Nullable StructureStart generate(ServerLevel level, Holder.Reference<Structure> holder, ChunkPos chunk) {
 		// (in a One Dimension world, by the Overworld band's own generator and moved into the level's heights: the level's
 		// generator would set it on the Cloud Sea's overcast, hundreds of blocks over the land it was raised for)
-		Stacked.Ground ground = Stacked.overworldGround(level);
+		return generate(level, holder, chunk, Stacked.overworldGround(level));
+	}
+
+	/** {@link #generate(ServerLevel, Holder.Reference, ChunkPos)} by {@code ground}'s generator. */
+	static @Nullable StructureStart generate(ServerLevel level, Holder.Reference<Structure> holder, ChunkPos chunk, Stacked.Ground ground) {
 		ChunkGenerator generator = ground.generator();
 		var randomState = ground.randomState();
 		try {
