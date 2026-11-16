@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: any
 from: Andy (four-mods project thread, 2026-11-15)
 asked: 2026-11-16
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 
