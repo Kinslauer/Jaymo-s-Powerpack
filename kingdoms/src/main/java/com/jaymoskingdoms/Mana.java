@@ -228,6 +228,15 @@ public final class Mana {
 		return attuned(player) || Necromancy.necromancer(player);
 	}
 
+	/**
+	 * Andy (2026-11-16): "only the attuned and death magicians should ever see the ki ghosts". Whether {@code viewer} sees
+	 * the dead who linger (the ghost at a grave, a player out of their body or waiting in Limbo) and hears what they say:
+	 * the attuned, and the Death Sorcerer, whose craft is the dead.
+	 */
+	public static boolean seesGhosts(Player viewer) {
+		return attuned(viewer) || Necromancy.necromancer(viewer);
+	}
+
 	/** A natural: a Mage or Sorcerer with mana (attuned, or a Death Sorcerer's). */
 	public static boolean natural(Player player) {
 		return hasMana(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player));

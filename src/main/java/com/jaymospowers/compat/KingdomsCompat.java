@@ -30,6 +30,9 @@ public final class KingdomsCompat {
 	private static Method knowledgeLevel;
 	private static boolean knowledgeLooked;
 
+	private static Method seesGhosts;
+	private static boolean seesGhostsLooked;
+
 	private KingdomsCompat() {
 	}
 
@@ -85,6 +88,29 @@ public final class KingdomsCompat {
 			return formsPerk != null && Boolean.TRUE.equals(formsPerk.invoke(null, player));
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return false;
+		}
+	}
+
+	/**
+	 * Whether {@code viewer} sees ghosts and hears them (Kingdoms' {@code Mana.seesGhosts}: the attuned and Death Sorcerers;
+	 * server side). True without Kingdoms: there is no attunement to lack.
+	 */
+	public static boolean seesGhosts(Player viewer) {
+		if (!LOADED || viewer == null) {
+			return true;
+		}
+		if (!seesGhostsLooked) {
+			seesGhostsLooked = true;
+			try {
+				seesGhosts = Class.forName("com.jaymoskingdoms.Mana").getMethod("seesGhosts", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				seesGhosts = null;
+			}
+		}
+		try {
+			return seesGhosts == null || Boolean.TRUE.equals(seesGhosts.invoke(null, viewer));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return true;
 		}
 	}
 

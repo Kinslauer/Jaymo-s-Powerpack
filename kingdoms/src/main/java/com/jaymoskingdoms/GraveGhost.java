@@ -49,6 +49,8 @@ import org.jspecify.annotations.Nullable;
  * by, and say a few words if spoken to (right-click). Give one a flower or a candle and it thanks you and goes for good:
  * a little experience, and a little of its settlement's good opinion. Leave it be and it simply stops coming after its
  * last night. Ghosts are never saved with the world: each night's is raised anew from the grave's record.
+ * <p>Only those who can see the dead see one ({@link Mana#seesGhosts}): to anyone else it is never there, nor its motes,
+ * so nobody else can speak to it or hear it.
  */
 public class GraveGhost extends PathfinderMob implements Acting {
 	/** How many nights after the burial it stands at its grave. */
@@ -115,7 +117,7 @@ public class GraveGhost extends PathfinderMob implements Acting {
 			if (standing != null && level.getEntity(standing) instanceof GraveGhost ghost && ghost.isAlive()) {
 				continue;
 			}
-			if (!com.jaymoskingdoms.Loaded.made(level, head) || level.getNearestPlayer(head.getX() + 0.5, head.getY(), head.getZ() + 0.5, SHOW_RANGE, false) == null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, head) || level.getNearestPlayer(head.getX() + 0.5, head.getY(), head.getZ() + 0.5, SHOW_RANGE, GraveGhost::seer) == null) {
 				continue;
 			}
 			raise(level, g);
@@ -136,7 +138,28 @@ public class GraveGhost extends PathfinderMob implements Acting {
 		ghost.setCustomName(g.name());
 		level.addFreshEntity(ghost);
 		STANDING.put(g.head(), ghost.getUUID());
-		level.sendParticles(Fx.mote(COLOR, 1.0F), ghost.getX(), ghost.getY() + 1.0, ghost.getZ(), 12, 0.25, 0.6, 0.25, 0.01);
+		motes(level, ghost, 12, 0.6, 0.01);
+	}
+
+	/** Someone who can see it. */
+	private static boolean seer(Entity entity) {
+		return entity instanceof Player player && Mana.seesGhosts(player);
+	}
+
+	/** Its motes, shown only to those who can see it. */
+	private static void motes(ServerLevel level, GraveGhost ghost, int count, double spread, double speed) {
+		for (ServerPlayer viewer : level.players()) {
+			if (Mana.seesGhosts(viewer)) {
+				level.sendParticles(viewer, Fx.mote(COLOR, 1.0F), false, false, ghost.getX(), ghost.getY() + 1.0, ghost.getZ(), count, 0.25, spread, 0.25,
+					speed);
+			}
+		}
+	}
+
+	@Override
+	public boolean broadcastToPlayer(ServerPlayer player) {
+		// (to anyone who can't see the dead, it isn't sent at all)
+		return Mana.seesGhosts(player) && super.broadcastToPlayer(player);
 	}
 
 	// ---- one ghost -----------------------------------------------------------------------------------------------------
@@ -154,7 +177,7 @@ public class GraveGhost extends PathfinderMob implements Acting {
 		if (this.tickCount % CHECK_EVERY != 0) {
 			return;
 		}
-		if (!level.isDarkOutside() || level.getNearestPlayer(this, LEAVE_RANGE) == null || this.hasGrave && !this.graveStands(level)) {
+		if (!level.isDarkOutside() || level.getNearestPlayer(this.getX(), this.getY(), this.getZ(), LEAVE_RANGE, GraveGhost::seer) == null || this.hasGrave && !this.graveStands(level)) {
 			this.fade(level);
 		}
 	}
@@ -182,7 +205,7 @@ public class GraveGhost extends PathfinderMob implements Acting {
 
 	/** It thins out and is gone (until tomorrow night, unless it was laid to rest). */
 	private void fade(ServerLevel level) {
-		level.sendParticles(Fx.mote(COLOR, 1.0F), this.getX(), this.getY() + 1.0, this.getZ(), 16, 0.25, 0.7, 0.25, 0.02);
+		motes(level, this, 16, 0.7, 0.02);
 		if (this.hasGrave) {
 			STANDING.remove(this.grave, this.getUUID());
 		}
