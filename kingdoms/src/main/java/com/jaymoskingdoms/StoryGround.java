@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -39,11 +40,9 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -259,10 +258,16 @@ public final class StoryGround {
 		record Spot(Structure structure, StructurePlacement placement, ChunkPos chunk, int distance) {
 		}
 
+		/** Holds a likely village's chunk while it's made (no timeout, never saved). */
+		private static final TicketType MAKING = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
+
 		final BlockPos spawn;
 		final List<Spot> spots = new ArrayList<>();
 		int next;
 		@Nullable BlockPos found;
+		/** The spot whose chunk is being made, to see if its village really starts, and when that's done (null: none). */
+		@Nullable Spot making;
+		@Nullable CompletableFuture<?> made;
 		final long startedAt = System.nanoTime();
 
 		VillageSearch(ServerLevel level, BlockPos spawn) {
@@ -305,12 +310,33 @@ public final class StoryGround {
 
 		/** Looks at spots till {@code budgetNanos} is used up; true once it's over (found, or none left). */
 		boolean step(ServerLevel level, long budgetNanos) {
+			if (this.making != null) {
+				if (!this.made.isDone()) {
+					return false;
+				}
+				Spot spot = this.making;
+				this.making = null;
+				this.found = Stacked.searchingOverworld(level, () -> started(level, spot));
+				level.getChunkSource().removeTicketWithRadius(MAKING, spot.chunk(), 0);
+				if (this.found != null) {
+					return true;
+				}
+			}
 			long until = System.nanoTime() + budgetNanos;
 			while (this.next < this.spots.size()) {
 				Spot spot = this.spots.get(this.next++);
-				this.found = Stacked.searchingOverworld(level, () -> village(level, spot));
-				if (this.found != null) {
+				StructureCheckResult result = Stacked.searchingOverworld(level,
+					() -> level.structureManager().checkStructurePresence(spot.chunk(), spot.structure(), spot.placement(), false));
+				if (result == StructureCheckResult.START_PRESENT) {
+					this.found = spot.placement().getLocatePos(spot.chunk());
 					return true;
+				}
+				if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
+					// vanilla's check says a village starts here: its chunk is made off the server thread and looked at once
+					// it's there (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
+					this.making = spot;
+					this.made = level.getChunkSource().addTicketAndLoadWithRadius(MAKING, spot.chunk(), 0);
+					return false;
 				}
 				if (System.nanoTime() >= until) {
 					return false;
@@ -319,21 +345,11 @@ public final class StoryGround {
 			return true;
 		}
 
-		/** Whether a village starts at {@code spot}, where vanilla's search would say (null: none). */
-		private static @Nullable BlockPos village(ServerLevel level, Spot spot) {
-			StructureManager structures = level.structureManager();
-			StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), spot.structure(), spot.placement(), false);
-			if (result == StructureCheckResult.START_PRESENT) {
-				return spot.placement().getLocatePos(spot.chunk());
-			}
-			if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
-				ChunkAccess chunk = level.getChunk(spot.chunk().x(), spot.chunk().z(), ChunkStatus.STRUCTURE_STARTS);
-				StructureStart start = structures.getStartForStructure(spot.structure(), chunk);
-				if (start != null && start.isValid()) {
-					return spot.placement().getLocatePos(start.getChunkPos());
-				}
-			}
-			return null;
+		/** Whether the village vanilla's check foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
+		private static @Nullable BlockPos started(ServerLevel level, Spot spot) {
+			LevelChunk chunk = level.getChunkSource().getChunkNow(spot.chunk().x(), spot.chunk().z());
+			StructureStart start = chunk == null ? null : level.structureManager().getStartForStructure(spot.structure(), chunk);
+			return start != null && start.isValid() ? spot.placement().getLocatePos(start.getChunkPos()) : null;
 		}
 	}
 
