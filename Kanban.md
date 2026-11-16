@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 20:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 20:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/deck-server-watch|deck-server-watch]] · 💻 Odysseus · #1619 · running
 
 
 ## In review
@@ -21,6 +20,7 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/combat-animations-trial|combat-animations-trial]] · 💻 Odysseus · #1618 · in-review
+- [ ] [[Agents/proving-grounds|proving-grounds]] · 💻 Odysseus · #1620 · in-review
 
 
 ## Needs Andy
