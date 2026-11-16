@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 03:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 03:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Agents/combat-animations-trial|combat-animations-trial]] · 💻 Odysseus · #1618 · in-review
 
 
 ## Needs Andy
@@ -31,7 +30,6 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
@@ -39,6 +37,7 @@ kanban-plugin: board
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 
 
 %% kanban:settings
