@@ -246,7 +246,7 @@ final class SkyWrecks {
 			laid.removeFirst();
 		}
 		level.setAttached(LAID, List.copyOf(laid));
-		JaymosKingdoms.LOGGER.info("A downed airship, the {}, lies at {} (bound for {})", name, ground, toF.name());
+		JaymosKingdoms.LOGGER.info("A downed airship, the {}, lies at {} (bound for {})", name, ground, toF != null ? toF.name() : "nowhere");
 	}
 
 	/**
