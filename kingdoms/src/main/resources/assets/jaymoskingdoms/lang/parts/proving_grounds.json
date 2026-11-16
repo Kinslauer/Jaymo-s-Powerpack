@@ -2,7 +2,7 @@
   "message.jaymoskingdoms.proving_grounds.emeralds": "The altar wants %s emeralds laid beside the offering.",
   "message.jaymoskingdoms.proving_grounds.taken": "The light of %s takes you up to its proving ground. Its champion is coming.",
   "message.jaymoskingdoms.proving_grounds.won": "%s's champion falls. Gather what it left: the light takes you home in %s seconds.",
-  "message.jaymoskingdoms.proving_grounds.fell": "You fall on the proving ground, and %s's light carries you home.",
+  "message.jaymoskingdoms.proving_grounds.fell": "You fall on the proving ground. %s's light holds you there to watch the rest; it carries you home when the trial is over.",
   "message.jaymoskingdoms.proving_grounds.lost": "The trial is lost. %s's light carries you home.",
   "biome.jaymoskingdoms.proving_grounds": "Proving Ground"
 }

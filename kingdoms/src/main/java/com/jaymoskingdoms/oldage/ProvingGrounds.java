@@ -12,9 +12,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -41,6 +43,7 @@ import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,10 +64,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The fight:</b> the champion comes down across from them after {@link #RISE_TICKS}: the same champion as a
  * temple's, scaled to how many came. Won (it falls): what a champion gives and the patron's boon, as at the altar, then
  * {@link #WON_TICKS} to pick up its spoils before the light takes them home. Anything still lying there goes home too.</li>
- * <li><b>Falling</b> (dying or going down) costs only the fight (Andy): carried back to where they stood, at
- * {@link #FALLEN_HEALTH} or as the downed get up, keeping everything. The last one out loses it; so does
- * {@link #LIMIT}.</li>
- * <li><b>Logging out, the server stopping, a crash:</b> back where they stood at their next login ({@link #BACK} is saved).</li>
+ * <li><b>Falling</b> (dying or going down) costs only the fight (Andy): they get up a spectator ({@link #fall}), keeping
+ * everything, and watch the rest fight on; when it's over they go home with the game mode they had. The last one
+ * standing falling loses it; so does {@link #LIMIT}.</li>
+ * <li><b>Logging out, the server stopping, a crash:</b> back where they stood, game mode and all, at their next login
+ * ({@link #BACK} is saved).</li>
  * </ul>
  */
 public final class ProvingGrounds {
@@ -89,6 +93,8 @@ public final class ProvingGrounds {
 	static final float FALLEN_HEALTH = 4.0F;
 	/** Farther than this from the centre (an ender pearl, a power), they're put back on the floor. */
 	static final double STRAY = RADIUS + 4;
+	/** How much farther than {@link #STRAY} a fallen spectator may drift before they're put back over the floor. */
+	static final double WATCH_ROOM = 12.0;
 	/** The champion's beam: from how high, how long. */
 	static final double BEAM_HEIGHT = 28.0;
 	static final int BEAM_TICKS = 30;
@@ -97,12 +103,16 @@ public final class ProvingGrounds {
 	/** On every champion the grounds raise (so one left over after a crash is known and removed). */
 	static final String TAG = "jaymoskingdoms.proving_grounds";
 
-	/** Where a fighter goes home to: saved while they're in, so a logout or a crash still brings them back. */
-	public record Back(ResourceKey<Level> dimension, Vec3 pos, float yaw) {
+	/**
+	 * Where a fighter goes home to: saved while they're in, so a logout or a crash still brings them back; and, once they
+	 * fell and watch as a spectator, the game mode they had before.
+	 */
+	public record Back(ResourceKey<Level> dimension, Vec3 pos, float yaw, Optional<GameType> mode) {
 		public static final Codec<Back> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(Back::dimension),
 				Vec3.CODEC.fieldOf("pos").forGetter(Back::pos),
-				Codec.FLOAT.fieldOf("yaw").forGetter(Back::yaw))
+				Codec.FLOAT.fieldOf("yaw").forGetter(Back::yaw),
+				GameType.CODEC.optionalFieldOf("mode").forGetter(Back::mode))
 			.apply(i, Back::new));
 	}
 
@@ -120,6 +130,8 @@ public final class ProvingGrounds {
 		final long since;
 		/** Those still in it, and their way home. */
 		final Map<UUID, Back> fighters = new LinkedHashMap<>();
+		/** Those who fell, watching as spectators until it's over. */
+		final Set<UUID> watchers = new HashSet<>();
 		@Nullable UUID champion;
 		long wonAt = -1;
 
@@ -145,7 +157,10 @@ public final class ProvingGrounds {
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player && BY_PLAYER.containsKey(player.getUUID())) {
 				player.setHealth(FALLEN_HEALTH);
-				fall(player, BY_PLAYER.get(player.getUUID()));
+				Fight f = BY_PLAYER.get(player.getUUID());
+				if (!f.watchers.contains(player.getUUID())) {
+					fall(player, f);
+				}
 				return false;
 			}
 			return true;
@@ -154,7 +169,9 @@ public final class ProvingGrounds {
 			for (Fight f : FIGHTS.values()) {
 				if (entity.getUUID().equals(f.champion) && f.wonAt < 0) {
 					f.wonAt = f.arena.getGameTime();
-					for (ServerPlayer sp : online(f)) {
+					List<ServerPlayer> all = online(f);
+					all.addAll(watching(f));
+					for (ServerPlayer sp : all) {
 						sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.proving_grounds.won", f.patron.named(), WON_TICKS / 20)
 							.withStyle(s -> s.withColor(f.patron.colour & 0xFFFFFF)));
 					}
@@ -166,6 +183,7 @@ public final class ProvingGrounds {
 			if (f != null) {
 				// (BACK stays: they're brought home at their next login; the fight goes on without them)
 				f.fighters.remove(handler.getPlayer().getUUID());
+				f.watchers.remove(handler.getPlayer().getUUID());
 			}
 		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> mend(handler.getPlayer()));
@@ -278,6 +296,25 @@ public final class ProvingGrounds {
 					teleport(sp, f.arena, mid.add(-WAKE, 0.0, 0.0), -90.0F);
 				}
 			}
+			for (UUID id : List.copyOf(f.watchers)) {
+				ServerPlayer sp = server.getPlayerList().getPlayer(id);
+				if (sp == null) {
+					f.watchers.remove(id);
+					BY_PLAYER.remove(id);
+					continue;
+				}
+				if (sp.level() != f.arena) {
+					// (a spectator's teleport elsewhere): they've stopped watching, so home now, as they were
+					f.watchers.remove(id);
+					BY_PLAYER.remove(id);
+					home(sp);
+					continue;
+				}
+				Vec3 mid = Vec3.atBottomCenterOf(f.centre.above());
+				if (sp.position().distanceTo(mid) > STRAY + WATCH_ROOM) {
+					teleport(sp, f.arena, mid.add(-WAKE, WALL + 2.0, 0.0), -90.0F);
+				}
+			}
 			if (f.fighters.isEmpty()) {
 				finish(f, f.wonAt >= 0);
 				continue;
@@ -331,16 +368,23 @@ public final class ProvingGrounds {
 
 	// ---- the way home -----------------------------------------------------------------------------------------------
 
-	/** {@code sp} fell in the fight: carried home alone, keeping everything; the rest fight on. */
+	/**
+	 * {@code sp} fell in the fight (Andy: they spectate): up again, a spectator who watches the rest fight on, keeping
+	 * everything; home, as they were, when it's over.
+	 */
 	private static void fall(ServerPlayer sp, Fight f) {
 		f.fighters.remove(sp.getUUID());
-		BY_PLAYER.remove(sp.getUUID());
+		f.watchers.add(sp.getUUID());
 		if (Downed.isDowned(sp)) {
 			PowersCompat.getUp(f.arena, sp);
 		}
 		sp.setHealth(Math.max(sp.getHealth(), FALLEN_HEALTH));
 		sp.clearFire();
-		home(sp);
+		Back back = sp.getAttached(BACK);
+		if (back != null && back.mode().isEmpty()) {
+			sp.setAttached(BACK, new Back(back.dimension(), back.pos(), back.yaw(), Optional.of(sp.gameMode.getGameModeForPlayer())));
+		}
+		sp.setGameMode(GameType.SPECTATOR);
 		sp.sendSystemMessage(Component.translatable(f.fighters.isEmpty() && f.wonAt < 0 ? "message.jaymoskingdoms.proving_grounds.lost"
 			: "message.jaymoskingdoms.proving_grounds.fell", f.patron.named()).withStyle(s -> s.withColor(f.patron.colour & 0xFFFFFF)));
 	}
@@ -348,6 +392,14 @@ public final class ProvingGrounds {
 	/** The fight is over: everyone still in it goes home, the spoils left lying with them, and the plot is cleared. */
 	private static void finish(Fight f, boolean won) {
 		FIGHTS.remove(f.plot);
+		for (UUID id : List.copyOf(f.watchers)) {
+			BY_PLAYER.remove(id);
+			ServerPlayer sp = f.arena.getServer().getPlayerList().getPlayer(id);
+			if (sp != null) {
+				home(sp);
+			}
+		}
+		f.watchers.clear();
 		for (UUID id : List.copyOf(f.fighters.keySet())) {
 			BY_PLAYER.remove(id);
 			ServerPlayer sp = f.arena.getServer().getPlayerList().getPlayer(id);
@@ -381,6 +433,7 @@ public final class ProvingGrounds {
 		if (back == null) {
 			return;
 		}
+		back.mode().ifPresent(sp::setGameMode);
 		ServerLevel level = sp.level().getServer().getLevel(back.dimension());
 		if (level == null) {
 			level = sp.level().getServer().overworld();
@@ -418,8 +471,19 @@ public final class ProvingGrounds {
 		return out;
 	}
 
+	private static List<ServerPlayer> watching(Fight f) {
+		List<ServerPlayer> out = new ArrayList<>();
+		for (UUID id : f.watchers) {
+			ServerPlayer sp = f.arena.getServer().getPlayerList().getPlayer(id);
+			if (sp != null) {
+				out.add(sp);
+			}
+		}
+		return out;
+	}
+
 	private static Back back(ServerPlayer sp) {
-		return new Back(sp.level().dimension(), sp.position(), sp.getYRot());
+		return new Back(sp.level().dimension(), sp.position(), sp.getYRot(), Optional.empty());
 	}
 
 	private static void teleport(ServerPlayer sp, ServerLevel level, Vec3 to, float yaw) {
