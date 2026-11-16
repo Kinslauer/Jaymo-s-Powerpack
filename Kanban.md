@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 20:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 20:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/deck-server-watch|deck-server-watch]] · 💻 Odysseus · running
+- [ ] [[Agents/deck-server-watch|deck-server-watch]] · 💻 Odysseus · #1619 · running
 
 
 ## In review
