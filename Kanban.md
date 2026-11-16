@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 13:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 13:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]] · 🪶 Quill · #1650 · writing
 - [ ] [[Agents/crash-risk-sweep|crash-risk-sweep]] · 💻 Odysseus · running
 
 
@@ -22,6 +21,7 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · #1649 · in-review
+- [ ] [[Inbox/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]] · ☀️ Apollo · #1650 · in-review
 
 
 ## Needs Andy
