@@ -265,7 +265,7 @@ final class GrandSeats {
 	}
 
 	/** A seat, not a dungeon: its monsters, loose items and spawners go, and its chests stand empty (the treasury is the panic room's). */
-	private static void empty(ServerLevel level, BoundingBox box) {
+	static void empty(ServerLevel level, BoundingBox box) {
 		for (Entity e : level.getEntitiesOfClass(Entity.class, AABB.of(box).inflate(2.0), e -> e instanceof Enemy || e instanceof ItemEntity)) {
 			e.discard();
 		}
