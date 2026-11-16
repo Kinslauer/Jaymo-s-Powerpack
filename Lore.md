@@ -705,7 +705,7 @@ wall. Beasts and monsters don't see them. The living do, and hear them. Carry th
 moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
 dead choose, Limbo among it.
 
-**(new) Who sees the dead** (ghosts thread; Andy, 2026-11-16: "only the attuned and death magicians should ever see the ki
+**Who sees the dead** (ghosts thread; approved by Andy 2026-11-16; Andy, 2026-11-16: "only the attuned and death magicians should ever see the ki
 ghosts, also the ghosts should have wispy tails like wisp"). A ghost is the ki a body has let go of, and ki out of a body
 shows only to those who can see mana: the attuned. A Death Sorcerer is not attuned, but sees them all the same, because
 the dead are a Death Sorcerer's craft. To anyone else the dead are not there at all: no shape over the grave, no voice

@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: Only the attuned and Death Sorcerers see ki ghosts; ghosts get wispy tails
 branch: claude/project-thread-0gcpku
 with: 
@@ -26,7 +26,7 @@ owns:
 - Legs replaced by an 8-link tapering tail on both ghost models.
 
 ## Notes
-- Lore.md "(new) Who sees the dead" awaits Andy.
+- Lore approved by Andy 2026-11-16; merged.
 
 ## Done
 PR #1633: grave + player ghosts sent only to attuned / Death Sorcerers, ghost voices too; tails on both. Compiled, not played.
