@@ -14456,3 +14456,9 @@ Pixel shadows from the sun and moon now fade smoothly at their edges instead of 
 - Starting a talk with an MCA villager opens a letterbox cutscene: black bars slide in, the HUD clears, and the camera swaps between the two of you.
 - Every time the speaker changes (player <-> villager), the POV swaps with it: behind the player's shoulder looking at the villager while the player speaks, at the villager's eyes looking at the player while they speak. It ends when the talk screen closes.
 - `sh ./gradlew build` compiles; not played in game.
+
+## 0.9.77 (2026-11-16): Youth the wood-wisp: more idle behaviors (#1650)
+
+- **Youth now picks idle behaviors at random**: it no longer just drifts about its summon spot. It may stay put with almost no drift, follow its asker drifting in front at head height, playfully avoid the asker's gaze (when the asker looks at it, it drifts away; when the asker looks away, it drifts back), circle the asker at a distance, or drift as before.
+- The wisp switches between these modes every 20–60 seconds while it waits.
+- Built; not played.
