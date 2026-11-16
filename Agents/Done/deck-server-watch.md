@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: Deck server handoff (keep the Steam Deck server stable)
 branch: claude/capital-search-no-chunk-wait
 with: Claude Code on Andy's PC
@@ -34,3 +34,4 @@ until it runs 30 minutes with Andy on and no crash. History goes in `Agents/Done
   on the next restart unless re-armed.
 
 ## Done
+- 2026-11-15 20:57 PR #1619 is merged into master; moved to Agents/Done.

@@ -1,9 +1,9 @@
 ---
-status: working
+status: in-review
 task: proving-grounds
 branch: claude/proving-grounds
 with:
-pr:
+pr: 1620
 mods: kingdoms
 versions:
 started: 2026-11-15
