@@ -5449,3 +5449,7 @@ Built; not played.
 ## 0.24.33 (2026-11-16): Cats owned by villagers no longer stop the server
 
 - Enhanced Cats checks each tick whether a tame cat's owner is near, taking the owner to be a player. A cat tamed by an MCA villager stopped the server when a player came near its village (Thalfell, 2026-11-16). Such cats now skip that check.
+
+## 0.24.34 (2026-11-16): Enhanced Cats taken out
+
+- Enhanced Cats took every tame cat's owner for a player, and villagers in Kingdoms keep cats as pets, so the server stopped whenever a player came near one of them (twice on 2026-11-16). It's out of the pack; villagers' cats and dogs are as before.
