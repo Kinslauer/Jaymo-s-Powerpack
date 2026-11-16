@@ -112,6 +112,7 @@ public final class CostumeNet {
 
 	static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(WardrobeBlock.Open.TYPE, WardrobeBlock.Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Sew.TYPE, Sew.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(TakeOff.TYPE, TakeOff.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ToggleMask.TYPE, ToggleMask.CODEC);
@@ -159,7 +160,8 @@ public final class CostumeNet {
 	}
 
 	private static boolean atTable(ServerPlayer player, BlockPos pos) {
-		return com.jaymospowers.core.Loaded.made(player.level(), pos) && player.level().getBlockState(pos).is(Costume.TABLE)
+		return com.jaymospowers.core.Loaded.made(player.level(), pos) && (player.level().getBlockState(pos).is(Costume.TABLE)
+			|| player.level().getBlockState(pos).is(Costume.WARDROBE))
 			&& player.isWithinBlockInteractionRange(pos, REACH_BUFFER);
 	}
 

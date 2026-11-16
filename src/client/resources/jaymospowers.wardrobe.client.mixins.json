@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.wardrobe",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"WardrobeEditorTabsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
