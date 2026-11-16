@@ -37,4 +37,5 @@ Added (same thread): Witcher 3 / Baldur's Gate 3 style conversation system — a
 - This is mod work (code + possibly assets), routed to hermes (builders). Not a model, art, or writing task itself.
 - The dialogue wheel needs a UI design: wheel sections by temperament, how options are selected, how the list stems from the wheel.
 - Camera work: back-and-forth cuts, breaking the 180 — needs specific shot/reverse-shot framing per speaker.
-- Ask Tiv: which NPC conversations get this (all of them, or masters/quest-givers/court wizards only)? Does the wheel replace MCA's existing dialogue UI or sit beside it?
+
+Settled by Tiv: the new system replaces MCA's dialogue UI completely. Design philosophy: extravagant emergent gameplay with very little hand-holding — whatever information is there should be more like a hint and less like an answer. Learning everything MCA gives you outright is counter-intuitive to that vision.
