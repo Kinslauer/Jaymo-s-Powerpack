@@ -47,6 +47,10 @@ abstract class HandshakeCameraMixin {
 			// (the Family farmhand waking in the family's bed: FarmWakeFilmClient)
 			view = com.jaymoskingdoms.client.films.FarmWakeFilmClient.view(this.minecraft, partialTicks);
 		}
+		if (view == null) {
+			// (a villager and a player talking: the letterbox cutscene)
+			view = com.jaymoskingdoms.client.DialogueCinematic.view(this.minecraft, partialTicks);
+		}
 		if (view != null) {
 			this.setRotation((float)view[3], (float)view[4]);
 			this.setPosition(view[0], view[1], view[2]);

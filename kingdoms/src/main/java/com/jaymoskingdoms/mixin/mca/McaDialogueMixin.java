@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.DialogueCue;
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.EmberHugs;
@@ -86,6 +87,10 @@ abstract class McaDialogueMixin {
 
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("main".equals(question)) {
+			// (letterbox cutscene) the player picked an answer: they're speaking now
+			DialogueCue.cue(player, villager, DialogueCue.Speaker.PLAYER);
+		}
 		if ("root".equals(question) && McaCompat.shunOpening(villager, player)) {
 			// one who turned their back on you for pestering them won't talk yet (Introductions#shunned)
 			ci.cancel();
@@ -576,6 +581,14 @@ abstract class McaDialogueMixin {
 				gained += warm;
 			}
 			Recollections.socialised(villager, player, question, gained);
+		}
+	}
+
+	/** (letterbox cutscene) the villager answers back after the player's pick, or the idle chat loops around. */
+	@Inject(method = "selectAnswer", at = @At("RETURN"))
+	private void jaymoskingdoms$reply(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("main".equals(question) || "chat.topic".equals(question)) {
+			DialogueCue.cue(player, villager, DialogueCue.Speaker.VILLAGER);
 		}
 	}
 }
