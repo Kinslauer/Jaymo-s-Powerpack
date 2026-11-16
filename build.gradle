@@ -601,9 +601,8 @@ def packModsNoCf = [
 	// VO: Better Dogs (GPL-3.0-only, dasikigaijin): wolves get personalities and smarter AI. Client and server.
 	// 5.0.59+26.3 for 26.3.
 	[dep: "maven.modrinth:vanilla-outsider-better-dogs:Hf2kV4x0", cf: null],
-	// Enhanced Cats (all rights reserved, IslandAggravating; shipped unchanged): cats get more to do. Needs GeckoLib and
-	// Fabric Language Kotlin. Client and server. 1.2.1 for 26.3.
-	[dep: "maven.modrinth:enhanced-cats:rk4XiZGI", cf: null],
+	// (Enhanced Cats left out: it takes every cat's owner for a player, and Kingdoms' villagers keep cats, which stopped
+	// the server each time a player came near one, 2026-11-16)
 	// Prickle (LGPL-2.1-only, Darkhax): the config library Herd Mentality needs. Client and server. 26.3.0.2 for 26.3.
 	[dep: "maven.modrinth:prickle:aPdekuq6", cf: null],
 	// Herd Mentality (LGPL-2.1-only, Darkhax): hit a hostile mob and its kind nearby join in. Hostile mobs only (Andy):
