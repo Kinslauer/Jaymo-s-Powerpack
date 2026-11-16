@@ -1,2 +1,0 @@
-# A village capital waits for its land to load too
-- When the story makes a village near spawn the first capital, it checked that the land round the bell was loaded with a test that is also true of land still only queued to load. Raising the town, or a castle beside it, could then generate ground on the server thread and run into the 60 s watchdog, like the open-ground capital fixed before. The land within 13 chunks of the bell now loads in the background first, and the village keeps its full time to do so.
