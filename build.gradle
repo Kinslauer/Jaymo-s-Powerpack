@@ -105,8 +105,9 @@ def packMods = [
 	[dep: "maven.modrinth:mp-moogs-paths:irh19s8L", cf: [1546855, 9148952]],
 	// Grindstone Sharper Tools and its library Collective (all rights reserved; modpacks allowed while the downloads
 	// stay on CurseForge/Modrinth): sneak+right-click a grindstone with a tool for sharpened hits
+	// (Collective 8.85: Seaworthy Boats needs it)
 	[dep: "maven.modrinth:grindstone-sharper-tools:L4PcjMdo", cf: [347346, 9034113]],
-	[dep: "maven.modrinth:collective:94WEkZry", cf: [342584, 9272094]],
+	[dep: "maven.modrinth:collective:Jl348nuI", cf: [342584, 9527347]],
 	// (Combat Roll left in 0.15.5: the dodge and the feathers are our own now, stamina/Dodge and stamina/Feathers)
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
@@ -636,8 +637,8 @@ def packModsNoCf = [
 	// Doors Closed (MIT, Estecka): villagers close the doors they walk through. Server-side. 1.0.1+26.1.2 for 26.3.
 	[dep: "maven.modrinth:doors-closed:NA4I85Bx", cf: null],
 	// Room For Two (Sir Cow's protective licence, Sir_Cow; shipped unchanged): share a bed with a villager or another
-	// player. Beta. Client and server. 0.3.1 for 26.3.
-	[dep: "maven.modrinth:room-for-two:YWsnsbTY", cf: null],
+	// player. Beta. Client and server. 0.3.0 for 26.3: 0.3.1 needs Fabric Loader 0.20.1 (we run 0.19.5).
+	[dep: "maven.modrinth:room-for-two:GTZPHBjE", cf: null],
 	// Village Masquerade (MPL-2.0, Fuzs): dress as a villager. Needs Puzzles Lib and Forge Config API Port. Client and
 	// server. 26.3.0 for 26.3.
 	[dep: "maven.modrinth:village-masquerade:NhCCM1f5", cf: null],
