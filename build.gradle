@@ -1029,7 +1029,10 @@ tasks.register("checkPackMods") {
 			}
 			def meta = slurper.parse(new String(entries["fabric.mod.json"] as byte[], "UTF-8").toCharArray())
 			def v = version(meta.version as String)
-			present[meta.id as String] = v
+			// the newest copy of a mod wins, as Fabric Loader picks it
+			if (present[meta.id as String] == null || v > present[meta.id as String]) {
+				present[meta.id as String] = v
+			}
 			(meta.provides ?: []).each { present[it as String] = v }
 			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:]]
 			(meta.jars ?: []).each { nested ->
