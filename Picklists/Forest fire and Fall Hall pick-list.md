@@ -10,6 +10,9 @@ tags: [inbox, picklist, mods, kingdoms, castles]
 
 # Forest Fire & Firefighting and Fall Hall: fit check
 
+**Pick on the page, not here:** https://claude.ai/artifact/AFN7f4YxdZh6aJSotkMrrT (ticks and notes save there and
+Claude reads them back; "Copy picks" gives the rows in the docs/*-Rows.md format). This file is the first draft.
+
 Neither goes in today. The fire mod is MIT and nearly runs on 26.3, but its jar is locked to 26.2. Fall Hall is a
 26.3 world made only of vanilla blocks, but it has no licence and it's a world save, not a structure our castle code
 can place. Facts were read on 2026-11-15 from the mod's jar, the world's region files and our code (Qwen's research
