@@ -103,8 +103,13 @@ public final class MobRagdolls {
 					mob.removeAttached(LIMP);
 					it.remove();
 				} else if (!mob.isAlive()) {
-					// killed after its own tick (an arrow, a mob's bite): its corpse takes the body on its next tick, so the
-					// body is kept till then, or the corpse would stand back up where it lay
+					if (!leavesBody(mob)) {
+						// dies as vanilla has it (no corpse here): it isn't left hanging limp through its death
+						mob.removeAttached(LIMP);
+						it.remove();
+					}
+					// otherwise killed after its own tick (an arrow, a mob's bite): its corpse takes the body on its next
+					// tick, so the body is kept till then, or the corpse would stand back up where it lay
 				} else if (!tick(mob, e.getValue())) {
 					getUp(mob, e.getValue());
 					it.remove();
@@ -131,6 +136,12 @@ public final class MobRagdolls {
 			takeIn(copy, pushed);
 		}
 		return copy;
+	}
+
+	/** Whether {@code mob}, dying, will be swapped for a corpse that takes its body (as LivingEntityMixin decides). */
+	private static boolean leavesBody(Mob mob) {
+		return com.jaymoskitchen.corpse.Corpses.leavesCorpse(mob) && !com.jaymoskitchen.corpse.Corpses.inNoCorpseZone(mob)
+			&& !com.jaymoskitchen.corpse.SnowMelt.melts(mob);
 	}
 
 	/** Whether {@code mob} can be knocked limp at all just now. */

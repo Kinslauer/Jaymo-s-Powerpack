@@ -437,6 +437,25 @@ public final class RagdollSimCheck {
 			}
 		}
 
+		System.out.println("Keeling over off a ledge, it's let go as it tips out over the drop (not held up by a foot)");
+		for (Object[] c : new Object[][] {{"cow", cow}, {"player", player}}) {
+			RagdollRig rig = (RagdollRig) c[1];
+			// a ledge at x = 0.6: the floor at 64 runs to there, then a drop to 58
+			World w = new World().add(-50, 63, -50, 0.6, 64, 50).add(-50, 57, -50, 50, 58, 50);
+			RagdollBody b = RagdollBody.standing(rig, 0.4, 64, 0, 0);
+			KeelOver keel = new KeelOver(rig, 0.4, 64, 0, 0, 1.0, 0.0, 7L);
+			int t = 0, air = 0;
+			while (keel.steer(b)) {
+				b.step(w, 0.0F);
+				t++;
+				air = b.grounded() || b.nearGround(1.0F) ? 0 : air + 1;
+				if (air >= 3) {
+					break;
+				}
+			}
+			check(c[0] + ": let go before the keel-over ends", t < keel.ticks(), "ticks " + t + " of " + keel.ticks());
+		}
+
 		System.out.println("Dying on its feet, it sways, keels over onto its side, then goes limp (KeelOver)");
 		{
 			Object[][] cases = {{"cow", cow, 0.0, 0.0}, {"chicken", chicken, 0.0, 0.0}, {"player pushed east", player, 0.2, 0.0},
