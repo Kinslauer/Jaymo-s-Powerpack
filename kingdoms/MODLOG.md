@@ -14417,3 +14417,13 @@ Built; not played.
 ## 0.9.71 (2026-11-16): A capital's land loads a ring at a time
 
 - Raising the first capital asked for 729 chunks round it at once, all of them run as well as loaded. On a new world that was not pregenerated, the Deck fell 60 s behind and the watchdog stopped it (2026-11-16, 2:31 AM; Hedmere's founding came within a few seconds of it earlier). The usual 10 chunks round it run as before; the land past that is loaded but not run, one ring more each try once the last is there.
+
+## 0.9.72 (2026-11-16): Hostile Mobs Improve Over Time follows the world tiers
+
+- **Monsters learn new tricks with your world tier, not your play time** (Andy: "Can we work it in with the world
+  tiers?"). Hostile Mobs Improve Over Time (a Sensible MC pick) normally raises your level every 20 minutes of play. Now
+  its timer is stopped, and every 5 seconds your level is set from the tier you play at: Hearth 0, Borderlands 5,
+  Wildlands 12, Dread 20, Legend 30 (`HostileMobsTiers.LEVEL`). Step down a tier and the mobs near you lose those tricks.
+  The levels are kept low because world tiers already make foes tougher.
+- `HostileMobsTiers`, through the datapack's own scoreboards; without the mod the commands do nothing.
+- Not built or played here.
