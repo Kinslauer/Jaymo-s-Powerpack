@@ -14330,3 +14330,13 @@ Built; not played.
   nightmare.
 - `MutantRampage` (registered beside `Feuds`), matched by entity id `mutantmonsters:mutant_zombie` (no compile link to
   the mod). Built; not played (Mutant Monsters isn't in the dev runtime).
+
+## 0.9.61 (2026-11-16): The Keeping: the old home's sleeping smith
+
+- **The old home's cell** (ATi Structures' old home, the lone brick and mud house of the plains and savanna): the villager ATi puts in the cell under the floor is now the smith who built the house, laid asleep in the cell's bed with the hollow blight in him. ATi placed him half in the floor of a cell too low to stand in, so he mostly suffocated; now he lies in the bed and lives. The red light on the wall is his keeping: while it burns he sleeps on and his blight goes no further. Using him while he sleeps gets a murmur.
+- **Waking him**: break the light and the keeping ends. He wakes coughing with a day left before he turns, the hatch over the bed opens and he climbs up into the house.
+- **Curing him**: the Hollow's Cure, or (his alone) weakness and then a golden apple. Cured awake, he thanks you and forges a piece of armour to your measure: iron, or diamond if you bring the diamonds (helmet 5, chestplate 8, leggings 7, boots 4), ready a day or two later. Cured in his sleep, he wakes later not knowing it and won't believe you: nothing for it. Left uncured after the light goes, he rises as one of the dead.
+- **The tale "The Keeping"** starts when you open the hatch and see him (new tale start `found`, new step `await` that code moves on by marks; `tools/tale_check.py` knows both). Lore: "The old homes and the keeping" (approved).
+- Old homes already in a world: a villager still alive in the cell becomes the smith when his area loads; cells whose villager already died stay empty.
+- `KeepingCells` (new), `Tales.found`/`Tales.advance`, hooks in `BlightSpread.cured`/`turn`, lang part `keeping.json`, tale `the_keeping.json`.
+- Built; not played.
