@@ -1,0 +1,2 @@
+# No more server crash refreshing a creature's changed stats
+- When a creature's changed attributes were handled, handling one (max health lowering its health, its size changing) could mark another as changed through other mods' hooks while the game was still going through the list. That broke the list and stopped the server (an ocelot on 2026-11-16, a zombie on 2026-11-08). They're now handled from a copy, and any changed meanwhile are handled right after.
