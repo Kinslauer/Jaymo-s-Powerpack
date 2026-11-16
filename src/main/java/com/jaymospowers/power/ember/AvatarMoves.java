@@ -3,6 +3,7 @@ package com.jaymospowers.power.ember;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.wounds.LimbUse;
 import com.jaymospowers.power.smoke.SmokeField;
@@ -288,7 +289,7 @@ public final class AvatarMoves {
 		ball.age++;
 		Vec3 from = ball.pos;
 		Vec3 to = from.add(ball.velocity);
-		if (!level.isLoaded(BlockPos.containing(to)) || ball.owner.level() != level || ball.owner.isRemoved()) {
+		if (!Loaded.made(level, BlockPos.containing(to)) || ball.owner.level() != level || ball.owner.isRemoved()) {
 			return true;
 		}
 		if (level.getFluidState(BlockPos.containing(to)).is(FluidTags.WATER)) {

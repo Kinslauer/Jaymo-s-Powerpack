@@ -3,6 +3,7 @@ package com.jaymospowers.power.wind;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
@@ -371,6 +372,9 @@ public final class WindModes {
 			double distance = 8.0 + random.nextDouble() * 16.0;
 			double x = player.getX() + Math.cos(angle) * distance;
 			double z = player.getZ() + Math.sin(angle) * distance;
+			if (!Loaded.made(level, (int)Math.floor(x), (int)Math.floor(z))) {
+				return;
+			}
 			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
 			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 			if (bolt != null) {
@@ -414,6 +418,9 @@ public final class WindModes {
 			double distance = 4.0 + random.nextDouble() * 10.0;
 			double x = player.getX() + Math.cos(angle) * distance;
 			double z = player.getZ() + Math.sin(angle) * distance;
+			if (!Loaded.made(level, (int)Math.floor(x), (int)Math.floor(z))) {
+				return;
+			}
 			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
 			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 			if (bolt != null) {

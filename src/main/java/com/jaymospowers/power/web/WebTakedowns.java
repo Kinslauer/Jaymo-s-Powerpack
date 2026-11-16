@@ -206,6 +206,9 @@ public final class WebTakedowns {
 	private static void tickThrown() {
 		for (Map.Entry<LivingEntity, Throw> e : java.util.List.copyOf(THROWN.entrySet())) {
 			LivingEntity target = e.getKey();
+			if (target == null) {
+				continue;
+			}
 			Throw t = e.getValue();
 			if (!(target.level() instanceof ServerLevel level) || !target.isAlive() || level.getGameTime() > t.until()) {
 				THROWN.remove(target);

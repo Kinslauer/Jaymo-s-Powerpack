@@ -1,6 +1,7 @@
 package com.jaymospowers.power.smoke;
 
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.power.wind.WindWeather;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -385,6 +386,9 @@ final class SmokeCloudshaper {
 		BlockPos g = rain.ground;
 		for (BlockPos pos : BlockPos.betweenClosed(g.offset(-RAIN_RADIUS, -4, -RAIN_RADIUS), g.offset(RAIN_RADIUS, rain.top - g.getY(), RAIN_RADIUS))) {
 			if (pos.distSqr(new BlockPos(g.getX(), pos.getY(), g.getZ())) > RAIN_RADIUS * RAIN_RADIUS) {
+				continue;
+			}
+			if (!Loaded.made(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);

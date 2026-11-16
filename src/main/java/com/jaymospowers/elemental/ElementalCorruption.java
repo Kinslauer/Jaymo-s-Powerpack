@@ -210,14 +210,17 @@ public final class ElementalCorruption {
 			double angle = random.nextDouble() * net.minecraft.util.Mth.TWO_PI;
 			double far = net.minecraft.util.Mth.lerp(random.nextDouble(), OUTCRY_NEAR, OUTCRY_FAR);
 			int x = net.minecraft.util.Mth.floor(player.getX() + Math.cos(angle) * far), z = net.minecraft.util.Mth.floor(player.getZ() + Math.sin(angle) * far);
-			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
-			net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(level,
-				net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
-			if (bolt != null) {
-				bolt.snapTo(x + 0.5, y, z + 0.5);
-				// (the look of it: the gods are shouting, not striking yet)
-				bolt.setVisualOnly(true);
-				level.addFreshEntity(bolt);
+			// skip the bolt when its column is not made yet: reading it would wait on generation
+			if (com.jaymospowers.core.Loaded.made(level, x, z)) {
+				int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
+				net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(level,
+					net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+				if (bolt != null) {
+					bolt.snapTo(x + 0.5, y, z + 0.5);
+					// (the look of it: the gods are shouting, not striking yet)
+					bolt.setVisualOnly(true);
+					level.addFreshEntity(bolt);
+				}
 			}
 		}
 		if (random.nextInt(OUTCRY_THUNDER_EVERY) == 0) {

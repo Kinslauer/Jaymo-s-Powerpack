@@ -4,6 +4,7 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.core.UltimateFilm;
+import com.jaymospowers.core.Loaded;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -243,8 +244,11 @@ final class WindGift implements GiftKit {
 		}
 		double angle = mob.getRandom().nextDouble() * Math.PI * 2.0;
 		double far = FLY_MIN + mob.getRandom().nextDouble() * (FLY_MAX - FLY_MIN);
-		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-			BlockPos.containing(mob.getX() + Math.cos(angle) * far, mob.getY(), mob.getZ() + Math.sin(angle) * far));
+		BlockPos target = BlockPos.containing(mob.getX() + Math.cos(angle) * far, mob.getY(), mob.getZ() + Math.sin(angle) * far);
+		if (!Loaded.made(level, target)) {
+			return;
+		}
+		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, target);
 		if (Math.abs(ground.getY() - mob.getY()) > FLY_CLIMB || !level.getFluidState(ground.below()).isEmpty() || !room(level, mob, FLY_HEIGHT)) {
 			return;
 		}

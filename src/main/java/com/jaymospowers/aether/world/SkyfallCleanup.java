@@ -3,6 +3,7 @@ package com.jaymospowers.aether.world;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.cloudsea.CloudSea;
 import com.jaymospowers.compat.Stacked;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.power.wind.aether.WindAether;
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -119,7 +120,7 @@ public final class SkyfallCleanup {
 		for (int i = 0; i < PER_TICK && !QUEUE.isEmpty(); i++) {
 			ChunkPos pos = QUEUE.poll();
 			QUEUED.remove(pos);
-			if (at != Integer.MIN_VALUE && level.hasChunk(pos.x(), pos.z())) {
+			if (at != Integer.MIN_VALUE && Loaded.made(level, pos.getMinBlockX(), pos.getMinBlockZ())) {
 				cut(level, pos, at);
 			}
 		}

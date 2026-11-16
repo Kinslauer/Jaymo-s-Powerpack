@@ -1,5 +1,6 @@
 package com.jaymospowers.power.web;
 
+import com.jaymospowers.core.Loaded;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,6 +90,9 @@ public final class WebCracks {
 		long now = level.getGameTime();
 		for (Iterator<Map.Entry<BlockPos, Crack>> it = cracks.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<BlockPos, Crack> entry = it.next();
+			if (!Loaded.made(level, entry.getKey())) {
+				continue; // land not made: look again later
+			}
 			Crack crack = entry.getValue();
 			long age = now - crack.at;
 			int shown = age < HOLD_TICKS ? crack.stage

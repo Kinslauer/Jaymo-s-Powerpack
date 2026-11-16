@@ -1,6 +1,7 @@
 package com.jaymospowers.power.blindness;
 
 import com.jaymospowers.core.BladeBlood;
+import com.jaymospowers.core.Loaded;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -310,6 +311,9 @@ public final class BlindnessService {
 
 	/** Open ground at x, z: the top block is solid, the two over it are clear and it isn't water. Returns the standing spot. */
 	static @Nullable BlockPos ground(ServerLevel level, int x, int z) {
+		if (!Loaded.made(level, x, z)) {
+			return null;
+		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 		BlockPos at = new BlockPos(x, y, z);
 		BlockState below = level.getBlockState(at.below());

@@ -840,7 +840,12 @@ final class DarktideMoves {
 	}
 
 	static void tickWorld(MinecraftServer server) {
-		WAVES.removeIf(DarktideMoves::tickWave);
+		// a lethal hit inside tickWave can cancel (remove) waves, so tick a copy and skip ones already cancelled
+		for (Wave wave : new ArrayList<>(WAVES)) {
+			if (WAVES.contains(wave) && tickWave(wave)) {
+				WAVES.remove(wave);
+			}
+		}
 		if (!PUDDLES.isEmpty()) {
 			for (Iterator<Puddle> it = PUDDLES.iterator(); it.hasNext(); ) {
 				Puddle puddle = it.next();

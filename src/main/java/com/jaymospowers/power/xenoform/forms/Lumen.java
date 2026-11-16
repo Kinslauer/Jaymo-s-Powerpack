@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -151,8 +152,11 @@ public final class Lumen extends XenoForm {
 					oldest = entry.getLongKey();
 				}
 			}
-			out(level, BlockPos.of(oldest));
-			live.lights.remove(oldest);
+			// (its land not made: it stays listed, and goes out when its time comes and the land is there)
+			if (Loaded.made(level, BlockPos.of(oldest))) {
+				out(level, BlockPos.of(oldest));
+				live.lights.remove(oldest);
+			}
 		}
 		level.setBlockAndUpdate(at, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15));
 		live.lights.put(at.asLong(), level.getGameTime() + LIGHT_TICKS);
@@ -167,14 +171,18 @@ public final class Lumen extends XenoForm {
 		while (it.hasNext()) {
 			var entry = it.next();
 			if (entry.getLongValue() <= now) {
-				out(level, BlockPos.of(entry.getLongKey()));
+				BlockPos at = BlockPos.of(entry.getLongKey());
+				if (!Loaded.made(level, at)) {
+					continue; // land not made: try again later
+				}
+				out(level, at);
 				it.remove();
 			}
 		}
 	}
 
 	private static void out(ServerLevel level, BlockPos at) {
-		if (level.isLoaded(at) && level.getBlockState(at).is(Blocks.LIGHT)) {
+		if (Loaded.made(level, at) && level.getBlockState(at).is(Blocks.LIGHT)) {
 			level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
 		}
 	}

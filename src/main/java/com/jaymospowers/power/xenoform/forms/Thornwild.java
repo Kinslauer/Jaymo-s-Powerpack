@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.BlockPos;
@@ -166,7 +167,10 @@ public final class Thornwild extends XenoForm {
 			var entry = it.next();
 			if (entry.getLongValue() <= now) {
 				BlockPos at = BlockPos.of(entry.getLongKey());
-				if (level.isLoaded(at) && level.getBlockState(at).is(Blocks.OAK_LEAVES)) {
+				if (!Loaded.made(level, at)) {
+					continue; // land not made: try again later
+				}
+				if (level.getBlockState(at).is(Blocks.OAK_LEAVES)) {
 					level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
 					level.sendParticles(ParticleTypes.FALLING_SPORE_BLOSSOM, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.0);
 				}

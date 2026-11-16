@@ -1,6 +1,7 @@
 package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -98,9 +99,14 @@ final class GravityPush {
 			double step = Math.min(push.speed, push.left);
 			AABB next = target.getBoundingBox().move(push.dir.scale(step));
 			boolean stopped = false;
+			boolean waiting = false;
 			if (!push.phasing) {
 				for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(next.minX, next.minY, next.minZ),
 					BlockPos.containing(next.maxX - 1.0E-3, next.maxY - 1.0E-3, next.maxZ - 1.0E-3))) {
+					if (!Loaded.made(level, pos)) {
+						waiting = true;
+						break;
+					}
 					BlockState state = level.getBlockState(pos);
 					if (state.getCollisionShape(level, pos).isEmpty()) {
 						continue;
@@ -116,6 +122,12 @@ final class GravityPush {
 						break;
 					}
 				}
+			}
+			if (waiting) {
+				// land ahead isn't made yet: the push ends here rather than wait on it
+				release(target);
+				it.remove();
+				continue;
 			}
 			if (stopped) {
 				// slammed into something that won't give

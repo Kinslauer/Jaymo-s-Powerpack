@@ -584,6 +584,9 @@ public final class LimbEaters {
 				float yaw = bird.getRandom().nextFloat() * Mth.TWO_PI;
 				double far = CARRY_MIN + bird.getRandom().nextDouble() * (CARRY_MAX - CARRY_MIN);
 				double x = bird.getX() + Mth.cos(yaw) * far, z = bird.getZ() + Mth.sin(yaw) * far;
+				if (!Loaded.made(level, Mth.floor(x), Mth.floor(z))) {
+					continue;
+				}
 				int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(x), Mth.floor(z));
 				Vec3 at = new Vec3(x, y, z);
 				if (!level.getFluidState(net.minecraft.core.BlockPos.containing(x, y - 1, z)).isEmpty()) {
