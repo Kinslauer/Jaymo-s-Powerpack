@@ -32,3 +32,4 @@ writer: hermes-writer
 
 ## Notes
 - 2026-11-16 05:19 Text pass: PR #1643 claude/faith-page-champion. Player-visible text: only the new changes/kingdoms/faith-page-champion.md - plain, accurate, matches change-note format (what the player sees, classes touched, not played in game). The PR adds no lang, dialogue, hint or screen strings, so nothing to rewrite; no code changed by the pass.
+- 2026-11-16 06:06 Text pass: PR #1643 claude/faith-page-champion. Player-visible text: only the new changes/kingdoms/faith-page-champion.md - reviewed, plain and accurate, matches change-note format (what the player sees, classes touched, not played in game). The PR adds no lang, dialogue, hint or screen strings; KiGhost.java and LifeStoryScreen.java contain no player-visible text. Nothing rewritten, nothing committed.
