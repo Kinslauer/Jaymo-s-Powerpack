@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "minecraft:spruce_planks",
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:chest"
+  },
+  "pattern": [
+    "PGP",
+    "P P",
+    "PCP"
+  ],
+  "result": {
+    "id": "jaymospowers:wardrobe"
+  }
+}

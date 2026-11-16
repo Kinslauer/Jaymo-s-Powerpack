@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:wardrobe",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:wardrobe",
+            "state": {
+              "half": "lower"
+            }
+          },
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:wardrobe",
+              "properties": [
+                "costumes"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/wardrobe"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:wardrobe",
+    "jaymospowers:costume_table"
+  ],
+  "result": {
+    "id": "jaymospowers:wardrobe",
+    "components": {
+      "minecraft:block_state": {
+        "costumes": "true"
+      }
+    }
+  }
+}

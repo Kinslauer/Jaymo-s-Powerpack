@@ -1,6 +1,7 @@
 package com.jaymospowers.client.costume;
 
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.client.wardrobe.WardrobeClient;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeNet;
@@ -185,7 +186,17 @@ public class CostumeScreen extends Screen {
 		// (0.12.3) the worn costume's mask off / on (the mask key's, here too)
 		this.maskToggle = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.mask_off"),
 			b -> CostumeClient.toggleMask()).bounds(left() + W - 8 - 64 - 4 - 64 - 4 - 64, by, 64, 14).build());
+		// (in a wardrobe: its tabs, between the title and the suit editor)
+		if (wardrobe()) {
+			WardrobeClient.tabs(left() + W - 8 - 84 - 6 - WardrobeClient.rowWidth() / 2, top() + 7, WardrobeClient.Tab.COSTUME,
+				this::addRenderableWidget);
+		}
 		labels();
+	}
+
+	/** Whether this is the Costume tab of an open wardrobe (WardrobeClient), not a table's or a tailor's designer. */
+	private boolean wardrobe() {
+		return this.pos != null && this.pos.equals(WardrobeClient.open()) && WardrobeClient.showing(WardrobeClient.Tab.COSTUME);
 	}
 
 	private void labels() {
@@ -326,8 +337,14 @@ public class CostumeScreen extends Screen {
 		int x = left();
 		int y = top();
 		UiStyle.panel(graphics, x, y, W, H, ACCENT);
-		UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Costume.TABLE), this.title,
-			Component.translatable(tailoring() ? "screen.jaymospowers.costume.tailor_sub" : "screen.jaymospowers.costume.sub"), ACCENT, 0);
+		if (wardrobe()) {
+			// the tabs take the header's middle: just the wardrobe's name before them
+			UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Costume.WARDROBE), Component.translatable("screen.jaymospowers.wardrobe.title"),
+				null, ACCENT, W - 8 - 84 - 6 - WardrobeClient.rowWidth() - 4 - 28);
+		} else {
+			UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Costume.TABLE), this.title,
+				Component.translatable(tailoring() ? "screen.jaymospowers.costume.tailor_sub" : "screen.jaymospowers.costume.sub"), ACCENT, 0);
+		}
 		preview(graphics, player);
 		middle(graphics, mouseX, mouseY);
 		emblem(graphics, mouseX, mouseY);

@@ -1,0 +1,133 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/spruce_planks",
+    "planks": "minecraft:block/spruce_planks",
+    "front": "jaymospowers:block/wardrobe/front_upper"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        3
+      ],
+      "to": [
+        15,
+        14,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            2,
+            15,
+            16
+          ],
+          "texture": "#front"
+        },
+        "south": {
+          "uv": [
+            1,
+            2,
+            15,
+            16
+          ],
+          "texture": "#planks",
+          "cullface": "south"
+        },
+        "east": {
+          "uv": [
+            3,
+            2,
+            16,
+            16
+          ],
+          "texture": "#planks"
+        },
+        "west": {
+          "uv": [
+            0,
+            2,
+            13,
+            16
+          ],
+          "texture": "#planks"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14,
+        2
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#planks"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#planks",
+          "cullface": "south"
+        },
+        "east": {
+          "uv": [
+            2,
+            0,
+            16,
+            2
+          ],
+          "texture": "#planks",
+          "cullface": "east"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            14,
+            2
+          ],
+          "texture": "#planks",
+          "cullface": "west"
+        },
+        "up": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#planks",
+          "cullface": "up"
+        },
+        "down": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#planks"
+        }
+      }
+    }
+  ]
+}

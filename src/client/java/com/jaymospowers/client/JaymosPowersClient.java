@@ -270,6 +270,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		SwallowedPowerClient.init();
 		HiddenArmorClient.init();
 		com.jaymospowers.client.costume.CostumeClient.init();
+		com.jaymospowers.client.wardrobe.WardrobeClient.init();
 		// (0.19.49) a dead player's body still wears their costume (Kitchen's corpse)
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
