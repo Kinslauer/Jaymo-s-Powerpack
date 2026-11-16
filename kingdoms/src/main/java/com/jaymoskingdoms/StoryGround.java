@@ -123,6 +123,9 @@ public final class StoryGround {
 		@Nullable VillageSearch search;
 		/** The mainland the capital's citadel is looked for round, and its spot there (null: not chosen yet). */
 		@Nullable BlockPos citadelNear, citadel;
+		/** Beyond {@link #TICKET_RADIUS}: how far the land round {@link #landAt} is being loaded so far ({@link #step}). */
+		int land;
+		@Nullable ChunkPos landAt;
 
 		Job(BlockPos at, long giveUpAt, Predicate<ServerLevel> attempt, java.util.function.Consumer<ServerLevel> fallback) {
 			this.at = at;
@@ -440,6 +443,8 @@ public final class StoryGround {
 	 * unloaded ground there was made on the spot, and on a new world that ran into the 60 s watchdog.
 	 */
 	static final int CITADEL_RADIUS = 13;
+	/** Keeps a capital's wider land loaded (made, not run) while it's tried; lapses like a portal's once it's over. */
+	private static final TicketType LAND = new TicketType(300L, TicketType.FLAG_LOADING);
 	/** Chunks round the mainland loaded before the citadel's spot is looked for there ({@link #citadelSpot}'s 56 blocks). */
 	static final int SPOT_RADIUS = 5;
 
@@ -1082,7 +1087,20 @@ public final class StoryGround {
 
 	/** One try at {@code job} (its land kept loaded, its waiting players kept safe): whether it's over, made or given up. */
 	private static boolean step(ServerLevel level, Job job, String making) {
-		level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(job.at), job.radius);
+		ChunkPos centre = ChunkPos.containing(job.at);
+		level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, centre, Math.min(job.radius, TICKET_RADIUS));
+		if (job.radius > TICKET_RADIUS) {
+			// a capital's wider land (CITADEL_RADIUS): loaded, never run, a ring more each try once the last is made; all
+			// 729 chunks asked for at once (and simulated) put a new world's Deck 60 s behind, past the watchdog
+			if (!centre.equals(job.landAt)) {
+				job.landAt = centre;
+				job.land = TICKET_RADIUS;
+			}
+			if (job.land < job.radius && loaded(level, job.at, job.land)) {
+				job.land++;
+			}
+			level.getChunkSource().addTicketWithRadius(LAND, centre, job.land);
+		}
 		for (ChunkPos chunk : job.chunks) {
 			level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, chunk, 0);
 		}
