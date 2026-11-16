@@ -159,10 +159,10 @@ public final class FrontierWear {
 		wear(mob, EquipmentSlot.LEGS, FrontierArmour.stack("settler", ArmorType.LEGGINGS));
 	}
 
-	/** Puts {@code stack} on {@code mob} if that slot is bare (or holds another of ours), never to be dropped. */
+	/** Puts {@code stack} on {@code mob} if that slot is bare (or holds another of ours) and their body takes it ({@link SeaBodies#fits}), never to be dropped. */
 	private static void wear(Mob mob, EquipmentSlot slot, ItemStack stack) {
 		ItemStack worn = mob.getItemBySlot(slot);
-		if (stack.isEmpty() || worn.is(stack.getItem()) || !worn.isEmpty() && FrontierArmour.setOf(worn) == null) {
+		if (stack.isEmpty() || worn.is(stack.getItem()) || !worn.isEmpty() && FrontierArmour.setOf(worn) == null || !SeaBodies.fits(mob, slot, stack)) {
 			return;
 		}
 		mob.setItemSlot(slot, stack);

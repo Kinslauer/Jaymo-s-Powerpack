@@ -38,8 +38,12 @@ abstract class McaEquipmentMixin {
 		// (and a guard's issue is their settlement's: Templar plate, the settler's gear, a gunner's harness)
 		// (and a realm's knight puts on its plate and harness)
 		// (and a realm's militia wear its levy leather: Ranks)
-		villager.setItemSlot(slot, com.jaymoskingdoms.HeraldryWear.issue(villager, slot, com.jaymoskingdoms.Ranks.issue(villager, slot,
-			FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot)))));
+		ItemStack issued = com.jaymoskingdoms.HeraldryWear.issue(villager, slot, com.jaymoskingdoms.Ranks.issue(villager, slot,
+			FrontierWear.issue(villager, slot, Regalia.lesser(stack, slot))));
+		// a helm or breastplate their sea-shaped body can't take isn't put on, or it's shed and a new one issued every round
+		if (com.jaymoskingdoms.SeaBodies.fits(villager, slot, issued)) {
+			villager.setItemSlot(slot, issued);
+		}
 	}
 
 	/** A caravan guard's musketoon stays in his hands when MCA would arm him with a sword or a bow. */
