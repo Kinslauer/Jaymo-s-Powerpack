@@ -41,3 +41,4 @@ Added (same thread): Witcher 3 / Baldur's Gate 3 style conversation system — a
 
 Settled by Tiv: the new system replaces MCA's dialogue UI completely. Design philosophy: extravagant emergent gameplay with very little hand-holding — whatever information is there should be more like a hint and less like an answer. Learning everything MCA gives you outright is counter-intuitive to that vision.
 - 2026-11-16 12:47 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-16 12:58 Text pass: removed code-internals line from changes/kingdoms/dialogue-letterbox-pov.md (mentioned payload id, DialogueCue and HandshakeCameraMixin class names; lines 2-3 already describe what the player sees: letterbox bars, HUD clear, camera/POV swap per speaker)
