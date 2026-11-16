@@ -14310,3 +14310,23 @@ Built; not played.
 - **A story start's capital takes the village it found again.** The village search gives the village's spot at height 0, and its bell was then looked for within 96 blocks of that point, height included. A town up on high ground (the savanna plateau at y 108 on the Deck server) had its bell out of reach. The start waited two minutes, gave up and raised a new kingdom beside the village instead, which is how the terracotta citadel came about. The bell is now looked for around the village's ground (`StoryGround.foundInVillage`).
 - **Grand seats in a One Dimension world:** when the Overworld band's own generator won't generate a castle, `GrandSeats` now tries the stacked world's generator before falling back to the citadel. Its heights don't matter, because the castle is moved onto the site's floor anyway. The log says which one worked. Why the band's generator refuses (the Epic savanna town and both ATi castles all refused at the same spot) is still unknown; that log line is there to find out.
 - Compiled (Gradle, Kingdoms). Not played.
+
+## 0.9.60 (2026-11-16): mutant zombies attack everything around them (#1626)
+
+- **Mutant zombies rampage** (Andy: "mutant zombies should attack EVERYTHING around them other hostile mobs included"):
+  Mutant Monsters' Mutant Zombie now goes for the nearest living thing it can see, whatever it is: players, villagers,
+  animals, skeletons, creepers, spiders, illagers, orcs and every other monster, closest first. It spares only its own
+  kind: other mutant zombies and the zombies its roar raises from the ground. Ordinary zombies still can't hurt it
+  (the mod's own rule), so they come off worst.
+- **Others answer it**: anything able to fight that a mutant hits turns on it when it has no foe of its own (most
+  monsters and neutral beasts already did); plain animals (cattle, sheep, pigs, horses...) run from a mutant they can
+  see within 12 blocks, unless ridden or on a lead. All the usual targeting rules still hold (white flags, the
+  Reaper's shroud, the downed, ghosts in Limbo unseen).
+- **Mutant zombies are terrifying** (Andy: "it is also terrifying and should make people faint or run away"): the
+  Mutant Zombie joins the `supernatural`, `overwhelming` and `frightful` entity tags. Players and folk who see it grow
+  uneasy (cold edges and heartbeat for players), folk may withdraw and run, and anyone below Seasoned exposure may
+  faint outright (`Overcome`; the Brave never). While it is in view, feet won't carry anyone toward it and aim shakes
+  until a Grit save (`Fear`). Like any supernatural thing it also gives exposure, and its wounds can carry the living
+  nightmare.
+- `MutantRampage` (registered beside `Feuds`), matched by entity id `mutantmonsters:mutant_zombie` (no compile link to
+  the mod). Built; not played (Mutant Monsters isn't in the dev runtime).
