@@ -1,7 +1,7 @@
 ---
 status: working
 task: proving-grounds
-branch: claude/vibrant-kapitsa-144d76
+branch: claude/proving-grounds
 with:
 pr:
 mods: kingdoms
@@ -10,11 +10,13 @@ started: 2026-11-15
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/oldage/ProvingGrounds.java
   - kingdoms/src/main/java/com/jaymoskingdoms/oldage/OldTemples.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/oldage/OldAge.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/PowersCompat.java (getUp only)
   - kingdoms/src/main/resources/data/jaymoskingdoms/dimension/proving_grounds.json
   - kingdoms/src/main/resources/data/jaymoskingdoms/dimension_type/proving_grounds.json
   - kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/biome/proving_grounds.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/proving_grounds.json
-  - changes/kingdoms/claude-vibrant-kapitsa-144d76.md
+  - changes/kingdoms/proving-grounds.md
 ---
 
 # Proving Grounds (instanced boss arenas)

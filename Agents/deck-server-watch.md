@@ -9,7 +9,7 @@ versions:
 started: 2026-11-15
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/StoryGround.java
-  - changes/kingdoms/claude-capital-search-no-chunk-wait.md
+  - changes/kingdoms/capital-search-no-chunk-wait.md
 ---
 # Deck server watch
 
