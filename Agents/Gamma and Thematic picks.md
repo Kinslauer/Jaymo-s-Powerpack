@@ -3,7 +3,7 @@ status: stalled
 task: Build Andy's 100 picks from the Gamma and Thematic picklist, big suit first
 branch: claude/project-thread-akompj
 with: Claude (cloud thread "Pick Gamma and Thematic ideas for powers")
-pr: 
+pr: 1346, 1350, 1351, 1355, 1364
 mods: powers
 versions: 
 started: 2026-11-12
