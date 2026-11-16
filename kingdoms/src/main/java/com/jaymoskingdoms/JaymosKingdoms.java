@@ -1028,6 +1028,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Research.register();
 		// fifth edition picks, patch 2: conditions and fight moves
 		Afflictions.register();
+		DialogueCue.register();
 		HeldFast.register();
 		Fear.register();
 		// occult exposure, the living nightmare, and being overcome at the sight of the other side

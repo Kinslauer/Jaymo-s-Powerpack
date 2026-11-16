@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.DialogueCue;
 import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.Folk;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -129,6 +130,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BioTailEngulf.register();
 		RubberStomachView.register();
 		HandshakeCinematic.register();
+		// a villager and a player talking: letterbox bars and a camera on whoever speaks
+		DialogueCinematic.register();
 		SpeechBubbles.register();
 		// (0.7.454) which Interact-page actions a villager offers
 		InteractActionsClient.register();
@@ -338,6 +341,16 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;
 			context.client().gui.setScreen(new StableScreen(payload, scroll));
+		});
+		// the server says whose turn it is in an NPC talk: swap the letterbox camera
+		ClientPlayNetworking.registerGlobalReceiver(DialogueCue.TYPE, (payload, context) -> {
+			context.client().execute(() -> {
+				if (payload.speaker() == null) {
+					DialogueCinematic.stop(context.client());
+				} else {
+					DialogueCinematic.cue(context.client(), payload.villager(), payload.speaker());
+				}
+			});
 		});
 	}
 
