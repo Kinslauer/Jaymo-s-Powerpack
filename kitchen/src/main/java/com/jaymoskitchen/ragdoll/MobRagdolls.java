@@ -98,10 +98,13 @@ public final class MobRagdolls {
 			while (it.hasNext()) {
 				Map.Entry<Mob, Limp> e = it.next();
 				Mob mob = e.getKey();
-				if (mob.isRemoved() || !mob.isAlive()) {
-					// dead: its corpse took the body already (Corpses#deathBody)
+				if (mob.isRemoved()) {
+					// dead and gone: its corpse took the body (Corpses#deathBody)
 					mob.removeAttached(LIMP);
 					it.remove();
+				} else if (!mob.isAlive()) {
+					// killed after its own tick (an arrow, a mob's bite): its corpse takes the body on its next tick, so the
+					// body is kept till then, or the corpse would stand back up where it lay
 				} else if (!tick(mob, e.getValue())) {
 					getUp(mob, e.getValue());
 					it.remove();

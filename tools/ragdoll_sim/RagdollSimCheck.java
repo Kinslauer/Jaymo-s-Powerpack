@@ -411,6 +411,32 @@ public final class RagdollSimCheck {
 			}
 		}
 
+		System.out.println("Killed by a blow, it falls along it without hopping (Andy: \"popping into the air\")");
+		for (Object[] c : new Object[][] {{"player", player}, {"cow", cow}, {"giant", giant}}) {
+			RagdollRig rig = (RagdollRig) c[1];
+			for (double knock : new double[] {0.24, 0.42}) {
+				World w = ground();
+				RagdollBody b = RagdollBody.standing(rig, 0, 64, 0, -90);
+				// as Corpses#deathBody: the knockback's share and its lift, then a topple at the head along it
+				b.setSpeed(knock, 0.05, 0);
+				int head = rig.shape == RagdollRig.Shape.HUMANOID ? RagdollRig.HEAD : RagdollRig.SNOUT;
+				b.hit(b.x[head], b.y[head], b.z[head], 0.11, 0.0, 0.0, 0.3F);
+				double highest = b.bottom();
+				for (int t = 0; t < 20; t++) {
+					b.step(w);
+					highest = Math.max(highest, b.bottom());
+				}
+				String name = c[0] + " knocked " + knock;
+				check(name + ": starts on the ground, not in it", worstDepth(RagdollBody.standing(rig, 0, 64, 0, -90), w) < 0.001, "");
+				check(name + ": never leaves the ground", highest < 64.05, "bottom up to " + f(highest));
+				run(b, w, 800);
+				if (rig != giant) {
+					// (a body twelve blocks tall has its feet swept and goes over backwards, as it did before)
+					check(name + ": lies along the blow", b.middle()[0] > 0.3, "middle x " + f(b.middle()[0]));
+				}
+			}
+		}
+
 		System.out.println("Dying on its feet, it sways, keels over onto its side, then goes limp (KeelOver)");
 		{
 			Object[][] cases = {{"cow", cow, 0.0, 0.0}, {"chicken", chicken, 0.0, 0.0}, {"player pushed east", player, 0.2, 0.0},
@@ -423,10 +449,15 @@ public final class RagdollSimCheck {
 				RagdollBody b = RagdollBody.standing(rig, 0.5, 64, 0.5, 40);
 				KeelOver keel = new KeelOver(rig, 0.5, 64, 0.5, 40, (double) c[2], (double) c[3], 7L);
 				double worst = 0, lowest = Double.MAX_VALUE;
-				int t = 0;
+				int t = 0, air = 0;
 				while (keel.steer(b)) {
 					b.step(w, 0.0F);
 					t++;
+					// (as CorpseRagdoll: three ticks off the ground and the keel-over is given up)
+					air = b.grounded() || b.nearGround(1.0F) ? 0 : air + 1;
+					if (air >= 3) {
+						break;
+					}
 					worst = Math.max(worst, worstStretch(b));
 					lowest = Math.min(lowest, b.bottom());
 					if (!b.sane()) {

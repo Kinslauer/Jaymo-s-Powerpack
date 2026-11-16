@@ -43,6 +43,11 @@ final class CorpseRagdoll {
 	 */
 	private static final double KEEL_BREAK = 0.05;
 	private static final int KEEL_AIR_TICKS = 3;
+	/**
+	 * Keeling over, a part above the ground by no more than this share of its own size still counts as on it: rocking
+	 * over the outer edge of its feet lifts them by up to 0.9 of theirs (tools/ragdoll_sim).
+	 */
+	private static final float KEEL_GROUND_GAP = 1.0F;
 	/** A body flung into a wall ({@link WallSlump#struck}) slides down it and sits there this share of the time (the rest crumple as they fall). */
 	private static final float SLUMP_CHANCE = 0.85F;
 	/** Sitting against a wall, a part moving faster than this (blocks a tick: kicked by someone walking into it) tips it over. */
@@ -139,7 +144,7 @@ final class CorpseRagdoll {
 			unprop();
 		}
 		if (keel != null) {
-			keelAir = body.grounded() ? 0 : keelAir + 1;
+			keelAir = body.grounded() || body.nearGround(KEEL_GROUND_GAP) ? 0 : keelAir + 1;
 			if (!keeling || keelAir >= KEEL_AIR_TICKS) {
 				// down (or nothing under it): the physics has it from here, still falling as it was
 				endKeel(corpse);
