@@ -1,3 +1,0 @@
-# The server starts again after the Sensible MC picks
-- Three mods added with the Sensible MC picks would not start with the pack: Stoneworks 26.3.4 and Room For Two 0.3.1 need a newer Fabric Loader (0.20) than the pack runs, and Seaworthy Boats needs Collective 8.85. The pack now carries Stoneworks 26.3.1 and Room For Two 0.3.0 (the newest that work with our loader; the same blocks and features) and Collective 8.85.
-- Herd Mentality's hostiles-only setting was written in a form its config library refuses, so the game and the server stopped on start. It's now written the way the mod expects, and a file already written the old way is put right on the next start.
