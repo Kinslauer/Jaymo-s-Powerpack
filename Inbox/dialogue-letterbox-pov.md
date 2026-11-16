@@ -1,5 +1,5 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-16)
 asked: 2026-11-16
