@@ -27,6 +27,8 @@ import net.minecraft.util.Mth;
  * whisper, talk or shout; on the right how lit you are (a bar to full light) with a drop of blood below it while you bleed.
  * It shows while the eye does, while you sneak, bleed or talk. Its icons are {@code textures/gui/stealth_meter.png}
  * ({@code tools/gen_items.py}): six 8x8 frames, noise, light, blood, whisper, talk, shout.
+ * <p>The eye and the meter fade out while the view is zoomed in (Ok Zoomer, a spyglass, a drawn bow), like Powers' aim
+ * crosshair shrinks: the camera's FOV over the FOV setting, fully shown at {@link #ZOOM_SHOWN}, gone by {@link #ZOOM_GONE}.
  */
 public final class SensesClient {
 	/** The eye's size, and how far above the crosshair's middle its bottom sits (pixels). */
@@ -43,6 +45,8 @@ public final class SensesClient {
 	static final int NOISE_PALE_RGB = 0xD8D8D8, NOISE_AMBER_RGB = 0xE0A030, NOISE_RED_RGB = 0xD04030, LIGHT_RGB = 0xF2D27A, BAR_BACK = 0x80000000;
 	private static final Identifier METER = JaymosKingdoms.id("textures/gui/stealth_meter.png");
 	private static final int METER_FRAMES = 6, SOUND = 0, SUN = 1, BLOOD = 2, MOUTH = 3;
+	/** Zoom (camera FOV over the FOV setting) at which the eye and meter start to fade, and at which they're gone. */
+	static final float ZOOM_SHOWN = 0.97F, ZOOM_GONE = 0.8F;
 
 	/** What the server last said, and how visible the eye is now and a tick ago. */
 	private static int state, fill;
@@ -86,8 +90,9 @@ public final class SensesClient {
 	private static void hud(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		float partial = delta.getGameTimeDeltaPartialTick(false);
-		float a = Mth.lerp(partial, lastAlpha, alpha);
-		float m = Mth.lerp(partial, lastMeterAlpha, meterAlpha);
+		float clear = zoomClear(minecraft);
+		float a = Mth.lerp(partial, lastAlpha, alpha) * clear;
+		float m = Mth.lerp(partial, lastMeterAlpha, meterAlpha) * clear;
 		if (a <= 0.01F && m <= 0.01F || minecraft.player == null || minecraft.player.isSpectator()) {
 			return;
 		}
@@ -116,6 +121,16 @@ public final class SensesClient {
 				}
 			}
 		}
+	}
+
+	/** 1 unzoomed, falling to 0 as the view zooms in from {@link #ZOOM_SHOWN} to {@link #ZOOM_GONE}. */
+	private static float zoomClear(Minecraft minecraft) {
+		float fov = minecraft.gameRenderer.mainCamera().getFov();
+		float base = minecraft.options.fov().get();
+		if (fov <= 1.0F || base <= 1.0F) {
+			return 1.0F;
+		}
+		return Mth.clamp((fov / base - ZOOM_GONE) / (ZOOM_SHOWN - ZOOM_GONE), 0.0F, 1.0F);
 	}
 
 	/** The meter's two sides, the eye's space between them, at {@code x}, {@code y}, as visible as {@code a}. */
