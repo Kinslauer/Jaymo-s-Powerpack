@@ -3,7 +3,7 @@ status: running
 task: Deck server handoff (keep the Steam Deck server stable)
 branch: claude/capital-search-no-chunk-wait
 with: Claude Code on Andy's PC
-pr: 
+pr: 1619
 mods: kingdoms
 versions: 
 started: 2026-11-15
