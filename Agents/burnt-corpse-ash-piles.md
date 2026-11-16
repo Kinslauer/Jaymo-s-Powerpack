@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: burnt-corpse-ash-piles
 branch: claude/burnt-corpse-ash-piles
 with:
@@ -41,3 +41,6 @@ owns:
 
 **Done**
 - (none yet)
+
+## Notes
+- 2026-11-16 05:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).
