@@ -10,6 +10,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · for any · open
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · for any · open
+- [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · for any · open
 
 
 ## Being built
