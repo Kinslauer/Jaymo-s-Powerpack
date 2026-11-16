@@ -6,6 +6,7 @@
     "minecraft:warden",
     "jaymoskingdoms:wraith",
     { "id": "jaymoskingdoms:lich", "required": false },
-    { "id": "jaymoskingdoms:hag", "required": false }
+    { "id": "jaymoskingdoms:hag", "required": false },
+    { "id": "mutantmonsters:mutant_zombie", "required": false }
   ]
 }

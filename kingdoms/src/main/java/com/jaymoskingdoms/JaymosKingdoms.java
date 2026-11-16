@@ -298,6 +298,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		WhiteFlags.register();
 		Colours.register();
 		Feuds.register();
+		MutantRampage.register();
 		// (gb-haggle) the jobs haggled over
 		LOGGER.debug("haggle attachments: {} {}", Haggle.HAGGLED, Haggle.OFFER_HAGGLED);
 		HeldBack.register();
