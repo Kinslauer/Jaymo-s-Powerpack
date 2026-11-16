@@ -156,11 +156,10 @@ write(f"{R}/data/jaymospowers/loot_table/blocks/wardrobe.json", {
     "type": "minecraft:block",
     "pools": [{
         "rolls": 1,
-        "conditions": [{"condition": "minecraft:survives_explosion"}],
+        "condition": {"type": "minecraft:survives_explosion"},
         "entries": [{
             "type": "minecraft:item", "name": "jaymospowers:wardrobe",
-            "conditions": [{"condition": "minecraft:block_state_property", "block": "jaymospowers:wardrobe",
-                            "properties": {"half": "lower"}}],
+            "condition": {"type": "minecraft:match_block", "blocks": "jaymospowers:wardrobe", "state": {"half": "lower"}},
         }],
     }],
     "random_sequence": "jaymospowers:blocks/wardrobe",
