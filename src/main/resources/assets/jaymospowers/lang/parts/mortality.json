@@ -17,6 +17,8 @@
 	"message.jaymospowers.mortality.wake.wither": "You wake grey and cold to the bone.",
 	"message.jaymospowers.mortality.wake.fire": "You wake with your skin tight and raw.",
 	"message.jaymospowers.mortality.wake.drowning": "You wake on the shore, coughing up water.",
+	"message.jaymospowers.mortality.wake.sea": "You wake on dry land with salt in your mouth. Whatever dragged you under let you go.",
+	"message.jaymospowers.mortality.wake.lava": "You wake far from the heat, your hair singed short. You don't know how you got out.",
 	"message.jaymospowers.mortality.wake.fall": "You wake where you landed. Your legs are wrong.",
 	"message.jaymospowers.mortality.wake.environment": "You wake, barely. Something in you didn't come back.",
 	"message.jaymospowers.mortality.wake.player": "You wake alone. They left you for dead.",
