@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -8,6 +8,7 @@ claimed_by: hermes-writer
 pr:
 suggested_owns: []
 writer: hermes-writer
+text_pass: 
 ---
 
 # Research sky-lands biomes for Aether
@@ -64,3 +65,4 @@ Powers already has 16 Aether biomes across 4 climate zones (Highfields, Magnetic
 - Celestium-style ore tier could inform future Aether gear progression
 
 No code changes yet — research only, as the task states.
+- 2026-11-15 20:03 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
