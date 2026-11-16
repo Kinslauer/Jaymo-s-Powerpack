@@ -705,6 +705,16 @@ wall. Beasts and monsters don't see them. The living do, and hear them. Carry th
 moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
 dead choose, Limbo among it.
 
+**(new) Who sees the dead** (ghosts thread; Andy, 2026-11-16: "only the attuned and death magicians should ever see the ki
+ghosts, also the ghosts should have wispy tails like wisp"). A ghost is the ki a body has let go of, and ki out of a body
+shows only to those who can see mana: the attuned. A Death Sorcerer is not attuned, but sees them all the same, because
+the dead are a Death Sorcerer's craft. To anyone else the dead are not there at all: no shape over the grave, no voice
+from the bottom of the well, nobody to give a flower to. None of them has legs any more. Below the waist each is a single
+tail of the same pale light, thinning to nothing and wavering as they hang, and streaming out behind when they drift, as
+a Wisp's does. So a friend waiting in Limbo can stand over their own burial and be seen by the one court wizard in the
+crowd and by nobody else. (This narrows "The nights at the grave", "Limbo's ghosts", "The unbodied" and "Out of the
+body": where those say the living see and hear the dead, it is only these.)
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
