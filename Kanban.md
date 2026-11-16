@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 12:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,6 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🪶 Quill · #1649 · writing
 
 
 ## In review
@@ -22,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · 🍇 Bacchus · #1642 · in-review
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · 🍇 Bacchus · #1643 · in-review
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · ☀️ Apollo · #1644 · in-review
-- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · #1649 · in-review
 
 
 ## Needs Andy
