@@ -31,4 +31,4 @@ writer: hermes-writer
 - Lore: champions and sigils already exist in canon; no new Lore.md paragraph should be needed. If one is, quote it in full in the PR for Andy.
 
 ## Notes
-- 
+- 2026-11-16 05:19 Text pass: PR #1643 claude/faith-page-champion. Player-visible text: only the new changes/kingdoms/faith-page-champion.md - plain, accurate, matches change-note format (what the player sees, classes touched, not played in game). The PR adds no lang, dialogue, hint or screen strings, so nothing to rewrite; no code changed by the pass.
