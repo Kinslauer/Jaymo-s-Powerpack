@@ -1,8 +1,8 @@
 ---
 slug: youth-wisp-idle-behaviors
-status: running
+status: in-review
 branch: claude/youth-wisp-idle-behaviors
-pr:
+pr: 1650
 task: Youth the wood-wisp: more idle behaviors (stay, follow, avoid gaze)
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/YouthWisp.java
