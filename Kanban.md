@@ -8,11 +8,11 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · open
 
 
 ## Being built
 
+- [ ] [[Inbox/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 🍇 Bacchus · claimed
 
 
 ## In review
