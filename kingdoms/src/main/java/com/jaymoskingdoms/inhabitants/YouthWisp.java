@@ -53,6 +53,13 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** Its name at the front of a line, and what follows it (the question). */
 	static final java.util.regex.Pattern LEAD = java.util.regex.Pattern.compile("^[!*]?\\s*youth\\b[\\s,:!.?-]*(.*)$",
 		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/**
+	 * A follow-up while its wisp is beside you: a line that asks something ("what are these things that show when i
+	 * sneak?") needs no "youth" in it. A question mark anywhere, or one of these words first.
+	 */
+	static final java.util.regex.Pattern QUESTION = java.util.regex.Pattern.compile(
+		"^.*\\?.*$|^(what|whats|what's|how|hows|how's|why|where|when|who|which|can|could|is|are|does|do|did|should|will|would|wheres|where's)\\b.*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
 	/** A cry for help ("HELP", "help me!", "youth, help me"), which carries its crier home if a wisp is in sight. */
 	static final java.util.regex.Pattern HELP = java.util.regex.Pattern.compile("^help(\\s+me)?[\\s!.]*$", java.util.regex.Pattern.CASE_INSENSITIVE);
 	/** A wisp is in sight for a cry for help this near (blocks), in clear view and within this cosine of where they look. */
@@ -179,7 +186,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/**
 	 * A chat line someone said. A cry for help ({@link #HELP}) with a wisp in sight carries them home ({@link #carryHome}).
-	 * Otherwise, if it names Youth anywhere, their wisp comes, and the line goes in the server log as
+	 * Otherwise, if it names Youth anywhere, or it is a question ({@link #QUESTION}) while their own wisp is beside them
+	 * (a follow-up), their wisp comes, and the line goes in the server log as
 	 * {@code [youth-ask] <account name> <question>} (the words after its name when it leads, else the whole line; empty
 	 * when they only said its name). Chat here is proximity chat, which never reaches the log in vanilla's form, and shows
 	 * nicknames ("Stranger"), so this fixed line is what Hermes's listener reads. The account name is what
@@ -195,7 +203,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				return;
 			}
 		}
-		if (CALL.matcher(text).find()) {
+		// its name calls it; with its wisp already beside them, a plain question is asked of it too
+		if (CALL.matcher(text).find() || has(player) && QUESTION.matcher(text.strip()).matches()) {
 			YouthWisp wisp = summon(player);
 			if (wisp != null) {
 				wisp.lastAsked = wisp.tickCount;
@@ -236,17 +245,17 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		long day = player.level().getOverworldClockTime() / 24000L;
 		Long last = player.getAttached(CARRIED_DAY);
 		if (last != null && last == day) {
-			player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.joke." + this.random.nextInt(JOKE_LINES))));
+			this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.joke." + this.random.nextInt(JOKE_LINES)));
 			return;
 		}
 		net.minecraft.world.level.portal.TeleportTransition home = player.getRespawnConfig() == null ? null
 			: player.findRespawnPositionAndUseSpawnBlock(false, net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING);
 		if (home == null || home.missingRespawnBlock()) {
-			player.sendSystemMessage(line(Component.translatable(home == null
-				? "message.jaymoskingdoms.youth_wisp.no_bed" : "message.jaymoskingdoms.youth_wisp.bed_gone")));
+			this.speak(player, Component.translatable(home == null
+				? "message.jaymoskingdoms.youth_wisp.no_bed" : "message.jaymoskingdoms.youth_wisp.bed_gone"));
 			return;
 		}
-		player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.home." + this.random.nextInt(HOME_LINES))));
+		this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.home." + this.random.nextInt(HOME_LINES)));
 		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HomeFlash.TYPE)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HomeFlash());
 		}
@@ -305,20 +314,37 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		return true;
 	}
 
-	/** {@code player}'s wisp gestures, and {@code text} goes to them in chat as Youth's words. */
+	/** {@code player}'s wisp gestures, and {@code text} goes to them in chat as Youth's words, and floats over the wisp. */
 	public static void say(ServerPlayer player, String text) {
-		gesture(player);
-		player.sendSystemMessage(line(Component.literal(text)));
+		YouthWisp wisp = gesture(player);
+		Component words = Component.literal(text);
+		if (wisp != null) {
+			wisp.speak(player, words);
+		} else {
+			player.sendSystemMessage(line(words));
+		}
+	}
+
+	/**
+	 * This wisp says {@code words} to {@code player}: in chat (so the whole answer is kept) and in a speech bubble over the
+	 * wisp in its own colour, which anyone near sees too ({@link com.jaymoskingdoms.Speech#sayPlainly}).
+	 */
+	void speak(ServerPlayer player, Component words) {
+		player.sendSystemMessage(line(words));
+		if (this.level() instanceof ServerLevel level) {
+			com.jaymoskingdoms.Speech.sayPlainly(level, this, player, words, COLOUR);
+		}
 	}
 
 	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks. */
-	static void gesture(ServerPlayer player) {
+	static @Nullable YouthWisp gesture(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
 			wisp.pending = false;
 			wisp.triggerAnim("action", "talk");
 		}
+		return wisp;
 	}
 
 	/** One line of Youth's in chat: its name in its own colour, then the words. */
@@ -401,7 +427,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
 			if (player != null && this.pending && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
 				this.triggerAnim("action", "talk");
-				player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES))));
+				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
 			this.vanish();
 			return;
@@ -478,7 +504,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer
 			&& this.tickCount - this.lastHint > HINT_COOLDOWN) {
 			this.lastHint = this.tickCount;
-			serverPlayer.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.how")));
+			this.speak(serverPlayer, Component.translatable("message.jaymoskingdoms.youth_wisp.how"));
 		}
 		return InteractionResult.SUCCESS;
 	}
