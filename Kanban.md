@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 04:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 04:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,7 +14,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · 🪶 Quill · #1642 · writing
 
 
 ## In review
@@ -22,6 +21,7 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
+- [ ] [[Inbox/burnt-corpse-ash-piles|burnt-corpse-ash-piles]] · 🍇 Bacchus · #1642 · in-review
 
 
 ## Needs Andy
