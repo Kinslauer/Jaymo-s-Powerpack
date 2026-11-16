@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · 🍇 Bacchus · #1643 · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · ☀️ Apollo · #1644 · in-review
-- [ ] [[Agents/sensible-picks|sensible-picks]] · 💻 Odysseus · #1645 · in-review
 
 
 ## Needs Andy
