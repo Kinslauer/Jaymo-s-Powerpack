@@ -870,6 +870,32 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Downed.getUp(ServerLevel, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle downedGetUp;
+	private static boolean lookedForGetUp;
+
+	/** A downed {@code entity} stands up (Powers' own getting up); nothing without Powers. */
+	public static void getUp(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.LivingEntity entity) {
+		if (!lookedForGetUp) {
+			lookedForGetUp = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					downedGetUp = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Downed"), "getUp",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Downed.getUp (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (downedGetUp != null) {
+				downedGetUp.invoke(level, entity);
+			}
+		} catch (Throwable ignored) {
+		}
+	}
+
 	/** (0.7.594) Powers' {@code Fainting}: out(Entity), thirst(Player), bringRound(ServerPlayer). */
 	private static java.lang.invoke.@Nullable MethodHandle faintOut, faintThirst, faintWake;
 	private static boolean lookedForFaint;
