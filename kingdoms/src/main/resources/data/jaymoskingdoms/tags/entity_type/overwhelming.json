@@ -47,6 +47,10 @@
     {
       "id": "jaymoskingdoms:gaunt",
       "required": false
+    },
+    {
+      "id": "mutantmonsters:mutant_zombie",
+      "required": false
     }
   ]
 }

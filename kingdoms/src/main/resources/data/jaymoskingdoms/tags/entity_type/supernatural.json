@@ -125,6 +125,10 @@
     {
       "id": "jaymospowers:player_ghost",
       "required": false
+    },
+    {
+      "id": "mutantmonsters:mutant_zombie",
+      "required": false
     }
   ]
 }
