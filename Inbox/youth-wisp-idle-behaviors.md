@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-16)
 asked: 2026-11-16
@@ -7,6 +7,7 @@ thread: 1569189294512537671
 claimed_by: hermes-a
 pr: 1650
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/YouthWisp.java, kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/YouthCommand.java, kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/Inhabitants.java]
+writer: hermes-writer
 ---
 
 # Youth the wisp: more idle behaviors (stay, follow, avoid gaze)
