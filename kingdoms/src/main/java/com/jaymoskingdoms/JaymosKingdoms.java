@@ -50,6 +50,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
 		McaCompat.register();
+		// offline accounts sign in (EasyAuth, server only) before their character creation starts
+		SignIn.register();
 		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
 		// and the harness: what a blow meets in its layers, a shut visor's glance, who may have plate gilded

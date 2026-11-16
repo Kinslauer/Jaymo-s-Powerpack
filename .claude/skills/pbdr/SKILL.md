@@ -97,7 +97,8 @@ cd "$SRV"
 rm -rf mods && cp -r "$REPO/modpack/mods" mods
 ```
 
-The mods folder is replaced whole so jars that left the pack leave the server too.
+The mods folder is replaced whole so jars that left the pack leave the server too. The server's helper scripts come
+along each time (they don't hold secrets): `cp "$REPO"/deck/rcon.py "$REPO"/deck/whitelist.py "$SRV"/`.
 
 **New world only:** set the old one aside, named like the earlier backups:
 
@@ -135,12 +136,27 @@ If both are already set, skip this step. Otherwise stop the server as in step 3,
 (`sed -i 's/^voice_host=.*/voice_host=malls-harrington.tun.ply.gg:44082/; s/^port=.*/port=24454/' "$F"`, or add the
 line if it's missing), and start it again as in step 5. Don't touch the rest of the file.
 
+## 6b. Offline accounts and the whitelist (once)
+
+Friends on offline (non-premium) accounts can join through EasyAuth, which the pack ships on the server only. Keep
+`online-mode=true` in `server.properties`: premium players are still checked with Mojang and keep their own UUIDs and
+inventories, and offline players choose a password for their name the first time they join (Jaymo's Kingdoms shows them
+a sign-in screen). Never set `online-mode=false`: everyone would get new offline UUIDs and lose their inventories.
+
+If `grep -qx 'white-list=true' "$SRV/server.properties"` fails, the whitelist isn't on yet. With the server running, run
+`cd "$SRV" && ./whitelist.py on`: it whitelists everyone who has ever joined (from `usercache.json`), so nobody already
+playing is locked out, then switches the whitelist on. Report how many it added. Andy adds friends later with
+`./whitelist.py add <name>` (premium names are looked up with Mojang, other names get their offline UUID;
+`--offline` for an offline friend whose name a premium account also has). A friend who forgot their password:
+`./rcon.py auth remove <name>`, and they choose a new one on their next join.
+
 ## 7. Check and report
 
 - `logs/latest.log` reached `Done (` with no mod errors. The Jade line about a client-only plugin being skipped is
   known and harmless.
 - The tunnel: `playit.log` shows it connected; friends join at `pgsql-jvc.tun.ply.gg`.
 - Voice: `ss -lun | grep -q ':24454 '` and `voice_host` set as above.
+- Sign-in: `logs/latest.log` names EasyAuth among the loaded mods, `online-mode=true` and `white-list=true` are set.
 - Tell Andy: pack / Kingdoms / Kitchen versions, same world or new world (and the backup's name), tunnel and voice
   status, whether anyone was kicked, and that friends need `modpack/Jaymos-Powers-Modpack-<pack>.zip` from the Deck
   checkout (the PC makes the same zip when it builds).
@@ -150,4 +166,4 @@ line if it's missing), and start it again as in step 5. Don't touch the rest of 
 
 - Never commit or push from the Deck, and never commit `Serverfiles/` or `playit-secret.txt` (they hold secrets).
 - Only one copy of the world runs: never start the PC's old server.
-- Don't change `server.properties` or other configs beyond what's above unless Andy asks.
+- Don't change `server.properties` or other configs beyond what's above unless Andy asks. Never `online-mode=false`.

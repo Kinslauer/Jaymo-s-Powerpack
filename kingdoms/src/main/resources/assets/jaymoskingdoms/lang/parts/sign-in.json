@@ -1,0 +1,15 @@
+{
+  "gui.jaymoskingdoms.sign_in.title": "Sign in",
+  "gui.jaymoskingdoms.sign_in.why": "This name is kept with a password. Enter it to play.",
+  "gui.jaymoskingdoms.sign_in.choose": "Choose a password",
+  "gui.jaymoskingdoms.sign_in.choose_why": "Nobody plays under this name yet. Choose a password so only you can.",
+  "gui.jaymoskingdoms.sign_in.password": "Password",
+  "gui.jaymoskingdoms.sign_in.again": "The same password again",
+  "gui.jaymoskingdoms.sign_in.enter": "Sign in",
+  "gui.jaymoskingdoms.sign_in.keep": "Keep this password",
+  "gui.jaymoskingdoms.sign_in.leave": "Leave",
+  "gui.jaymoskingdoms.sign_in.checking": "Checking...",
+  "gui.jaymoskingdoms.sign_in.mismatch": "The two passwords don't match.",
+  "gui.jaymoskingdoms.sign_in.refused": "That isn't this name's password.",
+  "gui.jaymoskingdoms.sign_in.not_kept": "That password wasn't kept. Try a longer one."
+}

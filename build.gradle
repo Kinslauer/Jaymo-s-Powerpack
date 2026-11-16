@@ -518,6 +518,16 @@ def packModsOverride = [
 	// Pinned by its Modrinth version number (project rgcja1LM). TODO(home PC): move it to packMods if it has a CurseForge file.
 	[dep: "maven.modrinth:respawn-recap:1.2.1-26.3"],
 ]
+// on the server only: in modpack/mods (so the Deck and Serverfiles get them), never in the CurseForge import, your
+// profile or the dev game
+def serverOnlyMods = [
+	// EasyAuth (MIT, NikitaCartes; github.com/NikitaCartes/EasyAuth; shipped unchanged): offline (non-premium) accounts may
+	// join (Andy, 2026-11-15). online-mode stays on, so a premium account is checked with Mojang and walks in with its own
+	// UUID (premium-auto-login, on by default); an offline one signs in with a password kept for its name, through Jaymo's
+	// Kingdoms' sign-in screen (SignIn), and nobody can take a premium player's name. Server-only by its fabric.mod.json.
+	// 3.4.4 for 26.3 (Modrinth version Qd0CWVQP). The whitelist and offline friends: deck/whitelist.py.
+	[dep: "maven.modrinth:easyauth:Qd0CWVQP"],
+]
 // not on CurseForge: shipped inside the pack as overrides
 // The Kitchen jar in libs/: the one matching the Kitchen source (kitchen/gradle.properties), else the newest. A git pull on
 // Windows can leave an old one behind if the game or Gradle had it open; extra jars are ignored with a warning (two would
@@ -695,6 +705,11 @@ configurations {
 		canBeResolved = true
 		transitive = false
 	}
+	serverOnlyJars {
+		canBeConsumed = false
+		canBeResolved = true
+		transitive = false
+	}
 }
 
 dependencies {
@@ -737,6 +752,7 @@ dependencies {
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
 	packModsOverride.each { packJars it.dep; packOverrideJars it.dep }
+	serverOnlyMods.each { serverOnlyJars it.dep }
 }
 
 // gradlew packageModpack:
@@ -745,6 +761,7 @@ dependencies {
 def packDir = file("modpack")
 tasks.register("modpackMods", Sync) {
 	from configurations.packJars
+	from configurations.serverOnlyJars
 	from tasks.named("jar")
 	from kitchenShipJar
 	from mcaJar
@@ -809,6 +826,7 @@ tasks.register("serverMods", Sync) {
 		true
 	}
 	from configurations.packJars
+	from configurations.serverOnlyJars
 	from tasks.named("jar")
 	from kitchenShipJar
 	from mcaJar

@@ -77,7 +77,8 @@ public final class StoryStasis {
 	private static void tick(MinecraftServer server) {
 		boolean shoo = server.getTickCount() % SHOO_EVERY == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!player.isAlive() || player.isSpectator()) {
+			// (an offline account still to sign in hasn't started making their character: SignIn)
+			if (!player.isAlive() || player.isSpectator() || !SignIn.signedIn(player)) {
 				continue;
 			}
 			// (the story set out once MCA's creator was done, however it was finished)
