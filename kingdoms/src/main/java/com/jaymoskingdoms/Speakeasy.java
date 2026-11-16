@@ -2,13 +2,18 @@ package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -43,6 +48,12 @@ import org.jspecify.annotations.Nullable;
 final class Speakeasy {
 	/** The den's floor is this far under the hatch; its room this wide (x), deep (z) and high inside. */
 	static final int DEPTH = 9, WIDTH = 9, LENGTH = 7, HEIGHT = 4;
+	/**
+	 * The way the den's ladder faces (it hangs on the shaft's north side), and so its hatch. Open, a trapdoor over a ladder
+	 * is a rung only when it faces as the ladder does; facing any other way it leaves the ladder a block short of the top,
+	 * and nobody climbs out.
+	 */
+	static final Direction LADDER_FACING = Direction.SOUTH;
 	/** Sites are looked for in rings this far from the seat, this far apart, at this many points round each. */
 	static final int RING_MIN = 14, RING_MAX = 50, RING_STEP = 3, RING_POINTS = 16;
 	/** At least this much earth over the den's ceiling, everywhere over it. */
@@ -194,10 +205,10 @@ final class Speakeasy {
 			set(level, hx, y, hz + 1, stone(random));
 		}
 		for (int y = fy + 1; y < gy; y++) {
-			set(level, hx, y, hz, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.SOUTH));
+			set(level, hx, y, hz, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, LADDER_FACING));
 		}
 		set(level, hx, gy, hz, Blocks.SPRUCE_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
-			.setValue(TrapDoorBlock.OPEN, false).setValue(TrapDoorBlock.FACING, Direction.NORTH));
+			.setValue(TrapDoorBlock.OPEN, false).setValue(TrapDoorBlock.FACING, LADDER_FACING));
 		// a bale by the hatch, as if it were only somebody's fodder
 		BlockPos bale = new BlockPos(hx + 1, gy + 1, hz);
 		if (level.getBlockState(bale).canBeReplaced() && level.getBlockState(bale.below()).isFaceSturdy(level, bale.below(), Direction.UP)) {
@@ -239,6 +250,41 @@ final class Speakeasy {
 		set(level, hx - 1, ceil, hz + 1, hung);
 		set(level, hx - 2, ceil, hz, Blocks.COBWEB.defaultBlockState());
 		set(level, hx + 6, ceil, hz + LENGTH - 1, Blocks.COBWEB.defaultBlockState());
+	}
+
+	// ---- getting in and out -------------------------------------------------------------------------------------------
+
+	/**
+	 * The hatch turned to face as its ladder does, so that open it's the ladder's last rung (dens dug before facing it so
+	 * are put right the next time they're looked at).
+	 */
+	static void fitHatch(ServerLevel level, BlockPos hatch) {
+		BlockState s = level.getBlockState(hatch), below = level.getBlockState(hatch.below());
+		if (s.getBlock() instanceof TrapDoorBlock && below.is(Blocks.LADDER) && s.getValue(TrapDoorBlock.FACING) != below.getValue(LadderBlock.FACING)) {
+			level.setBlock(hatch, s.setValue(TrapDoorBlock.FACING, below.getValue(LadderBlock.FACING)), Block.UPDATE_CLIENTS);
+		}
+	}
+
+	/** The open hatch let fall shut (a wooden one; it's somebody's fodder hole, not a well to walk into). */
+	static void shutHatch(ServerLevel level, BlockPos hatch) {
+		BlockState s = level.getBlockState(hatch);
+		if (s.getBlock() instanceof TrapDoorBlock && !s.is(Blocks.IRON_TRAPDOOR) && s.getValue(TrapDoorBlock.OPEN)) {
+			level.setBlock(hatch, s.setValue(TrapDoorBlock.OPEN, false), Block.UPDATE_ALL);
+			level.playSound(null, hatch, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.8F, 1.0F);
+		}
+	}
+
+	/**
+	 * Nothing in {@code box} (a den's room or its pit) is anybody's work site or meeting place: a barrel is a fisherman's
+	 * work site and a bell a meeting place, and townsfolk who took one walked to it, fell down the shaft and stayed there.
+	 */
+	static void clearWorkSites(ServerLevel level, AABB box) {
+		PoiManager pois = level.getPoiManager();
+		BlockPos center = BlockPos.containing(box.getCenter());
+		int r = (int)Math.ceil(Math.max(box.getXsize(), box.getZsize()) / 2.0) + 1;
+		List<BlockPos> taken = pois.getInSquare(type -> true, center, r, PoiManager.Occupancy.ANY).map(PoiRecord::getPos)
+			.filter(p -> box.contains(Vec3.atCenterOf(p))).toList();
+		taken.forEach(pois::remove);
 	}
 
 	// ---- the fight pit (0.7.224) ---------------------------------------------------------------------------------------

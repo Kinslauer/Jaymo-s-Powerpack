@@ -39,6 +39,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -140,6 +141,10 @@ public final class Underworld {
 	 * running is put out at its nearer end. The bookie alone may go up into town by day ({@link Bookies}).
 	 */
 	static final int HOME_CHECK = 40, SHAFT_STUCK = 2;
+	/** A stranger found in a den's room this many checks running, with no player down there, is put out up top. */
+	static final int ROOM_STUCK = 3;
+	/** A den's open hatch falls shut once no player is this near it (blocks) or down below. */
+	static final double HATCH_CLEAR = 6.0;
 	/** How far round a den its hands are looked for. */
 	static final double HANDS_RANGE = 64.0;
 
@@ -304,7 +309,7 @@ public final class Underworld {
 	private static int games;
 	/** Realm → the day a site for its den was last looked for and none found (looked for once a day after that). */
 	private static final Map<String, Long> NO_SITE = new HashMap<>();
-	/** (0.7.450) Villager → how many checks running it's been found in a den's shaft. */
+	/** Villager or townsman → how many checks running it's been found stranded in a den's shaft or room. */
 	private static final Map<UUID, Integer> IN_SHAFT = new HashMap<>();
 
 	private Underworld() {
@@ -665,7 +670,10 @@ public final class Underworld {
 		return new AABB(hatch.getX(), hatch.getY() - Speakeasy.DEPTH + 1, hatch.getZ(), hatch.getX() + 1, hatch.getY() + 1, hatch.getZ() + 1);
 	}
 
-	/** Every den nearby: its hands kept at home, one of each; nobody left stuck on its ladder. */
+	/**
+	 * Every den nearby: its hatch facing its ladder and shut when nobody's by it, no work sites down there to draw the town's
+	 * folk in, nobody but its hands left in it or on its ladder, and its hands kept at home, one of each.
+	 */
 	private static void keepHome(ServerLevel level, long now) {
 		MinecraftServer server = level.getServer();
 		java.util.Set<UUID> stuck = new java.util.HashSet<>();
@@ -674,31 +682,62 @@ public final class Underworld {
 				continue;
 			}
 			Den d = builtDen(server, f);
-			if (d == null || !level.isPositionEntityTicking(d.hatch()) || d.shutAt(now) || DenRaids.live(f.id())) {
-				// (a den under a raid, or shut after one, isn't kept: DenRaids sees to it)
+			if (d == null || !level.isPositionEntityTicking(d.hatch()) || DenRaids.live(f.id())) {
+				// (a den under a raid isn't kept: DenRaids sees to it)
 				continue;
 			}
 			BlockPos hatch = d.hatch();
 			AABB room = Speakeasy.room(hatch).inflate(1.0), shaft = shaft(hatch);
 			Speakeasy.Pit pit = FightPit.pit(server, f.id());
 			AABB pitRoom = pit == null ? null : pit.room().inflate(1.0);
-			Map<String, Villager> kept = new HashMap<>();
+			Speakeasy.fitHatch(level, hatch);
+			Speakeasy.clearWorkSites(level, room);
+			if (pitRoom != null) {
+				Speakeasy.clearWorkSites(level, pitRoom);
+			}
+			boolean playerBelow = false, playerNear = false;
+			for (ServerPlayer p : level.players()) {
+				if (p.isSpectator()) {
+					continue;
+				}
+				boolean below = room.contains(p.position()) || shaft.intersects(p.getBoundingBox()) || pitRoom != null && pitRoom.contains(p.position());
+				playerBelow |= below;
+				playerNear |= below || p.distanceToSqr(Vec3.atCenterOf(hatch)) <= HATCH_CLEAR * HATCH_CLEAR;
+			}
+			if (!playerNear) {
+				Speakeasy.shutHatch(level, hatch);
+			}
+			boolean kept = !d.shutAt(now);
+			Map<String, Villager> keptHands = new HashMap<>();
 			AABB around = room.inflate(HANDS_RANGE, HANDS_RANGE, HANDS_RANGE);
-			for (Villager v : level.getEntitiesOfClass(Villager.class, around, v -> v.isAlive() && !v.isPassenger())) {
-				boolean inShaft = shaft.intersects(v.getBoundingBox()) && !room.contains(v.position());
-				String tag = hand(v);
+			for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, around,
+				m -> m.isAlive() && !m.isPassenger() && !m.isLeashed() && (m instanceof Villager || m instanceof Folk))) {
+				boolean inShaft = shaft.intersects(m.getBoundingBox()) && !room.contains(m.position());
+				boolean inRoom = room.contains(m.position()) || pitRoom != null && pitRoom.contains(m.position());
+				String tag = m instanceof Villager v ? hand(v) : null;
 				if (tag == null) {
-					if (inShaft) {
-						// anyone else on the ladder this long is stuck there: out at whichever end is nearer
-						int n = IN_SHAFT.merge(v.getUUID(), 1, Integer::sum);
-						stuck.add(v.getUUID());
-						if (n >= SHAFT_STUCK) {
-							Vec3 out = v.getY() - room.minY < hatch.getY() - v.getY() ? Speakeasy.wakeSpot(hatch) : topside(level, hatch);
-							v.snapTo(out.x, out.y, out.z, v.getYRot(), 0.0F);
-							v.getNavigation().stop();
-							IN_SHAFT.remove(v.getUUID());
+					// anyone else down there this long can't get out by himself (nobody else lives there, and a villager
+					// can't work a trapdoor): up and out beside the hatch. With a player below, a stranger in the room may
+					// be with them, and one on the ladder nearer its foot is put down there instead.
+					if (inShaft || inRoom && !playerBelow) {
+						int n = IN_SHAFT.merge(m.getUUID(), 1, Integer::sum);
+						stuck.add(m.getUUID());
+						if (n >= (inShaft ? SHAFT_STUCK : ROOM_STUCK)) {
+							boolean down = inShaft && playerBelow && m.getY() - room.minY < hatch.getY() - m.getY();
+							Vec3 out = down ? Speakeasy.wakeSpot(hatch) : topside(level, hatch);
+							m.snapTo(out.x, out.y, out.z, m.getYRot(), 0.0F);
+							m.getNavigation().stop();
+							if (m instanceof Villager v) {
+								forgetDen(v, room, pitRoom);
+							}
+							IN_SHAFT.remove(m.getUUID());
 						}
 					}
+					continue;
+				}
+				Villager v = (Villager)m;
+				if (!kept) {
+					// (a den shut after a raid has no hands: DenRaids takes them off)
 					continue;
 				}
 				if (tag.equals(FightPit.FIGHTER_TAG) && (FightPit.onCard(v.getUUID()) || pitRoom == null)) {
@@ -708,13 +747,13 @@ public final class Underworld {
 				boolean atHome = home.contains(v.position()) || tag.equals(FightPit.ATTENDANT_TAG) && room.contains(v.position());
 				if (tag.equals(Bookies.TAG) && (Bookies.walking(v.getUUID()) || !atHome && !inShaft && Bookies.outAndAbout(level, v, d))) {
 					// the bookie, up in town on his own business, or leading someone down
-					if (!kept.containsKey(tag)) {
-						kept.put(tag, v);
+					if (!keptHands.containsKey(tag)) {
+						keptHands.put(tag, v);
 					}
 					continue;
 				}
 				if (!tag.equals(FightPit.FIGHTER_TAG)) {
-					Villager first = kept.get(tag);
+					Villager first = keptHands.get(tag);
 					if (first != null && first != v) {
 						// one of each: a second hand hired while the first was off wandering goes back to town, an ordinary man
 						v.removeTag(tag);
@@ -722,7 +761,7 @@ public final class Underworld {
 						v.snapTo(out.x, out.y, out.z, v.getYRot(), 0.0F);
 						continue;
 					}
-					kept.put(tag, v);
+					keptHands.put(tag, v);
 				}
 				if (!atHome) {
 					Vec3 spot = switch (tag) {
@@ -742,6 +781,23 @@ public final class Underworld {
 			}
 		}
 		IN_SHAFT.keySet().retainAll(stuck);
+	}
+
+	/** {@code v}'s work site, meeting place or home, if any was down in the den (taken before it kept none): forgotten. */
+	private static void forgetDen(Villager v, AABB room, @Nullable AABB pitRoom) {
+		for (net.minecraft.world.entity.ai.memory.MemoryModuleType<net.minecraft.core.GlobalPos> m : List.of(
+			net.minecraft.world.entity.ai.memory.MemoryModuleType.JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryModuleType.POTENTIAL_JOB_SITE,
+			net.minecraft.world.entity.ai.memory.MemoryModuleType.MEETING_POINT, net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME)) {
+			if (!v.getBrain().checkMemory(m, net.minecraft.world.entity.ai.memory.MemoryStatus.REGISTERED)) {
+				continue;
+			}
+			v.getBrain().getMemory(m).ifPresent(g -> {
+				Vec3 at = Vec3.atCenterOf(g.pos());
+				if (g.dimension() == v.level().dimension() && (room.contains(at) || pitRoom != null && pitRoom.contains(at))) {
+					v.getBrain().eraseMemory(m);
+				}
+			});
+		}
 	}
 
 	/** Standing room up top, beside the hatch (never on it). */
