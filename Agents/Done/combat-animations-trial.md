@@ -46,4 +46,4 @@ and the fuller write-up from source in the Claude project: "Epic Fight animation
   Blender moves". Elbow bends are drawn for Better Combat animations (SwingElbows). Builds and was stepped through PAL
   outside the game; not played. Mobs get the moves with straight arms and no guard (PalMobAnimator ignores bend).
 - Waiting on Andy: play it, then pick a route.
-- 2026-11-16 03:53 PR #1618 is merged into master; moved to Agents/Done.
+- 2026-11-16 04:03 PR #1618 is merged into master; moved to Agents/Done.

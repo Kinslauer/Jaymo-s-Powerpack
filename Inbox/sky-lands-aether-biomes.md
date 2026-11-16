@@ -8,7 +8,7 @@ claimed_by: hermes-writer
 pr:
 suggested_owns: []
 writer: hermes-writer
-text_pass: 
+text_pass: none
 ---
 
 # Research sky-lands biomes for Aether
