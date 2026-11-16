@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Crash-risk review of all three mods (read-only)
 branch: none (review only, no edits)
 with: Andy
@@ -23,3 +23,4 @@ owns:
 - Guards that count: `Loaded.made(level, pos)` (each mod has one), `getChunkSource().getChunkNow(x, z) != null`. Plain `isLoaded`/`hasChunkAt`/`hasChunk` don't (true while the chunk is still being made).
 
 ## Done
+- 2026-11-16 12:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
