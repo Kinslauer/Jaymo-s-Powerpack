@@ -1,0 +1,64 @@
+# After each Release run (so every merge, with its version bumps in): rebuild the testers' packwiz pack and publish it.
+# The pack's text files go on the tester-pack branch (raw.githubusercontent.com serves pack.toml from there), our own
+# jars and the Prism instance zip on the tester-pack-files release. Testers' Prism Launcher runs packwiz before each
+# launch and downloads whatever changed. What it does: tools/packwiz_pack.py. For testers: docs/Tester-Pack.md.
+name: Tester pack
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+
+# one at a time, newest master wins: a run queued behind another builds whatever master is by then
+concurrency:
+  group: tester-pack
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      # services.gradle.org times out now and then: fetch Gradle on its own, a few tries, before the real build
+      - name: Fetch Gradle
+        run: |
+          for try in 1 2 3 4 5; do
+            sh ./gradlew --version --no-daemon && exit 0
+            echo "Gradle download failed (try $try), waiting before the next one"
+            sleep $((try * 20))
+          done
+          exit 1
+      - name: Build the mods and list the pack
+        run: sh ./gradlew packwizList --no-daemon --stacktrace -x test
+      - name: The last published pack
+        run: |
+          if git fetch --depth 1 origin tester-pack; then
+            mkdir -p build/previous-pack && git archive FETCH_HEAD | tar -x -C build/previous-pack
+          fi
+      - name: Write the pack and upload our jars
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/packwiz_pack.py build/packwiz-list.json --out build/tester-pack --previous build/previous-pack --publish
+      - name: Publish the pack on the tester-pack branch
+        working-directory: build/tester-pack
+        run: |
+          git init -q -b tester-pack
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Tester pack for master $(git -C ../.. rev-parse --short HEAD)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tester-pack
