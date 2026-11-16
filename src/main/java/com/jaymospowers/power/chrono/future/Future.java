@@ -260,7 +260,9 @@ public final class Future {
 				if (!free.test(future, new net.minecraft.core.BlockPos(x, 0, z))) {
 					continue;
 				}
-				future.getChunk(x >> 4, z >> 4);
+				if (!com.jaymospowers.core.Loaded.made(future, x, z)) {
+					continue;
+				}
 				int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 				net.minecraft.core.BlockPos feet = new net.minecraft.core.BlockPos(x, y, z);
 				if (Math.abs(y - square.y) <= ARRIVAL_FREE_RISE && future.getBlockState(feet.below()).isFaceSturdy(future, feet.below(), net.minecraft.core.Direction.UP)

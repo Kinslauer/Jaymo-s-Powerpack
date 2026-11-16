@@ -1,6 +1,7 @@
 package com.jaymospowers.power.resonance;
 
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -139,8 +140,11 @@ public final class ResonanceFate {
 	private static void listen(ServerPlayer player, ServerLevel level) {
 		Listening listening = LISTENING.get(player.getUUID());
 		if (listening != null) {
-			JukeboxSongPlayer songs = level.getBlockEntity(listening.jukebox) instanceof JukeboxBlockEntity jukebox ? jukebox.getSongPlayer() : null;
 			boolean near = player.position().distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(listening.jukebox)) <= (CURE_RADIUS + 0.5) * (CURE_RADIUS + 0.5);
+			if (near && !Loaded.made(level, listening.jukebox)) {
+				return;
+			}
+			JukeboxSongPlayer songs = near && level.getBlockEntity(listening.jukebox) instanceof JukeboxBlockEntity jukebox ? jukebox.getSongPlayer() : null;
 			if (songs == null || !near) {
 				LISTENING.remove(player.getUUID());
 				return;

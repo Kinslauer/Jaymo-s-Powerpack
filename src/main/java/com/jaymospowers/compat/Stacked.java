@@ -1,5 +1,6 @@
 package com.jaymospowers.compat;
 
+import com.jaymospowers.core.Loaded;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -197,6 +198,9 @@ public final class Stacked {
 				band = bandOf.invoke(stack.get(), Level.OVERWORLD);
 			}
 			if (band == null) {
+				return null;
+			}
+			if (!Loaded.made(level, x, z)) {
 				return null;
 			}
 			ChunkAccess chunk = level.getChunk(x >> 4, z >> 4);

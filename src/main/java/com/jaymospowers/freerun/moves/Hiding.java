@@ -2,6 +2,7 @@ package com.jaymospowers.freerun.moves;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Ledge;
+import com.jaymospowers.core.Loaded;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -120,6 +121,9 @@ public final class Hiding {
 	static void hide(ServerPlayer player, long packed) {
 		BlockPos pos = BlockPos.of(packed);
 		ServerLevel level = player.level();
+		if (!Loaded.made(level, pos)) {
+			return;
+		}
 		BlockState state = level.getBlockState(pos);
 		Vec3 feet = player.position();
 		if (hidden(player) || !player.isShiftKeyDown() || !player.onGround() || !Ledge.canHang(player) || !hideable(state)
@@ -144,6 +148,10 @@ public final class Hiding {
 			return;
 		}
 		ServerLevel level = player.level();
+		if (!Loaded.made(level, pos)) {
+			// (taken far from the spot: nothing to go back to)
+			return;
+		}
 		Vec3 out = from != null && level.noCollision(player, player.getBoundingBox().move(from.subtract(player.position()))) ? from
 			: Vec3.atBottomCenterOf(pos.above());
 		player.teleportTo(out.x, out.y, out.z);
@@ -163,8 +171,8 @@ public final class Hiding {
 				continue;
 			}
 			player.resetFallDistance();
-			if (!player.isAlive() || !hideable(player.level().getBlockState(pos)) || player.position().distanceTo(anchor(pos)) > DRIFT
-				|| player.isPassenger() || player.isSpectator()) {
+			if (!player.isAlive() || !Loaded.made(player.level(), pos) || player.position().distanceTo(anchor(pos)) > DRIFT
+				|| !hideable(player.level().getBlockState(pos)) || player.isPassenger() || player.isSpectator()) {
 				leave(player);
 				continue;
 			}

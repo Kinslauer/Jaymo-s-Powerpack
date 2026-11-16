@@ -23,6 +23,11 @@ import org.jspecify.annotations.Nullable;
 public final class WildRoom {
 	/** Spots tried for a site, and the most the ground may rise or fall under the room (blocks). */
 	static final int TRIES = 28, MAX_SLOPE = 3;
+	/**
+	 * Of those, how many may be on land not yet made: each makes its chunks on the server thread, and 28 of them in a row
+	 * ran a find past the watchdog.
+	 */
+	static final int MAKING_TRIES = 4;
 	/** How far the foundation reaches down at most (blocks), and how much sky is cleared over the roof. */
 	static final int FOUNDATION = 8, CLEAR_ABOVE = 4;
 
@@ -47,7 +52,7 @@ public final class WildRoom {
 	public static @Nullable BlockPos find(ServerLevel level, BlockPos near, int min, int max, int w, int d, int h, RandomSource random,
 		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		for (int pass = 0; pass < 2; pass++) {
-			for (int i = 0; i < TRIES; i++) {
+			for (int i = 0; i < (pass == 0 ? TRIES : MAKING_TRIES); i++) {
 				double angle = random.nextDouble() * Math.PI * 2.0;
 				int dist = min + random.nextInt(Math.max(1, max - min + 1));
 				int x0 = near.getX() + Mth.floor(Math.cos(angle) * dist), z0 = near.getZ() + Mth.floor(Math.sin(angle) * dist);

@@ -769,7 +769,8 @@ public final class Ledge {
 			ServerLevel level = player.level();
 			long age = level.getGameTime() - hold.start();
 			boolean over = hold.climbing() ? age > hold.climbTicks() + CLIMB_SLACK_TICKS : age > HANG_MAX_TICKS + CONFIRM_TICKS;
-			boolean held = VAULTING.contains(entry.getKey()) ? vaultable(level, entry.getValue()) : holdable(level, entry.getValue());
+			boolean held = Loaded.made(level, entry.getValue())
+				&& (VAULTING.contains(entry.getKey()) ? vaultable(level, entry.getValue()) : holdable(level, entry.getValue()));
 			if (over || !canHang(player) || !hold.climbing() && !held) {
 				VAULTING.remove(entry.getKey());
 				it.remove();

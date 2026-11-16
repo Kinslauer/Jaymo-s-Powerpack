@@ -2,6 +2,7 @@ package com.jaymospowers.power.ember;
 
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Flames;
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.smoke.SmokeField;
 import com.jaymospowers.power.smoke.SmokePower;
@@ -110,7 +111,7 @@ public final class EmberFireball {
 		ball.age++;
 		Vec3 from = ball.pos;
 		Vec3 to = from.add(ball.velocity);
-		if (!level.isLoaded(BlockPos.containing(to)) || ball.owner.level() != level) {
+		if (!Loaded.made(level, BlockPos.containing(to)) || ball.owner.level() != level) {
 			return true;
 		}
 		if (level.getFluidState(BlockPos.containing(to)).is(FluidTags.WATER)) {

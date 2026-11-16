@@ -2,6 +2,7 @@ package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.Stacked;
+import com.jaymospowers.core.Loaded;
 import com.mojang.serialization.Codec;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -17,9 +18,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -46,6 +49,8 @@ public final class ArsenalEmber {
 	static final int WORLD_LIMIT = 29_999_000;
 	/** How often (ticks) a stranded player is checked for having reached the Overworld. */
 	static final int CHECK_EVERY = 20;
+	/** Holds the far side of a rift loading (not waited on) until a later pass finds it made. */
+	private static final TicketType RIFT_LOAD = new TicketType(200L, TicketType.FLAG_LOADING);
 
 	/** The player went through a random Nether rift and hasn't been back to the Overworld since. */
 	public static final AttachmentType<Boolean> STRANDED = AttachmentRegistry.create(JaymosPowers.id("arsenal_ember_stranded"),
@@ -170,10 +175,22 @@ public final class ArsenalEmber {
 		}
 		Vec3 at;
 		if (toNether) {
-			at = netherSpot(to, Math.floorDiv(player.getBlockX(), SCALE), Math.floorDiv(player.getBlockZ(), SCALE), Stacked.shift(server, Level.NETHER));
+			int x = Math.floorDiv(player.getBlockX(), SCALE);
+			int z = Math.floorDiv(player.getBlockZ(), SCALE);
+			// the floor search and the fallback platform reach SEARCH_RADIUS around the spot, over up to four chunks
+			if (!Loaded.made(to, x - SEARCH_RADIUS, z - SEARCH_RADIUS) || !Loaded.made(to, x + SEARCH_RADIUS, z - SEARCH_RADIUS)
+				|| !Loaded.made(to, x - SEARCH_RADIUS, z + SEARCH_RADIUS) || !Loaded.made(to, x + SEARCH_RADIUS, z + SEARCH_RADIUS)) {
+				to.getChunkSource().addTicketAndLoadWithRadius(RIFT_LOAD, ChunkPos.containing(new BlockPos(x, 0, z)), 1);
+				return;
+			}
+			at = netherSpot(to, x, z, Stacked.shift(server, Level.NETHER));
 		} else {
 			int x = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, player.getBlockX() * SCALE));
 			int z = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, player.getBlockZ() * SCALE));
+			if (!Loaded.made(to, x, z)) {
+				to.getChunkSource().addTicketAndLoadWithRadius(RIFT_LOAD, ChunkPos.containing(new BlockPos(x, 0, z)), 0);
+				return;
+			}
 			BlockPos top = to.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 			at = Vec3.atBottomCenterOf(top);
 		}
