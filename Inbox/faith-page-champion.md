@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-16
 thread: Reason Art project thread "Show faith champions in the life-story creator"
 claimed_by: hermes-b
-pr: 
+pr: 1643
 suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/LifeStoryScreen.java (faith page preview + sigil backdrop only)
   - kingdoms/src/client/java/com/jaymoskingdoms/client/StoryFigure.java
