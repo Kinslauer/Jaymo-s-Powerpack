@@ -34,12 +34,19 @@ import org.jspecify.annotations.Nullable;
  * The Wardrobe (Andy: "a closet or wardrobe block. two blocks tall, like the fridge, and it should allow you to use the
  * /mca editor window, costumes and also the YDM weapon master config. combined into the same screen"). Two blocks tall,
  * set like a door: the lower half is the wardrobe proper (its item, its drop), the upper half comes and goes with it.
- * Opening either half opens the wardrobe's screen on the client ({@link Open}): your looks (MCA's editor), the Costume
- * Table's designer (this counts as a table for sewing, {@link CostumeNet}) and how your weapons hang on you (YDM's
- * Weapon Master), as tabs of one screen.
+ * Opening either half opens the wardrobe's screen on the client ({@link Open}): your clothes (MCA's clothing page only),
+ * the Costume Table's designer and how your weapons hang on you (YDM's Weapon Master), as tabs of one screen.
+ * <p>Andy: "you should have to first combine the table with the wardrobe either by craft or right clicking the wardrobe
+ * with the table in hand. follow the setting. they should only ever change clothes not the looks or anything else from
+ * the editor". The Costume tab is there only once a Costume Table has gone into the wardrobe ({@link #COSTUMES}: used
+ * on it, or crafted in, which the item keeps); only then does it count as a table for sewing ({@link CostumeNet}). The
+ * Clothes tab follows MCA's own rule for {@code /mca editor} ({@link WardrobeClothesRule}).
  */
 public class WardrobeBlock extends HorizontalDirectionalBlock {
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
+	/** A Costume Table has gone into it: it has the Costume tab. */
+	public static final net.minecraft.world.level.block.state.properties.BooleanProperty COSTUMES =
+		net.minecraft.world.level.block.state.properties.BooleanProperty.create("costumes");
 
 	// (each half facing north, the doors at the front: a plinth and the body below, the body and its crown above; the
 	// model's boxes are these, so nothing beside it is culled away)
@@ -48,7 +55,8 @@ public class WardrobeBlock extends HorizontalDirectionalBlock {
 
 	public WardrobeBlock(Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER));
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER)
+			.setValue(COSTUMES, false));
 	}
 
 	/** {@code boxes} (x0, y0, z0, x1, y1, z1, facing north) turned to each facing, by its 2D data value. */
@@ -72,7 +80,7 @@ public class WardrobeBlock extends HorizontalDirectionalBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, HALF);
+		builder.add(FACING, HALF, COSTUMES);
 	}
 
 	@Override
@@ -82,11 +90,35 @@ public class WardrobeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+		net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
+		if (state.getValue(COSTUMES) || !stack.is(Costume.TABLE.asItem())) {
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
+		// the Costume Table goes in: both halves have it from now on
+		if (!level.isClientSide()) {
+			BlockPos lower = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+			for (BlockPos half : new BlockPos[] {lower, lower.above()}) {
+				BlockState there = level.getBlockState(half);
+				if (there.is(this)) {
+					level.setBlock(half, there.setValue(COSTUMES, true), Block.UPDATE_ALL);
+				}
+			}
+			stack.consume(1, player);
+			level.playSound(null, lower, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+			if (player instanceof ServerPlayer server) {
+				server.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wardrobe.table_in"));
+			}
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (player instanceof ServerPlayer server) {
 			BlockPos lower = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
 			level.playSound(null, lower, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
-			ServerPlayNetworking.send(server, new Open(lower));
+			ServerPlayNetworking.send(server, new Open(lower, state.getValue(COSTUMES), WardrobeClothesRule.allowed(server)));
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -145,11 +177,15 @@ public class WardrobeBlock extends HorizontalDirectionalBlock {
 		return super.playerWillDestroy(level, pos, state, player);
 	}
 
-	/** Server → client: open the wardrobe's screen, for the wardrobe whose lower half is at {@code pos}. */
-	public record Open(BlockPos pos) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+	/**
+	 * Server → client: open the wardrobe's screen, for the wardrobe whose lower half is at {@code pos}; whether it has
+	 * the Costume tab, and whether MCA lets this player change their clothes.
+	 */
+	public record Open(BlockPos pos, boolean costumes, boolean clothes) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(com.jaymospowers.JaymosPowers.id("wardrobe_open"));
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Open> CODEC =
-			BlockPos.STREAM_CODEC.map(Open::new, Open::pos);
+			net.minecraft.network.codec.StreamCodec.composite(BlockPos.STREAM_CODEC, Open::pos,
+				net.minecraft.network.codec.ByteBufCodecs.BOOL, Open::costumes, net.minecraft.network.codec.ByteBufCodecs.BOOL, Open::clothes, Open::new);
 
 		@Override
 		public Type<Open> type() {

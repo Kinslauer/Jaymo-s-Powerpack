@@ -160,18 +160,27 @@ write(f"{R}/data/jaymospowers/loot_table/blocks/wardrobe.json", {
         "entries": [{
             "type": "minecraft:item", "name": "jaymospowers:wardrobe",
             "condition": {"type": "minecraft:match_block", "blocks": "jaymospowers:wardrobe", "state": {"half": "lower"}},
+            # a wardrobe with a Costume Table in it stays one
+            "modifier": [{"type": "minecraft:copy_state", "block": "jaymospowers:wardrobe", "properties": ["costumes"]}],
         }],
     }],
     "random_sequence": "jaymospowers:blocks/wardrobe",
 })
 
-# a glass to dress at (the MCA editor), the Costume Table for the costumes, a chest for the weapons' pegs
+# a glass to dress at, a chest for the weapons' pegs
 write(f"{R}/data/jaymospowers/recipe/wardrobe.json", {
     "type": "minecraft:crafting_shaped",
     "category": "misc",
-    "key": {"P": "minecraft:spruce_planks", "G": "minecraft:glass_pane", "T": "jaymospowers:costume_table", "C": "minecraft:chest"},
-    "pattern": ["PGP", "PTP", "PCP"],
+    "key": {"P": "minecraft:spruce_planks", "G": "minecraft:glass_pane", "C": "minecraft:chest"},
+    "pattern": ["PGP", "P P", "PCP"],
     "result": {"id": "jaymospowers:wardrobe"},
+})
+# a Costume Table crafted in gives it the Costume tab (or use the table on a set wardrobe)
+write(f"{R}/data/jaymospowers/recipe/wardrobe_with_costume_table.json", {
+    "type": "minecraft:crafting_shapeless",
+    "category": "misc",
+    "ingredients": ["jaymospowers:wardrobe", "jaymospowers:costume_table"],
+    "result": {"id": "jaymospowers:wardrobe", "components": {"minecraft:block_state": {"costumes": "true"}}},
 })
 
 axe = f"{R}/data/minecraft/tags/block/mineable/axe.json"

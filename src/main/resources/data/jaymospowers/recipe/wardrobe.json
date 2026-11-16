@@ -4,12 +4,11 @@
   "key": {
     "P": "minecraft:spruce_planks",
     "G": "minecraft:glass_pane",
-    "T": "jaymospowers:costume_table",
     "C": "minecraft:chest"
   },
   "pattern": [
     "PGP",
-    "PTP",
+    "P P",
     "PCP"
   ],
   "result": {

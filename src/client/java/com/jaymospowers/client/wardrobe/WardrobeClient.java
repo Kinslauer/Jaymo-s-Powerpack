@@ -22,15 +22,15 @@ import net.minecraft.sounds.SoundSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Wardrobe's screen ({@link WardrobeBlock}): one screen with a tab for each part of how you look and carry yourself.
+ * The Wardrobe's screen ({@link WardrobeBlock}): one screen with a tab for each part of how you dress and carry yourself.
  * <ul>
- * <li><b>Looks</b>: MCA's character editor on yourself, the one {@code /mca editor} opens ({@link WardrobeLooks}). Its own
- * page row (General, Body, Traits) gets the Costume and Weapons tabs added to it ({@code WardrobeEditorTabsMixin}).</li>
- * <li><b>Costume</b>: the Costume Table's designer; the wardrobe counts as a table for sewing and taking off.</li>
+ * <li><b>Clothes</b>: MCA's editor held to its clothing page ({@link WardrobeClothes}), when MCA's setting for
+ * {@code /mca editor} lets this player use it (the server says).</li>
+ * <li><b>Costume</b>: the Costume Table's designer, once a table has gone into this wardrobe.</li>
  * <li><b>Weapons</b>: YDM's Weapon Master settings, where each carried item hangs on the body (found by name: it is optional).</li>
  * </ul>
  * Each tab is that mod's own screen, whole, with the same row of tabs over it, so nothing of theirs is squeezed or cut:
- * switching tabs keeps what was set (MCA's editor is saved, Weapon Master writes its config). The wardrobe stays open
+ * switching tabs keeps what was set (the clothes are sent, Weapon Master writes its config). The wardrobe stays open
  * while any of its tabs (or a page they open, like the suit editor) is up, and shuts with them.
  */
 public final class WardrobeClient {
@@ -43,7 +43,7 @@ public final class WardrobeClient {
 	private static final String WEAPON_CONFIG = "yourdailymodder.weaponmaster.setup.config.ModConfigs";
 
 	public enum Tab {
-		LOOKS, COSTUME, WEAPONS;
+		CLOTHES, COSTUME, WEAPONS;
 
 		Component label() {
 			return Component.translatable("screen.jaymospowers.wardrobe." + name().toLowerCase(java.util.Locale.ROOT));
@@ -51,21 +51,19 @@ public final class WardrobeClient {
 
 		boolean available() {
 			return switch (this) {
-				case LOOKS -> FabricLoader.getInstance().isModLoaded(MCA);
-				case COSTUME -> true;
+				case CLOTHES -> clothes && FabricLoader.getInstance().isModLoaded(MCA);
+				case COSTUME -> costumes;
 				case WEAPONS -> FabricLoader.getInstance().isModLoaded(WEAPON_MASTER);
 			};
 		}
 	}
 
-	/** MCA's editor page names for the wardrobe's other tabs, added to its page row (WardrobeEditorTabsMixin), in order. */
-	public static final java.util.Map<String, Tab> EDITOR_PAGES = editorPages();
-	private static final String EDITOR_SCREEN = "net.conczin.mca.client.gui.VillagerEditorScreen";
-
 	/** The open wardrobe's lower half, or null while none is open. */
 	private static @Nullable BlockPos open;
 	/** The tab showing, and the last one shown (the next wardrobe opens on it). */
-	private static Tab showing = Tab.LOOKS;
+	private static Tab showing = Tab.CLOTHES;
+	/** What the open wardrobe offers: the Costume tab (a table went in), the Clothes tab (MCA's setting allows it). */
+	private static boolean costumes, clothes;
 
 	private WardrobeClient() {
 	}
@@ -73,7 +71,17 @@ public final class WardrobeClient {
 	public static void init() {
 		ClientPlayNetworking.registerGlobalReceiver(WardrobeBlock.Open.TYPE, (payload, context) -> {
 			open = payload.pos();
-			show(showing.available() ? showing : Tab.COSTUME);
+			costumes = payload.costumes();
+			clothes = payload.clothes();
+			List<Tab> tabs = available();
+			if (tabs.isEmpty()) {
+				open = null;
+				if (context.client().player != null) {
+					context.client().player.sendOverlayMessage(Component.translatable("message.jaymospowers.wardrobe.empty"));
+				}
+				return;
+			}
+			show(showing.available() ? showing : tabs.get(0));
 		});
 		// the wardrobe shuts when its screens do
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -91,21 +99,6 @@ public final class WardrobeClient {
 				tabs(width / 2, Math.max(2, height / 2 - WEAPON_PANEL_H / 2 - TAB_H - 4), Tab.WEAPONS, widgets::add);
 			}
 		});
-	}
-
-	private static java.util.Map<String, Tab> editorPages() {
-		java.util.Map<String, Tab> pages = new java.util.LinkedHashMap<>();
-		for (Tab tab : Tab.values()) {
-			if (tab != Tab.LOOKS && tab.available()) {
-				pages.put("jaymospowers_" + tab.name().toLowerCase(java.util.Locale.ROOT), tab);
-			}
-		}
-		return java.util.Collections.unmodifiableMap(pages);
-	}
-
-	/** Whether {@code editor} is MCA's editor showing as the open wardrobe's Looks tab (its exact class: not MCA's creator, needle or comb). */
-	public static boolean editorTabs(Object editor) {
-		return showing(Tab.LOOKS) && editor.getClass().getName().equals(EDITOR_SCREEN);
 	}
 
 	/** The open wardrobe's lower half, or null: the Costume tab sews against it. */
@@ -161,7 +154,7 @@ public final class WardrobeClient {
 		}
 		keep(minecraft.gui.screen());
 		Screen next = switch (tab) {
-			case LOOKS -> WardrobeLooks.editor(minecraft.player.getUUID());
+			case CLOTHES -> WardrobeClothes.open(minecraft.player.getUUID());
 			case COSTUME -> new CostumeScreen(pos);
 			case WEAPONS -> weaponMaster();
 		};
@@ -172,13 +165,13 @@ public final class WardrobeClient {
 		minecraft.gui.setScreen(next);
 	}
 
-	/** Before leaving a tab: MCA's editor sends its edits (as its Done button does), Weapon Master writes its config. */
+	/** Before leaving a tab: the clothes are sent (as MCA's Done button sends them), Weapon Master writes its config. */
 	private static void keep(@Nullable Screen screen) {
 		if (screen == null) {
 			return;
 		}
-		if (showing == Tab.LOOKS && FabricLoader.getInstance().isModLoaded(MCA)) {
-			WardrobeLooks.keep(screen);
+		if (showing == Tab.CLOTHES && FabricLoader.getInstance().isModLoaded(MCA)) {
+			WardrobeClothes.keep(screen);
 		} else if (screen.getClass().getName().equals(WEAPON_SCREEN)) {
 			try {
 				Class.forName(WEAPON_CONFIG).getMethod("changeConfig").invoke(null);

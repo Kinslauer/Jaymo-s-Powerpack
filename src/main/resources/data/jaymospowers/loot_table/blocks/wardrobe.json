@@ -16,7 +16,16 @@
             "state": {
               "half": "lower"
             }
-          }
+          },
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:wardrobe",
+              "properties": [
+                "costumes"
+              ]
+            }
+          ]
         }
       ]
     }
