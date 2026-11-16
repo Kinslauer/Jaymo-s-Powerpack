@@ -39,3 +39,4 @@ Added (same thread): Witcher 3 / Baldur's Gate 3 style conversation system — a
 - Camera work: back-and-forth cuts, breaking the 180 — needs specific shot/reverse-shot framing per speaker.
 
 Settled by Tiv: the new system replaces MCA's dialogue UI completely. Design philosophy: extravagant emergent gameplay with very little hand-holding — whatever information is there should be more like a hint and less like an answer. Learning everything MCA gives you outright is counter-intuitive to that vision.
+- 2026-11-16 12:47 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
