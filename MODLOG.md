@@ -5395,3 +5395,7 @@ Built; not played.
 
 - Andy: "the sit key should start the animation for players". Downed beside a wall, a player no longer sits up against it on their own after lying still: pressing the Sit key (] by default) starts the 1.5 s get-up (roll onto the back, sit up, turn round, push back to the wall), and pressing it again lays them back down. Everyone sees it (it uses the same synced mark as being set there by a carrier). Out cold, the key does nothing; carriers can still set anyone against a wall, and mobs sit as before.
 - Andy: "players should also stay seated when recovering to their feet, and they can recover with blacked limbs this way, it just takes longer." Sat against a wall, holding sneak to get up pushes them up the wall to their feet (the slide down it played back up, the head coming up with them), and letting go part way slides them back down it, with no drop to the floor. Up a wall even a player too wounded to rise otherwise (head, body or an arm red, broken or gone) can get up, over twice as long (16 s). Without legs to stand on they rise as before.
+
+## 0.24.29 (2026-11-16): No more server crash refreshing a creature's changed stats
+
+- When a creature's changed attributes were handled, handling one (max health lowering its health, its size changing) could mark another as changed through other mods' hooks while the game was still going through the list. That broke the list and stopped the server (an ocelot on 2026-11-16, a zombie on 2026-11-08). They're now handled from a copy, and any changed meanwhile are handled right after.
