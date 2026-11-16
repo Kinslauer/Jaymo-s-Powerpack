@@ -651,3 +651,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-15 Explosion Overhaul (Vinlanx, custom licence): ideas only. Andy wants its screenshake and debris effects, not its realistic explosions. Built as PR #1616.
 - 2026-11-16 Wardrobe (PR #1617): the Costume tab only after a Costume Table is put in (crafted in, or used on the wardrobe); the Clothes tab follows MCA's player-editor setting and only changes clothes (no body, face, hair or traits). Lore "The wardrobe" approved without the costume lines.
+- 2026-11-15 (Andy, proving-grounds / instanced arena, Claude app): old-age temple altars go first (all eight patrons' champions); the offering costs the patron's offering plus emeralds; the nearby party goes in together; falling or logging out inside costs nothing but the fight (sent back to the altar at low health, keeping items; last one down loses it). Rewards unchanged from the champion's (weapon-head chance, boon, deeds).
