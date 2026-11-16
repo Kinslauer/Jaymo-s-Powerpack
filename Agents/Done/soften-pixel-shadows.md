@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: soften-pixel-shadows
 branch: claude/soften-pixel-shadows
 with:
@@ -34,3 +34,4 @@ owns:
 - Change note added at `changes/kingdoms/soften-pixel-shadows.md`
 - Build and PR checks pass
 - PR #1644 opened
+- 2026-11-16 13:22 PR #1644 is merged into master; moved to Agents/Done.
