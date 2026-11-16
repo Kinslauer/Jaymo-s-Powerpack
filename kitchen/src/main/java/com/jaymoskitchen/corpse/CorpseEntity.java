@@ -1,5 +1,6 @@
 package com.jaymoskitchen.corpse;
 
+import com.jaymoskitchen.Loaded;
 import com.jaymoskitchen.horse.CartEntity;
 import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
@@ -1620,6 +1621,45 @@ public class CorpseEntity extends Entity {
 		return false;
 	}
 
+	/**
+
+	 * A body burned away by fire leaves a pile of ash where it lay (snow-style, 1-8 layers): a zombie a small heap,
+	 * a horse or bear more, a ghast or giant a big pile across several blocks. Lava burns leave nothing - it falls
+	 * into the lava. Only air where the body lay is taken, and the block below has to hold the pile.
+	 */
+	private void leaveAshPile(ServerLevel level) {
+		if (isInLava()) {
+			return;
+		}
+		BlockPos at = blockPosition();
+		if (!Loaded.made(level, at) || !level.getBlockState(at).isAir()) {
+			return;
+		}
+		EntityType<?> type = sourceType();
+		float width = type == null ? 0.6F : type.getDimensions().width();
+		float height = type == null ? 1.8F : type.getDimensions().height();
+		boolean huge = width >= HUGE || height >= HUGE_LONG;
+		boolean big = width >= BIG_WIDTH || height >= BIG_HEIGHT;
+		int layers = huge ? 8 : big ? 6 : width < 0.5F && height < 0.9F ? 2 : 4;
+		BlockPos[] spots = {at, at.north(), at.east(), at.south(), at.west()};
+		int count = huge ? 5 : big ? 2 : 1;
+		int placed = 0;
+		for (BlockPos spot : spots) {
+			if (placed >= count) {
+				break;
+			}
+			if (!Loaded.made(level, spot) || !level.getBlockState(spot).isAir()) {
+				continue;
+			}
+			BlockPos below = spot.below();
+			if (!level.getBlockState(below).isCollisionShapeFullBlock(level, below)) {
+				continue;
+			}
+			level.setBlockAndUpdate(spot, Corpses.ASH_PILE.defaultBlockState().setValue(AshPileBlock.LAYERS, layers));
+			placed++;
+		}
+	}
+
 	private void serverTick(ServerLevel level) {
 		age++;
 		if (Keeping.kept(this, level)) {
@@ -1688,6 +1728,7 @@ public class CorpseEntity extends Entity {
 				if (kind == CorpseKind.SKELETON && bones > 0) {
 					spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
 				}
+				leaveAshPile(level);
 				discard();
 				return;
 			}

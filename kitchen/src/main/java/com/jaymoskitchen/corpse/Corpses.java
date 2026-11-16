@@ -108,7 +108,9 @@ public final class Corpses {
 	public static DataComponentType<CorpseData> CORPSE_DATA;
 	public static Item CORPSE_ITEM;
 	/** The oak butcher block (the original one); every wood has its own, all in {@link #BUTCHER_BLOCKS}. */
-	public static Block BUTCHER_BLOCK;
+		public static Block BUTCHER_BLOCK;
+		/** Ash left where a burnt-away corpse lay (see {@link CorpseEntity#leaveAshPile}). */
+		public static Block ASH_PILE;
 	/** Woods with a butcher block, in creative-tab order. Oak's is plain "butcher_block". */
 	public static final List<String> WOODS = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove",
 		"cherry", "pale_oak", "crimson", "warped");
@@ -162,12 +164,23 @@ public final class Corpses {
 			if (wood.equals("oak")) {
 				BUTCHER_BLOCK = block;
 			}
+
 			ResourceKey<Item> blockItemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
 			butcherBlocks.add(Registry.register(BuiltInRegistries.ITEM, blockItemKey,
 				new BlockItem(block, new Item.Properties().useBlockDescriptionPrefix().setId(blockItemKey))));
-		}
+			}
 
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			// burnt corpses leave an ash pile where they lay
+			ResourceKey<Block> ashKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("ash_pile"));
+			ASH_PILE = Registry.register(BuiltInRegistries.BLOCK, ashKey,
+				new AshPileBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(0.5F)
+					.sound(SoundType.SAND).setId(ashKey)));
+			ResourceKey<Item> ashItemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("ash_pile"));
+			Registry.register(BuiltInRegistries.ITEM, ashItemKey,
+				new BlockItem(ASH_PILE, new Item.Properties().setId(ashItemKey).useBlockDescriptionPrefix()));
+
+
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			ItemStack after = new ItemStack(Items.CRAFTING_TABLE);
 			// (stacks are made here, not at registration: items can't be stacked before components are bound)
 			for (Item item : butcherBlocks) {
