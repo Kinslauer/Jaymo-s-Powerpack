@@ -1,9 +1,12 @@
 ---
-updated: 2026-11-15 20:07
+updated: 2026-11-15 20:13
 ---
 # Open PRs
 
-0 open, as of 2026-11-15 20:07. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+1 open, as of 2026-11-15 20:13. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-Nothing open.
+## [#1618](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1618) Longsword trial: the same moves keyed in Blockbench and in Blender, switchable in game
+- **Branch:** `ccr-b68e2018-5sopgk` · **Updated:** 2026-11-16 (today)
+- **Checks:** ⏳ 1 of 4 running
+- **Agent:** no agent note
