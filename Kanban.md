@@ -4,16 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 04:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 04:35). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/faith-page-champion|faith-page-champion]] · for any · open
 - [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · for any · open
 
 
 ## Being built
 
+- [ ] [[Inbox/faith-page-champion|faith-page-champion]] · 🍇 Bacchus · claimed
 
 
 ## In review
