@@ -649,8 +649,8 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:villager-converting:CNWh8vEW", cf: null],
 	// --- Sensible MC picks: building and world ---
 	// Stoneworks (MPL-2.0, Fuzs): more shapes and variants of vanilla stones. Needs Puzzles Lib and Forge Config API Port.
-	// Client and server. 26.3.4 for 26.3.
-	[dep: "maven.modrinth:stoneworks:WC5MX8kL", cf: null],
+	// Client and server. 26.3.1: 26.3.2 and later need Fabric Loader 0.20 and Puzzles Lib 26.3.16 (we run 0.19.5 and 26.3.15).
+	[dep: "maven.modrinth:stoneworks:blHWPVsk", cf: null],
 	// Scholar (GPL-3.0-only, mortuusars): two-page books, formatting, coloured books, mobs that read. Client and server.
 	// 1.2.12 for 26.3.
 	[dep: "maven.modrinth:scholar:43vc4YZi", cf: null],
