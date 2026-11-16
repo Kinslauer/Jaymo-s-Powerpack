@@ -14450,3 +14450,9 @@ Pixel shadows from the sun and moon now fade smoothly at their edges instead of 
 ## 0.9.75 (2026-11-16): A downed airship with nowhere it was bound no longer stops the server
 
 - In a world with no steam towns a downed airship has no home port and no destination; laying one then stopped the server (2026-11-16, 2:23 PM). Its logbook already said so; the line noting it for the server log now does too.
+
+## 0.9.76 (2026-11-16): letterbox cutscene and POV swap on NPC dialogue (#1649)
+
+- Starting a talk with an MCA villager opens a letterbox cutscene: black bars slide in, the HUD clears, and the camera swaps between the two of you.
+- Every time the speaker changes (player <-> villager), the POV swaps with it: behind the player's shoulder looking at the villager while the player speaks, at the villager's eyes looking at the player while they speak. It ends when the talk screen closes.
+- `sh ./gradlew build` compiles; not played in game.
