@@ -9,7 +9,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -173,7 +172,7 @@ final class DenRaids {
 		if (d.shut() > 0L) {
 			if (d.shutAt(now)) {
 				if (loaded) {
-					seal(level, d.hatch(), true);
+					seal(level, d.hatch(), !playerBelow(level, f, d.hatch()));
 					sweep(level, f, d, true);
 				}
 				return;
@@ -550,9 +549,27 @@ final class DenRaids {
 		Underworld.put(server, d.raided(now + SHUT, HEAT_AFTER));
 		Post.news(server, Component.translatable("news.jaymoskingdoms.underworld.raided", f.name()));
 		if (level.isPositionEntityTicking(d.hatch())) {
-			seal(level, d.hatch(), true);
+			seal(level, d.hatch(), !playerBelow(level, f, d.hatch()));
 			sweep(level, f, d, true);
 		}
+	}
+
+	/**
+	 * A player down in the den or on its ladder: its hatch isn't nailed down over them (nobody can lift an iron trapdoor),
+	 * it's left wooden until they're out.
+	 */
+	private static boolean playerBelow(ServerLevel level, Faction f, BlockPos hatch) {
+		AABB shaft = Underworld.shaft(hatch);
+		List<AABB> rooms = rooms(level.getServer(), f.id(), hatch);
+		for (ServerPlayer p : level.players()) {
+			if (p.isSpectator()) {
+				continue;
+			}
+			if (shaft.intersects(p.getBoundingBox()) || rooms.stream().anyMatch(box -> box.contains(p.position()))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The hatch nailed down under iron ({@code shut}), or a wooden one put back. */
@@ -564,7 +581,7 @@ final class DenRaids {
 			return;
 		}
 		BlockState put = (shut ? Blocks.IRON_TRAPDOOR : Blocks.SPRUCE_TRAPDOOR).defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
-			.setValue(TrapDoorBlock.OPEN, false).setValue(TrapDoorBlock.FACING, Direction.NORTH);
+			.setValue(TrapDoorBlock.OPEN, false).setValue(TrapDoorBlock.FACING, Speakeasy.LADDER_FACING);
 		level.setBlockAndUpdate(hatch, put);
 		level.playSound(null, hatch, shut ? SoundEvents.IRON_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 0.8F);
 	}
