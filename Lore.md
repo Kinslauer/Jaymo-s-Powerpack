@@ -1790,7 +1790,7 @@ what is learned, from hermits who guide the way.
 
 **The chopping block** (Andy approved, 2026-11-15). Wherever folk split their own wood there is a chopping block: a round sawn off a log of the same tree, set on its end and scarred with old cuts. A log stood on it splits cleaner than one hacked on the bare ground, a plank more for the same work, and the better the axe the fewer the blows. The chips swept up round it are the sawdust the paper-pressers want. (In game: Powers PR #1599.)
 
-(new) **The wardrobe** (Claude's placement for Andy's wardrobe, 2026-11-16, for Andy to approve). A wardrobe is a joiner's piece, two doors high, with a glass on the inside of one door. Folk who can afford one keep everything they are seen in there: the clothes the tailor sewed, a costume folded at the back where nobody looks, and the pegs where blades, tools and quivers hang so they go on the body the same way every morning. Dressing at your own glass needs no tailor; sewing a new costume there still takes the cloth. (In game: Powers, the Wardrobe block.)
+**The wardrobe** (Andy approved, 2026-11-16). A wardrobe is a joiner's piece, two doors high, with a glass on the inside of one door. Folk who can afford one keep everything they are seen in there: the clothes the tailor sewed, and the pegs where blades, tools and quivers hang so they go on the body the same way every morning. Dressing at your own glass needs no tailor. (In game: Powers, the Wardrobe block.)
 
 **Plate and travelers' gear** (portable-mods thread, 2026-11-14; Andy picked Tinkers' plate armour and travelers'
 gear; approved 2026-11-14). A smith makes armour the way he makes tools: each piece is a plating cast
