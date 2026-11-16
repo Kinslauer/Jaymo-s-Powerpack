@@ -1,37 +1,17 @@
 ---
-updated: 2026-11-16 13:29
+updated: 2026-11-16 13:39
 ---
 # Open PRs
 
-4 open, as of 2026-11-16 13:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-16 13:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-## [#1642](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1642) Burnt corpses leave ash piles where they lay
-- **Branch:** `claude/burnt-corpse-ash-piles` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
+## [#1649](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1649) Kingdoms: letterbox cutscene and POV swap on NPC dialogue
+- **Branch:** `claude/dialogue-letterbox-pov` · **Updated:** 2026-11-16 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1643](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1643) Faith page shows the faith's champion, sigil behind it
-- **Branch:** `claude/faith-page-champion` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1644](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1644) Soften pixel shadows' edges
-- **Branch:** `claude/soften-pixel-shadows` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1645](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1645) Sensible MC picks: 68 mods and 10 resource packs
-- **Branch:** `claude/sensible-picks` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1643](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1643) Faith page shows the faith's champion, sigil behind it
-- **Branch:** `claude/faith-page-champion` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1644](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1644) Soften pixel shadows' edges
-- **Branch:** `claude/soften-pixel-shadows` · **Updated:** 2026-11-16 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** [[soften-pixel-shadows]]
+## [#1650](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1650) Youth the wood-wisp: more idle behaviors
+- **Branch:** `claude/youth-wisp-idle-behaviors` · **Updated:** 2026-11-16 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[youth-wisp-idle-behaviors]]
