@@ -117,3 +117,8 @@ let the owed village start run, close the game when needed. Long loading screens
 - 5:33 PM: Chunky finished radius 2500 (99,225 chunks). No chunk errors after the fix.
 - Stopped at Andy's request. The server is up and idle, and no monitors are running. The old world is kept at `world-old-20261115-144334`.
 - Not yet looked at: whether the 16 failed chunks (X 2230–2440, Z 2510–2550) have terrain now.
+
+## 2026-11-15 evening (back from the reviewer)
+- 8:15 PM: server watchdog kill in `StoryGround$VillageSearch.village`. It loaded a chunk on the server thread (capital village search on the 8:08 PM new world). This was already fixed on master by #1619, but the Deck was on Kingdoms 0.9.53.
+- 9:37 PM: the client crashed on startup. JVM native out of memory: the PC had only 453 MB of RAM free. Not a mod bug.
+- Reviewer Claude ran out of usage partway through a 9:34 PM deploy, which left the server stopped. 9:52 PM: keep-world deploy of master (Powers 0.24.22, Kingdoms 0.9.55, Kitchen 0.6.30). Server up, game updated, watcher re-armed.
