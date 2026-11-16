@@ -14377,3 +14377,8 @@ Built; not played.
 - **The hatch falls shut** once no player is within 6 blocks of it or below, so it isn't left gaping for people to walk into.
 - **Nobody is nailed in**: a den shut after a raid keeps a wooden hatch while a player is down in it or on its ladder, and gets its iron one once they're out (`DenRaids.playerBelow`).
 - Built; not played.
+
+## 0.9.68 (2026-11-16): no more piles of dropped Scoundrel's Hoods
+
+- **Hood flood fixed**: a fence, smuggler or night-time pickpocket of a sea-blooded shape that can't wear a helmet (or a chestplate) was put in the Scoundrel's wrappings every 5 seconds by `FrontierWear`'s sweep, and `SeaBodies` shed the piece at their feet every 5 seconds, so a fresh hood (and coat) piled up on the floor each round. New `SeaBodies.fits` is asked first: `FrontierWear.wear` (scoundrel wrappings, a farmer's or carter's hat and coat, a fletcher's mantle, a wizard's garb) and MCA's armour routine (`McaEquipmentMixin`: a guard's or archer's issued helm and breastplate, made fresh each round) no longer put on what the body can't wear. Legs and boots still go on. Hoods already dropped despawn as normal.
+- Built; not played.
