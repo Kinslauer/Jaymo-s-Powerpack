@@ -5360,3 +5360,11 @@ Built; not played.
 - Classes: `costume/WardrobeBlock` + `WardrobeClothesRule`, `client/wardrobe/WardrobeClient` + `WardrobeClothes`;
   `CostumeNet` accepts a wardrobe with a table as a table, `CostumeScreen` shows the tabs in its header when opened from one.
 - Compiled; not played. The tab rows over MCA's clothing page and Weapon Master's panel are placed from their code, not seen.
+
+## 0.24.23 (2026-11-16): longsword trial: Blockbench moves against Blender moves
+
+- **The longsword fights in the Still Water way** (Andy's combat-animation trial): it holds a middle guard of its own, its first swing is a cut falling right to left from that guard, and its last is a heavy overhead raised high behind the head that lands a little later in the swing (upswing 0.6). The cross cut and thrust between them are Better Combat's, as before.
+- **Two versions of the same moves, to compare:** by default, the moves keyed in Blockbench. Switch on the resource pack "Jaymo's Powers: longsword trial, Blender moves" (Options, Resource Packs) for the same keys made in Blender. There, inverse kinematics keeps the left hand on the hilt at every frame, and the cut speeds up into the hit. The Blockbench left hand is placed by eye at the keys and drifts up to 6.7 pixels off the hilt between them in the overhead (3.3 in Blender).
+- **Elbows bend in Better Combat animations:** an animation's `bend` folds the arm at the elbow (SwingElbows, read through PalAccess, drawn with KneeBend), and the held item turns with the forearm (SwingElbowsHandMixin). Better Combat's own swings have no bend and look the same as before.
+- Sources: `tools/combat_trial/` (blockbench_route.py, blender_route.py, run headless with `blender -b --python`), `art/combat_trial/` (the .bbmodel, the .blend and a side-by-side sheet of the key frames). The animations were loaded and stepped with Player Animation Library outside the game.
+- Built; not played. Mobs swinging a longsword play the new moves without elbow bends (Kingdoms' PalMobAnimator doesn't read bend yet), so their first cut winds up with the sword raised forward instead of drawn back, and they have no guard pose.
