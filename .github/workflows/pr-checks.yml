@@ -26,6 +26,9 @@ jobs:
   # the pack's mod list or loader may have changed. build.gradle's checkPackMods says what it can't catch.
   pack-mods:
     name: Pack mods start together
+    # after the builds: they fetch the same Modrinth jars, and both at once got Modrinth's 429 (too many requests);
+    # the Gradle cache they leave behind serves most of them here
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
