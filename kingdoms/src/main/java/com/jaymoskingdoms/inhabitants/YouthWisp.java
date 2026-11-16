@@ -245,17 +245,17 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		long day = player.level().getOverworldClockTime() / 24000L;
 		Long last = player.getAttached(CARRIED_DAY);
 		if (last != null && last == day) {
-			player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.joke." + this.random.nextInt(JOKE_LINES))));
+			this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.joke." + this.random.nextInt(JOKE_LINES)));
 			return;
 		}
 		net.minecraft.world.level.portal.TeleportTransition home = player.getRespawnConfig() == null ? null
 			: player.findRespawnPositionAndUseSpawnBlock(false, net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING);
 		if (home == null || home.missingRespawnBlock()) {
-			player.sendSystemMessage(line(Component.translatable(home == null
-				? "message.jaymoskingdoms.youth_wisp.no_bed" : "message.jaymoskingdoms.youth_wisp.bed_gone")));
+			this.speak(player, Component.translatable(home == null
+				? "message.jaymoskingdoms.youth_wisp.no_bed" : "message.jaymoskingdoms.youth_wisp.bed_gone"));
 			return;
 		}
-		player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.home." + this.random.nextInt(HOME_LINES))));
+		this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.home." + this.random.nextInt(HOME_LINES)));
 		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HomeFlash.TYPE)) {
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HomeFlash());
 		}
@@ -314,20 +314,37 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		return true;
 	}
 
-	/** {@code player}'s wisp gestures, and {@code text} goes to them in chat as Youth's words. */
+	/** {@code player}'s wisp gestures, and {@code text} goes to them in chat as Youth's words, and floats over the wisp. */
 	public static void say(ServerPlayer player, String text) {
-		gesture(player);
-		player.sendSystemMessage(line(Component.literal(text)));
+		YouthWisp wisp = gesture(player);
+		Component words = Component.literal(text);
+		if (wisp != null) {
+			wisp.speak(player, words);
+		} else {
+			player.sendSystemMessage(line(words));
+		}
+	}
+
+	/**
+	 * This wisp says {@code words} to {@code player}: in chat (so the whole answer is kept) and in a speech bubble over the
+	 * wisp in its own colour, which anyone near sees too ({@link com.jaymoskingdoms.Speech#sayPlainly}).
+	 */
+	void speak(ServerPlayer player, Component words) {
+		player.sendSystemMessage(line(words));
+		if (this.level() instanceof ServerLevel level) {
+			com.jaymoskingdoms.Speech.sayPlainly(level, this, player, words, COLOUR);
+		}
 	}
 
 	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks. */
-	static void gesture(ServerPlayer player) {
+	static @Nullable YouthWisp gesture(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
 			wisp.pending = false;
 			wisp.triggerAnim("action", "talk");
 		}
+		return wisp;
 	}
 
 	/** One line of Youth's in chat: its name in its own colour, then the words. */
@@ -410,7 +427,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
 			if (player != null && this.pending && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
 				this.triggerAnim("action", "talk");
-				player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES))));
+				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
 			this.vanish();
 			return;
@@ -487,7 +504,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer
 			&& this.tickCount - this.lastHint > HINT_COOLDOWN) {
 			this.lastHint = this.tickCount;
-			serverPlayer.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.how")));
+			this.speak(serverPlayer, Component.translatable("message.jaymoskingdoms.youth_wisp.how"));
 		}
 		return InteractionResult.SUCCESS;
 	}

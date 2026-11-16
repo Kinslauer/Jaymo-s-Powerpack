@@ -60,11 +60,13 @@ public final class YouthCommand {
 	}
 
 	private static int sayAll(CommandContext<CommandSourceStack> c) {
-		Component line = YouthWisp.line(Component.literal(clean(StringArgumentType.getString(c, "text"))));
+		Component words = Component.literal(clean(StringArgumentType.getString(c, "text")));
 		for (ServerPlayer player : c.getSource().getServer().getPlayerList().getPlayers()) {
-			player.sendSystemMessage(line);
-			if (YouthWisp.has(player)) {
-				YouthWisp.gesture(player);
+			YouthWisp wisp = YouthWisp.has(player) ? YouthWisp.gesture(player) : null;
+			if (wisp != null) {
+				wisp.speak(player, words);
+			} else {
+				player.sendSystemMessage(YouthWisp.line(words));
 			}
 		}
 		c.getSource().sendSuccess(() -> Component.literal("Youth spoke to everyone"), false);
