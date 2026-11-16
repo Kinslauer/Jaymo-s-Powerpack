@@ -389,8 +389,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/** In front of the player at about head height, in open air (above them if the way ahead is blocked). */
 	static Vec3 spotBeside(ServerPlayer player) {
-		Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
-		gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
+		Vec3 look = player.getLookAngle().multiply(1, 0, 1);
+		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
 		Vec3 ahead = player.position().add(look.scale(AHEAD)).add(0, HEIGHT, 0);
 		ServerLevel level = player.level();
 		if (level.noCollision(Inhabitants.YOUTH_WISP.getSpawnAABB(ahead.x, ahead.y, ahead.z))) {
@@ -497,8 +497,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				break;
 			case FOLLOW:
 				// drift in front of the asker at head height, moving with them
-				Vec3 gaze = player.getLookAngle().multiply(1, 0, 1);
-				gaze = gaze.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : gaze.normalize();
+				Vec3 look = player.getLookAngle().multiply(1, 0, 1);
+				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
 				Vec3 followSpot = player.position().add(look.scale(AHEAD * 0.9)).add(0, HEIGHT + 0.15, 0);
 				this.spot = followSpot;
 				Vec3 followTarget = followSpot.add(Math.sin(t / 47.0) * 0.3, Math.sin(t / 29.0) * 0.1, Math.cos(t / 53.0) * 0.3);
