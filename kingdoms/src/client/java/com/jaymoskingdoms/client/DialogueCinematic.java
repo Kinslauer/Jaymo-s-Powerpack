@@ -34,6 +34,8 @@ public final class DialogueCinematic {
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.25F;
 	/** Behind the player's shoulder when they speak (blocks). */
 	static final double BEHIND = 1.5;
+	/** How long the camera stays on the player after they pick an answer before it swaps to the villager's reply (ticks). */
+	static final int PLAYER_HOLD = 40;
 
 	private static final Identifier[] HIDDEN = { VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR,
 		VanillaHudElements.ARMOR_BAR, VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR,
@@ -45,11 +47,17 @@ public final class DialogueCinematic {
 	private static int villager = -1;
 	private static float bars, barsO;
 	private static @Nullable CameraType viewBefore;
+	/** The villager's reply, waiting for the player's turn on camera to end; the client tick it may show. */
+	private static @Nullable Speaker pending;
+	private static int ticks, holdUntil;
 
 	private DialogueCinematic() {
 	}
 
 	static void register() {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mca")) {
+			return; // MCA's talk screen is what starts it; without MCA nothing here may touch MCA's classes
+		}
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> tick(minecraft));
 		for (Identifier id : HIDDEN) {
 			HudElementRegistry.replaceElement(id, old -> (graphics, delta) -> {
@@ -80,7 +88,16 @@ public final class DialogueCinematic {
 			start(minecraft, villager);
 		}
 		DialogueCinematic.villager = villager;
-		DialogueCinematic.speaker = speaker;
+		if (speaker == Speaker.PLAYER) {
+			// the player's line gets its moment on camera; a reply sent the same tick waits for it
+			DialogueCinematic.speaker = speaker;
+			pending = null;
+			holdUntil = ticks + PLAYER_HOLD;
+		} else if (ticks < holdUntil) {
+			pending = speaker;
+		} else {
+			DialogueCinematic.speaker = speaker;
+		}
 	}
 
 	/** The talk screen closed (or the player left): give the camera back. */
@@ -90,12 +107,19 @@ public final class DialogueCinematic {
 		}
 		running = false;
 		speaker = null;
+		pending = null;
+		holdUntil = 0;
 		villager = -1;
 		viewBefore = null;
 	}
 
 	private static void tick(Minecraft minecraft) {
+		ticks++;
 		barsO = bars;
+		if (pending != null && ticks >= holdUntil) {
+			speaker = pending;
+			pending = null;
+		}
 		LocalPlayer self = minecraft.player;
 		Screen screen = minecraft.gui.screen();
 		boolean talking = self != null && minecraft.level != null && screen instanceof InteractScreen;

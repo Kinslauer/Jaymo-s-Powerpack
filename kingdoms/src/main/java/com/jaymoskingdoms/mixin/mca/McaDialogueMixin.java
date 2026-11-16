@@ -581,14 +581,14 @@ abstract class McaDialogueMixin {
 				gained += warm;
 			}
 			Recollections.socialised(villager, player, question, gained);
-			}
-			}
+		}
+	}
 
-			/** (letterbox cutscene) the villager answers back after the player's pick, or the idle chat loops around. */
-			@Inject(method = "selectAnswer", at = @At("RETURN"))
-			private void jaymoskingdoms$reply(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
-			if ("main".equals(question) || "chat.topic".equals(question)) {
-				DialogueCue.cue(player, villager, DialogueCue.Speaker.VILLAGER);
-			}
-			}
+	/** (letterbox cutscene) the villager answers back after the player's pick, or the idle chat loops around. */
+	@Inject(method = "selectAnswer", at = @At("RETURN"))
+	private void jaymoskingdoms$reply(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("main".equals(question) || "chat.topic".equals(question)) {
+			DialogueCue.cue(player, villager, DialogueCue.Speaker.VILLAGER);
+		}
+	}
 }
