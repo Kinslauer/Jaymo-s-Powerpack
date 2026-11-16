@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Add Andy's Sensible MC picks to the pack
 branch: claude/sensible-picks
 with: Claude (cloud)
