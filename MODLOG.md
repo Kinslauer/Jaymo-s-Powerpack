@@ -5299,3 +5299,31 @@ Built; not played.
 - Andy: "I dont see the arms being used in the frames, that's fine if they dont have any or if they are broken, but they should use what they can". Getting up against a wall now uses the arms: the arm on top plants beside the shoulder and pushes them over onto their back, both hands go down beside them to prop them up as they sit up, they step round on the floor as the body turns its back to the wall, and two pushes shove the hips back to it before the arms fall to their sides. A planted hand stays put on the floor while the body moves over it, the elbow bending to suit. A broken arm, or one that's gone with nothing fitted, just hangs and the other arm does it all alone; with neither, or out cold, the arms hang limp. Set down against a wall by someone else, the arms just hang (sat up, a Minecraft arm doesn't reach the floor).
 - In first person, a sitting player's view is at their model's own eyes all the way through: it moves from the crawl's view onto the head as they roll over, rises with it as they sit up (to about 1 block up), and follows the head as it lolls.
 - `client/wounds/WallSit` (the sit, the get-up, the view; tuning at the top), `client/wounds/WallSitArms` (the arms' part: when and where each hand goes down, and the reach that puts it there; tuning at the top), a `WALL` style in `DownedPose`, hooks in `CrawlPose` (the sit's arms and legs laid on past the springs, and its elbows bent) and `ProneCameraMixin`; `DownedLie#wall` finds the wall (`#propSpot` / `#prop` set someone against one, `PROPPED` marks them), `Carry#release` uses them, and `markBody` tags a body to stay sat. Checked in a pose sim (no part goes into the floor, the sat head stays off the wall; every way of lying beside the wall with both, one or no arms, the Java arm code run against it); not played.
+
+## 0.24.17 (2026-11-15): Server starts again after the Stone Age recipes
+
+- The vanilla recipes the Stone Age patch replaces (wooden doors, fences and gates, the iron door, torches, chest, crafting table, glass, paper, brick) also lose their vanilla unlock advancements, which still pointed at them and stopped the server from starting.
+- The future scrap chests give an iron chain (26.3's name for the chain), which also stopped the server from starting.
+
+## 0.24.18 (2026-11-15): Dynamic Waters: no more chunks without terrain from crossing streams
+
+- When two mountain streams' mouths landed on each other, Dynamic Waters' check for streams left dry by ravines asked each one about the other forever. The worker thread ran out of stack and the chunk was left without terrain (seen during a new world's pregen). A stream met again in the same check now counts as not left dry.
+
+## 0.24.19 (2026-11-15): the future is built from Mosslorn (#1615)
+
+- **The future's city**: milkshake_mp3 gave permission, so new futures are now fetched from Mosslorn (v4.0, 553 MB) instead of Los Perrito City; in the world it is still Los Perrito, ruined and overgrown as before. You arrive on the street the map's own lobby sends players to. The first visit credits the map with a link to its page.
+- **Crates and command blocks**: the map's crates are refilled from our `chests/future/food|household|scrap|cache` tables, and its command blocks are removed.
+- **Old worlds** keep their Los Perrito future until an operator runs `/future swap`: the old city (and everything built or left in the future) is cleared at the next server start, and the next leap fetches Mosslorn.
+- Built; not played.
+
+## 0.24.20 (2026-11-16): Explosions: flying debris, ground dust, cave-in grit, flash, ringing ears (#1616)
+
+- Andy's pick from Explosion Overhaul (custom licence, ideas only, our own code): everything a blast does besides break blocks, for every explosion from any mod. How blocks break is unchanged.
+- **Debris**: chunks of the blocks a blast broke are flung up and out, tumble, bounce where they land and lie a few seconds before shrinking away (`client/blast/DebrisChunk`). Only blasts that broke something throw them, more the more they broke (6 plus one per 2 blocks, at most 110), and never more than 300 in a tick across all blasts.
+- **Dust**: a ring of dust in the colour of the ground (its map colour, mixed toward grey-brown) rolls out along it, and a little dark smoke rises from the middle.
+- **Cave-ins**: underground, the ceiling round a blast (twice its radius) sheds falling dust and loose grit for about 2.5 seconds.
+- **Flash**: a short warm whiteout when a blast goes off in your sight, up to 14 radii away, stronger for bigger blasts, nearer ones and when you look at it. Blocked by walls.
+- **Ringing ears**: within 1.8 radii of a blast your ears ring (new sound `blast.ring`, made by `tools/gen_blast_sounds.py ring`), other sounds start muffled (down to 25%) and come back over 2-7 seconds, and the view sways slowly (`ScreenShake#daze`, turned down with `/shake` like the rest).
+- **Screen shake** from an explosion is 1.4x harder when neither you nor the blast can see the sky.
+- Less of all the particles on Decreased/Minimal particles and in low-end mode. Client only, nothing sent. Tuning at the top of `client/blast/BlastFx`.
+- Built; not played.

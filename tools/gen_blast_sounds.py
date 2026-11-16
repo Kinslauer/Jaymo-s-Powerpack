@@ -7,6 +7,7 @@ Writes mono .ogg files into src/main/resources/assets/jaymospowers/sounds/blast/
   far_1..3     the far layer: a low thump and a long rolling rumble, what a blast sounds like a long way off
   report_1..2  a cannon's report: a hard concussive thump with a short low tail
   whistle      a shell in flight, made to loop: a whining tone over a rushing hiss
+  ring         ears ringing after a blast went off right beside you: a thin high tone that wavers and fades
 Re-run to change them; the seeds keep every file the same from run to run.
 """
 import os
@@ -153,11 +154,31 @@ def whistle():
     return norm(tone + rush * 0.7, 0.8)
 
 
+def ring():
+    """A high, thin whine (two close tones beating), loud at once and fading over a few seconds, with a dull hush under it."""
+    rng = np.random.default_rng(40)
+    n = int(RATE * 5.0)
+    t = np.arange(n) / RATE
+    fade = np.minimum(1.0, t / 0.03) * np.exp(-t / 1.6)
+    tone = np.sin(2 * np.pi * 3950.0 * t) + 0.6 * np.sin(2 * np.pi * 3957.0 * t + 0.7) + 0.15 * np.sin(2 * np.pi * 7900.0 * t)
+    hush = lowpass_fast(rng.standard_normal(n), 250) * np.exp(-t / 0.9) * 0.6
+    x = tone * fade * 0.5 + hush
+    x *= np.minimum(1.0, (n - np.arange(n)) / (RATE * 0.3))
+    return norm(x, 0.7)
+
+
 if __name__ == "__main__":
+    # one sound by name (python3 tools/gen_blast_sounds.py ring) leaves the others as they are
+    import sys
+    if len(sys.argv) > 1:
+        for name in sys.argv[1:]:
+            write(name, globals()[name]())
+        sys.exit()
     for i in range(3):
         write(f"crack_{i + 1}", crack(10 + i))
         write(f"far_{i + 1}", far(20 + i))
     for i in range(2):
         write(f"report_{i + 1}", report(30 + i))
     write("whistle", whistle())
+    write("ring", ring())
     print("wrote", sorted(os.listdir(OUT)))
