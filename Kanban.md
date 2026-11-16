@@ -9,6 +9,7 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/faith-page-champion|faith-page-champion]] · for any · open
+- [ ] [[Inbox/soften-pixel-shadows|soften-pixel-shadows]] · for any · open
 
 
 ## Being built
