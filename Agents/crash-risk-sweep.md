@@ -1,5 +1,5 @@
 ---
-status: running
+status: stopped
 task: Crash-risk review of all three mods (read-only)
 branch: none (review only, no edits)
 with: Andy
@@ -25,3 +25,4 @@ owns:
 ## Done
 - 2026-11-16 12:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 1:40 PM: it was the 5-hour usage limit. All 58 scans done (228 findings), 48 verified (25 real). Resumed to verify the other 180.
+- Andy stopped it. 87 of 228 verified: 45 real (25 hang, 2 crash, 18 lag), 42 refuted; 141 unverified. Journal: ~/.claude/projects/E--Origins-Mod/3cb6f135-.../subagents/workflows/wf_ff1eeba0-a36/journal.jsonl (resumable).

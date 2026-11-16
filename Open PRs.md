@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-16 13:39
+updated: 2026-11-16 15:01
 ---
 # Open PRs
 
-2 open, as of 2026-11-16 13:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-16 15:01. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1649](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1649) Kingdoms: letterbox cutscene and POV swap on NPC dialogue
