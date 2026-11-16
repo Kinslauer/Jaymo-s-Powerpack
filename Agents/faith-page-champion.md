@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: faith-page-champion
 branch: claude/faith-page-champion
 with:
@@ -33,3 +33,6 @@ behind the figure and stays behind the preview on every later creator page.
 
 **Done**
 - (none yet)
+
+## Notes
+- 2026-11-16 05:51 No sign of work for 30 min: marked stalled (whoever ran it stopped).
