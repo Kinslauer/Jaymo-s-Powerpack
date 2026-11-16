@@ -705,6 +705,16 @@ wall. Beasts and monsters don't see them. The living do, and hear them. Carry th
 moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
 dead choose, Limbo among it.
 
+**Who sees the dead** (ghosts thread; approved by Andy 2026-11-16; Andy, 2026-11-16: "only the attuned and death magicians should ever see the ki
+ghosts, also the ghosts should have wispy tails like wisp"). A ghost is the ki a body has let go of, and ki out of a body
+shows only to those who can see mana: the attuned. A Death Sorcerer is not attuned, but sees them all the same, because
+the dead are a Death Sorcerer's craft. To anyone else the dead are not there at all: no shape over the grave, no voice
+from the bottom of the well, nobody to give a flower to. None of them has legs any more. Below the waist each is a single
+tail of the same pale light, thinning to nothing and wavering as they hang, and streaming out behind when they drift, as
+a Wisp's does. So a friend waiting in Limbo can stand over their own burial and be seen by the one court wizard in the
+crowd and by nobody else. (This narrows "The nights at the grave", "Limbo's ghosts", "The unbodied" and "Out of the
+body": where those say the living see and hear the dead, it is only these.)
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
@@ -1185,6 +1195,16 @@ Now and then a town falls sick and the sick spread it among their neighbours, an
 sick and burn the blighted dead, for anyone who dies with it in them gets up the next night unless the body is burned or
 buried.
 
+**The old homes and the keeping** (Andy approved, 2026-11-16; ATi's old home). The old homes of the plains and savanna
+were built by smiths who worked alone, far from any town. Those smiths keep the Anvil-Father's faith and know his
+**keeping**, the rite they say over iron so it never rusts. A desperate smith can say it over flesh too. When the hollow
+blight came through one of these houses, there was no cure that far out. The household turned, and they're the husks
+upstairs. The smith felt the cold in his own hands, so he dug a cell under the floor, lit a red keeping light on its wall
+and lay down beneath it. While the light burns he sleeps as he was the night he lay down. The blight goes no further and
+he doesn't wake. Break the light and the keeping ends: he wakes coughing with a day left before he turns. Cured awake, he
+knows who saved him and forges them a piece of armour to their measure; cured in his sleep, he wakes not knowing it and
+won't believe whoever says so (tale: The Keeping).
+
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
 
@@ -1536,6 +1556,15 @@ A realm is founded on one creed, and the creed decides how it treats its neighbo
 
 Kingdoms come only from Epic villages. Grim keeps and citadels are fiefs or allied small villages, never kingdoms.
 
+(new) **The castle towns** (sprawling kingdoms thread, 2026-11-16; Andy picked "Seat compounds"). Not every kingdom grew
+out of a great town. Some began as a lord's castle with its first town laid round it in one go: the square with the
+bell, the garden behind the walls, the barracks for the household guard and a handful of homes for the people who
+serve there. The castles are the land's own (a marble chateau in the plains, a woodland keep in the north, a fortress
+in the jungle), and the town is built in the land's stone and wood. Such a place stands empty of monsters and its
+stores are its lord's, not a dungeon's. Far from any realm it is a kingdom's seat; within a kingdom's reach it is that
+kingdom's fiefdom, its lord sworn to the crown; where a kingdom already has its fiefs it is a village allied to it.
+Its builders grow it outward like any other town.
+
 **Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
 elders and foremen, its court wizard and sometimes a court necromancer, and its guards, archers and King's Guard. A
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
@@ -1707,6 +1736,17 @@ placement for him to approve). The barrow beetle has a cousin that lives only in
 crystal buds, and what it eats grows out of its shell. A few of them keep a geode alive: where they have fed, plain
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
+
+(new) **Bores, brines, direbats and the small beasts** (Sensible MC picks, 2026-11-16; the mods are Andy's picks, the
+placement Claude's for him to approve). The Blaze and the Breeze are not alone. Where ki has soaked into deep stone for
+long enough it wakes as a **bore**: an earth spirit that keeps the ancient ruins under the hills, spits stone that
+shatters on impact, and burrows away if you get too close. A pick will dig it back out. Its twin in the sea is the
+**brine**, which keeps the drowned temples beside their guardians. It throws water that sticks and then bursts, and the
+conduit's light leaves it alone. Neither is a demon or a dead thing. They are the ground and the deep keeping what is
+theirs, and the elemental sorcerers of earth and water learn from the rods they leave behind. In the deep caves live
+**direbats**, bats grown big and ill-tempered on the dark. They snatch what glitters from a miner's hands and carry it
+off to their roosts. The night folk's bat shape is not one of them, and a direbat will not answer to a vampire. The
+warm rivers and swamps have **capybaras**, unbothered by anything, and the cold shores have **penguins**.
 
 **The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
 placement, approved by Andy). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,

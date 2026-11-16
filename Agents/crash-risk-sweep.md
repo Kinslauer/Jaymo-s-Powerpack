@@ -1,0 +1,25 @@
+---
+status: running
+task: Crash-risk review of all three mods (read-only)
+branch: none (review only, no edits)
+with: Andy
+pr: 
+mods: powers, kingdoms, kitchen
+versions: 
+started: 2026-11-16
+owns:
+  - (nothing: read-only)
+---
+# Crash-risk sweep
+
+**Task:** Andy asked for a whole-repo review; scoped to a crash-risk sweep of all three mods.
+
+## Plan
+- Triage the Deck crash reports (modpack/deck-crash, modpack/deck-logs): done. 9 own-mod sync-chunk-load hangs, most fixed since (#1435, #1451, #1454, #1459, #1466); 4 third-party (reanimal red panda, MCA spawn queue, Felled CutLogs OOM x2); 1 /forceload hang; 1 AIOOBE with no stack.
+- Workflow: Haiku scanners over every server file that reads the world (unguarded files first), looking for sync chunk loads and tick crashes; each finding checked by a Sonnet verifier.
+- Phase 2 (offer): static-collection leaks, attachments, packets, codecs.
+
+## Notes
+- Guards that count: `Loaded.made(level, pos)` (each mod has one), `getChunkSource().getChunkNow(x, z) != null`. Plain `isLoaded`/`hasChunkAt`/`hasChunk` don't (true while the chunk is still being made).
+
+## Done

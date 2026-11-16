@@ -25,3 +25,13 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/sensible-picks` · **Updated:** 2026-11-16 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
+
+## [#1643](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1643) Faith page shows the faith's champion, sigil behind it
+- **Branch:** `claude/faith-page-champion` · **Updated:** 2026-11-16 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1644](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1644) Soften pixel shadows' edges
+- **Branch:** `claude/soften-pixel-shadows` · **Updated:** 2026-11-16 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** [[soften-pixel-shadows]]
