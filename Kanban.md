@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-15 21:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-15 21:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/forest-fire-and-fall-hall|forest-fire-and-fall-hall]] · 💻 Odysseus · running
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · running
 
 
@@ -26,6 +25,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Agents/forest-fire-and-fall-hall|forest-fire-and-fall-hall]] · 💻 Odysseus · stalled
 
 
 ## Done
