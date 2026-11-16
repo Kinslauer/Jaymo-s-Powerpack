@@ -39,3 +39,5 @@ Youth the wood-wisp (a Sylvan GeckoLib mob summoned with `/youth summon`, speaks
 - "Actively avoid gaze" needs the wisp to know where the player is looking — compare the player's look angle to the direction to the wisp.
 - "Stay put" vs "follow" vs "avoid gaze" are mutually exclusive modes; the wisp could pick one when summoned or switch over time.
 - Ask Tiv: should the player be able to choose a mode (e.g. `/youth summon stay`), or should Youth pick at random each time?
+
+Settled by Tiv: if the player says "youth look" or "what's that" (or similar), Youth instead describes what's on the player's crosshair. In that look mode it always floats in the player's POV instead of drifting about its spot.
