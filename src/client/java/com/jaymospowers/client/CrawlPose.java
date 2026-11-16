@@ -262,7 +262,7 @@ public final class CrawlPose {
 		boolean downed = Downed.isDowned(player);
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
 		Long rising = downed ? player.getAttached(Downed.RISING) : null;
-		float rise = rising == null ? -1.0F : Mth.clamp((time - rising + partialTicks) / Downed.RISE_TICKS, 0.0F, 1.0F);
+		float rise = rising == null ? -1.0F : Mth.clamp((time - rising + partialTicks) / Downed.riseTicks(player), 0.0F, 1.0F);
 		if (rise >= 0.0F && Downed.standless(player)) {
 			// (Andy, 2026-11-14: "the struggles should make sense dependent on the context") nothing to stand on: the rise is
 			// only its push up onto the arms, held there as they pull themselves together; never the knees or the feet
@@ -276,6 +276,11 @@ public final class CrawlPose {
 		rise = sink(player.getId(), downed, rise, time + partialTicks);
 		// (Andy, 2026-11-15) downed and lying still beside a wall a moment: sat up against it
 		com.jaymospowers.client.wounds.WallSit.extract(player, state, partialTicks, rise >= 0.0F);
+		if (com.jaymospowers.client.wounds.WallSit.upTheWall(state)) {
+			// (Andy, 2026-11-16) rising up the wall they sat against: WallSit draws it, and letting go slides them back down it
+			SINKING.remove(player.getId());
+			rise = -1.0F;
+		}
 		// (0.19.30) which way they're going along the body: the way they face, or backing up
 		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);

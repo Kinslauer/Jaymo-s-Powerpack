@@ -34,7 +34,10 @@ import org.jspecify.annotations.Nullable;
  * them on the wall, and there should be a smooth animation for the 1.5s it takes to get onto the wall." Then: "the sit
  * key should start the animation for players". A downed player beside a wall who presses the Sit key
  * ({@code DownedLie#sitKey}) gets up against it over {@link #IN_TICKS}: rolls over onto their back, swings round, sits
- * up and shuffles back to it; pressed again, they go back down. One that another sets down against a wall ({@link DownedLie#PROPPED}) is stood there and
+ * up and shuffles back to it; pressed again, they go back down. Then: "players should also stay seated when recovering to
+ * their feet, and they can recover with blacked limbs this way, it just takes longer." Sat there, the rise (sneak held,
+ * {@code Downed#RISING}) is them pushing up the wall to their feet, the slide down it played back up ({@link Seat#up});
+ * let go part way, they slide back down it. One that another sets down against a wall ({@link DownedLie#PROPPED}) is stood there and
  * slides down it into the sit, out cold or not; one dragged there and let go gets up against it from the floor. Crawling
  * off, the sit plays back down to the floor ({@link #OUT_TICKS}). In first person the view is at the model's own eyes
  * ({@link #eye}).
@@ -111,7 +114,7 @@ public final class WallSit {
 	 * A downed player sitting (or getting up against the wall, or back down off it): the body as it's drawn, and how far;
 	 * the body's pitch (radians, the legs kept along the floor under it); the arms ({@link WallSitArms#pose}).
 	 */
-	record PlayerSit(Matrix4f body, float p, boolean placed, int id, boolean out, int broken, float pitch, float[] arms) {
+	record PlayerSit(Matrix4f body, float p, boolean placed, boolean up, int id, boolean out, int broken, float pitch, float[] arms) {
 		/** How far the limbs are the sit's rather than the crawl's (0-1). */
 		float taken() {
 			return this.placed ? 1.0F : PoseBlend.seg(this.p, 0.0F, LIMBS_END);
@@ -141,6 +144,8 @@ public final class WallSit {
 		float roll = 1.0F;
 		/** What the arms do getting up (made with the turn). */
 		WallSitArms.Plan plan;
+		/** Rising to their feet up the wall: how far (0-1, sat to stood); -1 if not. */
+		float up = -1.0F;
 
 		Seat(Sit sit) {
 			this.sit = sit;
@@ -148,6 +153,9 @@ public final class WallSit {
 
 		/** How far onto the wall (0 lying, 1 sat): along the slide down it when {@link #placed}. */
 		float progress(float now) {
+			if (this.up >= 0.0F) {
+				return 1.0F - this.up;
+			}
 			float dt = Math.max(0.0F, now - this.at);
 			if (!this.in) {
 				return Math.max(0.0F, this.from - dt / OUT_TICKS);
@@ -263,9 +271,27 @@ public final class WallSit {
 		long time = player.level().getGameTime();
 		float now = time + partialTicks;
 		float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
-		rising |= player.hasAttached(Downed.RISING);
 		Seat seat = SEATS.get(id);
 		Long propped = player.getAttached(DownedLie.PROPPED);
+		Long risingAt = player.getAttached(Downed.RISING);
+		if (seat != null && propped != null && risingAt != null && seat.in && !Downed.standless(player)
+			&& (seat.up >= 0.0F || seat.progress(now) >= 1.0F)) {
+			// (Andy, 2026-11-16) sat there and rising: up the wall to their feet, the slide down it played back up
+			if (seat.up < 0.0F) {
+				seat.placed = true;
+				seat.turnFrom(player, bodyRot);
+			}
+			seat.up = Mth.clamp((now - risingAt) / Downed.riseTicks(player), 0.0F, 1.0F);
+			LAST_MOVED.put(id, now);
+			return seat;
+		}
+		if (seat != null && seat.up >= 0.0F) {
+			// let go (or knocked) part way up: sliding back down the wall from there
+			seat.from = 1.0F - seat.up;
+			seat.at = now;
+			seat.up = -1.0F;
+		}
+		rising |= risingAt != null;
 		if (propped != null && (!TAKEN.containsKey(id) || TAKEN.get(id) != propped)) {
 			// set against a wall by another (or let go beside one): sat there now (once they're seen there)
 			Sit sit = of(player);
@@ -417,13 +443,21 @@ public final class WallSit {
 
 	/** How far the head's lolled sat {@code p} of the way (0-1). */
 	private static float lolled(boolean placed, float p) {
+		return lolled(placed, false, p);
+	}
+
+	/** As {@link #lolled(boolean, float)}; {@code up}: rising up the wall, the head coming up with them. */
+	private static float lolled(boolean placed, boolean up, float p) {
+		if (up) {
+			return p;
+		}
 		return placed ? 1.0F : PoseBlend.seg(p, LOLL_FROM, 1.0F);
 	}
 
 	/** The head's turn sat {@code p} of the way (x, y, z, as on the model): the chin tucked getting up, then lolled. */
-	private static float[] head(boolean placed, float p, int id) {
+	private static float[] head(boolean placed, boolean up, float p, int id) {
 		float side = DownedLie.pick(id * 17) < 0.5F ? 1.0F : -1.0F;
-		float lolled = lolled(placed, p);
+		float lolled = lolled(placed, up, p);
 		float tuck = placed ? 0.0F : PoseBlend.bump(p, 0.05F, 0.25F, 0.55F, 0.75F);
 		return new float[] {HEAD_DROP * lolled + CHIN * tuck, HEAD_TURN * side * lolled, HEAD_TIP * side * lolled};
 	}
@@ -447,7 +481,7 @@ public final class WallSit {
 			sat.get(PoseBlend.LEFT_ARM + 1), sat.get(PoseBlend.LEFT_ARM + 2),
 			out || cradle || (broken & Dismember.LEFT_ARM) != 0 ? 0.0F : -WallSitArms.FOLD};
 		float move = (seat.sit.distance() - SEAT_BACK * state.scale) / state.scale;
-		state.setData(KEY, new PlayerSit(body(seat, p, state.bodyRot, state.scale), p, seat.placed, player.getId(), out, broken,
+		state.setData(KEY, new PlayerSit(body(seat, p, state.bodyRot, state.scale), p, seat.placed, seat.up >= 0.0F, player.getId(), out, broken,
 			seat.placed ? 0.0F : pitch(p, move), WallSitArms.pose(room(seat, state.bodyRot, state.scale), seat.plan, p, rest)));
 	}
 
@@ -472,6 +506,12 @@ public final class WallSit {
 	 * After the crawl's limbs are on {@code f}: over to the sit's as they get up against the wall (outright, set against
 	 * it). How far the limbs are the sit's (0-1); 0 if they aren't sitting.
 	 */
+	/** Whether {@code state}'s player is rising up the wall they sat against (drawn here, not as a rise off the floor). */
+	public static boolean upTheWall(AvatarRenderState state) {
+		PlayerSit sitting = state.getData(KEY);
+		return sitting != null && sitting.up();
+	}
+
 	public static float posePlayer(AvatarRenderState state, PoseBlend.Frame f) {
 		PlayerSit sitting = state.getData(KEY);
 		if (sitting == null) {
@@ -488,7 +528,7 @@ public final class WallSit {
 		float legs = placed ? sat.get(PoseBlend.RIGHT_LEG) * up : -(Mth.HALF_PI + sitting.pitch());
 		float rest = placed ? 1.0F : PoseBlend.seg(p, LOLL_FROM, 1.0F);
 		float k = sitting.taken();
-		float[] head = head(placed, p, sitting.id());
+		float[] head = head(placed, sitting.up(), p, sitting.id());
 		float breath = sitting.out() ? 0.0F : Mth.sin(state.ageInTicks * BREATH_RATE) * BREATH_DEPTH * rest;
 		f.mix(PoseBlend.HEAD, head[0] - breath, head[1], head[2], k);
 		float[] arms = sitting.arms();
@@ -510,7 +550,7 @@ public final class WallSit {
 	/** How far forward this player's head hangs off the neck sat against a wall (model pixels; 0 if they aren't sitting). */
 	public static float headForward(AvatarRenderState state) {
 		PlayerSit sitting = state.getData(KEY);
-		return sitting == null ? 0.0F : HEAD_FORWARD * lolled(sitting.placed(), sitting.p());
+		return sitting == null ? 0.0F : HEAD_FORWARD * lolled(sitting.placed(), sitting.up(), sitting.p());
 	}
 
 	/** {@code a} turned the short way round from {@code from} (radians). */
@@ -546,11 +586,11 @@ public final class WallSit {
 		float p = seat.progress(player.level().getGameTime() + partialTicks);
 		float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
 		float scale = player.getScale();
-		float[] head = head(seat.placed, p, player.getId());
+		float[] head = head(seat.placed, seat.up >= 0.0F, p, player.getId());
 		// the head's middle at vanilla's eye height, turned with the head about the neck (the model is drawn flipped on x
 		// and y, so those two turn the other way here), then with the body; then into the world with its turn and size
 		Vector3f eye = new Vector3f(0.0F, EYE - NECK, 0.0F).rotateX(-head[0]).rotateY(-head[1]).rotateZ(head[2])
-			.add(0.0F, NECK, -HEAD_FORWARD * PX * lolled(seat.placed, p));
+			.add(0.0F, NECK, -HEAD_FORWARD * PX * lolled(seat.placed, seat.up >= 0.0F, p));
 		body(seat, p, bodyRot, scale).transformPosition(eye);
 		eye.rotateY((180.0F - bodyRot) * Mth.DEG_TO_RAD).mul(scale);
 		Vec3 at = new Vec3(Mth.lerp(partialTicks, player.xo, player.getX()) + eye.x, Mth.lerp(partialTicks, player.yo, player.getY()) + eye.y,
