@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: forest-fire-and-fall-hall (research only: two integration checklists for Andy)
 branch: none (research; no branch or PR until Andy says go)
 with:
@@ -34,3 +34,4 @@ kingdom's castles". Deliverable: one checklist per link, in chat. Research only:
 
 ## Done
 No player-visible change: two checklists and the questions for Andy, delivered in chat. Not playtested (nothing built).
+- 2026-11-15 21:49 No sign of work for 30 min: marked stalled (whoever ran it stopped).
