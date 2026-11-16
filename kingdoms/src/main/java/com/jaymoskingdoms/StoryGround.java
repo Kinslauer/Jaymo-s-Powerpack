@@ -122,6 +122,8 @@ public final class StoryGround {
 		List<ChunkPos> chunks = List.of();
 		/** (0.7.350) The capital's village still being looked for (null: found, or not looked for). */
 		@Nullable VillageSearch search;
+		/** The mainland the capital's citadel is looked for round, and its spot there (null: not chosen yet). */
+		@Nullable BlockPos citadelNear, citadel;
 
 		Job(BlockPos at, long giveUpAt, Predicate<ServerLevel> attempt, java.util.function.Consumer<ServerLevel> fallback) {
 			this.at = at;
@@ -229,9 +231,13 @@ public final class StoryGround {
 				if (job().search != null) {
 					return false;
 				}
-				// (0.7.243) with no village near, the citadel goes up at the first try, not after waiting out the village's time
+				// (0.7.243) with no village near, the citadel is started at the first try, not after waiting out the village's
+				// time; a village that never takes it settles for a citadel by it, made the same way
 				BlockPos village = search.found;
-				return village != null ? foundInVillage(l, village) : citadel(l, job().at) != null || !realmless(l.getServer());
+				if (village != null && job().citadelNear == null && l.getGameTime() < job().giveUpAt) {
+					return foundInVillage(l, village);
+				}
+				return citadelWhenLoaded(l, job());
 			}, l -> citadel(l, job().at));
 			job.search = search;
 			capital = job;
@@ -419,16 +425,76 @@ public final class StoryGround {
 		return true;
 	}
 
+	/**
+	 * Chunks round a capital's citadel loaded before it's raised: a grand seat's site is looked for up to
+	 * {@code GrandSeats.MAX_SIDE / 2 + SITE_MARGIN + SITE_CLEARANCE + SITE_REACH} blocks from its middle and measured
+	 * half its side again round that (183 blocks), and its terrain pieces a little past. Read on the server thread,
+	 * unloaded ground there was made on the spot, and on a new world that ran into the 60 s watchdog.
+	 */
+	static final int CITADEL_RADIUS = 13;
+	/** Chunks round the mainland loaded before the citadel's spot is looked for there ({@link #citadelSpot}'s 56 blocks). */
+	static final int SPOT_RADIUS = 5;
+
+	/**
+	 * The capital's citadel ({@link #citadel}), raised only on loaded land: the job's ticket is moved to the mainland
+	 * near it and, once that's loaded, to the spot found there; each loads off the server thread over later tries. It
+	 * is waited for, never given up on: the job's fallback would raise it on land not yet loaded.
+	 */
+	private static boolean citadelWhenLoaded(ServerLevel level, Job job) {
+		if (!realmless(level.getServer())) {
+			return true;
+		}
+		job.giveUpAt = Long.MAX_VALUE;
+		if (job.citadelNear == null) {
+			job.citadelNear = mainland(level, job.at);
+			job.at = job.citadelNear;
+			job.radius = SPOT_RADIUS;
+			return false;
+		}
+		if (job.citadel == null) {
+			if (!loaded(level, job.citadelNear, SPOT_RADIUS)) {
+				return false;
+			}
+			job.citadel = citadelSpot(level, job.citadelNear);
+			job.at = job.citadel;
+			job.radius = CITADEL_RADIUS;
+			return false;
+		}
+		if (!loaded(level, job.citadel, CITADEL_RADIUS)) {
+			return false;
+		}
+		return KingdomEvents.foundTown(level, job.citadel) != null || !realmless(level.getServer());
+	}
+
+	/**
+	 * Whether every chunk within {@code radius} chunks of {@code at}'s is made and loaded (not {@code hasChunksAt}: in
+	 * 26.3 that's true of chunks only scheduled, see {@link Loaded}).
+	 */
+	private static boolean loaded(ServerLevel level, BlockPos at, int radius) {
+		ChunkPos c = ChunkPos.containing(at);
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dz = -radius; dz <= radius; dz++) {
+				if (level.getChunkSource().getChunkNow(c.x() + dx, c.z() + dz) == null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Dry, open ground round {@code near}, on the mainland ({@link #mainland}) and loaded there. */
+	private static BlockPos citadelSpot(ServerLevel level, BlockPos near) {
+		BlockPos ground = LifeStory.ground(level, near, 0, LifeStory.STRUCTURE_NEAR * 4, level.getRandom());
+		return ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
+	}
+
 	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else its castle. */
 	private static @Nullable Faction citadel(ServerLevel level, BlockPos near) {
 		if (!realmless(level.getServer())) {
 			return null;
 		}
 		// never out at sea or on an island: from the mainland nearest it
-		near = mainland(level, near);
-		BlockPos ground = LifeStory.ground(level, near, 0, LifeStory.STRUCTURE_NEAR * 4, level.getRandom());
-		BlockPos at = ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
-		return KingdomEvents.foundTown(level, at);
+		return KingdomEvents.foundTown(level, citadelSpot(level, mainland(level, near)));
 	}
 
 	/**
