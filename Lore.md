@@ -1737,8 +1737,8 @@ crystal buds, and what it eats grows out of its shell. A few of them keep a geod
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
-(new) **Bores, brines, direbats and the small beasts** (Sensible MC picks, 2026-11-16; the mods are Andy's picks, the
-placement Claude's for him to approve). The Blaze and the Breeze are not alone. Where ki has soaked into deep stone for
+**Bores, brines, direbats and the small beasts** (Sensible MC picks, 2026-11-16; the mods are Andy's picks, the
+placement Claude's, approved by Andy 2026-11-16). The Blaze and the Breeze are not alone. Where ki has soaked into deep stone for
 long enough it wakes as a **bore**: an earth spirit that keeps the ancient ruins under the hills, spits stone that
 shatters on impact, and burrows away if you get too close. A pick will dig it back out. Its twin in the sea is the
 **brine**, which keeps the drowned temples beside their guardians. It throws water that sticks and then bursts, and the

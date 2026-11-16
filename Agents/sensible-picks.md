@@ -20,7 +20,7 @@ owns:
 ## Notes
 - Left out: Lithosphere (needs a new world), the extra shaders (CurseForge only), and five we already have our own of
   (Crawl, Visual Workbench, SleepWarp, Explosive Enhancement, The Fletching Table Mod).
-- Lore: bores, brines, direbats, capybaras and penguins placed under The wild as (new), for Andy to approve.
+- Lore: bores, brines, direbats, capybaras and penguins placed under The wild; approved by Andy 2026-11-16.
 
 ## Done
 68 mods, 8 libraries and 10 resource packs. Gold armour rare outside the Nether, Herd Mentality hostiles only, Hostile
