@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: proving-grounds
 branch: claude/proving-grounds
 with:
