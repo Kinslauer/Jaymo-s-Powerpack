@@ -187,8 +187,14 @@ public final class OutOfBody {
 		player.removeAttached(OUT);
 	}
 
+	/** Its motes, shown only to those who see it ({@link PlayerGhost#broadcastToPlayer}). */
 	private static void motes(ServerLevel level, PlayerGhost ghost) {
-		level.sendParticles(MagicFx.mote(COLOR, 1.0F), ghost.getX(), ghost.getY() + 1.0, ghost.getZ(), 14, 0.25, 0.6, 0.25, 0.01);
+		for (ServerPlayer viewer : level.players()) {
+			if (ghost.broadcastToPlayer(viewer)) {
+				level.sendParticles(viewer, MagicFx.mote(COLOR, 1.0F), false, false, ghost.getX(), ghost.getY() + 1.0, ghost.getZ(), 14, 0.25, 0.6, 0.25,
+					0.01);
+			}
+		}
 	}
 
 	/** {@code player}'s client says where their ghost has drifted to: taken, inside the leash and loaded ground. */

@@ -5373,3 +5373,16 @@ Built; not played.
 
 - **Ember Soak** (Emberborn and Pyre bracing: sneak standing still with empty hands): the big orange ball drawn round your body, which filled your own view every time you sneaked still, is gone. A brace now shows as a heat ring running out from your feet, embers drifting up round you and a glow at each hand, the same for you and for anyone watching (`EmberSoak.bracedLook`, tuning `RING_RADIUS`, `RING_EVERY`, `HAND_SIDE`, `HAND_HEIGHT`). What the brace does is unchanged.
 - Compiled; not played.
+
+## 0.24.25 (2026-11-16): sea and lava wake-up lines (#1632)
+
+- Waking after being left for dead by a sea creature (shark, drowned, guardian, crocodile...) showed the raw key `message.jaymospowers.mortality.wake.sea` on the black screen. It now reads "You wake on dry land with salt in your mouth. Whatever dragged you under let you go."
+- Lava had the same gap (it can wake on a life's first two deaths): "You wake far from the heat, your hair singed short. You don't know how you got out."
+- Every other cause that can wake already had its line; the void and beheading never wake, so they need none.
+- Built; not played.
+
+## 0.24.26 (2026-11-16): ghosts seen only by the attuned, wispy tails (#1633)
+
+- **Who sees the dead**: a player's ghost (out of their body, or waiting in Limbo; `PlayerGhost`) is sent only to its owner and to attuned players and Death Sorcerers (Kingdoms' `Mana.seesGhosts`, through `KingdomsCompat.seesGhosts`), and its motes the same. Without Kingdoms everyone sees it.
+- **Wispy tail**: the ghost has no legs; the same tapering 8-link tail as the grave ghost hangs from its waist, curled and wavering, and streams out behind as it drifts (`PlayerGhostRenderer`).
+- Built; not played.

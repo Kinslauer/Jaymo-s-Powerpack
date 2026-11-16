@@ -1,9 +1,11 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.compat.KingdomsCompat;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,6 +22,8 @@ import org.jspecify.annotations.Nullable;
  * nothing by itself: it is put where its owner drifts, and looks where they look. Nothing touches it, it touches nothing,
  * no mob sees it, and it is never saved. On its owner's own client a second one, never added to the world, is the camera
  * they look out of ({@link #looksWith}).
+ * <p>Andy (2026-11-16): "only the attuned and death magicians should ever see the ki ghosts". It is sent only to its owner
+ * and to those who can see the dead ({@code KingdomsCompat.seesGhosts}); to anyone else it isn't there.
  */
 public class PlayerGhost extends PathfinderMob {
 	private static final EntityDataAccessor<Integer> DATA_OWNER = SynchedEntityData.defineId(PlayerGhost.class, EntityDataSerializers.INT);
@@ -54,6 +58,11 @@ public class PlayerGhost extends PathfinderMob {
 
 	void owner(Entity owner) {
 		this.entityData.set(DATA_OWNER, owner.getId());
+	}
+
+	@Override
+	public boolean broadcastToPlayer(ServerPlayer player) {
+		return (player.getId() == this.owner() || KingdomsCompat.seesGhosts(player)) && super.broadcastToPlayer(player);
 	}
 
 	@Override
