@@ -244,6 +244,20 @@ public final class DownedLie {
 		PROPPED_AT.put(body, body.position());
 	}
 
+	/**
+	 * The Sit key, pressed by a downed {@code player} (Andy: "the sit key should start the animation for players"): sat
+	 * against the wall beside them, they lie back down off it; otherwise, awake beside one, they get up against it from
+	 * the floor. Nothing if there's no wall.
+	 */
+	public static void sitKey(ServerPlayer player) {
+		if (player.hasAttached(PROPPED)) {
+			player.removeAttached(PROPPED);
+			PROPPED_AT.remove(player);
+		} else if (!Downed.passedOut(player)) {
+			prop(player, true);
+		}
+	}
+
 	/** Each server tick: a propped body that's moved off its spot, been picked up or isn't down any more is off the wall. */
 	static void tickPropped() {
 		if (PROPPED_AT.isEmpty()) {

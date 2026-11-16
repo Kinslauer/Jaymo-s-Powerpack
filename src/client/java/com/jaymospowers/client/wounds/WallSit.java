@@ -31,9 +31,10 @@ import org.jspecify.annotations.Nullable;
  * (Jaymo's Kitchen's corpse, {@code DownedLie#markBody}).
  * <p>
  * Andy (2026-11-15): "the view needs to move to the exact height on the model. other players should be able to place
- * them on the wall, and there should be a smooth animation for the 1.5s it takes to get onto the wall." A downed player
- * who lies still beside a wall gets up against it over {@link #IN_TICKS}: rolls over onto their back, swings round, sits
- * up and shuffles back to it. One that another sets down against a wall ({@link DownedLie#PROPPED}) is stood there and
+ * them on the wall, and there should be a smooth animation for the 1.5s it takes to get onto the wall." Then: "the sit
+ * key should start the animation for players". A downed player beside a wall who presses the Sit key
+ * ({@code DownedLie#sitKey}) gets up against it over {@link #IN_TICKS}: rolls over onto their back, swings round, sits
+ * up and shuffles back to it; pressed again, they go back down. One that another sets down against a wall ({@link DownedLie#PROPPED}) is stood there and
  * slides down it into the sit, out cold or not; one dragged there and let go gets up against it from the floor. Crawling
  * off, the sit plays back down to the floor ({@link #OUT_TICKS}). In first person the view is at the model's own eyes
  * ({@link #eye}).
@@ -61,7 +62,7 @@ public final class WallSit {
 
 	// ---- downed players
 
-	/** A downed player lies still this long beside a wall before they start getting up against it (ticks). */
+	/** Sat there (by the Sit key or another), a downed player lies still this long before they get up against it (ticks). */
 	static final float STILL_TICKS = 4.0F;
 	/** Getting up against the wall from the floor; set against it, sliding down it; back down off it to crawl away (ticks). */
 	static final float IN_TICKS = 30.0F, PLACE_TICKS = 16.0F, OUT_TICKS = 12.0F;
@@ -247,8 +248,8 @@ public final class WallSit {
 	// ---------------------------------------------------------------- downed players (CrawlPose)
 
 	/**
-	 * Brings this downed player's seat up to now: getting up against a wall once they've lain still beside it a moment
-	 * (awake, or propped there by another), set against one, or going back down off it as they move. Null if they aren't
+	 * Brings this downed player's seat up to now: getting up against a wall once they've pressed the Sit key beside it
+	 * (or been propped there by another), set against one, or going back down off it as they move. Null if they aren't
 	 * sitting, getting up or going down. Shared by the drawing and the first-person view, so both see the same.
 	 */
 	private static @Nullable Seat seat(Player player, float partialTicks, boolean rising) {
@@ -307,13 +308,13 @@ public final class WallSit {
 			if (same) {
 				seat.sit = live;
 			}
-			if (seat.placed && (moved || !same)) {
+			if (seat.placed && (moved || !same || propped == null)) {
 				// moved off (or the wall gone) before they'd slid down it: lying, as before
 				SEATS.remove(id);
 				return null;
 			}
-			if (seat.in && (moved || !same)) {
-				// crawling off (or the wall's gone): back down to the floor
+			if (seat.in && (moved || !same || propped == null)) {
+				// crawling off (or the wall's gone, or the Sit key pressed again): back down to the floor
 				seat.from = seat.progress(now);
 				seat.at = now;
 				seat.in = false;
@@ -323,9 +324,8 @@ public final class WallSit {
 				seat = null;
 			}
 		}
-		if ((seat == null || !seat.in) && !moved && now - LAST_MOVED.get(id) >= STILL_TICKS
-			&& (propped != null || !Downed.passedOut(player))) {
-			// lying still beside a wall a moment: getting up against it (from where they are, if on the way down)
+		if ((seat == null || !seat.in) && !moved && now - LAST_MOVED.get(id) >= STILL_TICKS && propped != null) {
+			// sat there (the Sit key, or set there) and lying still: getting up against it (from where they are, if on the way down)
 			Sit sit = of(player);
 			if (sit != null) {
 				Seat up = seat != null ? seat : new Seat(sit);
