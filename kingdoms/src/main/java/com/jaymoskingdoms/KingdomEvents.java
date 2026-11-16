@@ -190,7 +190,7 @@ public final class KingdomEvents {
 		if (NOT_VILLAGE.getOrDefault(key, Long.MIN_VALUE) > now) {
 			return;
 		}
-		Seats.Found village = Seats.structureAt(level, bell.get(), Seats::village);
+		Seats.Found village = Seats.structureAt(level, bell.get(), SeatCompounds::settled);
 		if (village.status() == Seats.Status.UNREADY) {
 			return;
 		}
@@ -207,7 +207,10 @@ public final class KingdomEvents {
 		}
 		Faction founded;
 		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
-		if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
+		if (SeatCompounds.is(village.id())) {
+			// a seat compound: a kingdom, a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
+			founded = SeatCompounds.found(level, bell.get(), village.start());
+		} else if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());
 			if (founded == null) {
 				// (0.5.1) no building there fit for a king: the kingdom raises its castle beside the village

@@ -1,0 +1,7 @@
+{
+  "type": "jaymoskingdoms:seat_compound",
+  "biomes": "#minecraft:is_overworld",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_box",
+  "spawn_overrides": {}
+}

@@ -1539,6 +1539,23 @@ final class Buildings {
 				: Blocks.GLASS_PANE.defaultBlockState();
 		}
 
+		/** Colours a seat compound's buildings may take before any settlement stands ({@link #wild}). */
+		private static final String[] WILD_COLOURS = {"red", "blue", "yellow", "green", "white", "black", "purple", "orange", "cyan", "brown",
+			"light_blue", "lime"};
+
+		/**
+		 * A building's kit at world generation, before any settlement stands there ({@link SeatCompounds}): the land's own
+		 * palette and wood, a realm's stone roofing, its colour and details rolled from {@code seed} (the same seed draws
+		 * the same building every time).
+		 */
+		static Kit wild(Palette land, long seed) {
+			RandomSource m = RandomSource.create(seed);
+			String main = WILD_COLOURS[m.nextInt(WILD_COLOURS.length)];
+			boolean dry = land == Palette.DESERT || land == Palette.BADLANDS || land == Palette.SAVANNA;
+			return new Kit(land, false, woodOf(land), main, "white", land.stairs(), land.slab(), land.wall(), land.planks(), List.of(main), dry,
+				false, land, RandomSource.create(seed ^ 0x5DEECE66DL));
+		}
+
 		/** The plain kit (variant 0). */
 		static Kit of(ServerLevel level, Faction faction) {
 			return of(level, faction, 0L, 0L);

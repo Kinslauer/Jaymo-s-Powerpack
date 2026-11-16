@@ -253,7 +253,7 @@ public final class GrimSites {
 	}
 
 	/** {@code kingdom}'s standing fiefdoms ({@code hold}) or the standing camps near it, in Grim structures. */
-	private static int count(MinecraftServer server, Faction kingdom, boolean hold) {
+	static int count(MinecraftServer server, Faction kingdom, boolean hold) {
 		int n = 0;
 		for (var e : Holds.all(server).entrySet()) {
 			Faction f = Factions.get(server, Integer.parseInt(e.getKey()));
@@ -339,6 +339,11 @@ public final class GrimSites {
 
 	/** A fiefdom of {@code kingdom} in a Grim hold: its lord on a throne in its largest building, guards, archers, a storehouse. */
 	static @Nullable Faction foundFief(ServerLevel level, StructureStart start, String path, Faction kingdom) {
+		return foundFief(level, start, path, kingdom, "message.jaymoskingdoms.grim.fiefdom");
+	}
+
+	/** The same, announced by {@code news} (a seat compound's fiefdom is no old ruin: {@link SeatCompounds}). */
+	static @Nullable Faction foundFief(ServerLevel level, StructureStart start, String path, Faction kingdom, String news) {
 		MinecraftServer server = level.getServer();
 		Seats.Pick pick = Seats.pick(level, Seats.buildings(start), kingdom.seat(), false);
 		if (pick == null) {
@@ -364,7 +369,7 @@ public final class GrimSites {
 			KingdomEvents.spawnArcher(level, Factions.get(server, id));
 		}
 		storehouse(level, fief, pick, keep);
-		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.grim.fiefdom", fief.name(), kingdom.name())
+		KingdomEvents.announce(server, Component.translatable(news, fief.name(), kingdom.name())
 			.withStyle(ChatFormatting.GOLD));
 		JaymosKingdoms.LOGGER.info("The fiefdom of {} ({}'s) took the Grim {} at {}; its lord's throne at {}", fief.name(), kingdom.name(), path, seat,
 			keep.throne());
