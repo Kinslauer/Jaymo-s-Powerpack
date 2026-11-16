@@ -5483,3 +5483,7 @@ Built; not played.
 - The Fluid & Foolish resource pack (only Punchy! Moves' moves) is no longer fetched or switched on, and is switched
   off at launch where it was on (client/PackResourcePacks RETIRED). Its file stays in resourcepacks/.
 - Built; not played. Whether these two were the lag isn't measured: if it stays, a spark profile would show what is.
+
+## 0.24.37 (2026-11-16): Mobs spawn only in the stacked lands where players are
+
+- In a One Dimension world the game spawned mobs in each stacked land (the Aether, the Overworld, the Nether, ...) round every loaded chunk, wherever the players were. Monsters made in an empty land despawned at once, and animals piled up in lands nobody visited. A land with no player within about 140 blocks is now skipped, as if it were its own dimension. The server had frozen for half a minute as a player joined (2026-11-16, 5:57 PM).
