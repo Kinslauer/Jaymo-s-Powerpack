@@ -30,6 +30,7 @@ owns:
 - Killed by a blow (the killing damage has a source position): no keel-over, limp at once along the blow. Andy approved: deaths from nowhere still keel over.
 - The keel-over was always cut short after about 3 ticks by the air check; it now counts a part within its radius of a block top as on the ground.
 - A limp mob killed after its own tick keeps its body for its corpse.
-- ragdoll_sim: new "killed by a blow" section; all checks pass. Not built locally (CI builds it); not tested in game.
+- Review round (2 findings, both verified, both fixed): no-corpse mobs (slimes, the Other World, melting snow golems) aren't left hanging limp through their death; a keel-over tipping off a ledge is let go instead of held up by one foot.
+- ragdoll_sim: new "killed by a blow" and "keeling off a ledge" sections; all checks pass. CI passed (all four builds). Not tested in game.
 
 Open for Andy: bodies now slide instead of flying, so they stop sooner (player 2.5 blocks vs 3.5 on a 0.42 knock). `DEATH_CARRY` 0.6 in Corpses is the dial if he wants more carry.
