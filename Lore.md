@@ -1185,6 +1185,16 @@ Now and then a town falls sick and the sick spread it among their neighbours, an
 sick and burn the blighted dead, for anyone who dies with it in them gets up the next night unless the body is burned or
 buried.
 
+**The old homes and the keeping** (Andy approved, 2026-11-16; ATi's old home). The old homes of the plains and savanna
+were built by smiths who worked alone, far from any town. Those smiths keep the Anvil-Father's faith and know his
+**keeping**, the rite they say over iron so it never rusts. A desperate smith can say it over flesh too. When the hollow
+blight came through one of these houses, there was no cure that far out. The household turned, and they're the husks
+upstairs. The smith felt the cold in his own hands, so he dug a cell under the floor, lit a red keeping light on its wall
+and lay down beneath it. While the light burns he sleeps as he was the night he lay down. The blight goes no further and
+he doesn't wake. Break the light and the keeping ends: he wakes coughing with a day left before he turns. Cured awake, he
+knows who saved him and forges them a piece of armour to their measure; cured in his sleep, he wakes not knowing it and
+won't believe whoever says so (tale: The Keeping).
+
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
 
