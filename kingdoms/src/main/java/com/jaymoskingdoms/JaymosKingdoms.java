@@ -373,6 +373,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
+		HostileMobsTiers.register();
 		// (0.7.386) star-touched foes on Jaymo's Powers' far worlds (its attachment)
 		LOGGER.debug("star-touched attachment: {}", StarTouched.STAR);
 		StarTouched.register();

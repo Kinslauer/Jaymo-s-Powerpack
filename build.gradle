@@ -490,6 +490,225 @@ def packModsNoCf = [
 	// else, and during our films (client/compat/FreecamCompat). 1.5.1+mc26.3. CurseForge [project id, file id] to look
 	// up from the home PC (cloud can't reach CurseForge).
 	[dep: "maven.modrinth:freecam:lwrkvqym", cf: null],
+	// --- Sensible MC picks (Andy, 2026-11-16, docs/checklists/Sensible MC pick-list.md): performance ---
+	// Entity Culling (tr7zw's protective licence, tr7zw; shipped unchanged): skips drawing entities and block entities
+	// that can't be seen. Client-only. 1.12.1 for 26.3.
+	[dep: "maven.modrinth:entityculling:UWpkLRV5", cf: null],
+	// ImmediatelyFast (LGPL-3.0-or-later, RaphiMC): faster HUD, text and map drawing. Client-only. 1.17.1+26.3-fabric for
+	// 26.3.
+	[dep: "maven.modrinth:immediatelyfast:3MP9UR23", cf: null],
+	// ModernFix-mVUS (LGPL-3.0-only, Coredex): a ModernFix fork with a 26.3 build: faster launch, less memory. Client and
+	// server. 5.27.20-build.2 for 26.3.
+	[dep: "maven.modrinth:modernfix-mvus:pa9cAfYg", cf: null],
+	// ScalableLux (LGPL-3.0-only, ishland): faster light updates (Starlight's way). Alpha. Client and server.
+	// 0.3.0-alpha.0.6+26.3 for 26.3.
+	[dep: "maven.modrinth:scalablelux:g4eqNSKd", cf: null],
+	// Resourceful Config (MIT, epic_oreo): the config library Structure Layout Optimizer needs. Client and server. 6.0.2
+	// for 26.3.
+	[dep: "maven.modrinth:resourceful-config:t3odHyFJ", cf: null],
+	// Structure Layout Optimizer (MIT, TelepathicGrunt): faster jigsaw structure generation (we run many structure packs).
+	// Server-side. 1.1.5+26.3-fabric for 26.3.
+	[dep: "maven.modrinth:structure-layout-optimizer:TNDMLvM0", cf: null],
+	// Krypton (LGPL-3.0-only, astei): lighter networking. Client and server. 0.3.2 for 26.3.
+	[dep: "maven.modrinth:krypton:UugdIYJw", cf: null],
+	// BadOptimizations (MIT, thosea): small client speed-ups away from rendering. Client-only. 2.4.1 for 26.3.
+	[dep: "maven.modrinth:badoptimizations:Sp0ctspw", cf: null],
+	// Cull Leaves (MIT, Motschen): culls hidden leaf faces. Client-only. 4.1.2+26.3-fabric for 26.3.
+	[dep: "maven.modrinth:cull-leaves:jqOVPlQ8", cf: null],
+	// Particle Core (MIT, fzzyhmstrs): particle culling and cheaper particle rendering. Needs Fabric Language Kotlin and
+	// Fzzy Config (packMods). Client-only. 0.3.3+fix1+26.2 for 26.3.
+	[dep: "maven.modrinth:particle-core:NPLw1nMG", cf: null],
+	// Optimized Block Entities [OBE] (LGPL-3.0-or-later, maDU59_): faster block entity rendering. Client-only. 1.2.5 for
+	// 26.3.
+	[dep: "maven.modrinth:obe:cowxN4rq", cf: null],
+	// Almanac (LGPL-3.0-only, frikinjay): the library Let Me Despawn needs. Server-side. 1.26.11.1 for 26.3.
+	[dep: "maven.modrinth:almanac:mSuvUaBg", cf: null],
+	// Let Me Despawn (LGPL-3.0-only, frikinjay): mobs that picked up an item can despawn again. Server-side. 1.26.11.1 for
+	// 26.3.
+	[dep: "maven.modrinth:lmd:a3ISt6Ob", cf: null],
+	// Packet Fixer (MIT, TonimatasDEV): fewer 'packet too big' kicks and timeouts. Client and server. 3.3.6 for 26.3.
+	[dep: "maven.modrinth:packet-fixer:dTKbGYbb", cf: null],
+	// Remove Reloading Screen (OSL-3.0, dima_dencep): resource packs reload in the background. Alpha. Client-only.
+	// 5.2.8+mc26.3 for 26.3.
+	[dep: "maven.modrinth:rrls:CAVJGGfj", cf: null],
+	// --- Sensible MC picks: looks and sounds ---
+	// Cirrus (all rights reserved, jvn; shipped unchanged): clouds and sky overhaul (Andy liked Simple Clouds' look, which
+	// we can't use). Needs YACL. Client-only. 1.4.2 for 26.3.
+	[dep: "maven.modrinth:cirrus:eYWl8ES1", cf: null],
+	// Visuality (MIT, PinkGoosik): small particles: sparks off hit armour, rain circles on water, glinting ores. Client-
+	// only. 0.7.15+26.3 for 26.3.
+	[dep: "maven.modrinth:visuality:BNe9kpJ7", cf: null],
+	// Cool Rain (all rights reserved, Jaiz; shipped unchanged): rain sounds different on leaves, metal, glass and the
+	// rest. Client and server. 1.4.0-26.3 for 26.3.
+	[dep: "maven.modrinth:coolrain:K9R06E1l", cf: null],
+	// Windy (LGPL-3.0-only, mazik): wind streaks in the air. Needs YACL. Client-only. 1.1.1+26.1 for 26.3.
+	[dep: "maven.modrinth:windy:qKwLQacO", cf: null],
+	// TLib (MIT, iMeeTake): the library Effectual needs. Client and server. 1.5.0-26.3 for 26.3.
+	[dep: "maven.modrinth:tlib:4shvVPZP", cf: null],
+	// Effectual (MIT, iMeeTake): fireflies, dust and other ambient particles. Needs Cloth Config and Architectury. Client-
+	// only. 1.4.2-26.3 for 26.3.
+	[dep: "maven.modrinth:effectual:LJUNgffX", cf: null],
+	// Grassier Grass (all rights reserved, leonardoinc22; shipped unchanged): grass that sways. Client-only. 1.4.5 for
+	// 26.3.
+	[dep: "maven.modrinth:grassier-grass:Ktvm8pvj", cf: null],
+	// Continuity (LGPL-3.0-only, Pepper_Bell): connected textures for resource packs that use them. Client-only.
+	// 3.0.1+26.3 for 26.3.
+	[dep: "maven.modrinth:continuity:Jt2sCWTQ", cf: null],
+	// Particle Interactions (CC-BY-NC-4.0, enchanted-games): particles when you strip logs, place blocks and the like.
+	// Client-only. 0.10.5+26.3-fabric for 26.3.
+	[dep: "maven.modrinth:particle-interactions:wdwSEgcr", cf: null],
+	// Make Bubbles Pop (custom licence, Tschipcraft; shipped unchanged): bubbles rise to the surface and pop. Client-only.
+	// 0.3.4-fabric for 26.3.
+	[dep: "maven.modrinth:make_bubbles_pop:CAFPNCYd", cf: null],
+	// Handful (Handful non-commercial licence, mammut53; shipped unchanged): a held stack looks like a stack. Client-only.
+	// 26.3+1.1.0-fabric for 26.3.
+	[dep: "maven.modrinth:handful:jJSR3X0W", cf: null],
+	// Stupid Block Animations (its own licence, fnn; shipped unchanged): blocks pop in when placed and shrink when broken.
+	// Needs YACL and Mod Menu. Client-only. 0.1.3+26.3-fabric for 26.3.
+	[dep: "maven.modrinth:stupid-block-animations:6JJXDxg7", cf: null],
+	// Telepistons (CC0-1.0, Tec): pistons slide instead of snapping. Client-only. 1.1.4 for 26.3.
+	[dep: "maven.modrinth:telepistons:geiPkx5u", cf: null],
+	// WindChime Unofficial Continued (CC-BY-4.0, NightEpiphany0401): a wind chime block that sways and chimes in the wind.
+	// Client and server. 1.11.0-26.3 for 26.3.
+	[dep: "maven.modrinth:windchime-unofficial-continued:tZFQMiMH", cf: null],
+	// --- Sensible MC picks: moving and sitting ---
+	// Take a Seat! (MIT, Icywhenhot): 20+ sitting poses. Client and server. 1.0.4 for 26.3.
+	[dep: "maven.modrinth:tas:Rw0pkzPu", cf: null],
+	// Better Climbing (CC0-1.0, artemisSystem): ladders, vines and scaffolding climb better. Client-only. 6-fabric for
+	// 26.3.
+	[dep: "maven.modrinth:better-climbing:dUxGZmcn", cf: null],
+	// Cut Through (MPL-2.0, Fuzs): swing through tall grass to hit the mob behind it. Needs Puzzles Lib and Forge Config
+	// API Port. Client-only. 26.3.0 for 26.3.
+	[dep: "maven.modrinth:cut-through:PCWjwufI", cf: null],
+	// --- Sensible MC picks: creatures ---
+	// Armored Foes (MPL-2.0, Fuzs): zombies, skeletons, illagers and the rest spawn with real armour. Gold is the rarest
+	// step of its ladder outside the Nether (our data/armoredfoes override; Andy: "gold is only realistically used in the
+	// nether"). Needs Puzzles Lib and Forge Config API Port. Client and server. 26.3.0 for 26.3.
+	[dep: "maven.modrinth:armored-foes:PEU7vsJj", cf: null],
+	// Direbats (Vampire Bats!) (MIT, dvits): big vampire bats in caves that steal items. Client and server. 4.0.0+26.3 for
+	// 26.3.
+	[dep: "maven.modrinth:direbats:HAesXjW7", cf: null],
+	// Earth & Water (all rights reserved, PotatoWolfie; shipped unchanged): earth and water elementals beside the Blaze
+	// and Breeze. Client and server. 1.0.6 for 26.3.
+	[dep: "maven.modrinth:earth-and-water:mjHxn13r", cf: null],
+	// Ambient Creatures (MIT, victoraa1116): a few small friendly critters. Beta. Client and server. 0.3.0-beta-26.3 for
+	// 26.3.
+	[dep: "maven.modrinth:ambient-creatures:sJb88U80", cf: null],
+	// Dasik Library (GPL-3.0-or-later, dasikigaijin): the library VO: Better Dogs needs. Client and server. 1.13.0 for
+	// 26.3.
+	[dep: "maven.modrinth:dasik-library:liDYLOQj", cf: null],
+	// VO: Better Dogs (GPL-3.0-only, dasikigaijin): wolves get personalities and smarter AI. Client and server.
+	// 5.0.59+26.3 for 26.3.
+	[dep: "maven.modrinth:vanilla-outsider-better-dogs:Hf2kV4x0", cf: null],
+	// Enhanced Cats (all rights reserved, IslandAggravating; shipped unchanged): cats get more to do. Needs GeckoLib and
+	// Fabric Language Kotlin. Client and server. 1.2.1 for 26.3.
+	[dep: "maven.modrinth:enhanced-cats:rk4XiZGI", cf: null],
+	// Prickle (LGPL-2.1-only, Darkhax): the config library Herd Mentality needs. Client and server. 26.3.0.2 for 26.3.
+	[dep: "maven.modrinth:prickle:aPdekuq6", cf: null],
+	// Herd Mentality (LGPL-2.1-only, Darkhax): hit a hostile mob and its kind nearby join in. Hostile mobs only (Andy):
+	// core/HerdPreset switches its neutral mobs off once per install. Client and server. 26.3.0.1 for 26.3.
+	[dep: "maven.modrinth:herd-mentality:aCvupK5j", cf: null],
+	// Hostile Mobs Improve Over Time (all rights reserved, KNIZE1007; shipped unchanged): mobs gain abilities with each
+	// level. A datapack mod. Its levels follow the player's world tier, not play time (Andy: Jaymo's Kingdoms'
+	// HostileMobsTiers). Server-side (clients may have it). 2.3+mod for 26.3.
+	[dep: "maven.modrinth:hostile-mobs-improve-over-time:YoyM2GpX", cf: null],
+	// Brainier Bees (MIT, dopadream): bees on the Brain AI, with their bugs fixed. Server-side. 1.10.3 for 26.3.
+	[dep: "maven.modrinth:brainier-bees:2HjX62kA", cf: null],
+	// FrozenLib (GPL-3.0-only, ?): the library Luna Slimes needs. Client and server. 3.0.3-mc26.3-fabric for 26.3.
+	[dep: "maven.modrinth:frozenlib:W1wrCkKg", cf: null],
+	// Luna Slimes (FrozenBlock Modding Oasis licence, Lunade; shipped unchanged): more varied, configurable slimes. Client
+	// and server. 1.10-mc26.3-fabric for 26.3.
+	[dep: "maven.modrinth:luna-slimes:z3yWfsEY", cf: null],
+	// --- Sensible MC picks: mounts and travel ---
+	// Ultimate Horseshoes (LGPL-3.0-only, Nanaky): horseshoes as horse gear. Client and server. 26.3 for 26.3.
+	[dep: "maven.modrinth:ultimate_horseshoes:CmIcH7gj", cf: null],
+	// Seaworthy Boats (all rights reserved, Serilum; shipped unchanged): boats reinforced into tougher tiers at a
+	// shipyard. Needs Collective. Client and server. 26.3.0-2.0-fabric+forge+neo for 26.3.
+	[dep: "maven.modrinth:seaworthy-boats:29sIHp7D", cf: null],
+	// Stretchy Leash (MIT, Estecka): leashes snap less, and make a sound when they do. Server-side. 3.0.0+26.1.2 for 26.3.
+	[dep: "maven.modrinth:stretchy-leash:yewvryEP", cf: null],
+	// Craftable Horse Armor (Craemon's datapack licence, Craemon; shipped unchanged): horse armour can be crafted. Server-
+	// side (clients may have it). 1.1.0+mod for 26.3.
+	[dep: "maven.modrinth:craft-horse-armor:AJkpa6SJ", cf: null],
+	// --- Sensible MC picks: villages ---
+	// Shifting Wares (EUPL-1.2, Estecka): villagers now and then reroll their trades. Server-side. 4.0.0+26.3 for 26.3.
+	[dep: "maven.modrinth:shifting-wares:itzUzrlX", cf: null],
+	// Doors Closed (MIT, Estecka): villagers close the doors they walk through. Server-side. 1.0.1+26.1.2 for 26.3.
+	[dep: "maven.modrinth:doors-closed:NA4I85Bx", cf: null],
+	// Room For Two (Sir Cow's protective licence, Sir_Cow; shipped unchanged): share a bed with a villager or another
+	// player. Beta. Client and server. 0.3.1 for 26.3.
+	[dep: "maven.modrinth:room-for-two:YWsnsbTY", cf: null],
+	// Village Masquerade (MPL-2.0, Fuzs): dress as a villager. Needs Puzzles Lib and Forge Config API Port. Client and
+	// server. 26.3.0 for 26.3.
+	[dep: "maven.modrinth:village-masquerade:NhCCM1f5", cf: null],
+	// Droppable Villager Trades (all rights reserved, NotTouchedGrass; shipped unchanged): a villager may drop one of its
+	// trades on death. Server-side. 1.0.1 for 26.3.
+	[dep: "maven.modrinth:droppable-villager-trades:HR2MyIvc", cf: null],
+	// Villager Converting (MIT, Roundaround): villagers a zombie kills always turn into zombie villagers. Server-side.
+	// 2.0.2+26.3-fabric for 26.3.
+	[dep: "maven.modrinth:villager-converting:CNWh8vEW", cf: null],
+	// --- Sensible MC picks: building and world ---
+	// Stoneworks (MPL-2.0, Fuzs): more shapes and variants of vanilla stones. Needs Puzzles Lib and Forge Config API Port.
+	// Client and server. 26.3.4 for 26.3.
+	[dep: "maven.modrinth:stoneworks:WC5MX8kL", cf: null],
+	// Scholar (GPL-3.0-only, mortuusars): two-page books, formatting, coloured books, mobs that read. Client and server.
+	// 1.2.12 for 26.3.
+	[dep: "maven.modrinth:scholar:43vc4YZi", cf: null],
+	// Animal  Weights (MIT, Leclowndu93150): farm animals grow heavier with light, water, grazing and room. Client and
+	// server. 1.2.2 for 26.3.
+	[dep: "maven.modrinth:animal-weight:gVMKXZKE", cf: null],
+	// Unloaded Activity (LGPL-3.0-only, Moono): crops, furnaces and animals catch up after their chunk was unloaded.
+	// Alpha. Server-side. 0.8.0-SNAPSHOT.1+mc26.3 for 26.3.
+	[dep: "maven.modrinth:unloaded-activity:1FrNgzRc", cf: null],
+	// NoWeatherSkip (BSD-2-Clause, MDen): sleeping keeps the rain and snow. Server-side. 1.1.1-fabric+mc26.1 for 26.3.
+	[dep: "maven.modrinth:noweatherskip:oJgqPe4k", cf: null],
+	// Comfortable Campfires (MIT, Cassian): sitting by a lit campfire gives slow regeneration. Server-side.
+	// 2.0.1+26.1-snapshot-10-fabric for 26.3.
+	[dep: "maven.modrinth:comfortable-campfires:3dQrrBky", cf: null],
+	// Block Runner (MPL-2.0, Fuzs): run faster on paths and roads. Needs Puzzles Lib and Forge Config API Port. Server-
+	// side (clients may have it). 26.3.0 for 26.3.
+	[dep: "maven.modrinth:block-runner:32WnkvOu", cf: null],
+	// Immersive Snow Reloaded (MIT, CerealCamera): snow piles up in cold weather. Server-side. 2.2.1+26.1-fabric for 26.3.
+	[dep: "maven.modrinth:immersive-snow-reloaded:HBnBf0gs", cf: null],
+	// Taller Forests (GPL-3.0-only, TheKingOfNerds): trees in dense forests grow a little taller. Server-side (clients may
+	// have it). v3.0+mod for 26.3.
+	[dep: "maven.modrinth:taller-forests:opedeSPp", cf: null],
+	// Tiered Shields (MIT, nugrevan): golden, copper, diamond and netherite shields. Its textures are the KSPACK resource
+	// pack (client/PackResourcePacks). Server-side (clients may have it). 26.3+mod for 26.3.
+	[dep: "maven.modrinth:ks-shields:N2OYaKps", cf: null],
+	// Passive Shield (all rights reserved, Serilum; shipped unchanged): a shield held idle in the off hand blocks on its
+	// own. Needs Collective. Client and server. 26.3.0-4.0-fabric+forge+neo for 26.3.
+	[dep: "maven.modrinth:passive-shield:ih2WFeUv", cf: null],
+	// --- Sensible MC picks: map and HUD ---
+	// Xaero's World Map (all rights reserved, thexaero; shipped unchanged): the full-screen world map beside Xaero's
+	// Minimap. Client and server. fabric-26.3-1.47.2 for 26.3.
+	[dep: "maven.modrinth:xaeros-world-map:VM8lNSSM", cf: null],
+	// AppleSkin (Unlicense, squeek502): shows saturation and what a food restores. Client and server. 3.0.10+mc26.3 for
+	// 26.3.
+	[dep: "maven.modrinth:appleskin:PHjDtQay", cf: null],
+	// Iceberg (CC-BY-NC-ND-4.0, Grend): the library Item Highlighter and Legendary Tooltips need. Client and server.
+	// 1.4.3.1 for 26.3.
+	[dep: "maven.modrinth:iceberg:zhVGUJyW", cf: null],
+	// Item Highlighter (CC-BY-NC-ND-4.0, Grend): marks newly picked-up items. Client-only. 1.2.3 for 26.3.
+	[dep: "maven.modrinth:item-highlighter:aaau0F2w", cf: null],
+	// Prism (CC-BY-NC-ND-4.0, Grend): the library Legendary Tooltips needs. Client-only. 1.1.3 for 26.3.
+	[dep: "maven.modrinth:prism-lib:ETN2U7Rc", cf: null],
+	// Legendary Tooltips (CC-BY-NC-ND-4.0, Grend): fancier tooltips for rare gear. Client-only. 1.6.3 for 26.3.
+	[dep: "maven.modrinth:legendary-tooltips:Yqi0k5XH", cf: null],
+	// Polymorph+ (LGPL-3.0-or-later, aminoquiz): choose between recipes that clash. Client and server. 1.5.0+26.3.0-fabric
+	// for 26.3.
+	[dep: "maven.modrinth:polymorph_plus:1Q5h8wvM", cf: null],
+	// Chat Heads (MPL-2.0, dzwdz): player heads beside chat lines. Client-only. 1.3.2 for 26.3.
+	[dep: "maven.modrinth:chat-heads:i3gcElvQ", cf: null],
+	// --- Sensible MC picks: Punchy. Likeliest to clash (Better Combat, First-person Model, Shoulder Surfing, our poses):
+	// drop these two first if hands or swings look wrong ---
+	// Punchy! (all rights reserved, Punchy Guys Studios; shipped unchanged): first-person animations, with hands visible
+	// holding items. Client-only. 3.2b for 26.3.
+	[dep: "maven.modrinth:punchy-fpa:JRytS9VK", cf: null],
+	// Punchy! Moves (all rights reserved, Punchy Guys Studios; shipped unchanged): third-person moves and a dynamic
+	// third-person camera. Its moves are the Fluid & Foolish resource pack (client/PackResourcePacks). Beta. Client and
+	// server. 1.0.9 for 26.3.
+	[dep: "maven.modrinth:punchymoves:lRMHnY4W", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
