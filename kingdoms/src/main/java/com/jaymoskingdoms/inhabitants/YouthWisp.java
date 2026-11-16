@@ -513,8 +513,14 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				toPlayer = dist < 1.0E-4 ? new Vec3(0, 0, 1) : toPlayer.normalize();
 				Vec3 avoidSpot;
 				if (this.isPlayerLookingAt(player)) {
-					// drift away from the asker's gaze
-					avoidSpot = this.spot.add(toPlayer.scale(-DRIFT * 1.5)).add(0, 0.2, 0);
+					// slip out of the asker's gaze to its side (a fixed spot beside the asker, so it can't run off)
+					Vec3 look = player.getLookAngle().multiply(1, 0, 1);
+					look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
+					Vec3 side = new Vec3(-look.z, 0, look.x);
+					if (side.dot(toPlayer) > 0) {
+						side = side.scale(-1); // stay on the side it is already on
+					}
+					avoidSpot = player.position().add(side.scale(AHEAD)).add(0, HEIGHT + 0.2, 0);
 				} else {
 					// drift back toward the asker's POV
 					Vec3 lookAway = player.getLookAngle().multiply(1, 0, 1);
