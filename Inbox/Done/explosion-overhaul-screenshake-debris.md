@@ -25,3 +25,4 @@ Research only — no code changes yet.
 - 2026-11-15 15:00 Text pass: nothing to pass - no PR, no player-visible text (explosion-overhaul screenshake/debris research); research only, no code changes yet.
 
 - 2026-11-15 Built by Claude (project thread) as PR #1616, branch claude/project-thread-kh0o85: debris chunks, ground dust, cave-in grit, flash, ringing ears + muffle + daze, 1.4x shake underground. Build passed, not played.
+- 2026-11-15 19:22 PR #1616 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: sky-lands-aether-biomes
 branch:
 with:
@@ -82,3 +82,4 @@ owns:
 **Bottom line:** Sky Lands is a Forge mod (MCreator) with a different structure (separate underground dimension). The Aether in Powers is a single noise-based dimension with 20 biomes across climate zones. The most portable ideas are: biome variants within zones, cloud particle improvements, glider/skiff stamina mechanics, and biome-specific structure loot. The "Abyss" underground dimension aligns with Andy's noted "Cloud Sea" concept (MODLOG #4335) — a cloud/air layer between Overworld and Aether.
 
 *Compiled 2026-11-15; ready for Andy's review.*
+- 2026-11-15 19:22 No sign of work for 30 min: marked stalled (whoever ran it stopped).
