@@ -14361,3 +14361,10 @@ Built; not played.
 - **Journal map, Last Bell map**: in a One Dimension world the stacked level's heightmaps see the whole column, so both maps drew the top block of each column: the Aether's islands (and the Cloud Sea) over the Overworld. They now read each column from the top of the band you stand in down to its floor, so the Overworld is mapped under the Aether, and the Aether once you're up in it. An ordinary world draws as before.
 - New `client/MapBand` (band floors from CustomChunks' stack layout by reflection, like Powers' AetherVeil does for Xaero's Minimap); `JournalScreen` and `BellMapScreen` use it.
 - Compile-checked; not played.
+
+## 0.9.66 (2026-11-16): ghosts seen only by the attuned, wispy tails (#1633)
+
+- **Who sees the dead** (Andy: "only the attuned and death magicians should ever see the ki ghosts"): the ghost at a grave (`GraveGhost`) is sent only to attuned players and Death Sorcerers (`Mana.seesGhosts`); anyone else never sees it, its motes or its words, and can't lay it to rest. It rises and fades by the nearness of someone who can see it.
+- A ghost's voice (out of the body or in Limbo, Simple Voice Chat) is heard only by those who can see the dead (`VoiceMasks.hearsGhosts`, `VoiceRange`).
+- **Wispy tail** ("the ghosts should have wispy tails like wisp"): the grave ghost's legs are gone; an 8-link tail tapers from the waist, fading toward the tip, curled back a little and wavering (`GraveGhostTail`, model rebuilt by `tools/gen_ghost_tail.py`).
+- Built; not played.
