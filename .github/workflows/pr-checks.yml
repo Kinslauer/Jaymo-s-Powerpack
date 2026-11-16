@@ -22,6 +22,46 @@ jobs:
       - run: python3 tools/pr_checks.py origin/${{ github.base_ref }}
       - run: python3 tools/check_data_refs.py
 
+  # Each pack mod's declared needs (loader, Minecraft, other mods) met, as Fabric Loader checks them at start; only when
+  # the pack's mod list or loader may have changed. build.gradle's checkPackMods says what it can't catch.
+  pack-mods:
+    name: Pack mods start together
+    # after the builds: they fetch the same Modrinth jars, and both at once got Modrinth's 429 (too many requests);
+    # the Gradle cache they leave behind serves most of them here
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Did the pack change?
+        id: changed
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -qxE 'build.gradle|gradle.properties'; then
+            echo "pack=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-java@v4
+        if: steps.changed.outputs.pack == 'true'
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.changed.outputs.pack == 'true'
+        with:
+          cache-read-only: false
+      - name: Fetch Gradle
+        if: steps.changed.outputs.pack == 'true'
+        run: |
+          for try in 1 2 3 4 5; do
+            sh ./gradlew --version --no-daemon && exit 0
+            echo "Gradle download failed (try $try), waiting before the next one"
+            sleep $((try * 20))
+          done
+          exit 1
+      - name: Check the pack mods' needs
+        if: steps.changed.outputs.pack == 'true'
+        run: sh ./gradlew checkPackMods --no-daemon --stacktrace
+
   build:
     name: Build ${{ matrix.mod }}
     runs-on: ubuntu-latest

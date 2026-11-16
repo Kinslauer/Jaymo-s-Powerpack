@@ -191,8 +191,8 @@ def packMods = [
 	[dep: "maven.modrinth:bundle-api:mQ3mo5tp", cf: [1189983, 8990141]],
 	// Fancy World Animations (MIT, by maDU59; "feel free to add this mod in your modpacks"): doors, trapdoors, gates,
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
-	// Client-only.
-	[dep: "maven.modrinth:fwa:Ssrxtw49", cf: [1452982, 9131733]],
+	// Client-only. 1.3.7: 1.3.6 and older patch a field Entity Culling 1.12 no longer has, and the game stops on start.
+	[dep: "maven.modrinth:fwa:JRzSDvfy", cf: [1452982, 9594250]],
 	// Controlling (MIT, by Jaredlll08) and its library Searchables (MIT, same author): a search bar on the Controls >
 	// Key Binds screen (by name, by key, or by category), plus a filter for conflicting and unbound keys. Client-only.
 	[dep: "maven.modrinth:controlling:V6AbRm67", cf: [250398, 9110875]],
@@ -990,6 +990,95 @@ tasks.register("modpackMods", Sync) {
 	from dwJar
 	from localPackJars
 	into new File(packDir, "mods")
+}
+// gradlew checkPackMods: each pack jar's declared needs (fabric.mod.json "depends" and "breaks", and those of the jars
+// inside it) checked the way Fabric Loader checks them at start, against the pack's loader, Minecraft and each other.
+// A jar that would stop the game or the server starting fails it (Sensible MC picks, 2026-11-16: Stoneworks and Room
+// For Two wanted loader 0.20, Seaworthy Boats a newer Collective). Clashing mixins aren't declared: only a launch finds
+// those (Fancy World Animations 1.3.0 against Entity Culling 1.12, the same day). Run by CI when build.gradle changes.
+configurations {
+	packCheckLoader {
+		canBeConsumed = false
+		canBeResolved = true
+		transitive = false
+	}
+}
+dependencies {
+	packCheckLoader "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+tasks.register("checkPackMods") {
+	def jars = configurations.packJars.plus(configurations.serverOnlyJars).plus(localPackJars).plus(mcaJar)
+	def loaderJars = configurations.packCheckLoader
+	def own = ["src", "kingdoms/src", "kitchen/src", "ports/trmt/src", "ports/dynamicwaters/src"]
+		.collect { file("$it/main/resources/fabric.mod.json") }.findAll { it.exists() }
+	def mcVersion = project.minecraft_version
+	def loaderVersion = project.loader_version
+	inputs.files jars
+	doLast {
+		def loader = new URLClassLoader(loaderJars.files.collect { it.toURI().toURL() } as URL[], getClass().classLoader)
+		def versionClass = loader.loadClass("net.fabricmc.loader.api.Version")
+		def predicateClass = loader.loadClass("net.fabricmc.loader.api.metadata.version.VersionPredicate")
+		def parseVersion = versionClass.getMethod("parse", String)
+		def parsePredicate = predicateClass.getMethod("parse", String)
+		def version = { String v -> parseVersion.invoke(null, v) }
+		def slurper = new groovy.json.JsonSlurper().setType(groovy.json.JsonParserType.LAX)
+		// id -> version, and each mod's [owner, id, depends, breaks]
+		def present = [minecraft: version(mcVersion), java: version("25"), fabricloader: version(loaderVersion)]
+		def mods = []
+		def read
+		read = { String owner, InputStream jar ->
+			def entries = [:]
+			new java.util.zip.ZipInputStream(jar).withCloseable { zip ->
+				for (def e = zip.nextEntry; e != null; e = zip.nextEntry) {
+					if (e.name == "fabric.mod.json" || e.name.endsWith(".jar")) {
+						entries[e.name] = zip.readAllBytes()
+					}
+				}
+			}
+			if (!entries.containsKey("fabric.mod.json")) {
+				return
+			}
+			def meta = slurper.parse(new String(entries["fabric.mod.json"] as byte[], "UTF-8").toCharArray())
+			def v = version(meta.version as String)
+			present[meta.id as String] = v
+			(meta.provides ?: []).each { present[it as String] = v }
+			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:]]
+			(meta.jars ?: []).each { nested ->
+				def bytes = entries[nested.file as String]
+				if (bytes != null) {
+					read(owner, new ByteArrayInputStream(bytes as byte[]))
+				}
+			}
+		}
+		jars.files.each { f -> f.withInputStream { read(f.name, it) } }
+		own.each { f ->
+			def meta = slurper.parse(f)
+			present[meta.id as String] = version("999.0.0")
+			mods << [f.path, meta.id as String, meta.depends ?: [:], [:]]
+		}
+		def matches = { spec, v -> (spec instanceof List ? spec : [spec]).any { parsePredicate.invoke(null, it as String).test(v) } }
+		def problems = []
+		mods.each { owner, id, depends, breaks ->
+			depends.each { dep, spec ->
+				def have = present[dep]
+				if (have == null) {
+					problems << "$id ($owner) needs $dep $spec, which isn't in the pack"
+				} else if (!matches(spec, have)) {
+					problems << "$id ($owner) needs $dep $spec; the pack has ${have.friendlyString}"
+				}
+			}
+			breaks.each { dep, spec ->
+				def have = present[dep]
+				if (have != null && matches(spec, have)) {
+					problems << "$id ($owner) breaks with $dep $spec, and the pack has ${have.friendlyString}"
+				}
+			}
+		}
+		if (!problems.isEmpty()) {
+			throw new GradleException("These pack mods would stop the game or the server starting:\n  " + problems.unique().join("\n  "))
+		}
+		logger.lifecycle("checkPackMods: ${mods.size()} mods' needs met (loader $loaderVersion, Minecraft $mcVersion)")
+	}
 }
 tasks.register("curseforgeManifest") {
 	def out = layout.buildDirectory.file("modpack/manifest.json")
