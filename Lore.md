@@ -1737,6 +1737,17 @@ crystal buds, and what it eats grows out of its shell. A few of them keep a geod
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
+**Bores, brines, direbats and the small beasts** (Sensible MC picks, 2026-11-16; the mods are Andy's picks, the
+placement Claude's, approved by Andy 2026-11-16). The Blaze and the Breeze are not alone. Where ki has soaked into deep stone for
+long enough it wakes as a **bore**: an earth spirit that keeps the ancient ruins under the hills, spits stone that
+shatters on impact, and burrows away if you get too close. A pick will dig it back out. Its twin in the sea is the
+**brine**, which keeps the drowned temples beside their guardians. It throws water that sticks and then bursts, and the
+conduit's light leaves it alone. Neither is a demon or a dead thing. They are the ground and the deep keeping what is
+theirs, and the elemental sorcerers of earth and water learn from the rods they leave behind. In the deep caves live
+**direbats**, bats grown big and ill-tempered on the dark. They snatch what glitters from a miner's hands and carry it
+off to their roosts. The night folk's bat shape is not one of them, and a direbat will not answer to a vampire. The
+warm rivers and swamps have **capybaras**, unbothered by anything, and the cold shores have **penguins**.
+
 **The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
 placement, approved by Andy). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
 towers and lookouts, balloon towers, tipi camps, stables, and on the cold seas citadels, galleons, icebound yards and
