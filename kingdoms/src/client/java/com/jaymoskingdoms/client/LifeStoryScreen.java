@@ -2634,6 +2634,35 @@ final class LifeStoryScreen extends Screen {
 			KiGhost.draw(graphics, x0, y0, x1, y1);
 			return;
 		}
+		// (gb-faith) the chosen faith's sigil behind the figure, from this page on
+		Answer sigilFaith = null;
+		if (s.question == Question.FAITH) {
+			sigilFaith = here;
+		} else {
+			Answer faith = picked(Question.FAITH);
+			sigilFaith = faith;
+		}
+		if (sigilFaith != null) {
+			drawSigil(graphics, com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + sigilFaith.key() + ".png"), x0, y0, x1, y1);
+		}
+		// (gb-faith) on the faith page the figure is the chosen faith's champion; The Truth has no champion,
+		// so it is drawn as a bright yellow-white ki ghost instead
+		if (s.question == Question.FAITH && here != null) {
+			com.jaymoskingdoms.Patron faithPatron = here.patron();
+			if (faithPatron == com.jaymoskingdoms.Patron.TRUTH) {
+				drawTruthGhost(graphics, x0, y0, x1, y1);
+				return;
+			}
+			com.jaymoskingdoms.PatronChampion champ = null;
+			net.minecraft.world.entity.EntityType<com.jaymoskingdoms.PatronChampion> type = com.jaymoskingdoms.PatronChampions.typeOf(faithPatron);
+			if (type != null) {
+				champ = type.create(player.level(), net.minecraft.world.entity.EntitySpawnReason.LOAD);
+			}
+			if (champ != null) {
+				drawChampion(graphics, x0, y0, x1, y1, champ);
+				return;
+			}
+		}
 		List<String> scenes = new ArrayList<>();
 		List<Question> told = Question.told();
 		for (Question q : told) {
@@ -2675,6 +2704,29 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		StoryFigure.draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, draft.gender);
+	}
+
+	/** (gb-faith) The chosen faith's sigil, drawn large and semi-transparent behind the figure. */
+	private static void drawSigil(GuiGraphicsExtractor graphics, net.minecraft.resources.Identifier glyph, int x0, int y0, int x1, int y1) {
+		int side = (int)(Math.min(y1 - y0, x1 - x0) * 0.55F);
+		if (side < 16) {
+			return;
+		}
+		int x = (x0 + x1 - side) / 2;
+		int y = (y0 + y1 - side) / 2;
+		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, side, side, 16, 16, side, side, 0x60FFFFFF);
+	}
+
+	/** (gb-faith) The chosen faith's champion, standing in the figure's box. */
+	private static void drawChampion(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, com.jaymoskingdoms.PatronChampion champ) {
+		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE));
+		float cx = (x0 + x1) / 2.0F, cy = y0 + (y1 - y0) * 0.35F;
+		net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, cx, cy, champ);
+	}
+
+	/** (gb-faith) The Truth has no champion: a bright yellow-white ki ghost. */
+	private static void drawTruthGhost(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1) {
+		KiGhost.draw(graphics, x0, y0, x1, y1, 0xFFFFFE, 0xFFFFFFFF, 0xFFFFFF);
 	}
 
 	// ---- the realm page's people (gb-realmcards) ----------------------------------------------------------------------
