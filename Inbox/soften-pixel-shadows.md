@@ -27,3 +27,4 @@ Each block top is 8x8 squares (`CELLS`), each fully shaded or not (`Column.shade
 - Keep it cheap: it rebuilds about 26 columns a tick within 14 blocks.
 - Shaders on must still switch it off (`DarkNights.shaderPackOn()`).
 - Kingdoms change note `changes/kingdoms/<branch>.md`; no version or MODLOG edits.
+- 2026-11-16 06:18 Text pass: PR #1644 claude/soften-pixel-shadows. Rewrote changes/kingdoms/soften-pixel-shadows.md to house format: what the player sees, class touched (com.jaymoskingdoms.client.disasters.SunShade), not played in game; 'sun/moon' -> 'sun and moon'; added trailing newline. SunShade.java contains no player-visible strings. Built kingdoms (BUILD SUCCESSFUL), python tools/pr_checks.py passed, committed 5b8e20d0f and pushed to the PR branch claude/soften-pixel-shadows (fast-forward, not force-pushed).
