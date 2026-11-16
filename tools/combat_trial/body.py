@@ -3,16 +3,17 @@ forward), so a pose can be checked by where its hands and blade end up. Matches 
 
 - a part turns by its pitch/yaw/roll as a ModelPart does (Rz * Ry * Rx) about its pivot; the arms ride the torso's yaw;
 - an arm folds at ELBOW pixels down it (KneeBend about the part's X; + bend brings the forearm forward);
-- the item sits at the fist's GRIP point and its blade runs along BLADE (ItemInHandLayer plus the handheld model's
-  third-person display: rotation [0, -90, 55]).
+- the item sits at the fist's GRIP point (ItemInHandLayer) and its blade runs along BLADE: the longsword's sprite
+  (textures/item/armory/iron_longsword.png) through its third-person display (rotation [320, 270, 0], translation
+  [0, 11.75, 1], scale 2), which puts the fist on the handle just below the guard and the pommel 6 pixels behind it.
 """
 import math
 
 ELBOW = 4.0
 PIVOT = {"right": (-5.0, 2.0, 0.0), "left": (5.0, 2.0, 0.0)}
 GRIP = {"right": (-1.0, 10.0, -2.0), "left": (1.0, 10.0, -2.0)}
-# the blade's direction in the fist (part space): forward, a little down while the arm hangs
-BLADE = (0.0, 0.1736, -0.9848)
+# the blade's direction in the fist (part space): forward, 5 degrees up while the arm hangs
+BLADE = (0.0, -0.087, -0.9962)
 # a two-handed grip: the second fist this far up the hilt from the first (toward the pommel)
 HILT = 4.0
 

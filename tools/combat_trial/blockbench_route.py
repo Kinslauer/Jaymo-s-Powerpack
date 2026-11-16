@@ -34,21 +34,21 @@ OUT = os.path.join(ROOT, "src", "main", "resources", "assets", "jaymospowers", "
 # Animation Library turns it the other way from the game and doesn't carry the arms round with it.
 POSES = {
     # middle guard: hands before the belly, the point at the eyes
-    "guard": ((-28, -15, -19, 1), (-3, 10, 43, 0)),
+    "guard": ((-28, -15, -19, 1), (-5, 10, 38, 0)),
     # the guard's breath: the hands rise a little
-    "breath": ((-30, -15, -19, 4), (-6, 13, 42, 0)),
+    "breath": ((-30, -15, -19, 4), (-8, 13, 37, 0)),
     # first cut: the sword up by the right shoulder
-    "cut_up": ((-37, 1, 21, 98), (-66, 61, 16, 0)),
+    "cut_up": ((-37, 1, 21, 98), (-70, 58, 14, 0)),
     # ... falling across, the hands out in front
-    "cut_hit": ((-48, -1, -57, 0), (0, 29, 20, 53)),
+    "cut_hit": ((-48, -1, -57, 0), (-9, 24, 17, 43)),
     # ... and through, low on the left
-    "cut_end": ((-20, 25, -56, 0), (54, 0, 33, 76)),
+    "cut_end": ((-20, 25, -56, 0), (48, 1, 25, 70)),
     # heavy overhead: the sword raised high behind the head
-    "ovh_up": ((-155, -12, 24, 0), (-138, 23, -36, 0)),
+    "ovh_up": ((-155, -12, 24, 0), (-137, 21, -32, 0)),
     # ... falling straight down the middle
-    "ovh_hit": ((-52, -18, -24, 0), (-26, 29, 30, 0)),
+    "ovh_hit": ((-52, -18, -24, 0), (-29, 26, 26, 0)),
     # ... and through, the point low
-    "ovh_end": ((-19, -1, -28, 0), (5, 4, 41, 0)),
+    "ovh_end": ((-19, -1, -28, 0), (3, 4, 37, 0)),
 }
 
 # name -> (description, loop, beginTick, endTick, [(tick, pose, interpolation)])
@@ -73,14 +73,14 @@ BONES = {
     "head": ((0, 24, 0), "body", [((-4, 24, -4), (4, 32, 4))]),
     "right_arm": ((5, 22, 0), "body", [((4, 18, -2), (8, 24, 2))]),
     "right_forearm": ((5, 18, 0), "right_arm", [((4, 12, -2), (8, 18, 2))]),
-    "sword": ((6, 12, -2), "right_forearm", [((5.5, 11.5, -22), (6.5, 12.5, 4)), ((3.5, 11.5, -3), (8.5, 12.5, -2))]),
+    "sword": ((6, 12, -2), "right_forearm", [((5.5, 11.5, -28), (6.5, 12.5, 4)), ((3.5, 11.5, -3), (8.5, 12.5, -2))]),
     "left_arm": ((-5, 22, 0), "body", [((-8, 18, -2), (-4, 24, 2))]),
     "left_forearm": ((-5, 18, 0), "left_arm", [((-8, 12, -2), (-4, 18, 2))]),
     "right_leg": ((1.9, 12, 0), None, [((-0.1, 0, -2), (3.9, 12, 2))]),
     "left_leg": ((-1.9, 12, 0), None, [((-3.9, 0, -2), (0.1, 12, 2))]),
 }
-# the blade leaves the fist 10 degrees down from straight ahead (body.BLADE)
-SWORD_TILT = (-10, 0, 0)
+# the blade leaves the fist 5 degrees up from straight ahead (body.BLADE)
+SWORD_TILT = (5, 0, 0)
 
 
 def bb_keys(pose):

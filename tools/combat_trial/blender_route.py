@@ -315,10 +315,10 @@ def add_body(rig):
     for side, x0 in (("right", -8), ("left", 4)):
         box(side + "_upper", (x0, 0, -2), (x0 + 4, 6, 2), side + "_arm", shirt)
         box(side + "_lower", (x0, 6, -2), (x0 + 4, 12, 2), side + "_forearm", skin)
-    # the sword in the right fist: blade and handle along BLADE from the grip, and a crossguard
+    # the sword in the right fist: blade and handle along BLADE from the grip (26 pixels ahead, 6 behind), and a crossguard
     grip = Vector(body.PIVOT["right"]) + Vector(body.GRIP["right"])
     turn = Matrix.Rotation(math.atan2(body.BLADE[1], -body.BLADE[2]), 3, "X")
-    box("blade", (-0.5, -0.5, -20), (0.5, 0.5, 6), "right_fist", steel, turn, grip)
+    box("blade", (-0.5, -0.5, -26), (0.5, 0.5, 6), "right_fist", steel, turn, grip)
     box("guard", (-2.5, -0.5, -1), (2.5, 0.5, 0), "right_fist", steel, turn, grip)
 
 
