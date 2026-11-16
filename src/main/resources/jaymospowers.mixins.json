@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"AetherEdgeMixin",
+		"BandSpawnNearPlayersMixin",
 		"DirtyAttributesMixin",
 		"SkyfallStopMixin",
 		"ArmourWearStackMixin",

@@ -35,6 +35,8 @@ public final class Stacked {
 	private static boolean ready;
 	private static Method dimensionAt, contextDimension, stacksOf, bandOf, bandShift, bandMin, bandMax, enter, leave, surface;
 	private static Method bandGenerator, bandRandomState, bandHeight, bandStructures;
+	/** CustomChunks' {@code BandSpawning.spawning()}: the band whose mobs are being spawned now, or null if it can't be read. */
+	private static Method spawningBand;
 	/** CustomChunks' own "searching this band" mark ({@code StackedChunkGenerator.SEARCHING}), or null if it can't be read. */
 	private static ThreadLocal<Object> searching;
 	/** Set while {@link #surface} runs, so its own chunk reads never come back through the heightmap hook. */
@@ -79,6 +81,11 @@ public final class Stacked {
 				} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 					searching = null;
 				}
+				try {
+					spawningBand = Class.forName("codx.customchunks.BandSpawning").getMethod("spawning");
+				} catch (ReflectiveOperationException | LinkageError e) {
+					spawningBand = null;
+				}
 			} catch (ReflectiveOperationException | LinkageError e) {
 				dimensionAt = null;
 			}
@@ -105,6 +112,22 @@ public final class Stacked {
 	/** The realm this entity is in. */
 	public static ResourceKey<Level> realm(Entity entity) {
 		return realm(entity.level(), entity.getY());
+	}
+
+	/**
+	 * The heights of the band whose mobs CustomChunks is spawning right now ({min, max exclusive}), or null: not a stacked
+	 * world, or not inside its band-by-band spawning.
+	 */
+	public static int[] spawningBand() {
+		if (!api() || spawningBand == null) {
+			return null;
+		}
+		try {
+			Object band = spawningBand.invoke(null);
+			return band == null ? null : new int[] {read(band, bandMin, Integer.MIN_VALUE), read(band, bandMax, Integer.MAX_VALUE)};
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
 	}
 
 	/** Whether this entity is in that realm (its own dimension, or that band of a stacked world). */
