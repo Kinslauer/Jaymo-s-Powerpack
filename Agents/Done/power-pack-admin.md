@@ -122,3 +122,4 @@ let the owed village start run, close the game when needed. Long loading screens
 - 8:15 PM: server watchdog kill in `StoryGround$VillageSearch.village`. It loaded a chunk on the server thread (capital village search on the 8:08 PM new world). This was already fixed on master by #1619, but the Deck was on Kingdoms 0.9.53.
 - 9:37 PM: the client crashed on startup. JVM native out of memory: the PC had only 453 MB of RAM free. Not a mod bug.
 - Reviewer Claude ran out of usage partway through a 9:34 PM deploy, which left the server stopped. 9:52 PM: keep-world deploy of master (Powers 0.24.22, Kingdoms 0.9.55, Kitchen 0.6.30). Server up, game updated, watcher re-armed.
+- 10:15 PM–10:52 PM: Andy online 37 minutes with no crash. The stability goal is met on Powers 0.24.22, Kingdoms 0.9.55 and Kitchen 0.6.30.
