@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: explosion-overhaul-screenshake-debris
 branch: claude/explosion-overhaul-screenshake-debris
 with: 
