@@ -75,6 +75,7 @@ Sizes: `S` drop in · `M` needs one test launch or a config pass · `L` likely c
 
 - [x] **Windy / Effectual / Grassier Grass** `M` ^sn-wind
   Wind streaks, fireflies and dust, grass that sways. All client side. Pick one or two; they overlap with Subtle Effects.
+  Grassier Grass removed 2026-11-16 (Andy: lagging the game); Windy and Effectual stay.
   Notes:
 
 - [x] **Continuity** `S` ^sn-continuity
@@ -124,6 +125,7 @@ Sizes: `S` drop in · `M` needs one test launch or a config pass · `L` likely c
 These touch the same ground as the combat-animations trial. Treat them as references.
 
 - [x] **Punchy! / Punchy! Moves / Fluid & Foolish** `L` ^sn-punchy
+  Removed 2026-11-16 (Andy: lagging the game).
   First and third person animations with a dynamic camera. Sensible just swapped Not Enough Animations for these. Likely fights Better Combat, First-person Model, Shoulder Surfing and our own poses.
   Notes:
 
