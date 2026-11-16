@@ -138,11 +138,13 @@ final class PackResourcePacks {
 		// "KSPACK" (MIT): the textures Tiered Shields (ks-shields, build.gradle) draws its shields with. 26.3-1.
 		new Pack("Tiered Shields' textures", "jaymospowers-kspack-v1", "KSPACK", "KSPACK_26.3-1.zip",
 			"https://cdn.modrinth.com/data/1NDTwAcs/versions/4gUjKYHi/KSPACK_26.3-1.zip",
-			"ab93778ed41546c8bccd46d518e83a745531235e", false),
-		// "Fluid & Foolish" (all rights reserved): the moves Punchy! Moves (build.gradle) plays. 1.0.1 (project fQdwNxte).
-		new Pack("Fluid & Foolish", "jaymospowers-fluid-foolish-v1", "Fluid & Foolish", "Fluid & Foolish 1.0.1.zip",
-			"https://cdn.modrinth.com/data/fQdwNxte/versions/UAp4jRDk/Fluid%20%26%20Foolish%201.0.1.zip",
-			"45a52f5456bc56686e1587dcc182c3e4601baec8", false));
+			"ab93778ed41546c8bccd46d518e83a745531235e", false));
+
+	/**
+	 * File name prefixes of packs that left the pack: switched off at launch if found on. "Fluid & Foolish" held only
+	 * Punchy! Moves' moves, and Punchy! Moves left with Punchy! (Andy, 2026-11-16: they lagged the game).
+	 */
+	private static final List<String> RETIRED = List.of("Fluid & Foolish");
 
 	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
 	static final List<Pack> OPTIONAL = List.of(
@@ -169,6 +171,11 @@ final class PackResourcePacks {
 	}
 
 	static void enableOnce(Minecraft minecraft) {
+		if (minecraft.options.resourcePacks.removeIf(id -> RETIRED.stream().anyMatch(prefix -> id.startsWith("file/" + prefix)))) {
+			minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
+			minecraft.options.save();
+			minecraft.reloadResourcePacks();
+		}
 		for (Pack pack : PACKS) {
 			enableOnce(minecraft, pack);
 		}
