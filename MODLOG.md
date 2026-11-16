@@ -5373,3 +5373,10 @@ Built; not played.
 
 - **Ember Soak** (Emberborn and Pyre bracing: sneak standing still with empty hands): the big orange ball drawn round your body, which filled your own view every time you sneaked still, is gone. A brace now shows as a heat ring running out from your feet, embers drifting up round you and a glow at each hand, the same for you and for anyone watching (`EmberSoak.bracedLook`, tuning `RING_RADIUS`, `RING_EVERY`, `HAND_SIDE`, `HAND_HEIGHT`). What the brace does is unchanged.
 - Compiled; not played.
+
+## 0.24.25 (2026-11-16): sea and lava wake-up lines (#1632)
+
+- Waking after being left for dead by a sea creature (shark, drowned, guardian, crocodile...) showed the raw key `message.jaymospowers.mortality.wake.sea` on the black screen. It now reads "You wake on dry land with salt in your mouth. Whatever dragged you under let you go."
+- Lava had the same gap (it can wake on a life's first two deaths): "You wake far from the heat, your hair singed short. You don't know how you got out."
+- Every other cause that can wake already had its line; the void and beheading never wake, so they need none.
+- Built; not played.
