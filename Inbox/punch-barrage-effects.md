@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
 thread: 
 claimed_by: hermes-b
-pr: 
+pr: 1665
 suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/ChronoPunch.java
   - kingdoms/src/main/java/com/jaymoskingdoms/spirits/SpiritBarrage.java
