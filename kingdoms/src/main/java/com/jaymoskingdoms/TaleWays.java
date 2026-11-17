@@ -579,6 +579,10 @@ final class TaleWays {
 		}
 		JsonObject own = Tale.object(step, "voices");
 		for (Mob m : Bonds.companions(player, Convictions.WITNESS)) {
+			if (m.getUUID().equals(run.giverId())) {
+				// (the one whose tale it is doesn't speak up about their own choice)
+				continue;
+			}
 			for (Convictions.Belief b : Convictions.of(m)) {
 				if (turns.contains(b)) {
 					MutableComponent line = Tales.words(player, run, own, b.key);
