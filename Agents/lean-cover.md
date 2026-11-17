@@ -3,7 +3,7 @@ status: in-review
 task: lean-cover
 branch: claude/lean-cover
 with: ragdolls track (separate agent)
-pr: 
+pr: 1663
 mods: kingdoms, powers
 versions: 
 started: 2026-11-16
