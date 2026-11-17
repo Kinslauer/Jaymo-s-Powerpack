@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
 thread: 
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/future/
@@ -37,3 +37,4 @@ Effects only through typed FX (docs/MagicFx.md). Lore: the future (check Lore.md
 - Not to be built in the Claude Code thread that made the pick-list.
 - Builds go on the Deck or CI, never Andy's PC.
 - Can be split into one PR per row.
+- 2026-11-16 21:15 hermes-a's claim had no sign of work for 30 min: handed back as open.
