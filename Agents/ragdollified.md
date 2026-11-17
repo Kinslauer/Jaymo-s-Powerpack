@@ -3,7 +3,7 @@ status: in-review
 task: Ragdolls track of "Ragdolls and Cover": add Ragdollified and Ragdollified Reactions, Kitchen's ragdolls stand down
 branch: ragdollified
 with: Lean/Cover track (Kingdoms Cover.java, lean code, keybinds; not touched)
-pr: 
+pr: 1661
 mods: powers (pack), kitchen
 versions: 
 started: 2026-11-16
