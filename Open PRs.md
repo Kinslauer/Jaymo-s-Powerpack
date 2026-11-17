@@ -1,14 +1,14 @@
 ---
-updated: 2026-11-17 12:56
+updated: 2026-11-17 15:48
 ---
 # Open PRs
 
-7 open, as of 2026-11-17 12:56. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-17 15:48. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1684](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1684) Oaths and pacts bind: forbidden acts are refused unless broken on purpose
 - **Branch:** `claude/binding-vows` · **Updated:** 2026-11-17 (today)
-- **Checks:** ❌ failing: Build Kingdoms
+- **Checks:** ✅ 5 passed
 - **Agent:** [[binding-vows]]
 
 ## [#1687](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1687) Add cooking block textures and model
@@ -31,12 +31,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1699](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1699) Slower grounded dodge roll, slowed further by armour weight
-- **Branch:** `claude/project-thread-k8mvto` · **Updated:** 2026-11-17 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#1700](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1700) Gun handling for the future's guns, and blinking while downed
-- **Branch:** `claude/project-thread-0townd` · **Updated:** 2026-11-17 (today)
+## [#1701](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1701) The Green Huntsman's rangers walk the forests: they hunt, teach, scold and hogtie poachers
+- **Branch:** `claude/forest-rangers` · **Updated:** 2026-11-17 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
