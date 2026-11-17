@@ -1,9 +1,9 @@
 ---
 status: in-review
 task: Scaling audit (read-only): every progression line in Powers, Kingdoms, Kitchen; pick-list for Andy
-branch: none (read-only)
+branch: claude/project-thread-god01i
 with: 
-pr: 
+pr: 1703
 mods: powers, kingdoms, kitchen
 versions: 
 started: 2026-11-17
@@ -29,3 +29,6 @@ fresh start to the late game; keep the early game weak and earned. Result: a sho
 
 ## Done
 Read-only: 10 scans + 5 verifier batches, every finding re-checked against master; wrong claims dropped. Ten worst: uncapped crippled stabs on bosses, armour x1.4 on mobs, player armour capped at Hearth, empty Legend tier for players, blight modifier bug, guns never scale, Z Fighter punch cap eats Super forms, Thief opener stacking, patron champion solo/group pacing, no late money sinks.
+
+## Build (2026-11-17)
+Andy saved 44/45 picks + the last hold note. Built in PR #1703 in 4 tracks (Powers combat; Kingdoms skills/faith; gear and tiers; Kingdoms world/money) + the last hold and Legend feasts. thief, class-xp and the Marksman gun share are on PR #1698. Row-checked by a verifier; all three builds pass; not played; no runServer boot.
