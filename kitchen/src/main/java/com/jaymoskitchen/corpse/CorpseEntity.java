@@ -103,6 +103,9 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.INT);
 	private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.STRING);
+	/** How an animal's body was killed ({@link CleanKill}, "clean" for a clean kill; empty for any other body), for its name. */
+	private static final EntityDataAccessor<String> KILL = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.STRING);
 	/**
 	 * (0.5.37, Andy: a player's corpse "should always look the way it did when the player died") The dead player's own
 	 * tags that carry their look ({@link #LOOK_TAG_PREFIXES}: Kingdoms' heritage and Bio-built form), space-separated, so
@@ -955,6 +958,7 @@ public class CorpseEntity extends Entity {
 		builder.define(PINNED, -1);
 		builder.define(ARROWS, 0);
 		builder.define(ORIGIN, -1);
+		builder.define(KILL, "");
 	}
 
 	/** (0.5.23) The arrows still in the body, packed as {@link com.jaymoskitchen.archery.StuckArrows} packs them. */
@@ -1075,6 +1079,12 @@ public class CorpseEntity extends Entity {
 	void setDeath(String death, List<ItemStack> spoiled) {
 		this.death = death;
 		this.spoiled = new ArrayList<>(spoiled);
+		syncKill();
+	}
+
+	/** Tells clients how the body was killed (an animal's only), for its name. */
+	private void syncKill() {
+		this.entityData.set(KILL, kind != CorpseKind.ANIMAL ? "" : death.isEmpty() ? "clean" : death);
 	}
 
 	void startBleeding(int ticks) {
@@ -1999,10 +2009,11 @@ public class CorpseEntity extends Entity {
 				addLoot(spoiled);
 				spoiled = new ArrayList<>();
 				death = CleanKill.CLEAN;
+				syncKill();
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death.saved"));
 				return InteractionResult.SUCCESS_SERVER;
 			}
-			if (!deathTold) {
+			if (!deathTold && reads(player)) {
 				// looked over before the first cut: what dying that way did to it
 				deathTold = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.death." + death));
@@ -3056,14 +3067,45 @@ public class CorpseEntity extends Entity {
 		return sourceTypeCache;
 	}
 
-	/** Named for whose body it is: a player's by their name, a mob's by its kind ("Zombie Corpse"), so Jade says it too. */
+	/**
+	 * Who can tell whose a body is and how it was killed (its pelt): everyone, unless another mod says otherwise (Jaymo's
+	 * Kingdoms: Read the Ground). Plain Java and Minecraft types, so it can be set by reflection.
+	 */
+	private static java.util.function.Predicate<Player> reader = p -> true;
+	/** Client: the player looking (set by the Kitchen's client), so a body is named only to a reader. */
+	public static java.util.function.Supplier<@Nullable Player> viewer = () -> null;
+
+	public static void setReader(java.util.function.Predicate<Player> test) {
+		reader = test;
+	}
+
+	/** Whether {@code player} can tell whose a body is and how it was killed (no one in particular: yes). */
+	public static boolean reads(@Nullable Player player) {
+		return player == null || reader.test(player);
+	}
+
+	/**
+	 * Named for whose body it is, to a reader ({@link #reads}) only: a player's by their name, a mob's by its kind ("Deer
+	 * Corpse"), an animal's with what its killing left of the pelt ("Deer Corpse, torn hide"), so Jade says it too. To
+	 * anyone else it is just a corpse.
+	 */
 	@Override
 	protected Component getTypeName() {
-		if (isPlayerCorpse() && !ownerName().isEmpty()) {
-			return Component.translatable("entity.jaymoskitchen.corpse.of_player", ownerName());
+		if (level().isClientSide() && !reads(viewer.get())) {
+			return super.getTypeName();
 		}
+		Component name;
 		EntityType<?> type = sourceType();
-		return type != null ? Component.translatable("entity.jaymoskitchen.corpse.of", type.getDescription()) : super.getTypeName();
+		if (isPlayerCorpse() && !ownerName().isEmpty()) {
+			name = Component.translatable("entity.jaymoskitchen.corpse.of_player", ownerName());
+		} else if (type != null) {
+			name = Component.translatable("entity.jaymoskitchen.corpse.of", type.getDescription());
+		} else {
+			return super.getTypeName();
+		}
+		String kill = this.entityData.get(KILL);
+		return kill.isEmpty() ? name : Component.translatable("entity.jaymoskitchen.corpse.with_kill", name,
+			Component.translatable("entity.jaymoskitchen.corpse.kill." + kill));
 	}
 
 	/** Puts a carried animal corpse back into the world. */
@@ -3893,6 +3935,7 @@ public class CorpseEntity extends Entity {
 		this.gutted = input.getBooleanOr("Gutted", false);
 		this.entityData.set(DRESSED, input.getIntOr("Dressed", 0));
 		this.death = input.getStringOr("Death", CleanKill.CLEAN);
+		syncKill();
 		this.spoiled = new ArrayList<>(input.read("Spoiled", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));

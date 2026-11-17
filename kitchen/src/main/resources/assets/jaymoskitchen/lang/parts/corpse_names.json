@@ -1,4 +1,10 @@
 {
 	"entity.jaymoskitchen.corpse.of": "%s Corpse",
-	"entity.jaymoskitchen.corpse.of_player": "%s's Corpse"
+	"entity.jaymoskitchen.corpse.of_player": "%s's Corpse",
+	"entity.jaymoskitchen.corpse.with_kill": "%s, %s",
+	"entity.jaymoskitchen.corpse.kill.clean": "clean kill, pelt whole",
+	"entity.jaymoskitchen.corpse.kill.mauled": "mauled, hide torn",
+	"entity.jaymoskitchen.corpse.kill.burnt": "burnt, hide ruined",
+	"entity.jaymoskitchen.corpse.kill.battered": "battered, meat bruised",
+	"entity.jaymoskitchen.corpse.kill.bruised": "pulped, hide torn"
 }
