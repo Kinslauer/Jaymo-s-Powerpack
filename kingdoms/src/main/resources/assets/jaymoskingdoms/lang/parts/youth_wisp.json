@@ -36,5 +36,8 @@
   "message.jaymoskingdoms.youth_wisp.bye.0": "Off I go! Call if you need me.",
   "message.jaymoskingdoms.youth_wisp.bye.1": "Bye! Just say my name.",
   "message.jaymoskingdoms.youth_wisp.bye.2": "Back to the trees!",
-  "message.jaymoskingdoms.youth_wisp.bye.3": "Anytime!"
+  "message.jaymoskingdoms.youth_wisp.bye.3": "Anytime!",
+  "message.jaymoskingdoms.youth_wisp.voice.0": "I heard you! Type your question in chat.",
+  "message.jaymoskingdoms.youth_wisp.voice.1": "You called? Ask me in chat!",
+  "message.jaymoskingdoms.youth_wisp.voice.2": "Here! What do you want to know? Type it in chat."
 }

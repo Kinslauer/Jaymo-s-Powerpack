@@ -119,6 +119,7 @@ public final class VoiceRange implements VoicechatPlugin {
 		registration.registerEvent(MicrophonePacketEvent.class, VoiceRange::spoken);
 		registration.registerEvent(PlayerDisconnectedEvent.class, event -> {
 			MICS.remove(event.getPlayerUuid());
+			com.jaymoskingdoms.inhabitants.YouthEars.left(event.getPlayerUuid());
 			OpusDecoder decoder = DECODERS.remove(event.getPlayerUuid());
 			if (decoder != null) {
 				synchronized (decoder) {
@@ -210,6 +211,7 @@ public final class VoiceRange implements VoicechatPlugin {
 		byte[] opus = packet.getOpusEncodedData();
 		if (opus == null || opus.length == 0) {
 			// (the end of what they said: the next words start the decoder afresh)
+			com.jaymoskingdoms.inhabitants.YouthEars.ended(who);
 			OpusDecoder decoder = DECODERS.get(who);
 			if (decoder != null) {
 				synchronized (decoder) {
@@ -229,6 +231,10 @@ public final class VoiceRange implements VoicechatPlugin {
 				return;
 			}
 			pcm = decoder.decode(opus);
+		}
+		// Youth listens for its name (YouthEars)
+		if (pcm != null) {
+			com.jaymoskingdoms.inhabitants.YouthEars.heard(who, pcm);
 		}
 		double db = loudness(pcm);
 		if (db < SILENCE_DB) {

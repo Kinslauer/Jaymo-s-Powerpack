@@ -20,3 +20,12 @@
   answer it still waits up to 2 minutes, then says "be right back". After "youth, look!" it waits 15 seconds for a yes.
 - **Send it off** anytime: "go away", "bye", "thanks", "leave", "go home", "nevermind"... (with its name, or alone while
   it's beside you). It says goodbye ("Off I go! Call if you need me.") and goes.
+- **Say "youth" aloud** (Andy): on the dedicated server, Youth hears its name in Simple Voice Chat and comes ("I heard
+  you! Type your question in chat."). Only the name; questions are still typed. It uses Vosk (Apache 2.0), an offline
+  recogniser listening for that one word: on the server's first start it fetches Vosk, JNA and Vosk's small English
+  model (about 70 MB, hash-checked) into `config/jaymoskingdoms/youth-ears/`; nothing is added to the mod jar or
+  clients. An empty file `config/jaymoskingdoms/youth-ears/off` turns it off. If anything fails it logs why once and
+  Youth just doesn't hear voices. Logged as `[youth-call] <name> voice`.
+- Classes: `inhabitants/YouthEars` (new), `inhabitants/YouthWisp` (`calledByVoice`, `BYE`, `ANSWER_TIMEOUT`), `VoiceRange`
+  (feeds it the decoded voice). Lang: `youth_wisp.bye.*`, `youth_wisp.voice.*`.
+- The voice part is compiled only; it hasn't run (Vosk not loaded or tried on speech here).

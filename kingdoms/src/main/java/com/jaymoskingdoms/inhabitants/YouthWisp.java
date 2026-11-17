@@ -58,6 +58,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		java.util.regex.Pattern.CASE_INSENSITIVE);
 	/** How many goodbye lines it has (message.jaymoskingdoms.youth_wisp.bye.0 ...). */
 	static final int BYE_LINES = 4;
+	/** How many "I heard you" lines it has, for its name said aloud (message.jaymoskingdoms.youth_wisp.voice.0 ...). */
+	static final int VOICE_LINES = 3;
 	/** Ticks between two right-click hints from the same wisp. */
 	static final int HINT_COOLDOWN = 5 * 20;
 	/** A chat line that calls Youth: its name anywhere in it, as a word, in any case ("youth, how does Crush work?"). */
@@ -414,6 +416,21 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		this.setPos(this.position().add(target.subtract(this.position()).scale(0.2)));
 		this.face(player);
 		return true;
+	}
+
+	/**
+	 * {@code player} said "youth" aloud in voice chat ({@link YouthEars}): their wisp comes (or perks up) and asks them to
+	 * type the question. Logged as {@code [youth-call] <account name> voice} (Hermes needn't answer it).
+	 */
+	static void calledByVoice(ServerPlayer player) {
+		YouthWisp wisp = summon(player);
+		if (wisp == null) {
+			return;
+		}
+		wisp.lastAsked = wisp.tickCount;
+		wisp.triggerAnim("action", "talk");
+		wisp.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.voice." + wisp.random.nextInt(VOICE_LINES)));
+		com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-call] {} voice", player.getGameProfile().name());
 	}
 
 	/** The nearest wisp {@code player} can see on their screen (near, in clear view, before them), or null. */
