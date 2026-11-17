@@ -1470,7 +1470,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		graphics.enableScissor(sx0, sy0, sx1, sy1);
 		// you, acting the start out on the ground of the place
-		figure(graphics, new Step(Question.ROAD, false, false), -1, -1, bx0 + off, sy0 + 4, bx1 + off, ground + (sy1 - ground) / 2);
+		figure(graphics, new Step(Question.ROAD, false, false), -1, -1, bx0 + off, sy0 + 4, bx1 + off, ground + (sy1 - ground) / 2, true);
 
 		// its picture, large
 		int ix = sx0 + off, wx = ix + (textW - ICON_WELL) / 2, wy = sy0 + 4;
@@ -2467,6 +2467,11 @@ final class LifeStoryScreen extends Screen {
 			reviewCard(graphics, s, mouseX, mouseY);
 			return;
 		}
+		// the faith's sigil fills the whole panel, behind its text (inside the frame and the divider)
+		Answer faith = faithShown(s, mouseX, mouseY);
+		if (faith != null) {
+			drawSigil(graphics, sigilOf(faith), x + 4, y + 4, w - 9, panelH() - 8);
+		}
 		if (s.gender) {
 			int row = rowAt(s, mouseX, mouseY);
 			int g = row >= 0 ? row : draft.gender;
@@ -2534,7 +2539,7 @@ final class LifeStoryScreen extends Screen {
 		int figureH = Math.min(FIGURE_H, bottom - ty - 3 * Ui.LINE);
 		if (figureH >= FIGURE_MIN_H) {
 			bottom -= figureH;
-			figure(graphics, s, mouseX, mouseY, x + 8, bottom + 2, x + w - 8, bottom + figureH);
+			figure(graphics, s, mouseX, mouseY, x + 8, bottom + 2, x + w - 8, bottom + figureH, false);
 		}
 		block(graphics, lines, good, x, ty, w, bottom);
 	}
@@ -2595,9 +2600,10 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.282) Andy: "an animated simulation of the character in every story frame, like in bannerlord ... helps the
 	 * user see the effect of every race on their character". You, drawn as the page would make you: the heritage and
 	 * look of the birthplace or childhood pointed at (or picked), acting out the answer in its gear ({@link StoryFigure}).
-	 * On the story page it follows the heritage, look and class buttons, in the class's gear.
+	 * On the story page it follows the heritage, look and class buttons, in the class's gear. {@code sigil}: the faith's
+	 * sigil behind it (the carousel; the story pages' panel draws its own).
 	 */
-	private void figure(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY, int x0, int y0, int x1, int y1) {
+	private void figure(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY, int x0, int y0, int x1, int y1, boolean sigil) {
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) {
 			return;
@@ -2634,16 +2640,13 @@ final class LifeStoryScreen extends Screen {
 			KiGhost.draw(graphics, x0, y0, x1, y1);
 			return;
 		}
-		// (gb-faith) the chosen faith's sigil behind the figure, from this page on
-		Answer sigilFaith = null;
-		if (s.question == Question.FAITH) {
-			sigilFaith = here;
-		} else {
-			Answer faith = picked(Question.FAITH);
-			sigilFaith = faith;
-		}
+		// (gb-faith) the chosen faith's sigil behind the figure, from this page on (on the story pages the panel draws it)
+		Answer sigilFaith = sigil ? faithShown(s, mouseX, mouseY) : null;
 		if (sigilFaith != null) {
-			drawSigil(graphics, com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + sigilFaith.key() + ".png"), x0, y0, x1, y1);
+			int side = (int)(Math.min(y1 - y0, x1 - x0) * 0.55F);
+			if (side >= 16) {
+				drawSigil(graphics, sigilOf(sigilFaith), (x0 + x1 - side) / 2, (y0 + y1 - side) / 2, side, side);
+			}
 		}
 		// (gb-faith) on the faith page the figure is the chosen faith's champion; The Truth has no champion,
 		// so it is drawn as a bright yellow-white ki ghost instead
@@ -2710,15 +2713,34 @@ final class LifeStoryScreen extends Screen {
 		StoryFigure.draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, draft.gender);
 	}
 
-	/** (gb-faith) The chosen faith's sigil, drawn large and semi-transparent behind the figure. */
-	private static void drawSigil(GuiGraphicsExtractor graphics, net.minecraft.resources.Identifier glyph, int x0, int y0, int x1, int y1) {
-		int side = (int)(Math.min(y1 - y0, x1 - x0) * 0.55F);
-		if (side < 16) {
-			return;
+	/**
+	 * The faith whose sigil shows on this page: the one pointed at or picked on the faith page, the one picked after it;
+	 * none on the gender page or while fate's road shows its ki ghost.
+	 */
+	private @Nullable Answer faithShown(Step s, int mouseX, int mouseY) {
+		if (s.gender) {
+			return null;
 		}
-		int x = (x0 + x1 - side) / 2;
-		int y = (y0 + y1 - side) / 2;
-		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, side, side, 16, 16, side, side, 0x60FFFFFF);
+		if (s.question == Question.FAITH || s.question == Question.ROAD) {
+			int row = s.realm ? -1 : rowAt(s, mouseX, mouseY);
+			Answer here = row >= 0 ? listedAt(s.question, row) : picked(s.question);
+			if (s.question == Question.FAITH) {
+				return here;
+			}
+			if (here != null && here.start() == LifeStory.Start.FATE) {
+				return null;
+			}
+		}
+		return picked(Question.FAITH);
+	}
+
+	private static net.minecraft.resources.Identifier sigilOf(Answer faith) {
+		return com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + faith.key() + ".png");
+	}
+
+	/** (gb-faith) A faith's sigil (its whole 16x16 glyph), stretched over {@code w} x {@code h} and semi-transparent. */
+	private static void drawSigil(GuiGraphicsExtractor graphics, net.minecraft.resources.Identifier glyph, int x, int y, int w, int h) {
+		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, w, h, 16, 16, 16, 16, 0x60FFFFFF);
 	}
 
 	/** (gb-faith) The chosen faith's champion, standing in the figure's box. */
