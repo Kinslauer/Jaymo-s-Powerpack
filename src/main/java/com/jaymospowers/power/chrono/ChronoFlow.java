@@ -1026,6 +1026,20 @@ public final class ChronoFlow {
 				clockFace(level, player, target, n);
 				// each punch shakes harder than the last
 				com.jaymospowers.core.Shakes.send(player, BARRAGE_SHAKE + BARRAGE_SHAKE_STEP * n);
+				// blurred fists and sparks, like Chrono Punch's flurry
+				Vec3 eye = player.getEyePosition();
+				Vec3 look = player.getLookAngle();
+				Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
+				Vec3 side = new Vec3(-look.z, 0.0, look.x);
+				if (side.lengthSqr() < 1.0E-6) {
+					side = new Vec3(1.0, 0.0, 0.0);
+				}
+				for (int k = 0; k < 4; k++) {
+					Vec3 off = side.scale((k - 1) * 0.18).add(0.0, 0.12 * k, 0.0).add(look.scale(0.15 * k));
+					MagicFx.stroke(level, fist.add(off), fist.add(off).add(look.scale(0.7)), 0.35F, 0xFFE08A);
+				}
+				Vec3 atPos = target.getBoundingBox().getCenter();
+				ChronoFx.particles(level, player, MagicFx.spark(0xFFE08A, 1.0F), atPos.x, atPos.y, atPos.z, 6, 0.2, 0.2, 0.2, 0.2);
 				target.syncVelocity = true;
 				fighter.lastBlow = now;
 				setCombo(player, fighter, fighter.combo + 1);

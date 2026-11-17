@@ -51,6 +51,12 @@ public final class ZFighterRush {
 	static final float DRAGON_SHARE = 3.0F;
 	static final double DRAGON_PUSH = 1.6, DRAGON_LIFT = 0.7;
 	static final float DRAGON_POISE = 14.0F;
+	static final float RING_RADIUS = 1.5F;
+	static final int RING_COLOR = 0xFFFFFF;
+	static final double WAVE_DISTANCE = 5.0;
+	static final float WAVE_WIDTH = 1.5F;
+	static final int WAVE_COLOR = 0xD0D0D0;
+	static final int WAVE_TICKS = 10;
 	/** The trail: this many coils behind him, spaced this far, each smaller. */
 	static final int TRAIL_SEGMENTS = 12;
 	static final double TRAIL_SPACING = 0.5, TRAIL_WIDTH = 0.55;
@@ -275,8 +281,9 @@ public final class ZFighterRush {
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y, at.z, big ? 16 : 5, 0.25, 0.25, 0.25, 0.1);
 		if (big) {
 			level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			MagicFx.ring(level, at.add(0.0, 0.1, 0.0), 1.5F, 0xFFFFFF);
-			MagicFx.wave(level, at, player.getLookAngle(), 5.0, 1.5F, 0xD0D0D0, 10);
+			Vec3 feet = foe.position().add(0.0, 0.1, 0.0);
+			MagicFx.ring(level, feet, RING_RADIUS, RING_COLOR);
+			MagicFx.wave(level, feet, player.getLookAngle(), WAVE_DISTANCE, WAVE_WIDTH, WAVE_COLOR, WAVE_TICKS);
 		}
 		level.playSound(null, at.x, at.y, at.z, big ? SoundEvents.PLAYER_ATTACK_KNOCKBACK : SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS,
 			big ? 1.2F : 0.8F, big ? 0.7F : 1.0F + level.getRandom().nextFloat() * 0.3F);
