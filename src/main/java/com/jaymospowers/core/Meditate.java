@@ -82,7 +82,7 @@ public final class Meditate {
 
 	public static final int MEDITATING = 0, SHADOWBOXING = 1, SHADOWBOXING_HEAVY = 2;
 	/** (0.19.67) How many ways there are to sit, on the ground and on a seat each (the Sit key goes round them). */
-	public static final int POSES = 3;
+	public static final int POSES = 4;
 
 	/**
 	 * On a meditating player: since when (game time), how ({@link #MEDITATING}, {@link #SHADOWBOXING}...) and how many

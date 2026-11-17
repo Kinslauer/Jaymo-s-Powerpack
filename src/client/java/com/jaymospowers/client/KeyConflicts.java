@@ -29,9 +29,10 @@ final class KeyConflicts {
 	 * zooms instead ({@code SneakZoom}). v8: Simple Voice Chat's menu sat on V (it opens a screen, which ate every power's V:
 	 * Resonance's Echolocation never fired), so it goes on F7 (no vanilla key, not even an F3 combo, uses it); its group
 	 * screen (G) and hide-icons (H) keys are unbound, both being buttons in that menu. v9: Andy wants the front camera on F7,
-	 * so it moves there from F6 and the voice chat menu takes F6.
+	 * so it moves there from F6 and the voice chat menu takes F6. v10: Take a Seat's sit key comes off X (Andy: "move those
+	 * to our sit button"; our Sit key plays its poses, {@code TakeASeatPoses}).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v9";
+	private static final String MARKER = "jaymospowers-keys-v10";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -55,7 +56,8 @@ final class KeyConflicts {
 		Map.entry("key.voice_chat", new Move("key.keyboard.v|key.keyboard.f7", "key.keyboard.f6")),
 		Map.entry("key.jaymospowers.front_camera", new Move("key.keyboard.f6", "key.keyboard.f7")),
 		Map.entry("key.voice_chat_group", new Move("key.keyboard.g", "key.keyboard.unknown")),
-		Map.entry("key.hide_icons", new Move("key.keyboard.h", "key.keyboard.unknown")));
+		Map.entry("key.hide_icons", new Move("key.keyboard.h", "key.keyboard.unknown")),
+		Map.entry("key.takeaseat.sit", new Move("key.keyboard.x", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):

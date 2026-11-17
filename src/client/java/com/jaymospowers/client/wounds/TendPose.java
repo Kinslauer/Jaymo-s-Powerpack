@@ -70,6 +70,7 @@ public final class TendPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		state.setData(com.jaymospowers.client.compat.TakeASeatPoses.KNEELING, com.jaymospowers.client.compat.TakeASeatPoses.kneeling(entity) ? Boolean.TRUE : null);
 		Tending.Tend tend = entity.getAttached(Tending.TEND);
 		Track track = TRACKS.get(entity.getId());
 		if (tend == null && track == null) {
@@ -114,7 +115,8 @@ public final class TendPose {
 	/** After the body faces its way: sunk onto the knee, leaning in from the hips. */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		Tend tend = state.getData(KEY);
-		if (tend == null || state.deathTime > 0.0F) {
+		if (tend == null || state.deathTime > 0.0F || com.jaymospowers.client.compat.TakeASeatPoses.kneeling(state)) {
+			// (Take a Seat's kneel lowers and holds the body itself)
 			return;
 		}
 		poseStack.translate(0.0F, -SINK * tend.down(), 0.0F);
@@ -133,8 +135,12 @@ public final class TendPose {
 			return;
 		}
 		float k = Mth.clamp(tend.down(), 0.0F, 1.0F);
-		float pitch = lean(tend) * Mth.DEG_TO_RAD;
-		blend(h.body, 0.0F, 0.0F, 0.0F, k);
+		boolean theirs = com.jaymospowers.client.compat.TakeASeatPoses.kneeling(state);
+		// (Take a Seat's kneel has the body upright, so no lean under the hands)
+		float pitch = theirs ? 0.0F : lean(tend) * Mth.DEG_TO_RAD;
+		if (!theirs) {
+			blend(h.body, 0.0F, 0.0F, 0.0F, k);
+		}
 		if (tend.drink()) {
 			// (0.21.28) on hands and knees: both thighs straight down, both shins flat behind (KneelLegs), hands planted
 			// straight down to the ground either side, head down at it, bobbing with each gulp
@@ -149,9 +155,11 @@ public final class TendPose {
 		}
 		// the legs as the world sees them, so they stay planted under the lean: (0.21.28) the right foot planted, the
 		// thigh level and the shin straight down, the left knee on the ground with the shin flat behind (KneelLegs)
-		blend(h.rightLeg, KneelLegs.UP_THIGH - pitch, 0.1F, 0.0F, k);
-		blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.1F, 0.0F, k);
-		KneelLegs.want(state, KneelLegs.UP_KNEE * k, KneelLegs.DOWN_KNEE * k);
+		if (!theirs) {
+			blend(h.rightLeg, KneelLegs.UP_THIGH - pitch, 0.1F, 0.0F, k);
+			blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.1F, 0.0F, k);
+			KneelLegs.want(state, KneelLegs.UP_KNEE * k, KneelLegs.DOWN_KNEE * k);
+		}
 		float reach = Mth.lerp(tend.low(), REACH_HIGH, REACH_LOW);
 		float work = Mth.sin(tend.time() * WORK_RATE) * WORK_AMOUNT;
 		// hands together at the wound, one then the other
