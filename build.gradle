@@ -596,12 +596,8 @@ def packModsNoCf = [
 	// Ambient Creatures (MIT, victoraa1116): a few small friendly critters. Beta. Client and server. 0.3.0-beta-26.3 for
 	// 26.3.
 	[dep: "maven.modrinth:ambient-creatures:sJb88U80", cf: null],
-	// Dasik Library (GPL-3.0-or-later, dasikigaijin): the library VO: Better Dogs needs. Client and server. 1.13.0 for
-	// 26.3.
-	[dep: "maven.modrinth:dasik-library:liDYLOQj", cf: null],
-	// VO: Better Dogs (GPL-3.0-only, dasikigaijin): wolves get personalities and smarter AI. Client and server.
-	// 5.0.59+26.3 for 26.3.
-	[dep: "maven.modrinth:vanilla-outsider-better-dogs:Hf2kV4x0", cf: null],
+	// (VO: Better Dogs and its Dasik Library left out: its wolves call Wolf.swing(InteractionHand), which 26.3 doesn't
+	// have, and the server stopped each time a wolf attacked, 2026-11-16)
 	// (Enhanced Cats left out: it takes every cat's owner for a player, and Kingdoms' villagers keep cats, which stopped
 	// the server each time a player came near one, 2026-11-16)
 	// Prickle (LGPL-2.1-only, Darkhax): the config library Herd Mentality needs. Client and server. 26.3.0.2 for 26.3.
@@ -887,9 +883,11 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // "you can remove the immersive"; it checks for Sound Physics by an old mod id, so it never stood down);
 // Streams Reflowing (Dynamic Waters took its place); Grassier Grass and Punchy! with Punchy! Moves (Andy, 2026-11-16: "i
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
-// Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list)
+// Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
+// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
 def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
-	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions"]
+	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
+	"vanilla-outsider-better-dogs", "dasik-library"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
