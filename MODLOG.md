@@ -5645,3 +5645,87 @@ When a finisher asks for a key, it now holds still for up to a second and a half
 - Cloud timing, new world, seed 12345, 4 cores: spawn search 175 s -> 163 s with the sampler fix alone, 69 s once the
   template cache is warm (181 s the very first time, while it fills).
 - Built and timed on a dev server; not played.
+
+## 0.24.58 (2026-11-17): blood stays drawn on MCA bodies (#1694)
+
+- Andy: blood decals "need to stay drawn on the MCA models". MCA draws villagers (and players in an MCA body) with its own skin and clothes layers, so the blood coat laid on the body's own model sat at the depth of MCA's bare skin, under its clothes, so it only showed through their gaps. Now on an MCA body the blood (a corpse's too) and the dirt on skin and clothes are painted over each of MCA's skin and clothes textures and drawn on that layer's own model, one step after MCA's, so they stay on top: bare skin shows its blood, clothes show theirs. Other bodies are drawn as before.
+- `BloodCoatLayer` (`paints`), new `McaBlood` (only loaded with MCA).
+- Built; not played.
+
+## 0.24.59 (2026-11-17): temperament idles come and go (#1697)
+
+- **Temperament looks in spells** (Andy: "none of the idle animations should play 24/7"): a timid or suspicious
+  player's scared hunch and glancing, a hotheaded one's tense arms, a gloomy one's slump and a cheerful one's bounce
+  no longer show all the time. Time is cut into 3 second slots, and each slot is on by chance (45% for a scared player,
+  30% for the rest), so a look shows for a few seconds, sometimes longer, then rests; it still eases in and out
+  (`BodyMotion.inSpell`, knobs `SPELL_SLOT_TICKS`, `SPELL_CHANCE_SCARED`, `SPELL_CHANCE`). The spells come from the
+  player's id and the game time, so everyone in view sees the same.
+- Built; not played.
+
+## 0.24.60 (2026-11-17): Gun handling for the future's guns (TaCZ Additions picks) and blinking while downed
+
+- **Water splash**: a shot that goes into water throws up drops and a ring of ripples where it goes in. A gunner's shot
+  into water stops 2.5 blocks under the surface (players' TaCZ bullets keep TaCZ's own water handling).
+- **Trail on every shot**: shots that aren't tracers leave a thin grey wisp along their line for a moment.
+- **Laser sights**: TaCZ already draws a fitted laser's beam; the End key now switches it off and on (a click), and a
+  switched-on laser puts a dot where it points, for everyone. About 1 in 3 of the future's gunners have one, off until
+  they take aim, so a dot on the wall comes before the shot.
+- **Gun movement, first person**: the gun lags behind when you turn and leans when you step sideways; standing, it
+  rises and falls with your breath (harder after sprinting or under half health). Aiming down sights calms both.
+  Floors and ceilings don't tuck it, so aiming down while prone still fires.
+- **Tuck**: up against a wall the gun comes back to your chest, muzzle up, and won't fire. WeaponMod's musket,
+  blunderbuss and flintlock pistol tuck too and can't be readied while tucked.
+- **Long-gun grips by stance** (Andy's note): musket and blunderbuss sit at the hip standing, the low ready in a plain
+  sneak, a shouldered high ready in the low crouch, and forward and level lying prone. First person only.
+- **Scope sway**: at 4x zoom and up your aim drifts in a slow figure eight (the crosshair with it); prone, kneeling, the low crouch, a sneak or
+  resting the gun on a wall top steadies it.
+- **Scroll zoom**: aiming down a scope, the mouse wheel steps its zoom (TaCZ's zoom key, so either way steps on to the
+  next setting) instead of the hotbar or the stances. Iron sights leave the wheel alone.
+- **Recoil by kind**: pistols, SMGs, rifles, machine guns, shotguns and snipers each kick the view by their own share
+  of TaCZ's recoil, the view stays where the kick left it, and the gun jumps back in your hands.
+- **Downed blinking**: down and awake, your eyes droop shut and open again, slower and longer as you weaken.
+- Classes: armory/GunLasers, client/armory/GunHandling, GunLaserClient, MusketSights, wounds/DownedHud,
+  mixin/tacz/TaczLaserBeamMixin, TaczAttachmentLaserMixin, TaczRecoilMixin; power/chrono/future/GunGear, FutureGuns.
+- Compiled with Gradle and checked against TaCZ 0.8.5's own code by an independent review; not played. Picture-in-picture scopes were left out (not picked).
+
+## 0.24.61 (2026-11-17): Slower prone roll, weighed by armour
+
+- **Prone roll** (double-tap Left or Right while prone; Andy: "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your gear has. To an upper limit."): each one-block roll now takes 0.6 s instead of 0.25 s, with the arms folded in to the chest (round a weapon) like Snake's instead of stretched past the head. You stay prone after it, as before.
+- **Gear weight**: armour points plus toughness (full netherite = 32, the cap) stretch each roll up to 1.6x as long (about 0.95 s); nothing past the cap slows it more. Knobs: `Crawl.ROLL_TICKS`, `HEAVIEST`, `HEAVY_SLOW`; arms: `CrawlPose.ROLL_ARM_X`, `ROLL_ARM_IN`.
+- The roll's length is synced, so others see a heavy roll at its own pace. Rolling fire out (roll back the other way) and the 2 s one-way limit are unchanged. The Alt dodge is untouched.
+- `Crawl`, `CrawlTaps`, `CrawlPose`. Compile-checked; not played.
+
+## 0.24.62 (2026-11-17): scaling audit picks: armour, power growth, Z Fighter, gear and tiers
+
+Andy's picks from the scaling audit (pick page rows; early game kept weak, late game given room to grow).
+- **Armour**: the armour-wear bonus (ArmourWear) now applies to players only, and is 1.15x armour (was 1.4x; toughness
+  stays 1.25x), so armour no longer hits the 80% cap with Hearth gear. Mobs meet the world-tier armour as written.
+- **Blight elites**: their armour and follow range are now flat per tier (+1.5 armour, +8 blocks), not multiplied
+  (BlightMobs used a total multiplier: tier 3 had 5.5x armour and 25x follow range).
+- **Wind**: Gust damage is capped at 100 after weather, Stormbound and Tempest.
+- **Xenoform**: a player's blows in an alien form hit 10% harder per unlock (x1.4 at full mastery; XenoformDamageMixin).
+- **Resonance**: Pulse grows 5 x (1 + 0.15 per unlock): 6.5 at unlock 2, 8 at full mastery.
+- **Web**: the always-on physique starts at nothing and reaches its full +3 attack at full mastery (was +0.6 on day one).
+- **Symbiote**: every symbiote attack gains up to +50% with bond (x1.5 at bond 100). **Rig**: the palm blast gains 15%
+  per Mind level above the first (x1.6 at level 5). The crash is damage to the pilot, so it was left alone.
+- **Z Fighter**: the punch cap is multiplied by the form's fist bonus (base 9, Super 1 ~10.8, Super 3 ~13.8, God ~16.6),
+  so Super forms now show in punches. Fists start at 2 (was 3) and grow 1 per unlock to 6 at full mastery, as before.
+- **Pacts and Void**: Cinder's toughness 4 -> 2; Arsenal's Void fills the Fate meter 4 per Enderman kill (was 10).
+- **Tinkering**: head attack silver 2.25 -> 3.0, amethyst bronze 1.5 -> 3.0, steel 3.0 -> 4.0, manyullyn 3.5 -> 4.5.
+  Forged-grade Tinkering plate now gets the grade's armour (Poor -1 to Master +1.5) like every other armour.
+- **Legendary grade**: a fifth grade above Master (+2 armour a piece, attack Master's +1.5 more, x1.4 durability). A smith
+  forges it only when they have reached Legend (Kingdoms; KingdomsCompat.legend): a Master result at Legend comes out
+  Legendary half the time. Without Kingdoms it never forges.
+- **Rust** reads the metal: Tinkering plate of copper, bronze, silver or gold no longer rusts, and the Gladiator set is
+  tagged rustproof (new jaymospowers:rustproof tag).
+- **Fishing**: the big-fish glut counts per angler per day across every village (it was per village, so carrying the
+  catch to the next one dodged it). Old per-village glut data is no longer read.
+- Comments fixed in GravityPower (a fresh slam is 0.48 of full) and ZFighterTraining (mastery ticks every 20 s).
+- **The last hold** (Andy's note: "When players are attacked they get to take an extra hit if the one they take would
+  have downed them"): the first attacked blow that would down a player leaves them on half a heart instead, with a heavy
+  heartbeat and a red edge pulse. The next downing blow downs them as usual. The hold comes back after 30 s unhurt, and
+  on a relog. Falls, fire, drowning and other unattacked harm, executions, beheadings, gibs and blows that halve ignore
+  it. It is checked before every other save (Kingdoms' Last Stand, Darktide shade, sparring), so those come after it
+  (LastHold).
+- A landed legend fish also gives a Legend's Fillet (Kitchen's Deep King's Platter).
+- Built; not played.

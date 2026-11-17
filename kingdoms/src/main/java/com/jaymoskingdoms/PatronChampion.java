@@ -61,9 +61,9 @@ import org.jspecify.annotations.Nullable;
  */
 public class PatronChampion extends Monster {
 	/** The solo base at Hearth (the tier and the group raise it): health, blow, armour, toughness, speed, knockback resistance, follow range. */
-	static final double HEALTH = 600.0, DAMAGE = 14.0, ARMOR = 16.0, TOUGHNESS = 8.0, SPEED = 0.30, KNOCKBACK_RESISTANCE = 0.9, FOLLOW = 40.0;
+	static final double HEALTH = 600.0, DAMAGE = 14.0, ARMOR = 10.0, TOUGHNESS = 4.0, SPEED = 0.30, KNOCKBACK_RESISTANCE = 0.9, FOLLOW = 40.0;
 	/** Each counted player past the first adds this share of the base health and of the blow; at most GROUP_MOST count. */
-	static final double HEALTH_PER_PLAYER = 0.6, DAMAGE_PER_PLAYER = 0.08;
+	static final double HEALTH_PER_PLAYER = 0.35, DAMAGE_PER_PLAYER = 0.08;
 	static final int GROUP_MOST = 6;
 	/** (0.7.518) The most max health a champion is scaled to. It matches the cap in MaxHealthCapMixin. */
 	static final double HEALTH_CAP = 4096.0;

@@ -201,6 +201,14 @@ public final class EarlyGuns {
 		return dir.add(random.triangle(0.0, s), random.triangle(0.0, s), random.triangle(0.0, s)).normalize();
 	}
 
+	/** The ball's blow times the gun's forging grade: Poor to Legendary (an ungraded gun, or no Powers, is Well Forged). */
+	static final float[] GRADE_DAMAGE = {0.85F, 1.0F, 1.1F, 1.25F, 1.4F, 1.5F};
+
+	private static float gradeFactor(ItemStack gun) {
+		int grade = GradedTrades.gradeIndex(gun);
+		return grade < 0 ? 1.0F : GRADE_DAMAGE[Math.min(grade, GRADE_DAMAGE.length - 1)];
+	}
+
 	/** Out of {@code shooter}'s hands: the ball, the noise, and (with Jaymo's Powers) the blast at its muzzle. */
 	private static void fire(ServerLevel level, LivingEntity shooter, ItemStack gun, Rung rung, Vec3 aim, float damage) {
 		// (class trees) a Marksman's Steady Aim: less stray
@@ -208,7 +216,7 @@ public final class EarlyGuns {
 		boolean muffled = Workshop.muffled(gun);
 		Vec3 eye = shooter.getEyePosition().add(0.0, -0.1, 0.0);
 		Vec3 muzzle = eye.add(dir);
-		GunBall.shot(level, shooter, eye, dir, rung.speed, damage);
+		GunBall.shot(level, shooter, eye, dir, rung.speed, damage * gradeFactor(gun));
 		if (!PowersCompat.gunFired(shooter, gun)) {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 8, 0.12, 0.12, 0.12, 0.03);
 			level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 3, 0.06, 0.06, 0.06, 0.02);

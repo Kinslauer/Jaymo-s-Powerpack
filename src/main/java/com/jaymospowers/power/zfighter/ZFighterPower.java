@@ -99,8 +99,9 @@ public final class ZFighterPower implements Power {
 	static final int EXTRA_STOMACH = 2;
 
 	// ---- fists (added to the player's attack damage) ----
-	static final double FIST_DAMAGE = 3.0;
-	static final double FIST_PER_ABILITY = 0.75;
+	/** 2 at awakening, rising by {@code FIST_PER_ABILITY} with each unlocked ability to 6 at full mastery. */
+	static final double FIST_DAMAGE = 2.0;
+	static final double FIST_PER_ABILITY = 1.0;
 	static final double FIST_PER_DEFEAT = 0.1;
 	static final double ASCENDED_FIST = 1.0;
 

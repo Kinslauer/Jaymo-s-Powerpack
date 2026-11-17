@@ -53,6 +53,8 @@ public final class RigActives {
 	static final int PALM_COST = 60, PALM_COOLDOWN = 15;
 	static final double PALM_RANGE = 24.0, PALM_KNOCKBACK = 0.9;
 	static final float PALM_DAMAGE = 6.0F;
+	/** The palm blast hits this much harder for every Mind level above the first (x1.6 at level 5). */
+	static final float DAMAGE_PER_LEVEL = 0.15F;
 	/** The palm blast's kick on the wearer's screen. */
 	static final float PALM_SHAKE = 0.4F;
 	/** Augments: Xenoform's reach, Resonance's knockback, Web's slow (ticks, amplifier), Smoke's blinding (ticks). */
@@ -105,6 +107,11 @@ public final class RigActives {
 	/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
 	static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
 	static final double SPUTTER_KICK = 0.12;
+
+	/** The Mind's level as a damage factor: 1 + {@link #DAMAGE_PER_LEVEL} per level above the first. */
+	static float levelDamage(Player player) {
+		return 1.0F + DAMAGE_PER_LEVEL * (Rig.level(player) - 1);
+	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
 	private static final List<Missile> MISSILES_IN_FLIGHT = new ArrayList<>();
@@ -557,7 +564,7 @@ public final class RigActives {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.9F);
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
 			DamageSource source = level.damageSources().playerAttack(player);
-			float damage = PALM_DAMAGE * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F);
+			float damage = PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F);
 			target.hurtServer(level, source, damage);
 			double knock = PALM_KNOCKBACK * (augment == Rig.Augment.RESONANCE ? RESONANCE_KNOCKBACK : 1.0);
 			target.knockback(knock, -look.x, -look.z, source, damage);
@@ -570,7 +577,7 @@ public final class RigActives {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, end.x, end.y, end.z, 8, 0.3, 0.3, 0.3, 0.01);
 			}
 		} else if (hit == null && block.getType() != HitResult.Type.MISS) {
-			RigBank.palm(player, block.getLocation(), block.getDirection(), PALM_DAMAGE * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F), RigForgeBlock.FX_COLOR);
+			RigBank.palm(player, block.getLocation(), block.getDirection(), PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F), RigForgeBlock.FX_COLOR);
 		}
 	}
 

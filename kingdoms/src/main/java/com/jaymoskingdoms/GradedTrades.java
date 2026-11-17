@@ -16,6 +16,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
@@ -32,7 +34,7 @@ import org.jspecify.annotations.Nullable;
 public final class GradedTrades {
 	/** Powers' grade component (a grade id string). */
 	private static final Identifier GRADE_ID = Identifier.fromNamespaceAndPath("jaymospowers", "forging_grade");
-	private static final String[] GRADES = {"poor", "well", "expert", "perfect", "master"};
+	private static final String[] GRADES = {"poor", "well", "expert", "perfect", "master", "legendary"};
 
 	/** Reputation (-1000 to 1000) at which each chance starts to rise and where it tops out. */
 	static final int MASTER_FROM = 500, PERFECT_FROM = 200, EXPERT_FROM = -500, TOP = 1000;
@@ -41,6 +43,9 @@ public final class GradedTrades {
 	/** The chance of Poorly Forged gear at the bottom of reputation, and the reputation above which there is none. */
 	static final float POOR_MAX = 0.70F;
 	static final int POOR_UNTIL = 300, BOTTOM = -1000;
+
+	/** At Legend the armourer and weaponsmith also sell one piece of Legendary gear, for this many emerald blocks (9 emeralds each: 200 to 400 emeralds). */
+	static final int LEGENDARY_MIN_BLOCKS = 23, LEGENDARY_MAX_BLOCKS = 44, LEGENDARY_USES = 1, LEGENDARY_XP = 40;
 
 	private static boolean looked;
 	private static @Nullable DataComponentType<String> grade;
@@ -111,12 +116,38 @@ public final class GradedTrades {
 		int index = 0;
 		for (MerchantOffer offer : v.getOffers()) {
 			ItemStack result = offer.getResult();
-			if (offer.getUses() == 0 && gear(result)) {
+			if (offer.getUses() == 0 && gear(result) && gradeIndex(result) < TierGate.LEGENDARY_GRADE) {
 				// (0.7.383) and never above the grade the buyer's world tier allows (TierGate)
 				result.set(type, GRADES[Math.min(roll(rep, draw(player.getUUID(), v.getUUID(), index)), TierGate.maxGrade(player))]);
 			}
 			index++;
 		}
+		if (TierGate.maxGrade(player) >= TierGate.LEGENDARY_GRADE && (v.getVillagerData().profession().is(VillagerProfession.ARMORER)
+			|| v.getVillagerData().profession().is(VillagerProfession.WEAPONSMITH))) {
+			legendary(type, player, v);
+		}
+	}
+
+	/** A late money sink: one Legendary piece, made from the smith's own best gear on offer, for 200 to 400 emeralds. Added once. */
+	private static void legendary(DataComponentType<String> type, ServerPlayer player, Villager v) {
+		ItemStack best = ItemStack.EMPTY;
+		for (MerchantOffer offer : v.getOffers()) {
+			ItemStack result = offer.getResult();
+			if (gradeIndex(result) >= TierGate.LEGENDARY_GRADE) {
+				return;
+			}
+			if (gear(result) && result.getMaxDamage() > best.getMaxDamage()) {
+				best = result;
+			}
+		}
+		if (best.isEmpty()) {
+			return;
+		}
+		ItemStack legendary = best.copyWithCount(1);
+		legendary.set(type, GRADES[TierGate.LEGENDARY_GRADE]);
+		int span = LEGENDARY_MAX_BLOCKS - LEGENDARY_MIN_BLOCKS + 1;
+		int blocks = LEGENDARY_MIN_BLOCKS + Math.min(span - 1, (int)(draw(player.getUUID(), v.getUUID(), -1) * span));
+		v.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD_BLOCK, blocks), legendary, LEGENDARY_USES, LEGENDARY_XP, 0.05F));
 	}
 
 	/** Gear that takes a grade: a damageable tool, weapon or armour piece. */

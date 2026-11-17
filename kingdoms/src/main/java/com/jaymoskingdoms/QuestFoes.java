@@ -74,7 +74,9 @@ public final class QuestFoes {
 	/** How near (blocks, flat) the quest's player must come for its cache or champion to be set out. */
 	static final double SET_OUT_RANGE = 48.0;
 	/** A champion: health (a beast's more), its blows on top of its own, armour, toughness. */
-	static final double CHAMPION_HEALTH = 500.0, BEAST_HEALTH = 700.0, CHAMPION_DAMAGE = 10.0, CHAMPION_ARMOR = 20.0, CHAMPION_TOUGHNESS = 10.0;
+	static final double CHAMPION_HEALTH = 500.0, BEAST_HEALTH = 700.0, CHAMPION_DAMAGE = 10.0, CHAMPION_TOUGHNESS = 10.0;
+	/** A champion's armour by the quest taker's world tier: Hearth to Legend. */
+	static final double[] CHAMPION_ARMOR = {8.0, 12.0, 16.0, 20.0, 20.0};
 	/** How far it keeps from its lair, and how far it sees. */
 	static final int CHAMPION_HOME_RADIUS = 20;
 	static final double CHAMPION_SIGHT = 40.0;
@@ -341,7 +343,7 @@ public final class QuestFoes {
 		if (champion == null) {
 			return null;
 		}
-		outfit(level, champion, foe);
+		outfit(level, champion, foe, player);
 		champion.setHomeTo(spot, CHAMPION_HOME_RADIUS);
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < ESCORT; i++) {
@@ -391,13 +393,13 @@ public final class QuestFoes {
 	}
 
 	/** A champion's make: its health, blows, plate, a name, and gear that doesn't drop. */
-	private static void outfit(ServerLevel level, Mob mob, String foe) {
+	private static void outfit(ServerLevel level, Mob mob, String foe, ServerPlayer player) {
 		health(mob, foe.equals("beast") ? BEAST_HEALTH : CHAMPION_HEALTH);
 		AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (damage != null) {
 			damage.setBaseValue(damage.getBaseValue() + CHAMPION_DAMAGE);
 		}
-		attribute(mob, Attributes.ARMOR, CHAMPION_ARMOR);
+		attribute(mob, Attributes.ARMOR, CHAMPION_ARMOR[WorldTiers.of(player).ordinal()]);
 		attribute(mob, Attributes.ARMOR_TOUGHNESS, CHAMPION_TOUGHNESS);
 		attribute(mob, Attributes.KNOCKBACK_RESISTANCE, 1.0);
 		AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);

@@ -33,6 +33,9 @@ public final class KingdomsCompat {
 	private static Method seesGhosts;
 	private static boolean seesGhostsLooked;
 
+	private static Method maxGrade;
+	private static boolean maxGradeLooked;
+
 	private KingdomsCompat() {
 	}
 
@@ -120,6 +123,32 @@ public final class KingdomsCompat {
 				return true;
 			}
 			return formsPerk != null && Boolean.TRUE.equals(formsPerk.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** The grade ordinal Legendary has in Powers' {@code Grade} (what Kingdoms' {@code TierGate.maxGrade} reaches at Legend). */
+	private static final int LEGENDARY_GRADE = 5;
+
+	/**
+	 * Whether {@code smith}'s world tier is Legend (Kingdoms' {@code TierGate.maxGrade} reaches Legendary; server side), the
+	 * only time a Legendary grade can be forged. False without Kingdoms (or if it can't be read): then Legendary never forges.
+	 */
+	public static boolean legend(Player smith) {
+		if (!LOADED || smith == null) {
+			return false;
+		}
+		if (!maxGradeLooked) {
+			maxGradeLooked = true;
+			try {
+				maxGrade = Class.forName("com.jaymoskingdoms.TierGate").getMethod("maxGrade", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				maxGrade = null;
+			}
+		}
+		try {
+			return maxGrade != null && maxGrade.invoke(null, smith) instanceof Integer grade && grade >= LEGENDARY_GRADE;
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return false;
 		}

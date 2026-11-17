@@ -5,6 +5,7 @@ import com.jaymospowers.client.wet.ArmourGrimeTextures;
 import com.jaymospowers.core.blood.Bloodied;
 import com.jaymospowers.core.wet.ArmourGrime;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -23,6 +24,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.41) Andy liked Hematic's blood on creatures (ideas only). A body splashed with blood ({@link Bloodied#COAT}) is
@@ -38,6 +40,11 @@ import net.minecraft.world.entity.LivingEntity;
  * each body's state to {@link #corpseBody} as it's drawn (its {@code CorpseDressing.BODY} hook, by name), and a dead
  * player drawn in their plain skin gets it through {@code EXTRACT} and {@code SUBMIT}.
  * <p>
+ * Andy: the blood "needs to stay drawn on the MCA models". MCA draws a villager (and a player in an MCA body) with its own
+ * layers, skin and clothes each on its own model, so blood laid on the body's model sat at the bare skin's depth, under
+ * the clothes, and only showed through their gaps. On such a body the blood and dirt are painted over each of
+ * MCA's skin and clothes textures and drawn on that layer's own model, after it ({@link McaBlood}).
+ * <p>
  * The dirt on a body's own clothes and skin ({@link ArmourGrime#BODY}) is drawn here too, under its blood
  * ({@link ArmourGrimeTextures#body}).
  */
@@ -48,6 +55,7 @@ public final class BloodCoatLayer {
 	/** The grime on the body's own clothes and skin. */
 	static final RenderStateDataKey<ArmourGrime.Grime> GRIME = RenderStateDataKey.create(() -> "jaymospowers:body_grime");
 	private static final String DRESSING = "com.jaymoskitchen.client.corpse.CorpseDressing";
+	private static final boolean MCA = FabricLoader.getInstance().isModLoaded("mca");
 
 	private BloodCoatLayer() {
 	}
@@ -123,6 +131,11 @@ public final class BloodCoatLayer {
 			if (coat == null && dead == null && grime == null || state.isInvisible) {
 				return;
 			}
+			// an MCA body is drawn by MCA's own layers: the dirt and blood go on those, over its skin and clothes
+			if (MCA && McaBlood.submit(this.renderer, state, texture -> paints(texture, coat, dead, grime, true), poseStack, collector,
+				lightCoords)) {
+				return;
+			}
 			Identifier skin;
 			try {
 				skin = this.renderer.getTextureLocation(state);
@@ -131,18 +144,28 @@ public final class BloodCoatLayer {
 			}
 			// (0.20.66) a body in the player's layout wears the blood over its outer layer too
 			boolean layered = this.getParentModel() instanceof PlayerModel;
-			Identifier dirty = skin == null ? null : ArmourGrimeTextures.body(skin, grime, layered);
-			if (dirty != null) {
-				renderColoredCutoutModel(this.getParentModel(), dirty, poseStack, collector, lightCoords, state, -1, 1);
-			}
-			if (coat == null && dead == null) {
-				return;
-			}
-			Identifier painted = skin == null ? null
-				: dead != null ? ArmourGrimeTextures.skin(skin, dead, layered) : ArmourGrimeTextures.skin(skin, coat, layered);
-			if (painted != null) {
+			for (Identifier painted : paints(skin, coat, dead, grime, layered)) {
 				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
 			}
 		}
+	}
+
+	/** The pictures to lay over a body drawn from {@code skin}: its dirt, then its blood (a corpse's in place of a coat). */
+	static List<Identifier> paints(@Nullable Identifier skin, Bloodied.@Nullable Coat coat, Bloodied.@Nullable Blood dead,
+		ArmourGrime.@Nullable Grime grime, boolean layered) {
+		if (skin == null) {
+			return List.of();
+		}
+		Identifier dirty = ArmourGrimeTextures.body(skin, grime, layered);
+		Identifier painted = dead != null ? ArmourGrimeTextures.skin(skin, dead, layered)
+			: coat != null ? ArmourGrimeTextures.skin(skin, coat, layered) : null;
+		List<Identifier> paints = new ArrayList<>(2);
+		if (dirty != null) {
+			paints.add(dirty);
+		}
+		if (painted != null) {
+			paints.add(painted);
+		}
+		return paints;
 	}
 }

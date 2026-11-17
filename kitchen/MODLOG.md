@@ -2404,3 +2404,14 @@ inventory icon.
 - **Fix**: an arm that comes off a corpse (torn away lifting a rotten body, struck off, a skeleton falling to pieces)
   lets go of what its hand held: it drops loose beside the body. It used to stay on the body, drawn hanging in the air
   where the hand had been (a pirate lobber's TNT).
+
+## 0.6.41 (2026-11-17): Legend feasts: Skyfall Roast, Giant's Marrow Broth, Deep King's Platter
+
+Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-age ingredients, each giving its buff for
+3 minutes, and only when cooked to Perfect:
+- **Skyfall Roast** (campfire roast: wind-dragon meat, potato, carrot): Strength II.
+- **Giant's Marrow Broth** (pot: bowl, giant's marrow, carrot, potato): Resistance II.
+- **Deep King's Platter** (campfire grill: a legend's fillet, dried kelp, flip, flip): Strength II.
+- The ingredients come from Kingdoms (wind dragons, the Aether's Giants) and Powers (landed legend fish), looked up by id
+  (OptionalItems), so Kitchen still loads without them; the recipes load only when they're present.
+- Built; not played.

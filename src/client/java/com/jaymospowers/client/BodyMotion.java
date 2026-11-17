@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Temperament</b> (Jaymo's Kingdoms gives each player one from their life story, for good): timid and
  * suspicious players hunch and glance about with their hands close when it's dark, they're hurt or a monster is near;
  * hotheaded ones stand with their arms tense and ready; gloomy ones slump; cheerful ones walk with a bounce; brave ones
- * barely flinch.</li>
+ * barely flinch. None of these looks is held for good: each comes in spells and goes again ({@link #inSpell}), on a
+ * beat worked out from the player's id and the game time, so everyone in view sees the same spells.</li>
  * </ul>
  */
 public final class BodyMotion {
@@ -59,6 +60,12 @@ public final class BodyMotion {
 	static final float IDLE_BELOW = 0.35F, IDLE_EASE_TICKS = 10.0F;
 	/** How often the scared check looks around (ticks): checking every frame for monsters would cost too much. */
 	static final int SCARED_CHECK_TICKS = 10;
+	/**
+	 * Spells: time is cut into slots this long (ticks), each one on or off by chance, so a look shows for one slot or a
+	 * few in a row and then rests. The chance a slot is on: a scared player's, everyone else's.
+	 */
+	static final int SPELL_SLOT_TICKS = 60;
+	static final float SPELL_CHANCE_SCARED = 0.45F, SPELL_CHANCE = 0.3F;
 	// ================================================================================================================
 
 	/** Temperaments with their own look here. */
@@ -156,18 +163,32 @@ public final class BodyMotion {
 			default -> Mood.NONE;
 		};
 		boolean idle = state.walkAnimationSpeed < IDLE_BELOW && !avatar.isUsingItem && avatar.swingAnimation <= 0.0F;
-		boolean shows = mood == Mood.CHEERFUL || mood != Mood.NONE && idle;
+		boolean shows = (mood == Mood.CHEERFUL || mood != Mood.NONE && idle) && inSpell(player, mood == Mood.SCARED ? SPELL_CHANCE_SCARED : SPELL_CHANCE);
 		float in = MOOD_IN.getOrDefault(id, 0.0F);
 		in = Mth.clamp(in + (shows ? frame : -frame) / IDLE_EASE_TICKS, 0.0F, 1.0F);
 		MOOD_IN.put(id, in);
 		float bounce = mood == Mood.CHEERFUL && player.onGround()
-			? Math.abs(Mth.sin(state.walkAnimationPos * 0.6662F)) * CHEERFUL_BOUNCE * Math.min(1.0F, state.walkAnimationSpeed) : 0.0F;
+			? Math.abs(Mth.sin(state.walkAnimationPos * 0.6662F)) * CHEERFUL_BOUNCE * Math.min(1.0F, state.walkAnimationSpeed) * smooth(in) : 0.0F;
 
 		if (Math.abs(twist) < 0.5F && Math.abs(strafe) < 0.01F && flinch <= 0.0F && in <= 0.0F && bounce <= 0.0F) {
 			state.setData(KEY, null);
 			return;
 		}
 		state.setData(KEY, new Motion(twist, strafe, flinch, player.getHurtDir(), in > 0.0F ? mood : Mood.NONE, smooth(in), time, bounce));
+	}
+
+	/**
+	 * Whether the temperament's look is showing now: the slot of {@link #SPELL_SLOT_TICKS} this player is in is on with
+	 * {@code chance}, picked from their id and the slot (each player's slots start at their own offset).
+	 */
+	static boolean inSpell(Player player, float chance) {
+		long seed = player.getUUID().getLeastSignificantBits() ^ player.getUUID().getMostSignificantBits();
+		long slot = Math.floorDiv(player.level().getGameTime() + Math.floorMod(seed, SPELL_SLOT_TICKS), SPELL_SLOT_TICKS);
+		long h = seed ^ slot * 0x9E3779B97F4A7C15L;
+		h = (h ^ h >>> 33) * 0xFF51AFD7ED558CCDL;
+		h = (h ^ h >>> 33) * 0xC4CEB9FE1A85EC53L;
+		h ^= h >>> 33;
+		return (h >>> 40) / (float)(1L << 24) < chance;
 	}
 
 	/** Dark around them, badly hurt, or a monster close by (looked at every {@link #SCARED_CHECK_TICKS}). */

@@ -15,9 +15,18 @@ import net.minecraft.resources.Identifier;
 public final class ChampionRenderer extends HumanoidMobRenderer<PatronChampion, ChampionRenderer.State, ChampionModel> {
 	public static final class State extends HumanoidRenderState {
 		Patron patron = Patron.HEARTHKEEPER;
-		boolean dormant, turning;
+		boolean dormant, turning, apparition;
 		int casting = -1;
 	}
+
+	/**
+	 * Set only while the life story's faith page draws a champion: it shows as an apparition, see-through and glowing in its
+	 * patron's light, not flesh (Andy: "they should be more ethereal looking"). Read at extract, since the screen draws later.
+	 */
+	public static boolean apparition;
+	/** The apparition's opacity (0-255), and how far its tint leans from white to its patron's colour. */
+	static final int APPARITION_ALPHA = 150;
+	static final float APPARITION_HUE = 0.35F;
 
 	private static float scale(Patron p) {
 		return switch (p) {
@@ -51,6 +60,26 @@ public final class ChampionRenderer extends HumanoidMobRenderer<PatronChampion, 
 		state.dormant = champion.dormant();
 		state.casting = champion.casting();
 		state.turning = champion.turning();
+		state.apparition = apparition;
+	}
+
+	@Override
+	protected net.minecraft.client.renderer.rendertype.RenderType getRenderType(State state, boolean bodyVisible,
+		boolean translucent, boolean glowing) {
+		return state.apparition ? net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucentEmissive(this.texture)
+			: super.getRenderType(state, bodyVisible, translucent, glowing);
+	}
+
+	@Override
+	protected int getModelTint(State state) {
+		if (!state.apparition) {
+			return super.getModelTint(state);
+		}
+		int c = state.patron.colour;
+		int r = Math.round(255 + (((c >> 16) & 0xFF) - 255) * APPARITION_HUE);
+		int g = Math.round(255 + (((c >> 8) & 0xFF) - 255) * APPARITION_HUE);
+		int b = Math.round(255 + ((c & 0xFF) - 255) * APPARITION_HUE);
+		return net.minecraft.util.ARGB.color(APPARITION_ALPHA, r, g, b);
 	}
 
 	@Override

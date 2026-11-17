@@ -479,6 +479,19 @@ public final class Dismember {
 	}
 
 	/**
+	 * Whether {@code source} is a blow that could cut {@code target} in half ({@link #halve}): a heavy axe or greatsword blow
+	 * struck by hand, on a body with both legs still on. Rolls nothing and changes nothing (the last hold stands aside for it).
+	 */
+	public static boolean halvable(LivingEntity target, DamageSource source, float amount) {
+		if (!canLoseParts(target) || amount < HALVE_DAMAGE || (missing(target) & (RIGHT_LEG | LEFT_LEG)) != 0
+			|| !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker || striker == target) {
+			return false;
+		}
+		com.jaymospowers.core.finisher.Finishers.Kind kind = com.jaymospowers.core.finisher.Finishers.kind(striker.getMainHandItem());
+		return kind == com.jaymospowers.core.finisher.Finishers.Kind.AXE || kind == com.jaymospowers.core.finisher.Finishers.Kind.GREATSWORD;
+	}
+
+	/**
 	 * (0.20.61) Andy: "why not splitting a torso clean off too". A heavy axe or greatsword blow (at least
 	 * {@link #HALVE_DAMAGE}) that lands on the torso ({@code torso}; null: worked out from a player's aim, a mob's lands
 	 * there by chance) may cut the body in half at the waist: both legs come off at once and the upper half is left. At

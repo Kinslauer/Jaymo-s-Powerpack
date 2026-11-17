@@ -211,8 +211,10 @@ public final class VampirePlayers {
 			}
 			if (night) {
 				player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
-				// (0.7.185) bloodbound ({@link BloodFever}): the night's strength a level higher
-				player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, NIGHT_STRENGTH + (BloodFever.bloodbound(player) ? 1 : 0), true, false, true));
+				// the night's strength comes only once bloodbound ({@link BloodFever}); the speed is theirs from the first night
+				if (BloodFever.bloodbound(player)) {
+					player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, NIGHT_STRENGTH + 1, true, false, true));
+				}
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, NIGHT_SPEED, true, false, true));
 			} else if (sunlit(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));

@@ -278,7 +278,7 @@ public final class Downed {
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it dies unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 	/** Those being finished off just now (their death let through as it comes). */
-	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
+	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	/** A downed player → how long they've held sneak to give up (ticks). */
 	private static final Map<UUID, Integer> GIVING_UP = new HashMap<>();
 
@@ -743,7 +743,7 @@ public final class Downed {
 	 * Whether this blow leaves anything to get up: not one that ignores invulnerability, nor a beheading (or a body already
 	 * headless). And a totem in hand is left to do its work (this event comes before it).
 	 */
-	private static boolean spared(LivingEntity entity, DamageSource source) {
+	static boolean spared(LivingEntity entity, DamageSource source) {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
 			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)

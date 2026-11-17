@@ -261,9 +261,9 @@ public final class GravityPower implements Power {
 	static final float IMPACT_DEBRIS = 2.2F, BURY_DEBRIS = 2.8F;
 	/**
 	 * Damage. The most a slam ever does is {@code SLAM_DAMAGE_MAX}: from mid-air, on something big, every ability
-	 * mastered and ascended. Everything else is a share of that: a fresh power {@code SLAM_DAMAGE_FRESH} of it (growing
-	 * with each ability and the ascension), from the ground {@code SLAM_GROUND_SHARE}, on something small
-	 * {@code SLAM_SMALL_SHARE}.
+	 * mastered and ascended. Everything else is a share of that: {@code SLAM_DAMAGE_FRESH} of it with no abilities (growing
+	 * with each ability and the ascension; a slam needs the first ability, so the first slam is 0.48 of it, 9.6), from
+	 * the ground {@code SLAM_GROUND_SHARE}, on something small {@code SLAM_SMALL_SHARE}.
 	 */
 	static final float SLAM_DAMAGE_MAX = 20.0F, SLAM_DAMAGE_FRESH = 0.35F, SLAM_GROUND_SHARE = 0.65F, SLAM_SMALL_SHARE = 0.75F;
 	/** Something hurled with Lift never hits harder than this. */

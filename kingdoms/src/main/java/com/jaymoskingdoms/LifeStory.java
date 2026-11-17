@@ -416,7 +416,12 @@ public final class LifeStory {
 			return new Answer(patron.key, icon, null, null, false, null, "", List.of(), null, false);
 		}
 
-		/** (gb-faith) The patron a faith answer names, or null for any other answer. */
+		/** No faith at all (Andy: "there should be an option for none"): sworn to no patron, no sigil, no champion. */
+		static Answer noFaith(Item icon) {
+			return new Answer(NO_FAITH, icon, null, null, false, null, "", List.of(), null, false);
+		}
+
+		/** (gb-faith) The patron a faith answer names, or null for any other answer (and for no faith). */
 		public @Nullable Patron patron() {
 			return Question.FAITH.answers.contains(this) ? Patron.byKey(this.key) : null;
 		}
@@ -644,7 +649,8 @@ public final class LifeStory {
 				Answer.faith(Patron.LANTERN_WARDEN, Items.LANTERN),
 				Answer.faith(Patron.CROWNED_SUN, Items.SUNFLOWER),
 				Answer.faith(Patron.ASH_WHISPERER, Items.CHARCOAL),
-				Answer.faith(Patron.TRUTH, Items.WRITABLE_BOOK)));
+				Answer.faith(Patron.TRUTH, Items.WRITABLE_BOOK),
+				Answer.noFaith(Items.BARRIER)));
 		}
 	}
 
@@ -661,6 +667,9 @@ public final class LifeStory {
 	 * ({@link Patrons#storyStart}). Kept apart from {@link #STORY}, whose places after the road hold other things. Saved,
 	 * kept through death, synced to its own player (the road told after MCA's creator reads it back).
 	 */
+	/** The faith page's answer for growing up praying to no one. */
+	public static final String NO_FAITH = "none";
+
 	public static final AttachmentType<String> FAITH = AttachmentRegistry.create(JaymosKingdoms.id("story_faith"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
 
@@ -2556,8 +2565,8 @@ public final class LifeStory {
 	 */
 	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
 		if (start == Start.SWORN) {
-			// a realm's sworn guard: iron head to foot, a sword and a shield
-			for (Item item : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.IRON_SWORD, Items.SHIELD)) {
+			// a realm's sworn guard: an iron helmet, a chainmail chestplate, an iron sword and a shield
+			for (Item item : List.of(Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.IRON_SWORD, Items.SHIELD)) {
 				equip(player, new ItemStack(item));
 			}
 		}

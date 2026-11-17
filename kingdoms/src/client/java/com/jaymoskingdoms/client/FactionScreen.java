@@ -2,6 +2,10 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.MenuNet;
 import com.jaymoskingdoms.Patron;
+import com.jaymoskingdoms.Rank;
+import com.jaymoskingdoms.client.ui.FlatButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import com.jaymoskingdoms.Patrons;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -28,6 +32,9 @@ final class FactionScreen extends Screen {
 	/** The last answer (kept for the Map tab's pins too). */
 	static MenuNet.@Nullable Info info;
 
+	private EditBox amount;
+	private Button withdraw;
+
 	FactionScreen() {
 		super(Component.translatable("menu.jaymoskingdoms.faction.title"));
 	}
@@ -42,6 +49,20 @@ final class FactionScreen extends Screen {
 	@Override
 	protected void init() {
 		ask();
+		int lw = Math.min(LEFT_W, panelW() / 2 + 10) - 16;
+		int wx = left() + 10, wy = top() + PANEL_H - 24;
+		this.amount = new EditBox(this.font, wx, wy, 52, 16, Component.translatable("menu.jaymoskingdoms.faction.withdraw.hint"));
+		this.amount.setMaxLength(6);
+		this.amount.setHint(Component.translatable("menu.jaymoskingdoms.faction.withdraw.hint"));
+		addRenderableWidget(this.amount);
+		this.withdraw = FlatButton.builder(Component.translatable("menu.jaymoskingdoms.faction.withdraw"), b -> {
+			// (digits only; anything else typed is dropped, and an empty box asks for the whole day's allowance)
+			String text = this.amount.getValue().replaceAll("[^0-9]", "");
+			int silver = text.isEmpty() ? 0 : Integer.parseInt(text);
+			ClientPlayNetworking.send(new MenuNet.Withdraw(silver));
+			this.amount.setValue("");
+		}).bounds(wx + 56, wy, lw - 56, 16).build();
+		addRenderableWidget(this.withdraw);
 	}
 
 	@Override
@@ -86,6 +107,14 @@ final class FactionScreen extends Screen {
 		LocalPlayer player = this.minecraft.player;
 		int x = left(), y = top(), w = panelW();
 		MenuNet.Info i = info;
+		// a lord's control to draw on the treasury (the server holds the daily cap and asks again with the allowance)
+		boolean lord = i != null && i.sworn() && i.rank().equals(Rank.LORD.key());
+		this.amount.visible = lord;
+		this.withdraw.visible = lord;
+		this.withdraw.active = lord && i.allowance() > 0;
+		if (lord) {
+			this.withdraw.setTooltip(Ui.tipOf(Component.translatable("menu.jaymoskingdoms.faction.withdraw.tip", i.allowance())));
+		}
 		int accent = i != null && i.sworn() ? 0xFF000000 | i.color() : Ui.GOLD;
 		Ui.window(graphics, x, y, w, PANEL_H);
 		graphics.item(new ItemStack(Items.BELL), x + 8, y + 8);

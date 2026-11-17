@@ -60,7 +60,9 @@ final class ZFighterBattle {
 	/**
 	 * Most a left-mouse blow (a punch, a hold-combo hit, a finisher) does: {@link #PUNCH_SOFT_CAP} for most of a fighter's
 	 * life, rising to {@link #PUNCH_MAX_CAP} only with every Z Fighter stat and Kingdoms attribute maxed (the rise follows
-	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). Not the Great Ape.
+	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). The cap is
+	 * times (1 + the current form's fist bonus, {@link ZFighterPower#FORM_FIST}): at the top, 9 in base form, about 10.8 in Super,
+	 * 13.8 in Super 3, 16.6 as a god. Not the Great Ape.
 	 */
 	static final float PUNCH_SOFT_CAP = 7.0F, PUNCH_MAX_CAP = 9.0F;
 	static final double PUNCH_CAP_CURVE = 3.0;
@@ -263,7 +265,8 @@ final class ZFighterBattle {
 		double stats = data.totalLevels() / (double)(ZFighterTraining.STATS * ZFighterTraining.STAT_CAP);
 		double attributes = ZFighterKingdoms.attributes(player);
 		double progress = Math.clamp(attributes < 0.0 ? stats : (stats + attributes) / 2.0, 0.0, 1.0);
-		return PUNCH_SOFT_CAP + (PUNCH_MAX_CAP - PUNCH_SOFT_CAP) * (float)Math.pow(progress, PUNCH_CAP_CURVE);
+		float cap = PUNCH_SOFT_CAP + (PUNCH_MAX_CAP - PUNCH_SOFT_CAP) * (float)Math.pow(progress, PUNCH_CAP_CURVE);
+		return cap * (1.0F + (float)ZFighterPower.FORM_FIST[ZFighterPower.live(player).form]);
 	}
 
 	/** A bare-fisted punch landed: ki, the combo, and every fifth hit a finisher. */

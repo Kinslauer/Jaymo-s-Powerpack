@@ -530,12 +530,18 @@ final class LifeStoryScreen extends Screen {
 			// your blood pray to listed first
 			com.jaymoskingdoms.Patron usual = kind == null ? null : com.jaymoskingdoms.Faiths.startOf(kind);
 			for (int i = 0; i < q.answers().size(); i++) {
-				if (q.answers().get(i).patron() == usual) {
+				if (usual != null && q.answers().get(i).patron() == usual) {
 					out.add(i);
 				}
 			}
 			for (int i = 0; i < q.answers().size(); i++) {
-				if (q.answers().get(i).patron() != usual) {
+				if (q.answers().get(i).patron() != usual && q.answers().get(i).patron() != null) {
+					out.add(i);
+				}
+			}
+			// no faith, always last
+			for (int i = 0; i < q.answers().size(); i++) {
+				if (q.answers().get(i).patron() == null) {
 					out.add(i);
 				}
 			}
@@ -2637,7 +2643,7 @@ final class LifeStoryScreen extends Screen {
 		// (0.7.364) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
 		// no one in particular, only the ki every one of them holds
 		if (s.question == Question.ROAD && here != null && here.start() == LifeStory.Start.FATE) {
-			KiGhost.draw(graphics, x0, y0, x1, y1);
+			KiGhost.draw(graphics, x0, y0, x1, y1, mouseX);
 			return;
 		}
 		// (gb-faith) the chosen faith's sigil behind the figure, from this page on (on the story pages the panel draws it)
@@ -2650,10 +2656,11 @@ final class LifeStoryScreen extends Screen {
 		}
 		// (gb-faith) on the faith page the figure is the chosen faith's champion; The Truth has no champion,
 		// so it is drawn as a bright yellow-white ki ghost instead
-		if (s.question == Question.FAITH && here != null) {
+		// (no faith has no champion: it shows you, as the other pages do)
+		if (s.question == Question.FAITH && here != null && here.patron() != null) {
 			com.jaymoskingdoms.Patron faithPatron = here.patron();
 			if (faithPatron == com.jaymoskingdoms.Patron.TRUTH) {
-				drawTruthGhost(graphics, x0, y0, x1, y1);
+				drawTruthGhost(graphics, x0, y0, x1, y1, mouseX);
 				return;
 			}
 			com.jaymoskingdoms.PatronChampion champ = null;
@@ -2715,9 +2722,14 @@ final class LifeStoryScreen extends Screen {
 
 	/**
 	 * The faith whose sigil shows on this page: the one pointed at or picked on the faith page, the one picked after it;
-	 * none on the gender page or while fate's road shows its ki ghost.
+	 * none on the gender page, while fate's road shows its ki ghost, or for no faith (it has no sigil).
 	 */
 	private @Nullable Answer faithShown(Step s, int mouseX, int mouseY) {
+		Answer a = faithShownAny(s, mouseX, mouseY);
+		return a == null || a.patron() == null ? null : a;
+	}
+
+	private @Nullable Answer faithShownAny(Step s, int mouseX, int mouseY) {
 		if (s.gender) {
 			return null;
 		}
@@ -2743,16 +2755,29 @@ final class LifeStoryScreen extends Screen {
 		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, w, h, 16, 16, 16, 16, 0x60FFFFFF);
 	}
 
-	/** (gb-faith) The chosen faith's champion, standing in the figure's box. */
+	/**
+	 * (gb-faith) The chosen faith's champion, standing in the figure's box. Champions stand far taller than a man, so it is
+	 * sized to the player's height in the box (Andy: "patron heads are cut"), and drawn as an apparition, see-through and
+	 * glowing (Andy: "they should be more ethereal looking"; {@link com.jaymoskingdoms.client.champions.ChampionRenderer#apparition}).
+	 */
 	private static void drawChampion(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, com.jaymoskingdoms.PatronChampion champ) {
-		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE));
+		float tall = Math.max(0.5F, champ.getBbHeight() / Math.max(0.01F, champ.getScale()));
+		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE * PLAYER_TALL / tall));
 		float cx = (x0 + x1) / 2.0F, cy = y0 + (y1 - y0) * 0.35F;
-		net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, cx, cy, champ);
+		com.jaymoskingdoms.client.champions.ChampionRenderer.apparition = true;
+		try {
+			net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, cx, cy, champ);
+		} finally {
+			com.jaymoskingdoms.client.champions.ChampionRenderer.apparition = false;
+		}
 	}
 
+	/** A player's height (blocks): a champion is drawn this tall in the figure's box, as you are. */
+	private static final float PLAYER_TALL = 1.8F;
+
 	/** (gb-faith) The Truth has no champion: a bright yellow-white ki ghost. */
-	private static void drawTruthGhost(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1) {
-		KiGhost.draw(graphics, x0, y0, x1, y1, 0xFFFFFE, 0xFFFFFFFF, 0xFFFFFF);
+	private static void drawTruthGhost(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int mouseX) {
+		KiGhost.draw(graphics, x0, y0, x1, y1, mouseX, 0xFFFFFE, 0xFFFFFFFF, 0xFFFFFF);
 	}
 
 	// ---- the realm page's people (gb-realmcards) ----------------------------------------------------------------------

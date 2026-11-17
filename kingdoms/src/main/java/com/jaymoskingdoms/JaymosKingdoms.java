@@ -1029,6 +1029,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Carousing.register();
 		Tables.register();
 		ForgedPapers.register();
+		EstateCharters.register();
+		LegendLarder.register();
 		ChalkMarks.register();
 		Lifestyle.register();
 		Research.register();
