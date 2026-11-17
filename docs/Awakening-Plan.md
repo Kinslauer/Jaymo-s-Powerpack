@@ -207,3 +207,47 @@ Lore (new): the web fluids are the Web Slinger's own brews. Endless Fall, Surfac
 Arsenal's rift turned on the world (the Seal is what a master of the pocket does: folds a piece of the world into one).
 Battle fury is the Warrior-born's blood that the Great Ape is made of, showing in any Z Fighter pushed hard enough. The
 stretching grab is the Rubber-folk's and the Verdant's stretch, as in the Verdant combo.
+
+### Patch 5: new powers (Reactor Heart, Blinker, Lawgiver)
+- `aw-nuclear` with `aw-kinetic` folded in: **Reactor Heart** (`power/reactor`, lang `reactor.json`). One charge
+  (0-100) fills from running (0.15 a block), landing from 3+ blocks (1.5 a block fallen) and being hurt (3 a point of
+  harm). Full, it **detonates** round you (5 blocks, 12 harm at the middle) and you take none of it; none of your own
+  blasts hurt you and none breaks a block. **Z, the dial**: each move pours in a quarter, a half or all of the charge (never
+  under its own least), and hits harder for it (0.5 + spent / 40). **R Cone Burst** (the starter, at half strength): a
+  punched wave of air and heat in a 6-block cone. **G Blast Dash** along the look; **Sneak + G Recoil**: blast in front,
+  thrown backwards. **V Shell Beam**: 48 blocks, bursting where it hits; **Sneak + V Charged Throw**: one of the held
+  stack thrown to burst where it lands. **B (hold) the Drill**: stone, deepslate, netherrack, dirt, sand, gravel, clay,
+  sandstone and end stone come out as their items (as an iron pickaxe would), 1 charge a block; never an ore, never a
+  made block, never where you may not build. **Sneak + B Ground Crack**: an 8-block split that harms and pops foes up.
+  **C (ascended, hold 5 s) the Nuke**: all the charge in a 14-block blast (up to 30 harm), then 30 s of fallout 10
+  blocks wide (1 harm a second and poison to everyone but you). Calling: live through a blast of 6+ harm (a day off, once
+  a day; in Chrono's Future at once).
+- `aw-blinker` **Blinker** (`power/blinker`, lang `blinker.json`). **R Blink** 12 blocks (the starter: 6), short of
+  walls, untouchable for half a second (all harm refused but what bypasses invulnerability). **G Blink Strike**: behind
+  a foe up to 18 blocks off, 1.5x fists + 2. **V Vanish**: blinding smoke 5 blocks round (blindness 4 s, mobs lose you),
+  invisible 5 s, blink up to 5 blocks back. **B Sky Drop**: a foe within 6 blocks and you blink 14 up, held a moment,
+  then you blink home while it falls (not what no portal takes; refused under a roof). **C (ascended) Flicker**: 2 s, a
+  blow every 4 ticks (five a second) on a random foe within 12, untouchable throughout. Calling: land 16 ender pearls
+  (an End-born, 8). Awakens at once.
+- `aw-rules` **Lawgiver** (`power/rules`, lang `rules.json`, the rulebook screen `RuleBookScreen`). Up to five rules,
+  each a sentence of four parts picked in the rulebook: **who** (I, my allies near me, the foes near me, the one I look
+  at, everyone near me; near is 12 blocks), **what** (mend, wither, swift, slowed, strong, weak, hardened, float, burn,
+  have no powers, glow, blind), **strength** 1-5 (held to 1 + abilities learned) and **length** (5, 15, 30, 60 s).
+  Enacting costs **ink** (what x strength x (seconds / 5)^0.6 x who: 1 self or one, 1.5 allies, 2 foes, 2.5 everyone;
+  150 ink most, 1 back a second, 2 with no rule running). One rule at a time; three at mastery 9 (abilities learned +
+  rank = 9). Area rules find who they're about each second. "Have no powers" is the Eight-Sign silencer (players),
+  Kingdoms `Will` (tag `jaymospowers_ruled_mute`) and forms, and a gifted villager's power. Keys: **R** enact the rule
+  picked (the starter's first rulebook: "I mend, strength 1, 15 s"), **G** the rulebook, **V** pick (Sneak: back),
+  **B** repeal (half the unspent ink back). Calling: lay a book you wrote and signed on a lectern (a day off, once a day).
+
+Design calls: "Reactor" is already a Z Fighter android form, so the power is the Reactor Heart. The kinetic charger's
+fill (moving, landing, being hit) is the Reactor's heat: one gauge, not two. Its blasts are hand-rolled so the maker
+takes none and no block breaks (a nuke that levels builds would be griefing). The drill's "never builds" is held by
+what it takes (the natural ground kinds); a stone block a player placed looks the same and is taken. The Lawgiver's
+"mastery 9" is abilities learned (4) plus rank (5). "Have no powers" written about yourself silences you too, until
+it runs out. Each new power is fated (fate can hand it out) and has its own calling.
+
+Lore (new): the **Reactor Heart** is the ruined future's (Chrono's Future): the reactors that powered its cities and
+burned them down, one beating in a person. The **Blinker** is the End's own step, the endermen's; the End-born wake to
+it soonest. The **Lawgiver** is the Judge's gift (the afterlife's Judge, who rules on the dead): a living hand that
+writes law, and for a while the world keeps it.

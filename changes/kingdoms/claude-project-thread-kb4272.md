@@ -7,4 +7,5 @@
 - **Awakening picks, patch 1**: the **Warding Hush** (blows and shots stop short of you for a feather of stamina a point; explosions get through), from the Lantern Warden's third tier or a Scroll of the Warding Hush for staff casters. The Ash Whisperer's **rot**: every sworn blow lays Decay (no cap, 0.5 harm a second a stack, gone 8 s after the last), and a new Rot key (End) for Grip, Spread, Rush, Breach (tunnels that close again) and Collapse (a crater that grows back).
 - **Awakening picks, patch 2**: Water Sorcerers pour carried water into their reserve (look down while holding J: a waterskin's sip, a bottle, a bucket) or draw it from the moisture in the air; a caster choked by Darktide's Strangling Lift can't cast.
 - **Awakening picks, patch 3**: Rubber-folk and Verdants: the heritage key while sprinting is the **stretching grab** (with Jaymo's Powers): the arm hooks a foe up to 8 blocks off, round cover, and yanks it to your feet. Casters inside a Pocket Arsenal's Rift Seal can't cast.
+- **Awakening picks, patch 5**: a caster a Jaymo's Powers Lawgiver's rule says has no powers can't cast.
 - Built; not played.

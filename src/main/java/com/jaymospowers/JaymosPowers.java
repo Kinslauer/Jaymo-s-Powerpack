@@ -121,6 +121,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.xenoform.XenoformPower.init();
 		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		com.jaymospowers.power.smoke.SmokePower.init();
+		// (Awakening picks) the Reactor Heart, the Blinker and the Lawgiver
+		com.jaymospowers.power.reactor.ReactorPower.init();
+		com.jaymospowers.power.blinker.BlinkerPower.init();
+		com.jaymospowers.power.rules.RulesPower.init();
 		// Blindness, the condition (lost eyes), and the Unseeing
 		com.jaymospowers.power.blindness.Blind.init();
 		// Elemental Corruption: the gods of the elements answer a corrupted elemental user's murders (each element registers its part)
@@ -292,7 +296,7 @@ public class JaymosPowers implements ModInitializer {
 			"elemental.ElementalCorruption", "power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
-			"water.Dives", "core.MagicMoves",
+			"water.Dives", "core.MagicMoves", "power.rules.Rules",
 			"alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};

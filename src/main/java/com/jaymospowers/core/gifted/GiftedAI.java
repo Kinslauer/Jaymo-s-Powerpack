@@ -180,8 +180,8 @@ public final class GiftedAI {
 				continue;
 			}
 			if (!mob.isAlive() || mob.isBaby() || mob.entityTags().contains(DOWNED)
-				|| com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob)) {
-				// (a Rift Seal round them) their power sleeps
+				|| com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob) || com.jaymospowers.power.rules.RulesPower.muted(mob)) {
+				// (a Rift Seal round them, or a Lawgiver's rule) their power sleeps
 				continue;
 			}
 			kit.tick(level, mob, gift);
@@ -405,7 +405,7 @@ public final class GiftedAI {
 		GiftKit kit = gift == null ? null : Gifted.kit(gift.power());
 		GiftKit.Ultimate ultimate = kit == null ? null : kit.ultimate();
 		if (ultimate == null || !(mob.level() instanceof ServerLevel level) || !mob.isAlive() || mob.entityTags().contains(DOWNED)
-			|| !fightable(mob, foe) || com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob)) {
+			|| !fightable(mob, foe) || com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob) || com.jaymospowers.power.rules.RulesPower.muted(mob)) {
 			return false;
 		}
 		long now = level.getGameTime();
