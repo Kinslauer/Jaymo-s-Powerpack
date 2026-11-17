@@ -2557,8 +2557,8 @@ public final class LifeStory {
 	 */
 	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
 		if (start == Start.SWORN) {
-			// a realm's sworn guard: iron head to foot, a sword and a shield
-			for (Item item : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.IRON_SWORD, Items.SHIELD)) {
+			// a realm's sworn guard: an iron helmet, a chainmail chestplate, an iron sword and a shield
+			for (Item item : List.of(Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.IRON_SWORD, Items.SHIELD)) {
 				equip(player, new ItemStack(item));
 			}
 		}

@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:gladiator_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gladiator_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gladiator_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gladiator_boots",
+      "required": false
+    }
+  ]
+}

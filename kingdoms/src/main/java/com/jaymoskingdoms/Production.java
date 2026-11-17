@@ -50,6 +50,8 @@ public final class Production {
 	static final int TAX_BASE = 2, VILLAGERS_PER_TAX = 2, TAX_PER_MEMBER = 1;
 	/** The share (percent) of a fiefdom's taxes that goes to its overlord. */
 	static final int TRIBUTE_PERCENT = 30;
+	/** A fiefdom costs its overlord this many emeralds a day for every this many folk (villagers and staff) in it. */
+	static final int UPKEEP_FOLK = 4;
 	/** The survey: villagers counted, and crops sought, this far round the seat; woodland sampled this far, this often. */
 	static final int SURVEY_RANGE = 64, FARM_RANGE = 48, LAND_RANGE = 96, LAND_STEP = 6;
 	/** Woodland's share (percent) is kept within these, so there's always some of each. */
@@ -155,6 +157,13 @@ public final class Production {
 			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + kept));
 			if (tribute > 0) {
 				Factions.update(server, f.overlord(), x -> x.withTreasury(x.treasury() + tribute));
+			}
+			if (f.type() == FactionType.FIEFDOM && f.overlord() >= 0) {
+				// its overlord keeps it up: a day's upkeep for its folk, from his treasury, never below nothing
+				long upkeep = (long)(h.population() + h.staff()) / UPKEEP_FOLK * days;
+				if (upkeep > 0) {
+					Factions.update(server, f.overlord(), x -> x.withTreasury(Math.max(0L, x.treasury() - upkeep)));
+				}
 			}
 		}
 		// (0.7.490) a haven's works make their goods besides

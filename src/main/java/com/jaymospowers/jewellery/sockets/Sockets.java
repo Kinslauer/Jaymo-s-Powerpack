@@ -44,6 +44,7 @@ public final class Sockets {
 		GRADE_SOCKETS.put(Grade.EXPERT, 1);
 		GRADE_SOCKETS.put(Grade.PERFECT, 1);
 		GRADE_SOCKETS.put(Grade.MASTER, 2);
+		GRADE_SOCKETS.put(Grade.LEGENDARY, 2);
 	}
 
 	/** (0.20.7) The cut gems set in a forged weapon or armour piece, in socket order. Saved id: never rename. */

@@ -180,6 +180,8 @@ public final class WebSymbiote {
 	// ===== the bond meter (0.8.6) ===================================================================================
 	/** How far it trusts you, 0-{@code BOND_MAX}. A new bond starts anywhere from nothing to {@code BOND_START_MAX} (halfway). */
 	public static final int BOND_MAX = 100, BOND_START_MAX = 50;
+	/** The symbiote's own attacks hit this much harder at full bond, growing in step with the bond (x1.5 at 100). */
+	public static final float BOND_DAMAGE_AT_MAX = 0.5F;
 	/**
 	 * The bond each ability opens at (radial order: Tendril Grab, Living Armor, Wall Crawl, Consume, Spike Burst, Shroud).
 	 * Only the Shroud is there from the start. At {@link #BOND_MAX}, Living Armor brings the big body too, yours to drive.
@@ -1215,6 +1217,11 @@ public final class WebSymbiote {
 	}
 
 	// ---- shared queries (both sides: the bond is synced) -------------------------------------------------------------
+
+	/** What one of the symbiote's attacks deals once the bond has grown: {@code damage} x (1 + bond/200). */
+	static float bonded(ServerPlayer player, float damage) {
+		return damage * (1.0F + BOND_DAMAGE_AT_MAX * Mth.clamp(state(player).bond() / (float)BOND_MAX, 0.0F, 1.0F));
+	}
 
 	public static WebSymbioteState state(Player player) {
 		WebSymbioteState state = player.getAttached(STATE);
@@ -3587,7 +3594,7 @@ public final class WebSymbiote {
 		}
 		if (player.getRandom().nextFloat() < CURIOUS_ATTACK && target instanceof LivingEntity living) {
 			// it didn't like what it saw
-			living.hurtServer(level, level.damageSources().playerAttack(player), STRIKE_DAMAGE);
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, STRIKE_DAMAGE));
 			Vec3 away = living.position().subtract(player.position()).horizontal();
 			away = away.lengthSqr() < 1.0E-4 ? look : away.normalize();
 			living.setDeltaMovement(away.scale(0.9).add(0.0, 0.35, 0.0));
@@ -3710,7 +3717,7 @@ public final class WebSymbiote {
 			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
 				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
 					// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
-					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), RAMPAGE_BITE_DAMAGE);
+					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), bonded(player, RAMPAGE_BITE_DAMAGE));
 					ServerLevel level = player.level();
 					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
 					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
@@ -4583,7 +4590,7 @@ public final class WebSymbiote {
 				}
 				if (nearest != null) {
 					lash(player, nearest, level.getGameTime(), RETALIATE_LAG);
-					nearest.hurtServer(level, level.damageSources().playerAttack(player), FLINT_LASH_DAMAGE);
+					nearest.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, FLINT_LASH_DAMAGE));
 				} else {
 					player.hurtServer(level, level.damageSources().magic(), FLINT_LASH_DAMAGE * 0.5F);
 				}
@@ -4676,7 +4683,7 @@ public final class WebSymbiote {
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
 				&& !(e instanceof Player p && p.isCreative()) && e.distanceTo(player) <= radius + e.getBbWidth() * 0.5)) {
-			if (living.hurtServer(level, level.damageSources().playerAttack(player), FLAIL_DAMAGE)) {
+			if (living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, FLAIL_DAMAGE))) {
 				Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 				away = away.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : away.normalize();
 				living.push(away.x * FLAIL_KNOCK, FLAIL_LIFT, away.z * FLAIL_KNOCK);
@@ -4976,7 +4983,7 @@ public final class WebSymbiote {
 								abortFeeding(player, live);
 								return;
 							}
-							prey.hurtServer(level, level.damageSources().playerAttack(player), CONSUME_FINISH_DAMAGE);
+							prey.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, CONSUME_FINISH_DAMAGE));
 							level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
 							level.sendParticles(dust(1.4F), prey.getX(), prey.getY() + prey.getBbHeight() * 0.6, prey.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
 						}
@@ -5264,7 +5271,7 @@ public final class WebSymbiote {
 			int pieces = debris instanceof com.jaymospowers.core.BlockCluster chunk ? chunk.pieces().size() : 1;
 			damage = HEAVY_STRIKE_DAMAGE * Mth.clamp(HEAVY_SIZE_BASE + HEAVY_SIZE_PER_PIECE * pieces, HEAVY_SIZE_MIN, HEAVY_SIZE_MAX);
 		}
-		living.hurtServer(level, level.damageSources().playerAttack(player), damage);
+		living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, damage));
 		Vec3 away = living.position().subtract(player.position()).horizontal();
 		if (away.lengthSqr() < 1.0E-4) {
 			away = player.getLookAngle().horizontal();
@@ -5648,7 +5655,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			float before = living.getHealth();
-			living.hurtServer(level, level.damageSources().playerAttack(player), (burst ? ROAR_DAMAGE * WebFury.BURST_DAMAGE : ROAR_DAMAGE));
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, (burst ? ROAR_DAMAGE * WebFury.BURST_DAMAGE : ROAR_DAMAGE)));
 			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
@@ -5755,7 +5762,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			float before = living.getHealth();
-			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, SPIKE_DAMAGE));
 			if (strain == WebSymbioteStrain.RED && living.isAlive()) {
 				com.jaymospowers.core.BladeBlood.splash(living, before - living.getHealth());
 				WebMorph.bleed(player, living, WebSymbioteStrains.RED_BURST_BLEED_HITS);
