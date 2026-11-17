@@ -121,7 +121,7 @@ public final class Ford {
 			Plan plan = level.getAttached(PLAN);
 			if (plan == null) {
 				if (!level.getAttachedOrElse(NO_SITE, false)) {
-					plan(level);
+					planning(level);
 				}
 				return;
 			}
@@ -158,11 +158,48 @@ public final class Ford {
 		return true;
 	}
 
+	/** The site being chosen on a background thread (null: none under way), and the level it's for. */
+	private static java.util.concurrent.@Nullable CompletableFuture<java.util.Optional<Plan>> planning;
+	private static @Nullable ServerLevel planningFor;
+
+	/**
+	 * Chooses the site off the server thread: each biome looked at on the map can have Dynamic Waters work out the rivers of
+	 * land thousands of blocks off, and the 1,600 looks stalled a new world's first minute for 5-40 s, just as the first
+	 * player came in. The answer is kept the next time the world is looked at.
+	 */
+	private static void planning(ServerLevel level) {
+		if (planning == null || planningFor != level) {
+			planningFor = level;
+			planning = java.util.concurrent.CompletableFuture.supplyAsync(() -> java.util.Optional.ofNullable(plan(level)),
+				net.minecraft.util.Util.backgroundExecutor());
+			return;
+		}
+		if (!planning.isDone()) {
+			return;
+		}
+		java.util.Optional<Plan> found;
+		try {
+			found = planning.join();
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("Choosing the site of the keep above the ford failed", e);
+			found = java.util.Optional.empty();
+		}
+		planning = null;
+		planningFor = null;
+		if (found.isPresent()) {
+			level.setAttached(PLAN, found.get());
+			JaymosKingdoms.LOGGER.info("The keep above the ford will stand at {} (river to the {})", found.get().column(), found.get().toWater().getSerializedName());
+		} else {
+			level.setAttached(NO_SITE, true);
+			JaymosKingdoms.LOGGER.warn("No forest beside a river found for the keep above the ford");
+		}
+	}
+
 	/**
 	 * Chooses the site from the world's biome map without loading anything: rings out from spawn, a forest column with a
-	 * river in reach of it on the map, the river's side remembered. Run once per world.
+	 * river in reach of it on the map, the river's side remembered (null: none). Run once per world, off the server thread.
 	 */
-	static void plan(ServerLevel level) {
+	static @Nullable Plan plan(ServerLevel level) {
 		RandomSource random = RandomSource.create(level.getSeed() ^ 0x1F0DDEFEC1L);
 		BlockPos spawn = level.getRespawnData().pos();
 		int sea = level.getSeaLevel();
@@ -181,9 +218,7 @@ public final class Ford {
 						Holder<Biome> b = biome(level, at);
 						if (b.is(BiomeTags.IS_RIVER)) {
 							// the keep stands well back in the trees, the river ahead of its gate
-							level.setAttached(PLAN, new Plan(column, d));
-							JaymosKingdoms.LOGGER.info("The keep above the ford will stand at {} (river to the {})", column, d.getSerializedName());
-							return;
+							return new Plan(column, d);
 						}
 						if (!b.is(BiomeTags.IS_FOREST)) {
 							break;
@@ -192,8 +227,7 @@ public final class Ford {
 				}
 			}
 		}
-		level.setAttached(NO_SITE, true);
-		JaymosKingdoms.LOGGER.warn("No forest beside a river found for the keep above the ford");
+		return null;
 	}
 
 	private static Holder<Biome> biome(ServerLevel level, BlockPos at) {

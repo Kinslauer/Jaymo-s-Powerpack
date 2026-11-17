@@ -386,7 +386,7 @@ public final class BasinTile {
     }
 
     public static double labDryness(RandomState randomState, long seed, int seaLevel, int x, int z) {
-        return turned(plainDryness(randomState.getSampler(WiredRouter.of(randomState).vegetation()), densityNoise(seed), x, z, seaLevel));
+        return turned(plainDryness(WiredRouter.samplers(randomState).vegetation(), densityNoise(seed), x, z, seaLevel));
     }
 
     private record DensityNoise(long seed, SimplexNoise noise) {
@@ -2528,7 +2528,7 @@ public final class BasinTile {
             final int gw = Math.floorDiv(cx0 + W - 1, g) - gi0 + 2;
             final int gh = Math.floorDiv(cz0 + W - 1, g) - gj0 + 2;
             final double[] dry = new double[gw * gh];
-            final net.minecraft.world.level.levelgen.densityfunction.DensitySampler humidity = randomState.getSampler(WiredRouter.of(randomState).vegetation());
+            final net.minecraft.world.level.levelgen.densityfunction.DensitySampler humidity = WiredRouter.samplers(randomState).vegetation();
             final SimplexNoise noise = densityNoise(seed);
             for (int b = 0; b < gh; b++) {
                 for (int a = 0; a < gw; a++) {
