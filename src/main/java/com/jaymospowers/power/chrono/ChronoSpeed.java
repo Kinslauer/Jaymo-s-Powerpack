@@ -196,7 +196,10 @@ public final class ChronoSpeed {
 					Vec3 at = was.add(moved.scale(i / 3.0));
 					ChronoFx.particles(level, player, MagicFx.CRACKLE, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 				}
-				if (palette == SKY) {
+				if (SpeedPrism.picked(player) > 0) {
+					// a prism's colour, in place of the power's own dust
+					ChronoFx.particles(level, player, MagicFx.wisp(SpeedPrism.colour(player, 0), 1.2F), was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
+				} else if (palette == SKY) {
 					ChronoFx.particles(level, player, SKY_DUST, was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
 				} else {
 					ChronoFx.particles(level, player, MagicFx.EMBER, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);

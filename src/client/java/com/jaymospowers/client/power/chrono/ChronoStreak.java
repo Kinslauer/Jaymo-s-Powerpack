@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.chrono;
 
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.chrono.ChronoSpeed;
+import com.jaymospowers.power.chrono.SpeedPrism;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -115,6 +116,20 @@ public final class ChronoStreak {
 		float run, runO;
 		/** Its colours ({@link ChronoSpeed#GOLD} or {@link ChronoSpeed#SKY}), kept as it fades. */
 		int palette;
+		/** The Speed Prism colour its runner picked (0: the palette's own), kept as it fades. */
+		int prism;
+
+		int ghost() {
+			return prism == 0 ? GHOST_RGB[palette] : SpeedPrism.whiten(SpeedPrism.COLOURS[prism - 1], SpeedPrism.GHOST_WHITEN);
+		}
+
+		int core() {
+			return prism == 0 ? CORE_RGB[palette] : SpeedPrism.whiten(SpeedPrism.COLOURS[prism - 1], SpeedPrism.CORE_WHITEN);
+		}
+
+		int glow() {
+			return prism == 0 ? GLOW_RGB[palette] : SpeedPrism.COLOURS[prism - 1];
+		}
 		@Nullable AvatarRenderState latest;
 	}
 
@@ -175,6 +190,7 @@ public final class ChronoStreak {
 			Integer palette = player.getAttached(ChronoSpeed.FLASH);
 			if (palette != null) {
 				trail.palette = Mth.clamp(palette, 0, GHOST_RGB.length - 1);
+				trail.prism = SpeedPrism.picked(player);
 			}
 			Vec3 was = new Vec3(player.xo, player.yo, player.zo);
 			Vec3 moved = player.position().subtract(was);
@@ -292,7 +308,7 @@ public final class ChronoStreak {
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
-			int tint = ARGB.color(Math.round(alpha * 255.0F), GHOST_RGB[trail.palette]);
+			int tint = ARGB.color(Math.round(alpha * 255.0F), trail.ghost());
 			if (!com.jaymospowers.client.power.xenoform.XenoformClient.submitGhost(state, poseStack, collector, FULL_BRIGHT, tint)) {
 				collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tint,
 					null, EntityRenderState.NO_OUTLINE);
@@ -396,7 +412,7 @@ public final class ChronoStreak {
 		poseStack.pushPose();
 		poseStack.translate(-camera.x, -camera.y, -camera.z);
 		Vec3 eye = camera;
-		int glow = GLOW_RGB[trail.palette], core = CORE_RGB[trail.palette];
+		int glow = trail.glow(), core = trail.core();
 		collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (pose, buffer) -> {
 			for (float[] bolt : bolts) {
 				ribbon(buffer, pose, bolt, eye, GLOW_WIDTH, glow, GLOW_ALPHA);

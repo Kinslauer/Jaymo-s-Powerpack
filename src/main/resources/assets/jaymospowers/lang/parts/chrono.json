@@ -168,5 +168,20 @@
 	"message.jaymospowers.speed_no_mark": "No mark. Sneak and press the mark key to lay one.",
 	"message.jaymospowers.speed_no_path": "No way there that you can run, or it is too far.",
 	"hud.jaymospowers.speed_gear": "Gear %s",
-	"hud.jaymospowers.speed_run": "Running to the mark"
+	"hud.jaymospowers.speed_run": "Running to the mark",
+	"item.jaymospowers.speed_prism": "Speed Prism",
+	"tooltip.jaymospowers.speed_prism": "Use it to change the colour of your speed lightning. For a Chrono or a Velox.",
+	"message.jaymospowers.speed_prism.set": "Your lightning runs %s.",
+	"message.jaymospowers.speed_prism.own": "Your lightning is your power's own again.",
+	"message.jaymospowers.speed_prism.useless": "The prism does nothing for you. It is for a speedster.",
+	"prism.jaymospowers.red": "red",
+	"prism.jaymospowers.orange": "orange",
+	"prism.jaymospowers.green": "green",
+	"prism.jaymospowers.teal": "teal",
+	"prism.jaymospowers.blue": "blue",
+	"prism.jaymospowers.violet": "violet",
+	"prism.jaymospowers.pink": "pink",
+	"prism.jaymospowers.white": "white",
+	"item.jaymospowers.energy_bar": "Energy Bar",
+	"tooltip.jaymospowers.energy_bar": "Quick to eat. A speedster gets back some of the hunger running costs."
 }

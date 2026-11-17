@@ -158,6 +158,8 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
+		// the speedsters' prism (the lightning's colour) and energy bar
+		SpeedPrism.init();
 		// (0.20.50) cheating death: R on a black screen instead of dying
 		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
