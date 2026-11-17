@@ -226,3 +226,55 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
 - Gaps: Divine Sense's glow is the vanilla effect, so others near see it too. Empty Body's "slip through blows" is every blow
   from a living source missing. A Vigil is one prayer at night, not a night kept awake at the shrine.
 - Lore: the oaths (mercy, justice, honour), the shrines and the ki of the boxing schools are already canon; nothing new to place.
+### Patch 7: Cleric, Druid, Warlock
+- **Cleric** (`Litany`, new; `Clerics` asks it). Turn the Undead stays the start; practice raises the health of the dead it
+  unmakes (x `ClassTrees.practice`). **Devout** (3 ranks): +1 turning a rank. **Bless the Band** (3): today's blessing behind
+  the node, kept free by Clerics who had the class. **Sanctify** (5): sneak+J with the symbol spends a turning: a 5-block
+  circle for a minute (an `Fx.pool`); the undead in it are pushed out and their pathing stopped, and players, your pets,
+  villagers and your followers in it heal 1 every 2 s. **Last Rites** (8): J with the symbol, looking at a Kitchen body within
+  4, tags it (`jaymoskingdoms_rited`); `KitchenCompat.fallenNear` skips tagged bodies, so neither the Unburied's rising nor its
+  egg's gathering takes them. You get `XP_RITE` and +2 good name with the settlement it lies in. Village priests (any grown
+  cleric villager, so MCA's too) do the same: every 5 s, near each player, an unread body inside a settlement draws the
+  nearest priest within 32, who walks over and reads the rites. **Healer / War Priest** (fork, 10): mending and sanctuary heal
+  x1.3 and mending reaches x1.5 / melee blows +2 (+4 on the dead), 20% to stun the dead 2 s. **Patron's Gift** (15): added to
+  each blessing by patron (Hearthkeeper heal 6, Anvil-Father mends 10% of held gear, Deep Mother water breathing, Green
+  Huntsman speed, Crowned Sun strength, Ash Whisperer fire resistance, Truth lifts harmful effects), and the Lantern Warden's
+  Hush: with the symbol in hand, undead that target you drop you unless you've struck one in the last 10 s. **Destroy Undead**
+  (20): the dead unmade are x3 as strong, and each boss in the cone takes 20% of its max health once a raising.
+- **Druid** (`WildShapes`, new; `Druids` asks it). One shape to start: the shapes you may wear are the studied ones in the
+  order learned (a new `druid_learned` list; ones studied before it are put after it, in the old order), one plus a rank of
+  **More Shapes** (3 ranks). Practice lengthens every shape. **Long Shape** (3): x2. **Fox and Stag** (5): the vanilla fox
+  and Naturalist's deer (`naturalist:deer`, the pack's) can be studied and worn: the fox is half size (`SCALE`), 40% as loud
+  (`Awareness.noise`), Speed I, Haste II, night vision; the stag Speed III under open sky (Speed I under cover), Jump I, and
+  at a sprint it rams what's ahead (5 harm and a throw, once a second per foe). **Moon / Land** (fork, 10): +25% blows in a
+  shape and 6 health as one is taken / five more rites known by heart (spike growth, fog, water walk, spider climb, the
+  harrying gale) and spell cooldowns x0.7 out of shape. **Pack Leader** (12): in a shape, untamed beasts of its kind within 16
+  stop hunting you, follow, and attack what you last struck or what last struck you; your stand-in is drawn +35% (its
+  `SCALE`). **Barkskin** (15): sneak+J in a shape spends a shape use: 3 minutes of +6 armour, +2 toughness, -15% speed (it
+  outlasts the shape). **Elder Shape** (20): the treant (a Creaking stand-in at 1.8x: Strength III, Resistance II, Slowness II,
+  +20 health) and the great wind elemental (a Breeze at 2.2x: Speed II, Jump IV, slow falling, Strength II, +10 health) join
+  the shape list; one of them a day (a long-rest pool), for half a shape's time.
+- **Warlock** (`PactArts`, new; `Warlocks` asks it). One pact slot to start (`SLOTS` 1); practice makes pact casts harder
+  (`ClassCasters.power`). **Pact Slots** (3 ranks): +1 a rank; Warlocks who had the class keep one rank free (so the two
+  they had). **Patient Creditor** (3): +2 days. **Eldritch Bolt** (3): J with the seal and nothing owed: a beam to what you
+  look at within 24, 3 + 0.15 a Warlock level, once a second, no slot. **In Kind** (5): J while owing with 4 of the patron's
+  offerings (its `offerings` tag) in the main hand settles the debt. **Renege** (8): sneak+J while owing moves the ask to the
+  next kind, once a debt (a `reneged` flag on the saved pact). **Blade / Chain / Tome** (a fork of three, 10): seal in the off
+  hand, the main-hand weapon's blows +30% / while the seal is in hand a familiar bat (no AI, kept above you, gone when the seal
+  isn't) shows hostiles within 16 (Glowing) and stings what you fight (2 magic every 2 s) / any scroll's spell may be learned.
+  **Arcanum** (20): once a day (a long-rest pool), a cast made sneaking costs no slot, runs up no debt and is x2.
+- Class descriptions and the class screen's lines say what moved: the blessing at 3, one shape, one pact slot.
+- My calls: the keys. Cleric: J blesses, or (looking at a body) reads the rites; sneak+J sanctifies (it did nothing before).
+  Druid: sneak+J in a shape is Barkskin (it used to shed the shape like J). Warlock: J with nothing owed is the bolt (sneak+J
+  still tells how things stand); J while owing with offerings in hand pays in kind; sneak+J while owing reneges. The
+  patrons' gifts ride on the blessing; the Hush is the Lantern Warden's own. "The village thinks better of you" is the
+  settlement's good name (`Reputation.change`). Levels the rows didn't give: Sanctify 5, Last Rites 8, Fox and Stag 5, Pack
+  Leader 12, Barkskin 15, In Kind 5, Renege 8, the bolt 3, the tops 20.
+- Gaps: no treant model exists, so the treant is a Creaking scaled up, and the great elemental a Breeze. The stag needs
+  Naturalist's deer: without it the stag can't be worn. Pack Leader doesn't change the player's own hitbox (it's a man's,
+  already larger than these beasts); "sized" is the drawn stand-in. Pact of the Blade has no summoned weapon: the weapon you
+  hold with the seal in the off hand is the pact weapon. The familiar is a plain bat with no AI of its own. Scout glow and
+  Glowing are the vanilla effect, seen by everyone. Last Rites needs Kitchen (no bodies without it). Existing Druids keep only
+  their first studied shape until they buy More Shapes.
+- Lore: the treant is the Druid's elder spirit of the wood and the wind elemental of the open sky (both nature's own, no new
+  people); the familiar is the patron's small servant. Nothing else new to place.

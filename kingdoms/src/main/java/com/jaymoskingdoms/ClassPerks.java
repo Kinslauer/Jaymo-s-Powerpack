@@ -237,7 +237,7 @@ public final class ClassPerks {
 			}
 			case DRUID -> {
 				lines.add(line("rites", "+"));
-				lines.add(line("shapes", "4"));
+				lines.add(line("shapes", "1"));
 				lines.add(line("shape_time", Druids.SHAPE_TICKS / 1200 + "m"));
 			}
 			case MONK -> {

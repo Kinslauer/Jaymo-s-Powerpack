@@ -19,5 +19,8 @@ public final class TreeLayout {
 		RiderTree.build();
 		MonkTree.build();
 		PaladinTree.build();
+		ClericTree.build();
+		DruidTree.build();
+		WarlockTree.build();
 	}
 }

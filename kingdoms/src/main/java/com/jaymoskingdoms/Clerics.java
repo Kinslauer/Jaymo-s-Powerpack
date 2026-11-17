@@ -91,12 +91,14 @@ public final class Clerics {
 		int base = Classes.is(player, PlayerClass.PALADIN) ? PALADIN_CHANNEL : CHANNEL_BASE;
 		// the second class has a share of the turnings, and a Warden's patron path one more
 		PlayerClass held = Classes.is(player, PlayerClass.CLERIC) ? PlayerClass.CLERIC : PlayerClass.PALADIN;
-		return Classes.scaled(player, held, base + tier) + Paths.extraChannels(player);
+		return Classes.scaled(player, held, base + tier) + Paths.extraChannels(player) + Litany.devout(player);
 	}
 
 	/** The health the dead may have for {@code player}'s symbol to unmake them. */
 	static float crumbleHealth(Player player) {
-		return CRUMBLE_BASE + CRUMBLE_PER_TIER * Patrons.state(player).tier();
+		// practice: a Cleric's symbol unmakes stronger dead as they rise in the class; (class trees) Destroy Undead far stronger
+		float practice = Classes.is(player, PlayerClass.CLERIC) ? ClassTrees.practice(player, PlayerClass.CLERIC) : 1.0F;
+		return (CRUMBLE_BASE + CRUMBLE_PER_TIER * Patrons.state(player).tier()) * practice * Litany.destroy(player);
 	}
 
 	private static boolean holds(ServerPlayer player) {
@@ -117,7 +119,7 @@ public final class Clerics {
 				return;
 			}
 			RAISING.put(player.getUUID(), true);
-			colour(player);
+			Litany.raised(player);
 			Fx.ring(level, player.position().add(0.0, 0.1, 0.0), (float) TURN_RANGE * 0.6F, colour(player));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		}
@@ -158,6 +160,10 @@ public final class Clerics {
 				continue;
 			}
 			Fx.beam(level, eye.add(0.0, -0.3, 0.0), mob.getBoundingBox().getCenter(), 0.05F, colour(player), 6);
+			if (Legendary.boss(mob)) {
+				// (class trees) Destroy Undead: the great dead take a heavy blow
+				Litany.great(player, level, mob);
+			}
 			if (!Legendary.boss(mob) && mob.getMaxHealth() <= crumbleHealth(player)) {
 				// the weak dead are unmade
 				mob.hurtServer(level, level.damageSources().indirectMagic(player, player), mob.getMaxHealth() * 2.0F);
@@ -205,11 +211,19 @@ public final class Clerics {
 
 	/** The class key: with the symbol in hand, bless the band (spends a turning). */
 	static void key(ServerPlayer player, boolean sneak) {
-		if (!(player.level() instanceof ServerLevel level) || sneak) {
+		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
 		if (!holds(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cleric.symbol"));
+			return;
+		}
+		// (class trees) sneak: Sanctify; looking at a body: Last Rites; the blessing is a tree perk now
+		if (sneak) {
+			Litany.sanctify(player);
+			return;
+		}
+		if (Litany.rites(player) || !ClassTrees.check(player, Litany.BLESS)) {
 			return;
 		}
 		if (!Rests.spend(player, Rests.CHANNEL, 1, channels(player))) {
@@ -235,6 +249,8 @@ public final class Clerics {
 			who.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, BLESS_TICKS, tier >= 3 ? 1 : 0, true, true, true), player);
 			BLESSED.put(who.getUUID(), until);
 			Fear.calm(who);
+			// (class trees) the patron's gift
+			Litany.blessed(player, who, BLESS_TICKS);
 			level.sendParticles(ParticleTypes.END_ROD, who.getX(), who.getY(1.0), who.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 			Fx.ring(level, who.position().add(0.0, 0.1, 0.0), 1.4F, colour(player));
 		}

@@ -97,7 +97,8 @@ public final class ClassCasters {
 	/** Whether {@code player}'s calling lets them learn {@code spell} from a scroll (anyone else's scroll is read once). */
 	public static boolean mayLearn(Player player, String spell) {
 		List<PlayerClass> held = Classes.both(player);
-		if (held.isEmpty()) {
+		// (class trees) Pact of the Tome: any scroll's spell
+		if (held.isEmpty() || PactArts.tome(player)) {
 			return true;
 		}
 		// (a pact with the Reaper opens all of death magic)
@@ -119,7 +120,8 @@ public final class ClassCasters {
 				return true;
 			}
 		}
-		return false;
+		// (class trees) a Druid of the Land's rites
+		return WildShapes.born(player, spell);
 	}
 
 	/**
@@ -133,7 +135,8 @@ public final class ClassCasters {
 				case MAGE -> Spellcraft.MAGE_POWER;
 				case CLERIC -> CLERIC_POWER;
 				case DRUID -> DRUID_POWER;
-				case WARLOCK -> Warlocks.POWER;
+				// practice: a Warlock's pact casts grow harder with the class level
+				case WARLOCK -> Warlocks.POWER * ClassTrees.practice(player, PlayerClass.WARLOCK);
 				default -> attuned;
 			};
 			best = Math.max(best, attuned + (v - attuned) * Classes.share(player, cls));
@@ -152,6 +155,7 @@ public final class ClassCasters {
 			};
 			best = Math.min(best, attuned + (v - attuned) * Classes.share(player, cls));
 		}
-		return best;
+		// (class trees) a Druid of the Land casts quicker out of shape
+		return best * WildShapes.cooldown(player);
 	}
 }

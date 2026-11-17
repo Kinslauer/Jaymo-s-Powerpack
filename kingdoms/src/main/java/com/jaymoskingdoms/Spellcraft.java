@@ -280,7 +280,9 @@ public final class Spellcraft {
 		// a Warlock's magic is bought from a patron, in pact slots, not mana ({@link Warlocks})
 		boolean pact = ClassCasters.pact(player, spell);
 		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
-		if (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
+		// (class trees) the Warlock's Arcanum: once a day, sneaking, a great cast with no slot and no debt
+		boolean arcanum = pact && PactArts.arcanum(player);
+		if (!arcanum && (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative())) {
 			if (blood && !pact) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			}
@@ -292,12 +294,15 @@ public final class Spellcraft {
 		}
 		// (class trees) a Warder's wards last longer
 		float wardPower = mage ? ClassForks.wardPower(player, spell) : 1.0F;
-		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * wardPower * (blood && !pact ? Hemomancy.power(player) : 1.0F))) {
+		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * wardPower * (blood && !pact ? Hemomancy.power(player) : 1.0F)
+			* (arcanum ? PactArts.ARCANUM_POWER : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
 		SpellParts.spend(player, spell);
-		if (pact) {
+		if (arcanum) {
+			PactArts.arcanumCast(player, level);
+		} else if (pact) {
 			Warlocks.pay(player, spell);
 		} else if (blood) {
 			Hemomancy.pay(player, cost);

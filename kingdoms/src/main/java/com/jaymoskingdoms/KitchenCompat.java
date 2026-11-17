@@ -432,7 +432,8 @@ public final class KitchenCompat {
 			return java.util.List.of();
 		}
 		return level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), e -> {
-			if (!isFreeCorpse(e) || isPlayerCorpse(e)) {
+			// (class trees) a body the rites were read over never rises
+			if (!isFreeCorpse(e) || isPlayerCorpse(e) || e.entityTags().contains(Litany.RITES_TAG)) {
 				return false;
 			}
 			net.minecraft.world.entity.EntityType<?> was = sourceType(e);
