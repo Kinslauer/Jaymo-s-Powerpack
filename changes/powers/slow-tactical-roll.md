@@ -1,0 +1,5 @@
+# Slower, grounded dodge roll weighed by armour
+- **Dodge roll** (Andy: "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your gear has. To an upper limit."): no more hop. The roll drops low, turns over the right shoulder on a slant and carries you along the ground at a steady pace for its whole turn (0.9 s bare, about 3.6 blocks), easing in and out; the walking keys don't add to it, and a roll off an edge stops pushing and falls.
+- **Gear weight**: armour points plus toughness (full netherite = 32, the cap) stretch the roll up to 1.6x as long and as slow (about 1.45 s in full netherite); nothing past the cap slows it more. Knobs: `Dodge.ROLL_TICKS`, `ROLL_PACE`, `HEAVIEST`, `HEAVY_SLOW`; look: `DodgeRollPose.DROP`, `SHOULDER`, `TURN_FROM/TO`.
+- Roll length is synced with the roll, so others see your heavy roll at its own pace. A new roll can't start until the last one ends. The evade window is unchanged (first 5 ticks).
+- `Dodge`, `DodgeClient`, `DodgeRollPose`, `StanceInputMixin`. Compile-checked; not played.

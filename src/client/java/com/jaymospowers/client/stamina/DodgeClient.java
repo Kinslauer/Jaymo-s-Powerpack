@@ -35,6 +35,9 @@ public final class DodgeClient {
 	/** (0.15.74) Client game time our own last roll started and which way, drawn at once ({@link DodgeRollPose}). */
 	static long rollStart = Long.MIN_VALUE;
 	static float rollX, rollZ;
+	/** How long our own last roll takes (ticks) and its pace along the ground (blocks/tick), both slower under heavy armour. */
+	static int rollTicks = Dodge.ROLL_TICKS;
+	static double rollPace;
 	/** Whether our own last roll was the flip in the air ({@link Dodge#canFlip}). */
 	static boolean rollFlip;
 	/** Leaving the ground faster than this upward (blocks/tick) is a jump, not a step off an edge. */
@@ -87,6 +90,7 @@ public final class DodgeClient {
 			jumped = true;
 		}
 		wasOnGround = ground;
+		carry(player);
 		boolean wanted = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
@@ -120,6 +124,35 @@ public final class DodgeClient {
 			}
 		}
 	}
+
+	/**
+	 * The roll carries us along the ground for its whole turn rather than a hop's one push: easing in as we go down, the
+	 * full pace through the middle, and easing out as we come up. A roll off an edge stops pushing and falls.
+	 */
+	private static void carry(LocalPlayer player) {
+		if (!rolling(player, 1) || !player.onGround()) {
+			return;
+		}
+		// (set at the end of a tick, so this is the push for the next one)
+		float t = (player.level().getGameTime() + 1 - rollStart) / (float)rollTicks;
+		double pace = rollPace * Math.min(1.0F, Math.min(t / CARRY_IN, (1.0F - t) / CARRY_OUT));
+		player.setDeltaMovement(rollX * pace, player.getDeltaMovement().y, rollZ * pace);
+	}
+
+	/** Our own roll on the ground is under way {@code ahead} ticks from now. */
+	private static boolean rolling(LocalPlayer player, int ahead) {
+		long age = player.level().getGameTime() + ahead - rollStart;
+		return !rollFlip && rollStart != Long.MIN_VALUE && age >= 0 && age < rollTicks;
+	}
+
+	/** While our own roll carries us, the walking keys add nothing to it ({@code StanceInputMixin}). */
+	public static boolean carrying() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		return player != null && rolling(player, 0);
+	}
+
+	/** Of the roll, the share spent easing up to its pace at the start, and easing off at the end. */
+	static final float CARRY_IN = 0.15F, CARRY_OUT = 0.25F;
 
 	/**
 	 * (0.21.22) Andy: "the input should be jump plus alt key or roll bind in mid air". Dodge pressed in the air with a foe's
@@ -213,10 +246,13 @@ public final class DodgeClient {
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
 		Vec3 dir = new Vec3(strafe * cos - forward * sin, 0.0, forward * cos + strafe * sin).normalize();
-		Vec3 motion = player.getDeltaMovement();
-		player.setDeltaMovement(dir.x * Dodge.SPEED + motion.x * 0.2, Dodge.UP, dir.z * Dodge.SPEED + motion.z * 0.2);
+		// no hop: the roll stays on the ground and carries us along it (#carry)
+		rollTicks = Dodge.rollTicks(player);
+		rollPace = Dodge.rollPace(player);
+		player.setDeltaMovement(dir.x * rollPace * CARRY_IN, player.getDeltaMovement().y, dir.z * rollPace * CARRY_IN);
 		player.setSprinting(false);
-		cooldown = Dodge.COOLDOWN;
+		// (no new roll until this one's up)
+		cooldown = Math.max(Dodge.COOLDOWN, rollTicks);
 		sinceDodge = 0;
 		rollStart = player.level().getGameTime();
 		rollX = (float)dir.x;
@@ -225,6 +261,7 @@ public final class DodgeClient {
 		// the body is the low one for the roll (Dodge#rollingLow), at once
 		Dodge.localRollId = player.getId();
 		Dodge.localRollStart = player.level().getGameTime();
+		Dodge.localRollTicks = rollTicks;
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z));
 		}

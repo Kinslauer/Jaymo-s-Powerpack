@@ -37,5 +37,9 @@ abstract class StanceInputMixin extends ClientInput {
 			this.keyPresses = new Input(false, false, false, false, k.jump(), k.shift(), false);
 			this.moveVector = Vec2.ZERO;
 		}
+		// a dodge's roll carries you at its own pace (DodgeClient#carry): the walking keys don't add to it
+		if (com.jaymospowers.client.stamina.DodgeClient.carrying()) {
+			this.moveVector = Vec2.ZERO;
+		}
 	}
 }
