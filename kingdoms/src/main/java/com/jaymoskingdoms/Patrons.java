@@ -655,6 +655,10 @@ public final class Patrons {
 		// (gb-faith) the patron they grew up praying to, from the story's faith page: sworn to it from the start (more
 		// favour for a devout upbringing), which they may later keep or leave (Turning)
 		Patron raised = LifeStory.faithOf(sp);
+		// (Andy, 2026-11-17) a bound blood is its patron's, whatever its story says (Faiths.bound)
+		if (Faiths.bound(kind) != null) {
+			raised = Faiths.bound(kind);
+		}
 		if (raised != null) {
 			mine = raised;
 			if (!state(sp).sworn()) {

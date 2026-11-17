@@ -263,6 +263,13 @@ final class ClassScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Minecraft minecraft = Minecraft.getInstance();
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their story raised them to; a second class picks freely
+		if (this.picked != null && this.teaching == null && minecraft.player != null) {
+			String raised = Classes.clericPatron(minecraft.player, this.picked);
+			if (raised != null) {
+				this.option = this.picked.options.indexOf(raised);
+			}
+		}
 		if (done(minecraft)) {
 			onClose();
 			return;

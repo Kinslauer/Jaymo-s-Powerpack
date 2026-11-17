@@ -387,7 +387,19 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
 	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a);
+		com.jaymoskingdoms.Patron bound = com.jaymoskingdoms.Faiths.bound(heritage());
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a)
+			&& (a.patron() == null || bound == null || a.patron() == bound);
+	}
+
+	/**
+	 * (Andy, 2026-11-17) The chip a Cleric's option is held to: the patron the story's faith page names; -1 when it's theirs to
+	 * pick (another class, or no faith). The server holds them to it too ({@link LifeStory}).
+	 */
+	private static int clericChip() {
+		Classes.PlayerClass cls = youthClass();
+		Answer faith = picked(Question.FAITH);
+		return cls != Classes.PlayerClass.CLERIC || faith == null || faith.patron() == null ? -1 : cls.options.indexOf(faith.patron().key);
 	}
 
 	/** (0.7.501) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
@@ -529,6 +541,16 @@ final class LifeStoryScreen extends Screen {
 			// (gb-faith) every patron is open to every blood (folk of any blood hold any faith now and then), the one most of
 			// your blood pray to listed first
 			com.jaymoskingdoms.Patron usual = kind == null ? null : com.jaymoskingdoms.Faiths.startOf(kind);
+			// (Andy, 2026-11-17) but the Tideborn and the Dawnborn are bound to theirs: it's the only one listed
+			com.jaymoskingdoms.Patron bound = com.jaymoskingdoms.Faiths.bound(heritage());
+			if (bound != null) {
+				for (int i = 0; i < q.answers().size(); i++) {
+					if (q.answers().get(i).patron() == bound) {
+						out.add(i);
+					}
+				}
+				return out;
+			}
 			for (int i = 0; i < q.answers().size(); i++) {
 				if (q.answers().get(i).patron() == usual) {
 					out.add(i);
@@ -1136,6 +1158,10 @@ final class LifeStoryScreen extends Screen {
 			onClose();
 			return;
 		}
+		// a Cleric's patron is the faith page's, however the option was last moved
+		if (clericChip() >= 0) {
+			draft.option = clericChip();
+		}
 		Step s = step();
 		if (this.cards != (s.summary() && draft.explicit)) {
 			rebuildWidgets();
@@ -1677,7 +1703,7 @@ final class LifeStoryScreen extends Screen {
 					graphics.fill(chip[0], cy + 12, chip[0] + chip[2], cy + 14, ACCENT);
 				}
 				graphics.centeredText(this.font, Component.translatable("class.jaymoskingdoms.option." + cls.options.get(c)), chip[0] + chip[2] / 2, cy + 3,
-					chosen ? ACCENT : Ui.TEXT);
+					chosen ? ACCENT : clericChip() >= 0 ? Ui.DIM : Ui.TEXT);
 				y = Math.max(y, cy + 18);
 			}
 		} else {

@@ -429,13 +429,25 @@ public final class Classes {
 			return;
 		}
 		if (choose.second()) {
+			// (a Cleric taken as a second class picks its patron freely: Andy, "or they multi class into it")
 			SecondClass.chosen(player, cls, option);
 			return;
+		}
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one
+		String raised = clericPatron(player, cls);
+		if (raised != null) {
+			option = raised;
 		}
 		if (classOf(player) != null) {
 			clear(player);
 		}
 		set(player, cls, option);
+	}
+
+	/** The patron a first-class Cleric must serve: the one their life story says they grew up praying to; null for any other class or no faith. */
+	public static @Nullable String clericPatron(Player player, PlayerClass cls) {
+		String faith = player.getAttached(LifeStory.FAITH);
+		return cls == PlayerClass.CLERIC && faith != null && cls.options.contains(faith) ? faith : null;
 	}
 
 	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */

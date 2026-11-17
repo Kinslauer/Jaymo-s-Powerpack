@@ -1221,6 +1221,11 @@ public final class LifeStory {
 			heritage = road.makes();
 			Heritage.unlock(player, heritage);
 		}
+		// (Andy, 2026-11-17) a bound blood's faith is its patron's, whatever page came back (Faiths.bound)
+		Patron bound = Faiths.bound(heritage);
+		if (bound != null) {
+			faith = Question.FAITH.answers.stream().filter(a -> a.patron() == bound).findFirst().orElse(faith);
+		}
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
 		Faction roadRealm = road != null && road.realm ? realm(server, live.roadRealm()) : null;
 		if (raised.realm && nobleRealm == null || road != null && road.realm && roadRealm == null) {
@@ -1231,6 +1236,10 @@ public final class LifeStory {
 		String option = cls != null && live.option() >= 0 && live.option() < cls.options.size() ? cls.options.get(live.option()) : "";
 		if (cls == null || !cls.options.isEmpty() && option.isEmpty()) {
 			return;
+		}
+		// (Andy, 2026-11-17) a Cleric serves the patron they grew up praying to; only one with no faith in their story picks
+		if (cls == Classes.PlayerClass.CLERIC && faith != null && faith.patron() != null) {
+			option = faith.patron().key;
 		}
 
 		if (live.gender() == 0 || live.gender() == 1) {
