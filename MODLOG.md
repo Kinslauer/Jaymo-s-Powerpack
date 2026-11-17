@@ -5606,3 +5606,26 @@ Fixed the server failing to start after the conjoined twin mutation: the twin ri
 ## 0.24.53 (2026-11-17): More time for finisher key prompts
 
 When a finisher asks for a key, it now holds still for up to a second and a half until you press it, then goes on at once, so the prompt is no longer gone in half a second. The bar under the key runs down over the whole time you have.
+
+## 0.24.54 (2026-11-17): The Maw salvager starts with a helm, a pack, a pick and a lantern
+
+- **Salvager at the Maw**: you now wake wearing a Sealed Helm (eight minutes of air, refilled at the pod, so the airless Maw doesn't choke you), with a backpack on your back, an iron pickaxe, a lantern and the deck plates. If the helm or pack slot is already taken, it goes into your inventory instead. (`ZFighterStarts.maw`)
+- Built; not played.
+
+## 0.24.55 (2026-11-17): others fit prosthetics, Creative revives from Limbo, thrown limbs hit
+
+- **Fitting someone else's limb** (Andy: "there needs to be a way that other players or villagers can help you in this condition"): use a wooden, iron or Rig arm or leg on another player who is missing that limb and it is strapped on them, downed or standing (`Prosthetics.fitOther`, a `UseEntityCallback`; Downed's revive hold leaves the click alone). They're told who fitted it.
+- **Got up with your limbs on**: a player who revives you (the kneeling hold) first straps on every prosthetic you carry, or that lies within 6 blocks of you (`Prosthetics.fitFrom`, also called by Kingdoms' tending villagers and field medics).
+- **Creative from Limbo** (Andy: "going into creative mode from limbo should revive your character"): switching to Creative while waiting in Limbo brings the same character back, in Creative, where the body lies: nothing wiped, no gift lost, health, food and wounds made whole, Kitchen's corpse of theirs gone and its hotbar handed back (`Limbo.revive`). With no body left, they get up where the ghost is.
+- **Thrown limbs hit** (Andy: "thrown limbs should deal damage"): a severed head or limb thrown from the hand strikes the first living thing in its path once (head 3, arm 2.5, leg 3.5, times its speed, at most double), with a thud and a spatter, then drops off it (`SeveredPart.strike`). Never the thrower; nothing once it has touched the ground.
+- Built; not played.
+
+## 0.24.56 (2026-11-17): Chrono abilities while downed, Overclock healing, Overclock flurry and weapon swings
+
+- **Every Chrono ability works while downed** (awake, unlocked): Rewind, Stasis Field, Overclock and Time Bloom. A Stasis, Overclock or Bloom running as you fall now runs on (only Time Flow and a wall phase end). Sneak is the rise down there, so the sneak forms (Fast Forward, Calculation's dodge, the decoys) wait till you're up. Overclock's wall run doesn't climb with a downed body.
+- **Time Bloom downed**: every half second your most hurt part mends 1 (a bed's mend), the bleed-out clock holds (adrenaline kept if you still have it), a passed-out Chrono comes round, a rise started under the Bloom takes half as long, and you rise with what the mended parts hold (`Downed.timeMend`).
+- **Rewind downed is "if soon enough"**: the history held at the fall is reached only within 3 s of going down (the sooner, the further back before the fall, so the more health comes back; still at least 30%). Later, R is cheating death's, as when Rewind is on cooldown or an execution is coming (`ChronoCheatDeath.downedOpen`); Rewind no longer races cheat death for the same press.
+- **Overclock heals**: Regeneration II beside the Speed V and Haste II (Haste II was already there; the key text now says so). Downed, where nothing heals, Overclock mends your most hurt part 1 every 25 ticks instead.
+- **Overclock flurry** (`ChronoFlurry`, `ChronoFlurryClient`): hold attack for a quarter second, bare-fisted or in boxing gear and not aimed at a block (mining), while overclocked: ten alternating jabs (one every 2 ticks, each 8% harder) into the nearest creature in front, then an uppercut that throws it, a short breath, and again while held. Jab 0.5 + 0.15 per ability mastered. Not downed or in Time Flow.
+- **Overclock weapon swings** (Andy: "Melee weapons should also swing fast but only deal damage once every 4 ticks"): the same held attack with a melee weapon (anything with attack damage on it, not boxing gear) swings it every 2 ticks, and every 4 ticks a swing lands as a fully charged attack of the weapon (`player.attack`: damage, enchantments, sweep, wear) on the nearest one in front (`ChronoAttackStrengthAccessor`). While it runs, no other melee hit of yours lands.
+- Built; not played.

@@ -91,6 +91,17 @@ public class SeveredPart extends Entity {
 	private @org.jspecify.annotations.Nullable EntityType<?> was;
 	private boolean wasLooked;
 
+	/**
+	 * Andy: "thrown limbs should deal damage". Thrown from the hand ({@link Carry}), a part strikes the first living thing in its
+	 * path for this much (a head, an arm, a leg), times how fast it flies against {@link #HIT_SPEED} (at most
+	 * {@link #HIT_MOST} times), once, then drops off it. Slower than {@link #HIT_SLOWEST} (blocks a tick), or once it has
+	 * touched the ground, it hits nothing.
+	 */
+	static final float HEAD_HIT = 3.0F, ARM_HIT = 2.5F, LEG_HIT = 3.5F, HIT_MOST = 2.0F;
+	static final double HIT_SPEED = 1.0, HIT_SLOWEST = 0.35;
+	/** Who threw it, while it is still flying from the throw; never saved. */
+	private @org.jspecify.annotations.Nullable UUID thrower;
+
 	/** Bites until a limb, or a head, is eaten; the chance a bone is left of it, and how hard each bite tugs it. */
 	static final int BITES_LIMB = 3, BITES_HEAD = 4;
 	static final float BONE_LEFT = 0.5F;
@@ -294,6 +305,13 @@ public class SeveredPart extends Entity {
 		}
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, -GRAVITY, 0.0));
 		Vec3 before = this.getDeltaMovement();
+		if (this.thrower != null && this.level() instanceof ServerLevel level) {
+			if (this.onGround() || before.lengthSqr() < HIT_SLOWEST * HIT_SLOWEST) {
+				this.thrower = null;
+			} else if (strike(level, before)) {
+				before = this.getDeltaMovement();
+			}
+		}
 		this.move(MoverType.SELF, before);
 		if (this.verticalCollision && before.y < -0.15) {
 			// a thud and a little bounce
@@ -337,6 +355,43 @@ public class SeveredPart extends Entity {
 			}
 			this.spin += this.spinVel;
 		}
+	}
+
+	/** Thrown from {@code by}'s hand ({@link Carry}): it strikes what it flies into. */
+	void hurled(Player by) {
+		this.thrower = by.getUUID();
+	}
+
+	/** In flight from a throw: the first living thing in its path this tick is struck, and it drops off it. True if it hit. */
+	private boolean strike(ServerLevel level, Vec3 motion) {
+		UUID by = this.thrower;
+		LivingEntity hit = null;
+		double best = Double.MAX_VALUE;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().expandTowards(motion).inflate(0.1),
+			e -> e.isAlive() && !e.isSpectator() && e.isPickable() && !e.getUUID().equals(by) && e.getVehicle() != this)) {
+			double d = e.distanceToSqr(this);
+			if (d < best) {
+				best = d;
+				hit = e;
+			}
+		}
+		if (hit == null) {
+			return false;
+		}
+		this.thrower = null;
+		int part = this.part();
+		float base = part == Dismember.HEAD ? HEAD_HIT : (part & (Dismember.RIGHT_LEG | Dismember.LEFT_LEG)) != 0 ? LEG_HIT : ARM_HIT;
+		float damage = base * (float) Math.min(HIT_MOST, motion.length() / HIT_SPEED);
+		Entity owner = by == null ? null : level.getEntity(by);
+		hit.hurtServer(level, this.damageSources().thrown(this, owner == null ? this : owner), damage);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_KNOCKBACK,
+			net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 0.7F + this.random.nextFloat() * 0.2F);
+		if (this.blood != BladeBlood.NO_BLOOD) {
+			level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 4, 0.1, 0.1, 0.1, 0.0);
+		}
+		// it drops off what it struck, a little back the way it came
+		this.setDeltaMovement(motion.multiply(-0.2, 0.0, -0.2).add(0.0, 0.1, 0.0));
+		return true;
 	}
 
 	/** What it came off (the body's kind, from its look), or null if that can't be told. */

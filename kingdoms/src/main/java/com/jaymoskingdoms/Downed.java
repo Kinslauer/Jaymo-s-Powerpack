@@ -440,6 +440,9 @@ public final class Downed {
 		if (tending.ticks >= Temperaments.tendTicks(helper)) {
 			untend(body);
 			if (body instanceof ServerPlayer player) {
+				// (Andy, 2026-11-17: "a quadruple amputee, laying right in front of a prosthetic that i have no way to attach")
+				// the limbs they carry, or that lie by them, are strapped on before they're got up
+				PowersCompat.fitProsthetics(player, helper);
 				Temperaments.gotUp(level, helper, player);
 				// (0.7.254) they stay a moment, to be thanked ({@link SharedHistory})
 				SharedHistory.revived(helper, player);

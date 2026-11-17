@@ -314,7 +314,7 @@ public final class DownedStruggle {
 		}
 		long lain = now - rest.since;
 		if (lain > 0 && lain % REST_INTERVAL == 0) {
-			mendWorst(player);
+			mendWorst(player, REST_HEAL);
 		}
 		if (REST_SET_TICKS > 0 && lain == REST_SET_TICKS) {
 			BodyPlan plan = Wounds.plan(player);
@@ -330,11 +330,11 @@ public final class DownedStruggle {
 		return true;
 	}
 
-	/** The most hurt part that can still mend, by {@link #REST_HEAL}. */
-	private static void mendWorst(ServerPlayer player) {
+	/** The most hurt part that can still mend, by {@code amount}. True if one did. */
+	static boolean mendWorst(ServerPlayer player, float amount) {
 		BodyPlan plan = Wounds.plan(player);
 		if (plan == null) {
-			return;
+			return false;
 		}
 		@Nullable BodyPart worst = null;
 		float lowest = REST_CAP - 0.001F;
@@ -350,9 +350,7 @@ public final class DownedStruggle {
 				}
 			}
 		}
-		if (worst != null) {
-			Wounds.restPart(player, worst, REST_HEAL, REST_CAP);
-		}
+		return worst != null && Wounds.restPart(player, worst, amount, REST_CAP) > 0.0F;
 	}
 
 	/** They're up, gone or dead: nothing of theirs is kept. */

@@ -1,8 +1,10 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.backpack.Backpack;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.wounds.MedicineItems;
+import com.jaymospowers.power.zfighter.breath.Breath;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
@@ -44,6 +46,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -82,7 +85,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Escaped the Iron-Master's mines</b> ({@code rustfall}): you break out at a mine mouth under Rustfall's weight, the
  * Iron-Master's overseers ({@link #HUNTED}) hunt you for a day, and the way home is the pod on their pad.</li>
  * <li><b>Salvager at the Maw</b> ({@code maw}): the pull has taken your crew; you wake on the Maw's pad by a working pod, with
- * deck plates to reach the wrecks.</li>
+ * deck plates to reach the wrecks, a sealed helm on (air), a backpack on your back, an iron pickaxe and a lantern.</li>
  * <li><b>Raised by a demon master</b> ({@code demon}): you leave a demon village's hall in the Nether's demon biomes, its army
  * leaving you be ({@link #WARD}) till you first leave the Nether, with an old portal close by.</li>
  * <li><b>Back from the afterlife</b> ({@code afterlife}): you wake among the dead in the Other World
@@ -209,6 +212,15 @@ public final class ZFighterStarts {
 
 	private static void give(ServerPlayer player, ItemStack stack) {
 		player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
+	}
+
+	/** Puts {@code stack} on in {@code slot} if that slot is free; into the pack if not. */
+	private static void wear(ServerPlayer player, ItemStack stack, EquipmentSlot slot) {
+		if (player.getItemBySlot(slot).isEmpty()) {
+			player.setItemSlot(slot, stack);
+		} else {
+			give(player, stack);
+		}
 	}
 
 	/** A compass that points at {@code at} in {@code level}, as a lodestone's does (no lodestone needed). */
@@ -588,8 +600,17 @@ public final class ZFighterStarts {
 			}
 		}
 		put(player, maw, deck.offset(0, 0, 2));
-		give(player, new ItemStack(Items.POLISHED_BLACKSTONE_BRICKS, DECK_PLATES));
+		// (Andy 2026-11-17) a salvager's kit: a sealed helm on (the Maw has no air: Breath), a pack on their back, a pick for
+		// the wrecks and the rock, a lantern, and the deck plates
+		wear(player, new ItemStack(Breath.SEALED_HELM), EquipmentSlot.HEAD);
+		if (Backpack.wearing(player)) {
+			give(player, new ItemStack(Backpack.ITEM));
+		} else {
+			Backpack.putOn(player, new ItemStack(Backpack.ITEM));
+		}
+		give(player, new ItemStack(Items.IRON_PICKAXE));
 		give(player, new ItemStack(Items.LANTERN));
+		give(player, new ItemStack(Items.POLISHED_BLACKSTONE_BRICKS, DECK_PLATES));
 		return true;
 	}
 
