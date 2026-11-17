@@ -4,17 +4,17 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:02). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · for any · open
 - [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · 🍇 Bacchus · claimed
 
 
 ## In review
