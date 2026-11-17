@@ -450,3 +450,55 @@ Andy ticked these on the Scaling Audit Picks page; the rest of that list is buil
   number. Built as `Workshop.GUN_SHARE`: a Marksman's shot from a gun (main or second class, gun in hand; not a
   crossbow) deals 2% more a Marksman level, so x1.5 at level 25, before Steady Aim, Called Shot and Precision. The
   grade scaling and the Dread musket's 9 to 18 are built on the scaling audit's own branch.
+
+### Andy's rulings (2026-11-17)
+Andy ticked all 40 rows of the Picks PR Rulings page with no notes and chose "Change all 40, Claude picks details".
+Every row below is changed from what the parts above say; where a row asked for a detail, the choice is marked
+**(my pick)** so it can be overruled. Built, not played.
+
+Class trees:
+- **`r-ct-over30` (my pick: cheaper perks, not more points)**: the Druid really held 42, not 39. Its four folded perks
+  (`dru_green`, `dru_bloom`, `dru_sizes`, `dru_ray`) cost 1 a rank now (12 points down to 6), so the Druid holds 36;
+  reaching 32 would mean cheapening the Druid's own older perks, which this did not touch. The Sun's Arts cost 2, so
+  the Cleric and the Paladin hold 32. Totals now: Thief 31, Warlord 30, Mage 42, Brute 30, Marksman 31, Rider 30,
+  Cleric 32, Druid 36, Monk 30, Paladin 32, Ranger 32, Warlock 30, Sorcerer 31, Tinkerer 32.
+- **`r-ct-sigil`**: every element's tap throws the sigil, blade or open hand. Sneak and tap was already taken (Ward
+  Sigil, Bolt Step), so the old open-hand workings (Storm Ring, Bulwark, Tide Pearl, Harrying Gale, still needing
+  Absorbing) are on sneak and HOLD (`Abilities.HOLD_TICKS` 10) and no longer need an empty hand. For Druids and
+  those four Sorcerers a sneak and tap now answers as the key comes up.
+- **`r-ct-smith`**: anyone can make guns, shot and barrels. A Gunsmith gets half again as many bullets or shot a craft
+  (`Workshop.SMITH_SHOT`, WeaponMod's), and a handgonne or arquebus built on a barrel a Gunsmith forged is not worn by a
+  quarter of its shots (`SMITH_SPARE`; the barrel is marked at the anvil and the mark goes on to the gun). Early guns
+  load iron nuggets, so they get no extra shot (it would make iron). A cheaper barrel or more durability would need a
+  new hook in Powers.
+- **`r-ct-bark`**: Barkskin is also on sneak and hold, in a shape or out. Sneak and tap is as it was.
+- **`r-ct-reneg`**: sneak and the key while owing opens a small menu (`client/RenegeScreen`), one button per other
+  kind of debt; the server checks the pick. A Reaper pact has one other kind, so one button.
+
+Extras:
+- **`r-xt-noise`**: no landing or climbing noise for anyone. Second Storey halves how far the Thief's footsteps carry
+  (`STOREY_STEPS` 0.5).
+- **`r-xt-scroll` (my pick)**: learning a scroll for good is instant for everyone again. A Scholar keeps the scroll one
+  time in four (`SCHOLAR_KEEPS`).
+- **`r-xt-stolen`**: no "Stolen" mark. With no mark, pocketed goods can't be told from any others, so the fence no
+  longer buys pocket loot at all (buying anything would sell junk for coin). Fence's Friend is a quarter more on what a
+  den's fence pays in his own trades (`FENCE_MORE`). The fence sells and buys prime Pmeh at one price, so a friend nets a
+  little there, 6 trades a day at most.
+- **`r-xt-wild` (my pick)**: a wild Sorcerer's Wellspring and Hide answer only to the element their last working came
+  out as (none until one has been cast; forgotten on a restart).
+- **`r-xt-blood` (my pick)**: the Wellspring also fills while the Sorcerer is bleeding or at half health or less
+  (`WELL_HURT`); the Hide also halves their own bleeding (`HIDE_BLEED`, through a new Powers hook `Bleeding.harm`).
+- **`r-xt-shadow`**: armour counts against Shadow Blade: the foe's most health plus its armour past the first two
+  points (`BLADE_ARMOUR_FREE`, so a plain zombie's hide doesn't count) must be no more than the Thief's own most health
+  (the limit was always the Thief's health, not 30 as the rulings page said).
+- **`r-xt-fletch`**: a chance, not always. Without Kitchen the arrow drops half the time (`FLETCH_BACK`). With Kitchen
+  an arrow already comes out whole 60% of the time, so a flat half would be worse than no perk: half of those that
+  would have snapped come out whole instead (80% for plain arrows).
+- **`r-xt-wary`**: a wary mark is saved with the villager (`RogueExtras.WARY`), so a restart keeps it.
+
+Scaling:
+- **`r-sc-xp`**: class XP and pillar XP are both paid in full again (the halving and its tick-end settling are gone).
+  This undoes the `class-xp` scaling pick above.
+- **`r-sc-gun` (my pick)**: a Marksman's gun shots deal 3% more a level (`GUN_SHARE`), x1.75 at level 25.
+- **`r-sc-assassin` (my pick)**: with a Thief's burst and Sneak Attack on one blow, the bigger is dealt plus a quarter
+  of what the smaller would have added (`ThiefSneak.BOTH_SHARE`). The once-a-second burst is spent on such a blow.
