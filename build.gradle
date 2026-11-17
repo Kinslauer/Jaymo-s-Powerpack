@@ -1105,6 +1105,49 @@ tasks.register("curseforgePack", Zip) {
 		from dwJar
 	}
 }
+// gradlew packwizList: every file of the testers' packwiz pack (docs/Tester-Pack.md), written to
+// build/packwiz-list.json for tools/packwiz_pack.py, which .github/workflows/tester-pack.yml runs after each release.
+// Each mod's side comes from its fabric.mod.json "environment", so client-only mods stay off a packwiz server install.
+tasks.register("packwizList") {
+	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters"
+	def out = layout.buildDirectory.file("packwiz-list.json")
+	outputs.file out
+	outputs.upToDateWhen { false }
+	doLast {
+		def side = { File jar ->
+			def env = modJson(jar)?.environment
+			env == "client" ? "client" : env == "server" ? "server" : "both"
+		}
+		def mods = []
+		// from Modrinth (packwiz_pack.py finds each by its file hash), or through CurseForge for the curse.maven ones
+		def fetched = { Configuration c, String forceSide ->
+			c.resolvedConfiguration.resolvedArtifacts.each { a ->
+				def id = a.moduleVersion.id
+				def entry = [file: a.file.absolutePath, from: "modrinth", side: forceSide ?: side(a.file)]
+				if (id.group == "curse.maven") {
+					entry += [from: "curseforge", cf: [(id.name =~ /(\d+)$/)[0][1] as long, id.version as long]]
+				}
+				mods << entry
+			}
+		}
+		fetched(configurations.packJars, null)
+		fetched(configurations.serverOnlyJars, "server")
+		// ours and our ports: uploaded to the repo's tester-pack release
+		([tasks.named("jar").get().archiveFile.get().asFile] + kitchenShipJar.files + mcaJar.files + kingdomsJar.files +
+			trmtJar.files + dwJar.files).each { mods << [file: it.absolutePath, from: "release", side: side(it)] }
+		// on CurseForge only: downloaded through CurseForge by its ids
+		localPackMods.each { mods << [file: file(it.file).absolutePath, from: "curseforge", cf: it.cf, side: side(file(it.file))] }
+		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+			name         : "Jaymo's Powers",
+			version      : project.version,
+			minecraft    : project.minecraft_version,
+			fabric       : project.loader_version,
+			mods         : mods,
+			resourcepacks: packResourcePacks.collect { [cf: it.cf, file: it.file] },
+			shaderpacks  : packShaderPacks.collect { [cf: it.cf, file: it.file] },
+		]))
+	}
+}
 // the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
 // running (Windows locks the jars, and swapping mods under live players would break their connection anyway)
 def serverDir = file("../Serverfiles")
