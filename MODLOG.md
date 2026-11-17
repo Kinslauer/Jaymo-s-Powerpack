@@ -5561,3 +5561,7 @@ Andy's Ragdolls and Cover picks (ln-npc). `FutureCover`: a gunner of the future 
   (fainting at a terrible sight) still comes on at once. `Fainting` (`WARN`, `WARN_DEPTHS`, `WARN_PULSE`, `WARN_GAP`),
   `FaintHud`.
 - Not built in the cloud session and not played.
+
+## 0.24.48 (2026-11-17): Climbing from the crouch stands you up
+
+Sneak + a scroll down to climb a block, ledge or fence from the crouch now leaves you standing on top, not still crouched, and Sneak and the stance wheel don't crouch you again for a second after the climb ends. A climb in on your belly under a low gap still ends prone.

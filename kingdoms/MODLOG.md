@@ -14537,3 +14537,7 @@ Andy's Ragdolls and Cover picks (ln-player, ln-cover, ln-npc). The idea is Leani
 - **Crash fix**: the smith's keeping (KeepingCells) no longer reads blocks in chunks that aren't loaded. A villager loaded at the edge of the loaded land is looked at once the land round him has loaded (tried each tick, up to 10 seconds, then again the next time he loads), and a kept smith's light, bed and hatch are only checked while the chunks round his cell are loaded. Before, the look made the missing chunk on the server thread, which held the Deck past its 60-second watchdog (crash 2026-11-17, 7:18 AM).
 - **Starts stay in made land**: where Chunky has pre-generated the world (its saved task in config/chunky/tasks: centre, radius, shape and how far it got), a setting out's random point is drawn inside that land, 128 blocks in from its edge, and a start only stands you on ground inside it. A village, wreck or wild ring found past the edge is passed over for the start's fallback, so nobody wakes in land the Deck has to make while they play. With no Chunky task for the world, starts work as before (Pregen).
 - Built by CI; not tested on the server yet.
+
+## 0.9.87 (2026-11-17): Sneak attacks are learned
+
+The sneak attack (a heavy blow on a monster that hasn't noticed you) now needs the Sneak Attack perk on the Stealth tree, and only lands when you strike from behind the monster. Without the perk, a hit from behind is a plain hit, so you no longer get stealth kills by accident. Ambusher, Cutthroat, the Quiet Word choke and Assassinate are unchanged.
