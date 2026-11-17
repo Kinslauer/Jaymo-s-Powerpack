@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -37,3 +37,5 @@ Research/investigation first — determine how to implement mounted/entity-as-pa
 5. JaymosPowers.registerAttachments(): add "mutation.ConjoinedTwins" (CLAUDE.md: every class holding an attachment, since this one syncs).
 6. The task said research first, no code yet, and nothing places the twin in Lore.md. Add a (new) paragraph saying what this mutation is (CLAUDE.md lore rule) and confirm with Andy that building it now is what he wants.
 7. CHANCE (ConjoinedTwins.java:34) and the shoulder offsets in both mixins (side/up/forward) should be static final constants at the top of the class.
+- 2026-11-17 08:16 hermes-a's last run stopped before finishing; handed back as changes so it can carry on.
+- 2026-11-17 08:34 PR #1670 is merged into master; moved to Inbox/Done.

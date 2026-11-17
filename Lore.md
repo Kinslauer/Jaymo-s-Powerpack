@@ -637,6 +637,8 @@ are: villagers who died a long time ago, in ages this world has already forgotte
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
 
+**Conjoined twin mutation (new).** Rarely, a villager or zombie spawns with a conjoined twin — a baby or toddler of the same kind riding on its shoulder, clinging as it did in life. Villagers carry baby villagers; zombies, husks and drowned carry baby zombies. MCA villagers likewise carry MCA toddlers. This is a purely cosmetic mutation, a remnant of the bond that held them together in the womb. It has no gameplay effect: the twin does not attack, cannot be targeted separately, and simply rides along. The sight unsettles some; others say it is a mercy, that the two never had to part.
+
 **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement Andy approved 2026-11-17). The old dead
 were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
 fields, a few carrying the hoe or shovel they were buried with. The older the world grows, the more of them wake, and

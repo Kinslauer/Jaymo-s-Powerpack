@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: conjoined-twin-mutation
 branch: claude/conjoined-twin-mutation
 with:
@@ -52,3 +52,4 @@ owns:
 - Multiplayer sync of passenger position
 - Performance with many conjoined twins
 - Baby entity AI while mounted (should be passive)
+- 2026-11-17 08:34 PR #1670 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: punch-barrage-effects
 branch: claude/punch-barrage-effects, claude/punch-barrage-effects-kingdoms
 with: 
@@ -34,3 +34,4 @@ owns:
 ## Done
 What a player will see: heavy punch impacts land with a shockwave ring, a dust wave along the ground and a short screen shake — on spirits' Spirit Punch, Gravity's Inversion (GravityGutPunch), the Z-Fighter rushes' finishers and Chrono Punch's last hit; Chrono Punch's flurry paints blurred fists in front of you and throws sparks where its punches land; Kingdoms' Spirit Barrage clashes throw sparks where the two flurries meet.
 What wasn't tested: not played in game; compile-checked and sh ./gradlew clean build passes on both branches.
+- 2026-11-17 08:34 PR #1665 is merged into master; moved to Agents/Done.
