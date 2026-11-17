@@ -113,7 +113,13 @@ public final class MuzzleFlash {
 		}
 		Vec3 aim = who.getLookAngle();
 		FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
-		flash(level, muzzle(who, aim, PLAYER_AHEAD, PLAYER_SIDE, PLAYER_DOWN), aim, known == null ? UNKNOWN : size(known.kind()));
+		Vec3 muzzle = muzzle(who, aim, PLAYER_AHEAD, PLAYER_SIDE, PLAYER_DOWN);
+		flash(level, muzzle, aim, known == null ? UNKNOWN : size(known.kind()));
+		// a tracer's streak runs from the muzzle to whatever the shot meets
+		Vec3 eye = who.getEyePosition();
+		Vec3 end = level.clip(new net.minecraft.world.level.ClipContext(eye, eye.add(aim.scale(known == null ? GunGear.TRACER_RANGE : known.kind().range())),
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, who)).getLocation();
+		GunGear.shot(level, gun, muzzle, end);
 	}
 
 	/** (0.20.100) An execution's shot from {@code gun} ({@code core/finisher/Finishers}), its muzzle at {@code at}: the burst, for everyone. */

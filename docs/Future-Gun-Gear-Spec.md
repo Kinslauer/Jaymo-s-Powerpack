@@ -2,7 +2,7 @@
 
 Source: vault inbox task `future-gun-gear` — Andy: "These would be good for our future aesthetic" (Fracture Point, TaCZ Tracers & Flash, TaCZ Additions, TaCZ Magazines, all by Raiiiden; rows fu-tracers, fu-mags, fu-additions and fu-armour on the Ragdolls and Cover pick-list). This spec covers the three named items: **Fracture Point** (fu-armour), **TaCZ Tracers & Flash** (fu-tracers), **TaCZ** (fu-mags — magazines). fu-additions is a pick-list for Andy, not built here (see Deferred below).
 
-Nothing is copied: no code or art from Fracture Point, TaCZ, TaCZ Additions or TaCZ Magazines. Our own models, pixels, recipes, numbers.
+Nothing is copied: no code or art from Fracture Point, TaCZ, TaCZ Additions or TaCZ Magazines. Our own models, pixels and numbers.
 
 ## What exists in the pack (verified against the code)
 
@@ -13,23 +13,15 @@ Nothing is copied: no code or art from Fracture Point, TaCZ, TaCZ Additions or T
 
 ## 1. Fracture Point — plate carrier (fu-armour)
 
-**Identity and slot.** `jaymospowers:plate_carrier`, display name "Fracture Point Carrier". Chest armour slot (worn in place of a chestplate). Part of the future gunner's kit: FutureGuns gunners can spawn wearing one, and it drops with their gun at the gun's normal drop roll. Also craftable (recipe below). Follow-ups not in this spec: a matching helmet, pouches, and any ammo storage in the carrier.
+**Identity and slot.** `jaymospowers:plate_carrier`, display name "Plate Carrier". Chest armour slot (worn in place of a chestplate). Part of the future gunner's kit: A FutureGuns gunner wears one 1 time in 4 (if its chest is bare) and drops it 1 time in 10. Follow-ups not in this spec: a matching helmet, pouches, and any ammo storage in the carrier.
 
-**Stats and behaviour.** Armour 5 (iron chestplate level), toughness 2, enchantability 10, durability 280. No movement penalty (proposed — Andy's call). When a gunner wearing one dies, the carrier drops beside its gun; a looted carrier is empty of magazines. The carrier is armour, not storage — magazine storage is a separate choice for Andy (see Open questions).
+**Stats and behaviour.** Armour 5 (iron chestplate level), toughness 2, enchantability 10, durability 288 (18 x 16; 280 can't be hit exactly). No movement penalty (proposed — Andy's call). When a gunner wearing one dies, the carrier drops beside its gun; a looted carrier is empty of magazines. The carrier is armour, not storage — magazine storage is a separate choice for Andy (see Open questions).
 
-**Crafting recipe** (crafting table, shaped):
+**How you get it.** Loot only (Andy, 2026-11-17): never craftable, in no creative tab.
 
-```
-LIL
-I I
- L
-```
+**Lang key.** `item.jaymospowers.plate_carrier` = "Plate Carrier" — lang/parts/gun_gear.json.
 
-L = `minecraft:leather`, I = `#c:nuggets/steel` → 1 plate carrier. (3 leather, 3 steel nuggets.)
-
-**Lang key.** `item.jaymospowers.plate_carrier` = "Fracture Point Carrier" — add to lang/parts/armory.json.
-
-**Lore.** "The dead of Los Perrito still wear the rigs they died in. Frostborn troopers and the Warrior-born alike go into the streets' three-sided war in plate carriers; when a gunner falls, its carrier falls open beside its gun. Put one on and you wear the future's last war."
+**Lore.** "Worn on Los Perrito's east bridge, and taken off the fallen with their guns." (The Frostborn fight in whole Rigs, so the carrier is the city's own kit, not theirs: Lore.md, *The last stand's kit*.)
 
 **Visual references.** Fracture Point by Raiiiden (CurseForge, Modrinth): military-style 3D armour — plate carriers, backpacks, animated armour plates (Geckolib). Reference only: our own model at vanilla proportions, muted rig colours (coyote brown, olive drab, steel grey), no copied art or textures.
 
@@ -37,19 +29,11 @@ L = `minecraft:leather`, I = `#c:nuggets/steel` → 1 plate carrier. (3 leather,
 
 **Identity and slot.** `jaymospowers:tracer_round`, display name "Tracer Round". Ammo: loaded into a modern gun's magazine and carried in the inventory; stack 16.
 
-**Stats and behaviour.** Same damage, range and magazine capacity as a normal round of the gun's calibre. When a modern gun fires, each round is a tracer with probability 1 in 4 (proposed — Andy's call; this was left open by the previous run). A tracer leaves a glowing stroke along the shot: typed FX (docs/MagicFx.md), one quad particle per block of flight, amber-orange (proposed #f5a623 — Andy's call), fading over 20 ticks — visible in daylight and clearly distinct from a normal shot. Plus a moment of dynamic light at the muzzle on firing: light level 12 within 6 blocks, fading over 8 ticks, drawn by typed FX light (no placed block, no world changes). Tracers and normal rounds share one magazine and fire in load order; a gunner's looted gun carries tracers at the same rate as the player's. Muzzle flash itself already exists (`MuzzleFlash#FLASH`) — tracers add the streak; flash colour follows the gun, not the round.
+**Stats and behaviour.** Same damage, range and magazine capacity as a normal round of the gun's calibre. When a modern gun fires, each round is a tracer with probability 1 in 4 (Andy, 2026-11-17). A tracer leaves a glowing stroke along the shot: typed FX (docs/MagicFx.md), one quad particle per block of flight, amber-orange (#f5a623), fading over 20 ticks — visible in daylight and clearly distinct from a normal shot. Plus a moment of dynamic light at the muzzle on firing: light level 12 within 6 blocks, fading over 8 ticks, drawn by typed FX light (no placed block, no world changes). Tracers and normal rounds share one magazine and fire in load order; a gunner's looted gun carries tracers at the same rate as the player's. Muzzle flash itself already exists (`MuzzleFlash#FLASH`) — tracers add the streak; flash colour follows the gun, not the round.
 
-**Crafting recipe** (crafting table, shaped):
+**How you get it.** Loot only (Andy, 2026-11-17): never craftable, in no creative tab.
 
-```
-SGS
-GIG
-SGS
-```
-
-S = `minecraft:gunpowder`, G = `minecraft:glowstone_dust`, I = `#c:nuggets/iron` → 4 tracer rounds. (4 gunpowder, 4 glowstone dust, 1 iron nugget.)
-
-**Lang key.** `item.jaymospowers.tracer_round` = "Tracer Round" — add to lang/parts/armory.json.
+**Lang key.** `item.jaymospowers.tracer_round` = "Tracer Round" — lang/parts/gun_gear.json.
 
 **Lore.** "Every fourth round burns bright, so the dead can follow their own fire through Los Perrito's endless night."
 
@@ -59,21 +43,11 @@ S = `minecraft:gunpowder`, G = `minecraft:glowstone_dust`, I = `#c:nuggets/iron`
 
 **Identity and slot.** `jaymospowers:magazine`, display name "Magazine". Held item; loaded into a modern gun's magazine (custom data holds the ammo id and round count). One magazine item serves every gun family; the family sets capacity (proposed — Andy's call): handgun 17, submachine gun 30, rifle 30, shotgun 8, machine gun 60.
 
-**Stats and behaviour.** A modern gun with no magazine fires nothing. Reload is a swap: right-click a modern gun with a matching magazine → it loads; the spent magazine returns to the inventory empty (custom data cleared). Loaded magazines stack to 1; empty magazines stack to 6 (mirrors TaCZ Magazines: "mags stack up to 6 when they have the same ammo count"). Refill: one empty magazine plus rounds of one calibre in a crafting grid → one loaded magazine of that calibre (shapeless; the ammo id is preserved in custom data; rounds consumed up to the magazine's capacity). ArsenalFutureGun's future handguns spawn with exactly one magazine and nothing else; once empty they're done unless reloaded with a magazine item. Guns looted from future gunners keep whatever magazine they had.
+**Stats and behaviour.** Each magazine is made for one family (it says so in its name). Load it by hand: right-click loose rounds of a calibre that family takes onto it, up to its size. Reload is a swap: right-click the magazine onto a gun of its family in the inventory; the gun takes the magazine's rounds and the magazine takes the gun's (any over its size come back loose), tracers included. Loaded magazines stack to 1; empty ones stack to 6. A dead gunner drops a magazine for its gun 1 time in 4, up to half full. TaCZ's own reload from loose rounds still works (not blocked: that would change every future gun at once; ask Andy if he wants it).
 
-**Crafting recipe** (crafting table, shaped):
+**How you get it.** Loot only (Andy, 2026-11-17): never craftable, in no creative tab.
 
-```
-LSL
-SIS
-LSL
-```
-
-L = `minecraft:leather`, S = `minecraft:string`, I = `#c:nuggets/steel` → 2 empty magazines. (4 leather, 4 string, 1 steel nugget.)
-
-**Refill recipe** (shapeless): empty magazine + one stack of rounds of one calibre → 1 loaded magazine of that calibre.
-
-**Lang key.** `item.jaymospowers.magazine` = "Magazine" — add to lang/parts/armory.json.
+**Lang key.** `item.jaymospowers.magazine` = "Magazine" — lang/parts/gun_gear.json.
 
 **Lore.** "A future gunner counts every magazine. A dropped gun with one still in it is a gift; an empty gun is just a heavy club."
 
@@ -83,12 +57,13 @@ L = `minecraft:leather`, S = `minecraft:string`, I = `#c:nuggets/steel` → 2 em
 
 From TaCZ Additions (Raiiiden, CurseForge feature list), worth building, in no order: bullet trails and water splash; muzzle flash when shooting; laser pointers with dynamic colour; PiP scopes; recoil multiplier per gun type; gun idle and tuck/pitch near walls; scope sway after 4× zoom; variable scope zoom scrolling; momentum-based gun movement and tilt. Recommendation: start with muzzle flash plus bullet trail, since fu-tracers rides on them. Bring to Andy as a Discord poll (2–4 options) before anything is built.
 
-## Open questions — needs Andy's call
+## Andy's answers (2026-11-17)
 
-1. fu-tracers: tracer probability (proposed 1 in 4 rounds) and streak colour (proposed amber-orange #f5a623) — left open by the previous run.
-2. fu-mags: magazine capacity per gun family (table above is proposed).
-3. No new items without telling Andy first (2026-11-08): nothing in this spec is added to the game yet. If Andy wants them, the item list goes to his DMs with the patch notes before anything is pushed, and dungeon/chest loot prefers existing pack items.
-4. Row priority: fu-tracers, fu-mags or fu-armour — which to build first.
-5. fu-additions: which, if any, to build (pick-list above).
-
-A builder can implement each item from this spec without further questions once items 1–2 above are confirmed.
+1. Tracers: both. About 1 ordinary shot in 4 from a future gun streaks (amber #f5a623, muzzle light 12 fading over 8
+   ticks), and Tracer Rounds always streak. A tracer round right-clicked onto a loaded gun takes the place of one of
+   its rounds, which comes back to you.
+2. Magazines: the sizes above (handgun 17, SMG 30, rifle 30, shotgun 8, machine gun 60). Snipers have none. TaCZ's
+   own reload from loose rounds is left working; magazines are a faster swap, not a requirement.
+3. All three built together (PR #1671).
+4. Loot only: off the future's dead and echoes, like the guns. No recipes, no creative tab.
+5. fu-additions: still open, not built here.
