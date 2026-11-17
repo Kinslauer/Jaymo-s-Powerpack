@@ -26,6 +26,10 @@ import org.jspecify.annotations.Nullable;
  * Tarkov-style ({@link StanceHud}).
  */
 public final class StanceScroll {
+	/** After a climb from the crouch: how long (ticks, counted once the climb is over) Sneak and the wheel don't crouch you. */
+	static final int CLIMB_STAND_TICKS = 20;
+	/** Ticks left of that ({@link #CLIMB_STAND_TICKS}). */
+	private static int standTicks;
 	/** The stance held for you (a {@link Stance} constant), or null: none, Sneak works as it always has. */
 	private static @Nullable Integer held;
 	/** The wheel turned so far toward the next notch (a trackpad scrolls in small bits). */
@@ -82,8 +86,17 @@ public final class StanceScroll {
 		int from = current(player);
 		int to = Mth.clamp(from + step, Stance.PRONE, Stance.STAND);
 		// (0.20.63) a notch down to the crouch (or on from it) facing a ledge, a one-high gap, a fence or anything short of
-		// two blocks takes hold of it and climbs (LedgeClient#scrollGrab); the stance stays as it was
+		// two blocks takes hold of it and climbs (LedgeClient#scrollGrab). Andy (2026-11-17): you come up standing, and
+		// can't crouch again for a moment (CLIMB_STAND_TICKS); a climb in on the belly ends prone as before
 		if (step < 0 && (from == Stance.SNEAK || from == Stance.LOW) && LedgeClient.scrollGrab(player)) {
+			wheel = 0.0;
+			setLow(player, false);
+			held = Stance.STAND;
+			standTicks = CLIMB_STAND_TICKS;
+			return true;
+		}
+		if (standTicks > 0 && !CrawlTaps.prone()) {
+			// (just up from a climb: the wheel doesn't crouch you yet)
 			wheel = 0.0;
 			return true;
 		}
@@ -104,6 +117,9 @@ public final class StanceScroll {
 	 * sneak or low crouch holds it down; standing by the wheel with Sneak still down lets it up.
 	 */
 	public static @Nullable Boolean shift() {
+		if (standTicks > 0 && !CrawlTaps.prone()) {
+			return false;
+		}
 		if (held == null) {
 			return null;
 		}
@@ -182,6 +198,9 @@ public final class StanceScroll {
 		boolean shift = minecraft.options.keyShift.isDown();
 		boolean jump = minecraft.options.keyJump.isDown();
 		boolean free = minecraft.gui.screen() == null;
+		if (standTicks > 0 && !LedgeClient.active()) {
+			standTicks--;
+		}
 		if (shift && !shiftWas) {
 			scrolledThisPress = false;
 		}
