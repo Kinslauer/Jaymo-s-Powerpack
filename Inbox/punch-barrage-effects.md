@@ -1,5 +1,5 @@
 ---
-status: changes
+status: claimed
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
