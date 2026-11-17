@@ -278,6 +278,12 @@ the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' g
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
 
+(new) **The Huntsman's rangers** (Andy, 2026-11-17; placement Claude's for him to approve). The Green Huntsman's hunters
+don't keep to the villages: they walk the forests, the taiga and the jungle in ones, bow in hand, taking the old and
+the slow and leaving the young. They'll teach their trade to a stranger with none, and give a hunter's advice to anyone
+else. The Huntsman's law is theirs to keep where no realm's law reaches: one who kills more than the wood can spare is
+scolded, and one who keeps at it is run down, hogtied and carried to the nearest realm's guards as a poacher.
+
 **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
 those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
 **Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
