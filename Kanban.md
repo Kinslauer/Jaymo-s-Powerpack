@@ -14,6 +14,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · changes · fixing review notes
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · changes · fixing review notes
 
 
 ## In review
@@ -21,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
