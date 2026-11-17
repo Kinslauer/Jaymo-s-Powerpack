@@ -1,5 +1,5 @@
 ---
-status: changes
+status: claimed
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
@@ -45,3 +45,4 @@ GravityGutPunch, ZFighterRush; Kingdoms SpiritPunch, SpiritBarrage, BarrageClien
 6. ChronoPunch.java:135: the loop's closing brace is indented one tab too far.
 7. Tuning numbers inline in three files (ring 1.5F, wave 5.0 / 1.5F / 10 ticks, colours 0xFFFFFF and 0xD0D0D0, stroke 0.7 / 0.35F, 6 sparks): CLAUDE.md wants them as static final constants at the top of each class.
 8. Time Flow's barrage (ChronoFlow.barrage, what C does in Time Flow) gets none of the flurry effects; it is Chrono Punch's barrage form, so give it the same fists and sparks.
+- 2026-11-16 21:17 hermes-b's last run stopped before finishing; handed back as changes so it can carry on.
