@@ -1119,6 +1119,10 @@ public final class Carry {
 		}
 		if (how == Let.THROW) {
 			carried.setAttached(THROWN, now);
+			if (carried instanceof SeveredPart part && carrier != null) {
+				// (Andy: "thrown limbs should deal damage") it strikes what it flies into
+				part.hurled(carrier);
+			}
 		}
 		carried.resetFallDistance();
 		if (CarryBlock.is(carried)) {

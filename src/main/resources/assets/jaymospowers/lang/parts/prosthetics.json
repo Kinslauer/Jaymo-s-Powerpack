@@ -5,7 +5,8 @@
   "item.jaymospowers.iron_leg": "Iron Leg",
   "tooltip.jaymospowers.prosthetic.wood": "Pegged planks and leather straps. Slow to swing and a poor grip, but it is a limb.",
   "tooltip.jaymospowers.prosthetic.iron": "Forged at the smithing anvil. Sturdier than wood, and heavy.",
-  "tooltip.jaymospowers.prosthetic.fit": "Use it while you are missing that limb to fit it. It drops off if the real one grows back.",
+  "tooltip.jaymospowers.prosthetic.fit": "Use it while you are missing that limb to fit it, or use it on someone else who is missing one. It drops off if the real one grows back.",
   "message.jaymospowers.prosthetic.nothing_to_fit.arm": "You have no missing arm to fit it to.",
-  "message.jaymospowers.prosthetic.nothing_to_fit.leg": "You have no missing leg to fit it to."
+  "message.jaymospowers.prosthetic.nothing_to_fit.leg": "You have no missing leg to fit it to.",
+  "message.jaymospowers.prosthetic.fitted_by": "%s straps on your new %s."
 }

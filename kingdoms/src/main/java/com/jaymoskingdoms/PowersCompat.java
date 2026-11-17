@@ -2937,6 +2937,32 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle fitProsthetics;
+	private static boolean fitProstheticsLooked;
+
+	/**
+	 * {@code helper} straps on the prosthetics downed {@code patient} carries or that lie near them (Powers'
+	 * {@code Prosthetics.fitFrom}). How many went on; 0 without Powers.
+	 */
+	public static int fitProsthetics(net.minecraft.server.level.ServerPlayer patient, LivingEntity helper) {
+		if (!fitProstheticsLooked) {
+			fitProstheticsLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					fitProsthetics = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Prosthetics"),
+						"fitFrom", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics.fitFrom (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return fitProsthetics == null ? 0 : (int)fitProsthetics.invoke(patient, helper);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle carried;
 	private static boolean carriedLooked;
 
