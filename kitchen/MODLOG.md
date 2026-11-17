@@ -2371,3 +2371,10 @@ inventory icon.
 - **Reactions**: with Ragdollified Reactions loaded, our player limp (crashes, blasts, carts, hard landings, the limp key) and the mob limp from big hits and heavy blades stand down; its own do those. The first-person head camera yields to Ragdollified's camera while its ragdoll plays, and is ours again once the corpse lies.
 - Without Ragdollified (the dev game) nothing changes: our ragdolls do all of it. All calls into Ragdollified are by reflection (`compat/RagdollifiedCompat`, `client/ragdoll/RagdollifiedBridge`).
 - Not played. Corpses lie in our fallen pose, not the pose the ragdoll landed in (its pose isn't mapped onto our rig).
+
+## 0.6.37 (2026-11-17): Corpses lie in the pose Ragdollified's ragdoll landed in
+
+- With Ragdollified loaded, a humanoid corpse now lies exactly as its ragdoll came to rest, not in our fallen pose. The client maps Ragdollified's six part boxes onto our humanoid rig (`client/ragdoll/RagdollifiedPose`): the torso box gives the frame (up toward the head, right toward the right arm), our torso points sit in it, each arm and leg runs from its shoulder or hip along its box's long axis away from the torso for the length of our stick, and the head runs on from the neck toward the head box. The pose rides on `RagdollNet.Settled` as a sleeping `RagdollSnapshot`; the server checks it (our rig for that corpse, middle within 2 blocks of the reported spot, every point within reach, every stick within 15% of its rest length) and the corpse takes it as its body (`CorpseEntity.settleAt`), so jolts, carrying and hanging go on from that pose with our own code.
+- A limb Ragdollified no longer has (Dismember) hangs straight down and stays missing on the corpse.
+- Only the humanoid rig is mapped (players, zombies, skeletons, villagers, illagers, piglins...). Quadruped, box and chain bodies have no matching part list, so they lie in our fallen pose at the landed spot as before. A pose that can't be read or doesn't pass the server's checks does the same; the 600-tick timeout and play without Ragdollified are unchanged.
+- Not played.
