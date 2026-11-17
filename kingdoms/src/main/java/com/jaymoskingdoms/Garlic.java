@@ -35,10 +35,16 @@ import net.minecraft.world.phys.Vec3;
  * struggle, rolled for them): {@link #HOLD_OUT} at no surrender, nothing at a whole surrender, so the more they've given
  * in, the likelier the flinch. A dhampir doesn't flinch; vampires among the folk always do. Garlic is used up by a
  * flinch; silver isn't.
+ *
+ * <p>Wolfsbane (Andy's 2026-11-17 tale picks: "bring wolfsbane and silver") is the wolf's herb as garlic is the blood's: a
+ * plain {@code wolfsbane} item, a hooded blue flower of damp woods that turns up now and then when fern is cut
+ * ({@link #FERN_DROP}). Tales ask for it against the one who walks at the moon (a foe step's {@code weak_to}).
  */
 public final class Garlic {
 	/** The chance cutting grass drops a head of garlic. */
 	static final float GRASS_DROP = 0.03F;
+	/** The chance cutting fern drops a sprig of wolfsbane. */
+	static final float FERN_DROP = 0.04F;
 	/** The chance a vampire player holds out at no surrender (it falls to nothing at a whole surrender). */
 	static final float HOLD_OUT = 0.5F;
 	/** The shove (blocks a tick) and the lift. */
@@ -47,6 +53,7 @@ public final class Garlic {
 	static final long TRY_EVERY = 20L;
 
 	public static Item GARLIC;
+	public static Item WOLFSBANE;
 
 	/** No try by this player before this game time (not kept). */
 	private static final Map<UUID, Long> TRIED = new HashMap<>();
@@ -57,11 +64,20 @@ public final class Garlic {
 	static void register() {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("garlic"));
 		GARLIC = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key)));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(GARLIC));
+		ResourceKey<Item> bane = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("wolfsbane"));
+		WOLFSBANE = Registry.register(BuiltInRegistries.ITEM, bane, new Item(new Item.Properties().setId(bane)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(GARLIC);
+			output.accept(WOLFSBANE);
+		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
 			if (level instanceof ServerLevel server && (state.is(Blocks.SHORT_GRASS) || state.is(Blocks.TALL_GRASS)) && !player.isCreative()
 				&& server.getRandom().nextFloat() < GRASS_DROP) {
 				Block.popResource(server, pos, new ItemStack(GARLIC));
+			}
+			if (level instanceof ServerLevel server && (state.is(Blocks.FERN) || state.is(Blocks.LARGE_FERN)) && !player.isCreative()
+				&& server.getRandom().nextFloat() < FERN_DROP) {
+				Block.popResource(server, pos, new ItemStack(WOLFSBANE));
 			}
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {

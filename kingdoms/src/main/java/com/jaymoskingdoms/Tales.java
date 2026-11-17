@@ -842,6 +842,35 @@ public final class Tales {
 		}
 	}
 
+	/**
+	 * Something the code saw {@code player} do while {@code giver}'s run of {@code taleId} waits (an {@code await} step):
+	 * {@code mark} is set (or taken back), and, set for the first time, the step's {@code noted} line for it is written in
+	 * the journal. The tale doesn't move on.
+	 */
+	static void remark(ServerPlayer player, String taleId, LivingEntity giver, String mark, boolean holds) {
+		State s = stateOrNull(player);
+		if (s == null) {
+			return;
+		}
+		String id = giver.getUUID().toString();
+		for (Run run : s.runs) {
+			Tale tale = run.tale.equals(taleId) && run.giver.equals(id) ? Tale.get(run.tale) : null;
+			JsonObject step = tale == null ? null : tale.step(run.step);
+			if (step == null || !Tale.string(step, "do", "").equals("await")) {
+				continue;
+			}
+			if (!holds) {
+				s.marks.remove(mark);
+			} else if (s.marks.add(mark)) {
+				MutableComponent line = words(player, run, Tale.object(step, "noted"), mark);
+				if (line != null) {
+					note(run, line.getString());
+					Quests.sync(player, true);
+				}
+			}
+		}
+	}
+
 	/** A new run of {@code tale} for {@code player}, asked by {@code giver} (or nobody), from {@code home}; its first step is entered. */
 	private static Run start(ServerLevel level, ServerPlayer player, Tale tale, @Nullable LivingEntity giver, int faction, BlockPos home,
 		@Nullable LivingEntity speaker) {
@@ -1587,7 +1616,7 @@ public final class Tales {
 				} else {
 					// (what a bribe will cost with this one, and how it's likely to go, in words)
 					label = text(player, run, words.replace("{price}", "{coins:" + TaleWays.price(attempt, who) + "}"))
-						.append(" (").append(TaleWays.oddsWords(TaleWays.odds(player, run, attempt, who))).append(")");
+						.append(" (").append(TaleWays.chance(player, run, attempt, who)).append(")");
 					can &= TaleWays.canTry(player, run, attempt, who);
 				}
 				int index = n;
@@ -1923,6 +1952,9 @@ public final class Tales {
 		}
 		String kind = Tale.string(step, "do", "");
 		String before = run.step;
+		if (run.vars.containsKey(TaleWays.CANDLE) && TaleWays.candle(level, run)) {
+			run.vars.remove(TaleWays.CANDLE);
+		}
 		if (run.taken && TaleWays.late(level, run, step)) {
 			// (its days ran out: the tale goes on without them)
 			go(player, run, step.get("late"), null);

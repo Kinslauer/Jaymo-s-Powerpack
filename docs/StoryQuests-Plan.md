@@ -380,6 +380,13 @@ their `"not_now"` line outside it (or a stock one), a place only counts by that 
 doesn't begin; the log says "(after dark)". A cast member with `"hours": "night"` (or `day`) is only at their place in
 those hours. A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
 
+`"candle": true` on any step: when it opens, a black candle is set burning in a window of the town's tavern (the guild's
+mark that someone has been paid for; lore "What goes on in the shadows"). A cast creature with `"lying": true` is laid
+out on the ground where it's set out and doesn't get up (the drowned in the burying ground).
+
+An `await` step (one the code carries on) may have `"noted": { "<mark>": "journal line" }`: when the code sets that mark
+while the step waits (`Tales.remark`), the line goes in the journal. The Keeping's `keeping_rested` is the first.
+
 ### a word that may or may not land: `try`
 
 On a reply: `"try": { "how": "persuade" | "threaten" | "bribe", "odds": -2..2, "coins": N, "helps": [conditions],
@@ -390,6 +397,9 @@ might listen, likely to listen. A try is made once. Failed, the tale goes the tr
 without that reply. A bribe's `coins` are its price before the listener's greed (the greedy ask half again, the proud
 won't be bought); `{price}` in the reply's words is what this listener asks, and the coin is only taken if they take it.
 Being bought or threatened is remembered.
+
+`"how": "dice"` is a throw against them: `coins` is the stake, won or lost on an even throw (`odds`, `helps` and
+`hurts` load it; nothing about the two of you does), and the reply only says it's a throw of the dice.
 
 ### naming who did it: `"do": "name"`
 

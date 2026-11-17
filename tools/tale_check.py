@@ -26,7 +26,7 @@ STEP_FIELDS = {
     "bring": {"who", "item", "count", "say", "not_now"},
     "slay": {"target", "count"},
     "wait": {"days", "wake", "letter"},
-    "await": {"who"},
+    "await": {"who", "noted"},
     "defend": {"at", "waves", "foes", "stars", "failed"},
     "escort": {"who", "to", "failed"},
     "pack": {"at", "foes", "count", "stars"},
@@ -37,10 +37,10 @@ STEP_FIELDS = {
     "rescue": {"who", "at", "kin", "stars", "failed"},
     "capture": {"who", "at", "crime", "stars", "failed", "let_go"},
 }
-COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden", "within", "late", "until", "clock", "when"}
+COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden", "within", "late", "until", "clock", "when", "candle"}
 # (docs/StoryQuests-Plan.md, section 7) when a step can be done, how a try is made, how someone is dressed
 WHENS = {"night", "day", "moon:full", "moon:new"}
-TRIES = {"persuade", "threaten", "bribe"}
+TRIES = {"persuade", "threaten", "bribe", "dice"}
 DRESS = {"fine", "plain", "ragged", "armoured", "bloodied"}
 TONGUES = {"common", "northern", "southern", "wildwood", "blossom", "old"}
 PATRONS = {"hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "none"}
@@ -265,10 +265,10 @@ def check_try(c, where, t, tale, edges):
         c.err(where, f"unknown fields {sorted(unknown)}")
     if not (isinstance(t.get("odds", 0), int) and -2 <= t.get("odds", 0) <= 2):
         c.err(where, "odds is -2 (very hard) to 2 (very easy)")
-    if t["how"] == "bribe" and not (isinstance(t.get("coins"), int) and t["coins"] > 0):
-        c.err(where, "a bribe needs 'coins' (its price before the listener's greed)")
-    if t["how"] != "bribe" and "coins" in t:
-        c.err(where, "only a bribe has 'coins'")
+    if t["how"] in ("bribe", "dice") and not (isinstance(t.get("coins"), int) and t["coins"] > 0):
+        c.err(where, "a bribe needs 'coins' (its price before the listener's greed), and a throw of the dice its stake")
+    if t["how"] not in ("bribe", "dice") and "coins" in t:
+        c.err(where, "only a bribe or a throw of the dice has 'coins'")
     for field in ("helps", "hurts"):
         for cond in t.get(field, []):
             check_condition(c, f"{where}.{field}", cond, tale)
@@ -418,7 +418,7 @@ def check_tale(path):
             check_condition(c, where, who["if"], tale)
         if who.get("hours", "night") not in ("night", "day"):
             c.err(where, "hours must be night or day")
-        unknown = set(who) - {"name", "body", "job", "female", "at", "if", "late", "hours", "health", "damage", "armor", "hand", "head", "chest", "men", "men_body"}
+        unknown = set(who) - {"name", "body", "job", "female", "at", "if", "late", "hours", "lying", "health", "damage", "armor", "hand", "head", "chest", "men", "men_body"}
         if unknown:
             c.err(where, f"unknown fields {sorted(unknown)}")
         for slot in ("hand", "head", "chest"):
@@ -511,7 +511,7 @@ def check_tale(path):
                 unknown = set(r) - {"say", "then", "if", "needs_item", "needs_coins", "mark", "journal", "against", "returns", "try", "for", "irks", "lie"}
                 if unknown:
                     c.err(rw, f"unknown fields {sorted(unknown)}")
-                check_text(c, rw + ".say", r["say"], tale, extra=("price",) if r.get("try", {}).get("how") == "bribe" else ())
+                check_text(c, rw + ".say", r["say"], tale, extra=("price",) if r.get("try", {}).get("how") in ("bribe", "dice") else ())
                 if "try" in r:
                     check_try(c, rw + ".try", r["try"], tale, edges)
                 for field in ("for", "irks"):

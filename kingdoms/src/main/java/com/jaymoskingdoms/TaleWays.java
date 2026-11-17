@@ -17,7 +17,9 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -45,6 +47,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.MoonPhase;
+import net.minecraft.world.level.block.AbstractCandleBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -91,6 +96,9 @@ final class TaleWays {
 
 	static final String BY = "~by:", MET = "~met:", TRIED = "~tried:";
 	static final String KEY_UNREAD = "jaymoskingdoms_tale_unread";
+	/** How far round the tavern's counter a window sill is looked for (blocks, across), and the run var of a candle still to be lit. */
+	static final int CANDLE_REACH = 7;
+	static final String CANDLE = "~candle";
 	private static final Pattern COMPARE = Pattern.compile("^(reputation|hearts|coins|since:[a-z0-9_]+)(>=|<)(-?\\d+)$");
 
 	/**
@@ -263,10 +271,51 @@ final class TaleWays {
 		for (Map.Entry<String, JsonElement> e : Tale.object(step, "clock").entrySet()) {
 			run.vars.putIfAbsent(BY + e.getKey(), Long.toString(today + Tale.between(e.getValue(), 1, random)));
 		}
+		if (Tale.flag(step, "candle") && !candle(level, run)) {
+			run.vars.put(CANDLE, "1");
+		}
 		JsonElement within = step.get("within");
 		if (within != null && !named(within)) {
 			run.scratch.put("by", Long.toString(today + Tale.between(within, 1, random)));
 		}
+	}
+
+	/**
+	 * A black candle is set burning in a window of the tavern of {@code run}'s town (the guild's mark that someone has
+	 * been paid for): on a sill beside glass if one is near the counter, else on the counter. False if the tavern isn't
+	 * loaded yet (it's tried again while the tale runs).
+	 */
+	static boolean candle(ServerLevel level, Tales.Run run) {
+		Faction f = run.faction < 0 ? null : Factions.get(level.getServer(), run.faction);
+		BlockPos tavern = f == null ? null : tavern(level, f);
+		BlockPos at = tavern != null ? tavern : f != null ? f.seat() : BlockPos.of(run.home);
+		if (!level.isLoaded(at)) {
+			return false;
+		}
+		BlockPos spot = null;
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-CANDLE_REACH, -1, -CANDLE_REACH), at.offset(CANDLE_REACH, 3, CANDLE_REACH))) {
+			if (!level.isLoaded(p) || !level.getBlockState(p).isAir() || !level.getBlockState(p.below()).isFaceSturdy(level, p.below(), Direction.UP)) {
+				continue;
+			}
+			boolean window = false;
+			for (Direction d : Direction.Plane.HORIZONTAL) {
+				BlockState beside = level.getBlockState(p.relative(d));
+				window |= beside.is(ConventionalBlockTags.GLASS_PANES) || beside.is(ConventionalBlockTags.GLASS_BLOCKS);
+			}
+			if (window && (spot == null || p.distSqr(at) < spot.distSqr(at))) {
+				spot = p.immutable();
+			}
+		}
+		if (spot == null) {
+			spot = at.above();
+			if (!level.getBlockState(spot).isAir()) {
+				// (nowhere to stand it: the town still knows, by its marks and its talk)
+				return true;
+			}
+		}
+		BlockState candle = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace("black_candle")).orElse(Blocks.CANDLE).defaultBlockState();
+		level.setBlockAndUpdate(spot, candle.setValue(AbstractCandleBlock.LIT, true));
+		return true;
 	}
 
 	private static boolean named(JsonElement within) {
@@ -356,7 +405,9 @@ final class TaleWays {
 	 */
 	static int odds(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
 		String how = Tale.string(t, "how", "persuade");
-		Temperaments.Temperament temper = Temperaments.of(who);
+		boolean dice = how.equals("dice");
+		// (the dice have no temper and no memory: only what the tale says loads them)
+		Temperaments.Temperament temper = dice ? null : Temperaments.of(who);
 		if (how.equals("bribe") && Boolean.FALSE.equals(Temperaments.takesBribe(who))) {
 			return ODDS_LEAST;
 		}
@@ -388,7 +439,9 @@ final class TaleWays {
 				};
 			};
 		}
-		if (how.equals("threaten")) {
+		if (dice) {
+			// (nothing about the two of them sways a throw)
+		} else if (how.equals("threaten")) {
 			Set<String> dress = dress(player);
 			odds += (dress.contains("armoured") ? THREAT_ARMOUR : 0) + (dress.contains("bloodied") ? THREAT_BLOOD : 0)
 				+ (run.vars.containsKey("~cut_down") ? THREAT_DEED : 0);
@@ -411,26 +464,46 @@ final class TaleWays {
 		return Component.translatable("tale.jaymoskingdoms.odds." + (odds >= 75 ? 3 : odds >= 50 ? 2 : odds >= 25 ? 1 : 0)).withStyle(ChatFormatting.GRAY);
 	}
 
-	/** What {@code who} asks for the bribe {@code t} (coins): its price, and more from the greedy and the proud. */
+	/** How a try is likely to go, in words, as it's shown beside the reply (a throw of the dice only says it's one). */
+	static Component chance(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
+		return Tale.string(t, "how", "persuade").equals("dice")
+			? Component.translatable("tale.jaymoskingdoms.odds.dice").withStyle(ChatFormatting.GRAY) : oddsWords(odds(player, run, t, who));
+	}
+
+	/**
+	 * What {@code who} asks for the bribe {@code t} (coins): its price, and more from the greedy and the proud. For a
+	 * throw of the dice, the stake.
+	 */
 	static int price(JsonObject t, LivingEntity who) {
 		int coins = Math.max(1, Tale.number(t, "coins", 1));
+		if (Tale.string(t, "how", "persuade").equals("dice")) {
+			return coins;
+		}
 		return (int)Math.ceil(coins * (Temperaments.is(who, Temperaments.Temperament.GREEDY) ? BRIBE_GREEDY
 			: Temperaments.is(who, Temperaments.Temperament.PROUD) ? BRIBE_PROUD : 1.0));
 	}
 
-	/** Whether {@code player} can make the try {@code t} at all (a bribe takes the coin). */
+	/** Whether {@code player} can make the try {@code t} at all (a bribe takes the coin; a stake has to be on the table). */
 	static boolean canTry(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
-		return !Tale.string(t, "how", "persuade").equals("bribe") || Money.canPay(player, Tales.faction(player, run), Money.worth(price(t, who)));
+		String how = Tale.string(t, "how", "persuade");
+		return !how.equals("bribe") && !how.equals("dice") || Money.canPay(player, Tales.faction(player, run), Money.worth(price(t, who)));
 	}
 
 	/**
 	 * {@code player} makes the try {@code t} on {@code who}: the lot is drawn against {@link #odds}. A bribe taken is paid
-	 * (one refused is kept), and they remember being bought or threatened. True if it worked.
+	 * (one refused is kept), a stake at dice is won or lost, and they remember being bought or threatened. True if it worked.
 	 */
 	static boolean attempt(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
 		String how = Tale.string(t, "how", "persuade");
 		boolean won = player.getRandom().nextInt(100) < odds(player, run, t, who);
-		if (how.equals("bribe") && won) {
+		if (how.equals("dice")) {
+			// (the stake changes hands one way or the other)
+			if (won) {
+				Money.pay(player, Tales.faction(player, run), Money.worth(price(t, who)));
+			} else {
+				Money.charge(player, Tales.faction(player, run), Money.worth(price(t, who)));
+			}
+		} else if (how.equals("bribe") && won) {
 			Money.charge(player, Tales.faction(player, run), Money.worth(price(t, who)));
 			Recollections.remember(who, player, Recollections.Kind.BRIBED, Component.empty());
 		} else if (how.equals("threaten")) {

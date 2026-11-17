@@ -39,6 +39,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -316,6 +317,11 @@ final class TaleCast {
 		mob.setCanPickUpLoot(false);
 		mob.setPermanentlyInvulnerable(true);
 		mob.setAttached(CAST, new Cast(instance, man ? role + "~" : role, at.asLong(), false, false, false, 0L));
+		if (Tale.flag(body, "lying") && !kind.equals("villager") && !kind.equals("fighter")) {
+			// (laid out on the ground, and staying so: nothing stands a creature that isn't moving back up)
+			mob.setNoAi(true);
+			mob.setPose(Pose.SLEEPING);
+		}
 		LOADED.add(mob);
 		return mob;
 	}
