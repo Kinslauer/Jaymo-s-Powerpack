@@ -1,16 +1,19 @@
 ---
-status: running
+status: in-review
 task: punch-barrage-effects
-branch: claude/punch-barrage-effects
+branch: claude/punch-barrage-effects, claude/punch-barrage-effects-kingdoms
 with: 
-pr: 
+pr: 1665, 1667
 mods: powers, kingdoms
 versions: 
 started: 2026-11-16
 owns:
   - src/main/java/com/jaymospowers/power/chrono/ChronoPunch.java
+  - src/main/java/com/jaymospowers/power/gravity/GravityGutPunch.java
+  - src/main/java/com/jaymospowers/power/zfighter/ZFighterRush.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Fx.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/spirits/SpiritPunch.java
   - kingdoms/src/main/java/com/jaymoskingdoms/spirits/SpiritBarrage.java
-  - kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/BarrageClient.java
 ---
 # Punch and barrage effects
 
@@ -29,4 +32,5 @@ owns:
 - Not tested in game (builds go on Deck/CI, never Andy's PC).
 
 ## Done
-What a player will see, and what wasn't tested.
+What a player will see: heavy punch impacts land with a shockwave ring, a dust wave along the ground and a short screen shake — on spirits' Spirit Punch, Gravity's Inversion (GravityGutPunch), the Z-Fighter rushes' finishers and Chrono Punch's last hit; Chrono Punch's flurry paints blurred fists in front of you and throws sparks where its punches land; Kingdoms' Spirit Barrage clashes throw sparks where the two flurries meet.
+What wasn't tested: not played in game; compile-checked and sh ./gradlew clean build passes on both branches.
