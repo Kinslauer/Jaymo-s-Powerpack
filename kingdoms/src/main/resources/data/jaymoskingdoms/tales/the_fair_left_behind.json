@@ -6,14 +6,18 @@
     "child": { "name": ["Bobbin", "Jink", "Tumble"], "body": "villager", "job": "none", "at": "shed" },
     "neighbour": { "name": ["Orla Fenn", "Hilde Crabb", "Prue Sallow"], "body": "villager", "job": "farmer", "female": true, "at": "lane" },
     "carter": { "name": ["Dunn Harker", "Wilf Otley", "Sim Radley"], "body": "villager", "job": "leatherworker", "at": "crossroads" },
-    "master": { "name": ["Ansel Crake", "Hob Tarrant", "Jory Maddern"], "body": "villager", "job": "nitwit", "at": "fairground" },
-    "mother": { "name": ["Kitty Spring", "Sorrel Bright", "Mag Lissom"], "body": "villager", "job": "none", "female": true, "at": "fairground" }
+    "master": { "name": ["Ansel Crake", "Hob Tarrant", "Jory Maddern"], "body": "villager", "job": "nitwit", "if": "mark:fair_found", "at": { "?mark:fair_gone": "fairground", "?": "halt" } },
+    "mother": { "name": ["Kitty Spring", "Sorrel Bright", "Mag Lissom"], "body": "villager", "job": "none", "female": true, "if": "mark:fair_found", "at": { "?mark:fair_gone": "fairground", "?": "halt" } },
+    "smith": { "if": "mark:fair_found & !mark:fair_gone", "name": ["Garth Stout", "Hamo Bell", "Brock Tanner"], "body": "villager", "job": "toolsmith", "female": false, "at": "halt" }
   },
   "places": {
     "shed": { "at": "near", "from": "home", "dist": [10, 25], "name": "the shed" },
     "lane": { "at": "near", "from": "home", "dist": [30, 60], "name": "the lane" },
     "pitch": { "at": "near", "from": "home", "dist": [60, 110], "name": "the fair's old pitch" },
     "crossroads": { "at": "road", "from": "home", "dist": [100, 180], "name": "the crossroads" },
+    "halt": { "at": "road", "from": "home", "dist": [170, 250], "name": "the fair's halt on the east road" },
+    "rise": { "at": "near", "from": "halt", "dist": [60, 72], "name": "the rise by the fair's halt" },
+    "ford": { "at": "road", "from": "halt", "dist": [80, 140], "name": "the ford on the east road" },
     "fairground": { "at": "wild", "from": "home", "dist": [300, 500], "name": "the fair's winter ground" }
   },
   "first": "ask",
@@ -134,8 +138,10 @@
     },
     "tell_giver": {
       "do": "talk", "who": "giver", "goal": "Tell {giver} what you've found",
+      "clock": { "fair": [4, 5] },
       "say": [
         "East, then. And {carter} is the one who'd know how far, and he's on his round. A day. Two. I'll send when he's in.",
+        "A fair doesn't go straight home. It pitches a few days at every halt along its road to earn its bread, and then it moves on. So it's near yet, and it won't be for long.",
         "I looked in on the shed while you were gone. It has taught itself to sweep. Badly. Don't tell it I said badly."
       ],
       "replies": [
@@ -175,11 +181,78 @@
         "?why=given": "{carter} says the fair winters in a hollow with a pond. A woman walked behind the last wagon and never once looked back.",
         "?": "{carter} says the fair winters in a hollow with a pond. The fair-master was searching his own wagons as they went."
       },
+      "then": { "?late:fair": "carter_gone", "?": "carter_halt" }
+    },
+    "carter_halt": {
+      "do": "talk", "who": "carter",
+      "say": [
+        "But you'll not need to walk that far, if you're quick. They never go straight home. I came back by the east road yesterday and they were pitched {way:halt}, tents up, earning their supper off a hamlet.",
+        "A fair stops a few days at a halt and no more. By my reckoning they strike their tents {in:fair}. After that they're over the hills and out of this country, and then it's the whole long road to the winter ground for you and the little one. Go now."
+      ],
+      "replies": [
+        { "say": "Then we go now.", "then": "halt_walk", "mark": "fair_to_halt", "journal": "{carter} says the fair is still on the road, pitched at a halt to the east. It moves on every few days. If I am quick, I can catch it before it leaves this country." }
+      ]
+    },
+    "carter_gone": {
+      "do": "talk", "who": "carter",
+      "say": [
+        "They never go straight home, mind. They pitch a few days at each halt along the road. I saw them setting up {way:halt}, but that was days back, and a fair doesn't wait. They'll have struck by now and gone over the hills.",
+        "Start from the halt and follow the ruts. Seven wagons, and one dragging on the near side. A blind man could follow that."
+      ],
+      "replies": [
+        { "say": "Then we follow the ruts.", "then": "halt_cold_walk", "journal": "{carter} says the fair pitched at a halt to the east, but it will have moved on by now. I am to start from the halt and follow its wheel ruts along the road." }
+      ]
+    },
+    "halt_walk": {
+      "do": "escort", "who": "child", "to": "rise", "goal": "Walk {child} to {place:rise} before the fair moves on",
+      "within": "fair", "late": "halt_cold_walk", "until": "before the fair strikes its tents",
+      "mark": "fair_found",
+      "journal": "From the rise I could see the fair's tents still standing at its halt. We were in time.",
+      "then": "halt_in"
+    },
+    "halt_in": { "do": "escort", "who": "child", "to": "halt", "goal": "Walk {child} down into the fair's pitch", "then": "tail" },
+    "tail": {
+      "do": "talk", "who": "smith", "goal": "Speak with the big man at the edge of the pitch",
+      "say": [
+        "Hold up. That's one of ours you've got by the hand. {child}! Walking in, bold as a brass pan.",
+        "You've caught us with the pegs half drawn. We strike at first light and go over the hills. I'm the one who'd have gone last, because I'm the horse: ours died at midsummer, and somebody has to be in the shafts. Another day and you'd have had cold ashes and a long walk.",
+        "There's those in there will have a deal to say about this, and I'm not one of them. I pull the wagon. {master} is by the cook fire, counting seats. Go on in."
+      ],
+      "replies": [
+        { "say": "Take us to him.", "then": { "?why=driven": "master_driven", "?why=given": "master_given", "?": "master_hid" }, "mark": "fair_caught_tail", "journal": "I caught the fair at its halt on the east road, with the tents still standing. {smith}, the strong smith, who draws a wagon in place of a horse, sent us in to the fair-master." }
+      ]
+    },
+    "halt_cold_walk": { "do": "escort", "who": "child", "to": "halt", "goal": "Walk {child} to {place:halt}", "mark": "fair_gone", "then": "halt_ruts" },
+    "halt_ruts": {
+      "do": "search", "at": "halt", "need": 2, "goal": "Look over the ground where the fair was pitched",
+      "clues": [
+        { "name": "Seven rings of wet ash", "item": "minecraft:charcoal", "lore": ["Cook fires, raked out and then drowned, every one.", "These folk put a fire out twice. The ash is days cold."], "journal": "The fair's fires at the halt were raked out, drowned, and days cold. It has moved on." },
+        { "name": "Wheel ruts", "item": "minecraft:clay_ball", "lore": ["Seven wagons turning back on to the road and going east.", "One drags on the near side. Between its ruts are boot prints as deep as a horse's."], "journal": "Seven wagons left the halt going east. One is drawn by a man, by the prints between its ruts." },
+        { "name": "A juggler's club", "item": "minecraft:stick", "lore": ["Painted in rings, split down the grain and thrown in the ditch.", "{child} knows whose it was, and says so, twice."], "journal": "{child} found a split juggling club in the ditch at the halt and knew whose it was." }
+      ],
+      "then": "follow_ruts"
+    },
+    "follow_ruts": {
+      "do": "escort", "who": "child", "to": "ford", "goal": "Follow the fair's wheel ruts along the east road with {child}",
+      "journal": "We followed the ruts east along the road, as far as the ford.",
+      "then": "ford_ruts"
+    },
+    "ford_ruts": {
+      "do": "search", "at": "ford", "need": 2, "goal": "Find where the ruts go from the ford",
+      "clues": [
+        { "name": "Ruts in the ford mud", "item": "minecraft:clay_ball", "lore": ["All seven crossed here. The dragging wheel cut the bank away.", "On the far side they leave the road for a hill track."], "journal": "The wagons crossed the ford and left the road for a hill track on the far side.", "mark": "fair_found" },
+        { "name": "A strip of burnt canvas", "item": "minecraft:brown_wool", "lore": ["Tent cloth, scorched along one edge, caught on a thorn by the hill track.", "It tore off the last wagon as it climbed."], "journal": "A strip of tent canvas hangs on a thorn where the hill track leaves the ford.", "mark": "fair_found" },
+        { "name": "A honey cake, trodden", "item": "minecraft:cookie", "lore": ["Dropped off a tailboard and walked on by whoever came behind.", "{child} says the track goes round a pond, further on. It has seen the pond from the third wagon."], "journal": "{child} knew the hill track from the ford: it goes round a pond, on to where the fair winters.", "mark": "fair_found" }
+      ],
+      "mark": "fair_followed_ruts",
       "then": "walk"
     },
     "walk": {
       "do": "escort", "who": "child", "to": "fairground", "goal": "Walk {child} to the fair's winter ground",
-      "journal": "I walked {child} east to the hollow where the fair winters.",
+      "journal": {
+        "?mark:fair_followed_ruts": "The fair had left the country before we could catch it. I walked {child} after its wheel ruts, over the hills, to the hollow where it winters.",
+        "?": "I walked {child} east to the hollow where the fair winters."
+      },
       "then": { "?why=driven": "master_driven", "?why=given": "master_given", "?": "master_hid" }
     },
 
@@ -282,8 +355,14 @@
     },
     "mother_hid2": {
       "do": "talk", "who": "mother",
-      "say": "No. You never did. And I never saw you. Go round by the pond, he's busy with his tent. Tell the one with the shed: no hearth in the room where it sleeps. Not ever. And cake on its naming day. It will say it doesn't mind about cake. It minds.",
-      "journal": "{mother} signed the paper and has been sorry since. She let me walk {child} out of the hollow behind the fair-master's back, and sent word for {giver}: no hearth where it sleeps, and cake on its naming day.",
+      "say": {
+        "?mark:fair_caught_tail": "No. You never did. And I never saw you. Go round behind the wagons, he's busy with his tent. Tell the one with the shed: no hearth in the room where it sleeps. Not ever. And cake on its naming day. It will say it doesn't mind about cake. It minds.",
+        "?": "No. You never did. And I never saw you. Go round by the pond, he's busy with his tent. Tell the one with the shed: no hearth in the room where it sleeps. Not ever. And cake on its naming day. It will say it doesn't mind about cake. It minds."
+      },
+      "journal": {
+        "?mark:fair_caught_tail": "{mother} signed the paper and has been sorry since. She let me walk {child} out of the fair's pitch behind the fair-master's back, and sent word for {giver}: no hearth where it sleeps, and cake on its naming day.",
+        "?": "{mother} signed the paper and has been sorry since. She let me walk {child} out of the hollow behind the fair-master's back, and sent word for {giver}: no hearth where it sleeps, and cake on its naming day."
+      },
       "then": "wait_stay"
     },
 
