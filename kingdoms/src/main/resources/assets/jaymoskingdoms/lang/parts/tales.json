@@ -128,5 +128,14 @@
   "tale.jaymoskingdoms.reader.no": "No. I'll keep it to myself.",
   "tale.jaymoskingdoms.reader.read.0": "There. That's what it says, word for word.",
   "tale.jaymoskingdoms.reader.read.1": "That's all of it. I'd think on who else you show it to.",
-  "quest.jaymoskingdoms.town.tale.hand": "Written in %1$s."
+  "quest.jaymoskingdoms.town.tale.hand": "Written in %1$s.",
+  "gui.jaymoskingdoms.story.hint.193": "Some tales won't wait for you. If the asker names a day, the tale goes on without you when it passes, and ends its own way.",
+  "gui.jaymoskingdoms.story.hint.194": "People keep hours. Some are only at the tavern after dark, and some things can only be done by night, or only by day.",
+  "gui.jaymoskingdoms.story.hint.195": "What you wear, your blood, your patron and your name in a town change what people say to you, and what they offer.",
+  "gui.jaymoskingdoms.story.hint.196": "You can try to persuade, threaten or pay your way through a talk. The reply says how it's likely to go. A try is made once.",
+  "gui.jaymoskingdoms.story.hint.197": "Learn what a beast fears before you fight it. Carry it into the fight and the beast is weaker, and your bestiary keeps the note.",
+  "gui.jaymoskingdoms.story.hint.198": "A letter in a tongue you can't read stays shut to you until you learn the tongue, or pay a priest or a librarian to read it aloud. Then they know what it says too.",
+  "gui.jaymoskingdoms.story.hint.199": "A lie told in a tale can come out weeks later. So can thanks: a letter, a new neighbour, talk at the inn.",
+  "gui.jaymoskingdoms.story.hint.200": "Now and then a notice on the town board is the start of a tale, written in the asker's own hand.",
+  "gui.jaymoskingdoms.story.hint.201": "Wolfsbane turns up now and then when you cut fern. The one who walks at the moon can't abide it."
 }
