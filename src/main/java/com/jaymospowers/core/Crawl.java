@@ -36,8 +36,17 @@ import org.jspecify.annotations.Nullable;
  * look: the better view down a weapon, and the only way to draw a bow lying down ({@code ProneBowMixin}).
  */
 public final class Crawl {
-	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
-	public static final int ROLL_TICKS = 5;
+	/**
+	 * How long a roll takes with no armour on, in ticks (the client spreads the one-block slide over these). Andy:
+	 * "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your gear
+	 * has. To an upper limit": a heavier, tucked log roll, and armour stretches it out ({@link #rollTicks}).
+	 */
+	public static final int ROLL_TICKS = 12;
+	/**
+	 * Gear weight: armour points plus armour toughness at which the roll is slowest (full netherite is 32), and how many
+	 * times longer the roll takes there. Nothing past it slows it more.
+	 */
+	public static final float HEAVIEST = 32.0F, HEAVY_SLOW = 1.6F;
 	/**
 	 * (0.19.30) Andy: "on your back, you shuffle forward with your hips, so you move slower than you would prone on your
 	 * stomach". Prone on the back moves at this share of the belly crawl's pace (the client's input is scaled).
@@ -60,31 +69,40 @@ public final class Crawl {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	/**
-	 * A roll in progress: when it started (game time), which way ({@code right}) and when the run of rolls that way began
-	 * ({@code streakStart}). Synced to everyone for the animation.
+	 * A roll in progress: when it started (game time), which way ({@code right}), when the run of rolls that way began
+	 * ({@code streakStart}) and how long it takes ({@code ticks}, {@link #rollTicks}). Synced to everyone for the animation.
 	 */
-	public record Rolling(long start, boolean right, long streakStart) {
+	public record Rolling(long start, boolean right, long streakStart, int ticks) {
 		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Rolling::start,
 			ByteBufCodecs.BOOL, Rolling::right,
 			ByteBufCodecs.VAR_LONG, Rolling::streakStart,
+			ByteBufCodecs.VAR_INT, Rolling::ticks,
 			Rolling::new);
 
 		/** Whether this roll ended long enough before {@code now} that the next one starts fresh. */
 		boolean rested(long now) {
-			return now - (start + ROLL_TICKS) > ROLL_REST_TICKS;
+			return now - (start + ticks) > ROLL_REST_TICKS;
 		}
 	}
 
+	/** How long {@code player}'s roll takes (ticks): {@link #ROLL_TICKS}, up to {@link #HEAVY_SLOW} times that under heavy armour. Either side. */
+	public static int rollTicks(Player player) {
+		double load = player.getArmorValue() + player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS);
+		float heft = (float)Math.clamp(load / HEAVIEST, 0.0, 1.0);
+		return Math.round(ROLL_TICKS * (1.0F + (HEAVY_SLOW - 1.0F) * heft));
+	}
+
 	/**
-	 * The roll that would start at {@code now} going {@code right} after {@code last} (null if none yet), or null when
-	 * that way is spent: you've rolled it for {@link #ROLL_STREAK_TICKS} and must roll back first. Shared by both sides.
+	 * The roll that would start at {@code now} going {@code right} after {@code last} (null if none yet), taking
+	 * {@code ticks}, or null when that way is spent: you've rolled it for {@link #ROLL_STREAK_TICKS} and must roll back
+	 * first. Shared by both sides.
 	 */
-	public static @Nullable Rolling nextRoll(@Nullable Rolling last, long now, boolean right) {
+	public static @Nullable Rolling nextRoll(@Nullable Rolling last, long now, boolean right, int ticks) {
 		if (last == null || last.rested(now) || last.right() != right) {
-			return new Rolling(now, right, now);
+			return new Rolling(now, right, now, ticks);
 		}
-		return now - last.streakStart() >= ROLL_STREAK_TICKS ? null : new Rolling(now, right, last.streakStart());
+		return now - last.streakStart() >= ROLL_STREAK_TICKS ? null : new Rolling(now, right, last.streakStart(), ticks);
 	}
 
 	/** Whether rolling {@code right} at {@code now} reverses a roll the other way (the back-and-forth that douses you). */
@@ -184,10 +202,10 @@ public final class Crawl {
 		long now = level.getGameTime();
 		Rolling last = player.getAttached(ROLLING);
 		// a held key chains rolls back to back, so allow a couple of ticks of network jitter
-		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || com.jaymospowers.core.wounds.Downed.passedOut(player) || last != null && now - last.start() < ROLL_TICKS - 2) {
+		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || com.jaymospowers.core.wounds.Downed.passedOut(player) || last != null && now - last.start() < last.ticks() - 2) {
 			return;
 		}
-		Rolling next = nextRoll(last, now, right);
+		Rolling next = nextRoll(last, now, right, rollTicks(player));
 		if (next == null) {
 			return;
 		}
@@ -224,7 +242,7 @@ public final class Crawl {
 		if (rolling == null) {
 			return null;
 		}
-		float t = (gameTime - rolling.start() + partialTick) / ROLL_TICKS;
+		float t = (gameTime - rolling.start() + partialTick) / Math.max(1, rolling.ticks());
 		if (t < 0.0F || t >= 1.0F) {
 			return null;
 		}
