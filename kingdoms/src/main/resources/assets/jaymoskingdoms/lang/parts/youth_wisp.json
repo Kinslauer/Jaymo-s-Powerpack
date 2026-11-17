@@ -39,7 +39,5 @@
   "message.jaymoskingdoms.youth_wisp.bye.3": "Anytime!",
   "message.jaymoskingdoms.youth_wisp.voice.0": "I heard you! Type your question in chat.",
   "message.jaymoskingdoms.youth_wisp.voice.1": "You called? Ask me in chat!",
-  "message.jaymoskingdoms.youth_wisp.voice.2": "Here! What do you want to know? Type it in chat.",
-  "hud.jaymoskingdoms.youth_hearing.open": "Youth can hear you",
-  "hud.jaymoskingdoms.youth_hearing.closed": "Youth can't hear voices here"
+  "message.jaymoskingdoms.youth_wisp.voice.2": "Here! What do you want to know? Type it in chat."
 }

@@ -29,7 +29,9 @@
 - Classes: `inhabitants/YouthEars` (new), `inhabitants/YouthWisp` (`calledByVoice`, `BYE`, `ANSWER_TIMEOUT`), `VoiceRange`
   (feeds it the decoded voice). Lang: `youth_wisp.bye.*`, `youth_wisp.voice.*`.
 - The voice part is compiled only; it hasn't run (Vosk not loaded or tried on speech here).
-- **"Youth can hear you"** (Andy): while you talk in voice chat, a small line at the top of the screen says whether
-  Youth is listening ("Youth can hear you" in its leaf-green, or grey "Youth can't hear voices here" when the ears are
-  off or failed, or in singleplayer). It fades a moment after you stop. `YouthEars.Hearing`, drawn in
-  `client/inhabitants/YouthWispRenderer`. Lang: `hud.jaymoskingdoms.youth_hearing.*`.
+- **Can Youth hear you?** (Andy): while you talk in voice chat, Youth's face shows in voice chat's own player row (the
+  group heads, top left by default; it follows that row's position, size and direction settings, after any group heads),
+  framed in leaf-green when it can hear you and grey when it can't (ears off or failed, or singleplayer). It fades a
+  moment after you stop. `YouthEars.Hearing`, drawn in `client/inhabitants/YouthWispRenderer` (`drawHearing`,
+  `voiceRow`); icon `textures/gui/youth_icon.png` from `kingdoms/tools/gen_youth_icon.py` (the wisp's own face).
+  Group calls aren't proximity voice, so Youth doesn't listen to them and no face shows there.

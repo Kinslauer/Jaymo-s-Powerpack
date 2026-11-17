@@ -29,7 +29,11 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 	/** The "can Youth hear you" line: shown this long past the server's last word (it sends one every 0.4 s while you
 	 * talk), then faded over this long; its height from the top, and its colours. */
 	static final long HEARING_MS = 700L, HEARING_FADE_MS = 400L;
-	static final int HEARING_Y = 3, HEARING_OPEN = 0xBEF0D6, HEARING_CLOSED = 0x9A9A9A;
+	static final int HEARING_OPEN = 0x8CE0A8, HEARING_CLOSED = 0x8A8A8A;
+	/** Voice chat's heads are this far apart in its row (its own spacing). */
+	static final int ICON_STEP = 11;
+	/** Youth's face for that row (kingdoms/tools/gen_youth_icon.py). */
+	static final Identifier ICON = JaymosKingdoms.id("textures/gui/youth_icon.png");
 	private static long hearingAt = -HEARING_MS - HEARING_FADE_MS;
 	private static boolean hearing;
 
@@ -58,8 +62,12 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 	}
 
 	/**
-	 * While you talk in voice chat, a line at the top of the screen: "Youth can hear you" in its leaf-green, or "Youth
-	 * can't hear voices here" in grey ({@link com.jaymoskingdoms.inhabitants.YouthEars}). It fades out once you stop.
+	 * While you talk in voice chat, Youth sits in voice chat's own player row (Andy: "it should just go in the existing
+	 * box that we have for players"): Simple Voice Chat's group icons, top left by default, one head every 11 pixels. Its
+	 * face goes in the next place after the group's heads (the first place when you're in no group), framed in its
+	 * leaf-green when it can hear you, grey when it can't ({@link com.jaymoskingdoms.inhabitants.YouthEars}). Where that
+	 * row is, how big and which way it runs come from voice chat's own client settings, read by name
+	 * ({@link #voiceRow}); without them, its defaults. It fades out once you stop.
 	 */
 	private static void drawHearing(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		long since = net.minecraft.util.Util.getMillis() - hearingAt;
@@ -68,11 +76,57 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 		}
 		float k = since < HEARING_MS ? 1.0F : 1.0F - (since - HEARING_MS) / (float) HEARING_FADE_MS;
 		int alpha = Math.max(8, Math.round(255 * k));
-		net.minecraft.network.chat.Component line = net.minecraft.network.chat.Component.translatable(
-			hearing ? "hud.jaymoskingdoms.youth_hearing.open" : "hud.jaymoskingdoms.youth_hearing.closed");
-		net.minecraft.client.gui.Font font = net.minecraft.client.Minecraft.getInstance().font;
-		int x = (graphics.guiWidth() - font.width(line)) / 2;
-		graphics.text(font, line, x, HEARING_Y, alpha << 24 | (hearing ? HEARING_OPEN : HEARING_CLOSED), true);
+		VoiceRow row = voiceRow();
+		var pose = graphics.pose();
+		pose.pushMatrix();
+		if (row.x() < 0) {
+			pose.translate(graphics.guiWidth(), 0.0F);
+		}
+		if (row.y() < 0) {
+			pose.translate(0.0F, graphics.guiHeight());
+		}
+		pose.translate(row.x(), row.y());
+		pose.scale(row.scale(), row.scale());
+		float step = ICON_STEP * row.index() * (row.vertical() ? (row.y() < 0 ? -1 : 1) : (row.x() < 0 ? -1 : 1));
+		pose.translate(row.vertical() ? 0.0F : step, row.vertical() ? step : 0.0F);
+		int ox = row.x() < 0 ? -10 : 0, oy = row.y() < 0 ? -10 : 0;
+		int frame = alpha << 24 | (hearing ? HEARING_OPEN : HEARING_CLOSED);
+		graphics.fill(ox, oy, ox + 10, oy + 1, frame);
+		graphics.fill(ox, oy + 9, ox + 10, oy + 10, frame);
+		graphics.fill(ox, oy + 1, ox + 1, oy + 9, frame);
+		graphics.fill(ox + 9, oy + 1, ox + 10, oy + 9, frame);
+		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, ICON, ox + 1, oy + 1, 0.0F, 0.0F, 8, 8, 8, 8,
+			(hearing ? alpha : alpha / 2) << 24 | 0xFFFFFF);
+		pose.popMatrix();
+	}
+
+	/** Where voice chat's player row is: its x and y (negative: from the right or bottom), scale, direction, and Youth's place in it. */
+	record VoiceRow(int x, int y, float scale, boolean vertical, int index) {
+	}
+
+	/**
+	 * Simple Voice Chat's group icon settings (its client config) and how many heads its row shows now, read by name since
+	 * it has no API for them; its defaults when it isn't there or anything is off.
+	 */
+	static VoiceRow voiceRow() {
+		try {
+			Class<?> client = Class.forName("de.maxhenkel.voicechat.VoicechatClient");
+			Object config = client.getField("CLIENT_CONFIG").get(null);
+			int x = ((Number) entry(config, "groupPlayerIconPosX")).intValue(), y = ((Number) entry(config, "groupPlayerIconPosY")).intValue();
+			float scale = ((Number) entry(config, "groupHudIconScale")).floatValue();
+			boolean vertical = "VERTICAL".equals(String.valueOf(entry(config, "groupPlayerIconOrientation")));
+			boolean own = (Boolean) entry(config, "showOwnGroupIcon");
+			Object members = Class.forName("de.maxhenkel.voicechat.voice.client.GroupChatManager").getMethod("getGroupMembers", boolean.class)
+				.invoke(null, own);
+			return new VoiceRow(x, y, scale, vertical, ((java.util.List<?>) members).size());
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			return new VoiceRow(4, 4, 2.0F, true, 0);
+		}
+	}
+
+	private static Object entry(Object config, String name) throws ReflectiveOperationException {
+		Object entry = config.getClass().getField(name).get(config);
+		return entry.getClass().getMethod("get").invoke(entry);
 	}
 
 	private static void drawFlash(GuiGraphicsExtractor graphics, DeltaTracker delta) {

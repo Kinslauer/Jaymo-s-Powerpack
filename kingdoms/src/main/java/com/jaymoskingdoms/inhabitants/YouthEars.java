@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
  * background thread; if any of it fails (no network, an unsupported machine), Youth just doesn't hear voices, and says
  * why in the log once. An empty file {@code config/jaymoskingdoms/youth-ears/off} turns it off.
  *
- * <p>While you talk, a line at the top of your screen says whether Youth can hear you (Andy): the server sends
+ * <p>While you talk, Youth's face in voice chat's player row says whether it can hear you (Andy): the server sends
  * {@link Hearing} a couple of times a second while your voice comes in, open or not, and the client shows it a moment
  * past the last one.
  */
