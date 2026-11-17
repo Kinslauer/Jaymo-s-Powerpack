@@ -1,7 +1,8 @@
 """
 The Blockbench project for Youth, the wood-wisp (kingdoms/art/youth_wisp.bbmodel): a small, half-there Sylvan boy with two
 pairs of fae wings, who flies like a cocky lost boy rather than drifts like a fairy light (Andy: "think peter pan, less
-navi"; quick moves, he's so small), and his animations (8 idles he wanders between, plus appear, vanish and talk). Our own model, cubes and texture made here. Then run tools/bbmodel_geckolib.py on it.
+navi"; quick moves, he's so small), and his animations (8 idles he wanders between, 4 thinking ones he wanders between while an answer is coming, plus appear,
+vanish and talk). Our own model, cubes and texture made here. Then run tools/bbmodel_geckolib.py on it.
 
 Blockbench space: y up, the front at -z, the model's right at +x. Rotations as Blockbench shows them: +x swings a hanging
 limb forward and up (and tips an upright part back), +z lifts the right arm (at +x) out to the side.
@@ -198,6 +199,41 @@ def animations():
 								  (0.75, (20, 0, 0)), (0.9, (8, 0, 0)), (1.2, Z)]},
 			"right_arm": {"rotation": [(0, Z), (0.12, (40, -30, 0)), (1.05, (40, -30, 0)), (1.2, Z)]},
 			"left_arm": {"rotation": [(0, Z), (0.12, (40, 30, 0)), (1.05, (40, 30, 0)), (1.2, Z)]}})),
+		# thinking, while an answer is coming (YouthWisp#THINKING): busy, so nobody takes him for frozen
+		# T1. chin in hand, head cocked, a nod now and then, one foot swinging
+		anim("think.ponder", 2.0, "once", tracks(wings(2.0, 0.14, 16), {
+			"right_arm": {"rotation": [(0, Z), (0.15, (115, -35, 0)), (1.85, (115, -35, 0)), (2.0, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.15, (45, 40, 0)), (1.85, (45, 40, 0)), (2.0, Z)]},
+			"head": {"rotation": [(0, Z), (0.2, (-6, 0, 12)), (0.7, (-2, 0, 14)), (0.85, (-10, 0, 12)), (1.0, (-2, 0, 14)),
+								  (1.5, (-6, 0, 10)), (1.8, (-6, 0, 12)), (2.0, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.2, (40, 0, -15)), (1.8, (40, 0, -15)), (2.0, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.3, (20, 0, 0)), (0.6, (45, 0, 0)), (0.9, (20, 0, 0)), (1.2, (45, 0, 0)),
+									  (1.5, (20, 0, 0)), (1.8, (45, 0, 0)), (2.0, Z)]}})),
+		# T2. paces the air side to side, hands behind his back, head down
+		anim("think.pace", 2.4, "once", tracks(wings(2.4, 0.12, 20), kick(2.4, 18, 0.4), {
+			"root": {"position": [(0, Z), (0.6, (-5, 0, 0)), (0.75, (-5, 0, 0)), (1.65, (5, 0, 0)), (1.8, (5, 0, 0)), (2.4, Z)],
+					 "rotation": [(0, Z), (0.12, (0, 90, 0)), (0.6, (0, 90, 0)), (0.75, (0, -90, 0)), (1.65, (0, -90, 0)),
+								  (1.8, (0, 90, 0)), (2.25, (0, 90, 0)), (2.4, Z)]},
+			"right_arm": {"rotation": [(0, Z), (0.15, (-40, 0, 12)), (2.25, (-40, 0, 12)), (2.4, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.15, (-40, 0, -12)), (2.25, (-40, 0, -12)), (2.4, Z)]},
+			"head": {"rotation": [(0, Z), (0.2, (-18, 0, 0)), (2.2, (-18, 0, 0)), (2.4, Z)]}})),
+		# T3. scratches his head, the other fist on his hip, head tipping side to side
+		anim("think.scratch", 1.4, "once", tracks(wings(1.4, 0.12, 20), {
+			"right_arm": {"rotation": [(0, Z), (0.15, (165, 0, 15)), (0.3, (165, 0, 24)), (0.45, (165, 0, 8)),
+									   (0.6, (165, 0, 24)), (0.75, (165, 0, 8)), (0.9, (165, 0, 24)), (1.05, (165, 0, 8)),
+									   (1.25, (165, 0, 15)), (1.4, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.12, (-25, 0, -45)), (1.28, (-25, 0, -45)), (1.4, Z)]},
+			"head": {"rotation": [(0, Z), (0.2, (-4, 0, -12)), (0.7, (-4, 0, 10)), (1.2, (-4, 0, -8)), (1.4, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.15, (10, 0, 6)), (1.25, (10, 0, 6)), (1.4, Z)]}})),
+		# T4. rolls over to hang upside down in the air, arms folded, mulling it, then rolls back up
+		anim("think.upside", 2.0, "once", tracks(wings(2.0, 0.14, 16), {
+			"root": {"rotation": [(0, Z), (0.3, (0, 0, 180)), (1.7, (0, 0, 180)), (2.0, (0, 0, 360))],
+					 "position": [(0, Z), (0.3, (0, 16, 0)), (1.7, (0, 16, 0)), (2.0, Z)]},
+			"right_arm": {"rotation": [(0, Z), (0.3, (75, -45, 0)), (1.7, (75, -45, 0)), (2.0, Z)]},
+			"left_arm": {"rotation": [(0, Z), (0.3, (65, 45, 0)), (1.7, (65, 45, 0)), (2.0, Z)]},
+			"head": {"rotation": [(0, Z), (0.4, (-8, 0, 0)), (0.8, (-8, 0, 10)), (1.2, (-8, 0, -10)), (1.6, (-8, 0, 0)), (2.0, Z)]},
+			"right_leg": {"rotation": [(0, Z), (0.3, (0, 0, 8)), (1.7, (0, 0, 8)), (2.0, Z)]},
+			"left_leg": {"rotation": [(0, Z), (0.3, (0, 0, -8)), (1.7, (0, 0, -8)), (2.0, Z)]}})),
 		# coming and going: zips in out of nothing, zips off upward
 		anim("appear", 0.5, "once", {
 			"root": {"scale": [(0, Z), (0.3, (1.25, 1.25, 1.25)), (0.5, (1, 1, 1))],

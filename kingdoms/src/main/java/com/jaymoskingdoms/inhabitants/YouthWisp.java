@@ -117,6 +117,20 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final String[] IDLES = {"hover", "crow", "flip", "sit", "swoop", "lounge", "spin", "laugh"};
 	static final float[] IDLE_SECONDS = {1.2F, 1.3F, 0.7F, 1.8F, 0.8F, 1.8F, 0.6F, 1.2F};
 	static final int[] IDLE_WEIGHT = {3, 1, 1, 1, 1, 1, 1, 1};
+	/**
+	 * The four it wanders between while it thinks (an answer is coming, {@link #THINKING}): chin in hand, pacing the air,
+	 * scratching its head, hanging upside down. Never the same one twice running, and only a short hover between them,
+	 * so it is plainly busy, not frozen. How long each plays (seconds).
+	 */
+	static final String[] THINKS = {"ponder", "pace", "scratch", "upside"};
+	static final float[] THINK_SECONDS = {2.0F, 2.4F, 1.4F, 2.0F};
+	/** The hover between two thinking animations (ticks, a random length between these). */
+	static final int THINK_GAP_MIN = 4, THINK_GAP_MAX = 12;
+	/** While it thinks, three dots of light wink on over its head in turn, one every this many ticks. */
+	static final int DOT_EVERY = 6;
+	/** Thinking: summoned for a question whose answer hasn't come yet. Synced, so the client plays the thinking set. */
+	static final net.minecraft.network.syncher.EntityDataAccessor<Boolean> THINKING = net.minecraft.network.syncher.SynchedEntityData
+		.defineId(YouthWisp.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
 	static final RawAnimation HOVER = RawAnimation.begin().thenLoop("hover");
 	static final RawAnimation APPEAR = RawAnimation.begin().thenPlay("appear");
 	static final RawAnimation VANISH = RawAnimation.begin().thenPlayAndHold("vanish");
@@ -130,8 +144,6 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private Vec3 spot = Vec3.ZERO;
 	private int lastAsked;
 	private int lastHint = -HINT_COOLDOWN - 1;
-	/** Summoned for a question whose answer hasn't come yet. */
-	private boolean pending;
 	private int vanishing = -1;
 	/** The current idle behavior mode. */
 	private BehaviorMode behaviorMode = BehaviorMode.DRIFT;
@@ -143,12 +155,28 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private RawAnimation idle = HOVER;
 	private int idleIndex;
 	private int idleUntil;
+	private boolean wasThinking;
 
 	public YouthWisp(EntityType<? extends YouthWisp> type, Level level) {
 		super(type, level);
 		this.setNoGravity(true);
 		this.noPhysics = true;
 		this.setPersistenceRequired();
+	}
+
+	@Override
+	protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder entityData) {
+		super.defineSynchedData(entityData);
+		entityData.define(THINKING, false);
+	}
+
+	/** Summoned for a question whose answer hasn't come yet. */
+	boolean pending() {
+		return this.entityData.get(THINKING);
+	}
+
+	void setPending(boolean pending) {
+		this.entityData.set(THINKING, pending);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -205,7 +233,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public static @Nullable YouthWisp hold(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
-			wisp.pending = true;
+			wisp.setPending(true);
 		}
 		return wisp;
 	}
@@ -232,11 +260,15 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		// its name calls it; with its wisp already beside them, a plain question is asked of it too
 		if (CALL.matcher(text).find() || has(player) && QUESTION.matcher(text.strip()).matches()) {
 			YouthWisp wisp = summon(player);
+			String question = rest.replaceAll("\\s+", " ").strip();
 			if (wisp != null) {
 				wisp.lastAsked = wisp.tickCount;
+				// a question (not only its name) and it starts thinking at once, till the answer comes
+				if (!question.isEmpty()) {
+					wisp.setPending(true);
+				}
 			}
-			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(),
-				rest.replaceAll("\\s+", " ").strip());
+			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(), question);
 		}
 	}
 
@@ -367,7 +399,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
-			wisp.pending = false;
+			wisp.setPending(false);
 			wisp.triggerAnim("action", "talk");
 		}
 		return wisp;
@@ -472,7 +504,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		ServerPlayer player = this.askerPlayer();
 		if (player == null || player.level() != level || player.distanceToSqr(this) > LEASH * LEASH
 			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
-			if (player != null && this.pending && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
+			if (player != null && this.pending() && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
 				this.triggerAnim("action", "talk");
 				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
@@ -549,6 +581,14 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		}
 		if (this.tickCount % MOTE_EVERY == 0) {
 			level.sendParticles(Fx.mote(COLOUR, 0.6F), this.getX(), this.getY() + 0.3, this.getZ(), 1, 0.15, 0.1, 0.15, 0.0);
+		}
+		if (this.pending() && this.tickCount % DOT_EVERY == 0) {
+			// "...": a dot over its head, left to right across where it faces, then again
+			int dot = this.tickCount / DOT_EVERY % 3 - 1;
+			float yaw = this.getYRot() * Mth.DEG_TO_RAD;
+			double sx = Math.cos(yaw) * 0.18 * dot, sz = Math.sin(yaw) * 0.18 * dot;
+			level.sendParticles(Fx.mote(COLOUR, 0.5F), this.getX() + sx, this.getY() + this.getBbHeight() + 0.25, this.getZ() + sz,
+				1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -636,10 +676,28 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			this.idleRandom = RandomSource.create(this.getId() * 0x9E3779B97F4A7C15L);
 			this.idleUntil = this.tickCount + gap(this.idleRandom);
 		}
+		boolean thinking = this.pending();
+		if (thinking != this.wasThinking) {
+			// starts (or stops) thinking: the next animation now, from the other set
+			this.wasThinking = thinking;
+			this.idleIndex = -1;
+			this.idleUntil = this.tickCount;
+		}
 		if (this.tickCount < this.idleUntil) {
 			return this.idle;
 		}
 		RandomSource random = this.idleRandom;
+		if (thinking) {
+			int pick = random.nextInt(this.idleIndex >= 0 && this.idleIndex < THINKS.length ? THINKS.length - 1 : THINKS.length);
+			if (this.idleIndex >= 0 && pick >= this.idleIndex) {
+				pick++;
+			}
+			this.idleIndex = pick;
+			this.idle = RawAnimation.begin().thenPlay(THINKS[pick]).thenLoop("hover");
+			this.idleUntil = this.tickCount + Math.round(THINK_SECONDS[pick] * 20) + THINK_GAP_MIN
+				+ random.nextInt(THINK_GAP_MAX - THINK_GAP_MIN + 1);
+			return this.idle;
+		}
 		int total = 0;
 		for (int i = 0; i < IDLES.length; i++) {
 			total += i == this.idleIndex ? 0 : IDLE_WEIGHT[i];
