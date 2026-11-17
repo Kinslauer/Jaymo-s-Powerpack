@@ -432,6 +432,12 @@ foot for the place. Coming nearer than `near` blocks where they can see you (hal
 more than `far` behind for twelve seconds goes `lost`; still with them when they arrive, the tale goes on, and that's
 where they stand from then. Don't give them `hours` that end before the walk does.
 
+### a field to cut: `"do": "reap"`
+
+`{ "do": "reap", "at": place, "count": 16, "crop": "minecraft:wheat" }`. The first time the player comes near the
+place a small ripe field stands there (nine by nine, ploughed where the ground is earth, a pool in the middle); the
+step is done when `count` ripe plants have been cut in it. The Barley Cut uses it.
+
 ### know the beast: `weak_to`
 
 On a foe step: `"weak_to": [ { "know": condition, "item": id or #tag, "share": 0.7, "journal": "why it was easier",

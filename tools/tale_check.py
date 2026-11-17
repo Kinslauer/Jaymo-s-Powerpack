@@ -21,6 +21,7 @@ STEP_FIELDS = {
     "name": {"who", "say", "suspects", "none", "not_now"},
     "vigil": {"at", "radius", "lines", "gap", "left"},
     "tail": {"who", "to", "near", "far", "seen", "lost"},
+    "reap": {"at", "count", "crop"},
     "go": {"to", "radius"},
     "search": {"at", "clues", "need"},
     "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at", "spared_returns", "weak_to"},
@@ -54,7 +55,7 @@ REQUIRED = {
     "escort": {"who", "to"}, "pack": {"at", "foes", "count"}, "build": {"at", "blocks", "count"}, "blast": {"at"},
     "stash": {"at", "item", "count"}, "lamps": {"at", "count"},
     "rescue": {"who", "at"}, "capture": {"who", "at"}, "await": {"who"},
-    "name": {"who", "suspects"}, "vigil": {"at", "lines"}, "tail": {"who", "to", "seen", "lost"},
+    "name": {"who", "suspects"}, "vigil": {"at", "lines"}, "tail": {"who", "to", "seen", "lost"}, "reap": {"at", "count"},
 }
 # Whose kin a captive is, and what a criminal is wanted for (work.jaymoskingdoms.kin.* / crime.* in lang/parts/captures.json).
 KIN = {"daughter", "son", "sister", "brother", "wife", "husband", "mother", "father", "apprentice", "neighbour"}
@@ -609,6 +610,12 @@ def check_tale(path):
                         check_condition(c, lw, line["if"], tale)
             if "left" in step:
                 check_then(c, where + ".left", step["left"], tale, edges)
+        elif do == "reap":
+            check_place(c, where, step["at"], tale)
+            if not (isinstance(step["count"], int) and 1 <= step["count"] <= 60):
+                c.err(where, "count is how many ripe plants to cut (1 to 60; the field holds about 80)")
+            if "crop" in step and not ITEM.match(step["crop"]):
+                c.err(where, f"'{step['crop']}' is not a block id")
         elif do == "tail":
             check_role(c, where, step["who"], tale)
             check_place(c, where, step["to"], tale)

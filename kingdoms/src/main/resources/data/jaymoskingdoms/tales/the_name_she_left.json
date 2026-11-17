@@ -16,6 +16,8 @@
   "roll": { "fate": ["lame", "taken", "done"] },
   "cast": {
     "wren": { "name": ["Wren"], "body": "villager", "job": "fisherman", "female": true, "at": "clearing" },
+    "seeker": { "name": ["Hal Ashdown", "Ned Ashdown", "Col Ashdown"], "body": "villager", "job": "shepherd", "female": false, "at": "hut", "hours": "day" },
+    "seeker_man": { "name": ["Dunstan Pike", "Wat Kell", "Odo Marsh"], "body": "villager", "job": "none", "female": false, "at": "hut", "hours": "day" },
     "father": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "gully", "if": "fate=lame" },
     "father_held": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "cut", "if": "fate=taken" },
     "chief": { "name": ["Marrow Jack", "Bess Calder", "Tam Rudd"], "body": "fighter", "at": "cut", "if": "fate=taken",
@@ -56,6 +58,16 @@
     "ask_where": {
       "do": "talk", "who": "wren",
       "say": "There is a hut the shepherds use in summer, {way:hut}. He took me up there every year until I was twelve, to count the lambs and to be away from my mother's tongue.\nIf he thinks I ran, that is where he thinks I ran to. Start there. And if you find him... no. Find him first.",
+      "then": "ask_search"
+    },
+    "ask_search": {
+      "do": "talk", "who": "wren",
+      "say": [
+        "One thing more, and it matters. The search has not all gone home. My cousin {seeker} is still on that hill with a man of the miller's. They sit at the hut by day, and go down to the low fold at dusk.",
+        "{seeker} taught me to whistle. He would know me by my walk across a field. If he hears there is a deckhand at the burners' who keeps her hood up, he will come and look, and he will not need to look twice.",
+        "Go up after dark if you can, and have the hut to yourself. If they see you, you came from nowhere, and you never saw me."
+      ],
+      "journal": "Wren's cousin {seeker} is still searching the hill with a man of the miller's. They keep the shepherds' hut by day and go down at dusk. If they learn where she is, she is found.",
       "then": "to_hut"
     },
     "to_hut": { "do": "go", "to": "hut", "goal": "Go up to {place:hut}", "then": "search_hut" },
@@ -68,7 +80,93 @@
         { "name": "A cut strap", "item": "minecraft:leather", "lore": ["The strap of a bread bag, cut clean with a knife, not torn.", "Three sets of boots came to the door, and four went away."], "journal": "Somebody took him from the hut. Three came, four left, toward the old quarry.", "if": "fate=taken" },
         { "name": "Small stones, sorted", "item": "minecraft:cobblestone", "lore": ["A heap of flat stones by the door, picked for size, and a track worn from it up to the saddle.", "An old man's work, a few stones at a time."], "journal": "He had been carrying stones up to the saddle above the hut, a few at a time.", "if": "fate=done" }
       ],
-      "then": { "?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn" }
+      "then": { "?met:seeker": "seekers", "?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn" }
+    },
+    "seekers": {
+      "do": "talk", "who": "seeker", "when": "day", "goal": "Speak with the men at the hut",
+      "say": {
+        "?mark:bride_road_lie": [
+          "Hold there. You're no shepherd, and you have been through that hut like a bailiff. I'm {seeker}. That's {seeker_man}, the miller's man. We are eleven days after my uncle, old Edric Ashdown, who came up here with a stick to look for his dead girl's bones.",
+          "The road took her, they say. I helped carry the empty box. He never believed it, and now the hill has him too. So. Who are you, and who sends a stranger up here? You came up from the burners' side. I watched you."
+        ],
+        "?": [
+          "Hold there. You're no shepherd, and you have been through that hut like a bailiff. I'm {seeker}. That's {seeker_man}, the miller's man. We are eleven days after my uncle, old Edric Ashdown, who came up here with a stick to fetch home a girl who ran from her wedding.",
+          "She was my cousin. Half our valley spits when it says her name, and the other half has stopped saying it. He went after her all the same, and now the hill has him. So. Who are you, and who sends a stranger up here? You came up from the burners' side. I watched you."
+        ]
+      },
+      "replies": [
+        { "say": "I'm after the same old man. A friend of his sent me. That's all there is to it.", "then": "seekers_careful", "mark": "wren_passed_search", "journal": "I met Wren's cousin {seeker} and the miller's man at the hut. They took me for one more searcher and let me by.", "try": {"how": "persuade", "odds": 1, "helps": ["dress:plain"], "hurts": ["dress:armoured", "dress:bloodied"], "fail": "seekers_pressed", "refuse": "A friend of his. He has a wife and he has creditors. He has not got friends who hire."} },
+        { "say": "You're on the wrong hill. I saw an old man's fire on the east ridge yesterday.", "then": "seekers_wrong", "mark": "wren_sent_wrong", "journal": "I sent Wren's cousin and the miller's man off to the east ridge, after a fire that was never there.", "returns": {"who": "seeker_man", "days": [7, 12], "as": "warning", "say": "You'll remember me. The miller's man, off the hill. We walked the east ridge three days on your word. No fire, no ash, not a turned stone. {seeker} says you were mistaken. I say anyone who sends two searchers off a hill wants the hill to themselves. I've told the miller so. Mind how you go in our valley."} },
+        { "say": "His daughter sent me. She is alive.", "then": "seekers_truth", "mark": "wren_found", "journal": "I told Wren's cousin {seeker} that she is alive." }
+      ]
+    },
+    "seekers_pressed": {
+      "do": "talk", "who": "seeker",
+      "say": [
+        "No. {seeker_man} was at the burners' on Tuesday, asking. There is a deckhand lodging there with black hands, who keeps her hood up and will not say what boat. And now here is a stranger up from that side, sent by a friend with no name.",
+        "I'll ask it plain, then. Who is at the burners'?"
+      ],
+      "replies": [
+        { "say": "Nobody but burners. Go and count them.", "then": "seekers_lied", "mark": "wren_lied_search", "journal": "Wren's cousin {seeker} asked me straight who was lodging at the burners'. I told him nobody but burners.", "lie": {"name": "wren_nobody_there", "days": [5, 9], "unless": "mark:wren_cairn", "town": ["A shepherd from over the hills was at the charcoal burners', looking at their beds. He counted one more than there were burners.", "Some stranger swore there was nobody at the burners' but burners. Somebody had slept there who smelt of fish."], "returns": {"who": "seeker", "as": "warning", "say": "Don't trouble to stand. I went down to the burners' myself, after. One bed still warm, a smell of fish, and a billet of wood with a wren cut in the end of it, the way I used to cut them for her. So I know what I know. I've said nothing at home, and I may go on saying nothing. But you looked me in the face on that hill and lied, and I wanted you to know that I know that as well."}} },
+        { "say": "You're on the wrong hill. I saw an old man's fire on the east ridge yesterday.", "then": "seekers_wrong", "mark": "wren_sent_wrong", "journal": "I sent Wren's cousin and the miller's man off to the east ridge, after a fire that was never there.", "returns": {"who": "seeker_man", "days": [7, 12], "as": "warning", "say": "You'll remember me. The miller's man, off the hill. We walked the east ridge three days on your word. No fire, no ash, not a turned stone. {seeker} says you were mistaken. I say anyone who sends two searchers off a hill wants the hill to themselves. I've told the miller so. Mind how you go in our valley."} },
+        { "say": "His daughter sent me. She is alive.", "then": "seekers_truth", "mark": "wren_found", "journal": "I told Wren's cousin {seeker} that she is alive." }
+      ]
+    },
+    "seekers_careful": {
+      "do": "talk", "who": "seeker",
+      "say": "Well. A third pair of eyes, whoever is paying for them. We have done the west side as far as the burn. Take the hut and the saddle, and shout if you find so much as a button. {seeker_man}, stop looking at the stranger's boots.",
+      "then": {"?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn"}
+    },
+    "seekers_lied": {
+      "do": "talk", "who": "seeker",
+      "say": "Burners. Well. {seeker_man} cannot count past his fingers, that's true enough. Go on, then. The hut and the saddle are yours. We have the west side to finish before the light goes.",
+      "then": {"?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn"}
+    },
+    "seekers_wrong": {
+      "do": "talk", "who": "seeker",
+      "say": "The east ridge. That's a day round by the burn. He'd not have gone east, there is nothing east but stone. No. A fire is a fire, and I have nothing better. {seeker_man}, get the bags.",
+      "then": {"?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn"}
+    },
+    "seekers_truth": {
+      "do": "talk", "who": "seeker",
+      "say": [
+        "Alive.",
+        "{seeker_man}. You heard nothing. No. You heard, and you will be down the valley with it before dark, I can see your feet going already. Go, then. Tell the miller. Tell my aunt.",
+        "And you. Where is she? No. Don't say. The burners'. The one with the hood. I stood ten yards from her on Tuesday and bought charcoal. I'm going down. You have done what you came up here to do, whatever that was."
+      ],
+      "journal": "{seeker} has gone down to the burners' clearing to find her, and the miller's man has gone to tell the valley.",
+      "then": "back_down"
+    },
+    "back_down": {
+      "do": "go", "to": "clearing", "goal": "Get back down to {place:clearing}",
+      "then": "found_out"
+    },
+    "found_out": {
+      "do": "talk", "who": "wren", "goal": "Speak with Wren",
+      "say": [
+        "{seeker} was here before you. He stood at the edge of the stacks and said my old name, the whole of it, the way my mother says it. I had a billet of wood in my hand. I put it down.",
+        "The miller's man has gone down the valley at a run, so by tomorrow night every door in it knows. {seeker} has gone back up for my father, with whoever he can raise. He said they know that hill, and that you had done enough.",
+        "You told them. I asked you for one thing besides the finding."
+      ],
+      "replies": [
+        { "say": "He asked me about his own kin. I would not lie to him.", "then": {"?fate=lame": "wait_found_lame", "?fate=taken": "wait_found_taken", "?": "wait_found_done"}, "journal": "Wren's cousin reached her before I did. I told her I would not lie to a man asking after his own kin." },
+        { "say": "It was a mistake. I am sorry for it.", "then": {"?fate=lame": "wait_found_lame", "?fate=taken": "wait_found_taken", "?": "wait_found_done"}, "journal": "Wren's cousin reached her before I did. I told her I was sorry." }
+      ]
+    },
+    "wait_found_lame": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": {"from": "Wren", "lines": ["{seeker} found him in the gully below the hut with his leg gone under him, and carried him down on his back. They brought him past the stacks so that he could see me. He did not make a speech. He asked whether I was eating.", "I am to be fetched home on Thursday. I shall not be here on Wednesday. The Grey Hen sails on the tide, and her master does not ask.", "So I have run twice, and this time they all know it, and he must live among them knowing it. I do not thank you. I think you meant no harm, and I have learned what that is worth."]},
+      "then": "end:found"
+    },
+    "wait_found_taken": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": {"from": "Wren", "lines": ["Once there was a living girl to shame them, eight went up from the valley who would not go for a dead one. They took my father out of the old quarry cut without a blow struck. Outlaws do not haggle with eight.", "So he is home and whole, and that is as much your doing as anyone's. I am to be fetched home on Thursday. I shall not be here on Wednesday. The Grey Hen sails on the tide, and her master does not ask.", "He will have to live among them now, the father of the one who ran twice. I do not thank you. I think you meant no harm, and I have learned what that is worth."]},
+      "then": "end:found"
+    },
+    "wait_found_done": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": {"from": "Wren", "lines": ["{seeker} found him on the saddle above the hut, sitting against a cairn he had been building, with his face to the water. Two nights dead. They carried him down and put him in the burying ground at home, facing the mill. He hated that mill.", "They let me stand at the back, in a borrowed hood. Nobody spoke to me, and nobody stopped me at the gate after. Perhaps that is all the fetching there will be.", "{seeker} gave me a letter that was in his coat. It stops in the middle of a line. I do not thank you, and I do not blame you. If you had kept my secret, he would be sitting up there yet."]},
+      "then": "end:found"
     },
 
     "to_gully": { "do": "go", "to": "gully", "goal": "Climb down into {place:gully}", "then": "father_found" },
@@ -237,23 +335,37 @@
     "reunited": {
       "text": "Wren's father lives on the shingle by the Grey Hen now, mending nets badly. Their town thinks the hills took him, as the road took her.",
       "reward": { "coins": 8, "items": ["minecraft:cod*8", "minecraft:nautilus_shell*1"] }, "marks": ["wren_reunited"],
+      "later": [{"days": [14, 24], "if": "mark:caught:wren_nobody_there", "letter": {"from": "Wren", "lines": ["My cousin came down to the shingle. Somebody had told him there was nobody at the burners' but burners, and he had gone to see for himself, and followed the smell of fish from there.", "He saw my father before he saw me, mending a net and arguing with it. He sat down on a bollard for a long time. Then he went home. He left a whistle on the mooring post, cut out of ash, the kind he used to make me.", "So there are three who know now, and one of them still lives in that valley. That was nearer than I like. I am not blaming you. I am telling you how near."]}}],
       "returns": { "who": "father", "days": [10, 16], "as": "thanks", "say": "I am told you are the one to thank for the knee, the daughter, and the smell of fish I shall never now be rid of. I count two of those to your credit. Here. Stockings. I knit now. Do not laugh.", "gift": ["minecraft:leather_boots*1", "minecraft:bread*4"] }
     },
     "parted": {
       "text": "Wren told her father no, and he carried it home without a word to anyone. She kept his stick.",
-      "reward": { "coins": 8, "items": ["minecraft:cod*8"] }, "marks": ["wren_parted"]
+      "reward": { "coins": 8, "items": ["minecraft:cod*8"] }, "marks": ["wren_parted"],
+      "later": [{"days": [14, 24], "if": "mark:caught:wren_nobody_there", "letter": {"from": "Wren", "lines": ["My cousin came down to the shingle and stood an hour looking at the boats. Somebody had told him there was nobody at the burners' but burners, and he had gone to see for himself, and found a berth still warm.", "He did not come aboard. He left a whistle on the mooring post, cut out of ash, the kind he used to make me. So he knows, and he has chosen to go home and not know.", "That was nearer than I like. I am not blaming you. I am telling you how near."]}}]
     },
     "unsaid": {
       "text": "I never told him, and he knew anyway. He sends her stockings with no name on the parcel. Neither of them has said a word.",
-      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unsaid"]
+      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unsaid"],
+      "later": [{"days": [14, 24], "if": "mark:caught:wren_nobody_there", "letter": {"from": "Wren", "lines": ["My cousin came down to the shingle and stood an hour looking at the boats. Somebody had told him there was nobody at the burners' but burners, and he had gone to see for himself, and found a berth still warm.", "He did not come aboard. He left a whistle on the mooring post, cut out of ash, the kind he used to make me. So he knows, and he has chosen to go home and not know.", "That was nearer than I like. I am not blaming you. I am telling you how near."]}}]
     },
     "cairn": {
       "text": "Wren buried her father herself, on the saddle facing the water. The valley says a ghost did it, and has stopped looking for her.",
       "reward": { "coins": 6, "items": ["minecraft:cod*6", "minecraft:nautilus_shell*1"] }, "marks": ["wren_cairn"]
     },
+    "found": {
+      "text": {
+        "?fate=lame": "I told Wren's cousin she was alive, and he found her. He carried her father down off the hill on his back. The whole valley knows now, and she went back to sea a day ahead of being fetched.",
+        "?fate=taken": "I told Wren's cousin she was alive, and he found her. With a living girl to shame them, the valley went up and took her father back from the outlaws. She went back to sea a day ahead of being fetched.",
+        "?": "I told Wren's cousin she was alive, and he found her. He found her father too, dead on the saddle, and carried him home to be buried. She stood at the back, and nobody stopped her at the gate."
+      },
+      "reward": {"coins": 4, "items": ["minecraft:cod*4"]},
+      "marks": ["wren_found"],
+      "returns": {"who": "seeker", "days": [10, 16], "as": "thanks", "say": "You could have lied to me on that hill. Plenty would have, and I'd never have known the difference. She is gone again, and I'll not say I blame her. But my aunt has stopped laying a place and staring at it. She knows the girl is living, and near enough where, and that is your doing. This is from her. She said to tell you it is not thanks. It is only bread.", "gift": ["minecraft:bread*6", "minecraft:mutton*4"]}
+    },
     "unseen": {
       "text": "I buried Wren's father alone so she would not be seen. She has his last letter, which stops in the middle of a line.",
-      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unseen"]
+      "reward": { "coins": 6, "items": ["minecraft:cod*6"] }, "marks": ["wren_unseen"],
+      "later": [{"days": [14, 24], "if": "mark:caught:wren_nobody_there", "letter": {"from": "Wren", "lines": ["My cousin came down to the shingle and stood an hour looking at the boats. Somebody had told him there was nobody at the burners' but burners, and he had gone to see for himself, and found a berth still warm.", "He did not come aboard. He left a whistle on the mooring post, cut out of ash, the kind he used to make me. So he knows, and he has chosen to go home and not know.", "That was nearer than I like. I am not blaming you. I am telling you how near."]}}]
     }
   }
 }

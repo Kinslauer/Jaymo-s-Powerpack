@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -288,6 +289,11 @@ public final class Tales {
 		TaleCast.register();
 		ServerTickEvents.END_SERVER_TICK.register(Tales::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(Tales::died);
+		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, be) -> {
+			if (world instanceof ServerLevel level && player instanceof ServerPlayer sp && stateOrNull(sp) != null) {
+				TaleWays.cut(level, sp, pos, state);
+			}
+		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(entity instanceof LivingEntity who)) {
 				return InteractionResult.PASS;
@@ -1982,6 +1988,7 @@ public final class Tales {
 			}
 			case "vigil" -> TaleWays.vigil(level, player, run, tale, step);
 			case "tail" -> TaleWays.tail(level, player, run, tale, step);
+			case "reap" -> TaleWays.reap(level, player, run, tale, step);
 			case "slay" -> {
 				Quest q = Quests.quest(player, run.quest());
 				if (q != null && q.counted()) {

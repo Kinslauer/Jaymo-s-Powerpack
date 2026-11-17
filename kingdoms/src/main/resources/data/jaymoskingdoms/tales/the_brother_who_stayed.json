@@ -288,6 +288,7 @@
       "text": "Corin is alive and forgives nothing. We mended his fence, and he told us when the barley is. {giver} means to be there for it.",
       "reward": { "coins": 6, "hearts": 12, "reputation": 8 },
       "marks": ["brother_alive", "brother_mended"],
+      "later": [{"days": [3, 5], "town": ["Corin up at the old farm has been asking the carters what day of the month it is. He never cared before. It's his barley, he says.", "There's a second scythe hung on the barn wall at the old farm. Corin says it was always there. It was not."]}],
       "town": ["That companion of the stranger's went home after twelve years. Got set to mending fences, I heard. Real ones.", "Twelve years gone and the brother put them straight to work. That's family."],
       "returns": { "who": "brother", "days": [12, 20], "as": "thanks", "say": "The barley's in. I'm not stopping, I was passing. It took two days less with the extra back, and I'll say so once. This is from the farm. Don't tell that one I carried it all this way.", "gift": ["minecraft:bread*8", "minecraft:wheat*16", "minecraft:mutton*4"] }
     },

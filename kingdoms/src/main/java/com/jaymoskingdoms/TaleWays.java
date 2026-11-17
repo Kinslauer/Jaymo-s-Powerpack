@@ -32,6 +32,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.attribute.EnvironmentAttributes;
@@ -49,7 +50,10 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -104,6 +108,13 @@ final class TaleWays {
 	 * out of reach before they're lost, and how near their journey's end counts as arrived.
 	 */
 	static final int TAIL_NEAR = 6, TAIL_FAR = 28, TAIL_LOST = 12, TAIL_ARRIVE = 5;
+	/**
+	 * A field to cut: how far it's sown round its place (blocks each way), how near the player comes before it stands
+	 * there, how far from its place a cut still counts, and the most the ground may rise or fall across it.
+	 */
+	static final int REAP_REACH = 4, REAP_NEAR = 40, REAP_RADIUS = 10, REAP_SLOPE = 3;
+	/** The run var of a field already sown (so it's sown once). */
+	static final String SOWN = "~sown:";
 	/** Set in a run's scratch as its step is left undone (its days ran out, a watch was walked out on, a job failed). */
 	static final String UNDONE = "undone";
 	private static final Pattern COMPARE = Pattern.compile("^(reputation|hearts|coins|since:[a-z0-9_]+)(>=|<)(-?\\d+)$");
@@ -730,6 +741,76 @@ final class TaleWays {
 		String mark = Tale.string(line, "mark", "");
 		if (!mark.isEmpty()) {
 			Tales.state(player).marks.add(mark);
+		}
+	}
+
+	// ---- a field to cut -----------------------------------------------------------------------------------------------------------
+
+	/**
+	 * A field to cut ({@code "do": "reap"}): the first time {@code player} comes near its place a small ripe field
+	 * stands there (ploughed where the ground is earth, a pool in the middle to keep it), and the step is done when
+	 * {@code count} ripe plants have been cut in it ({@link #cut}).
+	 */
+	static void reap(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step) {
+		BlockPos at = Tales.ground(level, run, tale, Tale.pickString(step, "at", Tales.facts(player, run), ""));
+		if (at == null || !now(player, run, step)) {
+			return;
+		}
+		double dx = at.getX() + 0.5 - player.getX(), dz = at.getZ() + 0.5 - player.getZ();
+		if (dx * dx + dz * dz > REAP_NEAR * REAP_NEAR || !level.isLoaded(at)) {
+			return;
+		}
+		String sown = SOWN + run.step;
+		if (!run.vars.containsKey(sown)) {
+			Tales.each(player, run, r -> r.vars.put(sown, "1"));
+			Identifier id = Identifier.tryParse(Tale.string(step, "crop", "minecraft:wheat"));
+			CropBlock crop = id != null && BuiltInRegistries.BLOCK.getValue(id) instanceof CropBlock c ? c : (CropBlock) Blocks.WHEAT;
+			for (int x = -REAP_REACH; x <= REAP_REACH; x++) {
+				for (int z = -REAP_REACH; z <= REAP_REACH; z++) {
+					BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.offset(x, 0, z));
+					BlockPos soil = top.below();
+					BlockState ground = level.getBlockState(soil);
+					if (Math.abs(top.getY() - at.getY()) > REAP_SLOPE || !ground.is(BlockTags.DIRT) && !ground.is(Blocks.FARMLAND)
+						|| !level.getBlockState(top).canBeReplaced()) {
+						continue;
+					}
+					if (x == 0 && z == 0) {
+						level.setBlockAndUpdate(soil, Blocks.WATER.defaultBlockState());
+						continue;
+					}
+					level.setBlockAndUpdate(soil, Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7));
+					level.setBlockAndUpdate(top, crop.getStateForAge(crop.getMaxAge()));
+				}
+			}
+		}
+		if (Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) >= Tale.number(step, "count", 8)) {
+			Tales.go(player, run, step.get("then"), null);
+		}
+	}
+
+	/** {@code player} broke {@code state} at {@code pos}: a ripe plant cut in the field of a {@code reap} step of theirs is counted. */
+	static void cut(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+		if (!(state.getBlock() instanceof CropBlock crop) || !crop.isMaxAge(state)) {
+			return;
+		}
+		for (Tales.Run run : Tales.state(player).runs) {
+			Tale tale = Tale.get(run.tale);
+			JsonObject step = tale == null ? null : tale.step(run.step);
+			if (step == null || !Tale.string(step, "do", "").equals("reap")) {
+				continue;
+			}
+			BlockPos at = Tales.place(level, run, tale, Tale.pickString(step, "at", Tales.facts(player, run), ""));
+			if (Math.abs(pos.getX() - at.getX()) > REAP_RADIUS || Math.abs(pos.getZ() - at.getZ()) > REAP_RADIUS) {
+				continue;
+			}
+			int cut = Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) + 1;
+			run.scratch.put("cut", Integer.toString(cut));
+			Quest q = Quests.quest(player, run.quest());
+			if (q != null) {
+				Quest.Objective o = q.objective();
+				Quests.put(player, q.withObjective(new Quest.Objective(o.target(), o.count(), Math.min(cut, o.count()), o.pos(), o.other(), o.otherName(), o.place(), o.spawned())));
+				Quests.sync(player, true);
+			}
 		}
 	}
 

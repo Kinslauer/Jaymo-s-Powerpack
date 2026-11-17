@@ -203,9 +203,167 @@
       ],
       "replies": [
         { "say": "Go in. Say all of it.", "then": "wait_told", "journal": "{son} went home alive. I told {giver} to go in to the widow's table and say all of it." },
+        { "say": "We go in together. I'll sit by you while you say it.", "then": "table_in", "journal": "{son} went home alive. I went in to the widow's table with {giver}." },
         { "say": "Pay the half hire. Leave the rest unsaid.", "then": "wait_paid", "journal": "{son} went home alive. I told {giver} to pay the widow the half hire and leave the rest unsaid.", "returns": { "who": "son", "days": [10, 16], "as": "warning", "say": "I've not brought the sword. I sold it back for seed. Mother put the guard's coin in the seed chest, where the sword money was. Then she sat up three nights at the table, with a chair pulled out. Nobody came to sit in it. Tell the guard that. It is all I came to say." } },
         { "say": "The boy is home. That is enough. We go.", "then": "wait_left", "journal": "{son} went home alive. I told {giver} that was enough, and we left the steading.", "against": ["honour"], "returns": { "who": "son", "days": [10, 16], "as": "warning", "say": "I've not brought the sword. I came to say this once. The guard stood at our wall a quarter of an hour and went down the path, and Mother watched it. If the guard comes up that path again, let it be to come in. If not, keep off the ford road. I'll not have been practising on a post." } }
       ]
+    },
+    "table_in": {
+      "do": "talk", "who": "widow", "goal": "Sit down at the Arkle table with {giver}",
+      "say": [
+        "Both of you, then. Sit. Not that chair. That one. I have kept it pulled out six years, and I'll not have it wasted on the wrong one of you.",
+        "{son} is in the back room with the door open. He'll hear what I hear. I'll not help you, {giver}. I have waited long enough that I can wait through a silence. Begin where it begins."
+      ],
+      "then": "table_one"
+    },
+    "table_one": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} can bring out",
+      "say": {
+        "?truth=ran": "Where it begins. It begins with me getting down on the far side of the wagon. If I say that, I have said I ran, in his own kitchen, with his boy behind that door. Or I can say that raiders came out of the willows, and there were six. That's true as well. Which do I say?",
+        "?truth=talked": "Where it begins. It begins the night before, at an inn, with a stranger buying. If I say that, I have said I put them in the willows myself. Or I can begin at the ford, where I fought. That's true as well. Which do I say?",
+        "?": "Where it begins. It begins with him in the shallows and me coming round beside him. If I say that, I must say whose hand it was at the end. Or I can say the raiders left him dying, and he died. That's true as well. Which do I say?"
+      },
+      "replies": [
+        { "say": "Say the hard one. Plainly.", "then": "table_one_heard", "mark": "owed_said_one", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the hard part, and {giver} did." },
+        { "say": "Say the part that's easier to hear.", "then": "table_one_heard", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the part that was easier to hear." }
+      ]
+    },
+    "table_one_heard": {
+      "do": "talk", "who": "widow", "goal": "Hear what {widow} says to it",
+      "say": {
+        "?truth=ran & mark:owed_said_one": "Got down the far side and ran. Did not draw. Did not shout. Yes. That is how the salt-master had it, near enough. Go on.",
+        "?truth=ran": "Six of them, out of the willows. I know there were six. The salt-master counted the tracks for me. That is where the raiders begin. I asked where you begin. Well. Go on.",
+        "?truth=talked & mark:owed_said_one": "A stranger buying, and you told him the load and the road. Yes. The innkeeper wrote me how freely. Go on.",
+        "?truth=talked": "You fought. I can see the scar from here, you have it turned to the light. That is where the ford begins. I asked where you begin. Well. Go on.",
+        "?mark:owed_said_one": "You. With his own knife. I have kept that blade under a slate six years, and oiled it, and not known whose hand I was oiling it against. Go on.",
+        "?": "He died of the wound. I know he died of the wound. I washed him. I asked for more than I could get from washing him. Well. Go on."
+      },
+      "then": "table_two"
+    },
+    "table_two": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} can bring out",
+      "say": {
+        "?truth=ran": "The next of it is that he called me. By my name, twice. I heard it both times and I never turned my head. She cannot know that. Nobody was left alive at that ford to tell her. It is mine to give or to keep.",
+        "?truth=talked": "The next of it is the price. He was buying, and I talked for as long as the jug lasted. A man's road, for a jug. She has the inn in a letter. She has not got the jug. It is mine to give or to keep.",
+        "?": "The next of it is the purse. I took it off his belt to carry to her with the news, and I drank it in the next town, every coin. She thinks the raiders had it. It is mine to give or to keep."
+      },
+      "replies": [
+        { "say": "Give it to her.", "then": "table_two_heard", "mark": "owed_said_two", "journal": "I told {giver} to give her the part nobody else could have told her." },
+        { "say": "Keep it. She has enough to carry.", "then": "table_two_heard", "journal": "I told {giver} to keep back the part nobody else could have told her." }
+      ]
+    },
+    "table_two_heard": {
+      "do": "talk", "who": "widow", "goal": "Hear what {widow} says to it",
+      "say": {
+        "?truth=ran & mark:owed_said_two": "He called you. Twice. He had a carrying voice. He could call the cows in from the far field without getting up from this table. And you heard him. Go on.",
+        "?truth=ran": "And then? No. I see. And then nothing. A man runs, and after it there is a deal of nothing, and at the end of the nothing a marker on a hill. Go on, if there is any more.",
+        "?truth=talked & mark:owed_said_two": "For a jug. I had wondered what he fetched. I thought silver, at the least. A jug. Go on.",
+        "?truth=talked": "And the stranger went away knowing the road, for no reason you can give me. Folk do talk, at inns. Go on, if there is any more.",
+        "?mark:owed_said_two": "Drank it. So that is where the purse went. I sold the second cow that winter and told the boy she had gone dry. Go on.",
+        "?": "And his purse? No. You'd not know. The raiders had it, the salt-master said. Go on, if there is any more."
+      },
+      "then": "table_three"
+    },
+    "table_three": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} can bring out",
+      "say": {
+        "?truth=ran": "Last. The half hire. It was in my purse when I ran, and I spent it on the north road, and I did not come here. Six years. Because I was more afraid of this kitchen than I ever was of the willows. The coin I can put down without a word. The why is the rest of it.",
+        "?truth=talked": "Last. The scar. I have shown it at every hiring post for six years as proof that I stand. I got it at his ford, and I have got my bread on the strength of it since. I can keep my sleeve down and say nothing. That is the rest of it.",
+        "?": "Last. She will ask whether he was afraid. They always ask. He was. He wept, and he asked for her, and then he asked for the knife. I can tell her no. I think I could make her believe it. That is the rest of it."
+      },
+      "replies": [
+        { "say": "Say it as it was.", "then": "table_three_heard", "mark": "owed_said_three", "journal": "I told {giver} to finish it as it was." },
+        { "say": "Leave that where it lies.", "then": "table_three_heard", "journal": "I told {giver} to leave the last of it where it lay." }
+      ]
+    },
+    "table_three_heard": {
+      "do": "talk", "who": "widow", "goal": "Hear what {widow} says to it",
+      "say": {
+        "?truth=ran & mark:owed_said_three": "Afraid of my kitchen. Well. It is a plain enough kitchen. I have been afraid in it myself.",
+        "?truth=ran": "And here is the half hire, counted. You have a clerk's way of paying, {giver}. Not a word over.",
+        "?truth=talked & mark:owed_said_three": "Push the sleeve up. Let me see it. Yes. It is a small thing, to have fed a man six years.",
+        "?truth=talked": "And that is all. You keep that arm very still, for someone with nothing more to say.",
+        "?mark:owed_said_three": "Afraid. And asked for me. Thank you. I'd have known a lie. He was afraid of wasps, and of owing money, and of the dark in the byre. I never thought the less of him for any of it.",
+        "?": "Not afraid. No. That is kind of you. It is a kind thing to say."
+      },
+      "then": {
+        "?mark:owed_said_one & mark:owed_said_two & mark:owed_said_three": "table_hers",
+        "?mark:owed_said_one": "table_slip",
+        "?mark:owed_said_two": "table_slip",
+        "?mark:owed_said_three": "table_slip",
+        "?": "table_door"
+      }
+    },
+    "table_hers": {
+      "do": "talk", "who": "widow", "goal": "Hear {widow} out",
+      "say": {
+        "?truth=ran": [
+          "That is all of it, then. I have had most of it in the salt-master's hand these six years. I wanted to know whether it could be said at this table, by you, with the boy listening. It could. Eat. I'll not have a bowl go cold in front of that chair a second time.",
+          "Now you'll hear mine. You have earned it, and there is nobody else I could say it to and go on living beside. He was not to have gone that week. He meant to wait for the autumn wagons and go in company, six carts and six guards. I said the rent would not wait on six carts. I said it standing where you are sitting. He went on the Tuesday, alone, with the one guard we could pay for.",
+          "And that night, the night he lay in the shallows, I sat at this table with the lamp lit, and I was glad of the quiet. We had parted on hard words, and I thought: good, eleven days, let him stew. I cut 'he was waited for' on his marker. It is true of every night but that one."
+        ],
+        "?truth=talked": [
+          "That is all of it, then. So it was not cowardice. It was a loose mouth. I had hoped for cowardice. A coward I could have pitied. I'll take what is owed, and I'll not pardon you, and you may sit there all the same. You have paid for the chair.",
+          "Now you'll hear mine. You have earned it, and there is nobody else I could say it to and go on living beside. He was not to have gone that week. He meant to wait for the autumn wagons and go in company, six carts and six guards. I said the rent would not wait on six carts. I said it standing where you are sitting. He went on the Tuesday, alone, with the one guard we could pay for.",
+          "And that night, the night he lay in the shallows, I sat at this table with the lamp lit, and I was glad of the quiet. We had parted on hard words, and I thought: good, eleven days, let him stew. I cut 'he was waited for' on his marker. It is true of every night but that one."
+        ],
+        "?": [
+          "That is all of it, then. Here. Take it. It did him the last kindness anybody did him, and I'll not keep it under a slate any longer. I do not know whether I am giving you a gift or a sentence. Carry it and find out.",
+          "Now you'll hear mine. You have earned it, and there is nobody else I could say it to and go on living beside. He was not to have gone that week. He meant to wait for the autumn wagons and go in company, six carts and six guards. I said the rent would not wait on six carts. I said it standing where you are sitting. He went on the Tuesday, alone, with the one guard we could pay for.",
+          "And that night, the night he lay in the shallows, I sat at this table with the lamp lit, and I was glad of the quiet. We had parted on hard words, and I thought: good, eleven days, let him stew. I cut 'he was waited for' on his marker. It is true of every night but that one."
+        ]
+      },
+      "replies": [
+        { "say": "You could not have known.", "then": "table_hers_more" },
+        { "say": "Why tell {giver}, of all people?", "then": "table_hers_more" }
+      ]
+    },
+    "table_hers_more": {
+      "do": "talk", "who": "widow",
+      "say": [
+        "Because for six years I have had you to hate, {giver}, and it has been a great convenience. I picked you off the hiring post myself. Did you know that? He wanted the grey one who asked double. I said take the other.",
+        "So I chose the week, and the road, and the guard, and then I chose somebody to blame for all three. You have said yours. I have said mine. {son} has heard the pair of us, which is more than I'd have managed alone.",
+        "Go on, now, both of you. There is hay to get in, and I have a son to feed who has just learned his mother is no better than a hired guard."
+      ],
+      "journal": "{giver} owned to all of it at the Arkle table. Then {widow} told us her own part. She sent {carter} out that week alone because the rent would not wait, she chose the cheaper guard herself, and on the night he died she sat glad of the quiet.",
+      "mark": "owed_widow_secret",
+      "then": "table_after"
+    },
+    "table_after": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver} outside the Arkle door",
+      "say": [
+        "She picked me off the post. By the price. Six years I have thought she hated the one who failed him. She has hated the one she chose, which is not the same thing, and is worse for her.",
+        "A share of every hire goes up that path from now on. She did not ask it. I do not think she will send it back.",
+        "You sat by me. I'd not have got past the first of it alone. I'd have told her about the willows, and gone down that path believing I had confessed."
+      ],
+      "then": "end:told"
+    },
+    "table_slip": {
+      "do": "talk", "who": "widow", "goal": "Hear {widow} out",
+      "say": [
+        "That is some of it. I'll not pretend I can't hear where the rest should be. Six years of going over a thing, you learn its shape. You have walked round the middle of it as you'd walk round a well.",
+        "I'll take the half hire. It was his. And for the part you did say, you may have this much from me and no more. He was not to have gone that week. He was to have waited, and gone in company. That is all. Finish yours some day, and I may finish mine."
+      ],
+      "journal": "{giver} owned to part of it at the Arkle table, and {widow} heard the gaps. She said {carter} was never meant to travel that week, and would say no more.",
+      "mark": "owed_widow_slip",
+      "then": "table_after_half"
+    },
+    "table_after_half": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver} outside the Arkle door",
+      "say": [
+        "She knew. Every place I stepped over, she looked at it. I thought I could give her the half and she would take it for the whole, the way you take short weight from a man you are sorry for.",
+        "'Not to have gone that week.' She has a middle to walk round as well, then. So I must come back up this path some day with the rest of mine. I did not want to know that."
+      ],
+      "then": "end:half_told"
+    },
+    "table_door": {
+      "do": "talk", "who": "widow", "goal": "Hear {widow} out",
+      "say": [
+        "You sat in that chair and told me that raiders came and that he died, and you put the half hire on my table as though it were the whole of what you carried up here. I knew raiders came. I knew he died.",
+        "{son}. See them to the gate. Do not come into this kitchen again, {giver}, to tell me what I know."
+      ],
+      "journal": "{giver} sat at the Arkle table and, on my word each time, told {widow} nothing she did not know. She had us seen to the gate.",
+      "then": "wait_paid"
     },
     "wait_told": { "do": "wait", "days": [5, 9], "wake": "giver", "then": "told_after" },
     "told_after": {
@@ -258,6 +416,7 @@
       },
       "reward": { "hearts": 12, "reputation": 8 },
       "marks": ["companion_made_it_right"],
+      "later": [{"days": [20, 32], "if": "mark:owed_widow_secret", "letter": {"from": "{widow}", "lines": ["The share came up with a carter. I have put it in the seed chest.", "{son} asked me at supper whether it was true about the hard words. I said it was. He said his father would have gone that week anyway, he never could wait on six carts. I do not know that it is so. It is the first kind thing anyone has said to me about that week.", "I have turned the chair in to the table. Tell {giver}."]}}],
       "town": ["Some hired sword sends coin up to the Arkle steading every season. The widow takes it and says nothing.", "Young Arkle's back at the hay. Sold his sword for seed corn, and got a poor price."],
       "returns": { "who": "son", "days": [10, 16], "as": "thanks", "say": "Mother sent me with this, for the road. I am not here to make friends with the guard. I only wanted to see the pair of you once in daylight, without a sword in my hand, so that I can stop seeing you the other way. That is all. Go well.", "gift": ["minecraft:bread*4", "minecraft:apple*4"] }
     },
@@ -266,6 +425,15 @@
       "reward": { "hearts": 4, "reputation": 4 },
       "marks": ["companion_paid_in_coin"],
       "town": ["The Arkle widow was paid some old debt of her man's. She didn't look glad of it.", "Young Arkle's back at the hay. He looks at the road a good deal."]
+    },
+    "half_told": {
+      "text": "{giver} sat at the Arkle table and owned to part of it. {widow} heard the gaps as plainly as the words. She took the half hire, and began to say something about that week that she did not finish.",
+      "reward": {"hearts": 7, "reputation": 6},
+      "marks": ["companion_half_told"],
+      "town": [
+        "The Arkle widow had that hired sword at her table at last. It was not for long, and she saw nobody to the gate.",
+        "Young Arkle's back at the hay. He says the guard talked and his mother listened, and neither of them finished."
+      ]
     },
     "unsaid": {
       "text": "{son} went home alive. {giver} stood a quarter of an hour at the Arkle wall, then came away. Nothing was paid and nothing was said.",
