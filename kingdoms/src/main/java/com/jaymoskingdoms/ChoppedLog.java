@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -40,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * ({@code ChoppedLogRenderer}), and gives that log's wood when it comes down with the tree or is broken. (0.7.510) Andy,
  * after Timber Tales: it no longer thins; it keeps the whole log's size and its cracks run deeper with every chop
  * ({@link #CHOPS}), while the chopper sees how far the tree is from coming down ({@link Trees#chop}). It's one of the game's logs (the {@code logs} tag), so leaves
- * keep to it and the tree is still a tree. See {@link Trees#chop}.
+ * keep to it and the tree is still a tree. See {@link Trees#chop}. Andy (2026-11-16): the trunk carves out where the
+ * axe lands, the wood's own grain showing inside the cut ({@link WoodVolume}, from Immersive Tree Chop, MIT).
  */
 public final class ChoppedLog extends BaseEntityBlock {
 	/** The most chops one log shows; more go into the log above ({@link Trees#chop}). */
@@ -83,6 +86,22 @@ public final class ChoppedLog extends BaseEntityBlock {
 		}
 	}
 
+	/** How hard an ordinary axe stroke bites ({@link WoodVolume#carve}; 0 is Immersive Tree Chop's lightest). */
+	static final float CARVE_POWER = 0.0F;
+
+	/**
+	 * An axe stroke lands on the chopped log at {@code pos}: a bite is cut out of its wood where it struck ({@code point},
+	 * inside the block, 0 to 1 each way) from the side it came in from, and everyone near sees it.
+	 */
+	static void carve(Level level, BlockPos pos, Vec3 point, Direction face) {
+		if (level.getBlockEntity(pos) instanceof Entity e) {
+			e.wood.carve(point, face, CARVE_POWER, e.strokes++);
+			e.setChanged();
+			BlockState state = level.getBlockState(pos);
+			level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
+		}
+	}
+
 	/** The chops in the log at {@code pos} (0 for a whole one). */
 	static int chops(BlockState state) {
 		return state.is(BLOCK) ? state.getValue(CHOPS) : 0;
@@ -118,9 +137,12 @@ public final class ChoppedLog extends BaseEntityBlock {
 		return new Entity(pos, state);
 	}
 
-	/** Which log it was. */
+	/** Which log it was, and the wood the axe has left of it. */
 	public static final class Entity extends BlockEntity {
 		private BlockState log = Blocks.OAK_LOG.defaultBlockState();
+		private WoodVolume wood = new WoodVolume();
+		/** How many strokes have bitten into it (each slants the other way from the last). */
+		private int strokes;
 
 		public Entity(BlockPos pos, BlockState state) {
 			super(ENTITY, pos, state);
@@ -130,17 +152,36 @@ public final class ChoppedLog extends BaseEntityBlock {
 			return log;
 		}
 
+		/** The wood left of it ({@link WoodVolume}). */
+		public WoodVolume wood() {
+			return wood;
+		}
+
 		@Override
 		protected void loadAdditional(ValueInput input) {
 			super.loadAdditional(input);
 			log = input.read("log", BlockState.CODEC).orElse(Blocks.OAK_LOG.defaultBlockState());
+			// (a log chopped before it could be carved has no wood saved: it stands whole)
+			wood = input.read("wood", WOOD).map(cells -> new WoodVolume(cells.stream().mapToLong(Long::longValue).toArray()))
+				.orElseGet(WoodVolume::new);
+			strokes = input.read("strokes", Codec.INT).orElse(0);
 		}
 
 		@Override
 		protected void saveAdditional(ValueOutput output) {
 			super.saveAdditional(output);
-			output.store("log", BlockState.CODEC, log);
+			store(output);
 		}
+
+		private void store(ValueOutput output) {
+			output.store("log", BlockState.CODEC, log);
+			if (!wood.whole()) {
+				output.store("wood", WOOD, java.util.Arrays.stream(wood.data()).boxed().toList());
+				output.store("strokes", Codec.INT, strokes);
+			}
+		}
+
+		private static final Codec<List<Long>> WOOD = Codec.LONG.listOf();
 
 		@Override
 		public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -150,7 +191,7 @@ public final class ChoppedLog extends BaseEntityBlock {
 		@Override
 		public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 			TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
-			output.store("log", BlockState.CODEC, log);
+			store(output);
 			return output.buildResult();
 		}
 	}

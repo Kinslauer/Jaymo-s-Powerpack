@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
@@ -633,6 +634,7 @@ public final class Trees {
 		}
 		BlockState there = level.getBlockState(at);
 		ChoppedLog.set(level, at, there, ChoppedLog.chops(there) + 1);
+		carve(level, at, cutter);
 		chips(level, cut, real, cutter);
 		if (cutter instanceof ServerPlayer player) {
 			// (0.7.510) as in Timber Tales: the chopper sees how near the tree is to coming down; full, the next stroke fells it
@@ -640,6 +642,41 @@ public final class Trees {
 			showChops(player, Math.min(need, taken + 1 + Careers.chop(cutter)), need);
 		}
 		return 0;
+	}
+
+	/** How far along its look a cutter's axe can land on the log (blocks). */
+	static final double CARVE_REACH = 8.0;
+
+	/**
+	 * The stroke bites into the chopped log at {@code at} ({@link ChoppedLog#carve}): where the cutter is looking on it,
+	 * or (looking elsewhere, or no cutter) the middle of the side that faces them.
+	 */
+	private static void carve(ServerLevel level, BlockPos at, @Nullable Entity cutter) {
+		Direction face = Direction.NORTH;
+		Vec3 point = null;
+		if (cutter != null) {
+			Vec3 eye = cutter.getEyePosition();
+			Vec3 hit = new AABB(at).clip(eye, eye.add(cutter.getLookAngle().scale(CARVE_REACH))).orElse(null);
+			if (hit != null) {
+				Vec3 in = hit.subtract(at.getX(), at.getY(), at.getZ());
+				// the side the look came in through: the one the hit lies on
+				double edge = 1.0E-4;
+				Direction through = in.x <= edge ? Direction.WEST : in.x >= 1.0 - edge ? Direction.EAST : in.z <= edge ? Direction.NORTH
+					: in.z >= 1.0 - edge ? Direction.SOUTH : in.y <= edge ? Direction.DOWN : in.y >= 1.0 - edge ? Direction.UP : null;
+				if (through != null) {
+					face = through;
+					point = in;
+				}
+			}
+			if (point == null) {
+				double dx = cutter.getX() - (at.getX() + 0.5), dz = cutter.getZ() - (at.getZ() + 0.5);
+				face = Math.abs(dx) > Math.abs(dz) ? (dx > 0.0 ? Direction.EAST : Direction.WEST) : (dz > 0.0 ? Direction.SOUTH : Direction.NORTH);
+			}
+		}
+		if (point == null) {
+			point = new Vec3(0.5 + 0.5 * face.getStepX(), 0.5, 0.5 + 0.5 * face.getStepZ());
+		}
+		ChoppedLog.carve(level, at, point, face);
 	}
 
 	/** The stroke that fells it: a player's goes to Felled when it's in the pack ({@link FelledCompat}), else ours. */
