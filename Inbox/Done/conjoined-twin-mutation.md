@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -44,3 +44,4 @@ Research/investigation first — determine how to implement mounted/entity-as-pa
 - 2026-11-17 08:37 PR #1670 is merged into master; moved to Inbox/Done.
 - 2026-11-17 08:38 PR #1670 is merged into master; moved to Inbox/Done.
 - 2026-11-17 08:45 Fixes applied: @Inject pattern for positionRider, Zombie.setBaby(true), STRUCTURE spawn reason, removed duplicate addFreshEntity, registered attachment, constants made public, lore entry added. PR pushed, ready for review.
+- 2026-11-17 08:42 PR #1670 is merged into master; moved to Inbox/Done.
