@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-17 06:02
+updated: 2026-11-17 07:19
 ---
 # Open PRs
 
-4 open, as of 2026-11-17 06:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-17 07:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1665](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1665) Punch and barrage effects: heavy punch impacts and flurry sparks
@@ -13,7 +13,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1667](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1667) Punch and barrage effects: Kingdoms Spirit Punch and Barrage clashes
 - **Branch:** `claude/punch-barrage-effects-kingdoms` · **Updated:** 2026-11-17 (today)
-- **Checks:** ❌ failing: Build Kingdoms
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#1670](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1670) Conjoined twin cosmetic mutation for villagers and zombies
