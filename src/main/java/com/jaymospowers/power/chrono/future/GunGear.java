@@ -160,7 +160,7 @@ public final class GunGear {
 		TRACER_ROUND = item("tracer_round", TracerRound::new, p -> p.stacksTo(TRACER_STACK)
 			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.tracer_round.lore")
 				.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)))));
-		ServerTickEvents.END_WORLD_TICK.register(GunGear::fadeLights);
+		ServerTickEvents.END_LEVEL_TICK.register(GunGear::fadeLights);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (ServerLevel level : server.getAllLevels()) {
 				LIT.keySet().removeIf(lit -> lit.dimension() == level.dimension() && unlight(level, lit.pos()));
@@ -228,7 +228,7 @@ public final class GunGear {
 	 * ordinary round in four, streaks and lights the muzzle.
 	 */
 	static void shot(ServerLevel level, ItemStack gun, Vec3 muzzle, Vec3 end) {
-		if (TaczGuns.gunId(gun).isEmpty()) {
+		if (!FutureGuns.BY_ID.containsKey(TaczGuns.gunId(gun))) {
 			return;
 		}
 		int tracers = intIn(gun, TRACERS);
@@ -364,7 +364,10 @@ public final class GunGear {
 			return true;
 		}
 
-		/** Right-clicked onto a gun of its family: the gun takes its rounds, it takes the gun's. */
+		/**
+		 * Right-clicked onto a gun of its family: the gun takes its rounds (no more than the gun itself holds), it takes
+		 * the gun's and whatever the gun couldn't; past its size they come back loose.
+		 */
 		@Override
 		public boolean overrideStackedOnOther(ItemStack self, Slot slot, ClickAction action, Player player) {
 			if (action != ClickAction.SECONDARY || self.getCount() != 1 || !slot.allowModification(player)) {
@@ -378,14 +381,16 @@ public final class GunGear {
 				return false;
 			}
 			int had = intIn(gun, "GunCurrentAmmoCount"), hadTracers = intIn(gun, TRACERS), tracers = intIn(self, TRACERS);
+			int in = Math.min(rounds, known.magazine());
 			CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> {
-				tag.putInt("GunCurrentAmmoCount", rounds);
-				tag.putInt(TRACERS, tracers);
+				tag.putInt("GunCurrentAmmoCount", in);
+				tag.putInt(TRACERS, Math.min(tracers, in));
 			});
-			int kept = Math.min(had, family.rounds);
-			fill(self, known.ammo(), kept, hadTracers);
-			if (had > kept) {
-				giveBack(player, TaczGuns.modernAmmo(known.ammo(), had - kept));
+			int out = had + rounds - in;
+			int kept = Math.min(out, family.rounds);
+			fill(self, known.ammo(), kept, hadTracers + Math.max(0, tracers - in));
+			if (out > kept) {
+				giveBack(player, TaczGuns.modernAmmo(known.ammo(), out - kept));
 			}
 			slot.setChanged();
 			player.playSound(SoundEvents.ARMOR_EQUIP_IRON.value(), 0.8F, 1.4F);
@@ -426,7 +431,8 @@ public final class GunGear {
 				return false;
 			}
 			ItemStack gun = slot.getItem();
-			if (TaczGuns.gunId(gun).isEmpty()) {
+			FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
+			if (known == null) {
 				return false;
 			}
 			int tracers = intIn(gun, TRACERS);
@@ -436,8 +442,7 @@ public final class GunGear {
 			}
 			CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> tag.putInt(TRACERS, tracers + n));
 			self.shrink(n);
-			FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
-			if (known != null && !known.ammo().isEmpty()) {
+			if (!known.ammo().isEmpty()) {
 				giveBack(player, TaczGuns.modernAmmo(known.ammo(), n));
 			}
 			slot.setChanged();
