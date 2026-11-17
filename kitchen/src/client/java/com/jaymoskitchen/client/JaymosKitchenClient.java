@@ -50,6 +50,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.butchery.BoneStandRenderer.register();
 		// (0.5.43) low on water: faint veins at the screen edges
 		com.jaymoskitchen.client.climate.DryVeins.register();
+		com.jaymoskitchen.client.climate.ParasiteHud.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();

@@ -412,6 +412,17 @@ public final class Payloads {
 		}
 	}
 
+	/** Server → client: a parasite cramp just hit you (ParasiteEffect): the sickly flash at the edges of the screen. */
+	public record Cramp() implements CustomPacketPayload {
+		public static final Type<Cramp> TYPE = new Type<>(JaymosKitchen.id("parasite_cramp"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Cramp> CODEC = StreamCodec.unit(new Cramp());
+
+		@Override
+		public Type<Cramp> type() {
+			return TYPE;
+		}
+	}
+
 	/**
 	 * Server → client: open the screen of the hearth or icebox at {@code pos}: its fuel (of {@code most}), whether it is the
 	 * cold one and lit, how much air it fills, and whether the player carries something it burns.
@@ -456,6 +467,7 @@ public final class Payloads {
 		PayloadTypeRegistry.serverboundPlay().register(FeedHearth.TYPE, FeedHearth.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SeasonSync.TYPE, SeasonSync.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SpitRip.TYPE, SpitRip.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Cramp.TYPE, Cramp.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);
