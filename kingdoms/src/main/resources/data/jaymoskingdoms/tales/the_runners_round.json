@@ -1,0 +1,1168 @@
+{
+  "title": "The Runner's Round",
+  "arc": "The Black Candle",
+  "start": {
+    "by": "notice",
+    "weight": 2,
+    "notice": {
+      "title": "Legs wanted, two days",
+      "lines": [
+        "The valley runner is laid up with his ankle, and his bag is full.",
+        "Three doors and a tree. It wants doing inside two days.",
+        "Honest legs only. Ask at the house with the bag on the gatepost."
+      ],
+      "hand": "a plain hand that has written out a good many bills"
+    }
+  },
+  "roll": {
+    "news": [
+      "sick",
+      "wed",
+      "debt"
+    ]
+  },
+  "cast": {
+    "runner": {
+      "name": "Tam Rudd",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "loft"
+    },
+    "widow": {
+      "name": "Marta Fenn",
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "cottage"
+    },
+    "miller": {
+      "name": "Giles Cobb",
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "mill"
+    },
+    "mother": {
+      "name": [
+        "Ellen Pask",
+        "Joan Harker",
+        "Sib Moss"
+      ],
+      "body": "villager",
+      "job": "shepherd",
+      "female": true,
+      "at": "fold"
+    },
+    "burner": {
+      "name": "Old Peter Sallow",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "oak"
+    }
+  },
+  "places": {
+    "loft": {
+      "at": "home",
+      "name": "the loft"
+    },
+    "cottage": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        40,
+        90
+      ],
+      "name": "the cottage by the wash stones"
+    },
+    "mill": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        150,
+        280
+      ],
+      "name": "the mill on the leat"
+    },
+    "fold": {
+      "at": "wild",
+      "from": "mill",
+      "dist": [
+        120,
+        240
+      ],
+      "name": "the hill fold"
+    },
+    "oak": {
+      "at": "wild",
+      "from": "fold",
+      "dist": [
+        120,
+        240
+      ],
+      "name": "the split oak"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "round": 2
+      },
+      "say": [
+        "You took the paper down, so you have legs and you can read. That is more than I hoped for before noon. I have the valley runner in my loft with an ankle the size of a turnip. Tam Rudd. He put his foot in a rabbit hole by the ford and came the last mile on his hands, with the bag strap in his teeth.",
+        "He will not lie still. He says a late bag is a runner's shame, and he has not had one in eleven years. I have taken his boots away. The round wants doing {in:round}: three doors and a tree, he says, though what a tree wants with a runner I could not tell you. There is {coins:8} from me for whoever carries it. Then perhaps he will rest."
+      ],
+      "replies": [
+        {
+          "say": "I'll carry his bag.",
+          "then": "see_tam",
+          "journal": "{giver} has the valley runner, Tam Rudd, laid up in the loft with a bad ankle and a full bag. I said I would carry his round: three doors and a tree, inside two days."
+        },
+        {
+          "say": "What does a tree want with a runner?",
+          "then": "ask_tree"
+        },
+        {
+          "say": "I am no runner.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "ask_tree": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "Ask him. I asked. He said a runner does not ask, and looked pleased with himself. It has been on his round longer than he has. Now, will you carry it or not? He has started on the rafters with a spoon handle, counting the days."
+      ],
+      "replies": [
+        {
+          "say": "I'll carry his bag.",
+          "then": "see_tam",
+          "journal": "{giver} has the valley runner, Tam Rudd, laid up in the loft with a bad ankle and a full bag. I said I would carry his round: three doors and a tree, inside two days."
+        },
+        {
+          "say": "I am no runner.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_tam": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "See Tam Rudd in {place:loft}",
+      "say": [
+        "You are the legs. Sit. No, not on the bag. Tam Rudd. I run the valley round, every door from the ford to the hill folds, and I have not been a day late in eleven years. Then a rabbit digs a hole, and here I am, counting rafters.",
+        "A runner has three rules, and they are all one rule. You do not read what you carry. You do not ask what it is. You do not wait on the step for thanks. Now. The widow Fenn first, at {place:cottage}. Her boy's letter came down the line sealed, and her eyes are gone, so it wants reading to her. That one you may read, since she will ask you to. Read it as it is written. A runner does not mend the news.",
+        "Then the mill. {miller} owes {coins:3} carriage on his parcel, and that comes back to me. Then the bottle to {mother} at the fold. Tell her a spoon at night. She knows. Tell her anyway.",
+        "Last, the sewn packet. That goes in the hollow of the split oak, {way:oak}. No door and no name. You put it in, you walk away, and you do not look back to see who comes for it. It has gone in that tree on this day of the month since before I had the round."
+      ],
+      "replies": [
+        {
+          "say": "Three doors and a tree. I have it.",
+          "then": {
+            "?news=sick": "letter_sick",
+            "?news=wed": "letter_wed",
+            "?": "letter_debt"
+          },
+          "journal": "Tam Rudd gave me his bag and his rules: do not read it, do not ask, do not wait for thanks. A sealed letter for the widow Fenn, a parcel for the mill, a bottle for the hill fold, and a sewn packet for the hollow of a split oak."
+        },
+        {
+          "say": "Who is the packet for?",
+          "then": "tam_oak"
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "tam_oak": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "That is the second rule gone, and you have not got your boots on yet. For whoever comes to the oak. I never asked, and I am not paid to. The runner before me did not know either. It is good carriage, it is regular, it is left for me on the gatepost in a twist of cloth, and by the weight it is not letters. That is all I have. It is more than a runner ought to say."
+      ],
+      "replies": [
+        {
+          "say": "Three doors and a tree. I have it.",
+          "then": {
+            "?news=sick": "letter_sick",
+            "?news=wed": "letter_wed",
+            "?": "letter_debt"
+          },
+          "journal": "Tam Rudd gave me his bag and his rules: do not read it, do not ask, do not wait for thanks. A sealed letter for the widow Fenn, a parcel for the mill, a bottle for the hill fold, and a sewn packet for the hollow of a split oak. He does not know who the packet is for. He has never asked."
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "letter_sick": {
+      "do": "bring",
+      "who": "widow",
+      "item": "minecraft:paper",
+      "count": 1,
+      "goal": "Take the sealed letter to {widow} at {place:cottage}",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A sealed letter for Marta Fenn",
+          "lore": [
+            "Mother. I am laid up at the drovers' house with the lung fever, and another is writing this for me.",
+            "They say I am mending. Do not come. The road is too long for you. Robin.",
+            "Under his name, in the same hand, written small: He is not mending. He does not know I have put this. Come if you can."
+          ]
+        },
+        {
+          "item": "minecraft:white_wool",
+          "count": 1,
+          "name": "A parcel for the mill",
+          "lore": [
+            "Sewn in sacking, and soft. Bolting cloth, by the feel.",
+            "Chalked on it: Cobb. Carriage owing."
+          ]
+        },
+        {
+          "item": "minecraft:honey_bottle",
+          "count": 1,
+          "name": "A stoppered bottle",
+          "lore": [
+            "For the hill fold. Thick, dark, and stopped with wax.",
+            "Scratched in the wax: a spoon at night."
+          ]
+        },
+        {
+          "item": "minecraft:leather",
+          "count": 1,
+          "name": "A sewn packet",
+          "lore": [
+            "Oiled leather, stitched shut with waxed thread. Heavy for its size, and it does not rustle.",
+            "No name on it. No door."
+          ]
+        }
+      ],
+      "say": [
+        "That is not Tam on my step. Tam drags his left foot. Who are you, with his bag? Laid up. Well, the ford was always going to have him. Give it here.",
+        "Sealed. That is Robin: it is the right weight for Robin, he never wrote a long letter in his life. My eyes went two winters back. Come in off the step and read it to me. Slowly. I have waited since the thaw."
+      ],
+      "then": "read_letter",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "letter_wed": {
+      "do": "bring",
+      "who": "widow",
+      "item": "minecraft:paper",
+      "count": 1,
+      "goal": "Take the sealed letter to {widow} at {place:cottage}",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A sealed letter for Marta Fenn",
+          "lore": [
+            "Mother. I was wed at midsummer to a cooper's daughter in the south town, and there is a child coming.",
+            "Her father has given me a place at the bench. I'll not be home for the harvest, nor the one after.",
+            "Sell the cow if you cannot manage her. I am sorry it is a letter. Robin."
+          ]
+        },
+        {
+          "item": "minecraft:white_wool",
+          "count": 1,
+          "name": "A parcel for the mill",
+          "lore": [
+            "Sewn in sacking, and soft. Bolting cloth, by the feel.",
+            "Chalked on it: Cobb. Carriage owing."
+          ]
+        },
+        {
+          "item": "minecraft:honey_bottle",
+          "count": 1,
+          "name": "A stoppered bottle",
+          "lore": [
+            "For the hill fold. Thick, dark, and stopped with wax.",
+            "Scratched in the wax: a spoon at night."
+          ]
+        },
+        {
+          "item": "minecraft:leather",
+          "count": 1,
+          "name": "A sewn packet",
+          "lore": [
+            "Oiled leather, stitched shut with waxed thread. Heavy for its size, and it does not rustle.",
+            "No name on it. No door."
+          ]
+        }
+      ],
+      "say": [
+        "That is not Tam on my step. Tam drags his left foot. Who are you, with his bag? Laid up. Well, the ford was always going to have him. Give it here.",
+        "Sealed. That is Robin: it is the right weight for Robin, he never wrote a long letter in his life. My eyes went two winters back. Come in off the step and read it to me. Slowly. I have waited since the thaw."
+      ],
+      "then": "read_letter",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "letter_debt": {
+      "do": "bring",
+      "who": "widow",
+      "item": "minecraft:paper",
+      "count": 1,
+      "goal": "Take the sealed letter to {widow} at {place:cottage}",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A sealed letter for Marta Fenn",
+          "lore": [
+            "Mother. I must have {coins:20} by the end of the month, or it goes badly for me here.",
+            "I know it is the third time. It is the last. Send it by the runner.",
+            "Do not tell my uncle. Robin."
+          ]
+        },
+        {
+          "item": "minecraft:white_wool",
+          "count": 1,
+          "name": "A parcel for the mill",
+          "lore": [
+            "Sewn in sacking, and soft. Bolting cloth, by the feel.",
+            "Chalked on it: Cobb. Carriage owing."
+          ]
+        },
+        {
+          "item": "minecraft:honey_bottle",
+          "count": 1,
+          "name": "A stoppered bottle",
+          "lore": [
+            "For the hill fold. Thick, dark, and stopped with wax.",
+            "Scratched in the wax: a spoon at night."
+          ]
+        },
+        {
+          "item": "minecraft:leather",
+          "count": 1,
+          "name": "A sewn packet",
+          "lore": [
+            "Oiled leather, stitched shut with waxed thread. Heavy for its size, and it does not rustle.",
+            "No name on it. No door."
+          ]
+        }
+      ],
+      "say": [
+        "That is not Tam on my step. Tam drags his left foot. Who are you, with his bag? Laid up. Well, the ford was always going to have him. Give it here.",
+        "Sealed. That is Robin: it is the right weight for Robin, he never wrote a long letter in his life. My eyes went two winters back. Come in off the step and read it to me. Slowly. I have waited since the thaw."
+      ],
+      "then": "read_letter",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "read_letter": {
+      "do": "talk",
+      "who": "widow",
+      "say": [
+        "Well? Break the wax. Read me what my son says. All of it, mind. I can hear when a body skips."
+      ],
+      "replies": [
+        {
+          "say": "Read it as it is written, to the last line.",
+          "then": "widow_true",
+          "mark": "runner_read_true",
+          "journal": "I read {widow} her son's letter as it was written, every line of it."
+        },
+        {
+          "if": "news=sick",
+          "say": "Read it, and stop before the small writing.",
+          "then": "widow_soft",
+          "mark": "runner_read_soft",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "runner_soft_letter",
+            "days": [
+              4,
+              8
+            ],
+            "unless": "mark:runner_owned_soft",
+            "hearts": 25,
+            "reputation": 6,
+            "town": [
+              "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
+              "Eleven years, and Tam Rudd never changed a word of anybody's news. One day with his bag, and a stranger does."
+            ]
+          },
+          "journal": "I read {widow} her son's letter and left out what the other hand had written under his name."
+        },
+        {
+          "if": "news=wed",
+          "say": "Read it, and add that he will be home in the spring.",
+          "then": "widow_soft",
+          "mark": "runner_read_soft",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "runner_soft_letter",
+            "days": [
+              4,
+              8
+            ],
+            "unless": "mark:runner_owned_soft",
+            "hearts": 25,
+            "reputation": 6,
+            "town": [
+              "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
+              "Eleven years, and Tam Rudd never changed a word of anybody's news. One day with his bag, and a stranger does."
+            ]
+          },
+          "journal": "I read {widow} her son's letter and put in a line of my own, that he would be home in the spring."
+        },
+        {
+          "if": "news=debt",
+          "say": "Read her a letter with no asking in it.",
+          "then": "widow_soft",
+          "mark": "runner_read_soft",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "runner_soft_letter",
+            "days": [
+              4,
+              8
+            ],
+            "unless": "mark:runner_owned_soft",
+            "hearts": 25,
+            "reputation": 6,
+            "town": [
+              "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
+              "Eleven years, and Tam Rudd never changed a word of anybody's news. One day with his bag, and a stranger does."
+            ]
+          },
+          "journal": "I read {widow} a letter from her son with no asking in it. It was not the one in my hand."
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "widow_true": {
+      "do": "talk",
+      "who": "widow",
+      "say": {
+        "?news=sick": [
+          "Not mending. And he does not know she put it. That is the drover's wife. She always had sense.",
+          "Then I am going. Do not tell me the road is long. I walked it before you were born. {miller} will lend me the cart if I ask it right. Thank you for the small writing. Another would have spared me it, and I would have sat here knitting while he died."
+        ],
+        "?news=wed": [
+          "Wed. A cooper's daughter, and a child coming, and I am told of it by a stranger on my own floor.",
+          "Well. He is alive and he is fed. Sell the cow, he says. He never could milk her. Thank you for reading it plain. I would sooner know the size of a thing."
+        ],
+        "?": [
+          "The third time. He does not say what it is for. He never does.",
+          "It will be in the crock for Tam by his next round. Do not look at me so. I know what he is. I knew what his father was. You read it as it stood, and that is what I asked of you."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Good day to you.",
+          "then": "mill"
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "widow_soft": {
+      "do": "talk",
+      "who": "widow",
+      "say": {
+        "?news=sick": [
+          "Mending. There. I knew it by the weight of the letter. Bad news comes heavy.",
+          "Then I'll not fret, and I'll not go bothering him down that long road. I'll knit him the grey stockings and send them by Tam. Thank you. You have a kind voice for reading."
+        ],
+        "?news=wed": [
+          "Wed! And home in the spring. Then I'll keep the cow for his wife to see, whatever he says about selling.",
+          "I'll have the back room limed for them. Thank you. You have a kind voice for reading."
+        ],
+        "?": [
+          "He is well, and he thinks of me. That is not like Robin. He must be growing up at last.",
+          "Nothing to send, then. I'll put a little by all the same. Thank you. You have a kind voice for reading."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Good day to you.",
+          "then": "mill"
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "mill": {
+      "do": "bring",
+      "who": "miller",
+      "item": "minecraft:white_wool",
+      "count": 1,
+      "goal": "Take the parcel to {miller} at {place:mill}",
+      "say": [
+        "You are carrying Tam's bag, and you are not Tam. Laid up? Ha. Eleven years I have told him that ford would have him. Bolting cloth, and about time. I have been sieving through my wife's apron. Here is the carriage, {coins:3}. That is Tam's, mind. Not yours.",
+        "Are you doing the oak as well? Then do it by daylight. I am not a fanciful man. I grind corn. But my top door looks down on that tree, and in all my years I have never seen anybody come for what he leaves there while the sun was up."
+      ],
+      "pay": 3,
+      "journal": "{miller} at the mill took his parcel and paid {coins:3} carriage. It is Tam's money. He told me to do the oak by daylight.",
+      "then": "fold",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "fold": {
+      "do": "bring",
+      "who": "mother",
+      "item": "minecraft:honey_bottle",
+      "count": 1,
+      "goal": "Take the stoppered bottle to {mother} at {place:fold}",
+      "say": [
+        "Tam's bottle. Give it. A spoon at night, I know. He says it every month, as if I had not reared four. She has coughed since the lambing, and that is the one thing that lets her sleep. I have no time for a stranger on the step. The way down goes by the charcoal stacks. Shut the gate after you."
+      ],
+      "journal": "I left the bottle with {mother} at the hill fold. She did not thank me, and Tam said not to wait for it.",
+      "then": "to_oak",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "to_oak": {
+      "do": "go",
+      "to": "oak",
+      "goal": "Carry the sewn packet to {place:oak}",
+      "then": "at_oak",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "at_oak": {
+      "do": "talk",
+      "who": "burner",
+      "goal": "Speak with the old man sitting by {place:oak}",
+      "say": [
+        "You are not Tam. Tam whistles. I burn charcoal forty yards off, and I see that tree every day there is. Twelve packets a year go in that hollow. I never touch them, and they are always gone by morning.",
+        "I'll tell you what I tell Tam, and he laughs at it. Twice this year there has been a candle stub left in the hollow after the packet was gone. Black wax, burned right down. Now who carries a candle out to a tree?"
+      ],
+      "replies": [
+        {
+          "say": "What do you think is in the packet?",
+          "then": "burner_more"
+        },
+        {
+          "say": "I only carry it. It goes in the tree.",
+          "then": "drop_oak"
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "burner_more": {
+      "do": "talk",
+      "who": "burner",
+      "say": [
+        "Money. It sits like money. Leather, sewn, heavy, and it does not rustle. {coins:30} at the least. And nobody to see but me, and I am half blind with smoke. I am not telling you to. I am an old man telling you that nobody would know it before this day next month, and then it is Tam they would ask."
+      ],
+      "replies": [
+        {
+          "say": "It goes in the tree.",
+          "then": "drop_oak",
+          "journal": "{burner}, who burns charcoal by the split oak, says the packet is money, and that twice this year a black candle stub was left in the hollow after it was taken."
+        },
+        {
+          "say": "Nobody would know.",
+          "then": "report_short",
+          "mark": "runner_kept_purse",
+          "against": [
+            "law",
+            "honour"
+          ],
+          "journal": "{burner}, who burns charcoal by the split oak, says the packet is money. I kept it. Nothing went in the tree."
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "drop_oak": {
+      "do": "stash",
+      "at": "oak",
+      "item": "minecraft:leather",
+      "count": 1,
+      "goal": "Leave the sewn packet in the hollow of {place:oak}",
+      "journal": "I put the sewn packet in the hollow of the split oak and walked away without looking back, as Tam said.",
+      "then": "report",
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "report": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go back to Tam Rudd with his empty bag",
+      "say": [
+        "That is my bag, and it is flat. Good. Sit down and tell it me in order, the way I would tell it. The widow had her letter read. The mill took its cloth. The bottle went to the fold. The packet is in the oak, and you did not look back.",
+        "Yes? And {miller} paid his carriage?"
+      ],
+      "replies": [
+        {
+          "say": "Every door, and the tree. Here is his {coins:3}.",
+          "needs_coins": 3,
+          "then": "wait_mend",
+          "mark": "runner_gave_fee",
+          "journal": "I told Tam Rudd his round was done, and gave him the mill's carriage."
+        },
+        {
+          "say": "Every door, and the tree. I spent his carriage on the road. I'll make it good.",
+          "then": "wait_mend",
+          "journal": "I told Tam Rudd his round was done, and that I owe him the mill's carriage."
+        },
+        {
+          "say": "Every door, and the tree. He says he will settle with you himself.",
+          "then": "wait_mend",
+          "irks": [
+            "honour"
+          ],
+          "journal": "I told Tam Rudd his round was done, and that the miller had not paid me.",
+          "lie": {
+            "name": "runner_mill_fee",
+            "days": [
+              3,
+              6
+            ],
+            "hearts": 15,
+            "reputation": 4,
+            "town": [
+              "{miller} says he paid Tam Rudd's carriage into a stranger's hand. Tam says he never saw it.",
+              "{coins:3}. Who robs a lame runner of {coins:3}?"
+            ]
+          }
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "report_short": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go back to Tam Rudd with his bag",
+      "say": [
+        "That is my bag, and it is flat. Good. Sit down and tell it me in order, the way I would tell it. The widow had her letter read. The mill took its cloth. The bottle went to the fold. The packet is in the oak, and you did not look back.",
+        "Yes?"
+      ],
+      "replies": [
+        {
+          "say": "Every door, and the tree.",
+          "then": "wait_mend",
+          "irks": [
+            "honour"
+          ],
+          "journal": "I told Tam Rudd his round was done, every door and the tree. The packet is in my coat.",
+          "lie": {
+            "name": "runner_all_done",
+            "days": [
+              5,
+              9
+            ],
+            "hearts": 30,
+            "reputation": 8,
+            "town": [
+              "Nothing went in the split oak this month. Old Sallow at the charcoal stacks swears it. Tam Rudd swears the bag went out full.",
+              "Tam says {player} carried his round that week. He says it very quietly, for Tam."
+            ]
+          }
+        },
+        {
+          "say": "The packet never went in the tree. I have it here.",
+          "then": "tam_aghast",
+          "journal": "I told Tam Rudd I had kept the packet that was meant for the oak."
+        }
+      ],
+      "within": "round",
+      "late": "late_tam",
+      "until": "before the round goes stale"
+    },
+    "tam_aghast": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "You have it. In your coat. In my loft.",
+        "Listen to me. I do not know who comes to that tree. I have never wanted to know. But in eleven years that packet has never once been short and never once been late, and I do not think that is because the valley is honest. Put it back. Now, tonight, whatever the hour is. Late is bad enough. Short is something I have no word for."
+      ],
+      "replies": [
+        {
+          "say": "I'll take it back to the oak now.",
+          "then": "drop_late"
+        },
+        {
+          "say": "It is mine now. Nobody will know before next month.",
+          "then": "end:kept_purse",
+          "mark": "runner_tam_knows_purse",
+          "against": [
+            "law",
+            "honour"
+          ],
+          "journal": "Tam Rudd told me to put the packet back in the oak. I would not."
+        }
+      ]
+    },
+    "drop_late": {
+      "do": "stash",
+      "at": "oak",
+      "item": "minecraft:leather",
+      "count": 1,
+      "goal": "Put the sewn packet in the hollow of {place:oak}, late as it is",
+      "mark": "runner_put_back",
+      "journal": "I put the packet in the hollow of the split oak, late. There was a black candle stub in there already, burned down to the wood.",
+      "then": "wait_mend"
+    },
+    "wait_mend": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "none",
+      "then": "tam_mended"
+    },
+    "tam_mended": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Look in on Tam Rudd, now that he is on his feet",
+      "say": {
+        "?mark:runner_put_back": [
+          "On a stick, but up. I walk the round tomorrow, slowly. I have thought about that packet for two nights. You took it, you told me so to my face, and you put it back. That is three things, and only the first of them is bad.",
+          "It went in late. I do not know what late costs. Nobody has ever been late. So I'll go on as I always have, and whistle, and not look back at the tree. The carrier's money is there on the sill. You did carry it."
+        ],
+        "?": [
+          "On a stick, but up. I walk the round tomorrow, slowly. Sit down. I have a thing to say, and I would sooner say it only once.",
+          "You read the widow her letter. I could not have. Eleven years a runner, and I cannot read a word. Whoever sends a letter says it over to me, and I say it back at the door, and I have never dropped one. A sealed one I take round by the cleric and tell him my eyes are tired. Nobody on the round knows. Now you do, and I find I do not mind it."
+        ]
+      },
+      "replies": [
+        {
+          "if": "!mark:runner_put_back",
+          "say": "It stays in this loft.",
+          "then": {
+            "?mark:runner_put_back": "end:late_purse",
+            "?mark:runner_kept_purse": "end:kept_purse",
+            "?": "end:round_done"
+          },
+          "journal": "Tam Rudd cannot read. He has every letter said over to him and says it back at the door, and in eleven years nobody on his round has known."
+        },
+        {
+          "if": "mark:runner_read_soft&!mark:runner_put_back",
+          "say": "Then I must tell you something. I did not read it to her as it was written.",
+          "then": "tam_news",
+          "journal": "Tam Rudd cannot read. He has every letter said over to him and says it back at the door. I told him I had changed the widow's letter in the reading."
+        },
+        {
+          "say": "Mind that ankle, Tam.",
+          "then": {
+            "?mark:runner_put_back": "end:late_purse",
+            "?mark:runner_kept_purse": "end:kept_purse",
+            "?": "end:round_done"
+          }
+        }
+      ]
+    },
+    "tam_news": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "You changed it. On her own floor, with her sitting there listening for a skipped line.",
+        "Say it to me now. The true one. All of it, slowly, and then once more. There. I have it. I do not drop them. I'll be on her step tomorrow before the dew is off, and she will have it as it was written. I'll tell her the runner was new and the light was bad. That is the first lie I ever carried, and you have made me a present of it."
+      ],
+      "replies": [
+        {
+          "say": "Thank you, Tam.",
+          "then": {
+            "?mark:runner_put_back": "end:late_purse",
+            "?mark:runner_kept_purse": "end:kept_purse",
+            "?": "end:round_done"
+          },
+          "mark": "runner_owned_soft",
+          "journal": "I said the widow's letter over to Tam Rudd as it was truly written. He will carry it to her himself."
+        }
+      ]
+    },
+    "late_tam": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "The round is stale: go back to Tam Rudd",
+      "say": [
+        "Two days. I counted them on the rafters. It is stale, then. No, give me the bag. Give it here. I have cut myself a stick.",
+        "I'll not shout at you. You took it on when nobody else would read the paper. But a round is a promise made at a great many doors, and tomorrow I go and say sorry at every one of them on one leg."
+      ],
+      "replies": [
+        {
+          "say": "I am sorry for it, Tam.",
+          "then": {
+            "?mark:runner_kept_purse&!mark:runner_put_back": "end:kept_purse",
+            "?": "end:stale"
+          }
+        }
+      ]
+    }
+  },
+  "endings": {
+    "round_done": {
+      "text": "I carried Tam Rudd's round for him: three doors and a tree, inside two days. He is back on the road with a stick, and I know the one thing about him that nobody on his round knows.",
+      "reward": {
+        "coins": 8,
+        "hearts": 8,
+        "reputation": 5
+      },
+      "marks": [
+        "runner_knows_tam",
+        "runner_round_clean"
+      ],
+      "town": [
+        "Tam Rudd's round went out on a stranger's legs, and not a door was missed. He is telling everybody. He is that sort.",
+        "Three doors and a tree, Tam says. What sort of round has a tree in it?"
+      ],
+      "returns": {
+        "who": "runner",
+        "days": [
+          6,
+          10
+        ],
+        "as": "thanks",
+        "say": "I cannot stop. The bag is full and the ankle is slow. I was at the cobbler's door on the round, and I said: a pair for somebody who walks like a runner and is not one. A runner does not wait on the step for thanks. It turns out he does not much like giving them either. Here.",
+        "gift": [
+          "minecraft:leather_boots*1",
+          "minecraft:bread*4"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_read_true",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "The woman who put the small writing is putting this. I was in time. He knew me. He lived nine days after I came, and I had every one of them.",
+              "I am bringing him home in the miller's cart, to lie by his father. I'll not want the grey wool now. Tam may have it for stockings.",
+              "You read me the whole of it when you might have stopped. I have told them here what sort of runner the valley has."
+            ]
+          }
+        },
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "Tam came on one leg and said my letter over again, with a piece on the end that you had not read me. I went the same hour. I was in time by one night.",
+              "One night. I had a day and a half of stockings knitted. I have thought a good deal about that day and a half.",
+              "Tam says the runner was new and the light was bad. Tam is a poor liar. But you sent him, I think, so I am writing, and that is all I am doing."
+            ]
+          }
+        },
+        {
+          "days": [
+            14,
+            20
+          ],
+          "if": "news=sick&mark:runner_read_soft&!mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the cleric",
+            "lines": [
+              "The cleric has read me Robin's letter over again, and then a second that came after it in the same small hand. He was buried a fortnight since. I was knitting him stockings.",
+              "There was a line at the foot of the first that you did not read. I asked for all of it. I said I could hear a skipped line. It seems I cannot.",
+              "You have a kind voice. I'll not have it in my house again."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=wed&mark:runner_read_true",
+          "town": [
+            "The widow Fenn has sold her cow and bought a cradle board with the money, to send south. Says she would sooner know the size of a thing."
+          ]
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=debt&mark:runner_read_true",
+          "town": [
+            "The widow Fenn had {coins:20} in a crock for Tam Rudd's bag. For that boy of hers, again. She says she knows what he is."
+          ]
+        }
+      ]
+    },
+    "kept_purse": {
+      "text": {
+        "?late:round": "I kept the packet that was meant for the split oak, and brought Tam Rudd's bag back late besides. There was {coins:30} in it. He finished the round himself, on a stick.",
+        "?mark:runner_tam_knows_purse": "I kept the packet that was meant for the split oak, and told Tam Rudd so to his face. There was {coins:30} in it. He would not look at me when I went down the ladder.",
+        "?": "I kept the packet that was meant for the split oak, and told Tam Rudd that his round was done. There was {coins:30} in it. He thanked me."
+      },
+      "reward": {
+        "coins": 30
+      },
+      "marks": [
+        "runner_knows_tam",
+        "runner_purse_short"
+      ],
+      "town": [
+        "Tam Rudd is back on his round, on a stick. He has gone very quiet about the week he was laid up.",
+        "Old Sallow at the charcoal stacks says nothing went in the split oak this month. He would know. He has nothing else to look at."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_read_true",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "The woman who put the small writing is putting this. I was in time. He knew me. He lived nine days after I came, and I had every one of them.",
+              "I am bringing him home in the miller's cart, to lie by his father. I'll not want the grey wool now. Tam may have it for stockings.",
+              "You read me the whole of it when you might have stopped. I have told them here what sort of runner the valley has."
+            ]
+          }
+        },
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "Tam came on one leg and said my letter over again, with a piece on the end that you had not read me. I went the same hour. I was in time by one night.",
+              "One night. I had a day and a half of stockings knitted. I have thought a good deal about that day and a half.",
+              "Tam says the runner was new and the light was bad. Tam is a poor liar. But you sent him, I think, so I am writing, and that is all I am doing."
+            ]
+          }
+        },
+        {
+          "days": [
+            14,
+            20
+          ],
+          "if": "news=sick&mark:runner_read_soft&!mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the cleric",
+            "lines": [
+              "The cleric has read me Robin's letter over again, and then a second that came after it in the same small hand. He was buried a fortnight since. I was knitting him stockings.",
+              "There was a line at the foot of the first that you did not read. I asked for all of it. I said I could hear a skipped line. It seems I cannot.",
+              "You have a kind voice. I'll not have it in my house again."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=wed&mark:runner_read_true",
+          "town": [
+            "The widow Fenn has sold her cow and bought a cradle board with the money, to send south. Says she would sooner know the size of a thing."
+          ]
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=debt&mark:runner_read_true",
+          "town": [
+            "The widow Fenn had {coins:20} in a crock for Tam Rudd's bag. For that boy of hers, again. She says she knows what he is."
+          ]
+        }
+      ]
+    },
+    "late_purse": {
+      "text": "I took the packet for myself, and then put it back in the split oak a night late. Tam Rudd knows all of it. He is back on the road with a stick, whistling, and not looking back at the tree.",
+      "reward": {
+        "coins": 8,
+        "hearts": 2
+      },
+      "marks": [
+        "runner_knows_tam",
+        "runner_round_late"
+      ],
+      "town": [
+        "Tam Rudd is back on his round, on a stick. Ask him about the week he was laid up and he will tell you about his ankle.",
+        "Old Sallow says the packet went in the split oak a night late this month. First time he has known it. He says the tree did not like it. He is half blind with smoke, mind."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_read_true",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "The woman who put the small writing is putting this. I was in time. He knew me. He lived nine days after I came, and I had every one of them.",
+              "I am bringing him home in the miller's cart, to lie by his father. I'll not want the grey wool now. Tam may have it for stockings.",
+              "You read me the whole of it when you might have stopped. I have told them here what sort of runner the valley has."
+            ]
+          }
+        },
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "Tam came on one leg and said my letter over again, with a piece on the end that you had not read me. I went the same hour. I was in time by one night.",
+              "One night. I had a day and a half of stockings knitted. I have thought a good deal about that day and a half.",
+              "Tam says the runner was new and the light was bad. Tam is a poor liar. But you sent him, I think, so I am writing, and that is all I am doing."
+            ]
+          }
+        },
+        {
+          "days": [
+            14,
+            20
+          ],
+          "if": "news=sick&mark:runner_read_soft&!mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the cleric",
+            "lines": [
+              "The cleric has read me Robin's letter over again, and then a second that came after it in the same small hand. He was buried a fortnight since. I was knitting him stockings.",
+              "There was a line at the foot of the first that you did not read. I asked for all of it. I said I could hear a skipped line. It seems I cannot.",
+              "You have a kind voice. I'll not have it in my house again."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=wed&mark:runner_read_true",
+          "town": [
+            "The widow Fenn has sold her cow and bought a cradle board with the money, to send south. Says she would sooner know the size of a thing."
+          ]
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=debt&mark:runner_read_true",
+          "town": [
+            "The widow Fenn had {coins:20} in a crock for Tam Rudd's bag. For that boy of hers, again. She says she knows what he is."
+          ]
+        }
+      ]
+    },
+    "stale": {
+      "text": "I was late with Tam Rudd's round. He finished it himself on a stick, a door at a time, saying sorry at each one. It was the first late bag in eleven years.",
+      "marks": [
+        "runner_knows_tam",
+        "runner_round_late"
+      ],
+      "town": [
+        "Tam Rudd's bag came late. Late! I had my boy stand at the gate two mornings. Tam says a stranger carried it.",
+        "He went round on one leg to say sorry at every door. Even at the oak, old Sallow says. Stood there and said sorry to a tree."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_read_true",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "The woman who put the small writing is putting this. I was in time. He knew me. He lived nine days after I came, and I had every one of them.",
+              "I am bringing him home in the miller's cart, to lie by his father. I'll not want the grey wool now. Tam may have it for stockings.",
+              "You read me the whole of it when you might have stopped. I have told them here what sort of runner the valley has."
+            ]
+          }
+        },
+        {
+          "days": [
+            12,
+            18
+          ],
+          "if": "news=sick&mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the drover's wife",
+            "lines": [
+              "Tam came on one leg and said my letter over again, with a piece on the end that you had not read me. I went the same hour. I was in time by one night.",
+              "One night. I had a day and a half of stockings knitted. I have thought a good deal about that day and a half.",
+              "Tam says the runner was new and the light was bad. Tam is a poor liar. But you sent him, I think, so I am writing, and that is all I am doing."
+            ]
+          }
+        },
+        {
+          "days": [
+            14,
+            20
+          ],
+          "if": "news=sick&mark:runner_read_soft&!mark:runner_owned_soft",
+          "letter": {
+            "from": "Marta Fenn, by the hand of the cleric",
+            "lines": [
+              "The cleric has read me Robin's letter over again, and then a second that came after it in the same small hand. He was buried a fortnight since. I was knitting him stockings.",
+              "There was a line at the foot of the first that you did not read. I asked for all of it. I said I could hear a skipped line. It seems I cannot.",
+              "You have a kind voice. I'll not have it in my house again."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=wed&mark:runner_read_true",
+          "town": [
+            "The widow Fenn has sold her cow and bought a cradle board with the money, to send south. Says she would sooner know the size of a thing."
+          ]
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "news=debt&mark:runner_read_true",
+          "town": [
+            "The widow Fenn had {coins:20} in a crock for Tam Rudd's bag. For that boy of hers, again. She says she knows what he is."
+          ]
+        }
+      ]
+    },
+    "refused": {
+      "text": "I left the valley runner's bag hanging where it was. Running is not my trade.",
+      "failed": true
+    }
+  }
+}

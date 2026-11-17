@@ -469,6 +469,8 @@ def check_tale(path):
         unknown = set(step) - COMMON - STEP_FIELDS[do]
         if unknown:
             c.err(where, f"unknown fields {sorted(unknown)} for '{do}'")
+        if "candle" in step and step["candle"] is not True and step["candle"] != "white":
+            c.err(where, "'candle' must be true (a black one) or \"white\"")
         missing = REQUIRED[do] - set(step)
         if missing:
             c.err(where, f"missing {sorted(missing)}")

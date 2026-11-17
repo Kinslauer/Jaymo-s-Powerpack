@@ -19,7 +19,10 @@
     "sister": { "name": ["Annis Dunnock", "Kate Dunnock", "Marjory Dunnock"], "body": "villager", "job": "leatherworker", "female": true, "at": "lodging" },
     "captain": { "name": ["Edmund Sark", "Rafe Holloway", "Giles Warrender"], "body": "fighter", "female": false, "at": "gatehouse", "health": 70, "damage": 7, "armor": 12, "hand": "minecraft:iron_sword", "head": "minecraft:iron_helmet", "chest": "minecraft:iron_chestplate" },
     "fence": { "name": ["Sal Vetch", "Nell Quillon", "Agnes Orrin"], "body": "villager", "job": "none", "female": true, "at": "den" },
-    "sergeant": { "name": ["Brock Harl", "Wat Gannon", "Denny Shaw"], "body": "fighter", "female": false, "at": "toll", "health": 65, "damage": 7, "armor": 9, "hand": "minecraft:iron_sword", "head": "minecraft:chainmail_helmet", "chest": "minecraft:chainmail_chestplate", "men": 2, "men_body": "minecraft:pillager" }
+    "sergeant": { "name": ["Brock Harl", "Wat Gannon", "Denny Shaw"], "body": "fighter", "female": false, "at": "toll", "health": 65, "damage": 7, "armor": 9, "hand": "minecraft:iron_sword", "head": "minecraft:chainmail_helmet", "chest": "minecraft:chainmail_chestplate", "men": 2, "men_body": "minecraft:pillager" },
+    "doorman": { "name": ["Old Corby", "Lame Jack Marrow", "Tib Seddon"], "body": "villager", "job": "none", "female": false, "at": "den", "if": "!mark:potato_told_watch" },
+    "dicer": { "name": ["Moll Thrift", "Joan Last", "Bess Hallow"], "body": "villager", "job": "none", "female": true, "at": "den", "if": "!mark:potato_told_watch", "hours": "night" },
+    "bruiser": { "name": ["Ham Brody", "Col Rudge", "Ned Stott"], "body": "fighter", "female": false, "at": "den", "if": "!mark:potato_told_watch", "hours": "night", "health": 40, "damage": 4, "armor": 2 }
   },
   "places": {
     "seat": { "at": "town", "name": "the town" },
@@ -114,7 +117,103 @@
       ] },
       "then": "to_den"
     },
-    "to_den": { "do": "go", "to": "den", "goal": "Go down {place:den}", "then": "see_fence" },
+    "to_den": { "do": "go", "to": "den", "goal": "Go down {place:den}", "then": "den_door" },
+    "den_door": {
+      "do": "talk", "who": "doorman", "when": "night", "goal": "After dark, knock twice at the hatch",
+      "not_now": "Nothing here by day but grass, and me sitting on it. Come back after dark and knock twice.",
+      "say": [
+        "Evening. Two knocks, so somebody has told you that much. There is a whole bank of grass back here, and you have found the one yard of it with a hinge.",
+        "Who sent you?"
+      ],
+      "replies": [
+        { "say": "Nobody sent me.", "then": "den_floor" },
+        { "say": "{fence} sent for me.", "then": "den_door_wrong" }
+      ]
+    },
+    "den_door_wrong": {
+      "do": "talk", "who": "doorman",
+      "say": ["Did she. Then she will have told you what to say at the door, and that was not it. I'll ask the once more, since she said to look out for a stranger, and strangers are slow. Who sent you?"],
+      "replies": [
+        { "say": "Nobody sent me.", "then": "den_floor" }
+      ]
+    },
+    "den_floor": {
+      "do": "vigil", "at": "den", "when": "night", "radius": 12, "gap": 8, "goal": "Go down the ladder into the Tallow Room",
+      "lines": [
+        { "who": "doorman", "say": "Down you go. Eleven rungs, and the ninth is a liar. Keep your hands off your belt at the bottom.", "sound": "minecraft:block.wooden_door.open" },
+        { "say": "A long cellar under the chandlers' row. It is lit by tallow dips in saucers, a hundred of them, on every ledge and crate, and the air is brown with them." },
+        { "who": "dicer", "say": "That is the name, before you ask. Tallow. {fence} lives under a row of chandlers and will not pay one of them for wax." },
+        { "say": "Dice go down on an upturned potato crate. Behind a ring of grain sacks two men are hitting each other, and the crowd round them hardly makes a sound.", "sound": "minecraft:block.wood.hit" },
+        { "who": "bruiser", "say": "Nobody cheers down here. Cheering comes up through a floor. You learn to lose a tooth quietly." },
+        { "say": "Potato sacks are stacked to the roof along one wall. The bottom sack of every stack is tied with a different cord from the rest." },
+        { "who": "doorman", "say": "She is at the back, behind the scales. She will look up when she is ready to. Throw a die or watch a bout while you wait. Everybody does." }
+      ],
+      "journal": "I gave the whisper at the hatch behind the chandlers' row and went down the ladder. The Tallow Room is a cellar lit by a hundred tallow dips: dice on potato crates, a fight ring made of sacks, and a crowd that keeps its voice down.",
+      "left": "to_den",
+      "then": "den_dice"
+    },
+    "den_dice": {
+      "do": "talk", "who": "dicer", "when": "night", "goal": "Wait in the Tallow Room until {fence} looks up",
+      "say": [
+        "You are the one who made Hob's drop. Don't look round. Everybody knows. A stranger carried four bricks to a kiln for a dead man and never opened one. That was the talk of this room for a whole evening, and we have a fight pit.",
+        "Hob sat on that crate every dark night for three years. He lost to me every time and thanked me for the game. Sit down. One throw, {coins:5}. If you win it, I'll tell you a thing about Hob's last night that nobody else down here will."
+      ],
+      "replies": [
+        { "say": "{price} on the crate. Throw.", "try": { "how": "dice", "coins": 5, "fail": "den_dice_lost", "refuse": "A five and a four, to me. Hob used to pull that very face." }, "then": "den_dice_won", "mark": "potato_dice_won", "journal": "I threw dice in the Tallow Room with {dicer}, on the crate where Dunnock used to sit, and won {coins:5} from her." },
+        { "say": "I'll keep my purse.", "then": "den_pit" }
+      ]
+    },
+    "den_dice_won": {
+      "do": "talk", "who": "dicer",
+      "say": [
+        "Well. That crate has not paid out since Hob died. Here it is, then. His last dark night he sat where you are and said to me: the gate man has asked which night I cross the ford. I said, tell {fence}. He said he would, after this run, when he was quit and she had nothing to hold over him. He never had an after.",
+        "And the man she sent to look at his boy was {doorman}, on the hatch. He came back down the ladder and would not eat. Ask him, and he will tell you that he only looked."
+      ],
+      "replies": [
+        { "say": "I'll remember it.", "then": "den_pit", "journal": "{dicer} says Dunnock meant to tell the Room about the gate sergeant's question once his debt was clear, and never lived to. The man the Room sent to look at his boy was {doorman}, who keeps the hatch." }
+      ]
+    },
+    "den_dice_lost": {
+      "do": "talk", "who": "dicer",
+      "say": ["No hard feelings. Hob never had any either. He would say 'that is Wilf's shoes gone', and laugh, and stake the other shoe. He was not a clever man. He was the only one down here who ever asked after my mother. Go and watch the pit. It is cheaper."],
+      "replies": [
+        { "say": "I'll watch the pit.", "then": "den_pit", "journal": "I lost {coins:5} at dice to {dicer} in the Tallow Room. She says Dunnock lost to her for three years and laughed about it." }
+      ]
+    },
+    "den_pit": {
+      "do": "talk", "who": "bruiser", "when": "night",
+      "say": [
+        "You have a fighter's feet. I watched you come down the ladder. {fence} lets a stranger have one bout in the sacks, and the room lays its money. It stops when one of us says enough. Nobody dies in the pit. She cannot get a body up that ladder.",
+        "There is {coins:6} to whoever is left standing. I have a bad shoulder tonight, so I would call it even."
+      ],
+      "replies": [
+        { "say": "One bout, then.", "then": "pit_bout" },
+        { "say": "Not tonight.", "then": "see_fence" }
+      ]
+    },
+    "pit_bout": {
+      "do": "foe", "who": "bruiser", "when": "night", "goal": "Stand a bout in the sacks with {bruiser}",
+      "taunt": "Hands up, stranger. Mind the saucers.",
+      "plea": "Enough! Enough. That is the shoulder gone. I said enough.",
+      "mercy": "Enough it is.",
+      "thanks": "Fair bout. Stand me a jug out of it and I'll call you a friend.",
+      "slain": "pit_dead", "spared": "pit_won"
+    },
+    "pit_won": {
+      "do": "talk", "who": "bruiser",
+      "say": ["The room's money, counted: {coins:6}. Half of them laid against you, so mind who smiles at you on the way out. There. She has looked up. Go on."],
+      "pay": 6,
+      "replies": [
+        { "say": "Fair bout.", "then": "see_fence", "journal": "I stood a bout in the Tallow Room's pit with {bruiser} and stopped when he said enough. The room paid me {coins:6}." }
+      ]
+    },
+    "pit_dead": {
+      "do": "talk", "who": "doorman",
+      "say": ["That man is dead. Nobody dies in the sacks. It is the one rule this room has, and you have been down here an hour. She will still see you. She has a use for you. But nobody down here will drink with you, and I would not come back for the dice."],
+      "replies": [
+        { "say": "Take me to her.", "then": "see_fence", "mark": "potato_pit_blood", "journal": "I killed {bruiser} in the Tallow Room's pit. The room went quiet in a different way." }
+      ]
+    },
     "see_fence": {
       "do": "talk", "who": "fence", "goal": "Speak with {fence}",
       "say": [
@@ -158,13 +257,37 @@
       ],
       "journal": "The watch raided the Tallow Room. Before it did, one of the Room's men kicked in {sister}'s door looking for who told. She had hidden the boy. The sergeant has run for the camp road."
     },
-    "to_toll": { "do": "go", "to": "toll", "goal": "Find {sergeant} at {place:toll}", "then": "see_sergeant" },
+    "to_toll": {
+      "do": "go", "to": "toll", "goal": "Find {sergeant} at {place:toll}",
+      "candle": true, "mark": "potato_candle_lit",
+      "journal": "The night I set out after {sergeant}, a black candle was burning in the tavern window. It was not there in the morning, and I did not put it there.",
+      "then": "see_sergeant"
+    },
     "see_sergeant": {
       "do": "talk", "who": "sergeant", "goal": "Face {sergeant}",
       "say": [
         "Stop there. You are the one with Dunnock's book. I knew that book would be the end of me. I told him not to write things down. He said a carter who cannot show his tally is a thief.",
         "Before you draw, do a sum. Forty in that camp. Six winters back they came down on the east farms twice a year. So I made an arrangement. I tell them which carts carry more than potatoes. They take those and leave the farms be. Smugglers. Men nobody counts. Six years, and not one farmer buried. Now tell me which of us has kept this town."
       ],
+      "replies": [
+        { "say": "You took a third for it.", "then": "sergeant_more" },
+        { "say": "Dunnock had a boy of nine.", "then": "sergeant_more" },
+        { "say": "There is a black candle in the tavern window tonight.", "then": "sergeant_candle" }
+      ]
+    },
+    "sergeant_candle": {
+      "do": "talk", "who": "sergeant",
+      "say": {
+        "?mark:potato_told_watch": [
+          "Is there. Then somebody has been paid for. That is all a black candle says. It does not say who, and it does not say by whom. Eleven years on that gate and I have seen four of them lit. Each time somebody in the town was dead before it burned down, and each time the watch wrote 'misadventure'.",
+          "So the Room is nailed shut and has still found the money. Or my captain would sooner put up a stone than put a sergeant before the ruler. I'll not ask you which. I do not think you know. Either way I am walking under a candle, whatever you do here. Now do your sum."
+        ],
+        "?": [
+          "Is there. Then somebody has been paid for. That is all a black candle says. It does not say who, and it does not say by whom. Eleven years on that gate and I have seen four of them lit. Each time somebody in the town was dead before it burned down, and each time the watch wrote 'misadventure'.",
+          "{fence} lit it. You she sends because you cost her nothing until it is done. The candle is in case you turn out to have a conscience. That makes you the cheap way, stranger, and me a dead man by one road or the other. Now do your sum."
+        ]
+      },
+      "journal": "{sergeant} says a black candle is the guild's mark that somebody has been paid for, and that this one is lit for him.",
       "replies": [
         { "say": "You took a third for it.", "then": "sergeant_more" },
         { "say": "Dunnock had a boy of nine.", "then": "sergeant_more" }
@@ -225,21 +348,44 @@
       "text": "I paid Dunnock's debt out of my own purse. The Room has its money and still wants its bricks. The boy is left alone, for now.",
       "reward": { "hearts": 8, "reputation": 4 },
       "marks": ["potato_paid_debt"],
-      "town": ["Somebody paid off Hob Dunnock's debt after he was dead. Who does that? Nobody honest.", "The carter's boy has new shoes. Don't ask me where a tanner's lodger finds shoes."]
+      "town": ["Somebody paid off Hob Dunnock's debt after he was dead. Who does that? Nobody honest.", "The carter's boy has new shoes. Don't ask me where a tanner's lodger finds shoes."],
+      "later": [
+        { "days": [22, 34], "letter": { "from": "{sister}", "lines": [
+          "Wilf is bound to me at the tannery now, on the bark pits, since he will not go near a cart. He is good at it. He counts the hides twice and writes the number down, and I have not the heart to tell him where he gets that from.",
+          "Nobody has looked at my door. I still look at it myself, every night, before I bar it. I expect I always will.",
+          "You paid a dead man's debt and asked for nothing, and I said a hard thing about it at the time. I am not good at thanking. This is me doing it."
+        ] } }
+      ]
     },
     "rooms_knife": {
       "text": "{sergeant} is dead at the toll stone, and the Tallow Room has stopped losing carters. The camp is no longer fed. It has gone back to the farms.",
       "reward": { "coins": 20, "reputation": 4 },
       "marks": ["nobody_sent_you", "slew_gate_sergeant"],
       "town": ["The sergeant's to have a stone. Died defending us, the captain says. From what, on the camp road, at night?", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
-      "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a thing over and above what was agreed, because you never asked what was in the bricks. It is for seeing the watch before the watch sees you. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:spyglass*1", "minecraft:baked_potato*8"] }
+      "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a thing over and above what was agreed, because you never asked what was in the bricks. It is for seeing the watch before the watch sees you. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:spyglass*1", "minecraft:baked_potato*8"] },
+      "later": [
+        { "days": [1, 3], "town": ["A black candle in the tavern window, and the same week the sergeant is dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
+        { "days": [22, 34], "letter": { "from": "{sister}", "lines": [
+          "They have put up the sergeant's stone. Wilf asked who he was. I said a man from the gate, and he was content with that. I was not.",
+          "The Room sends a boy round with a sack of potatoes on the first of the month. I did not ask for them. I left the first on the step and it was gone by morning, and the next month there were two. So we eat them. That is how that sort keeps you. Not with a knife. With a kindness you cannot give back.",
+          "I am not blaming you. You did what Hob wrote, and then what she asked. I only want somebody to know that I know whose potatoes they are."
+        ] } }
+      ]
     },
     "clean_gate": {
       "text": "The Tallow Room is nailed shut and {sergeant} is dead at the toll stone. The gate is clean. The camp is no longer fed and has gone back to the farms, and the carter's sister bars her door.",
       "reward": { "coins": 12, "hearts": 4, "reputation": 14 },
       "marks": ["potato_told_watch", "slew_gate_sergeant"],
       "town": ["They nailed the hatch behind the chandlers' row. Give it a week. That trade's like damp.", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
-      "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door, as I said it would. Next morning there was a potato on the step, cut in half. You know what that means. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] }
+      "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door, as I said it would. Next morning there was a potato on the step, cut in half. You know what that means. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] },
+      "later": [
+        { "days": [1, 3], "town": ["A black candle in the tavern window, and the same week the sergeant is dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
+        { "days": [25, 40], "letter": { "from": "{sister}", "lines": [
+          "We are at my cousin's, over the hills. I'll not write where. It is sheep here and not hides, and the smell is a change at least.",
+          "A carter came through with word that the hatch behind the chandlers' row is open again, with a new woman keeping it. I told you that trade was like damp. He says the black candle is still on the tavern sill, and nobody will be the one to move it.",
+          "Wilf has stopped asking when his father is coming. Now he asks when we are going home, which is worse, because I had an answer to the other. I do not thank you. But I have stopped saying your name like a curse, and you may have that."
+        ] } }
+      ]
     },
     "let_walk": {
       "text": {
@@ -249,13 +395,34 @@
       "reward": { "coins": 8, "hearts": 6, "reputation": 6 },
       "marks": ["spared_gate_sergeant"],
       "town": ["{sergeant}'s gone from the gate. Eleven years, and off without a word or a pension.", "A wheat carter lost on the ford road. Honest wheat. That road's cursed, I tell you."],
-      "returns": { "who": "sergeant", "days": [7, 12], "as": "recruit", "say": "I have no gate and no arrangement, and I find I cannot sit in an alehouse while carts go out to that ford. You did the sum and still would not have it. I should like to learn how that is done. I can hold a line, and I know every raider path within a day's walk." }
+      "returns": { "who": "sergeant", "days": [7, 12], "as": "recruit", "say": "I have no gate and no arrangement, and I find I cannot sit in an alehouse while carts go out to that ford. You did the sum and still would not have it. I should like to learn how that is done. I can hold a line, and I know every raider path within a day's walk." },
+      "later": [
+        { "days": [1, 3], "town": ["That black candle is still burning in the tavern window, and {sergeant} is still breathing, last anyone heard. Somebody's money has not been earned yet."] },
+        { "days": [22, 34], "if": "!mark:potato_told_watch", "letter": { "from": "{sister}", "lines": [
+          "{sergeant} came to my door. Himself, in a plain coat, with no gate behind him. He stood on the step and said he was the one who told the camp which night Hob crossed. He did not ask for anything. I think he wanted to be hit.",
+          "I did not hit him. I shut the door. Then I opened it again and told him the boy's name is Wilf, and that he could carry that about with him. Then I shut it for good.",
+          "I hear it was you who let him walk. I have thought about whether I am angry. I am. But I notice I would sooner he came to my step than had a stone. Make of that what you can. I cannot."
+        ] } },
+        { "days": [22, 34], "if": "mark:potato_told_watch", "letter": { "from": "{sister}", "lines": [
+          "The watch stopped minding my door, as I said it would. Nothing has come through it. I am told that is because the one who would have sent somebody is before the ruler, and the one who sold my brother has gone from the gate.",
+          "Gone. Not hanged and not dead. Walking about somewhere with his legs under him. They say you stood in front of him at the toll stone and let him go. Nobody let Hob go.",
+          "Wilf found the bolt hole in the tailboard when they brought the cart in. He put his finger in it and said nothing. I am telling you because somebody ought to be told, and you are the one who knows what it was."
+        ] } }
+      ]
     },
     "cut_in": {
       "text": "I took {sergeant}'s money. The arrangement stands. The farms are quiet, and the carters go on dying at the ford.",
       "reward": { "coins": 15 },
       "marks": ["takes_gate_coin"],
-      "town": ["A quiet season at the east farms. Somebody up there must like us.", "Another potato man gone on the ford road. Well. They know the risks, that sort."]
+      "town": ["A quiet season at the east farms. Somebody up there must like us.", "Another potato man gone on the ford road. Well. They know the risks, that sort."],
+      "later": [
+        { "days": [1, 3], "town": ["A black candle in the tavern window since the dark night. Who is it for? Don't look at it. Looking is how you get asked."] },
+        { "days": [20, 32], "letter": { "from": "{sister}", "lines": [
+          "A man from the gate told a man at the tannery that the sergeant has a new friend, and what the friend was paid: {coins:15}. I have had it worked out for me. It is less than Hob owed.",
+          "The carters still go out to the ford. One of them lodged two doors down from me. His wife came to ask what I did, after. I told her I buy bark and I bar the door.",
+          "Do not come by the tannery. Wilf would know your boots, and he thinks well of them, and I will not be the one to tell him."
+        ] } }
+      ]
     }
   }
 }

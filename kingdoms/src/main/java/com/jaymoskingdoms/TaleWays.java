@@ -49,6 +49,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.block.AbstractCandleBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -294,8 +295,9 @@ final class TaleWays {
 		for (Map.Entry<String, JsonElement> e : Tale.object(step, "clock").entrySet()) {
 			run.vars.putIfAbsent(BY + e.getKey(), Long.toString(today + Tale.between(e.getValue(), 1, random)));
 		}
-		if (Tale.flag(step, "candle") && !candle(level, run)) {
-			run.vars.put(CANDLE, "1");
+		String candle = Tale.flag(step, "candle") ? "black" : Tale.string(step, "candle", "");
+		if (!candle.isEmpty() && !candle(level, run, candle)) {
+			run.vars.put(CANDLE, candle);
 		}
 		JsonElement within = step.get("within");
 		if (within != null && !named(within)) {
@@ -306,17 +308,25 @@ final class TaleWays {
 	/**
 	 * A black candle is set burning in a window of the tavern of {@code run}'s town (the guild's mark that someone has
 	 * been paid for): on a sill beside glass if one is near the counter, else on the counter. False if the tavern isn't
-	 * loaded yet (it's tried again while the tale runs).
+	 * loaded yet (it's tried again while the tale runs). {@code colour} is "black", or "white" for the candle that
+	 * answers it (the paper bought back). One of a colour is enough for a window; a tale with no town lights none.
 	 */
-	static boolean candle(ServerLevel level, Tales.Run run) {
+	static boolean candle(ServerLevel level, Tales.Run run, String colour) {
 		Faction f = run.faction < 0 ? null : Factions.get(level.getServer(), run.faction);
-		BlockPos tavern = f == null ? null : tavern(level, f);
-		BlockPos at = tavern != null ? tavern : f != null ? f.seat() : BlockPos.of(run.home);
+		if (f == null) {
+			return true;
+		}
+		BlockPos tavern = tavern(level, f);
+		BlockPos at = tavern != null ? tavern : f.seat();
 		if (!level.isLoaded(at)) {
 			return false;
 		}
+		Block block = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace(colour + "_candle")).orElse(Blocks.CANDLE);
 		BlockPos spot = null;
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-CANDLE_REACH, -1, -CANDLE_REACH), at.offset(CANDLE_REACH, 3, CANDLE_REACH))) {
+			if (level.isLoaded(p) && level.getBlockState(p).is(block)) {
+				return true;
+			}
 			if (!level.isLoaded(p) || !level.getBlockState(p).isAir() || !level.getBlockState(p.below()).isFaceSturdy(level, p.below(), Direction.UP)) {
 				continue;
 			}
@@ -336,8 +346,7 @@ final class TaleWays {
 				return true;
 			}
 		}
-		BlockState candle = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace("black_candle")).orElse(Blocks.CANDLE).defaultBlockState();
-		level.setBlockAndUpdate(spot, candle.setValue(AbstractCandleBlock.LIT, true));
+		level.setBlockAndUpdate(spot, block.defaultBlockState().setValue(AbstractCandleBlock.LIT, true));
 		return true;
 	}
 

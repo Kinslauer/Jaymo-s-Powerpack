@@ -1,0 +1,991 @@
+{
+  "title": "Letters to a Dead Man",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "none",
+      "farmer",
+      "shepherd",
+      "fletcher",
+      "leatherworker",
+      "mason",
+      "fisherman"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "writer": [
+      "mother",
+      "daughter",
+      "comrade"
+    ]
+  },
+  "cast": {
+    "friend": {
+      "name": [
+        "Amos Thrale",
+        "Silas Thrale",
+        "Peter Thrale"
+      ],
+      "body": "villager",
+      "job": "toolsmith",
+      "female": false,
+      "at": "cooperage"
+    },
+    "runner": {
+      "name": [
+        "Col Pennock",
+        "Wat Pennock",
+        "Dickon Pennock"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "lane"
+    },
+    "mother": {
+      "name": [
+        "Mabel Averill",
+        "Hester Averill",
+        "Edith Averill"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "staithe",
+      "if": "writer=mother"
+    },
+    "daughter": {
+      "name": [
+        "Ellin Kemble",
+        "Bridie Kemble",
+        "Sabra Kemble"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "staithe",
+      "if": "writer=daughter"
+    },
+    "comrade": {
+      "name": [
+        "Gil Hobday",
+        "Rafe Hobday",
+        "Aubrey Hobday"
+      ],
+      "body": "villager",
+      "job": "fisherman",
+      "female": false,
+      "at": "staithe",
+      "if": "writer=comrade"
+    }
+  },
+  "places": {
+    "house": {
+      "at": "home",
+      "name": "Ned Averill's house"
+    },
+    "lane": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        8,
+        18
+      ],
+      "name": "the lane before Averill's door"
+    },
+    "cooperage": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        25,
+        50
+      ],
+      "name": "the cooperage"
+    },
+    "graveyard": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        45,
+        85
+      ],
+      "name": "the burying ground"
+    },
+    "staithe": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        220,
+        380
+      ],
+      "name": "the ferry stage at Low Staithe"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "Do you read? I don't, or not to trust. Then you'll do. Come in off the step.",
+        "This was Ned Averill's house. A cooper. He has been a year in the burying ground, and I had the house off the reeve after, with his bench still in it.",
+        "Every month, near enough, {runner} comes up the lane with a letter for him. I say he's dead. {runner} says a runner is paid to carry and not to argue. So they go in the crock on the shelf. I'll not open a dead man's letters and I'll not burn them. But somebody is writing to a grave and doesn't know it, and that sits badly with me. {friend} at the cooperage had the next bench to his, if you want to know what he was."
+      ],
+      "replies": [
+        {
+          "say": "Let me see the crock.",
+          "then": "read",
+          "journal": "{giver} lives in the house of a cooper, Ned Averill, who has been dead a year. A runner still brings a letter for him every month. {giver} has kept them all in a crock, unopened, and asked me to read them."
+        },
+        {
+          "say": "Burn them. He'll not miss them.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "read": {
+      "do": "search",
+      "at": "house",
+      "need": 2,
+      "goal": "Read what is in the crock",
+      "clues": [
+        {
+          "if": "writer=mother",
+          "name": "The oldest letter, in a child's round hand",
+          "item": "minecraft:paper",
+          "lore": [
+            "'Dear Ned. Mam says thank you for yours and she is glad the chest is better. Nan read it to her twice.'",
+            "'I am writing this as Mam's eyes are no good now. Jem.'"
+          ],
+          "journal": "The oldest letter is from Ned Averill's mother, written for her by a child. It thanks Ned for a letter of his own. He was in the ground before it was written."
+        },
+        {
+          "if": "writer=daughter",
+          "name": "The oldest letter, in a careful hand",
+          "item": "minecraft:paper",
+          "lore": [
+            "'You will not know my name. My mother was Joan Kemble, who kept the ferry inn at Low Staithe. She told me yours the week she died. She said you made the inn's casks the summer of the flood.'",
+            "'I ask for nothing. I only thought you should know that there is one of me. {daughter}.'"
+          ],
+          "journal": "The oldest letter is from {daughter}, a daughter Ned Averill may never have known he had. Her mother told her his name on her deathbed. By then he was already dead."
+        },
+        {
+          "if": "writer=comrade",
+          "name": "The oldest letter, with a coin sewn in the fold",
+          "item": "minecraft:paper",
+          "lore": [
+            "'Ned, you old stump. Here is more toward what I owe. You never answer, and you never did in nine years, so I take it you are well and still think me a fool. {comrade}.'",
+            "The stitching has never been cut. Nor has it on any of the others."
+          ],
+          "journal": "The oldest letter is from {comrade}, who is paying off an old debt to Ned Averill a coin at a time. Ned never answered him in nine years."
+        },
+        {
+          "name": "The crock on the shelf",
+          "item": "minecraft:flower_pot",
+          "lore": [
+            "A letter for near every month since the burying. Every seal was whole until today.",
+            "Each is marked on the back by the ferry carter: 'up from Low Staithe'."
+          ],
+          "journal": "Every letter in the crock came up from Low Staithe by the ferry carter."
+        }
+      ],
+      "then": "runner_talk"
+    },
+    "runner_talk": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Ask {runner} where the letters come from",
+      "say": [
+        "I know. I'm told it at that door every month. Dead a year. I'm sorry for it, each time.",
+        "I have them off the carter, and the carter has them off the ferry at Low Staithe, and whoever writes them pays at that end. I can't send 'he's dead' back down the line. Nobody has paid for it, and the carter carries paper, not words.",
+        "They've been coming closer together of late. There's one due any day. I'll put them in your hand from now on and not in the crock, if the house agrees. Then they are yours to answer or not."
+      ],
+      "replies": [
+        {
+          "say": "Bring them to me as they come.",
+          "then": "wait_one",
+          "journal": "{runner} has the letters from the ferry carter, who has them off the ferry at Low Staithe. Nobody on that road is paid to carry word back. They come closer together now, and {runner} will bring each one to me."
+        }
+      ]
+    },
+    "wait_one": {
+      "do": "wait",
+      "days": [
+        1,
+        2
+      ],
+      "wake": "letter",
+      "letter": {
+        "from": "{writer}, at Low Staithe",
+        "to": "Ned Averill",
+        "lines": {
+          "?writer=mother": [
+            "Dear Ned. You have not wrote since harvest. Nan is dead, did they tell you.",
+            "Nobody reads Mam your letters now, for none come. She has me read her the old ones out of my head, the bits I remember.",
+            "Mam says are you angry. Jem."
+          ],
+          "?writer=daughter": [
+            "This is the tenth. I have told you about the inn, and the ferry, and my mother's last winter, and you have said nothing to any of it.",
+            "I asked the carter if he knew you. He says he only hands them on at the bridge and has never been up your lane.",
+            "So I do not know if you read these. I do not know if you can read. {daughter}."
+          ],
+          "?": [
+            "Ned. More toward it, sewn in the fold as before.",
+            "I saw a cask of yours at the ferry inn, as tight as the day it was made, and I told the whole room whose work it was. They asked, does he write to you? I said, Ned? He would as soon sing.",
+            "So do not trouble. {comrade}."
+          ]
+        }
+      },
+      "journal": {
+        "?writer=mother": "A letter came for Ned Averill. It says that Nan died at harvest, and that no letters have come from Ned since. Whoever Nan was, his answers stopped when she did.",
+        "?writer=daughter": "A letter came for Ned Averill, her tenth. The carter who takes them has never been up this lane, so nobody at her end knows what became of him.",
+        "?": "A letter came for Ned Averill with a coin in the fold. Nobody at Low Staithe looks for an answer from Ned, so his silence has told them nothing."
+      },
+      "then": "friend_talk"
+    },
+    "friend_talk": {
+      "do": "talk",
+      "who": "friend",
+      "goal": "Ask {friend} at {place:cooperage} about Ned Averill",
+      "say": {
+        "?writer=mother": [
+          "Ned? Twenty years at the next bench. He made a tight cask and he talked about as much as one. A cough took him, in the wet spring. I made his box myself. It seemed right that a cooper should.",
+          "Letters? He had a mother downriver, I know that much. Every quarter he sent her the third part of what he made, by the ferry carter, and he never once went himself. He said the two of them got on better at a distance. She'd be very old. But the reeve sent word when he died. I saw that letter go. Somebody down there had it."
+        ],
+        "?writer=daughter": [
+          "Ned? Twenty years at the next bench. He made a tight cask and he talked about as much as one. A cough took him, in the wet spring. I made his box myself. It seemed right that a cooper should.",
+          "Letters, from Low Staithe? He worked a summer there, the year of the flood, before my time with him. He'd go quiet if the ferry inn was named. He never spoke of a child. I don't believe he knew of one. He'd have gone, if he had known. He was that sort."
+        ],
+        "?": [
+          "Ned? Twenty years at the next bench. He made a tight cask and he talked about as much as one. A cough took him, in the wet spring. I made his box myself. It seemed right that a cooper should.",
+          "Letters with money in? That will be Hobday. They were lads together. Hobday broke a toll keeper's jaw, and Ned stood surety for him, and when Hobday ran, Ned paid. It cost him his own shop. That's why he worked at my bench and not his own. He never said a hard word of the man. He never wrote him a word either."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Whoever it is has to be told. I'll see what the next letter says.",
+          "then": "wait_two"
+        },
+        {
+          "say": "How did he write? If I held a letter of his, how would I know it?",
+          "then": "friend_hand",
+          "mark": "letters_know_his_hand"
+        }
+      ],
+      "journal": {
+        "?writer=mother": "{friend} says Ned Averill sent money to an old mother downriver. The reeve sent word there when he died, so somebody at Low Staithe had that letter and kept it from her.",
+        "?writer=daughter": "{friend} says Ned Averill worked one summer at Low Staithe and never spoke of a child. He does not think Ned knew.",
+        "?": "{friend} says Ned Averill stood surety for {comrade} long ago, and lost his own shop paying it. Ned never wrote to him, before or after."
+      }
+    },
+    "friend_hand": {
+      "do": "talk",
+      "who": "friend",
+      "goal": "Ask {friend} at {place:cooperage} about Ned Averill",
+      "say": "He hardly did write. He made his letters like staves, all upright, and never more than six lines of them. And he never signed his name. He drew a hoop, a little ring, with his mark inside it. Even on a bill. Here, this is a tally of his. Keep it. I've others.",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "Ned Averill's tally",
+          "lore": [
+            "Six lines, the letters upright as staves.",
+            "No name at the foot. A small inked hoop, with a cooper's mark inside it."
+          ]
+        }
+      ],
+      "replies": [
+        {
+          "say": "I'll see what the next letter says.",
+          "then": "wait_two",
+          "journal": "{friend} showed me Ned Averill's hand: upright letters, six lines at the most, and never a name. He signed with a small hoop and his mark inside it."
+        }
+      ]
+    },
+    "wait_two": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "letter",
+      "letter": {
+        "from": "{writer}, at Low Staithe",
+        "to": "Ned Averill",
+        "lines": {
+          "?writer=mother": [
+            "Dear Ned. Mam asked for your old letters, so I looked in Nan's box for them. There are none in it.",
+            "There is one letter only, from a reeve, and it is to Nan and not to Mam, and I cannot read the hard words in it.",
+            "Mam says never mind the box, only write. Jem."
+          ],
+          "?writer=daughter": [
+            "This is the eleventh. I have said that I will stop at twelve.",
+            "A man who wants no daughter need only say so, and I will not trouble him again.",
+            "But say it. {daughter}."
+          ],
+          "?": [
+            "Ned. This is near the last of it.",
+            "When it is all paid I mean to come up the river and stand you a drink, and have you look me in the eye.",
+            "Do not put yourself out to write. I know you will not. {comrade}."
+          ]
+        }
+      },
+      "journal": {
+        "?writer=mother": "Another letter came. There never were any letters from Ned in Nan's box. There is only one from a reeve, addressed to Nan. She knew he was dead, and she made up his letters for the old woman.",
+        "?writer=daughter": "Another letter came, her eleventh. She takes his silence for an answer, and means to stop at twelve.",
+        "?": "Another letter came. The debt is nearly paid, and he means to come up the river when it is."
+      },
+      "then": "choose_first"
+    },
+    "wait_three": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "letter",
+      "letter": {
+        "from": "{writer}, at Low Staithe",
+        "to": "Ned Averill",
+        "lines": {
+          "?writer=mother": [
+            "Dear Ned. Mam has had me walk her down to the ferry three mornings to ask the carter if there is anything from you. There is not.",
+            "She says she will come up the river herself if she has to be carried. She cannot. She can hardly do the stairs. But she says it.",
+            "She says to put: I am not angry, whatever it is. Jem."
+          ],
+          "?writer=daughter": [
+            "This is the twelfth, and I said I would stop at twelve.",
+            "I will be on the ferry stage at Low Staithe each morning until the month is out. If you come, I will know you. My mother said I have your hands.",
+            "If you do not come, I will have my answer, and I will not think badly of you. I never knew you well enough to. {daughter}."
+          ],
+          "?": [
+            "Ned. This is the last of it. Count it if you like. I did, three times.",
+            "So we are quits, and I can come up the river with my head up. I mean to, when the ferry runs again after the rains. I am on the stage at Low Staithe most mornings, seeing about a place on it.",
+            "Nine years and never a word from you. I have chosen to take that as a good sign. {comrade}."
+          ]
+        }
+      },
+      "journal": {
+        "?writer=mother": "A third letter came. The old woman has herself walked to the ferry each morning to ask for word of him.",
+        "?writer=daughter": "A third letter came, her twelfth and last. She will wait on the ferry stage at Low Staithe each morning until the month is out.",
+        "?": "A third letter came, with the last of the debt. He means to come up the river as soon as the ferry runs."
+      },
+      "then": "choose"
+    },
+    "choose_first": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Decide with {giver} what is to be done about the letters",
+      "say": {
+        "?writer=mother": "Read it me. Slowly. So there never were any letters from him. That Nan had the reeve's word in her box the whole year, and read the old woman a son out of her own head. Well. It comes to your hand now and not to my crock. What's to be done?",
+        "?writer=daughter": "Read it me. Slowly. One more, she says, and then she'll stop, and think she has her answer. And it's the wrong answer. Well. It comes to your hand now and not to my crock. What's to be done?",
+        "?": "Read it me. Slowly. So he'll pay the last of it, and then he'll come up here for his drink. Well. It comes to your hand now and not to my crock. What's to be done?"
+      },
+      "voices": {
+        "honour": "They are owed the truth, and from a face, not from a paper.",
+        "mercy": "There is a way to do this that leaves them something to hold. Find it."
+      },
+      "replies": [
+        {
+          "say": "I'll go down to Low Staithe and say it to their face.",
+          "then": "meet",
+          "for": [
+            "honour",
+            "courage"
+          ],
+          "journal": "I set out for Low Staithe to tell the one who writes that Ned Averill is dead."
+        },
+        {
+          "say": "Find me a pen. Ned Averill is going to answer.",
+          "then": "end:kept",
+          "mark": "letters_wrote_back",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "letters_wrote_back",
+            "days": [
+              6,
+              10
+            ],
+            "unless": "mark:letters_know_his_hand",
+            "reputation": 8,
+            "town": [
+              "An answer went down the river in Ned Averill's name, and him a year in the ground. It was {player} who wrote it. Low Staithe knew before the foot of the page that it was not his hand.",
+              "I don't say it wasn't kindly meant. But you can't write a dead man's letters for him. It comes out, and then they have lost him twice."
+            ],
+            "returns": {
+              "who": "runner",
+              "as": "warning",
+              "say": {
+                "?writer=mother": "I'm to give you this back. The child read your letter out, and the old woman stopped him at the foot of it. 'Ned never signed a name in his life,' she said. 'He drew his hoop.' She knows he is dead. She knew it by a name.",
+                "?writer=daughter": "I'm to give you this back. She carried it up the river to the cooperage, to see the hand that wrote it, and they showed her his. Staves, and a hoop. Not yours. She knows where he is now, and she knows somebody thought she could not bear to be told.",
+                "?": "I'm to give you this back. He laughed when he opened it. 'A whole page,' he said. 'Ned never wrote six lines together, and he never signed.' Then he stopped laughing. He has asked the way to the burying ground."
+              }
+            }
+          },
+          "journal": "I sat down at Ned Averill's own bench and answered the letters in his name."
+        },
+        {
+          "say": "They were sent to him. I'll lay them on his grave, every one.",
+          "then": "lay"
+        },
+        {
+          "say": "Nothing yet. I want to see what the next one says.",
+          "then": "wait_three"
+        }
+      ]
+    },
+    "choose": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Decide with {giver} what is to be done about the letters",
+      "say": {
+        "?writer=mother": "Read it me. Slowly. 'I am not angry, whatever it is.' Oh, that's hard. That is an old woman waiting on a dead son. There'll not be a kinder letter than that one, nor a better day to answer it. What's to be done?",
+        "?writer=daughter": "Read it me. Slowly. So she'll stand on that ferry stage every morning, looking for a man with her hands. And he's under the yew. That's her last. There's no waiting on another. What's to be done?",
+        "?": "Read it me. Slowly. So he means to come up the river with his head up, and what he'll find is a grave. That's his last. There's no waiting on another. What's to be done?"
+      },
+      "voices": {
+        "honour": "They are owed the truth, and from a face, not from a paper.",
+        "mercy": "There is a way to do this that leaves them something to hold. Find it."
+      },
+      "replies": [
+        {
+          "say": "I'll go down to Low Staithe and say it to their face.",
+          "then": "meet",
+          "for": [
+            "honour",
+            "courage"
+          ],
+          "journal": "I set out for Low Staithe to tell the one who writes that Ned Averill is dead."
+        },
+        {
+          "say": "Find me a pen. Ned Averill is going to answer.",
+          "then": "end:kept",
+          "mark": "letters_wrote_back",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "letters_wrote_back",
+            "days": [
+              6,
+              10
+            ],
+            "unless": "mark:letters_know_his_hand",
+            "reputation": 8,
+            "town": [
+              "An answer went down the river in Ned Averill's name, and him a year in the ground. It was {player} who wrote it. Low Staithe knew before the foot of the page that it was not his hand.",
+              "I don't say it wasn't kindly meant. But you can't write a dead man's letters for him. It comes out, and then they have lost him twice."
+            ],
+            "returns": {
+              "who": "runner",
+              "as": "warning",
+              "say": {
+                "?writer=mother": "I'm to give you this back. The child read your letter out, and the old woman stopped him at the foot of it. 'Ned never signed a name in his life,' she said. 'He drew his hoop.' She knows he is dead. She knew it by a name.",
+                "?writer=daughter": "I'm to give you this back. She carried it up the river to the cooperage, to see the hand that wrote it, and they showed her his. Staves, and a hoop. Not yours. She knows where he is now, and she knows somebody thought she could not bear to be told.",
+                "?": "I'm to give you this back. He laughed when he opened it. 'A whole page,' he said. 'Ned never wrote six lines together, and he never signed.' Then he stopped laughing. He has asked the way to the burying ground."
+              }
+            }
+          },
+          "journal": "I sat down at Ned Averill's own bench and answered the letters in his name."
+        },
+        {
+          "say": "They were sent to him. I'll lay them on his grave, every one.",
+          "then": "lay"
+        }
+      ]
+    },
+    "lay": {
+      "do": "go",
+      "to": "graveyard",
+      "goal": "Lay the letters on Ned Averill's grave in {place:graveyard}",
+      "journal": "I laid the letters on Ned Averill's grave, the newest on top, and set a stone on them against the wind.",
+      "then": "end:left"
+    },
+    "meet": {
+      "do": "talk",
+      "who": {
+        "?writer=mother": "mother",
+        "?writer=daughter": "daughter",
+        "?": "comrade"
+      },
+      "goal": "Find the one who writes, at {place:staithe}",
+      "say": {
+        "?writer=mother": "Who's that? Jem, who is it? Come where the light is, I see shapes and no more. You're up from his town. I can smell the road on you. He has sent you in place of a letter, hasn't he? That's like him. He never would write when he could send.",
+        "?writer=daughter": "You're looking for somebody. So am I. No. Your hands are wrong. But you have come off the upriver road with a packet of letters, and I know the hand on them, because it's mine. Did he send you?",
+        "?": "Up from {town}? Then you'll know a cooper there, Averill. A miserable upright stick of a man. Never writes. I've all but paid him a debt, and I mean to go up and make him say so. Hold on. Those are my letters. What are you doing with my letters?"
+      },
+      "voices": {
+        "honour": "Say it now. It will not be easier in a minute."
+      },
+      "replies": [
+        {
+          "say": "Ned Averill died a year ago. A cough, in the wet spring. Your letters came to his door, and nobody there knew where to send word.",
+          "then": "told",
+          "journal": {
+            "?writer=mother": "At Low Staithe I found Ned Averill's mother, {mother}, old and near blind. I told her that her son has been dead a year.",
+            "?writer=daughter": "At Low Staithe I found {daughter} on the ferry stage. I told her that her father was dead before she wrote her first letter.",
+            "?": "At Low Staithe I found {comrade} seeing about a place on the ferry. I told him the man he owed has been dead a year."
+          }
+        },
+        {
+          "say": "He is well. He's a poor hand at letters, that is all. He sent me to say he has every one of them.",
+          "then": "end:kept",
+          "mark": "letters_said_well",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "letters_he_is_well",
+            "days": [
+              5,
+              9
+            ],
+            "reputation": 10,
+            "hearts": 20,
+            "town": [
+              "{player} went down to Low Staithe and told them Ned Averill was alive and well. A year in the burying ground, and well! The carter put it right inside the week. He said he had never seen a face fall so far.",
+              "Why go all that way to say it, and then not say it? I can't make it out."
+            ],
+            "returns": {
+              "who": "runner",
+              "as": "warning",
+              "say": {
+                "?writer=mother": "The carter told her. He didn't know there was anything to keep quiet. She asked him how Ned looked, and he said, 'Under the yew, mistress, this twelvemonth.' I'm to tell you she doesn't want your name spoken at her table.",
+                "?writer=daughter": "The carter told her. He didn't know there was anything to keep quiet. She asked him to carry one letter more, and he said there was nobody at that door to read it. I'm to tell you she waited on that stage four more mornings on your word.",
+                "?": "The carter told him. He didn't know there was anything to keep quiet. Hobday came up the river with a drink in each hand, and it was the sexton who had to walk him to the yew. I'm to tell you he would sooner have heard it from you."
+              }
+            }
+          },
+          "journal": "At Low Staithe I found the one who had been writing. I had the truth ready, and I said instead that Ned Averill was well."
+        }
+      ]
+    },
+    "told": {
+      "do": "talk",
+      "who": {
+        "?writer=mother": "mother",
+        "?writer=daughter": "daughter",
+        "?": "comrade"
+      },
+      "goal": "Stay and hear them",
+      "say": {
+        "?writer=mother": [
+          "Dead. A year. And Nan read me his letters all last winter. 'The chest is better, Mam.' 'There's a new lad at the bench, Mam.' She made them up at my own table, and I thanked her for reading so nicely.",
+          "She could not tell me. So she gave me a year more of him. I don't know if I am to bless her or curse her, and she is dead too, so it is all one. Where does he lie? Is there a stone?"
+        ],
+        "?writer=daughter": [
+          "A year. Then he was dead before I wrote the first. I have been asking a grave whether it wanted a daughter, and taking its quiet for an answer.",
+          "I had a whole man built out of that quiet. A hard one, who read every letter and put it on the fire. Now I've to pull him down, and I have nothing to put up in his place. What was he? Does anybody up there know what he was?"
+        ],
+        "?": [
+          "Ah, no. No, he isn't. Not Ned. A year?",
+          "Nine years I've paid that debt, so I could feel easy when I looked at him. And I have been a year paying it to nobody. I thought his not writing was only Ned. It was always only Ned. How was I to tell one quiet from another? Is there a stone on him? There'll be no stone. He'd not have left the price of one, and I know why."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Come up the river with me. I'll take you to where he lies.",
+          "then": "walk_grave"
+        },
+        {
+          "say": "There's a man at the cooperage who had the next bench to his for twenty years. Come and hear him.",
+          "then": "walk_friend"
+        },
+        {
+          "say": "I can't stay. Here are your letters. I am sorry for it.",
+          "then": "end:parted"
+        }
+      ]
+    },
+    "walk_grave": {
+      "do": "escort",
+      "who": {
+        "?writer=mother": "mother",
+        "?writer=daughter": "daughter",
+        "?": "comrade"
+      },
+      "to": "graveyard",
+      "goal": "Walk with them up the river to {place:graveyard}",
+      "failed": "end:lost_on_road",
+      "then": "at_grave"
+    },
+    "at_grave": {
+      "do": "vigil",
+      "at": "graveyard",
+      "gap": 10,
+      "goal": "Stand by at Ned Averill's grave",
+      "lines": {
+        "?writer=mother": [
+          {
+            "who": "mother",
+            "say": "Put my hand on it. Is this the head or the foot? The head. There. He always did sleep with his face to the wall."
+          },
+          {
+            "say": "Wind in the yews. A long way off, a bell counts the hour.",
+            "sound": "minecraft:block.bell.use"
+          },
+          {
+            "who": "mother",
+            "say": "Nan wrote me that his chest was better. I'll hold to that one. It is the only letter of hers that has come out true."
+          },
+          {
+            "who": "mother",
+            "say": "Leave me a while. I have a year of talk for him, and it is not for strangers."
+          }
+        ],
+        "?writer=daughter": [
+          {
+            "who": "daughter",
+            "say": "No stone. Only a barrel hoop set in the turf. Somebody thought of that."
+          },
+          {
+            "say": "Wind in the yews. A long way off, a bell counts the hour.",
+            "sound": "minecraft:block.bell.use"
+          },
+          {
+            "who": "daughter",
+            "say": "I'm Joan's girl. You don't know me. She said I have your hands. I'd have liked to see for myself."
+          },
+          {
+            "who": "daughter",
+            "say": "I'll leave the letters with him. They were his. He ought to have them."
+          }
+        ],
+        "?": [
+          {
+            "who": "comrade",
+            "say": "There you are, you old stump. Under a barrel hoop. Of course you are."
+          },
+          {
+            "say": "Wind in the yews. A long way off, a bell counts the hour.",
+            "sound": "minecraft:block.bell.use"
+          },
+          {
+            "who": "comrade",
+            "say": "It's paid, Ned. Every piece of it. You'd never have counted it. I counted it for you."
+          },
+          {
+            "who": "comrade",
+            "say": "He'll have a stone. That money has sat a year in a crock doing nobody any good. It can do this."
+          }
+        ]
+      },
+      "journal": "I stood by at Ned Averill's grave while the one who had written to him all year said what there was to say.",
+      "then": "end:grave"
+    },
+    "walk_friend": {
+      "do": "escort",
+      "who": {
+        "?writer=mother": "mother",
+        "?writer=daughter": "daughter",
+        "?": "comrade"
+      },
+      "to": "cooperage",
+      "goal": "Walk with them up the river to {place:cooperage}",
+      "failed": "end:lost_on_road",
+      "then": "friend_meets"
+    },
+    "friend_meets": {
+      "do": "talk",
+      "who": "friend",
+      "goal": "Bring them to {friend}",
+      "say": {
+        "?writer=mother": [
+          "Mistress Averill. Sit. That's his stool you are on, and nobody has sat on it since. He sent you the third part of every cask, and he grumbled over every one, and he'd have sent the half if you had asked.",
+          "He kept your letters in the lid of his tool chest. I have the chest. It's yours, tools and all, and I will carry it down to the ferry myself."
+        ],
+        "?writer=daughter": [
+          "Let me see your hands. Turn them over. Well, now. Those are his thumbs. He could feel a leak through a stave with those before the water found it.",
+          "He never knew of you. I'd swear to that on this bench. If he had known, he'd have walked to Low Staithe in his shirt. Sit down. I have twenty years of him to tell, and it will take more than the one evening."
+        ],
+        "?": [
+          "So you are Hobday. I've wanted a look at you for twenty years. He lost his shop for you.",
+          "And he never said one hard word about it. I asked him once why he didn't write and curse you. He said, 'What for? He knows.' That is all you'll get from me, because it is all I ever got from him. Sit down. You'll want a drink."
+        ]
+      },
+      "journal": "I brought the one who had written to Ned Averill to the cooperage, to hear {friend} tell what he was.",
+      "then": "end:meeting"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I told {giver} to burn them. A dead man takes no post, and whoever was writing to him was no business of mine."
+    },
+    "grave": {
+      "text": {
+        "?writer=mother": "I told {mother} her son was a year dead, and gave her my arm up the river to his grave. She put her hand on the turf at the head of it and sent the rest of us away.",
+        "?writer=daughter": "I told {daughter} her father was dead before she ever wrote to him, and walked her up the river to his grave. She left her letters there with him.",
+        "?": "I told {comrade} the man he owed was a year dead, and walked him up the river to the grave. He means to put a stone on it with the debt money."
+      },
+      "reward": {
+        "coins": {
+          "?writer=comrade": 14,
+          "?": 5
+        },
+        "items": [
+          "minecraft:bread*3"
+        ],
+        "hearts": 30,
+        "reputation": 8
+      },
+      "marks": [
+        "letters_grave"
+      ],
+      "town": [
+        "The one who wrote to Ned Averill all this year came up the river and stood at his grave. It was {player} who went down and fetched them.",
+        "No more letters go in that crock, I'm told. A fine thing, and about time."
+      ],
+      "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "letter": {
+            "from": "{writer}",
+            "lines": {
+              "?writer=mother": [
+                "Jem writes this for me, as before. I am home, and the stairs are no better.",
+                "I have him write to Ned still, the first of every month. The house there has said it will carry each one up to the yew and read it out. I know he cannot answer. He never did answer much.",
+                "You told an old woman a hard thing to her face and then gave her your arm. I had forgotten that people did both."
+              ],
+              "?writer=daughter": [
+                "I have not gone back to Low Staithe. There is a shed behind the cooperage that wanted a tenant, and a bench that wanted a pair of hands.",
+                "Thrale says I split a stave the way my father did, which is to say badly, for the first month. I am in the second month now.",
+                "The house gave me his crock of letters. I read them over, some nights. They are a strange thing to have written. But they got me here."
+              ],
+              "?": [
+                "The stone is up. Thrale cut a hoop on it and I paid, out of the crock, with Ned's own debt money. He would say it was the first sensible thing I ever did with a coin.",
+                "I come up the river on the first of each month. I sit there an hour and tell him the news. He is no worse company than he ever was.",
+                "If you are by the yew on a first, there is a drink in it for you."
+              ]
+            }
+          }
+        },
+        {
+          "days": [
+            10,
+            18
+          ],
+          "if": "writer=daughter",
+          "settles": "daughter"
+        }
+      ]
+    },
+    "meeting": {
+      "text": {
+        "?writer=mother": "I told {mother} her son was a year dead, and brought her up the river to the bench where he had worked. {friend} gave her his tool chest, with every letter she had ever sent him kept in the lid.",
+        "?writer=daughter": "I told {daughter} her father was dead before she ever wrote to him, and brought her to the man who had worked beside him. She came up the river for a father and was given twenty years of stories about one.",
+        "?": "I told {comrade} the man he owed was a year dead, and brought him to the cooperage. {friend} told him what Ned Averill had said of the debt: 'What for? He knows.'"
+      },
+      "reward": {
+        "coins": 5,
+        "items": [
+          "minecraft:bread*3"
+        ],
+        "hearts": 30,
+        "reputation": 8
+      },
+      "marks": [
+        "letters_meeting"
+      ],
+      "town": [
+        "There was a stranger sat on Ned Averill's stool at the cooperage half the night, and Thrale talking. I never heard Thrale say so much in a year.",
+        "{player} went down to Low Staithe and brought back whoever it was that kept writing to Ned. That was a long walk to do a hard thing."
+      ],
+      "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "letter": {
+            "from": "{friend}",
+            "lines": {
+              "?writer=mother": [
+                "I carried the chest down to the ferry as I said. She had the child read her own letters back to her out of the lid, the whole length of the stage.",
+                "She says he kept them, so he read them, so he knew. I did not tell her that he had me read him the long ones. It comes to the same.",
+                "Come by the cooperage. There is a stool here that nobody sits on, and it has begun to look lonely."
+              ],
+              "?writer=daughter": [
+                "She comes up on the ferry every market day and sits on his stool and asks me things. What he ate. How he swore. Whether he sang. He did not sing, and we may all be thankful.",
+                "I am running short of Ned. I have started on the same tales a second time, and she lets me.",
+                "That is your doing. I thought you should know how it goes on."
+              ],
+              "?": [
+                "Hobday has paid for a stone. I told him Ned would have called it a waste of good money. He said that was the point of it.",
+                "He sat on Ned's stool for an afternoon and said nothing at all. It was like having Ned back.",
+                "Come by the cooperage. He left the price of a drink for you on the bench. I am an honest man, but I am not a patient one."
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "parted": {
+      "text": "I said it plainly on the ferry stage at Low Staithe: Ned Averill is a year dead. I gave back the letters and came away. I had nothing in my hands to mend it with.",
+      "reward": {
+        "coins": 3,
+        "hearts": 15,
+        "reputation": 5
+      },
+      "marks": [
+        "letters_parted"
+      ],
+      "town": [
+        "No more letters for Ned Averill. {player} went down to Low Staithe and told them. Just told them, and came home."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            15
+          ],
+          "town": {
+            "?writer=mother": [
+              "The carter says the old woman at Low Staithe has stopped coming down to the ferry. She sits at her window, turned upriver. Blind as she is.",
+              "Somebody might have walked her up to see the grave. It's not so very far."
+            ],
+            "?writer=daughter": [
+              "The carter says the young woman who waited on the ferry stage went back to the inn the same day, and has not been seen at the water since.",
+              "Thrale would have told her about her father, if anybody had brought her. He's said so twice."
+            ],
+            "?": [
+              "A man came up from Low Staithe, stood an hour in the burying ground, and went down again without a word to anybody. He left the price of a stone with the reeve.",
+              "Thrale says that was Hobday. Says he'd have liked a word with him."
+            ]
+          }
+        }
+      ]
+    },
+    "kept": {
+      "text": {
+        "?mark:letters_wrote_back & mark:letters_know_his_hand": "I wrote six upright lines down the river in a dead man's hand, and drew his hoop at the foot of them: that he was well, that he was busy, that he had every letter. {giver} watched me seal it and said nothing.",
+        "?mark:letters_wrote_back": "I wrote down the river in a dead man's name: that he was well, that he was busy, that he had every letter. {giver} watched me seal it and said nothing.",
+        "?": "I stood at Low Staithe with the truth ready in my mouth, and what came out was that Ned Averill was well and a poor hand at letters. I was thanked for it."
+      },
+      "reward": {
+        "hearts": 5
+      },
+      "marks": [
+        "letters_kept"
+      ],
+      "against": [
+        "honour"
+      ],
+      "town": {
+        "?mark:letters_wrote_back": [
+          "The letters for Ned Averill still come, and they say there are answers going back now. I didn't ask who writes them. I don't want to know."
+        ],
+        "?": [
+          "The letters for Ned Averill still come. I thought {player} went down the river to put a stop to that."
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            9,
+            14
+          ],
+          "if": "mark:letters_wrote_back & mark:letters_know_his_hand",
+          "letter": {
+            "from": "{writer}, at Low Staithe",
+            "to": "Ned Averill",
+            "lines": {
+              "?writer=mother": [
+                "Dear Ned. Mam had me read yours four times, and then she slept with it under her hand. She says do not work so hard.",
+                "She is easier now. She has stopped asking the carter. Jem."
+              ],
+              "?writer=daughter": [
+                "You answered. I had stopped hoping that you would. I have read it until the fold has gone soft.",
+                "You say you are no hand at letters and I should not look for many. I will not. One was more than I had. {daughter}."
+              ],
+              "?": [
+                "Ned! A letter! From you! I have shown it to the whole ferry and nobody believes it.",
+                "You say do not come up, the roads are bad and you are busy. That is the most Ned thing I ever read. I will stay where I am, then. For now. {comrade}."
+              ]
+            }
+          }
+        },
+        {
+          "days": [
+            2,
+            4
+          ],
+          "if": "!mark:letters_wrote_back",
+          "letter": {
+            "from": "{writer}, at Low Staithe",
+            "to": "Ned Averill",
+            "lines": {
+              "?writer=mother": [
+                "Dear Ned. The one you sent says you are well and have all my letters. Mam says then why does he not answer them.",
+                "She says she is not angry. She has had me put that in every one. Jem."
+              ],
+              "?writer=daughter": [
+                "The one you sent says you are well and have every letter. So you have read them, and still you do not write.",
+                "I said that I would stop. Here is another all the same, and I am ashamed of it. {daughter}."
+              ],
+              "?": [
+                "Your messenger says you are well. Then you can stand me that drink, you old stump. I will come up when the ferry runs.",
+                "Have the cask tapped. {comrade}."
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "left": {
+      "text": "I laid the letters on Ned Averill's grave, the newest on top, and a stone on them against the wind. They were sent to him, and he has them. Nobody at Low Staithe was told anything.",
+      "reward": {
+        "hearts": 10
+      },
+      "marks": [
+        "letters_left"
+      ],
+      "town": [
+        "{giver} carries each letter for Ned Averill up to the burying ground now, the day it comes, and lays it with the rest. It was {player} who began that."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            22
+          ],
+          "town": {
+            "?writer=mother": [
+              "The letters for Ned Averill have stopped. The carter says there was a burying at Low Staithe. An old woman. So that is the both of them, and she never knew he had gone before her.",
+              "There's a year of letters on that grave gone to pulp in the rain. Somebody should have read them to him, at the least."
+            ],
+            "?writer=daughter": [
+              "The letters for Ned Averill stopped at twelve. Whoever she was, she said she would stop, and she did.",
+              "There's a year of letters on that grave gone to pulp in the rain. I hope she never comes to see what became of them."
+            ],
+            "?": [
+              "A man came up from Low Staithe asking for Averill the cooper, with a drink in each hand. It was the sexton who had to walk him to the yew. Nobody had told him.",
+              "He found his own letters on the grave. All of them, and never opened. He sat down in the wet grass."
+            ]
+          }
+        }
+      ]
+    },
+    "lost_on_road": {
+      "failed": true,
+      "text": "I lost {writer} on the road up from Low Staithe. Whatever was to have been said at the end of it was never said.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "Somebody set out up the river to see Ned Averill's grave, with {player} to see them safe, and did not come to the end of the road. That's all I know of it."
+      ]
+    }
+  }
+}

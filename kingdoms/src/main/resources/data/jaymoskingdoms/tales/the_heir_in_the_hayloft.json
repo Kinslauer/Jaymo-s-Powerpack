@@ -1,0 +1,1583 @@
+{
+  "title": "The Heir in the Hayloft",
+  "start": {
+    "by": "rumour",
+    "weight": 1,
+    "rumour": "The King's Guard are going through this town a house at a time, flour bins and all, and they'll not say what for. I'll tell you what for. Old Wymer, out {way:farm}, has bought white bread three days running. Wymer! Who has eaten barley all his life and grudged it. So who is he feeding? I'm only saying what the baker told me."
+  },
+  "roll": {
+    "tongue": [
+      "neighbour",
+      "quiet"
+    ]
+  },
+  "cast": {
+    "farmer": {
+      "name": [
+        "Jacob Wymer",
+        "Giles Wymer",
+        "Walter Wymer"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "farm"
+    },
+    "heir": {
+      "name": [
+        "Alis",
+        "Sunniva",
+        "Edony"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "loft"
+    },
+    "captain": {
+      "name": [
+        "Captain Roland Corbet",
+        "Captain Edmund Corbet",
+        "Captain Hugh Corbet"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "green",
+      "hours": "day",
+      "health": 80,
+      "damage": 8,
+      "armor": 10,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:iron_chestplate",
+      "men": 2
+    },
+    "beloved": {
+      "name": [
+        "Jon Wherry",
+        "Luke Wherry",
+        "Kester Wherry"
+      ],
+      "body": "villager",
+      "job": "fisherman",
+      "female": false,
+      "at": "landing"
+    },
+    "neighbour": {
+      "name": [
+        "Enoch Mottram",
+        "Silas Mottram",
+        "Abel Mottram"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "lane",
+      "if": "tongue=neighbour"
+    },
+    "sergeant": {
+      "name": [
+        "Sergeant Wulf Durrant",
+        "Sergeant Bran Durrant",
+        "Sergeant Hal Durrant"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": {
+        "?mark:heir_lied_guard": "camp",
+        "?mark:heir_captain_wary": "next_door",
+        "?late:back_lane": "next_door",
+        "?mark:heir_sold": "lane_mouth",
+        "?late:church_lane": "lane_mouth",
+        "?late:mill_lane": "church_row",
+        "?": "mill_row"
+      },
+      "hours": "day",
+      "health": 60,
+      "damage": 7,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "guard_one": {
+      "name": [
+        "Guardsman Ham Lacey",
+        "Guardsman Col Lacey",
+        "Guardsman Nick Lacey"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": {
+        "?mark:heir_lied_guard": "camp",
+        "?mark:heir_captain_wary": "next_door",
+        "?late:back_lane": "next_door",
+        "?mark:heir_sold": "lane_mouth",
+        "?late:church_lane": "lane_mouth",
+        "?late:mill_lane": "church_row",
+        "?": "mill_row"
+      },
+      "hours": "day",
+      "health": 50,
+      "damage": 6,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "guard_two": {
+      "name": [
+        "Guardsman Jem Stiles",
+        "Guardsman Rob Stiles",
+        "Guardsman Wat Stiles"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": {
+        "?mark:heir_lied_guard": "camp",
+        "?mark:heir_captain_wary": "next_door",
+        "?late:back_lane": "next_door",
+        "?mark:heir_sold": "lane_mouth",
+        "?late:church_lane": "lane_mouth",
+        "?late:mill_lane": "church_row",
+        "?": "mill_row"
+      },
+      "hours": "day",
+      "health": 50,
+      "damage": 6,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "sentry": {
+      "name": [
+        "Guardsman Arne Hewitt",
+        "Guardsman Cuthbert Hewitt",
+        "Guardsman Simm Hewitt"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "lane_end",
+      "hours": "night",
+      "health": 50,
+      "damage": 6,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate"
+    }
+  },
+  "places": {
+    "farm": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        60,
+        110
+      ],
+      "name": "Wymer's farm, at the end of Back Lane"
+    },
+    "loft": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        5,
+        12
+      ],
+      "name": "the hayloft over Wymer's barn"
+    },
+    "lane": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        18,
+        32
+      ],
+      "name": "Back Lane"
+    },
+    "green": {
+      "at": "town",
+      "name": "the green"
+    },
+    "mill_row": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        130,
+        170
+      ],
+      "name": "Mill Lane"
+    },
+    "church_row": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        85,
+        115
+      ],
+      "name": "Church Lane"
+    },
+    "lane_mouth": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        45,
+        65
+      ],
+      "name": "the bottom of Back Lane"
+    },
+    "next_door": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        18,
+        28
+      ],
+      "name": "the house next to Wymer's"
+    },
+    "camp": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        90,
+        150
+      ],
+      "name": "the Guard's camp by the mill"
+    },
+    "lane_end": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        50,
+        80
+      ],
+      "name": "the lane end, where the river path begins"
+    },
+    "landing": {
+      "at": "wild",
+      "from": "farm",
+      "dist": [
+        200,
+        340
+      ],
+      "name": "the barge landing below the weir"
+    }
+  },
+  "first": "find",
+  "steps": {
+    "find": {
+      "do": "go",
+      "to": "farm",
+      "hidden": true,
+      "journal": "I followed a drunk's talk out to a farm at the end of a back lane. A Guardsman's horse was tied at the lane mouth, and the farmer was carrying a white loaf up a ladder into his barn.",
+      "then": "ask"
+    },
+    "ask": {
+      "do": "talk",
+      "who": "farmer",
+      "clock": {
+        "mill_lane": 0,
+        "church_lane": 1,
+        "back_lane": 2,
+        "search": 3
+      },
+      "say": [
+        "Stop there. Who sent you down this lane? Somebody at the tavern. I knew it. One white loaf I bought. Three, then. A man can't buy bread in this town.",
+        "You'd best come into the barn, before the whole Guard sees you stood at my gate. There's somebody up that ladder. I'll not say who. She'll say, if she chooses. She walked in out of the rain eight nights back and asked for the loft, and paid for it with a ring I daren't sell.",
+        "The King's Guard are going through the town a house at a time, a lane a day. Mill Lane today. Church Lane tomorrow. Then they start up Back Lane from the bottom, and we are the last barn in it. They'll be at this door {in:search}. I'm a tenant. If they find her under my roof, I've no roof."
+      ],
+      "replies": [
+        {
+          "say": "I'll go up.",
+          "then": "see_heir",
+          "journal": "{farmer} is hiding somebody in his hayloft, and the King's Guard are searching the town house by house. They will reach his farm in a few days. He is a tenant, and will lose the farm if she is found there."
+        },
+        {
+          "say": "This is the crown's business. I never came down this lane.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_heir": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Climb to {place:loft} and hear who is hiding there",
+      "say": {
+        "?tongue=neighbour": [
+          "You may as well sit. The hay is clean. He told you nothing, I hope. He is a good man and a dreadful liar.",
+          "I am {heir}. Yes. That one. In eleven days I am to be betrothed to the Lord of the River Marches, who is fifty-one, and has buried two wives, and looked at my teeth when we were introduced. The crown gets the toll rights on three bridges. I have read the contract. I am set down in it between the bridges and a stud of horses.",
+          "So I went out of a window. Here I am Loveday, Wymer's niece from the coast, and I am told my accent is terrible. There is somebody I meant to reach: {beloved}, who works a grain barge. He is to tie up at {place:landing} and wait. He doesn't know there are Guardsmen between here and the water.",
+          "And there is a man in the lane. {neighbour}. He has walked past the barn door four times today, and he looked up each time."
+        ],
+        "?": [
+          "You may as well sit. The hay is clean. He told you nothing, I hope. He is a good man and a dreadful liar.",
+          "I am {heir}. Yes. That one. In eleven days I am to be betrothed to the Lord of the River Marches, who is fifty-one, and has buried two wives, and looked at my teeth when we were introduced. The crown gets the toll rights on three bridges. I have read the contract. I am set down in it between the bridges and a stud of horses.",
+          "So I went out of a window. Here I am Loveday, Wymer's niece from the coast, and I am told my accent is terrible. There is somebody I meant to reach: {beloved}, who works a grain barge. He is to tie up at {place:landing} and wait. He doesn't know there are Guardsmen between here and the water."
+        ]
+      },
+      "replies": [
+        {
+          "say": "What do you want done?",
+          "then": "hub",
+          "journal": {
+            "?tongue=neighbour": "The one in the loft is {heir}, heir to the realm, run from a betrothal to the Lord of the River Marches. She means to reach a bargeman, {beloved}, who waits at {place:landing}. A neighbour, {neighbour}, has been watching the barn.",
+            "?": "The one in the loft is {heir}, heir to the realm, run from a betrothal to the Lord of the River Marches. She means to reach a bargeman, {beloved}, who waits at {place:landing}."
+          }
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "hub": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Decide what is to be done about {heir}",
+      "say": {
+        "?mark:heir_sold": "Wymer says that man has been to the Guard. Then they'll not wait their turn for Back Lane, and a niece from the coast will not stand up to a second look. Whatever you mean to do, do it now.",
+        "?mark:heir_captain_turned": "So the captain will come late, and loudly, and his man at the lane end is a slow eater. Then it is the river, or it is home on my own feet. He has not left me a hayloft. Which is it to be?",
+        "?late:back_lane": "They are next door. I can count their helmets through the knot hole. At first light it is this barn. Whatever you mean to do, do it now.",
+        "?late:church_lane": "They finished Church Lane yesterday. Today they are at the bottom of Back Lane. I can hear it from here: doors, and dogs. Tomorrow the house next door. Then us.",
+        "?late:mill_lane": "Wymer says they went through Mill Lane yesterday and found four stills and a pig in a bed. Church Lane today. Then they start on Back Lane. What do you say I should do?",
+        "?": "Wymer says they are in Mill Lane today, turning out the flour bins. There is a little time. What do you say I should do? I have kept my own counsel for eight days, and it has got me a hayloft."
+      },
+      "voices": {
+        "law": "She is the crown's heir, and the crown is asking for her. This is not yours to hide.",
+        "mercy": "Between the bridges and the horses. Don't send her back to that.",
+        "courage": "She climbed out of a window for this. Don't be the one who tells her to climb back in."
+      },
+      "replies": [
+        {
+          "say": "Stay up here. I'll see that the Guard look somewhere else.",
+          "then": "captain",
+          "journal": "I told {heir} to stay in the loft, and went to see what could be done with the captain of the King's Guard."
+        },
+        {
+          "say": "You can't live in a hayloft. Let me take you home.",
+          "then": "home_ask"
+        },
+        {
+          "say": "I'll walk you to the river tonight.",
+          "then": "night_run",
+          "for": [
+            "courage"
+          ],
+          "journal": "I told {heir} I would walk her down to the river after dark."
+        },
+        {
+          "if": "tongue=neighbour & !mark:heir_neighbour_quiet & !mark:heir_sold",
+          "say": "First I want to know where that neighbour goes of a night.",
+          "then": "tail_neighbour",
+          "journal": "I went to see where {neighbour} goes after dark."
+        },
+        {
+          "if": "!mark:heir_seen_search",
+          "say": "First I want a look at this search for myself.",
+          "then": "watch_search"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "watch_search": {
+      "do": "vigil",
+      "at": {
+        "?mark:heir_lied_guard": "camp",
+        "?mark:heir_captain_wary": "next_door",
+        "?late:back_lane": "next_door",
+        "?mark:heir_sold": "lane_mouth",
+        "?late:church_lane": "lane_mouth",
+        "?late:mill_lane": "church_row",
+        "?": "mill_row"
+      },
+      "when": "day",
+      "gap": 4,
+      "goal": "By day, find the King's Guard at their search, and watch",
+      "lines": {
+        "?late:back_lane": [
+          {
+            "who": "guard_one",
+            "say": "Nothing here, sergeant. That leaves the one barn, at the top of the lane."
+          },
+          {
+            "who": "sergeant",
+            "say": "Wymer's. First light. And nobody goes up or down this lane tonight."
+          },
+          {
+            "who": "guard_two",
+            "say": "He's been buying white bread, the baker says.",
+            "sound": "minecraft:block.wooden_door.close"
+          }
+        ],
+        "?mark:heir_sold": [
+          {
+            "who": "sergeant",
+            "say": "Back Lane, and never mind whose turn it is. Every loft. Prod the hay."
+          },
+          {
+            "who": "guard_two",
+            "say": "What with, sergeant?"
+          },
+          {
+            "who": "sergeant",
+            "say": "With whatever you'd least like to be prodded with yourself.",
+            "sound": "minecraft:block.wooden_door.open"
+          }
+        ],
+        "?late:church_lane": [
+          {
+            "who": "sergeant",
+            "say": "Back Lane. Tenants and hay. Every loft. Prod the hay."
+          },
+          {
+            "who": "guard_two",
+            "say": "What with, sergeant?"
+          },
+          {
+            "who": "sergeant",
+            "say": "With whatever you'd least like to be prodded with yourself.",
+            "sound": "minecraft:block.wooden_door.open"
+          }
+        ],
+        "?late:mill_lane": [
+          {
+            "who": "sergeant",
+            "say": "Church Lane. The same as yesterday. And look at their hands, lads. A lady's hands can't lie."
+          },
+          {
+            "who": "guard_one",
+            "say": "The priest says his loft is holy ground, sergeant."
+          },
+          {
+            "who": "sergeant",
+            "say": "Then search it reverently.",
+            "sound": "minecraft:block.wooden_door.open"
+          }
+        ],
+        "?": [
+          {
+            "who": "sergeant",
+            "say": "Next house. Bins, loft, under the beds. And look at the women's hands."
+          },
+          {
+            "who": "guard_one",
+            "say": "It's another still, sergeant. That makes four in the one lane.",
+            "sound": "minecraft:block.barrel.open"
+          },
+          {
+            "who": "guard_two",
+            "say": "And a pig in the bed. With a blanket over it."
+          }
+        ]
+      },
+      "mark": "heir_seen_search",
+      "journal": "I watched the King's Guard at their search. They turn out every bin and every loft, a lane a day, and they look at every woman's hands.",
+      "then": "ask_sergeant",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "ask_sergeant": {
+      "do": "talk",
+      "who": "sergeant",
+      "goal": "By day, have a word with {sergeant}",
+      "say": [
+        "Move along. This is the King's business.",
+        "What are we after? A young woman with soft hands and a hard way of talking. If you see one carrying a pail as though it were a hat box, come and find me."
+      ],
+      "replies": [
+        {
+          "say": "Soft hands. I'll keep an eye out.",
+          "then": "hub"
+        },
+        {
+          "say": "How long before you are done with this town?",
+          "then": "sergeant_days"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "sergeant_days": {
+      "do": "talk",
+      "who": "sergeant",
+      "goal": "By day, have a word with {sergeant}",
+      "say": "At a lane a day? We'll be at the last barn in Back Lane {in:search}. Then it's downriver to the next town, to do it all over again. I have looked in more flour bins this month than a miller's cat.",
+      "then": "hub",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "tail_neighbour": {
+      "do": "tail",
+      "who": "neighbour",
+      "to": "camp",
+      "when": "night",
+      "near": 6,
+      "far": 28,
+      "goal": "After dark, follow {neighbour} from {place:lane} without his seeing you",
+      "seen": "neighbour_seen",
+      "lost": "neighbour_lost",
+      "journal": "I followed {neighbour} down the lane after dark. He went straight to the camp of the King's Guard by the mill, and stopped at the edge of the firelight to get his nerve up.",
+      "then": "neighbour_caught",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "neighbour_caught": {
+      "do": "talk",
+      "who": "neighbour",
+      "goal": "Stop {neighbour} telling the Guard what he has seen",
+      "say": "Who's there? Oh. Wymer's visitor. You've a quiet foot. Don't stand in my road. There's a purse out for that girl in his loft, niece or no niece, and I've a roof wants thatching. I've done nobody any harm. I only mean to say what I have seen.",
+      "replies": [
+        {
+          "say": "You'll have a purse and no neighbours. Who brings your harvest in, once the lane knows you sold a girl out of Wymer's barn?",
+          "then": "neighbour_quiet",
+          "try": {
+            "how": "persuade",
+            "odds": 1,
+            "helps": [
+              "reputation>=20"
+            ],
+            "hurts": [
+              "dress:ragged"
+            ],
+            "refuse": "The lane! The lane has never brought my harvest in yet. I'll take the purse."
+          }
+        },
+        {
+          "say": "Go into that camp, and you had better hope they let you sleep there.",
+          "then": "neighbour_quiet",
+          "irks": [
+            "mercy"
+          ],
+          "try": {
+            "how": "threaten",
+            "odds": 1,
+            "helps": [
+              "dress:armoured",
+              "dress:bloodied"
+            ],
+            "refuse": "Is that a threat? With forty of the King's Guard in shouting distance? You'll have to do better."
+          }
+        },
+        {
+          "say": "{price} says you saw a niece from the coast, and nothing more.",
+          "then": "neighbour_quiet",
+          "try": {
+            "how": "bribe",
+            "coins": 12,
+            "refuse": "That? The Guard will give me that for the first word, and I've a good many words."
+          }
+        },
+        {
+          "say": "Go on, then. Tell them.",
+          "then": "neighbour_tells"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "neighbour_seen": {
+      "do": "talk",
+      "who": "neighbour",
+      "goal": "Stop {neighbour} telling the Guard what he has seen",
+      "say": "I can hear you back there. I've heard you since the pump. You're Wymer's visitor, and you're following me, and that tells me all I wanted to know about his niece. There's a purse out for her. I only mean to say what I have seen.",
+      "replies": [
+        {
+          "say": "You'll have a purse and no neighbours. Who brings your harvest in, once the lane knows you sold a girl out of Wymer's barn?",
+          "then": "neighbour_quiet",
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "reputation>=20"
+            ],
+            "hurts": [
+              "dress:ragged"
+            ],
+            "refuse": "The lane! The lane has never brought my harvest in yet. I'll take the purse."
+          }
+        },
+        {
+          "say": "Go into that camp, and you had better hope they let you sleep there.",
+          "then": "neighbour_quiet",
+          "irks": [
+            "mercy"
+          ],
+          "try": {
+            "how": "threaten",
+            "odds": -1,
+            "helps": [
+              "dress:armoured",
+              "dress:bloodied"
+            ],
+            "refuse": "Is that a threat? With forty of the King's Guard in shouting distance? You'll have to do better."
+          }
+        },
+        {
+          "say": "{price} says you saw a niece from the coast, and nothing more.",
+          "then": "neighbour_quiet",
+          "try": {
+            "how": "bribe",
+            "coins": 12,
+            "refuse": "That? The Guard will give me that for the first word, and I've a good many words."
+          }
+        },
+        {
+          "say": "Go on, then. Tell them.",
+          "then": "neighbour_tells"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "neighbour_lost": {
+      "do": "talk",
+      "who": "farmer",
+      "goal": "Go back to {farmer}",
+      "mark": "heir_sold",
+      "say": "You lost him? Then I'll tell you where he went. Mottram came back up the lane an hour since, whistling, with his hand in his pocket. He's sold us. They'll not wait their turn for Back Lane now.",
+      "journal": "I lost {neighbour} in the dark. He came home whistling. He has told the Guard about the new face at the farm.",
+      "then": "hub",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "neighbour_quiet": {
+      "do": "talk",
+      "who": "neighbour",
+      "goal": "Hear {neighbour}",
+      "mark": "heir_neighbour_quiet",
+      "say": "All right. All right. I saw a niece. A plain girl with a coast way of talking, and I never looked twice. I'm going home to my bed. And I'll thank you to tell Wymer his gate wants oiling. A man can't help but hear who comes and goes.",
+      "journal": "{neighbour} has agreed that he saw a niece from the coast and nothing more.",
+      "then": "hub",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "neighbour_tells": {
+      "do": "talk",
+      "who": "neighbour",
+      "goal": "Hear {neighbour}",
+      "mark": "heir_sold",
+      "say": "I'll say what I've seen, and you may stand there and watch me do it. Captain! Captain Corbet! I've a word for you about Back Lane!",
+      "journal": "{neighbour} walked into the camp of the King's Guard and told them about the new face at the farm.",
+      "then": "hub",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "captain": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "By day, speak with {captain} on {place:green}",
+      "say": {
+        "?mark:heir_sold": [
+          "You've come from Back Lane. Don't trouble to deny it. I have had a man in my camp who watched you go in.",
+          "Wymer has a niece, I'm told. Up from the coast. I mean to meet this niece, and soon. Unless you have something to say to me that saves us both a cold morning."
+        ],
+        "?dress:fine": [
+          "Good day to you. You are the first soul in this town to come to me without waiting for me to come to them. And well turned out. I notice that.",
+          "I am looking for a young woman of rank who has gone out of a window. I am to bring her home unharmed and unremarked. I have forty houses left to search, and a great many pigs. If you know this town, I'll hear you."
+        ],
+        "?dress:ragged": [
+          "Stand there, where I can see your hands. I have had beggars at this table all day with an heir in every hen house, each of them wanting paying.",
+          "I am looking for a young woman of rank who has gone out of a window. I am to bring her home unharmed and unremarked. If you know anything, say it short."
+        ],
+        "?dress:bloodied": [
+          "Stand there, where I can see your hands. Whose blood is that? No. Don't tell me. I have enough to write down.",
+          "I am looking for a young woman of rank who has gone out of a window. I am to bring her home unharmed and unremarked. If you know anything, say it short."
+        ],
+        "?": [
+          "Yes? I've a table and a book and forty houses still to do. Speak up.",
+          "I am looking for a young woman of rank who has gone out of a window. I am to bring her home unharmed and unremarked. If you know this town, I'll hear you."
+        ]
+      },
+      "voices": {
+        "honour": "He asked a plain question in the crown's name. Mind what you put your name to.",
+        "gain": "There will be a purse for whoever saves that man his forty houses."
+      },
+      "replies": [
+        {
+          "if": "!mark:heir_sold",
+          "say": "Back Lane is all tenants and hay. There's nobody new at Wymer's but a niece from the coast, and I'd put my name to that.",
+          "then": "hide_wait",
+          "mark": "heir_lied_guard",
+          "irks": [
+            "law",
+            "honour"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": 0,
+            "helps": [
+              "dress:fine",
+              "reputation>=20",
+              "mark:heir_seen_search"
+            ],
+            "hurts": [
+              "dress:ragged",
+              "dress:bloodied",
+              "reputation<0"
+            ],
+            "fail": "captain_wary",
+            "refuse": "Would you. Then you'll not object if I begin with Back Lane after all, and write your name in my book beside it."
+          },
+          "lie": {
+            "name": "heir_nobody_new",
+            "days": [
+              8,
+              12
+            ],
+            "unless": "mark:heir_lie_covered",
+            "reputation": 15,
+            "town": [
+              "The Guard came back to Back Lane. Somebody in the lane sold what they had seen for a purse, and they took the realm's own heir out of Wymer's kitchen with flour to her elbows.",
+              "And it was {player} who stood before the captain and swore there was nobody at Wymer's but a niece. He's not forgotten that. He had it written down."
+            ],
+            "returns": {
+              "who": "captain",
+              "as": "warning",
+              "say": "You put your name to Back Lane. I struck it out of my book on your word, and rode forty miles downriver on that word. She is found. No thanks to you. The King's Guard keeps a list of those it will not ask twice, and you are on it."
+            }
+          },
+          "journal": "I told {captain} there was nobody new in Back Lane but Wymer's niece, and put my name to it. He struck the lane out of his book."
+        },
+        {
+          "say": "She is in a hayloft, and she'll go back over her own dead body. You have seen the man they mean her for. Search Back Lane last, and slowly.",
+          "then": "captain_turns",
+          "for": [
+            "mercy"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "reputation>=30",
+              "dress:fine",
+              "patron:hearthkeeper"
+            ],
+            "hurts": [
+              "dress:ragged",
+              "dress:bloodied",
+              "mark:heir_sold"
+            ],
+            "fail": "captain_thanks",
+            "refuse": "A hayloft. Thank you. That narrows it by a good many pigs."
+          }
+        },
+        {
+          "say": "She's in the hayloft at Wymer's, at the end of Back Lane. Take her home.",
+          "then": "end:handed",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "I told {captain} which loft to look in."
+        },
+        {
+          "say": "Nothing. I only came to see what the King's Guard looks like.",
+          "then": "hub"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "captain_turns": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Hear {captain}",
+      "mark": "heir_captain_turned",
+      "say": [
+        "I have a daughter. She is nine, and already nobody can tell her anything.",
+        "I cannot fail to search a barn. I can search it late, and loudly. My men will come to Wymer's last of all, at noon, with drums. And the man at the lane end goes to his supper at moonrise each night, and he is a slow eater. What is not in a loft when I arrive, I cannot find. That is the whole of what I can do, and I never said a word of it."
+      ],
+      "journal": "{captain} will search Wymer's barn last and loudly, and his man at the lane end will be at supper at moonrise. He cannot do more. She must be gone from the loft before he comes.",
+      "then": "hub",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "captain_thanks": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Hear {captain}",
+      "mark": "heir_begged",
+      "say": "Sergeant! Back Lane. Every loft, and begin with the tenants. I heard the rest of what you said. I have my orders and I have a daughter of my own, and only one of those rides with me.",
+      "then": "end:handed",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "captain_wary": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Hear {captain}",
+      "mark": "heir_captain_wary",
+      "say": "I have been lied to in nine towns, and by better dressed liars. You said 'niece' before I had asked about anyone's niece. Sergeant! We'll do Back Lane now. This one may come and watch.",
+      "journal": "{captain} did not believe me. He turned his men for Back Lane at once.",
+      "then": "run_now",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "run_now": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Get to {heir} before the Guard do",
+      "say": "I can hear horses. That's the lane. They are in the lane. What did you say to him? No, never mind what you said. What do I do?",
+      "replies": [
+        {
+          "say": "Out by the back, now. We run for the river.",
+          "then": "dash"
+        },
+        {
+          "say": "Go down the ladder and meet them on your own feet. Don't let them pull you out of the hay.",
+          "then": "end:gave_up"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "dash": {
+      "do": "escort",
+      "who": "heir",
+      "to": "landing",
+      "goal": "Run for {place:landing} with {heir}",
+      "failed": "end:lost",
+      "journal": "We went out by the back of the barn with the Guard at the front of it, and ran for the river in broad day.",
+      "then": "landing",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "hide_wait": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "none",
+      "then": "after_search"
+    },
+    "after_search": {
+      "do": "talk",
+      "who": "farmer",
+      "goal": "Ask {farmer} whether the Guard have gone",
+      "say": [
+        "They came through at noon. Eleven of them. The captain stood in my yard and read your name out of his book, and said Back Lane was vouched for. Then he had his men count my hay forks, and they went.",
+        "She sat up there with her hand over her own mouth the whole time. I've aged ten years. They have gone on downriver to the next village."
+      ],
+      "journal": "The King's Guard passed through Back Lane on my word and did not climb the ladder. They have gone on downriver.",
+      "then": {
+        "?tongue=neighbour & !mark:heir_neighbour_quiet": "heir_watched",
+        "?": "heir_safe"
+      }
+    },
+    "heir_safe": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Ask {heir} what she means to do now",
+      "mark": "heir_lie_covered",
+      "say": "They've gone. I watched the last horse out of the lane through a knot hole. I could stay. Wymer says a niece is a niece, and there's a harvest to get in. Loveday bakes a poor loaf, but she is learning. Or there is still the river. {beloved} will wait as long as his factor lets him.",
+      "replies": [
+        {
+          "say": "Stay. Be Loveday a while.",
+          "then": "end:hidden"
+        },
+        {
+          "say": "The river, then. Tonight.",
+          "then": "night_free"
+        }
+      ]
+    },
+    "heir_watched": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Ask {heir} what she means to do now",
+      "say": "They've gone. I watched the last horse out of the lane through a knot hole. I could stay. Wymer says a niece is a niece, and there's a harvest to get in. But {neighbour} was at his gate when they rode off, and he looked at this barn like a man doing a sum. Or there is still the river. {beloved} will wait as long as his factor lets him.",
+      "replies": [
+        {
+          "say": "Stay. Be Loveday a while.",
+          "then": "end:hidden"
+        },
+        {
+          "say": "The river, then. Tonight.",
+          "then": "night_free"
+        }
+      ]
+    },
+    "night_free": {
+      "do": "escort",
+      "who": "heir",
+      "to": "landing",
+      "when": "night",
+      "goal": "After dark, walk {heir} down to {place:landing}",
+      "failed": "end:lost",
+      "journal": "With the Guard gone downriver, I walked {heir} to the river by night, and nobody stopped us.",
+      "then": "landing"
+    },
+    "home_ask": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Talk {heir} into going home",
+      "say": "Home. To be weighed out with three bridges. You sound like my nurse. Go on, then. Say it. I've nothing else to do up here but listen.",
+      "replies": [
+        {
+          "say": "Go back and refuse him in open court, where it is heard. A 'no' said from a hayloft is only a girl gone missing.",
+          "then": "home_willing",
+          "mark": "heir_to_refuse",
+          "for": [
+            "courage",
+            "law"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": 0,
+            "helps": [
+              "reputation>=20",
+              "mark:heir_captain_turned"
+            ],
+            "refuse": "From the step below the high seat. With the whole court looking on. You have never stood on that step."
+          }
+        },
+        {
+          "say": "Wymer loses his farm if they find you here. You know that. You have known it for eight days.",
+          "then": "home_willing",
+          "for": [
+            "mercy"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": 0,
+            "helps": [
+              "late:church_lane",
+              "mark:heir_sold"
+            ],
+            "refuse": "That is not fair. It is true, and it is not fair. I'll be gone before they come. I will. Give me a day."
+          }
+        },
+        {
+          "say": "Then it had better be the river.",
+          "then": "hub"
+        },
+        {
+          "say": "I can't make you. But I can tell the captain where to look.",
+          "then": "end:handed",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "{heir} would not come home. I told {captain} which loft to look in."
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "home_willing": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Hear {heir}",
+      "mark": "heir_willing",
+      "say": "Very well. But I walk in. I'll not be carried in over a saddle bow with hay in my hair. You will walk me to that captain yourself, by daylight, with my hood down. And you'll stand there while I tell him whose idea the window was. Mine. Not Wymer's.",
+      "replies": [
+        {
+          "say": "By daylight, then.",
+          "then": "walk_home",
+          "journal": "{heir} has agreed to go home, on her own feet and by daylight. I am to walk her to the captain of the King's Guard."
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "walk_home": {
+      "do": "escort",
+      "who": "heir",
+      "to": "green",
+      "when": "day",
+      "goal": "By day, walk {heir} to {captain} on {place:green}",
+      "failed": "end:lost",
+      "then": "hand_home",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "hand_home": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Bring {heir} before {captain}",
+      "say": [
+        "My lady. I have ridden nine days and looked into four hundred flour bins. I had not thought to see you walk up to me across a green.",
+        "You shall have my own horse. No man of mine will lay a hand on you, or speak of where you were. And you: the King's Guard will remember who walked her in, when there were some who would have sold her."
+      ],
+      "replies": [
+        {
+          "say": "She has something to say in open court. See that she is let to say it.",
+          "then": "end:home",
+          "mark": "heir_asked_hearing"
+        },
+        {
+          "say": "She is home. That is all I undertook.",
+          "then": "end:home"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "night_run": {
+      "do": "escort",
+      "who": "heir",
+      "to": "lane_end",
+      "when": "night",
+      "goal": "After dark, bring {heir} down Back Lane to {place:lane_end}",
+      "failed": "end:lost",
+      "then": {
+        "?mark:heir_captain_turned": "supper",
+        "?": "picket"
+      },
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "supper": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Go on past the lane end",
+      "say": "There's nobody here. A lantern on the post, and a stool, and nobody on it. Your captain keeps his word. Come on, before his man has finished eating.",
+      "journal": "The lane end was unwatched, as {captain} had said it would be.",
+      "then": "landing_run",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "picket": {
+      "do": "talk",
+      "who": "sentry",
+      "goal": "Get {heir} past the Guardsman at {place:lane_end}",
+      "say": {
+        "?mark:heir_sold": "Stand! Nobody leaves Back Lane tonight. Captain's order, and a fresh one. Lantern up. The both of you.",
+        "?": "Stand. Who goes down the river lane at this hour? Two of you. Lantern up, and let's have a look."
+      },
+      "replies": [
+        {
+          "say": "Wymer's niece, taken bad with a fever. I'm walking her to the wise woman by the weir before it gets to her chest.",
+          "then": "landing_run",
+          "try": {
+            "how": "persuade",
+            "odds": 0,
+            "helps": [
+              "dress:plain",
+              "dress:ragged"
+            ],
+            "hurts": [
+              "dress:armoured",
+              "dress:bloodied",
+              "dress:fine",
+              "mark:heir_sold"
+            ],
+            "refuse": "A fever. And she steps out like that, with a fever? Hood back, mistress."
+          },
+          "journal": "I told the Guardsman at the lane end that she was Wymer's niece with a fever, and he let us by."
+        },
+        {
+          "say": "You look half asleep. I'll throw you for the lane. {price} on the stone.",
+          "then": "landing_run",
+          "try": {
+            "how": "dice",
+            "coins": 6,
+            "refuse": "Mine. That's my night's ale found. The lane is still shut."
+          },
+          "journal": "I threw dice with the Guardsman at the lane end for the right to pass, and won."
+        },
+        {
+          "say": "{price}, for a short memory.",
+          "then": "landing_run",
+          "try": {
+            "how": "bribe",
+            "coins": 15,
+            "hurts": [
+              "mark:heir_sold"
+            ],
+            "refuse": "Put it away. Our captain counts our purses at muster."
+          },
+          "journal": "I paid the Guardsman at the lane end to forget he had seen us."
+        },
+        {
+          "say": "Then I'll go through you.",
+          "then": "picket_fight",
+          "irks": [
+            "law"
+          ]
+        },
+        {
+          "say": "We'll go back.",
+          "then": "hub"
+        }
+      ],
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "picket_fight": {
+      "do": "foe",
+      "who": "sentry",
+      "goal": "Get past {sentry}",
+      "mark": "heir_fought_guard",
+      "taunt": "Guard! To the lane end! To me!",
+      "plea": "Hold! Hold. I've a wife in the north. Go through. I never saw which way.",
+      "mercy": "Sit down there and count to a thousand.",
+      "thanks": "A thousand. Slowly. Go on.",
+      "slain": "guard_dead",
+      "spared": "landing_run",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "guard_dead": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "Hear {heir}",
+      "mark": "heir_killed_guard",
+      "say": "He's dead. That is a man of the King's Guard, and he is dead in a lane, for me. I knew his face. He held my horse once. Don't speak. Walk.",
+      "journal": "I killed the Guardsman at the lane end. {heir} knew him.",
+      "then": "landing_run",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "landing_run": {
+      "do": "escort",
+      "who": "heir",
+      "to": "landing",
+      "when": "night",
+      "goal": "Before dawn, bring {heir} to {place:landing}",
+      "failed": "end:lost",
+      "then": "landing",
+      "within": "search",
+      "late": "end:found",
+      "until": "before the King's Guard reach Back Lane"
+    },
+    "landing": {
+      "do": "talk",
+      "who": "beloved",
+      "goal": "Find {beloved} at {place:landing}",
+      "say": [
+        "You came. I've had this barge tied up three days on a tale of a cracked rudder, and the factor wants my hide. And who's this? You brought her through the Guard? I don't know your name, and I'll not forget your face.",
+        "We go down on the current as far as the salt wharves. I've a cousin there who asks nobody's name. It is not a palace. I have told her and told her it is not a palace."
+      ],
+      "then": "farewell"
+    },
+    "farewell": {
+      "do": "talk",
+      "who": "heir",
+      "goal": "See {heir} aboard",
+      "mark": "heir_lie_covered",
+      "say": [
+        "It is a grain barge. It smells of wet sacks, and it is the finest thing I ever saw.",
+        "Take this. It is my seal. I have no use for it where I am going, and I can't sink it in the river. My grandmother wore it. If the realm ever asks what became of me, show it or don't, as you judge."
+      ],
+      "give": [
+        {
+          "item": "minecraft:gold_nugget",
+          "count": 1,
+          "name": "The Heir's Seal",
+          "lore": [
+            "A small gold seal, with the realm's arms cut deep in it.",
+            "There is hay in the knot of the ribbon."
+          ]
+        }
+      ],
+      "replies": [
+        {
+          "say": "Go on. The current won't wait for you.",
+          "then": {
+            "?mark:heir_killed_guard": "end:away_hunted",
+            "?mark:heir_fought_guard": "end:away_hunted",
+            "?mark:heir_captain_wary": "end:away_hunted",
+            "?": "end:away"
+          },
+          "journal": "{heir} gave me her seal on the landing stage and went aboard the barge."
+        }
+      ]
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I walked back up the lane and left the barn to its own business. Whoever was up that ladder, the crown could find them without my help."
+    },
+    "hidden": {
+      "text": "The King's Guard came through Back Lane on my word, and found a farmer, a hayloft, and a niece called Loveday. They rode on downriver. {heir} stayed.",
+      "reward": {
+        "coins": 8,
+        "items": [
+          "minecraft:bread*4",
+          "minecraft:pumpkin_pie"
+        ],
+        "reputation": 5
+      },
+      "marks": [
+        "heir_hidden"
+      ],
+      "against": [
+        "law"
+      ],
+      "town": [
+        "Wymer has his niece stopping on. Loveday. She bakes a fair loaf now, and talks like nobody I ever met from the coast.",
+        "The Guard never did find whoever it was. Four hundred houses. I'd not be that captain when he gets home."
+      ],
+      "later": [
+        {
+          "days": [
+            15,
+            24
+          ],
+          "still": "!mark:caught:heir_nobody_new",
+          "letter": {
+            "from": "Loveday, at Wymer's",
+            "lines": [
+              "I have brought in a harvest. I have blisters in places I had no names for, and Wymer says I stook like a drunk man building a church.",
+              "{beloved} ties up at the landing every third week. He sits in the kitchen with his cap in his hands and Wymer glares at him. Nobody has ever glared at anybody on my account before. I like it very much.",
+              "The realm has given out that its heir is travelling for her health. I suppose that I am."
+            ]
+          }
+        },
+        {
+          "days": [
+            26,
+            40
+          ],
+          "still": "!mark:caught:heir_nobody_new",
+          "scene": [
+            [
+              "a",
+              "That niece of Wymer's. Loveday. Have you seen her curtsey?"
+            ],
+            [
+              "b",
+              "I have. Like a duchess. She did it to the miller."
+            ],
+            [
+              "a",
+              "And Wymer's rent paid ten years ahead, they say. On barley!"
+            ],
+            [
+              "b",
+              "I've stopped asking about Back Lane. You sleep better."
+            ]
+          ]
+        },
+        {
+          "days": [
+            16,
+            24
+          ],
+          "still": "mark:caught:heir_nobody_new",
+          "town": [
+            "Wymer's out of his farm at quarter day. The steward said a tenant who hides the crown's business can farm somewhere the crown isn't.",
+            "She spoke for him, they say, the heir did, from the saddle, with a Guardsman on each rein. It made no odds."
+          ]
+        },
+        {
+          "days": [
+            22,
+            34
+          ],
+          "still": "mark:caught:heir_nobody_new",
+          "letter": {
+            "from": "{heir}",
+            "lines": [
+              "They found me in Wymer's kitchen with my hands in the dough. The sergeant looked at them and said he had never seen a lady's hands so ruined, and I have not been paid a finer thing in my life.",
+              "I told them you took me for a niece, as Wymer did. I do not think the captain believed it. But he wrote it down, and it is the written thing that counts where I live.",
+              "I am to be married at midsummer. I can bake now. Nobody here will let me."
+            ]
+          }
+        }
+      ]
+    },
+    "home": {
+      "text": "{heir} walked across the green to the captain of the King's Guard with her hood down, and I walked beside her. She told him the window had been her own idea and no one else's. He gave her his horse.",
+      "reward": {
+        "coins": 20,
+        "reputation": 20
+      },
+      "marks": [
+        "heir_home"
+      ],
+      "town": [
+        "The heir to the realm was a week in Wymer's hayloft, and none of us knew. It was {player} who walked her out to the Guard. On her own feet, mind. Nobody dragged her.",
+        "The captain touched his cap to old Wymer as they rode out. To Wymer!"
+      ],
+      "returns": {
+        "who": "captain",
+        "days": [
+          4,
+          8
+        ],
+        "as": "thanks",
+        "say": "I said the King's Guard would remember, and it does. She is home, unharmed and unremarked, which was the whole of my order. This is from the Guard's own stable, and not from the crown. The crown does not know how near a thing it was.",
+        "gift": [
+          "minecraft:saddle",
+          "minecraft:golden_carrot*4"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "letter": {
+            "from": "{heir}",
+            "lines": {
+              "?mark:heir_to_refuse": [
+                "I said no. In the great hall, from the step below the high seat, with the Lord of the River Marches stood nearer to me than you were in the hayloft. I said it twice, in case of deafness.",
+                "The high seat has not spoken to me in nine days. The bridges are still his. I am told I have cost the realm a great deal, and I have asked to have it written down exactly how much, so that I know my own price.",
+                "Wymer's rent is paid ten years ahead, out of my own purse. He will try to send it back. Do not let him."
+              ],
+              "?mark:heir_asked_hearing": [
+                "The captain kept his word to you. I was heard. I said no in the great hall, from the step below the high seat, and I said it twice, in case of deafness.",
+                "The high seat has not spoken to me in nine days. The bridges are still the Lord of the River Marches' own. I am told I have cost the realm a great deal.",
+                "Wymer's rent is paid ten years ahead, out of my own purse. He will try to send it back. Do not let him."
+              ],
+              "?": [
+                "I am to be married at midsummer. Nobody asked me a second time, and I found that I had used up my running.",
+                "It is not so bad as it looked from the hayloft, nor so good as they tell me. He has stopped looking at my teeth.",
+                "Wymer's rent is paid ten years ahead, out of my own purse. That much I could still do. I think of the loft more than I ought."
+              ]
+            }
+          }
+        },
+        {
+          "days": [
+            20,
+            34
+          ],
+          "town": [
+            "They're calling it the Heir's Loft now, Wymer's barn. He charges the curious a loaf to climb the ladder. White bread, mind. He has got a taste for it."
+          ]
+        }
+      ]
+    },
+    "handed": {
+      "text": {
+        "?mark:heir_begged": "I told the captain where she was, and asked him to look away. He thanked me for the first part. The King's Guard took {heir} out of Wymer's loft within the hour.",
+        "?": "I told the captain of the King's Guard which loft to look in. They took {heir} home on a led horse, with a man at each rein. She did not look at me as she passed."
+      },
+      "reward": {
+        "coins": {
+          "?mark:heir_begged": 10,
+          "?": 30
+        },
+        "reputation": 12
+      },
+      "marks": [
+        "heir_handed"
+      ],
+      "against": [
+        "mercy"
+      ],
+      "town": [
+        "They had the heir to the realm out of Wymer's hayloft with hay still in her hair. It was {player} who told the Guard where to look. The crown pays well for that, I hear.",
+        "Wymer says he took her for a girl in trouble, and nobody can prove he didn't. He'll keep the farm. He'll not speak to {player} again."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "letter": {
+            "from": "{heir}",
+            "lines": [
+              "They tell me it was you. I had your name from the captain, who thought I would wish to thank you.",
+              "I do not. But I have had Wymer's farm made sure to him, since you did not think of him either.",
+              "I am to be married at midsummer."
+            ]
+          }
+        }
+      ]
+    },
+    "gave_up": {
+      "text": "The captain did not believe me, and turned his men straight for Back Lane. {heir} went down the ladder and met them in the yard on her own feet, sooner than be pulled out of the hay.",
+      "reward": {
+        "reputation": -10
+      },
+      "marks": [
+        "heir_gave_up"
+      ],
+      "town": [
+        "The heir to the realm walked out of Wymer's barn and gave herself up to the Guard, as cool as you like. And there was {player} stood by, who had sworn to the captain's face that the lane was empty.",
+        "The captain wrote something in his book about {player}. He pressed hard with the pen."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "letter": {
+            "from": "{heir}",
+            "lines": [
+              "You lie very badly. I am told you said 'niece' before anybody had asked. I have laughed about that since, which I did not expect to do here.",
+              "I told them Wymer took me for his niece's friend, and you took me for the niece. I do not know that they believed it. But the farm is his still, and your name is off the captain's page. I watched him strike it.",
+              "I am to be married at midsummer. I mean to be very difficult about it."
+            ]
+          }
+        }
+      ]
+    },
+    "away": {
+      "text": "{heir} went down the river on a grain barge before it was light, with {beloved} at the sweep. When the King's Guard searched Back Lane they found a farmer and a great deal of hay.",
+      "reward": {
+        "reputation": 8,
+        "items": [
+          "minecraft:bread*4"
+        ]
+      },
+      "marks": [
+        "heir_away"
+      ],
+      "against": [
+        "law"
+      ],
+      "town": [
+        "They never found that heir. Four hundred houses. And old Wymer has had a face like a cat in a dairy ever since, and he'll not say why.",
+        "Somebody saw {player} on the river path, the night before the Guard did Back Lane. I say nothing. I only say it was a good night for a walk."
+      ],
+      "later": [
+        {
+          "days": [
+            16,
+            30
+          ],
+          "letter": {
+            "from": "One who went down the river",
+            "lines": [
+              "We are at the salt wharves. I can gut a fish. I can also be cheated by a chandler in two ways of speaking.",
+              "{beloved} says I am to tell you the rudder was never cracked. He is proud of that lie, and has nobody else to boast of it to.",
+              "The realm has given out that its heir is travelling for her health. I was never in better. Burn this."
+            ]
+          }
+        },
+        {
+          "days": [
+            30,
+            50
+          ],
+          "town": [
+            "The Lord of the River Marches has married a widow with two mills. So that's his bridges gone, and nobody the worse for it but the crown."
+          ]
+        }
+      ]
+    },
+    "away_hunted": {
+      "text": {
+        "?mark:heir_killed_guard": "{heir} went down the river before it was light. A man of the King's Guard lies dead at the lane end to pay for it, and his captain knows whose hand it was.",
+        "?mark:heir_fought_guard": "{heir} went down the river before it was light. A man of the King's Guard sits at the lane end with a broken head, and he has told his captain what I look like.",
+        "?": "{heir} went down the river in broad day, with the Guard a field behind us. The captain I lied to found an empty loft, and he has my face and my word in his book."
+      },
+      "reward": {
+        "reputation": -20
+      },
+      "marks": [
+        "heir_away",
+        "heir_hunted"
+      ],
+      "against": [
+        "law"
+      ],
+      "town": {
+        "?mark:heir_killed_guard": [
+          "A King's Guardsman dead at the end of Back Lane, and the heir gone down the river. They're asking for {player} at every door. I've told them what I know, which is nothing, and I'll go on knowing it.",
+          "Wymer's been taken to answer questions. He went quiet as a lamb. He said it was worth it."
+        ],
+        "?": [
+          "The heir got away down the river, and the Guard are asking for {player} at every door. I've told them what I know, which is nothing.",
+          "Wymer's been taken to answer questions. He went quiet as a lamb. He said it was worth it."
+        ]
+      },
+      "returns": {
+        "who": "captain",
+        "days": [
+          5,
+          10
+        ],
+        "as": "revenge",
+        "say": {
+          "?mark:heir_killed_guard": "Hewitt had eleven years in the Guard. He held her horse when she was six. I have ridden nine days for a girl and I'll ride nine more for you. Draw.",
+          "?": "I lost the realm its heir, and I'll answer for that at the high seat. But first I mean to have something to show them. Draw."
+        }
+      },
+      "later": [
+        {
+          "days": [
+            16,
+            30
+          ],
+          "letter": {
+            "from": "One who went down the river",
+            "lines": [
+              "We are at the salt wharves. Word came down the river after us of what it cost at the lane end. I did not ask that of you. I do not know that I would have gone, had I known.",
+              "But I went, and I am here, and I can gut a fish. That is yours as well.",
+              "Keep away from the King's Guard a year or two. They have long memories and short tempers. Burn this."
+            ]
+          }
+        }
+      ]
+    },
+    "lost": {
+      "failed": true,
+      "text": "I lost {heir} on the road. I set out to walk her somewhere better than a hayloft, and I did not get her there.",
+      "reward": {
+        "reputation": -10
+      },
+      "town": [
+        "The heir to the realm came to grief on the road, and {player} walking beside her. The Guard are saying nothing about it, and saying it very loudly.",
+        "Wymer's shut his barn up. He'll not have the loft spoken of."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            22
+          ],
+          "town": [
+            "The King's Guard have a long memory for who was last seen with her. I'd not go near their camp if I were {player}."
+          ]
+        }
+      ]
+    },
+    "found": {
+      "failed": true,
+      "text": "The King's Guard reached the last barn in Back Lane before I had done anything that mattered. {heir} went home on a led horse with a man at each rein, and Wymer has lost his farm for the hayloft.",
+      "reward": {
+        "reputation": -5
+      },
+      "town": [
+        "They pulled the heir to the realm out of Wymer's hayloft. Wymer! He's to be out by quarter day. Thirty years on that land.",
+        "{player} was in and out of that barn all week, and what came of it? Nothing came of it."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "town": [
+            "The heir's to marry the Lord of the River Marches at midsummer. Fifty-one, and two wives buried. They say she looked straight ahead the whole way home."
+          ]
+        }
+      ]
+    }
+  }
+}

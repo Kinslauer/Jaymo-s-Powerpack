@@ -1974,7 +1974,7 @@ public final class Tales {
 		}
 		String kind = Tale.string(step, "do", "");
 		String before = run.step;
-		if (run.vars.containsKey(TaleWays.CANDLE) && TaleWays.candle(level, run)) {
+		if (run.vars.containsKey(TaleWays.CANDLE) && TaleWays.candle(level, run, "white".equals(run.vars.get(TaleWays.CANDLE)) ? "white" : "black")) {
 			run.vars.remove(TaleWays.CANDLE);
 		}
 		if (run.taken && TaleWays.late(level, run, step)) {

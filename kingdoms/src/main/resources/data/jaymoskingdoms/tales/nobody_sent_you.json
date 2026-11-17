@@ -1,0 +1,1333 @@
+{
+  "title": "Nobody Sent You",
+  "arc": "The Black Candle",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "shepherd",
+      "butcher",
+      "leatherworker",
+      "toolsmith",
+      "mason",
+      "fletcher",
+      "none"
+    ],
+    "weight": 4,
+    "needs": [
+      "mark:candle_paper_dealt",
+      "since:a_candle_in_the_window>=4"
+    ]
+  },
+  "roll": {
+    "hand": [
+      "chandler",
+      "sexton",
+      "clerk"
+    ]
+  },
+  "cast": {
+    "runner": {
+      "name": "Tam Rudd",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "loft"
+    },
+    "knife": {
+      "name": "a man in a hood",
+      "body": "fighter",
+      "female": false,
+      "at": "yard",
+      "hours": "night",
+      "health": 60,
+      "damage": 8,
+      "armor": 6,
+      "hand": "minecraft:iron_sword",
+      "head": "minecraft:leather_helmet"
+    },
+    "knife_loft": {
+      "name": "a man in a hood",
+      "body": "fighter",
+      "female": false,
+      "at": "loft",
+      "late": true,
+      "health": 60,
+      "damage": 8,
+      "armor": 6,
+      "hand": "minecraft:iron_sword",
+      "head": "minecraft:leather_helmet"
+    },
+    "chandler": {
+      "name": "Agnes Tolley",
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "shop"
+    },
+    "sexton": {
+      "name": "Wat Pym",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "bonehouse"
+    },
+    "clerk": {
+      "name": "Simon Aske",
+      "body": "villager",
+      "job": "librarian",
+      "female": false,
+      "at": "press"
+    },
+    "reeve": {
+      "name": "Harmon Bell",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "hall"
+    }
+  },
+  "places": {
+    "loft": {
+      "at": "home",
+      "name": "the hayloft"
+    },
+    "inn": {
+      "at": "tavern",
+      "name": "the tavern"
+    },
+    "yard": {
+      "at": "near",
+      "from": "inn",
+      "dist": [
+        8,
+        20
+      ],
+      "name": "the tavern yard"
+    },
+    "shop": {
+      "at": "near",
+      "from": "inn",
+      "dist": [
+        30,
+        80
+      ],
+      "name": "the chandler's shop"
+    },
+    "bonehouse": {
+      "at": "near",
+      "from": "inn",
+      "dist": [
+        50,
+        110
+      ],
+      "name": "the bone house by the burying ground"
+    },
+    "press": {
+      "at": "near",
+      "from": "inn",
+      "dist": [
+        30,
+        80
+      ],
+      "name": "the reeve's writing room"
+    },
+    "hall": {
+      "at": "town",
+      "name": "the reeve's hall"
+    },
+    "road": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        220,
+        400
+      ],
+      "name": "the milestone on the out road"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "say": {
+        "?mark:candle_put_back": [
+          "You are the one Tam Rudd calls the legs. He said you would come if you heard. He is up in my hayloft with the ladder pulled up after him, and he has not whistled in four days.",
+          "There is a black candle in the tavern window, and everybody knows by now whose it is. And there is a stranger at the tavern. A man in a hood. Just passing through, he says, and he has been passing through since the week began. He asks very civilly which loft the valley runner sleeps in. Nobody has told him. Somebody will.",
+          "I'll not have him killed in my hay, and I'll not turn him out either. That leaves me nothing to do, and I am no good at that. Will you go up?"
+        ],
+        "?mark:candle_burned": [
+          "You are the one Tam Rudd calls the legs. He said you would come if you heard. He is up in my hayloft with the ladder pulled up after him, and he has not whistled in four days.",
+          "There is a black candle in the tavern window, and the word up from the osier hatch is that two names are paid for now, and not one. Tam's, and whoever it was that burned a paper. And a man in a hood has taken the end room at the tavern. Just passing through, he says.",
+          "I'll not have him killed in my hay, and I'll not turn him out either. That leaves me nothing to do, and I am no good at that. Will you go up?"
+        ],
+        "?": [
+          "You are the one Tam Rudd calls the legs. He said you would come if you heard. He is up in my hayloft with the ladder pulled up after him, and he has not whistled in four days.",
+          "There is a black candle in the tavern window that should have been done with by now, and is not. And since it ran past its time there is a man in a hood at the tavern. Just passing through, he says. He asks very civilly who holds a paper that was promised to him. He asks after the runner as well.",
+          "I'll not have him killed in my hay, and I'll not turn him out either. That leaves me nothing to do, and I am no good at that. Will you go up?"
+        ]
+      },
+      "replies": [
+        {
+          "say": "Let the ladder down.",
+          "then": "see_tam",
+          "journal": "Tam Rudd is hiding in {giver}'s hayloft. A man in a hood has taken a room at the tavern and is asking after him, and the black candle is still in the window."
+        },
+        {
+          "say": "This is past mending. I am sorry.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_tam": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go up to Tam Rudd in {place:loft}",
+      "clock": {
+        "nights": 3
+      },
+      "candle": true,
+      "say": {
+        "?mark:caught:candle_only_a_bill": [
+          "So it is you. The one who read me my own name and called it candles. Come up, then. I have nobody else, and it turns out that counts for more than whether I can stand the sight of you.",
+          "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
+          "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
+        ],
+        "?!mark:candle_told_tam": [
+          "Come up. Mind the third rung. So. It was never a bill. The whole town knew whose candle that was before I did. You read me my own name and said candles. I'll have that out with you another day, if I am given one.",
+          "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
+          "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
+        ],
+        "?mark:candle_put_back": [
+          "Come up. Mind the third rung. You put it back, and somebody took it up, and now he is sat in the tavern in a hood. I am not blaming you. I have had four days in the hay to try, and I find I cannot.",
+          "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
+          "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
+        ],
+        "?mark:candle_burned": [
+          "Come up. Mind the third rung. Two candles, they said, if it was burned. Well, there is a man in a hood at the tavern, and I am told he has two names in his coat. We are a pair still, the runner and the legs.",
+          "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
+          "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
+        ],
+        "?": [
+          "Come up. Mind the third rung. You held it past the candle, and I walked my round every day that you did. I'll not forget that. But he has come all the same. For the paper first, and then for me.",
+          "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
+          "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Tell me the four things.",
+          "then": "plan"
+        }
+      ]
+    },
+    "plan": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Settle with Tam Rudd what is to be done",
+      "say": [
+        "Here is what I have. Somebody in this town lights that candle and keeps it trimmed, and might be made to say how one is put out. Or you sit in the hay with me, and we wait for him. Or I go tonight, down the out road, and never see this valley again. Or you go across to the tavern yard after dark and look him in the hood.",
+        "I have turned them over for four days. I am a runner. I am no good at stopping."
+      ],
+      "voices": {
+        "courage": "We wait in the hay, and we meet him at the hatch. I have heard enough about candles.",
+        "mercy": "Get him out of the valley. Alive and somewhere else is still alive.",
+        "law": "A reeve has a lock-up. Somebody in this town is lighting that candle against the law.",
+        "gain": "A man who is paid can be paid more. It is worth the asking."
+      },
+      "replies": [
+        {
+          "say": "I'll see about whoever lights that candle.",
+          "then": {
+            "?mark:nobody_hand_found": "hand_talk",
+            "?mark:nobody_sill": "name_hand",
+            "?": "watch_window"
+          },
+          "for": [
+            "law"
+          ]
+        },
+        {
+          "say": "I'll sit in the hay with you tonight.",
+          "then": "stand",
+          "for": [
+            "courage"
+          ]
+        },
+        {
+          "say": "You are going tonight. I'll walk you to the road.",
+          "then": "run_road",
+          "for": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "I'll go across and look him in the hood.",
+          "then": "see_knife"
+        },
+        {
+          "if": "!mark:nobody_confessed",
+          "say": "Tam. Before any of it. This is on my account.",
+          "then": "confess",
+          "for": [
+            "honour"
+          ]
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "confess": {
+      "do": "talk",
+      "who": "runner",
+      "say": {
+        "?mark:runner_purse_short": [
+          "The packet. The week of my ankle. It never went in the tree. Somebody was waiting on it and was not paid, and a tree has only the one man who goes to it.",
+          "I have lain here four days asking what I did. Eleven years. I thought, there must be a door I missed. And it was not a door, and it was not me.",
+          "Well. I am not going to hit you. I have not the wind for it, and I need your arm more than I need to break it. But when this is done, if it is done, you will put {coins:30} in that oak with your own hand, and you will not look back."
+        ],
+        "?mark:runner_round_late": [
+          "The week of my ankle. It went to the tree late. Somebody stood out by that oak waiting, and a tree has only the one man who goes to it.",
+          "I have lain here four days asking what I did. Eleven years. I thought, there must be a door I missed. And it was a rabbit hole, and a pair of slow legs.",
+          "I asked for legs on a paper on a board, and I took what came. I cannot put it on you whole, though I should like to. Half. You can carry half."
+        ],
+        "?": [
+          "On your account? You did every door and the tree, and you never looked back. I had it from old Sallow.",
+          "Oh. The tree. I showed you the tree. Eleven years I never told a soul where that packet goes, and then I told the first pair of legs that read a notice, because my ankle hurt. That is not on your account. That is on mine. You only walked where I pointed.",
+          "It is a hard thing, to be killed for the one time you asked for help. Do not let it stop you asking, when it is your turn."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Then let me help carry it.",
+          "then": "plan",
+          "mark": "nobody_confessed",
+          "journal": {
+            "?mark:runner_purse_short": "I told Tam Rudd that the candle is lit for him because I kept the packet meant for his oak. He says I am to put {coins:30} in that tree with my own hand when this is done.",
+            "?mark:runner_round_late": "I told Tam Rudd that the candle is lit for him because the packet came late to his oak the week I had his bag. He says I can carry half of it.",
+            "?": "I told Tam Rudd that the candle is lit for him because a stranger was seen at his oak, and I am the stranger. He says that is his doing, for showing me the tree."
+          }
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "watch_window": {
+      "do": "vigil",
+      "at": "inn",
+      "when": "night",
+      "radius": 14,
+      "gap": 9,
+      "goal": "After dark, watch the black candle in the tavern window",
+      "lines": [
+        {
+          "say": "The tavern shutters go up one by one. The window with the black candle is left open, and nobody inside sits near it.",
+          "sound": "minecraft:block.wood.hit"
+        },
+        {
+          "say": "Somebody is coming along the lane with no lantern, walking like one who knows every stone of it.",
+          "sound": "minecraft:block.gravel.step"
+        },
+        {
+          "if": "hand=chandler",
+          "say": "The figure reaches in over the sill and pinches the wick straight with bare fingers. It does not flinch from the flame."
+        },
+        {
+          "if": "hand=sexton",
+          "say": "The figure sets something long against the wall, and it rings on the stone like iron. Then it stoops to the sill like one who has dug all day."
+        },
+        {
+          "if": "hand=clerk",
+          "say": "The figure takes out a small knife and trims the wick with one cut, the way a pen is cut, and wipes the blade on a cloth."
+        },
+        {
+          "say": "The flame stands up clean and tall. The figure looks at it for a moment, as you might look at a job done properly, and goes back the way it came. The hood never turns.",
+          "mark": "nobody_saw_hand"
+        }
+      ],
+      "journal": "I watched the tavern window after dark. Somebody came down the lane with no light, trimmed the black candle from outside, and went away again. I did not see a face.",
+      "left": "plan",
+      "then": "search_sill",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "search_sill": {
+      "do": "search",
+      "at": "inn",
+      "goal": "Look over the sill under the tavern window",
+      "clues": [
+        {
+          "name": "The black candle",
+          "item": "minecraft:black_candle",
+          "lore": [
+            "Beeswax, dyed right through. Not a dip. A poured candle, and a dear one.",
+            "It is trimmed every night. There is hardly a drip on it."
+          ],
+          "journal": "The black candle is good beeswax, poured and dyed, and somebody trims it every night."
+        },
+        {
+          "if": "hand=chandler",
+          "name": "A smear on the sill",
+          "item": "minecraft:candle",
+          "lore": [
+            "Mutton tallow, where a hand rested. It has gone white in the cold.",
+            "The candle is beeswax. The tallow came on the hand."
+          ],
+          "mark": "nobody_sill",
+          "journal": "There is mutton tallow on the sill where a hand rested. The candle itself is beeswax."
+        },
+        {
+          "if": "hand=sexton",
+          "name": "A heel print under the window",
+          "item": "minecraft:clay_ball",
+          "lore": [
+            "Grey clay, dried hard, in the print of a boot heel.",
+            "The lane here is gravel. The nearest clay like this is six feet down."
+          ],
+          "mark": "nobody_sill",
+          "journal": "There is a heel print of grey clay under the window. The lane is gravel. Clay like that comes from six feet down."
+        },
+        {
+          "if": "hand=clerk",
+          "name": "A thumbprint on the sill",
+          "item": "minecraft:ink_sac",
+          "lore": [
+            "Black, on the limewash. It is not soot. It will not rub off.",
+            "Oak gall ink, dried the way it dries on a ledger."
+          ],
+          "mark": "nobody_sill",
+          "journal": "There is a thumbprint in oak gall ink on the limewash of the sill."
+        },
+        {
+          "name": "A twist of paper",
+          "item": "minecraft:paper",
+          "lore": [
+            "Tucked behind the shutter hook. One line, in a hand made to look like nobody's:",
+            "This window. Keep it trimmed until the white one comes."
+          ],
+          "journal": "Behind the shutter hook was a twist of paper: 'This window. Keep it trimmed until the white one comes.' Whoever lights the candle is sent word, and is sent the candle. There are three in this town who might have left what I found: the chandler, the sexton, and the reeve's clerk."
+        }
+      ],
+      "then": "call_chandler",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "call_chandler": {
+      "do": "talk",
+      "who": "chandler",
+      "goal": "Call on {chandler} at {place:shop}",
+      "say": {
+        "?hand=chandler": [
+          "Black wax? Nobody round here dyes wax. I sell tallow dips to the town and beeswax to the temple.",
+          "I was at my vats all last night. All of it. You may ask my girl. She will tell you the same, for I have told her to. Mind the vat."
+        ],
+        "?": [
+          "Black wax? Nobody round here dyes wax. I sell tallow dips to the town and beeswax to the temple, and I have never been asked for a black one in my life. If I had been, I would remember, and I would have said no.",
+          "That thing in the tavern window was never bought over my counter. Ask anybody. And mind the vat."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Good day to you.",
+          "then": "call_sexton"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "call_sexton": {
+      "do": "talk",
+      "who": "sexton",
+      "goal": "Call on {sexton} at {place:bonehouse}",
+      "say": {
+        "?hand=sexton": [
+          "I dig them and I fill them in. Candles are the cleric's business.",
+          "I was abed by dusk last night. A digger sleeps. And the spade was in the bone house, locked up. I did not have it with me. Why would I have had it with me?"
+        ],
+        "?": [
+          "I dig them and I fill them in. Candles are the cleric's business. There is clay on my boots every day of the year, so do not look at them as if they had told you something.",
+          "I'll say this much. Whoever is under that candle, I have not been told to measure for him yet. They do tell me. I like a day's notice."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Good day to you.",
+          "then": "call_clerk"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "call_clerk": {
+      "do": "talk",
+      "who": "clerk",
+      "goal": "Call on {clerk} at {place:press}",
+      "say": {
+        "?hand=clerk": [
+          "The reeve's clerk does not light candles in taverns. I can hardly afford to light them at my own desk.",
+          "I was copying the tithe roll until midnight. Here, by this window, with these hands. Is it a crime to have ink on them? Everybody who writes has ink on them."
+        ],
+        "?": [
+          "The reeve's clerk does not light candles in taverns. I can hardly afford to light them at my own desk. Look at this stub.",
+          "If you want to know who is paid for, do not ask in a writing room. Nothing about that candle will ever be written down by anybody. That is the first thing I would tell you about it."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Good day to you.",
+          "then": "name_hand"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "name_hand": {
+      "do": "name",
+      "who": "reeve",
+      "goal": "Name whoever lights the candle to {reeve} at {place:hall}",
+      "say": {
+        "?dress:ragged": [
+          "You have the look of the road on you, so I'll say it plainly. I do not take a neighbour's name from a stranger on a feeling.",
+          "I am the reeve. I know there is a black candle in my tavern. Before you ask: no reeve ever took one down. The last who tried, two valleys over, had one lit for him before the month was out. So we look at it, and we wait, and we bury whoever it was.",
+          "But lighting it is not the guild's own work. That is somebody of mine. A neighbour. Show me which, with more than a feeling, and I can ask them a question that the law allows. Who is it?"
+        ],
+        "?dress:fine": [
+          "Come in and sit. You will forgive the hall. It is a working one.",
+          "I am the reeve. I know there is a black candle in my tavern. Before you ask: no reeve ever took one down. The last who tried, two valleys over, had one lit for him before the month was out. So we look at it, and we wait, and we bury whoever it was.",
+          "But lighting it is not the guild's own work. That is somebody of mine. A neighbour. Show me which, with more than a feeling, and I can ask them a question that the law allows. Who is it?"
+        ],
+        "?": [
+          "I am the reeve. I know there is a black candle in my tavern. Before you ask: no reeve ever took one down. The last who tried, two valleys over, had one lit for him before the month was out. So we look at it, and we wait, and we bury whoever it was.",
+          "But lighting it is not the guild's own work. That is somebody of mine. A neighbour. Show me which, with more than a feeling, and I can ask them a question that the law allows. Who is it?"
+        ]
+      },
+      "suspects": [
+        {
+          "who": "chandler",
+          "say": "It is {chandler}, the chandler.",
+          "proof": [
+            "hand=chandler",
+            "mark:nobody_saw_hand",
+            "mark:nobody_sill"
+          ],
+          "need": 3,
+          "then": "reeve_right",
+          "doubted": "reeve_wrong"
+        },
+        {
+          "who": "sexton",
+          "say": "It is {sexton}, the sexton.",
+          "proof": [
+            "hand=sexton",
+            "mark:nobody_saw_hand",
+            "mark:nobody_sill"
+          ],
+          "need": 3,
+          "then": "reeve_right",
+          "doubted": "reeve_wrong"
+        },
+        {
+          "who": "clerk",
+          "say": "It is {clerk}, the clerk.",
+          "proof": [
+            "hand=clerk",
+            "mark:nobody_saw_hand",
+            "mark:nobody_sill"
+          ],
+          "need": 3,
+          "then": "reeve_right",
+          "doubted": "reeve_wrong"
+        }
+      ],
+      "none": {
+        "say": "I cannot say yet.",
+        "then": "plan"
+      },
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "reeve_wrong": {
+      "do": "talk",
+      "who": "reeve",
+      "say": [
+        "{named}? No. What you have shown me does not fit that trade, and I'll not walk a neighbour down the street on it. {named} will hear that you said it, mind. This is a small town. Look again at what you found, and come back when it points somewhere."
+      ],
+      "replies": [
+        {
+          "say": "I'll look again.",
+          "then": "plan",
+          "mark": "nobody_named_wrong",
+          "journal": "I named {named} to the reeve as the one who lights the candle. He would not have it. What I found does not fit that trade."
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "reeve_right": {
+      "do": "talk",
+      "who": "reeve",
+      "say": [
+        "{named}. Yes. You saw the window trimmed, you have what was left on the sill, and it fits the trade. I have known {named} thirty years. It is enough to ask a question on. It is not enough to put a neighbour in the lock-up.",
+        "Go and ask it yourself. Say that the reeve knows. If the answer is a lie, or a pair of heels, then I have my reason. If it is the truth, you may learn how one of those candles is put out, which is more than I ever have."
+      ],
+      "replies": [
+        {
+          "say": "I'll ask it.",
+          "then": "hand_talk",
+          "mark": "nobody_hand_found",
+          "journal": "I named {named} to the reeve as the one who lights the black candle, and showed him why. He believes it. He has sent me to ask the question myself."
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "hand_talk": {
+      "do": "talk",
+      "who": {
+        "?hand=chandler": "chandler",
+        "?hand=sexton": "sexton",
+        "?": "clerk"
+      },
+      "goal": "Put the reeve's question to whoever lights the candle",
+      "say": [
+        "The reeve knows. Then shut the door. Yes. I light it. Sit down. You look as though you expected me to deny it.",
+        "A black candle comes to me in with my ordinary goods, with a twist of paper that names a window. I light it in that window, and I keep it trimmed until I am sent a white one. I am paid the price of a candle. I have never known whose purse it is, nor whose name. I have taken care not to. My mother lit them before me.",
+        "You want to know how one is put out. Three ways. The work is done. Or whoever paid sends the same purse again by the same road, and that buys the paper back. I have seen it once. Or the one who took the paper up sends it back with their own blood on it, alive or dead. A paper that has been bled on is finished. They do not send twice for the same name. They are thrifty people."
+      ],
+      "journal": "The one who lights the candle is sent it with their ordinary goods and never knows whose purse or whose name. A candle goes out three ways: the work is done, or the same purse is sent again and buys the paper back, or whoever took the paper up sends it back with their own blood on it.",
+      "replies": [
+        {
+          "say": "Then send this up your road. The same purse again: {coins:30}.",
+          "needs_coins": 30,
+          "then": "hand_paid",
+          "mark": "nobody_bought_back",
+          "for": [
+            "mercy"
+          ],
+          "journal": "I gave the candle keeper {coins:30} to send up the road the black candle came down: the same purse again, to buy Tam Rudd's paper back."
+        },
+        {
+          "say": "The one who took the paper up. What do you know of him?",
+          "then": "hand_knife"
+        },
+        {
+          "say": "That is all I came for.",
+          "then": "plan"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "hand_knife": {
+      "do": "talk",
+      "who": {
+        "?hand=chandler": "chandler",
+        "?hand=sexton": "sexton",
+        "?": "clerk"
+      },
+      "say": [
+        "I have never seen him, and he has never seen me. That is the whole point of us. But people tell a candle keeper things, to be rid of them.",
+        "He will come at the dead of night, and never where a light is burning. They do not like to be looked at. He will give your runner the chance to walk out to him first, because a body in a lane is less trouble than a body in a loft. And he is paid for the one name. He will not fight a second person for it if he can step round them. So stand in the door, keep a lantern lit, and make him choose."
+      ],
+      "replies": [
+        {
+          "say": "I'll remember it.",
+          "then": "plan",
+          "mark": "nobody_knows_knife",
+          "journal": "The candle keeper says the one who took up the paper comes at dead of night, will not work where a light is burning, and will not fight a second person if he can step round them. I should stand in the door with a lantern lit."
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "hand_paid": {
+      "do": "talk",
+      "who": {
+        "?hand=chandler": "chandler",
+        "?hand=sexton": "sexton",
+        "?": "clerk"
+      },
+      "say": [
+        "{coins:30}. Counted. It goes up tonight by the road the candle came down, and I'll say nothing with it, because nothing is ever said. If it is taken, a white candle comes back to me, and I set it in the window, and your man in the hood reads it like anybody else and goes home. He will be paid for his trouble. They are fair about that.",
+        "If it is not taken, your purse comes back to you and I go on trimming. Two days. Keep the runner off his ladder until then."
+      ],
+      "replies": [
+        {
+          "say": "Two days.",
+          "then": "wait_white"
+        }
+      ]
+    },
+    "wait_white": {
+      "do": "wait",
+      "days": [
+        2,
+        2
+      ],
+      "wake": "none",
+      "then": "white"
+    },
+    "white": {
+      "do": "talk",
+      "candle": "white",
+      "who": {
+        "?hand=chandler": "chandler",
+        "?hand=sexton": "sexton",
+        "?": "clerk"
+      },
+      "goal": "Go back to the candle keeper",
+      "say": [
+        "It came yesterday, in with my goods. White. I set it in the tavern window before first light, beside the other, and I trim the black one no more.",
+        "Your man in the hood paid his reckoning at the tavern an hour ago. Very civil, the taverner says. The runner may come down his ladder. And I have a mind to be too old for candles, after this one. Tell the reeve that is my answer."
+      ],
+      "replies": [
+        {
+          "say": "I'll tell them both.",
+          "then": "end:bought_off",
+          "journal": "A white candle came down the road for the candle keeper to set in the tavern window. The purse was taken. The man in the hood has paid his reckoning and gone."
+        }
+      ]
+    },
+    "stand": {
+      "do": "vigil",
+      "at": "loft",
+      "when": "night",
+      "radius": 12,
+      "gap": 10,
+      "goal": "After dark, keep watch in the hayloft with Tam Rudd",
+      "mark": "nobody_stood",
+      "lines": [
+        {
+          "who": "runner",
+          "say": "Ladder is up. Lantern or no lantern? I never know which is worse. Sit by the hatch."
+        },
+        {
+          "say": "The town goes quiet a street at a time. Somewhere a door is barred.",
+          "sound": "minecraft:block.wooden_door.open"
+        },
+        {
+          "who": "runner",
+          "say": "I have been saying over every letter I ever carried. I have them all. Births, mostly, and prices. It is a good trade. You see folk at the door before they know."
+        },
+        {
+          "say": "Gravel, under the loft. One pair of feet, in no hurry. They stop.",
+          "sound": "minecraft:block.gravel.step"
+        },
+        {
+          "say": "A voice from the yard below, quite pleasant: 'Runner. Come down and walk a little way with me. It is easier in a lane.'"
+        },
+        {
+          "if": "mark:candle_burned",
+          "say": "The same voice: 'And the other one, who burns papers. You may come down as well. I have both names.'"
+        },
+        {
+          "if": "!mark:candle_burned&!mark:candle_put_back",
+          "say": "The same voice: 'And whoever is up there with a paper that was promised to me. You may throw it down first.'"
+        },
+        {
+          "who": "runner",
+          "say": "A runner does not wait on the step. But this once I think I will."
+        },
+        {
+          "say": "The foot of a ladder knocks against the wall under the hatch. He has brought his own.",
+          "sound": "minecraft:block.wood.hit"
+        }
+      ],
+      "journal": "I sat up in the hayloft with Tam Rudd. When the town was quiet a man came into the yard and asked him, civilly, to come down and walk with him. Then he set a ladder to the hatch.",
+      "left": "plan",
+      "then": "fight_loft",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "fight_loft": {
+      "do": "foe",
+      "who": "knife_loft",
+      "when": "night",
+      "goal": "Hold the hatch against the man in the hood",
+      "taunt": "I am paid for the one name. Stand aside, and I'll forget that I saw you.",
+      "plea": "Stop. I yield it. I'll not die for a runner. Nobody paid me for that.",
+      "mercy": "Then go, and send his paper back up the line.",
+      "thanks": "It goes back with my blood on it. That closes it. They do not send twice for the same name.",
+      "weak_to": [
+        {
+          "know": "mark:nobody_knows_knife",
+          "item": "minecraft:lantern",
+          "share": 0.6,
+          "journal": "I kept a lantern lit between us, as the candle keeper said. He does not like to be looked at, and he came on badly."
+        }
+      ],
+      "slain": "after_slain",
+      "spared": "after_spared",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "after_slain": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go to Tam Rudd",
+      "say": {
+        "?mark:nobody_stood": [
+          "Is he dead? He was civil. I keep on thinking of that. He asked me to come down as if it were a letter for me.",
+          "I'll go out on the round in the morning. If I sit here, I shall only listen for the ladder. Help me get him out of this yard before it is light. It is the least a lodger can do."
+        ],
+        "?": [
+          "In the tavern yard? Dead? And I was up here with my fingers in my ears, like a child in a storm.",
+          "I'll go out on the round in the morning. If I sit here, I shall only listen for the ladder. I do not know what a runner says to somebody for this. Nobody ever said it over to me."
+        ]
+      },
+      "replies": [
+        {
+          "say": "In the morning, then.",
+          "then": "end:lives",
+          "journal": "The man in the hood is dead, with Tam Rudd's paper in his coat. Tam means to walk his round in the morning."
+        }
+      ]
+    },
+    "after_spared": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go to Tam Rudd",
+      "say": [
+        "You let him go. With the paper. It goes back with his blood on it, he says, and that closes it.",
+        "I do not know that I believe him. But he had no need to say it, and he did not look to me like one who wastes words. I'll go out on the round in the morning."
+      ],
+      "replies": [
+        {
+          "say": "In the morning, then.",
+          "then": "end:lives",
+          "mark": "nobody_spared_knife",
+          "journal": "The man in the hood yielded, and I let him go with Tam Rudd's paper bloodied. He says that closes it."
+        }
+      ]
+    },
+    "run_road": {
+      "do": "escort",
+      "who": "runner",
+      "to": "road",
+      "when": "night",
+      "goal": "After dark, walk Tam Rudd out to {place:road}",
+      "failed": "end:dead",
+      "journal": "I walked Tam Rudd out of the town by night, past the tavern and its window, as far as the milestone.",
+      "then": "road_part",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "road_part": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "That is the milestone. I have passed it twice a month for eleven years, and never once carrying nothing.",
+        "The round will want somebody. The widow's letters. The bottle for the fold: a spoon at night, tell them. The oak can whistle for its packet. Tell {giver} that the hay was good hay.",
+        "I cannot write to you. You know why. But I'll find somebody who can, and say it over to them, and it will come."
+      ],
+      "replies": [
+        {
+          "say": "Go well, Tam.",
+          "then": "end:gone"
+        }
+      ]
+    },
+    "see_knife": {
+      "do": "talk",
+      "who": "knife",
+      "when": "night",
+      "goal": "After dark, find the man in the hood in {place:yard}",
+      "say": {
+        "?mark:candle_put_back": [
+          "Just passing through, friend. A cold night to be standing in a yard.",
+          "Ah. The runner's friend. Then you know what is in my coat, since I am told it was in yours first, and you put it back like a sensible person. I took up nothing that you did not lay down. I say it without ill will.",
+          "I am paid for one name. I am not paid to argue in a yard. He may walk out to me, which is easiest for everybody. Or you may tell me which loft it is and go home. Or you may stand in my way, and I'll step round you if I can."
+        ],
+        "?mark:candle_burned": [
+          "Just passing through, friend. A cold night to be standing in a yard.",
+          "Ah. The one who burns papers. That was not sensible. A paper is only a paper. They wrote his out again, and then they wrote a second. I am to mention that nobody has taken the second up yet. It is lying under a stub. You would know the tree.",
+          "I am paid for one name. I am not paid to argue in a yard. He may walk out to me, which is easiest for everybody. Or you may tell me which loft it is and go home. Or you may stand in my way, and I'll step round you if I can."
+        ],
+        "?": [
+          "Just passing through, friend. A cold night to be standing in a yard.",
+          "Ah. You are the one who holds a paper that was promised to me. You held it past its candle, and that was noted. I am sent to carry it the rest of the way. You may hand it to me here, and that is the end of the note.",
+          "I am paid for one name. I am not paid to argue in a yard. He may walk out to me, which is easiest for everybody. Or you may tell me which loft it is and go home. Or you may stand in my way, and I'll step round you if I can."
+        ]
+      },
+      "replies": [
+        {
+          "say": "It is the hayloft behind {giver}'s house.",
+          "then": "end:dead",
+          "mark": "nobody_gave_loft",
+          "against": [
+            "mercy",
+            "honour"
+          ],
+          "journal": "I told the man in the hood which loft Tam Rudd sleeps in."
+        },
+        {
+          "say": "{price} to pass through some other valley for a week.",
+          "then": "knife_week",
+          "try": {
+            "how": "bribe",
+            "coins": 25,
+            "odds": -1,
+            "fail": "knife_no",
+            "refuse": "No."
+          }
+        },
+        {
+          "say": "Then step round me, if you can.",
+          "then": "fight_yard",
+          "for": [
+            "courage"
+          ]
+        },
+        {
+          "say": "I was only passing through myself.",
+          "then": "plan"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "knife_week": {
+      "do": "talk",
+      "who": "knife",
+      "say": [
+        "That is a week's lodging somewhere else. I'll take it, and I'll be a week finding the right loft. I am a slow traveller. After the week I shall find it. If your runner is still in this valley then, I'll have been paid twice for the one walk."
+      ],
+      "replies": [
+        {
+          "say": "He will be gone tonight.",
+          "then": "run_road",
+          "mark": "nobody_bought_week",
+          "journal": "I paid the man in the hood to be a week finding the right loft. Tam Rudd must be out of the valley before it is up."
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "knife_no": {
+      "do": "talk",
+      "who": "knife",
+      "say": [
+        "I am paid already. That is the whole of what I am. Keep your purse, and stand aside, or do not."
+      ],
+      "replies": [
+        {
+          "say": "Then step round me, if you can.",
+          "then": "fight_yard",
+          "for": [
+            "courage"
+          ]
+        },
+        {
+          "say": "I'll not stand in a yard all night.",
+          "then": "plan"
+        }
+      ],
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    },
+    "fight_yard": {
+      "do": "foe",
+      "who": "knife",
+      "when": "night",
+      "goal": "Stand in the way of the man in the hood",
+      "taunt": "I am paid for the one name. Stand aside, and I'll forget that I saw you.",
+      "plea": "Stop. I yield it. I'll not die for a runner. Nobody paid me for that.",
+      "mercy": "Then go, and send his paper back up the line.",
+      "thanks": "It goes back with my blood on it. That closes it. They do not send twice for the same name.",
+      "weak_to": [
+        {
+          "know": "mark:nobody_knows_knife",
+          "item": "minecraft:lantern",
+          "share": 0.6,
+          "journal": "I kept a lantern lit between us, as the candle keeper said. He does not like to be looked at, and he came on badly."
+        }
+      ],
+      "slain": "after_slain",
+      "spared": "after_spared",
+      "within": "nights",
+      "late": "end:dead",
+      "until": "before the third night is out"
+    }
+  },
+  "endings": {
+    "lives": {
+      "text": {
+        "?mark:nobody_spared_knife": "I stood in the way of the man in the hood, and when he yielded I let him go with Tam Rudd's paper bloodied. He says that closes it. Tam went out on his round in the morning.",
+        "?": "The man in the hood is dead, with Tam Rudd's paper in his coat. They do not send twice for the same name, I am told. Tam went out on his round in the morning."
+      },
+      "reward": {
+        "coins": 10,
+        "hearts": 10,
+        "reputation": 8
+      },
+      "marks": [
+        "nobody_tam_lives"
+      ],
+      "town": [
+        "Tam Rudd is whistling again. I heard him at the ford before I saw him. I had not known I missed it.",
+        "There was a stranger at the tavern, very civil, paid in advance. He never came back for his change. The taverner is keeping it in a jar and will not touch it."
+      ],
+      "returns": {
+        "who": "runner",
+        "days": [
+          8,
+          12
+        ],
+        "as": "thanks",
+        "say": "I cannot stop. The bag is full. I had this said over to me by nobody, so it is only mine, and I have been saying it all down the valley to get it right. You stood in a door for me. I have stood at a great many doors, and nobody ever stood in one for me before. There. That is all of it. I did not drop a word.",
+        "gift": [
+          "minecraft:lantern*1",
+          "minecraft:honey_bottle*2",
+          "minecraft:bread*4"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=chandler&mark:nobody_hand_found",
+          "town": [
+            "{chandler} has sold her vats and gone to her sister's. The reeve asked her one question, they say, and she answered it.",
+            "Who do we buy our dips from now? I never thought I would miss a chandler."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=sexton&mark:nobody_hand_found",
+          "town": [
+            "{sexton} has given up the spade. Says he is too old for the clay. The reeve asked him one question, they say, and he answered it.",
+            "Who digs for us now? You never think about a sexton until you want one."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=clerk&mark:nobody_hand_found",
+          "town": [
+            "{clerk} has left the reeve's writing room. Asked one question, they say, and he answered it, and then he cleaned his pens and went.",
+            "The tithe roll is being kept by the reeve's own hand now. You can tell. Nobody can read it."
+          ]
+        },
+        {
+          "days": [
+            3,
+            6
+          ],
+          "if": "mark:nobody_named_wrong",
+          "town": [
+            "{player} went to the reeve and named an honest neighbour for lighting that candle. On what? On a look. I would bar my door to that one."
+          ]
+        },
+        {
+          "days": [
+            12,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "Tam Rudd brought my sister's letter and said it over at the door. Word for word."
+            ],
+            [
+              "b",
+              "He always does. Have you ever seen him look at one?"
+            ],
+            [
+              "a",
+              "Now that you say it. No."
+            ],
+            [
+              "b",
+              "Then do not say it. He is the best runner this valley ever had."
+            ]
+          ]
+        }
+      ]
+    },
+    "bought_off": {
+      "text": {
+        "?mark:runner_purse_short": "I sent {coins:30} up the candle keeper's road, the same purse again, and a white candle came back down it. It was the purse I kept from the oak, near enough, gone at last where it should have gone. The man in the hood went home paid. Tam Rudd is on his round.",
+        "?": "I sent {coins:30} up the candle keeper's road, the same purse again, and a white candle came back down it. The man in the hood went home paid for his trouble. Tam Rudd is on his round."
+      },
+      "reward": {
+        "hearts": 10,
+        "reputation": 6
+      },
+      "marks": [
+        "nobody_tam_lives",
+        "nobody_bought_back"
+      ],
+      "town": [
+        "A white candle in the tavern window, they are saying, set beside the black. I never heard of that. My grandmother had, once.",
+        "Tam Rudd is whistling again. Somebody paid for that. You do not get a white one for nothing."
+      ],
+      "returns": {
+        "who": "runner",
+        "days": [
+          8,
+          12
+        ],
+        "as": "thanks",
+        "say": "I cannot stop. The bag is full. They tell me you bought me back, like a cow out of the pound. I do not know what a runner is worth. I know what you paid. I'll carry for you free until one of us is dead, any door in the valley, and the oak can go and whistle.",
+        "gift": [
+          "minecraft:leather*4",
+          "minecraft:honey_bottle*2"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=chandler&mark:nobody_hand_found",
+          "town": [
+            "{chandler} has sold her vats and gone to her sister's. The reeve asked her one question, they say, and she answered it.",
+            "Who do we buy our dips from now? I never thought I would miss a chandler."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=sexton&mark:nobody_hand_found",
+          "town": [
+            "{sexton} has given up the spade. Says he is too old for the clay. The reeve asked him one question, they say, and he answered it.",
+            "Who digs for us now? You never think about a sexton until you want one."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=clerk&mark:nobody_hand_found",
+          "town": [
+            "{clerk} has left the reeve's writing room. Asked one question, they say, and he answered it, and then he cleaned his pens and went.",
+            "The tithe roll is being kept by the reeve's own hand now. You can tell. Nobody can read it."
+          ]
+        },
+        {
+          "days": [
+            3,
+            6
+          ],
+          "if": "mark:nobody_named_wrong",
+          "town": [
+            "{player} went to the reeve and named an honest neighbour for lighting that candle. On what? On a look. I would bar my door to that one."
+          ]
+        }
+      ]
+    },
+    "gone": {
+      "text": "I walked Tam Rudd out to the milestone by night. The valley has no runner now. Somewhere there is a man with a bad ankle and every letter he ever carried still in his head.",
+      "reward": {
+        "hearts": 6,
+        "reputation": 4
+      },
+      "marks": [
+        "nobody_tam_gone"
+      ],
+      "town": [
+        "No runner. My sister's letter has sat at the ford a fortnight. Eleven years, and Tam Rudd goes without a word.",
+        "The stranger at the tavern stayed out his three nights and went. He asked the taverner where a lame man would go. Very civil about it."
+      ],
+      "later": [
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=chandler&mark:nobody_hand_found",
+          "town": [
+            "{chandler} has sold her vats and gone to her sister's. The reeve asked her one question, they say, and she answered it.",
+            "Who do we buy our dips from now? I never thought I would miss a chandler."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=sexton&mark:nobody_hand_found",
+          "town": [
+            "{sexton} has given up the spade. Says he is too old for the clay. The reeve asked him one question, they say, and he answered it.",
+            "Who digs for us now? You never think about a sexton until you want one."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=clerk&mark:nobody_hand_found",
+          "town": [
+            "{clerk} has left the reeve's writing room. Asked one question, they say, and he answered it, and then he cleaned his pens and went.",
+            "The tithe roll is being kept by the reeve's own hand now. You can tell. Nobody can read it."
+          ]
+        },
+        {
+          "days": [
+            3,
+            6
+          ],
+          "if": "mark:nobody_named_wrong",
+          "town": [
+            "{player} went to the reeve and named an honest neighbour for lighting that candle. On what? On a look. I would bar my door to that one."
+          ]
+        },
+        {
+          "days": [
+            20,
+            35
+          ],
+          "letter": {
+            "from": "Tam Rudd, by the hand of a carter's wife",
+            "lines": [
+              "This is said over to a carter's wife, who writes a fair hand and does not ask questions. I am three valleys off and I'll not say which way. There was no runner here. There is now.",
+              "It is a hill round, and hard on the ankle. Nobody here has a tree. I looked.",
+              "I have you by heart, the way I have the letters. I'll not drop it. Tell them at the fold: a spoon at night."
+            ]
+          }
+        },
+        {
+          "days": [
+            8,
+            14
+          ],
+          "scene": [
+            [
+              "a",
+              "Who is to carry the widow Fenn's letters now?"
+            ],
+            [
+              "b",
+              "There was a paper on the board. Legs wanted."
+            ],
+            [
+              "a",
+              "And who took it down?"
+            ],
+            [
+              "b",
+              "Nobody. Would you, after Tam?"
+            ]
+          ]
+        }
+      ]
+    },
+    "dead": {
+      "text": {
+        "?mark:nobody_gave_loft": "I told the man in the hood which loft, and went home. I did not go back to look. The valley has no runner now.",
+        "?": "I was too slow. Somebody set a ladder to {giver}'s hayloft while I was elsewhere. The valley has no runner now, and nobody will be the one to take that candle out of the window."
+      },
+      "marks": [
+        "nobody_tam_dead"
+      ],
+      "town": [
+        "Tam Rudd is dead. In a hayloft, with the ladder pulled up. So somebody brought their own.",
+        "His bag was on its nail, buckled, with every letter in it. Not one opened. Who is to say them over at the doors now?"
+      ],
+      "later": [
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=chandler&mark:nobody_hand_found",
+          "town": [
+            "{chandler} has sold her vats and gone to her sister's. The reeve asked her one question, they say, and she answered it.",
+            "Who do we buy our dips from now? I never thought I would miss a chandler."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=sexton&mark:nobody_hand_found",
+          "town": [
+            "{sexton} has given up the spade. Says he is too old for the clay. The reeve asked him one question, they say, and he answered it.",
+            "Who digs for us now? You never think about a sexton until you want one."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=clerk&mark:nobody_hand_found",
+          "town": [
+            "{clerk} has left the reeve's writing room. Asked one question, they say, and he answered it, and then he cleaned his pens and went.",
+            "The tithe roll is being kept by the reeve's own hand now. You can tell. Nobody can read it."
+          ]
+        },
+        {
+          "days": [
+            3,
+            6
+          ],
+          "if": "mark:nobody_named_wrong",
+          "town": [
+            "{player} went to the reeve and named an honest neighbour for lighting that candle. On what? On a look. I would bar my door to that one."
+          ]
+        },
+        {
+          "days": [
+            5,
+            9
+          ],
+          "scene": [
+            [
+              "a",
+              "They buried the runner with his bag. The cleric would not have the letters read out."
+            ],
+            [
+              "b",
+              "Did anyone know he could not read them himself?"
+            ],
+            [
+              "a",
+              "Tam? Never. Who told you that?"
+            ],
+            [
+              "b",
+              "Nobody. Nobody told me."
+            ]
+          ]
+        }
+      ]
+    },
+    "refused": {
+      "text": "I would not go up the ladder. Whatever is coming for Tam Rudd, it will find him without me.",
+      "failed": true
+    }
+  }
+}

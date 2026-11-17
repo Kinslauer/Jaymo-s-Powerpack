@@ -387,7 +387,9 @@ doesn't begin; the log says "(after dark)". A cast member with `"hours": "night"
 those hours. A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
 
 `"candle": true` on any step: when it opens, a black candle is set burning in a window of the town's tavern (the guild's
-mark that someone has been paid for; lore "What goes on in the shadows"). A cast creature with `"lying": true` is laid
+mark that someone has been paid for; lore "What goes on in the shadows"). One black candle is enough for a window: a
+second tale in the same town lights no second one. `"candle": "white"` stands a white one in the same window (the
+paper bought back). A tale begun outside any town lights none. A cast creature with `"lying": true` is laid
 out on the ground where it's set out and doesn't get up; with a condition instead (`"lying": "mark:wl_bell_ninth"`) it
 stands until that holds, then it and its `men` lie down one after another while the player is there to see (the
 drowned in the burying ground). A `defend` step doesn't read `when` (its waves come after dark): put a `go` with the
