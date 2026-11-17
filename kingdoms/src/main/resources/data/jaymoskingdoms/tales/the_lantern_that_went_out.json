@@ -5,10 +5,12 @@
   "cast": {
     "keeper": { "name": ["Ansel Varrow", "Corbin Thale", "Jessop Marle"], "body": "villager", "job": "none", "at": "inner" },
     "ward": { "name": ["Nessa", "Maud", "Edda"], "body": "villager", "job": "none", "female": true, "at": "cottage" },
-    "robber": { "name": ["Morna Sedge", "Hesper Coyle", "Rill Ashby"], "body": "fighter", "female": true, "at": "hollow", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+    "robber": { "name": ["Morna Sedge", "Hesper Coyle", "Rill Ashby"], "body": "fighter", "female": true, "at": "hollow", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 },
+    "knights": { "if": "mark:lantern_light_set & !mark:lantern_nights_kept", "name": "a knight of the mound", "body": "jaymoskingdoms:zombie_knight", "at": "door", "hours": "night", "men": 2 }
   },
   "places": {
     "barrow": { "at": "ruin", "name": "the old barrow" },
+    "door": { "at": "near", "from": "barrow", "dist": [6, 12], "name": "the mound door" },
     "inner": { "at": "near", "from": "barrow", "dist": [24, 40], "name": "the lord's mound" },
     "cottage": { "at": "near", "from": "home", "dist": [40, 80], "name": "the keeper's cottage" },
     "hollow": { "at": "wild", "from": "barrow", "dist": [160, 300], "name": "the charcoal burners' hollow" }
@@ -195,10 +197,23 @@
     "set_light": {
       "do": "build", "at": "barrow", "blocks": "minecraft:lantern", "count": 1, "goal": "Set a lantern at the mound door",
       "journal": "I set a light at the mound door at dusk.",
+      "mark": "lantern_light_set",
+      "then": "first_night"
+    },
+    "first_night": {
+      "do": "vigil", "at": "barrow", "when": "night", "radius": 16, "gap": 14, "goal": "Keep the first night's vigil by the light",
+      "lines": [
+        { "say": "The light stands on the door stone. The moor is quiet round it, and the quiet has an edge.", "sound": "minecraft:block.lantern.place" },
+        { "say": "Three come up out of the mound in kettle helms and old mail, and take their places by the door. They do not hurry.", "sound": "minecraft:entity.skeleton.step" },
+        { "say": "They look at the lantern. Not one of them looks at who carried it." },
+        { "say": "When a lantern is carried across in front of them, the nearest draws back his sword arm to let the light go by." },
+        { "say": "A wind gets up and the flame leans. All three lean with it, a little, as men do at a hearth." },
+        { "say": "Grey in the east. They go down as they came up, the last one backwards, facing the light.", "sound": "minecraft:entity.skeleton.step" }
+      ],
       "then": "vigil"
     },
     "vigil": {
-      "do": "wait", "days": [3, 3], "wake": "none", "goal": "Keep the light three nights",
+      "do": "wait", "days": [2, 2], "wake": "none", "goal": "Keep the light three nights", "mark": "lantern_nights_kept",
       "journal": {
         "?mark:lantern_let_thieves_go": "Three nights I kept the light. Each night they stood at the inner door and looked at the empty cist, and they did not go down until the third dawn.",
         "?": "Three nights I kept the light. On the third they went back down, one by one, and the moor was quiet."
@@ -328,19 +343,45 @@
       "reward": { "coins": 14, "items": ["minecraft:candle*4"], "hearts": 10, "reputation": 12 },
       "marks": ["lantern_given_to_ward"],
       "town": ["There's a light on the hill again. Lower than it was. The girl hasn't the old man's reach.", "We pay the lamp tithe again. Nobody argued this time."],
-      "returns": { "who": "ward", "days": [10, 16], "as": "thanks", "say": "This was on the sill of the first mound one dawn, where the thieves left their coal. It is not grave goods. I asked them, in my way, and nobody minded. He used to say a keeper ought to give light and not only carry it. So.", "gift": ["minecraft:soul_lantern*1"] }
+      "returns": { "who": "ward", "days": [10, 16], "as": "thanks", "say": "This was on the sill of the first mound one dawn, where the thieves left their coal. It is not grave goods. I asked them, in my way, and nobody minded. He used to say a keeper ought to give light and not only carry it. So.", "gift": ["minecraft:soul_lantern*1"] },
+      "later": [
+        { "days": [24, 36], "if": "!mark:lantern_warned_ward", "letter": { "from": "{ward}", "lines": [
+          "The first winter is done, so I am writing, as I said I would not.",
+          "I missed two nights. One was the great snow, when I got as far as the second stone and could not find the third. One I was sick. Both mornings I went up at first light and said sorry at the door, out loud, like a fool. Nothing came down either time. I think they allow for weather. He never told me that. I think he never missed, so he never found out.",
+          "The oil froze in the jar at midwinter and I carried it up inside my coat. {giver} sends a boy with bread on the worst days. I have chilblains and a cough, and the light has not been out past one dawn. Come and see it when your road allows."
+        ] } },
+        { "days": [24, 36], "if": "mark:lantern_warned_ward", "letter": { "from": "{ward}", "lines": [
+          "The first winter is done, so I am writing, as I said I would not.",
+          "I missed two nights. One was the great snow, when I got as far as the second stone and could not find the third. One I was sick. Both mornings I went up at first light and said sorry at the door, out loud, like a fool. Nothing came down either time. I think they allow for weather. He never told me that. I think he never missed, so he never found out.",
+          "You told me to want other things too. I have a cat now. It will not go past the foot of the hill, so we wait for each other there. It is not much of another thing, but it is not a lantern. Come and see the light when your road allows."
+        ] } }
+      ]
     },
     "ward_lie": {
       "text": "{ward} carries the lantern, and knows that I lied to her about {keeper}. She keeps the light. She does not speak to me.",
       "reward": { "coins": 10, "reputation": 4 },
       "marks": ["lantern_given_to_ward", "lantern_lied_to_ward"],
-      "town": ["The girl keeps the hill light and keeps her own counsel. Something soured there.", "Ask her about the old keeper and she walks off. Mid-word."]
+      "town": ["The girl keeps the hill light and keeps her own counsel. Something soured there.", "Ask her about the old keeper and she walks off. Mid-word."],
+      "later": [
+        { "days": [24, 36], "letter": { "from": "{ward}", "lines": [
+          "A keeper sends word once a winter to whoever set the light. He taught me that much, whatever else he was.",
+          "So. The first winter is done. The oil froze twice and I carried it up inside my coat. I missed no night.",
+          "That is all the news there is, and you have had it."
+        ] } }
+      ]
     },
     "bearer": {
       "text": "I carry the keeper's lantern myself. When I am near, there is a light on the hill. When I am not, there is none.",
       "reward": { "coins": 8, "hearts": 6, "reputation": 6 },
       "marks": ["barrow_lantern_bearer"],
-      "town": ["The stranger took the hill light off down the road. A light's a light, they said. Tell that to the hill.", "{ward} sits at the foot of the barrow at dusk with a candle stub. It isn't the same, and she knows it."]
+      "town": ["The stranger took the hill light off down the road. A light's a light, they said. Tell that to the hill.", "{ward} sits at the foot of the barrow at dusk with a candle stub. It isn't the same, and she knows it."],
+      "later": [
+        { "days": [24, 36], "letter": { "from": "{ward}", "lines": [
+          "There was no light on the hill this winter, wherever you and the lantern have got to.",
+          "I sat at the foot with a candle most dusks until the snow closed the path. At midwinter two of them came down as far as the second stone and stood there. They came no further. I do not know if that was my candle or their manners.",
+          "{giver} has stopped asking when you are coming back. I have not. If you pass this way, pass at dusk."
+        ] } }
+      ]
     },
     "walled": {
       "text": {
@@ -349,13 +390,27 @@
       },
       "reward": { "coins": 16, "reputation": 10 },
       "marks": ["walled_the_barrow"],
-      "town": ["A good stout wall on the old mound. Should have been done in my grandfather's day.", "My dog won't pass that wall. Sits down in the moor road and won't be pulled."]
+      "town": ["A good stout wall on the old mound. Should have been done in my grandfather's day.", "My dog won't pass that wall. Sits down in the moor road and won't be pulled."],
+      "later": [
+        { "days": [24, 36], "letter": { "from": "{ward}", "lines": [
+          "I went south at the thaw, as I said, and wintered two rivers down, sweeping for a chandler who sells more candles than he burns.",
+          "Nobody here keeps a light for anybody. It is restful. I do not sleep. At dusk I still go to the door and stand there until someone asks what I am waiting for.",
+          "I hope your wall is holding. I mean that both ways."
+        ] } }
+      ]
     },
     "thief_keeps": {
       "text": "{robber} carries the Lantern Warden's light over the graves she robbed. It burns every night. {ward} has not forgiven me for it.",
       "reward": { "coins": 12, "hearts": 4, "reputation": 6 },
       "marks": ["lantern_given_to_thief"],
       "town": ["A charcoal burner keeping the barrow light. Her sort. And yet it's lit every dusk, I'll say that.", "She leaves a pinch of coal on the sill by the lamp, they say. Two gods on one doorstep. No good comes of that."],
+      "later": [
+        { "days": [24, 36], "letter": { "from": "{ward}", "lines": [
+          "The first winter is done. {robber} and I got the hill through it between us.",
+          "She carries the light up and I carry it down, since her knees hate the ice and my arm hates the weight. We do not talk on the hill. At the bottom we talk a little. She burns a good clean coal, I will say that.",
+          "I have still not forgiven you. I thought you should know that the light is not what suffers for it."
+        ] } }
+      ],
       "returns": { "who": "robber", "days": [9, 14], "as": "thanks", "say": "I came down off the hill for one day. The girl is minding it. Yes, her. She put the stone down and held out the other hand, and I put the lantern in it, and tomorrow I take it back. We have an arrangement. This is from the hollow.", "gift": ["minecraft:charcoal*16", "minecraft:lantern*1"] }
     }
   }

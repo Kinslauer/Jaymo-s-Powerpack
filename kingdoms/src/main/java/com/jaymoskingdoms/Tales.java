@@ -500,7 +500,10 @@ public final class Tales {
 			return Rumours.words(player.position(), place(level, run, tale, name.substring(4)));
 		}
 		if (name.startsWith("left:") && player.level() instanceof ServerLevel level) {
-			return TaleWays.leftOn(level, run, name.substring(5));
+			return TaleWays.leftOn(level, run, name.substring(5), false);
+		}
+		if (name.startsWith("in:") && player.level() instanceof ServerLevel level) {
+			return TaleWays.leftOn(level, run, name.substring(3), true);
 		}
 		String rolled = run.vars.get(name);
 		String role = rolled != null ? rolled : name;
@@ -1123,16 +1126,18 @@ public final class Tales {
 		Tale tale = Tale.get(run.tale);
 		JsonObject step = tale == null ? null : tale.step(run.step);
 		if (step != null && player.level() instanceof ServerLevel level) {
-			MutableComponent line = words(player, run, step, "journal");
+			// (a step left undone, its days gone or the watch walked out on, isn't written up, marked or paid as done)
+			boolean done = !run.scratch.containsKey(TaleWays.UNDONE);
+			MutableComponent line = done ? words(player, run, step, "journal") : null;
 			if (line != null) {
 				note(run, line.getString());
 			}
-			String mark = Tale.string(step, "mark", "");
+			String mark = done ? Tale.string(step, "mark", "") : "";
 			if (!mark.isEmpty()) {
 				state(player).marks.add(mark);
 			}
 			// (gb-haggle) as much more as was haggled for
-			int pay = Haggle.talePay(Tale.pickNumber(step, "pay", facts(player, run), 0), run.vars);
+			int pay = done ? Haggle.talePay(Tale.pickNumber(step, "pay", facts(player, run), 0), run.vars) : 0;
 			if (pay > 0) {
 				Money.pay(player, faction(player, run), Money.worth(pay));
 			}
@@ -1274,7 +1279,7 @@ public final class Tales {
 			case "go", "escort" -> Tale.pickString(step, "to", facts, "");
 			case "talk", "bring", "foe", "name" -> {
 				JsonObject role = tale.role(Tale.pickString(step, "who", facts, ""));
-				yield role == null ? "" : Tale.string(role, "at", "");
+				yield role == null ? "" : Tale.pickString(role, "at", facts, "");
 			}
 			default -> Tale.pickString(step, "at", facts, "");
 		};
@@ -1433,6 +1438,7 @@ public final class Tales {
 			return;
 		}
 		if (step.has("failed")) {
+			run.scratch.put(TaleWays.UNDONE, "1");
 			go(player, run, step.get("failed"), null);
 			return;
 		}
@@ -1957,6 +1963,7 @@ public final class Tales {
 		}
 		if (run.taken && TaleWays.late(level, run, step)) {
 			// (its days ran out: the tale goes on without them)
+			run.scratch.put(TaleWays.UNDONE, "1");
 			go(player, run, step.get("late"), null);
 			return;
 		}

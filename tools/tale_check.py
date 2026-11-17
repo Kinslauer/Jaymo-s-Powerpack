@@ -199,8 +199,8 @@ def check_text(c, where, value, tale, extra=()):
                     if not name[6:].isdigit():
                         c.err(where, f"{{{name}}}: coins need a whole number")
                     continue
-                if name.startswith("left:"):
-                    if name[5:] not in clocks(tale):
+                if name.startswith("left:") or name.startswith("in:"):
+                    if name.split(":", 1)[1] not in clocks(tale):
                         c.err(where, f"{{{name}}}: no step starts that clock")
                     continue
                 if name.startswith("place:") or name.startswith("way:"):
@@ -413,7 +413,9 @@ def check_tale(path):
         if body not in BODIES and not ITEM.match(body):
             c.err(where, f"body '{body}' must be villager, fighter or an entity id")
         if "at" in who:
-            check_place(c, where, who["at"], tale)
+            # (a switch: where they stand can turn on how the tale has gone)
+            for key in (who["at"].values() if isinstance(who["at"], dict) else [who["at"]]):
+                check_place(c, where, key, tale)
         if "if" in who:
             check_condition(c, where, who["if"], tale)
         if who.get("hours", "night") not in ("night", "day"):

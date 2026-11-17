@@ -91,7 +91,8 @@ Each role is a person or a creature of the tale. The asker is always the role `g
 - `body`: `villager` (a townsperson: stands and talks), `fighter` (an armed person: can be fought, yields, can be
   spared), or an entity id (`minecraft:wolf`, `jaymoskingdoms:...`) for a beast or monster.
 - `job` (villager): their trade, for clothes. `female`: true or false, if it matters.
-- `at`: the place they wait. They're set out when the player first comes near it.
+- `at`: the place they wait. They're set out when the player first comes near it. May be a switch
+  (`{ "?mark:fair_in_time": "halt", "?": "winter" }`): where they are when they're set out.
 - `if`: a condition (below). Someone who is only in some tellings (`"if": "culprit=wolves"`) isn't set out in the
   others. `late`: true for someone who must not be seen before the step that's about them (a beast met at the end).
   Whoever the open step names as `who` is always set out.
@@ -371,7 +372,10 @@ Any step may have `"within": 3` (or `[2, 4]`): the days it stays open. When they
 (a step or an ending), whether the player is there or not; the two fields go together. `"until"` is the deadline as the
 asker would say it, shown after the goal with the days counted: `Bring the ransom to the mill (before the miller locks
 up; by tomorrow)`. A deadline that runs across several steps is a clock: one step starts it with `"clock": { "raid": 3 }`,
-later steps say `"within": "raid"`, text can say `{left:raid}`, and `late:raid` is a condition.
+later steps say `"within": "raid"`, and `late:raid` is a condition. Text can say `{left:raid}` ("3 days left", "by
+tomorrow", "today is the last day": for brackets) or `{in:raid}` ("in 3 days", "tomorrow", "today": inside a sentence).
+A step left by its `late` way (or a vigil's `left`, a job's `failed`) is left undone: its `journal`, `mark` and `pay`
+don't happen.
 
 ### day and night: `when`, `hours`, `not_now`, the `tavern`
 

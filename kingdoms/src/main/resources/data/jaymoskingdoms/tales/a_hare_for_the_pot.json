@@ -83,7 +83,7 @@
       },
       "say": [
         "You took my paper down. Then you have read it. {poacher} is my brother. The forester found him in {place:wood} with a hare in his coat and walked him to the reeve on a rope. The reeve has let him home on my surety until the court sits.",
-        "Forest law is not town law. The court sits {left:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper."
+        "Forest law is not town law. The court sits {in:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper."
       ],
       "replies": [
         {

@@ -99,6 +99,8 @@ final class TaleWays {
 	/** How far round the tavern's counter a window sill is looked for (blocks, across), and the run var of a candle still to be lit. */
 	static final int CANDLE_REACH = 7;
 	static final String CANDLE = "~candle";
+	/** Set in a run's scratch as its step is left undone (its days ran out, a watch was walked out on, a job failed). */
+	static final String UNDONE = "undone";
 	private static final Pattern COMPARE = Pattern.compile("^(reputation|hearts|coins|since:[a-z0-9_]+)(>=|<)(-?\\d+)$");
 
 	/**
@@ -345,9 +347,15 @@ final class TaleWays {
 	}
 
 	/** How long the clock {@code name} of {@code run} has left, in words (for {@code {left:name}}). */
-	static Component leftOn(ServerLevel level, Tales.Run run, String name) {
+	static Component leftOn(ServerLevel level, Tales.Run run, String name, boolean said) {
 		String due = run.vars.get(BY + name);
-		return due == null ? Component.empty() : leftWords(Tales.parse(due, 0) - Tales.day(level));
+		if (due == null) {
+			return Component.empty();
+		}
+		long left = Tales.parse(due, 0) - Tales.day(level);
+		// ({in:<clock>} is how someone says it in a sentence: today, tomorrow, in 3 days)
+		return !said ? leftWords(left) : left <= 0 ? Component.translatable("tale.jaymoskingdoms.in.0")
+			: left == 1 ? Component.translatable("tale.jaymoskingdoms.in.1") : Component.translatable("tale.jaymoskingdoms.in.n", left);
 	}
 
 	/**
@@ -671,6 +679,7 @@ final class TaleWays {
 		int n = Tales.parse(run.scratch.getOrDefault("line", "0"), 0);
 		if (far > radius) {
 			if (n > 0 && step.has("left") && far > radius * 3.0) {
+				run.scratch.put(UNDONE, "1");
 				Tales.go(player, run, step.get("left"), null);
 			}
 			return;

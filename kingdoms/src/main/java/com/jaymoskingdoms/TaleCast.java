@@ -368,7 +368,7 @@ final class TaleCast {
 				continue;
 			}
 			JsonObject body = e.getValue().getAsJsonObject();
-			String key = Tale.string(body, "at", "");
+			String key = Tale.pickString(body, "at", c -> Tales.holds(player, run, c), "");
 			if (key.isEmpty() || flat(player, Tales.place(level, run, tale, key)) > Tales.SET_OUT_RANGE) {
 				continue;
 			}
@@ -418,7 +418,7 @@ final class TaleCast {
 				return;
 			}
 			// (gone missing: killed while nobody was by, or lost with their chunk. They're there again when the player is.)
-			String key = Tale.string(body, "at", "");
+			String key = Tale.pickString(body, "at", c -> Tales.holds(player, run, c), "");
 			Long left = run.places.get("@" + who);
 			BlockPos ground = left != null ? BlockPos.of(left) : key.isEmpty() ? null : Tales.ground(level, run, tale, key);
 			if (ground != null && flat(player, ground) <= BACK_WITHIN && level.isPositionEntityTicking(ground)) {
