@@ -1,5 +1,5 @@
 ---
-status: writing
+status: done
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -27,3 +27,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots) in a pure 
 - Say back the task name and that Prometheus is starting it, and add it to the todo list as `in_progress`.
 - Reference image: vanilla leather helmet at `https://textures.minecraft.net/texture/leather_helmet.png` as the visual style guide (solid brown with white border).
 - 2026-11-11 19:14 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-17 16:20 PR #1313 is merged into master; moved to Inbox/Done.
