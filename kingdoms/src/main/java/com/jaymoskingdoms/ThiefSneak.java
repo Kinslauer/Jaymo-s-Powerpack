@@ -49,7 +49,8 @@ public final class ThiefSneak {
 		}
 		boolean blade = source.getDirectEntity() == thief && HiddenBlade.weapon(thief).is(ClassPerks.LIGHT_BLADES);
 		boolean bow = source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof BowItem;
-		if (!blade && !bow || !busy(target, thief) && !(target instanceof Mob && Senses.unaware(target, thief))) {
+		boolean unaware = target instanceof Mob && Senses.unaware(target, thief);
+		if (!blade && !bow || !busy(target, thief) && !unaware) {
 			return amount;
 		}
 		long now = level.getGameTime();
@@ -60,6 +61,10 @@ public final class ThiefSneak {
 		LAST.put(thief.getUUID(), now);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.25, 0.3, 0.25, 0.3);
+		if (unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0) {
+			// (class trees) an Assassin's on a foe that never knew they were there
+			return amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT;
+		}
 		return amount * MULT + FLAT;
 	}
 

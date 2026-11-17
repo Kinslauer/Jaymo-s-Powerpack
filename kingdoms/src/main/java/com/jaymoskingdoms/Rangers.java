@@ -232,6 +232,10 @@ public final class Rangers {
 		}
 		long now = level.getGameTime();
 		if (sneak) {
+			// (class trees) a Beast Master looking at a beast they tamed bonds with it instead
+			if (ClassForks.bond(player)) {
+				return;
+			}
 			Long at = player.getAttached(CLAIMED);
 			if (at != null && now - at < CLAIM_COOLDOWN && now >= at) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.ranger.claimed_lately"));

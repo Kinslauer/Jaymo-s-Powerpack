@@ -2,11 +2,16 @@ package com.jaymoskingdoms.trees;
 
 import static com.jaymoskingdoms.Classes.PlayerClass.MAGE;
 
+import com.jaymoskingdoms.ClassForks;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Skills.Perk;
+import java.util.List;
 import java.util.Set;
 
-/** The Mage's tree: Spellcraft, moved off Survival (Arcane, Fire and Frost, a column each), and its crown, Enchanted Storage. */
+/**
+ * The Mage's tree: Spellcraft, moved off Survival (Arcane, Fire and Frost, a column each), its crown, Enchanted Storage,
+ * and a crossroads of its own at 10 across the top: Evoker or Warder ({@link ClassForks}).
+ */
 final class MageTree {
 	private MageTree() {
 	}
@@ -16,6 +21,9 @@ final class MageTree {
 		column(2, Perk.FIRE_BREATH, Perk.FIRE_SLASH, Perk.FIRE_METEOR, Perk.FIRE_STORM, Perk.FIRE_WALL, Perk.FIRE_HYDRA);
 		column(4, Perk.FROST_NOVA, Perk.FROST_SPIKES, Perk.FROST_SHIELD, Perk.FROST_LANCE, Perk.FROST_BLIZZARD, Perk.FROST_ELEMENTAL);
 		ClassTrees.moved(Perk.ENCHANTED_STORAGE, Set.of(MAGE), 15, 7, 1, "arcane_evocation");
+		// the crossroads at 10: Evoker or Warder
+		ClassTrees.add(ClassForks.EVOKER, Set.of(MAGE), 1, 3, 10, 0, 1, List.of(), List.of(ClassForks.WARDER));
+		ClassTrees.add(ClassForks.WARDER, Set.of(MAGE), 1, 3, 10, 0, 3, List.of(), List.of(ClassForks.EVOKER));
 	}
 
 	/** A school's six spells down one column, each needing the one above, at the levels they needed on Survival. */

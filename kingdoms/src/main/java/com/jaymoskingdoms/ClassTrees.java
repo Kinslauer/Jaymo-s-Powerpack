@@ -167,6 +167,32 @@ public final class ClassTrees {
 		return node;
 	}
 
+	/**
+	 * What a class could do before class trees that is a tree perk now (a Monk's stunning blow, a Paladin's smite): a
+	 * character who held the class when they moved onto the trees keeps it, as a free rank ({@link #migrate}).
+	 */
+	private static final List<Kept> KEPT = new ArrayList<>();
+	/** Saved beside a kept rank, so a respec leaves it (as it leaves what a trainer taught). */
+	static final String KEPT_MARK = "@kept";
+
+	/** A tree perk {@code key} kept free by whoever held {@code cls} on the move (and, if {@code had} isn't null, a rank saved under it). */
+	private record Kept(PlayerClass cls, @Nullable String had, String key) {
+	}
+
+	/** {@code keys} were {@code cls}'s from the start before class trees: kept free by those who had the class then. */
+	public static void kept(PlayerClass cls, String... keys) {
+		for (String key : keys) {
+			KEPT.add(new Kept(cls, null, key));
+		}
+	}
+
+	/** As {@link #kept(PlayerClass, String...)}, for those who had learned {@code had} (a rank key) as well. */
+	public static void keptIf(PlayerClass cls, String had, String... keys) {
+		for (String key : keys) {
+			KEPT.add(new Kept(cls, had, key));
+		}
+	}
+
 	/** Every tree, built once (each class's own file adds its nodes: {@link TreeLayout}). */
 	private static void build() {
 		if (!built) {
@@ -301,6 +327,33 @@ public final class ClassTrees {
 		}
 		float s = strength(player, node);
 		return s <= 0.0F ? 0 : Math.max(1, (int) s);
+	}
+
+	/** {@code player}'s working ranks in tree perk {@code key}, as a share (a second class's at its share): for scaling an effect. */
+	public static float power(Player player, String key) {
+		Node node = node(key);
+		return node == null ? 0.0F : strength(player, node);
+	}
+
+	private static final Map<UUID, Long> TOLD = new HashMap<>();
+
+	/**
+	 * Whether {@code player} has tree perk {@code key} (creative players always do); if not, the action bar names the perk
+	 * with a dull sound, as a locked ability does ({@link TreeLocks#refuse}), at most every {@link TreeLocks#TELL_EVERY} ticks.
+	 */
+	public static boolean check(ServerPlayer player, String key) {
+		if (player.isCreative() || has(player, key) > 0) {
+			return true;
+		}
+		Node node = node(key);
+		long now = player.level().getGameTime();
+		Long last = TOLD.get(player.getUUID());
+		if (node != null && (last == null || now - last >= TreeLocks.TELL_EVERY || now < last)) {
+			TOLD.put(player.getUUID(), now);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tree_lock.locked", Component.translatable(node.nameKey())));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.5F, 0.7F);
+		}
+		return false;
 	}
 
 	/** The class among {@code player}'s that would pay for a rank of {@code node}: the one with the most points, if enough. */
@@ -473,6 +526,7 @@ public final class ClassTrees {
 		ServerPlayNetworking.registerGlobalReceiver(Spend.TYPE, (payload, context) -> context.server().execute(() -> spend(context.player(), payload.key())));
 		ServerPlayerEvents.JOIN.register(ClassTrees::migrate);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			TOLD.clear();
 			NEXT_BLOW.clear();
 			RIDE_FROM.clear();
 			RIDDEN.clear();
@@ -639,6 +693,16 @@ public final class ClassTrees {
 			int level = p.level(perk.pillar);
 			String k = XP_PREFIX + owner.key();
 			xp.put(k, Math.max(xp.getOrDefault(k, 0), total(Math.min(MAX_LEVEL, Math.max(level, n.minLevel())))));
+		}
+		// what the class could do before it was a tree perk: kept free (no class paid for it)
+		for (Kept k : KEPT) {
+			if (held.contains(k.cls()) && (k.had() == null || p.ranks().getOrDefault(k.had(), 0) > 0)) {
+				Node n = NODES.get(k.key());
+				if (n != null && ranks.getOrDefault(n.rankKey(), 0) == 0) {
+					ranks.put(n.rankKey(), 1);
+					ranks.put(n.rankKey() + KEPT_MARK, 1);
+				}
+			}
 		}
 		xp.put(MIGRATED, 1);
 		player.setAttached(Skills.PROGRESS, new Skills.Progress(Map.copyOf(xp), Map.copyOf(ranks)));

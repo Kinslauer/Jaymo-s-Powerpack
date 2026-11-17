@@ -183,7 +183,7 @@ public final class Followers {
 				}
 				continue;
 			}
-			if (!Languages.understands(player, v)) {
+			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
 			}

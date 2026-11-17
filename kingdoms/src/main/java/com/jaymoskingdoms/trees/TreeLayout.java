@@ -14,5 +14,13 @@ public final class TreeLayout {
 		SorcererTree.build();
 		RangerTree.build();
 		WarfareTrees.build();
+		MarksmanTree.build();
+		TinkererTree.build();
+		RiderTree.build();
+		MonkTree.build();
+		PaladinTree.build();
+		ClericTree.build();
+		DruidTree.build();
+		WarlockTree.build();
 	}
 }

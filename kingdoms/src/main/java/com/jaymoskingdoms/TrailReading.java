@@ -171,6 +171,8 @@ public final class TrailReading {
 		long now = level.getGameTime();
 		int best = READ_RANGE.length - 1;
 		double reach = READ_RANGE[rank] * READ_RANGE[rank], far = READ_RANGE[best] * READ_RANGE[best];
+		// (class trees) a Hunter follows the favoured foe's trail further
+		far *= ClassForks.trackReach(player) * ClassForks.trackReach(player);
 		int shown = 0;
 		java.util.Map<Integer, Boolean> hunted = new java.util.HashMap<>();
 		// newest first, so a crowded patch of ground shows what is fresh

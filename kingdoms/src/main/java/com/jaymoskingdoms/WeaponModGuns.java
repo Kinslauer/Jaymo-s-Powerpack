@@ -40,7 +40,8 @@ public final class WeaponModGuns {
 		}
 		Vec3 dir = v.scale(1.0 / speed);
 		Vec3 eye = shot.position();
-		double cosLimit = Math.cos(Math.toRadians(ClassPerks.MARKSMAN_AIM_DEGREES));
+		// (class trees) Steady Aim widens it, standing still and crouched
+		double cosLimit = Math.cos(Math.toRadians(ClassPerks.MARKSMAN_AIM_DEGREES + Workshop.aimDegrees(shooter)));
 		LivingEntity best = null;
 		double bestCos = cosLimit;
 		AABB box = new AABB(eye, eye.add(dir.scale(ClassPerks.MARKSMAN_AIM_REACH))).inflate(4.0);
@@ -65,6 +66,16 @@ public final class WeaponModGuns {
 		shot.setExtraDamage(shot.extraDamage + shot.getDamage(shooter) * (float) bonus);
 	}
 
+	/** Whether WeaponMod's {@code gun} is loaded. */
+	static boolean reloaded(ItemStack gun) {
+		return gun.getItem() instanceof ckathode.weaponmod.item.IItemWeapon && RangedComponent.isReloaded(gun);
+	}
+
+	/** Empties WeaponMod's {@code gun} (a shot taken without it: Quick Shot). */
+	static void unload(ItemStack gun) {
+		RangedComponent.setReloadState(gun, ckathode.weaponmod.ReloadHelper.ReloadState.STATE_NONE);
+	}
+
 	/**
 	 * From {@code RangedComponentMixin}: the ticks {@code gun} has left of its use ({@code count} counts down from the
 	 * use duration) as a Marksman's gun reads them, so it reloads and winds up {@link ClassPerks#MARKSMAN_RELOAD} faster.
@@ -73,13 +84,20 @@ public final class WeaponModGuns {
 		if (!(user instanceof ServerPlayer sp) || !gun.is(ClassPerks.GUNS)) {
 			return count;
 		}
+		if (Workshop.primed(sp) && !RangedComponent.isReloaded(gun)) {
+			// (class trees) Speed Load: this reload is done at once, with a spin of the gun
+			Workshop.spin(sp);
+			return Math.max(0, component.getUseDuration(gun) - component.getReloadDuration(gun) - 1);
+		}
 		// (and anyone in the Ranger's harness, on top of it: FrontierPerks)
 		double faster = (Classes.is(sp, PlayerClass.MARKSMAN) ? ClassPerks.MARKSMAN_RELOAD : 0.0) + FrontierPerks.reload(sp);
-		if (faster <= 0.0) {
+		// (class trees) a Marksman's practice: a little faster with each level
+		double rate = Workshop.loadRate(sp);
+		if (faster <= 0.0 && rate <= 1.0) {
 			return count;
 		}
 		int use = component.getUseDuration(gun);
 		int elapsed = use - count;
-		return use - (int) (elapsed / (1.0 - faster));
+		return use - (int) (elapsed * rate / (1.0 - faster));
 	}
 }

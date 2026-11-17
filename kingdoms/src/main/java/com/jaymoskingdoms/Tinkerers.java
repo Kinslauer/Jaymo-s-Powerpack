@@ -49,7 +49,7 @@ public final class Tinkerers {
 
 	/** The infusions at once {@code player} may keep (the second class has a share; a Battle Smith one more). */
 	static int most(net.minecraft.world.entity.player.Player player) {
-		return Classes.scaled(player, PlayerClass.TINKERER, MOST) + Paths.extraInfusions(player);
+		return Classes.scaled(player, PlayerClass.TINKERER, MOST) + Paths.extraInfusions(player) + ClassTrees.has(player, TinkerPerks.HANDS);
 	}
 	/** The gadgets a Tinkerer can learn to make (their recipes are taught by a smith). */
 	static final List<String> GADGETS = List.of("immovable_rod", "climbing_rope", "endless_jug", "floating_light", "smoke_bottle");
@@ -69,7 +69,11 @@ public final class Tinkerers {
 				return InteractionResult.PASS;
 			}
 			ItemStack held = sp.getMainHandItem();
-			String kind = kindFor(held);
+			// (class trees) Spare Hands' kinds, picked by the material in the off hand, before the ones the thing takes by itself
+			String kind = TinkerPerks.spareKind(sp, held);
+			if (kind.isEmpty()) {
+				kind = kindFor(held);
+			}
 			if (kind.isEmpty()) {
 				return InteractionResult.PASS;
 			}
@@ -90,7 +94,7 @@ public final class Tinkerers {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.begin").withStyle(net.minecraft.ChatFormatting.GRAY));
 	}
 
-	private static boolean station(BlockState state) {
+	static boolean station(BlockState state) {
 		net.minecraft.resources.Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
 		return id.getNamespace().equals("jaymospowers") && STATIONS.contains(id.getPath());
 	}
@@ -154,9 +158,19 @@ public final class Tinkerers {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.most", most(player)));
 			return;
 		}
-		Item mat = material(kind);
-		int need = cost(kind);
-		if (!player.isCreative() && !take(player, mat, need)) {
+		if (TinkerPerks.spare(kind)) {
+			// Spare Hands' kinds take their material from the off hand
+			ItemStack off = player.getOffhandItem();
+			if (!player.isCreative() && off.getCount() < TinkerPerks.NEW_INFUSION_COST) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.materials", TinkerPerks.NEW_INFUSION_COST, off.getHoverName()));
+				return;
+			}
+			if (!player.isCreative()) {
+				off.shrink(TinkerPerks.NEW_INFUSION_COST);
+			}
+		} else if (!player.isCreative() && !take(player, material(kind), cost(kind))) {
+			Item mat = material(kind);
+			int need = cost(kind);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.materials", need, new net.minecraft.world.item.ItemStack(mat).getHoverName()));
 			return;
 		}
@@ -199,6 +213,10 @@ public final class Tinkerers {
 	static void key(ServerPlayer player, boolean sneak) {
 		Component infusions = Component.translatable("message.jaymoskingdoms.tinkerer.infusions", carried(player), most(player));
 		if (sneak) {
+			// (class trees) a damaged thing in hand and the Field Kit: mended a little
+			if (ClassTrees.has(player, Workshop.KIT) > 0 && Workshop.fieldKit(player)) {
+				return;
+			}
 			player.sendOverlayMessage(infusions);
 			return;
 		}

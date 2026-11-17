@@ -234,7 +234,7 @@ public final class Formations {
 		List<Villager> yours = new ArrayList<>();
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, Followers.ALL_RANGE)),
 			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player))) {
-			if (!Languages.understands(player, v)) {
+			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
 			}

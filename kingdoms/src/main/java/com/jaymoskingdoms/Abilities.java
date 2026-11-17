@@ -47,6 +47,13 @@ public final class Abilities {
 			case RANGER -> Rangers.key(player, sneak);
 			case WARLOCK -> Warlocks.key(player, sneak);
 			case TINKERER -> Tinkerers.key(player, sneak);
+			// (class trees) the Marksman's Field Kit
+			case MARKSMAN -> Workshop.key(player, sneak);
+			// (class trees) Perfect Form and the Rampage
+			case WARLORD -> Discipline.key(player, sneak);
+			case BRUTE -> Fury.key(player, sneak);
+			// (class trees) Spur, and hanging off the side
+			case RIDER -> com.jaymoskingdoms.equestrian.Horsemanship.key(player, sneak);
 			default -> {
 				return false;
 			}

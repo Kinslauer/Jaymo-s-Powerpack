@@ -199,7 +199,9 @@ public final class EarlyGuns {
 
 	/** Out of {@code shooter}'s hands: the ball, the noise, and (with Jaymo's Powers) the blast at its muzzle. */
 	private static void fire(ServerLevel level, LivingEntity shooter, ItemStack gun, Rung rung, Vec3 aim, float damage) {
-		Vec3 dir = stray(aim, rung.spread, level.getRandom());
+		// (class trees) a Marksman's Steady Aim: less stray
+		Vec3 dir = stray(aim, rung.spread * Workshop.spread(shooter), level.getRandom());
+		boolean muffled = Workshop.muffled(gun);
 		Vec3 eye = shooter.getEyePosition().add(0.0, -0.1, 0.0);
 		Vec3 muzzle = eye.add(dir);
 		GunBall.shot(level, shooter, eye, dir, rung.speed, damage);
@@ -207,9 +209,12 @@ public final class EarlyGuns {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 8, 0.12, 0.12, 0.12, 0.03);
 			level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 3, 0.06, 0.06, 0.06, 0.02);
 		}
+		// (class trees) a Muffled barrel: a cough, not a bang
 		level.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.GENERIC_EXPLODE.value(),
-			shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 1.1F, rung.pitch + level.getRandom().nextFloat() * 0.2F);
-		Deafened.blast(level, muzzle, Deafened.MUZZLE);
+			shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, muffled ? 0.15F : 1.1F, rung.pitch + level.getRandom().nextFloat() * 0.2F);
+		if (!muffled) {
+			Deafened.blast(level, muzzle, Deafened.MUZZLE);
+		}
 	}
 
 	/** The match hisses out: nothing fires. */
@@ -367,8 +372,13 @@ public final class EarlyGuns {
 				ServerPlayer smith = (ServerPlayer) args[0];
 				String option = (String) id.invoke(args[2]);
 				for (Rung rung : Rung.values()) {
-					if (option.contains("weapon/" + rung.id() + "_barrel") && !WorldTiers.open(smith, WorldTiers.Tier.values()[rung.tier])) {
+					// (class trees: a Tinkerer's eye opens the tiers early, TierGate.gearTier)
+					if (option.contains("weapon/" + rung.id() + "_barrel") && !smith.isCreative() && TierGate.gearTier(smith) < rung.tier) {
 						return Component.translatable("message.jaymoskingdoms.early_gun.tier." + rung.id());
+					}
+					// (class trees) and only a Gunsmith forges a gun's barrel
+					if (option.contains("weapon/" + rung.id() + "_barrel") && !Workshop.mayForge(smith)) {
+						return Component.translatable("message.jaymoskingdoms.workshop.gunsmith");
 					}
 				}
 				return null;
@@ -490,8 +500,14 @@ public final class EarlyGuns {
 				return;
 			}
 			int held = this.getUseDuration(stack, user) - remaining;
+			if (Workshop.primed(user) && user instanceof Player && this.loadNow(stack, level, (Player) user)) {
+				// (class trees) Speed Load: loaded at once, with a spin of the gun
+				Workshop.spin(user);
+				user.stopUsingItem();
+				return;
+			}
 			// (quicker in the Ranger's harness: FrontierPerks)
-			int load = FrontierPerks.reload(user, this.rung.load);
+			int load = Workshop.reload(user, FrontierPerks.reload(user, this.rung.load));
 			if (held == load / 3 || held == load * 2 / 3) {
 				// the powder down, then the ball rammed home
 				level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.PLAYERS, 0.7F, 0.6F);
@@ -502,7 +518,15 @@ public final class EarlyGuns {
 
 		@Override
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
-			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < FrontierPerks.reload(user, this.rung.load)) {
+			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < Workshop.reload(user, FrontierPerks.reload(user, this.rung.load))) {
+				return false;
+			}
+			return this.loadNow(stack, level, player);
+		}
+
+		/** Powder and ball into {@code stack}, out of {@code player}'s pack; false if they haven't both. */
+		private boolean loadNow(ItemStack stack, Level level, Player player) {
+			if (loaded(stack)) {
 				return false;
 			}
 			ItemStack powder = powder(player), ball = ball(player);

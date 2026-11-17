@@ -3,11 +3,16 @@ package com.jaymoskingdoms.trees;
 import static com.jaymoskingdoms.Classes.PlayerClass.RANGER;
 import static com.jaymoskingdoms.Classes.PlayerClass.THIEF;
 
+import com.jaymoskingdoms.ClassForks;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Skills.Perk;
+import java.util.List;
 import java.util.Set;
 
-/** The Thief's tree: the Rogue's Arts, moved off Stealth (the Bear Trap the Ranger's too, as it was the Survivalist's). */
+/**
+ * The Thief's tree: the Rogue's Arts, moved off Stealth (the Bear Trap the Ranger's too, as it was the Survivalist's), and a
+ * crossroads of its own at 10: Assassin or Acrobat ({@link ClassForks}).
+ */
 final class ThiefTree {
 	private ThiefTree() {
 	}
@@ -19,5 +24,8 @@ final class ThiefTree {
 		ClassTrees.moved(Perk.SHADOW_STEP, Set.of(THIEF), 9, 2, 3, "shock_powder");
 		ClassTrees.moved(Perk.MUTILATE, Set.of(THIEF), 13, 3, 1, "slice_and_dice");
 		ClassTrees.moved(Perk.VANISH, Set.of(THIEF), 13, 3, 3, "shadow_step");
+		// the crossroads at 10: Assassin or Acrobat
+		ClassTrees.add(ClassForks.ASSASSIN, Set.of(THIEF), 1, 3, 10, 4, 1, List.of(), List.of(ClassForks.ACROBAT));
+		ClassTrees.add(ClassForks.ACROBAT, Set.of(THIEF), 1, 3, 10, 4, 3, List.of(), List.of(ClassForks.ASSASSIN));
 	}
 }

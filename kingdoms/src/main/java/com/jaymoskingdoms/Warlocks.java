@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
 public final class Warlocks {
 	public static Item SEAL;
 	/** Slots, how much harder the magic hits (a share of a scroll's). */
-	static final int SLOTS = 2;
+	static final int SLOTS = 1;
 	static final float POWER = 1.5F;
 	/** Casts between debts, the casts allowed while one is open, the days it is due in. */
 	static final int CAST_PER_DEBT = 5, GRACE_CASTS = 3, DEBT_DAYS = 3;
@@ -50,13 +50,19 @@ public final class Warlocks {
 	static final String[] REAPER_KINDS = {"blood", "death"};
 
 	/** Casts since the last debt (or the open one's), the open debt's kind ("" for none) and the day it is due. */
-	record Pact(int casts, String kind, long due) {
+	record Pact(int casts, String kind, long due, boolean reneged) {
 		static final Pact NONE = new Pact(0, "", -1L);
 		static final Codec<Pact> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("casts", 0).forGetter(Pact::casts),
 			Codec.STRING.optionalFieldOf("kind", "").forGetter(Pact::kind),
-			Codec.LONG.optionalFieldOf("due", -1L).forGetter(Pact::due)
+			Codec.LONG.optionalFieldOf("due", -1L).forGetter(Pact::due),
+			// (class trees) Renege: the ask was swapped once already
+			Codec.BOOL.optionalFieldOf("reneged", false).forGetter(Pact::reneged)
 		).apply(i, Pact::new));
+
+		Pact(int casts, String kind, long due) {
+			this(casts, kind, due, false);
+		}
 
 		boolean owing() {
 			return !kind.isEmpty();
@@ -92,7 +98,7 @@ public final class Warlocks {
 	/** A new Warlock swears to the patron they picked. */
 	/** The pact slots {@code player} has (the second class has a share; the Tome path one more). */
 	static int slots(ServerPlayer player) {
-		return Classes.scaled(player, PlayerClass.WARLOCK, SLOTS) + Paths.extraSlots(player);
+		return Classes.scaled(player, PlayerClass.WARLOCK, SLOTS) + Paths.extraSlots(player) + PactArts.slots(player);
 	}
 
 	static void begin(ServerPlayer player, String option) {
@@ -135,7 +141,7 @@ public final class Warlocks {
 		Pact pact = pact(player);
 		int casts = pact.casts() + 1;
 		if (pact.owing()) {
-			player.setAttached(PACT, new Pact(casts, pact.kind(), pact.due()));
+			player.setAttached(PACT, new Pact(casts, pact.kind(), pact.due(), pact.reneged()));
 			return;
 		}
 		if (casts < CAST_PER_DEBT) {
@@ -145,7 +151,7 @@ public final class Warlocks {
 		long today = Patrons.today(player.level().getServer());
 		String[] kinds = Reaper.pact(player) ? REAPER_KINDS : KINDS;
 		String kind = kinds[(int) Math.floorMod(today + player.getRandom().nextInt(kinds.length), kinds.length)];
-		int days = Paths.debtDays(player, DEBT_DAYS);
+		int days = Paths.debtDays(player, PactArts.days(player, DEBT_DAYS));
 		player.setAttached(PACT, new Pact(0, kind, today + days));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.6F);
@@ -158,10 +164,29 @@ public final class Warlocks {
 	/** The class key: settle the debt (favour, blood or coin); with nothing owed, or with sneak held, say how things stand. */
 	static void key(ServerPlayer player, boolean sneak) {
 		Pact pact = pact(player);
+		// (class trees) Renege: sneak and the key while owing swaps the ask, once a debt
+		if (pact.owing() && sneak) {
+			String swap = PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS);
+			if (swap != null) {
+				player.setAttached(PACT, new Pact(pact.casts(), swap, pact.due(), true));
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.reneged", debtName(swap)).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.6F, 0.8F);
+				return;
+			}
+		}
+		// (class trees) Eldritch Bolt with nothing owed
+		if (!pact.owing() && !sneak && PactArts.bolt(player)) {
+			return;
+		}
 		if (!pact.owing() || sneak) {
 			long days = pact.owing() ? Math.max(0L, pact.due() - Patrons.today(player.level().getServer())) : 0L;
 			player.sendOverlayMessage(pact.owing() ? Component.translatable("message.jaymoskingdoms.warlock.owing", debtName(pact.kind()), days)
 				: Component.translatable("message.jaymoskingdoms.warlock.clear", Rests.left(player, Rests.PACT, slots(player))));
+			return;
+		}
+		// (class trees) In Kind: the patron's own offerings settle it
+		if (PactArts.inKind(player)) {
+			settled(player);
 			return;
 		}
 		boolean paid = switch (pact.kind()) {

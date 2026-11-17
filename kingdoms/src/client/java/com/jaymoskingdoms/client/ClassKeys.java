@@ -17,7 +17,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
-/** (0.6.0) The classes' key: {@code J} imbues a Sorcerer's blade ({@link Spellcraft}); sneak and {@code J} throws the bolt. */
+/** (0.6.0) The classes' key: {@code J} is a Sorcerer's sigil, held their Imbue ({@link Spellcraft}, {@link com.jaymoskingdoms.Sigils}). */
 final class ClassKeys {
 	private static KeyMapping imbue, growth, second;
 	/** (0.7.554) A Blood Sorcerer's J is down (BloodBlasts.Hold sent). */
@@ -66,8 +66,10 @@ final class ClassKeys {
 							bloodHeld = true;
 							ClientPlayNetworking.send(new BloodBlasts.Hold(true));
 						}
-					} else if (Absorption.absorber(minecraft.player) && !minecraft.player.isShiftKeyDown()) {
+					} else if ((Absorption.absorber(minecraft.player) || Classes.is(minecraft.player, Classes.PlayerClass.SORCERER))
+						&& !minecraft.player.isShiftKeyDown()) {
 						// (0.7.570) every other element: held to absorb it (fire: the cone), empty-handed to throw it
+						// (class trees) and for every Sorcerer, a tap is the sigil and a hold the Imbue (told apart on the server)
 						if (!elementHeld) {
 							elementHeld = true;
 							ClientPlayNetworking.send(new Absorption.Hold(true));
