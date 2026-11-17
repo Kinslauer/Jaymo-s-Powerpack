@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Dodge roll prone-only (sideways log roll), slower, slower with heavier armour (capped)
 branch: claude/project-thread-k8mvto
 with: 
@@ -25,3 +25,6 @@ owns:
 
 ## Done
 - PR #1699: grounded shoulder roll, 0.9 s bare, up to 1.6x slower by armour points + toughness (cap 32). Compiles; not played.
+
+## Notes
+- 2026-11-17 19:44 PR #1699 is merged into master; moved to Agents/Done.
