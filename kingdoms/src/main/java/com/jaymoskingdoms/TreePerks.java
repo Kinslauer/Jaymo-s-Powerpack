@@ -16,6 +16,8 @@ public final class TreePerks {
 		ClassForks.register();
 		Workshop.register();
 		TinkerPerks.register();
+		Discipline.register();
+		Fury.register();
 	}
 
 	/** What the trees' perks do to a blow on {@code target}: after the class perks, before the heritages. */
@@ -23,6 +25,7 @@ public final class TreePerks {
 		if (amount <= 0.0F) {
 			return amount;
 		}
-		return TinkerPerks.dealt(target, source, Workshop.dealt(target, source, ClassForks.dealt(target, source, amount)));
+		float dealt = TinkerPerks.dealt(target, source, Workshop.dealt(target, source, ClassForks.dealt(target, source, amount)));
+		return Fury.dealt(target, source, Discipline.dealt(target, source, dealt));
 	}
 }

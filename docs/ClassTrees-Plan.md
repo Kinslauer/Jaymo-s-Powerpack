@@ -127,3 +127,37 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
   WeaponMod guns stops our noise and deafening, but WeaponMod's own report still plays. The Tinkerer's **own forging** has no
   tier ceiling in Kingdoms today, so there was none to raise. Dismantle opens our locked chests; door locks aren't ours.
 - Lore: the Workshop is the gunsmith's and tinker's craft already in the canon (the stations, the early guns); nothing new to place.
+
+### Patch 4: Warlord and Brute
+- **The gauges.** **Composure** (`Discipline`, new): +0.1 a full-strength blow, +0.12 a block, +0.2 a parry (Powers'
+  `Guard.PARRIED`), -0.2 a clean hit taken; it ebbs after 10 s out of a fight. At full the Warlord hits +15% (practice: x
+  `ClassTrees.practice`), with gold motes about them. Drawn as a thin bar left of the hotbar (`ComposureHud`), the mirror of
+  the rage bar on the right. **Rage** is the Brute's existing `BruteRage`; its damage now grows by practice, and while raging
+  the Brute can't block, drink or eat (any item that blocks or is consumed is refused, and one in use is dropped from use).
+- The class key (J) is now the Warlord's and the Brute's: it shows the gauge, or spends it with the top perk.
+- **Discipline** (cols 0-2): **Measured Strikes** (3): +25% Composure a full-strength blow and +5% at full, a rank. **Riposte**
+  (3): a blow within 1 s of a block or parry x1.5 and a stagger (`spirits.Staggered`, made public). Shout (5) and Throw Net (8)
+  stay where patch 1 put them. **Sword and Board / Two-Handed Master** (fork, 10): a blow landed with the shield up (Powers'
+  shield bash) staggers 2 s, and blocks and parries build double / the Warlord's cleave reaches 1.5x as far and takes one more
+  foe, and two-handed blows pierce armour (+2% a point of the foe's armour, at most +40%). **Read the Foe** (15): at full
+  Composure a block up to 24 ticks into the guard is a parry (Powers' window is 12; done through the guard's spark hook,
+  ahead of the sparks). **Commander / Duelist** (fork, 20): orders reach 2x (`Presence.reach`, the quick orders), and your
+  hirelings and companions take them whatever their tongue / +30% with no more than one foe within 10 blocks. **Perfect Form**
+  (top, 24): J at full Composure spends it; the next blow within 5 s can't be parried by a mob (`MobParry`), hits x2, staggers
+  3 s, and breaks a boss's posture outright (`BossPosture`: it kneels).
+- **Fury** (cols 2-4): **Blood Up** (3): Rage fills 25% faster a rank, and blows hit +5% a rank times how full it is (all of it
+  while raging). **Pain Feeds** (3): 20% of a blow taken while raging is healed. Throw (5) and Warrior's Charge (8) as before.
+  **Reckless / Juggernaut** (fork, 10): no shield, +25% while raging / heavy armour's slow is lifted while raging
+  (`ClassPerks.attributes`, refreshed as the rage starts and ends). **Shrug It Off** (15): raging, full knockback resistance
+  and slowness (a stagger) shaken off. Warrior's Last Stand moved up to row 5 to make room. **Blackout / Bloodlust** (fork,
+  20): raging, a killing blow leaves you at 1 health until the rage runs out / a kill while raging fills the rage's time again
+  and heals 15%. **Rampage** (top, 24): J while raging: for 8 s every blow carries 75% to every foe within 3 blocks of the one
+  struck; when it ends, the rage's usual spent plus Slowness II and Weakness for 15 s.
+- My calls: Composure's numbers and its +15% at full (the plan names no base effect, and a gauge that does nothing until the
+  top perk would be dead weight). Commander's "hirelings and companions follow them" is read as: the ones who take your
+  orders take them across a tongue they don't share (they already obey you otherwise). Two-Handed Master's "pierce armour"
+  is a bonus by the foe's armour, not a change to vanilla's armour sums.
+- Gaps: Shrug It Off sheds slowness and knockback; Powers' own stuns on a player are Powers' and aren't cleared. Perfect Form
+  "can't miss" is "can't be parried by a mob, and lands whole"; a vanilla shield held up by a mob still blocks it.
+- Lore: Discipline and Fury are the two warrior traditions already in the canon (the levy's drill and the berserker's rage);
+  nothing new to place.

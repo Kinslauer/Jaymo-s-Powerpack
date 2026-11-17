@@ -428,6 +428,10 @@ public final class ClassPerks {
 				}
 			}
 		}
+		if (Fury.weightless(player)) {
+			// (class trees) a raging Juggernaut: heavy armour weighs nothing
+			weight = 0.0;
+		}
 		float before = player.getMaxHealth();
 		Skills.modifier(player, Attributes.ATTACK_DAMAGE, DAMAGE_ID, damage, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		Skills.modifier(player, Attributes.ATTACK_SPEED, ATTACK_SPEED_ID, attackSpeed, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -755,12 +759,13 @@ public final class ClassPerks {
 			return;
 		}
 		// (enemies, and whatever has its eye on the warlord: no townsfolk or friends caught in the swing)
-		List<LivingEntity> near = CombatArts.foes(level, warlord, struck.getBoundingBox().inflate(WARLORD_CLEAVE_RANGE));
+		// (class trees: a Two-Handed Master's sweep is wider, Discipline)
+		List<LivingEntity> near = CombatArts.foes(level, warlord, struck.getBoundingBox().inflate(WARLORD_CLEAVE_RANGE * Discipline.sweep(warlord)));
 		near.remove(struck);
 		near.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(struck)));
 		cleaving = true;
 		try {
-			for (int i = 0; i < Math.min(WARLORD_CLEAVE_COUNT, near.size()); i++) {
+			for (int i = 0; i < Math.min(WARLORD_CLEAVE_COUNT + Discipline.sweepMore(warlord), near.size()); i++) {
 				CombatArts.strike(level, warlord, near.get(i), share);
 			}
 		} finally {

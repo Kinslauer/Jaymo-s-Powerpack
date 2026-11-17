@@ -49,6 +49,9 @@ public final class Abilities {
 			case TINKERER -> Tinkerers.key(player, sneak);
 			// (class trees) the Marksman's Field Kit
 			case MARKSMAN -> Workshop.key(player, sneak);
+			// (class trees) Perfect Form and the Rampage
+			case WARLORD -> Discipline.key(player, sneak);
+			case BRUTE -> Fury.key(player, sneak);
 			default -> {
 				return false;
 			}
