@@ -126,8 +126,8 @@ public final class FormsClient {
 
 	/**
 	 * (Awakening pick) Combat mode, toggled by its key: in stance, the hotbar's number keys 1 to {@value Forms#BELT_SLOTS} fire
-	 * that belt slot's form at once instead of picking a hotbar slot (Ctrl and scroll only pick). Kept until toggled off, on
-	 * this client.
+	 * that belt slot's form at once instead of picking a hotbar slot (Ctrl and scroll only pick), and the four number keys after
+	 * them are the art keys ({@code ArtKeysClient}), in stance or out. Kept until toggled off, on this client.
 	 */
 	private static boolean combat;
 

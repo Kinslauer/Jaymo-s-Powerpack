@@ -55,6 +55,8 @@ public final class Relics {
 	static final int CHECK_TICKS = 10;
 	/** The chance a fallen boss leaves its relic. */
 	static final float BOSS_DROP = 1.0F;
+	/** The chance it leaves a second relic beside it, of any other kind (so every kind can come from every boss). */
+	static final float SECOND_DROP = 0.25F;
 	/** The focus relic: this share more harm from your power's moves per level (with Ability Power). */
 	static final double FOCUS_PER_LEVEL = 0.05;
 	/** The wind knot: golden feathers (half-feathers) per level. */
@@ -147,7 +149,13 @@ public final class Relics {
 		ServerTickEvents.END_SERVER_TICK.register(Relics::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity.level() instanceof ServerLevel level && boss(entity) && level.getRandom().nextFloat() < BOSS_DROP) {
-				entity.spawnAtLocation(level, relic(bossRelic(entity.getType()), 1));
+				Kind own = bossRelic(entity.getType());
+				entity.spawnAtLocation(level, relic(own, 1));
+				if (level.getRandom().nextFloat() < SECOND_DROP) {
+					List<Kind> others = new ArrayList<>(List.of(Kind.values()));
+					others.remove(own);
+					entity.spawnAtLocation(level, relic(others.get(level.getRandom().nextInt(others.size())), 1));
+				}
 			}
 		});
 	}
