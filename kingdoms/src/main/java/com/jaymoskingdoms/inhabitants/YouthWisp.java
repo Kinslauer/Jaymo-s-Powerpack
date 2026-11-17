@@ -7,7 +7,9 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
 import com.geckolib.util.GeckoLibUtil;
+import com.jaymoskingdoms.CharacterNames;
 import com.jaymoskingdoms.Fx;
+import com.jaymoskingdoms.Introductions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -903,14 +905,25 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/**
 	 * The online players as one line of JSON: name, the display name chat shows (a nickname can differ from the account
-	 * name, and Hermes reads chat from the log), dimension, block position, and whether their wisp is about.
+	 * name, and Hermes reads chat from the log), dimension, block position, whether their wisp is about, their own MCA
+	 * character name (empty if none; a mask doesn't hide it here), and the online players they've been introduced to
+	 * (accounts), so Youth names someone's character only to those who've met it (Andy: "Desto, Kinslauer, or whatever
+	 * my MCA character's name is if the requesting player has been introduced").
 	 */
 	static String status(List<ServerPlayer> players) {
 		List<String> rows = new ArrayList<>();
 		for (ServerPlayer p : players) {
-			rows.add(String.format("{\"name\":\"%s\",\"display\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b}",
+			List<String> knows = new ArrayList<>();
+			for (ServerPlayer other : players) {
+				if (other != p && Introductions.introduced(p, other)) {
+					knows.add("\"" + json(other.getName().getString()) + "\"");
+				}
+			}
+			String character = CharacterNames.character(p);
+			rows.add(String.format("{\"name\":\"%s\",\"display\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b,"
+				+ "\"character\":\"%s\",\"knows\":[%s]}",
 				json(p.getName().getString()), json(p.getDisplayName().getString()), p.level().dimension().identifier(),
-				p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p)));
+				p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p), json(character == null ? "" : character), String.join(",", knows)));
 		}
 		return "{\"players\":[" + String.join(",", rows) + "]}";
 	}
