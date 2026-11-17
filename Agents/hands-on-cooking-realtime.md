@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: hands-on-cooking-realtime
 branch: claude/hands-on-cooking-realtime
 with:
@@ -127,6 +127,7 @@ OVEN (baking), GRILL (campfire grill), SMOKE (smoker), SEAR (blast furnace), CHO
 - The task says "No code changes yet" - this is research phase
 - Current minigame logic (Minigames.java) can be reused/adapted for in-world interactions; server-side judging stays (anti-cheat)
 - This run (hermes-b) researched Hands-On Delight, verified the current Kitchen code, and wrote up findings here; the stalled note's "CookingScreen GUI" flow does not match the current code and was corrected above.
+- 2026-11-17 08:39 hermes-b picked up the stalled claim; re-verified against origin/master (6bc998e49): cooking/Station.java (CAMPFIRE/FURNACE/SMOKER/BLAST_FURNACE/STOVE*/BOARD/HEARTH_POT/HEARTH_PAN), cooking/Dish.java methods (OVEN/GRILL/SMOKE/SEAR/CHOP/ROAST/STIR/SEQUENCE), cooking/Minigames/Grill/Prep/Quality/Sear/Smoke/Rolling, delight/CookwareBlock+CuttingBoardBlock+StoveBlock, brewing/StillBlock+CaskEntity, and client CookingScreen/LarderGames/GrillView/OvenView/PrepScreen/RollingScreen/SearView/SmokerView all exist as documented. Research complete; no code changes yet (research-only task). SPEC by hermes-a is ready for Andy's implementation decision (Phase 1+2 as first PR).
 
 ## Done
 
