@@ -5487,3 +5487,10 @@ Built; not played.
 ## 0.24.37 (2026-11-16): Mobs spawn only in the stacked lands where players are
 
 - In a One Dimension world the game spawned mobs in each stacked land (the Aether, the Overworld, the Nether, ...) round every loaded chunk, wherever the players were. Monsters made in an empty land despawned at once, and animals piled up in lands nobody visited. A land with no player within about 140 blocks is now skipped, as if it were its own dimension. The server had frozen for half a minute as a player joined (2026-11-16, 5:57 PM).
+
+## 0.24.38 (2026-11-17): Killing blows dismember humanoids
+
+- **Every killing hit takes a part off**: a hit struck by hand (or a power's cut) that kills a humanoid mob, or downs it (it would have killed), always takes off the part it landed on: an arm or a leg every time, the head half the time (`Dismember#LETHAL_HEAD_CHANCE`). A beheaded humanoid isn't downed: it dies. A hit on the body takes a random arm or leg (after the chance to cut it in half). The finishing hit on a downed humanoid does the same. Skeletons' parts shatter as before. Armour doesn't guard against it.
+- Players, village children, arrows and other shots, and blasts keep their own rules.
+- `Dismember#lethalHit`, `#lethalPart`, `#lethalSever`, `#lethalBlow`; called from `Downed` (going down, the finishing hit) and `Wounds#killingBlow`.
+- Built; not played.
