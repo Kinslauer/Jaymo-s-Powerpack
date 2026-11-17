@@ -5645,3 +5645,9 @@ When a finisher asks for a key, it now holds still for up to a second and a half
 - Cloud timing, new world, seed 12345, 4 cores: spawn search 175 s -> 163 s with the sampler fix alone, 69 s once the
   template cache is warm (181 s the very first time, while it fills).
 - Built and timed on a dev server; not played.
+
+## 0.24.58 (2026-11-17): blood stays drawn on MCA bodies (#1694)
+
+- Andy: blood decals "need to stay drawn on the MCA models". MCA draws villagers (and players in an MCA body) with its own skin and clothes layers, so the blood coat laid on the body's own model sat at the depth of MCA's bare skin, under its clothes, so it only showed through their gaps. Now on an MCA body the blood (a corpse's too) and the dirt on skin and clothes are painted over each of MCA's skin and clothes textures and drawn on that layer's own model, one step after MCA's, so they stay on top: bare skin shows its blood, clothes show theirs. Other bodies are drawn as before.
+- `BloodCoatLayer` (`paints`), new `McaBlood` (only loaded with MCA).
+- Built; not played.
