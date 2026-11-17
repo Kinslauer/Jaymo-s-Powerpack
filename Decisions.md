@@ -671,3 +671,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Kingdoms, `ChoppedLog`, `ChoppedLogRenderer`, `Trees.chop`.
 - **Agent:** [[Agents/tree-carve|tree-carve]]
 - 2026-11-16 (Andy, Ragdolls and Cover picks): "remove ragdollified until i can put everything in. it doesnt work well at all mixed with our corpses". Ragdollified and Reactions leave the pack (PR #1668); Kitchen's compat code stays idle; they return with Amputation, Player Corpses and Revive & Drag once those have 26.3 builds (Watch list.md).
+
+### 2026-11-17: future gun gear, Andy's answers to the spec's open questions
+- **Decided:** tracers are "Both": ordinary rounds from future guns streak about 1 in 4 shots (amber, with a moment of muzzle light), and tracer rounds (loot, not crafted) always streak. Magazines use the spec sizes (handgun 17, SMG 30, rifle 30, shotgun 8, machine gun 60). Build all three (plate carrier, tracers, magazines) together. Players get the gear only as loot from the future's dead and echoes, like the guns: never craftable. Andy asked to pick up PR #1671 after the review.
+- **Applies to:** Powers, armory (TaczGuns, Armory), power/chrono/future (FutureGuns, MuzzleFlash), PR #1671, docs/Future-Gun-Gear-Spec.md.
+- **Agent:** [[Agents/claude-future-gun-gear-build|claude-future-gun-gear-build]]
