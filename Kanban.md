@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · claimed
 
 
 ## In review
