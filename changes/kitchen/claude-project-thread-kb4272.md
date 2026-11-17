@@ -3,3 +3,4 @@
 - **One dish at a station, shared**: anyone with the right tool can step in; it is judged once, with the same judging as the screen games, and as left if the last cook is more than 8 blocks away or logs out.
 - New tools: Wooden Spoon, Kitchen Tongs, Smoker's Fan, Baker's Peel (the knife is the Kitchen's own).
 - Built; not played. Cooking methods move to the block one patch at a time; those not yet moved keep their screens.
+- **Chopping, stirring, dough and joints by hand**: swing the knife to chop on the board, point the spoon round the pot to stir, hold use to pour water and oil then knead for dough, and grind, sprinkle and roll a joint at the worktop. Several cooks can work the same dish; it is judged by the same rules as the screens.

@@ -1104,5 +1104,14 @@
 	"message.jaymoskitchen.hands.nothing_yet": "%1$s on it: nothing it makes yet.",
 	"message.jaymoskitchen.hands.picked": "%1$s (%2$s of %3$s): start it with %4$s",
 	"message.jaymoskitchen.hands.wrong_tool": "%1$s wants %2$s.",
-	"message.jaymoskitchen.station_busy": "Something's already cooking there."
+	"message.jaymoskitchen.station_busy": "Something's already cooking there.",
+	"hud.jaymoskitchen.hands.stir": "Stir round the pot",
+	"hud.jaymoskitchen.hands.dough.water": "Hold use to pour the water",
+	"hud.jaymoskitchen.hands.dough.oil": "Hold use to pour the oil",
+	"hud.jaymoskitchen.hands.dough.knead": "Knead: right-click, left-click, in turn",
+	"hud.jaymoskitchen.hands.dough.off": "Off the mark",
+	"hud.jaymoskitchen.hands.dough.near": "Nearly right",
+	"hud.jaymoskitchen.hands.joint.grind": "Hold use and circle the grinder",
+	"hud.jaymoskitchen.hands.joint.sprinkle": "Hold use and sprinkle along the paper",
+	"hud.jaymoskitchen.hands.joint.roll": "Hold use and move the view up and down, steadily"
 }

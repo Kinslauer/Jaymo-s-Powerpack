@@ -46,3 +46,15 @@ did. The spec's per-player sessions (R11) become one session per station that se
 - Client (`client/hands/`): `HandsClient` (what stations round here hold, from `HandsSync`), `HandsHud` (a plate under the
   crosshair: placed items, the dish and its tool; the running readout; the verdict), `Readouts` (one drawer per kind),
   `HandsInputs` (per-tick inputs a click can't carry).
+
+### Patch 2: board and pot
+- `ChopRun` (`hc-chop`, `hc-q6-chop`): the knife's left-click swing is the chop; the screen's slide, speed step and marks run on the
+  server (ints: cuts so far and each result; floats: slide, speed), judged by `Minigames.judgeChop`. Walking away: BURNT.
+- `StirRun` (`hc-stir`, `hc-q7-stir`): with the spoon in hand the client sends the angle where the crosshair meets the pot's
+  plane round `Geometry.potCenter` (`IN_ANGLE`); the server sums every cook's turn per tick (each capped at 1.2 rad), smooths it
+  like the screen and keeps stirred/stuck/spilled and the boil-ups; judged by `Minigames.judgeStir`. Walking away: CHARRED.
+- `DoughRun` (`hc-prep`, dough): hold use to pour water then oil (the client sends `IN_HOLD` with a keepalive every 5 ticks),
+  let go inside the band, then knead with right-click and left-click in turn; `Prep.score`. The mixing bowl is borrowed.
+- `JointRun` (`hc-prep`, joint): hold use and circle the grinder, hold use and point along the paper to sprinkle (`IN_ACROSS`),
+  hold use and move the view up and down at a steady pace to roll (`IN_ROLL`, 6 px of the screen game per degree); `Rolling.score`.
+- `Geometry`, the readouts for the four kinds, `HandsInputs`, and `Prep.start` goes through `HandsOn.fromPrep`.

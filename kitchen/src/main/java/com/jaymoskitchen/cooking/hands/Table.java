@@ -189,6 +189,16 @@ public final class Table {
 		return player != null && player.level() == level ? player : null;
 	}
 
+	/** Something made by hand goes to the last cook still about, else it's left on the station. */
+	void handOver(Run run, ItemStack stack) {
+		ServerPlayer cook = recipient(run);
+		if (cook != null) {
+			Kitchen.give(cook, stack);
+		} else {
+			Block.popResource(level, pos.above(), stack);
+		}
+	}
+
 	boolean empty() {
 		return placed.isEmpty() && run == null && verdictUntil == 0;
 	}

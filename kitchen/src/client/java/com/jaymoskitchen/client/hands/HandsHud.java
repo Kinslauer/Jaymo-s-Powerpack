@@ -29,7 +29,7 @@ final class HandsHud {
 	interface Drawer {
 		int height(HandsSync sync);
 
-		void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float time);
+		void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age);
 	}
 
 	static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {
@@ -51,7 +51,7 @@ final class HandsHud {
 			return;
 		}
 		HudStyle.plate(graphics, at[0], at[1], WIDTH, height, HudStyle.PLATE, HudStyle.RIM_DIM);
-		drawer.draw(graphics, font, sync, at[0] + PAD, at[1] + PAD, time);
+		drawer.draw(graphics, font, sync, at[0] + PAD, at[1] + PAD, Math.max(0.0F, time - view.seen()));
 	}
 
 	static Component dishName(int dish, int kind) {

@@ -52,6 +52,10 @@ import org.jspecify.annotations.Nullable;
 public final class HandsOn {
 	/** How far (blocks, squared) a cook may be from the station: past it, they've left. */
 	public static final double LEAVE_RANGE_SQ = 8.0 * 8.0;
+	/** What a {@link Payloads.HandsInput} carries: an angle round the centre (NaN: not on it), use held (1 or 0), where across the worktop, how far the view moved up or down (degrees). */
+	public static final int IN_ANGLE = 0, IN_HOLD = 1, IN_ACROSS = 2, IN_ROLL = 3;
+	/** A held input that hasn't been refreshed for this many ticks has been let go. */
+	public static final int HOLD_STALE = 12;
 	/** Ticks things lie on a station with nobody within reach before they're put back on the floor. */
 	static final int IDLE_TICKS = 20 * 90;
 	/** Ticks between checks that the game rule hasn't changed under the clients. */
@@ -268,6 +272,30 @@ public final class HandsOn {
 				return true;
 			}
 			Kitchen.takeIngredients(player, pos, dish.ingredients());
+		}
+		begin(table, pick, player, level.getServer().getTickCount());
+		return true;
+	}
+
+	/** The same for the prep board's screen: dough or a joint picked there starts at the block. False if the screen must handle it. */
+	public static boolean fromPrep(ServerPlayer player, BlockPos pos, Prep.Recipe recipe, boolean[] refused) {
+		ServerLevel level = player.level();
+		Pick pick = new Pick(recipe == Prep.Recipe.JOINT ? Pick.Kind.JOINT : Pick.Kind.DOUGH, null, 0);
+		if (!enabled(level) || !FACTORIES.containsKey(pick.kind())) {
+			return false;
+		}
+		Table table = tableFor(level, pos);
+		if (table.run != null || !Kitchen.inReach(player, pos)) {
+			refused[0] = true;
+			return true;
+		}
+		if (!player.hasInfiniteMaterials()) {
+			if (!Kitchen.hasIngredients(Kitchen.sources(player, pos), pick.ingredients())) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.missing_ingredients"));
+				refused[0] = true;
+				return true;
+			}
+			Kitchen.takeIngredients(player, pos, pick.ingredients());
 		}
 		begin(table, pick, player, level.getServer().getTickCount());
 		return true;
