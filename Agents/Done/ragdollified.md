@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Ragdolls track of "Ragdolls and Cover": add Ragdollified and Ragdollified Reactions, Kitchen's ragdolls stand down
 branch: ragdollified
 with: Lean/Cover track (Kingdoms Cover.java, lean code, keybinds; not touched)
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 Pushed for CI; see the PR.
+- 2026-11-16 20:25 PR #1661 is merged into master; moved to Agents/Done.
