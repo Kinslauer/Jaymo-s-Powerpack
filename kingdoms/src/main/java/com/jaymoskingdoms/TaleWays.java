@@ -136,6 +136,11 @@ final class TaleWays {
 			Long have = amount(level, player, run, m.group(1), n);
 			return have != null && (m.group(2).equals(">=") ? have >= n : have < n);
 		}
+		if (c.startsWith("exists:")) {
+			// (a thing another of the pack's mods makes: a path that needs it is only offered where it can be made)
+			Identifier id = Identifier.tryParse(c.substring(7));
+			return id != null && BuiltInRegistries.ITEM.containsKey(id);
+		}
 		ServerLevel world = Factions.level(level.getServer());
 		if (c.equals("night")) {
 			return Approaches.night(world);

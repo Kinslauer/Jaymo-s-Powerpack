@@ -21,6 +21,7 @@
     "orla": { "name": "Orla Pell", "body": "villager", "job": "fisherman", "female": true, "at": "lofts" },
     "keeper": { "name": ["Amos Kettle", "Hew Tregar", "Silas Brane"], "body": "villager", "job": "none", "female": false, "at": "head" },
     "chandler": { "name": ["Gideon Marsh", "Lowell Fitch", "Peder Sallow"], "body": "villager", "job": "none", "female": false, "at": "shop", "if": "told=chandler" },
+    "hind": { "name": "Tobin Pell", "body": "minecraft:drowned", "at": "yard", "if": "mark:wl_bell_shapes", "hours": "night", "lying": "mark:wl_bell_ninth", "men": 8 },
     "wrecker": { "name": ["Wenna Crane", "Bett Crane", "Tamsin Crane"], "body": "fighter", "female": true, "at": "scrape", "health": 60, "damage": 6, "armor": 5, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
   },
   "places": {
@@ -158,14 +159,18 @@
       "do": "wait", "days": [2, 4], "wake": "letter",
       "letter": { "from": "{priest}", "lines": [
         "The dead came up out of the burying ground again last night, more of them than before. Jory Fenn held the lych gate one-armed with a hay fork until the cock crowed. He says he owes Tobin that much.",
-        "The dark of the moon is tomorrow. The Scrape will be out on the water, and our dead will be out of the ground. I would not ask a stranger to stand at our gate, but I have nobody left to ask.",
-        "If you will, come to the burying ground at dusk."
+        "The dark of the moon is nearly on us. The Scrape will be out on the water, and our dead will be out of the ground. I would not ask a stranger to stand at our gate, but I have nobody left to ask.",
+        "And Jory swears there is worse than our own. On the last dark night he saw men come up out of the tide below the quay and walk for the burying ground, wet through, in a line. He would not tell me how many.",
+        "If you will, come to the burying ground at dusk, on the night there is no moon."
       ] },
-      "then": "defend_yard"
+      "then": "yard_dark"
+    },
+    "yard_dark": {
+      "do": "go", "to": "yard", "when": "moon:new", "goal": "Come to {place:yard} on the dark of the moon", "then": "defend_yard"
     },
     "defend_yard": {
-      "do": "defend", "at": "yard", "waves": 3, "foes": "minecraft:zombie", "stars": 2, "goal": "Hold {place:yard} through the dark of the moon",
-      "journal": "The dead came up out of the burying ground at the dark of the moon, and were put back before dawn. Without a bell they would come again.",
+      "do": "defend", "at": "yard", "waves": 3, "foes": "minecraft:drowned", "stars": 2, "when": "moon:new", "goal": "Hold {place:yard} through the dark of the moon",
+      "journal": "On the dark of the moon the drowned came up from the quay to the burying ground, wet through and walking slow, and were held at the lych gate until dawn. Without a bell they would come again.",
       "then": "to_scrape"
     },
     "to_scrape": { "do": "go", "to": "scrape", "goal": "Find {wrecker} at {place:scrape}", "then": "wrecker" },
@@ -314,7 +319,7 @@
           "Jory Fenn would not go to see it. He sat in the lych gate all day with his arm in its sling, and would not say why."
         ]
       } },
-      "then": "end:named"
+      "then": "bell_ask"
     },
     "wait_confessed": {
       "do": "wait", "days": [3, 6], "wake": "letter",
@@ -335,7 +340,7 @@
           "The families are calling the Hind's crew honest men again. They do not know what it cost."
         ]
       } },
-      "then": "end:confessed"
+      "then": "bell_ask"
     },
     "wait_gone": {
       "do": "wait", "days": [3, 6], "wake": "letter",
@@ -344,7 +349,7 @@
         "{told} is gone. The house is empty and the door left open, and nobody can say where. The reeve asks me if it means anything. I tell him I do not deal in guesses.",
         "You never did give me a name. I think you gave me something instead, and I have not decided what."
       ] },
-      "then": "end:gone"
+      "then": "bell_ask"
     },
     "wait_quiet": {
       "do": "wait", "days": [3, 6], "wake": "letter",
@@ -353,7 +358,48 @@
         "The families are calling the Hind's crew honest men again. The reeve wants a name for the rest of it, and I have told him the sea has none. I said it in the Truth's house. I hope you know what you have made me say.",
         "There is {coins:15} from the poor box. The families would have it so."
       ] },
-      "then": { "?mark:wl_bought": "end:bought", "?": "end:quiet" }
+      "then": "bell_ask"
+    },
+    "bell_ask": {
+      "do": "talk", "who": "priest", "goal": "See {priest} at {place:temple} about the Hind's men",
+      "say": [
+        "The bell has kept our own dead down every night since it was hung. I wrote you so, and it is so.",
+        "But the ones you held the gate against were not ours. Jory Fenn knew two of the faces. They were the Hind's men, come up out of the tide and walking for a burying ground that has no place in it for them.",
+        "The dark of the moon is the night they come. I mean to ring nine strokes, one a man, and see what they do. I would have you at the lych gate when I ring. If the bell does not hold them, somebody must."
+      ],
+      "replies": [
+        {"say": "I'll be at the gate.", "then": "bell_eve", "journal": "{priest} says the drowned who came on the dark of the moon were the Grey Hind's own men. He means to ring nine strokes for them on the next night with no moon, and asked me to stand at the lych gate."},
+        {"say": "You have your bell. Ring it without me.", "then": {"?mark:wl_named": "end:named", "?mark:wl_confessed": "end:confessed", "?mark:wl_exiled": "end:gone", "?mark:wl_bought": "end:bought", "?": "end:quiet"}}
+      ]
+    },
+    "bell_eve": {
+      "do": "go", "to": "yard", "when": "moon:new", "goal": "Be at {place:yard} on the dark of the moon", "then": "bell_night"
+    },
+    "bell_night": {
+      "do": "vigil", "at": "yard", "when": "night", "gap": 9, "goal": "Stand at the lych gate while the bell is rung", "left": {"?mark:wl_named": "end:named", "?mark:wl_confessed": "end:confessed", "?mark:wl_exiled": "end:gone", "?mark:wl_bought": "end:bought", "?": "end:quiet"}, "then": "bell_after",
+      "lines": [
+        {"say": "No moon. The burying ground is black to the wall, and the tide is making below the quay."},
+        {"say": "Wet feet on the quay road, slow, and a good many of them. They are coming up the way they came the last time.", "sound": "minecraft:entity.drowned.step"},
+        {"say": "Shapes at the lych gate, no more than a darker dark. One of them has a hand on the gate.", "sound": "minecraft:entity.drowned.ambient", "mark": "wl_bell_shapes"},
+        {"say": "The bell. The first stroke goes out over the ground and over the water, and the feet stop.", "sound": "minecraft:block.bell.use"},
+        {"say": "The second stroke, and the third. He is ringing it slow. Nothing at the gate moves, and nothing comes on.", "sound": "minecraft:block.bell.use"},
+        {"say": "The ninth stroke. When it has died away there is no sound from the gate at all.", "sound": "minecraft:block.bell.resonate", "mark": "wl_bell_ninth"},
+        {"say": "They have come inside the wall, into the long grass between the stones, and they are lying down. One, and then the next. Nine of them, laid out straight, like men who have been a long time on their feet."},
+        {"say": "None of them stirs. The salt water is still running out of their clothes into the grass."}
+      ],
+      "journal": "On the dark of the moon after the bell was hung, the nine drowned men of the Grey Hind came up the quay road again. At the ninth stroke they lay down in the burying ground, and they did not get up."
+    },
+    "bell_after": {
+      "do": "talk", "who": "priest", "goal": "Speak with {priest} at {place:temple}",
+      "say": [
+        "You saw them. I saw them from the rope. I rang nine and looked down, and they were lying in my ground like a crew turned in for the night.",
+        "They were never ours to bury. Nine men off a coaster, with no stone here, and nobody's coin in this ground for them. But it was their lading. They were carrying a bell to this town, and I think they would not lie down until they had heard it. I say I think. I do not know, and I'll not preach it.",
+        "I shall not dig them in. They chose where. At first light I read the rite over the grass where they lie, and after that I cut nine names in the wall."
+      ],
+      "replies": [
+        {"say": "Cut the captain's first. He did not run.", "then": {"?mark:wl_named": "end:named", "?mark:wl_confessed": "end:confessed", "?mark:wl_exiled": "end:gone", "?mark:wl_bought": "end:bought", "?": "end:quiet"}, "journal": "{priest} will read the rite over the Hind's men where they lie, and cut their nine names in the burying ground wall, Captain Haskett's first."},
+        {"say": "Then it is finished.", "then": {"?mark:wl_named": "end:named", "?mark:wl_confessed": "end:confessed", "?mark:wl_exiled": "end:gone", "?mark:wl_bought": "end:bought", "?": "end:quiet"}}
+      ]
     }
   },
   "endings": {

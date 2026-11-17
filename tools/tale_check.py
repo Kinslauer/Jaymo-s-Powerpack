@@ -131,6 +131,10 @@ def check_condition(c, where, cond, tale):
         return
     if body in ("night", "day", "human", "cursed", "companion", "moon:full", "moon:new", "moon:blood") or COMPARE.match(body):
         return
+    if body.startswith("exists:"):
+        if not ITEM.match(body[7:]):
+            c.err(where, f"'{body}': exists:<item id>")
+        return
     kind, _, value = body.partition(":")
     known = {"heritage": HERITAGES, "patron": PATRONS, "dress": DRESS, "reads": TONGUES, "companion": BELIEFS,
              "late": clocks(tale), "met": set(tale.get("cast", {})) | {"giver"}}
@@ -419,6 +423,8 @@ def check_tale(path):
                 check_place(c, where, key, tale)
         if "if" in who:
             check_condition(c, where, who["if"], tale)
+        if isinstance(who.get("lying"), str):
+            check_condition(c, where, who["lying"], tale)
         if who.get("hours", "night") not in ("night", "day"):
             c.err(where, "hours must be night or day")
         unknown = set(who) - {"name", "body", "job", "female", "at", "if", "late", "hours", "lying", "health", "damage", "armor", "hand", "head", "chest", "men", "men_body"}

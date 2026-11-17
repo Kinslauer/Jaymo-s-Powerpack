@@ -401,6 +401,19 @@ final class TaleCast {
 				Tales.each(player, run, r -> r.vars.put(TaleWays.MET + e.getKey(), "1"));
 			}
 			Cast c = there.getAttached(CAST);
+			JsonElement lying = theirs.get("lying");
+			if (c != null && lying != null && lying.isJsonPrimitive() && lying.getAsJsonPrimitive().isString() && Tales.holds(player, run, lying.getAsString())) {
+				// (they lie down once it has happened, one of them each look, so whoever is there sees it)
+				List<Mob> all = new ArrayList<>(men(level, there, c));
+				all.add(0, there);
+				for (Mob m : all) {
+					if (m.getPose() != Pose.SLEEPING) {
+						m.setNoAi(true);
+						m.setPose(Pose.SLEEPING);
+						break;
+					}
+				}
+			}
 			if (!hours(player, run, theirs) && c != null && !c.fight() && !c.yielded() && !HELD.containsKey(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE)) {
 				// (their hours are over: they've gone home, and are back when the hours are)
 				LOADED.remove(there);

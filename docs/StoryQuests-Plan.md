@@ -365,6 +365,7 @@ Anywhere a condition goes (`if`, `needs`, `bars`, a switch's `?` key), besides `
 | `since:<tale>>=N` | that tale ended at least N days ago (false if it never has) |
 | `met:<role>` | they've spoken with, or stood near, that one of the cast |
 | `companion`, `companion:<belief>` | a companion is with them (one who holds that belief) |
+| `exists:<item id>` | that item is in the game (a path that needs something another of the pack's mods makes) |
 
 ### time doesn't wait: `within`, `late`, `clock`, `until`
 
@@ -386,7 +387,10 @@ those hours. A place can be `"at": "tavern"`: the town's tavern (its seat if it 
 
 `"candle": true` on any step: when it opens, a black candle is set burning in a window of the town's tavern (the guild's
 mark that someone has been paid for; lore "What goes on in the shadows"). A cast creature with `"lying": true` is laid
-out on the ground where it's set out and doesn't get up (the drowned in the burying ground).
+out on the ground where it's set out and doesn't get up; with a condition instead (`"lying": "mark:wl_bell_ninth"`) it
+stands until that holds, then it and its `men` lie down one after another while the player is there to see (the
+drowned in the burying ground). A `defend` step doesn't read `when` (its waves come after dark): put a `go` with the
+`when` in front of it.
 
 An `await` step (one the code carries on) may have `"noted": { "<mark>": "journal line" }`: when the code sets that mark
 while the step waits (`Tales.remark`), the line goes in the journal. The Keeping's `keeping_rested` is the first.
