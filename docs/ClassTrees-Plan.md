@@ -278,3 +278,27 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
   their first studied shape until they buy More Shapes.
 - Lore: the treant is the Druid's elder spirit of the wood and the wind elemental of the open sky (both nature's own, no new
   people); the familiar is the patron's small servant. Nothing else new to place.
+
+### After the row check (independent audit of every row against the code)
+Fixed: a rited body can't be raised by a necromancer or the Reaper either (`KitchenCompat.isRaisableCorpse`); the rites
+are for people's and monsters' bodies and players', not animal carcasses; the dead's MCA kin within 32 blocks warm to
+the reader by 10 hearts. A deer following a Pack Leader charges and butts (it has no attack of its own). Mercy heals
+only for the blow that fells a foe. An Honour Paladin's Challenge isn't re-called on the foe already challenged, so the
+key lays hands again. A wild shape that can't be made costs no use. Trick bolts that burst in the ground are spent.
+The trees are built once under a lock (server and client thread in singleplayer).
+
+Not as the rows say, for Andy to rule on:
+- **`ct-points` ("each tree holds about 30 points")**: only what the rows define is in the trees, and that comes to
+  less: Thief 13, Ranger 16, Sorcerer 17, Druid 20, Warlock 20, Cleric 21, Monk 22, Paladin 23, Warlord 23, Brute 26,
+  Marksman 26 and Tinkerer 30 (both with the bench's 12), Rider 26, Mage 39. So most classes can buy their whole tree
+  before level 25 and only the crossroads force a choice. Needs more perks or dearer ones to reach 30.
+- **`ct-forks` ("two or three forks per tree")**: Rider has 3; Sorcerer, Warlord, Brute and Monk 2; the other nine
+  have the one fork their rows define.
+- **`ct-sor-sigil`**: the tap throws the sigil with a blade in hand, and from the open hand for fire, ice, blood and
+  wild. A lightning, earth, water or air Sorcerer with Absorbing and no blade still gets their old open-hand working
+  on the tap (Storm Ring, Bulwark, Tide Pearl, Harrying Gale), as before the trees. With Ward Sigil, sneak and the key
+  lays the ward.
+- **`ct-bench-smith`**: "making at the stations" is a lock: only a Gunsmith can take a gun or shot out of a crafting
+  grid or forge a barrel; everyone else buys from weaponsmiths.
+- **`ct-dru-bark`**: Barkskin is used in a shape only (sneak and the key; out of a shape that key picks the shape).
+- **`ct-war-reneg`**: Renegotiate moves the debt to the next kind in order; there is no choosing which.

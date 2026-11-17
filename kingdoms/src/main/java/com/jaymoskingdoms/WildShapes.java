@@ -68,6 +68,9 @@ public final class WildShapes {
 	static final Set<String> LAND_RITES = Set.of("spike_growth", "fog", "water_walk", "spider_climb", "harrying_gale");
 	/** Pack Leader: how far the beasts are gathered from, and how big the leader is drawn. */
 	static final double PACK_RANGE = 16.0, PACK_SCALE = 0.35;
+	/** Pack Leader: a beast with no bite of its own (a deer) charges and butts for this much, when this near. */
+	static final float PACK_BUTT = 3.0F;
+	static final double PACK_BUTT_REACH = 2.0;
 	/** Barkskin: how long (ticks), its armour, toughness and the slowing. */
 	static final int BARK_TICKS = 20 * 60 * 3;
 	static final double BARK_ARMOUR = 6.0, BARK_TOUGH = 2.0, BARK_SLOW = -0.15;
@@ -383,6 +386,13 @@ public final class WildShapes {
 			}
 			if (foe != null && foe != beast && foe.isAlive() && foe.distanceTo(player) < PACK_RANGE) {
 				beast.setTarget(foe);
+				if (beast.getAttribute(Attributes.ATTACK_DAMAGE) == null) {
+					// a beast that never fights (the stag's deer) has no attack of its own: it charges and butts
+					beast.getNavigation().moveTo(foe, 1.4);
+					if (beast.distanceTo(foe) < PACK_BUTT_REACH) {
+						foe.hurtServer(level, level.damageSources().mobAttack(beast), PACK_BUTT);
+					}
+				}
 			} else if (beast.distanceTo(player) > 4.0) {
 				beast.getNavigation().moveTo(player, 1.2);
 			}

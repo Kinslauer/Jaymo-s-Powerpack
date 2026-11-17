@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import net.blay09.mods.cookingforblockheads.block.entity.OvenBlockEntity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -50,8 +51,6 @@ import org.jspecify.annotations.Nullable;
  * {@code jaymoskitchen:hands_on_cooking} (on by default) turns it off: the screens come back as they were.
  */
 public final class HandsOn {
-	/** How far (blocks, squared) a cook may be from the station: past it, they've left. */
-	public static final double LEAVE_RANGE_SQ = 8.0 * 8.0;
 	/** What a {@link Payloads.HandsInput} carries: an angle round the centre (NaN: not on it), use held (1 or 0), where across the worktop, how far the view moved up or down (degrees). */
 	public static final int IN_ANGLE = 0, IN_HOLD = 1, IN_ACROSS = 2, IN_ROLL = 3;
 	/** A held input that hasn't been refreshed for this many ticks has been let go. */
@@ -67,6 +66,8 @@ public final class HandsOn {
 	public static Predicate<BlockPos> clientRuns = pos -> false;
 	/** Client side: whether hands-on cooking is on (from the server). */
 	public static boolean clientOn;
+	/** Client side: true once for each press of the attack key (a held key asks every tick; only the press is a chop). */
+	public static BooleanSupplier clientPress = () -> true;
 
 	/** Makes the run for a chosen dish. */
 	@FunctionalInterface
@@ -307,7 +308,11 @@ public final class HandsOn {
 			return InteractionResult.PASS;
 		}
 		if (level.isClientSide()) {
-			return clientOn && clientRuns.test(pos) ? InteractionResult.FAIL : InteractionResult.PASS;
+			if (!clientOn || !clientRuns.test(pos)) {
+				return InteractionResult.PASS;
+			}
+			// SUCCESS is what sends the click on to the server (a FAIL stops here); the block is never mined either way
+			return clientPress.getAsBoolean() ? InteractionResult.SUCCESS : InteractionResult.FAIL;
 		}
 		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer cook) || !enabled(server)) {
 			return InteractionResult.PASS;

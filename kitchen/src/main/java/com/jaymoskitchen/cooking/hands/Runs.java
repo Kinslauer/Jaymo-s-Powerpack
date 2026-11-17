@@ -39,10 +39,22 @@ final class Runs {
 			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.need_spit"));
 			return false;
 		}
-		if (pick.kind() == Pick.Kind.TEA && com.jaymoskitchen.cooking.Station.of(table.level, table.pos.below()) == null) {
+		if (pick.kind() == Pick.Kind.TEA && !heated(table)) {
 			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.need_heat"));
 			return false;
 		}
 		return true;
+	}
+
+	/** Whether there is a fire under the kettle: a lit campfire or stove, a turned-on oven, or a furnace, smoker or blast furnace that is burning. */
+	private static boolean heated(Table table) {
+		net.minecraft.core.BlockPos below = table.pos.below();
+		com.jaymoskitchen.cooking.Station under = com.jaymoskitchen.cooking.Station.of(table.level, below);
+		if (under == null || under == com.jaymoskitchen.cooking.Station.BOARD) {
+			return false;
+		}
+		net.minecraft.world.level.block.state.BlockState state = table.level.getBlockState(below);
+		return !state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+			|| state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT);
 	}
 }

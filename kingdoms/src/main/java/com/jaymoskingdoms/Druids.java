@@ -230,17 +230,15 @@ public final class Druids {
 		if (Downed.isDowned(player) || player.isPassenger() && !player.isCreative()) {
 			return;
 		}
-		if (!WildShapes.spend(player, form, shapes(player))) {
+		// the stand-in first: a shape that can't be made (its beast's mod is missing) costs no use
+		Mob beast = stand(level, form);
+		if (beast == null || !WildShapes.spend(player, form, shapes(player))) {
 			return;
 		}
-		take(player, level, form);
+		take(player, level, form, beast);
 	}
 
-	private static void take(ServerPlayer player, ServerLevel level, String form) {
-		Mob beast = stand(level, form);
-		if (beast == null) {
-			return;
-		}
+	private static void take(ServerPlayer player, ServerLevel level, String form, Mob beast) {
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}

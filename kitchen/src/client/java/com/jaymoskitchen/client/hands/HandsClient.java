@@ -34,6 +34,8 @@ public final class HandsClient {
 
 	static final Map<BlockPos, View> VIEWS = new HashMap<>();
 	static int clock;
+	/** The attack key's press has already been sent as a chop (or a knead); cleared when the key comes up. */
+	private static boolean pressed;
 
 	private HandsClient() {
 	}
@@ -51,12 +53,20 @@ public final class HandsClient {
 			View view = VIEWS.get(pos);
 			return view != null && view.sync().phase() == Payloads.HandsSync.PHASE_RUNNING;
 		};
+		HandsOn.clientPress = () -> {
+			boolean fresh = !pressed;
+			pressed = true;
+			return fresh;
+		};
 		ClientTickEvents.END_CLIENT_TICK.register(HandsClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("hands"), HandsHud::draw);
 	}
 
 	private static void tick(Minecraft minecraft) {
 		clock++;
+		if (!minecraft.options.keyAttack.isDown()) {
+			pressed = false;
+		}
 		Iterator<View> it = VIEWS.values().iterator();
 		while (it.hasNext()) {
 			if (clock - it.next().seen() > STALE_TICKS) {

@@ -500,7 +500,8 @@ public final class KitchenCompat {
 	/** A body the Reaper can raise: any a necromancer can ({@link #isRaisableCorpse}), and a player's too. */
 	static boolean isReapableCorpse(Entity entity) {
 		return isRaisableCorpse(entity) || CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
-			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity);
+			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity)
+			&& !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.7.132) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
@@ -591,7 +592,8 @@ public final class KitchenCompat {
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
-			&& !BodyKeeping.isPreserved(entity);
+			// (class trees) nothing raises a body the rites were read over
+			&& !BodyKeeping.isPreserved(entity) && !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.5.37) What the corpse was in life, or null. */

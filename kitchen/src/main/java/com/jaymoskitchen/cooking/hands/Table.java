@@ -306,7 +306,9 @@ public final class Table {
 						break;
 					}
 				}
-				if (remainderStep != null && remainderStep.remainder() != null) {
+				// a keg's or a kettle's water bottles go on to hold the drinks (the run hands back any left empty)
+				boolean bottled = (pick.kind() == Pick.Kind.KEG || pick.kind() == Pick.Kind.TEA) && remainderStep == Step.WATER_BOTTLE;
+				if (remainderStep != null && remainderStep.remainder() != null && !bottled) {
 					Kitchen.give(starter, new ItemStack(remainderStep.remainder()));
 				}
 			}

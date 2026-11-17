@@ -68,7 +68,7 @@ class DoughRun extends Run {
 
 	@Override
 	boolean use(ServerPlayer player, ItemStack held, boolean sneaking, int now) {
-		if (phase == KNEAD) {
+		if (phase == KNEAD && held.isEmpty()) {
 			knead(1);
 		}
 		return held.isEmpty();
@@ -76,7 +76,7 @@ class DoughRun extends Run {
 
 	@Override
 	boolean attack(ServerPlayer player, ItemStack held, int now) {
-		if (phase == KNEAD) {
+		if (phase == KNEAD && held.isEmpty()) {
 			knead(-1);
 		}
 		return held.isEmpty();
@@ -135,8 +135,12 @@ class DoughRun extends Run {
 				finish(false);
 			} else if (phase == WATER) {
 				phase = OIL;
-			} else {
+			} else if (kneads()) {
 				phase = KNEAD;
+			} else {
+				// the keg and the kettle are done with the second pour
+				finish(true);
+				return;
 			}
 		}
 		if (phase == KNEAD && ++kneadTicks > Prep.KNEAD_TICKS) {

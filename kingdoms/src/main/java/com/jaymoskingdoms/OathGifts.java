@@ -3,7 +3,9 @@ package com.jaymoskingdoms;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -81,6 +83,9 @@ public final class OathGifts {
 
 	private static final Map<LivingEntity, Ward> WARDS = new HashMap<>();
 	/** A Challenge: Paladin → the foe called out, and until when. */
+	/** Who was already down when the blow now landing was struck (entity ids; Mercy heals only for the blow that fells). */
+	private static final Set<Integer> ALREADY_DOWN = new HashSet<>();
+
 	private record Called(Mob foe, long until) {
 	}
 
@@ -94,6 +99,12 @@ public final class OathGifts {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(OathGifts::tick);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (Downed.isDowned(entity)) {
+				ALREADY_DOWN.add(entity.getId());
+			}
+			return true;
+		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> spare(entity, source));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WARDS.clear();
@@ -152,6 +163,11 @@ public final class OathGifts {
 			return false;
 		}
 		ServerLevel level = paladin.level();
+		Called standing = CALLED.get(paladin.getUUID());
+		if (standing != null && standing.foe() == foe && standing.until() > level.getGameTime()) {
+			// already called out: the key is the Paladin's hands again
+			return false;
+		}
 		CALLED.put(paladin.getUUID(), new Called(foe, level.getGameTime() + CHALLENGE_TICKS));
 		foe.setTarget(paladin);
 		Fx.ring(level, foe.position().add(0.0, 0.1, 0.0), 1.0F, 0xFFE9A0);
@@ -282,7 +298,9 @@ public final class OathGifts {
 
 	/** Mercy's Spare the Fallen: a foe brought down (not killed) by a Paladin's blow heals them. */
 	private static void spare(LivingEntity entity, DamageSource source) {
-		if (!(source.getEntity() instanceof ServerPlayer paladin) || entity == paladin || !Downed.isDowned(entity) || SPARED.containsKey(entity.getId())
+		// only the blow that brings them down, not one on a foe already lying there
+		boolean lying = ALREADY_DOWN.remove(entity.getId());
+		if (lying || !(source.getEntity() instanceof ServerPlayer paladin) || entity == paladin || !Downed.isDowned(entity) || SPARED.containsKey(entity.getId())
 			|| !has(paladin, OATH) || !Paladins.oath(paladin).equals("mercy")) {
 			return;
 		}
@@ -296,6 +314,8 @@ public final class OathGifts {
 
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
+		// a blow that was refused never reaches {@link #spare}
+		ALREADY_DOWN.clear();
 		if (!CALLED.isEmpty()) {
 			CALLED.entrySet().removeIf(e -> {
 				Called c = e.getValue();

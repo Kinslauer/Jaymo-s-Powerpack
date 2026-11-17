@@ -67,7 +67,7 @@ did. The spec's per-player sessions (R11) become one session per station that se
   heat each flip, soul fire hotter), sneak + tongs serves; oven (`Kind.OVEN`): the peel pulls it out, heat surges by itself;
   judged by `Quality.judgeGrill/judgeOven`; burnt to `Grill.ASH` ends it. Walking away serves as it is, as closing the screen did.
 - `SearRun` (`hc-sear`): five rounds of the sweeping marker; a right-click with the tongs presses; `Sear.judge`. Walking away: CHARRED.
-- `SmokeRun` (`hc-smoke`): hold use with the fan (client `IN_HOLD`, every cook fanning adds to the one fire); heat, gusts, cure, scorch
+- `SmokeRun` (`hc-smoke`): hold use with the fan (client `IN_HOLD`, any cook with a fan keeps the one fire going; two fans blow no harder than one, so the judging stays the screen's); heat, gusts, cure, scorch
   as the screen; `Smoke.judge`. Walking away: BURNT.
 - Readouts for all four (side meters with the golden and burnt marks, the sear bar, the smoker's heat band).
 
@@ -93,3 +93,18 @@ did. The spec's per-player sessions (R11) become one session per station that se
   **Sushi Mat** (the rolls the board's chopping makes, `SALMON_ROLL`, `COD_ROLL`, `KELP_ROLL`, `RICE_ROLL_MEDLEY`; press, season, roll).
   They share dough's pouring (`DoughRun`, same bands and `Prep.score`), so they feel the same; sushi comes out at GOOD or PERFECT.
 - New step `TEA_HERB` (before the actions in `Step`).
+
+### After the row check (independent audit of every row against the code)
+Fixed: left clicks at a running station never reached the server (the client answered FAIL, and Fabric only sends the
+click on for SUCCESS), so every chop was a miss and dough and sushi rolls could not be kneaded; one press is now one
+chop or knead (`HandsOn.clientPress`). The keg and the kettle went on to a knead they don't have and always came out
+ruined; they now finish on the second pour. Kneading needs an empty hand. Pouring needs an empty hand and the mix in
+the crosshair (a bystander eating nearby no longer pours). The kettle needs a real fire under it (lit campfire or stove,
+or a burning furnace, smoker or blast furnace). The keg's and kettle's water bottles now hold the drinks instead of
+coming back as extra glass bottles; the ones left empty are handed back.
+
+Not as the rows say, for Andy to rule on:
+- **`hc-sequence`**: every ingredient step is the same empty-hand click, so a wrong ingredient can't be picked (on the
+  screen it was a mistake). Easier than the screen.
+- **`hc-sear`**: the sweeping marker is on the HUD plate under the crosshair, not drawn in the world over the furnace.
+- **`hc-sandwich`**: no timing game; stacked in order and cut once.

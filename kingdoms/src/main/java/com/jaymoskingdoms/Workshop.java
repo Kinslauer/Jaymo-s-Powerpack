@@ -128,7 +128,7 @@ public final class Workshop {
 	private static final Map<UUID, Vec3> STILL_AT = new HashMap<>();
 	private static final Map<UUID, Long> STILL_SINCE = new HashMap<>();
 	/** Shots fired from a crouch by a Called Shot Marksman. */
-	private static final Set<UUID> CALLED_SHOTS = new HashSet<>();
+	private static final Set<Entity> CALLED_SHOTS = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 	/** Trick bolts in flight: the arrow, its kind, where it was last tick. */
 	private static final Map<AbstractArrow, String> TRICKS = new HashMap<>();
 	private static final Map<AbstractArrow, Vec3> TRICK_AT = new HashMap<>();
@@ -419,7 +419,7 @@ public final class Workshop {
 			shot.setDeltaMovement(v);
 		}
 		if (shooter.isShiftKeyDown() && ClassTrees.has(shooter, CALLED) > 0) {
-			CALLED_SHOTS.add(shot.getUUID());
+			CALLED_SHOTS.add(shot);
 		}
 	}
 
@@ -446,7 +446,7 @@ public final class Workshop {
 		if (steady(player) && ClassTrees.has(player, AIM) > 0) {
 			amount *= 1.0F + STEADY_DAMAGE * ClassTrees.power(player, AIM);
 		}
-		if (direct != null && CALLED_SHOTS.remove(direct.getUUID())) {
+		if (direct != null && CALLED_SHOTS.remove(direct)) {
 			amount = called(level, player, target, direct, amount);
 		}
 		if (ClassTrees.has(player, PRECISE) > 0 && (target instanceof Mob && Senses.unaware(target, player) || HiddenBlade.crippled(target))) {
@@ -704,6 +704,8 @@ public final class Workshop {
 				it.remove();
 				TRICK_AT.remove(arrow);
 				trick(level, arrow, e.getValue(), arrow.position(), null);
+				// spent: it isn't picked up to be shot again
+				arrow.discard();
 			} else {
 				TRICK_AT.put(arrow, arrow.position());
 			}

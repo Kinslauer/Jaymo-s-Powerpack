@@ -25,9 +25,9 @@ final class Recipes {
 	/** The rolls the sushi mat makes (the board's chopping makes them too). */
 	private static final Dish[] SUSHI = {Dish.SALMON_ROLL, Dish.COD_ROLL, Dish.KELP_ROLL, Dish.RICE_ROLL_MEDLEY};
 	/** What a keg of one brew wants: its base, and water to match. */
-	private static final int KEG_BASE = com.jaymoskitchen.brewing.CaskEntity.BASE_PER_BATCH, KEG_WATER = com.jaymoskitchen.brewing.CaskEntity.CAPACITY;
+	static final int KEG_BASE = com.jaymoskitchen.brewing.CaskEntity.BASE_PER_BATCH, KEG_WATER = com.jaymoskitchen.brewing.CaskEntity.CAPACITY;
 	/** What a kettle wants: herbs and water for a batch of cups. */
-	private static final int TEA_HERBS = 2, TEA_WATER = com.jaymoskitchen.brewing.CaskEntity.DRINKS_PER_BATCH;
+	static final int TEA_HERBS = 2, TEA_WATER = com.jaymoskitchen.brewing.CaskEntity.DRINKS_PER_BATCH;
 	/** Layers a sandwich needs at least (bread, a filling, bread). */
 	private static final int MIN_LAYERS = 3;
 

@@ -147,6 +147,7 @@ public final class ClassTrees {
 	private static final Map<String, Node> NODES = new LinkedHashMap<>();
 	private static final Map<Skills.Perk, Node> BY_PERK = new EnumMap<>(Skills.Perk.class);
 	private static boolean built;
+	private static volatile boolean ready;
 
 	private ClassTrees() {
 	}
@@ -195,9 +196,16 @@ public final class ClassTrees {
 
 	/** Every tree, built once (each class's own file adds its nodes: {@link TreeLayout}). */
 	private static void build() {
-		if (!built) {
-			built = true;
-			TreeLayout.build();
+		if (ready) {
+			return;
+		}
+		// the server and the client thread can both ask first (singleplayer): one fills the trees, the other waits
+		synchronized (ClassTrees.class) {
+			if (!built) {
+				built = true;
+				TreeLayout.build();
+				ready = true;
+			}
 		}
 	}
 

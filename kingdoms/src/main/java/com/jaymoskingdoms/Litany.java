@@ -57,6 +57,9 @@ public final class Litany {
 	/** Last Rites: how near a body must be, the good name won, the tag a rited body carries; a priest's reach and pace. */
 	static final double RITES_REACH = 4.0, PRIEST_SEEK = 32.0, PRIEST_READ = 2.0;
 	static final int RITES_REP = 2, PRIEST_EVERY = 100;
+	/** Last Rites: the dead's kin this near warm to the one who read them, by this many hearts. */
+	static final double RITES_KIN_REACH = 32.0;
+	static final int RITES_KIN_HEARTS = 10;
 	public static final String RITES_TAG = "jaymoskingdoms_rited";
 	/** Healer: healing prayers this many times as strong, and reaching this much further. */
 	static final float HEALER = 1.3F;
@@ -148,10 +151,17 @@ public final class Litany {
 		Vec3 eye = cleric.getEyePosition();
 		Vec3 end = eye.add(cleric.getLookAngle().scale(RITES_REACH));
 		for (Entity body : level.getEntities((Entity) null, cleric.getBoundingBox().inflate(RITES_REACH), KitchenCompat::isCorpse)) {
-			if (body.entityTags().contains(RITES_TAG) || body.getBoundingBox().inflate(0.3).clip(eye, end).isEmpty()) {
+			if (body.entityTags().contains(RITES_TAG) || !mourned(body) || body.getBoundingBox().inflate(0.3).clip(eye, end).isEmpty()) {
 				continue;
 			}
 			read(level, body);
+			// the dead's kin nearby think better of the one who read over them
+			Bearers.who(level, body).id().ifPresent(dead -> {
+				for (Villager kin : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(RITES_KIN_REACH),
+					v -> v.isAlive() && McaCompat.kinOf(v, dead) != McaCompat.STRANGERS)) {
+					McaCompat.hearts(kin, cleric, RITES_KIN_HEARTS);
+				}
+			});
 			ClassTrees.give(cleric, PlayerClass.CLERIC, ClassTrees.XP_RITE);
 			Faction home = Factions.at(level.getServer(), level, body.blockPosition());
 			if (home != null) {
@@ -161,6 +171,16 @@ public final class Litany {
 			return true;
 		}
 		return false;
+	}
+
+	/** A body rites are read over: a person's or a monster's (what can rise), or a player's; not a beast's carcass. */
+	private static boolean mourned(Entity body) {
+		if (KitchenCompat.isPlayerCorpse(body)) {
+			return true;
+		}
+		net.minecraft.world.entity.EntityType<?> was = KitchenCompat.sourceType(body);
+		return was != null && (was.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER
+			|| was.getCategory() == net.minecraft.world.entity.MobCategory.MISC);
 	}
 
 	/** The rites are read over {@code body}: it will never rise. */

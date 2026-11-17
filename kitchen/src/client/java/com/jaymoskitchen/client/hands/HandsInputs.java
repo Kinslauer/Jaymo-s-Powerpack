@@ -51,9 +51,11 @@ final class HandsInputs {
 					}
 				}
 				case SMOKE -> wantsHold = minecraft.options.keyUse.isDown() && CookTools.Tool.FAN.holds(player.getMainHandItem());
-				case DOUGH, KEG, TEA, SUSHI -> wantsHold = phase < 2 && minecraft.options.keyUse.isDown();
+				// pouring is by the empty hand, at the mix you're looking at (not whichever is nearest while you eat)
+				case DOUGH, KEG, TEA, SUSHI -> wantsHold = phase < 2 && minecraft.options.keyUse.isDown() && player.getMainHandItem().isEmpty()
+					&& HandsClient.aimed(minecraft) == view;
 				case JOINT -> {
-					wantsHold = minecraft.options.keyUse.isDown();
+					wantsHold = minecraft.options.keyUse.isDown() && !player.isUsingItem();
 					if (phase == 0) {
 						float angle = Geometry.pointedAngle(eye, look, topCenter(minecraft, pos));
 						aimed = !Float.isNaN(angle);

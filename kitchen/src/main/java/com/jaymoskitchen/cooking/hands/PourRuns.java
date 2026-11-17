@@ -22,6 +22,13 @@ final class PourRuns {
 		return result == Prep.Result.PERFECT ? BATCH : result == Prep.Result.GOOD ? BATCH - 1 : 0;
 	}
 
+	/** The water bottles that didn't end up holding a drink come back empty. */
+	private static void empties(DoughRun run, int count) {
+		if (count > 0) {
+			run.table.handOver(run, new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE, count));
+		}
+	}
+
 	/** The brewing keg: the fermented drinks the cask makes, but worked by hand in a sitting. */
 	static final class Keg extends DoughRun {
 		Keg(Table table, Pick pick, int now) {
@@ -40,8 +47,14 @@ final class PourRuns {
 				if (drinks(result) > 0) {
 					table.handOver(this, new ItemStack(Brewing.drink(brew), drinks(result)));
 				}
+				empties(this, Recipes.KEG_WATER - drinks(result));
 				cue(result);
 			});
+		}
+
+		@Override
+		void leave() {
+			endWith(Prep.Result.RUINED.ordinal(), () -> empties(this, Recipes.KEG_WATER));
 		}
 	}
 
@@ -62,8 +75,14 @@ final class PourRuns {
 				if (drinks(result) > 0) {
 					table.handOver(this, new ItemStack(HandsBlocks.TEA, drinks(result)));
 				}
+				empties(this, Recipes.TEA_WATER - drinks(result));
 				cue(result);
 			});
+		}
+
+		@Override
+		void leave() {
+			endWith(Prep.Result.RUINED.ordinal(), () -> empties(this, Recipes.TEA_WATER));
 		}
 	}
 
