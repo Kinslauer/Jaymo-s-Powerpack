@@ -670,3 +670,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   retaining the interior texture and all". From Immersive Tree Chop (Litewer, MIT) only the carving is taken.
 - **Applies to:** Kingdoms, `ChoppedLog`, `ChoppedLogRenderer`, `Trees.chop`.
 - **Agent:** [[Agents/tree-carve|tree-carve]]
+- 2026-11-16 (Andy, Ragdolls and Cover picks): "remove ragdollified until i can put everything in. it doesnt work well at all mixed with our corpses". Ragdollified and Reactions leave the pack (PR #1668); Kitchen's compat code stays idle; they return with Amputation, Player Corpses and Revive & Drag once those have 26.3 builds (Watch list.md).
