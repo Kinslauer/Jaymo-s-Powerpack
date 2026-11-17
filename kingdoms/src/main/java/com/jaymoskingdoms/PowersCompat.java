@@ -2818,6 +2818,23 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * Tells {@code carrier} of everything one of Powers' Tool Stations makes from a forged head (the head, and what is made
+	 * of it), by adding it to Powers' {@code Grades.CARRIERS}. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void onAssembled(java.util.function.BiConsumer<net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack> carrier) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.tinkering.smithing.Grades").getField("CARRIERS").get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack>>)list).add(carrier);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Tool Station carriers (older Powers?)", e);
+		}
+	}
+
+	/**
 	 * (0.7.616) Tells {@code listener} of every parry on the server (the player and whom they parried, null for an arrow), by
 	 * listening on Powers' {@code Guard.PARRIED} event. Nothing happens without Powers (or an older one).
 	 */
@@ -3185,6 +3202,9 @@ public final class PowersCompat {
 			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("closing").set(null, closing);
 			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> fletch = RogueExtras::fletchShare;
 			Class.forName("com.jaymospowers.tinkering.fletching.Fletching").getField("more").set(null, fletch);
+			// (last: a Powers without it keeps the ones above) a blood Sorcerer's Hide turns half their own bleeding
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> bleed = ArcaneExtras::bleedHarm;
+			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("harm").set(null, bleed);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
 		}

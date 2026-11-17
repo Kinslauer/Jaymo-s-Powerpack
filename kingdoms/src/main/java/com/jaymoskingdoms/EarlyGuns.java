@@ -483,7 +483,10 @@ public final class EarlyGuns {
 				player.push(back.x, 0.05, back.z);
 				player.syncVelocity = true;
 				player.awardStat(Stats.ITEM_USED.get(this));
-				gun.hurtAndBreak(1, player, hand);
+				// (class trees) a gun on a Gunsmith's barrel wears slower
+				if (!Workshop.spared(gun, player)) {
+					gun.hurtAndBreak(1, player, hand);
+				}
 			}
 			player.getCooldowns().addCooldown(gun, SETTLE);
 		}

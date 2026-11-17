@@ -36,6 +36,6 @@ final class ClericTree {
 		ClassTrees.add(FaithExtras.EXORCIST, cleric, 1, 3, 18, 6, 3, List.of(), List.of(FaithExtras.SHEPHERD));
 		ClassTrees.add(FaithExtras.INTERCESSION, cleric, 1, 2, 22, 7, 2, List.of(), List.of());
 		// the folded Awakening row: the Crowned Sun's arts, learned (a Dawnborn has them by blood)
-		ClassTrees.add(com.jaymoskingdoms.SunArts.CLERIC_NODE, cleric, 1, 3, 10, 3, 4, List.of(), List.of());
+		ClassTrees.add(com.jaymoskingdoms.SunArts.CLERIC_NODE, cleric, 1, 2, 10, 3, 4, List.of(), List.of());
 	}
 }

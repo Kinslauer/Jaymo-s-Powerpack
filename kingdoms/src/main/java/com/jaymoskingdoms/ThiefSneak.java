@@ -26,15 +26,17 @@ import java.util.UUID;
  * Sneak attack (fifth edition's Rogue feature, Andy's pick C5). A Thief's light blade or bow blow on a foe who is busy with
  * a friend of theirs (it is after someone else on their side), or caught unaware ({@link Senses#unaware}), does a
  * burst of extra damage: {@code blow x} {@link #MULT} {@code +} {@link #FLAT}. Once a second ({@link #EVERY} ticks).
- * <p>(Scaling audit) It doesn't stack with the Sneak Attack perk's blow ({@link Senses#dealt}): when both would land on one
- * blow, the bigger of the two is dealt, not their product. On a boss it is held to the same share of its health as any
- * other unaware blow ({@link Senses#unawareBlow}).
+ * <p>(Scaling audit) It doesn't multiply with the Sneak Attack perk's blow ({@link Senses#dealt}): when both would land on one
+ * blow, the bigger of the two is dealt, and {@link #BOTH_SHARE} of what the smaller would have added on its own. On a boss
+ * it is held to the same share of its health as any other unaware blow ({@link Senses#unawareBlow}).
  */
 public final class ThiefSneak {
 	/** The burst: the blow times this, plus this much more. */
 	static final float MULT = 1.5F, FLAT = 2.0F;
 	/** Once in this many ticks. */
 	static final long EVERY = 20L;
+	/** With the Sneak Attack perk on the same blow: this share of the smaller one's extra damage is dealt on top of the bigger one. */
+	static final float BOTH_SHARE = 0.25F;
 
 	private static final Map<UUID, Long> LAST = new HashMap<>();
 
@@ -66,15 +68,8 @@ public final class ThiefSneak {
 		}
 		// (class trees) an Assassin's on a foe that never knew they were there
 		float burst = unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0 ? amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT : amount * MULT + FLAT;
-		// (scaling audit) with the Sneak Attack perk on the same blow the two don't multiply: the bigger one is dealt
+		// (scaling audit) with the Sneak Attack perk on the same blow the two don't multiply: the bigger one is dealt, and a share of the smaller one's extra
 		float perk = stabbed(target, thief, source) ? 0.0F : Senses.sneakAttack(target, source);
-		if (perk > 0.0F && burst <= amount * perk) {
-			// the perk's is the bigger: the blow is left to it (a Ghost's first blow is struck all the same)
-			if (ghost) {
-				RogueExtras.ghostStruck(thief);
-			}
-			return amount;
-		}
 		LAST.put(thief.getUUID(), now);
 		if (ghost) {
 			RogueExtras.ghostStruck(thief);
@@ -82,8 +77,10 @@ public final class ThiefSneak {
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.25, 0.3, 0.25, 0.3);
 		if (perk > 0.0F) {
-			// the perk multiplies what is left of the blow afterwards (and holds it to a boss's share): together they come to the burst
-			return burst / perk;
+			float sneak = amount * perk;
+			float both = Math.max(burst, sneak) + BOTH_SHARE * Math.max(0.0F, Math.min(burst, sneak) - amount);
+			// the perk multiplies what is left of the blow afterwards (and holds it to a boss's share): together they come to this
+			return both / perk;
 		}
 		return Senses.unawareBlow(target, amount, burst);
 	}

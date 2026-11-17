@@ -74,7 +74,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #QUICK_SHOT_REACH} blocks, once per short rest.</li>
  * <li><b>Precision</b> (top): a shot on an unaware or crippled foe is always a critical.</li>
  * <li><b>Gunsmith</b> (the bench): anyone makes guns, barrels and shot; a Gunsmith's craft of shot gives
- * {@link #SMITH_SHOT} more ({@link #smithed}). Whoever isn't one can also buy guns and shot of a weaponsmith ({@link #stock}).</li>
+ * {@link #SMITH_SHOT} more ({@link #smithed}), and a handgonne or arquebus built on a barrel a Gunsmith forged is spared the wear
+ * of {@link #SMITH_SPARE} of its shots ({@link #forged}). Whoever isn't one can also buy guns and shot of a weaponsmith ({@link #stock}).</li>
  * <li><b>Gun upgrades</b> (3 ranks): one part a rank fitted at a station, never all four: Muffled (no noise), Long Barrel
  * (further), Choke (a blunderbuss's shot held tight) and Bayonet (a blow with it).</li>
  * <li><b>Trick Shot bolts</b>: arrows turned at a station into grapple, oil, water and shrapnel bolts. Oil sets up fire (an
@@ -84,8 +85,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Workshop {
-	/** (Scaling audit) A Marksman's shot from a gun deals this share more for each Marksman class level (half again at 25). */
-	static final float GUN_SHARE = 0.02F;
+	/** (Scaling audit) A Marksman's shot from a gun deals this share more for each Marksman class level (three quarters more at 25). */
+	static final float GUN_SHARE = 0.03F;
 	/** Steady Aim, a rank: this share harder; this many degrees more aim assist; this share less stray. Still: moved less than this for this long. */
 	static final float STEADY_DAMAGE = 0.1F, STEADY_DEGREES = 1.5F, STEADY_SPREAD = 0.25F;
 	static final double STILL_MOVE = 0.02;
@@ -112,6 +113,10 @@ public final class Workshop {
 	static final int KIT_COOLDOWN = 20 * 30;
 	/** Gunsmith: the share more shot (WeaponMod's bullets, a blunderbuss's shot) each craft gives (half again: twelve for eight). */
 	static final float SMITH_SHOT = 0.5F;
+	/** Gunsmith: a handgonne or arquebus built on a barrel a Gunsmith forged isn't worn by this share of its shots. */
+	static final float SMITH_SPARE = 0.25F;
+	/** On a Gunsmith's barrel, and the gun built on it: how much of a Gunsmith forged it (their share of the perk, up to 1). */
+	static final String SMITH_TAG = "jaymoskingdoms_gunsmith";
 	/** A weaponsmith's guns and shot for the Gunsmith-less: emeralds, how many, uses. */
 	static final int HANDGONNE_PRICE = 8, ARQUEBUS_PRICE = 14, FLINTLOCK_PRICE = 18, MUSKET_PRICE = 24, BULLETS_PRICE = 2, BULLETS = 8, STOCK_USES = 4;
 
@@ -160,6 +165,8 @@ public final class Workshop {
 		ServerEntityEvents.ENTITY_LOAD.register(Workshop::loaded);
 		ServerLivingEntityEvents.AFTER_DEATH.register(Workshop::killed);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Workshop::struck);
+		PowersCompat.onForged(Workshop::forged);
+		PowersCompat.onAssembled(Workshop::assembled);
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level.isClientSide() || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown() || hand != InteractionHand.MAIN_HAND
 				|| !Tinkerers.station(level.getBlockState(hit.getBlockPos()))) {
@@ -361,6 +368,36 @@ public final class Workshop {
 		if (!sp.getInventory().add(extra) && !extra.isEmpty()) {
 			sp.drop(extra, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
+	}
+
+	/** Gunsmith: a handgonne's or arquebus's barrel off a Gunsmith's anvil is marked as theirs ({@link #SMITH_TAG}). */
+	private static void forged(ServerPlayer smith, ItemStack result) {
+		float share = Math.min(1.0F, ClassTrees.power(smith, SMITH));
+		if (share <= 0.0F) {
+			return;
+		}
+		String path = BuiltInRegistries.ITEM.getKey(result.getItem()).getPath();
+		for (EarlyGuns.Rung rung : EarlyGuns.Rung.values()) {
+			if (path.equals(rung.id() + "_barrel")) {
+				CustomData.update(DataComponents.CUSTOM_DATA, result, tag -> tag.putFloat(SMITH_TAG, share));
+			}
+		}
+	}
+
+	/** Gunsmith: the mark on a barrel goes onto the gun the Tool Station builds on it. */
+	private static void assembled(ItemStack barrel, ItemStack made) {
+		CustomData data = barrel.get(DataComponents.CUSTOM_DATA);
+		float share = data == null ? 0.0F : data.copyTag().getFloatOr(SMITH_TAG, 0.0F);
+		if (share > 0.0F && EarlyGuns.Rung.of(made) != null) {
+			CustomData.update(DataComponents.CUSTOM_DATA, made, tag -> tag.putFloat(SMITH_TAG, share));
+		}
+	}
+
+	/** Gunsmith: whether this shot leaves {@code gun} unworn (a gun built on a Gunsmith's barrel, {@link #SMITH_SPARE} of its shots). */
+	static boolean spared(ItemStack gun, LivingEntity shooter) {
+		CustomData data = gun.get(DataComponents.CUSTOM_DATA);
+		float share = data == null ? 0.0F : data.copyTag().getFloatOr(SMITH_TAG, 0.0F);
+		return share > 0.0F && shooter.getRandom().nextFloat() < SMITH_SPARE * Math.min(1.0F, share);
 	}
 
 	/** A weaponsmith keeps guns and shot for whoever isn't a Gunsmith (as far as their tier allows, {@link TierGate}). */

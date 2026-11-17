@@ -82,8 +82,10 @@ public final class RogueExtras {
 	static final float WARY_FACTOR = 1.5F;
 	/** Shadow Blade: "weaker" is no more of its own health than this share of the Thief's. */
 	static final float BLADE_WEAKER = 1.0F;
-	/** Shadow Blade: armoured foes resist it: each point of the foe's armour counts as this much health against that. */
+	/** Shadow Blade: armoured foes resist it: each point of the foe's armour past {@link #BLADE_ARMOUR_FREE} counts as this much health against that. */
 	static final float BLADE_ARMOUR = 1.0F;
+	/** Shadow Blade: this much of a foe's armour doesn't count (a zombie's own hide). */
+	static final float BLADE_ARMOUR_FREE = 2.0F;
 	/** Shadow Blade: the felling blow is this many times what the foe has left, so armour and warding (at most 96% between them) don't save them. */
 	static final float BLADE_THROUGH = 30.0F;
 	/** Ghost: how long after Vanish's cover is gone the first blow still counts (ticks). */
@@ -374,14 +376,14 @@ public final class RogueExtras {
 
 	// ---- blows ----------------------------------------------------------------------------------------------------------------
 
-	/** Shadow Blade: a light blade in the back of an unaware weaker foe puts it down; its armour counts against it ({@link #BLADE_ARMOUR}). */
+	/** Shadow Blade: a light blade in the back of an unaware weaker foe puts it down; its armour past the first {@link #BLADE_ARMOUR_FREE} points counts against it ({@link #BLADE_ARMOUR}). */
 	static float dealt(LivingEntity target, DamageSource source, float amount) {
 		if (!(source.getEntity() instanceof ServerPlayer thief) || source.getDirectEntity() != thief || target == thief || !(target instanceof Mob mob)) {
 			return amount;
 		}
 		float blade = ClassTrees.power(thief, SHADOW_BLADE);
 		if (blade <= 0.0F || !HiddenBlade.weapon(thief).is(ClassPerks.LIGHT_BLADES) || Senses.boss(mob) || Senses.cooling(target, source)
-			|| mob.getMaxHealth() + mob.getArmorValue() * BLADE_ARMOUR > thief.getMaxHealth() * BLADE_WEAKER * Math.min(1.0F, blade)
+			|| mob.getMaxHealth() + Math.max(0.0F, mob.getArmorValue() - BLADE_ARMOUR_FREE) * BLADE_ARMOUR > thief.getMaxHealth() * BLADE_WEAKER * Math.min(1.0F, blade)
 			|| !Senses.unaware(target, thief) || !Senses.fromRear(target, thief)) {
 			return amount;
 		}

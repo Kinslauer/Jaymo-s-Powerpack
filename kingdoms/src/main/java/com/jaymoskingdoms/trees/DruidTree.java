@@ -36,10 +36,11 @@ final class DruidTree {
 		ClassTrees.add(FaithExtras.THICK_HIDE, druid, 1, 3, 18, 6, 1, List.of(), List.of(FaithExtras.SWIFT_PAWS));
 		ClassTrees.add(FaithExtras.SWIFT_PAWS, druid, 1, 3, 18, 6, 3, List.of(), List.of(FaithExtras.THICK_HIDE));
 		ClassTrees.add(FaithExtras.WILD_HEART, druid, 1, 3, 22, 7, 2, List.of(), List.of());
-		// the folded Awakening rows: the green arts (the left edge) and the seven sizes (the right)
-		ClassTrees.add(GreenArts.GREEN, druid, 1, 2, 3, 1, 0, List.of(), List.of());
-		ClassTrees.add(GreenArts.BLOOM, druid, 1, 2, 8, 3, 0, List.of(GreenArts.GREEN), List.of());
-		ClassTrees.add(SizeArts.SIZES, druid, 3, 2, 5, 2, 4, List.of(), List.of());
-		ClassTrees.add(SizeArts.RAY, druid, 1, 2, 12, 4, 4, List.of(SizeArts.SIZES), List.of());
+		// the folded Awakening rows: the green arts (the left edge) and the seven sizes (the right); a point a rank, so the
+		// tree doesn't hold far more than a Druid can buy
+		ClassTrees.add(GreenArts.GREEN, druid, 1, 1, 3, 1, 0, List.of(), List.of());
+		ClassTrees.add(GreenArts.BLOOM, druid, 1, 1, 8, 3, 0, List.of(GreenArts.GREEN), List.of());
+		ClassTrees.add(SizeArts.SIZES, druid, 3, 1, 5, 2, 4, List.of(), List.of());
+		ClassTrees.add(SizeArts.RAY, druid, 1, 1, 12, 4, 4, List.of(SizeArts.SIZES), List.of());
 	}
 }

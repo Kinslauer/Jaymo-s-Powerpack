@@ -78,6 +78,11 @@ public final class Bleeding {
 	 * Brute's Scar Tissue); without Kingdoms everyone's is 1.
 	 */
 	public static java.util.function.ToDoubleFunction<LivingEntity> closing = body -> 1.0;
+	/**
+	 * What each bleed tick's harm to {@code body} is multiplied by, against anyone else's (1). Jaymo's Kingdoms sets this at
+	 * server start (a blood Sorcerer's Element's Hide); without Kingdoms everyone's is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> harm = body -> 1.0;
 	/** (0.14.4) An open cut's part heals no further than this fraction (stitching or a bandage closes it). */
 	public static final float CUT_CAP = 0.5F;
 	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
@@ -618,11 +623,17 @@ public final class Bleeding {
 		if (body instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return;
 		}
+		float harmed;
+		try {
+			harmed = (float) harm.applyAsDouble(body);
+		} catch (RuntimeException e) {
+			harmed = 1.0F;
+		}
 		for (BodyPart part : BodyPart.values()) {
 			if ((mask & Breaks.bit(part)) == 0 || !body.isAlive() || Downed.isDowned(body)) {
 				continue;
 			}
-			Wounds.hurtPart(body, part, Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE, null, BLEEDING_DAMAGE);
+			Wounds.hurtPart(body, part, (Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE) * harmed, null, BLEEDING_DAMAGE);
 		}
 	}
 

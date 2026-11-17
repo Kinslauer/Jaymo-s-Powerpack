@@ -241,11 +241,6 @@ public final class Spellcraft {
 	 * A Mage (0.7.212: or another staff caster) reading a scroll of a spell they don't know: they learn it. False for anyone
 	 * else, or a spell they know.
 	 */
-	/** Whether {@link #learn} would teach {@code player} {@code spell} (class trees: a scroll learned is studied first, {@link Arcana.Scroll}). */
-	static boolean learns(ServerPlayer player, String spell) {
-		return staffCaster(player) && !Classes.of(player).spells().contains(spell) && ClassCasters.mayLearn(player, spell) && Knowledge.has(player, Knowledge.HIGHER_ARTS);
-	}
-
 	static boolean learn(ServerPlayer player, String spell) {
 		Classes.Chosen c = Classes.of(player);
 		if (!staffCaster(player) || c.spells().contains(spell) || !ClassCasters.mayLearn(player, spell)) {
@@ -466,8 +461,9 @@ public final class Spellcraft {
 			return;
 		}
 		if (element.equals(WildMagic.WILD)) {
-			// the wild bloodline's sigil takes a different element every time
+			// the wild bloodline's sigil takes a different element every time (their Hide and Wellspring follow it)
 			element = WildMagic.element(level.getRandom());
+			ArcaneExtras.wildCast(player, element);
 		}
 		if (element.equals("restoration")) {
 			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their healing is their sigil, theirs from the start
@@ -549,6 +545,7 @@ public final class Spellcraft {
 		}
 		if (element.equals(WildMagic.WILD)) {
 			element = WildMagic.element(level.getRandom());
+			ArcaneExtras.wildCast(player, element);
 		}
 		if (player.getCooldowns().isOnCooldown(Arcana.WIZARD_STAFF.getDefaultInstance())) {
 			return;

@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
  * (an imbued blade put away stops burning down until it is drawn; worked in {@link Spellcraft}) and Wellspring (mana comes
  * back twice as fast standing in their element).
  *
- * <p><b>Mage.</b> The second crossroads Scholar (a scroll is learned in half the study) or Battlemage (a staff strikes
+ * <p><b>Mage.</b> The second crossroads Scholar (a scroll learned from is sometimes not used up) or Battlemage (a staff strikes
  * like a mace, and a cast leaves the shield on their arm up).
  *
  * <p><b>Warlock.</b> Dark Sight (they see in the dark while they owe), Borrowed Time (once a rest, the blow that would put
@@ -60,13 +60,14 @@ public final class ArcaneExtras {
 	/** Wellspring: how many times as fast mana comes back, and how high open sky counts as open wind. */
 	static final float WELL = 2.0F;
 	static final double WELL_WIND = 96.0;
-	/** Wellspring: how near the fallen or the dying a blood Sorcerer stands in their element; the elements the wild bloodline shares. */
+	/** Wellspring: how near the fallen or the dying a blood Sorcerer stands in their element; the share of their own health at or under which they do anywhere. */
 	static final double WELL_BLOOD = 6.0;
-	static final String[] WILD_PLACES = {"fire", "water", "ice", "lightning", "earth", "air"};
+	static final float WELL_HURT = 0.5F;
+	/** Element's Hide, blood: the share of their own bleeding's harm it turns. */
+	static final float HIDE_BLEED = 0.5F;
 	// ---- Mage ----
-	/** Learning a scroll: how long it is studied (ticks), and the share of that a Scholar needs. */
-	static final int STUDY_TICKS = 60;
-	static final float SCHOLAR = 0.5F;
+	/** Scholar: the chance a scroll they learn a spell from for good isn't used up. */
+	static final float SCHOLAR_KEEPS = 0.25F;
 	/** Battlemage: what a staff's blow deals at least (a mace's), and how long after a cast the shield on the arm still turns blows (ticks). */
 	static final float MACE = 6.0F;
 	static final int GUARD_TICKS = 30;
@@ -92,6 +93,8 @@ public final class ArcaneExtras {
 
 	/** Battlemage: until when each Mage's shield still turns blows after a cast. */
 	private static final Map<UUID, Long> GUARD = new HashMap<>();
+	/** The element each wild Sorcerer's last working came out as (not saved): what their Hide and Wellspring answer to. */
+	private static final Map<UUID, String> WILD_LAST = new HashMap<>();
 
 	private ArcaneExtras() {
 	}
@@ -99,7 +102,10 @@ public final class ArcaneExtras {
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("class tree extras attachments: {} {}", TITHED, HAND_STATE);
 		ServerTickEvents.END_SERVER_TICK.register(ArcaneExtras::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> GUARD.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			GUARD.clear();
+			WILD_LAST.clear();
+		});
 		// Borrowed Time: before Jaymo's Powers' own downing (which waits to the last)
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> !(entity instanceof ServerPlayer warlock && borrowTime(warlock)));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer mage && guarded(mage, source)));
@@ -150,6 +156,11 @@ public final class ArcaneExtras {
 		Spellcraft.strike(level, owner, next, element, true);
 	}
 
+	/** A wild Sorcerer's working came out as {@code element}: their Hide and Wellspring answer to it until the next. */
+	static void wildCast(ServerPlayer sorcerer, String element) {
+		WILD_LAST.put(sorcerer.getUUID(), element);
+	}
+
 	/** Wellspring: what {@code player}'s mana regeneration is multiplied by, standing in their element. */
 	static float wellspring(Player player) {
 		if (!(player instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel level)) {
@@ -166,21 +177,18 @@ public final class ArcaneExtras {
 	/** Standing in one's element: where it trickles in by itself ({@link Absorption#inElement}), and rain for the storm, open sky up high for the wind, soul ground for death. */
 	private static boolean inElement(ServerLevel level, ServerPlayer player, String element) {
 		if (element.equals(WildMagic.WILD)) {
-			// the wild bloodline is every element by turns: any of their places is its own
-			for (String each : WILD_PLACES) {
-				if (inElement(level, player, each)) {
-					return true;
-				}
-			}
-			return false;
+			// the wild bloodline is every element by turns: the one its last working came out as (none yet: nowhere)
+			String last = WILD_LAST.get(player.getUUID());
+			return last != null && inElement(level, player, last);
 		}
 		if (Absorption.inElement(level, player, element)) {
 			return true;
 		}
 		BlockPos at = player.blockPosition();
 		if (element.equals("blood")) {
-			// blood: beside the fallen or the dying
-			return !level.getEntities(player, player.getBoundingBox().inflate(WELL_BLOOD),
+			// blood: their own running (bleeding, or at half health or less), or beside the fallen or the dying
+			return PowersCompat.cuts(player) > 0 || player.getHealth() <= player.getMaxHealth() * WELL_HURT
+				|| !level.getEntities(player, player.getBoundingBox().inflate(WELL_BLOOD),
 				e -> KitchenCompat.isCorpse(e) || e instanceof LivingEntity l && l.isAlive() && Downed.isDowned(l)).isEmpty();
 		}
 		return switch (element) {
@@ -198,15 +206,11 @@ public final class ArcaneExtras {
 			return true;
 		}
 		if (element.equals(WildMagic.WILD)) {
-			for (String each : WILD_PLACES) {
-				if (ofElement(source, each, sorcerer)) {
-					return true;
-				}
-			}
-			return false;
+			String last = WILD_LAST.get(sorcerer.getUUID());
+			return last != null && ofElement(source, last, sorcerer);
 		}
 		return switch (element) {
-			// blood: what draws it
+			// blood: what draws it (their own bleeding has no blow to turn: {@link #bleedHarm})
 			case "blood" -> source.is(DamageTypes.CACTUS) || source.is(DamageTypes.SWEET_BERRY_BUSH) || source.is(DamageTypes.THORNS);
 			case "fire" -> source.is(DamageTypeTags.IS_FIRE);
 			case "water" -> source.is(DamageTypeTags.IS_DROWNING);
@@ -221,12 +225,24 @@ public final class ArcaneExtras {
 		};
 	}
 
+	/**
+	 * Element's Hide, blood (Jaymo's Powers asks, {@link PowersCompat#shareExtras}): what a bleed tick's harm to
+	 * {@code body} is multiplied by ({@link #HIDE_BLEED} less for a blood Sorcerer with the Hide).
+	 */
+	static double bleedHarm(LivingEntity body) {
+		return body instanceof ServerPlayer sorcerer && "blood".equals(Spellcraft.element(sorcerer))
+			? 1.0 - HIDE_BLEED * Math.min(1.0F, ClassTrees.power(sorcerer, HIDE)) : 1.0;
+	}
+
 	// ---- Mage -----------------------------------------------------------------------------------------------------------------
 
-	/** How long {@code reader} studies a scroll to learn it for good (ticks): half for a Scholar. */
-	static int study(LivingEntity reader) {
-		float scholar = reader instanceof Player player ? Math.min(1.0F, ClassTrees.power(player, SCHOLAR_KEY)) : 0.0F;
-		return Math.max(1, Math.round(STUDY_TICKS * (1.0F - (1.0F - SCHOLAR) * scholar)));
+	/** Scholar: {@code reader} has just learned a scroll's spell for good; whether the scroll is still whole ({@link #SCHOLAR_KEEPS}). */
+	static boolean scrollKept(ServerPlayer reader) {
+		if (reader.getRandom().nextFloat() >= SCHOLAR_KEEPS * Math.min(1.0F, ClassTrees.power(reader, SCHOLAR_KEY))) {
+			return false;
+		}
+		reader.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.scroll_kept"));
+		return true;
 	}
 
 	/** Battlemage: a staff cast was made; a shield on the other arm stays up through it. */
