@@ -14525,3 +14525,15 @@ Andy's Ragdolls and Cover picks (ln-player, ln-cover, ln-npc). The idea is Leani
 - **Read the Ground** (Survival): you also know a body for what it was ("Deer Corpse", or whose it is) and how it was
   killed, so what's left of its pelt ("mauled, hide torn"). Without the perk every body is just "Corpse", and nobody
   else is told at the first cut what the killing did to a carcass. Needs Jaymo's Kitchen.
+
+## 0.9.85 (2026-11-17): vampire leap and holy dread
+
+- **Right-click leap** (Andy, from a clip of a vampire trying to reach prey on a tower): a vampire's right-click with an empty main hand, when nothing else takes the click. Locked on (middle mouse), they fly at the target (up to 18 blocks, in sight) and feed on it when they reach it, as Feed does (the grab on people, the bite on the rest). Not locked: a strong jump the way they look. No fall damage until they land. In the open sun by day, or near something holy, the leap is weaker and slower to come back. Dhampirs don't fear the sun. Holding the button leaps once (`BloodLeap`, `BloodLeapUseMixin`).
+- **Holy dread**: every patron's holy things sting a vampire's blood, the Lantern Warden's and the Truth's worst. A holy symbol or patron weapon held nearby (or in their own hand), a Cleric, Paladin or village priest, a shrine or old altar, or a patron's temple weakens them like daylight (Weakness, weaker leap) and makes them smoke; close enough, the blood burns. Staying near brings the wrath ladder: omens, then lightning nearby, then a smiting. Swearing, a prayer answered, an offering or a boon burns a vampire at once (`HolyDread`).
+- Built by CI only; not played.
+
+## 0.9.86 (2026-11-17): server: no chunk loads from the smith's keeping, starts stay in pre-generated land
+
+- **Crash fix**: the smith's keeping (KeepingCells) no longer reads blocks in chunks that aren't loaded. A villager loaded at the edge of the loaded land is looked at once the land round him has loaded (tried each tick, up to 10 seconds, then again the next time he loads), and a kept smith's light, bed and hatch are only checked while the chunks round his cell are loaded. Before, the look made the missing chunk on the server thread, which held the Deck past its 60-second watchdog (crash 2026-11-17, 7:18 AM).
+- **Starts stay in made land**: where Chunky has pre-generated the world (its saved task in config/chunky/tasks: centre, radius, shape and how far it got), a setting out's random point is drawn inside that land, 128 blocks in from its edge, and a start only stands you on ground inside it. A village, wreck or wild ring found past the edge is passed over for the start's fallback, so nobody wakes in land the Deck has to make while they play. With no Chunky task for the world, starts work as before (Pregen).
+- Built by CI; not tested on the server yet.
