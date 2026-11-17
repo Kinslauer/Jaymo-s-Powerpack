@@ -26,4 +26,6 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
   charter (1,000, from a realm's cartographer, Dread and reputation 400) makes a patch of that realm's land your
   homestead and you a householder there.
 - **Treasury**: /kingdom withdraw is gone; lords withdraw from the Faction tab, up to a tenth of the treasury a day.
+- **Legend larder**: wind dragons drop Wind-Dragon Meat and the Aether's Giants drop Giant's Marrow (for Kitchen's Legend
+  feasts; LegendLarder).
 - Built; not played.

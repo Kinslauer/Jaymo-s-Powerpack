@@ -23,4 +23,11 @@ Andy's picks from the scaling audit (pick page rows; early game kept weak, late 
 - **Fishing**: the big-fish glut counts per angler per day across every village (it was per village, so carrying the
   catch to the next one dodged it). Old per-village glut data is no longer read.
 - Comments fixed in GravityPower (a fresh slam is 0.48 of full) and ZFighterTraining (mastery ticks every 20 s).
+- **The last hold** (Andy's note: "When players are attacked they get to take an extra hit if the one they take would
+  have downed them"): the first attacked blow that would down a player leaves them on half a heart instead, with a heavy
+  heartbeat and a red edge pulse. The next downing blow downs them as usual. The hold comes back after 30 s unhurt, and
+  on a relog. Falls, fire, drowning and other unattacked harm, executions, beheadings, gibs and blows that halve ignore
+  it. It is checked before every other save (Kingdoms' Last Stand, Darktide shade, sparring), so those come after it
+  (LastHold).
+- A landed legend fish also gives a Legend's Fillet (Kitchen's Deep King's Platter).
 - Built; not played.
