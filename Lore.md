@@ -761,7 +761,7 @@ them apart, spiders are crushed to legs, looters rob them, and kin carry their f
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
 you."
 
-(new) **The last hold** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve); Andy's words: "When players are attacked they get to take an extra
+(new) **The last hold** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve; Andy's words: "When players are attacked they get to take an extra
 hit if the one they take would have downed them"). A fighter's body does not drop to the first blow that should have
 felled it. It holds, for one breath, on the last of its strength, and only the next blow takes it down. Spent, the hold
 comes back once the fighter has had half a minute unhurt. A blade at the neck, an execution or a blast that tears the
