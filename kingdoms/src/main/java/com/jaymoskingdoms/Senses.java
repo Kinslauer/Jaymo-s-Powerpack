@@ -77,7 +77,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes; and the
  * stealth meter beside it ({@link Meter}): how far your noise carries, how lit you are, whether you bleed, whether you talk.</li>
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
- * it is searching) is a sneak attack, {@link #SNEAK_ATTACK_MULT}; Sneak Attack's ranks make it more. The hidden blade's
+ * it is searching) and struck from its rear ({@link #REAR_DOT}) is a sneak attack, only with the Sneak Attack perk (its ranks: {@link #SNEAK_ATTACK_RANK_MULT}). The hidden blade's
  * full-strength stab on an unaware one is an assassination ({@link HiddenBlade}, Assassinate).</li>
  * <li><b>Bosses and pets</b> (0.7.114): even they can get got. A boss is harder to catch: stealth cuts its sight no lower
  * than {@link #BOSS_SIGHT_MIN}, it sees in a wider cone ({@link #BOSS_VIEW_COS}), it is only unaware while it is after no
@@ -119,9 +119,10 @@ public final class Senses {
 	static final double LOST_LURE = 8.0;
 	static final int LURE_TICKS_PER_BLOCK = 12;
 
-	/** A sneak attack multiplies the blow by this; Sneak Attack rank 1 and rank 2 by these instead. */
-	static final float SNEAK_ATTACK_MULT = 2.0F;
+	/** (Andy, 2026-11-17: "stealth kills need to go onto the skill tree, attacking from behind should be intentional") A sneak attack, only with the Sneak Attack perk, multiplies the blow by this at rank 1 and 2. */
 	static final float[] SNEAK_ATTACK_RANK_MULT = {2.5F, 3.0F};
+	/** A sneak attack only from the mob's rear: the way from it to the attacker, flat, against its look, at most this (-0.3: the back 145 degrees or so). */
+	static final double REAR_DOT = -0.3;
 
 	/** Bosses: stealth cuts their sight no lower than this share; they see within this cosine of their look (-0.5: a 240 degree cone). */
 	static final double BOSS_SIGHT_MIN = 0.4, BOSS_VIEW_COS = -0.5;
@@ -835,9 +836,23 @@ public final class Senses {
 		return Skills.rank(player, Skills.Perk.ASSASSINATE) > 0 && unaware(target, player);
 	}
 
+	/** Whether {@code player} strikes {@code target} from its rear ({@link #REAR_DOT}), flat, against where it looks. */
+	static boolean fromRear(LivingEntity target, ServerPlayer player) {
+		Vec3 to = player.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 look = target.getViewVector(1.0F).multiply(1.0, 0.0, 1.0);
+		if (target instanceof EnderDragon) {
+			// (the dragon's look runs backwards, as in inCone)
+			look = look.scale(-1.0);
+		}
+		if (to.lengthSqr() < 1.0E-4 || look.lengthSqr() < 1.0E-4) {
+			return false;
+		}
+		return to.normalize().dot(look.normalize()) <= REAR_DOT;
+	}
+
 	/**
 	 * What a blow deals, from {@code amount}: a player's melee blow on a monster that is unaware of them is a sneak attack
-	 * ({@link #SNEAK_ATTACK_MULT}, or Sneak Attack's). Never on a player, or one of the Combat Arts' own blows.
+	 * (Sneak Attack's {@link #SNEAK_ATTACK_RANK_MULT}, with the perk and from its rear, {@link #REAR_DOT}). Never on a player, or one of the Combat Arts' own blows.
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		if (CombatArts.striking() || target instanceof Player || !(source.getEntity() instanceof ServerPlayer sp)
@@ -845,7 +860,8 @@ public final class Senses {
 			|| HiddenBlade.is(sp.getMainHandItem()) && !HiddenBlade.skilled(sp) || !unaware(target, sp)) {
 			return amount;
 		}
-		if (cooling(target, source)) {
+		int rank = Skills.rank(sp, Skills.Perk.SNEAK_ATTACK);
+		if (rank <= 0 || !fromRear(target, sp) || cooling(target, source)) {
 			return amount;
 		}
 		long now = sp.level().getGameTime();
@@ -854,8 +870,7 @@ public final class Senses {
 			return amount;
 		}
 		STRUCK.put(sp.getUUID(), new long[] {target.getId(), now});
-		int rank = Skills.rank(sp, Skills.Perk.SNEAK_ATTACK);
-		float mult = rank <= 0 ? SNEAK_ATTACK_MULT : SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
+		float mult = SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
 		if (sp.level() instanceof ServerLevel level) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.8F, 0.8F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.25, 0.3, 0.25, 0.2);
