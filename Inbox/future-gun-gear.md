@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
 thread: 
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/future/
