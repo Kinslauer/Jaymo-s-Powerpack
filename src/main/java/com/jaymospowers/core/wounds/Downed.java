@@ -1562,6 +1562,10 @@ public final class Downed {
 			// (0.14.4) medicine in hand: Treatment's, not a revive
 			return InteractionResult.PASS;
 		}
+		if (com.jaymospowers.core.Prosthetics.fitsOn(player.getMainHandItem(), entity) != 0) {
+			// a limb in hand that they lack: it's fitted to them (Prosthetics), not a revive
+			return InteractionResult.PASS;
+		}
 		// (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking,
 		// reviving, lifting": from a kneel at their side (Kneel: the low crouch, held still) a hold of use brings them round and
 		// a tap lifts them (Carry#liftDowned). Standing, a tap is only a tap (a Xenoform band torn off); a sneak standing over
@@ -1705,6 +1709,10 @@ public final class Downed {
 					eaten = stack.getHoverName();
 					stack.consume(1, player);
 					player.getInventory().setChanged();
+				}
+				if (body instanceof ServerPlayer patient) {
+					// (Andy, 2026-11-17) the limbs they carry, or that lie by them, are strapped on as they're got up
+					com.jaymospowers.core.Prosthetics.fitFrom(patient, player);
 				}
 				String revived = feet(body, "message.jaymospowers.downed.revived");
 				getUp(level, body);
