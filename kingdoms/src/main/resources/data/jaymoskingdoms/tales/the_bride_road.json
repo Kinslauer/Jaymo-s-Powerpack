@@ -13,7 +13,9 @@
     "yard": { "at": "home", "name": "the yard" },
     "milestone": { "at": "road", "from": "home", "dist": [200, 380], "name": "the ninth milestone" },
     "far": { "at": "other_town", "name": "the next town" },
-    "mill": { "at": "near", "from": "far", "dist": [30, 80], "name": "Pell's mill" }
+    "mill": { "at": "near", "from": "far", "dist": [30, 80], "name": "Pell's mill" },
+    "overlook": { "at": "near", "from": "milestone", "dist": [35, 60], "name": "the rise above the ninth milestone" },
+    "drove": { "at": "wild", "from": "home", "dist": [260, 420], "name": "the drovers' track over the hill" }
   },
   "first": "ask",
   "steps": {
@@ -42,7 +44,7 @@
       ]
     },
     "meet_bride": {
-      "do": "talk", "who": "bride", "goal": "Meet {bride} in {place:yard}",
+      "do": "talk", "who": "bride", "goal": "Meet {bride} in {place:yard}", "clock": { "wedding": 5 },
       "say": [
         "You are the escort. Good. I had wagered on a cousin with a cudgel. Has {giver} told you what I am worth? Three harvests of flour, ground fine. I have done the sum. It comes to rather less than a good cow.",
         "I can walk twenty miles in a day and I do not need to be talked to. Two things. I carry my own bundle. And if I say we stop, we stop, and you do not ask why."
@@ -56,12 +58,103 @@
       "do": "talk", "who": "bride",
       "say": "Then we understand each other. One question, and answer it honestly, for I shall know. If I asked you to walk slowly: would you?",
       "replies": [
-        { "say": "As slowly as you like.", "then": "escort_road", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I would." },
-        { "say": "I was hired to arrive.", "then": "escort_road", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I was hired to arrive." }
+        { "say": "As slowly as you like.", "then": "road_word", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I would." },
+        { "say": "I was hired to arrive.", "then": "road_word", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I was hired to arrive." }
+      ]
+    },
+    "road_word": {
+      "do": "talk", "who": "giver", "goal": "Hear {giver}'s word about the road",
+      "say": [
+        "One thing before you go. A carter came in last night by the bride road. Three men at the ninth milestone, sat on their hands, stopping nobody. Waiting. It may be nothing. It may be a cart they are owed.",
+        "You have three ways, as I see it. Walk her straight up the road. Go ahead yourself after dark and see what they are. Or take the drovers' track over the hill, which is two days longer.",
+        "And mind this. The wedding is {in:wedding}, and {groom} is not a man to stand at a door past the day. If she is not at it, the match is off and the debt stands."
+      ],
+      "replies": [
+        { "say": "We walk the road.", "then": "escort_road" },
+        { "say": "I'll look them over first, after dark.", "then": "scout_go", "journal": "A carter saw three men waiting at the ninth milestone. I mean to look them over after dark, before I walk {bride} past them." },
+        { "say": "The drovers' track. Late is better than waylaid.", "then": "long_road", "mark": "bride_road_long", "journal": "A carter saw three men waiting at the ninth milestone. I chose the drovers' track over the hill, though it costs two days and the wedding will not wait." }
+      ]
+    },
+    "scout_go": {
+      "do": "go", "to": "overlook", "goal": "Go up to {place:overlook} after dark", "when": "night", "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
+      "then": "scout_watch"
+    },
+    "scout_watch": {
+      "do": "vigil", "at": "overlook", "goal": "Watch the men at the milestone", "when": "night", "gap": 12, "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
+      "lines": [
+        { "say": "Three men round a small fire below the milestone. No cart, no packs, no beasts. They are not travelling.", "sound": "minecraft:block.fire.ambient" },
+        { "say": "One has a stone axe across his knees. The other two have cudgels, and between them lies a sack with a drawstring, long enough for a person." },
+        { "say": "The one with the axe says it over for the other two: the girl in the grey hood, quick, and it is to look as if the road did it.", "if": "hand=kin" },
+        { "say": "The one with the axe says it over for the other two: the girl in the grey hood, and she is not to be marked.", "if": "!hand=kin" },
+        { "say": "The fire burns down. Two of them sleep. The axe-man keeps the watch, and he keeps it facing the town road. Nobody is watching the hill behind him.", "mark": "bride_road_scouted" }
+      ],
+      "left": "road_word",
+      "then": "scout_back"
+    },
+    "scout_back": {
+      "do": "talk", "who": "bride", "goal": "Tell {bride} what waits at the milestone",
+      "say": "Three men and a sack. Well. I have been called a good many things, but never before a parcel. And what does my escort propose to do about it?",
+      "replies": [
+        { "say": "We walk the road. I know where they sit, and which way they are looking.", "then": "escort_road", "journal": "From the rise I watched the three men at the ninth milestone. They are waiting for {bride}, and know her by her grey hood. I know where they sit and which way their watch faces. We walk the road." },
+        { "say": "We take the drovers' track, and they can sit there till the snow.", "then": "long_road", "mark": "bride_road_long", "journal": "From the rise I watched the three men at the ninth milestone. They are waiting for {bride}, and know her by her grey hood. I chose the drovers' track over the hill, though it costs two days." }
+      ]
+    },
+    "long_road": {
+      "do": "escort", "who": "bride", "to": "drove", "goal": "Walk {bride} round by {place:drove}", "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
+      "journal": "We left the road and took the drovers' track. It is all sheep-walk and wind up there, and no milestones.",
+      "then": "hill_days"
+    },
+    "hill_days": {
+      "do": "wait", "goal": "Cross the hill by the drovers' track", "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
+      "days": [2, 2],
+      "wake": "none",
+      "journal": "Two days over the hill, where the road would have been one. {bride} did not complain of it. I think she was counting them as well.",
+      "then": "hill_fire"
+    },
+    "hill_fire": {
+      "do": "talk", "who": "bride", "goal": "Speak with {bride} at the hill fire",
+      "say": {
+        "?hand=bride": [
+          "You took the hill. Of all the careful fools {giver} could have hired.",
+          "Those three at the milestone were mine. My grandmother's ring paid them. They were to carry me off, gently, and set me down on the coast road. My father would weep and say the road took me, and Pell would pity him and forgive the debt. They are sat there yet, I suppose, earning their advance. And here am I, two days nearer a mill."
+        ],
+        "?mark:bride_road_scouted": [
+          "Two days over a hill, to walk round three men and a sack. I am not complaining. It is two days more that I am nobody's wife.",
+          "Somebody paid for that sack. I have gone through everyone I know, twice, and I find I can believe it of nearly all of them. And I'll tell you what else I have thought, up here where nobody hears. I do not want to arrive. There is the coast. The Tideborn smacks take on hands and ask nothing."
+        ],
+        "?": [
+          "Two days over a hill, to walk round three men who may have been waiting for a cart. I am not complaining. It is two days more that I am nobody's wife.",
+          "I'll tell you what I have been thinking, up here where nobody hears. I do not want to arrive. There is the coast. The Tideborn smacks take on hands and ask nothing. I have thought of it every night for a month and never had the nerve alone."
+        ]
+      },
+      "journal": {
+        "?hand=bride": "On the hill {bride} told me the men at the milestone were her own, hired with her grandmother's ring to carry her off, so that she need never arrive and her father could keep the bride-gift out of the miller's pity. I had walked her round her own plan.",
+        "?": "On the hill {bride} told me she does not want to arrive. She has thought of the coast, and the smacks that ask nothing. We never learned who set those men at the milestone."
+      },
+      "replies": [
+        { "say": "We go on. Speak for yourself at the mill door.", "then": "escort_far_long", "journal": "I told {bride} we go on to the mill, and that she can speak for herself when we get there." },
+        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} go down the far side of the hill toward the coast. She did not look back. I turned for home to tell them something.", "against": ["honour"] }
+      ]
+    },
+    "escort_far_long": {
+      "do": "escort", "who": "bride", "to": "mill", "goal": "Walk {bride} on to {place:mill}", "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
+      "then": "groom_talk_long"
+    },
+    "groom_talk_long": {
+      "do": "talk", "who": "groom", "goal": "Speak with {groom} at the mill door",
+      "say": [
+        "You have brought her, and the day nearly out. The priest had his book under his arm. Come in out of the wind, the pair of you. There is broth.",
+        "By the hill track, was it? Then you are a careful one. Before you go, I will ask you what I asked her father in my letter. He answered me about flour. Is she willing? You have walked days beside her. I have seen her once, across a market. You would know better than I."
+      ],
+      "replies": [
+        { "say": "She is here. Ask her yourself.", "then": "wait_wed", "journal": "{groom} asked me whether {bride} was willing. I told him to ask her. I do not know what she said. The wedding went ahead." },
+        { "say": "Willing enough.", "then": "wait_wed", "mark": "bride_road_vouched", "journal": "{groom} asked me whether {bride} was willing. I said she was. The wedding went ahead.", "against": ["honour"] },
+        { "say": "She is not willing. She never was.", "then": "groom_unwilling" }
       ]
     },
     "escort_road": {
       "do": "escort", "who": "bride", "to": "milestone", "goal": "Walk {bride} as far as {place:milestone}",
+      "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill",
       "journal": "We walked the first day. She set the pace, and it was not a fast one. She kept looking at the hills to the west.",
       "then": "ambush"
     },
@@ -79,11 +172,14 @@
       "mercy": "Get off this road.",
       "thanks": "Gone. We are gone. You'll not see us this side of the hills.",
       "journal": "Three men were waiting at the ninth milestone. They were not after my purse. They knew her hood.",
+      "weak_to": [
+        { "know": "mark:bride_road_scouted", "share": 0.7, "journal": "I knew where the three of them sat and which way the axe-man faced. We came at them from the hill side, and they were slow to their feet for it." }
+      ],
       "slain": "search_raider", "spared": "fire",
       "spared_returns": { "as": "warning", "days": [7, 12], "say": { "?hand=bride": "Easy. I'm not here for work. There's a man going round the hill camps asking who took coin at the ninth milestone, and what became of the girl in the grey hood. Her father's money, I'd guess, or the miller's. I told him the road took her. If you're asked, tell it the same.", "?": "Easy. I'm not here for work. The one who paid us on the bride road came round the hill camps again, wanting hands who don't ask why. I said no. Somebody won't. I thought you'd want to know the wanting hasn't stopped." } }
     },
     "search_raider": {
-      "do": "search", "at": "milestone", "goal": "Search the dead man",
+      "do": "search", "at": "milestone", "goal": "Search the dead man", "mark": "bride_road_raider_dead",
       "clues": [
         { "name": "A hire purse", "item": "minecraft:leather", "lore": ["Paid in advance, and paid well for three men and a day's work.", "Road thieves are not paid. Somebody hired this."], "journal": "The men at the milestone were hired. Their leader carried his advance in a purse." },
         { "name": "A woman's ring", "item": "minecraft:gold_nugget", "lore": ["A thin gold band, worn smooth, too small for his hand. It was in the purse with the coin.", "{bride} looked at it once, and then at the hills."], "journal": "Part of the hire was a woman's ring. {bride} knew it when she saw it.", "if": "hand=bride" },
@@ -127,10 +223,11 @@
       },
       "replies": [
         { "say": "We go on. Speak for yourself at the mill door.", "then": "escort_far", "journal": "I told {bride} we go on to the mill, and that she can speak for herself when we get there." },
-        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} take the coast road at first light. She did not look back. I turned for home to tell them something.", "against": ["honour"] }
+        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} take the coast road at first light. She did not look back. I turned for home to tell them something.", "against": ["honour"] },
+        { "say": "Take the coast road. Your men are alive to swear the road took you, and I'll swear it with them.", "if": "hand=bride & !mark:bride_road_raider_dead", "then": "report_gone", "mark": "bride_road_men_swear", "journal": "I let {bride} take the coast road at first light. Her hired men are alive, and will say the road took her if they are asked. So will I.", "against": ["honour"] }
       ]
     },
-    "escort_far": { "do": "escort", "who": "bride", "to": "mill", "goal": "Walk {bride} on to {place:mill}", "then": "groom_talk" },
+    "escort_far": { "do": "escort", "who": "bride", "to": "mill", "goal": "Walk {bride} on to {place:mill}", "within": "wedding", "late": "end:overdue", "until": "before the wedding day at the mill", "then": "groom_talk" },
     "groom_talk": {
       "do": "talk", "who": "groom", "goal": "Speak with {groom} at the mill door",
       "say": [
@@ -173,6 +270,10 @@
     "wed_after": {
       "do": "talk", "who": "bride", "goal": "Visit {bride} at {place:mill}",
       "say": {
+        "?mark:bride_road_long & hand=kin": [
+          "There is a son. {stepson}. He looked at me across the table the first night as a man looks at a cart he had thought to find in a ditch. He passes me the salt very civilly, and he has asked to be sent to the mill's other wheel, up the valley.",
+          "I think of those three men at the milestone, and of who has gone so quiet since I walked in alive. I have no proof and I want none. {groom} asks before he comes into a room. I am learning the sluice and the tallies. Tell nobody what I think."
+        ],
         "?hand=bride": [
           "He is kind. I had been ready for anything but that, and I find I have no plan for it. He asks before he comes into a room. He has shown me the sluice and the tallies.",
           "I tried the coast in my head again last night. It was further off than it used to be. I do not know whether that is contentment, or only a door shutting quietly. You stopped me on the road. I have not decided whether to thank you for it."
@@ -211,9 +312,18 @@
     },
     "report_gone": {
       "do": "talk", "who": "giver", "goal": "Go back to {giver} without her",
-      "say": "You are back, and alone, and two days early. Sit down. No. Stand. Tell me where {bride} is, and tell it carefully, because whatever you say I shall have to say again to her father and to the miller, and I shall need to get it right.",
+      "say": {
+        "?mark:bride_road_long": "You are back, and alone, and the wedding day not yet come. Sit down. No. Stand. Tell me where {bride} is, and tell it carefully, because whatever you say I shall have to say again to her father and to the miller, and I shall need to get it right.",
+        "?": "You are back, and alone, and two days early. Sit down. No. Stand. Tell me where {bride} is, and tell it carefully, because whatever you say I shall have to say again to her father and to the miller, and I shall need to get it right."
+      },
       "replies": [
-        { "say": "Men took her at the ninth milestone. I could not hold them.", "then": "wait_gone_lie", "mark": "bride_road_lie", "journal": "I told {giver} that raiders carried {bride} off at the ninth milestone.", "against": ["honour"] },
+        { "say": "Men took her at the ninth milestone. I could not hold them.", "then": "wait_gone_lie", "mark": "bride_road_lie", "journal": "I told {giver} that raiders carried {bride} off at the ninth milestone.", "against": ["honour"],
+          "lie": { "name": "road_took_her", "days": [8, 14], "unless": "mark:bride_road_men_swear", "reputation": 15, "hearts": 40,
+            "town": [
+              "The searchers found the Ashdown girl's trail. Not in the hills. On the coast road, alone, at her own pace, with nobody dragging her.",
+              "So the road never took her. And {player} stood in {giver}'s house and swore that it had. Eight days my barley stood uncut for that."
+            ],
+            "returns": { "who": "groom", "as": "warning", "say": "I forgave three harvests because a girl was stolen on the way to my door. Now a shepherd tells me she walked to the coast on her own two feet, and that you watched her go. I'll not take the debt up again. I would not know how to ask an old man for it twice. But I wanted to look at whoever stood before honest people and grieved on her behalf. That is all. I have looked." } } },
         { "say": "She chose her own road. I let her take it.", "then": "wait_gone_truth", "journal": "I told {giver} the truth: {bride} chose her own road, and I let her take it." }
       ]
     },
@@ -238,6 +348,13 @@
   },
   "endings": {
     "refused": { "text": "I left {giver} to find another escort for the bride.", "failed": true },
+    "overdue": {
+      "failed": true,
+      "text": "The wedding day came and went with {bride} still on the road. {groom} took an empty door for his answer and called the match off. The Ashdowns' debt stands.",
+      "marks": ["bride_road_overdue"],
+      "town": ["Pell stood at his mill door till dark on the wedding day. Then he went in and banked the fire.", "Late! A bride, late. {giver} says never again to hire anybody by the look of them."],
+      "later": [{ "days": [8, 14], "letter": { "from": "{bride}", "lines": ["They told me at the mill gate that the day had passed, and the match with it. Nobody asked me, and then nobody wanted me, all inside one week.", "I have gone to the coast. A smack called the Grey Hen has taken me on to gut and to mend. My father writes that the debt stands and that I am to blame for it.", "Thank you for being slow. I do not think you meant it for a kindness. It was the only one I was shown."] } }]
+    },
     "wed": {
       "text": "{bride} is wed to {groom} and lives at the mill. Nobody asked her. She is making of it what she can.",
       "reward": { "coins": 14, "hearts": 6, "reputation": 10 },

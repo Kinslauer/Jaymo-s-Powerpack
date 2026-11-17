@@ -416,9 +416,17 @@ leads wherever the tale sends it, and its ending's `marks` remember it.
 ### a night's watch: `"do": "vigil"`
 
 `{ "do": "vigil", "at": place, "radius": 12, "gap": 10, "when": "night", "lines": [ { "who": role, "say": ... } |
-{ "say": ..., "sound": "minecraft:entity.wolf.howl" } ], "left": <then>, "then": ... }`. While the player keeps near
+{ "say": ..., "sound": "minecraft:entity.wolf.growl" } ], "left": <then>, "then": ... }`. While the player keeps near
 the place at its hour the lines come one at a time: a cast member's as a speech bubble; the rest (what's seen and
 heard) as the tracker's line while the watch lasts and a line in the journal, with a sound if given. A line may have `if` and `mark`. Walking well away once it's begun goes `left`.
+
+### following someone: `"do": "tail"`
+
+`{ "do": "tail", "who": role, "to": place, "when": "night", "near": 6, "far": 28, "seen": <then>, "lost": <then>,
+"then": ... }`. At its hour, once the player is within `far` of them, `who` (one of the cast, not the asker) sets off on
+foot for the place. Coming nearer than `near` blocks where they can see you (half that, crouched) goes `seen`; falling
+more than `far` behind for twelve seconds goes `lost`; still with them when they arrive, the tale goes on, and that's
+where they stand from then. Don't give them `hours` that end before the walk does.
 
 ### know the beast: `weak_to`
 

@@ -617,6 +617,14 @@ final class TaleCast {
 	}
 
 	/** ({@link QuestJobs}) {@code mob} is being walked somewhere: where it stands is where it belongs now. */
+	/** {@code mob} of a tale's cast is sent to stand at {@code to}: it walks there, and that's where it waits from now. */
+	static void send(Mob mob, BlockPos to) {
+		Cast c = mob.getAttached(CAST);
+		if (c != null && !c.over()) {
+			mob.setAttached(CAST, new Cast(c.instance(), c.role(), to.asLong(), c.fight(), c.yielded(), c.over(), c.since()));
+		}
+	}
+
 	static void moved(Mob mob) {
 		Cast c = mob.getAttached(CAST);
 		if (c != null && !c.over()) {

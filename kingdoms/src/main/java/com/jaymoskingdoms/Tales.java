@@ -1277,7 +1277,7 @@ public final class Tales {
 		Predicate<String> facts = facts(player, run);
 		String key = switch (kind) {
 			case "go", "escort" -> Tale.pickString(step, "to", facts, "");
-			case "talk", "bring", "foe", "name" -> {
+			case "talk", "bring", "foe", "name", "tail" -> {
 				JsonObject role = tale.role(Tale.pickString(step, "who", facts, ""));
 				yield role == null ? "" : Tale.pickString(role, "at", facts, "");
 			}
@@ -1981,6 +1981,7 @@ public final class Tales {
 				}
 			}
 			case "vigil" -> TaleWays.vigil(level, player, run, tale, step);
+			case "tail" -> TaleWays.tail(level, player, run, tale, step);
 			case "slay" -> {
 				Quest q = Quests.quest(player, run.quest());
 				if (q != null && q.counted()) {

@@ -20,6 +20,7 @@ STEP_FIELDS = {
     "talk": {"who", "say", "replies", "voices", "not_now"},
     "name": {"who", "say", "suspects", "none", "not_now"},
     "vigil": {"at", "radius", "lines", "gap", "left"},
+    "tail": {"who", "to", "near", "far", "seen", "lost"},
     "go": {"to", "radius"},
     "search": {"at", "clues", "need"},
     "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at", "spared_returns", "weak_to"},
@@ -53,7 +54,7 @@ REQUIRED = {
     "escort": {"who", "to"}, "pack": {"at", "foes", "count"}, "build": {"at", "blocks", "count"}, "blast": {"at"},
     "stash": {"at", "item", "count"}, "lamps": {"at", "count"},
     "rescue": {"who", "at"}, "capture": {"who", "at"}, "await": {"who"},
-    "name": {"who", "suspects"}, "vigil": {"at", "lines"},
+    "name": {"who", "suspects"}, "vigil": {"at", "lines"}, "tail": {"who", "to", "seen", "lost"},
 }
 # Whose kin a captive is, and what a criminal is wanted for (work.jaymoskingdoms.kin.* / crime.* in lang/parts/captures.json).
 KIN = {"daughter", "son", "sister", "brother", "wife", "husband", "mother", "father", "apprentice", "neighbour"}
@@ -602,6 +603,13 @@ def check_tale(path):
                         check_condition(c, lw, line["if"], tale)
             if "left" in step:
                 check_then(c, where + ".left", step["left"], tale, edges)
+        elif do == "tail":
+            check_role(c, where, step["who"], tale)
+            check_place(c, where, step["to"], tale)
+            if step["who"] == "giver":
+                c.err(where, "only one of the tale's cast can be followed")
+            for field in ("seen", "lost"):
+                check_then(c, f"{where}.{field}", step[field], tale, edges)
         elif do == "go":
             check_place(c, where, step["to"], tale)
         elif do == "search":
@@ -747,7 +755,7 @@ def check_tale(path):
                 used.add(t[4:])
 
     for sid, step in steps.items():
-        for field in ("then", "slain", "spared", "failed", "let_go", "late", "left"):
+        for field in ("then", "slain", "spared", "failed", "let_go", "late", "left", "seen", "lost"):
             ends(step.get(field))
         for r in step.get("replies", []):
             ends(r.get("then"))

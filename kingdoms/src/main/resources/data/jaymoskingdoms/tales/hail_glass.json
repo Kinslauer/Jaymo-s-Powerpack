@@ -6,7 +6,7 @@
     "traveller": { "name": ["Tavik Oun", "Isk Varn", "Sele Korrin"], "body": "villager", "job": "none", "at": "house" },
     "clerk": { "name": ["Perrin Dow", "Aldis Wren", "Hew Tarling"], "body": "villager", "job": "librarian", "at": "house" },
     "ember": { "name": ["Kessa Brand", "Oda Harl", "Runa Sprake"], "body": "villager", "job": "toolsmith", "female": true, "at": "works" },
-    "fence": { "name": ["Nan Corry", "Sib Harrow", "Jass Quillon"], "body": "villager", "job": "none", "female": true, "at": "hatch" },
+    "fence": { "name": ["Nan Corry", "Sib Harrow", "Jass Quillon"], "body": "villager", "job": "none", "female": true, "at": "hatch", "hours": "night" },
     "sword": { "name": ["Dunstan Roke", "Lew Garrick", "Hob Marsh"], "body": "fighter", "at": "hatch", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate" }
   },
   "places": {
@@ -130,7 +130,21 @@
       },
       "replies": [
         { "say": "You hold those pages very close.", "then": "clerk_more" },
-        { "say": "Who has keys to that room?", "then": "clerk_more" }
+        { "say": "Who has keys to that room?", "then": "clerk_more" },
+        { "say": "Read me what's chalked on the slate by the door.", "then": "clerk_reads" }
+      ]
+    },
+    "clerk_reads": {
+      "do": "talk", "who": "clerk",
+      "say": [
+        "The slate. Yes. It's the day's sheets. It says north, the... the north... You read it. I know what it says. I chalked it myself this morning.",
+        "Now this I can read you. 'From the ford the road goes by the three stones.' There. Every word of it. It only has to be here, where I can get at it.",
+        "It's the light. The slate hangs in the dark corner. Everybody says the light in here is bad."
+      ],
+      "journal": "I asked {clerk} to read the slate by the door. He could not, though he chalked it himself this morning. A page held up to his nose he read me every word of.",
+      "replies": [
+        { "say": "Who has keys to that room?", "then": "clerk_more" },
+        { "say": "You hold that page very close.", "then": "clerk_more" }
       ]
     },
     "clerk_more": {
@@ -162,15 +176,56 @@
       "letter": { "from": "{giver}", "lines": [
         "There is lamplight under the grass behind the tannery again.",
         "Go at dusk. Knock twice and say nobody sent you. It is the only true thing anyone says down there.",
-        "Take money. They will not give it up for a kind word. And be quick: the watch wants {ember} by tomorrow, and they will not wait for me twice."
+        "Take money. They will not give it up for a kind word. And be quick: the watch wants {ember} by tomorrow, and they will not wait for me twice.",
+        "Forgive the hand. {clerk} wrote this out for me and the lines have wandered off the rule. I had not the heart to make him do it again."
       ] },
       "then": "to_hatch"
     },
-    "to_hatch": { "do": "go", "to": "hatch", "goal": "Go to the hatch behind the tannery", "then": "see_fence" },
-    "see_fence": {
-      "do": "talk", "who": "fence", "goal": "Speak with the fence",
+    "to_hatch": { "do": "go", "to": "hatch", "goal": "Go to the hatch behind the tannery", "then": "whisper" },
+    "whisper": {
+      "do": "talk", "who": "sword", "goal": "Knock twice at the hatch, after dark", "when": "night",
+      "not_now": "Nothing down there by day but rats and barrels. She keeps lamp hours. Come back when it's dark, and knock twice.",
+      "say": "That's the two knocks. Now the other half of it. Who sent you?",
+      "replies": [
+        { "say": "Nobody sent me.", "then": "dice", "journal": "I knocked twice at the hatch behind the tannery and said nobody sent me. {sword} lifted it, and I went down the ladder." },
+        { "say": "{giver} sent me.", "then": "whisper_wrong" },
+        { "say": "The watch sent me.", "then": "whisper_wrong" }
+      ]
+    },
+    "whisper_wrong": {
+      "do": "talk", "who": "sword",
+      "say": "Then they can come down themselves, and bring their own ladder. I'll ask it once more, because I'm paid by the week and it's all one to me. Who sent you?",
+      "replies": [
+        { "say": "Nobody sent me.", "then": "dice", "journal": "I knocked twice at the hatch behind the tannery and, the second time of asking, said nobody sent me. {sword} lifted it, and I went down the ladder." }
+      ]
+    },
+    "dice": {
+      "do": "talk", "who": "fence", "goal": "Throw dice with the fence", "when": "night",
       "say": [
         "Nobody sent you. Good. Nobody sends all my best customers.",
+        "Sit. Before we talk goods, we throw. I don't sell to anybody I haven't watched lose. A body that sulks over {coins:5} will weep to the watch over a real sum. Three bones, high takes it. {coins:5} on the barrel."
+      ],
+      "replies": [
+        { "say": "{price} on the barrel. Throw.", "try": { "how": "dice", "coins": 5, "refuse": "Two fours and a six, to me. There. You paid over without a face on you, and that is all I wanted to see.", "fail": "see_fence" }, "then": "fence_won", "journal": "The fence under the tannery would not talk goods until I had thrown dice with her. I took {coins:5} off her." },
+        { "say": "I didn't come down here to play. That glass is stolen, and I'll take it up with your man.", "then": "fight" }
+      ]
+    },
+    "fence_won": {
+      "do": "talk", "who": "fence", "goal": "Speak with the fence", "when": "night",
+      "say": [
+        "Three fives. Well. Take it up, it's yours, and don't count it in front of me.",
+        "You win the way you'd lose, which is the other thing I wanted to see. So. A glass from Hail, with the numbers still swimming in it? It came down my ladder the very night the nails came out. For somebody who has had my money and not crowed over it, {coins:20}, and it goes back up the ladder with you.",
+        "The name of who brought it comes with it. Or take it up with {sword}. He's the one stood behind you."
+      ],
+      "replies": [
+        { "say": "{coins:20}. The glass and the name.", "needs_coins": 20, "then": "fence_tells", "mark": "hail_bought_glass", "journal": "Having won a throw off her, I bought the scouter back from the fence under the tannery for {coins:20}." },
+        { "say": "It's stolen. I'll take it, and I'll take it up with him.", "then": "fight" }
+      ]
+    },
+    "see_fence": {
+      "do": "talk", "who": "fence", "goal": "Speak with the fence", "when": "night",
+      "say": [
+        "So. Now I've seen how you lose, we can talk goods.",
         "A glass from Hail, with the numbers still swimming in it? I might have seen one. It came down my ladder the very night the nails came out. {coins:25}, and it goes back up the ladder with you. I'm told that's a tenth of its worth, so you're robbing me, and we're both content.",
         "The name of who brought it? Pay for the glass and I'll throw the name in, because I like your boots. Or take it up with {sword}. He's the one stood behind you."
       ],
@@ -189,7 +244,7 @@
       "spared_returns": { "as": "recruit", "days": [6, 11], "say": "She turned me off the ladder the night you went. Said a man who yields once yields twice. Maybe. But I yielded to somebody who let me keep my arm, and I'd sooner stand behind that than behind her. I've a sword and no week's wages. Take me on and I'll not ask what anything does." }
     },
     "fence_tells": {
-      "do": "talk", "who": "fence", "goal": "Take the glass from the fence",
+      "do": "talk", "who": "fence", "goal": "Take the glass from the fence", "when": "night",
       "give": [{ "item": "minecraft:spyglass", "count": 1, "name": "The Hail-glass", "lore": ["A Frostborn scouter.", "Small cold numbers swim in it."] }],
       "say": {
         "?thief=clerk": [
@@ -213,7 +268,7 @@
       "then": { "?thief=clerk": "clerk_truth", "?thief=traveller": "owner_truth", "?": "ember_truth" }
     },
     "fence_cold": {
-      "do": "talk", "who": "fence", "goal": "Take the glass from the fence",
+      "do": "talk", "who": "fence", "goal": "Take the glass from the fence", "when": "night",
       "give": [{ "item": "minecraft:spyglass", "count": 1, "name": "The Hail-glass", "lore": ["A Frostborn scouter.", "Small cold numbers swim in it."] }],
       "say": [
         "You've killed {sword}. Over an eyeglass. Take it. It's bad luck now, and I'd not get a tenth of a tenth.",
@@ -225,7 +280,7 @@
       ]
     },
     "fence_name": {
-      "do": "talk", "who": "fence",
+      "do": "talk", "who": "fence", "when": "night",
       "say": {
         "?thief=clerk": "A boy with ink to the elbows, squinting like a mole. He asked {coins:6} and I gave him {coins:4}. Now go up my ladder and don't come down it again.",
         "?thief=traveller": "The frost-man himself, with his hood up, wanting passage money. He took {coins:20} and asked me to forget his face. Now go up my ladder and don't come down it again.",

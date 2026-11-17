@@ -99,6 +99,11 @@ final class TaleWays {
 	/** How far round the tavern's counter a window sill is looked for (blocks, across), and the run var of a candle still to be lit. */
 	static final int CANDLE_REACH = 7;
 	static final String CANDLE = "~candle";
+	/**
+	 * Following someone: how near is too near (blocks; half that crouched), how far is losing them, how many seconds
+	 * out of reach before they're lost, and how near their journey's end counts as arrived.
+	 */
+	static final int TAIL_NEAR = 6, TAIL_FAR = 28, TAIL_LOST = 12, TAIL_ARRIVE = 5;
 	/** Set in a run's scratch as its step is left undone (its days ran out, a watch was walked out on, a job failed). */
 	static final String UNDONE = "undone";
 	private static final Pattern COMPARE = Pattern.compile("^(reputation|hearts|coins|since:[a-z0-9_]+)(>=|<)(-?\\d+)$");
@@ -720,6 +725,57 @@ final class TaleWays {
 		String mark = Tale.string(line, "mark", "");
 		if (!mark.isEmpty()) {
 			Tales.state(player).marks.add(mark);
+		}
+	}
+
+	// ---- following someone -----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Following someone ({@code "do": "tail"}): at its hour, once {@code player} is near enough to follow, the step's
+	 * {@code who} sets off on foot for its {@code to} place. Coming nearer than {@code near} blocks where they can see
+	 * (half that, crouched) goes the step's {@code seen} way; falling further back than {@code far} for
+	 * {@link #TAIL_LOST} seconds goes its {@code lost} way. Still with them when they arrive, the tale goes on.
+	 */
+	static void tail(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step) {
+		if (!now(player, run, step)) {
+			return;
+		}
+		Predicate<String> facts = Tales.facts(player, run);
+		String role = Tale.pickString(step, "who", facts, "");
+		BlockPos to = Tales.ground(level, run, tale, Tale.pickString(step, "to", facts, ""));
+		if (!(Tales.entity(level, Tales.uuid(run.cast.get(role))) instanceof Mob mob) || to == null) {
+			return;
+		}
+		int near = Tale.number(step, "near", TAIL_NEAR), far = Tale.number(step, "far", TAIL_FAR);
+		double gap = Math.sqrt(mob.distanceToSqr(player));
+		if (!run.scratch.containsKey("going")) {
+			if (gap > far) {
+				// (they don't set off until there's someone to follow them)
+				return;
+			}
+			run.scratch.put("going", "1");
+			TaleCast.send(mob, to);
+			Tales.each(player, run, r -> r.places.put("@" + role, to.asLong()));
+		}
+		if (gap < (player.isCrouching() ? near / 2.0 : near) && mob.hasLineOfSight(player)) {
+			run.scratch.put(UNDONE, "1");
+			Tales.go(player, run, step.get("seen"), mob);
+			return;
+		}
+		if (gap > far) {
+			int lost = Tales.parse(run.scratch.getOrDefault("lost", "0"), 0) + 1;
+			if (lost >= TAIL_LOST) {
+				run.scratch.put(UNDONE, "1");
+				Tales.go(player, run, step.get("lost"), null);
+				return;
+			}
+			run.scratch.put("lost", Integer.toString(lost));
+		} else {
+			run.scratch.remove("lost");
+		}
+		double dx = to.getX() + 0.5 - mob.getX(), dz = to.getZ() + 0.5 - mob.getZ();
+		if (dx * dx + dz * dz <= TAIL_ARRIVE * TAIL_ARRIVE) {
+			Tales.go(player, run, step.get("then"), null);
 		}
 	}
 
