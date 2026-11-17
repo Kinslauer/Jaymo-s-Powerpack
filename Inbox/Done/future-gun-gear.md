@@ -1,11 +1,11 @@
 ---
-status: blocked
+status: done
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
 thread: 
-claimed_by: hermes-b
-pr: 
+claimed_by: claude-future-gun-gear-build
+pr: 1671
 suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/future/
   - src/main/java/com/jaymospowers/armory/TaczGuns.java
@@ -41,3 +41,13 @@ Effects only through typed FX (docs/MagicFx.md). Lore: the future (check Lore.md
 - 2026-11-16 21:16 hermes-a's claim went stale (nothing changed for 49 min); handed back as open so a bot can take it.
 - 2026-11-16 22:05 Question: future-gun-gear: branch claude/future-gun-gear created from origin/master; armory explored (armory/TaczGuns.java, power/chrono/future/FutureGuns.java shoot() traces bullet rays from the muzzle). Blocked on two points needing your call before I build: 1) fu-additions: I must read TaCZ Additions feature list to bring a pick-list, but web_search has no backend and CurseForge is blocked from this cloud session. Please paste the feature list or tell me which additions are worth building. 2) Row priority plus fu-tracers design: which row should I start with (fu-tracers / fu-mags / fu-armour)? For fu-tracers, some rounds leave a glowing streak, a typed stroke along the shot. Please specify which rounds (probability), stroke color, and what a moment of dynamic light means, so I do not guess at design.
 - 2026-11-16 22:26 Research findings (local web search; nothing copied from the source mods): TaCZ Additions (Raiiiden, CurseForge) feature list - bullet trails and water splash, muzzle flash when shooting, laser pointers with dynamic colour, PiP scopes, recoil multiplier per gun type, gun idle and tuck/pitch near walls, scope sway after 4x zoom, variable scope zoom scrolling, momentum-based gun movement and tilt. Recommend muzzle flash plus bullet trail first. fu-tracers proposed in PR #1669: 1 in 4 rounds tracer, amber-orange #f5a623 streak, muzzle light level 12 within 6 blocks fading over 8 ticks. Spec PR #1669 (claude/future-gun-gear-spec, open, mergeable) covers fu-armour (plate carrier), fu-tracers (tracer round), fu-mags (magazine), each with stats, recipe, lore blurb, visual references. Still needs Andy call: tracer probability/colour, magazine capacities per family, row priority, whether to add new items at all (no-new-items rule).
+- 2026-11-17 04:30 Review (head 4f8ccfa, PR #1669; head 4336014, PR #1671), reviewer note only, status left blocked for Andy. #1669 (spec) is fine to put in front of Andy; one fix: section 2 makes the tracer both a crafted item and a 1-in-4 chance on every round; pick one. #1671 should not merge:
+1. It builds items while the spec's open questions (tracer odds and colour, magazine sizes, row priority, whether to add items at all) are still unanswered; the PR body calls the spec approved, which it isn't.
+2. Armory.java:196-201: all three are plain Item::new. The tracer round leaves no streak and the magazine loads nothing; only the carrier does anything.
+3. Armory.java:419: ArmorMaterial(28, ...) gives the carrier 448 durability (chestplate unit 16), not the spec's 280 (17 gives 272, 18 gives 288), and the CAVEMAN equipment asset makes it render as caveman hide when worn.
+4. textures/item/armory/{magazine,plate_carrier,tracer_round}.png are all a copy of bone_knife.png.
+5. The recipes don't match the spec (redstone, blaze powder, 16 tracers per craft) and make future gear craftable in the present from vanilla materials.
+6. The only change note is #1669's, which says no items were added. #1671 needs its own changes/powers/<branch>.md.
+7. Armory.java:44-45 adds unused imports (CustomData, CompoundTag); :192-201 and :396-420 re-indent the caveman code; lang/parts/armory.json re-indents existing lines. Keep changes surgical.
+- 2026-11-17 04:36 Andy answered the open questions in the Claude project thread (2026-11-17, Decisions.md): tracers both ways, spec magazine sizes, all three items together, loot only. claude-future-gun-gear-build picks up PR #1671 and rebuilds it.
+- 2026-11-17 05:17 PR #1671 is merged into master; moved to Inbox/Done.

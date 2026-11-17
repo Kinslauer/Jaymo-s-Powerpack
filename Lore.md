@@ -965,6 +965,11 @@ the dead fight each other as well. A traveller is one more enemy to them: they s
 hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
 and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
+(new) **The last stand's kit** (claude-future-gun-gear-build, 2026-11-17). The plate carriers, magazines and tracer rounds
+the future's gunners carry are what Los Perrito's defenders wore and loaded for the last stand on the east bridge. The
+Warrior-born dead took them off the fallen with their guns, and the echoes carry what the city's soldiers carried. Nobody
+makes any of it now: a traveller only gets it off the dead.
+
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
 the city, corrupted by the Tinkerer's bug.
@@ -2140,6 +2145,8 @@ the Druid and the Ranger to the wild the villages keep out of (the Ranger is wha
 and survivalists alike), the Monk to the discipline the boxers teach, and the Tinkerer to the smiths' benches.
 Priests teach the symbol, farmers the sprig, librarians the seal and smiths the gadgets. The Warrior-born have none
 of them.
+
+**How the sworn callings are learned young** (Andy approved, 2026-11-17; the life story's youth page). Before the shrine, the bench or the master, each sworn calling has its own first school. A Cleric starts keeping a village temple's lamps until the priest teaches the symbol; a Paladin squires for a knight already sworn, and swears at the same shrine; a Warlock strikes a bargain at a shrine at midnight with whatever answers, and is not told the price; a Druid has the sprig and its rites from an old farmer; a Monk is taken on by an old boxing master; a Tinkerer works a bench in the steam towns, where the old hands still remember the Mad Tinkerer's touch.
 
 (new) **Second callings, marks and paths** (Claude's placement for the fifth edition picks, patch 11b, 2026-11-13, for
 Andy to approve). A calling can be joined by a second, but only late and only from a master: a villager at the top of

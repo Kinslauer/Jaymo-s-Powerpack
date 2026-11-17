@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 05:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,9 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · changes · fixing review notes
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · changes · fixing review notes
 
 
 ## In review
@@ -20,28 +22,26 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · in-review
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
+- [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
-- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
-- [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
-- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
-- [x] [[Inbox/Done/burnt-corpse-ash-piles|burnt-corpse-ash-piles]]
-- [x] [[Inbox/Done/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 
 
 %% kanban:settings

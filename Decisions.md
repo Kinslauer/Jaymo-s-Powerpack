@@ -674,3 +674,13 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-17 (Andy): Grassier Grass stays out of the pack (already removed 2026-11-16); VO: Better Dogs and Dasik Library leave too, after Better Dogs' wolves crashed the Deck server on 26.3 (PR #1673).
 - 2026-11-17 (Andy): "close range blunderbuss shots should gib like explosions", then "they should knock off limbs most often, gibs are only for kills with one shot at close range". Powers `BlastGore`: a shot takes a limb by closeness (living or dead, once per shot), gibs only a body it killed from full health (PR #1675).
 - 2026-11-17 (Andy): corpse names "hidden unless you have a skill from the survivalist tree for it. allowing tracking as well as identifying corpses and kills ... pelt quality. hidden from everyone too." Kingdoms' Read the Ground is the reader; Kitchen names a body (and an animal's kill and pelt) only to readers, everyone without Kingdoms (PR #1678).
+
+### 2026-11-17: future gun gear, Andy's answers to the spec's open questions
+- **Decided:** tracers are "Both": ordinary rounds from future guns streak about 1 in 4 shots (amber, with a moment of muzzle light), and tracer rounds (loot, not crafted) always streak. Magazines use the spec sizes (handgun 17, SMG 30, rifle 30, shotgun 8, machine gun 60). Build all three (plate carrier, tracers, magazines) together. Players get the gear only as loot from the future's dead and echoes, like the guns: never craftable. Andy asked to pick up PR #1671 after the review.
+- **Applies to:** Powers, armory (TaczGuns, Armory), power/chrono/future (FutureGuns, MuzzleFlash), PR #1671, docs/Future-Gun-Gear-Spec.md.
+- **Agent:** [[Agents/claude-future-gun-gear-build|claude-future-gun-gear-build]]
+
+- 2026-11-17 (Andy, future gun gear): "snipers should get mags, they should all be the real capacity": one magazine per gun at that gun's own capacity, snipers included (replaces the family sizes). "use the models": Andy picked the mods' own models (Fracture Point, TaCZ Magazines); both are All Rights Reserved, so not used without Raiiiden's permission. Agent: [[Agents/claude-future-gun-gear-build|claude-future-gun-gear-build]]
+
+- 2026-11-17 (Andy, future gun gear): keep both reloads: TaCZ's reload from loose rounds stays, magazines are a faster swap, not required. Keep the flat icons and worn texture for the carrier and magazines (the mods' own models are All Rights Reserved). PR #1669 closed (#1671 carries the spec). Agent: [[Agents/claude-future-gun-gear-build|claude-future-gun-gear-build]]
+- 2026-11-17: Andy approved the youth-page lore for the sworn callings ("Good lore") and merged PR #1679 (youth answers and road routes for Cleric, Paladin, Warlock, Druid, Monk, Tinkerer).

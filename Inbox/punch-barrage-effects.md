@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
@@ -11,7 +11,7 @@ suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/spirits/SpiritBarrage.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/BarrageClient.java
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 # Punch and barrage effects
 
@@ -47,3 +47,10 @@ GravityGutPunch, ZFighterRush; Kingdoms SpiritPunch, SpiritBarrage, BarrageClien
 8. Time Flow's barrage (ChronoFlow.barrage, what C does in Time Flow) gets none of the flurry effects; it is Chrono Punch's barrage form, so give it the same fists and sparks.
 - 2026-11-16 21:17 hermes-b's last run stopped before finishing; handed back as changes so it can carry on.
 - 2026-11-16 22:08 Text pass: rewrote changes/powers/claude-punch-barrage-effects.md, the only player-visible text in PR #1665: added that Time Flow's barrage (ChronoFlow) also throws blurred fists and sparks, added ChronoFlow to the classes list, and smoothed the Z-Fighter Rush finisher wording. The PR's four Java edits are MagicFx particle calls only - no lang, chat, dialogue, hint or UI strings. pr_checks passed.
+- 2026-11-17 04:29 Review (head e7af3cf, PR #1665; head db19a9a, PR #1667): changes needed. #1665 fixed review points 2-8 (feet, blur of fists, ChronoFx sparks, constants, Time Flow barrage) and CI is green; the Kingdoms half moved to #1667, which is broken.
+1. #1667 fails CI (Build Kingdoms): kingdoms/.../spirits/SpiritBarrage.java:444 uses Fx without importing com.jaymoskingdoms.Fx.
+2. #1667 kingdoms/.../Fx.java:58 looks up MagicFx.wave with 6 parameters; MagicFx.wave (MagicFx.java:265) takes 7 (..., int color, int ticks). findStatic throws, and the catch at Fx.java:60 nulls every handle, so ALL of Kingdoms' typed FX (wisp, spark, ring, beam, orb...) lose Powers' renderers whenever Powers is loaded. Add int.class for ticks and pass distance as a double (drop the (float) cast at :195).
+3. #1667 Fx.java:191-201: wave() has no fallback when Powers is absent (every other Fx method draws something), its closing brace is mis-indented, and :187 (ring's fallback line) lost its indentation. Add a dust fallback and restore the indentation.
+4. #1667 SpiritPunch.java:192-193: ring and wave start at the target's body centre (hit). Same fix as #1665 point 3: target.position() plus 0.1. Move 1.5F, 0xFFFFFF, 5.0, 0xD0D0D0, 10 into static final constants at the top of the class.
+5. #1667 Kingdoms barrage clashes only gain sparks (SpiritBarrage.java:444); the task also wants blurred fists in front of each side while the flurries meet (BarrageClient or strokes from SpiritBarrage, as #1665 did for Chrono).
+6. #1665 ChronoFlow.java:1029-1042: the barrage's new numbers are inline (1.4, -0.3, 0.18, 0.12, 0.15, 0.7, 0.35F, 0xFFE08A, 6 sparks). Make them constants at the top of ChronoFlow, as ChronoPunch now does.
