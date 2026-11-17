@@ -55,7 +55,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands draw your own best blade; a real knife → a katana of dark
  * water of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
- * to raise one, which follows and defends you until the corruption lifts (a villager rises as itself: a guard fights for
+ * to raise one (or the wave set in the soul menu, {@link DarktideSouls}), which follows and defends you until the corruption
+ * lifts, when it sinks back among your shadows; only one that dies is gone (a villager rises as itself: a guard fights for
  * you, anyone else goes back to its life, not quite right). Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
@@ -98,6 +99,8 @@ final class DarktideTide {
 	/** Risen shadow → its master. */
 	private static final Map<UUID, UUID> RISEN_OWNER = new HashMap<>();
 	private static final List<Mob> RISEN = new ArrayList<>();
+	/** Risen shadow → the shadow it was raised from (as stored), so one that sinks back is not lost. */
+	private static final Map<UUID, String> RISEN_SHADOW = new HashMap<>();
 	private static final Map<UUID, Enemy> ENEMIES = new HashMap<>();
 
 	private DarktideTide() {
@@ -162,8 +165,16 @@ final class DarktideTide {
 			return;
 		}
 		Entity corpse = aimedCorpse(player);
+		// no corpse in the sights, but a risen shadow of yours: you ride in it
+		if (corpse == null && DarktideSouls.possess(player)) {
+			return;
+		}
 		if (corpse == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_corpse").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (DarktideSouls.taken(corpse)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadow_gone").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
@@ -529,6 +540,10 @@ final class DarktideTide {
 		return entity.getAttached(DarktideState.HOLLOW) != null;
 	}
 
+	/**
+	 * A tap of C: the wave set in the soul menu rises, as much of it as is not up yet ({@link DarktideSouls#pending}); with
+	 * no wave set (or all of it up), the last shadow taken.
+	 */
 	private static void raise(ServerPlayer player) {
 		DarktideLive live = DarktidePower.live(player);
 		ServerLevel level = player.level();
@@ -541,12 +556,24 @@ final class DarktideTide {
 			return;
 		}
 		List<String> shadows = DarktideState.mutable(DarktideState.save(player).shadows());
-		String id = shadows.removeLast();
+		List<String> wave = DarktideSouls.pending(player, shadows, MAX_RISEN - live.risen.size());
+		if (wave.isEmpty()) {
+			wave = List.of(shadows.removeLast());
+		}
 		player.setAttached(DarktideState.SAVE, DarktideState.save(player).withShadows(shadows));
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(RISE_REACH)), ClipContext.Block.COLLIDER,
 			ClipContext.Fluid.NONE, player));
 		BlockPos at = hit.getType() == HitResult.Type.MISS ? BlockPos.containing(eye.add(player.getLookAngle().scale(3.0))) : hit.getBlockPos().relative(hit.getDirection());
+		for (int i = 0; i < wave.size(); i++) {
+			// side by side, the first where you look
+			raiseOne(player, live, level, wave.get(i), at.relative(player.getDirection().getClockWise(), i % 2 == 1 ? (i + 1) / 2 : -(i / 2)));
+		}
+		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
+		DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
+	}
+
+	private static void raiseOne(ServerPlayer player, DarktideLive live, ServerLevel level, String id, BlockPos at) {
 		Entity spawned;
 		if (id.startsWith("{")) {
 			// (0.11.103) a villager's shadow: the very one that died
@@ -581,12 +608,11 @@ final class DarktideTide {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.5F, 1.6F);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.hollow_rises", mob.getDisplayName())
 				.withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
-			DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
-			DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
 			return;
 		}
 		mob.setAttached(DarktideState.RISEN, player.getId());
 		RISEN_OWNER.put(mob.getUUID(), player.getUUID());
+		RISEN_SHADOW.put(mob.getUUID(), id);
 		RISEN.add(mob);
 		live.risen.add(mob.getId());
 		mob.setTarget(null);
@@ -596,8 +622,50 @@ final class DarktideTide {
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 			30, 0.4, 0.1, 0.4, 0.1);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.6F, 1.4F);
-		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
-		DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
+	}
+
+	/** The master of the risen shadow {@code entity} if they are here, or null. */
+	static @Nullable ServerPlayer masterOf(Entity entity, @Nullable MinecraftServer server) {
+		UUID owner = RISEN_OWNER.get(entity.getUUID());
+		return owner == null || server == null ? null : server.getPlayerList().getPlayer(owner);
+	}
+
+	/** The shadows (as stored) that {@code player}'s risen were raised from. */
+	static List<String> risenShadows(ServerPlayer player) {
+		List<String> out = new ArrayList<>();
+		for (Mob mob : RISEN) {
+			String shadow = RISEN_SHADOW.get(mob.getUUID());
+			if (shadow != null && mob.isAlive() && risenOf(mob, player)) {
+				out.add(shadow);
+			}
+		}
+		return out;
+	}
+
+	/** {@code player}'s newest risen shadow sinks back into the dark, not lost ({@link DarktideSouls#upkeep}). True if one did. */
+	static boolean sinkNewest(ServerPlayer player) {
+		for (int i = RISEN.size() - 1; i >= 0; i--) {
+			Mob mob = RISEN.get(i);
+			if (risenOf(mob, player) && !DarktideSouls.ridden(mob)) {
+				RISEN.remove(i);
+				sink(mob, player);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A risen shadow that did not die goes back among its master's shadows (if there is room), and melts. */
+	private static void sink(Mob mob, @Nullable ServerPlayer owner) {
+		String shadow = RISEN_SHADOW.get(mob.getUUID());
+		if (owner != null && shadow != null && mob.isAlive()) {
+			List<String> shadows = DarktideState.mutable(DarktideState.save(owner).shadows());
+			if (shadows.size() < MAX_SHADOWS) {
+				shadows.add(shadow);
+				owner.setAttached(DarktideState.SAVE, DarktideState.save(owner).withShadows(shadows));
+			}
+		}
+		melt(mob);
 	}
 
 	/** Whether {@code entity} is one of {@code player}'s risen shadows. */
@@ -627,6 +695,7 @@ final class DarktideTide {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
 		RISEN_OWNER.remove(mob.getUUID());
+		RISEN_SHADOW.remove(mob.getUUID());
 		mob.discard();
 	}
 
@@ -635,7 +704,7 @@ final class DarktideTide {
 			Mob mob = it.next();
 			if (risenOf(mob, player)) {
 				it.remove();
-				melt(mob);
+				sink(mob, player);
 			}
 		}
 		DarktideLive live = DarktidePower.liveIfAny(player);
@@ -662,16 +731,25 @@ final class DarktideTide {
 			if (mob.isRemoved() || !mob.isAlive()) {
 				it.remove();
 				RISEN_OWNER.remove(mob.getUUID());
+				RISEN_SHADOW.remove(mob.getUUID());
 				continue;
 			}
 			// they melt when the corruption lifts (sunrise, for a cured master), and without their master near
 			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktidePower.corrupted(owner)
-				|| mob.distanceTo(owner) > RISEN_LEASH) {
+				|| mob.distanceTo(owner) > RISEN_LEASH && !DarktideSouls.ridden(mob)) {
 				it.remove();
-				melt(mob);
+				// it melts, but it did not die: its shadow is its master's still
+				sink(mob, owner);
 				continue;
 			}
 			mob.clearFire();
+			if (DarktideSouls.ridden(mob)) {
+				// its master rides in it: it goes where they say
+				if (mob.getTarget() != null) {
+					mob.setTarget(null);
+				}
+				continue;
+			}
 			if (spares(mob, mob.getTarget())) {
 				// (a mob that picks targets through its brain, not setTarget: a piglin, a hoglin, a breeze)
 				mob.setTarget(null);
@@ -797,6 +875,7 @@ final class DarktideTide {
 		}
 		RISEN.clear();
 		RISEN_OWNER.clear();
+		RISEN_SHADOW.clear();
 		ENEMIES.clear();
 	}
 }

@@ -32,7 +32,8 @@ import net.minecraft.world.phys.Vec3;
  * through a wall up to four blocks thick. A shaking gold crackle marks it; the meter shows under the gear chip.
  *
  * <p>The collision itself is {@code ChronoHeldPhaseMixin}, which asks {@link #phasing}; written so another held phase
- * (any power) could ask the same thing of one attachment.
+ * (any power) could ask the same thing of one attachment. A player standing in a speed tunnel ({@link ChronoTunnel}) is
+ * let through the same way.
  */
 public final class ChronoPhase {
 	// ---- tuning ----
@@ -71,7 +72,7 @@ public final class ChronoPhase {
 
 	/** Whether {@code player} is phasing right now and the collision should let it through (either side). */
 	public static boolean phasing(Player player) {
-		return !ASKING.get() && player.getAttached(PHASING) != null;
+		return !ASKING.get() && (player.getAttached(PHASING) != null || player.getAttached(ChronoTunnel.CARRIED) != null);
 	}
 
 	/** Stasis Field winds the cooldown back too. */
@@ -145,7 +146,8 @@ public final class ChronoPhase {
 		}
 	}
 
-	private static boolean clear(ServerLevel level, ServerPlayer player, Vec3 at) {
+	/** Whether {@code player}'s body fits at {@code at}, asked of the true world (the phase set aside). */
+	static boolean clear(ServerLevel level, ServerPlayer player, Vec3 at) {
 		ASKING.set(true);
 		try {
 			return level.noCollision(player, player.getBoundingBox().move(at.subtract(player.position())));

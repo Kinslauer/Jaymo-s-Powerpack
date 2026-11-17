@@ -35,5 +35,7 @@ final class PaladinTree {
 		ClassTrees.add(FaithExtras.AVENGER, paladin, 1, 3, 18, 7, 1, List.of(), List.of(FaithExtras.REDEEMER));
 		ClassTrees.add(FaithExtras.REDEEMER, paladin, 1, 3, 18, 7, 3, List.of(), List.of(FaithExtras.AVENGER));
 		ClassTrees.add(FaithExtras.BEACON, paladin, 1, 2, 22, 8, 2, List.of(OathGifts.AURA), List.of());
+		// the folded Awakening row: the Crowned Sun's arts, learned (a Dawnborn has them by blood)
+		ClassTrees.add(com.jaymoskingdoms.SunArts.PALADIN_NODE, paladin, 1, 3, 10, 3, 4, List.of(), List.of());
 	}
 }

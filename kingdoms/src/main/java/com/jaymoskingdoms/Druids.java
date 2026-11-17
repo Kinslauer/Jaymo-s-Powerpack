@@ -167,6 +167,12 @@ public final class Druids {
 		return !player.getAttachedOrElse(FORM, "").isEmpty();
 	}
 
+	/** The stand-in beast of the shape {@code player} wears, or null ({@link SizeArts} sizes it with the body). */
+	static @org.jspecify.annotations.Nullable Mob beast(Player player) {
+		Shape shape = SHAPES_WORN.get(player.getUUID());
+		return shape == null ? null : shape.beast;
+	}
+
 	/** Whether {@code player} has studied {@code form}. */
 	public static boolean knows(Player player, String form) {
 		if (player.isCreative()) {
@@ -383,6 +389,7 @@ public final class Druids {
 		}
 		fold(player);
 		WildShapes.shed(player);
+		SizeArts.shed(player);
 		for (var effect : List.of(MobEffects.HASTE, MobEffects.SPEED, MobEffects.STRENGTH, MobEffects.JUMP_BOOST, MobEffects.RESISTANCE, MobEffects.SLOWNESS, MobEffects.SLOW_FALLING,
 			MobEffects.WATER_BREATHING, MobEffects.DOLPHINS_GRACE, MobEffects.WEAKNESS, MobEffects.NIGHT_VISION)) {
 			MobEffectInstance on = player.getEffect(effect);

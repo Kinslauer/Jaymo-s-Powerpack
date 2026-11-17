@@ -42,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * ({@code ChronoRapidBowMixin}).</li>
  * <li><b>Catch and hurl:</b> use, aiming at a shot in flight within {@link #CATCH_REACH}: you pluck it from the air and
  * it hangs before you. Use again and it flies back {@link #HURL_FACTOR} times as fast, down your sight.</li>
+ * <li><b>Static:</b> use with an empty hand and nothing to catch or snatch hurls the run's static charge as a bolt
+ * ({@link ChronoMomentum#hurl}).</li>
  * <li><b>Weapon snatch:</b> use on an armed mob while you run past: its main-hand weapon is in your hand (or your pack,
  * or on the ground). Never on players.</li>
  * <li><b>Quickened rocks:</b> Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming
@@ -184,7 +186,10 @@ public final class ChronoRapid {
 			MagicFx.blast(level, shot.position(), 0.6F, 0xFFE9A0);
 			return;
 		}
-		snatch(player, level);
+		if (!snatch(player, level)) {
+			// nothing to catch, nothing to snatch: the run's static goes
+			ChronoMomentum.hurl(player, level);
+		}
 	}
 
 	/** The nearest shot in flight along the sight line within reach, or null. */
@@ -291,9 +296,10 @@ public final class ChronoRapid {
 		shot.syncVelocity = true;
 	}
 
-	private static void snatch(ServerPlayer player, ServerLevel level) {
+	/** True if a weapon was taken. */
+	private static boolean snatch(ServerPlayer player, ServerLevel level) {
 		if (speed(player) < SNATCH_SPEED || SNATCHED.getOrDefault(player.getUUID(), 0) > player.tickCount) {
-			return;
+			return false;
 		}
 		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
 		Vec3 end = eye.add(look.scale(SNATCH_REACH));
@@ -310,7 +316,7 @@ public final class ChronoRapid {
 			}
 		}
 		if (best == null) {
-			return;
+			return false;
 		}
 		ItemStack weapon = best.getMainHandItem();
 		best.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -323,6 +329,7 @@ public final class ChronoRapid {
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, best.getX(), best.getY(), best.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, 1.5F);
 		level.sendParticles(ParticleTypes.CRIT, best.getX(), best.getEyeY() - 0.4, best.getZ(), 6, 0.3, 0.2, 0.3, 0.2);
+		return true;
 	}
 
 	/** Each tick (server) while overclocked: a held shot hangs before you, and is let go when held too long. */

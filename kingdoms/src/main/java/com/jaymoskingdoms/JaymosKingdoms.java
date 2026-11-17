@@ -1064,6 +1064,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
 		HushWard.register();
 		AshRot.register();
+		ArtKeys.register();
 		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
 		Cordon.register();
 		AwakenedStrangers.register();

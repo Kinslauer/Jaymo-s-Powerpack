@@ -120,6 +120,8 @@ public final class DarktidePower implements Power {
 		DarktideDodges.init();
 		// (Awakening picks) the pit and the lift (a choked player can't use powers)
 		DarktidePit.init();
+		// (Awakening pick, folded in) kills give shadows, the soul menu and its wave, the stamina they cost, possession
+		DarktideSouls.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer player = handler.player;
 			if (has(player)) {
@@ -377,6 +379,10 @@ public final class DarktidePower implements Power {
 		if (down && player.isShiftKeyDown() && DarktidePicks.shoal(player)) {
 			return;
 		}
+		// sprint + Z: the soul menu
+		if (down && player.isSprinting() && !player.isShiftKeyDown() && DarktideSouls.openMenu(player)) {
+			return;
+		}
 		if (!down) {
 			DarktideTide.modeKey(player, false);
 			return;
@@ -547,6 +553,7 @@ public final class DarktidePower implements Power {
 		DarktideGedan.tick(player, live);
 		DarktideTide.tick(player, live);
 		DarktideTide.tickHold(player, live);
+		DarktideSouls.upkeep(player, live);
 		DarktideBlade.tick(player, live);
 		DarktideMaelstrom.tick(player, live);
 		DarktideDodges.tickEvasion(player, live);
