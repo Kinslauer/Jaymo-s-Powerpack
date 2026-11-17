@@ -77,6 +77,8 @@ public final class RogueExtras {
 	/** Fence's Friend: the share of its worth a fence gives anyone for stolen goods, and the least a piece is worth (milli). */
 	static final float FENCE_PLAIN = 0.5F;
 	static final long STOLEN_FLOOR = 40L;
+	/** The smallest coin there is (milli): a fence pays in whole coins. */
+	static final long SMALLEST_COIN = 100L;
 	/** (what loot is worth is counted in the old emerald's 1.5: {@link Lockpicking#worth}) */
 	static final float WORTH_EMERALD = 1.5F;
 	/** Second Storey: a landing from this far (blocks) is heard, this far and so much further a block fallen, to this at most; under this a Second Storey Thief's isn't. A climb is heard this far. */
@@ -86,6 +88,8 @@ public final class RogueExtras {
 	static final float WARY_FACTOR = 1.5F;
 	/** Shadow Blade: "weaker" is no more of its own health than this share of the Thief's. */
 	static final float BLADE_WEAKER = 1.0F;
+	/** Shadow Blade: the felling blow is this many times what the foe has left, so armour and warding (at most 96% between them) don't save them. */
+	static final float BLADE_THROUGH = 30.0F;
 	/** Ghost: how long after Vanish's cover is gone the first blow still counts (ticks). */
 	static final int GHOST_TICKS = 120;
 	// ---- Ranger ----
@@ -97,6 +101,9 @@ public final class RogueExtras {
 	static final double DRESS_REACH = 6.0;
 	/** Fletcher: arrows a set (vanilla's four), and the chance the arrow that kills is given back. */
 	static final int FLETCH_SET = 6, PLAIN_SET = 4;
+	/** A shot already looked at (saved with the arrow). Kitchen's tag for an arrow's chance to come out of a body whole, and its plain chance. */
+	static final String SEEN_TAG = "jaymoskingdoms_shot_seen", SALVAGE_TAG = "jaymoskitchen.salvage.";
+	static final float PLAIN_SALVAGE = 0.6F;
 	/** Stalker: nothing sees them past this (blocks). */
 	static final double STALK_RANGE = 6.0;
 	/** Warden: how far a favoured foe is felt, how often it is looked for, and the heartbeat's slowest and fastest (ticks) and quietest. */
@@ -162,18 +169,30 @@ public final class RogueExtras {
 		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			// Keen Eye: the arrow leaves the string nearer the line of the eye, and faster
-			if (entity instanceof AbstractArrow arrow && arrow.tickCount == 0 && arrow.getOwner() instanceof ServerPlayer archer && bowShot(arrow)) {
+			if (entity instanceof AbstractArrow arrow && arrow.tickCount == 0 && !arrow.entityTags().contains(SEEN_TAG)
+				&& arrow.getOwner() instanceof ServerPlayer archer && bowShot(arrow)) {
+				// (the tag is saved: an arrow coming back with its chunk isn't a fresh shot)
+				arrow.addTag(SEEN_TAG);
+				float fletch = Math.min(1.0F, ClassTrees.power(archer, FLETCH));
+				if (fletch > 0.0F && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
+					// Fletcher, with Kitchen: every arrow of theirs comes out of a body whole (Kitchen rolls it as the arrow goes in)
+					arrow.entityTags().removeIf(tag -> tag.startsWith(SALVAGE_TAG));
+					arrow.addTag(SALVAGE_TAG + Math.round(100.0F * (PLAIN_SALVAGE + (1.0F - PLAIN_SALVAGE) * fletch)));
+				}
 				float eye = ClassTrees.power(archer, EYE);
 				double speed = arrow.getDeltaMovement().length();
 				if (eye > 0.0F && speed > 0.0 && arrow.getDeltaMovement().normalize().dot(archer.getLookAngle()) > EYE_OWN) {
 					Vec3 line = arrow.getDeltaMovement().normalize().lerp(archer.getLookAngle(), Math.min(1.0F, EYE_TRUER * eye)).normalize();
 					arrow.setDeltaMovement(line.scale(speed * (1.0F + EYE_SPEED * eye)));
+					arrow.needsSync = true;
 				}
 			}
 		});
 		// Fletcher: the arrow that kills isn't broken in the kill
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer archer
+				// (with Kitchen the arrow stays in the body and is pulled out whole: no second one is dropped)
+				&& !KitchenCompat.corpsesExist()
 				&& arrow.pickup == AbstractArrow.Pickup.ALLOWED && entity.level() instanceof ServerLevel level && ClassTrees.has(archer, FLETCH) > 0
 				&& level.getRandom().nextFloat() < Math.min(1.0F, ClassTrees.power(archer, FLETCH))) {
 				ItemStack back = arrow.getPickupItemStackOrigin().copyWithCount(1);
@@ -250,6 +269,13 @@ public final class RogueExtras {
 		float friend = Math.min(1.0F, ClassTrees.power(player, FENCE));
 		long pays = Math.max(1L, Math.round(stolenWorth(goods) * (FENCE_PLAIN + (1.0F - FENCE_PLAIN) * friend)));
 		Faction law = Theft.lawAt(level, fence.blockPosition());
+		// coins come whole: what doesn't make the smallest coin isn't bought (and the goods aren't taken)
+		pays -= pays % SMALLEST_COIN;
+		if (pays <= 0L) {
+			Speech.tell(level, fence, player, Component.translatable("message.jaymoskingdoms.extras.fence_nothing"), Speech.GOLD);
+			level.playSound(null, fence.getX(), fence.getY(), fence.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
+			return;
+		}
 		goods.setCount(0);
 		Money.pay(player, law, pays);
 		Speech.tell(level, fence, player, Component.translatable(friend > 0.0F ? "message.jaymoskingdoms.extras.fence_friend" : "message.jaymoskingdoms.extras.fence_plain",
@@ -305,6 +331,11 @@ public final class RogueExtras {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return 0;
 		}
+	}
+
+	/** Fletcher: the share of a set's arrows {@code player} gets over and above it at Jaymo's Powers' Fletching Station (half again: six for four). */
+	public static double fletchShare(Player player) {
+		return (FLETCH_SET - PLAIN_SET) / (double) PLAIN_SET * Math.min(1.0F, ClassTrees.power(player, FLETCH));
 	}
 
 	/** Fletcher: {@code crafted} arrows came out of the grid; the Fletcher's sets are six, so the rest are handed over. */
@@ -379,7 +410,8 @@ public final class RogueExtras {
 		if (target.level() instanceof ServerLevel level) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
-		return Math.max(amount, target.getHealth() + target.getAbsorptionAmount() + 1.0F);
+		// this is the blow before armour and warding take their share: enough that what is left still fells
+		return Math.max(amount, (target.getHealth() + target.getAbsorptionAmount() + 1.0F) * BLADE_THROUGH);
 	}
 
 	// ---- every tick -----------------------------------------------------------------------------------------------------------

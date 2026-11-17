@@ -54,10 +54,15 @@ public final class ArcaneExtras {
 	static final float QUICK = 1.0F / 3.0F;
 	/** Sigil Chain: how far the jump (blocks), and the share of the burst the second foe takes. */
 	static final double CHAIN_RANGE = 4.0;
+	/** Sigil Chain: how far from the burst's centre the next foe is looked for (the burst's own reach and the jump). */
+	static final double CHAIN_SEARCH = 12.0;
 	static final float CHAIN_SHARE = 0.5F;
 	/** Wellspring: how many times as fast mana comes back, and how high open sky counts as open wind. */
 	static final float WELL = 2.0F;
 	static final double WELL_WIND = 96.0;
+	/** Wellspring: how near the fallen or the dying a blood Sorcerer stands in their element; the elements the wild bloodline shares. */
+	static final double WELL_BLOOD = 6.0;
+	static final String[] WILD_PLACES = {"fire", "water", "ice", "lightning", "earth", "air"};
 	// ---- Mage ----
 	/** Learning a scroll: how long it is studied (ticks), and the share of that a Scholar needs. */
 	static final int STUDY_TICKS = 60;
@@ -120,10 +125,18 @@ public final class ArcaneExtras {
 			return;
 		}
 		LivingEntity next = null;
-		for (LivingEntity foe : CombatArts.foes(level, owner, new AABB(from, from).inflate(CHAIN_RANGE))) {
-			if (!struck.contains(foe) && foe.position().distanceToSqr(from) <= CHAIN_RANGE * CHAIN_RANGE
-				&& (next == null || foe.position().distanceToSqr(from) < next.position().distanceToSqr(from))) {
-				next = foe;
+		// measured from whoever the burst struck (a wide burst has already struck everyone near its centre)
+		double best = CHAIN_RANGE * CHAIN_RANGE;
+		for (LivingEntity foe : CombatArts.foes(level, owner, new AABB(from, from).inflate(CHAIN_SEARCH))) {
+			if (struck.contains(foe)) {
+				continue;
+			}
+			for (LivingEntity hit : struck) {
+				double d = foe.distanceToSqr(hit);
+				if (d <= best) {
+					best = d;
+					next = foe;
+				}
 			}
 		}
 		if (next == null) {
@@ -152,10 +165,24 @@ public final class ArcaneExtras {
 
 	/** Standing in one's element: where it trickles in by itself ({@link Absorption#inElement}), and rain for the storm, open sky up high for the wind, soul ground for death. */
 	private static boolean inElement(ServerLevel level, ServerPlayer player, String element) {
+		if (element.equals(WildMagic.WILD)) {
+			// the wild bloodline is every element by turns: any of their places is its own
+			for (String each : WILD_PLACES) {
+				if (inElement(level, player, each)) {
+					return true;
+				}
+			}
+			return false;
+		}
 		if (Absorption.inElement(level, player, element)) {
 			return true;
 		}
 		BlockPos at = player.blockPosition();
+		if (element.equals("blood")) {
+			// blood: beside the fallen or the dying
+			return !level.getEntities(player, player.getBoundingBox().inflate(WELL_BLOOD),
+				e -> KitchenCompat.isCorpse(e) || e instanceof LivingEntity l && l.isAlive() && Downed.isDowned(l)).isEmpty();
+		}
 		return switch (element) {
 			case "lightning" -> level.isRainingAt(at.above());
 			case "air" -> level.canSeeSky(at) && player.getY() >= WELL_WIND;
@@ -170,7 +197,17 @@ public final class ArcaneExtras {
 		if (source.is(DamageTypes.INDIRECT_MAGIC) && source.getEntity() instanceof ServerPlayer caster && Spellcraft.element(caster).equals(element)) {
 			return true;
 		}
+		if (element.equals(WildMagic.WILD)) {
+			for (String each : WILD_PLACES) {
+				if (ofElement(source, each, sorcerer)) {
+					return true;
+				}
+			}
+			return false;
+		}
 		return switch (element) {
+			// blood: what draws it
+			case "blood" -> source.is(DamageTypes.CACTUS) || source.is(DamageTypes.SWEET_BERRY_BUSH) || source.is(DamageTypes.THORNS);
 			case "fire" -> source.is(DamageTypeTags.IS_FIRE);
 			case "water" -> source.is(DamageTypeTags.IS_DROWNING);
 			case "ice" -> source.is(DamageTypeTags.IS_FREEZING);

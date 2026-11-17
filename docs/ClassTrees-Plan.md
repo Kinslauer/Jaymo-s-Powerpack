@@ -403,3 +403,28 @@ Where a row leaned on something that isn't there the way it assumes (the nearest
   back half of each part, rounded. Clockmaker shortens every mimic gadget's pause and the contraption's.
 - Lore: nothing new to place. Every perk is a skill of a class that already stands in the canon (the fence is the
   speakeasy's own, the patron the Warlock's own, the beasts the Druid's studied kin).
+
+### After the row check of patch 8 (independent audit of all 45 extras against the code)
+Fixed: a Redeemer's spared foe and a Beast Tongue Druid's studied beasts are now turned away where every mob picks its
+target (`FaithExtras.spares`, asked by `canAttack`), not only by clearing the target every few ticks, which a mob
+could beat with one swing. Intercession spends its daily use only if the friend really got up. Chain Sigil hops from
+the foe it struck (12 blocks), not from the caster. A fence who'd pay less than one coin says so and gives the goods
+back instead of taking them for nothing. Keen Eye bends an arrow once, as it leaves the bow, and the client sees the
+new flight. A Sharpshooter's settled shot isn't spent by a ball loaded back in from a saved world. Nimble
+Fingers shortens the lock's waits only; a stiff pin's lift is no longer changed by it. Goods carrying the "Stolen"
+mark can still be given to a town project (the mark alone was shutting them out). Fletcher also works at
+Jaymo's Powers' Fletching Station (six arrows for a set of four, any head), through a new hook `Fletching.more`.
+
+How rows were read where they don't say, for Andy to rule on:
+- **`xt-sor-wild` (wild places)**: a wild Sorcerer's Wellspring and Hide answer to any of fire, water, ice, lightning,
+  earth and air, whichever is at hand.
+- **Blood Wellspring and Hide**: the Wellspring fills within 6 blocks of a corpse or a downed creature; the Hide
+  turns cactus, berry bushes and thorns.
+- **Shadow Blade**: works on a foe with 30 health or less whatever its armour ("weaker" is health, not armour).
+- **Fletcher's returned arrow**: with Jaymo's Kitchen the arrow comes out of the body whole (Kitchen's own salvage
+  roll, set to always); without Kitchen a copy drops where the foe fell.
+- **Cutpurse King's wary marks**: a mark stays wary for a day, but that isn't saved: a server restart forgets it.
+- **Three changes reach every player, not only the class that bought the perk**: landings and climbing now make noise
+  mobs hear (so Light Step and Cat's Grace have something to quiet); a scroll that will be learned for good is held
+  for 3 s by everyone (so the Scholar's 1.5 s is a gain); pickpocketed goods carry a "Stolen" mark, and fences buy
+  marked goods from anyone at half price (so Fence's Friend's full price is a gain).

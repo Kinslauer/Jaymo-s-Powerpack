@@ -272,7 +272,7 @@ final class LockpickScreen extends Screen {
 		}
 	}
 
-	/** (class trees) Nimble Fingers: the lock's waits (the strain easing, a stiff pin's lift, the pauses) are this much shorter. */
+	/** (class trees) Nimble Fingers: the lock's waits (the strain easing, the pauses) are this much shorter. */
 	private float haste() {
 		return this.minecraft.player == null ? 1.0F : RogueExtras.fingers(this.minecraft.player);
 	}
@@ -347,7 +347,7 @@ final class LockpickScreen extends Screen {
 			return;
 		}
 		if (s == bindingPin()) {
-			this.lift[s] += PIN_STIFF / haste();
+			this.lift[s] += PIN_STIFF;
 			boolean in = Math.abs(this.lift[s] - this.line[s]) <= this.half;
 			if (in && !this.ticked) {
 				this.ticked = true;

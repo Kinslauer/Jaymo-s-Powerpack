@@ -136,6 +136,21 @@ public final class FaithExtras {
 			|| e instanceof AbstractGolem || Followers.takesOrders(e, player);
 	}
 
+	/**
+	 * Whether {@code attacker} leaves {@code target} be (asked by every mob's targeting): one a Redeemer brought down and spared
+	 * never goes for that Redeemer again, and a beast of a studied kind doesn't hunt a Druid who speaks its tongue unless the Druid
+	 * struck it first.
+	 */
+	public static boolean spares(LivingEntity attacker, LivingEntity target) {
+		if (!(target instanceof Player player) || !(attacker instanceof Mob mob)) {
+			return false;
+		}
+		if (mob.entityTags().contains(REDEEMED_TAG + player.getUUID()) && player instanceof ServerPlayer paladin && OathGifts.has(paladin, REDEEMER)) {
+			return true;
+		}
+		return mob.getLastHurtByMob() != player && beastFriend(player, mob);
+	}
+
 	// ---- Druid ----------------------------------------------------------------------------------------------------------------
 
 	/** Beast Tongue: {@code beast} is of a kind {@code player} has studied (a shape's kin), and they speak its tongue. */
@@ -417,9 +432,14 @@ public final class FaithExtras {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.avenge", friend.getDisplayName()));
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.6F, 0.7F);
 				}
-				if (!up && d <= INTER_RANGE * INTER_RANGE && ClassTrees.has(player, INTERCESSION) > 0 && Rests.spend(player, INTER_POOL, 1, 1)) {
-					up = true;
+				if (!up && d <= INTER_RANGE * INTER_RANGE && ClassTrees.has(player, INTERCESSION) > 0 && Rests.left(player, INTER_POOL, 1) > 0) {
 					PowersCompat.getUp(level, friend);
+					if (Downed.isDowned(friend)) {
+						// held down, pulled apart or halved: no prayer stands them up, and none is spent
+						continue;
+					}
+					Rests.spend(player, INTER_POOL, 1, 1);
+					up = true;
 					friend.setHealth(Math.max(friend.getHealth(), Math.min(friend.getMaxHealth(), INTER_HEALTH * Math.min(1.0F, ClassTrees.power(player, INTERCESSION)))));
 					DOWN.remove(friend.getUUID());
 					Fx.beam(level, player.getEyePosition().add(0.0, -0.3, 0.0), friend.getBoundingBox().getCenter(), 0.06F, 0xFFF4D0, 10);

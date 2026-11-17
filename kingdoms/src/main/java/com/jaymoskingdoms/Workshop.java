@@ -395,6 +395,9 @@ public final class Workshop {
 
 	// ---- shots ---------------------------------------------------------------------------------------------------------
 
+	/** A shot the Workshop has already looked at (saved with it). */
+	private static final String FIRED_TAG = "jaymoskingdoms_shot_fired";
+
 	private static void loaded(Entity entity, ServerLevel level) {
 		if (entity instanceof AbstractArrow arrow) {
 			CustomData data = arrow.getPickupItemStackOrigin().get(DataComponents.CUSTOM_DATA);
@@ -405,6 +408,10 @@ public final class Workshop {
 			}
 		}
 		if (!(entity instanceof Projectile shot) || !(shot.getOwner() instanceof ServerPlayer shooter) || !armed(shooter)) {
+			return;
+		}
+		// only as it leaves the barrel: a shot saved in flight and loaded again is left as it was
+		if (!shot.addTag(FIRED_TAG)) {
 			return;
 		}
 		ItemStack gun = gun(shooter.getMainHandItem()) ? shooter.getMainHandItem() : shooter.getOffhandItem();

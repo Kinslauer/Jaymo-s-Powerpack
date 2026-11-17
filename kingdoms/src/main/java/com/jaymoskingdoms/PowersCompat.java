@@ -3183,6 +3183,8 @@ public final class PowersCompat {
 			Class.forName("com.jaymospowers.core.wounds.Downed").getField("headKnock").set(null, skull);
 			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> closing = WarExtras::closing;
 			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("closing").set(null, closing);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> fletch = RogueExtras::fletchShare;
+			Class.forName("com.jaymospowers.tinkering.fletching.Fletching").getField("more").set(null, fletch);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
 		}

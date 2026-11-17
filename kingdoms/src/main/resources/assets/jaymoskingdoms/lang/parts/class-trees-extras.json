@@ -110,6 +110,7 @@
   "message.jaymoskingdoms.extras.wary": "%s felt your hand, and keeps a hand on their purse.",
   "tooltip.jaymoskingdoms.stolen": "Stolen",
   "message.jaymoskingdoms.extras.fence_friend": "For you, full price: %s.",
+  "message.jaymoskingdoms.extras.fence_nothing": "That's not worth a coin. Keep it.",
   "message.jaymoskingdoms.extras.fence_plain": "Hot goods. Half, take it or leave it: %s.",
   "message.jaymoskingdoms.extras.wild_heart": "Your wild heart throws you back into your own body.",
   "message.jaymoskingdoms.extras.avenge": "%s has fallen. Your next smite costs nothing.",

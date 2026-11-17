@@ -583,7 +583,7 @@ public final class TownProjects {
 				}
 				ItemStack stack = inv.getItem(slot);
 				// (letters, keepsakes, notices and named things are not goods)
-				if (stack.isEmpty() || stack.has(DataComponents.CUSTOM_DATA) || stack.has(DataComponents.CUSTOM_NAME) || !matches(stack, n)) {
+				if (stack.isEmpty() || stack.has(DataComponents.CUSTOM_DATA) && !RogueExtras.stolen(stack) || stack.has(DataComponents.CUSTOM_NAME) || !matches(stack, n)) {
 					continue;
 				}
 				ItemStack taken = stack.split(Math.min(stack.getCount(), left));

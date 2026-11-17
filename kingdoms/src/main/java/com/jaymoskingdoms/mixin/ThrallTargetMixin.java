@@ -26,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Nor a siege's side at one it leaves be ({@link com.jaymoskingdoms.Sieges#spares}), anyone at one standing under a white
  * flag ({@link com.jaymoskingdoms.WhiteFlags#spares}), nor a realm's guards at one passing in its colours
  * ({@link com.jaymoskingdoms.Colours#spares}).
+ * Nor one a Redeemer spared at that Redeemer, nor a studied beast at a Druid who speaks its tongue
+ * ({@link com.jaymoskingdoms.FaithExtras#spares}).
  * Nor anyone hogtied or grabbed on a lasso ({@link com.jaymoskingdoms.forms.Lasso#pinned}) at anybody.
  */
 @Mixin(LivingEntity.class)
@@ -46,6 +48,7 @@ public abstract class ThrallTargetMixin {
 			|| com.jaymoskingdoms.Sieges.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.WhiteFlags.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Colours.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.FaithExtras.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.forms.Lasso.pinned((LivingEntity)(Object)this)) {
 			cir.setReturnValue(false);
 		}
