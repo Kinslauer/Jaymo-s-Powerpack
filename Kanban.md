@@ -4,17 +4,17 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 22:09). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🪶 Quill · #1665 · writing
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · claimed
 
 
 ## In review
