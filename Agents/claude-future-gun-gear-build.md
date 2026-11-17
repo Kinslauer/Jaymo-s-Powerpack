@@ -34,5 +34,4 @@ loot only from the future's dead and echoes.
 - Tracers 1 in 4 plus tracer rounds; a magazine per gun at its real capacity, snipers included; plate carrier with
   its own art; loot only. Lore.md (new) paragraph "The last stand's kit".
 - Not played in game; couldn't build in the cloud (Modrinth CDN blocked), CI built it.
-- Open: Andy wants Fracture Point's and TaCZ Magazines' own models, both All Rights Reserved: needs Raiiiden's
-  permission or our own 3D models. #1669 can close (this PR carries the spec).
+- Andy kept both reloads and the flat icons (2026-11-17); #1669 closed.
