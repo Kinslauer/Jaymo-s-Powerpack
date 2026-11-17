@@ -397,6 +397,10 @@ public final class FishingReal {
                 gives.add(jaw);
             }
         }
+        if (!legend.isEmpty()) {
+            // a water's legend lends a cook its best cut as well (the fish itself can still go back)
+            gives.add(new ItemStack(FishCatch.LEGEND_FILLET));
+        }
         Component name = sp == null ? fish.getName() : Component.translatable(sp.nameKey());
         for (ItemStack give : gives) {
             if (!player.addItem(give)) {
