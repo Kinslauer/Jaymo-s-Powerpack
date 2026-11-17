@@ -48,6 +48,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		// mobs knocked limp by heavy blows and big blades (its LIMP attachment is class-loaded here, on both sides)
 		com.jaymoskitchen.ragdoll.MobRagdolls.register();
+		// Ragdollified plays a dying body's fall (the corpse lies down where it lands)
+		com.jaymoskitchen.compat.RagdollifiedCompat.register();
 		ModItems.register();
 		// (0.5.29) Pmeh grows wild only in jungles and savannas (no more from tall grass)
 		com.jaymoskitchen.herb.PmehFarming.register();

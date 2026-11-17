@@ -84,6 +84,10 @@ public final class MobRagdolls {
 	}
 
 	public static void register() {
+		if (com.jaymoskitchen.compat.RagdollifiedCompat.reactionsLoaded()) {
+			// Ragdollified Reactions does the big hits and heavy blades
+			return;
+		}
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!(entity instanceof Mob mob) || blocked || damageTaken <= 0.0F || !mob.isAlive()) {
 				return;

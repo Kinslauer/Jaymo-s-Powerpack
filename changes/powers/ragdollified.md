@@ -1,0 +1,4 @@
+# Ragdollified and Ragdollified Reactions in the pack
+- **Pack**: Ragdollified 1.2.2 (Raiiiden, all rights reserved; downloaded by id from CurseForge, never copied or changed; shares Felled's Zarith) and Ragdollified Reactions 0.1.3-BETA (Raiiiden, all rights reserved). A body that dies now falls as a physics ragdoll built from its own model; the player ragdolls in a crash, a blast or a hard landing, and H ragdolls you by hand. Kept out of the dev game. Jaymo's Kitchen stands down for them (see its note); Powers' own ragdolls (Web, Gravity flings) stay Powers'.
+- Ragdollified Amputation, Player Corpses and Revive & Drag only have Fabric 26.2 builds and are not added (watch-list in the vault).
+- Built by CI; not played. One test launch should check: Felled and Ragdollified sharing Zarith, Iris with Complementary, EMF and ETF models, First-person Model, MCA villagers, GeckoLib mobs, Dismember's missing limbs on a ragdoll, costumes on corpses.

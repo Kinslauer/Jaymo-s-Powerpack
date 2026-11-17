@@ -386,6 +386,7 @@ public final class Corpses {
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
 		}
 		corpse.markJustDied();
+		corpse.setOrigin(mob);
 		// on its feet, it sways and keels over first, then goes limp; anything else falls as it dies
 		KeelOver keel = keelFor(mob);
 		if (keel != null) {

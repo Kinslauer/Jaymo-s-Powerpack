@@ -1,6 +1,7 @@
 package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.Loaded;
+import com.jaymoskitchen.compat.RagdollifiedCompat;
 import com.jaymoskitchen.horse.CartEntity;
 import com.jaymoskitchen.ragdoll.KeelOver;
 import com.jaymoskitchen.ragdoll.RagdollBody;
@@ -89,6 +90,12 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.INT);
 	/** (0.5.23) The arrows still in the body (see StuckArrows): how many, and how many could come out whole, packed. */
 	private static final EntityDataAccessor<Integer> ARROWS = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	/**
+	 * Ragdollified (see RagdollifiedCompat): the entity id of the dying body its ragdoll is playing out, or -1. The corpse
+	 * isn't drawn while that ragdoll is, and takes its place where it came to rest.
+	 */
+	private static final EntityDataAccessor<Integer> ORIGIN = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
 	/** (0.5.23) How often (ticks) a pinned body checks the wall behind it is still there. */
 	private static final int PIN_CHECK_TICKS = 20;
@@ -947,6 +954,7 @@ public class CorpseEntity extends Entity {
 		builder.define(SLUNG_AT, 0L);
 		builder.define(PINNED, -1);
 		builder.define(ARROWS, 0);
+		builder.define(ORIGIN, -1);
 	}
 
 	/** (0.5.23) The arrows still in the body, packed as {@link com.jaymoskitchen.archery.StuckArrows} packs them. */
@@ -1212,6 +1220,41 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.4.39) Server: it has just died, this tick (see {@link #sinceDeath}). */
+	/** Server: waits for Ragdollified's ragdoll of {@code dying} (see {@link #origin}); only while that mod is loaded. */
+	public void setOrigin(net.minecraft.world.entity.Entity dying) {
+		if (RagdollifiedCompat.loaded()) {
+			this.entityData.set(ORIGIN, dying.getId());
+		}
+	}
+
+	/** The entity id of the dying body Ragdollified is still playing out for this corpse, or -1. */
+	public int origin() {
+		return this.entityData.get(ORIGIN);
+	}
+
+	/** Client: whether this corpse is left undrawn right now (Ragdollified's ragdoll is playing its fall). Set by the client. */
+	public static java.util.function.Predicate<CorpseEntity> hiddenByRagdoll = corpse -> false;
+	/** Client: the corpses still waiting for a ragdoll to come to rest (see {@link #origin}). */
+	public static final java.util.Set<CorpseEntity> WAITING = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
+	/**
+	 * Server: Ragdollified's ragdoll came to rest here, along {@code yaw} (the way its head points): the corpse lies down
+	 * in its place and is drawn again. Not moved while it is held, hung or dragged.
+	 */
+	public void settleAt(double x, double y, double z, float yaw) {
+		if (!(level() instanceof ServerLevel) || origin() < 0) {
+			return;
+		}
+		this.entityData.set(ORIGIN, -1);
+		if (carrier() != null || dragger() != null || isPassenger() || ragdoll == null || ragdoll.body.pinned()) {
+			return;
+		}
+		snapTo(x, y, z, yaw, 0.0F);
+		setKeeling(false);
+		this.ragdoll = new CorpseRagdoll(this, lyingBody());
+		this.ragdoll.send(this);
+	}
+
 	public void markJustDied() {
 		this.entityData.set(BORN, level().getGameTime());
 	}
@@ -1378,6 +1421,14 @@ public class CorpseEntity extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (origin() >= 0) {
+			if (level().isClientSide()) {
+				WAITING.add(this);
+			} else if (tickCount > RagdollifiedCompat.WAIT_TICKS) {
+				// no client reported the ragdoll at rest: drawn again where it is
+				this.entityData.set(ORIGIN, -1);
+			}
+		}
 		if (this.entityData.get(CRUMBLING)) {
 			tickCrumbling();
 			if (isRemoved()) {
@@ -3366,6 +3417,9 @@ public class CorpseEntity extends Entity {
 	 */
 	@Override
 	public boolean shouldRenderAtSqrDistance(double distanceSq) {
+		if (origin() >= 0 && hiddenByRagdoll.test(this)) {
+			return false;
+		}
 		return isTumbling() || falling() || super.shouldRenderAtSqrDistance(distanceSq);
 	}
 

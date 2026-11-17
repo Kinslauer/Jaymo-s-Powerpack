@@ -77,8 +77,31 @@ public final class RagdollNet {
 		}
 	}
 
+	/**
+	 * Client → server: Ragdollified's ragdoll of a dying body came to rest here, its head along {@code yaw}; the corpse
+	 * that waited for it lies down there (see {@code CorpseEntity#settleAt}).
+	 */
+	public record Settled(int corpse, double x, double y, double z, float yaw) implements CustomPacketPayload {
+		public static final Type<Settled> TYPE = new Type<>(JaymosKitchen.id("ragdoll_settled"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Settled> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.corpse);
+				buf.writeDouble(p.x);
+				buf.writeDouble(p.y);
+				buf.writeDouble(p.z);
+				buf.writeFloat(p.yaw);
+			},
+			buf -> new Settled(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat()));
+
+		@Override
+		public Type<Settled> type() {
+			return TYPE;
+		}
+	}
+
 	/** Called first thing at startup, before any receiver (see {@code Payloads.register}). */
 	public static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Settled.TYPE, Settled.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pose.TYPE, Pose.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Knock.TYPE, Knock.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(LimpPose.TYPE, LimpPose.CODEC);

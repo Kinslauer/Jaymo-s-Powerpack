@@ -82,6 +82,10 @@ public final class LimpController {
 	}
 
 	public static void register() {
+		if (com.jaymoskitchen.compat.RagdollifiedCompat.reactionsLoaded()) {
+			// Ragdollified Reactions ragdolls the player (its own H key too)
+			return;
+		}
 		ClientTickEvents.START_CLIENT_TICK.register(LimpController::startTick);
 		ClientTickEvents.END_CLIENT_TICK.register(LimpController::endTick);
 		ClientPlayNetworking.registerGlobalReceiver(RagdollNet.Knock.TYPE,
