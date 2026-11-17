@@ -265,9 +265,11 @@ def main():
             except Exception as e:  # noqa: BLE001 - reported below
                 problems.append(f"{p['file']}: couldn't download it from CurseForge's CDN to hash it ({e})")
                 continue
+            # "cdn": a file packwiz can't get through CurseForge's API comes straight from CurseForge's CDN
+            download = ({"url": cf_url(p["cf"][1], p["file"])} if p.get("cdn") else {"mode": "metadata:curseforge"})
             files[f"{kind}/{slug(os.path.splitext(p['file'])[0])}.pw.toml"] = metafile(
                 os.path.splitext(p["file"])[0], p["file"], "client",
-                {"hash-format": "sha1", "hash": sha("sha1", data), "mode": "metadata:curseforge"},
+                dict(download, **{"hash-format": "sha1", "hash": sha("sha1", data)}),
                 ("curseforge", {"file-id": p["cf"][1], "project-id": p["cf"][0]}))
 
     if problems:
