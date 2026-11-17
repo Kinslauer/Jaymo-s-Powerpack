@@ -1113,5 +1113,14 @@
 	"hud.jaymoskitchen.hands.dough.near": "Nearly right",
 	"hud.jaymoskitchen.hands.joint.grind": "Hold use and circle the grinder",
 	"hud.jaymoskitchen.hands.joint.sprinkle": "Hold use and sprinkle along the paper",
-	"hud.jaymoskitchen.hands.joint.roll": "Hold use and move the view up and down, steadily"
+	"hud.jaymoskitchen.hands.joint.roll": "Hold use and move the view up and down, steadily",
+	"hud.jaymoskitchen.hands.roast": "Turn the spit: empty hand, right-click",
+	"hud.jaymoskitchen.hands.roast.turning": "Turning...",
+	"hud.jaymoskitchen.hands.grill": "Flip with tongs, sneak to serve",
+	"hud.jaymoskitchen.hands.oven": "Pull it out with the peel",
+	"hud.jaymoskitchen.hands.sear": "Sear %s of %s: press with the tongs in the gold",
+	"hud.jaymoskitchen.hands.smoke": "Hold use with the fan to keep the heat in the green",
+	"hud.jaymoskitchen.hands.smoke.hot": "Too hot, ease off the fan",
+	"hud.jaymoskitchen.hands.smoke.cold": "Cooling, fan it",
+	"message.jaymoskitchen.hands.need_spit": "Set a spit over the fire first."
 }

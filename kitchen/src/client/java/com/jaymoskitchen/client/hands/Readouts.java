@@ -1,9 +1,12 @@
 package com.jaymoskitchen.client.hands;
 
 import com.jaymoskitchen.client.hud.HudStyle;
+import com.jaymoskitchen.cooking.Grill;
 import com.jaymoskitchen.cooking.Minigames;
 import com.jaymoskitchen.cooking.Prep;
 import com.jaymoskitchen.cooking.Rolling;
+import com.jaymoskitchen.cooking.Sear;
+import com.jaymoskitchen.cooking.Smoke;
 import com.jaymoskitchen.cooking.hands.Pick;
 import com.jaymoskitchen.net.Payloads.HandsSync;
 import net.minecraft.client.gui.Font;
@@ -45,6 +48,10 @@ final class Readouts {
 			case STIR -> STIR;
 			case DOUGH -> DOUGH;
 			case JOINT -> JOINT;
+			case ROAST -> ROAST;
+			case GRILL, OVEN -> GRILL;
+			case SEAR -> SEAR;
+			case SMOKE -> SMOKE;
 			default -> PLAIN;
 		};
 	}
@@ -180,6 +187,144 @@ final class Readouts {
 			float pmax = (water ? Prep.WATER_PERFECT_MAX : Prep.OIL_PERFECT_MAX) + shift;
 			band(graphics, x, gy, W, 7, min, max, 0x8055FF55);
 			band(graphics, x, gy, W, 7, pmin, pmax, 0xB0FFFFFF);
+		}
+	};
+
+	// --- fire ---
+
+	private static int mix(int a, int b, float t) {
+		t = Math.max(0.0F, Math.min(1.0F, t));
+		int r = Math.round(((a >> 16) & 255) + (((b >> 16) & 255) - ((a >> 16) & 255)) * t);
+		int g = Math.round(((a >> 8) & 255) + (((b >> 8) & 255) - ((a >> 8) & 255)) * t);
+		int bl = Math.round((a & 255) + ((b & 255) - (a & 255)) * t);
+		return 0xFF000000 | r << 16 | g << 8 | bl;
+	}
+
+	/** Raw pink, then golden, brown and black, as the screens showed a side. */
+	private static int shade(float doneness, float golden, float burnt, float end) {
+		if (doneness < golden) {
+			return mix(0xFFE8A6A0, 0xFFD9A040, doneness / golden);
+		}
+		if (doneness < burnt) {
+			return mix(0xFFD9A040, 0xFFB0702C, (doneness - golden) / (burnt - golden));
+		}
+		return mix(0xFF8A5025, 0xFF1E140E, (doneness - burnt) / (end - burnt));
+	}
+
+	/** A side's meter: filled to its doneness, the golden mark in white and the burnt mark in red; {@code facing} flags the side in the fire. */
+	private static void side(GuiGraphicsExtractor graphics, int x, int y, int w, int h, float doneness, float golden, float burnt, float end,
+		boolean facing) {
+		graphics.fill(x, y, x + w, y + h, 0xFF202020);
+		int fill = Math.round(w * Math.max(0.0F, Math.min(1.0F, doneness / end)));
+		graphics.fill(x, y, x + fill, y + h, shade(doneness, golden, burnt, end));
+		int g = x + Math.round(w * golden / end);
+		int b = x + Math.round(w * burnt / end);
+		graphics.fill(g, y, g + 1, y + h, 0xFFFFFFFF);
+		graphics.fill(b, y, b + 1, y + h, BAD);
+		if (facing) {
+			graphics.fill(x - 3, y, x - 1, y + h, WARN);
+		}
+	}
+
+	private static final HandsHud.Drawer ROAST = new HandsHud.Drawer() {
+		@Override
+		public int height(HandsSync sync) {
+			return HandsHud.LINE + 2 + 4 * 6;
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
+			int[] i = sync.ints();
+			float[] f = sync.floats();
+			int down = get(i, 0);
+			HudStyle.text(graphics, font, Component.translatable(get(i, 1) >= 0 ? "hud.jaymoskitchen.hands.roast.turning" : "hud.jaymoskitchen.hands.roast"),
+				x, y, HudStyle.TEXT);
+			for (int s = 0; s < Minigames.SIDES; s++) {
+				// the side in the fire first, then the ones round from it
+				int sideNo = (down + s) % Minigames.SIDES;
+				side(graphics, x + 4, y + HandsHud.LINE + 2 + s * 6, W - 4, 4, get(f, 1 + sideNo), Minigames.GOLDEN, Minigames.BURNT_AT,
+					Minigames.ROAST_END, s == 0);
+			}
+		}
+	};
+
+	private static final HandsHud.Drawer GRILL = new HandsHud.Drawer() {
+		@Override
+		public int height(HandsSync sync) {
+			return HandsHud.LINE + 2 + (get(sync.ints(), 2) == 1 ? 6 : 14);
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
+			int[] i = sync.ints();
+			float[] f = sync.floats();
+			boolean oven = get(i, 2) == 1;
+			int down = get(i, 0);
+			float perTick = get(f, 0);
+			float hot = get(f, 1);
+			HudStyle.text(graphics, font, Component.translatable(oven ? "hud.jaymoskitchen.hands.oven" : "hud.jaymoskitchen.hands.grill"), x, y,
+				hot > 1.2F ? WARN : HudStyle.TEXT);
+			int gy = y + HandsHud.LINE + 2;
+			if (oven) {
+				side(graphics, x, gy, W, 4, get(f, 2) + perTick * age, Grill.GOLDEN, Grill.BURNT, Grill.OVEN_CHARRED, false);
+				return;
+			}
+			for (int s = 0; s < 2; s++) {
+				int sideNo = s == 0 ? down : 1 - down;
+				float done = get(f, 2 + sideNo) + (sideNo == down ? perTick * age : 0.0F);
+				side(graphics, x + 4, gy + s * 8, W - 4, 5, done, Grill.GOLDEN, Grill.BURNT, Grill.ASH, s == 0);
+			}
+		}
+	};
+
+	private static final HandsHud.Drawer SEAR = new HandsHud.Drawer() {
+		@Override
+		public int height(HandsSync sync) {
+			return HandsHud.LINE + 2 + 10 + 7;
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
+			int[] i = sync.ints();
+			float[] f = sync.floats();
+			HudStyle.text(graphics, font, Component.translatable("hud.jaymoskitchen.hands.sear", Math.min(get(i, 0) + 1, Sear.ROUNDS), Sear.ROUNDS), x, y,
+				HudStyle.TEXT);
+			int gy = y + HandsHud.LINE + 2;
+			graphics.fill(x, gy, x + W, gy + 10, 0xFF3A1810);
+			float zone = get(f, 1);
+			band(graphics, x, gy, W, 10, zone - Sear.ZONE_WIDTH / 2, zone + Sear.ZONE_WIDTH / 2, 0xFFE0A030);
+			band(graphics, x, gy, W, 10, zone - Sear.CORE_WIDTH / 2, zone + Sear.CORE_WIDTH / 2, 0xFFFFF0B4);
+			needle(graphics, x, gy, W, 10, get(f, 0) + get(f, 2) * age);
+			int cell = (W - 3 * (Sear.ROUNDS - 1)) / Sear.ROUNDS;
+			for (int r = 0; r < Sear.ROUNDS; r++) {
+				int result = i.length > 2 + r ? i[2 + r] : -1;
+				int px = x + r * (cell + 3);
+				graphics.fill(px, gy + 13, px + cell, gy + 17, result == 2 ? GOOD : result == 1 ? WARN : result == 0 ? BAD : 0xFF404040);
+			}
+		}
+	};
+
+	private static final HandsHud.Drawer SMOKE = new HandsHud.Drawer() {
+		@Override
+		public int height(HandsSync sync) {
+			return HandsHud.LINE + 2 + 8 + 3 + 3 + 4;
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
+			int[] i = sync.ints();
+			float heat = get(sync.floats(), 0);
+			boolean scorching = heat > Smoke.SCORCH;
+			Component line = Component.translatable(scorching ? "hud.jaymoskitchen.hands.smoke.hot" : heat < Smoke.BAND_MIN ? "hud.jaymoskitchen.hands.smoke.cold"
+				: "hud.jaymoskitchen.hands.smoke");
+			HudStyle.text(graphics, font, line, x, y, scorching ? BAD : HudStyle.TEXT);
+			int gy = y + HandsHud.LINE + 2;
+			HudStyle.bar(graphics, x, gy, W, 8, 0.0F, 0xFFFFFF);
+			band(graphics, x, gy, W, 8, Smoke.BAND_MIN, Smoke.BAND_MAX, 0xC055C055);
+			band(graphics, x, gy, W, 8, Smoke.SCORCH, 1.0F, 0xC0C03030);
+			needle(graphics, x, gy, W, 8, heat);
+			HudStyle.bar(graphics, x, gy + 11, W, 3, get(i, 0) / (float) Smoke.CURE_TICKS, GOOD);
+			HudStyle.bar(graphics, x, gy + 15, W, 3, 1.0F - get(i, 3) / (float) Smoke.TIME_LIMIT, WARN);
 		}
 	};
 

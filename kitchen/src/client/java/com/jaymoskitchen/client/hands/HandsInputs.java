@@ -50,6 +50,7 @@ final class HandsInputs {
 						}
 					}
 				}
+				case SMOKE -> wantsHold = minecraft.options.keyUse.isDown() && CookTools.Tool.FAN.holds(player.getMainHandItem());
 				case DOUGH -> wantsHold = phase < 2 && minecraft.options.keyUse.isDown();
 				case JOINT -> {
 					wantsHold = minecraft.options.keyUse.isDown();

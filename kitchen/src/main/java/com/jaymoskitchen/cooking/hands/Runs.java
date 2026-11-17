@@ -1,5 +1,6 @@
 package com.jaymoskitchen.cooking.hands;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -20,10 +21,19 @@ final class Runs {
 			return new DoughRun(table, pick, now);
 		});
 		HandsOn.factory(Pick.Kind.JOINT, (table, pick, starter, now) -> new JointRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.ROAST, (table, pick, starter, now) -> new RoastRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.GRILL, (table, pick, starter, now) -> new GrillRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.OVEN, (table, pick, starter, now) -> new GrillRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.SEAR, (table, pick, starter, now) -> new SearRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.SMOKE, (table, pick, starter, now) -> new SmokeRun(table, pick, now));
 	}
 
 	/** Whether {@code pick} can begin on this table (the spit is up for a roast...); says so to the cook if not. */
 	static boolean ready(Table table, Pick pick, ServerPlayer cook) {
+		if (pick.kind() == Pick.Kind.ROAST && !table.level.getBlockState(table.pos.above()).is(com.jaymoskitchen.cooking.spit.SpitBlock.SPIT)) {
+			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.need_spit"));
+			return false;
+		}
 		return true;
 	}
 }

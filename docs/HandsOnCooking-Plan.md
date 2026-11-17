@@ -58,3 +58,15 @@ did. The spec's per-player sessions (R11) become one session per station that se
 - `JointRun` (`hc-prep`, joint): hold use and circle the grinder, hold use and point along the paper to sprinkle (`IN_ACROSS`),
   hold use and move the view up and down at a steady pace to roll (`IN_ROLL`, 6 px of the screen game per degree); `Rolling.score`.
 - `Geometry`, the readouts for the four kinds, `HandsInputs`, and `Prep.start` goes through `HandsOn.fromPrep`.
+
+### Patch 3: fire
+- `RoastRun` (`hc-roast`): needs `SpitBlock.SPIT` on the fire (`Runs.ready` says so otherwise). Empty-hand right-click on the spit
+  turns it a quarter (the screen's four sides, heat gaps, side spill, `TURN_TICKS`); sneak + right-click takes it off; judged by
+  `Minigames.judgeRoast`. Walking away: CHARRED.
+- `GrillRun` (`hc-grill`): one run for the grill and the oven. Grill (campfire, hearth or hob pan): tongs flip (`FLIP_TICKS` gap, new
+  heat each flip, soul fire hotter), sneak + tongs serves; oven (`Kind.OVEN`): the peel pulls it out, heat surges by itself;
+  judged by `Quality.judgeGrill/judgeOven`; burnt to `Grill.ASH` ends it. Walking away serves as it is, as closing the screen did.
+- `SearRun` (`hc-sear`): five rounds of the sweeping marker; a right-click with the tongs presses; `Sear.judge`. Walking away: CHARRED.
+- `SmokeRun` (`hc-smoke`): hold use with the fan (client `IN_HOLD`, every cook fanning adds to the one fire); heat, gusts, cure, scorch
+  as the screen; `Smoke.judge`. Walking away: BURNT.
+- Readouts for all four (side meters with the golden and burnt marks, the sear bar, the smoker's heat band).
