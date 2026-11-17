@@ -80,15 +80,22 @@ public final class BossShare {
 					f.health = entity.getMaxHealth();
 					return f;
 				});
-				// the last blow counts only what was left of it
-				float dealt = entity.isDeadOrDying() ? Math.min(taken, fight.health) : taken;
-				fight.harm.merge(player.getUUID(), dealt, Float::sum);
+				fight.harm.merge(player.getUUID(), taken, Float::sum);
 				fight.names.put(player.getUUID(), player.getGameProfile().name());
 				fight.health = Math.max(0.0F, entity.getHealth());
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			Fight fight = FIGHTS.remove(entity.getUUID());
+			if (source.getEntity() instanceof ServerPlayer player && com.jaymospowers.relics.Relics.boss(entity)) {
+				// the blow that fells is never seen above (no AFTER_DAMAGE on a killing blow): it counts what was left
+				if (fight == null) {
+					fight = new Fight();
+					fight.health = entity.getMaxHealth();
+				}
+				fight.harm.merge(player.getUUID(), fight.health, Float::sum);
+				fight.names.put(player.getUUID(), player.getGameProfile().name());
+			}
 			if (fight != null) {
 				fell(entity, fight);
 			}

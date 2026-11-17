@@ -45,6 +45,8 @@ public final class ChronoWindDay {
 	static final double SPEED_UP = 0.04;
 	/** How often (ticks) the others are told someone would wind it. */
 	static final int ASK_EVERY = 40;
+	/** How long (ticks) the first winding waits for the others' leave before it is let go for good. */
+	static final int FIRST_WAIT = 20 * 60;
 
 	/**
 	 * False: this player has attuned for the first time and the first winding is owed; true: it has happened. Saved, kept through
@@ -56,6 +58,7 @@ public final class ChronoWindDay {
 	/** When Z went down (game time), while it is held. The first winding's progress (clock ticks wound so far). */
 	private static final Map<UUID, Long> HELD = new HashMap<>();
 	private static final Map<UUID, Integer> FIRST = new HashMap<>();
+	private static final Map<UUID, Integer> WAITED = new HashMap<>();
 
 	private ChronoWindDay() {
 	}
@@ -113,8 +116,15 @@ public final class ChronoWindDay {
 	/** The first winding, a whole day over the newly attuned, once the others allow it. */
 	private static void first(ServerPlayer player, ServerLevel level) {
 		if (!leave(player)) {
+			// the others aren't asked for ever: after a while the moment has passed
+			if (WAITED.merge(player.getUUID(), 1, Integer::sum) >= FIRST_WAIT) {
+				WAITED.remove(player.getUUID());
+				FIRST.remove(player.getUUID());
+				player.setAttached(WOUND, true);
+			}
 			return;
 		}
+		WAITED.remove(player.getUUID());
 		int done = FIRST.getOrDefault(player.getUUID(), 0);
 		if (done == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2F, 0.5F);

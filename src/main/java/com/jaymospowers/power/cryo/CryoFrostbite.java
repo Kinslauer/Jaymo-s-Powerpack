@@ -96,7 +96,8 @@ public final class CryoFrostbite {
 					continue;
 				}
 			}
-			if ((now - b.lastAdded) % 20 == 19) {
+			// a steady beat of its own (not timed from the last stack, which fresh hits keep renewing)
+			if ((now + target.getId()) % 20 == 0) {
 				int slow = Math.min(MAX_SLOW, b.stacks / STACKS_PER_SLOW);
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, slow, false, true));
 				target.hurtServer(level, level.damageSources().source(DamageTypes.FREEZE, null, b.by), HARM_PER_STACK * b.stacks);

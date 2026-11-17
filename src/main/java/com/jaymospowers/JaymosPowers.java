@@ -134,6 +134,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.bonebond.Boneiron.init();
 		// (Awakening picks) who did what when a boss falls, and the threat tracker sold on the Lookout
 		com.jaymospowers.core.BossShare.init();
+		com.jaymospowers.core.StaleTags.init();
 		com.jaymospowers.tracker.ThreatTracker.init();
 		// Blindness, the condition (lost eyes), and the Unseeing
 		com.jaymospowers.power.blindness.Blind.init();

@@ -59,8 +59,8 @@ off far shots (`aw-deflect`).
   after the last new one. The Ash Whisperer's sworn: tier 1, every blow lays a stack; a new **Rot key** (default End,
   Patron keys category) holds the arts: tap at a foe = **Grip** (pins 2.5 s, stacks while held), sneak = **Spread** (a
   12-block strip of rotting ground for 6 s), tier 3 sprint = **Rush** (drives the foe till it meets a wall), tap at
-  nothing = **Breach** (rots a 3x3 tunnel 6 deep that closes after 20 s), tier 4 hold 2 s = **Collapse** (a crater 9
-  across and 6 deep that grows back over a minute, 5 min wait). The Unseeing's ritual-keepers (Powers
+  nothing = **Breach** (rots a 3x3 tunnel 6 deep that closes after 20 s), tier 4 hold 2 s = **Collapse** (a crater 19
+  across, radius 9 and 6 deep that grows back over a minute, 5 min wait). The Unseeing's ritual-keepers (Powers
   `UnseeingRites`: blindfolded, gouged or zealous, never a follower who still has their eyes) lay rot with every blow
   (a short withering without Kingdoms), draw blood across the air to heal themselves, and lay death's touch (lingering
   withering).
@@ -389,3 +389,30 @@ hold. **Awakened strangers** are gifted folk who left home to see what their gif
 they meet who carry one; they take a title on the road, Adept or Master, and most of them yield before it costs them
 their life. The **threat tracker** is the Keeper's: "the wind up here carries everything, and a little of it is in that
 needle", and it turns to whatever great thing is near.
+
+### After the row check (independent audit of every built row against the code)
+All 43 rows of patches 1-3 and 5-7 have code a player can reach; none of the unpicked rows is built.
+
+Fixed: an awakened stranger with no MCA (a plain villager) crashed the server on its first blow (no attack attribute);
+it now strikes with a fist. The four silencing marks (Airless Dome, Drowning Pit, Rift Seal, a Lawgiver's rule) were
+saved with the entity and never came off after a logout, an unload or a crash; anything entering the world now enters
+unmarked (`core/StaleTags`). Rot and Frostbite timed their hurt from the last stack, so a Grip or fast hits kept
+pushing it back and they never hurt: each now has a steady beat. Rotted holes grow back through water, lava or grass
+that came in (only a block someone put there is left). The boss share card never counted the felling blow, and showed
+nothing for a boss felled in one: the last blow now counts what was left. The first day-winding asked the other players
+for ever; it waits a minute and is then let go. The Court of Judgment is never marked in a realm's land and is not
+raised over ground with a chest, bed, furnace or the like on it. Heft is dropped on death. The kill-with-your-power
+trial counts only your own power.
+
+Not as the rows say, or worth Andy's eye:
+- **`aw-grav-planets`**: each planet thrown costs a little hunger (0.6 exhaustion) and none can be thrown at 1 food
+  bar or less, like the other Gravity moves. Arriving keeps 35% of your speed; a throw mid-fall keeps all of it.
+- **`aw-trials`**: one shared 16-step ladder with each power's own ability names, not a hand-written ladder per power.
+  The trials screen has one how-to line ("Your own thoughts on how to push your limits...").
+- **`aw-power`**: Ability Power raises harm, aimed reach and effect length; not size or number of targets.
+- **`aw-bone`**: bonding is crouching in the vat; plating is a plate clicked onto armour, not at the Tinkering forge.
+- **`aw-combat`**: combat mode covers the Weapon Forms belt only.
+- **`aw-relics`**: the four vanilla bosses have fixed relics; other bosses give one of the seven by kind of boss. Wind
+  Knot, Hale Coin and Stride Spur only come from those other bosses.
+- **`aw-cordon`**: a court whose spot turns out to be built on is not raised, so that summons' map leads to nothing.
+- **`aw-decay`**: a crash while a rotted hole is open leaves it open (they are closed on a normal stop).

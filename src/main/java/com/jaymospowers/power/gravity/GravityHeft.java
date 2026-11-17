@@ -116,6 +116,10 @@ final class GravityHeft {
 
 	/** Every tick: the heavy sink in water. */
 	static void tick(ServerPlayer player) {
+		if (weight(player) != NORMAL && player.getAttribute(Attributes.GRAVITY) != null && !player.getAttribute(Attributes.GRAVITY).hasModifier(GRAVITY_ID)) {
+			// died and came back: the weight went with the old body
+			WEIGHT.remove(player.getUUID());
+		}
 		if (weight(player) == HEAVY && player.isInWater() && !player.getAbilities().flying) {
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(v.x, Math.min(v.y, 0.0) - HEAVY_SINK, v.z);

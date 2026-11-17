@@ -43,6 +43,8 @@ public final class AwakenedStrangers {
 	/** How long a fight may go on (ticks), the share of health they yield at, and how long they take to go once done. */
 	static final int FIGHT_TICKS = 6000, LEAVE_TICKS = 300;
 	static final float YIELD_AT = 0.25F;
+	/** A stranger with no attack of their own (a plain villager) hits for this much. */
+	static final float FIST = 3.0F;
 	/** Their reach, and the beat of their blows (ticks). */
 	static final double REACH = 2.6;
 	static final int BLOW_EVERY = 20;
@@ -191,7 +193,12 @@ public final class AwakenedStrangers {
 		} else if (mob.tickCount % BLOW_EVERY < 10) {
 			mob.getNavigation().stop();
 			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			mob.doHurtTarget(level, quarry);
+			if (mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) != null) {
+				mob.doHurtTarget(level, quarry);
+			} else {
+				// a plain villager (no MCA) has no attack of its own
+				quarry.hurtServer(level, level.damageSources().mobAttack(mob), FIST);
+			}
 		}
 		return true;
 	}

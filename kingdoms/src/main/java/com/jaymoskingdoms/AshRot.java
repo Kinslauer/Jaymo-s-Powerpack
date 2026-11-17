@@ -220,7 +220,8 @@ public final class AshRot {
 				it.remove();
 				continue;
 			}
-			if ((now - rot.last) % ROT_BEAT == ROT_BEAT - 1 && target.level() instanceof ServerLevel level) {
+			// a steady beat of its own (not timed from the last stack, which a Grip keeps renewing)
+			if ((now + target.getId()) % ROT_BEAT == 0 && target.level() instanceof ServerLevel level) {
 				Entity by = rot.by == null ? null : level.getEntity(rot.by);
 				float harm = rot.stacks * ROT_DAMAGE;
 				hurts.add(() -> {
@@ -568,7 +569,8 @@ public final class AshRot {
 		if (!force && !level.getEntitiesOfClass(LivingEntity.class, new AABB(pos)).isEmpty()) {
 			return false;
 		}
-		if (level.getBlockState(pos).isAir()) {
+		// water, lava or grass that came into the hole gives way; a block someone put there stays
+		if (level.getBlockState(pos).canBeReplaced()) {
 			level.setBlock(pos, scar.states.get(i), Block.UPDATE_ALL);
 		}
 		scar.next++;

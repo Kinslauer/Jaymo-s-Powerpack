@@ -76,6 +76,8 @@ public final class Cordon {
 	/** How far off the court is from where the summons is read (blocks), and how near a player must come for it to rise. */
 	static final int COURT_MIN = 400, COURT_MAX = 700, COURT_NEAR = 48;
 	/** The court's floor radius, its pillars' height, and how many sentinels stand guard with the Arbiter. */
+	/** How many spots a summons tries for one outside every realm's land. */
+	static final int COURT_TRIES = 16;
 	static final int COURT_RADIUS = 11, PILLAR_HEIGHT = 6, COURT_GUARDS = 2;
 	/** Ash grey, and the binding red of their seals. */
 	public static final int ASH = 0x8A8580, BINDING = 0xB0202A;
@@ -284,8 +286,14 @@ public final class Cordon {
 				return InteractionResult.FAIL;
 			}
 			RandomSource random = server.getRandom();
-			double angle = random.nextDouble() * Math.PI * 2.0, distance = Mth.nextInt(random, COURT_MIN, COURT_MAX);
-			BlockPos court = BlockPos.containing(sp.getX() + Math.cos(angle) * distance, 64, sp.getZ() + Math.sin(angle) * distance);
+			BlockPos court = null;
+			for (int tries = 0; tries < COURT_TRIES; tries++) {
+				double angle = random.nextDouble() * Math.PI * 2.0, distance = Mth.nextInt(random, COURT_MIN, COURT_MAX);
+				court = BlockPos.containing(sp.getX() + Math.cos(angle) * distance, 64, sp.getZ() + Math.sin(angle) * distance);
+				if (Factions.at(server.getServer(), server, court) == null) {
+					break; // the court sits in the wild, never in a realm's land
+				}
+			}
 			Map<String, Integer> courts = new HashMap<>(server.getAttachedOrElse(COURTS, Map.of()));
 			courts.put(Long.toString(court.asLong()), MARKED);
 			server.setAttached(COURTS, courts);
@@ -322,7 +330,10 @@ public final class Cordon {
 				double dx = player.getX() - marked.getX(), dz = player.getZ() - marked.getZ();
 				if (dx * dx + dz * dz <= COURT_NEAR * COURT_NEAR && level.isLoaded(marked)
 					&& level.hasChunksAt(marked.offset(-COURT_RADIUS, 0, -COURT_RADIUS), marked.offset(COURT_RADIUS, 0, COURT_RADIUS))) {
-					raise(level, marked);
+					// never over anyone's work: a realm's land, or ground with a chest, bed, furnace or the like on it
+					if (Factions.at(level.getServer(), level, marked) == null && !built(level, marked)) {
+						raise(level, marked);
+					}
 					Map<String, Integer> next = new HashMap<>(courts);
 					next.put(e.getKey(), RAISED);
 					level.setAttached(COURTS, next);
@@ -330,6 +341,22 @@ public final class Cordon {
 				}
 			}
 		}
+	}
+
+	/** Whether someone has built where the court would stand: any block entity inside its round. */
+	private static boolean built(ServerLevel level, BlockPos marked) {
+		int r = COURT_RADIUS + 2;
+		for (int cx = (marked.getX() - r) >> 4; cx <= (marked.getX() + r) >> 4; cx++) {
+			for (int cz = (marked.getZ() - r) >> 4; cz <= (marked.getZ() + r) >> 4; cz++) {
+				for (BlockPos at : level.getChunk(cx, cz).getBlockEntitiesPos()) {
+					int dx = at.getX() - marked.getX(), dz = at.getZ() - marked.getZ();
+					if (dx * dx + dz * dz <= r * r) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/** The Arbiter at {@code court} has fallen: the court is judged. */

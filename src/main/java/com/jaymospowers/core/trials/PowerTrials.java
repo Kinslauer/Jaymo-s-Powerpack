@@ -175,7 +175,7 @@ public final class PowerTrials {
 			}
 			if (entity instanceof Enemy) {
 				progress(player, Kind.KILL, 1, null);
-				if (Powers.actingNow()) {
+				if (Powers.actor() == player) {
 					progress(player, Kind.KILL_POWER, 1, null);
 				}
 			}
