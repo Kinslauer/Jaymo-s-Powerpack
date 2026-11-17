@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>the <b>Soul key</b>: the Reaper's keeper ({@link SoulArts});</li>
  * <li>the <b>Claw key</b>: a vampire ({@link ClawArts});</li>
- * <li>the <b>Wild key</b>: a Druid, the green arts out of a shape and the sizes in one ({@link GreenArts}, {@link SizeArts});</li>
+ * <li>the <b>Wild key</b>: a Druid, the green arts out of a shape and the sizes in one, or at any size but their own
+ * ({@link GreenArts}, {@link SizeArts});</li>
  * <li>the <b>Sun key</b>: a Dawnborn, or a Cleric or Paladin who has learned the Sun's arts ({@link SunArts}).</li>
  * </ul>
  * A gesture is a tap, a tap sneaking, a tap sprinting, or a hold (let go after {@link #HOLD_TICKS}), plain or sneaking.
@@ -114,7 +115,7 @@ public final class ArtKeys {
 			case SOUL -> SoulArts.key(player, gesture);
 			case CLAW -> ClawArts.key(player, gesture);
 			case WILD -> {
-				if (Druids.shaped(player)) {
+				if (Druids.shaped(player) || SizeArts.size(player) != SizeArts.NATURAL) {
 					SizeArts.key(player, gesture);
 				} else {
 					GreenArts.key(player, gesture);

@@ -9,13 +9,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 
 /**
- * The four art keys ({@link ArtKeys}; numpad 1 to 4, rebindable, under their own heading): Soul, Claw, Wild and Sun. Each key's
+ * The four art keys ({@link ArtKeys}; the arrow keys up, left, down and right, on every keyboard, rebindable, under their own
+ * heading): Soul, Claw, Wild and Sun. Each key's
  * press and release go to the server, which reads the gesture (as the Rot key's is read). Sent only with no screen open; the
  * server ignores a key whose arts are not the player's.
  */
 final class ArtKeysClient {
 	private static final String[] NAMES = {"art_soul", "art_claw", "art_wild", "art_sun"};
-	private static final int[] DEFAULTS = {InputConstants.KEY_NUMPAD1, InputConstants.KEY_NUMPAD2, InputConstants.KEY_NUMPAD3, InputConstants.KEY_NUMPAD4};
+	private static final int[] DEFAULTS = {InputConstants.KEY_UP, InputConstants.KEY_LEFT, InputConstants.KEY_DOWN, InputConstants.KEY_RIGHT};
 	private static final KeyMapping[] KEYS = new KeyMapping[ArtKeys.ARTS];
 	private static final boolean[] DOWN = new boolean[ArtKeys.ARTS];
 

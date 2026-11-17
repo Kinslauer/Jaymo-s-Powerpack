@@ -19,6 +19,8 @@
   "message.jaymoskingdoms.art.jar_stuck": "No room to let it out there.",
   "message.jaymoskingdoms.art.jar_too_much": "It carries too much to fit in a jar.",
   "message.jaymoskingdoms.art.sun_ash": "The Sun lends no fire to the Ash Whisperer's own.",
+  "message.jaymoskingdoms.art.sun_unsworn": "The Sun's arts answer only to the Crowned Sun's sworn.",
+  "gui.jaymoskingdoms.classtree.blocked.sun": "Only the Crowned Sun's sworn can learn this.",
   "message.jaymoskingdoms.art.sun_no_spot": "Nowhere there for the pillar to stand.",
   "message.jaymoskingdoms.art.sun_axe_needs": "An axe in your hand and a nether star in the other.",
   "message.jaymoskingdoms.art.sun_axe_made": "The star is in this axe already.",
@@ -43,11 +45,11 @@
   "classtree.jaymoskingdoms.dru_bloom": "Bloom and Root",
   "classtree.jaymoskingdoms.dru_bloom.desc": "The Wild key, out of a shape. Sneak and tap with no foe in sight: a patch of sunflowers at your feet heals your side, twice as fast in the day's sun. Sprint and tap at a friend (or at no one, for yourself): a cocoon of roots closes over them. Nothing harms them, they can't move, and they mend.",
   "classtree.jaymoskingdoms.dru_sizes": "Seven Sizes",
-  "classtree.jaymoskingdoms.dru_sizes.desc": "The Wild key, in a shape. Tap grows the beast a size, sneak and tap shrinks it; each rank opens one more size each way, a speck to a colossus. Small, use a bigger creature to ride it unnoticed. Big, sprint and tap stomps, and holding the key grabs a smaller creature (hold again to throw it).",
+  "classtree.jaymoskingdoms.dru_sizes.desc": "The Wild key. In a shape, tap grows you a size and sneak and tap shrinks you. Out of a shape, hold the key with no creature in sight to shrink, sneak and hold to grow; until you are your own size again the key works as it does in a shape. Each rank opens one more size each way, a speck to a colossus. Small, use a bigger creature to ride it unnoticed. Big, sprint and tap stomps, and holding the key grabs a smaller creature (hold again to throw it). Shedding a shape sheds the size.",
   "classtree.jaymoskingdoms.dru_ray": "Wax and Wane",
-  "classtree.jaymoskingdoms.dru_ray.desc": "The Wild key, out of a shape. Hold it at a creature: a ray shrinks it a size. Sneak and hold: the ray grows it. It wears off in a minute. A creature shrunk as far as it goes can be put in a glass bottle, and let out again where you use the jar.",
+  "classtree.jaymoskingdoms.dru_ray.desc": "The Wild key, out of a shape. Hold it at a creature: a ray shrinks it a size. Sneak and hold: the ray grows it. It wears off in a minute. A creature you have shrunk as far as it goes can be put in a glass bottle, and let out again where you use the jar.",
   "classtree.jaymoskingdoms.cle_sun": "The Sun's Arts",
-  "classtree.jaymoskingdoms.cle_sun.desc": "The Sun key. Tap: a sun orb. Sneak and tap: a pillar of sunfire. Sprint and tap at a foe near you: pin and pummel. Hold: a sun of your own to fight by. Fighting climbs four steps of ascension, growing as you go. All of it is stronger the higher the sun stands. Not for the Ash Whisperer's sworn.",
+  "classtree.jaymoskingdoms.cle_sun.desc": "The Sun key. Tap: a sun orb. Sneak and tap: a pillar of sunfire. Sprint and tap at a foe near you: pin and pummel. Hold: a sun of your own to fight by. Fighting climbs four steps of ascension, growing as you go. All of it is stronger the higher the sun stands. Only the Crowned Sun's sworn can learn it or use it.",
   "classtree.jaymoskingdoms.pal_sun": "The Sun's Arts",
-  "classtree.jaymoskingdoms.pal_sun.desc": "The Sun key. Tap: a sun orb. Sneak and tap: a pillar of sunfire. Sprint and tap at a foe near you: pin and pummel. Hold: a sun of your own to fight by. Fighting climbs four steps of ascension, growing as you go. All of it is stronger the higher the sun stands. Not for the Ash Whisperer's sworn."
+  "classtree.jaymoskingdoms.pal_sun.desc": "The Sun key. Tap: a sun orb. Sneak and tap: a pillar of sunfire. Sprint and tap at a foe near you: pin and pummel. Hold: a sun of your own to fight by. Fighting climbs four steps of ascension, growing as you go. All of it is stronger the higher the sun stands. Only the Crowned Sun's sworn can learn it or use it."
 }

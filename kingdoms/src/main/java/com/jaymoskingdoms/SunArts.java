@@ -43,8 +43,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Crowned Sun's arts (Andy's Awakening pick "Sun power", 2026-11-17: "The crowned patrons's moves initially all dawnborn,
  * clerics and paladins can learn it"), on the Sun key ({@link ArtKeys}). Every Dawnborn has them by blood; a Cleric
- * ({@link #CLERIC_NODE}) or a Paladin ({@link #PALADIN_NODE}) learns them in the tree. The Ash Whisperer's sworn are refused:
- * the Sun lends no fire to its rival's own.
+ * ({@link #CLERIC_NODE}) or a Paladin ({@link #PALADIN_NODE}) learns them in the tree, and only one sworn to the Crowned Sun
+ * can learn them or use them once learned. The Ash Whisperer's sworn are refused, Dawnborn too: the Sun lends no fire to its
+ * rival's own.
  * <ul>
  * <li><b>The higher the sun, the stronger</b>: the arts and your own blows go by the sun's height where you stand under the
  * open sky ({@link #ART_NOON} and {@link #BLOW_NOON} at noon); by night, under a roof, or where there is no sun, the arts are
@@ -195,10 +196,22 @@ public final class SunArts {
 		});
 	}
 
-	/** Whether the Sun's arts are {@code player}'s: a Dawnborn, or a Cleric or Paladin who learned them; never the Ash's sworn. */
+	/**
+	 * Whether the Sun's arts are {@code player}'s: a Dawnborn, or a Cleric or Paladin sworn to the Crowned Sun who learned them;
+	 * never the Ash's sworn.
+	 */
 	public static boolean holds(Player player) {
-		return (Heritage.is(player, Heritage.Kind.DAWNBORN) || ClassTrees.has(player, CLERIC_NODE) > 0 || ClassTrees.has(player, PALADIN_NODE) > 0)
-			&& Patrons.of(player) != Patron.ASH_WHISPERER;
+		Patron patron = Patrons.of(player);
+		return patron != Patron.ASH_WHISPERER && (Heritage.is(player, Heritage.Kind.DAWNBORN) || patron == Patron.CROWNED_SUN && learned(player));
+	}
+
+	private static boolean learned(Player player) {
+		return ClassTrees.has(player, CLERIC_NODE) > 0 || ClassTrees.has(player, PALADIN_NODE) > 0;
+	}
+
+	/** Whether {@code player} may learn the tree perk {@code node}: the Sun's arts are only for the Crowned Sun's sworn. */
+	public static boolean learnable(Player player, String node) {
+		return !node.equals(CLERIC_NODE) && !node.equals(PALADIN_NODE) || Patrons.of(player) == Patron.CROWNED_SUN;
 	}
 
 	/** How high the sun stands over {@code player}, 0 (no sun: night, a roof, no sky) to 1 (noon under the open sky). */
@@ -255,10 +268,9 @@ public final class SunArts {
 
 	static void key(ServerPlayer player, ArtKeys.Gesture gesture) {
 		if (!holds(player) || !(player.level() instanceof ServerLevel level)) {
-			if (Patrons.of(player) == Patron.ASH_WHISPERER && (Heritage.is(player, Heritage.Kind.DAWNBORN) || ClassTrees.has(player, CLERIC_NODE) > 0
-				|| ClassTrees.has(player, PALADIN_NODE) > 0)) {
+			if (Heritage.is(player, Heritage.Kind.DAWNBORN) || learned(player)) {
 				// theirs by blood or by learning, and refused: they are told why
-				ArtKeys.refuse(player, "sun_ash");
+				ArtKeys.refuse(player, Patrons.of(player) == Patron.ASH_WHISPERER ? "sun_ash" : "sun_unsworn");
 			}
 			return;
 		}

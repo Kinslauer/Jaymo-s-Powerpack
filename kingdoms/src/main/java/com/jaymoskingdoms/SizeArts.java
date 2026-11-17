@@ -47,9 +47,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The seven sizes (Andy's Awakening pick "Size changer", 2026-11-17: "Wrap druid into this with his beast forms"). A Druid's
- * wild shape is the body the sizes are worn on: in a shape, the Wild key ({@link ArtKeys}) steps the beast through
- * {@link #SCALES}, a speck to a colossus (the Druid's own body and the stand-in beast are both sized).
+ * The seven sizes (Andy's Awakening pick "Size changer", 2026-11-17: "Wrap druid into this with his beast forms"). A Druid
+ * wears the sizes in a wild shape or out of one: the Wild key ({@link ArtKeys}) steps the body through {@link #SCALES}, a
+ * speck to a colossus (in a shape the Druid's own body and the stand-in beast are both sized). Out of a shape and at their
+ * own size the key is the green arts' ({@link GreenArts}), and its ray turned on no creature is turned on the Druid: hold
+ * shrinks them a size, sneak + hold grows them. While they are any size but their own the key is the sizes', as in a shape.
+ * Shedding a shape sheds the size with it.
  * <ul>
  * <li><b>Seven Sizes</b> ({@link #SIZES}, 3 ranks): tap grows a size, sneak + tap shrinks one; each rank opens one more size
  * each way from the beast's own. Health and blows go with the size.</li>
@@ -59,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * smaller creature you look at into your hand, and hold again <b>throws</b> it.</li>
  * <li><b>Wax and Wane</b> ({@link #RAY}), out of a shape: hold the key at a creature and a ray <b>shrinks</b> it a size; sneak
  * + hold <b>grows</b> it (five sizes for others, back to its own in a while). A creature at the smallest size goes into a
- * glass bottle used on it, a <b>jar</b>: used on a block, the jar lets it out again.</li>
+ * glass bottle the Druid who shrank it uses on it, a <b>jar</b>: used on a block, the jar lets it out again.</li>
  * </ul>
  */
 public final class SizeArts {
@@ -103,6 +106,8 @@ public final class SizeArts {
 	private static final class Sized {
 		int step;
 		long until;
+		/** Whose ray gave the size (null: nobody's, a creature let out of a jar). Only they may jar it. */
+		@Nullable UUID by;
 	}
 
 	/** A shaped Druid's size (an index into {@link #SCALES}); none is the beast's own. */
@@ -122,8 +127,8 @@ public final class SizeArts {
 			if (sp.getMainHandItem().is(Items.GLASS_BOTTLE) && !jar(sp.getMainHandItem())) {
 				return bottle(sp, level, target) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 			}
-			// small, in a shape: up onto a bigger creature
-			if (Druids.shaped(sp) && size(sp) <= SMALL_FROM && !sp.isPassenger() && target.getBbHeight() >= sp.getBbHeight() * RIDE_TALLER
+			// small: up onto a bigger creature
+			if (size(sp) <= SMALL_FROM && !sp.isPassenger() && target.getBbHeight() >= sp.getBbHeight() * RIDE_TALLER
 				&& sp.startRiding(target, true, true)) {
 				unnoticed(sp, level);
 				return InteractionResult.SUCCESS;
@@ -152,7 +157,7 @@ public final class SizeArts {
 		return SIZE.getOrDefault(player.getUUID(), NATURAL);
 	}
 
-	// ---- the key (in a shape) -------------------------------------------------------------------------------------------------
+	// ---- the key (in a shape, or at any size but one's own) -------------------------------------------------------------------
 
 	static void key(ServerPlayer player, ArtKeys.Gesture gesture) {
 		if (!(player.level() instanceof ServerLevel level) || !ClassTrees.check(player, SIZES)) {
@@ -160,17 +165,7 @@ public final class SizeArts {
 		}
 		int size = size(player);
 		switch (gesture) {
-			case TAP, SNEAK -> {
-				int reach = player.isCreative() ? NATURAL : Math.min(NATURAL, ClassTrees.has(player, SIZES));
-				int to = size + (gesture == ArtKeys.Gesture.TAP ? 1 : -1);
-				if (to < NATURAL - reach || to > NATURAL + reach) {
-					ArtKeys.refuse(player, "size_limit");
-				} else if (to > size && !room(player, level, SCALES[to] / SCALES[size])) {
-					ArtKeys.refuse(player, "size_no_room");
-				} else if (!ArtKeys.cooling(player, "size_step", STEP_COOLDOWN)) {
-					set(player, level, to);
-				}
-			}
+			case TAP, SNEAK -> step(player, level, gesture == ArtKeys.Gesture.TAP);
 			case SPRINT -> {
 				if (size < BIG_FROM) {
 					ArtKeys.refuse(player, "size_too_small");
@@ -194,6 +189,20 @@ public final class SizeArts {
 					}
 				}
 			}
+		}
+	}
+
+	/** One size up ({@code grow}) or down, as far as the ranks of {@link #SIZES} reach. */
+	private static void step(ServerPlayer player, ServerLevel level, boolean grow) {
+		int size = size(player);
+		int reach = player.isCreative() ? NATURAL : Math.min(NATURAL, ClassTrees.has(player, SIZES));
+		int to = size + (grow ? 1 : -1);
+		if (to < NATURAL - reach || to > NATURAL + reach) {
+			ArtKeys.refuse(player, "size_limit");
+		} else if (to > size && !room(player, level, SCALES[to] / SCALES[size])) {
+			ArtKeys.refuse(player, "size_no_room");
+		} else if (!ArtKeys.cooling(player, "size_step", STEP_COOLDOWN)) {
+			set(player, level, to);
 		}
 	}
 
@@ -287,7 +296,7 @@ public final class SizeArts {
 	 */
 	public static boolean unnoticed(LivingEntity attacker, LivingEntity target) {
 		return target instanceof ServerPlayer rider && rider.getVehicle() instanceof LivingEntity && attacker.getLastHurtByMob() != rider
-			&& Druids.shaped(rider) && size(rider) <= SMALL_FROM;
+			&& size(rider) <= SMALL_FROM;
 	}
 
 	/** Whatever hunts {@code player} loses them. */
@@ -325,12 +334,19 @@ public final class SizeArts {
 
 	// ---- the ray --------------------------------------------------------------------------------------------------------------
 
-	/** The Wild key held out of a shape: a ray that shrinks (or, {@code grow}, grows) the creature looked at, one size. */
+	/**
+	 * The Wild key held out of a shape: a ray that shrinks (or, {@code grow}, grows) the creature looked at, one size. With no
+	 * creature in sight a Druid of the {@link #SIZES} turns it on themselves.
+	 */
 	static void ray(ServerPlayer player, ServerLevel level, boolean grow) {
+		LivingEntity target = ArtKeys.sight(player, RAY_REACH, e -> true);
+		if (target == null && (player.isCreative() || ClassTrees.has(player, SIZES) > 0)) {
+			step(player, level, grow);
+			return;
+		}
 		if (!ClassTrees.check(player, RAY)) {
 			return;
 		}
-		LivingEntity target = ArtKeys.sight(player, RAY_REACH, e -> true);
 		if (target == null) {
 			ArtKeys.refuse(player, "no_creature");
 			return;
@@ -349,20 +365,21 @@ public final class SizeArts {
 		if (ArtKeys.cooling(player, "size_ray", RAY_COOLDOWN)) {
 			return;
 		}
-		size(target, step, level.getGameTime() + RAY_TICKS);
+		size(target, step, level.getGameTime() + RAY_TICKS, player.getUUID());
 		Fx.beam(level, player.getEyePosition().add(0.0, -0.3, 0.0), target.getBoundingBox().getCenter(), 0.1F, grow ? WAX : WANE, 12);
 		Fx.blast(level, target.getBoundingBox().getCenter(), 0.8F, grow ? WAX : WANE);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), grow ? SoundEvents.PUFFER_FISH_BLOW_UP : SoundEvents.PUFFER_FISH_BLOW_OUT,
 			SoundSource.PLAYERS, 1.0F, grow ? 0.7F : 1.4F);
 	}
 
-	private static void size(LivingEntity target, int step, long until) {
+	private static void size(LivingEntity target, int step, long until, @Nullable UUID by) {
 		if (step == RAY_NATURAL) {
 			OTHERS.remove(target);
 		} else {
 			Sized sized = OTHERS.computeIfAbsent(target, t -> new Sized());
 			sized.step = step;
 			sized.until = until;
+			sized.by = by;
 		}
 		modifier(target, Attributes.SCALE, RAY_SCALE_ID, RAY_SCALES[step] - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		modifier(target, Attributes.ATTACK_DAMAGE, RAY_DAMAGE_ID, RAY_DAMAGE[step], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -380,13 +397,13 @@ public final class SizeArts {
 	private static boolean bottle(ServerPlayer player, ServerLevel level, LivingEntity target) {
 		Sized sized = OTHERS.get(target);
 		// (people are not put in jars)
-		if (sized == null || sized.step != 0 || target instanceof Player || target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
+		if (sized == null || sized.step != 0 || !player.getUUID().equals(sized.by) || target instanceof Player || target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
 			|| kept(target) || target.isPassenger() || target.isVehicle()
 			|| target instanceof OwnableEntity pet && pet.getOwnerReference() != null && !player.getUUID().equals(pet.getOwnerReference().getUUID())) {
 			return false;
 		}
 		// (its own size goes into the jar with it, not the ray's)
-		size(target, RAY_NATURAL, 0L);
+		size(target, RAY_NATURAL, 0L, null);
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 		if (!target.saveAsPassenger(out)) {
 			return false;
@@ -426,7 +443,7 @@ public final class SizeArts {
 		}
 		if (out instanceof LivingEntity living) {
 			// still small a while, then its own size
-			size(living, 0, level.getGameTime() + JAR_SMALL_TICKS);
+			size(living, 0, level.getGameTime() + JAR_SMALL_TICKS, null);
 		}
 		player.setItemInHand(hand, new ItemStack(Items.GLASS_BOTTLE));
 		level.playSound(null, at, SoundEvents.BOTTLE_EMPTY, SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -443,7 +460,22 @@ public final class SizeArts {
 			if (!(player.level() instanceof ServerLevel level)) {
 				continue;
 			}
-			if (Druids.shaped(player) && size(player) <= SMALL_FROM && player.getVehicle() instanceof LivingEntity) {
+			Integer worn = SIZE.get(player.getUUID());
+			if (worn != null) {
+				AttributeInstance scale = player.getAttribute(Attributes.SCALE);
+				if (scale == null || !scale.hasModifier(SCALE_ID)) {
+					// died or came back to the world: the size went with the old body
+					shed(player);
+				} else {
+					// a shape taken while sized: its beast is sized with the body
+					Mob beast = Druids.beast(player);
+					AttributeInstance beastScale = beast == null ? null : beast.getAttribute(Attributes.SCALE);
+					if (beastScale != null && !beastScale.hasModifier(SCALE_ID)) {
+						modifier(beast, Attributes.SCALE, SCALE_ID, SCALES[worn] - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+					}
+				}
+			}
+			if (size(player) <= SMALL_FROM && player.getVehicle() instanceof LivingEntity) {
 				unnoticed(player, level);
 			}
 			LivingEntity held = GRABBED.get(player.getUUID());

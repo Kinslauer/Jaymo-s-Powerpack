@@ -47,8 +47,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Reaper's soul arts (Andy's Awakening pick "Reaper", 2026-11-17: "Add this to the death spirit"). Whoever carries the
- * Reaper ({@link Reaper#has}) banks a <b>soul</b> for every kill, and the souls are never spent: they are a tier. A keeper with
- * none is thin ({@link #HEARTS_NEW} hearts, {@link #DAMAGE_NEW} of every blow); one with {@link #SOULS_FULL} is death itself
+ * Reaper ({@link Reaper#has}) banks a <b>soul</b> for every kill, and the souls are a tier, spent only on the scythe. A keeper with
+ * none is as they were before ({@link #HEARTS_NEW} hearts, {@link #DAMAGE_NEW} of every blow); one with {@link #SOULS_FULL} is death itself
  * ({@link #HEARTS_FULL} hearts, {@link #DAMAGE_FULL} times every blow), and everything between slides. The Toll a keeper has
  * already paid is counted in the first time ({@link #SEED_PER_TOLL} souls a point).
  * <p>
@@ -61,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Soul chain</b> (sprint + tap at a foe): a chain between you; while it holds, the foe is drained each second and you
  * are healed.</li>
  * <li><b>Drift</b> (hold): while the key is held you drift through walls ({@code SoulDriftMixin}); the floor still holds.</li>
- * <li><b>The Soul Scythe</b> (sneak + hold, empty hand, {@link #SCYTHE_SOULS} souls banked): the Reaper hands you its scythe.
+ * <li><b>The Soul Scythe</b> (sneak + hold, empty hand, {@link #SCYTHE_SOULS} souls spent): the Reaper hands you its scythe.
  * Its blows reap everything beside the one struck, and a kill with it banks twice.</li>
  * </ul>
  */
@@ -72,8 +72,8 @@ public final class SoulArts {
 	static final float GREAT_HEALTH = 100.0F;
 	/** The tier: souls for the full tier, and the hearts and the share of every blow at none and at full. */
 	static final int SOULS_FULL = 1000;
-	static final double HEARTS_NEW = 5.0, HEARTS_FULL = 20.0;
-	static final float DAMAGE_NEW = 0.5F, DAMAGE_FULL = 6.0F;
+	static final double HEARTS_NEW = 10.0, HEARTS_FULL = 20.0;
+	static final float DAMAGE_NEW = 1.0F, DAMAGE_FULL = 6.0F;
 	/** Souls a keeper starts with for each point of Toll already paid. */
 	static final int SEED_PER_TOLL = 5;
 	/** Wisps: how many, reach to pick a foe, speed (blocks a tick), harm each, how long they hunt (ticks), cooldown. */
@@ -91,7 +91,7 @@ public final class SoulArts {
 	/** Drift: the longest it holds (ticks), the wait after, how far a clear spot is looked for at its end, what ending in stone costs. */
 	static final int DRIFT_TICKS = 80, DRIFT_COOLDOWN = 200, DRIFT_OUT = 3;
 	static final float DRIFT_DAMAGE = 4.0F;
-	/** The scythe: souls needed, the wait between forgings (ticks), its reaping reach and the share of a blow the others take. */
+	/** The scythe: souls its forging spends, the wait between forgings (ticks), its reaping reach and the share of a blow the others take. */
 	static final int SCYTHE_SOULS = 500, SCYTHE_COOLDOWN = 24000;
 	static final double SCYTHE_REACH = 3.0;
 	static final float SCYTHE_REAP = 0.5F;
@@ -369,6 +369,8 @@ public final class SoulArts {
 		if (ArtKeys.cooling(player, "soul_scythe", SCYTHE_COOLDOWN)) {
 			return;
 		}
+		// the scythe is made of the souls: they leave the keeper's tier
+		player.setAttached(SOULS, souls - SCYTHE_SOULS);
 		// Jaymo's Powers' war scythe where it is in the pack (its art), else a hoe
 		Item item = BuiltInRegistries.ITEM.containsKey(WAR_SCYTHE) ? BuiltInRegistries.ITEM.getValue(WAR_SCYTHE) : Items.NETHERITE_HOE;
 		ItemStack scythe = new ItemStack(item);

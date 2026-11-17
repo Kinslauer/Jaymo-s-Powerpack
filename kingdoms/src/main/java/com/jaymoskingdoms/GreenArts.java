@@ -10,6 +10,8 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -25,6 +28,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -36,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  * gives them your health; tap at a block, the vine <b>grapples</b> it and hauls you there; sneak + tap at a foe, the vine
  * <b>drains</b> it into you. And the green is in you: under the open sky by day you mend, and fire hurts you more.</li>
  * <li><b>Bloom and Root</b> ({@link #BLOOM}): sneak + tap with no foe in sight, a <b>patch of sunflowers</b> at your feet heals
- * your side; sprint + tap at a friend (or at no one, for yourself), a <b>cocoon of roots</b> closes over them: nothing harms
+ * your side (real sunflowers, where they can stand, that wither with the patch and give nothing if picked); sprint + tap at a friend (or at no one, for yourself), a <b>cocoon of roots</b> closes over them: nothing harms
  * them, they cannot move, and they mend.</li>
  * </ul>
  * The rays (hold, and sneak + hold) are {@link SizeArts#ray}.
@@ -60,6 +67,8 @@ public final class GreenArts {
 	/** The sunflower patch: its radius, how long it lasts (ticks), what it heals each second (and under the day's sun), cooldown. */
 	static final float PATCH_RADIUS = 4.0F, PATCH_HEAL = 1.0F, PATCH_SUN_HEAL = 2.0F;
 	static final int PATCH_TICKS = 400, PATCH_COOLDOWN = 900;
+	/** The patch's sunflowers are real while it lasts: at most this many are planted, and they wither with it. */
+	static final int PATCH_FLOWERS = 12;
 	/** The cocoon: reach to an ally, how long it holds (ticks), what it heals each second, cooldown. */
 	static final double COCOON_REACH = 12.0;
 	static final int COCOON_TICKS = 100, COCOON_COOLDOWN = 1200;
@@ -78,7 +87,11 @@ public final class GreenArts {
 	private record Grapple(Vec3 point, long until) {
 	}
 
-	private record Patch(ServerLevel level, ServerPlayer owner, Vec3 at, long until) {
+	/** A sunflower the patch planted (its lower half), and what was in its two blocks before. */
+	private record Flower(BlockPos at, BlockState lower, BlockState upper) {
+	}
+
+	private record Patch(ServerLevel level, ServerPlayer owner, Vec3 at, long until, List<Flower> flowers) {
 	}
 
 	private static final List<Root> ROOTS = new ArrayList<>();
@@ -95,6 +108,29 @@ public final class GreenArts {
 		// nothing harms the cocooned (but what nothing can stop)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!cocooned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
+		// a patch's sunflower is nobody's to pick: struck, it withers and gives nothing
+		PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, entity) -> {
+			if (!state.is(Blocks.SUNFLOWER) || PATCHES.isEmpty()) {
+				return true;
+			}
+			for (Patch p : PATCHES) {
+				for (Iterator<Flower> it = p.flowers.iterator(); it.hasNext();) {
+					Flower f = it.next();
+					if (p.level == world && (f.at.equals(pos) || f.at.above().equals(pos))) {
+						it.remove();
+						wither(p.level, f);
+						return false;
+					}
+				}
+			}
+			return true;
+		});
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			for (Patch p : PATCHES) {
+				p.flowers.forEach(f -> wither(p.level, f));
+			}
+			PATCHES.clear();
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ROOTS.clear();
 			VINES.clear();
@@ -129,7 +165,7 @@ public final class GreenArts {
 						vine(player, level, foe, false);
 					}
 				} else if (ClassTrees.check(player, BLOOM) && !ArtKeys.cooling(player, "green_patch", PATCH_COOLDOWN)) {
-					PATCHES.add(new Patch(level, player, player.position(), level.getGameTime() + PATCH_TICKS));
+					PATCHES.add(new Patch(level, player, player.position(), level.getGameTime() + PATCH_TICKS, plant(level, player, player.position())));
 					Fx.pool(level, player.position().add(0.0, 0.05, 0.0), PATCH_RADIUS, SUN, PATCH_TICKS);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BONE_MEAL_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
 				}
@@ -144,6 +180,50 @@ public final class GreenArts {
 			}
 			case HOLD -> SizeArts.ray(player, level, false);
 			case SNEAK_HOLD -> SizeArts.ray(player, level, true);
+		}
+	}
+
+	/**
+	 * Plants the patch's sunflowers about {@code at}, where sunflowers can stand: in the wild or on land the Druid rules, never
+	 * on another realm's. Grass and the like they stand in comes back when they wither.
+	 */
+	private static List<Flower> plant(ServerLevel level, ServerPlayer player, Vec3 at) {
+		List<Flower> flowers = new ArrayList<>();
+		Faction there = Factions.around(level.getServer(), level, BlockPos.containing(at), 0);
+		if (there != null && !Crowns.rules(level.getServer(), there, player.getUUID())) {
+			return flowers;
+		}
+		BlockState sunflower = Blocks.SUNFLOWER.defaultBlockState();
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < PATCH_FLOWERS * 4 && flowers.size() < PATCH_FLOWERS; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0, far = Math.sqrt(random.nextDouble()) * PATCH_RADIUS;
+			BlockPos column = BlockPos.containing(at.x + Math.cos(angle) * far, at.y, at.z + Math.sin(angle) * far);
+			for (int dy = 1; dy >= -2; dy--) {
+				BlockPos pos = column.above(dy);
+				if (free(level.getBlockState(pos)) && free(level.getBlockState(pos.above())) && sunflower.canSurvive(level, pos)) {
+					flowers.add(new Flower(pos, level.getBlockState(pos), level.getBlockState(pos.above())));
+					DoublePlantBlock.placeAt(level, sunflower, pos, Block.UPDATE_CLIENTS);
+					break;
+				}
+			}
+		}
+		return flowers;
+	}
+
+	/** Whether a sunflower may take this block's place for a while: air, or grass and the like (never water, or another tall plant). */
+	private static boolean free(BlockState state) {
+		return state.isAir() || state.canBeReplaced() && state.getFluidState().isEmpty() && !state.hasBlockEntity() && !(state.getBlock() instanceof DoublePlantBlock);
+	}
+
+	/** The sunflower withers: gone without a drop, and what stood there is back. */
+	private static void wither(ServerLevel level, Flower flower) {
+		int quiet = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
+		if (level.getBlockState(flower.at.above()).is(Blocks.SUNFLOWER)) {
+			level.setBlock(flower.at.above(), flower.upper, quiet);
+		}
+		if (level.getBlockState(flower.at).is(Blocks.SUNFLOWER)) {
+			level.setBlock(flower.at, flower.lower, quiet);
+			level.sendParticles(Fx.miasma(BARK, 0.8F), flower.at.getX() + 0.5, flower.at.getY() + 0.8, flower.at.getZ() + 0.5, 4, 0.2, 0.5, 0.2, 0.0);
 		}
 	}
 
@@ -271,6 +351,10 @@ public final class GreenArts {
 			Patch p = it.next();
 			if (now >= p.until) {
 				it.remove();
+				p.flowers.forEach(f -> wither(p.level, f));
+				if (!p.flowers.isEmpty()) {
+					p.level.playSound(null, p.at.x, p.at.y, p.at.z, SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.8F, 0.6F);
+				}
 				continue;
 			}
 			if (now % 20L == 0L) {

@@ -392,6 +392,9 @@ public final class ClassTrees {
 		if (held.stream().noneMatch(node::of) && !player.isCreative()) {
 			return "gui.jaymoskingdoms.classtree.blocked.class";
 		}
+		if (!SunArts.learnable(player, node.key())) {
+			return "gui.jaymoskingdoms.classtree.blocked.sun";
+		}
 		if (rank(p, node) >= node.maxRank()) {
 			return "gui.jaymoskingdoms.skills.blocked.max";
 		}
