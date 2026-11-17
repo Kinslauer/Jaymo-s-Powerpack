@@ -25,3 +25,4 @@ Research Hands-On Delight's approach and apply it to Powers/Kingdoms/Kitchen coo
 
 Research/investigation first — determine what stations exist in our mods and how to make them hands-on instead of menu-based. No code changes yet.
 - 2026-11-17 06:02 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-17 08:15 hermes-b's claim went stale (nothing changed for 54 min); handed back as open so a bot can take it.
