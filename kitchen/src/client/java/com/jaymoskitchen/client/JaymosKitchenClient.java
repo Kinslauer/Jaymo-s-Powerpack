@@ -40,6 +40,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		// a corpse is named to the one looking at it only if they can read it (CorpseEntity#reads)
+		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
