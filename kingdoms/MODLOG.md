@@ -14507,3 +14507,9 @@ Andy's Ragdolls and Cover picks (ln-player, ln-cover, ln-npc). The idea is Leani
 - `Skills.Perk.AIR_COMBO` (added last, so no saved ranks move), `TreeLocks.Lock.AIR_COMBO`, its spot on the web
   (`SkillWeb`, ring 2) and icon (a wind charge); lang part `air-combo.json`.
 - Not built locally (no JDK 25 in the cloud workspace; the PR checks build it); not played.
+
+## 0.9.82 (2026-11-17): The faith's sigil fills the life-story panel
+
+- **Life story**: from the faith page on, the chosen faith's sigil now fills the whole left panel behind its text,
+  instead of a small square behind the figure. It also shows the whole glyph now; before, it showed only a magnified
+  corner of it.

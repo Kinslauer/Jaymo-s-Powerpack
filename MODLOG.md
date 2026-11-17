@@ -5530,3 +5530,9 @@ Andy's Ragdolls and Cover picks (ln-npc). `FutureCover`: a gunner of the future 
   blow lands as a plain hit and the action bar names the perk. The juggle and slam need a launch first, so they're
   learned with it. Without Kingdoms nothing changes.
 - Not built locally (no JDK 25 in the cloud workspace; the PR checks build it); not played.
+
+## 0.24.44 (2026-11-17): Better Dogs leaves the pack
+
+- **VO: Better Dogs** (and the Dasik Library it needs) is out: its wolf AI calls a method 26.3 doesn't have, so the
+  server crashed whenever a wolf attacked something. Wolves are back to vanilla. The build moves both jars out of the
+  CurseForge profile.
