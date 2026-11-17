@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,6 +32,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 - [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
 - [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
@@ -39,7 +40,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
 - [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
 - [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
-- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
 
 
 %% kanban:settings
