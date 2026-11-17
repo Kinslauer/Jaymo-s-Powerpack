@@ -315,14 +315,10 @@ def packMods = [
 	// (FelledCompat); blasts, giants, tornadoes and gatherers still use Kingdoms' own falling trees.
 	[dep: "curse.maven:felled-1715901:9305152", cf: [1715901, 9305152], dev: false],
 	[dep: "curse.maven:zarith-1720181:9284445", cf: [1720181, 9284445], dev: false],
-	// Ragdollified (all rights reserved, by Raiiiden; downloaded by id from CurseForge, never copied or edited; shares Felled's
-	// Zarith): a body that dies falls as a physics ragdoll built from its own model. Kitchen's corpse waits undrawn for it
-	// and lies down where it comes to rest (compat/RagdollifiedCompat, client/ragdoll/RagdollifiedBridge); Powers'
-	// Dismember tells it which limbs are gone. Ragdollified Reactions (all rights reserved, Raiiiden): the player ragdolls
-	// in a crash, a blast or a hard landing, and H ragdolls you by hand; Kitchen's own limp (crashes, blasts, carts, big
-	// hits) stands down while it's loaded. Fabric 26.3 files, kept out of the dev game.
-	[dep: "curse.maven:ragdollified-1417732:9437483", cf: [1417732, 9437483], dev: false],
-	[dep: "curse.maven:ragdollifiedreactions-1693039:9413054", cf: [1693039, 9413054], dev: false],
+	// Ragdollified and Ragdollified Reactions (Raiiiden; CurseForge 1417732/9437483 and 1693039/9413054) are out for now:
+	// Andy, 2026-11-16: "remove ragdollified until i can put everything in. it doesnt work well at all mixed with our
+	// corpses". Kitchen's side stays (compat/RagdollifiedCompat, client/ragdoll/RagdollifiedBridge) and does nothing
+	// without them; they come back with Amputation, Player Corpses and Revive & Drag once those have 26.3 builds.
 	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; shipped unchanged in a free pack): your own voice changed
 	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
 	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
@@ -890,9 +886,10 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // ImmersiveFX: Resurrected (Andy, 2026-11-12: with Sound Physics Remastered both filtered every sound and everyone lagged,
 // "you can remove the immersive"; it checks for Sound Physics by an old mod id, so it never stood down);
 // Streams Reflowing (Dynamic Waters took its place); Grassier Grass and Punchy! with Punchy! Moves (Andy, 2026-11-16: "i
-// think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves)
+// think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
+// Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list)
 def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
-	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions"]
+	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
