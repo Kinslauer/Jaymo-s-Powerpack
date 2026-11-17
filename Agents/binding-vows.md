@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Paladin oaths and Warlock pacts bind (refused acts, deliberate breaks), with patron terms after 5e
 branch: claude/binding-vows
 with: Claude (cloud, Powerpack project thread)
-pr: 
+pr: 1684
 mods: kingdoms
 versions: 
 started: 2026-11-17
