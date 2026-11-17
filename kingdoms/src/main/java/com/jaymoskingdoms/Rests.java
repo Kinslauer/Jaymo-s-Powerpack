@@ -52,6 +52,18 @@ public final class Rests {
 		return true;
 	}
 
+	/** {@code n} of {@code pool} comes back (class trees: a Monk's Still Mind, a Paladin's Vigil). */
+	public static void regain(ServerPlayer player, String pool, int n) {
+		Map<String, Integer> now = new HashMap<>(player.getAttachedOrElse(SPENT, Map.<String, Integer>of()));
+		int left = now.getOrDefault(pool, 0) - n;
+		if (left > 0) {
+			now.put(pool, left);
+		} else {
+			now.remove(pool);
+		}
+		player.setAttached(SPENT, now);
+	}
+
 	/** A short rest: the pools that come back. */
 	public static void shortRest(ServerPlayer player) {
 		Map<String, Integer> now = new HashMap<>(player.getAttachedOrElse(SPENT, Map.<String, Integer>of()));

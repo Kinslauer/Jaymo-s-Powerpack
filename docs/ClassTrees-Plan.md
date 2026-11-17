@@ -193,3 +193,36 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
   Powers already downs a tamed horse instead of killing it; Bonded is that a downed horse can no longer be finished off. The
   hanging pose has no easing and always takes the left flank.
 - Lore: the Chivalry realms' tilt-yards and the stables already hold every one of these; nothing new to place.
+### Patch 6: Monk and Paladin
+- **Monk** (`KiArts`, new; `Monks` asks it). Catch an Arrow stays the start; practice widens its window (12 ticks x
+  `ClassTrees.practice`). **Deep Breath** (3 ranks): +1 ki a rank. **Stunning Blow** (3) and **Step of the Wind** (8) hold
+  today's stun and wall slide, both kept free by Monks who had the class (`ClassTrees.kept`). **Deflect** (3): fists free, an
+  arrow not caught does half; sneak held as you catch one and it's thrown straight back at its shooter. **Flurry** (5):
+  sneak+J with no caught arrow to throw readies it (5 s); the next fist blow spends a ki and two blows follow 4 and 8 ticks
+  later at half its damage. **Step of the Wind**: J in the air spends a ki: a dash along the look (1.4) with a lift; the wall
+  slide now takes no fall harm. **Open Hand / Iron Body** (fork, 10): flurry blows shove, the last stuns 1.5 s (`HeldFast`,
+  so bosses resist) / a blow that would take you under half health spends a ki: half harm for 5 s. **Still Mind** (15): fear
+  (`Fear.calm`) and charms (`Charm.free`) are shed each second; while meditating (Powers' Meditate) a ki comes back every 10 s
+  (`Rests.regain`, new). **Quivering Palm / Empty Body** (fork, 20): a landed stunning blow sets the palm for a ki more; within
+  2 minutes and 48 blocks, J ends it: health + 100 as magic from you (a boss or a player takes 30% of its max health) / sneak+J
+  in the air spends 2 ki: 5 s invisible, every mob hunting you loses you, and every blow from anyone misses.
+- **Paladin** (`OathGifts`, new; `Paladins` asks it). Lay on Hands stays the start; practice grows the pool (20 x practice).
+  **Deep Wells** (3 ranks): +6 to the pool and +1 smite a rank. **Smite** (3) and the **Aura** (8) hold today's (the aura's saves
+  and the Paladin's own fearlessness), kept free by Paladins who had the class. **Shield of Faith** (5): sneak+J on a friend
+  within 4: 4 from the hands' pool, and the next 3 blows on them each lose up to 4 harm, for a minute. **Oath's Gift** (10):
+  Mercy, a foe your blow brings down (downed, not dead) heals you 6, once a foe; Justice, a smite on one Crooks knows for a
+  crime, or on a raider, x1.5; Honour, J on a hostile within 16 (or one after you) calls it out for 30 s: it's kept targeting
+  you and your blows on it are +25%. **Divine Sense** (12): J with no harm to mend: undead and fiends within 32 glow 5 s (every
+  20 s). **Aura of Courage / Aura of Warding** (fork, 15): friends in the aura can't be frightened / take 30% less from spell
+  damage (`WITCH_RESISTANT_TO`). **Vigil** (top, 20): a shrine prayer by night (12500-23500) refills smites and hands; until the
+  next sunset the smite, the pool and the aura (reach and save) are x1.5.
+- The class descriptions and class-screen lines now say which of today's gifts come at 3 and 8.
+- My calls: the keys. Monk: J catches (arrow coming), leaps (in the air), ends a palm (one set), or readies the stun; sneak+J
+  throws a caught arrow back, or goes Empty Body (in the air), or readies a Flurry. Paladin: J calls out a foe (Honour),
+  heals, or (nothing to heal) Divine Sense; sneak+J shields a friend, or readies a smite. Iron Body is spent on its own (no key
+  was left), on the blow that would put you under half. "Fiends" are fire-proof monsters (blazes, ghasts, magma cubes, wither
+  skeletons, ...). A lawbreaker is one Crooks marks as a known criminal, or a raider. Levels the rows didn't give: Deflect 3,
+  Shield of Faith 5, Divine Sense 12, both tops 20.
+- Gaps: Divine Sense's glow is the vanilla effect, so others near see it too. Empty Body's "slip through blows" is every blow
+  from a living source missing. A Vigil is one prayer at night, not a night kept awake at the shrine.
+- Lore: the oaths (mercy, justice, honour), the shrines and the ki of the boxing schools are already canon; nothing new to place.

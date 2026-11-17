@@ -19,6 +19,8 @@ public final class TreePerks {
 		Discipline.register();
 		Fury.register();
 		com.jaymoskingdoms.equestrian.Horsemanship.register();
+		KiArts.register();
+		OathGifts.register();
 	}
 
 	/** What the trees' perks do to a blow on {@code target}: after the class perks, before the heritages. */
@@ -27,7 +29,7 @@ public final class TreePerks {
 			return amount;
 		}
 		float dealt = TinkerPerks.dealt(target, source, Workshop.dealt(target, source, ClassForks.dealt(target, source, amount)));
-		dealt = Fury.dealt(target, source, Discipline.dealt(target, source, dealt));
+		dealt = OathGifts.dealt(target, source, KiArts.dealt(target, source, Fury.dealt(target, source, Discipline.dealt(target, source, dealt))));
 		return com.jaymoskingdoms.equestrian.Horsemanship.dealt(target, source, dealt);
 	}
 }

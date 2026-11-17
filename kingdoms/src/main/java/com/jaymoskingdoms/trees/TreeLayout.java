@@ -17,5 +17,7 @@ public final class TreeLayout {
 		MarksmanTree.build();
 		TinkererTree.build();
 		RiderTree.build();
+		MonkTree.build();
+		PaladinTree.build();
 	}
 }
