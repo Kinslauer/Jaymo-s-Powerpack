@@ -53,6 +53,7 @@ public final class Jewellery {
 		GRADE_FACTOR.put(Grade.EXPERT, 1.25F);
 		GRADE_FACTOR.put(Grade.PERFECT, 1.5F);
 		GRADE_FACTOR.put(Grade.MASTER, 2.0F);
+		GRADE_FACTOR.put(Grade.LEGENDARY, 2.0F);
 		METAL_FACTOR.put(Molten.COPPER, 0.8F);
 		METAL_FACTOR.put(Molten.SILVER, 1.0F);
 		METAL_FACTOR.put(Molten.GOLD, 1.15F);

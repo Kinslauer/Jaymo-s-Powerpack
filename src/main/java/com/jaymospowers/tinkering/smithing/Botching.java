@@ -37,7 +37,7 @@ public final class Botching {
 			return 0.0F;
 		}
 		float reach = switch (grade) {
-			case MASTER -> MASTER_RISK;
+			case MASTER, LEGENDARY -> MASTER_RISK;
 			case PERFECT -> PERFECT_RISK;
 			case EXPERT -> EXPERT_RISK;
 			default -> 0.0F;
