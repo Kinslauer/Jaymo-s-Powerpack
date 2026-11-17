@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,8 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
-- [ ] [[Agents/lean-cover|lean-cover]] · 💻 Odysseus · #1663 · in-review
-- [ ] [[Agents/ragdollified|ragdollified]] · 💻 Odysseus · #1661 · in-review
 
 
 ## Needs Andy
@@ -34,14 +32,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
-- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
-- [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
-- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
-- [x] [[Inbox/Done/burnt-corpse-ash-piles|burnt-corpse-ash-piles]]
-- [x] [[Inbox/Done/explosion-overhaul-screenshake-debris|explosion-overhaul-screenshake-debris]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 
 
 %% kanban:settings
