@@ -582,6 +582,11 @@ public final class Heritage {
 		return Math.max(GROWN_FACTOR_FLOOR, (float) (1.0 - (1.0 - factor) * grow(entity)));
 	}
 
+	/** A factor above 1 that raises something (1.1: a tenth more) with the share it raises by grown. */
+	static float boost(LivingEntity entity, float factor) {
+		return 1.0F + (float) ((factor - 1.0F) * grow(entity));
+	}
+
 	/** Puts {@code player}'s heritage on them as they stand (the attributes that don't change with the light). */
 	static void attributes(ServerPlayer player) {
 		Kind kind = of(player);
