@@ -5602,3 +5602,7 @@ Sneak + a scroll down to climb a block, ledge or fence from the crouch now leave
 ## 0.24.52 (2026-11-17): The server starts again with conjoined twins
 
 Fixed the server failing to start after the conjoined twin mutation: the twin riding on a villager's or zombie's shoulder is now placed in a way that works on Minecraft 26.3.
+
+## 0.24.53 (2026-11-17): More time for finisher key prompts
+
+When a finisher asks for a key, it now holds still for up to a second and a half until you press it, then goes on at once, so the prompt is no longer gone in half a second. The bar under the key runs down over the whole time you have.
