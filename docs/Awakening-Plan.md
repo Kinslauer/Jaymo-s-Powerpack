@@ -300,7 +300,7 @@ No existing key was taken. The Powers rows use what the power already had (the w
 - `aw-sun` **Sun power → the Crowned Sun's arts** (`SunArts`; Sun key). Every **Dawnborn** has them; a **Cleric** or a
   **Paladin** learns them in the tree (level 10, 3 points). **Stronger the higher the sun**: under the open sky the arts
   run from full strength at the horizon to half again at noon, and your own blows up to a fifth harder; with no sun the
-  arts are at 0.7 and your blows are only your own. **Ascension**: blows landed and taken (and standing in the sun) fill
+  arts are at 0.7 and your blows are only your own. **Ascension**: blows landed and taken fill (and, within 10 s of a blow, so does standing in the sun)
   you with heat; each 100 is a step, **four** of them, and at each you grow a tenth, hit harder and your arts burn
   hotter; it ebbs 10 s after the fighting stops. **Sun orb** (tap), **sunfire pillar** (sneak + tap at a spot: a warning,
   then four beats of fire), **pin and pummel** (sprint + tap at a foe within 5 blocks: held fast, five blows, the last
@@ -325,6 +325,55 @@ give and take, and can wear the beast at any size the grove has ever grown one. 
 Sun's own, in the blood of the Dawnborn, its bound people, and taught by its priests and its sworn swords; the Ash
 Whisperer's people cannot be taught them. **The speedsters**: Chrono's static is his own time rubbing against the
 world's, and the tunnel is the stretch of the world he has already run through, a moment ahead of everyone else.
+
+
+#### After the row check of patch 4 (independent audit of the seven rows against the code)
+Fixed:
+- **Darktide possession never started**: the body left behind was swept away as a stray the moment it was made, so the
+  ride ended in the tick it began. The ride is now known before the body enters the world. A ridden shadow strikes
+  only monsters and what is hunting it or you (it could hit villagers, animals and players).
+- **Sprint + Z** opens the soul menu only for the corrupted with shadows held and no corpse in the sights; it was taking
+  the key from the Veil and from the harvest.
+- **Shadows always have room to sink back**: risen shadows count toward the 15, for kills and for the hand harvest.
+- **The soul tier, the Sun's blows and fire on a Greenwarden** are worked out before the rest of the blow, not after
+  it, so a spar still stops short of harm and a boss still takes at most 15% from an unaware blow. The Sun's height
+  no longer counts twice on the Sun's own arts.
+- **Reaper**: the brand pays and jumps only on the keeper's own kill (a grinder farmed it). The scythe is one at a
+  time: forging a new one makes the old one come apart in whoever's hand it is in, and only its keeper reaps with it.
+  A keeper's hearts are saved with them (they logged in clamped to 10). The drift never lets out below the world.
+- **Vampire**: a claw that did nothing (a player where players can't fight) opens no wound and pins nobody. Rend never
+  executes a player or a boss; a boss may shrug off the pounce's pin.
+- **Druid**: ivy slows a boss but it may tear free. The ray and the jar refuse bosses and anything with a boss bar
+  (rulers, lords, warlords, quest champions), settlement folk, and another Druid's beast shape; another player only
+  if they are of your party or players may fight here. A creature carrying too much (a laden pack beast) won't go in a
+  jar. Riding small and unnoticed now holds at the moment a mob picks its target, until you strike it.
+- **Speedsters**: tunnels stopped opening after a death (so did Chrono's held phase: both waits now run on world
+  time). A static bolt arcs only to enemies, not pets or villagers. Shots pass only through a blur or a phasing
+  Chrono, not through whoever stands in a tunnel. Speed healing and the copies' count follow the gear the wheel is set
+  to, as they did before momentum (they were fading to nothing when the runner stood to fight).
+- An Ash-sworn Dawnborn, Cleric or Paladin pressing the Sun key is told why nothing happens.
+- Loose numbers moved to named constants.
+
+Not as the rows say, or not said above, for Andy to rule on:
+- **`aw-velocity`, "its prism (lightning colour) and energy bar food come with it"**: not built. The note said this
+  should be just what Chrono and Velox can do, and both keep their own streak colours; an energy bar would be a new
+  food item with art and a place in the lore. Say if either is wanted.
+- **`aw-velocity`, the tunnel**: it opens by itself when a blur (gear 5 at speed) sprints at a wall with clear ground
+  within 10 blocks behind it. That would have taken wall-running away at gear 5, so **holding jump at the wall runs up
+  it instead**. Below gear 5 nothing changes. Hurling static needs you sprinting or at speed, an empty hand and
+  nothing to catch.
+- **`aw-velocity`, gears**: a run now starts in gear 1 and climbs to the wheel's gear (0.8 s to gear 3), instead of
+  starting in it. That is the row ("sprinting builds momentum in gears"), but it is a change to how Overclock felt.
+- **`aw-reaper`**: every keeper, old ones too, now has the tier: 5 hearts and half damage at no souls (old keepers
+  start with 5 souls per Toll paid, at most 500). A drift that runs out inside stone costs 2 hearts. The scythe needs
+  500 souls banked and spends none.
+- **`aw-summoner`**: kills bank a shadow only while corrupted, never villagers or anything of 100 health or more.
+  Riding a shadow has no mouse look and it strikes by itself; it is the piece most in need of a play test.
+- **`aw-scaler`**: sizes only in a beast shape, three ranks to reach all seven. Anyone holding a glass bottle can jar
+  a creature the Druid has shrunk to the smallest size. A dispenser can still fill a jar with water and lose what is
+  in it.
+- **`aw-sun`**: nothing ties the arts to the Crowned Sun's own sworn; any Cleric or Paladin not sworn to the Ash
+  Whisperer can learn them. After a server crash a personal sun's light block can be left behind.
 
 ### Patch 5: new powers (Reactor Heart, Blinker, Lawgiver)
 - `aw-nuclear` with `aw-kinetic` folded in: **Reactor Heart** (`power/reactor`, lang `reactor.json`). One charge

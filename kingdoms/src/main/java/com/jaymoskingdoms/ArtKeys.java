@@ -40,6 +40,11 @@ import org.jspecify.annotations.Nullable;
  * A gesture is a tap, a tap sneaking, a tap sprinting, or a hold (let go after {@link #HOLD_TICKS}), plain or sneaking.
  */
 public final class ArtKeys {
+	/** Health at which a creature is too great for the arts that take hold of one ({@link #great}). */
+	static final float GREAT_HEALTH = 100.0F;
+	/** An art's aim: within this cosine of the look, or anything this near (blocks). */
+	static final double SIGHT_CONE = 0.94, SIGHT_NEAR = 1.5;
+
 	// ---- tuning ----
 	/** Held this long (ticks) before it is let go, a press is a hold. */
 	static final int HOLD_TICKS = 10;
@@ -155,7 +160,7 @@ public final class ArtKeys {
 			e -> e != player && e.isAlive() && !e.isSpectator() && test.test(e))) {
 			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
 			double d = to.length();
-			if (d <= reach && d < bestD && (d < 1.5 || to.normalize().dot(look) > 0.94) && player.hasLineOfSight(e)) {
+			if (d <= reach && d < bestD && (d < SIGHT_NEAR || to.normalize().dot(look) > SIGHT_CONE) && player.hasLineOfSight(e)) {
 				best = e;
 				bestD = d;
 			}
@@ -176,6 +181,14 @@ public final class ArtKeys {
 		return e instanceof ServerPlayer other && Parties.allied(player, other)
 			|| e instanceof OwnableEntity pet && pet.getOwnerReference() != null && player.getUUID().equals(pet.getOwnerReference().getUUID())
 			|| Followers.takesOrders(e, player);
+	}
+
+	/**
+	 * Too great for an art that bottles, shrinks, grabs or kills outright: a boss, whatever shows a boss bar (a ruler, a lord, a
+	 * warlord, a quest's champion), or anything of {@link #GREAT_HEALTH} or more.
+	 */
+	static boolean great(LivingEntity e) {
+		return e.getMaxHealth() >= GREAT_HEALTH || Legendary.boss(e);
 	}
 
 	/** Someone an art that helps reaches: {@code player}'s own, another player, the townsfolk ({@link FaithExtras#friend}). */

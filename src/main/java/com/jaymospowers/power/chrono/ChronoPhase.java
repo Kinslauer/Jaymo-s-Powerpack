@@ -59,7 +59,7 @@ public final class ChronoPhase {
 	}
 
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
-	private static final Map<UUID, Integer> READY = new HashMap<>();
+	private static final Map<UUID, Long> READY = new HashMap<>();
 
 	private ChronoPhase() {
 	}
@@ -83,7 +83,7 @@ public final class ChronoPhase {
 	/** V at a wall: start holding the phase. True if it started. */
 	static boolean start(ServerPlayer player) {
 		ServerLevel level = player.level();
-		if (RUNS.containsKey(player.getUUID()) || READY.getOrDefault(player.getUUID(), 0) > player.tickCount || player.isPassenger()) {
+		if (RUNS.containsKey(player.getUUID()) || READY.getOrDefault(player.getUUID(), 0L) > player.level().getGameTime() || player.isPassenger()) {
 			return false;
 		}
 		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
@@ -164,7 +164,7 @@ public final class ChronoPhase {
 		ServerLevel level = player.level();
 		player.removeAttached(PHASING);
 		ChronoMeters.set(player, ChronoMeters.PHASE, -1.0F);
-		READY.put(player.getUUID(), player.tickCount + COOLDOWN + Math.round(run.ticks * COOLDOWN_SHARE));
+		READY.put(player.getUUID(), player.level().getGameTime() + COOLDOWN + Math.round(run.ticks * COOLDOWN_SHARE));
 		if (!clear(level, player, player.position())) {
 			Vec3 out = nearestClear(level, player);
 			if (out == null) {

@@ -21,6 +21,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.item.component.SwingAnimation;
@@ -71,6 +72,9 @@ public final class ClawArts {
 	/** Roar: how far it is heard, how long the fright and the frenzy last (ticks), cooldown. */
 	static final double ROAR_RANGE = 8.0;
 	static final int ROAR_FEAR = 100, FRENZY_TICKS = 240, ROAR_COOLDOWN = 1800;
+	/** What can't be frightened is slowed this long (ticks) at this level instead. The execute's blow is the foe's health times this. */
+	static final int ROAR_SLOW_TICKS = 40, ROAR_SLOW_LEVEL = 1;
+	static final float REND_OVERKILL = 4.0F;
 	static final int BLOOD = 0x8A0A12;
 
 	private static final class Bleed {
@@ -186,19 +190,25 @@ public final class ClawArts {
 		Fx.stroke(level, centre.add(side).add(0.0, 0.5, 0.0), centre.subtract(side).add(0.0, -0.5, 0.0), 0.25F, BLOOD);
 		player.swing(left ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		foe.setInvulnerableTime(0);
+		boolean hit;
 		slashing = true;
 		try {
-			foe.hurtServer(level, player.damageSources().playerAttack(player), harm(player, harm));
+			hit = foe.hurtServer(level, player.damageSources().playerAttack(player), harm(player, harm));
 		} finally {
 			slashing = false;
 		}
-		bleed(foe, player, wounds);
+		// (a blow that did nothing, on a player where players can't fight say, opens no wound)
+		if (hit) {
+			bleed(foe, player, wounds);
+		}
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.5F);
 	}
 
 	private static void rend(ServerPlayer player, ServerLevel level, LivingEntity foe) {
-		boolean kill = foe.getMaxHealth() < REND_GREAT && foe.getHealth() <= foe.getMaxHealth() * REND_SHARE && !BloodLeap.weak(player);
-		slash(player, level, foe, kill ? Math.max(REND_DAMAGE, foe.getHealth() + foe.getAbsorptionAmount() + 1.0F) * 4.0F : REND_DAMAGE, REND_WOUNDS, true);
+		// (never a player, a boss, or anything great)
+		boolean kill = foe.getMaxHealth() < REND_GREAT && !(foe instanceof Player) && !ArtKeys.great(foe)
+			&& foe.getHealth() <= foe.getMaxHealth() * REND_SHARE && !BloodLeap.weak(player);
+		slash(player, level, foe, kill ? Math.max(REND_DAMAGE, foe.getHealth() + foe.getAbsorptionAmount() + 1.0F) * REND_OVERKILL : REND_DAMAGE, REND_WOUNDS, true);
 		if (kill && !foe.isAlive()) {
 			player.heal(REND_HEAL);
 			Fx.blast(level, foe.getBoundingBox().getCenter(), 1.0F, BLOOD);
@@ -214,7 +224,7 @@ public final class ClawArts {
 			Fear.frighten(e, player, ROAR_FEAR);
 			if (e instanceof Mob mob && !Fear.frightened(mob)) {
 				// what cannot fear is at least thrown off its stride
-				mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), player);
+				mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ROAR_SLOW_TICKS, ROAR_SLOW_LEVEL), player);
 			}
 		}
 		Fx.ring(level, player.position().add(0.0, 0.2, 0.0), (float) ROAR_RANGE, BLOOD);
@@ -299,17 +309,22 @@ public final class ClawArts {
 		}
 		POUNCES.remove(player.getUUID());
 		NightGifts.push(player, Vec3.ZERO);
-		// borne down and pinned
-		HeldFast.hold(target, PIN_TICKS);
-		target.setDeltaMovement(Vec3.ZERO);
 		target.setInvulnerableTime(0);
+		boolean hit;
 		slashing = true;
 		try {
-			target.hurtServer(level, player.damageSources().playerAttack(player), harm(player, POUNCE_DAMAGE));
+			hit = target.hurtServer(level, player.damageSources().playerAttack(player), harm(player, POUNCE_DAMAGE));
 		} finally {
 			slashing = false;
 		}
-		bleed(target, player, 1);
+		// borne down and pinned, if the blow told (a boss may shrug the pin off)
+		if (hit) {
+			if (!Legendary.shrugs(target)) {
+				HeldFast.hold(target, PIN_TICKS);
+				target.setDeltaMovement(Vec3.ZERO);
+			}
+			bleed(target, player, 1);
+		}
 		Fx.ring(level, target.position().add(0.0, 0.1, 0.0), 1.6F, BLOOD);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
 	}

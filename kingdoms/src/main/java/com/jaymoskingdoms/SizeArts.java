@@ -81,7 +81,9 @@ public final class SizeArts {
 	static final int STOMP_COOLDOWN = 100;
 	/** Grab: reach at the first big size (and more each size), how small the grabbed must be next to you, the throw's speed and harm, cooldown. */
 	static final double GRAB_REACH = 4.0, GRAB_SMALLER = 0.6, THROW_SPEED = 1.3, THROW_SPEED_PER = 0.3;
-	static final float THROW_DAMAGE = 4.0F, GREAT_HEALTH = 100.0F;
+	static final float THROW_DAMAGE = 4.0F;
+	/** A grabbed creature is held helpless this long (ticks) at a time. A jar holds at most this much of a creature (bytes of its saved self). */
+	static final int GRAB_HOLD = 30, JAR_BYTES = 65536;
 	static final int GRAB_COOLDOWN = 40;
 	/** The ray: reach, the sizes it gives others (and what each does to their blows), how long a size lasts (ticks), cooldown. */
 	static final double RAY_REACH = 16.0;
@@ -184,7 +186,7 @@ public final class SizeArts {
 					ArtKeys.refuse(player, "size_too_small");
 				} else {
 					LivingEntity seen = ArtKeys.sight(player, GRAB_REACH + (size - BIG_FROM) * REACH_PER, e -> !ArtKeys.mine(player, e));
-					if (seen == null || seen.getBbHeight() > player.getBbHeight() * GRAB_SMALLER || seen.getMaxHealth() >= GREAT_HEALTH) {
+					if (seen == null || seen.getBbHeight() > player.getBbHeight() * GRAB_SMALLER || ArtKeys.great(seen)) {
 						ArtKeys.refuse(player, "size_no_grab");
 					} else if (!ArtKeys.cooling(player, "size_grab", GRAB_COOLDOWN) && seen.startRiding(player, true, false)) {
 						GRABBED.put(player.getUUID(), seen);
@@ -274,6 +276,20 @@ public final class SizeArts {
 
 	// ---- small: riding unnoticed ----------------------------------------------------------------------------------------------
 
+	/** Whether {@code target} is too great, or too much somebody, for the ray or the jar. */
+	private static boolean kept(LivingEntity target) {
+		return ArtKeys.great(target) || target instanceof Folk || Druids.standIn(target);
+	}
+
+	/**
+	 * Whether {@code attacker} can't take {@code target} for prey: a Druid small enough, riding a bigger creature, whom it has
+	 * no blow from to remember (asked by every mob's targeting).
+	 */
+	public static boolean unnoticed(LivingEntity attacker, LivingEntity target) {
+		return target instanceof ServerPlayer rider && rider.getVehicle() instanceof LivingEntity && attacker.getLastHurtByMob() != rider
+			&& Druids.shaped(rider) && size(rider) <= SMALL_FROM;
+	}
+
 	/** Whatever hunts {@code player} loses them. */
 	private static void unnoticed(ServerPlayer player, ServerLevel level) {
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(UNNOTICED_RANGE), m -> m.getTarget() == player)) {
@@ -319,7 +335,8 @@ public final class SizeArts {
 			ArtKeys.refuse(player, "no_creature");
 			return;
 		}
-		if (target.getMaxHealth() >= GREAT_HEALTH || target instanceof Player other && !ArtKeys.friend(player, other) && !ArtKeys.foe(player, other)) {
+		// (never a boss or a lord, the townsfolk, another Druid's shape; another player only of their own party, or where players may fight)
+		if (kept(target) || target instanceof Player other && !ArtKeys.mine(player, other) && !ArtKeys.foe(player, other)) {
 			ArtKeys.refuse(player, "size_too_great");
 			return;
 		}
@@ -364,7 +381,7 @@ public final class SizeArts {
 		Sized sized = OTHERS.get(target);
 		// (people are not put in jars)
 		if (sized == null || sized.step != 0 || target instanceof Player || target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
-			|| target.isPassenger() || target.isVehicle()
+			|| kept(target) || target.isPassenger() || target.isVehicle()
 			|| target instanceof OwnableEntity pet && pet.getOwnerReference() != null && !player.getUUID().equals(pet.getOwnerReference().getUUID())) {
 			return false;
 		}
@@ -375,6 +392,11 @@ public final class SizeArts {
 			return false;
 		}
 		CompoundTag body = out.buildResult();
+		// (a pack beast with a load of its own, jars in it even, is too much for one)
+		if (body.sizeInBytes() > JAR_BYTES) {
+			ArtKeys.refuse(player, "jar_too_much");
+			return false;
+		}
 		ItemStack jar = new ItemStack(Items.GLASS_BOTTLE);
 		CustomData.update(DataComponents.CUSTOM_DATA, jar, tag -> tag.put(JAR_TAG, body));
 		jar.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.creature_jar", target.getDisplayName()).withStyle(s -> s.withItalic(false).withColor(ChatFormatting.AQUA)));
@@ -430,7 +452,7 @@ public final class SizeArts {
 					GRABBED.remove(player.getUUID());
 				} else {
 					// in the hand it can do nothing
-					HeldFast.hold(held, 30);
+					HeldFast.hold(held, GRAB_HOLD);
 				}
 			}
 		}

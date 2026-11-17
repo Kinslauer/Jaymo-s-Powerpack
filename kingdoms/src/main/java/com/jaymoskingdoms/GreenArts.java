@@ -47,6 +47,8 @@ public final class GreenArts {
 	/** Ivy: reach, how long it roots (ticks), cooldown. */
 	static final double IVY_REACH = 16.0;
 	static final int IVY_TICKS = 80, IVY_COOLDOWN = 160;
+	/** The Slowness level ivy lays on what it roots. */
+	static final int IVY_SLOW = 9;
 	/** The vines: reach, the distance that snaps one, how long one holds (ticks), cooldown. */
 	static final double VINE_REACH = 14.0, VINE_BREAK = 18.0;
 	static final int VINE_TICKS = 120, VINE_COOLDOWN = 200;
@@ -158,9 +160,12 @@ public final class GreenArts {
 		}
 		if (seen != null) {
 			if (!ArtKeys.cooling(player, "green_ivy", IVY_COOLDOWN)) {
-				ROOTS.removeIf(r -> r.target == seen);
-				ROOTS.add(new Root(seen, seen.position(), level.getGameTime() + IVY_TICKS));
-				seen.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, IVY_TICKS, 9), player);
+				// (a boss may tear free at once: the ivy shows, and slows it, but doesn't hold it)
+				if (!Legendary.shrugs(seen)) {
+					ROOTS.removeIf(r -> r.target == seen);
+					ROOTS.add(new Root(seen, seen.position(), level.getGameTime() + IVY_TICKS));
+				}
+				seen.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, IVY_TICKS, IVY_SLOW), player);
 				Fx.sigil(level, seen.position().add(0.0, 0.05, 0.0), seen.getBbWidth() + 0.8F, LEAF, IVY_TICKS);
 				level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.VINE_PLACE, SoundSource.PLAYERS, 1.2F, 0.7F);
 			}

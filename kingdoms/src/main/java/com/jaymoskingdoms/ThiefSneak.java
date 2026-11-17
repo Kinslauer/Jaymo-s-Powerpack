@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
@@ -66,7 +67,7 @@ public final class ThiefSneak {
 		// (class trees) an Assassin's on a foe that never knew they were there
 		float burst = unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0 ? amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT : amount * MULT + FLAT;
 		// (scaling audit) with the Sneak Attack perk on the same blow the two don't multiply: the bigger one is dealt
-		float perk = Senses.sneakAttack(target, source);
+		float perk = stabbed(target, thief, source) ? 0.0F : Senses.sneakAttack(target, source);
 		if (perk > 0.0F && burst <= amount * perk) {
 			// the perk's is the bigger: the blow is left to it (a Ghost's first blow is struck all the same)
 			if (ghost) {
@@ -85,6 +86,16 @@ public final class ThiefSneak {
 			return burst / perk;
 		}
 		return Senses.unawareBlow(target, amount, burst);
+	}
+
+	/**
+	 * Whether the hidden blade takes this blow as its own stab ({@link HiddenBlade#dealt}): the Sneak Attack perk never sees
+	 * such a blow, so the burst has nothing to give way to.
+	 */
+	private static boolean stabbed(LivingEntity target, ServerPlayer thief, DamageSource source) {
+		return source.getDirectEntity() == thief && source.is(DamageTypes.PLAYER_ATTACK) && !CombatArts.striking() && HiddenBlade.bladeOut(thief)
+			&& HiddenBlade.skilled(thief) && (HiddenBlade.crippled(target) || Senses.assassinable(target, thief))
+			&& CombatArts.fullStrength(thief, thief.level().getGameTime());
 	}
 
 	/** {@code target} is busy with a friend of {@code thief}'s: it is after another player, their pet, or one of the town's. */

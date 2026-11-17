@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -40,8 +41,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Crowned Sun's arts (Andy's Awakening pick "Sun power", 2026-11-17: "Wrap into Crowned patron moves. At first all Dawnborn
- * have it. Clerics and Paladins can learn it"), on the Sun key ({@link ArtKeys}). Every Dawnborn has them by blood; a Cleric
+ * The Crowned Sun's arts (Andy's Awakening pick "Sun power", 2026-11-17: "The crowned patrons's moves initially all dawnborn,
+ * clerics and paladins can learn it"), on the Sun key ({@link ArtKeys}). Every Dawnborn has them by blood; a Cleric
  * ({@link #CLERIC_NODE}) or a Paladin ({@link #PALADIN_NODE}) learns them in the tree. The Ash Whisperer's sworn are refused:
  * the Sun lends no fire to its rival's own.
  * <ul>
@@ -90,6 +91,9 @@ public final class SunArts {
 	static final double PIN_REACH = 5.0, PIN_THROW = 1.1;
 	static final int PIN_TICKS = 30, PIN_BLOWS = 5, PIN_BEAT = 6, PIN_COOLDOWN = 300;
 	static final float PIN_DAMAGE = 3.0F;
+	/** The last blow of the pummelling is this many times as hard, and throws the foe up this fast (blocks a tick). */
+	static final float PIN_LAST = 2.0F;
+	static final double PIN_LIFT = 0.45;
 	/** A sun of your own: how long it burns (ticks), how high it hangs, its light, cooldown once it is out. */
 	static final int OWN_SUN_TICKS = 2400, OWN_SUN_LIGHT = 15, OWN_SUN_COOLDOWN = 1200;
 	static final double OWN_SUN_HEIGHT = 3.0;
@@ -225,7 +229,8 @@ public final class SunArts {
 
 	/** A sun holder's own blows: more the higher the sun, and with each step ({@code LivingEntityHurtMixin}). */
 	public static float dealt(LivingEntity victim, DamageSource source, float amount) {
-		if (amount <= 0.0F || !(source.getDirectEntity() instanceof ServerPlayer by) || by == victim || !holds(by)) {
+		// (their own blows only: the arts carry the sun's height already)
+		if (amount <= 0.0F || !source.is(DamageTypes.PLAYER_ATTACK) || !(source.getDirectEntity() instanceof ServerPlayer by) || by == victim || !holds(by)) {
 			return amount;
 		}
 		return amount * Mth.lerp(height(by), 1.0F, BLOW_NOON) * (1.0F + STEP_BLOW * step(by));
@@ -250,6 +255,11 @@ public final class SunArts {
 
 	static void key(ServerPlayer player, ArtKeys.Gesture gesture) {
 		if (!holds(player) || !(player.level() instanceof ServerLevel level)) {
+			if (Patrons.of(player) == Patron.ASH_WHISPERER && (Heritage.is(player, Heritage.Kind.DAWNBORN) || ClassTrees.has(player, CLERIC_NODE) > 0
+				|| ClassTrees.has(player, PALADIN_NODE) > 0)) {
+				// theirs by blood or by learning, and refused: they are told why
+				ArtKeys.refuse(player, "sun_ash");
+			}
 			return;
 		}
 		switch (gesture) {
@@ -507,13 +517,13 @@ public final class SunArts {
 			Fx.stroke(level, from.add(mid.subtract(from).scale(0.4)), mid, 0.5F, last ? WHITE : GOLD);
 			p.owner.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			p.target.setInvulnerableTime(0);
-			p.target.hurtServer(level, level.damageSources().indirectMagic(p.owner, p.owner), PIN_DAMAGE * power(p.owner) * (last ? 2.0F : 1.0F));
+			p.target.hurtServer(level, level.damageSources().indirectMagic(p.owner, p.owner), PIN_DAMAGE * power(p.owner) * (last ? PIN_LAST : 1.0F));
 			level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, last ? 0.7F : 1.1F);
 			if (last) {
 				it.remove();
 				Vec3 away = mid.subtract(from).multiply(1.0, 0.0, 1.0);
 				if (away.lengthSqr() > 1.0E-4) {
-					p.target.setDeltaMovement(away.normalize().scale(PIN_THROW).add(0.0, 0.45, 0.0));
+					p.target.setDeltaMovement(away.normalize().scale(PIN_THROW).add(0.0, PIN_LIFT, 0.0));
 					p.target.needsSync = true;
 				}
 				p.target.igniteForTicks(ORB_FIRE);

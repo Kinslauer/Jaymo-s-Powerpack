@@ -41,8 +41,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.Mannequin;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.GameType;
@@ -85,6 +87,10 @@ public final class DarktideSouls {
 	static final float TURN = 6.0F;
 	static final double WALK = 0.6, RUN = 1.0, STRIKE_REACH = 2.2;
 	static final int STRIKE_EVERY = 15;
+	/** How squarely the shadow must be looked at to ride it (cosine). A ridden shadow's slowest and fastest pace (blocks a tick), and its share of that going backward. */
+	static final double POSSESS_AIM = 0.96, SLOWEST = 0.06, FASTEST = 0.45, BACK = 0.5;
+	/** The blow of a ridden shadow that has no attack of its own. */
+	static final float PLAIN_STRIKE = 2.0F;
 	/** A corpse whose shadow a kill already gave up. Kept on the corpse for good: it stays true. */
 	static final String TAKEN_TAG = "jaymospowers_shadow_taken";
 	/** The body left behind, so one left over from a restart can be swept away. */
@@ -189,7 +195,8 @@ public final class DarktideSouls {
 			return;
 		}
 		List<String> shadows = DarktideState.mutable(DarktideState.save(killer).shadows());
-		if (shadows.size() >= DarktideTide.MAX_SHADOWS) {
+		// the risen count too: each must have room to sink back
+		if (shadows.size() + DarktideTide.risenShadows(killer).size() >= DarktideTide.MAX_SHADOWS) {
 			return;
 		}
 		shadows.add(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString());
@@ -265,6 +272,10 @@ public final class DarktideSouls {
 			return false;
 		}
 		List<String> shadows = DarktideState.save(player).shadows();
+		// only for the corrupted with shadows held, and never over a corpse in the sights (Z there is the harvest)
+		if (!DarktidePower.corrupted(player) || shadows.isEmpty() || DarktideTide.aimedCorpse(player) != null) {
+			return false;
+		}
 		List<String> names = new ArrayList<>();
 		for (String shadow : shadows) {
 			names.add(typeOf(shadow));
@@ -354,7 +365,7 @@ public final class DarktideSouls {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
 		Mob best = null;
-		double bestDot = 0.96;
+		double bestDot = POSSESS_AIM;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(POSSESS_REACH), m -> m.isAlive() && DarktideTide.risenOf(m, player))) {
 			Vec3 to = mob.getBoundingBox().getCenter().subtract(eye);
 			double dot = to.normalize().dot(look);
@@ -383,9 +394,6 @@ public final class DarktideSouls {
 		body.snapTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
 		body.setYHeadRot(player.getYHeadRot());
 		body.setYBodyRot(player.yBodyRot);
-		if (!level.addFreshEntity(body)) {
-			return true;
-		}
 		Ride ride = new Ride();
 		ride.level = level;
 		ride.mob = best;
@@ -396,7 +404,12 @@ public final class DarktideSouls {
 		ride.steer = best.getYRot();
 		ride.mode = player.gameMode();
 		ride.until = now + POSSESS_TICKS;
+		// the ride is known before the body enters the world: the stray-body sweep runs as it is added
 		RIDES.put(player.getUUID(), ride);
+		if (!level.addFreshEntity(body)) {
+			RIDES.remove(player.getUUID());
+			return true;
+		}
 		player.setAttached(POSSESSING, ride.mode.getId());
 		MagicFx.stroke(level, eye.add(0.0, -0.3, 0.0), best.getBoundingBox().getCenter(), 0.1F, DarktideLooks.INK);
 		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.3, 0.6, 0.3, 0.03);
@@ -481,8 +494,8 @@ public final class DarktideSouls {
 		mob.setYBodyRot(ride.steer);
 		Vec3 dir = Vec3.directionFromRotation(0.0F, ride.steer);
 		if (input.forward() || input.backward()) {
-			double speed = Mth.clamp(mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * (input.sprint() ? RUN : WALK), 0.06, 0.45);
-			Vec3 go = input.forward() ? dir.scale(speed) : dir.scale(-speed * 0.5);
+			double speed = Mth.clamp(mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * (input.sprint() ? RUN : WALK), SLOWEST, FASTEST);
+			Vec3 go = input.forward() ? dir.scale(speed) : dir.scale(-speed * BACK);
 			mob.setDeltaMovement(go.x, mob.getDeltaMovement().y, go.z);
 			if (mob.horizontalCollision && mob.onGround()) {
 				mob.getJumpControl().jump();
@@ -498,7 +511,8 @@ public final class DarktideSouls {
 		LivingEntity foe = null;
 		double best = reach * reach;
 		for (LivingEntity e : ride.level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(reach),
-			e -> e != mob && !(e instanceof Mannequin) && PickKit.foe(player, e) && !DarktideTide.risenOf(e, player))) {
+			e -> e != mob && !(e instanceof Mannequin) && !(e instanceof Player) && PickKit.foe(player, e) && !DarktideTide.risenOf(e, player)
+				&& (e instanceof Enemy || e instanceof Mob hunter && (hunter.getTarget() == mob || hunter.getTarget() == player)))) {
 			Vec3 to = e.position().subtract(mob.position());
 			double d = to.lengthSqr();
 			if (d <= best && (d < 0.5 || to.normalize().dot(dir) > 0.3)) {
@@ -513,7 +527,7 @@ public final class DarktideSouls {
 		if (mob.getAttribute(Attributes.ATTACK_DAMAGE) != null) {
 			mob.doHurtTarget(ride.level, foe);
 		} else {
-			foe.hurtServer(ride.level, ride.level.damageSources().mobAttack(mob), 2.0F);
+			foe.hurtServer(ride.level, ride.level.damageSources().mobAttack(mob), PLAIN_STRIKE);
 		}
 		DarktideTide.enemy(player, foe);
 	}

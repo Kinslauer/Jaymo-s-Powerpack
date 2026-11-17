@@ -177,7 +177,7 @@ final class DarktideTide {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadow_gone").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
+		if (DarktideState.save(player).shadows().size() + risenShadows(player).size() >= MAX_SHADOWS) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
 			return;
 		}
@@ -424,7 +424,7 @@ final class DarktideTide {
 
 	// ---- Necromancy ---------------------------------------------------------------------------------------------------
 
-	private static @Nullable Entity aimedCorpse(ServerPlayer player) {
+	static @Nullable Entity aimedCorpse(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		Entity best = null;

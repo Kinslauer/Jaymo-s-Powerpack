@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,8 @@ public final class ChronoMomentum {
 	static final double STATIC_REACH = 24.0, ARC_REACH = 5.0;
 	static final float STATIC_DAMAGE = 10.0F, ARC_SHARE = 0.5F;
 	static final int ARCS = 2, DAZE_TICKS = 30, STATIC_GAP = 10;
+	/** The Slowness level a static bolt leaves on what it shocks. */
+	static final int DAZE_LEVEL = 3;
 	static final int GOLD = 0xFFD070, SKY = 0x8FD8FF;
 
 	/** The top gear the wheel has set, 1 to 5 (the owner's HUD). */
@@ -86,7 +89,7 @@ public final class ChronoMomentum {
 
 	/** Whether shots pass through {@code player}: a blur, or phasing. On either side. */
 	public static boolean shotsPass(Player player) {
-		return player.getAttached(BLUR) != null || ChronoPhase.phasing(player);
+		return player.getAttached(BLUR) != null || player.getAttached(ChronoPhase.PHASING) != null;
 	}
 
 	/** Each tick (server), before {@link ChronoGears#tick}: the gear follows the momentum, the blur and the static charge follow the gear. */
@@ -205,7 +208,7 @@ public final class ChronoMomentum {
 			LivingEntity at = last, next = null;
 			double near = ARC_REACH * ARC_REACH;
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, at.getBoundingBox().inflate(ARC_REACH),
-				e -> e != player && e.isAlive() && !e.isSpectator() && !done.contains(e) && !(e instanceof Player))) {
+				e -> !done.contains(e) && PickKit.enemy(player, e))) {
 				double d = e.distanceToSqr(at);
 				if (d < near) {
 					near = d;
@@ -225,7 +228,7 @@ public final class ChronoMomentum {
 
 	private static void shock(ServerPlayer player, ServerLevel level, LivingEntity target, float damage) {
 		if (target.hurtServer(level, level.damageSources().indirectMagic(player, player), damage)) {
-			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DAZE_TICKS, 3), player);
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DAZE_TICKS, DAZE_LEVEL), player);
 			level.sendParticles(MagicFx.CRACKLE, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 8, 0.3, 0.4, 0.3, 0.1);
 		}
 	}

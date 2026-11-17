@@ -95,12 +95,18 @@ public final class SoulArts {
 	static final int SCYTHE_SOULS = 500, SCYTHE_COOLDOWN = 24000;
 	static final double SCYTHE_REACH = 3.0;
 	static final float SCYTHE_REAP = 0.5F;
-	static final String SCYTHE_TAG = "jaymoskingdoms_soul_scythe";
+	static final String SCYTHE_TAG = "jaymoskingdoms_soul_scythe", SCYTHE_OF = "jaymoskingdoms_soul_scythe_of", SCYTHE_NTH = "jaymoskingdoms_soul_scythe_nth";
 	static final Identifier WAR_SCYTHE = Identifier.fromNamespaceAndPath("jaymospowers", "netherite_war_scythe");
 	static final int PALE = 0x9FE8E0;
 
 	/** The souls a keeper has banked. Saved, kept through death. */
 	static final AttachmentType<Integer> SOULS = AttachmentRegistry.create(JaymosKingdoms.id("reaper_souls"),
+		b -> b.persistent(Codec.INT).copyOnDeath());
+	/**
+	 * How many scythes a keeper has forged. Saved, kept through death. Only the last one forged is theirs: an older one, or
+	 * another keeper's, comes apart in the hand, so the forging can't be turned into a pile of free scythes.
+	 */
+	static final AttachmentType<Integer> FORGED = AttachmentRegistry.create(JaymosKingdoms.id("reaper_scythes"),
 		b -> b.persistent(Codec.INT).copyOnDeath());
 	/** On a keeper while drifting, for both sides' collision. Not saved. */
 	public static final AttachmentType<Boolean> DRIFTING = AttachmentRegistry.create(JaymosKingdoms.id("reaper_drifting"),
@@ -151,7 +157,7 @@ public final class SoulArts {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
 			// the scythe reaps: whoever stands beside the one struck takes a share
 			if (reaping || taken <= 0.0F || blocked || !(source.getEntity() instanceof ServerPlayer keeper) || source.getDirectEntity() != keeper
-				|| !source.is(DamageTypes.PLAYER_ATTACK) || !scythe(keeper.getMainHandItem()) || !(victim.level() instanceof ServerLevel level)) {
+				|| !source.is(DamageTypes.PLAYER_ATTACK) || !mine(keeper, keeper.getMainHandItem()) || !(victim.level() instanceof ServerLevel level)) {
 				return;
 			}
 			reaping = true;
@@ -200,7 +206,8 @@ public final class SoulArts {
 		}
 		Brand brand = BRANDS.remove(dead);
 		ServerPlayer brander = brand == null ? null : level.getServer().getPlayerList().getPlayer(brand.by);
-		if (brander != null && level.getGameTime() < brand.until) {
+		// (only the brander's own kill: a branded mob dying of anything else, in a grinder say, pays nothing and passes nothing on)
+		if (brander != null && source.getEntity() == brander && level.getGameTime() < brand.until) {
 			// the brand jumps to the nearest foe, and the branded soul is worth more
 			if (Reaper.has(brander)) {
 				bank(brander, BRAND_SOULS);
@@ -221,7 +228,7 @@ public final class SoulArts {
 		}
 		if (source.getEntity() instanceof ServerPlayer keeper && keeper != dead && Reaper.has(keeper)) {
 			int souls = dead.getMaxHealth() >= GREAT_HEALTH ? SOUL_GREAT : SOUL_KILL;
-			bank(keeper, scythe(keeper.getMainHandItem()) ? souls * SCYTHE_SOULS_TIMES : souls);
+			bank(keeper, mine(keeper, keeper.getMainHandItem()) ? souls * SCYTHE_SOULS_TIMES : souls);
 			level.sendParticles(ParticleTypes.SOUL, dead.getX(), dead.getY(0.5), dead.getZ(), 4, 0.2, 0.3, 0.2, 0.03);
 		}
 	}
@@ -320,6 +327,31 @@ public final class SoulArts {
 		return data != null && data.copyTag().contains(SCYTHE_TAG);
 	}
 
+	/** Whether {@code stack} is the scythe {@code keeper} forged last (the only one that reaps). */
+	static boolean mine(Player keeper, ItemStack stack) {
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		if (data == null || !Reaper.has(keeper)) {
+			return false;
+		}
+		net.minecraft.nbt.CompoundTag tag = data.copyTag();
+		return tag.contains(SCYTHE_TAG) && keeper.getUUID().toString().equals(tag.getStringOr(SCYTHE_OF, ""))
+			&& tag.getIntOr(SCYTHE_NTH, 0) == keeper.getAttachedOrElse(FORGED, 0);
+	}
+
+	/** A scythe in hand that isn't its holder's last forging comes apart. */
+	private static void unmake(ServerPlayer player) {
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack held = player.getItemInHand(hand);
+			if (scythe(held) && !mine(player, held)) {
+				player.setItemInHand(hand, ItemStack.EMPTY);
+				if (player.level() instanceof ServerLevel level) {
+					level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY(1.0), player.getZ(), 16, 0.3, 0.5, 0.3, 0.04);
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.8F, 0.8F);
+				}
+			}
+		}
+	}
+
 	private static void forge(ServerPlayer player, ServerLevel level) {
 		int souls = souls(player);
 		if (souls < SCYTHE_SOULS) {
@@ -340,7 +372,14 @@ public final class SoulArts {
 		// Jaymo's Powers' war scythe where it is in the pack (its art), else a hoe
 		Item item = BuiltInRegistries.ITEM.containsKey(WAR_SCYTHE) ? BuiltInRegistries.ITEM.getValue(WAR_SCYTHE) : Items.NETHERITE_HOE;
 		ItemStack scythe = new ItemStack(item);
-		CustomData.update(DataComponents.CUSTOM_DATA, scythe, tag -> tag.putBoolean(SCYTHE_TAG, true));
+		// the newest is the only one: any forged before stops being theirs
+		int nth = player.getAttachedOrElse(FORGED, 0) + 1;
+		player.setAttached(FORGED, nth);
+		CustomData.update(DataComponents.CUSTOM_DATA, scythe, tag -> {
+			tag.putBoolean(SCYTHE_TAG, true);
+			tag.putString(SCYTHE_OF, player.getUUID().toString());
+			tag.putInt(SCYTHE_NTH, nth);
+		});
 		scythe.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.soul_scythe").withStyle(s -> s.withColor(Reaper.RED).withItalic(false)));
 		scythe.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymoskingdoms.soul_scythe.desc").withStyle(ChatFormatting.GRAY))));
 		scythe.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
@@ -381,7 +420,8 @@ public final class SoulArts {
 					for (int dz = -DRIFT_OUT; dz <= DRIFT_OUT; dz++) {
 						Vec3 spot = player.position().add(dx, dy, dz);
 						double d = dx * dx + dy * dy + dz * dz;
-						if (d < best && clear(player, spot)) {
+						// never out below the world
+						if (d < best && spot.y >= level.getMinY() && clear(player, spot)) {
 							best = d;
 							out = spot;
 						}
@@ -450,6 +490,9 @@ public final class SoulArts {
 	}
 
 	private static void tickKeeper(ServerPlayer player) {
+		if (player.tickCount % 20 == 0) {
+			unmake(player);
+		}
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (!Reaper.has(player)) {
 			if (health != null && health.hasModifier(HEALTH_ID)) {
@@ -468,7 +511,8 @@ public final class SoulArts {
 			double amount = hearts * 2.0 - 20.0;
 			AttributeModifier old = health.getModifier(HEALTH_ID);
 			if (old == null || Math.abs(old.amount() - amount) > 0.01) {
-				health.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, amount, AttributeModifier.Operation.ADD_VALUE));
+				// (saved with the keeper: a transient one would read their saved health against 10 hearts at every login)
+				health.addOrReplacePermanentModifier(new AttributeModifier(HEALTH_ID, amount, AttributeModifier.Operation.ADD_VALUE));
 				if (player.getHealth() > player.getMaxHealth()) {
 					player.setHealth(player.getMaxHealth());
 				}

@@ -38,6 +38,8 @@ public final class ChronoTunnel {
 	static final double PROBE = 1.0, MAX_LENGTH = 10.0, WIDTH = 1.3;
 	/** How long it stays open (ticks), and the wait before the same runner opens another. */
 	static final int OPEN_TICKS = 160, COOLDOWN = 60;
+	/** The wait (ticks) before a wall with no way through is tried again. */
+	static final int RETRY = 10;
 
 	/** On a player standing in an open tunnel, for both sides' collision. */
 	public static final AttachmentType<Boolean> CARRIED = AttachmentRegistry.create(JaymosPowers.id("chrono_tunnel_carried"),
@@ -60,7 +62,8 @@ public final class ChronoTunnel {
 
 	private static final List<Tunnel> TUNNELS = new ArrayList<>();
 	private static final Map<UUID, Tunnel> INSIDE = new HashMap<>();
-	private static final Map<UUID, Integer> READY = new HashMap<>();
+	/** When (game time) each runner may open another. */
+	private static final Map<UUID, Long> READY = new HashMap<>();
 
 	private ChronoTunnel() {
 	}
@@ -82,7 +85,8 @@ public final class ChronoTunnel {
 
 	/** A blur is sprinting: if a wall stands in its way and there is clear ground past it, the tunnel opens. */
 	static void run(ServerPlayer player, ServerLevel level, int color) {
-		if (READY.getOrDefault(player.getUUID(), 0) > player.tickCount || ChronoPhase.phasing(player)) {
+		// jump held at the wall: they mean to run up it, as a speedster always could
+		if (READY.getOrDefault(player.getUUID(), 0L) > level.getGameTime() || ChronoPhase.phasing(player) || player.getLastClientInput().jump()) {
 			return;
 		}
 		Vec3 dir = player.getLookAngle().multiply(1.0, 0.0, 1.0);
@@ -110,7 +114,7 @@ public final class ChronoTunnel {
 			}
 		}
 		// no way through here: do not ask again at once
-		READY.put(player.getUUID(), player.tickCount + (to == null ? 10 : COOLDOWN));
+		READY.put(player.getUUID(), level.getGameTime() + (to == null ? RETRY : COOLDOWN));
 		if (to == null) {
 			return;
 		}

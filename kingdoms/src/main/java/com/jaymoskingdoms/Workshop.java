@@ -189,6 +189,11 @@ public final class Workshop {
 		return direct instanceof Projectile && direct != player && (armed(player) || player.getMainHandItem().is(Items.CROSSBOW));
 	}
 
+	/** Whether {@code shot} came out of a gun (an early gun's ball, or a WeaponMod bullet), whatever its shooter holds by the time it lands. */
+	private static boolean bullet(@Nullable Entity shot) {
+		return shot instanceof GunBall || shot instanceof AbstractArrow arrow && arrow.getWeaponItem() != null && arrow.getWeaponItem().is(ClassPerks.GUNS);
+	}
+
 	/** How many times as fast {@code user} reloads a gun: a Marksman's practice ({@link ClassTrees#practice}), 1 for anyone else. */
 	public static double loadRate(LivingEntity user) {
 		return user instanceof Player player && Classes.is(player, PlayerClass.MARKSMAN) ? ClassTrees.practice(player, PlayerClass.MARKSMAN) : 1.0;
@@ -456,7 +461,7 @@ public final class Workshop {
 		if (!shot(source, player)) {
 			return amount;
 		}
-		if (armed(player) && Classes.is(player, PlayerClass.MARKSMAN)) {
+		if (bullet(direct) && Classes.is(player, PlayerClass.MARKSMAN)) {
 			// (scaling audit) a Marksman's own shot from a gun grows with their class level
 			amount *= 1.0F + GUN_SHARE * ClassTrees.level(player, PlayerClass.MARKSMAN);
 		}

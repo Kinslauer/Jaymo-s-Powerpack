@@ -104,7 +104,8 @@ public final class ChronoGears {
 		if (player.isSprinting() && !player.isCreative()) {
 			player.causeFoodExhaustion(EXHAUSTION[gear - 1]);
 		}
-		float heal = HEAL_PER_SECOND[gear - 1];
+		// speed healing follows the gear the wheel is set to, as it always did: it doesn't fade when the runner stands to fight
+		float heal = HEAL_PER_SECOND[ChronoMomentum.top(player) - 1];
 		if (heal > 0.0F && player.tickCount % 10 == 0 && player.getHealth() < player.getMaxHealth()
 			&& (player.isCreative() || player.getFoodData().getFoodLevel() >= HEAL_MIN_FOOD)) {
 			float took = Mending.mend(player, heal / 2.0F);

@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ({@link com.jaymoskingdoms.Colours#spares}).
  * Nor one a Redeemer spared at that Redeemer, nor a studied beast at a Druid who speaks its tongue
  * ({@link com.jaymoskingdoms.FaithExtras#spares}).
+ * Nor anyone at a Druid small enough to ride a bigger creature unnoticed ({@link com.jaymoskingdoms.SizeArts#unnoticed}).
  * Nor anyone hogtied or grabbed on a lasso ({@link com.jaymoskingdoms.forms.Lasso#pinned}) at anybody.
  */
 @Mixin(LivingEntity.class)
@@ -49,6 +50,7 @@ public abstract class ThrallTargetMixin {
 			|| com.jaymoskingdoms.WhiteFlags.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Colours.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.FaithExtras.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.SizeArts.unnoticed((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.forms.Lasso.pinned((LivingEntity)(Object)this)) {
 			cir.setReturnValue(false);
 		}
