@@ -212,7 +212,8 @@ public final class Discipline {
 
 	/** Commander: how many times as far {@code player}'s orders reach ({@link Presence#reach}). */
 	public static double orderReach(Player player) {
-		return player instanceof ServerPlayer sp && ClassTrees.has(sp, COMMANDER) > 0 ? COMMAND_REACH : 1.0;
+		// (and Far Command's 48 blocks, WarExtras)
+		return (player instanceof ServerPlayer sp && ClassTrees.has(sp, COMMANDER) > 0 ? COMMAND_REACH : 1.0) * WarExtras.far(player);
 	}
 
 	/** Commander: one of {@code player}'s hirelings or companions takes the order whatever tongue it speaks. */

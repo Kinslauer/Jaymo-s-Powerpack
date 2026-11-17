@@ -200,17 +200,19 @@ public final class Workshop {
 	/** {@code player} has stood still (and crouched) for a moment. */
 	static boolean steady(ServerPlayer player) {
 		Long since = STILL_SINCE.get(player.getUUID());
-		return player.isShiftKeyDown() && since != null && player.level().getGameTime() - since >= STILL_TICKS;
+		// (a Gunslinger steadies twice as fast just after the draw, WarExtras)
+		return player.isShiftKeyDown() && since != null && player.level().getGameTime() - since >= STILL_TICKS * WarExtras.draw(player);
 	}
 
 	/** Steady Aim's extra aim assist, in degrees, for {@code player} now. */
 	public static double aimDegrees(ServerPlayer player) {
-		return steady(player) ? STEADY_DEGREES * ClassTrees.power(player, AIM) : 0.0;
+		// (a Gunslinger's aim finds its mark twice as readily just after the draw: the Marksman's own cone again)
+		return (steady(player) ? STEADY_DEGREES * ClassTrees.power(player, AIM) : 0.0) + ClassPerks.MARKSMAN_AIM_DEGREES * (1.0 / WarExtras.draw(player) - 1.0);
 	}
 
 	/** How much of an early gun's stray is left for {@code shooter} (1: all of it). */
 	static float spread(LivingEntity shooter) {
-		return shooter instanceof ServerPlayer sp && steady(sp) ? Math.max(0.1F, 1.0F - STEADY_SPREAD * ClassTrees.power(sp, AIM)) : 1.0F;
+		return (shooter instanceof ServerPlayer sp && steady(sp) ? Math.max(0.1F, 1.0F - STEADY_SPREAD * ClassTrees.power(sp, AIM)) : 1.0F) * WarExtras.draw(shooter);
 	}
 
 	// ---- the parts on a gun ----------------------------------------------------------------------------------------
@@ -415,6 +417,8 @@ public final class Workshop {
 			Vec3 aim = shooter.getLookAngle().scale(v.length());
 			v = v.lerp(aim, CHOKE);
 		}
+		// (class trees) a Sharpshooter's settled shot: dead along the eye, and a quarter further
+		v = WarExtras.sharpshot(shooter, v);
 		if (v != shot.getDeltaMovement()) {
 			shot.setDeltaMovement(v);
 		}

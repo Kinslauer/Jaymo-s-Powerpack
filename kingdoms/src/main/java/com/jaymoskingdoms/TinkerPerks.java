@@ -324,7 +324,7 @@ public final class TinkerPerks {
 		if (!player.getInventory().add(made)) {
 			player.drop(made, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
-		player.getCooldowns().addCooldown(new ItemStack(Items.COPPER_NUGGET), CONTRAPTION_COOLDOWN);
+		player.getCooldowns().addCooldown(new ItemStack(Items.COPPER_NUGGET), WarExtras.wait(player, CONTRAPTION_COOLDOWN));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.PLAYERS, 0.8F, 1.6F);
 		ClassTrees.giveEvery(player, PlayerClass.TINKERER, ClassTrees.XP_MADE, "made", 10L);
 	}

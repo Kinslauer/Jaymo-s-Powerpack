@@ -337,6 +337,10 @@ public final class Awareness {
 	 * big where it lands that stays put (Andy: blood that has landed stays still; it used to be shown again every second).
 	 */
 	private static void spill(ServerLevel level, ServerPlayer player, int drops, float stain) {
+		// (class trees) a Ghost leaves no blood behind out of Vanish
+		if (RogueExtras.bloodless(player)) {
+			return;
+		}
 		long now = level.getGameTime();
 		int lasts = SCENT_TICKS / (Skills.rank(player, Skills.Perk.SLIP_THE_NET) > 0 ? Senses.SLIP_THE_NET_DIVISOR : 1);
 		Deque<Scent> scents = SCENTS.computeIfAbsent(level, l -> new ArrayDeque<>());

@@ -136,7 +136,8 @@ public final class ClassCasters {
 				case CLERIC -> CLERIC_POWER;
 				case DRUID -> DRUID_POWER;
 				// practice: a Warlock's pact casts grow harder with the class level
-				case WARLOCK -> Warlocks.POWER * ClassTrees.practice(player, PlayerClass.WARLOCK);
+				// (class trees: and a fifth harder under Usury while they owe)
+				case WARLOCK -> Warlocks.POWER * ClassTrees.practice(player, PlayerClass.WARLOCK) * ArcaneExtras.usury(player);
 				default -> attuned;
 			};
 			best = Math.max(best, attuned + (v - attuned) * Classes.share(player, cls));

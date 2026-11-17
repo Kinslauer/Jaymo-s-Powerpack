@@ -946,6 +946,22 @@ public final class Downed {
 	}
 
 	/**
+	 * How likely a blow to the head is to knock {@code victim} out cold, against anyone else (1): a thrown rock's and a blunt
+	 * arrow's chance is multiplied by it. Jaymo's Kingdoms sets this at server start (its {@code PowersCompat}, a Brute's
+	 * Thick Skull); without Kingdoms every skull is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> headKnock = victim -> 1.0;
+
+	/** {@link #headKnock} for {@code victim}, safely. */
+	public static float headKnock(LivingEntity victim) {
+		try {
+			return (float) headKnock.applyAsDouble(victim);
+		} catch (RuntimeException e) {
+			return 1.0F;
+		}
+	}
+
+	/**
 	 * (0.14.4) Knocked out for {@code ticks} (too much poppy): one who's up goes down where they stand (no health lost) and
 	 * passes out, and gets up again by themselves after; one already down passes out, and comes round still down. Only
 	 * those who can go down ({@link #downable}) or already are. True if they were knocked out.

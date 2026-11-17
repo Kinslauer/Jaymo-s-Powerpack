@@ -5,6 +5,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.TINKERER;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.WarExtras;
 import com.jaymoskingdoms.Workshop;
 import java.util.List;
 import java.util.Set;
@@ -29,5 +30,9 @@ final class MarksmanTree {
 		ClassTrees.add(Workshop.PARTS, bench, 3, 2, 3, 1, 2, List.of(Workshop.SMITH), List.of());
 		ClassTrees.add(Workshop.TRICK, bench, 1, 2, 5, 2, 2, List.of(), List.of());
 		ClassTrees.add(Workshop.KIT, bench, 1, 2, 8, 3, 2, List.of(), List.of());
+		// patch 8: the extras
+		ClassTrees.add(WarExtras.POWDER, marksman, 1, 2, 12, 3, 0, List.of(), List.of());
+		ClassTrees.add(WarExtras.SHARP, marksman, 1, 3, 15, 4, 0, List.of(), List.of(WarExtras.SLINGER));
+		ClassTrees.add(WarExtras.SLINGER, marksman, 1, 3, 15, 4, 1, List.of(), List.of(WarExtras.SHARP));
 	}
 }

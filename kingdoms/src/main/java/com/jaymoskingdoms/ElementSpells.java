@@ -191,6 +191,12 @@ public final class ElementSpells {
 	}
 
 	/** A Sorcerer reading the scroll of {@code spell}: true if they learned it for good (the scroll is spent). */
+	/** Whether {@link #learn} would teach {@code player} {@code spell}. */
+	static boolean learns(ServerPlayer player, String spell) {
+		return ours(spell) && Classes.is(player, Classes.PlayerClass.SORCERER) && !player.getAttachedOrElse(LEARNED, List.of()).contains(spell)
+			&& fits(Classes.optionOf(player, Classes.PlayerClass.SORCERER), spell) && Knowledge.has(player, Knowledge.HIGHER_ARTS);
+	}
+
 	static boolean learn(ServerPlayer player, String spell) {
 		if (!ours(spell) || !Classes.is(player, Classes.PlayerClass.SORCERER) || !(player.level() instanceof ServerLevel level)) {
 			return false;

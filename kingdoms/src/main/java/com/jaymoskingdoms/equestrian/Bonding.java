@@ -580,7 +580,8 @@ public final class Bonding {
 		}
 		if (!horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
-			horse.heal(fill / 8.0F);
+			// (class trees) a Farrier's feeding mends their own horse besides
+			horse.heal(fill / 8.0F + Horsemanship.farrierHeal(horse, player));
 		}
 		return true;
 	}
@@ -590,6 +591,7 @@ public final class Bonding {
 		Float fill = FEED.get(stack.getItem());
 		if (fill != null && Equestrian.covered(horse) && kept(horse) && !horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
+			horse.heal(Horsemanship.farrierHeal(horse, player));
 		}
 	}
 
@@ -941,6 +943,10 @@ public final class Bonding {
 					}
 				} else {
 					float hooves = b.hooves() - (float)blocks / HOOF_WEAR;
+					if (Horsemanship.farriered(horse)) {
+						// (class trees) a Farrier's own horse never wears its hooves down to lameness
+						hooves = Math.max(hooves, Math.min(b.hooves(), LAME));
+					}
 					horse.setAttached(BOND, b.withFeet(hooves, 0.0F));
 					if (b.hooves() >= LAME && hooves < LAME) {
 						rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.lame", name(horse)), true);
@@ -951,8 +957,8 @@ public final class Bonding {
 	}
 
 	static void throwOff(AbstractHorse horse, ServerPlayer rider, String message) {
-		if (Horsemanship.whisperer(rider)) {
-			// a Horse Whisperer is never thrown
+		if (Horsemanship.whisperer(rider) || Horsemanship.sureSeat(rider)) {
+			// a Horse Whisperer is never thrown, nor one with a Sure Seat
 			return;
 		}
 		rider.stopRiding();

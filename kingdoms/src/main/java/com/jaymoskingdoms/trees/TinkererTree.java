@@ -5,6 +5,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.TINKERER;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.jaymoskingdoms.TinkerPerks;
+import com.jaymoskingdoms.WarExtras;
 import java.util.List;
 import java.util.Set;
 
@@ -26,5 +27,8 @@ final class TinkererTree {
 		ClassTrees.add(TinkerPerks.DEFENDER, tinkerer, 1, 2, 18, 4, 3, List.of(TinkerPerks.PUP), List.of(TinkerPerks.HOUND));
 		ClassTrees.add(TinkerPerks.HOUND, tinkerer, 1, 2, 18, 4, 4, List.of(TinkerPerks.PUP), List.of(TinkerPerks.DEFENDER));
 		ClassTrees.add(TinkerPerks.IMITATION, tinkerer, 1, 3, 22, 5, 4, List.of(), List.of());
+		// patch 8: the extras
+		ClassTrees.add(WarExtras.CLOCK, tinkerer, 1, 2, 8, 1, 3, List.of(), List.of(WarExtras.SCRAP));
+		ClassTrees.add(WarExtras.SCRAP, tinkerer, 1, 2, 8, 2, 3, List.of(), List.of(WarExtras.CLOCK));
 	}
 }

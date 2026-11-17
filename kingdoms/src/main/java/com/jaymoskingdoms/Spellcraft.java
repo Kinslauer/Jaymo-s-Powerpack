@@ -227,6 +227,11 @@ public final class Spellcraft {
 	 * A Mage (0.7.212: or another staff caster) reading a scroll of a spell they don't know: they learn it. False for anyone
 	 * else, or a spell they know.
 	 */
+	/** Whether {@link #learn} would teach {@code player} {@code spell} (class trees: a scroll learned is studied first, {@link Arcana.Scroll}). */
+	static boolean learns(ServerPlayer player, String spell) {
+		return staffCaster(player) && !Classes.of(player).spells().contains(spell) && ClassCasters.mayLearn(player, spell) && Knowledge.has(player, Knowledge.HIGHER_ARTS);
+	}
+
 	static boolean learn(ServerPlayer player, String spell) {
 		Classes.Chosen c = Classes.of(player);
 		if (!staffCaster(player) || c.spells().contains(spell) || !ClassCasters.mayLearn(player, spell)) {
@@ -282,7 +287,9 @@ public final class Spellcraft {
 		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
 		// (class trees) the Warlock's Arcanum: once a day, sneaking, a great cast with no slot and no debt
 		boolean arcanum = pact && PactArts.arcanum(player);
-		if (!arcanum && (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative())) {
+		// (class trees) the Hand of the Patron: after a debt settled and a rest, one cast for nothing
+		boolean free = pact && !arcanum && ArcaneExtras.handReady(player);
+		if (!arcanum && !free && (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative())) {
 			if (blood && !pact) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			}
@@ -302,6 +309,8 @@ public final class Spellcraft {
 		SpellParts.spend(player, spell);
 		if (arcanum) {
 			PactArts.arcanumCast(player, level);
+		} else if (free) {
+			ArcaneExtras.handSpent(player, level);
 		} else if (pact) {
 			Warlocks.pay(player, spell);
 		} else if (blood) {
@@ -309,6 +318,8 @@ public final class Spellcraft {
 		} else {
 			Mana.take(player, cost);
 		}
+		// (class trees) a Battlemage's shield stays up through the cast
+		ArcaneExtras.cast(player);
 		Casting.gesture(player, Casting.of(spell), Casting.colour(spell));
 		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (!mage && "wind".equals(PowersCompat.power(player))) {
@@ -729,6 +740,7 @@ public final class Spellcraft {
 				stripIfDead(inv.getItem(i), now);
 			}
 			stripIfDead(player.containerMenu.getCarried(), now);
+			remember(player, now);
 		}
 		String element = live(held, now);
 		if (element != null && now % 4L == 0L && player.level() instanceof ServerLevel level) {
@@ -736,6 +748,37 @@ public final class Spellcraft {
 			// (0.7.212) a blade's quiet trail is for the attuned to see
 			Mana.sendSeen(level, particle(element), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
 		}
+	}
+
+	/**
+	 * (class trees) Blade Memory: while the Sorcerer's own imbued blade is put away (in the pack, in neither hand), it
+	 * doesn't burn down: its clock and theirs are pushed on by the sweep that just passed (a second class's by its share).
+	 */
+	private static void remember(ServerPlayer player, long now) {
+		Current mine = IMBUED.get(player.getUUID());
+		float memory = Math.min(1.0F, ClassTrees.power(player, ArcaneExtras.MEMORY));
+		if (mine == null || memory <= 0.0F || own(player, player.getMainHandItem(), mine) || own(player, player.getOffhandItem(), mine)) {
+			return;
+		}
+		long more = Math.round(SWEEP_EVERY * memory);
+		Inventory inv = player.getInventory();
+		boolean kept = false;
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			if (own(player, stack, mine)) {
+				Charge c = charge(stack);
+				write(stack, new Charge(c.sorcerer(), c.name(), c.element(), c.until() + more, c.stamp()));
+				kept = true;
+			}
+		}
+		if (kept) {
+			IMBUED.put(player.getUUID(), new Current(mine.stamp(), mine.until() + more));
+		}
+	}
+
+	private static boolean own(ServerPlayer player, ItemStack stack, Current mine) {
+		Charge c = charge(stack);
+		return c != null && c.sorcerer().equals(player.getUUID()) && c.stamp() == mine.stamp();
 	}
 
 	/** The element of an imbued blade someone holds (or, a player, carries), for a HUD or a look; null for none. */

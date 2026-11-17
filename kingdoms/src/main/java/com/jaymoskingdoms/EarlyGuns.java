@@ -187,6 +187,10 @@ public final class EarlyGuns {
 
 	/** A match burns in neither rain nor water, and damp powder often won't take (decided on the server). */
 	private static boolean wet(LivingEntity shooter) {
+		// (class trees) a Marksman's Dry Powder takes in rain, standing water or a soaking
+		if (WarExtras.dryPowder(shooter)) {
+			return false;
+		}
 		return shooter.isInWaterOrRain()
 			|| shooter.level() instanceof ServerLevel && PowersCompat.soaked(shooter) && shooter.getRandom().nextFloat() < DAMP_FIZZLE;
 	}
@@ -433,7 +437,8 @@ public final class EarlyGuns {
 
 		@Override
 		public int getUseDuration(ItemStack stack, LivingEntity user) {
-			return loaded(stack) ? this.rung.touch : 72000;
+			// (class trees) a Gunslinger's match comes down twice as fast just after the draw
+			return loaded(stack) ? Math.round(this.rung.touch * WarExtras.draw(user)) : 72000;
 		}
 
 		@Override

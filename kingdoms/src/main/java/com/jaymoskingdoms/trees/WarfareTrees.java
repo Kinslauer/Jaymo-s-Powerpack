@@ -8,6 +8,7 @@ import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Discipline;
 import com.jaymoskingdoms.Fury;
 import com.jaymoskingdoms.Skills.Perk;
+import com.jaymoskingdoms.WarExtras;
 import java.util.List;
 import java.util.Set;
 
@@ -48,5 +49,11 @@ final class WarfareTrees {
 		ClassTrees.add(Fury.BLACKOUT, brute, 1, 3, 20, 6, 3, List.of(), List.of(Fury.BLOODLUST));
 		ClassTrees.add(Fury.BLOODLUST, brute, 1, 3, 20, 6, 4, List.of(), List.of(Fury.BLACKOUT));
 		ClassTrees.add(Fury.RAMPAGE, brute, 1, 3, 24, 7, 3, List.of(Fury.BLOOD_UP), List.of());
+		// patch 8: the extras
+		ClassTrees.add(WarExtras.DRILLED, warlord, 1, 2, 5, 2, 2, List.of(), List.of());
+		ClassTrees.add(WarExtras.WALL, warlord, 1, 2, 12, 4, 0, List.of(), List.of());
+		ClassTrees.add(WarExtras.FAR, warlord, 1, 3, 18, 5, 0, List.of(), List.of());
+		ClassTrees.add(WarExtras.SKULL_KEY, brute, 1, 2, 5, 1, 4, List.of(), List.of());
+		ClassTrees.add(WarExtras.SCAR, brute, 1, 2, 12, 4, 3, List.of(), List.of());
 	}
 }

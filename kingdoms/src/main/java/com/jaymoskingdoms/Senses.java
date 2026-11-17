@@ -367,6 +367,8 @@ public final class Senses {
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
 		f *= Mist.sight(level, player.getEyePosition());
 		f = Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
+		// (class trees) a Stalker Ranger, crouched and still in grass or leaves, isn't seen past six blocks
+		f = RogueExtras.stalked(player, looker, !MOVING.getOrDefault(player.getUUID(), true), f);
 		// heard: someone walking about close by, not sneaking, is noticed in the dark or behind its back
 		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
 			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
