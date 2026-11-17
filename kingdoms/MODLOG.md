@@ -14462,3 +14462,9 @@ Pixel shadows from the sun and moon now fade smoothly at their edges instead of 
 - **Youth now picks idle behaviors at random**: it no longer just drifts about its summon spot. It may stay put with almost no drift, follow its asker drifting in front at head height, playfully avoid the asker's gaze (when the asker looks at it, it drifts away; when the asker looks away, it drifts back), circle the asker at a distance, or drift as before.
 - The wisp switches between these modes every 20–60 seconds while it waits.
 - Built; not played.
+
+## 0.9.78 (2026-11-17): Choosing a patron no longer crashes
+
+- The faith page of your life story crashed the game when it drew the chosen patron's champion: the figure had no
+  entity id, and Cube Animals asks every drawn entity for one. It now gets a fixed preview id, like the story's other
+  figures.
