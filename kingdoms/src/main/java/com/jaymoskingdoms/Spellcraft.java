@@ -111,6 +111,18 @@ public final class Spellcraft {
 		}
 	}
 
+	/** Player → server: sneak and the class key held for {@link Abilities#HOLD_TICKS} ({@code second}: the second class's key). */
+	public record Held(boolean second) implements CustomPacketPayload {
+		public static final Type<Held> TYPE = new Type<>(JaymosKingdoms.id("class_key_held"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Held> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.second), buf -> new Held(buf.readBoolean()));
+
+		@Override
+		public Type<Held> type() {
+			return TYPE;
+		}
+	}
+
 	/** The custom data key an imbued blade keeps its {@link Charge} under. */
 	static final String CHARGE_KEY = "jaymoskingdoms_imbue";
 	/** How often (ticks) a player's whole inventory is checked for blades whose element has gone out. */
@@ -134,6 +146,8 @@ public final class Spellcraft {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Imbue.TYPE, Imbue.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Imbue.TYPE, (payload, context) -> imbue(context.player(), payload.bolt()));
+		PayloadTypeRegistry.serverboundPlay().register(Held.TYPE, Held.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Held.TYPE, (payload, context) -> Abilities.held(context.player(), payload.second()));
 		Mana.register();
 		com.jaymoskingdoms.spirits.Spirits.register();
 		Restoration.register();
@@ -425,10 +439,11 @@ public final class Spellcraft {
 	}
 
 	/**
-	 * The Sorcerer's own answer to the class key (class trees, {@link Sigils}): a tap throws the sigil; sneak and the key
-	 * their element's own working or, with Ward Sigil, lays a sigil on the ground, and throws the sigil when there's
-	 * neither (where the old bolt was). Holding the key imbues the blade ({@link #holdImbue}). Death's tap raises a body
-	 * and restoration's keys heal, as before.
+	 * The Sorcerer's own answer to the class key (class trees, {@link Sigils}): a tap throws the sigil, off the blade or
+	 * from the open hand, whatever the element; sneak and the key their element's own key or, with Ward Sigil, lays a sigil
+	 * on the ground, and throws the sigil when there's neither (where the old bolt was). Holding the key imbues the blade
+	 * ({@link #holdImbue}); sneak and the key held is the element's open-hand working ({@link #working}). Death's tap
+	 * raises a body and restoration's keys heal, as before.
 	 */
 	static void sorcerer(ServerPlayer player, boolean bolt) {
 		String element = element(player);
@@ -476,16 +491,29 @@ public final class Spellcraft {
 			Sigils.cast(player, level, element, false);
 			return;
 		}
-		ItemStack held = player.getMainHandItem();
-		// (patch 6) a lightning Sorcerer with no blade in hand: the Storm Ring
-		if (arts && !blade(held) && element.equals("lightning") && StormArts.ring(player, level)) {
-			return;
-		}
-		// the same for earth (Bulwark), water (Tide Pearl) and air (Harrying Gale)
-		if (arts && !blade(held) && SorceryPicks.key(player, level, element)) {
-			return;
-		}
 		Sigils.cast(player, level, element, false);
+	}
+
+	/** The elements with a working on sneak and the key held ({@link #working}). */
+	public static boolean hasWorking(String element) {
+		return "lightning".equals(element) || SorceryPicks.spellOf(element) != null;
+	}
+
+	/**
+	 * Sneak and the class key held: the element's own working, which comes with Absorbing (lightning's Storm Ring, earth's
+	 * Bulwark, water's Tide Pearl, air's Harrying Gale; they were on the tap with no blade in hand, which is the sigil's
+	 * now). False when they have none, and sneak and the key answers as a tap.
+	 */
+	static boolean working(ServerPlayer player) {
+		String element = element(player);
+		if (!hasWorking(element) || !TreeLocks.has(player, TreeLocks.Lock.SORCERY) || !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		// a cast in the window is answered first, if they know counterspell
+		if (Counterspell.key(player, level)) {
+			return true;
+		}
+		return element.equals("lightning") ? StormArts.ring(player, level) : SorceryPicks.key(player, level, element);
 	}
 
 	/**

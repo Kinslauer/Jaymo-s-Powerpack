@@ -388,10 +388,6 @@ public final class EarlyGuns {
 					if (option.contains("weapon/" + rung.id() + "_barrel") && !smith.isCreative() && TierGate.gearTier(smith) < rung.tier) {
 						return Component.translatable("message.jaymoskingdoms.early_gun.tier." + rung.id());
 					}
-					// (class trees) and only a Gunsmith forges a gun's barrel
-					if (option.contains("weapon/" + rung.id() + "_barrel") && !Workshop.mayForge(smith)) {
-						return Component.translatable("message.jaymoskingdoms.workshop.gunsmith");
-					}
 				}
 				return null;
 			});

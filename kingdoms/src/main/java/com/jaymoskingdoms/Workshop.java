@@ -73,8 +73,8 @@ import org.jspecify.annotations.Nullable;
  * arms: the foe drops its weapon; the legs: it limps); or a free shot at any foe that swings at you or a friend within
  * {@link #QUICK_SHOT_REACH} blocks, once per short rest.</li>
  * <li><b>Precision</b> (top): a shot on an unaware or crippled foe is always a critical.</li>
- * <li><b>Gunsmith</b> (the bench): guns, barrels and bullets are made only by those who have it ({@link #mayMake}); a
- * Marksman without it (or anyone else) buys them of a weaponsmith ({@link #stock}).</li>
+ * <li><b>Gunsmith</b> (the bench): anyone makes guns, barrels and shot; a Gunsmith's craft of shot gives
+ * {@link #SMITH_SHOT} more ({@link #smithed}). Whoever isn't one can also buy guns and shot of a weaponsmith ({@link #stock}).</li>
  * <li><b>Gun upgrades</b> (3 ranks): one part a rank fitted at a station, never all four: Muffled (no noise), Long Barrel
  * (further), Choke (a blunderbuss's shot held tight) and Bayonet (a blow with it).</li>
  * <li><b>Trick Shot bolts</b>: arrows turned at a station into grapple, oil, water and shrapnel bolts. Oil sets up fire (an
@@ -110,6 +110,8 @@ public final class Workshop {
 	/** Field Kit: share of the gear's full durability mended, the wait (ticks). */
 	static final float KIT_MEND = 0.15F;
 	static final int KIT_COOLDOWN = 20 * 30;
+	/** Gunsmith: the share more shot (WeaponMod's bullets, a blunderbuss's shot) each craft gives (half again: twelve for eight). */
+	static final float SMITH_SHOT = 0.5F;
 	/** A weaponsmith's guns and shot for the Gunsmith-less: emeralds, how many, uses. */
 	static final int HANDGONNE_PRICE = 8, ARQUEBUS_PRICE = 14, FLINTLOCK_PRICE = 18, MUSKET_PRICE = 24, BULLETS_PRICE = 2, BULLETS = 8, STOCK_USES = 4;
 
@@ -338,32 +340,30 @@ public final class Workshop {
 
 	// ---- Gunsmith ------------------------------------------------------------------------------------------------------
 
-	/** Whether {@code result} is a gun, a barrel or a bullet: made only with Gunsmith. */
-	static boolean gunsmithing(ItemStack result) {
-		Identifier id = BuiltInRegistries.ITEM.getKey(result.getItem());
-		return gun(result) || id.toString().equals("weaponmod:bullet") || id.getPath().endsWith("_barrel") && id.getPath().contains("gun");
-	}
-
-	/** Whether {@code player} may take {@code result} out of a grid: anything but a gun or its shot, or a Gunsmith. */
-	public static boolean mayMake(Player player, ItemStack result) {
-		if (!gunsmithing(result) || player.isCreative() || ClassTrees.has(player, SMITH) > 0) {
-			return true;
-		}
-		if (player instanceof ServerPlayer sp) {
-			ClassTrees.check(sp, SMITH);
-		}
-		return false;
-	}
-
-	/** Whether {@code smith} may forge a gun's barrel: a Gunsmith. */
-	static boolean mayForge(ServerPlayer smith) {
-		return smith.isCreative() || ClassTrees.has(smith, SMITH) > 0;
-	}
-
 	/**
-	 * A weaponsmith keeps guns and shot for whoever can't make them: a Marksman without Gunsmith, and anyone else, since only a
-	 * Gunsmith makes them (as far as their tier allows, {@link TierGate}).
+	 * Gunsmith: {@code crafted} of {@code made} came out of the grid (from {@code FletcherCraftMixin}); if it is shot for a
+	 * gun (WeaponMod's bullets, or a blunderbuss's shot), a Gunsmith's measure gives {@link #SMITH_SHOT} more, handed over.
+	 * Anyone may make guns and shot.
 	 */
+	public static void smithed(Player player, ItemStack made, int crafted) {
+		if (!(player instanceof ServerPlayer sp) || crafted <= 0 || ClassTrees.has(sp, SMITH) <= 0) {
+			return;
+		}
+		String id = BuiltInRegistries.ITEM.getKey(made.getItem()).toString();
+		if (!id.equals("weaponmod:bullet") && !id.equals("weaponmod:shot")) {
+			return;
+		}
+		int more = Math.round(crafted * SMITH_SHOT * Math.min(1.0F, ClassTrees.power(sp, SMITH)));
+		if (more <= 0) {
+			return;
+		}
+		ItemStack extra = new ItemStack(made.getItem(), more);
+		if (!sp.getInventory().add(extra) && !extra.isEmpty()) {
+			sp.drop(extra, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** A weaponsmith keeps guns and shot for whoever isn't a Gunsmith (as far as their tier allows, {@link TierGate}). */
 	private static void stock(ServerPlayer player, Villager smith) {
 		if (ClassTrees.has(player, SMITH) > 0 || smith.isBaby()
 			|| !smith.getVillagerData().profession().is(VillagerProfession.WEAPONSMITH)) {

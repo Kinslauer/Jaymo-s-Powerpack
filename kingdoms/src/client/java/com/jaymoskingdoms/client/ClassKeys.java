@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Abilities;
 import com.jaymoskingdoms.Absorption;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.SecondClass;
@@ -24,6 +25,8 @@ final class ClassKeys {
 	private static boolean bloodHeld;
 	/** (0.7.570) Any other Sorcerer's J is down (Absorption.Hold sent). */
 	private static boolean elementHeld;
+	/** Sneak and the class key (0) or the second class's (1) is down: the ticks so far ({@link Abilities#HOLD_TICKS}: the hold went); -1 when not. */
+	private static final int[] sneakHeld = {-1, -1};
 
 	/** The "classes" key category; 26.3 throws if a category id is registered twice, so every class key shares this one. */
 	private static KeyMapping.Category category;
@@ -48,8 +51,13 @@ final class ClassKeys {
 		second = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.second_class", InputConstants.KEY_RALT, category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (second.consumeClick()) {
-				if (minecraft.player != null && minecraft.gui.screen() == null && Classes.second(minecraft.player) != null) {
-					ClientPlayNetworking.send(new SecondClass.Key(minecraft.player.isShiftKeyDown()));
+				// (a key held down clicks again and again: not while its sneak-hold is being told from a tap)
+				if (minecraft.player != null && minecraft.gui.screen() == null && Classes.second(minecraft.player) != null && sneakHeld[1] < 0) {
+					if (minecraft.player.isShiftKeyDown() && Abilities.holds(minecraft.player, true)) {
+						sneakHeld[1] = 0;
+					} else {
+						ClientPlayNetworking.send(new SecondClass.Key(minecraft.player.isShiftKeyDown()));
+					}
 				}
 			}
 			while (growth.consumeClick()) {
@@ -58,7 +66,7 @@ final class ClassKeys {
 				}
 			}
 			while (imbue.consumeClick()) {
-				if (minecraft.player != null && minecraft.gui.screen() == null) {
+				if (minecraft.player != null && minecraft.gui.screen() == null && sneakHeld[0] < 0) {
 					// (0.7.554) a Blood Sorcerer's J is held, not pressed: gather the blood near, empty-handed throw it
 					// (BloodBlasts; a tap is still the Imbue, decided on the server when it's let go)
 					if (Hemomancy.bloodMage(minecraft.player) && !minecraft.player.isShiftKeyDown()) {
@@ -74,11 +82,16 @@ final class ClassKeys {
 							elementHeld = true;
 							ClientPlayNetworking.send(new Absorption.Hold(true));
 						}
+					} else if (minecraft.player.isShiftKeyDown() && !elementHeld && Abilities.holds(minecraft.player, false)) {
+						// sneak and the key: a Druid's and a Sorcerer's is told apart, a tap from a hold, as it's let go
+						sneakHeld[0] = 0;
 					} else {
 						ClientPlayNetworking.send(new Spellcraft.Imbue(minecraft.player.isShiftKeyDown()));
 					}
 				}
 			}
+			sneakHold(minecraft, 0, imbue);
+			sneakHold(minecraft, 1, second);
 			if (bloodHeld && (!imbue.isDown() || minecraft.player == null || minecraft.gui.screen() != null)) {
 				bloodHeld = false;
 				if (minecraft.getConnection() != null) {
@@ -107,5 +120,26 @@ final class ClassKeys {
 				Component.translatable("class.jaymoskingdoms.option." + charge.element()), charge.name(), left / 20)
 				.withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 		});
+	}
+
+	/**
+	 * Sneak and a class key held down ({@code which}: 0 the class key, 1 the second class's): let go before
+	 * {@link Abilities#HOLD_TICKS} it was sneak and a tap; held that long it is the hold's own working ({@link Spellcraft.Held}).
+	 */
+	private static void sneakHold(Minecraft minecraft, int which, KeyMapping key) {
+		if (sneakHeld[which] < 0) {
+			return;
+		}
+		if (minecraft.player == null || minecraft.gui.screen() != null || minecraft.getConnection() == null) {
+			sneakHeld[which] = -1;
+		} else if (!key.isDown()) {
+			if (sneakHeld[which] < Abilities.HOLD_TICKS) {
+				ClientPlayNetworking.send(which == 0 ? new Spellcraft.Imbue(true) : new SecondClass.Key(true));
+			}
+			sneakHeld[which] = -1;
+		} else if (sneakHeld[which] < Abilities.HOLD_TICKS && ++sneakHeld[which] >= Abilities.HOLD_TICKS) {
+			// it stays at the full count until the key is let go, so a hold isn't followed by a tap
+			ClientPlayNetworking.send(new Spellcraft.Held(which == 1));
+		}
 	}
 }

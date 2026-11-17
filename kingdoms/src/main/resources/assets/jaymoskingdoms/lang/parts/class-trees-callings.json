@@ -28,7 +28,7 @@
   "classtree.jaymoskingdoms.dru_pack": "Pack Leader",
   "classtree.jaymoskingdoms.dru_pack.desc": "In a shape, the wild beasts of that kind within 16 blocks follow you and go for what you fight, and you are drawn larger than they are.",
   "classtree.jaymoskingdoms.dru_bark": "Barkskin",
-  "classtree.jaymoskingdoms.dru_bark.desc": "Sneak and the class key in a shape spends one of your shapes: for three minutes your skin is bark, 6 more armour and 2 toughness, and you are a little slower.",
+  "classtree.jaymoskingdoms.dru_bark.desc": "Sneak and hold the class key, in a shape or out of one, to spend one of your shapes: for three minutes your skin is bark, 6 more armour and 2 toughness, and you are a little slower.",
   "classtree.jaymoskingdoms.dru_elder": "Elder Shape",
   "classtree.jaymoskingdoms.dru_elder.desc": "Once a day (back with a night's sleep) you may take the shape of a treant, huge, strong and slow, or of a great wind elemental, quick and light, for half a shape's time. Pick them as you pick your other shapes.",
   "classtree.jaymoskingdoms.wlk_slots": "Pact Slots",
@@ -40,7 +40,7 @@
   "classtree.jaymoskingdoms.wlk_kind": "In Kind",
   "classtree.jaymoskingdoms.wlk_kind.desc": "The class key with four of your patron's offerings in hand pays whatever debt is owed with them.",
   "classtree.jaymoskingdoms.wlk_renege": "Renege",
-  "classtree.jaymoskingdoms.wlk_renege.desc": "Sneak and the class key while you owe swaps what the patron asks for another kind, once a debt.",
+  "classtree.jaymoskingdoms.wlk_renege.desc": "Sneak and the class key while you owe opens a choice of what the patron takes instead. Pick one. Once a debt.",
   "classtree.jaymoskingdoms.wlk_blade": "Pact of the Blade",
   "classtree.jaymoskingdoms.wlk_blade.desc": "With the seal in your off hand, the weapon in your other is your pact weapon: its blows hit 30% harder.",
   "classtree.jaymoskingdoms.wlk_chain": "Pact of the Chain",
@@ -58,5 +58,7 @@
   "message.jaymoskingdoms.druid.elder_spent": "Your elder shape is spent until you sleep.",
   "message.jaymoskingdoms.druid.bark": "Your skin turns to bark.",
   "message.jaymoskingdoms.warlock.arcanum": "Your patron's arcanum answers.",
-  "message.jaymoskingdoms.warlock.reneged": "You haggle. Your patron will take %s instead."
+  "message.jaymoskingdoms.warlock.reneged": "You haggle. Your patron will take %s instead.",
+  "renege.jaymoskingdoms.title": "Renege",
+  "renege.jaymoskingdoms.owed": "You owe %s. Offer instead:"
 }

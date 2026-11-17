@@ -3,7 +3,6 @@ package com.jaymoskingdoms;
 import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.money.Money;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -15,7 +14,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -45,8 +43,6 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -56,16 +52,17 @@ import org.jspecify.annotations.Nullable;
  * Class trees patch 8, the extras of the Thief and the Ranger (docs/ClassTrees-Plan.md).
  *
  * <p><b>Thief.</b> Nimble Fingers (a pocket or a lock a tenth quicker a rank), Case the Mark (sneak and watch someone three
- * seconds: two pips by the crosshair say whether they are wary and whether their pockets are worth it), Fence's Friend (what
- * is lifted from a pocket is stolen goods; a speakeasy's fence buys them, at half their worth from anyone and in full from a
- * friend), Second Storey (a landing from under six blocks and a climb aren't heard), the second crossroads Cutpurse King (a
- * fumbled pocket only makes the mark wary) or Shadow Blade (a light blade in the back of an unaware weaker foe puts it down),
- * and Ghost (the first blow out of Vanish is a sneak attack, and no blood is left while it lasts).
+ * seconds: two pips by the crosshair say whether they are wary and whether their pockets are worth it), Fence's Friend (a
+ * speakeasy's fence pays a friend more for what he buys), Second Storey (footsteps are heard half as far), the second
+ * crossroads Cutpurse King (a fumbled pocket only makes the mark wary) or Shadow Blade (a light blade in the back of an
+ * unaware weaker foe puts it down; armour makes a foe hardier), and Ghost (the first blow out of Vanish is a sneak attack,
+ * and no blood is left while it lasts).
  *
  * <p><b>Ranger.</b> Keen Eye (arrows truer and faster a rank), Field Dressing (one more round of cuts from your own kill on
- * the hook), Fletcher (six arrows a set, and the arrow that kills is given back), the second crossroads Stalker (crouched
- * and still in grass or leaves, unseen past six blocks) or Warden (a favoured foe within 24 blocks is felt as a heartbeat),
- * and Heartseeker (a full-drawn shot at an unaware favoured foe can't miss or glance off the head it was called on).
+ * the hook), Fletcher (six arrows a set, and half the time the arrow that kills is given back), the second crossroads
+ * Stalker (crouched and still in grass or leaves, unseen past six blocks) or Warden (a favoured foe within 24 blocks is felt
+ * as a heartbeat), and Heartseeker (a full-drawn shot at an unaware favoured foe can't miss or glance off the head it was
+ * called on).
  */
 public final class RogueExtras {
 	// ---- Thief ----
@@ -74,20 +71,19 @@ public final class RogueExtras {
 	/** Case the Mark: how long to watch (ticks), how far, how squarely (the look's dot), and how often the marks are sent again. */
 	static final int CASE_TICKS = 60, CASE_EVERY = 10;
 	static final double CASE_RANGE = 16.0, CASE_DOT = 0.98;
-	/** Fence's Friend: the share of its worth a fence gives anyone for stolen goods, and the least a piece is worth (milli). */
-	static final float FENCE_PLAIN = 0.5F;
-	static final long STOLEN_FLOOR = 40L;
+	/** Fence's Friend: the share more a den's fence pays the Thief for what he buys of them. */
+	static final float FENCE_MORE = 0.25F;
 	/** The smallest coin there is (milli): a fence pays in whole coins. */
 	static final long SMALLEST_COIN = 100L;
-	/** (what loot is worth is counted in the old emerald's 1.5: {@link Lockpicking#worth}) */
-	static final float WORTH_EMERALD = 1.5F;
-	/** Second Storey: a landing from this far (blocks) is heard, this far and so much further a block fallen, to this at most; under this a Second Storey Thief's isn't. A climb is heard this far. */
-	static final double LAND_HEARD = 2.5, LAND_BASE = 5.0, LAND_PER_BLOCK = 1.5, LAND_MOST = 20.0, STOREY_FALL = 6.0, CLIMB_REACH = 6.0, CLIMB_MOVED = 0.3;
+	/** Second Storey: the share of their reach the Thief's footsteps carry ({@link Footsteps#reach}, and the "heard walking" of {@link Senses}). */
+	static final double STOREY_STEPS = 0.5;
 	/** Cutpurse King: a mark made wary keeps a hand on their purse this long (ticks), and a pocket of theirs takes this much longer. */
 	static final int WARY_TICKS = 24000;
 	static final float WARY_FACTOR = 1.5F;
 	/** Shadow Blade: "weaker" is no more of its own health than this share of the Thief's. */
 	static final float BLADE_WEAKER = 1.0F;
+	/** Shadow Blade: armoured foes resist it: each point of the foe's armour counts as this much health against that. */
+	static final float BLADE_ARMOUR = 1.0F;
 	/** Shadow Blade: the felling blow is this many times what the foe has left, so armour and warding (at most 96% between them) don't save them. */
 	static final float BLADE_THROUGH = 30.0F;
 	/** Ghost: how long after Vanish's cover is gone the first blow still counts (ticks). */
@@ -99,8 +95,9 @@ public final class RogueExtras {
 	/** Field Dressing: more rounds of cuts from your own kill, and how near the carcass is looked for (blocks). */
 	static final int DRESS_CUTS = 1;
 	static final double DRESS_REACH = 6.0;
-	/** Fletcher: arrows a set (vanilla's four), and the chance the arrow that kills is given back. */
+	/** Fletcher: arrows a set (vanilla's four), and the chance an arrow that would have broken in the kill is given back whole. */
 	static final int FLETCH_SET = 6, PLAIN_SET = 4;
+	static final float FLETCH_BACK = 0.5F;
 	/** A shot already looked at (saved with the arrow). Kitchen's tag for an arrow's chance to come out of a body whole, and its plain chance. */
 	static final String SEEN_TAG = "jaymoskingdoms_shot_seen", SALVAGE_TAG = "jaymoskitchen.salvage.";
 	static final float PLAIN_SALVAGE = 0.6F;
@@ -114,7 +111,6 @@ public final class RogueExtras {
 	public static final String FINGERS = "thief_fingers", CASE = "thief_case", FENCE = "thief_fence", STOREY = "thief_storey", CUTPURSE = "thief_cutpurse",
 		SHADOW_BLADE = "thief_shadow_blade", GHOST = "thief_ghost";
 	public static final String EYE = "ranger_eye", DRESS = "ranger_dress", FLETCH = "ranger_fletch", STALKER = "ranger_stalker", WARDEN = "ranger_warden", HEART = "ranger_heart";
-	static final String STOLEN_TAG = "jaymoskingdoms_stolen";
 
 	/** Server → client: the mark {@code entity} has been cased; whether they are wary, and whether their pockets are worth it. */
 	public record Cased(int entity, boolean wary, boolean worth) implements CustomPacketPayload {
@@ -141,9 +137,6 @@ public final class RogueExtras {
 	/** Until when (game time) a mark made wary (Cutpurse King) stays so. Saved with the mark, so a restart doesn't forget it. */
 	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Long> WARY = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
 		.create(JaymosKingdoms.id("wary_until"), builder -> builder.persistent(com.mojang.serialization.Codec.LONG));
-	/** The furthest each player has fallen this drop, and where they were on the last climb check. */
-	private static final Map<UUID, Double> FALLING = new HashMap<>();
-	private static final Map<UUID, Double> CLIMBED = new HashMap<>();
 	/** Ghost: until when the first blow counts, whether it has been struck, and who had Vanish's cover on them a tick ago. */
 	private static final Map<UUID, Long> GHOST_UNTIL = new HashMap<>();
 	private static final Map<UUID, Boolean> GHOST_SPENT = new HashMap<>();
@@ -160,8 +153,6 @@ public final class RogueExtras {
 		ServerTickEvents.END_SERVER_TICK.register(RogueExtras::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WATCHING.clear();
-			FALLING.clear();
-			CLIMBED.clear();
 			GHOST_UNTIL.clear();
 			GHOST_SPENT.clear();
 			HIDDEN.clear();
@@ -175,9 +166,20 @@ public final class RogueExtras {
 				arrow.addTag(SEEN_TAG);
 				float fletch = Math.min(1.0F, ClassTrees.power(archer, FLETCH));
 				if (fletch > 0.0F && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
-					// Fletcher, with Kitchen: every arrow of theirs comes out of a body whole (Kitchen rolls it as the arrow goes in)
+					// Fletcher, with Kitchen: of their arrows that would snap in a body, FLETCH_BACK come out whole instead
+					// (Kitchen rolls it as the arrow goes in; a Tinkering arrow's own shaft chance is what it starts from)
+					float plain = PLAIN_SALVAGE;
+					for (String tag : arrow.entityTags()) {
+						if (tag.startsWith(SALVAGE_TAG)) {
+							try {
+								plain = Math.clamp(Integer.parseInt(tag.substring(SALVAGE_TAG.length())) / 100.0F, 0.0F, 1.0F);
+							} catch (NumberFormatException e) {
+								// not a chance: Kitchen's plain one stands
+							}
+						}
+					}
 					arrow.entityTags().removeIf(tag -> tag.startsWith(SALVAGE_TAG));
-					arrow.addTag(SALVAGE_TAG + Math.round(100.0F * (PLAIN_SALVAGE + (1.0F - PLAIN_SALVAGE) * fletch)));
+					arrow.addTag(SALVAGE_TAG + Math.round(100.0F * (plain + (1.0F - plain) * FLETCH_BACK * fletch)));
 				}
 				float eye = ClassTrees.power(archer, EYE);
 				double speed = arrow.getDeltaMovement().length();
@@ -188,13 +190,13 @@ public final class RogueExtras {
 				}
 			}
 		});
-		// Fletcher: the arrow that kills isn't broken in the kill
+		// Fletcher: the arrow that kills isn't always broken in the kill (FLETCH_BACK)
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer archer
-				// (with Kitchen the arrow stays in the body and is pulled out whole: no second one is dropped)
+				// (with Kitchen the arrow stays in the body and is pulled out, whole or snapped: no second one is dropped)
 				&& !KitchenCompat.corpsesExist()
 				&& arrow.pickup == AbstractArrow.Pickup.ALLOWED && entity.level() instanceof ServerLevel level && ClassTrees.has(archer, FLETCH) > 0
-				&& level.getRandom().nextFloat() < Math.min(1.0F, ClassTrees.power(archer, FLETCH))) {
+				&& level.getRandom().nextFloat() < FLETCH_BACK * Math.min(1.0F, ClassTrees.power(archer, FLETCH))) {
 				ItemStack back = arrow.getPickupItemStackOrigin().copyWithCount(1);
 				if (!back.isEmpty()) {
 					level.addFreshEntity(new ItemEntity(level, entity.getX(), entity.getY(0.5), entity.getZ(), back));
@@ -242,45 +244,20 @@ public final class RogueExtras {
 		return true;
 	}
 
-	/** Fence's Friend: what is lifted from a pocket is stolen goods (not coin, nor a thing that carries its own mark, a key). */
-	static void steal(ItemStack loot) {
-		if (loot.isEmpty() || Coinage.held(loot) > 0L || loot.has(DataComponents.CUSTOM_DATA)) {
-			return;
-		}
-		CustomData.update(DataComponents.CUSTOM_DATA, loot, tag -> tag.putBoolean(STOLEN_TAG, true));
-		loot.set(DataComponents.LORE, loot.getOrDefault(DataComponents.LORE, ItemLore.EMPTY)
-			.withLineAdded(Component.translatable("tooltip.jaymoskingdoms.stolen").withStyle(ChatFormatting.DARK_RED)));
-	}
-
-	static boolean stolen(ItemStack stack) {
-		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-		return data != null && data.copyTag().getBooleanOr(STOLEN_TAG, false);
-	}
-
-	/** What a stack of stolen goods is worth in full (milli). */
-	static long stolenWorth(ItemStack stack) {
-		long counted = (long) (Lockpicking.worth(List.of(stack)) / WORTH_EMERALD * Money.worth(1));
-		return Math.max(counted, STOLEN_FLOOR * stack.getCount());
-	}
-
-	/** The fence buys the stolen goods in {@code player}'s hand: half their worth from anyone, all of it from a Fence's Friend. */
-	static void fence(ServerLevel level, ServerPlayer player, Villager fence) {
-		ItemStack goods = player.getMainHandItem();
+	/**
+	 * Fence's Friend ({@link Underworld#traded}): a den's fence has paid {@code player} {@code paid} (coin, or emeralds) for
+	 * what he bought of them; a friend gets {@link #FENCE_MORE} of it more on top, in whole coins.
+	 */
+	static void fencePaid(ServerLevel level, ServerPlayer player, Villager fence, ItemStack paid) {
 		float friend = Math.min(1.0F, ClassTrees.power(player, FENCE));
-		long pays = Math.max(1L, Math.round(stolenWorth(goods) * (FENCE_PLAIN + (1.0F - FENCE_PLAIN) * friend)));
-		Faction law = Theft.lawAt(level, fence.blockPosition());
-		// coins come whole: what doesn't make the smallest coin isn't bought (and the goods aren't taken)
-		pays -= pays % SMALLEST_COIN;
-		if (pays <= 0L) {
-			Speech.tell(level, fence, player, Component.translatable("message.jaymoskingdoms.extras.fence_nothing"), Speech.GOLD);
-			level.playSound(null, fence.getX(), fence.getY(), fence.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
+		long more = Math.round((paid.is(Items.EMERALD) ? Money.worth(paid.getCount()) : Coinage.held(paid)) * FENCE_MORE * friend);
+		more -= more % SMALLEST_COIN;
+		if (more <= 0L) {
 			return;
 		}
-		goods.setCount(0);
-		Money.pay(player, law, pays);
-		Speech.tell(level, fence, player, Component.translatable(friend > 0.0F ? "message.jaymoskingdoms.extras.fence_friend" : "message.jaymoskingdoms.extras.fence_plain",
-			Money.text(law, pays)), Speech.GOLD);
-		level.playSound(null, fence.getX(), fence.getY(), fence.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 0.9F);
+		Faction law = Theft.lawAt(level, fence.blockPosition());
+		Money.pay(player, law, more);
+		Speech.tell(level, fence, player, Component.translatable("message.jaymoskingdoms.extras.fence_friend", Money.text(law, more)), Speech.GOLD);
 	}
 
 	/** Ghost: whether {@code thief} is out of Vanish and their first blow still to come. */
@@ -397,14 +374,15 @@ public final class RogueExtras {
 
 	// ---- blows ----------------------------------------------------------------------------------------------------------------
 
-	/** Shadow Blade: a light blade in the back of an unaware weaker foe puts it down. */
+	/** Shadow Blade: a light blade in the back of an unaware weaker foe puts it down; its armour counts against it ({@link #BLADE_ARMOUR}). */
 	static float dealt(LivingEntity target, DamageSource source, float amount) {
 		if (!(source.getEntity() instanceof ServerPlayer thief) || source.getDirectEntity() != thief || target == thief || !(target instanceof Mob mob)) {
 			return amount;
 		}
 		float blade = ClassTrees.power(thief, SHADOW_BLADE);
 		if (blade <= 0.0F || !HiddenBlade.weapon(thief).is(ClassPerks.LIGHT_BLADES) || Senses.boss(mob) || Senses.cooling(target, source)
-			|| mob.getMaxHealth() > thief.getMaxHealth() * BLADE_WEAKER * Math.min(1.0F, blade) || !Senses.unaware(target, thief) || !Senses.fromRear(target, thief)) {
+			|| mob.getMaxHealth() + mob.getArmorValue() * BLADE_ARMOUR > thief.getMaxHealth() * BLADE_WEAKER * Math.min(1.0F, blade)
+			|| !Senses.unaware(target, thief) || !Senses.fromRear(target, thief)) {
 			return amount;
 		}
 		if (target.level() instanceof ServerLevel level) {
@@ -423,7 +401,6 @@ public final class RogueExtras {
 			}
 			long now = level.getGameTime();
 			UUID id = player.getUUID();
-			heard(level, player, id, now);
 			if (ClassTrees.has(player, GHOST) > 0) {
 				if (vanished(player)) {
 					// (each Vanish has its one blow)
@@ -448,33 +425,9 @@ public final class RogueExtras {
 		}
 	}
 
-	/** Second Storey: a landing and a climb are heard, but not a Second Storey Thief's from under six blocks, or their climb. */
-	private static void heard(ServerLevel level, ServerPlayer player, UUID id, long now) {
-		if (player.isCreative() || player.isPassenger()) {
-			FALLING.remove(id);
-			return;
-		}
-		boolean storey = ClassTrees.has(player, STOREY) > 0;
-		if (!player.onGround() && !player.isInWater() && !player.onClimbable() && !player.getAbilities().flying && !player.isFallFlying()) {
-			if (player.fallDistance > 0.0) {
-				FALLING.merge(id, player.fallDistance, Math::max);
-			}
-		} else {
-			Double fell = FALLING.remove(id);
-			if (fell != null && fell >= LAND_HEARD && player.onGround() && !(storey && fell < STOREY_FALL)) {
-				Hearing.noise(level, player.position(), Math.min(LAND_MOST, LAND_BASE + fell * LAND_PER_BLOCK), id, Hearing.Kind.STEP);
-			}
-		}
-		if ((now + player.getId()) % Footsteps.EVERY == 0) {
-			if (player.onClimbable() && !player.onGround()) {
-				Double last = CLIMBED.put(id, player.getY());
-				if (last != null && Math.abs(player.getY() - last) >= CLIMB_MOVED && !storey && !player.isCrouching()) {
-					Hearing.noise(level, player.position(), CLIMB_REACH, id, Hearing.Kind.STEP);
-				}
-			} else {
-				CLIMBED.remove(id);
-			}
-		}
+	/** Second Storey: how far {@code player}'s footsteps carry, as a share. */
+	static double steps(Player player) {
+		return 1.0 - (1.0 - STOREY_STEPS) * Math.min(1.0F, ClassTrees.power(player, STOREY));
 	}
 
 	/** Case the Mark: sneaking and watching someone, the Thief reads them. */
