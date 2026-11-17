@@ -33,16 +33,24 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-17): "chronos should also get a flurry punch combo when they hold left click while overclocked". Held
  * attack ({@link #HOLD_TICKS} on the client, never at a block, which is mining) while Overclock runs: a string of
  * {@link #JABS} jabs from alternating fists, one every {@link #JAB_EVERY} ticks, each a little harder than the last, into
- * the nearest creature in front of you, with your fists (an empty main hand or boxing gear: {@link #fists}); then an uppercut that throws it ({@link #FINISH_WINDUP} ticks to land); then a
+ * the nearest creature in front of you, with your fists (an empty main hand or boxing gear: {@link #inHand}; a melee weapon swings instead, below); then an uppercut that throws it ({@link #FINISH_WINDUP} ticks to land); then a
  * breath ({@link #REST} ticks) and the next string, for as long as the button is held. Hits grow with mastery. Not downed,
  * not in Time Flow (which has its own blows), and it ends with Overclock. The client says when the hold starts and stops
  * ({@link Hold}).
+ *
+ * <p>Andy (2026-11-17): "Melee weapons should also swing fast but only deal damage once every 4 ticks". With a melee
+ * weapon in hand (anything with attack damage on it), the held attack swings it every {@link #JAB_EVERY} ticks, but only
+ * every {@link #WEAPON_HIT_EVERY} ticks does a swing land: a full-strength attack of the weapon (its damage,
+ * enchantments, sweep and wear) on the nearest one in front. Meanwhile no other melee hit of yours lands, so the held
+ * swings can't be stacked with clicks.
  */
 public final class ChronoFlurry {
 	// ---- tuning ----
 	/** Ticks of held attack before the flurry starts (a click stays a click). */
 	public static final int HOLD_TICKS = 5;
 	static final int JAB_EVERY = 2, JABS = 10, FINISH_WINDUP = 4, REST = 6;
+	/** With a melee weapon: one swing in this many ticks lands. */
+	static final int WEAPON_HIT_EVERY = 4;
 	/** Reach (blocks, eyes to the target's middle) and the cosine of how wide either side of your look it finds one. */
 	static final double REACH = 3.0, CONE = 0.5;
 	/** A jab: base damage, plus this per ability mastered; each jab of the string lands this share harder than the first. */
@@ -68,6 +76,8 @@ public final class ChronoFlurry {
 
 	/** Ticks into the current string, per flurrying player. */
 	private static final Map<UUID, Integer> RUNS = new HashMap<>();
+	/** A weapon flurry's own landing blow is under way (any other melee hit of a weapon flurrier is refused). */
+	private static boolean landing;
 
 	private ChronoFlurry() {
 	}
@@ -76,6 +86,10 @@ public final class ChronoFlurry {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> hold(ctx.player(), payload.on()));
 		ServerTickEvents.END_SERVER_TICK.register(ChronoFlurry::tick);
+		// a weapon flurry lands once every WEAPON_HIT_EVERY ticks, whatever else is clicked or swung meanwhile
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			landing || !(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player
+				|| !RUNS.containsKey(player.getUUID()) || !weapon(player.getMainHandItem()));
 	}
 
 	private static void hold(ServerPlayer player, boolean on) {
@@ -88,13 +102,21 @@ public final class ChronoFlurry {
 
 	private static boolean able(ServerPlayer player) {
 		return player.isAlive() && !player.isSpectator() && ChronoPower.overclocked(player) && !Downed.isDowned(player)
-			&& !ChronoFlow.on(player) && fists(player);
+			&& !ChronoFlow.on(player) && inHand(player);
 	}
 
-	/** A punch flurry wants fists: an empty main hand, or boxing gear on it. A held weapon swings as it always has. */
-	public static boolean fists(net.minecraft.world.entity.player.Player player) {
+	/** A flurry wants fists (an empty main hand, or boxing gear on it) or a melee weapon. */
+	public static boolean inHand(net.minecraft.world.entity.player.Player player) {
 		net.minecraft.world.item.ItemStack held = player.getMainHandItem();
-		return held.isEmpty() || com.jaymospowers.boxing.BoxingGear.isGear(held);
+		return held.isEmpty() || com.jaymospowers.boxing.BoxingGear.isGear(held) || weapon(held);
+	}
+
+	/** A melee weapon (not boxing gear): anything that adds attack damage in the hand. */
+	static boolean weapon(net.minecraft.world.item.ItemStack held) {
+		return !held.isEmpty() && !com.jaymospowers.boxing.BoxingGear.isGear(held)
+			&& held.getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS,
+				net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY).modifiers().stream()
+				.anyMatch(e -> e.attribute().equals(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
 	}
 
 	static void stop(ServerPlayer player) {
@@ -114,6 +136,13 @@ public final class ChronoFlurry {
 				continue;
 			}
 			int t = entry.getValue();
+			if (weapon(player.getMainHandItem())) {
+				if (t % JAB_EVERY == 0) {
+					swingWeapon(player, t % WEAPON_HIT_EVERY == 0);
+				}
+				entry.setValue((t + 1) % (JAB_EVERY * WEAPON_HIT_EVERY));
+				continue;
+			}
 			int jabsEnd = JABS * JAB_EVERY;
 			if (t < jabsEnd && t % JAB_EVERY == 0) {
 				jab(player, t / JAB_EVERY);
@@ -125,6 +154,25 @@ public final class ChronoFlurry {
 				finish(player);
 			}
 			entry.setValue(t + 1 >= jabsEnd + FINISH_WINDUP + REST ? 0 : t + 1);
+		}
+	}
+
+	/** One swing of a held weapon; {@code lands}, it strikes as a fully charged attack. */
+	private static void swingWeapon(ServerPlayer player, boolean lands) {
+		player.swing(InteractionHand.MAIN_HAND, JAB, true);
+		ServerLevel level = player.level();
+		LivingEntity target = lands ? target(player) : null;
+		if (target != null) {
+			target.setInvulnerableTime(0);
+			((com.jaymospowers.power.chrono.mixin.ChronoAttackStrengthAccessor) player).jaymospowers$setAttackStrengthTicker(1000);
+			landing = true;
+			try {
+				player.attack(target);
+			} finally {
+				landing = false;
+			}
+		} else {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.35F, 1.6F);
 		}
 	}
 
