@@ -260,13 +260,19 @@ public final class FutureGuns {
 		}
 		if (gun == null || !fighting) {
 			BURST.remove(mob);
+			FutureCover.release(mob);
 			return;
 		}
 		if (dry(mob)) {
+			FutureCover.release(mob);
 			letGo(mob);
 			return;
 		}
 		holdBack(mob);
+		FutureCover.underFire(level, mob, foe);
+		if (FutureCover.hiding(mob, foe)) {
+			return;
+		}
 		Kind kind = gun.kind;
 		double d = mob.distanceTo(foe);
 		boolean sight = mob.hasLineOfSight(foe);
@@ -368,6 +374,7 @@ public final class FutureGuns {
 		BURST.remove(mob);
 		AIMING.remove(mob);
 		NEXT.put(mob, now + (long) gun.kind.reload * RELOAD_SCALE);
+		FutureCover.reload(level, mob, mob.getTarget(), gun.kind.reload * RELOAD_SCALE);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.HOSTILE, 0.7F, 1.2F);
 	}
 
@@ -407,7 +414,9 @@ public final class FutureGuns {
 			NEXT.put(mob, now + kind.gap);
 		} else {
 			BURST.remove(mob);
-			NEXT.put(mob, now + kind.reload + level.getRandom().nextInt(30));
+			int wait = kind.reload + level.getRandom().nextInt(30);
+			NEXT.put(mob, now + wait);
+			FutureCover.reload(level, mob, foe, wait);
 		}
 		fire(level, mob, foe, gun);
 		return true;

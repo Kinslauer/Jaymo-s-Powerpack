@@ -1,8 +1,10 @@
 package com.jaymoskingdoms.mixin.fifth;
 
 import com.jaymoskingdoms.Cover;
+import com.jaymoskingdoms.RangedTactics;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -26,6 +28,9 @@ abstract class ProjectileCoverMixin {
 			BlockHitResult block = Cover.takes(level, self, target);
 			if (block != null) {
 				Cover.stuck(level, block, target);
+				if (target instanceof Mob mob && self.getOwner() instanceof LivingEntity shooter) {
+					RangedTactics.underFire(mob, shooter);
+				}
 				this.onHitBlock(block);
 				ci.cancel();
 			}

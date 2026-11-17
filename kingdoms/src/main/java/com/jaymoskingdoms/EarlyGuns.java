@@ -321,14 +321,18 @@ public final class EarlyGuns {
 				continue;
 			}
 			if (rung == null) {
-				e.setValue(now + FrontierPerks.reload(guard, Muskets.RELOAD) + level.getRandom().nextInt(Muskets.JITTER));
+				int wait = FrontierPerks.reload(guard, Muskets.RELOAD) + level.getRandom().nextInt(Muskets.JITTER);
+				e.setValue(now + wait);
+				RangedTactics.reload(guard, wait);
 				Muskets.fire(level, guard, foe);
 				continue;
 			}
 			if (!MobAmmo.spend(guard, MobAmmo.Kind.SHOT)) {
 				continue;
 			}
-			e.setValue(now + FrontierPerks.reload(guard, rung.guardReload) + level.getRandom().nextInt(JITTER));
+			int wait = FrontierPerks.reload(guard, rung.guardReload) + level.getRandom().nextInt(JITTER);
+			e.setValue(now + wait);
+			RangedTactics.reload(guard, wait);
 			guard.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 			// (the ball drops as it flies: aimed a little over him, more the further he is)
 			Vec3 from = guard.getEyePosition();

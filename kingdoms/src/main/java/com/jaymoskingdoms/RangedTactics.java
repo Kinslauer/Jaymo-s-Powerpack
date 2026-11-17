@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,6 +92,16 @@ public final class RangedTactics {
 	static final float DUCK_CHANCE = 0.35F;
 	static final double COVER_REACH = 8.0;
 	static final int DUCK_LEAST = 30, DUCK_MOST = 70;
+	/**
+	 * Being shot at (hit, or a shot stopped by its cover) sends a shooter to cover this often. Having just loosed a shot from a gun
+	 * that has to be reloaded ({@link #reload}) it always ducks, for the reload, and leans out again {@link #LEAN_OUT} ticks before
+	 * it is ready (never for longer than {@link #DUCK_LONGEST}).
+	 */
+	static final float UNDER_FIRE_CHANCE = 0.8F;
+	static final int LEAN_OUT = 10, DUCK_LONGEST = 160;
+	/** A shooter looks for cover no more often than this (ticks), and a spot found is kept this long while the foe stays within {@link #COVER_MOVED} blocks of where it was. */
+	static final int DUCK_COOLDOWN = 40, COVER_KEPT = 200;
+	static final double COVER_MOVED = 6.0;
 
 	/** What a shooter does about failing. */
 	enum Plan {
@@ -109,6 +120,13 @@ public final class RangedTactics {
 		boolean holding;
 		/** Crouched behind cover (so it is stood up again when the plan ends). */
 		boolean ducking;
+		/** How long the cover plan holds (0: {@link #DUCK_LEAST} to {@link #DUCK_MOST}), when its gun is ready again, and when it may look for cover next. */
+		int duckFor;
+		long reloadUntil, nextDuck;
+		/** The cover found last, and where the foe stood and when. */
+		@Nullable BlockPos coverAt;
+		@Nullable Vec3 coverFoe;
+		long coverTick;
 	}
 
 	/** A shot in the air. */
@@ -166,8 +184,13 @@ public final class RangedTactics {
 				Shot shot = new Shot(projectile, shooter, target.getUUID());
 				SHOTS.add(shot);
 				BY_PROJECTILE.put(projectile, shot);
-				if (shooter.getRandom().nextFloat() < DUCK_CHANCE) {
-					duck(shooter, target);
+				State s = STATES.get(shooter);
+				long ready = s == null ? 0L : s.reloadUntil - LEAN_OUT - shooter.level().getGameTime();
+				if (ready >= DUCK_LEAST) {
+					// a gun to reload: down behind cover for it, up again to shoot
+					duck(shooter, target, (int)Math.min(ready, DUCK_LONGEST));
+				} else if (shooter.getRandom().nextFloat() < DUCK_CHANCE) {
+					duck(shooter, target, 0);
 				}
 			}
 		} else if ((entity instanceof AbstractSkeleton || entity instanceof Pillager) && GIVEN.add((Mob)entity)) {
@@ -176,26 +199,71 @@ public final class RangedTactics {
 		}
 	}
 
-	/** Having shot, a shooter goes to cover nearby, if there is any, and crouches there before leaning out again. */
-	private static void duck(Mob shooter, LivingEntity target) {
+	/** A gun that takes {@code ticks} to reload was just fired: the shooter ducks behind cover for that long (see {@link #LEAN_OUT}). */
+	static void reload(Mob shooter, int ticks) {
+		if (reacts(shooter)) {
+			state(shooter).reloadUntil = shooter.level().getGameTime() + ticks;
+		}
+	}
+
+	/** {@code by} shot at {@code victim}, or its shot was stopped by cover: a shooter under fire goes to cover. */
+	public static void underFire(Mob victim, LivingEntity by) {
+		if (by != victim && reacts(victim) && !friendly(victim, by) && victim.getRandom().nextFloat() < UNDER_FIRE_CHANCE) {
+			duck(victim, by, 0);
+		}
+	}
+
+	/**
+	 * A shooter goes to cover nearby, if there is any, and crouches there for {@code hold} ticks (0: a short while) before leaning
+	 * out again. Where it stands already is cover if a wall or a parapet in front of it hides the crouching body but not the
+	 * standing one; a wall archer, kept to his post, takes no other.
+	 */
+	private static void duck(Mob shooter, LivingEntity target, int hold) {
 		if (!(shooter.level() instanceof ServerLevel level) || active(shooter) || melee(shooter) || shooter.distanceToSqr(target) > RANGE * RANGE) {
 			return;
 		}
-		BlockPos spot = Cover.spot(level, shooter, target, COVER_REACH, SAMPLES);
-		if (spot == null) {
+		State s = state(shooter);
+		long now = level.getGameTime();
+		if (now < s.nextDuck) {
 			return;
 		}
-		Path path = shooter.getNavigation().createPath(spot, 0);
-		if (path != null && path.canReach()) {
-			State s = state(shooter);
-			begin(level, shooter, s, Plan.TAKE_COVER, Vec3.atBottomCenterOf(spot), level.getGameTime());
+		s.nextDuck = now + DUCK_COOLDOWN;
+		BlockPos here = shooter.blockPosition();
+		BlockPos spot = Cover.works(level, shooter, target, Vec3.atBottomCenterOf(here)) ? here : null;
+		if (spot == null && !(shooter instanceof Folk folk && WallArchers.posted(level, folk))) {
+			spot = coverSpot(level, shooter, target, s, now);
+			if (spot != null) {
+				Path path = shooter.getNavigation().createPath(spot, 0);
+				if (path == null || !path.canReach()) {
+					spot = null;
+				}
+			}
 		}
+		if (spot != null) {
+			s.duckFor = hold;
+			begin(level, shooter, s, Plan.TAKE_COVER, Vec3.atBottomCenterOf(spot), now);
+		}
+	}
+
+	/** Cover for {@code shooter} from {@code target}: the one found last, while it still works against a foe that has not gone far, else a new one. */
+	private static @Nullable BlockPos coverSpot(ServerLevel level, Mob shooter, LivingEntity target, State s, long now) {
+		if (s.coverAt != null && s.coverFoe != null && now - s.coverTick < COVER_KEPT && target.position().distanceToSqr(s.coverFoe) < COVER_MOVED * COVER_MOVED
+			&& Cover.works(level, shooter, target, Vec3.atBottomCenterOf(s.coverAt))) {
+			return s.coverAt;
+		}
+		s.coverAt = Cover.spot(level, shooter, target, COVER_REACH, SAMPLES);
+		s.coverFoe = target.position();
+		s.coverTick = now;
+		return s.coverAt;
 	}
 
 	// ---- the shots ---------------------------------------------------------------------------------------------------------
 
 	/** A shot's hit: on the target it is a success, in a shield or one of its own side's backs it is not. */
 	private static boolean allowDamage(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (victim instanceof Mob mob && source.is(DamageTypeTags.IS_PROJECTILE) && source.getEntity() instanceof LivingEntity by) {
+			underFire(mob, by);
+		}
 		if (BY_PROJECTILE.isEmpty() || source.getDirectEntity() == null) {
 			return true;
 		}
@@ -526,7 +594,7 @@ public final class RangedTactics {
 		if (s.plan == Plan.COVER || s.plan == Plan.TAKE_COVER) {
 			if (there && !s.holding) {
 				s.holding = true;
-				s.holdUntil = now + (s.plan == Plan.TAKE_COVER ? DUCK_LEAST + mob.getRandom().nextInt(DUCK_MOST - DUCK_LEAST + 1) : COVER_HOLD);
+				s.holdUntil = now + (s.plan == Plan.TAKE_COVER ? s.duckFor > 0 ? s.duckFor : DUCK_LEAST + mob.getRandom().nextInt(DUCK_MOST - DUCK_LEAST + 1) : COVER_HOLD);
 				s.planEnds = Math.max(s.planEnds, s.holdUntil);
 			}
 			if (s.holding) {

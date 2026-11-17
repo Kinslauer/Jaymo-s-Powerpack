@@ -88,7 +88,8 @@ public final class Cover {
 		BlockHitResult best = null;
 		int covered = 0;
 		for (double line : LINES) {
-			Vec3 body = new Vec3(target.getX(), target.getY() + target.getBbHeight() * line, target.getZ());
+			// a leaning body is aimed at where it has leaned out to: the higher up, the further out (the feet stay put)
+			Vec3 body = new Vec3(target.getX(), target.getY() + target.getBbHeight() * line, target.getZ()).add(Lean.shift(target, line));
 			BlockHitResult hit = level.clip(new ClipContext(back, body, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, from));
 			if (hit.getType() == HitResult.Type.BLOCK) {
 				covered++;
@@ -102,7 +103,8 @@ public final class Cover {
 		}
 		double share = covered / (double) LINES.length;
 		boolean low = target.isCrouching() || target instanceof net.minecraft.world.entity.player.Player p && PowersCompat.lowStance(p);
-		double chance = Math.min(MOST, low ? share : share * STANDING);
+		// leaning out from cover: what is behind the wall is behind it for certain, and only the part leaned out can be hit
+		double chance = Lean.dir(target) != 0 ? share : Math.min(MOST, low ? share : share * STANDING);
 		return level.getRandom().nextDouble() < chance ? best : null;
 	}
 
@@ -119,7 +121,6 @@ public final class Cover {
 	 */
 	public static @Nullable BlockPos spot(ServerLevel level, LivingEntity shooter, LivingEntity foe, double reach, int tries) {
 		var random = shooter.getRandom();
-		double crouch = shooter.getBbHeight() * 0.72;
 		for (int i = 0; i < tries; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0, d = 2.0 + random.nextDouble() * (reach - 2.0);
 			BlockPos column = BlockPos.containing(shooter.getX() + Math.cos(angle) * d, shooter.getY(), shooter.getZ() + Math.sin(angle) * d);
@@ -135,15 +136,22 @@ public final class Cover {
 			if (feet == null) {
 				continue;
 			}
-			Vec3 base = Vec3.atBottomCenterOf(feet);
-			Vec3 foeEye = foe.getEyePosition();
-			Vec3 standing = base.add(0.0, shooter.getEyeHeight(), 0.0), ducking = base.add(0.0, crouch, 0.0);
-			boolean leans = level.clip(new ClipContext(standing, foeEye, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.MISS;
-			boolean hidden = level.clip(new ClipContext(ducking, foe.getBoundingBox().getCenter(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.BLOCK;
-			if (leans && hidden && base.distanceTo(foe.position()) > 5.0) {
+			if (works(level, shooter, foe, Vec3.atBottomCenterOf(feet))) {
 				return feet;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Whether {@code base} (the floor of a block to stand in) is cover from {@code foe} for {@code shooter}: crouching, the line to
+	 * the foe is stopped by something, and standing it is clear (so it can lean out to shoot), the foe more than five blocks off.
+	 */
+	public static boolean works(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base) {
+		double crouch = shooter.getBbHeight() * 0.72;
+		Vec3 standing = base.add(0.0, shooter.getEyeHeight(), 0.0), ducking = base.add(0.0, crouch, 0.0);
+		boolean leans = level.clip(new ClipContext(standing, foe.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.MISS;
+		boolean hidden = level.clip(new ClipContext(ducking, foe.getBoundingBox().getCenter(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.BLOCK;
+		return leans && hidden && base.distanceTo(foe.position()) > 5.0;
 	}
 }
