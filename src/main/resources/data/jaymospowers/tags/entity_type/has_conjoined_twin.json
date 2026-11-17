@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:villager",
+		"minecraft:zombie",
+		"minecraft:husk",
+		"minecraft:drowned",
+		{ "id": "mca:villager", "required": false }
+	]
+}
