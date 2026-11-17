@@ -16,3 +16,7 @@
   no and it looks again at wherever you point now. Pointing at nothing: "Look at what? Point me at it!". With no answer
   in 30 seconds it comes back.
 - Classes: `inhabitants/YouthWisp` (`looked`, `show`, `hoverShown`, `Shown`). Lang: `youth_wisp.look.*`, `look_miss`.
+- **Youth leaves sooner** (Andy): with nothing to do it goes home after 15 seconds (was 2 minutes). Waiting on an
+  answer it still waits up to 2 minutes, then says "be right back". After "youth, look!" it waits 15 seconds for a yes.
+- **Send it off** anytime: "go away", "bye", "thanks", "leave", "go home", "nevermind"... (with its name, or alone while
+  it's beside you). It says goodbye ("Off I go! Call if you need me.") and goes.

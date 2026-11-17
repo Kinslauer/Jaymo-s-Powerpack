@@ -32,5 +32,9 @@
   "message.jaymoskingdoms.youth_wisp.look.1": "This one?",
   "message.jaymoskingdoms.youth_wisp.look.2": "This here?",
   "message.jaymoskingdoms.youth_wisp.look.3": "Ooh, this?",
-  "message.jaymoskingdoms.youth_wisp.look_miss": "Look at what? Point me at it!"
+  "message.jaymoskingdoms.youth_wisp.look_miss": "Look at what? Point me at it!",
+  "message.jaymoskingdoms.youth_wisp.bye.0": "Off I go! Call if you need me.",
+  "message.jaymoskingdoms.youth_wisp.bye.1": "Bye! Just say my name.",
+  "message.jaymoskingdoms.youth_wisp.bye.2": "Back to the trees!",
+  "message.jaymoskingdoms.youth_wisp.bye.3": "Anytime!"
 }

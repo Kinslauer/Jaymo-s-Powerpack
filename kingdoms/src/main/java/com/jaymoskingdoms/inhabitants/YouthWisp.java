@@ -46,7 +46,18 @@ import org.jspecify.annotations.Nullable;
  */
 public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** It vanishes after this long with no question (ticks). */
-	static final int IDLE_TIMEOUT = 2 * 60 * 20;
+	static final int IDLE_TIMEOUT = 15 * 20;
+	/** ...but while an answer is coming it waits this long, then says "be right back" ({@link #HOLD_LINES}) and goes. */
+	static final int ANSWER_TIMEOUT = 2 * 60 * 20;
+	/**
+	 * Sending it off (Andy: "leave anytime you tell him to"): "go away", "bye", "thanks", "leave", "go home"... with its
+	 * name, or bare while its wisp is beside you.
+	 */
+	static final java.util.regex.Pattern BYE = java.util.regex.Pattern.compile(
+		"^(go away|go home|leave|you can go|off you go|shoo|dismissed|bye|goodbye|good bye|bye bye|see ya|see you|later|cya|thanks|thank you|thx|ty|cheers|that's all|thats all|never ?mind|nvm)\\b[\\s,!.]*(youth)?[\\s!.]*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE);
+	/** How many goodbye lines it has (message.jaymoskingdoms.youth_wisp.bye.0 ...). */
+	static final int BYE_LINES = 4;
 	/** Ticks between two right-click hints from the same wisp. */
 	static final int HINT_COOLDOWN = 5 * 20;
 	/** A chat line that calls Youth: its name anywhere in it, as a word, in any case ("youth, how does Crush work?"). */
@@ -73,7 +84,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
 	/** How far it will go to look at what it's shown (blocks), and how long it waits by it for a yes (ticks). */
 	static final double LOOK_RANGE = 48.0;
-	static final int LOOK_WAIT = 30 * 20;
+	static final int LOOK_WAIT = IDLE_TIMEOUT;
 	/** How many "This?" lines it has (message.jaymoskingdoms.youth_wisp.look.0 ...). */
 	static final int LOOK_LINES = 4;
 	/** A cry for help ("HELP", "help me!", "youth, help me"), which carries its crier home if a wisp is in sight. */
@@ -269,6 +280,16 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public static void heard(ServerPlayer player, String text) {
 		java.util.regex.Matcher lead = LEAD.matcher(text);
 		String rest = lead.matches() ? lead.group(1) : text;
+		// sent off: says goodbye and goes (with its name, or bare while it's beside them)
+		if ((lead.matches() || has(player)) && BYE.matcher(rest.strip()).matches()) {
+			YouthWisp wisp = BY_ASKER.get(player.getUUID());
+			if (wisp != null && has(player)) {
+				wisp.triggerAnim("action", "talk");
+				wisp.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.bye." + wisp.random.nextInt(BYE_LINES)));
+				wisp.vanish();
+			}
+			return;
+		}
 		if (looked(player, lead.matches(), rest.strip())) {
 			return;
 		}
@@ -627,8 +648,8 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		ServerPlayer player = this.askerPlayer();
 		double leash = this.shown != null ? LOOK_RANGE + LEASH : LEASH;
 		if (player == null || player.level() != level || player.distanceToSqr(this) > leash * leash
-			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
-			if (player != null && this.pending() && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
+			|| this.tickCount - this.lastAsked > (this.pending() ? ANSWER_TIMEOUT : IDLE_TIMEOUT) || BY_ASKER.get(this.asker) != this) {
+			if (player != null && this.pending() && this.tickCount - this.lastAsked > ANSWER_TIMEOUT) {
 				this.triggerAnim("action", "talk");
 				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
