@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
+- [ ] [[Agents/forest-rangers|forest-rangers]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
