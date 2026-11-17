@@ -5629,3 +5629,19 @@ When a finisher asks for a key, it now holds still for up to a second and a half
 - **Overclock flurry** (`ChronoFlurry`, `ChronoFlurryClient`): hold attack for a quarter second, bare-fisted or in boxing gear and not aimed at a block (mining), while overclocked: ten alternating jabs (one every 2 ticks, each 8% harder) into the nearest creature in front, then an uppercut that throws it, a short breath, and again while held. Jab 0.5 + 0.15 per ability mastered. Not downed or in Time Flow.
 - **Overclock weapon swings** (Andy: "Melee weapons should also swing fast but only deal damage once every 4 ticks"): the same held attack with a melee weapon (anything with attack damage on it, not boxing gear) swings it every 2 ticks, and every 4 ticks a swing lands as a fully charged attack of the weapon (`player.attack`: damage, enchantments, sweep, wear) on the nearest one in front (`ChronoAttackStrengthAccessor`). While it runs, no other melee hit of yours lands.
 - Built; not played.
+
+## 0.24.57 (2026-11-17): faster singleplayer world loading (template cache, Dynamic Waters samplers)
+
+- **Old structure templates are upgraded once, ever**: 9,719 of the pack's 13,599 structure templates are saved in older
+  Minecraft versions, and the game ran each one through the data fixer every session the first time it was placed
+  (about 30% of all CPU while a new world picked its spawn and while the first player joined). The upgraded copy is now
+  kept in `.cache/jaymospowers/templates-v<world version>/` and read straight back next time (`TemplateUpgrades`,
+  `TemplateUpgradeMixin` on `TemplateSource.readStructure`). The folder is cleared when the game version changes; if it
+  can't be written, templates are upgraded as before.
+- **Dynamic Waters (port)**: its height field asked `RandomState.getSampler` for the surface and density functions on
+  every column, and each ask hashed the whole density-function tree (20% of all CPU at first join). The five samplers it
+  uses are now looked up once per world (`WiredRouter.Samplers`, kept on `RandomState`); `CoarseHeightField`,
+  `VanillaRiverFlow` and `BasinTile` use them.
+- Cloud timing, new world, seed 12345, 4 cores: spawn search 175 s -> 163 s with the sampler fix alone, 69 s once the
+  template cache is warm (181 s the very first time, while it fills).
+- Built and timed on a dev server; not played.

@@ -14562,3 +14562,14 @@ The sneak attack (a heavy blow on a monster that hasn't noticed you) now needs t
 
 - A villager tending a downed player, or a field medic getting one up, first straps on every prosthetic the player carries or that lies within 6 blocks (Powers' `Prosthetics.fitFrom`, through `PowersCompat.fitProsthetics`), so a quadruple amputee lying by a wooden arm gets it on.
 - Built; not played.
+
+## 0.9.92 (2026-11-17): capital village search and ford keep site off the server thread
+
+- **Capital village search**: right after the first player joined, the search for the capital's village placed
+  structures on the server thread (about 8 s of loading and upgrading templates, then more), so the game froze with
+  "can't keep up" warnings. The spot checks now run on a background thread in order, using the worldgen-safe
+  `Structure.findValidGenerationPoint` path, and the server only follows their answers each tick (`StoryGround.VillageSearch`).
+  Same spots, same order, same village picked.
+- **Keep above the ford**: its site search (about 4 s) runs on a background thread too (`Ford.planning`), then sets the
+  plan or gives up as before.
+- Built and timed on a dev server; not played.
