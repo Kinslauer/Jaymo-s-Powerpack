@@ -1,0 +1,1156 @@
+{
+  "title": "The Novice",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "cleric",
+      "baker",
+      "farmer",
+      "shepherd",
+      "librarian"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "truth": [
+      "cellarer",
+      "nephew",
+      "pale"
+    ]
+  },
+  "cast": {
+    "prior": {
+      "name": [
+        "Prior Aldwin",
+        "Prior Cerdic",
+        "Prior Osmund"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "parlour"
+    },
+    "cellarer": {
+      "name": [
+        "Brother Hob",
+        "Brother Wilf",
+        "Brother Gamel"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "store",
+      "hours": "day"
+    },
+    "nephew": {
+      "name": [
+        "Brother Lewin",
+        "Brother Piers",
+        "Brother Col"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "garden"
+    },
+    "herbalist": {
+      "name": [
+        "Brother Odo",
+        "Brother Wace",
+        "Brother Dunn"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "herbhouse"
+    },
+    "pale": {
+      "name": [
+        "Brother Ivo",
+        "Brother Sewal",
+        "Brother Marten"
+      ],
+      "body": "fighter",
+      "at": "gate",
+      "hours": "night",
+      "health": 70,
+      "damage": 8,
+      "armor": 2
+    },
+    "fence": {
+      "name": [
+        "Latch",
+        "Tolly",
+        "Brim"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "postern",
+      "if": "truth=cellarer",
+      "hours": "night"
+    }
+  },
+  "places": {
+    "house": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        180,
+        320
+      ],
+      "name": "the brothers' house"
+    },
+    "parlour": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        8,
+        18
+      ],
+      "name": "the prior's parlour"
+    },
+    "bell": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        10,
+        22
+      ],
+      "name": "the bell frame"
+    },
+    "temple": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        10,
+        25
+      ],
+      "name": "the temple of the house"
+    },
+    "cells": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        15,
+        30
+      ],
+      "name": "the brothers' cells"
+    },
+    "store": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        15,
+        32
+      ],
+      "name": "the cellarer's store"
+    },
+    "garden": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        20,
+        38
+      ],
+      "name": "the garth garden"
+    },
+    "herbhouse": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        24,
+        42
+      ],
+      "name": "the herb house"
+    },
+    "gate": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        26,
+        44
+      ],
+      "name": "the gatehouse"
+    },
+    "postern": {
+      "at": "near",
+      "from": "house",
+      "dist": [
+        36,
+        58
+      ],
+      "name": "the postern in the back wall"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "feast": 6
+      },
+      "say": [
+        "You are not known on the hill, are you? Up at the brothers' house? Good. That is what the prior asked me to find.",
+        "They keep a lamp up there. The Vigil Lamp. A lamp-keeper of the Warden left it with them when the last of his own house died, longer ago than anybody can count, and it has not gone out since. The brothers hold to no patron by name, only the hours. But they keep what they are given to keep.",
+        "It is gone out of its case. Nobody has come over the wall, so it was one of thirty brothers, and the prior cannot turn out his own house without saying why. He carries that lamp out to show the valley on the feast of the long night, {in:feast}. He wants a novice nobody knows. Somebody to ring the bells and sweep the floors and keep their eyes open after dark."
+      ],
+      "replies": [
+        {
+          "say": "I'll take the robe.",
+          "then": "to_house",
+          "journal": "The Vigil Lamp is gone from the brothers' house on the hill, and one of the brothers took it. {giver} says the prior wants a novice nobody knows, to find it before the feast of the long night."
+        },
+        {
+          "say": "I'm no brother.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "to_house": {
+      "do": "go",
+      "to": "house",
+      "radius": 20,
+      "goal": "Go up to {place:house}",
+      "then": "robe",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "robe": {
+      "do": "talk",
+      "who": "prior",
+      "goal": "Present yourself to {prior} in {place:parlour}",
+      "say": [
+        "So you are what {giver} found. You'll do. You have the look of somebody who has done a day's work, which is more than most who come to that gate asking for a robe.",
+        "Here it is. While you wear it you are Novice and nothing else, and you keep the rule. It is short. The bell is rung at the hours, and the novice rings it. Nobody speaks between the night bell and the dawn bell, for any cause, to anyone. And the novice does whatever work the house has no other hands for.",
+        "Three of my brothers had the key to the lamp's case, or the chance of it. {cellarer} keeps every key we own. {nephew} trims the temple lights, and I will tell you before another does that he is my sister's son. {pale} keeps the gate by night, and has let nobody in or out. One of them. I cannot think which, and I find I do not want to. That is why you are here. Begin with the bell."
+      ],
+      "replies": [
+        {
+          "say": "(Put on the robe.)",
+          "then": "ring_bell",
+          "journal": "{prior} gave me a novice's robe and the rule: ring the hours, keep silence from the night bell to the dawn bell, do the work nobody else will. Three brothers could have reached the lamp: {cellarer}, who keeps the keys, {nephew}, who is the prior's sister's son, and {pale}, who keeps the gate by night."
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "ring_bell": {
+      "do": "vigil",
+      "at": "bell",
+      "when": "day",
+      "radius": 8,
+      "gap": 9,
+      "goal": "Ring the hour at {place:bell}",
+      "give": [
+        {
+          "item": "minecraft:leather_chestplate",
+          "count": 1,
+          "name": "A Novice's Robe",
+          "lore": [
+            "Undyed wool, patched at both elbows.",
+            "Whoever wore it last was shorter."
+          ]
+        }
+      ],
+      "lines": [
+        {
+          "say": "The rope is worn smooth where three hundred years of novices have held it.",
+          "sound": "minecraft:block.bell.use"
+        },
+        {
+          "say": "Brothers cross the garth below with their hoods up. One of them stops, counts the strokes on his fingers, and nods.",
+          "sound": "minecraft:block.bell.use"
+        },
+        {
+          "say": "From the bell frame the whole house can be seen: the temple, the cells in their row, the gatehouse, and a little door in the back wall that nobody mentioned.",
+          "sound": "minecraft:block.bell.use"
+        }
+      ],
+      "journal": "I rang the hour. From the bell frame I could see a postern in the back wall that nobody had spoken of.",
+      "then": "chores",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "chores": {
+      "do": "talk",
+      "who": "cellarer",
+      "when": "day",
+      "goal": "Ask {cellarer} at {place:store} for the novice's work",
+      "not_now": "The store is locked at the night bell. So is my mouth, and so should yours be.",
+      "say": [
+        "Novice. Good. I have been a pair of hands short since Lammas. Don't look at the shelves, look at me.",
+        "The temple wants its candles, lamp or no lamp. Four. They are counted. I count everything in this house, it is what a cellarer is for. Lay them in the chest by the case, and don't dawdle about the garth with them. I have people to see and I want this door locked."
+      ],
+      "replies": [
+        {
+          "say": "(Take the candles.)",
+          "then": "candles"
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "candles": {
+      "do": "stash",
+      "at": "temple",
+      "item": "minecraft:candle",
+      "count": 4,
+      "goal": "Lay the four candles in the chest at {place:temple}",
+      "give": [
+        {
+          "item": "minecraft:candle",
+          "count": 4,
+          "name": "Temple Candles",
+          "lore": [
+            "Four, tallow, counted."
+          ]
+        }
+      ],
+      "journal": "I laid the candles in the temple chest. The lamp's case stands open on its stone beside it, lined with oil-cloth, with a clean ring in the dust where the lamp stood.",
+      "then": "garden",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "garden": {
+      "do": "talk",
+      "who": "nephew",
+      "goal": "See what {nephew} wants done in {place:garden}",
+      "say": [
+        "You're the new one. Don't tell me your name, novices haven't any. I am {nephew}. Yes, that one. The nephew. You'd have heard inside a day. Everybody does.",
+        "Hold that line straight while I set these beans and I'll tell you the only thing worth knowing in this house: which flagstones in the cells creak. Third from every door. You'll want that after the night bell, if you are the sort who can't sleep. I am the sort."
+      ],
+      "replies": [
+        {
+          "say": "(Hold the line.)",
+          "then": "kindling",
+          "journal": "{nephew} set me to holding a line for his beans. He says the third flagstone from every cell door creaks, and that he does not sleep."
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "kindling": {
+      "do": "bring",
+      "who": "herbalist",
+      "item": "minecraft:stick",
+      "count": 8,
+      "goal": "Bring {herbalist} eight sticks of kindling for the still",
+      "journal": "I carried kindling to the herb house, as the novice does.",
+      "then": "herb_talk",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "herb_talk": {
+      "do": "talk",
+      "who": "herbalist",
+      "goal": "Hear {herbalist} at {place:herbhouse}",
+      "say": {
+        "?truth=pale": [
+          "Set it by the still. Thank you. You have a look about you that is not all novice, and I mend whoever comes in at that gate, so I have seen a great many looks. I'll not ask.",
+          "I will tell you a thing, since you are carrying wood and I am an old man talking to himself. {pale} came to me at midsummer with a burn across his palm in the shape of a handle, and would not say what he had picked up. I dressed it. It would not take the salve. It was closed by morning, with no mark at all. No burn does that."
+        ],
+        "?truth=cellarer": [
+          "Set it by the still. Thank you. You have a look about you that is not all novice, and I mend whoever comes in at that gate, so I have seen a great many looks. I'll not ask.",
+          "I will tell you a thing, since you are carrying wood and I am an old man talking to himself. {cellarer} has had a sleeping draught of me three times this month. A man who counts candles all day should sleep like a stone. Something is sitting on that brother's chest, and it is not his supper."
+        ],
+        "?": [
+          "Set it by the still. Thank you. You have a look about you that is not all novice, and I mend whoever comes in at that gate, so I have seen a great many looks. I'll not ask.",
+          "I will tell you a thing, since you are carrying wood and I am an old man talking to himself. {nephew} asked me last week what it costs to take passage on a river boat. I said I was a brother and did not know. He said, 'Neither do I, yet.' I have been turning that over."
+        ]
+      },
+      "replies": [
+        {
+          "say": "(Bow, and go to ring the night bell.)",
+          "then": "night_bell",
+          "journal": {
+            "?truth=pale": "{herbalist} says {pale} came to him at midsummer with a burn on his palm shaped like a handle. It would not take salve, and was gone by morning.",
+            "?truth=cellarer": "{herbalist} says {cellarer} cannot sleep, and has asked for a draught three times this month.",
+            "?": "{herbalist} says {nephew} has been asking what passage on a river boat costs."
+          }
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "night_bell": {
+      "do": "vigil",
+      "at": "bell",
+      "when": "night",
+      "radius": 8,
+      "gap": 9,
+      "goal": "Ring the night bell at {place:bell}",
+      "lines": [
+        {
+          "say": "Nine strokes. The lights go out along the row of cells, one after another.",
+          "sound": "minecraft:block.bell.use"
+        },
+        {
+          "say": "The last stroke. From now until the dawn bell nobody in this house may speak, for any cause, to anyone.",
+          "sound": "minecraft:block.bell.use"
+        },
+        {
+          "say": "Somebody is moving in the garth garden without a light."
+        }
+      ],
+      "journal": "I rang the night bell. The silence began.",
+      "then": "whisper",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "whisper": {
+      "do": "talk",
+      "who": "nephew",
+      "when": "night",
+      "goal": "See who is in {place:garden} after the night bell",
+      "say": [
+        "Novice. Novice! Here. I know, I know, the silence. Nobody hears anything in the bean rows.",
+        "You were put here to find the lamp. My uncle never took a novice at a week's notice in his life. Say yes or say no. I shall know either way."
+      ],
+      "voices": {
+        "honour": "You gave your word on the rule this morning. One night, and already?",
+        "gain": "He wants to talk. Let him. Rules are for brothers."
+      },
+      "replies": [
+        {
+          "say": "(Keep the silence. Lay a finger on your lips, and go.)",
+          "then": "search_cells",
+          "for": [
+            "honour",
+            "faith"
+          ],
+          "mark": "novice_kept_silence",
+          "journal": "{nephew} spoke to me in the garden after the night bell. I kept the silence."
+        },
+        {
+          "say": "(Whisper.) Yes. What do you know?",
+          "then": "nephew_tells",
+          "irks": [
+            "honour"
+          ],
+          "mark": "novice_broke_silence",
+          "journal": "{nephew} spoke to me in the garden after the night bell, and I broke the silence to answer him."
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "nephew_tells": {
+      "do": "talk",
+      "who": "nephew",
+      "when": "night",
+      "say": {
+        "?truth=nephew": "Then find it quickly, and say it was mice. I'll tell you this much for nothing. It is not sold and it is not broken. Whoever has it has not let it go out. He would not dare. Now go and creep about. Third flagstone, remember.",
+        "?truth=cellarer": "Then watch the postern in the back wall. Three times this month somebody has gone down to it after the night bell with a lantern under his scapular, and stood talking through the grille. I can't sleep, I told you. I see things. I'd not say it to my uncle. He would ask what I was doing up.",
+        "?": "Then I'll tell you what I have not told my uncle, because he would call me fanciful. {pale} has kept the gate three winters and I have never once seen him by daylight. Not at an office. Not at table. And the temple lights used to gutter when he passed the door. I trim them. I know."
+      },
+      "mark": "novice_nephew_told",
+      "journal": {
+        "?truth=nephew": "{nephew} says the lamp is not sold, not broken, and has not been let go out. He seemed very sure.",
+        "?truth=cellarer": "{nephew} has seen somebody go to the postern three times this month after the night bell, with a lantern hidden.",
+        "?": "{nephew} has never seen {pale} by daylight in three winters, and says the temple lights guttered when he passed the door."
+      },
+      "then": "search_cells",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "search_cells": {
+      "do": "search",
+      "at": "cells",
+      "when": "night",
+      "goal": "Go through {place:cells} while the house sleeps",
+      "clues": [
+        {
+          "name": "A Tally of Debts",
+          "item": "minecraft:paper",
+          "lore": [
+            "Under the pallet in the cell nearest the store: sums owed, to a name that is no brother's.",
+            "The last line is the largest, and is not crossed through."
+          ],
+          "mark": "novice_debts",
+          "journal": "{cellarer} owes money outside the walls. More than a brother should be able to owe."
+        },
+        {
+          "name": "A Packed Bag",
+          "item": "minecraft:leather",
+          "lore": [
+            "Under the cot in the cell with the best blanket: a lay coat, a razor, a heel of bread.",
+            "Somebody is ready to go over the wall, and has been for a while."
+          ],
+          "mark": "novice_bag",
+          "journal": "{nephew} keeps a bag packed under his cot, with a lay coat in it."
+        },
+        {
+          "name": "A Cell with No Candle",
+          "item": "minecraft:flint",
+          "lore": [
+            "The cell by the gate stair has no candle stub, no holder, and no tinder but this.",
+            "The flint has never been struck. Whoever sleeps here has never once wanted a light."
+          ],
+          "mark": "novice_no_candle",
+          "journal": "{pale}'s cell has no candle in it, and a flint that has never been struck."
+        },
+        {
+          "if": "truth=cellarer",
+          "name": "A Pledge Ticket",
+          "item": "minecraft:paper",
+          "lore": [
+            "Folded small inside the tally: 'One lamp, old glass, lit. Held against the whole sum. Redeem by the feast or it is sold on.'",
+            "No name. A little drawing of a latch."
+          ],
+          "mark": "novice_proof_cellarer",
+          "journal": "A pledge ticket was folded inside {cellarer}'s tally. The lamp is held against his debts, and is sold on after the feast."
+        },
+        {
+          "if": "truth=nephew",
+          "name": "A Letter in a Southern Hand",
+          "item": "minecraft:paper",
+          "tongue": "southern",
+          "lore": [
+            "Bring it when you come. He says an old lamp like that would buy us the boat and a year besides.",
+            "I will be at the ford every night until the feast. Do not let them make you take the vows."
+          ],
+          "mark": "novice_proof_nephew",
+          "told": "The prior's nephew up at the brothers' house means to go over the wall to a girl at the ford, and to take the house's lamp to pay their way.",
+          "journal": "A letter was sewn into the lining of {nephew}'s packed bag. It is written in a southern hand."
+        },
+        {
+          "if": "truth=pale",
+          "name": "A Scorched Glove",
+          "item": "minecraft:leather",
+          "lore": [
+            "Pushed behind the door of the cell by the gate stair. The palm is burnt through, in the shape of a handle.",
+            "It smells of lamp oil, and of something worse."
+          ],
+          "mark": "novice_proof_pale",
+          "journal": "A glove was hidden in {pale}'s cell with the palm burnt through in the shape of a lamp's handle."
+        }
+      ],
+      "then": "case_chore",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "case_chore": {
+      "do": "talk",
+      "who": "prior",
+      "when": "day",
+      "goal": "Go to {prior} after the dawn bell",
+      "not_now": "The silence, Novice. After the dawn bell.",
+      "say": {
+        "?mark:novice_broke_silence": [
+          "Before anything else. You broke the silence on your first night. {herbalist} sleeps lightly, and he told me, as he must. I say it only so that you know I know.",
+          "There is a custom while the lamp is out of its case. The novice carries the empty case round the house after the night bell, so that every brother may lay a hand on it and remember what it is for. It has not been needed in my time. It is needed now. Carry it to the gate tonight. And on your way back, look at that postern you saw from the bell frame."
+        ],
+        "?": [
+          "You kept the rule last night, I am told, with temptation hissing at you from the bean rows. Good. Then I will trust that you kept your eyes open too.",
+          "There is a custom while the lamp is out of its case. The novice carries the empty case round the house after the night bell, so that every brother may lay a hand on it and remember what it is for. It has not been needed in my time. It is needed now. Carry it to the gate tonight. And on your way back, look at that postern you saw from the bell frame."
+        ]
+      },
+      "replies": [
+        {
+          "say": "(Take the case.)",
+          "then": "case_gate",
+          "journal": "{prior} has given me the lamp's empty case to carry round the house after the night bell, for every brother to lay a hand on."
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "case_gate": {
+      "do": "talk",
+      "who": "pale",
+      "when": "night",
+      "goal": "Carry the lamp's case to {pale} at {place:gate} after the night bell",
+      "give": [
+        {
+          "item": "minecraft:lantern",
+          "count": 1,
+          "name": "The Vigil Lamp's Case",
+          "lore": [
+            "A cage of old bronze, lined with oil-cloth, and empty.",
+            "It still smells of the oil. It is warm, though nothing burns in it."
+          ]
+        }
+      ],
+      "say": {
+        "?truth=pale": [
+          "The case. So he has sent it round. I had heard that was the custom. I had hoped not to see it done.",
+          "No. Take it on, Novice. I have a cold in my hands, I'd not put them on a holy thing. Take it on. Now, if you please."
+        ],
+        "?": [
+          "The case. So he has sent it round. I had heard that was the custom. Give it here.",
+          "There. Three winters I have watched that light at the end of the yard from this gate. It is a long night without it. Go on to your bed, Novice, and mind the third flagstone."
+        ]
+      },
+      "replies": [
+        {
+          "if": "truth=pale",
+          "say": "(Hold it out to him again.)",
+          "then": "watch_postern",
+          "mark": "novice_proof_pale2",
+          "journal": "{pale} would not lay a hand on the lamp's case. When I held it nearer he stepped back, and where the bronze brushed his wrist the skin went white and blistered as I watched."
+        },
+        {
+          "if": "!truth=pale",
+          "say": "(Take the case back, and go.)",
+          "then": "watch_postern",
+          "mark": "novice_pale_clean",
+          "journal": "{pale} took the lamp's case in both bare hands, held it a while, and gave it back."
+        },
+        {
+          "say": "(Bow, and go on.)",
+          "then": "watch_postern"
+        }
+      ],
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "watch_postern": {
+      "do": "vigil",
+      "at": "postern",
+      "when": "night",
+      "radius": 12,
+      "gap": 11,
+      "goal": "Watch {place:postern} from the shadow of the wall",
+      "lines": [
+        {
+          "if": "truth=cellarer",
+          "say": "A lantern comes along the inside of the wall, held low under a scapular. It is {cellarer}, who should be asleep.",
+          "sound": "minecraft:block.gravel.step"
+        },
+        {
+          "if": "truth=cellarer",
+          "who": "fence",
+          "say": "You're late, Brother. And you're light. This is the interest and no more. The lamp stays on my shelf till I see the rest, and the day after your feast it goes downriver. I told you."
+        },
+        {
+          "if": "truth=cellarer",
+          "say": "Coins go through the grille. Not enough of them, by the sound. He stands a long time after the other has gone.",
+          "mark": "novice_proof_cellarer2"
+        },
+        {
+          "if": "truth=nephew",
+          "say": "Nobody comes to the postern. But there is a light up in the bell frame, where there should be none at this hour. It is not a candle. It is steadier than a candle."
+        },
+        {
+          "if": "truth=nephew",
+          "say": "Somebody is sitting up there in the dark with a lit lamp in his lap, looking out over the wall toward the river.",
+          "mark": "novice_proof_nephew2"
+        },
+        {
+          "if": "truth=pale",
+          "say": "Nobody comes to the postern. The door has not been opened in years. There is ivy across the bolt."
+        },
+        {
+          "if": "truth=pale",
+          "say": "From the midden against the back wall, a little warmth, and a smell of lamp oil where there should be only ash and cabbage stalks.",
+          "mark": "novice_midden"
+        }
+      ],
+      "journal": {
+        "?truth=cellarer": "I watched the postern. {cellarer} came to it with a hidden lantern and paid money through the grille to a man who holds the lamp against the rest.",
+        "?truth=nephew": "Nobody came to the postern. But somebody was sitting in the bell frame in the dark with a lit lamp in his lap, looking toward the river.",
+        "?": "Nobody came to the postern, and nobody has for years. The midden by the back wall is warm, and smells of lamp oil."
+      },
+      "then": "name_thief",
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "name_thief": {
+      "do": "name",
+      "who": "prior",
+      "when": "day",
+      "not_now": "The silence, Novice. After the dawn bell.",
+      "say": "You have had two nights. I'll not ask what you did with them. I ask only this, and I ask you to be sure, because I shall have to look at whoever you name across a table for the rest of my life. Who?",
+      "suspects": [
+        {
+          "who": "cellarer",
+          "say": "{cellarer}. The lamp is pledged against his debts.",
+          "proof": [
+            "mark:novice_proof_cellarer",
+            "mark:novice_proof_cellarer2"
+          ],
+          "need": 1,
+          "then": "judge_cellarer",
+          "doubted": "cast_out",
+          "journal": "I named {cellarer} to the prior."
+        },
+        {
+          "who": "nephew",
+          "say": "{nephew}. He means to go over the wall, and to take it with him.",
+          "proof": [
+            "mark:novice_proof_nephew",
+            "mark:novice_proof_nephew2",
+            "mark:novice_bag"
+          ],
+          "need": 2,
+          "then": "judge_nephew",
+          "doubted": "cast_out",
+          "journal": "I named {nephew} to the prior."
+        },
+        {
+          "who": "pale",
+          "say": "{pale}. He cannot bear the lamp near him. He is no brother, nor any living man.",
+          "proof": [
+            "mark:novice_proof_pale",
+            "mark:novice_proof_pale2",
+            "mark:novice_midden"
+          ],
+          "need": 2,
+          "then": "judge_pale",
+          "doubted": "cast_out",
+          "journal": "I named {pale} to the prior."
+        }
+      ],
+      "none": {
+        "say": "I am not sure yet."
+      },
+      "within": "feast",
+      "late": "end:empty_case",
+      "until": "before the feast of the long night"
+    },
+    "judge_cellarer": {
+      "do": "talk",
+      "who": "prior",
+      "say": [
+        "{cellarer}. Pledged. To a man with a latch for a name. He has kept my keys nineteen years, and I never once counted after him.",
+        "The lamp must be bought back before the feast. The house has the money. He would know, he counts it. What I do not know is what to do with him. You found him. Say what you would do. I do not promise to do it."
+      ],
+      "voices": {
+        "mercy": "Nineteen years of honest keys, and one bad debt. Keep him.",
+        "law": "He pawned what was given in trust. That is theft, robe or no robe."
+      },
+      "replies": [
+        {
+          "say": "Keep him. Let him work the debt off inside the walls.",
+          "then": "end:restored_quietly",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "law"
+          ]
+        },
+        {
+          "say": "He is a thief. Give him to the reeve.",
+          "then": "end:restored_openly",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        }
+      ]
+    },
+    "judge_nephew": {
+      "do": "talk",
+      "who": "prior",
+      "say": [
+        "My sister's boy. Sitting in the bell frame with it in his lap. He was put here at nine years old. Did he tell you that? Nobody asked him. I did not ask him.",
+        "He never took the vows. He could walk out of that gate tomorrow in a lay coat with my blessing, if he had thought to ask for it, and he would need no lamp to pay his way. Or the house can be told what he did, and he can be put out of it with nothing, as the rule says. You found him. Say what you would do. I do not promise to do it."
+      ],
+      "voices": {
+        "mercy": "He is a boy who wants to go to a girl. Open the gate for him.",
+        "honour": "Thirty brothers have been looked at sideways for a week. They are owed the truth."
+      },
+      "replies": [
+        {
+          "say": "Let him go to her, with your blessing. Say the lamp was mislaid.",
+          "then": "end:restored_quietly",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour"
+          ]
+        },
+        {
+          "say": "The house should be told. The rule is the rule.",
+          "then": "end:restored_openly",
+          "for": [
+            "honour",
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        }
+      ]
+    },
+    "judge_pale": {
+      "do": "talk",
+      "who": "prior",
+      "say": [
+        "Three winters. He has kept my gate three winters, and stood at the back of every night office in his gloves, and I took it for humility.",
+        "No patron's name is over our door. I think that is why he could bear to be here at all. And then the one holy thing in the house was more than he could stand, and he put it where it could not burn him. He is at the gate now. It is dark. I am an old man with a bell rope. I cannot ask you to go down there."
+      ],
+      "replies": [
+        {
+          "say": "I'll go down.",
+          "then": "face_pale",
+          "journal": "{prior} believes me. He thinks {pale} could bear the house because no patron's name is over its door, and could not bear the lamp."
+        }
+      ]
+    },
+    "face_pale": {
+      "do": "talk",
+      "who": "pale",
+      "when": "night",
+      "goal": "Go down to {pale} at {place:gate} after dark",
+      "say": [
+        "So the novice has a tongue after all, and has used it in the parlour. I heard the old man's door.",
+        "The lamp is in the midden, under the ash, wrapped in wet sacking. I have not harmed it. I could not have if I had wished to. I could not carry it ten steps. Do you know what it is to want nothing but a quiet place and a rule to keep, and to have that thing burning at the end of the yard every hour of every night?",
+        "I have fed on nobody in this house. Ask the herbalist how many brothers he has bled these three years. More than I have. Open the gate and I will walk out of it, and you may have your lamp and your feast."
+      ],
+      "voices": {
+        "mercy": "Three years and he harmed nobody. Let him walk.",
+        "faith": "The Warden's lamp was left here against his kind. Do not open that gate.",
+        "courage": "He is asking because he is not sure he would win."
+      },
+      "replies": [
+        {
+          "say": "Go, then. Before I think better of it.",
+          "then": "end:night_road",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "faith"
+          ],
+          "returns": {
+            "who": "pale",
+            "days": [
+              10,
+              20
+            ],
+            "as": "warning",
+            "say": "I keep the hours still. I got the habit of them on that hill. I came to say one thing. There are others on the river road who never kept any rule at all, and they have heard there is a house up there with no patron's name over the door. Tell the old man to keep his lamp lit."
+          },
+          "journal": "I opened the gate and let {pale} walk out into the dark."
+        },
+        {
+          "say": "The Warden's lamp was left here against your kind.",
+          "then": "fight_pale",
+          "for": [
+            "faith",
+            "courage"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        }
+      ]
+    },
+    "fight_pale": {
+      "do": "foe",
+      "who": "pale",
+      "when": "night",
+      "goal": "Put down {pale} at {place:gate}",
+      "taunt": "Then you have ended the only three quiet years I ever had.",
+      "plea": "Enough. Enough! Let me out by the gate. I'll not ask it twice.",
+      "mercy": "Go. Do not come back to this valley.",
+      "thanks": "I'll keep the hours wherever I am. I got the habit of them here.",
+      "weak_to": [
+        {
+          "know": "mark:novice_proof_pale2",
+          "item": "jaymoskingdoms:holy_symbol",
+          "share": 0.7,
+          "journal": "I had seen what bronze that only held the lamp did to his wrist. He would not come within a pace of the holy symbol, and pulled every blow he made toward it.",
+          "bestiary": "What is holy burns the blood. One that has hidden among the living will still not close with a holy symbol held up to it, and strikes the weaker for it."
+        },
+        {
+          "item": "jaymoskingdoms:garlic",
+          "share": 0.8,
+          "journal": "The garlic set him coughing like a man in smoke.",
+          "bestiary": "Garlic chokes a blood-drinker. It does not stop one, but it fights short of breath."
+        }
+      ],
+      "slain": "end:dust",
+      "spared": "end:night_road",
+      "spared_returns": {
+        "as": "warning",
+        "days": [
+          10,
+          20
+        ],
+        "say": "You could have finished it at the gate and did not. I keep the hours still. I came to say one thing. There are others on the river road who never kept any rule at all, and they have heard there is a house up there with no patron's name over the door. Tell the old man to keep his lamp lit."
+      }
+    },
+    "cast_out": {
+      "do": "talk",
+      "who": "prior",
+      "say": [
+        "{named}. You are certain. And you have brought me this, and no more than this.",
+        "No. I asked you to keep your eyes open. I did not ask you to guess. Take off the robe. I will find another way, or I will stand before the valley with an empty case and say so."
+      ],
+      "then": "end:cast_out"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I told {giver} I was no brother, and left the hill to its own troubles."
+    },
+    "restored_quietly": {
+      "text": {
+        "?truth=cellarer": "{cellarer} had pledged the Vigil Lamp against his debts. The prior bought it back before the feast and kept him inside the walls, without his keys, to work the sum off. The valley saw the lamp carried out, and was told nothing.",
+        "?": "{nephew} had the Vigil Lamp, to pay his way to a girl at the ford. The prior opened the gate for him in a lay coat, with his blessing, and told the house the lamp had been mislaid. The valley saw it carried out on the feast night."
+      },
+      "reward": {
+        "coins": 16,
+        "hearts": 30,
+        "reputation": 12,
+        "items": [
+          "minecraft:lantern"
+        ]
+      },
+      "marks": [
+        "novice_restored",
+        "novice_quietly"
+      ],
+      "town": [
+        "They carried the lamp out on the long night, same as every year. I don't know what all the whispering on the hill was about.",
+        "The brothers had a novice up there for three days. Came down again without a word. Not everybody is made for it."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "truth=nephew",
+          "settles": "nephew",
+          "town": [
+            "That young fellow who has taken the room over the cooper's was a brother on the hill, they say. He has a wife from down the river and no trade at all, and I never saw a man so pleased with himself."
+          ]
+        },
+        {
+          "days": [
+            14,
+            28
+          ],
+          "if": "truth=cellarer",
+          "letter": {
+            "from": "{prior}",
+            "lines": [
+              "He scrubs the temple floor each morning before the dawn bell and has asked for nothing.",
+              "I have given the keys to nobody. I carry them myself, and find I count the candles twice. I had not known what it was to carry them.",
+              "The debt is a third paid. You will always have a bowl and a bed on this hill."
+            ]
+          }
+        },
+        {
+          "days": [
+            30,
+            40
+          ],
+          "if": "mark:novice_kept_silence",
+          "letter": {
+            "from": "{prior}",
+            "lines": [
+              "I have thought since about your first night, and my nephew hissing at you out of the beans, and you with a finger on your lips.",
+              "Most who take the robe in earnest do not manage that. You took it as a ruse, and did.",
+              "The robe is on its peg. I do not say you should want it. I say it is on its peg."
+            ]
+          }
+        }
+      ]
+    },
+    "restored_openly": {
+      "text": {
+        "?truth=cellarer": "{cellarer} had pledged the Vigil Lamp against his debts. The prior bought it back before the feast and gave him to the reeve as a thief, before the whole house. The valley saw the lamp carried out, and knows why it nearly was not.",
+        "?": "{nephew} had the Vigil Lamp, to pay his way to a girl at the ford. The house was told, and he was put out of the gate with nothing, as the rule says. The prior carried the lamp out on the feast night and did not look at anybody."
+      },
+      "reward": {
+        "coins": 16,
+        "hearts": 15,
+        "reputation": 15,
+        "items": [
+          "minecraft:lantern"
+        ]
+      },
+      "marks": [
+        "novice_restored",
+        "novice_openly"
+      ],
+      "town": [
+        "One of the brothers stole their own lamp. One of the brothers! And the prior stood up and said so in front of all of them.",
+        "They carried it out on the long night all the same. The old man looked as if he was carrying a millstone."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "I'd have kept it inside the walls, myself. Who is helped by knowing?"
+            ],
+            [
+              "b",
+              "Thirty brothers were looked at sideways for a week. They are helped."
+            ],
+            [
+              "a",
+              "And the one who was put out?"
+            ],
+            [
+              "b",
+              "He was never looking at anybody but himself. Let him."
+            ]
+          ]
+        },
+        {
+          "days": [
+            14,
+            28
+          ],
+          "if": "truth=nephew",
+          "town": [
+            "The prior's nephew was seen at the ford with a girl and no coat. They went downriver on a coal barge, working their passage."
+          ]
+        }
+      ]
+    },
+    "dust": {
+      "text": "{pale} was no brother and no living man. I fought him at his own gate, and there was nothing left of him by morning but a habit and a little ash. The Vigil Lamp was in the midden, wrapped in wet sacking, still alight. The prior carried it out on the feast night.",
+      "reward": {
+        "coins": 22,
+        "hearts": 30,
+        "reputation": 18,
+        "items": [
+          "minecraft:lantern"
+        ]
+      },
+      "marks": [
+        "novice_restored",
+        "novice_dust"
+      ],
+      "town": [
+        "The brothers had one of those at their gate. Three winters. Ringing the hours with the rest of them.",
+        "No patron's name over the door, you see. I always said it. A house ought to belong to somebody."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "letter": {
+            "from": "{prior}",
+            "lines": [
+              "We have moved the lamp. It stands in the gatehouse window now, where anyone coming up the hill must pass it.",
+              "{herbalist} says that is shutting the byre door. I say it is a door that was never there before.",
+              "We still put no patron's name over ours. But I have had the Warden's sign cut small, on the inside of the lintel, where only we need know."
+            ]
+          }
+        }
+      ]
+    },
+    "night_road": {
+      "text": "{pale} was no brother and no living man, and he had fed on nobody in that house. I let him walk out of the gate into the dark. The Vigil Lamp was in the midden, wrapped in wet sacking, still alight. The prior carried it out on the feast night, and asked me nothing about the gate.",
+      "reward": {
+        "coins": 16,
+        "hearts": 20,
+        "reputation": 8,
+        "items": [
+          "minecraft:lantern"
+        ]
+      },
+      "marks": [
+        "novice_restored",
+        "novice_night_road"
+      ],
+      "town": [
+        "The brothers have a new man on their gate. The old one went off in the night, they say. No word, no bundle.",
+        "They carried the lamp out on the long night, same as ever."
+      ],
+      "later": [
+        {
+          "days": [
+            20,
+            35
+          ],
+          "town": [
+            "A carter on the river road swears a brother in a hood walked beside his wagon half the night and told him the hours as they passed. Never asked for a ride. Never came near the lantern."
+          ]
+        }
+      ]
+    },
+    "cast_out": {
+      "text": "I named {named} to the prior and could not make it stand. He took the robe back. {named} knows what the novice said in the parlour, and so, by now, does the whole house.",
+      "reward": {
+        "hearts": -15,
+        "reputation": -8
+      },
+      "marks": [
+        "novice_cast_out"
+      ],
+      "town": [
+        "The brothers put their novice out after three days. For slandering one of their own, I heard.",
+        "And the lamp's still gone. They will have an empty case to show us on the long night."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            14
+          ],
+          "town": [
+            "The prior stood up on the feast night with nothing in his hands and said the lamp was lost. Two hundred years, and lost. Nobody knew where to look."
+          ]
+        }
+      ]
+    },
+    "empty_case": {
+      "failed": true,
+      "text": "The feast of the long night came before I had a name to give. The prior stood before the valley with an empty case and said the lamp was lost.",
+      "reward": {
+        "hearts": -10
+      },
+      "town": [
+        "The prior stood up on the feast night with nothing in his hands and said the lamp was lost. Two hundred years, and lost. Nobody knew where to look."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            25
+          ],
+          "if": "truth=cellarer",
+          "town": [
+            "They say there's an old lamp for sale downriver that will not go out. The price is past anything this valley could find."
+          ]
+        },
+        {
+          "days": [
+            10,
+            25
+          ],
+          "if": "!truth=cellarer",
+          "town": [
+            "The brothers ring the hours as before. But the temple on the hill is dark at night now, and folk coming up the road say it is like a face with one eye shut."
+          ]
+        }
+      ]
+    }
+  }
+}

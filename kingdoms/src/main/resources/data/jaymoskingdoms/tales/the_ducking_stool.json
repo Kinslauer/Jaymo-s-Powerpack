@@ -1,0 +1,965 @@
+{
+  "title": "The Ducking Stool",
+  "start": {
+    "by": "notice",
+    "jobs": [
+      "cleric"
+    ],
+    "weight": 2,
+    "notice": {
+      "title": "Trial by water",
+      "lines": [
+        "Sib Yarrow, herbwife, stands accused of fouling the low well by craft.",
+        "She goes to the water in four days.",
+        "Whoever has cause to speak, speak to the examiner before then."
+      ],
+      "hand": "a square black hand, every letter the same height"
+    }
+  },
+  "roll": {
+    "truth": [
+      "tanner",
+      "shepherd",
+      "herbwife"
+    ]
+  },
+  "cast": {
+    "herbwife": {
+      "name": "Sib Yarrow",
+      "body": "villager",
+      "job": "farmer",
+      "female": true,
+      "at": "lockup"
+    },
+    "prentice": {
+      "name": [
+        "Tibby Marsh",
+        "Nan Sedge",
+        "Ansel Reed"
+      ],
+      "body": "villager",
+      "job": "none",
+      "at": "hearth"
+    },
+    "tanner": {
+      "name": [
+        "Garrick Oake",
+        "Hugh Oake",
+        "Lambert Oake"
+      ],
+      "body": "villager",
+      "job": "leatherworker",
+      "female": false,
+      "at": "tanyard"
+    },
+    "shepherd": {
+      "name": [
+        "Dunstan Pike",
+        "Cuddy Pike",
+        "Alban Pike"
+      ],
+      "body": "villager",
+      "job": "shepherd",
+      "female": false,
+      "at": "fold"
+    }
+  },
+  "places": {
+    "well": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        20,
+        50
+      ],
+      "name": "the low well"
+    },
+    "lockup": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        20,
+        50
+      ],
+      "name": "the lock-up"
+    },
+    "hearth": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        40,
+        80
+      ],
+      "name": "Sib Yarrow's house"
+    },
+    "spring": {
+      "at": "near",
+      "from": "well",
+      "dist": [
+        50,
+        100
+      ],
+      "name": "the spring head above the low well"
+    },
+    "tanyard": {
+      "at": "near",
+      "from": "spring",
+      "dist": [
+        20,
+        45
+      ],
+      "name": "the tan yard"
+    },
+    "fold": {
+      "at": "near",
+      "from": "spring",
+      "dist": [
+        40,
+        80
+      ],
+      "name": "Pike's fold"
+    },
+    "pond": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        70,
+        130
+      ],
+      "name": "the mill pond"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "ordeal": 4
+      },
+      "say": [
+        "You took my paper down. Then you have cause to speak, or you mean to find one. Good. It has been on that board since I wrote it, and you are the first.",
+        "The low well went foul a fortnight since. Nine are sick of it and a child is dead. {herbwife} was heard to say at that well, before witnesses, that it would turn on them. She keeps a hearth to the Hearthkeeper and sells what she boils on it. That is no crime. Fouling a well by craft is.",
+        "I do not say she did it. I say she is accused, and nobody will speak, for her or against her, and the Truth does not leave a thing unspoken. So the water will speak. She goes to the pond {in:ordeal}. If she sinks she is clean, and we draw her out. Bring me what fouled that well and whose hand it was, and I will hear that instead, and gladly."
+      ],
+      "replies": [
+        {
+          "say": "I'll find what fouled it.",
+          "then": "see_herbwife",
+          "journal": "The Truth's examiner, {giver}, has set a water ordeal for the herbwife {herbwife}, accused of cursing the low well at {town}. She goes to the pond in four days unless somebody shows what fouled the well, and who."
+        },
+        {
+          "say": "Let the water speak.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_herbwife": {
+      "do": "talk",
+      "who": "herbwife",
+      "goal": "Hear {herbwife} at {place:lockup}",
+      "say": {
+        "?truth=herbwife": [
+          "Another one come to look at the witch. No? Then sit, if you can find a dry place.",
+          "I said the well would turn on them. I did say it. They had let the cover rot and the cattle drink at the lip, and I said a well kept like that turns. That is not a curse. That is forty years of looking at wells.",
+          "Go and taste it. Not much. A curse has no taste. Tell me what that water tastes of, because nobody will let me near enough to find out, and I have lain here thinking of little else. I have a notion I'll not like the answer. {prentice} keeps my hearth while I am in here. Ask there for whatever you need."
+        ],
+        "?": [
+          "Another one come to look at the witch. No? Then sit, if you can find a dry place.",
+          "I said the well would turn on them. I did say it. They had let the cover rot and the cattle drink at the lip, and I said a well kept like that turns. That is not a curse. That is forty years of looking at wells.",
+          "Go and taste it. Not much. A curse has no taste. Whatever is in that water has a taste and a smell and came from somewhere uphill, and somebody knows where. {prentice} keeps my hearth while I am in here. Ask there for whatever you need."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll taste it.",
+          "then": "search_well",
+          "journal": "{herbwife} owns she said the well would turn, because it was badly kept. She says a curse has no taste, and told me to go and taste the water."
+        }
+      ],
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "search_well": {
+      "do": "search",
+      "at": "well",
+      "goal": "Taste the water at {place:well}, and look at how it is kept",
+      "clues": [
+        {
+          "name": "The Well Cover",
+          "item": "minecraft:oak_trapdoor",
+          "lore": [
+            "Rotten through along one side, as she said.",
+            "Anything could have fallen down this well, or been put down it."
+          ],
+          "journal": "The cover of the low well is rotten through. Anything could have gone down it."
+        },
+        {
+          "if": "truth=tanner",
+          "name": "A Cup from the Low Well",
+          "item": "minecraft:glass_bottle",
+          "lore": [
+            "Brown as weak ale, with a skin on it.",
+            "It tastes of oak bark, and of lime."
+          ],
+          "mark": "duck_taste",
+          "journal": "The well water is brown and tastes of oak bark and lime."
+        },
+        {
+          "if": "truth=shepherd",
+          "name": "A Cup from the Low Well",
+          "item": "minecraft:glass_bottle",
+          "lore": [
+            "Cloudy, with a grease lying on it.",
+            "It smells of something a week dead."
+          ],
+          "mark": "duck_taste",
+          "journal": "The well water is cloudy and greasy, and smells of something a week dead."
+        },
+        {
+          "if": "truth=shepherd",
+          "name": "Wool on the Well Rope",
+          "item": "minecraft:string",
+          "lore": [
+            "A hank of fleece caught in the rope, raddled red on one side.",
+            "This rope has lowered something heavier than a bucket."
+          ],
+          "mark": "duck_wool",
+          "journal": "There is raddled fleece caught in the well rope, and the rope has been strained by something heavy."
+        },
+        {
+          "if": "truth=herbwife",
+          "name": "A Cup from the Low Well",
+          "item": "minecraft:glass_bottle",
+          "lore": [
+            "Yellow-green, and slimy between the fingers.",
+            "It smells like a flax pond in August."
+          ],
+          "mark": "duck_taste",
+          "journal": "The well water is yellow-green and slimy, and smells like a flax pond in August."
+        }
+      ],
+      "then": "upstream",
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "upstream": {
+      "do": "search",
+      "at": "spring",
+      "goal": "Follow the water uphill to {place:spring}",
+      "clues": [
+        {
+          "if": "truth=tanner",
+          "name": "A New-Cut Drain",
+          "item": "minecraft:clay_ball",
+          "lore": [
+            "A trench dug this summer, from the tan yard's bark pits to the spring's own channel.",
+            "Brown water is standing in it."
+          ],
+          "mark": "duck_proof_tanner",
+          "journal": "A drain cut this summer runs from the tan yard's bark pits straight into the spring that feeds the low well."
+        },
+        {
+          "if": "truth=tanner",
+          "name": "Spent Oak Bark",
+          "item": "minecraft:brown_dye",
+          "lore": [
+            "Tanner's bark, washed down and caught in the cresses.",
+            "The cress is dead for a yard round it."
+          ],
+          "journal": "Spent tanning bark has washed into the spring, and the cress has died round it."
+        },
+        {
+          "if": "truth=shepherd",
+          "name": "A Ewe's Ear",
+          "item": "minecraft:leather",
+          "lore": [
+            "Notched twice at the tip. A flock mark.",
+            "It was cut off before the ewe went anywhere. Somebody did not want her known."
+          ],
+          "mark": "duck_proof_shepherd",
+          "journal": "A ewe's ear with a double notch was thrown in the gorse above the spring. Somebody cut the flock mark off a dead sheep."
+        },
+        {
+          "if": "truth=shepherd",
+          "name": "A Hurdle's Runners",
+          "item": "minecraft:stick",
+          "lore": [
+            "Two lines in the turf from the hill pasture down to the well lane.",
+            "Whoever dragged it had to stop often."
+          ],
+          "journal": "Something heavy was dragged on a hurdle from the hill pasture down to the well lane."
+        },
+        {
+          "if": "truth=herbwife",
+          "name": "Flax in the Spring Pool",
+          "item": "minecraft:wheat",
+          "lore": [
+            "Bundles of flax sunk under stones to ret, a month too long, and rotted to slime.",
+            "Each is tied with the knot that binds a dressing."
+          ],
+          "mark": "duck_proof_herbwife",
+          "journal": "Flax was sunk in the spring pool to ret and left there until it rotted. The bundles are tied with a healer's knot."
+        },
+        {
+          "if": "truth=herbwife",
+          "name": "A Clay Hearth on a Thong",
+          "item": "minecraft:brick",
+          "lore": [
+            "A little hearth of baked clay, such as the Hearthkeeper's folk wear at the neck.",
+            "The thong has snapped. It has lain in the pool some weeks."
+          ],
+          "journal": "One of the Hearthkeeper's clay tokens lay in the spring pool with a broken thong."
+        }
+      ],
+      "then": "see_tanner",
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "see_tanner": {
+      "do": "talk",
+      "who": "tanner",
+      "goal": "Ask at {place:tanyard} what {tanner} heard at the well",
+      "say": {
+        "?truth=tanner": [
+          "The low well? What would I know of the low well? I draw from the beck. Ask the witch. She said it would turn and it turned. I was there. I heard her.",
+          "That? That is a drain. A man may drain his own yard. It runs to the beck. Mostly to the beck. It is nobody's business where my yard drains."
+        ],
+        "?": [
+          "The low well. Aye. My youngest is one of the nine. So you'll forgive me if I do not weep for {herbwife}.",
+          "I was there when she said it. 'It'll turn on you.' Looking straight at us. And it turned. I'm a plain man. I do not know what else you would call that."
+        ]
+      },
+      "replies": [
+        {
+          "if": "mark:duck_proof_tanner",
+          "say": "Your new drain runs into the spring. The well tastes of your bark pits.",
+          "then": "tanner_owns",
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "reputation>=10"
+            ],
+            "fail": "see_shepherd",
+            "refuse": "It runs to the beck. I'll say so before the examiner and the Truth both. Now get out of my yard."
+          }
+        },
+        {
+          "say": "I'll leave you to your hides.",
+          "then": "see_shepherd",
+          "journal": {
+            "?truth=tanner": "{tanner} says his new drain runs to the beck, and that where it runs is nobody's business.",
+            "?": "{tanner} was at the well when {herbwife} said it would turn. His youngest is one of the sick."
+          }
+        }
+      ],
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "tanner_owns": {
+      "do": "talk",
+      "who": "tanner",
+      "say": "My own boy drinks from that well. Do you think I have not lain awake? I cut the drain at midsummer because the pits were flooding the yard. I never thought where it went. Then the well turned, and she had said that thing, and everybody looked at her, and I let them look. I let them. I'll say it to the examiner. I had sooner say it than watch her go in the pond.",
+      "mark": "duck_owned",
+      "journal": "{tanner} owned it. He cut the drain at midsummer, saw the well turn, and let the town look at {herbwife} instead. He will say so to the examiner.",
+      "then": "see_shepherd",
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "see_shepherd": {
+      "do": "talk",
+      "who": "shepherd",
+      "goal": "Ask at {place:fold} what {shepherd} knows",
+      "say": {
+        "?truth=shepherd": [
+          "I've nothing to say about any well. I lost a ewe, that is all I know about anything. The staggers. I buried her.",
+          "Where? What is that to you? In the ground. Sib Yarrow let my Mabel die with a posset and a prayer and took her fee for it. Whatever comes to her, she has it coming."
+        ],
+        "?": [
+          "The well? I water at the beck, me. Sheep won't touch that well, did you know that? Not this fortnight. Sheep know.",
+          "I've no love for Sib Yarrow. She sat with my Mabel three nights and Mabel died all the same. But she sat the three nights. I'd not have said she was one to poison a well. I'd have said she was one to tell you your well was a disgrace, and be right."
+        ]
+      },
+      "replies": [
+        {
+          "if": "mark:duck_proof_shepherd",
+          "say": "A ewe's ear with your notch. A hurdle dragged to the well lane.",
+          "then": "shepherd_owns",
+          "try": {
+            "how": "threaten",
+            "helps": [
+              "mark:duck_wool"
+            ],
+            "fail": "choose",
+            "refuse": "Half the valley notches twice. Prove that ear is mine. You can't."
+          }
+        },
+        {
+          "say": "That's all I wanted.",
+          "then": "choose",
+          "journal": {
+            "?truth=shepherd": "{shepherd} lost a ewe and will not say where he buried her. He blames {herbwife} for his wife's death.",
+            "?": "{shepherd} has no love for {herbwife}, but does not think she would poison a well."
+          }
+        }
+      ],
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "shepherd_owns": {
+      "do": "talk",
+      "who": "shepherd",
+      "say": "She was dead already. The ewe. I never killed a beast to do it. I only wanted them to stop going to her door. I wanted them to look at her the way I look at her. I never thought anyone would drink it once it stank. I never thought of the child. I have thought of nothing else since.",
+      "mark": "duck_owned",
+      "journal": "{shepherd} owned it. He put a dead ewe down the low well so the town would turn on {herbwife}, and never thought anyone would drink.",
+      "then": "choose",
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "choose": {
+      "do": "talk",
+      "who": "prentice",
+      "goal": "Go to {prentice} at {place:hearth}, and settle what to do",
+      "say": {
+        "?truth=herbwife": [
+          "The flax. Oh, no. She had me sink it in the spring pool at midsummer, for bandage linen, and then old Garth's leg went bad and we were up at his steading three weeks, and I forgot it. I forgot it. It was me that forgot it.",
+          "If you say so to the examiner, it is still her flax and her knots, and she still said what she said at the well. He might call it carelessness. He might not.",
+          "There is another way. They say a witch floats. So she has to sink, and be seen to sink. Iron sewn into the hems of her shift would do it. Eight bits no bigger than beans. I have the needle. I have not the iron. Or you can let the water say what it likes. She is old. She cannot hold her breath as she once could."
+        ],
+        "?": [
+          "You know, then. You know what did it, and who. I've kept her hearth lit every night, the way she showed me. The Hearthkeeper forgets a cold hearth.",
+          "The examiner will hear a name if you can make it stand. He is hard, but he is not deaf.",
+          "Or there is another way. They say a witch floats. So she has to sink, and be seen to sink. Iron sewn into the hems of her shift would do it. Eight bits no bigger than beans. I have the needle. I have not the iron. Or you can let the water say what it likes. She is old. She cannot hold her breath as she once could."
+        ]
+      },
+      "voices": {
+        "honour": "Say what you found, in the open, and let it stand or fall.",
+        "mercy": "Whatever gets that old woman out of the pond alive.",
+        "faith": "It is the Truth's own court. Put iron in her hems and you make a liar of the water."
+      },
+      "replies": [
+        {
+          "say": "I'll speak at the trial.",
+          "then": "trial_gate",
+          "for": [
+            "honour",
+            "law"
+          ]
+        },
+        {
+          "say": "I'll bring you the iron.",
+          "then": "bring_iron",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour",
+            "faith"
+          ],
+          "journal": "{prentice} means to sew iron into {herbwife}'s hems so that she sinks and is called clean. I said I would bring it."
+        },
+        {
+          "say": "Let the water judge her.",
+          "then": "wait_day",
+          "irks": [
+            "mercy"
+          ],
+          "journal": "I have decided to say nothing, and let the ordeal go ahead."
+        }
+      ],
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "bring_iron": {
+      "do": "bring",
+      "who": "prentice",
+      "item": "minecraft:iron_nugget",
+      "count": 8,
+      "goal": "Bring {prentice} eight iron nuggets for the hems",
+      "mark": "duck_iron",
+      "journal": "I brought the iron. {prentice} sewed it into the hem of {herbwife}'s shift by rushlight, a bean at a time.",
+      "then": "wait_day",
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "wait_day": {
+      "do": "wait",
+      "days": [
+        1,
+        2
+      ],
+      "wake": "none",
+      "journal": "The day of the ordeal came.",
+      "then": "ordeal"
+    },
+    "ordeal": {
+      "do": "vigil",
+      "at": "pond",
+      "when": "day",
+      "radius": 14,
+      "gap": 11,
+      "goal": "Be on the bank at {place:pond} for the ordeal",
+      "lines": [
+        {
+          "say": "Half of {town} is on the bank. The stool is run out over the deep end on its beam, and {herbwife} is tied into it in her shift. She looks very small."
+        },
+        {
+          "say": "The examiner reads the charge in the voice he would use for a grain tally. Then he nods to the men at the beam.",
+          "sound": "minecraft:block.wooden_door.open"
+        },
+        {
+          "if": "mark:duck_iron",
+          "say": "She goes down like a stone. The water closes, and nothing comes up but a little air.",
+          "sound": "minecraft:entity.generic.splash"
+        },
+        {
+          "if": "mark:duck_iron",
+          "say": "They count forty, as the rule is, and haul. She comes up grey, and coughing water, and alive."
+        },
+        {
+          "if": "mark:duck_iron",
+          "say": "The examiner writes one word in his book. Those near enough to read it say it is 'clean'.",
+          "mark": "duck_sank"
+        },
+        {
+          "if": "!mark:duck_iron",
+          "say": "She goes under and comes up again. The shift has caught the air. She lies on the water with her face to the sky, like something dropped.",
+          "sound": "minecraft:entity.generic.splash"
+        },
+        {
+          "if": "!mark:duck_iron",
+          "say": "The bank makes a sound I do not want to hear again. The examiner counts forty all the same, and has her drawn in."
+        },
+        {
+          "if": "!mark:duck_iron",
+          "say": "He writes one word in his book. It is not 'clean'.",
+          "mark": "duck_floated"
+        }
+      ],
+      "journal": {
+        "?mark:duck_iron": "{herbwife} went to the water and sank like a stone, and was drawn out alive. The examiner wrote her down clean.",
+        "?": "{herbwife} went to the water and did not sink. The examiner wrote her down guilty."
+      },
+      "then": {
+        "?mark:duck_iron": "after_rig",
+        "?": "end:ordeal"
+      }
+    },
+    "after_rig": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Answer the examiner",
+      "say": [
+        "She sank, and she is clean. The water has spoken and I have written it down.",
+        "And yet. I have stood on that bank eleven times, and nobody sinks so quick as that. I will ask it once, because the Truth asks everything once. Did you see anything done to her clothes?"
+      ],
+      "voices": {
+        "honour": "He will know a lie when he hears one. It is his whole trade.",
+        "mercy": "She is out and breathing. Say whatever keeps her so."
+      },
+      "replies": [
+        {
+          "say": "Nothing. She sank as the clean do.",
+          "then": "end:rigged",
+          "irks": [
+            "honour",
+            "faith"
+          ],
+          "lie": {
+            "name": "duck_hems",
+            "days": [
+              5,
+              12
+            ],
+            "reputation": 15,
+            "hearts": 30,
+            "town": [
+              "They found a row of iron beans sewn in the hem of Sib Yarrow's shift when it went to the wash. The examiner has them on his table in a row.",
+              "He asked {player} straight out whether anything was done to her clothes. Straight out. And was told no."
+            ]
+          },
+          "journal": "The examiner asked whether anything was done to her clothes. I told him nothing was."
+        },
+        {
+          "say": "Iron in her hems. I carried it there.",
+          "then": "trial_again",
+          "for": [
+            "honour"
+          ],
+          "journal": "The examiner asked whether anything was done to her clothes. I told him about the iron."
+        }
+      ]
+    },
+    "trial_again": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "Then the water was made to lie, in my court, and you are standing here telling me so. I have never had that before. I am not certain what the book says I should do with you.",
+        "I know what it says of her. She goes in again tomorrow, with her hems cut open. Unless you can give me now what you could have given me yesterday. What fouled the well, and whose hand."
+      ],
+      "replies": [
+        {
+          "say": "I can name it.",
+          "then": "trial"
+        },
+        {
+          "say": "I have nothing that would stand.",
+          "then": "end:ordeal"
+        }
+      ]
+    },
+    "trial_gate": {
+      "do": "talk",
+      "who": "giver",
+      "when": "day",
+      "goal": "Speak before the examiner",
+      "not_now": "The Truth is heard by daylight. Come when there is some.",
+      "say": {
+        "?patron:hearthkeeper": "You wear her hearth, as the accused does. I'll hear you all the same. The Truth hears everyone, and weighs them after.",
+        "?patron:truth": "You are sworn as I am. Then you know I cannot be kinder than what you bring me.",
+        "?": "You have been four days about it. I hope they were well spent."
+      },
+      "replies": [
+        {
+          "say": "I'm ready to speak.",
+          "then": "trial"
+        },
+        {
+          "say": "Not yet.",
+          "then": "choose"
+        }
+      ],
+      "within": "ordeal",
+      "late": "end:missed",
+      "until": "before she goes to the water"
+    },
+    "trial": {
+      "do": "name",
+      "who": "giver",
+      "say": "Speak, then. Name what fouled the well and whose hand it was. I will weigh what you bring. I will not weigh how much you wish it.",
+      "suspects": [
+        {
+          "who": "tanner",
+          "say": "The tan yard's drain. {tanner} cut it into the spring at midsummer.",
+          "proof": [
+            "mark:duck_proof_tanner",
+            "mark:duck_owned"
+          ],
+          "need": 1,
+          "then": "heard_tanner",
+          "doubted": "heard_doubt",
+          "journal": "I named {tanner} and his drain before the examiner."
+        },
+        {
+          "who": "shepherd",
+          "say": "A dead ewe, put down the well by {shepherd}.",
+          "proof": [
+            "mark:duck_proof_shepherd",
+            "mark:duck_owned"
+          ],
+          "need": 1,
+          "then": "heard_shepherd",
+          "doubted": "heard_doubt",
+          "journal": "I named {shepherd} and his dead ewe before the examiner."
+        },
+        {
+          "who": "herbwife",
+          "say": "Her own flax, left to rot in the spring pool. Carelessness. There was no craft in it.",
+          "proof": [
+            "mark:duck_proof_herbwife"
+          ],
+          "need": 1,
+          "then": "heard_flax",
+          "doubted": "heard_doubt",
+          "journal": "I told the examiner the well was fouled by {herbwife}'s own flax, forgotten in the spring pool."
+        }
+      ],
+      "none": {
+        "say": "I have nothing that would stand.",
+        "then": {
+          "?mark:duck_sank": "end:ordeal",
+          "?": "choose"
+        }
+      }
+    },
+    "heard_tanner": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "A drain. Bark and lime. I tasted that water myself on the first day and wrote down 'foul', and did not ask of what. That is a fault, and it is mine, and I will write that down too.",
+        "{herbwife} is free of it. The tanner will fill his drain with his own hands, pay the nine households their physic, and stand at the well each market day for a year and say what he did. The Truth does not take a hand for a trench. It takes the silence out of him."
+      ],
+      "mark": "duck_cleared",
+      "then": "end:cleared"
+    },
+    "heard_shepherd": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "A sheep. Put there. To make a town look at an old woman. And a child drank it. I have sat on many of these, and craft is rare, and spite is common, and I still look for the craft first. I will write that down.",
+        "{herbwife} is free of it. The shepherd I give to the reeve. That is no matter for the water. That is a matter for a rope or a long road, and it is not mine to say which."
+      ],
+      "mark": "duck_cleared",
+      "then": "end:cleared"
+    },
+    "heard_flax": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "Flax. Left to rot, by a woman who told others their well was badly kept. There is no craft in that. There is only a fault, and the Truth knows the difference, whatever folk say of us.",
+        "The pond is not for this. She will clear that pool with her own hands, tend the nine without fee until they are well, and say at the well what she did. And she will hear what the child's mother has to say, for as long as the mother wants to say it. That is harder than the pond. It is meant to be."
+      ],
+      "mark": "duck_cleared",
+      "then": "end:careless"
+    },
+    "heard_doubt": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "You name {named}. And you bring me what? Your own certainty. I have a town full of certainty. It is certainty that tied that woman to a stool.",
+        "I will not weigh it. {named} goes home, and will know who spoke. The water stands."
+      ],
+      "then": "end:slander"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I let the examiner's paper fall where it would. The water can speak for itself."
+    },
+    "cleared": {
+      "text": {
+        "?truth=tanner": "I showed the examiner the tan yard's drain, and it stood. {herbwife} is free of the well. {tanner} filled his trench in, and stands there on market days saying what he did.",
+        "?": "I showed the examiner the ewe's ear and the hurdle's track, and it stood. {herbwife} is free of the well. {shepherd} was given to the reeve."
+      },
+      "reward": {
+        "coins": 10,
+        "hearts": 30,
+        "reputation": 15
+      },
+      "marks": [
+        "duck_cleared_end"
+      ],
+      "town": [
+        "It was never a curse. The examiner wrote down that he was wrong. In ink. I'd not have thought they could.",
+        "Sib Yarrow's back at her hearth. Half the ones who'd have watched her drown were at her door by Friday with a cough."
+      ],
+      "returns": {
+        "who": "herbwife",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "I'm told I owe you my lungs. I don't like owing. The honey is for a cough, a spoon at night and no more. The bread is from the ones who would have stood on the bank and watched. And see to your own well cover while you are about it.",
+        "gift": [
+          "minecraft:honey_bottle*2",
+          "minecraft:bread*3"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "letter": {
+            "from": "{prentice}",
+            "lines": [
+              "The low well runs clear. They have put a new oak cover on it with a lock, and Sib has the key, which she says is the first sense this town has shown.",
+              "The nine are mending. She sat with the dead child's mother every night for a week and would not let me come.",
+              "The hearth has not been cold once. I thought you would want to know that it was kept."
+            ]
+          }
+        }
+      ]
+    },
+    "careless": {
+      "text": "I told the examiner about the flax. He called it a fault and not a craft, and would not have the pond used for it. {herbwife} cleared the spring pool with her own hands, tends the nine without fee, and has to hear the child's mother out for as long as the mother wants.",
+      "reward": {
+        "coins": 8,
+        "hearts": 15,
+        "reputation": 12
+      },
+      "marks": [
+        "duck_careless"
+      ],
+      "town": [
+        "Her own flax. Forty years telling the rest of us how to keep a well.",
+        "She's up at the spring every morning with a rake, at her age. Nobody's made her. Well. The examiner made her. But she'd have gone."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            22
+          ],
+          "scene": [
+            [
+              "a",
+              "Sib Yarrow came to bind my hand and would not take a thing for it."
+            ],
+            [
+              "b",
+              "She'll not take anything till the nine are well. Examiner's word."
+            ],
+            [
+              "a",
+              "I left a loaf on her step all the same."
+            ],
+            [
+              "b",
+              "So did I. So did everybody. She must be sick of bread."
+            ]
+          ]
+        }
+      ]
+    },
+    "slander": {
+      "text": "I named {named} before the examiner with nothing in my hand that would stand. He would not weigh it. {named} went home knowing who had spoken, and {herbwife} went to the water.",
+      "reward": {
+        "hearts": -20,
+        "reputation": -10
+      },
+      "marks": [
+        "duck_slander"
+      ],
+      "town": [
+        "{player} stood up before the examiner and put it on {named}. With nothing. The examiner near threw the book.",
+        "Sib Yarrow floated. They've put out her hearth and put her on the road. And the well's no better."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "town": [
+            "Two more down with the well sickness. So it wasn't her, was it. Or it was, and she's still at it from wherever she's gone. You hear both."
+          ]
+        }
+      ]
+    },
+    "rigged": {
+      "text": "{herbwife} sank with iron in her hems and was drawn out alive and written down clean. The examiner asked me one question, and I gave him an answer.",
+      "reward": {
+        "hearts": 25
+      },
+      "marks": [
+        "duck_rigged"
+      ],
+      "town": [
+        "She went down like an anvil. Clean as a whistle, the examiner says. I never saw anybody sink so fast.",
+        "Sib Yarrow's back at her hearth, and coughing. The pond's cold, this time of year."
+      ],
+      "returns": {
+        "who": "prentice",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "She knows about the hems. I told her. She said it was the stupidest thing she ever heard of, and then she said to bring you these. That is how she says it.",
+        "gift": [
+          "minecraft:honey_bottle",
+          "minecraft:bread*2"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            8,
+            16
+          ],
+          "if": "!mark:duck_owned",
+          "town": [
+            "The low well is as foul as ever. Two more sick. If Sib Yarrow is clean, then what is doing it?",
+            "They are saying the water can't have been asked the right question."
+          ]
+        }
+      ]
+    },
+    "ordeal": {
+      "text": {
+        "?mark:duck_sank": "I told the examiner about the iron and could give him nothing better. He put {herbwife} to the water a second time with her hems cut open. She did not sink. They put out her hearth and set her on the road.",
+        "?": "I let the ordeal go ahead. {herbwife} did not sink. The examiner wrote her down guilty of the well, and they put out her hearth and set her on the road with what she could carry."
+      },
+      "reward": {
+        "hearts": -20
+      },
+      "marks": [
+        "duck_ordeal"
+      ],
+      "town": [
+        "She floated. I saw it. Lying on the water like a leaf. You can't argue with that.",
+        "They raked out Sib Yarrow's hearth and threw the ashes in the lane. Forty years it had been alight."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            16
+          ],
+          "town": [
+            "The low well is as foul as ever, and Sib Yarrow three weeks gone. Two more sick.",
+            "And nobody to go to for it now. We saw to that ourselves."
+          ]
+        },
+        {
+          "days": [
+            20,
+            35
+          ],
+          "scene": [
+            [
+              "a",
+              "Who do you send for now, when the little one's fevered?"
+            ],
+            [
+              "b",
+              "Nobody. You sit up and you pray. To the Hearthkeeper, if she'll still hear this town."
+            ],
+            [
+              "a",
+              "She forgets a cold hearth, they say."
+            ],
+            [
+              "b",
+              "Then she has forgotten us. We put it out ourselves."
+            ]
+          ]
+        }
+      ]
+    },
+    "missed": {
+      "failed": true,
+      "text": "The day came before I had anything to say. {herbwife} went to the water and did not sink. They put out her hearth and set her on the road.",
+      "reward": {
+        "hearts": -10
+      },
+      "town": [
+        "Somebody took the examiner's paper down as if they meant to speak. Nobody spoke.",
+        "She floated. They've put out her hearth."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            16
+          ],
+          "town": [
+            "The low well is as foul as ever, and Sib Yarrow three weeks gone. Two more sick."
+          ]
+        }
+      ]
+    }
+  }
+}

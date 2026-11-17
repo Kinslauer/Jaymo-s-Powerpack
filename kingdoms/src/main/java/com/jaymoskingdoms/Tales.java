@@ -1755,7 +1755,7 @@ public final class Tales {
 		backFor(player, run, reply.get("returns"), "");
 		if (player.level() instanceof ServerLevel level) {
 			if (reply.has("lie")) {
-				TaleWays.lied(level, player, run, Tale.object(reply, "lie"));
+				TaleWays.lied(level, player, run, Tale.object(reply, "lie"), who);
 			}
 			for (ServerPlayer p : sharers(player, run)) {
 				TaleWays.voiceAfter(level, p, reply);

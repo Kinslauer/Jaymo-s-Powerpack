@@ -983,7 +983,7 @@ final class TaleWays {
 	 * {@code hearts} with the one lied to, and who {@code returns} to the liar's door). It's marked {@code lie:<name>} now
 	 * and {@code caught:<name>} if it comes out.
 	 */
-	static void lied(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject lie) {
+	static void lied(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject lie, LivingEntity who) {
 		String name = Tale.string(lie, "name", "");
 		if (name.isEmpty()) {
 			return;
@@ -994,7 +994,8 @@ final class TaleWays {
 		kept.add("town", filled(player, run, lie.get("town")));
 		kept.addProperty("reputation", Tale.number(lie, "reputation", 0));
 		kept.addProperty("hearts", Tale.number(lie, "hearts", 0));
-		kept.addProperty("to", run.giver);
+		// (the one it was told to: one of the tale's own people is gone by then, and only the town's folk remember)
+		kept.addProperty("to", who.getUUID().toString());
 		// (who it brings to the liar's door when it's out)
 		JsonObject back = Tale.object(lie, "returns");
 		Tale tale = Tale.get(run.tale);

@@ -1,0 +1,1134 @@
+{
+  "title": "The Crossroads Gibbet",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "shepherd",
+      "butcher",
+      "fisherman",
+      "baker",
+      "none"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "truth": [
+      "hanged",
+      "widow",
+      "tollman"
+    ]
+  },
+  "cast": {
+    "hanged": {
+      "name": "Tam Rudge",
+      "body": "minecraft:zombie",
+      "at": "crossroads",
+      "hours": "night"
+    },
+    "laid": {
+      "name": "Tam Rudge",
+      "body": "minecraft:zombie",
+      "at": "lych",
+      "if": "mark:gibbet_laid_down",
+      "lying": true
+    },
+    "hangman": {
+      "name": [
+        "Edric Marl",
+        "Godwin Marl",
+        "Osbert Marl"
+      ],
+      "body": "fighter",
+      "at": "post",
+      "hours": "day",
+      "hand": "minecraft:iron_axe",
+      "chest": "minecraft:netherite_chestplate",
+      "health": 70,
+      "damage": 8
+    },
+    "widow": {
+      "name": [
+        "Marget Rudge",
+        "Annis Rudge",
+        "Joan Rudge"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "cottage"
+    },
+    "tollman": {
+      "name": [
+        "Jory Pell",
+        "Ned Pell",
+        "Hob Pell"
+      ],
+      "body": "villager",
+      "job": "toolsmith",
+      "female": false,
+      "at": "tollhouse"
+    },
+    "whisperer": {
+      "name": [
+        "Soot",
+        "Kindle",
+        "Smut"
+      ],
+      "body": "villager",
+      "job": "none",
+      "at": "back_room",
+      "hours": "night"
+    },
+    "keeper": {
+      "name": [
+        "Hew Tallow",
+        "Simon Rush",
+        "Odo Lampwright"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "lych"
+    },
+    "lord": {
+      "name": [
+        "Lord Hamon Stane",
+        "Lord Aubrey Stane",
+        "Lord Piers Stane"
+      ],
+      "body": "villager",
+      "job": "librarian",
+      "female": false,
+      "at": "hall",
+      "hours": "day"
+    }
+  },
+  "places": {
+    "crossroads": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        140,
+        260
+      ],
+      "name": "the crossroads gibbet"
+    },
+    "post": {
+      "at": "near",
+      "from": "crossroads",
+      "dist": [
+        10,
+        22
+      ],
+      "name": "the headsman's post"
+    },
+    "tollhouse": {
+      "at": "near",
+      "from": "crossroads",
+      "dist": [
+        25,
+        50
+      ],
+      "name": "the tollhouse"
+    },
+    "cottage": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        25,
+        60
+      ],
+      "name": "the Rudge cottage"
+    },
+    "back_room": {
+      "at": "tavern",
+      "name": "the back of the tavern"
+    },
+    "lych": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        50,
+        100
+      ],
+      "name": "the burying ground"
+    },
+    "hall": {
+      "at": "town",
+      "name": "the lord's hall"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "assize": 6
+      },
+      "say": [
+        "You'll have come in by the other road, or you'd know. Nobody passes the crossroads after dark. Not since they hanged {hanged}.",
+        "He took a wool factor's purse on the road, so the tollman swore, and the headsman had him on the beam inside two days. That was a week gone. Every night since, he's come down off it. He stands at the crossroads till cockcrow, and at first light he's back on his rope like washing.",
+        "The lamp-keeper says a man hanged wrong won't lie still. The headsman says a thief is a thief and the walking is none of his trade. The assize rides on {in:assize}, and when it goes, he goes in the lime pit with no candle. I'd have somebody find out which of them is right before that."
+      ],
+      "replies": [
+        {
+          "say": "I'll go and look at him.",
+          "then": "watch_gibbet",
+          "journal": "{hanged} was hanged at the crossroads a week ago for a wool factor's purse, and has come down off the gibbet every night since. {giver} wants to know whether he was hanged wrong before the assize rides on and he goes in the lime pit."
+        },
+        {
+          "say": "Dead men are the lamp-keeper's work.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "watch_gibbet": {
+      "do": "vigil",
+      "at": "crossroads",
+      "when": "night",
+      "radius": 6,
+      "gap": 11,
+      "goal": "Stand under {place:crossroads} after dark",
+      "lines": [
+        {
+          "say": "The rope creaks in the wind. Then it stops creaking.",
+          "sound": "minecraft:block.wood.step"
+        },
+        {
+          "say": "He is standing under the beam with the noose on him and the rope hanging slack above, looking at his hands.",
+          "sound": "minecraft:entity.zombie.ambient"
+        },
+        {
+          "if": "truth=hanged",
+          "say": "He turns to the old milestone and looks down at the foot of it. He looks nowhere else.",
+          "mark": "gibbet_saw_stone"
+        },
+        {
+          "if": "truth=widow",
+          "say": "He turns to the town road, to where one roof shows above the hedge. He looks nowhere else.",
+          "mark": "gibbet_saw_roof"
+        },
+        {
+          "if": "truth=tollman",
+          "say": "He turns to the tollhouse door and holds out both hands to it, palms up and empty. He looks nowhere else.",
+          "mark": "gibbet_saw_door"
+        },
+        {
+          "say": "He never once looks at me. Whatever he wants, it is not the living."
+        }
+      ],
+      "journal": "I stood under the gibbet after dark. {hanged} came down off his rope and stood at the crossroads until I left him there.",
+      "then": "hangman",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "hangman": {
+      "do": "talk",
+      "who": "hangman",
+      "when": "day",
+      "goal": "Ask {hangman} at {place:post} about the hanging",
+      "say": [
+        "You're the one who stood out here last night. Ask, then. I've nothing to hide in it. The reeve gave me a name and the tollman's oath, and I did what the plate is for.",
+        "The purse was never found. He'd not say where it was. He'd not say anything, and that is rare. On the beam they mostly find something to say.",
+        "He stays up till the assize rides. That's the law for a road thief, so the road can see him. Then the pit. His people have asked for him twice and I have said no twice. His walking is the lamp-keeper's trouble. Mine ended when the rope went tight."
+      ],
+      "replies": [
+        {
+          "say": "Did you believe the oath?",
+          "then": "hangman_more"
+        },
+        {
+          "say": "Where will I find his widow?",
+          "then": "widow",
+          "journal": "{hangman} hanged {hanged} on the tollman's oath. The purse was never found, and {hanged} said nothing at the beam."
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "hangman_more": {
+      "do": "talk",
+      "who": "hangman",
+      "when": "day",
+      "say": "I don't weigh oaths. I'd be no use if I did. A headsman who starts believing and not believing ends by hanging nobody, and then what is the law? A word on a paper. Ask {tollman} what he saw. Ask {widow} where her man was. She's at the cottage with the green door. I'll be here.",
+      "replies": [
+        {
+          "say": "I'll ask them.",
+          "then": "widow",
+          "journal": "{hangman} hanged {hanged} on the tollman's oath. The purse was never found, and {hanged} said nothing at the beam."
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "widow": {
+      "do": "talk",
+      "who": "widow",
+      "goal": "Ask {widow} at {place:cottage} where her husband was",
+      "say": {
+        "?truth=hanged": [
+          "You've been up to look at him. Everyone has. I have not.",
+          "He was out that night. I'll not lie to you, I am done lying for Tam. He came in past midnight with clay to the knee and wouldn't say where he'd been, and in the morning the reeve's men were at the door.",
+          "But they say a guilty man lies quiet. So you tell me what he's standing out there for."
+        ],
+        "?truth=widow": [
+          "You've been up to look at him. Everyone has. I have not.",
+          "He was here that night. All of it. I told the reeve so and the reeve wrote nothing down, because what is a thief's wife's word.",
+          "He never said a thing at the beam, did he. They told me that. Not one thing. That was like him."
+        ],
+        "?": [
+          "You've been up to look at him. Everyone has. I have not.",
+          "He was here that night, with me and the little one down with the croup. I told the reeve so and the reeve wrote nothing down, because what is a thief's wife's word.",
+          "Tam cut purses at fairs. I'll not dress it up. He never once worked a dark road. He was afraid of the dark, if you want to laugh."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Who wanted him hanged?",
+          "then": "widow_more"
+        },
+        {
+          "say": "I'll look over the crossroads by daylight.",
+          "then": "search_cross",
+          "journal": {
+            "?truth=hanged": "{widow} says her husband was out that night and came home with clay to the knee.",
+            "?": "{widow} swears her husband was at home all that night. The reeve did not write it down."
+          }
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "widow_more": {
+      "do": "talk",
+      "who": "widow",
+      "say": "Wanted? Nobody wanted. He was the easy name. Did you see the headsman's plate? It had gone grey as a pewter dish. It does that when they've stood idle too long. It is black again now. And {tollman} swore to a shape by lantern-light at forty paces. That is all it took. Tam's own folk will tell you more than I can. They drink at the back of the tavern after dark, and they don't like questions, so ask short.",
+      "replies": [
+        {
+          "say": "I'll look over the crossroads by daylight.",
+          "then": "search_cross",
+          "journal": {
+            "?truth=hanged": "{widow} says her husband was out that night and came home with clay to the knee. His own people drink at the back of the tavern after dark.",
+            "?": "{widow} swears her husband was at home all that night. His own people drink at the back of the tavern after dark."
+          }
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "search_cross": {
+      "do": "search",
+      "at": "crossroads",
+      "when": "day",
+      "goal": "Look over the ground at {place:crossroads} by daylight",
+      "clues": [
+        {
+          "name": "The Factor's Tally Stick",
+          "item": "minecraft:stick",
+          "lore": [
+            "Notched for a season's wool money, and dropped in the rut.",
+            "Twenty-two notches, and a split where a hoof came down on it."
+          ],
+          "journal": "The wool factor's tally stick was still lying in the rut. His horse shied here, and he dropped more than a stick."
+        },
+        {
+          "if": "truth=hanged",
+          "name": "A Purse Under the Milestone",
+          "item": "minecraft:leather",
+          "lore": [
+            "Buried a hand deep at the foot of the stone, under a turf.",
+            "The strings are cut clean. It is all still in it."
+          ],
+          "mark": "gibbet_proof_hanged",
+          "journal": "The factor's purse is buried at the foot of the old milestone, strings cut, every coin still in it."
+        },
+        {
+          "if": "truth=hanged",
+          "name": "Knee Marks in the Ditch",
+          "item": "minecraft:clay_ball",
+          "lore": [
+            "Two hollows in the clay beside the milestone.",
+            "Somebody knelt here in the dark, and not to pray."
+          ],
+          "journal": "Somebody knelt in the clay of the ditch by the milestone."
+        },
+        {
+          "if": "truth=widow",
+          "name": "A Bone Needle Case",
+          "item": "minecraft:bone",
+          "lore": [
+            "A woman's, carved with a wren, trodden into the verge.",
+            "It lies just where the factor's horse shied."
+          ],
+          "mark": "gibbet_proof_widow",
+          "journal": "A woman's needle case, carved with a wren, was trodden into the verge where the factor's horse shied."
+        },
+        {
+          "if": "truth=widow",
+          "name": "Small Prints in the Clay",
+          "item": "minecraft:clay_ball",
+          "lore": [
+            "Pattens, coming up from the town side and going back the same way.",
+            "A woman's foot, or a boy's. Not a man's."
+          ],
+          "journal": "Small prints in pattens come up to the crossroads from the town side and go back again. No man made them."
+        },
+        {
+          "if": "truth=tollman",
+          "name": "Five Nails in a Heel",
+          "item": "minecraft:iron_nugget",
+          "lore": [
+            "A boot print by the rut with five nails set in a ring.",
+            "The same heel has worn a path from here to the tollhouse door."
+          ],
+          "mark": "gibbet_proof_tollman",
+          "journal": "A boot with five nails in a ring stood where the factor dropped his bag. The same heel has worn the path to the tollhouse door."
+        },
+        {
+          "if": "truth=tollman",
+          "name": "A Leaf of the Toll Roll",
+          "item": "minecraft:paper",
+          "lore": [
+            "Blown into the hedge. That night's tolls, in a careful hand.",
+            "The factor's line is written, and then scratched out with a nail."
+          ],
+          "journal": "A leaf of the toll roll was in the hedge. The factor's toll for that night was written down and then scratched out."
+        }
+      ],
+      "then": "tollman",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "tollman": {
+      "do": "talk",
+      "who": "tollman",
+      "goal": "Hear {tollman}'s oath again at {place:tollhouse}",
+      "say": {
+        "?truth=tollman": [
+          "I've said it to the reeve and I've said it on oath and now I'm to say it to you? I saw him. Rudge. By the stone, by my own lantern, bent over the factor's saddlebag.",
+          "Forty paces, fifty, what does it matter? I know that man's shape. Everybody knows it. Why are you looking at my boots? There's nothing to see about my boots."
+        ],
+        "?": [
+          "I've said it to the reeve and on oath, and I'll say it to you the same. I saw a man by the stone, by my lantern, at the factor's saddlebag. Rudge's height. Rudge's cap.",
+          "Was it his face? It was dark. It was his cap. I said Rudge because who else would it be, and the reeve was content. I've not slept well since they put him up, if you want it plain. He stands out there at night. Did they tell you? Just out there."
+        ]
+      },
+      "replies": [
+        {
+          "if": "mark:gibbet_proof_tollman",
+          "say": "Five nails in a ring, from the rut to your door. And a line scratched out of your roll.",
+          "then": "tollman_broke",
+          "try": {
+            "how": "threaten",
+            "odds": 1,
+            "fail": "whisper",
+            "refuse": "Nails! Every boot in the county has nails. Get off my step."
+          }
+        },
+        {
+          "say": "That's all I wanted to hear.",
+          "then": "whisper",
+          "journal": {
+            "?truth=tollman": "{tollman} swears he knew {hanged}'s shape by lantern-light at forty paces. He did not like me looking at his boots.",
+            "?": "{tollman} saw a man of {hanged}'s height in {hanged}'s cap. He never saw a face."
+          }
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "tollman_broke": {
+      "do": "talk",
+      "who": "tollman",
+      "say": "All right. All right! He'd dropped it. The factor. It was lying in the road when I went out with the lantern, and nobody by, and four years I've sat in this box for next to nothing a cart. Then the hue was up and they wanted a name. I gave them the one they wanted to hear. I never thought they'd be so quick about it.",
+      "mark": "gibbet_tollman_broke",
+      "journal": "{tollman} broke. He found the factor's bag in the road and kept it, and when they wanted a name he gave them {hanged}'s.",
+      "then": "whisper",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "whisper": {
+      "do": "talk",
+      "who": "whisperer",
+      "when": "night",
+      "goal": "Find {hanged}'s people at {place:back_room} after dark",
+      "not_now": "Not by daylight. Not here.",
+      "say": {
+        "?truth=hanged": [
+          "Short questions. Good. Did Tam take it? Tam was a thief. You don't ask a baker did he bake.",
+          "He never laid a hand on the factor, mind. The fool dropped his bag when the horse shied, and Tam was passing. Where we come from that is called finding.",
+          "We don't care what the Sun's men call him. We want him down. Hers go to the fire and the ash goes on the wind. They don't hang for the crows and then lie in lime."
+        ],
+        "?truth=widow": [
+          "Short questions. Good. Did Tam take it? Tam never worked a road in his life. Fairs and church doors. He'd not have known which end of a horse to rob.",
+          "Ask who taught him the trade. Ask who has the quicker hands in that house. I'll say no more than that, and I'd not have said so much, only he is hanging.",
+          "We don't care what the Sun's men call him. We want him down. Hers go to the fire and the ash goes on the wind. They don't hang for the crows and then lie in lime."
+        ],
+        "?": [
+          "Short questions. Good. Did Tam take it? Tam was at the cockpit in the next town that night, losing. Thirty of ours watched him lose.",
+          "Thirty thieves' oaths. Would your lord like to hear those? No. So he hangs on one honest man's lantern.",
+          "We don't care what the Sun's men call him. We want him down. Hers go to the fire and the ash goes on the wind. They don't hang for the crows and then lie in lime."
+        ]
+      },
+      "replies": [
+        {
+          "say": "You mean to cut him down.",
+          "then": "cut_offer"
+        },
+        {
+          "say": "I'll take what I have to someone who can use it.",
+          "then": "decide",
+          "journal": {
+            "?truth=hanged": "{whisperer}, one of the Ash Whisperer's people, says {hanged} found the bag in the road and kept it. They want his body for the fire.",
+            "?truth=widow": "{whisperer}, one of the Ash Whisperer's people, says {hanged} never worked a road, and that somebody in his own house has quicker hands. They want his body for the fire.",
+            "?": "{whisperer}, one of the Ash Whisperer's people, says {hanged} was at a cockpit in the next town that night. They want his body for the fire."
+          }
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "cut_offer": {
+      "do": "talk",
+      "who": "whisperer",
+      "when": "night",
+      "not_now": "Not by daylight. Not here.",
+      "say": "Tomorrow night, when the headsman's abed. Two of us and a knife. He comes down by himself after dark, but he'll not walk off with the Sun's rope on his neck. Not for us. Cut it, and he will come like a lamb. What we lack is somebody on the town road to cough if a lantern comes. You'd not be touching him. You'd be standing in a road. Is that against your law?",
+      "voices": {
+        "law": "That is the crown's gibbet and the crown's rope. Cutting it is a hanging matter by itself.",
+        "mercy": "Let his own people have him. Who else wants him?",
+        "faith": "Fire or earth, he should have one of them. Not a rope for ever."
+      },
+      "replies": [
+        {
+          "say": "I'll stand in the road.",
+          "then": "cut_watch",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "{hanged}'s people mean to cut him down from the gibbet themselves. I said I would watch the town road for them."
+        },
+        {
+          "say": "No. There's a better way than this.",
+          "then": "decide",
+          "journal": "{hanged}'s people mean to cut him down from the gibbet themselves and give him to the fire. I told them there was a better way."
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "decide": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} what you have, and settle what's to be done",
+      "say": [
+        "So. You've been to all of them. I can see it's no simple thing, or you'd have said it from the door.",
+        "There's three roads I can see. The lamp-keeper will bury him under the Warden's light if he's given the chance, guilty or no. The lord sits at the hall until the assize rides, and he'll hear a name if you have one to give him. Or we leave him to the ones at the back of the tavern, and all look the other way."
+      ],
+      "voices": {
+        "law": "Take it to the lord. That's what an assize is for.",
+        "mercy": "Bury the man. The rest is only talk.",
+        "faith": "The dead that walk are the Warden's. Go to his keeper."
+      },
+      "replies": [
+        {
+          "say": "The lamp-keeper. Let him have a light.",
+          "then": "keeper",
+          "for": [
+            "faith",
+            "mercy"
+          ]
+        },
+        {
+          "say": "The lord. I've a name to give him.",
+          "then": "lord_gate",
+          "for": [
+            "law"
+          ]
+        },
+        {
+          "say": "His own people. I'll watch the road for them.",
+          "then": "cut_watch",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "I mean to let {hanged}'s own people cut him down, and watch the town road for them."
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "keeper": {
+      "do": "talk",
+      "who": "keeper",
+      "goal": "Speak with {keeper} at {place:lych}",
+      "say": {
+        "?patron:lantern_warden": [
+          "You carry his light yourself. Then I needn't tell you what it means that the man walks. Nobody lit him one.",
+          "The headsman won't give him up and I won't ask him to. But the dead that walk are the Warden's own, and this ground is his from the lych gate in. If {hanged} comes through that gate himself, no law takes him out again.",
+          "He'll follow a light. They do, the ones who were never given one. That rope never held him. He hangs in it because he has nowhere else to be. Bring me a lantern that has never been lit, and tomorrow night you carry it down from the crossroads and I'll have the ground open."
+        ],
+        "?": [
+          "A hanged man gets no candle. That is the Sun's law, not the Warden's. The Warden never asked what a man did. He asks only that somebody keep a light.",
+          "The headsman won't give him up and I won't ask him to. But the dead that walk are the Warden's own, and this ground is his from the lych gate in. If {hanged} comes through that gate himself, no law takes him out again.",
+          "He'll follow a light. They do, the ones who were never given one. That rope never held him. He hangs in it because he has nowhere else to be. Bring me a lantern that has never been lit, and tomorrow night you carry it down from the crossroads and I'll have the ground open."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll bring one.",
+          "then": "bring_lantern",
+          "journal": "{keeper} keeps the Lantern Warden's light at the burying ground. He says the dead who walk will follow a lantern, and that the Warden's ground is beyond any law's reach."
+        },
+        {
+          "say": "I need to think on it.",
+          "then": "decide"
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "bring_lantern": {
+      "do": "bring",
+      "who": "keeper",
+      "item": "minecraft:lantern",
+      "count": 1,
+      "goal": "Bring {keeper} a new lantern",
+      "journal": "I brought {keeper} a new lantern. He said the Warden's words over it and told me to walk it down from the crossroads after dark.",
+      "then": "fetch_him",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "fetch_him": {
+      "do": "go",
+      "to": "crossroads",
+      "when": "night",
+      "radius": 8,
+      "goal": "Go up to {place:crossroads} after dark, and let him see the light",
+      "give": [
+        {
+          "item": "minecraft:lantern",
+          "count": 1,
+          "name": "A lantern for Tam Rudge",
+          "lore": [
+            "New, and blessed at the lych gate.",
+            "It is to be lit for one man."
+          ]
+        }
+      ],
+      "journal": "I stood under the gibbet with the lantern lit. He looked at it, the first thing I have seen him look at that was not his own hands.",
+      "then": "light_home",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "light_home": {
+      "do": "vigil",
+      "at": "lych",
+      "when": "night",
+      "radius": 10,
+      "gap": 11,
+      "goal": "Walk down to {place:lych}, and wait there with {keeper}",
+      "lines": [
+        {
+          "who": "keeper",
+          "say": "Set it down by the open ground. Don't speak to him. He has not come for you."
+        },
+        {
+          "say": "Something has followed the light down from the crossroads. It kept the same distance behind me the whole way.",
+          "sound": "minecraft:entity.zombie.ambient"
+        },
+        {
+          "say": "He comes in under the lych gate with the noose on him and its rope trailing in the grass behind, and stops at the lantern as a man stops at a fire on a cold night."
+        },
+        {
+          "who": "keeper",
+          "say": "{hanged}. Here is your light. Nobody will put it out. Lie down."
+        },
+        {
+          "say": "He lies down in the open ground like a man getting into his own bed.",
+          "sound": "minecraft:block.gravel.place",
+          "mark": "gibbet_laid_down"
+        },
+        {
+          "who": "keeper",
+          "say": "There. That is all he wanted. It is all most of them want."
+        }
+      ],
+      "journal": "{hanged} followed the lantern in under the lych gate and lay down in the Warden's ground.",
+      "then": "end:laid",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "lord_gate": {
+      "do": "talk",
+      "who": "lord",
+      "when": "day",
+      "goal": "Go before {lord} at {place:hall}",
+      "not_now": "The assize sits by daylight. Come back when it does.",
+      "say": {
+        "?dress:ragged": [
+          "Who let this in? No, let them stay. The assize hears all comers, it says so over the door. Speak, then, and be brief about it.",
+          "The thief at the crossroads. I have had the lamp-keeper about him and the widow about him. He was sworn against and hanged by the law. If you say the law hanged the wrong man, you'll say who the right one is, and you'll show me why."
+        ],
+        "?dress:fine": [
+          "Come forward. It is not often the assize sees a good coat on this side of the bar.",
+          "The thief at the crossroads. I have had the lamp-keeper about him and the widow about him. He was sworn against and hanged by the law. If you say the law hanged the wrong man, you'll say who the right one is, and you'll show me why."
+        ],
+        "?": [
+          "The assize hears all comers. Speak.",
+          "The thief at the crossroads. I have had the lamp-keeper about him and the widow about him. He was sworn against and hanged by the law. If you say the law hanged the wrong man, you'll say who the right one is, and you'll show me why."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll name who took the purse.",
+          "then": "lord_name"
+        },
+        {
+          "say": "I'm not ready to say.",
+          "then": "decide"
+        }
+      ],
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "lord_name": {
+      "do": "name",
+      "who": "lord",
+      "when": "day",
+      "not_now": "The assize sits by daylight. Come back when it does.",
+      "say": "Name them, then. And mind this: a name said in this hall stays said.",
+      "suspects": [
+        {
+          "who": "tollman",
+          "say": "{tollman}, who swore the oath. He kept the bag himself.",
+          "proof": [
+            "mark:gibbet_proof_tollman",
+            "mark:gibbet_tollman_broke"
+          ],
+          "need": 1,
+          "then": "lord_tollman",
+          "doubted": "lord_doubts",
+          "journal": "I named {tollman} before the lord."
+        },
+        {
+          "who": "widow",
+          "say": "{widow}. Her husband hanged in her place and held his tongue.",
+          "proof": [
+            "mark:gibbet_proof_widow"
+          ],
+          "need": 1,
+          "then": "lord_widow",
+          "doubted": "lord_doubts",
+          "journal": "I named {widow} before the lord."
+        },
+        {
+          "who": "hanged",
+          "say": "{hanged} took it after all. I can show where it lies.",
+          "proof": [
+            "mark:gibbet_proof_hanged"
+          ],
+          "need": 1,
+          "then": "lord_guilty",
+          "doubted": "lord_shrugs",
+          "journal": "I told the lord that {hanged} took the purse after all."
+        }
+      ],
+      "none": {
+        "say": "I can't say yet.",
+        "then": "decide"
+      },
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "lord_tollman": {
+      "do": "talk",
+      "who": "lord",
+      "say": [
+        "Five nails and a scratched roll. I have hanged men on less, and it seems I have hanged one on nothing at all. Fetch the tollman.",
+        "Rudge comes down today. He goes in the burying ground with his name said over him, and the clerk will write it in the roll that the oath was false. It will not comfort him. It may comfort the law."
+      ],
+      "then": "end:cleared"
+    },
+    "lord_widow": {
+      "do": "talk",
+      "who": "lord",
+      "say": [
+        "A needle case. And he stood on my beam and said nothing, and let me do it. I have sat this bench eleven years and never had a man make a fool of the law by dying for it.",
+        "He comes down a clean man. She goes up to answer for the purse. Don't look at me so. You brought the name into this hall, and I told you it would stay said."
+      ],
+      "then": "end:named_her"
+    },
+    "lord_guilty": {
+      "do": "talk",
+      "who": "lord",
+      "say": [
+        "Under the milestone, the whole time. Then the law hanged the right man, and the factor has his wool money back. That is the first tidy thing I have heard this assize.",
+        "The debt's paid. Let the lamp-keeper have what's left of him. No name on the mound. Here is the finder's share, and my thanks for not wasting a morning."
+      ],
+      "then": "end:purse_found"
+    },
+    "lord_doubts": {
+      "do": "talk",
+      "who": "lord",
+      "say": [
+        "And that is all you bring? A name and your own word for it? I hanged one man this month on a name and a word. You have just told me that was ill done, and now you ask me to do it twice.",
+        "No. {named} goes home. So do you. The assize has other business."
+      ],
+      "then": "end:slandered"
+    },
+    "lord_shrugs": {
+      "do": "talk",
+      "who": "lord",
+      "say": "You say he took it, and show me nothing? Then you have told the assize what the assize already wrote down. He stays where he is until we ride. Next.",
+      "then": "end:left_hanging"
+    },
+    "cut_watch": {
+      "do": "vigil",
+      "at": "crossroads",
+      "when": "night",
+      "radius": 14,
+      "gap": 12,
+      "goal": "Watch the town road at {place:crossroads} after dark",
+      "lines": [
+        {
+          "say": "Two shapes come up out of the ditch without a sound. One carries a horse blanket. The other has a knife in her teeth."
+        },
+        {
+          "say": "A lantern, far down the town road. It turns off toward the mill and is gone.",
+          "sound": "minecraft:entity.fox.ambient"
+        },
+        {
+          "say": "She goes up the gibbet post like a cat and cuts the rope through in three strokes. The end of it falls in the road. He does not flinch.",
+          "sound": "minecraft:block.wool.break"
+        },
+        {
+          "say": "The other speaks to him, low, and takes his arm as you would a friend who has drunk too much."
+        },
+        {
+          "say": "He goes with them. He does not look back at the beam."
+        },
+        {
+          "say": "Later, out on the heath, a fire. It burns high and fast, and then it is out.",
+          "sound": "minecraft:block.fire.ambient",
+          "mark": "gibbet_burned"
+        }
+      ],
+      "journal": "I watched the town road while {hanged}'s people cut him down. He walked away between them with the noose still on him. There was a fire on the heath before dawn.",
+      "then": "morning",
+      "within": "assize",
+      "late": "end:left_hanging",
+      "until": "before the assize rides on"
+    },
+    "morning": {
+      "do": "talk",
+      "who": "hangman",
+      "when": "day",
+      "goal": "Answer {hangman} at {place:post} in the morning",
+      "say": [
+        "My beam's bare, and my rope is cut through a hand's breadth under the knot. A clean knife, and somebody who can climb.",
+        "You were seen on the town road last night. I'll ask it once. Did you see who came?"
+      ],
+      "voices": {
+        "honour": "He asked it once and plainly. Give him a plain answer.",
+        "gain": "Say nothing you can be fined for."
+      },
+      "replies": [
+        {
+          "say": "Nobody came. I saw nobody.",
+          "then": "end:cut_down",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "gibbet_rope",
+            "days": [
+              5,
+              10
+            ],
+            "reputation": 10,
+            "town": [
+              "The headsman found a horse blanket on the heath and a ring of ash, and the miller says {player} stood on the town road half that night.",
+              "Saw nobody, did they? Then they've the worst eyes in the county."
+            ]
+          },
+          "journal": "{hangman} asked whether I saw who cut his rope. I told him nobody came."
+        },
+        {
+          "say": "His own people came for him. I watched the road.",
+          "then": "end:cut_down",
+          "for": [
+            "honour"
+          ],
+          "mark": "gibbet_owned_up",
+          "journal": "{hangman} asked whether I saw who cut his rope. I told him {hanged}'s own people came, and that I watched the road for them."
+        }
+      ]
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I left the crossroads to the people who have to use it."
+    },
+    "laid": {
+      "text": {
+        "?truth=widow": "{hanged} followed a new lantern in under the lych gate and lay down in the Warden's ground. I said no name in any hall. Whatever he kept his mouth shut for on the beam, it is still kept, and the crossroads is quiet.",
+        "?": "{hanged} followed a new lantern in under the lych gate and lay down in the Warden's ground. Whatever he did or did not do, he has a light now, and the crossroads is quiet."
+      },
+      "reward": {
+        "coins": 10,
+        "hearts": 25,
+        "reputation": 10
+      },
+      "marks": [
+        "gibbet_laid"
+      ],
+      "town": [
+        "The beam's bare, rope and all, and no knife went near it. They say he walked into the burying ground by himself, after a lantern.",
+        "You can take the crossroads at night again. I did, Tuesday. Nothing there but the wind."
+      ],
+      "returns": {
+        "who": "widow",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "I've been to see where he lies. There is a lamp on it. I never thought he would have a lamp. It isn't much, what I've brought. It's what there is.",
+        "gift": [
+          "minecraft:bread*2",
+          "minecraft:candle*2"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            25
+          ],
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "There has been a fresh candle on his mound every night since, and I am not the one who lights it.",
+              "She comes after dark with the little one on her hip, and goes before I can say good evening. I leave the gate on the latch.",
+              "He has not stirred. I thought you would want it written down by somebody."
+            ]
+          }
+        }
+      ]
+    },
+    "cleared": {
+      "text": "I named {tollman} before the lord with what I had found, and it stood. {hanged} was taken down and buried with his name said over him, and the roll says the oath was false. The tollman was given to the headsman.",
+      "reward": {
+        "coins": 18,
+        "hearts": 30,
+        "reputation": 15
+      },
+      "marks": [
+        "gibbet_cleared"
+      ],
+      "town": [
+        "Rudge never took it. It was Pell at the tollhouse, the whole time, and he let them hang a man for it.",
+        "They said his name over him at the burying. A cutpurse, and the lord's own clerk said his name."
+      ],
+      "returns": {
+        "who": "widow",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "They wrote it in the roll. False oath. I can't read it, but the clerk showed me the place and put my finger on it. The little one will be able to say her father was hanged wrong. That is not nothing. That is not nothing at all.",
+        "gift": [
+          "minecraft:bread*2",
+          "minecraft:honey_bottle"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "There's a new man in the tollhouse. Counts every cart twice."
+            ],
+            [
+              "b",
+              "After the last one, I should hope so."
+            ],
+            [
+              "a",
+              "The headsman's plate is black as a crow again. Did you see?"
+            ],
+            [
+              "b",
+              "I saw. I'd sooner not have known why."
+            ]
+          ]
+        }
+      ]
+    },
+    "named_her": {
+      "text": "I named {widow} before the lord and showed him the needle case. {hanged} was taken down a clean man, and she was taken up in his place. He held his tongue on the beam to stop exactly this, and I opened mine.",
+      "reward": {
+        "coins": 12,
+        "hearts": -25,
+        "reputation": 5
+      },
+      "marks": [
+        "gibbet_named_widow"
+      ],
+      "town": [
+        "So it was her. And he stood up there and never said. I don't know whether that is the best thing I ever heard of a man or the worst.",
+        "It was {player} who took her name to the hall. The law's the law. I'd not have had the stomach."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            22
+          ],
+          "town": [
+            "The Rudge child is with the lamp-keeper now. He says the Warden never asked whose she was.",
+            "Two of that house on the one beam inside a month. Folk go round by the mill road again."
+          ]
+        }
+      ]
+    },
+    "purse_found": {
+      "text": "I told the lord that {hanged} took the purse after all, and showed where it lay. The factor has his wool money back. The lord let the lamp-keeper have the body, since the debt was paid, and he was buried with no name on the mound.",
+      "reward": {
+        "coins": 14,
+        "reputation": 8,
+        "hearts": 5
+      },
+      "marks": [
+        "gibbet_purse_found"
+      ],
+      "town": [
+        "Under the milestone the whole time. He was standing out there looking at it every night, they say.",
+        "Well, he's in the ground now. A thief, but he's in the ground."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "letter": {
+            "from": "{widow}",
+            "lines": [
+              "So he did it. I knew he did. I knew it when he came in with the clay on him.",
+              "They let me see the mound. There is no name on it but there is a lamp, and the keeper says a lamp is the better of the two.",
+              "I am not writing to thank you. I am writing so that you know I do not blame you either."
+            ]
+          }
+        }
+      ]
+    },
+    "slandered": {
+      "text": "I named {named} before the lord and could not make it stand. The assize rode on with nothing changed, {hanged} went in the lime pit, and {named} has not forgotten whose mouth their name came out of in that hall.",
+      "reward": {
+        "hearts": -15,
+        "reputation": -10
+      },
+      "marks": [
+        "gibbet_slandered"
+      ],
+      "town": [
+        "{player} stood up at the assize and called {named} a thief, with nothing in their hand to show for it.",
+        "Mind what you say near that one. They name names."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            16
+          ],
+          "town": [
+            "They say Rudge still stands at the crossroads, pit or no pit. Somebody ought to have got that right."
+          ]
+        }
+      ]
+    },
+    "cut_down": {
+      "text": {
+        "?mark:gibbet_owned_up": "{hanged}'s own people cut him down from the Sun's gibbet in the night and gave him to the fire, as theirs are given. I told the headsman so to his face. The beam is bare, the crossroads is quiet, and nobody will ever say his name was clean.",
+        "?": "{hanged}'s own people cut him down from the Sun's gibbet in the night and gave him to the fire, as theirs are given. The beam is bare, the crossroads is quiet, and nobody will ever say his name was clean."
+      },
+      "reward": {
+        "hearts": 15
+      },
+      "marks": [
+        "gibbet_cut_down"
+      ],
+      "town": [
+        "The gibbet's empty and the rope's cut. The headsman has a face like a shut door about it.",
+        "There was a fire on the heath that night. I didn't ask whose. You don't."
+      ],
+      "returns": {
+        "who": "whisperer",
+        "days": [
+          4,
+          8
+        ],
+        "as": "thanks",
+        "say": "Ash on the wind, as is right. Hers don't leave a debt lying. If you ever want a door opened that's shut, ask at the back of any tavern for the one who owes for Tam.",
+        "gift": [
+          "minecraft:charcoal*4",
+          "minecraft:gold_nugget*3"
+        ]
+      }
+    },
+    "left_hanging": {
+      "failed": true,
+      "text": "The assize rode on. {hanged} went in the lime pit without a candle, and they say he stands at the crossroads still, pit or no pit.",
+      "reward": {
+        "hearts": -10
+      },
+      "town": [
+        "Nobody ever did find out about Rudge. He's in the pit, and he's at the crossroads too, if you ask the carters.",
+        "I go round by the mill now. It's an hour longer. I don't mind the hour."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            25
+          ],
+          "town": [
+            "The tollman's given up his box. Says he can't abide the nights out there. They can't get another man to take it."
+          ]
+        }
+      ]
+    }
+  }
+}

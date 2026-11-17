@@ -1,0 +1,802 @@
+{
+  "title": "Short Measure",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "baker",
+      "shepherd",
+      "butcher"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "hand": [
+      "bailiff",
+      "hall"
+    ]
+  },
+  "cast": {
+    "bailiff": {
+      "name": [
+        "Rafe Deverel",
+        "Aymer Deverel",
+        "Hamo Deverel"
+      ],
+      "body": "villager",
+      "job": "cartographer",
+      "female": false,
+      "at": "barn",
+      "hours": "day"
+    },
+    "clerk": {
+      "name": [
+        "Edith Quill",
+        "Maud Quill",
+        "Sabeth Quill"
+      ],
+      "body": "villager",
+      "job": "librarian",
+      "female": true,
+      "at": "shelf"
+    },
+    "steward": {
+      "name": [
+        "Wymond Sale",
+        "Gervase Sale",
+        "Reynold Sale"
+      ],
+      "body": "villager",
+      "job": "librarian",
+      "female": false,
+      "at": "hall",
+      "hours": "day"
+    }
+  },
+  "places": {
+    "barn": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        60,
+        120
+      ],
+      "name": "the tithe barn"
+    },
+    "shelf": {
+      "at": "town",
+      "name": "the shelf where the town book is kept"
+    },
+    "byre": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        40,
+        90
+      ],
+      "name": "the old byre"
+    },
+    "hall": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        160,
+        300
+      ],
+      "name": "the gate of the lord's hall"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "weighing": 5
+      },
+      "say": [
+        "We don't grudge the Sun his tenth. Say that first, wherever you say the rest. A lord takes a tenth as the Sun takes it of him, and that is how the world is hung.",
+        "But by our own bushel we have carted the tenth in full, three harvests running, and by {bailiff}'s we come a fifth short every time. What's short is owed double at Candlemas. We paid it twice. We cannot pay it a third time.",
+        "I'll tell you the rest, because you'd find it anyway. There are folk here who have stopped carting all they grow. I don't ask where they keep it. You'd not either, if you had seen last winter. The barn takes the last carts and shuts its roll {in:weighing}."
+      ],
+      "replies": [
+        {
+          "say": "I'll look at both sets of books.",
+          "then": "town_book",
+          "journal": "{giver} says the lord's bailiff, {bailiff}, has weighed {town}'s tithe a fifth light three harvests running, and that some here hide grain because of it. The barn shuts its roll in five days."
+        },
+        {
+          "say": "That is between you and your lord.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "town_book": {
+      "do": "talk",
+      "who": "clerk",
+      "goal": "Ask {clerk} for the tithe leaves in {town}'s book",
+      "say": {
+        "?reputation<0": [
+          "The book is on its shelf and there it stays. This town's affairs are for those who have done it some good, and I've heard what you have done it.",
+          "If {giver} wants you to see the tithe leaves, {giver} may fetch the book down and copy them out. Anyone grown here may. You may not."
+        ],
+        "?": [
+          "The tithe leaves? Anyone may see them. That is what the book is for. Here. Carted and counted by the porch bushel, the one on the chain that every village for ten miles cut theirs from.",
+          "Forty bushels to the barn this harvest. Forty the last. Forty the one before. I'll copy you the leaf. Mind, it is only our word. His roll is the one the hall reads."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Then I'll go and see what his roll says.",
+          "then": "barn_night",
+          "journal": {
+            "?reputation<0": "{clerk} would not open {town}'s book to me. {giver} copied out the tithe leaf instead: forty bushels carted, three harvests running.",
+            "?": "{clerk} copied me the tithe leaf out of {town}'s book: forty bushels carted to the barn, three harvests running, by the porch bushel."
+          }
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "barn_night": {
+      "do": "search",
+      "at": "barn",
+      "when": "night",
+      "goal": "Go through {place:barn} after dark, while the bailiff sleeps",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A Leaf from the Town Book",
+          "lore": [
+            "Tithe carted to the barn, by the porch bushel:",
+            "forty bushels this harvest, forty the last, forty the one before."
+          ]
+        }
+      ],
+      "clues": [
+        {
+          "name": "The Tithe Roll",
+          "item": "minecraft:paper",
+          "lore": [
+            "The roll that goes up to the hall, in a fair hand.",
+            "Received of the village, by my lord's bushel: thirty-two. Eight short, owed double at Candlemas."
+          ],
+          "mark": "measure_roll",
+          "journal": "The bailiff's tithe roll has the village down for thirty-two bushels this harvest, by the lord's bushel."
+        },
+        {
+          "name": "The Lord's Bushel",
+          "item": "minecraft:bowl",
+          "lore": [
+            "Stamped with the sun on its side. Inside, a floor of new board a hand above the old one.",
+            "It holds four parts in five of what the stamp says."
+          ],
+          "mark": "measure_bushel",
+          "journal": "The lord's bushel at the barn has a false floor. It holds four parts in five of a true bushel."
+        },
+        {
+          "if": "hand=bailiff",
+          "name": "The Bailiff's Own Reckoning",
+          "item": "minecraft:paper",
+          "tongue": "southern",
+          "lore": [
+            "Eight bushels a village. Eleven villages. Sold at the river landing, by night, to the same barge.",
+            "The hall knows nothing of it and need not."
+          ],
+          "mark": "measure_reckoning",
+          "told": "The bailiff has been selling eight bushels in every forty at the river, and has it written down in his own hand.",
+          "journal": "I took a close-written sheet from under the bailiff's roll. It is not in the hand, or the tongue, of the roll."
+        },
+        {
+          "if": "hand=hall",
+          "name": "The Bailiff's Own Reckoning",
+          "item": "minecraft:paper",
+          "tongue": "southern",
+          "lore": [
+            "By the steward's order, under the sun seal: the long bushel again this year. My lord's levy to the crown is not met.",
+            "Eight in forty to the hall's own granary, unwritten. One in eight of that to me, for the doing of it."
+          ],
+          "mark": "measure_reckoning",
+          "told": "The short tithe is the hall's own doing. The bailiff has the steward's order written down, and his share of it.",
+          "journal": "I took a close-written sheet from under the bailiff's roll. It is not in the hand, or the tongue, of the roll."
+        }
+      ],
+      "then": "read_books",
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "read_books": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Lay the bailiff's roll beside {town}'s leaf, with {giver}",
+      "say": {
+        "?mark:measure_reckoning": [
+          "Forty by our book. Thirty-two by his. There it is, in two hands on two papers, and eight bushels between them. And this bowl of his with the floor in it. I have tipped my barley into that for three years and thanked him.",
+          "And you've had the other sheet read. So you know where the eight go. Then you know more than I want to. Before you go back to the barn, go by {place:byre} and look under the floor. I said I don't ask where it is kept. I know, all the same. Look, and then decide what you think of us."
+        ],
+        "?": [
+          "Forty by our book. Thirty-two by his. There it is, in two hands on two papers, and eight bushels between them. And this bowl of his with the floor in it. I have tipped my barley into that for three years and thanked him.",
+          "The other sheet I can't make out, and nor can you by your face. That's southern writing. He came up from the south with my lord's household. A priest could read it out to you, or the bookhouse, for a coin. Mind whom you ask. Whoever reads it, knows it. And before you go back to the barn, go by {place:byre} and look under the floor. I said I don't ask where it is kept. I know, all the same. Look, and then decide what you think of us."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll look.",
+          "then": "see_pit",
+          "journal": "{town}'s book says forty bushels. The bailiff's roll says thirty-two. His bushel has a false floor, and that is where the other eight go missing."
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "see_pit": {
+      "do": "search",
+      "at": "byre",
+      "goal": "Look under the floor of {place:byre}",
+      "clues": [
+        {
+          "name": "Sacks Under the Byre Floor",
+          "item": "minecraft:wheat",
+          "lore": [
+            "Barley in tarred sacks, under loose boards and old dung.",
+            "Enough to see a village through to the cuckoo. No more than that."
+          ],
+          "mark": "measure_saw_pit",
+          "journal": "There is barley hidden under the floor of the old byre. It would see the village through to spring, and no further."
+        },
+        {
+          "name": "Chalk Strokes on a Beam",
+          "item": "minecraft:stick",
+          "lore": [
+            "A row of strokes on the beam above the pit, one for every week until spring.",
+            "Beside each, a smaller mark. Somebody has worked out how thin to slice it."
+          ],
+          "journal": "Somebody has chalked the weeks till spring on a beam over the hidden grain, and how little to eat in each."
+        }
+      ],
+      "then": "watch_weighing",
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "watch_weighing": {
+      "do": "vigil",
+      "at": "barn",
+      "when": "day",
+      "radius": 12,
+      "gap": 10,
+      "goal": "Watch {bailiff} weigh the tithe at {place:barn}",
+      "lines": [
+        {
+          "who": "bailiff",
+          "say": "Next cart. Tip it in. Level, not heaped. This is my lord's bushel and not a market stall."
+        },
+        {
+          "say": "A cart of barley goes through the bushel a measure at a time. He strikes each one off level with a stick and calls it to the roll.",
+          "sound": "minecraft:block.sand.fall"
+        },
+        {
+          "who": "bailiff",
+          "say": "Nine. I make it nine. Your tally says eleven? Then your tally is generous. Nine, and write it."
+        },
+        {
+          "say": "The carter looks at the bushel, then at the bailiff, then at his own boots. He says nothing. Nobody in the line says anything.",
+          "mark": "measure_seen"
+        },
+        {
+          "who": "bailiff",
+          "say": "And you, with a face like a ledger. Have you grain to tithe? No? Then come round the back when I've done here. I think you and I should talk."
+        }
+      ],
+      "journal": "I watched {bailiff} weigh a cart of eleven bushels and write down nine. Nobody in the line said a word.",
+      "then": "confront",
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "confront": {
+      "do": "talk",
+      "who": "bailiff",
+      "when": "day",
+      "goal": "Hear what {bailiff} has to say behind {place:barn}",
+      "not_now": "I keep the barn by daylight and my bed by night. Tomorrow.",
+      "say": {
+        "?hand=hall": [
+          "You have been in my barn. Don't trouble to deny it, the bushel was put back the wrong way round. So you know about the floor.",
+          "Do you think I cut that board for my own good? I weigh as I am told to weigh. The order is the steward's, under the sun seal. My lord owes the crown a levy and the crown does not take excuses in place of grain. I have a wife who likes to eat.",
+          "The hall pays for quiet, and pays well. {coins:15}, out of the same chest the grain goes into. Take it, burn that leaf of yours, and nobody is worse off than they were at Michaelmas."
+        ],
+        "?": [
+          "You have been in my barn. Don't trouble to deny it, the bushel was put back the wrong way round. So you know about the floor.",
+          "Eight in forty. And who is hurt by it? They hide twice that in their pits and swear by the Sun they have carted all. Everybody in this valley takes a little. I am only the one who keeps tidy books of mine.",
+          "Here is what a sensible person does. They take {coins:15} of good money, they burn that leaf, and they go and find their trouble somewhere it pays."
+        ]
+      },
+      "voices": {
+        "gain": "Fifteen, for burning one sheet of paper. I have done worse for less.",
+        "law": "A false measure under the Sun's own stamp. That is not a little thing.",
+        "mercy": "Think who goes hungry for those eight bushels before you take his coin."
+      },
+      "replies": [
+        {
+          "say": "Give me the purse.",
+          "then": "end:purse",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "law",
+            "honour",
+            "mercy"
+          ],
+          "journal": "{bailiff} offered me {coins:15} to burn the leaf and forget his bushel. I took it."
+        },
+        {
+          "say": "The hall will hear of this.",
+          "then": "steward_gate",
+          "for": [
+            "law"
+          ],
+          "journal": {
+            "?hand=hall": "{bailiff} says the false bushel is the steward's own order. I mean to hear the steward say so.",
+            "?": "{bailiff} offered me money to forget his bushel. I am taking it to the lord's steward instead."
+          }
+        },
+        {
+          "say": "The villages will hear of it first.",
+          "then": "village_meet",
+          "for": [
+            "mercy"
+          ],
+          "journal": {
+            "?hand=hall": "{bailiff} says the false bushel is the steward's own order. I am taking that back to {giver}.",
+            "?": "{bailiff} offered me money to forget his bushel. I am taking it back to {giver} instead."
+          }
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "steward_gate": {
+      "do": "talk",
+      "who": "steward",
+      "when": "day",
+      "goal": "Ask for the steward at {place:hall}",
+      "not_now": "The gate is shut at dusk. My lord's business is done by daylight.",
+      "say": {
+        "?dress:ragged": "Kitchen door, on Fridays, with the other beggars. This is the front gate, and I am the steward, and I have a levy to count.",
+        "?dress:fine": "Good day to you. You'll forgive the mud, we are carting. You have the look of somebody with business, and I've a little time. What is it?",
+        "?": "Yes? I am the steward. If it is about the tithe, say so quickly. Everything is about the tithe this week."
+      },
+      "replies": [
+        {
+          "if": "!dress:ragged",
+          "say": "It is about the tithe.",
+          "then": "steward"
+        },
+        {
+          "if": "dress:ragged",
+          "say": "It's about your tithe barn. Your lord will want it heard.",
+          "then": "steward",
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "reputation>=20",
+              "mark:measure_reckoning"
+            ],
+            "fail": "steward_shut",
+            "refuse": "My lord wants a great many things heard, and none of them from under that hat. Fridays."
+          }
+        },
+        {
+          "say": "Another day.",
+          "then": "confront"
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "steward_shut": {
+      "do": "talk",
+      "who": "steward",
+      "when": "day",
+      "say": "I said Fridays. Come back in a coat, or come back with somebody the town thinks well of.",
+      "then": "confront",
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "steward": {
+      "do": "talk",
+      "who": "steward",
+      "when": "day",
+      "say": {
+        "?hand=hall": [
+          "The long bushel. Yes. I know of it. I wrote the order. My lord has a levy to meet, and I had rather shave eleven villages a little than tell the crown we are short. Did you walk out here to tell me my own business?",
+          "But you have been among them, with their book and their grumbling. So tell me something I don't know. They are holding grain back. Everybody says so and nobody says where. Is it true?"
+        ],
+        "?": [
+          "Eight in forty. Three harvests. And sold at the river, under my nose, in my lord's sacks. Show me the bushel. Yes. He will be in irons by dark, and I will have every measure in that barn broken up for kindling.",
+          "Now. Since you have been among them. They are holding grain back. Everybody says so and nobody says where. A tenth of a pit is the Sun's as much as a tenth of a cart. Is it true?"
+        ]
+      },
+      "voices": {
+        "law": "He asked you straight. The tenth is the tenth, wherever it is kept.",
+        "mercy": "Whatever is in those pits is all that stands between them and the spring."
+      },
+      "replies": [
+        {
+          "say": "It's true. Look under the old byre.",
+          "then": "end:lord_side",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "The steward asked whether the villages are hiding grain. I told him they are, and where."
+        },
+        {
+          "say": "I saw no hidden grain. Only a short bushel.",
+          "then": {
+            "?hand=hall": "end:long_bushel",
+            "?": "end:fair_weight"
+          },
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "measure_pits",
+            "days": [
+              8,
+              16
+            ],
+            "town": [
+              "The steward's men were through with iron rods, sounding every floor. They found the pit under the old byre and took the lot.",
+              "They say the steward asked {player} to their face whether there was grain hidden, and was told no. He has a long memory, that one. So have we, mind. We know who said no."
+            ]
+          },
+          "journal": "The steward asked whether the villages are hiding grain. I had stood over it the day before. I told him I had seen none."
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "village_meet": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} what the bailiff said",
+      "say": {
+        "?hand=hall": [
+          "The hall's own order. Under the seal. Then there is nobody above him to tell, is there. I had thought there was. I had thought that for three years.",
+          "Then it is done at the scales, before every cart in the valley. If one of us calls that bushel false, he is flogged for it. If forty of us turn it over and knock on the bottom, that is not one man's word. Will you stand there with us? They'll not flog a stranger so quickly."
+        ],
+        "?": [
+          "Offered you money, did he. And you are here, telling me. Well. I'll remember that when I have forgotten a good deal else.",
+          "Then it is done at the scales, before every cart in the valley. If one of us calls that bushel false, he is flogged for it. If forty of us turn it over and knock on the bottom, that is not one man's word. Will you stand there with us? They'll not flog a stranger so quickly."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll stand with you.",
+          "then": "stand_scales",
+          "journal": "{giver} means to have the whole valley turn the lord's bushel over at the scales. I said I would stand with them."
+        },
+        {
+          "say": "No. This should go to the hall.",
+          "then": "steward_gate"
+        }
+      ],
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    },
+    "stand_scales": {
+      "do": "vigil",
+      "at": "barn",
+      "when": "day",
+      "radius": 12,
+      "gap": 10,
+      "goal": "Stand with the villages at the scales at {place:barn}",
+      "lines": [
+        {
+          "say": "The line of carts has stopped. Nobody tips a sack. Nobody says why."
+        },
+        {
+          "who": "bailiff",
+          "say": "Well? Next cart. I have not got all day and neither has my lord."
+        },
+        {
+          "say": "{giver} walks up to the lord's bushel, turns it over on the threshing floor and knocks on the bottom. It sounds like a drum.",
+          "sound": "minecraft:block.wood.hit"
+        },
+        {
+          "who": "bailiff",
+          "say": "Take your hands off my lord's measure! I'll have the reeve to every one of you."
+        },
+        {
+          "say": "Two men come up the lane carrying the porch bushel on its chain, and set it down beside his. One is plainly the bigger.",
+          "sound": "minecraft:block.chain.place"
+        },
+        {
+          "if": "hand=hall",
+          "who": "bailiff",
+          "say": "You think that floor is mine? You think I would dare? Ask at the hall whose bushel it is. Ask them! Weigh by yours, then, and see what comes down the road after it."
+        },
+        {
+          "if": "hand=bailiff",
+          "who": "bailiff",
+          "say": "All right. All right! Weigh by yours. Weigh by a hat, for all I care. I am going up to the hall."
+        },
+        {
+          "say": "The tithe is weighed by the porch bushel, cart after cart, and written down by two hands.",
+          "mark": "measure_stood"
+        }
+      ],
+      "journal": "The valley turned the lord's bushel over at the scales and weighed its tithe by its own. I stood there with them.",
+      "then": "end:true_bushel",
+      "within": "weighing",
+      "late": "end:weighed_light",
+      "until": "before the tithe roll is shut"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "A lord's tithe is a lord's business. I left them to it."
+    },
+    "lord_side": {
+      "text": {
+        "?hand=hall": "I told the steward the villages are hiding grain. He thanked me, paid me, and said nothing more about his long bushel. His men will be out with rods before the frost.",
+        "?": "I gave the steward his bailiff, and then I gave him the villages. {bailiff} is in irons for the false bushel. The steward's men will be out with rods for the hidden grain before the frost."
+      },
+      "reward": {
+        "coins": 20,
+        "hearts": -30,
+        "reputation": -20
+      },
+      "marks": [
+        "measure_lord_side"
+      ],
+      "town": [
+        "The steward knows about the pits. He did not guess it. Somebody stood at his gate and told him.",
+        "{player} took the hall's money. I hope it keeps them warm."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "town": [
+            "The lord's men came Tuesday with iron rods and sounded every floor in the village. They took it all. The seed corn too.",
+            "They counted the tenth out of the pits, and then the fine, and then there was nothing left to count."
+          ]
+        },
+        {
+          "days": [
+            30,
+            40
+          ],
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "You will not want to hear from me and I do not much want to write.",
+              "We buried two before Candlemas, an old man and a child, and we have eaten the plough ox. The hall has its tenth in full, by a true bushel, I'm told.",
+              "I am writing only so that somebody outside this valley knows what a tenth cost here."
+            ]
+          }
+        }
+      ]
+    },
+    "fair_weight": {
+      "text": "I showed the steward the false floor and said nothing of any pits. {bailiff} is in irons, his measures are kindling, and the tithe was weighed again by a true bushel. The steward asked me a question and I gave him a short answer.",
+      "reward": {
+        "coins": 12,
+        "hearts": 30,
+        "reputation": 15
+      },
+      "marks": [
+        "measure_fair_weight"
+      ],
+      "town": [
+        "They broke up the bailiff's bushel in the yard and burned it. Forty carted and forty written. First time in three years.",
+        "The steward asked about the pits, they say. And was told there were none. Bless whoever has such poor eyesight."
+      ],
+      "returns": {
+        "who": "clerk",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "I have written it in the book. The false floor, the irons, and who went up to the hall. Books ought to have the good years in them too. This is from the porch. Everyone put in a handful.",
+        "gift": [
+          "minecraft:bread*4",
+          "minecraft:wheat*8"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            20,
+            35
+          ],
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "A quiet winter. Nobody fat, nobody buried. That is as good as it gets here.",
+              "There is a new man at the barn who weighs heaped and calls it level, to be on the safe side.",
+              "What is under certain floors is still under them. We'll plant it in the spring."
+            ]
+          }
+        }
+      ]
+    },
+    "long_bushel": {
+      "text": "The false bushel was the steward's own order, and he told me so to my face at his gate. I said nothing of any pits. Nothing is changed: the tithe is weighed short, by the hall's wish, and now the hall knows that I know it.",
+      "reward": {
+        "hearts": 10
+      },
+      "marks": [
+        "measure_long_bushel"
+      ],
+      "town": [
+        "It was never the bailiff. It's the hall. The steward said so himself and didn't trouble to lower his voice.",
+        "So we are robbed by the lord and not by his man. I don't know why that should feel worse. It does."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            28
+          ],
+          "town": [
+            "Double at Candlemas again. Old Tibb has sold his cow to meet it.",
+            "There's talk of carting nothing at all next year, and seeing how many of us the hall cares to hang."
+          ]
+        }
+      ]
+    },
+    "true_bushel": {
+      "text": {
+        "?hand=hall": "The valley turned the lord's bushel over at the scales and weighed its tithe by the porch bushel, and I stood with them. The false floor was the hall's own order. The hall will not forget who knocked on it.",
+        "?": "The valley turned the lord's bushel over at the scales and weighed its tithe by the porch bushel, and I stood with them. {bailiff} went up the road to the hall in a hurry and has not come back down it."
+      },
+      "reward": {
+        "hearts": 35,
+        "reputation": 20
+      },
+      "marks": [
+        "measure_true_bushel"
+      ],
+      "town": [
+        "Forty of us, and that stranger, and nobody flogged. I'd not have believed it at Michaelmas.",
+        "It sounded like a drum. I shall hear that the rest of my life, {giver} knocking on the lord's bushel."
+      ],
+      "returns": {
+        "who": "clerk",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "I have written it in the book, the whole morning, and your name with ours. Whatever comes of it, it is written. This is from the porch. Everyone put in a handful.",
+        "gift": [
+          "minecraft:bread*4",
+          "minecraft:wheat*8"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "if": "hand=hall",
+          "town": [
+            "The lord's men came, as we knew they would. Twelve of them, mounted. They took the porch bushel off its chain and carried it away.",
+            "They were asking for {giver} by name. And for the stranger who stood at the scales."
+          ]
+        },
+        {
+          "days": [
+            12,
+            24
+          ],
+          "if": "hand=bailiff",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "The steward came down himself, looked at the floor in that bushel, and went a colour I have not seen on a man before.",
+              "{bailiff} was taken on the river road with a purse on him that would buy this village. The hall has given us back two years of the double.",
+              "Not the third. A lord is still a lord. But two."
+            ]
+          }
+        }
+      ]
+    },
+    "purse": {
+      "text": "I took the bailiff's purse and burned the leaf. The tithe was weighed light again, and what was short is owed double at Candlemas.",
+      "reward": {
+        "coins": 15,
+        "hearts": -25,
+        "reputation": -10
+      },
+      "marks": [
+        "measure_purse"
+      ],
+      "town": [
+        "Thirty-two again. And the one who was going to look at the books has gone very quiet, and has new gloves."
+      ],
+      "later": [
+        {
+          "days": [
+            25,
+            40
+          ],
+          "town": [
+            "A hungry winter. Three families gone down the valley to beg at the river towns, and they'll not be back.",
+            "They opened the last pit at Candlemas to pay the double. There's nothing under any floor now."
+          ]
+        },
+        {
+          "days": [
+            12,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "Somebody was going to lay our book beside his roll. Whatever came of that?"
+            ],
+            [
+              "b",
+              "He bought them. What else comes of anything?"
+            ],
+            [
+              "a",
+              "For how much, I wonder."
+            ],
+            [
+              "b",
+              "Less than eight bushels, you may be sure."
+            ]
+          ]
+        }
+      ]
+    },
+    "weighed_light": {
+      "failed": true,
+      "text": "The barn shut its roll before I had done anything about it. {town}'s tithe went up to the hall a fifth short for the third year, and the double falls due at Candlemas.",
+      "reward": {
+        "hearts": -10
+      },
+      "town": [
+        "Thirty-two again. I don't know why we count."
+      ],
+      "later": [
+        {
+          "days": [
+            25,
+            40
+          ],
+          "town": [
+            "A hungry winter. Three families gone down the valley to beg at the river towns, and they'll not be back.",
+            "They opened the last pit at Candlemas to pay the double. There's nothing under any floor now."
+          ]
+        }
+      ]
+    }
+  }
+}
