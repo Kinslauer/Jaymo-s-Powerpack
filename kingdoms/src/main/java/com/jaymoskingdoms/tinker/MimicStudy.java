@@ -213,6 +213,8 @@ public final class MimicStudy {
 
 	/** {@code player} studies each of {@code mimics} {@code ticks} more. */
 	private static void add(ServerPlayer player, ServerLevel level, Set<Mimic> mimics, int ticks) {
+		// (class trees) a Tinkerer studies faster with their level (practice), and with Imitation one sight is enough
+		ticks = com.jaymoskingdoms.TinkerPerks.study(player, ticks);
 		Map<String, Integer> studied = null;
 		for (Mimic m : mimics) {
 			if (knows(player, m)) {

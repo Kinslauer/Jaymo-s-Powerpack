@@ -502,6 +502,10 @@ public final class Hearing {
 		if (owner instanceof ServerPlayer player && silent(player)) {
 			return;
 		}
+		if (owner instanceof LivingEntity shooter && Workshop.muffled(shooter.getMainHandItem())) {
+			// (class trees) a Muffled barrel: nothing to hear
+			return;
+		}
 		Vec3 from = shot.position();
 		UUID who = owner instanceof ServerPlayer ? owner.getUUID() : null;
 		SHOTS.put(shot, new Shot(from, who));

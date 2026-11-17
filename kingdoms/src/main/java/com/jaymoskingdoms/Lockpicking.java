@@ -210,6 +210,10 @@ public final class Lockpicking {
 		if (lock == null || !lock.locked()) {
 			return InteractionResult.PASS;
 		}
+		if (TinkerPerks.dismantleLock(sp, server, lockPos)) {
+			// (class trees) a Tinkerer's Dismantle: the lock comes apart at a touch
+			return InteractionResult.SUCCESS;
+		}
 		if (sp.getMainHandItem().is(RaiderGear.KEY) && lock.level() <= RaiderGear.KEY_LEVEL) {
 			// a rusty key (the illagers'): it turns a simple lock once, and snaps in it
 			sp.getMainHandItem().consume(1, sp);

@@ -372,7 +372,8 @@ public final class Senses {
 			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
 			if (range > 0.0) {
 				// (Hearing) quiet or loud ground, wet ground, and soft boots and leggings carry it less or further (ordinary ground as before)
-				f = Math.max(f, HEARD * Rangers.quiet(player) * Footsteps.heardFloor(level, player) / range);
+				// (class trees) and Muffled boots (a Tinkerer's infusion) carry it half as far
+				f = Math.max(f, HEARD * Rangers.quiet(player) * TinkerPerks.footfall(player) * Footsteps.heardFloor(level, player) / range);
 			}
 		}
 		return f;

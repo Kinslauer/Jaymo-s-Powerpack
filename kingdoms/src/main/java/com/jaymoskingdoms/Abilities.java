@@ -47,6 +47,8 @@ public final class Abilities {
 			case RANGER -> Rangers.key(player, sneak);
 			case WARLOCK -> Warlocks.key(player, sneak);
 			case TINKERER -> Tinkerers.key(player, sneak);
+			// (class trees) the Marksman's Field Kit
+			case MARKSMAN -> Workshop.key(player, sneak);
 			default -> {
 				return false;
 			}

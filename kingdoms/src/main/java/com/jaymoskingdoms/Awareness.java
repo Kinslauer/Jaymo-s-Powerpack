@@ -187,9 +187,9 @@ public final class Awareness {
 		Hearing.noise(level, at, reach, who, kind);
 	}
 
-	/** How far {@code player}'s own noise carries, as a share: less sneaking, and less with Quiet Step. */
+	/** How far {@code player}'s own noise carries, as a share: less sneaking, and less with Quiet Step or Muffled boots. */
 	static double noise(ServerPlayer player) {
-		return Rangers.quiet(player) * baseNoise(player);
+		return Rangers.quiet(player) * TinkerPerks.footfall(player) * baseNoise(player);
 	}
 
 	private static double baseNoise(ServerPlayer player) {

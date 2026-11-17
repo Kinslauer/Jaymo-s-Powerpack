@@ -311,7 +311,8 @@ public final class TierHiding {
 		}
 		Set<Item> hide = new HashSet<>();
 		if (!player.isCreative() && !player.isSpectator()) {
-			int open = WorldTiers.progress(player).open();
+			// (class trees) a Tinkerer's eye opens the gear early: TierGate.gearTier
+			int open = TierGate.gearTier(player);
 			int know = Knowledge.level(player);
 			for (Item item : tiers.keySet()) {
 				if (hidden(player, item, open, know, seen)) {

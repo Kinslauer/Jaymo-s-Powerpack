@@ -80,3 +80,50 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
   Powers' parkour; changing it would mean a Powers hook). The Warder's longer wards are our own wards; the RPG Series' Frost
   Shield is the Wizards mod's spell and isn't lengthened.
 - Lore: the sigil is the canon's typed "sigil" (a working laid as a circle of marks); nothing new to place.
+
+### Patch 3: the Workshop (Marksman, the bench, Tinkerer)
+- **Trees** (`trees/MarksmanTree`, `trees/TinkererTree`): the Marksman's column on the left (cols 0-1), the bench in the
+  middle (col 2, nodes open to both classes), the Tinkerer's on the right (cols 3-4). Each class's tab shows its own column
+  and the bench.
+- **Marksman** (`Workshop`). Practice: a Marksman reloads faster with each level (`Workshop.loadRate`, the early guns and
+  WeaponMod's). **Steady Aim** (3): crouched and still for half a second, +10% damage, +1.5 degrees of aim assist and 25%
+  less stray from an early gun a rank. **Speed Load**: every 3rd gun kill primes the next reload, which is done at once with a
+  spin of the gun (a new `SPIN` gesture: the arm flicks in third person, the gun turns twice over in first person).
+  **Called Shot / Quick Shot** (fork, 10): sneak and fire, and the height the shot strikes picks head (x1.75), arm (a mob
+  drops its weapon) or leg (crippled and slowed for 6 s); or, with a loaded gun, a mob that swings at you or a friend within
+  10 blocks takes a ball from you, spending the gun's load (once per short rest, `Rests` pool `quick_shot`). **Precision**
+  (top, 20): a shot on an unaware mob (`Senses.unaware`) or a crippled foe hits x1.5 with the critical's sparks and sound.
+- **The bench.** **Gunsmith**: guns, barrels and bullets come out of a crafting grid only for a Gunsmith (`TreeLocks.mayCraft`),
+  and only a Gunsmith forges a gun barrel at the anvil. **Gun Upgrades** (3): sneak-use a station with the gun in hand and
+  the stuff in the off hand: Muffled (wool: no Hearing noise, a quiet report, no Deafened), Long Barrel (an iron ingot: the
+  ball flies 1.35x as fast, so further), Choke (a copper ingot, blunderbuss only: each pellet is pulled 60% back to the line of the barrel), Bayonet (a sword:
+  +5 to a melee blow with the gun); one part a rank on a gun. **Trick Shot**: arrows at a station become 4 grapple (tripwire
+  hook), oil (coal), water (a water bottle) or shrapnel (gunpowder) bolts; oil makes what it soaks burn longer and a player's fire
+  hurt it 1.5x, water puts fire out and makes lightning (and a lightning Sorcerer's magic) hurt 1.75x for 30 s. **Field Kit**:
+  the Marksman's class key (a Tinkerer's sneak and key) mends 15% of the gear in hand from its own repair stuff (or an iron
+  nugget), every 30 s.
+- **Tinkerer** (`TinkerPerks`). **The craftsman's eye**: `TierGate.gearTier` is the higher of the world tier and the
+  Tinkerer's eye (Borderlands at 5, Wildlands 10, Dread 15, Legend 20); it sets what merchants offer them (`TierGate.allowed`),
+  the grade their smiths forge to (`maxGrade`), what JEI and the recipe book hide from them (`TierHiding`) and the early gun
+  barrels they may forge. Monsters still read the real tier. Practice: a Tinkerer studies an ability faster with their level
+  (`MimicStudy`). **Spare Hands** (2): +1 infusion kept a rank, and Muffled boots (wool: your noise and your heard footsteps
+  carry half as far, `Awareness.noise`, `Senses`), a Warded chest (magma cream: freezing builds and fire burns out half as
+  fast) and a Keen blade (flint: mends a point every 5 s, in hand or pack), made at a station with 2 of the stuff in the off
+  hand. **Contraption** (5, 2 ranks): sneak-use 4 copper nuggets with gunpowder in the pack and a scrap bundle is made (a
+  3 s wait); thrown, it bursts at random with a flash (blinds foes), a net (slows them hard), a healing mist (regeneration for
+  friends), water, oil, a small bang, or a dud; rank 2 (Educated Guess) gives a dud back. **Dismantle** (10): sneak and touch a
+  tripwire, its hook, a pressure plate or a covered pit with an empty hand and it breaks off (dropping its parts); a locked
+  chest's lock comes open the same way; golems and clockwork mobs take 1.75x from a Tinkerer's blows. **Iron Pup** (12): built at
+  a station (sneak, empty hand, 6 iron, 2 redstone, a clock in the pack); it follows, bites and carries loose items to you; it
+  takes no food. **Iron Defender / Iron Hound** (fork, 18): +6 armour and patches you 2 health every 6 s when near / faster, a
+  harder bite, and every 10 s the foes within 24 blocks glow. **Imitation** (top, 22): one sight of an ability studies it whole.
+- My calls: Called Shot and Quick Shot are a fork at 10 (the crossroads row), not Quick Shot at 15 (its own line). Gunsmith
+  gates the guns for everyone, so a weaponsmith sells guns and shot to anyone who isn't a Gunsmith, not only to Marksmen
+  (otherwise no other class could get one). Gun parts, trick bolts and contraptions are vanilla items with our data, names and
+  an item model (no new art). Spare Hands' kinds take their stuff from the off hand, since boots and swords already take
+  Springing and Returning. Dismantle on a lock is the same "spirit" opening as a spell's (`Lockpicking.pickBySpirit`).
+- Gaps: the **Iron Pup** is a tamed vanilla wolf in copper-dyed wolf armour, named Iron Pup, not a new clockwork model (no
+  model or art in this patch). **Quick Shot** fires as the swing lands (Fabric's after-damage hook), not before it. Muffled on
+  WeaponMod guns stops our noise and deafening, but WeaponMod's own report still plays. The Tinkerer's **own forging** has no
+  tier ceiling in Kingdoms today, so there was none to raise. Dismantle opens our locked chests; door locks aren't ours.
+- Lore: the Workshop is the gunsmith's and tinker's craft already in the canon (the stations, the early guns); nothing new to place.
