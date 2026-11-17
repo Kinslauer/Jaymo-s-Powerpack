@@ -2378,3 +2378,8 @@ inventory icon.
 - A limb Ragdollified no longer has (Dismember) hangs straight down and stays missing on the corpse.
 - Only the humanoid rig is mapped (players, zombies, skeletons, villagers, illagers, piglins...). Quadruped, box and chain bodies have no matching part list, so they lie in our fallen pose at the landed spot as before. A pose that can't be read or doesn't pass the server's checks does the same; the 600-tick timeout and play without Ragdollified are unchanged.
 - Not played.
+
+## 0.6.38 (2026-11-17): Blunderbuss gibs
+
+- **Gibs**: a mob Jaymo's Powers marks as blown apart by a point-blank blunderbuss shot bursts into chunks as from a
+  blast (farm animals still leave a body).
