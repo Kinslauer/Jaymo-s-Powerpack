@@ -139,6 +139,8 @@ public enum Step {
 	ROLL_SALMON(() -> com.jaymoskitchen.ModItems.dish(Dish.SALMON_ROLL), null),
 	ROLL_COD(() -> com.jaymoskitchen.ModItems.dish(Dish.COD_ROLL), null),
 	KELP_ROLL_SLICE(() -> com.jaymoskitchen.delight.DelightDishes.KELP_ROLL_SLICE, null),
+	// the kettle's tea (hands-on cooking): any of the herbs in the tag
+	TEA_HERB(() -> Items.FERN, null, "tea_herb"),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
