@@ -218,14 +218,19 @@
     },
     "table_one": {
       "do": "talk", "who": "giver", "goal": "Hear what {giver} can bring out",
+      "voices": {
+        "honour": "A thing half said at that table is worse than a thing not said. If it's to be told, let it all be told.",
+        "mercy": "That woman has buried him once. Mind how much of it you make her dig up.",
+        "courage": "It took six years to walk in at that door. It would be a poor thing to go quiet now."
+      },
       "say": {
         "?truth=ran": "Where it begins. It begins with me getting down on the far side of the wagon. If I say that, I have said I ran, in his own kitchen, with his boy behind that door. Or I can say that raiders came out of the willows, and there were six. That's true as well. Which do I say?",
         "?truth=talked": "Where it begins. It begins the night before, at an inn, with a stranger buying. If I say that, I have said I put them in the willows myself. Or I can begin at the ford, where I fought. That's true as well. Which do I say?",
         "?": "Where it begins. It begins with him in the shallows and me coming round beside him. If I say that, I must say whose hand it was at the end. Or I can say the raiders left him dying, and he died. That's true as well. Which do I say?"
       },
       "replies": [
-        { "say": "Say the hard one. Plainly.", "then": "table_one_heard", "mark": "owed_said_one", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the hard part, and {giver} did." },
-        { "say": "Say the part that's easier to hear.", "then": "table_one_heard", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the part that was easier to hear." }
+        { "say": "Say the hard one. Plainly.", "for": ["honour", "courage"], "then": "table_one_heard", "mark": "owed_said_one", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the hard part, and {giver} did." },
+        { "say": "Say the part that's easier to hear.", "for": ["mercy"], "irks": ["honour"], "then": "table_one_heard", "journal": "At the Arkle table {giver} asked me how to begin. I said to begin with the part that was easier to hear." }
       ]
     },
     "table_one_heard": {
@@ -248,8 +253,8 @@
         "?": "The next of it is the purse. I took it off his belt to carry to her with the news, and I drank it in the next town, every coin. She thinks the raiders had it. It is mine to give or to keep."
       },
       "replies": [
-        { "say": "Give it to her.", "then": "table_two_heard", "mark": "owed_said_two", "journal": "I told {giver} to give her the part nobody else could have told her." },
-        { "say": "Keep it. She has enough to carry.", "then": "table_two_heard", "journal": "I told {giver} to keep back the part nobody else could have told her." }
+        { "say": "Give it to her.", "for": ["honour"], "then": "table_two_heard", "mark": "owed_said_two", "journal": "I told {giver} to give her the part nobody else could have told her." },
+        { "say": "Keep it. She has enough to carry.", "for": ["mercy"], "irks": ["honour"], "then": "table_two_heard", "journal": "I told {giver} to keep back the part nobody else could have told her." }
       ]
     },
     "table_two_heard": {
@@ -272,8 +277,8 @@
         "?": "Last. She will ask whether he was afraid. They always ask. He was. He wept, and he asked for her, and then he asked for the knife. I can tell her no. I think I could make her believe it. That is the rest of it."
       },
       "replies": [
-        { "say": "Say it as it was.", "then": "table_three_heard", "mark": "owed_said_three", "journal": "I told {giver} to finish it as it was." },
-        { "say": "Leave that where it lies.", "then": "table_three_heard", "journal": "I told {giver} to leave the last of it where it lay." }
+        { "say": "Say it as it was.", "for": ["honour", "courage"], "then": "table_three_heard", "mark": "owed_said_three", "journal": "I told {giver} to finish it as it was." },
+        { "say": "Leave that where it lies.", "for": ["mercy"], "irks": ["honour", "courage"], "then": "table_three_heard", "journal": "I told {giver} to leave the last of it where it lay." }
       ]
     },
     "table_three_heard": {
