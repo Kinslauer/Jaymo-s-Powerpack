@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Fx {
 	private static boolean looked;
-	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst, pool, shape;
+	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, wave, orb, sigil, burst, pool, shape;
 
 	private Fx() {
 	}
@@ -55,8 +55,9 @@ public final class Fx {
 			burst = lookup.findStatic(fx, "burst", MethodType.methodType(void.class, ServerLevel.class, double.class, double.class, double.class, int.class,
 				float.class, int.class, double.class, double.class, double.class));
 			pool = lookup.findStatic(fx, "pool", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class, int.class));
+			wave = lookup.findStatic(fx, "wave", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, Vec3.class, double.class, float.class, int.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
-			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = pool = null;
+			wisp = mote = miasma = spark = rune = beam = blast = ring = wave = orb = sigil = burst = pool = null;
 		}
 		try {
 			shape = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.fx.MagicFx"), "shape",
@@ -183,8 +184,21 @@ public final class Fx {
 				// fall through
 			}
 		}
-		level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.4F), at.x, at.y + 0.1, at.z, 24, radius * 0.5, 0.05, radius * 0.5, 0.0);
+	level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.4F), at.x, at.y + 0.1, at.z, 24, radius * 0.5, 0.05, radius * 0.5, 0.0);
 	}
+
+	/** A wave rising at {@code from} and rolling {@code distance} blocks along {@code direction} over {@code ticks}, {@code width} across. */
+	public static void wave(ServerLevel level, Vec3 from, Vec3 direction, double distance, float width, int color, int ticks) {
+		look();
+		if (wave != null) {
+			try {
+				wave.invoke(level, from, direction, (float)distance, width, color, ticks);
+				return;
+			} catch (Throwable e) {
+				// fall through
+			}
+		}
+		}
 
 	/** A ball of power held at {@code at} for {@code ticks}. */
 	public static void orb(ServerLevel level, Vec3 at, float radius, int color, int ticks) {

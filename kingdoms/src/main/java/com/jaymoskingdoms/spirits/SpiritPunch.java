@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.spirits;
 
 import com.jaymoskingdoms.Folk;
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
 import java.util.ArrayList;
@@ -188,6 +189,8 @@ public final class SpiritPunch implements Move {
 		Vec3 hit = target.getBoundingBox().getCenter();
 		Mana.sendSeen(level, Mana.MOTE, hit.x, hit.y, hit.z, 12, 0.3, 0.3, 0.3, 0.12);
 		level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, hit.x, hit.y, hit.z, 6, 0.2, 0.2, 0.2, 0.3);
+		Fx.ring(level, hit.add(0.0, 0.1, 0.0), 1.5F, 0xFFFFFF);
+		Fx.wave(level, hit, look, 5.0, 1.5F, 0xD0D0D0, 10);
 		level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.8F);
 		PowersCompat.shake(player, SHAKE);
 		if (target instanceof ServerPlayer struck) {

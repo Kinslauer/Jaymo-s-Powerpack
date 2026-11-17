@@ -441,6 +441,7 @@ public final class SpiritBarrage {
 			level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.2F, 0.6F + 0.4F * level.getRandom().nextFloat());
 			level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 10, 0.25, 0.25, 0.25, 0.5);
 			Mana.sendSeen(level, Mana.MOTE, mid.x, mid.y, mid.z, 10, 0.3, 0.3, 0.3, 0.15);
+			level.sendParticles(Fx.spark(0xFFE08A, 1.0F), mid.x, mid.y, mid.z, 12, 0.3, 0.3, 0.3, 0.3);
 		} else if (gain[0] != gain[1]) {
 			// one side's blows got through
 			LivingEntity hit = s.side[gain[0] > gain[1] ? 1 : 0];
