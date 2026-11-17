@@ -664,3 +664,9 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-16 (Andy, Ragdolls and Cover picks): 20 of 21 rows picked, no notes; only pb-ref (match a clip) left out. Ragdollified + Reactions go in and Kitchen's ragdolls stand down (Kitchen's corpse takes over once a ragdoll rests; power ragdolls stay ours); Amputation, Player Corpses and Revive & Drag replace Dismember, Kitchen's player corpses and our downed look once they have 26.3 builds; our own lean + cover for players and NPC shooters; our own tracers, magazines, tactical armour and TaCZ Additions features for the future; punch-impact and barrage-flurry effects. https://claude.ai/artifact/6v9SAjDsK47H9ay6MqgcPF
 - 2026-11-16 (Andy, Ragdolls and Cover picks): build the Ragdolls track and the Lean/Cover track first (future gear and punch FX after). Lean keys: Q and E while sneaking (Q drops and E opens the inventory as usual otherwise).
 - 2026-11-16 (Andy, Ragdolls and Cover picks): lore approved for leaning and taking cover (Lore.md: soldiers' craft from Varro's drill). "merge": PRs #1661 (Ragdollified) and #1663 (lean and cover) merged untested in game.
+
+### 2026-11-16: take only the trunk carving from Immersive Tree Chop
+- **Decided:** "Our mod does NOT have cracks that deepen thats all i want from here ... i want the trunk to carve out,
+  retaining the interior texture and all". From Immersive Tree Chop (Litewer, MIT) only the carving is taken.
+- **Applies to:** Kingdoms, `ChoppedLog`, `ChoppedLogRenderer`, `Trees.chop`.
+- **Agent:** [[Agents/tree-carve|tree-carve]]
