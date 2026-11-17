@@ -40,7 +40,7 @@ public final class ChronoSpeedClient {
 		}
 		boolean able = overclocked && player.input.keyPresses.forward() && !player.input.keyPresses.shift()
 			&& !player.getAbilities().flying && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable()
-			&& !player.isSpectator() && player.isAlive();
+			&& !player.isSpectator() && player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player);
 		Direction was = wall;
 		Direction now = null;
 		if (able && player.horizontalCollision) {
