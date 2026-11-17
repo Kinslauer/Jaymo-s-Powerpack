@@ -1535,6 +1535,12 @@ raised among folk catches the suspicion from both sides.
 **Nightborn and Dawnborn.** Daylight dulls the one and feeds the other, and neither has ever trusted the other. A
 Nightborn keeps the Lantern Warden, a Dawnborn keeps the Crowned Sun, and each quietly blames the other's god.
 
+(new) **The bound bloods** (Andy, 2026-11-17: "All tideborn are deep mother, and they and dawnborn are the only heritages
+with a bound patron"; placement for him to approve). Every other people has a god most of its children pray to, and
+any child of theirs may grow up keeping another. Not these two. A Tideborn is the Deep Mother's from the first breath of
+salt, and a Dawnborn the Crowned Sun's from the first sunrise: they're raised to it and no other. A priest serves the god
+they were raised to; only one raised to none chooses a god, or one who comes to the priesthood later in life.
+
 **Emberborn and Frostborn.** Fire and frost, in the blood and in the land. Each flourishes where the other starves,
 and each has spent generations being told the other's country is not worth having.
 
