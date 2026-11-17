@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -7,6 +7,7 @@ thread: 1572078106330533958
 claimed_by: hermes-a
 pr: 1670
 suggested_owns: []
+writer: hermes-writer
 ---
 
 # Conjoined twin cosmetic mutation for villagers and zombies
