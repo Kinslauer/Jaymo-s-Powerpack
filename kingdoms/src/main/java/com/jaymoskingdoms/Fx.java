@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Fx {
 	private static boolean looked;
-	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst, pool, shape;
+	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, wave, orb, sigil, burst, pool, stroke, shape;
 
 	private Fx() {
 	}
@@ -55,8 +55,10 @@ public final class Fx {
 			burst = lookup.findStatic(fx, "burst", MethodType.methodType(void.class, ServerLevel.class, double.class, double.class, double.class, int.class,
 				float.class, int.class, double.class, double.class, double.class));
 			pool = lookup.findStatic(fx, "pool", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class, int.class));
+			wave = lookup.findStatic(fx, "wave", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, Vec3.class, double.class, float.class, int.class, int.class));
+			stroke = lookup.findStatic(fx, "stroke", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, Vec3.class, float.class, int.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
-			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = pool = null;
+			wisp = mote = miasma = spark = rune = beam = blast = ring = wave = orb = sigil = burst = pool = stroke = null;
 		}
 		try {
 			shape = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.fx.MagicFx"), "shape",
@@ -183,7 +185,35 @@ public final class Fx {
 				// fall through
 			}
 		}
-		level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.4F), at.x, at.y + 0.1, at.z, 24, radius * 0.5, 0.05, radius * 0.5, 0.0);
+			level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.4F), at.x, at.y + 0.1, at.z, 24, radius * 0.5, 0.05, radius * 0.5, 0.0);
+			}
+
+	/** A wave rising at {@code from} and rolling {@code distance} blocks along {@code direction} over {@code ticks}, {@code width} across. */
+	public static void wave(ServerLevel level, Vec3 from, Vec3 direction, double distance, float width, int color, int ticks) {
+		look();
+		if (wave != null) {
+			try {
+				wave.invoke(level, from, direction, distance, width, color, ticks);
+				return;
+			} catch (Throwable e) {
+				// fall through
+			}
+		}
+		level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.0F), from.x, from.y, from.z, 16, direction.x * 0.1, 0.05, direction.z * 0.1, 0.0);
+		}
+
+		/** A straight cut from {@code from} to {@code to}, {@code width} across, {@code color} (0xRRGGBB). */
+	public static void stroke(ServerLevel level, Vec3 from, Vec3 to, float width, int color) {
+		look();
+		if (stroke != null) {
+			try {
+				stroke.invoke(level, from, to, width, color);
+				return;
+			} catch (Throwable e) {
+				// fall through
+			}
+		}
+		level.sendParticles(new DustParticleOptions(color & 0xFFFFFF, 1.0F), (from.x + to.x) * 0.5, (from.y + to.y) * 0.5, (from.z + to.z) * 0.5, 8, 0.0, 0.05, 0.0, 0.0);
 	}
 
 	/** A ball of power held at {@code at} for {@code ticks}. */
