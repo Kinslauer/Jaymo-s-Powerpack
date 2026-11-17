@@ -8,4 +8,5 @@
 - **Awakening picks, patch 2**: Water Sorcerers pour carried water into their reserve (look down while holding J: a waterskin's sip, a bottle, a bucket) or draw it from the moisture in the air; a caster choked by Darktide's Strangling Lift can't cast.
 - **Awakening picks, patch 3**: Rubber-folk and Verdants: the heritage key while sprinting is the **stretching grab** (with Jaymo's Powers): the arm hooks a foe up to 8 blocks off, round cover, and yanks it to your feet. Casters inside a Pocket Arsenal's Rift Seal can't cast.
 - **Awakening picks, patch 5**: a caster a Jaymo's Powers Lawgiver's rule says has no powers can't cast.
+- **Awakening picks, patch 6**: a ninth attribute, **Ability Power**, for those with a Jaymo's Powers power (its moves hit harder, reach further and last longer on others); **combat mode** (F4): in stance the number keys fire the belt's Weapon Forms at once; finishing a quest gives back a Powers trial swap; the Verdant, vampires and werewolves heal fast enough for Powers' Bonding Vat.
 - Built; not played.

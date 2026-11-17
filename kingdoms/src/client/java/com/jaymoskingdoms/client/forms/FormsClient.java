@@ -124,6 +124,43 @@ public final class FormsClient {
 		}
 	}
 
+	/**
+	 * (Awakening pick) Combat mode, toggled by its key: in stance, the hotbar's number keys 1 to {@value Forms#BELT_SLOTS} fire
+	 * that belt slot's form at once instead of picking a hotbar slot (Ctrl and scroll only pick). Kept until toggled off, on
+	 * this client.
+	 */
+	private static boolean combat;
+
+	public static void combatMode(KeyMapping toggle) {
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			while (toggle.consumeClick()) {
+				combat = !combat;
+				minecraft.gui.hud.setOverlayMessage(Component.translatable(combat ? "message.jaymoskingdoms.combat_mode.on"
+					: "message.jaymoskingdoms.combat_mode.off"), false);
+			}
+			LocalPlayer player = minecraft.player;
+			if (!combat || player == null || minecraft.gui.screen() != null || !Forms.book(player).stance()
+				|| !ClientPlayNetworking.canSend(Forms.Pick.TYPE) || !ClientPlayNetworking.canSend(Forms.Fire.TYPE)) {
+				return;
+			}
+			for (int i = 0; i < Forms.BELT_SLOTS; i++) {
+				boolean pressed = false;
+				while (minecraft.options.keyHotbarSlots[i].consumeClick()) {
+					pressed = true;
+				}
+				if (pressed) {
+					ClientPlayNetworking.send(new Forms.Pick(Forms.PICK_SLOT + i));
+					ClientPlayNetworking.send(new Forms.Fire(false));
+				}
+			}
+		});
+	}
+
+	/** Whether combat mode is on (the belt strip marks it). */
+	public static boolean combatMode() {
+		return combat;
+	}
+
 	/** How long the attack button is held with a sword (ticks) before a Wheel Cut begins. */
 	static final int WHEEL_HOLD_TICKS = 10;
 	private static int attackHeld;
@@ -241,7 +278,8 @@ public final class FormsClient {
 			int x = x0 + i * (w + SLOT_GAP);
 			boolean picked = i == book.slot();
 			Forms.Form form = Forms.get(book.belt().get(i));
-			graphics.fill(x - 1, y - 1, x + w + 1, y + SLOT_H + 1, picked ? SLOT_PICKED : SLOT_BACK);
+			// (Awakening pick) in combat mode every slot is edged: each fires on its number
+			graphics.fill(x - 1, y - 1, x + w + 1, y + SLOT_H + 1, picked ? SLOT_PICKED : combat ? HudStyle.WARN : SLOT_BACK);
 			graphics.fill(x, y, x + w, y + SLOT_H, SLOT_BACK);
 			int color = form == null ? Ui.HINT : !form.family().holds(player.getMainHandItem()) ? SLOT_WRONG : picked ? Ui.TEXT : Ui.DIM;
 			String text = named ? (i + 1) + " " + (form == null ? "-" : form.name().getString()) : String.valueOf(i + 1);

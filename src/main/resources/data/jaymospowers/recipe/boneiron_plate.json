@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "III"
+  ],
+  "key": {
+    "I": "jaymospowers:boneiron_ingot"
+  },
+  "result": {
+    "id": "jaymospowers:boneiron_plate"
+  }
+}

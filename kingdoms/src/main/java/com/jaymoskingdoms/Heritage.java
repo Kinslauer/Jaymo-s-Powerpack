@@ -480,6 +480,14 @@ public final class Heritage {
 		return of(player) == kind;
 	}
 
+	/**
+	 * (Awakening pick) Whether {@code player}'s body mends fast enough to take metal into the bone (Jaymo's Powers' Bonding Vat
+	 * asks by reflection): the Verdant, and vampires and werewolves.
+	 */
+	public static boolean healsFast(Player player) {
+		return is(player, Kind.VERDANT) || Kinship.monster(player);
+	}
+
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {

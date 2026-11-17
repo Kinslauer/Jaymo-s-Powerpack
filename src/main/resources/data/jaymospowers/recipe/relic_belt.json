@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "LLL",
+    "SGS"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:string",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "jaymospowers:relic_belt"
+  }
+}

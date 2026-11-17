@@ -143,6 +143,14 @@ public final class Callings {
 	/** (Awakening picks) Reactor Heart and Lawgiver: the day each last counted. */
 	private static final Map<UUID, Long> BLAST_DAY = new HashMap<>();
 	private static final Map<UUID, Long> LECTERN_DAY = new HashMap<>();
+	/**
+	 * (Awakening pick) The brink: a powerless player left at {@link #BRINK_HEALTH} or less by a blow lives through it, and
+	 * whatever sleeps in them stirs. Once a day it takes {@link #DAY} off the wait, never past {@link #BRINK_FLOOR} (it
+	 * shortens the wait; it never skips it) and never claims a power.
+	 */
+	public static final float BRINK_HEALTH = 4.0F;
+	public static final int BRINK_FLOOR = 6000;
+	private static final Map<UUID, Long> BRINK_DAY = new HashMap<>();
 
 	private Callings() {
 	}
@@ -200,6 +208,9 @@ public final class Callings {
 					call(player, "blinker", Integer.MAX_VALUE);
 				}
 			}
+			if (damageTaken > 0.0F && player.getHealth() <= BRINK_HEALTH && Powers.of(player) == null) {
+				brink(player);
+			}
 			if (source.is(DamageTypes.SONIC_BOOM)) {
 				call(player, "resonance", Integer.MAX_VALUE);
 			} else if (source.getEntity() instanceof CaveSpider && !source.is(DamageTypeTags.IS_PROJECTILE)
@@ -235,7 +246,24 @@ public final class Callings {
 			COLD_DAY.clear();
 			BLAST_DAY.clear();
 			LECTERN_DAY.clear();
+			BRINK_DAY.clear();
 		});
+	}
+
+	/** (Awakening pick) Brought to the brink and still standing: the wait shortens by a day (once a day), never below the floor. */
+	private static void brink(ServerPlayer player) {
+		if (player.isCreative() || player.isSpectator() || com.jaymospowers.alchemy.picks.GivingUp.settled(player)) {
+			return;
+		}
+		Integer left = player.getAttached(Powers.AWAKEN_IN);
+		int now = left == null ? Powers.AWAKEN_MIN_TICKS : left;
+		if (now <= BRINK_FLOOR || !once(BRINK_DAY, player)) {
+			return;
+		}
+		player.setAttached(Powers.AWAKEN_IN, Math.max(BRINK_FLOOR, now - DAY));
+		player.setAttached(Powers.AWAKEN_SLOW, true);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.brink").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.5F);
 	}
 
 	/** Counts once per in-game day for this player: true the first time today. */

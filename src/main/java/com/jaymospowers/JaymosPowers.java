@@ -125,6 +125,13 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.reactor.ReactorPower.init();
 		com.jaymospowers.power.blinker.BlinkerPower.init();
 		com.jaymospowers.power.rules.RulesPower.init();
+		// (Awakening picks) each power's ladder of trials
+		com.jaymospowers.core.trials.PowerTrials.init();
+		// (Awakening picks) trading powers through the Bonding Earrings
+		com.jaymospowers.core.PowerTrade.init();
+		// (Awakening picks) the relic belt, and boneiron bonded to bone
+		com.jaymospowers.relics.Relics.init();
+		com.jaymospowers.bonebond.Boneiron.init();
 		// Blindness, the condition (lost eyes), and the Unseeing
 		com.jaymospowers.power.blindness.Blind.init();
 		// Elemental Corruption: the gods of the elements answer a corrupted elemental user's murders (each element registers its part)
@@ -296,7 +303,7 @@ public class JaymosPowers implements ModInitializer {
 			"elemental.ElementalCorruption", "power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
-			"water.Dives", "core.MagicMoves", "power.rules.Rules",
+			"water.Dives", "core.MagicMoves", "power.rules.Rules", "core.trials.PowerTrials", "bonebond.Boneiron",
 			"alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};

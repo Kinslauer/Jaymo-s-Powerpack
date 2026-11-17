@@ -251,3 +251,69 @@ Lore (new): the **Reactor Heart** is the ruined future's (Chrono's Future): the 
 burned them down, one beating in a person. The **Blinker** is the End's own step, the endermen's; the End-born wake to
 it soonest. The **Lawgiver** is the Judge's gift (the afterlife's Judge, who rules on the dead): a living hand that
 writes law, and for a while the world keeps it.
+
+### Patch 6: how powers are earned
+- `aw-brink` **The brink** (`core/Callings`). A powerless survival player brought to 4 health or less by any harm, and
+  still alive, takes a day off the awakening wait, once a game day, never below 5 minutes (6000 ticks): it shortens the
+  3-5 day wait without skipping it and claims no power (any calling still decides which one). An italic overlay says
+  something in them woke a little.
+- `aw-trials` **Power trials** (`core/trials/PowerTrials`, the H menu's **Trials** tab and a pinned line on the HUD,
+  `client/trials/TrialsScreen`, lang `trials.json`). Every power has the same 16-rung ladder in its own words: use each of
+  its four abilities (by their names: 10, 10, 15, 15 times), land 25 blows, fell 10 and 40 hostile creatures, fell 10 and
+  30 with the power itself, fell a great foe (100+ health or a Kingdoms boss), take 30 harm and live, go below Y -40,
+  above Y 200, into the Nether and the End, and travel 3000 blocks. Each finished trial is 25 mastery points (all 16: 400,
+  nearly the 420 that unlocks every ability), beside mastery by use. Three are open at once in ladder order; one whose
+  ability isn't learned yet waits and opens the moment it is. Pin one (it shows on the top-left rail), or swap one to the
+  back of the ladder for one of 3 swaps; finishing any quest (a Kingdoms quest, by reflection, or a Z Fighter master's job)
+  gives a swap back. A new power starts a new ladder. The prompts are the holder's own thoughts, as italic overlays ("I
+  could push further... Fell a great foe"), never chat.
+- `aw-power` **Ability Power** (Kingdoms `Stats.Stat.POWER` on the K screen's Attributes tab, shown to those with a Powers
+  power; Powers `core/AbilityPower`). A ninth attribute, 0-100 like the rest (the world tier's cap, the same points). It
+  works on what a power does while it acts (its keys and its own tick): +0.3% harm a point (100: +30%) from the power's
+  moves to anyone but the maker, +0.2% reach a point (+20%) where a move picks its target by aim (`PickKit.aimed`), +0.25%
+  longer a point (+25%) on effects a move lays on someone else. Health and stamina stay where they were (hearts are
+  Hearty Meals', stamina the Feathers), so only Ability Power is new.
+- `aw-trade` **Trading powers** through the Bonding Earrings (`core/PowerTrade`). Two players with a power and an earring in
+  hand, within 5 blocks, facing: sneak and use the earring at the other. Each must say yes twice (the offer and its answer,
+  then once more to be sure), each yes within 15 s of the last. Then both earrings crack and the powers change hands;
+  mastery starts again from the first ability, fate (ascended, corrupted) starts fresh, and a new trial ladder begins. Any
+  two powers, not only Z Fighters; the earrings' fusion (plain use) is unchanged.
+- `aw-relics` **The relic belt** (`relics/Relics`, `RelicBeltItem`, `RelicItem`, lang `relics.json`). A belt-slot bauble
+  (leather, string and a gold ingot) with 4 pouches, loaded like a bundle. Seven relics, levels 1-3: **Heartseed** +2 most
+  health a level, **Wind Knot** +1 stamina feather, **Focus Stone** +5% harm from your power's moves (on top of Ability
+  Power), always; **Hale Coin** +1 attack while at 80% health or more; **Last Ember** +3 armour at 30% health or less; **Tide
+  Scale** +20% swimming speed in water; **Stride Spur** +5% speed while sprinting. Click a relic onto its twin (same
+  level) to merge them a level up. Every boss leaves its own relic when it falls: the Warden a Heartseed, the Wither a
+  Last Ember, the Ender Dragon a Focus Stone, the Elder Guardian a Tide Scale, and each Kingdoms boss-bar mob the same kind
+  every time (by its type).
+- `aw-bone` **Boneiron** (`bonebond/Boneiron`, `BondingVatBlock`, `BoneironPlateItem`, lang `bonebond.json`). A rare ore in
+  deepslate between Y -64 and -40 (veins of up to 3 in about one chunk in three; iron pickaxe), smelted to boneiron
+  ingots. The **Bonding Vat** (a cauldron, two ingots and a bone block) takes up to 6 ingots in its brine. A fast healer
+  climbs in and settles (sneaking) for 10 s, taking 1 harm a second, and their bones take the next tier (tier n costs n+1
+  ingots), up to 5. Each tier is +2 armour, +1 toughness, +1 attack and +0.2 knockback, kept through death. Fast healers:
+  Kingdoms' Verdant, vampires and werewolves (`Heritage.healsFast`), and a Z Fighter of the Verdant line; anyone else is
+  refused. Or plate armour: a **boneiron plate** (three ingots in a row) clicked onto any piece of armour, up to 3 a piece,
+  each worn plating +0.5 armour, +0.25 toughness, +0.25 attack and +0.05 knockback.
+- `aw-combat` **Combat mode** (Kingdoms `FormsClient`, key F4 under Combat Arts). Our R G V B keys and the class key already
+  fire at once, and Spell Engine's skill bar fires on its own keys; the one thing that only picks is the Weapon Forms belt
+  (Ctrl and scroll pick a slot, the Combat Art key fires it). With combat mode on, in stance, the number keys 1-5 fire
+  that belt slot's form at once instead of changing the hotbar slot; the belt strip edges every slot red while it is on.
+  It stays until toggled off, on that client.
+
+Design calls and gaps: "Ability Power raises every ability in its own way" is three levers that reach every power's moves
+(harm, aimed reach, effect length), not a hand-tuned rule per ability: a move's size or number of targets is its own code and isn't read from a shared place, so those two aren't raised. Harm from a power's projectile or a lingering field
+counts only when it lands inside the power's own tick or key (most do; a vanilla arrow or snowball it threw does not).
+Without Kingdoms there is no Ability Power (only the Focus Stone). The trials are one shared ladder shape filled with each
+power's own ability names, not 16 hand-written feats per power. The bonding is done crouched in the vat, not lying down
+(the game has no lying pose outside a bed). Plating is done by clicking a plate onto armour, not at the Tinkering forge:
+the forge works only its own fixed set of molten metals, and adding boneiron to it would mean a new molten metal through
+the smeltery, casts and forging tables. Relics need no bond (they're worn in the belt, not as baubles of their own).
+
+Lore (new): the **trials** are nobody's but the holder's: thoughts that come to someone with a power of how far they could
+push it, and the push itself is the training. **The brink**: whatever sleeps in the powerless stirs when death comes
+close, and comes a little sooner after. The **Bonding Earrings** bind two souls for the fusion; held out without the dance,
+the bond carries what woke in each across to the other, and cracks. A **relic** is what a great creature's death leaves
+hardened behind, a knot of the strength that kept it up; worn close, a little of it goes into the wearer. **Boneiron**:
+in the deepest deepslate, where the world's oldest bones lie pressed into the stone, the iron has taken something of
+them; it takes to living bone the way other metals take to fire, if the body can mend round it fast enough (the Verdant,
+the vampires, the wolfblooded).

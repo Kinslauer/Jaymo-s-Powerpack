@@ -20,8 +20,11 @@ final class CombatArtKey {
 	}
 
 	static void register() {
+		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("combat_arts"));
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_art", InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_4,
-			KeyMapping.Category.register(JaymosKingdoms.id("combat_arts"))));
+			category));
+		// (Awakening pick) combat mode: the number keys fire the belt's forms at once in stance
+		FormsClient.combatMode(KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_mode", InputConstants.KEY_F4, category)));
 		// (0.7.381) with a form's weapon in hand the key is also the Battle Stance (hold) and the forms (tap): Weapon Forms decides
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> FormsClient.key(minecraft, key, () -> {
 			if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(CombatArts.Use.TYPE)) {

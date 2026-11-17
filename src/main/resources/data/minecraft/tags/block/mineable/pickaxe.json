@@ -194,6 +194,8 @@
     "jaymospowers:deepslate_small_silver_ore",
     "jaymospowers:lead_ore",
     "jaymospowers:deepslate_lead_ore",
-    "jaymospowers:inscription_table"
+    "jaymospowers:inscription_table",
+    "jaymospowers:deepslate_boneiron_ore",
+    "jaymospowers:bonding_vat"
   ]
 }

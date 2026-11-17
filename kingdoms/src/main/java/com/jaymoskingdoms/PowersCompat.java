@@ -807,6 +807,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle questDone;
+	private static boolean lookedForQuestDone;
+
+	/** (Awakening pick) A quest finished: Jaymo's Powers gives back one of its power trials' swaps. Nothing without Powers. */
+	public static void questDone(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForQuestDone) {
+			lookedForQuestDone = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					questDone = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.trials.PowerTrials"),
+						"questDone", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' power trials (older Powers?)", e);
+				}
+			}
+		}
+		if (questDone == null) {
+			return;
+		}
+		try {
+			questDone.invokeExact(player);
+		} catch (Throwable e) {
+			questDone = null;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;
