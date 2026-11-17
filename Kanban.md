@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,6 +13,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/future-gun-gear|future-gun-gear]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🪶 Quill · #1665 · writing
 
 
 ## In review
@@ -20,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
