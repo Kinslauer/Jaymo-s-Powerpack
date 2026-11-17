@@ -1,6 +1,7 @@
-# Point-blank blunderbuss shots blow bodies apart
+# Point-blank blunderbuss shots tear limbs off
 
-- **Blunderbuss**: a shot that kills at close range now gibs the body like a blast does, mobs and players alike. The
-  closer the shooter stood, the likelier: about three in four at a block away, none from 4.5 blocks out (`SHOT_REACH`
-  in `BlastGore`). Only killing shots gib; a survivor doesn't lose limbs to it. Mobs burst into chunks with Jaymo's
-  Kitchen.
+- **Blunderbuss**: a shot at close range now tears like a blast, mostly by taking a limb: about three in four at a
+  block away, one in two at two blocks, none from about 4 blocks out, from the living and the dead alike (rolled once per
+  shot, not per pellet). It blows a body apart only when the one shot killed it from full health, at close range (about
+  three in four at a block). Mobs burst into chunks with Jaymo's Kitchen. Tuning in `BlastGore` (`SHOT_REACH`,
+  `SHOT_LIMB_SCALE`, `ONE_SHOT_HEALTH`).
