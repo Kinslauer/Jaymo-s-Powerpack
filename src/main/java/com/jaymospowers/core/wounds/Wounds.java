@@ -496,6 +496,10 @@ public final class Wounds {
 		if (loss <= EPS) {
 			return;
 		}
+		// (Andy, 2026-11-16) its lethal hit was already rolled as it went down (Downed): nothing more comes off
+		if (Dismember.lethalRolled(victim)) {
+			return;
+		}
 		BodyPart aimed = Dismember.cutAim(victim);
 		BodyPart landed;
 		if (aimed != null && plan.index(aimed) >= 0) {
@@ -506,6 +510,11 @@ public final class Wounds {
 		}
 		// (0.20.61) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
 		if (Dismember.halve(victim, blow.source(), loss, landed == BodyPart.BODY)) {
+			return;
+		}
+		// (Andy, 2026-11-16) a humanoid's killing hit takes the part it landed on, a head half the time (no overkill roll)
+		if (Dismember.lethalHit(victim, blow.source())) {
+			Dismember.lethalBlow(victim, blow.source(), landed);
 			return;
 		}
 		sever(victim, plan, blow.source(), landed, was, points, loss, victim.getMaxHealth(), loss);
@@ -676,6 +685,12 @@ public final class Wounds {
 		ROUTED.put(victim, hit);
 		// (never above what vanilla had: the hit only ever takes)
 		return Math.min(before, hearts(hit.now(), plan, max));
+	}
+
+	/** The part {@code source}'s hit on {@code victim} landed on, while it lands (before its after-damage), or null if not known. */
+	static @Nullable BodyPart landed(LivingEntity victim, DamageSource source) {
+		Routed hit = ROUTED.get(victim);
+		return hit != null && hit.source() == source ? hit.landed() : null;
 	}
 
 	/** (0.15.94) Takes {@code loss} from the parts as they stand at {@code health}, where {@code source} lands it; stores them. */

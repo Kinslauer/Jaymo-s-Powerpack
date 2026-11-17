@@ -399,7 +399,14 @@ public final class Downed {
 				Dismember.split(entity);
 				return false;
 			}
+			// (Andy, 2026-11-16) a hit that would have killed a humanoid takes a part off; a head (half the time) ends them
+			int lethal = Dismember.lethalPart(entity, source, Wounds.landed(entity, source));
+			if (lethal == Dismember.HEAD) {
+				Dismember.lethalSever(entity, lethal, source);
+				return true;
+			}
 			goDown(level, entity, source, false);
+			Dismember.lethalSever(entity, lethal, source);
 			// a zombie downed by an ordinary blow gets back up (fifth edition's Undead Fortitude)
 			UndeadFortitude.downed(entity, source);
 			return false;
@@ -414,6 +421,10 @@ public final class Downed {
 					blowLands(level, entity, source, false);
 				}
 				finish(level, entity);
+				// (Andy, 2026-11-16) the killing hit takes a part off the body
+				if (entity.isDeadOrDying()) {
+					Dismember.lethalBlow(entity, source, null);
+				}
 				return false;
 			}
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
