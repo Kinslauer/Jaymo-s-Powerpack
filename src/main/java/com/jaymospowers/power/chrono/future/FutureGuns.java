@@ -156,9 +156,11 @@ public final class FutureGuns {
 	}
 
 	static void init() {
+		GunGear.init();
 		MuzzleFlash.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Mob mob && mob.entityTags().contains(TAG) && mob.level() instanceof ServerLevel level) {
+				GunGear.drops(level, mob, ARMED.containsKey(mob) ? ARMED.get(mob) : held(mob));
 				dropAmmo(level, mob);
 			}
 		});
@@ -179,6 +181,7 @@ public final class FutureGuns {
 		mob.setItemSlot(EquipmentSlot.MAINHAND, gun);
 		mob.setAttached(SPARE, random.nextInt(Math.round(pick.magazine * SPARE_SHARE) + 1));
 		mob.setDropChance(EquipmentSlot.MAINHAND, DROP_CHANCE);
+		GunGear.dress(mob, random);
 		mob.addTag(TAG);
 		ARMED.put(mob, pick);
 		NEXT.put(mob, mob.level().getGameTime() + 10 + random.nextInt(20));
@@ -446,6 +449,7 @@ public final class FutureGuns {
 		Vec3 eye = mob.getEyePosition();
 		Vec3 aim = foe.getBoundingBox().getCenter().subtract(eye).normalize();
 		float spread = mob instanceof net.minecraft.world.entity.monster.zombie.Zombie ? kind.spread * ZOMBIE_STRAY_SCALE + ZOMBIE_STRAY_ADD : kind.spread;
+		Vec3 first = null;
 		for (int i = 0; i < kind.balls; i++) {
 			Vec3 dir = stray(aim, spread, random);
 			Vec3 end = eye.add(dir.scale(kind.range));
@@ -470,9 +474,15 @@ public final class FutureGuns {
 			} else if (wall.getType() != HitResult.Type.MISS) {
 				level.sendParticles(ParticleTypes.CRIT, end.x, end.y, end.z, 3, 0.05, 0.05, 0.05, 0.1);
 			}
+			if (first == null) {
+				first = end;
+			}
 		}
 		// (0.17.135) a bright burst at the muzzle, not just a wisp of smoke
 		MuzzleFlash.mobShot(level, mob, aim, kind);
+		if (first != null) {
+			GunGear.shot(level, mob.getMainHandItem(), MuzzleFlash.muzzle(mob, aim, MuzzleFlash.MOB_AHEAD, MuzzleFlash.MOB_SIDE, MuzzleFlash.MOB_DOWN), first);
+		}
 		if (!report(mob, gun)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE,
 				kind == SHOTGUN ? 1.2F : 0.9F, (kind == PISTOL ? 1.9F : 1.6F) + random.nextFloat() * 0.2F);
