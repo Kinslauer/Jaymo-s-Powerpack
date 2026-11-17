@@ -33,13 +33,13 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 - [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
 - [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
 - [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
 - [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
+- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
 
 
 %% kanban:settings
