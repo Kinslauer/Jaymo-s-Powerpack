@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: future-gun-gear
 branch: implement/future-gun-gear
 with: 
@@ -35,3 +35,4 @@ loot only from the future's dead and echoes.
   its own art; loot only. Lore.md (new) paragraph "The last stand's kit".
 - Not played in game; couldn't build in the cloud (Modrinth CDN blocked), CI built it.
 - Andy kept both reloads and the flat icons (2026-11-17); #1669 closed.
+- Merged 2026-11-17 on Andy's say-so (merge 60b743c100).

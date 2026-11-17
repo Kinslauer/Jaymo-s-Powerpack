@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
@@ -50,3 +50,4 @@ Effects only through typed FX (docs/MagicFx.md). Lore: the future (check Lore.md
 6. The only change note is #1669's, which says no items were added. #1671 needs its own changes/powers/<branch>.md.
 7. Armory.java:44-45 adds unused imports (CustomData, CompoundTag); :192-201 and :396-420 re-indent the caveman code; lang/parts/armory.json re-indents existing lines. Keep changes surgical.
 - 2026-11-17 04:36 Andy answered the open questions in the Claude project thread (2026-11-17, Decisions.md): tracers both ways, spec magazine sizes, all three items together, loot only. claude-future-gun-gear-build picks up PR #1671 and rebuilds it.
+- 2026-11-17 05:17 PR #1671 is merged into master; moved to Inbox/Done.
