@@ -1,9 +1,6 @@
 package com.jaymospowers.mixin;
 
 import com.jaymospowers.mutation.ConjoinedTwins;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,6 +9,8 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Positions a conjoined twin baby passenger on a zombie's shoulder.
@@ -24,9 +23,8 @@ public abstract class ConjoinedTwinZombieMixin extends Mob {
         super(type, level);
     }
 
-    @WrapOperation(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;moveFunction(Lnet/minecraft/world/entity/Entity$MoveFunction;DDD)V"))
-    private void jaymospowers$positionConjoinedTwin(Entity passenger, Entity.MoveFunction moveFunction, double x, double y, double z, Operation<Void> original, @Local(argsOnly = true) Entity vehicle) {
+    @Inject(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V", at = @At("HEAD"), cancellable = true)
+    private void jaymospowers$positionConjoinedTwin(Entity passenger, Entity.MoveFunction moveFunction, CallbackInfo ci) {
         Zombie zombie = (Zombie) (Object) this;
         Entity conjoinedTwin = ConjoinedTwins.getConjoinedTwin(zombie);
         if (conjoinedTwin != null && passenger == conjoinedTwin) {
@@ -37,9 +35,9 @@ public abstract class ConjoinedTwinZombieMixin extends Mob {
             Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
 
             // Shoulder position: slightly to the left, up at ~70% height (zombies hunch), slightly forward
-            double side = -0.3;
-            double up = height * 0.7;
-            double forward = 0.1;
+            double side = ConjoinedTwins.ZOMBIE_SIDE_OFFSET;
+            double up = height * ConjoinedTwins.ZOMBIE_UP_FACTOR;
+            double forward = ConjoinedTwins.ZOMBIE_FORWARD_OFFSET;
 
             Vec3 pos = zombie.position().add(right.scale(side)).add(ahead.scale(forward)).add(0.0, up, 0.0);
             moveFunction.accept(passenger, pos.x, pos.y, pos.z);
@@ -52,8 +50,7 @@ public abstract class ConjoinedTwinZombieMixin extends Mob {
                 living.yBodyRotO = zombie.yBodyRot;
                 living.setYHeadRot(zombie.yBodyRot);
             }
-            return;
+            ci.cancel();
         }
-        original.call(passenger, moveFunction, x, y, z);
     }
 }

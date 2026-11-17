@@ -31,7 +31,17 @@ public final class ConjoinedTwins {
     public static final TagKey<EntityType<?>> HAS_CONJOINED_TWIN = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("has_conjoined_twin"));
 
     /** Chance a natural spawn gets a conjoined twin passenger. */
-    private static final float CHANCE = 0.05F; // 5%
+    public static final float CHANCE = 0.05F; // 5%
+
+    /** Shoulder offset constants for villager twin positioning. */
+    public static final double VILLAGER_SIDE_OFFSET = -0.35;
+    public static final double VILLAGER_UP_FACTOR = 0.75;
+    public static final double VILLAGER_FORWARD_OFFSET = 0.15;
+
+    /** Shoulder offset constants for zombie twin positioning. */
+    public static final double ZOMBIE_SIDE_OFFSET = -0.3;
+    public static final double ZOMBIE_UP_FACTOR = 0.7;
+    public static final double ZOMBIE_FORWARD_OFFSET = 0.1;
 
     /** The passenger entity UUID, stored on the adult (synced to clients for rendering). */
     public static final AttachmentType<String> CONJOINED_TWIN = AttachmentRegistry.create(JaymosPowers.id("conjoined_twin"),
@@ -43,7 +53,10 @@ public final class ConjoinedTwins {
      * Called when a mob finishes spawning naturally. May attach a conjoined twin passenger.
      */
     public static void onNaturalSpawn(Mob adult, ServerLevelAccessor level, EntitySpawnReason reason) {
-        if (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION) {
+        // Villagers spawn with STRUCTURE reason (from village structures), zombies with NATURAL/CHUNK_GENERATION
+        if (reason != EntitySpawnReason.NATURAL
+                && reason != EntitySpawnReason.CHUNK_GENERATION
+                && reason != EntitySpawnReason.STRUCTURE) {
             return;
         }
         if (!adult.getType().builtInRegistryHolder().is(HAS_CONJOINED_TWIN)) {
@@ -66,6 +79,8 @@ public final class ConjoinedTwins {
         // Make it a baby
         if (child instanceof AgeableMob ageable) {
             ageable.setAge(-24000); // standard baby age
+        } else if (child instanceof net.minecraft.world.entity.monster.zombie.Zombie zombie) {
+            zombie.setBaby(true); // Zombie isn't AgeableMob, use setBaby directly
         }
 
         // Position at adult's location
@@ -82,8 +97,8 @@ public final class ConjoinedTwins {
             return;
         }
 
-        // Spawn the baby in the world (it will be saved as a passenger of the adult)
-        level.addFreshEntityWithPassengers(child);
+        // The spawner adds the adult with its passengers; don't add the child separately
+        // to avoid "UUID of added entity already exists" errors
     }
 
     /**
