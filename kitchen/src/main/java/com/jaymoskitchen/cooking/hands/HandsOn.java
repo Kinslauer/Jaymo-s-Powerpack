@@ -339,8 +339,10 @@ public final class HandsOn {
 			return InteractionResult.PASS;
 		}
 		int now = server.getServer().getTickCount();
-		if (table.run.attack(cook, cook.getMainHandItem(), now)) {
-			table.run.touch(cook, now);
+		// (the blow that finishes the dish clears table.run)
+		Run run = table.run;
+		if (run.attack(cook, cook.getMainHandItem(), now)) {
+			run.touch(cook, now);
 			return InteractionResult.FAIL;
 		}
 		return InteractionResult.PASS;

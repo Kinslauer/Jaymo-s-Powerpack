@@ -340,7 +340,9 @@ public final class SizeArts {
 	 */
 	static void ray(ServerPlayer player, ServerLevel level, boolean grow) {
 		LivingEntity target = ArtKeys.sight(player, RAY_REACH, e -> true);
-		if (target == null && (player.isCreative() || ClassTrees.has(player, SIZES) > 0)) {
+		// (one with the sizes but not the ray has only themself to turn it on, whatever stands in sight)
+		boolean rays = player.isCreative() || ClassTrees.has(player, RAY) > 0;
+		if ((target == null || !rays) && (player.isCreative() || ClassTrees.has(player, SIZES) > 0)) {
 			step(player, level, grow);
 			return;
 		}
@@ -463,8 +465,8 @@ public final class SizeArts {
 			Integer worn = SIZE.get(player.getUUID());
 			if (worn != null) {
 				AttributeInstance scale = player.getAttribute(Attributes.SCALE);
-				if (scale == null || !scale.hasModifier(SCALE_ID)) {
-					// died or came back to the world: the size went with the old body
+				if (scale == null || !scale.hasModifier(SCALE_ID) || !player.isCreative() && ClassTrees.has(player, SIZES) == 0) {
+					// died or came back to the world (the size went with the old body), or the sizes were unlearned: back to their own
 					shed(player);
 				} else {
 					// a shape taken while sized: its beast is sized with the body

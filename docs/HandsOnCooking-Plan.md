@@ -130,3 +130,9 @@ are compile-checked only).
   does (about 3 s), and the knife's left-click is the cut. A clean cut keeps the sandwich as it was judged (fine with
   three different fillings, else good); a poor cut drops it a step; a miss, or walking away, squashes it: still handed
   over, with half its saturation (`SQUASHED_SATURATION`) and "Squashed" as the verdict. The item itself carries no mark.
+
+After the row check of the rulings: the last knead of dough by left-click hit the same null run as the last step did
+(the attack path's twin of that fix), a server crash; fixed. The ingredient that just went in, still in hand with the
+use key held, is no longer a mistake for half a second (`SequenceRun.REPEAT_GRACE`). A plain (not fine) sandwich with a
+poor cut is squashed, the same as a miss.
+

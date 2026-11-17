@@ -650,3 +650,18 @@ Patch 4:
 - **`r-a4-sun`**: only a Cleric or Paladin sworn to the Crowned Sun can learn the Sun's arts, and one who turns from it
   can't use them until they swear again (the points stay spent). Every Dawnborn still has them by blood; the Ash
   Whisperer's sworn are still refused.
+
+#### After the row check of the rulings (independent audit of 39 rows against the code; the trials are checked apart)
+Fixed: a Druid who unlearned Seven Sizes while sized (a Writ of Rebirth, a respec) was stuck at that size until death;
+the size is now shed. A Druid with the sizes but not the ray could not change their own size with any creature in
+sight; the ray is now always turned on themself. Digging the ground out from under a patch sunflower, or bone-mealing
+one, gave a sunflower; both wither it or are refused now, and the land check is per flower. A mineshaft chest or a
+spawner far under a court's spot no longer counts as someone's building (`Cordon.BUILT_BELOW`).
+
+Worth knowing: combat mode takes the number keys 6 to 9 from anyone who turns it on, arts or none. An explosion can
+still knock a patch sunflower out as an item. Seven area moves keep whole-block radii (Billow, Flame Avatar burst,
+Smother, Cloudshaper rain, Haywire, Bloom, Time Bloom), so a radius of 4 doesn't widen until about 63 Ability Power.
+Sneaking while overclocked slows you to a walk and the blur lasts 8 ticks off speed, so the Sneak for a tunnel has to
+come in the last moments before the wall: this needs a play test. A Tool Forge holding two stacks of plates gives no
+plating. Stepping down from your own size gets you off a horse or out of a boat.
+

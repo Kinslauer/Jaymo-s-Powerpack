@@ -78,6 +78,8 @@ public final class Cordon {
 	/** The court's floor radius, its pillars' height, and how many sentinels stand guard with the Arbiter. */
 	/** How many spots a summons tries for one outside every realm's land. */
 	static final int COURT_TRIES = 16;
+	/** A chest, bed or the like this far below the ground (blocks) or deeper is not someone's building on the court's spot. */
+	static final int BUILT_BELOW = 6;
 	static final int COURT_RADIUS = 11, PILLAR_HEIGHT = 6, COURT_GUARDS = 2;
 	/** Ash grey, and the binding red of their seals. */
 	public static final int ASH = 0x8A8580, BINDING = 0xB0202A;
@@ -365,14 +367,18 @@ public final class Cordon {
 		}
 	}
 
-	/** Whether someone has built where the court would stand: any block entity inside its round. */
+	/**
+	 * Whether someone has built where the court would stand: any block entity inside its round, at the ground or above it
+	 * (a mineshaft's chest or a spawner far below is nobody's work).
+	 */
 	private static boolean built(ServerLevel level, BlockPos marked) {
 		int r = COURT_RADIUS + 2;
+		int floor = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, marked).getY() - BUILT_BELOW;
 		for (int cx = (marked.getX() - r) >> 4; cx <= (marked.getX() + r) >> 4; cx++) {
 			for (int cz = (marked.getZ() - r) >> 4; cz <= (marked.getZ() + r) >> 4; cz++) {
 				for (BlockPos at : level.getChunk(cx, cz).getBlockEntitiesPos()) {
 					int dx = at.getX() - marked.getX(), dz = at.getZ() - marked.getZ();
-					if (dx * dx + dz * dz <= r * r) {
+					if (dx * dx + dz * dz <= r * r && at.getY() >= floor) {
 						return true;
 					}
 				}

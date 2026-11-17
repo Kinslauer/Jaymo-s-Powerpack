@@ -21,12 +21,16 @@ import net.minecraft.world.item.ItemStack;
 final class SequenceRun extends Run {
 	/** A second click this soon after the last is the same click (the key bounced). */
 	private static final int DEBOUNCE = 3;
+	/** After an ingredient goes in, the same thing still in hand is not a mistake for this long (the use key held repeats). */
+	private static final int REPEAT_GRACE = 10;
 
 	private final int parTicks;
 	private final int limitTicks;
 	private int progress;
 	private int mistakes;
 	private int lastClick = -DEBOUNCE;
+	private Step lastIn;
+	private int lastInTick = -REPEAT_GRACE;
 
 	SequenceRun(Table table, Pick pick, int now) {
 		super(table, pick, now);
@@ -80,7 +84,15 @@ final class SequenceRun extends Run {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.seq.add", Component.translatable(wanted.translationKey())));
 			return true;
 		}
+		if (!goesIn && lastIn != null && now - lastInTick < REPEAT_GRACE && lastIn.matches(held)) {
+			// the use key still held from the ingredient that just went in
+			return true;
+		}
 		if (goesIn || stepOf(held, sneaking) == wanted) {
+			if (goesIn) {
+				lastIn = wanted;
+				lastInTick = now;
+			}
 			if (goesIn && !player.hasInfiniteMaterials()) {
 				held.shrink(1);
 				if (wanted.remainder() != null) {

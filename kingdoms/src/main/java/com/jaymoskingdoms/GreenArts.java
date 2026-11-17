@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -108,22 +110,41 @@ public final class GreenArts {
 		// nothing harms the cocooned (but what nothing can stop)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!cocooned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
-		// a patch's sunflower is nobody's to pick: struck, it withers and gives nothing
+		// a patch's sunflower is nobody's to pick: struck, it withers and gives nothing; so does one whose ground is dug away
 		PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, entity) -> {
-			if (!state.is(Blocks.SUNFLOWER) || PATCHES.isEmpty()) {
-				return true;
-			}
 			for (Patch p : PATCHES) {
 				for (Iterator<Flower> it = p.flowers.iterator(); it.hasNext();) {
 					Flower f = it.next();
-					if (p.level == world && (f.at.equals(pos) || f.at.above().equals(pos))) {
+					if (p.level != world) {
+						continue;
+					}
+					if (f.at.equals(pos) || f.at.above().equals(pos)) {
 						it.remove();
 						wither(p.level, f);
 						return false;
 					}
+					if (f.at.below().equals(pos)) {
+						it.remove();
+						wither(p.level, f);
+					}
 				}
 			}
 			return true;
+		});
+		// nor does bone meal make more of one
+		UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
+			if (PATCHES.isEmpty() || !player.getItemInHand(hand).is(Items.BONE_MEAL)) {
+				return InteractionResult.PASS;
+			}
+			BlockPos pos = hit.getBlockPos();
+			for (Patch p : PATCHES) {
+				for (Flower f : p.flowers) {
+					if (p.level == world && (f.at.equals(pos) || f.at.above().equals(pos))) {
+						return InteractionResult.FAIL;
+					}
+				}
+			}
+			return InteractionResult.PASS;
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (Patch p : PATCHES) {
@@ -189,15 +210,15 @@ public final class GreenArts {
 	 */
 	private static List<Flower> plant(ServerLevel level, ServerPlayer player, Vec3 at) {
 		List<Flower> flowers = new ArrayList<>();
-		Faction there = Factions.around(level.getServer(), level, BlockPos.containing(at), 0);
-		if (there != null && !Crowns.rules(level.getServer(), there, player.getUUID())) {
-			return flowers;
-		}
 		BlockState sunflower = Blocks.SUNFLOWER.defaultBlockState();
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < PATCH_FLOWERS * 4 && flowers.size() < PATCH_FLOWERS; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0, far = Math.sqrt(random.nextDouble()) * PATCH_RADIUS;
 			BlockPos column = BlockPos.containing(at.x + Math.cos(angle) * far, at.y, at.z + Math.sin(angle) * far);
+			Faction there = Factions.around(level.getServer(), level, column, 0);
+			if (there != null && !Crowns.rules(level.getServer(), there, player.getUUID())) {
+				continue;
+			}
 			for (int dy = 1; dy >= -2; dy--) {
 				BlockPos pos = column.above(dy);
 				if (free(level.getBlockState(pos)) && free(level.getBlockState(pos.above())) && sunflower.canSurvive(level, pos)) {

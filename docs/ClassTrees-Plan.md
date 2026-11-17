@@ -502,3 +502,8 @@ Scaling:
 - **`r-sc-gun` (my pick)**: a Marksman's gun shots deal 3% more a level (`GUN_SHARE`), x1.75 at level 25.
 - **`r-sc-assassin` (my pick)**: with a Thief's burst and Sneak Attack on one blow, the bigger is dealt plus a quarter
   of what the smaller would have added (`ThiefSneak.BOTH_SHARE`). The once-a-second burst is spent on such a blow.
+
+After the row check of the rulings: nothing to fix in the class rows. Worth knowing: the Fence's Friend's quarter is
+rounded down to whole coins, so a small sale pays nothing more, and it also applies to a smuggling bundle's payout. A
+Druid without Barkskin who holds sneak and the key gets the sneak-and-tap art as the key comes up.
+
