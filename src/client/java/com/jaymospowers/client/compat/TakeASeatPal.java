@@ -48,16 +48,16 @@ final class TakeASeatPal {
 
 	// Take a Seat's animations, by its own names, grouped as it groups them (the first of each its first press)
 	static final Identifier KNEESITTING = tas("kneesitting");
-	static final Identifier[] GROUND = tas("kneesitting", "buttsit", "buttsit2", "kneeleaning");
-	static final Identifier[] CHAIR = tas("chairsitting", "chairsitting2", "chairsitting3", "chairsitting4");
-	static final Identifier[] FENCE = tas("fencesitting", "fencesitting2");
-	static final Identifier[] BED = tas("bedlyingdown", "bedlyingdown2", "bedlyingdown3");
-	static final Identifier[] SWORD = tas("swordsit", "swordsit2");
-	static final Identifier[] AXE = tas("sittingaxe");
-	static final Identifier[] SHOVEL = tas("sittingshovel");
-	static final Identifier[] FISHING = tas("fishing");
-	static final Identifier[] CAMPFIRE = tas("campfiresit");
-	static final Identifier[] FURNACE = tas("furnacesit");
+	static final Identifier[] GROUND = set("kneesitting", "buttsit", "buttsit2", "kneeleaning");
+	static final Identifier[] CHAIR = set("chairsitting", "chairsitting2", "chairsitting3", "chairsitting4");
+	static final Identifier[] FENCE = set("fencesitting", "fencesitting2");
+	static final Identifier[] BED = set("bedlyingdown", "bedlyingdown2", "bedlyingdown3");
+	static final Identifier[] SWORD = set("swordsit", "swordsit2");
+	static final Identifier[] AXE = set("sittingaxe");
+	static final Identifier[] SHOVEL = set("sittingshovel");
+	static final Identifier[] FISHING = set("fishing");
+	static final Identifier[] CAMPFIRE = set("campfiresit");
+	static final Identifier[] FURNACE = set("furnacesit");
 
 	/** One animation on a layer, and whether it leaves the hands to us. */
 	private record Play(Identifier animation, boolean handsFree) {
@@ -74,7 +74,7 @@ final class TakeASeatPal {
 		return Identifier.fromNamespaceAndPath("takeaseat", name);
 	}
 
-	private static Identifier[] tas(String... names) {
+	private static Identifier[] set(String... names) {
 		Identifier[] out = new Identifier[names.length];
 		for (int i = 0; i < names.length; i++) {
 			out[i] = tas(names[i]);
