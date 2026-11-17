@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PNP",
+    "P P",
+    "PNP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "jaymoskitchen:brewing_keg",
+    "count": 1
+  }
+}

@@ -92,6 +92,9 @@ public final class Table {
 		return Recipes.extraWanted(this, stack);
 	}
 
+	/** What a sandwich was stacked from (in order), for its run. */
+	List<ItemStack> taken = List.of();
+
 	boolean put(ServerPlayer player, ItemStack held) {
 		if (placed.size() >= MAX_PLACED || !wanted(held)) {
 			return false;
@@ -283,6 +286,13 @@ public final class Table {
 
 	/** Uses up what {@code pick} needs from the worktop and gives what's left over back to {@code starter}. */
 	void consume(Pick pick, ServerPlayer starter) {
+		if (pick.kind() == Pick.Kind.SANDWICH) {
+			// the whole stack is the sandwich
+			taken = new ArrayList<>(placed);
+			placed.clear();
+			changed();
+			return;
+		}
 		boolean[] used = cover(placed, pick.ingredients());
 		List<ItemStack> keep = new ArrayList<>();
 		for (int i = 0; i < placed.size(); i++) {

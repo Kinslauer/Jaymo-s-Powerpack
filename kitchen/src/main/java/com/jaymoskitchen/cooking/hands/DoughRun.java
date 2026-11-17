@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
  * then knead, right-click and left-click in turn. The same game and numbers as the screen's (see {@link Prep}), shared:
  * whoever holds use pours, and any hand can knead.
  */
-final class DoughRun extends Run {
+class DoughRun extends Run {
 	/** How long a pour's verdict shows before moving on (ticks). */
 	private static final int VERDICT_TICKS = 20;
 	private static final int WATER = 0, OIL = 1, KNEAD = 2;
@@ -155,15 +155,28 @@ final class DoughRun extends Run {
 		table.playBlock(verdictBand == 0 ? SoundEvents.SLIME_SQUISH : SoundEvents.BOTTLE_FILL, 0.6F, 1.0F);
 	}
 
+	/** Whether the mix ends with kneading (dough, the sushi mat's roll) or with the second pour. */
+	boolean kneads() {
+		return true;
+	}
+
 	private void finish(boolean kneaded) {
-		Prep.Result result = Prep.score(water, oil, kneaded, waterShift, oilShift);
+		conclude(Prep.score(water, oil, kneaded, waterShift, oilShift));
+	}
+
+	/** What the mix comes to: dough here; the keg, the kettle and the sushi mat make their own. */
+	void conclude(Prep.Result result) {
 		endWith(result.ordinal(), () -> {
 			if (result.amount() > 0) {
 				table.handOver(this, new ItemStack(ModItems.DOUGH, result.amount()));
 			}
-			table.playBlock(result == Prep.Result.RUINED ? SoundEvents.SLIME_SQUISH : SoundEvents.PLAYER_LEVELUP, result == Prep.Result.PERFECT ? 1.0F : 0.6F,
-				1.0F);
+			cue(result);
 		});
+	}
+
+	final void cue(Prep.Result result) {
+		table.playBlock(result == Prep.Result.RUINED ? SoundEvents.SLIME_SQUISH : SoundEvents.PLAYER_LEVELUP, result == Prep.Result.PERFECT ? 1.0F : 0.6F,
+			1.0F);
 	}
 
 	/** Walking away mid-mix wastes the ingredients. */

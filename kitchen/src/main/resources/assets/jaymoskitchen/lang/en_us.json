@@ -1124,5 +1124,21 @@
 	"hud.jaymoskitchen.hands.smoke.cold": "Cooling, fan it",
 	"message.jaymoskitchen.hands.need_spit": "Set a spit over the fire first.",
 	"hud.jaymoskitchen.hands.seq": "Next: %s, right-click with %s",
-	"hud.jaymoskitchen.hands.seq.sneak": "Next: %s, sneak and right-click with %s"
+	"hud.jaymoskitchen.hands.seq.sneak": "Next: %s, sneak and right-click with %s",
+	"block.jaymoskitchen.brewing_keg": "Brewing Keg",
+	"block.jaymoskitchen.tea_kettle": "Tea Kettle",
+	"block.jaymoskitchen.sushi_mat": "Sushi Mat",
+	"item.jaymoskitchen.tea": "Cup of Tea",
+	"item.jaymoskitchen.sandwich": "Sandwich",
+	"step.jaymoskitchen.tea_herb": "Tea herb",
+	"hud.jaymoskitchen.hands.keg.water": "Hold use to pour the water in",
+	"hud.jaymoskitchen.hands.keg.oil": "Hold use to pour the mash in",
+	"hud.jaymoskitchen.hands.keg.knead": "Tap the keg",
+	"hud.jaymoskitchen.hands.tea.water": "Hold use to pour the water",
+	"hud.jaymoskitchen.hands.tea.oil": "Hold use to steep the herbs",
+	"hud.jaymoskitchen.hands.tea.knead": "Stir the cup",
+	"hud.jaymoskitchen.hands.sushi.water": "Hold use to press the rice",
+	"hud.jaymoskitchen.hands.sushi.oil": "Hold use to sprinkle the vinegar",
+	"hud.jaymoskitchen.hands.sushi.knead": "Roll the mat: right-click, left-click, in turn",
+	"message.jaymoskitchen.hands.need_heat": "The kettle needs a lit fire under it."
 }

@@ -100,6 +100,7 @@ public final class HandsOn {
 	public static void register() {
 		ENABLED = GameRuleBuilder.forBoolean(true).category(GameRuleCategory.PLAYER).buildAndRegister(JaymosKitchen.id("hands_on_cooking"));
 		CookTools.register();
+		HandsBlocks.register();
 		Runs.register();
 		UseBlockCallback.EVENT.register(HandsOn::use);
 		AttackBlockCallback.EVENT.register(HandsOn::attack);
@@ -156,7 +157,7 @@ public final class HandsOn {
 	}
 
 	private static boolean worktop(ServerLevel level, BlockPos pos, Direction face) {
-		return Station.of(level, pos) != null || Prep.isPrepSurface(level, pos, level.getBlockState(pos), face);
+		return Station.of(level, pos) != null || HandsBlocks.isStation(level.getBlockState(pos)) || Prep.isPrepSurface(level, pos, level.getBlockState(pos), face);
 	}
 
 	// --- clicks ---
@@ -376,7 +377,7 @@ public final class HandsOn {
 			Run run = table.run;
 			if (run != null) {
 				Station here = table.station();
-				boolean gone = run.dish != null && (run.station == null || here == null || !run.station.cooks(table.level, table.pos, run.dish));
+				boolean gone = run.dish != null && run.kind() != Pick.Kind.SUSHI && (run.station == null || here == null || !run.station.cooks(table.level, table.pos, run.dish));
 				if (run.over) {
 					table.run = null;
 				} else if (gone || run.lostCooks()) {

@@ -56,6 +56,8 @@ public record Pick(Kind kind, @Nullable Dish dish, int extra) {
 		return switch (kind) {
 			case DOUGH -> Prep.ingredients(Prep.Recipe.DOUGH);
 			case JOINT -> Prep.ingredients(Prep.Recipe.JOINT);
+			case KEG -> Recipes.kegIngredients(extra);
+			case TEA -> Recipes.teaIngredients();
 			default -> new EnumMap<>(Step.class);
 		};
 	}

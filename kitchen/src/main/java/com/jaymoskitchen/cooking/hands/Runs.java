@@ -22,6 +22,10 @@ final class Runs {
 		});
 		HandsOn.factory(Pick.Kind.JOINT, (table, pick, starter, now) -> new JointRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.SEQUENCE, (table, pick, starter, now) -> new SequenceRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.SANDWICH, (table, pick, starter, now) -> new SandwichRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.KEG, (table, pick, starter, now) -> new PourRuns.Keg(table, pick, now));
+		HandsOn.factory(Pick.Kind.TEA, (table, pick, starter, now) -> new PourRuns.Tea(table, pick, now));
+		HandsOn.factory(Pick.Kind.SUSHI, (table, pick, starter, now) -> new PourRuns.Sushi(table, pick, now));
 		HandsOn.factory(Pick.Kind.ROAST, (table, pick, starter, now) -> new RoastRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.GRILL, (table, pick, starter, now) -> new GrillRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.OVEN, (table, pick, starter, now) -> new GrillRun(table, pick, now));
@@ -33,6 +37,10 @@ final class Runs {
 	static boolean ready(Table table, Pick pick, ServerPlayer cook) {
 		if (pick.kind() == Pick.Kind.ROAST && !table.level.getBlockState(table.pos.above()).is(com.jaymoskitchen.cooking.spit.SpitBlock.SPIT)) {
 			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.need_spit"));
+			return false;
+		}
+		if (pick.kind() == Pick.Kind.TEA && com.jaymoskitchen.cooking.Station.of(table.level, table.pos.below()) == null) {
+			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.need_heat"));
 			return false;
 		}
 		return true;

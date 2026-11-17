@@ -80,3 +80,16 @@ did. The spec's per-player sessions (R11) become one session per station that se
   use callback): it says what lies on it and what it would make (`HandsOn.hintAt`); a worktop's picks are made from what was put on
   it (sneak + scroll chooses). The screens open only with the rule off, or for the Cooking for Blockheads table's own buttons, which
   start the dish at the block without a screen.
+
+### Patch 5: new work at the board and new stations
+- `hc-sandwich` (`SandwichRun`): on a cutting board, counter or slab, sneak + right-click puts layers on in order (any bread, any
+  food); bread first, at least one filling, bread last is a sandwich pick, started with the knife. It is done in the moment of the
+  cut: nothing to time (the old screens had no sandwich game to match). The new `Sandwich` item is as filling as the layers
+  (their food values summed, capped), lists them in its lore; three different fillings or more is "made well".
+- `hc-newstations` (`HandsBlocks`, `PourRuns`, `Recipes`): three new blocks, no block entity (the station's `Table` keeps the
+  state like any worktop), art by `kitchen/tools/gen_cooking_stations.py`, shaped recipes: **Brewing Keg** (three of a brew's
+  base and three water bottles; pour the water, pour the mash; perfect gives the cask's three drinks, good two), **Tea Kettle**
+  (needs a lit fire under it; two herbs of the new `tea_herb` tag and three water bottles; pour, steep; three Cups of Tea or two),
+  **Sushi Mat** (the rolls the board's chopping makes, `SALMON_ROLL`, `COD_ROLL`, `KELP_ROLL`, `RICE_ROLL_MEDLEY`; press, season, roll).
+  They share dough's pouring (`DoughRun`, same bands and `Prep.score`), so they feel the same; sushi comes out at GOOD or PERFECT.
+- New step `TEA_HERB` (before the actions in `Step`).

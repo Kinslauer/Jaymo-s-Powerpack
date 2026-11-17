@@ -50,6 +50,9 @@ final class Readouts {
 			case STIR -> STIR;
 			case DOUGH -> DOUGH;
 			case JOINT -> JOINT;
+			case KEG -> KEG;
+			case TEA -> TEA;
+			case SUSHI -> SUSHI;
 			case SEQUENCE -> SEQUENCE;
 			case ROAST -> ROAST;
 			case GRILL, OVEN -> GRILL;
@@ -160,7 +163,11 @@ final class Readouts {
 
 	// --- dough ---
 
-	private static final HandsHud.Drawer DOUGH = new HandsHud.Drawer() {
+	private static final HandsHud.Drawer DOUGH = pour("dough", true), KEG = pour("keg", false), TEA = pour("tea", false), SUSHI = pour("sushi", true);
+
+	/** The pour-and-band readout of dough, and of the keg, the kettle and the sushi mat (which only differ in what they say). */
+	private static HandsHud.Drawer pour(String name, boolean kneads) {
+		return new HandsHud.Drawer() {
 		@Override
 		public int height(HandsSync sync) {
 			return HandsHud.LINE + 2 + 7 + 3;
@@ -174,7 +181,7 @@ final class Readouts {
 			int verdict = get(i, 2);
 			Component line = verdict >= 0 ? Component.translatable(verdict == 0 ? "hud.jaymoskitchen.hands.dough.off"
 				: verdict == 2 ? "screen.jaymoskitchen.prep.just_right" : "hud.jaymoskitchen.hands.dough.near")
-				: Component.translatable("hud.jaymoskitchen.hands.dough." + (phase == 0 ? "water" : phase == 1 ? "oil" : "knead"));
+				: Component.translatable("hud.jaymoskitchen.hands." + name + "." + (phase == 0 ? "water" : phase == 1 ? "oil" : "knead"));
 			HudStyle.text(graphics, font, line, x, y, verdict < 0 ? HudStyle.TEXT : verdict == 0 ? BAD : verdict == 2 ? GOOD : WARN);
 			int gy = y + HandsHud.LINE + 2;
 			if (phase == 2) {
@@ -191,7 +198,8 @@ final class Readouts {
 			band(graphics, x, gy, W, 7, min, max, 0x8055FF55);
 			band(graphics, x, gy, W, 7, pmin, pmax, 0xB0FFFFFF);
 		}
-	};
+		};
+	}
 
 	// --- fire ---
 
