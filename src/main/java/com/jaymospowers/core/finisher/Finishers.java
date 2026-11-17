@@ -381,13 +381,22 @@ public final class Finishers {
 	private static final String[] BLUNT_WORDS = {"mace", "hammer", "cudgel", "club", "flail", "morningstar", "morning_star", "maul", "sledge",
 		"mattock", "pickaxe", "scepter", "sceptre", "excavator", "battlesign"};
 
-	/** The finisher being played: which, since when (game time), and on whom (entity id). Synced to everyone, not saved. */
-	public record Finish(int kind, long start, int target) {
+	/**
+	 * The finisher being played: which, since when (game time), and on whom (entity id); how long (ticks) prompts have held
+	 * it still in all ({@link Prompts#HOLD}), and whether one holds it now. Synced to everyone, not saved.
+	 */
+	public record Finish(int kind, long start, int target, int held, boolean holding) {
 		public static final StreamCodec<ByteBuf, Finish> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Finish::kind,
-			ByteBufCodecs.VAR_LONG, Finish::start, ByteBufCodecs.VAR_INT, Finish::target, Finish::new);
+			ByteBufCodecs.VAR_LONG, Finish::start, ByteBufCodecs.VAR_INT, Finish::target, ByteBufCodecs.VAR_INT, Finish::held,
+			ByteBufCodecs.BOOL, Finish::holding, Finish::new);
 
 		public Kind type() {
 			return Kind.of(this.kind);
+		}
+
+		/** Ticks into the finisher at {@code gameTime} (and {@code partial} of the next): time held at prompts doesn't count, and while held it stands still. */
+		public float at(long gameTime, float partial) {
+			return gameTime - this.start - this.held + (this.holding ? 0.0F : partial);
 		}
 	}
 
@@ -1211,7 +1220,7 @@ public final class Finishers {
 	// ---- playing it out ---------------------------------------------------------------------------------------------------
 
 	private static void begin(ServerLevel level, ServerPlayer player, LivingEntity body, Kind kind) {
-		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
+		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId(), 0, false));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());
 		Prompts.begin(player, body, kind);
@@ -1262,7 +1271,7 @@ public final class Finishers {
 				continue;
 			}
 			Kind kind = finish.type();
-			int t = (int) (level.getGameTime() - finish.start());
+			int t = (int) finish.at(level.getGameTime(), 0.0F);
 			// (0.15.114) a crippled one stays held till it's over; a downed one that gets up is spared
 			boolean present = body.isAlive() && !body.isRemoved() && body.level() == level && (!p.downed() || Downed.isDowned(body)) && !Carry.isCarried(body)
 				&& player.distanceTo(body) <= MAX_DISTANCE;
@@ -1297,6 +1306,15 @@ public final class Finishers {
 				mob.getNavigation().stop();
 				mob.setTarget(null);
 				mob.setDeltaMovement(0.0, Math.min(0.0, mob.getDeltaMovement().y), 0.0);
+			}
+			// (Andy, 2026-11-17: "players need more time to complete the qte finishers") a prompt that has just come up holds
+			// the finisher still till its key is pressed, for at most Prompts#HOLD: the blows wait and its clock doesn't count
+			boolean hold = present && Prompts.holds(player, kind, t);
+			if (hold || finish.holding()) {
+				player.setAttached(FINISHING, new Finish(finish.kind(), finish.start(), finish.target(), finish.held() + (hold ? 1 : 0), hold));
+			}
+			if (hold) {
+				continue;
 			}
 			if (kind == Kind.WHIP && t == Kind.WHIP_CRACK && present) {
 				// (0.15.148) the lash cracks round the neck

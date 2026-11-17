@@ -535,7 +535,7 @@ public final class FinisherPose {
 			return;
 		}
 		Finishers.Kind kind = finish.type();
-		float t = entity.level().getGameTime() - finish.start() + partialTicks;
+		float t = finish.at(entity.level().getGameTime(), partialTicks);
 		Key[] keys = KEYS.get(kind);
 		if (keys == null || t < 0.0F || t >= kind.length) {
 			state.setData(KEY, null);
