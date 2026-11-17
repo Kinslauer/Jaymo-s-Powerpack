@@ -485,6 +485,16 @@ public final class Classes {
 		}
 	}
 
+	/** {@code player}'s class becomes {@code cls}: what the old one gave goes (its oath, pact, shapes and paths), the second class and feats stay. */
+	static void replace(ServerPlayer player, PlayerClass cls, String option) {
+		Druids.unmake(player);
+		Paladins.unmake(player);
+		Warlocks.unmake(player);
+		Paths.unmake(player);
+		player.removeAttached(CLASS);
+		set(player, cls, option);
+	}
+
 	/**
 	 * Takes {@code player}'s classes away (their attributes with them), and what the classes gave them: the second class, the
 	 * paths and the feats too (a Writ of Rebirth remakes the whole character).

@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,8 +51,12 @@ import org.jspecify.annotations.Nullable;
  * no fire lit in a settlement. The Anvil-Father, no trident and no turtle shell (the sea rusts what he makes). The Deep
  * Mother, no pick on ore, no harm to dolphins or turtles. The Green Huntsman, no young beast killed. The Lantern
  * Warden, no death or blood magic and no feeding on blood. The Crowned Sun, no theft, pickpocketing or lockpicking, no
- * unprovoked blow on a guard or a ruler. The Ash Whisperer, no yielding to the guards and no fine paid. The Truth and
- * the Reaper set no terms yet.</li>
+ * unprovoked blow on a guard or a ruler. The Ash Whisperer, no yielding to the guards, no fine paid, no bounty turned in,
+ * and no good choice in a tale (mercy to a yielded foe; a reply that goes against gain or vengeance). The Reaper sets no
+ * terms yet.</li>
+ * <li><b>The Truth:</b> everyone sworn to it (and its Warlocks) is a pacifist: no killing blow on anything living but the
+ * undead (Andy, 2026-11-17: "thou shall not kill"). One who kills on purpose falls: the Truth lets them go, and their
+ * class becomes the Death Sorcerer's ({@link Classes#replace}).</li>
  * </ul>
  * Crimes a Justice oath can't stop before the act (trespass, poaching, dealing...) still break it when done, as before
  * ({@link Paladins#crime}).
@@ -79,7 +84,9 @@ public final class Vows {
 		"green_huntsman", Set.of("young_beast"),
 		"lantern_warden", Set.of("dark_arts", "feeding"),
 		"crowned_sun", Set.of("theft", "pickpocket", "lockpick", "guard"),
-		"ash_whisperer", Set.of("yield", "fine"));
+		"ash_whisperer", Set.of("yield", "fine", "bounty", "good"));
+	/** What the Truth forbids everyone sworn to it, and its Warlocks. */
+	static final Set<String> TRUTH = Set.of("kill");
 
 	private static final Map<String, Long> REFUSED = new HashMap<>();
 	private static final Map<String, Long> LAPSED = new HashMap<>();
@@ -118,19 +125,26 @@ public final class Vows {
 
 	// ---- the vow ------------------------------------------------------------------------------------------------------
 
-	/** The oath ("mercy"...) or the patron's key a term binds {@code player} by, and whether it's an oath; null if it doesn't bind them. */
-	private record Vow(String what, boolean oath) {
+	/** What binds: a Paladin's oath, a Warlock's pact, or being sworn to the Truth. */
+	private enum Kind {
+		OATH, PACT, TRUTH
+	}
+
+	/** The oath ("mercy"...) or the patron's key a term binds {@code player} by, and how; null if it doesn't bind them. */
+	private record Vow(String what, Kind kind) {
 	}
 
 	private static @Nullable Vow vow(ServerPlayer player, String term) {
-		if (Paladins.keeping(player) && OATHS.getOrDefault(Paladins.oath(player), Set.of()).contains(term)) {
-			return new Vow(Paladins.oath(player), true);
+		boolean warlock = Classes.is(player, PlayerClass.WARLOCK);
+		String patron = warlock ? Classes.optionOf(player, PlayerClass.WARLOCK) : "";
+		if (TRUTH.contains(term) && (Patrons.of(player) == Patron.TRUTH || patron.equals(Patron.TRUTH.key))) {
+			return new Vow(Patron.TRUTH.key, Kind.TRUTH);
 		}
-		if (Classes.is(player, PlayerClass.WARLOCK)) {
-			String patron = Classes.optionOf(player, PlayerClass.WARLOCK);
-			if (PACTS.getOrDefault(patron, Set.of()).contains(term)) {
-				return new Vow(patron, false);
-			}
+		if (Paladins.keeping(player) && OATHS.getOrDefault(Paladins.oath(player), Set.of()).contains(term)) {
+			return new Vow(Paladins.oath(player), Kind.OATH);
+		}
+		if (warlock && PACTS.getOrDefault(patron, Set.of()).contains(term)) {
+			return new Vow(patron, Kind.PACT);
 		}
 		return null;
 	}
@@ -163,21 +177,30 @@ public final class Vows {
 		Long first = REFUSED.get(key);
 		if (first != null && now - first >= SETTLE_TICKS && now - first <= AGAIN_TICKS && (!sneak || player.isShiftKeyDown())) {
 			REFUSED.remove(key);
-			if (vow.oath()) {
-				Paladins.breakOath(player, why(vow.what(), term));
-			} else {
-				Warlocks.collect(player);
-				LAPSED.put(key, now + LAPSE_TICKS);
+			switch (vow.kind()) {
+				case OATH -> Paladins.breakOath(player, why(vow.what(), term));
+				case PACT -> {
+					Warlocks.collect(player);
+					LAPSED.put(key, now + LAPSE_TICKS);
+				}
+				case TRUTH -> fall(player);
 			}
 			return true;
 		}
 		if (first == null || now - first > AGAIN_TICKS) {
 			REFUSED.put(key, now);
 		}
-		Component whose = vow.oath() ? Component.translatable("option.jaymoskingdoms.oath." + vow.what()) : patronName(vow.what());
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.vow.refused." + (vow.oath() ? "oath" : "pact") + (sneak ? "" : ".choose"),
-			whose, Component.translatable("message.jaymoskingdoms.vow.term." + term)).withStyle(ChatFormatting.GOLD));
+		Component whose = vow.kind() == Kind.OATH ? Component.translatable("option.jaymoskingdoms.oath." + vow.what()) : patronName(vow.what());
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.vow.refused." + vow.kind().name().toLowerCase(java.util.Locale.ROOT)
+			+ (sneak ? "" : ".choose"), whose, Component.translatable("message.jaymoskingdoms.vow.term." + term)).withStyle(ChatFormatting.GOLD));
 		return false;
+	}
+
+	/** One sworn to the Truth killed on purpose: it lets them go, and death takes its place (a Death Sorcerer now). */
+	private static void fall(ServerPlayer player) {
+		Patrons.forsake(player);
+		Classes.replace(player, PlayerClass.SORCERER, "death");
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vow.truth_fallen").withStyle(ChatFormatting.DARK_PURPLE));
 	}
 
 	/** The reason {@link Paladins#breakOath} gives for an oath broken over {@code term}. */
@@ -202,6 +225,10 @@ public final class Vows {
 			return false;
 		}
 		if (amount >= victim.getHealth() && Paladins.helpless(player, victim) && !allows(player, "helpless")) {
+			return false;
+		}
+		if (amount >= victim.getHealth() && (victim instanceof Mob || victim instanceof net.minecraft.world.entity.player.Player)
+			&& !victim.getType().is(EntityTypeTags.UNDEAD) && !allows(player, "kill")) {
 			return false;
 		}
 		boolean provoked = provoked(player, victim);

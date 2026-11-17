@@ -22,5 +22,11 @@
   "message.jaymoskingdoms.vow.term.feeding": "feeding on blood",
   "message.jaymoskingdoms.vow.term.guard": "an unprovoked blow on a guard or a ruler",
   "message.jaymoskingdoms.vow.term.yield": "yielding to the guards",
-  "message.jaymoskingdoms.vow.term.fine": "paying a fine"
+  "message.jaymoskingdoms.vow.term.fine": "paying a fine",
+  "message.jaymoskingdoms.vow.refused.truth": "%s forbids %s. Do it again, sneaking, and it lets you go.",
+  "message.jaymoskingdoms.vow.refused.truth.choose": "%s forbids %s. Choose it again, and it lets you go.",
+  "message.jaymoskingdoms.vow.term.kill": "killing",
+  "message.jaymoskingdoms.vow.term.bounty": "turning in a bounty",
+  "message.jaymoskingdoms.vow.term.good": "a merciful or selfless choice",
+  "message.jaymoskingdoms.vow.truth_fallen": "You killed. The Truth lets you go, and death takes its place: you are a Death Sorcerer now."
 }

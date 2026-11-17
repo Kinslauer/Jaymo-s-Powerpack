@@ -467,6 +467,12 @@ public final class Patrons {
 	}
 
 	/** Sworn to {@code p} from now: {@code favour} to begin with. */
+	/** {@code sp} is sworn to no one now (one of the Truth's who killed: {@link Vows}); the patrons they know and their marks stay. */
+	static void forsake(ServerPlayer sp) {
+		State s = state(sp);
+		set(sp, new State("", 0, 0, -1L, Streak.NONE, -1L, -1L, Daily.NONE, 0L, s.known(), s.marks(), s.seeded()));
+	}
+
 	static void swear(ServerPlayer sp, Patron p, int favour, long today) {
 		HolyDread.rite(sp, p);
 		State s = state(sp);

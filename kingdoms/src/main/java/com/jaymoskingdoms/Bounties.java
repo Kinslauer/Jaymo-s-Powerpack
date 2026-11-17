@@ -880,6 +880,10 @@ public final class Bounties {
 		ItemStack held = player.getMainHandItem();
 		// (0.7.147) Hornkin horns, a bounty on raiders from the Nether
 		if (held.is(com.jaymoskingdoms.nether.NetherTrophies.HORNKIN_HORN)) {
+			if (!Vows.allows(player, "bounty")) {
+				// (a pact that forbids it, the Ash Whisperer's)
+				return true;
+			}
 			int horns = held.getCount();
 			int emeralds = horns * com.jaymoskingdoms.nether.NetherTrophies.HORN_BOUNTY;
 			held.shrink(horns);
@@ -897,6 +901,9 @@ public final class Bounties {
 		if (headOf != null) {
 			Bounty b = all(server).get(headOf);
 			if (b != null && b.court() == court.id()) {
+				if (!Vows.allows(player, "bounty")) {
+					return true;
+				}
 				held.shrink(1);
 				pay(level, player, ruler, court, b, headPrice(b), "head");
 				return true;
@@ -908,6 +915,9 @@ public final class Bounties {
 			Bounty b = on(server, body, court.id());
 			if (b == null) {
 				continue;
+			}
+			if (!Vows.allows(player, "bounty")) {
+				return true;
 			}
 			// (a confession taken on the way pays more: Captures)
 			pay(level, player, ruler, court, b, (int)Math.ceil(b.price() * Captures.bonus(body)), "alive");
