@@ -13,6 +13,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · claimed
+- [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · running
 
 
 ## In review
