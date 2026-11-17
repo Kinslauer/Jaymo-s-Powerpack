@@ -315,16 +315,19 @@ No existing key was taken. The Powers rows use what the power already had (the w
 2, Wax and Wane 2), Cleric +3 and Paladin +3 (the Sun's Arts). They sit in the two outer columns of each tree. Nobody can
 buy everything in those trees now; say if the level-ups should give more points or the perks should cost less.
 
-Lore (new): no new people or gods. **The Reaper's souls**: death keeps count, and what its keeper sends it stays sent;
-the keeper is thin as a shade when the count is low and terrible when it is high, and the scythe is the Reaper's own,
-lent to one who has filled it. **The Darktide's shadows** are the Drowned Dark's: what its servant kills goes down into
-the dark water at once, and the servant can go down after it and look out through its eyes, leaving the body on the
-shore. **The vampire's claws**: the blood that is their curse is also what mends them, and it answers to any blood
+Lore (new): no new people or gods. **The Reaper's souls**: death keeps count of what its keeper sends it; the keeper is
+only themself when the count is low and terrible when it is high, and the scythe is the Reaper's own, made of five
+hundred of those souls, which go out of the count and into the blade. **The Darktide's shadows** are the Drowned Dark's: what its servant kills goes down into
+the dark water at once, corrupted or not, and waits there to be raised. **The vampire's claws**: the blood that is their curse is also what mends them, and it answers to any blood
 they spill. **The green arts and the sizes** are the groves': a Druid who can wear a beast can ask the green to hold,
-give and take, and can wear the beast at any size the grove has ever grown one. **The Sun's arts** are the Crowned
-Sun's own, in the blood of the Dawnborn, its bound people, and taught by its priests and its sworn swords; the Ash
-Whisperer's people cannot be taught them. **The speedsters**: Chrono's static is his own time rubbing against the
-world's, and the tunnel is the stretch of the world he has already run through, a moment ahead of everyone else.
+give and take (its sunflowers are real while they stand, and wither when it lets go), and can take any size the grove
+has ever grown a beast, in a shape or in their own body. **The Sun's arts** are the Crowned
+Sun's own, in the blood of the Dawnborn, its bound people, and taught only to priests and swords sworn to the Crowned Sun
+itself; one who turns from it keeps the learning and loses the fire, and the Ash Whisperer's people cannot be taught
+them at all. **The speedsters**: Chrono's static is his own time rubbing against the
+world's, and the tunnel is the stretch of the world he has already run through, a moment ahead of everyone else. A
+**speed prism** is cut glass that splits that static into one colour; an **energy bar** is road food, pressed for those
+who burn through a day's meals in a mile.
 
 
 #### After the row check of patch 4 (independent audit of the seven rows against the code)
@@ -583,3 +586,67 @@ Not as the rows say, or worth Andy's eye:
   Knot, Hale Coin and Stride Spur only come from those other bosses.
 - **`aw-cordon`**: a court whose spot turns out to be built on is not raised, so that summons' map leads to nothing.
 - **`aw-decay`**: a crash while a rotted hole is open leaves it open (they are closed on a normal stop).
+
+### Andy's rulings (2026-11-17)
+Andy ticked all 40 rows of the Picks PR Rulings page with no notes and chose "Change all 40, Claude picks details".
+Every row below is changed from what the parts above say; where a row asked for a detail, the choice is marked
+**(my pick)** so it can be overruled. Built, not played. The "Lore (new)" paragraphs above are edited to match
+(`r-lore`, my pick: no other lore change was named).
+
+Patches 1 to 3 and 5 to 7:
+- **`r-aw-planets`**: planets are free to throw: no hunger cost, no food gate. The 12-tick wait between throws stays.
+- **`r-aw-trials` (my pick: every power)**: TRIALS_PLACEHOLDER
+- **`r-aw-power` (my pick: size)**: Ability Power also widens area moves, +0.2% a point (`AbilityPower.SIZE_PER_POINT`,
+  +20% at 100), the effect and its drawn Fx together, across every power's blasts, rings, fields, pools, shockwaves and
+  splash (about 150 moves; the K screen's reach figure serves both). Number of targets is not raised. Left alone:
+  areas the client draws at a fixed size (Cryo blizzard, smoke and wind jets, gravity rock orbit, symbiote spikes,
+  Darktide field, arsenal portals), anything with no player to read (the rulers' gifts, a Chrono echo's drag, the Web
+  Behemoth), cones kept as cosines, beam and blade widths, search and detection ranges, and cone lengths. The sweep went
+  by constant names (`RADIUS`, `SPLASH`, box inflates), so an area with an unusual name or an Fx drawn with a bare
+  number may be unscaled.
+- **`r-aw-bone`**: plating is done at the Tool Forge (`ToolStationMenu.plate`): one armour piece and a boneiron plate
+  give the piece with one more plating, up to 3. The click-a-plate-onto-armour route is gone. (The Forge Hearth only
+  heats ingots, so "the Tinkering forge" is read as the Tool Forge.) No JEI entry.
+- **`r-aw-combat` (my pick)**: combat mode also covers the four art keys: with it on, 6 to 9 are Soul, Claw, Wild and
+  Sun (tap and hold both work) and pick no hotbar slot, in stance or out.
+- **`r-aw-relics` (my pick)**: every boss still leaves its own relic, and one time in four (`Relics.SECOND_DROP`) a
+  second relic of any other kind, so all seven can come from any boss.
+- **`r-aw-court`**: a court whose ground was built on (or taken into a realm) since the summons was read moves: a new
+  spot is marked and whoever came near is handed a new map (`Cordon.courts`).
+- **`r-aw-rot`**: open rot holes are saved with their level (`AshRot.HOLES`); any found when the server starts were
+  left by a crash and are closed then.
+
+Patch 4:
+- **`r-a4-keys` (my pick)**: the art keys default to the arrow keys (up Soul, left Claw, down Wild, right Sun), which
+  every keyboard has. Still rebindable.
+- **`r-a4-prism` (my pick: both)**: the **Speed Prism** (`power/chrono/SpeedPrism`; amethyst, glass pane, copper): use
+  it to step your speed lightning through red, orange, green, teal, blue, violet, pink, white and back to your power's
+  own; saved, kept through death; it colours the streak, sparks, bolt, tunnel ring and the speed HUD chip. The
+  **Energy Bar** (`EnergyBarItem`; wheat, honey, cocoa, berries, gives 2): 6 hunger, eaten in 0.8 s, stacks to 16, and 3
+  extra saturation for a speedster. A speedster here is a Chrono holder or any Xenoform holder, not only one in Velox
+  form.
+- **`r-a4-tunnel`**: running into a wall always runs up it. The tunnel needs Sneak held while sprinting at the wall
+  in gear 5 (no new key; the wall-run already lets go on Sneak, so the two can't both fire). Sneak must be down before
+  the wall is reached.
+- **`r-a4-gears`**: a run starts in gear 3 (`ChronoMomentum.START_GEAR`), or the wheel's top gear if that is lower;
+  only gears 4 and 5 are climbed to and lost.
+- **`r-a4-reaper` (my pick: a gentler floor)**: a keeper with no souls has 10 hearts and deals their blows in full
+  (`HEARTS_NEW` 10, `DAMAGE_NEW` 1.0), so nobody is weaker than before; 1000 souls is still 20 hearts and six times.
+- **`r-a4-scythe`**: forging the Soul Scythe spends its 500 souls, so the keeper's tier drops with it.
+- **`r-a4-shadows`**: a kill banks its shadow whether you are corrupted or not. The soul menu and raising still need
+  corruption.
+- **`r-a4-ride`**: riding a risen shadow is left out until it can be done with full control: possession, its entry
+  on Z, the left-behind body and its crash recovery are removed. Banking, raising and the menu stay.
+- **`r-a4-sizes`**: the Druid changes size out of a shape too. At their own size the Wild key is still the green
+  arts', and its ray turned on no creature is turned on the Druid (hold shrinks, sneak and hold grows). While they
+  are any size but their own the key is the sizes' as in a shape (tap, sneak and tap, stomp, grab), so the green arts
+  wait until they are their own size again. Riding a bigger creature unnoticed works at the small sizes out of a shape.
+  Shedding a shape still sheds the size.
+- **`r-a4-jar`**: only the Druid whose ray shrank a creature can jar it.
+- **`r-a4-flowers`**: the patch plants up to 12 real sunflowers (`PATCH_FLOWERS`) where they can stand, in the wild or
+  on land the Druid rules, and they wither with the patch; grass they stood in comes back. A player who breaks one
+  gets nothing (it withers). The ground glow stays so the patch reads on stone. Limits: water or a piston can still
+  knock one out as an item, and a crash leaves them standing.
+- **`r-a4-sun`**: only a Cleric or Paladin sworn to the Crowned Sun can learn the Sun's arts, and one who turns from it
+  can't use them until they swear again (the points stay spent). Every Dawnborn still has them by blood; the Ash
+  Whisperer's sworn are still refused.
