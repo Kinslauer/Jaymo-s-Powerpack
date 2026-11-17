@@ -127,7 +127,9 @@ final class Muskets {
 		if (d < NEAREST || d > FURTHEST || !folk.hasLineOfSight(foe) || !MobCombat.aimed(level, folk, foe)) {
 			return;
 		}
-		NEXT.put(folk, now + FrontierPerks.reload(folk, RELOAD) + level.getRandom().nextInt(JITTER));
+		int wait = FrontierPerks.reload(folk, RELOAD) + level.getRandom().nextInt(JITTER);
+		NEXT.put(folk, now + wait);
+		RangedTactics.reload(folk, wait);
 		fire(level, folk, foe);
 	}
 
