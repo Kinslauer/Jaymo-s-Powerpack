@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -133,10 +134,10 @@ public final class EmberShells {
 				continue;
 			}
 			if (now % 4 == 0) {
-				p.level.sendParticles(MagicFx.mote(COLOUR, 0.9F), p.at.x, p.at.y + 0.1, p.at.z, 3, PATCH_RADIUS * 0.5, 0.05, PATCH_RADIUS * 0.5, 0.01);
+				p.level.sendParticles(MagicFx.mote(COLOUR, 0.9F), p.at.x, p.at.y + 0.1, p.at.z, 3, AbilityPower.size(p.owner, PATCH_RADIUS) * 0.5, 0.05, AbilityPower.size(p.owner, PATCH_RADIUS) * 0.5, 0.01);
 			}
 			if (now % 20 == 0) {
-				for (LivingEntity e : p.level.getEntitiesOfClass(LivingEntity.class, new AABB(p.at, p.at).inflate(PATCH_RADIUS, 1.0, PATCH_RADIUS),
+				for (LivingEntity e : p.level.getEntitiesOfClass(LivingEntity.class, new AABB(p.at, p.at).inflate(AbilityPower.size(p.owner, PATCH_RADIUS), 1.0, AbilityPower.size(p.owner, PATCH_RADIUS)),
 					e -> FireKit.foe(p.owner, e))) {
 					FireKit.hurt(p.owner, e, PATCH_DAMAGE);
 					Flames.touch(p.level, e, 2, p.owner);
@@ -163,14 +164,14 @@ public final class EmberShells {
 
 	private static void burst(Shot s) {
 		Vec3 at = s.pos;
-		MagicFx.blast(s.level, at, (float)BOMB_RADIUS, COLOUR);
+		MagicFx.blast(s.level, at, (float)AbilityPower.size(s.owner, BOMB_RADIUS), COLOUR);
 		s.level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.4F);
-		for (LivingEntity e : s.level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BOMB_RADIUS),
-			e -> FireKit.foe(s.owner, e) && e.position().distanceToSqr(at) <= BOMB_RADIUS * BOMB_RADIUS * 1.5)) {
+		for (LivingEntity e : s.level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(s.owner, BOMB_RADIUS)),
+			e -> FireKit.foe(s.owner, e) && e.position().distanceToSqr(at) <= AbilityPower.size(s.owner, BOMB_RADIUS) * AbilityPower.size(s.owner, BOMB_RADIUS) * 1.5)) {
 			FireKit.hurt(s.owner, e, BOMB_DAMAGE);
 			Flames.touch(s.level, e, BOMB_BURN, s.owner);
 		}
-		MagicFx.pool(s.level, at, (float)PATCH_RADIUS, COLOUR, BURN_TICKS);
+		MagicFx.pool(s.level, at, (float)AbilityPower.size(s.owner, PATCH_RADIUS), COLOUR, BURN_TICKS);
 		PATCHES.add(new Patch(s.owner, s.level, at, s.level.getGameTime() + BURN_TICKS));
 	}
 }

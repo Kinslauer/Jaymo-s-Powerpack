@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Carry;
@@ -216,7 +217,7 @@ public final class WindCyclone {
 
 	/** The funnel's top radius at this player's mastery (blocks). */
 	public static double radius(Player player) {
-		return Mth.lerp(masteryShare(player), RADIUS_MIN, RADIUS_MAX);
+		return Mth.lerp(masteryShare(player), AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX));
 	}
 
 	/** The funnel's height at this player's mastery (blocks). */

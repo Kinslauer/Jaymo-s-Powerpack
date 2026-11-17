@@ -57,6 +57,7 @@ public final class ChronoMomentum {
 	static final int ARCS = 2, DAZE_TICKS = 30, STATIC_GAP = 10;
 	/** The Slowness level a static bolt leaves on what it shocks. */
 	static final int DAZE_LEVEL = 3;
+	/** The static's own colours (Chrono's, Velox's); a Speed Prism's colour comes first ({@link SpeedPrism}). */
 	static final int GOLD = 0xFFD070, SKY = 0x8FD8FF;
 
 	/** The top gear the wheel has set, 1 to 5 (the owner's HUD). */
@@ -144,11 +145,11 @@ public final class ChronoMomentum {
 			}
 		}
 		if (blur && player.isSprinting()) {
-			ChronoTunnel.run(player, level, palette == ChronoSpeed.SKY ? SKY : GOLD);
+			ChronoTunnel.run(player, level, SpeedPrism.colour(player, palette == ChronoSpeed.SKY ? SKY : GOLD));
 		}
 		ChronoMeters.set(player, ChronoMeters.STATIC, run.charge > 0.0F ? run.charge : -1.0F);
 		if (run.charge >= STATIC_MIN && player.tickCount % 6 == 0) {
-			level.sendParticles(MagicFx.spark(palette == ChronoSpeed.SKY ? SKY : GOLD, 0.6F), player.getX(), player.getY() + 0.9, player.getZ(),
+			level.sendParticles(MagicFx.spark(SpeedPrism.colour(player, palette == ChronoSpeed.SKY ? SKY : GOLD), 0.6F), player.getX(), player.getY() + 0.9, player.getZ(),
 				1 + (int) (run.charge * 3.0F), 0.3, 0.5, 0.3, 0.0);
 		}
 	}
@@ -177,7 +178,7 @@ public final class ChronoMomentum {
 		float charge = run.charge;
 		run.charge = 0.0F;
 		run.nextBolt = player.tickCount + STATIC_GAP;
-		int color = ChronoSpeed.velocity(player) ? SKY : GOLD;
+		int color = SpeedPrism.colour(player, ChronoSpeed.velocity(player) ? SKY : GOLD);
 		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
 		Vec3 end = eye.add(look.scale(STATIC_REACH));
 		HitResult wall = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

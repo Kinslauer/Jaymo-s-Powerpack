@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Dismember;
@@ -422,7 +423,7 @@ final class DarktideMoves {
 		}
 		live.undertow = new DarktideLive.Undertow(to, level.getGameTime() + UNDERTOW_DELAY);
 		if (spring) {
-			for (LivingEntity near : around(player, player.getBoundingBox().inflate(UNDERTOW_DRAG_RADIUS, 1.0, UNDERTOW_DRAG_RADIUS))) {
+			for (LivingEntity near : around(player, player.getBoundingBox().inflate(AbilityPower.size(player, UNDERTOW_DRAG_RADIUS), 1.0, AbilityPower.size(player, UNDERTOW_DRAG_RADIUS)))) {
 				live.undertow.dragged.add(near.getId());
 				DarktideStatus.stun(near, UNDERTOW_DELAY + 10);
 				DarktideLooks.pool(level, near.position(), DarktideLooks.BODY_POOL * 0.8F, UNDERTOW_DELAY + 12);
@@ -478,7 +479,7 @@ final class DarktideMoves {
 		Vec3 to = undertow.to;
 		player.teleportTo(level, to.x, to.y, to.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		// out in a burst of spray
-		DarktideLooks.spray(level, to, (float) (Fate.isAscended(player) ? UNDERTOW_SURFACE_RADIUS_MASTERED : UNDERTOW_SURFACE_RADIUS) + 0.5F);
+		DarktideLooks.spray(level, to, (float) (Fate.isAscended(player) ? AbilityPower.size(player, UNDERTOW_SURFACE_RADIUS_MASTERED) : AbilityPower.size(player, UNDERTOW_SURFACE_RADIUS)) + 0.5F);
 		DarktideLooks.ink(level, to.add(0.0, 0.5, 0.0), 10, 0.35);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.7F, 0.8F);
 		// the dragged come up with you, a step off, and take the burst like anyone standing there
@@ -489,7 +490,7 @@ final class DarktideMoves {
 				dragged.teleportTo(level, to.x + Math.cos(a) * 1.4, to.y, to.z + Math.sin(a) * 1.4, Set.of(), dragged.getYRot(), dragged.getXRot(), false);
 			}
 		}
-		double radius = Fate.isAscended(player) ? UNDERTOW_SURFACE_RADIUS_MASTERED : UNDERTOW_SURFACE_RADIUS;
+		double radius = Fate.isAscended(player) ? AbilityPower.size(player, UNDERTOW_SURFACE_RADIUS_MASTERED) : AbilityPower.size(player, UNDERTOW_SURFACE_RADIUS);
 		for (LivingEntity near : around(player, new AABB(to, to).inflate(radius, 1.5, radius))) {
 			if (hit(player, near, UNDERTOW_SURFACE_DAMAGE)) {
 				Vec3 away = near.position().subtract(to).multiply(1.0, 0.0, 1.0);

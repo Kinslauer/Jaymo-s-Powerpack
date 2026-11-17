@@ -1,5 +1,6 @@
 package com.jaymospowers.power.reactor;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ final class ReactorMoves {
 		PickKit.spend(TABLE, player, DASH, DASH_COOLDOWN);
 		float f = ReactorPower.strength(spent);
 		Vec3 look = player.getLookAngle();
-		ReactorPower.blast(player, player.position().add(0.0, 0.5, 0.0), DASH_RADIUS, DASH_HARM * f, 0.6);
+		ReactorPower.blast(player, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, DASH_RADIUS), DASH_HARM * f, 0.6);
 		player.setDeltaMovement(look.scale(DASH_SPEED * Math.min(2.0, f)).add(0.0, 0.2, 0.0));
 		player.syncVelocity = true;
 		player.resetFallDistance();
@@ -159,7 +160,7 @@ final class ReactorMoves {
 		PickKit.spend(TABLE, player, DASH, DASH_COOLDOWN);
 		float f = ReactorPower.strength(spent);
 		Vec3 look = player.getLookAngle();
-		ReactorPower.blast(player, player.getEyePosition().add(look.scale(1.8)), DASH_RADIUS * 1.2, DASH_HARM * 1.5F * f, 1.0);
+		ReactorPower.blast(player, player.getEyePosition().add(look.scale(1.8)), AbilityPower.size(player, DASH_RADIUS) * 1.2, DASH_HARM * 1.5F * f, 1.0);
 		player.setDeltaMovement(look.scale(-DASH_SPEED * Math.min(2.0, f)).add(0.0, 0.3, 0.0));
 		player.syncVelocity = true;
 		player.resetFallDistance();
@@ -191,7 +192,7 @@ final class ReactorMoves {
 		MagicFx.beam(level, eye.add(0.0, -0.2, 0.0), end, 0.25F, ReactorPower.GLOW, 8);
 		MagicFx.beam(level, eye.add(0.0, -0.2, 0.0), end, 0.1F, ReactorPower.CORE, 8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.8F);
-		ReactorPower.blast(player, end, BEAM_RADIUS, BEAM_HARM * f, 0.8);
+		ReactorPower.blast(player, end, AbilityPower.size(player, BEAM_RADIUS), BEAM_HARM * f, 0.8);
 	}
 
 	/** Sneak + V: the held item, charged, thrown to burst where it lands. */
@@ -322,7 +323,7 @@ final class ReactorMoves {
 			Vec3 at = LAST.remove(t.shot());
 			it.remove();
 			if (at != null && !t.owner().isRemoved() && t.owner().level() == t.shot().level()) {
-				ReactorPower.blast(t.owner(), at, TOSS_RADIUS, TOSS_HARM * t.strength(), 0.8);
+				ReactorPower.blast(t.owner(), at, AbilityPower.size(t.owner(), TOSS_RADIUS), TOSS_HARM * t.strength(), 0.8);
 			}
 		}
 	}

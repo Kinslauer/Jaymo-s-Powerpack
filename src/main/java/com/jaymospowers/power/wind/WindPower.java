@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -874,9 +875,9 @@ public final class WindPower implements Power {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 1.2F);
 			}
 			case GALE_BARRIER -> {
-				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), BARRIER_PUSH_RADIUS, player);
+				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, BARRIER_PUSH_RADIUS), player);
 				if (stormbound) {
-					LivingEntity nearest = this.nearestEnemy(player, level, BARRIER_PUSH_RADIUS);
+					LivingEntity nearest = this.nearestEnemy(player, level, AbilityPower.size(player, BARRIER_PUSH_RADIUS));
 					WindStorm.strike(player, nearest != null ? nearest.position() : player.position());
 				}
 				s.barrierTicks = (int)(Mth.lerpInt(f, BARRIER_MIN_TICKS, BARRIER_MAX_TICKS) * w);
@@ -899,7 +900,7 @@ public final class WindPower implements Power {
 						? WindCold.cooldown(player, CALL_LIGHTNING_COOLDOWN) : 20;
 					break;
 				}
-				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), ZEPHYR_RADIUS, player);
+				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, ZEPHYR_RADIUS), player);
 				if (!s.flight.flying() && !player.isPassenger()) {
 					// (Jung's revamp) a spiral of wind lifts the caster two blocks and spins them
 					WindMoves.zephyr(player, level);
@@ -907,9 +908,9 @@ public final class WindPower implements Power {
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
 				int regen = (int)(Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX) * w);
 				int regenAmp = f >= 1.0F ? 1 : 0;
-				AABB area = player.getBoundingBox().inflate(ZEPHYR_RADIUS);
+				AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, ZEPHYR_RADIUS));
 				for (Player target : level.getEntitiesOfClass(Player.class, area,
-					p -> p.isAlive() && !p.isSpectator() && p.distanceToSqr(player) <= ZEPHYR_RADIUS * ZEPHYR_RADIUS)) {
+					p -> p.isAlive() && !p.isSpectator() && p.distanceToSqr(player) <= AbilityPower.size(player, ZEPHYR_RADIUS) * AbilityPower.size(player, ZEPHYR_RADIUS))) {
 					target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, fall, 0), player);
 					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regen, regenAmp), player);
 					com.jaymospowers.core.Fractures.startMend(target, com.jaymospowers.core.Fractures.ZEPHYR_MEND);
@@ -973,9 +974,9 @@ public final class WindPower implements Power {
 
 	private void pushMobs(ServerPlayer player, ServerLevel level, float f, float scale) {
 		double strength = Mth.lerp(f, BARRIER_PUSH_MIN, BARRIER_PUSH_MAX) * scale;
-		AABB area = player.getBoundingBox().inflate(BARRIER_PUSH_RADIUS);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_PUSH_RADIUS));
 		for (LivingEntity mob : level.getEntitiesOfClass(LivingEntity.class, area,
-			e -> e instanceof Enemy && e.isAlive() && e.distanceToSqr(player) <= BARRIER_PUSH_RADIUS * BARRIER_PUSH_RADIUS)) {
+			e -> e instanceof Enemy && e.isAlive() && e.distanceToSqr(player) <= AbilityPower.size(player, BARRIER_PUSH_RADIUS) * AbilityPower.size(player, BARRIER_PUSH_RADIUS))) {
 			Vec3 away = new Vec3(mob.getX() - player.getX(), 0.0, mob.getZ() - player.getZ());
 			if (away.lengthSqr() < 1.0E-4) {
 				away = player.getLookAngle().horizontal();
@@ -985,7 +986,7 @@ public final class WindPower implements Power {
 				continue;
 			}
 			// weaker further out
-			double falloff = 1.0 - 0.5 * Math.sqrt(mob.distanceToSqr(player)) / BARRIER_PUSH_RADIUS;
+			double falloff = 1.0 - 0.5 * Math.sqrt(mob.distanceToSqr(player)) / AbilityPower.size(player, BARRIER_PUSH_RADIUS);
 			Vec3 push = away.normalize().scale(strength * falloff * resist);
 			mob.push(push.x, 0.35 * resist, push.z);
 			level.sendParticles(ParticleTypes.SMALL_GUST, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 1, 0.1, 0.1, 0.1, 0.0);
@@ -994,11 +995,11 @@ public final class WindPower implements Power {
 
 	private void barrierTick(ServerPlayer player, ServerLevel level, State s) {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		AABB area = player.getBoundingBox().inflate(BARRIER_DEFLECT_RADIUS);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_DEFLECT_RADIUS));
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area, p -> p.isAlive() && p.getOwner() != player)) {
 			Vec3 velocity = projectile.getDeltaMovement();
 			Vec3 toPlayer = center.subtract(projectile.position());
-			if (velocity.lengthSqr() < 0.01 || velocity.dot(toPlayer) <= 0.0 || toPlayer.lengthSqr() > BARRIER_DEFLECT_RADIUS * BARRIER_DEFLECT_RADIUS) {
+			if (velocity.lengthSqr() < 0.01 || velocity.dot(toPlayer) <= 0.0 || toPlayer.lengthSqr() > AbilityPower.size(player, BARRIER_DEFLECT_RADIUS) * AbilityPower.size(player, BARRIER_DEFLECT_RADIUS)) {
 				continue;
 			}
 			projectile.deflect((p, deflector, random, power) -> {

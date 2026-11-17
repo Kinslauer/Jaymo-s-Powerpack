@@ -1,6 +1,7 @@
 package com.jaymospowers.power.ember;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -222,7 +223,7 @@ public final class RunningHot {
 		live.ventReady = now + VENT_COOLDOWN;
 		EmberHeat.cast(player);
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
-		double reach = 2.5 + (VENT_RADIUS - 2.5) * share;
+		double reach = 2.5 + (AbilityPower.size(player, VENT_RADIUS) - 2.5) * share;
 		MagicFx.ring(level, player.position(), (float)reach, COLOR);
 		for (int i = 0; i < 6; i++) {
 			double angle = Math.PI * 2.0 * i / 6.0;
@@ -245,11 +246,11 @@ public final class RunningHot {
 		live.ventReady = now + VENT_COOLDOWN;
 		Vec3 at = player.position().add(0.0, 0.8, 0.0);
 		MagicFx.blast(level, at, 4.0F, WHITE);
-		MagicFx.ring(level, player.position(), (float)BURST_RADIUS, COLOR);
+		MagicFx.ring(level, player.position(), (float)AbilityPower.size(player, BURST_RADIUS), COLOR);
 		level.sendParticles(MagicFx.miasma(STEAM, 2.0F), at.x, at.y, at.z, 24, 1.5, 0.8, 1.5, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 1.1F);
 		Shakes.heavy(player, at, 16.0, 1.0F);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BURST_RADIUS), e -> FireKit.foe(player, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, BURST_RADIUS)), e -> FireKit.foe(player, e))) {
 			FireKit.hurt(player, living, BURST_DAMAGE);
 			Flames.touch(level, living, BURST_BURN, player);
 			Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);

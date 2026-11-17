@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.serialization.Codec;
@@ -278,7 +279,7 @@ public final class WebFury {
 	 * their screens go dark, and the wearer's screen shudders. A burst reaches further and adds a shockwave.
 	 */
 	static void roared(ServerPlayer player, ServerLevel level, Vec3 center, boolean burst) {
-		double reach = DREAD_RADIUS * (burst ? BURST_RADIUS : 1.0);
+		double reach = AbilityPower.size(player, DREAD_RADIUS) * (burst ? BURST_RADIUS : 1.0);
 		long until = level.getGameTime() + (long)(DREAD_TICKS * (burst ? BURST_RADIUS : 1.0));
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(reach),
 			m -> m.isAlive() && m instanceof PathfinderMob && !(m instanceof WitherBoss) && !(m instanceof EnderDragon)
@@ -300,7 +301,7 @@ public final class WebFury {
 		MagicFx.ring(level, ground, (float)reach * 0.5F, ROAR_COLOR);
 		if (burst) {
 			Shakes.send(player, BURST_SHAKE);
-			MagicFx.blast(level, center, (float)(WebSymbiote.ROAR_RADIUS * BURST_RADIUS), BURST_COLOR);
+			MagicFx.blast(level, center, (float)(AbilityPower.size(player, WebSymbiote.ROAR_RADIUS) * BURST_RADIUS), BURST_COLOR);
 			MagicFx.ring(level, ground, (float)reach, BURST_COLOR);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.6F, 0.5F);
 		}

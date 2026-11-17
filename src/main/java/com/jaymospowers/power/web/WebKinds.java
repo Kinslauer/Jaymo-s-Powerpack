@@ -1,5 +1,6 @@
 package com.jaymospowers.power.web;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -60,11 +61,11 @@ public final class WebKinds {
 	 */
 	static boolean burst(ServerLevel level, int kind, Entity ball, @Nullable Entity owner, @Nullable Entity direct, Vec3 at, float damage) {
 		if (kind == CONCUSSIVE) {
-			MagicFx.blast(level, at, (float)THUMP_RADIUS, THUMP);
-			MagicFx.ring(level, at, (float)THUMP_RADIUS * 1.2F, THUMP);
+			MagicFx.blast(level, at, (float)AbilityPower.size(owner, THUMP_RADIUS), THUMP);
+			MagicFx.ring(level, at, (float)AbilityPower.size(owner, THUMP_RADIUS) * 1.2F, THUMP);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(THUMP_RADIUS),
-				e -> e.isAlive() && !e.isSpectator() && e != owner && e.position().distanceToSqr(at) <= THUMP_RADIUS * THUMP_RADIUS * 1.5)) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, THUMP_RADIUS)),
+				e -> e.isAlive() && !e.isSpectator() && e != owner && e.position().distanceToSqr(at) <= AbilityPower.size(owner, THUMP_RADIUS) * AbilityPower.size(owner, THUMP_RADIUS) * 1.5)) {
 				float hurt = e == direct ? damage * THUMP_SHARE : damage * 0.5F;
 				e.hurtServer(level, ball.damageSources().thrown(ball, owner), hurt);
 				Vec3 out = e.position().subtract(at).multiply(1.0, 0.0, 1.0);

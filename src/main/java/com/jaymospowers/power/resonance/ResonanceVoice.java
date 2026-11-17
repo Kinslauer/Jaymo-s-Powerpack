@@ -1,5 +1,6 @@
 package com.jaymospowers.power.resonance;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
@@ -131,8 +132,8 @@ final class ResonanceVoice {
 		// only the thrower sees where it landed
 		level.sendParticles(player, ParticleTypes.NOTE, true, false, spot.x, spot.y + 0.3, spot.z, 1, 0.0, 0.0, 0.0, 0.5);
 		long until = level.getGameTime() + LURE_TICKS;
-		for (Mob mob : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(spot, spot).inflate(LURE_RADIUS),
-			m -> m.isAlive() && m.getTarget() == null && !m.isNoAi() && m.distanceToSqr(spot) <= LURE_RADIUS * LURE_RADIUS)) {
+		for (Mob mob : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(spot, spot).inflate(AbilityPower.size(player, LURE_RADIUS)),
+			m -> m.isAlive() && m.getTarget() == null && !m.isNoAi() && m.distanceToSqr(spot) <= AbilityPower.size(player, LURE_RADIUS) * AbilityPower.size(player, LURE_RADIUS))) {
 			LURES.removeIf(lure -> lure.mob == mob);
 			LURES.add(new Lure(mob, spot, until));
 			mob.getNavigation().moveTo(spot.x, spot.y, spot.z, LURE_SPEED);

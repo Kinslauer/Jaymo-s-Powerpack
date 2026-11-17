@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -313,13 +314,13 @@ public final class Pyre extends XenoForm {
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
 		player.resetFallDistance();
 		drive(player, Vec3.ZERO);
-		for (LivingEntity living : around(player, DIVE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, DIVE_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), DIVE_DAMAGE);
 			shove(living, player.position(), 0.9, 0.45);
 		}
-		Flames.area(level, at, DIVE_RADIUS, DIVE_BURN_SECONDS, player, e -> e != player);
-		com.jaymospowers.core.fx.MagicFx.blast(level, at, (float) DIVE_RADIUS, 0xFF8A2A);
-		ring(level, ParticleTypes.FLAME, at, DIVE_RADIUS, 40);
+		Flames.area(level, at, AbilityPower.size(player, DIVE_RADIUS), DIVE_BURN_SECONDS, player, e -> e != player);
+		com.jaymospowers.core.fx.MagicFx.blast(level, at, (float) AbilityPower.size(player, DIVE_RADIUS), 0xFF8A2A);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, DIVE_RADIUS), 40);
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 24, 1.2, 0.5, 1.2, 0.0);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.1F);
 		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.5F);
@@ -329,13 +330,13 @@ public final class Pyre extends XenoForm {
 	private static void nova(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
-		for (LivingEntity living : around(player, NOVA_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, NOVA_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), NOVA_DAMAGE);
 			shove(living, player.position(), 0.6, 0.3);
 		}
-		Flames.area(level, at, NOVA_RADIUS, NOVA_BURN_SECONDS, player, e -> e != player);
-		ring(level, ParticleTypes.FLAME, at, NOVA_RADIUS * 0.5, 24);
-		ring(level, ParticleTypes.FLAME, at, NOVA_RADIUS, 40);
+		Flames.area(level, at, AbilityPower.size(player, NOVA_RADIUS), NOVA_BURN_SECONDS, player, e -> e != player);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, NOVA_RADIUS) * 0.5, 24);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, NOVA_RADIUS), 40);
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 20, 1.0, 0.5, 1.0, 0.0);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.8F, 1.4F);
 		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.6F);

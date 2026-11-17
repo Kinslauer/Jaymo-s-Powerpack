@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -415,7 +416,7 @@ final class ZFighterBattle {
 		ZFighterPower.addHardship(player, RAGE_HARDSHIP);
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ZFighterPower.SUPER_BURST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, ZFighterPower.SUPER_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			ZFighterKi.push(near, near.position().subtract(centre), 1.2, 0.3);
 		}

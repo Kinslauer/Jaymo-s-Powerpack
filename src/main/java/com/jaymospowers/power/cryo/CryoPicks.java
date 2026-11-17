@@ -1,5 +1,6 @@
 package com.jaymospowers.power.cryo;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Bleeding;
@@ -356,11 +357,11 @@ public final class CryoPicks {
 
 	private static void burstBall(Shot shot, Vec3 at) {
 		ServerLevel level = shot.level;
-		MagicFx.blast(level, at, (float)BALL_RADIUS, COLOR);
-		MagicFx.ring(level, at, (float)BALL_RADIUS * 1.4F, WHITE);
+		MagicFx.blast(level, at, (float)AbilityPower.size(shot.owner, BALL_RADIUS), COLOR);
+		MagicFx.ring(level, at, (float)AbilityPower.size(shot.owner, BALL_RADIUS) * 1.4F, WHITE);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 0.7F);
 		float strength = CryoPower.strength(shot.owner);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BALL_RADIUS), e -> foe(shot.owner, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(shot.owner, BALL_RADIUS)), e -> foe(shot.owner, e))) {
 			living.hurtServer(level, shot.owner.damageSources().playerAttack(shot.owner), BALL_DAMAGE * strength);
 			living.clearFire();
 			CryoFrostbite.bite(living, shot.owner, 2);

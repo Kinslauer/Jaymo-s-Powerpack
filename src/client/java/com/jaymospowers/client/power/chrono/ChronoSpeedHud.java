@@ -6,6 +6,7 @@ import com.jaymospowers.power.chrono.ChronoGears;
 import com.jaymospowers.power.chrono.ChronoMeters;
 import com.jaymospowers.power.chrono.ChronoMomentum;
 import com.jaymospowers.power.chrono.ChronoSpeed;
+import com.jaymospowers.power.chrono.SpeedPrism;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -31,7 +32,7 @@ public final class ChronoSpeedHud {
 			HudZones.clear(HudZones.DOCK_RIGHT, "chrono_gear");
 			return;
 		}
-		int colour = ChronoSpeed.velocity(player) ? SKY : GOLD;
+		int colour = 0xFF000000 | SpeedPrism.colour(player, ChronoSpeed.velocity(player) ? SKY : GOLD);
 		Integer phase = player.getAttached(ChronoMeters.PHASE), slow = player.getAttached(ChronoMeters.SLOW), caught = player.getAttached(ChronoMeters.CAUGHT);
 		Integer charge = player.getAttached(ChronoMeters.STATIC);
 		int top = ChronoMomentum.top(player);

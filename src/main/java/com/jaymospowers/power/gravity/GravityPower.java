@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -1777,7 +1778,7 @@ public final class GravityPower implements Power {
 		cool(player, WELL, WELL_COOLDOWN);
 		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.5F, 1.8F);
 		// it goes off in a swelling bubble that shoves the ground up around it
-		GravityShockwave.start(player.level(), at);
+		GravityShockwave.start(player.level(), at, player);
 	}
 
 	/** What Lift holds, if it's a living creature (not a chunk, an item, a cart or a corpse), or null. */
@@ -1799,7 +1800,7 @@ public final class GravityPower implements Power {
 			if (ownWell(player) != null) {
 				wellLaunch(player, state);
 			}
-			crush(player, 0.0F, player.position(), CRUSH_TAP_RADIUS);
+			crush(player, 0.0F, player.position(), AbilityPower.size(player, CRUSH_TAP_RADIUS));
 			return;
 		}
 		if (!ready(player, CRUSH)) {
@@ -1808,7 +1809,7 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		if (GravityOrbit.collapsingHorizon(player)) {
 			GravityOrbit.rain(player, aimPoint(player, GravityWave.range(charge) + GravityWave.COLLAPSE_RANGE_BONUS),
-				Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + COLLAPSE_RADIUS_BONUS);
+				Mth.lerp(charge, AbilityPower.size(player, CRUSH_RADIUS_MIN), AbilityPower.size(player, CRUSH_RADIUS_MAX)) + COLLAPSE_RADIUS_BONUS);
 		}
 		GravityWave.fire(player, charge);
 		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
@@ -2120,12 +2121,12 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		if (player.tickCount % 4 == 0) {
 			Vec3 me = player.position().add(0.0, 1.0, 0.0);
-			AABB area = player.getBoundingBox().inflate(COLLAPSE_DRIFT_RADIUS);
+			AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, COLLAPSE_DRIFT_RADIUS));
 			for (Entity e : level.getEntities(player, area, e -> e instanceof ItemEntity
 				|| e instanceof LivingEntity living && living.getMaxHealth() <= 10.0F && !(e instanceof Player) && living.isAlive())) {
 				Vec3 to = me.subtract(e.position());
 				double d = to.length();
-				if (d > 0.8 && d < COLLAPSE_DRIFT_RADIUS) {
+				if (d > 0.8 && d < AbilityPower.size(player, COLLAPSE_DRIFT_RADIUS)) {
 					e.setDeltaMovement(e.getDeltaMovement().add(to.scale(COLLAPSE_DRIFT * 4.0 / d)));
 					e.needsSync = true;
 				}
@@ -2151,7 +2152,7 @@ public final class GravityPower implements Power {
 	/** Event Horizon: projectiles that come too close are bent away. */
 	private static void deflect(ServerPlayer player) {
 		Vec3 me = player.getBoundingBox().getCenter();
-		for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(HORIZON_DEFLECT_RADIUS),
+		for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, HORIZON_DEFLECT_RADIUS)),
 			p -> p.isAlive() && p.getOwner() != player)) {
 			Vec3 away = projectile.position().subtract(me);
 			double d = away.length();
@@ -2166,7 +2167,7 @@ public final class GravityPower implements Power {
 
 	/** Weightless: the weight you shed lands on everyone around you. */
 	private static void heavyAura(ServerPlayer player) {
-		weighDown(player, player.position(), HEAVY_AURA_RADIUS);
+		weighDown(player, player.position(), AbilityPower.size(player, HEAVY_AURA_RADIUS));
 	}
 
 	/**
@@ -2315,7 +2316,7 @@ public final class GravityPower implements Power {
 			tickField(level, well, owner, left);
 			return;
 		}
-		double radius = SINGULARITY_PULL_RADIUS;
+		double radius = AbilityPower.size(owner, SINGULARITY_PULL_RADIUS);
 		double pull = SINGULARITY_PULL;
 		if (owner != null && Fate.isCorrupted(owner)) {
 			pull *= COLLAPSE_DAMAGE;
@@ -2339,7 +2340,7 @@ public final class GravityPower implements Power {
 				if (owner != null) {
 					touch(living, owner);
 				}
-				if (hit && d <= SINGULARITY_CORE) {
+				if (hit && d <= AbilityPower.size(owner, SINGULARITY_CORE)) {
 					DamageSource source = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
 					living.setInvulnerableTime(0);
 					living.hurtServer(level, source, SINGULARITY_HIT);
@@ -2362,7 +2363,7 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Vec3 at = owner.position();
-		double radius = WELL_RADIUS;
+		double radius = AbilityPower.size(owner, WELL_RADIUS);
 		if (left % HEAVY_AURA_REFRESH == 0) {
 			weighDown(owner, at, radius);
 		}
@@ -2388,7 +2389,7 @@ public final class GravityPower implements Power {
 	/** The Singularity's end: it snaps open and throws everything out. */
 	private static void burst(ServerLevel level, Well well, @Nullable ServerPlayer owner) {
 		Vec3 at = well.at();
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(SINGULARITY_CORE + 1.0),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, SINGULARITY_CORE) + 1.0),
 			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
 			Vec3 away = living.getBoundingBox().getCenter().subtract(at);
 			double d = Math.max(0.3, away.length());

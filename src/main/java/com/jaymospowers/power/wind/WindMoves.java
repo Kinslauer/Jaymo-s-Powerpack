@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
@@ -291,7 +292,7 @@ public final class WindMoves {
 		Vec3 c = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		double age = SPHERE_TICKS - left;
 		// the first few ticks it swells out to full size
-		double r = SPHERE_RADIUS * Math.min(1.0, 0.4 + age / 6.0);
+		double r = AbilityPower.size(player, SPHERE_RADIUS) * Math.min(1.0, 0.4 + age / 6.0);
 		// bands of wind sweeping round the sphere at different tilts, fewer as it fades
 		int bands = Math.max(1, (int)Math.round(6 * fade));
 		for (int b = 0; b < bands; b++) {

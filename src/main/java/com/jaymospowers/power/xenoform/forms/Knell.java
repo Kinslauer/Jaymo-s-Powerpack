@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import java.util.Set;
@@ -180,18 +181,18 @@ public final class Knell extends XenoForm {
 
 	private static void shriek(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SHRIEK_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SHRIEK_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), SHRIEK_DAMAGE);
 			living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, SHRIEK_DARKNESS_TICKS, 0));
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHRIEK_SLOW_TICKS, 1));
 		}
 		Vec3 at = player.position().add(0.0, 1.5, 0.0);
-		ring(level, ParticleTypes.SCULK_CHARGE_POP, at, SHRIEK_RADIUS * 0.4, 16);
-		ring(level, ParticleTypes.SCULK_SOUL, at, SHRIEK_RADIUS * 0.8, 32);
+		ring(level, ParticleTypes.SCULK_CHARGE_POP, at, AbilityPower.size(player, SHRIEK_RADIUS) * 0.4, 16);
+		ring(level, ParticleTypes.SCULK_SOUL, at, AbilityPower.size(player, SHRIEK_RADIUS) * 0.8, 32);
 		level.sendParticles(new net.minecraft.core.particles.ShriekParticleOption(0), at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		sound(player, SoundEvents.WARDEN_ROAR, 3.0F, 1.0F);
 		sound(player, SoundEvents.SCULK_SHRIEKER_SHRIEK, 2.0F, 0.8F);
-		com.jaymospowers.core.Shakes.heavy(player, at, SHRIEK_RADIUS * 1.5, 1.6F);
+		com.jaymospowers.core.Shakes.heavy(player, at, AbilityPower.size(player, SHRIEK_RADIUS) * 1.5, 1.6F);
 	}
 
 	/** Picks where you come up: the surface of the block you look at, or the ground {@link #BURROW_RANGE} ahead. */

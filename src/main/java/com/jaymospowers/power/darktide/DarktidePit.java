@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
@@ -114,9 +115,9 @@ final class DarktidePit {
 		int ticks = dark ? PIT_DARK_TICKS : PIT_TICKS;
 		PITS.add(new Pit(player, at, level.getGameTime() + ticks));
 		PickKit.spend(TABLE, player, PIT, PIT_COOLDOWN);
-		MagicFx.pool(level, at, (float)PIT_RADIUS, DarktideLooks.INK, ticks);
-		MagicFx.ring(level, at.add(0.0, 0.05, 0.0), (float)PIT_RADIUS, DarktideLooks.DEEP);
-		DarktideLooks.ink(level, at.add(0.0, 0.4, 0.0), 20, PIT_RADIUS * 0.4);
+		MagicFx.pool(level, at, (float)AbilityPower.size(player, PIT_RADIUS), DarktideLooks.INK, ticks);
+		MagicFx.ring(level, at.add(0.0, 0.05, 0.0), (float)AbilityPower.size(player, PIT_RADIUS), DarktideLooks.DEEP);
+		DarktideLooks.ink(level, at.add(0.0, 0.4, 0.0), 20, AbilityPower.size(player, PIT_RADIUS) * 0.4);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 1.4F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 0.4F);
 	}
@@ -183,8 +184,8 @@ final class DarktidePit {
 
 	private static void tickPit(Pit pit, long now) {
 		ServerLevel level = pit.level;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pit.at, pit.at).inflate(PIT_RADIUS, 2.0, PIT_RADIUS),
-			e -> PickKit.foe(pit.owner, e) && e.position().distanceToSqr(pit.at) <= PIT_RADIUS * PIT_RADIUS * 1.2)) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pit.at, pit.at).inflate(AbilityPower.size(pit.owner, PIT_RADIUS), 2.0, AbilityPower.size(pit.owner, PIT_RADIUS)),
+			e -> PickKit.foe(pit.owner, e) && e.position().distanceToSqr(pit.at) <= AbilityPower.size(pit.owner, PIT_RADIUS) * AbilityPower.size(pit.owner, PIT_RADIUS) * 1.2)) {
 			Vec3 in = pit.at.subtract(e.position()).multiply(1.0, 0.0, 1.0);
 			double d = in.length();
 			if (d > PIT_HELD) {
@@ -211,10 +212,10 @@ final class DarktidePit {
 			}
 		}
 		if (now % 6 == 0) {
-			DarktideLooks.ink(level, pit.at.add(0.0, 0.3, 0.0), 6, PIT_RADIUS * 0.35);
+			DarktideLooks.ink(level, pit.at.add(0.0, 0.3, 0.0), 6, AbilityPower.size(pit.owner, PIT_RADIUS) * 0.35);
 		}
 		if (now % 20 == 0) {
-			MagicFx.ring(level, pit.at.add(0.0, 0.05, 0.0), (float)PIT_RADIUS, DarktideLooks.DEEP);
+			MagicFx.ring(level, pit.at.add(0.0, 0.05, 0.0), (float)AbilityPower.size(pit.owner, PIT_RADIUS), DarktideLooks.DEEP);
 		}
 	}
 
@@ -226,7 +227,7 @@ final class DarktidePit {
 				e.syncVelocity = true;
 			}
 		}
-		DarktideLooks.ink(pit.level, pit.at.add(0.0, 0.5, 0.0), 24, PIT_RADIUS * 0.5);
+		DarktideLooks.ink(pit.level, pit.at.add(0.0, 0.5, 0.0), 24, AbilityPower.size(pit.owner, PIT_RADIUS) * 0.5);
 		pit.level.playSound(null, pit.at.x, pit.at.y, pit.at.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6F, 1.6F);
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
@@ -362,14 +363,14 @@ public final class SorasDagger extends Item {
 		Vec3 center = player.position().add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
-		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WIND_BURST_RADIUS),
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, WIND_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !player.isAlliedTo(e) && !(e instanceof TamableAnimal pet && pet.isOwnedBy(player)))) {
 			Vec3 away = target.position().subtract(player.position());
 			double distance = away.length();
-			if (distance > WIND_BURST_RADIUS || distance < 1.0E-3) {
+			if (distance > AbilityPower.size(player, WIND_BURST_RADIUS) || distance < 1.0E-3) {
 				continue;
 			}
-			double strength = WIND_BURST_PUSH * (1.0 - distance / (WIND_BURST_RADIUS + 1.0));
+			double strength = WIND_BURST_PUSH * (1.0 - distance / (AbilityPower.size(player, WIND_BURST_RADIUS) + 1.0));
 			target.setDeltaMovement(target.getDeltaMovement().add(new Vec3(away.x, 0.0, away.z).normalize().scale(strength)).add(0.0, strength * 0.6, 0.0));
 			target.syncVelocity = true;
 		}

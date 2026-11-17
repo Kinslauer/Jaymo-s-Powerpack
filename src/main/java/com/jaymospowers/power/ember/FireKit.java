@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -308,7 +309,7 @@ public final class FireKit {
 		ServerLevel level = player.level();
 		Vec3 at = aim(player, COLUMN_REACH);
 		COLUMNS.add(new Column(level, player, at, level.getGameTime() + COLUMN_DELAY));
-		MagicFx.sigil(level, at.add(0.0, 0.1, 0.0), (float)COLUMN_RADIUS, COLOR, COLUMN_DELAY);
+		MagicFx.sigil(level, at.add(0.0, 0.1, 0.0), (float)AbilityPower.size(player, COLUMN_RADIUS), COLOR, COLUMN_DELAY);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.2F, 0.6F);
 		cooldown(player, COLUMN, COLUMN_COOLDOWN);
 		return true;
@@ -409,11 +410,11 @@ public final class FireKit {
 		double spin = now * 0.35;
 		for (int i = 0; i < 6; i++) {
 			double angle = spin + Math.PI * 2.0 * i / 6.0;
-			level.sendParticles(ParticleTypes.FLAME, owner.getX() + Math.cos(angle) * RING_RADIUS, owner.getY() + 0.5 + (i % 2) * 0.6,
-				owner.getZ() + Math.sin(angle) * RING_RADIUS, 1, 0.05, 0.1, 0.05, 0.01);
+			level.sendParticles(ParticleTypes.FLAME, owner.getX() + Math.cos(angle) * AbilityPower.size(owner, RING_RADIUS), owner.getY() + 0.5 + (i % 2) * 0.6,
+				owner.getZ() + Math.sin(angle) * AbilityPower.size(owner, RING_RADIUS), 1, 0.05, 0.1, 0.05, 0.01);
 		}
 		if (now % 12 == 0) {
-			MagicFx.ring(level, owner.position().add(0.0, 0.2, 0.0), (float)RING_RADIUS, COLOR);
+			MagicFx.ring(level, owner.position().add(0.0, 0.2, 0.0), (float)AbilityPower.size(owner, RING_RADIUS), COLOR);
 		}
 		if (now % 20 == 0) {
 			owner.causeFoodExhaustion(0.2F);
@@ -422,10 +423,10 @@ public final class FireKit {
 			return;
 		}
 		boolean damage = now % HIT_EVERY == 0;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, owner.getBoundingBox().inflate(RING_RADIUS + RING_BAND), e -> foe(owner, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, owner.getBoundingBox().inflate(AbilityPower.size(owner, RING_RADIUS) + RING_BAND), e -> foe(owner, e))) {
 			Vec3 out = living.position().subtract(owner.position()).multiply(1.0, 0.0, 1.0);
 			double distance = out.length();
-			if (distance < RING_RADIUS - RING_BAND || distance > RING_RADIUS + RING_BAND) {
+			if (distance < AbilityPower.size(owner, RING_RADIUS) - RING_BAND || distance > AbilityPower.size(owner, RING_RADIUS) + RING_BAND) {
 				continue;
 			}
 			Flames.touch(level, living, RING_BURN, owner);
@@ -469,12 +470,12 @@ public final class FireKit {
 		ServerPlayer owner = column.owner;
 		Vec3 at = column.at;
 		MagicFx.beam(level, at.add(0.0, COLUMN_FROM, 0.0), at, 1.1F, WHITE, 8);
-		MagicFx.blast(level, at.add(0.0, 0.5, 0.0), (float)COLUMN_RADIUS, COLOR);
+		MagicFx.blast(level, at.add(0.0, 0.5, 0.0), (float)AbilityPower.size(owner, COLUMN_RADIUS), COLOR);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
 		if (owner.isAlive()) {
 			Shakes.heavy(owner, at, 16.0, 0.7F);
 		}
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(COLUMN_RADIUS, COLUMN_FROM * 0.4, COLUMN_RADIUS), e -> foe(owner, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, COLUMN_RADIUS), COLUMN_FROM * 0.4, AbilityPower.size(owner, COLUMN_RADIUS)), e -> foe(owner, e))) {
 			hurt(owner, living, COLUMN_DAMAGE);
 			Flames.touch(level, living, COLUMN_BURN, owner);
 			living.push(0.0, 0.5, 0.0);
@@ -534,7 +535,7 @@ public final class FireKit {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8F, 1.5F);
 		depth++;
 		try {
-			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS), e -> e != dead && foe(owner, e))) {
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, BURST_RADIUS)), e -> e != dead && foe(owner, e))) {
 				Flames.touch(level, near, BURST_BURN, owner);
 				hurt(owner, near, BURST_DAMAGE);
 			}

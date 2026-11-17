@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
@@ -471,7 +472,7 @@ public final class WindModes {
 	/** Projectiles near a Tempest are blown back the way they came. */
 	private static void deflect(ServerPlayer player, ServerLevel level) {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		AABB area = player.getBoundingBox().inflate(TEMPEST_DEFLECT_RADIUS);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, TEMPEST_DEFLECT_RADIUS));
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area, p -> p.isAlive() && p.getOwner() != player)) {
 			Vec3 velocity = projectile.getDeltaMovement();
 			Vec3 toPlayer = center.subtract(projectile.position());
@@ -618,7 +619,7 @@ public final class WindModes {
 		}
 		float damage = Mth.lerp(f, CALL_DAMAGE_MIN, CALL_DAMAGE_MAX) * scale;
 		DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
-		AABB area = new AABB(at, at).inflate(CALL_RADIUS, CALL_RADIUS + 3.0, CALL_RADIUS);
+		AABB area = new AABB(at, at).inflate(AbilityPower.size(player, CALL_RADIUS), AbilityPower.size(player, CALL_RADIUS) + 3.0, AbilityPower.size(player, CALL_RADIUS));
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != player && !e.isSpectator())) {
 			target.hurtServer(level, source, damage);
 			chargeCreeper(target);

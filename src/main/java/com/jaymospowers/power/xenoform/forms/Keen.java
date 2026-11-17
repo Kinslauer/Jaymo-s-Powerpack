@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -87,7 +88,7 @@ public final class Keen extends XenoForm {
 			}
 			case ABILITY_2 -> {
 				if (ready(player, live, G)) {
-					for (LivingEntity e : around(player, SCREECH_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, SCREECH_RADIUS))) {
 						if (e.onGround() || e.isInWater()) {
 							continue;
 						}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -189,10 +190,10 @@ public final class Wyrm extends XenoForm {
 		AreaEffectCloud cloud = new AreaEffectCloud(level, at.x, at.y, at.z);
 		cloud.setOwner(player);
 		cloud.setCustomParticle(MagicFx.MURK);
-		cloud.setRadius(BREATH_RADIUS);
+		cloud.setRadius(AbilityPower.size(player, BREATH_RADIUS));
 		int ticks = (int)(BREATH_TICKS * linger);
 		cloud.setDuration(ticks);
-		cloud.setRadiusPerTick(-BREATH_RADIUS * 0.3F / ticks);
+		cloud.setRadiusPerTick(-AbilityPower.size(player, BREATH_RADIUS) * 0.3F / ticks);
 		cloud.setPotionDurationScale(0.25F);
 		cloud.addEffect(new MobEffectInstance(MobEffects.INSTANT_DAMAGE, 1, 1));
 		level.addFreshEntity(cloud);
@@ -206,7 +207,7 @@ public final class Wyrm extends XenoForm {
 
 	private static void gust(ServerPlayer player, double reach) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, GUST_RADIUS * reach)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, GUST_RADIUS) * reach)) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), GUST_DAMAGE);
 			shove(living, player.position(), GUST_OUT, GUST_UP);
 		}
@@ -215,8 +216,8 @@ public final class Wyrm extends XenoForm {
 			player.setDeltaMovement(player.getDeltaMovement().add(back.normalize().scale(-GUST_RECOIL)).add(0.0, 0.2, 0.0));
 			player.syncVelocity = true;
 		}
-		ring(level, ParticleTypes.CLOUD, player.position().add(0.0, 1.0, 0.0), GUST_RADIUS * reach * 0.5, 16);
-		ring(level, ParticleTypes.GUST, player.position(), GUST_RADIUS * reach, 8);
+		ring(level, ParticleTypes.CLOUD, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, GUST_RADIUS) * reach * 0.5, 16);
+		ring(level, ParticleTypes.GUST, player.position(), AbilityPower.size(player, GUST_RADIUS) * reach, 8);
 		sound(player, SoundEvents.ENDER_DRAGON_FLAP, 2.0F, 0.7F);
 		sound(player, SoundEvents.WIND_CHARGE_BURST.value(), 1.0F, 0.8F);
 		// the beat throws you back: felt from ahead

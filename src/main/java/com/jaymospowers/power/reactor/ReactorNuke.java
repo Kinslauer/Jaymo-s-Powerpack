@@ -1,5 +1,6 @@
 package com.jaymospowers.power.reactor;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -97,13 +98,13 @@ final class ReactorNuke {
 		ReactorPower.live(player).charge = 0.0F;
 		float f = 0.6F + 0.4F * charge / ReactorPower.FULL;
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		ReactorPower.blast(player, at, RADIUS, HARM * f, 2.0);
-		MagicFx.blast(level, at, (float)RADIUS, ReactorPower.CORE, 30);
-		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), (float)RADIUS * 1.3F, ReactorPower.GLOW);
-		MagicFx.beam(level, player.position(), player.position().add(0.0, RADIUS * 2.0, 0.0), 3.0F, ReactorPower.CORE, 30);
+		ReactorPower.blast(player, at, AbilityPower.size(player, RADIUS), HARM * f, 2.0);
+		MagicFx.blast(level, at, (float)AbilityPower.size(player, RADIUS), ReactorPower.CORE, 30);
+		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), (float)AbilityPower.size(player, RADIUS) * 1.3F, ReactorPower.GLOW);
+		MagicFx.beam(level, player.position(), player.position().add(0.0, AbilityPower.size(player, RADIUS) * 2.0, 0.0), 3.0F, ReactorPower.CORE, 30);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 6.0F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 0.5F);
-		com.jaymospowers.core.Shakes.around(level, at, RADIUS * 4.0, 2.5F);
+		com.jaymospowers.core.Shakes.around(level, at, AbilityPower.size(player, RADIUS) * 4.0, 2.5F);
 		FALLOUT.add(new Fallout(player.getUUID(), level.dimension(), player.position(), level.getGameTime() + FALLOUT_TICKS));
 	}
 
@@ -138,14 +139,14 @@ final class ReactorNuke {
 			}
 			long now = level.getGameTime();
 			if (now % 10 == 0) {
-				level.sendParticles(MagicFx.miasma(ReactorPower.GLOW, 1.4F), f.at().x, f.at().y + 0.6, f.at().z, 10, FALLOUT_RADIUS * 0.5, 0.4,
-					FALLOUT_RADIUS * 0.5, 0.01);
+				level.sendParticles(MagicFx.miasma(ReactorPower.GLOW, 1.4F), f.at().x, f.at().y + 0.6, f.at().z, 10, AbilityPower.size(level, f.owner(), FALLOUT_RADIUS) * 0.5, 0.4,
+					AbilityPower.size(level, f.owner(), FALLOUT_RADIUS) * 0.5, 0.01);
 			}
 			if (now % 20 != 0) {
 				continue;
 			}
 			ServerPlayer owner = server.getPlayerList().getPlayer(f.owner());
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(f.at(), f.at()).inflate(FALLOUT_RADIUS, 4.0, FALLOUT_RADIUS),
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(f.at(), f.at()).inflate(AbilityPower.size(level, f.owner(), FALLOUT_RADIUS), 4.0, AbilityPower.size(level, f.owner(), FALLOUT_RADIUS)),
 				e -> e.isAlive() && !e.getUUID().equals(f.owner()) && e.position().distanceToSqr(f.at()) <= FALLOUT_RADIUS * FALLOUT_RADIUS)) {
 				e.hurtServer(level, owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic(), FALLOUT_HARM);
 				e.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 0));

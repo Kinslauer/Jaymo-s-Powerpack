@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
@@ -102,8 +103,8 @@ public final class EmberBackdraft {
 	}
 
 	private static void draw(ServerPlayer p, ServerLevel level, Vec3 at, Draft d) {
-		AABB box = new AABB(at, at).inflate(RADIUS);
-		for (Entity e : level.getEntities(p, box, e -> e.isAlive() && e.position().distanceToSqr(at) <= RADIUS * RADIUS)) {
+		AABB box = new AABB(at, at).inflate(AbilityPower.size(p, RADIUS));
+		for (Entity e : level.getEntities(p, box, e -> e.isAlive() && e.position().distanceToSqr(at) <= AbilityPower.size(p, RADIUS) * AbilityPower.size(p, RADIUS))) {
 			if (e.isOnFire()) {
 				e.clearFire();
 				d.swallowed++;
@@ -119,13 +120,13 @@ public final class EmberBackdraft {
 			}
 		}
 		// the fire blocks, a slice of the sphere a tick
-		int r = (int)Math.ceil(RADIUS), side = 2 * r + 1, total = side * side * side;
+		int r = (int)Math.ceil(AbilityPower.size(p, RADIUS)), side = 2 * r + 1, total = side * side * side;
 		BlockPos centre = BlockPos.containing(at);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int n = 0; n < BLOCKS_PER_TICK && d.scan < total; n++, d.scan++) {
 			int i = d.scan;
 			pos.set(centre.getX() - r + i % side, centre.getY() - r + (i / side) % side, centre.getZ() - r + i / (side * side));
-			if (pos.distSqr(centre) > RADIUS * RADIUS) {
+			if (pos.distSqr(centre) > AbilityPower.size(p, RADIUS) * AbilityPower.size(p, RADIUS)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);
@@ -141,7 +142,7 @@ public final class EmberBackdraft {
 		}
 		// the air streams in from every side
 		for (int i = 0; i < 6; i++) {
-			Vec3 from = at.add(new Vec3(level.getRandom().nextGaussian(), level.getRandom().nextGaussian() * 0.5, level.getRandom().nextGaussian()).normalize().scale(RADIUS * 0.8));
+			Vec3 from = at.add(new Vec3(level.getRandom().nextGaussian(), level.getRandom().nextGaussian() * 0.5, level.getRandom().nextGaussian()).normalize().scale(AbilityPower.size(p, RADIUS) * 0.8));
 			Vec3 v = at.subtract(from).scale(0.08);
 			level.sendParticles(MagicFx.miasma(AIR, 1.4F), from.x, from.y, from.z, 0, v.x, v.y, v.z, 1.0);
 		}
@@ -159,7 +160,7 @@ public final class EmberBackdraft {
 	}
 
 	private static void blast(ServerPlayer p, ServerLevel level, Vec3 at, int swallowed) {
-		double radius = Math.min(MAX_RADIUS, BLAST_RADIUS + swallowed * PER_FIRE_RADIUS);
+		double radius = Math.min(AbilityPower.size(p, MAX_RADIUS), AbilityPower.size(p, BLAST_RADIUS) + swallowed * AbilityPower.size(p, PER_FIRE_RADIUS));
 		// (FireKit.hurt adds Heat's bonus)
 		float damage = Math.min(MAX_DAMAGE, BLAST_DAMAGE + swallowed * PER_FIRE_DAMAGE);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius), e -> FireKit.foe(p, e) && e.position().distanceToSqr(at) <= radius * radius)) {

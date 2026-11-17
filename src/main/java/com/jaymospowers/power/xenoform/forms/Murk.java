@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -72,13 +73,13 @@ public final class Murk extends XenoForm {
 		switch (key) {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
-					for (LivingEntity e : around(player, INK_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, INK_RADIUS))) {
 						e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, INK_BLIND, 0), player);
 						if (e instanceof Mob mob && mob.getTarget() == player) {
 							mob.setTarget(null);
 						}
 					}
-					burst(level, ParticleTypes.SQUID_INK, player.position().add(0.0, 1.0, 0.0), 80, INK_RADIUS * 0.5, 0.05);
+					burst(level, ParticleTypes.SQUID_INK, player.position().add(0.0, 1.0, 0.0), 80, AbilityPower.size(player, INK_RADIUS) * 0.5, 0.05);
 					sound(player, SoundEvents.SQUID_SQUIRT, 1.4F, 0.8F);
 					cooldown(player, live, R, INK_COOLDOWN);
 				}
@@ -158,7 +159,7 @@ public final class Murk extends XenoForm {
 				level.sendParticles(MagicFx.GLOW, player.getX(), player.getY() + 1.4, player.getZ(), 3, 0.4, 0.4, 0.4, 0.01);
 			}
 			if (live.lure % 10 == 0) {
-				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LURE_RADIUS),
+				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(AbilityPower.size(player, LURE_RADIUS)),
 					m -> m.isAlive() && m.isInWater() && !spared(player, m))) {
 					mob.getNavigation().moveTo(player, LURE_SPEED);
 				}

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.armory.ThrowingWeaponItem;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.ground.ThrownRocks;
@@ -234,7 +235,7 @@ public final class ZFighterKiThrow {
 	}
 
 	private static void blast(ServerLevel level, Player owner, Vec3 at, float power, int color) {
-		double radius = RADIUS_MIN + (RADIUS_MAX - RADIUS_MIN) * power;
+		double radius = AbilityPower.size(owner, RADIUS_MIN) + (AbilityPower.size(owner, RADIUS_MAX) - AbilityPower.size(owner, RADIUS_MIN)) * power;
 		float damage = BASE_DAMAGE + (MAX_DAMAGE - BASE_DAMAGE) * power;
 		if (owner instanceof ServerPlayer sp) {
 			damage *= ZFighterPower.kiPower(sp, ZFighterPower.live(sp));

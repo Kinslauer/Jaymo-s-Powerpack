@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -158,6 +159,8 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
+		// the speedsters' prism (the lightning's colour) and energy bar
+		SpeedPrism.init();
 		// (0.20.50) cheating death: R on a black screen instead of dying
 		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
@@ -836,11 +839,11 @@ public final class ChronoPower implements Power {
 	/** Time Bloom's mending for everything living around you: players, villagers, animals and monsters alike. */
 	private static void bloomHealNearby(ServerPlayer player, ServerLevel level) {
 		// a symbiote mid-takeover feels the bloom (WebSymbioteStrains: purifying)
-		com.jaymospowers.power.web.WebSymbioteStrains.purifyAround(player, BLOOM_HEAL_RADIUS, com.jaymospowers.power.web.WebSymbioteStrains.Half.TIME);
-		AABB area = player.getBoundingBox().inflate(BLOOM_HEAL_RADIUS);
+		com.jaymospowers.power.web.WebSymbioteStrains.purifyAround(player, AbilityPower.size(player, BLOOM_HEAL_RADIUS), com.jaymospowers.power.web.WebSymbioteStrains.Half.TIME);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BLOOM_HEAL_RADIUS));
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.getHealth() < e.getMaxHealth()
-				&& e.distanceToSqr(player) <= BLOOM_HEAL_RADIUS * BLOOM_HEAL_RADIUS
+				&& e.distanceToSqr(player) <= AbilityPower.size(player, BLOOM_HEAL_RADIUS) * AbilityPower.size(player, BLOOM_HEAL_RADIUS)
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.heal(BLOOM_HEAL);
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.4, 0.3, 0.0);
@@ -848,9 +851,9 @@ public final class ChronoPower implements Power {
 	}
 
 	private static void overclockDrag(ServerPlayer player, ServerLevel level) {
-		AABB area = player.getBoundingBox().inflate(OVERCLOCK_DRAG_RADIUS);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS));
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
-			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= OVERCLOCK_DRAG_RADIUS * OVERCLOCK_DRAG_RADIUS
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS) * AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS)
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, OVERCLOCK_DRAG_EVERY + 10, OVERCLOCK_DRAG_AMPLIFIER, false, false, true), player);
 			if (level.getRandom().nextInt(3) == 0) {
@@ -899,7 +902,7 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Time Bloom
 
 	private static boolean bloom(ServerPlayer player, ChronoState state) {
-		state.bloom = new TimeBloom(player.level(), player.blockPosition(), ChronoFx.style(player));
+		state.bloom = new TimeBloom(player.level(), player.blockPosition(), ChronoFx.style(player), player);
 		state.bloom.start();
 		return true;
 	}
