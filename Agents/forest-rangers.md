@@ -3,7 +3,7 @@ status: in-review
 task: The Green Huntsman's rangers in the forests (hunt, teach, scold, hogtie poachers)
 branch: claude/forest-rangers
 with: Claude (cloud, Powerpack project thread)
-pr: 
+pr: 1701
 mods: kingdoms
 versions: 
 started: 2026-11-17
