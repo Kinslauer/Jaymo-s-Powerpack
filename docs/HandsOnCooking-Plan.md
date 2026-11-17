@@ -23,4 +23,26 @@ did. The spec's per-player sessions (R11) become one session per station that se
    (keg brewing, kettle tea, sushi mat, all by hand).
 
 ## As built
-(filled in per patch)
+
+### Patch 1: at the block
+- `cooking/hands/` (server): `HandsOn` (the game rule `jaymoskitchen:hands_on_cooking`, default on; the one registry of
+  `Table`s keyed by dimension and block; the use-block and attack-block callbacks; the tick that drops cooks who logged
+  out or went past `LEAVE_RANGE_SQ` = 8 blocks and judges the dish as left; what lies on an idle station for `IDLE_TICKS`
+  (90 s) with nobody near goes back on the floor; on server stop dishes are judged as left and items dropped).
+  `Table` is the worktop: what was put on it (sneak + right-click with the item; sneak + empty hand takes the last back),
+  the dishes that makes (`Recipes`, fullest recipe first, sneak + scroll chooses: `HandsPick` packet and a client mixin on
+  `MouseHandler.onScroll`), and the one shared `Run`. `Run` is the shared dish: any cook with the right tool in hand
+  joins (`cooks` map), it is judged once. `Pick` = a dish (by its `Dish.Method`) or dough/joint/... with the `Tool`
+  that starts it. A finished dish goes to the last cook still online (as `Kitchen.award` always did), else it is left on
+  the station.
+- Judging is the screens' own static functions (`Minigames.judge*`, `Quality.judgeGrill/judgeOven`, `Sear.judge`,
+  `Smoke.judge`, `Prep.score`, `Rolling.score`) with the same constants; each run only moves the simulation to the server.
+- Interim: the screen still opens to pick a dish; picking one whose method is done by hand starts it at the block and
+  closes the screen (`CookUpdate.STATUS_HANDS`, `PrepUpdate.STATUS_HANDS`). The Cooking for Blockheads table likewise.
+- Classic mode: the game rule off, and everything is as before (`HandsMode` tells clients).
+- Tools: the Kitchen had a knife (`#jaymoskitchen:knives`) but NO spoon or tongs (the plan assumed them); added
+  `Wooden Spoon`, `Kitchen Tongs`, `Smoker's Fan`, `Baker's Peel` (`CookTools`, art by `kitchen/tools/gen_cooking_tools.py`,
+  shaped recipes). The spit already exists as a block (`SpitBlock`).
+- Client (`client/hands/`): `HandsClient` (what stations round here hold, from `HandsSync`), `HandsHud` (a plate under the
+  crosshair: placed items, the dish and its tool; the running readout; the verdict), `Readouts` (one drawer per kind),
+  `HandsInputs` (per-tick inputs a click can't carry).
