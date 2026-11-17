@@ -175,7 +175,7 @@ public final class Stats {
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
 		int free = WarriorZenkai.points(player) + LifeStory.freePoints(player);
-		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + (kind == null ? 0 : kind.freePoints) * GIFT_STEP + TIER_POINTS[tier(player)];
+		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + (kind == null ? 0 : kind.freePoints) * GIFT_STEP + SkillRenown.statPoints(p) + TIER_POINTS[tier(player)];
 	}
 
 	/** (0.7.540) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
