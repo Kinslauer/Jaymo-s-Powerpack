@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: future-gun-gear
 branch: claude/future-gun-gear
 pr: 
