@@ -428,3 +428,21 @@ How rows were read where they don't say, for Andy to rule on:
   mobs hear (so Light Step and Cat's Grace have something to quiet); a scroll that will be learned for good is held
   for 3 s by everyone (so the Scholar's 1.5 s is a gain); pickpocketed goods carry a "Stolen" mark, and fences buy
   marked goods from anyone at half price (so Fence's Friend's full price is a gain).
+
+### Scaling audit picks (2026-11-17: the two rows that touch this PR's files)
+Andy ticked these on the Scaling Audit Picks page; the rest of that list is built on its own branch.
+- **`thief` (Thief opener stacks less)**: `ThiefSneak` asks `Senses.sneakAttack` whether the Sneak Attack perk will take
+  the same blow. If it will, the two no longer multiply: the bigger of the burst and the perk's blow is dealt (the
+  burst is divided by the perk's multiplier, which is applied after it). Otherwise the burst goes through
+  `Senses.unawareBlow`, so on a boss it is at most 15% of its health. Worst opener before: x1.5 + 2 (Assassin x2.5 + 4)
+  times backstab x1.5 times Sneak Attack x3. Now: backstab x1.5 times the bigger of the two.
+  What follows from it: for a Thief who also holds Sneak Attack rank 2, the Assassin fork's x2.5 + 4 only beats the
+  perk's x3 on blows under 8 damage; the fork still pays in full on bow shots, on blows not from the rear, and for
+  Thieves without the perk. The hidden blade's x10 stab is not this row's (it is the `cripple` row, on the other
+  branch).
+- **`class-xp` (class XP and pillar XP from one blow)**: the row offered "keep both, or class XP halves"; ticked with
+  no note is read as "halves". Class experience is now paid as the tick ends (`ClassTrees.settle`): if the player's
+  pillar experience rose in that same tick, what their classes earned in it counts half (`SHARED_XP`), with the odd
+  half kept toward the next. So a 1-point blow that also paid a pillar gives a class point every second time.
+  "The same action" is read as "the same tick": class experience from work that pays no pillar (riding distance, time
+  in a shape, things made) is paid in full unless a pillar happens to be paid in that tick.

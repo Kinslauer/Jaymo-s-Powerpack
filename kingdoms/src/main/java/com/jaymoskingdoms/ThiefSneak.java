@@ -25,6 +25,9 @@ import java.util.UUID;
  * Sneak attack (fifth edition's Rogue feature, Andy's pick C5). A Thief's light blade or bow blow on a foe who is busy with
  * a friend of theirs (it is after someone else on their side), or caught unaware ({@link Senses#unaware}), does a
  * burst of extra damage: {@code blow x} {@link #MULT} {@code +} {@link #FLAT}. Once a second ({@link #EVERY} ticks).
+ * <p>(Scaling audit) It doesn't stack with the Sneak Attack perk's blow ({@link Senses#dealt}): when both would land on one
+ * blow, the bigger of the two is dealt, not their product. On a boss it is held to the same share of its health as any
+ * other unaware blow ({@link Senses#unawareBlow}).
  */
 public final class ThiefSneak {
 	/** The burst: the blow times this, plus this much more. */
@@ -60,17 +63,28 @@ public final class ThiefSneak {
 		if (last != null && now - last < EVERY) {
 			return amount;
 		}
+		// (class trees) an Assassin's on a foe that never knew they were there
+		float burst = unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0 ? amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT : amount * MULT + FLAT;
+		// (scaling audit) with the Sneak Attack perk on the same blow the two don't multiply: the bigger one is dealt
+		float perk = Senses.sneakAttack(target, source);
+		if (perk > 0.0F && burst <= amount * perk) {
+			// the perk's is the bigger: the blow is left to it (a Ghost's first blow is struck all the same)
+			if (ghost) {
+				RogueExtras.ghostStruck(thief);
+			}
+			return amount;
+		}
 		LAST.put(thief.getUUID(), now);
 		if (ghost) {
 			RogueExtras.ghostStruck(thief);
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.25, 0.3, 0.25, 0.3);
-		if (unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0) {
-			// (class trees) an Assassin's on a foe that never knew they were there
-			return amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT;
+		if (perk > 0.0F) {
+			// the perk multiplies what is left of the blow afterwards (and holds it to a boss's share): together they come to the burst
+			return burst / perk;
 		}
-		return amount * MULT + FLAT;
+		return Senses.unawareBlow(target, amount, burst);
 	}
 
 	/** {@code target} is busy with a friend of {@code thief}'s: it is after another player, their pet, or one of the town's. */
