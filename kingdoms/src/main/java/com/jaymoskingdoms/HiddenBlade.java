@@ -44,6 +44,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -407,8 +408,8 @@ public final class HiddenBlade {
 		} else {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
 		}
-		// (the crippled and the assassin's bonus are one and the same: they don't stack; an assassination on a boss is capped)
-		return cripple ? amount * CRIPPLED_STAB : Senses.unawareBlow(target, amount, amount * CRIPPLED_STAB);
+		// (the crippled and the assassin's bonus are one and the same: they don't stack; either one on a boss is capped)
+		return Senses.unawareBlow(target, amount, amount * CRIPPLED_STAB);
 	}
 
 	// ---- the leap ------------------------------------------------------------------------------------------------------
@@ -477,7 +478,7 @@ public final class HiddenBlade {
 			sound(player, true);
 		}
 		CombatArts.strike(level, player, target, damage);
-		if (target.isAlive()) {
+		if (target.isAlive() && !(target instanceof Mob mob && Senses.boss(mob))) {
 			int extra = (int) Math.floor(Math.max(0.0, fell - LEAP_MIN_FALL) / CRIPPLE_STEP) * CRIPPLE_STEP_TICKS;
 			cripple(target, Math.min(CRIPPLE_MAX_TICKS, CRIPPLE_BASE_TICKS + extra));
 		}

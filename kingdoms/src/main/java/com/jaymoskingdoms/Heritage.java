@@ -195,7 +195,7 @@ public final class Heritage {
 	 */
 	static final double DAWN_SUN_DAMAGE = 0.15, DAWN_DARK_WEAK = 0.1;
 	static final float DAWN_UNDEAD = 0.3F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
-	static final int DAWN_HEAL_EVERY = 60, DAWN_UNDEAD_BURN = 4;
+	static final int DAWN_HEAL_EVERY = 160, DAWN_UNDEAD_BURN = 4;
 	/**
 	 * (0.7.106) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
 	 * they can again (ticks); water and rain hurt this much this often (ticks).
