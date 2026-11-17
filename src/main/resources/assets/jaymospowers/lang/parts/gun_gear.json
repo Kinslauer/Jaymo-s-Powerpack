@@ -1,0 +1,13 @@
+{
+  "item.jaymospowers.plate_carrier": "Plate Carrier",
+  "item.jaymospowers.plate_carrier.lore": "Worn on Los Perrito's east bridge, and taken off the fallen with their guns.",
+  "item.jaymospowers.tracer_round": "Tracer Round",
+  "item.jaymospowers.tracer_round.hint": "Right-click onto a loaded future gun: its next shots streak",
+  "item.jaymospowers.tracer_round.lore": "Every fourth round burns bright, so the dead can follow their own fire through Los Perrito's endless night.",
+  "item.jaymospowers.magazine": "Magazine",
+  "item.jaymospowers.magazine.for": "%s Magazine",
+  "item.jaymospowers.magazine.rounds": "%s/%s rounds of %s",
+  "item.jaymospowers.magazine.empty": "Empty (holds %s)",
+  "item.jaymospowers.magazine.hint": "Right-click rounds onto it to load it; right-click it onto its gun to swap",
+  "item.jaymospowers.magazine.lore": "A future gunner counts every magazine. A dropped gun with one still in it is a gift; an empty gun is just a heavy club."
+}

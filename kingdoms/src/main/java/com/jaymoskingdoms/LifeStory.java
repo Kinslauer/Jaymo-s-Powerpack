@@ -141,6 +141,10 @@ public final class LifeStory {
 	 * than all searching the same land and queueing past each other's taken places. Up to ORIGIN_TRIES points are drawn for
 	 * one off the open sea (biome noise only: no land is made to choose) and at least ORIGIN_APART blocks from where the
 	 * player last woke.
+	 * <p>
+	 * (2026-11-17, Andy: "do both fixes") Where Chunky has made the land ahead ({@link Pregen}), the point is drawn inside it, and
+	 * a start's search only stands you on ground inside it (a village or wreck found past its edge is passed over for the
+	 * start's fallback): the Deck lagged and crashed making land live round players who set out past the 1,000 blocks it had made.
 	 */
 	static final int ORIGIN_SPREAD = 1500, ORIGIN_TRIES = 8, ORIGIN_APART = 480;
 	/**
@@ -572,7 +576,14 @@ public final class LifeStory {
 				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.RANGER),
 				Answer.youth("pits", Items.SHIELD, Classes.PlayerClass.BRUTE),
 				Answer.youth("gunsmith", Items.GUNPOWDER, Classes.PlayerClass.MARKSMAN),
-				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER)));
+				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER),
+				// the sworn callings (Lore: "Seven sworn callings"; the Ranger already had its two): the Warrior-born keep none of them
+				Answer.youth("acolyte", Items.CANDLE, Classes.PlayerClass.CLERIC).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("squire", Items.IRON_CHESTPLATE, Classes.PlayerClass.PALADIN).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("bargain", Items.ECHO_SHARD, Classes.PlayerClass.WARLOCK).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("sprig", Items.OAK_SAPLING, Classes.PlayerClass.DRUID).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("boxer", Items.BAMBOO, Classes.PlayerClass.MONK).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("bench", Items.PISTON, Classes.PlayerClass.TINKERER).notBorn(Heritage.Kind.WARRIORBORN)));
 			TURN.answers.addAll(List.of(
 				Answer.turn("bite", Items.SPIDER_EYE, "web"),
 				Answer.turn("weapon", Items.IRON_SWORD, "arsenal"),
@@ -2305,6 +2316,11 @@ public final class LifeStory {
 	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
 		java.util.function.Predicate<BlockPos> ok) {
 		int[] made = {NEW_CHUNKS};
+		if (WANTED != null) {
+			// (2026-11-17) a start stands you only in the land Chunky has made ({@link Pregen}), where it's known
+			java.util.function.Predicate<BlockPos> given = ok;
+			ok = column -> Pregen.inside(level, column) && given.test(column);
+		}
 		// (0.7.584) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
 		for (BlockPos column : columns(center, min, max, random, GROUND_TRIES * 2)) {
 			if (!ok.test(column) || !reach(level, column.getX(), column.getZ(), made)) {
@@ -2944,10 +2960,13 @@ public final class LifeStory {
 		BlockPos woke = past != null && past.dimension.equals(level.dimension().identifier().toString()) ? BlockPos.of(past.wake) : null;
 		int sea = net.minecraft.core.QuartPos.fromBlock(level.getSeaLevel());
 		BlockPos wet = null;
+		// (2026-11-17) inside the land Chunky has made, where it's known
+		Pregen.Area made = Pregen.of(level);
+		double spread = made == null ? ORIGIN_SPREAD : Math.min(ORIGIN_SPREAD, made.reach());
 		for (int i = 0; i < ORIGIN_TRIES; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0, d = ORIGIN_SPREAD * Math.sqrt(random.nextDouble());
+			double angle = random.nextDouble() * Math.PI * 2.0, d = spread * Math.sqrt(random.nextDouble());
 			BlockPos at = new BlockPos(spawn.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), spawn.getZ() + Mth.floor(Math.sin(angle) * d));
-			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART) {
+			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART || !Pregen.inside(level, at)) {
 				continue;
 			}
 			if (!level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(at.getX()), sea, net.minecraft.core.QuartPos.fromBlock(at.getZ()))

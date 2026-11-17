@@ -40,6 +40,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		// a corpse is named to the one looking at it only if they can read it (CorpseEntity#reads)
+		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
@@ -50,6 +52,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.butchery.BoneStandRenderer.register();
 		// (0.5.43) low on water: faint veins at the screen edges
 		com.jaymoskitchen.client.climate.DryVeins.register();
+		com.jaymoskitchen.client.climate.ParasiteHud.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();

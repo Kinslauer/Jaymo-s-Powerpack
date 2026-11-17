@@ -3124,6 +3124,16 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Client side: whether this client's Powers lock-on holds a target now (false without Powers). */
+	public static boolean lockedClient() {
+		lookForLock();
+		try {
+			return lockLocked != null && lockLocked.getInt(null) >= 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * (0.7.381) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
 	 * locked already. Takes the client ({@code Minecraft}) and its player as plain objects, since this class is common code.

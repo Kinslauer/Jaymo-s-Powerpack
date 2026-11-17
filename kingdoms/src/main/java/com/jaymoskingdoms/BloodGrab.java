@@ -222,6 +222,11 @@ public final class BloodGrab {
 				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
 			return false;
 		}
+		return feedOn(level, player, target);
+	}
+
+	/** Feed on {@code target}: the one {@link #feed} found, or the one a leap ({@link BloodLeap}) reached. */
+	static boolean feedOn(ServerLevel level, ServerPlayer player, LivingEntity target) {
 		if (!player.getMainHandItem().isEmpty()) {
 			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.hand")
 				.withStyle(net.minecraft.ChatFormatting.DARK_RED));

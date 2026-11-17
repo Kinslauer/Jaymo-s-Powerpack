@@ -400,6 +400,7 @@ public final class Patrons {
 		if (shrine == null) {
 			return;
 		}
+		HolyDread.rite(sp, shrine);
 		met(sp, shrine, pos);
 		Paladins.prayed(sp);
 		Warlocks.prayed(sp, shrine);
@@ -467,6 +468,7 @@ public final class Patrons {
 
 	/** Sworn to {@code p} from now: {@code favour} to begin with. */
 	static void swear(ServerPlayer sp, Patron p, int favour, long today) {
+		HolyDread.rite(sp, p);
 		State s = state(sp);
 		State next = s.sworn(p, favour, today);
 		set(sp, next);
@@ -477,6 +479,7 @@ public final class Patrons {
 
 	/** An offering of {@code p}'s made at their shrine. The caller has checked the stack; this takes it if it counts. */
 	static void offered(ServerPlayer sp, Patron p, ItemStack stack) {
+		HolyDread.rite(sp, p);
 		State s = state(sp);
 		long today = today(sp.level().getServer());
 		if (!s.sworn() || !p.key.equals(s.patron)) {

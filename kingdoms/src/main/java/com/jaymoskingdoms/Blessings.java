@@ -492,6 +492,7 @@ public final class Blessings {
 
 	/** The tier 4 boon of {@code patron}, called by {@code sp}. */
 	public static void boon(ServerPlayer sp, Patron patron) {
+		HolyDread.rite(sp, patron);
 		ServerLevel level = sp.level();
 		long now = level.getGameTime();
 		level.playSound(null, sp.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.9F, 1.1F);

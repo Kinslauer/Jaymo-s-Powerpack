@@ -136,6 +136,12 @@ final class StoryFigure {
 		scene("youth.pits", Act.GUARD, Items.IRON_AXE, Items.SHIELD, null, lc, null, null);
 		scene("youth.gunsmith", Act.USE, Items.CROSSBOW, null, lh, null, null, null);
 		scene("youth.messenger", Act.USE, Items.GOAT_HORN, null, null, null, null, lb);
+		scene("youth.acolyte", Act.USE, Items.CANDLE);
+		scene("youth.squire", Act.GUARD, Items.IRON_SWORD, Items.SHIELD, null, Items.IRON_CHESTPLATE, null, null);
+		scene("youth.bargain", Act.LOOK_DOWN, Items.ECHO_SHARD);
+		scene("youth.sprig", Act.WORK, Items.OAK_SAPLING, null, null, null, ll, lb);
+		scene("youth.boxer", Act.SWING, null);
+		scene("youth.bench", Act.WORK, Items.IRON_INGOT, Items.PISTON, null, lc, null, null);
 		// then one day
 		scene("turn.bite", Act.LOOK_DOWN, null);
 		scene("turn.weapon", Act.SWING, Items.IRON_SWORD);
@@ -205,18 +211,18 @@ final class StoryFigure {
 	}
 
 	static {
-		jobs("farmer", "farmers", "village");
+		jobs("farmer", "farmers", "village", "sprig");
 		jobs("armorer", "smiths");
 		jobs("fisherman", "fisherfolk", "swimming", "sea", "shipwreck", "whalers");
 		jobs("archer", "hunters", "hunted");
 		jobs("cartographer", "merchants", "city");
-		jobs("guard", "soldiers", "levy", "pits", "sworn", "weapon", "blades", "fights", "fists");
-		jobs("cleric", "healers", "nobles", "bell", "bells", "temple", "shrine");
+		jobs("guard", "soldiers", "levy", "pits", "squire", "boxer", "sworn", "weapon", "blades", "fights", "fists");
+		jobs("cleric", "healers", "nobles", "bell", "bells", "temple", "shrine", "acolyte", "bargain");
 		jobs("librarian", "wizard", "apprentice", "books", "clock", "timelost", "hermit", "scholars");
 		jobs("leatherworker", "outlaws", "cutpurses", "captive", "banished", "chained", "hideout");
 		jobs("miner", "caves", "cave", "monolith", "bite", "mountain", "forge");
 		jobs("shepherd", "winter", "snowed", "blizzard", "snow", "north", "foundling");
-		jobs("toolsmith", "gunsmith");
+		jobs("toolsmith", "gunsmith", "bench");
 		jobs("fletcher", "messenger", "wild", "nobodies");
 		// (0.7.414) a trader dresses as a cartographer-merchant, the heirloom's heir as a guard, the pup's keeper as a shepherd
 		jobs("cartographer", "trader");

@@ -33,6 +33,11 @@ import net.minecraft.world.phys.Vec3;
  * A player who sneaks with Soft Step leaves no prints, nor does anything in water or in the air.
  * <p>
  * Blood and drag marks need no perk: they are already on the ground for all to see (Jaymo's Powers' blood trail).
+ * <p>
+ * The perk also reads the dead (Andy: corpse names "hidden unless you have a skill from the survivalist tree for it ...
+ * identifying corpses and kills ... pelt quality"): with Jaymo's Kitchen, a body is named for what it was and how it was
+ * killed only to someone with it ({@code CorpseEntity#setReader}), and only they are told at the first cut what the
+ * killing did to the carcass.
  */
 public final class TrailReading {
 	// ---- tuning ----
@@ -68,6 +73,15 @@ public final class TrailReading {
 	}
 
 	static void register() {
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
+			try {
+				java.util.function.Predicate<Player> reads = player -> Skills.rank(player, Skills.Perk.READ_THE_GROUND) > 0;
+				Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("setReader", java.util.function.Predicate.class)
+					.invoke(null, reads);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to keep corpses' names to trackers: {}", e.toString());
+			}
+		}
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			PRINTS.clear();
 			LAST.clear();

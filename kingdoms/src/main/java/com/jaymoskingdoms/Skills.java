@@ -416,7 +416,10 @@ public final class Skills {
 		LIFELEECH(Pillar.STEALTH, 1, 1, 0, 20, 0),
 		NIGHT_SENSE(Pillar.STEALTH, 1, 1, 0, 20, 2),
 		NIGHT_POUND(Pillar.STEALTH, 1, 1, 3, 21, 0),
-		BAT_WINGS(Pillar.STEALTH, 1, 1, 3, 21, 2);
+		BAT_WINGS(Pillar.STEALTH, 1, 1, 3, 21, 2),
+		// Might: the air combo's launcher (Jaymo's Powers' AirCombo), a sneaking blow that throws a foe up for those whose power
+		// follows it into the air; the juggle and slam come after it. Last, so no ordinal moves
+		AIR_COMBO(Pillar.STRENGTH, 1, 1, 2, 1, 2);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

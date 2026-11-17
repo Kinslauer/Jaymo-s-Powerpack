@@ -14497,3 +14497,47 @@ Andy's Ragdolls and Cover picks (ln-player, ln-cover, ln-npc). The idea is Leani
 - Not built locally (no JDK 25 in the cloud workspace; the PR checks build it). The carving and meshing were run on
   their own outside the game (six strokes, mesh area checked against the wood's surface). Not played: untested are how
   the carved log is lit beside its neighbours, the texture direction on sideways logs, and saving and reloading a cut.
+
+## 0.9.81 (2026-11-17): the air combo is learned in the tree
+
+- Andy: "The crouching air combo uptilt needs to be unlocked in the tree". A new perk on Might, **Air Combo** (1 point,
+  from level 2, beside Sweep Kick), opens the crouching launcher for those whose power follows a foe into the air (Wind,
+  Z Fighter, Smoke, Xenoform, Web, Darktide, Gravity). Until it's learned, the crouching blow is an ordinary blow and
+  the action bar names the perk. The juggle and the slam only follow a launch, so they come with it.
+- `Skills.Perk.AIR_COMBO` (added last, so no saved ranks move), `TreeLocks.Lock.AIR_COMBO`, its spot on the web
+  (`SkillWeb`, ring 2) and icon (a wind charge); lang part `air-combo.json`.
+- Not built locally (no JDK 25 in the cloud workspace; the PR checks build it); not played.
+
+## 0.9.82 (2026-11-17): The faith's sigil fills the life-story panel
+
+- **Life story**: from the faith page on, the chosen faith's sigil now fills the whole left panel behind its text,
+  instead of a small square behind the figure. It also shows the whole glyph now; before, it showed only a magnified
+  corner of it.
+
+## 0.9.83 (2026-11-17): The life story's youth page offers the sworn callings (#1679)
+
+- The "As you grew up..." page now has a road into each of the six classes it was missing: kept the lamps in a village temple (Cleric), squired for a knight sworn to an oath (Paladin), struck a bargain at a shrine at midnight (Warlock), learned the sprig's rites from an old farmer (Druid), trained under an old boxing master (Monk), worked a tinker's bench in a steam town (Tinkerer). The Cleric's and Warlock's patron and the Paladin's oath are picked on the story page, as the Mage's spell is. The Warrior-born aren't offered them. The page's heading, its line and the nine old answers are unchanged, voice lines included; the new tales are read in silence until they're recorded.
+- Each opens a secret past to a locked road, as the old answers do: raised by healers and an acolyte, down on your luck in a rich city; raised by nobles and a squire, the family blade; raised a foundling who struck a bargain, the moon's mark; raised by farmers and taught the sprig, alone in the wild; a childhood of fights and a boxing master, unarmed; raised by smiths and a tinker's bench, fresh off the bench.
+- A Bio-built is told each new answer its own way ("Once you were full grown..."), and the story's figure dresses and works for each.
+
+## 0.9.84 (2026-11-17): Read the Ground reads the dead
+
+- **Read the Ground** (Survival): you also know a body for what it was ("Deer Corpse", or whose it is) and how it was
+  killed, so what's left of its pelt ("mauled, hide torn"). Without the perk every body is just "Corpse", and nobody
+  else is told at the first cut what the killing did to a carcass. Needs Jaymo's Kitchen.
+
+## 0.9.85 (2026-11-17): vampire leap and holy dread
+
+- **Right-click leap** (Andy, from a clip of a vampire trying to reach prey on a tower): a vampire's right-click with an empty main hand, when nothing else takes the click. Locked on (middle mouse), they fly at the target (up to 18 blocks, in sight) and feed on it when they reach it, as Feed does (the grab on people, the bite on the rest). Not locked: a strong jump the way they look. No fall damage until they land. In the open sun by day, or near something holy, the leap is weaker and slower to come back. Dhampirs don't fear the sun. Holding the button leaps once (`BloodLeap`, `BloodLeapUseMixin`).
+- **Holy dread**: every patron's holy things sting a vampire's blood, the Lantern Warden's and the Truth's worst. A holy symbol or patron weapon held nearby (or in their own hand), a Cleric, Paladin or village priest, a shrine or old altar, or a patron's temple weakens them like daylight (Weakness, weaker leap) and makes them smoke; close enough, the blood burns. Staying near brings the wrath ladder: omens, then lightning nearby, then a smiting. Swearing, a prayer answered, an offering or a boon burns a vampire at once (`HolyDread`).
+- Built by CI only; not played.
+
+## 0.9.86 (2026-11-17): server: no chunk loads from the smith's keeping, starts stay in pre-generated land
+
+- **Crash fix**: the smith's keeping (KeepingCells) no longer reads blocks in chunks that aren't loaded. A villager loaded at the edge of the loaded land is looked at once the land round him has loaded (tried each tick, up to 10 seconds, then again the next time he loads), and a kept smith's light, bed and hatch are only checked while the chunks round his cell are loaded. Before, the look made the missing chunk on the server thread, which held the Deck past its 60-second watchdog (crash 2026-11-17, 7:18 AM).
+- **Starts stay in made land**: where Chunky has pre-generated the world (its saved task in config/chunky/tasks: centre, radius, shape and how far it got), a setting out's random point is drawn inside that land, 128 blocks in from its edge, and a start only stands you on ground inside it. A village, wreck or wild ring found past the edge is passed over for the start's fallback, so nobody wakes in land the Deck has to make while they play. With no Chunky task for the world, starts work as before (Pregen).
+- Built by CI; not tested on the server yet.
+
+## 0.9.87 (2026-11-17): Sneak attacks are learned
+
+The sneak attack (a heavy blow on a monster that hasn't noticed you) now needs the Sneak Attack perk on the Stealth tree, and only lands when you strike from behind the monster. Without the perk, a hit from behind is a plain hit, so you no longer get stealth kills by accident. Ambusher, Cutthroat, the Quiet Word choke and Assassinate are unchanged.

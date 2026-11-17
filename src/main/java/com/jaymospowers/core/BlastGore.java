@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,6 +40,10 @@ import org.jspecify.annotations.Nullable;
  * them, {@code Downed}); Rubber-folk it gibs lose every limb but keep their head and go down, to mend with a swallow in
  * time as when cut in half ({@link Dismember#split}); beheading still kills them. Their limbs come off easier, as on a
  * blade ({@link Dismember#RUBBER_SEVER_SCALE}), and Will's Grim Hand counts for whoever is behind the blast.
+ * <p>A WeaponMod blunderbuss's shot ({@link #blunderShot}) at close range tears like a blast, its closeness by how near the
+ * shooter stood ({@link #SHOT_REACH}), all its pellets counting as one hit ({@link #SHOT_TICKS}). Most often it takes a
+ * limb, from the living or the dead ({@link #SHOT_LIMB_SCALE}); it blows a body apart only when that one shot killed it
+ * from full health ({@link #ONE_SHOT_HEALTH}).
  */
 public final class BlastGore {
 	/** A blast this big (radius; TNT's is 4) counts in full; a smaller one's closeness is scaled by the root of its share. */
@@ -51,6 +56,16 @@ public final class BlastGore {
 	public static final float SECOND_LIMB = 0.4F;
 	/** A body killed but not gibbed keeps this share of a survivor's chance to lose a limb onto the corpse. */
 	public static final float CORPSE_LIMB = 0.6F;
+	/** A blunderbuss shot's closeness: 1 with the shooter on top of the body, 0 this far away (blocks) or more. */
+	public static final double SHOT_REACH = 6.0;
+	/** A blunderbuss shot's pellets landing on a body within this many ticks of the first are the one shot. */
+	public static final int SHOT_TICKS = 4;
+	/** A shot takes a limb this much more readily than a blast (at most certain); the corpse's lesser share doesn't apply. */
+	public static final float SHOT_LIMB_SCALE = 2.0F;
+	/** A shot gibs only a body it killed from at least this share of its health (from full, give or take). */
+	public static final float ONE_SHOT_HEALTH = 0.99F;
+	/** WeaponMod's blunderbuss shot. */
+	private static final Identifier BLUNDER_SHOT = Identifier.fromNamespaceAndPath("weaponmod", "shot");
 	/** With no blast to measure from (another mod's blast damage), this much damage counts as point-blank. */
 	public static final float FALLBACK_FULL_DAMAGE = 40.0F;
 	/** Kingdoms' Stoneborn heritage tag: Andy, "noone but stoneborn are exempt" (from being blown apart; they still lose limbs). */
@@ -68,6 +83,8 @@ public final class BlastGore {
 	private static final Deque<Blast> GOING_OFF = new ArrayDeque<>();
 	/** A body's gib already rolled for the blow that's killing it (game time, and whether it's gibbed). */
 	private static final Map<LivingEntity, long[]> ROLLED = new WeakHashMap<>();
+	/** A body under a blunderbuss shot: the tick its first pellet landed, its health before it, and whether a limb was rolled. */
+	private static final Map<LivingEntity, long[]> SHOTS = new WeakHashMap<>();
 	/** A player blown apart → the parts they'd lost before it (all they come back without). */
 	private static final Map<UUID, Integer> BEFORE = new HashMap<>();
 
@@ -79,20 +96,29 @@ public final class BlastGore {
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Event.DEFAULT_PHASE, PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(com.jaymospowers.core.wounds.Downed.lastPhase(), PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, (entity, source, amount) -> {
-			if (blast(source) && entity.level() instanceof ServerLevel) {
+			if ((blast(source) || blunderShot(source)) && entity.level() instanceof ServerLevel) {
 				boolean gib = gibs(entity, source, amount);
 				entity.removeTag(gib ? NO_GIB_TAG : GIB_TAG);
 				entity.addTag(gib ? GIB_TAG : NO_GIB_TAG);
+			} else {
+				// (Kitchen takes a gib tag on any death as a shot's, so none is left over from a death that didn't happen)
+				entity.removeTag(GIB_TAG);
 			}
 			return true;
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (blast(source) && entity.level() instanceof ServerLevel) {
+			if ((blast(source) || blunderShot(source)) && entity.level() instanceof ServerLevel) {
 				died(entity, source);
 			}
 		});
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (blunderShot(source) && entity.level() instanceof ServerLevel) {
+				shot(entity);
+			}
+			return true;
+		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (!blocked && blast(source) && entity.isAlive() && entity.level() instanceof ServerLevel) {
+			if (!blocked && (blast(source) || blunderShot(source)) && entity.isAlive() && entity.level() instanceof ServerLevel) {
 				survived(entity, source, taken);
 			}
 		});
@@ -125,12 +151,46 @@ public final class BlastGore {
 		return source.is(DamageTypeTags.IS_EXPLOSION);
 	}
 
+	/** A WeaponMod blunderbuss's shot, fired by someone (the closeness is measured from them). */
+	public static boolean blunderShot(DamageSource source) {
+		return source.getDirectEntity() != null && source.getEntity() != null
+			&& BLUNDER_SHOT.equals(BuiltInRegistries.ENTITY_TYPE.getKey(source.getDirectEntity().getType()));
+	}
+
+	/** The blunderbuss shot {@code victim} is under: begun by this pellet if none landed in the last {@link #SHOT_TICKS}. */
+	private static long[] shot(LivingEntity victim) {
+		long now = victim.level().getGameTime();
+		long[] shot = SHOTS.get(victim);
+		if (shot == null || now - shot[0] > SHOT_TICKS) {
+			shot = new long[] {now, Float.floatToIntBits(victim.getHealth()), 0};
+			SHOTS.put(victim, shot);
+		}
+		return shot;
+	}
+
+	/** Whether the shot {@code victim} is under found them at full health (so it killed them with the one shot). */
+	private static boolean fromFull(LivingEntity victim) {
+		long[] shot = shot(victim);
+		return Float.intBitsToFloat((int) shot[1]) >= victim.getMaxHealth() * ONE_SHOT_HEALTH;
+	}
+
+	/** Whether this shot may still take a limb from {@code victim} (once per shot), and it now has. */
+	private static boolean limbRoll(LivingEntity victim) {
+		long[] shot = shot(victim);
+		boolean first = shot[2] == 0;
+		shot[2] = 1;
+		return first;
+	}
+
 	/**
 	 * How close {@code victim} was to the blast hurting it, 0 to 1: one less its distance over the blast's reach (twice its
 	 * radius, as vanilla measures it), times the root of the blast's size over {@link #FULL_RADIUS} (at most 1). With no
 	 * vanilla blast going off, the damage stands in for it ({@link #FALLBACK_FULL_DAMAGE}).
 	 */
 	public static float closeness(LivingEntity victim, DamageSource source, float amount) {
+		if (blunderShot(source)) {
+			return (float) Mth.clamp(1.0 - Math.sqrt(victim.distanceToSqr(source.getEntity())) / SHOT_REACH, 0.0, 1.0);
+		}
 		Blast blast = GOING_OFF.peek();
 		if (blast == null) {
 			return Mth.clamp(amount / FALLBACK_FULL_DAMAGE, 0.0F, 1.0F);
@@ -163,7 +223,7 @@ public final class BlastGore {
 	 * gibbed die rather than go down; then the death itself). Creative and spectating players never are.
 	 */
 	public static boolean gibs(LivingEntity entity, DamageSource source, float amount) {
-		if (!blast(source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
+		if (!blast(source) && !blunderShot(source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
 			return false;
 		}
 		long now = entity.level().getGameTime();
@@ -172,7 +232,7 @@ public final class BlastGore {
 			return rolled[1] != 0;
 		}
 		float closeness = closeness(entity, source, amount);
-		boolean gib = entity.getRandom().nextFloat() < gibChance(closeness);
+		boolean gib = (!blunderShot(source) || fromFull(entity)) && entity.getRandom().nextFloat() < gibChance(closeness);
 		ROLLED.put(entity, new long[] {now, gib ? 1 : 0, Float.floatToIntBits(closeness)});
 		return gib;
 	}
@@ -215,7 +275,11 @@ public final class BlastGore {
 			}
 			return;
 		}
-		if (entity.getRandom().nextFloat() < CORPSE_LIMB * chance(entity, by, closeness)) {
+		boolean shot = blunderShot(source);
+		if (shot && !limbRoll(entity)) {
+			return;
+		}
+		if (entity.getRandom().nextFloat() < (shot ? 1.0F : CORPSE_LIMB) * chance(entity, by, closeness, source)) {
 			loseLimb(entity, by, from);
 		}
 	}
@@ -224,7 +288,12 @@ public final class BlastGore {
 
 	/** A body that lived through a blast (standing, or just downed by it) may lose an arm or a leg, now and then two. */
 	private static void survived(LivingEntity entity, DamageSource source, float taken) {
-		if (taken < Dismember.MIN_DAMAGE || !Dismember.canLoseParts(entity) || entity instanceof Player p && (p.isCreative() || p.isSpectator())) {
+		boolean shot = blunderShot(source);
+		// (a shot's pellets each hit light: the shot counts as one blow, rolled on its first pellet)
+		if (!shot && taken < Dismember.MIN_DAMAGE || !Dismember.canLoseParts(entity) || entity instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return;
+		}
+		if (shot && !limbRoll(entity)) {
 			return;
 		}
 		long[] rolled = ROLLED.get(entity);
@@ -234,7 +303,7 @@ public final class BlastGore {
 		}
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
 		Vec3 from = centre(source);
-		float chance = chance(entity, by, closeness(entity, source, taken));
+		float chance = chance(entity, by, closeness(entity, source, taken), source);
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}
@@ -243,9 +312,12 @@ public final class BlastGore {
 		}
 	}
 
-	/** A survivor's (or a corpse's) chance at this closeness, raised for Rubber-folk and by Grim Hand, at most certain. */
-	private static float chance(LivingEntity entity, @Nullable LivingEntity by, float closeness) {
+	/** A survivor's (or a corpse's) chance at this closeness, raised for a shot, for Rubber-folk and by Grim Hand, at most certain. */
+	private static float chance(LivingEntity entity, @Nullable LivingEntity by, float closeness, DamageSource source) {
 		float chance = limbChance(closeness);
+		if (blunderShot(source)) {
+			chance *= SHOT_LIMB_SCALE;
+		}
 		if (Dismember.rubber(entity)) {
 			chance *= Dismember.RUBBER_SEVER_SCALE;
 		}

@@ -897,6 +897,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.nightforms.NightForms.register();
 		LOGGER.debug("blood grab attachment: {}", BloodGrab.GRABBING);
 		BloodGrab.register();
+		BloodLeap.register();
+		HolyDread.register();
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();

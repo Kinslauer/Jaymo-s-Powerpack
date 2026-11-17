@@ -5522,3 +5522,46 @@ Andy's Ragdolls and Cover picks (ln-npc). `FutureCover`: a gunner of the future 
   profile into removed-mods. Kitchen's own ragdolls, limp and corpses are back as they were.
 - They come back together with Amputation, Player Corpses and Revive & Drag once those have 26.3 builds. Kitchen's
   code for them stays and does nothing while they're absent.
+
+## 0.24.43 (2026-11-17): the air combo's launcher needs the tree's Air Combo
+
+- Andy: "The crouching air combo uptilt needs to be unlocked in the tree". With Jaymo's Kingdoms, the crouching launcher
+  (`AirCombo`) works only once Kingdoms' skill-tree perk Air Combo is learned (`TreeLocks.AIR_COMBO`); before that the
+  blow lands as a plain hit and the action bar names the perk. The juggle and slam need a launch first, so they're
+  learned with it. Without Kingdoms nothing changes.
+- Not built locally (no JDK 25 in the cloud workspace; the PR checks build it); not played.
+
+## 0.24.44 (2026-11-17): Better Dogs leaves the pack
+
+- **VO: Better Dogs** (and the Dasik Library it needs) is out: its wolf AI calls a method 26.3 doesn't have, so the
+  server crashed whenever a wolf attacked something. Wolves are back to vanilla. The build moves both jars out of the
+  CurseForge profile.
+
+## 0.24.45 (2026-11-17): Point-blank blunderbuss shots tear limbs off
+
+- **Blunderbuss**: a shot at close range now tears like a blast, mostly by taking a limb: about three in four at a
+  block away, one in two at two blocks, none from about 4 blocks out, from the living and the dead alike (rolled once per
+  shot, not per pellet). It blows a body apart only when the one shot killed it from full health, at close range (about
+  three in four at a block). Mobs burst into chunks with Jaymo's Kitchen. Tuning in `BlastGore` (`SHOT_REACH`,
+  `SHOT_LIMB_SCALE`, `ONE_SHOT_HEALTH`).
+
+## 0.24.46 (2026-11-17): Gun gear from the future: tracers, magazines, plate carriers
+
+- Future guns now fire tracers: about one shot in four leaves a glowing amber streak to wherever it lands and lights the muzzle for a moment. Tracer Rounds, right-clicked onto a loaded future gun in your inventory, take the place of that many of its rounds (you get those back) and always streak.
+- Magazines for every future gun, snipers included, each holding what its gun really holds (a Glock's 17, a Desert Eagle's 7, an M249's 75). Right-click rounds onto one to load it; right-click it onto its gun to swap: the gun takes its rounds and the magazine takes the gun's. TaCZ's own reload from loose rounds still works.
+- Plate Carrier: chest armour (iron's protection, a little toughness) some of the future's gunners wear.
+- None of it is craftable or in a creative tab: dead gunners and echoes drop magazines for their own gun, tracer rounds and the carriers they wear.
+- Classes: GunGear (new), FutureGuns, MuzzleFlash. Not played in game.
+
+## 0.24.47 (2026-11-17): fainting warns you first (#1677)
+
+- **Fainting** from hunger, thirst or exhaustion: before you go, the letterbox now pulses in three times (to about a
+  third, then 60%, then 85% shut), each with a heavier heartbeat, about 15 seconds in all, while you keep full control.
+  Eat, drink or rest back above the faint line and it stops; otherwise the swoon follows as before. Kingdoms' Overcome
+  (fainting at a terrible sight) still comes on at once. `Fainting` (`WARN`, `WARN_DEPTHS`, `WARN_PULSE`, `WARN_GAP`),
+  `FaintHud`.
+- Not built in the cloud session and not played.
+
+## 0.24.48 (2026-11-17): Climbing from the crouch stands you up
+
+Sneak + a scroll down to climb a block, ledge or fence from the crouch now leaves you standing on top, not still crouched, and Sneak and the stance wheel don't crouch you again for a second after the climb ends. A climb in on your belly under a low gap still ends prone.

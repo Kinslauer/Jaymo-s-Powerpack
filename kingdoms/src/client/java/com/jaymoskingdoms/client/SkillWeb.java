@@ -96,7 +96,7 @@ final class SkillWeb {
 		ring(2, Skills.Perk.CHARGE_JUMP, Skills.Perk.LONG_JUMP);
 		ring(3, Skills.Perk.SLIDE, Skills.Perk.STRONG_SWIMMER);
 		ring(0, Skills.Perk.SHOVE, Skills.Perk.AIM_PARTS);
-		ring(2, Skills.Perk.SWEEP_KICK);
+		ring(2, Skills.Perk.SWEEP_KICK, Skills.Perk.AIR_COMBO);
 		ring(3, Skills.Perk.BOXER, Skills.Perk.COMMAND);
 		ring(4, Skills.Perk.TWO_BLADES, Skills.Perk.SHIELDBEARER, Skills.Perk.THROWER);
 		ring(5, Skills.Perk.HAUL_BOUND, Skills.Perk.PATH_STRENGTH);

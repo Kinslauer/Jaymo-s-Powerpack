@@ -331,7 +331,7 @@ public final class PatronWrath {
 	}
 
 	/** A sign meant for {@code sp} alone: a far bell, a howl, a snuffed flame, a cold breath. */
-	private static void omen(ServerPlayer sp, ServerLevel level, RandomSource random) {
+	static void omen(ServerPlayer sp, ServerLevel level, RandomSource random) {
 		switch (random.nextInt(4)) {
 			case 0 -> {
 				Vec3 far = sp.position().add((random.nextDouble() - 0.5) * 60.0, 0.0, (random.nextDouble() - 0.5) * 60.0);
@@ -404,7 +404,7 @@ public final class PatronWrath {
 	}
 
 	/** Lightning near {@code sp} (or, {@code on} them), under the open sky only. */
-	private static boolean bolt(ServerLevel level, ServerPlayer sp, RandomSource random, boolean on) {
+	static boolean bolt(ServerLevel level, ServerPlayer sp, RandomSource random, boolean on) {
 		Vec3 at = sp.position();
 		if (!on) {
 			double angle = random.nextDouble() * Math.PI * 2.0, d = BOLT_NEAR + random.nextDouble() * (BOLT_FAR - BOLT_NEAR);
@@ -424,7 +424,7 @@ public final class PatronWrath {
 	}
 
 	/** The bottom of the ladder: struck down, under the sky by lightning, beneath it by the earth itself. */
-	private static void smite(ServerLevel level, ServerPlayer sp, RandomSource random) {
+	static void smite(ServerLevel level, ServerPlayer sp, RandomSource random) {
 		if (bolt(level, sp, random, true)) {
 			return;
 		}

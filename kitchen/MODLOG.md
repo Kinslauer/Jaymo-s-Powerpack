@@ -2378,3 +2378,29 @@ inventory icon.
 - A limb Ragdollified no longer has (Dismember) hangs straight down and stays missing on the corpse.
 - Only the humanoid rig is mapped (players, zombies, skeletons, villagers, illagers, piglins...). Quadruped, box and chain bodies have no matching part list, so they lie in our fallen pose at the landed spot as before. A pose that can't be read or doesn't pass the server's checks does the same; the 600-tick timeout and play without Ragdollified are unchanged.
 - Not played.
+
+## 0.6.38 (2026-11-17): Blunderbuss gibs
+
+- **Gibs**: a mob Jaymo's Powers marks as blown apart by a point-blank blunderbuss shot bursts into chunks as from a
+  blast (farm animals still leave a body).
+
+## 0.6.39 (2026-11-17): parasites you can feel: hunger, growls, late cramps (#1677)
+
+- **Parasite** (dirty water): now eats your food from the start, at the Hunger effect's rate, and your stomach growls
+  now and then (a low gurgle and slosh that people near you hear too). The damage is unchanged (a point roughly every
+  15 seconds, never the killing blow) but only starts a third of the way in (about 13 minutes): each cramp comes with a
+  louder growl, a sickly olive flash from the screen's edges and your head jerking down, and a faint olive tint stays at
+  the edges while the cramps last. Hot chocolate and the teas still cure it. Hungry enough, Jaymo's Powers' fainting
+  takes over (now with warnings). `ParasiteEffect` (`HUNGER`, `GROWL_EVERY`, `CRAMPS_AFTER`), `Payloads.Cramp`, new
+  client `ParasiteHud`.
+- Not built in the cloud session (Modrinth's CDN was blocked) and not played.
+
+## 0.6.40 (2026-11-17): Corpses say whose they are to those who can read them, and drop what a lost hand held
+
+- **Corpse names**: a corpse is named for what it was, "Deer Corpse" or "Steve's Corpse" for a player, and an
+  animal's adds how it was killed and what that left of its pelt ("Deer Corpse, mauled, hide torn"), so Jade tells you.
+  With Jaymo's Kingdoms only someone with its Read the Ground perk sees this (and is told at the first cut what the
+  killing did to the carcass); to everyone else it's just "Corpse". Without Kingdoms everyone sees it.
+- **Fix**: an arm that comes off a corpse (torn away lifting a rotten body, struck off, a skeleton falling to pieces)
+  lets go of what its hand held: it drops loose beside the body. It used to stay on the body, drawn hanging in the air
+  where the hand had been (a pirate lobber's TNT).
