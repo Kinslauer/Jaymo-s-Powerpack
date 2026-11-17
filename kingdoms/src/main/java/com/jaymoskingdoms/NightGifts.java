@@ -545,7 +545,13 @@ public final class NightGifts {
 		return false;
 	}
 
-	private static void push(ServerPlayer player, Vec3 v) {
+	/** Thrown by another leap ({@link BloodLeap}): no fall damage until they land, as after a dash. */
+	static void thrown(ServerPlayer player) {
+		AIRBORNE.put(player.getUUID(), player.level().getGameTime());
+		player.fallDistance = 0.0;
+	}
+
+	static void push(ServerPlayer player, Vec3 v) {
 		player.setDeltaMovement(v);
 		player.needsSync = true;
 		player.connection.send(new ClientboundSetEntityMotionPacket(player));
