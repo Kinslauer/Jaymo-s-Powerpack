@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 06:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 06:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,7 +14,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · changes · fixing review notes
-- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · changes · fixing review notes
+- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · claimed
 
 
 ## In review
