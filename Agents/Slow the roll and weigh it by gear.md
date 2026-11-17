@@ -1,6 +1,6 @@
 ---
 status: in-review
-task: Dodge roll prone-only (sideways log roll), slower, slower with heavier armour (capped)
+task: Prone A/D roll slower, Snake-style arms, slower with heavier armour (capped); Alt dodge untouched
 branch: claude/project-thread-k8mvto
 with: 
 pr: 1699
@@ -8,11 +8,9 @@ mods: powers
 versions: 
 started: 2026-11-17
 owns:
+  - src/main/java/com/jaymospowers/core/Crawl.java
+  - src/client/java/com/jaymospowers/client/CrawlTaps.java
   - src/client/java/com/jaymospowers/client/CrawlPose.java
-  - src/main/java/com/jaymospowers/stamina/Dodge.java
-  - src/client/java/com/jaymospowers/client/stamina/DodgeClient.java
-  - src/client/java/com/jaymospowers/client/stamina/DodgeRollPose.java
-  - src/client/java/com/jaymospowers/client/mixin/StanceInputMixin.java
 ---
 # Slow the roll and weigh it by gear
 
