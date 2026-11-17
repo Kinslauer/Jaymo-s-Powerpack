@@ -153,6 +153,8 @@ public final class Vampires {
 	static final double GROUP_RANGE = 10.0;
 	/** A mob vampire's weaknesses: fire's damage (times; a vampire player's stays {@link #FIRE_FACTOR}), a blow from a torch in either hand (times, and the seconds it burns), a burning arrow (times), a silver weapon (times). */
 	static final float MOB_FIRE_FACTOR = 4.0F, TORCH_FACTOR = 3.0F, FLAME_ARROW_FACTOR = 3.0F, SILVER_FACTOR = 4.0F;
+	/** A vampire player's silver and torch weaknesses (a dhampir has none); their fire, burning arrows and stake stay as they were. */
+	static final float PLAYER_SILVER_FACTOR = 2.0F, PLAYER_TORCH_FACTOR = 1.5F;
 	static final int TORCH_BURN_SECONDS = 5;
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
@@ -353,14 +355,16 @@ public final class Vampires {
 	 * A mob vampire's weaknesses, on top of the stake: a blow from someone with a torch in either hand lands
 	 * {@link #TORCH_FACTOR} times over and sets it burning; a burning arrow {@link #FLAME_ARROW_FACTOR} times; a silver
 	 * weapon (the silver sword, anything silver but the realms' coins) {@link #SILVER_FACTOR} times. Burning itself is
-	 * {@link #MOB_FIRE_FACTOR}. A vampire player's weaknesses are left as they are. For {@code LivingEntityHurtMixin}.
+	 * {@link #MOB_FIRE_FACTOR}. A vampire player (not a dhampir) takes the torch and silver too, but milder ({@link #PLAYER_TORCH_FACTOR},
+	 * {@link #PLAYER_SILVER_FACTOR}) and is not set alight; their fire and arrows are left as they are. For {@code LivingEntityHurtMixin}.
 	 */
 	public static float weakness(LivingEntity self, DamageSource source, float amount) {
-		if (amount <= 0.0F || self instanceof Player || !isVampire(self) || !(self.level() instanceof ServerLevel level)) {
+		boolean player = self instanceof Player;
+		if (amount <= 0.0F || !isVampire(self) || player && kind(self) == Kind.DHAMPIR || !(self.level() instanceof ServerLevel level)) {
 			return amount;
 		}
 		Entity direct = source.getDirectEntity();
-		if (direct instanceof net.minecraft.world.entity.projectile.Projectile arrow && arrow.isOnFire()) {
+		if (!player && direct instanceof net.minecraft.world.entity.projectile.Projectile arrow && arrow.isOnFire()) {
 			return amount * FLAME_ARROW_FACTOR;
 		}
 		if (!(source.getEntity() instanceof LivingEntity attacker) || direct != attacker) {
@@ -368,12 +372,14 @@ public final class Vampires {
 		}
 		float factor = 1.0F;
 		if (torch(attacker.getMainHandItem()) || torch(attacker.getOffhandItem())) {
-			factor *= TORCH_FACTOR;
-			self.igniteForSeconds(TORCH_BURN_SECONDS);
+			factor *= player ? PLAYER_TORCH_FACTOR : TORCH_FACTOR;
+			if (!player) {
+				self.igniteForSeconds(TORCH_BURN_SECONDS);
+			}
 			level.sendParticles(ParticleTypes.FLAME, self.getX(), self.getY(0.6), self.getZ(), 10, 0.2, 0.3, 0.2, 0.02);
 		}
 		if (silver(attacker.getMainHandItem())) {
-			factor *= SILVER_FACTOR;
+			factor *= player ? PLAYER_SILVER_FACTOR : SILVER_FACTOR;
 			level.sendParticles(ParticleTypes.SMOKE, self.getX(), self.getY(0.6), self.getZ(), 12, 0.2, 0.3, 0.2, 0.02);
 			level.playSound(null, self.getX(), self.getY(), self.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 1.4F);
 		}
