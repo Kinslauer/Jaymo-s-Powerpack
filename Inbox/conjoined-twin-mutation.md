@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
