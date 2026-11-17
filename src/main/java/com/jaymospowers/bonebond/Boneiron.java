@@ -60,8 +60,9 @@ import net.minecraft.world.level.material.MapColor;
  * line) climbs in and settles (sneaking) for {@link #BOND_TICKS}, hurting all the while, and the metal goes into their
  * bones: one tier more, up to {@link #TIERS}, each tier {@link #TIER_ARMOR} armour, {@link #TIER_TOUGHNESS} toughness,
  * {@link #TIER_ATTACK} attack and {@link #TIER_KNOCKBACK} knockback, kept through death. Anyone else can't take it in.
- * Or plate armour with it: a boneiron plate clicked onto a piece, up to {@link #PLATINGS} a piece, each a smaller share of
- * the same four while worn.
+ * Or plate armour with it: a boneiron plate and a piece of armour in a Tool Forge
+ * ({@link com.jaymospowers.tinkering.ToolStationMenu}), up to {@link #PLATINGS} a piece, each a smaller share of the same
+ * four while worn.
  * <p>Lore: in the deepest deepslate, where the world's oldest bones lie pressed into the stone, the iron has taken something of
  * them, and it takes to living bone the way other metals take to fire, if the body can mend round it fast enough.
  */
