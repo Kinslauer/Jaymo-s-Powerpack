@@ -31,6 +31,9 @@ public final class PromptClient {
 	/** The finisher these answers belong to (its start), which blows you have answered (a bit each), and which of those rightly. */
 	private static long start = Long.MIN_VALUE;
 	private static int answered, right;
+	/** When (game time) the finisher's hold at the prompt showing began, and whether it was held last tick. */
+	private static long holdSince;
+	private static boolean wasHolding;
 	private static final boolean[] wasDown = new boolean[KEYS.length];
 
 	private PromptClient() {
@@ -65,6 +68,11 @@ public final class PromptClient {
 			answered = 0;
 			right = 0;
 		}
+		boolean holding = finish != null && finish.holding();
+		if (holding && !wasHolding) {
+			holdSince = player.level().getGameTime();
+		}
+		wasHolding = holding;
 		int pressed = -1;
 		for (int i = 0; i < KEYS.length; i++) {
 			boolean down = finish != null && minecraft.gui.screen() == null && JaymosPowersClient.keyMapping(KEYS[i]).isDown();
@@ -76,7 +84,7 @@ public final class PromptClient {
 		if (finish == null || pressed < 0) {
 			return;
 		}
-		int t = (int) (player.level().getGameTime() - finish.start());
+		int t = (int) finish.at(player.level().getGameTime(), 0.0F);
 		int beat = showing(finish, t);
 		if (beat < 0 || (answered & 1 << beat) != 0 || t > finish.type().beats[beat] - Prompts.LEAD) {
 			return;
@@ -96,7 +104,8 @@ public final class PromptClient {
 			return;
 		}
 		Finishers.Kind kind = finish.type();
-		float t = player.level().getGameTime() - finish.start() + delta.getGameTimeDeltaPartialTick(false);
+		float partial = delta.getGameTimeDeltaPartialTick(false);
+		float t = finish.at(player.level().getGameTime(), partial);
 		int beat = showing(finish, (int) t);
 		if (beat < 0) {
 			return;
@@ -110,9 +119,10 @@ public final class PromptClient {
 		graphics.fill(at[0], at[1], at[0] + WIDTH, at[1] + HEIGHT, BACK);
 		graphics.centeredText(minecraft.font, name, at[0] + WIDTH / 2, at[1] + 6, !done ? KEY : (right & 1 << beat) != 0 ? RIGHT : WRONG);
 		if (!done) {
-			// the time left to answer, running out toward the blow
+			// the time left to answer, running out toward the blow: the hold at the prompt first (Prompts#HOLD), then the wind-up
 			int opens = Prompts.opens(kind, beat), closes = kind.beats[beat] - Prompts.LEAD;
-			float left = Mth.clamp((closes - t) / Math.max(1, closes - opens), 0.0F, 1.0F);
+			float holdLeft = finish.holding() ? Math.max(0.0F, Prompts.HOLD - (player.level().getGameTime() + partial - holdSince)) : 0.0F;
+			float left = Mth.clamp((holdLeft + closes - t) / Math.max(1, Prompts.HOLD + closes - opens), 0.0F, 1.0F);
 			graphics.fill(at[0] + 2, at[1] + HEIGHT - BAR_HEIGHT - 2, at[0] + 2 + Math.round((WIDTH - 4) * left), at[1] + HEIGHT - 2, BAR);
 		}
 	}

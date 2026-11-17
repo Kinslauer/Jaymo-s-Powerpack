@@ -38,6 +38,11 @@ public final class Prompts {
 	public static final int WINDOW = 14;
 	/** The client stops taking a key this long before the blow, so its answer is with the server in time. */
 	public static final int LEAD = 3;
+	/**
+	 * (Andy, 2026-11-17: "players need more time to complete the qte finishers") When a prompt comes up, the finisher holds
+	 * still this long at most (ticks) for its key; pressed sooner, it goes on at once.
+	 */
+	public static final int HOLD = 30;
 	/** Blows closer than this to the last prompted one go unasked (a dagger's quick stabs). */
 	static final int GAP = 8;
 	/** Thrown off: how hard, how high, and what it costs. */
@@ -67,6 +72,8 @@ public final class Prompts {
 
 	/** The blows each player has answered rightly (a bit per blow), or {@link #FAILED}. */
 	private static final Map<UUID, Integer> PASSED = new HashMap<>();
+	/** The blow each player's finisher is held for now, and how long it has been held for it ({@link #HOLD}). */
+	private static final Map<UUID, int[]> HELD = new HashMap<>();
 
 	private Prompts() {
 	}
@@ -74,7 +81,10 @@ public final class Prompts {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Answer.TYPE, Answer.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Answer.TYPE, (payload, ctx) -> answered(ctx.player(), payload.beat(), payload.key()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> PASSED.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			PASSED.clear();
+			HELD.clear();
+		});
 	}
 
 	// ---- queries (both sides) ---------------------------------------------------------------------------------------------
@@ -127,6 +137,7 @@ public final class Prompts {
 	/** A finisher begins on {@code body}: prompted if they are open to one, or it is a power's own ({@link PowerFinishers}). */
 	static void begin(ServerPlayer player, LivingEntity body, Finishers.Kind kind) {
 		PASSED.remove(player.getUUID());
+		HELD.remove(player.getUUID());
 		if (open(body) || kind.strike == Finishers.Strike.POWER) {
 			player.setAttached(PROMPTED, true);
 		}
@@ -134,6 +145,7 @@ public final class Prompts {
 
 	static void end(ServerPlayer player) {
 		PASSED.remove(player.getUUID());
+		HELD.remove(player.getUUID());
 		player.removeAttached(PROMPTED);
 	}
 
@@ -146,7 +158,7 @@ public final class Prompts {
 		if (beat < 0 || beat >= kind.beats.length || !asks(kind, beat)) {
 			return;
 		}
-		int t = (int) (player.level().getGameTime() - finish.start());
+		int t = (int) finish.at(player.level().getGameTime(), 0.0F);
 		if (t >= kind.beats[beat]) {
 			// (too late: the blow's tick has already judged it)
 			return;
@@ -156,6 +168,31 @@ public final class Prompts {
 		} else {
 			PASSED.merge(player.getUUID(), 1 << beat, (a, b) -> a | b);
 		}
+	}
+
+	/**
+	 * Whether {@code player}'s prompted finisher holds still at tick {@code t}: a prompt has just come up there ({@link #opens}),
+	 * its key not yet pressed, and it has held for it less than {@link #HOLD}. Asked once a tick; counts the hold.
+	 */
+	static boolean holds(ServerPlayer player, Finishers.Kind kind, int t) {
+		if (!prompted(player)) {
+			return false;
+		}
+		int passed = PASSED.getOrDefault(player.getUUID(), 0);
+		if (passed == FAILED) {
+			return false;
+		}
+		for (int i = 0; i < kind.beats.length; i++) {
+			if (asks(kind, i) && opens(kind, i) == t && (passed & 1 << i) == 0) {
+				int[] held = HELD.get(player.getUUID());
+				if (held == null || held[0] != i) {
+					held = new int[] {i, 0};
+					HELD.put(player.getUUID(), held);
+				}
+				return ++held[1] <= HOLD;
+			}
+		}
+		return false;
 	}
 
 	/** Whether {@code player}'s prompted finisher fails at tick {@code t}: a wrong key pressed, or a blow due with its key not given. */
