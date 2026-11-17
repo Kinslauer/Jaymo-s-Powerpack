@@ -5598,3 +5598,7 @@ Sneak + a scroll down to climb a block, ledge or fence from the crouch now leave
 - `client.compat.TakeASeatPoses` (new, and `TakeASeatPal` behind it); `MeditatePose`, `CrouchPose` and `TendPose`
   stand down while it plays; `Meditate.POSES` is 4; `KeyConflicts` v10.
 - Not built locally (no JDK 25 in the cloud workspace; the PR checks build it). Not played.
+
+## 0.24.52 (2026-11-17): The server starts again with conjoined twins
+
+Fixed the server failing to start after the conjoined twin mutation: the twin riding on a villager's or zombie's shoulder is now placed in a way that works on Minecraft 26.3.
