@@ -1037,7 +1037,10 @@ them, and set no fire where folk live. The Anvil-Father's carry no trident and w
 what he makes. The Deep Mother's take no pick to ore, the miners' god's, and harm no dolphin or turtle. The Green
 Huntsman's kill no young beast. The Lantern Warden's work no death or blood magic and drink no blood. The Crowned
 Sun's take nothing that isn't theirs, pick no pocket and no lock, and raise no hand to a guard or a ruler unprovoked.
-The Ash Whisperer's never yield to the crown's men nor pay its fines: a shut mouth. A Paladin's oath binds the same way.
+The Ash Whisperer's never yield to the crown's men nor pay its fines, never collect a bounty, and show no
+mercy nor selflessness: a shut mouth and an open hand. And the Truth asks one thing of everyone sworn to it, priest
+or not: thou shalt not kill, save the dead that walk. One who kills anyway is let go by the Truth, and what comes for
+them instead is death's own sorcery. A Paladin's oath binds the same way.
 
 **The Truth**: law, certainty and the plain word, the clerics' faith. It needs no idols and takes the written word:
 paper, a book, a blank book to be filled. The cursed cannot hide from it, nor can sorcery bend it. Its own book says it
