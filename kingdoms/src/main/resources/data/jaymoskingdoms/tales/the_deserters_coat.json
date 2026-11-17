@@ -1,0 +1,775 @@
+{
+  "title": "The Deserter's Coat",
+  "start": {
+    "by": "notice",
+    "jobs": [
+      "farmer",
+      "toolsmith",
+      "mason",
+      "armorer",
+      "none"
+    ],
+    "weight": 2,
+    "notice": {
+      "title": "By order of the levy",
+      "lines": [
+        "A man of the levy has run from the siege lines in the realm's coat.",
+        "Who shelters him shares his rope. Who gives him up is paid.",
+        "Ask the one who nailed this where the sergeant is camped."
+      ],
+      "hand": "a heavy, slow hand, as if someone stood over the writer"
+    }
+  },
+  "roll": {
+    "why": [
+      "refused",
+      "afraid"
+    ]
+  },
+  "cast": {
+    "deserter": {
+      "name": [
+        "Col Ardley",
+        "Jory Ardley",
+        "Wat Ardley"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "loft"
+    },
+    "sergeant": {
+      "name": [
+        "Sergeant Brand Holloway",
+        "Sergeant Odo Holloway",
+        "Sergeant Tam Holloway"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "camp",
+      "health": 70,
+      "damage": 7,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate",
+      "men": 2
+    },
+    "lord": {
+      "name": [
+        "Lord Hamo Trevick",
+        "Lord Reynold Trevick",
+        "Lord Ansel Trevick"
+      ],
+      "body": "villager",
+      "job": "armorer",
+      "female": false,
+      "at": "muster",
+      "hours": "day"
+    }
+  },
+  "places": {
+    "loft": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        25,
+        50
+      ],
+      "name": "the hayloft on Ardley's croft"
+    },
+    "camp": {
+      "at": "road",
+      "from": "home",
+      "dist": [
+        70,
+        120
+      ],
+      "name": "the sergeant's camp"
+    },
+    "muster": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        150,
+        260
+      ],
+      "name": "the muster field"
+    },
+    "copse": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        90,
+        140
+      ],
+      "name": "the alder copse by the road"
+    },
+    "ford": {
+      "at": "wild",
+      "from": "copse",
+      "dist": [
+        80,
+        140
+      ],
+      "name": "the east ford"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "search": [
+          3,
+          4
+        ]
+      },
+      "say": [
+        "You've taken it down. Good. I nailed it up with the sergeant stood at my elbow, and I've wanted it off that board ever since.",
+        "The man they want is {deserter}. He's my sister's boy. He came in off the hill road four nights back, in a levy coat with the badge cut off it, and he's in {place:loft} with the ladder pulled up after him.",
+        "The sergeant goes house by house and strikes each door out of a book. He'll be at that barn {in:search}. The whole street knows where the lad is, and nobody has said a word. I can't make it come out right on my own."
+      ],
+      "replies": [
+        {
+          "say": "I'll go up and hear him.",
+          "then": "see_deserter",
+          "journal": "{giver} was made to nail up the levy's notice for a deserter. The man is {giver}'s own nephew, {deserter}, hidden in {place:loft}. The sergeant searches house by house and will reach the barn in a few days."
+        },
+        {
+          "say": "The notice says there's pay for him.",
+          "then": "see_sergeant",
+          "journal": "{giver} was made to nail up the levy's notice for a deserter, who is {giver}'s own nephew {deserter}, hidden in {place:loft}. I went to hear what the sergeant has to say."
+        },
+        {
+          "say": "A man who runs leaves others to hold the line. Find someone else.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_deserter": {
+      "do": "talk",
+      "who": "deserter",
+      "goal": "Hear {deserter} in {place:loft}",
+      "say": {
+        "?why=refused": [
+          "Mind the third rung, it's split. You'll want to know what I did. I'll tell it the once.",
+          "We'd sat under the mill at Carrow Ford a week. The captain said fire it, there were bowmen in the loft. There weren't. There was the miller and his people down in the cellar. I knew, because I'd carried them bread. I put my torch down and I walked. I didn't run. I walked, and nobody laid a hand on me till I was past the pickets, and then I ran.",
+          "I'll wear the rope for walking off, if it comes to that. I'll not wear it for the mill."
+        ],
+        "?": [
+          "Mind the third rung, it's split. You'll want to know what I did. I'll tell it the once.",
+          "They brought their engine up on the fifth day. The first stone took the man on my left. Hod. We'd shared a blanket since the muster. There wasn't enough of him left to pick up. I don't remember putting my pike down. I remember the hill road, and that it was dark, and that I still had the coat on.",
+          "I'm not going to tell you I had a reason. I was afraid. I'm afraid now. That's all there is of it."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Then let's think what's to be done.",
+          "then": "ways",
+          "journal": {
+            "?why=refused": "{deserter} says he was ordered to fire the mill at Carrow Ford with the miller's people in its cellar. He put down his torch and walked off the line.",
+            "?": "{deserter} says the first stone from the engine killed the man beside him, and he ran. He gives no other reason."
+          }
+        }
+      ],
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "ways": {
+      "do": "talk",
+      "who": "deserter",
+      "goal": "Decide what to do about {deserter}",
+      "say": {
+        "?why=refused": "So. What's to be done with me? They say at the house you've a head for this sort of thing. I'll go along with what you say. Anything, short of going back to finish that mill.",
+        "?": "So. What's to be done with me? They say at the house you've a head for this sort of thing. I'll go along with what you say. I've not had a good idea of my own since the muster."
+      },
+      "voices": {
+        "law": "He took the coat and he took the pay. The rope is what he put his mark to.",
+        "mercy": "Look at him. He's a boy under a horse blanket.",
+        "courage": "Every man on that line was afraid. They stood."
+      },
+      "replies": [
+        {
+          "say": "Stay where you are. I'll send the sergeant looking somewhere else.",
+          "then": "coat",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "law"
+          ]
+        },
+        {
+          "say": "There's a ford east of here, and no levy beyond it. We go by night.",
+          "then": "walk_out",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "I told {deserter} I would take him by night to {place:ford}. Beyond it the levy's writ does not run."
+        },
+        {
+          "say": "There's a lord over that sergeant. I'll ask him for your pardon.",
+          "then": "see_lord",
+          "for": [
+            "law",
+            "honour"
+          ],
+          "journal": "I told {deserter} I would ask {lord}, who commands the levy from {place:muster}, for his pardon."
+        },
+        {
+          "say": "I'll hear the sergeant before I say.",
+          "then": "see_sergeant"
+        }
+      ],
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "coat": {
+      "do": "talk",
+      "who": "deserter",
+      "say": "Then there's the coat. It's good wool and it's the only warm thing I've got, and it'll hang me the day they turn this hay. What do I do with it?",
+      "replies": [
+        {
+          "say": "Give it here. It goes in the fire.",
+          "then": "see_sergeant",
+          "mark": "deserter_coat_burned",
+          "journal": "{deserter} is to stay hidden. I took the levy coat off him and burned it."
+        },
+        {
+          "say": "Keep it on. The nights are cold up here.",
+          "then": "see_sergeant",
+          "journal": "{deserter} is to stay hidden. He kept the levy coat, for the cold."
+        }
+      ],
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "see_sergeant": {
+      "do": "talk",
+      "who": "sergeant",
+      "goal": "Speak with {sergeant} at {place:camp}",
+      "say": {
+        "?dress:armoured": [
+          "You've stood in a line yourself, by the way you carry that. Then I needn't explain my trade to you.",
+          "{deserter}. Left the lines at Carrow Ford with the realm's coat on his back. I've a book with every door in {town} in it and I'm most of the way down the page. Have you seen him?"
+        ],
+        "?dress:ragged": [
+          "Stand there, where I can see your hands. You've the look of somebody who sleeps in barns. I'm interested in barns this week.",
+          "{deserter}. Left the lines at Carrow Ford with the realm's coat on his back. I've a book with every door in {town} in it and I'm most of the way down the page. Have you seen him?"
+        ],
+        "?": [
+          "If it's about the notice, say it plain. I've had four days of people here telling me what a good boy he was.",
+          "{deserter}. Left the lines at Carrow Ford with the realm's coat on his back. I've a book with every door in {town} in it and I'm most of the way down the page. Have you seen him?"
+        ]
+      },
+      "voices": {
+        "honour": "He asked you straight. Whatever you say next, you'll have said it to a man doing his duty.",
+        "gain": "A sergeant on four days' bread. He has a price. They all have by the fourth day."
+      },
+      "replies": [
+        {
+          "if": "!mark:deserter_heard_sergeant",
+          "say": "What did he do, to be worth all this walking?",
+          "then": "sergeant_more"
+        },
+        {
+          "say": "He came through. He took the hill road north, two days back.",
+          "then": "wait_search",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour",
+            "law"
+          ],
+          "lie": {
+            "name": "deserter_went_north",
+            "days": [
+              5,
+              9
+            ],
+            "unless": "mark:deserter_coat_burned",
+            "reputation": 12,
+            "town": [
+              "The levy turned the hay on Ardley's croft a second time and found a coat with the badge cut off. Still warm, one of them said.",
+              "It was {player} told the sergeant the lad had gone north. He walked his men two days up the hill road on that word. He'll remember the face."
+            ],
+            "returns": {
+              "who": "sergeant",
+              "as": "revenge",
+              "say": "Two days up a hill road, on your word. I've a coat with no badge and no man in it, and I've you. Stand still."
+            }
+          },
+          "journal": "I told {sergeant} that {deserter} went north over the hill road two days ago."
+        },
+        {
+          "say": "He's in {place:loft}. Is the pay what the notice says?",
+          "then": "end:handed",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "I'll hear the lad before I answer that.",
+          "then": {
+            "?met:deserter": "ways",
+            "?": "see_deserter"
+          }
+        },
+        {
+          "say": "Suppose your book said he drowned at the ford. Would {price} cover the ink?",
+          "then": "end:bought",
+          "irks": [
+            "law",
+            "honour"
+          ],
+          "try": {
+            "how": "bribe",
+            "coins": 10,
+            "refuse": "I've buried men who would have given both hands to walk off that field. Put it away, before I write your name under his."
+          }
+        }
+      ],
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "sergeant_more": {
+      "do": "talk",
+      "who": "sergeant",
+      "mark": "deserter_heard_sergeant",
+      "say": {
+        "?why=refused": "He was given an order, and he put his torch down and walked off in front of the whole file. What the order was is the captain's affair. It isn't mine and it isn't his. If one man gets to weigh his orders, they all do, and then there's no line, there's a crowd.",
+        "?": "He broke. First stone from their engine and he was gone, and the gap he left is where they came through that night. Two men died in it. I don't hate the lad. I've seen it take better. But I've their two names in the same book as his."
+      },
+      "journal": {
+        "?why=refused": "The sergeant says {deserter} refused an order before the whole file. He would not say what the order was.",
+        "?": "The sergeant says two men died in the gap {deserter} left when he ran."
+      },
+      "then": "see_sergeant",
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "wait_search": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "giver",
+      "journal": "The levy went on down its book of doors.",
+      "then": "passed"
+    },
+    "passed": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Hear from {giver} how the search went",
+      "say": {
+        "?mark:deserter_coat_burned": [
+          "They turned the hay in that barn with pitchforks yesterday. They found hay. One of them stood on the very boards he was under.",
+          "The sergeant struck his camp at first light and took the north road, as you sent him. My sister has not stopped baking since. I'd not know what to say to you, so I'll say nothing, and you'll know what I mean by it."
+        ],
+        "?": [
+          "They turned the hay in that barn with pitchforks yesterday. One of them stood on the very boards he was under. He had that coat rolled up beneath him, and he says he didn't breathe.",
+          "The sergeant struck his camp at first light and took the north road, as you sent him. He looked a long time at that barn before he went. My sister has not stopped baking since. I'll say nothing, and you'll know what I mean by it."
+        ]
+      },
+      "then": "end:hidden"
+    },
+    "walk_out": {
+      "do": "escort",
+      "who": "deserter",
+      "to": "copse",
+      "when": "night",
+      "goal": "Take {deserter} out of {town} by night, as far as {place:copse}",
+      "failed": "end:taken",
+      "then": "patrol",
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "patrol": {
+      "do": "vigil",
+      "at": "copse",
+      "when": "night",
+      "gap": 10,
+      "goal": "Lie up in {place:copse} until the road is clear",
+      "lines": [
+        {
+          "who": "deserter",
+          "say": "Down. Get down. That's a lantern on the road."
+        },
+        {
+          "say": "Three men of the levy come along the road at a walk, one with a lantern on a pole. They are trying the ditches with the butts of their spears.",
+          "sound": "minecraft:block.gravel.step"
+        },
+        {
+          "who": "deserter",
+          "say": "The one at the back is Pask. He owes me a week's bread. Don't let him see my face."
+        },
+        {
+          "say": "The lantern stops level with the copse. Somebody laughs. Then it goes on.",
+          "sound": "minecraft:block.gravel.step"
+        },
+        {
+          "say": "The road is dark again, as far as can be seen toward the ford."
+        },
+        {
+          "who": "deserter",
+          "say": "Now. While their backs are to us."
+        }
+      ],
+      "left": "end:taken",
+      "journal": "A patrol of the levy passed within a spear's length of the copse where we lay, and went on.",
+      "then": "to_ford",
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "to_ford": {
+      "do": "escort",
+      "who": "deserter",
+      "to": "ford",
+      "when": "night",
+      "goal": "Bring {deserter} to {place:ford}",
+      "failed": "end:taken",
+      "then": "parting",
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "parting": {
+      "do": "talk",
+      "who": "deserter",
+      "goal": "See {deserter} over the water",
+      "say": [
+        "That's it, then. Over there the levy's book is only a book.",
+        "I can't take the coat across. If they find it on me the far side, they'll know what I am before I open my mouth. And I can't leave it for the patrol. Will you see to it? Put it in the water with a stone in it. It was a good coat."
+      ],
+      "replies": [
+        {
+          "say": "I'll see to it. Go on, and don't look back.",
+          "then": "end:over_water",
+          "mark": "deserter_coat_burned"
+        },
+        {
+          "say": "Take this for the road.",
+          "needs_coins": 4,
+          "then": "end:over_water",
+          "mark": "deserter_coat_burned",
+          "journal": "I gave {deserter} something for the road before he crossed."
+        }
+      ]
+    },
+    "see_lord": {
+      "do": "talk",
+      "who": "lord",
+      "when": "day",
+      "goal": "Ask {lord} for a pardon at {place:muster}",
+      "not_now": "My lord keeps daylight hours. Come back when he's at his table.",
+      "say": {
+        "?reputation<20": [
+          "A pardon. For a man who left my line.",
+          "I asked in {town} who you are, as I ask about anyone who comes to my table wanting something. Nobody could tell me enough. A pardon is a debt, and I don't lend to people I can't find again."
+        ],
+        "?dress:fine": [
+          "Sit. You've dressed for this, which is more respect than most of {town} shows a muster field. A pardon, for a man who left my line.",
+          "I asked in {town} who you are. They knew. That's the only reason you're past the tent rope. Say what you came to say."
+        ],
+        "?": [
+          "A pardon. For a man who left my line.",
+          "I asked in {town} who you are. They knew. That's the only reason you're past the tent rope. Say what you came to say."
+        ]
+      },
+      "replies": [
+        {
+          "if": "reputation>=20",
+          "say": "They know me in {town}. I'll stand surety for him, in my own name.",
+          "then": "pardon",
+          "for": [
+            "honour"
+          ],
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "reputation>=40",
+              "why=refused & mark:deserter_heard_sergeant",
+              "dress:fine"
+            ],
+            "hurts": [
+              "why=afraid",
+              "dress:bloodied"
+            ],
+            "fail": "lord_no",
+            "refuse": "No. A good name in one town doesn't buy a man off my line. Not today."
+          }
+        },
+        {
+          "say": "Then I've taken up your morning for nothing.",
+          "then": "lord_no"
+        }
+      ],
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "lord_no": {
+      "do": "talk",
+      "who": "lord",
+      "when": "day",
+      "say": "I'll say this much. I haven't heard where he is, and I'll not ask you. My sergeant comes to the end of his book when he comes to it. That's all the mercy I have in me today.",
+      "journal": "{lord} would give no pardon. He did not ask me where {deserter} is.",
+      "then": "ways",
+      "within": "search",
+      "late": "end:taken",
+      "until": "before the sergeant reaches the barn"
+    },
+    "pardon": {
+      "do": "talk",
+      "who": "lord",
+      "when": "day",
+      "say": {
+        "?why=refused": [
+          "Carrow mill. Yes. I had the captain's account of that. And a week after, I had the miller's, when he came to my tent with his cap in his two hands. I've been wondering which of them I'd be made to believe.",
+          "He has his pardon. He doesn't have his pay, and he doesn't come back to my line. A man who weighs one order will weigh the next. But nobody hangs him for that mill while I hold this field."
+        ],
+        "?": [
+          "He broke, and two men died where he should have been standing. I'll not write that away for anybody's name.",
+          "I'll write this. He comes back. He serves out his term on the engine crews, hauling, behind the line, and nobody puts a rope on him. That's the pardon. It's the only one I have."
+        ]
+      },
+      "journal": {
+        "?why=refused": "I stood surety, and {lord} wrote the pardon. {deserter} loses his pay and his place in the levy, and keeps his neck.",
+        "?": "I stood surety, and {lord} wrote the pardon. {deserter} must go back and serve out his term hauling for the engine crews."
+      },
+      "then": "show_pardon"
+    },
+    "show_pardon": {
+      "do": "talk",
+      "who": "sergeant",
+      "goal": "Show the pardon to {sergeant} at {place:camp}",
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A Pardon Under Seal",
+          "lore": [
+            "For the man of the levy named within, who left the lines at Carrow Ford.",
+            "Sealed in wax with a lord's ring. The surety's name is written under it. It is yours."
+          ]
+        }
+      ],
+      "say": [
+        "That's his seal. I've had it on enough of my own orders to know it.",
+        "Then I close the book. I'll not pretend I like it, and I'll not pretend I'm sorry either. Tell the lad he can come down the ladder. Tell him to mind the third rung. Half this street has told me about that rung without meaning to."
+      ],
+      "then": "end:pardoned"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I put the notice back on its nail. A man who leaves the line has the levy to answer to, not me."
+    },
+    "handed": {
+      "text": "I told the sergeant where {deserter} was hidden. They brought him down the ladder with his hands tied, in the coat. The sergeant paid me out of the levy's purse, as the notice said.",
+      "reward": {
+        "coins": 12,
+        "hearts": -30,
+        "reputation": -10
+      },
+      "marks": [
+        "deserter_handed"
+      ],
+      "town": [
+        "It was {player} gave up the Ardley lad. The whole street kept quiet for four days, and a stranger sold him in an afternoon.",
+        "They took him off toward the muster field with a rope on him. His mother walked behind as far as the last house, and {giver} with her."
+      ],
+      "later": [
+        {
+          "days": [
+            8,
+            16
+          ],
+          "if": "why=refused",
+          "scene": [
+            [
+              "a",
+              "Did you hear what the Ardley boy said at the muster field? About the mill?"
+            ],
+            [
+              "b",
+              "I heard. The miller's people were in the cellar. And they hanged him anyway."
+            ],
+            [
+              "a",
+              "They did. Somebody here took pay for that."
+            ]
+          ]
+        },
+        {
+          "days": [
+            8,
+            16
+          ],
+          "if": "why=afraid",
+          "town": [
+            "They hanged the Ardley boy at the muster field. He asked for the blanket over his head. They let him have that."
+          ]
+        }
+      ]
+    },
+    "bought": {
+      "text": "The sergeant's book now says that {deserter} drowned at the ford. The sergeant's purse is heavier, and he did not look at me when he wrote it.",
+      "reward": {
+        "hearts": 15
+      },
+      "marks": [
+        "deserter_bought"
+      ],
+      "town": [
+        "The levy has gone. The sergeant's book says the Ardley lad drowned at the east ford. Nobody here has seen the river that high in years."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "The lad has gone to his mother's cousin two valleys over, as a hired man, under her name and not his own.",
+              "A drowned man can't come home, so we shan't see him at harvest. But he is breathing, and he writes that he sleeps most nights now.",
+              "I burned the notice. I thought you'd want to know that it burned well."
+            ]
+          }
+        }
+      ]
+    },
+    "hidden": {
+      "text": "The levy searched the barn and found nothing, and went north after a man who was never on that road. {deserter} is still under the hay.",
+      "reward": {
+        "hearts": 25,
+        "reputation": 10,
+        "items": [
+          "minecraft:bread*3"
+        ]
+      },
+      "marks": [
+        "deserter_hidden"
+      ],
+      "town": [
+        "The sergeant has struck his camp and gone north. I couldn't tell you why north. Could you?"
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            24
+          ],
+          "if": "mark:deserter_coat_burned",
+          "settles": "deserter",
+          "town": [
+            "Ardley's nephew is back from the hills, they say, and working the croft. He's been here all along, of course. Nobody's going to be the one who says so."
+          ]
+        }
+      ]
+    },
+    "over_water": {
+      "text": "I took {deserter} past the levy's patrol by night and saw him over the east ford. I sank his coat in the deep pool below it, with a stone in the sleeve.",
+      "reward": {
+        "hearts": 20,
+        "reputation": 6
+      },
+      "marks": [
+        "deserter_over_water"
+      ],
+      "town": [
+        "The sergeant finished his book and found nobody. He says the lad must have slipped the patrols. On his own, he says. I'd not put him right."
+      ],
+      "later": [
+        {
+          "days": [
+            15,
+            30
+          ],
+          "letter": {
+            "from": "{deserter}",
+            "lines": [
+              "I am over the water and working for a wheelwright who has not asked where I learned to carry a pike.",
+              "They are raising a levy here too. I saw the notice go up on the board. I stood and read every line of it, and then I went back to work.",
+              "Tell them at home I am warm enough. Tell them the coat was the last thing of theirs I owned, and I do not miss it."
+            ]
+          }
+        }
+      ]
+    },
+    "pardoned": {
+      "text": {
+        "?why=refused": "I stood surety before {lord}, and he pardoned {deserter} for walking away from the mill at Carrow Ford. The sergeant closed his book.",
+        "?": "I stood surety before {lord}. {deserter} keeps his neck, and goes back to haul for the engines until his term is out. The sergeant closed his book."
+      },
+      "reward": {
+        "hearts": 30,
+        "reputation": 12
+      },
+      "marks": [
+        "deserter_pardoned"
+      ],
+      "town": [
+        "{player} went up to the muster field and came back with the lord's seal on a paper. For the Ardley boy. I didn't know anyone here had a name that carried so far."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            22
+          ],
+          "if": "why=refused",
+          "settles": "deserter",
+          "town": [
+            "The Ardley lad walks down the street in daylight now. He keeps that paper inside his shirt. I don't think he'll ever take it out."
+          ]
+        },
+        {
+          "days": [
+            20,
+            35
+          ],
+          "if": "why=afraid",
+          "letter": {
+            "from": "{deserter}",
+            "lines": [
+              "I am back, on the ropes of the big engine. It is mule's work and I am glad of it.",
+              "When the stones come over I still shake. The crew master says everybody on an engine shakes, it is how you know the ones worth having.",
+              "My term is out at the first frost. I mean to walk home by the road, in daylight, and knock."
+            ]
+          }
+        }
+      ]
+    },
+    "taken": {
+      "failed": true,
+      "text": "The sergeant came to the end of his book. They found {deserter} under the hay in the levy coat, and took him away on a rope.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "They found the Ardley lad in the hayloft this morning. The sergeant didn't even raise his voice.",
+        "The levy has fined the whole street for the hiding of him. A fair price, the sergeant called it."
+      ]
+    }
+  }
+}

@@ -1,0 +1,1083 @@
+{
+  "title": "Guests After Dark",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "butcher",
+      "shepherd",
+      "leatherworker",
+      "none"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "truth": [
+      "willing",
+      "taken"
+    ]
+  },
+  "cast": {
+    "lord": {
+      "name": "Lord Aymer Sallow",
+      "body": "fighter",
+      "female": false,
+      "health": 100,
+      "damage": 10,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "at": "hall",
+      "hours": "night"
+    },
+    "resting": {
+      "name": "Lord Aymer Sallow",
+      "body": "fighter",
+      "female": false,
+      "health": 100,
+      "damage": 10,
+      "armor": 8,
+      "hand": "minecraft:iron_sword",
+      "at": "icehouse",
+      "late": true
+    },
+    "steward": {
+      "name": [
+        "Piers Venner",
+        "Odo Venner",
+        "Martin Venner"
+      ],
+      "body": "villager",
+      "job": "librarian",
+      "female": false,
+      "at": "gate"
+    },
+    "maid": {
+      "name": [
+        "Annot",
+        "Cecily",
+        "Mabel"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "kitchen"
+    },
+    "porter": {
+      "name": [
+        "Old Tam Rudd",
+        "Old Hob Rudd",
+        "Old Dick Rudd"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "kitchen"
+    },
+    "priest": {
+      "name": [
+        "Brother Anselm Kerr",
+        "Brother Luke Kerr",
+        "Brother Otho Kerr"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "chapel"
+    }
+  },
+  "places": {
+    "hall": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        160,
+        280
+      ],
+      "name": "Sallow Hall"
+    },
+    "gate": {
+      "at": "near",
+      "from": "hall",
+      "dist": [
+        10,
+        20
+      ],
+      "name": "the gate of Sallow Hall"
+    },
+    "kitchen": {
+      "at": "near",
+      "from": "hall",
+      "dist": [
+        15,
+        30
+      ],
+      "name": "the kitchen yard of the hall"
+    },
+    "icehouse": {
+      "at": "near",
+      "from": "hall",
+      "dist": [
+        40,
+        70
+      ],
+      "name": "the old icehouse behind the yews"
+    },
+    "chapel": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        30,
+        60
+      ],
+      "name": "the Warden's chapel"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "supper": [
+          5,
+          6
+        ]
+      },
+      "say": [
+        "My girl {maid} went into service at {place:hall} at the spring hiring. She came home on her free day as white as tallow, and slept till noon, and she keeps her left cuff buttoned down to the knuckle.",
+        "She's not the only one. The cook's boy is the same, and the laundry woman. And {lord} sees nobody by day. He hasn't for years. He receives after dark, by one candle, and they say he's very civil.",
+        "My mother lived through the Nightfall years. She has hung garlic over our door this week and won't say why. His lordship gives a supper for guests {in:supper}, and {maid} is to wait at the high table. I want to know what she'll be waiting on."
+      ],
+      "replies": [
+        {
+          "say": "I'll go up to the hall and see her.",
+          "then": "see_maid",
+          "journal": "{giver}'s girl {maid} serves at {place:hall} and has come home pale, with her cuff buttoned over one wrist. Other servants are the same. {lord} receives nobody by day. He gives a supper in a few days, and she is to wait at his table."
+        },
+        {
+          "say": "Garlic over the door. What does your mother think it is?",
+          "then": "ask_more"
+        },
+        {
+          "say": "Service is hard work. Girls come home pale.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "ask_more": {
+      "do": "talk",
+      "who": "giver",
+      "say": "She'll not say the word. She says that in the Nightfall years the cloaked things came down every valley, and the plague came after them, and there was garlic over every door. And she says one house in this valley never hung any, and never needed to. That was the hall. Make of it what you will. I've made what I can of it, and I don't sleep.",
+      "journal": "{giver}'s girl {maid} serves at {place:hall} and has come home pale, with her cuff buttoned over one wrist. Other servants are the same. {lord} receives nobody by day. He gives a supper in a few days, and she is to wait at his table. The old folk remember that the hall hung no garlic in the Nightfall years.",
+      "then": "see_maid"
+    },
+    "see_maid": {
+      "do": "talk",
+      "who": "maid",
+      "goal": "Speak with {maid} in {place:kitchen}",
+      "say": {
+        "?truth=willing": [
+          "They sent you from home. They would. I'm not ill. I'm tired, and I'm paid for being tired, which is more than I ever was in our kitchen.",
+          "He asks. Every time, he asks, and you can say no. {porter} has said no for thirty years and still has his place by the fire. It's {coins:3} a time, and meat at the servants' table, and nobody raises a hand to you. Do you know what the tan yard pays? I'm to wait at the high table at his supper. I said yes to that as well."
+        ],
+        "?": [
+          "They sent you from home. They would. I'm not ill. I sleep badly here, that's all. Everybody sleeps badly at the hall.",
+          "There's a posset sent up to the servants every night, with honey in it, by his lordship's own order. He's kind like that. You drink it and you're gone till cocklight, and you dream. I dream somebody is sat on the end of my bed. In the morning my wrist aches. It's only how I lie on it. I'm to wait at the high table at his supper. It's an honour. Cook said so."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Show me your wrist.",
+          "then": "maid_wrist"
+        },
+        {
+          "say": "Who keeps the door here?",
+          "then": "see_steward",
+          "journal": {
+            "?truth=willing": "{maid} says {lord} asks, and pays, and takes no for an answer. She would not say for what.",
+            "?": "{maid} says the servants are sent a posset every night and sleep like the dead. She dreams of someone sitting on her bed."
+          }
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "maid_wrist": {
+      "do": "talk",
+      "who": "maid",
+      "mark": "hall_saw_wrist",
+      "say": {
+        "?truth=willing": "There. Two marks, clean, and he binds it himself after, with linen. So now you know what the garlic at home is for. Don't you tell them. I'll tell them myself, when I've enough put by that nobody can make me come home.",
+        "?": "There's nothing to see. Oh. I'd not looked. I've not looked in a good while. That's a bite. Those are teeth. What is it that sits on the end of my bed?"
+      },
+      "journal": {
+        "?truth=willing": "{maid} has two clean marks on her wrist, bound with linen. She says she is paid for them and may refuse. She asked me not to tell them at home.",
+        "?": "{maid} has a bite on her wrist that she had never looked at. She drinks a posset each night and remembers nothing."
+      },
+      "then": "see_steward",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "see_steward": {
+      "do": "talk",
+      "who": "steward",
+      "goal": "Ask at {place:gate} to see {lord}",
+      "say": {
+        "?dress:fine": [
+          "Good day to you. You'll be wanting his lordship. He does not receive by day. An affliction of the eyes, of long standing.",
+          "Come at dusk and I'll show you up myself. He is glad of company that can hold a conversation. We get so little of it out here."
+        ],
+        "?dress:ragged": [
+          "The kitchen door is round by the midden. The answer there is no as well.",
+          "His lordship does not receive by day, for his eyes. After dark he receives whom he pleases. I'll tell him somebody came. I shan't trouble him with a description."
+        ],
+        "?": [
+          "His lordship does not receive by day. An affliction of the eyes, of long standing.",
+          "Come at dusk. I'll ask whether he will see you. I make no promise of it."
+        ]
+      },
+      "voices": {
+        "gain": "Twenty years of another man's keys on his belt. He'd sell one of them, if the price was right."
+      },
+      "replies": [
+        {
+          "say": "I'll come at dusk. I'll look at the grounds meanwhile.",
+          "then": "search_hall"
+        },
+        {
+          "say": "And where does he pass the day? {price} says you know.",
+          "then": "steward_tells",
+          "irks": [
+            "honour"
+          ],
+          "try": {
+            "how": "bribe",
+            "coins": 8,
+            "refuse": "I have kept this house's keys for twenty years. You could not count out enough."
+          }
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "steward_tells": {
+      "do": "talk",
+      "who": "steward",
+      "mark": "hall_knows_rest",
+      "say": "The old icehouse, behind the yews. He goes down before cocklight. {porter} bars the door after him. I have told you nothing, and I have never seen you, and I shall count this twice when you've gone.",
+      "journal": "I paid the steward. {lord} passes the day in {place:icehouse}, with the door barred from outside.",
+      "then": "search_hall",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "search_hall": {
+      "do": "search",
+      "at": "hall",
+      "when": "day",
+      "need": 3,
+      "goal": "Look round {place:hall} by daylight",
+      "clues": [
+        {
+          "name": "Nails Over the Kitchen Door",
+          "item": "minecraft:iron_nugget",
+          "lore": [
+            "A row of bent nails in the lintel, each with a wisp of dry stalk still under it.",
+            "A whole string of garlic hung here once. Somebody took it down."
+          ],
+          "journal": "Garlic hung over the hall's kitchen door once, and was taken down."
+        },
+        {
+          "name": "A Splinter of Shutter",
+          "item": "minecraft:stick",
+          "mark": "hall_saw_shutters",
+          "lore": [
+            "Every window of the great chamber is shuttered, and the shutters are nailed on the inside.",
+            "The nail heads are bright. Somebody draws them each dusk and drives them again before dawn."
+          ],
+          "journal": "The great chamber's shutters are nailed shut from the inside every morning and opened every dusk. Whoever sleeps in this house cannot bear daylight."
+        },
+        {
+          "name": "A Silvered Button",
+          "item": "minecraft:gold_nugget",
+          "lore": [
+            "A coat button with worn silver trim, trodden deep into the midden.",
+            "The Warden's hunters wore such coats in the Nightfall years. One of them came to this house once."
+          ],
+          "journal": "A button from a Warden's hunter's coat lies in the hall's midden. One of them came here, long ago. The coat did not leave with all its buttons."
+        },
+        {
+          "if": "truth=willing",
+          "name": "A Leaf from the Wage Book",
+          "item": "minecraft:paper",
+          "mark": "hall_proof_willing",
+          "lore": [
+            "Names and dates in the steward's hand, and against each one, 'for the night service', a sum.",
+            "Beside two of the names: 'declined'. No sum. Nothing else is written against them."
+          ],
+          "journal": "The steward's book pays servants 'for the night service'. Two names are marked 'declined', with nothing worse written against them."
+        },
+        {
+          "if": "truth=taken",
+          "name": "A Posset Cup",
+          "item": "minecraft:bowl",
+          "mark": "hall_proof_drugged",
+          "lore": [
+            "Dregs of milk and honey, and under the honey something bitter.",
+            "Poppy. Enough to keep a grown woman asleep through anything at all."
+          ],
+          "journal": "The servants' evening posset is dosed with poppy. Nobody who drinks it would wake for anything."
+        }
+      ],
+      "then": "see_porter",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "see_porter": {
+      "do": "talk",
+      "who": "porter",
+      "goal": "Speak with {porter} in {place:kitchen}",
+      "say": [
+        "You've been poking about in the midden. I saw you. I'll save you the trouble of asking.",
+        "I was a boy in the Nightfall years. The cloaked things came down every valley but this one, and the plague after them, and they burned whole streets in {town} to stop it. Not one came here. Not one. Ask yourself what keeps a wolf off a flock. Another wolf, that's what. One that's particular about its sheep.",
+        "He's never had a drop off me. I said no the first night, and he bowed, and I've had my place by the fire ever since. That's all I know of him and all I want to. He receives after dark. Go and ask him to his face. He'd think the better of you for it."
+      ],
+      "replies": [
+        {
+          "if": "!mark:hall_knows_rest",
+          "say": "Where does he pass the day?",
+          "then": "porter_tells",
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "mark:hall_proof_drugged",
+              "mark:hall_saw_wrist"
+            ],
+            "refuse": "That I'll not tell you, nor anybody. A man's entitled to his sleep, whatever else he is."
+          }
+        },
+        {
+          "say": "I'll ask him to his face.",
+          "then": "audience",
+          "journal": "{porter} says no cloaked thing came into this valley in the Nightfall years, because something else already hunted here. He has refused {lord} for thirty years and kept his place."
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "porter_tells": {
+      "do": "talk",
+      "who": "porter",
+      "mark": "hall_knows_rest",
+      "say": {
+        "?mark:hall_proof_drugged": "Poppy? In the girls' posset? He asks. He's always asked. Show me that cup. Well. Thirty years I've barred that door for him and sat with my back to it. The old icehouse, behind the yews. He goes down before cocklight. If there's poppy in that cup, I've been sat against the wrong door.",
+        "?": "The old icehouse, behind the yews. He goes down before cocklight and I bar the door after him. I'm telling you because you asked civil and because I'm old. I'd not stop you going down there, I haven't the arms for it now. But you'd have it to remember that I asked you not to."
+      },
+      "journal": "{porter} told me where {lord} lies by day: {place:icehouse}, with the door barred from outside.",
+      "then": "audience",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "audience": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "goal": "Go up to {lord} at {place:hall}, after dark",
+      "not_now": "His lordship does not receive by day.",
+      "say": {
+        "?dress:bloodied": [
+          "Come in. You'll forgive me if I sit a little further from you than is polite. You have brought the smell of your work up my stairs.",
+          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+        ],
+        "?dress:fine": [
+          "Come in, come in. A guest who has dressed to climb my stairs. You would be surprised how rare that has become.",
+          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+        ],
+        "?": [
+          "Come in. Sit. Forgive the one candle. My eyes are not what they were.",
+          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+        ]
+      },
+      "replies": [
+        {
+          "say": "What are you?",
+          "then": "lord_owns"
+        },
+        {
+          "say": "What do you take from them at night?",
+          "then": "lord_owns"
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "lord_owns": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "say": {
+        "?truth=willing": [
+          "Old. Older than the yews. I was lord here before the Nightfall years, and through them, and you will have noticed which valley the cloaked ones never entered. Nothing that drinks will hunt another's ground.",
+          "I take what I am given, from those who are paid for it and may refuse. {porter} has refused me for thirty years, and I have never liked a man better. Now you know. You are, I think, the eleventh who has. I am curious what the eleventh will do."
+        ],
+        "?": [
+          "Old. Older than the yews. I was lord here before the Nightfall years, and through them, and you will have noticed which valley the cloaked ones never entered. Nothing that drinks will hunt another's ground.",
+          "I take very little. They sleep, they feel nothing, and they wake with wages in their pockets in a valley that has not seen plague in sixty years. I call that a fair rent. I did not ask them, no. One does not ask the flock. Now you know. I am curious what you will do."
+        ]
+      },
+      "voices": {
+        "faith": "A blood-drinker at a lord's table. Fetch a priest and a light.",
+        "mercy": "Ask the girl what she wants before you decide it for her.",
+        "gain": "A lord who owes you his secret is worth more than a dead one.",
+        "courage": "He's told you to your face. Answer him the same way."
+      },
+      "replies": [
+        {
+          "say": "I'll be back, with the Warden's priest.",
+          "then": "see_priest",
+          "for": [
+            "faith"
+          ],
+          "journal": {
+            "?truth=willing": "{lord} is a blood-drinker, and says so. He says he takes only from servants who are paid and may refuse.",
+            "?": "{lord} is a blood-drinker, and says so. He takes from his servants while they sleep, and calls it rent."
+          }
+        },
+        {
+          "say": "Then let's have terms, you and I.",
+          "then": "bargain",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "faith"
+          ],
+          "journal": {
+            "?truth=willing": "{lord} is a blood-drinker, and says so. He says he takes only from servants who are paid and may refuse.",
+            "?": "{lord} is a blood-drinker, and says so. He takes from his servants while they sleep, and calls it rent."
+          }
+        },
+        {
+          "say": "Good night, my lord.",
+          "then": "decide",
+          "journal": {
+            "?truth=willing": "{lord} is a blood-drinker, and says so. He says he takes only from servants who are paid and may refuse.",
+            "?": "{lord} is a blood-drinker, and says so. He takes from his servants while they sleep, and calls it rent."
+          }
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "decide": {
+      "do": "talk",
+      "who": "maid",
+      "goal": "Decide what is to be done about {lord}",
+      "say": {
+        "?truth=willing": "You've been up to him. So now you know what the cuff is for. Whatever you mean to do, do it knowing I never asked you to.",
+        "?mark:hall_saw_wrist": "You've been up to him. Was it him? On my bed? Don't tell me. Tell me what you're going to do.",
+        "?": "You've been up to him. You've gone a queer colour. What did he say to you?"
+      },
+      "replies": [
+        {
+          "say": "I'm fetching the Warden's priest to him.",
+          "then": "see_priest",
+          "for": [
+            "faith"
+          ]
+        },
+        {
+          "if": "!mark:hall_bargain_refused",
+          "say": "I'm going back up to make terms with him.",
+          "then": "bargain"
+        },
+        {
+          "if": "mark:hall_knows_rest",
+          "say": "I know where he lies by day. I'm going down there.",
+          "then": "find_rest",
+          "for": [
+            "courage"
+          ]
+        },
+        {
+          "if": "!mark:hall_knows_rest",
+          "say": "Where does he go, by day?",
+          "then": "ask_rest"
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "ask_rest": {
+      "do": "talk",
+      "who": "maid",
+      "mark": "hall_knows_rest",
+      "say": "By day? Before cocklight he goes down behind the yews, with {porter} carrying the lantern. I've seen it from the dairy window. There's nothing down there but the old icehouse.",
+      "journal": "{maid} has seen {lord} go down behind the yews before dawn. There is nothing there but {place:icehouse}.",
+      "then": "decide",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "see_priest": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Tell {priest} at {place:chapel}",
+      "say": [
+        "Sallow Hall. I've wondered about that house since the day I was given this lamp. Every door in the valley has the Warden's sign scratched beside it from the Nightfall years. That one never did.",
+        "They can be unmasked. Before a priest, with the Warden's light set where they must look at it, they can't keep the face they wear. What is holy burns the blood. I'll come. You carry the lamp, for I'll want my hands for the book. Walk me up after dark, and when he receives you, set it down on his own table."
+      ],
+      "replies": [
+        {
+          "say": "Come, then.",
+          "then": "walk_priest",
+          "journal": "{priest} will come to the hall after dark. I am to carry the Warden's lamp and set it on {lord}'s own table."
+        },
+        {
+          "say": "Not yet.",
+          "then": "decide"
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "walk_priest": {
+      "do": "escort",
+      "who": "priest",
+      "to": "hall",
+      "when": "night",
+      "goal": "Walk {priest} up to {place:hall} after dark",
+      "give": [
+        {
+          "item": "minecraft:lantern",
+          "count": 1,
+          "name": "The Warden's Lamp",
+          "lore": [
+            "A plain horn lantern, lit from the chapel's own flame.",
+            "It is to be set down where the one who hides must look at it."
+          ]
+        }
+      ],
+      "failed": "decide",
+      "then": "unmask",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "unmask": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "goal": "Set the Warden's lamp on {lord}'s table",
+      "say": [
+        "You have brought a guest. And a lamp. Brother, you are welcome in my hall, as your order has not always made me welcome in theirs.",
+        "Well. Set it down, if that is what you came to do. I'll not stop you. I have wondered for some years what I look like."
+      ],
+      "replies": [
+        {
+          "say": "Set the Warden's lamp on the table.",
+          "needs_item": {
+            "item": "minecraft:lantern",
+            "count": 1
+          },
+          "then": "unmasked",
+          "mark": "hall_unmasked",
+          "for": [
+            "faith"
+          ],
+          "journal": "I set the Warden's lamp on {lord}'s table before {priest}. His face would not hold in that light, and his hands began to smoke."
+        },
+        {
+          "if": "!mark:hall_bargain_refused",
+          "say": "No. Not like this. Let's have terms instead.",
+          "then": "bargain"
+        },
+        {
+          "say": "Not tonight. Good night, my lord.",
+          "then": "decide"
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "unmasked": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "say": [
+        "There. Is it very bad? No, don't tell me. I can see it in the brother's face, and he has watched the dead walk.",
+        "My hands are smoking. I had forgotten that it hurts. You have your unmasking, and a priest to witness it, and by morning the whole valley will have it too. So. I am what the garlic was for. What happens now is in your hand and not in mine. That is new, for me."
+      ],
+      "voices": {
+        "faith": "He stands unmasked before the Warden's light. End it.",
+        "mercy": "He set no hand on you. He let you put the lamp down."
+      },
+      "replies": [
+        {
+          "say": "It ends here.",
+          "then": "fight_night",
+          "for": [
+            "faith",
+            "courage"
+          ]
+        },
+        {
+          "say": "Take the night road. Leave this valley and never come back.",
+          "then": "end:exiled",
+          "for": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "Stay. But only the willing, paid, and free to go. The brother will hold you to it.",
+          "then": "bargain_struck",
+          "irks": [
+            "faith"
+          ]
+        }
+      ]
+    },
+    "fight_night": {
+      "do": "foe",
+      "who": "lord",
+      "when": "night",
+      "goal": "Put down {lord} in his hall",
+      "taunt": "I did ask what you would do. Thank you for telling me plainly.",
+      "plea": "Enough. Enough. I yield the hall. Let me take the night road, and this valley will not see me again.",
+      "mercy": "Go. Before the brother changes my mind.",
+      "thanks": "I kept the cloaked ones out of this valley for sixty years. Remember that I told you so, when they come.",
+      "weak_to": [
+        {
+          "know": "mark:hall_unmasked",
+          "share": 0.75,
+          "journal": "The Warden's lamp was still burning on his table. He would not turn his face to it, and fought half blind.",
+          "bestiary": "A blood-drinker fights badly within sight of the Lantern Warden's light. It will not look that way, and does not see what comes from there."
+        },
+        {
+          "item": "jaymoskingdoms:garlic",
+          "share": 0.8,
+          "journal": "The garlic I carried set him coughing like a man in smoke.",
+          "bestiary": "Garlic chokes a blood-drinker. It does not stop one, but it fights short of breath."
+        },
+        {
+          "item": "jaymoskingdoms:silver_sword",
+          "share": 0.8,
+          "journal": "Where the silver touched him it did not close.",
+          "bestiary": "Silver wounds a blood-drinker as steel does not. The cuts stay open."
+        },
+        {
+          "item": "jaymoskingdoms:holy_symbol",
+          "share": 0.8,
+          "journal": "He would not close with the holy symbol, and pulled every blow he made toward it.",
+          "bestiary": "What is holy burns the blood. A blood-drinker will not close with a holy symbol held up to it."
+        }
+      ],
+      "slain": "end:put_down",
+      "spared": "end:exiled"
+    },
+    "bargain": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "goal": "Make terms with {lord}, after dark",
+      "say": {
+        "?truth=willing": [
+          "Terms. I have not been offered terms since the Nightfall years, and those came on the end of a pike.",
+          "Name them. I'll tell you now that I already ask, and I already pay. You may find you have very little left to bargain for."
+        ],
+        "?": [
+          "Terms. I have not been offered terms since the Nightfall years, and those came on the end of a pike.",
+          "Name them. I will hear anything once."
+        ]
+      },
+      "replies": [
+        {
+          "if": "truth=willing",
+          "say": "As you do now: only the willing, paid, free to refuse. And {maid} goes home if her people ask it. And you go on keeping the cloaked ones out.",
+          "then": "bargain_struck"
+        },
+        {
+          "if": "truth=taken",
+          "say": "No more poppy. You ask, you pay, and whoever says no keeps their place.",
+          "then": "bargain_struck",
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "mark:hall_proof_drugged",
+              "reputation>=20",
+              "dress:fine"
+            ],
+            "hurts": [
+              "dress:ragged"
+            ],
+            "fail": "bargain_no",
+            "refuse": "No. You would have me go begging in my own hall, to my own scullions. I have heard your terms. Now you must do as you think best."
+          }
+        },
+        {
+          "if": "truth=taken & mark:hall_knows_rest",
+          "say": "Ask them and pay them, or I come back by day. I know about the icehouse.",
+          "then": "bargain_struck",
+          "irks": [
+            "honour"
+          ],
+          "try": {
+            "how": "threaten",
+            "odds": 1,
+            "fail": "bargain_no",
+            "refuse": "Then come by day. I have been threatened in this room by better, and most of them are under the yews."
+          }
+        },
+        {
+          "say": "No. There's nothing here to bargain over. Good night.",
+          "then": "decide"
+        }
+      ],
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "bargain_no": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "mark": "hall_bargain_refused",
+      "say": "You have until my supper to decide what you are. So have I, it seems. Good night.",
+      "journal": "{lord} would not take my terms.",
+      "then": "decide",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "bargain_struck": {
+      "do": "talk",
+      "who": "lord",
+      "when": "night",
+      "mark": "hall_bargain",
+      "say": {
+        "?truth=willing": "Done. It costs me nothing I was not paying already, and you knew that when you asked. You wanted to hear me say it. Very well. Only the willing, paid, and free to go. The girl goes home if her people ask it. I rather think the girl will have something to say about that. Tell them at her house whatever you like. I have never minded the truth. It is other people who mind it.",
+        "?": "Hm. Very well. No more poppy. I shall ask, as I did when I was young and it was the custom, and I shall be refused, and I shall bear it. You drive a bargain like a horse dealer. Tell them at the girl's house whatever you like."
+      },
+      "journal": "{lord} has given his word: he feeds only on the willing, who are paid and free to refuse.",
+      "then": "tell_home"
+    },
+    "tell_home": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} what {maid} waits on",
+      "say": "You've been up at that hall two nights. I can see it on you that you know. Tell me. What is it she's to wait on at that table?",
+      "voices": {
+        "honour": "That's a plain question about their own child. Answer it plain.",
+        "mercy": "The truth will have that girl dragged home by the hair. Think before you say it."
+      },
+      "replies": [
+        {
+          "if": "truth=willing",
+          "say": "The garlic was for him. He drinks. He takes only from those who agree to it, and {maid} agreed.",
+          "then": "end:bargain",
+          "for": [
+            "honour"
+          ]
+        },
+        {
+          "if": "truth=taken",
+          "say": "The garlic was for him. He drinks. He took from her sleeping. He has sworn to ask now, and pay, and take no for an answer.",
+          "then": "end:bargain",
+          "for": [
+            "honour"
+          ]
+        },
+        {
+          "say": "It's the green sickness. Half the girls in service have it. Rest and red meat, and she'll mend.",
+          "then": "end:bargain_quiet",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "hall_green_sickness",
+            "days": [
+              8,
+              16
+            ],
+            "hearts": 30,
+            "reputation": 8,
+            "town": [
+              "{maid} came home from the hall on her free day and showed them her wrist at last. Green sickness, {player} called it. Green sickness doesn't leave teeth marks.",
+              "They say {player} knew what sits in Sallow Hall, and told that family it was nothing. What was that worth, I wonder?"
+            ]
+          },
+          "journal": "I told {giver} that {maid} has the green sickness, and nothing worse."
+        }
+      ]
+    },
+    "find_rest": {
+      "do": "go",
+      "to": "icehouse",
+      "when": "day",
+      "radius": 8,
+      "goal": "Go down to {place:icehouse}, by daylight",
+      "journal": "The icehouse door was barred on the outside, and the bar was worn smooth where a man's back has leaned against it. Inside, on the straw where the ice once lay, {lord} sleeps with his hands folded.",
+      "then": "fight_rest",
+      "within": "supper",
+      "late": "end:faded",
+      "until": "before the lord's supper"
+    },
+    "fight_rest": {
+      "do": "foe",
+      "who": "resting",
+      "when": "day",
+      "goal": "Deal with {lord} where he lies",
+      "taunt": "By day. Yes. That is how I would have done it.",
+      "plea": "Stop. Stop. I cannot see you. Is it day? Let me go when it's dark. I'll take the night road. You have my word, and it is older than your house.",
+      "mercy": "At dusk, then. And never back.",
+      "thanks": "At dusk. You'll not see me again. Bar the door when you go. The light hurts.",
+      "weak_to": [
+        {
+          "know": "mark:hall_saw_shutters",
+          "share": 0.7,
+          "journal": "I knew from his nailed shutters what daylight does to him, and left the icehouse door wide open behind me. He fought with one arm across his eyes.",
+          "bestiary": "A blood-drinker nails its shutters from the inside for a reason. Fought by day, with the door open at your back, it is half blind and slow."
+        },
+        {
+          "item": "jaymoskingdoms:garlic",
+          "share": 0.8,
+          "journal": "The garlic I carried set him coughing like a man in smoke.",
+          "bestiary": "Garlic chokes a blood-drinker. It does not stop one, but it fights short of breath."
+        },
+        {
+          "item": "jaymoskingdoms:silver_sword",
+          "share": 0.8,
+          "journal": "Where the silver touched him it did not close.",
+          "bestiary": "Silver wounds a blood-drinker as steel does not. The cuts stay open."
+        },
+        {
+          "item": "jaymoskingdoms:holy_symbol",
+          "share": 0.8,
+          "journal": "He would not close with the holy symbol, and pulled every blow he made toward it.",
+          "bestiary": "What is holy burns the blood. A blood-drinker will not close with a holy symbol held up to it."
+        }
+      ],
+      "slain": "end:rested",
+      "spared": "end:exiled"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I told {giver} that girls in service come home pale, and left it there."
+    },
+    "put_down": {
+      "text": "I unmasked {lord} before the Warden's priest, and killed him in his own hall with the lamp still burning on the table.",
+      "reward": {
+        "coins": 16,
+        "hearts": 10,
+        "reputation": 15
+      },
+      "marks": [
+        "hall_lord_dead"
+      ],
+      "town": [
+        "Sixty years he sat up there, and we took our rents to him. {player} and the brother from the chapel put an end to it in one night.",
+        "They've nailed the Warden's sign to the hall door. A bit late, my gran says."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "town": [
+            "There were bats over the low pasture last night. Big ones. We've not had those in this valley in my lifetime.",
+            "Something in a cloak was seen on the hall road at dusk. The brother has gone up with his lamp. He's garlic over his own door now."
+          ]
+        },
+        {
+          "days": [
+            8,
+            14
+          ],
+          "if": "truth=willing",
+          "letter": {
+            "from": "{maid}",
+            "lines": [
+              "They have turned us all off, with a week's wages and no character. Nobody in the valley will take a servant from that house.",
+              "I had nearly enough put by. Another winter would have done it.",
+              "You'll say you saved me. I never asked to be saved. I asked not to be told on."
+            ]
+          }
+        },
+        {
+          "days": [
+            8,
+            14
+          ],
+          "if": "truth=taken",
+          "letter": {
+            "from": "{maid}",
+            "lines": [
+              "I am home. I sleep with the shutters open and nothing sits on my bed.",
+              "They burned the posset cups in the yard. Cook cried, and said she never knew, and I believe her.",
+              "The mark on my wrist is going. I look at it every morning to be sure."
+            ]
+          }
+        }
+      ]
+    },
+    "rested": {
+      "text": "I went down to the icehouse by day and killed {lord} where he lay. Nobody in the valley knows what he was. They say he died in his bed, of his eyes.",
+      "reward": {
+        "hearts": 10,
+        "reputation": 4
+      },
+      "marks": [
+        "hall_lord_dead"
+      ],
+      "town": [
+        "His lordship is dead up at the hall. In his sleep, the steward says. They buried him the same day, which is quick, for a lord."
+      ],
+      "returns": {
+        "who": "steward",
+        "days": [
+          4,
+          8
+        ],
+        "as": "warning",
+        "say": "I buried him under the yews, with the key of that door. I know it was you. I'll say nothing, for his sake, not for yours. He kept the cloaked ones out of this valley for sixty years. I have sent the servants home with their wages. When the bats come, don't send up to the hall. There's nobody there."
+      },
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "town": [
+            "There were bats over the low pasture last night. Big ones. We've not had those in this valley in my lifetime.",
+            "Something in a cloak was seen on the hall road at dusk. Nobody's gone up to look."
+          ]
+        }
+      ]
+    },
+    "exiled": {
+      "text": "{lord} yielded his hall and took the night road out of the valley. He went on foot, with one servant carrying a lantern behind him.",
+      "reward": {
+        "hearts": 15,
+        "reputation": 10
+      },
+      "marks": [
+        "hall_lord_exiled"
+      ],
+      "town": [
+        "His lordship has gone. In the night, on foot, and old Rudd with him carrying the light. The hall's shut up.",
+        "Gone where? Nobody knows. Nobody asked him to stay, I notice."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            26
+          ],
+          "town": [
+            "There were bats over the low pasture last night. Big ones. We've not had those in this valley in my lifetime.",
+            "Something in a cloak was seen on the hall road at dusk. I've hung garlic. So should you."
+          ]
+        },
+        {
+          "days": [
+            25,
+            40
+          ],
+          "letter": {
+            "from": "{lord}",
+            "lines": [
+              "I am over the mountains, in a town that hangs no garlic. I ask. I find I have got into the habit of it.",
+              "By now the cloaked ones will have found your valley. I am sorry for it. I did say.",
+              "Rudd died on the road, in his sleep, by the fire. He refused me to the end. I have never liked a man better."
+            ]
+          }
+        }
+      ]
+    },
+    "bargain": {
+      "text": {
+        "?truth=willing": "{lord} keeps his hall, on his word to feed only on the willing. I told {giver} the truth of what {maid} is paid for.",
+        "?": "{lord} keeps his hall, on his word to feed only on the willing from now on. I told {giver} the truth of what was done to {maid}."
+      },
+      "reward": {
+        "hearts": 15,
+        "reputation": 5
+      },
+      "marks": [
+        "hall_bargain_kept"
+      ],
+      "town": [
+        "{maid} still goes up to the hall. Her people know what for, now, and there was shouting, and she still goes.",
+        "There's garlic over half the doors in the street. And not one bat has been seen in this valley. Explain that to me."
+      ],
+      "later": [
+        {
+          "days": [
+            15,
+            28
+          ],
+          "if": "truth=willing",
+          "letter": {
+            "from": "{maid}",
+            "lines": [
+              "They came up to the hall from home, to fetch me. His lordship received them himself, after dark, and they sat an hour.",
+              "They came out and said I might stay until I had my portion saved, and not one day longer.",
+              "I waited at the high table at his supper. He ate nothing. The guests never noticed."
+            ]
+          }
+        },
+        {
+          "days": [
+            15,
+            28
+          ],
+          "if": "truth=taken",
+          "letter": {
+            "from": "{maid}",
+            "lines": [
+              "He asks now. He stands at the foot of the stair with his hands behind him, like a boy asking for a dance.",
+              "Two of us said no. He bowed. Cook said yes, the old fool. She says the wages beat the kitchen's.",
+              "I said no. I am still in my place. I wanted you to know that part held."
+            ]
+          }
+        }
+      ]
+    },
+    "bargain_quiet": {
+      "text": "{lord} keeps his hall, on his word to feed only on the willing. I told {giver} it was the green sickness.",
+      "reward": {
+        "hearts": 20
+      },
+      "marks": [
+        "hall_bargain_kept"
+      ],
+      "town": [
+        "{maid} is back up at the hall. Green sickness, it was. Rest and red meat. She does look a little better."
+      ]
+    },
+    "faded": {
+      "failed": true,
+      "text": "{lord} gave his supper. {maid} waited at the high table. She has not come home on a free day since, and sends her wages down by the carter.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "{maid} doesn't come down from the hall any more. She sends money. Good money. Her people don't spend it."
+      ]
+    }
+  }
+}

@@ -89,7 +89,7 @@
         {
           "say": "I'll see what can be done.",
           "then": "see_poacher",
-          "journal": "{giver} nailed a notice to the board: her brother {poacher} was taken in {place:wood} with a hare. The forest court sits in three days, and for a hare it takes two fingers."
+          "journal": "{giver} nailed a notice to the board: a brother, {poacher}, was taken in {place:wood} with a hare. The forest court sits in three days, and for a hare it takes two fingers."
         },
         {
           "say": "He knew whose wood it was.",

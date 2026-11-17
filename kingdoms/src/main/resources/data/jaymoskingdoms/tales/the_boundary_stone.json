@@ -1,0 +1,736 @@
+{
+  "title": "The Boundary Stone",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "shepherd",
+      "mason",
+      "none"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "line": [
+      "over",
+      "nether",
+      "common"
+    ]
+  },
+  "cast": {
+    "reeve": {
+      "name": [
+        "Aldith Marsh",
+        "Bertrade Marsh",
+        "Hawise Marsh"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": true,
+      "at": "nether"
+    },
+    "champion": {
+      "late": true,
+      "name": [
+        "Big Dunstan Marsh",
+        "Long Wilf Marsh",
+        "Red Osbert Marsh"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "stone",
+      "health": 80,
+      "damage": 8,
+      "armor": 6,
+      "hand": "minecraft:iron_axe",
+      "chest": "minecraft:leather_chestplate"
+    }
+  },
+  "places": {
+    "stone": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        60,
+        100
+      ],
+      "name": "the boundary stone on the water meadow"
+    },
+    "nether": {
+      "at": "near",
+      "from": "stone",
+      "dist": [
+        70,
+        120
+      ],
+      "name": "Netherbeck"
+    },
+    "chapel": {
+      "at": "wild",
+      "from": "stone",
+      "dist": [
+        140,
+        240
+      ],
+      "name": "the old chapel at the beck head"
+    },
+    "seat": {
+      "at": "town",
+      "name": "the town"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "fence": 1,
+        "barn": 3,
+        "cow": 4,
+        "challenge": 6
+      },
+      "say": [
+        "That stone stood by the three alders since before my grandfather, and every blade of the water meadow this side of it was Overbeck's. Monday morning it stood hard against our own hedge, and Netherbeck had their cows on our grass.",
+        "They say we moved it first, years back, and all they've done is put it right. We say they're thieves. Nobody living saw it set, so nobody can say.",
+        "I know how this goes. I've seen it go. First it's a fence. Then it's a barn. Then it's somebody's beast, and then it's somebody's son. There's said to be a charter that tells where the line runs. I want it found before we get to the son."
+      ],
+      "replies": [
+        {
+          "say": "I'll look at the stone first.",
+          "then": "see_stone",
+          "journal": "The boundary stone between Overbeck and Netherbeck has been moved, and each hamlet calls the other the thief. {giver} wants the old charter found before the quarrel comes to blood."
+        },
+        {
+          "say": "Two hamlets and one meadow. Share it.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_stone": {
+      "do": "search",
+      "at": "stone",
+      "need": 3,
+      "goal": "Look over {place:stone}",
+      "clues": [
+        {
+          "name": "A Mason's Mark",
+          "item": "minecraft:flint",
+          "lore": [
+            "Cut low on the north face of the stone: a key, and three strokes under it.",
+            "The key is the mark of the old chapel at the beck head. The stone was set by its word."
+          ],
+          "journal": "The boundary stone carries the mark of the old chapel at the beck head. It was set by charter, and the charter may lie there still."
+        },
+        {
+          "name": "Fresh-Turned Earth",
+          "item": "minecraft:coarse_dirt",
+          "lore": [
+            "A square socket in the turf by the three alders, a long way from where the stone stands now.",
+            "The grass has not had time to creep over its edge."
+          ],
+          "journal": "There is a fresh, empty socket by the three alders. The stone stood there until a few days ago."
+        },
+        {
+          "if": "line=over",
+          "name": "Sledge Ruts",
+          "item": "minecraft:stick",
+          "lore": [
+            "Two runner tracks from the alders to the hedge, cut deep by a great weight.",
+            "The ox prints beside them go home toward Netherbeck."
+          ],
+          "journal": "Sledge ruts run from the alders to the hedge. The oxen that drew the stone went home to Netherbeck."
+        },
+        {
+          "if": "line=nether",
+          "name": "An Older Socket",
+          "item": "minecraft:mossy_cobblestone",
+          "lore": [
+            "Under the stone where it stands now, at the hedge: a second hollow, long grassed over.",
+            "It stood here once before. Somebody took it away, and somebody has brought it back."
+          ],
+          "journal": "Where the stone stands now, at Overbeck's hedge, there is a far older socket under it. It stood here once before."
+        },
+        {
+          "if": "line=common",
+          "name": "A Line of Flood Wrack",
+          "item": "minecraft:wheat_seeds",
+          "lore": [
+            "Dried reed and silt in a line across the meadow, level with the empty socket by the alders.",
+            "The beck comes up exactly this far in a wet spring, and no further."
+          ],
+          "journal": "The empty socket by the alders lies exactly on the line the beck floods to in a wet spring."
+        }
+      ],
+      "then": "see_reeve",
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "see_reeve": {
+      "do": "talk",
+      "who": "reeve",
+      "goal": "Hear Netherbeck's side from {reeve}",
+      "say": {
+        "?late:cow": [
+          "You're the one Overbeck sent. You've a nerve, walking in here today. There's a cow of mine lying in the beck with her throat cut. I had her from a calf.",
+          "I'll tell you what I'd have told you a week ago, before any of this. That stone was moved in my grandmother's time, by Overbeck men, at night, with an ox sledge. She saw the lantern. We put it back where it stood. That's the whole of what we did first. There's a charter in the chapel at the beck head, in a chest. We'd have fetched it ourselves, if any of us had the old letters."
+        ],
+        "?late:barn": [
+          "You're the one Overbeck sent. They'll have told you we fired their tithe barn. I'll not say we didn't. I'll say I was in my bed, and so was everybody I asked.",
+          "That stone was moved in my grandmother's time, by Overbeck men, at night, with an ox sledge. She saw the lantern. We put it back where it stood. That's the whole of what we did first. There's a charter in the chapel at the beck head, in a chest. We'd have fetched it ourselves, if any of us had the old letters."
+        ],
+        "?late:fence": [
+          "You're the one Overbeck sent. Come to count the fence your friends threw down in the night? Forty yards of it, and the gate off its pins.",
+          "That stone was moved in my grandmother's time, by Overbeck men, at night, with an ox sledge. She saw the lantern. We put it back where it stood. That's all we've done. There's a charter in the chapel at the beck head, in a chest. We'd have fetched it ourselves, if any of us had the old letters."
+        ],
+        "?": [
+          "Overbeck have sent a stranger to ask. Well. That's the first sensible thing they've done since Monday.",
+          "That stone was moved in my grandmother's time, by Overbeck men, at night, with an ox sledge. She saw the lantern. We put it back where it stood. That's all we've done. There's a charter in the chapel at the beck head, in a chest. We'd have fetched it ourselves, if any of us had the old letters."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Then I'll fetch it, and both of you can hear it.",
+          "then": "find_charter",
+          "journal": "{reeve} of Netherbeck says Overbeck men moved the stone by night in her grandmother's time, and Netherbeck only put it back. She says the charter is in a chest in {place:chapel}."
+        }
+      ],
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "find_charter": {
+      "do": "search",
+      "at": "chapel",
+      "need": 2,
+      "goal": "Find the charter in {place:chapel}",
+      "clues": [
+        {
+          "name": "A Chest Hasp",
+          "item": "minecraft:iron_nugget",
+          "lore": [
+            "Green with age, torn out of rotten wood.",
+            "The chest it closed was opened a long time ago, and shut again with care."
+          ],
+          "journal": "The chapel's chest was broken open long ago by somebody who then shut it carefully. Whoever it was wanted to know what the charter said, and did not want it lost."
+        },
+        {
+          "if": "line=over",
+          "name": "The Charter of the Becks",
+          "item": "minecraft:paper",
+          "tongue": "old",
+          "mark": "stone_charter_read",
+          "lore": [
+            "We have set this stone at the three alders.",
+            "All the meadow from the stone to the hedge is Overbeck's, to mow and to graze.",
+            "Whoever moves the stone, let him be named a thief at both wells."
+          ],
+          "told": "The old charter of the becks gives the water meadow to Overbeck, from the three alders to the hedge. I read it out myself.",
+          "journal": "I have the charter from the chapel chest. It is written in the old letters."
+        },
+        {
+          "if": "line=nether",
+          "name": "The Charter of the Becks",
+          "item": "minecraft:paper",
+          "tongue": "old",
+          "mark": "stone_charter_read",
+          "lore": [
+            "We have set this stone at the Overbeck hedge.",
+            "All the meadow from the stone to the three alders is Netherbeck's, to mow and to graze.",
+            "Whoever moves the stone, let him be named a thief at both wells."
+          ],
+          "told": "The old charter of the becks gives the water meadow to Netherbeck, from the hedge to the three alders. I read it out myself.",
+          "journal": "I have the charter from the chapel chest. It is written in the old letters."
+        },
+        {
+          "if": "line=common",
+          "name": "The Charter of the Becks",
+          "item": "minecraft:paper",
+          "tongue": "old",
+          "mark": "stone_charter_read",
+          "lore": [
+            "This stone is no man's mark. We have set it where the beck comes in a wet spring, so that both hamlets may know when to drive their beasts up.",
+            "The meadow is the beck's. Overbeck and Netherbeck shall graze it side by side, and neither shall fence it."
+          ],
+          "told": "The old charter of the becks says the stone on the water meadow is a flood mark and no boundary at all. The meadow is common to both hamlets. I read it out myself.",
+          "journal": "I have the charter from the chapel chest. It is written in the old letters."
+        }
+      ],
+      "then": "read",
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "read": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Bring the charter to {giver}",
+      "say": {
+        "?late:cow": [
+          "Somebody cut the throat of a Netherbeck cow in the night and left her lying in the beck. I've asked every man here, and every man here was asleep. They'll send a challenge now. That's what comes after the beast.",
+          "You have it. Let me see. No, it's no use showing me. Nobody in Overbeck has the old letters, and I'm no better. A priest or a bookman in {town} will read it to you for a coin. Go quickly."
+        ],
+        "?late:barn": [
+          "Our tithe barn burned in the night. A year's tenth, and the roof with it. Nobody saw who. Nobody needed to. The young men are sharpening things and I can't make them stop.",
+          "You have it. Let me see. No, it's no use showing me. Nobody in Overbeck has the old letters, and I'm no better. A priest or a bookman in {town} will read it to you for a coin. Go quickly."
+        ],
+        "?late:fence": [
+          "Forty yards of Netherbeck's fence went down in the night. I know who did it, and I gave him the rough side of my tongue, and it will make no difference at all.",
+          "You have it. Let me see. No, it's no use showing me. Nobody in Overbeck has the old letters, and I'm no better. A priest or a bookman in {town} will read it to you for a coin. Go quickly."
+        ],
+        "?": [
+          "You have it. That was quick. Let me see. No, it's no use showing me.",
+          "Nobody in Overbeck has the old letters, and I'm no better. A priest or a bookman in {town} will read it to you for a coin. Go quickly."
+        ]
+      },
+      "voices": {
+        "law": "There's a charter. Have it read. That is what charters are for.",
+        "courage": "Stand for them at the stone. A fight in daylight ends a thing clean.",
+        "honour": "Whatever it says, say it as it's written."
+      },
+      "replies": [
+        {
+          "if": "mark:stone_charter_read",
+          "say": "I know what it says now. Hear it as it's written.",
+          "then": "hear",
+          "for": [
+            "honour",
+            "law"
+          ]
+        },
+        {
+          "if": "mark:stone_charter_read & !line=over",
+          "say": "It says the meadow is Overbeck's.",
+          "then": "hear_false",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "honour",
+            "law"
+          ],
+          "lie": {
+            "name": "stone_false_reading",
+            "days": [
+              6,
+              12
+            ],
+            "unless": "!mark:stone_charter_read:aloud",
+            "reputation": 15,
+            "hearts": 30,
+            "town": [
+              "The one who read that old charter out for {player} says it never gave Overbeck the water meadow. Not a line of it.",
+              "{player} stood in Overbeck and told them the paper said what they wanted. Netherbeck have heard. You can guess the rest."
+            ]
+          },
+          "journal": "I told {giver} the charter gives the meadow to Overbeck. It does not."
+        },
+        {
+          "say": "I'll take it to someone who has the old letters.",
+          "then": "to_town"
+        },
+        {
+          "say": "Leave the paper. I'll stand for Overbeck at the stone.",
+          "then": "challenge_ask",
+          "for": [
+            "courage"
+          ]
+        }
+      ],
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "to_town": {
+      "do": "go",
+      "to": "seat",
+      "radius": 24,
+      "goal": "Take the charter to a priest or a librarian in {town} and hold it out to them",
+      "then": "back",
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "back": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Bring the charter's words to {giver}",
+      "say": {
+        "?late:cow": "There's a Netherbeck cow dead in the beck and they'll send a challenge for it. Tell me you've had that paper read. What does it say?",
+        "?late:barn": "The barn's still smoking. Tell me you've had that paper read. What does it say?",
+        "?": "Well? Have you had it read? What does it say?"
+      },
+      "replies": [
+        {
+          "if": "mark:stone_charter_read",
+          "say": "I know what it says now. Hear it as it's written.",
+          "then": "hear",
+          "for": [
+            "honour",
+            "law"
+          ]
+        },
+        {
+          "if": "mark:stone_charter_read & !line=over",
+          "say": "It says the meadow is Overbeck's.",
+          "then": "hear_false",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "honour",
+            "law"
+          ],
+          "lie": {
+            "name": "stone_false_reading",
+            "days": [
+              6,
+              12
+            ],
+            "unless": "!mark:stone_charter_read:aloud",
+            "reputation": 15,
+            "hearts": 30,
+            "town": [
+              "The one who read that old charter out for {player} says it never gave Overbeck the water meadow. Not a line of it.",
+              "{player} stood in Overbeck and told them the paper said what they wanted. Netherbeck have heard. You can guess the rest."
+            ]
+          },
+          "journal": "I told {giver} the charter gives the meadow to Overbeck. It does not."
+        },
+        {
+          "say": "I'll take it to someone who has the old letters.",
+          "then": "to_town"
+        },
+        {
+          "say": "Leave the paper. I'll stand for Overbeck at the stone.",
+          "then": "challenge_ask",
+          "for": [
+            "courage"
+          ]
+        }
+      ],
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "hear": {
+      "do": "talk",
+      "who": "giver",
+      "say": {
+        "?line=over": [
+          "At the three alders. From the stone to the hedge. I knew it. I've known it all my life and I never once could prove it.",
+          "Go and read that to {reeve}, word for word. Slowly. And watch her face for me, because I'll not be let within a bowshot of Netherbeck to see it."
+        ],
+        "?line=nether": [
+          "From our hedge to the alders. Netherbeck's.",
+          "Then her grandmother did see a lantern. And my grandfather was the thief, and I've cut sixty years of hay off stolen ground. Go and read it to {reeve}. I'd sooner she heard it from a stranger than had to hear it from me."
+        ],
+        "?": [
+          "No man's mark. A flood stone. So we'd know when to drive the beasts up.",
+          "We have been throwing down fences over a flood stone. Go and read it to {reeve}. Read her the part about side by side. Read it twice."
+        ]
+      },
+      "journal": "I gave {giver} the charter's true words.",
+      "then": "tell_reeve"
+    },
+    "hear_false": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "At the three alders. I knew it. I've known it all my life and never once could prove it.",
+        "I'll have it cried at the well this evening, and Netherbeck can come and argue with a charter if they like. They can't read it any more than I can. Keep the paper safe. Keep it somewhere they'll not think to look."
+      ],
+      "then": "end:false_reading"
+    },
+    "tell_reeve": {
+      "do": "talk",
+      "who": "reeve",
+      "goal": "Read the charter to {reeve} in {place:nether}",
+      "say": {
+        "?line=over": [
+          "Read that last part again. 'Named a thief at both wells.'",
+          "That's my own folk it's naming. Well. The cows come off tonight. The stone goes back to the alders on Saturday, and Overbeck can send men to carry an end of it or not, as they please."
+        ],
+        "?line=nether": [
+          "So it was ours. All this while.",
+          "{giver} sent you to read me that? Knowing what it says? Then take this back from me. The hay that's cut is cut. We'll not be asking for sixty years of it back. We only ever wanted the grass."
+        ],
+        "?": [
+          "A flood stone. Then my grandmother saw a lantern, and somebody moving a marker for the water, and she made sixty years of thieving out of it.",
+          "Nobody stole anything. I don't know what to do with that. I've been angry at Overbeck since I could walk. Tell {giver} our cows will keep to the lower end, and Overbeck's can have the top, and neither of us will put up so much as a hurdle."
+        ]
+      },
+      "then": {
+        "?line=over": "end:charter_over",
+        "?line=nether": "end:charter_nether",
+        "?": "end:charter_common"
+      }
+    },
+    "challenge_ask": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "You'd stand for us? At the stone, before both hamlets, against whoever they send?",
+        "It's the old way, and I'll say this for it, it settles a thing. Whoever's man is on his feet at the end, the stone stays where his people say, and there's no going back on it after. It will be {champion} for Netherbeck. Be at the stone by daylight, and think again on the way there."
+      ],
+      "replies": [
+        {
+          "say": "I'll stand.",
+          "then": "trial",
+          "journal": "I told {giver} I would stand as Overbeck's champion at the stone. Netherbeck's man will be {champion}."
+        },
+        {
+          "say": "No. Let's have the paper read first.",
+          "then": "to_town"
+        }
+      ],
+      "within": "challenge",
+      "late": "challenge_day",
+      "until": "before it comes to a challenge"
+    },
+    "challenge_day": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Answer {giver}: the challenge has come",
+      "within": 2,
+      "late": "end:blood",
+      "until": "before the day of the challenge is past",
+      "say": [
+        "It's come. Netherbeck sent a boy over at first light with a hazel rod, peeled white. That's a challenge, in the old way. Their man against ours at the stone, and whoever stands, his people say where it goes.",
+        "It will be {champion} for them. We've nobody. I'd go myself, and he would kill me and be sorry about it after. Will you stand for Overbeck?"
+      ],
+      "voices": {
+        "courage": "Stand. Somebody has to, and it had better be someone who can.",
+        "mercy": "If nobody stands, some boy of theirs will pick up that rod himself."
+      },
+      "replies": [
+        {
+          "say": "I'll stand.",
+          "then": "trial",
+          "for": [
+            "courage"
+          ],
+          "journal": "The quarrel came to a challenge before the charter was read. I said I would stand for Overbeck at the stone against {champion}."
+        },
+        {
+          "say": "This isn't my quarrel to bleed for.",
+          "then": "end:blood",
+          "irks": [
+            "courage"
+          ]
+        }
+      ]
+    },
+    "trial": {
+      "do": "foe",
+      "who": "champion",
+      "when": "day",
+      "goal": "Stand as Overbeck's champion at {place:stone}",
+      "taunt": "Nothing against you, stranger. I'd sooner it had been one of them. Mind your feet. The meadow's wet.",
+      "plea": "Hold! Hold. That's me done. The stone's yours. Say where it goes.",
+      "mercy": "It's settled. Get up.",
+      "thanks": "Fair fought. I'll tell them so, and I'll carry an end of that stone myself.",
+      "yield_at": 0.35,
+      "slain": "end:champion_slain",
+      "spared": "end:champion",
+      "spared_returns": {
+        "as": "thanks",
+        "days": [
+          4,
+          8
+        ],
+        "say": "I told them it was fair fought, and that you could have finished it and didn't. Some of them even listened. My mother made this. She says a man who leaves her son his head is owed a pie at the least.",
+        "gift": [
+          "minecraft:pumpkin_pie*2"
+        ]
+      }
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I told {giver} that two hamlets could share one meadow, and left them to it."
+    },
+    "charter_over": {
+      "text": {
+        "?late:cow": "The charter gave the water meadow to Overbeck, and Netherbeck took their cows off it. It came too late for a fence, a barn and a cow.",
+        "?late:barn": "The charter gave the water meadow to Overbeck, and Netherbeck took their cows off it. It came too late for Overbeck's tithe barn.",
+        "?": "The charter gave the water meadow to Overbeck, and Netherbeck took their cows off it. The stone goes back to the three alders."
+      },
+      "reward": {
+        "coins": 12,
+        "hearts": 25,
+        "reputation": 12
+      },
+      "marks": [
+        "stone_settled"
+      ],
+      "town": [
+        "Overbeck had the right of it over that meadow. There was a charter all along, up in the old chapel. {player} had it read.",
+        "Netherbeck carried one end of the stone back themselves. I'd have paid to see that."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "scene": [
+            [
+              "a",
+              "They've set that stone back at the alders. Both hamlets hauling."
+            ],
+            [
+              "b",
+              "Together? Overbeck and Netherbeck?"
+            ],
+            [
+              "a",
+              "Not a word said between them the whole morning. But together."
+            ]
+          ]
+        }
+      ]
+    },
+    "charter_nether": {
+      "text": {
+        "?late:cow": "The charter gave the water meadow to Netherbeck, and {giver} sent me to read it to them all the same. It came too late for a fence, a barn and a cow.",
+        "?": "The charter gave the water meadow to Netherbeck, and {giver} sent me to read it to them all the same. The stone stays at Overbeck's hedge."
+      },
+      "reward": {
+        "coins": 6,
+        "hearts": 10,
+        "reputation": 15
+      },
+      "marks": [
+        "stone_settled"
+      ],
+      "town": [
+        "The meadow was Netherbeck's all the while, and it was Overbeck's own elder that sent the charter down to be read to them. That took something."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            28
+          ],
+          "letter": {
+            "from": "{reeve}",
+            "lines": [
+              "We mowed the water meadow this week, the first time in sixty years.",
+              "I sent three loads of the hay up to Overbeck. {giver} sent back a cheese, with no message.",
+              "That is as near as either of us will ever come to saying it. I thought you should know it was said."
+            ]
+          }
+        }
+      ]
+    },
+    "charter_common": {
+      "text": {
+        "?late:cow": "The stone was never a boundary. It marks how high the beck floods, and the meadow is common to both hamlets. They found that out after a fence, a barn and a cow.",
+        "?": "The stone was never a boundary. It marks how high the beck floods, and the meadow is common to both hamlets. Nobody stole anything from anybody."
+      },
+      "reward": {
+        "coins": 10,
+        "hearts": 20,
+        "reputation": 15
+      },
+      "marks": [
+        "stone_settled"
+      ],
+      "town": [
+        "Sixty years those two hamlets have hated each other over a flood stone. A flood stone! {player} had the old charter read, and that's all it ever was."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "Both herds were on the water meadow this morning. Overbeck's at the top, Netherbeck's at the bottom."
+            ],
+            [
+              "b",
+              "And no fence between?"
+            ],
+            [
+              "a",
+              "Not a hurdle. The cows don't seem to know which hamlet they belong to."
+            ]
+          ]
+        }
+      ]
+    },
+    "false_reading": {
+      "text": "I told {giver} the charter gave the meadow to Overbeck. It does not. It was cried at the well in Overbeck, and Netherbeck cannot read the paper to say otherwise.",
+      "reward": {
+        "coins": 12,
+        "hearts": 25
+      },
+      "marks": [
+        "stone_false"
+      ],
+      "town": [
+        "Overbeck say there's a charter gives them the water meadow. Netherbeck say show us. Overbeck say you couldn't read it if we did."
+      ]
+    },
+    "champion": {
+      "text": "I stood for Overbeck at the stone and beat {champion}, and let him up. By the old way, the stone goes back to the three alders, and nobody may speak against it.",
+      "reward": {
+        "coins": 14,
+        "hearts": 20,
+        "reputation": 8
+      },
+      "marks": [
+        "stone_champion"
+      ],
+      "town": [
+        "{player} fought Netherbeck's man at the boundary stone and put him on his back, and then gave him a hand up. That's how it ought to be done.",
+        "Nobody ever did find that charter. I'd still like to know what it says."
+      ]
+    },
+    "champion_slain": {
+      "text": "I stood for Overbeck at the stone and killed {champion}. By the old way the stone goes back to the three alders. Netherbeck carried their man home on a hurdle.",
+      "reward": {
+        "coins": 14,
+        "hearts": 10,
+        "reputation": -5
+      },
+      "marks": [
+        "stone_champion",
+        "stone_blood"
+      ],
+      "town": [
+        "Overbeck have their meadow. Netherbeck have a grave. It's the old way, and nobody can say a word against it, and nobody is saying a word."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            25
+          ],
+          "town": [
+            "Netherbeck don't come to market on Overbeck's days any more. They wait till the others have gone home."
+          ]
+        }
+      ]
+    },
+    "blood": {
+      "failed": true,
+      "text": "Nobody stood for Overbeck. {giver}'s grandson took up the hazel rod himself, and {champion} killed him at the stone, and wept doing it.",
+      "reward": {
+        "hearts": -20
+      },
+      "marks": [
+        "stone_blood"
+      ],
+      "town": [
+        "It came to the son, as the old folk always said it would. They buried the boy on Thursday.",
+        "The stone stays at the hedge. Nobody in Overbeck will walk that side of the meadow."
+      ]
+    }
+  }
+}
