@@ -41,6 +41,8 @@ import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -187,10 +189,17 @@ public final class Armory {
 			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY),
 				Component.translatable("item.jaymospowers.twinblade_schematic.old").withStyle(ChatFormatting.DARK_GRAY)))));
 		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
-		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
-		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
-		item("caveman_boots", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.BOOTS));
-		// antiquity's bow, Japan's throwing irons, the whalers' harpoon
+			item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
+			item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
+			item("caveman_boots", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.BOOTS));
+			// Future gun gear (spec: docs/Future-Gun-Gear-Spec.md)
+			item("plate_carrier", Item::new, p -> p.humanoidArmor(plateCarrierMaterial(), ArmorType.CHESTPLATE)
+				.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.plate_carrier.lore").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)))));
+			item("tracer_round", Item::new, p -> p.stacksTo(16).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+				.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.tracer_round.lore").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)))));
+			item("magazine", Item::new, p -> p.stacksTo(6)
+				.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.magazine.lore").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)))));
+			// antiquity's bow, Japan's throwing irons, the whalers' harpoon
 		item("recurve_bow", RecurveBowItem::new, p -> p.durability(RecurveBowItem.DURABILITY).enchantable(1));
 		// (Smithing) its steel broadhead
 		item("broadhead_arrow", BroadheadArrowItem::new, p -> p.component(DataComponents.LORE, new ItemLore(
@@ -386,18 +395,29 @@ public final class Armory {
 	}
 
 	private static ArmorMaterial caveman;
+		private static ArmorMaterial plateCarrier;
 
-	/** Hide and bone: leather's protection, a little tougher-wearing. */
-	private static ArmorMaterial cavemanHide() {
-		if (caveman == null) {
-			Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
-			defense.put(ArmorType.BOOTS, 1);
-			defense.put(ArmorType.LEGGINGS, 2);
-			defense.put(ArmorType.CHESTPLATE, 3);
-			defense.put(ArmorType.HELMET, 1);
-			defense.put(ArmorType.BODY, 3);
-			caveman = new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, CAVEMAN);
+		/** Hide and bone: leather's protection, a little tougher-wearing. */
+		private static ArmorMaterial cavemanHide() {
+			if (caveman == null) {
+				Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+				defense.put(ArmorType.BOOTS, 1);
+				defense.put(ArmorType.LEGGINGS, 2);
+				defense.put(ArmorType.CHESTPLATE, 3);
+				defense.put(ArmorType.HELMET, 1);
+				defense.put(ArmorType.BODY, 3);
+				caveman = new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, CAVEMAN);
+			}
+			return caveman;
 		}
-		return caveman;
+
+		/** Fracture Point plate carrier: iron-level protection with toughness, for the future gunner. */
+		private static ArmorMaterial plateCarrierMaterial() {
+			if (plateCarrier == null) {
+				Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+				defense.put(ArmorType.CHESTPLATE, 5);
+				plateCarrier = new ArmorMaterial(28, defense, 10, SoundEvents.ARMOR_EQUIP_IRON, 2.0F, 0.0F, ItemTags.REPAIRS_IRON_ARMOR, CAVEMAN);
+			}
+			return plateCarrier;
+		}
 	}
-}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "#minecraft:iron_tool_materials",
+    "S": "minecraft:iron_nugget",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "ISI",
+    "ISI",
+    " R "
+  ],
+  "result": {
+    "id": "jaymospowers:magazine"
+  }
+}

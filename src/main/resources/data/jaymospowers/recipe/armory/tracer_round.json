@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:gunpowder",
+    "B": "minecraft:blaze_powder",
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    " C ",
+    "GBG",
+    " N "
+  ],
+  "result": {
+    "id": "jaymospowers:tracer_round",
+    "count": 16
+  }
+}
