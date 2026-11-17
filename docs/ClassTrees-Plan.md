@@ -429,7 +429,7 @@ How rows were read where they don't say, for Andy to rule on:
   for 3 s by everyone (so the Scholar's 1.5 s is a gain); pickpocketed goods carry a "Stolen" mark, and fences buy
   marked goods from anyone at half price (so Fence's Friend's full price is a gain).
 
-### Scaling audit picks (2026-11-17: the two rows that touch this PR's files)
+### Scaling audit picks (2026-11-17: the rows that touch this PR's files)
 Andy ticked these on the Scaling Audit Picks page; the rest of that list is built on its own branch.
 - **`thief` (Thief opener stacks less)**: `ThiefSneak` asks `Senses.sneakAttack` whether the Sneak Attack perk will take
   the same blow. If it will, the two no longer multiply: the bigger of the burst and the perk's blow is dealt (the
@@ -446,3 +446,7 @@ Andy ticked these on the Scaling Audit Picks page; the rest of that list is buil
   half kept toward the next. So a 1-point blow that also paid a pillar gives a class point every second time.
   "The same action" is read as "the same tick": class experience from work that pays no pillar (riding distance, time
   in a shape, things made) is paid in full unless a pillar happens to be paid in that tick.
+- **`guns` (powder guns keep up), the Marksman class share only**: the row names "a Marksman class share" with no
+  number. Built as `Workshop.GUN_SHARE`: a Marksman's shot from a gun (main or second class, gun in hand; not a
+  crossbow) deals 2% more a Marksman level, so x1.5 at level 25, before Steady Aim, Called Shot and Precision. The
+  grade scaling and the Dread musket's 9 to 18 are built on the scaling audit's own branch.

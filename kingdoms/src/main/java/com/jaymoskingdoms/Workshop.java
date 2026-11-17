@@ -84,6 +84,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Workshop {
+	/** (Scaling audit) A Marksman's shot from a gun deals this share more for each Marksman class level (half again at 25). */
+	static final float GUN_SHARE = 0.02F;
 	/** Steady Aim, a rank: this share harder; this many degrees more aim assist; this share less stray. Still: moved less than this for this long. */
 	static final float STEADY_DAMAGE = 0.1F, STEADY_DEGREES = 1.5F, STEADY_SPREAD = 0.25F;
 	static final double STILL_MOVE = 0.02;
@@ -453,6 +455,10 @@ public final class Workshop {
 		}
 		if (!shot(source, player)) {
 			return amount;
+		}
+		if (armed(player) && Classes.is(player, PlayerClass.MARKSMAN)) {
+			// (scaling audit) a Marksman's own shot from a gun grows with their class level
+			amount *= 1.0F + GUN_SHARE * ClassTrees.level(player, PlayerClass.MARKSMAN);
 		}
 		if (steady(player) && ClassTrees.has(player, AIM) > 0) {
 			amount *= 1.0F + STEADY_DAMAGE * ClassTrees.power(player, AIM);
