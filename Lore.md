@@ -1213,6 +1213,15 @@ won't believe whoever says so (tale: The Keeping).
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
 
+(new) **What is holy burns the blood** (vampire leap thread, 2026-11-17; Andy asked for vampires to suffer near holy
+things and patron rites; the placement is Claude's for him to approve). A vampire is something the patrons have turned
+their faces from, and wherever a patron's attention rests, the blood feels it: a holy symbol or a champion's weapon in
+someone's hand, a priest, a cleric or a paladin, a shrine, an old altar, a temple. Near them the cursed weaken as under
+the sun and smoke; close, the blood burns; and a vampire who stays is noticed, first by omens, then by lightning, at
+last by a smiting. The Lantern Warden's light and the Truth's word burn worst, since the Warden keeps the dark against
+them and the Truth will not let the cursed hide. A vampire who swears, prays, offers or calls a boon is burned by the
+rite. The same sun and holiness that weaken them shorten the blood-drinker's leap, the bound a vampire makes at its prey.
+
 **More of the cursed.** A vampire stranded in the Nether drinks from piglins and Hornkin, never the zombified. A
 werewolf who has tamed the curse can run as a lean wolf on all fours instead of the great beast.
 
