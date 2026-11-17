@@ -4,11 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 21:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 21:42). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/future-gun-gear|future-gun-gear]] · for any · open
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
