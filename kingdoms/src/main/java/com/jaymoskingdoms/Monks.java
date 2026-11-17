@@ -167,6 +167,7 @@ public final class Monks {
 			tag.putBoolean(CAUGHT, true);
 			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			arrow.discard();
+			ClassTrees.give(player, PlayerClass.MONK, ClassTrees.XP_CATCH);
 			if (player.getMainHandItem().isEmpty()) {
 				player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
 			} else {
@@ -223,6 +224,7 @@ public final class Monks {
 			return amount;
 		}
 		READY.remove(monk.getUUID());
+		ClassTrees.give(monk, PlayerClass.MONK, ClassTrees.XP_STUN);
 		if (monk.level() instanceof ServerLevel level) {
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.4, 0.3, 0.3);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4F, 1.8F);

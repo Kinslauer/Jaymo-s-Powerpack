@@ -125,6 +125,8 @@ public final class QuickOrders {
 			// (Andy's skill-tree locks) giving orders is learned: Command
 			return;
 		}
+		// (class trees) an order given: the Warlord's
+		ClassTrees.giveEvery(player, Classes.PlayerClass.WARLORD, ClassTrees.XP_ORDER, "order", 100L);
 		ServerLevel level = player.level();
 		List<Villager> yours = new ArrayList<>();
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Followers.ALL_RANGE),

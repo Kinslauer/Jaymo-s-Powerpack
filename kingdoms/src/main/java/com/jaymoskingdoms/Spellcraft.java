@@ -243,6 +243,7 @@ public final class Spellcraft {
 		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 40, 0.4, 0.5, 0.4, 0.8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.4F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spell.learned", spellName(spell)).withStyle(ChatFormatting.LIGHT_PURPLE));
+		ClassTrees.give(player, Classes.PlayerClass.MAGE, ClassTrees.XP_SCROLL);
 		return true;
 	}
 
@@ -535,6 +536,14 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		// (class trees) a cast is the caster's class experience: a Sorcerer's element, else a Mage's spell
+		if (Classes.PlayerClass.SORCERER.options.contains(spellOrElement)) {
+			ClassTrees.giveEvery(player, Classes.PlayerClass.SORCERER, ClassTrees.XP_SIGIL, "cast", 20L);
+		} else {
+			ClassTrees.giveEvery(player, Classes.PlayerClass.MAGE, ClassTrees.XP_SPELL, "cast", 20L);
+			// a Cleric's prayers: friends healed and blessed
+			ClassTrees.giveEvery(player, Classes.PlayerClass.CLERIC, ClassTrees.XP_HEAL, "cast", 20L);
+		}
 		Paths.cast(player, level);
 		// a cast may surge into something else (the wild bloodline, a cursed place)
 		WildMagic.cast(player, level);
@@ -549,6 +558,10 @@ public final class Spellcraft {
 
 	/** {@code element} bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
 	static void strike(ServerLevel level, LivingEntity player, LivingEntity target, String element, boolean bolt) {
+		if (player instanceof ServerPlayer sp) {
+			// (class trees) a sigil or an imbued blow that lands
+			ClassTrees.giveBlow(sp, Classes.PlayerClass.SORCERER, ClassTrees.XP_SIGIL);
+		}
 		Vec3 away = target.position().subtract(player.position()).normalize();
 		switch (element) {
 			case "fire" -> {

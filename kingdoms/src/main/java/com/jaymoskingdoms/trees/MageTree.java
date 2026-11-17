@@ -1,0 +1,31 @@
+package com.jaymoskingdoms.trees;
+
+import static com.jaymoskingdoms.Classes.PlayerClass.MAGE;
+
+import com.jaymoskingdoms.ClassTrees;
+import com.jaymoskingdoms.Skills.Perk;
+import java.util.Set;
+
+/** The Mage's tree: Spellcraft, moved off Survival (Arcane, Fire and Frost, a column each), and its crown, Enchanted Storage. */
+final class MageTree {
+	private MageTree() {
+	}
+
+	static void build() {
+		column(0, Perk.ARCANE_MISSILE, Perk.ARCANE_EXPLOSION, Perk.ARCANE_BEAM, Perk.ARCANE_BARRAGE, Perk.ARCANE_BLINK, Perk.ARCANE_EVOCATION);
+		column(2, Perk.FIRE_BREATH, Perk.FIRE_SLASH, Perk.FIRE_METEOR, Perk.FIRE_STORM, Perk.FIRE_WALL, Perk.FIRE_HYDRA);
+		column(4, Perk.FROST_NOVA, Perk.FROST_SPIKES, Perk.FROST_SHIELD, Perk.FROST_LANCE, Perk.FROST_BLIZZARD, Perk.FROST_ELEMENTAL);
+		ClassTrees.moved(Perk.ENCHANTED_STORAGE, Set.of(MAGE), 15, 7, 1, "arcane_evocation");
+	}
+
+	/** A school's six spells down one column, each needing the one above, at the levels they needed on Survival. */
+	private static void column(int col, Perk... spells) {
+		for (int i = 0; i < spells.length; i++) {
+			if (i == 0) {
+				ClassTrees.moved(spells[i], Set.of(MAGE), spells[i].minLevel, 1, col);
+			} else {
+				ClassTrees.moved(spells[i], Set.of(MAGE), spells[i].minLevel, 1 + i, col, spells[i - 1].key());
+			}
+		}
+	}
+}

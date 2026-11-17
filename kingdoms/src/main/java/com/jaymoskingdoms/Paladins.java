@@ -133,6 +133,7 @@ public final class Paladins {
 			return;
 		}
 		who.heal(give);
+		ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_HANDS);
 		Fx.beam(level, player.getEyePosition().add(0.0, -0.3, 0.0), who.getBoundingBox().getCenter(), 0.05F, 0xFFE9A0, 8);
 		level.sendParticles(ParticleTypes.HEART, who.getX(), who.getY(1.0), who.getZ(), 5, 0.3, 0.4, 0.3, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.4F);
@@ -156,6 +157,7 @@ public final class Paladins {
 			return amount;
 		}
 		float extra = Restoration.undead(target) ? SMITE_BONUS * 2.0F : SMITE_BONUS;
+		ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_SMITE);
 		if (player.level() instanceof ServerLevel level) {
 			Fx.blast(level, target.getBoundingBox().getCenter(), 1.4F, 0xFFE9A0);
 			level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.4, 0.3, 0.15);
@@ -265,6 +267,10 @@ public final class Paladins {
 	static void rested(ServerPlayer player) {
 		if (Classes.is(player, PlayerClass.PALADIN)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.rested"));
+			if (keeping(player)) {
+				// (class trees) each day the oath holds
+				ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_OATH_DAY);
+			}
 		}
 	}
 }

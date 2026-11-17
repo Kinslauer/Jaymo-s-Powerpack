@@ -363,6 +363,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
+		ClassTrees.register();
 		// (RPG Series patch 1) Wizards', Archers' and Rogues & Warriors' spells only for their classes
 		RpgSeriesGate.init();
 		// (0.7.550) Weapon Forms on the RPG Series skill bar

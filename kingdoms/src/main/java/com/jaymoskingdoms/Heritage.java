@@ -507,7 +507,7 @@ public final class Heritage {
 		set(player, kind);
 		HeritageVariants.choose(player, kind, variant);
 		// (character creation: the class comes next)
-		if (Classes.classOf(player) == null) {
+		if (!Classes.decided(player)) {
 			Classes.ask(player, true);
 		}
 	}

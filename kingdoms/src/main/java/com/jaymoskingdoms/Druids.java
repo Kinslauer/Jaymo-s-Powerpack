@@ -459,6 +459,7 @@ public final class Druids {
 	}
 
 	private static void learned(ServerPlayer player, ServerLevel level, String form) {
+		ClassTrees.give(player, PlayerClass.DRUID, ClassTrees.XP_STUDY);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY(1.0), player.getZ(), 14, 0.4, 0.5, 0.4, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.learned", Component.translatable("druid.jaymoskingdoms.form." + form)));

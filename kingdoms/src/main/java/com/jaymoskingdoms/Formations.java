@@ -166,6 +166,8 @@ public final class Formations {
 		if (kind < LINE || kind > POINT || !player.isAlive() || player.isSpectator() || !TreeLocks.check(player, TreeLocks.Lock.ORDERS)) {
 			return;
 		}
+		// (class trees) an order given: the Warlord's
+		ClassTrees.giveEvery(player, Classes.PlayerClass.WARLORD, ClassTrees.XP_ORDER, "order", 100L);
 		ServerLevel level = player.level();
 		Formation f = FORMED.get(player.getUUID());
 		if (kind == POINT) {

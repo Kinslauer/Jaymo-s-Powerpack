@@ -145,6 +145,7 @@ public final class Clerics {
 
 	/** One pulse of the raised symbol over the dead before the holder. */
 	private static void turn(ServerPlayer player, ServerLevel level) {
+		ClassTrees.give(player, PlayerClass.CLERIC, ClassTrees.XP_TURNING);
 		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
 		if (look.lengthSqr() < 1.0E-4) {
 			look = player.getLookAngle();
@@ -220,6 +221,7 @@ public final class Clerics {
 
 	/** Every friend near {@code player} is blessed: warded, steadied, a fright lifted. */
 	static void bless(ServerLevel level, ServerPlayer player) {
+		ClassTrees.give(player, PlayerClass.CLERIC, ClassTrees.XP_BLESS);
 		long until = level.getGameTime() + BLESS_TICKS;
 		int tier = Patrons.state(player).tier();
 		List<LivingEntity> band = new ArrayList<>();

@@ -131,6 +131,7 @@ public final class Warlocks {
 	/** A cast was made: a slot is spent and the patron's account grows. */
 	static void pay(ServerPlayer player, String spell) {
 		Rests.spend(player, Rests.PACT, 1, slots(player));
+		ClassTrees.give(player, PlayerClass.WARLOCK, ClassTrees.XP_PACT);
 		Pact pact = pact(player);
 		int casts = pact.casts() + 1;
 		if (pact.owing()) {
@@ -201,6 +202,7 @@ public final class Warlocks {
 
 	private static void settled(ServerPlayer player) {
 		player.setAttached(PACT, Pact.NONE);
+		ClassTrees.give(player, PlayerClass.WARLOCK, ClassTrees.XP_DEBT);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.settled"));
 		if (player.level() instanceof ServerLevel level) {
 			Fx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), 0x8A4FD0, 1.0F, 18, 0.4, 0.7, 0.4);

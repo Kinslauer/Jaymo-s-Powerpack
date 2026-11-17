@@ -534,7 +534,8 @@ public final class Skills {
 			for (Perk perk : Perk.values()) {
 				n += rank(perk);
 			}
-			return n;
+			// (class trees) and the trees' own perks
+			return n + ClassTrees.spent(this);
 		}
 
 		/** Points left to spend in {@code pillar}: one per level, less what its perks cost. */
@@ -546,7 +547,8 @@ public final class Skills {
 					if (perk.in(pillar)) {
 						spent += ranks.getOrDefault(perk.paidKey(pillar), 0) * perk.cost;
 					}
-				} else if (perk.pillar == pillar) {
+				} else if (perk.pillar == pillar && ClassTrees.moved(perk) == null) {
+					// (class trees) an old class page's ranks are paid from its class's points now
 					// (0.7.516) a rank a trainer taught costs nothing (Learnables)
 					spent += (rank(perk) - ranks.getOrDefault(Learnables.taughtKey(perk), 0)) * perk.cost;
 				}
@@ -559,6 +561,10 @@ public final class Skills {
 		public @Nullable String blocked(Perk perk) {
 			if (!perk.pillar.open) {
 				return "gui.jaymoskingdoms.skills.blocked.later";
+			}
+			if (ClassTrees.moved(perk) != null) {
+				// (class trees) learned on the class tab now
+				return "gui.jaymoskingdoms.classtree.blocked.moved";
 			}
 			if (perk == Perk.MAKE_DO && !OmniCrossbows.LOADED) {
 				return "gui.jaymoskingdoms.skills.blocked.omni";
@@ -992,6 +998,7 @@ public final class Skills {
 			return 0;
 		}
 		grant(player, Pillar.STEALTH, amount);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_POCKET);
 		return amount;
 	}
 
@@ -1004,6 +1011,7 @@ public final class Skills {
 		// (0.7.509) a theft nobody saw pleases the Ash Whisperer
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "unseen_theft");
 		grant(player, Pillar.STEALTH, XP_THEFT);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_THEFT);
 	}
 
 	/** (0.7.102) A freerun move: a little experience, at most every {@link #FREERUN_XP_TICKS}. */
@@ -1022,6 +1030,7 @@ public final class Skills {
 		}
 		NEXT_SNEAK_XP.put(player.getUUID(), now + SNEAK_XP_TICKS);
 		grant(player, Pillar.STEALTH, XP_SNEAK_ATTACK);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_SNEAK);
 	}
 
 	/** (0.7.136) Sneaking past monsters unseen for a while ({@link Senses}): a little experience. */
@@ -1041,6 +1050,7 @@ public final class Skills {
 	/** (0.7.111) An assassination (an unaware hidden blade stab): more experience, every time. */
 	static void assassination(ServerPlayer player) {
 		grant(player, Pillar.STEALTH, XP_ASSASSINATION);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_SNEAK * 2);
 	}
 
 	/** How long {@code player}'s hand must stay in a pocket, from {@code ticks}: shorter with practice and Light Fingers. */

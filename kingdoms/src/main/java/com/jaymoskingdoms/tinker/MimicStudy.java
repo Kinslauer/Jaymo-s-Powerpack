@@ -233,6 +233,7 @@ public final class MimicStudy {
 	}
 
 	private static void learned(ServerPlayer player, ServerLevel level, Mimic m) {
+		com.jaymoskingdoms.ClassTrees.give(player, PlayerClass.TINKERER, com.jaymoskingdoms.ClassTrees.XP_STUDIED);
 		level.sendParticles(ParticleTypes.WAX_ON, player.getX(), player.getY(1.0), player.getZ(), 14, 0.4, 0.5, 0.4, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4F, 1.8F);

@@ -194,6 +194,10 @@ public final class TrailReading {
 			// (count 0: the offsets are the mote's own drift, the way the maker went)
 			level.sendParticles(player, Fx.mote(print.color, size), true, false, print.x, print.y, print.z, 0, print.hx, 0.0, print.hz, DRIFT);
 			shown++;
+			if (prey) {
+				// (class trees) the favoured foe's tracks, followed: the Ranger's, once in a while
+				ClassTrees.giveEvery(player, Classes.PlayerClass.RANGER, ClassTrees.XP_TRACK, "track", 200L);
+			}
 		}
 	}
 }

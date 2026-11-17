@@ -109,6 +109,8 @@ final class SkillScreen extends Screen {
 	private static boolean stats;
 	/** (0.7.220) Whether the Jobs tab is the one shown. */
 	private static boolean jobs;
+	/** (class trees) Whether the class tab is the one shown ({@link ClassTreeTab}). */
+	private static boolean classTab;
 	/** (0.7.220) The Jobs tab's rows. */
 	static final int JOB_ROW = 12, JOB_ACCENT = 0xFFC8A060;
 	/** (0.7.540) How far the Attributes or Jobs rows are scrolled (pixels). */
@@ -226,7 +228,16 @@ final class SkillScreen extends Screen {
 		var player = this.minecraft.player;
 		int fy = this.height - WEB_FOOTER + 3, x = this.width - 6;
 		x = foot(x, fy, 60, Component.translatable("gui.done"), b -> onClose());
-		if (jobs) {
+		if (classTab) {
+			// with a second class, its tree is a button away
+			if (player != null && Classes.both(player).size() > 1) {
+				com.jaymoskingdoms.Classes.PlayerClass other = Classes.both(player).get(ClassTreeTab.which == 0 ? 1 : 0);
+				x = foot(x, fy, 110, Component.translatable("gui.jaymoskingdoms.classtree.switch", Component.translatable("class.jaymoskingdoms." + other.key())), b -> {
+					ClassTreeTab.flip();
+					rebuildWidgets();
+				});
+			}
+		} else if (jobs) {
 			// Standing's one deed: give your spark to a friend standing near
 			if (player != null && !this.sparkGiven && Sparks.held(player)) {
 				for (Player friend : friends()) {
@@ -262,22 +273,23 @@ final class SkillScreen extends Screen {
 		return right - w - 4;
 	}
 
-	/** The tab shown: 0 the web, 1 Attributes, 2 Jobs & Standing. */
+	/** The tab shown: 0 the web, 1 Attributes, 2 Jobs & Standing, 3 the class's tree. */
 	private static int page() {
-		return jobs ? 2 : stats ? 1 : 0;
+		return classTab ? 3 : jobs ? 2 : stats ? 1 : 0;
 	}
 
 	private void page(int page) {
 		listScroll = 0;
 		stats = page == 1;
 		jobs = page == 2;
+		classTab = page == 3;
 		rebuildWidgets();
 	}
 
 	/** The three tabs at the top bar's right, each as wide as its name: the web, Attributes, Jobs & Standing. */
 	private void tabs(int y) {
 		Component[] names = {Component.translatable("gui.jaymoskingdoms.skills.web.tab"), Component.translatable("gui.jaymoskingdoms.stats.tab"),
-			Component.translatable("gui.jaymoskingdoms.jobs.tab")};
+			Component.translatable("gui.jaymoskingdoms.jobs.tab"), Component.translatable("gui.jaymoskingdoms.classtree.tab")};
 		int[] w = new int[names.length];
 		int total = 4 * (names.length - 1);
 		for (int i = 0; i < names.length; i++) {
@@ -300,7 +312,7 @@ final class SkillScreen extends Screen {
 	private static final Skills.Pillar[] ORDER = {Skills.Pillar.STRENGTH, Skills.Pillar.SURVIVAL, Skills.Pillar.STEALTH};
 
 	private boolean onWeb() {
-		return !stats && !jobs;
+		return !stats && !jobs && !classTab;
 	}
 
 	/** The left panel's width (your pillars and attributes). */
@@ -780,9 +792,9 @@ final class SkillScreen extends Screen {
 	/** The bar along the foot: what the mouse and keys do; the buttons sit at its right. */
 	private void bottomBar(GuiGraphicsExtractor graphics) {
 		frame(graphics, 0, this.height - WEB_FOOTER, this.width, WEB_FOOTER);
-		if (onWeb()) {
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.keys"), 8, this.height - WEB_FOOTER + 7,
-				this.footLeft - 16, Ui.DIM);
+		if (onWeb() || classTab) {
+			Ui.line(graphics, this.font, Component.translatable(classTab ? "gui.jaymoskingdoms.classtree.keys" : "gui.jaymoskingdoms.skills.web.keys"), 8,
+				this.height - WEB_FOOTER + 7, this.footLeft - 16, Ui.DIM);
 		}
 	}
 
@@ -1406,6 +1418,9 @@ final class SkillScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
+		if (classTab && this.minecraft.player != null) {
+			return ClassTreeTab.click(this.minecraft.player, event.x(), event.y(), 0, WEB_HEADER, this.width, this.height - WEB_FOOTER);
+		}
 		if (onWeb()) {
 			int mx = (int)event.x(), my = (int)event.y();
 			int[] box = learnBox();
@@ -1484,6 +1499,10 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		if (classTab && (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER)) {
+			ClassTreeTab.learnSelected();
+			return true;
+		}
 		if (onWeb() && selected != null && (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER)) {
 			learn(selected);
 			return true;
@@ -1507,6 +1526,10 @@ final class SkillScreen extends Screen {
 			targetY += uy * (before - targetZoom);
 			return true;
 		}
+		if (classTab && scrollY != 0.0 && this.minecraft.player != null) {
+			ClassTreeTab.scroll(this.minecraft.player, scrollY, this.height - WEB_FOOTER - WEB_HEADER);
+			return true;
+		}
 		if (jobs && scrollY != 0.0 && mouseX < standW()) {
 			// Standing's lines, a line a notch
 			standScroll = Math.max(0, standScroll - (int)Math.signum(scrollY) * STAND_LINE);
@@ -1523,6 +1546,16 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
+		if (classTab && this.minecraft.player != null) {
+			sky(graphics);
+			com.jaymoskingdoms.Classes.PlayerClass cls = ClassTreeTab.shown(this.minecraft.player);
+			topBar(graphics, cls == null ? Component.translatable("gui.jaymoskingdoms.classtree.none")
+				: Component.translatable("gui.jaymoskingdoms.classtree.title", Component.translatable("class.jaymoskingdoms." + cls.key())), this.width / 2);
+			bottomBar(graphics);
+			ClassTreeTab.render(graphics, this.font, this.minecraft.player, 0, WEB_HEADER, this.width, this.height - WEB_FOOTER, mouseX, mouseY);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
+		}
 		if (jobs || stats) {
 			sky(graphics);
 			topBar(graphics, Component.translatable(jobs ? "gui.jaymoskingdoms.jobs.tab" : "gui.jaymoskingdoms.stats.tab"), (mainL() + mainR()) / 2);

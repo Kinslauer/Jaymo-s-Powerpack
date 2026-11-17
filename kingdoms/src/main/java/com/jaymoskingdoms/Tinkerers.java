@@ -172,6 +172,7 @@ public final class Tinkerers {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.done", Component.translatable("item.jaymoskingdoms.infusion." + kind)));
+		ClassTrees.give(player, PlayerClass.TINKERER, ClassTrees.XP_INFUSE);
 	}
 
 	private static boolean take(ServerPlayer player, Item item, int n) {

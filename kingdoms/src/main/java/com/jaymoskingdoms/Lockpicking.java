@@ -296,6 +296,7 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+				ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
@@ -365,6 +366,7 @@ public final class Lockpicking {
 				VIRTUAL.remove(player.getUUID());
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
+				ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
@@ -406,6 +408,7 @@ public final class Lockpicking {
 		level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 		Commandments.act(player, "lockpick");
 		return true;

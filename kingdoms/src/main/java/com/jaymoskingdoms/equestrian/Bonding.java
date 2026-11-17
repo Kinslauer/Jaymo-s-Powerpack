@@ -436,7 +436,12 @@ public final class Bonding {
 		b = b.withXp(d, b.xp(d) + xp);
 		horse.setAttached(BOND, b);
 		int after = b.level(d);
+		if (d == Discipline.JUMPING) {
+			// (class trees) a jump cleared: the Rider's
+			com.jaymoskingdoms.ClassTrees.giveEvery(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_JUMP, "jump", 20L);
+		}
 		if (after > before) {
+			com.jaymoskingdoms.ClassTrees.give(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_DISCIPLINE);
 			rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.horse_level", name(horse),
 				Component.translatable(d.key()), after), true);
 			level.playSound(null, horse.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6F, 1.4F);

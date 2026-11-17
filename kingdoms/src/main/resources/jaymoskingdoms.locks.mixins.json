@@ -4,6 +4,6 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": ["BlockStateBaseMixin", "DoorBlockMixin", "TrapDoorBlockMixin", "FenceGateBlockMixin",
 		"HopperBlockEntityMixin", "TransportItemsBetweenContainersMixin",
-		"ContainerOpenersHushMixin", "ChestCreakVolumeMixin", "TreeLockCraftMixin"],
+		"ContainerOpenersHushMixin", "ChestCreakVolumeMixin", "TreeLockCraftMixin", "ClassCraftMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

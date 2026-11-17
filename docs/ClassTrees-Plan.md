@@ -32,4 +32,20 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
    larger Pack Leader, `ct-war-*`).
 
 ## As built
-(filled in per patch)
+### Patch 1: class levels (framework)
+- `ClassTrees` holds level and XP per class in the pillar progress map (`class_<key>`), level cap 25, a level costs
+  30 + 15 x level XP, one class point per level, a milestone fanfare every 5 levels. Second class: XP at
+  `Classes.SECOND_SHARE`, ranks work at that share (`ClassTrees.strength`).
+- Trees are laid out in `trees/` (one file per class, `TreeLayout` calls them); this patch fills the moved pages:
+  Thief (Rogue's Arts), Mage (Spellcraft, Arcane/Fire/Frost columns), Sorcerer (Sorcery, Forbidden Arts), Ranger
+  (Archery), Warlord and Brute (Warfare). My calls: Mortal Strike is in both the Warlord and Brute trees; Throw Net
+  (Warlord) and Bear Trap (Thief) are shared with the Ranger. `RpgSeriesGate` follows the same owners.
+- Migration on join: a moved rank owned by a held class is paid from that class and the class's XP is raised to cover
+  it; ranks no held class owns are removed and their pillar points come back; taught ranks stay free.
+- Respec gives class points back and keeps the level (ranks are counted, not stored as spent); the Writ wipes both.
+- XP sources wired now, every class: see `changes/kingdoms/claude-project-thread-kb4272.md`. Practice (`ct-practice`)
+  has its hook (`ClassTrees.practice`); each class's starting move takes it in that class's patch. Cleric rites XP
+  comes with Last Rites (patch 7). Mage "spells that land" is counted as magic damage dealt.
+- No class yet: youth answer "Drifted" and a "No class yet" button on the class screen. Classless players learn a first
+  class from **any villager of that class's trade** (the teachers' trades list, `SecondClass.offers`) for 10 silver,
+  rather than only from a named master, so it can be found in any village.
