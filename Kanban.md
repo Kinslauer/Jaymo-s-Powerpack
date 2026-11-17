@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 12:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 18:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,13 +35,13 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
-- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
-- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
+- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
 - [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
+- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
+- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
 - [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
 
 
