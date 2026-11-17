@@ -74,18 +74,30 @@ public final class WebShooters {
 	 * {@code off} the other), -1 with no cartridge in. {@code nozzle} (bits by hand, worn only): whether that hand's
 	 * web now out came from the shooter, so everyone draws it braided.
 	 */
-	public record Load(int main, int off, int nozzle) {
-		public static final Load EMPTY = new Load(-1, -1, 0);
+	public record Load(int main, int off, int nozzle, int kinds) {
+		public static final Load EMPTY = new Load(-1, -1, 0, 0);
 		public static final Codec<Load> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("main").forGetter(Load::main),
 			Codec.INT.fieldOf("off").forGetter(Load::off),
-			Codec.INT.optionalFieldOf("nozzle", 0).forGetter(Load::nozzle)
+			Codec.INT.optionalFieldOf("nozzle", 0).forGetter(Load::nozzle),
+			Codec.INT.optionalFieldOf("kinds", 0).forGetter(Load::kinds)
 		).apply(i, Load::new));
 		public static final StreamCodec<ByteBuf, Load> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, l -> l.main() + 1,
 			ByteBufCodecs.VAR_INT, l -> l.off() + 1,
 			ByteBufCodecs.VAR_INT, Load::nozzle,
-			(main, off, nozzle) -> new Load(main - 1, off - 1, nozzle));
+			ByteBufCodecs.VAR_INT, Load::kinds,
+			(main, off, nozzle, kinds) -> new Load(main - 1, off - 1, nozzle, kinds));
+
+		/** (Web cartridges) The kind of web in {@code hand}'s cartridge ({@link WebKinds}). */
+		public int kind(int hand) {
+			return this.kinds >> (hand * 4) & 0xF;
+		}
+
+		public Load withKind(int hand, int kind) {
+			int cleared = this.kinds & ~(0xF << (hand * 4));
+			return new Load(this.main, this.off, this.nozzle, cleared | (kind & 0xF) << (hand * 4));
+		}
 
 		/** The shots left on {@code hand}'s wrist (-1: no cartridge). */
 		public int fluid(int hand) {
@@ -93,7 +105,7 @@ public final class WebShooters {
 		}
 
 		public Load withFluid(int hand, int fluid) {
-			return hand == WebNet.OFF ? new Load(this.main, fluid, this.nozzle) : new Load(fluid, this.off, this.nozzle);
+			return hand == WebNet.OFF ? new Load(this.main, fluid, this.nozzle, this.kinds) : new Load(fluid, this.off, this.nozzle, this.kinds);
 		}
 
 		public boolean nozzle(int hand) {
@@ -102,7 +114,7 @@ public final class WebShooters {
 
 		public Load withNozzle(int hand, boolean on) {
 			int bits = on ? this.nozzle | 1 << hand : this.nozzle & ~(1 << hand);
-			return new Load(this.main, this.off, bits);
+			return new Load(this.main, this.off, bits, this.kinds);
 		}
 	}
 
@@ -113,6 +125,8 @@ public final class WebShooters {
 	/** On the shooter item: what its wrists hold. On a cartridge: the shots left (none: full). */
 	public static DataComponentType<Load> LOAD;
 	public static DataComponentType<Integer> FLUID;
+	/** (Web cartridges) On a cartridge: the kind of web in it ({@link WebKinds}; none: sticky). */
+	public static DataComponentType<Integer> KIND;
 	public static Item SHOOTER, CARTRIDGE;
 
 	/** Client → server: Sneak + use with an empty hand at nothing: take the shooters off. */
@@ -134,11 +148,16 @@ public final class WebShooters {
 			DataComponentType.<Load>builder().persistent(Load.CODEC).networkSynchronized(Load.STREAM_CODEC).build());
 		FLUID = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("web_fluid"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		KIND = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("web_kind"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		SHOOTER = item("web_shooter", p -> new WebShooterItem(p.stacksTo(1)));
 		CARTRIDGE = item("web_cartridge", p -> new WebCartridgeItem(p.stacksTo(CARTRIDGE_STACK)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(SHOOTER);
 			output.accept(CARTRIDGE);
+			for (int kind = 1; kind < WebKinds.COUNT; kind++) {
+				output.accept(cartridge(CARTRIDGE_SHOTS, kind));
+			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(TakeOff.TYPE, TakeOff.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(TakeOff.TYPE, (payload, context) -> takeOffIntoHand(context.player()));
@@ -210,8 +229,19 @@ public final class WebShooters {
 		return cartridge.getOrDefault(FLUID, CARTRIDGE_SHOTS);
 	}
 
-	/** A cartridge item holding {@code fluid} shots (none: the glass bottle it was), or empty for no cartridge. */
-	static ItemStack cartridge(int fluid) {
+	/** (Web cartridges) The kind of web in a cartridge item. */
+	public static int kind(ItemStack cartridge) {
+		return cartridge.getOrDefault(KIND, WebKinds.STICKY);
+	}
+
+	/** The kind of web {@code hand}'s wrist would fire now (sticky without shooters). */
+	public static int kind(Player player, int hand) {
+		Load load = worn(player);
+		return load == null ? WebKinds.STICKY : load.kind(hand);
+	}
+
+	/** A cartridge item holding {@code fluid} shots of {@code kind} (none: the glass bottle it was), or empty for no cartridge. */
+	static ItemStack cartridge(int fluid, int kind) {
 		if (fluid < 0) {
 			return ItemStack.EMPTY;
 		}
@@ -221,6 +251,9 @@ public final class WebShooters {
 		ItemStack stack = new ItemStack(CARTRIDGE);
 		if (fluid < CARTRIDGE_SHOTS) {
 			stack.set(FLUID, fluid);
+		}
+		if (kind != WebKinds.STICKY) {
+			stack.set(KIND, kind);
 		}
 		return stack;
 	}
@@ -254,7 +287,7 @@ public final class WebShooters {
 	/** Straps the pair in {@code stack} on (its cartridges with it). */
 	static void putOn(ServerPlayer player, ItemStack stack) {
 		Load load = stack.getOrDefault(LOAD, Load.EMPTY);
-		player.setAttached(WORN, new Load(load.main(), load.off(), 0));
+		player.setAttached(WORN, new Load(load.main(), load.off(), 0, load.kinds()));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
@@ -266,7 +299,7 @@ public final class WebShooters {
 		}
 		player.removeAttached(WORN);
 		ItemStack stack = new ItemStack(SHOOTER);
-		stack.set(LOAD, new Load(load.main(), load.off(), 0));
+		stack.set(LOAD, new Load(load.main(), load.off(), 0, load.kinds()));
 		return stack;
 	}
 
@@ -293,16 +326,19 @@ public final class WebShooters {
 		if (load == null) {
 			return false;
 		}
-		int hand = load.fluid(WebNet.OFF) < load.fluid(WebNet.MAIN) ? WebNet.OFF : WebNet.MAIN;
+		int kind = kind(cartridge);
+		// (Web cartridges) another kind goes into the main wrist (the one a Web Shot leaves first), swapping out what's there
+		int hand = kind != load.kind(WebNet.MAIN) ? WebNet.MAIN : load.fluid(WebNet.OFF) < load.fluid(WebNet.MAIN) ? WebNet.OFF : WebNet.MAIN;
 		int fresh = fluid(cartridge);
 		int old = load.fluid(hand);
-		if (old >= fresh) {
+		int oldKind = load.kind(hand);
+		if (old >= fresh && oldKind == kind) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_shooter.full"));
 			return false;
 		}
-		player.setAttached(WORN, load.withFluid(hand, fresh));
+		player.setAttached(WORN, load.withFluid(hand, fresh).withKind(hand, kind));
 		cartridge.shrink(1);
-		giveBack(player, cartridge(old));
+		giveBack(player, cartridge(old, oldKind));
 		clunk(player);
 		return true;
 	}
@@ -326,9 +362,10 @@ public final class WebShooters {
 				break;
 			}
 			int old = load.fluid(hand);
-			load = load.withFluid(hand, fluid(best));
+			int oldKind = load.kind(hand);
+			load = load.withFluid(hand, fluid(best)).withKind(hand, kind(best));
 			best.shrink(1);
-			giveBack(player, cartridge(old));
+			giveBack(player, cartridge(old, oldKind));
 			loadedAny = true;
 		}
 		if (!loadedAny) {

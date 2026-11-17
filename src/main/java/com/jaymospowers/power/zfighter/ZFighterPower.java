@@ -607,6 +607,7 @@ public final class ZFighterPower implements Power {
 			live.flying = false;
 		}
 		ZFighterHands.drop(player);
+		ZFighterFury.drop(player);
 		landFlight(player);
 		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
@@ -674,6 +675,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		ZFighterFury.tick(player);
 		ZFighterSelfDestruct.tick(player, live);
 		// (0.17.56) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
 		ZFighterRaces.tick(player, live, max);
@@ -830,6 +832,11 @@ public final class ZFighterPower implements Power {
 		}
 		// R while the Eye Beams are held: the spin (ZFighterEyeBeams)
 		if (down && key == PowerKey.ABILITY_1 && ZFighterEyeBeams.spin(player)) {
+			return;
+		}
+		// (Awakening pick) a Rubber-folk's or a Verdant's sprint + R: the stretching grab
+		if (down && key == PowerKey.ABILITY_1 && player.isSprinting() && !player.isShiftKeyDown() && ZFighterReel.stretchy(player)
+			&& ZFighterReel.reel(player)) {
 			return;
 		}
 		switch (key) {

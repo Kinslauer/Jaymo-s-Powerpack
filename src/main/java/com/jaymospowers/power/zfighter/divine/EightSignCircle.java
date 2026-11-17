@@ -76,6 +76,10 @@ public final class EightSignCircle {
 	 * Jaymo's Kingdoms can ask by reflection.
 	 */
 	public static boolean sealed(Entity entity) {
+		// (the Pocket Arsenal's Rift Seal) inside someone's seal, powers and forms are refused just the same
+		if (com.jaymospowers.power.arsenal.ArsenalSeal.sealed(entity)) {
+			return true;
+		}
 		if (SEALED.isEmpty()) {
 			return false;
 		}

@@ -863,6 +863,10 @@ public final class Heritage {
 		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
 			return;
 		}
+		// (Awakening pick) a Rubber-folk or a Verdant, sprinting: the stretching grab (Jaymo's Powers)
+		if ((kind == Kind.RUBBERFOLK || kind == Kind.VERDANT) && player.isSprinting() && !player.isShiftKeyDown() && PowersCompat.reel(player)) {
+			return;
+		}
 		if (kind == Kind.WARRIORBORN) {
 			if (player.isShiftKeyDown()) {
 				// (0.7.490) sneaking, the key is the war cry instead

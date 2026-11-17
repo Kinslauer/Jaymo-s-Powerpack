@@ -10,6 +10,7 @@ public final class ZFighterHooks {
 
 	public static float modifyDamage(LivingEntity victim, DamageSource source, float damage) {
 		// (0.17.60) then the difficulty he wished for
-		return ZFighterWishExtras.scaled(victim, ZFighterBattle.modifyDamage(victim, source, damage));
+		// (Awakening pick) a body left airborne, flat or pinned takes a Z Fighter's or a boxer's next hit harder (past the punch cap)
+		return ZFighterWishExtras.scaled(victim, ZFighterStates.apply(victim, source, ZFighterBattle.modifyDamage(victim, source, damage)));
 	}
 }

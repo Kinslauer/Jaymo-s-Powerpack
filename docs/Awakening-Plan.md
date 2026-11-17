@@ -144,3 +144,66 @@ not new items.
 
 Lore (new): no new people. Backdraft and the shells are the Emberborn's fire; the pit and the lift are the Drowned
 Dark's; the water sorcerer's moisture-drawing is the water element's.
+
+### Patch 3: Web, Arsenal, Z Fighter, Rubber
+- `aw-web-types` **Web cartridges** (`WebKinds`, `WebShooters`, `WebBall`): a cartridge holds one kind of web fluid and
+  the Web Shot (the tapped pellet and the charged shot) from that wrist is that kind. **Sticky** is the plain cartridge,
+  the web as it was (each pellet hit stacks, five in a row webs them up). **Concussive** (brewed with gunpowder): no web,
+  a thump that hurts 1.4x, throws back everything within 2.5 blocks and leaves them reeling (nausea, slowness).
+  **Taser** (copper and redstone): no web, 3 harm on top, shocked still for 1.5 s, and the charge jumps to the nearest
+  foe within 5 blocks. **Splitter** (flint): the charged shot leaves as three, fanned 8 degrees. A cartridge of another
+  kind loads into the main hand's shooter, swapping out the old one with what's left in it. The bomb and the suit's
+  mass stay plain web. Recipes take raw ingredients (2 string, a slime ball, a glass bottle, plus the kind's), never a
+  used cartridge. Each kind has its own tint and name.
+- `aw-arsenal-loop` **Endless Fall** (`ArsenalFall`), the Void Arsenal's sprint+V (the gates are the corrupted
+  Arsenal's): a gate opens in the floor under the foe you look at (24 blocks) and another up to 7 blocks over it (lower
+  under a roof, never under 2.5); it falls through and out of the top again 8 times, 2.5 harm each pass through the
+  floor, its fall forgiven each pass. What no portal will take (the dragon, the wither) isn't taken. 25 s wait.
+- `aw-arsenal-surface` **Surface** (`ArsenalSurface`), sprint+G: a rift straight up and you step out at the highest safe
+  spot above you (sturdy footing, room to stand, no fire, lava, water, magma, powder snow, berry bush, wither rose or
+  web). Under a closed roof (the Nether), the highest safe spot below the roof. 60 s wait.
+- `aw-arsenal-dome` **Rift Seal** (`ArsenalSeal`, our own name and look: the world inside folded off into a pocket,
+  walled in deep void with a pale violet rim): from the last rank of training (Paragon), C, or sprint+C once ascended
+  (whose C stays the Hundred Blades). Hold C and the edge spreads from 9 to 20 blocks; let go and it closes. For up to
+  60 s nobody inside can leave: at the wall they're thrown back, and whoever gets out anyway (a pearl, a gate, a portal)
+  is pulled back in. Every player and creature inside but you has no powers: power keys refused (through the
+  Eight-Sign Circle's silencer), Kingdoms casters hushed (`Will`, tag `jaymospowers_sealed`) and forms sealed, a gifted
+  villager's power asleep, an illager's spell broken. It drains you every second: hunger, then 1 health a second once
+  you're at 3 drumsticks. C again lets it go; it ends if you die or lose the power. 3 min wait.
+- `aw-z-states` **Airborne, flat, pinned** (`ZFighterStates`, on the Z Fighter's hurt hook, every creature): a Z
+  Fighter's harm, or a boxer's punch, on a body in the air (not one that flies of itself), flat (knocked out, lying,
+  or swept: the leg sweep's trip) or pinned (staggered, held, shocked or webbed still) is 5% harder if the same move put
+  it there and 10% if another did; each state-hit in a row within 2 s adds 2.5%, up to 15% (so 25% at most). A move is
+  the boxer's punch, the hold combo's blow, or else the kind of harm and what carried it.
+- `aw-z-counter` **Full Counter** (`ZFighterFullCounter`): raise the guard with Sneak held and for half a second
+  whatever hits you, from any side, goes back and you take none: a blow at 2x on the striker, an arrow back at the
+  archer (the bracers' send-back), any other shot its harm on whoever loosed it, a blast or spell or anything else half
+  on whoever did it. Harm nobody did (falls, fire, drowning) isn't turned. 6 s wait. A counter is never countered.
+- `aw-z-rage` **Battle fury** (`ZFighterFury`): every blow a Z Fighter lands adds 4% and every one he takes 3%; he grows
+  with it, up to 35% bigger, 5 more hearts and 30% harder blows at full. Out of the fight 5 s and it cools, full to
+  none in 30 s. At full fury his grab (Sneak + left click) is the Great Ape's: he takes hold of the foe and pounds it into
+  the ground four times (each slam 0.6 of his fists, wears its poise, cracks the ground), and the fury is spent. The
+  gauge shows on the action bar. Not as the Great Ape, who keeps his own rage (`ApeRage`). The old Rage (the pre-Super
+  beating fury) is unchanged.
+- `aw-rubber-reel` **Stretching grab** (`ZFighterReel`): the arm shoots out up to 8 blocks to the foe you look toward
+  (or the nearest close round your look), bends over or round what's in the way, hooks it and yanks it to your feet:
+  a drawn bow or raised shield lowered, a creeper's fuse undone, an illager's spell broken, its steps stopped, its poise
+  worn, slowed a second. A Rubber-folk or Verdant Z Fighter: sprint+R. Any Kingdoms Rubber-folk or Verdant: the
+  heritage key while sprinting (`Heritage.gift` calls it through `PowersCompat.reel`). Everyone sees the Verdant
+  combo's stretched arm. 4 s wait.
+
+Design calls: the Arsenal's new moves are on sprint+key, like Darktide's. Endless Fall stays on the Void Arsenal, as
+the row names its gates. The Rift Seal holds its owner in too (they can let it go), and borrows the Eight-Sign Circle's
+silencer path so Kingdoms forms are sealed with no new Kingdoms reflection. The fury is a new meter beside the old Rage,
+which is a once-before-Super burst and stays as it was; the pound is the existing grab at full fury. The state bonus is
+read at the moment of the hit (what state the body is in and which move last landed on it), not tracked as flags.
+
+Gaps: the stretching grab for Kingdoms heritage players runs in Jaymo's Powers, so without Powers installed the
+sprinting heritage key does what it always did. It cuts off vanilla windups, illager spells and item use, not a
+Kingdoms folk caster's spell already being cast (Kingdoms keeps that state to itself). The Rift Seal pulls back a
+player who leaves its dimension; a creature that leaves it is let go.
+
+Lore (new): the web fluids are the Web Slinger's own brews. Endless Fall, Surface and the Rift Seal are the Pocket
+Arsenal's rift turned on the world (the Seal is what a master of the pocket does: folds a piece of the world into one).
+Battle fury is the Warrior-born's blood that the Great Ape is made of, showing in any Z Fighter pushed hard enough. The
+stretching grab is the Rubber-folk's and the Verdant's stretch, as in the Verdant combo.

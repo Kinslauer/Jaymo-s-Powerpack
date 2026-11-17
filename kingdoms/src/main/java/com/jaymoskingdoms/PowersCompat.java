@@ -776,6 +776,37 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ZFighterReel.reel(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle reel;
+	private static boolean lookedForReel;
+
+	/**
+	 * (Awakening pick) A Rubber-folk's or a Verdant's stretching grab: the arm shoots out to the foe they look toward and yanks it
+	 * to their feet (Jaymo's Powers does the stretch). True if the key was spent on it; false without Powers.
+	 */
+	public static boolean reel(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForReel) {
+			lookedForReel = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					reel = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterReel"),
+						"reel", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stretching grab (older Powers?)", e);
+				}
+			}
+		}
+		if (reel == null) {
+			return false;
+		}
+		try {
+			return (boolean) reel.invokeExact(player);
+		} catch (Throwable e) {
+			reel = null;
+			return false;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;

@@ -1441,6 +1441,8 @@ public final class WebPower implements Power {
 		}
 		// everything but the suit's mass leaves a web shooter, one web a shot (the wrists may have run dry while it charged)
 		int wrist = dark ? -1 : WebShooters.shotHand(player);
+		// (Web cartridges) the kind of web in that wrist's cartridge
+		int kind = dark ? WebKinds.STICKY : WebShooters.kind(player, wrist);
 		if (!dark) {
 			if (wrist < 0) {
 				dryShot(player);
@@ -1458,7 +1460,7 @@ public final class WebPower implements Power {
 		}
 		if (pellet) {
 			// a tap: a quick webshooter pellet, one per tap (no V cooldown, just the floor)
-			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet().kind(kind), level,
 				new ItemStack(WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
 			state.pelletReady = now + PELLET_COOLDOWN;
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.6F, 1.9F);
@@ -1473,8 +1475,18 @@ public final class WebPower implements Power {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, 1.6F);
 			return;
 		}
-		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,
-			new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		if (kind == WebKinds.SPLITTER) {
+			// a Splitter cartridge: the shot leaves the nozzle as three, fanned
+			for (int i = 0; i < WebKinds.SPLIT; i++) {
+				WebBall ball = new WebBall(level, player, new ItemStack(WEB_BALL_ITEM)).charged(charge);
+				ball.shootFromRotation(player, player.getXRot(), player.getYRot() + (i - (WebKinds.SPLIT - 1) / 2.0F) * WebKinds.SPLIT_SPREAD, 0.0F,
+					SHOT_SPEED, 0.5F);
+				Projectile.spawnProjectile(ball, level, new ItemStack(WEB_BALL_ITEM));
+			}
+		} else {
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge).kind(kind), level,
+				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		}
 		int cooldown = Mth.lerpInt(charge, SHOT_COOLDOWN, SHOT_COOLDOWN_MAX);
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + cooldown, cooldowns.yank()));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
