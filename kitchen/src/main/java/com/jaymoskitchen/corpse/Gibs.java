@@ -86,7 +86,7 @@ public final class Gibs {
 	/** Creatures with blood but nothing inside to throw: spiders, slimes and the like (data/jaymoskitchen/tags/entity_type/no_innards.json). */
 	public static final TagKey<EntityType<?>> NO_INNARDS = TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("no_innards"));
 
-	/** (0.5.67) Tags Jaymo's Powers puts on a body dying of a blast: blown apart, or left whole (by how close it was). */
+	/** (0.5.67) Tags Jaymo's Powers puts on a body dying of a blast or a blunderbuss shot: blown apart, or left whole (by how close it was). */
 	public static final String GIB_TAG = "jaymoskitchen.gib", NO_GIB_TAG = "jaymoskitchen.no_gib";
 
 	public static EntityType<Gib> GIB;
@@ -120,10 +120,12 @@ public final class Gibs {
 	/** Whether {@code mob}, just now dying from a blow of {@code damage}, was blown apart (and leaves no corpse). */
 	public static boolean blownApart(LivingEntity mob, float damage) {
 		DamageSource last = mob.getLastDamageSource();
-		if (last == null || !last.is(DamageTypeTags.IS_EXPLOSION)) {
+		boolean blast = last != null && last.is(DamageTypeTags.IS_EXPLOSION);
+		// (not a blast: only a point-blank blunderbuss shot Jaymo's Powers rolled to blow the body apart)
+		if (!blast && !mob.entityTags().contains(GIB_TAG)) {
 			return false;
 		}
-		if (mob instanceof Creeper) {
+		if (blast && mob instanceof Creeper) {
 			return true;
 		}
 		if (mob.getType().builtInRegistryHolder().is(com.jaymoskitchen.farm.Familiarity.FARM_ANIMALS)) {
