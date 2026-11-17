@@ -52,6 +52,8 @@ public final class Abilities {
 			// (class trees) Perfect Form and the Rampage
 			case WARLORD -> Discipline.key(player, sneak);
 			case BRUTE -> Fury.key(player, sneak);
+			// (class trees) Spur, and hanging off the side
+			case RIDER -> com.jaymoskingdoms.equestrian.Horsemanship.key(player, sneak);
 			default -> {
 				return false;
 			}

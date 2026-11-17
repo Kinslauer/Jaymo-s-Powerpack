@@ -161,3 +161,35 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
   "can't miss" is "can't be parried by a mob, and lands whole"; a vanilla shield held up by a mob still blocks it.
 - Lore: Discipline and Fury are the two warrior traditions already in the canon (the levy's drill and the berserker's rage);
   nothing new to place.
+### Patch 5: Rider
+- All in `equestrian/Horsemanship` (new); the equestrian systems ask it what the ranks change (`Equestrian` drain, ridden
+  speed, barding, shying, trampling; `Bonding` bravery, throwing off, war training, the whistle; `Herding` orders and
+  defence; `Mounted` charge and run-down; `Riders.lance`). Tree in `trees/RiderTree`, lang in `class-trees-rider.json`.
+- **Spur** (start, the class key): at the gallop, +40% speed for 2.5 s at no stamina (an attribute modifier, so the drain is
+  untouched); wait 30 s divided by `ClassTrees.practice`. Off the gallop the key says so (or, with Trick Riding, hangs you).
+- **Long Wind** (3 ranks): -15% stamina drain a rank. **Horse Whisperer** (3): no shying, no throw-offs of any kind (the buck,
+  the racing saddle's throw, a shy), +0.3 bravery under you. **Lancer / Horse Archer** (fork, 5): the lance's gallop bonus
+  x1.5 and the mounted charge fills x2 / a shot from the saddle within ~8 degrees of your look is set straight along it at the
+  same speed (multishot's side bolts keep their spread). **Stay in the Saddle** (8): a shy from a blow or a blast never
+  throws you, and anything else that knocks you off in the tick you were hit puts you back on the same horse (within 4).
+  **Trick Riding** (10): J off the gallop toggles hanging (synced; `HangPose` rolls the body down the left flank about the
+  hips). Hanging, a projectile hits the horse for half and not you; at the gallop items within 2.5 are picked up and a downed
+  player or follower is pulled up behind (`rider.rescued`).
+- **Cavalier / Outrider** (fork, 15): barding no longer slows a Courser, charge, run-down and elephant trample x1.5, war
+  discipline XP x2 / trot and canter x1.15 (both sides, through `riddenSpeed`), no fall damage to the horse, and the whistle
+  in the saddle calls your freshest horse (most stamina, within 96) at a run; within 3 blocks you're swapped onto it and the
+  old one is told to follow. **Herd Master** (18): a wheel order (follow, stay, home...) goes to every horse of yours within
+  24, and your horses come to your defence whatever their trust. **Banner Bearer** (20): with a banner in your horse's tack,
+  everyone within 16 who is a player, takes your orders or is tamed by you is calmed of fear each second, hits +10%
+  (`TreePerks.dealt`), and the horse they ride drains at 75%. **Bonded / Beast of Legend** (fork, 24): your horse, once
+  downed, can't be killed by anything short of what bypasses invulnerability (health held at 1) / a nightmare, bat horse or
+  war elephant you ride is tamed to you with trust 100, and a bat horse aloft drains at half.
+- My calls: Spur's numbers; Whisperer also stops bucking (a horse that "never throws you"); Trick Riding uses J off the
+  gallop because sneak dismounts; the banner counts every player near as a friend (there's no party to ask). The Rider's
+  class description now names Spur.
+- Gaps: Horse Archer's "no draw slowdown": the pack never slows a draw in the saddle (vanilla doesn't slow a passenger's
+  input), so only the steady aim is built. Cavalier's "barding weighs nothing": only Coursers are slowed by barding, so it
+  is theirs. Bat horse "flies twice as long": it has no flight limit, only stamina, so it's half the drain aloft. Bonded:
+  Powers already downs a tamed horse instead of killing it; Bonded is that a downed horse can no longer be finished off. The
+  hanging pose has no easing and always takes the left flank.
+- Lore: the Chivalry realms' tilt-yards and the stables already hold every one of these; nothing new to place.

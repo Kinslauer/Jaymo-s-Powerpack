@@ -330,7 +330,7 @@ public final class Bonding {
 	/** Its nerve, more for its war level. */
 	public static double bravery(AbstractHorse horse, Equine e) {
 		Bond b = horse.getAttached(BOND);
-		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1));
+		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1) + Horsemanship.nerve(horse));
 	}
 
 	/** Its jump, higher for its jumping level. */
@@ -431,6 +431,10 @@ public final class Bonding {
 		Bond b = bond(horse);
 		if (xp <= 0.0F || kept(horse) && b.hunger() < HUNGRY) {
 			return;
+		}
+		if (d == Discipline.WAR) {
+			// a Cavalier's horse learns war twice as fast
+			xp *= Horsemanship.warSchool(rider);
 		}
 		int before = b.level(d);
 		b = b.withXp(d, b.xp(d) + xp);
@@ -612,6 +616,10 @@ public final class Bonding {
 	private static void whistle(ServerPlayer player) {
 		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
 			// (Andy's skill-tree locks) the whistle is learned: Horseman (a Rider knows it)
+			return;
+		}
+		if (Horsemanship.swap(player)) {
+			// an Outrider in the saddle: a fresh horse comes to be swapped onto
 			return;
 		}
 		ServerLevel level = player.level();
@@ -943,6 +951,10 @@ public final class Bonding {
 	}
 
 	static void throwOff(AbstractHorse horse, ServerPlayer rider, String message) {
+		if (Horsemanship.whisperer(rider)) {
+			// a Horse Whisperer is never thrown
+			return;
+		}
 		rider.stopRiding();
 		Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-0.4);
 		rider.push(back.x, 0.3, back.z);
