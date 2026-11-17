@@ -146,6 +146,13 @@ public final class ChronoFlow {
 	static final double GRAB_RANGE = 3.0;
 	/** Each barrage punch leaves a faint clock face over the hit, its hand ticking on a twelfth each punch: its size. */
 	static final double CLOCK_RADIUS = 0.35;
+
+	/** The barrage's blurred fists: where the fist starts in front of you, and each stroke's spread and length. */
+	static final double BARRAGE_FIST_AHEAD = 1.4, BARRAGE_FIST_DOWN = 0.3;
+	static final double BARRAGE_STROKE_SIDE = 0.18, BARRAGE_STROKE_UP = 0.12, BARRAGE_STROKE_AHEAD = 0.15, BARRAGE_STROKE_LENGTH = 0.7;
+	static final float BARRAGE_STROKE_WIDTH = 0.35F;
+	static final int BARRAGE_STROKE_COLOR = 0xFFE08A;
+	static final int BARRAGE_SPARK_COUNT = 6;
 	/** Reactions on whoever's hit: a flinch from a blow that holds them ({@code FLINCH_TICKS}), a ragdoll when thrown
 	 * (until they land, {@code FLUNG_MIN}..{@code FLUNG_TICKS}). */
 	public static final int FLINCH = 0, FLUNG = 1;
@@ -1029,17 +1036,17 @@ public final class ChronoFlow {
 				// blurred fists and sparks, like Chrono Punch's flurry
 				Vec3 eye = player.getEyePosition();
 				Vec3 look = player.getLookAngle();
-				Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
+				Vec3 fist = eye.add(look.scale(BARRAGE_FIST_AHEAD)).add(0.0, -BARRAGE_FIST_DOWN, 0.0);
 				Vec3 side = new Vec3(-look.z, 0.0, look.x);
 				if (side.lengthSqr() < 1.0E-6) {
 					side = new Vec3(1.0, 0.0, 0.0);
 				}
 				for (int k = 0; k < 4; k++) {
-					Vec3 off = side.scale((k - 1) * 0.18).add(0.0, 0.12 * k, 0.0).add(look.scale(0.15 * k));
-					MagicFx.stroke(level, fist.add(off), fist.add(off).add(look.scale(0.7)), 0.35F, 0xFFE08A);
+					Vec3 off = side.scale((k - 1) * BARRAGE_STROKE_SIDE).add(0.0, BARRAGE_STROKE_UP * k, 0.0).add(look.scale(BARRAGE_STROKE_AHEAD * k));
+					MagicFx.stroke(level, fist.add(off), fist.add(off).add(look.scale(BARRAGE_STROKE_LENGTH)), BARRAGE_STROKE_WIDTH, BARRAGE_STROKE_COLOR);
 				}
 				Vec3 atPos = target.getBoundingBox().getCenter();
-				ChronoFx.particles(level, player, MagicFx.spark(0xFFE08A, 1.0F), atPos.x, atPos.y, atPos.z, 6, 0.2, 0.2, 0.2, 0.2);
+				ChronoFx.particles(level, player, MagicFx.spark(0xFFE08A, 1.0F), atPos.x, atPos.y, atPos.z, BARRAGE_SPARK_COUNT, 0.2, 0.2, 0.2, 0.2);
 				target.syncVelocity = true;
 				fighter.lastBlow = now;
 				setCombo(player, fighter, fighter.combo + 1);
