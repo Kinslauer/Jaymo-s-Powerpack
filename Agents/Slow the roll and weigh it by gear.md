@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Prone A/D roll slower, Snake-style arms, slower with heavier armour (capped); Alt dodge untouched
 branch: claude/project-thread-k8mvto
 with: 
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 - PR #1699: grounded shoulder roll, 0.9 s bare, up to 1.6x slower by armour points + toughness (cap 32). Compiles; not played.
+- Merged 2026-11-17 2:20 PM (PR #1699).
