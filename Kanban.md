@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 21:15). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · for any · open
 
 
 ## Being built
 
-- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · changes · fixing review notes
 
 
