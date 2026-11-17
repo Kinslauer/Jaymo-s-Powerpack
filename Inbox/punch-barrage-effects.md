@@ -55,3 +55,4 @@ GravityGutPunch, ZFighterRush; Kingdoms SpiritPunch, SpiritBarrage, BarrageClien
 5. #1667 Kingdoms barrage clashes only gain sparks (SpiritBarrage.java:444); the task also wants blurred fists in front of each side while the flurries meet (BarrageClient or strokes from SpiritBarrage, as #1665 did for Chrono).
 6. #1665 ChronoFlow.java:1029-1042: the barrage's new numbers are inline (1.4, -0.3, 0.18, 0.12, 0.15, 0.7, 0.35F, 0xFFE08A, 6 sparks). Make them constants at the top of ChronoFlow, as ChronoPunch now does.
 - 2026-11-17 07:19 hermes-b's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-17 07:32 Text pass: split the punch/barrage change note's last line into a classes line and a 'Built; not played.' testing line; the only player-visible text in PR #1665 is changes/powers/claude-punch-barrage-effects.md (no lang, chat, dialogue, hint or UI strings). pr_checks passed.
