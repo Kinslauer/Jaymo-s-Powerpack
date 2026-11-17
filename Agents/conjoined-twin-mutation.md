@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: conjoined-twin-mutation
 branch: claude/conjoined-twin-mutation
 with:
-pr:
+pr: 1670
 mods: powers
 versions:
 started: 2026-11-16
@@ -11,6 +11,8 @@ owns:
   - src/main/java/com/jaymospowers/mutation/ConjoinedTwins.java
   - src/main/java/com/jaymospowers/mixin/ConjoinedTwinVillagerMixin.java
   - src/main/java/com/jaymospowers/mixin/ConjoinedTwinZombieMixin.java
+  - src/main/java/com/jaymospowers/mixin/ConjoinedTwinSpawnMixin.java
+  - src/main/resources/data/jaymospowers/tags/entity_type/has_conjoined_twin.json
 ---
 # Conjoined Twin Cosmetic Mutation
 
@@ -36,4 +38,17 @@ owns:
 - Spawning hook: can use ServerEntityEvents.ENTITY_SPAWN or mixin into NaturalSpawner like the loot goblins
 
 ## Done
-Research complete. Implementation plan documented. No code changes yet.
+- Created entity type tag \`jaymospowers:has_conjoined_twin\` for villagers, zombies, husks, drowned, and optional MCA villagers
+- Implemented \`ConjoinedTwins\` class with attachment-based passenger tracking (UUID synced to clients)
+- Created \`ConjoinedTwinSpawnMixin\` hooking into \`Mob.finalizeSpawn\` (5% chance on natural spawns)
+- Created \`ConjoinedTwinVillagerMixin\` and \`ConjoinedTwinZombieMixin\` overriding \`positionRider\` for shoulder positioning
+- Build compiles successfully, PR checks pass
+- PR #1670 opened for review
+
+## Not tested in game
+- Visual appearance of baby on shoulder (positioning may need tweaking)
+- MCA villager integration (tag is optional/required=false)
+- Baby growth/despawning behavior (currently permanent passengers)
+- Multiplayer sync of passenger position
+- Performance with many conjoined twins
+- Baby entity AI while mounted (should be passive)
