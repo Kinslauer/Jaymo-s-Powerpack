@@ -275,6 +275,8 @@ public final class ZFighterRush {
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y, at.z, big ? 16 : 5, 0.25, 0.25, 0.25, 0.1);
 		if (big) {
 			level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.ring(level, at.add(0.0, 0.1, 0.0), 1.5F, 0xFFFFFF);
+			MagicFx.wave(level, at, player.getLookAngle(), 5.0, 1.5F, 0xD0D0D0, 10);
 		}
 		level.playSound(null, at.x, at.y, at.z, big ? SoundEvents.PLAYER_ATTACK_KNOCKBACK : SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS,
 			big ? 1.2F : 0.8F, big ? 0.7F : 1.0F + level.getRandom().nextFloat() * 0.3F);

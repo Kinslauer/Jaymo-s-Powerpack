@@ -97,6 +97,7 @@ final class ChronoPunch {
 		Vec3 look = player.getLookAngle();
 		Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
 		ChronoFx.particles(level, player, GOLD, fist.x, fist.y, fist.z, 3, 0.25, 0.2, 0.25, 0.0);
+		MagicFx.stroke(level, fist, fist.add(look.scale(0.7)), 0.35F, 0xFFE08A);
 		boolean any = false;
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !player.isAlliedTo(e)
@@ -118,6 +119,9 @@ final class ChronoPunch {
 				target.setDeltaMovement(away.scale(FINISH_PUSH).add(0.0, 0.45, 0.0));
 				ChronoFlow.reel(target, ChronoFlow.FLUNG, 0);
 				ChronoFx.particles(level, player, ParticleTypes.EXPLOSION, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				Vec3 at = target.getBoundingBox().getCenter();
+				MagicFx.ring(level, at.add(0.0, 0.1, 0.0), 1.5F, 0xFFFFFF);
+				MagicFx.wave(level, at, away, 5.0, 1.5F, 0xD0D0D0, 10);
 			} else {
 				// held in the moment: the punches pin them where they stand
 				target.setDeltaMovement(before.scale(0.2));
@@ -127,7 +131,8 @@ final class ChronoPunch {
 			Vec3 at = target.getBoundingBox().getCenter();
 			ChronoFx.crackSound(level, player, at.x, at.y, at.z);
 			ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
-		}
+			level.sendParticles(MagicFx.spark(0xFFE08A, 1.0F), at.x, at.y, at.z, 6, 0.2, 0.2, 0.2, 0.2);
+			}
 		if (any) {
 			// (0.11.40) each punch shakes harder than the last
 			com.jaymospowers.core.Shakes.send(player, SHAKE + SHAKE_STEP * n);
