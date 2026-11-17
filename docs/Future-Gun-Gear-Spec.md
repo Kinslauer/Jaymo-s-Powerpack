@@ -41,9 +41,9 @@ Nothing is copied: no code or art from Fracture Point, TaCZ, TaCZ Additions or T
 
 ## 3. TaCZ — magazine (fu-mags)
 
-**Identity and slot.** `jaymospowers:magazine`, display name "Magazine". Held item; loaded into a modern gun's magazine (custom data holds the ammo id and round count). One magazine item serves every gun family; the family sets capacity (proposed — Andy's call): handgun 17, submachine gun 30, rifle 30, shotgun 8, machine gun 60.
+**Identity and slot.** `jaymospowers:magazine`, display name "Magazine". Held item; loaded into a modern gun's magazine (custom data holds the ammo id and round count). One magazine item, made for one gun at a time (its gun id in custom data), holding that gun's real capacity.
 
-**Stats and behaviour.** Each magazine is made for one family (it says so in its name). Load it by hand: right-click loose rounds of a calibre that family takes onto it, up to its size. Reload is a swap: right-click the magazine onto a gun of its family in the inventory; the gun takes the magazine's rounds, up to what that gun holds (a 7-shot pistol takes 7), and the magazine takes the gun's and what didn't fit (any over its size come back loose), tracers included. Loaded magazines stack to 1; empty ones stack to 6. A dead gunner drops a magazine for its gun 1 time in 4, up to half full. TaCZ's own reload from loose rounds still works (not blocked: that would change every future gun at once; ask Andy if he wants it).
+**Stats and behaviour.** Each magazine is made for one gun and holds what that gun really holds (Andy, 2026-11-17), snipers included; its name says which gun. Load it by hand: right-click loose rounds of that gun's calibre onto it. Reload is a swap: right-click the magazine onto its gun in the inventory; the gun takes the magazine's rounds and the magazine takes the gun's (any over its size come back loose), tracers included. Loaded magazines stack to 1; empty ones stack to 6. A dead gunner drops a magazine for its gun 1 time in 4, up to half full. TaCZ's own reload from loose rounds still works (not blocked: that would change every future gun at once; ask Andy if he wants it).
 
 **How you get it.** Loot only (Andy, 2026-11-17): never craftable, in no creative tab.
 
@@ -62,7 +62,7 @@ From TaCZ Additions (Raiiiden, CurseForge feature list), worth building, in no o
 1. Tracers: both. About 1 ordinary shot in 4 from a future gun streaks (amber #f5a623, muzzle light 12 fading over 8
    ticks), and Tracer Rounds always streak. A tracer round right-clicked onto a loaded gun takes the place of one of
    its rounds, which comes back to you.
-2. Magazines: the sizes above (handgun 17, SMG 30, rifle 30, shotgun 8, machine gun 60). Snipers have none. TaCZ's
+2. Magazines: first the sizes above (handgun 17, SMG 30, rifle 30, shotgun 8, machine gun 60), then (Andy, 2026-11-17) "snipers should get mags, they should all be the real capacity": one magazine per gun, holding that gun's own capacity (FutureGuns' magazine sizes). TaCZ's
    own reload from loose rounds is left working; magazines are a faster swap, not a requirement.
 3. All three built together (PR #1671).
 4. Loot only: off the future's dead and echoes, like the guns. No recipes, no creative tab.

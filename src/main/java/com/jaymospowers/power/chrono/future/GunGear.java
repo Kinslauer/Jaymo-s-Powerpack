@@ -58,9 +58,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Tracers.</b> About one ordinary shot in four from a future gun ({@link #TRACER_CHANCE}) leaves a glowing amber
  * streak along its path and lights the muzzle for a moment; tracer rounds, right-clicked onto a loaded gun in the
  * inventory, take the place of that many of its rounds (which come back to you) and always streak.</li>
- * <li><b>Magazines.</b> One per gun family, holding that family's rounds ({@link Family}). Right-click rounds onto one
- * to load it; right-click it onto a gun of its family to swap: the gun takes its rounds and the magazine takes the
- * gun's. Snipers have none (they're loaded by hand). TaCZ's own reload from loose rounds still works.</li>
+ * <li><b>Magazines.</b> One for each gun, holding what that gun really holds (Andy, 2026-11-17: "they should all be the
+ * real capacity", snipers too). Right-click rounds onto one to load it; right-click it onto its gun to swap: the gun
+ * takes its rounds and the magazine takes the gun's. TaCZ's own reload from loose rounds still works.</li>
  * <li><b>Plate carrier.</b> Chest armour some gunners wear and may drop.</li>
  * </ul>
  */
@@ -74,8 +74,6 @@ public final class GunGear {
 	static final double TRACER_RANGE = 64.0;
 	/** The muzzle light a tracer gives: this bright, fading out over this many ticks. */
 	static final int LIGHT_LEVEL = 12, LIGHT_TICKS = 8;
-	/** Rounds a magazine holds, by family (the spec's sizes, Andy 2026-11-17). */
-	static final int HANDGUN_ROUNDS = 17, SMG_ROUNDS = 30, RIFLE_ROUNDS = 30, SHOTGUN_ROUNDS = 8, MG_ROUNDS = 60;
 	/** Empty magazines stack this high; tracer rounds this high. */
 	static final int MAGAZINE_STACK = 6, TRACER_STACK = 16;
 	/** A gunner wears a carrier this often and drops it this often. */
@@ -87,58 +85,10 @@ public final class GunGear {
 	static final int CARRIER_ARMOR = 5, CARRIER_DURABILITY = 18, CARRIER_ENCHANTABILITY = 10;
 	static final float CARRIER_TOUGHNESS = 2.0F;
 
-	/** In a gun's custom data: how many of its rounds are tracers (fired first). In a magazine's: its family, ammo, rounds and tracers. */
-	static final String TRACERS = "JaymosTracers", FAMILY = "MagFamily", AMMO = "MagAmmo", ROUNDS = "MagRounds";
+	/** In a gun's custom data: how many of its rounds are tracers (fired first). In a magazine's: its gun, ammo, rounds and tracers. */
+	static final String TRACERS = "JaymosTracers", GUN = "MagGun", AMMO = "MagAmmo", ROUNDS = "MagRounds";
 
 	public static final ResourceKey<EquipmentAsset> CARRIER_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("plate_carrier"));
-
-	/** The families a magazine is made for, by the kind of gun. */
-	enum Family {
-		HANDGUN("handgun", HANDGUN_ROUNDS), SMG("smg", SMG_ROUNDS), RIFLE("rifle", RIFLE_ROUNDS), SHOTGUN("shotgun", SHOTGUN_ROUNDS),
-		MACHINE_GUN("machine_gun", MG_ROUNDS);
-
-		final String id;
-		final int rounds;
-
-		Family(String id, int rounds) {
-			this.id = id;
-			this.rounds = rounds;
-		}
-
-		static @Nullable Family of(FutureGuns.Kind kind) {
-			if (kind == FutureGuns.PISTOL) {
-				return HANDGUN;
-			} else if (kind == FutureGuns.SMG) {
-				return SMG;
-			} else if (kind == FutureGuns.RIFLE) {
-				return RIFLE;
-			} else if (kind == FutureGuns.SHOTGUN) {
-				return SHOTGUN;
-			} else if (kind == FutureGuns.MG) {
-				return MACHINE_GUN;
-			}
-			return null;
-		}
-
-		static @Nullable Family byId(String id) {
-			for (Family family : values()) {
-				if (family.id.equals(id)) {
-					return family;
-				}
-			}
-			return null;
-		}
-
-		/** Whether some gun of this family takes {@code ammo}. */
-		boolean takes(String ammo) {
-			for (FutureGuns.Gun gun : FutureGuns.MODERN) {
-				if (of(gun.kind()) == this && gun.ammo().equals(ammo)) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
 
 	public static Item PLATE_CARRIER, MAGAZINE, TRACER_ROUND;
 	private static @Nullable ArmorMaterial carrier;
@@ -202,22 +152,21 @@ public final class GunGear {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		Family family = Family.of(gun.kind());
-		if (family != null && !gun.ammo().isEmpty() && random.nextFloat() < MAGAZINE_DROP) {
-			mob.spawnAtLocation(level, magazine(family, gun.ammo(), random.nextInt(Math.round(family.rounds * MAGAZINE_FILL) + 1)));
+		if (!gun.ammo().isEmpty() && random.nextFloat() < MAGAZINE_DROP) {
+			mob.spawnAtLocation(level, magazine(gun, random.nextInt(Math.round(gun.magazine() * MAGAZINE_FILL) + 1)));
 		}
 		if (random.nextFloat() < TRACER_DROP) {
 			mob.spawnAtLocation(level, new ItemStack(TRACER_ROUND, 1 + random.nextInt(TRACER_DROP_MAX)));
 		}
 	}
 
-	/** A {@code family} magazine holding {@code rounds} of {@code ammo}. */
-	static ItemStack magazine(Family family, String ammo, int rounds) {
+	/** A magazine for {@code gun} holding {@code rounds} of its ammo. */
+	static ItemStack magazine(FutureGuns.Gun gun, int rounds) {
 		ItemStack stack = new ItemStack(MAGAZINE);
 		CompoundTag tag = new CompoundTag();
-		tag.putString(FAMILY, family.id);
+		tag.putString(GUN, gun.id());
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-		fill(stack, ammo, rounds, 0);
+		fill(stack, gun.ammo(), rounds, 0);
 		return stack;
 	}
 
@@ -327,7 +276,12 @@ public final class GunGear {
 		}
 	}
 
-	/** A magazine for one family of guns: load it by hand, swap it into a gun. */
+	/** The gun a magazine is for, or null. */
+	private static FutureGuns.@Nullable Gun gunOf(ItemStack magazine) {
+		return FutureGuns.BY_ID.get(stringIn(magazine, GUN));
+	}
+
+	/** A magazine for one gun: load it by hand, swap it into the gun. */
 	static final class Magazine extends Item {
 		Magazine(Item.Properties properties) {
 			super(properties);
@@ -340,12 +294,12 @@ public final class GunGear {
 				return false;
 			}
 			String ammo = roundsOf(other);
-			Family family = Family.byId(stringIn(self, FAMILY));
+			FutureGuns.Gun gun = gunOf(self);
 			int rounds = intIn(self, ROUNDS);
-			if (ammo.isEmpty() || family == null || !family.takes(ammo) || rounds > 0 && !ammo.equals(stringIn(self, AMMO))) {
+			if (ammo.isEmpty() || gun == null || !ammo.equals(gun.ammo())) {
 				return false;
 			}
-			int n = Math.min(family.rounds - rounds, other.getCount());
+			int n = Math.min(gun.magazine() - rounds, other.getCount());
 			if (n <= 0) {
 				return true;
 			}
@@ -365,8 +319,8 @@ public final class GunGear {
 		}
 
 		/**
-		 * Right-clicked onto a gun of its family: the gun takes its rounds (no more than the gun itself holds), it takes
-		 * the gun's and whatever the gun couldn't; past its size they come back loose.
+		 * Right-clicked onto its gun: the gun takes its rounds and it takes the gun's (past its size they come back
+		 * loose: TaCZ's own reload can leave a round in the barrel on top).
 		 */
 		@Override
 		public boolean overrideStackedOnOther(ItemStack self, Slot slot, ClickAction action, Player player) {
@@ -375,9 +329,8 @@ public final class GunGear {
 			}
 			ItemStack gun = slot.getItem();
 			FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
-			Family family = Family.byId(stringIn(self, FAMILY));
 			int rounds = intIn(self, ROUNDS);
-			if (known == null || family == null || Family.of(known.kind()) != family || rounds > 0 && !known.ammo().equals(stringIn(self, AMMO))) {
+			if (known == null || known != gunOf(self)) {
 				return false;
 			}
 			int had = intIn(gun, "GunCurrentAmmoCount"), hadTracers = intIn(gun, TRACERS), tracers = intIn(self, TRACERS);
@@ -387,7 +340,7 @@ public final class GunGear {
 				tag.putInt(TRACERS, Math.min(tracers, in));
 			});
 			int out = had + rounds - in;
-			int kept = Math.min(out, family.rounds);
+			int kept = Math.min(out, known.magazine());
 			fill(self, known.ammo(), kept, hadTracers + Math.max(0, tracers - in));
 			if (out > kept) {
 				giveBack(player, TaczGuns.modernAmmo(known.ammo(), out - kept));
@@ -399,20 +352,25 @@ public final class GunGear {
 
 		@Override
 		public Component getName(ItemStack stack) {
-			Family family = Family.byId(stringIn(stack, FAMILY));
-			return family == null ? super.getName(stack) : Component.translatable("item.jaymospowers.magazine." + family.id);
+			FutureGuns.Gun gun = gunOf(stack);
+			if (gun == null) {
+				return super.getName(stack);
+			}
+			// the gun's own name, as TaCZ gives it (its id without TaCZ)
+			ItemStack named = TaczGuns.modernGun(gun.id().substring("tacz:".length()), 0);
+			return Component.translatable("item.jaymospowers.magazine.for", named.isEmpty() ? Component.literal(gun.id()) : named.getHoverName());
 		}
 
 		@Override
 		@SuppressWarnings("deprecation")
 		public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-			Family family = Family.byId(stringIn(stack, FAMILY));
+			FutureGuns.Gun gun = gunOf(stack);
 			int rounds = intIn(stack, ROUNDS);
-			if (family != null) {
-				String ammo = stringIn(stack, AMMO);
+			if (gun != null) {
+				String ammo = gun.ammo();
 				builder.accept(rounds > 0
-					? Component.translatable("item.jaymospowers.magazine.rounds", rounds, family.rounds, ammo.substring(ammo.indexOf(':') + 1)).withStyle(ChatFormatting.GRAY)
-					: Component.translatable("item.jaymospowers.magazine.empty", family.rounds).withStyle(ChatFormatting.GRAY));
+					? Component.translatable("item.jaymospowers.magazine.rounds", rounds, gun.magazine(), ammo.substring(ammo.indexOf(':') + 1)).withStyle(ChatFormatting.GRAY)
+					: Component.translatable("item.jaymospowers.magazine.empty", gun.magazine()).withStyle(ChatFormatting.GRAY));
 			}
 			builder.accept(Component.translatable("item.jaymospowers.magazine.hint").withStyle(ChatFormatting.DARK_GRAY));
 			builder.accept(Component.translatable("item.jaymospowers.magazine.lore").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));

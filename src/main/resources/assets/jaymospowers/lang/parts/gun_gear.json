@@ -5,13 +5,9 @@
   "item.jaymospowers.tracer_round.hint": "Right-click onto a loaded future gun: its next shots streak",
   "item.jaymospowers.tracer_round.lore": "Every fourth round burns bright, so the dead can follow their own fire through Los Perrito's endless night.",
   "item.jaymospowers.magazine": "Magazine",
-  "item.jaymospowers.magazine.handgun": "Handgun Magazine",
-  "item.jaymospowers.magazine.smg": "SMG Magazine",
-  "item.jaymospowers.magazine.rifle": "Rifle Magazine",
-  "item.jaymospowers.magazine.shotgun": "Shotgun Magazine",
-  "item.jaymospowers.magazine.machine_gun": "Machine Gun Magazine",
+  "item.jaymospowers.magazine.for": "%s Magazine",
   "item.jaymospowers.magazine.rounds": "%s/%s rounds of %s",
   "item.jaymospowers.magazine.empty": "Empty (holds %s)",
-  "item.jaymospowers.magazine.hint": "Right-click rounds onto it to load it; right-click it onto a gun of its kind to swap",
+  "item.jaymospowers.magazine.hint": "Right-click rounds onto it to load it; right-click it onto its gun to swap",
   "item.jaymospowers.magazine.lore": "A future gunner counts every magazine. A dropped gun with one still in it is a gift; an empty gun is just a heavy club."
 }
