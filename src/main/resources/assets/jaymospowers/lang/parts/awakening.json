@@ -1,0 +1,9 @@
+{
+	"message.jaymospowers.gravity_heft.light": "You are light.",
+	"message.jaymospowers.gravity_heft.heavy": "You are heavy.",
+	"message.jaymospowers.gravity_heft.normal": "Your weight settles.",
+	"message.jaymospowers.gravity_planets.hungry": "Too hungry to throw a planet.",
+	"message.jaymospowers.chrono_wind.waiting": "The others hold the day still.",
+	"message.jaymospowers.chrono_wind.ask": "A Chrono would turn the day: crouch to let it.",
+	"message.jaymospowers.airless.wait": "The air has not come back yet: %s s"
+}

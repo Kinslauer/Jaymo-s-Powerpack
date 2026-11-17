@@ -1,3 +1,4 @@
 # tool stations mark the maker for class experience
 - Building gear at a tool station puts a short-lived tag on the player (`Tinkering.MADE_TAG`); Jaymo's Kingdoms reads it, takes it off and gives the Tinkerer class XP.
+- **Awakening picks, patch 1**: Gravity's **Heft** (hold Z lighter, sneak+hold Z heavier: jump higher and fall softer, or shrug off knockback and sink; lightest is weightless) and **Planet hopping** (sneak+G throws a small planet up to 50 blocks to fall to, no fall damage, keep your speed). Chrono's **Wind the Day** (the day turns once the first time you attune; in Time Flow hold Z to sweep it forward, sneak to wind it back; needs the others' leave like sleeping). Wind and Smoke's **Airless Dome** at master rank (C, or sprint+C when ascended: 12 s of no air, creeper fuses stall, casters can't finish). Ride your own **Cyclone** (Sneak tap). The Unseeing's ritual-keepers fight with rot, blood draws and death's touch.
 - Built; not played.

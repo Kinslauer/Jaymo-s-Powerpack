@@ -533,6 +533,8 @@ public final class GravityPower implements Power {
 			GravityForward.forget(handler.player);
 			GravityCometRam.forget(handler.player);
 			GravityWalk.stop(handler.player);
+			GravityHeft.clear(handler.player);
+			GravityPlanets.forget(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
@@ -649,6 +651,8 @@ public final class GravityPower implements Power {
 			jump.removeModifier(PULL_JUMP_ID);
 		}
 		GravityWeight.clear(player);
+		GravityHeft.clear(player);
+		GravityPlanets.forget(player);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(KILLS);
 	}
@@ -662,13 +666,18 @@ public final class GravityPower implements Power {
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player) || GravityForward.falling(player)
-			|| GravityCometRam.ramming(player) || GravityWalk.walking(player);
+			|| GravityCometRam.ramming(player) || GravityWalk.walking(player) || GravityPlanets.falling(player);
 	}
 
 	// ---------------------------------------------------------------- keys
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (down && key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && !PowerInput.isDown(player, PowerKey.ABILITY_4) && ownWell(player) == null
+			&& GravityPlanets.throwPlanet(player)) {
+			// sneak + G: a planet thrown to fall to (GravityPlanets)
+			return;
+		}
 		State state = state(player);
 		if (down && key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && state.liftTarget < 0 && !state.chunkHold && state.ripFrom < 0 && ownWell(player) == null
 			&& GravityPicks.bands(player)) {
@@ -786,12 +795,22 @@ public final class GravityPower implements Power {
 	/** Z: the Immense Field (a dome of heavy gravity to train in), or take yours down. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (down && player.isShiftKeyDown() && GravityPicks.trade(player)) {
+		// (Heavy and light) a hold of Z steps your weight; a tap, told from it as the key comes up, is what Z always did
+		if (GravityHeft.key(player, down)) {
 			return;
 		}
-		if (down) {
-			GravityTrainingField.toggle(player);
+		if (player.isShiftKeyDown() && GravityPicks.trade(player)) {
+			return;
 		}
+		GravityTrainingField.toggle(player);
+	}
+
+	/** (Heavy and light) Weightless on or off from the far end of the weight scale: true if it is now as asked. */
+	static boolean heftWeightless(ServerPlayer player, boolean on) {
+		if ((player.getAttached(WEIGHTLESS_ON) != null) != on) {
+			toggleWeightless(player, state(player));
+		}
+		return (player.getAttached(WEIGHTLESS_ON) != null) == on;
 	}
 
 	/** Collapse has a C of its own (the black hole), corrupted or not ascended. */
@@ -1954,6 +1973,8 @@ public final class GravityPower implements Power {
 		smallThings(player);
 		GravityPicks.tick(player);
 		GravityWeight.tick(player);
+		GravityHeft.tick(player);
+		GravityPlanets.tick(player);
 		if (state.meteorFrom >= 0) {
 			if (Fate.isAscended(player) && !Fate.isCorrupted(player)) {
 				GravityMeteor.charging(player, meteorCharge(player, state), player.level().getGameTime() - state.meteorFrom);

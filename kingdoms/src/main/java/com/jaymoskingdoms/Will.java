@@ -116,6 +116,8 @@ public final class Will {
 	static final int HUSH_TICKS = 100, HUSH_PLAYER_TICKS = 60;
 	/** The tag on a hushed player (Jaymo's Powers keeps their power keys quiet while it's on: {@code WillSkill}). */
 	public static final String HUSHED_TAG = "jaymoskingdoms_hushed";
+	/** The tag on whoever stands in a Jaymo's Powers Airless Dome: no air to speak a spell with. */
+	static final String AIRLESS_TAG = "jaymospowers_airless";
 	/** Snap the Thread: the odds a thrall falls apart under a full-strength blow, and how long a necromancer's thralls reel (ticks). */
 	static final float SNAP_CHANCE = 0.35F;
 	static final int REEL_TICKS = 40;
@@ -545,6 +547,10 @@ public final class Will {
 
 	/** Whether {@code e} was hushed by a Spellbreaker Blow and can't cast yet (Sorcery, Mana and Arcana ask). */
 	public static boolean hushed(Entity e) {
+		// (Jaymo's Powers' Airless Dome) no breath, no spell finished
+		if (e.entityTags().contains(AIRLESS_TAG)) {
+			return true;
+		}
 		if (e instanceof Player) {
 			return e.entityTags().contains(HUSHED_TAG);
 		}

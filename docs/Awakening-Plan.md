@@ -47,4 +47,50 @@ off far shots (`aw-deflect`).
 7. **Bosses and hunters**: `aw-cordon`, `aw-adapt`, `aw-strangers`, `aw-tracker` (Lookout), `aw-share`, `aw-teamtime`.
 
 ## As built
-(filled in per patch)
+
+### Patch 1: this morning's calls, Gravity, Chrono, Wind
+- `aw-ward` **Warding Hush** (Kingdoms `HushWard`). Blows and shots with a hand behind them stop short of you; each point
+  of harm stopped costs a feather of stamina (Powers' stamina bar). What the feathers can't pay for gets through (the
+  paid share is taken off the blow on the hurt path). Explosions, falls, fire, drowning, hunger and anything with no
+  direct striker get through. Who has it: the Lantern Warden's sworn from the third tier (beside Lamp Against the
+  Night), and any staff caster from a Scroll of the Warding Hush (a court wizard keeps one; 20 mana, 30 s, longer from a
+  strong staff, 40 s wait). Without Powers it is paid in hunger.
+- `aw-decay` **Ash rot** (Kingdoms `AshRot`). Decay stacks with no cap; each stack does 0.5 harm a second, all drop 8 s
+  after the last new one. The Ash Whisperer's sworn: tier 1, every blow lays a stack; a new **Rot key** (default End,
+  Patron keys category) holds the arts: tap at a foe = **Grip** (pins 2.5 s, stacks while held), sneak = **Spread** (a
+  12-block strip of rotting ground for 6 s), tier 3 sprint = **Rush** (drives the foe till it meets a wall), tap at
+  nothing = **Breach** (rots a 3x3 tunnel 6 deep that closes after 20 s), tier 4 hold 2 s = **Collapse** (a crater 9
+  across and 6 deep that grows back over a minute, 5 min wait). The Unseeing's ritual-keepers (Powers
+  `UnseeingRites`: blindfolded, gouged or zealous, never a follower who still has their eyes) lay rot with every blow
+  (a short withering without Kingdoms), draw blood across the air to heal themselves, and lay death's touch (lingering
+  withering).
+- `aw-grav-weight` **Heft** (`GravityHeft`). Hold Z to step lighter, sneak+hold Z to step heavier (heavy, normal,
+  light, weightless). Light: lower gravity, higher jump, half fall damage. Heavy: knockback resistance, faster fall,
+  sinks in water. One step lighter than light is Gravity's own weightless state. Z taps keep their old jobs on release.
+- `aw-grav-planets` **Planet hopping** (`GravityPlanets`). Sneak+G throws a small planet up to 50 blocks; you fall to
+  it with no fall damage and keep some speed on arrival; throwing the next mid-fall keeps your speed (12-tick wait).
+- `aw-chrono-day` **Wind the Day** (`ChronoWindDay`). The first time a Chrono attunes the day winds a full turn
+  forward. After that, with Time Flow on, hold Z to sweep the day forward, faster the longer you hold, sneak to wind it
+  back. On a server it needs the same share of the other overworld players as sleeping does (the gamerule): they
+  agree by crouching or lying in bed; both sides see who is waiting on an overlay.
+- `aw-chrono-arrows` **Arrows stop too**: already built. Time Flow's time stop opens a Stasis Field that parks every
+  projectile in flight where it is and lets it carry on when time starts; the full time stop holds shots through the
+  tick freeze. Nothing added.
+- `aw-wind-airless` **Airless Dome** (`AirlessDome`, Wind and Smoke). At master rank with all four abilities: C (sprint+C
+  when C is taken by an ascended/corrupted ultimate). A 7-block dome for 12 s: everyone but you loses air and drowns
+  at 0 (armour or not; water-breathers are spared), creeper fuses run back, vanilla spellcasting illagers' spells are
+  broken off, and Kingdoms casters inside can't cast (hushed). 90 s wait.
+- `aw-wind-ride` **Ride your tornado** (`WindRide`). During Cyclone, a Sneak tap steps into the funnel: you ride it along
+  your look, carried with whatever it has caught; tap again to step out.
+
+Design calls: Rot arts on one new key so they don't take Patron boon keys; crater and tunnels grow back (no lasting
+grief, they wait for anyone standing in them); Heft on Z hold so Z's taps stay; Planets on sneak+G (G alone still casts
+the well); Wind the Day's consent is the sleeping rule; Airless Dome needs all four abilities and rank 3.
+
+Lore (new, for Andy to approve in Lore.md):
+- (new) **The Warding Hush** is the Lantern Warden's: the dark kept a hand's breadth from his own. Court wizards copied
+  it onto scrolls; it costs the body's own breath to hold.
+- (new) **Ash rot** is the Ash Whisperer's gift to his followers: what the Ash touches crumbles, earth and flesh both.
+  The Unseeing's ritual-keepers learned the same rot, and blood and death rites with it.
+- (new) Gravity's heft, Planet hopping, Wind the Day, Airless Dome and the ridden tornado are arts the powers grow
+  into, no new people.

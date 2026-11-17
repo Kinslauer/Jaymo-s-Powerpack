@@ -166,6 +166,7 @@ public final class ChronoPower implements Power {
 		// held attack while overclocked: the flurry
 		ChronoFlurry.register();
 		ChronoFlow.init();
+		ChronoWindDay.init();
 		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
 		ChronoTakedowns.init();
 		// Time Stop (sneak + C, Timeless): the whole server's tick freeze
@@ -239,6 +240,7 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		state.clearHistory();
 		state.synced = false;
+		ChronoWindDay.gained(player);
 	}
 
 	/**
@@ -310,6 +312,8 @@ public final class ChronoPower implements Power {
 		if (down) {
 			ChronoFlow.toggle(player);
 		}
+		// (Wind the day) Z kept held as the flow takes you winds the day
+		ChronoWindDay.mode(player, down);
 	}
 
 	/** Chrono Punch; sneaking, Time Stop ({@link ChronoTimeStop}, its own cooldown). */
@@ -432,6 +436,7 @@ public final class ChronoPower implements Power {
 			bloomHealNearby(player, level);
 		}
 		ChronoFlow.tickPlayer(player);
+		ChronoWindDay.tick(player);
 		if (state.overclockHeld && state.overclockLeft <= OVERCLOCK_HELD_REFRESH) {
 			if (overclockToggles(player)) {
 				// switched on for good: keep it running until V switches it off

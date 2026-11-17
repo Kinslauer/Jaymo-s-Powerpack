@@ -1,0 +1,10 @@
+{
+  "key.jaymoskingdoms.ash_rot": "Rot (the Ash's sworn)",
+  "message.jaymoskingdoms.ash_rot.unknown": "The rot has not come to your hands yet.",
+  "message.jaymoskingdoms.ash_rot.wait": "The rot gathers again: %s s",
+  "message.jaymoskingdoms.ash_rot.no_foe": "Nothing there for the rot to take.",
+  "message.jaymoskingdoms.ash_rot.no_wall": "No wall close enough to rot through.",
+  "item.jaymoskingdoms.scroll_of_hush_ward": "Scroll of the Warding Hush",
+  "class.jaymoskingdoms.option.hush_ward": "Warding Hush",
+  "class.jaymoskingdoms.option.hush_ward.desc": "The Lantern Warden's hush round you for half a minute: blows and shots stop just short of you, a point of stamina for each point of harm. Blasts get through."
+}

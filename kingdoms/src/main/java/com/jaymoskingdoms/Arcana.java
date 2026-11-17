@@ -140,7 +140,7 @@ public final class Arcana {
 		if (random.nextInt(NEW_SCROLL_ONE_IN) == 0) {
 			List<String> kept = switch (role) {
 				case Sorcery.WIZARD -> List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "hut", "feather_fall", "misty_step", "fog",
-					"create_food", "purify_food", "glass_shards", "glass_skin", "fire_ring", "fire_lance");
+					"create_food", "purify_food", "glass_shards", "glass_skin", "fire_ring", "fire_lance", HushWard.SPELL);
 				case Sorcery.SHAMAN, Orcs.SHAMAN -> List.of("speak_animals", "spider_climb", "water_walk", "long_jump", "web", "grease", "spike_growth",
 					"purify_food", "glass_spires", "molten_glass", "fire_pillars", "storm_cloak");
 				case Sorcery.NECROMANCER -> List.of("darkness", "silence", "web", "black_flame");

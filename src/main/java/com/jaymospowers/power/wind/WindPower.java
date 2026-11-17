@@ -66,6 +66,8 @@ public final class WindPower implements Power {
 	// ---- ability tuning ---------------------------------------------------------------------------------------
 	/** Tailwind: buff duration (ticks) at the weakest and full channel; dash speed (blocks/tick). */
 	static final int TAILWIND_MIN_TICKS = 100, TAILWIND_MAX_TICKS = 400;
+	/** The Airless Dome's colour for a Wind user: the pale of thin air. */
+	static final int AIRLESS_COLOUR = 0xDDE8F0;
 	static final float TAILWIND_DASH_MIN = 0.7F, TAILWIND_DASH_MAX = 1.5F;
 	/** Gale Barrier: duration, projectile deflection radius, mob push radius and strength. */
 	static final int BARRIER_MIN_TICKS = 120, BARRIER_MAX_TICKS = 360;
@@ -119,6 +121,8 @@ public final class WindPower implements Power {
 		WindModes.register();
 		WindBolts.init();
 		WindTempest.init();
+		// (Awakening pick) the Airless Dome, Wind's and Smoke's
+		AirlessDome.init();
 		SorasDagger.register();
 		SorasLineage.register();
 		SorasBladeChild.register();
@@ -284,6 +288,11 @@ public final class WindPower implements Power {
 	/** Cyclone Lance (C, ascended only): an instant spear of wind along the look direction. In the Thunderhead, mid-air and looking down, it is the {@link WindThunderDive} instead. */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
+		// (Awakening pick) the Airless Dome: C before the Tempest, sprint + C after
+		if (down && player.isAlive() && (!Fate.isAscended(player) || player.isSprinting()) && AirlessDome.unlocked(player)) {
+			AirlessDome.cast(player, AIRLESS_COLOUR);
+			return;
+		}
 		if (!down || !Fate.isAscended(player) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
@@ -363,7 +372,13 @@ public final class WindPower implements Power {
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		State s = this.states.get(player.getUUID());
-		return s != null && (s.flight.flying() || s.fallProtected);
+		return s != null && (s.flight.flying() || s.fallProtected) || WindRide.riding(player);
+	}
+
+	/** C answers the Tempest's Lance, and from the master rank the Airless Dome ({@link AirlessDome}). */
+	@Override
+	public boolean ultimateAnswers(Player player) {
+		return Fate.isAscended(player) || AirlessDome.unlocked(player);
 	}
 
 	@Override
