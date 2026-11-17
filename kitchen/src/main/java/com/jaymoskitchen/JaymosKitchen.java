@@ -195,6 +195,16 @@ public class JaymosKitchen implements ModInitializer {
 				}
 				return InteractionResult.SUCCESS;
 			}
+			// cooking by hand: no screen; sneaking empty-handed says what is on the station and what it would make
+			if (com.jaymoskitchen.cooking.hands.HandsOn.on(level)) {
+				if (sneakingEmptyHanded && (station != null || Prep.isPrepSurface(level, pos, state, hit.getDirection()))) {
+					if (player instanceof ServerPlayer serverPlayer) {
+						com.jaymoskitchen.cooking.hands.HandsOn.hintAt(serverPlayer, pos);
+					}
+					return InteractionResult.SUCCESS;
+				}
+				return InteractionResult.PASS;
+			}
 			// a cutting board opens the prep screen below, which has the chopping on it
 			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {
 				if (player instanceof ServerPlayer serverPlayer) {

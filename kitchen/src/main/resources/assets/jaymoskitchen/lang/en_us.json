@@ -1122,5 +1122,7 @@
 	"hud.jaymoskitchen.hands.smoke": "Hold use with the fan to keep the heat in the green",
 	"hud.jaymoskitchen.hands.smoke.hot": "Too hot, ease off the fan",
 	"hud.jaymoskitchen.hands.smoke.cold": "Cooling, fan it",
-	"message.jaymoskitchen.hands.need_spit": "Set a spit over the fire first."
+	"message.jaymoskitchen.hands.need_spit": "Set a spit over the fire first.",
+	"hud.jaymoskitchen.hands.seq": "Next: %s, right-click with %s",
+	"hud.jaymoskitchen.hands.seq.sneak": "Next: %s, sneak and right-click with %s"
 }

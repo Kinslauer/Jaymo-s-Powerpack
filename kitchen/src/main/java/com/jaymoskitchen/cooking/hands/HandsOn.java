@@ -330,6 +330,21 @@ public final class HandsOn {
 			: Component.translatable("hands.pick." + pick.kind().name().toLowerCase());
 	}
 
+	/** Whether cooking is done by hand here (the server's game rule, as the client was told). */
+	public static boolean on(Level level) {
+		return level instanceof ServerLevel server ? enabled(server) : clientOn;
+	}
+
+	/** Sneak and an empty hand at a station: what is on it and what it would make (there is no screen to open). */
+	public static void hintAt(ServerPlayer player, BlockPos pos) {
+		Table table = tableAt(player.level(), stationPos(player.level(), pos));
+		if (table == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.empty"));
+		} else if (table.run == null) {
+			hintPick(player, table);
+		}
+	}
+
 	/** What the station would make now, in the action-bar line. */
 	static void hintPick(ServerPlayer player, Table table) {
 		Pick pick = table.chosen();

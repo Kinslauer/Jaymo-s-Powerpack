@@ -21,6 +21,7 @@ final class Runs {
 			return new DoughRun(table, pick, now);
 		});
 		HandsOn.factory(Pick.Kind.JOINT, (table, pick, starter, now) -> new JointRun(table, pick, now));
+		HandsOn.factory(Pick.Kind.SEQUENCE, (table, pick, starter, now) -> new SequenceRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.ROAST, (table, pick, starter, now) -> new RoastRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.GRILL, (table, pick, starter, now) -> new GrillRun(table, pick, now));
 		HandsOn.factory(Pick.Kind.OVEN, (table, pick, starter, now) -> new GrillRun(table, pick, now));

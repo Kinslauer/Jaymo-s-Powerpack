@@ -4,6 +4,8 @@ import com.jaymoskitchen.client.hud.HudStyle;
 import com.jaymoskitchen.cooking.Grill;
 import com.jaymoskitchen.cooking.Minigames;
 import com.jaymoskitchen.cooking.Prep;
+import com.jaymoskitchen.cooking.Quality;
+import com.jaymoskitchen.cooking.Step;
 import com.jaymoskitchen.cooking.Rolling;
 import com.jaymoskitchen.cooking.Sear;
 import com.jaymoskitchen.cooking.Smoke;
@@ -48,6 +50,7 @@ final class Readouts {
 			case STIR -> STIR;
 			case DOUGH -> DOUGH;
 			case JOINT -> JOINT;
+			case SEQUENCE -> SEQUENCE;
 			case ROAST -> ROAST;
 			case GRILL, OVEN -> GRILL;
 			case SEAR -> SEAR;
@@ -325,6 +328,37 @@ final class Readouts {
 			needle(graphics, x, gy, W, 8, heat);
 			HudStyle.bar(graphics, x, gy + 11, W, 3, get(i, 0) / (float) Smoke.CURE_TICKS, GOOD);
 			HudStyle.bar(graphics, x, gy + 15, W, 3, 1.0F - get(i, 3) / (float) Smoke.TIME_LIMIT, WARN);
+		}
+	};
+
+	// --- step recipes ---
+
+	private static final HandsHud.Drawer SEQUENCE = new HandsHud.Drawer() {
+		@Override
+		public int height(HandsSync sync) {
+			return HandsHud.LINE + 2 + 6 + 3 + 4;
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
+			int[] i = sync.ints();
+			Step[] steps = Step.values();
+			int at = get(i, 3);
+			Step next = at >= 0 && at < steps.length ? steps[at] : null;
+			Component what = next == null ? Component.empty() : Component.translatable(next.translationKey());
+			Component how = Component.translatable(next == null ? "tool.jaymoskitchen.hand" : !next.isAction() ? "tool.jaymoskitchen.hand"
+				: next == Step.FLIP ? "tool.jaymoskitchen.tongs" : next == Step.BAKE ? "tool.jaymoskitchen.peel" : "tool.jaymoskitchen.spoon");
+			boolean sneak = next == Step.SIMMER;
+			HudStyle.text(graphics, font, Component.translatable(sneak ? "hud.jaymoskitchen.hands.seq.sneak" : "hud.jaymoskitchen.hands.seq", what, how), x, y,
+				HudStyle.TEXT);
+			int gy = y + HandsHud.LINE + 2;
+			HudStyle.bar(graphics, x, gy, W, 6, get(i, 0) / (float) Math.max(1, get(i, 1)), GOOD);
+			int limit = Math.max(1, get(i, 6));
+			float elapsed = get(i, 4) + age;
+			HudStyle.bar(graphics, x, gy + 9, W, 3, 1.0F - elapsed / limit, elapsed <= get(i, 5) ? GOOD : WARN);
+			for (int m = 0; m < Quality.MAX_MISTAKES; m++) {
+				graphics.fill(x + W - (m + 1) * 8, gy + 14, x + W - m * 8 - 2, gy + 17, m < get(i, 2) ? BAD : 0xFF404040);
+			}
 		}
 	};
 

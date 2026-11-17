@@ -70,3 +70,13 @@ did. The spec's per-player sessions (R11) become one session per station that se
 - `SmokeRun` (`hc-smoke`): hold use with the fan (client `IN_HOLD`, every cook fanning adds to the one fire); heat, gusts, cure, scorch
   as the screen; `Smoke.judge`. Walking away: BURNT.
 - Readouts for all four (side meters with the golden and burnt marks, the sear bar, the smoker's heat band).
+
+### Patch 4: no screens left
+- `SequenceRun` (`hc-sequence`): step recipes at the pot, pan or oven. Ingredient steps are a right-click with an empty hand (the
+  ingredients went in when it started, as before); actions with their tool: spoon stirs, sneak + spoon simmers (my reading, the
+  plan names no tool for simmering), tongs flip, peel bakes. Anything else is a mistake; three burn it; the dish's par and limit
+  are the screen's, stretched the same way; `Quality.judge`. Clicks within 3 ticks count once. Walking away: burnt.
+- `hc-recipepick`: with the game rule on, sneak + empty hand at a station or worktop no longer opens a screen (`JaymosKitchen`'s
+  use callback): it says what lies on it and what it would make (`HandsOn.hintAt`); a worktop's picks are made from what was put on
+  it (sneak + scroll chooses). The screens open only with the rule off, or for the Cooking for Blockheads table's own buttons, which
+  start the dish at the block without a screen.
