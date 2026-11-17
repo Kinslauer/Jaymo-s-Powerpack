@@ -362,7 +362,8 @@ public final class Arcana {
 		// (a held spell: broken, the ward goes from all of them)
 		Concentration.hold(player, "warding", (int) (SCROLL_WARD_TICKS * power), () -> warded.forEach(p -> p.removeEffect(MobEffects.ABSORPTION)));
 		for (Player p : warded) {
-			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL), player);
+			// (class trees) a Warder's ward soaks more
+			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL + ClassForks.wardSoak(player)), player);
 			level.sendParticles(Fx.LIGHT, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.4F);

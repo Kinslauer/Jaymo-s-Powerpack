@@ -49,3 +49,34 @@ picked is **Clockwork Scope** (`ct-bench-scope`), so the Workshop bench has no s
 - No class yet: youth answer "Drifted" and a "No class yet" button on the class screen. Classless players learn a first
   class from **any villager of that class's trade** (the teachers' trades list, `SecondClass.offers`) for 10 silver,
   rather than only from a named master, so it can be found in any village.
+
+### Patch 2: Sorcerer, and the Thief, Mage and Ranger forks
+- **Sorcerer** (`Sigils`, `Spellcraft`, `trees/SorcererTree`). A tap of J throws the **sigil** (`ct-sor-sigil`): a glyph flies
+  off the blade (or the open hand) until it meets something and bursts with the element through `Spellcraft.strike` (fire
+  alights, ice freezes, lightning chains, earth staggers, air launches, water douses, and puts out fire blocks in the burst).
+  Damage 3 x practice (`ClassTrees.practice`, so it grows with the level), the old bolt's mana price, a 1.5 s wait. It
+  replaces sneak+J's bolt, which is gone. **Sigilcraft** (3 ranks): +0.75 burst radius, +6 blocks of flight, -15% wait a
+  rank. **Imbue** (level 5) is held now: holding J with a blade in hand and nothing of the element to draw soaks the blade
+  for 2 minutes. **Ward Sigil / Twin Imbue** (10): sneak+J lays the sigil on the ground (two at once, a minute each; bursts
+  at 1.5x under the first foe) / the off hand's blade takes the same imbue. **Elemental Burst / Lingering Imbue** (15): J
+  held on a blade still burning ends the imbue in a blast round you (8 damage scaled by what was left) / imbues last twice
+  as long. **Absorbing** is the old Sorcery perk renamed (absorbing, the barrage, and the element's own workings: Storm
+  Ring, Bolt Step, Bulwark, Tide Pearl, Harrying Gale, death's and blood's keys); **Forbidden Arts** stays after it. **Etched
+  Blade** (top, 20): while imbued, every 4th combo link throws a free sigil (hooked into `CombatArts`' chain).
+- My calls: the old Sorcery perk stays the save key (renamed "Absorbing") so nobody loses ranks; a Sorcerer who had it before
+  trees keeps the Imbue free (`ClassTrees.keptIf`, a kept rank survives a respec). Restoration's keys (Mend etc.) are its
+  starting move instead of a damaging sigil, and stay free; death's tap still raises a body (Andy's earlier call), so a
+  Death Sorcerer's sigil is on sneak+J. Wild bloodline sigils take a random element. Sorcerers who don't absorb (the wild
+  bloodline, or Absorbing not learned) now send a tap/hold to the server too, so the hold can imbue.
+- **Thief** (`ClassForks`): **Assassin** (sneak attack on the unaware: blow x2.5 + 4 instead of x1.5 + 2) or **Acrobat**
+  (climbing 1.6x as fast by a mixin on the climb, +4 safe fall, fall damage halved, and +0.5 step height at a run, so a
+  block is vaulted in stride).
+- **Mage**: **Evoker** (magic, blasts and fiery non-arrow shots from the Mage hit 1.3x, and never hurt players, townsfolk,
+  golems or their own beasts unless those are after them) or **Warder** (Warding, Sanctuary and Bulwark cast from the staff
+  last 1.5x; Warding's absorption a step stronger).
+- **Ranger**: **Hunter** (+25% on the favoured foe, its trail read 1.5x as far) or **Beast Master** (sneak+J looking at a beast
+  you tamed bonds it; it gains health, bite and size with your Ranger level, at the second-class share for a second class).
+- Gaps: the Acrobat's "vaulting" is a step up at a run, not a faster version of Jaymo's Powers' own vault (that lives in
+  Powers' parkour; changing it would mean a Powers hook). The Warder's longer wards are our own wards; the RPG Series' Frost
+  Shield is the Wizards mod's spell and isn't lengthened.
+- Lore: the sigil is the canon's typed "sigil" (a working laid as a circle of marks); nothing new to place.

@@ -87,7 +87,8 @@ import org.jspecify.annotations.Nullable;
  * thrown as a barrage of small blasts of the element, hands taking turns, as the blood barrage. Each hurts and carries
  * a touch of the element; one in {@link #ELEMENT_ONE_IN} bursts with it in full ({@link Spellcraft#strike}).
  * Restoration's blasts heal the living they hit instead and sear only monsters and the undead.</li>
- * <li>A <b>tap</b> of J is still the Imbue (or Restoration's Mend, or lightning's Storm Ring), and sneak and J the keys.</li>
+ * <li>A <b>tap</b> of J is the sigil (class trees, {@link Sigils}; or Restoration's Mend, or lightning's Storm Ring), a hold
+ * with a blade in hand and nothing to draw from the Imbue, and sneak and J the keys.</li>
  * </ul>
  */
 public final class Absorption {
@@ -185,6 +186,8 @@ public final class Absorption {
 	private static final List<Blast> BLASTS = new ArrayList<>();
 	/** An empty hand's tap, by player: when it was let go (its Imbue waits to see if a second press makes it a double tap). */
 	private static final Map<UUID, Long> TAPPED = new HashMap<>();
+	/** (class trees) A plain press of a Sorcerer who doesn't absorb, by player: when it went down. */
+	private static final Map<UUID, Long> PRESSED = new HashMap<>();
 
 	private Absorption() {
 	}
@@ -197,6 +200,7 @@ public final class Absorption {
 			HOLDING.clear();
 			BLASTS.clear();
 			TAPPED.clear();
+			PRESSED.clear();
 		});
 		// death: every soul let go near a Death Sorcerer goes to them
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -275,19 +279,28 @@ public final class Absorption {
 	private static void hold(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
 		if (down) {
-			if (absorber(player) && player.isAlive() && !TreeLocks.check(player, TreeLocks.Lock.SORCERY)) {
-				// (Andy's skill-tree locks) absorbing is learned: Sorcery
-				return;
-			}
-			if (absorber(player) && player.isAlive()) {
+			if (absorber(player) && player.isAlive() && TreeLocks.has(player, TreeLocks.Lock.SORCERY)) {
+				// (Andy's skill-tree locks) absorbing is learned: Absorbing (the old Sorcery perk)
 				Long tapped = TAPPED.remove(player.getUUID());
 				boolean quick = tapped != null && now - tapped <= DOUBLE_TAP && player.getMainHandItem().isEmpty();
 				if (tapped != null && !quick) {
 					Spellcraft.imbue(player, false);
 				}
 				HOLDING.put(player.getUUID(), new Holding(now, quick));
+			} else if (Classes.is(player, PlayerClass.SORCERER) && player.isAlive()) {
+				// (class trees) a Sorcerer who can't absorb (not learned, or the wild bloodline): a tap is the sigil, a hold the Imbue
+				PRESSED.put(player.getUUID(), now);
 			} else {
 				Spellcraft.imbue(player, false);
+			}
+			return;
+		}
+		Long pressed = PRESSED.remove(player.getUUID());
+		if (pressed != null) {
+			if (now - pressed < TAP_TICKS) {
+				Spellcraft.imbue(player, false);
+			} else {
+				Spellcraft.holdImbue(player);
 			}
 			return;
 		}
@@ -364,6 +377,10 @@ public final class Absorption {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), gatherSound(element), SoundSource.PLAYERS, 0.6F, 0.8F);
 			}
 			if (!h.gathering && !player.getMainHandItem().isEmpty()) {
+				// (class trees) a blade in hand and nothing to draw from: the hold is the Imbue
+				if (Spellcraft.blade(player.getMainHandItem())) {
+					Spellcraft.holdImbue(player);
+				}
 				return;
 			}
 		}
