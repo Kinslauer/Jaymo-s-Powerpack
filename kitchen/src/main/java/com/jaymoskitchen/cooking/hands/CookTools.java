@@ -42,7 +42,7 @@ public final class CookTools {
 
 	/** What a cook holds to do one thing at a station. */
 	public enum Tool {
-		/** The empty hand (kneading dough, sprinkling, turning the spit, adding what the recipe says). */
+		/** The empty hand (kneading dough, sprinkling, turning the spit). */
 		HAND,
 		KNIFE,
 		SPOON,
