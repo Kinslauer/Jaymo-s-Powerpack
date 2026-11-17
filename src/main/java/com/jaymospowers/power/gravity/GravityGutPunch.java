@@ -51,6 +51,12 @@ final class GravityGutPunch {
 	static final int SLOW_TICKS = 140, SLOW_LEVEL = 3;
 	/** B's cooldown after it (ticks). */
 	static final int COOLDOWN = 220;
+	static final float RING_RADIUS = 1.5F;
+	static final int RING_COLOR = 0xFFFFFF;
+	static final double WAVE_DISTANCE = 5.0;
+	static final float WAVE_WIDTH = 1.5F;
+	static final int WAVE_COLOR = 0xD0D0D0;
+	static final int WAVE_TICKS = 10;
 
 	private static final com.jaymospowers.core.blood.BloodParticles.Fleck BLOOD = com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0A0A, 1.0F);
 
@@ -162,6 +168,9 @@ final class GravityGutPunch {
 		Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
 		level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 30, 0.3, 0.3, 0.3, 0.4);
+		Vec3 feet = target.position().add(0.0, 0.1, 0.0);
+		MagicFx.ring(level, feet, RING_RADIUS, RING_COLOR);
+		MagicFx.wave(level, feet, owner.getLookAngle(), WAVE_DISTANCE, WAVE_WIDTH, WAVE_COLOR, WAVE_TICKS);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 1.0F, 0.5F);

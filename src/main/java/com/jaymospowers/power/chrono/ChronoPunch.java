@@ -41,6 +41,16 @@ final class ChronoPunch {
 	static final int FILM_TICKS = 22;
 	/** Screen shake per landed punch: the first, then this much more each. */
 	static final float SHAKE = 0.1F, SHAKE_STEP = 0.06F;
+	static final float RING_RADIUS = 1.5F;
+	static final int RING_COLOR = 0xFFFFFF;
+	static final double WAVE_DISTANCE = 5.0;
+	static final float WAVE_WIDTH = 1.5F;
+	static final int WAVE_COLOR = 0xD0D0D0;
+	static final int WAVE_TICKS = 10;
+	static final float STROKE_LENGTH = 0.7F;
+	static final float STROKE_WIDTH = 0.35F;
+	static final int STROKE_COLOR = 0xFFE08A;
+	static final int SPARK_COUNT = 6;
 	private static final ParticleOptions GOLD = MagicFx.wisp(0xFFE08A, 1.0F);
 	private static final SwingAnimation JAB = new SwingAnimation(SwingAnimationType.WHACK, EVERY);
 
@@ -97,6 +107,15 @@ final class ChronoPunch {
 		Vec3 look = player.getLookAngle();
 		Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
 		ChronoFx.particles(level, player, GOLD, fist.x, fist.y, fist.z, 3, 0.25, 0.2, 0.25, 0.0);
+		// a blur of fists: several strokes across the flurry's cone
+		Vec3 strokeSide = new Vec3(-look.z, 0.0, look.x);
+		if (strokeSide.lengthSqr() < 1.0E-6) {
+			strokeSide = new Vec3(1.0, 0.0, 0.0);
+		}
+		for (int k = 0; k < 4; k++) {
+			Vec3 off = strokeSide.scale((k - 1) * 0.18).add(0.0, 0.12 * k, 0.0).add(look.scale(STROKE_LENGTH));
+			MagicFx.stroke(level, fist.add(off), fist.add(off).add(look.scale(STROKE_LENGTH)), STROKE_WIDTH, STROKE_COLOR);
+		}
 		boolean any = false;
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !player.isAlliedTo(e)
@@ -118,6 +137,9 @@ final class ChronoPunch {
 				target.setDeltaMovement(away.scale(FINISH_PUSH).add(0.0, 0.45, 0.0));
 				ChronoFlow.reel(target, ChronoFlow.FLUNG, 0);
 				ChronoFx.particles(level, player, ParticleTypes.EXPLOSION, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				Vec3 at = target.position().add(0.0, 0.1, 0.0);
+				MagicFx.ring(level, at, RING_RADIUS, RING_COLOR);
+				MagicFx.wave(level, at, away, WAVE_DISTANCE, WAVE_WIDTH, WAVE_COLOR, WAVE_TICKS);
 			} else {
 				// held in the moment: the punches pin them where they stand
 				target.setDeltaMovement(before.scale(0.2));
@@ -127,6 +149,7 @@ final class ChronoPunch {
 			Vec3 at = target.getBoundingBox().getCenter();
 			ChronoFx.crackSound(level, player, at.x, at.y, at.z);
 			ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
+			ChronoFx.particles(level, player, MagicFx.spark(0xFFE08A, 1.0F), at.x, at.y, at.z, SPARK_COUNT, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (any) {
 			// (0.11.40) each punch shakes harder than the last
