@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 04:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 04:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,6 +15,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · changes · fixing review notes
 - [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · changes · fixing review notes
+- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · 💻 Odysseus · #1671 · claimed
 
 
 ## In review
@@ -27,7 +28,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/future-gun-gear|future-gun-gear]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 
 
