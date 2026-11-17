@@ -1,19 +1,22 @@
 package com.jaymoskitchen.cooking.hands;
 
+import com.jaymoskitchen.cooking.Kitchen;
 import com.jaymoskitchen.cooking.Quality;
 import com.jaymoskitchen.cooking.Step;
 import java.util.List;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * A step recipe at the pot, pan or oven, done step by step in the order the recipe says. An ingredient step is a
- * right-click with an empty hand (the ingredients are already in); an action is done with its own tool: stir with the
- * spoon, simmer by sneaking with the spoon, flip with the tongs, bake with the peel. The wrong thing is a mistake, three
- * mistakes burn it, and it burns if left too long. Judged by {@link Quality#judge} with the par and limit the screen
- * used (randomly stretched or squeezed for each dish). Everyone at the station does the steps of the one dish.
+ * right-click with that ingredient in hand (one is used up; nothing went in when the dish started, so a dish left or
+ * burnt loses only what was added); an action is done with its own tool: stir with the spoon, simmer by sneaking with
+ * the spoon, flip with the tongs, bake with the peel. The wrong thing (another ingredient, the wrong tool) is a mistake,
+ * three mistakes burn it, and it burns if left too long. Judged by {@link Quality#judge} with the par and limit the
+ * screen used (randomly stretched or squeezed for each dish). Everyone at the station does the steps of the one dish.
  */
 final class SequenceRun extends Run {
 	/** A second click this soon after the last is the same click (the key bounced). */
@@ -37,11 +40,8 @@ final class SequenceRun extends Run {
 		return dish.steps().get(Math.min(progress, dish.steps().size() - 1));
 	}
 
-	/** What a click with {@code held} does as a step: the action's step, an ingredient (empty hand), or null if it is no step at all. */
-	private static Step stepOf(ItemStack held, boolean sneaking, Step wanted) {
-		if (held.isEmpty()) {
-			return wanted.isAction() ? null : wanted;
-		}
+	/** The action a click with the tool {@code held} is, or null if it is none (a knife, a fan, an ingredient, an empty hand). */
+	private static Step stepOf(ItemStack held, boolean sneaking) {
 		if (CookTools.Tool.SPOON.holds(held)) {
 			return sneaking ? Step.SIMMER : Step.STIR;
 		}
@@ -54,19 +54,41 @@ final class SequenceRun extends Run {
 		return null;
 	}
 
+	/** Whether {@code held} is an ingredient of any recipe: put in at the wrong time it is a mistake, not a stray click. */
+	static boolean ingredient(ItemStack held) {
+		for (Step step : Step.values()) {
+			if (!step.isAction() && step.matches(held)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	boolean use(ServerPlayer player, ItemStack held, boolean sneaking, int now) {
-		boolean tool = CookTools.isTool(held);
-		if (!held.isEmpty() && !tool) {
+		Step wanted = next();
+		boolean goesIn = !wanted.isAction() && wanted.matches(held);
+		if (!held.isEmpty() && !CookTools.isTool(held) && !ingredient(held)) {
 			return false;
 		}
 		if (now - lastClick < DEBOUNCE) {
 			return true;
 		}
 		lastClick = now;
-		Step wanted = next();
-		Step done = stepOf(held, sneaking, wanted);
-		if (done == wanted) {
+		if (held.isEmpty() && !wanted.isAction()) {
+			// an empty hand adds nothing: say what goes in next
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hands.seq.add", Component.translatable(wanted.translationKey())));
+			return true;
+		}
+		if (goesIn || stepOf(held, sneaking) == wanted) {
+			if (goesIn && !player.hasInfiniteMaterials()) {
+				held.shrink(1);
+				if (wanted.remainder() != null) {
+					Kitchen.give(player, new ItemStack(wanted.remainder()));
+				}
+			}
+			// the cook whose step finishes the dish is the one it goes to
+			touch(player, now);
 			progress++;
 			table.playBlock(SoundEvents.NOTE_BLOCK_BELL.value(), 1.0F, 1.0F + progress * 0.1F);
 			table.level.sendParticles(ParticleTypes.HAPPY_VILLAGER, table.pos.getX() + 0.5, table.pos.getY() + 1.1, table.pos.getZ() + 0.5, 2, 0.15, 0.05,

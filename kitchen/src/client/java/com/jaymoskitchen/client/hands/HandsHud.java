@@ -113,6 +113,8 @@ final class HandsHud {
 			boolean dish = sync.dish() >= 0 && sync.quality() >= 0 && sync.quality() < all.length;
 			Component what = dish
 				? Component.translatable(all[sync.quality()].translationKey(), dishName(sync.dish(), sync.kind())).withStyle(all[sync.quality()].color())
+				// a sandwich cut badly is squashed, not lost
+				: sync.kind() == Pick.Kind.SANDWICH.ordinal() && sync.quality() == 0 ? Component.translatable("hud.jaymoskitchen.hands.sandwich.squashed")
 				: Component.translatable("hud.jaymoskitchen.hands.done." + Math.max(0, Math.min(2, sync.quality())));
 			int color = HudStyle.TEXT;
 			HudStyle.text(graphics, font, what, x, y, color);

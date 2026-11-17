@@ -2,6 +2,7 @@ package com.jaymoskitchen.client.hands;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.cooking.hands.HandsOn;
+import com.jaymoskitchen.cooking.hands.Pick;
 import com.jaymoskitchen.net.Payloads;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -19,7 +21,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The client side of cooking by hand: what the stations round here hold and how their dishes are going (the server
- * tells us, see {@link Payloads.HandsSync}), the readout of the one you're at, and the inputs a click can't carry (the
+ * tells us, see {@link Payloads.HandsSync}), the readout of the one you're at (and, in the world, the searing bar over
+ * any pan near, see {@link SearBar}), and the inputs a click can't carry (the
  * angle you point round a pot, whether use is held), sent while you work a running dish. Sneak and scroll over a station
  * picks between the dishes it could make.
  */
@@ -53,6 +56,10 @@ public final class HandsClient {
 			View view = VIEWS.get(pos);
 			return view != null && view.sync().phase() == Payloads.HandsSync.PHASE_RUNNING;
 		};
+		HandsOn.clientSteps = pos -> {
+			View view = VIEWS.get(stationOf(Minecraft.getInstance(), pos));
+			return view != null && view.sync().phase() == Payloads.HandsSync.PHASE_RUNNING && view.sync().kind() == Pick.Kind.SEQUENCE.ordinal();
+		};
 		HandsOn.clientPress = () -> {
 			boolean fresh = !pressed;
 			pressed = true;
@@ -60,6 +67,7 @@ public final class HandsClient {
 		};
 		ClientTickEvents.END_CLIENT_TICK.register(HandsClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("hands"), HandsHud::draw);
+		LevelRenderEvents.COLLECT_SUBMITS.register(SearBar::render);
 	}
 
 	private static void tick(Minecraft minecraft) {

@@ -64,6 +64,8 @@ public final class HandsOn {
 
 	/** Client side: whether the station at a position is known to have a dish running (so a left-click there is a chop, not mining). */
 	public static Predicate<BlockPos> clientRuns = pos -> false;
+	/** Client side: whether the station at a position is known to have a step recipe running (so an ingredient held there goes in the dish). */
+	public static Predicate<BlockPos> clientSteps = pos -> false;
 	/** Client side: whether hands-on cooking is on (from the server). */
 	public static boolean clientOn;
 	/** Client side: true once for each press of the attack key (a held key asks every tick; only the press is a chop). */
@@ -164,6 +166,11 @@ public final class HandsOn {
 	// --- clicks ---
 
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
+		if (level.isClientSide()) {
+			// an ingredient held at a step recipe goes in the dish: the click is sent on and nothing else is done with it (it isn't eaten)
+			return hand == InteractionHand.MAIN_HAND && !player.isSpectator() && clientOn && clientSteps.test(hit.getBlockPos())
+				&& SequenceRun.ingredient(player.getMainHandItem()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		}
 		if (hand != InteractionHand.MAIN_HAND || player.isSpectator() || !(level instanceof ServerLevel server)
 			|| !(player instanceof ServerPlayer cook) || !enabled(server)) {
 			return InteractionResult.PASS;
@@ -177,8 +184,10 @@ public final class HandsOn {
 			if (!table.inReach(cook) || table.run.over) {
 				return InteractionResult.PASS;
 			}
-			if (table.run.use(cook, held, sneaking, now)) {
-				table.run.touch(cook, now);
+			// the click may finish the dish, and the station then has no run
+			Run run = table.run;
+			if (run.use(cook, held, sneaking, now)) {
+				run.touch(cook, now);
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			return InteractionResult.PASS;
@@ -228,7 +237,12 @@ public final class HandsOn {
 			cook.sendOverlayMessage(Component.translatable("message.jaymoskitchen.oven_low_heat"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		table.consume(pick, cook);
+		if (pick.kind() == Pick.Kind.SEQUENCE) {
+			// a step recipe uses nothing up yet: what was put on only chose the dish, and each ingredient goes in by hand
+			table.clear(cook);
+		} else {
+			table.consume(pick, cook);
+		}
 		begin(table, pick, cook, now);
 		return InteractionResult.SUCCESS_SERVER;
 	}
@@ -247,8 +261,8 @@ public final class HandsOn {
 
 	/**
 	 * A dish picked on the old screen (or in the cooking table) at {@code pos}: if the way it's cooked is done by hand
-	 * here, its ingredients come from the pockets and kitchen as they always did and the dish starts at the block, no
-	 * screen. False if the screens must handle it.
+	 * here, its ingredients come from the pockets and kitchen as they always did (a step recipe's are only checked for:
+	 * they go in by hand) and the dish starts at the block, no screen. False if the screens must handle it.
 	 */
 	public static boolean fromScreen(ServerPlayer player, BlockPos pos, Dish dish, boolean[] refused) {
 		ServerLevel level = player.level();
@@ -273,7 +287,10 @@ public final class HandsOn {
 				refused[0] = true;
 				return true;
 			}
-			Kitchen.takeIngredients(player, pos, dish.ingredients());
+			// a step recipe's ingredients go in by hand, one step at a time
+			if (pick.kind() != Pick.Kind.SEQUENCE) {
+				Kitchen.takeIngredients(player, pos, dish.ingredients());
+			}
 		}
 		begin(table, pick, player, level.getServer().getTickCount());
 		return true;

@@ -54,6 +54,7 @@ final class Readouts {
 			case TEA -> TEA;
 			case SUSHI -> SUSHI;
 			case SEQUENCE -> SEQUENCE;
+			case SANDWICH -> SANDWICH;
 			case ROAST -> ROAST;
 			case GRILL, OVEN -> GRILL;
 			case SEAR -> SEAR;
@@ -89,7 +90,13 @@ final class Readouts {
 
 	private static final float CHOP_PX = 360.0F;
 
-	private static final HandsHud.Drawer CHOP = new HandsHud.Drawer() {
+	/** The sandwich is cut once, through its middle (it is one gap between marks long, the mark in its middle), on the chopping board's readout. */
+	private static final HandsHud.Drawer CHOP = chop(Minigames.CUTS, 1.0F, 0xFFE58A24, 0xFFB8641A),
+		SANDWICH = chop(1, Minigames.MARK_GAP, 0xFFD9B27A, 0xFF9C6B36);
+
+	/** What slides under the knife ({@code length} long, in its two colours), the marks of its {@code cuts}, and how each cut went. */
+	private static HandsHud.Drawer chop(int cuts, float length, int top, int under) {
+		return new HandsHud.Drawer() {
 		@Override
 		public int height(HandsSync sync) {
 			return 12 + 6 + 8;
@@ -104,12 +111,12 @@ final class Readouts {
 			int cx = x + W / 2;
 			graphics.fill(x, y, x + W, y + 12, 0xFF3A2410);
 			int x0 = Math.max(x, Math.round(cx + (0.0F - slide) * CHOP_PX));
-			int x1 = Math.min(x + W, Math.round(cx + (1.0F - slide) * CHOP_PX));
+			int x1 = Math.min(x + W, Math.round(cx + (length - slide) * CHOP_PX));
 			if (x1 > x0) {
-				graphics.fill(x0, y + 2, x1, y + 10, 0xFFE58A24);
-				graphics.fill(x0, y + 7, x1, y + 10, 0xFFB8641A);
+				graphics.fill(x0, y + 2, x1, y + 10, top);
+				graphics.fill(x0, y + 7, x1, y + 10, under);
 			}
-			for (int m = 0; m < Minigames.CUTS; m++) {
+			for (int m = 0; m < cuts; m++) {
 				int mx = Math.round(cx + ((m + 0.5F) * Minigames.MARK_GAP - slide) * CHOP_PX);
 				if (mx > x && mx < x + W) {
 					graphics.fill(mx, y, mx + 1, y + 12, m < next ? 0xFF1A0E06 : 0xFFFFFFFF);
@@ -120,8 +127,8 @@ final class Readouts {
 			graphics.fill(cx - good, y + 13, cx + good + 1, y + 15, 0xFFE0A030);
 			graphics.fill(cx - perfect, y + 13, cx + perfect + 1, y + 15, 0xFFFFF0B4);
 			graphics.fill(cx, y - 2, cx + 1, y + 14, 0xFFD8D8E0);
-			for (int p = 0; p < Minigames.CUTS; p++) {
-				int px = x + (W - Minigames.CUTS * 14) / 2 + p * 14;
+			for (int p = 0; p < cuts; p++) {
+				int px = x + (W - cuts * 14) / 2 + p * 14;
 				int color = 0xFF404040;
 				if (p < next && 1 + p < i.length) {
 					color = i[1 + p] == 2 ? GOOD : i[1 + p] == 1 ? WARN : BAD;
@@ -129,7 +136,8 @@ final class Readouts {
 				graphics.fill(px, y + 18, px + 10, y + 24, color);
 			}
 		}
-	};
+		};
+	}
 
 	// --- stirring ---
 
@@ -288,29 +296,24 @@ final class Readouts {
 		}
 	};
 
+	/** The round and how each went; the sweeping marker itself is drawn in the world, over the pan (see {@link SearBar}). */
 	private static final HandsHud.Drawer SEAR = new HandsHud.Drawer() {
 		@Override
 		public int height(HandsSync sync) {
-			return HandsHud.LINE + 2 + 10 + 7;
+			return HandsHud.LINE + 2 + 4;
 		}
 
 		@Override
 		public void draw(GuiGraphicsExtractor graphics, Font font, HandsSync sync, int x, int y, float age) {
 			int[] i = sync.ints();
-			float[] f = sync.floats();
 			HudStyle.text(graphics, font, Component.translatable("hud.jaymoskitchen.hands.sear", Math.min(get(i, 0) + 1, Sear.ROUNDS), Sear.ROUNDS), x, y,
 				HudStyle.TEXT);
 			int gy = y + HandsHud.LINE + 2;
-			graphics.fill(x, gy, x + W, gy + 10, 0xFF3A1810);
-			float zone = get(f, 1);
-			band(graphics, x, gy, W, 10, zone - Sear.ZONE_WIDTH / 2, zone + Sear.ZONE_WIDTH / 2, 0xFFE0A030);
-			band(graphics, x, gy, W, 10, zone - Sear.CORE_WIDTH / 2, zone + Sear.CORE_WIDTH / 2, 0xFFFFF0B4);
-			needle(graphics, x, gy, W, 10, get(f, 0) + get(f, 2) * age);
 			int cell = (W - 3 * (Sear.ROUNDS - 1)) / Sear.ROUNDS;
 			for (int r = 0; r < Sear.ROUNDS; r++) {
 				int result = i.length > 2 + r ? i[2 + r] : -1;
 				int px = x + r * (cell + 3);
-				graphics.fill(px, gy + 13, px + cell, gy + 17, result == 2 ? GOOD : result == 1 ? WARN : result == 0 ? BAD : 0xFF404040);
+				graphics.fill(px, gy, px + cell, gy + 4, result == 2 ? GOOD : result == 1 ? WARN : result == 0 ? BAD : 0xFF404040);
 			}
 		}
 	};
@@ -354,11 +357,12 @@ final class Readouts {
 			int at = get(i, 3);
 			Step next = at >= 0 && at < steps.length ? steps[at] : null;
 			Component what = next == null ? Component.empty() : Component.translatable(next.translationKey());
-			Component how = Component.translatable(next == null ? "tool.jaymoskitchen.hand" : !next.isAction() ? "tool.jaymoskitchen.hand"
-				: next == Step.FLIP ? "tool.jaymoskitchen.tongs" : next == Step.BAKE ? "tool.jaymoskitchen.peel" : "tool.jaymoskitchen.spoon");
+			Component how = Component.translatable(next == Step.FLIP ? "tool.jaymoskitchen.tongs" : next == Step.BAKE ? "tool.jaymoskitchen.peel"
+				: "tool.jaymoskitchen.spoon");
 			boolean sneak = next == Step.SIMMER;
-			HudStyle.text(graphics, font, Component.translatable(sneak ? "hud.jaymoskitchen.hands.seq.sneak" : "hud.jaymoskitchen.hands.seq", what, how), x, y,
-				HudStyle.TEXT);
+			// an ingredient goes in from the hand that holds it; an action is done with its tool
+			HudStyle.text(graphics, font, next != null && !next.isAction() ? Component.translatable("hud.jaymoskitchen.hands.seq.add", what)
+				: Component.translatable(sneak ? "hud.jaymoskitchen.hands.seq.sneak" : "hud.jaymoskitchen.hands.seq", what, how), x, y, HudStyle.TEXT);
 			int gy = y + HandsHud.LINE + 2;
 			HudStyle.bar(graphics, x, gy, W, 6, get(i, 0) / (float) Math.max(1, get(i, 1)), GOOD);
 			int limit = Math.max(1, get(i, 6));
