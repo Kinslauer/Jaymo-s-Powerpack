@@ -40,6 +40,10 @@ import org.jspecify.annotations.Nullable;
  * {@code config/jaymoskingdoms/youth-ears/}, and loads them in a class loader of their own. Everything runs on one
  * background thread; if any of it fails (no network, an unsupported machine), Youth just doesn't hear voices, and says
  * why in the log once. An empty file {@code config/jaymoskingdoms/youth-ears/off} turns it off.
+ *
+ * <p>While you talk, a line at the top of your screen says whether Youth can hear you (Andy): the server sends
+ * {@link Hearing} a couple of times a second while your voice comes in, open or not, and the client shows it a moment
+ * past the last one.
  */
 public final class YouthEars {
 	/** What it fetches: where from, the file it keeps, and its SHA-256. */
@@ -59,6 +63,8 @@ public final class YouthEars {
 	static final int DOWNSAMPLE = 3;
 	/** One call per player this often at most (milliseconds). */
 	static final long COOLDOWN_MS = 4000;
+	/** While someone talks, they're told whether Youth hears them this often (milliseconds). */
+	static final long TELL_EVERY_MS = 400;
 
 	private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
 		Thread t = new Thread(r, "Youth's ears");
@@ -67,6 +73,7 @@ public final class YouthEars {
 	});
 	private static final Map<UUID, Object> RECOGNISERS = new ConcurrentHashMap<>();
 	private static final Map<UUID, Long> LAST_CALL = new ConcurrentHashMap<>();
+	private static final Map<UUID, Long> LAST_TOLD = new ConcurrentHashMap<>();
 	private static volatile @Nullable MinecraftServer server;
 	private static volatile @Nullable Object model;
 	private static @Nullable Constructor<?> newRecogniser;
@@ -77,8 +84,8 @@ public final class YouthEars {
 
 	static void register() {
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> {
+			server = s;
 			if (s.isDedicatedServer()) {
-				server = s;
 				WORKER.execute(YouthEars::load);
 			}
 		});
@@ -93,6 +100,7 @@ public final class YouthEars {
 
 	/** A frame of what {@code who} said (16-bit, 48 kHz mono), from voice chat's thread. */
 	public static void heard(UUID who, short[] pcm) {
+		tell(who);
 		if (model == null || pcm.length < DOWNSAMPLE) {
 			return;
 		}
@@ -112,7 +120,38 @@ public final class YouthEars {
 		});
 	}
 
+	/** Tells {@code who} (now and then, while they talk) whether Youth can hear them. */
+	private static void tell(UUID who) {
+		MinecraftServer s = server;
+		long now = System.currentTimeMillis();
+		Long last = LAST_TOLD.get(who);
+		if (s == null || last != null && now - last < TELL_EVERY_MS) {
+			return;
+		}
+		LAST_TOLD.put(who, now);
+		boolean open = model != null;
+		s.execute(() -> {
+			ServerPlayer player = s.getPlayerList().getPlayer(who);
+			if (player != null && net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, Hearing.TYPE)) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new Hearing(open));
+			}
+		});
+	}
+
+	/** Server to a player who is talking: whether Youth can hear them ({@code open}) or not. */
+	public record Hearing(boolean open) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<Hearing> TYPE = new Type<>(JaymosKingdoms.id("youth_hearing"));
+		public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, Hearing> CODEC =
+			net.minecraft.network.codec.ByteBufCodecs.BOOL.map(Hearing::new, Hearing::open).cast();
+
+		@Override
+		public Type<Hearing> type() {
+			return TYPE;
+		}
+	}
+
 	public static void left(UUID who) {
+		LAST_TOLD.remove(who);
 		WORKER.execute(() -> closeQuietly(RECOGNISERS.remove(who)));
 	}
 

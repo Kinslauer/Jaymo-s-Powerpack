@@ -26,6 +26,12 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 	static final long FLASH_MS = 900L;
 	static final int FLASH_ALPHA = 200, FLASH_COLOUR = 0x5CE07A;
 	private static long flashAt = -FLASH_MS;
+	/** The "can Youth hear you" line: shown this long past the server's last word (it sends one every 0.4 s while you
+	 * talk), then faded over this long; its height from the top, and its colours. */
+	static final long HEARING_MS = 700L, HEARING_FADE_MS = 400L;
+	static final int HEARING_Y = 3, HEARING_OPEN = 0xBEF0D6, HEARING_CLOSED = 0x9A9A9A;
+	private static long hearingAt = -HEARING_MS - HEARING_FADE_MS;
+	private static boolean hearing;
 
 	public YouthWispRenderer(EntityRendererProvider.Context context) {
 		super(context, "youth_wisp", SCALE, SHADOW, "head");
@@ -44,6 +50,29 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 	static void registerFlash() {
 		ClientPlayNetworking.registerGlobalReceiver(YouthWisp.HomeFlash.TYPE, (payload, context) -> flashAt = net.minecraft.util.Util.getMillis());
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKingdoms.id("youth_home_flash"), YouthWispRenderer::drawFlash);
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.inhabitants.YouthEars.Hearing.TYPE, (payload, context) -> {
+			hearingAt = net.minecraft.util.Util.getMillis();
+			hearing = payload.open();
+		});
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKingdoms.id("youth_hearing"), YouthWispRenderer::drawHearing);
+	}
+
+	/**
+	 * While you talk in voice chat, a line at the top of the screen: "Youth can hear you" in its leaf-green, or "Youth
+	 * can't hear voices here" in grey ({@link com.jaymoskingdoms.inhabitants.YouthEars}). It fades out once you stop.
+	 */
+	private static void drawHearing(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		long since = net.minecraft.util.Util.getMillis() - hearingAt;
+		if (since < 0 || since >= HEARING_MS + HEARING_FADE_MS) {
+			return;
+		}
+		float k = since < HEARING_MS ? 1.0F : 1.0F - (since - HEARING_MS) / (float) HEARING_FADE_MS;
+		int alpha = Math.max(8, Math.round(255 * k));
+		net.minecraft.network.chat.Component line = net.minecraft.network.chat.Component.translatable(
+			hearing ? "hud.jaymoskingdoms.youth_hearing.open" : "hud.jaymoskingdoms.youth_hearing.closed");
+		net.minecraft.client.gui.Font font = net.minecraft.client.Minecraft.getInstance().font;
+		int x = (graphics.guiWidth() - font.width(line)) / 2;
+		graphics.text(font, line, x, HEARING_Y, alpha << 24 | (hearing ? HEARING_OPEN : HEARING_CLOSED), true);
 	}
 
 	private static void drawFlash(GuiGraphicsExtractor graphics, DeltaTracker delta) {
