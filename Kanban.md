@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-16 20:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,8 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
-- [ ] [[Agents/ragdollified|ragdollified]] · 💻 Odysseus · in-review
+- [ ] [[Agents/lean-cover|lean-cover]] · 💻 Odysseus · in-review
+- [ ] [[Agents/ragdollified|ragdollified]] · 💻 Odysseus · #1661 · in-review
 
 
 ## Needs Andy
