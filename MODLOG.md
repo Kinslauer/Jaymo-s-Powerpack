@@ -5661,3 +5661,29 @@ When a finisher asks for a key, it now holds still for up to a second and a half
   (`BodyMotion.inSpell`, knobs `SPELL_SLOT_TICKS`, `SPELL_CHANCE_SCARED`, `SPELL_CHANCE`). The spells come from the
   player's id and the game time, so everyone in view sees the same.
 - Built; not played.
+
+## 0.24.60 (2026-11-17): Gun handling for the future's guns (TaCZ Additions picks) and blinking while downed
+
+- **Water splash**: a shot that goes into water throws up drops and a ring of ripples where it goes in. A gunner's shot
+  into water stops 2.5 blocks under the surface (players' TaCZ bullets keep TaCZ's own water handling).
+- **Trail on every shot**: shots that aren't tracers leave a thin grey wisp along their line for a moment.
+- **Laser sights**: TaCZ already draws a fitted laser's beam; the End key now switches it off and on (a click), and a
+  switched-on laser puts a dot where it points, for everyone. About 1 in 3 of the future's gunners have one, off until
+  they take aim, so a dot on the wall comes before the shot.
+- **Gun movement, first person**: the gun lags behind when you turn and leans when you step sideways; standing, it
+  rises and falls with your breath (harder after sprinting or under half health). Aiming down sights calms both.
+  Floors and ceilings don't tuck it, so aiming down while prone still fires.
+- **Tuck**: up against a wall the gun comes back to your chest, muzzle up, and won't fire. WeaponMod's musket,
+  blunderbuss and flintlock pistol tuck too and can't be readied while tucked.
+- **Long-gun grips by stance** (Andy's note): musket and blunderbuss sit at the hip standing, the low ready in a plain
+  sneak, a shouldered high ready in the low crouch, and forward and level lying prone. First person only.
+- **Scope sway**: at 4x zoom and up your aim drifts in a slow figure eight (the crosshair with it); prone, kneeling, the low crouch, a sneak or
+  resting the gun on a wall top steadies it.
+- **Scroll zoom**: aiming down a scope, the mouse wheel steps its zoom (TaCZ's zoom key, so either way steps on to the
+  next setting) instead of the hotbar or the stances. Iron sights leave the wheel alone.
+- **Recoil by kind**: pistols, SMGs, rifles, machine guns, shotguns and snipers each kick the view by their own share
+  of TaCZ's recoil, the view stays where the kick left it, and the gun jumps back in your hands.
+- **Downed blinking**: down and awake, your eyes droop shut and open again, slower and longer as you weaken.
+- Classes: armory/GunLasers, client/armory/GunHandling, GunLaserClient, MusketSights, wounds/DownedHud,
+  mixin/tacz/TaczLaserBeamMixin, TaczAttachmentLaserMixin, TaczRecoilMixin; power/chrono/future/GunGear, FutureGuns.
+- Compiled with Gradle and checked against TaCZ 0.8.5's own code by an independent review; not played. Picture-in-picture scopes were left out (not picked).
