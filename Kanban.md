@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 07:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,8 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · for any · #1665 · in-review
-- [ ] [[Agents/claude-spawn-pregen-fixes|claude-spawn-pregen-fixes]] · 💻 Odysseus · #1681 · in-review
-- [ ] [[Agents/claude-vampire-leap-holy|claude-vampire-leap-holy]] · 💻 Odysseus · #1680 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
