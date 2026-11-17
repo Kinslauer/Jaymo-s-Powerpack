@@ -2659,6 +2659,10 @@ final class LifeStoryScreen extends Screen {
 				champ = type.create(player.level(), net.minecraft.world.entity.EntitySpawnReason.LOAD);
 			}
 			if (champ != null) {
+				// never added to a level, so it has no id; Cube Animals' glow check asks for one and crashed the screen
+				champ.setId(-7_770_002);
+			}
+			if (champ != null) {
 				drawChampion(graphics, x0, y0, x1, y1, champ);
 				return;
 			}
