@@ -3046,13 +3046,24 @@ public class CorpseEntity extends Entity {
 	private @Nullable EntityType<?> sourceTypeCache;
 	private boolean typeKnown;
 
-	/** The type of mob this was, for naming the carried corpse. */
+	/** The type of mob this was, for naming the corpse and the carried corpse. */
 	public @Nullable EntityType<?> sourceType() {
-		if (!typeKnown) {
+		// (a client may ask before the look has come over: not known yet, so not kept)
+		if (!typeKnown && !look().isEmpty()) {
 			sourceTypeCache = typeOf(parse(look())).orElse(null);
 			typeKnown = true;
 		}
 		return sourceTypeCache;
+	}
+
+	/** Named for whose body it is: a player's by their name, a mob's by its kind ("Zombie Corpse"), so Jade says it too. */
+	@Override
+	protected Component getTypeName() {
+		if (isPlayerCorpse() && !ownerName().isEmpty()) {
+			return Component.translatable("entity.jaymoskitchen.corpse.of_player", ownerName());
+		}
+		EntityType<?> type = sourceType();
+		return type != null ? Component.translatable("entity.jaymoskitchen.corpse.of", type.getDescription()) : super.getTypeName();
 	}
 
 	/** Puts a carried animal corpse back into the world. */
@@ -3685,6 +3696,7 @@ public class CorpseEntity extends Entity {
 	private void shed(ServerLevel level, int part, @Nullable Entity by, boolean toHand) {
 		Vec3 at = partPosition(part);
 		setMissing(missing() | part);
+		dropHeld(level, part, at);
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
@@ -3697,6 +3709,40 @@ public class CorpseEntity extends Entity {
 		ItemStack scrap = kind == CorpseKind.SKELETON ? new ItemStack(Items.BONE) : kind == CorpseKind.ZOMBIE ? new ItemStack(Items.ROTTEN_FLESH) : ItemStack.EMPTY;
 		if (!scrap.isEmpty()) {
 			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, scrap));
+		}
+	}
+
+	/**
+	 * An arm come off lets go of what its hand held (the main hand is the right, unless the mob was left-handed): it falls
+	 * loose at the hand, worn as gear taken off a body is, rather than hanging in the air where the hand was.
+	 */
+	private void dropHeld(ServerLevel level, int part, Vec3 at) {
+		if (part != PART_RIGHT_ARM && part != PART_LEFT_ARM) {
+			return;
+		}
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return;
+		}
+		String slot = (part == PART_RIGHT_ARM) != tag.getBooleanOr("LeftHanded", false) ? "mainhand" : "offhand";
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		if (!gear.contains(slot)) {
+			return;
+		}
+		ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
+			.result().orElse(ItemStack.EMPTY);
+		if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+			wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
+		}
+		gear.remove(slot);
+		if (gear.isEmpty()) {
+			tag.remove("equipment");
+		} else {
+			tag.put("equipment", gear);
+		}
+		this.entityData.set(LOOK, tag.toString());
+		if (!stack.isEmpty()) {
+			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack));
 		}
 	}
 
