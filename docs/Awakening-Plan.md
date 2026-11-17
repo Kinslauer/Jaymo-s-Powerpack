@@ -94,3 +94,53 @@ Lore (new, for Andy to approve in Lore.md):
   The Unseeing's ritual-keepers learned the same rot, and blood and death rites with it.
 - (new) Gravity's heft, Planet hopping, Wind the Day, Airless Dome and the ridden tornado are arts the powers grow
   into, no new people.
+
+### Patch 2: Ember, Cryo, Darktide
+- `aw-ember-heat` **Heat** (`EmberHeat`, for every fire user: Emberborn and Pyre). Every fire move cast (Kindle starting,
+  the fireball, the fire kit's rays, ring, wall and column, the Flame Avatar's moves, the vent, Backdraft, the shells)
+  adds 15 to a 100 gauge; at full the fire kit hits 30% harder (`EmberKindle.seasonal`, `FireKit.hurt`, the Judgement).
+  At full, each cast burns a point of your own health (never under 4) to push past the cap, up to 30% more again. It
+  cools 5 s after the last cast. Shown on the action bar.
+- `aw-ember-backdraft` **Backdraft** (`EmberBackdraft`): sneak as you start Kindle (Emberborn), or sneak+G on the ground
+  (Pyre). For 2 s the air and every fire within 12 blocks is drawn in (fire blocks, lit campfires, burning creatures go
+  out) and foes are dragged in; then one blast, bigger and harder for every fire swallowed, and the fires it put out
+  light again where they were. 20 s wait.
+- `aw-ember-shells` **Cluster shells** (`EmberShells`), built for Ember (the row's first choice, not the Arsenal
+  battery): let Kindle go at full heat while sneaking and the heat leaves as three lobbed shells; each bursts into six
+  bomblets, and each bomblet leaves a patch of burning ground for 5 s (harms and sets alight; no fire blocks are lit).
+- `aw-cryo-frostbite` **Frostbite** (`CryoFrostbite`): every ice hit (shards, breath, Flash Freeze, gaze, volley, ball,
+  Blizzard, javelin, rampart, and a gifted villager's ice) and every breath of freezing fog (`SmokeField.chill`) lays a
+  stack (up to 10). Each second the bitten take 0.25 freezing harm a stack and a slowness that deepens with the stacks;
+  stacks hold 5 s after the last, then thaw one a second. What can't freeze is never bitten.
+- `aw-cryo-rampart` **Glacier Rampart** (`CryoRampart`): sneak+X with every ability learned. A glacier of packed ice
+  surges 20 blocks ahead (3 wide, a block higher every 3 so it's a walkable ramp), freezing every foe it reaches for 4 s
+  (Flash Freeze's shell), stands 12 s and shatters. Shares the Ice Wall's cooldown (30 s).
+- `aw-cryo-encase` **Encase and javelin**: Flash Freeze now holds 3 s, longer with each Mastery rank up to 5 s, and no
+  longer refuses big targets: a boss is frozen through and pinned where it stands (no shell). Sprint+V throws an **Ice
+  Javelin** (`CryoJavelin`) that flies dead straight 64 blocks, 9 harm and 3 Frostbite.
+- `aw-dark-light` **Darkness feeds it** (`DarktideDark` + `DarktideDarkHurtMixin`): everything a Darktide or Smoke user
+  hurts takes 25% more at light 3 and under and 20% less at light 12 and over (block light and the sky as the time of
+  day dims it), sliding between. Smoke included (Andy's "if you like").
+- `aw-dark-pit` (`DarktidePit`): sprint+B **Devouring Pit**, a pit of shadow on the ground up to 28 blocks out, drags
+  foes in and swallows them (held, blind, 2 harm a second) for 4 s, 8 s where the ground lies in full dark; spat out
+  when it closes. Sprint+V **Strangling Lift**, the foe you look at is lifted 2.5 blocks by a hand of shadow and choked
+  for 3 s: drowning harm, and while it hangs it can't use powers (Powers silencer for players, Kingdoms `Will.hushed`
+  for casters, an illager's spell falls apart).
+- `aw-dark-surf` (`DarktideSurf`): sprint+G **Surf**, ride a crest of dark water along your look, 0.45 b/t over land,
+  0.75 over water or in rain, knocking aside whoever's in the way (1 Flow a second); sprint+G again or Sneak steps off.
+  Sprint+R **Geyser**, under the foe you look at (throws it up, 4 harm) or under yourself to ride up and land soft.
+- `aw-dark-vessels` **Carry your water** (`DarktideVessels`, `compat/KitchenWaterskins`): Surf over dry land and the
+  Geyser need water; near water or in rain it's free, otherwise it comes from what you carry: a flask (a bottle of
+  Unpurified Water, 25), a canteen (a sip of a Kitchen waterskin, 15), a reservoir (a water bucket, 100). With none it is
+  wrung out of Flow. In the rain or standing in water all Darktide harm is 25% stronger. **Water Sorcerers** (Kingdoms
+  `Absorption`): hold J looking down into your hands to pour in what you carry (a sip, a bottle, a bucket), or with
+  nothing carried to draw a little water out of the air (more in warm wet lands, none where it never rains).
+
+Design calls: Heat is its own gauge (Running Hot stays the blows' gauge). Backdraft relights only the fires it put out.
+New Darktide moves are on sprint+key (sneak+key is taken by the sea picks). The wet 25% applies to all of Darktide's
+harm, since its moves mix water and dark. The water sorcerer's pour is on looking down so it never steals the blast
+hold (which starts looking at nothing). Flask, canteen and reservoir are the bottle, Kitchen's waterskin and the bucket,
+not new items.
+
+Lore (new): no new people. Backdraft and the shells are the Emberborn's fire; the pit and the lift are the Drowned
+Dark's; the water sorcerer's moisture-drawing is the water element's.

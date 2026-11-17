@@ -22,7 +22,7 @@
   "heritage.jaymoskingdoms.verdant.flaw": "Flaw: fire burns you 50% longer",
   "heritage.jaymoskingdoms.verdant.desc": "Of the Verdant blood, like the folk of the Verdant World. The sun feeds you, and fire is your oldest enemy.",
   "heritage.jaymoskingdoms.emberborn": "Emberborn",
-  "heritage.jaymoskingdoms.emberborn.gift": "Gift: fire, lava and burning never hurt you; hunger drains slower in hot lands; Kindle: hold left mouse bare-handed for a gush of flame from your palm, and let go at full heat to throw a fireball",
+  "heritage.jaymoskingdoms.emberborn.gift": "Gift: fire, lava and burning never hurt you; hunger drains slower in hot lands; Kindle: hold left mouse bare-handed for a gush of flame from your palm, and let go at full heat to throw a fireball (sneaking as you let go: three cluster shells that burst into bomblets and leave the ground burning). Sneak as you start it: Backdraft, the air and every fire within 12 blocks drawn in for 2 s, then one blast. Every fire move builds Heat, up to 30% harder (burn your own health to push past it)",
   "heritage.jaymoskingdoms.emberborn.flaw": "Flaw: the cold (snowy lands, freezing) saps you: 15% weaker blows, 10% slower (twice that when freezing), and hunger drains 25% faster",
   "heritage.jaymoskingdoms.emberborn.desc": "Born of the badlands, the deserts and the burning places. Flame and lava cannot touch you, but the frost saps your strength and starves you.",
   "heritage.jaymoskingdoms.frostborn": "Frostborn",

@@ -172,7 +172,7 @@ public final class AvatarJudgement {
 	/** One pulse of the harm burning the target. */
 	private static void pulse(ServerPlayer player, LivingEntity target, float guilt) {
 		ServerLevel level = player.level();
-		float damage = PULSE_MIN + (PULSE_MAX - PULSE_MIN) * guilt;
+		float damage = (PULSE_MIN + (PULSE_MAX - PULSE_MIN) * guilt) * EmberHeat.factor(player);
 		target.setInvulnerableTime(0);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player), damage);
 		target.igniteForSeconds(BURN_SECONDS);

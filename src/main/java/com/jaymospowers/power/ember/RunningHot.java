@@ -220,6 +220,7 @@ public final class RunningHot {
 		float share = live.heat / MAX;
 		live.heat *= VENT_LEFT;
 		live.ventReady = now + VENT_COOLDOWN;
+		EmberHeat.cast(player);
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
 		double reach = 2.5 + (VENT_RADIUS - 2.5) * share;
 		MagicFx.ring(level, player.position(), (float)reach, COLOR);

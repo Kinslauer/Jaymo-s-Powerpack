@@ -96,6 +96,18 @@ public final class AirlessDome {
 		return true;
 	}
 
+	/** A spellcasting illager's working can't be finished without breath: whatever spell it is on falls apart. */
+	public static void breakSpell(LivingEntity e) {
+		if (e instanceof SpellcasterIllager caster) {
+			for (WrappedGoal goal : caster.getGoalSelector().getAvailableGoals()) {
+				Class<?> outer = goal.getGoal().getClass().getEnclosingClass();
+				if (goal.isRunning() && outer != null && SpellcasterIllager.class.isAssignableFrom(outer)) {
+					goal.stop();
+				}
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
 		Iterator<Dome> it = DOMES.iterator();
 		while (it.hasNext()) {
@@ -132,15 +144,7 @@ public final class AirlessDome {
 					// no air, no spark: the fuse goes back down
 					creeper.setSwellDir(-1);
 				}
-				if (e instanceof SpellcasterIllager caster) {
-					// the working can't be finished without breath: whatever spell it is on falls apart
-					for (WrappedGoal goal : caster.getGoalSelector().getAvailableGoals()) {
-						Class<?> outer = goal.getGoal().getClass().getEnclosingClass();
-						if (goal.isRunning() && outer != null && SpellcasterIllager.class.isAssignableFrom(outer)) {
-							goal.stop();
-						}
-					}
-				}
+				breakSpell(e);
 			}
 			for (Iterator<Entity> t = d.tagged().iterator(); t.hasNext();) {
 				Entity e = t.next();

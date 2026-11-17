@@ -239,6 +239,7 @@ public final class AvatarMoves {
 		next[move] = player.level().getGameTime() + ticks;
 		next[move + 3] = ticks;
 		player.setAttached(COOLDOWNS, next);
+		EmberHeat.cast(player);
 	}
 
 	/** The spot under the cursor out to {@link #PILLAR_RANGE}: the block looked at, or the ground below the end of the look. */

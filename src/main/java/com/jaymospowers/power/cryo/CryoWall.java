@@ -50,6 +50,11 @@ public final class CryoWall {
 		if (Powers.silenced(player) || !CryoPower.ready(player, CryoState.WALL)) {
 			return;
 		}
+		// sneak + X: the Glacier Rampart instead
+		if (player.isShiftKeyDown()) {
+			CryoRampart.surge(player);
+			return;
+		}
 		raise(player);
 	}
 

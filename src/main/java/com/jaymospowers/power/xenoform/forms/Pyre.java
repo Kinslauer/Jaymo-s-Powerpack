@@ -95,6 +95,11 @@ public final class Pyre extends XenoForm {
 			}
 			return;
 		}
+		// sneak + G on the ground: Backdraft (the air drawn in, then the blast)
+		if (down && player.isShiftKeyDown() && key == PowerKey.ABILITY_2 && !live.jet) {
+			com.jaymospowers.power.ember.EmberBackdraft.start(player);
+			return;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			// a toggle: G takes off, G again ends it (the client flies it, as a Z Fighter's flight)
 			if (down) {

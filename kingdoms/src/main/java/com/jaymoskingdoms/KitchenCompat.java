@@ -736,6 +736,41 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * (Carry your water) Takes a sip out of a Kitchen waterskin: its water is the data component
+	 * {@code jaymoskitchen:waterskin_water}, a record whose first part is the sips left. False if {@code stack} has none.
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static boolean sipWaterskin(net.minecraft.world.item.ItemStack stack) {
+		if (stack.isEmpty() || !FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			net.minecraft.core.component.DataComponentType type = net.minecraft.core.registries.BuiltInRegistries.DATA_COMPONENT_TYPE
+				.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, "waterskin_water"));
+			Object water = type == null ? null : stack.get(type);
+			if (water == null) {
+				return false;
+			}
+			java.lang.reflect.RecordComponent[] parts = water.getClass().getRecordComponents();
+			Object[] args = new Object[parts.length];
+			Class<?>[] types = new Class<?>[parts.length];
+			for (int i = 0; i < parts.length; i++) {
+				types[i] = parts[i].getType();
+				args[i] = parts[i].getAccessor().invoke(water);
+			}
+			if (!(args[0] instanceof Integer sips) || sips <= 0) {
+				return false;
+			}
+			args[0] = sips - 1;
+			stack.set(type, water.getClass().getDeclaredConstructor(types).newInstance(args));
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's waterskin sip failed: {}", e.toString());
+			return false;
+		}
+	}
+
 	private static @Nullable Object call(@Nullable Method method, Entity corpse, Object... args) {
 		if (method == null) {
 			return null;

@@ -83,6 +83,7 @@ final class CryoGift implements GiftKit {
 		level.playSound(null, caster.getX(), caster.getEyeY(), caster.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 0.8F, 0.6F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GLASS_BREAK, SoundSource.NEUTRAL, 0.7F, 1.6F);
 		foe.hurtServer(level, level.damageSources().freeze(), SHARD_DAMAGE);
+		CryoFrostbite.bite(foe, caster, 1);
 		foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHARD_SLOW_TICKS, 0), caster);
 		chill(foe, SHARD_FREEZE);
 		return true;
@@ -108,6 +109,7 @@ final class CryoGift implements GiftKit {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(NOVA_RADIUS),
 			e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy))) {
 			e.hurtServer(level, level.damageSources().freeze(), NOVA_DAMAGE);
+			CryoFrostbite.bite(e, caster, 1);
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, NOVA_SLOW_TICKS, NOVA_SLOW_LEVEL), caster);
 			chill(e, SHARD_FREEZE);
 		}
@@ -153,6 +155,7 @@ final class CryoGift implements GiftKit {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(BLIZZARD_RADIUS),
 			e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy || e.getLastHurtByMob() == caster || caster.getLastHurtByMob() == e))) {
 			e.hurtServer(level, level.damageSources().freeze(), BLIZZARD_DAMAGE);
+			CryoFrostbite.bite(e, caster, 2);
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, BLIZZARD_TICKS, 3), caster);
 			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIZZARD_TICKS / 2, 0), caster);
 			chill(e, BLIZZARD_FREEZE);

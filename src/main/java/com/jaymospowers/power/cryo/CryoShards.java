@@ -168,6 +168,7 @@ public final class CryoShards {
 			return;
 		}
 		living.hurtServer(level, level.damageSources().thrown(shard.ball, shard.owner), DAMAGE * shard.strength);
+		CryoFrostbite.bite(living, shard.owner, 1);
 		if (living.canFreeze()) {
 			living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE, living.getTicksFrozen() + Math.round(FREEZE * shard.strength)));
 		}

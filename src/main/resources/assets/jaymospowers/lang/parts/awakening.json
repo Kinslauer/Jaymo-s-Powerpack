@@ -5,5 +5,11 @@
 	"message.jaymospowers.gravity_planets.hungry": "Too hungry to throw a planet.",
 	"message.jaymospowers.chrono_wind.waiting": "The others hold the day still.",
 	"message.jaymospowers.chrono_wind.ask": "A Chrono would turn the day: crouch to let it.",
-	"message.jaymospowers.airless.wait": "The air has not come back yet: %s s"
+	"message.jaymospowers.airless.wait": "The air has not come back yet: %s s",
+	"message.jaymospowers.ember_heat": "Heat %1$s +%2$s%%",
+	"message.jaymospowers.darktide.cooling": "The dark has not gathered again yet.",
+	"message.jaymospowers.darktide.pit_ground": "No ground there for a pit.",
+	"message.jaymospowers.darktide.lift_none": "No one there to lift.",
+	"message.jaymospowers.darktide.choked": "A hand of shadow at your throat: you can't use your powers.",
+	"message.jaymospowers.darktide.no_water": "No water near, none carried, and too little Flow to wring it out."
 }

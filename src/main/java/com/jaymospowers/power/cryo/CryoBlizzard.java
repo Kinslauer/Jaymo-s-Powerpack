@@ -148,6 +148,7 @@ public final class CryoBlizzard {
 				continue;
 			}
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, 0), player);
+			CryoFrostbite.bite(living, player, 1);
 			if (living.canFreeze()) {
 				living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE_OVER, living.getTicksFrozen() + Math.round(FREEZE * strength)));
 			}
