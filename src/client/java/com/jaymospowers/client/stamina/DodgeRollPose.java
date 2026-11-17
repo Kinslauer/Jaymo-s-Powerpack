@@ -25,22 +25,15 @@ import org.jspecify.annotations.Nullable;
  * <p>Your own roll draws at once from {@link DodgeClient}; everyone else's from the synced {@link Dodge#ROLLING}. In
  * first person the view tumbles with it ({@link #applyCamera}) and dips toward the ground; your own body drawn there
  * (First-person Model) stays upright rather than swinging through the camera.
- * <p>Andy wanted it slower and grounded, like Snake's roll in Metal Gear (a motion reference only): the body goes down
- * first and stays low, turns over one shoulder on a slant ({@link #SHOULDER}) rather than straight over the head, and
- * comes up at the end. Its length is the roll's own ({@link Dodge#rollTicks}: longer under heavy armour).
+ * <p>The roll on the ground now starts only lying prone ({@link Dodge#canRollFrom}), so it is a log roll drawn by the
+ * crawl's own pose ({@code CrawlPose}, from {@link #crawlRoll}); the tumble here is left to the flip in the air.
  */
 public final class DodgeRollPose {
 	// ===== the knobs ================================================================================================
-	/** How far the body's middle drops while it rolls (blocks, before the entity's scale). */
-	static final float DROP = 0.6F;
-	/** Of the roll, the share spent going down at the start, and coming back up at the end; it stays low between. */
-	static final float GO_DOWN = 0.2F, COME_UP = 0.3F;
-	/** Of the roll, when the turn over begins and when it's done (it dives before it turns, and lands before it stands). */
-	static final float TURN_FROM = 0.1F, TURN_TO = 0.85F;
-	/** The slant of a forward or back roll toward the right shoulder (radians): over the shoulder, not over the head. */
-	static final float SHOULDER = 0.5F;
+	/** How far the body's middle drops at the low point of the roll (blocks, before the entity's scale). */
+	static final float DROP = 0.45F;
 	/** The tuck: legs drawn up, arms forward round them, the back rounded and the chin down (radians). */
-	static final float LEG_TUCK = -1.5F, ARM_TUCK = -1.2F, ARM_IN = 0.25F, BODY_CURL = 0.45F, CHIN = 0.6F;
+	static final float LEG_TUCK = -1.6F, ARM_TUCK = -1.2F, ARM_IN = 0.25F, BODY_CURL = 0.45F, CHIN = 0.6F;
 	/** Of the roll, the share spent tucking in at the start, and opening out at the end. */
 	static final float TUCK_IN = 0.15F, TUCK_OUT = 0.3F;
 	/** First person: how much of the full turn the view follows (1: all the way over), and how far it dips (blocks). */
@@ -105,30 +98,48 @@ public final class DodgeRollPose {
 			ticks = rolling.ticks();
 		}
 		float t = (now - start + partialTicks) / Math.max(1, ticks);
-		// (a flip in the air is a flip for everyone)
-		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
-	}
-
-	/** How far over the roll has turned (radians): the flip turns all the way through, the roll between {@link #TURN_FROM} and {@link #TURN_TO}. */
-	private static float turn(Roll roll) {
-		float t = roll.flip() ? roll.t() : Mth.clamp((roll.t() - TURN_FROM) / (TURN_TO - TURN_FROM), 0.0F, 1.0F);
-		return t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
-	}
-
-	/** How low the rolling body is (0 to 1): down quickly, held low, back up at the end. */
-	private static float low(float t) {
-		float d = Math.min(1.0F, Math.min(t / GO_DOWN, (1.0F - t) / COME_UP));
-		return d * d * (3.0F - 2.0F * d);
+		// (a flip in the air is a flip for everyone; a roll lying prone is the crawl's to draw, #crawlRoll)
+		return t < 0.0F || t >= 1.0F || !flip && com.jaymospowers.core.Crawl.crawling(player) ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
 	}
 
 	/**
-	 * The axis the body turns about, in its own frame, for a roll toward {@code (right, -forward)}: (up x way), slanted
-	 * toward the way by {@link #SHOULDER} on a forward or back roll (a roll to the side is already over the shoulder).
+	 * A prone roll ({@link Dodge#canRollFrom}) as the crawl's pose draws a roll ({@code Crawl#rollProgress}): how far
+	 * through the current turn over (0 to 1), positive rolling right, negative left; null when not in one. The
+	 * {@link Dodge#ROLL_TURNS} turns are eased as a whole, slow to start and to settle.
 	 */
-	private static org.joml.Vector3f axis(Roll roll, float forward, float right, float length) {
-		float slant = roll.flip() ? 0.0F : SHOULDER * Math.abs(forward) / length;
-		float c = Mth.cos(slant), s = Mth.sin(slant);
-		return new org.joml.Vector3f((-forward * c + right * s) / length, 0.0F, (-right * c - forward * s) / length);
+	public static @Nullable Float crawlRoll(Player player, float partialTicks) {
+		long now = player.level().getGameTime();
+		long start;
+		float x, z;
+		int ticks;
+		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
+			if (DodgeClient.rollFlip) {
+				return null;
+			}
+			start = DodgeClient.rollStart;
+			x = DodgeClient.rollX;
+			z = DodgeClient.rollZ;
+			ticks = DodgeClient.rollTicks;
+		} else {
+			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
+			if (rolling == null || rolling.flip()) {
+				return null;
+			}
+			start = rolling.start();
+			x = rolling.x();
+			z = rolling.z();
+			ticks = rolling.ticks();
+		}
+		float t = (now - start + partialTicks) / Math.max(1, ticks);
+		if (t < 0.0F || t >= 1.0F) {
+			return null;
+		}
+		float turns = t * t * (3.0F - 2.0F * t) * Dodge.ROLL_TURNS;
+		float part = Math.min(turns - Mth.floor(turns), 0.9999F);
+		// right of where the body faces is (-cos yaw, -sin yaw), as the crawl's own roll goes
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		boolean right = -x * Mth.cos(yaw) - z * Mth.sin(yaw) > 0.0F;
+		return right ? part : -part;
 	}
 
 	/** How tucked the body is (0 to 1): curling in at the start, opening out to land on its feet. */
@@ -159,13 +170,14 @@ public final class DodgeRollPose {
 			poseStack.scale(1.0F - STRETCH_THINNER * out, 1.0F + STRETCH_LONGER * out, 1.0F - STRETCH_THINNER * out);
 			return;
 		}
+		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 		if (!roll.flip()) {
-			// down into a ball near the ground, kept low, and back up to the feet (the flip turns where it is, in the air)
-			poseStack.translate(0.0F, -DROP * low(t), 0.0F);
+			// down into a ball near the ground, and back up to the feet (the flip turns where it is, in the air)
+			poseStack.translate(0.0F, -DROP * Mth.sin(Mth.PI * t), 0.0F);
 		}
-		// the top tips toward the way of the dodge, over the shoulder, round the body's middle
-		poseStack.rotateAround(new Quaternionf().rotateAxis(turn(roll), axis(roll, forward, right, length)), 0.0F, middle, 0.0F);
+		// the top tips toward the way of the dodge: about (up x way), round the body's middle
+		poseStack.rotateAround(new Quaternionf().rotateAxis(turn, -forward / length, 0.0F, -right / length), 0.0F, middle, 0.0F);
 	}
 
 	/** First person, with the hurt bob (ScreenShakeMixin): the view turns over with our own roll and dips at its middle. */
@@ -188,12 +200,12 @@ public final class DodgeRollPose {
 			return;
 		}
 		float t = roll.t();
-		float turn = turn(roll) * VIEW_ROLL;
+		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI * VIEW_ROLL;
 		// (the view turns the opposite way to the body: the world swings round the other way)
 		if (!roll.flip()) {
-			poseStack.translate(0.0F, VIEW_DIP * low(t), 0.0F);
+			poseStack.translate(0.0F, VIEW_DIP * Mth.sin(Mth.PI * t), 0.0F);
 		}
-		poseStack.rotate(new Quaternionf().rotateAxis(-turn, axis(roll, forward, right, length)));
+		poseStack.rotate(new Quaternionf().rotateAxis(-turn, -forward / length, 0.0F, -right / length));
 	}
 
 	/** Our own body drawn round the camera in first person: it stays upright (the view doesn't tumble). */

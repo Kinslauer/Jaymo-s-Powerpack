@@ -259,6 +259,10 @@ public final class CrawlPose {
 		long time = player.level().getGameTime();
 		Float roll = player == Minecraft.getInstance().player ? CrawlTaps.localRollProgress(time, partialTicks)
 			: Crawl.rollProgress(player, time, partialTicks);
+		if (roll == null) {
+			// the dodge's roll, which starts only lying prone: the same log roll, turned over more than once
+			roll = com.jaymospowers.client.stamina.DodgeRollPose.crawlRoll(player, partialTicks);
+		}
 		boolean downed = Downed.isDowned(player);
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
 		Long rising = downed ? player.getAttached(Downed.RISING) : null;

@@ -46,9 +46,10 @@ import net.minecraft.world.phys.Vec3;
  * ({@code DodgeRollPose}); your own client draws it at once. While it rolls the body is a block high at most
  * ({@link #rollingLow}), so a roll goes under a low gap.
  * <p>Andy: "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your
- * gear has. To an upper limit." The roll is a low shoulder roll that carries you along the ground at {@link #ROLL_PACE}
- * for its whole turn (no hop), and your armour's weight ({@link #heft}) stretches it out, at most {@link #HEAVY_SLOW}
- * times as long.
+ * gear has. To an upper limit." Then: "you can only initiate the roll from prone, and you should stay until you get up".
+ * The roll is started only lying prone ({@link #canRollFrom}): a log roll to the side you hold (right with none), over
+ * {@link #ROLL_TURNS} times, carrying you along the ground at {@link #ROLL_PACE} for its whole length (no hop), and you
+ * are still prone at its end. Your armour's weight ({@link #heft}) stretches it out, at most {@link #HEAVY_SLOW} times as long.
  */
 public final class Dodge {
 	// ===== the knobs ================================================================================================
@@ -56,6 +57,8 @@ public final class Dodge {
 	public static final int COST = 6;
 	/** The roll's pace along the ground for an unarmoured body (blocks/tick), kept up for the whole turn. */
 	public static final double ROLL_PACE = 0.2;
+	/** How many times the body turns over along its length in a roll (whole turns: you end the way up you began). */
+	public static final int ROLL_TURNS = 2;
 	/** Ticks between dodges. */
 	public static final int COOLDOWN = 10;
 	/** Ticks from the start in which a blow or projectile misses. */
@@ -171,6 +174,14 @@ public final class Dodge {
 		return ROLL_PACE / slowness(player);
 	}
 
+	/**
+	 * Whether {@code player} lies prone, which is the only way into the roll (both sides): crawling by choice, not downed.
+	 * The flip in the air, the shield vault and boxing's evades don't need it.
+	 */
+	public static boolean canRollFrom(Player player) {
+		return com.jaymospowers.core.Crawl.crawling(player) && !com.jaymospowers.core.wounds.Downed.isDowned(player);
+	}
+
 	/** Told of every dodge the server lets through. */
 	@FunctionalInterface
 	public interface Listener {
@@ -278,7 +289,8 @@ public final class Dodge {
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
 		// the client checked the ground as it hopped; by now the server may already have it in the air
-		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
+		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))
+			|| !canRollFrom(player)) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {

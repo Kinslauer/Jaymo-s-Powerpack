@@ -233,19 +233,16 @@ public final class DodgeClient {
 			cooldown = Dodge.COOLDOWN;
 			return;
 		}
-		if (!Feathers.canSpend(player, Dodge.COST)) {
+		if (!Dodge.canRollFrom(player) || !Feathers.canSpend(player, Dodge.COST)) {
+			// the roll starts only lying prone (Andy)
 			return;
 		}
+		// a log roll to the side: Left or Right, right with neither held
 		Input input = player.input.keyPresses;
-		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
-		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
-		if (forward == 0.0F && strafe == 0.0F) {
-			forward = landing ? 1.0F : -1.0F;
-		}
-		// the movement keys turned to the world by the player's facing (as vanilla's own input is)
+		float strafe = input.left() && !input.right() ? 1.0F : -1.0F;
+		// the side turned to the world by the player's facing (as vanilla's own input is)
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
-		Vec3 dir = new Vec3(strafe * cos - forward * sin, 0.0, forward * cos + strafe * sin).normalize();
+		Vec3 dir = new Vec3(strafe * Mth.cos(yaw), 0.0, strafe * Mth.sin(yaw));
 		// no hop: the roll stays on the ground and carries us along it (#carry)
 		rollTicks = Dodge.rollTicks(player);
 		rollPace = Dodge.rollPace(player);
