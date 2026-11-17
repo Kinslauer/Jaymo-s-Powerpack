@@ -273,6 +273,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		LedgeClient.init();
 		ProneHaulClient.init();
 		MeditateClient.init();
+		com.jaymospowers.client.compat.TakeASeatPoses.init();
 		SwallowedPowerClient.init();
 		HiddenArmorClient.init();
 		com.jaymospowers.client.costume.CostumeClient.init();

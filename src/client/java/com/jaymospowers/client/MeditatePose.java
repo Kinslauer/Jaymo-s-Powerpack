@@ -36,6 +36,8 @@ import org.joml.Vector3f;
 public final class MeditatePose {
 	/** How long sitting down (or settling into the stance) takes, in ticks. */
 	static final float SETTLE = 12.0F;
+	/** Our own ways of sitting, each place (Take a Seat's, which replace them, have up to {@link Meditate#POSES}). */
+	static final int OWN_POSES = 3;
 	/** Sitting: how far the body sinks (blocks), so the hips rest on the ground. */
 	static final float SIT_SINK = 0.62F;
 	/** (0.19.67) On a seat, how far the head may turn from the seat's way (degrees). */
@@ -170,6 +172,11 @@ public final class MeditatePose {
 				state.yRot = Mth.clamp(Mth.wrapDegrees(head - meditating.seatYaw()), -SEAT_LOOK, SEAT_LOOK);
 			}
 		}
+		if (meditating.kind() == Meditate.MEDITATING && com.jaymospowers.client.compat.TakeASeatPoses.sitting(entity)) {
+			// Take a Seat's sitting pose has the body (Andy: "move those to our sit button"; "Replace ours")
+			state.setData(KEY, null);
+			return;
+		}
 		state.setData(KEY, new State(time, meditating.kind(), frame, meditating.pose(), meditating.seated(), held));
 	}
 
@@ -260,7 +267,7 @@ public final class MeditatePose {
 		float breath = Mth.sin(m.time() * 0.12F);
 		float lean = 0.0F;
 		float headX = 0.25F;
-		int pose = Math.floorMod(m.pose(), Meditate.POSES);
+		int pose = Math.floorMod(m.pose(), OWN_POSES);
 		if (!m.seated()) {
 			if (pose == 0) {
 				// thighs out to the sides along the ground; the shins fold back across in front (bendKnees)
@@ -353,7 +360,7 @@ public final class MeditatePose {
 			return;
 		}
 		float in = settle(m.time());
-		int pose = Math.floorMod(m.pose(), Meditate.POSES);
+		int pose = Math.floorMod(m.pose(), OWN_POSES);
 		float[] knees = KNEES[m.seated() ? 1 : 0][pose];
 		// cross-legged folds across (the right shin toward the left, the left toward the right); the rest at the knee
 		boolean sideways = !m.seated() && pose == 0;

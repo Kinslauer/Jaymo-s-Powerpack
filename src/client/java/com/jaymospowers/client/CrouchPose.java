@@ -156,9 +156,17 @@ public final class CrouchPose {
 		float bend;
 		float stillSince = -1.0F;
 		float last = -1.0F;
+		/** Whether they're down on the knee now (not easing). */
+		boolean kneeling;
 	}
 
 	private static final Int2ObjectOpenHashMap<Track> TRACKS = new Int2ObjectOpenHashMap<>();
+
+	/** Whether the body with this id is down on the knee in the low crouch (as last drawn). */
+	public static boolean kneeling(int id) {
+		Track track = TRACKS.get(id);
+		return track != null && track.kneeling;
+	}
 
 	private CrouchPose() {
 	}
@@ -198,10 +206,16 @@ public final class CrouchPose {
 		// (0.18.66) arms out and swaying only in the low crouch; a plain sneak is vanilla's
 		track.ready = approach(track.ready, low ? 1.0F : 0.0F, dt / READY_IN);
 		track.kneel = approach(track.kneel, kneel ? 1.0F : 0.0F, dt / (kneel ? KNEEL_IN : GET_UP));
+		track.kneeling = kneel;
 		track.low = approach(track.low, low ? 1.0F : 0.0F, dt / LOW_IN);
 		track.bend = approach(track.bend, bent ? 1.0F : 0.0F, dt / BEND_IN);
 		if (!crouched && !bent && track.ready <= 0.0F && track.kneel <= 0.0F && track.low <= 0.0F && track.bend <= 0.0F || entity.isRemoved()) {
 			TRACKS.remove(entity.getId());
+			state.setData(KEY, null);
+			return;
+		}
+		if (kneel && com.jaymospowers.client.compat.TakeASeatPoses.kneeling(entity)) {
+			// Take a Seat's kneel has the whole body (Andy: "change the kneel animation to theirs")
 			state.setData(KEY, null);
 			return;
 		}
