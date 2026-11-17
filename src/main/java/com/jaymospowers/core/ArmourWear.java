@@ -39,9 +39,9 @@ import net.minecraft.world.item.equipment.Equippable;
 public final class ArmourWear {
 	/** Share of its old durability every armour piece keeps. */
 	public static final float DURABILITY = 0.3F;
-	/** Worn armour counts this many times its armour points against a hit. */
-	public static final float ARMOR_ABSORB = 1.4F;
-	/** ...and this many times its toughness. */
+	/** Worn armour counts this many times its armour points against a hit (players only; mobs get plain armour). */
+	public static final float ARMOR_ABSORB = 1.15F;
+	/** ...and this many times its toughness (players only). */
 	public static final float TOUGHNESS_ABSORB = 1.25F;
 	/** Axes, maces and blunt weapons wear armour this many times faster. */
 	public static final float HEAVY_WEAR = 2.5F;
