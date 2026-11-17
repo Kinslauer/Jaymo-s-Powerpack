@@ -4,10 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 16:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 16:20). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 
 
 ## Being built
@@ -34,13 +35,13 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
+- [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
+- [x] [[Inbox/Done/tinkerer-cheats-death|tinkerer-cheats-death]]
+- [x] [[Inbox/Done/tinker-gadget-icons|tinker-gadget-icons]]
 - [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
 - [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
-- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
-- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
-- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
-- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings
