@@ -102,6 +102,11 @@ public final class ZFighterGrab {
 			if (!sp.isShiftKeyDown() || !sp.getMainHandItem().isEmpty() || !Powers.has(sp, ZFighterPower.INSTANCE) || !canGrab(sp, foe)) {
 				return InteractionResult.PASS;
 			}
+			if (ZFighterFury.full(sp)) {
+				// (Awakening pick) at full fury the grab is a pounding
+				ZFighterFury.seize(sp, foe);
+				return InteractionResult.SUCCESS;
+			}
 			seize(sp, foe, false);
 			return InteractionResult.SUCCESS;
 		});

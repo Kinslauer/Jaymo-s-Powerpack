@@ -24,7 +24,7 @@
 	"power.jaymospowers.xenoform.key.ability_4.bulwark.name": "Leap Slam",
 	"power.jaymospowers.xenoform.key.ability_1.pyre": "Fire Bolt: a small fireball where you look",
 	"power.jaymospowers.xenoform.key.ability_1.pyre.name": "Fire Bolt",
-	"power.jaymospowers.xenoform.key.ability_2.pyre": "Flame Jet: G to take off and hover (WASD, Jump rises, Sneak sinks), Sprint to streak along your look as a comet of flame; G again, or Sneak on the ground, to come down. Free",
+	"power.jaymospowers.xenoform.key.ability_2.pyre": "Flame Jet: G to take off and hover (WASD, Jump rises, Sneak sinks), Sprint to streak along your look as a comet of flame; G again, or Sneak on the ground, to come down. Free. Sneak+G on the ground: Backdraft (2 s drawing the air and every fire within 12 blocks in, foes dragged with it, then one blast, bigger for every fire swallowed)",
 	"power.jaymospowers.xenoform.key.ability_2.pyre.name": "Flame Jet",
 	"power.jaymospowers.xenoform.key.ability_3.pyre": "Fire Nova: everything within 5 blocks is burnt and set alight",
 	"power.jaymospowers.xenoform.key.ability_3.pyre.name": "Fire Nova",

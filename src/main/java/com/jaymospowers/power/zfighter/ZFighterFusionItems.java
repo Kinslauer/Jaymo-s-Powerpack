@@ -94,7 +94,11 @@ public final class ZFighterFusionItems {
 
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
-			if (player instanceof ServerPlayer server) {
+			if (player instanceof ServerPlayer server && kind == ZFighterFusion.Kind.EARRING && player.isShiftKeyDown()) {
+				// (Awakening pick) sneaking, an earring held out offers to trade powers instead
+				com.jaymospowers.core.PowerTrade.offer(server, BONDING_EARRING);
+				player.getCooldowns().addCooldown(player.getItemInHand(hand), USE_COOLDOWN);
+			} else if (player instanceof ServerPlayer server) {
 				offer(server, hand, kind);
 				player.getCooldowns().addCooldown(player.getItemInHand(hand), USE_COOLDOWN);
 			}

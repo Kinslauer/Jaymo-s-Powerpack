@@ -168,6 +168,7 @@ public final class CryoBreath {
 		if (living.canFreeze()) {
 			living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE_OVER, living.getTicksFrozen() + Math.round(FREEZE * strength)));
 		}
+		CryoFrostbite.bite(living, player, 1);
 		if (living.isFullyFrozen()) {
 			// frozen stiff
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STIFF_TICKS, 6, false, false), player);

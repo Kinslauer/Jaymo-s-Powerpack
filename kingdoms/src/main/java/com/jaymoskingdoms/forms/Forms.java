@@ -287,6 +287,9 @@ public final class Forms {
 	}
 
 	/** Player → server: move the selected slot (Ctrl and scroll); {@code delta} is -1 or 1. */
+	/** (Awakening pick) A {@link Pick} of this plus a slot names that belt slot outright (combat mode's number keys). */
+	public static final int PICK_SLOT = 100;
+
 	public record Pick(int delta) implements CustomPacketPayload {
 		public static final Type<Pick> TYPE = new Type<>(JaymosKingdoms.id("form_pick"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Pick> CODEC = CustomPacketPayload.codec(
@@ -727,6 +730,11 @@ public final class Forms {
 
 	private static void pick(ServerPlayer player, int delta) {
 		Book book = book(player);
+		if (book.stance() && delta >= PICK_SLOT && delta < PICK_SLOT + BELT_SLOTS) {
+			// (Awakening pick) combat mode: a belt slot named outright
+			player.setAttached(BOOK, book.withSlot(delta - PICK_SLOT));
+			return;
+		}
 		if (book.stance() && delta != 0) {
 			player.setAttached(BOOK, book.withSlot(book.slot() + (delta > 0 ? 1 : -1)));
 		}

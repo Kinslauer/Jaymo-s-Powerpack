@@ -271,6 +271,7 @@ public final class CryoPicks {
 			}
 			if (!snow) {
 				target.hurtServer(level, owner.damageSources().playerAttack(owner), EYES_DAMAGE * strength);
+				CryoFrostbite.bite(target, owner, 1);
 			}
 			level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 4, 0.2, 0.3, 0.2, 0.02);
 		}
@@ -347,6 +348,7 @@ public final class CryoPicks {
 			level.playSound(null, end.x, end.y, end.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.6F, 1.5F);
 			struck.hurtServer(level, shot.owner.damageSources().playerAttack(shot.owner), VOLLEY_DAMAGE * CryoPower.strength(shot.owner));
 			struck.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, VOLLEY_SLOW, 0), shot.owner);
+			CryoFrostbite.bite(struck, shot.owner, 1);
 			Bleeding.open(struck, BodyPart.BODY, false);
 		}
 		return true;
@@ -361,6 +363,7 @@ public final class CryoPicks {
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BALL_RADIUS), e -> foe(shot.owner, e))) {
 			living.hurtServer(level, shot.owner.damageSources().playerAttack(shot.owner), BALL_DAMAGE * strength);
 			living.clearFire();
+			CryoFrostbite.bite(living, shot.owner, 2);
 			stiffenFor(shot.owner, living, ROOT_TICKS);
 			shell(level, living, ROOT_TICKS);
 		}

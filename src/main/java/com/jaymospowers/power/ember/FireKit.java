@@ -187,7 +187,7 @@ public final class FireKit {
 		boolean was = RunningHot.internal;
 		RunningHot.internal = true;
 		try {
-			target.hurtServer(owner.level(), owner.damageSources().playerAttack(owner), amount);
+			target.hurtServer(owner.level(), owner.damageSources().playerAttack(owner), amount * EmberHeat.factor(owner));
 		} finally {
 			RunningHot.internal = was;
 		}
@@ -215,6 +215,7 @@ public final class FireKit {
 	private static void cooldown(ServerPlayer player, int slot, int ticks) {
 		COOLDOWNS.computeIfAbsent(player.getUUID(), k -> new long[4])[slot] = player.level().getGameTime() + ticks;
 		player.causeFoodExhaustion(EXHAUSTION);
+		EmberHeat.cast(player);
 	}
 
 	/** Where the player points: a block within {@code reach}, or the end of the reach. */

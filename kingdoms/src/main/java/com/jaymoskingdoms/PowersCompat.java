@@ -776,6 +776,64 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ZFighterReel.reel(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle reel;
+	private static boolean lookedForReel;
+
+	/**
+	 * (Awakening pick) A Rubber-folk's or a Verdant's stretching grab: the arm shoots out to the foe they look toward and yanks it
+	 * to their feet (Jaymo's Powers does the stretch). True if the key was spent on it; false without Powers.
+	 */
+	public static boolean reel(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForReel) {
+			lookedForReel = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					reel = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterReel"),
+						"reel", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stretching grab (older Powers?)", e);
+				}
+			}
+		}
+		if (reel == null) {
+			return false;
+		}
+		try {
+			return (boolean) reel.invokeExact(player);
+		} catch (Throwable e) {
+			reel = null;
+			return false;
+		}
+	}
+
+	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle questDone;
+	private static boolean lookedForQuestDone;
+
+	/** (Awakening pick) A quest finished: Jaymo's Powers gives back one of its power trials' swaps. Nothing without Powers. */
+	public static void questDone(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForQuestDone) {
+			lookedForQuestDone = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					questDone = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.trials.PowerTrials"),
+						"questDone", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' power trials (older Powers?)", e);
+				}
+			}
+		}
+		if (questDone == null) {
+			return;
+		}
+		try {
+			questDone.invokeExact(player);
+		} catch (Throwable e) {
+			questDone = null;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;
@@ -1072,6 +1130,55 @@ public final class PowersCompat {
 		}
 		try {
 			return (boolean)sealed.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (Awakening pick) Powers' {@code EightSignCircle.sealFor(Entity, int)} and {@code Blind.sightless(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle sealFor, sightless;
+	private static boolean lookedForSealFor, lookedForSightless;
+
+	/** (Awakening pick) Seals {@code entity}'s power (and forms) for {@code ticks}, as an Eight-Sign Circle does; nothing without Powers. */
+	public static void seal(net.minecraft.world.entity.Entity entity, int ticks) {
+		if (!lookedForSealFor) {
+			lookedForSealFor = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sealFor = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.divine.EightSignCircle"),
+						"sealFor", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Entity.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' seal (older Powers?)", e);
+				}
+			}
+		}
+		if (sealFor != null) {
+			try {
+				sealFor.invoke(entity, ticks);
+			} catch (Throwable e) {
+				// no seal, then
+			}
+		}
+	}
+
+	/** (Awakening pick) Whether {@code entity} can't see now (both eyes gone, or a blindfold on: Powers' Blind); false without Powers. */
+	public static boolean sightless(LivingEntity entity) {
+		if (!lookedForSightless) {
+			lookedForSightless = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sightless = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.blindness.Blind"),
+						"sightless", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blindness (older Powers?)", e);
+				}
+			}
+		}
+		if (sightless == null) {
+			return false;
+		}
+		try {
+			return (boolean)sightless.invoke(entity);
 		} catch (Throwable e) {
 			return false;
 		}

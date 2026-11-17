@@ -105,6 +105,7 @@ public final class DarktidePower implements Power {
 			DarktideMoves.tickWorld(server);
 			DarktideTide.tickWorld(server);
 			DarktideMaelstrom.tickWorld(server);
+			DarktidePit.tickWorld(server);
 		});
 		// Balkon's knives throw on right click: for a Darktide user plain right click is the guard; sneak + right click throws
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -117,6 +118,8 @@ public final class DarktidePower implements Power {
 			return InteractionResult.PASS;
 		});
 		DarktideDodges.init();
+		// (Awakening picks) the pit and the lift (a choked player can't use powers)
+		DarktidePit.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer player = handler.player;
 			if (has(player)) {
@@ -135,6 +138,7 @@ public final class DarktidePower implements Power {
 			DarktideMoves.clear();
 			DarktideTide.clear();
 			DarktideMaelstrom.clear();
+			DarktidePit.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> DarktideDebugCommand.register(dispatcher));
 	}
@@ -307,6 +311,16 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		// (Awakening picks) sprint + R Geyser, G Surf, V Strangling Lift, B Devouring Pit
+		if (down && player.isSprinting() && !player.isShiftKeyDown() && Mastery.isUnlocked(player, key)) {
+			switch (key) {
+				case ABILITY_1 -> DarktideSurf.geyser(player);
+				case ABILITY_2 -> DarktideSurf.toggle(player);
+				case ABILITY_3 -> DarktidePit.lift(player);
+				default -> DarktidePit.pit(player);
+			}
+			return;
+		}
 		if (DarktidePicks.key(player, key, down)) {
 			return;
 		}
@@ -458,6 +472,8 @@ public final class DarktidePower implements Power {
 		}
 		DarktideFlow.dry(player);
 		DarktidePicks.forget(player);
+		DarktideSurf.forget(player);
+		DarktideVessels.forget(player);
 		DarktideBlade.dismiss(player, false);
 		DarktideMaelstrom.end(player, false);
 		DarktideGuard.drop(player);
@@ -481,7 +497,13 @@ public final class DarktidePower implements Power {
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		DarktideLive live = LIVE.get(player.getUUID());
-		return live != null && (DarktideMoves.moving(live) || live.gedan != null || live.maelstrom != null);
+		return live != null && (DarktideMoves.moving(live) || live.gedan != null || live.maelstrom != null) || DarktideSurf.surfing(player);
+	}
+
+	/** (Surf) riding the crest a little over the ground. */
+	@Override
+	public boolean allowsFloating(ServerPlayer player) {
+		return DarktideSurf.surfing(player);
 	}
 
 	@Override
@@ -520,6 +542,7 @@ public final class DarktidePower implements Power {
 		}
 		DarktideGuard.tick(player, live);
 		DarktidePicks.tick(player, live);
+		DarktideSurf.tick(player, live);
 		DarktideMoves.tick(player, live);
 		DarktideGedan.tick(player, live);
 		DarktideTide.tick(player, live);

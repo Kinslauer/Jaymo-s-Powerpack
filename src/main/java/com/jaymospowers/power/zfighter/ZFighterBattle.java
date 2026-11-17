@@ -113,6 +113,9 @@ final class ZFighterBattle {
 			}
 			if (entity instanceof ServerPlayer hurt && Powers.has(hurt, ZFighterPower.INSTANCE)) {
 				ZFighterGrowth.took(hurt, source, damageTaken);
+				if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity) {
+					ZFighterFury.took(hurt);
+				}
 			}
 			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
@@ -120,6 +123,7 @@ final class ZFighterBattle {
 			}
 			ZFighterTraining.landed(player, ZFighterPower.live(player), damageTaken, entity.getMaxHealth());
 			ZFighterGrowth.dealt(player, entity, source, damageTaken);
+			ZFighterFury.dealt(player);
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
 				punched(player, entity);
 			}

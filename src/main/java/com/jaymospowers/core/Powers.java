@@ -238,10 +238,13 @@ public final class Powers {
 				// ((0.17.183) acting: what it moves of someone else is Will Over Flesh's to lessen)
 				if (!paused(player)) {
 					acting++;
+					ServerPlayer was = actor;
+					actor = player;
 					try {
 						com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
 					} finally {
 						acting--;
+						actor = was;
 					}
 				}
 				Mastery.tick(player);
@@ -295,6 +298,13 @@ public final class Powers {
 		return acting > 0;
 	}
 
+	/** (Awakening pick) Whose power is acting right now ({@link AbilityPower}), or null. */
+	private static @Nullable ServerPlayer actor;
+
+	public static @Nullable ServerPlayer actor() {
+		return acting > 0 ? actor : null;
+	}
+
 	static void key(ServerPlayer player, PowerKey key, boolean down) {
 		Power power = of(player);
 		// (0.17.108) no power of their own: R is a swallowed one's
@@ -327,13 +337,18 @@ public final class Powers {
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			// a broken one throws the aim off
 			acting++;
+			ServerPlayer was = actor;
+			actor = player;
 			try {
 				LimbUse.aimed(player, need, () -> com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.onKey(player, key, down)));
 			} finally {
 				acting--;
+				actor = was;
 			}
 			if (down) {
 				Mastery.used(player);
+				// (Awakening pick) an ability trial counts the press
+				com.jaymospowers.core.trials.PowerTrials.used(player, key);
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
 			}
 		}

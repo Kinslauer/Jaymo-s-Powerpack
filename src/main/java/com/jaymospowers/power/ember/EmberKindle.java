@@ -148,6 +148,8 @@ public final class EmberKindle {
 	/** One Emberborn's flame on the server. */
 	private static final class Live {
 		boolean on;
+		/** (Backdraft) this held click already drew the air in. */
+		boolean drawing;
 		/** When the stream started and when the client last said it's held (game time). */
 		long since, heard;
 		float heat;
@@ -165,6 +167,9 @@ public final class EmberKindle {
 		PayloadTypeRegistry.serverboundPlay().register(Kindle.TYPE, Kindle.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Kindle.TYPE, (payload, context) -> hold(context.player(), payload.on()));
 		ServerTickEvents.END_SERVER_TICK.register(EmberKindle::serverTick);
+		EmberHeat.init();
+		EmberBackdraft.init();
+		EmberShells.init();
 		// (0.15.65) the held click never breaks a block while the flame runs (the client holds the digging back too)
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
 			Live live = LIVE.get(player.getUUID());
@@ -205,13 +210,16 @@ public final class EmberKindle {
 
 	/** (0.15.31) Ember's fire damage from {@code owner}: {@link #SUMMER_HEAT} times as much in summer, where there are seasons. */
 	static float seasonal(@org.jspecify.annotations.Nullable Entity owner, float damage) {
-		return Seasons.is(owner, Seasons.Season.SUMMER) ? damage * SUMMER_HEAT : damage;
+		// (Heat) the casting gauge's bonus on top
+		float heat = owner instanceof Player player ? EmberHeat.factor(player) : 1.0F;
+		return (Seasons.is(owner, Seasons.Season.SUMMER) ? damage * SUMMER_HEAT : damage) * heat;
 	}
 
 	private static void hold(ServerPlayer player, boolean on) {
 		Live live = LIVE.computeIfAbsent(player.getUUID(), k -> new Live());
 		long now = player.level().getGameTime();
 		if (!on) {
+			live.drawing = false;
 			if (live.on) {
 				stop(player, live, true);
 			}
@@ -220,7 +228,16 @@ public final class EmberKindle {
 		live.heard = now;
 		// (Andy's skill-tree locks) a blood's hold is learned: Blood Awakening
 		if (!live.on && usable(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
+			// (Backdraft) sneaking as it starts, the air is drawn in instead (once for the whole held click)
+			if (player.isShiftKeyDown()) {
+				if (!live.drawing) {
+					live.drawing = true;
+					EmberBackdraft.start(player);
+				}
+				return;
+			}
 			live.on = true;
+			EmberHeat.cast(player);
 			live.since = now;
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8F, 0.7F);
 		}
@@ -237,7 +254,12 @@ public final class EmberKindle {
 	/** The flame goes out; let go at full heat ({@code release}), the heat is thrown as a fireball. */
 	private static void stop(ServerPlayer player, Live live, boolean release) {
 		live.on = false;
-		if (release && live.heat >= 1.0F && player.isAlive() && EmberFireball.throwFrom(player, palm(player))) {
+		// (Cluster shells) let go at full heat while sneaking: the heat leaves as lobbed shells
+		if (release && live.heat >= 1.0F && player.isAlive() && player.isShiftKeyDown()) {
+			EmberShells.lob(player, palm(player));
+			live.heat = 0.0F;
+		} else if (release && live.heat >= 1.0F && player.isAlive() && EmberFireball.throwFrom(player, palm(player))) {
+			EmberHeat.cast(player);
 			live.heat = 0.0F;
 		}
 	}

@@ -59,6 +59,8 @@ public class WebBall extends ThrowableItemProjectile {
 	/** A Mending Shot (the white symbiote's): it heals what it hits. Server only. */
 	private boolean mending;
 	private boolean burst;
+	/** (Web cartridges) The kind of web it is ({@link WebKinds}). Server only. */
+	private int kind = WebKinds.STICKY;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
 	/** A web bomb is lobbed like a snowball. */
@@ -82,6 +84,12 @@ public class WebBall extends ThrowableItemProjectile {
 	/** A quick webshooter pellet (see {@link #PELLET_DAMAGE}). */
 	public WebBall pellet() {
 		this.pellet = true;
+		return this;
+	}
+
+	/** Of the kind loaded in the wrist it left ({@link WebKinds}). */
+	public WebBall kind(int kind) {
+		this.kind = kind;
 		return this;
 	}
 
@@ -142,6 +150,10 @@ public class WebBall extends ThrowableItemProjectile {
 		}
 		if (this.bomb) {
 			WebStrength.bomb(level, this.position(), this.getOwner(), dark);
+			return;
+		}
+		if (WebKinds.burst(level, this.kind, this, this.getOwner(), direct, this.position(), this.pellet ? PELLET_DAMAGE
+			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX))) {
 			return;
 		}
 		if (this.pellet) {

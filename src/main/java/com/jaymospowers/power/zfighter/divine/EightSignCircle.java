@@ -76,11 +76,24 @@ public final class EightSignCircle {
 	 * Jaymo's Kingdoms can ask by reflection.
 	 */
 	public static boolean sealed(Entity entity) {
+		// (the Pocket Arsenal's Rift Seal, a Lawgiver's rule) inside someone's seal, or ruled powerless, powers and forms are refused just the same
+		if (com.jaymospowers.power.arsenal.ArsenalSeal.sealed(entity) || com.jaymospowers.power.rules.RulesPower.muted(entity)) {
+			return true;
+		}
 		if (SEALED.isEmpty()) {
 			return false;
 		}
 		Long until = SEALED.get(entity.getUUID());
 		return until != null && until > entity.level().getGameTime();
+	}
+
+	/**
+	 * (Awakening pick) Seals {@code entity} for {@code ticks} without a ring, as the ring's seal does (powers and forms refused):
+	 * Jaymo's Kingdoms' Cordon enforcers' blows lay it, by reflection. A longer seal already on it stays.
+	 */
+	public static void sealFor(Entity entity, int ticks) {
+		long until = entity.level().getGameTime() + ticks;
+		SEALED.merge(entity.getUUID(), until, Math::max);
 	}
 
 	/** Draws a ring at {@code centre} for {@code caster}. */
