@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -182,7 +183,7 @@ public final class Polestar extends XenoForm {
 
 	private static void repel(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity e : around(player, REPEL_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, REPEL_RADIUS))) {
 			int n = iron(e);
 			if (n == 0) {
 				continue;
@@ -190,11 +191,11 @@ public final class Polestar extends XenoForm {
 			e.hurtServer(level, player.damageSources().playerAttack(player), n * REPEL_PER_PIECE_DAMAGE);
 			shove(e, player.position(), REPEL_BASE + REPEL_PER_PIECE * n, 0.4);
 		}
-		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(REPEL_RADIUS), a -> a.getOwner() != player)) {
+		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(AbilityPower.size(player, REPEL_RADIUS)), a -> a.getOwner() != player)) {
 			turn(arrow, player);
 		}
-		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.5, 24);
-		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.9, 32);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, REPEL_RADIUS) * 0.5, 24);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, REPEL_RADIUS) * 0.9, 32);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 8.0, 0.3F);
 	}
@@ -258,14 +259,14 @@ public final class Polestar extends XenoForm {
 			level.sendParticles(MagicFx.CRACKLE, over.x, over.y, over.z, 1, 0.4, 0.4, 0.4, 0.0);
 		}
 		if (live.field) {
-			for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(FIELD_RADIUS),
+			for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(AbilityPower.size(player, FIELD_RADIUS)),
 				a -> a.getOwner() != player && a.getDeltaMovement().lengthSqr() > 0.04
 					&& player.position().subtract(a.position()).dot(a.getDeltaMovement()) > 0.0)) {
 				turn(arrow, player);
 				sound(player, SoundEvents.CHAIN_BREAK, 0.6F, 1.6F);
 			}
 			if (player.tickCount % 6 == 0) {
-				ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.4, 10);
+				ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), AbilityPower.size(player, FIELD_RADIUS) * 0.4, 10);
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import net.minecraft.ChatFormatting;
@@ -54,14 +55,14 @@ final class ZFighterRageScream {
 		Vec3 at = player.position();
 		float damage = DAMAGE * ZFighterPower.kiPower(player, live);
 		var source = ZFighterKi.source(player);
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 away = near.position().subtract(at);
 			double distance = away.length();
-			if (distance > RADIUS) {
+			if (distance > AbilityPower.size(player, RADIUS)) {
 				continue;
 			}
-			double falloff = 1.0 - 0.4 * distance / RADIUS;
+			double falloff = 1.0 - 0.4 * distance / AbilityPower.size(player, RADIUS);
 			ZFighterKi.push(near, away.lengthSqr() < 1.0E-4 ? player.getLookAngle() : away, PUSH * falloff, LIFT);
 			if (ZFighterArts.valid(player, near)) {
 				near.setInvulnerableTime(0);
@@ -71,7 +72,7 @@ final class ZFighterRageScream {
 		}
 		ParticleOptions rage = MagicFx.wisp(ZFighterBattle.RAGE_COLOR, 2.0F);
 		for (int ring = 1; ring <= RINGS; ring++) {
-			double r = RADIUS * ring / RINGS;
+			double r = AbilityPower.size(player, RADIUS) * ring / RINGS;
 			int points = 16 + ring * 12;
 			for (int i = 0; i < points; i++) {
 				double a = i * Math.PI * 2.0 / points;

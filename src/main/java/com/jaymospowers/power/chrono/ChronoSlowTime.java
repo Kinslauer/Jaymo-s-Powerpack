@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public final class ChronoSlowTime {
 				}
 				if (owner.tickCount % 5 == 0) {
 					for (ServerPlayer other : owner.level().players()) {
-						if (other != owner && other.distanceToSqr(owner) <= DRAG_RADIUS * DRAG_RADIUS) {
+						if (other != owner && other.distanceToSqr(owner) <= AbilityPower.size(owner, DRAG_RADIUS) * AbilityPower.size(owner, DRAG_RADIUS)) {
 							other.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 12, DRAG_AMPLIFIER, false, false, false));
 						}
 					}

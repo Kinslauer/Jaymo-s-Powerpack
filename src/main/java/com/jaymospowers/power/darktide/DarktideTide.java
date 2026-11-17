@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Oddities;
@@ -804,36 +805,36 @@ final class DarktideTide {
 			if (now >= zone.until || zone.owner.isRemoved()) {
 				it.remove();
 				// it lets go: the water drops and runs out over the ground
-				Vec3 floor = zone.center.add(0.0, -DROWN_RADIUS, 0.0);
-				DarktideLooks.spray(level, floor, (float) DROWN_RADIUS * 1.4F);
-				DarktideLooks.pool(level, floor, (float) DROWN_RADIUS, DarktideLooks.POOL_TICKS);
+				Vec3 floor = zone.center.add(0.0, -AbilityPower.size(zone.owner, DROWN_RADIUS), 0.0);
+				DarktideLooks.spray(level, floor, (float) AbilityPower.size(zone.owner, DROWN_RADIUS) * 1.4F);
+				DarktideLooks.pool(level, floor, (float) AbilityPower.size(zone.owner, DROWN_RADIUS), DarktideLooks.POOL_TICKS);
 				continue;
 			}
 			// a ball of dark water, drawn as a slow, wobbling see-through orb (ZFighterOrbs)
 			float swell = Math.min(1.0F, (now - (zone.until - DROWN_TICKS) + 1) / (float)DROWN_SWELL);
-			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, DROWN_RADIUS * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
+			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, AbilityPower.size(zone.owner, DROWN_RADIUS) * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
 				DROWN_COLOR);
 			var random = level.getRandom();
 			for (int i = 0; i < 8; i++) {
 				// bubbles through it, a shimmering skin
 				Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
-				Vec3 skin = zone.center.add(dir.scale(DROWN_RADIUS));
+				Vec3 skin = zone.center.add(dir.scale(AbilityPower.size(zone.owner, DROWN_RADIUS)));
 				level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
-				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * DROWN_RADIUS));
+				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * AbilityPower.size(zone.owner, DROWN_RADIUS)));
 				level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.6F), inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
 				if (i % 3 == 0) {
 					level.sendParticles(MagicFx.wisp(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}
 			}
-			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(zone.center, zone.center).inflate(DROWN_RADIUS + 1.0),
+			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(zone.center, zone.center).inflate(AbilityPower.size(zone.owner, DROWN_RADIUS) + 1.0),
 					e -> e.isAlive() && !e.isSpectator() && e != zone.owner && !risenOf(e, zone.owner))) {
 				Vec3 off = victim.position().add(0.0, victim.getBbHeight() / 2.0, 0.0).subtract(zone.center);
 				double d = off.length();
-				if (d > DROWN_RADIUS + 0.5) {
+				if (d > AbilityPower.size(zone.owner, DROWN_RADIUS) + 0.5) {
 					continue;
 				}
 				// can't swim out: pulled back from the skin, and held low in the water
-				if (d > DROWN_RADIUS - 1.2) {
+				if (d > AbilityPower.size(zone.owner, DROWN_RADIUS) - 1.2) {
 					Vec3 back = off.normalize().scale(-0.25);
 					victim.setDeltaMovement(back.x, Math.min(back.y, 0.02), back.z);
 					victim.syncVelocity = true;

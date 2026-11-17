@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal.entity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.power.arsenal.ArsenalDamocles;
@@ -131,13 +132,13 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 
 	private void burst(ServerLevel level, ServerPlayer player, Vec3 at, @Nullable Entity direct) {
 		DamageSource source = this.damageSources().explosion(this, player);
-		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
+		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			double d = victim == direct ? 0.0 : victim.getBoundingBox().getCenter().distanceTo(at);
-			if (d > BURST_RADIUS) {
+			if (d > AbilityPower.size(player, BURST_RADIUS)) {
 				continue;
 			}
-			float share = (float) (1.0 - d / BURST_RADIUS);
+			float share = (float) (1.0 - d / AbilityPower.size(player, BURST_RADIUS));
 			victim.hurtServer(level, source, this.damage * (0.4F + 0.6F * share));
 			if (this.isVoid()) {
 				ArsenalVoid.voidHit(victim, player, false);
@@ -159,7 +160,7 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 			level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 20, 0.4, 0.4, 0.4, 0.1);
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
-		com.jaymospowers.core.Shakes.around(level, at, BURST_RADIUS * 3.0, this.isVoid() ? 1.1F : 0.8F);
+		com.jaymospowers.core.Shakes.around(level, at, AbilityPower.size(player, BURST_RADIUS) * 3.0, this.isVoid() ? 1.1F : 0.8F);
 		this.discard();
 	}
 

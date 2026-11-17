@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.EnderscapeLoot;
@@ -181,7 +182,7 @@ public final class RelicWeapons {
 				}
 				case SUNFANG -> {
 					Flames.touch(level, entity, SUN_FIRE_SECONDS, attacker);
-					Flames.area(level, entity.getBoundingBox().inflate(SUN_SPLASH), SUN_FIRE_SECONDS, attacker,
+					Flames.area(level, entity.getBoundingBox().inflate(AbilityPower.size(attacker, SUN_SPLASH)), SUN_FIRE_SECONDS, attacker,
 						e -> e != entity && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == attacker));
 				}
 				case RIMECLAW -> chill(level, entity, attacker);
@@ -344,7 +345,7 @@ public final class RelicWeapons {
 		}
 
 		private static int rimeSlam(ServerLevel level, ServerPlayer player) {
-			for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RIME_SLAM_REACH, 1.0, RIME_SLAM_REACH),
+			for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, RIME_SLAM_REACH), 1.0, AbilityPower.size(player, RIME_SLAM_REACH)),
 				e -> e != player && e.isAlive() && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == player))) {
 				if (target.hurtServer(level, level.damageSources().playerAttack(player), RIME_SLAM_DAMAGE)) {
 					target.setDeltaMovement(target.getDeltaMovement().add(0.0, RIME_SLAM_LIFT, 0.0));
@@ -352,7 +353,7 @@ public final class RelicWeapons {
 					chill(level, target, player);
 				}
 			}
-			level.sendParticles(ParticleTypes.SNOWFLAKE, player.getX(), player.getY() + 0.2, player.getZ(), 70, RIME_SLAM_REACH * 0.5, 0.15, RIME_SLAM_REACH * 0.5,
+			level.sendParticles(ParticleTypes.SNOWFLAKE, player.getX(), player.getY() + 0.2, player.getZ(), 70, AbilityPower.size(player, RIME_SLAM_REACH) * 0.5, 0.15, AbilityPower.size(player, RIME_SLAM_REACH) * 0.5,
 				0.06);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);

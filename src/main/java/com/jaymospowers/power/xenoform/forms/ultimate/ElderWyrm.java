@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
@@ -357,12 +358,12 @@ public final class ElderWyrm extends XenoUltimate {
 			return;
 		}
 		cloud.setPotionContents(PotionContents.EMPTY);
-		cloud.setRadius(VOLLEY_CLOUD_RADIUS);
+		cloud.setRadius(AbilityPower.size(owner, VOLLEY_CLOUD_RADIUS));
 		cloud.setRadiusPerTick(0.0F);
 		cloud.setRadiusOnUse(0.0F);
 		cloud.setDurationOnUse(0);
 		cloud.setDuration(VOLLEY_CLOUD_TICKS);
-		Cast cast = new Cast(level, VOLLEY_CLOUD_RADIUS, VOLLEY_DAMAGE, VOLLEY_CLOUD_TICKS);
+		Cast cast = new Cast(level, AbilityPower.size(owner, VOLLEY_CLOUD_RADIUS), VOLLEY_DAMAGE, VOLLEY_CLOUD_TICKS);
 		cast.spots.add(cloud.position());
 		cast.clouds.add(cloud.getId());
 		work.casts.add(cast);
@@ -437,7 +438,7 @@ public final class ElderWyrm extends XenoUltimate {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
-		Cast cast = new Cast(level, BREATH_RADIUS, BREATH_DAMAGE, BREATH_TICKS);
+		Cast cast = new Cast(level, AbilityPower.size(player, BREATH_RADIUS), BREATH_DAMAGE, BREATH_TICKS);
 		for (double ahead : BREATH_AHEAD) {
 			Vec3 want = eye.add(look.scale(ahead));
 			BlockHitResult wall = level.clip(new ClipContext(eye, want, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
@@ -485,12 +486,12 @@ public final class ElderWyrm extends XenoUltimate {
 		work.diveTicks = 0;
 		work.diveGrace = 0;
 		ServerLevel level = player.level();
-		for (LivingEntity living : foes(player, DIVE_RADIUS)) {
+		for (LivingEntity living : foes(player, AbilityPower.size(player, DIVE_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), DIVE_DAMAGE);
 			shove(living, player.position(), DIVE_OUT, DIVE_UP);
 		}
-		ring(level, ParticleTypes.CLOUD, player.position(), DIVE_RADIUS * 0.5, 16);
-		ring(level, MagicFx.MURK, player.position(), DIVE_RADIUS, 24);
+		ring(level, ParticleTypes.CLOUD, player.position(), AbilityPower.size(player, DIVE_RADIUS) * 0.5, 16);
+		ring(level, MagicFx.MURK, player.position(), AbilityPower.size(player, DIVE_RADIUS), 24);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.7F);
 		sound(player, SoundEvents.ENDER_DRAGON_FLAP, 1.5F, 0.6F);
 		Shakes.heavy(player, player.position(), TEMPEST_SHAKE_RANGE, DIVE_SHAKE);
@@ -500,14 +501,14 @@ public final class ElderWyrm extends XenoUltimate {
 
 	private static void tempest(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : foes(player, TEMPEST_RADIUS)) {
+		for (LivingEntity living : foes(player, AbilityPower.size(player, TEMPEST_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), TEMPEST_DAMAGE);
 			shove(living, player.position(), TEMPEST_OUT, TEMPEST_UP);
 		}
 		// arrows and other projectiles are swatted away, none of its own, its pets' or its team's
 		Vec3 centre = player.getBoundingBox().getCenter();
-		for (Projectile shot : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(TEMPEST_RADIUS),
-			p -> p.isAlive() && p.distanceToSqr(player) <= TEMPEST_RADIUS * TEMPEST_RADIUS)) {
+		for (Projectile shot : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, TEMPEST_RADIUS)),
+			p -> p.isAlive() && p.distanceToSqr(player) <= AbilityPower.size(player, TEMPEST_RADIUS) * AbilityPower.size(player, TEMPEST_RADIUS))) {
 			Entity owner = shot.getOwner();
 			if (owner == player || owner != null && spared(player, owner) || shot.entityTags().contains(FIREBALL_TAG)) {
 				continue;
@@ -524,8 +525,8 @@ public final class ElderWyrm extends XenoUltimate {
 			player.syncVelocity = true;
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		ring(level, ParticleTypes.CLOUD, player.position().add(0.0, 1.0, 0.0), TEMPEST_RADIUS * 0.5, 24);
-		ring(level, ParticleTypes.GUST, player.position(), TEMPEST_RADIUS, 12);
+		ring(level, ParticleTypes.CLOUD, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, TEMPEST_RADIUS) * 0.5, 24);
+		ring(level, ParticleTypes.GUST, player.position(), AbilityPower.size(player, TEMPEST_RADIUS), 12);
 		sound(player, SoundEvents.ENDER_DRAGON_FLAP, 2.0F, 0.5F);
 		sound(player, SoundEvents.WIND_CHARGE_BURST.value(), 1.2F, 0.7F);
 		Shakes.heavy(player, player.getEyePosition().add(player.getLookAngle().scale(2.0)), TEMPEST_SHAKE_RANGE, ELDER_SHAKE);
@@ -549,7 +550,7 @@ public final class ElderWyrm extends XenoUltimate {
 				continue;
 			}
 			Vec3 from = player.position();
-			Cast cast = new Cast(level, RIFT_CLOUD_RADIUS, RIFT_CLOUD_DAMAGE, RIFT_CLOUD_TICKS);
+			Cast cast = new Cast(level, AbilityPower.size(player, RIFT_CLOUD_RADIUS), RIFT_CLOUD_DAMAGE, RIFT_CLOUD_TICKS);
 			cloud(player, cast, from.add(0.0, 0.1, 0.0));
 			player.teleportTo(level, feet.x, feet.y, feet.z, Set.of(), player.getYRot(), player.getXRot(), false);
 			player.resetFallDistance();

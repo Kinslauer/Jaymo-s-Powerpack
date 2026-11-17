@@ -50,6 +50,8 @@ final class StasisField {
 	/** Its owner's particle style ({@link ChronoFx#style}). */
 	final int fx;
 	final int duration;
+	/** How far it reaches: {@link #RADIUS}, wider by its caster's Ability Power when it was cast. */
+	private final double radius;
 	int ticksLeft;
 	private int age;
 	private final List<Entity> held = new ArrayList<>();
@@ -61,6 +63,7 @@ final class StasisField {
 		this.owner = owner;
 		this.duration = duration;
 		this.ticksLeft = duration;
+		this.radius = com.jaymospowers.core.AbilityPower.size(level, owner, RADIUS);
 	}
 
 	/** How long a field of this player's lasts. */
@@ -159,14 +162,14 @@ final class StasisField {
 	}
 
 	private void capture() {
-		AABB box = new AABB(center, center).inflate(RADIUS);
+		AABB box = new AABB(center, center).inflate(radius);
 		// (Awakening pick: your side gets caught too) an enemy player in the field pulls the caster's teammates near it in too
 		java.util.Set<Entity> side = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 		if (level.getPlayerByUUID(owner) instanceof net.minecraft.server.level.ServerPlayer caster) {
 			for (net.minecraft.server.level.ServerPlayer p : level.players()) {
-				if (p != caster && !p.isSpectator() && p.position().distanceToSqr(center) <= RADIUS * RADIUS
+				if (p != caster && !p.isSpectator() && p.position().distanceToSqr(center) <= radius * radius
 					&& !com.jaymospowers.core.TeamTime.allied(caster, p)) {
-					double reach = RADIUS + com.jaymospowers.core.TeamTime.RANGE;
+					double reach = radius + com.jaymospowers.core.TeamTime.RANGE;
 					for (net.minecraft.server.level.ServerPlayer mate : level.players()) {
 						if (mate != caster && !mate.isSpectator() && mate.isAlive() && mate.position().distanceToSqr(center) <= reach * reach
 							&& com.jaymospowers.core.TeamTime.allied(caster, mate)) {
@@ -180,7 +183,7 @@ final class StasisField {
 		List<Entity> caught = new ArrayList<>(level.getEntities((Entity) null, box, e -> freezable(e) && !e.getUUID().equals(owner)));
 		caught.addAll(side);
 		for (Entity entity : caught) {
-			if (!side.contains(entity) && entity.position().distanceToSqr(center) > RADIUS * RADIUS || held.contains(entity)) {
+			if (!side.contains(entity) && entity.position().distanceToSqr(center) > radius * radius || held.contains(entity)) {
 				continue;
 			}
 			Frozen frozen = FROZEN.get(entity);
@@ -231,16 +234,16 @@ final class StasisField {
 			double y = 1.0 - (i + 0.5) / points * 2.0;
 			double r = Math.sqrt(1.0 - y * y);
 			double a = golden * i + twist + (age % 4) * 0.4;
-			double px = center.x + Math.cos(a) * r * RADIUS;
-			double py = center.y + 1.0 + y * RADIUS;
-			double pz = center.z + Math.sin(a) * r * RADIUS;
+			double px = center.x + Math.cos(a) * r * radius;
+			double py = center.y + 1.0 + y * radius;
+			double pz = center.z + Math.sin(a) * r * radius;
 			ChronoFx.particles(level, fx, i % 7 == 0 ? AMBER_DUST : GOLD_DUST, px, py, pz, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (age % 10 == 0) {
 			for (int h = 0; h < 12; h++) {
 				double a = h / 12.0 * Math.PI * 2.0 - twist * 0.25;
 				ChronoFx.particles(level, fx, h % 3 == 0 ? MagicFx.LIGHT : MagicFx.EMBER,
-					center.x + Math.sin(a) * RADIUS, center.y + 1.0, center.z - Math.cos(a) * RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+					center.x + Math.sin(a) * radius, center.y + 1.0, center.z - Math.cos(a) * radius, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 	}

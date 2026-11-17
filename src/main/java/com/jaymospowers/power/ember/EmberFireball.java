@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Loaded;
@@ -157,18 +158,18 @@ public final class EmberFireball {
 		ServerLevel level = ball.level;
 		ServerPlayer owner = ball.owner;
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 40, RADIUS * 0.4, RADIUS * 0.4, RADIUS * 0.4, 0.06);
-		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 8, RADIUS * 0.3, RADIUS * 0.3, RADIUS * 0.3, 0.0);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, RADIUS * 0.3, RADIUS * 0.3, RADIUS * 0.3, 0.02);
+		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 40, AbilityPower.size(owner, RADIUS) * 0.4, AbilityPower.size(owner, RADIUS) * 0.4, AbilityPower.size(owner, RADIUS) * 0.4, 0.06);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 8, AbilityPower.size(owner, RADIUS) * 0.3, AbilityPower.size(owner, RADIUS) * 0.3, AbilityPower.size(owner, RADIUS) * 0.3, 0.0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, AbilityPower.size(owner, RADIUS) * 0.3, AbilityPower.size(owner, RADIUS) * 0.3, AbilityPower.size(owner, RADIUS) * 0.3, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.5F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.2F, 0.5F);
-		Flames.area(level, at, RADIUS, BURN_SECONDS, owner, e -> true);
+		Flames.area(level, at, AbilityPower.size(owner, RADIUS), BURN_SECONDS, owner, e -> true);
 		// (0.14.0) freezing fog in the burst thaws at once
-		SmokeField.thaw(level, at, RADIUS + 0.5);
-		double r2 = RADIUS * RADIUS;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(RADIUS),
+		SmokeField.thaw(level, at, AbilityPower.size(owner, RADIUS) + 0.5);
+		double r2 = AbilityPower.size(owner, RADIUS) * AbilityPower.size(owner, RADIUS);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, RADIUS)),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && e.getBoundingBox().distanceToSqr(at) <= r2)) {
-			double share = 1.0 - 0.5 * Math.sqrt(living.getBoundingBox().distanceToSqr(at)) / RADIUS;
+			double share = 1.0 - 0.5 * Math.sqrt(living.getBoundingBox().distanceToSqr(at)) / AbilityPower.size(owner, RADIUS);
 			living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, owner), EmberKindle.seasonal(owner, (float)(DAMAGE * share)));
 		}
 		if (block != null) {
@@ -178,7 +179,7 @@ public final class EmberFireball {
 		EmberKindle.ignite(level, BlockPos.containing(at));
 		if (Powers.has(owner, SmokePower.INSTANCE)) {
 			// any of the thrower's own thick smoke in the burst goes up
-			int r = (int)Math.ceil(RADIUS);
+			int r = (int)Math.ceil(AbilityPower.size(owner, RADIUS));
 			BlockPos center = BlockPos.containing(at);
 			for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
 				if (SmokeField.ownedDensity(level, pos.asLong(), owner.getId()) >= EmberKindle.FLASH_LEAST) {

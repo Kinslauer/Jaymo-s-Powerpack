@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
@@ -797,12 +798,12 @@ public final class ChronoFlow {
 		float weapon = Math.max(0.0F, (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1.0F) * WEAPON_SHARE;
 		float damage = (DAMAGE[SPIN] + weapon) * (1.0F + Math.min(COMBO_MAX_BONUS, fighter.combo * COMBO_BONUS));
 		int struck = 0;
-		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SPIN_RADIUS + 1.0),
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, SPIN_RADIUS) + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !player.isAlliedTo(e)
 				&& !(e instanceof TamableAnimal pet && pet.isOwnedBy(player)))) {
 			Vec3 to = target.position().subtract(player.position()).horizontal();
 			double distance = to.length();
-			if (distance - target.getBbWidth() * 0.5 > SPIN_RADIUS || !player.hasLineOfSight(target)) {
+			if (distance - target.getBbWidth() * 0.5 > AbilityPower.size(player, SPIN_RADIUS) || !player.hasLineOfSight(target)) {
 				continue;
 			}
 			target.setInvulnerableTime(0);
@@ -826,7 +827,7 @@ public final class ChronoFlow {
 		// a golden ring thrown out at waist height
 		for (int i = 0; i < 32; i++) {
 			double a = i / 32.0 * Math.PI * 2.0;
-			for (double r = 1.0; r <= SPIN_RADIUS; r += 2.0) {
+			for (double r = 1.0; r <= AbilityPower.size(player, SPIN_RADIUS); r += 2.0) {
 				ChronoFx.particles(level, player, GOLD, player.getX() + Math.cos(a) * r, player.getY() + 0.8, player.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
@@ -835,7 +836,7 @@ public final class ChronoFlow {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
 		com.jaymospowers.core.Shakes.send(player, SPIN_LAND_SHAKE);
-		com.jaymospowers.core.Shakes.around(level, player.position(), SPIN_RADIUS * 2.0, 0.6F, com.jaymospowers.core.Shakes.ticksFor(0.6F), player);
+		com.jaymospowers.core.Shakes.around(level, player.position(), AbilityPower.size(player, SPIN_RADIUS) * 2.0, 0.6F, com.jaymospowers.core.Shakes.ticksFor(0.6F), player);
 	}
 
 	/**

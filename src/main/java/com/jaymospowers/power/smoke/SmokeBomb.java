@@ -1,5 +1,6 @@
 package com.jaymospowers.power.smoke;
 
+import com.jaymospowers.core.AbilityPower;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +104,7 @@ final class SmokeBomb {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, at, 10.0, 0.4F);
 		boolean choke = owner != null && com.jaymospowers.core.Fate.isCorrupted(owner);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BLIND_RADIUS),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, BLIND_RADIUS)),
 			e -> e.isAlive() && e != owner)) {
 			living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIND_TICKS, 0), owner);
 			if (choke) {

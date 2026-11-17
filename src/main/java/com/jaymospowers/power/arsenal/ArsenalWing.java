@@ -2,6 +2,7 @@ package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.combat.Guard;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.ground.FirstTools;
 import com.jaymospowers.api.PowerKey;
@@ -796,7 +797,7 @@ public final class ArsenalWing {
 		int n = wing.blades().size();
 		if (wing.mode() == WHIRL) {
 			double angle = (now - wing.modeStart()) * 0.6 + i * Mth.TWO_PI / n;
-			return player.getPosition(partialTick).add(Math.cos(angle) * WHIRL_RADIUS, 1.0 + Math.sin(angle * 0.5 + i) * 0.35, Math.sin(angle) * WHIRL_RADIUS);
+			return player.getPosition(partialTick).add(Math.cos(angle) * AbilityPower.size(player, WHIRL_RADIUS), 1.0 + Math.sin(angle * 0.5 + i) * 0.35, Math.sin(angle) * AbilityPower.size(player, WHIRL_RADIUS));
 		}
 		if (wing.mode() == RING) {
 			Vec3 ringed = ArsenalWingMoves.ringSlot(player, wing, i, now, partialTick);

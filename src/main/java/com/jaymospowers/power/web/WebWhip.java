@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.Powers;
@@ -503,7 +504,7 @@ public final class WebWhip {
 			com.jaymospowers.core.Shakes.send(struck, TARGET_SHAKE, struck.position());
 		}
 		// anything else where it lands is caught under it
-		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, new AABB(ground, ground).inflate(SPLASH + force * 0.5),
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, new AABB(ground, ground).inflate(AbilityPower.size(player, SPLASH) + force * 0.5),
 			e -> e != player && e != target && e.isAlive() && !e.isSpectator())) {
 			other.hurtServer(level, level.damageSources().playerAttack(player), SPLASH_DAMAGE);
 			Vec3 push = other.position().subtract(ground).multiply(1.0, 0.0, 1.0);

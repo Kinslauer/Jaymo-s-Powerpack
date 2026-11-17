@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Soundscape;
 import java.util.Map;
@@ -125,10 +126,10 @@ final class ZFighterTechniques {
 		}
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(FLASH_RANGE),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, FLASH_RANGE)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 toward = eye.subtract(near.getEyePosition());
-			if (toward.length() > FLASH_RANGE || toward.lengthSqr() < 1.0E-4) {
+			if (toward.length() > AbilityPower.size(player, FLASH_RANGE) || toward.lengthSqr() < 1.0E-4) {
 				continue;
 			}
 			if (near.getViewVector(1.0F).dot(toward.normalize()) < FLASH_FACING || !near.hasLineOfSight(player)) {
@@ -167,7 +168,7 @@ final class ZFighterTechniques {
 		live.barrierTicks--;
 		ServerLevel level = player.level();
 		Vec3 centre = player.getBoundingBox().getCenter();
-		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(BARRIER_RADIUS),
+		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_RADIUS)),
 			p -> p.getOwner() != player)) {
 			Vec3 at = projectile.position();
 			level.sendParticles(MagicFx.wisp(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.5F), true, false, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.05);
@@ -179,7 +180,7 @@ final class ZFighterTechniques {
 			ParticleOptions dust = MagicFx.wisp(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.0F);
 			for (int i = 0; i < 14; i++) {
 				Vec3 dir = new Vec3(random.nextGaussian(), Math.abs(random.nextGaussian()), random.nextGaussian()).normalize();
-				Vec3 at = centre.add(dir.scale(BARRIER_RADIUS * 0.8));
+				Vec3 at = centre.add(dir.scale(AbilityPower.size(player, BARRIER_RADIUS) * 0.8));
 				level.sendParticles(dust, true, false, at.x, at.y - 0.6, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}

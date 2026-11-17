@@ -3,6 +3,7 @@ package com.jaymospowers.power.blinker;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
@@ -304,10 +305,10 @@ public final class BlinkerPower implements Power {
 		ServerLevel level = player.level();
 		PickKit.spend(TABLE, player, VANISH, VANISH_COOLDOWN);
 		Vec3 at = player.position();
-		level.sendParticles(MagicFx.miasma(SMOKE, 2.0F), at.x, at.y + 1.0, at.z, 60, VANISH_RADIUS * 0.4, 1.0, VANISH_RADIUS * 0.4, 0.02);
-		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), (float)VANISH_RADIUS * 0.6F, SMOKE);
+		level.sendParticles(MagicFx.miasma(SMOKE, 2.0F), at.x, at.y + 1.0, at.z, 60, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 1.0, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 0.02);
+		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, VANISH_RADIUS) * 0.6F, SMOKE);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.8F);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(VANISH_RADIUS), e -> e != player && e.isAlive())) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, VANISH_RADIUS)), e -> e != player && e.isAlive())) {
 			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, VANISH_BLIND, 0), player);
 			if (e instanceof Mob mob && mob.getTarget() == player) {
 				mob.setTarget(null);

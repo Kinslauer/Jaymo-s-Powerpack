@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
@@ -199,13 +200,13 @@ public final class ZFighterFrostForms {
 			return;
 		}
 		if (branch == ZFighterBranchForms.SOVEREIGN && level.getGameTime() % CHILL_EVERY == 0) {
-			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CHILL_RANGE),
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, CHILL_RANGE)),
 				e -> e != player && e.isAlive() && e instanceof Enemy)) {
 				near.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CHILL_TICKS, CHILL_LEVEL, false, true), player);
 				level.sendParticles(ParticleTypes.SNOWFLAKE, near.getX(), near.getY() + near.getBbHeight() * 0.5, near.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
 			}
-			level.sendParticles(ParticleTypes.SNOWFLAKE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 10, CHILL_RANGE * 0.5, 0.8,
-				CHILL_RANGE * 0.5, 0.01);
+			level.sendParticles(ParticleTypes.SNOWFLAKE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 10, AbilityPower.size(player, CHILL_RANGE) * 0.5, 0.8,
+				AbilityPower.size(player, CHILL_RANGE) * 0.5, 0.01);
 		}
 	}
 }

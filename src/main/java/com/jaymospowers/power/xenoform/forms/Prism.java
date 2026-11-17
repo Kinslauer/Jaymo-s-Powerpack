@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -252,21 +253,21 @@ public final class Prism extends XenoForm {
 
 	private static void spikes(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SPIKE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SPIKE_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), SPIKE_DAMAGE);
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SPIKE_SLOW_TICKS, 1));
 			shove(living, player.position(), 0.2, 0.35);
 		}
 		Vec3 feet = player.position();
-		ring(level, CRYSTAL_DUST, feet, SPIKE_RADIUS * 0.5, 12);
-		ring(level, CRYSTAL_DUST, feet, SPIKE_RADIUS, 24);
+		ring(level, CRYSTAL_DUST, feet, AbilityPower.size(player, SPIKE_RADIUS) * 0.5, 12);
+		ring(level, CRYSTAL_DUST, feet, AbilityPower.size(player, SPIKE_RADIUS), 24);
 		for (int i = 0; i < 16; i++) {
 			double a = i / 16.0 * Math.PI * 2.0;
-			double r = 1.0 + player.getRandom().nextDouble() * (SPIKE_RADIUS - 1.0);
+			double r = 1.0 + player.getRandom().nextDouble() * (AbilityPower.size(player, SPIKE_RADIUS) - 1.0);
 			level.sendParticles(CRYSTAL_DUST, feet.x + Math.cos(a) * r, feet.y + 0.5, feet.z + Math.sin(a) * r, 4, 0.1, 0.5, 0.1, 0.0);
 		}
 		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.2F, 0.6F);
 		sound(player, SoundEvents.GLASS_BREAK, 0.8F, 0.7F);
-		com.jaymospowers.core.Shakes.heavy(player, feet, SPIKE_RADIUS * 2.0, 0.8F);
+		com.jaymospowers.core.Shakes.heavy(player, feet, AbilityPower.size(player, SPIKE_RADIUS) * 2.0, 0.8F);
 	}
 }

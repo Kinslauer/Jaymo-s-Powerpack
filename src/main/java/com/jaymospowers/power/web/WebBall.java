@@ -169,7 +169,7 @@ public class WebBall extends ThrowableItemProjectile {
 		}
 		float damage = dark ? net.minecraft.util.Mth.lerp(this.charge, DARK_DAMAGE_MIN, DARK_DAMAGE_MAX)
 			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
-		double radius = net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX);
+		double radius = com.jaymospowers.core.AbilityPower.size(this.getOwner(), net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX));
 		int slowTicks = net.minecraft.util.Mth.lerpInt(this.charge, SLOWNESS_MIN_TICKS, SLOWNESS_MAX_TICKS);
 		Entity owner = this.getOwner();
 		net.minecraft.world.phys.AABB area = this.getBoundingBox().inflate(radius, radius * 0.5, radius);

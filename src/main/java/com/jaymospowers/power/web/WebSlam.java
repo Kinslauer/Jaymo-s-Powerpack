@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Debris;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -176,14 +177,14 @@ public final class WebSlam {
 		ahead = ahead.lengthSqr() < 1.0E-4 ? Vec3.ZERO : ahead.normalize();
 		Vec3 impact = at.add(ahead.scale(0.8));
 		float damage = DAMAGE + Math.min(FALL_BONUS_MAX, Math.max(0.0F, fallen) * FALL_BONUS);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RADIUS),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			Vec3 to = living.position().subtract(impact);
 			double d = to.horizontalDistance();
-			if (d > RADIUS + living.getBbWidth() * 0.5 || Math.abs(to.y) > 3.0) {
+			if (d > AbilityPower.size(player, RADIUS) + living.getBbWidth() * 0.5 || Math.abs(to.y) > 3.0) {
 				continue;
 			}
-			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / RADIUS);
+			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / AbilityPower.size(player, RADIUS));
 			living.hurtServer(level, level.damageSources().playerAttack(player), damage * share);
 			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 out = new Vec3(to.x, 0.0, to.z);
@@ -218,14 +219,14 @@ public final class WebSlam {
 		ServerLevel level = player.level();
 		Vec3 at = player.position();
 		float damage = DIVE_DAMAGE + DIVE_DAMAGE_PER_SPEED * (float)speed;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(DIVE_RADIUS),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, DIVE_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			Vec3 to = living.position().subtract(at);
 			double d = to.horizontalDistance();
-			if (d > DIVE_RADIUS + living.getBbWidth() * 0.5 || Math.abs(to.y) > 2.5) {
+			if (d > AbilityPower.size(player, DIVE_RADIUS) + living.getBbWidth() * 0.5 || Math.abs(to.y) > 2.5) {
 				continue;
 			}
-			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / DIVE_RADIUS);
+			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / AbilityPower.size(player, DIVE_RADIUS));
 			living.hurtServer(level, level.damageSources().playerAttack(player), damage * share);
 			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 out = new Vec3(to.x, 0.0, to.z);
@@ -241,7 +242,7 @@ public final class WebSlam {
 		Debris.smash(level, at.subtract(0.0, 0.5, 0.0), Math.max(SMASH_SPEED, speed), player);
 		Debris.ring(level, player.blockPosition().below(), (int)Math.min(5, 2 + speed * 1.2), (float)Math.min(2.2, 1.0 + speed * 0.5));
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.2, at.z, 14, DIVE_RADIUS * 0.4, 0.1, DIVE_RADIUS * 0.4, 0.02);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.2, at.z, 14, AbilityPower.size(player, DIVE_RADIUS) * 0.4, 0.1, AbilityPower.size(player, DIVE_RADIUS) * 0.4, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.8F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 0.9F);
 		com.jaymospowers.core.Shakes.send(player, DIVE_SHAKE, at);

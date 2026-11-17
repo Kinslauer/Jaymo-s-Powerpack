@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
@@ -133,14 +134,14 @@ final class ZFighterDrillBeam {
 		}
 
 		// the small blast: hurts what is near, tears nothing
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(end, end).inflate(BLAST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(end, end).inflate(AbilityPower.size(player, BLAST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			double distance = near.getBoundingBox().getCenter().distanceTo(end);
-			if (distance > BLAST_RADIUS) {
+			if (distance > AbilityPower.size(player, BLAST_RADIUS)) {
 				continue;
 			}
 			near.setInvulnerableTime(0);
-			near.hurtServer(level, source, damage * BLAST_SHARE * (float)(1.0 - 0.5 * distance / BLAST_RADIUS));
+			near.hurtServer(level, source, damage * BLAST_SHARE * (float)(1.0 - 0.5 * distance / AbilityPower.size(player, BLAST_RADIUS)));
 			ZFighterKi.push(near, near.position().subtract(end), 0.6, 0.3);
 		}
 		level.explode(player, source, ZFighterKi.GROUND_ONLY, end.x, end.y, end.z, BLAST_POWER, false, Level.ExplosionInteraction.NONE);

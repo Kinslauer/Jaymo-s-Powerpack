@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.BlockPos;
@@ -179,7 +180,7 @@ public final class Gyre extends XenoForm {
 		if (live.whirlTicks > 0 && live.whirl != null) {
 			live.whirlTicks--;
 			Vec3 eye = live.whirl;
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(eye, eye).inflate(WHIRL_RADIUS, 3.0, WHIRL_RADIUS),
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(eye, eye).inflate(AbilityPower.size(player, WHIRL_RADIUS), 3.0, AbilityPower.size(player, WHIRL_RADIUS)),
 				e -> e != player && e.isAlive() && !e.isSpectator() && !spared(player, e))) {
 				Vec3 in = eye.subtract(e.position()).horizontal();
 				Vec3 round = new Vec3(-in.z, 0.0, in.x).normalize().scale(0.25);

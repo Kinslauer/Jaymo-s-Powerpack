@@ -3,6 +3,7 @@ package com.jaymospowers.power.reactor;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
@@ -183,8 +184,8 @@ public final class ReactorPower implements Power {
 		live.charge = 0.0F;
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		blast(player, at, OVERLOAD_RADIUS, OVERLOAD_HARM, 1.2);
-		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), (float)OVERLOAD_RADIUS, GLOW);
+		blast(player, at, AbilityPower.size(player, OVERLOAD_RADIUS), OVERLOAD_HARM, 1.2);
+		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), (float)AbilityPower.size(player, OVERLOAD_RADIUS), GLOW);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.reactor.overload").withStyle(ChatFormatting.GREEN));
 	}
 

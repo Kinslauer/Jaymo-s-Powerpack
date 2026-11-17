@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.core.wounds.Downed;
@@ -4678,7 +4679,7 @@ public final class WebSymbiote {
 		}
 		live.flailHitAt = now + FLAIL_HIT_EVERY;
 		ServerLevel level = player.level();
-		double radius = FLAIL_RADIUS * player.getScale();
+		double radius = AbilityPower.size(player, FLAIL_RADIUS) * player.getScale();
 		boolean hit = false;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
@@ -5646,7 +5647,7 @@ public final class WebSymbiote {
 	private static void roarBlast(ServerPlayer player) {
 		ServerLevel level = player.level();
 		boolean burst = WebFury.takeBurst(player);
-		double radius = burst ? ROAR_RADIUS * WebFury.BURST_RADIUS : ROAR_RADIUS;
+		double radius = burst ? AbilityPower.size(player, ROAR_RADIUS) * WebFury.BURST_RADIUS : AbilityPower.size(player, ROAR_RADIUS);
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {

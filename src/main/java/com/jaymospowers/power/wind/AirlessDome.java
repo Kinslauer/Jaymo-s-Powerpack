@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public final class AirlessDome {
 		READY.put(player.getUUID(), now + COOLDOWN);
 		Vec3 at = player.position();
 		DOMES.add(new Dome(player.getUUID(), level.dimension(), at, now + TICKS, colour, new HashSet<>()));
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)RADIUS, colour);
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)AbilityPower.size(player, RADIUS), colour);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 2.0F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.6F, 2.0F);
 		return true;
@@ -117,18 +118,18 @@ public final class AirlessDome {
 			if (level == null || now >= d.until()) {
 				d.tagged().forEach(e -> e.removeTag(TAG));
 				if (level != null) {
-					MagicFx.blast(level, d.at().add(0.0, 1.0, 0.0), (float)RADIUS * 0.5F, d.colour());
+					MagicFx.blast(level, d.at().add(0.0, 1.0, 0.0), (float)AbilityPower.size(level, d.owner(), RADIUS) * 0.5F, d.colour());
 					level.playSound(null, d.at().x, d.at().y, d.at().z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.5F, 0.6F);
 				}
 				it.remove();
 				continue;
 			}
 			if (now % 10 == 0) {
-				MagicFx.orb(level, d.at().add(0.0, 0.5, 0.0), (float)RADIUS, d.colour(), 12);
+				MagicFx.orb(level, d.at().add(0.0, 0.5, 0.0), (float)AbilityPower.size(level, d.owner(), RADIUS), d.colour(), 12);
 			}
 			Set<Entity> inside = new HashSet<>();
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(d.at(), d.at()).inflate(RADIUS),
-				e -> e.isAlive() && !e.getUUID().equals(d.owner()) && e.position().distanceToSqr(d.at()) <= RADIUS * RADIUS)) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(d.at(), d.at()).inflate(AbilityPower.size(level, d.owner(), RADIUS)),
+				e -> e.isAlive() && !e.getUUID().equals(d.owner()) && e.position().distanceToSqr(d.at()) <= AbilityPower.size(level, d.owner(), RADIUS) * AbilityPower.size(level, d.owner(), RADIUS))) {
 				inside.add(e);
 				if (d.tagged().add(e)) {
 					e.addTag(TAG);

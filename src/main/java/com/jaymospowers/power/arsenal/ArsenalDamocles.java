@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Debris;
@@ -312,7 +313,7 @@ public final class ArsenalDamocles {
 		int points = 20;
 		for (int i = 0; i < points; i++) {
 			double a = i / (double) points * Math.PI * 2.0 + held * 0.15;
-			level.sendParticles(player, MARKER, true, false, to.x + Math.cos(a) * IMPACT_RADIUS, y, to.z + Math.sin(a) * IMPACT_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(player, MARKER, true, false, to.x + Math.cos(a) * AbilityPower.size(player, IMPACT_RADIUS), y, to.z + Math.sin(a) * AbilityPower.size(player, IMPACT_RADIUS), 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		// the point's mark in the middle
 		level.sendParticles(player, MARKER, true, false, to.x, y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -468,16 +469,16 @@ public final class ArsenalDamocles {
 		// the Attendant Blades go in after it
 		ArsenalWingMoves.join(player, at.add(0.0, 1.0, 0.0));
 		// the ground around the point splits open (soft ground only)
-		int r = Mth.ceil(CRATER_RADIUS);
+		int r = Mth.ceil(AbilityPower.size(player, CRATER_RADIUS));
 		BlockPos center = BlockPos.containing(at);
 		var random = level.getRandom();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -2, -r), center.offset(r, 0, r))) {
 			double d = Math.sqrt(pos.distToCenterSqr(at.x, pos.getY() + 0.5, at.z));
-			if (d <= CRATER_RADIUS && random.nextFloat() < 0.75F * (1.0F - (float) (d / (CRATER_RADIUS + 1.0)))) {
+			if (d <= AbilityPower.size(player, CRATER_RADIUS) && random.nextFloat() < 0.75F * (1.0F - (float) (d / (AbilityPower.size(player, CRATER_RADIUS) + 1.0)))) {
 				smash(player, level, pos.immutable(), CRATER_HARDNESS, true);
 			}
 		}
-		Debris.ring(level, center.below(), Mth.ceil(IMPACT_RADIUS), 1.6F);
+		Debris.ring(level, center.below(), Mth.ceil(AbilityPower.size(player, IMPACT_RADIUS)), 1.6F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(MagicFx.VOID, at.x, at.y + 1.0, at.z, 200, 2.5, 0.5, 2.5, 0.25);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 0.5, at.z, 60, 3.0, 0.3, 3.0, 0.08);
@@ -486,14 +487,14 @@ public final class ArsenalDamocles {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 2.0F, 0.6F);
 
 		// everything near the point is struck and thrown back
-		AABB box = new AABB(at.x - IMPACT_RADIUS, at.y - 2.0, at.z - IMPACT_RADIUS, at.x + IMPACT_RADIUS, at.y + 4.0, at.z + IMPACT_RADIUS);
+		AABB box = new AABB(at.x - AbilityPower.size(player, IMPACT_RADIUS), at.y - 2.0, at.z - AbilityPower.size(player, IMPACT_RADIUS), at.x + AbilityPower.size(player, IMPACT_RADIUS), at.y + 4.0, at.z + AbilityPower.size(player, IMPACT_RADIUS));
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive() && !e.isSpectator())) {
 			Vec3 away = victim.position().subtract(at);
 			double d = Math.sqrt(away.x * away.x + away.z * away.z);
-			if (d > IMPACT_RADIUS) {
+			if (d > AbilityPower.size(player, IMPACT_RADIUS)) {
 				continue;
 			}
-			float share = (float) (1.0 - d / IMPACT_RADIUS);
+			float share = (float) (1.0 - d / AbilityPower.size(player, IMPACT_RADIUS));
 			if (!live.hit.contains(victim.getId())) {
 				victim.hurtServer(level, level.damageSources().playerAttack(player), IMPACT_DAMAGE * share);
 				ArsenalVoid.voidHit(victim, player, false);

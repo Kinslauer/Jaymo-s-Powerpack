@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -1133,14 +1134,14 @@ public final class ZFighterPower implements Power {
 		}
 		ServerLevel level = player.level();
 		Vec3 center = player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SUPER_BURST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, SUPER_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 away = near.position().subtract(center);
 			double distance = Math.max(0.5, away.length());
-			if (distance > SUPER_BURST_RADIUS) {
+			if (distance > AbilityPower.size(player, SUPER_BURST_RADIUS)) {
 				continue;
 			}
-			double strength = 1.6 * (1.0 - distance / (SUPER_BURST_RADIUS + 1.0));
+			double strength = 1.6 * (1.0 - distance / (AbilityPower.size(player, SUPER_BURST_RADIUS) + 1.0));
 			ZFighterKi.push(near, away, strength, 0.4);
 		}
 		MagicFx.blast(level, center.x, center.y + 1.0, center.z, MagicFx.FLASH_RADIUS, 0xFFE08A);
@@ -1460,7 +1461,7 @@ public final class ZFighterPower implements Power {
 					0.4 + random.nextDouble() * 0.3);
 			}
 		}
-		debris(player, FULL_BURST_DEBRIS, FULL_BURST_RADIUS, 0.7 + 0.1 * live.tier(), true);
+		debris(player, FULL_BURST_DEBRIS, AbilityPower.size(player, FULL_BURST_RADIUS), 0.7 + 0.1 * live.tier(), true);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4F, 0.9F + 0.05F * live.tier());
 		com.jaymospowers.core.Shakes.heavy(player, c, FULL_BURST_SHAKE_RANGE, FULL_BURST_SHAKE);
 	}

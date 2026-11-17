@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
@@ -355,7 +356,7 @@ public final class EmberKindle {
 			reach = wall.getLocation().distanceTo(from);
 		}
 		boolean white = live.heat >= 1.0F;
-		particles(level, from, look, reach, white);
+		particles(level, from, look, reach, white, player);
 		if ((now - live.since) % THAW_EVERY == 0) {
 			// (0.14.0) the flame thaws freezing fog (Cryokinesis' cold on smoke) all along it
 			for (double t = 0.5; t <= reach; t += THAW_STEP) {
@@ -398,7 +399,7 @@ public final class EmberKindle {
 		}
 	}
 
-	private static void particles(ServerLevel level, Vec3 from, Vec3 look, double reach, boolean white) {
+	private static void particles(ServerLevel level, Vec3 from, Vec3 look, double reach, boolean white, ServerPlayer player) {
 		var random = level.getRandom();
 		// the gush from the palm, carried along the look
 		for (int i = 0; i < 3; i++) {
@@ -410,7 +411,7 @@ public final class EmberKindle {
 		int along = (int)Math.ceil(reach * 1.6);
 		for (int i = 0; i < along; i++) {
 			double t = random.nextDouble() * reach;
-			double width = MOUTH + SPREAD * t;
+			double width = AbilityPower.size(player, MOUTH) + AbilityPower.size(player, SPREAD) * t;
 			Vec3 p = from.add(look.scale(t));
 			level.sendParticles(white && random.nextInt(3) == 0 ? MagicFx.LIGHT : ParticleTypes.FLAME, p.x, p.y, p.z, 1,
 				width * 0.5, width * 0.5, width * 0.5, 0.01);
@@ -425,7 +426,7 @@ public final class EmberKindle {
 	/** Everything living (and burnable) in the cone, in sight of the palm, is set alight and singed. */
 	private static void burn(ServerPlayer player, ServerLevel level, Vec3 from, Vec3 look, double reach, boolean white) {
 		Vec3 end = from.add(look.scale(reach));
-		AABB box = new AABB(from, end).inflate(MOUTH + SPREAD * reach + 0.5);
+		AABB box = new AABB(from, end).inflate(AbilityPower.size(player, MOUTH) + AbilityPower.size(player, SPREAD) * reach + 0.5);
 		for (Entity entity : level.getEntities(player, box, e -> !e.isSpectator() && e.isAlive())) {
 			Vec3 at = entity.getBoundingBox().getCenter();
 			Vec3 off = at.subtract(from);
@@ -434,7 +435,7 @@ public final class EmberKindle {
 				continue;
 			}
 			double side = off.subtract(look.scale(t)).length();
-			if (side > MOUTH + SPREAD * t + entity.getBbWidth() * 0.5) {
+			if (side > AbilityPower.size(player, MOUTH) + AbilityPower.size(player, SPREAD) * t + entity.getBbWidth() * 0.5) {
 				continue;
 			}
 			if (level.clip(new ClipContext(from, at, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() != HitResult.Type.MISS) {
