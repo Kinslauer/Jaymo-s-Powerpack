@@ -33,8 +33,11 @@ import java.util.UUID;
  * <ul>
  * <li><b>Light-headed:</b> with food or water (Jaymo's Kitchen's thirst) at {@link #LIGHTHEADED} or less, the edges of the
  * screen darken inward, more the lower the emptier one gets ({@link #weakness}; drawn by the client's {@code FaintHud}).</li>
- * <li><b>Swooning:</b> at {@link #FAINT_FROM} weakness or worse, each second has a chance ({@link #CHANCE_LEAST} to
- * {@link #CHANCE_MOST}, doubled while sprinting or swimming) that they start to go. For {@link #SWOON} the letterbox closes
+ * <li><b>Warnings:</b> at {@link #FAINT_FROM} weakness or worse, each second has a chance ({@link #CHANCE_LEAST} to
+ * {@link #CHANCE_MOST}, doubled while sprinting or swimming) that they start to go. First the letterbox pulses in
+ * {@link #WARN_DEPTHS} times, each closer to shut ({@link #WARN}), while they still have their keys: eating, drinking or
+ * resting enough to come back above {@link #FAINT_FROM} stops it.</li>
+ * <li><b>Swooning:</b> after the last warning, for {@link #SWOON} the letterbox closes
  * fully shut, the darkness closes in, their head droops and sways, and their keys stop answering: whatever they were doing
  * (walking, running, standing) they keep on doing, slower and staggering ({@code FaintInputMixin}).</li>
  * <li><b>Out:</b> they collapse forward onto their face as Kitchen's ragdoll ({@link #TIP}), and lie as it lands for
@@ -63,6 +66,12 @@ public final class Fainting {
 	public static final int SWOON = 80, OUT = 260, WAKE = 60;
 	/** An overcome faint starts this far into the swoon (ticks), so it comes on faster than hunger's. */
 	static final int OVERCOME_SWOON = 40;
+	/** The warnings before a hunger or thirst faint: how far each pulse shuts the letterbox (0-1; 1 is black). */
+	public static final float[] WARN_DEPTHS = {0.35F, 0.6F, 0.85F};
+	/** Each warning closes and opens again over this long (ticks), with this long between them (and before the swoon). */
+	public static final int WARN_PULSE = 40, WARN_GAP = 60;
+	/** The whole run of warnings (ticks). */
+	public static final int WARN_TICKS = WARN_DEPTHS.length * (WARN_PULSE + WARN_GAP);
 	/** After coming round, no fainting again for this long (ticks). */
 	static final int COOLDOWN = 1200;
 	/** The collapse: tipped forward this fast (blocks a tick), on top of whatever speed they still had. */
@@ -75,6 +84,10 @@ public final class Fainting {
 
 	/** When the faint began (game time). Synced to the fainting player, not saved. */
 	public static final AttachmentType<Long> FAINT = AttachmentRegistry.create(JaymosPowers.id("wounds_faint"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
+
+	/** When the warnings before a faint began (game time). Synced to the player, not saved. */
+	public static final AttachmentType<Long> WARN = AttachmentRegistry.create(JaymosPowers.id("wounds_faint_warn"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
 
 	/** Server: no fainting before this (game time), by player. */
@@ -141,6 +154,8 @@ public final class Fainting {
 		if (player.hasAttached(FAINT) || !able(player)) {
 			return false;
 		}
+		// the shock skips the warnings
+		player.removeAttached(WARN);
 		long now = player.level().getGameTime();
 		player.setAttached(FAINT, now - OVERCOME_SWOON);
 		TIPPED.remove(player.getUUID());
@@ -163,6 +178,12 @@ public final class Fainting {
 		} catch (LinkageError e) {
 			return 20;
 		}
+	}
+
+	/** Ticks since the warnings before {@code entity}'s faint began, or -1. Both sides. */
+	public static long warning(Entity entity) {
+		Long start = entity.getAttached(WARN);
+		return start == null ? -1L : Math.max(0L, entity.level().getGameTime() - start);
 	}
 
 	/** Ticks since {@code entity} began to faint, or -1. */
@@ -216,6 +237,8 @@ public final class Fainting {
 			long now = player.level().getGameTime();
 			if (player.hasAttached(FAINT)) {
 				following(player, id, now);
+			} else if (player.hasAttached(WARN)) {
+				warned(player, now);
 			} else if (player.tickCount % 20 == 0 && now >= RESTED.getOrDefault(id, Long.MIN_VALUE)) {
 				maybeFaint(player, now);
 			}
@@ -260,6 +283,20 @@ public final class Fainting {
 		if (player.getRandom().nextFloat() >= chance) {
 			return;
 		}
+		// not yet: the letterbox pulses in a few times first, while they can still eat, drink or sit down
+		player.setAttached(WARN, now);
+	}
+
+	/** The warnings under way: called off if they're no longer weak enough (or can't faint now), else the swoon after the last. */
+	private static void warned(ServerPlayer player, long now) {
+		if (weakness(player) < FAINT_FROM || !able(player)) {
+			player.removeAttached(WARN);
+			return;
+		}
+		if (warning(player) < WARN_TICKS) {
+			return;
+		}
+		player.removeAttached(WARN);
 		player.setAttached(FAINT, now);
 		TIPPED.remove(player.getUUID());
 		player.setSprinting(false);

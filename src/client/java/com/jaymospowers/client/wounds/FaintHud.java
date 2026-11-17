@@ -22,6 +22,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Light-headed:</b> darkness closes in from the edges ({@link #TUNNEL_LEAST} to {@link #TUNNEL_MOST} of the way
  * in), deeper the emptier you are, slowly breathing in and out. No change to the field of view itself: only the edges
  * darken, so the view stays with your head.</li>
+ * <li><b>Warnings:</b> before a hunger or thirst faint the letterbox pulses in a few times, each closer to shut, with
+ * a heartbeat ({@link Fainting#WARN_DEPTHS}); your keys still answer.</li>
  * <li><b>Swooning:</b> the darkness comes in further ({@link #TUNNEL_SWOON}) and the letterbox (Adrenaline's bars) slides
  * shut over the whole swoon. The head droops toward the ground ({@link #DROOP}) and sways ({@link #SWAY}), and your
  * keys stop answering ({@code FaintInputMixin}): whatever you were doing as it began goes on, slowing ({@link #SLOW}) and
@@ -48,6 +50,8 @@ public final class FaintHud {
 
 	private static float weak, lastWeak;
 	private static int sinceBeat;
+	/** The warning pulse last heard (its heartbeat plays once as it starts), or -1. */
+	private static int heardPulse = -1;
 	/** The keys as the swoon began (held from then on), or null. */
 	private static @Nullable Input heldKeys;
 	private static Vec2 heldMove = Vec2.ZERO;
@@ -73,6 +77,14 @@ public final class FaintHud {
 		}
 		float target = Fainting.weakness(player);
 		weak = target > weak ? Math.min(target, weak + EASE) : Math.max(target, weak - EASE);
+		long warned = Fainting.warning(player);
+		int pulse = warned < 0 ? -1 : (int) (warned / (Fainting.WARN_PULSE + Fainting.WARN_GAP));
+		if (pulse != heardPulse && pulse >= 0 && pulse < Fainting.WARN_DEPTHS.length) {
+			// each warning comes with a heartbeat, heavier each time
+			player.level().playLocalSound(player, SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS,
+				0.5F + 0.15F * pulse, 0.75F - 0.07F * pulse);
+		}
+		heardPulse = pulse;
 		if (!Fainting.swooning(player)) {
 			heldKeys = null;
 			sinceBeat = 0;
@@ -142,9 +154,13 @@ public final class FaintHud {
 		if (player == null) {
 			return;
 		}
-		float shut = shut(player, delta.getGameTimeDeltaPartialTick(false));
+		float partial = delta.getGameTimeDeltaPartialTick(false);
+		float shut = shut(player, partial);
 		if (shut < 0.0F) {
-			return;
+			shut = warned(player, partial);
+			if (shut <= 0.0F) {
+				return;
+			}
 		}
 		AdrenalineHud.letterbox(graphics, 0.5F * shut);
 	}
@@ -164,6 +180,28 @@ public final class FaintHud {
 		}
 		float p = Mth.clamp((t - Fainting.SWOON - Fainting.OUT) / Fainting.WAKE, 0.0F, 1.0F);
 		return 1.0F - p * p * (3.0F - 2.0F * p);
+	}
+
+	/** How far a warning pulse has the letterbox shut (0-1), or 0 between pulses or with no warning. */
+	private static float warned(LocalPlayer player, float partial) {
+		long since = Fainting.warning(player);
+		if (since < 0L) {
+			return 0.0F;
+		}
+		float t = since + partial;
+		int each = Fainting.WARN_PULSE + Fainting.WARN_GAP;
+		int pulse = (int) (t / each);
+		if (pulse >= Fainting.WARN_DEPTHS.length) {
+			return 0.0F;
+		}
+		float in = (t - pulse * each) / Fainting.WARN_PULSE;
+		if (in >= 1.0F) {
+			return 0.0F;
+		}
+		// in quickly, a moment held, then slowly back open
+		float rise = Mth.clamp(in / 0.3F, 0.0F, 1.0F), fall = Mth.clamp((1.0F - in) / 0.5F, 0.0F, 1.0F);
+		float p = Math.min(rise * rise * (3.0F - 2.0F * rise), fall * fall * (3.0F - 2.0F * fall));
+		return Fainting.WARN_DEPTHS[pulse] * p;
 	}
 
 	/** Black from the edges in, {@code reach} of the shorter side, {@code edge} thick (0-255) at the edge, thinning inward. */
