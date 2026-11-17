@@ -118,6 +118,7 @@ public final class ChronoSpeed {
 		ChronoPhase.register();
 		ChronoSlowTime.register();
 		ChronoRings.register();
+		ChronoTunnel.register();
 	}
 
 	private static void wallRun(ServerPlayer player, int face) {
@@ -177,6 +178,7 @@ public final class ChronoSpeed {
 			player.removeAttached(FLASH);
 		}
 		boolean sprinting = overclocked && player.isSprinting();
+		ChronoMomentum.tick(player, level, overclocked, palette);
 		ChronoGears.tick(player, level, overclocked);
 		ChronoPhase.tick(player, level, overclocked);
 		ChronoRings.tick(player, level, overclocked);
@@ -338,6 +340,7 @@ public final class ChronoSpeed {
 		control(player, false);
 		ChronoGears.clear(player);
 		ChronoRapid.clear(player);
+		ChronoMomentum.clear(player);
 		if (player.getAttached(FLASH) != null) {
 			player.removeAttached(FLASH);
 		}

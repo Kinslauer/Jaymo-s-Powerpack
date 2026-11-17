@@ -208,6 +208,124 @@ Arsenal's rift turned on the world (the Seal is what a master of the pocket does
 Battle fury is the Warrior-born's blood that the Great Ape is made of, showing in any Z Fighter pushed hard enough. The
 stretching grab is the Rubber-folk's and the Verdant's stretch, as in the Verdant combo.
 
+### Patch 4: folded into what we have
+Seven picked rows that Andy said to fold into things already in the pack. Nothing here is a new power. All of it builds;
+none of it has been played.
+
+**Keys.** The four Kingdoms rows that had no key left share one new scheme, **the art keys** (`ArtKeys`, client
+`ArtKeysClient`; their own heading "Jaymo's Arts" in Controls, rebindable): **Soul** (numpad 1), **Claw** (numpad 2),
+**Wild** (numpad 3), **Sun** (numpad 4). Each is read the way the Rot key is: the server gets the press and the release
+and reads a **tap**, a **sneak + tap**, a **sprint + tap**, a **hold** (let go after half a second) or a **sneak + hold**.
+No existing key was taken. The Powers rows use what the power already had (the wheel, use, Z, C).
+
+- `aw-velocity` **Speedster → Chrono's Overclock and Velox's Velocity** (`ChronoMomentum`, `ChronoTunnel`,
+  `ChronoShotPassMixin`; both speedsters get all of it, since both already run the same code).
+  **Momentum in gears**: the wheel no longer puts you in a gear, it sets your **top gear**; a run starts in gear 1 and
+  sprinting at speed carries you up a gear every 0.4 s to the top gear, and you lose one every half second off speed. The
+  chip underlines the top gear. **Phase through arrows**: every shot passes through a speedster in gear 5 at speed (a
+  "blur"), and through a Chrono holding the phase. Phasing through walls is the held phase Chrono already had.
+  **Hurl static**: running charges you (faster in higher gears, a violet bar under the chip); use with an empty hand and
+  nothing to catch or snatch throws all of it as a bolt down your sight (10 harm at a full charge, 24 blocks, a daze),
+  arcing on to two more creatures within 5 blocks at half. **Slow the world while you keep your speed** was already
+  built (`ChronoSlowTime`, both speedsters); nothing was added. **The tunnel**: a blur that runs at a wall (a real wall,
+  not a step) opens a straight tunnel to the first clear spot past it, at most 10 blocks on; it stays open 8 s and
+  anyone standing in its line walks through. No block is touched: the phase's own collision rule lets a player in the
+  line through, floor and unbreakable blocks excepted. Step out of the line inside the wall, or be in it when it closes,
+  and you are put at the nearer mouth.
+  My calls: momentum climbs to the gear the wheel sets, not always to 5, so a player who wants gear 3 still gets gear 3
+  (the price is a short ramp from a standing start, 0.8 s to gear 3). Velox opens tunnels too although it has no held
+  phase, so the row is shared. Gaps: only **players** can follow through a tunnel (the collision rule is for players;
+  a creature would need its own); a tunnel never goes through bedrock or barriers.
+- `aw-reaper` **Reaper → the Kingdoms Reaper spirit** (`SoulArts`, `SoulDriftMixin`; Soul key).
+  **Souls** are banked for good: 1 a kill, 10 for a great foe (100 health or more), twice that with the scythe in hand;
+  a keeper who had already paid Toll starts with 5 souls for each point. **The tier** runs from 0 to 1000 souls: 5
+  hearts and half damage at none, 20 hearts and six times the damage at full, on every blow the keeper lands.
+  **Wisps** (tap): three homing wisps, 3 harm each. **Brand** (sneak + tap): the branded takes a quarter more from you
+  for 30 s, is worth a soul more, and when it dies the brand jumps to the nearest foe within 10 blocks. **Chain**
+  (sprint + tap): 2 harm and 1 healing a second for 5 s, on a steady beat. **Drift** (hold the key down): you drift
+  through walls for up to 4 s, the floor still holding; ending in stone puts you at the nearest clear spot. **The Soul
+  Scythe** (sneak + hold, empty hand): needs 500 souls banked; its blows reap half the harm to every foe within 3
+  blocks, and its kills bank twice.
+  My calls: souls are never spent, since the row calls them a permanent tier, so the scythe needs 500 banked rather than
+  costing 500. The scythe is Jaymo's Powers' netherite war scythe where that mod is in the pack (its art), else a
+  netherite hoe; no new art. **Balance, for Andy**: a new keeper is weaker than a keeper was before this patch (5
+  hearts, half damage), and a full one is far stronger; that is the row as written. The numbers are at the top of
+  `SoulArts`.
+- `aw-summoner` **Soul summoner → Darktide's Necromancy** (`DarktideSouls`, `DarktideTide`, client
+  `DarktideSoulScreen`). **Kills give souls**: while corrupted, what you or your risen shadows kill gives its shadow up
+  at once; the corpse it leaves is marked so the same shadow is not taken from it again. **Stamina to keep**: every
+  risen shadow wears at your feathers; run dry and the newest sinks back among your shadows. **Gone for good if they
+  die**: a shadow that melts because the corruption lifted, you left, or you ran dry now goes back into your list
+  (before this patch it was lost); only one that dies is gone. **The soul menu** (sprint + Z): the shadows you hold;
+  click up to three as your **wave**, and a tap of C raises all of the wave that is not up yet (no wave set: the last
+  shadow taken, as before). **Possess** (Z at a risen shadow of yours): your body is left standing as a mannequin in
+  your skin and you ride in the shadow for up to 20 s: you see from it, forward and back walk it, left and right turn
+  it, jump jumps, sprint runs, and it strikes what stands in front of it. Sneak puts you back in your body. **Warp**:
+  sneak with sprint held and your body comes to the shadow instead. A blow to the body throws you back into it and
+  lands on you.
+  My calls and gaps: villagers and anything with 100 health or more still have to be taken from the body by hand (a
+  villager's shadow is the villager itself, which only the body holds). While riding, **the mouse does not look**: the
+  game's own camera on another body ignores it, so the shadow is steered with the move keys, and it strikes by itself
+  rather than on a click. Riding uses the game's spectator camera (your game mode is put back when it ends, and at the
+  next login if the server died in between). No stamina is worn while riding (20 s at most, then a 30 s wait).
+- `aw-regen` **Regenerator → the vampire** (`ClawArts`; Claw key; vampires and dhampirs). **You never stop healing**:
+  half a heart every 2 s, four times slower when the sun or a holy thing has you weak, twice as fast in a frenzy.
+  **Claws bleed, and the bleeding heals you**: an empty-handed blow lays a wound (up to 8; half a point a second each,
+  on a steady beat; they close 8 s after the last), and half of what bleeds out heals you within 24 blocks. Skeletons
+  and golems do not bleed. **Rake** (tap): three slashes, twice the harm on a pinned foe. **Rend** (sneak + tap): 7
+  harm and two wounds; a foe at a quarter health or less is killed outright (never one with 100 health or more).
+  **Pounce** (sprint + tap): you fly at a foe up to 14 blocks off and **pin** it under you for 2.5 s. **Roar of frenzy**
+  (hold): everything within 8 blocks is frightened, and for 12 s you are stronger, faster, heal twice as fast and your
+  claws lay two wounds. 90 s wait.
+- `aw-green` **Green power → the Druid** (`GreenArts`; Wild key, out of a shape; two tree perks). **Greenwarden** (level
+  3): tap at a foe, **ivy** roots it 4 s; tap at a friend, a **vine gives** them your health; tap at a block, the vine
+  **grapples** you to it; sneak + tap at a foe, the vine **drains** it into you. **Daylight heals you** (under the open
+  sky by day) and **fire hurts half again as much**. **Bloom and Root** (level 8): sneak + tap with no foe in sight, a
+  **patch of sunflowers** heals your side for 20 s (twice as fast in the day's sun); sprint + tap at a friend (or no one,
+  for yourself), a **cocoon of roots**: 5 s in which nothing harms them, they cannot move, and they mend.
+  Gap: the sunflower patch is drawn (a pool of light and sunflower petals), not real sunflower blocks: real ones would
+  be free flowers and dye from every cast, and would have to be planted in other people's land.
+- `aw-scaler` **Size changer → the Druid's beast forms** (`SizeArts`; Wild key, in a shape; two tree perks). **Seven
+  Sizes** (level 5, 3 ranks): in a shape, tap grows the beast a size and sneak + tap shrinks it, speck (a tenth) to
+  colossus (four times); each rank opens one more size each way. Health, blows, step and reach go with the size. **Small**
+  (the two smallest): use a creature at least twice your height to **ride it**; what hunted you loses you. **Big**:
+  sprint + tap **stomps**, hold **grabs** a smaller creature into your hand and hold again throws it. **Wax and Wane**
+  (level 12), out of a shape: hold the key at a creature and a **ray shrinks** it a size, sneak + hold **grows** it, for
+  a minute (never a creature with 100 health or more). **The jar**: a glass bottle used on a creature shrunk as far as
+  it goes holds it; use the jar on a block to let it out.
+  My calls: the sizes are worn on the wild shape (Andy: "wrap druid into this with his beast forms"), so a Druid out of
+  a shape has the green arts on the same key and the sizes in one. No new beast models: the Druid's own stand-in beast
+  is scaled. People are not put in jars (no players, no villagers), nor another's pet. Gap: the ray gives others five
+  sizes, not seven (a quarter to two and three quarter times).
+- `aw-sun` **Sun power → the Crowned Sun's arts** (`SunArts`; Sun key). Every **Dawnborn** has them; a **Cleric** or a
+  **Paladin** learns them in the tree (level 10, 3 points). **Stronger the higher the sun**: under the open sky the arts
+  run from full strength at the horizon to half again at noon, and your own blows up to a fifth harder; with no sun the
+  arts are at 0.7 and your blows are only your own. **Ascension**: blows landed and taken (and standing in the sun) fill
+  you with heat; each 100 is a step, **four** of them, and at each you grow a tenth, hit harder and your arts burn
+  hotter; it ebbs 10 s after the fighting stops. **Sun orb** (tap), **sunfire pillar** (sneak + tap at a spot: a warning,
+  then four beats of fire), **pin and pummel** (sprint + tap at a foe within 5 blocks: held fast, five blows, the last
+  throws it), **a sun of your own** (hold: a small sun overhead for 2 minutes, light to fight by, and it counts as a
+  sun where the real one cannot be seen). **The Zenith Axe** (sneak + hold with an axe in hand and a nether star in the
+  other): the star is forged into the axe; with it in hand the ascension has a **fifth** step.
+  My calls: any Cleric or Paladin can learn them whatever their patron, **except the Ash Whisperer's sworn**, who are
+  refused (Dawnborn too): the Sun is her rival. Say if it should need the Sun's own oath. The personal sun's light is
+  the game's invisible light block, moved with you and taken away when it goes out.
+
+**Class trees go over 30 points.** New perks: Druid +9 points (Greenwarden 2, Bloom and Root 2, Seven Sizes 3 ranks at
+2, Wax and Wane 2), Cleric +3 and Paladin +3 (the Sun's Arts). They sit in the two outer columns of each tree. Nobody can
+buy everything in those trees now; say if the level-ups should give more points or the perks should cost less.
+
+Lore (new): no new people or gods. **The Reaper's souls**: death keeps count, and what its keeper sends it stays sent;
+the keeper is thin as a shade when the count is low and terrible when it is high, and the scythe is the Reaper's own,
+lent to one who has filled it. **The Darktide's shadows** are the Drowned Dark's: what its servant kills goes down into
+the dark water at once, and the servant can go down after it and look out through its eyes, leaving the body on the
+shore. **The vampire's claws**: the blood that is their curse is also what mends them, and it answers to any blood
+they spill. **The green arts and the sizes** are the groves': a Druid who can wear a beast can ask the green to hold,
+give and take, and can wear the beast at any size the grove has ever grown one. **The Sun's arts** are the Crowned
+Sun's own, in the blood of the Dawnborn, its bound people, and taught by its priests and its sworn swords; the Ash
+Whisperer's people cannot be taught them. **The speedsters**: Chrono's static is his own time rubbing against the
+world's, and the tunnel is the stretch of the world he has already run through, a moment ahead of everyone else.
+
 ### Patch 5: new powers (Reactor Heart, Blinker, Lawgiver)
 - `aw-nuclear` with `aw-kinetic` folded in: **Reactor Heart** (`power/reactor`, lang `reactor.json`). One charge
   (0-100) fills from running (0.15 a block), landing from 3+ blocks (1.5 a block fallen) and being hurt (3 a point of

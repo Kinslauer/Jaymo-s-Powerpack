@@ -20,8 +20,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * What a runner sees while Overclock (or Velox's Velocity) is on: five gears, shifted with the mouse wheel while sprinting
- * at speed. A higher gear runs faster ({@link #SPEED_SCALE}), turns wider (client side, {@link #TURN_SHED}), burns more
+ * What a runner sees while Overclock (or Velox's Velocity) is on: five gears. The mouse wheel, while sprinting at speed,
+ * sets the top gear, and momentum carries the gear up to it ({@link ChronoMomentum}). A higher gear runs faster ({@link #SPEED_SCALE}), turns wider (client side, {@link #TURN_SHED}), burns more
  * hunger ({@link #EXHAUSTION}), leaves a longer streak (the streak follows real speed) and closes wounds faster
  * ({@link #HEAL_PER_SECOND}) for a steep hunger price ({@link #HEAL_COST}). Gear 3 is the speed Overclock always had.
  * The gear shows on a chip bottom right, beside the clocks (or the Xenoform chip).
@@ -76,10 +76,11 @@ public final class ChronoGears {
 		if (delta == 0 || !ChronoSpeed.overclocked(player) || !player.isAlive()) {
 			return;
 		}
-		int now = gear(player);
+		// the wheel sets the top gear; momentum carries the gear itself up to it (ChronoMomentum)
+		int now = ChronoMomentum.top(player);
 		int to = Mth.clamp(now + (delta > 0 ? 1 : -1), 1, GEARS);
 		if (to != now) {
-			player.setAttached(GEAR, to);
+			ChronoMomentum.top(player, to);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
 				0.6F, 0.6F + to * 0.25F);
 		}
