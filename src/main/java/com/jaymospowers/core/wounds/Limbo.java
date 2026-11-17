@@ -244,6 +244,11 @@ public final class Limbo {
 					player.removeAttached(FREE);
 				}
 			}
+			if (APPLIED.contains(id) && player.gameMode() == GameType.CREATIVE) {
+				// Andy: "going into creative mode from limbo should revive your character"
+				revive(player, home, free ? null : centre);
+				continue;
+			}
 			if (!APPLIED.contains(id) || player.gameMode() != GameType.SPECTATOR) {
 				APPLIED.add(id);
 				player.setGameMode(GameType.SPECTATOR);
@@ -277,6 +282,12 @@ public final class Limbo {
 
 	/** Where their body lies now if it was carried off (Kitchen's corpse of theirs, near the last place), or null. */
 	private static @Nullable Vec3 findBody(ServerLevel level, ServerPlayer player, Vec3 near) {
+		Entity corpse = findCorpse(level, player, near);
+		return corpse == null ? null : corpse.position();
+	}
+
+	/** Kitchen's corpse of theirs near {@code near}, or null. */
+	private static @Nullable Entity findCorpse(ServerLevel level, ServerPlayer player, Vec3 near) {
 		if (!ownerLooked) {
 			ownerLooked = true;
 			try {
@@ -293,7 +304,7 @@ public final class Limbo {
 		for (Entity e : level.getEntities((Entity) null, box, entity -> owner.getDeclaringClass().isInstance(entity) && !entity.isRemoved())) {
 			try {
 				if (owner.invoke(e) instanceof Optional<?> who && who.isPresent() && id.equals(who.get())) {
-					return e.position();
+					return e;
 				}
 			} catch (ReflectiveOperationException | RuntimeException ex) {
 				owner = null;
@@ -370,6 +381,47 @@ public final class Limbo {
 			}
 		}
 		return list;
+	}
+
+	/**
+	 * Switched to Creative while waiting (Andy: "going into creative mode from limbo should revive your character"): the same
+	 * character gets up again, in Creative, where the body lies ({@code at}; null when no body is left, and they get up where
+	 * their ghost is). Nothing is wiped and no gift is lost: the death is undone. Kitchen's corpse of theirs goes, and the hotbar
+	 * it held comes back to them.
+	 */
+	private static void revive(ServerPlayer player, ServerLevel home, @Nullable Vec3 at) {
+		Entity corpse = at == null ? null : findCorpse(home, player, at);
+		player.removeAttached(STATE);
+		player.removeAttached(FREE);
+		APPLIED.remove(player.getUUID());
+		CENTRE.remove(player.getUUID());
+		MISSING.remove(player.getUUID());
+		Mortality.undoFinal(player);
+		if (corpse != null) {
+			try {
+				if (corpse.getClass().getMethod("takeHotbar").invoke(corpse) instanceof java.util.List<?> hotbar) {
+					for (Object stack : hotbar) {
+						if (stack instanceof net.minecraft.world.item.ItemStack item && !player.getInventory().add(item)) {
+							player.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+						}
+					}
+				}
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				JaymosPowers.LOGGER.warn("Couldn't take back {}'s hotbar from their corpse", player.getScoreboardName(), e);
+			}
+			corpse.discard();
+		}
+		if (at != null) {
+			player.teleportTo(home, at.x, at.y + 0.1, at.z, Set.of(), player.getYRot(), 0.0F, true);
+		}
+		Wounds.healAll(player);
+		player.setHealth(player.getMaxHealth());
+		player.getFoodData().setFoodLevel(20);
+		player.clearFire();
+		player.inventoryMenu.broadcastChanges();
+		home.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.limbo.creative_revived"));
+		JaymosPowers.LOGGER.info("{} switched to Creative in Limbo and was brought back", player.getScoreboardName());
 	}
 
 	/** A line for a player the rite cannot reach. */

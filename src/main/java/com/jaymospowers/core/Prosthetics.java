@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -45,7 +46,10 @@ import org.jspecify.annotations.Nullable;
  * slower on its own). It stays {@link Dismember#MISSING} underneath, so the wound is still there, and when the real
  * limb grows back (a Hermit Bean, a Verdant) the prosthetic pops off and drops as an item ({@link #sync}). On death it
  * drops with the body and the stump respawns bare (0.18.87: lost limbs stay lost), ready to be fitted again.
- * A smith villager does not fit them yet: self-fitting only.
+ * <p>Andy: "there needs to be a way that other players or villagers can help you in this condition. i am a quadruple amputee,
+ * laying right in front of a prosthetic that i have no way to attach". Another player fits one by using it on you
+ * ({@link #fitOther}), downed or standing; a villager who comes to tend you while you're downed (Kingdoms) fits whatever limbs
+ * you carry, or that lie near you, before getting you up ({@link #fitFrom}).
  */
 public final class Prosthetics {
 	/** A fitted limb's strength against 1 for a sound one (a broken limb is 0.4): wood is weaker, iron sturdier. */
@@ -60,6 +64,8 @@ public final class Prosthetics {
 	public static final double RIG_LEG_SPEED = -0.04;
 	/** How often (ticks) a body is checked for a prosthetic whose limb has grown back. */
 	public static final int CHECK_EVERY = 20;
+	/** How far (blocks) from a downed body a helper looks for a prosthetic lying on the ground ({@link #fitFrom}). */
+	public static final double LYING_REACH = 6.0;
 	/** Iron ingots a forged limb takes (the smithing anvil). */
 	public static final int IRON_ARM_INGOTS = 4, IRON_LEG_INGOTS = 5;
 	/** The iron flags sit this many bits above the fitted ones in {@link #FITTED}. */
@@ -110,6 +116,16 @@ public final class Prosthetics {
 			if (fitted(entity) != 0) {
 				popAll(entity);
 			}
+		});
+		// a prosthetic used on someone else goes on them (ahead of Downed's revive hold and its catch-all, which leave it be)
+		UseEntityCallback.EVENT.register((player, level, hand, target, hit) -> {
+			if (fitsOn(player.getItemInHand(hand), target) == 0 || player.isSpectator()) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer helper && target instanceof ServerPlayer patient) {
+				fitOther(helper, patient, hand);
+			}
+			return InteractionResult.SUCCESS;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % CHECK_EVERY != 0) {
@@ -202,6 +218,73 @@ public final class Prosthetics {
 			}
 		}
 		return 0;
+	}
+
+	/**
+	 * The limb {@code stack} would go on if used on {@code body} (a player: they are who it is fitted to and drawn on), or 0
+	 * if it is no prosthetic, or {@code body} has no limb of its kind missing and bare.
+	 */
+	public static int fitsOn(ItemStack stack, net.minecraft.world.entity.Entity body) {
+		if (!(stack.getItem() instanceof ProstheticItem item) || !(body instanceof Player patient) || !patient.isAlive()) {
+			return 0;
+		}
+		return item.arm ? free(patient, ARMS, Dismember.RIGHT_ARM, Dismember.LEFT_ARM) : free(patient, LEGS, Dismember.RIGHT_LEG, Dismember.LEFT_LEG);
+	}
+
+	/** {@code helper} fits the prosthetic in their {@code hand} to {@code patient}. True if it went on. */
+	public static boolean fitOther(ServerPlayer helper, ServerPlayer patient, InteractionHand hand) {
+		ItemStack stack = helper.getItemInHand(hand);
+		if (!(stack.getItem() instanceof ProstheticItem item) || !fit(patient, item.kind, item.arm, stack.getOrDefault(com.jaymospowers.rig.Rig.FRAME, ""))) {
+			return false;
+		}
+		stack.consume(1, helper);
+		helper.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		told(patient, helper, item);
+		return true;
+	}
+
+	/**
+	 * A helper (Kingdoms' villager tending {@code patient} while they're downed) fits every limb it can: the prosthetics
+	 * {@code patient} carries first, then any lying within {@link #LYING_REACH}. How many went on.
+	 */
+	public static int fitFrom(ServerPlayer patient, LivingEntity helper) {
+		int fitted = 0;
+		var inventory = patient.getInventory();
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
+			while (!stack.isEmpty() && stack.getItem() instanceof ProstheticItem item
+				&& fit(patient, item.kind, item.arm, stack.getOrDefault(com.jaymospowers.rig.Rig.FRAME, ""))) {
+				stack.shrink(1);
+				told(patient, helper, item);
+				fitted++;
+			}
+		}
+		for (net.minecraft.world.entity.item.ItemEntity lying : patient.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+			patient.getBoundingBox().inflate(LYING_REACH), e -> e.isAlive() && e.getItem().getItem() instanceof ProstheticItem)) {
+			ItemStack stack = lying.getItem();
+			while (!stack.isEmpty() && stack.getItem() instanceof ProstheticItem item
+				&& fit(patient, item.kind, item.arm, stack.getOrDefault(com.jaymospowers.rig.Rig.FRAME, ""))) {
+				stack.shrink(1);
+				told(patient, helper, item);
+				fitted++;
+			}
+			if (stack.isEmpty()) {
+				lying.discard();
+			} else {
+				lying.setItem(stack);
+			}
+		}
+		if (fitted > 0) {
+			inventory.setChanged();
+			helper.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		}
+		return fitted;
+	}
+
+	/** Tells {@code patient} who fitted which limb to them. */
+	private static void told(ServerPlayer patient, LivingEntity helper, ProstheticItem item) {
+		patient.sendOverlayMessage(Component.translatable("message.jaymospowers.prosthetic.fitted_by", helper.getDisplayName(),
+			Component.translatable(item.getDescriptionId())).withStyle(ChatFormatting.GRAY));
 	}
 
 	/** Fits a prosthetic of this kind to the first limb of its kind that is missing and bare. True if it went on. */
