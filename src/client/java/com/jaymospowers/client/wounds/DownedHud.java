@@ -80,6 +80,12 @@ public final class DownedHud {
 	/** The black this dark or more, with a line on it, keeps the chat and the rest of the HUD off the screen. */
 	static final float SCENE_DARK = 0.5F;
 
+	/** The last hold's cue: a heartbeat this loud and this low, and the edge pulse's fade per tick (it lasts a second). */
+	static final float HOLD_VOLUME = 1.0F, HOLD_PITCH = 0.5F, HOLD_PULSE_FADE = 0.05F;
+	/** The hold's spent-at time last seen, and the edge pulse's strength (0-1), last tick and now. */
+	private static @org.jspecify.annotations.Nullable Long holdSeen;
+	private static float holdPulse, holdPulseBefore;
+
 	private static int downTicks;
 	/** (dw_blink) Ticks to the next blink, how far into the one going on (ticks, or -1), and how shut the eyes are (0-1) last tick and now. */
 	private static float toBlink = BLINK_EVERY_STRONG, blinking = -1.0F, lid, lidBefore;
@@ -133,6 +139,16 @@ public final class DownedHud {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		blackBefore = black;
+		// the last hold spent (LastHold): a thud of the heart and the screen's edge flushes once
+		holdPulseBefore = holdPulse;
+		holdPulse = Math.max(0.0F, holdPulse - HOLD_PULSE_FADE);
+		Long spent = player == null ? null : player.getAttached(com.jaymospowers.core.wounds.LastHold.SPENT);
+		if (spent != null && !spent.equals(holdSeen)) {
+			holdPulse = 1.0F;
+			holdPulseBefore = 1.0F;
+			player.level().playLocalSound(player, SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, HOLD_VOLUME, HOLD_PITCH);
+		}
+		holdSeen = spent;
 		// ((0.20.94) and black while a life that ended waits for the new character: Mortality.REBORNING)
 		boolean reborning = player != null && player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING);
 		// (out of their body, the black lifts: they look out of their ghost, OutOfBodyClient)
@@ -216,6 +232,10 @@ public final class DownedHud {
 
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		LocalPlayer player = Minecraft.getInstance().player;
+		float pulse = holdPulseBefore + (holdPulse - holdPulseBefore) * delta.getGameTimeDeltaPartialTick(false);
+		if (pulse > 0.0F) {
+			ring(graphics, 0.0F, pulse, pulse);
+		}
 		if (player != null && OutOfBodyClient.drifting()) {
 			// a ghost's eyes: the world a little pale and blue, not the grey of the dying
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), GHOST_ALPHA << 24 | GHOST);
