@@ -285,22 +285,7 @@ public final class Cordon {
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cordon.summons_blank"));
 				return InteractionResult.FAIL;
 			}
-			RandomSource random = server.getRandom();
-			BlockPos court = null;
-			for (int tries = 0; tries < COURT_TRIES; tries++) {
-				double angle = random.nextDouble() * Math.PI * 2.0, distance = Mth.nextInt(random, COURT_MIN, COURT_MAX);
-				court = BlockPos.containing(sp.getX() + Math.cos(angle) * distance, 64, sp.getZ() + Math.sin(angle) * distance);
-				if (Factions.at(server.getServer(), server, court) == null) {
-					break; // the court sits in the wild, never in a realm's land
-				}
-			}
-			Map<String, Integer> courts = new HashMap<>(server.getAttachedOrElse(COURTS, Map.of()));
-			courts.put(Long.toString(court.asLong()), MARKED);
-			server.setAttached(COURTS, courts);
-			ItemStack map = MapItem.create(server, court.getX(), court.getZ(), (byte)2, true, true);
-			MapItem.renderBiomePreviewMap(server, map);
-			MapItemSavedData.addTargetDecoration(map, court, "+", MapDecorationTypes.TARGET_X);
-			map.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.cordon_court_map"));
+			ItemStack map = map(server, mark(server, sp));
 			server.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.7F);
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cordon.summons_read"));
 			ItemStack held = player.getItemInHand(hand);
@@ -313,6 +298,32 @@ public final class Cordon {
 			}
 			return InteractionResult.SUCCESS;
 		}
+	}
+
+	/** Marks a new court in the wild, {@link #COURT_MIN}-{@link #COURT_MAX} blocks from {@code near}. */
+	private static BlockPos mark(ServerLevel level, ServerPlayer near) {
+		RandomSource random = level.getRandom();
+		BlockPos court = null;
+		for (int tries = 0; tries < COURT_TRIES; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0, distance = Mth.nextInt(random, COURT_MIN, COURT_MAX);
+			court = BlockPos.containing(near.getX() + Math.cos(angle) * distance, 64, near.getZ() + Math.sin(angle) * distance);
+			if (Factions.at(level.getServer(), level, court) == null) {
+				break; // the court sits in the wild, never in a realm's land
+			}
+		}
+		Map<String, Integer> courts = new HashMap<>(level.getAttachedOrElse(COURTS, Map.of()));
+		courts.put(Long.toString(court.asLong()), MARKED);
+		level.setAttached(COURTS, courts);
+		return court;
+	}
+
+	/** The map that leads to {@code court}. */
+	private static ItemStack map(ServerLevel level, BlockPos court) {
+		ItemStack map = MapItem.create(level, court.getX(), court.getZ(), (byte)2, true, true);
+		MapItem.renderBiomePreviewMap(level, map);
+		MapItemSavedData.addTargetDecoration(map, court, "+", MapDecorationTypes.TARGET_X);
+		map.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.cordon_court_map"));
+		return map;
 	}
 
 	/** Raises any court a player has come near, with its Arbiter and guards. */
@@ -333,10 +344,21 @@ public final class Cordon {
 					// never over anyone's work: a realm's land, or ground with a chest, bed, furnace or the like on it
 					if (Factions.at(level.getServer(), level, marked) == null && !built(level, marked)) {
 						raise(level, marked);
+						Map<String, Integer> next = new HashMap<>(courts);
+						next.put(e.getKey(), RAISED);
+						level.setAttached(COURTS, next);
+						return; // one a look
 					}
+					// the ground was taken since the summons was read: the court sits elsewhere, and whoever came gets the way to it
 					Map<String, Integer> next = new HashMap<>(courts);
-					next.put(e.getKey(), RAISED);
+					next.remove(e.getKey());
 					level.setAttached(COURTS, next);
+					ItemStack map = map(level, mark(level, player));
+					if (!player.addItem(map)) {
+						player.drop(map, false, net.minecraft.util.Prediction.SERVER_ONLY);
+					}
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.7F);
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cordon.court_moved"));
 					return; // one a look
 				}
 			}

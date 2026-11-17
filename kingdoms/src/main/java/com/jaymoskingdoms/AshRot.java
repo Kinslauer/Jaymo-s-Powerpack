@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -144,6 +148,19 @@ public final class AshRot {
 	private static final List<Strip> STRIPS = new ArrayList<>();
 	private static final List<Drive> DRIVES = new ArrayList<>();
 	private static final List<Scar> SCARS = new ArrayList<>();
+
+	/** A hole as its level keeps it: where it was eaten and what stood there. */
+	record Hole(List<Long> pos, List<BlockState> states) {
+		static final Codec<Hole> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.LONG.listOf().fieldOf("pos").forGetter(Hole::pos),
+			BlockState.CODEC.listOf().fieldOf("states").forGetter(Hole::states)).apply(i, Hole::new));
+	}
+
+	/**
+	 * The holes open in a level, saved with it. A normal stop closes every hole and leaves none here, so any found when the server
+	 * starts were left by a crash, and are closed then.
+	 */
+	static final AttachmentType<List<Hole>> HOLES = AttachmentRegistry.create(JaymosKingdoms.id("ash_rot_holes"),
+		builder -> builder.persistent(Hole.CODEC.listOf()));
 	private static final Map<UUID, long[]> READY = new HashMap<>();
 	private static final Map<UUID, Long> HELD_FROM = new HashMap<>();
 
@@ -163,6 +180,23 @@ public final class AshRot {
 			READY.remove(handler.player.getUUID());
 			HELD_FROM.remove(handler.player.getUUID());
 		});
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+			// holes a crash left open close now
+			for (ServerLevel level : server.getAllLevels()) {
+				List<Hole> left = level.removeAttached(HOLES);
+				if (left == null) {
+					continue;
+				}
+				for (Hole hole : left) {
+					for (int i = Math.min(hole.pos().size(), hole.states().size()) - 1; i >= 0; i--) {
+						BlockPos pos = BlockPos.of(hole.pos().get(i));
+						if (level.getBlockState(pos).canBeReplaced()) {
+							level.setBlock(pos, hole.states().get(i), Block.UPDATE_ALL);
+						}
+					}
+				}
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			// every hole closes before the world is saved
 			for (Scar scar : SCARS) {
@@ -174,6 +208,9 @@ public final class AshRot {
 				}
 			}
 			SCARS.clear();
+			for (ServerLevel level : server.getAllLevels()) {
+				level.removeAttached(HOLES);
+			}
 			ROTS.clear();
 			GRIPS.clear();
 			STRIPS.clear();
@@ -493,6 +530,7 @@ public final class AshRot {
 			return false;
 		}
 		SCARS.add(scar);
+		keep(level);
 		Vec3 mouth = Vec3.atCenterOf(bhr.getBlockPos());
 		Fx.blast(level, mouth, 1.8F, COLOUR);
 		level.sendParticles(Fx.miasma(COLOUR, 2.0F), mouth.x, mouth.y, mouth.z, 30, 1.0, 1.0, 1.0, 0.02);
@@ -526,6 +564,7 @@ public final class AshRot {
 			return false;
 		}
 		SCARS.add(scar);
+		keep(level);
 		Vec3 at = Vec3.atCenterOf(centre);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(r, COLLAPSE_DEPTH + 4, r), e -> e != player && e.isAlive())) {
 			rot(e, player, COLLAPSE_STACKS);
@@ -558,7 +597,23 @@ public final class AshRot {
 			}
 			if (scar.next >= scar.pos.size()) {
 				it.remove();
+				keep(level);
 			}
+		}
+	}
+
+	/** Writes {@code level}'s open holes to it, so a crash doesn't leave them open for good. */
+	private static void keep(ServerLevel level) {
+		List<Hole> open = new ArrayList<>();
+		for (Scar scar : SCARS) {
+			if (scar.dim == level.dimension()) {
+				open.add(new Hole(scar.pos.stream().map(BlockPos::asLong).toList(), List.copyOf(scar.states)));
+			}
+		}
+		if (open.isEmpty()) {
+			level.removeAttached(HOLES);
+		} else {
+			level.setAttached(HOLES, open);
 		}
 	}
 

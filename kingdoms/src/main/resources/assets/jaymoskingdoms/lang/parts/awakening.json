@@ -22,6 +22,7 @@
   "item.jaymoskingdoms.cordon_summons": "Cordon Summons",
   "item.jaymoskingdoms.cordon_court_map": "The Court of Judgment",
   "message.jaymoskingdoms.cordon.summons_read": "The summons unfolds into a map. The court is marked on it.",
+  "message.jaymoskingdoms.cordon.court_moved": "Someone has built where the court was to stand. A new map is pressed into your hand.",
   "message.jaymoskingdoms.cordon.summons_blank": "The summons is blank here. Its court is in the Overworld.",
   "message.jaymoskingdoms.cordon.bound": "Your gift is bound (%s s)",
   "speech.jaymoskingdoms.cordon.arrive.0": "What woke in you was never yours to keep.",

@@ -138,8 +138,9 @@ public final class RogueExtras {
 	}
 
 	private static final Map<UUID, Watch> WATCHING = new HashMap<>();
-	/** Marks made wary (Cutpurse King): mark → until. */
-	private static final Map<UUID, Long> WARY = new HashMap<>();
+	/** Until when (game time) a mark made wary (Cutpurse King) stays so. Saved with the mark, so a restart doesn't forget it. */
+	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Long> WARY = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+		.create(JaymosKingdoms.id("wary_until"), builder -> builder.persistent(com.mojang.serialization.Codec.LONG));
 	/** The furthest each player has fallen this drop, and where they were on the last climb check. */
 	private static final Map<UUID, Double> FALLING = new HashMap<>();
 	private static final Map<UUID, Double> CLIMBED = new HashMap<>();
@@ -159,7 +160,6 @@ public final class RogueExtras {
 		ServerTickEvents.END_SERVER_TICK.register(RogueExtras::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WATCHING.clear();
-			WARY.clear();
 			FALLING.clear();
 			CLIMBED.clear();
 			GHOST_UNTIL.clear();
@@ -217,12 +217,12 @@ public final class RogueExtras {
 
 	/** Cutpurse King: whether {@code mark} was made wary by a fumbled pocket and still is. */
 	static boolean wary(LivingEntity mark, long now) {
-		Long until = WARY.get(mark.getUUID());
+		Long until = mark.getAttached(WARY);
 		if (until == null) {
 			return false;
 		}
 		if (until <= now) {
-			WARY.remove(mark.getUUID());
+			mark.removeAttached(WARY);
 			return false;
 		}
 		return true;
@@ -236,7 +236,7 @@ public final class RogueExtras {
 		if (ClassTrees.has(player, CUTPURSE) <= 0) {
 			return false;
 		}
-		WARY.put(mark.getUUID(), level.getGameTime() + WARY_TICKS);
+		mark.setAttached(WARY, level.getGameTime() + WARY_TICKS);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.wary", mark.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, mark.getX(), mark.getY(), mark.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.6F, 1.1F);
 		return true;
