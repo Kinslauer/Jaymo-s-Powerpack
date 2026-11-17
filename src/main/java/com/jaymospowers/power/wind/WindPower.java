@@ -95,6 +95,8 @@ public final class WindPower implements Power {
 	static final double GUST_RANGE_MIN = 6.0, GUST_RANGE_MAX = 12.0;
 	static final double GUST_HALF_ANGLE = 35.0;
 	static final float GUST_DAMAGE_MIN = 4.0F, GUST_DAMAGE_MAX = 57.0F;
+	/** The final gust damage never goes above this, whatever the weather, Stormbound and Tempest multiply it to. */
+	static final float GUST_MAX_DAMAGE = 100.0F;
 	static final double GUST_KNOCKBACK_MIN = 0.6, GUST_KNOCKBACK_MAX = 1.8;
 	static final int GUST_COOLDOWN_MIN = 400, GUST_COOLDOWN_MAX = 3600;
 	/** A charge at least this full is a full blast (explosion and all). */
@@ -923,7 +925,7 @@ public final class WindPower implements Power {
 		// the weather (and a Stormbound wind) scale the blow
 		float strength = weather * WindStorm.galeMultiplier(player);
 		// damage grows faster than the charge: most of a full blast's power is in its last second or two
-		float maxDamage = Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX) * strength;
+		float maxDamage = Math.min(Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX) * strength, GUST_MAX_DAMAGE);
 		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX) * strength;
 		// (Jung's revamp) a push flowing into an uppercut throws a spiralling gust that runs out and curls upward,
 		// carrying and lifting what it catches (WindMoves)

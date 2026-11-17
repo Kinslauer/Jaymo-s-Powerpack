@@ -138,17 +138,17 @@ public final class BlightMobs {
 		Integer tier = mob.getAttached(BLIGHT);
 		if (tier == null || tier <= 0) return;
 
-		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, HEALTH_PER_TIER * tier);
-		modify(mob, Attributes.ATTACK_DAMAGE, DAMAGE_ID, DAMAGE_PER_TIER * tier);
-		modify(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED_PER_TIER * tier);
-		modify(mob, Attributes.ARMOR, ARMOR_ID, tier * 1.5); // +1.5 armor per tier
-		modify(mob, Attributes.FOLLOW_RANGE, FOLLOW_RANGE_ID, tier * 8.0); // +8 blocks follow range per tier
+		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, HEALTH_PER_TIER * tier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		modify(mob, Attributes.ATTACK_DAMAGE, DAMAGE_ID, DAMAGE_PER_TIER * tier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		modify(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED_PER_TIER * tier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		modify(mob, Attributes.ARMOR, ARMOR_ID, tier * 1.5, AttributeModifier.Operation.ADD_VALUE); // +1.5 armor per tier
+		modify(mob, Attributes.FOLLOW_RANGE, FOLLOW_RANGE_ID, tier * 8.0, AttributeModifier.Operation.ADD_VALUE); // +8 blocks follow range per tier
 	}
 
-	private static void modify(Mob mob, Holder<Attribute> attribute, Identifier id, double amount) {
+	private static void modify(Mob mob, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
 		AttributeInstance instance = mob.getAttribute(attribute);
 		if (instance != null) {
-			instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, op));
 		}
 	}
 
