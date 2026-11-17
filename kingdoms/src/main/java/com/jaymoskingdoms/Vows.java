@@ -228,7 +228,7 @@ public final class Vows {
 			return false;
 		}
 		if (amount >= victim.getHealth() && (victim instanceof Mob || victim instanceof net.minecraft.world.entity.player.Player)
-			&& !victim.getType().is(EntityTypeTags.UNDEAD) && !allows(player, "kill")) {
+			&& !victim.is(EntityTypeTags.UNDEAD) && !allows(player, "kill")) {
 			return false;
 		}
 		boolean provoked = provoked(player, victim);
