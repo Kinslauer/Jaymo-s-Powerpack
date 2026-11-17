@@ -965,6 +965,11 @@ the dead fight each other as well. A traveller is one more enemy to them: they s
 hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
 and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
+(new) **The last stand's kit** (claude-future-gun-gear-build, 2026-11-17). The plate carriers, magazines and tracer rounds
+the future's gunners carry are what Los Perrito's defenders wore and loaded for the last stand on the east bridge. The
+Warrior-born dead took them off the fallen with their guns, and the echoes carry what the city's soldiers carried. Nobody
+makes any of it now: a traveller only gets it off the dead.
+
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
 the city, corrupted by the Tinkerer's bug.
