@@ -108,3 +108,25 @@ Not as the rows say, for Andy to rule on:
   screen it was a mistake). Easier than the screen.
 - **`hc-sear`**: the sweeping marker is on the HUD plate under the crosshair, not drawn in the world over the furnace.
 - **`hc-sandwich`**: no timing game; stacked in order and cut once.
+
+### Andy's rulings (2026-11-17)
+Andy ticked all 40 rows of the Picks PR Rulings page with no notes and chose "Change all 40, Claude picks details".
+The three cooking rows are changed from what the parts above say. Built, not played (the in-world bar and the timings
+are compile-checked only).
+- **`r-hc-seq`**: a step recipe uses nothing up when it starts. What was placed on the station only chose the dish and
+  is handed back to the cook as the tool starts it (from the old screen or the Cooking for Blockheads table the
+  has-ingredients check stays and nothing is taken). Each ingredient step is a right-click with that ingredient in hand
+  (group tags and alternatives count): one is used up, its bottle or bowl comes back, and the dish moves on. Any other
+  ingredient in hand is a mistake and is not used up; an empty hand on an ingredient step only says what goes in next.
+  Tools and actions are as before (an empty hand on an action step is still a mistake). Leaving or burning the dish
+  loses only what already went in. The cook who does the last step gets the dish. Fixed on the way: the last step of
+  every step recipe, and serving a grill, oven or roast, hit a null run (`HandsOn.use`). Hazards: holding the use key
+  clicks again after about 4 ticks, so a held ingredient can cost a mistake; in creative the hand-back at the start
+  duplicates what was placed.
+- **`r-hc-sear`**: the sweeping marker is a bar drawn in the world above the pan (`client/hands/SearBar`: track, gold
+  band, pale core, marker, facing the viewer, hidden by walls), for everyone within 24 blocks who has the station
+  synced. The HUD keeps "Sear n of 5" and the five round marks; its bar is gone.
+- **`r-hc-sandwich`**: the cut is timed. After the knife starts it a marker slides to one mark as the chopping board's
+  does (about 3 s), and the knife's left-click is the cut. A clean cut keeps the sandwich as it was judged (fine with
+  three different fillings, else good); a poor cut drops it a step; a miss, or walking away, squashes it: still handed
+  over, with half its saturation (`SQUASHED_SATURATION`) and "Squashed" as the verdict. The item itself carries no mark.
