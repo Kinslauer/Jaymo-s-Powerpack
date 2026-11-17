@@ -5,7 +5,7 @@ from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
 thread: 1572078106330533958
 claimed_by: hermes-a
-pr:
+pr: 1670
 suggested_owns: []
 ---
 
