@@ -502,7 +502,7 @@ stands.
 
 **The great disasters** (Andy approved, 2026-11-15; medieval picks). The world is not quiet under the realms: mountains in the hot lands wake as volcanoes, quakes under the sea send waves inland, hurricanes come off the sea, a star sometimes falls far bigger than the rest and leaves a crater with a heart of meteoric iron, and slopes let go their snow and earth. Each comes in its strength, from minor to catastrophic, and one sets off the next. Animals know first.
 
-(new) **What Legend gives back** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). The age of songs is not only harder. Once the dragon has
+**What Legend gives back** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). The age of songs is not only harder. Once the dragon has
 fallen, a smith can forge to a fifth grade, **Legendary**, and only then: the bone of the wind dragons and the storm
 bone of the great ones take an edge no lesser age can give them. A hero who has gone as far as training goes keeps
 growing as **renown**, the songs sung about them, and renown opens what plain practice cannot. Late coin has its uses
@@ -761,7 +761,7 @@ them apart, spiders are crushed to legs, looters rob them, and kin carry their f
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
 you."
 
-(new) **The last hold** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve; Andy's words: "When players are attacked they get to take an extra
+**The last hold** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17; Andy's words: "When players are attacked they get to take an extra
 hit if the one they take would have downed them"). A fighter's body does not drop to the first blow that should have
 felled it. It holds, for one breath, on the last of its strength, and only the next blow takes it down. Spent, the hold
 comes back once the fighter has had half a minute unhurt. A blade at the neck, an execution or a blast that tears the
@@ -1027,7 +1027,7 @@ not forgive the miners' god.
 left where he can find it. He walks without a sound and knows where the old beasts lie. Dress what you kill and waste
 none.
 
-(new) **The Huntsman's sight** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). A follower the Green Huntsman favours to his second degree sees as he
+**The Huntsman's sight** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). A follower the Green Huntsman favours to his second degree sees as he
 does: the fresh tracks of the beast they hunt shine for a short while, so the hunt is never lost.
 
 **The Lantern Warden**: the night and the dead. He wants a lantern, a candle, a bone, the glow of the deep squid: light
@@ -1547,7 +1547,7 @@ the Youth wisp, Kingdoms PR #1467, which Hermes's YOUTH answers players through.
 
 A wood-wisp is a child of the woods and acts like one: quick, cheeky, never still, forever turning somersaults in the air. Village folk know to just say its name, and the old ones say a wisp knows the way home: cry for help where one can see you and it flies you to your own bed in a flash of green. (In game: Kingdoms PR #1568.)
 
-(new) **The blood wakes with the ladder** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). A blood's gifts are not all given at birth. Each king or
+**The blood wakes with the ladder** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). A blood's gifts are not all given at birth. Each king or
 terror that falls on the ladder of Knowledge wakes a little more of what a people's blood was made for: the Nightborn
 see further into the night, the Dawnborn draw more from the sun. The cursed bloods grow the same way, by feeding and by
 moons: a new vampire's strength comes only once the blood has bound them, and a new wolf's beast grows strong over the
