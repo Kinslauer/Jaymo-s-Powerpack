@@ -247,6 +247,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TalkScreen.register();
 		GameScreen.register();
 		RecallScreen.register();
+		RenegeScreen.register();
 		ChalkClient.register();
 		ResearchScreen.register();
 		MimicBenchScreen.register();

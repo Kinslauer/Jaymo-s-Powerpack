@@ -344,11 +344,6 @@ public final class Underworld {
 				Tables.sitAtDicer(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
-			if (sp.isShiftKeyDown() && v.entityTags().contains(FENCE_TAG) && RogueExtras.stolen(sp.getMainHandItem())) {
-				// (class trees) the fence buys stolen goods: half their worth, all of it from a Fence's Friend
-				RogueExtras.fence(level, sp, v);
-				return InteractionResult.SUCCESS;
-			}
 			if (sp.isShiftKeyDown() && contraband(sp.getMainHandItem()) && !Smuggling.isBundle(sp.getMainHandItem()) && !v.entityTags().contains(FENCE_TAG) && !v.entityTags().contains(DICER_TAG)) {
 				pitch(level, sp, v);
 				return InteractionResult.SUCCESS;
@@ -1126,6 +1121,10 @@ public final class Underworld {
 	public static void traded(Villager v, MerchantOffer offer) {
 		if (!(v.level() instanceof ServerLevel level) || !(v.getTradingPlayer() instanceof ServerPlayer player)) {
 			return;
+		}
+		// (class trees) Fence's Friend: a den's fence pays a friend more for what he buys of them
+		if (v.entityTags().contains(FENCE_TAG)) {
+			RogueExtras.fencePaid(level, player, v, offer.getResult());
 		}
 		if (!contraband(offer.getResult()) && !contraband(offer.getCostA()) && !contraband(offer.getCostB())) {
 			return;

@@ -3,9 +3,11 @@ package com.jaymoskingdoms;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -177,20 +179,18 @@ public final class Warlocks {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.borrowed", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 	}
 
-	static Component debtName(String kind) {
+	public static Component debtName(String kind) {
 		return Component.translatable("message.jaymoskingdoms.warlock.kind." + kind, kind.equals("coin") ? COIN_SILVER : kind.equals("blood") ? (int) BLOOD : FAVOUR_COST);
 	}
 
 	/** The class key: settle the debt (favour, blood or coin); with nothing owed, or with sneak held, say how things stand. */
 	static void key(ServerPlayer player, boolean sneak) {
 		Pact pact = pact(player);
-		// (class trees) Renege: sneak and the key while owing swaps the ask, once a debt
+		// (class trees) Renege: sneak and the key while owing opens the menu to pick another ask, once a debt
 		if (pact.owing() && sneak) {
-			String swap = PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS);
-			if (swap != null) {
-				player.setAttached(PACT, new Pact(pact.casts(), swap, pact.due(), true));
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.reneged", debtName(swap)).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
-				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.6F, 0.8F);
+			List<String> swaps = PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS);
+			if (!swaps.isEmpty() && ServerPlayNetworking.canSend(player, PactArts.Offer.TYPE)) {
+				ServerPlayNetworking.send(player, new PactArts.Offer(pact.kind(), swaps));
 				return;
 			}
 		}
@@ -243,6 +243,17 @@ public final class Warlocks {
 		if (paid) {
 			settled(player);
 		}
+	}
+
+	/** (class trees) Renege: the ask is swapped for {@code kind}, picked on the menu ({@link PactArts.Pick}); once a debt. */
+	static void renege(ServerPlayer player, String kind) {
+		Pact pact = pact(player);
+		if (!pact.owing() || !PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS).contains(kind)) {
+			return;
+		}
+		player.setAttached(PACT, new Pact(pact.casts(), kind, pact.due(), true));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.reneged", debtName(kind)).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.6F, 0.8F);
 	}
 
 	static void settled(ServerPlayer player) {

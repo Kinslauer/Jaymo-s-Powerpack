@@ -196,7 +196,7 @@ public final class Druids {
 
 	// ---- the key ------------------------------------------------------------------------------------------------------------------
 
-	/** The class key: take the selected shape or let it go; with sneak, pick the next one studied. */
+	/** The class key: take the selected shape or let it go; with sneak, pick the next one studied (held: {@link #held}). */
 	static void key(ServerPlayer player, boolean sneak) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
@@ -242,6 +242,11 @@ public final class Druids {
 			return;
 		}
 		take(player, level, form, beast);
+	}
+
+	/** (class trees) Sneak and the key held: Barkskin, in a shape or out of one. False when it isn't theirs. */
+	static boolean held(ServerPlayer player) {
+		return WildShapes.bark(player, shapes(player));
 	}
 
 	private static void take(ServerPlayer player, ServerLevel level, String form, Mob beast) {

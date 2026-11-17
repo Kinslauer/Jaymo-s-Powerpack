@@ -2,12 +2,19 @@ package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.Classes.PlayerClass;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Eldritch Bolt</b> (3): the class key with the seal in hand and nothing owed throws a weak bolt from it, no slot spent; it
  * grows with the Warlock's level.</li>
  * <li><b>In Kind</b> (5): the key with the patron's own offerings in hand pays any debt with them.</li>
- * <li><b>Renege</b> (8): sneak and the key while owing swaps what's asked for another kind, once a debt.</li>
+ * <li><b>Renege</b> (8): sneak and the key while owing opens a menu ({@link Offer}) to pick another kind for what's asked,
+ * once a debt.</li>
  * <li><b>Pact of the Blade</b>, <b>of the Chain</b> or <b>of the Tome</b> (10): the seal in your off hand makes what's in the
  * other your pact weapon; or a familiar flies with you, showing what lurks and stinging what you fight; or any scroll's
  * spell is yours to learn.</li>
@@ -71,7 +79,34 @@ public final class PactArts {
 	private PactArts() {
 	}
 
+	/** Server → player: the Renege menu ({@code owed}: the debt's kind now; {@code kinds}: what it may become instead). */
+	public record Offer(String owed, List<String> kinds) implements CustomPacketPayload {
+		public static final Type<Offer> TYPE = new Type<>(JaymosKingdoms.id("renege_offer"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Offer> CODEC = StreamCodec.composite(
+			ByteBufCodecs.STRING_UTF8, Offer::owed, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(8)), Offer::kinds, Offer::new);
+
+		@Override
+		public Type<Offer> type() {
+			return TYPE;
+		}
+	}
+
+	/** Player → server: the kind picked on the Renege menu. */
+	public record Pick(String kind) implements CustomPacketPayload {
+		public static final Type<Pick> TYPE = new Type<>(JaymosKingdoms.id("renege_pick"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Pick> CODEC = StreamCodec.composite(
+			ByteBufCodecs.STRING_UTF8, Pick::kind, Pick::new);
+
+		@Override
+		public Type<Pick> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(Offer.TYPE, Offer.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, context) -> Warlocks.renege(context.player(), payload.kind()));
 		ServerTickEvents.END_SERVER_TICK.register(PactArts::tick);
 		// a familiar left behind (a crash, an unload) is gone
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
@@ -147,13 +182,12 @@ public final class PactArts {
 		return true;
 	}
 
-	/** Sneak and the key while owing: Renege. Returns the debt's new kind, or null when it isn't that. */
-	static String renege(ServerPlayer warlock, Warlocks.Pact pact, String[] kinds) {
+	/** Sneak and the key while owing: Renege. Returns the kinds the debt may become instead (the menu's), none when it isn't that. */
+	static List<String> renege(ServerPlayer warlock, Warlocks.Pact pact, String[] kinds) {
 		if (!has(warlock, RENEGE) || pact.reneged()) {
-			return null;
+			return List.of();
 		}
-		int at = java.util.Arrays.asList(kinds).indexOf(pact.kind());
-		return kinds[Math.floorMod(at + 1, kinds.length)];
+		return java.util.Arrays.stream(kinds).filter(kind -> !kind.equals(pact.kind())).toList();
 	}
 
 	// ---- casting --------------------------------------------------------------------------------------------------------------

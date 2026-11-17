@@ -87,8 +87,8 @@ import org.jspecify.annotations.Nullable;
  * thrown as a barrage of small blasts of the element, hands taking turns, as the blood barrage. Each hurts and carries
  * a touch of the element; one in {@link #ELEMENT_ONE_IN} bursts with it in full ({@link Spellcraft#strike}).
  * Restoration's blasts heal the living they hit instead and sear only monsters and the undead.</li>
- * <li>A <b>tap</b> of J is the sigil (class trees, {@link Sigils}; or Restoration's Mend, or lightning's Storm Ring), a hold
- * with a blade in hand and nothing to draw from the Imbue, and sneak and J the keys.</li>
+ * <li>A <b>tap</b> of J is the sigil (class trees, {@link Sigils}; or Restoration's Mend), a hold
+ * with a blade in hand and nothing to draw from the Imbue, and sneak and J the keys (held, the element's own working).</li>
  * </ul>
  */
 public final class Absorption {

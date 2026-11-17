@@ -80,11 +80,6 @@ public final class ClassTrees {
 		XP_STUN = 2, XP_TRACK = 2, XP_MADE = 3, XP_RIDDEN = 1, XP_JUMP = 1, XP_DISCIPLINE = 5, XP_INFUSE = 3, XP_STUDIED = 8,
 		XP_POCKET = 2, XP_LOCK = 3, XP_THEFT = 2, XP_SNEAK = 2, XP_ORDER = 1;
 	static final long BLOW_EVERY = 30L;
-	/**
-	 * (Scaling audit) Class experience earned in a tick that also paid pillar experience is worth this share, so one blow
-	 * doesn't pay in full twice. The rest is kept as a fraction toward the next.
-	 */
-	static final float SHARED_XP = 0.5F;
 	/** The tag Jaymo's Powers puts on a player for gear made at a tool station ({@code Tinkering.MADE_TAG}); taken off as it's read. */
 	static final String MADE_TAG = "jaymospowers_made";
 	/** A long shot (a Marksman's) is one from this far or further (blocks). */
@@ -466,57 +461,17 @@ public final class ClassTrees {
 	private static final Map<UUID, Map<String, Long>> NEXT_BLOW = new HashMap<>();
 	private static final Map<UUID, Vec3> RIDE_FROM = new HashMap<>();
 	private static final Map<UUID, Double> RIDDEN = new HashMap<>();
-	/** Class experience earned this tick and not yet paid; each player's pillar experience at the last paying; the fractions kept. */
-	private static final Map<UUID, Map<PlayerClass, Integer>> OWED = new HashMap<>();
-	private static final Map<UUID, Long> PILLARS = new HashMap<>();
-	private static final Map<UUID, Map<PlayerClass, Float>> PART = new HashMap<>();
 
 	/**
 	 * Gives {@code player} {@code amount} experience as {@code cls}, if they hold it: Wits and blood quicken it as they do the
-	 * pillars', a second class learns at {@link Classes#SECOND_SHARE} speed. It is paid as the tick ends ({@link #settle}), at
-	 * {@link #SHARED_XP} if a pillar was paid in the same tick. A level reached is announced.
+	 * pillars', a second class learns at {@link Classes#SECOND_SHARE} speed. A level reached is announced.
 	 */
 	public static void give(ServerPlayer player, PlayerClass cls, int amount) {
 		if (amount <= 0 || !Classes.is(player, cls)) {
 			return;
 		}
 		float f = Stats.xpFactor(player) * Heritage.xpFactor(player) * (Classes.classOf(player) == cls ? 1.0F : Classes.SECOND_SHARE);
-		OWED.computeIfAbsent(player.getUUID(), u -> new EnumMap<>(PlayerClass.class)).merge(cls, Math.max(1, Math.round(amount * f)), Integer::sum);
-	}
-
-	/** The tick's end: what each player earned as their classes is paid, at {@link #SHARED_XP} where a pillar was paid in the same tick. */
-	private static void settle(MinecraftServer server) {
-		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			Skills.Progress p = Skills.of(player);
-			long pillars = 0L;
-			for (Skills.Pillar pillar : Skills.Pillar.values()) {
-				pillars += p.xp(pillar);
-			}
-			Long before = PILLARS.put(player.getUUID(), pillars);
-			Map<PlayerClass, Integer> owed = OWED.remove(player.getUUID());
-			if (owed == null) {
-				continue;
-			}
-			boolean shared = before != null && pillars > before;
-			for (Map.Entry<PlayerClass, Integer> e : owed.entrySet()) {
-				int add = e.getValue();
-				if (shared) {
-					Map<PlayerClass, Float> part = PART.computeIfAbsent(player.getUUID(), u -> new EnumMap<>(PlayerClass.class));
-					float sum = part.getOrDefault(e.getKey(), 0.0F) + add * SHARED_XP;
-					add = (int) sum;
-					part.put(e.getKey(), sum - add);
-				}
-				pay(player, e.getKey(), add);
-			}
-		}
-		// whoever left before the tick ended
-		OWED.clear();
-	}
-
-	private static void pay(ServerPlayer player, PlayerClass cls, int add) {
-		if (add <= 0 || !Classes.is(player, cls)) {
-			return;
-		}
+		int add = Math.max(1, Math.round(amount * f));
 		Skills.Progress p = Skills.of(player);
 		int before = xp(p, cls);
 		int after = (int) Math.min(total(MAX_LEVEL), (long) before + add);
@@ -586,9 +541,6 @@ public final class ClassTrees {
 			NEXT_BLOW.clear();
 			RIDE_FROM.clear();
 			RIDDEN.clear();
-			OWED.clear();
-			PILLARS.clear();
-			PART.clear();
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(ClassTrees::damaged);
 		ServerLivingEntityEvents.AFTER_DEATH.register(ClassTrees::died);
@@ -662,10 +614,9 @@ public final class ClassTrees {
 		}
 	}
 
-	/** Distance in the saddle and time in a shape, once a second; every tick, the class experience earned in it is paid. */
+	/** Distance in the saddle and time in a shape, once a second. */
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % 20 != 0) {
-			settle(server);
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -692,7 +643,6 @@ public final class ClassTrees {
 				give(player, PlayerClass.DRUID, XP_SHAPE);
 			}
 		}
-		settle(server);
 	}
 
 	// ---- unmaking and the move onto class trees ----------------------------------------------------------------------

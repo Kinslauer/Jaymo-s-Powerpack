@@ -185,8 +185,7 @@ public final class TreeLocks {
 				}
 			}
 		}
-		// (class trees) guns and their shot only for a Gunsmith
-		return (lock == null || check(player, lock)) && Workshop.mayMake(player, result);
+		return lock == null || check(player, lock);
 	}
 
 	/** The lock named {@code key} ("slide", "pickpocket"), or null. */

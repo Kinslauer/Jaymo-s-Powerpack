@@ -378,8 +378,6 @@ public final class Pickpocket {
 		boolean fresh = PICKED.getOrDefault(mark.getUUID(), 0L) <= now;
 		ItemStack loot = fresh ? loot(player, mark, random, f != null ? Currencies.of(level.getServer(), f) : Currencies.at(level, mark.blockPosition())) : ItemStack.EMPTY;
 		PICKED.put(mark.getUUID(), now + EMPTY_TICKS);
-		// (class trees) what comes out of a pocket is stolen goods, for a fence ({@link RogueExtras#fence})
-		RogueExtras.steal(loot);
 		// (0.5.52) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
 		int xp = fresh ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
 		Component gained = xp > 0 ? Component.translatable("message.jaymoskingdoms.pickpocket.xp", xp).withStyle(ChatFormatting.DARK_GREEN) : Component.empty();

@@ -49,8 +49,8 @@ import org.jspecify.annotations.Nullable;
  * rites known by heart and quicker casting out of shape.</li>
  * <li><b>Pack Leader</b> (12): in a shape, the wild beasts of that kind about follow you and fight beside you; you are drawn,
  * and sized, larger than they are.</li>
- * <li><b>Barkskin</b> (15): sneak and the key in a shape spends a shape's use: for a few minutes your skin is bark, more armour
- * and slower.</li>
+ * <li><b>Barkskin</b> (15): sneak and the key in a shape, or sneak and the key held in a shape or out of one, spends a shape's
+ * use: for a few minutes your skin is bark, more armour and slower.</li>
  * <li><b>Elder Shape</b> (20): once a day, the treant or the great wind elemental joins the shapes you can pick.</li>
  * </ul>
  */

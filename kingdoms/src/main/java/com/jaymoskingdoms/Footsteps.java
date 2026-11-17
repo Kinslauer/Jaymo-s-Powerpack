@@ -126,6 +126,8 @@ public final class Footsteps {
 		reach *= underfoot(level, player);
 		reach *= 1.0 + ARMOUR_PER_POINT * player.getArmorValue();
 		reach *= Awareness.noise(player);
+		// (class trees) a Second Storey Thief's tread
+		reach *= RogueExtras.steps(player);
 		if (player.getPose() == Pose.SWIMMING && !player.isInWater()) {
 			reach *= PRONE;
 		} else if (player.isCrouching() && PowersCompat.lowStance(player)) {
