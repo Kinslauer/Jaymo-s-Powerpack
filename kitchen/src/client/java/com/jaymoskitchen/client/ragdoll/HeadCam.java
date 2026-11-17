@@ -45,7 +45,8 @@ public final class HeadCam {
 			}
 		} else {
 			CorpseEntity corpse = ownCorpse(player);
-			if (corpse != null && corpse.carrier() == null) {
+			// while Ragdollified's ragdoll plays the fall (origin), its own camera has the view
+			if (corpse != null && corpse.carrier() == null && corpse.origin() < 0) {
 				track = ClientRagdolls.get(corpse.getId());
 			}
 		}

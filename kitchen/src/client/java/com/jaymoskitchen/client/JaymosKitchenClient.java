@@ -56,6 +56,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		// (0.5.45) a dragged body follows the hand this client draws
 		com.jaymoskitchen.client.ragdoll.DragSim.register();
 		com.jaymoskitchen.client.ragdoll.LimpController.register();
+		// Ragdollified plays a dying body's fall; the corpse takes its place where it lands
+		com.jaymoskitchen.client.ragdoll.RagdollifiedBridge.register();
 		// drinking: the view sways when you're drunk
 		com.jaymoskitchen.client.brewing.DrunkSway.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin

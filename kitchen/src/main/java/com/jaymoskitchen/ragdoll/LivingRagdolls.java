@@ -78,6 +78,10 @@ public final class LivingRagdolls {
 	}
 
 	public static void register() {
+		if (com.jaymoskitchen.compat.RagdollifiedCompat.reactionsLoaded()) {
+			// Ragdollified Reactions does the crashes, blasts and hard landings
+			return;
+		}
 		ServerPlayNetworking.registerGlobalReceiver(RagdollNet.Limp.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			if (payload.on()) {
