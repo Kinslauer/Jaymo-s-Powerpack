@@ -253,6 +253,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
+		com.jaymospowers.client.armory.GunLaserClient.init();
+		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();

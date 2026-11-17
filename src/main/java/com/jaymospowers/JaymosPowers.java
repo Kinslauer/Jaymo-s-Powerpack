@@ -134,6 +134,7 @@ public class JaymosPowers implements ModInitializer {
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
+		com.jaymospowers.armory.GunLasers.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.armory.GunBlast.init();
 		// (0.21.53) realistic fishing: a bite hooks a live fish and the player reels it in tug-of-war style
