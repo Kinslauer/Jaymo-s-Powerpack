@@ -505,9 +505,17 @@ def meant_for(props, agent):
     return target in (agent, "any") or agent.startswith(target + "-")
 
 
+def built_by_hermes(props):
+    """A task a Hermes bot built (claimed_by hermes-a, hermes-b, ...). A Claude session's branch is its own: the
+    writer bot doesn't push onto it (Andy, 2026-11-17)."""
+    return (props.get("claimed_by") or "").strip().lower().startswith("hermes-")
+
+
 def awaiting_text_pass(props):
-    """In-review tasks go to the writer bot before review: its text pass sets text_pass (done or none)."""
-    return props.get("status") == "in-review" and not (props.get("text_pass") or "").strip()
+    """In-review tasks a Hermes bot built go to the writer bot before review: its text pass sets text_pass (done or
+    none). Tasks built by Claude sessions skip the pass and go straight to review."""
+    return (props.get("status") == "in-review" and not (props.get("text_pass") or "").strip()
+            and built_by_hermes(props))
 
 
 def review_queue(live):
