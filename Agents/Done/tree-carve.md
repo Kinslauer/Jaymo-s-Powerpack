@@ -1,9 +1,9 @@
 ---
-status: running
+status: merged
 task: carve the trunk as you chop (from Immersive Tree Chop, MIT)
 branch: claude/tree-carve
 with: 
-pr: 
+pr: 1666
 mods: kingdoms
 versions: 
 started: 2026-11-16
@@ -27,3 +27,5 @@ Immersive Tree Chop (Litewer, MIT). He says our chopped logs show no deepening c
 - Cloud session (the Claude Code thread Andy opened on 2026-11-07).
 
 ## Done
+Each axe stroke cuts a bite out of the log where you look, deeper every stroke, bark outside and end grain inside.
+Change note `changes/kingdoms/tree-carve.md`. Not built locally (PR checks build it); not played.
