@@ -5552,3 +5552,12 @@ Andy's Ragdolls and Cover picks (ln-npc). `FutureCover`: a gunner of the future 
 - Plate Carrier: chest armour (iron's protection, a little toughness) some of the future's gunners wear.
 - None of it is craftable or in a creative tab: dead gunners and echoes drop magazines for their own gun, tracer rounds and the carriers they wear.
 - Classes: GunGear (new), FutureGuns, MuzzleFlash. Not played in game.
+
+## 0.24.47 (2026-11-17): fainting warns you first (#1677)
+
+- **Fainting** from hunger, thirst or exhaustion: before you go, the letterbox now pulses in three times (to about a
+  third, then 60%, then 85% shut), each with a heavier heartbeat, about 15 seconds in all, while you keep full control.
+  Eat, drink or rest back above the faint line and it stops; otherwise the swoon follows as before. Kingdoms' Overcome
+  (fainting at a terrible sight) still comes on at once. `Fainting` (`WARN`, `WARN_DEPTHS`, `WARN_PULSE`, `WARN_GAP`),
+  `FaintHud`.
+- Not built in the cloud session and not played.
