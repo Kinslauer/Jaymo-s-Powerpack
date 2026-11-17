@@ -14557,3 +14557,8 @@ The sneak attack (a heavy blow on a monster that hasn't noticed you) now needs t
 
 - The Salvager at the Maw wake text now mentions the sealed helm, pack, pick and lantern you start with (`story-road.json`).
 - Built; not played.
+
+## 0.9.91 (2026-11-17): villagers strap on a downed player's prosthetics
+
+- A villager tending a downed player, or a field medic getting one up, first straps on every prosthetic the player carries or that lies within 6 blocks (Powers' `Prosthetics.fitFrom`, through `PowersCompat.fitProsthetics`), so a quadruple amputee lying by a wooden arm gets it on.
+- Built; not played.

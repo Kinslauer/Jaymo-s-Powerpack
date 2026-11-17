@@ -5611,3 +5611,11 @@ When a finisher asks for a key, it now holds still for up to a second and a half
 
 - **Salvager at the Maw**: you now wake wearing a Sealed Helm (eight minutes of air, refilled at the pod, so the airless Maw doesn't choke you), with a backpack on your back, an iron pickaxe, a lantern and the deck plates. If the helm or pack slot is already taken, it goes into your inventory instead. (`ZFighterStarts.maw`)
 - Built; not played.
+
+## 0.24.55 (2026-11-17): others fit prosthetics, Creative revives from Limbo, thrown limbs hit
+
+- **Fitting someone else's limb** (Andy: "there needs to be a way that other players or villagers can help you in this condition"): use a wooden, iron or Rig arm or leg on another player who is missing that limb and it is strapped on them, downed or standing (`Prosthetics.fitOther`, a `UseEntityCallback`; Downed's revive hold leaves the click alone). They're told who fitted it.
+- **Got up with your limbs on**: a player who revives you (the kneeling hold) first straps on every prosthetic you carry, or that lies within 6 blocks of you (`Prosthetics.fitFrom`, also called by Kingdoms' tending villagers and field medics).
+- **Creative from Limbo** (Andy: "going into creative mode from limbo should revive your character"): switching to Creative while waiting in Limbo brings the same character back, in Creative, where the body lies: nothing wiped, no gift lost, health, food and wounds made whole, Kitchen's corpse of theirs gone and its hotbar handed back (`Limbo.revive`). With no body left, they get up where the ghost is.
+- **Thrown limbs hit** (Andy: "thrown limbs should deal damage"): a severed head or limb thrown from the hand strikes the first living thing in its path once (head 3, arm 2.5, leg 3.5, times its speed, at most double), with a thud and a spatter, then drops off it (`SeveredPart.strike`). Never the thrower; nothing once it has touched the ground.
+- Built; not played.
