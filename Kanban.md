@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · changes · fixing review notes
 
 
 ## In review
@@ -21,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · for any · #1665 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -34,14 +32,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
+- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 - [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
 - [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
 - [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
 - [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
-- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
-- [x] [[Inbox/Done/burnt-corpse-ash-piles|burnt-corpse-ash-piles]]
 
 
 %% kanban:settings
