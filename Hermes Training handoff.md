@@ -555,3 +555,14 @@ The listener no longer needs to send `/youth summon` just to bring the wisp (har
 wisp as waiting for an answer, so it says "be right back" if the answer is slow).
 "help" / "help me" (or "youth, help me") with a wisp in sight is handled in the mod (flies the player to their bed) and
 is NOT logged, so Hermes never sees it.
+
+## Quill keeps off Claude sessions' branches (Nov 17, PR #1702, waits on Andy's merge)
+YOUTH report 3: Quill pushed text passes onto `claude/*` PR branches (Claude sessions' own). Andy: "Yes add it".
+#1702 makes `vault_sync.py --claim hermes-writer --writes` hand out only tasks a Hermes bot built (`claimed_by: hermes-*`);
+Claude-built tasks skip the pass and go straight to review.
+- [ ] After #1702 merges: pull master in `E:/Origins Mod`.
+- [ ] Check whether `E:/hermes/powerpack/vault.py`, `dispatch_bots.py` or Quill's profile/skill picks text-pass work any
+  other way (e.g. scanning open PRs). If so, give it the same rule: never push to a branch starting `claude/`, and only
+  text-pass tasks whose `claimed_by` starts `hermes-`. Add one line to Quill's SOUL: "Never push to a `claude/` branch."
+  Back up anything you change, run `refresh-prompts` for quill.
+- [ ] Tick these, run `python tools/vault_sync.py`, tell Andy in one line.
