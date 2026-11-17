@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: future-gun-gear
 branch: implement/future-gun-gear
 with: 
@@ -30,3 +30,9 @@ loot only from the future's dead and echoes.
 - Takes over from hermes-b's agent note future-gun-gear (blocked on Andy's answers, now given).
 
 ## Done
+### 2026-11-17: PR #1671 rebuilt (head 8344bebe6d, CI green)
+- Tracers 1 in 4 plus tracer rounds; a magazine per gun at its real capacity, snipers included; plate carrier with
+  its own art; loot only. Lore.md (new) paragraph "The last stand's kit".
+- Not played in game; couldn't build in the cloud (Modrinth CDN blocked), CI built it.
+- Open: Andy wants Fracture Point's and TaCZ Magazines' own models, both All Rights Reserved: needs Raiiiden's
+  permission or our own 3D models. #1669 can close (this PR carries the spec).
