@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
@@ -442,6 +443,21 @@ public final class SpiritBarrage {
 			level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 10, 0.25, 0.25, 0.25, 0.5);
 			Mana.sendSeen(level, Mana.MOTE, mid.x, mid.y, mid.z, 10, 0.3, 0.3, 0.3, 0.15);
 			level.sendParticles(Fx.spark(0xFFE08A, 1.0F), mid.x, mid.y, mid.z, 12, 0.3, 0.3, 0.3, 0.3);
+			// blurred fists in front of each side while the flurries meet
+			for (int si = 0; si < 2; si++) {
+				LivingEntity p = s.side[si];
+				Vec3 eye = p.getEyePosition();
+				Vec3 look = p.getLookAngle();
+				Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
+				Vec3 strokeSide = new Vec3(-look.z, 0.0, look.x);
+				if (strokeSide.lengthSqr() < 1.0E-6) {
+					strokeSide = new Vec3(1.0, 0.0, 0.0);
+				}
+				for (int kk = 0; kk < 4; kk++) {
+					Vec3 off = strokeSide.scale((kk - 1) * 0.18).add(0.0, 0.12 * kk, 0.0).add(look.scale(0.15 * kk));
+					Fx.stroke(level, fist.add(off), fist.add(off).add(look.scale(0.7)), 0.35F, 0xFFE08A);
+				}
+			}
 		} else if (gain[0] != gain[1]) {
 			// one side's blows got through
 			LivingEntity hit = s.side[gain[0] > gain[1] ? 1 : 0];

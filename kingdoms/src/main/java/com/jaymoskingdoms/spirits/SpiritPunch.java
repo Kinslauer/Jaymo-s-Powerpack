@@ -59,6 +59,12 @@ public final class SpiritPunch implements Move {
 	static final int RUSH_HOLD = 14, RUSH_TICKS = 32, RUSH_EVERY = 3, RUSH_REST = 120;
 	static final float RUSH_SHARE = 0.35F, RUSH_COST = 14.0F;
 	static final double RUSH_KNOCK = 0.15;
+static final float RING_RADIUS = 1.5F;
+static final int RING_COLOR = 0xFFFFFF;
+static final double WAVE_DISTANCE = 5.0;
+static final float WAVE_WIDTH = 1.5F;
+static final int WAVE_COLOR = 0xD0D0D0;
+static final int WAVE_TICKS = 10;
 
 	/** Barrages under way: by thrower, the game time it ends. */
 	private static final Map<UUID, Long> RUSHES = new HashMap<>();
@@ -187,10 +193,11 @@ public final class SpiritPunch implements Move {
 			target.syncVelocity = true;
 		}
 		Vec3 hit = target.getBoundingBox().getCenter();
+		Vec3 feet = target.position().add(0.0, 0.1, 0.0);
 		Mana.sendSeen(level, Mana.MOTE, hit.x, hit.y, hit.z, 12, 0.3, 0.3, 0.3, 0.12);
 		level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, hit.x, hit.y, hit.z, 6, 0.2, 0.2, 0.2, 0.3);
-		Fx.ring(level, hit.add(0.0, 0.1, 0.0), 1.5F, 0xFFFFFF);
-		Fx.wave(level, hit, look, 5.0, 1.5F, 0xD0D0D0, 10);
+		Fx.ring(level, feet, RING_RADIUS, RING_COLOR);
+		Fx.wave(level, feet, look, WAVE_DISTANCE, WAVE_WIDTH, WAVE_COLOR, WAVE_TICKS);
 		level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.8F);
 		PowersCompat.shake(player, SHAKE);
 		if (target instanceof ServerPlayer struck) {
