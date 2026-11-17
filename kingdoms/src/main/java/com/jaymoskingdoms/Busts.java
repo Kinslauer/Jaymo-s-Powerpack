@@ -260,7 +260,8 @@ public final class Busts {
 
 	// ---- sentencing ----------------------------------------------------------------------------------------------------
 
-	private static void sentence(ServerLevel level, ServerPlayer player, Faction f, String crime, PathfinderMob guard, boolean yielded) {
+	/** {@code guard} sentences {@code player} for {@code crime} in {@code f} (also a poacher a forest ranger hands over, {@link ForestRangers}). */
+	static void sentence(ServerLevel level, ServerPlayer player, Faction f, String crime, PathfinderMob guard, boolean yielded) {
 		RandomSource random = level.getRandom();
 		String key = Integer.toString(f.id());
 		// a forged pardon shown to the guard who takes you: dropped if it holds, forgery if it is spotted

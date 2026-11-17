@@ -283,6 +283,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobTweaks.register();
 		VillagerHunters.register();
 		Theft.register();
+		ForestRangers.register();
 		Retaliation.register();
 		Customs.register();
 		// (gb-tent) the tent, and the homestead it claims
