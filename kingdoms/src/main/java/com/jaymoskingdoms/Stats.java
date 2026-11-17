@@ -61,6 +61,8 @@ import org.jspecify.annotations.Nullable;
 public final class Stats {
 	/** (0.7.540) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
 	public static final int STEP = 10;
+	/** What a heritage's gift or a story answer's point is worth (a class's is still {@link #STEP}). */
+	public static final int GIFT_STEP = 5;
 	/** (0.7.540) Attribute points per character level (all three pillars at their top: 75 levels, 375 points). */
 	public static final int POINTS_PER_LEVEL = 5;
 	/** An attribute's highest value, free points from heritage and class included. */
@@ -172,8 +174,8 @@ public final class Stats {
 	 */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
-		int free = (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player) + LifeStory.freePoints(player);
-		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + TIER_POINTS[tier(player)];
+		int free = WarriorZenkai.points(player) + LifeStory.freePoints(player);
+		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + (kind == null ? 0 : kind.freePoints) * GIFT_STEP + TIER_POINTS[tier(player)];
 	}
 
 	/** (0.7.540) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
@@ -221,12 +223,12 @@ public final class Stats {
 	/** Free points in {@code stat} from {@code player}'s heritage. */
 	public static int fromHeritage(Player player, Stat stat) {
 		Heritage.Kind kind = Heritage.of(player);
-		return kind == null ? 0 : kind.bonus(stat) * STEP;
+		return kind == null ? 0 : kind.bonus(stat) * GIFT_STEP;
 	}
 
 	/** (0.7.216) Free points in {@code stat} from {@code player}'s life story ({@link LifeStory}). */
 	public static int fromStory(Player player, Stat stat) {
-		return LifeStory.points(player, stat) * STEP;
+		return LifeStory.points(player, stat) * GIFT_STEP;
 	}
 
 	/** Might trained in the weights so far, the fraction included (0 for none). */
