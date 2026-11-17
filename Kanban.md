@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 08:39). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · claimed
 
 
 ## In review
