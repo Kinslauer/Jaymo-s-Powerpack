@@ -2,8 +2,10 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -78,6 +80,12 @@ public final class KeepingCells {
 	static final int LIGHT_REACH = 2;
 	/** How far round the light the cell's bed is looked for, and the way out (blocks). */
 	static final int BED_REACH = 3, OUT_REACH = 3;
+	/**
+	 * A villager loaded at the edge of the loaded land is only looked at once every chunk the look reads is loaded (reading an
+	 * unloaded one would make it on the server thread: the Deck's 2026-11-17 watchdog crash). He's tried again each tick, at
+	 * most this many times, then left for the next time he loads.
+	 */
+	static final int LOOK_TRIES = 200;
 	/** How far into his blight he is held (of a day's turning): taken hold, coughing now and then. */
 	static final float HELD = 0.4F;
 	/** A player this near him finds him (blocks). */
@@ -112,6 +120,8 @@ public final class KeepingCells {
 	private static final Set<Villager> FRESH = new HashSet<>();
 	/** Kept smiths in loaded chunks. Not kept: they're found again as they load. */
 	private static final Set<Villager> KEEPING = new HashSet<>();
+	/** Villagers waiting for the land round them to load before they're looked at, and how many ticks they've waited. */
+	private static final Map<Villager, Integer> WAITED = new HashMap<>();
 
 	private KeepingCells() {
 	}
@@ -134,6 +144,7 @@ public final class KeepingCells {
 			if (entity instanceof Villager v) {
 				FRESH.remove(v);
 				KEEPING.remove(v);
+				WAITED.remove(v);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(KeepingCells::tick);
@@ -152,6 +163,7 @@ public final class KeepingCells {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FRESH.clear();
 			KEEPING.clear();
+			WAITED.clear();
 		});
 	}
 
@@ -167,6 +179,15 @@ public final class KeepingCells {
 			for (Villager v : new ArrayList<>(FRESH)) {
 				FRESH.remove(v);
 				if (!v.isRemoved() && v.isAlive() && v.level() instanceof ServerLevel level) {
+					if (!loaded(level, v.blockPosition(), LIGHT_REACH + BED_REACH)) {
+						if (WAITED.merge(v, 1, Integer::sum) < LOOK_TRIES) {
+							FRESH.add(v);
+						} else {
+							WAITED.remove(v);
+						}
+						continue;
+					}
+					WAITED.remove(v);
 					look(level, v);
 				}
 			}
@@ -222,6 +243,11 @@ public final class KeepingCells {
 		JaymosKingdoms.LOGGER.info("An old home's smith ({}) sleeps under his keeping at {}", v.getName().getString(), light.toShortString());
 	}
 
+	/** Whether every chunk within {@code reach} blocks (across) of {@code at} is loaded, so reading them never makes one. */
+	private static boolean loaded(ServerLevel level, BlockPos at, int reach) {
+		return level.hasChunksAt(at.offset(-reach, 0, -reach), at.offset(reach, 0, reach));
+	}
+
 	private static boolean isLight(BlockState state) {
 		return state.is(Blocks.REDSTONE_WALL_TORCH) || state.is(Blocks.REDSTONE_TORCH);
 	}
@@ -247,7 +273,11 @@ public final class KeepingCells {
 		if (light == null) {
 			return;
 		}
-		if (level.isLoaded(light) && !isLight(level.getBlockState(light))) {
+		if (!loaded(level, light, BED_REACH + OUT_REACH)) {
+			// (the cell's edge isn't loaded: the bed, the hatch and the way out are read next second instead)
+			return;
+		}
+		if (!isLight(level.getBlockState(light))) {
 			wake(level, v, light);
 			return;
 		}
