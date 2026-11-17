@@ -41,3 +41,4 @@ Research/investigation first — determine how to implement mounted/entity-as-pa
 - 2026-11-17 08:34 PR #1670 is merged into master; moved to Inbox/Done.
 - 2026-11-17 08:35 PR #1670 is merged into master; moved to Inbox/Done.
 - 2026-11-17 08:36 PR #1670 is merged into master; moved to Inbox/Done.
+- 2026-11-17 08:37 PR #1670 is merged into master; moved to Inbox/Done.
