@@ -674,6 +674,65 @@ public final class Dismember {
 		return blastOff(target, part, by, target.position().add(xd, 0.0, zd), false);
 	}
 
+	/**
+	 * Andy (2026-11-16): "Any single hit that would kill a humanoid should dismember, attacks targeting the head do that 50% of
+	 * the time." A hit that kills a humanoid mob, or downs it (it would have killed), always takes off the part it landed on;
+	 * a head only at this chance (else nothing comes off). A hit on the body takes an arm or a leg (after a halving's own
+	 * roll), and so does one on a part already gone. Players, village children, shots and blasts keep their own rules.
+	 */
+	public static final float LETHAL_HEAD_CHANCE = 0.5F;
+	/** A lethal hit already rolled on this body this tick (game time): its death's later hooks don't roll it again. */
+	private static final Map<LivingEntity, Long> LETHAL_ROLLED = new java.util.WeakHashMap<>();
+
+	/** Whether a lethal hit was already rolled on {@code target} this tick ({@link #lethalPart}). */
+	public static boolean lethalRolled(LivingEntity target) {
+		Long at = LETHAL_ROLLED.get(target);
+		return at != null && at == target.level().getGameTime();
+	}
+
+	/** Whether {@code source} is a hit that dismembers {@code target} when it kills ({@link #LETHAL_HEAD_CHANCE}): a blow struck by hand, or a power's cut. */
+	public static boolean lethalHit(LivingEntity target, DamageSource source) {
+		return target.level() instanceof ServerLevel && !(target instanceof Player) && canLoseParts(target)
+			&& !(target.isBaby() && !(target instanceof net.minecraft.world.entity.monster.Enemy))
+			&& source.getEntity() instanceof LivingEntity attacker && attacker != target
+			&& (source.getDirectEntity() == attacker || cutting != null && cutting.target == target);
+	}
+
+	/**
+	 * The part a lethal hit ({@link #lethalHit}) takes off {@code target}, or 0 for none: where it {@code landed} (Wounds'
+	 * part, if known; else the attacker's aim, {@link #aimedPart}).
+	 */
+	public static int lethalPart(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
+		if (!lethalHit(target, source) || lethalRolled(target)) {
+			return 0;
+		}
+		LETHAL_ROLLED.put(target, target.level().getGameTime());
+		int part = landed != null ? com.jaymospowers.core.wounds.Breaks.limb(landed) : aimedPart((LivingEntity) source.getEntity(), target);
+		if (part == HEAD) {
+			return !headless(target) && target.getRandom().nextFloat() < LETHAL_HEAD_CHANCE ? HEAD : 0;
+		}
+		int left = LIMBS & ~missing(target);
+		if (part != 0 && (left & part) != 0 || left == 0) {
+			return part & left;
+		}
+		// (the body, or a part already gone: an arm or a leg still on)
+		for (int skip = target.getRandom().nextInt(Integer.bitCount(left)); skip > 0; skip--) {
+			left &= ~Integer.lowestOneBit(left);
+		}
+		return Integer.lowestOneBit(left);
+	}
+
+	/** Takes {@code part} off {@code target} for a lethal hit: cut off, or a skeleton's shattered. True if it came off. */
+	public static boolean lethalSever(LivingEntity target, int part, DamageSource source) {
+		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
+		return part != 0 && (target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS) ? shatter(target, part, by) : sever(target, part, by));
+	}
+
+	/** Takes off whatever a lethal hit takes ({@link #lethalPart}, {@link #lethalSever}). True if something came off. */
+	public static boolean lethalBlow(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
+		return lethalSever(target, lethalPart(target, source, landed), source);
+	}
+
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
 		return lose(target, part, by, false, null, false);
