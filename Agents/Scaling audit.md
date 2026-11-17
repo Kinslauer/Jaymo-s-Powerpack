@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Scaling audit (read-only): every progression line in Powers, Kingdoms, Kitchen; pick-list for Andy
 branch: claude/project-thread-god01i
 with: 

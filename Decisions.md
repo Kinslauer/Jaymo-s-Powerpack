@@ -708,3 +708,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Powers, Kingdoms, Kitchen. `thief` and `class-xp` go to draft PR #1698 (its files); the rest on branch claude/project-thread-god01i.
 - **Agent:** [[Agents/Scaling audit|Scaling audit]]
 - 2026-11-17 4:23 PM ET (Andy, Hermes Training): "Yes add it" — Quill no longer text-passes tasks Claude sessions built (PR #1702); PC steps in Hermes Training handoff.md.
+- 2026-11-17 (Andy): "Merge": scaling audit picks PR #1703 merged. Agent: [[Agents/Scaling audit|Scaling audit]]
