@@ -1263,6 +1263,11 @@ public final class Approaches {
 		if (answer.option() >= options.size() || !options.get(answer.option()).enabled() || a.mob.distanceTo(player) > TALK_RANGE) {
 			return;
 		}
+		if (a.topic == ACCUSE && answer.option() == 0 && !Vows.allows(player, "fine", false)) {
+			// (a pact that forbids paying it, the Ash Whisperer's: they ask again; picked again, it's broken)
+			ask(player, a);
+			return;
+		}
 		a.done = true;
 		a.answered = true;
 		Faction f = Factions.get(level.getServer(), a.faction);

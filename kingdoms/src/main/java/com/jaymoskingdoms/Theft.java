@@ -238,13 +238,33 @@ public final class Theft {
 		return id.getNamespace().equals("jaymospowers") && id.getPath().endsWith("_rock");
 	}
 
+	/** Whether {@code player} is lighting a fire with what's in {@code hand}: flint and steel, a fire charge, flint struck on a rock. */
+	static boolean lightsFire(Player player, InteractionHand hand) {
+		return player.getItemInHand(hand).is(Items.FLINT_AND_STEEL) || player.getItemInHand(hand).is(Items.FIRE_CHARGE) || strikesFlint(player);
+	}
+
+	/** Whether a fire {@code player} lit at {@code pos} would be arson ({@link #kindled}, before it catches): where a faction's law holds, off a hearth. */
+	static boolean arson(ServerPlayer player, ServerLevel level, BlockPos pos) {
+		if (player.isCreative() || level != Factions.level(level.getServer()) || level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD)) {
+			return false;
+		}
+		Faction f = lawAt(level, pos);
+		return f != null && !exempt(player, f);
+	}
+
+	/** Whether opening the container at {@code pos} is going through someone else's stores ({@link #opened}): a faction's, not placed by them, nor theirs to take from. */
+	static boolean rummages(ServerPlayer player, ServerLevel level, BlockPos pos) {
+		Faction f = Factions.storageOwner(level.getServer(), pos);
+		return f != null && !f.fallen() && level == Factions.level(level.getServer()) && level.getBlockEntity(pos) instanceof Container
+			&& !Placed.byPlayer(player, level, pos, level.getBlockState(pos)) && !player.isCreative() && !exempt(player, f);
+	}
+
 	static void register() {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && !(sp.isSecondaryUseActive() && !sp.getItemInHand(hand).isEmpty())) {
 				opened(sp, server, hit.getBlockPos());
 			}
-			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && server == Factions.level(server.getServer())
-				&& (player.getItemInHand(hand).is(Items.FLINT_AND_STEEL) || player.getItemInHand(hand).is(Items.FIRE_CHARGE) || strikesFlint(player))) {
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && server == Factions.level(server.getServer()) && lightsFire(sp, hand)) {
 				KINDLED.add(new Kindled(sp.getUUID(), hit.getBlockPos().relative(hit.getDirection()).immutable(), server.getGameTime()));
 			}
 			return InteractionResult.PASS;
@@ -445,27 +465,35 @@ public final class Theft {
 	}
 
 	private static void broke(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
-		// (gb-tent) and the land's own blocks in your own homestead are yours (never anyone's goods there)
-		boolean own = Placed.byPlayer(player, level, pos, state) || Homesteads.mayBreak(player, level, pos, state, entity);
+		Crime crime = blockCrime(player, level, pos, state, entity);
 		Placed.forget(level, pos);
-		if (own) {
-			// (0.5.46) breaking a block you placed yourself is no crime
+		if (crime == null) {
 			return;
 		}
 		Faction owner = Factions.storageOwner(level.getServer(), pos);
 		Faction f = owner != null ? owner : lawAt(level, pos);
+		commit(player, level, f, crime, pos, crime == Crime.BURGLARY && owner != null ? Weight.HEAVY : null, false);
+	}
+
+	/** The crime breaking the block at {@code pos} is for {@code player}, or null if it's none (also asked before the break, {@link Vows}). */
+	static @Nullable Crime blockCrime(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
+		// (gb-tent) and the land's own blocks in your own homestead are yours (never anyone's goods there)
+		if (Placed.byPlayer(player, level, pos, state) || Homesteads.mayBreak(player, level, pos, state, entity)) {
+			// (0.5.46) breaking a block you placed yourself is no crime
+			return null;
+		}
+		Faction owner = Factions.storageOwner(level.getServer(), pos);
+		Faction f = owner != null ? owner : lawAt(level, pos);
 		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN || exempt(player, f)) {
-			return;
+			return null;
 		}
 		if (Locks.lockedAgainst(level, pos, state, entity, player)) {
 			// (0.7.497) a locked door, gate, trapdoor or chest broken open is burglary
-			commit(player, level, f, Crime.BURGLARY, pos, owner != null ? Weight.HEAVY : null, false);
-			return;
+			return Crime.BURGLARY;
 		}
 		if (owner == null && Homesteads.ownerAt(level, pos) != null) {
 			// (gb-tent) the realm's people count a homestead its holder's: breaking into another's is vandalism
-			commit(player, level, f, Crime.HOMESTEAD, pos, null, false);
-			return;
+			return Crime.HOMESTEAD;
 		}
 		Crime crime;
 		if (owner != null) {
@@ -483,9 +511,9 @@ public final class Theft {
 		} else if (Customs.sacred(level, f, state)) {
 			crime = Crime.FELLING;
 		} else {
-			return;
+			return null;
 		}
-		commit(player, level, f, crime, pos, null, false);
+		return crime;
 	}
 
 	/** A fire {@code player} lit at {@code pos} (it caught): arson, where a faction's law holds (a hearth doesn't count). */

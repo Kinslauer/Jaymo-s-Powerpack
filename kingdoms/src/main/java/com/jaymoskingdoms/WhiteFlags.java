@@ -270,7 +270,7 @@ public final class WhiteFlags {
 		boolean fineDue = owes && level.getGameTime() - wait(p, fined) >= FINE_GAP;
 		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.whiteflag.pay", Money.text(f, milli)), fineDue && Money.canPay(p, f, milli), sp -> {
 			// (asked again as it's picked: the whole fine, or nothing)
-			if (level.getGameTime() - wait(sp, fined) < FINE_GAP || !Money.canPay(sp, f, milli) || !Money.charge(sp, f, milli)) {
+			if (level.getGameTime() - wait(sp, fined) < FINE_GAP || !Money.canPay(sp, f, milli) || !Vows.allows(sp, "fine", false) || !Money.charge(sp, f, milli)) {
 				return;
 			}
 			wait(sp, fined, level.getGameTime());
@@ -280,6 +280,10 @@ public final class WhiteFlags {
 			Speech.tell(level, guard, sp, Component.translatable("speech.jaymoskingdoms.whiteflag.paid." + level.getRandom().nextInt(LINES)), Speech.GOLD);
 		}));
 		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.whiteflag.give_up"), owes, sp -> {
+			if (!Vows.allows(sp, "yield", false)) {
+				// (a pact that forbids it, the Ash Whisperer's)
+				return;
+			}
 			if (!Busts.giveUp(level, sp, f, guard)) {
 				Theft.clearWanted(sp, f.id());
 				Speech.tell(level, guard, sp, Component.translatable("speech.jaymoskingdoms.whiteflag.let_go." + level.getRandom().nextInt(LINES)), Speech.WHITE);

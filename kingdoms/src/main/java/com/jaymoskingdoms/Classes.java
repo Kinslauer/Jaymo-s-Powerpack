@@ -277,6 +277,7 @@ public final class Classes {
 			Druids.clear();
 			Monks.clear();
 			Paladins.clear();
+			Vows.clear();
 			Rangers.clear();
 			Tinkerers.clear();
 			ClassTeachers.clear();

@@ -282,6 +282,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
 		VillagerHunters.register();
+		// (ahead of Theft: a refused chest or fire never reaches its record of what was opened)
+		Vows.register();
 		Theft.register();
 		Retaliation.register();
 		Customs.register();
