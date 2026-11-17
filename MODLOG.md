@@ -5606,3 +5606,8 @@ Fixed the server failing to start after the conjoined twin mutation: the twin ri
 ## 0.24.53 (2026-11-17): More time for finisher key prompts
 
 When a finisher asks for a key, it now holds still for up to a second and a half until you press it, then goes on at once, so the prompt is no longer gone in half a second. The bar under the key runs down over the whole time you have.
+
+## 0.24.54 (2026-11-17): The Maw salvager starts with a helm, a pack, a pick and a lantern
+
+- **Salvager at the Maw**: you now wake wearing a Sealed Helm (eight minutes of air, refilled at the pod, so the airless Maw doesn't choke you), with a backpack on your back, an iron pickaxe, a lantern and the deck plates. If the helm or pack slot is already taken, it goes into your inventory instead. (`ZFighterStarts.maw`)
+- Built; not played.
