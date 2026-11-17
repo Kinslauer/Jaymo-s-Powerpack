@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: merged
 task: carve the trunk as you chop (from Immersive Tree Chop, MIT)
 branch: claude/tree-carve
 with: 
