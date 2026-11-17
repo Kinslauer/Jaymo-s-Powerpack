@@ -13,7 +13,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · claimed
 
 
 ## In review
@@ -22,6 +21,7 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/punch-barrage-effects|punch-barrage-effects]] · 🍇 Bacchus · #1665 · in-review
+- [ ] [[Inbox/conjoined-twin-mutation|conjoined-twin-mutation]] · ☀️ Apollo · #1670 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
