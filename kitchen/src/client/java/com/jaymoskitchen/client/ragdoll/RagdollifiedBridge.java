@@ -4,6 +4,7 @@ import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.compat.RagdollifiedCompat;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.ragdoll.RagdollNet;
+import com.jaymoskitchen.ragdoll.RagdollSnapshot;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public final class RagdollifiedBridge {
 	private static final Map<Integer, Integer> SENT = new HashMap<>();
 	private static int now;
 
+	private static Class<?> apiClass = Object.class;
 	private static @Nullable Method hasRagdoll, getState, remove, torsoPosition, partPositions;
 
 	private RagdollifiedBridge() {
@@ -51,6 +53,7 @@ public final class RagdollifiedBridge {
 			Class<?> listener = Class.forName("com.raiiiden.ragdollified.api.RagdollSettleListener");
 			Class<?> state = Class.forName("com.raiiiden.ragdollified.api.RagdollState");
 			Class<?> event = Class.forName("com.raiiiden.ragdollified.api.RagdollSettleEvent");
+			apiClass = api;
 			hasRagdoll = api.getMethod("hasRagdoll", int.class);
 			getState = api.getMethod("getState", int.class);
 			remove = api.getMethod("remove", int.class);
@@ -163,7 +166,10 @@ public final class RagdollifiedBridge {
 					yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
 				}
 			}
-			ClientPlayNetworking.send(new RagdollNet.Settled(corpse.getId(), torso.x, ground, torso.z, yaw));
+			// the pose it lies in, on our rig (humanoids only; null otherwise, and the corpse lies in our fallen pose)
+			ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
+			RagdollSnapshot pose = track == null ? null : RagdollifiedPose.build(apiClass, id, track.rig);
+			ClientPlayNetworking.send(new RagdollNet.Settled(corpse.getId(), torso.x, ground, torso.z, yaw, pose));
 			SENT.put(id, now);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKitchen.LOGGER.debug("Ragdollified's ragdoll {} couldn't be read: {}", id, e.toString());

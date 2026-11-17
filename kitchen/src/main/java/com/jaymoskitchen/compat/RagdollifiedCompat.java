@@ -5,6 +5,8 @@ import com.jaymoskitchen.Loaded;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.corpse.Corpses;
 import com.jaymoskitchen.ragdoll.RagdollNet;
+import com.jaymoskitchen.ragdoll.RagdollRig;
+import com.jaymoskitchen.ragdoll.RagdollSnapshot;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -30,6 +32,8 @@ public final class RagdollifiedCompat {
 	private static final double SETTLE_REACH = 64.0;
 	/** The furthest (blocks) a reporting player may be from the corpse. */
 	private static final double REPORT_REACH = 128.0;
+	/** How far (blocks) a mapped pose's middle may be from the spot reported with it. */
+	private static final double POSE_NEAR = 2.0;
 
 	private RagdollifiedCompat() {
 	}
@@ -57,13 +61,40 @@ public final class RagdollifiedCompat {
 				|| !Loaded.made(player.level(), BlockPos.containing(x, y, z))) {
 				return;
 			}
-			corpse.settleAt(x, y, z, payload.yaw());
+			RagdollSnapshot pose = payload.pose();
+			corpse.settleAt(x, y, z, payload.yaw(), pose != null && believable(pose, corpse.ragdollRig(), x, y, z) ? pose : null);
 		});
 		try {
 			registerSeveredParts();
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			JaymosKitchen.LOGGER.warn("Ragdollified is loaded but its severed-part hook didn't take: {}", e.toString());
 		}
+	}
+
+	/**
+	 * Whether a pose a client mapped from Ragdollified's ragdoll is for this corpse's rig, lies where the ragdoll was
+	 * reported, and holds together: every point within the body's reach of its middle, every stick near its rest length.
+	 */
+	private static boolean believable(RagdollSnapshot pose, RagdollRig rig, double x, double y, double z) {
+		if (!pose.fits(rig) || !Double.isFinite(pose.x() + pose.y() + pose.z())
+			|| Math.abs(pose.x() - x) > POSE_NEAR || Math.abs(pose.z() - z) > POSE_NEAR || Math.abs(pose.y() - y) > POSE_NEAR) {
+			return false;
+		}
+		double reach = rig.height * 1.5 + 1.0;
+		for (int i = 0; i < rig.count; i++) {
+			double dx = pose.pointX(i) - pose.x(), dy = pose.pointY(i) - pose.y(), dz = pose.pointZ(i) - pose.z();
+			if (dx * dx + dy * dy + dz * dz > reach * reach) {
+				return false;
+			}
+		}
+		for (int k = 0; k < rig.stickA.length; k++) {
+			int a = rig.stickA[k], b = rig.stickB[k];
+			double dx = pose.pointX(a) - pose.pointX(b), dy = pose.pointY(a) - pose.pointY(b), dz = pose.pointZ(a) - pose.pointZ(b);
+			if (Math.abs(Math.sqrt(dx * dx + dy * dy + dz * dz) - rig.stickLength[k]) > rig.stickLength[k] * 0.15 + 0.05) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
