@@ -351,6 +351,10 @@ public final class Downed {
 	private static final Set<UUID> MASH_HELD = new java.util.HashSet<>();
 	/** Knocked-out player → how long their knock-out was in all (ticks), for the presses it takes and the bar. Not saved. */
 	private static final Map<UUID, Integer> MASH_LENGTH = new HashMap<>();
+	/** Downed players whose own time runs fast (Chrono's Time Bloom, {@link #timeMend}): the game time they last were. */
+	private static final Map<UUID, Long> HASTENED = new HashMap<>();
+	/** Downed players whose parts time has mended: they rise with what those parts hold, as from a rest in bed. */
+	private static final Set<UUID> TIME_MENDED = new java.util.HashSet<>();
 
 	private Downed() {
 	}
@@ -609,6 +613,38 @@ public final class Downed {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-17): "bloom will wake them faster as they heal". A downed player's own time run fast, this tick (Chrono's
+	 * Time Bloom, and Overclock's quicker mending): their most hurt part mends {@code amount} (a bed's mend, {@link
+	 * DownedStruggle}) and the bleed-out clock holds; with {@code hasten} (the Bloom) a passed-out one comes round and a
+	 * rise started now takes half as long. They rise with what the mended parts hold. Server side; nothing for one who isn't down.
+	 */
+	public static void timeMend(ServerPlayer player, float amount, boolean hasten) {
+		if (!isDowned(player) || player.hasAttached(KNOCKED)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (hasten && passedOut(player)) {
+			wake(player, false);
+		}
+		if (now - since(player) > ADRENALINE_TICKS) {
+			// (held past the rush only: one still on adrenaline keeps it)
+			holdClock(player, now);
+		}
+		if (amount > 0.0F && DownedStruggle.mendWorst(player, amount)) {
+			TIME_MENDED.add(player.getUUID());
+		}
+		if (hasten) {
+			HASTENED.put(player.getUUID(), now);
+		}
+	}
+
+	/** Whether {@code player}'s time ran fast last tick or this one ({@link #timeMend}). */
+	private static boolean hastened(ServerPlayer player, long now) {
+		Long at = HASTENED.get(player.getUUID());
+		return at != null && now - at <= 1L;
+	}
+
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
@@ -792,6 +828,8 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
+			HASTENED.remove(player.getUUID());
+			TIME_MENDED.remove(player.getUUID());
 			if (player instanceof ServerPlayer server) {
 				DownedStruggle.forget(server);
 			}
@@ -1360,6 +1398,10 @@ public final class Downed {
 		}
 		if (r.ticks++ == 0) {
 			r.length = tooHurt(player) ? Math.round(RISE_TICKS * WALL_RISE_SLOW) : RISE_TICKS;
+			if (hastened(player, now)) {
+				// (Andy, 2026-11-17) their own time running fast under a Time Bloom: up in half the time
+				r.length = Math.max(1, r.length / 2);
+			}
 			if (r.length != RISE_TICKS) {
 				player.setAttached(RISE_LENGTH, r.length);
 			} else if (player.hasAttached(RISE_LENGTH)) {
@@ -1382,7 +1424,7 @@ public final class Downed {
 		}
 		RISES.remove(player.getUUID());
 		// (0.21.49) what a rest in bed mended, they rise with
-		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
+		float rested = DownedStruggle.resting(player) || TIME_MENDED.contains(player.getUUID()) ? Wounds.restedHealth(player) : 0.0F;
 		// (asked before the getting up: a cane picked up after doesn't change what they did)
 		String risen = feet(player, "message.jaymospowers.downed.risen");
 		getUp(level, player);

@@ -95,6 +95,22 @@ public final class ChronoPower implements Power {
 	static final int BLOOM_HEAL_EVERY = 10;
 	/** Since 0.11.25 the mending reaches every living thing this close to you as well (friend or foe alike). */
 	static final double BLOOM_HEAL_RADIUS = 5.0;
+	/**
+	 * Andy (2026-11-17): "overclock should give a haste effect as well as increased healing". Overclocked, your body's
+	 * time runs fast too: Regeneration at this amplifier (1 = Regeneration II) beside the Haste II. Downed (where nothing
+	 * heals), your most hurt part mends {@code OVERCLOCK_DOWNED_MEND} every {@code OVERCLOCK_DOWNED_EVERY} ticks instead.
+	 */
+	static final int OVERCLOCK_REGEN_AMPLIFIER = 1;
+	static final int OVERCLOCK_HASTE_AMPLIFIER = 1;
+	static final float OVERCLOCK_DOWNED_MEND = 1.0F;
+	static final int OVERCLOCK_DOWNED_EVERY = 25;
+	/**
+	 * Andy (2026-11-17): "R will revert time so if they do it soon enough they will be back standing with the health they
+	 * lost". Downed, Rewind still reaches back only {@code REWIND_TICKS}: within that of going down it takes you to a moment
+	 * before the fall (the sooner, the further before it, so the more of the lost health comes back); later than that the
+	 * fall is out of its reach.
+	 */
+	static final int REWIND_DOWNED_REACH = REWIND_TICKS;
 	/** Overclock makes you a speedster: Speed amplifier (4 = Speed V). */
 	static final int OVERCLOCK_SPEED_AMPLIFIER = 4;
 	/** Overclock's drag on everyone around you: radius, Slowness amplifier (3 = Slowness IV), refreshed this often. */
@@ -147,6 +163,8 @@ public final class ChronoPower implements Power {
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
+		// held attack while overclocked: the flurry
+		ChronoFlurry.register();
 		ChronoFlow.init();
 		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
 		ChronoTakedowns.init();
@@ -165,6 +183,7 @@ public final class ChronoPower implements Power {
 			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && ChronoSpeed.overclocked(player)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
+			ChronoFlurry.stop(handler.player);
 			if (state != null) {
 				stopAll(handler.player, state);
 				state.clearHistory();
@@ -180,6 +199,7 @@ public final class ChronoPower implements Power {
 			}
 			StasisField.releaseAll();
 			ChronoPunch.clear();
+			ChronoFlurry.clear();
 			ChronoFlow.clear();
 			STATES.clear();
 		});
@@ -222,12 +242,15 @@ public final class ChronoPower implements Power {
 	}
 
 	/**
-	 * (0.15.83) Andy: "chrono should be able to use R when downed, this will revert him as it should". Rewind stays live
-	 * while down (not passed out), once it's unlocked.
+	 * (0.15.83) Andy: "chrono should be able to use R when downed, this will revert him as it should". Andy (2026-11-17):
+	 * "chronos should be able to use their abilities while downed". Every ability key stays live while down and awake (not
+	 * passed out or knocked out), once it's unlocked: Rewind (back up, if soon enough), Stasis, Overclock (a quicker crawl
+	 * and quicker mending) and Time Bloom (mending and a quicker rise). Sneak is the rise down there, so the sneak forms
+	 * (Fast Forward, Calculation's dodge, the decoys) wait till you're up.
 	 */
 	@Override
 	public boolean usableDowned(Player player, PowerKey key) {
-		return key == PowerKey.ABILITY_1 && !Downed.passedOut(player) && !com.jaymospowers.core.Mastery.starterOnly(player)
+		return key.ordinal() <= BLOOM && Downed.awake(player) && !com.jaymospowers.core.Mastery.starterOnly(player)
 			&& com.jaymospowers.core.Mastery.isUnlocked(player, key);
 	}
 
@@ -237,14 +260,14 @@ public final class ChronoPower implements Power {
 		return key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && com.jaymospowers.power.chrono.future.Future.wakesEarly(player);
 	}
 
-	/** (0.15.31) Downed: what was running ends. */
+	/**
+	 * (0.15.31) Downed: the flow ends, and a phase through a wall. Andy (2026-11-17): Chrono's abilities work down there,
+	 * so a Stasis, Overclock or Time Bloom running as you fall runs on.
+	 */
 	@Override
 	public void onDowned(ServerPlayer player) {
-		// stasis, bloom, overclock and trail end (cooldowns kept), and so does the flow
-		ChronoState state = STATES.get(player.getUUID());
-		if (state != null) {
-			stopAll(player, state);
-		}
+		ChronoPhase.release(player);
+		ChronoFlurry.stop(player);
 		ChronoFlow.stop(player);
 	}
 
@@ -254,7 +277,8 @@ public final class ChronoPower implements Power {
 		if (state != null) {
 			if (state.overclockLeft > 0) {
 				removeOverclockEffect(player, MobEffects.SPEED, OVERCLOCK_SPEED_AMPLIFIER, state.overclockLeft);
-				removeOverclockEffect(player, MobEffects.HASTE, 1, state.overclockLeft);
+				removeOverclockEffect(player, MobEffects.HASTE, OVERCLOCK_HASTE_AMPLIFIER, state.overclockLeft);
+				removeOverclockEffect(player, MobEffects.REGENERATION, OVERCLOCK_REGEN_AMPLIFIER, state.overclockLeft);
 			}
 			stopAll(player, state);
 			STATES.remove(player.getUUID());
@@ -353,6 +377,9 @@ public final class ChronoPower implements Power {
 		// (0.15.83) down, time holds on to the moments before the fall (a Rewind takes you back to them, and up); up again
 		// by any other means, those moments are stale
 		boolean downed = Downed.isDowned(player);
+		if (downed && !state.downed) {
+			state.downedAt = level.getGameTime();
+		}
 		if (!downed) {
 			if (state.downed) {
 				state.clearHistory();
@@ -384,9 +411,21 @@ public final class ChronoPower implements Power {
 			// broken bones start running forward to knitted
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.5, 0.3, 0.0);
 		}
+		if (state.bloom != null && downed) {
+			// (Andy, 2026-11-17) down, your wounds run forward to where you can rise, and the rise itself goes quicker
+			boolean mend = player.tickCount % BLOOM_HEAL_EVERY == 0;
+			Downed.timeMend(player, mend ? BLOOM_HEAL : 0.0F, true);
+			if (mend) {
+				ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 0.4, player.getZ(), 3, 0.4, 0.2, 0.4, 0.0);
+			}
+		}
+		if (state.overclockLeft > 0 && downed && player.tickCount % OVERCLOCK_DOWNED_EVERY == 0) {
+			// overclocked on the ground: Regeneration can't reach the downed, so the mending runs this way
+			Downed.timeMend(player, OVERCLOCK_DOWNED_MEND, false);
+		}
 		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0) {
-			// your own wounds run forward too, to healed
-			if (player.getHealth() < player.getMaxHealth()) {
+			// your own wounds run forward too, to healed (downed, above)
+			if (!downed && player.getHealth() < player.getMaxHealth()) {
 				player.heal(BLOOM_HEAL);
 				ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
 			}
@@ -418,6 +457,23 @@ public final class ChronoPower implements Power {
 		sync(player, state, now);
 	}
 
+	/**
+	 * The oldest sample of the history held at the fall that a Rewind still reaches for a downed {@code player} (age 0 is
+	 * the last moment standing), or -1 when they've lain longer than {@link #REWIND_DOWNED_REACH}.
+	 */
+	private static int rewindDownedReach(ServerPlayer player) {
+		ChronoState state = STATES.get(player.getUUID());
+		// (timed from the fall itself: the downed clock is held and restarted by rests and waking)
+		long lain = state == null || !state.downed ? 0L : player.level().getGameTime() - state.downedAt;
+		return lain > REWIND_DOWNED_REACH ? -1 : (int) (REWIND_DOWNED_REACH - lain);
+	}
+
+	/** Whether a downed {@code player}'s Rewind can still reach back before the fall (server side). */
+	static boolean rewindReachesFall(ServerPlayer player) {
+		ChronoState state = STATES.get(player.getUUID());
+		return state != null && state.size() > 0 && rewindDownedReach(player) >= 0;
+	}
+
 	/** (0.20.92) Whether Rewind is off its cooldown for {@code player} (server side). */
 	static boolean rewindReady(ServerPlayer player) {
 		ChronoState state = STATES.get(player.getUUID());
@@ -442,17 +498,19 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		int ability = key.ordinal();
 		int now = now(player);
-		if (ability == BLOOM && player.isShiftKeyDown()
+		// (Andy, 2026-11-17) downed, sneak is the rise: the sneak forms wait till you're up
+		boolean sneaking = player.isShiftKeyDown() && !Downed.isDowned(player);
+		if (ability == BLOOM && sneaking
 			&& (!com.jaymospowers.core.Mastery.starterOnly(player) || com.jaymospowers.power.chrono.future.Future.wakesEarly(player))) {
 			// sneak+B, Fast Forward: a leap into the ruined future (or back), with its own recharge
 			com.jaymospowers.power.chrono.future.Future.leap(player);
 			return;
 		}
-		if (ability == STASIS && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player) && ChronoCalculation.spend(player)) {
+		if (ability == STASIS && sneaking && !com.jaymospowers.core.Mastery.starterOnly(player) && ChronoCalculation.spend(player)) {
 			// sneak+G with Calculation's bar charged: it is spent on dodging instead of casting Stasis
 			return;
 		}
-		if (ability == OVERCLOCK && state.overclockLeft > 0 && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player)) {
+		if (ability == OVERCLOCK && state.overclockLeft > 0 && sneaking && !com.jaymospowers.core.Mastery.starterOnly(player)) {
 			// sneak+V while overclocked: afterimage decoys (their own recharge)
 			ChronoDecoys.cast(player);
 			return;
@@ -469,6 +527,11 @@ public final class ChronoPower implements Power {
 				state.cooldownTotal[OVERCLOCK] = cooldown;
 				sync(player, state, now);
 			}
+			return;
+		}
+		if (ability == REWIND && Downed.isDowned(player) && ChronoCheatDeath.has(player) && ChronoCheatDeath.downedOpen(player)) {
+			// down where Rewind can't answer (lain too long, an execution coming, on its cooldown): R is cheating death's,
+			// which the client sends on its own, so Rewind stays out of its way
 			return;
 		}
 		if (state.cooldownLeft(ability, now) > 0) {
@@ -635,9 +698,21 @@ public final class ChronoPower implements Power {
 		}
 		// the oldest recorded spot you'd fit into again (blocks may have been placed there since); downed, standing up
 		boolean downed = Downed.isDowned(player);
+		int oldest = state.size() - 1;
+		int newest = REWIND_MIN_HISTORY - 1;
+		if (downed) {
+			// (Andy, 2026-11-17) "if they do it soon enough": the history held still at the fall, and Rewind reaches only
+			// REWIND_DOWNED_REACH back from now, so the longer you've lain, the less of it is in reach
+			int reach = rewindDownedReach(player);
+			if (reach < 0) {
+				return fail(player, "message.jaymospowers.chrono_rewind_too_late");
+			}
+			oldest = Math.min(oldest, reach);
+			newest = 0;
+		}
 		int chosen = -1;
 		Vec3 here = player.position();
-		for (int age = state.size() - 1; age >= REWIND_MIN_HISTORY - 1; age--) {
+		for (int age = oldest; age >= newest; age--) {
 			AABB box = downed ? player.getDimensions(Pose.STANDING).makeBoundingBox(state.pos(age))
 				: player.getBoundingBox().move(state.pos(age).subtract(here));
 			if (level.noCollision(player, box)) {
@@ -726,7 +801,8 @@ public final class ChronoPower implements Power {
 
 	private static void overclockEffects(ServerPlayer player) {
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
-		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, OVERCLOCK_HASTE_AMPLIFIER, false, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, OVERCLOCK_TICKS, OVERCLOCK_REGEN_AMPLIFIER, false, false, true));
 	}
 
 	/** Max rank, all four abilities unlocked: Overclock is a toggle instead of 6 s. */
@@ -737,7 +813,8 @@ public final class ChronoPower implements Power {
 	/** Switches a held (max rank) Overclock off: our effects go, the speed ends. */
 	private static void overclockOff(ServerPlayer player, ChronoState state) {
 		removeOverclockEffect(player, MobEffects.SPEED, OVERCLOCK_SPEED_AMPLIFIER, state.overclockLeft);
-		removeOverclockEffect(player, MobEffects.HASTE, 1, state.overclockLeft);
+		removeOverclockEffect(player, MobEffects.HASTE, OVERCLOCK_HASTE_AMPLIFIER, state.overclockLeft);
+		removeOverclockEffect(player, MobEffects.REGENERATION, OVERCLOCK_REGEN_AMPLIFIER, state.overclockLeft);
 		state.overclockLeft = 0;
 		state.overclockHeld = false;
 		setOverclockModifier(player, false);
