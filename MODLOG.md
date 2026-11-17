@@ -5508,3 +5508,9 @@ Built; not played.
 - **Pack**: Ragdollified 1.2.2 (Raiiiden, all rights reserved; downloaded by id from CurseForge, never copied or changed; shares Felled's Zarith) and Ragdollified Reactions 0.1.3-BETA (Raiiiden, all rights reserved). A body that dies now falls as a physics ragdoll built from its own model; the player ragdolls in a crash, a blast or a hard landing, and H ragdolls you by hand. Kept out of the dev game. Jaymo's Kitchen stands down for them (see its note); Powers' own ragdolls (Web, Gravity flings) stay Powers'.
 - Ragdollified Amputation, Player Corpses and Revive & Drag only have Fabric 26.2 builds and are not added (watch-list in the vault).
 - Built by CI; not played. One test launch should check: Felled and Ragdollified sharing Zarith, Iris with Complementary, EMF and ETF models, First-person Model, MCA villagers, GeckoLib mobs, Dismember's missing limbs on a ragdoll, costumes on corpses.
+
+## 0.24.41 (2026-11-17): The future's gunners duck behind cover to reload
+
+Andy's Ragdolls and Cover picks (ln-npc). `FutureCover`: a gunner of the future (`FutureGuns`: the armed dead, the echoes) that has just fired a burst or reloaded goes down behind a wall or block for as long as the gun takes to be ready, and stands to lean out 10 ticks before; one that is shot at keeps its head down for 3 seconds. Where it stands already is cover if something hides the crouching body but not the standing one; otherwise it tries a few spots within 7 blocks (a few clips, no wide scan) and keeps the one it finds while the foe stays near.
+- Leaning itself (Q/E while sneaking) is Jaymo's Kingdoms'.
+- Built; not played.
