@@ -829,7 +829,10 @@ def packResourcePacks = [
 	// MCA - Default Medieval (by DE4THR4SH): vanilla-style medieval clothes, faces and hair for MCA's villagers. Its
 	// newest file says 1.21.1, but it only retextures MCA's skins, and 1144 of our 26.3 MCA jar's 1145 skin files are
 	// at the same paths (the last one is MCA's own folder icon).
-	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"],
+	// packwiz: "cdn": packwiz can't fetch this file through CurseForge's API (Jung's first tester-pack launch,
+	// 2026-11-17: "Failed file downloads"), so the tester pack downloads it straight from CurseForge's CDN, the same
+	// address profileMods uses
+	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip", packwiz: "cdn"],
 	// Fresh Animations: Player Extension (by FreshLX; modpacks may include it, never redistribute it): livelier player
 	// animations through Entity Model Features. Stands alone, no base Fresh Animations needed; supports up to 26.3.
 	[cf: [1281029, 8245230], file: "FA+Player-v1.1.zip"],
@@ -1146,8 +1149,8 @@ tasks.register("packwizList") {
 			minecraft    : project.minecraft_version,
 			fabric       : project.loader_version,
 			mods         : mods,
-			resourcepacks: packResourcePacks.collect { [cf: it.cf, file: it.file] },
-			shaderpacks  : packShaderPacks.collect { [cf: it.cf, file: it.file] },
+			resourcepacks: packResourcePacks.collect { [cf: it.cf, file: it.file, cdn: it.packwiz == "cdn"] },
+			shaderpacks  : packShaderPacks.collect { [cf: it.cf, file: it.file, cdn: it.packwiz == "cdn"] },
 		]))
 	}
 }
