@@ -4,7 +4,9 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"TaczMuzzleFlashMixin",
-		"TaczMannequinAnimMixin"
+		"TaczMannequinAnimMixin",
+		"TaczLaserBeamMixin",
+		"TaczRecoilMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

@@ -25,5 +25,7 @@ abstract class ScreenShakeMixin {
 		com.jaymospowers.client.PanicCam.applyCamera(poseStack, partialTicks);
 		// spun too long: the view rolls as the world keeps turning
 		com.jaymospowers.client.wounds.SpinDizzyHud.applyCamera(poseStack, partialTicks);
+		// looking down a strong scope, the view drifts (GunHandling)
+		com.jaymospowers.client.armory.GunHandling.applyCamera(poseStack, partialTicks);
 	}
 }
