@@ -145,8 +145,16 @@ public final class Stables {
 	}
 
 	/** One of the market's horses. */
-	record Offer(Equine equine, int price) {
+	record Offer(Equine equine, int price, int war) {
+		Offer(Equine equine, int price) {
+			this(equine, price, 0);
+		}
 	}
+
+	/** The war-bred horses a stable sells to a player of world tier Dread (the first) and Legend (also the second): their price, and what they have over their breed's best (speed, jump, health, as a share more). */
+	static final int[] WAR_PRICE = {300, 450};
+	static final double[] WAR_SPEED = {0.5, 0.65}, WAR_JUMP = {0.4, 0.5}, WAR_HEALTH = {0.5, 0.7};
+	static final String WARHORSE = "jaymoskingdoms.warhorse";
 
 	private static final class Job {
 		@Nullable UUID horse;
@@ -648,7 +656,7 @@ public final class Stables {
 	}
 
 	/** Today's horses at {@code f}'s stable (the same all day for everyone). */
-	static List<Offer> offers(ServerLevel level, Faction f) {
+	static List<Offer> offers(ServerLevel level, Faction f, ServerPlayer player) {
 		Wealth.Tier tier = Wealth.of(level.getServer(), f);
 		long day = Production.day(level.getServer());
 		RandomSource random = RandomSource.create(day * 7919L + f.id() * 104729L);
@@ -659,7 +667,37 @@ public final class Stables {
 			Equine e = new Equine(breed, rolled.coat(), stat(tier, random), stat(tier, random), stat(tier, random), stat(tier, random), rolled.temper());
 			out.add(new Offer(e, value(e)));
 		}
+		// (late coin: war-bred destriers, for those the world has hardened; the same all day, like the rest)
+		int warhorses = WorldTiers.of(player).ordinal() - WorldTiers.Tier.DREAD.ordinal() + 1;
+		for (int i = 0; i < Math.min(WAR_PRICE.length, warhorses); i++) {
+			Equine rolled = Equine.roll(Breed.DESTRIER, random);
+			out.add(new Offer(new Equine(Breed.DESTRIER, rolled.coat(), 0.9F + random.nextFloat() * 0.1F, 0.9F + random.nextFloat() * 0.1F,
+				0.9F + random.nextFloat() * 0.1F, 0.9F + random.nextFloat() * 0.1F, rolled.temper()), WAR_PRICE[i], i + 1));
+		}
 		return out;
+	}
+
+	/** {@code horse} is war-bred, grade {@code war} (1 or 2): faster, higher and hardier than any of its breed (still a horse, so it wears horse armour). */
+	private static void bredForWar(AbstractHorse horse, int war) {
+		horse.addTag(WARHORSE);
+		bonus(horse, Attributes.MOVEMENT_SPEED, "warhorse_speed", WAR_SPEED[war - 1]);
+		bonus(horse, Attributes.JUMP_STRENGTH, "warhorse_jump", WAR_JUMP[war - 1]);
+		bonus(horse, Attributes.MAX_HEALTH, "warhorse_health", WAR_HEALTH[war - 1]);
+		horse.setHealth(horse.getMaxHealth());
+	}
+
+	private static void bonus(AbstractHorse horse, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute, String id, double share) {
+		net.minecraft.world.entity.ai.attributes.AttributeInstance a = horse.getAttribute(attribute);
+		if (a != null) {
+			a.addOrReplacePermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(JaymosKingdoms.id(id), share,
+				net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		}
+	}
+
+	/** An offer's breed as the market names it: a war-bred horse says so. */
+	private static Component breedName(Offer offer) {
+		Component breed = Component.translatable(offer.equine().breed().key());
+		return offer.war() > 0 ? Component.translatable("gui.jaymoskingdoms.stable.warbred", breed) : breed;
 	}
 
 	/** A stat for a horse a stable of this wealth sells: a poor one's are middling at best, a wealthy one's the better of two. */
@@ -707,7 +745,7 @@ public final class Stables {
 		if (f == null) {
 			return 0;
 		}
-		List<Offer> offers = offers(level, f);
+		List<Offer> offers = offers(level, f, player);
 		tell(player, Component.translatable("message.jaymoskingdoms.stable.market", f.name()).withStyle(ChatFormatting.GOLD));
 		int shown = 0;
 		for (int i = 0; i < offers.size(); i++) {
@@ -715,7 +753,7 @@ public final class Stables {
 				continue;
 			}
 			Equine e = offers.get(i).equine();
-			MutableComponent line = Component.translatable("message.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
+			MutableComponent line = Component.translatable("message.jaymoskingdoms.stable.offer", breedName(offers.get(i)),
 				Component.translatable("coat.jaymoskingdoms." + e.coatName()), pct(e.speed()), pct(e.stamina()), pct(e.jump()), pct(e.courage()),
 				coins(player, offers.get(i).price()));
 			option(player, line, "/kingdom stable buy " + i);
@@ -738,7 +776,7 @@ public final class Stables {
 		if (f == null) {
 			return 0;
 		}
-		List<Offer> offers = offers(level, f);
+		List<Offer> offers = offers(level, f, player);
 		String key = soldKey(level, f, index);
 		if (index < 0 || index >= offers.size() || SOLD.containsKey(key)) {
 			tell(player, Component.translatable("message.jaymoskingdoms.stable.gone").withStyle(ChatFormatting.GRAY));
@@ -754,6 +792,9 @@ public final class Stables {
 			return 0;
 		}
 		Equestrian.apply(horse, offer.equine(), true);
+		if (offer.war() > 0) {
+			bredForWar(horse, offer.war());
+		}
 		horse.setPersistenceRequired();
 		horse.addTag(BOUGHT);
 		level.addFreshEntity(horse);
@@ -1043,13 +1084,13 @@ public final class Stables {
 				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.collect", coins(player, fee)), StableNet.COLLECT, horse.getId(), true))));
 		}
 		List<StableNet.Row> market = new ArrayList<>();
-		List<Offer> offers = offers(level, f);
+		List<Offer> offers = offers(level, f, player);
 		for (int i = 0; i < offers.size(); i++) {
 			if (SOLD.containsKey(soldKey(level, f, i))) {
 				continue;
 			}
 			Equine e = offers.get(i).equine();
-			Component name = Component.translatable("gui.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
+			Component name = Component.translatable("gui.jaymoskingdoms.stable.offer", breedName(offers.get(i)),
 				Component.translatable("coat.jaymoskingdoms." + e.coatName()));
 			market.add(new StableNet.Row(icon(e.breed()), Optional.of(e), name, stats(e), List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", coins(player, offers.get(i).price())), StableNet.BUY, i, true))));

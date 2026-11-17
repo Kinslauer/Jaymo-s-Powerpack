@@ -34,16 +34,26 @@ import net.minecraft.world.item.trading.MerchantOffers;
 public final class TierGate {
 	// ---- tuning ----
 	/** The tier (an ordinal) of each Tinkering material that isn't open from the start; any other material is Hearth's. */
-	static final Map<String, Integer> MATERIAL_TIER = Map.of(
-		"pig_iron", 1,
-		"seared_stone", 1,
-		"silver", 2,
-		"rose_gold", 2,
-		"amethyst_bronze", 2,
-		"slimesteel", 3,
-		"steel", 3);
-	/** Per player tier (Hearth to Legend), the best forging grade a smith's gear can come with (0 poor, 1 well, 2 expert, 3 perfect, 4 master). */
-	static final int[] MAX_GRADE = {1, 2, 3, 4, 4};
+	static final Map<String, Integer> MATERIAL_TIER = Map.ofEntries(
+		Map.entry("pig_iron", 1),
+		Map.entry("seared_stone", 1),
+		Map.entry("silver", 2),
+		Map.entry("rose_gold", 2),
+		Map.entry("amethyst_bronze", 2),
+		Map.entry("cobalt", 2),
+		Map.entry("queen_slime", 2),
+		Map.entry("slimesteel", 3),
+		Map.entry("steel", 3),
+		Map.entry("manyullyn", 3),
+		Map.entry("hepatizon", 3),
+		Map.entry("ember_dragon_bone", 4),
+		Map.entry("rime_dragon_bone", 4),
+		Map.entry("venom_dragon_bone", 4),
+		Map.entry("storm_dragon_bone", 4));
+	/** Per player tier (Hearth to Legend), the best forging grade a smith's gear can come with (0 poor, 1 well, 2 expert, 3 perfect, 4 master, 5 legendary). */
+	static final int[] MAX_GRADE = {1, 2, 3, 4, 5};
+	/** The grade index of Legendary, and the tier (Legend) that gear of it belongs to. */
+	static final int LEGENDARY_GRADE = 5, LEGEND_TIER = 4;
 	/** The namespace whose parts are read by material. */
 	static final String TINKERING = "jaymospowers";
 
@@ -91,6 +101,9 @@ public final class TierGate {
 				tier = Math.max(tier, MATERIAL_TIER.getOrDefault(data.strings().get(0), 0));
 			}
 		}
+		if (GradedTrades.gradeIndex(stack) >= LEGENDARY_GRADE) {
+			tier = Math.max(tier, LEGEND_TIER);
+		}
 		return tier;
 	}
 
@@ -99,7 +112,7 @@ public final class TierGate {
 		return player.isCreative() || tierOf(stack) <= WorldTiers.progress(player).open();
 	}
 
-	/** The best forging grade (0 poor to 4 master) a smith's gear may come with for {@code player}. */
+	/** The best forging grade (0 poor to 5 legendary) a smith's gear may come with for {@code player}. */
 	public static int maxGrade(Player player) {
 		return player.isCreative() ? MAX_GRADE[MAX_GRADE.length - 1] : MAX_GRADE[Math.clamp(WorldTiers.progress(player).open(), 0, MAX_GRADE.length - 1)];
 	}

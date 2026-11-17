@@ -168,7 +168,7 @@ public final class BioBuilt {
 			player.removeAttached(FORM);
 		}
 		Skills.modifier(player, Attributes.MAX_HEALTH, "heritage_bio_health", bio ? HEALTH[form] : 0.0, AttributeModifier.Operation.ADD_VALUE);
-		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_bio_damage", bio ? DAMAGE[form] : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_bio_damage", bio ? DAMAGE[form] * Heritage.grow(player) : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		Skills.modifier(player, Attributes.ARMOR, "heritage_bio_armor", bio ? ARMOR[form] : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_bio_knock", bio ? KNOCK[form] : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.SCALE, "heritage_bio_scale", bio ? SIZE[form] : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);

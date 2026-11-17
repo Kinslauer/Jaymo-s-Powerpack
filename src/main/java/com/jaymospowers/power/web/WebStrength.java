@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
  * A cocoon holds a creature where it is (and a player all but still) for a few seconds.
  */
 public final class WebStrength {
-	/** Spider physique at every ability unlocked (scaled down before: a fresh awakening has a fifth of it). */
+	/** Spider physique at every ability unlocked (none at awakening, scaling up with every ability unlocked). */
 	public static final double PHYSIQUE_DAMAGE = 3.0;
 	public static final double PHYSIQUE_SPEED = 0.15;
 	public static final double PHYSIQUE_JUMP = 0.25;
@@ -156,7 +156,7 @@ public final class WebStrength {
 
 	/** Puts the physique on (or brings it up to date with what's unlocked); called every second from the power's tick. */
 	static void physique(ServerPlayer player) {
-		double share = (Mastery.unlocked(player) + 1) / (double)(Mastery.ALL + 1);
+		double share = Mastery.unlocked(player) / (double)Mastery.ALL;
 		modifier(player, Attributes.ATTACK_DAMAGE, DAMAGE_ID, PHYSIQUE_DAMAGE * share, AttributeModifier.Operation.ADD_VALUE);
 		modifier(player, Attributes.MOVEMENT_SPEED, SPEED_ID, PHYSIQUE_SPEED * share, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		modifier(player, Attributes.JUMP_STRENGTH, JUMP_ID, PHYSIQUE_JUMP * share, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);

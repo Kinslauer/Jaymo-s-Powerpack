@@ -11,6 +11,7 @@
 		"ArmourWearStackMixin",
 		"CollideMoveMixin",
 		"ElementalWrathDamageMixin",
+		"XenoformDamageMixin",
 		"ArmourWearLivingMixin",
 		"BlowsLivingMixin",
 		"BlowsPlayerMixin",

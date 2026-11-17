@@ -63,8 +63,8 @@ public final class WerewolfPlayers {
 	static final int MASTERY_MOONS = 3;
 	/** The doubling over before the beast comes (ticks). */
 	static final int CONVULSE_TICKS = 40;
-	/** As the beast: Strength, Speed, Jump Boost, Resistance levels (amplifiers), and extra health. */
-	static final int BEAST_STRENGTH = 1, BEAST_SPEED = 0, BEAST_JUMP = 1, BEAST_RESISTANCE = 0;
+	/** As the beast: Strength (an amplifier; one higher from this feral stage on), Speed, Jump Boost, Resistance levels (amplifiers), and extra health. */
+	static final int BEAST_STRENGTH = 0, FERAL_STRENGTH_STAGE = 2, BEAST_SPEED = 0, BEAST_JUMP = 1, BEAST_RESISTANCE = 0;
 	static final double BEAST_HEALTH = 10.0;
 	/** The share of each armour piece's durability the change tears off. */
 	static final float ARMOUR_TEAR = 0.3F;
@@ -500,7 +500,7 @@ public final class WerewolfPlayers {
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60, 0, true, false, true));
 			return;
 		}
-		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 60, BEAST_STRENGTH, true, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 60, BEAST_STRENGTH + (FeralCurse.stage(player) >= FERAL_STRENGTH_STAGE ? 1 : 0), true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, BEAST_SPEED, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, BEAST_JUMP, true, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 60, BEAST_RESISTANCE, true, false, true));

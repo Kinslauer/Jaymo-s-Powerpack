@@ -39,7 +39,7 @@ public final class MenuNet {
 	 * the top); {@code overlord}: the realm it answers to ("" none); {@code here}: you stand in the settlements' world.
 	 */
 	public record Info(boolean sworn, String name, String kind, int color, String rank, int standing, int next, int members, int population,
-		long treasury, String overlord, List<Tie> ties, List<Place> places, boolean here) implements CustomPacketPayload {
+		long treasury, String overlord, List<Tie> ties, List<Place> places, boolean here, long allowance) implements CustomPacketPayload {
 		public static final Type<Info> TYPE = new Type<>(JaymosKingdoms.id("menu_info"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Info> CODEC = CustomPacketPayload.codec(Info::write, Info::read);
 
@@ -68,6 +68,7 @@ public final class MenuNet {
 				buf.writeBlockPos(p.seat);
 			}
 			buf.writeBoolean(here);
+			buf.writeVarLong(allowance);
 		}
 
 		private static Info read(RegistryFriendlyByteBuf buf) {
@@ -88,7 +89,7 @@ public final class MenuNet {
 			for (int i = 0; i < n; i++) {
 				places.add(new Place(buf.readUtf(), buf.readInt(), buf.readBlockPos()));
 			}
-			return new Info(sworn, name, kind, color, rank, standing, next, members, population, treasury, overlord, ties, places, buf.readBoolean());
+			return new Info(sworn, name, kind, color, rank, standing, next, members, population, treasury, overlord, ties, places, buf.readBoolean(), buf.readVarLong());
 		}
 
 		@Override
@@ -108,13 +109,32 @@ public final class MenuNet {
 		}
 	}
 
+	/** Player → server: a lord draws {@code silver} from the treasury (nothing or less: all of today's allowance, {@link Withdrawals}). */
+	public record Withdraw(int silver) implements CustomPacketPayload {
+		public static final Type<Withdraw> TYPE = new Type<>(JaymosKingdoms.id("menu_withdraw"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Withdraw> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.silver), buf -> new Withdraw(buf.readVarInt()));
+
+		@Override
+		public Type<Withdraw> type() {
+			return TYPE;
+		}
+	}
+
 	private MenuNet() {
 	}
 
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Info.TYPE, Info.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Ask.TYPE, Ask.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Withdraw.TYPE, Withdraw.CODEC);
+		// (loads Withdrawals, so its saved attachment is registered before any world loads)
+		Withdrawals.register();
 		ServerPlayNetworking.registerGlobalReceiver(Ask.TYPE, (payload, context) -> send(context.player()));
+		ServerPlayNetworking.registerGlobalReceiver(Withdraw.TYPE, (payload, context) -> {
+			Withdrawals.draw(context.player(), payload.silver());
+			send(context.player());
+		});
 	}
 
 	private static void send(ServerPlayer player) {
@@ -135,7 +155,7 @@ public final class MenuNet {
 		}
 		Faction f = Factions.of(server, player.getUUID());
 		if (f == null) {
-			ServerPlayNetworking.send(player, new Info(false, "", "", 0, "", 0, -1, 0, 0, 0L, "", List.of(), places, here));
+			ServerPlayNetworking.send(player, new Info(false, "", "", 0, "", 0, -1, 0, 0, 0L, "", List.of(), places, here, 0L));
 			return;
 		}
 		Faction.Member me = f.members().get(player.getUUID());
@@ -165,6 +185,7 @@ public final class MenuNet {
 			ties.add(new Tie(o.name(), o.styleColor(server).getTextureDiffuseColor() & 0xFFFFFF, Relations.between(f, o).id()));
 		}
 		ServerPlayNetworking.send(player, new Info(true, f.name(), f.type().key(), f.styleColor(server).getTextureDiffuseColor() & 0xFFFFFF, rank.key(),
-			standing, next, f.members().size(), f.holdings().population(), f.treasury(), over == null ? "" : over.name(), ties, places, here));
+			standing, next, f.members().size(), f.holdings().population(), f.treasury(), over == null ? "" : over.name(), ties, places, here,
+			me != null && Withdrawals.lord(me) ? Withdrawals.allowance(player, f) : 0L));
 	}
 }

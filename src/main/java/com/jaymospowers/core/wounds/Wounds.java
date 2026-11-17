@@ -148,6 +148,7 @@ public final class Wounds {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
 		// (0.14.1) phase 2: the downed
 		Downed.register();
+		LastHold.register();
 		// (0.17.183) Kingdoms' Will pages: No Getting Up, No Mercy, Grim Hand, hushes, Will Over Flesh
 		WillSkill.register();
 		// (0.14.2) phase 3: broken limbs

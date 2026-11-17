@@ -1709,6 +1709,20 @@ public final class XenoformPower implements Power {
 		return has(player) ? live(player).form : null;
 	}
 
+	/** Every unlocked power step adds this share to the damage an alien deals (x1.4 at full mastery). */
+	public static final float DAMAGE_PER_UNLOCK = 0.1F;
+
+	/**
+	 * A blow dealt by a player in an alien's body, grown by their mastery: every form's hits, moves and caps alike (a hit
+	 * on themselves doesn't count).
+	 */
+	public static float grow(LivingEntity victim, DamageSource source, float damage) {
+		if (source.getEntity() instanceof ServerPlayer player && player != victim && formOf(player) != null) {
+			return damage * (1.0F + DAMAGE_PER_UNLOCK * Mastery.unlocked(player));
+		}
+		return damage;
+	}
+
 	/** Clears every cooldown and the recharge, and fills the band (the debug command). */
 	static void ready(ServerPlayer player) {
 		Live live = live(player);

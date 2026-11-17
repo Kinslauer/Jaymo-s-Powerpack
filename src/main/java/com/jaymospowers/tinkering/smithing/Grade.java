@@ -15,7 +15,9 @@ public enum Grade {
 	WELL("well", ChatFormatting.WHITE, 1.0F, 0.0F, 0.0F, 1.0F, 0.0F),
 	EXPERT("expert", ChatFormatting.GREEN, 1.1F, 0.5F, 0.05F, 1.1F, 0.5F),
 	PERFECT("perfect", ChatFormatting.AQUA, 1.2F, 1.0F, 0.1F, 1.2F, 1.0F),
-	MASTER("master", ChatFormatting.GOLD, 1.3F, 2.0F, 0.15F, 1.3F, 1.5F);
+	MASTER("master", ChatFormatting.GOLD, 1.3F, 2.0F, 0.15F, 1.3F, 1.5F),
+	/** Forged only once the dragon has fallen (the smith's world tier is Legend): +2 armour a piece, +1.5 attack over Master, x1.4 durability. */
+	LEGENDARY("legendary", ChatFormatting.LIGHT_PURPLE, 1.4F, 3.5F, 0.15F, 1.4F, 2.0F);
 
 	public final String id;
 	public final ChatFormatting colour;
@@ -41,8 +43,9 @@ public enum Grade {
 		return this == POOR ? POOR : values()[ordinal() - 1];
 	}
 
+	/** The next grade up a blueprint's ladder (Legendary is no blueprint level: it stops at Master). */
 	public Grade higher() {
-		return this == MASTER ? MASTER : values()[ordinal() + 1];
+		return atLeast(MASTER) ? this : values()[ordinal() + 1];
 	}
 
 	public static Grade min(Grade a, Grade b) {

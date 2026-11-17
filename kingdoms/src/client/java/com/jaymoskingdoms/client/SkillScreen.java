@@ -9,6 +9,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Lessons;
 import com.jaymoskingdoms.Lifestyle;
 import com.jaymoskingdoms.Renown;
+import com.jaymoskingdoms.SkillRenown;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.Sparks;
 import com.jaymoskingdoms.StartPerks;
@@ -447,6 +448,13 @@ final class SkillScreen extends Screen {
 			&& !com.jaymoskingdoms.Learnables.classLocked(player, perk));
 	}
 
+	/** Whether a renown point buys a rank of {@code perk} now (when the pillar's points won't): the server checks it again. */
+	private boolean renownLearn(Skills.Progress shown, Skills.Perk perk) {
+		var player = this.minecraft.player;
+		return SkillRenown.available(shown) > 0 && !perk.bridge() && shown.blocked(perk) != null && shown.blocked(perk, true) == null
+			&& (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk) && !com.jaymoskingdoms.Learnables.classLocked(player, perk));
+	}
+
 	/** Picks {@code perk} for the right panel, and brings it to the middle if it sits near the edge or is too small to read. */
 	private void select(Skills.Perk perk) {
 		selected = perk;
@@ -465,6 +473,9 @@ final class SkillScreen extends Screen {
 	private void learn(Skills.Perk perk) {
 		if (canLearn(progress(), perk)) {
 			ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
+			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+		} else if (renownLearn(progress(), perk)) {
+			ClientPlayNetworking.send(new SkillRenown.Spend(perk.ordinal()));
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		}
 	}
@@ -935,8 +946,12 @@ final class SkillScreen extends Screen {
 			Component label = rank >= perk.maxRank ? Component.translatable("gui.jaymoskingdoms.skills.web.learnt")
 				: rank > 0 ? Component.translatable("gui.jaymoskingdoms.skills.web.raise", rank + 1, perk.maxRank)
 				: Component.translatable("gui.jaymoskingdoms.skills.web.learn");
+			boolean renown = !canLearn(shown, perk) && renownLearn(shown, perk);
+			if (renown) {
+				label = Component.translatable("gui.jaymoskingdoms.renown.web.spend", SkillRenown.available(shown));
+			}
 			Ui.button(graphics, this.font, box[0], box[1], box[2], box[3], label, accent, Ui.over(mouseX, mouseY, box[0], box[1], box[2], box[3]),
-				canLearn(shown, perk));
+				renown || canLearn(shown, perk));
 		}
 	}
 
@@ -985,6 +1000,13 @@ final class SkillScreen extends Screen {
 		}
 		if (shown.ranks().containsKey(com.jaymoskingdoms.Learnables.taughtKey(perk))) {
 			text.add(Component.translatable("gui.jaymoskingdoms.skills.taught").withColor(Ui.GOOD));
+		}
+		if (SkillRenown.earned(shown) > 0 || SkillRenown.available(shown) > 0) {
+			text.add(Component.translatable("gui.jaymoskingdoms.renown.have", SkillRenown.available(shown), SkillRenown.earned(shown)).withColor(Ui.GOLD));
+		}
+		if (blocked != null && renownLearn(shown, perk)) {
+			text.add(Component.translatable("gui.jaymoskingdoms.renown.learn").withColor(Ui.GOLD));
+			return;
 		}
 		text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD)
 			: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
@@ -1089,6 +1111,12 @@ final class SkillScreen extends Screen {
 		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", level), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.points", points), x + 9, y + 19, w / 2 - 12, points > 0 ? Ui.GOOD : Ui.DIM);
+		// renown: shown beside the level; with one to spend, a press on it buys attribute points (mouseClicked)
+		int renown = SkillRenown.available(shown);
+		if (SkillRenown.earned(shown) > 0) {
+			Ui.lineRight(graphics, this.font, Component.translatable(renown > 0 ? "gui.jaymoskingdoms.renown.stat" : "gui.jaymoskingdoms.renown.count", renown, SkillRenown.STAT_POINTS),
+				x + w / 2 - 6, y + 8, w / 4, renown > 0 ? Ui.GOLD : Ui.DIM);
+		}
 		Heritage.Kind kind = player == null ? null : Heritage.of(player);
 		Classes.PlayerClass cls = player == null ? null : Classes.classOf(player);
 		Ui.lineRight(graphics, this.font, kind == null ? Component.translatable("gui.jaymoskingdoms.stats.heritage.none")
@@ -1394,6 +1422,13 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (stats && SkillRenown.available(progress()) > 0
+			&& Ui.over((int)event.x(), (int)event.y(), contentX() + contentW() / 2 - 6 - contentW() / 4, WEB_HEADER + 6, contentW() / 4, 12)) {
+			// renown: five attribute points
+			ClientPlayNetworking.send(new SkillRenown.Spend(-1));
+			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			return true;
+		}
 		Stats.Stat stat = statAt(event.x(), event.y());
 		if (stat != null) {
 			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {

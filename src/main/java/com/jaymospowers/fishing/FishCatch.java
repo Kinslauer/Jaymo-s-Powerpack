@@ -84,6 +84,8 @@ public final class FishCatch {
         }
     }
     public static Item TUNA, TUNA_STEAK, COOKED_TUNA_STEAK, SHARK_MEAT, COOKED_SHARK_MEAT;
+    /** What a landed legend gives a cook beside the fish: its best cut (Jaymo's Kitchen's Deep King's Platter). Not food as it is. */
+    public static Item LEGEND_FILLET;
 
     private FishCatch() {
     }
@@ -98,7 +100,10 @@ public final class FishCatch {
         COOKED_TUNA_STEAK = food("cooked_tuna_steak", COOKED_TUNA_STEAK_FOOD, COOKED_SATURATION);
         SHARK_MEAT = food("shark_meat", SHARK_FOOD, RAW_SATURATION);
         COOKED_SHARK_MEAT = food("cooked_shark_meat", COOKED_SHARK_FOOD, COOKED_SATURATION);
+        ResourceKey<Item> fillet = ResourceKey.create(Registries.ITEM, JaymosPowers.id("legend_fillet"));
+        LEGEND_FILLET = Registry.register(BuiltInRegistries.ITEM, fillet, new Item(new Item.Properties().setId(fillet).rarity(net.minecraft.world.item.Rarity.RARE)));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
+            output.accept(LEGEND_FILLET);
             output.accept(TUNA);
             output.accept(TUNA_STEAK);
             output.accept(COOKED_TUNA_STEAK);

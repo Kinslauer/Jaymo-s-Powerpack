@@ -131,7 +131,10 @@ public final class Rust {
 		if (kind != ArmourKind.MAIL && kind != ArmourKind.PLATE || stack.is(RUSTPROOF)) {
 			return false;
 		}
-		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
+		// Tinkering plate is one item id a piece: what it rusts as is its main (plating) material
+		String path = stack.getItem() instanceof com.jaymospowers.tinkering.TinkerTool
+			? com.jaymospowers.tinkering.ToolStats.materials(stack).getFirst().id.toLowerCase(Locale.ROOT)
+			: BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
 		for (String word : RUSTPROOF_WORDS) {
 			if (path.contains(word)) {
 				return false;

@@ -75,7 +75,7 @@ public final class ZFighterTraining {
 	public static final int FREE_ENTRY_MASTERY = 5000;
 	/** Mastery per blow landed in a form (0.12%); a heavy blow (a fifth of the target's health or more) counts four times. */
 	public static final int MASTERY_PER_HIT = 12;
-	/** Mastery for every 5 s spent in a form (0.02%). */
+	/** Mastery for every {@link #TP_PASSIVE_TICKS} ticks (20 s) spent in a form (0.02%). */
 	public static final int MASTERY_PER_TIME = 2;
 
 	// ---- techniques: G (quick) and V (charged) each hold one; the Spirit Bomb is C in Super 3 ----
