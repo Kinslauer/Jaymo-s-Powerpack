@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-17 18:42
+updated: 2026-11-17 18:50
 ---
 # Open PRs
 
-5 open, as of 2026-11-17 18:42. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+5 open, as of 2026-11-17 18:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1684](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1684) Oaths and pacts bind: forbidden acts are refused unless broken on purpose
@@ -23,7 +23,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1698](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1698) Class trees, hands-on cooking and Awakening picks
 - **Branch:** `claude/project-thread-kb4272` · **Updated:** 2026-11-17 (today)
-- **Checks:** ✅ 5 passed
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
 
 ## [#1701](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1701) The Green Huntsman's rangers walk the forests: they hunt, teach, scold and hogtie poachers
