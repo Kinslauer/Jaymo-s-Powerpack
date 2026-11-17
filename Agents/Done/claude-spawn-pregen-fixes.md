@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: spawn-pregen-fixes
 branch: claude/spawn-pregen-fixes
 with:
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Players set out inside pre-generated land; the smith's keeping can't force a chunk load. CI build only; not tested on the server yet.
+- 2026-11-17 08:15 PR #1681 is merged into master; moved to Agents/Done.

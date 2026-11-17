@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: vampire-leap-holy
 branch: claude/vampire-leap-holy
 with:
@@ -19,3 +19,6 @@ owns:
 
 ## Done
 Right-click with an empty hand: locked on, a leap at the target (18 blocks) that feeds on arrival; else a strong jump. Weaker in sun or near holiness. Holy dread from held symbols/patron weapons, clerics/paladins/priests, shrines/altars, temples: Weakness, smoke, burning up close, wrath ladder if they linger; swearing/prayer/offering/boon burns. Small edits to BloodGrab (feedOn), NightGifts (thrown/push), PatronWrath (omen/bolt/smite visibility), Patrons, Blessings, PowersCompat (lockedClient), JaymosKingdoms. Built by CI only; not played.
+
+## Notes
+- 2026-11-17 08:15 PR #1680 is merged into master; moved to Agents/Done.
