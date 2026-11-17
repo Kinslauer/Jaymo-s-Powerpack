@@ -1,11 +1,11 @@
 ---
-status: blocked
+status: claimed
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
 thread: 
-claimed_by: hermes-b
-pr: 
+claimed_by: claude-future-gun-gear-build
+pr: 1671
 suggested_owns:
   - src/main/java/com/jaymospowers/power/chrono/future/
   - src/main/java/com/jaymospowers/armory/TaczGuns.java
