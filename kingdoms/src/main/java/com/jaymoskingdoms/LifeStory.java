@@ -572,7 +572,14 @@ public final class LifeStory {
 				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.RANGER),
 				Answer.youth("pits", Items.SHIELD, Classes.PlayerClass.BRUTE),
 				Answer.youth("gunsmith", Items.GUNPOWDER, Classes.PlayerClass.MARKSMAN),
-				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER)));
+				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER),
+				// the sworn callings (Lore: "Seven sworn callings"; the Ranger already had its two): the Warrior-born keep none of them
+				Answer.youth("acolyte", Items.CANDLE, Classes.PlayerClass.CLERIC).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("squire", Items.IRON_CHESTPLATE, Classes.PlayerClass.PALADIN).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("bargain", Items.ECHO_SHARD, Classes.PlayerClass.WARLOCK).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("sprig", Items.OAK_SAPLING, Classes.PlayerClass.DRUID).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("boxer", Items.BAMBOO, Classes.PlayerClass.MONK).notBorn(Heritage.Kind.WARRIORBORN),
+				Answer.youth("bench", Items.PISTON, Classes.PlayerClass.TINKERER).notBorn(Heritage.Kind.WARRIORBORN)));
 			TURN.answers.addAll(List.of(
 				Answer.turn("bite", Items.SPIDER_EYE, "web"),
 				Answer.turn("weapon", Items.IRON_SWORD, "arsenal"),

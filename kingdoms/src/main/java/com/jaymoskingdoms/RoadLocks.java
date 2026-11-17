@@ -132,10 +132,12 @@ public final class RoadLocks {
 		lock(Start.TIMELOST, p -> is(p, Question.CHILDHOOD, "books") && is(p, Question.TURN, "clock"), "world.time_chamber");
 		lock(Start.SNOWED, p -> is(p, Question.BORN, "north") && is(p, Question.CHILDHOOD, "snow") || is(p, Question.CHILDHOOD, "snow") && is(p, Question.YOUTH, "winter"), "kill.stray");
 		lock(Start.WHALERS, p -> is(p, Question.RAISED, "fisherfolk") && is(p, Question.CHILDHOOD, "swimming"), "whalers.signed", "whale.taken");
-		lock(Start.UNARMED, p -> is(p, Question.CHILDHOOD, "fights") && is(p, Question.YOUTH, "pits"), "pit.won");
+		lock(Start.UNARMED, p -> is(p, Question.CHILDHOOD, "fights") && is(p, Question.YOUTH, "pits", "boxer"), "pit.won");
 		// (0.7.605) the roads Andy took off the first day, each on a deed of its own
-		lock(Start.CITY, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "apprentice"), TRADE_DEED);
-		lock(Start.WILD, p -> is(p, Question.RAISED, "hunters") && is(p, Question.YOUTH, "hermit"), WILD_DEED);
+		lock(Start.CITY, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "apprentice")
+			|| is(p, Question.RAISED, "healers") && is(p, Question.YOUTH, "acolyte"), TRADE_DEED);
+		lock(Start.WILD, p -> is(p, Question.RAISED, "hunters") && is(p, Question.YOUTH, "hermit")
+			|| is(p, Question.RAISED, "farmers") && is(p, Question.YOUTH, "sprig"), WILD_DEED);
 		lock(Start.SWORN, p -> is(p, Question.RAISED, "soldiers"), RAIDER_DEED);
 		lock(Start.SENTENCED, p -> is(p, Question.RAISED, "outlaws"), "cells.held");
 		lock(Start.NOBODIES, p -> false, "orders.taken");
@@ -150,12 +152,12 @@ public final class RoadLocks {
 		lock(Start.CAST_OUT, p -> false, BIOBUILT_DEED);
 		lock(Start.HIDEOUT, p -> is(p, Question.RAISED, "outlaws") && is(p, Question.YOUTH, "cutpurses"), "market.black", "cells.broke");
 		// the kit roads
-		lock(Start.HEIRLOOM, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "levy"), "assassin.killed");
+		lock(Start.HEIRLOOM, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "levy", "squire"), "assassin.killed");
 		lock(Start.TRADER, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "messenger"), "orders.sent");
 		lock(Start.PUP, p -> is(p, Question.RAISED, "hunters") && is(p, Question.YOUTH, "winter"), "life.saved");
 		// the powered roads
-		lock(Start.ANDROID, p -> is(p, Question.RAISED, "smiths") && is(p, Question.YOUTH, "gunsmith"), "rise.lab");
-		lock(Start.MOON_CURSED, p -> is(p, Question.BORN, "moors"), "moon.blood");
+		lock(Start.ANDROID, p -> is(p, Question.RAISED, "smiths") && is(p, Question.YOUTH, "gunsmith", "bench"), "rise.lab");
+		lock(Start.MOON_CURSED, p -> is(p, Question.BORN, "moors") || is(p, Question.RAISED, "foundling") && is(p, Question.YOUTH, "bargain"), "moon.blood");
 		// the other worlds
 		lock(Start.MOON, p -> is(p, Question.CHILDHOOD, "roofs") && is(p, Question.TURN, "fall"), "world.moon");
 		lock(Start.RUSTFALL, p -> is(p, Question.RAISED, "smiths") && is(p, Question.CHILDHOOD, "fire"), "world.rustfall");
