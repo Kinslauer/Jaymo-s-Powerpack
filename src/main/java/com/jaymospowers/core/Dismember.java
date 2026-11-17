@@ -676,11 +676,20 @@ public final class Dismember {
 
 	/**
 	 * Andy (2026-11-16): "Any single hit that would kill a humanoid should dismember, attacks targeting the head do that 50% of
-	 * the time." A hit that kills a humanoid mob, or downs it (it would have killed), always takes off the part it landed on;
-	 * a head only at this chance (else nothing comes off). A hit on the body takes an arm or a leg (after a halving's own
-	 * roll), and so does one on a part already gone. Players, village children, shots and blasts keep their own rules.
+	 * the time"; then "armor should still lower the chance, and this should happen with blunt weapons but for breaks instead,
+	 * very low dismember chance. Also daggers and short blades do this less but 75% to the head, change other dismembers down
+	 * to 25%". A hit that kills a humanoid mob, or downs it (it would have killed), may take off the part it landed on: a head
+	 * at {@link #LETHAL_HEAD_CHANCE}, an arm or a leg at {@link #LETHAL_LIMB_CHANCE}; daggers and short blades
+	 * ({@link #shortBlade}) at their own. A blunt blow (or a bare fist) breaks the part instead, and severs it only at
+	 * {@link #LETHAL_BLUNT_SEVER}. Every chance is lowered by the armour over the part ({@link #armourGuard}). A hit on the
+	 * body picks an arm or a leg (after a halving's own roll), and so does one on a part already gone. A beheaded humanoid
+	 * isn't downed: it dies. Players, village children, shots and blasts keep their own rules.
 	 */
-	public static final float LETHAL_HEAD_CHANCE = 0.5F;
+	public static final float LETHAL_HEAD_CHANCE = 0.5F, LETHAL_LIMB_CHANCE = 0.25F;
+	public static final float LETHAL_SHORT_HEAD_CHANCE = 0.75F, LETHAL_SHORT_LIMB_CHANCE = 0.125F;
+	public static final float LETHAL_BLUNT_SEVER = 0.05F;
+	/** Set on {@link #lethalPart}'s answer: break the part, don't sever it. */
+	public static final int LETHAL_BREAK = 1 << 8;
 	/** A lethal hit already rolled on this body this tick (game time): its death's later hooks don't roll it again. */
 	private static final Map<LivingEntity, Long> LETHAL_ROLLED = new java.util.WeakHashMap<>();
 
@@ -698,37 +707,68 @@ public final class Dismember {
 			&& (source.getDirectEntity() == attacker || cutting != null && cutting.target == target);
 	}
 
+	/** Daggers, knives and other short blades (Better Combat's dagger and claw kinds, {@link com.jaymospowers.combat.WeaponKind}). */
+	public static boolean shortBlade(ItemStack stack) {
+		com.jaymospowers.combat.WeaponKind kind = com.jaymospowers.combat.WeaponKind.of(stack);
+		return kind == com.jaymospowers.combat.WeaponKind.DAGGER || kind == com.jaymospowers.combat.WeaponKind.CLAW;
+	}
+
 	/**
-	 * The part a lethal hit ({@link #lethalHit}) takes off {@code target}, or 0 for none: where it {@code landed} (Wounds'
-	 * part, if known; else the attacker's aim, {@link #aimedPart}).
+	 * What a lethal hit ({@link #lethalHit}) does to {@code target}: the part it takes off, with {@link #LETHAL_BREAK} set if
+	 * it only breaks it, or 0 for nothing. The part is where it {@code landed} (Wounds' part, if known; else the attacker's
+	 * aim, {@link #aimedPart}). Rolled once a tick per body.
 	 */
 	public static int lethalPart(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
 		if (!lethalHit(target, source) || lethalRolled(target)) {
 			return 0;
 		}
 		LETHAL_ROLLED.put(target, target.level().getGameTime());
-		int part = landed != null ? com.jaymospowers.core.wounds.Breaks.limb(landed) : aimedPart((LivingEntity) source.getEntity(), target);
-		if (part == HEAD) {
-			return !headless(target) && target.getRandom().nextFloat() < LETHAL_HEAD_CHANCE ? HEAD : 0;
-		}
+		LivingEntity attacker = (LivingEntity) source.getEntity();
+		int part = landed != null ? com.jaymospowers.core.wounds.Breaks.limb(landed) : aimedPart(attacker, target);
 		int left = LIMBS & ~missing(target);
-		if (part != 0 && (left & part) != 0 || left == 0) {
-			return part & left;
+		if (part == HEAD) {
+			if (headless(target)) {
+				return 0;
+			}
+		} else if (part == 0 || (left & part) == 0) {
+			// (the body, or a part already gone: an arm or a leg still on)
+			if (left == 0) {
+				return 0;
+			}
+			for (int skip = target.getRandom().nextInt(Integer.bitCount(left)); skip > 0; skip--) {
+				left &= ~Integer.lowestOneBit(left);
+			}
+			part = Integer.lowestOneBit(left);
 		}
-		// (the body, or a part already gone: an arm or a leg still on)
-		for (int skip = target.getRandom().nextInt(Integer.bitCount(left)); skip > 0; skip--) {
-			left &= ~Integer.lowestOneBit(left);
+		ItemStack weapon = attacker.getMainHandItem();
+		boolean cut = cutting != null && cutting.target == target || blade(weapon);
+		boolean blunt = !cut && (weapon.isEmpty() || Fractures.blunt(weapon));
+		float chance = blunt ? LETHAL_BLUNT_SEVER : shortBlade(weapon) ? (part == HEAD ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_SHORT_LIMB_CHANCE)
+			: part == HEAD ? LETHAL_HEAD_CHANCE : LETHAL_LIMB_CHANCE;
+		float guard = armourGuard(target, part);
+		if (target.getRandom().nextFloat() < chance * guard) {
+			return part;
 		}
-		return Integer.lowestOneBit(left);
+		// a blunt blow that didn't sever breaks the part (armour may turn that too)
+		return blunt && target.getRandom().nextFloat() < guard ? part | LETHAL_BREAK : 0;
 	}
 
-	/** Takes {@code part} off {@code target} for a lethal hit: cut off, or a skeleton's shattered. True if it came off. */
+	/** Does what {@link #lethalPart} picked: severs the part (a skeleton's shatters), or breaks it. True if anything happened. */
 	public static boolean lethalSever(LivingEntity target, int part, DamageSource source) {
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
-		return part != 0 && (target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS) ? shatter(target, part, by) : sever(target, part, by));
+		if (part == 0) {
+			return false;
+		}
+		boolean bones = target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS);
+		if ((part & LETHAL_BREAK) != 0) {
+			part &= ~LETHAL_BREAK;
+			// (a skeleton's bones break as Fractures breaks them: they shatter)
+			return bones ? shatter(target, part, by) : by != null && Fractures.breakBone(target, part, by);
+		}
+		return bones ? shatter(target, part, by) : sever(target, part, by);
 	}
 
-	/** Takes off whatever a lethal hit takes ({@link #lethalPart}, {@link #lethalSever}). True if something came off. */
+	/** Does whatever a lethal hit does ({@link #lethalPart}, {@link #lethalSever}). True if anything happened. */
 	public static boolean lethalBlow(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
 		return lethalSever(target, lethalPart(target, source, landed), source);
 	}
