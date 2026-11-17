@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-17 04:12
+updated: 2026-11-17 06:02
 ---
 # Open PRs
 
-6 open, as of 2026-11-17 04:12. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-17 06:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1665](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1665) Punch and barrage effects: heavy punch impacts and flurry sparks
@@ -16,22 +16,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** no agent note
 
-## [#1669](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1669) Spec the three future gun gear items
-- **Branch:** `claude/future-gun-gear-spec` · **Updated:** 2026-11-17 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
 ## [#1670](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1670) Conjoined twin cosmetic mutation for villagers and zombies
 - **Branch:** `claude/conjoined-twin-mutation` · **Updated:** 2026-11-17 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[conjoined-twin-mutation]]
 
-## [#1671](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1671) Implement future gun gear items
-- **Branch:** `implement/future-gun-gear` · **Updated:** 2026-11-17 (today)
+## [#1676](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1676) Take a Seat's poses on our Sit key and every kneel; its X key off
+- **Branch:** `claude/tas-sit-kneel` · **Updated:** 2026-11-17 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#1672](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1672) Air combo's crouching launcher is learned in the tree
-- **Branch:** `claude/air-combo-lock` · **Updated:** 2026-11-17 (today)
-- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
