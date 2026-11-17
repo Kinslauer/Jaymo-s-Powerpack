@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lean-cover
 branch: claude/lean-cover
 with: ragdolls track (separate agent)
@@ -29,3 +29,4 @@ owns:
 
 ## Notes
 - Camera roll sign and model tilt sign are reasoned, not seen: check in game.
+- 2026-11-16 20:21 PR #1663 is merged into master; moved to Agents/Done.
