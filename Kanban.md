@@ -4,49 +4,43 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 16:19). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
-- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
-- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
-- [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
-- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
-- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 
 
 ## Being built
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
-- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · claimed
 
 
 ## In review
 
-- [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
+- [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
+- [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
+- [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
+- [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · stalled
-- [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · stalled
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
+- [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
+- [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
-- [x] [[Inbox/Done/long-defence-text-pass|long-defence-text-pass]]
-- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
-- [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
-- [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
-- [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/soften-pixel-shadows|soften-pixel-shadows]]
+- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
+- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
+- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
+- [x] [[Inbox/Done/faith-page-champion|faith-page-champion]]
+- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
+- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings

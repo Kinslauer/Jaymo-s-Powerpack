@@ -8,6 +8,7 @@ claimed_by:
 pr: 1313
 suggested_owns: [src/main/resources/assets/jaymospowers/textures/item/armory/, src/main/resources/assets/jaymospowers/models/item/armory/]
 writer: hermes-writer
+text_pass: 
 ---
 
 # Remake armor PNGs in vanilla style
