@@ -31,5 +31,5 @@ Remake the mod's armor textures in pure vanilla Minecraft style — solid 1-pixe
 - Task claimed via vault.py --claim hermes-modeller (tiv, Tasks thread, 2026-11-08); claim printed at 2026-11-11 13:40 EST.
 - Worn equipment textures (textures/entity/equipment/humanoid/bog_iron.png etc., 64x32) left untouched — out of the task's item-texture scope.
 - No bbmodel: flat item textures, verified with vision_analyze instead of bbrender.
-- 2026-11-12 05:20 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-16 22:36 PR #1313 is merged into master; moved to Agents/Done.
+- 2026-11-11 20:35 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-17 16:20 PR #1313 is merged into master; moved to Agents/Done.
