@@ -27,3 +27,4 @@ Andy wants a cosmetic mutation where villagers and zombies spawn as conjoined tw
 ## Notes
 
 Research/investigation first — determine how to implement mounted/entity-as-passenger rendering for cosmetic purposes. No code changes yet.
+- 2026-11-16 22:35 Text pass: PR #1670 (conjoined-twin-mutation) adds only code - new ConjoinedTwins attachment class, ConjoinedTwinSpawnMixin/VillagerMixin/ZombieMixin, has_conjoined_twin entity tag, mixins.json registration. No lang parts, change notes, dialogue, hints, item/ability text, chat lines or screens added or changed, so there is no player-visible text to rewrite.
