@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * {@code /kingdom} (and its alias {@code /faction}, for villages and camps too): list, info, pledge, leave, deposit,
- * withdraw (lords), reputation; and for operators: found (a kingdom or village at your feet), storage, produce,
+ * reputation; and for operators: found (a kingdom or village at your feet), storage, produce,
  * storehouse, crew, hire, relation.
  */
 final class KingdomCommands {
@@ -45,7 +45,6 @@ final class KingdomCommands {
 			.then(Commands.literal("serve").then(Commands.argument("name", StringArgumentType.word()).executes(KingdomCommands::serve)))
 			.then(Commands.literal("leave").executes(KingdomCommands::leave))
 			.then(Commands.literal("deposit").then(Commands.argument("silver", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
-			.then(Commands.literal("withdraw").then(Commands.argument("silver", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
 			.then(Commands.literal("reputation").executes(KingdomCommands::reputation))
 			// (0.7.184) asking the nearest guard to be taken to their ruler (what a folk guard's audience offers)
 			.then(Commands.literal("audience").executes(c -> {
@@ -358,23 +357,6 @@ final class KingdomCommands {
 		Reputation.change(player, paid, want / 4);
 		KingdomEvents.standing(server, player, paid, paid.member(player.getUUID()).standing() + want);
 		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.deposited", Money.text(Money.worth(want)), k.name(), paid.treasury()), false);
-		return want;
-	}
-
-	private static int withdraw(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
-		ServerPlayer player = c.getSource().getPlayerOrException();
-		MinecraftServer server = c.getSource().getServer();
-		Faction k = Factions.of(server, player.getUUID());
-		Faction.Member member = k == null ? null : k.member(player.getUUID());
-		if (member == null || Rank.forStanding(member.standing()) != Rank.LORD) {
-			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.lords_only"));
-			return 0;
-		}
-		int want = (int)Math.min(IntegerArgumentType.getInteger(c, "silver"), k.treasury());
-		Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() - want));
-		// (0.7.498) paid out in silver: into the worn purse if it has room, else the pack, else the ground
-		Money.pay(player, Money.worth(want));
-		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", Money.text(Money.worth(want)), k.name()), false);
 		return want;
 	}
 
