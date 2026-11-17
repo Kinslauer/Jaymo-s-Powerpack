@@ -353,6 +353,7 @@ Anywhere a condition goes (`if`, `needs`, `bars`, a switch's `?` key), besides `
 | `night`, `day` | the hour (night is dusk to just before dawn) |
 | `moon:full`, `moon:new`, `moon:blood` | tonight's moon |
 | `human`, `heritage:<kind>` | the player's blood (`heritage:nightborn`); `human` is the five human bloods |
+| `cursed` | the blood or the moon has them: a vampire, or one who carries the wolf |
 | `patron:<key>`, `patron:none` | who they're sworn to (`patron:lantern_warden`) |
 | `reputation>=N`, `reputation<N` | their standing with the tale's settlement |
 | `hearts>=N`, `hearts<N` | MCA hearts with whoever the open step is with (its `who`, else the asker) |
@@ -402,8 +403,8 @@ leads wherever the tale sends it, and its ending's `marks` remember it.
 
 `{ "do": "vigil", "at": place, "radius": 12, "gap": 10, "when": "night", "lines": [ { "who": role, "say": ... } |
 { "say": ..., "sound": "minecraft:entity.wolf.howl" } ], "left": <then>, "then": ... }`. While the player keeps near
-the place at its hour the lines come one at a time: a cast member's as a speech bubble, the rest over the hotbar and
-into the journal, with a sound if given. A line may have `if` and `mark`. Walking well away once it's begun goes `left`.
+the place at its hour the lines come one at a time: a cast member's as a speech bubble; the rest (what's seen and
+heard) as the tracker's line while the watch lasts and a line in the journal, with a sound if given. A line may have `if` and `mark`. Walking well away once it's begun goes `left`.
 
 ### know the beast: `weak_to`
 
@@ -439,9 +440,10 @@ letter that starts or wakes a tale does nothing until it can be read.
 ### lies come out: `lie`
 
 On a reply: `"lie": { "name": "road_took_her", "days": [6, 14], "unless": condition, "town": [lines],
-"reputation": 15, "hearts": 40 }`. `lie:<name>` is marked at once. On its day, unless the condition holds by then, the
-lie is out: `caught:<name>` is marked, the one lied to remembers it and loses those hearts, the town thinks that much
-less of the player and has the lines to say. Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
+"reputation": 15, "hearts": 40, "returns": { who, as, say, gift } }`. `lie:<name>` is marked at once. On its day,
+unless the condition holds by then, the lie is out: `caught:<name>` is marked, the one lied to remembers it and loses
+those hearts, the town thinks that much less of the player and has the lines to say, and whoever it `returns` comes to
+the player's door (as a tale's returns do). Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
 
 ### notices, and tales that grow
 

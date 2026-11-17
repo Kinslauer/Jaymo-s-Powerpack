@@ -137,6 +137,10 @@ final class TaleWays {
 		if (c.equals("moon:blood")) {
 			return Moons.blood(level.getServer());
 		}
+		if (c.equals("cursed")) {
+			// (the blood or the moon has them: a vampire, or one who carries the wolf)
+			return Vampires.isVampire(player) || Lycans.cursed(player) || MoonCurse.cursed(player);
+		}
 		if (c.equals("human")) {
 			return Faiths.human(Heritage.of(player));
 		}
@@ -579,7 +583,7 @@ final class TaleWays {
 
 	/**
 	 * A watch ({@code "do": "vigil"}): while {@code player} keeps near its place at its hour, its {@code lines} come one
-	 * at a time (said by one of the tale's people, or seen and heard: over the hotbar, and written down), and when the
+	 * at a time (said by one of the tale's people, or seen and heard: the tracker reads it, and it's written down), and when the
 	 * last has, the tale goes on. Walking well away once it's begun goes the step's {@code left} way, if it has one.
 	 */
 	static void vigil(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step) {
@@ -621,8 +625,10 @@ final class TaleWays {
 		if (words != null && who != null) {
 			Speech.tell(level, who, player, words, Speech.WHITE);
 		} else if (words != null) {
-			player.sendOverlayMessage(words.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			// (what's seen and heard is the player's own to write: the tracker reads it, and the journal keeps it)
+			run.scratch.put("seen", words.getString());
 			Tales.note(run, words.getString());
+			Quests.sync(player, true);
 		}
 		Identifier sound = Identifier.tryParse(Tale.string(line, "sound", ""));
 		SoundEvent heard = sound == null ? null : BuiltInRegistries.SOUND_EVENT.getOptional(sound).orElse(null);
@@ -892,7 +898,8 @@ final class TaleWays {
 	/**
 	 * {@code player} told a lie ({@code lie} on the reply they chose: its {@code name}, the {@code days} until it can come
 	 * out, {@code unless} something has covered it by then, and what it costs: {@code town} talk, {@code reputation},
-	 * {@code hearts} with the one lied to). It's marked {@code lie:<name>} now and {@code caught:<name>} if it comes out.
+	 * {@code hearts} with the one lied to, and who {@code returns} to the liar's door). It's marked {@code lie:<name>} now
+	 * and {@code caught:<name>} if it comes out.
 	 */
 	static void lied(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject lie) {
 		String name = Tale.string(lie, "name", "");
@@ -906,6 +913,20 @@ final class TaleWays {
 		kept.addProperty("reputation", Tale.number(lie, "reputation", 0));
 		kept.addProperty("hearts", Tale.number(lie, "hearts", 0));
 		kept.addProperty("to", run.giver);
+		// (who it brings to the liar's door when it's out)
+		JsonObject back = Tale.object(lie, "returns");
+		Tale tale = Tale.get(run.tale);
+		JsonObject body = tale == null ? null : tale.role(Tale.string(back, "who", ""));
+		if (body != null) {
+			JsonObject comes = new JsonObject();
+			comes.addProperty("name", run.names.getOrDefault(Tale.string(back, "who", ""), ""));
+			comes.addProperty("body", body.toString());
+			comes.addProperty("as", Tale.string(back, "as", "warning"));
+			MutableComponent say = Tales.words(player, run, back, "say");
+			comes.addProperty("say", say == null ? "" : say.getString());
+			comes.add("gift", back.has("gift") ? back.get("gift") : new JsonArray());
+			kept.add("returns", comes);
+		}
 		JsonObject what = new JsonObject();
 		what.add("lie", kept);
 		for (ServerPlayer p : Tales.sharers(player, run)) {
@@ -989,6 +1010,14 @@ final class TaleWays {
 			return;
 		}
 		s.marks.add("caught:" + Tale.string(lie, "name", ""));
+		JsonObject comes = Tale.object(lie, "returns");
+		if (!comes.isEmpty()) {
+			String as = Tale.string(comes, "as", "warning");
+			boolean fighter = comes.get("body").getAsString().contains("\"fighter\"");
+			s.returns.add(new Tales.Return(Tale.string(comes, "name", ""), Tale.string(comes, "body", "{}"), Tales.day(level),
+				fighter ? as : as.equals("revenge") ? "warning" : as.equals("recruit") ? "thanks" : as, Tale.string(comes, "say", ""), Tale.strings(comes.get("gift")),
+				f == null ? -1 : f.id()));
+		}
 		LivingEntity to = Tales.entity(level, Tales.uuid(Tale.string(lie, "to", "")));
 		if (to != null) {
 			Recollections.remember(to, player, Recollections.Kind.LIED, Component.empty());

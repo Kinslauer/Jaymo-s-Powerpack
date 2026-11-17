@@ -1,0 +1,562 @@
+{
+  "title": "A Hare for the Pot",
+  "start": {
+    "by": "notice",
+    "weight": 2,
+    "notice": {
+      "title": "Taken in the lord's wood",
+      "lines": [
+        "My brother is taken for one hare out of the lord's wood.",
+        "The forest court sits in three days.",
+        "Whoever will speak for him, ask at my door."
+      ],
+      "hand": "a careful hand that has not written much"
+    }
+  },
+  "roll": {
+    "truth": [
+      "hungry",
+      "trade"
+    ]
+  },
+  "cast": {
+    "poacher": {
+      "name": [
+        "Wat Furrow",
+        "Hob Furrow",
+        "Perkin Furrow"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "cottage"
+    },
+    "forester": {
+      "name": [
+        "Aldous Brake",
+        "Giles Brake",
+        "Osric Brake"
+      ],
+      "body": "villager",
+      "job": "fletcher",
+      "female": false,
+      "at": "lodge",
+      "hours": "day"
+    }
+  },
+  "places": {
+    "cottage": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        20,
+        45
+      ],
+      "name": "Furrow's cottage"
+    },
+    "wood": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        120,
+        240
+      ],
+      "name": "the lord's wood"
+    },
+    "lodge": {
+      "at": "near",
+      "from": "wood",
+      "dist": [
+        30,
+        60
+      ],
+      "name": "the forester's lodge"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "court": 3
+      },
+      "say": [
+        "You took my paper down. Then you have read it. {poacher} is my brother. The forester found him in {place:wood} with a hare in his coat and walked him to the reeve on a rope. The reeve has let him home on my surety until the court sits.",
+        "Forest law is not town law. The court sits {left:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper."
+      ],
+      "replies": [
+        {
+          "say": "I'll see what can be done.",
+          "then": "see_poacher",
+          "journal": "{giver} nailed a notice to the board: her brother {poacher} was taken in {place:wood} with a hare. The forest court sits in three days, and for a hare it takes two fingers."
+        },
+        {
+          "say": "He knew whose wood it was.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_poacher": {
+      "do": "talk",
+      "who": "poacher",
+      "goal": "Hear {poacher} at {place:cottage}",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "say": {
+        "?truth=trade": [
+          "One hare. I'll swear it on the Huntsman's own stone. One hare, for the pot, and I left the foot at his shrine as you should.",
+          "Go and look, if you doubt me. My snare is by the split oak. You'll find it. You'll find nothing else, for there is nothing else."
+        ],
+        "?": [
+          "It was one hare. The barley failed and the little ones had been on turnip water a week. I set one wire by the split oak and I left the foot at the Huntsman's shrine, as you should.",
+          "I'd not ask anyone to lie for me. Go and look. One wire. That is all I ever set in my life."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll go and look.",
+          "then": "search_wood",
+          "journal": "{poacher} swears it was one hare for the pot, one wire by the split oak, and the foot left at the Green Huntsman's shrine."
+        }
+      ]
+    },
+    "search_wood": {
+      "do": "search",
+      "at": "wood",
+      "need": 2,
+      "goal": "Look over the snare by the split oak in {place:wood}",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "clues": [
+        {
+          "name": "A Hare's Foot on the Stone",
+          "item": "minecraft:rabbit_foot",
+          "lore": [
+            "Left on the Green Huntsman's shrine stone, a few days old.",
+            "Whoever took the hare gave the Huntsman his due."
+          ],
+          "mark": "hare_offering",
+          "journal": "A hare's foot lies on the Huntsman's stone at the edge of the wood. Whoever took the hare paid the god for it."
+        },
+        {
+          "if": "truth=hungry",
+          "name": "A Snare, Badly Made",
+          "item": "minecraft:string",
+          "lore": [
+            "One wire, twisted by somebody who had never made one before.",
+            "It would have held a hare. Only just."
+          ],
+          "mark": "hare_one_snare",
+          "journal": "One snare by the split oak, and a poor one. A man who lives by this does not tie a wire like that."
+        },
+        {
+          "if": "truth=trade",
+          "name": "A Dozen Good Wires",
+          "item": "minecraft:string",
+          "lore": [
+            "Twelve snares in a bundle, every one made by a practised hand."
+          ],
+          "mark": "hare_cache",
+          "journal": "A bundle of a dozen snares was pushed under a root. Good wires, well made. This is somebody's trade."
+        },
+        {
+          "if": "truth=trade",
+          "name": "Salted Hides",
+          "item": "minecraft:rabbit_hide",
+          "lore": [
+            "Hare and coney skins, salted and rolled for selling.",
+            "More than one winter's worth."
+          ],
+          "mark": "hare_cache",
+          "journal": "Rolled hides, salted for market, hidden a few paces from the split oak. He has been at this a long while."
+        }
+      ],
+      "then": "back_home"
+    },
+    "back_home": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} what the wood showed",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "say": {
+        "?mark:hare_cache": [
+          "You found the wires. I can see it in you. Yes. He has sold a hare or two to the tavern since the spring. What else was he to sell? The barley?",
+          "His little ones have nothing in the house but turnips, and he means to go out again tonight, court or no court. He asked if you would go with him. One more pair of eyes for the forester's lantern."
+        ],
+        "?": [
+          "One wire. I told you. He is no poacher, he is a farmer with an empty barn.",
+          "His little ones have nothing in the house but turnips, and he means to go out again tonight, court or no court. I cannot stop him. He asked if you would go with him. One more pair of eyes for the forester's lantern."
+        ]
+      },
+      "voices": {
+        "mercy": "Three children and turnip water. One hare would not be missed.",
+        "law": "The wood has a lord and the lord has a law. Don't put your hand in that snare."
+      },
+      "replies": [
+        {
+          "say": "I'll go out with him tonight.",
+          "then": "walk_out",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "The children are hungry, and {poacher} means to go back into the lord's wood tonight. I said I would go with him."
+        },
+        {
+          "say": "I'll speak to the forester.",
+          "then": "plead"
+        }
+      ]
+    },
+    "walk_out": {
+      "do": "escort",
+      "who": "poacher",
+      "to": "wood",
+      "when": "night",
+      "goal": "Walk out to {place:wood} with {poacher}",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "failed": "end:maimed",
+      "then": "poach"
+    },
+    "poach": {
+      "do": "vigil",
+      "at": "wood",
+      "when": "night",
+      "gap": 12,
+      "goal": "Keep watch by the split oak while {poacher} sets his wire",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "lines": [
+        {
+          "who": "poacher",
+          "say": "Down. Here. The run comes through under the split oak, see it? Hold still and watch for a light."
+        },
+        {
+          "say": "A lantern, a long way off between the trunks. The forester is walking his round.",
+          "sound": "minecraft:entity.fox.ambient"
+        },
+        {
+          "who": "poacher",
+          "say": "That's Brake. He turns at the stream. Count twenty and he's gone."
+        },
+        {
+          "say": "Something small comes down the run, stops, and comes on."
+        },
+        {
+          "say": "The wire jumps. A hare, and a heavy one.",
+          "sound": "minecraft:entity.rabbit.hurt",
+          "mark": "hare_poached"
+        },
+        {
+          "who": "poacher",
+          "say": "There. The foot goes on the Huntsman's stone on the way out. The rest goes in the pot. You never saw me, and I never saw you."
+        }
+      ],
+      "journal": "I kept watch by the split oak while {poacher} took a hare out of the lord's wood. The forester's lantern passed within a bowshot and went on.",
+      "then": "plead"
+    },
+    "plead": {
+      "do": "talk",
+      "who": "forester",
+      "when": "day",
+      "goal": "Speak for {poacher} to {forester} at {place:lodge}",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "not_now": "The wood is shut at night and so am I. Come by daylight.",
+      "say": {
+        "?dress:fine": [
+          "Good day to you. Forgive the state of the lodge, we do not see quality out here. You have come about Furrow. I can guess it.",
+          "It is my lord's wood and my lord's hare. I am not a hard man, but if I let one go, I will have the whole village in the trees by Yule. Has anyone been in my wood since I took him?"
+        ],
+        "?dress:ragged": [
+          "Another one. If you have come to beg for Furrow, beg quickly. I have a round to walk.",
+          "It is my lord's wood and my lord's hare. Let one go and I will have the whole village in the trees by Yule. Has anyone been in my wood since I took him?"
+        ],
+        "?": [
+          "You have come about Furrow. They always send somebody.",
+          "It is my lord's wood and my lord's hare. I am not a hard man, but if I let one go, I will have the whole village in the trees by Yule. Has anyone been in my wood since I took him?"
+        ]
+      },
+      "voices": {
+        "honour": "He asked you a plain question. Answer it plainly.",
+        "gain": "That man can be bought. Look at his boots."
+      },
+      "replies": [
+        {
+          "if": "mark:hare_poached",
+          "say": "Nobody. I'd have heard.",
+          "then": "plead_on",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "lords_hare",
+            "days": [
+              4,
+              9
+            ],
+            "unless": "mark:hare_under_keeper",
+            "reputation": 12,
+            "hearts": 20,
+            "town": [
+              "The forester found a fresh wire by the split oak, set the very night before {player} stood in his lodge and swore the wood was quiet.",
+              "He says he will not take a stranger's word again. Can't say I blame him."
+            ]
+          },
+          "journal": "The forester asked if anyone had been in his wood since. I told him nobody had."
+        },
+        {
+          "if": "mark:hare_poached",
+          "say": "I was. Last night. His children had nothing.",
+          "then": "plead_on",
+          "for": [
+            "honour"
+          ],
+          "mark": "hare_owned_up",
+          "journal": "The forester asked if anyone had been in his wood since. I told him I had, and why."
+        },
+        {
+          "if": "!mark:hare_poached",
+          "say": "Not that I know of.",
+          "then": "plead_on"
+        },
+        {
+          "say": "I've nothing to say for him after all.",
+          "then": "end:maimed"
+        }
+      ]
+    },
+    "plead_on": {
+      "do": "talk",
+      "who": "forester",
+      "when": "day",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "say": {
+        "?mark:hare_owned_up": "You stand in my lodge and tell me that to my face. Well. That is more than Furrow did. Say your piece, then.",
+        "?": "Hm. Say your piece, then."
+      },
+      "replies": [
+        {
+          "say": "It was one wire, badly made. He paid the Huntsman his due. He is no poacher.",
+          "then": "end:spoken",
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "mark:hare_offering",
+              "mark:hare_one_snare",
+              "mark:hare_owned_up"
+            ],
+            "hurts": [
+              "mark:hare_cache"
+            ],
+            "fail": "fine",
+            "refuse": "A foot on a stone does not make it his hare. No. The court will hear it."
+          }
+        },
+        {
+          "say": "What is a hare worth to your lord? {price}?",
+          "then": "end:bought",
+          "try": {
+            "how": "bribe",
+            "coins": 6,
+            "fail": "fine",
+            "refuse": "Put that away. I have walked this wood thirty years on my lord's bread, not yours."
+          },
+          "irks": [
+            "law"
+          ]
+        },
+        {
+          "if": "mark:hare_cache",
+          "say": "He lied to me. There are a dozen wires and a winter of hides out there. He's yours.",
+          "then": "end:handed",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "Is there nothing he can pay instead?",
+          "then": "fine"
+        }
+      ]
+    },
+    "fine": {
+      "do": "talk",
+      "who": "forester",
+      "when": "day",
+      "within": "court",
+      "late": "end:maimed",
+      "until": "before the forest court sits",
+      "say": "There is the fine, if anyone will stand it. {coins:10} to my lord's steward, and Furrow keeps his fingers and loses his right to gather so much as a stick in the wood for a year. That is the law, not my kindness.",
+      "replies": [
+        {
+          "say": "I'll stand it.",
+          "needs_coins": 10,
+          "then": "end:paid"
+        },
+        {
+          "say": "Then the court must have him.",
+          "then": "end:maimed"
+        }
+      ]
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I left the paper where it fell. It was his hare to answer for."
+    },
+    "spoken": {
+      "text": "The forester heard me out and let the court go by. {poacher} walked home with both hands whole, and the lord's wood is one hare the lighter.",
+      "reward": {
+        "hearts": 25,
+        "reputation": 10
+      },
+      "marks": [
+        "hare_spoken"
+      ],
+      "town": [
+        "{poacher} is home, and with all his fingers. They say {player} talked the forester round, and that is no small thing.",
+        "Old Brake let a poacher walk. I never thought I'd see it."
+      ],
+      "returns": {
+        "who": "poacher",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "I owe you ten fingers, and I only have ten. This is honest come by. I got it off the common.",
+        "gift": [
+          "minecraft:rabbit_stew*2"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            24
+          ],
+          "mark": "hare_under_keeper",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "{poacher} goes into the wood by daylight now, and with the forester's leave.",
+              "Brake said a man who knows where the hares run is better kept inside the fence than out. He is under-keeper since Monday, on a penny a week and what the lord does not want.",
+              "The little ones have meat on Sundays. I thought you should know how it came out."
+            ]
+          }
+        }
+      ]
+    },
+    "bought": {
+      "text": "The forester's purse is heavier and his memory is shorter. {poacher} was let out by the back of the lock-up before the court sat.",
+      "reward": {
+        "hearts": 20
+      },
+      "marks": [
+        "hare_bought"
+      ],
+      "town": [
+        "{poacher} is out, and nobody will say how. Brake has new boots, though."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "scene": [
+            [
+              "a",
+              "Did you see Brake's new boots?"
+            ],
+            [
+              "b",
+              "I saw them. A hare must cost more than it used to."
+            ],
+            [
+              "a",
+              "Hush. He walks past here."
+            ]
+          ]
+        }
+      ]
+    },
+    "handed": {
+      "text": "I told the forester what was under the root. The court sat, and {poacher} will not draw a bow again. His sister shut her door when I passed.",
+      "reward": {
+        "coins": 6,
+        "hearts": -30,
+        "reputation": 5
+      },
+      "marks": [
+        "hare_handed"
+      ],
+      "town": [
+        "It was {player} who showed the forester the hides. Law's law, I suppose. I'd not have done it to a man with three children."
+      ]
+    },
+    "paid": {
+      "text": "I stood the fine. {poacher} keeps his fingers and loses the wood for a year, and the lord's steward wrote my name in his book beside it.",
+      "reward": {
+        "hearts": 30,
+        "reputation": 8
+      },
+      "marks": [
+        "hare_paid"
+      ],
+      "town": [
+        "{player} paid Furrow's fine out of their own purse. For a stranger's brother. Would you?"
+      ],
+      "returns": {
+        "who": "poacher",
+        "days": [
+          4,
+          8
+        ],
+        "as": "thanks",
+        "say": "I can't pay it back. Not this year. But I can mend, and thatch, and carry. Send for me when you need hands.",
+        "gift": [
+          "minecraft:bread*3"
+        ]
+      }
+    },
+    "maimed": {
+      "failed": true,
+      "text": "The forest court sat, and it took two fingers of {poacher}'s bow hand, as the law has it for a hare.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "They took Furrow's fingers this morning. For a hare. His sister had a paper up for days and nobody came to anything."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            25
+          ],
+          "town": [
+            "Furrow can't hold a scythe properly now. The children are with his sister for good."
+          ]
+        }
+      ]
+    }
+  }
+}

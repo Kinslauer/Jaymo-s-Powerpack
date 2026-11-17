@@ -1317,7 +1317,9 @@ public final class Tales {
 		if (step == null) {
 			return Component.empty();
 		}
-		MutableComponent goal = words(player, run, step, "goal");
+		// (a watch being kept reads what was last seen or heard)
+		String seen = run.scratch.get("seen");
+		MutableComponent goal = seen != null ? Component.literal(seen) : words(player, run, step, "goal");
 		Quest.Objective o = q.objective();
 		if (goal == null) {
 			String kind = Tale.string(step, "do", "");

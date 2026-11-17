@@ -128,7 +128,7 @@ def check_condition(c, where, cond, tale):
     body = cond[1:] if cond.startswith("!") else cond
     if body == "powers" or body.startswith("mark:") or body.startswith("done:"):
         return
-    if body in ("night", "day", "human", "companion", "moon:full", "moon:new", "moon:blood") or COMPARE.match(body):
+    if body in ("night", "day", "human", "cursed", "companion", "moon:full", "moon:new", "moon:blood") or COMPARE.match(body):
         return
     kind, _, value = body.partition(":")
     known = {"heritage": HERITAGES, "patron": PATRONS, "dress": DRESS, "reads": TONGUES, "companion": BELIEFS,
@@ -283,12 +283,20 @@ def check_lie(c, where, lie, tale):
     if not isinstance(lie, dict) or not re.match(r"^[a-z0-9_]+$", str(lie.get("name", ""))):
         c.err(where, "a lie needs a 'name' in lower_snake_case (it's marked lie:<name>, and caught:<name> if it comes out)")
         return
-    unknown = set(lie) - {"name", "days", "unless", "town", "reputation", "hearts"}
+    unknown = set(lie) - {"name", "days", "unless", "town", "reputation", "hearts", "returns"}
     if unknown:
         c.err(where, f"unknown fields {sorted(unknown)}")
     check_days(c, where + ".days", lie.get("days"))
     if "unless" in lie:
         check_condition(c, where + ".unless", lie["unless"], tale)
+    if "returns" in lie:
+        # (they come on the day it's out: no days of their own)
+        back = lie["returns"]
+        if not isinstance(back, dict) or set(back) - {"who", "as", "say", "gift"} or not {"who", "as", "say"} <= set(back) or back.get("as") not in RETURNS:
+            c.err(where + ".returns", f"returns is {{ who, as, say, gift }}, as one of {sorted(RETURNS)}")
+        else:
+            check_role(c, where + ".returns", back["who"], tale)
+            check_text(c, where + ".returns.say", back["say"], tale)
     if "town" not in lie:
         c.err(where, "needs 'town' (what's said when it comes out)")
     else:
