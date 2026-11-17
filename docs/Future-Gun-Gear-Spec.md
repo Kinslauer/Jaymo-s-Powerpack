@@ -43,7 +43,7 @@ Nothing is copied: no code or art from Fracture Point, TaCZ, TaCZ Additions or T
 
 **Identity and slot.** `jaymospowers:magazine`, display name "Magazine". Held item; loaded into a modern gun's magazine (custom data holds the ammo id and round count). One magazine item, made for one gun at a time (its gun id in custom data), holding that gun's real capacity.
 
-**Stats and behaviour.** Each magazine is made for one gun and holds what that gun really holds (Andy, 2026-11-17), snipers included; its name says which gun. Load it by hand: right-click loose rounds of that gun's calibre onto it. Reload is a swap: right-click the magazine onto its gun in the inventory; the gun takes the magazine's rounds and the magazine takes the gun's (any over its size come back loose), tracers included. Loaded magazines stack to 1; empty ones stack to 6. A dead gunner drops a magazine for its gun 1 time in 4, up to half full. TaCZ's own reload from loose rounds still works (not blocked: that would change every future gun at once; ask Andy if he wants it).
+**Stats and behaviour.** Each magazine is made for one gun and holds what that gun really holds (Andy, 2026-11-17), snipers included; its name says which gun. Load it by hand: right-click loose rounds of that gun's calibre onto it. Reload is a swap: right-click the magazine onto its gun in the inventory; the gun takes the magazine's rounds and the magazine takes the gun's (any over its size come back loose), tracers included. Loaded magazines stack to 1; empty ones stack to 6. A dead gunner drops a magazine for its gun 1 time in 4, up to half full. TaCZ's own reload from loose rounds still works: Andy (2026-11-17) kept both ways, so a magazine is a faster swap, not a requirement.
 
 **How you get it.** Loot only (Andy, 2026-11-17): never craftable, in no creative tab.
 
@@ -66,4 +66,6 @@ From TaCZ Additions (Raiiiden, CurseForge feature list), worth building, in no o
    own reload from loose rounds is left working; magazines are a faster swap, not a requirement.
 3. All three built together (PR #1671).
 4. Loot only: off the future's dead and echoes, like the guns. No recipes, no creative tab.
-5. fu-additions: still open, not built here.
+5. Looks: the flat item icons and worn texture made for the pack (Andy, 2026-11-17). Fracture Point's and TaCZ
+   Magazines' own models are All Rights Reserved, so neither is used.
+6. fu-additions: still open, not built here.
