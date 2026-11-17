@@ -5651,3 +5651,13 @@ When a finisher asks for a key, it now holds still for up to a second and a half
 - Andy: blood decals "need to stay drawn on the MCA models". MCA draws villagers (and players in an MCA body) with its own skin and clothes layers, so the blood coat laid on the body's own model sat at the depth of MCA's bare skin, under its clothes, so it only showed through their gaps. Now on an MCA body the blood (a corpse's too) and the dirt on skin and clothes are painted over each of MCA's skin and clothes textures and drawn on that layer's own model, one step after MCA's, so they stay on top: bare skin shows its blood, clothes show theirs. Other bodies are drawn as before.
 - `BloodCoatLayer` (`paints`), new `McaBlood` (only loaded with MCA).
 - Built; not played.
+
+## 0.24.59 (2026-11-17): temperament idles come and go (#1697)
+
+- **Temperament looks in spells** (Andy: "none of the idle animations should play 24/7"): a timid or suspicious
+  player's scared hunch and glancing, a hotheaded one's tense arms, a gloomy one's slump and a cheerful one's bounce
+  no longer show all the time. Time is cut into 3 second slots, and each slot is on by chance (45% for a scared player,
+  30% for the rest), so a look shows for a few seconds, sometimes longer, then rests; it still eases in and out
+  (`BodyMotion.inSpell`, knobs `SPELL_SLOT_TICKS`, `SPELL_CHANCE_SCARED`, `SPELL_CHANCE`). The spells come from the
+  player's id and the game time, so everyone in view sees the same.
+- Built; not played.
