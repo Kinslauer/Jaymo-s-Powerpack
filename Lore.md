@@ -1029,6 +1029,16 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
+(new) **What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
+placement for him to approve). A Warlock's patron gives, and asks two things back: the debts, and terms that are never
+lifted. The hand that would break one stops of itself, and only a deliberate second try gets through, and then the
+patron takes its due at once. The Hearthkeeper's sworn never strike the fallen nor anyone under a roof who isn't fighting
+them, and set no fire where folk live. The Anvil-Father's carry no trident and wear no turtle's shell: the sea rusts
+what he makes. The Deep Mother's take no pick to ore, the miners' god's, and harm no dolphin or turtle. The Green
+Huntsman's kill no young beast. The Lantern Warden's work no death or blood magic and drink no blood. The Crowned
+Sun's take nothing that isn't theirs, pick no pocket and no lock, and raise no hand to a guard or a ruler unprovoked.
+The Ash Whisperer's never yield to the crown's men nor pay its fines: a shut mouth. A Paladin's oath binds the same way.
+
 **The Truth**: law, certainty and the plain word, the clerics' faith. It needs no idols and takes the written word:
 paper, a book, a blank book to be filled. The cursed cannot hide from it, nor can sorcery bend it. Its own book says it
 plainly: **"The seven are tales told by those who would not hear it."**
