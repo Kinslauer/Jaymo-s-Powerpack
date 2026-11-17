@@ -175,7 +175,7 @@
 				{
 					"type": "minecraft:item",
 					"name": "jaymoskingdoms:wind_dragon_meat",
-					"functions": [
+					"modifier": [
 						{
 							"type": "minecraft:set_count",
 							"count": {

@@ -111,7 +111,7 @@
 				{
 					"type": "minecraft:item",
 					"name": "jaymoskingdoms:giants_marrow",
-					"functions": [
+					"modifier": [
 						{
 							"type": "minecraft:set_count",
 							"count": {
