@@ -1,48 +1,50 @@
 ---
-status: stalled
+status: running
 task: hands-on-cooking-realtime
 branch: claude/hands-on-cooking-realtime
 with:
 pr:
 mods: kitchen
 versions:
-started: 2026-11-16
+started: 2026-11-17
 owns:
+- research only; no files owned yet
 ---
 # Hands-on Cooking / Realtime Minigames Research
 
 **Task:** Research Hands-On Delight's approach and apply it to Powers/Kingdoms/Kitchen cooking — make cooking hands-on and realtime, like minigames. Andy wants "our minigames into realtime like this. All cooking should be hands on."
 
-## Current Cooking System (Kitchen mod)
+## Current Cooking System (Kitchen mod) — verified against the code
 
-### Stations (Station.java enum)
-- **Vanilla**: CAMPFIRE, FURNACE, SMOKER, BLAST_FURNACE
-- **Cooking for Blockheads oven**: STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL (lit oven with pot/pan on hob)
-- **Cutting board**: BOARD (Cooking for Blockheads or Kitchen's own)
-- **Farmer's Delight cookware on fire**: HEARTH_POT, HEARTH_PAN (Cooking Pot/Frying Pan placed on campfire)
+Kitchen cooking is ALREADY hands-on and in-world; there is no `CookingScreen` GUI. Sessions run per player: the client plays the minigame and reports back over a custom payload, and the server judges quality (anti-cheat).
 
-### Dish Methods (Dish.Method)
-- OVEN (baking in furnace/smoker/oven)
-- GRILL (grilling on campfire/grill)
-- SMOKE (smoking in smoker)
-- SEAR (searing in blast furnace)
-- CHOP (chopping on cutting board - minigame)
-- ROAST (spit roasting over campfire - minigame)
-- STIR (stirring in pot - minigame)
+### Stations (cooking/Station.java enum)
+- Vanilla: CAMPFIRE, FURNACE, SMOKER, BLAST_FURNACE
+- Cooking for Blockheads oven: STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL (a lit oven; a Cooking Pot / Frying Pan on its hob)
+- Cutting board: BOARD (Cooking for Blockheads or Kitchen's own)
+- Farmer's Delight-style cookware on a fire: HEARTH_POT, HEARTH_PAN (CookwareBlock set on a heat source)
 
-### Current Flow
-1. Player right-clicks station → opens `CookingScreen` (GUI)
-2. Select dish from list → server starts session (`Kitchen.start`)
-3. **Minigames** (CHOP/ROAST/STIR): Client plays `LarderGames` in screen, reports results via `SimUpdate`
-4. **Grilling/Smoking/Searing**: Client simulates in screen, server validates
-5. Server judges quality → awards dish
+### Dish methods (cooking/Dish.java)
+OVEN (baking), GRILL (campfire grill), SMOKE (smoker), SEAR (blast furnace), CHOP (cutting-board minigame), ROAST (spit minigame), STIR (pot-stirring minigame)
 
-### Key Classes
-- `Kitchen.java` - Server-side session management
-- `Minigames.java` - CHOP/ROAST/STIR logic (client + server judging)
-- `Grill.java`, `Sear.java`, `Smoke.java` - Other cooking methods
-- `CookingScreen.java` - Client GUI (856 lines, complex phases)
-- `LarderGames.java` (inner classes) - CHOP/ROAST/STIR game implementations
+### Current flow
+1. Player interacts with a station in the world (right-click with the right tool/item).
+2. The server starts a per-player session (Minigames.start / Grill.start / Prep.start) and sends a custom payload (SimUpdate / GrillUpdate / PrepUpdate) with STATUS_STARTED.
+3. The client plays the minigame — chop under the knife marks, turn the spit a quarter at a time, circle the mouse to stir (pour-to-band + knead for prep) — and reports back.
+4. The server validates timing and amounts, judges Quality (PERFECT / GOOD / BURNT / CHARRED / UNDERCOOKED / ruined), awards the dish, sends STATUS_FINISHED. Walking away abandons the cook (burnt/charred).
+
+### Key classes
+- cooking/Minigames.java — CHOP/ROAST/STIR logic + quality judging
+- cooking/Grill.java — grill minigame (flip, heat surges, oven mode)
+- cooking/Prep.java — prep board (pour water/oil to shifting bands, knead; dough and joints)
+- cooking/Rolling.java, Sear.java, Smoke.java, Quality.java
+- cooking/Dish.java — each dish lists its Station(s) and Method
+- delight/ — Farmer's Delight remake: Cooking Pot + Frying Pan over a fire (CookwareBlock), CuttingBoard + knives (Chopping), feasts, cabbage/rice crops, Comfort/Nourishment effects
+- brewing/ — Still and Cask (a keg)
+
+### Not in the pack
+- Powers and Kingdoms: no cooking at all.
+- Farmer's Delight Refabricated is not a confirmed pack dependency (build.gradle lists cooking-for-blockheads; farmers-delight-refabricated not checked).
 
 ## Hands-On Delight Approach (from CurseForge description)
 
@@ -54,6 +56,14 @@ owns:
 - **No menus — blocks open in the world**
 - Every recipe of Farmer's Delight and its addons
 - **No new blocks or items**
+
+## Gaps vs Hands-On Delight (possible follow-ups, not decided)
+- Nothing in our stations moves the camera to the block or shows nearby players what's being cooked (Diegesis' signature). A kettle-tea station (brew, then tip the kettle to fill cups) would match H-O-D closely.
+- H-O-D covers every Farmer's Delight recipe; our Delight content is Kitchen's own remake, not Farmer's Delight's recipes.
+
+## Next steps (when Andy wants code — its own topic/PR)
+- Show these findings to Andy; pick a station (cutting-board chop or kettle tea) and prototype it in-world.
+- Reuse Minigames/Grill/Prep judging logic; keep server-side validation.
 
 ## Research Questions
 
@@ -115,14 +125,12 @@ owns:
 ## Notes
 
 - The task says "No code changes yet" - this is research phase
-- Need to understand Hands-On Delight's implementation before designing ours
-- Current minigame logic (Minigames.java) can be reused/adapted for in-world interactions
-- Server-side judging logic should remain similar (anti-cheat)
+- Current minigame logic (Minigames.java) can be reused/adapted for in-world interactions; server-side judging stays (anti-cheat)
+- This run (hermes-b) researched Hands-On Delight, verified the current Kitchen code, and wrote up findings here; the stalled note's "CookingScreen GUI" flow does not match the current code and was corrected above.
 
 ## Done
 
-- Documented current Kitchen cooking system (stations, methods, flow, key classes)
-- Analyzed Hands-On Delight approach from CurseForge description
-- Identified research questions and implementation strategy options
-- No code changes made
-- 2026-11-17 04:13 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- Documented the real Kitchen cooking system (stations, methods, payload-based flow, key classes)
+- Analyzed Hands-On Delight from its CurseForge page
+- Listed gaps vs Hands-On Delight and next steps
+- No code changes made; no PR opened
