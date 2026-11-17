@@ -38,3 +38,4 @@ Effects only through typed FX (docs/MagicFx.md). Lore: the future (check Lore.md
 - Builds go on the Deck or CI, never Andy's PC.
 - Can be split into one PR per row.
 - 2026-11-16 21:15 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-16 21:16 hermes-a's claim went stale (nothing changed for 49 min); handed back as open so a bot can take it.
