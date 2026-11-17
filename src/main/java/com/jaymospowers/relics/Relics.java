@@ -245,7 +245,7 @@ public final class Relics {
 	}
 
 	/** A boss: Kingdoms' boss-bar mobs and the vanilla four. */
-	static boolean boss(LivingEntity entity) {
+	public static boolean boss(LivingEntity entity) {
 		EntityType<?> type = entity.getType();
 		return type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
 			|| KingdomsCompat.boss(entity);

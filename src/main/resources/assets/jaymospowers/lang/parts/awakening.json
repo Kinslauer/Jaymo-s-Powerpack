@@ -29,5 +29,13 @@
 	"message.jaymospowers.arsenal.seal_spread": "Rift Seal: %s blocks (let go to close it)",
 	"message.jaymospowers.zfighter.reel_none": "No foe within reach of your arm",
 	"message.jaymospowers.zfighter.reel_blocked": "Your arm can't find a way round to it",
-	"message.jaymospowers.zfighter.fury": "Fury %s"
+	"message.jaymospowers.zfighter.fury": "Fury %s",
+	"item.jaymospowers.threat_tracker": "Threat Tracker",
+	"message.jaymospowers.threat_tracker.near": "%s: %s blocks",
+	"message.jaymospowers.threat_tracker.none": "Nothing great within %s blocks",
+	"talk.jaymospowers.keeper.tracker": "Buy a threat tracker (%s)",
+	"talk.jaymospowers.keeper.tracker_poor": "\"%s, friend. The wind is free; brass isn't.\"",
+	"talk.jaymospowers.keeper.tracker_sold": "\"The wind up here carries everything, and a little of it is in that needle now. It turns to whatever great thing is near. Go carefully.\"",
+	"hud.jaymospowers.boss_share.fell": "%s has fallen",
+	"hud.jaymospowers.boss_share.line": "%s. %s  %s%% (%s)"
 }

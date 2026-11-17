@@ -87,6 +87,15 @@ public final class EightSignCircle {
 		return until != null && until > entity.level().getGameTime();
 	}
 
+	/**
+	 * (Awakening pick) Seals {@code entity} for {@code ticks} without a ring, as the ring's seal does (powers and forms refused):
+	 * Jaymo's Kingdoms' Cordon enforcers' blows lay it, by reflection. A longer seal already on it stays.
+	 */
+	public static void sealFor(Entity entity, int ticks) {
+		long until = entity.level().getGameTime() + ticks;
+		SEALED.merge(entity.getUUID(), until, Math::max);
+	}
+
 	/** Draws a ring at {@code centre} for {@code caster}. */
 	public static void open(ServerPlayer caster) {
 		ServerLevel level = caster.level();

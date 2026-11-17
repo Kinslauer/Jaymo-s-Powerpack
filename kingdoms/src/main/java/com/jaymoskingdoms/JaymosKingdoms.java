@@ -1062,6 +1062,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
 		HushWard.register();
 		AshRot.register();
+		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
+		Cordon.register();
+		AwakenedStrangers.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

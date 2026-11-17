@@ -317,3 +317,75 @@ hardened behind, a knot of the strength that kept it up; worn close, a little of
 in the deepest deepslate, where the world's oldest bones lie pressed into the stone, the iron has taken something of
 them; it takes to living bone the way other metals take to fire, if the body can mend round it fast enough (the Verdant,
 the vampires, the wolfblooded).
+
+### Patch 7: bosses and hunters
+- `aw-cordon` **The Cordon** (Kingdoms `Cordon`, `CordonFolk`, client `CordonRenderer`, lang `awakening.json`; skins and the
+  summons drawn by `tools/gen_awakening_assets.py`). A sect of the Ash Whisperer's faithful who hunt the awakened. They hunt
+  anyone holding a Jaymo's Powers power, except a Resonance holder who can't see (eyes gone or a blindfold on: blindseeing),
+  and anyone working sanctioned magic: a Mage, Cleric, Druid or Paladin, a Warlock of any patron but the Reaper, a Sorcerer
+  of any element but death and blood. Blood and death mages, blindseers and the artless are left alone. Every 2 minutes
+  each such player in the Overworld's wild (never in a realm's land) has a 12% chance (+4% a world tier, no oftener than
+  every 10 minutes) of a patrol arriving 26-40 blocks off with a bell and a shout: 2 sentinels (+1 a tier, up to 5); from
+  the Borderlands a **stalker** (invisible until within 6 blocks of its quarry or struck; its knife lays 2 Rot), from the
+  Wildlands an **enforcer** (mail; each blow binds the struck one's power and forms for 5 s, through Powers' seal,
+  `EightSignCircle.sealFor`), from the Dread an **Overseer** at its head (once at half health it rallies the Cordon within
+  16 blocks: Strength for 20 s). **Sentinels** carry spears. The Overseer always carries a **Cordon summons**: read (used)
+  in the Overworld, it becomes a filled map (biome preview, a target X) to the **Court of Judgment** 400-700 blocks off. The
+  court rises when a player comes within 48 blocks: a round floor of polished blackstone bricks (radius 11) with the air
+  cleared above, eight basalt pillars with soul lanterns, the judge's dais on the north side, the Arbiter on it and two
+  sentinels at its feet. Courts are kept on the Overworld (marked, raised, judged).
+- `aw-adapt` **The Arbiter** (`CordonFolk`, the ARBITER rank; a boss bar through `BossBars`, a head taller, 320 health). It
+  learns the harm dealt it by kind (fire, shot, blunt, blade, magic and powers, beasts: the same kinds a Bane learns,
+  `CaptainWays.cause`): each kind is taken less and less as more of it lands, down to a quarter once 60 of it has been
+  dealt, and it says so when it has a kind ("Your blade is known to me."). What it soaks builds up; at 80 it **overloads**:
+  a burst of binding red (8 harm and a throw back to everything within 6 blocks), then 5 s staggered (it can't strike, it
+  barely moves, it takes double harm) and it forgets all it had learned. Its blows bind the power for 3 s and lay a Rot.
+  Changing what you hit it with keeps it from learning; keeping to one thing makes it overload sooner.
+- `aw-strangers` **Awakened strangers** (Kingdoms `AwakenedStrangers`). Every minute each player with a power in the
+  Overworld's wild has a 5% chance (no oftener than once a game day) of a stranger walking up from 22-34 blocks off: an MCA
+  villager (a guard, so armed; a plain villager without MCA) given a random giftable power as an open gift of Jaymo's
+  Powers' gifted folk, fighting boldly, named with their mastery's title: "<name>, Adept of <power>" or "<name>, Master of
+  <power>" (a master 15% of the time, +10% a world tier, with the gifted masters' faster moves, signature and ultimate).
+  Within 14 blocks they call the player out (a speech bubble), then fight: their power's moves through the gifted folk's
+  AI, and blows by hand. At a quarter of their health they yield ("I yield. I've more road to walk yet.") and walk off; so
+  they do when the quarry is gone or dead, or after 5 minutes; gone a little later.
+- `aw-tracker` **The threat tracker** (Powers `tracker/ThreatTracker`). Sold by the Keeper on the Lookout for 30 silver: in
+  his talk with MCA, or (as the old trader) by sneaking and clicking him empty-handed. A brass case whose needle turns to
+  the nearest elite or boss within 96 blocks (blighted creatures, Kingdoms' marked monsters with a bar, the vanilla four
+  and Kingdoms' boss-bar mobs), sixteen needle turns drawn on our own case, picked by the game's own compass angle to the
+  item's lodestone tracker (set every second, untracked, so no lodestone is needed); with nothing near it spins. Held, the
+  action bar says what it points at and how far.
+- `aw-share` **Who did what** (Powers `core/BossShare`, client `client/boss/BossShareCard`). The harm each player deals a
+  boss (the vanilla four and Kingdoms' boss-bar mobs: by hand, shot or power, whatever names them; the killing blow counts
+  only what was left) is tallied; when it falls, everyone who fought it gets a card on the top-left rail for 10 s: the
+  boss's name, then up to six fighters, most harm first, each with their share and a bar (yours in gold, and always on the
+  card).
+- `aw-teamtime` **Your side gets caught too** (Powers `core/TeamTime`, `TeamTimeMixin`, `TeamTimeFrozenMixin`, Chrono's
+  `StasisField`). When a power's move, while it acts, lays Slowness or Freezing on an enemy player, or sets frost on them,
+  every one of the caster's teammates within 8 blocks of that player gets the same. Teammates: one Kingdoms party
+  (`Parties.allied`, by reflection) or one scoreboard team. An enemy player caught in a Chrono's Stasis Field pulls the
+  Chrono's teammates within 8 blocks of the field's edge into it too. Time Stop (every player but the Chrono) and Slow Time
+  (every player near) already caught the Chrono's own side.
+
+Design calls and gaps: the Cordon hunts players only, not the gifted villagers who carry powers (they'd need a whole war
+between NPCs); the court is built by code where the map says, not a structure file, and is raised once (an Arbiter that
+has fallen doesn't come back; a second summons marks a second court). The adapting construct is the Arbiter, the Cordon's
+boss, not a remnant construct. The strangers' "mastery title" is two ranks (Adept and Master of their power), not a title
+per power, and they come only to players who hold a power (they seek their own kind). The tracker's elites are the two
+kinds of elite there are (Powers' blighted creatures and Kingdoms' marked monsters); with MCA the Keeper sells it in his
+talk, without it on a sneaking click. The share card credits harm that names a player (a tamed wolf's or a summoned
+creature's bites don't). Team time covers players' powers only (a gifted villager's slow isn't caught), and only what is
+laid while the power acts (its keys and its own tick), as Ability Power does.
+
+Lore (new): **The Cordon** are a sect among the Ash Whisperer's faithful. Her people keep secrets, and the awakening is a
+light shone on everything: a power is seen from far off, and what is seen can be watched. So the Cordon draw a line round
+the arts and hunt whoever steps over it: only what is worked in the dark is let be, the blind who see by sound, and blood
+and death magic, the arts every crown hangs men for and so the arts that keep their mouths shut. They wear ash-grey, and
+the black band of the blindfold over their eyes, the devout's rite turned to a uniform; they lay her rot. Their
+**enforcers** bind a gift with a blood-knot that holds a while. Their **Overseers** carry the summons: a letter sealed in
+binding red that, read, shows the way to a **Court of Judgment**, where **the Arbiter** sits, the sect's judge, bound in
+blood magic to learn every blow struck at it; it judges by learning, until it has learned more than the binding can
+hold. **Awakened strangers** are gifted folk who left home to see what their gift is worth, and test it on the others
+they meet who carry one; they take a title on the road, Adept or Master, and most of them yield before it costs them
+their life. The **threat tracker** is the Keeper's: "the wind up here carries everything, and a little of it is in that
+needle", and it turns to whatever great thing is near.

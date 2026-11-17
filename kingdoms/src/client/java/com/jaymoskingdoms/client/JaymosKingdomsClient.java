@@ -87,6 +87,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.310) a Bio-built's buds, small copies of their maker
 		BioBudRenderer.register();
 		RisenOrcRenderer.register();
+		// (Awakening pick) the Cordon
+		CordonRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs

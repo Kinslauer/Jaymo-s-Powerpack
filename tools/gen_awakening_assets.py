@@ -4,7 +4,10 @@
 * boneiron: the deepslate ore (vanilla's deepslate iron ore with its specks turned to old bone), the raw lump and ingot
   (vanilla's iron ones recoloured), the plate (drawn), the Bonding Vat (vanilla's cauldron shape, its textures recoloured,
   and a milky brine drawn here); their models, block states, loot, tags, recipes and the ore's worldgen;
-* the threat tracker (drawn: a brass case with a needle; the needle's eight turns are separate textures).
+* the threat tracker (drawn: a brass case with a needle; the needle's sixteen turns are separate textures, picked by
+  vanilla's compass property aimed at the item's lodestone tracker, which the server sets to the nearest threat).
+
+And in Jaymo's Kingdoms (patch 7): the Cordon's five skins (64x64 player layout, drawn here) and the Cordon summons.
 
 Run pointing at a 26.3 client jar (for the textures recoloured from vanilla):
 
@@ -154,7 +157,7 @@ def brine():
 
 
 def tracker(turn):
-    """The threat tracker: a dark-brass case, a pale face and a red needle at one of eight turns (0 = up, clockwise)."""
+    """The threat tracker: a dark-brass case, a pale face and a red needle at one of sixteen turns (0 = up, clockwise)."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     px = img.load()
     for y in range(16):
@@ -164,7 +167,7 @@ def tracker(turn):
                 px[x, y] = mix((0x5A, 0x40, 0x18), (0xC8, 0x98, 0x40), 0.7 if y < 8 else 0.35) + (255,)
             elif d <= 5.6:
                 px[x, y] = mix((0x40, 0x3A, 0x34), (0x6A, 0x62, 0x58), 0.5) + (255,)
-    a = turn * math.pi / 4.0
+    a = turn * math.pi / 8.0
     for s in range(0, 9):
         t = s / 2.0
         x = round(7.5 + math.sin(a) * t)
@@ -172,6 +175,152 @@ def tracker(turn):
         if 0 <= x < 16 and 0 <= y < 16:
             px[x, y] = (0xE8, 0x30, 0x28, 255) if t > 0.6 else (0xF0, 0xE0, 0xC0, 255)
     return img
+
+
+# ---- Jaymo's Kingdoms: the Cordon ------------------------------------------------------------------------------------
+
+K_ASSETS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
+SKIN, BAND = (0xC8, 0xA0, 0x84), (0x16, 0x14, 0x16)
+
+# a box in the 64x64 player skin: its texture corner and size (w, h, d)
+BOXES = {
+    "head": ((0, 0), (8, 8, 8)), "hat": ((32, 0), (8, 8, 8)),
+    "body": ((16, 16), (8, 12, 4)), "jacket": ((16, 32), (8, 12, 4)),
+    "right_arm": ((40, 16), (4, 12, 4)), "left_arm": ((32, 48), (4, 12, 4)),
+    "right_leg": ((0, 16), (4, 12, 4)), "left_leg": ((16, 48), (4, 12, 4)),
+}
+
+
+def faces(box):
+    """Each face of a box: name -> (x, y, w, h) in the skin."""
+    (u, v), (w, h, d) = BOXES[box]
+    return {"top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d), "right": (u, v + d, d, h), "front": (u + d, v + d, w, h),
+            "left": (u + d + w, v + d, d, h), "back": (u + d + w + d, v + d, w, h)}
+
+
+def paint(px, box, colour):
+    """Fills a box: colour(face, x, y, w, h) gives each pixel's (r, g, b) or None (left clear)."""
+    for face, (x0, y0, w, h) in faces(box).items():
+        for y in range(h):
+            for x in range(w):
+                c = colour(face, x, y, w, h)
+                if c is not None:
+                    px[x0 + x, y0 + y] = tuple(c) + (255,)
+
+
+def grain(c, x, y, k=10):
+    n = int((math.sin(x * 2.3 + y * 1.7) + math.sin(x * 0.7 - y * 2.9)) * k / 2)
+    return tuple(max(0, min(255, v + n)) for v in c)
+
+
+def cordon_skin(rank):
+    """One rank's skin: ash robes, the black band over the eyes, and the rank's own marks (see CordonRenderer)."""
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+    robe = {"sentinel": (0x8A, 0x85, 0x80), "stalker": (0x5E, 0x5A, 0x56), "enforcer": (0x7A, 0x76, 0x72),
+            "overseer": (0x8A, 0x85, 0x80), "arbiter": (0x24, 0x22, 0x24)}[rank]
+    dark = mix(robe, (0, 0, 0), 0.35)
+    red = (0xB0, 0x20, 0x2A)
+
+    def head(face, x, y, w, h):
+        if face == "top":
+            return grain((0x3A, 0x36, 0x34), x, y)
+        if face == "bottom":
+            return SKIN
+        if face in ("front", "right", "left", "back") and y in (3, 4):
+            return BAND
+        if rank == "arbiter" and face == "front":
+            return red if y == 6 and 2 <= x <= 5 else grain((0xB8, 0xB4, 0xAC), x, y, 6)
+        if face == "front" and y == 6 and 3 <= x <= 4:
+            return mix(SKIN, (0x60, 0x30, 0x28), 0.5)
+        if face == "back" or y < 2:
+            return grain((0x3A, 0x36, 0x34), x, y)
+        return SKIN
+
+    def hood(face, x, y, w, h):
+        if rank not in ("stalker", "overseer", "arbiter"):
+            return None
+        c = {"stalker": (0x3A, 0x37, 0x34), "overseer": (0x6A, 0x22, 0x26), "arbiter": (0x18, 0x16, 0x18)}[rank]
+        if face == "bottom" or face == "front" and y >= 2 and 1 <= x <= w - 2:
+            return None
+        if face in ("right", "left") and y >= 7:
+            return None
+        return grain(c, x, y, 8)
+
+    def body(face, x, y, w, h):
+        if face in ("top", "bottom"):
+            return dark
+        c = grain(robe, x, y)
+        if y == 0:
+            c = dark
+        if y == 7:
+            c = (0xC8, 0xA0, 0x40) if rank == "overseer" else dark
+        if rank == "enforcer" and face in ("front", "back") and y < 7:
+            c = (0xB8, 0xB8, 0xB8) if (x + y) % 2 == 0 else (0x70, 0x70, 0x74)
+        if face == "front" and rank in ("enforcer", "overseer") and x == (y * w) // h:
+            c = red
+        if rank == "arbiter" and y == h - 1:
+            c = red
+        return c
+
+    def arm(face, x, y, w, h):
+        if face == "bottom" or y >= 10:
+            return SKIN
+        if face == "top":
+            return dark
+        if rank == "arbiter" and y == 9:
+            return red
+        return grain(robe, x, y)
+
+    def leg(face, x, y, w, h):
+        if face == "bottom" or y >= 9:
+            return (0x2A, 0x26, 0x22)
+        if face == "top":
+            return dark
+        if rank == "arbiter" and y == 8:
+            return red
+        return grain(mix(robe, dark, 0.2), x, y)
+
+    paint(px, "head", head)
+    paint(px, "hat", hood)
+    paint(px, "body", body)
+    for a in ("right_arm", "left_arm"):
+        paint(px, a, arm)
+    for l in ("right_leg", "left_leg"):
+        paint(px, l, leg)
+    return img
+
+
+def summons():
+    """The Cordon's summons: a folded grey letter, its binding-red wax seal."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(3, 13):
+        for x in range(2, 14):
+            edge = y in (3, 12) or x in (2, 13)
+            px[x, y] = (mix((0xB8, 0xB0, 0xA0), (0xE0, 0xD8, 0xC8), 0.3 if edge else 0.8 - 0.04 * abs(x - 8))) + (255,)
+    for x in range(3, 13):
+        y = 4 + abs(x - 7.5) // 1.5
+        px[x, int(y)] = (0x90, 0x88, 0x78, 255)
+    for y in range(7, 11):
+        for x in range(6, 10):
+            if math.hypot(x - 7.5, y - 8.5) <= 2.0:
+                px[x, y] = (0xB0, 0x20, 0x2A, 255) if math.hypot(x - 7.0, y - 8.0) > 0.8 else (0xE0, 0x50, 0x50, 255)
+    return img
+
+
+def kingdoms():
+    for rank in ("sentinel", "stalker", "enforcer", "overseer", "arbiter"):
+        path = os.path.join(K_ASSETS, "textures", "entity", "cordon", rank + ".png")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        cordon_skin(rank).save(path)
+    path = os.path.join(K_ASSETS, "textures", "item", "cordon_summons.png")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    summons().save(path)
+    write(os.path.join(K_ASSETS, "models", "item", "cordon_summons.json"),
+          {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymoskingdoms:item/cordon_summons"}})
+    write(os.path.join(K_ASSETS, "items", "cordon_summons.json"),
+          {"model": {"type": "minecraft:model", "model": "jaymoskingdoms:item/cordon_summons"}})
 
 
 # ---- the models and data --------------------------------------------------------------------------------------------
@@ -286,18 +435,21 @@ def main(jar):
                                                                     "max_inclusive": {"absolute": -40}}},
                       {"type": "minecraft:biome"}]})
 
+    kingdoms()
     if "--no-tracker" in sys.argv:
         return
-    # the threat tracker: the needle's eight turns, picked by the item's own number
-    cases = []
-    for turn in range(8):
+    # the threat tracker: the needle's sixteen turns, by vanilla's compass angle to the item's lodestone tracker (0 = the
+    # target straight ahead, the needle up; it turns clockwise), spinning when there's none; no swap bob as it updates
+    entries = []
+    for turn in range(16):
         name = "threat_tracker_%d" % turn
         save(tracker(turn), "item", name + ".png")
         item_model(name)
-        cases.append({"when": turn, "model": {"type": "minecraft:model", "model": NS + ":item/" + name}})
-    write(os.path.join(ASSETS, "items", "threat_tracker.json"), {"model": {
-        "type": "minecraft:select", "property": "minecraft:component", "component": NS + ":tracker_turn", "cases": cases,
-        "fallback": {"type": "minecraft:model", "model": NS + ":item/threat_tracker_0"}}})
+        entries.append({"threshold": 0.0 if turn == 0 else turn - 0.5, "model": {"type": "minecraft:model", "model": NS + ":item/" + name}})
+    entries.append({"threshold": 15.5, "model": {"type": "minecraft:model", "model": NS + ":item/threat_tracker_0"}})
+    write(os.path.join(ASSETS, "items", "threat_tracker.json"), {"hand_animation_on_swap": False, "model": {
+        "type": "minecraft:range_dispatch", "property": "minecraft:compass", "target": "lodestone", "scale": 16.0,
+        "entries": entries}})
 
 
 if __name__ == "__main__":

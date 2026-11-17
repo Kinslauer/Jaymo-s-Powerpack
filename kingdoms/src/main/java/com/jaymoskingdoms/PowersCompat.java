@@ -1135,6 +1135,55 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (Awakening pick) Powers' {@code EightSignCircle.sealFor(Entity, int)} and {@code Blind.sightless(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle sealFor, sightless;
+	private static boolean lookedForSealFor, lookedForSightless;
+
+	/** (Awakening pick) Seals {@code entity}'s power (and forms) for {@code ticks}, as an Eight-Sign Circle does; nothing without Powers. */
+	public static void seal(net.minecraft.world.entity.Entity entity, int ticks) {
+		if (!lookedForSealFor) {
+			lookedForSealFor = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sealFor = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.divine.EightSignCircle"),
+						"sealFor", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Entity.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' seal (older Powers?)", e);
+				}
+			}
+		}
+		if (sealFor != null) {
+			try {
+				sealFor.invoke(entity, ticks);
+			} catch (Throwable e) {
+				// no seal, then
+			}
+		}
+	}
+
+	/** (Awakening pick) Whether {@code entity} can't see now (both eyes gone, or a blindfold on: Powers' Blind); false without Powers. */
+	public static boolean sightless(LivingEntity entity) {
+		if (!lookedForSightless) {
+			lookedForSightless = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sightless = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.blindness.Blind"),
+						"sightless", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blindness (older Powers?)", e);
+				}
+			}
+		}
+		if (sightless == null) {
+			return false;
+		}
+		try {
+			return (boolean)sightless.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.406) Powers' {@code Breaks.armless(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle armless;
 	private static boolean lookedForArmless;

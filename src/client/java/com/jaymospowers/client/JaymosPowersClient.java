@@ -303,6 +303,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.rules.RuleBookScreen.register();
 		// (Awakening picks) the power trials page and the pinned trial
 		com.jaymospowers.client.trials.TrialsScreen.register();
+		com.jaymospowers.client.boss.BossShareCard.register();
 		com.jaymospowers.client.bonebond.BoneironClient.init();
 		// (0.20.52) the stacked Aether hidden from under the clouds
 		com.jaymospowers.client.aether.AetherVeil.init();

@@ -132,6 +132,9 @@ public class JaymosPowers implements ModInitializer {
 		// (Awakening picks) the relic belt, and boneiron bonded to bone
 		com.jaymospowers.relics.Relics.init();
 		com.jaymospowers.bonebond.Boneiron.init();
+		// (Awakening picks) who did what when a boss falls, and the threat tracker sold on the Lookout
+		com.jaymospowers.core.BossShare.init();
+		com.jaymospowers.tracker.ThreatTracker.init();
 		// Blindness, the condition (lost eyes), and the Unseeing
 		com.jaymospowers.power.blindness.Blind.init();
 		// Elemental Corruption: the gods of the elements answer a corrupted elemental user's murders (each element registers its part)

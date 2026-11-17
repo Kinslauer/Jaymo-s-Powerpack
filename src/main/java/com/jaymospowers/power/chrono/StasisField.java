@@ -160,8 +160,27 @@ final class StasisField {
 
 	private void capture() {
 		AABB box = new AABB(center, center).inflate(RADIUS);
-		for (Entity entity : level.getEntities((Entity) null, box, e -> freezable(e) && !e.getUUID().equals(owner))) {
-			if (entity.position().distanceToSqr(center) > RADIUS * RADIUS || held.contains(entity)) {
+		// (Awakening pick: your side gets caught too) an enemy player in the field pulls the caster's teammates near it in too
+		java.util.Set<Entity> side = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+		if (level.getPlayerByUUID(owner) instanceof net.minecraft.server.level.ServerPlayer caster) {
+			for (net.minecraft.server.level.ServerPlayer p : level.players()) {
+				if (p != caster && !p.isSpectator() && p.position().distanceToSqr(center) <= RADIUS * RADIUS
+					&& !com.jaymospowers.core.TeamTime.allied(caster, p)) {
+					double reach = RADIUS + com.jaymospowers.core.TeamTime.RANGE;
+					for (net.minecraft.server.level.ServerPlayer mate : level.players()) {
+						if (mate != caster && !mate.isSpectator() && mate.isAlive() && mate.position().distanceToSqr(center) <= reach * reach
+							&& com.jaymospowers.core.TeamTime.allied(caster, mate)) {
+							side.add(mate);
+						}
+					}
+					break;
+				}
+			}
+		}
+		List<Entity> caught = new ArrayList<>(level.getEntities((Entity) null, box, e -> freezable(e) && !e.getUUID().equals(owner)));
+		caught.addAll(side);
+		for (Entity entity : caught) {
+			if (!side.contains(entity) && entity.position().distanceToSqr(center) > RADIUS * RADIUS || held.contains(entity)) {
 				continue;
 			}
 			Frozen frozen = FROZEN.get(entity);
