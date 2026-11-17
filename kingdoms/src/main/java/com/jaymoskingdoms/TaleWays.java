@@ -1,0 +1,1011 @@
+package com.jaymoskingdoms;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.jaymoskingdoms.money.Money;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.MoonPhase;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The ways a tale ({@link Tales}) reads the world it's told in (docs/StoryQuests-Plan.md, section 7): the hour and the
+ * moon, who the player is (blood, patron, standing, dress, purse), days that run out, a word that may or may not sway
+ * its listener, naming who did it, a night's watch, what a beast is weak to, what a companion makes of a choice, a
+ * letter in a tongue the player can't read, a lie that comes out, and what an ending brings weeks later.
+ */
+final class TaleWays {
+	// ================================================================================================================
+	// Tuning
+	/** Armour this heavy is "armoured"; a worn piece this far gone is rags. */
+	static final int ARMOURED = 10;
+	static final float RAGGED_WEAR = 0.8F;
+	/** What counts as fine dress, and as rags whatever its wear (data/jaymoskingdoms/tags/item/fine_dress.json, ragged_dress.json). */
+	static final TagKey<Item> FINE = TagKey.create(Registries.ITEM, JaymosKingdoms.id("fine_dress"));
+	static final TagKey<Item> RAGS = TagKey.create(Registries.ITEM, JaymosKingdoms.id("ragged_dress"));
+	/**
+	 * A try's odds (in a hundred): where they start, what each step of a tale's {@code odds} is worth, what each thing
+	 * that helps or hurts is worth, and their bounds. Hearts, standing and what the listener remembers each sway them by
+	 * one for every so many, up to {@link #SWAY_MOST}.
+	 */
+	static final int ODDS = 50, ODDS_STEP = 15, HELP = 15, ODDS_LEAST = 5, ODDS_MOST = 95;
+	static final int HEARTS_PER = 5, STANDING_PER = 20, LEAN_TIMES = 3, SWAY_MOST = 15;
+	/** A threat from someone in armour, with blood on them, or known to have cut down one who yielded. */
+	static final int THREAT_ARMOUR = 10, THREAT_BLOOD = 5, THREAT_DEED = 10;
+	/** What the greedy and the proud ask of a bribe, as a share of its price. */
+	static final double BRIBE_GREEDY = 1.5, BRIBE_PROUD = 2.0;
+	/** What agreeing or not with a companion's belief moves their bond by. */
+	static final int VOICE_BOND = 3;
+	/** What a priest or a librarian takes to read something aloud (coins); how often they talk of it after. */
+	static final int READ_COINS = 1;
+	static final float READER_TALKS = 0.5F;
+	/** What each thing known of a beast leaves of its health and its blow, and the least they can be brought to. */
+	static final double WEAK_SHARE = 0.7, WEAK_LEAST = 0.35;
+	/** A watch is kept this near its place (blocks), a line every so many seconds. */
+	static final int VIGIL_RADIUS = 12, VIGIL_GAP = 10;
+	/** A tale's person is met once a player has stood this near; one whose hours are over goes once nobody is this near. */
+	static final double MEET_RANGE = 8.0, HOURS_GONE = 14.0;
+	/** Someone who moves to a town does so when the player is next this near its seat; what's owed later is dropped after this many days unpaid. */
+	static final int SETTLE_NEAR = 96, LATER_KEPT = 60;
+	/** Lines a companion has for each belief before a choice, and for agreeing and not after it. */
+	static final int VOICE_LINES = 2;
+
+	static final String BY = "~by:", MET = "~met:", TRIED = "~tried:";
+	static final String KEY_UNREAD = "jaymoskingdoms_tale_unread";
+	private static final Pattern COMPARE = Pattern.compile("^(reputation|hearts|coins|since:[a-z0-9_]+)(>=|<)(-?\\d+)$");
+
+	/**
+	 * Something an ending (or a lie) brings later: on {@code day}, in the settlement {@code faction}, {@code what} (a
+	 * letter, town talk, a scene, someone who moves there, a mark, a lie found out), its words already filled in.
+	 */
+	record Later(long day, int faction, String what) {
+		static final Codec<Later> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.LONG.fieldOf("day").forGetter(Later::day),
+				Codec.INT.optionalFieldOf("faction", -1).forGetter(Later::faction),
+				Codec.STRING.fieldOf("what").forGetter(Later::what))
+			.apply(i, Later::new));
+	}
+
+	private TaleWays() {
+	}
+
+	// ---- conditions ------------------------------------------------------------------------------------------------------
+
+	/** Whether {@code c} (one of this class's conditions, without its {@code !}) holds; null if it isn't one of them. */
+	static @Nullable Boolean holds(ServerPlayer player, Tales.@Nullable Run run, String c) {
+		if (!(player.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		Matcher m = COMPARE.matcher(c);
+		if (m.matches()) {
+			long n = Long.parseLong(m.group(3));
+			Long have = amount(level, player, run, m.group(1), n);
+			return have != null && (m.group(2).equals(">=") ? have >= n : have < n);
+		}
+		ServerLevel world = Factions.level(level.getServer());
+		if (c.equals("night")) {
+			return Approaches.night(world);
+		}
+		if (c.equals("day")) {
+			return !Approaches.night(world);
+		}
+		if (c.equals("moon:full")) {
+			return Lycans.fullMoon(world, world.getOverworldClockTime());
+		}
+		if (c.equals("moon:new")) {
+			return world.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.NEW_MOON;
+		}
+		if (c.equals("moon:blood")) {
+			return Moons.blood(level.getServer());
+		}
+		if (c.equals("human")) {
+			return Faiths.human(Heritage.of(player));
+		}
+		if (c.startsWith("heritage:")) {
+			Heritage.Kind kind = Heritage.of(player);
+			return kind != null && kind.name().equalsIgnoreCase(c.substring(9));
+		}
+		if (c.startsWith("patron:")) {
+			Patron patron = Patrons.of(player);
+			return c.substring(7).equals("none") ? patron == null : patron != null && patron.key.equals(c.substring(7));
+		}
+		if (c.startsWith("dress:")) {
+			return dress(player).contains(c.substring(6));
+		}
+		if (c.startsWith("reads:")) {
+			Languages.Tongue tongue = tongue(c.substring(6));
+			return tongue != null && Languages.speaks(player, tongue);
+		}
+		if (c.startsWith("late:")) {
+			String due = run == null ? null : run.vars.get(BY + c.substring(5));
+			return due != null && Tales.day(level) > Tales.parse(due, Integer.MAX_VALUE);
+		}
+		if (c.startsWith("met:")) {
+			return run != null && run.vars.containsKey(MET + c.substring(4));
+		}
+		if (c.equals("companion")) {
+			return !Bonds.companions(player, Convictions.WITNESS).isEmpty();
+		}
+		if (c.startsWith("companion:")) {
+			Convictions.Belief belief = Convictions.Belief.byKey(c.substring(10));
+			for (Mob m2 : Bonds.companions(player, Convictions.WITNESS)) {
+				if (belief != null && Convictions.of(m2).contains(belief)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return null;
+	}
+
+	/** How much {@code player} has of what a comparison weighs; null: nothing to weigh (the tale it counts from never ended). */
+	private static @Nullable Long amount(ServerLevel level, ServerPlayer player, Tales.@Nullable Run run, String what, long asked) {
+		Faction f = run == null || run.faction < 0 ? null : Factions.get(level.getServer(), run.faction);
+		if (what.equals("coins")) {
+			return Money.canPay(player, f, Money.worth(asked)) ? asked : asked - 1;
+		}
+		if (what.equals("reputation")) {
+			return f == null ? 0L : (long)Reputation.get(player, f.id());
+		}
+		if (what.equals("hearts")) {
+			LivingEntity who = run == null ? null : speaker(level, run);
+			return who instanceof Villager v ? (long)McaCompat.heartsOf(v, player) : 0L;
+		}
+		// since:<tale>: days since it ended
+		Tales.State s = player.getAttached(Tales.STATE);
+		if (s != null) {
+			for (Tales.Told told : s.told) {
+				if (told.tale().equals(what.substring(6))) {
+					return Tales.day(level) - told.day();
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Whoever {@code run}'s open step is with (its {@code who}, when that's one plain name), or else its asker. */
+	private static @Nullable LivingEntity speaker(ServerLevel level, Tales.Run run) {
+		Tale tale = Tale.get(run.tale);
+		JsonObject step = tale == null ? null : tale.step(run.step);
+		String who = step == null ? "giver" : Tale.string(step, "who", "giver");
+		return Tales.entity(level, who.equals("giver") ? run.giverId() : Tales.uuid(run.cast.get(who)));
+	}
+
+	static Languages.@Nullable Tongue tongue(String id) {
+		for (Languages.Tongue t : Languages.Tongue.values()) {
+			if (t.id().equals(id)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * How {@code player} is dressed, as anyone would see it: {@code armoured} (heavy armour), {@code bloodied} (blood on
+	 * them), {@code fine} (something of {@link #FINE} on, and no rags), {@code ragged} (in {@link #RAGS}, or in a piece worn
+	 * nearly through), and {@code plain} when neither fine, ragged nor armoured.
+	 */
+	static Set<String> dress(ServerPlayer player) {
+		Set<String> out = new HashSet<>();
+		boolean fine = false, ragged = false;
+		for (EquipmentSlot slot : List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			ItemStack worn = player.getItemBySlot(slot);
+			fine |= worn.is(FINE);
+			ragged |= worn.is(RAGS) || worn.isDamageableItem() && worn.getDamageValue() >= worn.getMaxDamage() * RAGGED_WEAR;
+		}
+		if (player.getArmorValue() >= ARMOURED) {
+			out.add("armoured");
+		}
+		if (PowersCompat.bloodSeen(player) >= 0) {
+			out.add("bloodied");
+		}
+		if (ragged) {
+			out.add("ragged");
+		} else if (fine) {
+			out.add("fine");
+		}
+		if (!ragged && !fine && !out.contains("armoured")) {
+			out.add("plain");
+		}
+		return out;
+	}
+
+	// ---- days that run out --------------------------------------------------------------------------------------------
+
+	/** {@code run}'s step is begun: the clocks it starts are started (once), and its own days are counted from today. */
+	static void entered(ServerLevel level, Tales.Run run, JsonObject step) {
+		long today = Tales.day(level);
+		// (the same for everyone sharing the run, whoever's turn it is to count)
+		RandomSource random = RandomSource.create(run.instance.hashCode() * 31L + run.step.hashCode());
+		for (Map.Entry<String, JsonElement> e : Tale.object(step, "clock").entrySet()) {
+			run.vars.putIfAbsent(BY + e.getKey(), Long.toString(today + Tale.between(e.getValue(), 1, random)));
+		}
+		JsonElement within = step.get("within");
+		if (within != null && !named(within)) {
+			run.scratch.put("by", Long.toString(today + Tale.between(within, 1, random)));
+		}
+	}
+
+	private static boolean named(JsonElement within) {
+		return within.isJsonPrimitive() && within.getAsJsonPrimitive().isString();
+	}
+
+	/** The last day {@code run}'s step may be done on (its {@code within}: so many days, or a clock by name), or -1. */
+	static long due(Tales.Run run, JsonObject step) {
+		JsonElement within = step.get("within");
+		if (within == null) {
+			return -1L;
+		}
+		String due = named(within) ? run.vars.get(BY + within.getAsString()) : run.scratch.get("by");
+		return due == null ? -1L : Tales.parse(due, -1);
+	}
+
+	/** Whether {@code run}'s step has run out of days (and says what happens then: {@code late}). */
+	static boolean late(ServerLevel level, Tales.Run run, JsonObject step) {
+		long due = due(run, step);
+		return step.has("late") && due >= 0 && Tales.day(level) > due;
+	}
+
+	/** So many days left, in words. */
+	static Component leftWords(long left) {
+		return left <= 0 ? Component.translatable("tale.jaymoskingdoms.left.0") : left == 1 ? Component.translatable("tale.jaymoskingdoms.left.1")
+			: Component.translatable("tale.jaymoskingdoms.left.n", left);
+	}
+
+	/** How long the clock {@code name} of {@code run} has left, in words (for {@code {left:name}}). */
+	static Component leftOn(ServerLevel level, Tales.Run run, String name) {
+		String due = run.vars.get(BY + name);
+		return due == null ? Component.empty() : leftWords(Tales.parse(due, 0) - Tales.day(level));
+	}
+
+	/**
+	 * What follows a step's goal in the log: when it can be done ({@code when}), and how long is left, as its asker
+	 * would say it ({@code until}) with the days counted after. Null if the step has neither.
+	 */
+	static @Nullable Component after(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject step) {
+		MutableComponent out = Component.empty();
+		String when = Tale.string(step, "when", "");
+		if (!when.isEmpty()) {
+			out.append(Component.translatable("tale.jaymoskingdoms.when." + when.replace(':', '_')));
+		}
+		long due = due(run, step);
+		if (due >= 0) {
+			Component left = leftWords(due - Tales.day(level));
+			MutableComponent until = Tales.words(player, run, step, "until");
+			out.append(until == null ? Component.translatable("tale.jaymoskingdoms.left.plain", left) : Component.translatable("tale.jaymoskingdoms.left", until, left));
+		}
+		return when.isEmpty() && due < 0 ? null : out;
+	}
+
+	/** Whether {@code run}'s step can be done at this hour (its {@code when}). */
+	static boolean now(ServerPlayer player, Tales.Run run, JsonObject step) {
+		String when = Tale.string(step, "when", "");
+		return when.isEmpty() || Tales.holds(player, run, when);
+	}
+
+	/** {@code who} has nothing to say at this hour: their own words for it ({@code not_now}), or the usual. */
+	static void notNow(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject step, LivingEntity who) {
+		MutableComponent own = Tales.words(player, run, step, "not_now");
+		Speech.tell(level, who, player, own != null ? own
+			: Component.translatable("tale.jaymoskingdoms.not_now." + Tale.string(step, "when", "").replace(':', '_')), Speech.WHITE);
+	}
+
+	/** The tavern of {@code f}, where its counter is; or null if it has none. */
+	static @Nullable BlockPos tavern(ServerLevel level, Faction f) {
+		for (Meals.Eatery e : Meals.eateries(level, f)) {
+			if (e.tavern()) {
+				return e.counter();
+			}
+		}
+		return null;
+	}
+
+	// ---- a word that may or may not sway them ----------------------------------------------------------------------------
+
+	private static int clamp(int v, int most) {
+		return Math.clamp(v, -most, most);
+	}
+
+	/**
+	 * The odds (in a hundred) that {@code who} is swayed by the try {@code t} ({@code how}: persuade, threaten or bribe):
+	 * from their temperament, their hearts for the player, the player's standing with their town, what they remember of
+	 * the player, how the player looks (a threat), and whatever the tale says {@code helps} or {@code hurts}.
+	 */
+	static int odds(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
+		String how = Tale.string(t, "how", "persuade");
+		Temperaments.Temperament temper = Temperaments.of(who);
+		if (how.equals("bribe") && Boolean.FALSE.equals(Temperaments.takesBribe(who))) {
+			return ODDS_LEAST;
+		}
+		int odds = ODDS + Tale.number(t, "odds", 0) * ODDS_STEP;
+		if (temper != null) {
+			odds += switch (how) {
+				case "threaten" -> switch (temper) {
+					case TIMID -> 25;
+					case GLOOMY, GREEDY -> 5;
+					case BRAVE -> -25;
+					case HOTHEADED -> -15;
+					case PROUD, SPITEFUL -> -10;
+					default -> 0;
+				};
+				case "bribe" -> switch (temper) {
+					case GREEDY -> 30;
+					case SPITEFUL, GLOOMY -> 5;
+					case DUTIFUL -> -15;
+					case DEVOUT -> -20;
+					default -> 0;
+				};
+				default -> switch (temper) {
+					case KINDHEARTED -> 15;
+					case CHEERFUL -> 10;
+					case GLOOMY -> -5;
+					case PROUD, SPITEFUL -> -10;
+					case SUSPICIOUS -> -15;
+					default -> 0;
+				};
+			};
+		}
+		if (how.equals("threaten")) {
+			Set<String> dress = dress(player);
+			odds += (dress.contains("armoured") ? THREAT_ARMOUR : 0) + (dress.contains("bloodied") ? THREAT_BLOOD : 0)
+				+ (run.vars.containsKey("~cut_down") ? THREAT_DEED : 0);
+		} else {
+			odds += who instanceof Villager v ? clamp(McaCompat.heartsOf(v, player) / HEARTS_PER, SWAY_MOST) : 0;
+			odds += run.faction < 0 ? 0 : clamp(Reputation.get(player, run.faction) / STANDING_PER, SWAY_MOST);
+			odds += clamp(Recollections.leaning(who, player) * LEAN_TIMES, SWAY_MOST);
+		}
+		for (String cond : Tale.strings(t.get("helps"))) {
+			odds += Tales.holds(player, run, cond) ? HELP : 0;
+		}
+		for (String cond : Tale.strings(t.get("hurts"))) {
+			odds -= Tales.holds(player, run, cond) ? HELP : 0;
+		}
+		return Math.clamp(odds, ODDS_LEAST, ODDS_MOST);
+	}
+
+	/** The odds in words, as they're shown beside the reply. */
+	static Component oddsWords(int odds) {
+		return Component.translatable("tale.jaymoskingdoms.odds." + (odds >= 75 ? 3 : odds >= 50 ? 2 : odds >= 25 ? 1 : 0)).withStyle(ChatFormatting.GRAY);
+	}
+
+	/** What {@code who} asks for the bribe {@code t} (coins): its price, and more from the greedy and the proud. */
+	static int price(JsonObject t, LivingEntity who) {
+		int coins = Math.max(1, Tale.number(t, "coins", 1));
+		return (int)Math.ceil(coins * (Temperaments.is(who, Temperaments.Temperament.GREEDY) ? BRIBE_GREEDY
+			: Temperaments.is(who, Temperaments.Temperament.PROUD) ? BRIBE_PROUD : 1.0));
+	}
+
+	/** Whether {@code player} can make the try {@code t} at all (a bribe takes the coin). */
+	static boolean canTry(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
+		return !Tale.string(t, "how", "persuade").equals("bribe") || Money.canPay(player, Tales.faction(player, run), Money.worth(price(t, who)));
+	}
+
+	/**
+	 * {@code player} makes the try {@code t} on {@code who}: the lot is drawn against {@link #odds}. A bribe taken is paid
+	 * (one refused is kept), and they remember being bought or threatened. True if it worked.
+	 */
+	static boolean attempt(ServerPlayer player, Tales.Run run, JsonObject t, LivingEntity who) {
+		String how = Tale.string(t, "how", "persuade");
+		boolean won = player.getRandom().nextInt(100) < odds(player, run, t, who);
+		if (how.equals("bribe") && won) {
+			Money.charge(player, Tales.faction(player, run), Money.worth(price(t, who)));
+			Recollections.remember(who, player, Recollections.Kind.BRIBED, Component.empty());
+		} else if (how.equals("threaten")) {
+			Recollections.remember(who, player, Recollections.Kind.THREATENED, Component.empty());
+		}
+		if (!won && player.level() instanceof ServerLevel level) {
+			MutableComponent refuse = Tales.words(player, run, t, "refuse");
+			Speech.tell(level, who, player, refuse != null ? refuse : Component.translatable("tale.jaymoskingdoms.refuse." + how + "." + level.getRandom().nextInt(2)), Speech.RED);
+		}
+		return won;
+	}
+
+	// ---- what a companion makes of it -------------------------------------------------------------------------------------
+
+	private static Set<Convictions.Belief> beliefs(List<String> keys) {
+		Set<Convictions.Belief> out = new HashSet<>();
+		for (String key : keys) {
+			Convictions.Belief b = Convictions.Belief.byKey(key);
+			if (b != null) {
+				out.add(b);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * A choice is before {@code player}: one companion near who believes in something it turns on ({@code for},
+	 * {@code irks} or {@code against} on one of the step's replies) says so, in the tale's words for that belief
+	 * ({@code voices}) or their own. Once for each step.
+	 */
+	static void voiceBefore(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject step) {
+		if (run.scratch.putIfAbsent("voiced", "1") != null) {
+			return;
+		}
+		List<String> keys = new ArrayList<>();
+		for (JsonObject reply : Tale.objects(step.get("replies"))) {
+			keys.addAll(Tale.strings(reply.get("for")));
+			keys.addAll(Tale.strings(reply.get("irks")));
+			keys.addAll(Tale.strings(reply.get("against")));
+		}
+		Set<Convictions.Belief> turns = beliefs(keys);
+		if (turns.isEmpty()) {
+			return;
+		}
+		JsonObject own = Tale.object(step, "voices");
+		for (Mob m : Bonds.companions(player, Convictions.WITNESS)) {
+			for (Convictions.Belief b : Convictions.of(m)) {
+				if (turns.contains(b)) {
+					MutableComponent line = Tales.words(player, run, own, b.key);
+					Speech.tell(level, m, player, line != null ? line
+						: Component.translatable("tale.jaymoskingdoms.voice." + b.key + "." + level.getRandom().nextInt(VOICE_LINES)), Speech.WHITE);
+					return;
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@code player} chose {@code reply}: each companion near who believes in what it stood {@code for} is a little
+	 * closer for it, and each who believes in what it {@code irks} a little further, and says so. One whose bond that
+	 * empties leaves; nobody else does.
+	 */
+	static void voiceAfter(ServerLevel level, ServerPlayer player, JsonObject reply) {
+		Set<Convictions.Belief> stood = beliefs(Tale.strings(reply.get("for"))), irked = beliefs(Tale.strings(reply.get("irks")));
+		if (stood.isEmpty() && irked.isEmpty()) {
+			return;
+		}
+		boolean said = false;
+		for (Mob m : Bonds.companions(player, Convictions.WITNESS)) {
+			Set<Convictions.Belief> holds = Convictions.of(m);
+			boolean differs = holds.stream().anyMatch(irked::contains);
+			if (!differs && holds.stream().noneMatch(stood::contains)) {
+				continue;
+			}
+			Bonds.add(m, player.getUUID(), differs ? -VOICE_BOND : VOICE_BOND);
+			if (!said) {
+				// (one of them speaks for the rest)
+				said = true;
+				Speech.tell(level, m, player, Component.translatable("tale.jaymoskingdoms.voice." + (differs ? "differ" : "agree") + "." + level.getRandom().nextInt(VOICE_LINES)),
+					differs ? Speech.RED : Speech.GOLD);
+			}
+			if (differs && Bonds.of(m, player.getUUID()) <= 0) {
+				Convictions.leave(level, m, player, holds.stream().filter(irked::contains).findFirst().orElseThrow().key);
+			}
+		}
+	}
+
+	// ---- naming who did it ---------------------------------------------------------------------------------------------------
+
+	/**
+	 * {@code who} asks {@code player} who did it ({@code "do": "name"}): everyone the step suspects whom the player has
+	 * met can be named, or nobody yet. Naming one goes on by whether there's proof enough ({@link #named}).
+	 */
+	static void name(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject step, LivingEntity who) {
+		if (!now(player, run, step)) {
+			notNow(level, player, run, step, who);
+			return;
+		}
+		String at = run.step;
+		List<Menus.Choice> choices = new ArrayList<>();
+		for (JsonObject suspect : Tale.objects(step.get("suspects"))) {
+			String role = Tale.string(suspect, "who", "");
+			String cond = Tale.string(suspect, "if", "");
+			if (!run.vars.containsKey(MET + role) || !cond.isEmpty() && !Tales.holds(player, run, cond)) {
+				continue;
+			}
+			choices.add(Menus.Choice.of(Tales.text(player, run, Tale.string(suspect, "say", "{" + role + "}")), p -> {
+				if (Tales.open(p, run, at)) {
+					named(p, run, suspect, who);
+				}
+			}));
+		}
+		JsonObject none = Tale.object(step, "none");
+		MutableComponent notYet = Tales.words(player, run, none, "say");
+		choices.add(Menus.Choice.of(notYet != null ? notYet : Component.translatable("tale.jaymoskingdoms.name.not_yet"), p -> {
+			if (none.has("then") && Tales.open(p, run, at)) {
+				Tales.go(p, run, none.get("then"), who);
+			}
+		}));
+		MutableComponent say = Tales.words(player, run, step, "say");
+		TaleCast.hold(who, player);
+		Menus.ask(player, who, say != null ? say : Component.translatable("tale.jaymoskingdoms.name.ask"), choices);
+	}
+
+	/** {@code player} named {@code suspect}: believed if enough of its {@code proof} holds ({@code need}, one if unsaid), doubted if not. */
+	private static void named(ServerPlayer player, Tales.Run run, JsonObject suspect, LivingEntity who) {
+		int have = 0;
+		for (String proof : Tale.strings(suspect.get("proof"))) {
+			have += Tales.holds(player, run, proof) ? 1 : 0;
+		}
+		boolean believed = !suspect.has("doubted") || have >= Tale.number(suspect, "need", 1);
+		String role = Tale.string(suspect, "who", "");
+		String mark = Tale.string(suspect, "mark", "");
+		MutableComponent line = Tales.words(player, run, suspect, "journal");
+		Tales.each(player, run, r -> {
+			r.vars.put("named", role);
+			if (line != null) {
+				Tales.note(r, line.getString());
+			}
+		});
+		if (!mark.isEmpty()) {
+			for (ServerPlayer p : Tales.sharers(player, run)) {
+				Tales.state(p).marks.add(mark);
+			}
+		}
+		Tales.go(player, run, believed ? suspect.get("then") : suspect.get("doubted"), who);
+	}
+
+	// ---- a watch kept ----------------------------------------------------------------------------------------------------------
+
+	/**
+	 * A watch ({@code "do": "vigil"}): while {@code player} keeps near its place at its hour, its {@code lines} come one
+	 * at a time (said by one of the tale's people, or seen and heard: over the hotbar, and written down), and when the
+	 * last has, the tale goes on. Walking well away once it's begun goes the step's {@code left} way, if it has one.
+	 */
+	static void vigil(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step) {
+		if (!now(player, run, step)) {
+			return;
+		}
+		Predicate<String> facts = Tales.facts(player, run);
+		BlockPos at = Tales.place(level, run, tale, Tale.pickString(step, "at", facts, ""));
+		double dx = at.getX() + 0.5 - player.getX(), dz = at.getZ() + 0.5 - player.getZ();
+		double far = Math.sqrt(dx * dx + dz * dz);
+		int radius = Tale.number(step, "radius", VIGIL_RADIUS);
+		int n = Tales.parse(run.scratch.getOrDefault("line", "0"), 0);
+		if (far > radius) {
+			if (n > 0 && step.has("left") && far > radius * 3.0) {
+				Tales.go(player, run, step.get("left"), null);
+			}
+			return;
+		}
+		int waited = Tales.parse(run.scratch.getOrDefault("waited", "0"), 0) + 1;
+		if (waited < Tale.number(step, "gap", VIGIL_GAP) && n > 0) {
+			run.scratch.put("waited", Integer.toString(waited));
+			return;
+		}
+		List<JsonObject> lines = Tale.objects(Tale.pick(step.get("lines"), facts));
+		if (n >= lines.size()) {
+			Tales.go(player, run, step.get("then"), null);
+			return;
+		}
+		JsonObject line = lines.get(n);
+		String cond = Tale.string(line, "if", "");
+		run.scratch.put("line", Integer.toString(n + 1));
+		run.scratch.put("waited", "0");
+		if (!cond.isEmpty() && !facts.test(cond)) {
+			return;
+		}
+		MutableComponent words = Tales.words(player, run, line, "say");
+		String role = Tale.string(line, "who", "");
+		LivingEntity who = role.isEmpty() ? null : Tales.entity(level, role.equals("giver") ? run.giverId() : Tales.uuid(run.cast.get(role)));
+		if (words != null && who != null) {
+			Speech.tell(level, who, player, words, Speech.WHITE);
+		} else if (words != null) {
+			player.sendOverlayMessage(words.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			Tales.note(run, words.getString());
+		}
+		Identifier sound = Identifier.tryParse(Tale.string(line, "sound", ""));
+		SoundEvent heard = sound == null ? null : BuiltInRegistries.SOUND_EVENT.getOptional(sound).orElse(null);
+		if (heard != null) {
+			level.playSound(null, at, heard, SoundSource.AMBIENT, 1.0F, 1.0F);
+		}
+		String mark = Tale.string(line, "mark", "");
+		if (!mark.isEmpty()) {
+			Tales.state(player).marks.add(mark);
+		}
+	}
+
+	// ---- what a beast is weak to ------------------------------------------------------------------------------------------------
+
+	private static boolean carries(ServerPlayer player, String spec) {
+		Identifier id = Identifier.tryParse(spec.startsWith("#") ? spec.substring(1) : spec);
+		if (id == null) {
+			return false;
+		}
+		TagKey<Item> tag = spec.startsWith("#") ? TagKey.create(Registries.ITEM, id) : null;
+		Item item = tag != null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+		Inventory inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack s = inv.getItem(i);
+			if (!s.isEmpty() && (tag != null ? s.is(tag) : item != null && s.is(item))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The fight of {@code run}'s foe step begins: for each thing the step says the foe is {@code weak_to} that
+	 * {@code player} has learned ({@code know}) and carries ({@code item}, where it asks one), the foe has less health
+	 * and a lighter blow, the journal says why, and the bestiary gets its note.
+	 */
+	static void prepared(ServerPlayer player, Tales.Run run, JsonObject step, Mob foe) {
+		double share = 1.0;
+		for (JsonObject w : Tale.objects(step.get("weak_to"))) {
+			String know = Tale.string(w, "know", ""), item = Tale.string(w, "item", "");
+			if (!know.isEmpty() && !Tales.holds(player, run, know) || !item.isEmpty() && !carries(player, item)) {
+				continue;
+			}
+			share *= Tale.decimal(w, "share", WEAK_SHARE);
+			MutableComponent why = Tales.words(player, run, w, "journal");
+			if (why != null) {
+				Tales.each(player, run, r -> Tales.note(r, why.getString()));
+			}
+			MutableComponent note = Tales.words(player, run, w, "bestiary");
+			if (note != null) {
+				for (ServerPlayer p : Tales.sharers(player, run)) {
+					Bestiary.learned(p, foe.getName().getString(), note.getString());
+				}
+			}
+		}
+		if (share >= 1.0) {
+			return;
+		}
+		share = Math.max(WEAK_LEAST, share);
+		for (var attribute : List.of(Attributes.MAX_HEALTH, Attributes.ATTACK_DAMAGE)) {
+			AttributeInstance instance = foe.getAttribute(attribute);
+			if (instance != null) {
+				instance.setBaseValue(instance.getBaseValue() * share);
+			}
+		}
+		foe.setHealth(Math.min(foe.getHealth(), foe.getMaxHealth()));
+	}
+
+	// ---- words in a tongue you can't read -------------------------------------------------------------------------------------
+
+	/**
+	 * {@code lines}, as {@code player} can read what {@code spec} (a tale's letter, clue or thing) wrote: themselves, or
+	 * gibberish if it's in a {@code tongue} they don't speak. What reading it does ({@code mark}, {@code told}) is kept in
+	 * {@code tag} with the true words until it's read ({@link #read}).
+	 */
+	static List<Component> written(ServerPlayer player, Tales.Run run, JsonObject spec, List<Component> lines, CompoundTag tag) {
+		Languages.Tongue tongue = tongue(Tale.string(spec, "tongue", ""));
+		String mark = Tale.string(spec, "mark", "");
+		boolean veiled = tongue != null && !Languages.speaks(player, tongue);
+		if (!veiled && mark.isEmpty()) {
+			return lines;
+		}
+		JsonObject kept = new JsonObject();
+		kept.addProperty("mark", mark);
+		kept.addProperty("faction", run.faction);
+		MutableComponent told = Tales.words(player, run, spec, "told");
+		if (told != null) {
+			kept.addProperty("told", told.getString());
+		}
+		if (!veiled) {
+			tag.putString(KEY_UNREAD, kept.toString());
+			return lines;
+		}
+		kept.addProperty("tongue", tongue.id());
+		JsonArray truth = new JsonArray();
+		List<Component> out = new ArrayList<>();
+		for (int i = 0; i < lines.size(); i++) {
+			truth.add(lines.get(i).getString());
+			out.add(Languages.garble(tongue, run.instance.hashCode() * 31L + lines.get(i).getString().hashCode()));
+		}
+		kept.add("lines", truth);
+		tag.putString(KEY_UNREAD, kept.toString());
+		return out;
+	}
+
+	private static @Nullable JsonObject unread(ItemStack stack) {
+		String kept = Tales.tagged(stack, KEY_UNREAD);
+		if (kept.isEmpty()) {
+			return null;
+		}
+		try {
+			return JsonParser.parseString(kept).getAsJsonObject();
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * {@code player} looks at {@code stack}: if a tale wrote it and they can read it (it's in a tongue they speak, or one
+	 * they've learned since), its true words show and what reading it does is done. False if they still can't.
+	 */
+	static boolean read(ServerPlayer player, ItemStack stack) {
+		JsonObject kept = unread(stack);
+		if (kept == null) {
+			return true;
+		}
+		Languages.Tongue tongue = tongue(Tale.string(kept, "tongue", ""));
+		if (tongue != null && !Languages.speaks(player, tongue)) {
+			return false;
+		}
+		reveal(player, stack, kept, "");
+		return true;
+	}
+
+	/** {@code stack}'s true words are shown, its mark set ({@code how}: a suffix for how it was read), and it's a plain thing from now on. */
+	private static void reveal(ServerPlayer player, ItemStack stack, JsonObject kept, String how) {
+		List<Component> lines = new ArrayList<>();
+		for (String line : Tale.strings(kept.get("lines"))) {
+			lines.add(Component.literal(line));
+		}
+		Letters.Letter letter = Letters.of(stack);
+		if (!lines.isEmpty() && letter != null) {
+			stack.set(Letters.CONTENTS, new Letters.Letter(letter.to(), letter.from(), lines, letter.title()));
+		} else if (!lines.isEmpty()) {
+			stack.set(DataComponents.LORE, new ItemLore(lines.stream()
+				.map(l -> (Component)l.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY))).toList()));
+		}
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		CompoundTag tag = data == null ? new CompoundTag() : data.copyTag();
+		tag.remove(KEY_UNREAD);
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		String mark = Tale.string(kept, "mark", "");
+		if (!mark.isEmpty()) {
+			Tales.state(player).marks.add(mark);
+			if (!how.isEmpty()) {
+				Tales.state(player).marks.add(mark + how);
+			}
+		}
+		player.containerMenu.broadcastChanges();
+	}
+
+	/**
+	 * {@code player} holds out something they can't read to {@code who}: a priest or a librarian reads it to them for a
+	 * coin. They know what it says from then on, and now and then their town hears of it ({@code told}). True if
+	 * {@code who} is one who reads and the thing is one that wants reading (the offer's made).
+	 */
+	static boolean reader(ServerPlayer player, LivingEntity who, ItemStack held) {
+		JsonObject kept = unread(held);
+		if (kept == null || !kept.has("tongue") || !(who instanceof Villager v) || v.isBaby() || TaleCast.cast(who) != null
+			|| !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		String job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
+		if (!job.equals("cleric") && !job.equals("librarian")) {
+			return false;
+		}
+		Faction f = Quests.settlement(level, v);
+		long cost = Money.worth(READ_COINS);
+		List<Menus.Choice> choices = new ArrayList<>();
+		choices.add(Menus.Choice.of(Component.translatable("tale.jaymoskingdoms.reader.pay", Money.text(f, cost)), Money.canPay(player, f, cost), p -> {
+			ItemStack now = p.getMainHandItem();
+			JsonObject still = unread(now);
+			if (still == null || !still.has("tongue") || !v.isAlive() || !Money.charge(p, f, cost)) {
+				return;
+			}
+			reveal(p, now, still, ":aloud");
+			Speech.tell(level, v, p, Component.translatable("tale.jaymoskingdoms.reader.read." + level.getRandom().nextInt(2)), Speech.WHITE);
+			level.playSound(null, v.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1.0F, 0.9F);
+			String told = Tale.string(still, "told", "");
+			if (!told.isEmpty() && f != null && level.getRandom().nextFloat() < READER_TALKS) {
+				Overheard.townTalk(p, f.id(), List.of(Component.literal(told)), false);
+				String mark = Tale.string(still, "mark", "");
+				if (!mark.isEmpty()) {
+					Tales.state(p).marks.add(mark + ":told");
+				}
+			}
+		}));
+		choices.add(Menus.Choice.of(Component.translatable("tale.jaymoskingdoms.reader.no"), p -> {
+		}));
+		TaleCast.hold(who, player);
+		Menus.ask(player, who, Component.translatable("tale.jaymoskingdoms.reader.offer"), choices);
+		return true;
+	}
+
+	// ---- what comes later ---------------------------------------------------------------------------------------------------------
+
+	private static JsonArray filled(ServerPlayer player, Tales.Run run, @Nullable JsonElement lines) {
+		JsonArray out = new JsonArray();
+		for (String line : Tale.strings(Tale.pick(lines, Tales.facts(player, run)))) {
+			out.add(Tales.text(player, run, line).getString());
+		}
+		return out;
+	}
+
+	/**
+	 * {@code run} ended with {@code ending}: what it brings {@code later} (each: {@code days}, and any of a
+	 * {@code letter}, {@code town} talk, a {@code scene} between two of the town, someone who {@code settles} there, a
+	 * {@code mark}) is put by for its day, its words filled in now while the tale still knows its names.
+	 */
+	static void schedule(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject ending) {
+		for (JsonObject l : Tale.objects(ending.get("later"))) {
+			String cond = Tale.string(l, "if", "");
+			if (!cond.isEmpty() && !Tales.holds(player, run, cond)) {
+				continue;
+			}
+			JsonObject what = new JsonObject();
+			JsonObject letter = Tale.object(l, "letter");
+			if (!letter.isEmpty()) {
+				JsonObject sent = letter.deepCopy();
+				sent.addProperty("from", Tales.text(player, run, Tale.string(letter, "from", "")).getString());
+				sent.add("lines", filled(player, run, letter.get("lines")));
+				MutableComponent told = Tales.words(player, run, letter, "told");
+				if (told != null) {
+					sent.addProperty("told", told.getString());
+				}
+				what.add("letter", sent);
+			}
+			if (l.has("town")) {
+				what.add("town", filled(player, run, l.get("town")));
+			}
+			JsonArray scene = new JsonArray();
+			for (JsonElement line : l.get("scene") instanceof JsonArray a ? a : new JsonArray()) {
+				if (line instanceof JsonArray pair && pair.size() == 2) {
+					scene.add(pair.get(0).getAsString() + "|" + Tales.text(player, run, pair.get(1).getAsString()).getString());
+				}
+			}
+			if (!scene.isEmpty()) {
+				what.add("scene", scene);
+			}
+			String settles = Tale.string(l, "settles", "");
+			JsonObject body = settles.isEmpty() || run.vars.containsKey(Tales.DEAD + settles) ? null : tale.role(settles);
+			if (body != null) {
+				JsonObject who = new JsonObject();
+				who.addProperty("name", run.names.getOrDefault(settles, ""));
+				who.add("body", body);
+				what.add("settles", who);
+			}
+			if (l.has("mark")) {
+				what.addProperty("mark", Tale.string(l, "mark", ""));
+			}
+			if (!what.isEmpty()) {
+				Tales.state(player).later.add(new Later(Tales.day(level) + Tale.between(l.get("days"), 10, level.getRandom()), run.faction, what.toString()));
+			}
+		}
+	}
+
+	/**
+	 * {@code player} told a lie ({@code lie} on the reply they chose: its {@code name}, the {@code days} until it can come
+	 * out, {@code unless} something has covered it by then, and what it costs: {@code town} talk, {@code reputation},
+	 * {@code hearts} with the one lied to). It's marked {@code lie:<name>} now and {@code caught:<name>} if it comes out.
+	 */
+	static void lied(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject lie) {
+		String name = Tale.string(lie, "name", "");
+		if (name.isEmpty()) {
+			return;
+		}
+		JsonObject kept = new JsonObject();
+		kept.addProperty("name", name);
+		kept.addProperty("unless", Tale.string(lie, "unless", ""));
+		kept.add("town", filled(player, run, lie.get("town")));
+		kept.addProperty("reputation", Tale.number(lie, "reputation", 0));
+		kept.addProperty("hearts", Tale.number(lie, "hearts", 0));
+		kept.addProperty("to", run.giver);
+		JsonObject what = new JsonObject();
+		what.add("lie", kept);
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			Tales.State s = Tales.state(p);
+			s.marks.add("lie:" + name);
+			s.later.add(new Later(Tales.day(level) + Tale.between(lie.get("days"), 7, level.getRandom()), run.faction, what.toString()));
+		}
+	}
+
+	private static List<Component> literal(@Nullable JsonElement lines) {
+		List<Component> out = new ArrayList<>();
+		for (String line : Tale.strings(lines)) {
+			out.add(Component.literal(line));
+		}
+		return out;
+	}
+
+	/** What's come due of what {@code player}'s tales left for later (one thing that needs a runner at a time). */
+	static void later(ServerLevel level, ServerPlayer player, Tales.State s, long today) {
+		for (Later l : new ArrayList<>(s.later)) {
+			if (today < l.day()) {
+				continue;
+			}
+			JsonObject what;
+			try {
+				what = JsonParser.parseString(l.what()).getAsJsonObject();
+			} catch (RuntimeException e) {
+				s.later.remove(l);
+				continue;
+			}
+			boolean stale = today > l.day() + LATER_KEPT;
+			Faction f = l.faction() < 0 ? null : Factions.get(level.getServer(), l.faction());
+			JsonObject letter = Tale.object(what, "letter");
+			JsonObject settles = Tale.object(what, "settles");
+			if (!stale && !letter.isEmpty() && !TaleCast.canVisit(level, player)) {
+				continue;
+			}
+			if (!stale && !settles.isEmpty() && f != null && (player.level() != level || !player.blockPosition().closerThan(f.seat(), SETTLE_NEAR)
+				|| !level.isPositionEntityTicking(f.seat()))) {
+				continue;
+			}
+			s.later.remove(l);
+			if (stale) {
+				continue;
+			}
+			JsonObject lie = Tale.object(what, "lie");
+			if (!lie.isEmpty()) {
+				caught(level, player, s, f, lie);
+			}
+			if (what.has("mark")) {
+				s.marks.add(Tale.string(what, "mark", ""));
+			}
+			if (f != null) {
+				Overheard.townTalk(player, f.id(), literal(what.get("town")), false);
+				Overheard.owe(player, f.id(), Tale.strings(what.get("scene")));
+			}
+			if (!settles.isEmpty() && f != null) {
+				TaleCast.settle(level, Tale.object(settles, "body"), Tale.string(settles, "name", ""), f.seat());
+			}
+			if (!letter.isEmpty()) {
+				// (written by the tale's own hand: the run it came from is over, so its words were filled in when it ended)
+				Tales.Run blank = new Tales.Run("later:" + l.day(), "", "", "", "", "", l.faction(), player.blockPosition().asLong(), -1L, false,
+					Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of());
+				CompoundTag tag = new CompoundTag();
+				List<Component> lines = written(player, blank, letter, literal(letter.get("lines")), tag);
+				ItemStack stack = Letters.sealed(new Letters.Letter(Post.nameOf(player).getString(), Component.literal(Tale.string(letter, "from", "")), lines, Optional.empty()));
+				if (!tag.isEmpty()) {
+					stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+				}
+				TaleCast.sendLetter(level, player, stack, () -> {
+				});
+				return;
+			}
+		}
+	}
+
+	/** A lie's day has come: unless something covered it, it's out. The one lied to and their town think the less of the liar. */
+	private static void caught(ServerLevel level, ServerPlayer player, Tales.State s, @Nullable Faction f, JsonObject lie) {
+		String unless = Tale.string(lie, "unless", "");
+		if (!unless.isEmpty() && Tales.holds(player, null, unless)) {
+			return;
+		}
+		s.marks.add("caught:" + Tale.string(lie, "name", ""));
+		LivingEntity to = Tales.entity(level, Tales.uuid(Tale.string(lie, "to", "")));
+		if (to != null) {
+			Recollections.remember(to, player, Recollections.Kind.LIED, Component.empty());
+			if (Tale.number(lie, "hearts", 0) != 0) {
+				McaCompat.hearts(to, player, -Math.abs(Tale.number(lie, "hearts", 0)));
+			}
+		}
+		if (f != null) {
+			if (Tale.number(lie, "reputation", 0) != 0) {
+				Reputation.change(player, f, -Math.abs(Tale.number(lie, "reputation", 0)));
+			}
+			Overheard.townTalk(player, f.id(), literal(lie.get("town")), true);
+		}
+	}
+
+	/** A try's place in a run's bookkeeping: the step, and which of its replies. */
+	static String tried(Tales.Run run, int reply) {
+		return TRIED + run.step + "#" + reply;
+	}
+}

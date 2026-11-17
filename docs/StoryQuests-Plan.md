@@ -285,7 +285,7 @@ for days between its parts (three to five waits in each, 1 to 10 days long), and
   from everyone near for the first if it went well, a shake of the head if badly. A town held through the night
   thanks you the same way. A toast at the tavern or a tended grave happens only where a tale's own words say so.
 
-**Left for later (not in the picks):** time-of-day or moon conditions on a step; a cast member whose body changes with the roll; a tale-only item for `stash` and `build`.
+**Left for later (not in the picks):** a cast member whose body changes with the roll; a tale-only item for `stash` and `build`. (Time-of-day and moon conditions came with section 7.)
 
 ## 6. Kidnapping (lasso work)
 
@@ -337,3 +337,116 @@ as two more kinds of board work and a new class, `Captures.java`. **Not played.*
   The Asking Price uses both.
 - **Not in this:** outlaws who come to a town to carry someone off.
 
+## 7. A real medieval feel (the 2026-11-17 picks)
+
+Andy's 48 picks: twelve changes to how every tale plays, one addition to each of the nineteen tales, and seventeen new
+tales. Inspiration only (deadlines that don't wait, people who keep hours, a word that may or may not land, contracts
+you prepare for): the stories, names and people are ours, and each new thing is placed in `Lore.md`. The code is
+`TaleWays.java` (everything below), called from `Tales.java` and `TaleCast.java`; `tools/tale_check.py` checks every field.
+
+### more conditions
+
+Anywhere a condition goes (`if`, `needs`, `bars`, a switch's `?` key), besides `mark:`, `done:`, `powers` and a roll:
+
+| condition | holds when |
+| --- | --- |
+| `night`, `day` | the hour (night is dusk to just before dawn) |
+| `moon:full`, `moon:new`, `moon:blood` | tonight's moon |
+| `human`, `heritage:<kind>` | the player's blood (`heritage:nightborn`); `human` is the five human bloods |
+| `patron:<key>`, `patron:none` | who they're sworn to (`patron:lantern_warden`) |
+| `reputation>=N`, `reputation<N` | their standing with the tale's settlement |
+| `hearts>=N`, `hearts<N` | MCA hearts with whoever the open step is with (its `who`, else the asker) |
+| `coins>=N`, `coins<N` | what's in their purse, in the settlement's coin |
+| `dress:fine`, `dress:plain`, `dress:ragged`, `dress:armoured`, `dress:bloodied` | how they look: `armoured` is heavy armour, `bloodied` is blood on them (Powers), `fine` is something of the `fine_dress` item tag, `ragged` the `ragged_dress` tag or a piece worn nearly through, `plain` none of fine, ragged or armoured |
+| `reads:<tongue>` | they speak that tongue (`common`, `northern`, `southern`, `wildwood`, `blossom`, `old`) |
+| `late:<clock>` | that clock has run out |
+| `since:<tale>>=N` | that tale ended at least N days ago (false if it never has) |
+| `met:<role>` | they've spoken with, or stood near, that one of the cast |
+| `companion`, `companion:<belief>` | a companion is with them (one who holds that belief) |
+
+### time doesn't wait: `within`, `late`, `clock`, `until`
+
+Any step may have `"within": 3` (or `[2, 4]`): the days it stays open. When they're gone the tale goes its `"late"` way
+(a step or an ending), whether the player is there or not; the two fields go together. `"until"` is the deadline as the
+asker would say it, shown after the goal with the days counted: `Bring the ransom to the mill (before the miller locks
+up; by tomorrow)`. A deadline that runs across several steps is a clock: one step starts it with `"clock": { "raid": 3 }`,
+later steps say `"within": "raid"`, text can say `{left:raid}`, and `late:raid` is a condition.
+
+### day and night: `when`, `hours`, `not_now`, the `tavern`
+
+`"when": "night"` (or `day`, `moon:full`, `moon:new`) on a step: it can only be done then. Someone to speak with says
+their `"not_now"` line outside it (or a stock one), a place only counts by that light, a search finds nothing, a fight
+doesn't begin; the log says "(after dark)". A cast member with `"hours": "night"` (or `day`) is only at their place in
+those hours. A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
+
+### a word that may or may not land: `try`
+
+On a reply: `"try": { "how": "persuade" | "threaten" | "bribe", "odds": -2..2, "coins": N, "helps": [conditions],
+"hurts": [conditions], "fail": <then>, "refuse": "what they say" }`. The lot is drawn from the listener's temperament,
+their hearts for the player, the player's standing, and what they remember of them; a threat instead weighs armour,
+blood, and having cut down someone who yielded. The reply shows how it's likely to go in words: long odds, not likely,
+might listen, likely to listen. A try is made once. Failed, the tale goes the try's `fail` way, or the talk goes on
+without that reply. A bribe's `coins` are its price before the listener's greed (the greedy ask half again, the proud
+won't be bought); `{price}` in the reply's words is what this listener asks, and the coin is only taken if they take it.
+Being bought or threatened is remembered.
+
+### naming who did it: `"do": "name"`
+
+`{ "do": "name", "who": <whom you tell>, "say": ..., "suspects": [ { "who": role, "say": "It was {role}.",
+"proof": [conditions], "need": 1, "then": ..., "doubted": ..., "mark": ..., "journal": ... } ], "none": { "say", "then" } }`.
+Only suspects the player has met are offered, with "I can't say yet". If enough of a suspect's `proof` holds (clues
+set marks: a clue may have `"mark"`), it goes `then`; if not, `doubted`. `{named}` is whoever was named. A wrong name
+leads wherever the tale sends it, and its ending's `marks` remember it.
+
+### a night's watch: `"do": "vigil"`
+
+`{ "do": "vigil", "at": place, "radius": 12, "gap": 10, "when": "night", "lines": [ { "who": role, "say": ... } |
+{ "say": ..., "sound": "minecraft:entity.wolf.howl" } ], "left": <then>, "then": ... }`. While the player keeps near
+the place at its hour the lines come one at a time: a cast member's as a speech bubble, the rest over the hotbar and
+into the journal, with a sound if given. A line may have `if` and `mark`. Walking well away once it's begun goes `left`.
+
+### know the beast: `weak_to`
+
+On a foe step: `"weak_to": [ { "know": condition, "item": id or #tag, "share": 0.7, "journal": "why it was easier",
+"bestiary": "the note" } ]`. For each one the player has learned (`know`) and carries (`item`, where asked) when the
+fight begins, the foe's health and blow are cut to that share (never below 35%), the journal says why, and the Greasy
+Bestiary gets a page under the foe's name.
+
+### companions speak up: `for`, `irks`, `voices`
+
+Replies may say what they stand `"for"` and what they `"irk"` (lists of beliefs: mercy, faith, law, courage, honour,
+gain, vengeance). Before the choice, one companion who holds a belief it turns on says so (the step's `"voices":
+{ "mercy": "..." }`, or a stock line). After it, companions who held what it stood for are a little closer (bond +3)
+and those it irked a little further (bond -3), and one says so. Only a bond emptied that way makes one leave;
+`against` is still the grave kind that sends them off there and then.
+
+### it comes back weeks later: `later`
+
+On an ending: `"later": [ { "days": [10, 40], "if": condition, "letter": { from, lines }, "town": [lines],
+"scene": [["a", "..."], ["b", "..."]], "settles": role, "mark": "..." } ]`. On its day a runner brings the letter, the
+town has its lines to say, two of its folk have the scene where the player can hear, the cast member comes to live in
+the town as an ordinary villager (when the player is next there), the mark is set. Words are filled in when the tale
+ends, so they can use its names.
+
+### letters you can't read: `tongue`, `mark`, `told`
+
+A letter, a clue or a thing a step gives may have `"tongue": "old"`. To a player who doesn't speak it the words are
+gibberish. They show once the player speaks the tongue (use the thing), or once a priest or a librarian has read it to
+them for a coin (hold it out to one). `"mark"` is set when its true words are known (and `<mark>:aloud` if it was read
+to them). `"told"` is what the reader may tell their town afterwards, about half the time (`<mark>:told` if they do). A
+letter that starts or wakes a tale does nothing until it can be read.
+
+### lies come out: `lie`
+
+On a reply: `"lie": { "name": "road_took_her", "days": [6, 14], "unless": condition, "town": [lines],
+"reputation": 15, "hearts": 40 }`. `lie:<name>` is marked at once. On its day, unless the condition holds by then, the
+lie is out: `caught:<name>` is marked, the one lied to remembers it and loses those hearts, the town thinks that much
+less of the player and has the lines to say. Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
+
+### notices, and tales that grow
+
+`"start": { "by": "notice", "notice": { "title", "lines", "hand" } }`: now and then a villager whose trade suits
+(`jobs`) nails the tale up on the town board in their own hand. Pulled off, the tale is the player's, the paper with
+it, and the poster is its asker (it opens with a talk with `giver`). `"arc": "The Black Candle"` at the top of a tale
+lists it under that name in the journal; its parts are linked by `needs` on `done:` and marks, with `since:` to space
+them, and each part's start can switch on how the last one ended.

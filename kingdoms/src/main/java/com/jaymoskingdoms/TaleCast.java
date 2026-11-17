@@ -371,6 +371,10 @@ final class TaleCast {
 			if (!e.getKey().equals(who) && (Tale.flag(body, "late") || !only.isEmpty() && !Tales.holds(player, run, only))) {
 				continue;
 			}
+			// (someone who keeps hours isn't there outside them)
+			if (!hours(player, run, body)) {
+				continue;
+			}
 			// (a captive or a criminal is set out by their kidnapping job, bound or armed at its camp: QuestJobs)
 			if (e.getKey().equals(who) && (kind.equals("rescue") || kind.equals("capture"))) {
 				continue;
@@ -380,12 +384,33 @@ final class TaleCast {
 				setOut(level, player, run, e.getKey(), body, ground);
 			}
 		}
+		for (Map.Entry<String, String> e : new ArrayList<>(run.cast.entrySet())) {
+			Mob there = find(level, e.getValue());
+			JsonObject theirs = tale.role(e.getKey());
+			if (there == null || theirs == null) {
+				continue;
+			}
+			if (there.distanceToSqr(player) <= TaleWays.MEET_RANGE * TaleWays.MEET_RANGE && !run.vars.containsKey(TaleWays.MET + e.getKey())) {
+				// (stood this near, they've been met: they can be named)
+				Tales.each(player, run, r -> r.vars.put(TaleWays.MET + e.getKey(), "1"));
+			}
+			Cast c = there.getAttached(CAST);
+			if (!hours(player, run, theirs) && c != null && !c.fight() && !c.yielded() && !HELD.containsKey(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE)) {
+				// (their hours are over: they've gone home, and are back when the hours are)
+				LOADED.remove(there);
+				McaCompat.vanish(there);
+				Tales.each(player, run, r -> r.cast.remove(e.getKey()));
+			}
+		}
 		JsonObject body = who.isEmpty() || who.equals("giver") ? null : tale.role(who);
 		if (body == null || !run.cast.containsKey(who)) {
 			return;
 		}
 		Mob mob = find(level, run.cast.get(who));
 		if (mob == null) {
+			if (!hours(player, run, body)) {
+				return;
+			}
 			// (gone missing: killed while nobody was by, or lost with their chunk. They're there again when the player is.)
 			String key = Tale.string(body, "at", "");
 			Long left = run.places.get("@" + who);
@@ -403,6 +428,21 @@ final class TaleCast {
 		if (kind.equals("foe")) {
 			fight(level, player, run, step, mob);
 		}
+	}
+
+	/** Whether one of the cast is about at this hour ({@code "hours"}: a condition, {@code night} or {@code day}). */
+	private static boolean hours(ServerPlayer player, Tales.Run run, JsonObject body) {
+		String hours = Tale.string(body, "hours", "");
+		return hours.isEmpty() || Tales.holds(player, run, hours);
+	}
+
+	private static boolean nobodyWithin(ServerPlayer player, Tales.Run run, Mob mob, double range) {
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			if (p.level() == mob.level() && p.distanceToSqr(mob) <= range * range) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static int parse(String s) {
@@ -445,9 +485,12 @@ final class TaleCast {
 		}
 		long now = level.getGameTime();
 		if (!c.fight() && !c.yielded()) {
-			if (foe.distanceToSqr(player) > 24.0 * 24.0) {
+			// (a fight that only comes at its hour, "when", doesn't begin outside it)
+			if (foe.distanceToSqr(player) > 24.0 * 24.0 || !TaleWays.now(player, run, step)) {
 				return;
 			}
+			// (what's been learned of it, and brought against it, tells before the first blow)
+			TaleWays.prepared(player, run, step, foe);
 			rouse(foe, c, player);
 			for (Mob man : men(level, foe, c)) {
 				Cast mc = man.getAttached(CAST);
@@ -592,6 +635,16 @@ final class TaleCast {
 		if (mob != null) {
 			joined(mob, player);
 		}
+	}
+
+	/**
+	 * ({@link TaleWays#later}) Someone of a tale that's over comes to live at {@code seat}: an ordinary villager from now
+	 * on, with the name and the trade the tale gave them.
+	 */
+	static void settle(ServerLevel level, JsonObject body, String name, BlockPos seat) {
+		BlockPos at = Construction.standable(level, seat.offset(level.getRandom().nextInt(9) - 4, 0, level.getRandom().nextInt(9) - 4), 4);
+		Boolean female = body.has("female") ? Tale.flag(body, "female") : null;
+		McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), profession(Tale.string(body, "job", "none")), female, name, false);
 	}
 
 	private static void joined(Mob mob, ServerPlayer player) {

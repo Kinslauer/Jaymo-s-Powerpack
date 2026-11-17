@@ -124,11 +124,17 @@ final class Tale {
 		return string(json, "title", id);
 	}
 
+	/** Its title as the journal lists it: under its arc's name, if it's one part of a longer story ({@code "arc"}). */
+	String listed() {
+		String arc = string(json, "arc", "");
+		return arc.isEmpty() ? title() : arc + ": " + title();
+	}
+
 	JsonObject start() {
 		return object(json, "start");
 	}
 
-	/** How it starts: giver, rumour, book, letter or companion. */
+	/** How it starts: giver, rumour, book, letter, companion, found or notice. */
 	String by() {
 		return string(start(), "by", "giver");
 	}

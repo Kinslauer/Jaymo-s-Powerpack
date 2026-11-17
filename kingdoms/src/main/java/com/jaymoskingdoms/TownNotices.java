@@ -61,6 +61,8 @@ final class TownNotices {
 	static final int HELP = -2;
 	/** A notice of paid work ({@link BoardWork}): its kind. */
 	static final int WORK = -3;
+	/** A notice that starts a tale ({@code town|tale.<id>|<poster>|...}, {@link Tales#notice}): its kind. */
+	static final int TALE = -4;
 
 	static Item ITEM;
 
@@ -88,6 +90,11 @@ final class TownNotices {
 
 		boolean work() {
 			return kind == WORK;
+		}
+
+		/** The tale this notice starts, or null. */
+		@Nullable Tale tale() {
+			return kind == TALE ? Tale.get(key.substring(5)) : null;
 		}
 
 		Careers.@Nullable Job job() {
@@ -169,6 +176,10 @@ final class TownNotices {
 		if (p[1].startsWith("work.")) {
 			return BoardWork.kind(p[1]) == null ? null : new N(p[1], WORK, "", 0, 0, 0);
 		}
+		if (p[1].startsWith("tale.")) {
+			Tale tale = Tale.get(p[1].substring(5));
+			return tale == null || !tale.by().equals("notice") ? null : new N(p[1], TALE, "", 0, 0, 0);
+		}
 		if (p[1].startsWith("tidings.")) {
 			// (0.7.424) the world's news, while it's kept
 			return Post.posted(p[1].substring(8)) == null ? null : N.news(p[1]);
@@ -212,6 +223,13 @@ final class TownNotices {
 			Post.Posted news = Post.postable(heard.getServer(), board, up);
 			if (news != null) {
 				return "town|tidings." + news.id() + "|" + board + "|" + now;
+			}
+		}
+		if (random.nextFloat() < Tales.NOTICE_CHANCE) {
+			// someone's own trouble, nailed up in their own hand: a tale
+			String tale = Tales.notice(poster, up, random);
+			if (tale != null) {
+				return "town|tale." + tale + "|" + poster.getStringUUID() + "|" + now;
 			}
 		}
 		if (random.nextFloat() < BoardWork.CHANCE && poster.level() instanceof ServerLevel world) {
@@ -266,6 +284,10 @@ final class TownNotices {
 		if (n.work()) {
 			return BoardWork.title(n.key());
 		}
+		Tale tale = n.tale();
+		if (tale != null) {
+			return Component.literal(Tale.string(Tale.object(tale.start(), "notice"), "title", tale.title()));
+		}
 		return Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".title");
 	}
 
@@ -283,7 +305,19 @@ final class TownNotices {
 			: n.help() ? Component.translatable("quest.jaymoskingdoms.town.help.lore")
 			: n.work() ? BoardWork.lore(n.key())
 			: Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".text");
-		List<Component> lines = news != null ? Post.wrap(news.line()) : List.of(words);
+		List<Component> lines = new ArrayList<>(news != null ? Post.wrap(news.line()) : List.of(words));
+		Tale tale = n.tale();
+		if (tale != null) {
+			// (its own words, and whose hand they're in)
+			lines.clear();
+			for (String line : Tale.strings(Tale.object(tale.start(), "notice").get("lines"))) {
+				lines.add(Component.literal(line));
+			}
+			String hand = Tale.string(Tale.object(tale.start(), "notice"), "hand", "");
+			if (!hand.isEmpty()) {
+				lines.add(Component.translatable("quest.jaymoskingdoms.town.tale.hand", hand));
+			}
+		}
 		stack.set(DataComponents.LORE, new ItemLore(lines.stream()
 			.map(line -> (Component) line.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY))).toList()));
 		CompoundTag tag = new CompoundTag();
@@ -309,7 +343,7 @@ final class TownNotices {
 		if (n == null) {
 			return true;
 		}
-		if (!n.errand() && !n.help() && !n.work()) {
+		if (!n.errand() && !n.help() && !n.work() && n.tale() == null) {
 			ItemStack paper = item(level, key);
 			if (!player.getInventory().add(paper)) {
 				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
@@ -335,6 +369,17 @@ final class TownNotices {
 		}
 		if (n.work()) {
 			return BoardWork.take(level, player, giver, f, n.key());
+		}
+		if (n.tale() != null) {
+			// (the tale is theirs, and the paper with it)
+			if (!Tales.pulled(level, player, n.key().substring(5), giver, f)) {
+				return false;
+			}
+			ItemStack paper = item(level, key);
+			if (!player.getInventory().add(paper)) {
+				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			return true;
 		}
 		RandomSource random = level.getRandom();
 		String job = giver instanceof Villager v
