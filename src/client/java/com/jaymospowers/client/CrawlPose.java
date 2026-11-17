@@ -193,6 +193,8 @@ public final class CrawlPose {
 	 * body ({@link #BACK_PIVOT} blocks up it) so you end face up with your feet toward where you look, MGSV-style.
 	 */
 	static final float BACK_TURN_TICKS = 10.0F, BACK_PIVOT = 0.9F;
+	/** The log roll's arms (Snake's, from Metal Gear, as a motion reference): bent up across the chest (pitch) and turned in toward each other (radians). */
+	static final float ROLL_ARM_X = -1.35F, ROLL_ARM_IN = 0.6F;
 	/** On the back: the head up off the ground looking down past the feet; the arms at rest, or brought up to aim (radians). */
 	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
 	/** On the back: one knee up, the other leg out straight (radians). */
@@ -259,10 +261,6 @@ public final class CrawlPose {
 		long time = player.level().getGameTime();
 		Float roll = player == Minecraft.getInstance().player ? CrawlTaps.localRollProgress(time, partialTicks)
 			: Crawl.rollProgress(player, time, partialTicks);
-		if (roll == null) {
-			// the dodge's roll, which starts only lying prone: the same log roll, turned over more than once
-			roll = com.jaymospowers.client.stamina.DodgeRollPose.crawlRoll(player, partialTicks);
-		}
 		boolean downed = Downed.isDowned(player);
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
 		Long rising = downed ? player.getAttached(Downed.RISING) : null;
@@ -502,9 +500,9 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl.roll() != null) {
-			// log roll: arms straight out past the head, legs together
-			f.set(PoseBlend.RIGHT_ARM, -Mth.PI, 0.0F, 0.12F);
-			f.set(PoseBlend.LEFT_ARM, -Mth.PI, 0.0F, -0.12F);
+			// log roll, Snake's way: the arms folded in to the chest (round a weapon), legs together
+			f.set(PoseBlend.RIGHT_ARM, ROLL_ARM_X, -ROLL_ARM_IN, 0.0F);
+			f.set(PoseBlend.LEFT_ARM, ROLL_ARM_X, ROLL_ARM_IN, 0.0F);
 			f.set(PoseBlend.RIGHT_LEG, 0.0F, 0.0F, 0.03F);
 			f.set(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -0.03F);
 			f.set(PoseBlend.BODY + 1, 0.0F);

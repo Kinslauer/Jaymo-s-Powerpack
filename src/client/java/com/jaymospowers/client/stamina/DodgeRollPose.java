@@ -25,8 +25,6 @@ import org.jspecify.annotations.Nullable;
  * <p>Your own roll draws at once from {@link DodgeClient}; everyone else's from the synced {@link Dodge#ROLLING}. In
  * first person the view tumbles with it ({@link #applyCamera}) and dips toward the ground; your own body drawn there
  * (First-person Model) stays upright rather than swinging through the camera.
- * <p>The roll on the ground now starts only lying prone ({@link Dodge#canRollFrom}), so it is a log roll drawn by the
- * crawl's own pose ({@code CrawlPose}, from {@link #crawlRoll}); the tumble here is left to the flip in the air.
  */
 public final class DodgeRollPose {
 	// ===== the knobs ================================================================================================
@@ -78,14 +76,12 @@ public final class DodgeRollPose {
 		long start;
 		float x, z;
 		boolean flip;
-		int ticks;
 		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
 			// our own roll: drawn the moment we hop, not when the server's copy comes back
 			start = DodgeClient.rollStart;
 			x = DodgeClient.rollX;
 			z = DodgeClient.rollZ;
 			flip = DodgeClient.rollFlip;
-			ticks = flip ? Dodge.FLIP_TICKS : DodgeClient.rollTicks;
 		} else {
 			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
 			if (rolling == null) {
@@ -95,51 +91,10 @@ public final class DodgeRollPose {
 			x = rolling.x();
 			z = rolling.z();
 			flip = rolling.flip();
-			ticks = rolling.ticks();
 		}
-		float t = (now - start + partialTicks) / Math.max(1, ticks);
-		// (a flip in the air is a flip for everyone; a roll lying prone is the crawl's to draw, #crawlRoll)
-		return t < 0.0F || t >= 1.0F || !flip && com.jaymospowers.core.Crawl.crawling(player) ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
-	}
-
-	/**
-	 * A prone roll ({@link Dodge#canRollFrom}) as the crawl's pose draws a roll ({@code Crawl#rollProgress}): how far
-	 * through the current turn over (0 to 1), positive rolling right, negative left; null when not in one. The
-	 * {@link Dodge#ROLL_TURNS} turns are eased as a whole, slow to start and to settle.
-	 */
-	public static @Nullable Float crawlRoll(Player player, float partialTicks) {
-		long now = player.level().getGameTime();
-		long start;
-		float x, z;
-		int ticks;
-		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
-			if (DodgeClient.rollFlip) {
-				return null;
-			}
-			start = DodgeClient.rollStart;
-			x = DodgeClient.rollX;
-			z = DodgeClient.rollZ;
-			ticks = DodgeClient.rollTicks;
-		} else {
-			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
-			if (rolling == null || rolling.flip()) {
-				return null;
-			}
-			start = rolling.start();
-			x = rolling.x();
-			z = rolling.z();
-			ticks = rolling.ticks();
-		}
-		float t = (now - start + partialTicks) / Math.max(1, ticks);
-		if (t < 0.0F || t >= 1.0F) {
-			return null;
-		}
-		float turns = t * t * (3.0F - 2.0F * t) * Dodge.ROLL_TURNS;
-		float part = Math.min(turns - Mth.floor(turns), 0.9999F);
-		// right of where the body faces is (-cos yaw, -sin yaw), as the crawl's own roll goes
-		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-		boolean right = -x * Mth.cos(yaw) - z * Mth.sin(yaw) > 0.0F;
-		return right ? part : -part;
+		float t = (now - start + partialTicks) / (flip ? Dodge.FLIP_TICKS : Dodge.ROLL_TICKS);
+		// (a flip in the air is a flip for everyone)
+		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
 	}
 
 	/** How tucked the body is (0 to 1): curling in at the start, opening out to land on its feet. */

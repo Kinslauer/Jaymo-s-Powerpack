@@ -45,20 +45,13 @@ import net.minecraft.world.phys.Vec3;
  * <p>(0.15.74) The roll: {@link #ROLLING} is synced to everyone so they see the body tumble the way you went
  * ({@code DodgeRollPose}); your own client draws it at once. While it rolls the body is a block high at most
  * ({@link #rollingLow}), so a roll goes under a low gap.
- * <p>Andy: "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your
- * gear has. To an upper limit." Then: "you can only initiate the roll from prone, and you should stay until you get up".
- * The roll is started only lying prone ({@link #canRollFrom}): a log roll to the side you hold (right with none), over
- * {@link #ROLL_TURNS} times, carrying you along the ground at {@link #ROLL_PACE} for its whole length (no hop), and you
- * are still prone at its end. Your armour's weight ({@link #heft}) stretches it out, at most {@link #HEAVY_SLOW} times as long.
  */
 public final class Dodge {
 	// ===== the knobs ================================================================================================
 	/** Feathers a dodge costs (half-feathers: 6 is three icons). */
 	public static final int COST = 6;
-	/** The roll's pace along the ground for an unarmoured body (blocks/tick), kept up for the whole turn. */
-	public static final double ROLL_PACE = 0.2;
-	/** How many times the body turns over along its length in a roll (whole turns: you end the way up you began). */
-	public static final int ROLL_TURNS = 2;
+	/** The hop: speed along the ground and up (blocks/tick). */
+	public static final double SPEED = 0.85, UP = 0.2;
 	/** Ticks between dodges. */
 	public static final int COOLDOWN = 10;
 	/** Ticks from the start in which a blow or projectile misses. */
@@ -67,13 +60,8 @@ public final class Dodge {
 	public static final float EXHAUSTION = 0.4F;
 	/** The server lets a dodge through this many ticks early (client and server clocks differ a little). */
 	static final int COOLDOWN_SLACK = 3;
-	/** How long the roll takes with no armour on (ticks): one full turn. */
-	public static final int ROLL_TICKS = 18;
-	/**
-	 * Gear weight: armour points plus armour toughness at which the roll is slowest (full netherite is 32), and how many
-	 * times longer (and slower) the roll is there. Nothing past it slows it more.
-	 */
-	public static final float HEAVIEST = 32.0F, HEAVY_SLOW = 1.6F;
+	/** How long the drawn roll takes (ticks): one full tumble. */
+	public static final int ROLL_TICKS = 10;
 	/** The flip: feathers it costs, the push along the way you hold and up (blocks/tick), how much of your own speed is kept, and how long the turn takes (ticks). */
 	public static final int FLIP_COST = 4;
 	public static final double FLIP_SPEED = 0.42, FLIP_UP = 0.3, FLIP_KEEP = 0.6;
@@ -104,18 +92,19 @@ public final class Dodge {
 		}
 	}
 
-	/**
-	 * A dodge's roll: when it started, which way it went (a unit vector on the ground), whether it's the flip in the air,
-	 * and how long its turn takes (ticks; a roll's is longer under heavy armour, {@link #rollTicks}).
-	 */
-	public record Rolling(long start, float x, float z, boolean flip, int ticks) {
+	/** A dodge's roll: when it started, which way it went (a unit vector on the ground), and whether it's the flip in the air. */
+	public record Rolling(long start, float x, float z, boolean flip) {
 		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Rolling::start,
 			ByteBufCodecs.FLOAT, Rolling::x,
 			ByteBufCodecs.FLOAT, Rolling::z,
 			ByteBufCodecs.BOOL, Rolling::flip,
-			ByteBufCodecs.VAR_INT, Rolling::ticks,
 			Rolling::new);
+
+		/** How long this one's turn takes (ticks). */
+		public int ticks() {
+			return this.flip ? FLIP_TICKS : ROLL_TICKS;
+		}
 	}
 
 	/** (0.15.74) On a player who's dodging (or last did): synced to everyone, who draw the roll. */
@@ -137,49 +126,19 @@ public final class Dodge {
 	 */
 	public static volatile int localRollId = -1;
 	public static volatile long localRollStart = Long.MIN_VALUE / 2;
-	public static volatile int localRollTicks = ROLL_TICKS;
 
 	/**
 	 * Whether {@code player} is in a dodge's roll on the ground (not the flip in the air), rolled up small: for those
-	 * roll's ticks the body is the crawl's low one ({@code CrawlPlayerMixin}), so a roll goes under a gap a block
+	 * {@link #ROLL_TICKS} ticks the body is the crawl's low one ({@code CrawlPlayerMixin}), so a roll goes under a gap a block
 	 * and a half high. Standing up afterwards is vanilla's: a crouch or crawl is kept until there's room. Either side.
 	 */
 	public static boolean rollingLow(Player player) {
 		long now = player.level().getGameTime();
-		if (player.level().isClientSide() && player.getId() == localRollId && now - localRollStart < localRollTicks) {
+		if (player.level().isClientSide() && player.getId() == localRollId && now - localRollStart < ROLL_TICKS) {
 			return true;
 		}
 		Rolling rolling = player.getAttached(ROLLING);
-		return rolling != null && !rolling.flip() && now - rolling.start() < rolling.ticks();
-	}
-
-	/** How heavy {@code player}'s armour is, 0 (none) to 1 ({@link #HEAVIEST} or more): armour points plus toughness. Either side. */
-	public static float heft(Player player) {
-		double load = player.getArmorValue() + player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS);
-		return (float)Math.clamp(load / HEAVIEST, 0.0, 1.0);
-	}
-
-	/** How many times longer (and slower) {@code player}'s roll is for their armour: 1 bare, {@link #HEAVY_SLOW} at most. */
-	public static float slowness(Player player) {
-		return 1.0F + (HEAVY_SLOW - 1.0F) * heft(player);
-	}
-
-	/** How long {@code player}'s roll on the ground takes (ticks). */
-	public static int rollTicks(Player player) {
-		return Math.round(ROLL_TICKS * slowness(player));
-	}
-
-	/** {@code player}'s pace along the ground while rolling (blocks/tick). */
-	public static double rollPace(Player player) {
-		return ROLL_PACE / slowness(player);
-	}
-
-	/**
-	 * Whether {@code player} lies prone, which is the only way into the roll (both sides): crawling by choice, not downed.
-	 * The flip in the air, the shield vault and boxing's evades don't need it.
-	 */
-	public static boolean canRollFrom(Player player) {
-		return com.jaymospowers.core.Crawl.crawling(player) && !com.jaymospowers.core.wounds.Downed.isDowned(player);
+		return rolling != null && !rolling.flip() && now - rolling.start() < ROLL_TICKS;
 	}
 
 	/** Told of every dodge the server lets through. */
@@ -276,7 +235,7 @@ public final class Dodge {
 		player.causeFoodExhaustion(EXHAUSTION);
 		Vec3 dir = new Vec3(flip.x(), 0.0, flip.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : dir.normalize();
-		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, true, FLIP_TICKS));
+		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, true));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.5F, 1.1F);
 		for (Listener listener : LISTENERS) {
@@ -289,8 +248,7 @@ public final class Dodge {
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
 		// the client checked the ground as it hopped; by now the server may already have it in the air
-		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))
-			|| !canRollFrom(player)) {
+		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {
@@ -300,7 +258,7 @@ public final class Dodge {
 		player.causeFoodExhaustion(EXHAUSTION);
 		Vec3 dir = new Vec3(start.x(), 0.0, start.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()).reverse() : dir.normalize();
-		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false, rollTicks(player)));
+		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.6F, 0.8F);
 		level.sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 0.1, player.getZ(), 4, 0.25, 0.02, 0.25, 0.02);
