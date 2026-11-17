@@ -140,6 +140,25 @@
 					]
 				}
 			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "jaymoskingdoms:wind_dragon_meat",
+					"functions": [
+						{
+							"type": "minecraft:set_count",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 2,
+								"max": 4
+							}
+						}
+					]
+				}
+			]
 		}
 	],
 	"random_sequence": "jaymoskingdoms:entities/eurus_dragon"
