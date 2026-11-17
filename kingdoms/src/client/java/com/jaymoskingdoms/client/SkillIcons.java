@@ -76,6 +76,7 @@ final class SkillIcons {
 		put(Skills.Perk.SHOVE, Items.PISTON);
 		put(Skills.Perk.AIM_PARTS, Items.TARGET);
 		put(Skills.Perk.SWEEP_KICK, Items.LEATHER_BOOTS);
+		put(Skills.Perk.AIR_COMBO, Items.WIND_CHARGE);
 		put(Skills.Perk.BOXER, Items.LEATHER);
 		put(Skills.Perk.HAUL_BOUND, Items.LEAD);
 		put(Skills.Perk.COMMAND, Items.BELL);
