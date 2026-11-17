@@ -34,3 +34,4 @@ GravityGutPunch, ZFighterRush; Kingdoms SpiritPunch, SpiritBarrage, BarrageClien
 ## Notes
 - Not to be built in the Claude Code thread that made the pick-list (Andy, 2026-11-16).
 - Builds go on the Deck or CI, never Andy's PC.
+- 2026-11-16 20:36 Text pass on PR #1665 punch-barrage-effects (commit 384419d35). Player-visible text is only changes/powers/claude-punch-barrage-effects.md; it already follows the change-note template (title, bullets, class list, not-tested line), plain and brief, so no rewrites were needed. The three Java edits (ChronoPunch, GravityGutPunch, ZFighterRush) add MagicFx ring/wave/spark particles and Shakes only - no lang, chat, dialogue, hint or UI strings.
