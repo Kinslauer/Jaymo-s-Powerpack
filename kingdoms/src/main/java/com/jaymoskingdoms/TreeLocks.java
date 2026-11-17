@@ -69,6 +69,7 @@ public final class TreeLocks {
 		TWO_BLADES(Perk.TWO_BLADES, 1),
 		THROWER(Perk.THROWER, 1),
 		SWEEP_KICK(Perk.SWEEP_KICK, 1),
+		AIR_COMBO(Perk.AIR_COMBO, 1),
 		SECOND_WIND(Perk.SECOND_WIND, 1),
 		BATTLE_CRY(Perk.WAR_CRY, 1),
 		BOXING(Perk.BOXER, 1),

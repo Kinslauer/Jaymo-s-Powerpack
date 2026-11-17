@@ -35,7 +35,8 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li><b>Launcher:</b> sneaking, on the ground, a blow at something on the ground throws it {@link #LAUNCH} up and you
  * after it ({@link #LAUNCH_WAIT} ticks between launches). Nothing too big ({@link #BIGGEST} blocks tall) or that
- * cannot be shoved.</li>
+ * cannot be shoved. Learned in Jaymo's Kingdoms' skill tree (Might's Air Combo, {@link com.jaymospowers.core.TreeLocks#AIR_COMBO});
+ * the juggle and slam only follow a launch.</li>
  * <li><b>Juggle:</b> each further blow on it before it lands bumps it back up, up to {@link #JUGGLES} times, and holds
  * you up with it.</li>
  * <li><b>Slam:</b> a sneaking blow on it in the air drives it down; where it lands it takes {@link #SLAM_DAMAGE} and
@@ -104,7 +105,8 @@ public final class AirCombo {
 			return;
 		}
 		if (player.isShiftKeyDown() && player.onGround() && target.onGround() && can(player) && now >= READY.getOrDefault(player.getUUID(), 0L)
-			&& target.getBbHeight() <= BIGGEST && target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) < 1.0) {
+			&& target.getBbHeight() <= BIGGEST && target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) < 1.0
+			&& com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIR_COMBO)) {
 			READY.put(player.getUUID(), now + LAUNCH_WAIT);
 			UP.put(target, new Up(player.getUUID(), now + AIRBORNE, 0));
 			fling(target, new Vec3(0.0, LAUNCH, 0.0));
