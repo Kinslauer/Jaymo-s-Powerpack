@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: any
 from: Andy (Claude Code thread, Ragdolls and Cover pick-list)
 asked: 2026-11-16
@@ -11,7 +11,7 @@ suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/spirits/SpiritBarrage.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/BarrageClient.java
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 # Punch and barrage effects
 
