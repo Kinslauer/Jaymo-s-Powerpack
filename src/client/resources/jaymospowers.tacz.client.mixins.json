@@ -6,7 +6,8 @@
 		"TaczMuzzleFlashMixin",
 		"TaczMannequinAnimMixin",
 		"TaczLaserBeamMixin",
-		"TaczRecoilMixin"
+		"TaczRecoilMixin",
+		"TaczAttachmentLaserMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

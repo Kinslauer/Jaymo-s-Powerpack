@@ -7,17 +7,18 @@
   they take aim, so a dot on the wall comes before the shot.
 - **Gun movement, first person**: the gun lags behind when you turn and leans when you step sideways; standing, it
   rises and falls with your breath (harder after sprinting or under half health). Aiming down sights calms both.
+  Floors and ceilings don't tuck it, so aiming down while prone still fires.
 - **Tuck**: up against a wall the gun comes back to your chest, muzzle up, and won't fire. WeaponMod's musket,
   blunderbuss and flintlock pistol tuck too and can't be readied while tucked.
 - **Long-gun grips by stance** (Andy's note): musket and blunderbuss sit at the hip standing, the low ready in a plain
   sneak, a shouldered high ready in the low crouch, and forward and level lying prone. First person only.
-- **Scope sway**: at 4x zoom and up the view drifts in a slow figure eight; prone, kneeling, the low crouch, a sneak or
+- **Scope sway**: at 4x zoom and up your aim drifts in a slow figure eight (the crosshair with it); prone, kneeling, the low crouch, a sneak or
   resting the gun on a wall top steadies it.
-- **Scroll zoom**: aiming down sights, the mouse wheel steps the scope's zoom (TaCZ's zoom key) instead of the hotbar
-  or the stances.
+- **Scroll zoom**: aiming down a scope, the mouse wheel steps its zoom (TaCZ's zoom key, so either way steps on to the
+  next setting) instead of the hotbar or the stances. Iron sights leave the wheel alone.
 - **Recoil by kind**: pistols, SMGs, rifles, machine guns, shotguns and snipers each kick the view by their own share
   of TaCZ's recoil, the view stays where the kick left it, and the gun jumps back in your hands.
 - **Downed blinking**: down and awake, your eyes droop shut and open again, slower and longer as you weaken.
 - Classes: armory/GunLasers, client/armory/GunHandling, GunLaserClient, MusketSights, wounds/DownedHud,
-  mixin/tacz/TaczLaserBeamMixin, TaczRecoilMixin; power/chrono/future/GunGear, FutureGuns.
-- Compiled with Gradle; not played. Picture-in-picture scopes were left out (not picked).
+  mixin/tacz/TaczLaserBeamMixin, TaczAttachmentLaserMixin, TaczRecoilMixin; power/chrono/future/GunGear, FutureGuns.
+- Compiled with Gradle and checked against TaCZ 0.8.5's own code by an independent review; not played. Picture-in-picture scopes were left out (not picked).

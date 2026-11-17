@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
 public final class GunLasers {
 	/** In a gun's custom data: its laser is switched off. */
 	public static final String OFF = "JaymosLaserOff";
+	/** In a gunner's gun's custom data: a laser was fitted to it here ({@link #fit}), so its state is worth keeping. */
+	static final String FITTED = "JaymosLaser";
 	/** TaCZ's own laser attachments (its default gun pack); a gunner gets the first its gun takes, tried in a random order. */
 	static final String[] LASERS = {"laser_compact", "laser_lopro", "laser_peq15", "laser_peq6", "laser_nightstick"};
 	/** The click of the switch: this loud, this high. */
@@ -92,6 +94,12 @@ public final class GunLasers {
 		}
 	}
 
+	/** Whether {@code gun} had a laser fitted by {@link #fit} (a cheap read, for the gunners' every tick). */
+	public static boolean fitted(ItemStack gun) {
+		CustomData data = gun.get(DataComponents.CUSTOM_DATA);
+		return data != null && data.copyTag().getBooleanOr(FITTED, false);
+	}
+
 	/** Whether {@code stack} is a TaCZ gun with a laser fitted (or built in). */
 	public static boolean hasLaser(ItemStack stack) {
 		if (!TaczGuns.LOADED || stack.isEmpty() || TaczGuns.gunId(stack).isEmpty() || !look()) {
@@ -126,6 +134,7 @@ public final class GunLasers {
 				ItemStack laser = (ItemStack) builderBuild.invoke(builder);
 				if (!laser.isEmpty() && Boolean.TRUE.equals(allow.invoke(iGun, gun, laser))) {
 					install.invoke(iGun, gun, laser);
+					CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> tag.putBoolean(FITTED, true));
 					setOff(gun, true);
 					return true;
 				}

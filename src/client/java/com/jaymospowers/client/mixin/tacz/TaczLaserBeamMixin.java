@@ -20,7 +20,7 @@ abstract class TaczLaserBeamMixin {
 	@Inject(method = "renderLaserBeam", at = @At("HEAD"), cancellable = true, require = 0)
 	private static void jaymospowers$off(ItemStack gun, com.mojang.blaze3d.vertex.PoseStack poseStack,
 		net.minecraft.world.item.ItemDisplayContext context, java.util.List<?> parts, CallbackInfo ci) {
-		if (GunLasers.off(gun)) {
+		if (GunLasers.off(gun) || GunLasers.off(com.jaymospowers.client.armory.GunLaserClient.drawing)) {
 			ci.cancel();
 		}
 	}
@@ -28,7 +28,7 @@ abstract class TaczLaserBeamMixin {
 	@Inject(method = "renderLaserBeamAccelerated", at = @At("HEAD"), cancellable = true, require = 0)
 	private static void jaymospowers$offAccelerated(ItemStack gun, com.mojang.blaze3d.vertex.PoseStack poseStack,
 		net.minecraft.world.item.ItemDisplayContext context, java.util.List<?> parts, CallbackInfoReturnable<Boolean> cir) {
-		if (GunLasers.off(gun)) {
+		if (GunLasers.off(gun) || GunLasers.off(com.jaymospowers.client.armory.GunLaserClient.drawing)) {
 			cir.setReturnValue(true);
 		}
 	}

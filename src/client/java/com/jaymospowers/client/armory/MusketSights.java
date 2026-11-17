@@ -89,7 +89,7 @@ public final class MusketSights {
 			return false;
 		}
 		Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-		return "weaponmod".equals(id.getNamespace()) && (id.getPath().startsWith("musket") || id.toString().equals(BLUNDERBUSS));
+		return "weaponmod".equals(id.getNamespace()) && (id.getPath().startsWith("musket") && !id.getPath().contains("part") || id.toString().equals(BLUNDERBUSS));
 	}
 
 	private static boolean isBlunderbuss(ItemStack stack) {

@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Tuck</b> (ad_tuck): up against a wall the gun comes back to your chest, muzzle up, and won't fire until there's
  * room ({@link #tucked}). The musket and blunderbuss tuck too ({@link MusketSights}).</li>
  * <li><b>Scope sway</b> (ad_scopesway): looking down a 4x or stronger scope, the view drifts in a slow figure eight
- * ({@link #applyCamera}). Lying prone, kneeling, the low crouch or resting the gun on a wall top steadies it.</li>
+ * ({@link #applyCamera}), and your aim with it. Lying prone, kneeling, the low crouch or resting the gun on a wall top steadies it.</li>
  * <li><b>Scroll zoom</b> (ad_zoom): aiming down sights, the wheel steps the scope's zoom (TaCZ's zoom key, {@link #scroll}).</li>
  * <li><b>Recoil by kind</b> (ad_recoil): each kind kicks the view by its own share of TaCZ's recoil, and the view stays
  * where the kick left it instead of settling back ({@code TaczRecoilMixin}); the gun itself jumps back in your hands.</li>
@@ -70,11 +70,17 @@ public final class GunHandling {
 	static final float[] KICK_BACK = {0.05F, 0.03F, 0.045F, 0.04F, 0.09F, 0.08F};
 	static final float[] KICK_UP = {6.0F, 2.5F, 3.5F, 3.0F, 9.0F, 7.0F};
 	static final float KICK_TICKS = 4.0F;
+	/** (ad_zoom) The wheel steps the zoom only on a scope this strong or more (iron sights keep the hotbar), at most once per this many ms. */
+	static final float ZOOM_SCROLL_MIN = 1.5F;
+	static final long ZOOM_SCROLL_GAP = 150L;
 
 	private static float swayYaw, swayPitch, swayYawBefore, swayPitchBefore, tilt, tiltBefore;
 	private static float breath, breathBefore, tuck, tuckBefore, kick, kickBefore;
 	private static int winded, kickKind = FutureGuns.KIND_RIFLE;
 	private static float lastYRot, lastXRot;
+	private static long lastZoom;
+	/** (ad_scopesway) The drift laid on your aim last tick (degrees), taken off again before the new one goes on. */
+	private static float driftYaw, driftPitch;
 	/** The held view kick of the shot in progress (TaCZ's spline values, cut to the peak): see {@link #recoilPitch}. */
 	private static double peakPitch, peakYaw;
 
@@ -165,8 +171,13 @@ public final class GunHandling {
 		peakYaw = 0.0;
 	}
 
+	private static net.minecraft.world.item.@Nullable Item gunItem;
+
 	private static boolean holdingGun(LocalPlayer player) {
-		return !TaczGuns.gunId(player.getMainHandItem()).isEmpty();
+		if (gunItem == null) {
+			gunItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("tacz:modern_kinetic_gun"));
+		}
+		return player.getMainHandItem().is(gunItem);
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -188,8 +199,8 @@ public final class GunHandling {
 			swayYaw = swayPitch = tilt = tuck = 0.0F;
 			return;
 		}
-		swayYaw = Mth.clamp(swayYaw * (1.0F - SWAY_RETURN) - turnedYaw * SWAY_PER_DEGREE, -SWAY_MAX, SWAY_MAX);
-		swayPitch = Mth.clamp(swayPitch * (1.0F - SWAY_RETURN) - turnedPitch * SWAY_PER_DEGREE, -SWAY_MAX, SWAY_MAX);
+		swayYaw = Mth.clamp(swayYaw * (1.0F - SWAY_RETURN) + turnedYaw * SWAY_PER_DEGREE, -SWAY_MAX, SWAY_MAX);
+		swayPitch = Mth.clamp(swayPitch * (1.0F - SWAY_RETURN) + turnedPitch * SWAY_PER_DEGREE, -SWAY_MAX, SWAY_MAX);
 		Vec3 look = player.getLookAngle();
 		Vec3 right = new Vec3(-look.z, 0.0, look.x);
 		double sideways = right.lengthSqr() < 1.0E-6 ? 0.0 : player.getDeltaMovement().dot(right.normalize());
@@ -206,12 +217,18 @@ public final class GunHandling {
 		return kind < 0 ? TUCK_REACH_UNKNOWN : TUCK_REACH[kind];
 	}
 
-	/** Whether a wall stands within {@code reach} of the camera along the look (where Kingdoms' lean has put it). */
+	/**
+	 * Whether a wall stands within {@code reach} of the eye along the look (in first person, from the camera, where
+	 * Kingdoms' lean has put it). Floors and ceilings don't count: aiming down while prone isn't a wall.
+	 */
 	static boolean wallAhead(Minecraft minecraft, LocalPlayer player, double reach) {
-		Vec3 eye = minecraft.gameRenderer.mainCamera().position();
+		if (minecraft.level == null) {
+			return false;
+		}
+		Vec3 eye = minecraft.options.getCameraType().isFirstPerson() ? minecraft.gameRenderer.mainCamera().position() : player.getEyePosition();
 		Vec3 to = eye.add(player.getLookAngle().scale(reach));
-		return minecraft.level != null
-			&& minecraft.level.clip(new ClipContext(eye, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK;
+		net.minecraft.world.phys.BlockHitResult hit = minecraft.level.clip(new ClipContext(eye, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.BLOCK && hit.getDirection().getAxis() != net.minecraft.core.Direction.Axis.Y;
 	}
 
 	/** Moves TaCZ's first-person gun: sway, tilt, breath, tuck and kick, eased between ticks. */
@@ -261,23 +278,33 @@ public final class GunHandling {
 	}
 
 	/**
-	 * (ad_scopesway) The view, looking down a strong scope: a slow figure eight, steadied by how you hold it. Called with the
-	 * view's pose where the hurt shake is laid on ({@code ScreenShakeMixin}); the scope's zoom magnifies it.
+	 * (ad_scopesway) Your aim, looking down a strong scope: it drifts in a slow figure eight, steadied by how you hold it.
+	 * The drift turns you (your aim really moves, the crosshair with it), a little each frame; the scope's zoom magnifies
+	 * it. Called once a frame ({@code ScreenShakeMixin}); the pose isn't touched.
 	 */
 	public static void applyCamera(PoseStack poseStack, float pt) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (player == null || !holdingGun(player) || !minecraft.options.getCameraType().isFirstPerson()) {
-			return;
+		float yaw = 0.0F, pitch = 0.0F;
+		if (player != null && !minecraft.isPaused() && holdingGun(player) && minecraft.options.getCameraType().isFirstPerson()) {
+			float aimed = aimed(player, pt);
+			if (aimed > 0.0F && zoom(player.getMainHandItem()) >= SCOPE_ZOOM) {
+				float t = (player.tickCount + pt) / SCOPE_TICKS * Mth.TWO_PI;
+				float a = SCOPE_SWAY * steadiness(minecraft, player) * aimed * (winded > 0 ? WINDED : 1.0F);
+				yaw = Mth.sin(t) * a;
+				pitch = Mth.sin(t * 2.0F) * a * 0.5F;
+			}
 		}
-		float aimed = aimed(player, pt);
-		if (aimed <= 0.0F || zoom(player.getMainHandItem()) < SCOPE_ZOOM) {
-			return;
+		if (player != null && (yaw != driftYaw || pitch != driftPitch)) {
+			float dYaw = yaw - driftYaw, dPitch = pitch - driftPitch;
+			player.setYRot(player.getYRot() + dYaw);
+			player.setXRot(Mth.clamp(player.getXRot() + dPitch, -90.0F, 90.0F));
+			// (the sway reads turning off these: the drift isn't you turning)
+			lastYRot += dYaw;
+			lastXRot += dPitch;
 		}
-		float t = (player.tickCount + pt) / SCOPE_TICKS * Mth.TWO_PI;
-		float a = SCOPE_SWAY * steadiness(minecraft, player) * aimed * (winded > 0 ? WINDED : 1.0F);
-		poseStack.rotateDegrees(Axis.YP, Mth.sin(t) * a);
-		poseStack.rotateDegrees(Axis.XP, Mth.sin(t * 2.0F) * a * 0.5F);
+		driftYaw = yaw;
+		driftPitch = pitch;
 	}
 
 	private static float steadiness(Minecraft minecraft, LocalPlayer player) {
@@ -312,10 +339,14 @@ public final class GunHandling {
 	public static boolean scroll(double amount) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || !holdingGun(player) || !aiming(player) || !look()) {
+		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || !holdingGun(player) || !aiming(player) || !look()
+			|| zoom(player.getMainHandItem()) < ZOOM_SCROLL_MIN) {
 			return false;
 		}
-		if (zoomMessage != null) {
+		// one step per notch: a touchpad's run of small scrolls steps once (TaCZ's zoom only steps on to the next setting)
+		long now = net.minecraft.util.Util.getMillis();
+		if (zoomMessage != null && now - lastZoom >= ZOOM_SCROLL_GAP) {
+			lastZoom = now;
 			ClientPlayNetworking.send(zoomMessage);
 		}
 		return true;

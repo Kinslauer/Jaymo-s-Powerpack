@@ -280,7 +280,7 @@ public final class FutureGuns {
 		} finally {
 			// (ad_laser) a laser comes on as it takes aim and goes off once the burst is done
 			ItemStack held = mob.getMainHandItem();
-			if (GunLasers.hasLaser(held)) {
+			if (GunLasers.fitted(held)) {
 				GunLasers.setOff(held, !AIMING.containsKey(mob) && !BURST.containsKey(mob));
 			}
 		}

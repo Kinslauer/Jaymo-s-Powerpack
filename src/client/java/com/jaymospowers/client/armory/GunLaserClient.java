@@ -36,6 +36,11 @@ public final class GunLaserClient {
 	/** A laser whose colour can't be read is this red. */
 	static final int RED = 0xFF2A1E;
 
+	/** The gun whose attachment TaCZ is drawing just now (empty otherwise), set by {@code TaczAttachmentLaserMixin}. */
+	public static ItemStack drawing = ItemStack.EMPTY;
+	/** TaCZ's one gun item (every gun is it, told apart by its id). */
+	private static net.minecraft.world.item.@Nullable Item gunItem;
+
 	private static @Nullable KeyMapping key;
 	private static boolean looked;
 	private static @Nullable Method colorOf;
@@ -66,7 +71,11 @@ public final class GunLaserClient {
 		ClientLevel level = minecraft.level;
 		for (LivingEntity who : level.getEntitiesOfClass(LivingEntity.class, minecraft.player.getBoundingBox().inflate(LOOK_RANGE))) {
 			ItemStack gun = who.getMainHandItem();
-			if (!who.isAlive() || TaczGuns.gunId(gun).isEmpty() || GunLasers.off(gun) || !GunLasers.hasLaser(gun)) {
+			if (gunItem == null) {
+				gunItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("tacz:modern_kinetic_gun"));
+			}
+			// (the item first: no copying of every mob's data each tick)
+			if (!gun.is(gunItem) || !who.isAlive() || GunLasers.off(gun) || !GunLasers.hasLaser(gun)) {
 				continue;
 			}
 			Vec3 eye = who.getEyePosition();
