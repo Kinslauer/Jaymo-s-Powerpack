@@ -40,3 +40,4 @@ Research/investigation first — determine how to implement mounted/entity-as-pa
 - 2026-11-17 08:16 hermes-a's last run stopped before finishing; handed back as changes so it can carry on.
 - 2026-11-17 08:34 PR #1670 is merged into master; moved to Inbox/Done.
 - 2026-11-17 08:35 PR #1670 is merged into master; moved to Inbox/Done.
+- 2026-11-17 08:36 PR #1670 is merged into master; moved to Inbox/Done.
