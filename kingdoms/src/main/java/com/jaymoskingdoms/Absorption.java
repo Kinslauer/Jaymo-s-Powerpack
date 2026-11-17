@@ -861,6 +861,11 @@ public final class Absorption {
 	}
 
 	/** The trickle a second for a Sorcerer standing in their element, not holding J. */
+	/** Whether {@code player} stands in {@code element}: where it trickles into them by itself (class trees: a Sorcerer's Wellspring). */
+	static boolean inElement(ServerLevel level, ServerPlayer player, String element) {
+		return trickle(level, player, element) > 0.0F;
+	}
+
 	private static float trickle(ServerLevel level, ServerPlayer player, String element) {
 		BlockPos at = player.blockPosition();
 		return switch (element) {

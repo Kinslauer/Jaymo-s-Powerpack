@@ -49,7 +49,9 @@ public final class ThiefSneak {
 		}
 		boolean blade = source.getDirectEntity() == thief && HiddenBlade.weapon(thief).is(ClassPerks.LIGHT_BLADES);
 		boolean bow = source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof BowItem;
-		boolean unaware = target instanceof Mob && Senses.unaware(target, thief);
+		// (class trees) Ghost: the first blow out of Vanish counts as one on a foe that never knew
+		boolean ghost = target instanceof Mob && RogueExtras.ghostBlow(thief);
+		boolean unaware = target instanceof Mob && Senses.unaware(target, thief) || ghost;
 		if (!blade && !bow || !busy(target, thief) && !unaware) {
 			return amount;
 		}
@@ -59,6 +61,9 @@ public final class ThiefSneak {
 			return amount;
 		}
 		LAST.put(thief.getUUID(), now);
+		if (ghost) {
+			RogueExtras.ghostStruck(thief);
+		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.25, 0.3, 0.25, 0.3);
 		if (unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0) {

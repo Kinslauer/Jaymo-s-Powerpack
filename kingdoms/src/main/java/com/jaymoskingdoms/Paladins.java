@@ -115,7 +115,8 @@ public final class Paladins {
 			if (OathGifts.shield(player, target) || !ClassTrees.check(player, OathGifts.SMITE)) {
 				return;
 			}
-			if (Rests.left(player, Rests.SMITE, smites(player)) <= 0) {
+			// (class trees) an Avenger with a friend just fallen has one for nothing
+			if (Rests.left(player, Rests.SMITE, smites(player)) <= 0 && !FaithExtras.avenging(player)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.no_smite"));
 				return;
 			}
@@ -166,7 +167,7 @@ public final class Paladins {
 			return amount;
 		}
 		READY.remove(player.getUUID());
-		if (until < player.level().getGameTime() || !Rests.spend(player, Rests.SMITE, 1, smites(player))) {
+		if (until < player.level().getGameTime() || !FaithExtras.avenged(player) && !Rests.spend(player, Rests.SMITE, 1, smites(player))) {
 			return amount;
 		}
 		float extra = OathGifts.smite(player, target, Restoration.undead(target) ? SMITE_BONUS * 2.0F : SMITE_BONUS);

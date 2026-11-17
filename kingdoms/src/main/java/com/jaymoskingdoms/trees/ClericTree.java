@@ -4,6 +4,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.CLERIC;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.FaithExtras;
 import com.jaymoskingdoms.Litany;
 import java.util.List;
 import java.util.Set;
@@ -28,5 +29,11 @@ final class ClericTree {
 		ClassTrees.add(Litany.PATRON, cleric, 1, 3, 15, 5, 2, List.of(), List.of());
 		ClassTrees.add(Litany.DESTROY_KEY, cleric, 1, 3, 20, 6, 2, List.of(), List.of());
 		ClassTrees.kept(CLERIC, Litany.BLESS);
+		// patch 8: the extras
+		ClassTrees.add(FaithExtras.STEADY, cleric, 1, 2, 3, 1, 3, List.of(), List.of());
+		ClassTrees.add(FaithExtras.CANDLE, cleric, 1, 2, 12, 5, 1, List.of(), List.of());
+		ClassTrees.add(FaithExtras.SHEPHERD, cleric, 1, 3, 18, 6, 1, List.of(), List.of(FaithExtras.EXORCIST));
+		ClassTrees.add(FaithExtras.EXORCIST, cleric, 1, 3, 18, 6, 3, List.of(), List.of(FaithExtras.SHEPHERD));
+		ClassTrees.add(FaithExtras.INTERCESSION, cleric, 1, 2, 22, 7, 2, List.of(), List.of());
 	}
 }

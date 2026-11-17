@@ -2,6 +2,7 @@ package com.jaymoskingdoms.trees;
 
 import static com.jaymoskingdoms.Classes.PlayerClass.MAGE;
 
+import com.jaymoskingdoms.ArcaneExtras;
 import com.jaymoskingdoms.ClassForks;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Skills.Perk;
@@ -24,6 +25,9 @@ final class MageTree {
 		// the crossroads at 10: Evoker or Warder
 		ClassTrees.add(ClassForks.EVOKER, Set.of(MAGE), 1, 3, 10, 0, 1, List.of(), List.of(ClassForks.WARDER));
 		ClassTrees.add(ClassForks.WARDER, Set.of(MAGE), 1, 3, 10, 0, 3, List.of(), List.of(ClassForks.EVOKER));
+		// patch 8: the extras
+		ClassTrees.add(ArcaneExtras.SCHOLAR_KEY, Set.of(MAGE), 1, 3, 18, 8, 1, List.of(), List.of(ArcaneExtras.BATTLEMAGE));
+		ClassTrees.add(ArcaneExtras.BATTLEMAGE, Set.of(MAGE), 1, 3, 18, 8, 3, List.of(), List.of(ArcaneExtras.SCHOLAR_KEY));
 	}
 
 	/** A school's six spells down one column, each needing the one above, at the levels they needed on Survival. */

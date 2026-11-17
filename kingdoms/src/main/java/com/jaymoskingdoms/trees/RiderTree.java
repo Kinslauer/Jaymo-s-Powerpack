@@ -4,6 +4,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.RIDER;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.WarExtras;
 import com.jaymoskingdoms.equestrian.Horsemanship;
 import java.util.List;
 import java.util.Set;
@@ -31,5 +32,8 @@ final class RiderTree {
 		ClassTrees.add(Horsemanship.BANNER, rider, 1, 3, 20, 7, 2, List.of(), List.of());
 		ClassTrees.add(Horsemanship.BONDED, rider, 1, 3, 24, 8, 1, List.of(), List.of(Horsemanship.LEGEND));
 		ClassTrees.add(Horsemanship.LEGEND, rider, 1, 3, 24, 8, 3, List.of(), List.of(Horsemanship.BONDED));
+		// patch 8: the extras
+		ClassTrees.add(WarExtras.FARRIER, rider, 1, 2, 5, 2, 0, List.of(), List.of());
+		ClassTrees.add(WarExtras.SEAT, rider, 1, 2, 12, 4, 3, List.of(), List.of());
 	}
 }

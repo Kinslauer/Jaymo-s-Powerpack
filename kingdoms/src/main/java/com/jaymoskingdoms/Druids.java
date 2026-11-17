@@ -239,6 +239,8 @@ public final class Druids {
 	}
 
 	private static void take(ServerPlayer player, ServerLevel level, String form, Mob beast) {
+		// (class trees) Wild Heart remembers the health they take it with
+		FaithExtras.shapeTaken(player);
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}

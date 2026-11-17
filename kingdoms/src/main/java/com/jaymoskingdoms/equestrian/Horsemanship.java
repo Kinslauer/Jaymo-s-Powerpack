@@ -132,7 +132,7 @@ public final class Horsemanship {
 			BEARERS.clear();
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (entity instanceof ServerPlayer player && has(player, STAY)) {
+			if (entity instanceof ServerPlayer player && (has(player, STAY) || sureSeat(player))) {
 				HIT.put(player.getUUID(), player.level().getGameTime());
 			}
 		});
@@ -201,6 +201,22 @@ public final class Horsemanship {
 	/** Stay in the Saddle: blows and blasts leave {@code rider} on. */
 	static boolean stays(@Nullable Entity rider) {
 		return has(rider, STAY);
+	}
+
+	/** Sure Seat ({@link com.jaymoskingdoms.WarExtras}): no lance hit, fright or bucking horse leaves {@code rider} on the ground. */
+	static boolean sureSeat(@Nullable Entity rider) {
+		return has(rider, com.jaymoskingdoms.WarExtras.SEAT);
+	}
+
+	/** Farrier: whether {@code horse} is a Farrier's own, whose hooves never wear down to lameness. */
+	static boolean farriered(AbstractHorse horse) {
+		return has(owner(horse), com.jaymoskingdoms.WarExtras.FARRIER);
+	}
+
+	/** Farrier: what {@code player} feeding {@code horse} heals it on top, when it is their own. */
+	static float farrierHeal(AbstractHorse horse, Player player) {
+		return horse instanceof OwnableEntity own && own.getOwnerReference() != null && player.getUUID().equals(own.getOwnerReference().getUUID()) && has(player, com.jaymoskingdoms.WarExtras.FARRIER)
+			? com.jaymoskingdoms.WarExtras.FARRIER_HEAL * Math.min(1.0F, ClassTrees.power(player, com.jaymoskingdoms.WarExtras.FARRIER)) : 0.0F;
 	}
 
 	/** Lancer: how many times over the lance's gallop bonus counts. */
@@ -435,7 +451,8 @@ public final class Horsemanship {
 				continue;
 			}
 			// Stay in the Saddle: knocked off by the blow that just landed: back on at once
-			if (has(player, STAY)) {
+			// (and Sure Seat: a lance hit that unhorses them)
+			if (has(player, STAY) || sureSeat(player)) {
 				if (horse != null) {
 					MOUNT.put(player.getUUID(), horse);
 				} else {

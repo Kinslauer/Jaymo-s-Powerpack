@@ -2,6 +2,7 @@ package com.jaymoskingdoms.trees;
 
 import static com.jaymoskingdoms.Classes.PlayerClass.WARLOCK;
 
+import com.jaymoskingdoms.ArcaneExtras;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.jaymoskingdoms.PactArts;
@@ -29,5 +30,11 @@ final class WarlockTree {
 		ClassTrees.add(PactArts.TOME, warlock, 1, 3, 10, 4, 3, List.of(), List.of(PactArts.BLADE, PactArts.CHAIN));
 		ClassTrees.add(PactArts.ARCANUM, warlock, 1, 3, 20, 5, 2, List.of(), List.of());
 		ClassTrees.kept(WARLOCK, PactArts.SLOTS);
+		// patch 8: the extras
+		ClassTrees.add(ArcaneExtras.SIGHT, warlock, 1, 2, 5, 2, 1, List.of(), List.of());
+		ClassTrees.add(ArcaneExtras.TIME, warlock, 1, 2, 12, 4, 0, List.of(), List.of());
+		ClassTrees.add(ArcaneExtras.TITHE, warlock, 1, 3, 15, 5, 1, List.of(), List.of(ArcaneExtras.USURY_KEY));
+		ClassTrees.add(ArcaneExtras.USURY_KEY, warlock, 1, 3, 15, 5, 3, List.of(), List.of(ArcaneExtras.TITHE));
+		ClassTrees.add(ArcaneExtras.HAND, warlock, 1, 3, 22, 6, 2, List.of(), List.of());
 	}
 }

@@ -144,7 +144,8 @@ public final class Warlocks {
 			player.setAttached(PACT, new Pact(casts, pact.kind(), pact.due(), pact.reneged()));
 			return;
 		}
-		if (casts < CAST_PER_DEBT) {
+		// (class trees) under Usury the next debt comes a fifth sooner
+		if (casts < ArcaneExtras.castsPerDebt(player, CAST_PER_DEBT)) {
 			player.setAttached(PACT, new Pact(casts, "", -1L));
 			return;
 		}
@@ -155,6 +156,25 @@ public final class Warlocks {
 		player.setAttached(PACT, new Pact(0, kind, today + days));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.6F);
+	}
+
+	/**
+	 * (class trees) Borrowed Time: the blow that would have put {@code player} down goes on the account. An open debt
+	 * falls due sooner and eats into the grace; with none open, one is opened now.
+	 */
+	static void borrowed(ServerPlayer player) {
+		Pact pact = pact(player);
+		long today = Patrons.today(player.level().getServer());
+		if (pact.owing()) {
+			player.setAttached(PACT, new Pact(pact.casts() + ArcaneExtras.BORROWED_CASTS, pact.kind(), Math.max(today, pact.due() - ArcaneExtras.BORROWED_DAYS), pact.reneged()));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.borrowed_more", debtName(pact.kind())).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+			return;
+		}
+		String[] kinds = Reaper.pact(player) ? REAPER_KINDS : KINDS;
+		String kind = kinds[(int) Math.floorMod(today + player.getRandom().nextInt(kinds.length), kinds.length)];
+		int days = Paths.debtDays(player, PactArts.days(player, DEBT_DAYS));
+		player.setAttached(PACT, new Pact(0, kind, today + days));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.borrowed", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 	}
 
 	static Component debtName(String kind) {
@@ -225,8 +245,10 @@ public final class Warlocks {
 		}
 	}
 
-	private static void settled(ServerPlayer player) {
+	static void settled(ServerPlayer player) {
 		player.setAttached(PACT, Pact.NONE);
+		// (class trees) the Hand of the Patron opens at the next rest
+		ArcaneExtras.settled(player);
 		ClassTrees.give(player, PlayerClass.WARLOCK, ClassTrees.XP_DEBT);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.settled"));
 		if (player.level() instanceof ServerLevel level) {

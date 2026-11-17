@@ -636,7 +636,9 @@ public final class Equestrian {
 		// (0.5.44) a war saddle's high cantle keeps its rider on through blows
 		boolean seated = fear == FEAR_BLOW && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.WAR_SADDLE)
 			// Stay in the Saddle: blows and blasts (not fire or monsters' fright) leave a Rider on
-			|| Horsemanship.stays(rider) && fear != FEAR_FIRE && fear != FEAR_MONSTER;
+			|| Horsemanship.stays(rider) && fear != FEAR_FIRE && fear != FEAR_MONSTER
+			// Sure Seat: a rearing horse, whatever frightened it, doesn't throw them
+			|| Horsemanship.sureSeat(rider);
 		if (!seated && random.nextDouble() < fear * (1.0 - bravery) * THROW_ODDS) {
 			rider.stopRiding();
 			horse.setDeltaMovement(away.scale(0.6).add(0.0, 0.2, 0.0));

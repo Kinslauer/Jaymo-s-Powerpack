@@ -125,7 +125,7 @@ public final class Sigils {
 				return;
 			}
 			float craft = ClassTrees.power(player, CRAFT);
-			player.getCooldowns().addCooldown(key, Math.max(5, Math.round(SIGIL_COOLDOWN * (1.0F - CRAFT_COOLDOWN * craft))));
+			player.getCooldowns().addCooldown(key, Math.max(5, Math.round(SIGIL_COOLDOWN * (1.0F - CRAFT_COOLDOWN * craft) * ArcaneExtras.glyph(player))));
 		}
 		Vec3 look = player.getLookAngle();
 		boolean blade = Spellcraft.blade(player.getMainHandItem());
@@ -149,7 +149,7 @@ public final class Sigils {
 			return;
 		}
 		float craft = ClassTrees.power(player, CRAFT);
-		player.getCooldowns().addCooldown(key, Math.max(5, Math.round(SIGIL_COOLDOWN * (1.0F - CRAFT_COOLDOWN * craft))));
+		player.getCooldowns().addCooldown(key, Math.max(5, Math.round(SIGIL_COOLDOWN * (1.0F - CRAFT_COOLDOWN * craft) * ArcaneExtras.glyph(player))));
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(WARD_REACH)), ClipContext.Block.COLLIDER,
 			ClipContext.Fluid.NONE, player));
@@ -267,6 +267,8 @@ public final class Sigils {
 			target.hurtServer(level, level.damageSources().indirectMagic(owner, owner), damage);
 			Spellcraft.strike(level, owner, target, element, true);
 		}
+		// (class trees) Sigil Chain: it jumps to one more foe near, at half strength
+		ArcaneExtras.chain(level, owner, element, direct != null ? direct.getBoundingBox().getCenter() : at, struck, damage);
 		if (element.equals("water")) {
 			// water douses the fires round it too
 			int r = (int) Math.ceil(radius);

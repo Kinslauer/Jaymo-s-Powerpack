@@ -3168,6 +3168,27 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * Class trees patch 8: hands Jaymo's Powers what three tree perks need of it. A Ranger's Heartseeker says which aimed
+	 * shots can't miss or glance ({@code LockOnRegions.sure}); a Brute's Thick Skull how likely a blow to the head is to knock
+	 * them out ({@code Downed.headKnock}); a Brute's Scar Tissue how soon their wounds close ({@code Bleeding.closing}).
+	 */
+	public static void shareExtras() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.util.function.BiPredicate<net.minecraft.world.entity.LivingEntity, net.minecraft.world.damagesource.DamageSource> sure = RogueExtras::sure;
+			Class.forName("com.jaymospowers.core.LockOnRegions").getField("sure").set(null, sure);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> skull = WarExtras::headKnock;
+			Class.forName("com.jaymospowers.core.wounds.Downed").getField("headKnock").set(null, skull);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> closing = WarExtras::closing;
+			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("closing").set(null, closing);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
+		}
+	}
+
+	/**
 	 * Hands Jaymo's Powers the {@link Harness}: what a blow meets in its layers and what it weighs ({@code ArmourKind.harness}),
 	 * how much likelier a head blow glances off a shut visor ({@code LockOnRegions.face}), and who may have plate gilded
 	 * at the anvil ({@code HeraldryForging.noble}).

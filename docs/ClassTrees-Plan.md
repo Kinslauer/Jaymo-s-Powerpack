@@ -302,3 +302,104 @@ Not as the rows say, for Andy to rule on:
   grid or forge a barrel; everyone else buys from weaponsmiths.
 - **`ct-dru-bark`**: Barkskin is used in a shape only (sneak and the key; out of a shape that key picks the shape).
 - **`ct-war-reneg`**: Renegotiate moves the debt to the next kind in order; there is no choosing which.
+
+### Patch 8: extras
+The 45 extra rows Andy ticked (54 nodes: nine rows are second crossroads of two perks each), built in four files beside
+the earlier patches' (`RogueExtras`: Thief, Ranger; `ArcaneExtras`: Sorcerer, Mage, Warlock; `FaithExtras`: Druid,
+Cleric, Monk, Paladin; `WarExtras`: Warlord, Brute, Marksman, Rider, Tinkerer), registered in `TreePerks`. Lang:
+`class-trees-extras.json`. Numbers are constants at the top of each file; a second class's share scales every number
+(`ClassTrees.power`). The three "once a rest" perks come back on any rest (`Rests.SHORT`).
+
+- **Thief** (+18, now 31). Nimble Fingers (3 ranks: a pocket's hold a tenth shorter a rank; in the lock screen the strain
+  eases, a stiff pin lifts and the pauses pass a tenth quicker a rank). Case the Mark (sneak and look at someone 3 s: the
+  server sends `RogueExtras.Cased`, `CaseMarkClient` draws two pips under the crosshair: red/green wary, gold/grey
+  worth it). Fence's Friend. Second Storey. Crossroads at 18: Cutpurse King (a fumble: no cry, no crime, no
+  recollection; the mark is wary a day and half again as slow to pick) or Shadow Blade (a light blade, from the rear, on
+  an unaware mob with no more health than the Thief, never a boss: lethal). Ghost (needs Vanish).
+- **Ranger** (+16, now 32). Keen Eye (3 ranks: an arrow leaves a quarter nearer the look a rank and 5% faster).
+  Field Dressing. Fletcher (two more arrows for every four crafted, by a `ResultSlot` mixin; the arrow that kills
+  drops at the body). Crossroads at 18: Stalker (crouched, still, grass/fern/bush at feet or eyes or leaves touching:
+  a mob's noticing range is capped at 6 blocks) or Warden (the warden's heartbeat to the Ranger alone, 44 ticks apart
+  facing away down to 10 facing it). Heartseeker (Powers hook `LockOnRegions.sure`).
+- **Sorcerer** (+14, now 31). Element's Hide (2 ranks). Quick Glyph. Sigil Chain. Blade Memory (needs Imbue).
+  Wellspring.
+- **Druid** (+10, now 30). Beast Tongue (an `AvoidEntityGoal` mixin and the shy deer; studied hunters' targets on the
+  Druid are cleared unless the Druid struck first). Green Thumb (on waking from a night's sleep: `CropBlock`s, stems
+  and saplings within 6 blocks). Crossroads at 18: Thick Hide or Swift Paws (+20% speed, jump strength +0.12).
+  Wild Heart (`ALLOW_DEATH`, before Powers' downing).
+- **Warlock** (+10, now 30). Dark Sight (Night Vision while owing). Borrowed Time. Crossroads at 15: Tithe (five foes
+  killed while owing settle the debt) or Usury (casts x1.2 while owing; a debt every 4 casts instead of 5). Hand of
+  the Patron.
+- **Cleric** (+9, now 30). Steady Hands. Candle Bearer. Crossroads at 18: Shepherd or Exorcist. Intercession.
+- **Monk** (+8, now 30). Light Step (safe fall distance 8; a `FarmlandBlock` mixin). Iron Palm (2 ranks; a `Player`
+  mixin on break speed and drops, both sides; 80% of an iron tool's speed; iron's tier of stone). The Fast.
+- **Paladin** (+7, now 30). Steadfast (knockback resistance 1 while blocking). Crossroads at 18: Avenger or Redeemer.
+  Beacon (needs the Aura).
+- **Warlord** (+7, now 30). Drilled. Shield Wall. Far Command.
+- **Brute** (+4, now 30). Thick Skull and Scar Tissue (Powers hooks `Downed.headKnock`, `Bleeding.closing`).
+- **Marksman** (+5, now 31 with the bench). Dry Powder. Crossroads at 15: Sharpshooter or Gunslinger.
+- **Rider** (+4, now 30). Farrier. Sure Seat.
+- **Mage** (+3, now 42). Crossroads at 18: Scholar or Battlemage.
+- **Tinkerer** (+2, now 32 with the bench). Crossroads at 8: Clockmaker or Scrapper.
+
+Where a row leaned on something that isn't there the way it assumes (the nearest honest version was built):
+- **`xt-thief-fingers`**: named **Nimble Fingers**, because Stealth already has a perk called Light Fingers (5 ranks,
+  8% a rank off a pocket's hold); the two stack. A lock has no clock, so "a tenth less time" is the lock screen's own
+  waits (strain easing, a stiff pin's lift, the pause after a snap).
+- **`xt-thief-fence`**: there were no stolen goods and a fence bought nothing. Now what is lifted from a pocket is
+  marked Stolen (not coin or purses, and not things that carry their own data, keys); sneak and use the stack on a
+  fence and he buys it at half its worth from anyone (the lock loot's own valuing, at least 0.04 of an emerald a
+  piece), in full from a Fence's Friend. Things stolen from chests are not marked.
+- **`xt-thief-storey`**: nothing heard a landing or a climb before. Now everyone's landing from 2.5 blocks or more is
+  heard (5 blocks and 1.5 more a block fallen, to 20) and climbing a ladder or vine is heard 6 blocks (not while
+  sneaking); the perk silences landings under 6 blocks and all climbing. Ledge grabs make no noise of their own.
+- **`xt-thief-ghost`**: Vanish is the Rogues mod's spell, so it is seen by its `rogues:stealth` effect: the window is
+  while that effect holds and 6 s after it goes; one sneak attack a Vanish; no blood scent or trail drops in the window.
+- **`xt-ranger-dress`**: Kitchen's only hook for extra cuts is the hung carcass (the meat hook): one more round of the
+  butcher's extras when the nearest carcass within 6 blocks is the Ranger's own kill. Not for a body cut on the ground.
+- **`xt-ranger-heart`**: only the head has a miss and a glance chance in Powers' lock-on, so that is what it removes;
+  "full-drawn" is the arrow's crit flag.
+- **`xt-ranger-fork2` Stalker**: bosses keep their own floor on sight.
+- **`xt-sor-hide`**: spell harm isn't typed by element, so "your own element" is its natural harm (fire: burning;
+  water: drowning; ice: freezing; lightning: lightning; earth: falling blocks, stalagmites, suffocation; air: wind
+  charges and flying into walls; death: wither; restoration: magic) and any spell of a Sorcerer of the same element
+  (their own bursts too).
+- **`xt-sor-well`**: "standing in the element" is where Absorbing trickles it in already, plus rain for lightning, open
+  sky above y 96 for air and soul sand or soil for death (my call); restoration is among flowers or budding amethyst.
+- **`xt-dru-tongue`**: "its predators don't hunt you" is read as the hunters among the studied kinds (wolves, coyotes,
+  bears, foxes). There is no table of what preys on what.
+- **`xt-wlk-time`**: "added to your debt" is: left on two hearts; an open debt falls due a day sooner and one grace
+  cast is used; with no debt open, one is opened on the spot.
+- **`xt-wlk-hand`**: every settling counts as "in full and in time" (the overdue path collects instead and never
+  settles), a reneged or tithed one too. The free cast spends no slot and adds nothing to the account.
+- **`xt-cle-steady`**: nothing broke the raised symbol or a shrine prayer on a hit; what a hit does break is a held
+  spell (`Concentration`: Zone of Truth, wards, battle prayers). Steady Hands keeps those.
+- **`xt-cle-candle`**: the light is the Light cantrip's own carried light (level 12, a torch is 14).
+- **`xt-cle-inter`, `xt-pal-fork2` Avenger**: "going down" is seen by watching friends within 24 blocks every 5 ticks
+  (a friend already down when you arrive doesn't count). A friend is a player, villager, townsfolk, any pet, a golem
+  or one who takes your orders.
+- **`xt-pal-fork2` Redeemer**: "spare" is bringing a foe down (Powers' downed) and leaving it alive: it is tagged, and
+  its target and grudge on that Paladin are cleared every 2 ticks within 24 blocks.
+- **`xt-pal-beacon`**: overlaps Aura of Courage (which already makes friends fearless); Beacon gives the same to a
+  Paladin who took Aura of Warding, and besides lifts a fright or an Overcome faint friends walk in with.
+- **`xt-wl-drilled`**: for the Warlord's own formations (the Formations orders): pace doubled; a soldier who was only
+  hit by a far foe stands instead of breaking ranks. No knockback change.
+- **`xt-wl-table`**: Commander already doubles order reach; the two multiply (96 blocks with both, before Presence).
+- **`xt-mm-powder`**: powder never spoiled; wet only stopped or fizzled the shot. Dry Powder fires in rain, in standing
+  water and when Soaked. Not under water.
+- **`xt-mm-fork2` Gunslinger**: guns have no aim timer. For a second after a gun comes to hand: the handgonne's match
+  time, Steady Aim's settling time and an early gun's stray are halved, and the Marksman's aim assist cone is doubled.
+  Sharpshooter's "no sway" is the shot flying exactly along the look; "range" is 25% more speed. Crouching counts as
+  kneeling.
+- **`xt-rid-seat`**: overlaps Stay in the Saddle and Horse Whisperer. Its own part: fire and monster frights and a
+  bucking horse don't throw, and a blow that unhorses (a lance) puts the Rider straight back on.
+- **`xt-rid-farrier`**: feeding already healed a little; the Farrier's heals two hearts more, vanilla feeding too.
+- **`xt-mage-fork2` Scholar**: learning from a scroll was instant, so there was nothing to halve. Now a scroll that
+  will be learned for good is studied (held) for 3 s by everyone, 1.5 s by a Scholar. Scrolls read once are as before.
+- **`xt-mage-fork2` Battlemage**: a staff blow deals at least a mace's 6. Casting uses the same key as raising a
+  shield, so "doesn't lower your guard" is: for 1.5 s after a staff cast a shield in the off hand turns blows from the
+  front that a shield stops (and wears by one).
+- **`xt-tink-fork2` Scrapper**: only two gadgets wear out today (the parry gauntlet and the climbing claws); they give
+  back half of each part, rounded. Clockmaker shortens every mimic gadget's pause and the contraption's.
+- Lore: nothing new to place. Every perk is a skill of a class that already stands in the canon (the fence is the
+  speakeasy's own, the patron the Warlock's own, the beasts the Druid's studied kin).

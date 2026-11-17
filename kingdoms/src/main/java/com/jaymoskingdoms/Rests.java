@@ -16,7 +16,9 @@ import net.minecraft.world.entity.player.Player;
 public final class Rests {
 	/** Pools that come back after a short rest (a long rest brings back all of them). */
 	public static final String CHANNEL = "channel", SHAPE = "shape", KI = "ki", PACT = "pact", SMITE = "smite", HANDS = "hands";
-	private static final java.util.Set<String> SHORT = java.util.Set.of(CHANNEL, SHAPE, KI, PACT, Workshop.QUICK_POOL);
+	private static final java.util.Set<String> SHORT = java.util.Set.of(CHANNEL, SHAPE, KI, PACT, Workshop.QUICK_POOL,
+		// (class trees) the once-a-rest extras: Wild Heart, Intercession, Borrowed Time
+		FaithExtras.HEART_POOL, FaithExtras.INTER_POOL, ArcaneExtras.TIME_POOL);
 
 	/** Pool → how much is spent. Saved, kept through death. */
 	public static final AttachmentType<Map<String, Integer>> SPENT = AttachmentRegistry.create(JaymosKingdoms.id("rest_spent"),
@@ -72,6 +74,7 @@ public final class Rests {
 			Warlocks.rested(player);
 		}
 		Clerics.rested(player);
+		ArcaneExtras.rested(player);
 		FeatsTrade.rested(player);
 		Paths.rested(player);
 	}
@@ -82,5 +85,8 @@ public final class Rests {
 			player.removeAttached(SPENT);
 		}
 		Paladins.rested(player);
+		// (class trees) a Druid's Green Thumb, a Warlock's Hand of the Patron
+		FaithExtras.woke(player);
+		ArcaneExtras.rested(player);
 	}
 }

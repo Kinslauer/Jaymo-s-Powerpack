@@ -577,7 +577,9 @@ public final class Trees {
 	 * one) takes an axe: without one it's slow, drops nothing ({@code PlayerLogToolMixin}) and won't chop.
 	 */
 	public static boolean needsAxe(Player player, BlockState state) {
-		return !player.isCreative() && (state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK)) && !isAxe(player.getMainHandItem());
+		return !player.isCreative() && (state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK)) && !isAxe(player.getMainHandItem())
+			// (class trees) a Monk's Iron Palm is axe enough
+			&& !FaithExtras.palm(player, state);
 	}
 
 	/** Anything that cuts wood faster than a hand: axes, the hand axe, mattocks. */

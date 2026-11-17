@@ -4,6 +4,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.DRUID;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.FaithExtras;
 import com.jaymoskingdoms.WildShapes;
 import java.util.List;
 import java.util.Set;
@@ -27,5 +28,11 @@ final class DruidTree {
 		ClassTrees.add(WildShapes.PACK, druid, 1, 2, 12, 4, 2, List.of(), List.of());
 		ClassTrees.add(WildShapes.BARK, druid, 1, 2, 15, 5, 2, List.of(), List.of());
 		ClassTrees.add(WildShapes.ELDER, druid, 1, 3, 20, 6, 2, List.of(), List.of());
+		// patch 8: the extras
+		ClassTrees.add(FaithExtras.TONGUE, druid, 1, 2, 3, 1, 3, List.of(), List.of());
+		ClassTrees.add(FaithExtras.THUMB, druid, 1, 2, 8, 2, 1, List.of(), List.of());
+		ClassTrees.add(FaithExtras.THICK_HIDE, druid, 1, 3, 18, 6, 1, List.of(), List.of(FaithExtras.SWIFT_PAWS));
+		ClassTrees.add(FaithExtras.SWIFT_PAWS, druid, 1, 3, 18, 6, 3, List.of(), List.of(FaithExtras.THICK_HIDE));
+		ClassTrees.add(FaithExtras.WILD_HEART, druid, 1, 3, 22, 7, 2, List.of(), List.of());
 	}
 }

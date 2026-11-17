@@ -4,6 +4,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.MONK;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.FaithExtras;
 import com.jaymoskingdoms.KiArts;
 import java.util.List;
 import java.util.Set;
@@ -30,5 +31,9 @@ final class MonkTree {
 		ClassTrees.add(KiArts.QUIVERING, monk, 1, 3, 20, 6, 1, List.of(KiArts.STUN), List.of(KiArts.EMPTY));
 		ClassTrees.add(KiArts.EMPTY, monk, 1, 3, 20, 6, 3, List.of(), List.of(KiArts.QUIVERING));
 		ClassTrees.kept(MONK, KiArts.STUN, KiArts.WIND);
+		// patch 8: the extras
+		ClassTrees.add(FaithExtras.LIGHT_STEP, monk, 1, 2, 5, 2, 1, List.of(), List.of());
+		ClassTrees.add(FaithExtras.IRON_PALM, monk, 2, 2, 12, 5, 1, List.of(), List.of());
+		ClassTrees.add(FaithExtras.FAST_KEY, monk, 1, 2, 18, 5, 3, List.of(), List.of());
 	}
 }

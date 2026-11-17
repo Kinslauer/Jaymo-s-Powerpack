@@ -2,6 +2,7 @@ package com.jaymoskingdoms.trees;
 
 import static com.jaymoskingdoms.Classes.PlayerClass.SORCERER;
 
+import com.jaymoskingdoms.ArcaneExtras;
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Sigils;
 import com.jaymoskingdoms.Skills.Perk;
@@ -30,5 +31,11 @@ final class SorcererTree {
 		ClassTrees.add(Sigils.ETCHED, sorcerer, 1, 3, 20, 5, 1, List.of(Sigils.IMBUE), List.of());
 		// a Sorcerer who had the old Sorcery page could imbue: they keep it
 		ClassTrees.keptIf(SORCERER, Perk.SORCERY.key(), Sigils.IMBUE);
+		// patch 8: the extras
+		ClassTrees.add(ArcaneExtras.HIDE, sorcerer, 2, 2, 3, 1, 3, List.of(), List.of());
+		ClassTrees.add(ArcaneExtras.QUICK_KEY, sorcerer, 1, 2, 8, 2, 4, List.of(), List.of());
+		ClassTrees.add(ArcaneExtras.CHAIN, sorcerer, 1, 3, 12, 3, 4, List.of(), List.of());
+		ClassTrees.add(ArcaneExtras.MEMORY, sorcerer, 1, 2, 18, 4, 1, List.of(Sigils.IMBUE), List.of());
+		ClassTrees.add(ArcaneExtras.WELL_KEY, sorcerer, 1, 3, 22, 6, 2, List.of(), List.of());
 	}
 }

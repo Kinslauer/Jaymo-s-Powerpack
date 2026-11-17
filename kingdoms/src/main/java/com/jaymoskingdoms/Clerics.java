@@ -133,6 +133,8 @@ public final class Clerics {
 		if (held % TURN_EVERY == 0) {
 			turn(player, level);
 		}
+		// (class trees) Candle Bearer
+		FaithExtras.candle(player, level, held);
 	}
 
 	/** The symbol comes down. */
@@ -154,6 +156,8 @@ public final class Clerics {
 		}
 		look = look.normalize();
 		Vec3 eye = player.getEyePosition();
+		// (class trees) an Exorcist's symbol also drives out possession and the nightmare, and unmasks a shapeshifter
+		FaithExtras.exorcise(player, level, look);
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(TURN_RANGE), m -> m.isAlive() && Restoration.undead(m))) {
 			Vec3 to = mob.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 			if (to.lengthSqr() > TURN_RANGE * TURN_RANGE || to.lengthSqr() < 1.0E-4 || look.dot(to.normalize()) < CONE_COS || !player.hasLineOfSight(mob)) {
@@ -240,8 +244,9 @@ public final class Clerics {
 		int tier = Patrons.state(player).tier();
 		List<LivingEntity> band = new ArrayList<>();
 		band.add(player);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BLESS_RANGE), e -> e != player && e.isAlive())) {
-			if (e instanceof ServerPlayer || e instanceof TamableAnimal pet && pet.isOwnedBy(player)) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(FaithExtras.blessRange(player)), e -> e != player && e.isAlive())) {
+			// (class trees) a Shepherd's reaches every friend, not only the band
+			if (e instanceof ServerPlayer || e instanceof TamableAnimal pet && pet.isOwnedBy(player) || FaithExtras.shepherded(player, e)) {
 				band.add(e);
 			}
 		}

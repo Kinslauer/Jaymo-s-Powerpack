@@ -4,6 +4,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.PALADIN;
 
 import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.FaithExtras;
 import com.jaymoskingdoms.OathGifts;
 import java.util.List;
 import java.util.Set;
@@ -29,5 +30,10 @@ final class PaladinTree {
 		ClassTrees.add(OathGifts.WARDING, paladin, 1, 3, 15, 6, 3, List.of(OathGifts.AURA), List.of(OathGifts.COURAGE));
 		ClassTrees.add(OathGifts.VIGIL_KEY, paladin, 1, 3, 20, 7, 2, List.of(), List.of());
 		ClassTrees.kept(PALADIN, OathGifts.SMITE, OathGifts.AURA);
+		// patch 8: the extras
+		ClassTrees.add(FaithExtras.STEADFAST, paladin, 1, 2, 5, 2, 1, List.of(), List.of());
+		ClassTrees.add(FaithExtras.AVENGER, paladin, 1, 3, 18, 7, 1, List.of(), List.of(FaithExtras.REDEEMER));
+		ClassTrees.add(FaithExtras.REDEEMER, paladin, 1, 3, 18, 7, 3, List.of(), List.of(FaithExtras.AVENGER));
+		ClassTrees.add(FaithExtras.BEACON, paladin, 1, 2, 22, 8, 2, List.of(OathGifts.AURA), List.of());
 	}
 }

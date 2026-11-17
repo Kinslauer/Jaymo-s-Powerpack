@@ -279,7 +279,8 @@ public final class OathGifts {
 
 	/** Aura of Courage: {@code who} stands near a Paladin whose aura drives out fear. */
 	static boolean courage(LivingEntity who) {
-		return !(who instanceof Enemy) && near(who, COURAGE);
+		// (class trees) and a Beacon's aura, whichever way their crossroads went
+		return !(who instanceof Enemy) && (near(who, COURAGE) || near(who, FaithExtras.BEACON));
 	}
 
 	/** {@code who} is within the aura of a Paladin with {@code key}. */

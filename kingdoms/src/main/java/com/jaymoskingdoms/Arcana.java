@@ -270,6 +270,20 @@ public final class Arcana {
 		}
 
 		@Override
+		public int getUseDuration(ItemStack stack, LivingEntity user) {
+			return ArcaneExtras.study(user);
+		}
+
+		/** The study is done: the spell is learned and the scroll crumbles. */
+		@Override
+		public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
+			if (user instanceof ServerPlayer reader && (Spellcraft.learn(reader, this.spell) || ElementSpells.learn(reader, this.spell))) {
+				stack.consume(1, reader);
+			}
+			return stack;
+		}
+
+		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
 			ItemStack stack = player.getItemInHand(hand);
 			if (!(level instanceof ServerLevel server)) {
@@ -292,6 +306,11 @@ public final class Arcana {
 					stack.consume(1, player);
 					return InteractionResult.SUCCESS;
 				}
+			} else if (reader != null && (Spellcraft.learns(reader, this.spell) || ElementSpells.learns(reader, this.spell))) {
+				// (class trees) a spell learned for good is studied first (a Scholar in half the time): held to the end, {@link #finishUsingItem}
+				player.startUsingItem(hand);
+				server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8F, 1.0F);
+				return InteractionResult.CONSUME;
 			} else if (reader != null && (Spellcraft.learn(reader, this.spell) || ElementSpells.learn(reader, this.spell))) {
 				stack.consume(1, player);
 				return InteractionResult.SUCCESS;

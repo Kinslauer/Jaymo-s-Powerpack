@@ -260,6 +260,9 @@ public final class KitchenCompat {
 			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
 				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
 					Patrons.blessed(player, Patron.GREEN_HUNTSMAN, 2) ? Blessings.CLEAN_CUTS_EXTRA : 0);
+			// (class trees) Field Dressing: a Ranger's own kill gives one more round
+			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) RogueExtras::dressing);
 			hanging.getMethod("addOnDone", java.util.function.BiConsumer.class)
 				.invoke(null, (java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>) (player, carcass) ->
 					Patrons.deed(player, Patron.GREEN_HUNTSMAN, Patrons.DEED_SMALL, "carcass"));
