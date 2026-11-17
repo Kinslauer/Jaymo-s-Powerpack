@@ -76,6 +76,8 @@ final class TaleCast {
 	static final double WITNESS_RANGE = 24.0;
 	/** A tale's people keep within this many blocks of where they were set out; one who's gone missing is back when a player is this near. */
 	static final int KEEP_WITHIN = 6, BACK_WITHIN = 24;
+	/** A cast member whose place has changed (a switched {@code at}) walks on if the new place is further than this from where they stand (blocks). */
+	static final int MOVE_ON = 10;
 	/** People of a tale that's over leave once no player is this near, or after this long (ticks). */
 	static final double LEAVE_UNSEEN = 20.0;
 	static final int LEAVE_TICKS = 20 * 120;
@@ -401,6 +403,15 @@ final class TaleCast {
 				Tales.each(player, run, r -> r.vars.put(TaleWays.MET + e.getKey(), "1"));
 			}
 			Cast c = there.getAttached(CAST);
+			if (c != null && theirs.get("at") instanceof JsonObject && !run.places.containsKey("@" + e.getKey()) && !c.fight() && !c.yielded()
+				&& !HELD.containsKey(there)) {
+				// (where they stand turns on how the tale has gone: when that changes, they walk to the new place)
+				String key = Tale.pickString(theirs, "at", cond -> Tales.holds(player, run, cond), "");
+				BlockPos now = key.isEmpty() ? null : Tales.ground(level, run, tale, key);
+				if (now != null && !BlockPos.of(c.anchor()).closerThan(now, MOVE_ON)) {
+					send(there, now);
+				}
+			}
 			JsonElement lying = theirs.get("lying");
 			if (c != null && lying != null && lying.isJsonPrimitive() && lying.getAsJsonPrimitive().isString() && Tales.holds(player, run, lying.getAsString())) {
 				// (they lie down once it has happened, one of them each look, so whoever is there sees it)

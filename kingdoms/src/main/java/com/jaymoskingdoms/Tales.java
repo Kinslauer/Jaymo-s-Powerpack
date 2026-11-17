@@ -1037,7 +1037,10 @@ public final class Tales {
 		tag.putString(KEY_LETTER, key);
 		// (in a tongue they can't read, it's gibberish until they can, or have it read to them)
 		lines = TaleWays.written(player, run, letter, lines, tag);
-		ItemStack stack = Letters.sealed(new Letters.Letter(Post.nameOf(player).getString(), text(player, run, Tale.string(letter, "from", "")), lines, Optional.empty()));
+		// (a letter meant for someone else carries their name, whoever's hand it ends in)
+		String to = Tale.string(letter, "to", "");
+		ItemStack stack = Letters.sealed(new Letters.Letter(to.isEmpty() ? Post.nameOf(player).getString() : text(player, run, to).getString(),
+			text(player, run, Tale.string(letter, "from", "")), lines, Optional.empty()));
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return stack;
 	}
@@ -1105,6 +1108,13 @@ public final class Tales {
 	 * everyone sharing it. {@code speaker}: whoever the player was just speaking with (a talk with them goes straight on).
 	 */
 	static void go(ServerPlayer player, Run run, @Nullable JsonElement then, @Nullable LivingEntity speaker) {
+		Tale from = Tale.get(run.tale);
+		JsonObject left = from == null ? null : from.step(run.step);
+		String done = left == null || run.scratch.containsKey(TaleWays.UNDONE) ? "" : Tale.string(left, "mark", "");
+		if (!done.isEmpty()) {
+			// (the step's own mark is set before its way on is picked, so the way on can turn on it)
+			state(player).marks.add(done);
+		}
 		JsonElement picked = Tale.pick(then, facts(player, run));
 		String target = picked != null && picked.isJsonPrimitive() ? picked.getAsString() : "";
 		if (target.isEmpty()) {

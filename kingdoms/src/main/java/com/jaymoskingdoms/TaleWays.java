@@ -1087,6 +1087,9 @@ final class TaleWays {
 			if (!letter.isEmpty()) {
 				JsonObject sent = letter.deepCopy();
 				sent.addProperty("from", Tales.text(player, run, Tale.string(letter, "from", "")).getString());
+				if (letter.has("to")) {
+					sent.addProperty("to", Tales.text(player, run, Tale.string(letter, "to", "")).getString());
+				}
 				sent.add("lines", filled(player, run, letter.get("lines")));
 				MutableComponent told = Tales.words(player, run, letter, "told");
 				if (told != null) {
@@ -1116,6 +1119,10 @@ final class TaleWays {
 			}
 			if (l.has("mark")) {
 				what.addProperty("mark", Tale.string(l, "mark", ""));
+			}
+			if (!what.isEmpty() && l.has("still")) {
+				// (asked again on its day, when the tale itself is long over: marks, standing, what else has ended)
+				what.addProperty("still", Tale.string(l, "still", ""));
 			}
 			if (!what.isEmpty()) {
 				Tales.state(player).later.add(new Later(Tales.day(level) + Tale.between(l.get("days"), 10, level.getRandom()), run.faction, what.toString()));
@@ -1198,7 +1205,7 @@ final class TaleWays {
 				continue;
 			}
 			s.later.remove(l);
-			if (stale) {
+			if (stale || what.has("still") && !Tales.holds(player, null, Tale.string(what, "still", ""))) {
 				continue;
 			}
 			JsonObject lie = Tale.object(what, "lie");
@@ -1221,7 +1228,8 @@ final class TaleWays {
 					Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of());
 				CompoundTag tag = new CompoundTag();
 				List<Component> lines = written(player, blank, letter, literal(letter.get("lines")), tag);
-				ItemStack stack = Letters.sealed(new Letters.Letter(Post.nameOf(player).getString(), Component.literal(Tale.string(letter, "from", "")), lines, Optional.empty()));
+				String to = Tale.string(letter, "to", "");
+				ItemStack stack = Letters.sealed(new Letters.Letter(to.isEmpty() ? Post.nameOf(player).getString() : to, Component.literal(Tale.string(letter, "from", "")), lines, Optional.empty()));
 				if (!tag.isEmpty()) {
 					stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 				}

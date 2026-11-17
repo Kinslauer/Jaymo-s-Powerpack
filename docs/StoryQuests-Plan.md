@@ -92,7 +92,8 @@ Each role is a person or a creature of the tale. The asker is always the role `g
   spared), or an entity id (`minecraft:wolf`, `jaymoskingdoms:...`) for a beast or monster.
 - `job` (villager): their trade, for clothes. `female`: true or false, if it matters.
 - `at`: the place they wait. They're set out when the player first comes near it. May be a switch
-  (`{ "?mark:fair_in_time": "halt", "?": "winter" }`): where they are when they're set out.
+  (`{ "?mark:fair_in_time": "halt", "?": "winter" }`): where they are when they're set out, and if it changes while
+  they stand there (a clock runs out, a mark is set) they walk to the new place.
 - `if`: a condition (below). Someone who is only in some tellings (`"if": "culprit=wolves"`) isn't set out in the
   others. `late`: true for someone who must not be seen before the step that's about them (a beast met at the end).
   Whoever the open step names as `who` is always set out.
@@ -373,7 +374,7 @@ Any step may have `"within": 3` (or `[2, 4]`): the days it stays open. When they
 (a step or an ending), whether the player is there or not; the two fields go together. `"until"` is the deadline as the
 asker would say it, shown after the goal with the days counted: `Bring the ransom to the mill (before the miller locks
 up; by tomorrow)`. A deadline that runs across several steps is a clock: one step starts it with `"clock": { "raid": 3 }`,
-later steps say `"within": "raid"`, and `late:raid` is a condition. Text can say `{left:raid}` ("3 days left", "by
+later steps say `"within": "raid"`, and `late:raid` is a condition. `0` days is today: it runs out at the next dawn. Text can say `{left:raid}` ("3 days left", "by
 tomorrow", "today is the last day": for brackets) or `{in:raid}` ("in 3 days", "tomorrow", "today": inside a sentence).
 A step left by its `late` way (or a vigil's `left`, a job's `failed`) is left undone: its `journal`, `mark` and `pay`
 don't happen.
@@ -459,7 +460,9 @@ On an ending: `"later": [ { "days": [10, 40], "if": condition, "letter": { from,
 "scene": [["a", "..."], ["b", "..."]], "settles": role, "mark": "..." } ]`. On its day a runner brings the letter, the
 town has its lines to say, two of its folk have the scene where the player can hear, the cast member comes to live in
 the town as an ordinary villager (when the player is next there), the mark is set. Words are filled in when the tale
-ends, so they can use its names.
+ends, so they can use its names. `if` is asked when the tale ends (it can use the tale's rolls); `"still"` is a second
+condition asked on the day itself, with the tale long over (marks, `done:`, standing: `"still": "mark:caught:<lie>"`
+for something that only happens if a lie has come out by then).
 
 ### letters you can't read: `tongue`, `mark`, `told`
 

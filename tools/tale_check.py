@@ -314,7 +314,7 @@ def check_later(c, where, later, tale):
     if not isinstance(later, dict):
         c.err(where, "later is a list of { days, ... }")
         return
-    unknown = set(later) - {"days", "if", "letter", "town", "scene", "settles", "mark"}
+    unknown = set(later) - {"days", "if", "still", "letter", "town", "scene", "settles", "mark"}
     if unknown:
         c.err(where, f"unknown fields {sorted(unknown)}")
     check_days(c, where + ".days", later.get("days"))
@@ -322,6 +322,11 @@ def check_later(c, where, later, tale):
         c.err(where, "brings nothing: add a letter, town, scene, settles or mark")
     if "if" in later:
         check_condition(c, where, later["if"], tale)
+    if "still" in later:
+        # (asked on its day, with the tale long over: nothing of the run is left to ask)
+        check_condition(c, where, later["still"], tale)
+        if "=" in later["still"].replace(">=", "") or "met:" in later["still"] or "late:" in later["still"]:
+            c.err(where, "'still' is asked weeks after the tale: marks, done:, standing, dress, not its rolls, clocks or who was met")
     if "letter" in later:
         check_letter(c, where + ".letter", later["letter"], tale)
     if "town" in later:
@@ -478,7 +483,7 @@ def check_tale(path):
                 c.err(where, "clock is { name: days }")
             else:
                 for name, days in step["clock"].items():
-                    if not (isinstance(days, int) and days > 0):
+                    if not (isinstance(days, int) and days >= 0):
                         check_days(c, f"{where}.clock.{name}", days)
         if ("within" in step) != ("late" in step):
             c.err(where, "'within' (the days it has) and 'late' (where it goes when they run out) go together")
@@ -487,7 +492,7 @@ def check_tale(path):
             if isinstance(within, str):
                 if within not in clocks(tale):
                     c.err(where, f"within: no step starts the clock '{within}'")
-            elif not (isinstance(within, int) and within > 0):
+            elif not (isinstance(within, int) and within >= 0):
                 check_days(c, where + ".within", within)
             check_then(c, where + ".late", step["late"], tale, edges)
         for give in step.get("give", []):
