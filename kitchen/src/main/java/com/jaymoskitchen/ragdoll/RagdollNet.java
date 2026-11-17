@@ -81,7 +81,8 @@ public final class RagdollNet {
 	 * Client → server: Ragdollified's ragdoll of a dying body came to rest here, its head along {@code yaw}; the corpse
 	 * that waited for it lies down there (see {@code CorpseEntity#settleAt}).
 	 */
-	public record Settled(int corpse, double x, double y, double z, float yaw) implements CustomPacketPayload {
+	public record Settled(int corpse, double x, double y, double z, float yaw, @org.jspecify.annotations.Nullable RagdollSnapshot pose)
+		implements CustomPacketPayload {
 		public static final Type<Settled> TYPE = new Type<>(JaymosKitchen.id("ragdoll_settled"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Settled> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -90,8 +91,13 @@ public final class RagdollNet {
 				buf.writeDouble(p.y);
 				buf.writeDouble(p.z);
 				buf.writeFloat(p.yaw);
+				buf.writeBoolean(p.pose != null);
+				if (p.pose != null) {
+					RagdollSnapshot.CODEC.encode(buf, p.pose);
+				}
 			},
-			buf -> new Settled(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat()));
+			buf -> new Settled(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(),
+				buf.readBoolean() ? RagdollSnapshot.CODEC.decode(buf) : null));
 
 		@Override
 		public Type<Settled> type() {

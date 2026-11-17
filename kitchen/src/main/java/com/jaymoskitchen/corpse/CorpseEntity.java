@@ -1241,7 +1241,7 @@ public class CorpseEntity extends Entity {
 	 * Server: Ragdollified's ragdoll came to rest here, along {@code yaw} (the way its head points): the corpse lies down
 	 * in its place and is drawn again. Not moved while it is held, hung or dragged.
 	 */
-	public void settleAt(double x, double y, double z, float yaw) {
+	public void settleAt(double x, double y, double z, float yaw, @Nullable RagdollSnapshot pose) {
 		if (!(level() instanceof ServerLevel) || origin() < 0) {
 			return;
 		}
@@ -1251,8 +1251,19 @@ public class CorpseEntity extends Entity {
 		}
 		snapTo(x, y, z, yaw, 0.0F);
 		setKeeling(false);
-		this.ragdoll = new CorpseRagdoll(this, lyingBody());
+		// the pose the ragdoll lay in (already checked against this corpse's rig), else our own fallen pose
+		RagdollBody lain = pose == null ? null : pose.body();
+		if (lain != null) {
+			lain.stop();
+			snapTo(pose.x(), lain.bottom(), pose.z(), yaw, 0.0F);
+		}
+		this.ragdoll = new CorpseRagdoll(this, lain != null ? lain : lyingBody());
 		this.ragdoll.send(this);
+	}
+
+	/** The rig of its body (shape and standing size). */
+	public RagdollRig ragdollRig() {
+		return rig();
 	}
 
 	public void markJustDied() {
