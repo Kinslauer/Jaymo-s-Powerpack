@@ -120,7 +120,7 @@ public final class DarktidePower implements Power {
 		DarktideDodges.init();
 		// (Awakening picks) the pit and the lift (a choked player can't use powers)
 		DarktidePit.init();
-		// (Awakening pick, folded in) kills give shadows, the soul menu and its wave, the stamina they cost, possession
+		// (Awakening pick, folded in) kills give shadows, the soul menu and its wave, the stamina they cost
 		DarktideSouls.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer player = handler.player;

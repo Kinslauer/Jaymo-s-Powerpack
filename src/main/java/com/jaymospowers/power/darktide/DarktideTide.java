@@ -165,10 +165,6 @@ final class DarktideTide {
 			return;
 		}
 		Entity corpse = aimedCorpse(player);
-		// no corpse in the sights, but a risen shadow of yours: you ride in it
-		if (corpse == null && DarktideSouls.possess(player)) {
-			return;
-		}
 		if (corpse == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_corpse").withStyle(ChatFormatting.GRAY));
 			return;
@@ -646,7 +642,7 @@ final class DarktideTide {
 	static boolean sinkNewest(ServerPlayer player) {
 		for (int i = RISEN.size() - 1; i >= 0; i--) {
 			Mob mob = RISEN.get(i);
-			if (risenOf(mob, player) && !DarktideSouls.ridden(mob)) {
+			if (risenOf(mob, player)) {
 				RISEN.remove(i);
 				sink(mob, player);
 				return true;
@@ -736,20 +732,13 @@ final class DarktideTide {
 			}
 			// they melt when the corruption lifts (sunrise, for a cured master), and without their master near
 			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktidePower.corrupted(owner)
-				|| mob.distanceTo(owner) > RISEN_LEASH && !DarktideSouls.ridden(mob)) {
+				|| mob.distanceTo(owner) > RISEN_LEASH) {
 				it.remove();
 				// it melts, but it did not die: its shadow is its master's still
 				sink(mob, owner);
 				continue;
 			}
 			mob.clearFire();
-			if (DarktideSouls.ridden(mob)) {
-				// its master rides in it: it goes where they say
-				if (mob.getTarget() != null) {
-					mob.setTarget(null);
-				}
-				continue;
-			}
 			if (spares(mob, mob.getTarget())) {
 				// (a mob that picks targets through its brain, not setTarget: a piglin, a hoglin, a breeze)
 				mob.setTarget(null);

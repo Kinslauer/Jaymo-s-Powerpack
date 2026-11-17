@@ -25,12 +25,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The speed tunnel: a blur ({@link ChronoMomentum#BLUR}) that runs at a wall goes through it, and the way it went stays
- * open for {@link #OPEN_TICKS} ticks for anyone to follow. No block is touched: the tunnel is a straight line from where
- * the runner stood to the first clear spot past the wall (at most {@link #MAX_LENGTH} blocks on), and a player standing in
- * it is {@link #CARRIED}, which the phase's own collision rule reads ({@link ChronoPhase#phasing}): no block stops them
- * but the floor under their feet and what nothing can break. Step out of the line inside the wall, or be in it when it
- * closes, and you are put out at its nearer mouth.
+ * The speed tunnel: a blur ({@link ChronoMomentum#BLUR}) that runs at a wall with sneak held goes through it, and the way
+ * it went stays open for {@link #OPEN_TICKS} ticks for anyone to follow. Sneak is the key: without it a wall is always run
+ * up ({@code ChronoSpeedClient}, which lets go of a wall while sneak is held, so the two never meet). No block is touched:
+ * the tunnel is a straight line from where the runner stood to the first clear spot past the wall (at most
+ * {@link #MAX_LENGTH} blocks on), and a player standing in it is {@link #CARRIED}, which the phase's own collision rule
+ * reads ({@link ChronoPhase#phasing}): no block stops them but the floor under their feet and what nothing can break. Step
+ * out of the line inside the wall, or be in it when it closes, and you are put out at its nearer mouth.
  */
 public final class ChronoTunnel {
 	// ---- tuning ----
@@ -83,10 +84,10 @@ public final class ChronoTunnel {
 		});
 	}
 
-	/** A blur is sprinting: if a wall stands in its way and there is clear ground past it, the tunnel opens. */
+	/** A blur is sprinting with sneak held: if a wall stands in its way and there is clear ground past it, the tunnel opens. */
 	static void run(ServerPlayer player, ServerLevel level, int color) {
-		// jump held at the wall: they mean to run up it, as a speedster always could
-		if (READY.getOrDefault(player.getUUID(), 0L) > level.getGameTime() || ChronoPhase.phasing(player) || player.getLastClientInput().jump()) {
+		// no sneak: the wall is run up, as a speedster always could
+		if (!player.isShiftKeyDown() || READY.getOrDefault(player.getUUID(), 0L) > level.getGameTime() || ChronoPhase.phasing(player)) {
 			return;
 		}
 		Vec3 dir = player.getLookAngle().multiply(1.0, 0.0, 1.0);

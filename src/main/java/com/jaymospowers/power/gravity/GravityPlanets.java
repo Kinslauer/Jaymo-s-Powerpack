@@ -6,8 +6,6 @@ import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -30,9 +28,8 @@ final class GravityPlanets {
 	static final double REACH = 50.0, PULL = 0.11, MAX_SPEED = 2.2;
 	/** Close enough to count as there (blocks), and what is kept of your speed as it catches you. */
 	static final double ARRIVE = 1.4, CATCH_KEEPS = 0.35;
-	/** How long a planet lasts (ticks), the wait between throws, the hunger each throw costs. */
+	/** How long a planet lasts (ticks), the wait between throws. Throwing is free: no hunger, no food gate. */
 	static final int LIFE = 120, COOLDOWN = 12;
-	static final float EXHAUSTION = 0.6F;
 	static final int COLOUR = 0x8A6CFF, CORE = 0xD9CCFF;
 
 	private record Planet(Vec3 at, long until) {
@@ -54,17 +51,12 @@ final class GravityPlanets {
 		if (READY.getOrDefault(player.getUUID(), 0L) > now) {
 			return true;
 		}
-		if (!player.getAbilities().instabuild && player.getFoodData().getFoodLevel() <= 2) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity_planets.hungry").withStyle(ChatFormatting.GRAY));
-			return true;
-		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(look.scale(REACH)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		Vec3 at = hit.getType() == HitResult.Type.MISS ? eye.add(look.scale(REACH)) : hit.getLocation().subtract(look.scale(0.8));
 		PLANETS.put(player.getUUID(), new Planet(at, now + LIFE));
 		READY.put(player.getUUID(), now + COOLDOWN);
-		player.causeFoodExhaustion(EXHAUSTION);
 		MagicFx.beam(level, eye.add(0.0, -0.3, 0.0), at, 0.05F, COLOUR, 6);
 		MagicFx.orb(level, at, 0.5F, COLOUR, 12);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.4F, 1.9F);

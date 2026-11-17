@@ -30,17 +30,20 @@ import net.minecraft.world.phys.Vec3;
  * A speedster's momentum (Overclock and Velox's Velocity both; Andy's Awakening pick "Speedster", folded in here).
  * <ul>
  * <li><b>Momentum in gears:</b> the wheel no longer puts you in a gear, it sets your <b>top gear</b> ({@link #TOP}). You
- * start a run in gear 1 and sprinting at speed carries you up a gear every {@link #BUILD_TICKS} ticks, to the top gear;
- * stop and you lose one every {@link #FALL_TICKS}.</li>
+ * start a run in gear {@link #START_GEAR} (or the top gear, if that is lower) and momentum builds only above it: sprinting
+ * at speed carries you up a gear every {@link #BUILD_TICKS} ticks, to the top gear; stop and you lose one every
+ * {@link #FALL_TICKS}, down to the gear a run starts in.</li>
  * <li><b>The blur:</b> in gear {@link ChronoGears#GEARS} at speed you are a {@link #BLUR}: arrows and every other shot pass
- * through you ({@code ChronoShotPassMixin}; a held phase does the same), and a wall in your way opens as a tunnel
- * ({@link ChronoTunnel}).</li>
+ * through you ({@code ChronoShotPassMixin}; a held phase does the same), and sneak held at a wall in your way opens it as
+ * a tunnel ({@link ChronoTunnel}).</li>
  * <li><b>Static:</b> running charges you ({@link #STATIC_PER_TICK}, by gear). Use with an empty hand and nothing to catch
  * or snatch hurls it all as a bolt down your sight; it arcs on to those beside the one it strikes.</li>
  * </ul>
  */
 public final class ChronoMomentum {
 	// ---- tuning ----
+	/** The gear a run starts in, as Overclock always ran; a top gear at or under it is reached at once, only those above are climbed to. */
+	static final int START_GEAR = 3;
 	/** Ticks of sprinting at speed that carry you up a gear, and ticks off speed that lose one. */
 	static final int BUILD_TICKS = 8, FALL_TICKS = 10;
 	/** The blur stays this long (ticks) after you drop off speed, so a wall you hit still opens. */
@@ -102,10 +105,12 @@ public final class ChronoMomentum {
 		if (player.getAttached(TOP) == null) {
 			player.setAttached(TOP, ChronoGears.DEFAULT_GEAR);
 		}
-		if (player.getAttached(ChronoGears.GEAR) == null) {
-			player.setAttached(ChronoGears.GEAR, 1);
+		int top = top(player), start = Math.min(top, START_GEAR);
+		// a run starts in the starting gear (or the top gear, if the wheel is set under it); momentum builds only above it
+		if (player.getAttached(ChronoGears.GEAR) == null || ChronoGears.gear(player) < start) {
+			player.setAttached(ChronoGears.GEAR, start);
 		}
-		int gear = ChronoGears.gear(player), top = top(player);
+		int gear = ChronoGears.gear(player);
 		boolean atSpeed = player.isSprinting() && !player.isPassenger() && ChronoRapid.speed(player) >= ChronoGears.SHIFT_MIN_SPEED;
 		if (atSpeed) {
 			run.lost = 0;
@@ -118,7 +123,7 @@ public final class ChronoMomentum {
 			run.charge = Math.min(1.0F, run.charge + STATIC_PER_TICK[gear - 1]);
 		} else {
 			run.built = 0;
-			if (gear > 1 && ++run.lost >= FALL_TICKS) {
+			if (gear > start && ++run.lost >= FALL_TICKS) {
 				run.lost = 0;
 				gear--;
 				player.setAttached(ChronoGears.GEAR, gear);
