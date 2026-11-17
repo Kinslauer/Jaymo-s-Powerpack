@@ -34,4 +34,4 @@
   framed in leaf-green when it can hear you and grey when it can't (ears off or failed, or singleplayer). It fades a
   moment after you stop. `YouthEars.Hearing`, drawn in `client/inhabitants/YouthWispRenderer` (`drawHearing`,
   `voiceRow`); icon `textures/gui/youth_icon.png` from `kingdoms/tools/gen_youth_icon.py` (the wisp's own face).
-  Group calls aren't proximity voice, so Youth doesn't listen to them and no face shows there.
+  Youth listens in voice chat group calls too (Andy), so its face sits after the group's heads there.
