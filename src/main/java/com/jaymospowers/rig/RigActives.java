@@ -53,7 +53,7 @@ public final class RigActives {
 	static final int PALM_COST = 60, PALM_COOLDOWN = 15;
 	static final double PALM_RANGE = 24.0, PALM_KNOCKBACK = 0.9;
 	static final float PALM_DAMAGE = 6.0F;
-	/** The palm blast and the crash hit this much harder for every Mind level above the first (x1.6 at level 5). */
+	/** The palm blast hits this much harder for every Mind level above the first (x1.6 at level 5). */
 	static final float DAMAGE_PER_LEVEL = 0.15F;
 	/** The palm blast's kick on the wearer's screen. */
 	static final float PALM_SHAKE = 0.4F;
@@ -487,7 +487,7 @@ public final class RigActives {
 		if (state.lastPos != null && player.horizontalCollision && state.lastSpeed - speed > CRASH_DROP && !player.isCreative()) {
 			double lost = state.lastSpeed - speed;
 			ServerLevel level = player.level();
-			player.hurtServer(level, level.damageSources().flyIntoWall(), (float)(lost * lost * CRASH_DAMAGE) * levelDamage(player));
+			player.hurtServer(level, level.damageSources().flyIntoWall(), (float)(lost * lost * CRASH_DAMAGE));
 			com.jaymospowers.core.Shakes.send(player, (float)(lost * 6.0));
 			state.flying = false;
 		}
