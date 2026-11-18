@@ -15064,3 +15064,7 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - Fixes: rival captains forgot their temperament on every restart (its saved data was dropped as unknown, since nothing had loaded it yet), and players joining didn't get their farmhand family or lesson course. Both are now registered at start-up.
 - Captains whose temperament was already lost get a new one. Also registered early: legendary bosses' spent resistances.
 - Built by CI; not played.
+
+## 0.10.36 (2026-11-18): Tree locks block crafting alongside The Graveyard (#1756)
+
+The crafting lock on trade stations and the saw now hooks the slot pickup check that every slot has and applies to crafting result slots, so it works with or without The Graveyard.
