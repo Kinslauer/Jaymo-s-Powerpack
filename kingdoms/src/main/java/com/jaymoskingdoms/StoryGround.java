@@ -175,6 +175,9 @@ public final class StoryGround {
 		}
 	}
 
+	/** The first capital's job ended with no realm made: it is not asked for again this session ({@link #capital}). */
+	static boolean noRealm;
+
 	private StoryGround() {
 	}
 
@@ -188,6 +191,7 @@ public final class StoryGround {
 				capital.search.cancel();
 			}
 			capital = null;
+			noRealm = false;
 			HARBOURS.clear();
 			ROADWAYS.clear();
 			AHEAD.clear();
@@ -229,7 +233,7 @@ public final class StoryGround {
 	 * {@code waiting} is held safe meanwhile. With a realm standing already, {@code then} runs at once.
 	 */
 	static void capital(MinecraftServer server, @Nullable ServerPlayer waiting, @Nullable Runnable then) {
-		if (!realmless(server)) {
+		if (!realmless(server) || noRealm) {
 			if (then != null) {
 				then.run();
 			}
@@ -704,6 +708,10 @@ public final class StoryGround {
 	static void milestone(ServerPlayer player, BlockPos spawn, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		if (realmless(server)) {
+			if (noRealm) {
+				fallback.run();
+				return;
+			}
 			capital(server, player, () -> milestone(player, spawn, then, fallback));
 			return;
 		}
@@ -1032,6 +1040,7 @@ public final class StoryGround {
 		if (capital != null && step(level, capital, "message.jaymoskingdoms.story.making.realm")) {
 			Job done = capital;
 			capital = null;
+			noRealm = realmless(server);
 			done.then.forEach(Runnable::run);
 		}
 		for (UUID id : List.copyOf(HARBOURS.keySet())) {

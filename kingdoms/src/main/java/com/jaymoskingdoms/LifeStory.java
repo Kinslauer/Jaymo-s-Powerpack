@@ -1111,7 +1111,7 @@ public final class LifeStory {
 		}
 		// (0.7.228) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
 		MinecraftServer server = player.level().getServer();
-		if (StoryGround.realmless(server)) {
+		if (StoryGround.realmless(server) && !StoryGround.noRealm) {
 			StoryGround.capital(server, player, () -> {
 				if (!player.isRemoved() && owed(player)) {
 					ask(player, forced);

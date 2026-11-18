@@ -248,6 +248,7 @@ public final class EpicTowns {
 			RAISE_FAILED.add(centre.pack());
 			return null;
 		}
+		RAISE_FAILED.add(centre.pack());
 		place(level, holder.get().value(), start, origin);
 		return crown(level, start, id);
 	}
