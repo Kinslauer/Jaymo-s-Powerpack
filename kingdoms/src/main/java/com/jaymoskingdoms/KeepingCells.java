@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -200,7 +201,7 @@ public final class KeepingCells {
 		for (Villager v : new ArrayList<>(KEEPING)) {
 			BlockPos light = v.level() == level ? v.getAttached(KEPT) : null;
 			// (one of his, wherever they fell: chased out of the door first, they're still his)
-			if (light != null && dead.entityTags().contains(HOUSEHOLD_TAG)) {
+			if (light != null && dead.entityTags().contains(mark(v))) {
 				v.setAttached(LAID, v.getAttachedOrElse(LAID, 0) + 1);
 				rest(level, v, light, dead);
 			}
@@ -217,9 +218,14 @@ public final class KeepingCells {
 			return;
 		}
 		for (Zombie z : level.getEntitiesOfClass(Zombie.class, house(light), z -> z.isAlive() && (!counted || z.isPersistenceRequired()))) {
-			z.addTag(HOUSEHOLD_TAG);
+			z.addTag(mark(v));
 		}
 		v.addTag(COUNTED_TAG);
+	}
+
+	/** The tag on {@code v}'s own household, so one smith's dead never count for another's. */
+	private static String mark(Villager v) {
+		return HOUSEHOLD_TAG + "." + v.getUUID();
 	}
 
 	private static AABB house(BlockPos light) {
@@ -228,11 +234,12 @@ public final class KeepingCells {
 
 	/**
 	 * Whoever has the smith's tale carries {@link #RESTED} if his household has been put down and none of it still
-	 * walks his house (not counting {@code but}, who is falling now), and doesn't if not.
+	 * walks, in his house or out of it (not counting {@code but}, who is falling now), and doesn't if not.
 	 */
 	private static void rest(ServerLevel level, Villager v, BlockPos light, @Nullable LivingEntity but) {
+		String mark = mark(v);
 		boolean rested = v.getAttachedOrElse(LAID, 0) > 0
-			&& level.getEntitiesOfClass(Zombie.class, house(light), z -> z != but && z.isAlive() && z.entityTags().contains(HOUSEHOLD_TAG)).isEmpty();
+			&& level.getEntities(EntityTypeTest.forClass(Zombie.class), z -> z != but && z.isAlive() && z.entityTags().contains(mark)).isEmpty();
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			Tales.remark(player, TALE, v, RESTED, rested);
 		}

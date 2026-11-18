@@ -926,7 +926,9 @@ final class TaleWays {
 		// (the one nearest them of everyone following: they're lost only when the whole party has lost them)
 		double nearest = gap;
 		for (ServerPlayer p : Tales.sharers(player, run)) {
-			nearest = Math.min(nearest, Math.sqrt(mob.distanceToSqr(p)));
+			if (p.level() == mob.level()) {
+				nearest = Math.min(nearest, Math.sqrt(mob.distanceToSqr(p)));
+			}
 		}
 		if (!run.scratch.containsKey("going")) {
 			if (nearest > far) {

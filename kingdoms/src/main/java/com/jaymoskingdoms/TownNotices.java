@@ -372,14 +372,14 @@ final class TownNotices {
 			return BoardWork.take(level, player, giver, f, n.key());
 		}
 		if (n.tale() != null) {
-			// (the tale is theirs, and the paper with it; one they've had already, or that isn't for them, is only the paper:
-			// the trouble on it, in the asker's own hand)
-			Tales.pulled(level, player, n.key().substring(5), giver, f);
+			// (the tale is theirs, and the paper with it; one they've had already, or that isn't for them, is only a copy of the
+			// paper, the trouble on it in the asker's own hand, and the notice stays up for whoever it is for)
+			boolean theirs = Tales.pulled(level, player, n.key().substring(5), giver, f);
 			ItemStack paper = item(level, key);
 			if (!player.getInventory().add(paper)) {
 				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
-			return true;
+			return theirs;
 		}
 		RandomSource random = level.getRandom();
 		String job = giver instanceof Villager v

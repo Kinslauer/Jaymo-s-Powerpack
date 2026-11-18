@@ -933,8 +933,12 @@ final class TaleCast {
 		BlockPos at = Construction.standable(level, seat.offset(level.getRandom().nextInt(SETTLE_SPREAD * 2 + 1) - SETTLE_SPREAD, 0,
 			level.getRandom().nextInt(SETTLE_SPREAD * 2 + 1) - SETTLE_SPREAD), SETTLE_SPREAD);
 		Boolean female = body.has("female") ? Tale.flag(body, "female") : null;
-		// (as one of the town's guards: MCA's guard, who keeps the town as its guards do)
-		McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), profession(Tale.string(body, "job", "none")), female, name, guard);
+		// (as one of the town's guards: MCA's guard, who keeps the town as its guards do; without MCA there are no guards,
+		// so a townsperson of their trade)
+		VillagerProfession job = profession(Tale.string(body, "job", "none"));
+		if (McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), job, female, name, guard) == null && guard) {
+			McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), job, female, name, false);
+		}
 	}
 
 	private static void joined(Mob mob, ServerPlayer player) {
