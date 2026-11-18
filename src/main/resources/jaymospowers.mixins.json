@@ -35,6 +35,7 @@
 		"YoungLivingMixin",
 		"KnockApartMixin",
 		"YoungSpawnMixin",
+		"PiglinStuddedMixin",
 		"ConjoinedTwinSpawnMixin",
 		"ConjoinedTwinVillagerMixin",
 		"ConjoinedTwinZombieMixin",
