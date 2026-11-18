@@ -1,0 +1,5 @@
+# NPC shooters lean round corners
+- **NPC shooters lean** (Andy: "do MCA and humanoids like illagers do it too?" "yes"). MCA villagers, illagers, skeletons and the other ranged NPCs that take cover can now use a wall's corner as well as low cover. They duck in behind the corner to reload or after being shot at, then lean out past it to shoot instead of stepping round. The pose is the same legs-carry-it lean players have: hips out, near knee bent, a 12 degree tilt.
+- While leaning, an NPC sees and shoots from its leaned-out head, and cover counts only the leaned-out part of its body. It straightens up when it moves off, loses its foe or goes down.
+- `Cover.corner` / `Cover.shelters`, `Lean.lean` (the NPC lean, cleared in Lean's tick), `RangedTactics` (finish leans out at a corner, ducking leans back in), `LeanSightMixin` (line of sight from the leaned eye), `LivingLeanMixin` (was AvatarLeanMixin: every living renderer), `LeanClient` (NPC leans eased, legs found by part name).
+- Built; not played.

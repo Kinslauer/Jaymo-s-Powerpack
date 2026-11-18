@@ -9,6 +9,7 @@
 		"DoorHandleMixin",
 		"DosedDishMixin",
 		"ProjectileCoverMixin",
+		"LeanSightMixin",
 		"LairSpawnMixin",
 		"BirdSongMixin",
 		"FoeStudyMixin",

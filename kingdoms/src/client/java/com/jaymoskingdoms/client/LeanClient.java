@@ -26,6 +26,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -129,12 +130,19 @@ public final class LeanClient {
 			ClientPlayNetworking.send(new Lean.Want(want));
 			sent = want;
 		}
-		for (Player player : minecraft.level.players()) {
-			float[] a = AMOUNTS.computeIfAbsent(player.getId(), id -> new float[4]);
+		// players, and the NPC shooters leaning (or easing back up)
+		for (Entity entity : minecraft.level.entitiesForRendering()) {
+			if (!(entity instanceof LivingEntity living) || !(living instanceof Player || Lean.dir(living) != 0 || AMOUNTS.containsKey(living.getId()))) {
+				continue;
+			}
+			float[] a = AMOUNTS.computeIfAbsent(living.getId(), id -> new float[4]);
 			a[0] = a[1];
-			a[1] += Mth.clamp((player == me ? want : Lean.dir(player)) - a[1], -STEP, STEP);
+			a[1] += Mth.clamp((living == me ? want : Lean.dir(living)) - a[1], -STEP, STEP);
 			a[2] = a[3];
-			a[3] += Mth.clamp((PowersCompat.lowStance(player) ? 1.0F : 0.0F) - a[3], -STEP, STEP);
+			a[3] += Mth.clamp((living instanceof Player p && PowersCompat.lowStance(p) ? 1.0F : 0.0F) - a[3], -STEP, STEP);
+			if (!(living instanceof Player) && a[0] == 0.0F && a[1] == 0.0F) {
+				AMOUNTS.remove(living.getId());
+			}
 		}
 		if (minecraft.level.getGameTime() % 200L == 0L) {
 			AMOUNTS.keySet().removeIf(id -> minecraft.level.getEntity(id) == null);
@@ -186,35 +194,51 @@ public final class LeanClient {
 	}
 
 	/**
-	 * Right after a leaning player's model is posed: each leg turned so its foot stays on the ground under the tilted body, the
+	 * Right after a leaning player's (or NPC's) model is posed: each leg turned so its foot stays on the ground under the tilted body, the
 	 * lean-side one stepped out and bent at the knee ({@link #bendKnee}), the far one straight; the head tilted back toward level.
 	 */
 	public static void pose(Model<?> model, Object state) {
-		if (!(state instanceof EntityRenderState s) || !(model instanceof HumanoidModel<?> h)) {
-			return;
-		}
-		float[] lean = STATES.get(s);
+		float[] lean = state instanceof EntityRenderState s ? STATES.get(s) : null;
 		if (lean == null) {
 			return;
 		}
 		float amount = lean[0], low = lean[1];
+		ModelPart near = part(model, amount > 0.0F ? "right_leg" : "left_leg");
+		ModelPart far = part(model, amount > 0.0F ? "left_leg" : "right_leg");
+		if (near == null || far == null) {
+			return;
+		}
 		float[] legs = legs(amount, low);
 		float side = Math.signum(amount);
-		ModelPart near = amount > 0.0F ? h.rightLeg : h.leftLeg;
-		ModelPart far = amount > 0.0F ? h.leftLeg : h.rightLeg;
 		// (+zRot swings a leg toward the model's right)
 		near.zRot += side * legs[0];
 		near.xRot -= legs[1] * 0.5F;
 		far.zRot += side * legs[2];
-		h.head.zRot += amount * tilt(low) * Mth.DEG_TO_RAD * HEAD_LEVEL;
+		ModelPart head = part(model, "head");
+		if (head != null) {
+			head.zRot += amount * tilt(low) * Mth.DEG_TO_RAD * HEAD_LEVEL;
+		}
+	}
+
+	/**
+	 * A humanoid model's part by its usual name (a player's, an MCA villager's, an illager's, a skeleton's: their legs and head
+	 * hang off the root), or null for a model without one.
+	 */
+	private static ModelPart part(Model<?> model, String name) {
+		if (model instanceof HumanoidModel<?> h) {
+			return switch (name) {
+				case "right_leg" -> h.rightLeg;
+				case "left_leg" -> h.leftLeg;
+				default -> h.head;
+			};
+		}
+		ModelPart root = model.root();
+		return root.hasChild(name) ? root.getChild(name) : null;
 	}
 
 	/** Right before a leaning player's model is drawn: the lean-side knee bent (Powers' KneeBend, which straightens it after). */
 	public static void bendKnee(Model<?> model, Object state) {
-		if (!(state instanceof EntityRenderState s) || !(model instanceof HumanoidModel<?> h)) {
-			return;
-		}
-		float[] lean = STATES.get(s);
+		float[] lean = state instanceof EntityRenderState s ? STATES.get(s) : null;
 		MethodHandle bend = lean == null ? null : kneeBend();
 		if (bend == null) {
 			return;
@@ -223,8 +247,12 @@ public final class LeanClient {
 		if (knee <= 0.0F) {
 			return;
 		}
+		ModelPart leg = part(model, lean[0] > 0.0F ? "right_leg" : "left_leg");
+		if (leg == null) {
+			return;
+		}
 		try {
-			bend.invoke(lean[0] > 0.0F ? h.rightLeg : h.leftLeg, knee);
+			bend.invoke(leg, knee);
 		} catch (Throwable e) {
 			kneeBend = null;
 			JaymosKingdoms.LOGGER.warn("Couldn't bend a leaning player's knee", e);
