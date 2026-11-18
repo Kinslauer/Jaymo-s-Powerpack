@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.wild;
 
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.ScentTrails;
 import com.jaymoskingdoms.disasters.Mist;
 import com.jaymoskingdoms.Vampires;
@@ -14,17 +15,22 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
@@ -60,6 +66,13 @@ import org.jspecify.annotations.Nullable;
  * Who stalks: our feral wolves always; the game's wild wolves at night, or by day when you're hurt, and never while
  * you hold a bone (so taming still works). Tamed wolves, pups and leashed wolves never stalk, and nobody stalks on
  * Peaceful or a creative or spectator player. State is kept per wolf in memory, not saved: a reload forgets the hunt.
+ * <p>Andy (2026-11-18): tigers and the other predators "should stalk you the way wolves do". Every beast in
+ * {@code jaymoskingdoms:stalkers} ({@link #STALKERS}: coyotes, the big cats, the bears) hunts a player the same way, by
+ * nose, from cover, then the rush, on the game's wolves' hours (night, mist, or you hurt), but not on a full belly
+ * ({@link FedPredators#fed}) nor asleep. Their own search for quarry won't send them straight at a player they'd stalk
+ * ({@link #holdsBack}, from {@code mixin/wild/PredatorTargetMixin}): only one who walks right up on them
+ * ({@link #STUMBLE}), hurts them, or comes near their young. While it stalks, a beast stays off the stealth eye unless
+ * the player can feel it ({@code Senses}).
  */
 public final class WolfStalkers {
 	// ---- tuning --------------------------------------------------------------------------------------------------------
@@ -104,6 +117,10 @@ public final class WolfStalkers {
 	static final int RUSH_TICKS = 80;
 	/** Within this many blocks of an unstalked feral wolf you've stumbled on it: it goes for you (feral ones only). */
 	public static final double STUMBLE = 4.0;
+	/** A mother with a cub of her kind this near (blocks) defends it as her own way, not by stalking. */
+	static final double YOUNG_NEAR = 10.0;
+	/** The beasts besides wolves that stalk players. */
+	static final TagKey<EntityType<?>> STALKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("stalkers"));
 	/** Tag that marks a wolf we've hushed for the stalk (so a reload can give its voice back). */
 	static final String HUSHED = "jaymoskingdoms.stalk_hushed";
 
@@ -160,15 +177,21 @@ public final class WolfStalkers {
 		});
 	}
 
-	/** A wolf: the game's or our feral one. */
+	/** A wolf (the game's or our feral one), or another beast that stalks ({@link #STALKERS}). */
 	static boolean kind(Mob mob) {
+		return wolfish(mob) || mob.getType().builtInRegistryHolder().is(STALKERS);
+	}
+
+	/** One of the wolves this began with, which keep their own rules. */
+	static boolean wolfish(Mob mob) {
 		return mob instanceof Wolf || mob instanceof FeralWolf;
 	}
 
-	/** A wolf that may stalk at all: wild, grown, free, not on Peaceful. */
+	/** A wolf that may stalk at all: wild, grown, free, awake, armed, not on Peaceful. */
 	static boolean able(Mob wolf) {
 		return wolf.isAlive() && !wolf.isBaby() && !(wolf instanceof TamableAnimal tame && tame.isTame()) && !wolf.isLeashed()
-			&& !wolf.isPassenger() && !wolf.isVehicle() && wolf.level().getDifficulty() != Difficulty.PEACEFUL;
+			&& !wolf.isPassenger() && !wolf.isVehicle() && wolf.level().getDifficulty() != Difficulty.PEACEFUL && !wolf.isSleeping()
+			&& wolf.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE);
 	}
 
 	/** Whether {@code wolf} would stalk {@code player} at all (who and when, not whether it can smell them). */
@@ -180,7 +203,11 @@ public final class WolfStalkers {
 			return true;
 		}
 		// the game's wolves: never while you hold out a bone; at night, or when you're hurt
-		if (player.getMainHandItem().is(Items.BONE) || player.getOffhandItem().is(Items.BONE)) {
+		if (wolf instanceof Wolf && (player.getMainHandItem().is(Items.BONE) || player.getOffhandItem().is(Items.BONE))) {
+			return false;
+		}
+		// the other beasts: the same hours, but not on a full belly
+		if (!wolfish(wolf) && FedPredators.fed(wolf)) {
 			return false;
 		}
 		return night((ServerLevel) wolf.level()) || wounded(player) || Mist.covers(wolf.level(), wolf.position());
@@ -204,6 +231,50 @@ public final class WolfStalkers {
 	public static boolean stalking(Mob wolf, Player player) {
 		Stalk s = STALKS.get(wolf);
 		return s != null && !s.rushed && s.quarry.equals(player.getUUID());
+	}
+
+	/** Whether {@code mob} is after {@code player} by a stalk at all: stalking them, or rushed and on them. */
+	public static boolean after(Mob mob, Player player) {
+		Stalk s = STALKS.get(mob);
+		return s != null && s.quarry.equals(player.getUUID());
+	}
+
+	/** How near {@code beast} has crept on {@code player}: 0 at {@code reach} blocks off, 1 within rushing range. */
+	public static double closeness(Mob beast, Player player, double reach) {
+		return Mth.clamp((reach - beast.distanceTo(player)) / (reach - RUSH_RANGE), 0.0, 1.0);
+	}
+
+	/**
+	 * For a stalker's own search for quarry (a {@code NearestAttackableTargetGoal} that found {@code player}): true if it
+	 * holds back and stalks them instead, taking up the stalk now if it hadn't. It goes straight in (false) when it's no
+	 * stalker or wouldn't stalk them, when they've stumbled right on it, hurt it or angered it, when its young are near,
+	 * or once it has rushed them. The wolves keep their own rules ({@link #strikes}).
+	 */
+	public static boolean holdsBack(Mob mob, Player player) {
+		if (wolfish(mob) || !kind(mob) || !able(mob) || !quarry(mob, player) || !(mob.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		Stalk s = STALKS.get(mob);
+		if (s != null && s.rushed && s.quarry.equals(player.getUUID())) {
+			return false;
+		}
+		if (mob.distanceTo(player) <= STUMBLE || mob.getLastHurtByMob() == player
+			|| mob instanceof NeutralMob angry && angry.isAngryAt(player, level) || young(mob)) {
+			return false;
+		}
+		if (s == null || !s.quarry.equals(player.getUUID())) {
+			if (s != null) {
+				end(mob);
+			}
+			begin(mob, player, level.getGameTime());
+		}
+		return true;
+	}
+
+	/** Whether a cub of {@code mob}'s kind is near it. */
+	static boolean young(Mob mob) {
+		return !mob.level().getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(YOUNG_NEAR),
+			o -> o != mob && o.getType() == mob.getType() && o.isBaby() && o.isAlive()).isEmpty();
 	}
 
 	/**
@@ -646,10 +717,15 @@ public final class WolfStalkers {
 			o.wolf.getNavigation().moveTo(quarry, RUSH_SPEED);
 			if (!growled || o.wolf.distanceToSqr(quarry) < 12.0 * 12.0) {
 				// one low growl as it breaks cover: the tell
-				float pitch = (o.wolf instanceof FeralWolf ? 0.75F : 0.9F) + level.getRandom().nextFloat() * 0.1F;
-				level.playSound(null, o.wolf.blockPosition(),
-					SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.ANGRY).adultSounds().growlSound().value(),
-					SoundSource.HOSTILE, growled ? 0.6F : 1.0F, pitch);
+				if (wolfish(o.wolf)) {
+					float pitch = (o.wolf instanceof FeralWolf ? 0.75F : 0.9F) + level.getRandom().nextFloat() * 0.1F;
+					level.playSound(null, o.wolf.blockPosition(),
+						SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.ANGRY).adultSounds().growlSound().value(),
+						SoundSource.HOSTILE, growled ? 0.6F : 1.0F, pitch);
+				} else {
+					// a big cat or a bear: its own voice
+					o.wolf.playAmbientSound();
+				}
 				growled = true;
 			}
 		}

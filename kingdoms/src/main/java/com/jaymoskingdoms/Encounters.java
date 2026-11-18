@@ -111,9 +111,10 @@ public final class Encounters {
 	}
 
 	static final List<Encounter> TABLE = List.of(
-		new Encounter("naturalist:bear", "naturalist:has_bear", 10, 1, 1),
-		new Encounter("naturalist:lion", "naturalist:has_lion", 10, 2, 3),
-		new Encounter("naturalist:tiger", "naturalist:has_tiger", 10, 1, 1),
+		// (where PredatorRanges keeps them: bears in the woods, big cats in the jungles, lions on the savannas)
+		new Encounter("naturalist:bear", "jaymoskingdoms:has_brown_bear", 10, 1, 1),
+		new Encounter("naturalist:lion", "jaymoskingdoms:has_lion", 10, 2, 3),
+		new Encounter("naturalist:tiger", "jaymoskingdoms:has_big_cats", 10, 1, 1),
 		new Encounter("naturalist:alligator", "naturalist:has_alligator", 10, 1, 2),
 		new Encounter("naturalist:komodo_dragon", "naturalist:has_komodo_dragon", 10, 1, 2),
 		new Encounter("naturalist:rhino", "naturalist:has_rhino", 6, 1, 1),
