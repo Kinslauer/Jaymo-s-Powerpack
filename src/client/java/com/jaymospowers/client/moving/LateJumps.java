@@ -73,6 +73,6 @@ public final class LateJumps {
 	private static boolean free(LocalPlayer player) {
 		return !player.isPassenger() && !player.getAbilities().flying && !player.isInWater() && !player.isInLava()
 			&& !player.onClimbable() && !player.isFallFlying() && !player.isSpectator() && !player.isSleeping()
-			&& !FreerunClient.active();
+			&& !FreerunClient.active() && !com.jaymospowers.client.power.web.WebSymbioteClient.inputLocked() && !com.jaymospowers.client.power.web.WebSymbioteClient.escaping();
 	}
 }

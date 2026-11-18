@@ -182,6 +182,9 @@ public final class Knocking {
 			if (v == null || !v.isAlive() || v.level().getGameTime() >= answer.until()
 				|| v.position().distanceToSqr(Vec3.atCenterOf(answer.door())) <= ARRIVED * ARRIVED) {
 				it.remove();
+				if (v != null) {
+					v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+				}
 			} else {
 				walk(v, answer.door());
 			}

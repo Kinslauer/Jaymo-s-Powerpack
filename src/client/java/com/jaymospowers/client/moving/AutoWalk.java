@@ -46,7 +46,7 @@ public final class AutoWalk {
 
 	/** From the input mixin, after the keys are read: adds the walk, or ends it if forward or back was pressed. */
 	public static void steer(Input keys, Vec2 move, java.util.function.BiConsumer<Input, Vec2> set) {
-		if (!on) {
+		if (!on || com.jaymospowers.client.power.web.WebSymbioteClient.inputLocked() || com.jaymospowers.client.power.web.WebSymbioteClient.escaping()) {
 			return;
 		}
 		if (keys.forward() || keys.backward()) {
