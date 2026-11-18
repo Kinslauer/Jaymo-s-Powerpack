@@ -1,0 +1,4 @@
+# Knight Armor and Weapons, forged
+- **Knight Armor and Weapons** (Pete MC Mods, all rights reserved) joins the pack as its own jar, untouched. A datapack (`data/knightarmorweapons/recipe`) switches off its grid recipes for the knight helmet, chestplate, leggings and boots, the long sword (and its blade and handle), the spiked mace, the hand scythe and the throwing axe. The Smithing Anvil forges them instead (`KnightArmorForging`), from iron, with the usual blueprints and grades. Armour takes 7, 9, 8 and 6 ingots (the grid wanted an iron piece and 5 to 7 more ingots, more than one anvil holds; the leather is no longer needed), the long sword 6, the mace 6, the scythe 3, and a throwing axe 2.
+- The broken throwing axe is still mended in the grid with three iron nuggets, which is not forging a metal piece.
+- Built; not played.
