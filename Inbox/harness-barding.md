@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
 claimed_by: hermes-a
 pr: 1744
 writer: hermes-writer
+text_pass: 
 ---
 
 # Harness 4: matching barding and caparisons
@@ -24,3 +25,4 @@ writer: hermes-writer
 
 ## Notes
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
+- 2026-11-18 12:43 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
