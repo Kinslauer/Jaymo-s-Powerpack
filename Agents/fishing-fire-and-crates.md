@@ -1,9 +1,9 @@
 ---
-status: done
+status: stalled
 task: fishing-fire-and-crates
 branch: claude/fishing-fire-and-crates
 with: pc-claude (subagent)
-pr: 1715
+pr: 
 mods: Powers
 versions: 
 started: 2026-11-17

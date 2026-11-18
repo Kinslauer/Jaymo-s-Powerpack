@@ -1,8 +1,8 @@
 ---
-status: done
+status: blocked
 task: future-gun-gear
 branch: claude/future-gun-gear
-pr: 1671
+pr: 
 mods: powers
 versions: 
 started: 2026-11-16
