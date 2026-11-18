@@ -24,4 +24,4 @@ pr:
 **Rules:** CLAUDE.md as always: one PR, change note in `changes/kingdoms/`, no version bumps, write keyframes with a script into the editable `.bbmodel`, typed MagicFx/Fx for any glow, credits beside the art and in `textures/entity/bb/CREDITS.txt`, Wither: Reincarnated is All Rights Reserved (ideas only, never its art or sounds), builds on the Deck or CI only (never Andy's PC). Say plainly in the PR that it hasn't been seen in game.
 
 ## Notes
--
+- 2026-11-18 03:34 Model spec and minimal .bbmodel created. Pending Andy's preview approval.
