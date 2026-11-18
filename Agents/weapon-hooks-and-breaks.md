@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: weapon-hooks-and-breaks
 branch: claude/weapon-hooks-and-breaks
 with: 
@@ -21,3 +21,7 @@ owns:
 
 ## Notes
 - Also touched: Freerun.dragOff, ThrownWeapon (one call), two mixin json lists.
+
+## Done
+PR 1713, CI green. A player sees: scythes, bills and gutting hooks drag a clinging or laddered foe down, and cut through half of a raised shield's block (chain clink and sparks). Mace hits slow the target for 1.5 seconds. Thrown Tinkering throwing axes break about 15% of hits (tooltip "Broken"), can't be thrown, and mend at an anvil with 3 iron nuggets.
+Not tested in game: the anvil mixin (field names checked against 26.3 sources only), the shield half-block, the Freerun drag-off.
