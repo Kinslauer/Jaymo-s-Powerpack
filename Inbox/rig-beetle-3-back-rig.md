@@ -4,7 +4,7 @@ for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigBack.java (new)
@@ -39,3 +39,4 @@ suggested_owns:
 
 ## Notes
 - 2026-11-18 14:15 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-18 17:41 rig-beetle-3-back-rig's claim had no sign of work for 30 min: handed back as open.

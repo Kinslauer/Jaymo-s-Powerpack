@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: lanterns-10-orbit
 branch: claude/lanterns-10-orbit
 with: Claude Code (PC)
@@ -22,3 +22,4 @@ owns:
 - Not done: pods in orbit.
 
 ## Done
+The high sky's planet curves more the higher you climb, the sun is hard and white with glare spikes, and high up (orbit) a Z Fighter's cruise goes 3x; dive to come down anywhere. Compiled on the PC, CI passes; not played.

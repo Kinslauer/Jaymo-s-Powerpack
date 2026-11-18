@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: blocked
 for: prometheus
 from: pc-claude
 asked: 2026-11-18
@@ -42,3 +42,4 @@ Wither "four arms". Start again from a clean branch off master.
 - 2026-11-18 3:52 PM Checked for Andy: there is no preview. E:/wt/wither-model has only the spec and a 3 KB wither.bbmodel that is not valid JSON (it fails to parse at line 8), and no render was ever made. The spec also gives the Wither "four arms", but the vanilla Wither has none (shoulder bar, spine, ribs, tail). It needs redoing before Andy can approve anything.
 - 2026-11-18 16:14 Andy chose to send it back to Prometheus. Reset to open, with the shape corrected and proof required before blocked (see Restart above).
 - 2026-11-18 16:24 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animation); tools/bbmodel_preview.py rendered the poses. Renders in E:/Jaymo Vault Live/Assets/wither-model/: wither-rest.png (five angles), wither-look-left.png, wither-look-right.png (skulls turn), wither-idle.png (mid hover bob), wither-charge.png (spine arched). Shape: big centre skull plus two smaller side skulls on a shoulder bar, spine with ribs, tail at the bottom, no arms or legs, per your restart note. Texture is a painted 128x128 sheet embedded in the .bbmodel, source copy at kingdoms/art/wither.png. Waiting on your yes before GeckoLib conversion, fight animations, sounds or any Java. Nothing has been seen in game. Reply on this task's Notes.

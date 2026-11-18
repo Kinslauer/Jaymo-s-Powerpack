@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
 claimed_by: rig-beetle-5-the-mind
-pr: 
+pr: 1773
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigTalk.java (new)
   - src/main/java/com/jaymospowers/rig/RigPilot.java (new)
@@ -42,3 +42,4 @@ suggested_owns:
 ## Notes
 - 2026-11-18 16:23 hermes-b's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-18 16:55 PC Claude took it on branch claude/rig-beetle-5-mind (an older E:/wt/rig-beetle-5-the-mind worktree was left from a stalled run, no commits; left untouched).
+- 2026-11-18 17:09 Question for Andy: md-voice needs a voice source you're happy with (VoiceStudio's default is non-commercial). Which voice? Everything else is in PR #1773.
