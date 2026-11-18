@@ -35,3 +35,6 @@ writer: hermes-writer
 - Run 2 patches at a time. Suggested pairs: (1 arm forms + 5 the Mind), (3 back rig + 6 senses and nova), (2 guns + 4 flight).
 - Lore first: read `Lore.md` (the Frostborn rigs, Los Perrito's troopers). Anything needing a new line gets a `(new)` paragraph, quoted in full to Andy for approval.
 - One PR per patch with `changes/powers/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging.
+
+## Notes
+- 2026-11-18 16:13 Text pass: added rig_menu pullup/hyper/meteor/smooth names and hud pullup/hyper/bank/meteor/smooth chips, view.pullup visor label, and mind pullup/hyper/meteor lines for all three personalities (rig.json, rig_picks.json); new changes/powers/rig-beetle-4-flight.md change note. No code changes.
