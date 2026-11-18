@@ -1,0 +1,3 @@
+# Daylight no longer stays as dark as the night before
+- **DarkNights**: the lightmap is worked out again every client tick, as vanilla does. BadOptimizations (added with the Sensible MC picks) caches it and only works it out again when the sky light factor changes, and that factor holds still from morning to dusk. A lightmap worked out mid-change (after sleeping, `/time set day` or joining, read between the old tick's night and the new tick's day) then stayed all day: the open sky as dark as the night it came from, while torches and lanterns lit as normal. It also never saw the Moon rise or set. The rest of BadOptimizations is left as it is.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.
