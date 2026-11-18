@@ -15015,3 +15015,11 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - **High wisps**: a third, faint deck at about 236 blocks, two slices, drifting 1.8x as fast, near white by day and warm at dusk. Off in low-end mode, which also has no bumps.
 - Classes: `CloudDecks` (drift is now kept per deck, so a changed pace never jumps a deck). Tuning constants are at the top of the class.
 - Built; not played.
+
+## 0.10.28 (2026-11-18): written oath and pact - the Lawgiver's rulebook becomes the Book of Vows
+
+- **Book of Vows** (Andy, 2026-11-18: the Awakening's "Rule writer" was meant as how Paladin oaths and Warlock pacts work; he picked "Written oath and pact"). A Paladin or Warlock gets one on swearing (one who swore before gets theirs on joining; a lost one is a book and quill and a gold nugget). Use it to read and write; sneak and use it to enact the rule picked in it.
+- **Terms**: the oath's or patron's own terms are written in and fixed. Up to four more may be sworn from any term a vow knows (`Vows` holds you to them like the rest). Striking out a term you swore breaks it: the oath breaks, or the patron collects.
+- **Rules**: one rule line, and one more for each sworn term (five at most). A rule is a sentence: who (I, my allies near me, the foes near me, the one I look at, everyone near me), what is true of them (the oath or patron decides: Mercy mends, quickens, hardens, slows, lights up; Justice lights up, slows, weakens, takes powers, blinds; Honour strengthens, hardens, quickens, weakens, lights up; each patron its own four or five), strength 1 + a step every 5 class levels (to 5), and 5 to 60 s. Enacting costs grace (Paladin) or credit with the patron (Warlock): 150 most, 1 a second back (2 with none running); one rule at a time, three from class level 20. A broken oath, or a patron withholding over an unpaid debt, enacts nothing; a broken oath or a lost class ends what runs. "Have no powers" puts Jaymo's Powers' ruled tag on whom it's about.
+- Classes: `VowBook` (new), `VowBookScreen` (new); `Vows` (sworn terms bind), `Paladins`/`Warlocks` (book on swearing, cleared on unmaking). Lang part `vow_book.json`.
+- Built; not played.
