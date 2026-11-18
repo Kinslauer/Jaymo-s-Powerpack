@@ -13,6 +13,7 @@
 		"TemplateUpgradeMixin",
 		"BandSpawnNearPlayersMixin",
 		"DirtyAttributesMixin",
+		"NullGoalMixin",
 		"StructureStartPieceIndexMixin",
 		"StructurePieceAtMixin",
 		"SkyfallStopMixin",
