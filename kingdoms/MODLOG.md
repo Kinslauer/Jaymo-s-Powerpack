@@ -15043,3 +15043,8 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - **Info panel text**: long text (class and option descriptions, heritage gifts) is broken at its sentences into short paragraphs, and an over-long sentence is broken again at its semicolons. Lines get a pixel more space, paragraphs get a gap, and sections with several lines are bulleted.
 - `PickerLayout` (`BOXES_SHOWN`, `PARA_SPLIT`, `PARA_SENTENCES`, `LEADING`, `PARA_GAP`).
 - Built; not played.
+
+## 0.10.32 (2026-11-18): Curing blight and seeing someone turn change how villagers see you (#1758)
+
+- Fixes: curing someone of the Hollow's blight, and being seen getting up as one of the Hollow, moved nothing in a villager's bearings toward you. A cure now gives +20 trust, +15 respect, +10 warmth; seeing you turn gives -10 trust and -15 warmth (Andy's numbers).
+- Built by CI; not played.
