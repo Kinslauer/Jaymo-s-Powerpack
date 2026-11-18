@@ -908,6 +908,11 @@ warrants. They come down for fighters whose power level gets talked about "out t
 with a pod, full tanks and a license: Rookie, then up the ranks by arrests. Patrolmen are named people (Jaco, Irilla,
 Bordo and the rest), and their Commanders (Vael, Orrin, Teska, Brandt) answer a skip writ.
 
+**Relief runs** (new; Lanterns patch 3, Andy's Buder's Lanterns pick). Not all the Patrol's work is fighting. The Overworld's
+healers have come to trust the Verdant World's limphium, and the dried leaf keeps on a long flight, so patrolmen send their
+officers down with it: six leaves to whichever town's healer is short. The Patrol keeps a file on every officer (rank,
+arrests on warrant, skip writs drawn, relief runs carried), and a patrolman will read it out if asked.
+
 **Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
 of their own, take what they like and leave. Beaten, one of their pods is left ticking over where it landed.
 
