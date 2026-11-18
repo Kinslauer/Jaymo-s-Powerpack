@@ -10,7 +10,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · for pc-claude · open
-- [ ] [[Inbox/inferno-fire|inferno-fire]] · for pc-claude · open
 - [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · for pc-claude · open
 
@@ -18,6 +17,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · claimed
+- [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · claimed
 
 
 ## In review
