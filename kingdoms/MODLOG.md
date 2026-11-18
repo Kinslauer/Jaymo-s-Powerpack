@@ -14944,3 +14944,11 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 
 - **DarkNights**: the lightmap is worked out again every client tick, as vanilla does. BadOptimizations (added with the Sensible MC picks) caches it and only works it out again when the sky light factor changes, and that factor holds still from morning to dusk. A lightmap worked out mid-change (after sleeping, `/time set day` or joining, read between the old tick's night and the new tick's day) then stayed all day: the open sky as dark as the night it came from, while torches and lanterns lit as normal. It also never saw the Moon rise or set. The rest of BadOptimizations is left as it is.
 - Compile-checked in the cloud (Kingdoms compileClientJava); not played.
+
+## 0.10.18 (2026-11-18): rangers and ship crews in light armour; smiths' orders for mail (#1730)
+
+- **Rangers**: the Green Huntsman's rangers wear studded leather (cap and brigandine); a seasoned one (30%, and always the one sent after a poacher) wears a mailed cap and jack. Never diamond or netherite.
+- **Ship crews**: a pirate captain wears a full mailed leather set, a sea captain a mailed cap and jack, and about half the deckhands a studded jerkin (`LightLeather`). Without Jaymo's Powers they keep their leather.
+- **Careers**: with Powers loaded, a town's smith orders sometimes ask for mail sheets, or one to three mailed jacks.
+- Built; not played.
+- **Sidesteps follow the armour**: fighting folk never sidestep a player's blow while wearing a piece of plate (armour outside `#jaymoskingdoms:light_armor`), the same as a player's backstep. The Huntsman's rangers and ship crewmen (MCA villagers) now sidestep too, 12% of blows, when they wear only leather or mail. Mailed and studded leather join `light_armor`, so Thieves' and Marksmen's light-armour bonus counts them.

@@ -5853,3 +5853,17 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
 - **Slowness**: each mail piece worn shortens a newly added Slowness by 10% (a full set, 40%). A full mail set sprinting while slowed needed no change: vanilla 26.3 never stops a sprint for Slowness.
 - **Quiet**: the distance mobs notice you at is scaled by armour, per slot share: padding x0.9, mail x1.0, plate x1.15 (bare slots x1.0); it multiplies with Hiding, Rigs and Darktide.
 - New `core/ArmourEase` holds the numbers; mixins `LightArmourSlowMixin`, `LightArmourQuietMixin`, `LightArmourSwimMixin`. Built; not played.
+
+## 0.24.78 (2026-11-18): light armour: the world wears it (#1730)
+
+- **Mobs**: Armored Foes' natural and raider equipment tables now hand out mailed and studded leather sets (new `mailed_leather_armor` and `studded_leather_armor` tables, one entry each beside chainmail's). A mob in the full mailed set runs 15% faster while it has a target (`LightFoes`, checked once a second, only for a mob in a mailed jack).
+- **Brutes**: bastion piglin brutes sometimes spawn in a full studded set (30%, two in five of those enchanted); a brute in the full studded set doesn't zombify (`PiglinStuddedMixin`).
+- **Armourers**: a village armourer sells Mail Rings and Mail Sheets (level 2), and at level 3 buys a Mailed Jack or Mailed Chausses for emeralds.
+- Built; not played.
+
+## 0.24.79 (2026-11-18): Light armour full-set boons: backstep, weathered, mixed harness (#1730)
+
+- **Backstep**: a backward dodge (more than 120 degrees from where you face, which includes the default hop back when you hold no direction) slips blows only in light armour: every worn piece padding, mail or none, counting Kingdoms' harness layers. Any plate piece (copper, iron, gold, diamond, netherite, anything plate) turns the slip off for backward hops only; sideways and forward hops are as before. Darktide's own evasions and the landing roll don't use this slip and are unchanged. In a full mailed leather set the backward slip also knocks an arrow aside (it flies back at 0.4 speed, no damage) with a chain rattle after the usual dodge sound, then rests 15 s; each Projectile Protection level on the worn pieces takes 0.5 s off, at least 5 s. `Dodge` remembers each hop's direction from the Start payload, server side.
+- **Weathered**: a full studded leather set shortens burning by 40% (`Entity.igniteForTicks`) and slows freezing by 40% (a rise in frozen ticks: powder snow, the Freezing effect, a power's chill; fractions rounded by chance, thawing untouched). Each Fire Protection level (burning) or Frost Walker level (freezing) worn adds 10%, at most 60%. No immunity. Kitchen's body heat counts the full set as one warm piece (it reads the `jaymospowers:studded_armor` tag, nothing needed from Powers).
+- **Full sets with harness**: `ArmourEase.fullSet(body, set, layer)`: head and feet must be the set's own pieces (not broken); the chest counts if it is the set's piece or a harness layer of the set's kind (mail for mailed, padding for studded) is worn under it, so a hauberk under a surcoat makes a mailed chest; the legs count the same way with a layer over the leggings. Only plain arrows are knocked aside, not tridents or thrown blades. In Kitchen's cold the studded set counts as one warm piece; the 40% slower freezing applies to Powers' frost and vanilla powder snow.
+- Built; not played.

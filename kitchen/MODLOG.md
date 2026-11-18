@@ -2438,3 +2438,7 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 
 - `HideTraits.isLeather` also takes pieces in the new `jaymoskitchen:hide_armour` tag (optional entries for Jaymo's Powers' mailed and studded leather), so their hide traits and soak wear work as on leather armour.
 - Built; not played.
+
+## 0.6.45 (2026-11-18): Studded leather as one warm piece (#1730)
+
+- Body heat counts a full set of Jaymo's Powers' studded leather (`jaymospowers:studded_armor`, all four slots) as one warm piece, for the cold and the heat alike. Harness layers are not counted on this side. Built; not played.
