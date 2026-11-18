@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,9 +23,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · claimed
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · 🪶 Quill · #1765 · writing
+- [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · #1767 · claimed
 
 
 ## In review
