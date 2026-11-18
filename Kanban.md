@@ -12,6 +12,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
+- [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 
 
 ## Being built
