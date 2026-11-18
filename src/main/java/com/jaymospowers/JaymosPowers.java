@@ -166,6 +166,10 @@ public class JaymosPowers implements ModInitializer {
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.BigVeins.init();
+		// ores in andesite, diorite, granite and tuff, big coal veins, Nether gold and quartz veins
+		com.jaymospowers.stoneores.StoneOres.init();
+		// an empty bottle takes a bottle of cloud out of the cloud and sky; the bottle lays a short-lived puff
+		com.jaymospowers.cloudbottle.CloudBottle.init();
 		// the Verdant World's strange growth: mycotic and pulse forests, the stone garden
 		com.jaymospowers.eden.Eden.init();
 		com.jaymospowers.ground.Panning.init();
