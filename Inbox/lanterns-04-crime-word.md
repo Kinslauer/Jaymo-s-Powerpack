@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
 claimed_by: lanterns-04-crime-word
-pr: 
+pr: 1763
 size: M
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/CrimeWord.java (new)
