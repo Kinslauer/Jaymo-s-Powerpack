@@ -23,10 +23,10 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · claimed
 - [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · claimed
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · 🪶 Quill · #1765 · writing
+- [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · claimed
 
 
 ## In review
