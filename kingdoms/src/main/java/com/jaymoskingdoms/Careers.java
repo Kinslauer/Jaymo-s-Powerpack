@@ -878,7 +878,8 @@ public final class Careers {
 			}
 			// ((0.7.625) less a Bane's cut)
 			Currencies.Pay payout = BaneCut.cut(player, new Currencies.Pay(money, paid, paidBits));
-			Currencies.give(player, payout);
+			// (held in the H menu's Rewards page until claimed)
+			Rewards.hold(player, Rewards.WAGES, f.name(), payout.stacks(), false);
 			player.sendSystemMessage(Component.translatable(paidMilli < owedMilli ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
 				payout.isEmpty() ? Currencies.amount(money, 0L) : Currencies.amount(payout), f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
 			edit(player, k -> {
@@ -1415,7 +1416,7 @@ public final class Careers {
 	static void refreshTitles(MinecraftServer server) {
 		Map<UUID, Component> now = new HashMap<>();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-			Component t = title(p);
+			Component t = TitleChoice.shown(p);
 			if (t != null) {
 				now.put(p.getUUID(), t);
 			}

@@ -1,4 +1,8 @@
 {
+	"menu.jaymospowers.tab.notices": "Notices",
+	"menu.jaymospowers.notices.title": "Notices",
+	"menu.jaymospowers.notices.none": "Nothing yet. What the world tells you is kept here, the last fifty.",
+	"menu.jaymospowers.character.ki": "Ki",
 	"menu.jaymospowers.tab.character": "Character",
 	"menu.jaymospowers.tab.powers": "Powers",
 	"menu.jaymospowers.tab.map": "Map & Waypoints",

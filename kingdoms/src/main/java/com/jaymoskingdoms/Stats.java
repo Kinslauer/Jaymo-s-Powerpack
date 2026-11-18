@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Locale;
@@ -91,8 +92,10 @@ public final class Stats {
 	static final double WITS_LUCK = 0.1 / STEP * TOP_SHARE;
 	/** (0.7.540) The rank key that marks a player's points as already on the 0-100 scale. */
 	static final String SCALED_KEY = "stat_scale";
-	/** (0.7.540) Points a shift-click puts in at once. */
-	public static final int SHIFT_STEP = 10;
+	/** Points a shift-click puts in at once. */
+	public static final int SHIFT_STEP = 5;
+	/** What taking every spent point back costs (emeralds' worth, paid in the coin of the land): the Redistribute button on the Attributes tab. */
+	public static final int REDISTRIBUTE_FEE = 12;
 	/** Presence: the free points everyone starts with (it is the one attribute no heritage or story gives). */
 	public static final int BASE_PRESENCE = STEP;
 	/**
@@ -140,12 +143,25 @@ public final class Stats {
 		}
 	}
 
+	/** Player → server: take every point spent on attributes back, for {@link #REDISTRIBUTE_FEE}. */
+	public record Redistribute() implements CustomPacketPayload {
+		public static final Type<Redistribute> TYPE = new Type<>(JaymosKingdoms.id("stat_redistribute"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Redistribute> CODEC = StreamCodec.unit(new Redistribute());
+
+		@Override
+		public Type<Redistribute> type() {
+			return TYPE;
+		}
+	}
+
 	private Stats() {
 	}
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Raise.TYPE, Raise.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Raise.TYPE, (payload, context) -> raise(context.player(), payload.stat(), payload.count()));
+		PayloadTypeRegistry.serverboundPlay().register(Redistribute.TYPE, Redistribute.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Redistribute.TYPE, (payload, context) -> redistribute(context.player()));
 	}
 
 	// ---- reading -----------------------------------------------------------------------------------------------
@@ -434,5 +450,32 @@ public final class Stats {
 		player.setAttached(Skills.PROGRESS, new Skills.Progress(p.xp(), Map.copyOf(ranks)));
 		attributes(player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.1F);
+	}
+
+	/**
+	 * Takes every point {@code player} spent on attributes back for {@link #REDISTRIBUTE_FEE}, to spend again (perks stay as they
+	 * are). Nothing happens if nothing is spent or the fee can't be paid; heritage, class, story and trained points aren't spent
+	 * points, so they stay.
+	 */
+	private static void redistribute(ServerPlayer player) {
+		migrate(player);
+		Skills.Progress p = Skills.of(player);
+		if (spent(p) == 0) {
+			return;
+		}
+		long fee = Money.worth(REDISTRIBUTE_FEE);
+		if (!Money.canPay(player, fee)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.stats.redistribute.poor", Money.text(player, fee)));
+			return;
+		}
+		Money.charge(player, fee);
+		Map<String, Integer> ranks = new HashMap<>(p.ranks());
+		for (Stat stat : Stat.values()) {
+			ranks.remove(stat.rankKey());
+		}
+		player.setAttached(Skills.PROGRESS, new Skills.Progress(p.xp(), Map.copyOf(ranks)));
+		attributes(player);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 0.8F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.stats.redistribute.done", points(player, Skills.of(player))));
 	}
 }

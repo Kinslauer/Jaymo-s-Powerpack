@@ -11,6 +11,7 @@ import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.Patrons;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
+import com.jaymoskingdoms.TitleChoice;
 import com.jaymoskingdoms.WorldTiers;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
@@ -52,7 +53,7 @@ public final class MenuCompat {
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
 	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60,
-		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62;
+		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62, ORDER_DAILY = 36, ORDER_TITLES = 29, ORDER_REWARDS = 71;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -63,6 +64,8 @@ public final class MenuCompat {
 		ClientPlayNetworking.registerGlobalReceiver(MenuNet.Info.TYPE, (payload, context) -> FactionScreen.info = payload);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> FactionScreen.info = null);
 		RetakingScreen.register();
+		ClientPlayNetworking.registerGlobalReceiver(TitleChoice.Info.TYPE, (payload, context) -> TitleChoice.info = payload);
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TitleChoice.info = null);
 		if (!FabricLoader.getInstance().isModLoaded(POWERS)) {
 			return;
 		}
@@ -108,6 +111,13 @@ public final class MenuCompat {
 				s -> s instanceof MagicScreen || s instanceof MagicPageScreen, s -> new int[] {0, 0});
 			tab(register, "followers", ORDER_FOLLOWERS, () -> new ItemStack(Items.LEAD), "menu.jaymoskingdoms.tab.followers",
 				FollowersScreen::openAll, s -> s instanceof FollowersScreen, s -> new int[] {0, 0});
+			// the daily task (World), the titles you wear (You) and the rewards held for you (Notices)
+			tab(register, "daily", ORDER_DAILY, () -> new ItemStack(Items.CLOCK), "menu.jaymoskingdoms.tab.daily",
+				() -> Minecraft.getInstance().gui.setScreen(new DailyTaskScreen()), s -> s instanceof DailyTaskScreen, s -> ((DailyTaskScreen)s).corner());
+			tab(register, "titles", ORDER_TITLES, () -> new ItemStack(Items.NAME_TAG), "menu.jaymoskingdoms.tab.titles",
+				() -> Minecraft.getInstance().gui.setScreen(new TitlesScreen()), s -> s instanceof TitlesScreen, s -> ((TitlesScreen)s).corner());
+			tab(register, "rewards", ORDER_REWARDS, () -> new ItemStack(Items.CHEST), "menu.jaymoskingdoms.tab.rewards",
+				() -> Minecraft.getInstance().gui.setScreen(new RewardsScreen()), s -> s instanceof RewardsScreen, s -> ((RewardsScreen)s).corner());
 			arrange(menu);
 			listen(menu);
 			Supplier<List<Map.Entry<Component, BlockPos>>> pins = MenuCompat::pins;
@@ -128,7 +138,8 @@ public final class MenuCompat {
 	/** Sorts Kingdoms' tabs into the menu's groups and gives locked ones their hints, each call apart so an older Powers still takes the rest. */
 	private static void arrange(Class<?> menu) {
 		String[][] groups = {{"skills", "you"}, {"class", "you"}, {"growth", "you"}, {"forms", "powers"}, {"magic", "powers"}, {"valor", "powers"},
-			{"boons", "powers"}, {"story", "world"}, {"journal", "world"}, {"tier", "world"}, {"faction", "people"}, {"party", "people"}, {"followers", "people"}};
+			{"boons", "powers"}, {"story", "world"}, {"journal", "world"}, {"tier", "world"}, {"faction", "people"}, {"party", "people"}, {"followers", "people"},
+			{"daily", "world"}, {"titles", "you"}, {"rewards", "notices"}};
 		for (String[] g : groups) {
 			reflect(menu, "group", new Class<?>[] {String.class, String.class}, g[0], g[1]);
 		}
@@ -150,6 +161,8 @@ public final class MenuCompat {
 			panel.invoke(null, "header", (Supplier<List<Component[]>>)MenuCompat::headerRows);
 			panel.invoke(null, "attributes", (Supplier<List<Component[]>>)MenuCompat::attributeRows);
 			panel.invoke(null, "record", (Supplier<List<Component[]>>)MenuCompat::recordRows);
+			// (mana, among the vitals; an older Powers without bars just leaves it out)
+			reflect(menu, "bars", new Class<?>[] {Supplier.class}, (Supplier<List<Object[]>>)MenuCompat::manaBar);
 		} catch (NoSuchMethodException e) {
 			Supplier<List<Component[]>> rows = MenuCompat::characterRows;
 			menu.getMethod("characterRows", Supplier.class).invoke(null, rows);
@@ -210,6 +223,18 @@ public final class MenuCompat {
 
 	private static Component none() {
 		return Component.translatable("menu.jaymoskingdoms.character.none");
+	}
+
+	/** The vitals' mana bar, for the attuned: {label, value, share, colour}. */
+	private static List<Object[]> manaBar() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		List<Object[]> bars = new ArrayList<>();
+		if (player != null && com.jaymoskingdoms.Mana.hasMana(player)) {
+			float now = com.jaymoskingdoms.Mana.current(player), most = com.jaymoskingdoms.Mana.max(player);
+			bars.add(new Object[] {Component.translatable("menu.jaymoskingdoms.character.mana"), Component.literal(Math.round(now) + " / " + Math.round(most)),
+				most <= 0.0F ? 0.0F : Math.min(1.0F, now / most), 0xFF000000 | ManaClient.COLOR});
+		}
+		return bars;
 	}
 
 	/** The header's one row: your character level. */
