@@ -30,7 +30,7 @@ The Kanban thread's board is edited in place, so it isn't counted. Claude Code o
 | True state | Broken 3 times | **Better, two slips.** The Kanban answer contradicted itself. Patch notes twice said "up to 0.22.51" when master was further on (below). The classes answer was wrong until Andy told it to re-read master. After that it was right: 14 classes, matching `Classes.java`. |
 | No heartbeats or narration | 2 heartbeats, 7 "Let me check…" | **Heartbeats gone. Narration not:** about 38 "Let me…" posts, despite the SOUL.md rule (below). |
 | Public posts only on a yes | Broken by the gateway | **Kept.** One shutdown notice reached Tenbuki > lair, at 12:00 AM on Nov 12. That was the planned restart that moved the home channel. Nothing public since. No patch-note draft went out. |
-| Do Andy's Hermes orders | "stop hephaestus" didn't hold | **Kept.** Hephaestus has made no runs or pushes since it went on the stop list. Memory approval was done once Andy restated it. |
+| Do Andy's Hermes orders | "stop hephaestus" didn't hold | **Kept.** Hephaestus went on the stop list at 7:01 AM on Nov 12. Its last activity was its final run on Nov 11, 4:39 to 5:10 PM; nothing since. Memory approval was done once Andy restated it. |
 
 ## What went wrong
 
@@ -52,7 +52,7 @@ The Kanban thread's board is edited in place, so it isn't counted. Claude Code o
    - The gateway log shows Hermes batched the 42-character message.
    - Discord's socket went stale at 9:14:53, and the batch was flushed while disconnected: `Error handling message: not_found` at 9:15:00.
    - The missed-message backfill then counted it as already seen (`scanned=2 missed=0`).
-   - Andy got an answer only after "Hello?" at 11:06 AM, 1 hour 55 minutes later. This is a Hermes bug, not YOUTH's judgement: backfill doesn't cover a batch that fails mid-reconnect.
+   - Andy got an answer only after "Hello?" at 11:06 AM, 1 hour 54 minutes later. This is a Hermes bug, not YOUTH's judgement: backfill doesn't cover a batch that fails mid-reconnect.
 5. **The Kanban answer contradicted itself (Nov 16 5:32 PM).** "Yes, the Kanban is up to date" listed `burnt-corpse-ash-piles` and `faith-page-champion` under both Needs Andy and Done.
 6. **The Experiments thread (Nov 13 7:52-8:10 AM).**
    - Andy said "those entries go here", meaning the two experiments YOUTH had just logged in the Dashboard. YOUTH had no context in the new thread and asked twice what he meant.
@@ -61,11 +61,10 @@ The Kanban thread's board is edited in place, so it isn't counted. Claude Code o
    - The "minecraft-server-bot" experiment is also marked done in the vault. YOUTH had told Andy "nothing to start" when he said "lets start on the server bot experiment" at 11:40 AM. (A Claude session later built the wood-wisp instead.)
    - OpenCode was listed as experiment 3 "queued", but it has no task file.
 7. **Task routing.** Andy asked for hands-on cooking to be prepared "as a task for reviewer claude tmr morning" (9:48 PM, Nov 16). YOUTH filed it `for: hermes`, so Apollo and then Bacchus picked it up overnight. Bot alerts showed both stalled on it, and it is `blocked` now.
-8. **Creating the thread failed in public.** On Nov 12 at 11:07 PM, "make a new thread called experiments" took 7 narration posts over 5 minutes before YOUTH said the tool can't open a forum post. Andy made it himself.
+8. **Creating the thread failed in public.** On Nov 12 at 11:07 PM, "make a new thread called experiments" took 7 narration posts (11:10 to 11:12 PM), and only at 11:16 PM did YOUTH say the tool can't open a forum post. Andy made it himself.
 9. **Noise:**
    - About 38 "Let me…" or "Now I'll…" posts. The worst was a run of 9 for the patch notes at 11:22 PM on Nov 14.
    - 4 "Self-improvement review" posts and 5 "Interrupting" or "Redirected" lines; those are Hermes system lines.
-   - One raw `UnicodeEncodeError` traceback, in a Patch Notes post on Nov 11 at 8:35 PM.
 
 ## Went well
 
@@ -94,3 +93,29 @@ The watchdog restarted the gateway on:
 4. **Hermes bug report or patch:** a text batch flushed during a Discord reconnect is dropped, and the backfill doesn't redo it. Backfill should re-dispatch messages whose handling failed.
 5. **SOUL.md:** "for reviewer Claude" or "for Claude" in a task request means `for: claude` (or the coordinator), not `for: hermes`.
 6. **Narration:** the "no 'Let me check…' posts" rule isn't holding. Consider `display.platforms.discord` options that hide interim assistant text, if Hermes has one, rather than relying on the prompt.
+
+Findings checked by an independent verifier agent on Nov 17. Its corrections are applied: the gap time, the thread-creation timing, Hephaestus's last run, and a traceback claim, which is removed.
+
+## Fixes done (Nov 17, Andy: all six)
+
+1. **"Approve" never merges:** SOUL.md Merging rule. Only "merge" merges; "approve all" after a memory list approves the memories.
+2. **Patch notes:** a new SOUL.md "Patch notes" section.
+   - Fetch master and read its versions before writing "up to X".
+   - "Since the last post" means after the newest notes in the thread; "today" means since midnight.
+   - Name the range in the first line, keep parts under 1,900 characters, and ask before going past about 10 parts.
+3. **Promises:**
+   - `E:/hermes/scripts/watch.py` (`add --pr N` / `add --task T`, `list`, `remove`).
+   - The no-agent cron job `promise-watch` runs every 5 minutes (`promise_watch.py`). It posts in Dashboard when a watch comes true. The wisp tells Andy (Manigraphic78) in game too, now or when he next comes on within a day (`watches.ingame.json`).
+   - SOUL.md: never say "I'll let you know" without adding a watch.
+   - Tested on #1671, #1686 and the future-gun-gear task.
+4. **Lost messages after a reconnect:** a local patch to `hermes-agent/plugins/platforms/discord/adapter.py`.
+   - The reconnect's backfill now re-runs a message whose live turn failed while it's still in the 5-minute dedup cache (`_discord_message_live_failed`). `max_attempts` still caps it.
+   - A new test in `tests/gateway/test_discord_missed_message_backfill.py` fails without the patch; all 21 pass with it.
+   - Backup: `backups/discord-adapter.py.2026-11-17-backfill-failed.bak`.
+   - **A Hermes update may overwrite this patch:** re-apply it from the backup diff, or report it upstream.
+5. **"For Claude" routing:** SOUL.md. "For reviewer Claude" and the like make a task `for: claude`, which the Hermes bots don't take.
+6. **No "Let me…" posts:** config.yaml `display.platforms.discord`: `interim_assistant_messages: false` and `streaming: false`.
+   - Only YOUTH's final answer goes to Discord.
+   - Backup: `backups/config.yaml.2026-11-17-no-interim.bak`.
+
+SOUL.md backup: `backups/SOUL.md.2026-11-17-report3.bak`. `hermes sessions refresh-prompts` was run (580 sessions). The gateway was restarted at 2:51 PM so the patch and the config load.
