@@ -9,7 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 
 
 ## Being built
@@ -18,6 +17,7 @@ kanban-plugin: board
 - [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · claimed
 - [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · claimed
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · claimed
+- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · claimed
 
 
 ## In review
