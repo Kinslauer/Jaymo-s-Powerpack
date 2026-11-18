@@ -1,0 +1,17 @@
+{
+  "message.jaymoskingdoms.ranger.coming": "Something moves in the trees, and keeps pace with you. The Huntsman's rangers know what you've killed.",
+  "speech.jaymoskingdoms.ranger.caught": "%s: \"The wood can't feed that many of your kind. You're coming with me.\"",
+  "message.jaymoskingdoms.ranger.delivered": "%s carries you, trussed like a buck, to %s, and hands you to its guards for poaching.",
+  "speech.jaymoskingdoms.ranger.let_off": "%s: \"No court for days. Go, and kill less.\"",
+  "speech.jaymoskingdoms.ranger.scold": "\"%s beasts since yesterday. The Huntsman takes the old and the slow, and leaves the rest to breed. Take that many again and I'll be the one hunting you.\"",
+  "speech.jaymoskingdoms.ranger.sorry": "I'll take less.",
+  "speech.jaymoskingdoms.ranger.offer": "\"You walk the woods like you've no trade. I could teach you ours. Which of the wild's enemies would you hunt?\"",
+  "speech.jaymoskingdoms.ranger.teach": "Teach me to hunt %s",
+  "speech.jaymoskingdoms.ranger.not_now": "Not now.",
+  "message.jaymoskingdoms.ranger.taught": "You walk the rest of the day with the ranger, and come out of the trees a Ranger.",
+  "speech.jaymoskingdoms.ranger.lesson.1": "\"Take the old and the slow. Leave the young, or there's nothing here next year.\"",
+  "speech.jaymoskingdoms.ranger.lesson.2": "\"Walk upwind of what you hunt. It smells you long before it sees you.\"",
+  "speech.jaymoskingdoms.ranger.lesson.3": "\"Where the deer are thick, the wolves aren't far. Where the wolves are gone, the deer eat the wood bare.\"",
+  "speech.jaymoskingdoms.ranger.lesson.4": "\"A clean kill and every part used. Anything less is a debt to the Huntsman.\"",
+  "speech.jaymoskingdoms.ranger.thanks": "Thank you."
+}
