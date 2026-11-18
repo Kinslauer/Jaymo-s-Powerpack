@@ -6,6 +6,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -71,10 +72,15 @@ public final class LightFoes {
 		}
 	}
 
-	/** (A mob's {@code finalizeSpawn}) A piglin brute sometimes comes in a full studded set. */
-	public static void spawned(Mob mob, DifficultyInstance difficulty) {
-		if (!(mob instanceof PiglinBrute) || mob.level().isClientSide()) {
+	/** (A mob's {@code finalizeSpawn}) A bastion's piglin brute, placed with the bastion and wearing nothing yet, sometimes comes in a full studded set. */
+	public static void spawned(Mob mob, EntitySpawnReason reason, DifficultyInstance difficulty) {
+		if (!(mob instanceof PiglinBrute) || mob.level().isClientSide() || reason != EntitySpawnReason.STRUCTURE) {
 			return;
+		}
+		for (EquipmentSlot slot : ARMOUR) {
+			if (!mob.getItemBySlot(slot).isEmpty()) {
+				return;
+			}
 		}
 		RandomSource random = mob.getRandom();
 		if (random.nextFloat() >= BRUTE_STUDDED) {

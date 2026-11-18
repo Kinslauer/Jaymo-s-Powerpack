@@ -521,9 +521,9 @@ public final class Careers {
 		}
 	}
 
-	/** Tags Jaymo's Powers reads for a smith's rank (its perfect zone on the hammering bar widens): Journeyman, Master. */
 	/** What a smith's orders may also ask for when Powers is there: mail sheets, and a mailed jack or two (1 to 3). */
 	private static final String[] MAILED_GOODS = {"jaymospowers:mail_sheet", "jaymospowers:mailed_jack"};
+	/** Tags Jaymo's Powers reads for a smith's rank (its perfect zone on the hammering bar widens): Journeyman, Master. */
 	static final String[] SMITH_TAGS ={"jaymoskingdoms.smith_rank_1", "jaymoskingdoms.smith_rank_2"};
 
 	/** (Powers' Smithing Anvil) Keeps {@code player}'s smith-rank tag true to the rank they hold. */
@@ -752,7 +752,8 @@ public final class Careers {
 			return null;
 		}
 		String what;
-		List<String> gives = kinds.stream().filter(k -> k.startsWith("give:")).toList();
+		// (mail goods are never stocked, so they'd always be "least of": they come up only by the plain draw)
+		List<String> gives = kinds.stream().filter(k -> k.startsWith("give:") && !java.util.Arrays.asList(MAILED_GOODS).contains(k.substring(5))).toList();
 		if (!gives.isEmpty() && Storage.loaded(level, f) && random.nextFloat() < 0.6F) {
 			// the goods the storehouse has least of
 			what = gives.stream().min(Comparator.comparingInt(g -> stock(level, f, g.substring(5)) + random.nextInt(16))).orElse(gives.getFirst());
