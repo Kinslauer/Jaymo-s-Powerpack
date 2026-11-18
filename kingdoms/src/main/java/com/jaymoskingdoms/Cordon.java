@@ -341,8 +341,8 @@ public final class Cordon {
 			BlockPos marked = BlockPos.of(Long.parseLong(e.getKey()));
 			for (ServerPlayer player : level.players()) {
 				double dx = player.getX() - marked.getX(), dz = player.getZ() - marked.getZ();
-				if (dx * dx + dz * dz <= COURT_NEAR * COURT_NEAR && level.isLoaded(marked)
-					&& level.hasChunksAt(marked.offset(-COURT_RADIUS, 0, -COURT_RADIUS), marked.offset(COURT_RADIUS, 0, COURT_RADIUS))) {
+				if (dx * dx + dz * dz <= COURT_NEAR * COURT_NEAR && Loaded.made(level, marked)
+					&& Loaded.made(level, marked.offset(-COURT_RADIUS, 0, -COURT_RADIUS), marked.offset(COURT_RADIUS, 0, COURT_RADIUS))) {
 					// never over anyone's work: a realm's land, or ground with a chest, bed, furnace or the like on it
 					if (Factions.at(level.getServer(), level, marked) == null && !built(level, marked)) {
 						raise(level, marked);
