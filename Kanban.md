@@ -26,9 +26,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · claimed
 - [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · claimed
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · #1753 · claimed
 
 
 ## In review
