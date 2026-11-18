@@ -1,16 +1,16 @@
 ---
-status: running
+status: in-review
 task: harness-creeds-and-lands
 branch: claude/harness-creeds-and-lands
 with:
-pr:
+pr: 1728
 mods: kingdoms
 versions:
 started: 2026-11-18
 owns:
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/HeraldryArmour.java
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/HeraldryWear.java
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/Harness.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryArmour.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryWear.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Harness.java
   - kingdoms/tools/gen_heraldry_armour.py
 ---
 
@@ -32,4 +32,9 @@ owns:
 - Five harness tasks touch HeraldryArmour and generator: take in order (helms, body, creeds/lands, barding, upkeep)
 
 ## Done
-What a player will see, and what wasn't tested.
+Added creed and land harness variants:
+- **Creed variants**: Faith (etched cuirass), Chivalry (oath sleeves), Conquest (spiked blackened spaulders), Coin (etched cuirass, barbute helms), Crown (gilt-banded cuirass/spaulders, tabard)
+- **Land variants**: Snowy (fur-lined full harness), Desert (quilted coat + veiled helm), Jungle (brine-soaked quilted cotton), Savanna (hide/bronze), Cherry (laced lamellar)
+- 9 new finishes, 22 new pieces, expanded KNIGHT_LANDS to all 9 climates
+- PR #1728 created, compiles and builds successfully, PR checks pass
+- Not tested in game: knight spawning with correct variants, texture generation, King's Guard livery, oath sleeve loss
