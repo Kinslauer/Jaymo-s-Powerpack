@@ -583,6 +583,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		TurnedVillagers.register();
 		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();
+		com.jaymoskingdoms.wild.PredatorRanges.register();
 		com.jaymoskingdoms.wild.Thinning.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)

@@ -165,7 +165,7 @@ public final class SeatCompounds {
 
 	/**
 	 * The compound round {@code bell} founded: its castle emptied of what world generation left in it, then a kingdom
-	 * (no realm near), a fiefdom of the kingdom near, or a village allied to the nearest. Every piece is held, and its
+	 * then a fiefdom of the kingdom near, or a village allied to the nearest (never a kingdom: {@link EpicTowns#seek}). Every piece is held, and its
 	 * barracks and homes count as built. Null if nothing could be founded.
 	 */
 	static @Nullable Faction found(ServerLevel level, BlockPos bell, StructureStart start) {
@@ -175,20 +175,17 @@ public final class SeatCompounds {
 				GrandSeats.empty(level, piece.getBoundingBox());
 			}
 		}
-		Faction founded;
+		// a lone castle is never a kingdom: a fiefdom of the kingdom near, else a village; with none near to swear to, a kingdom
+		// is looked for in an Epic town further out meanwhile
+		Faction lord = nearestKingdom(server, bell);
+		Faction founded = lord != null && GrimSites.count(server, lord, true) < GrimSites.FIEFS_PER_KINGDOM
+			? GrimSites.foundFief(level, start, "seat_compound", lord, "message.jaymoskingdoms.seat.fiefdom") : null;
+		if (founded == null) {
+			founded = Villages.found(level, bell);
+			Villages.ally(server, founded);
+		}
 		if (Factions.realmNear(server, bell, KingdomEvents.CAPITAL_SPACING) == null) {
-			founded = KingdomEvents.foundIn(level, bell, start);
-			if (founded == null) {
-				founded = KingdomEvents.found(level, bell, Castle.Kind.CITADEL);
-			}
-		} else {
-			Faction lord = nearestKingdom(server, bell);
-			founded = lord != null && GrimSites.count(server, lord, true) < GrimSites.FIEFS_PER_KINGDOM
-				? GrimSites.foundFief(level, start, "seat_compound", lord, "message.jaymoskingdoms.seat.fiefdom") : null;
-			if (founded == null) {
-				founded = Villages.found(level, bell);
-				Villages.ally(server, founded);
-			}
+			EpicTowns.seek(level, bell);
 		}
 		if (founded != null) {
 			settle(server, founded, start);

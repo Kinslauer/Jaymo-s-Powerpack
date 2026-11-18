@@ -88,10 +88,15 @@ public final class DownedLie {
 	/**
 	 * Marks a downed mob about to die so its corpse starts as it lies: a crawler face down with its head ahead, one on its
 	 * back with its head behind where it stood, one curled with its head out to the side it rolled to; anything not built
-	 * like a person along the way it faced. One tripped by a bolas and finished there lies face down. Not players (their own crawl is a lying pose already), nor anyone carried.
+	 * like a person along the way it faced. One tripped by a bolas and finished there lies face down. Not anyone carried. A
+	 * player as {@link #markPlayer}.
 	 */
 	static void markBody(LivingEntity entity) {
-		if (entity instanceof Player || Carry.isCarried(entity)) {
+		if (Carry.isCarried(entity)) {
+			return;
+		}
+		if (entity instanceof Player player) {
+			markPlayer(player);
 			return;
 		}
 		boolean tripped = !Downed.isDowned(entity) && Tripped.tripped(entity);
@@ -127,6 +132,22 @@ public final class DownedLie {
 			// sat against a wall: the body stays sat there (a Kitchen without walls to sit against lies it down as above)
 			entity.addTag(PROPPED_TAG + net.minecraft.core.Direction.getApproximateNearest(wall[0], 0.0, wall[1]).get2DDataValue());
 		}
+	}
+
+	/**
+	 * Andy (2026-11-18): "the death ragdoll when enemies and players are prone or crawling should keep them in that
+	 * position". A player dying flat (downed, crawling, crippled or squeezed under a low ceiling: the swimming pose out of
+	 * water) is marked so their body starts lying as they lay: on their back if they'd rolled over ({@link Crawl#supine}),
+	 * else face down, the head the way they faced.
+	 */
+	static void markPlayer(Player player) {
+		boolean flat = Downed.isDowned(player) || player.getPose() == Pose.SWIMMING && !player.isInWater();
+		if (!flat || player.isPassenger()) {
+			return;
+		}
+		clearBody(player);
+		boolean faceUp = com.jaymospowers.core.Crawl.supine(player);
+		player.addTag(LYING_TAG + (faceUp ? "u." : "d.") + Math.round(net.minecraft.util.Mth.wrapDegrees(player.yBodyRot)));
 	}
 
 	/**

@@ -37,7 +37,7 @@ Sizes: `S` drop in · `M` needs one test launch or a config pass · `L` likely c
 
 - [x] **ScalableLux** `S` ^sn-scalablelux
   Faster light updates. Helps with fire, dragon breath and Gravity's flying blocks.
-  Notes:
+  Notes: taken out again 2026-11-18: it breaks the stacked world's separate skies (the Overworld under the Aether stayed dark by day).
 
 - [x] **Structure Layout Optimizer** `S` ^sn-slo
   Faster jigsaw structure generation. We run a lot of structure packs (Epic, Moog's, Structory, Grim, Repurposed). Server only.

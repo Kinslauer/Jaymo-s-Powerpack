@@ -208,13 +208,14 @@ public final class KingdomEvents {
 		Faction founded;
 		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
 		if (SeatCompounds.is(village.id())) {
-			// a seat compound: a kingdom, a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
+			// a seat compound: a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
 			founded = SeatCompounds.found(level, bell.get(), village.start());
 		} else if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());
 			if (founded == null) {
-				// (0.5.1) no building there fit for a king: the kingdom raises its castle beside the village
-				founded = found(level, bell.get(), Castle.Kind.CITADEL);
+				// no building there fit for a king: no lone castle either, so the town is left and a kingdom is looked for further out
+				NOT_VILLAGE.put(key, now + NOT_VILLAGE_TICKS);
+				EpicTowns.seek(level, bell.get());
 			}
 		} else {
 			founded = Villages.found(level, bell.get());
@@ -251,12 +252,13 @@ public final class KingdomEvents {
 	}
 
 	/**
-	 * (0.7.598) A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and only if
-	 * none will do, its castle on open ground.
+	 * A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and if none will do, the
+	 * nearest one further out is looked for, a try at a time ({@link EpicTowns#foundFar}). Never a lone castle: null if
+	 * none stands ready yet (asked again later), when {@link EpicTowns#farLeft} says if there is any left to look at.
 	 */
-	static Faction foundTown(ServerLevel level, BlockPos at) {
+	static @Nullable Faction foundTown(ServerLevel level, BlockPos at) {
 		Faction town = EpicTowns.found(level, at);
-		return town != null ? town : found(level, at, Castle.Kind.CITADEL);
+		return town != null ? town : EpicTowns.foundFar(level, at);
 	}
 
 	/** A new kingdom at {@code capital}: named, coloured, its land claimed, its banner raised, its king and guards. */
@@ -356,6 +358,8 @@ public final class KingdomEvents {
 	/** A new kingdom's faction at {@code capital}: named, coloured, its land claimed, its banner raised. */
 	static Faction create(ServerLevel level, BlockPos capital) {
 		MinecraftServer server = level.getServer();
+		// (a realm stands again: a later fall of every realm may raise a capital once more)
+		StoryGround.noRealm = false;
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
 		Faction kingdom = Faction.create(Factions.nextId(server), FactionType.KINGDOM, Names.kingdom(random), color, capital,
