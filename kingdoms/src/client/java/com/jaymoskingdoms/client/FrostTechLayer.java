@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * What a villager wears of the Frostborn's work ({@link FrostTech}), for everyone to see: a scouter over one eye, a made
  * arm, a made leg; and the wooden or iron limb a smith fitted one with after they lost their own (Jaymo's Powers' own
- * wooden and iron limb sheets, the same box). The scouter is Jaymo's Powers' own, drawn from its armour sheet on a helmet-sized box (so
+ * wooden and iron limb sheets, the same box). The scouter is Jaymo's Powers' own, drawn from its armour sheet on a box just off the head (so
  * a resource pack that repaints the scouter repaints these too; without Powers there is no scouter to draw). A made
  * limb is plating of our own ({@code tools/gen_frost_tech.py}, in the scouter's greys and green light) drawn over the
  * arm or leg, just proud of the sleeve, with its lamps unlit by the dark. Both follow the body the way the Beastfolk's
@@ -39,8 +39,8 @@ import org.jspecify.annotations.Nullable;
 public final class FrostTechLayer {
 	/** How far a made limb stands off the bare limb: just past MCA's clothes (their outer layer sits at 0.3125). */
 	static final float LIMB_INFLATE = 0.36F;
-	/** The scouter's box off the head: a helmet's. */
-	static final float SCOUTER_INFLATE = 1.0F;
+	/** The scouter's box off the head: just past the hat layer (0.5) and MCA's hair, close to the face, not a helmet's full 1.0. */
+	static final float SCOUTER_INFLATE = 0.6F;
 
 	/** On a living body's render state: {@link FrostTech#of}, with {@link FrostTech#kinds} above it (shifted 8), or null for none. */
 	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:frost_tech");
