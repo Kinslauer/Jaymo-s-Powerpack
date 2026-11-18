@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · for any · open
-- [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · for any · open
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · for any · open
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · for any · open
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · for any · open
@@ -26,6 +25,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · claimed
+- [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · claimed
 
 
 ## In review
