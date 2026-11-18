@@ -14,6 +14,7 @@ suggested_owns:
 # Weapons: hooks, mace stagger, thrown axes break
 
 **Andy's words (2026-11-17 8:24 PM ET):** "done, send it to the vault for apollo" (after ticking the pick list).
+Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 **Andy's picks (4 Knight Armor rows):**
 - **Hooks pull climbers off walls** (ka_wall): a scythe, bill or gutting hook drags a wall-climbing foe down (everyone climbs in this pack).

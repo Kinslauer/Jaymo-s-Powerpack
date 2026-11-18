@@ -13,6 +13,7 @@ suggested_owns:
 # Fishing: lava, crates, notes, tackle bench, cave fish
 
 **Andy's words (2026-11-17 8:24 PM ET):** "done, send it to the vault for apollo" (after ticking the pick list).
+Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 **Andy's picks (all 5 Tide rows):**
 - **Lava fishing in the Ash** (td_lava): a heat-proof rod tier forged in Tinkers (iron rule) fishes Nether lava lakes; new species that behave like real hot-spring fish (keep to warm edges). Demons' villages fish the lakes.

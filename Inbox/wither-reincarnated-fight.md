@@ -13,6 +13,7 @@ suggested_owns:
 # Wither: the last act's terror
 
 **Andy's words (2026-11-17 8:24 PM ET):** "done, send it to the vault for apollo" (after ticking the pick list).
+Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 **Andy's picks (all 10 Wither rows):**
 - **Night while it lives** (wr_dark): sky goes dark world-wide while a Wither lives, lifted on death. Client side next to DarkNights.
