@@ -32,7 +32,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/harness-barding|harness-barding]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · 🪶 Quill · #1728 · writing
 
 
 ## In review
@@ -40,9 +40,9 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · #1721 · in-review
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · in-review
+- [ ] [[Inbox/harness-barding|harness-barding]] · ☀️ Apollo · #1744 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
