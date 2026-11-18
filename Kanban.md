@@ -13,11 +13,11 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · for any · open
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · for any · open
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · for any · open
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · for any · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · for any · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · for any · open
 
 
 ## Being built
