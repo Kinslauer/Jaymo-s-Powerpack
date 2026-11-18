@@ -4,14 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:37). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
-- [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · for any · open
-- [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · for any · open
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
@@ -24,6 +22,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · claimed
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · claimed
+- [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · claimed
 
 
 ## In review
