@@ -35,3 +35,4 @@ suggested_owns:
 
 ## Notes
 - 2026-11-18 20:42 lanterns-05-patrol-law's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-18 16:48 Back to in-review: PR #1764 was up and green; the stale sweep caught it during a long build.
