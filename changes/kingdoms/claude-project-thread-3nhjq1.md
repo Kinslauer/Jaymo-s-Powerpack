@@ -1,0 +1,3 @@
+# Rainy days no longer go dark as a moonless night
+- **DarkNights**: how far into the night it is now comes from the Sun's height, not from the sky light factor. Rain and thunder lower that factor by day too, so a rainy or stormy day was taken for night, and with the Moon set (as it is by day, most of the month) the open sky lost most of its light: a stormy noon was near pitch black while torches and lanterns lit as normal. By day the sky light is now left alone whatever the weather; nights darken by the Moon as before. Shader packs follow too, since the moonlight uniform reads the same night.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.

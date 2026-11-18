@@ -5,6 +5,7 @@ import com.jaymoskingdoms.astronomy.SunMoon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.LightmapRenderState;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.EnvironmentAttributeProbe;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.MoonPhase;
 
@@ -26,8 +27,12 @@ import net.minecraft.world.level.MoonPhase;
 public final class DarkNights {
 	/** Moonlight left in each phase, from full (index 0) round to waxing gibbous (7). */
 	static final float[] MOONLIGHT = {1.0F, 0.7F, 0.45F, 0.2F, 0.0F, 0.2F, 0.45F, 0.7F};
-	/** Vanilla's sky light factor at the dead of night (Timelines.NIGHT_SKY_LIGHT_FACTOR); 1 at noon. */
-	static final float NIGHT_SKY_FACTOR = 0.24F;
+	/**
+	 * The Sun's height (the y of its direction) where vanilla's day timeline starts dimming the sky light (tick 11270),
+	 * and where the night is at its darkest (tick 13140). The night is read off the Sun, not off the sky light factor,
+	 * since rain and thunder lower that factor by day too, and a rainy noon was taken for a moonless night.
+	 */
+	static final float DAY_SUN_Y = 0.4F, NIGHT_SUN_Y = -0.1F;
 
 	/** Past this far into the night (0-1) on a waning moon, shader packs go off (only when {@link ShaderSkyLight} didn't take). */
 	static final float SHADERS_OFF_AT = 0.3F;
@@ -195,14 +200,20 @@ public final class DarkNights {
 			lastNight = 0.0F;
 			return;
 		}
+		EnvironmentAttributeProbe probe = minecraft.gameRenderer.mainCamera().attributeProbe();
+		// how far into the night it is: 0 by day (whatever the weather), 1 once the sky is at its darkest
+		float sunY = Mth.cos(probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTicks) * Mth.DEG_TO_RAD);
+		float night = Mth.clamp((DAY_SUN_Y - sunY) / (DAY_SUN_Y - NIGHT_SUN_Y), 0.0F, 1.0F);
+		if (night <= 0.0F) {
+			lastNight = 0.0F;
+			return;
+		}
 		float moon = MOONLIGHT[0];
 		if (Moons.clientShown == Moons.Moon.NONE) {
-			MoonPhase phase = minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);
+			MoonPhase phase = probe.getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);
 			moon = MOONLIGHT[Math.floorMod(phase.index(), MOONLIGHT.length)];
 		}
-		moon *= SunMoon.moonlight(minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_ANGLE, partialTicks));
-		// how far into the night it is: 0 by day, 1 once the sky is at its darkest
-		float night = Mth.clamp((1.0F - state.skyFactor) / (1.0F - NIGHT_SKY_FACTOR), 0.0F, 1.0F);
+		moon *= SunMoon.moonlight(probe.getValue(EnvironmentAttributes.MOON_ANGLE, partialTicks));
 		lastNight = night;
 		lastMoon = moon;
 		state.skyFactor *= Mth.lerp(night, 1.0F, moon);
