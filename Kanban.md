@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 13:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 13:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · 🪶 Quill · #1749 · writing
 
 
 ## In review
@@ -42,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
 - [ ] [[Inbox/harness-barding|harness-barding]] · ☀️ Apollo · #1744 · in-review
 - [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · 🍇 Bacchus · #1746 · in-review
+- [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
