@@ -677,6 +677,17 @@ Overworld in the old age, before they were stopped. A powerful Frostborn Z Fight
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
 
+**The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
+zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
+have a similar but higher chance to turn giant"; the rest Claude's placement). Not every raider who died on the
+Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
+them, dragging tails rotted and mangled the way the future's dead drag theirs, or only a stump where one was cut. A
+Warrior-born villager who dies and turns keeps their blood too, and the tail kept wrapped in life comes loose and hangs.
+The dead still answer the moon: under a full moon or a blood moon, one with its tail still on it may swell into the
+wild Great Ape, its fur gone grey with the grave, until dawn, or until a blade takes the tail. The Verdant are fed by
+the sun in life and lose it in death, and the dead among them turn to the moon instead: an undead Verdant out under it
+swells into a giant more readily than a dead Warrior-born turns ape, and shrinks back by dawn.
+
 **The Other World.** A Z Fighter who dies wakes in the Other World: a pale hall on an island of holystone high in
 the sky, with a halo over their head. It is the Aether's, as the afterlife is, and there is no portal there either. The
 **Judge** reads their fights out of his book and sends them down the road: "Death is a door, not a wall." The **Master
