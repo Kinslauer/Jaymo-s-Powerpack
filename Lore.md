@@ -6,7 +6,7 @@ line of dialogue disagrees with this page, the page wins until Andy changes it h
 Most of what follows was already in the game or in a plan doc; the rest Andy has added since 2026-11-09. Andy adds to
 it, and nothing is removed without his say.
 
-**Approved.** Andy approved every entry added in the 2026-11-11 rewrite (2026-11-11), and every placement marked `(new)` up to 2026-11-17 (approved 2026-11-17), so the whole page is canon. New placements are still marked `(new)` when they are added.
+**Approved.** Andy approved every entry added in the 2026-11-11 rewrite (2026-11-11), and every placement marked `(new)` up to 2026-11-18 (approved 2026-11-17 and 2026-11-18), so the whole page is canon. New placements are still marked `(new)` when they are added.
 
 ## The ages of the world
 
@@ -278,11 +278,18 @@ the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' g
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
 
-(new) **The Huntsman's rangers** (Andy, 2026-11-17; placement Claude's for him to approve). The Green Huntsman's hunters
+**The Huntsman's rangers** (Andy, 2026-11-17; placement Claude's for him to approve). The Green Huntsman's hunters
 don't keep to the villages: they walk the forests, the taiga and the jungle in ones, bow in hand, taking the old and
 the slow and leaving the young. They'll teach their trade to a stranger with none, and give a hunter's advice to anyone
 else. The Huntsman's law is theirs to keep where no realm's law reaches: one who kills more than the wood can spare is
 scolded, and one who keeps at it is run down, hogtied and carried to the nearest realm's guards as a poacher.
+
+**Jacks and studded hides** (Andy approved, 2026-11-18; Claude's placement). Plate belongs to knights and to
+those who can pay for it. Everyone else who fights for a living goes in leather: the Huntsman's rangers, scouts and
+outriders, outlaw bands, ship crews. A smith who keeps the Anvil-Father's faith will sew mail into a leather coat and
+call it a jack, or hammer iron studs through a hide, and both are made at the bench, not the smithing table. Whoever
+wears them stays quick enough to climb, swim and step back from a blow that a knight in plate must take on his shield.
+In the bastions the piglin brutes stud their own hides with scrap.
 
 **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
 those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
@@ -502,7 +509,7 @@ stands.
 
 **The great disasters** (Andy approved, 2026-11-15; medieval picks). The world is not quiet under the realms: mountains in the hot lands wake as volcanoes, quakes under the sea send waves inland, hurricanes come off the sea, a star sometimes falls far bigger than the rest and leaves a crater with a heart of meteoric iron, and slopes let go their snow and earth. Each comes in its strength, from minor to catastrophic, and one sets off the next. Animals know first.
 
-(new) **What Legend gives back** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). The age of songs is not only harder. Once the dragon has
+**What Legend gives back** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). The age of songs is not only harder. Once the dragon has
 fallen, a smith can forge to a fifth grade, **Legendary**, and only then: the bone of the wind dragons and the storm
 bone of the great ones take an edge no lesser age can give them. A hero who has gone as far as training goes keeps
 growing as **renown**, the songs sung about them, and renown opens what plain practice cannot. Late coin has its uses
@@ -525,6 +532,16 @@ ever seen the islands, and why the things that fall come out of a clear sky "fro
 into and too deep to push up through. Here and there a **well** stands open in it, a shaft of blue: the geese go up by
 the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
 whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
+
+**Bottled cloud** (Andy approved, 2026-11-18; Clouds and Bits picks, Claude's placement). The sky folk say the overcast can be
+carried. A bottle held open in the Cloud Sea, or pressed into any soft cloud, fills with a little of it, and poured out it
+billows into a puff that holds a body for a breath before it thins away. Skiff crews keep one at the belt for the step
+off an edge. Ground folk who come by one take it for a trick bottle that is empty.
+
+**Phantoms that carry** (Andy approved, 2026-11-18; same picks). The phantoms that hunt the sleepless from the night sky do not only bite.
+Now and then one closes its claws on the one it dives at and climbs, and lets go when it tires or is hurt. Whoever is
+carried can strike at its soft belly, where it feels it most. Shepherds who have lost a lamb to one say the cure is to
+sleep.
 
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces are the **monoliths** and
 their **Giants**: a broken pillar with a heart floating in it, and one Giant for each highland's element (Highfield,
@@ -652,7 +669,7 @@ are: villagers who died a long time ago, in ages this world has already forgotte
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
 
-**Conjoined twin mutation (new).** Rarely, a villager or zombie spawns with a conjoined twin — a baby or toddler of the same kind riding on its shoulder, clinging as it did in life. Villagers carry baby villagers; zombies, husks and drowned carry baby zombies. MCA villagers likewise carry MCA toddlers. This is a purely cosmetic mutation, a remnant of the bond that held them together in the womb. It has no gameplay effect: the twin does not attack, cannot be targeted separately, and simply rides along. The sight unsettles some; others say it is a mercy, that the two never had to part.
+**Conjoined twin mutation.** Rarely, a villager or zombie spawns with a conjoined twin — a baby or toddler of the same kind riding on its shoulder, clinging as it did in life. Villagers carry baby villagers; zombies, husks and drowned carry baby zombies. MCA villagers likewise carry MCA toddlers. This is a purely cosmetic mutation, a remnant of the bond that held them together in the womb. It has no gameplay effect: the twin does not attack, cannot be targeted separately, and simply rides along. The sight unsettles some; others say it is a mercy, that the two never had to part.
 
 **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement Andy approved 2026-11-17). The old dead
 were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
@@ -676,6 +693,17 @@ open in the dark.
 Overworld in the old age, before they were stopped. A powerful Frostborn Z Fighter trapped them here forever: they
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
+
+**The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
+zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
+have a similar but higher chance to turn giant"; the rest Claude's placement, approved by Andy 2026-11-18). Not every raider who died on the
+Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
+them, dragging tails rotted and mangled the way the future's dead drag theirs, or only a stump where one was cut. A
+Warrior-born villager who dies and turns keeps their blood too, and the tail kept wrapped in life comes loose and hangs.
+The dead still answer the moon: under a full moon or a blood moon, one with its tail still on it may swell into the
+wild Great Ape, its fur gone grey with the grave, until dawn, or until a blade takes the tail. The Verdant are fed by
+the sun in life and lose it in death, and the dead among them turn to the moon instead: an undead Verdant out under it
+swells into a giant more readily than a dead Warrior-born turns ape, and shrinks back by dawn.
 
 **The Other World.** A Z Fighter who dies wakes in the Other World: a pale hall on an island of holystone high in
 the sky, with a halo over their head. It is the Aether's, as the afterlife is, and there is no portal there either. The
@@ -761,12 +789,13 @@ them apart, spiders are crushed to legs, looters rob them, and kin carry their f
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
 you."
 
-(new) **The last hold** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve; Andy's words: "When players are attacked they get to take an extra
-hit if the one they take would have downed them"). A fighter's body does not drop to the first blow that should have
-felled it. It holds, for one breath, on the last of its strength, and only the next blow takes it down. Spent, the hold
-comes back once the fighter has had half a minute unhurt. A blade at the neck, an execution or a blast that tears the
-body apart is past holding.
+**The hanged who walk** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A man hanged at a crossroads gets no candle, by the Sun's law, so now and then one comes down off the beam at night and stands under it until cockcrow. The Lantern Warden's keepers hold that such a one will follow a lantern lit for him, and that the burying ground is the Warden's from the lych gate in: what walks in there of its own will, no law takes out again. The Ash Whisperer's people want their hanged cut down and given to the fire, ash on the wind. A lord's assize hears all comers while it sits, and a hanged road thief is left up till it rides on, then goes to the lime pit (tale: The Crossroads Gibbet).
 
+**The night market** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). On the night of the new moon the dead set up stalls in a burying ground and trade for what the living can spare: a voice, sleep, a laugh, a face. They look like anyone. The Lantern Warden's lamp-keepers do not forbid it, they keep its rules: bring no light of your own, pay to the grain, buy nothing you did not come for, be out before first light. The old green stones are still good money there (tale: The Night Market).
+
+**The Hind's men** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A crew drowned with a temple's bell in their hold do not lie quiet in the sea: on the dark of the moon they come up the tide and walk for the burying ground of the town the bell was bound for. They are not that ground's own dead, and they lie down only when they have heard the bell rung there, a stroke a man. The priest who rang it only thinks this, and will not preach it (tale: The Wrong Light).
+
+**The smith's household** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). The husks upstairs in an old home were the smith's wife and children. He could not put them down himself, which is why he went under the floor instead. Whoever lays them to rest while he sleeps has done what he owed them, and he knows it when he wakes (tale: The Keeping).
 
 ## The Maw
 
@@ -1027,7 +1056,7 @@ not forgive the miners' god.
 left where he can find it. He walks without a sound and knows where the old beasts lie. Dress what you kill and waste
 none.
 
-(new) **The Huntsman's sight** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). A follower the Green Huntsman favours to his second degree sees as he
+**The Huntsman's sight** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). A follower the Green Huntsman favours to his second degree sees as he
 does: the fresh tracks of the beast they hunt shine for a short while, so the hunt is never lost.
 
 **The Lantern Warden**: the night and the dead. He wants a lantern, a candle, a bone, the glow of the deep squid: light
@@ -1054,7 +1083,11 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
-(new) **What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
+**No priests of the Ash Whisperer** (Andy approved, 2026-11-18; Clerics never pledge to her).
+She keeps no clerics and answers no prayer for healing. Her favour goes only to the dark arts, death and blood and the
+other forbidden sorceries, and whoever wants it strikes a Warlock's pact with her, never a priest's vow.
+
+**What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
 placement for him to approve). A Warlock's patron gives, and asks two things back: the debts, and terms that are never
 lifted. The hand that would break one stops of itself, and only a deliberate second try gets through, and then the
 patron takes its due at once. The Hearthkeeper's sworn never strike the fallen nor anyone under a roof who isn't fighting
@@ -1297,6 +1330,26 @@ what you hit it with (fire, shot, blade, spells, beasts) and climbs in rank whil
 the grave-knight with its barrow-host, the dead outlaw warlord with his turncoats ("You made me."), and the
 demon-sworn with its hell-sworn. Each leaves a weapon head when it is ended with its own marks.
 
+**Wolfsbane** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A hooded blue flower of damp woods, found now and then among fern. It is to the wolf's curse what garlic is to the blood: the one who walks at the moon cannot abide it, nor silver. A bookhouse bestiary says so, and says of the plain wolf that an old one burned once fears fire. A household that suspects one of its own bars them in the root cellar on the night of the full moon, and somebody sits the door (tale: The One Who Walks at Moonrise).
+
+**Holding the wolf** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). The wolf's curse can be lifted while it is young, by a priest's rite that is half healer's work: wolfsbane burned at night where the cursed one lies, and their own name called. It can also be held: a sprig of wolfsbane under the tongue and someone to say the names of those they love until morning, and what rises is the lean wolf with the person's own mind, not the great beast. Those who learn it by themselves are rare (tale: The Wolf in the Wood).
+
+**A blood-drinker's ground** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Nothing that drinks will hunt another's ground. In the Nightfall years the Night Bleeders came down every valley but the few where an old blood-drinker already sat, and those valleys never hung garlic or saw the plague. Where such a one is killed or driven out, the cloaked ones and their bats find the valley within the month. Some of the old ones ask and pay for what they take, as was once the custom, and keep a servant or two who has always refused them (tale: Guests After Dark).
+
+**Well bargains** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Country people say never to ask a dry well for water out loud. What answers keeps a bargain to the letter and is held by its own words as hard as the asker is; its terms are scratched on lead in the old tongue, and it counts seven nights after the water fails before it comes up to choose for itself. Nobody says what it is (tale: What the Well Was Promised).
+
+**Den custom** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A den lets a stranger in on two knocks and the answer "nobody sent me". A fence throws dice with a new customer before any trade, to see how they lose. Dens keep night hours only, and run a book on the fair melees through a hatch near the horse lines, which the marshals know of and cannot find. When the guild's black candle is set in a tavern window, the tavern leaves it be (tales: Hail Glass, The Lists, A Debt in Potatoes, The Black Candle).
+
+**The test for the grey** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Fen wise-women who sell the grey keep a test with it: pale galls cut from the fen alders by night and steeped a day in strong spirit. A hand that has opened a twist of the grey comes out of the bowl black to the wrist, and the stain takes weeks to wear off (tale: The Fourth Measure).
+
+**The brothers on the hill** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). They hold to no patron by name, only the hours, but they keep what they are given to keep. One house keeps the Vigil Lamp, left with them by the last lamp-keeper of a dead house of the Warden; it has never gone out, and the prior carries it out to show the valley each year on the feast of the long night. Their rule for a novice: ring the hours, keep silence from the night bell to the dawn bell, do the work nobody else will. A house with no patron's name over its door is one a blood-drinker can bear to live in, which a house with a shrine is not (tale: The Novice).
+
+**The Tallow Room** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A den in a cellar under a chandlers' row, lit by tallow dips in saucers because its keeper will not pay the chandlers overhead for wax. Its one rule is that nobody dies in the fight pit, since a body cannot be got up the ladder (tale: A Debt in Potatoes).
+
+**How the guild is hired and paid** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A sewn packet goes to a hollow tree by a runner who does not know what it is. A paper with a name on it is left there under a black candle stub, lying open, and whoever takes it up has taken it on: that is the whole of the hiring. The black candle in the tavern window is lit by a townsperson who is sent it with their ordinary goods and paid the price of a candle. The three hands never see each other, which is why nobody can say who pays (tale: The Black Candle).
+
+**What can be done with a paper** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A paper held is safe from other hands until its candle burns down, and then the holder is "noted". Put back under the stub, it is as if it was never taken up, and somebody else will. Burned, it is written out again and a second is written for whoever burned it. A candle goes out three ways: the work is done; whoever paid sends the same purse again, which buys the paper back and brings a white candle to the window; or whoever took the paper up sends it back with their own blood on it, and the guild does not send twice for the same name. No reeve takes a black candle down (tale: The Black Candle).
+
 ## The Nether and the demons
 
 **The demons' country.** The demons live in the Nether's depths, in three layers: **the Gloam** (their
@@ -1376,6 +1429,16 @@ through, that should be how they make their entrance to the overworld in the lon
 rifts in the air, like an Arsenal user's, and fly through them. That is how they came up to the sorcerer's battle in
 *The Long Defence*. These are tears, not gates: nothing stands open after they pass, so there is still no portal to the
 demons' country beyond the Nether's own.
+
+**The lit country** (new; Infernal Expansion Redux picks, 2026-11-18; Claude's placement, for Andy to approve). Above the
+demons' Gloam, where glowstone hangs thickest from the Nether's roof, lies a canyon of pale glittering sand, and the light
+there is food. Lampflies drink it out of the stone until a lump goes dim and then dull; blind gulpers sit in the sand and
+swallow any lit thing that moves, lampfly or traveller. Where the gulpers are left alone the canyon stays bright; where
+they are hunted out the lampflies drink it dark and then starve, and the stone slowly takes its light back. The Crowned
+Sun's priests take glowstone in tribute and pay well for bright stone, nothing for dull. Ember moths, magma voles and
+blink beetles are the Nether's own animals, like the strider: nobody made them. Among the canyon's spikes stand a few
+broken frames of glowstone. Cold air comes off them and frost forms on the stone nearby, and nothing goes through. The
+wicked dead who wake down here walk toward them first; none of them is the way up.
 
 **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
@@ -1547,7 +1610,7 @@ the Youth wisp, Kingdoms PR #1467, which Hermes's YOUTH answers players through.
 
 A wood-wisp is a child of the woods and acts like one: quick, cheeky, never still, forever turning somersaults in the air. Village folk know to just say its name, and the old ones say a wisp knows the way home: cry for help where one can see you and it flies you to your own bed in a flash of green. (In game: Kingdoms PR #1568.)
 
-(new) **The blood wakes with the ladder** (Andy, 2026-11-17, scaling picks; placement Claude's for him to approve). A blood's gifts are not all given at birth. Each king or
+**The blood wakes with the ladder** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17). A blood's gifts are not all given at birth. Each king or
 terror that falls on the ladder of Knowledge wakes a little more of what a people's blood was made for: the Nightborn
 see further into the night, the Dawnborn draw more from the sun. The cursed bloods grow the same way, by feeding and by
 moons: a new vampire's strength comes only once the blood has bound them, and a new wolf's beast grows strong over the
@@ -1570,7 +1633,7 @@ raised among folk catches the suspicion from both sides.
 **Nightborn and Dawnborn.** Daylight dulls the one and feeds the other, and neither has ever trusted the other. A
 Nightborn keeps the Lantern Warden, a Dawnborn keeps the Crowned Sun, and each quietly blames the other's god.
 
-(new) **The bound bloods** (Andy, 2026-11-17: "All tideborn are deep mother, and they and dawnborn are the only heritages
+**The bound bloods** (Andy, 2026-11-17: "All tideborn are deep mother, and they and dawnborn are the only heritages
 with a bound patron"; placement for him to approve). Every other people has a god most of its children pray to, and
 any child of theirs may grow up keeping another. Not these two. A Tideborn is the Deep Mother's from the first breath of
 salt, and a Dawnborn the Crowned Sun's from the first sunrise: they're raised to it and no other. A priest serves the god
@@ -1631,6 +1694,8 @@ in the jungle), and the town is built in the land's stone and wood. Such a place
 stores are its lord's, not a dungeon's. Far from any realm it is a kingdom's seat; within a kingdom's reach it is that
 kingdom's fiefdom, its lord sworn to the crown; where a kingdom already has its fiefs it is a village allied to it.
 Its builders grow it outward like any other town.
+
+**Only the great towns are crowned** (Andy approved, 2026-11-18; "they only get to be called kingdoms if they are of that magnitude now. a single castle no longer counts and can only ever be a fief or an accompanying part of a kingdom when the builders expand to make it so"). A crown is only ever worn in one of the great towns. A castle, even one with its first town laid round it, is never a kingdom: castle towns rise only within a kingdom's reach, as its fiefdoms or the villages allied to it, and a lone lord's castle far from any realm is not raised at all. Where a new realm is wanted and no great town stands near, the land is searched further out until one is found. A castle town is crowned only if its builders grow it to the size of the great towns. A lord who takes a crown for himself is another matter: one who buys it, wins it in a rebellion or is handed it by fate may still sit a lone castle as a king (Andy, 2026-11-18: "they can still spawn and be spawned"). This replaces "Far from any realm it is a kingdom's seat" in the castle towns above.
 
 **Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
 elders and foremen, its court wizard and sometimes a court necromancer, and its guards, archers and King's Guard. A
@@ -1980,6 +2045,54 @@ is on the wall.
 
 **The everburning mote** (Andy approved, 2026-11-15; Andy: "court wizards have developed a spell that lets a light mote inside a lantern burn indefinitely"). It is a court wizard's working, sold to those who can pay: a mote of their light shut in a lantern, which never needs oil and never gutters. Abandoned places have no one to tend their lamps, which is why the lamps of ruins flicker.
 
+**The scrying orb** (Andy approved, 2026-11-18; Claude's placement). Any caster can see far off in a bowl of water with a lock of someone's hair, but the bowl shows only a flat picture that clouds when the spell is let go. The court wizards keep that same sight in glass: a sphere ground with amethyst dust and set on a stand. An attuned hand wakes it with a lock of someone's hair, or with an amethyst shard that was pressed to the ground somewhere, since amethyst remembers where it has lain. Then the place around that person, or that spot, rises inside the orb as a small living picture. Its roofs, its trees and the folk moving about are all there, for as long as the sight is held. Only the attuned can wake an orb, but anyone in the room can look in. A court wizard keeps one in the tower, and a realm without one pays a wizard who has one to do its watching. Someone being watched feels a chill and nothing more; a place feels nothing.
+
+**Tale notices** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Now and then someone with a trouble too private for the work board's clerk nails it up there in their own hand. Whoever pulls it down has taken it on, and the paper goes with them.
+
+**Forest law** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A lord's wood has its own court, which sits on its own day and is not the town's. For a hare it takes two fingers of the bow hand. A poacher taken is bound over at his own door until it sits, and a keeper who has a use for a man who knows where the hares run may speak for him (tale: A Hare for the Pot).
+
+**The tithe** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A lord takes a tenth of the harvest as the Crowned Sun takes it of him, weighed at a tithe barn by the lord's bushel under the sun stamp; what a village comes short is owed double at Candlemas. Every village keeps a porch bushel on a chain that its neighbours cut theirs from, and writes what it carted in the town book (tale: Short Measure).
+
+**The water ordeal** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). The Truth's examiners will put an accusation of craft to the water when nobody will speak for or against: the accused is ducked on a stool, counted to forty and drawn out, since the Truth's sworn may not kill. One who sinks is written down clean; one who floats is put out of the town and her hearth raked out. An examiner would sooner hear a cause shown, and posts the day on the board so that anyone may speak before it. A hearth-healer wears a little clay hearth at the neck (tale: The Ducking Stool).
+
+**Hearings at the well** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Where two houses of different patrons share a town, a wrong between them is heard in the street at the well they share, with a priest of each patron to see the weighing. The name is given to the priest of whichever house was wronged first, and the other answers. Each priest pushes for their own, which is why there are two (tale: Salt and Iron).
+
+**The peeled rod** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Hamlets too small for a court settle a boundary by charter if one can be found and read, since most were written in the old letters and kept in a chapel chest. Where none can, the old way stands: a peeled hazel rod sent at first light is a challenge, each side names one champion, and they meet at the stone by day. Whoever is on their feet at the end, the stone stays where their people say, and nobody may speak against it (tale: The Boundary Stone).
+
+**The levy and its coat** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A realm at war musters a levy from its villages, each man given a coat with the realm's badge. A man who leaves the lines in that coat is hunted by a sergeant with a book of doors, who strikes out each house as it is searched; whoever shelters him shares his rope, and the lord who holds the muster field may pardon him under seal if someone of good name stands surety (tale: The Deserter's Coat).
+
+**Writs and bills** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A provost's writ under a muster's seal binds the provost too: the man is to be brought alive and heard. On the south road a thief-taker's bill is quit if the dead man's blood-price is paid into the widow's own hand, and the bearer is bound to carry it to her. The Sun's hanging lists are nailed to the gallows post and name those still to be taken where found (tale: The Cave-In).
+
+**Ransoms and the bride road** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Takers set a day on a ransom. When it passes they send the captive home maimed "for the lateness", so the next household pays on time. When a bride goes missing on the road, the groom's side sends searchers along it within a fortnight; the drovers' tracks through the hills are safe from road men and cost two days (tales: The Asking Price, The Bride Road).
+
+**Fair melees** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). At the big fairs knights fight a melee on foot with wooden arms, to the yield, under a marshal whose word is the law of the meadow. Killing a man there is a disgrace that follows the name on the helm (tale: The Lists).
+
+**How a fair travels** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). The Rubber-folk's fair never goes straight to its winter ground: it pitches a few days at each halt along its road to earn its bread, puts every fire out twice, and moves on (tale: The Fair Left Behind).
+
+**Cordons** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). When the hollow blight takes a hamlet the lord's leech has it shut in: a fence, bowmen, nothing that breathes in or out, bread carried to a trough, and the count of the sick called over the fence each morning. On the leech's day she passes out whoever is clean and the rest is fired. Inside, a herbwife holds the sick back with gilded flesh for as long as there is gold; a grove druid will give the Cure at his stone to any who reach it, but will not come down to a fence (tale: The Cordon).
+
+**Valley runners** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A runner keeps a round of doors and has three rules that are one rule: do not read what you carry, do not ask what it is, do not wait on the step for thanks. A runner who cannot read has a letter said over by its sender and says it back word for word at the door. A letter is paid for by the one who writes it, and nobody is paid to carry word back; at a ferry hamlet a carter takes the letters off the boat and the runners carry them on (tales: The Black Candle, Letters to a Dead Man).
+
+**The Hearthkeeper's feast day** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Each village keeps one in its year. The tables are laid in the open, and by old custom nobody breaks a loaf until the sermon has been said over the bread. The night before, the street drinks the Feast-Eve cup together (tale: The Feast-Day Sermon).
+
+**Heirs and bridges** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A lord who holds the bridges on a realm's river holds their tolls, and a realm's heir can be promised in marriage for such rights. When an heir runs from a match, the realm's guard is sent quietly, house by house, to bring them home unharmed and unremarked (tale: The Heir in the Hayloft).
+
+**Town graves** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A town's dead are buried together, a mound each beside the others near the seat, with a wooden board at the head giving the name and a line about them. A hanged man laid to rest under the Warden's light, or named innocent at the assize, gets his board like anyone (tale: The Crossroads Gibbet).
+
+**Thief-takers who stay** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). A thief-taker who is spared, and has seen what the bill was really for, may stay on in the town and take a guard's coat (tale: The Cave-In).
+
+**Leaving the valley** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). After a bad year a household may shut up its house and go, and nobody hears where. The house is left as it was (tale: Short Measure).
+
+**The Wither's coming** (Andy approved, 2026-11-17; Claude's placement for the Wither: Reincarnated picks). When the Wither is raised the sky goes dark over the whole land and stays dark while it lives. At first it does not hunt the one who raised it: it tears down what people built, houses first, then walls and towers. The dead near it wake with its light in their eyes and follow it; the barrow knights, who keep their own oath, do not. Every living thing that can run, runs. This is what the Dread tier's land remembers.
+
+**What fire leaves** (Andy approved, 2026-11-17; Claude's placement for the Inferno picks, 2026-11-18). A big fire chokes the air for a long way round it, and a burning man or beast carries fire to whatever he touches. The charcoal burners go in after a wildfire for the charred trunks still standing, and the Ash Whisperer's people say a fire that bites is a fire nobody watched. Smiths know a metal by the colour it burns: copper burns green. Soul fire, out of the demons' country, burns blue and bites twice as deep.
+
+**Fishing the fire** (Andy approved, 2026-11-17; Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
+
+**What the water keeps.** Rivers, seas, swamps and the demons' lava lakes all take things from people, and a line that finds one of their old crates brings it up wet: bait and lures from a river's anglers, nuggets and shells from the sea, swamp muck, and in the lava lakes whatever the fire could not eat. In the dark pools under the hills the olm and the pale blind cavefish live as they always have, slowly, on very little, and the Anvil-Father's miners left them be (placement for the Tide picks; Claude, 2026-11-17).
+
+**The labyrinth-builders' craft** (Andy approved, 2026-11-17; Claude's placement for the Asterion picks, 2026-11-18). The forgotten hands that raised the labyrinths worked bronze and fire. Their inner gates open only to tablets cut in the old tongue, scattered through the halls, and some of the braziers that light those halls are not braziers at all. Their prize was a blade that strikes twice. The plates of one of their geared instruments lie scattered in the oldest dungeons, mineshafts and desert and jungle temples (Andy, 2026-11-18), and whoever builds it from them finds it always turns toward the nearest labyrinth. In the warm lands the beetles that spit boiling spray live in colonies round a queen, and the old builders kept them.
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
@@ -2218,6 +2331,8 @@ element is not taught but woken, and the master librarians keep the rite. Each g
 whoever was there (the feats), and each calling narrows in time into a path: the thief into assassin, burglar or
 swashbuckler, the mage into a school.
 
+**A calling's first choice can be retaught** (Claude's placement for the menu redesign, 2026-11-18; Andy approved 2026-11-18 with 250 silver and a day to settle). A calling's first pick (a Mage's first spell, a Sorcerer's element, a Paladin's oath, a Ranger's chosen foe) is not fixed for life. The one who taught it will teach another for 250 silver, but not twice in quick succession: a mind needs a day to let the old way settle. Nothing already learned is lost. A patron is different: a Cleric's or a Warlock's patron is sworn at a shrine, and is changed only the way a faith is turned, never for coin.
+
 **Forged seals and deeds; the gorgon's gaze** (Claude's placement, the row-check fixes, 2026-11-13, Andy approved
 2026-11-17). The Underworld's forgers also turn out a writ under a lord's seal and a deed to a house, and only the fences
 and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
@@ -2317,6 +2432,7 @@ already loose on the hilt, and the camps say the first blow of any battle is str
 **The fire cannon, the avatars' callings, the smith's hammer and the mortar** (Claude's placement for Andy's Frontier Armaments picks, patch 3, 2026-11-14, Andy approved 2026-11-17). The Flame Avatars' camps are not one kind of fighter. The fire takes people of every calling and leaves the calling standing: a camp has its warlord with a two-handed axe, its sorcerer, its brute who fights with his hands, its cleric who mends the others at the hearth, its thief, its paladin behind a shield, its monk, and its tinkerer. The tinkerers are why the camps still stand. Hemmed between the Hornkin forts and the piglin war camps, with no powder that would keep in that heat and no iron to waste on shot, they built a gun that burns what the Nether gives: a blaze rod goes out of it whole and straight, through any plate, and a pinch of blaze powder goes out as a sheet of fire. They call it only "the cannon", and every camp's tinkerer carries one. They hand one to no outsider; an Emberborn who tinkers is another matter. The Forge Hammer is older and plainer: a smith's own hammer made heavy enough to fight with, which the Anvil-Father's smiths carry on the road because it works the anvil, breaks stone and breaks heads, and a smith with one needs nothing else. The field mortar is the gun-keeping realms' answer to a wall: a short tube on four legs that two soldiers can carry, which drops its shell over the top. War parties bring one beside their field gun and count its shells before they march.
 
 **The knight's harness** (Claude's placement for Andy's Knights & Heraldry picks, patch 4, 2026-11-14, Andy approved 2026-11-17). A realm's smiths work plate in pieces, not whole suits: a knight goes into an arming doublet, then a mail haubergeon, then the cuirass, with spaulders, arm harness, gauntlets, cuisses, greaves and sabatons buckled on after. The realm's knights are its veteran guards, in realms with iron to spare. Each realm's armourers keep one helm shape: one realm's knights all wear the armet, another's the sallet, another's the houndskull. Some realms blacken their plate against rust. Gilding is for the crowned and their lords only, and a smith won't gild for anyone else. Over the helm a ruler bears the realm's crest beast on a twisted torse in the realm's colour (dragon, lion, stag, boar, eagle, pegasus, unicorn or serpent), the same beast the realm has always shown; whoever takes the crown takes the beast with it. Village tailors sew the doublets, hoods, cloaks and the pleated giornea worn over armour. Outlaws and the banished go in what is left of theirs, torn.
+**The armourers' wider makes** (Claude's placement for Andy's harness picks, 2026-11-18, Andy approved 2026-11-18). The realms' armourers know more helms than the eight: the old flat-topped great helm that the Chivalry realms of the oldest oaths still keep, the barbute of the men-at-arms the Coin realms hire, the captains' peaked burgonet, the spangenhelm with its nose bar and mail curtain that the Old Blood never gave up, the lobster-tailed pot of the realms that keep guns on their walls, and the grotesque visor, a sculpted face of beast or grinning man, worn by Conquest champions and lords. A cuirass can be fluted in the late style or smooth and round; the poorer realms sew their plates inside a coat in the realm's colour. Gorget, faulds and tassets, rondels at the armpits and a tabard of the realm's arms complete a harness. Besides bright, blackened and gilded, smiths russet plate brown, blue it in the fire, etch it with thin gilt bands for knights the crown has honoured, or paint it in the realm's colours; a dead man's harness in barrow and ruin is rusted until someone scours it. A realm's creed shows on its knights: the faith's sign etched on the breast in Faith realms, an oath sleeve on the arm in Chivalry realms (lost when the oath is broken), always-blackened, spiked plate in Conquest realms, bought plate and hired brigandine in Coin realms, a matching gilt-banded King's Guard in Crown realms. Beyond the temperate lands the realms field knights in their own country's harness: fur-lined plate in the snows, mail over a quilted coat with a veiled, spiked helm in the sands, brine-soaked quilted cotton in the jungle, hide and bronze in the savanna, and in the blossom lands the folded lamellar their lords' guards already wear. Griffin, bear, wolf, raven and hound join the crest beasts, and any helm can take a plume in the realm's colour. A knight's horse goes in barding of the same make and finish, under a caparison of the realm's arms. Plate is looked after: left wet it rusts, oiled it stays bright, it shows its dents, and a smith who fits a harness to its wearer makes it sit lighter and guard better.
 
 **Match and powder, the smiths' heads, the old fields** (Claude's placement for Andy's Knights & Heraldry picks, patch 6, 2026-11-14, Andy approved 2026-11-17). The realms' first guns were the handgonne, an iron tube on a pole touched off with a burning match, and after it the arquebus, whose lever drops the match into the pan; the flintlock came last, and only the richest realms can keep a garrison in muskets. A realm arms its gunners by its purse: a poor kingdom or a fiefdom hands its picked men handgonnes, a prosperous one arquebuses, and every gunner knows a wet match is a club. The Anvil-Father's smiths forge two arrowheads for the wars of armour, the narrow bodkin that finds the rings of mail and the broad forked swallowtail that opens a man who wears none, and the hedge archers still loose pitch-soaked rags from the fire. Out on the old fields, where the line gave ground in the long defence and in the wars after it, the earth is still scuffed, and a brush turns up bones, heads and the wreck of old harness; now and then it is the heavy horned plate nobody forges any more, until a smith takes a broken piece apart at the drafting table and draws out how it was made.
 
