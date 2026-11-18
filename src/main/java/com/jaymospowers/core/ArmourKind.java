@@ -62,7 +62,9 @@ public enum ArmourKind {
 
 	public static final TagKey<Item> CLOTH_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("cloth_armor")),
 		MAIL_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("mail_armor")),
-		PLATE_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("plate_armor"));
+		PLATE_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("plate_armor")),
+		/** Padding with iron studs hammered in: a cut meets it a little less well than plain padding ({@code WeaponKind.Blow}). */
+		STUDDED_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("studded_armor"));
 
 	/**
 	 * What a body wears in layers beyond its four slots, outermost first, at a place: "torso" (under the chest piece),
@@ -123,6 +125,11 @@ public enum ArmourKind {
 			return MAIL;
 		}
 		return PLATE;
+	}
+
+	/** Whether {@code stack} is padding with mail on it (in both the mail and the cloth tags): a blow meets the better of the two. */
+	public static boolean padded(ItemStack stack) {
+		return stack.is(MAIL_TAG) && stack.is(CLOTH_TAG);
 	}
 
 	private static boolean has(String path, String[] words) {

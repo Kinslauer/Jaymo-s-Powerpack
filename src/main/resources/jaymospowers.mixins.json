@@ -4,6 +4,9 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"AbilityPowerEffectMixin",
+		"LightArmourSlowMixin",
+		"LightArmourQuietMixin",
+		"LightArmourSwimMixin",
 		"TeamTimeMixin",
 		"TeamTimeFrozenMixin",
 		"AetherEdgeMixin",
@@ -21,6 +24,7 @@
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",
 		"ArmourWearRepairMixin",
+		"LightArmourSnowMixin",
 		"ArmourWearMendingMixin",
 		"ArmourWearSlotMixin",
 		"GrindstoneMenuAccessor",
