@@ -4,19 +4,19 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 18:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 18:32). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · for any · open
 
 
 ## Being built
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · scrying-orb · claimed
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🍇 Bacchus · claimed
 
 
 ## In review
