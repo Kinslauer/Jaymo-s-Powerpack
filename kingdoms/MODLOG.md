@@ -14939,3 +14939,8 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 ## 0.10.16 (2026-11-18): A newcomer isn't given a random name before they pick theirs
 
 - A player with no character name is given one from MCA's name lists, but that happened as soon as they joined, before MCA's creator had opened. Their first join line and the creator showed a random name (Andy's "Yu-Fang" before he chose "Jek"). A random name is now given only once the creator is behind them, to those who left the name as their username.
+
+## 0.10.17 (2026-11-18): Daylight no longer stays as dark as the night before
+
+- **DarkNights**: the lightmap is worked out again every client tick, as vanilla does. BadOptimizations (added with the Sensible MC picks) caches it and only works it out again when the sky light factor changes, and that factor holds still from morning to dusk. A lightmap worked out mid-change (after sleeping, `/time set day` or joining, read between the old tick's night and the new tick's day) then stayed all day: the open sky as dark as the night it came from, while torches and lanterns lit as normal. It also never saw the Moon rise or set. The rest of BadOptimizations is left as it is.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.
