@@ -6,6 +6,7 @@ asked: 2026-11-18
 claimed_by: hermes-a
 pr: 1728
 writer: hermes-writer
+text_pass: done
 ---
 
 # Harness 3: creeds and other lands
