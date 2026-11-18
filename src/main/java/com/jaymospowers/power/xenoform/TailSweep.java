@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import java.util.HashMap;
@@ -62,9 +63,9 @@ public final class TailSweep {
 		long now = level.getGameTime();
 		NEXT.put(player.getUUID(), now + COOLDOWN);
 		player.setAttached(SWEEP, now);
-		List<LivingEntity> caught = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RADIUS),
+		List<LivingEntity> caught = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isPassengerOfSameVehicle(player)
-				&& !(e instanceof OwnableEntity pet && pet.getOwner() == player) && !player.isAlliedTo(e) && e.distanceToSqr(player) <= RADIUS * RADIUS);
+				&& !(e instanceof OwnableEntity pet && pet.getOwner() == player) && !player.isAlliedTo(e) && e.distanceToSqr(player) <= AbilityPower.size(player, RADIUS) * AbilityPower.size(player, RADIUS));
 		for (LivingEntity e : caught) {
 			DarktideStatus.stun(e, STUN_TICKS);
 			Vec3 push = e.position().subtract(player.position()).horizontal();
@@ -75,7 +76,7 @@ public final class TailSweep {
 		Vec3 centre = player.position().add(0.0, player.getBbHeight() * 0.35, 0.0);
 		Vec3 forward = Vec3.directionFromRotation(0.0F, player.getYRot());
 		Vec3 side = new Vec3(-forward.z, 0.0, forward.x);
-		MagicFx.swing(level, centre, forward, side, RADIUS * 0.85, 340.0, 0.12F, color, 8);
+		MagicFx.swing(level, centre, forward, side, AbilityPower.size(player, RADIUS) * 0.85, 340.0, 0.12F, color, 8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
 		return true;
 	}

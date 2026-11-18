@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public final class FuseStore {
 	/** Every fire within {@link #SMOTHER_FIRE_RADIUS} of {@code centre} goes out (where the player may build); how many. */
 	private static int putOutFires(ServerPlayer player, ServerLevel level, BlockPos centre) {
 		int out = 0;
-		int r = SMOTHER_FIRE_RADIUS;
+		int r = AbilityPower.size(player, SMOTHER_FIRE_RADIUS);
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-r, -r, -r), centre.offset(r, r, r))) {
 			if (level.getBlockState(pos).is(BlockTags.FIRE) && player.mayInteract(level, pos)) {
 				level.removeBlock(pos, false);

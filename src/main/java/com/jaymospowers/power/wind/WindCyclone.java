@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Carry;
@@ -216,7 +217,7 @@ public final class WindCyclone {
 
 	/** The funnel's top radius at this player's mastery (blocks). */
 	public static double radius(Player player) {
-		return Mth.lerp(masteryShare(player), RADIUS_MIN, RADIUS_MAX);
+		return Mth.lerp(masteryShare(player), AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX));
 	}
 
 	/** The funnel's height at this player's mastery (blocks). */
@@ -269,6 +270,7 @@ public final class WindCyclone {
 	/** Let go (or forced to): the funnel bursts outward, flinging what it held, and the cooldown starts. */
 	static void stop(ServerPlayer player) {
 		Active active = ACTIVE.remove(player.getUUID());
+		WindRide.stop(player);
 		unroot(player);
 		player.removeAttached(CYCLONE);
 		if (active == null) {
@@ -320,10 +322,13 @@ public final class WindCyclone {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(EXHAUSTION_PER_TICK);
 		}
+		// (Awakening pick) Sneak's tap steps up into the funnel to ride it, and again steps down
+		WindRide.tick(player);
 		if (age % WindCycloneElement.SAMPLE_EVERY == 0) {
 			// what it draws up from round about (before the douse below sweeps up the flames it would feed on)
 			java.util.List<LivingEntity> held = new java.util.ArrayList<>();
 			for (LivingEntity target : caught(player, level, radius, height)) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "wind.cyclone", age % 20 == 0 ? 1 : 0);
 				if (active.orbiting.containsKey(target.getUUID())) {
 					held.add(target);
 				}
@@ -393,7 +398,8 @@ public final class WindCyclone {
 
 	/** Everything else alive inside the funnel (wider toward the top). */
 	private static java.util.List<LivingEntity> caught(ServerPlayer player, ServerLevel level, double radius, double height) {
-		double baseY = player.getY();
+		// (riding it, the funnel's foot is still on the ground under you)
+		double baseY = player.getY() - (WindRide.riding(player) ? WindRide.HEIGHT : 0.0);
 		AABB box = new AABB(player.getX() - radius, baseY - 0.5, player.getZ() - radius, player.getX() + radius, baseY + height, player.getZ() + radius);
 		return level.getEntitiesOfClass(LivingEntity.class, box, e -> {
 			if (e == player || !e.isAlive() || e.isSpectator() || Carry.isCarried(e) || e == player.getVehicle()) {

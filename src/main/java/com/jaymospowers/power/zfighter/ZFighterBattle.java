@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -115,6 +116,9 @@ final class ZFighterBattle {
 			}
 			if (entity instanceof ServerPlayer hurt && Powers.has(hurt, ZFighterPower.INSTANCE)) {
 				ZFighterGrowth.took(hurt, source, damageTaken);
+				if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity) {
+					ZFighterFury.took(hurt);
+				}
 			}
 			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
@@ -122,6 +126,7 @@ final class ZFighterBattle {
 			}
 			ZFighterTraining.landed(player, ZFighterPower.live(player), damageTaken, entity.getMaxHealth());
 			ZFighterGrowth.dealt(player, entity, source, damageTaken);
+			ZFighterFury.dealt(player);
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
 				punched(player, entity);
 			}
@@ -274,6 +279,7 @@ final class ZFighterBattle {
 		live.lastHit = now;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + ZFighterPower.KI_PER_PUNCH);
 		Mastery.used(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.punch", player.getMainHandItem().isEmpty() ? 1 : 0);
 		if (live.combo % COMBO_FINISHER != 0 || !target.isAlive() || ZFighterCombo.running(player)) {
 			return;
 		}
@@ -411,7 +417,7 @@ final class ZFighterBattle {
 		ZFighterPower.addHardship(player, RAGE_HARDSHIP);
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ZFighterPower.SUPER_BURST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, ZFighterPower.SUPER_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			ZFighterKi.push(near, near.position().subtract(centre), 1.2, 0.3);
 		}

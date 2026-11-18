@@ -87,6 +87,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.310) a Bio-built's buds, small copies of their maker
 		BioBudRenderer.register();
 		RisenOrcRenderer.register();
+		// (Awakening pick) the Cordon
+		CordonRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -225,6 +227,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		KinshipClient.register();
 		WarriorFury.register();
 		BruteRageHud.register();
+		ComposureHud.register();
 		OwnSpeechHud.register();
 		BloodReservoirHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
@@ -238,11 +241,13 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
 		HiddenBladeClient.register();
+		CaseMarkClient.register();
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
 		GameScreen.register();
 		RecallScreen.register();
+		RenegeScreen.register();
 		ChalkClient.register();
 		ResearchScreen.register();
 		MimicBenchScreen.register();
@@ -338,6 +343,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.CloudDecks.register();
 		// 0.7.509: the patrons screen, the boon menu and the boon key
 		PatronKeys.register();
+		// the four art keys (Soul, Claw, Wild, Sun)
+		ArtKeysClient.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

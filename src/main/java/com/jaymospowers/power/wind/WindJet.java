@@ -156,6 +156,7 @@ public final class WindJet {
 		// what it catches is shoved along it, less the further off
 		AABB box = new AABB(from, to).inflate(MOUTH + reach * SPREAD);
 		for (Entity e : level.getEntities(player, box, e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && e != player.getVehicle())) {
+			com.jaymospowers.core.trials.PowerTrials.count(e instanceof net.minecraft.world.entity.LivingEntity && player.tickCount % 20 == 0 ? player : null, "wind.whistle", 1);
 			Vec3 c = e.getBoundingBox().getCenter().subtract(from);
 			double t = c.dot(look);
 			if (t < 0.0 || t > reach || c.subtract(look.scale(t)).length() > MOUTH + t * SPREAD + e.getBbWidth() * 0.5) {

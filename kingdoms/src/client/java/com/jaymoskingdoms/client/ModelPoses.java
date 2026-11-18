@@ -26,6 +26,7 @@ public final class ModelPoses {
 		}
 		HandshakePose.apply(model, state);
 		CastPose.apply(model, state);
+		HangPose.apply(model, state);
 		HordePoses.apply(model, state);
 		// Andy (2026-11-13): "the villager's costume was clipping outside its body". A villager's Better Combat swing is added
 		// to the bones it finds, and MCA's skin, clothes and hair bodies take the pose it captured with the swing already on:

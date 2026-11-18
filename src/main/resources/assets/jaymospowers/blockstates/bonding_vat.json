@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "metal=0": {
+      "model": "jaymospowers:block/bonding_vat"
+    },
+    "metal=1": {
+      "model": "jaymospowers:block/bonding_vat_level1"
+    },
+    "metal=2": {
+      "model": "jaymospowers:block/bonding_vat_level1"
+    },
+    "metal=3": {
+      "model": "jaymospowers:block/bonding_vat_level2"
+    },
+    "metal=4": {
+      "model": "jaymospowers:block/bonding_vat_level2"
+    },
+    "metal=5": {
+      "model": "jaymospowers:block/bonding_vat_full"
+    },
+    "metal=6": {
+      "model": "jaymospowers:block/bonding_vat_full"
+    }
+  }
+}

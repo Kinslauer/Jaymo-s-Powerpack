@@ -279,6 +279,8 @@ public final class ZFighterWaveBeam {
 				continue;
 			}
 			wave.struck.add(target.getId());
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.wave_hit", 1);
+			com.jaymospowers.core.trials.PowerTrials.reach(player, "zfighter.wave_many", wave.struck.size());
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source, spec.damage());
 			ZFighterKi.push(target, wave.dir, spec.push(), 0.3);

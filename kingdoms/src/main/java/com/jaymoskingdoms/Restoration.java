@@ -370,7 +370,9 @@ public final class Restoration {
 	/** Mending: who you look at (a friend, within reach), else you; healed, a cut closed, festering cured. The undead burnt instead. */
 	static boolean mending(ServerLevel level, Player player, float power) {
 		LivingEntity sighted = Arcana.sighted(player);
-		LivingEntity target = sighted != null && player.distanceTo(sighted) <= MENDING_REACH && (friend(player, sighted) || undead(sighted)) ? sighted : player;
+		// (class trees) a Healer's reach further and mend more
+		LivingEntity target = sighted != null && player.distanceTo(sighted) <= MENDING_REACH * Litany.healerReach(player) && (friend(player, sighted) || undead(sighted))
+			? sighted : player;
 		if (target != player) {
 			beam(level, player, target, GOLD);
 		}
@@ -382,7 +384,7 @@ public final class Restoration {
 		if (Downed.isDowned(target)) {
 			return false;
 		}
-		PowersCompat.mend(target, MENDING_HEAL * power * DivineBorn.heal(player));
+		PowersCompat.mend(target, MENDING_HEAL * power * DivineBorn.heal(player) * Litany.healer(player));
 		PowersCompat.closeCut(target);
 		PowersCompat.easeFever(target);
 		PowersCompat.cureCurses(target);
@@ -396,7 +398,7 @@ public final class Restoration {
 
 	/** Sanctuary: a circle of light where they stand; friends in it heal, the undead are thrown out of it. */
 	static boolean sanctuary(ServerLevel level, Player player, float power) {
-		Circle circle = new Circle(level, player.position(), level.getGameTime() + (long)(SANCTUARY_TICKS * power), SANCTUARY_HEAL * Math.max(1.0F, power * 0.75F),
+		Circle circle = new Circle(level, player.position(), level.getGameTime() + (long)(SANCTUARY_TICKS * power), SANCTUARY_HEAL * Math.max(1.0F, power * 0.75F) * Litany.healer(player),
 			player.getUUID());
 		CIRCLES.add(circle);
 		// (a held spell: broken, the circle goes out)

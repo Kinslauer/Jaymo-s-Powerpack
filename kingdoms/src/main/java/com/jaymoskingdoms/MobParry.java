@@ -70,7 +70,8 @@ public final class MobParry {
 		if (last != null && now - last < COOLDOWN_TICKS) {
 			return true;
 		}
-		if (player.getSecondsToDisableBlocking() > 0.0F || heavy(player) || !inFront(mob, player)) {
+		// (class trees: a Warlord's Perfect Form can't be parried, Discipline)
+		if (player.getSecondsToDisableBlocking() > 0.0F || heavy(player) || !inFront(mob, player) || Discipline.perfect(player)) {
 			return true;
 		}
 		long raised = MobShields.raisedFor(mob);

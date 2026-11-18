@@ -163,6 +163,10 @@ public class PrepScreen extends Screen {
 	/** Called on the client thread with the server's reply. */
 	public void onUpdate(PrepUpdate update) {
 		switch (update.status()) {
+			case PrepUpdate.STATUS_HANDS -> {
+				phase = Phase.RESULT;
+				onClose();
+			}
 			case PrepUpdate.STATUS_STARTED -> {
 				waterShift = update.waterShift();
 				oilShift = update.oilShift();

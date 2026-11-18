@@ -409,6 +409,8 @@ public final class Equestrian {
 		}
 		// (0.7.305) a Rider's gift from its breed
 		speed *= BreedGifts.speed(horse, e, controller, sprint, speed);
+		// an Outrider's trot and canter
+		speed *= Horsemanship.pace(controller, gait);
 		speed *= terrain(horse, e);
 		// a speed effect (or slowness) still tells
 		double base = horse.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
@@ -437,7 +439,7 @@ public final class Equestrian {
 			}
 		} else if (e.breed() == Breed.COURSER) {
 			ItemStack armour = horse.getItemBySlot(EquipmentSlot.BODY);
-			if (!armour.isEmpty() && !armour.is(Items.LEATHER_HORSE_ARMOR)) {
+			if (!armour.isEmpty() && !armour.is(Items.LEATHER_HORSE_ARMOR) && !Horsemanship.light(horse.getControllingPassenger())) {
 				f *= HEAVY_ARMOUR_SPEED;
 			}
 		}
@@ -548,6 +550,8 @@ public final class Equestrian {
 	static double drain(AbstractHorse horse, Equine e) {
 		// (0.6.0) a Rider's horse tires slower
 		double d = e.breed().drain * com.jaymoskingdoms.ClassPerks.stamina(horse.getControllingPassenger());
+		// the Rider's tree: Long Wind, a banner near, a legend's wings
+		d *= Horsemanship.wind(horse);
 		if (undead(horse)) {
 			return d * UNDEAD_DRAIN;
 		}
@@ -608,7 +612,7 @@ public final class Equestrian {
 
 	/** {@code horse} is frightened ({@code fear}, from {@code from}): a timid one shies (rears, drops to a walk), and may throw its rider. */
 	static void shy(ServerLevel level, AbstractHorse horse, ServerPlayer rider, double fear, Vec3 from) {
-		if (undead(horse)) {
+		if (undead(horse) || Horsemanship.whisperer(rider)) {
 			return;
 		}
 		Equine e = equine(horse);
@@ -630,7 +634,11 @@ public final class Equestrian {
 		Vec3 away = horse.position().subtract(from).multiply(1.0, 0.0, 1.0);
 		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, horse.getYRot()) : away.normalize();
 		// (0.5.44) a war saddle's high cantle keeps its rider on through blows
-		boolean seated = fear == FEAR_BLOW && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.WAR_SADDLE);
+		boolean seated = fear == FEAR_BLOW && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.WAR_SADDLE)
+			// Stay in the Saddle: blows and blasts (not fire or monsters' fright) leave a Rider on
+			|| Horsemanship.stays(rider) && fear != FEAR_FIRE && fear != FEAR_MONSTER
+			// Sure Seat: a rearing horse, whatever frightened it, doesn't throw them
+			|| Horsemanship.sureSeat(rider);
 		if (!seated && random.nextDouble() < fear * (1.0 - bravery) * THROW_ODDS) {
 			rider.stopRiding();
 			horse.setDeltaMovement(away.scale(0.6).add(0.0, 0.2, 0.0));
@@ -655,7 +663,7 @@ public final class Equestrian {
 			}
 			TRAMPLED.put(target.getId(), now + TRAMPLE_COOLDOWN);
 			DamageSource source = level.damageSources().mobAttack(elephant);
-			float damage = charge ? CHARGE_DAMAGE : TRAMPLE_DAMAGE;
+			float damage = (charge ? CHARGE_DAMAGE : TRAMPLE_DAMAGE) * Horsemanship.cavalier(rider);
 			target.hurtServer(level, source, damage);
 			target.knockback(TRAMPLE_KNOCKBACK, -ahead.x, -ahead.z, source, damage);
 			target.push(0.0, 0.35, 0.0);

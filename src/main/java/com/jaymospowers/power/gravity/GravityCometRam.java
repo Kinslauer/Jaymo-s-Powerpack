@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.Shakes;
@@ -229,7 +230,7 @@ public final class GravityCometRam {
 			return;
 		}
 		Vec3 centre = any || crashed ? spot : player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(centre, centre).inflate(SLAM_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(centre, centre).inflate(AbilityPower.size(player, SLAM_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !run.carried.contains(e.getUUID()))) {
 			Vec3 away = near.position().subtract(centre).multiply(1.0, 0.0, 1.0);
 			away = away.lengthSqr() < 1.0E-4 ? run.heading.multiply(1.0, 0.0, 1.0) : away.normalize();

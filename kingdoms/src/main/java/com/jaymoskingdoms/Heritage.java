@@ -484,6 +484,14 @@ public final class Heritage {
 		return of(player) == kind;
 	}
 
+	/**
+	 * (Awakening pick) Whether {@code player}'s body mends fast enough to take metal into the bone (Jaymo's Powers' Bonding Vat
+	 * asks by reflection): the Verdant, and vampires and werewolves.
+	 */
+	public static boolean healsFast(Player player) {
+		return is(player, Kind.VERDANT) || Kinship.monster(player);
+	}
+
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
@@ -511,7 +519,7 @@ public final class Heritage {
 		set(player, kind);
 		HeritageVariants.choose(player, kind, variant);
 		// (character creation: the class comes next)
-		if (Classes.classOf(player) == null) {
+		if (!Classes.decided(player)) {
 			Classes.ask(player, true);
 		}
 	}
@@ -880,6 +888,10 @@ public final class Heritage {
 		Kind kind = of(player);
 		// one who stayed at the Judge: Alight when there are feathers to bring back, else their own heritage's key
 		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
+			return;
+		}
+		// (Awakening pick) a Rubber-folk or a Verdant, sprinting: the stretching grab (Jaymo's Powers)
+		if ((kind == Kind.RUBBERFOLK || kind == Kind.VERDANT) && player.isSprinting() && !player.isShiftKeyDown() && PowersCompat.reel(player)) {
 			return;
 		}
 		if (kind == Kind.WARRIORBORN) {

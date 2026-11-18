@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Lockpicking;
+import com.jaymoskingdoms.RogueExtras;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -239,7 +240,7 @@ final class LockpickScreen extends Screen {
 	public void tick() {
 		this.tick++;
 		if (this.picked >= 0) {
-			if (++this.picked >= PICKED_SHOW) {
+			if (++this.picked >= PICKED_SHOW * haste()) {
 				this.minecraft.gui.setScreen(null);
 			}
 			return;
@@ -265,10 +266,15 @@ final class LockpickScreen extends Screen {
 		} else {
 			pinTick();
 		}
-		this.strain = Math.max(0.0F, this.strain - STRAIN_EASE);
+		this.strain = Math.max(0.0F, this.strain - STRAIN_EASE / haste());
 		if (this.strain >= 1.0F) {
 			slip();
 		}
+	}
+
+	/** (class trees) Nimble Fingers: the lock's waits (the strain easing, the pauses) are this much shorter. */
+	private float haste() {
+		return this.minecraft.player == null ? 1.0F : RogueExtras.fingers(this.minecraft.player);
 	}
 
 	/** The pick took too much: a forgiven slip, or it snaps (the server takes it) and the lock starts over. */
@@ -284,7 +290,7 @@ final class LockpickScreen extends Screen {
 		this.picks--;
 		this.strain = 0.0F;
 		this.forgive = this.lock.forgive();
-		this.pause = SNAP_PAUSE;
+		this.pause = Math.round(SNAP_PAUSE * haste());
 		if (this.rotary) {
 			this.gate = 0;
 		} else {

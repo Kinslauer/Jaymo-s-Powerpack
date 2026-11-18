@@ -43,6 +43,8 @@ public final class RpgSeriesGate {
 	static final Set<String> ROGUE_SPELLS = Set.of("slice_and_dice", "shock_powder", "shadow_step", "vanish", "mutilate", "bear_trap");
 	/** Spells the Survivalist casts besides their own class's: the trapper's two. */
 	static final Set<String> SURVIVALIST_SPELLS = Set.of("bear_trap", "throw_net");
+	/** (class trees) The warrior book's spells the Warlord casts (Shout, Throw Net); the Brute the rest, both Mortal Strike. */
+	static final Set<String> WARLORD_SPELLS = Set.of("shout", "throw_net");
 	/** The learned spells' source in Spell Engine's list. */
 	static final String SOURCE = "jaymoskingdoms_learned";
 	/** Ticks between two "only a ... casts this" lines for the same player. */
@@ -67,10 +69,12 @@ public final class RpgSeriesGate {
 		String path = spell.getPath();
 		return switch (spell.getNamespace()) {
 			case "wizards" -> EnumSet.of(PlayerClass.MAGE);
-			case "archers" -> EnumSet.of(PlayerClass.RANGER, PlayerClass.MARKSMAN);
+			// (class trees) Archery is the Ranger's alone, and Warfare is shared out between the two warriors
+			case "archers" -> EnumSet.of(PlayerClass.RANGER);
 			case "rogues" -> {
 				EnumSet<PlayerClass> classes = ROGUE_SPELLS.contains(path) ? EnumSet.of(PlayerClass.THIEF)
-					: EnumSet.of(PlayerClass.WARLORD, PlayerClass.BRUTE, PlayerClass.RIDER);
+					: WARLORD_SPELLS.contains(path) ? EnumSet.of(PlayerClass.WARLORD)
+					: path.equals("mortal_strike") ? EnumSet.of(PlayerClass.WARLORD, PlayerClass.BRUTE) : EnumSet.of(PlayerClass.BRUTE);
 				if (SURVIVALIST_SPELLS.contains(path)) {
 					classes.add(PlayerClass.RANGER);
 				}

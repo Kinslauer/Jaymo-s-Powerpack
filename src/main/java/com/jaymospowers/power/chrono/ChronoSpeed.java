@@ -118,11 +118,13 @@ public final class ChronoSpeed {
 		ChronoPhase.register();
 		ChronoSlowTime.register();
 		ChronoRings.register();
+		ChronoTunnel.register();
 	}
 
 	private static void wallRun(ServerPlayer player, int face) {
 		Direction side = face >= 0 && face < Direction.values().length ? Direction.from3DDataValue(face) : null;
 		if (side != null && side.getAxis().isHorizontal() && overclocked(player) && player.isAlive() && !player.isPassenger()) {
+			com.jaymospowers.core.trials.PowerTrials.count(player.getAttached(WALL_RUN) == null ? player : null, "chrono.wall_run", 1);
 			player.setAttached(WALL_RUN, side.get3DDataValue());
 			player.resetFallDistance();
 		} else if (player.getAttached(WALL_RUN) != null) {
@@ -177,6 +179,7 @@ public final class ChronoSpeed {
 			player.removeAttached(FLASH);
 		}
 		boolean sprinting = overclocked && player.isSprinting();
+		ChronoMomentum.tick(player, level, overclocked, palette);
 		ChronoGears.tick(player, level, overclocked);
 		ChronoPhase.tick(player, level, overclocked);
 		ChronoRings.tick(player, level, overclocked);
@@ -194,7 +197,10 @@ public final class ChronoSpeed {
 					Vec3 at = was.add(moved.scale(i / 3.0));
 					ChronoFx.particles(level, player, MagicFx.CRACKLE, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 				}
-				if (palette == SKY) {
+				if (SpeedPrism.picked(player) > 0) {
+					// a prism's colour, in place of the power's own dust
+					ChronoFx.particles(level, player, MagicFx.wisp(SpeedPrism.colour(player, 0), 1.2F), was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
+				} else if (palette == SKY) {
 					ChronoFx.particles(level, player, SKY_DUST, was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
 				} else {
 					ChronoFx.particles(level, player, MagicFx.EMBER, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
@@ -207,6 +213,7 @@ public final class ChronoSpeed {
 				ChronoFx.particles(level, player, ParticleTypes.SMOKE, player.getX(), player.getY() + 0.1, player.getZ(), 3, 0.3, 0.0, 0.3, 0.02);
 			} else if (player.onGround() && under.is(FluidTags.WATER)) {
 				wake(player, level, was, moved, player.blockPosition().below(), under);
+				com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.water", player.tickCount % 20 == 0 ? 1 : 0);
 			} else if (player.isInWater() || player.onGround() && !under.isEmpty()) {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}
@@ -338,6 +345,7 @@ public final class ChronoSpeed {
 		control(player, false);
 		ChronoGears.clear(player);
 		ChronoRapid.clear(player);
+		ChronoMomentum.clear(player);
 		if (player.getAttached(FLASH) != null) {
 			player.removeAttached(FLASH);
 		}

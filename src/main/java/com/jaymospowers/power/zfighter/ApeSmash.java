@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlowClash;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
@@ -150,7 +151,7 @@ public final class ApeSmash {
 		if (charge >= 1.0F) {
 			ZFighterSenses.impactFrame(level, at);
 		}
-		double radius = Mth.lerp(charge, RADIUS_MIN, RADIUS_MAX);
+		double radius = Mth.lerp(charge, AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX));
 		float damage = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !player.isPassengerOfSameVehicle(e)

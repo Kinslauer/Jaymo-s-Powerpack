@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.UltimateFilm;
@@ -146,7 +147,7 @@ public final class NadirFilm {
 		target.hurtServer(level, player.damageSources().playerAttack(player), BLOW_DAMAGE);
 		target.setDeltaMovement(target.getDeltaMovement().add(away.x * BLOW_PUSH, BLOW_LIFT, away.z * BLOW_PUSH));
 		target.syncVelocity = true;
-		for (LivingEntity near : NadirAim.around(player, at, SPLASH_RADIUS)) {
+		for (LivingEntity near : NadirAim.around(player, at, AbilityPower.size(player, SPLASH_RADIUS))) {
 			if (near != target) {
 				near.hurtServer(level, player.damageSources().playerAttack(player), SPLASH_DAMAGE);
 			}

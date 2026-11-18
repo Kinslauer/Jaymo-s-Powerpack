@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -573,17 +574,17 @@ public final class Worldmaw extends XenoUltimate {
 		live.hornSlam = false;
 		player.resetFallDistance();
 		float damage = Math.min(SLAM_MAX, SLAM_DAMAGE + (float)Math.max(0.0, live.hornFrom - player.getY()) * SLAM_PER_BLOCK);
-		for (LivingEntity e : foes(player, SLAM_RADIUS)) {
+		for (LivingEntity e : foes(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			if (hit(player, e, damage)) {
 				shove(e, player.position(), 1.0, 0.6);
 			}
 		}
 		BlockState ground = level.getBlockState(player.blockPosition().below());
 		if (!ground.isAir()) {
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 60, SLAM_RADIUS * 0.4, 0.1,
-				SLAM_RADIUS * 0.4, 0.2);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 60, AbilityPower.size(player, SLAM_RADIUS) * 0.4, 0.1,
+				AbilityPower.size(player, SLAM_RADIUS) * 0.4, 0.2);
 		}
-		ring(level, ParticleTypes.EXPLOSION, player.position(), SLAM_RADIUS * 0.6, 8);
+		ring(level, ParticleTypes.EXPLOSION, player.position(), AbilityPower.size(player, SLAM_RADIUS) * 0.6, 8);
 		sound(player, SoundEvents.MACE_SMASH_GROUND_HEAVY, 1.6F, 0.7F);
 		Shakes.heavy(player, player.position(), SLAM_SHAKE_RANGE, SLAM_SHAKE);
 	}

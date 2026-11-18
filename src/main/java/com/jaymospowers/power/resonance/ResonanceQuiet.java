@@ -49,6 +49,7 @@ final class ResonanceQuiet {
 			return;
 		}
 		long held = player.level().getGameTime() - at;
+		com.jaymospowers.core.trials.PowerTrials.count(QUIET.contains(id) ? player : null, "resonance.quiet", held % 20 == 0 ? 1 : 0);
 		if (held > 2 && !PowerInput.isDown(player, PowerKey.ABILITY_4) && !QUIET.contains(id) && held < HOLD_TICKS) {
 			// a tap still on its way up: the key-up casts the dome
 			return;

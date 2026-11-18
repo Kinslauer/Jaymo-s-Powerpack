@@ -49,6 +49,7 @@ public final class WebTricks {
 			return;
 		}
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "web.trick", 1);
 		long now = level.getGameTime();
 		WebPose current = player.getAttached(WebPower.POSE);
 		if (current != null && now - current.start() < current.ticks()) {

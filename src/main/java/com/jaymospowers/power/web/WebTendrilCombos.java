@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Debris;
 import io.netty.buffer.ByteBuf;
@@ -465,7 +466,7 @@ public final class WebTendrilCombos {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.45F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.3F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, 0.9F, 0.6F);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(THRASH_SPLASH),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, THRASH_SPLASH)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && handOf(player, e) < 0)) {
 			living.hurtServer(level, level.damageSources().playerAttack(player), THRASH_SPLASH_DAMAGE);
 			com.jaymospowers.core.Crushing.mark(living);

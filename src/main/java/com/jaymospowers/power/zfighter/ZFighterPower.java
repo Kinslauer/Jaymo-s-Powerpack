@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -608,6 +609,7 @@ public final class ZFighterPower implements Power {
 			live.flying = false;
 		}
 		ZFighterHands.drop(player);
+		ZFighterFury.drop(player);
 		landFlight(player);
 		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
@@ -675,6 +677,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		ZFighterFury.tick(player);
 		ZFighterSelfDestruct.tick(player, live);
 		// (0.17.56) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
 		ZFighterRaces.tick(player, live, max);
@@ -684,6 +687,7 @@ public final class ZFighterPower implements Power {
 		// a Z Fighter eats like three men, and every bite comes back as ki
 		if (live.lastFood >= 0 && food > live.lastFood) {
 			live.ki += (food - live.lastFood) * KI_PER_FOOD;
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.eat", food - live.lastFood);
 		}
 		live.lastFood = food;
 		if (!creative) {
@@ -701,6 +705,7 @@ public final class ZFighterPower implements Power {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_starving").withStyle(ChatFormatting.RED));
 			} else {
 				live.ki += Mastery.starterOnly(player) ? STARTER_CHARGE_RATE : CHARGE_RATE;
+				com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.charge", player.tickCount % 20 == 0 ? 1 : 0);
 				if (!creative) {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
 				}
@@ -708,6 +713,7 @@ public final class ZFighterPower implements Power {
 				chargeFx(player, live, now);
 				if (startKi < max && live.ki >= max && now - live.lastFullBurst >= FULL_BURST_GAP) {
 					fullBurst(player, live, now);
+					com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.full", 1);
 				}
 				if (Soundscape.due(player, "ki.power_up", 12, 20)) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
@@ -735,6 +741,7 @@ public final class ZFighterPower implements Power {
 					* ZFighterDivineGrace.flight(player);
 			}
 			player.resetFallDistance();
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.flight", player.tickCount % 20 == 0 ? 1 : 0);
 			if (now % 4 == 0) {
 				level.sendParticles(dust(live), true, false, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
 			}
@@ -831,6 +838,11 @@ public final class ZFighterPower implements Power {
 		}
 		// R while the Eye Beams are held: the spin (ZFighterEyeBeams)
 		if (down && key == PowerKey.ABILITY_1 && ZFighterEyeBeams.spin(player)) {
+			return;
+		}
+		// (Awakening pick) a Rubber-folk's or a Verdant's sprint + R: the stretching grab
+		if (down && key == PowerKey.ABILITY_1 && player.isSprinting() && !player.isShiftKeyDown() && ZFighterReel.stretchy(player)
+			&& ZFighterReel.reel(player)) {
 			return;
 		}
 		switch (key) {
@@ -1126,14 +1138,14 @@ public final class ZFighterPower implements Power {
 		}
 		ServerLevel level = player.level();
 		Vec3 center = player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SUPER_BURST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, SUPER_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 away = near.position().subtract(center);
 			double distance = Math.max(0.5, away.length());
-			if (distance > SUPER_BURST_RADIUS) {
+			if (distance > AbilityPower.size(player, SUPER_BURST_RADIUS)) {
 				continue;
 			}
-			double strength = 1.6 * (1.0 - distance / (SUPER_BURST_RADIUS + 1.0));
+			double strength = 1.6 * (1.0 - distance / (AbilityPower.size(player, SUPER_BURST_RADIUS) + 1.0));
 			ZFighterKi.push(near, away, strength, 0.4);
 		}
 		MagicFx.blast(level, center.x, center.y + 1.0, center.z, MagicFx.FLASH_RADIUS, 0xFFE08A);
@@ -1453,7 +1465,7 @@ public final class ZFighterPower implements Power {
 					0.4 + random.nextDouble() * 0.3);
 			}
 		}
-		debris(player, FULL_BURST_DEBRIS, FULL_BURST_RADIUS, 0.7 + 0.1 * live.tier(), true);
+		debris(player, FULL_BURST_DEBRIS, AbilityPower.size(player, FULL_BURST_RADIUS), 0.7 + 0.1 * live.tier(), true);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4F, 0.9F + 0.05F * live.tier());
 		com.jaymospowers.core.Shakes.heavy(player, c, FULL_BURST_SHAKE_RANGE, FULL_BURST_SHAKE);
 	}

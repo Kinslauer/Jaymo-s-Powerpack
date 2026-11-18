@@ -142,6 +142,11 @@ public final class ZFighterSites {
 				// ((0.17.146) as an MCA villager, the Keeper's menu leads to his talk: keeperTalk)
 				return InteractionResult.PASS;
 			}
+			// (Awakening pick) sneak and right-click empty-handed: buy a threat tracker (the MCA Keeper sells it in his talk)
+			if (hand == net.minecraft.world.InteractionHand.MAIN_HAND && player.isShiftKeyDown() && player.getMainHandItem().isEmpty()) {
+				sellTracker((ServerPlayer)player, entity instanceof LivingEntity keeper ? keeper : null, null);
+				return InteractionResult.SUCCESS;
+			}
 			// (0.17.61) sneak and right-click holding anything: talk about the story and jobs, not the blessing
 			if (hand == net.minecraft.world.InteractionHand.MAIN_HAND && player.isShiftKeyDown() && !player.getMainHandItem().isEmpty()) {
 				ZFighterSagas.speak((ServerPlayer)player, entity, true);
@@ -444,7 +449,11 @@ public final class ZFighterSites {
 		ZFighterNpcs.ask(player, keeper, Component.translatable(blessed ? "talk.jaymospowers.keeper.greet_blessed" : "talk.jaymospowers.keeper.greet"), List.of(
 			ZFighterNpcs.Option.of("talk.jaymospowers.keeper.bless", !blessed, () -> ZFighterNpcs.reply(player, keeper, () -> bless(player), back)),
 			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", true,
-				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterSagas.speak(player, keeper, true), back))));
+				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterSagas.speak(player, keeper, true), back)),
+			// (Awakening pick) the threat tracker, sold on the Lookout
+			ZFighterNpcs.Option.of("talk.jaymospowers.keeper.tracker", KingdomsMoney.canPay(player, KingdomsMoney.worth(com.jaymospowers.tracker.ThreatTracker.PRICE)),
+				() -> sellTracker(player, keeper, back),
+				KingdomsMoney.text(player, KingdomsMoney.worth(com.jaymospowers.tracker.ThreatTracker.PRICE)))));
 	}
 
 	/** The Hermit's talk: his wares for silver coins (he no longer keeps a trader's stall). (0.20.0) Was emeralds; prices unchanged, 1 silver = 1 old emerald. */
@@ -477,6 +486,34 @@ public final class ZFighterSites {
 	}
 
 	// ---------------------------------------------------------------- the Keeper
+
+	/**
+	 * (Awakening pick) The Keeper sells a threat tracker for silver: from his talk ({@code back} leads back to it), or, as the
+	 * old trader without MCA, on a sneaking empty-handed click (said on the action bar).
+	 */
+	private static void sellTracker(ServerPlayer player, @org.jspecify.annotations.Nullable LivingEntity keeper, @org.jspecify.annotations.Nullable Runnable back) {
+		int price = com.jaymospowers.tracker.ThreatTracker.PRICE;
+		if (!KingdomsMoney.charge(player, KingdomsMoney.worth(price))) {
+			Component poor = Component.translatable("talk.jaymospowers.keeper.tracker_poor", KingdomsMoney.text(player, KingdomsMoney.worth(price)));
+			if (keeper != null && back != null) {
+				ZFighterNpcs.ask(player, keeper, poor, List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+			} else {
+				player.sendOverlayMessage(poor.copy().withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		ItemStack ware = new ItemStack(com.jaymospowers.tracker.ThreatTracker.TRACKER);
+		if (!player.addItem(ware)) {
+			player.drop(ware, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
+		Component sold = Component.translatable("talk.jaymospowers.keeper.tracker_sold");
+		if (keeper != null && back != null) {
+			ZFighterNpcs.ask(player, keeper, sold, List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+		} else {
+			player.sendOverlayMessage(sold.copy().withStyle(ChatFormatting.GOLD));
+		}
+	}
 
 	private static void bless(ServerPlayer player) {
 		long now = player.level().getGameTime();

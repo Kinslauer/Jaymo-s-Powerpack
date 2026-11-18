@@ -71,6 +71,10 @@ public final class ZFighterGuard {
 		if (up) {
 			live.guardStart = player.level().getGameTime();
 			player.setAttached(GUARD, true);
+			if (player.isShiftKeyDown()) {
+				// (Awakening pick) raised with Sneak held: Full Counter
+				ZFighterFullCounter.open(player);
+			}
 			Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
 		} else {
 			player.removeAttached(GUARD);
@@ -87,10 +91,15 @@ public final class ZFighterGuard {
 		player.removeAttached(GUARD);
 		Guard.hidePower(player);
 		ZFighterBracers.dropped(player);
+		ZFighterFullCounter.forget(player);
 	}
 
 	/** What's left of {@code damage} after his guard (the victim side of the damage hook). */
 	static float guard(ServerPlayer player, ZFighterPower.Live live, DamageSource source, float damage) {
+		if (live.guarding && ZFighterFullCounter.holding(player)) {
+			// Full Counter: whatever hits him goes back
+			damage = ZFighterFullCounter.take(player, source, damage);
+		}
 		if (!live.guarding || damage <= 0.0F) {
 			return damage;
 		}
@@ -143,6 +152,7 @@ public final class ZFighterGuard {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		live.parryReadyAt = now + PARRY_COOLDOWN;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.parry", 1);
 		live.counterUntil = now + COUNTER_TICKS;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + PARRY_KI);
 		Mastery.used(player);

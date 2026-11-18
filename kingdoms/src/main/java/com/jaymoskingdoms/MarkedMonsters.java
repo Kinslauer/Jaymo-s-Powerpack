@@ -275,7 +275,7 @@ public final class MarkedMonsters {
 	}
 
 	/** Whether {@code e} carries a boss bar for its marks (its blows are tallied by {@link BossBars}). */
-	static boolean barred(Entity e) {
+	public static boolean barred(Entity e) {
 		return of(e).size() >= BAR_AT;
 	}
 

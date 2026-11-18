@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.ChatFormatting;
@@ -180,7 +181,7 @@ public final class Croaker extends XenoForm {
 	}
 
 	private static void croak(ServerPlayer player, ServerLevel level) {
-		for (LivingEntity e : around(player, CROAK_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, CROAK_RADIUS))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), CROAK_DAMAGE);
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CROAK_TICKS, 3), player);
 			if (e instanceof Player) {
@@ -189,7 +190,7 @@ public final class Croaker extends XenoForm {
 				mob.setTarget(null);
 			}
 		}
-		ring(level, ParticleTypes.NOTE, player.position().add(0.0, 1.0, 0.0), CROAK_RADIUS * 0.6, 16);
+		ring(level, ParticleTypes.NOTE, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, CROAK_RADIUS) * 0.6, 16);
 		sound(player, SoundEvents.FROG_AMBIENT, 2.0F, 0.4F);
 	}
 

@@ -76,7 +76,7 @@ final class ClassScreen extends Screen {
 
 	/** Whether the screen is done: a class chosen (not while a master teaches a second, nor while a creative player is switching). */
 	private boolean done(Minecraft minecraft) {
-		return this.teaching == null && !this.switching && minecraft.player != null && Classes.classOf(minecraft.player) != null;
+		return this.teaching == null && !this.switching && minecraft.player != null && Classes.decided(minecraft.player);
 	}
 
 	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
@@ -95,7 +95,7 @@ final class ClassScreen extends Screen {
 			if (!owed || minecraft.player == null) {
 				return;
 			}
-			if (Classes.classOf(minecraft.player) != null) {
+			if (Classes.decided(minecraft.player)) {
 				owed = false;
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
 				minecraft.gui.setScreen(new ClassScreen(true, 0));
@@ -169,6 +169,17 @@ final class ClassScreen extends Screen {
 		if (!this.forced) {
 			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
 			right -= 60;
+		}
+		if (this.teaching == null && !this.switching) {
+			// (class trees, Andy's page note) start with no class yet, and learn one later from a teacher
+			var none = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.none"), b -> {
+				ClientPlayNetworking.send(new Classes.Choose(Classes.NONE_CHOICE, -1, false));
+				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
+				onClose();
+			}).bounds(right - 90, y, 90, 16).build();
+			none.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.class.none.tip")));
+			addRenderableWidget(none);
+			right -= 94;
 		}
 		this.choose = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {

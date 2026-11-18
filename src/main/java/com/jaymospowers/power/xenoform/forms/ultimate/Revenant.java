@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
@@ -338,7 +339,7 @@ public final class Revenant extends XenoUltimate {
 		live.wail = WAIL_TICKS;
 		ServerLevel level = player.level();
 		scatter(player);
-		for (LivingEntity living : around(player, WAIL_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, WAIL_RADIUS))) {
 			if (living.entityTags().contains(XenoformState.MINION_TAG)) {
 				continue;
 			}
@@ -351,18 +352,18 @@ public final class Revenant extends XenoUltimate {
 				living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 60, 0));
 			}
 		}
-		ring(level, ParticleTypes.SCULK_SOUL, player.position().add(0.0, 1.0, 0.0), WAIL_RADIUS * 0.3, 20);
-		ring(level, ParticleTypes.SOUL, player.position(), WAIL_RADIUS * 0.6, 32);
-		ring(level, ParticleTypes.SOUL, player.position(), WAIL_RADIUS, 48);
+		ring(level, ParticleTypes.SCULK_SOUL, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, WAIL_RADIUS) * 0.3, 20);
+		ring(level, ParticleTypes.SOUL, player.position(), AbilityPower.size(player, WAIL_RADIUS) * 0.6, 32);
+		ring(level, ParticleTypes.SOUL, player.position(), AbilityPower.size(player, WAIL_RADIUS), 48);
 		sound(player, SoundEvents.PHANTOM_SWOOP, 2.0F, 0.5F);
 		sound(player, SoundEvents.WARDEN_ROAR, 1.0F, 1.6F);
 		sound(player, SoundEvents.PHANTOM_AMBIENT, 2.0F, 0.5F);
-		Shakes.heavy(player, player.position(), WAIL_RADIUS, 1.2F);
+		Shakes.heavy(player, player.position(), AbilityPower.size(player, WAIL_RADIUS), 1.2F);
 	}
 
 	/** Every mob within reach drops what it was doing and runs. */
 	private static void scatter(ServerPlayer player) {
-		for (LivingEntity living : around(player, WAIL_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, WAIL_RADIUS))) {
 			if (!(living instanceof Mob mob) || mob.entityTags().contains(XenoformState.MINION_TAG)) {
 				continue;
 			}

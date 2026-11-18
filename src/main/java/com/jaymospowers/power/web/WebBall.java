@@ -59,6 +59,8 @@ public class WebBall extends ThrowableItemProjectile {
 	/** A Mending Shot (the white symbiote's): it heals what it hits. Server only. */
 	private boolean mending;
 	private boolean burst;
+	/** (Web cartridges) The kind of web it is ({@link WebKinds}). Server only. */
+	private int kind = WebKinds.STICKY;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
 	/** A web bomb is lobbed like a snowball. */
@@ -82,6 +84,12 @@ public class WebBall extends ThrowableItemProjectile {
 	/** A quick webshooter pellet (see {@link #PELLET_DAMAGE}). */
 	public WebBall pellet() {
 		this.pellet = true;
+		return this;
+	}
+
+	/** Of the kind loaded in the wrist it left ({@link WebKinds}). */
+	public WebBall kind(int kind) {
+		this.kind = kind;
 		return this;
 	}
 
@@ -144,6 +152,10 @@ public class WebBall extends ThrowableItemProjectile {
 			WebStrength.bomb(level, this.position(), this.getOwner(), dark);
 			return;
 		}
+		if (WebKinds.burst(level, this.kind, this, this.getOwner(), direct, this.position(), this.pellet ? PELLET_DAMAGE
+			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX))) {
+			return;
+		}
 		if (this.pellet) {
 			// a pellet stings what it hits, and stacks web on it: enough hits in a row and it's webbed up
 			if (direct != null && direct != this.getOwner()) {
@@ -157,7 +169,7 @@ public class WebBall extends ThrowableItemProjectile {
 		}
 		float damage = dark ? net.minecraft.util.Mth.lerp(this.charge, DARK_DAMAGE_MIN, DARK_DAMAGE_MAX)
 			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
-		double radius = net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX);
+		double radius = com.jaymospowers.core.AbilityPower.size(this.getOwner(), net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX));
 		int slowTicks = net.minecraft.util.Mth.lerpInt(this.charge, SLOWNESS_MIN_TICKS, SLOWNESS_MAX_TICKS);
 		Entity owner = this.getOwner();
 		net.minecraft.world.phys.AABB area = this.getBoundingBox().inflate(radius, radius * 0.5, radius);
@@ -172,6 +184,7 @@ public class WebBall extends ThrowableItemProjectile {
 				living.hurtServer(level, this.damageSources().thrown(this, owner), hurt);
 			}
 			int ticks = (int)(slowTicks * strength);
+			com.jaymospowers.core.trials.PowerTrials.count(living != owner ? owner : null, "web.shot", 1);
 			if (living == direct && this.charge >= WebStrength.PIN_CHARGE && living.isAlive()) {
 				// an impact web: pinned to the wall behind it, or the floor
 				WebStrength.pin(level, living, this.getDeltaMovement(), this.charge, dark);

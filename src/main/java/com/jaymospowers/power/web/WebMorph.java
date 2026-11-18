@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fractures;
@@ -508,7 +509,7 @@ public final class WebMorph {
 				Dismember.cut(player, target, part, SCYTHE_SEVER * sever, () -> blow(target, level, source, damage));
 				push(target, right.scale(-SCYTHE_KNOCK).add(away.scale(0.3)).add(0.0, 0.25, 0.0));
 				// the sweep carries on through what's beside it
-				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(SCYTHE_SWEEP),
+				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(AbilityPower.size(player, SCYTHE_SWEEP)),
 					e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof Player p && p.isCreative())
 						&& e.position().subtract(player.position()).horizontal().dot(player.getLookAngle().horizontal()) > 0.0)) {
 					Dismember.cut(player, other, Dismember.aimedPart(player, other), SCYTHE_SEVER * 0.5F * sever,

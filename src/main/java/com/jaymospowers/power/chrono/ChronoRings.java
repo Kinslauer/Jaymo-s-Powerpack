@@ -145,6 +145,7 @@ public final class ChronoRings {
 
 	private static void raise(ServerPlayer player, ServerLevel level, Vec3 centre, double radius) {
 		VORTICES.add(new Vortex(level, player.getUUID(), centre, radius));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.ring", 1);
 		MagicFx.ring(level, centre.add(0.0, 0.1, 0.0), (float)radius, GOLD);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.7F);
 	}

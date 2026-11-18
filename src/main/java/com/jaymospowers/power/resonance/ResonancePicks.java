@@ -1,6 +1,7 @@
 package com.jaymospowers.power.resonance;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Powers;
@@ -224,10 +225,10 @@ final class ResonancePicks {
 		ServerLevel level = player.level();
 		PickKit.spend(TABLE, player, PANIC, PANIC_COOLDOWN);
 		Vec3 at = player.position();
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), null, (float)PANIC_RADIUS, VOICE, 14);
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), null, (float)AbilityPower.size(player, PANIC_RADIUS), VOICE, 14);
 		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), 2.0F, EDGE);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(at, PANIC_RADIUS), c -> PickKit.foe(player, c))) {
-			if (e.distanceToSqr(at) > PANIC_RADIUS * PANIC_RADIUS) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(at, AbilityPower.size(player, PANIC_RADIUS)), c -> PickKit.foe(player, c))) {
+			if (e.distanceToSqr(at) > AbilityPower.size(player, PANIC_RADIUS) * AbilityPower.size(player, PANIC_RADIUS)) {
 				continue;
 			}
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PANIC_SLOW, 2));

@@ -209,7 +209,8 @@ final class SkillWeb {
 			CRESTS.put(pillar, polar((from(pillar) + to(pillar)) / 2.0, CREST_R));
 			List<Branch> branches = new ArrayList<>();
 			for (Branch b : Branch.values()) {
-				if (b.pillar == pillar) {
+				// (class trees) a page that moved wholly into the classes' own trees leaves no branch behind
+				if (b.pillar == pillar && java.util.Arrays.stream(Skills.Perk.values()).anyMatch(p -> onWeb(p) && branch(p) == b)) {
 					branches.add(b);
 				}
 			}
@@ -221,7 +222,7 @@ final class SkillWeb {
 				int deepest = 0, deepestWill = 0;
 				Map<Integer, Integer> taken = new java.util.HashMap<>();
 				for (Skills.Perk perk : Skills.Perk.values()) {
-					if (perk.bridge() || !perk.pillar.web() || branch(perk) != b) {
+					if (!onWeb(perk) || branch(perk) != b) {
 						continue;
 					}
 					BRANCHES.put(perk, b);
@@ -254,6 +255,11 @@ final class SkillWeb {
 			int n = onBorder.merge(angle, 1, Integer::sum) - 1;
 			SPOTS.put(perk, polar(angle, R0 + (BRIDGE_RING + BRIDGE_RING_STEP * n) * STEP));
 		}
+	}
+
+	/** Whether {@code perk} sits on a pillar's branch of the web: not a bridge, not the Scholar's, not moved into a class tree. */
+	private static boolean onWeb(Skills.Perk perk) {
+		return !perk.bridge() && perk.pillar.web() && com.jaymoskingdoms.ClassTrees.moved(perk) == null;
 	}
 
 	/** The point to look at for a pillar: the middle of its wedge, between its first rings. */

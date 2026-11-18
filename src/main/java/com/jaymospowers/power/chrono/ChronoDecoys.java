@@ -137,7 +137,8 @@ public final class ChronoDecoys {
 
 	/** How many copies the player's gear makes. */
 	static int count(ServerPlayer player) {
-		int gear = ChronoGears.gear(player);
+		// the gear the wheel is set to (the copies step out from a crouch, when momentum has gone)
+		int gear = ChronoMomentum.top(player);
 		return gear >= ChronoGears.GEARS ? ARMY : COUNT_BY_GEAR[Mth.clamp(gear, 1, COUNT_BY_GEAR.length) - 1];
 	}
 
@@ -149,7 +150,8 @@ public final class ChronoDecoys {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_decoys.recharging"));
 			return;
 		}
-		boolean army = ChronoGears.gear(player) >= ChronoGears.GEARS;
+		boolean army = ChronoMomentum.top(player) >= ChronoGears.GEARS;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.decoys", 1);
 		Copies set = new Copies();
 		int want = count(player);
 		double min = army ? ARMY_RING_MIN : RING_MIN, max = army ? ARMY_RING_MAX : RING_MAX;

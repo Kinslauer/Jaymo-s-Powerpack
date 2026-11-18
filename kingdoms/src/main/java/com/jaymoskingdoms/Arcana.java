@@ -140,7 +140,7 @@ public final class Arcana {
 		if (random.nextInt(NEW_SCROLL_ONE_IN) == 0) {
 			List<String> kept = switch (role) {
 				case Sorcery.WIZARD -> List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "hut", "feather_fall", "misty_step", "fog",
-					"create_food", "purify_food", "glass_shards", "glass_skin", "fire_ring", "fire_lance");
+					"create_food", "purify_food", "glass_shards", "glass_skin", "fire_ring", "fire_lance", HushWard.SPELL);
 				case Sorcery.SHAMAN, Orcs.SHAMAN -> List.of("speak_animals", "spider_climb", "water_walk", "long_jump", "web", "grease", "spike_growth",
 					"purify_food", "glass_spires", "molten_glass", "fire_pillars", "storm_cloak");
 				case Sorcery.NECROMANCER -> List.of("darkness", "silence", "web", "black_flame");
@@ -293,7 +293,10 @@ public final class Arcana {
 					return InteractionResult.SUCCESS;
 				}
 			} else if (reader != null && (Spellcraft.learn(reader, this.spell) || ElementSpells.learn(reader, this.spell))) {
-				stack.consume(1, player);
+				// (class trees) a Scholar's scroll sometimes isn't used up by the learning
+				if (!ArcaneExtras.scrollKept(reader)) {
+					stack.consume(1, player);
+				}
 				return InteractionResult.SUCCESS;
 			}
 			if (!cast(this.spell, server, player, 1.0F)) {
@@ -362,7 +365,8 @@ public final class Arcana {
 		// (a held spell: broken, the ward goes from all of them)
 		Concentration.hold(player, "warding", (int) (SCROLL_WARD_TICKS * power), () -> warded.forEach(p -> p.removeEffect(MobEffects.ABSORPTION)));
 		for (Player p : warded) {
-			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL), player);
+			// (class trees) a Warder's ward soaks more
+			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL + ClassForks.wardSoak(player)), player);
 			level.sendParticles(Fx.LIGHT, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.4F);

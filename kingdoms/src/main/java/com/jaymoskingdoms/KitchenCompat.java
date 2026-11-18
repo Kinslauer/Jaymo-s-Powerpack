@@ -260,6 +260,9 @@ public final class KitchenCompat {
 			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
 				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
 					Patrons.blessed(player, Patron.GREEN_HUNTSMAN, 2) ? Blessings.CLEAN_CUTS_EXTRA : 0);
+			// (class trees) Field Dressing: a Ranger's own kill gives one more round
+			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) RogueExtras::dressing);
 			hanging.getMethod("addOnDone", java.util.function.BiConsumer.class)
 				.invoke(null, (java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>) (player, carcass) ->
 					Patrons.deed(player, Patron.GREEN_HUNTSMAN, Patrons.DEED_SMALL, "carcass"));
@@ -432,7 +435,8 @@ public final class KitchenCompat {
 			return java.util.List.of();
 		}
 		return level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), e -> {
-			if (!isFreeCorpse(e) || isPlayerCorpse(e)) {
+			// (class trees) a body the rites were read over never rises
+			if (!isFreeCorpse(e) || isPlayerCorpse(e) || e.entityTags().contains(Litany.RITES_TAG)) {
 				return false;
 			}
 			net.minecraft.world.entity.EntityType<?> was = sourceType(e);
@@ -499,7 +503,8 @@ public final class KitchenCompat {
 	/** A body the Reaper can raise: any a necromancer can ({@link #isRaisableCorpse}), and a player's too. */
 	static boolean isReapableCorpse(Entity entity) {
 		return isRaisableCorpse(entity) || CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
-			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity);
+			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity)
+			&& !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.7.132) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
@@ -590,7 +595,8 @@ public final class KitchenCompat {
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
-			&& !BodyKeeping.isPreserved(entity);
+			// (class trees) nothing raises a body the rites were read over
+			&& !BodyKeeping.isPreserved(entity) && !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.5.37) What the corpse was in life, or null. */
@@ -732,6 +738,41 @@ public final class KitchenCompat {
 			return true;
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen's drink failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/**
+	 * (Carry your water) Takes a sip out of a Kitchen waterskin: its water is the data component
+	 * {@code jaymoskitchen:waterskin_water}, a record whose first part is the sips left. False if {@code stack} has none.
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static boolean sipWaterskin(net.minecraft.world.item.ItemStack stack) {
+		if (stack.isEmpty() || !FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			net.minecraft.core.component.DataComponentType type = net.minecraft.core.registries.BuiltInRegistries.DATA_COMPONENT_TYPE
+				.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, "waterskin_water"));
+			Object water = type == null ? null : stack.get(type);
+			if (water == null) {
+				return false;
+			}
+			java.lang.reflect.RecordComponent[] parts = water.getClass().getRecordComponents();
+			Object[] args = new Object[parts.length];
+			Class<?>[] types = new Class<?>[parts.length];
+			for (int i = 0; i < parts.length; i++) {
+				types[i] = parts[i].getType();
+				args[i] = parts[i].getAccessor().invoke(water);
+			}
+			if (!(args[0] instanceof Integer sips) || sips <= 0) {
+				return false;
+			}
+			args[0] = sips - 1;
+			stack.set(type, water.getClass().getDeclaredConstructor(types).newInstance(args));
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's waterskin sip failed: {}", e.toString());
 			return false;
 		}
 	}
