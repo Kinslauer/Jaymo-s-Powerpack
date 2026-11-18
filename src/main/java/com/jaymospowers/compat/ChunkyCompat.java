@@ -12,14 +12,25 @@ import net.minecraft.server.MinecraftServer;
  * whenever a player is on". Its own commands are run: {@code chunky pause} when the first player is on, {@code chunky
  * continue} once nobody is (and at start-up with nobody on, which also picks up a task a restart left saved). With no
  * task, Chunky just says so (quietly).
+ * <p>
+ * At start-up the first {@code chunky continue} waits {@link #START_WAIT}: run five seconds in, while the world was still
+ * settling, the task came up but never made a chunk (0 a second, at 0, 0) after every restart on 2026-11-18, until it was
+ * paused and continued by hand. So it is also paused and continued once more {@link #START_KICK} later, which costs a
+ * running task nothing.
  */
 public final class ChunkyCompat {
 	private static final String MOD_ID = "chunky";
 	/** How often (ticks) who's on is looked at. */
 	static final int CHECK_TICKS = 100;
+	/** Ticks after start-up before Chunky is first told to continue, and before it is paused and continued once more. */
+	static final int START_WAIT = 60 * 20, START_KICK = 3 * 60 * 20;
+	/** Ticks between that pause and its continue (a continue right after a pause finds the old task still stopping). */
+	static final int KICK_GAP = 15 * 20;
 
 	/** Whether the server had players on at the last look (null: not looked yet since it started). */
 	private static Boolean busy;
+	/** The once-a-start pause and continue is still to come. */
+	private static boolean kickDue = true;
 
 	private ChunkyCompat() {
 	}
@@ -29,20 +40,39 @@ public final class ChunkyCompat {
 			return;
 		}
 		ServerTickEvents.END_SERVER_TICK.register(ChunkyCompat::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> busy = null);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			busy = null;
+			kickDue = true;
+		});
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (server.getTickCount() % CHECK_TICKS != 0) {
+		int ticks = server.getTickCount();
+		boolean now = !server.getPlayerList().getPlayers().isEmpty();
+		if (kickDue && busy != null && !busy && !now) {
+			if (ticks == START_KICK) {
+				run(server, "chunky pause", "Start-up kick");
+			} else if (ticks == START_KICK + KICK_GAP) {
+				kickDue = false;
+				run(server, "chunky continue", "Start-up kick");
+			}
+		}
+		if (ticks % CHECK_TICKS != 0 || busy == null && !now && ticks < START_WAIT) {
 			return;
 		}
-		boolean now = !server.getPlayerList().getPlayers().isEmpty();
 		if (busy != null && busy == now) {
 			return;
 		}
 		busy = now;
-		String command = now ? "chunky pause" : "chunky continue";
-		JaymosPowers.LOGGER.info("{}: running '{}'", now ? "A player is on" : "Nobody is on", command);
+		if (now) {
+			// (a player came on: the start-up kick isn't wanted any more)
+			kickDue = false;
+		}
+		run(server, now ? "chunky pause" : "chunky continue", now ? "A player is on" : "Nobody is on");
+	}
+
+	private static void run(MinecraftServer server, String command, String why) {
+		JaymosPowers.LOGGER.info("{}: running '{}'", why, command);
 		try {
 			server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command);
 		} catch (RuntimeException e) {
