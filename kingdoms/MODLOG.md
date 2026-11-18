@@ -15068,3 +15068,9 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 ## 0.10.36 (2026-11-18): Tree locks block crafting alongside The Graveyard (#1756)
 
 The crafting lock on trade stations and the saw now hooks the slot pickup check that every slot has and applies to crafting result slots, so it works with or without The Graveyard.
+
+## 0.10.37 (2026-11-18): holy books - each patron's sigil on its book; a stored book is no broken commandment (#1771)
+
+- **Holy book looks**: every patron's book of commandments is now the vanilla book with that patron's sigil set in a sunken square on the cover, lying on the cover's tilt (upright as you hold the book) (the anvil, the hearth flame, the waves, the antlers, the lantern, the crowned sun, the hooded ember, the Truth's cross), and its lore book is the written book with the same sigil. Old books of commandments take the new look the next time they are in an inventory; old lore books keep the plain look. Sigils are drawn from the shrine glyphs by `tools/gen_holy_books.py`, as a 32x32 overlay on the vanilla texture (twice the book's detail so the tilted sigil still reads; no vanilla pixels copied).
+- **Keeping the book**: the Truth's "Do not throw away My book" used to break the moment the book was dropped. Now it breaks only if the dropped book is lost (burnt, despawned, fallen into the void). Putting it in a chest, dropping it for a friend or into a hopper, or picking it up again is fine (`Commandments`, `LoreBooks`).
+- Built by the PR checks; not played.
