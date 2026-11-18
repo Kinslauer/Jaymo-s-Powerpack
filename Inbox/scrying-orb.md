@@ -39,5 +39,5 @@ suggested_owns:
 - Complementary on: miniature lit, not purple or invisible. 3 awake orbs cost under 1 ms a frame.
 
 ## Notes
-- Lore paragraph "The scrying orb" is in Lore.md (Daily life, after the everburning mote), waiting for Andy's OK.
+- Lore paragraph "The scrying orb" is in Lore.md (Daily life, after the everburning mote), approved by Andy 2026-11-18.
 - Open questions for Andy (ask in the thread, don't block on them): mote figures first or real tiny models from the start; any way for the watched to notice beyond the chill; can a keep or wizard's tower be warded so it shows only cloud.
