@@ -759,6 +759,16 @@
         },
         {
           "days": [
+            30,
+            40
+          ],
+          "leaves": "giver",
+          "town": [
+            "{giver}'s house is shut up. They went with the last cart down the valley, and left the door on the latch for whoever wants it."
+          ]
+        },
+        {
+          "days": [
             12,
             20
           ],

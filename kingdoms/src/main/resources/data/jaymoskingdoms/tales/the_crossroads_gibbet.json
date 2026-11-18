@@ -942,6 +942,21 @@
       "later": [
         {
           "days": [
+            10,
+            16
+          ],
+          "grave": [
+            "{hanged}",
+            "Laid down in",
+            "the Warden's",
+            "light"
+          ],
+          "town": [
+            "There's a new mound in the burying ground, with a board at its head. Somebody keeps a candle on it."
+          ]
+        },
+        {
+          "days": [
             12,
             25
           ],
@@ -984,6 +999,21 @@
         ]
       },
       "later": [
+        {
+          "days": [
+            10,
+            16
+          ],
+          "grave": [
+            "{hanged}",
+            "Hanged wrong.",
+            "Named true",
+            "at the assize."
+          ],
+          "town": [
+            "They've put a board on Rudge's mound. Hanged wrong, it says, for anyone who can read it."
+          ]
+        },
         {
           "days": [
             10,

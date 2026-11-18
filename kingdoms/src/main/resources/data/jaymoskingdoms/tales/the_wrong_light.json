@@ -169,7 +169,7 @@
       "do": "go", "to": "yard", "when": "moon:new", "goal": "Come to {place:yard} on the dark of the moon", "then": "defend_yard"
     },
     "defend_yard": {
-      "do": "defend", "at": "yard", "waves": 3, "foes": "minecraft:drowned", "stars": 2, "when": "moon:new", "goal": "Hold {place:yard} through the dark of the moon",
+      "do": "defend", "at": "yard", "waves": 3, "foes": "minecraft:drowned", "stars": 2, "goal": "Hold {place:yard} through the dark of the moon",
       "journal": "On the dark of the moon the drowned came up from the quay to the burying ground, wet through and walking slow, and were held at the lych gate until dawn. Without a bell they would come again.",
       "then": "to_scrape"
     },

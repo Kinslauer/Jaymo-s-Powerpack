@@ -427,7 +427,10 @@ final class TaleCast {
 				}
 			}
 			JsonElement lying = theirs.get("lying");
-			if (c != null && lying != null && lying.isJsonPrimitive() && lying.getAsJsonPrimitive().isString() && Tales.holds(player, run, lying.getAsString())) {
+			// (laid out from the start: a pose isn't kept when the ground is unloaded, so they're laid out again whenever they stand)
+			boolean laidOut = Tale.flag(theirs, "lying") && !Tale.string(theirs, "body", "villager").equals("villager")
+				&& !Tale.string(theirs, "body", "villager").equals("fighter");
+			if (c != null && (laidOut || lying != null && lying.isJsonPrimitive() && lying.getAsJsonPrimitive().isString() && Tales.holds(player, run, lying.getAsString()))) {
 				// (they lie down once it has happened, one of them each look, so whoever is there sees it)
 				List<Mob> all = new ArrayList<>(men(level, there, c));
 				all.add(0, there);
@@ -435,7 +438,9 @@ final class TaleCast {
 					if (m.getPose() != Pose.SLEEPING) {
 						m.setNoAi(true);
 						m.setPose(Pose.SLEEPING);
-						break;
+						if (!laidOut) {
+							break;
+						}
 					}
 				}
 			}
@@ -658,7 +663,6 @@ final class TaleCast {
 		LOADED.add(mob);
 	}
 
-	/** ({@link QuestJobs}) {@code mob} is being walked somewhere: where it stands is where it belongs now. */
 	/** {@code mob} of a tale's cast is sent to stand at {@code to}: it walks there, and that's where it waits from now. */
 	static void send(Mob mob, BlockPos to) {
 		Cast c = mob.getAttached(CAST);
@@ -667,6 +671,7 @@ final class TaleCast {
 		}
 	}
 
+	/** ({@link QuestJobs}) {@code mob} is being walked somewhere: where it stands is where it belongs now. */
 	static void moved(Mob mob) {
 		Cast c = mob.getAttached(CAST);
 		if (c != null && !c.over()) {

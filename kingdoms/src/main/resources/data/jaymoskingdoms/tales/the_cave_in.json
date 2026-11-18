@@ -6,7 +6,7 @@
     "quiet": { "name": ["Harl Dunmere", "Brand Ostrey", "Wace Tolliver"], "body": "fighter", "at": "minehead", "health": 60, "damage": 6, "armor": 6, "hand": "minecraft:iron_pickaxe" },
     "hurt": { "name": ["Osric Lunt", "Ebb Carrow", "Dag Fennimore"], "body": "villager", "job": "toolsmith", "at": "minehead" },
     "healer": { "name": ["Wenna Ashby", "Jude Marlow", "Sabra Kell"], "body": "villager", "job": "cleric", "female": true, "at": "minehead" },
-    "hunter": { "name": ["Ralf Stannard", "Gerent Voss", "Mather Crane"], "body": "fighter", "at": "ford", "health": 80, "damage": 8, "armor": 10, "hand": "minecraft:iron_sword", "chest": "minecraft:iron_chestplate", "men": 2 }
+    "hunter": { "name": ["Ralf Stannard", "Gerent Voss", "Mather Crane"], "body": "fighter", "at": "ford", "health": 80, "damage": 8, "armor": 10, "hand": "minecraft:iron_sword", "chest": "minecraft:iron_chestplate", "men": 2, "female": false }
   },
   "places": {
     "mine": { "at": "wild", "from": "home", "dist": [150, 300], "name": "the Number Two heading" },
@@ -384,7 +384,7 @@
         "So I'm dead under the Number Two, by the word of the one who came for me. I can be a dead man here, shifting spoil. Or I can be a dead man on the road behind you, and of some use. Say which."
       ],
       "replies": [
-        { "say": "On the road. Fetch your pick.", "then": "end:joined", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} asked to walk with me, and I said yes.", "returns": { "who": "hunter", "days": [8, 14], "as": "warning", "say": "Easy. I'm not here for him. I said the hill took him, and I'll go on saying it, for my own sake now. But I've seen a pick-man walking behind you on the north road, and I'm not the only one who keeps a list. The next one won't stop to talk at a ford." } },
+        { "say": "On the road. Fetch your pick.", "then": "end:joined", "mark": "cavein_hunter_walked", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} asked to walk with me, and I said yes.", "returns": { "who": "hunter", "days": [8, 14], "as": "warning", "say": "Easy. I'm not here for him. I said the hill took him, and I'll go on saying it, for my own sake now. But I've seen a pick-man walking behind you on the north road, and I'm not the only one who keeps a list. The next one won't stop to talk at a ford." } },
         { "say": "Stay dead here. It suits you.", "then": "end:stayed_spared", "journal": "I beat {hunter} and let him go, on his word to say the hill took {quiet}. {quiet} stays at the mine, a dead man on the tally." }
       ]
     },
@@ -450,7 +450,10 @@
       "reward": { "coins": 14, "hearts": 10, "reputation": 10 },
       "marks": ["cavein_quiet_joined"],
       "town": ["That quiet one from the Number Two has gone off with the stranger who blew the fall. Left his last week's wages for the boy.", "{hurt} says the hill's lost its best back. Then he says good riddance, and then he asks if there's been word."],
-      "joins": "quiet"
+      "joins": "quiet",
+      "later": [
+        { "days": [20, 30], "if": "mark:cavein_hunter_walked", "settles": "hunter", "as": "guard", "town": ["That thief-taker who came up the mine road has taken a guard's coat here. Says he's done with bills. Says the hill took the only man he ever came for, and he means to keep it that way."] }
+      ]
     },
     "stayed_slain": {
       "text": "{hunter} is dead at the ford and {quiet} is back at the face. He watches the mine road when he thinks nobody sees.",

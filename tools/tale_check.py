@@ -39,6 +39,8 @@ STEP_FIELDS = {
     "rescue": {"who", "at", "kin", "stars", "failed"},
     "capture": {"who", "at", "crime", "stars", "failed", "let_go"},
 }
+# (step kinds whose work is done by other code, which doesn't read the step's hour)
+UNGATED = {"slay", "wait", "await", "defend", "pack", "build", "blast", "stash", "lamps", "rescue", "capture"}
 COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden", "within", "late", "until", "clock", "when", "candle"}
 # (docs/StoryQuests-Plan.md, section 7) when a step can be done, how a try is made, how someone is dressed
 WHENS = {"night", "day", "moon:full", "moon:new"}
@@ -498,6 +500,8 @@ def check_tale(path):
         if do not in STEP_FIELDS:
             c.err(where, f"'do' must be one of {sorted(STEP_FIELDS)}")
             continue
+        if "when" in step and do in UNGATED:
+            c.err(where, f"a '{do}' step doesn't wait for its hour: put the 'when' on a 'go' before it")
         unknown = set(step) - COMMON - STEP_FIELDS[do]
         if unknown:
             c.err(where, f"unknown fields {sorted(unknown)} for '{do}'")
