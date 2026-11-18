@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -11,6 +11,7 @@ suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigDive.java (new)
   - changes/powers/<branch>.md
 writer: hermes-writer
+text_pass: done
 ---
 # Rig patch 4: flight and falling
 
