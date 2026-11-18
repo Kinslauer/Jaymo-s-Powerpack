@@ -72,6 +72,8 @@ public final class Paladins {
 	/** A new Paladin takes the oath they picked (and the symbol's making is a priest's to teach). */
 	static void begin(ServerPlayer player, String oath) {
 		player.removeAttached(BROKEN);
+		// (the written oath) the book it's kept in
+		VowBook.give(player);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.sworn", Component.translatable("option.jaymoskingdoms.oath." + oath)));
 	}
 
@@ -79,6 +81,7 @@ public final class Paladins {
 	static void unmake(ServerPlayer player) {
 		player.removeAttached(BROKEN);
 		READY.remove(player.getUUID());
+		VowBook.unmake(player);
 	}
 
 	/** Whether {@code player} is a Paladin whose oath holds. */

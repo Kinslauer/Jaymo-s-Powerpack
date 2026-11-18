@@ -120,7 +120,7 @@ public final class Will {
 	static final String AIRLESS_TAG = "jaymospowers_airless", CHOKED_TAG = "jaymospowers_choked";
 	/** The tag on whoever is shut inside a Jaymo's Powers Rift Seal: no power reaches in there. */
 	static final String SEALED_TAG = "jaymospowers_sealed";
-	/** The tag on whoever a Jaymo's Powers Lawgiver's rule says has no powers. */
+	/** The tag on whoever a rule in a Paladin's oath or a Warlock's pact ({@link VowBook}) says has no powers. */
 	static final String RULED_TAG = "jaymospowers_ruled_mute";
 	/** Snap the Thread: the odds a thrall falls apart under a full-strength blow, and how long a necromancer's thralls reel (ticks). */
 	static final float SNAP_CHANCE = 0.35F;

@@ -289,6 +289,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		VillagerHunters.register();
 		// (ahead of Theft: a refused chest or fire never reaches its record of what was opened)
 		Vows.register();
+		// (the Awakening's rule writer, as Andy meant it) Paladin oaths and Warlock pacts written in a book of vows
+		VowBook.register();
 		Theft.register();
 		ForestRangers.register();
 		Retaliation.register();
