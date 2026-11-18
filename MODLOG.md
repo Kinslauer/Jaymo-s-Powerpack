@@ -5885,3 +5885,7 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
 ## 0.24.82 (2026-11-18): Daylight under the Aether again (#1732)
 
 - Fixes: the Overworld stayed dark by day wherever the Aether lies overhead. ScalableLux is out of the pack (and removed from the CurseForge profile): it replaced the light engine that gives each stacked layer its own sky. Ground lit while it was in stays dark until the world is relit or started anew.
+
+## 0.25.0 (2026-11-18): Jaymo's Powers 0.25 (#1737)
+
+- A new minor version at Andy's call (2026-11-18): the 0.25 line starts with daylight back under the Aether, rescues only into real villages, kingdoms and fiefs, and metal and tinkered rods casting again.
