@@ -1725,7 +1725,7 @@ public final class Tales {
 				}
 				int index = n;
 				choices.add(Menus.Choice.of(label, can, p -> {
-					if (open(p, run, at)) {
+					if (open(p, run, at) && (!good(reply) || Vows.allows(p, "good", false))) {
 						reply(p, run, step, reply, who, index);
 					}
 				}));
@@ -1805,6 +1805,12 @@ public final class Tales {
 		}
 		int coins = Tale.number(reply, "needs_coins", 0);
 		return coins <= 0 || Money.canPay(player, faction(player, run), Money.worth(coins));
+	}
+
+	/** A good choice, which the Ash Whisperer's pact forbids ({@link Vows}): a reply that goes against gain or vengeance. */
+	private static boolean good(JsonObject reply) {
+		List<String> against = Tale.strings(reply.get("against"));
+		return against.contains(Convictions.Belief.GAIN.key) || against.contains(Convictions.Belief.VENGEANCE.key);
 	}
 
 	private static void reply(ServerPlayer player, Run run, JsonObject step, JsonObject reply, LivingEntity who, int index) {
@@ -1918,7 +1924,8 @@ public final class Tales {
 		MutableComponent mercy = words(player, run, step, "mercy");
 		List<Menus.Choice> choices = new ArrayList<>();
 		choices.add(Menus.Choice.of(mercy != null ? mercy : Component.translatable("tale.jaymoskingdoms.mercy"), p -> {
-			if (open(p, run, at)) {
+			// (mercy is a good choice: the Ash Whisperer's pact forbids it, Vows)
+			if (open(p, run, at) && Vows.allows(p, "good", false)) {
 				foeDone(p, run, who, false);
 			}
 		}));

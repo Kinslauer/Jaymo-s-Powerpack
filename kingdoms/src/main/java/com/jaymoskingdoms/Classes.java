@@ -284,6 +284,7 @@ public final class Classes {
 			Druids.clear();
 			Monks.clear();
 			Paladins.clear();
+			Vows.clear();
 			Rangers.clear();
 			Tinkerers.clear();
 			ClassTeachers.clear();
@@ -525,6 +526,16 @@ public final class Classes {
 			default -> {
 			}
 		}
+	}
+
+	/** {@code player}'s class becomes {@code cls}: what the old one gave goes (its oath, pact, shapes and paths), the second class and feats stay. */
+	static void replace(ServerPlayer player, PlayerClass cls, String option) {
+		Druids.unmake(player);
+		Paladins.unmake(player);
+		Warlocks.unmake(player);
+		Paths.unmake(player);
+		player.removeAttached(CLASS);
+		set(player, cls, option);
 	}
 
 	/**

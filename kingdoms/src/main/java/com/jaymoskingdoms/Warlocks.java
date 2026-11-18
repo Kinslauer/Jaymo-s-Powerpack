@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
  * <i>favour</i> (spent with the class key), an <i>errand</i> (prayer at their shrine), <i>blood</i> ({@link #BLOOD} health, with the
  * key), or <i>coin</i> ({@link #COIN_SILVER} silver, with the key). While a debt is open the slots are withheld after
  * {@link #GRACE_CASTS} more casts; if it falls overdue, the patron collects: favour lost, the slots spent, a curse on the body.</li>
+ * <li><b>The terms:</b> each patron forbids a few acts, and the pact binds: they're refused, and done again on purpose the
+ * patron collects at once ({@link Vows#PACTS}).</li>
  * </ul>
  */
 public final class Warlocks {
@@ -309,8 +311,8 @@ public final class Warlocks {
 		}
 	}
 
-	/** The patron collects: favour lost, the slots spent, a curse on the body. */
-	private static void collect(ServerPlayer player) {
+	/** The patron collects: favour lost, the slots spent, a curse on the body (also when a pact's term is broken on purpose, {@link Vows}). */
+	static void collect(ServerPlayer player) {
 		player.setAttached(PACT, Pact.NONE);
 		Patrons.lose(player, COLLECT_FAVOUR);
 		Rests.spend(player, Rests.PACT, slots(player), slots(player));

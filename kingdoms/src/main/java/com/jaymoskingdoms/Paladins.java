@@ -31,9 +31,11 @@ import net.minecraft.world.item.ItemStack;
  * <li><b>Lay on hands:</b> the key heals who you look at (or yourself) from a pool of {@link #HANDS_POOL} health a day.</li>
  * <li><b>Aura:</b> the Paladin and friends near them ({@link #AURA_RANGE}) save better ({@link #AURA_SAVE}, {@link Saves}) and the
  * Paladin is not afraid ({@link #fearless}).</li>
- * <li><b>Oath:</b> each oath has acts that break it. Mercy: killing the helpless (the held, the fleeing, the downed, folk and pets).
- * Justice: any crime ({@link Theft}). Honour: an unprovoked blow, or a theft or pickpocket. Broken, the oath takes smite, hands and aura
- * away until atoned for, by prayer at any shrine or by a priest's rite ({@link ClassTeachers}).</li>
+ * <li><b>Oath:</b> each oath forbids acts. Mercy: killing the helpless (the held, the fleeing, the downed, folk and pets).
+ * Justice: any crime ({@link Theft}). Honour: an unprovoked blow, or a theft or pickpocket. The oath binds: a forbidden act
+ * is refused, and only done again on purpose does it break the oath ({@link Vows}); a crime the refusal can't stop before
+ * the act still breaks it ({@link #crime}). Broken, the oath takes smite, hands and aura away until atoned for, by prayer
+ * at any shrine or by a priest's rite ({@link ClassTeachers}).</li>
  * </ul>
  */
 public final class Paladins {
@@ -158,7 +160,6 @@ public final class Paladins {
 
 	/** A Paladin's blow lands on {@code target}: a readied smite spends itself on it. Called from the class perks. */
 	static float struck(ServerPlayer player, LivingEntity target, ItemStack held, float amount) {
-		honourCheck(player, target);
 		if (!keeping(player)) {
 			return amount;
 		}
@@ -245,21 +246,21 @@ public final class Paladins {
 		}
 	}
 
-	/** Honour: a blow on something that has not noticed you and is no monster is no fair fight. */
-	private static void honourCheck(ServerPlayer player, LivingEntity target) {
-		if (keeping(player) && oath(player).equals("honour") && target instanceof Mob mob && !(mob instanceof Enemy) && mob.getTarget() != player
-			&& !(mob instanceof net.minecraft.world.entity.NeutralMob)) {
-			breakOath(player, "unprovoked");
-		}
+	/** Honour: a blow on something that has not noticed you and is no monster is no fair fight (refused, {@link Vows}). */
+	static boolean unprovoked(ServerPlayer player, LivingEntity target) {
+		return target instanceof Mob mob && !(mob instanceof Enemy) && mob.getTarget() != player && !(mob instanceof net.minecraft.world.entity.NeutralMob);
 	}
 
-	private static void died(LivingEntity victim, DamageSource source) {
-		if (!(source.getEntity() instanceof ServerPlayer player) || !keeping(player) || !oath(player).equals("mercy")) {
-			return;
-		}
+	/** Mercy: {@code victim} is helpless (folk and pets, the frightened, the held, the downed; a monster only frightened or held). */
+	static boolean helpless(ServerPlayer player, LivingEntity victim) {
 		boolean helpless = victim instanceof AbstractVillager || victim instanceof net.minecraft.world.entity.TamableAnimal || Fear.frightened(victim)
 			|| HeldFast.held(victim) || Downed.isDowned(victim);
-		if (helpless && !(victim instanceof Enemy && !Fear.frightened(victim) && !HeldFast.held(victim)) && victim != player) {
+		return helpless && !(victim instanceof Enemy && !Fear.frightened(victim) && !HeldFast.held(victim)) && victim != player;
+	}
+
+	/** A killing blow on the helpless the refusal didn't see (one that came round it): the oath breaks, as before. */
+	private static void died(LivingEntity victim, DamageSource source) {
+		if (source.getEntity() instanceof ServerPlayer player && keeping(player) && oath(player).equals("mercy") && helpless(player, victim)) {
 			breakOath(player, "helpless");
 		}
 	}

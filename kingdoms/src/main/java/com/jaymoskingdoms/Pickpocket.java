@@ -202,6 +202,10 @@ public final class Pickpocket {
 				// (Andy's skill-tree locks) picking a pocket is learned: Light Fingers (a Thief knows how)
 				return InteractionResult.PASS;
 			}
+			if (!Vows.allows(sp, "pickpocket")) {
+				// (an oath or a pact that forbids it)
+				return InteractionResult.SUCCESS;
+			}
 			start(sp, level, mark, now);
 			return InteractionResult.SUCCESS;
 		});

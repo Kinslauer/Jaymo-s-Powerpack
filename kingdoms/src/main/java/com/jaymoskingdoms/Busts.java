@@ -248,6 +248,10 @@ public final class Busts {
 			return false;
 		}
 		YIELDING.remove(player.getUUID());
+		if (!Vows.allows(player, "yield")) {
+			// (a pact that forbids it, the Ash Whisperer's: refused; yielded again straight after, it's broken)
+			return false;
+		}
 		sentence(level, player, f, crime, guard, true);
 		return true;
 	}

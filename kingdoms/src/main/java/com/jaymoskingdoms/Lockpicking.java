@@ -228,6 +228,10 @@ public final class Lockpicking {
 			return InteractionResult.PASS;
 		}
 		server.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
+		if (!Vows.allows(sp, "lockpick")) {
+			// (an oath or a pact that forbids it)
+			return InteractionResult.FAIL;
+		}
 		if (!TreeLocks.check(sp, TreeLocks.Lock.LOCKPICK)) {
 			// (Andy's skill-tree locks) picking a lock is learned: Lockpicking Prowess (a Thief knows how)
 			return InteractionResult.FAIL;
@@ -336,6 +340,10 @@ public final class Lockpicking {
 		if (!TreeLocks.check(sp, TreeLocks.Lock.LOCKPICK)) {
 			// (Andy's skill-tree locks: doors, cells and shackles too) not learned: told so, and nothing opens. True, so the
 			// caller doesn't add its own "no lockpick" line over the one naming the perk
+			return true;
+		}
+		if (!Vows.allows(sp, "lockpick")) {
+			// (an oath or a pact that forbids it: told so, as above)
 			return true;
 		}
 		int picks = sp.getInventory().countItem(LOCKPICK);
