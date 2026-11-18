@@ -757,3 +757,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy): Hermes bots stop every time he plays: dispatch_bots.py fires no builder or Prometheus while the Minecraft client runs, and stops running Gradle builds; Quill may go on.
 - 2026-11-18 (Andy): "Tacz should not be mentioned anywhere in jei or creative": no TaCZ items, tabs or JEI pages shown (PR 1757); its guns stay in the game for the future's gunners.
 - 2026-11-18 (Andy): villager bearings: CURED_BLIGHT +20 trust, +15 respect, +10 warmth; SAW_TURNED -10 trust, 0 respect, -15 warmth. Andy will voice-act the 38 missing narrator lines himself (separate thread).
+- 2026-11-18: Lanterns 8 (dream call): a dream arena built in place where you sleep (dark fog, world hidden), not a new dimension. (Andy, PC session)
