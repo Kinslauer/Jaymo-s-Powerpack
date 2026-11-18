@@ -12,6 +12,7 @@ suggested_owns:
 # Labyrinths: rune doors, finder, beetles, braziers, the Afterblow
 
 **Andy's words (2026-11-17 8:24 PM ET):** "done, send it to the vault for apollo" (after ticking the pick list).
+Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 **Andy's picks (6 Asterion rows):**
 - **A bronze mechanism that finds the labyrinth** (as_compass): geared compass pointing at the nearest of our labyrinths; built (forged) from plates found in the Deep Mother's drowned colonnades.

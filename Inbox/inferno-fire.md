@@ -13,6 +13,7 @@ suggested_owns:
 # Inferno: ship it, plus a torch rule
 
 **Andy's words (2026-11-17 8:24 PM ET):** "done, send it to the vault for apollo" (after ticking the pick list).
+Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 **Andy's picks:** Inferno as it is (in_ship, his note: "can we just ship the heavy fire smog effect?"), Charcoal trunks (in_charred, note: "they should"), Smoke that grows with the fire, Burning things spread fire, Strike with a torch, Soul fire bites deeper, Metals burn their own colour, Fire lower on your screen. Not picked: burnt ground that heals, fire flowers, the ore oak.
 
