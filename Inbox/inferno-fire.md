@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
-claimed_by: 
-pr: 
+claimed_by: pc-claude
+pr: 1716
 suggested_owns:
   - build.gradle (packMods lines)
   - default config for Inferno
@@ -33,3 +33,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 ## Notes
 - 2026-11-17 8:28 PM ET: Andy approved all four lore paragraphs; they are canon now.
+- 2026-11-17 21:02 pc-claude's claim had no sign of work for 30 min: handed back as open.

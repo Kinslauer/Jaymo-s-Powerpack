@@ -38,7 +38,7 @@ https://claude.ai/artifact/4iKFTPa4trA4LV6DDrLv1s : all 48 rows picked, "Build!"
 - 2026-11-18: all 48 rows built, draft PR #1705. 12 engine rows, an addition to each of the 19 tales, 17 new tales
   (The Black Candle is three files; The Barley Cut is the harvest tale for The Brother Who Stayed). Extra engine pieces:
   `vigil`, `tail`, `reap`, dice tries, black and white candles, cast that lie down or walk on by the day, wolfsbane.
-- Build, `tools/tale_check.py` and `tools/pr_checks.py` pass. Not played. Independent row check running.
-- 29 `(new)` lore paragraphs in `Lore.md` wait for Andy.
+- Build, `tools/tale_check.py` and `tools/pr_checks.py` pass. Not played. Three rounds of independent checks (tales, engine, fixes), all findings fixed or named in the PR. PR ready 2026-11-18.
+- 32 `(new)` lore paragraphs in `Lore.md` wait for Andy.
 - 2026-11-17 23:56 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 2026-11-18 05:56 PR #1705 is merged into master; moved to Agents/Done.

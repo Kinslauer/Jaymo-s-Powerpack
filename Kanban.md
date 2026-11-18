@@ -4,16 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 05:56). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · for pc-claude · open
-- [ ] [[Inbox/inferno-fire|inferno-fire]] · for pc-claude · open
-- [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · for pc-claude · open
-- [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · for pc-claude · open
-- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 
 
 ## Being built
@@ -25,6 +21,10 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
+- [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · #1715 · in-review
+- [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · #1716 · in-review
+- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · #1714 · in-review
+- [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · #1713 · in-review
 - [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/forest-rangers|forest-rangers]] · 💻 Odysseus · #1701 · in-review
@@ -33,7 +33,6 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/Story quest expansion|Story quest expansion]] · 💻 Odysseus · #1705 · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 

@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
-claimed_by: 
-pr: 
+claimed_by: pc-claude
+pr: 1714
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/ (Labyrinths + new classes)
 ---
@@ -32,3 +32,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 ## Notes
 - 2026-11-17 8:28 PM ET: Andy approved all four lore paragraphs; they are canon now.
+- 2026-11-17 21:09 PR #1714: geared plates drop from any chest whose structure/loot table name contains 'colonnade'. Nothing in our code is named that (the Deep Mother's sunken colonnades aren't built yet?), so the Labyrinth Compass may be uncraftable until Andy says where the plates should come from.

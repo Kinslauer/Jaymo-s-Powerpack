@@ -2048,6 +2048,8 @@ is on the wall.
 
 **Fishing the fire** (Andy approved, 2026-11-17; Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
 
+(new) **What the water keeps.** Rivers, seas, swamps and the demons' lava lakes all take things from people, and a line that finds one of their old crates brings it up wet: bait and lures from a river's anglers, nuggets and shells from the sea, swamp muck, and in the lava lakes whatever the fire could not eat. In the dark pools under the hills the olm and the pale blind cavefish live as they always have, slowly, on very little, and the Anvil-Father's miners left them be (placement for the Tide picks; Claude, 2026-11-17).
+
 **The labyrinth-builders' craft** (Andy approved, 2026-11-17; Claude's placement for the Asterion picks, 2026-11-18). The forgotten hands that raised the labyrinths worked bronze and fire. Their inner gates open only to tablets cut in the old tongue, scattered through the halls, and some of the braziers that light those halls are not braziers at all. Their prize was a blade that strikes twice. The sea took the plates of one of their geared instruments into the Deep Mother's drowned colonnades, and whoever builds it from them finds it always turns toward the nearest labyrinth. In the warm lands the beetles that spit boiling spray live in colonies round a queen, and the old builders kept them.
 
 ## Rules for writing against this

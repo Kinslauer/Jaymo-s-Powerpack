@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
-claimed_by: 
-pr: 
+claimed_by: pc-claude
+pr: 1713
 suggested_owns:
   - src/main/java/com/jaymospowers/combat/
   - src/main/java/com/jaymospowers/armory/ArmoryHits.java
@@ -34,3 +34,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 
 ## Notes
 - 2026-11-17 8:28 PM ET: Andy approved all four lore paragraphs; they are canon now.
+- 2026-11-17 20:44 Question for Andy: do you want Knight Armor's recipe changed by a datapack that swaps its grid recipes for Tinkers forging (it has a 26.3 Fabric build, 1.1.1, but is all rights reserved and its armour still doubles our knight's harness)? Not added, waiting on you.
