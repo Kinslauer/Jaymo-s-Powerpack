@@ -5,7 +5,7 @@ from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
 claimed_by: lanterns-07-talk-chat
-pr: 
+pr: 1767
 size: M
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/ChatTalk.java (new)
