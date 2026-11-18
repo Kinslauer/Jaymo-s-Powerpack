@@ -1,11 +1,15 @@
 package com.jaymoskingdoms;
 
+import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -15,6 +19,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -23,6 +28,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -38,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * Structures: Villages redraws into its towns; nothing of theirs is copied) is generated there the way
  * {@code /place structure} does, entered in its chunks as world generation would (so everything that reads villages
  * finds it), and the kingdom rises in it as in any town ({@link KingdomEvents#foundIn}). A town that would stand mostly
- * on water, or won't generate, is passed over for the castle as before ({@link GrandSeats}).
+ * on water, or won't generate, is passed over, and the nearest town world generation made further out is looked for instead ({@link #foundFar}): never a lone castle.
  */
 public final class EpicTowns {
 	/** A town with more than this share of its pieces over water is passed over (a shore seat's half in the sea). */
@@ -55,6 +61,29 @@ public final class EpicTowns {
 	static final int GROUND_LOOKS = 3;
 	/** The most time (ms) the search may take on the server thread: each try lays a whole town out and has its rivers checked. */
 	static final long SEARCH_MS = 2000;
+	/**
+	 * Only an Epic town is crowned (Andy, 2026-11-18): where none can be raised at the spot, the nearest one world
+	 * generation starts is looked for further out, {@link #FAR_RINGS} village spacings round it (a spacing is 34 chunks),
+	 * worked out without making a chunk ({@link Scout}).
+	 */
+	static final int FAR_RINGS = 6;
+	/** A far town's land is made in the background, up to this many chunks round its start, for at most this long (ticks) before it is passed over. */
+	static final int FAR_LAND = 10, FAR_WAIT_TICKS = 1200;
+	/** Keeps a far town's chunks loaded (made, not run) while it waits; lapses on its own if the search is dropped. */
+	private static final TicketType FAR = new TicketType(300L, TicketType.FLAG_LOADING);
+	/** The start chunks (packed) found to hold no town, or no use, so not looked at again; and the spots a town was already tried to be raised at. */
+	private static final Set<Long> PASSED = new HashSet<>(), RAISE_FAILED = new HashSet<>();
+	/** The far town being waited on: where, which, and when it was chosen (null: none). */
+	private static @Nullable Far far;
+
+	private record Far(ChunkPos chunk, long since) {
+	}
+
+	/** How often (ticks) and how long (ticks) a background {@link #seek} tries. */
+	static final int SEEK_EVERY = 20, SEEK_TICKS = 12000;
+	/** Where a kingdom is being sought for a castle town with none to swear to, and until when (game time); null: nowhere. */
+	private static @Nullable BlockPos seeking;
+	private static long seekUntil;
 
 	/** The five towns' ids (vanilla's villages, which Epic Structures redraws). */
 	static final List<String> TOWNS = List.of("minecraft:village_plains", "minecraft:village_desert", "minecraft:village_savanna",
@@ -81,7 +110,14 @@ public final class EpicTowns {
 
 	static void register() {
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> widen(server.registryAccess()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> lands = Map.of());
+		ServerTickEvents.END_SERVER_TICK.register(EpicTowns::seekTick);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			lands = Map.of();
+			seeking = null;
+			far = null;
+			PASSED.clear();
+			RAISE_FAILED.clear();
+		});
 	}
 
 	/** The land {@code structure} may stand on, if it is an Epic town; null for any other structure. */
@@ -127,6 +163,28 @@ public final class EpicTowns {
 		return true;
 	}
 
+	/**
+	 * A castle town with no kingdom near to swear to (a seat compound, an Epic town with no building fit for a king): a
+	 * kingdom is looked for in the nearest Epic town further out, in the background, until one is founded or none is left.
+	 */
+	static void seek(ServerLevel level, BlockPos from) {
+		if (seeking == null) {
+			seeking = from;
+			seekUntil = level.getGameTime() + SEEK_TICKS;
+		}
+	}
+
+	private static void seekTick(net.minecraft.server.MinecraftServer server) {
+		BlockPos from = seeking;
+		if (from == null || server.getTickCount() % SEEK_EVERY != 0) {
+			return;
+		}
+		ServerLevel level = Factions.level(server);
+		if (level.getGameTime() > seekUntil || foundFar(level, from) != null || !farLeft(level, from)) {
+			seeking = null;
+		}
+	}
+
 	/** The village id for {@code land}: vanilla's five, which Epic Structures redraws. */
 	static String villageFor(Palette land) {
 		if (land == Palette.DESERT || land == Palette.BADLANDS) {
@@ -152,6 +210,10 @@ public final class EpicTowns {
 			return null;
 		}
 		ChunkPos centre = ChunkPos.containing(at);
+		// (a spot already tried is not laid out again: a job waiting on a kingdom asks each second)
+		if (RAISE_FAILED.contains(centre.pack())) {
+			return null;
+		}
 		List<ChunkPos> around = new ArrayList<>();
 		for (int dx = -START_SEARCH; dx <= START_SEARCH; dx++) {
 			for (int dz = -START_SEARCH; dz <= START_SEARCH; dz++) {
@@ -183,17 +245,116 @@ public final class EpicTowns {
 		}
 		if (start == null) {
 			JaymosKingdoms.LOGGER.info("No {} would generate by {} ({} spots in water)", id, at, looks);
+			RAISE_FAILED.add(centre.pack());
 			return null;
 		}
+		RAISE_FAILED.add(centre.pack());
 		place(level, holder.get().value(), start, origin);
+		return crown(level, start, id);
+	}
+
+	/** A new kingdom in {@code start}, a town made in its chunks, round its bell; null if no building there will do. */
+	private static @Nullable Faction crown(ServerLevel level, StructureStart start, String id) {
 		BoundingBox box = start.getBoundingBox();
 		BlockPos middle = box.getCenter();
 		PoiManager poi = level.getPoiManager();
 		poi.ensureLoadedAndValid(level, middle, BELL_SEARCH);
 		Optional<BlockPos> bell = poi.findClosest(h -> h.is(PoiTypes.MEETING), middle, BELL_SEARCH, PoiManager.Occupancy.ANY);
 		BlockPos seat = bell.orElse(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle));
-		JaymosKingdoms.LOGGER.info("Raised a {} at {} ({} by {}) for a new kingdom", id, seat, box.getXSpan(), box.getZSpan());
+		JaymosKingdoms.LOGGER.info("Raising a kingdom in the {} at {} ({} by {})", id, seat, box.getXSpan(), box.getZSpan());
 		return KingdomEvents.foundIn(level, seat, start);
+	}
+
+	/** The Epic towns' structures. */
+	private static HolderSet<Structure> towns(ServerLevel level) {
+		Registry<Structure> structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+		List<Holder<Structure>> out = new ArrayList<>();
+		for (String id : TOWNS) {
+			structures.get(Identifier.parse(id)).ifPresent(out::add);
+		}
+		return HolderSet.direct(out);
+	}
+
+	/** The nearest Epic town's start world generation makes beyond the ones passed over, within {@link #FAR_RINGS} spacings of {@code from}. */
+	private static @Nullable Pair<BlockPos, Holder<Structure>> nextFar(ServerLevel level, BlockPos from) {
+		return Scout.find(level, towns(level), from, FAR_RINGS, chunk -> PASSED.contains(chunk.pack()));
+	}
+
+	/** Whether a far town is being waited on or another is still to look at ({@link #foundFar}). */
+	static boolean farLeft(ServerLevel level, BlockPos from) {
+		return far != null || nextFar(level, from) != null;
+	}
+
+	/**
+	 * A new kingdom in the nearest Epic town that is not too near another faction, further out than the spot asked for: the
+	 * town world generation made there (never one laid over it). Its land is made in the background, a try at a time
+	 * ({@link #FAR_LAND}), so this never holds the server: null (try again later) until it stands ready, and then also
+	 * null if it holds no building fit for a king, when the next is looked at. {@link #farLeft} says if any is left.
+	 */
+	static @Nullable Faction foundFar(ServerLevel level, BlockPos from) {
+		long now = level.getGameTime();
+		if (far == null) {
+			Pair<BlockPos, Holder<Structure>> next = nextFar(level, from);
+			if (next == null) {
+				JaymosKingdoms.LOGGER.info("No Epic town left to look at within {} spacings of {}", FAR_RINGS, from);
+				return null;
+			}
+			far = new Far(ChunkPos.containing(next.getFirst()), now);
+			JaymosKingdoms.LOGGER.info("Looking for a kingdom in the Epic town at {} (from {})", next.getFirst(), from);
+		}
+		Far looking = far;
+		if (now - looking.since() > FAR_WAIT_TICKS) {
+			return pass(looking, "its land was not made in time");
+		}
+		level.getChunkSource().addTicketWithRadius(FAR, looking.chunk(), FAR_LAND);
+		LevelChunk chunk = level.getChunkSource().getChunkNow(looking.chunk().x(), looking.chunk().z());
+		if (chunk == null) {
+			return null;
+		}
+		HolderSet<Structure> towns = towns(level);
+		StructureStart start = null;
+		String id = "";
+		for (Holder<Structure> town : towns) {
+			StructureStart there = level.structureManager().getStartForStructure(town.value(), chunk);
+			if (there != null && there.isValid()) {
+				start = there;
+				id = town.unwrapKey().map(k -> k.identifier().toString()).orElse("");
+				break;
+			}
+		}
+		if (start == null) {
+			return pass(looking, "no town started there");
+		}
+		BoundingBox box = start.getBoundingBox();
+		BlockPos middle = box.getCenter();
+		if (Factions.realmNear(level.getServer(), middle, KingdomEvents.CAPITAL_SPACING) != null) {
+			return pass(looking, "too near another kingdom's capital");
+		}
+		if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+			return null;
+		}
+		if (Factions.near(level.getServer(), middle, KingdomEvents.TOWN_RADIUS) != null) {
+			return pass(looking, "another faction holds it");
+		}
+		Faction kingdom = crown(level, start, id);
+		return kingdom != null ? done(kingdom) : pass(looking, "no building in it is fit for a king");
+	}
+
+	/** The far town being waited on is founded in: the search is over. */
+	private static Faction done(Faction kingdom) {
+		if (far != null) {
+			PASSED.add(far.chunk().pack());
+		}
+		far = null;
+		return kingdom;
+	}
+
+	/** The far town is given up on, for {@code why}; the next is looked at on the next try. */
+	private static @Nullable Faction pass(Far looking, String why) {
+		JaymosKingdoms.LOGGER.info("The Epic town at chunk {} is passed over: {}", looking.chunk(), why);
+		PASSED.add(looking.chunk().pack());
+		far = null;
+		return null;
 	}
 
 	/** Whether more than {@link #WET_MOST} of its pieces stand over water. */

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -61,12 +62,19 @@ public final class Scout {
 
 	/** {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} with which structure it is, as findNearestMapStructure gives. */
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
-		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
-		// have no placements at all and read the clouds as ground, so nothing was ever found)
-		return Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings));
+		return find(level, wanted, from, rings, chunk -> false);
 	}
 
-	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
+	/** {@link #find(ServerLevel, HolderSet, BlockPos, int)} leaving out the start chunks {@code skip} is true of. */
+	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings,
+		Predicate<ChunkPos> skip) {
+		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
+		// have no placements at all and read the clouds as ground, so nothing was ever found)
+		return Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings, skip));
+	}
+
+	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings,
+		Predicate<ChunkPos> skip) {
 		StructureManager structures = level.structureManager();
 		if (!structures.shouldGenerateStructures()) {
 			return null;
@@ -103,6 +111,9 @@ public final class Scout {
 		ChunkGenerator generator = ground.generator();
 		RandomState random = ground.randomState();
 		for (Spot spot : spots) {
+			if (skip.test(spot.chunk())) {
+				continue;
+			}
 			int x = spot.chunk().getMinBlockX() + 8, z = spot.chunk().getMinBlockZ() + 8;
 			Holder<Biome> biome = null;
 			for (Holder<Structure> structure : spot.structures()) {
