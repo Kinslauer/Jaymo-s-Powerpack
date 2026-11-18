@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:golden_helmet",
+      "required": false
+    },
+    {
+      "id": "minecraft:golden_chestplate",
+      "required": false
+    },
+    {
+      "id": "minecraft:golden_leggings",
+      "required": false
+    },
+    {
+      "id": "minecraft:golden_boots",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:royal_crown",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:jeweled_crown",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:laurel_crown",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:circlet",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cloak",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,1288 @@
+{
+  "title": "The Feast-Day Sermon",
+  "start": {
+    "by": "notice",
+    "jobs": [
+      "none",
+      "nitwit",
+      "farmer",
+      "butcher",
+      "shepherd",
+      "mason",
+      "toolsmith",
+      "fisherman"
+    ],
+    "weight": 2,
+    "notice": {
+      "title": "Wanted before the bread goes stale",
+      "lines": [
+        "Wanted at once: one sober body with a loud voice.",
+        "Ask the one who nailed this. Do not ask the priest.",
+        "There will be dinner."
+      ],
+      "hand": "a hurried hand, with a blot where the pen was dropped"
+    }
+  },
+  "roll": {
+    "lost": [
+      "pages",
+      "spectacles",
+      "key"
+    ]
+  },
+  "cast": {
+    "priest": {
+      "name": [
+        "Father Osbert Pye",
+        "Father Wilmot Pye",
+        "Father Godric Pye"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "vestry"
+    },
+    "widow": {
+      "name": [
+        "Winifred Mott",
+        "Hilda Mott",
+        "Sibley Mott"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "benches"
+    },
+    "baker": {
+      "name": [
+        "Dob Tulley",
+        "Ralf Tulley",
+        "Harry Tulley"
+      ],
+      "body": "villager",
+      "job": "butcher",
+      "female": false,
+      "at": "benches"
+    },
+    "tanner": {
+      "name": [
+        "Jude Hewlin",
+        "Amos Hewlin",
+        "Noll Hewlin"
+      ],
+      "body": "villager",
+      "job": "leatherworker",
+      "female": false,
+      "at": "benches"
+    },
+    "lad": {
+      "name": [
+        "Kit Tulley",
+        "Pip Tulley",
+        "Wat Tulley"
+      ],
+      "body": "villager",
+      "job": "nitwit",
+      "female": false,
+      "at": "benches"
+    }
+  },
+  "places": {
+    "vestry": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        18,
+        40
+      ],
+      "name": "the vestry step"
+    },
+    "tavern": {
+      "at": "tavern",
+      "name": "the tavern"
+    },
+    "benches": {
+      "at": "home",
+      "name": "the feast tables"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "feast": 0
+      },
+      "say": {
+        "?lost=pages": [
+          "You took it down. Good. Keep your voice low. It is the Hearthkeeper's feast. The tables are laid, the bread is out, and by old custom nobody breaks a loaf until the sermon is said over it.",
+          "The sermon is {priest}'s to give. {priest} is flat on the vestry step with last night's cask still in him, weeping about some pages. The whole street drank the Feast-Eve cup with him and nobody thought to count his.",
+          "So there they sit, looking at the bread. The feast is today and only today. Somebody has to stand up and say the words before the day is out, or the bread goes stale on the board and we're a laughing stock from here to the river."
+        ],
+        "?lost=spectacles": [
+          "You took it down. Good. Keep your voice low. It is the Hearthkeeper's feast. The tables are laid, the bread is out, and by old custom nobody breaks a loaf until the sermon is said over it.",
+          "The sermon is {priest}'s to give. {priest} is flat on the vestry step with last night's cask still in him, and he called me 'Your Majesty' when I shook him. He has lost his eye-glasses and can't tell a bench from a cow.",
+          "So there they sit, looking at the bread. The feast is today and only today. Somebody has to stand up and say the words before the day is out, or the bread goes stale on the board and we're a laughing stock from here to the river."
+        ],
+        "?": [
+          "You took it down. Good. Keep your voice low. It is the Hearthkeeper's feast. The tables are laid, the bread is out, and by old custom nobody breaks a loaf until the sermon is said over it.",
+          "The sermon is {priest}'s to give. {priest} is flat on the vestry step with last night's cask still in him. The feast stole and the loaf dish are locked in the vestry behind him, and he has lost the key.",
+          "So there they sit, looking at the bread. The feast is today and only today. Somebody has to stand up and say the words before the day is out, or the bread goes stale on the board and we're a laughing stock from here to the river."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Let me have a look at him.",
+          "then": "see_priest",
+          "journal": "{giver} nailed up a notice for a sober body with a loud voice. It is the Hearthkeeper's feast in {town}, nobody may break bread until the sermon is said, and the priest, {priest}, is flat with drink on the vestry step."
+        },
+        {
+          "say": "Never mind him. I'll give it myself.",
+          "then": "sermon_open",
+          "journal": "{giver} nailed up a notice for a sober body with a loud voice. It is the Hearthkeeper's feast in {town}, the priest is flat with drink, and nobody may break bread until the sermon is said. I said I would give it myself."
+        },
+        {
+          "say": "A priest's sore head is no business of mine.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_priest": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Look at {priest} on {place:vestry}",
+      "say": {
+        "?lost=pages": [
+          "Eleven pages. Eleven! On bread. On the meaning of bread. It took me since the thaw. There is a part about crust that would make a mason weep.",
+          "I had them at the Feast-Eve cup. I had them when I stood on the table. After the table I did not have them. Am I lying down? I feel as though I am lying down."
+        ],
+        "?lost=spectacles": [
+          "Who's that? Come closer. No, that's a post. I beg the post's pardon.",
+          "My eye-glasses. I took them off last night to look the miller in the face and tell him what I think of his flour. I put them down somewhere safe. Somewhere wet, I think. I can read nothing without them. I can't read you, and you are a good deal bigger than a word."
+        ],
+        "?": [
+          "The stole is in the vestry. The loaf dish is in the vestry. I am out here. You see the difficulty.",
+          "I had the key last night. I held it up at the tavern and I said, friends, this is the key to everything. They cheered. Then I gave it to somebody to mind. Somebody with a kind face. It may have been a ham."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Stay there. I'll go and look where you were drinking.",
+          "then": "search_tavern",
+          "journal": {
+            "?lost=pages": "{priest} wrote eleven pages on bread for the feast and lost them at the tavern last night, some time after he stood on a table.",
+            "?lost=spectacles": "{priest} cannot see without his eye-glasses. He took them off at the tavern last night and put them down somewhere wet.",
+            "?": "{priest} is locked out of his own vestry. He held the key up at the tavern last night and then gave it to something with a kind face to mind."
+          }
+        },
+        {
+          "say": "What you want is a bucket of milk inside you and a bucket of water over you.",
+          "then": "sober",
+          "journal": "{priest} is in no state to stand, let alone preach. I went for milk to line him and water to wake him."
+        },
+        {
+          "say": "Stay there. I'll give your sermon myself.",
+          "then": "sermon_open",
+          "journal": "{priest} is in no state to stand, let alone preach. I told him I would give the sermon myself."
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "search_tavern": {
+      "do": "search",
+      "at": "tavern",
+      "need": 2,
+      "goal": "Look round {place:tavern} for what {priest} lost",
+      "clues": [
+        {
+          "if": "lost=pages",
+          "name": "Eleven pages on bread",
+          "item": "minecraft:paper",
+          "mark": "sermon_found",
+          "lore": [
+            "Folded and pushed under the short leg of the long table, to stop it rocking.",
+            "Page four has a pie ring on it. The last line reads: 'Bread is what we agree to share. The rest is weather.'"
+          ],
+          "journal": "I found the priest's eleven pages under a table leg at the tavern, where somebody had put them to stop the table rocking."
+        },
+        {
+          "if": "lost=spectacles",
+          "name": "A pair of eye-glasses",
+          "item": "minecraft:glass_pane",
+          "mark": "sermon_found",
+          "lore": [
+            "Wire rims, at the bottom of a quart pot that was left out to soak.",
+            "One arm is bent. They smell of cider and will go on smelling of it."
+          ],
+          "journal": "I found the priest's eye-glasses at the bottom of a quart pot left to soak at the tavern."
+        },
+        {
+          "if": "lost=key",
+          "name": "The vestry key",
+          "item": "minecraft:tripwire_hook",
+          "mark": "sermon_found",
+          "lore": [
+            "Hung by its ribbon round the neck of the ham over the hearth.",
+            "A label is tied to it in a wandering hand: 'In your care, good sir.'"
+          ],
+          "journal": "I found the vestry key hung round the neck of the ham over the tavern hearth, with a note putting it in the ham's care."
+        },
+        {
+          "name": "A chalked score",
+          "item": "minecraft:flint",
+          "lore": [
+            "On the slate by the cask: a row of strokes under every name on the street.",
+            "The row under 'Father' runs off the slate and goes on along the wall."
+          ],
+          "journal": "The score chalked up at the tavern shows the whole street drank the Feast-Eve cup. The priest's row runs off the slate and along the wall."
+        }
+      ],
+      "then": "give_back",
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "give_back": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Take what you found back to {priest}",
+      "say": {
+        "?lost=pages": "My pages! All eleven? There is a ring on the fourth. No matter. It is a page about pie in any case. Help me up. No. Not yet. The step is moving.",
+        "?lost=spectacles": "Ah! There you are. I can see you. You're not a post at all. They smell of the orchard, but I can see the door, and both of my feet. Help me up. No. Not yet. The step is moving.",
+        "?": "The ham had it? I knew that ham was sound. Give it here. Now the stole, and the dish, and then the sermon. Help me up. No. Not yet. The step is moving."
+      },
+      "replies": [
+        {
+          "say": "Up you come. Lean on the lectern and don't let go of it.",
+          "then": "end:his_own",
+          "journal": "I gave {priest} back what he lost, stood him up and pointed him at his congregation."
+        },
+        {
+          "say": "Not like this. Milk first, then water. Sit down.",
+          "then": "sober",
+          "journal": "I gave {priest} back what he lost, but he could not stand to use it. I went for milk and water."
+        },
+        {
+          "if": "lost=pages",
+          "say": "Give me the pages. I'll read them out for you.",
+          "then": "sermon_open",
+          "mark": "sermon_has_pages",
+          "journal": "I found the priest's pages, and he could not stand to read them. I took them up to read myself."
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "sober": {
+      "do": "bring",
+      "who": "priest",
+      "item": "minecraft:milk_bucket",
+      "count": 1,
+      "goal": "Bring {priest} a bucket of milk",
+      "say": "Milk? I am a grown man of the cloth. Oh, very well. Hold my head. All of it? All of it. There. I can feel my knees again, and I am not sure that I wanted to.",
+      "not_now": "I'll not be stood up dry. My mother swore by milk the morning after, a whole pail of it, and she buried three husbands.",
+      "then": "sober_water",
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "sober_water": {
+      "do": "bring",
+      "who": "priest",
+      "item": "minecraft:water_bucket",
+      "count": 1,
+      "goal": "Bring {priest} a bucket of water, for over his head",
+      "say": "Is that for drinking? It is not for drink... Hearth and home! That was cold. That was cold right down my neck. Thank you. I mean it. I think I am in my own head again.",
+      "not_now": "One moment more. The step is still going round. Something cold would stop it, I think. A pail of well water, and never mind where it lands.",
+      "mark": "sermon_sobered",
+      "journal": "A bucket of milk inside him and a bucket of water over him, and {priest} could stand up on his own.",
+      "then": "sobered",
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "sobered": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "See whether {priest} can preach",
+      "say": {
+        "?mark:sermon_found": "I'm upright. I'm wet, and I'm upright, and I have what I lost. I can do this. I have done it twenty years, and never once sober the morning after, if the truth is told. Walk beside me as far as the tables.",
+        "?lost=pages": "I'm upright. I'm wet, and I'm upright. I have no pages. Eleven pages, and all I can call to mind of them is the word 'crust'. Well. A man can say a good deal about crust. Walk beside me as far as the tables.",
+        "?lost=spectacles": "I'm upright. I'm wet, and I'm upright. I still can't see past my own hand. I know where the benches are by the coughing. I'll preach at the coughing. Walk beside me as far as the tables.",
+        "?": "I'm upright. I'm wet, and I'm upright. No stole and no dish, with the vestry still locked. She was worshipped at a bare hearth before there was ever a stole. I'll use a bread board. Walk beside me as far as the tables."
+      },
+      "replies": [
+        {
+          "say": "Go on. They're waiting on you.",
+          "then": "end:his_own",
+          "journal": "{priest} went up to give his own sermon, wet to the collar and sober."
+        },
+        {
+          "say": "You're shaking like a leaf. Sit in the front and nod. I'll say it.",
+          "then": "sermon_open",
+          "journal": "{priest} was sober and shaking. I sat him on the front bench and went up in his place."
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "sermon_open": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Stand up before the congregation and begin",
+      "say": [
+        "Up on the cart tail, where they can see you. That's the whole street on those benches. They've had nothing since the Feast-Eve cup and they can smell the bread.",
+        "You'll not need me to tell you what they make of it. This lot never kept an opinion to themselves in their lives. Begin the way Father begins. He says who he is and why we've come."
+      ],
+      "replies": [
+        {
+          "say": "Friends. You know why we're here, for it's on the table. I'm {player}. I am not your priest, and I will be quick.",
+          "then": "open_hear",
+          "mark": "sermon_open_ok"
+        },
+        {
+          "say": "Hear me, people of {town}! Long have I wandered, and many are the wonders these eyes have seen!",
+          "then": "open_hear",
+          "mark": "sermon_open_grand"
+        },
+        {
+          "say": "Your priest is drunk on the vestry step, so you have got me instead.",
+          "then": "open_hear",
+          "mark": "sermon_told_on_priest"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "open_hear": {
+      "do": "vigil",
+      "at": "benches",
+      "gap": 4,
+      "goal": "Hear what the benches make of it",
+      "lines": {
+        "?mark:sermon_open_ok": [
+          {
+            "who": "widow",
+            "say": "That's honest, at the least. Sit down, child, the stranger is talking.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "tanner",
+            "say": "Quick, you said. I'll hold you to quick."
+          },
+          {
+            "who": "baker",
+            "say": "Go on, then. We're listening."
+          }
+        ],
+        "?mark:sermon_open_grand": [
+          {
+            "who": "lad",
+            "say": "Mam? Is that one selling something?"
+          },
+          {
+            "who": "widow",
+            "say": "Hush. Though I was wondering the same.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "tanner",
+            "say": "Wonders. I've a wonder for you. It's a pie, and it is going cold."
+          }
+        ],
+        "?": [
+          {
+            "who": "widow",
+            "say": "On the vestry step! And on her own feast day!",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "tanner",
+            "say": "You poured his fourth cup yourself, mistress. I watched you do it."
+          },
+          {
+            "who": "baker",
+            "say": "It wasn't a stranger's to tell. But it's told now. Go on."
+          }
+        ]
+      },
+      "then": {
+        "?patron:hearthkeeper": "creed_hearth",
+        "?patron:anvil_father": "creed_anvil",
+        "?patron:deep_mother": "creed_deep",
+        "?patron:green_huntsman": "creed_hunt",
+        "?patron:lantern_warden": "creed_lantern",
+        "?patron:crowned_sun": "creed_sun",
+        "?patron:ash_whisperer": "creed_ash",
+        "?patron:truth": "creed_truth",
+        "?": "creed_none"
+      },
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_hearth": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You keep her hearth yourself, by what's said of you, so you'll know it better than most.",
+      "replies": [
+        {
+          "say": "She asks little. Keep a fire in. Keep a door that opens. What is on this table is what a guest is given, and today every one of you is the guest.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "Leave her hearth cold too long and she forgets you. I counted the cold chimneys on this street as I came in.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_anvil": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You're the Anvil-Father's, by the look of your hands. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "My god loves a true blow and honest work. Somebody rose in the dark and struck this dough two hundred times. That was a true blow. Honour the baker.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "The Anvil-Father says a thing is proved by striking it. So. Who here will stand up and be proved?",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_deep": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. They say you're the Deep Mother's. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "The Deep Mother asks one thing: a little of what she gives, given back. So break the first loaf small, and carry a piece to whoever could not come today.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "All that is on this table came up out of the dark under your feet, and the dark will want it back. You as well, in time.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_hunt": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You're the Huntsman's, by the mud on you. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "The Huntsman's law is short. Dress what you kill and waste none. So eat all of it, crusts too, and the bones go to the dogs.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "My god walks without a sound, and a congregation should sit the same. I will wait until you are quiet.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_lantern": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You carry the Warden's lamp, they tell me. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "The Warden keeps the night and the dead. Set one place more than you need, and a candle by it. Those who sat at this table before you are owed the smell of the bread.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "The dead that walk are the Warden's to put down. Look at who is sat beside you. Are you sure of them?",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_sun": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You're the Crowned Sun's, with that back on you. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "The Crowned Sun loves law and good order. So here is the law of this table: the eldest served first, the children next, and nobody reaches across.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "The Crowned Sun asks tribute of all beneath him. A tenth of this table, then, set aside for the crown.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_ash": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. I've heard whose sign you keep in your sleeve. Say what you've got. A god's a god on a feast day.",
+      "replies": [
+        {
+          "say": "My god's rule is a shut mouth and an open hand. Keep your mouth shut on your neighbour's troubles, and your hand open when they are short. That is all of it.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "The Ash Whisperer loves quick hands. Look to your neighbour's plate while your neighbour is looking at me.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_truth": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. You're one of the plain-word folk, they say. Well. Mind how you go. There's bread on the table.",
+      "replies": [
+        {
+          "say": "I will say only what I know to be so. This bread was baked this morning by people who rose in the dark to do it, and it is meant for you. That is true. Be thankful for it.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "The seven are tales told by those who would not hear the Truth. Your hearth goddess is one of the seven.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_none": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell them what is asked of them",
+      "say": "Now the asking. Father tells us what she asks of us. They say you keep no god at all. Say something anyway. We've been sat here since first light.",
+      "replies": [
+        {
+          "say": "I keep no god. But I have knocked at strange doors on bad nights, and some of them opened. If that is her work, then I have met her, and I owe her.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_ok"
+        },
+        {
+          "say": "I keep no god, so I can't tell you what yours wants. I expect it is what they all want. Be good, and so on.",
+          "then": "creed_hear",
+          "mark": "sermon_creed_cold"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "creed_hear": {
+      "do": "vigil",
+      "at": "benches",
+      "gap": 4,
+      "goal": "Hear what the benches make of it",
+      "lines": {
+        "?mark:sermon_creed_ok & patron:hearthkeeper": [
+          {
+            "who": "widow",
+            "say": "So it is. So it is.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "She has not said that out loud since her wedding day."
+          },
+          {
+            "who": "tanner",
+            "say": "And the guest is hungry. I only mention it."
+          }
+        ],
+        "?patron:hearthkeeper": [
+          {
+            "who": "tanner",
+            "say": "That's my chimney you counted. It has been cold since my knee went."
+          },
+          {
+            "who": "widow",
+            "say": "That was true, and it was not kindly said.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "baker",
+            "say": "We'll bring wood round after, Hewlin. Go on, you."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:anvil_father": [
+          {
+            "who": "baker",
+            "say": "Two hundred! It was nearer three hundred.",
+            "sound": "minecraft:entity.villager.celebrate"
+          },
+          {
+            "who": "widow",
+            "say": "Sit down, man. It was only bread."
+          },
+          {
+            "who": "lad",
+            "say": "He'll be like this all week now."
+          }
+        ],
+        "?patron:anvil_father": [
+          {
+            "who": "widow",
+            "say": "I'll thank you to prove nothing on me, at my age.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "tanner",
+            "say": "We came out for bread, not for a hiding."
+          },
+          {
+            "who": "lad",
+            "say": "I'll stand up. After dinner."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:deep_mother": [
+          {
+            "who": "widow",
+            "say": "My mother did the same, and she never went down a hole in her life.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "Who's laid up this week? I'll cut theirs first."
+          },
+          {
+            "who": "tanner",
+            "say": "The old carter is. I'll carry it to him."
+          }
+        ],
+        "?patron:deep_mother": [
+          {
+            "who": "lad",
+            "say": "Mam? Is the dark coming for the pie?"
+          },
+          {
+            "who": "widow",
+            "say": "True, I daresay. And no word to say over a dinner.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "tanner",
+            "say": "It can have me and welcome, once I've eaten."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:green_huntsman": [
+          {
+            "who": "tanner",
+            "say": "Eat all of it. Now there's a law this bench can keep.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "lad",
+            "say": "Crusts too? Even the burnt ones?"
+          },
+          {
+            "who": "baker",
+            "say": "There are no burnt ones."
+          }
+        ],
+        "?patron:green_huntsman": [
+          {
+            "who": "tanner",
+            "say": "That was my belly. I beg its pardon. It has waited since first light."
+          },
+          {
+            "who": "lad",
+            "say": "It talked! Make it do that again!",
+            "sound": "minecraft:entity.villager.celebrate"
+          },
+          {
+            "who": "widow",
+            "say": "You'll get no quiet out of this lot until they're fed. Get on."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:lantern_warden": [
+          {
+            "who": "widow",
+            "say": "There. I've taken my basket off the stool. It was his stool.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "I've a candle end in my apron. Set it by her."
+          },
+          {
+            "who": "tanner",
+            "say": "That was well said. I'll say so to anybody."
+          }
+        ],
+        "?patron:lantern_warden": [
+          {
+            "who": "lad",
+            "say": "Master Hewlin's gone very pale."
+          },
+          {
+            "who": "tanner",
+            "say": "I'm pale because I've had nothing since last night's cup, you whelp."
+          },
+          {
+            "who": "widow",
+            "say": "Leave off frightening the children. Go on.",
+            "sound": "minecraft:entity.villager.no"
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:crowned_sun": [
+          {
+            "who": "widow",
+            "say": "Eldest first. I have waited sixty years to hear that said from a pulpit.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "lad",
+            "say": "I wasn't reaching."
+          },
+          {
+            "who": "baker",
+            "say": "That's the first law this street ever cheered.",
+            "sound": "minecraft:entity.villager.celebrate"
+          }
+        ],
+        "?patron:crowned_sun": [
+          {
+            "who": "tanner",
+            "say": "A tenth of the pie?"
+          },
+          {
+            "who": "baker",
+            "say": "The crown can bake its own.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "widow",
+            "say": "You'll not tithe a pie in this village. Go on, and quickly."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:ash_whisperer": [
+          {
+            "who": "widow",
+            "say": "Well. I'd not have looked for sense from that quarter.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "Mouth shut, hand open. It's better than last year's, and last year's took an hour."
+          },
+          {
+            "who": "tanner",
+            "say": "The shut mouth will come hard to some on this bench."
+          }
+        ],
+        "?patron:ash_whisperer": [
+          {
+            "who": "widow",
+            "say": "I have both hands on my bread, thank you.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "lad",
+            "say": "I wasn't going to!"
+          },
+          {
+            "who": "tanner",
+            "say": "We'll count the spoons after. No offence meant."
+          }
+        ],
+        "?mark:sermon_creed_ok & patron:truth": [
+          {
+            "who": "baker",
+            "say": "I did rise in the dark. It's true. Somebody has said so at last.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "widow",
+            "say": "Plain enough. Nobody can quarrel with that."
+          },
+          {
+            "who": "tanner",
+            "say": "He's crying. He does it at weddings as well."
+          }
+        ],
+        "?patron:truth": [
+          {
+            "who": "widow",
+            "say": "On her own feast day! At her own table!",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "lad",
+            "say": "She threw a crust! Can I throw one?"
+          },
+          {
+            "who": "baker",
+            "say": "That's the waste of a good crust. Say something else, and say it fast."
+          }
+        ],
+        "?mark:sermon_creed_ok": [
+          {
+            "who": "widow",
+            "say": "There's folk on this bench who pray every day and never said it half so well.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "Knock at mine, the next bad night."
+          },
+          {
+            "who": "tanner",
+            "say": "That will do. That will more than do."
+          }
+        ],
+        "?": [
+          {
+            "who": "tanner",
+            "say": "'And so on.' Father takes an hour to say as much.",
+            "sound": "minecraft:entity.villager.celebrate"
+          },
+          {
+            "who": "lad",
+            "say": "Is that all of it? Can we eat?"
+          },
+          {
+            "who": "widow",
+            "say": "Not yet, child. It wants an ending, such as it is."
+          }
+        ]
+      },
+      "then": "close",
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "close": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Finish the sermon",
+      "say": "Nearly there. Father ends with the blessing on the bread. It is nineteen verses when he gives it. The pie is going cold. I only mention it.",
+      "replies": [
+        {
+          "say": "Bless the hands that made it and the mouths that need it. Eat.",
+          "then": "close_hear",
+          "mark": "sermon_close_ok"
+        },
+        {
+          "say": "All nineteen verses, then, as near as I can remember them.",
+          "then": "close_hear",
+          "mark": "sermon_close_long"
+        },
+        {
+          "say": "One thing more. Your priest meant to stand here today, and it broke his heart to fail you. Be kind to him when he wakes. Now eat.",
+          "then": "close_hear",
+          "mark": "sermon_spoke_for_priest"
+        },
+        {
+          "if": "mark:sermon_has_pages",
+          "say": "I'll end with his words and not mine. This is the last line of his eleven pages: 'Bread is what we agree to share. The rest is weather.' Eat.",
+          "then": "close_hear",
+          "mark": "sermon_read_his_page"
+        }
+      ],
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    },
+    "close_hear": {
+      "do": "vigil",
+      "at": "benches",
+      "gap": 4,
+      "goal": "Hear what the benches make of it",
+      "lines": {
+        "?mark:sermon_close_long": [
+          {
+            "who": "tanner",
+            "say": "All nineteen. Hearthkeeper keep us."
+          },
+          {
+            "who": "baker",
+            "say": "That was the seventh verse. I am breaking this loaf. She'll forgive me.",
+            "sound": "minecraft:entity.villager.no"
+          },
+          {
+            "who": "widow",
+            "say": "Go on, go on. We'll hear the rest with our mouths full."
+          }
+        ],
+        "?mark:sermon_spoke_for_priest": [
+          {
+            "who": "widow",
+            "say": "He's a fool, but he is our fool. I'll take him broth.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "He'd have been at it since the thaw, knowing him. The poor old stick."
+          },
+          {
+            "who": "tanner",
+            "say": "We'll be kind when he wakes. Now we eat."
+          }
+        ],
+        "?mark:sermon_read_his_page": [
+          {
+            "who": "widow",
+            "say": "That's Father. That is him at his best, the old sot.",
+            "sound": "minecraft:entity.villager.yes"
+          },
+          {
+            "who": "baker",
+            "say": "'The rest is weather.' I'll have that painted over my oven."
+          },
+          {
+            "who": "tanner",
+            "say": "Eleven pages, and it only ever wanted the one line."
+          }
+        ],
+        "?": [
+          {
+            "who": "baker",
+            "say": "Eat! You heard. Break it, break it!",
+            "sound": "minecraft:entity.villager.celebrate"
+          },
+          {
+            "who": "lad",
+            "say": "That's the best one I ever heard."
+          },
+          {
+            "who": "widow",
+            "say": "Short. I'll allow it."
+          }
+        ]
+      },
+      "then": {
+        "?mark:sermon_open_ok & mark:sermon_creed_ok & !mark:sermon_close_long": "end:rousing",
+        "?!mark:sermon_open_ok & !mark:sermon_creed_ok & mark:sermon_close_long": "end:laughed",
+        "?": "end:passable"
+      },
+      "within": "feast",
+      "late": "end:missed",
+      "until": "before the feast day is out"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I put the notice back on its nail. A priest's sore head was no business of mine, and somebody else could talk to the benches."
+    },
+    "his_own": {
+      "text": {
+        "?mark:sermon_found & mark:sermon_sobered": "{priest} gave his own sermon, wet to the collar and sober as a post, with what he had lost back in his hands. It was short, because his head hurt, and the street said it was the best he had given in twenty years. Then they ate.",
+        "?mark:sermon_sobered": "{priest} gave his own sermon, wet to the collar and sober, without the thing he had lost. He made it up as he went and it took four minutes. Nobody on the benches minded that at all. Then they ate.",
+        "?": "{priest} gave his own sermon, holding on to the lectern the way a man holds the rail of a ferry. He got through it. Twice he blessed the same loaf, and once he blessed the baker's dog. Then they ate."
+      },
+      "reward": {
+        "coins": {
+          "?mark:sermon_found & mark:sermon_sobered": 8,
+          "?": 5
+        },
+        "items": [
+          "minecraft:bread*3",
+          "minecraft:cooked_chicken*2",
+          "minecraft:pumpkin_pie"
+        ],
+        "hearts": 20,
+        "reputation": 6
+      },
+      "marks": [
+        "sermon_priest_preached"
+      ],
+      "town": {
+        "?mark:sermon_sobered": [
+          "Father gave the feast sermon dripping wet, and it was four minutes long. Best one he ever gave. Somebody should throw a pail over him every year.",
+          "It was {player} who got Father on his feet for the feast. Milk, of all things."
+        ],
+        "?": [
+          "Father blessed the baker's dog on the feast day. The dog has been above itself ever since.",
+          "It was {player} who stood Father up for the feast. He stayed up, too. Mostly."
+        ]
+      },
+      "returns": {
+        "who": "priest",
+        "days": [
+          2,
+          4
+        ],
+        "as": "thanks",
+        "say": "I am told I owe you my feast day. I don't remember a great deal of it, but I remember the bucket. This is from the Hearthkeeper's own table. What a guest is given.",
+        "gift": [
+          "minecraft:honey_bottle*2",
+          "minecraft:cake"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "letter": {
+            "from": "{priest}",
+            "lines": [
+              "I have taken a pledge: nothing stronger than small ale until the next Feast-Eve. The front bench laughed for some time when I told them.",
+              "The baker has asked me to bless his dog again, as it has gone off its food since the honour wore off. I have said that I will.",
+              "There will be a place laid for you at the next feast. Come sober. One of us should be."
+            ]
+          }
+        }
+      ]
+    },
+    "rousing": {
+      "text": {
+        "?mark:sermon_spoke_for_priest": "I gave the feast-day sermon from a cart tail, and the street took every word of it. I asked them to be kind to their priest, and they were. They broke the bread before I had climbed down.",
+        "?mark:sermon_read_his_page": "I gave the feast-day sermon from a cart tail and ended it with the priest's own last line. The street took every word, his and mine. They broke the bread before I had climbed down.",
+        "?": "I gave the feast-day sermon from a cart tail, and the street took every word of it. It was done before the pie went cold. They broke the bread before I had climbed down."
+      },
+      "reward": {
+        "coins": 8,
+        "items": [
+          "minecraft:bread*3",
+          "minecraft:cooked_chicken*2",
+          "minecraft:pumpkin_pie",
+          "minecraft:honey_bottle"
+        ],
+        "hearts": 30,
+        "reputation": 10
+      },
+      "marks": [
+        "sermon_rousing"
+      ],
+      "town": [
+        "Did you hear {player} on the feast day? Up on a cart, no stole, no book. Shortest sermon this street ever sat through, and the only one I could say back to you after.",
+        "'Eat.' That was the blessing. I've heard worse from men who were paid for it."
+      ],
+      "returns": {
+        "who": "priest",
+        "days": [
+          2,
+          4
+        ],
+        "as": "thanks",
+        "say": {
+          "?mark:sermon_told_on_priest": "They tell me you gave my sermon, and gave it well, and that you told them why I could not. I had that coming. This is from the Hearthkeeper's own table. What a guest is given.",
+          "?": "They tell me you gave my sermon, and gave it well, and that nobody slept. I have been preaching twenty years and somebody always sleeps. This is from the Hearthkeeper's own table. What a guest is given."
+        },
+        "gift": [
+          "minecraft:honey_bottle*2",
+          "minecraft:cake"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "letter": {
+            "from": "{priest}",
+            "lines": [
+              "I have a favour to ask and no right to ask it. The front bench can say your sermon back to me by heart, and does, whenever mine runs long.",
+              "Would you write it down for me? I should like to use it next year. I will say that it is mine. I think the Hearthkeeper will wink at that, as it is in a good cause.",
+              "There is a place laid for you at the next feast, in any case."
+            ]
+          }
+        },
+        {
+          "days": [
+            20,
+            34
+          ],
+          "scene": [
+            [
+              "a",
+              "Are you saying the blessing, or am I?"
+            ],
+            [
+              "b",
+              "I'll say it. 'Eat.'"
+            ],
+            [
+              "a",
+              "That's not a blessing. That's what {player} said off the cart."
+            ],
+            [
+              "b",
+              "It did for the whole street on the feast day. It'll do for a bowl of pease."
+            ]
+          ]
+        }
+      ]
+    },
+    "passable": {
+      "text": {
+        "?mark:sermon_close_long": "I gave the feast-day sermon from a cart tail. Parts of it went down well. Then I began the nineteen verses, and at the seventh somebody broke a loaf, and after that I was blessing the backs of their heads.",
+        "?": "I gave the feast-day sermon from a cart tail. Some of it went down well and some of it went down like a dropped pot, but it was said, and they broke the bread on it."
+      },
+      "reward": {
+        "coins": 5,
+        "items": [
+          "minecraft:bread*3",
+          "minecraft:cooked_chicken*2"
+        ],
+        "hearts": 20,
+        "reputation": 5
+      },
+      "marks": [
+        "sermon_passable"
+      ],
+      "town": [
+        "{player} gave the feast sermon this year, off the back of a cart. It had good parts. I'd not say which parts with {player} in hearing.",
+        "The bread got blessed. That's the main of it. Nobody remembers Father's either."
+      ],
+      "returns": {
+        "who": "priest",
+        "days": [
+          2,
+          4
+        ],
+        "as": "thanks",
+        "say": "They tell me you stood up in my place. They tell me a good deal else about it, but I have stopped them there. You stood up, and I could not. This is from the Hearthkeeper's own table.",
+        "gift": [
+          "minecraft:honey_bottle"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "town": [
+            "Father's back in his pulpit and off the cider. He kept it to half an hour last week. They say {player} frightened him into it."
+          ]
+        }
+      ]
+    },
+    "laughed": {
+      "text": "I gave the feast-day sermon from a cart tail, and there was not one part of it the street did not laugh at. They laughed all through the nineteen verses. Then they made room for me on the front bench and cut me the first of the pie, and I have had worse days.",
+      "reward": {
+        "coins": 3,
+        "items": [
+          "minecraft:bread*3",
+          "minecraft:pumpkin_pie"
+        ],
+        "hearts": 15,
+        "reputation": 2
+      },
+      "marks": [
+        "sermon_laughed"
+      ],
+      "town": [
+        "Were you there for {player}'s sermon? I've not laughed so since the reeve fell in the pond. No harm in {player}, mind. Sat down and ate with us after as if nothing had gone amiss.",
+        "The bread got blessed, after a fashion. I think it did. It was hard to hear over the noise."
+      ],
+      "returns": {
+        "who": "priest",
+        "days": [
+          2,
+          4
+        ],
+        "as": "thanks",
+        "say": "They are still laughing, and for once it is not at me. You don't know what a gift that is to a man in my place. This is from the Hearthkeeper's own table.",
+        "gift": [
+          "minecraft:honey_bottle"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "scene": [
+            [
+              "a",
+              "How was the reeve's speech at the boundary walk?"
+            ],
+            [
+              "b",
+              "Long. Wrong in most of it. A proper {player}'s sermon."
+            ],
+            [
+              "a",
+              "As bad as that?"
+            ],
+            [
+              "b",
+              "No. Nobody gave us pie after the reeve's."
+            ]
+          ]
+        }
+      ]
+    },
+    "missed": {
+      "failed": true,
+      "text": "The feast bread went stale on the board with no word said over it. In the end the street ate it dry and unblessed, and {priest} woke on the vestry step to find his feast day had gone by without him.",
+      "reward": {
+        "hearts": -10
+      },
+      "town": [
+        "No sermon on the Hearthkeeper's feast. We sat the whole day looking at that bread. At dusk the children started on it, and you can't unbless a thing that was never blessed.",
+        "Father's been sweeping the temple step every morning since. Nobody set him to it."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            16
+          ],
+          "letter": {
+            "from": "{priest}",
+            "lines": [
+              "You do not know me, though I am told you saw me at my worst and took down the notice that was meant to save me from it.",
+              "I do not blame you. The cask was mine and so was the feast. I have baked a loaf for every house on the street with my own hands, and they were bad loaves, and every house ate theirs.",
+              "If you pass this way at the next feast, come and hear me. I mean to be awake for it."
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

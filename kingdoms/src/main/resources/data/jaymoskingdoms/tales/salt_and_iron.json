@@ -8,13 +8,16 @@
     "smith": { "name": ["Aldous Holt", "Brand Holt", "Corwin Holt"], "body": "villager", "job": "toolsmith", "female": false, "at": "forge" },
     "heir": { "name": ["Garrick Holt", "Emeric Holt", "Tobin Holt"], "body": "villager", "job": "toolsmith", "female": false, "at": "forge" },
     "chandler": { "name": ["Lucan Fairweather", "Piers Aldane", "Osric Penhallow"], "body": "villager", "job": "cartographer", "female": false, "at": "shop" },
-    "watcher": { "name": ["Hob Tully", "Sim Cray", "Ned Tully"], "body": "villager", "job": "nitwit", "female": false, "at": "strand" }
+    "watcher": { "name": ["Hob Tully", "Sim Cray", "Ned Tully"], "body": "villager", "job": "nitwit", "female": false, "at": "strand" },
+    "tidepriest": { "name": ["Wenna Sark", "Nessa Lugg", "Ysolt Penn"], "body": "villager", "job": "cleric", "female": true, "at": "well" },
+    "anvilpriest": { "name": ["Durn Hale", "Bram Stope", "Harl Coldiron"], "body": "villager", "job": "cleric", "female": false, "at": "well" }
   },
   "places": {
     "loft": { "at": "near", "from": "home", "dist": [40, 90], "name": "the Skerry net loft" },
     "forge": { "at": "near", "from": "home", "dist": [40, 90], "name": "the Holt forge" },
     "strand": { "at": "near", "from": "loft", "dist": [30, 60], "name": "the strand below the quay" },
-    "shop": { "at": "near", "from": "home", "dist": [30, 70], "name": "the chandlery" }
+    "shop": { "at": "near", "from": "home", "dist": [30, 70], "name": "the chandlery" },
+    "well": { "at": "near", "from": "home", "dist": [10, 22], "name": "the well in the street" }
   },
   "first": "ask",
   "steps": {
@@ -48,9 +51,9 @@
       "clues": [
         { "name": "A slashed long net", "item": "minecraft:string", "lore": ["Cut, not torn, mesh after mesh along the whole length.", "Only the long nets for the far grounds. The bay nets hang untouched beside them."], "journal": "Every long net for the far grounds was cut. The bay nets were left alone." },
         { "name": "Iron filings in the tar", "item": "minecraft:iron_nugget", "lore": ["Smith's dust, ground fine, trodden into the boards by the loft door.", "Somebody who works iron has stood here."], "journal": "There is smith's dust on the net loft floor, by the door." },
-        { "name": "A boot print in spilt tar", "item": "minecraft:clay_ball", "lore": ["Broad and deep. A heavy walker, and no sea boot.", "The nails are set in a ring, as the mountain cobblers set them."], "journal": "A heavy boot print in the tar under the nets, nailed in a ring as Stoneborn boots are.", "if": "culprit=heir" },
-        { "name": "A net knife, wrapped in a rag", "item": "minecraft:shears", "lore": ["Pushed to the bottom of the mending basket, under the twine.", "There is tarred fibre caught in the hinge. It was not put away clean."], "journal": "A net knife was hidden at the bottom of the mender's own basket, with tarred fibre still in it.", "if": "culprit=mender" },
-        { "name": "Drips of beeswax", "item": "minecraft:honeycomb", "lore": ["Spots of good wax on the boards beneath the cut nets.", "Fisher folk burn tallow. Somebody brought a costly candle to see by."], "journal": "Beeswax was spilt under the cut nets. Nobody on the quay burns wax.", "if": "culprit=chandler" }
+        { "name": "A boot print in spilt tar", "item": "minecraft:clay_ball", "lore": ["Broad and deep. A heavy walker, and no sea boot.", "The nails are set in a ring, as the mountain cobblers set them."], "journal": "A heavy boot print in the tar under the nets, nailed in a ring as Stoneborn boots are.", "if": "culprit=heir", "mark": "salt_loft_proof" },
+        { "name": "A net knife, wrapped in a rag", "item": "minecraft:shears", "lore": ["Pushed to the bottom of the mending basket, under the twine.", "There is tarred fibre caught in the hinge. It was not put away clean."], "journal": "A net knife was hidden at the bottom of the mender's own basket, with tarred fibre still in it.", "if": "culprit=mender", "mark": "salt_loft_proof" },
+        { "name": "Drips of beeswax", "item": "minecraft:honeycomb", "lore": ["Spots of good wax on the boards beneath the cut nets.", "Fisher folk burn tallow. Somebody brought a costly candle to see by."], "journal": "Beeswax was spilt under the cut nets. Nobody on the quay burns wax.", "if": "culprit=chandler", "mark": "salt_loft_proof" }
       ],
       "then": "netwife"
     },
@@ -81,9 +84,9 @@
       "clues": [
         { "name": "A bait bucket", "item": "minecraft:bucket", "lore": ["Left standing on the hearthstone, salt drying white on the staves.", "The Skerry mark is burnt into it. Nobody troubled to carry it away."], "journal": "A Skerry bait bucket was left on the Holts' hearthstone, in plain sight." },
         { "name": "The Father's portion", "item": "minecraft:raw_iron", "lore": ["A lump of raw iron kept on the hearth shelf: the god's share of the seam.", "The seawater reached it. It is red already."], "journal": "The raw iron the Holts keep on the hearth for the Anvil-Father was doused with the rest, and has rusted." },
-        { "name": "The door bar", "item": "minecraft:stick", "lore": ["Oak, a hand thick, and sound from end to end.", "The forge was barred from within that night and nothing is forced. The one window would not pass a grown man."], "journal": "The forge door was barred from the inside and was never forced.", "if": "culprit=heir" },
-        { "name": "A snag of oiled wool", "item": "minecraft:gray_wool", "lore": ["Caught low on the latch of the little window, with fish scales in the nap.", "Whoever came through that window was small."], "journal": "Oiled wool with fish scales in it was snagged on the forge's small window.", "if": "culprit=mender" },
-        { "name": "A heel mark in wet ash", "item": "minecraft:gunpowder", "lore": ["Narrow, with a stacked heel. A town shoe.", "Smiths wear hobnails, and fishers go in sea boots."], "journal": "A narrow, heeled shoe left its print in the wet ash of the hearth. Not a smith's boot, nor a fisher's.", "if": "culprit=chandler" }
+        { "name": "The door bar", "item": "minecraft:stick", "lore": ["Oak, a hand thick, and sound from end to end.", "The forge was barred from within that night and nothing is forced. The one window would not pass a grown man."], "journal": "The forge door was barred from the inside and was never forced.", "if": "culprit=heir", "mark": "salt_forge_proof" },
+        { "name": "A snag of oiled wool", "item": "minecraft:gray_wool", "lore": ["Caught low on the latch of the little window, with fish scales in the nap.", "Whoever came through that window was small."], "journal": "Oiled wool with fish scales in it was snagged on the forge's small window.", "if": "culprit=mender", "mark": "salt_forge_proof" },
+        { "name": "A heel mark in wet ash", "item": "minecraft:gunpowder", "lore": ["Narrow, with a stacked heel. A town shoe.", "Smiths wear hobnails, and fishers go in sea boots."], "journal": "A narrow, heeled shoe left its print in the wet ash of the hearth. Not a smith's boot, nor a fisher's.", "if": "culprit=chandler", "mark": "salt_forge_proof" }
       ],
       "then": "smith"
     },
@@ -130,7 +133,7 @@
         "?": "{watcher}, who sets eel pots by night, saw a man with a shuttered lantern and ringing heels draw seawater off the quay wall."
       },
       "replies": [
-        { "say": "Here is {coins:2} for your throat. What else?", "needs_coins": 2, "then": "watcher_more" },
+        { "say": "Here is {coins:2} for your throat. What else?", "needs_coins": 2, "then": "watcher_more", "mark": "salt_watcher_told" },
         { "say": "That will do.", "then": "see_chandler" }
       ]
     },
@@ -201,7 +204,7 @@
         "My mother asked every winter to go home under the mountain. The salt was in her chest. He would not leave his custom, and then he would not leave her grave. I thought if the fish-folk drove us out, he would have to go. I knew nothing of any autumn run. I am a smith. I thought nets were nets."
       ],
       "replies": [
-        { "say": "This goes before both houses, in the open.", "then": "wait_moot", "journal": "{heir} owned to both deeds. He hoped the Skerrys would drive his family home under the mountain. I am putting it before both houses." },
+        { "say": "This goes before both houses, in the open.", "then": "hearing_call", "journal": "{heir} owned to both deeds. He hoped the Skerrys would drive his family home under the mountain. I am putting it before both houses." },
         { "say": "Tell your father yourself. Then work off those nets at the Skerry loft.", "then": "wait_bound", "mark": "salt_bound_heir", "journal": "{heir} owned to both deeds. He hoped the Skerrys would drive his family home under the mountain. I told him to confess to his father, and to pay for the nets in work." }
       ]
     },
@@ -213,7 +216,7 @@
         "The forge I did so that nobody would look inside our own loft. And because I hate that iron. Without it the boats would keep to the bay, where a boy can swim home."
       ],
       "replies": [
-        { "say": "{netwife} must hear it. It is her house and her fleet.", "then": "wait_moot", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I am taking it to {netwife}." },
+        { "say": "{netwife} must hear it. It is her house and her fleet.", "then": "hearing_call", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I am taking it to {netwife}." },
         { "say": "I'll name a stranger off a trading ship. The boy's sailing is not yours to decide.", "then": "wait_kept", "mark": "salt_kept_menders_secret", "journal": "Old {mender} cut the nets she knotted herself, to keep her grandson off the far grounds, and quenched the forge to turn eyes away. I told {giver} it was a sailor off a trader, long gone.", "against": ["law", "honour"] }
       ]
     },
@@ -225,10 +228,115 @@
         "Now. {coins:20} says you found nothing, and I will be gentle with both houses. Or cry it in the square, and see who gives them credit in spring."
       ],
       "replies": [
-        { "say": "Keep your purse. The town hears it today.", "then": "wait_moot", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. He offered me {coins:20}. I am crying it in the square.", "returns": { "who": "chandler", "days": [8, 14], "as": "warning", "say": "Do not reach for anything. I am ashore for one tide, and I came to tell you a thing for nothing, which is not my habit. My cousin holds both notes now. He called in the Skerry boat on the first of the month, and the Holt forge is next. You put me on a ship. You did not put the debts on one. Good day." } },
+        { "say": "Keep your purse. The town hears it today.", "then": "hearing_call", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. He offered me {coins:20}. I am crying it in the square.", "returns": { "who": "chandler", "days": [8, 14], "as": "warning", "say": "Do not reach for anything. I am ashore for one tide, and I came to tell you a thing for nothing, which is not my habit. My cousin holds both notes now. He called in the Skerry boat on the first of the month, and the Holt forge is next. You put me on a ship. You did not put the debts on one. Good day." } },
         { "say": "Burn both notes, here, now. Then I saw nothing.", "then": "wait_notes", "mark": "salt_burned_notes", "journal": "{chandler} cut the nets and quenched the forge with his own hands, to hurry both houses into default. I made him burn both notes for my silence, and told {giver} I had no name after all.", "against": ["law"] },
         { "say": "{coins:20}. And I found nothing.", "then": "end:bought", "journal": "{chandler} cut the nets and quenched the forge with his own hands. He paid me {coins:20} to have found nothing.", "against": ["law", "vengeance"] }
       ]
+    },
+    "hearing_call": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} it must be heard in the open",
+      "say": [
+        "In the open. Then it is a hearing at {place:well}, the old way, as it was done before either house would drink there. Both houses stand to it, and a priest of each sees the weighing: {tidepriest} for the Deep Mother, {anvilpriest} for the Anvil-Father.",
+        "Neither of them will be fair. That is why there are two. Each will push for their own, and the street goes with whoever is left standing. So bring what you found. All of it.",
+        "{netwife} and {smith} will not come down for my asking. They might for yours. And know the form of it: the name is given to the Mother's priest, since the nets were cut first, and the Father's priest answers."
+      ],
+      "replies": [
+        { "say": "I'll bring them down.", "then": "fetch_netwife", "journal": "{giver} has called a hearing at {place:well}, before both houses and a priest of each god. I am to bring {netwife} and {smith} down to it, and give the name to the Deep Mother's priest." }
+      ]
+    },
+    "fetch_netwife": { "do": "escort", "who": "netwife", "to": "well", "goal": "Bring {netwife} down to {place:well}", "then": "fetch_smith" },
+    "fetch_smith": {
+      "do": "escort", "who": "smith", "to": "well", "goal": "Bring {smith} down to {place:well}",
+      "journal": "Both houses stand at the well, one to each side of it, with the width of the street between them.",
+      "then": "hear_tide"
+    },
+    "hear_tide": {
+      "do": "talk", "who": "tidepriest", "goal": "Hear what the Deep Mother's priest wants of the hearing",
+      "say": [
+        "So you are the one who will name it. Hear me first. The sea was wronged first. Nine long nets, and the far grounds the only water left with fish in it. Whatever else is said at this well, that is said first.",
+        "I know what the smith's priest will tell you: that salt on a hearth is the greater wrong, because iron remembers. Let him. The Mother gave those fish, and she is owed the hand that kept them from the boats. If it is a Holt hand, say so loudly. If you mean to tell me it is one of hers, you had better have more than a land-walker's guess."
+      ],
+      "replies": [
+        { "say": "I have more than a guess. Will you weigh it fairly, whoever it falls on?", "then": "hear_anvil", "mark": "salt_tide_fair",
+          "try": { "how": "persuade", "helps": ["mark:salt_watcher_told", "patron:deep_mother", "heritage:tideborn"], "hurts": ["patron:anvil_father", "heritage:stoneborn"], "fail": "hear_anvil", "refuse": "Fairly. The sea is not fair, and I do not serve her by pretending to be. Say your name at the well, and I will say what I think of it." },
+          "journal": "{tidepriest}, the Deep Mother's priest, gave me her word to weigh what I found fairly, even against a Skerry." },
+        { "say": "Say your piece at the well. I'll say mine.", "then": "hear_anvil" }
+      ]
+    },
+    "hear_anvil": {
+      "do": "talk", "who": "anvilpriest", "goal": "Hear what the Anvil-Father's priest wants of the hearing",
+      "say": [
+        "You are the stranger. Good. Then you have no kin to be ashamed of when this is done. I will say it once. A net is twine, and twine can be knotted again. Seawater on the hearth-iron is a thing done to the Father himself. His portion rusted where it sat.",
+        "The sea's woman will tell you the nets come first because they were cut first. That is counting, not weighing. If a Skerry hand is in this, the Father is owed it. If you mean to name one of his own at that well, bring something heavier than talk."
+      ],
+      "replies": [
+        { "say": "I've brought what I found. Will you weigh it as you'd weigh ore, whoever's it is?", "then": "hearing", "mark": "salt_anvil_fair",
+          "try": { "how": "persuade", "helps": ["mark:salt_watcher_told", "patron:anvil_father", "heritage:stoneborn"], "hurts": ["patron:deep_mother", "heritage:tideborn"], "fail": "hearing", "refuse": "I weigh what is put on the scale. I do not promise the answer before the ore is on it." },
+          "journal": "{anvilpriest}, the Anvil-Father's priest, gave me his word to weigh what I found as he would weigh ore, even against a Holt." },
+        { "say": "Then weigh it when you hear it.", "then": "hearing" }
+      ]
+    },
+    "hearing": {
+      "do": "name", "who": "tidepriest", "goal": "Give the name at {place:well}, before both houses",
+      "say": "Both houses are here, and both gods are listening, for what that is worth to you. The nets were cut first, so the name is given to the sea. Say it, and say what you found. {anvilpriest} will answer for the Father.",
+      "suspects": [
+        { "who": "heir", "say": "{heir}, the smith's own son.", "need": 3,
+          "proof": ["culprit=heir & mark:salt_loft_proof", "culprit=heir & mark:salt_forge_proof", "culprit=heir & mark:salt_watcher_told", "culprit=heir & mark:salt_anvil_fair"],
+          "then": "hearing_held", "doubted": { "?culprit=heir": "hearing_fails", "?": "hearing_false" },
+          "journal": "At the well, before both houses, I named {heir}, the smith's son." },
+        { "who": "mender", "say": "Old {mender}, of the Skerrys' own loft.", "need": 3,
+          "proof": ["culprit=mender & mark:salt_loft_proof", "culprit=mender & mark:salt_forge_proof", "culprit=mender & mark:salt_watcher_told", "culprit=mender & mark:salt_tide_fair"],
+          "then": "hearing_held", "doubted": { "?culprit=mender": "hearing_fails", "?": "hearing_false" },
+          "journal": "At the well, before both houses, I named old {mender}, the Skerrys' net-mender." },
+        { "who": "chandler", "say": "{chandler}, who holds a note on each house.", "need": 2,
+          "proof": ["culprit=chandler & mark:salt_loft_proof", "culprit=chandler & mark:salt_forge_proof", "culprit=chandler & mark:salt_watcher_told"],
+          "then": "hearing_held", "doubted": { "?culprit=chandler": "hearing_fails", "?": "hearing_false" },
+          "journal": "At the well, before both houses, I named {chandler}, the chandler." }
+      ]
+    },
+    "hearing_held": {
+      "do": "talk", "who": { "?culprit=heir": "anvilpriest", "?": "tidepriest" }, "goal": "Hear the priests' answer",
+      "say": {
+        "?culprit=heir": [
+          "The print, the bar, and the rest of it. I have weighed it, and it weighs. I do not like what it weighs.",
+          "Fetch {heir} down from the forge. If there is a thing to say, the Father would sooner hear it from his mouth than from a stranger's."
+        ],
+        "?culprit=mender": [
+          "The knife, the wool, and the rest of it. I have listened for the lie in it and I cannot hear one. The sea keeps nothing hidden for ever. She only takes her time.",
+          "Fetch {mender} down. If there is a thing to say, the Mother would sooner hear it from her mouth than from a stranger's."
+        ],
+        "?": [
+          "Wax, and a heel, and a note on each house. So neither of us gets the hand we wanted, {anvilpriest}. I find I can bear that.",
+          "Twenty years these two houses have shared this well by not looking at each other. Look now. Then go up the hill, the lot of you together, and ask him to his face."
+        ]
+      },
+      "journal": "What I had found carried the hearing. Both priests let the name stand, and the street with them.",
+      "then": "wait_moot"
+    },
+    "hearing_fails": {
+      "do": "talk", "who": { "?culprit=heir": "anvilpriest", "?": "tidepriest" }, "goal": "Hear the priests' answer",
+      "say": {
+        "?culprit=heir": [
+          "A boot print. A door bar. I have heard it. Half the lane wears nails set in a ring, and a bar that was not forced says only that it was not forced. You have laid a child's weight of ore on the scale and asked me to call it a seam.",
+          "And I will not have the boy fetched down to say whatever would get his father under the mountain. A son with a reason is no witness. The Father's house says it is not proved, and so it is not proved. Go home, all of you."
+        ],
+        "?": [
+          "A knife in a basket. A snag of wool. I have heard it. Every woman in that loft owns a net knife, and every shawl on this quay has scales in it. You have brought me the tide's leavings and called it a catch.",
+          "I will not have a woman named on that who has knotted for this house for fifty years. The Mother's house says it is not proved, and so it is not proved. Go home, all of you."
+        ]
+      },
+      "journal": "I named the true hand at the well and could not make it hold. The priest of that house would not have it, and what I had found was not enough to carry the street past them.",
+      "then": "end:unproven"
+    },
+    "hearing_false": {
+      "do": "talk", "who": "tidepriest", "goal": "Hear the priests' answer",
+      "say": [
+        "{named}. You say it loudly enough. And what have you laid at this well to carry it? Nothing that I can see, and nothing the Father's man can see either. When the two of us agree, the street should be afraid.",
+        "Too late. Look at them. Half of them came out wanting a name more than they wanted the right one, and you have handed them one."
+      ],
+      "mark": "salt_well_wrong",
+      "journal": "I gave the street a name I could not carry. It did not need carrying. They were moving on {named}'s door before the priests had finished speaking.",
+      "then": "wait_wrong"
     },
     "wait_moot": { "do": "wait", "days": [3, 6], "wake": "giver", "then": "moot_after" },
     "moot_after": {
@@ -280,6 +388,18 @@
     "wrong_after": {
       "do": "talk", "who": "giver", "goal": "Hear from {giver} what your name has done",
       "say": {
+        "?mark:salt_well_wrong & culprit=heir": [
+          "You gave me one name under my own roof and the well another, and the street acted on the one it heard. I'll not tell you all that was done. A door was broken, and it took four of us to stand in front of what was behind it.",
+          "Then last night, with the one you named shut in my own cellar for safety, somebody split the Holts' grindstone and poured brine into the bellows. So it was never the one in my cellar. So which name do you stand behind? Say it again, and be right."
+        ],
+        "?mark:salt_well_wrong & culprit=mender": [
+          "You gave me one name under my own roof and the well another, and the street acted on the one it heard. I'll not tell you all that was done. A door was broken, and it took four of us to stand in front of what was behind it.",
+          "Then last night, with the one you named shut in my own cellar for safety, the fleet's new storm anchors went off the quay end into deep water. All six. So it was never the one in my cellar. So which name do you stand behind? Say it again, and be right."
+        ],
+        "?mark:salt_well_wrong": [
+          "You gave me one name under my own roof and the well another, and the street acted on the one it heard. I'll not tell you all that was done. A door was broken, and it took four of us to stand in front of what was behind it.",
+          "Since then a Skerry boat has burned at her mooring and a Holt lad has a gaff wound in his arm. The houses did that to each other. And this morning both their notes of hand were called in, the town's peace being no longer to be relied on. Somebody is doing well out of this, and it is not the one in my cellar. So which name do you stand behind? Say it again, and be right."
+        ],
         "?culprit=heir": [
           "I carried your name to the elders and they acted on it. I'll not tell you all that was done. You will hear it in the street. A door was broken, and it took four of us to stand in front of what was behind it.",
           "Then last night, with the one you named shut in my own cellar for safety, somebody split the Holts' grindstone and poured brine into the bellows. So it was never the one in my cellar. I stood behind your name. Give me another, and be right."
@@ -346,8 +466,20 @@
       "marks": ["salt_took_chandler_coin"],
       "town": ["{giver} paid a stranger to find who did it, and the stranger found nothing. Funny, that.", "{chandler} bought the Skerrys' second boat last week. For a song."]
     },
+    "unproven": {
+      "text": "I named {culprit} at the well, before both houses, and could not make it hold. Each priest went home sure of their own. The nets are cut and the forge is cold, and now everyone has heard a name and nobody has had an answer.",
+      "reward": { "coins": 6, "reputation": 2 },
+      "marks": ["salt_unproven", "salt_feud_unsettled"],
+      "town": ["A stranger stood at the well and said a name, and the two priests ate it between them. I'd have liked to hear the rest.", "{culprit} goes about as before. Folk go quiet when it happens. That's all. For now."],
+      "later": [
+        { "days": [12, 20], "scene": [["a", "They say it was true, what the stranger said at the well."], ["b", "True's no use if you can't carry it past a priest."], ["a", "Hush. There's a Holt behind you. And a Skerry behind him."]] }
+      ]
+    },
     "late_truth": {
-      "text": "I named the wrong one first, and the town broke a door on my word. The second name was the true one. It was believed, but late.",
+      "text": {
+        "?mark:salt_well_wrong": "I had the true name and gave the well a wrong one, and the town broke a door on my word. When I said the true name again it was believed, but late.",
+        "?": "I named the wrong one first, and the town broke a door on my word. The second name was the true one. It was believed, but late."
+      },
       "reward": { "coins": 6, "reputation": 2 },
       "marks": ["salt_named_wrong"],
       "town": ["They broke an innocent body's door on a stranger's say-so. Nobody likes to recall who held the hammer.", "It's settled, they tell me. It doesn't feel settled."]
