@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,12 +13,12 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
-- [ ] [[Inbox/wither-model|wither-model]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
 ## In review
