@@ -14983,3 +14983,8 @@ Andy, 2026-11-18: only the kingdoms that generate properly (Epic villages) are k
 - **The first capital**: its Epic village is kept trying for 6000 ticks (was 1800, which the 11-17 world outran and fell to a castle), logging why each wait (`StoryGround.waitOn`); a village with no fit building sends the job to look for another town. With none left (or 6000 ticks), the world goes on without a realm until a player reaches an Epic town's bell.
 - Left as they were: operator `/kingdom found`, the Deck's keep and its deed, a player's paid `Crowns.found`, `GreatWars` and `Crowns` promoting a fief.
 - Built by CI only; not played.
+
+## 0.10.24 (2026-11-18): new-life starts land 500 to 1000 blocks from the last death (#1738)
+
+- **Starts**: a start in the wild or open land lands 500 to 1000 blocks from where the player last died (the vanilla last-death record): the setting-out point is drawn in that ring, and an open ring with no such spot takes one from the 500-1000 ring round the death. Starts that put the player inside a town, kingdom or fief (a capital, sworn, evicted, the moon-cursed village edge, the village starts) may stay close. A camp or wreck start with no such place in range falls to the wild. While little of the world is made yet (pregeneration), a start may still fall back to the spawn.
+- Built by CI; not played.
