@@ -7,9 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
-import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -35,8 +33,6 @@ public final class FarLand {
 	static final int WANT = 3;
 	/** How far (blocks) from a candidate the lie of the land is read, and the steepest it may be (height difference to any of the four). */
 	static final int SLOPE_STEP = 6, MAX_SLOPE = 5;
-	/** No village point of interest this near (blocks) the one picked; only the finalists are asked. */
-	static final int TOWN_CLEAR = 48;
 
 	/**
 	 * A column {@code min} to {@code max} blocks from {@code centre} on dry, gentle land (y is the ground the generator would
@@ -76,19 +72,18 @@ public final class FarLand {
 			int slope = 0;
 			for (int[] d : new int[][] {{SLOPE_STEP, 0}, {-SLOPE_STEP, 0}, {0, SLOPE_STEP}, {0, -SLOPE_STEP}}) {
 				slope = Math.max(slope, Math.abs(height(generator, ground, state, x + d[0], z + d[1]) - y));
+				if (slope > MAX_SLOPE) {
+					break;
+				}
 			}
 			if (slope <= MAX_SLOPE) {
 				passed.add(new Spot(new BlockPos(x, y + ground.shift(), z), slope));
 			}
 		}
+		// (no town is looked for here: reading the world's records of villages is region files on the server thread, and the
+		// caller's own test on the loaded spot keeps them clear of towns)
 		passed.sort(Comparator.comparingInt(Spot::slope));
-		for (Spot spot : passed) {
-			// (a village's points of interest, read from the world's records: no chunk is made for it)
-			if (level.getPoiManager().findClosest(h -> h.is(PoiTypeTags.VILLAGE), spot.at(), TOWN_CLEAR, PoiManager.Occupancy.ANY).isEmpty()) {
-				return spot.at();
-			}
-		}
-		return null;
+		return passed.isEmpty() ? null : passed.get(0).at();
 	}
 
 	private static int height(ChunkGenerator generator, com.jaymospowers.compat.Stacked.Ground ground, RandomState state, int x, int z) {
