@@ -14,11 +14,12 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The picker screens' shared layout (heritage, class, patrons, the life story's questions), in three columns across the whole
- * screen: the figure of you on the LEFT (with a button or two under it), a compact list of the choices in the middle (one or
- * two columns of icon, name and a one-line tag; the rows shrink and the list scrolls when there are many), and a big info
- * panel on the right (icon, name, tag, pills, the story, then labelled sections and the paths the choice grows into; it
- * scrolls with the wheel and a thin bar). Small windows get one list column and a narrower figure. Text is never cut: a long
- * line slides ({@link Ui#line}), a full panel scrolls.
+ * screen: the figure of you on the LEFT (with a button or two under it), the choices in the middle as big boxes, three or four
+ * at a time with the rest a wheel away (Andy: "show maybe 3 or 4 at a time, then scroll up and down", so each box has room for
+ * its name and tag in full), and a big info panel on the right (icon, name, tag, pills, the story, then labelled sections and
+ * the paths the choice grows into; it scrolls with the wheel and a thin bar). Long text in the panel is broken into short
+ * paragraphs with room between them, not one wall. Text is never cut: a long line slides ({@link Ui#line}), a full panel
+ * scrolls.
  *
  * <p>A screen owns one of these, calls {@link #fit} when it sets up and every frame before drawing, then {@link #header},
  * {@link #backdrop}, draws the figure in {@link #figureBox}, {@link #caption}, {@link #list} and {@link #info}.
@@ -30,6 +31,12 @@ public final class PickerLayout {
 	public static final int ROW_MAX = 24, ROW_MIN = 13, ROW_TAGGED = 21;
 	/** What one notch of the wheel moves the info panel (pixels). */
 	public static final int SCROLL_STEP = 12;
+	/** How many boxes the list shows at a time, and the fewest when the window is too short for that many {@link #BOX_MIN}-high boxes. */
+	public static final int BOXES_SHOWN = 4, BOXES_SHOWN_SHORT = 3, BOX_MIN = 44;
+	/** The info panel's spacing: extra pixels between lines, between paragraphs, between a section's lines, and the bullet's indent. */
+	public static final int LEADING = 1, PARA_GAP = 6, ITEM_GAP = 4, BULLET_W = 8;
+	/** A piece of text longer than this many characters is broken at its sentences into paragraphs of {@link #PARA_SENTENCES}. */
+	public static final int PARA_SPLIT = 160, PARA_SENTENCES = 2;
 	/** The height of a button under the figure, and the gap between two. */
 	public static final int BUTTON_H = 16, BUTTON_GAP = 3;
 
@@ -103,7 +110,7 @@ public final class PickerLayout {
 			fig -= giveFig;
 			list = total - fig - info - 2 * GAP;
 		}
-		this.cols = list >= 2 * MIN_COL + GAP ? 2 : 1;
+		this.cols = 1;
 		this.figX = MARGIN;
 		this.figW = fig;
 		this.listX = this.figX + fig + GAP;
@@ -185,7 +192,11 @@ public final class PickerLayout {
 	private void rowsFor(int n) {
 		this.rows = (n + this.cols - 1) / this.cols;
 		int avail = this.bodyBottom - this.bodyTop;
-		this.rowH = Math.clamp(avail / Math.max(1, this.rows), ROW_MIN, Math.max(ROW_MIN, this.rowMax));
+		// three or four boxes fill the column; a short list's boxes may grow to fill it, as far as the screen lets them
+		int shown = avail / BOXES_SHOWN >= BOX_MIN ? BOXES_SHOWN : BOXES_SHOWN_SHORT;
+		int box = avail / shown;
+		int fill = avail / Math.max(1, this.rows);
+		this.rowH = Math.max(ROW_MIN, Math.max(box, Math.min(fill, this.rowMax)));
 		this.listScroll = Math.clamp(this.listScroll, 0, Math.max(0, this.rows - visibleRows()));
 	}
 
@@ -390,7 +401,8 @@ public final class PickerLayout {
 	private int body(GuiGraphicsExtractor graphics, Font font, Info info, int x, int y, int w, int clipTop, int clipBottom, boolean draw) {
 		int start = y;
 		for (Component para : info.story()) {
-			y = paragraph(graphics, font, para, x, y, w, Ui.TEXT, clipTop, clipBottom, draw) + 3;
+			int color = para.getStyle().getColor() != null ? 0xFF000000 | para.getStyle().getColor().getValue() : Ui.TEXT;
+			y = paragraphs(graphics, font, para, x, y, w, color, clipTop, clipBottom, draw) + PARA_GAP;
 		}
 		for (Section s : info.sections()) {
 			if (s.lines().isEmpty()) {
@@ -400,10 +412,16 @@ public final class PickerLayout {
 			if (draw && y + Ui.LINE > clipTop && y < clipBottom) {
 				Ui.line(graphics, font, Component.literal(s.label().getString().toUpperCase(Locale.ROOT)), x, y, w, s.color());
 			}
-			y += Ui.LINE + 2;
+			y += Ui.LINE + 4;
+			// two or more lines are a list: each gets a bullet and hangs under it
+			boolean bullets = s.lines().size() > 1;
+			int lx = bullets ? x + BULLET_W : x, lw = bullets ? w - BULLET_W : w;
 			for (Component line : s.lines()) {
 				int color = line.getStyle().getColor() != null ? 0xFF000000 | line.getStyle().getColor().getValue() : Ui.TEXT;
-				y = paragraph(graphics, font, line, x, y, w, color, clipTop, clipBottom, draw) + 2;
+				if (bullets && draw && y + Ui.LINE > clipTop && y < clipBottom) {
+					graphics.text(font, Component.literal("\u2022"), x + 1, y, s.color());
+				}
+				y = paragraphs(graphics, font, line, lx, y, lw, color, clipTop, clipBottom, draw) + ITEM_GAP;
 			}
 		}
 		if (!info.paths().isEmpty()) {
@@ -413,7 +431,7 @@ public final class PickerLayout {
 			}
 			y += Ui.LINE + 2;
 			if (info.pathsNote() != null) {
-				y = paragraph(graphics, font, info.pathsNote(), x, y, w, Ui.HINT, clipTop, clipBottom, draw) + 3;
+				y = paragraph(graphics, font, info.pathsNote(), x, y, w, Ui.HINT, clipTop, clipBottom, draw) + ITEM_GAP;
 			}
 			for (Path p : info.paths()) {
 				int n = Math.min(p.icons().size(), Math.max(1, (w - 60) / 22));
@@ -449,9 +467,78 @@ public final class PickerLayout {
 			if (draw && y + Ui.LINE > clipTop && y < clipBottom) {
 				graphics.text(font, seq, x, y, color);
 			}
-			y += Ui.LINE;
+			y += Ui.LINE + LEADING;
 		}
 		return y;
+	}
+
+	/**
+	 * {@code text} as paragraphs: a short one as it is; a long one broken at its sentences, {@link #PARA_SENTENCES} to a
+	 * paragraph, and a sentence that is itself long broken again at its semicolons, with {@link #PARA_GAP} between paragraphs.
+	 * Returns the y under the last line.
+	 */
+	private static int paragraphs(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int w, int color, int clipTop, int clipBottom,
+		boolean draw) {
+		String all = text.getString();
+		if (all.length() <= PARA_SPLIT) {
+			return paragraph(graphics, font, text, x, y, w, color, clipTop, clipBottom, draw);
+		}
+		List<String> paras = new java.util.ArrayList<>();
+		StringBuilder group = new StringBuilder();
+		int inGroup = 0;
+		for (String sentence : splitTop(all, ". ", true)) {
+			if (sentence.length() > PARA_SPLIT) {
+				if (!group.isEmpty()) {
+					paras.add(group.toString());
+					group.setLength(0);
+					inGroup = 0;
+				}
+				paras.addAll(splitTop(sentence, "; ", true));
+				continue;
+			}
+			if (!group.isEmpty()) {
+				group.append(' ');
+			}
+			group.append(sentence);
+			if (++inGroup >= PARA_SENTENCES) {
+				paras.add(group.toString());
+				group.setLength(0);
+				inGroup = 0;
+			}
+		}
+		if (!group.isEmpty()) {
+			paras.add(group.toString());
+		}
+		for (int i = 0; i < paras.size(); i++) {
+			if (i > 0) {
+				y += PARA_GAP - LEADING;
+			}
+			y = paragraph(graphics, font, Component.literal(paras.get(i)), x, y, w, color, clipTop, clipBottom, draw);
+		}
+		return y;
+	}
+
+	/** {@code s} cut at each {@code sep} outside brackets, the separator's mark kept on the left piece when {@code keep}. */
+	static List<String> splitTop(String s, String sep, boolean keep) {
+		List<String> out = new java.util.ArrayList<>();
+		int depth = 0, from = 0;
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if (c == '(' || c == '[') {
+				depth++;
+			} else if ((c == ')' || c == ']') && depth > 0) {
+				depth--;
+			} else if (depth == 0 && s.startsWith(sep, i)) {
+				out.add(s.substring(from, keep ? i + 1 : i).trim());
+				from = i + sep.length();
+				i = from - 1;
+			}
+		}
+		String rest = s.substring(from).trim();
+		if (!rest.isEmpty()) {
+			out.add(rest);
+		}
+		return out;
 	}
 
 	/** The id of the pressable path row at the mouse, or -1. */
