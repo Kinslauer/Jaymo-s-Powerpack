@@ -66,6 +66,13 @@ public final class PickerLayout {
 	/** The figure column, the list and the info panel: x and width of each, and the body's top and bottom. */
 	public int figX, figW, listX, listW, infoX, infoW, bodyTop, bodyBottom;
 	public int cols = 1;
+	/**
+	 * A row's tallest height. The life story raises it ({@link #FILL_ROW_MAX}) so its few answers fill the middle column as big
+	 * boxes, with a bigger icon box and the name and tag wrapped in full (Andy: "there shouldnt be so much unused space").
+	 */
+	public int rowMax = ROW_MAX;
+	/** The tallest a row may grow when a screen lets the list fill its column, and the biggest its icon box gets. */
+	public static final int FILL_ROW_MAX = 80, FILL_BOX_MAX = 40;
 	private int buttons, rowH, rows;
 	private int listScroll;
 	private int infoScroll, infoContentH, infoViewH;
@@ -178,7 +185,7 @@ public final class PickerLayout {
 	private void rowsFor(int n) {
 		this.rows = (n + this.cols - 1) / this.cols;
 		int avail = this.bodyBottom - this.bodyTop;
-		this.rowH = Math.clamp(avail / Math.max(1, this.rows), ROW_MIN, ROW_MAX);
+		this.rowH = Math.clamp(avail / Math.max(1, this.rows), ROW_MIN, Math.max(ROW_MIN, this.rowMax));
 		this.listScroll = Math.clamp(this.listScroll, 0, Math.max(0, this.rows - visibleRows()));
 	}
 
@@ -233,24 +240,47 @@ public final class PickerLayout {
 			} else {
 				rim(graphics, x, y, cw, h, 0x30FFFFFF);
 			}
-			int box = Math.min(h - 4, 18);
-			int bx = x + 3, by = y + (h - box) / 2;
+			boolean big = h > ROW_MAX;
+			int box = big ? Math.min(h - 8, FILL_BOX_MAX) : Math.min(h - 4, 18);
+			int bx = x + (big ? 5 : 3), by = y + (h - box) / 2;
 			rim(graphics, bx, by, box, box, e.locked() ? 0x40FFFFFF : e.rim());
-			if (!e.locked()) {
+			if (!e.locked() && (e.glyph() != null || !e.icon().isEmpty())) {
+				// in a big box the picture grows with it
+				float k = big ? Math.max(1.0F, (box - 6) / 16.0F) : 1.0F;
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(bx + (box - 16 * k) / 2.0F, by + (box - 16 * k) / 2.0F);
+				graphics.pose().scale(k, k);
 				if (e.glyph() != null) {
-					e.glyph().paint(graphics, bx + (box - 16) / 2, by + (box - 16) / 2);
-				} else if (!e.icon().isEmpty()) {
-					graphics.item(e.icon(), bx + (box - 16) / 2, by + (box - 16) / 2);
+					e.glyph().paint(graphics, 0, 0);
+				} else {
+					graphics.item(e.icon(), 0, 0);
 				}
+				graphics.pose().popMatrix();
 			}
 			if (crossed && isPicked) {
 				cross(graphics, bx, by, box);
 			}
-			int tx = bx + box + 4, room = x + cw - 3 - tx;
+			int tx = bx + box + (big ? 7 : 4), room = x + cw - (big ? 6 : 3) - tx;
 			int nameColor = e.locked() ? Ui.HINT : isPicked ? accent : Ui.TEXT;
-			if (tagged && e.tag() != null) {
+			int tagColor = e.locked() ? 0xFF50505C : Ui.DIM;
+			List<FormattedCharSequence> nameLines = big ? font.split(e.name(), room) : List.of();
+			List<FormattedCharSequence> tagLines = big && e.tag() != null ? font.split(e.tag(), room) : List.of();
+			int textH = (nameLines.size() + tagLines.size()) * Ui.LINE + (tagLines.isEmpty() ? 0 : 2);
+			if (big && textH <= h - 6) {
+				// a big row: the name and the tag wrapped in full, centred in the row's height
+				int ty = y + (h - textH) / 2 + 1;
+				for (FormattedCharSequence l : nameLines) {
+					graphics.text(font, l, tx, ty, nameColor);
+					ty += Ui.LINE;
+				}
+				ty += 2;
+				for (FormattedCharSequence l : tagLines) {
+					graphics.text(font, l, tx, ty, tagColor);
+					ty += Ui.LINE;
+				}
+			} else if (tagged && e.tag() != null) {
 				Ui.line(graphics, font, e.name(), tx, y + 4, room, nameColor);
-				Ui.line(graphics, font, e.tag(), tx, y + 4 + Ui.LINE + 1, room, e.locked() ? 0xFF50505C : Ui.DIM);
+				Ui.line(graphics, font, e.tag(), tx, y + 4 + Ui.LINE + 1, room, tagColor);
 			} else {
 				Ui.line(graphics, font, e.name(), tx, y + (h - 8) / 2 + 1, room, nameColor);
 			}
@@ -273,18 +303,20 @@ public final class PickerLayout {
 		stroke(graphics, x + size - 1, y - over / 2, x - over, y + size - 1 + over, size, 1.7);
 	}
 
-	/** One stroke of the X, from (x0, y0) to (x1, y1), wavering up to a pixel off its line in big boxes. */
+	/** One stroke of the X, from (x0, y0) to (x1, y1), wavering up to a pixel off its line in bigger boxes. */
 	private static void stroke(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int size, double phase) {
 		double dx = x1 - x0, dy = y1 - y0, len = Math.sqrt(dx * dx + dy * dy);
 		int steps = Math.max(1, (int)Math.ceil(len * 2));
 		double wave = size >= 12 ? 1.0 : 0.0;
+		// a big box gets a broader nib
+		int pen = size >= 24 ? 2 : 1;
 		int lastX = Integer.MIN_VALUE, lastY = Integer.MIN_VALUE;
 		for (int i = 0; i <= steps; i++) {
 			double t = (double)i / steps, off = wave * Math.sin(t * Math.PI * 1.6 + phase) * Math.sin(t * Math.PI);
 			int px = (int)Math.round(x0 + dx * t - dy / len * off), py = (int)Math.round(y0 + dy * t + dx / len * off);
 			if (px != lastX || py != lastY) {
-				graphics.fill(px, py + 1, px + 1, py + 2, CROSS_EDGE);
-				graphics.fill(px, py, px + 1, py + 1, CROSS_INK);
+				graphics.fill(px, py + pen, px + pen, py + 2 * pen, CROSS_EDGE);
+				graphics.fill(px, py, px + pen, py + pen, CROSS_INK);
 				lastX = px;
 				lastY = py;
 			}

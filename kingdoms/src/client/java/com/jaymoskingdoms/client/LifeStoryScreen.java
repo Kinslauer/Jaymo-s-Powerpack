@@ -140,6 +140,11 @@ final class LifeStoryScreen extends Screen {
 	private @Nullable ToneSlider tone;
 	/** The question pages' layout (figure, list, info panel), and whether the footer buttons are placed for it now. */
 	private final PickerLayout picker = new PickerLayout();
+
+	{
+		// the answers fill the middle column as big boxes
+		this.picker.rowMax = PickerLayout.FILL_ROW_MAX;
+	}
 	private boolean pickerPlaced;
 	/** The character creator's: every row drawn again, and its presets (a name to save under, save, delete, load the next). */
 	/** Whether the creator's cards ({@link CreatorTab}) are on this screen now: the story skipped, with no creator of MCA's to hold them. */
@@ -1850,7 +1855,8 @@ final class LifeStoryScreen extends Screen {
 		Classes.PlayerClass cls = youthClass();
 		if (cls != null && !cls.options.isEmpty()) {
 			y += 4;
-			graphics.text(this.font, Component.translatable(cls == Classes.PlayerClass.MAGE ? "gui.jaymoskingdoms.story.spell" : "gui.jaymoskingdoms.story.element"),
+			graphics.text(this.font, Component.translatable(cls == Classes.PlayerClass.MAGE ? "gui.jaymoskingdoms.story.spell"
+				: cls == Classes.PlayerClass.CLERIC ? "gui.jaymoskingdoms.story.faith" : "gui.jaymoskingdoms.story.element"),
 				px + 10, y, draft.option < 0 ? ACCENT : Ui.DIM);
 			y += 12;
 			this.chipsTop = y + this.scroll;
