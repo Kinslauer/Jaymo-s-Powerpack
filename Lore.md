@@ -128,6 +128,14 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
+**Called in a dream** (new; Lanterns patch 8, Andy's Buder's Lanterns pick). Sometimes a sleeping power does not wait for
+days of hard living: it comes up through its holder while they sleep, from the one well, and they dream it. Most who are
+called dream of a quiet light that knows their name, and wake in the morning with the power in them. But the well runs close
+to the other side, and some calls come up through its dark instead: the sleeper starts up into a night with no edges, and
+the dark's own phantoms come for them out of it, real enough that anyone awake nearby sees black shapes wheeling over the
+bed. Nobody has died of one; the dark lets go before that, and takes the power back with it. Whoever lives the night through
+wakes with their power already bent the wrong way, corrupted from its first breath.
+
 **The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
