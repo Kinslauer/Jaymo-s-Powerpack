@@ -44,7 +44,7 @@ public final class BeltScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - WIDTH) / 2;
+		return com.jaymoskingdoms.client.MenuCompat.centre(this.width, WIDTH);
 	}
 
 	private int top() {

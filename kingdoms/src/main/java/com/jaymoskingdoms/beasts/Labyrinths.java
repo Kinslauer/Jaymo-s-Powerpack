@@ -167,6 +167,8 @@ public final class Labyrinths {
 			minotaur.setHomeTo(spot, HOME_RADIUS);
 			minotaur.addTag(TAG);
 			level.addFreshEntity(minotaur);
+			// the labyrinth-builders' braziers, gates, tablets and prize
+			LabyrinthKeep.furnish(level, halls, hall, spot);
 			return true;
 		}
 		minotaur.discard();

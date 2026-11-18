@@ -44,5 +44,10 @@ public final class SpeciesSizes {
 		Map.entry("crayfish", new Size(0.2F, 0.2F, 0.105F)),
 		Map.entry("crab", new Size(0.222F, 0.2F, 0.317F)),
 		Map.entry("lobster", new Size(0.315F, 0.2F, 0.254F)),
-		Map.entry("jellyfish", new Size(0.3F, 0.433F, 0.533F)));
+		Map.entry("jellyfish", new Size(0.3F, 0.433F, 0.533F)),
+		Map.entry("cavefish", new Size(0.2F, 0.2F, 0.101F)),
+		Map.entry("olm", new Size(0.2F, 0.2F, 0.195F)),
+		Map.entry("ash_molly", new Size(0.2F, 0.2F, 0.086F)),
+		Map.entry("cinder_pupfish", new Size(0.2F, 0.2F, 0.083F)),
+		Map.entry("ember_tilapia", new Size(0.2F, 0.2F, 0.295F)));
 }

@@ -156,7 +156,7 @@ public class PowerScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - W) / 2;
+		return com.jaymospowers.client.menu.MenuTabs.centreX(this.width, W);
 	}
 
 	private int top() {

@@ -437,6 +437,68 @@ final class FishShapes {
 			new P("arm3", "bell", 0, 21, -1F, 0F, 0F, 2F, 6F, 0F, 0.849F, 0.5F, -0.849F, 0F, -5.498F, 0F, 8, 11)));
 	}
 
+	private static Shape CAVEFISH() {
+		return new Shape(64, 32, List.of(
+			new P("body", null, 0, 0, -1F, -1.5F, 0F, 2F, 3F, 7F, 0F, 22F, -4F, 0F, 0F, 0F, 0, 0),
+			new P("head", null, 18, 0, -0.9F, -1.25F, -2.5F, 1.8F, 2.5F, 2.5F, 0F, 21.925F, -4F, 0F, 0F, 0F, 0, 0),
+			new P("stalk", null, 32, 0, -0.5F, -0.75F, 0F, 1F, 1.5F, 1.5F, 0F, 21.85F, 3F, 0F, 0F, 0F, 1, 0),
+			new P("tail", "stalk", 28, 0, 0F, -1.5F, 0F, 0F, 3F, 2F, 0F, 0F, 1.2F, 0F, 0F, 0F, 2, 0),
+			new P("dorsal", null, 38, 0, 0F, -1.5F, 0F, 0F, 1.5F, 2F, 0F, 20.5F, -1.2F, 0F, 0F, 0F, 0, 0),
+			new P("left_fin", null, 46, 0, 0F, 0F, 0F, 2F, 0F, 1.6F, 1F, 22.75F, -3.5F, 0F, 0F, 0.628F, 3, 0),
+			new P("right_fin", null, 54, 0, -2F, 0F, 0F, 2F, 0F, 1.6F, -1F, 22.75F, -3.5F, 0F, 0F, -0.628F, 4, 0),
+			new P("anal", null, 42, 0, 0F, 0F, 0F, 0F, 1.5F, 2F, 0F, 23.5F, 0.2F, 0F, 0F, 0F, 0, 0)));
+	}
+
+	private static Shape OLM() {
+		return new Shape(64, 32, List.of(
+			new P("head", null, 36, 8, -1F, -1F, -3F, 2F, 2F, 3F, 0F, 22.5F, -7.25F, 0F, 0F, 0F, 0, 0),
+			new P("seg0", null, 32, 0, -1F, -1F, 0F, 2F, 2F, 3.5F, 0F, 22.5F, -7.25F, 0F, 0F, 0F, 5, 0),
+			new P("seg1", "seg0", 44, 0, -0.88F, -0.88F, 0F, 1.76F, 1.76F, 3.5F, 0F, 0F, 3.5F, 0F, 0F, 0F, 5, 1),
+			new P("fin1", "seg1", 0, 0, 0F, -1.68F, 0F, 0F, 3.36F, 3.5F, 0F, 0F, 0F, 0F, 0F, 0F, 0, 0),
+			new P("seg2", "seg1", 0, 8, -0.76F, -0.76F, 0F, 1.52F, 1.52F, 3.5F, 0F, 0F, 3.5F, 0F, 0F, 0F, 5, 2),
+			new P("fin2", "seg2", 8, 0, 0F, -1.56F, 0F, 0F, 3.12F, 3.5F, 0F, 0F, 0F, 0F, 0F, 0F, 0, 0),
+			new P("seg3", "seg2", 12, 8, -0.64F, -0.64F, 0F, 1.28F, 1.28F, 3.5F, 0F, 0F, 3.5F, 0F, 0F, 0F, 5, 3),
+			new P("fin3", "seg3", 16, 0, 0F, -1.44F, 0F, 0F, 2.88F, 3.5F, 0F, 0F, 0F, 0F, 0F, 0F, 0, 0),
+			new P("seg4", "seg3", 24, 8, -0.52F, -0.52F, 0F, 1.04F, 1.04F, 3.5F, 0F, 0F, 3.5F, 0F, 0F, 0F, 5, 4),
+			new P("fin4", "seg4", 24, 0, 0F, -1.32F, 0F, 0F, 2.64F, 3.5F, 0F, 0F, 0F, 0F, 0F, 0F, 0, 0)));
+	}
+
+	private static Shape ASH_MOLLY() {
+		return new Shape(64, 32, List.of(
+			new P("body", null, 0, 0, -1F, -1.75F, 0F, 2F, 3.5F, 6F, 0F, 21.75F, -3.75F, 0F, 0F, 0F, 0, 0),
+			new P("head", null, 20, 0, -0.9F, -1.5F, -2F, 1.8F, 3F, 2F, 0F, 21.675F, -3.75F, 0F, 0F, 0F, 0, 0),
+			new P("stalk", null, 34, 0, -0.5F, -1F, 0F, 1F, 2F, 1.5F, 0F, 21.6F, 2.25F, 0F, 0F, 0F, 1, 0),
+			new P("tail", "stalk", 16, 0, 0F, -1.75F, 0F, 0F, 3.5F, 2F, 0F, 0F, 1.2F, 0F, 0F, 0F, 2, 0),
+			new P("dorsal", null, 28, 0, 0F, -2F, 0F, 0F, 2F, 3F, 0F, 20F, -1.95F, 0F, 0F, 0F, 0, 0),
+			new P("left_fin", null, 44, 0, 0F, 0F, 0F, 2F, 0F, 1.6F, 1F, 22.625F, -3.25F, 0F, 0F, 0.628F, 3, 0),
+			new P("right_fin", null, 52, 0, -2F, 0F, 0F, 2F, 0F, 1.6F, -1F, 22.625F, -3.25F, 0F, 0F, -0.628F, 4, 0),
+			new P("anal", null, 40, 0, 0F, 0F, 0F, 0F, 1.5F, 2F, 0F, 23.5F, -0.15F, 0F, 0F, 0F, 0, 0)));
+	}
+
+	private static Shape CINDER_PUPFISH() {
+		return new Shape(64, 32, List.of(
+			new P("body", null, 0, 0, -1.25F, -1.75F, 0F, 2.5F, 3.5F, 4F, 0F, 21.75F, -2.5F, 0F, 0F, 0F, 0, 0),
+			new P("head", null, 18, 0, -1.125F, -1.5F, -1.5F, 2.25F, 3F, 1.5F, 0F, 21.675F, -2.5F, 0F, 0F, 0F, 0, 0),
+			new P("stalk", null, 38, 0, -0.625F, -1F, 0F, 1.25F, 2F, 1F, 0F, 21.6F, 1.5F, 0F, 0F, 0F, 1, 0),
+			new P("tail", "stalk", 14, 0, 0F, -1.75F, 0F, 0F, 3.5F, 1.5F, 0F, 0F, 0.7F, 0F, 0F, 0F, 2, 0),
+			new P("dorsal", null, 28, 0, 0F, -1.5F, 0F, 0F, 1.5F, 2.5F, 0F, 20F, -1.3F, 0F, 0F, 0F, 0, 0),
+			new P("left_fin", null, 44, 0, 0F, 0F, 0F, 2F, 0F, 1.6F, 1.25F, 22.625F, -2F, 0F, 0F, 0.628F, 3, 0),
+			new P("right_fin", null, 52, 0, -2F, 0F, 0F, 2F, 0F, 1.6F, -1.25F, 22.625F, -2F, 0F, 0F, -0.628F, 4, 0),
+			new P("anal", null, 34, 0, 0F, 0F, 0F, 0F, 1.5F, 2F, 0F, 23.5F, -0.1F, 0F, 0F, 0F, 0, 0)));
+	}
+
+	private static Shape EMBER_TILAPIA() {
+		return new Shape(64, 32, List.of(
+			new P("body", null, 0, 0, -1.25F, -2.5F, 0F, 2.5F, 5F, 8F, 0F, 21F, -4.75F, 0F, 0F, 0F, 0, 0),
+			new P("head", null, 40, 0, -1.125F, -2F, -3F, 2.25F, 4F, 3F, 0F, 20.85F, -4.75F, 0F, 0F, 0F, 0, 0),
+			new P("stalk", null, 52, 0, -0.625F, -1.5F, 0F, 1.25F, 3F, 2F, 0F, 20.8F, 3.25F, 0F, 0F, 0F, 1, 0),
+			new P("tail", "stalk", 34, 0, 0F, -2.5F, 0F, 0F, 5F, 2.5F, 0F, 0F, 1.7F, 0F, 0F, 0F, 2, 0),
+			new P("dorsal", null, 22, 0, 0F, -3F, 0F, 0F, 3F, 6F, 0F, 18.5F, -3.55F, 0F, 0F, 0F, 0, 0),
+			new P("left_fin", null, 0, 13, 0F, 0F, 0F, 2F, 0F, 1.6F, 1.25F, 22.25F, -4.25F, 0F, 0F, 0.628F, 3, 0),
+			new P("right_fin", null, 8, 13, -2F, 0F, 0F, 2F, 0F, 1.6F, -1.25F, 22.25F, -4.25F, 0F, 0F, -0.628F, 4, 0),
+			new P("anal", null, 60, 0, 0F, 0F, 0F, 0F, 1.5F, 2F, 0F, 23.5F, 0.05F, 0F, 0F, 0F, 0, 0)));
+	}
+
 	static final Map<String, Shape> ALL = Map.ofEntries(
 		Map.entry("carp", CARP()),
 		Map.entry("pike", PIKE()),
@@ -467,5 +529,10 @@ final class FishShapes {
 		Map.entry("crayfish", CRAYFISH()),
 		Map.entry("crab", CRAB()),
 		Map.entry("lobster", LOBSTER()),
-		Map.entry("jellyfish", JELLYFISH()));
+		Map.entry("jellyfish", JELLYFISH()),
+		Map.entry("cavefish", CAVEFISH()),
+		Map.entry("olm", OLM()),
+		Map.entry("ash_molly", ASH_MOLLY()),
+		Map.entry("cinder_pupfish", CINDER_PUPFISH()),
+		Map.entry("ember_tilapia", EMBER_TILAPIA()));
 }
