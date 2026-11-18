@@ -5,6 +5,9 @@ import com.jaymoskingdoms.Lean;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -14,6 +17,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.util.Mth;
@@ -26,12 +33,29 @@ import net.minecraft.world.entity.player.Player;
  * view swing out and back. The camera ({@code CameraLeanMixin}) and every player's model ({@code AvatarLeanMixin}) read it.
  * <p>
  * The local player's lean follows the keys at once; everyone else's follows the attachment the server syncs.
+ * <p>
+ * Andy: "the character currently bends at the torso instead of using the leg to support that far of a bend". The lean is
+ * carried by the legs, as in a shooter's corner peek: the hips slide out {@link #HIP_SHIFT} and sink {@link #HIP_DROP}, the
+ * lean-side foot steps out {@link #STEP_OUT} and its knee bends under the weight, the far leg stays straight from where its
+ * foot was, and only the body above the hips tilts ({@link Lean#TILT}), the head kept nearer level ({@link #HEAD_LEVEL}).
+ * The knee is Jaymo's Powers' {@code KneeBend}; without Powers the leg is drawn straight.
  */
 public final class LeanClient {
 	/** How fast the lean comes and goes (a share of the full lean a tick): a quarter second to full. */
 	static final float STEP = 0.2F;
 	/** The camera stops this far short of a wall it leans into (blocks). */
 	public static final double CAMERA_GAP = 0.25;
+	/**
+	 * At a full lean (pixels of the player model): the hips slide this far out and sink this far, and the lean-side foot steps
+	 * this far out. With {@link Lean#TILT} above the hips, the eye ends up about {@link Lean#REACH} out.
+	 */
+	static final float HIP_SHIFT = 5.0F, HIP_DROP = 1.5F, STEP_OUT = 4.0F;
+	/** The head takes back this share of the body's tilt, so it stays nearer level. */
+	static final float HEAD_LEVEL = 0.5F;
+	/** The player model: legs this far either side of the middle and this long, the hips this far down the model (pixels). */
+	static final float HIP_HALF = 1.9F, LEG = 12.0F, HIP_Y = 12.0F;
+	/** A pixel of the player model in blocks (players are drawn at 0.9375), and where its origin sits above the feet (blocks). */
+	static final float PX = 0.9375F / 16.0F, MODEL_TOP = 1.501F;
 
 	private static KeyMapping left;
 	private static KeyMapping right;
@@ -41,6 +65,9 @@ public final class LeanClient {
 	private static final Map<EntityRenderState, Float> STATES = new WeakHashMap<>();
 	/** What the server was last told. */
 	private static int sent;
+	/** Jaymo's Powers' {@code KneeBend.bend(ModelPart, float)}, if it's there. */
+	private static MethodHandle kneeBend;
+	private static boolean lookedForKnee;
 
 	private LeanClient() {
 	}
@@ -120,11 +147,98 @@ public final class LeanClient {
 		}
 	}
 
-	/** Tilts a leaning player's model out about its feet (called as the model is set up, in the body's own frame). */
+	/**
+	 * Slides a leaning player's hips out and down and tilts the body above them (called as the model is set up, in the body's
+	 * own frame: +x to the right, blocks). The legs are set back on the ground by {@link #pose}.
+	 */
 	public static void rotate(EntityRenderState state, PoseStack poseStack) {
 		Float amount = STATES.get(state);
-		if (amount != null) {
-			poseStack.rotateDegrees(Axis.ZP, -amount * Lean.TILT);
+		if (amount == null) {
+			return;
 		}
+		float hip = (MODEL_TOP - HIP_Y / 16.0F) * 0.9375F;
+		poseStack.translate(amount * HIP_SHIFT * PX, hip - Math.abs(amount) * HIP_DROP * PX, 0.0F);
+		poseStack.rotateDegrees(Axis.ZP, -amount * Lean.TILT);
+		poseStack.translate(0.0F, -hip, 0.0F);
+	}
+
+	/**
+	 * Right after a leaning player's model is posed: each leg turned so its foot stays on the ground under the tilted body, the
+	 * lean-side one stepped out and bent at the knee ({@link #bendKnee}), the far one straight; the head tilted back toward level.
+	 */
+	public static void pose(Model<?> model, Object state) {
+		if (!(state instanceof EntityRenderState s) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		Float amount = STATES.get(s);
+		if (amount == null) {
+			return;
+		}
+		float[] legs = legs(amount);
+		float side = Math.signum(amount);
+		ModelPart lean = amount > 0.0F ? h.rightLeg : h.leftLeg;
+		ModelPart far = amount > 0.0F ? h.leftLeg : h.rightLeg;
+		// (+zRot swings a leg toward the model's right)
+		lean.zRot += side * legs[0];
+		lean.xRot -= legs[1] * 0.5F;
+		far.zRot += side * legs[2];
+		h.head.zRot += amount * Lean.TILT * Mth.DEG_TO_RAD * HEAD_LEVEL;
+	}
+
+	/** Right before a leaning player's model is drawn: the lean-side knee bent (Powers' KneeBend, which straightens it after). */
+	public static void bendKnee(Model<?> model, Object state) {
+		if (!(state instanceof EntityRenderState s) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		Float amount = STATES.get(s);
+		MethodHandle bend = amount == null ? null : kneeBend();
+		if (bend == null) {
+			return;
+		}
+		try {
+			bend.invoke(amount > 0.0F ? h.rightLeg : h.leftLeg, legs(amount)[1]);
+		} catch (Throwable e) {
+			kneeBend = null;
+			JaymosKingdoms.LOGGER.warn("Couldn't bend a leaning player's knee", e);
+		}
+	}
+
+	/**
+	 * The legs under a lean of {@code amount}, in the body's frame (radians, + toward the lean): the lean-side leg's turn and
+	 * knee bend, then the far leg's turn. Worked out across the body, the sideways move out and the up and down: the lean-side
+	 * foot stepped out from under its hip, the far foot straight down from its hip as far as a straight leg reaches.
+	 */
+	static float[] legs(float amount) {
+		float m = Math.abs(amount);
+		float tilt = m * Lean.TILT * Mth.DEG_TO_RAD;
+		float c = Mth.cos(tilt), s = Mth.sin(tilt);
+		float shift = m * HIP_SHIFT, drop = m * HIP_DROP;
+		// lean side: the hip (out and down with the tilt) to the foot stepped out on the ground
+		float hipOut = shift + HIP_HALF * c, hipUp = -drop - HIP_HALF * s;
+		float across = HIP_HALF + m * STEP_OUT - hipOut, down = hipUp + LEG;
+		float reach = (float)Math.sqrt(across * across + down * down);
+		float knee = reach < LEG ? 2.0F * (float)Math.acos(reach / LEG) : 0.0F;
+		float leanTurn = (float)Math.atan2(across, down) + tilt;
+		// far side: the hip (in and up with the tilt), the leg straight to the ground
+		float farUp = -drop + HIP_HALF * s;
+		float farDown = Math.min(LEG, farUp + LEG);
+		float farAcross = (float)Math.sqrt(Math.max(0.0F, LEG * LEG - farDown * farDown));
+		float farTurn = (float)Math.atan2(-farAcross, farDown) + tilt;
+		return new float[] {leanTurn, knee, farTurn};
+	}
+
+	private static MethodHandle kneeBend() {
+		if (!lookedForKnee) {
+			lookedForKnee = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					kneeBend = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.client.KneeBend"), "bend",
+						MethodType.methodType(void.class, ModelPart.class, float.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' KneeBend (older Powers?)", e);
+				}
+			}
+		}
+		return kneeBend;
 	}
 }

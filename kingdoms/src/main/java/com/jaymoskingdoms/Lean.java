@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Leaning round a corner (Andy's Ragdolls and Cover picks; the idea is Leaning Or Not's, nothing of it copied). Sneaking, the
- * lean keys (Q left, E right by default) tilt the body and the view out sideways about the feet: the eye moves out
+ * lean keys (Q left, E right by default) take the body and the view out sideways, the hips shifting over a bent leg: the eye moves out
  * {@link #REACH} blocks, the feet stay where they are, and what you shoot leaves from where the eye is now.
  * <p>
  * The state is one synced attachment, {@link #DIR} (-1 left, 0 upright, 1 right), set by the client's packet and dropped by
@@ -35,10 +35,10 @@ import net.minecraft.world.phys.Vec3;
  * stands in the way.
  */
 public final class Lean {
-	/** The eye's sideways move at a full lean (blocks): a body about 1.3 blocks tall tilted about 25 degrees at the feet. */
+	/** The eye's sideways move at a full lean (blocks): the hips slid out and the body above them tilted (client/LeanClient). */
 	public static final double REACH = 0.5;
-	/** The tilt of the body and the roll of the view at a full lean (degrees). */
-	public static final float TILT = 25.0F, ROLL = 7.0F;
+	/** The tilt of the body above the hips and the roll of the view at a full lean (degrees); the legs carry the rest. */
+	public static final float TILT = 12.0F, ROLL = 7.0F;
 	/** A shot is only moved if it starts this close to the eye (blocks, squared), so a loaded-from-disk arrow is left alone. */
 	static final double NEAR_EYE_SQR = 2.25;
 	/** A moved shot stops this short of a wall (blocks). */

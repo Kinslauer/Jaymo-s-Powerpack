@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Every player who leans ({@link Lean}) is drawn tilted out about their feet. */
+/** Every player who leans ({@link Lean}) is drawn with their hips slid out and the body above them tilted (LeanClient). */
 @Mixin(AvatarRenderer.class)
 abstract class AvatarLeanMixin {
 	@Inject(

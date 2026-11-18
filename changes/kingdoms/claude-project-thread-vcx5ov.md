@@ -1,0 +1,4 @@
+# lean on the legs
+- **Leaning** (Q/E while sneaking) no longer tips the whole body over at the feet. Andy: "the character currently bends at the torso instead of using the leg to support that far of a bend". Like a shooter's corner peek, the hips slide out and sink, the lean-side foot steps out with its knee bent under the weight, the far leg stays straight from where its foot was, and only the body above the hips tilts (12 degrees, was 25). The head stays nearer level. The eye still ends up the same half block out, so the camera, cover and shots are unchanged.
+- `LeanClient` (rotate, pose, bendKnee, legs), `LeanKneeMixin`, `ModelPoses`; the knee uses Jaymo's Powers' `KneeBend` (straight leg without Powers). Front-view preview: `art-overhaul/lean-legs/lean-front-before-after.png`.
+- Built; not played.
