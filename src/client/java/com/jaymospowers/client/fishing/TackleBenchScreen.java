@@ -32,7 +32,7 @@ public class TackleBenchScreen extends AbstractContainerScreen<TackleBenchMenu> 
 		UiStyle.panel(graphics, x, y, this.imageWidth, this.imageHeight, ACCENT);
 		UiStyle.slots(graphics, this.menu.slots, x, y);
 		ItemStack[] ghosts = {new ItemStack(Items.FISHING_ROD), new ItemStack(FishTackle.BARBED_HOOK), new ItemStack(FishTackle.BRAIDED_LINE),
-			new ItemStack(Items.RED_DYE)};
+			new ItemStack(Items.DYE.pick(net.minecraft.world.item.DyeColor.RED))};
 		for (int i = 0; i < ghosts.length; i++) {
 			if (!this.menu.getSlot(i).hasItem()) {
 				int sx = x + this.menu.getSlot(i).x, sy = y + this.menu.getSlot(i).y;
