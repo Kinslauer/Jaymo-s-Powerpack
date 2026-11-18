@@ -188,6 +188,8 @@
   "message.jaymospowers.zfighter_ape_grabbed": "%s has you in its grip!",
   "message.jaymospowers.zfighter_tail_cut": "Your tail's been cut off.",
   "message.jaymospowers.villager_ape_turn": "Something tears loose from %s's belt under the full moon. They're growing...",
+  "message.jaymospowers.dead_ape_turn": "The rotted tail on %s twitches under the moon. The dead thing is growing...",
+  "message.jaymospowers.dead_giant_turn": "%s lifts its green face to the moon and begins to swell...",
   "message.jaymospowers.villager_ape_crippled": "The great beast crashes down. Its tail lies loose behind it.",
   "message.jaymospowers.villager_ape_cut": "The tail is cut away. The beast shrinks back into %s.",
   "technique.jaymospowers.zfighter.ki_wave.warrior": "Crimson Cannon",

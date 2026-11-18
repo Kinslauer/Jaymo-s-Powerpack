@@ -55,6 +55,8 @@ public final class ZFighterApe {
 	 * this share, and it leans into the haul this far (radians), head held up.
 	 */
 	static final float HAUL_ARMS = 0.3F, HAUL_LEGS = 0.75F, HAUL_LEAN = 0.22F;
+	/** A dead Warrior-born's ape ({@code UndeadBlood}): its fur multiplied by this grave grey. */
+	static final int DEAD_FUR = 0xFF9C9A8A;
 	/** Vanilla's walk cycle: its legs swing with {@code cos(walkAnimationPos * this)}. */
 	private static final float VANILLA_WALK = 0.6662F;
 
@@ -117,7 +119,12 @@ public final class ZFighterApe {
 			return;
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
-		state.setData(STYLE, WarriorLooks.ape(entity));
+		WarriorLooks.Ape style = WarriorLooks.ape(entity);
+		if (entity.hasAttached(com.jaymospowers.power.zfighter.UndeadBlood.TAIL)) {
+			// one of the Warrior-born dead: its fur gone grey with the grave
+			style = new WarriorLooks.Ape(style.head(), style.arms(), style.bulk(), style.tail(), net.minecraft.util.ARGB.multiply(style.fur(), DEAD_FUR));
+		}
+		state.setData(STYLE, style);
 		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
 		state.setData(HAULING, entity.isSprinting() ? Boolean.TRUE : null);
 		float grab = ApeGrab.phase(entity, partialTicks);

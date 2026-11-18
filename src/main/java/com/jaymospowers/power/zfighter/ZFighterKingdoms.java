@@ -256,6 +256,26 @@ public final class ZFighterKingdoms {
 		}
 	}
 
+	/** Kingdoms' Moons.now(MinecraftServer), looked up the first time it's asked for (its enum's names: NONE, BLOOD, SUPER_BLOOD, ...). */
+	private static @Nullable Method MOON_NOW;
+	private static boolean moonMissing;
+
+	/** Whether Kingdoms says tonight is a Blood Moon or a Super Blood Moon; false without it. */
+	static boolean bloodMoon(MinecraftServer server) {
+		if (!LOADED || moonMissing) {
+			return false;
+		}
+		try {
+			if (MOON_NOW == null) {
+				MOON_NOW = Class.forName("com.jaymoskingdoms.Moons").getMethod("now", MinecraftServer.class);
+			}
+			return MOON_NOW.invoke(null, server) instanceof Enum<?> moon && (moon.name().equals("BLOOD") || moon.name().equals("SUPER_BLOOD"));
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			moonMissing = true;
+			return false;
+		}
+	}
+
 	/** (0.20.94) Whether Kingdoms still has {@code player} making their character; false without it. */
 	static boolean making(ServerPlayer player) {
 		if (MAKING == null) {
