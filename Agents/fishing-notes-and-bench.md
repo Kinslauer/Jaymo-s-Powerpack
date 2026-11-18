@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: fishing-fire-and-crates
 branch: claude/fishing-notes-and-bench
 with: 
-pr: 
+pr: 1719
 mods: powers
 versions: 
 started: 2026-11-18
@@ -27,3 +27,4 @@ owns:
 - Base is origin/claude/fishing-fire-and-crates (PR #1715 not merged yet).
 
 ## Done
+PR #1719 (stacks on #1715). Built by CI only; not played.
