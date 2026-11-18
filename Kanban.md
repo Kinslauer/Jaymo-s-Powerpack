@@ -9,7 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · for any · open
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · for any · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · claimed
 
 
 ## In review
