@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,9 +22,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · claimed
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · claimed
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · #1769 · claimed
 
 
 ## In review
