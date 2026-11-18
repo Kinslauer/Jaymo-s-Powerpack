@@ -96,9 +96,14 @@ public final class ChunkyCompat {
 			lastProgressTick = ticks;
 		}
 
-		if (busy == null && !now && ticks >= START_WAIT) {
-			busy = false;
-			continueDue = true;
+		if (busy == null) {
+			if (now) {
+				busy = true;
+				log("A player is on", "pause", Api.pause(worlds));
+			} else if (ticks >= START_WAIT) {
+				busy = false;
+				continueDue = true;
+			}
 		} else if (busy != null && busy != now) {
 			busy = now;
 			kickPausedAt = -1;
