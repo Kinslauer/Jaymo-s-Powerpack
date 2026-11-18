@@ -2447,3 +2447,8 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 
 - Andy: "the death ragdoll when enemies and players are prone or crawling should keep them in that position". A mob's pose is already DYING when its corpse is made, so the old crawling/sleeping check never fired and crawlers popped up to standing. The pose a body dies in is now noted as `die` begins (`LivingEntityMixin`, `Corpses.noteDying`), and a body that died crawling, asleep, gliding or down on its belly from a leg shot starts lying (a leg-shot crawler face down) and doesn't keel over.
 - Built; not played.
+
+## 0.6.47 (2026-11-18): Animals stop re-pathing to food they cannot reach (#1741)
+
+- Fixes: an animal by dropped food it couldn't reach (behind a fence, across water) worked out a new path to it every tick for ten seconds, a large share of the server's freezes on fresh land. It now tries once a second, and leaves the food when there is no way to it (`EatGroundFoodGoal`).
+- Built by CI; not played.
