@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
 claimed_by: hermes-a
 pr: 1728
+writer: hermes-writer
 ---
 
 # Harness 3: creeds and other lands

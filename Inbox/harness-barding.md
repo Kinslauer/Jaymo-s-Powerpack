@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
 claimed_by: hermes-a
-pr: 
+pr: 1744
 ---
 
 # Harness 4: matching barding and caparisons
