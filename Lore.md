@@ -2042,6 +2042,10 @@ is on the wall.
 
 (new) **Town graves.** A town's dead are buried together, a mound each beside the others near the seat, with a wooden board at the head giving the name and a line about them. A hanged man laid to rest under the Warden's light, or named innocent at the assize, gets his board like anyone (tale: The Crossroads Gibbet).
 
+(new) **Thief-takers who stay.** A thief-taker who is spared, and has seen what the bill was really for, may stay on in the town and take a guard's coat (tale: The Cave-In).
+
+(new) **Leaving the valley.** After a bad year a household may shut up its house and go, and nobody hears where. The house is left as it was (tale: Short Measure).
+
 **The Wither's coming** (Andy approved, 2026-11-17; Claude's placement for the Wither: Reincarnated picks). When the Wither is raised the sky goes dark over the whole land and stays dark while it lives. At first it does not hunt the one who raised it: it tears down what people built, houses first, then walls and towers. The dead near it wake with its light in their eyes and follow it; the barrow knights, who keep their own oath, do not. Every living thing that can run, runs. This is what the Dread tier's land remembers.
 
 **What fire leaves** (Andy approved, 2026-11-17; Claude's placement for the Inferno picks, 2026-11-18). A big fire chokes the air for a long way round it, and a burning man or beast carries fire to whatever he touches. The charcoal burners go in after a wildfire for the charred trunks still standing, and the Ash Whisperer's people say a fire that bites is a fire nobody watched. Smiths know a metal by the colour it burns: copper burns green. Soul fire, out of the demons' country, burns blue and bites twice as deep.
