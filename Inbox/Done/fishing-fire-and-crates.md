@@ -33,5 +33,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 ## Notes
 - 2026-11-17 8:28 PM ET: Andy approved all four lore paragraphs; they are canon now.
 - 2026-11-17 21:08 PR #1715 has lava fishing, crates and cave fish. Wet fishers' torn notes (Journal hints) and the tackle bench are not built yet: they need new UI, so they go in a second PR.
-- 2026-11-18 02:23 Second half (notes + tackle bench): PR #1719, stacks on #1715
-- 2026-11-18 07:32 PR #1715 is merged into master; moved to Inbox/Done.
+- 2026-11-18 07:37 PR #1715 is merged into master; moved to Inbox/Done.
