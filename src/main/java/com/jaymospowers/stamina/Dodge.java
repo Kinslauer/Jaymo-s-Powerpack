@@ -33,6 +33,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -313,7 +314,7 @@ public final class Dodge {
 			return false;
 		}
 		ServerLevel level = player.level();
-		if (backward && source.getDirectEntity() instanceof AbstractArrow arrow && ready(player) && ArmourEase.fullSet(player, LightArmour.MAILED, ArmourKind.MAIL)) {
+		if (backward && source.is(DamageTypes.ARROW) && source.getDirectEntity() instanceof AbstractArrow arrow && ready(player) && ArmourEase.fullSet(player, LightArmour.MAILED, ArmourKind.MAIL)) {
 			arrow.setDeltaMovement(arrow.getDeltaMovement().scale(-KNOCK_SPEED));
 			KNOCK_READY.put(player.getUUID(), level.getGameTime() + rest(player));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.8F, 1.2F);

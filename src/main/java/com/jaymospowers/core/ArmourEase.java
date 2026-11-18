@@ -77,19 +77,16 @@ public final class ArmourEase {
 	}
 
 	/**
-	 * Whether {@code body} wears the whole {@code set} (head, chest, legs, feet, in that order). Each of the four slots
-	 * holds its piece of the set (not broken), or, for head, legs and feet only, is covered by a harness layer of kind
-	 * {@code layer} ({@link ArmourKind#harness}: mail for the mailed set, padding for the studded) when the chest slot
-	 * holds the set's chest piece. So a mailed jack over a gambeson and a mail hauberk, in a surcoat, still counts as a
-	 * mailed set; a harness alone, without the set's chest piece, does not.
+	 * Whether {@code body} wears the whole {@code set} (head, chest, legs, feet, in that order), each piece whole. Jaymo's
+	 * Kingdoms' harness ({@link ArmourKind#harness}) stands in only where it covers the same place: a harness layer of
+	 * kind {@code layer} under the chest piece (mail for the mailed set, padding for the studded) counts for the chest
+	 * whatever is worn over it, so a mail hauberk under a surcoat is a mailed chest; one over the leggings counts for the
+	 * legs. Head and feet have no harness place and must be the set's own pieces.
 	 */
 	public static boolean fullSet(LivingEntity body, Item[] set, ArmourKind layer) {
-		if (!has(body, EquipmentSlot.CHEST, set[1])) {
-			return false;
-		}
-		boolean layered = ArmourKind.layers(body, "all").contains(layer);
-		return (layered || has(body, EquipmentSlot.HEAD, set[0])) && (layered || has(body, EquipmentSlot.LEGS, set[2]))
-			&& (layered || has(body, EquipmentSlot.FEET, set[3]));
+		return has(body, EquipmentSlot.HEAD, set[0]) && has(body, EquipmentSlot.FEET, set[3])
+			&& (has(body, EquipmentSlot.CHEST, set[1]) || ArmourKind.layers(body, "torso").contains(layer))
+			&& (has(body, EquipmentSlot.LEGS, set[2]) || ArmourKind.layers(body, "legs").contains(layer));
 	}
 
 	private static boolean has(LivingEntity body, EquipmentSlot slot, Item piece) {
