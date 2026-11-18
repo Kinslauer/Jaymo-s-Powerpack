@@ -5733,3 +5733,8 @@ Andy's picks from the scaling audit (pick page rows; early game kept weak, late 
 ## 0.24.63 (2026-11-18): Land checks wait for land that is really there
 
 - The rig, tundra lichen and moss, and river currents checked that land was loaded with a test that is also true of land only queued to be made, which could make the server wait on it. They now check for land that is made, like Kingdoms' checks.
+
+## 0.24.64 (2026-11-18): smaller scouter on the face
+
+- **Scouter** (worn): the head layer is smaller so the face shows. The band round the head is one pixel at the brow instead of two, the lens is a 4x3 frame over the left eye (it was 4x5 and ran down to the chin), and the ear cup is 3x3. Redrawn by `tools/gen_scouter.py`; the Excalibur-style pack's copy regraded with `tools/excalibur_style/grade.py --one`.
+- Built art only; not played.
