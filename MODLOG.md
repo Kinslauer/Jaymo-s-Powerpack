@@ -5993,3 +5993,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - Changes: nothing of TaCZ shows in JEI (no items, no painting, no gun smith table pages, no recipes) or in the creative menu (none of its tabs, none of its items in other tabs or the search). Its guns stay in the game for the future's gunners (`TaczGuns.hideModern`, `TaczHiddenJei`).
 - Built by CI; not played.
+
+## 0.25.13 (2026-11-18): Blood decals draw under Iris shaders (#1760)
+
+- Changes: blood puddles, footprints and wall marks are registered with Iris (as translucent particles) when it is loaded. Before, switching a shader pack on made Iris log "Missing program minecraft:pipeline/jaymospowers_blood_decal in override list" and a burst of GL_INVALID_OPERATION errors, and the decals could fail to draw.
+- Built by CI; not played.
