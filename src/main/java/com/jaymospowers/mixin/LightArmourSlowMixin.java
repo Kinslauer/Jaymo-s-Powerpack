@@ -1,6 +1,6 @@
 package com.jaymospowers.mixin;
 
-import com.jaymospowers.core.LightArmour;
+import com.jaymospowers.core.ArmourEase;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,7 +16,7 @@ abstract class LightArmourSlowMixin {
 		if (!effect.getEffect().is(MobEffects.SLOWNESS) || effect.isInfiniteDuration()) {
 			return effect;
 		}
-		float kept = LightArmour.slownessKept((LivingEntity) (Object) this);
+		float kept = ArmourEase.slownessKept((LivingEntity) (Object) this);
 		return kept >= 1.0F ? effect : effect.withScaledDuration(kept);
 	}
 }

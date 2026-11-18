@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
  * holds it and how far mobs notice it: plate slows a climb, a vault and a swim; mail shortens Slowness; padding is
  * quieter than plate. Each is scaled by the slots' own shares of the load.
  */
-public final class LightArmour {
+public final class ArmourEase {
 	// ===== the knobs ================================================================================================
 	/** A full suit of plate cuts the climbing grip, the vault's speed and the swimming stroke by this much (scaled by the plate share). */
 	public static final float PLATE_CLIMB = 0.3F, PLATE_VAULT = 0.2F, PLATE_SWIM = 0.2F;
@@ -20,7 +20,7 @@ public final class LightArmour {
 
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
-	private LightArmour() {
+	private ArmourEase() {
 	}
 
 	/** The share of {@code body}'s armour that is plate, 0 (none) to 1 (plate head to foot), by each slot's share of the load. */
