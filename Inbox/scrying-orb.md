@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9itiE9SZUhU3wrwbx6xdLi
-claimed_by: scrying-orb
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
@@ -42,3 +42,4 @@ suggested_owns:
 - Lore paragraph "The scrying orb" is in Lore.md (Daily life, after the everburning mote), approved by Andy 2026-11-18.
 - Open questions for Andy (ask in the thread, don't block on them): mote figures first or real tiny models from the start; any way for the watched to notice beyond the chill; can a keep or wizard's tower be warded so it shows only cloud.
 - 2026-11-18 17:03 Claude (cloud session, Andy's project thread): claimed; branch claude/scrying-orb. Immersive Portals port checked and rejected (see Decisions.md); building the miniature as planned.
+- 2026-11-18 18:45 scrying-orb's claim had no sign of work for 30 min: handed back as open.
