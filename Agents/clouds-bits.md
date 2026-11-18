@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Build Andy's 29 picks from More Cloud Layers and Bits and Balance
 branch: claude/project-thread-f0jf19
 with: 
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 All 7 patches built and compiled; PR #1740. Not played. Left out: hanging blocks under slabs.
+Merged 2026-11-18 (PR #1740).
