@@ -29,3 +29,4 @@ writer: hermes-writer
 
 ## Notes
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
+- 2026-11-18 11:32 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
