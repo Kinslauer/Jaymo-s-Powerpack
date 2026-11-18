@@ -14974,3 +14974,12 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 - **The stealth eye** (`Senses`, Andy: "not activating your stealth eye until your stealth is sufficient or a perk on tree"): a beast stalking you (wolves too) stays off the awareness eye until you reach Stealth 15 or learn **Sixth Sense** (new Stealth perk on the Shadows page, under Shadowed, 1 point, Stealth 5); then the eye fills as it creeps in. Once it rushes you the eye opens red as for any attacker.
 - Left as they were: the grizzly (its own warn-roar-charge territory), crocodiles and the other reptiles (their own water ambush), foxes.
 - Built; not played. Spawn changes take effect in chunks generated after the update (and animals that respawn).
+
+## 0.10.23 (2026-11-18): only Epic towns are crowned: no kingdom seated on a lone castle (#1739)
+
+Andy, 2026-11-18: only the kingdoms that generate properly (Epic villages) are kingdoms; a single castle is a fief or a part of a kingdom.
+- **No castle kingdoms**: `KingdomEvents.foundTown`, the capital job (`StoryGround`), a bell in an Epic town with no building fit for a king (`KingdomEvents.tryFound`) and a Grim seat compound (`SeatCompounds.found`) no longer fall back to `found(CITADEL)`. A compound is a fiefdom of the kingdom near, else a village.
+- **Looking further out**: where no Epic town can be raised at the spot (`EpicTowns.found`, now tried once per spot), `EpicTowns.foundFar` takes the nearest town world generation makes within 6 village spacings (`Scout`, no chunk made, nearest first), makes its land in the background (a ticket, never the server thread) and founds the kingdom in its buildings (`foundIn`). A town with no seat, held by another faction or not made in 1200 ticks is passed over for the next. `EpicTowns.seek` does the same in the background (every second, up to 10 minutes) for a castle town with no kingdom to swear to.
+- **The first capital**: its Epic village is kept trying for 6000 ticks (was 1800, which the 11-17 world outran and fell to a castle), logging why each wait (`StoryGround.waitOn`); a village with no fit building sends the job to look for another town. With none left (or 6000 ticks), the world goes on without a realm until a player reaches an Epic town's bell.
+- Left as they were: operator `/kingdom found`, the Deck's keep and its deed, a player's paid `Crowns.found`, `GreatWars` and `Crowns` promoting a fief.
+- Built by CI only; not played.
