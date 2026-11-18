@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.equestrian;
 
+import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
@@ -26,6 +28,7 @@ import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Blocks;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.44) Tack and care, the items of {@link Bonding}: the war and racing saddles (the vanilla saddle is the riding
@@ -44,11 +47,33 @@ public final class Tackroom {
 	public static final int BLANKET_COLOR = 0x8E2A2A;
 
 	public static Item WAR_SADDLE, RACING_SADDLE, BRIDLE, HORSE_BLANKET, CHAIN_BARDING, PLATE_BARDING, HORSESHOES, HOOF_PICK, OATS, HANDBOOK;
+	/** Caparison: cloth cover in realm colours, worn over barding. */
+	public static Item CAPARISON;
 	/** Icy's Better Horses' leftovers ({@link HorseKit}): the glide harness (a saddle) and the horse medkit. */
 	public static Item GLIDE_HARNESS, HORSE_MEDKIT;
 	/** (0.7.305) Opens the Horsekeeper's Handbook (set by the client). */
 	public static Runnable openHandbook = () -> {
 	};
+
+	/** A barding piece's finish (bright, blackened, gilded). Reuses {@link HeraldryArmour#FINISH}. */
+	public static String finish(ItemStack stack) {
+		return stack.getOrDefault(HeraldryArmour.FINISH, "");
+	}
+
+	/** Whether {@code stack} is gilded barding. */
+	public static boolean gilded(ItemStack stack) {
+		return HeraldryArmour.GILDED.equals(finish(stack));
+	}
+
+	/** {@code stack} given {@code finish} (\"\" leaves it bright); only plate/chain barding takes one. */
+	public static ItemStack finished(ItemStack stack, String finish) {
+		if (stack.isEmpty() || finish.isEmpty()) {
+			return stack;
+		}
+		stack.set(HeraldryArmour.FINISH, finish);
+		stack.set(DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.jaymoskingdoms.finish." + finish, net.minecraft.network.chat.Component.translatable(stack.getDescriptionId())));
+		return stack;
+	}
 
 	private Tackroom() {
 	}
@@ -60,35 +85,38 @@ public final class Tackroom {
 	}
 
 	static void register() {
-		List<Item> all = new ArrayList<>();
-		WAR_SADDLE = item("war_saddle", Item::new, saddle(), all);
-		RACING_SADDLE = item("racing_saddle", Item::new, saddle(), all);
-		GLIDE_HARNESS = item("glide_harness", Item::new, saddle(), all);
-		BRIDLE = item("bridle", Item::new, new Item.Properties().stacksTo(1), all);
-		HORSE_BLANKET = item("horse_blanket", Item::new, new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(BLANKET_COLOR)), all);
-		CHAIN_BARDING = item("chain_barding", Item::new, new Item.Properties().stacksTo(1).horseArmor(CHAIN), all);
-		PLATE_BARDING = item("plate_barding", Item::new, new Item.Properties().stacksTo(1).horseArmor(PLATE), all);
-		HORSESHOES = item("horseshoes", Item::new, new Item.Properties().stacksTo(16), all);
-		HOOF_PICK = item("hoof_pick", Item::new, new Item.Properties().durability(HOOF_PICK_USES), all);
-		OATS = item("oats", Item::new, new Item.Properties(), all);
-		HORSE_MEDKIT = item("horse_medkit", Item::new, new Item.Properties().durability(HorseKit.MEDKIT_USES), all);
-		// (0.7.305) the Horsekeeper's Handbook: everything about horses, read in hand
-		HANDBOOK = item("horse_handbook", Handbook::new, new Item.Properties().stacksTo(1), all);
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
-			Item after = Items.SADDLE;
-			for (Item item : all) {
-				output.insertAfter(after, item);
-				after = item;
-			}
-		});
-		// oats grow wild in the grass
-		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
-			if (table.unwrapKey().filter(k -> k.equals(Blocks.SHORT_GRASS.getLootTable().orElse(null))
-				|| k.equals(Blocks.TALL_GRASS.getLootTable().orElse(null))).isPresent() && context.getRandom().nextFloat() < OATS_CHANCE) {
-				drops.add(new ItemStack(OATS));
-			}
-		});
-	}
+			List<Item> all = new ArrayList<>();
+			WAR_SADDLE = item("war_saddle", Item::new, saddle(), all);
+			RACING_SADDLE = item("racing_saddle", Item::new, saddle(), all);
+			GLIDE_HARNESS = item("glide_harness", Item::new, saddle(), all);
+			BRIDLE = item("bridle", Item::new, new Item.Properties().stacksTo(1), all);
+			HORSE_BLANKET = item("horse_blanket", Item::new, new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(BLANKET_COLOR)), all);
+			// Barding items use a select model for inventory display (bright/blackened/gilded), entity rendering handled by BreedHorseRenderer
+			CHAIN_BARDING = item("chain_barding", Item::new, new Item.Properties().stacksTo(1).horseArmor(CHAIN), all);
+			PLATE_BARDING = item("plate_barding", Item::new, new Item.Properties().stacksTo(1).horseArmor(PLATE), all);
+			HORSESHOES = item("horseshoes", Item::new, new Item.Properties().stacksTo(16), all);
+			HOOF_PICK = item("hoof_pick", Item::new, new Item.Properties().durability(HOOF_PICK_USES), all);
+			OATS = item("oats", Item::new, new Item.Properties(), all);
+			HORSE_MEDKIT = item("horse_medkit", Item::new, new Item.Properties().durability(HorseKit.MEDKIT_USES), all);
+			// Caparison: cloth cover in realm colours, worn over barding
+			CAPARISON = item("caparison", Item::new, new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(0xFFFFFF)), all);
+			// (0.7.305) the Horsekeeper's Handbook: everything about horses, read in hand
+			HANDBOOK = item("horse_handbook", Handbook::new, new Item.Properties().stacksTo(1), all);
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
+				Item after = Items.SADDLE;
+				for (Item item : all) {
+					output.insertAfter(after, item);
+					after = item;
+				}
+			});
+			// oats grow wild in the grass
+			LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
+				if (table.unwrapKey().filter(k -> k.equals(Blocks.SHORT_GRASS.getLootTable().orElse(null))
+					|| k.equals(Blocks.TALL_GRASS.getLootTable().orElse(null))).isPresent() && context.getRandom().nextFloat() < OATS_CHANCE) {
+					drops.add(new ItemStack(OATS));
+				}
+			});
+		}
 
 	/** A saddle for horses (and elephants) only; it draws its own 3D shape ({@code TackLayer}), so it names no equipment asset. */
 	private static Item.Properties saddle() {

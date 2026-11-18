@@ -57,12 +57,12 @@ import org.jspecify.annotations.Nullable;
  * in the same places), read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py}); the models
  * follow the horse's own animation (they're horse models themselves). Also carries the kneel onto the render state, for
  * {@code LivingEntityRendererMixin}. (0.7.305) A carpet in the blanket's place is drawn as the blanket in its colour, and
- * a banner flies from a pole at the back of the saddle.
+ * a banner flies from a pole at the back of the saddle. (0.7.322) A caparison flies from the banner pole, over the barding.
  */
 public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, BreedHorseModel> {
 	/** What it wears: its saddle (0 none or vanilla's, 1 war, 2 racing), bridle, blanket colour (0 none), shoes; ridden; how far it kneels (0-1). */
 	public record Look(int saddle, boolean bridle, int blanket, boolean shod, boolean ridden, float kneel, @Nullable DyeColor banner,
-		BannerPatternLayers patterns) {
+		BannerPatternLayers patterns, @Nullable DyeColor caparison) {
 	}
 
 	public static final RenderStateDataKey<Look> LOOK = RenderStateDataKey.create(() -> "jaymoskingdoms:tack_look");
@@ -173,6 +173,14 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 		}
 		DyeColor banner = t.banner().getItem() instanceof BannerItem item ? item.getColor() : null;
 		BannerPatternLayers patterns = t.banner().getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+		// (0.7.322) Caparison colour from the caparison item's dye
+		DyeColor caparison = null;
+		DyedItemColor caparisonDyed = t.caparison().get(DataComponents.DYED_COLOR);
+		if (caparisonDyed != null) {
+			// Find the closest DyeColor to the RGB value
+			int rgb = caparisonDyed.rgb();
+			caparison = DyeColor.byId(DyeColor.getColorId(rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255));
+		}
 		var b = horse.getAttached(Bonding.BOND);
 		boolean shod = b != null && b.shod();
 		Long until = horse.getAttached(Bonding.KNEEL);
@@ -185,7 +193,7 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 			state.setData(LOOK, null);
 			return;
 		}
-		state.setData(LOOK, new Look(kind, !t.bridle().isEmpty(), blanket, shod, horse.isVehicle(), kneel, banner, patterns));
+		state.setData(LOOK, new Look(kind, !t.bridle().isEmpty(), blanket, shod, horse.isVehicle(), kneel, banner, patterns, caparison));
 	}
 
 	@Override
@@ -238,8 +246,8 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 				for (String group : GROUPS) {
 					if (part.hasChild("tack_" + group)) {
 						this.groups.computeIfAbsent(group, g -> new ArrayList<>()).add(part.getChild("tack_" + group));
-					}
-				}
+			}
+		}
 			}
 		}
 
