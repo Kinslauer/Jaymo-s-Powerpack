@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: harness-creeds-and-lands
 branch: claude/harness-creeds-and-lands
 with:
@@ -33,3 +33,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-18 12:59 No sign of work for 30 min: marked stalled (whoever ran it stopped).
