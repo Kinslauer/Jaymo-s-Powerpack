@@ -14723,3 +14723,10 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
 - **Leaning from the low crouch** (Powers' stance wheel), which was blocked before. Andy: "there needs to be animations from sneaking and crouching, crouching giving you the deepest lean out". From the crouch the hips go further out (7.5 px against 5) and the body tilts 18 degrees, so the eye reaches 0.7 blocks out against 0.5 from a sneak. The crouch's own bent knees and kneel are kept, with the legs swung out sideways from them. The camera, cover and shots use the deeper reach (`Lean.reach`), and moving between sneak and crouch eases.
 - `LeanClient` (rotate, pose, bendKnee, legs), `LeanKneeMixin`, `ModelPoses`; the knee uses Jaymo's Powers' `KneeBend` (straight leg without Powers). Front-view preview: `art-overhaul/lean-legs/lean-front-before-after.png`.
 - Built; not played.
+
+## 0.10.4 (2026-11-18): NPC shooters lean round corners (#1712)
+
+- **NPC shooters lean** (Andy: "do MCA and humanoids like illagers do it too?" "yes"). MCA villagers, illagers, skeletons and the other ranged NPCs that take cover can now use a wall's corner as well as low cover. They duck in behind the corner to reload or after being shot at, then lean out past it to shoot instead of stepping round. The pose is the same legs-carry-it lean players have: hips out, near knee bent, a 12 degree tilt.
+- While leaning, an NPC sees and shoots from its leaned-out head, and cover counts only the leaned-out part of its body. It straightens up when it moves off, loses its foe or goes down.
+- `Cover.corner` / `Cover.shelters`, `Lean.lean` (the NPC lean, cleared in Lean's tick), `RangedTactics` (finish leans out at a corner, ducking leans back in), `LeanSightMixin` (line of sight from the leaned eye), `LivingLeanMixin` (was AvatarLeanMixin: every living renderer), `LeanClient` (NPC leans eased, legs found by part name).
+- Built; not played.
