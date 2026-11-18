@@ -262,6 +262,7 @@ public final class Theft {
 	}
 
 	static void register() {
+		CrimeWord.register();
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && !(sp.isSecondaryUseActive() && !sp.getItemInHand(hand).isEmpty())) {
 				opened(sp, server, hit.getBlockPos());
@@ -719,11 +720,6 @@ public final class Theft {
 		}
 		// (0.5.42) golems can't speak: one that saw it only groans, unless someone else saw it too and cries out
 		LivingEntity witness = seen.stream().filter(e -> !(e instanceof IronGolem)).findFirst().orElse(seen.getFirst());
-		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
-		Speech.say(level, witness, cry, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
-		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
-			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
-		Reputation.change(player, f, w.rep);
 		// (0.7.109) each who saw it remembers it
 		Recollections.crime(player, seen, crime.cry);
 		if (!(witness instanceof IronGolem)) {
@@ -732,6 +728,25 @@ public final class Theft {
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);
 		}
+		// with no guard in earshot, a witness runs to tell one, and the law waits for them (CrimeWord)
+		if (CrimeWord.run(level, player, f, crime.cry, w, seen, witness)) {
+			return;
+		}
+		CrimeWord.spread(level, player, f, crime.cry, seen);
+		lawKnows(player, level, f, crime.cry, w, witness);
+	}
+
+	/**
+	 * {@code f}'s law hears of {@code player}'s crime ({@code cry}, of weight {@code w}): {@code crier} cries it out, the realm
+	 * thinks less of them, and a medium or heavy one makes them wanted, with a bounty, and sets the guards near them on them.
+	 * At once when a witness cries out within a guard's earshot; when a runner reaches a guard ({@link CrimeWord}) otherwise.
+	 */
+	static void lawKnows(ServerPlayer player, ServerLevel level, Faction f, String cry, Weight w, LivingEntity crier) {
+		Component words = Component.translatable("message.jaymoskingdoms.theft.cry." + cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
+		Speech.say(level, crier, words, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
+		level.playSound(null, crier.getX(), crier.getY(), crier.getZ(), crier instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
+			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
+		Reputation.change(player, f, w.rep);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.seen." + w.name().toLowerCase(java.util.Locale.ROOT), f.name())
 			.withStyle(ChatFormatting.RED));
 		if (w == Weight.LIGHT) {
@@ -743,9 +758,11 @@ public final class Theft {
 		if (w == Weight.HEAVY) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), Math.max(1L, (until - level.getGameTime()) / 24000L))
 				.withStyle(ChatFormatting.DARK_RED));
+			// word of it goes down the King's Roads to the towns beyond
+			CrimeWord.road(level, player, f, cry);
 		}
 		// (0.7.125) a price on their head (or their mask's)
-		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, crime.cry);
+		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, cry);
 		pursue(level, f, player);
 	}
 

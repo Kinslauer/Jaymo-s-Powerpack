@@ -574,7 +574,7 @@ public final class Approaches {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
 			// (0.7.591) nor someone down, carried off or in chains
 			|| PowersCompat.outOfPlay(mob) || Captives.bound(mob)
-			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
+			|| Theft.rioting(mob) || CrimeWord.running(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
 			// (0.7.141) a wind dragon in disguise keeps its own counsel
 			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;
