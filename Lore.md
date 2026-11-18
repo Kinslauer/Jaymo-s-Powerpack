@@ -2042,9 +2042,15 @@ is on the wall.
 
 (new) **Town graves.** A town's dead are buried together, a mound each beside the others near the seat, with a wooden board at the head giving the name and a line about them. A hanged man laid to rest under the Warden's light, or named innocent at the assize, gets his board like anyone (tale: The Crossroads Gibbet).
 
-(new) **Thief-takers who stay.** A thief-taker who is spared, and has seen what the bill was really for, may stay on in the town and take a guard's coat (tale: The Cave-In).
+**The Wither's coming** (Andy approved, 2026-11-17; Claude's placement for the Wither: Reincarnated picks). When the Wither is raised the sky goes dark over the whole land and stays dark while it lives. At first it does not hunt the one who raised it: it tears down what people built, houses first, then walls and towers. The dead near it wake with its light in their eyes and follow it; the barrow knights, who keep their own oath, do not. Every living thing that can run, runs. This is what the Dread tier's land remembers.
 
-(new) **Leaving the valley.** After a bad year a household may shut up its house and go, and nobody hears where. The house is left as it was (tale: Short Measure).
+**What fire leaves** (Andy approved, 2026-11-17; Claude's placement for the Inferno picks, 2026-11-18). A big fire chokes the air for a long way round it, and a burning man or beast carries fire to whatever he touches. The charcoal burners go in after a wildfire for the charred trunks still standing, and the Ash Whisperer's people say a fire that bites is a fire nobody watched. Smiths know a metal by the colour it burns: copper burns green. Soul fire, out of the demons' country, burns blue and bites twice as deep.
+
+**Fishing the fire** (Andy approved, 2026-11-17; Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
+
+(new) **What the water keeps.** Rivers, seas, swamps and the demons' lava lakes all take things from people, and a line that finds one of their old crates brings it up wet: bait and lures from a river's anglers, nuggets and shells from the sea, swamp muck, and in the lava lakes whatever the fire could not eat. In the dark pools under the hills the olm and the pale blind cavefish live as they always have, slowly, on very little, and the Anvil-Father's miners left them be (placement for the Tide picks; Claude, 2026-11-17).
+
+**The labyrinth-builders' craft** (Andy approved, 2026-11-17; Claude's placement for the Asterion picks, 2026-11-18). The forgotten hands that raised the labyrinths worked bronze and fire. Their inner gates open only to tablets cut in the old tongue, scattered through the halls, and some of the braziers that light those halls are not braziers at all. Their prize was a blade that strikes twice. The sea took the plates of one of their geared instruments into the Deep Mother's drowned colonnades, and whoever builds it from them finds it always turns toward the nearest labyrinth. In the warm lands the beetles that spit boiling spray live in colonies round a queen, and the old builders kept them.
 
 ## Rules for writing against this
 
