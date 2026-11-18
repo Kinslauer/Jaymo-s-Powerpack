@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9itiE9SZUhU3wrwbx6xdLi
-claimed_by: 
+claimed_by: scrying-orb
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
