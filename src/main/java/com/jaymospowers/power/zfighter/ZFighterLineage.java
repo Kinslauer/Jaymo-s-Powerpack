@@ -232,6 +232,8 @@ public final class ZFighterLineage {
 		com.jaymospowers.core.wounds.Giants.LEGS_GONE.add(ZFighterLineage::legsGone);
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
+		UndeadBlood.init();
+		UndeadGiant.init();
 		RaceMoves.init();
 		// (0.17.56) the lineages' extras (merging, the ki reserve, ...)
 		ZFighterRaces.init();
