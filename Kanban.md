@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 14:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 14:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,9 +26,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · claimed
 - [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · claimed
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · claimed
 
 
 ## In review
