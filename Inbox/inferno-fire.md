@@ -4,7 +4,7 @@ for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
-claimed_by: 
+claimed_by: pc-claude
 pr: 1716
 suggested_owns:
   - build.gradle (packMods lines)
