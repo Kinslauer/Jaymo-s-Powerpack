@@ -5946,3 +5946,11 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 - **Bottled cloud**: an empty glass bottle used on a Cloudbank or any aercloud, or in the air in the Cloud Sea or the high sky, gives a Bottle of Cloud. Used on a block it lays a 2x1x2 puff of soft cloud beside the face; used in mid-air while falling it lays one under your feet. Each puff block thins away after about 20 seconds.
 - Classes: `stoneores/StoneOres`, `stoneores/OreVeinFeature`, `cloudbottle/CloudBottle`, `BottleOfCloudItem`, `CloudPuffBlock`; hook in `ground/BigVeinFeature`; art, data and lang by `tools/gen_stone_ores.py`.
 - Built; not played.
+
+## 0.25.7 (2026-11-18): freeze CPU hot spots: structure spawns, Unloaded Activity, Earth & Water (#1742)
+
+- Three server-thread hot spots seen in the 2026-11-18 freeze profiles (22, 31 and 41 s on the Steam Deck, fresh land) are cut, with the same results as before.
+- **Structure spawns**: "is this block inside a piece of that structure" (`StructureManager.structureHasPieceAt`, asked on every natural spawn attempt for structures with per-piece spawn overrides) walked every piece of large structures such as Epic towns, 150 samples. A start with 16 or more pieces now answers from an index of its pieces per chunk column (`PieceIndex`, `StructurePieceAtMixin`, `StructureStartPieceIndexMixin`).
+- **Unloaded Activity**: its per-chunk, per-group position lists (water freezing, oxidizing, grass growing) were searched with `contains` on every block change, 158 samples. They now answer from a hash set kept in step with the list (`IndexedPositions`, `UnloadedActivityPositionsMixin`). Skipped when the mod isn't there.
+- **Earth & Water**: its scan of all 16 x 16 x height blocks of each newly loaded chunk is skipped for a chunk whose section palettes hold no block of that mod, 110 to 204 samples (`EarthWaterChunkScanMixin`). Chunks that have one are scanned as before. Skipped when the mod isn't there.
+- New mixin config `jaymospowers.freeze.mixins.json`. Not built or played; CI compiles.
