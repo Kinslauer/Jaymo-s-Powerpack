@@ -19,5 +19,6 @@ abstract class YoungSpawnMixin {
 		SpawnGroupData data, CallbackInfoReturnable<SpawnGroupData> cir) {
 		Younglings.spawned((Mob)(Object)this, level, reason);
 		com.jaymospowers.armory.Lodged.spawned((Mob)(Object)this, reason, level.getRandom());
+		com.jaymospowers.tinkering.smithing.LightFoes.spawned((Mob)(Object)this, difficulty);
 	}
 }
