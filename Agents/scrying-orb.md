@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: scrying-orb
 branch: claude/scrying-orb
 with: 
@@ -38,3 +38,4 @@ Complementary (block models in a block entity renderer, no second camera).
   shaders). Andy chose the planned miniature.
 
 ## Done
+- 2026-11-18 18:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
