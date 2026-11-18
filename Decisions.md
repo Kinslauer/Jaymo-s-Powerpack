@@ -754,3 +754,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy, clouds/bits thread): picked 29 of 48 rows from More Cloud Layers (CC0, not shipped: clashes with Cirrus/CloudDecks) and Bits and Balance (ARR, ideas only); plan docs/CloudsBits-Plan.md, 7 patches on claude/project-thread-f0jf19.
 - 2026-11-18 (Andy): approved the lore paragraphs "Bottled cloud" and "Phantoms that carry" (clouds/bits, PR #1740).
 - 2026-11-18 10:40 AM ET (Andy, scrying orb thread): "Have the bots start back up": resumed the dispatch-bots cron (paused since 3:50 AM) and took Hephaestus off the dispatcher stop list (stopped Nov 12); gateway was already up, no watchdog.off, other jobs already active; claude-writer stays retired.
+- 2026-11-18 (Andy): Hermes bots stop every time he plays: dispatch_bots.py fires no builder or Prometheus while the Minecraft client runs, and stops running Gradle builds; Quill may go on.
