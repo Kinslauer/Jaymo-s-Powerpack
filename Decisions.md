@@ -725,3 +725,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Decided:** Andy: "Yes to all, merge" for the 32 lore placements of the story-quest picks (the hanged who walk, the night market, wolfsbane, the guild's black candle, the tithe, the water ordeal, valley runners, town graves and the rest). PR #1705 merged the same night.
 - **Applies to:** Lore.md (now marked Andy approved, 2026-11-18).
 - **Agent:** [[Agents/Story quest expansion|Story quest expansion]]
+- 2026-11-18 (Andy): "approve all lore": every `(new)` placement in Lore.md is canon (The Huntsman's rangers, Conjoined twin mutation, What a pact holds you to, The bound bloods, What the water keeps). Also: labyrinth compass plates come from early dungeon loot; Knight Armor ships with a datapack that moves its recipes to Tinkers forging; fishing's second half (notes + tackle bench) goes ahead.

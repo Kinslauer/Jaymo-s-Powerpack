@@ -6,7 +6,7 @@ line of dialogue disagrees with this page, the page wins until Andy changes it h
 Most of what follows was already in the game or in a plan doc; the rest Andy has added since 2026-11-09. Andy adds to
 it, and nothing is removed without his say.
 
-**Approved.** Andy approved every entry added in the 2026-11-11 rewrite (2026-11-11), and every placement marked `(new)` up to 2026-11-17 (approved 2026-11-17), so the whole page is canon. New placements are still marked `(new)` when they are added.
+**Approved.** Andy approved every entry added in the 2026-11-11 rewrite (2026-11-11), and every placement marked `(new)` up to 2026-11-18 (approved 2026-11-17 and 2026-11-18), so the whole page is canon. New placements are still marked `(new)` when they are added.
 
 ## The ages of the world
 
@@ -278,7 +278,7 @@ the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' g
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
 
-(new) **The Huntsman's rangers** (Andy, 2026-11-17; placement Claude's for him to approve). The Green Huntsman's hunters
+**The Huntsman's rangers** (Andy, 2026-11-17; placement Claude's for him to approve). The Green Huntsman's hunters
 don't keep to the villages: they walk the forests, the taiga and the jungle in ones, bow in hand, taking the old and
 the slow and leaving the young. They'll teach their trade to a stranger with none, and give a hunter's advice to anyone
 else. The Huntsman's law is theirs to keep where no realm's law reaches: one who kills more than the wood can spare is
@@ -652,7 +652,7 @@ are: villagers who died a long time ago, in ages this world has already forgotte
 zombies are the recently dead, someone the village knew, turned within living memory; these are the older dead, much
 further gone, worn down to almost nothing of who they were.
 
-**Conjoined twin mutation (new).** Rarely, a villager or zombie spawns with a conjoined twin — a baby or toddler of the same kind riding on its shoulder, clinging as it did in life. Villagers carry baby villagers; zombies, husks and drowned carry baby zombies. MCA villagers likewise carry MCA toddlers. This is a purely cosmetic mutation, a remnant of the bond that held them together in the womb. It has no gameplay effect: the twin does not attack, cannot be targeted separately, and simply rides along. The sight unsettles some; others say it is a mercy, that the two never had to part.
+**Conjoined twin mutation.** Rarely, a villager or zombie spawns with a conjoined twin — a baby or toddler of the same kind riding on its shoulder, clinging as it did in life. Villagers carry baby villagers; zombies, husks and drowned carry baby zombies. MCA villagers likewise carry MCA toddlers. This is a purely cosmetic mutation, a remnant of the bond that held them together in the womb. It has no gameplay effect: the twin does not attack, cannot be targeted separately, and simply rides along. The sight unsettles some; others say it is a mercy, that the two never had to part.
 
 **The dead walk together** (zombie hordes thread, 2026-11-14; Claude's placement Andy approved 2026-11-17). The old dead
 were villagers, and they still keep to their villages: they rise and walk in crowds, the way they once went out to the
@@ -1055,7 +1055,7 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
-(new) **What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
+**What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
 placement for him to approve). A Warlock's patron gives, and asks two things back: the debts, and terms that are never
 lifted. The hand that would break one stops of itself, and only a deliberate second try gets through, and then the
 patron takes its due at once. The Hearthkeeper's sworn never strike the fallen nor anyone under a roof who isn't fighting
@@ -1591,7 +1591,7 @@ raised among folk catches the suspicion from both sides.
 **Nightborn and Dawnborn.** Daylight dulls the one and feeds the other, and neither has ever trusted the other. A
 Nightborn keeps the Lantern Warden, a Dawnborn keeps the Crowned Sun, and each quietly blames the other's god.
 
-(new) **The bound bloods** (Andy, 2026-11-17: "All tideborn are deep mother, and they and dawnborn are the only heritages
+**The bound bloods** (Andy, 2026-11-17: "All tideborn are deep mother, and they and dawnborn are the only heritages
 with a bound patron"; placement for him to approve). Every other people has a god most of its children pray to, and
 any child of theirs may grow up keeping another. Not these two. A Tideborn is the Deep Mother's from the first breath of
 salt, and a Dawnborn the Crowned Sun's from the first sunrise: they're raised to it and no other. A priest serves the god
@@ -2043,7 +2043,7 @@ is on the wall.
 
 **Fishing the fire** (Andy approved, 2026-11-17; Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
 
-(new) **What the water keeps.** Rivers, seas, swamps and the demons' lava lakes all take things from people, and a line that finds one of their old crates brings it up wet: bait and lures from a river's anglers, nuggets and shells from the sea, swamp muck, and in the lava lakes whatever the fire could not eat. In the dark pools under the hills the olm and the pale blind cavefish live as they always have, slowly, on very little, and the Anvil-Father's miners left them be (placement for the Tide picks; Claude, 2026-11-17).
+**What the water keeps.** Rivers, seas, swamps and the demons' lava lakes all take things from people, and a line that finds one of their old crates brings it up wet: bait and lures from a river's anglers, nuggets and shells from the sea, swamp muck, and in the lava lakes whatever the fire could not eat. In the dark pools under the hills the olm and the pale blind cavefish live as they always have, slowly, on very little, and the Anvil-Father's miners left them be (placement for the Tide picks; Claude, 2026-11-17).
 
 **The labyrinth-builders' craft** (Andy approved, 2026-11-17; Claude's placement for the Asterion picks, 2026-11-18). The forgotten hands that raised the labyrinths worked bronze and fire. Their inner gates open only to tablets cut in the old tongue, scattered through the halls, and some of the braziers that light those halls are not braziers at all. Their prize was a blade that strikes twice. The sea took the plates of one of their geared instruments into the Deep Mother's drowned colonnades, and whoever builds it from them finds it always turns toward the nearest labyrinth. In the warm lands the beetles that spit boiling spray live in colonies round a queen, and the old builders kept them.
 
