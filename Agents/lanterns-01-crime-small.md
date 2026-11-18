@@ -3,13 +3,16 @@ status: running
 task: lanterns-01-crime-small
 branch: claude/lanterns-01-crime-small
 with: Claude Code (PC)
-pr: 
+pr: 1751
 mods: kingdoms
 versions: 
 started: 2026-11-18
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Theft.java
   - kingdoms/src/main/java/com/jaymoskingdoms/Suspicion.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChestNoise.java (wakeToHear)
+  - kingdoms/src/main/java/com/jaymoskingdoms/Approaches.java (suspected made package-visible)
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/crime-watch.json
   - changes/kingdoms/lanterns-01-crime-small.md
 ---
 # lanterns-01-crime-small
@@ -21,6 +24,6 @@ owns:
 - Suspicion guard watch: spread from vampires/werewolves to crime hearsay and light crimes.
 
 ## Notes
-- 
+- No PC build (memory: PC runs only the game); CI is the compile check.
 
 ## Done
