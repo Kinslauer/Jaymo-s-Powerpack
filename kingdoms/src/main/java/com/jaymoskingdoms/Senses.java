@@ -74,7 +74,8 @@ import org.jspecify.annotations.Nullable;
  * first and within {@link #HEED_MEMORY}, brings it over,
  * as a loud one does at once. Lured, it searches the spot, then walks back to where it was ({@link #RETURN_SPEED}). A camp's
  * outlaws ({@link Folk}) hear and search too, but never lose a foe they are after.</li>
- * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes; and the
+ * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes (a beast
+ * stalking you, {@code wild.WolfStalkers}, shows only once you can feel it: {@link #feelsStalkers}); and the
  * stealth meter beside it ({@link Meter}): how far your noise carries, how lit you are, whether you bleed, whether you talk.</li>
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
  * it is searching) and struck from its rear ({@link #REAR_DOT}) is a sneak attack, only with the Sneak Attack perk (its ranks: {@link #SNEAK_ATTACK_RANK_MULT}). The hidden blade's
@@ -133,6 +134,8 @@ public final class Senses {
 	static final int GAUGE_TICKS = 5;
 	public static final int FILL_STEPS = 10;
 	static final double GAUGE_RANGE = 40.0;
+	/** Stealth level from which a beast stalking you shows on the eye (the Sixth Sense perk shows it at any level). */
+	public static final int FEEL_STALKERS_LEVEL = 15;
 
 	/** The gauge's states. */
 	public static final int IDLE = 0, NOTICING = 1, SEARCHING = 2, SPOTTED = 3;
@@ -707,12 +710,20 @@ public final class Senses {
 		int past = 0;
 		boolean sneaking = player.isCrouching() && MOVING.getOrDefault(player.getUUID(), false);
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
-			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE), m -> m.isAlive() && sensing(m))) {
+			boolean feels = feelsStalkers(player);
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE),
+				m -> m.isAlive() && (sensing(m) || com.jaymoskingdoms.wild.WolfStalkers.after(m, player)))) {
 				if (mob.getTarget() == player) {
 					state = SPOTTED;
 					break;
 				}
-				if (searchingFor(mob, player)) {
+				if (com.jaymoskingdoms.wild.WolfStalkers.stalking(mob, player)) {
+					// a stalking beast keeps its interest to itself, unless the one it hunts can feel it: the eye fills as it creeps in
+					if (feels && state <= NOTICING) {
+						state = NOTICING;
+						fill = Math.max(fill, Math.max(1, (int) Math.round(com.jaymoskingdoms.wild.WolfStalkers.closeness(mob, player, GAUGE_RANGE) * FILL_STEPS)));
+					}
+				} else if (searchingFor(mob, player)) {
 					state = Math.max(state, SEARCHING);
 				} else if (state <= NOTICING && heeding(mob, player)) {
 					// (stopped to listen for you: the eye half fills)
@@ -745,6 +756,14 @@ public final class Senses {
 			ServerPlayNetworking.send(player, new Gauge(state, fill));
 		}
 		meter(player);
+	}
+
+	/**
+	 * Andy (2026-11-18): the predators that stalk you don't set off the eye "until your stealth is sufficient or a perk on
+	 * tree": Stealth at {@link #FEEL_STALKERS_LEVEL}, or Sixth Sense.
+	 */
+	static boolean feelsStalkers(Player player) {
+		return Skills.rank(player, Skills.Perk.SIXTH_SENSE) > 0 || Skills.of(player).level(Skills.Pillar.STEALTH) >= FEEL_STALKERS_LEVEL;
 	}
 
 	/** The stealth meter: how far {@code player}'s noise carries, how lit they are, whether they bleed or talk; sent when it changes. */
