@@ -210,6 +210,11 @@ public final class PickerLayout {
 
 	/** The rows: icon in a rim of its colour, name, a one-line tag when the row is tall enough; the picked one has a gold rim. */
 	public void list(GuiGraphicsExtractor graphics, Font font, List<Entry> entries, int picked, int hover, int accent) {
+		list(graphics, font, entries, picked, hover, accent, false);
+	}
+
+	/** The same; with {@code crossed} the picked row's box is also struck through with a hand-drawn X ({@link #cross}). */
+	public void list(GuiGraphicsExtractor graphics, Font font, List<Entry> entries, int picked, int hover, int accent, boolean crossed) {
 		int n = entries.size();
 		rowsFor(n);
 		int cw = colW(), vis = visibleRows();
@@ -238,6 +243,9 @@ public final class PickerLayout {
 					graphics.item(e.icon(), bx + (box - 16) / 2, by + (box - 16) / 2);
 				}
 			}
+			if (crossed && isPicked) {
+				cross(graphics, bx, by, box);
+			}
 			int tx = bx + box + 4, room = x + cw - 3 - tx;
 			int nameColor = e.locked() ? Ui.HINT : isPicked ? accent : Ui.TEXT;
 			if (tagged && e.tag() != null) {
@@ -249,6 +257,37 @@ public final class PickerLayout {
 		}
 		if (this.rows > vis) {
 			Ui.scrollbar(graphics, this.listX + this.listW - 3, this.bodyTop, vis * this.rowH - 2, vis, this.rows, this.listScroll);
+		}
+	}
+
+	/** The hand-drawn X's ink: a quill's red, with a darker edge under each stroke. */
+	public static final int CROSS_INK = 0xFFD8322A, CROSS_EDGE = 0xFF5A0E0A;
+
+	/**
+	 * Andy's mark for a picked box: an X struck across the square {@code size} box at x, y as if by hand, two slightly wavering
+	 * strokes, the second running a little past the box's corner. The waver is fixed, so the mark doesn't shimmer.
+	 */
+	public static void cross(GuiGraphicsExtractor graphics, int x, int y, int size) {
+		int over = Math.max(1, size / 6);
+		stroke(graphics, x + 1, y, x + size - 1 + over / 2, y + size - 1 + over / 2, size, 0.0);
+		stroke(graphics, x + size - 1, y - over / 2, x - over, y + size - 1 + over, size, 1.7);
+	}
+
+	/** One stroke of the X, from (x0, y0) to (x1, y1), wavering up to a pixel off its line in big boxes. */
+	private static void stroke(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int size, double phase) {
+		double dx = x1 - x0, dy = y1 - y0, len = Math.sqrt(dx * dx + dy * dy);
+		int steps = Math.max(1, (int)Math.ceil(len * 2));
+		double wave = size >= 12 ? 1.0 : 0.0;
+		int lastX = Integer.MIN_VALUE, lastY = Integer.MIN_VALUE;
+		for (int i = 0; i <= steps; i++) {
+			double t = (double)i / steps, off = wave * Math.sin(t * Math.PI * 1.6 + phase) * Math.sin(t * Math.PI);
+			int px = (int)Math.round(x0 + dx * t - dy / len * off), py = (int)Math.round(y0 + dy * t + dx / len * off);
+			if (px != lastX || py != lastY) {
+				graphics.fill(px, py + 1, px + 1, py + 2, CROSS_EDGE);
+				graphics.fill(px, py, px + 1, py + 1, CROSS_INK);
+				lastX = px;
+				lastY = py;
+			}
 		}
 	}
 

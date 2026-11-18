@@ -824,7 +824,7 @@ final class LifeStoryScreen extends Screen {
 				Component.translatable(story(s.question.key() + "." + a.key())), PickerLayout.tag("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tag"),
 				ACCENT, !open(a)));
 		}
-		this.picker.list(graphics, this.font, entries, pickedRow, hover, ACCENT);
+		this.picker.list(graphics, this.font, entries, pickedRow, hover, ACCENT, true);
 		this.picker.backdrop(graphics, ACCENT, StoryFigure.SCALE);
 		int[] box = this.picker.figureBox();
 		figure(graphics, s, mouseX, mouseY, box[0], box[1], box[2], box[3], true);
@@ -2371,13 +2371,26 @@ final class LifeStoryScreen extends Screen {
 			} else {
 				Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, i, hover && able);
 			}
-			graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(choiceName(i)), px + 12, y + 2, on ? ACCENT : able ? Ui.TEXT : Ui.HINT);
+			tickBox(graphics, px + 12, y + 1, on, able);
+			graphics.text(this.font, choiceName(i), px + 24, y + 2, on ? ACCENT : able ? Ui.TEXT : Ui.HINT);
 			for (int l = 0; l < fx.size(); l++) {
 				graphics.text(this.font, fx.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, able ? Ui.DIM : Ui.HINT);
 			}
 			y += rh;
 		}
 		return sparkRows(graphics, mouseX, mouseY, y, px, pw, textW);
+	}
+
+	/** A flaw's or spark's box at x, y (9 square), struck with the story's hand-drawn X when {@code on}. */
+	private static void tickBox(GuiGraphicsExtractor graphics, int x, int y, boolean on, boolean able) {
+		int edge = on ? ACCENT : able ? Ui.DIM : Ui.HINT;
+		graphics.fill(x, y, x + 9, y + 1, edge);
+		graphics.fill(x, y + 8, x + 9, y + 9, edge);
+		graphics.fill(x, y + 1, x + 1, y + 8, edge);
+		graphics.fill(x + 8, y + 1, x + 9, y + 8, edge);
+		if (on) {
+			PickerLayout.cross(graphics, x, y, 9);
+		}
 	}
 
 	/** The first choice index of the spark picks: 3 lists of 3, ideal then bond then flaw. */
@@ -2420,8 +2433,8 @@ final class LifeStoryScreen extends Screen {
 				} else {
 					Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, index, hover);
 				}
-				graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(Component.translatable("spark." + kinds[kind] + "." + offered.get(pos))),
-					px + 12, y + 2, on ? ACCENT : Ui.TEXT);
+				tickBox(graphics, px + 12, y + 1, on, true);
+				graphics.text(this.font, Component.translatable("spark." + kinds[kind] + "." + offered.get(pos)), px + 24, y + 2, on ? ACCENT : Ui.TEXT);
 				for (int l = 0; l < split.size(); l++) {
 					graphics.text(this.font, split.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, Ui.DIM);
 				}
