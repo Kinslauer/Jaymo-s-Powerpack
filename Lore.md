@@ -533,12 +533,12 @@ into and too deep to push up through. Here and there a **well** stands open in i
 the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
 whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
 
-**Bottled cloud** (new) (Clouds and Bits picks, 2026-11-18; Claude's placement). The sky folk say the overcast can be
+**Bottled cloud** (Andy approved, 2026-11-18; Clouds and Bits picks, Claude's placement). The sky folk say the overcast can be
 carried. A bottle held open in the Cloud Sea, or pressed into any soft cloud, fills with a little of it, and poured out it
 billows into a puff that holds a body for a breath before it thins away. Skiff crews keep one at the belt for the step
 off an edge. Ground folk who come by one take it for a trick bottle that is empty.
 
-**Phantoms that carry** (new) (same picks). The phantoms that hunt the sleepless from the night sky do not only bite.
+**Phantoms that carry** (Andy approved, 2026-11-18; same picks). The phantoms that hunt the sleepless from the night sky do not only bite.
 Now and then one closes its claws on the one it dives at and climbs, and lets go when it tires or is hurt. Whoever is
 carried can strike at its soft belly, where it feels it most. Shepherds who have lost a lamb to one say the cure is to
 sleep.
