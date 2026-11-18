@@ -6019,3 +6019,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - Fixes: after every restart the world pre-generation came back stuck (0 chunks a second) until it was paused and continued by hand. `ChunkyCompat` now uses Chunky's API instead of its commands: it is still paused while a player is on and continued once nobody is, but a continue now waits until the paused task has finished stopping (it used to be lost when the pause was slow to drain). With nobody on, a watchdog pauses and continues a task that has run a minute without a progress event, up to three times in a row.
 - Built by CI; checked on the next restart.
+
+## 0.25.18 (2026-11-18): Oversized drops split into full stacks (#1768)
+
+- Fixes: a dropped stack bigger than its item's stack size (Droppable Villager Trades can drop up to 320 of a dead villager's trade at once, 152 bricks on the Deck) couldn't be saved and was lost when its chunk unloaded. Such a drop is now split into full stacks as it lands (`OversizedDropMixin`).
+- Built by CI; not played.
