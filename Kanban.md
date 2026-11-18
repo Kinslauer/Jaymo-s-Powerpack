@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 20:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 20:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,11 +13,11 @@ kanban-plugin: board
 - [ ] [[Inbox/inferno-fire|inferno-fire]] · for pc-claude · open
 - [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · for pc-claude · open
-- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · for pc-claude · open
 
 
 ## Being built
 
+- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · claimed
 
 
 ## In review
