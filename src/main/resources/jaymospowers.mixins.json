@@ -21,6 +21,7 @@
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",
 		"ArmourWearRepairMixin",
+		"LightArmourSnowMixin",
 		"ArmourWearMendingMixin",
 		"ArmourWearSlotMixin",
 		"GrindstoneMenuAccessor",
