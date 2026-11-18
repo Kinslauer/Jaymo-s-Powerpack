@@ -41,3 +41,4 @@ suggested_owns:
 ## Notes
 - Lore paragraph "The scrying orb" is in Lore.md (Daily life, after the everburning mote), approved by Andy 2026-11-18.
 - Open questions for Andy (ask in the thread, don't block on them): mote figures first or real tiny models from the start; any way for the watched to notice beyond the chill; can a keep or wizard's tower be warded so it shows only cloud.
+- 2026-11-18 17:03 Claude (cloud session, Andy's project thread): claimed; branch claude/scrying-orb. Immersive Portals port checked and rejected (see Decisions.md); building the miniature as planned.
