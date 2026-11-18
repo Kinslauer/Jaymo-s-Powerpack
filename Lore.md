@@ -1055,6 +1055,10 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
+**No priests of the Ash Whisperer** (new; Andy, 2026-11-18: Clerics never pledge to her; placement for him to approve).
+She keeps no clerics and answers no prayer for healing. Her favour goes only to the dark arts, death and blood and the
+other forbidden sorceries, and whoever wants it strikes a Warlock's pact with her, never a priest's vow.
+
 **What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
 placement for him to approve). A Warlock's patron gives, and asks two things back: the debts, and terms that are never
 lifted. The hand that would break one stops of itself, and only a deliberate second try gets through, and then the
