@@ -38,9 +38,9 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
  */
 public final class LightArmour {
 	// ===== the knobs: armour points (head, chest, legs, feet) ========================================================
-	/** Mailed leather: between iron and diamond in durability, iron's points and more toughness than iron. */
+	/** Mailed leather: between iron and diamond in durability and points (16, iron 15, diamond 20), and some toughness. */
 	static final int MAILED_DURABILITY = 22, MAILED_ENCHANT = 12;
-	static final int[] MAILED_DEFENSE = {2, 6, 5, 2};
+	static final int[] MAILED_DEFENSE = {2, 7, 5, 2};
 	static final float MAILED_TOUGHNESS = 1.0F;
 	/** Studded leather: between leather (5) and iron (15) in durability, a step over leather's points. */
 	static final int STUDDED_DURABILITY = 10, STUDDED_ENCHANT = 12;
@@ -119,8 +119,9 @@ public final class LightArmour {
 			to.set(DataComponents.MAX_DAMAGE, Math.round(to.getMaxDamage() * (float) from.getMaxDamage() / plain));
 		}
 		if (from.isDamaged() && from.getMaxDamage() > 0) {
-			float worn = (float) from.getDamageValue() / from.getMaxDamage();
-			to.setDamageValue(Math.min(to.getMaxDamage() - 1, Math.round(worn * to.getMaxDamage())));
+			// a broken piece stays broken (ArmourWear): it still wants mending
+			to.setDamageValue(com.jaymospowers.core.ArmourWear.broken(from) ? to.getMaxDamage()
+				: Math.min(to.getMaxDamage() - 1, Math.round((float) from.getDamageValue() / from.getMaxDamage() * to.getMaxDamage())));
 		}
 	}
 }

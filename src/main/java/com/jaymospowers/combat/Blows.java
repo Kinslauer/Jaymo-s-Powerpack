@@ -197,7 +197,8 @@ public final class Blows {
 		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
 		EquipmentSlot slot = slot(part);
 		List<ArmourKind> layers = new ArrayList<>();
-		ItemStack outer = ItemStack.EMPTY;
+		// the worn piece beside each layer (a mailed or studded piece meets a blow its own way); harness layers have none
+		List<ItemStack> pieces = new ArrayList<>();
 		String place = place(part);
 		List<ArmourKind> limb = place.equals("torso") ? List.of() : ArmourKind.layers(victim, place);
 		if (place.equals("arms") && !limb.isEmpty()) {
@@ -205,19 +206,28 @@ public final class Blows {
 			layers.addAll(limb);
 		} else {
 			layers.addAll(place.equals("legs") ? limb : List.of());
-			if (layers.isEmpty() && ArmourKind.worn(victim, slot) != ArmourKind.NONE) {
-				outer = victim.getItemBySlot(slot);
+			while (pieces.size() < layers.size()) {
+				pieces.add(ItemStack.EMPTY);
 			}
 			layers.add(ArmourKind.worn(victim, slot));
+			pieces.add(victim.getItemBySlot(slot));
 			if (slot == EquipmentSlot.CHEST) {
 				layers.addAll(ArmourKind.layers(victim, "torso"));
 			}
 		}
-		layers.removeIf(k -> k == ArmourKind.NONE);
+		while (pieces.size() < layers.size()) {
+			pieces.add(ItemStack.EMPTY);
+		}
+		for (int i = layers.size() - 1; i >= 0; i--) {
+			if (layers.get(i) == ArmourKind.NONE) {
+				layers.remove(i);
+				pieces.remove(i);
+			}
+		}
 		ArmourKind armour = layers.isEmpty() ? ArmourKind.NONE : layers.get(0);
-		float factor = kind.against(armour, outer);
+		float factor = layers.isEmpty() ? kind.against(armour) : kind.against(armour, pieces.get(0));
 		for (int i = 1; i < layers.size(); i++) {
-			float under = kind.against(layers.get(i));
+			float under = kind.against(layers.get(i), pieces.get(i));
 			if (under < factor) {
 				factor += (under - factor) * UNDER_SOAK;
 			}

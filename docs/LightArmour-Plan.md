@@ -28,7 +28,7 @@ Rows `cl-jack`, `cl-studded`, `cl-keep`, `cl-repair`, `fs-snow`. Package `com.ja
 `MailRings` (new class `LightArmour`), lang part `lang/parts/light_armour.json`.
 
 - **Mailed leather** ("Mailed Cap / Mailed Jack / Mailed Chausses / Mailed Boots"): shapeless at the crafting table,
-  one leather piece + Mail Sheets (2/4/3/2) + string. Armour between iron and diamond in points (helmet 2, jack 6,
+  one leather piece + Mail Sheets (2/4/3/2) + string. Armour between iron and diamond in points (helmet 2, jack 7,
   chausses 5, boots 2, toughness 1), durability between iron and diamond. Dyeable like leather (two-layer texture: dyed
   leather + undyed mail overlay). Tags: `jaymospowers:mail_armor` and `cloth_armor` both; `ArmourKind.of` picks MAIL
   (tag order), and `Blows.meetArmour` takes the better of the cloth and mail shares for a piece in both tags (one new

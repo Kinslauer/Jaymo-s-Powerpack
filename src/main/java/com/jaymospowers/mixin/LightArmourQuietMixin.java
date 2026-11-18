@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** The distance mobs notice a body at scales with the armour it wears (see {@link LightArmour#noticed}). */
+/** The distance mobs notice a body at scales with the armour it wears (see {@link ArmourEase#noticed}). */
 @Mixin(LivingEntity.class)
 abstract class LightArmourQuietMixin {
 	@Inject(method = "getVisibilityPercent", at = @At("RETURN"), cancellable = true)

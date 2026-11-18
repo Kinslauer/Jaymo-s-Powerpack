@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/** Mail shortens a Slowness added to its wearer (see {@link LightArmour#slownessKept}). */
+/** Mail shortens a Slowness added to its wearer (see {@link ArmourEase#slownessKept}). */
 @Mixin(LivingEntity.class)
 abstract class LightArmourSlowMixin {
 	@ModifyVariable(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), argsOnly = true)
