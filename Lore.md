@@ -862,6 +862,13 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
+**The Hollow** (new; Lanterns patch 6, Andy's Buder's Lanterns pick). Out past the last orbits, across the sky from the
+Maw, a sun burned out long ago and fell in on itself. What is left is a hole in the dark with a thin rim of bent light and a
+slow wheel of burning stuff going round it: nothing that goes in comes out, so no pod is ever pointed at it. Crews bound
+for Glacia or the Verdant World pass wide of it and still lose time to its pull, and say the stars slide aside as it goes
+by. Only the very strongest fighters have crossed open space with no pod at all, on their own ki, and only as far as the
+Pale Moon.
+
 **The giant's ring** (ring thread, 2026-11-15; Andy: "you should be able to travel to that planet", picked the ring).
 Nobody comes down on the blue giant itself: it is cloud all the way down. But a pod can make the short hop up from the
 Verdant World to its ring, which close to is no band at all but a field of drifts, slabs of old ice and dark rock hanging
