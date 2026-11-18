@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,7 +35,9 @@ abstract class StuckRideTeleportMixin {
 	private static final long AGAIN_MS = 5000;
 
 	/** The last far teleport that came while riding, and when (ms); null for none. */
+	@Unique
 	private static Vec3 jaymospowers$lastFar;
+	@Unique
 	private static long jaymospowers$lastFarAt;
 
 	@Inject(method = "handleMovePlayer", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
@@ -60,8 +63,12 @@ abstract class StuckRideTeleportMixin {
 			// (the first: maybe the ride itself is being teleported with them, so it's left to vanilla)
 			return;
 		}
-		jaymospowers$lastFar = null;
 		Entity ride = player.getVehicle();
+		if (ride != null && ride.distanceToSqr(target) <= REACH * REACH) {
+			// (the ride went there too: a ride teleported with its rider, its answer only slow)
+			return;
+		}
+		jaymospowers$lastFar = null;
 		JaymosPowers.LOGGER.warn("The same teleport {} blocks away came again while riding {} (id {}); getting off it so the teleport takes",
 			(int)Math.sqrt(target.distanceToSqr(player.position())), ride == null ? "?" : BuiltInRegistries.ENTITY_TYPE.getKey(ride.getType()),
 			ride == null ? -1 : ride.getId());
