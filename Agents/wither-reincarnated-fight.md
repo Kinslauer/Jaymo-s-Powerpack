@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: wither-reincarnated-fight
 branch: claude/wither-reincarnated-fight
 with: 
-pr: 
+pr: 1717
 mods: [kingdoms]
 versions:
 started: 2026-11-17
@@ -24,4 +24,5 @@ owns:
 - No local builds (Andy's gaming PC): CI only.
 
 ## Done
-(pending)
+Raising a Wither darkens the sky world-wide until it dies; it first throws skulls at nearby houses and walls (mobGriefing on), guards go for it, folk and animals run, nearby zombies, skeletons and draugr (never barrow) guard it. Then it circles the nearest player (tighter and faster in the last third) and uses beam, charge (shield stops and stuns it), skull rain on marked ground, and blue skulls a swing bats back. PR 1717, CI green.
+Not tested in game at all: every number is a guess. Charge-block, bat and beam hit detection, steering via goal flags and noAi stun, and the ruin finder (block tags, not true settlement data) need a play. Model and sounds still to come.
