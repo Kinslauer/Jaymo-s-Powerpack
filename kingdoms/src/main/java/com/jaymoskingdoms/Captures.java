@@ -451,5 +451,7 @@ final class Captures {
 		}
 		DUELS.remove(body.getUUID());
 		Lasso.drop(body);
+		// a Galactic Patrol officer's arrest (Jaymo's Powers)
+		PowersCompat.patrolHandedOver(player, body);
 	}
 }
