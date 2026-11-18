@@ -131,6 +131,8 @@ public final class ChunkyCompat {
 				lastProgressTick = ticks;
 			} else if (ticks - kickPausedAt >= DRAIN_LIMIT_TICKS) {
 				kickPausedAt = -1;
+				// (continued as soon as it does stop, so a slow drain on the last kick doesn't leave it paused)
+				continueDue = true;
 				JaymosPowers.LOGGER.warn("Chunky is still draining {} s after the watchdog paused it", DRAIN_LIMIT_TICKS / 20);
 			}
 		} else if (!continueDue && running && ticks - lastProgressTick >= STALL_TICKS) {
@@ -154,7 +156,12 @@ public final class ChunkyCompat {
 	/** The only place Chunky's classes are named, so nothing loads them while Chunky is absent. */
 	private static final class Api {
 		static boolean ready() {
-			return ChunkyProvider.get() != null;
+			try {
+				return ChunkyProvider.get() != null;
+			} catch (IllegalStateException e) {
+				// (Chunky's provider throws while it isn't loaded, before its server start and after its stop)
+				return false;
+			}
 		}
 
 		static void listen() {
