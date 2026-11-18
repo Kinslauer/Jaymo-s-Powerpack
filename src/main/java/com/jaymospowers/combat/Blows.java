@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -175,7 +176,7 @@ public final class Blows {
 		measured = null;
 		if (source.getDirectEntity() instanceof AbstractArrow missile) {
 			return damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ARMOR) ? damage
-				: damage * missile(missile, ArmourKind.worn(victim, struck(victim, source)));
+				: damage * missile(missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
 		}
 		if (damage <= 0.0F || !(victim.level() instanceof ServerLevel level) || !(source.getDirectEntity() instanceof LivingEntity attacker)
 			|| source.getEntity() != attacker || attacker == victim) {
@@ -225,14 +226,15 @@ public final class Blows {
 
 	/**
 	 * The share of its damage an arrow or a thrown weapon does against {@code armour}: an arrowhead's own way with it (a
-	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, and 1 for the rest.
+	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, {@link #ARROW_VS_MAIL} for a plain arrow
+	 * meeting mail, and 1 for the rest (a trident, a thrown blade).
 	 */
-	private static float missile(AbstractArrow missile, ArmourKind armour) {
+	private static float missile(AbstractArrow missile, boolean arrow, ArmourKind armour) {
 		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
 			return WeaponKind.Blow.THRUST.against(armour);
 		}
 		float head = HeadFx.againstArmour(missile, armour);
-		return armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
+		return arrow && armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
 	}
 
 	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */

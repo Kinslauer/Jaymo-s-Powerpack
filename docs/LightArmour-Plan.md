@@ -54,8 +54,9 @@ Rows `cl-jack`, `cl-studded`, `cl-keep`, `cl-repair`, `fs-snow`. Package `com.ja
 ## Patch 2: what mail is good at (Powers combat, freerun, stealth)
 Rows `mb-arrows`, `mb-nimble`, `mb-slow`, `mb-quiet`. No new items; reads `ArmourKind`, so it can run beside Patch 1.
 
-- **Arrows** (`mb-arrows`): `Blows.missile` gives an arrow against MAIL `ARROW_VS_MAIL = 0.75`; a thrust-headed bolt
-  (crossbow bolts, `WeaponKind.Blow.THRUST` heads) keeps the thrust share. Mail wears less for it, as `Blows` already does.
+- **Arrows** (`mb-arrows`): `Blows.missile` gives a plain arrow (damage type `minecraft:arrow`) against MAIL
+  `ARROW_VS_MAIL = 0.75`. An arrowhead with its own way with armour (bodkin, swallowtail) and the war dart keep their
+  own share; tridents and thrown blades are unchanged. Mail wears less for it, as `Blows` already does.
 - **Nimble** (`mb-nimble`): climbing grip, freerun vault speed and swim speed are slowed by plate only: scale by the plate
   share of `ArmourKind.load` (a full plate suit: climb grip -30%, vault -20%, swim -20%). Light armour: no change.
   Find the climb/vault/swim classes in `docs/codemap/powers.md` (freerun, climbing).
