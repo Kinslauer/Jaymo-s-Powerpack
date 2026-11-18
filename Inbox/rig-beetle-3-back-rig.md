@@ -25,7 +25,7 @@ suggested_owns:
 - **Grapple claw** (`bk-grapple`): A claw on a line: zip to a wall, or yank an enemy to you. _Our side:_ Uses WebHeft's rope weight and limits, so it behaves like a real line. A Rig active, not a web.
 - **Chain lightning from the helm** (`bk-horns`): Lightning jumps from the helm to the nearest foes in a chain. _Our side:_ A Mind level 4 active: arcs to up to 4 targets (MagicFx spark), stronger in rain, and it overcharges the Core like our lightning strike does.
 
-**Where to start:** Wings: two vane panels on the Core's back plate, spread in full flight, folded in hover (eased). Wing slash upgrades RigStrikes' dash; blade drones are a kind in RigDrones. Pincer hold uses CarryPose for the held one. Grapple uses WebHeft's rope rules (a Rig active, not a web). Horn lightning overcharges the Core like the lightning strike does (RigActives OVER_*).
+**Where to start:** Wings: two vane panels on the Core's back plate, spread in full flight, folded in hover (eased). Wing slash upgrades RigStrikes' dash (blade drones were not picked). Pincer hold uses CarryPose for the held one. Grapple uses WebHeft's rope rules (a Rig active, not a web). Horn lightning overcharges the Core like the lightning strike does (RigActives OVER_*).
 
 ## Shared rules for every rig-beetle patch
 - Source: Andy's picks (2026-11-18) from the Zemo&Baki "DC Universe" jar, which is one Blue Beetle armour mod. **All Rights Reserved: ideas only.** Own code, own poses, own art, no DC names (no scarab/Khaji-Da/Kord/Bug). Pick list: https://claude.ai/artifact/4hWigMxitF3zRsp1JYQsVX (db `picks/andy`). Reference dump on Andy's PC: `Mod Testing\zemo-dc\inventory.md` (names and text only).
