@@ -15036,3 +15036,10 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - Zombies spawned able to break doors (Hard) lose vanilla's door breaker when they load, not from inside the Pound goal's `canUse`. Removing a goal there changed the goal set while the goal selector was walking it, and a NullPointerException stopped the server (a zombie, 2026-11-18).
 - `DoorPounding`: `loaded()` calls `setCanBreakDoors(false)` before `paths()`; `Pound.canUse()` no longer does.
 - Not built or played; CI compiles.
+
+## 0.10.31 (2026-11-18): picker lists show 3-4 big boxes, info text in paragraphs (#1750)
+
+- **Picker lists** (heritage, class, patron, life story): the middle column shows three or four big boxes at a time (three on short windows) and scrolls with the wheel for the rest, so each box has room for its name and tag in full. Short lists still fill the column.
+- **Info panel text**: long text (class and option descriptions, heritage gifts) is broken at its sentences into short paragraphs, and an over-long sentence is broken again at its semicolons. Lines get a pixel more space, paragraphs get a gap, and sections with several lines are bulleted.
+- `PickerLayout` (`BOXES_SHOWN`, `PARA_SPLIT`, `PARA_SENTENCES`, `LEADING`, `PARA_GAP`).
+- Built; not played.
