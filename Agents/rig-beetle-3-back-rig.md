@@ -1,11 +1,11 @@
 ---
-status: stalled
+status: running
 task: rig-beetle-3-back-rig
 branch: claude/rig-beetle-3-back-rig
 with: 
 pr: 
-mods: 
-versions: 
+mods: powers
+versions: 0.25.19
 started: 2026-11-18
 owns:
   - src/main/java/com/jaymospowers/rig/RigBack.java (new)
