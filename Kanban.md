@@ -17,7 +17,6 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
 - [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · for any · open
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · for any · open
-- [ ] [[Inbox/wither-model|wither-model]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 
 
@@ -25,6 +24,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · claimed
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · claimed
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
 ## In review
