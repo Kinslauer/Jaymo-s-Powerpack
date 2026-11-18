@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 21:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 21:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,8 +23,8 @@ kanban-plugin: board
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · #1713 · in-review
-- [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · #1715 · in-review
 - [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · #1714 · in-review
+- [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · #1715 · in-review
 - [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/forest-rangers|forest-rangers]] · 💻 Odysseus · #1701 · in-review
