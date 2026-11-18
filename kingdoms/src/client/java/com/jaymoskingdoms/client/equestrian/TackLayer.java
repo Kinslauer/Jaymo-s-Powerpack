@@ -179,7 +179,17 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 		if (caparisonDyed != null) {
 			// Find the closest DyeColor to the RGB value
 			int rgb = caparisonDyed.rgb();
-			caparison = DyeColor.byId(DyeColor.getColorId(rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255));
+			DyeColor closest = DyeColor.WHITE;
+			int best = Integer.MAX_VALUE;
+			for (DyeColor dye : DyeColor.values()) {
+				int c = dye.getTextureDiffuseColor();
+				int d = Math.abs((c >> 16 & 255) - (rgb >> 16 & 255)) + Math.abs((c >> 8 & 255) - (rgb >> 8 & 255)) + Math.abs((c & 255) - (rgb & 255));
+				if (d < best) {
+					best = d;
+					closest = dye;
+				}
+			}
+			caparison = closest;
 		}
 		var b = horse.getAttached(Bonding.BOND);
 		boolean shod = b != null && b.shod();

@@ -71,7 +71,7 @@ public final class Tackroom {
 			return stack;
 		}
 		stack.set(HeraldryArmour.FINISH, finish);
-		stack.set(DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.jaymoskingdoms.finish." + finish, net.minecraft.network.chat.Component.translatable(stack.getDescriptionId())));
+		stack.set(DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.jaymoskingdoms.finish." + finish, net.minecraft.network.chat.Component.translatable(stack.getItem().getDescriptionId())));
 		return stack;
 	}
 
