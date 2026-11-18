@@ -733,3 +733,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2:38 AM, 2026-11-18 (Andy, decision card): compass plates stay in early dungeon chests (as merged in #1714); the sea-chest PR #1720 is closed.
 - 2026-11-18 (Andy): "approve all lore": "The armourers' wider makes" (harness picks) is canon.
 - 2026-11-18 (Andy): Rig picks from the Zemo&Baki "DC Universe" (Blue Beetle armour, ARR, ideas only): 36 of 45 rows, no notes (left out: wrist saws, blade swarm, giant fist, light greatsword, hard-light constructs, arsenal-overload ultimate, support ship, death messages, cores in old chests). Split into six Inbox tasks rig-beetle-1..6, run two at a time.
+- 2026-11-18 (Andy): "yes send it to prometheus": the Wither's new model, animations and sounds (wr_look) sent as Inbox task wither-model, previews to Andy before it's built in.
+- 2026-11-18 (Andy): retaught callings cost 250 silver ("everything should be more expensive") and a day to settle; lore paragraph approved with those numbers. Redistributing attribute points raised to 120 emeralds' worth to match.

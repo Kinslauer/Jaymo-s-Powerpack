@@ -1,9 +1,9 @@
 ---
-status: open
+status: blocked
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 ---
 
@@ -27,3 +27,4 @@ pr:
 
 ## Notes
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
+- 2026-11-18 03:09 Question: Task says 'Start after harness-helms-finishes-crests merges' but PR #1721 is still in review. Should I start this task now or wait for the merge?

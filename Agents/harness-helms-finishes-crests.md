@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: harness-helms-finishes-crests
 branch: claude/harness-helms-finishes-crests
 with: 
-pr: 
+pr: 1721
 mods: kingdoms
 versions: 
 started: 2026-11-18
