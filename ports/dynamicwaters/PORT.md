@@ -103,6 +103,10 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   columns checked against the old way, no difference), and a new world's first river region, which the spawn search
   waits for, went from about 9 minutes to under 1.5 on the cloud test host.
 
+- **Loaded land only**: the ice floe spawner and the running-water freeze check (`higherWaterBeside`) asked `hasChunkAt`,
+  which in 26.3 is also true of a chunk only scheduled, so they read land the server thread then waited to have made.
+  They ask `Loaded.made` (a chunk made and loaded, on the server's thread) instead.
+
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary
   `argument1`/`argument2` → `left`/`right`, unary `argument` → `input` (all built-in packs, compat packs included).

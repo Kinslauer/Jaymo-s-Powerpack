@@ -12,6 +12,7 @@
 		"AetherEdgeMixin",
 		"TemplateUpgradeMixin",
 		"BandSpawnNearPlayersMixin",
+		"SpawnLoadedMixin",
 		"DirtyAttributesMixin",
 		"SkyfallStopMixin",
 		"ArmourWearStackMixin",
