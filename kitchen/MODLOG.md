@@ -2433,3 +2433,8 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 
 - `KitchenUi` (generated from `tools/ui_style`) gains `pill`, `pillWidth`, `frame` and `panelFramed`, the same as the other mods' copies. No Kitchen screen uses them yet.
 - Built; not played.
+
+## 0.6.44 (2026-11-18): hide_armour tag: mailed and studded leather count as leather (#1729)
+
+- `HideTraits.isLeather` also takes pieces in the new `jaymoskitchen:hide_armour` tag (optional entries for Jaymo's Powers' mailed and studded leather), so their hide traits and soak wear work as on leather armour.
+- Built; not played.
