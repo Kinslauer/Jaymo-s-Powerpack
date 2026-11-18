@@ -1,0 +1,17 @@
+{
+	"block.jaymospowers.deepslate_boneiron_ore": "Deepslate Boneiron Ore",
+	"block.jaymospowers.bonding_vat": "Bonding Vat",
+	"item.jaymospowers.raw_boneiron": "Raw Boneiron",
+	"item.jaymospowers.boneiron_ingot": "Boneiron Ingot",
+	"item.jaymospowers.boneiron_plate": "Boneiron Plate",
+	"tooltip.jaymospowers.boneiron_plate": "Lay it in a Tool Forge with a piece of armour to plate the piece (up to %s a piece): armour, toughness, attack and knockback while worn.",
+	"gui.jaymospowers.tool_station.plate": "Plating with boneiron (%s of %s)",
+	"gui.jaymospowers.tool_station.plate_full": "This piece can take no more boneiron",
+	"tooltip.jaymospowers.boneiron_plated": "Boneiron platings: %s/%s",
+	"message.jaymospowers.bonebond.vat": "Boneiron in the brine: %s. Your bones' next tier takes %s. Climb in and settle (sneak).",
+	"message.jaymospowers.bonebond.full": "Your bones can take no more metal.",
+	"message.jaymospowers.bonebond.short": "Not enough boneiron in the brine for the next tier.",
+	"message.jaymospowers.bonebond.refused": "The metal would kill you. Only a body that heals fast can take it into the bone.",
+	"message.jaymospowers.bonebond.bonding": "The metal works into your bones %s",
+	"message.jaymospowers.bonebond.done": "Boneiron bonded to your bones: tier %s of %s."
+}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.divine;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
@@ -76,11 +77,24 @@ public final class EightSignCircle {
 	 * Jaymo's Kingdoms can ask by reflection.
 	 */
 	public static boolean sealed(Entity entity) {
+		// (the Pocket Arsenal's Rift Seal, a Lawgiver's rule) inside someone's seal, or ruled powerless, powers and forms are refused just the same
+		if (com.jaymospowers.power.arsenal.ArsenalSeal.sealed(entity) || com.jaymospowers.power.rules.RulesPower.muted(entity)) {
+			return true;
+		}
 		if (SEALED.isEmpty()) {
 			return false;
 		}
 		Long until = SEALED.get(entity.getUUID());
 		return until != null && until > entity.level().getGameTime();
+	}
+
+	/**
+	 * (Awakening pick) Seals {@code entity} for {@code ticks} without a ring, as the ring's seal does (powers and forms refused):
+	 * Jaymo's Kingdoms' Cordon enforcers' blows lay it, by reflection. A longer seal already on it stays.
+	 */
+	public static void sealFor(Entity entity, int ticks) {
+		long until = entity.level().getGameTime() + ticks;
+		SEALED.merge(entity.getUUID(), until, Math::max);
 	}
 
 	/** Draws a ring at {@code centre} for {@code caster}. */
@@ -91,7 +105,7 @@ public final class EightSignCircle {
 		RINGS.add(new Ring(level.dimension(), centre, caster.getUUID(), level.getGameTime() + LIFETIME));
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.7F);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
-		draw(level, centre, 1.0);
+		draw(level, centre, 1.0, AbilityPower.size(caster, RADIUS));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -110,10 +124,11 @@ public final class EightSignCircle {
 				continue;
 			}
 			long now = level.getGameTime();
-			AABB box = new AABB(ring.centre(), ring.centre()).inflate(RADIUS, HEIGHT, RADIUS);
+			double wide = AbilityPower.size(level, ring.caster(), RADIUS);
+			AABB box = new AABB(ring.centre(), ring.centre()).inflate(wide, HEIGHT, wide);
 			for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.getUUID().equals(ring.caster()))) {
 				double dx = living.getX() - ring.centre().x, dz = living.getZ() - ring.centre().z;
-				if (dx * dx + dz * dz > RADIUS * RADIUS) {
+				if (dx * dx + dz * dz > wide * wide) {
 					continue;
 				}
 				boolean fresh = !sealed(living);
@@ -125,26 +140,26 @@ public final class EightSignCircle {
 			}
 			if (now % 5 == 0) {
 				double fade = Math.min(1.0, (ring.until() - now) / 20.0);
-				draw(level, ring.centre(), fade);
+				draw(level, ring.centre(), fade, wide);
 			}
 		}
 	}
 
 	/** The ring (gold motes) with the eight signs (light columns) on it, following the ground. */
-	private static void draw(ServerLevel level, Vec3 centre, double strength) {
+	private static void draw(ServerLevel level, Vec3 centre, double strength, double wide) {
 		for (int i = 0; i < RING_POINTS; i++) {
 			double a = i * Math.PI * 2.0 / RING_POINTS;
-			double x = centre.x + Math.cos(a) * RADIUS, z = centre.z + Math.sin(a) * RADIUS;
+			double x = centre.x + Math.cos(a) * wide, z = centre.z + Math.sin(a) * wide;
 			level.sendParticles(GOLD, true, false, x, groundY(level, x, centre.y, z) + 0.1, z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		for (int i = 0; i < SIGNS; i++) {
 			double a = i * Math.PI * 2.0 / SIGNS;
-			double x = centre.x + Math.cos(a) * RADIUS, z = centre.z + Math.sin(a) * RADIUS;
+			double x = centre.x + Math.cos(a) * wide, z = centre.z + Math.sin(a) * wide;
 			double y = groundY(level, x, centre.y, z);
 			level.sendParticles(MagicFx.LIGHT, true, false, x, y + 0.4, z, 2, 0.05, 0.4 * strength, 0.05, 0.01);
 			level.sendParticles(MagicFx.GLYPH, true, false, x, y + 1.0, z, 3, 0.2, 0.4, 0.2, 0.3);
 			// the sign's inward stroke, toward the centre
-			double ix = centre.x + Math.cos(a) * RADIUS * 0.8, iz = centre.z + Math.sin(a) * RADIUS * 0.8;
+			double ix = centre.x + Math.cos(a) * wide * 0.8, iz = centre.z + Math.sin(a) * wide * 0.8;
 			level.sendParticles(GOLD, true, false, ix, groundY(level, ix, centre.y, iz) + 0.1, iz, 1, 0.1, 0.0, 0.1, 0.0);
 		}
 	}

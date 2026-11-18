@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -310,11 +311,11 @@ final class WindBolts {
 		if (slam.dived && (player.onGround() || player.isInWater())) {
 			SLAMS.remove(player.getUUID());
 			Vec3 at = player.position();
-			MagicFx.ring(level, at, (float)SLAM_RADIUS, BOLT);
+			MagicFx.ring(level, at, (float)AbilityPower.size(player, SLAM_RADIUS), BOLT);
 			MagicFx.blast(level, at.add(0.0, 0.3, 0.0), 2.5F, GLOW);
 			DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(at, SLAM_RADIUS), c -> PickKit.foe(player, c))) {
-				if (e.distanceToSqr(at) <= SLAM_RADIUS * SLAM_RADIUS) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(at, AbilityPower.size(player, SLAM_RADIUS)), c -> PickKit.foe(player, c))) {
+				if (e.distanceToSqr(at) <= AbilityPower.size(player, SLAM_RADIUS) * AbilityPower.size(player, SLAM_RADIUS)) {
 					e.hurtServer(level, source, SLAM_DAMAGE * sky(level));
 					DarktideStatus.stun(e, SLAM_STUN);
 					zap(level, at.add(0.0, 0.2, 0.0), e.getBoundingBox().getCenter());
@@ -342,36 +343,36 @@ final class WindBolts {
 		}
 		if (now >= d.until || !d.dimension.equals(level.dimension())) {
 			DOMES.remove(player.getUUID());
-			MagicFx.blast(level, d.centre.add(0.0, 1.0, 0.0), (float)DOME_RADIUS * 0.6F, BOLT);
+			MagicFx.blast(level, d.centre.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, DOME_RADIUS) * 0.6F, BOLT);
 			return;
 		}
 		Vec3 c = d.centre.add(0.0, 0.5, 0.0);
 		if (now % 4 == 0) {
-			MagicFx.orb(level, c, (float)DOME_RADIUS, GLOW, 6);
+			MagicFx.orb(level, c, (float)AbilityPower.size(player, DOME_RADIUS), GLOW, 6);
 		}
-		for (Projectile p : level.getEntitiesOfClass(Projectile.class, PickKit.around(c, DOME_RADIUS + 1.0))) {
+		for (Projectile p : level.getEntitiesOfClass(Projectile.class, PickKit.around(c, AbilityPower.size(player, DOME_RADIUS) + 1.0))) {
 			Entity owner = p.getOwner();
 			if (owner == player || owner != null && player.isAlliedTo(owner)) {
 				continue;
 			}
 			Vec3 to = c.subtract(p.position());
-			if (to.length() <= DOME_RADIUS && p.getDeltaMovement().dot(to) > 0.0) {
-				zap(level, p.position(), c.add(to.normalize().scale(-DOME_RADIUS)));
+			if (to.length() <= AbilityPower.size(player, DOME_RADIUS) && p.getDeltaMovement().dot(to) > 0.0) {
+				zap(level, p.position(), c.add(to.normalize().scale(-AbilityPower.size(player, DOME_RADIUS))));
 				p.discard();
 			}
 		}
 		if (now % DOME_ZAP_EVERY == 0) {
 			DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(c, DOME_RADIUS + 1.5), x -> PickKit.foe(player, x))) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(c, AbilityPower.size(player, DOME_RADIUS) + 1.5), x -> PickKit.foe(player, x))) {
 				double dist = e.position().add(0.0, 1.0, 0.0).distanceTo(c);
-				if (Math.abs(dist - DOME_RADIUS) <= 1.3 || dist < DOME_RADIUS && e.distanceTo(player) > DOME_RADIUS * 1.5) {
+				if (Math.abs(dist - AbilityPower.size(player, DOME_RADIUS)) <= 1.3 || dist < AbilityPower.size(player, DOME_RADIUS) && e.distanceTo(player) > AbilityPower.size(player, DOME_RADIUS) * 1.5) {
 					e.hurtServer(level, source, DOME_DAMAGE * sky(level));
 					Vec3 out = e.position().subtract(c).multiply(1.0, 0.0, 1.0);
 					if (out.lengthSqr() > 1.0E-4) {
 						e.setDeltaMovement(e.getDeltaMovement().add(out.normalize().scale(0.5)));
 						e.syncVelocity = true;
 					}
-					zap(level, c.add(e.position().subtract(c).normalize().scale(DOME_RADIUS)), e.getBoundingBox().getCenter());
+					zap(level, c.add(e.position().subtract(c).normalize().scale(AbilityPower.size(player, DOME_RADIUS))), e.getBoundingBox().getCenter());
 				}
 			}
 		}

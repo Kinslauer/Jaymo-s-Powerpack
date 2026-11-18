@@ -605,6 +605,7 @@ public final class XenoformPower implements Power {
 				Live live = live(player);
 				if (live.form != null) {
 					drain(player, live, Mth.ceil(damageTaken * HURT_DRAIN));
+					com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.soak", Mth.ceil(damageTaken));
 				}
 			}
 		});
@@ -613,6 +614,7 @@ public final class XenoformPower implements Power {
 				Live live = live(player);
 				if (live.form != null) {
 					live.hurt = true;
+					com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.blows", 1);
 					live.body().onDealtDamage(player, live, entity);
 				}
 			}
@@ -774,6 +776,8 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		BandUpgrades.tick(player);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "xenoform.reforged", player.tickCount % 20 == 0 && BandUpgrades.get(player).reforged() ? 1 : 0);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "xenoform.skill", player.tickCount % 20 == 0 ? BandUpgrades.get(player).spent() : 0);
 		long now = player.level().getGameTime();
 		if (live.form != null && XenoJam.jammed(player)) {
 			revert(player, false, true);
@@ -782,6 +786,7 @@ public final class XenoformPower implements Power {
 			// in a form: the charge runs down
 			int before = live.ticksLeft;
 			live.ticksLeft--;
+			com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.time", player.tickCount % 20 == 0 ? 1 : 0);
 			if (live.ult != null && charged(player) && !player.isCreative()) {
 				// (0.20.9) a reforged band burns faster as the Ultimate (directly, not through drain(), which would re-sync the HUD every tick)
 				live.ticksLeft -= ULT_DRAIN;
@@ -797,6 +802,7 @@ public final class XenoformPower implements Power {
 					player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.3, 0.3, 0.0);
 			}
 			if (live.ticksLeft <= 0) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.dry", 1);
 				revert(player, false, true);
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
@@ -824,6 +830,7 @@ public final class XenoformPower implements Power {
 					XenoForm next = randomKnown(player, live.form);
 					if (next != null) {
 						swap(player, live, next, 0);
+						com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.wild", 1);
 					}
 				}
 				// a grabbed creature that got away
@@ -856,8 +863,8 @@ public final class XenoformPower implements Power {
 			if (wild(player) && live.recharge <= 0 && live.charge >= SLAM_MIN && !XenoJam.jammed(player) && --live.wildNext <= 0) {
 				live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 				XenoForm next = randomKnown(player, null);
-				if (next != null) {
-					transform(player, next, false);
+				if (next != null && transform(player, next, false)) {
+					com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.wild", 1);
 				}
 			}
 			tickScan(player, live);
@@ -944,6 +951,7 @@ public final class XenoformPower implements Power {
 		}
 		if (live.scanTicks >= SCAN_TICKS) {
 			unlock(player, form);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.scan", 1);
 			live.scanTicks = 0;
 			live.scanForm = null;
 			live.hudDirty = true;
@@ -1046,6 +1054,7 @@ public final class XenoformPower implements Power {
 				return;
 			}
 			live.body().onKey(player, live, key, down);
+			com.jaymospowers.core.trials.PowerTrials.count(player, key == PowerKey.ABILITY_1 ? "xenoform.move_r" : key == PowerKey.ABILITY_2 ? "xenoform.move_g" : key == PowerKey.ABILITY_3 ? "xenoform.move_v" : "xenoform.move_b", down ? 1 : 0);
 			return;
 		}
 		if (down && key == PowerKey.ABILITY_4 && live.modeDownAt < 0L) {
@@ -1371,6 +1380,8 @@ public final class XenoformPower implements Power {
 		player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		form.onEnter(player, live);
 		Mastery.used(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.slam", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "xenoform.forms", XenoformState.band(player).unlocked().size());
 		live.hudDirty = true;
 		return true;
 	}
@@ -1824,6 +1835,7 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		if (swap(player, live, target, cost)) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "xenoform.quick", 1);
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, QUICK_DIZZY * 3, 0, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, QUICK_DIZZY, 1, false, false));
 		}

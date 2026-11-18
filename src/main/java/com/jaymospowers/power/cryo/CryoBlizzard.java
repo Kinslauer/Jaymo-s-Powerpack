@@ -148,6 +148,8 @@ public final class CryoBlizzard {
 				continue;
 			}
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, 0), player);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.blizzard_hold", age % 20 == 0 ? 1 : 0);
+			CryoFrostbite.bite(living, player, 1);
 			if (living.canFreeze()) {
 				living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE_OVER, living.getTicksFrozen() + Math.round(FREEZE * strength)));
 			}

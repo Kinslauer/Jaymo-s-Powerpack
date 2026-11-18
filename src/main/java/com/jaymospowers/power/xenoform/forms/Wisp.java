@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -386,19 +387,19 @@ public final class Wisp extends XenoForm {
 		live.wail = WAIL_TICKS;
 		ServerLevel level = player.level();
 		scatter(player);
-		for (LivingEntity living : around(player, WAIL_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, WAIL_RADIUS))) {
 			if (living instanceof Player) {
 				living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, WAIL_DARKNESS_TICKS, 0));
 				living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 60, 0));
 			}
 		}
 		wailCone(player);
-		ring(level, ParticleTypes.SCULK_SOUL, player.position().add(0.0, 1.0, 0.0), WAIL_RADIUS * 0.4, 16);
-		ring(level, ParticleTypes.SOUL, player.position(), WAIL_RADIUS, 32);
+		ring(level, ParticleTypes.SCULK_SOUL, player.position().add(0.0, 1.0, 0.0), AbilityPower.size(player, WAIL_RADIUS) * 0.4, 16);
+		ring(level, ParticleTypes.SOUL, player.position(), AbilityPower.size(player, WAIL_RADIUS), 32);
 		sound(player, SoundEvents.PHANTOM_SWOOP, 2.0F, 0.5F);
 		sound(player, SoundEvents.WARDEN_ROAR, 0.6F, 1.8F);
 		sound(player, SoundEvents.PHANTOM_AMBIENT, 2.0F, 0.6F);
-		com.jaymospowers.core.Shakes.heavy(player, player.position(), WAIL_RADIUS, 1.0F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), AbilityPower.size(player, WAIL_RADIUS), 1.0F);
 	}
 
 	/** The wail going out ahead: rings down the cone, everything in it shoved back, glass in it broken, and the wailer left drained. */
@@ -474,7 +475,7 @@ public final class Wisp extends XenoForm {
 
 	/** Every mob within reach drops what it was doing and runs. */
 	private static void scatter(ServerPlayer player) {
-		for (LivingEntity living : around(player, WAIL_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, WAIL_RADIUS))) {
 			if (!(living instanceof Mob mob)) {
 				continue;
 			}

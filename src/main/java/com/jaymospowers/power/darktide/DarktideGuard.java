@@ -248,6 +248,7 @@ public final class DarktideGuard {
 	/** A parry: nothing taken or spent, Flow gained, the next R empowered; a katana answers. */
 	private static void parry(ServerPlayer player, @Nullable LivingEntity attacker) {
 		DarktideLive live = DarktidePower.live(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.parry", 1);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		live.parryReadyAt = now + PARRY_COOLDOWN;
@@ -294,6 +295,7 @@ public final class DarktideGuard {
 	/** The katana's answer: an instant slash from the shoulder across the body, a flash, a streak of darkness, a freeze frame. */
 	private static void riposte(ServerPlayer player, LivingEntity target) {
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.riposte", 1);
 		DarktideMove.play(player, DarktideMove.RIPOSTE, DarktideMove.RIPOSTE_TICKS, 0);
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		float damage = RIPOSTE_DAMAGE + (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
@@ -367,6 +369,7 @@ public final class DarktideGuard {
 		}
 		swat(player, projectile.position());
 		Vec3 velocity = reflectVelocity(player, projectile);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.reflect", 1);
 		PENDING.add(new Pending(projectile, player, velocity));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 1.6F);
 		return (p, entity, random, power) -> {

@@ -109,12 +109,20 @@ public final class TierGate {
 
 	/** Whether {@code stack} may be offered to {@code player}: their tier has reached it (or they are in creative). */
 	public static boolean allowed(Player player, ItemStack stack) {
-		return player.isCreative() || tierOf(stack) <= WorldTiers.progress(player).open();
+		return player.isCreative() || tierOf(stack) <= gearTier(player);
+	}
+
+	/**
+	 * The tier whose gear {@code player} may see, buy and have forged: their world tier, or a Tinkerer's craftsman's eye if
+	 * that is higher ({@link TinkerPerks#eye}, class trees). Only the gear: the monsters round them stay at the real tier.
+	 */
+	public static int gearTier(Player player) {
+		return Math.max(WorldTiers.progress(player).open(), TinkerPerks.eye(player));
 	}
 
 	/** The best forging grade (0 poor to 5 legendary) a smith's gear may come with for {@code player}. */
 	public static int maxGrade(Player player) {
-		return player.isCreative() ? MAX_GRADE[MAX_GRADE.length - 1] : MAX_GRADE[Math.clamp(WorldTiers.progress(player).open(), 0, MAX_GRADE.length - 1)];
+		return player.isCreative() ? MAX_GRADE[MAX_GRADE.length - 1] : MAX_GRADE[Math.clamp(gearTier(player), 0, MAX_GRADE.length - 1)];
 	}
 
 	/** Sets aside the offers beyond {@code player}'s tier, and puts back the ones set aside that their tier has reached. */

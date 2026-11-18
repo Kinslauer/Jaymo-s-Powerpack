@@ -38,6 +38,7 @@
 		{
 			"id": "travelertoolbelt:netherite_belt",
 			"required": false
-		}
+		},
+		"jaymospowers:relic_belt"
 	]
 }

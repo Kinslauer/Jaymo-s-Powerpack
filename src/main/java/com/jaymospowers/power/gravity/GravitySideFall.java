@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,8 +82,8 @@ final class GravitySideFall {
 		ServerLevel level = player.level();
 		Vec3 me = player.position();
 		Vec3 look = player.getLookAngle();
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WELL_RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceTo(player) <= WELL_RADIUS)) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, WELL_RADIUS)),
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceTo(player) <= AbilityPower.size(player, WELL_RADIUS))) {
 			Vec3 away = living.position().subtract(me).horizontal();
 			start(player, living, away.lengthSqr() < 0.01 ? look : away);
 		}

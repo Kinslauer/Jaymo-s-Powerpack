@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.LockOn;
@@ -320,7 +321,7 @@ public final class ZFighterCreator {
 	private static void burst(ServerPlayer player, Made made, float kiPower) {
 		ServerLevel level = player.level();
 		int p = made.power();
-		double radius = BURST_RADIUS + BURST_RADIUS_PER * p;
+		double radius = AbilityPower.size(player, BURST_RADIUS) + AbilityPower.size(player, BURST_RADIUS_PER) * p;
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> ZFighterArts.valid(player, e))) {
 			Vec3 to = near.getBoundingBox().getCenter().subtract(at);

@@ -529,6 +529,7 @@ public final class ZFighterCombo {
 			ZFighterStretchCombo.impact(player, run.limb, at, finisher);
 		}
 		if (finisher) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.finisher", 1);
 			if (move == DRAGON_FIST) {
 				// up off the rising fist: its sliding stopped, then thrown high
 				Vec3 motion = target.getDeltaMovement();

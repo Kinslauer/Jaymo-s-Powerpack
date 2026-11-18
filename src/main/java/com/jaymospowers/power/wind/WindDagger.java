@@ -1,6 +1,7 @@
 package com.jaymospowers.power.wind;
 
 import com.jaymospowers.armory.ThrowingWeaponItem;
+import com.jaymospowers.core.AbilityPower;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -190,8 +191,8 @@ public final class WindDagger {
 		Vec3 center = player.position().add(look.scale(1.5)).add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 0.8F, 1.3F);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CROSS_RADIUS), e -> WindStaff.foe(player, e))) {
-			if (e.position().subtract(player.position()).horizontal().length() > CROSS_RADIUS) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, CROSS_RADIUS)), e -> WindStaff.foe(player, e))) {
+			if (e.position().subtract(player.position()).horizontal().length() > AbilityPower.size(player, CROSS_RADIUS)) {
 				continue;
 			}
 			WindStaff.push(e, across.scale(CROSS_PUSH * bonus).add(look.scale(0.3 * bonus)), 0.2);
@@ -202,15 +203,15 @@ public final class WindDagger {
 		ServerLevel level = player.level();
 		Vec3 center = target.position();
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, center.x, center.y + 0.5, center.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.1, center.z, 20, CYCLONE_RADIUS * 0.3, 0.1, CYCLONE_RADIUS * 0.3, 0.12);
+		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.1, center.z, 20, AbilityPower.size(player, CYCLONE_RADIUS) * 0.3, 0.1, AbilityPower.size(player, CYCLONE_RADIUS) * 0.3, 0.12);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 		float damage = (float)(player.getAttributeValue(Attributes.ATTACK_DAMAGE) * CYCLONE_DAMAGE * bonus);
 		Vec3 fromPlayer = center.subtract(player.position()).horizontal();
 		fromPlayer = fromPlayer.lengthSqr() > 1.0E-4 ? fromPlayer.normalize() : Vec3.ZERO;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(CYCLONE_RADIUS), e -> WindStaff.foe(player, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(AbilityPower.size(player, CYCLONE_RADIUS)), e -> WindStaff.foe(player, e))) {
 			Vec3 away = e.position().subtract(center).horizontal();
 			double distance = away.length();
-			if (distance > CYCLONE_RADIUS) {
+			if (distance > AbilityPower.size(player, CYCLONE_RADIUS)) {
 				continue;
 			}
 			if (e != target) {
@@ -218,7 +219,7 @@ public final class WindDagger {
 				e.hurtServer(level, player.damageSources().playerAttack(player), damage);
 			}
 			Vec3 out = distance > 1.0E-3 ? away.scale(1.0 / distance) : fromPlayer;
-			double share = 1.0 - distance / (CYCLONE_RADIUS + 1.0);
+			double share = 1.0 - distance / (AbilityPower.size(player, CYCLONE_RADIUS) + 1.0);
 			WindStaff.push(e, out.add(fromPlayer).normalize().scale(CYCLONE_PUSH * share * bonus), CYCLONE_LIFT * share * bonus);
 		}
 	}
@@ -309,14 +310,14 @@ public final class WindDagger {
 		Vec3 center = player.position().add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
-		com.jaymospowers.core.Shakes.heavy(player, center, BURST_RADIUS * 2.0, 0.8F);
-		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BURST_RADIUS), e -> WindStaff.foe(player, e))) {
+		com.jaymospowers.core.Shakes.heavy(player, center, AbilityPower.size(player, BURST_RADIUS) * 2.0, 0.8F);
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, BURST_RADIUS)), e -> WindStaff.foe(player, e))) {
 			Vec3 away = target.position().subtract(player.position()).horizontal();
 			double distance = away.length();
-			if (distance > BURST_RADIUS || distance < 1.0E-3) {
+			if (distance > AbilityPower.size(player, BURST_RADIUS) || distance < 1.0E-3) {
 				continue;
 			}
-			double strength = BURST_PUSH * WindStaff.bonus(player) * (1.0 - distance / (BURST_RADIUS + 1.0));
+			double strength = BURST_PUSH * WindStaff.bonus(player) * (1.0 - distance / (AbilityPower.size(player, BURST_RADIUS) + 1.0));
 			WindStaff.push(target, away.normalize().scale(strength), strength * 0.6);
 		}
 	}

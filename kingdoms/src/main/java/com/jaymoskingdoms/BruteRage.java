@@ -82,7 +82,8 @@ public final class BruteRage {
 			&& Classes.is(brute, PlayerClass.BRUTE)) {
 			fought(brute);
 			if (raging(brute) > 0) {
-				amount *= 1.0F + RAGE_DAMAGE;
+				// (class trees) practice: the rage grows with the Brute's level
+				amount *= 1.0F + RAGE_DAMAGE * ClassTrees.practice(brute, PlayerClass.BRUTE);
 				target.igniteForSeconds(RAGE_BURN_SECONDS);
 			} else {
 				fill(brute, FILL_HIT);
@@ -116,7 +117,8 @@ public final class BruteRage {
 	}
 
 	private static void fill(ServerPlayer brute, float by) {
-		brute.setAttached(METER, Math.min(1.0F, meter(brute) + by));
+		// (class trees: Blood Up builds it faster, Fury)
+		brute.setAttached(METER, Math.min(1.0F, meter(brute) + by * Fury.fillRate(brute)));
 	}
 
 	private static void tick(MinecraftServer server) {

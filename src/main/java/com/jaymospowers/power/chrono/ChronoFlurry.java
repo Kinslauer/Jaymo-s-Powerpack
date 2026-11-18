@@ -231,6 +231,7 @@ public final class ChronoFlurry {
 	/** A hit through any hit immunity (the jabs come faster than it lasts). True if it hurt. */
 	private static boolean strike(ServerPlayer player, LivingEntity target, float damage) {
 		target.setInvulnerableTime(0);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.flurry", 1);
 		return target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
 	}
 

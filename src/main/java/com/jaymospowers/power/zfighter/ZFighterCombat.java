@@ -36,6 +36,7 @@ public final class ZFighterCombat {
 	public static void init() {
 		ZFighterPoise.init();
 		ZFighterGrab.init();
+		ZFighterReel.init();
 		ZFighterSidestep.init();
 		PayloadTypeRegistry.serverboundPlay().register(Shape.TYPE, Shape.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Shape.TYPE, (payload, ctx) -> ZFighterKiWeapon.cycle(ctx.player()));

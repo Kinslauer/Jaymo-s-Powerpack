@@ -181,6 +181,10 @@ public final class BloodBlasts {
 			// is for is settled as it begins: looking at blood it can draw, it gathers for as long as it's held, and never fires
 			h.gathering = gather(level, player, look, true);
 			if (!h.gathering && !player.getMainHandItem().isEmpty()) {
+				// (class trees) a blade in hand and no blood to draw: the hold is the Imbue
+				if (Spellcraft.blade(player.getMainHandItem())) {
+					Spellcraft.holdImbue(player);
+				}
 				return;
 			}
 		}

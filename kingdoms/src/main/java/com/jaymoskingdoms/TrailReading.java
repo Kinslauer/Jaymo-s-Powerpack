@@ -171,6 +171,8 @@ public final class TrailReading {
 		long now = level.getGameTime();
 		int best = READ_RANGE.length - 1;
 		double reach = READ_RANGE[rank] * READ_RANGE[rank], far = READ_RANGE[best] * READ_RANGE[best];
+		// (class trees) a Hunter follows the favoured foe's trail further
+		far *= ClassForks.trackReach(player) * ClassForks.trackReach(player);
 		int shown = 0;
 		java.util.Map<Integer, Boolean> hunted = new java.util.HashMap<>();
 		// newest first, so a crowded patch of ground shows what is fresh
@@ -194,6 +196,10 @@ public final class TrailReading {
 			// (count 0: the offsets are the mote's own drift, the way the maker went)
 			level.sendParticles(player, Fx.mote(print.color, size), true, false, print.x, print.y, print.z, 0, print.hx, 0.0, print.hz, DRIFT);
 			shown++;
+			if (prey) {
+				// (class trees) the favoured foe's tracks, followed: the Ranger's, once in a while
+				ClassTrees.giveEvery(player, Classes.PlayerClass.RANGER, ClassTrees.XP_TRACK, "track", 200L);
+			}
 		}
 	}
 }

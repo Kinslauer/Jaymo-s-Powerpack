@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:honey_bottle",
+    "minecraft:cocoa_beans",
+    "minecraft:sweet_berries"
+  ],
+  "result": {
+    "id": "jaymospowers:energy_bar",
+    "count": 2
+  }
+}

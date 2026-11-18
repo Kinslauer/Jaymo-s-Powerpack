@@ -324,7 +324,7 @@ public final class KeepingCells {
 
 	/** Whether every chunk within {@code reach} blocks (across) of {@code at} is loaded, so reading them never makes one. */
 	private static boolean loaded(ServerLevel level, BlockPos at, int reach) {
-		return level.hasChunksAt(at.offset(-reach, 0, -reach), at.offset(reach, 0, reach));
+		return Loaded.made(level, at.offset(-reach, 0, -reach), at.offset(reach, 0, reach));
 	}
 
 	private static boolean isLight(BlockState state) {

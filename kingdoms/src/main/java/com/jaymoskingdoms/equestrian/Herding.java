@@ -326,9 +326,12 @@ public final class Herding {
 		Herd.Order order = Herd.Order.byId(payload.order());
 		if (order == Herd.Order.HOME) {
 			sendHome(level, horse, player);
+			Horsemanship.orderAll(level, player, horse, order);
 			return;
 		}
 		give(level, horse, order);
+		// a Herd Master's order goes to all their horses about
+		Horsemanship.orderAll(level, player, horse, order);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.order_given", Bonding.name(horse), Component.translatable(order.key())));
 		level.playSound(null, horse.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
 	}
@@ -525,7 +528,7 @@ public final class Herding {
 		for (AbstractHorse horse : level.getEntitiesOfClass(AbstractHorse.class, player.getBoundingBox().inflate(DEFEND_RANGE),
 			h -> Equestrian.covered(h) && h.isAlive() && h.isTamed() && !h.isBaby() && !h.isVehicle() && Bonding.owner(h, player))) {
 			Herd h = herd(horse);
-			if (h.orderOf() == Herd.Order.STAY || Bonding.trust(horse, player) < DEFEND_TRUST) {
+			if (h.orderOf() == Herd.Order.STAY || Bonding.trust(horse, player) < DEFEND_TRUST && !Horsemanship.herdMaster(player)) {
 				continue;
 			}
 			if (!Equestrian.undead(horse) && Bonding.bravery(horse, Equestrian.equine(horse)) < DEFEND_BRAVERY) {

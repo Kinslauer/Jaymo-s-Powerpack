@@ -183,6 +183,15 @@ public final class Introductions {
 		return known != null && known.contains(e.getUUID());
 	}
 
+	/**
+	 * {@code viewer} has been introduced to {@code other} (told their name, or in their group). Unlike {@link #knows}, a
+	 * mask doesn't count: for Youth, who names a player's character only to those who've met it.
+	 */
+	public static boolean introduced(Player viewer, Player other) {
+		Set<UUID> known = viewer.getAttached(KNOWN);
+		return Groups.together(viewer, other) || known != null && known.contains(other.getUUID());
+	}
+
 	/** This client's player knows {@code e}'s name (client side; true where there's no one looking). */
 	public static boolean knownHere(Entity e) {
 		return knows(viewer.get(), e);

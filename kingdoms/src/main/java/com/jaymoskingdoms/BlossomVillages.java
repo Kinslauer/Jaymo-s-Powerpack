@@ -285,7 +285,7 @@ public final class BlossomVillages {
 
 	/** {@code at} (already {@link #open}) could hold a town: its whole ground loaded, and no kingdom's seat within {@link #TOWN_REALM_SPACING}. */
 	private static boolean townSite(ServerLevel level, BlockPos at) {
-		if (!level.hasChunksAt(at.getX() - TOWN_RADIUS, at.getZ() - TOWN_RADIUS, at.getX() + TOWN_RADIUS, at.getZ() + TOWN_RADIUS)) {
+		if (!Loaded.made(level, at.getX() - TOWN_RADIUS, at.getZ() - TOWN_RADIUS, at.getX() + TOWN_RADIUS, at.getZ() + TOWN_RADIUS)) {
 			return false;
 		}
 		for (Faction f : Factions.all(level.getServer())) {

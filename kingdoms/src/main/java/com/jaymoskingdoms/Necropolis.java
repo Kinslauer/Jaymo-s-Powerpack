@@ -398,7 +398,7 @@ public final class Necropolis {
 	/** Makes the crypt about ({@code sx}, {@code sz}); true if made, false if the ground won't take one, null if the land isn't all loaded yet. */
 	private static @Nullable Boolean build(ServerLevel level, int sx, int sz, Random random) {
 		int reach = VESSEL_FAR + 6;
-		if (!level.hasChunksAt(sx - reach, sz - reach, sx + reach, sz + reach)) {
+		if (!Loaded.made(level, sx - reach, sz - reach, sx + reach, sz + reach)) {
 			return null;
 		}
 		MinecraftServer server = level.getServer();

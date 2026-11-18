@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
@@ -238,8 +239,8 @@ public final class Lodestar extends XenoUltimate {
 		ServerLevel level = player.level();
 		work.poleUntil = level.getGameTime() + POLE_TICKS;
 		work.caught.clear();
-		ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS * 0.5, 40);
-		ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS, 64);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, POLE_RADIUS) * 0.5, 40);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, POLE_RADIUS), 64);
 		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.6F, 0.4F);
 		sound(player, SoundEvents.BEACON_ACTIVATE, 1.0F, 1.6F);
 		Shakes.heavy(player, player.position(), POLE_SHAKE_RANGE, POLE_SHAKE);
@@ -326,7 +327,7 @@ public final class Lodestar extends XenoUltimate {
 
 	private static void repel(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity e : around(player, REPEL_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, REPEL_RADIUS))) {
 			if (!target(player, e)) {
 				continue;
 			}
@@ -338,13 +339,13 @@ public final class Lodestar extends XenoUltimate {
 			e.hurtServer(level, player.damageSources().playerAttack(player), n * REPEL_PER_PIECE_DAMAGE);
 			shove(e, player.position(), REPEL_BASE + REPEL_PER_PIECE * n, 0.4);
 		}
-		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(REPEL_RADIUS),
-			a -> a.getOwner() != player && a.getDeltaMovement().lengthSqr() > 0.04 && a.distanceToSqr(player) <= REPEL_RADIUS * REPEL_RADIUS)) {
+		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(AbilityPower.size(player, REPEL_RADIUS)),
+			a -> a.getOwner() != player && a.getDeltaMovement().lengthSqr() > 0.04 && a.distanceToSqr(player) <= AbilityPower.size(player, REPEL_RADIUS) * AbilityPower.size(player, REPEL_RADIUS))) {
 			turn(arrow, player, 1.2);
 		}
-		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.35, 24);
-		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.65, 40);
-		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.95, 56);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, REPEL_RADIUS) * 0.35, 24);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, REPEL_RADIUS) * 0.65, 40);
+		ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, REPEL_RADIUS) * 0.95, 56);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.4F, 0.5F);
 		Shakes.heavy(player, player.position(), POLE_SHAKE_RANGE, 0.8F);
 	}
@@ -499,21 +500,21 @@ public final class Lodestar extends XenoUltimate {
 
 	private static void fieldTick(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(FIELD_RADIUS),
+		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(AbilityPower.size(player, FIELD_RADIUS)),
 			a -> a.getOwner() != player && a.getDeltaMovement().lengthSqr() > 0.04 && player.position().subtract(a.position()).dot(a.getDeltaMovement()) > 0.0)) {
 			turn(arrow, player, FIELD_RETURN);
 			sound(player, SoundEvents.CHAIN_BREAK, 0.6F, 1.6F);
 		}
 		if (player.tickCount % 2 == 0) {
-			for (LivingEntity e : around(player, FIELD_RADIUS)) {
+			for (LivingEntity e : around(player, AbilityPower.size(player, FIELD_RADIUS))) {
 				if (ironOf(e) > 0 && target(player, e)) {
 					shove(e, player.position(), FIELD_PUSH, 0.0);
 				}
 			}
 		}
 		if (player.tickCount % 6 == 0) {
-			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.5, 14);
-			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS, 24);
+			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), AbilityPower.size(player, FIELD_RADIUS) * 0.5, 14);
+			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), AbilityPower.size(player, FIELD_RADIUS), 24);
 		}
 	}
 
@@ -526,7 +527,7 @@ public final class Lodestar extends XenoUltimate {
 			endPole(player, work, true);
 			return;
 		}
-		for (LivingEntity e : around(player, POLE_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, POLE_RADIUS))) {
 			if (work.caught.size() >= POLE_MAX) {
 				break;
 			}
@@ -538,7 +539,7 @@ public final class Lodestar extends XenoUltimate {
 		List<LivingEntity> held = new ArrayList<>();
 		for (Iterator<Integer> it = work.caught.iterator(); it.hasNext();) {
 			Entity found = level.getEntity(it.next());
-			if (!(found instanceof LivingEntity e) || !e.isAlive() || e.isRemoved() || e.distanceToSqr(player) > (POLE_RADIUS + POLE_ESCAPE) * (POLE_RADIUS + POLE_ESCAPE)
+			if (!(found instanceof LivingEntity e) || !e.isAlive() || e.isRemoved() || e.distanceToSqr(player) > (AbilityPower.size(player, POLE_RADIUS) + POLE_ESCAPE) * (AbilityPower.size(player, POLE_RADIUS) + POLE_ESCAPE)
 				|| ironOf(e) == 0 || !target(player, e)) {
 				it.remove();
 				continue;
@@ -567,13 +568,13 @@ public final class Lodestar extends XenoUltimate {
 				beam(level, e.getBoundingBox().getCenter(), player.getBoundingBox().getCenter(), MagicFx.CRACKLE, 6);
 			}
 		}
-		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(POLE_RADIUS), i -> Polestar.irony(i.getItem()))) {
+		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, POLE_RADIUS)), i -> Polestar.irony(i.getItem()))) {
 			Vec3 to = player.position().add(0.0, 0.5, 0.0).subtract(item.position());
 			item.setDeltaMovement(to.lengthSqr() < 1.0 ? Vec3.ZERO : to.normalize().scale(POLE_ITEM));
 		}
 		if (now % 4 == 0) {
 			double shrink = 1.0 - (now % 20) / 20.0;
-			ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS * shrink, 48);
+			ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, POLE_RADIUS) * shrink, 48);
 		}
 		if (now % 20 == 0) {
 			sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 0.7F, 0.5F);

@@ -227,6 +227,8 @@ public final class CombatArts {
 			chain.last = now;
 			// (0.7.381) the chain counter by the crosshair ({@code forms.Forms}) shows the links now, in place of the old "Combo xN" line
 			com.jaymoskingdoms.forms.Forms.chained(sp, chain.links);
+			// (class trees) Etched Blade: a free sigil now and then off an imbued blade
+			Sigils.linked(sp, chain.links);
 		}
 		boolean full = fullStrength(sp, now);
 		if (newLink && full && p.rank(Skills.Perk.CLEAVE) > 0) {

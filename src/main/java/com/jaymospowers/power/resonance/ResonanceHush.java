@@ -46,16 +46,20 @@ public final class ResonanceHush {
 	public static final double RADIUS = 6.0;
 	public static final int TICKS = 100;
 
-	/** On the caster, synced to everyone: their dome (each client mutes and shades it). */
-	public record Dome(Vec3 center, long until, boolean corrupted) {
+	/**
+	 * On the caster, synced to everyone: their dome (each client mutes and shades it). {@code radius} is {@link #RADIUS},
+	 * wider by the caster's Ability Power.
+	 */
+	public record Dome(Vec3 center, long until, boolean corrupted, float radius) {
 		public static final StreamCodec<ByteBuf, Dome> STREAM_CODEC = StreamCodec.composite(
 			Vec3.STREAM_CODEC, Dome::center,
 			ByteBufCodecs.VAR_LONG, Dome::until,
 			ByteBufCodecs.BOOL, Dome::corrupted,
+			ByteBufCodecs.FLOAT, Dome::radius,
 			Dome::new);
 
 		public boolean contains(Vec3 pos) {
-			return pos.distanceToSqr(center) <= RADIUS * RADIUS;
+			return pos.distanceToSqr(center) <= radius * radius;
 		}
 	}
 
@@ -85,14 +89,15 @@ public final class ResonanceHush {
 	 * ({@code ResonanceGift}; Andy: "It's okay to silence the players").
 	 */
 	static boolean cast(ServerLevel level, LivingEntity caster, boolean corrupted, int ticks) {
-		Dome dome = new Dome(caster.position(), level.getGameTime() + ticks, corrupted);
+		Dome dome = new Dome(caster.position(), level.getGameTime() + ticks, corrupted, (float)com.jaymospowers.core.AbilityPower.size(caster, RADIUS));
 		// the last sound before the silence
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5F, 0.5F);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		ACTIVE.removeIf(active -> active.owner.equals(caster.getUUID()));
 		ACTIVE.add(new Active(level, caster.getUUID(), dome));
 		caster.setAttached(DOME, dome);
-		ResonanceEcho.ripple(level, dome.center().add(0.0, 0.1, 0.0), RADIUS);
+		com.jaymospowers.core.trials.PowerTrials.reach(caster, "resonance.hush_many", level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(dome.center(), dome.center()).inflate(dome.radius()), m -> dome.contains(m.position())).size());
+		ResonanceEcho.ripple(level, dome.center().add(0.0, 0.1, 0.0), dome.radius());
 		for (ServerPlayer other : level.players()) {
 			if (other != caster && dome.contains(other.position()) && Powers.of(other) != null) {
 				other.sendOverlayMessage(Component.translatable("message.jaymospowers.resonance_hushed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -158,8 +163,8 @@ public final class ResonanceHush {
 				for (int i = 0; i < 14; i++) {
 					double yaw = active.level.getRandom().nextDouble() * Math.PI * 2.0;
 					double up = active.level.getRandom().nextDouble() * Math.PI * 0.5;
-					active.level.sendParticles(ParticleTypes.WHITE_ASH, c.x + Math.cos(yaw) * Math.cos(up) * RADIUS, c.y + Math.sin(up) * RADIUS,
-						c.z + Math.sin(yaw) * Math.cos(up) * RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+					active.level.sendParticles(ParticleTypes.WHITE_ASH, c.x + Math.cos(yaw) * Math.cos(up) * active.dome.radius(), c.y + Math.sin(up) * active.dome.radius(),
+						c.z + Math.sin(yaw) * Math.cos(up) * active.dome.radius(), 1, 0.0, 0.0, 0.0, 0.0);
 				}
 			}
 		}

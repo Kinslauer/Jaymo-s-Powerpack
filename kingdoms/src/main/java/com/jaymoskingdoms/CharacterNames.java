@@ -103,7 +103,7 @@ public final class CharacterNames {
 	}
 
 	/** (0.7.201) {@code player}'s own character name (no hood or disguise), or null for just the username. Server only. */
-	static @Nullable String character(ServerPlayer player) {
+	public static @Nullable String character(ServerPlayer player) {
 		return picked(player);
 	}
 

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Mob;
  * A foe a spirit has knocked off its feet for a moment (Grimsby's glaive and vault, Varro's hauling hand): it crawls, it
  * has no target, and while it lasts it is open to what only lands on the helpless (Grimsby's {@link GrimsbyArts} drain).
  */
-final class Staggered {
+public final class Staggered {
 	private static final Map<UUID, Entry> ALL = new HashMap<>();
 
 	private record Entry(LivingEntity who, long until) {
@@ -39,7 +39,7 @@ final class Staggered {
 	}
 
 	/** {@code foe} is off its feet for {@code ticks} (by {@code by}). */
-	static void stagger(LivingEntity by, LivingEntity foe, int ticks) {
+	public static void stagger(LivingEntity by, LivingEntity foe, int ticks) {
 		foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 4), by);
 		hold(foe, ticks);
 	}

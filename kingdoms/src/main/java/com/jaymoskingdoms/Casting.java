@@ -31,7 +31,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Casting {
 	public enum Gesture {
-		PUSH, RAISE, GROUND, WARD, GIVE, DRAW, SWEEP
+		PUSH, RAISE, GROUND, WARD, GIVE, DRAW, SWEEP,
+		/** (Class trees) not a spell: a Marksman's Speed Load, the gun spun round in the hand. */
+		SPIN
 	}
 
 	/** How long the arms are held in a gesture (ticks; the client eases in and out of it within this). */
@@ -110,6 +112,10 @@ public final class Casting {
 			if (ServerPlayNetworking.canSend(p, Cast.TYPE)) {
 				ServerPlayNetworking.send(p, packet);
 			}
+		}
+		if (gesture == Gesture.SPIN) {
+			// a gun spun in the hand draws no sigil
+			return;
 		}
 		Vec3 look = caster.getLookAngle(), feet = caster.position(), chest = feet.add(0.0, caster.getBbHeight() * 0.72, 0.0);
 		Vec3 flat = new Vec3(look.x, 0.0, look.z).lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, caster.getYRot()) : new Vec3(look.x, 0.0, look.z).normalize();

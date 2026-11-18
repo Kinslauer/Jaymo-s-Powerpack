@@ -167,6 +167,7 @@ public final class WebParkour {
 			return;
 		}
 		DOING.put(player.getUUID(), new Doing(kind, side == null ? -1 : side.get3DDataValue(), 0));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "web.parkour", 1);
 		int variant = 0;
 		if (kind == VAULT || kind == SLIDE) {
 			int[] last = LAST_VARIANT.computeIfAbsent(player.getUUID(), id -> new int[] {-1, -1});

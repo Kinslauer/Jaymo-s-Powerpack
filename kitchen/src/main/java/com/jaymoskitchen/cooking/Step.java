@@ -143,6 +143,8 @@ public enum Step {
 	WIND_DRAGON_MEAT(() -> kingdoms("wind_dragon_meat"), null),
 	GIANTS_MARROW(() -> kingdoms("giants_marrow"), null),
 	LEGEND_FILLET(() -> powers("legend_fillet"), null),
+	// the kettle's tea (hands-on cooking): any of the herbs in the tag
+	TEA_HERB(() -> Items.FERN, null, "tea_herb"),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),

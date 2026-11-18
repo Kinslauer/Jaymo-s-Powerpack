@@ -1,5 +1,6 @@
 package com.jaymospowers.power.cryo;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.smoke.SmokeField;
 import java.util.HashMap;
@@ -113,7 +114,7 @@ public final class CryoBreath {
 		for (int i = 0; i < 6; i++) {
 			double t = level.getRandom().nextDouble() * reach;
 			Vec3 p = from3.add(look.scale(t));
-			double w = MOUTH + t * SPREAD * 0.5;
+			double w = AbilityPower.size(player, MOUTH) + t * AbilityPower.size(player, SPREAD) * 0.5;
 			level.sendParticles(flake, p.x, p.y, p.z, 2, w, w, w, 0.02);
 		}
 		if (held % 2 == 0) {
@@ -124,21 +125,22 @@ public final class CryoBreath {
 			level.playSound(null, from3.x, from3.y, from3.z, SoundEvents.POWDER_SNOW_STEP, SoundSource.PLAYERS, 0.8F, 0.5F + level.getRandom().nextFloat() * 0.2F);
 		}
 		// what it catches
-		AABB box = new AABB(from3, from3.add(look.scale(reach))).inflate(MOUTH + reach * SPREAD);
+		AABB box = new AABB(from3, from3.add(look.scale(reach))).inflate(AbilityPower.size(player, MOUTH) + reach * AbilityPower.size(player, SPREAD));
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, box,
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 c = living.getBoundingBox().getCenter().subtract(from3);
 			double t = c.dot(look);
-			if (t < 0.0 || t > reach || c.subtract(look.scale(t)).length() > MOUTH + t * SPREAD + living.getBbWidth() * 0.5) {
+			if (t < 0.0 || t > reach || c.subtract(look.scale(t)).length() > AbilityPower.size(player, MOUTH) + t * AbilityPower.size(player, SPREAD) + living.getBbWidth() * 0.5) {
 				continue;
 			}
 			chill(player, living, snow, strength);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.breath", held % 20 == 0 ? 1 : 0);
 		}
 		// water freezes over, and smoke turns to freezing fog, all along it
 		if (held % ICE_EVERY == 0) {
 			for (double t = 1.0; t <= reach + 0.5; t += 1.0) {
 				Vec3 p = from3.add(look.scale(Math.min(t, reach)));
-				double w = MOUTH + t * SPREAD;
+				double w = AbilityPower.size(player, MOUTH) + t * AbilityPower.size(player, SPREAD);
 				if (!snow) {
 					SmokeField.freeze(level, p, w + 0.5);
 				}
@@ -146,6 +148,7 @@ public final class CryoBreath {
 					BlockPos at = BlockPos.containing(p);
 					for (int down = 0; down <= 2; down++) {
 						if (CryoIce.place(level, at.below(down), Blocks.ICE.defaultBlockState(), (int)(ICE_TICKS * strength), CryoIce.Mode.WATER)) {
+							com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.freeze_water", 1);
 							break;
 						}
 					}
@@ -168,6 +171,7 @@ public final class CryoBreath {
 		if (living.canFreeze()) {
 			living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE_OVER, living.getTicksFrozen() + Math.round(FREEZE * strength)));
 		}
+		CryoFrostbite.bite(living, player, 1);
 		if (living.isFullyFrozen()) {
 			// frozen stiff
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STIFF_TICKS, 6, false, false), player);

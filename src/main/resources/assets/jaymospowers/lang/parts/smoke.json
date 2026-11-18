@@ -26,7 +26,7 @@
 	"power.jaymospowers.smoke.key.special.corrupted.name": "Soot Jet",
 	"power.jaymospowers.smoke.key.mode": "Smoke Sight (toggle): every creature standing in smoke within 32 blocks is outlined through walls (dark for the hostile), and your own smoke is barely drawn; costs a little hunger while on",
 	"power.jaymospowers.smoke.key.mode.name": "Smoke Sight",
-	"power.jaymospowers.smoke.key.ultimate": "Harness the Sky: tap to call a raincloud where you aim (puts out fires, waters crops); hold under a storm to calm it (a supercell never puts down its tornado), or at a tornado to unwind it a rank at a time while it drags you in",
+	"power.jaymospowers.smoke.key.ultimate": "Harness the Sky: tap to call a raincloud where you aim (puts out fires, waters crops); hold under a storm to calm it (a supercell never puts down its tornado), or at a tornado to unwind it a rank at a time while it drags you in. From the master rank: Airless Dome (before Smoke has a C of its own on %6$s, after it sprint + %6$s): 12 s with no air round where you stand; everyone in it but you chokes, creepers' fuses die, no spell gets finished",
 	"power.jaymospowers.smoke.key.ultimate.name": "Harness the Sky",
 	"power.jaymospowers.smoke.key.ultimate.corrupted": "Pyroclasm: hold to gather, let go, and a burning cloud of smog and ash rolls out along the ground where you look (12-24 blocks), setting what it passes alight",
 	"power.jaymospowers.smoke.key.ultimate.corrupted.name": "Pyroclasm",

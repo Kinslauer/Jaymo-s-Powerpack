@@ -4,7 +4,9 @@ import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.client.hud.HudZones;
 import com.jaymospowers.power.chrono.ChronoGears;
 import com.jaymospowers.power.chrono.ChronoMeters;
+import com.jaymospowers.power.chrono.ChronoMomentum;
 import com.jaymospowers.power.chrono.ChronoSpeed;
+import com.jaymospowers.power.chrono.SpeedPrism;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,7 +15,8 @@ import net.minecraft.network.chat.Component;
 
 /**
  * The speedster's gear chip, bottom right in the right dock above the power's own block ({@code docs/HUD-Layout.md}, row 12):
- * "Gear 3" with five pips, and under it a thin bar for each meter running (held phase, slowed world, a shot being held) and
+ * "Gear 3" with five pips (the top gear the wheel has set is underlined up to), and under it a thin bar for each meter running
+ * (held phase, slowed world, a shot being held, the static charge) and
  * a line while a marked run is under way. Drawn by Chrono's HUD and Xenoform's, whichever the player has.
  */
 public final class ChronoSpeedHud {
@@ -29,9 +32,11 @@ public final class ChronoSpeedHud {
 			HudZones.clear(HudZones.DOCK_RIGHT, "chrono_gear");
 			return;
 		}
-		int colour = ChronoSpeed.velocity(player) ? SKY : GOLD;
+		int colour = 0xFF000000 | SpeedPrism.colour(player, ChronoSpeed.velocity(player) ? SKY : GOLD);
 		Integer phase = player.getAttached(ChronoMeters.PHASE), slow = player.getAttached(ChronoMeters.SLOW), caught = player.getAttached(ChronoMeters.CAUGHT);
-		int bars = (phase != null ? 1 : 0) + (slow != null ? 1 : 0) + (caught != null ? 1 : 0);
+		Integer charge = player.getAttached(ChronoMeters.STATIC);
+		int top = ChronoMomentum.top(player);
+		int bars = (phase != null ? 1 : 0) + (slow != null ? 1 : 0) + (caught != null ? 1 : 0) + (charge != null ? 1 : 0);
 		boolean run = ChronoSpeedKeys.running();
 		int height = 13 + bars * 6 + (run ? 10 : 0);
 		int[] at = HudZones.place(HudZones.DOCK_RIGHT, "chrono_gear", ROW, WIDTH, height);
@@ -45,6 +50,10 @@ public final class ChronoSpeedHud {
 		for (int i = 0; i < ChronoGears.GEARS; i++) {
 			int px = x + WIDTH - 4 - (ChronoGears.GEARS - i) * (PIP + PIP_GAP) + PIP_GAP;
 			graphics.fill(px, y + 4, px + PIP, y + 4 + 5, i < gear ? HudStyle.opaque(colour) : HudStyle.TRACK);
+			if (i >= gear && i < top) {
+				// the top gear the wheel has set, not reached yet
+				graphics.fill(px, y + 4 + 4, px + PIP, y + 4 + 5, HudStyle.opaque(colour));
+			}
 		}
 		int by = y + 14;
 		if (phase != null) {
@@ -57,6 +66,10 @@ public final class ChronoSpeedHud {
 		}
 		if (caught != null) {
 			HudStyle.bar(graphics, x + 4, by, WIDTH - 8, 3, caught / 100.0F, 0xFFD54A);
+			by += 6;
+		}
+		if (charge != null) {
+			HudStyle.bar(graphics, x + 4, by, WIDTH - 8, 3, charge / 100.0F, 0xC8B0FF);
 			by += 6;
 		}
 		if (run) {

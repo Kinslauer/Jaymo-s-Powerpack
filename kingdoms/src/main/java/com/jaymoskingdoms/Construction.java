@@ -853,7 +853,7 @@ public final class Construction {
 		MinecraftServer server = level.getServer();
 		Planner.Layout l = layout(level, f, p);
 		Works.Project cur = Works.project(server, f.id(), p);
-		if (l == null || cur == null || blocks <= 0 || !level.hasChunksAt(l.min().getX() - 1, l.min().getZ() - 1, l.max().getX() + 1, l.max().getZ() + 1)) {
+		if (l == null || cur == null || blocks <= 0 || !Loaded.made(level, l.min().getX() - 1, l.min().getZ() - 1, l.max().getX() + 1, l.max().getZ() + 1)) {
 			return 0;
 		}
 		if (cur.stage() == Works.STAKE) {

@@ -1,0 +1,130 @@
+{
+  "hand_animation_on_swap": false,
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:compass",
+    "target": "lodestone",
+    "scale": 16.0,
+    "entries": [
+      {
+        "threshold": 0.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_0"
+        }
+      },
+      {
+        "threshold": 0.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_1"
+        }
+      },
+      {
+        "threshold": 1.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_2"
+        }
+      },
+      {
+        "threshold": 2.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_3"
+        }
+      },
+      {
+        "threshold": 3.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_4"
+        }
+      },
+      {
+        "threshold": 4.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_5"
+        }
+      },
+      {
+        "threshold": 5.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_6"
+        }
+      },
+      {
+        "threshold": 6.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_7"
+        }
+      },
+      {
+        "threshold": 7.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_8"
+        }
+      },
+      {
+        "threshold": 8.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_9"
+        }
+      },
+      {
+        "threshold": 9.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_10"
+        }
+      },
+      {
+        "threshold": 10.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_11"
+        }
+      },
+      {
+        "threshold": 11.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_12"
+        }
+      },
+      {
+        "threshold": 12.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_13"
+        }
+      },
+      {
+        "threshold": 13.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_14"
+        }
+      },
+      {
+        "threshold": 14.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_15"
+        }
+      },
+      {
+        "threshold": 15.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/threat_tracker_0"
+        }
+      }
+    ]
+  }
+}

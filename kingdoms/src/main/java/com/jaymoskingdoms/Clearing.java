@@ -295,7 +295,7 @@ final class Clearing {
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		List<BlockPos> spawners = new ArrayList<>();
 		for (BoundingBox piece : site.pieces()) {
-			if (!level.hasChunksAt(piece.minX(), piece.minZ(), piece.maxX(), piece.maxZ())) {
+			if (!Loaded.made(level, piece.minX(), piece.minZ(), piece.maxX(), piece.maxZ())) {
 				return;
 			}
 			for (int x = piece.minX(); x <= piece.maxX(); x++) {

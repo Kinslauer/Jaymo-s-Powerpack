@@ -81,6 +81,10 @@ public final class CryoPower implements Power {
 		CryoShards.init();
 		CryoFlashFreeze.init();
 		CryoPicks.init();
+		// (Awakening picks) Frostbite, the Glacier Rampart, the Ice Javelin
+		CryoFrostbite.init();
+		CryoRampart.init();
+		CryoJavelin.init();
 		// (0.17.3) what a gifted villager does with Cryokinesis
 		CryoGift.init();
 		// its corruption (the cold that kills), and its part in Elemental Corruption
@@ -227,6 +231,9 @@ public final class CryoPower implements Power {
 				// sneak + V: a volley of bleeding icicles instead of the shards
 				if (down && player.isShiftKeyDown()) {
 					CryoPicks.volley(player);
+				} else if (down && player.isSprinting()) {
+					// sprint + V: the ice javelin, dead straight
+					CryoJavelin.throwFrom(player);
 				} else if (down && ready(player, CryoState.SHARDS)) {
 					CryoShards.fire(player);
 				}

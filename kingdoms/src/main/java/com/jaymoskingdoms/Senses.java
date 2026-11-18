@@ -367,12 +367,15 @@ public final class Senses {
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
 		f *= Mist.sight(level, player.getEyePosition());
 		f = Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
+		// (class trees) a Stalker Ranger, crouched and still in grass or leaves, isn't seen past six blocks
+		f = RogueExtras.stalked(player, looker, !MOVING.getOrDefault(player.getUUID(), true), f);
 		// heard: someone walking about close by, not sneaking, is noticed in the dark or behind its back
 		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
 			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
 			if (range > 0.0) {
 				// (Hearing) quiet or loud ground, wet ground, and soft boots and leggings carry it less or further (ordinary ground as before)
-				f = Math.max(f, HEARD * Rangers.quiet(player) * Footsteps.heardFloor(level, player) / range);
+				// (class trees) and Muffled boots (a Tinkerer's infusion) carry it half as far, a Second Storey Thief's tread too
+				f = Math.max(f, HEARD * Rangers.quiet(player) * TinkerPerks.footfall(player) * RogueExtras.steps(player) * Footsteps.heardFloor(level, player) / range);
 			}
 		}
 		return f;
@@ -855,13 +858,8 @@ public final class Senses {
 	 * (Sneak Attack's {@link #SNEAK_ATTACK_RANK_MULT}, with the perk and from its rear, {@link #REAR_DOT}). Never on a player, or one of the Combat Arts' own blows.
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
-		if (CombatArts.striking() || target instanceof Player || !(source.getEntity() instanceof ServerPlayer sp)
-			|| source.getDirectEntity() != sp || !source.is(DamageTypes.PLAYER_ATTACK) || sp.isSpectator() || target == sp
-			|| HiddenBlade.is(sp.getMainHandItem()) && !HiddenBlade.skilled(sp) || !unaware(target, sp)) {
-			return amount;
-		}
-		int rank = Skills.rank(sp, Skills.Perk.SNEAK_ATTACK);
-		if (rank <= 0 || !fromRear(target, sp) || cooling(target, source)) {
+		float mult = sneakAttack(target, source);
+		if (mult <= 0.0F || !(source.getEntity() instanceof ServerPlayer sp)) {
 			return amount;
 		}
 		long now = sp.level().getGameTime();
@@ -870,7 +868,6 @@ public final class Senses {
 			return amount;
 		}
 		STRUCK.put(sp.getUUID(), new long[] {target.getId(), now});
-		float mult = SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
 		if (sp.level() instanceof ServerLevel level) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.8F, 0.8F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.25, 0.3, 0.25, 0.2);
@@ -880,5 +877,22 @@ public final class Senses {
 		// (0.7.514) Ambusher and Cutthroat
 		Bridges.sneakAttack(sp, target);
 		return unawareBlow(target, amount, amount * mult);
+	}
+
+	/**
+	 * What {@link #dealt} would multiply this blow by as a sneak attack, or 0 if it isn't one. Changes nothing, so it can be
+	 * asked earlier in the same blow ({@link ThiefSneak}, whose burst doesn't stack with it).
+	 */
+	static float sneakAttack(LivingEntity target, DamageSource source) {
+		if (CombatArts.striking() || target instanceof Player || !(source.getEntity() instanceof ServerPlayer sp)
+			|| source.getDirectEntity() != sp || !source.is(DamageTypes.PLAYER_ATTACK) || sp.isSpectator() || target == sp
+			|| HiddenBlade.is(sp.getMainHandItem()) && !HiddenBlade.skilled(sp) || !unaware(target, sp)) {
+			return 0.0F;
+		}
+		int rank = Skills.rank(sp, Skills.Perk.SNEAK_ATTACK);
+		if (rank <= 0 || !fromRear(target, sp) || cooling(target, source)) {
+			return 0.0F;
+		}
+		return SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
 	}
 }

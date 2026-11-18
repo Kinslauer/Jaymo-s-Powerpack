@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -158,6 +159,8 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.init();
 		ChronoDirectives.init();
 		StoppedClockItem.init();
+		// the speedsters' prism (the lightning's colour) and energy bar
+		SpeedPrism.init();
 		// (0.20.50) cheating death: R on a black screen instead of dying
 		ChronoCheatDeath.init();
 		// touch the attachment types so they register at startup
@@ -166,6 +169,7 @@ public final class ChronoPower implements Power {
 		// held attack while overclocked: the flurry
 		ChronoFlurry.register();
 		ChronoFlow.init();
+		ChronoWindDay.init();
 		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
 		ChronoTakedowns.init();
 		// Time Stop (sneak + C, Timeless): the whole server's tick freeze
@@ -239,6 +243,7 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		state.clearHistory();
 		state.synced = false;
+		ChronoWindDay.gained(player);
 	}
 
 	/**
@@ -310,6 +315,8 @@ public final class ChronoPower implements Power {
 		if (down) {
 			ChronoFlow.toggle(player);
 		}
+		// (Wind the day) Z kept held as the flow takes you winds the day
+		ChronoWindDay.mode(player, down);
 	}
 
 	/** Chrono Punch; sneaking, Time Stop ({@link ChronoTimeStop}, its own cooldown). */
@@ -432,6 +439,7 @@ public final class ChronoPower implements Power {
 			bloomHealNearby(player, level);
 		}
 		ChronoFlow.tickPlayer(player);
+		ChronoWindDay.tick(player);
 		if (state.overclockHeld && state.overclockLeft <= OVERCLOCK_HELD_REFRESH) {
 			if (overclockToggles(player)) {
 				// switched on for good: keep it running until V switches it off
@@ -752,6 +760,7 @@ public final class ChronoPower implements Power {
 		level.playSound(null, target.x, target.y, target.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8F, 1.4F);
 
 		ChronoMemory.of(player).stoppedTime += chosen; // time undone counts as time outside time
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.rewind", Math.max(1, chosen / 20));
 		state.clearHistory(); // the jump itself shouldn't be part of the next rewind
 		state.trail = new RewindTrail(level, path, ChronoFx.style(player));
 		return true;
@@ -831,21 +840,22 @@ public final class ChronoPower implements Power {
 	/** Time Bloom's mending for everything living around you: players, villagers, animals and monsters alike. */
 	private static void bloomHealNearby(ServerPlayer player, ServerLevel level) {
 		// a symbiote mid-takeover feels the bloom (WebSymbioteStrains: purifying)
-		com.jaymospowers.power.web.WebSymbioteStrains.purifyAround(player, BLOOM_HEAL_RADIUS, com.jaymospowers.power.web.WebSymbioteStrains.Half.TIME);
-		AABB area = player.getBoundingBox().inflate(BLOOM_HEAL_RADIUS);
+		com.jaymospowers.power.web.WebSymbioteStrains.purifyAround(player, AbilityPower.size(player, BLOOM_HEAL_RADIUS), com.jaymospowers.power.web.WebSymbioteStrains.Half.TIME);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BLOOM_HEAL_RADIUS));
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.getHealth() < e.getMaxHealth()
-				&& e.distanceToSqr(player) <= BLOOM_HEAL_RADIUS * BLOOM_HEAL_RADIUS
+				&& e.distanceToSqr(player) <= AbilityPower.size(player, BLOOM_HEAL_RADIUS) * AbilityPower.size(player, BLOOM_HEAL_RADIUS)
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.heal(BLOOM_HEAL);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.bloom_heal", 1);
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.4, 0.3, 0.0);
 		}
 	}
 
 	private static void overclockDrag(ServerPlayer player, ServerLevel level) {
-		AABB area = player.getBoundingBox().inflate(OVERCLOCK_DRAG_RADIUS);
+		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS));
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
-			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= OVERCLOCK_DRAG_RADIUS * OVERCLOCK_DRAG_RADIUS
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS) * AbilityPower.size(player, OVERCLOCK_DRAG_RADIUS)
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, OVERCLOCK_DRAG_EVERY + 10, OVERCLOCK_DRAG_AMPLIFIER, false, false, true), player);
 			if (level.getRandom().nextInt(3) == 0) {
@@ -894,7 +904,7 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Time Bloom
 
 	private static boolean bloom(ServerPlayer player, ChronoState state) {
-		state.bloom = new TimeBloom(player.level(), player.blockPosition(), ChronoFx.style(player));
+		state.bloom = new TimeBloom(player.level(), player.blockPosition(), ChronoFx.style(player), player);
 		state.bloom.start();
 		return true;
 	}

@@ -54,6 +54,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		SignIn.register();
 		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareExtras());
 		// and the harness: what a blow meets in its layers, a shut visor's glance, who may have plate gilded
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareHarness());
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
@@ -363,6 +364,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
+		ClassTrees.register();
+		TreePerks.register();
 		// (RPG Series patch 1) Wizards', Archers' and Rogues & Warriors' spells only for their classes
 		RpgSeriesGate.init();
 		// (0.7.550) Weapon Forms on the RPG Series skill bar
@@ -1060,6 +1063,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		// where the old dead rose (dried, bloated, pale, frostbitten) and whose villagers they were (and its attachment)
 		LOGGER.debug("risen look attachment: {}", RisenLooks.ROSE);
 		RisenLooks.register();
+		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
+		HushWard.register();
+		AshRot.register();
+		ArtKeys.register();
+		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
+		Cordon.register();
+		AwakenedStrangers.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
