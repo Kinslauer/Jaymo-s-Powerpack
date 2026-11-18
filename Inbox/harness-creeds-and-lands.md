@@ -30,3 +30,4 @@ writer: hermes-writer
 ## Notes
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 11:32 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-18 11:35 Text pass: PR #1728 harness-creeds-and-lands. Reviewed all player-visible text: heraldry-armour.json adds 9 finish names (Etched/Spiked/Gilt-Banded/Fur-Lined/Quilted/Brine-Soaked/Hide/Bronze/Lamellar %s) matching existing Blackened/Gilded pattern; message.json shortens bounty.paid and job.paid/paid_short. All text already plain and brief, no rewrites needed. Deleted lang files and removed .tag keys are old UI text whose code was also removed. No hint additions. No text changes made by me.
