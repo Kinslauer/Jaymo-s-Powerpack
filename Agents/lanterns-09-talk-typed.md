@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: lanterns-09-talk-typed
 branch: claude/lanterns-09-talk-typed
 with: Claude Code (PC)
@@ -25,3 +25,4 @@ owns:
 - Entry is "Ask something..." in Town business (TalkErrands): a top-level MCA menu entry would need McaBridge, owned by dialogue-letterbox-pov.
 
 ## Done
+"Ask something..." on a villager's Town business opens a talk card with a typing box; they answer by topic in their own way, with three follow-up questions in a side panel. Compiled on the PC, CI passes; not played.
