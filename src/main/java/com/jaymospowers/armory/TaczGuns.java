@@ -154,9 +154,16 @@ public final class TaczGuns {
 	/** TaCZ's namespace (its items, tabs and JEI pages). */
 	public static final String NAMESPACE = "tacz";
 
-	/** Kept out of the creative tabs: a modern gun, ammo or attachment, or any other TaCZ item. */
-	static boolean hidden(ItemStack stack) {
-		return isModern(stack) || NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace());
+	/**
+	 * Kept out of the creative tabs and JEI: a modern gun, ammo or attachment, any other TaCZ item, or a painting of one of
+	 * TaCZ's variants (its collaboration painting is placeable, so vanilla lists it with the paintings).
+	 */
+	public static boolean hidden(ItemStack stack) {
+		if (isModern(stack) || NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace())) {
+			return true;
+		}
+		var painting = stack.get(net.minecraft.core.component.DataComponents.PAINTING_VARIANT);
+		return painting != null && painting.unwrapKey().map(k -> NAMESPACE.equals(k.identifier().getNamespace())).orElse(false);
 	}
 
 	/** One of TaCZ's own guns ({@code tacz:ak47}) with {@code rounds} in it; empty without TaCZ. */
