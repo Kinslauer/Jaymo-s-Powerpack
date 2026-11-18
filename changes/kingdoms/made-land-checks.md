@@ -1,2 +1,0 @@
-# Land checks wait for land that is really there
-- Kingdoms checked that land was loaded before founding, building, raising sites, starfall, smith keepings and the like with a test that is also true of land the game has only queued to make. Reading it then made the server wait for it, and on the Deck that ran into the 60 s watchdog (the smith keeping, 2026-11-17 7:18 AM). All 22 of those checks now wait for land that is made.

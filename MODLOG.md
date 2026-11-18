@@ -5729,3 +5729,7 @@ Andy's picks from the scaling audit (pick page rows; early game kept weak, late 
   (LastHold).
 - A landed legend fish also gives a Legend's Fillet (Kitchen's Deep King's Platter).
 - Built; not played.
+
+## 0.24.63 (2026-11-18): Land checks wait for land that is really there
+
+- The rig, tundra lichen and moss, and river currents checked that land was loaded with a test that is also true of land only queued to be made, which could make the server wait on it. They now check for land that is made, like Kingdoms' checks.
