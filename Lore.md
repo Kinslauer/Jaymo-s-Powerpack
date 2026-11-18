@@ -2046,6 +2046,8 @@ is on the wall.
 
 (new) **Fishing the fire** (Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
 
+(new) **The labyrinth-builders' craft** (Claude's placement for the Asterion picks, 2026-11-18). The forgotten hands that raised the labyrinths worked bronze and fire. Their inner gates open only to tablets cut in the old tongue, scattered through the halls; their lamps burn sea-fire that water does not put out; their bronze guardians still stand in the passages, and their dead lie in catacombs below in the same bronze. The sea took the plates of one of their geared instruments into the Deep Mother's drowned colonnades, and whoever builds it from them finds it always turns toward the nearest labyrinth.
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
