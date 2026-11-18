@@ -4,11 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 19:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:30). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · for pc-claude · open
+- [ ] [[Inbox/inferno-fire|inferno-fire]] · for pc-claude · open
+- [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · for pc-claude · open
+- [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · for pc-claude · open
+- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 
 
 ## Being built
@@ -28,7 +33,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/Story quest expansion|Story quest expansion]] · 💻 Odysseus · stalled
+- [ ] [[Agents/Story quest expansion|Story quest expansion]] · 💻 Odysseus · #1705 · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 
@@ -36,14 +41,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
-- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
-- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
-- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
-- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 
 
 %% kanban:settings
