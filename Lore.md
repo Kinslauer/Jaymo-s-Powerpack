@@ -913,6 +913,12 @@ healers have come to trust the Verdant World's limphium, and the dried leaf keep
 officers down with it: six leaves to whichever town's healer is short. The Patrol keeps a file on every officer (rank,
 arrests on warrant, skip writs drawn, relief runs carried), and a patrolman will read it out if asked.
 
+**The Patrol's own law** (new; Lanterns patch 5, Andy's Buder's Lanterns pick, "the buddy cop crime dynamic"). An officer
+the realms want for a crime has broken the license: the Patrol writes a warrant of its own, strips a rank for every crime on
+it, and sends a patrolman down to bring them in, by fists if it must. A crook an officer hands to a realm's ruler counts as
+an arrest. Officers are given a partner once they make Officer: a patrolman who works beside them, rides in their pod and
+backs them up, and is replaced if he falls.
+
 **Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
 of their own, take what they like and leave. Beaten, one of their pods is left ticking over where it landed.
 
