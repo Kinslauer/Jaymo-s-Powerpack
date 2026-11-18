@@ -4,13 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:37). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
-- [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · for any · open
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · for any · open
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · for any · open
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · for any · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · 🍇 Bacchus · claimed
 
 
 ## In review
