@@ -15,6 +15,11 @@ owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/scrying-orb.json
   - kingdoms/src/main/resources/assets/jaymoskingdoms/ (scrying_orb model, blockstate, item and texture files only)
   - changes/kingdoms/claude-scrying-orb.md
+  - kingdoms/src/main/java/com/jaymoskingdoms/Mana.java (one line: sighted shards aren't crushed)
+  - kingdoms/src/main/java/com/jaymoskingdoms/Professions.java (wizard's trade set only)
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/FamiliarClient.java (one line: registers the orb renderer)
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/fifth_p7.json (scrying spell description only)
+  - kingdoms/src/main/resources/data/jaymoskingdoms/ (scrying_orb infusion, wizard trade_set, tag and villager_trade)
 ---
 # scrying-orb
 
