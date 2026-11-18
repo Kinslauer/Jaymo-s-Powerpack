@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Pseudo
 @Mixin(targets = "dev.tr7zw.firstperson.LogicHandler", remap = false)
 abstract class FirstPersonModelMountedHandsMixin {
-	@ModifyReturnValue(method = "showVanillaHands(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z", at = @At("RETURN"), remap = false)
+	@ModifyReturnValue(method = "showVanillaHands(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z", at = @At("RETURN"), remap = false, require = 0)
 	private boolean jaymospowers$mounted(boolean original, ItemStack main, ItemStack off) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		return original || player != null && player.isPassenger() && (!main.isEmpty() || !off.isEmpty());

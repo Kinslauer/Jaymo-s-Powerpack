@@ -85,11 +85,11 @@ public final class ItemShare {
 			return sharer.getDisplayName();
 		}
 		boolean knows = Boolean.TRUE.equals(KingdomsCompat.call("Introductions", "knows",
-			new Class<?>[] {Player.class, net.minecraft.world.entity.Entity.class}, true, to, sharer));
+			new Class<?>[] {Player.class, net.minecraft.world.entity.Entity.class}, false, to, sharer)); // unknown if the call fails
 		if (knows) {
 			return sharer.getDisplayName();
 		}
 		Object stranger = KingdomsCompat.call("Introductions", "stranger", new Class<?>[0], null);
-		return stranger instanceof Component c ? c : sharer.getDisplayName();
+		return stranger instanceof Component c ? c : Component.literal("?");
 	}
 }
