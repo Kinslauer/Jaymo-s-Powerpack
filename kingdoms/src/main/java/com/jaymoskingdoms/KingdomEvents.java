@@ -358,6 +358,8 @@ public final class KingdomEvents {
 	/** A new kingdom's faction at {@code capital}: named, coloured, its land claimed, its banner raised. */
 	static Faction create(ServerLevel level, BlockPos capital) {
 		MinecraftServer server = level.getServer();
+		// (a realm stands again: a later fall of every realm may raise a capital once more)
+		StoryGround.noRealm = false;
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
 		Faction kingdom = Faction.create(Factions.nextId(server), FactionType.KINGDOM, Names.kingdom(random), color, capital,

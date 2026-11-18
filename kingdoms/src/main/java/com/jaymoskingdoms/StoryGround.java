@@ -254,7 +254,12 @@ public final class StoryGround {
 					return foundInVillage(l, village);
 				}
 				return citadelWhenLoaded(l, job());
-			}, l -> citadel(l, job().at));
+			}, l -> {
+				// (once its land is held the far search has had its time: raising one more town on land not yet made is not tried)
+				if (job().citadelNear == null) {
+					citadel(l, job().at);
+				}
+			});
 			job.search = search;
 			capital = job;
 		}
