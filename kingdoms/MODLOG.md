@@ -14665,3 +14665,9 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
 ## 0.9.98 (2026-11-18): Villagers stop re-pathing every tick to places they can't reach
 
 - Many of Kingdoms' errands (guards at their post, workers, pedlars, drivers and the rest) ask for a new path whenever the last walk is done. A walk to a spot they can't reach is done at once, so such a villager pathed again every tick. A camp of guards with an unreachable post held the server half a minute behind when a player came near (2026-11-16). A mob that just failed to reach a block now waits a second before trying for that same block again.
+
+## 0.9.99 (2026-11-18): Daylight no longer goes black under shaders or in rain
+
+- **DarkNights**: how far into the night it is now comes from the Sun's height, not from the sky light factor. Rain and thunder lower that factor by day too, so a rainy or stormy day was taken for night, and with the Moon set (as it is by day, most of the month) the open sky lost most of its light while torches lit as normal.
+- **Shader packs**: the uniform our Iris hook adds is now the darkness the night takes away (`jaymo_SkyDark`, 0 by day) instead of the light left (`jaymo_SkyLight`). A shader program the uniform never reached read 0 and drew the open sky with no light at all, so the day was pitch black under Complementary while torches and lanterns still lit; now such a program keeps its full sky light. The night is also worked out every client tick, so the shaders never keep a stale one when the vanilla lightmap isn't being updated.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.
