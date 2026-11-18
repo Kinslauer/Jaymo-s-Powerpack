@@ -188,7 +188,7 @@ public final class Starfall {
 	/** The ground at (x, z) if a star can land there: loaded all round, dry, on solid ground, and not in a town's claim. */
 	private static @Nullable BlockPos place(MinecraftServer server, ServerLevel level, int x, int z) {
 		int reach = (int)Math.ceil(BOWL + LINING) + 1;
-		if (!level.hasChunksAt(x - reach, z - reach, x + reach, z + reach)) {
+		if (!Loaded.made(level, x - reach, z - reach, x + reach, z + reach)) {
 			return null;
 		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
@@ -236,7 +236,7 @@ public final class Starfall {
 		Block ore = ore();
 		BlockPos at = fall.land;
 		int reach = (int)Math.ceil(BOWL + LINING) + 1;
-		if (ore == null || !level.hasChunksAt(at.getX() - reach, at.getZ() - reach, at.getX() + reach, at.getZ() + reach)) {
+		if (ore == null || !Loaded.made(level, at.getX() - reach, at.getZ() - reach, at.getX() + reach, at.getZ() + reach)) {
 			return;
 		}
 		// (0.7.419) a road deed: a star came down

@@ -91,26 +91,21 @@ def icon():
 
 
 def worn():
-    """The head layer (64x32, the vanilla armour layout): a band round the head, the ear cup on its left side and the
-    lens over the left eye on the front."""
+    """The head layer (64x32, the vanilla armour layout): a thin band round the head at the brow, a small ear cup on its
+    left side and a lens over the left eye on the front, kept small so the face still shows (Andy found it too big)."""
     img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
     # the four sides of the head are 8 wide at x 0-8 (right), 8-16 (front), 16-24 (left), 24-32 (back); rows 8-15
     for x in range(0, 32):
-        put(img, x, 10, IRON[0])
-        put(img, x, 11, IRON[2])
+        put(img, x, 11, IRON[1])
     # the ear cup on the left side
-    shaded_rect(img, 18, 11, 21, 15, IRON)
-    put(img, 19, 13, RED)
-    put(img, 20, 13, RED)
+    shaded_rect(img, 19, 11, 21, 13, IRON)
+    put(img, 20, 12, RED)
     # the boom along the left side to the front, and the lens over the left eye
-    for x in range(16, 18):
-        put(img, x, 12, IRON[1])
-    shaded_rect(img, 12, 11, 15, 15, IRON)
-    for y in range(12, 15):
-        for x in range(13, 15):
-            put(img, x, y, LENS[1])
+    put(img, 16, 12, IRON[2])
+    put(img, 17, 12, IRON[2])
+    shaded_rect(img, 12, 11, 15, 13, IRON)
     put(img, 13, 12, LENS[0])
-    put(img, 14, 14, LENS[2])
+    put(img, 14, 12, LENS[1])
     return img
 
 

@@ -14652,3 +14652,12 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
 - **Legend larder**: wind dragons drop Wind-Dragon Meat and the Aether's Giants drop Giant's Marrow (for Kitchen's Legend
   feasts; LegendLarder).
 - Built; not played.
+
+## 0.9.96 (2026-11-18): Land checks wait for land that is really there
+
+- Kingdoms checked that land was loaded before founding, building, raising sites, starfall, smith keepings and the like with a test that is also true of land the game has only queued to make. Reading it then made the server wait for it, and on the Deck that ran into the 60 s watchdog (the smith keeping, 2026-11-17 7:18 AM). All 22 of those checks now wait for land that is made.
+
+## 0.9.97 (2026-11-18): villagers' scouters sit close to the face
+
+- **FrostTechLayer**: a villager's or patrolman's scouter is drawn 0.6 off the head (just past the hat layer and MCA's hair) instead of a helmet's 1.0, so it hugs the face. With Powers' smaller scouter art it no longer covers half the face.
+- Not built in the cloud (no Fabric Maven) or played; a one-constant change.

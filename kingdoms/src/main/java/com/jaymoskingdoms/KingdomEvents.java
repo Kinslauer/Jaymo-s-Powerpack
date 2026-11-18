@@ -201,7 +201,7 @@ public final class KingdomEvents {
 		// (the village must be loaded round the bell to choose its buildings: a great town's far end may be left out)
 		BoundingBox area = village.start().getBoundingBox();
 		BlockPos b = bell.get();
-		if (!level.hasChunksAt(Math.max(area.minX(), b.getX() - LOAD_REACH), Math.max(area.minZ(), b.getZ() - LOAD_REACH),
+		if (!Loaded.made(level, Math.max(area.minX(), b.getX() - LOAD_REACH), Math.max(area.minZ(), b.getZ() - LOAD_REACH),
 			Math.min(area.maxX(), b.getX() + LOAD_REACH), Math.min(area.maxZ(), b.getZ() + LOAD_REACH))) {
 			return;
 		}
