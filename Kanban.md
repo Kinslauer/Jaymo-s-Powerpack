@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 07:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,13 +35,13 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/inferno-fire|inferno-fire]]
 - [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 - [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
+- [x] [[Inbox/Done/inferno-fire|inferno-fire]]
 - [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
+- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings
