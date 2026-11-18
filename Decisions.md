@@ -742,3 +742,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy): approved the lore paragraph "The Warrior-born dead"; said merge for PR #1725.
 - 2026-11-18 (Andy, chainmail thread): picked all 16 light-armour ideas from S&C Leather Armors (ARR, ideas only); the Dodge's backward slip is for everyone in light armour (padding/mail) and off in copper-tier plate or higher. Plan docs/LightArmour-Plan.md; lore paragraph "Jacks and studded hides" awaiting approval.
 - 2026-11-18 (Andy): approved the lore paragraph "Jacks and studded hides".
+- 2026-11-18 (Andy): NPCs follow the light-armour sidestep rule too: folk never sidestep in plate; rangers and crewmen in leather/mail sidestep (PR #1730).
