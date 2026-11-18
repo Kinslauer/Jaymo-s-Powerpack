@@ -408,6 +408,31 @@ public final class Corpses {
 		level.addFreshEntity(corpse);
 	}
 
+	/**
+	 * The pose each body was in as it began to die ({@link #noteDying}): a mob's turns {@code DYING} by the time its corpse
+	 * is made, so one crawling or lying flat would otherwise start standing and pop up (Andy, 2026-11-18: "the death
+	 * ragdoll when enemies and players are prone or crawling should keep them in that position").
+	 */
+	private static final java.util.Map<LivingEntity, Pose> DYING_POSE = new java.util.WeakHashMap<>();
+
+	/** (LivingEntityMixin, as {@code die} begins) remembers the pose {@code body} died in. */
+	public static void noteDying(LivingEntity body) {
+		if (!body.level().isClientSide() && body.getPose() != Pose.DYING) {
+			DYING_POSE.put(body, body.getPose());
+		}
+	}
+
+	/** The pose {@code body} died in ({@link #noteDying}), or its pose now if none was noted. */
+	static Pose poseAtDeath(LivingEntity body) {
+		return DYING_POSE.getOrDefault(body, body.getPose());
+	}
+
+	/** Whether {@code body} died lying flat: crawling (the swimming pose, or down on its belly from a leg shot), asleep or gliding. */
+	static boolean diedFlat(LivingEntity body) {
+		Pose pose = poseAtDeath(body);
+		return pose == Pose.SWIMMING || pose == Pose.SLEEPING || pose == Pose.FALL_FLYING || com.jaymoskitchen.archery.LegShots.isCrawling(body);
+	}
+
 	/** Knocked back faster than this (blocks a tick) by the killing blow, a body is thrown down, not keeled over. */
 	private static final double KEEL_MAX_KNOCK = 0.3;
 	/** A humanoid falls along the killing blow's knockback when it had at least this much (blocks a tick). */
@@ -424,8 +449,8 @@ public final class Corpses {
 			|| com.jaymoskitchen.archery.LegShots.isCrawling(mob)) {
 			return null;
 		}
-		// (its pose is already DYING by now, so lying asleep is asked of it directly)
-		if (mob.isSleeping() || mob.isFallFlying() || mob.isSwimming()) {
+		// (its pose is already DYING by now: the pose it died in is asked instead)
+		if (mob.isSleeping() || mob.isFallFlying() || mob.isSwimming() || diedFlat(mob)) {
 			return null;
 		}
 		for (String tag : mob.entityTags()) {
@@ -476,15 +501,17 @@ public final class Corpses {
 		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
 		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
 		net.minecraft.util.RandomSource random = mob.getRandom();
-		Pose pose = mob.getPose();
-		boolean down = pose == Pose.SWIMMING || pose == Pose.SLEEPING || pose == Pose.FALL_FLYING;
+		// (the pose it died in: by now a mob's is DYING)
+		boolean down = diedFlat(mob);
 		Vec3 v = mob.getDeltaMovement();
 		// Andy: downed enemies "popped up after, instead of being beaten into the ground": one that died lying stays lying
 		RagdollBody body = lyingFrom(mob, rig);
 		if (body != null) {
 			down = true;
 		} else if (down) {
-			body = RagdollBody.lying(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, random.nextBoolean(), random.nextLong());
+			// (one down on its belly from a leg shot stays face down)
+			boolean faceUp = !com.jaymoskitchen.archery.LegShots.isCrawling(mob) && random.nextBoolean();
+			body = RagdollBody.lying(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, faceUp, random.nextLong());
 		} else {
 			body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
 		}
