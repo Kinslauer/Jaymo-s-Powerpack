@@ -45,6 +45,14 @@ public final class EpicTowns {
 	static final double WET_MOST = 0.25;
 	/** Its bell is looked for this far round the town's middle (blocks). */
 	static final int BELL_SEARCH = 96;
+	/**
+	 * How far (chunks) round the spot asked for a town's start is looked for, nearest first. One chunk alone was nearly
+	 * always thrown out by the river and sea checks every village passes (Dynamic Waters' clearance, the raised sea), so no
+	 * kingdom's town rose on the Overworld ground and each fell back to a lone castle.
+	 */
+	static final int START_SEARCH = 4;
+	/** The most starts that pass those checks to look at the ground under (each loads its chunks) before giving up. */
+	static final int GROUND_LOOKS = 3;
 
 	/** The five towns' ids (vanilla's villages, which Epic Structures redraws). */
 	static final List<String> TOWNS = List.of("minecraft:village_plains", "minecraft:village_desert", "minecraft:village_savanna",
@@ -141,14 +149,34 @@ public final class EpicTowns {
 		if (holder.isEmpty()) {
 			return null;
 		}
-		ChunkPos origin = ChunkPos.containing(at);
-		StructureStart start = GrandSeats.generate(level, holder.get(), origin);
-		if (start == null) {
-			JaymosKingdoms.LOGGER.info("No {} would generate by {}", id, at);
-			return null;
+		ChunkPos centre = ChunkPos.containing(at);
+		List<ChunkPos> around = new ArrayList<>();
+		for (int dx = -START_SEARCH; dx <= START_SEARCH; dx++) {
+			for (int dz = -START_SEARCH; dz <= START_SEARCH; dz++) {
+				around.add(new ChunkPos(centre.x() + dx, centre.z() + dz));
+			}
 		}
-		if (wet(level, start)) {
-			JaymosKingdoms.LOGGER.info("The {} by {} would stand in water", id, at);
+		around.sort(java.util.Comparator.comparingInt(c -> (c.x() - centre.x()) * (c.x() - centre.x()) + (c.z() - centre.z()) * (c.z() - centre.z())));
+		StructureStart start = null;
+		ChunkPos origin = null;
+		int looks = 0;
+		for (ChunkPos c : around) {
+			StructureStart tried = GrandSeats.generate(level, holder.get(), c);
+			if (tried == null) {
+				continue;
+			}
+			if (wet(level, tried)) {
+				if (++looks >= GROUND_LOOKS) {
+					break;
+				}
+				continue;
+			}
+			start = tried;
+			origin = c;
+			break;
+		}
+		if (start == null) {
+			JaymosKingdoms.LOGGER.info("No {} would generate by {} ({} spots in water)", id, at, looks);
 			return null;
 		}
 		place(level, holder.get().value(), start, origin);
