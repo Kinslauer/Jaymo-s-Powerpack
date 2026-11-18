@@ -88,6 +88,8 @@ public final class KeepingCells {
 	static final String RESTED = "keeping_rested";
 	/** How far round his light his household is counted (blocks: across, below, above). */
 	static final int REST_REACH = 14, REST_BELOW = 3, REST_ABOVE = 14;
+	/** How near the house a player has to be for its dead to be counted as his household the first time (blocks). */
+	static final double COUNT_NEAR = 24.0;
 	/** How far round a villager the keeping light is looked for (blocks, across; up and down one). */
 	static final int LIGHT_REACH = 2;
 	/** How far round the light the cell's bed is looked for, and the way out (blocks). */
@@ -110,6 +112,11 @@ public final class KeepingCells {
 	static final String LOOKED_TAG = "jaymoskingdoms.keeping_looked";
 	/** Set for good on an old home's smith once he has been laid under his keeping. */
 	static final String SMITH_TAG = "jaymoskingdoms.keeping_smith";
+	/**
+	 * On the dead who are his household (those in his house when it's first read, and any the structure made to stay),
+	 * and on a smith whose house has been read for them: a stray in the yard is nobody of his.
+	 */
+	static final String HOUSEHOLD_TAG = "jaymoskingdoms.keeping_household", COUNTED_TAG = "jaymoskingdoms.keeping_counted";
 
 	/** The master smith's stall: uses of each piece a day (iron and the rest; diamond), his experience for a sale, the price rise. */
 	static final int USES = 12, DIAMOND_USES = 3, XP = 10;
@@ -192,11 +199,26 @@ public final class KeepingCells {
 	private static void laid(ServerLevel level, LivingEntity dead) {
 		for (Villager v : new ArrayList<>(KEEPING)) {
 			BlockPos light = v.level() == level ? v.getAttached(KEPT) : null;
-			if (light != null && house(light).contains(dead.position())) {
+			if (light != null && dead.entityTags().contains(HOUSEHOLD_TAG) && house(light).contains(dead.position())) {
 				v.setAttached(LAID, v.getAttachedOrElse(LAID, 0) + 1);
 				rest(level, v, light, dead);
 			}
 		}
+	}
+
+	/**
+	 * The dead in {@code v}'s house are marked as his household: everyone there the first time it's read with a player
+	 * near enough for them to be loaded, after that only the structure's own (those made to stay).
+	 */
+	private static void household(ServerLevel level, Villager v, BlockPos light) {
+		boolean counted = v.entityTags().contains(COUNTED_TAG);
+		if (!counted && level.getEntitiesOfClass(ServerPlayer.class, house(light).inflate(COUNT_NEAR), p -> !p.isSpectator()).isEmpty()) {
+			return;
+		}
+		for (Zombie z : level.getEntitiesOfClass(Zombie.class, house(light), z -> z.isAlive() && (!counted || z.isPersistenceRequired()))) {
+			z.addTag(HOUSEHOLD_TAG);
+		}
+		v.addTag(COUNTED_TAG);
 	}
 
 	private static AABB house(BlockPos light) {
@@ -209,7 +231,7 @@ public final class KeepingCells {
 	 */
 	private static void rest(ServerLevel level, Villager v, BlockPos light, @Nullable LivingEntity but) {
 		boolean rested = v.getAttachedOrElse(LAID, 0) > 0
-			&& level.getEntitiesOfClass(Zombie.class, house(light), z -> z != but && z.isAlive()).isEmpty();
+			&& level.getEntitiesOfClass(Zombie.class, house(light), z -> z != but && z.isAlive() && z.entityTags().contains(HOUSEHOLD_TAG)).isEmpty();
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			Tales.remark(player, TALE, v, RESTED, rested);
 		}
@@ -325,6 +347,7 @@ public final class KeepingCells {
 			// (the cell's edge isn't loaded: the bed, the hatch and the way out are read next second instead)
 			return;
 		}
+		household(level, v, light);
 		if (!isLight(level.getBlockState(light))) {
 			wake(level, v, light);
 			return;

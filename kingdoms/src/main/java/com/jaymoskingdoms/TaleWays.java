@@ -309,10 +309,14 @@ final class TaleWays {
 	 * A black candle is set burning in a window of the tavern of {@code run}'s town (the guild's mark that someone has
 	 * been paid for): on a sill beside glass if one is near the counter, else on the counter. False if the tavern isn't
 	 * loaded yet (it's tried again while the tale runs). {@code colour} is "black", or "white" for the candle that
-	 * answers it (the paper bought back). One of a colour is enough for a window; a tale with no town lights none.
+	 * answers it (the paper bought back). One of a colour is enough for a window. A tale begun outside any town (a
+	 * book opened on the road) lights the nearest town's.
 	 */
 	static boolean candle(ServerLevel level, Tales.Run run, String colour) {
 		Faction f = run.faction < 0 ? null : Factions.get(level.getServer(), run.faction);
+		if (f == null) {
+			f = Tales.nearest(level.getServer(), BlockPos.of(run.home), null, false);
+		}
 		if (f == null) {
 			return true;
 		}
@@ -410,7 +414,8 @@ final class TaleWays {
 	/** Whether {@code run}'s step can be done at this hour (its {@code when}). */
 	static boolean now(ServerPlayer player, Tales.Run run, JsonObject step) {
 		String when = Tale.string(step, "when", "");
-		return when.isEmpty() || Tales.holds(player, run, when);
+		// (a moon is a night: the day before it doesn't count)
+		return when.isEmpty() || Tales.holds(player, run, when) && (!when.contains("moon:") || Tales.holds(player, run, "night"));
 	}
 
 	/** {@code who} has nothing to say at this hour: their own words for it ({@code not_now}), or the usual. */
@@ -761,7 +766,7 @@ final class TaleWays {
 
 	/**
 	 * A field to cut ({@code "do": "reap"}): the first time {@code player} comes near its place a small ripe field
-	 * stands there (ploughed where the ground is earth, a pool in the middle to keep it), and the step is done when
+	 * stands there (ploughed out of the ground, a pool in the middle to keep it), and the step is done when
 	 * {@code count} ripe plants have been cut in it ({@link #cut}).
 	 */
 	static void reap(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step) {
@@ -783,7 +788,7 @@ final class TaleWays {
 					BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.offset(x, 0, z));
 					BlockPos soil = top.below();
 					BlockState ground = level.getBlockState(soil);
-					if (Math.abs(top.getY() - at.getY()) > REAP_SLOPE || !ground.is(BlockTags.DIRT) && !ground.is(Blocks.FARMLAND)
+					if (Math.abs(top.getY() - at.getY()) > REAP_SLOPE || !soil(ground)
 						|| !level.getBlockState(top).canBeReplaced()) {
 						continue;
 					}
@@ -799,6 +804,12 @@ final class TaleWays {
 		if (Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) >= Tale.number(step, "count", 8)) {
 			Tales.go(player, run, step.get("then"), null);
 		}
+	}
+
+	/** Ground a tale's field can be ploughed out of: earth, and failing that sand, gravel or bare stone, so there is always a crop to cut. */
+	private static boolean soil(BlockState ground) {
+		return ground.is(BlockTags.DIRT) || ground.is(Blocks.FARMLAND) || ground.is(BlockTags.SAND) || ground.is(Blocks.GRAVEL)
+			|| ground.is(BlockTags.BASE_STONE_OVERWORLD);
 	}
 
 	/** {@code player} broke {@code state} at {@code pos}: a ripe plant cut in the field of a {@code reap} step of theirs is counted. */

@@ -426,7 +426,11 @@ final class TaleCast {
 				}
 			}
 			if (!hours(player, run, theirs) && c != null && !c.fight() && !c.yielded() && !HELD.containsKey(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE)) {
-				// (their hours are over: they've gone home, and are back when the hours are)
+				// (their hours are over: they've gone home, their men with them, and are back when the hours are)
+				for (Mob man : men(level, there, c)) {
+					LOADED.remove(man);
+					McaCompat.vanish(man);
+				}
 				LOADED.remove(there);
 				McaCompat.vanish(there);
 				Tales.each(player, run, r -> r.cast.remove(e.getKey()));

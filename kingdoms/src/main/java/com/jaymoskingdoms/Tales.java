@@ -872,7 +872,7 @@ public final class Tales {
 				s.marks.remove(mark);
 			} else if (s.marks.add(mark)) {
 				MutableComponent line = words(player, run, Tale.object(step, "noted"), mark);
-				if (line != null) {
+				if (line != null && !run.notes.contains(line.getString())) {
 					note(run, line.getString());
 					Quests.sync(player, true);
 				}
