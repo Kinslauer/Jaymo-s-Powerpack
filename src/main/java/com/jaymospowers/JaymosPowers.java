@@ -260,6 +260,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.wet.Wet.init();
 		com.jaymospowers.core.wet.Rust.init();
 		com.jaymospowers.core.wet.Scrubbing.init();
+		com.jaymospowers.moving.PullRiders.init();
+		com.jaymospowers.moving.PetSafe.init();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();

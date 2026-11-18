@@ -9,6 +9,7 @@
 		"DarkPanelsTextureMixin",
 		"DarkPanelsTextMixin",
 		"FaintInputMixin",
+		"AutoWalkInputMixin",
 		"WetCoatTintMixin",
 		"TakeoverFacingMixin",
 		"TakeoverFacingHeadMixin",
