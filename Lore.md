@@ -1066,7 +1066,7 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
-**No priests of the Ash Whisperer** (new; Andy, 2026-11-18: Clerics never pledge to her; placement for him to approve).
+**No priests of the Ash Whisperer** (Andy approved, 2026-11-18; Clerics never pledge to her).
 She keeps no clerics and answers no prayer for healing. Her favour goes only to the dark arts, death and blood and the
 other forbidden sorceries, and whoever wants it strikes a Warlock's pact with her, never a priest's vow.
 
