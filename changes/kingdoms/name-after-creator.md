@@ -1,2 +1,0 @@
-# A newcomer isn't given a random name before they pick theirs
-- A player with no character name is given one from MCA's name lists, but that happened as soon as they joined, before MCA's creator had opened. Their first join line and the creator showed a random name (Andy's "Yu-Fang" before he chose "Jek"). A random name is now given only once the creator is behind them, to those who left the name as their username.

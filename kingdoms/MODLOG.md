@@ -14935,3 +14935,7 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 - The picked answer's box is struck through with a hand-drawn red X (`PickerLayout.cross`), on every question page and the gender page. The flaws and the ideal/bond/flaw picks on the last page draw the same box and X in place of "[x]" text.
 - Clerics can no longer pledge to the Ash Whisperer (Andy: she backs only death, blood and evil sorceries; Warlocks keep her). A Cleric's pick on the story's last page is headed "Pick the patron you serve:", not "element".
 - Compiled; not played.
+
+## 0.10.16 (2026-11-18): A newcomer isn't given a random name before they pick theirs
+
+- A player with no character name is given one from MCA's name lists, but that happened as soon as they joined, before MCA's creator had opened. Their first join line and the creator showed a random name (Andy's "Yu-Fang" before he chose "Jek"). A random name is now given only once the creator is behind them, to those who left the name as their username.
