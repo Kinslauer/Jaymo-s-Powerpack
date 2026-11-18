@@ -54,7 +54,7 @@ public class BottleOfCloudItem extends Item {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		if (player.isSpectator() || player.onGround() || player.isInWater() || player.isInLava() || player.isPassenger()
-			|| player.getAbilities().flying || player.fallDistance < MIN_FALL) {
+			|| player.getAbilities().flying || player.isFallFlying() || player.fallDistance < MIN_FALL) {
 			return InteractionResult.PASS;
 		}
 		// one puff, centred under the feet
@@ -64,7 +64,10 @@ public class BottleOfCloudItem extends Item {
 
 	/** Lays the puff on the cells that are open, spends the bottle; passes if none are. */
 	private static InteractionResult lay(Level level, Player player, InteractionHand hand, List<BlockPos> cells) {
-		List<BlockPos> open = cells.stream().filter(pos -> CloudBottle.open(level, pos)).toList();
+		if (!player.mayBuild()) {
+			return InteractionResult.PASS;
+		}
+		List<BlockPos> open = cells.stream().filter(pos -> CloudBottle.open(level, pos) && level.mayInteract(player, pos)).toList();
 		if (open.isEmpty()) {
 			return InteractionResult.PASS;
 		}

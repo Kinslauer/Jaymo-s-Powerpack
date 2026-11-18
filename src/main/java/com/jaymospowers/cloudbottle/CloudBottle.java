@@ -73,10 +73,9 @@ public final class CloudBottle {
 		return Stacked.in(player, CloudSea.REALM) || Stacked.in(player, ZFighterHighSky.HIGH_SKY);
 	}
 
-	/** Whether a puff block can go here: open air or something that gives way, and no fluid. */
+	/** Whether a puff block can go here: open air only, so nothing (grass, snow, flowers) is lost when the puff thins away. */
 	static boolean open(Level level, BlockPos pos) {
-		BlockState state = level.getBlockState(pos);
-		return level.isInWorldBounds(pos) && (state.isAir() || state.canBeReplaced() && state.getFluidState().isEmpty());
+		return level.isInWorldBounds(pos) && level.getBlockState(pos).isAir();
 	}
 
 	/** One empty bottle becomes a Bottle of Cloud. */
