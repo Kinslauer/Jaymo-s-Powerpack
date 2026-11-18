@@ -1,11 +1,11 @@
 ---
-status: running
+status: done
 task: weapon-hooks-and-breaks
 branch: claude/knight-armor-forging
 with: 
-pr: 
+pr: 1718
 mods: powers
-versions: 
+versions: Knight Armor and Weapons 1.1.1
 started: 2026-11-18
 owns:
   - build.gradle (one packMods block after fantasy_armor)
