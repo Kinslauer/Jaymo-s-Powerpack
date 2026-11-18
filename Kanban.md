@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 13:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 13:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · for any · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · for any · open
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 
 
 ## Being built
