@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -30,9 +29,10 @@ import org.jspecify.annotations.Nullable;
  * that thinks well enough of them ({@link #FRIENDLY}) has its seat within {@link #RANGE} of where they fell, it may
  * ({@link #CHANCE}) send folk to carry them in. They wake on one of its beds (Powers sets and dresses what it can: their
  * wounds are bandaged, their breaks splinted) and, once they come round, lie there resting ({@link BedRest#lay}) until they
- * get up. Only a real village carries anyone in (Andy, 2026-11-18: "you need to be taken to an actual village"): a bell with
- * homes round it ({@link #VILLAGE_HOMES}) by the faction's seat, and a free bed indoors there. A seat with none (a lone castle,
- * or a kingdom whose town never rose) sends nobody, and the next nearest that has one is tried.
+ * get up. Only a real village carries anyone in (Andy, 2026-11-18: "you need to be taken to an actual village"): a bell by the
+ * faction's seat, a village structure at it, or houses its builders put up, with {@link #VILLAGE_HOMES} homes round it and a
+ * free bed indoors there. A seat with none (a lone castle, or a kingdom whose town never rose) sends nobody, and the next
+ * nearest that has one is tried.
  */
 public final class Shelter {
 	// ---- tuning ----
@@ -90,7 +90,7 @@ public final class Shelter {
 		near.sort(Comparator.comparingDouble(f -> f.seat().distSqr(fell)));
 		RandomSource random = player.getRandom();
 		for (Faction home : near) {
-			BlockPos at = bed(level, home.seat(), random);
+			BlockPos at = bed(level, home, random);
 			if (at != null) {
 				WAITING.put(player.getUUID(), new Waiting(at, server.getTickCount()));
 				JaymosKingdoms.LOGGER.info("{} was taken in by {} ({})", player.getScoreboardName(), home.name(), home.id());
@@ -101,38 +101,58 @@ public final class Shelter {
 	}
 
 	/**
-	 * A free bed's head indoors in the village by {@code seat}, or null when there's no village there: no bell within {@link
-	 * #VILLAGE_REACH}, or fewer than {@link #VILLAGE_HOMES} homes round it. Beds are found by their points of interest, so
-	 * nothing is loaded for it; one in ground not loaded is taken on trust.
+	 * A free bed's head indoors in {@code f}'s village, or null when it has none: no bell within {@link #VILLAGE_REACH} of its
+	 * seat, no village structure at the seat and fewer than {@link #VILLAGE_HOMES} houses built by its builders, or fewer than
+	 * that many homes round the village's middle. Beds are found by their points of interest, so no chunk is loaded for it; a
+	 * bed in ground not loaded (its roof unseen) is only taken when no loaded one will do.
 	 */
-	private static @Nullable BlockPos bed(ServerLevel level, BlockPos seat, RandomSource random) {
+	private static @Nullable BlockPos bed(ServerLevel level, Faction f, RandomSource random) {
+		BlockPos seat = f.seat();
 		PoiManager pois = level.getPoiManager();
-		Optional<BlockPos> bell = pois.findClosest(type -> type.is(PoiTypes.MEETING), seat, VILLAGE_REACH, PoiManager.Occupancy.ANY);
-		if (bell.isEmpty()) {
-			return null;
+		BlockPos middle = pois.findClosest(type -> type.is(PoiTypes.MEETING), seat, VILLAGE_REACH, PoiManager.Occupancy.ANY).orElse(null);
+		if (middle == null) {
+			// (an Epic town whose middle has no bell, or a town its builders grew round a castle)
+			if (Seats.structureAt(level, seat, Seats::village).status() != Seats.Status.FOUND && houses(level, f) < VILLAGE_HOMES) {
+				return null;
+			}
+			middle = seat;
 		}
-		List<BlockPos> beds = pois.getInRange(type -> type.is(PoiTypes.HOME), bell.get(), VILLAGE_REACH, PoiManager.Occupancy.ANY)
+		BlockPos centre = middle;
+		List<BlockPos> beds = pois.getInRange(type -> type.is(PoiTypes.HOME), centre, VILLAGE_REACH, PoiManager.Occupancy.ANY)
 			.map(r -> r.getPos().immutable()).toList();
 		if (beds.size() < VILLAGE_HOMES) {
 			return null;
 		}
-		BlockPos found = null;
-		double best = Double.MAX_VALUE;
+		BlockPos found = null, unseen = null;
+		double best = Double.MAX_VALUE, bestUnseen = Double.MAX_VALUE;
 		for (BlockPos head : beds) {
-			if (Loaded.made(level, head)) {
-				BlockState state = level.getBlockState(head);
-				if (!(state.getBlock() instanceof BedBlock) || state.getValue(BedBlock.OCCUPIED) || !roofed(level, head)) {
-					continue;
+			// (not always the one nearest the middle: any of the near ones)
+			double d = head.distSqr(centre) * (0.75 + random.nextDouble() * 0.5);
+			if (!Loaded.made(level, head)) {
+				if (d < bestUnseen) {
+					bestUnseen = d;
+					unseen = head;
 				}
+				continue;
 			}
-			// (not always the one nearest the bell: any of the near ones)
-			double d = head.distSqr(bell.get()) * (0.75 + random.nextDouble() * 0.5);
-			if (d < best) {
+			BlockState state = level.getBlockState(head);
+			if (state.getBlock() instanceof BedBlock && !state.getValue(BedBlock.OCCUPIED) && roofed(level, head) && d < best) {
 				best = d;
 				found = head;
 			}
 		}
-		return found;
+		return found != null ? found : unseen;
+	}
+
+	/** How many houses {@code f}'s builders have finished. */
+	private static int houses(ServerLevel level, Faction f) {
+		int n = 0;
+		for (Works.Built b : Works.of(level.getServer(), f.id()).built()) {
+			if (b.entry().equals("house")) {
+				n++;
+			}
+		}
+		return n;
 	}
 
 	/** Whether something solid stands over {@code head} within {@link #ROOF_HEIGHT} (not by sky light, which the stacked world gets wrong). */
