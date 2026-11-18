@@ -6024,3 +6024,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - Fixes: a dropped stack bigger than its item's stack size (Droppable Villager Trades can drop up to 320 of a dead villager's trade at once, 152 bricks on the Deck) couldn't be saved and was lost when its chunk unloaded. Such a drop is now split into full stacks as it lands (`OversizedDropMixin`).
 - Built by CI; not played.
+
+## 0.25.19 (2026-11-18): Teleports no longer lost on a ride that already ended (#1775)
+
+- Fixes: a player whose game still thought they were riding something the server had already let go of ignored every teleport and rubber-banded back until they died (Jungxxv, 12:36 PM on the 18th). When the same far teleport is sent again while they still ride, they now get off the stale ride first (a single teleport of a ride with its rider, through an End gateway say, is left alone), and the ride is logged so the cause can be found (`StuckRideTeleportMixin`).
+- Built by CI; not played.
