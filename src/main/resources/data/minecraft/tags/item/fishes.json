@@ -27,6 +27,11 @@
     "jaymospowers:crayfish",
     "jaymospowers:crab",
     "jaymospowers:lobster",
+    "jaymospowers:cavefish",
+    "jaymospowers:olm",
+    "jaymospowers:ash_molly",
+    "jaymospowers:cinder_pupfish",
+    "jaymospowers:ember_tilapia",
     "jaymospowers:cooked_carp",
     "jaymospowers:cooked_pike",
     "jaymospowers:cooked_perch",
@@ -52,6 +57,11 @@
     "jaymospowers:cooked_shrimp",
     "jaymospowers:cooked_crayfish",
     "jaymospowers:cooked_crab",
-    "jaymospowers:cooked_lobster"
+    "jaymospowers:cooked_lobster",
+    "jaymospowers:cooked_cavefish",
+    "jaymospowers:cooked_olm",
+    "jaymospowers:cooked_ash_molly",
+    "jaymospowers:cooked_cinder_pupfish",
+    "jaymospowers:cooked_ember_tilapia"
   ]
 }
