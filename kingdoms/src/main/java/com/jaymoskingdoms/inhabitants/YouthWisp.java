@@ -123,6 +123,22 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final int COLOUR = 0xBEF0D6;
 	/** How often (ticks) a mote drifts off it while it waits. */
 	static final int MOTE_EVERY = 12;
+	/**
+	 * Off to find out (Andy: "he should animate flying away, then come back with the answer"): given a question, it
+	 * swoops off this far from its asker (blocks, out and up), fades into the trees there, and keeps that place by them
+	 * while it thinks. The answer brings it flying back, and it says it once it's beside them again.
+	 */
+	static final double AWAY_OUT = 10.0, AWAY_UP = 7.0;
+	/** Its speed going and coming (blocks a tick): it speeds up as it leaves, and slows to a stop as it comes back. */
+	static final double LEAVE_START = 0.08, LEAVE_GAIN = 0.04, LEAVE_TOP = 0.9, RETURN_TOP = 0.8, RETURN_EASE = 0.18;
+	/** It is gone, or back, once this near its mark (blocks), or after this long whatever happens (ticks). */
+	static final double ARRIVED = 0.4;
+	static final int LEAVE_TICKS = 40, RETURN_TICKS = 60;
+
+	/** Where it is with a question: here, flying off, gone off to think, or flying back with the answer. */
+	enum Away {
+		HERE, LEAVING, GONE, RETURNING
+	}
 
 	/** How often (ticks) the wisp may switch to a new idle behavior mode. */
 	static final int BEHAVIOR_SWITCH_MIN = 20 * 20; // 20 seconds
@@ -164,6 +180,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final RawAnimation APPEAR = RawAnimation.begin().thenPlay("appear");
 	static final RawAnimation VANISH = RawAnimation.begin().thenPlayAndHold("vanish");
 	static final RawAnimation TALK = RawAnimation.begin().thenPlay("talk");
+	static final RawAnimation SWOOP = RawAnimation.begin().thenPlay("swoop");
 
 	/** The wisps in the world, by their asker (server side). */
 	static final Map<UUID, YouthWisp> BY_ASKER = new HashMap<>();
@@ -180,6 +197,11 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private BehaviorMode behaviorMode = BehaviorMode.DRIFT;
 	/** Tick count when the behavior mode may next switch. */
 	private int behaviorSwitchAt;
+	/** Off thinking ({@link #AWAY_OUT}): where it is, since when (tick), which way from its asker, and the answer it brings. */
+	private Away away = Away.HERE;
+	private int awaySince;
+	private Vec3 awayDir = new Vec3(0, 0, 1);
+	private final List<Component> bringing = new ArrayList<>();
 
 	// the idle picker's state (client side)
 	private @Nullable RandomSource idleRandom;
@@ -206,8 +228,12 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		return this.entityData.get(THINKING);
 	}
 
+	/** Starts (or stops) waiting for an answer; starting, it flies off to think ({@link #leave}). */
 	void setPending(boolean pending) {
 		this.entityData.set(THINKING, pending);
+		if (pending && this.away == Away.HERE) {
+			this.leave();
+		}
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -439,7 +465,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp best = null;
 		double bestSq = HELP_RANGE * HELP_RANGE;
 		for (YouthWisp wisp : BY_ASKER.values()) {
-			if (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.level() != player.level()) {
+			if (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.away != Away.HERE || wisp.level() != player.level()) {
 				continue;
 			}
 			Vec3 to = wisp.getBoundingBox().getCenter().subtract(eye);
@@ -538,7 +564,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp wisp = gesture(player);
 		Component words = Component.literal(text);
 		if (wisp != null) {
-			wisp.speak(player, words);
+			wisp.answer(player, words);
 		} else {
 			player.sendSystemMessage(line(words));
 		}
@@ -555,15 +581,123 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		}
 	}
 
-	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks. */
+	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks (or, off thinking, starts back). */
 	static @Nullable YouthWisp gesture(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
 			wisp.setPending(false);
-			wisp.triggerAnim("action", "talk");
+			if (wisp.away == Away.HERE) {
+				wisp.triggerAnim("action", "talk");
+			} else {
+				wisp.comeBack();
+			}
 		}
 		return wisp;
+	}
+
+	/** Says {@code words} to {@code player} now, or, while it is off thinking, once it's back beside them. */
+	void answer(ServerPlayer player, Component words) {
+		if (this.away == Away.HERE) {
+			this.speak(player, words);
+		} else {
+			this.bringing.add(words);
+		}
+	}
+
+	/** Swoops off away from its asker (out and up) to think. */
+	private void leave() {
+		ServerPlayer player = this.askerPlayer();
+		Vec3 dir = player == null ? Vec3.ZERO : this.position().subtract(player.position()).multiply(1, 0, 1);
+		if (dir.lengthSqr() < 1.0E-4 && player != null) {
+			dir = player.getLookAngle().multiply(1, 0, 1);
+		}
+		this.awayDir = dir.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : dir.normalize();
+		this.shown = null;
+		this.away = Away.LEAVING;
+		this.awaySince = this.tickCount;
+		this.triggerAnim("action", "swoop");
+	}
+
+	/** Shows itself again where it went, and flies back to its asker. */
+	private void comeBack() {
+		if (this.away == Away.GONE) {
+			this.setInvisible(false);
+			if (this.level() instanceof ServerLevel level) {
+				Fx.burst(level, this.getX(), this.getY() + 0.5, this.getZ(), COLOUR, 0.8F, 18, 0.3, 0.4, 0.3);
+			}
+		}
+		if (this.away != Away.RETURNING) {
+			this.away = Away.RETURNING;
+			this.awaySince = this.tickCount;
+			this.triggerAnim("action", "swoop");
+		}
+	}
+
+	/** Where it goes to think: out from its asker the way it left, and up. */
+	private Vec3 awaySpot(ServerPlayer player) {
+		return player.position().add(this.awayDir.scale(AWAY_OUT)).add(0, AWAY_UP, 0);
+	}
+
+	/**
+	 * Off thinking, each tick: flying off (and fading there), keeping its place by its asker while gone, or flying back
+	 * and, once beside them, saying the answer it brought. False when it's here and this is nothing to do with it.
+	 */
+	private boolean tickAway(ServerLevel level, ServerPlayer player) {
+		int ticks = this.tickCount - this.awaySince;
+		switch (this.away) {
+			case LEAVING -> {
+				Vec3 to = this.awaySpot(player);
+				if (this.flyTo(to, Math.min(LEAVE_TOP, LEAVE_START + LEAVE_GAIN * ticks)) || ticks > LEAVE_TICKS) {
+					this.away = Away.GONE;
+					this.setInvisible(true);
+					Fx.burst(level, this.getX(), this.getY() + 0.5, this.getZ(), COLOUR, 0.8F, 18, 0.3, 0.4, 0.3);
+				} else {
+					this.motes(level);
+				}
+			}
+			case GONE -> this.setPos(this.awaySpot(player));
+			case RETURNING -> {
+				Vec3 to = spotBeside(player);
+				double speed = Math.min(RETURN_TOP, Math.max(0.05, this.position().distanceTo(to) * RETURN_EASE));
+				if (this.flyTo(to, speed) || ticks > RETURN_TICKS) {
+					this.away = Away.HERE;
+					this.spot = to;
+					this.face(player);
+					this.triggerAnim("action", "talk");
+					for (Component words : this.bringing) {
+						this.speak(player, words);
+					}
+					this.bringing.clear();
+				} else {
+					this.motes(level);
+				}
+			}
+			default -> {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** One tick's flight toward {@code to}, at most {@code speed} blocks, facing the way it goes; true once it's there. */
+	private boolean flyTo(Vec3 to, double speed) {
+		Vec3 gap = to.subtract(this.position());
+		double length = gap.length();
+		if (length <= ARRIVED) {
+			this.setPos(to);
+			return true;
+		}
+		Vec3 next = this.position().add(gap.scale(Math.min(1.0, speed / length)));
+		double dx = gap.x, dz = gap.z;
+		if (dx * dx + dz * dz > 1.0E-4) {
+			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
+			this.setYRot(yaw);
+			this.setYHeadRot(yaw);
+			this.setYBodyRot(yaw);
+		}
+		this.setPos(next);
+		return false;
 	}
 
 	/** One line of Youth's in chat: its name in its own colour, then the words. */
@@ -664,13 +798,16 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		}
 		ServerPlayer player = this.askerPlayer();
 		double leash = this.shown != null ? LOOK_RANGE + LEASH : LEASH;
-		if (player == null || player.level() != level || player.distanceToSqr(this) > leash * leash
+		if (player == null || player.level() != level || this.away == Away.HERE && player.distanceToSqr(this) > leash * leash
 			|| this.tickCount - this.lastAsked > (this.pending() ? ANSWER_TIMEOUT : IDLE_TIMEOUT) || BY_ASKER.get(this.asker) != this) {
 			if (player != null && this.pending() && this.tickCount - this.lastAsked > ANSWER_TIMEOUT) {
 				this.triggerAnim("action", "talk");
 				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
 			this.vanish();
+			return;
+		}
+		if (this.tickAway(level, player)) {
 			return;
 		}
 		if (this.hoverShown(player)) {
@@ -835,7 +972,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
 		controllers.add(new AnimationController<YouthWisp>("idle", 6, test -> test.setAndContinue(test.animatable().nextIdle())));
 		controllers.add(new AnimationController<YouthWisp>("action", test -> PlayState.STOP)
-			.triggerableAnim("appear", APPEAR).triggerableAnim("vanish", VANISH).triggerableAnim("talk", TALK));
+			.triggerableAnim("appear", APPEAR).triggerableAnim("vanish", VANISH).triggerableAnim("talk", TALK).triggerableAnim("swoop", SWOOP));
 	}
 
 	/**
