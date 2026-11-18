@@ -101,7 +101,8 @@
 		"WoundsRegenMixin",
 		"StructureStateLockMixin",
 		"BaublesQuickEquipMixin",
-		"BlockFxMixin"
+		"BlockFxMixin",
+		"ShieldHookMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -4,6 +4,10 @@ import com.jaymospowers.armory.ThrownWeapon;
 import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolType;
+import com.jaymospowers.tinkering.smithing.Wear;
+import java.util.List;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,7 +19,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
 
 /**
@@ -28,6 +35,9 @@ public final class Ranged {
 	public static final int HOLD_DURATION = 72000;
 	/** What a thrown blade without stats of its own does. */
 	static final float FALLBACK_DAMAGE = 2.0F;
+	/** The chance a thrown axe breaks on a hit, and how many iron nuggets mend it at an anvil. */
+	static final float AXE_BREAK_CHANCE = 0.15F;
+	public static final int MEND_NUGGETS = 3;
 
 	private Ranged() {
 	}
@@ -38,6 +48,9 @@ public final class Ranged {
 		if (type.style == ToolType.Style.JAVELIN) {
 			player.startUsingItem(hand);
 			return InteractionResult.CONSUME;
+		}
+		if (broken(stack)) {
+			return InteractionResult.FAIL;
 		}
 		player.getCooldowns().addCooldown(stack, type.ranged.cooldown());
 		if (level instanceof ServerLevel serverLevel) {
@@ -70,6 +83,34 @@ public final class Ranged {
 			weapon.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
 		level.playSound(null, weapon, SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.8F, type == ToolType.SHURIKEN ? 1.5F : 1.2F);
+	}
+
+	/** A throwing axe that broke on a hit: it can't be thrown till it is mended at an anvil ({@link #mends}). */
+	public static boolean broken(ItemStack stack) {
+		return stack.getItem() instanceof TinkerTool tool && tool.type() == ToolType.THROWING_AXE && stack.has(Wear.BROKEN);
+	}
+
+	/** A throwing axe that hit: it may break (marked broken, in place). True if it did. */
+	public static boolean breaksOnHit(ItemStack stack, RandomSource random) {
+		if (!(stack.getItem() instanceof TinkerTool tool) || tool.type() != ToolType.THROWING_AXE || broken(stack) || random.nextFloat() >= AXE_BREAK_CHANCE) {
+			return false;
+		}
+		stack.set(Wear.BROKEN, true);
+		stack.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("tooltip.jaymospowers.axe_broken"))));
+		return true;
+	}
+
+	/** Whether {@code axe} (broken) is mended by what lies in the anvil's second slot: three iron nuggets. */
+	public static boolean mends(ItemStack axe, ItemStack addition) {
+		return broken(axe) && addition.is(Items.IRON_NUGGET) && addition.getCount() >= MEND_NUGGETS;
+	}
+
+	/** The axe, mended. */
+	public static ItemStack mended(ItemStack axe) {
+		ItemStack mended = axe.copy();
+		mended.remove(Wear.BROKEN);
+		mended.remove(DataComponents.LORE);
+		return mended;
 	}
 
 	/** What a thrown Tinkering tool does when it hits (a ThrownWeapon asks). */
