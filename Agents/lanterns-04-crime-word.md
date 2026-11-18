@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: lanterns-04-crime-word
 branch: claude/lanterns-04-crime-word
 with: Claude Code (PC)
-pr: 
+pr: 1763
 mods: kingdoms
 versions: 
 started: 2026-11-18
@@ -24,3 +24,4 @@ owns:
 - JaymosKingdoms.java is owned by dialogue-letterbox-pov, so CrimeWord registers from Theft.register().
 
 ## Done
+A witness with no guard in earshot runs to tell one; catch them to plead, pay or stare them down. Crime hearsay spreads house to house and voices in gossip; heavy crimes reach road-linked realms days later. CI passes; not played.
