@@ -67,7 +67,7 @@ final class SkillScreen extends Screen {
 	 * {@link #HEADER} tall. Rows that don't fit scroll (the wheel), clipped to their own area. The tabs are at least
 	 * {@link #TAB_W} wide; Standing's panel is {@link #STAND_MIN} to {@link #STAND_MAX} wide, its lines {@link #STAND_LINE} apart.
 	 */
-	static final int CONTENT_W = 340, HEADER = 34, TAB_W = 40, TAB_H = 16, STAT_ROW = 16, STAND_MIN = 110, STAND_MAX = 170, STAND_LINE = 10,
+	static final int CONTENT_W = 340, HEADER = 34, TAB_W = 40, TAB_H = 16, STAT_ROW = 27, STAND_MIN = 110, STAND_MAX = 170, STAND_LINE = 10,
 		GIVE_RANGE = 8;
 	/** (0.7.540) The attribute bar: ten segments of ten points each. */
 	static final int SEG_W = 13, SEG_GAP = 2, SEGMENTS = 10, LOCKED = 0xFF0E0E14;
@@ -192,7 +192,16 @@ final class SkillScreen extends Screen {
 	}
 
 	private int listBottom() {
-		return this.height - WEB_FOOTER - 6;
+		return this.height - WEB_FOOTER - 6 - (stats ? REDISTRIBUTE_H + 4 : 0);
+	}
+
+	/** The Redistribute button's height (Attributes tab), under the rows. */
+	static final int REDISTRIBUTE_H = 16;
+	/** Whether the Redistribute button was pressed once and waits for a second press to confirm. */
+	private boolean redistributeArmed;
+
+	private int redistributeY() {
+		return listBottom() + 4;
 	}
 
 	/** (0.7.540) The rows' height, all of them, on the tab shown. */
@@ -1171,12 +1180,21 @@ final class SkillScreen extends Screen {
 				graphics.fill(nx, ry + 2, nx + 1, ry + 12, accent);
 			}
 			Ui.line(graphics, this.font, Component.literal(value + "/" + Stats.MAX), numX, ry + 3, plusX - numX - 2, value >= cap ? accent : Ui.TEXT);
+			// what the points do now, read from the same formulas that put them on you
+			Ui.line(graphics, this.font, Stats.now(stat, value), x + 13, ry + 14, rowRight - x - 18, Ui.DIM);
 			if (blocked == null) {
-				graphics.text(this.font, "+", plusX, ry + 3, Ui.GOOD);
+				boolean overPlus = Ui.over(mouseX, mouseY, plusX - 2, ry + 1, 12, 12);
+				graphics.fill(plusX - 2, ry + 1, plusX + 10, ry + 13, overPlus ? Ui.ROW_HOVER : Ui.ROW);
+				graphics.text(this.font, "+", plusX + 2, ry + 3, Ui.GOOD);
 			}
 		}
 		graphics.disableScissor();
 		Ui.scrollbar(graphics, x + w - 7, listTop(), listBottom() - listTop(), listBottom() - listTop(), listContent(), listScroll);
+		boolean anySpent = Stats.spent(shown) > 0;
+		Component fee = com.jaymoskingdoms.money.Money.text(com.jaymoskingdoms.money.Money.worth(Stats.REDISTRIBUTE_FEE));
+		Ui.button(graphics, this.font, x + 8, redistributeY(), w - 16, REDISTRIBUTE_H, Component.translatable(this.redistributeArmed
+			? "gui.jaymoskingdoms.stats.redistribute.confirm" : "gui.jaymoskingdoms.stats.redistribute", fee), this.redistributeArmed ? Ui.BAD : accent,
+			anySpent && Ui.over(mouseX, mouseY, x + 8, redistributeY(), w - 16, REDISTRIBUTE_H), anySpent);
 
 		Component name;
 		List<Component> text = new ArrayList<>();
@@ -1434,6 +1452,18 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (stats && Ui.over((int)event.x(), (int)event.y(), contentX() + 8, redistributeY(), contentW() - 16, REDISTRIBUTE_H)) {
+			if (Stats.spent(progress()) > 0) {
+				// a second press confirms: the points come back for a fee
+				if (this.redistributeArmed) {
+					ClientPlayNetworking.send(new Stats.Redistribute());
+				}
+				this.redistributeArmed = !this.redistributeArmed;
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			}
+			return true;
+		}
+		this.redistributeArmed = false;
 		if (stats && SkillRenown.available(progress()) > 0
 			&& Ui.over((int)event.x(), (int)event.y(), contentX() + contentW() / 2 - 6 - contentW() / 4, WEB_HEADER + 6, contentW() / 4, 12)) {
 			// renown: five attribute points

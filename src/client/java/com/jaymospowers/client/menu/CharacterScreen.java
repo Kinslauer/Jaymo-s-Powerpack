@@ -7,6 +7,8 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterState;
 import com.jaymospowers.stamina.Feathers;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ public class CharacterScreen extends Screen {
 	/** The most the page is wide, the figure box's width and least height, the header's height, a gap, a list row's height. */
 	static final int MAX_W = 460, FIG_W = 132, FIG_MIN_H = 196, HEADER_H = 26, GAP = 4, ROW = 11;
 	/** A worn-gear well's size and step down the box's sides, and the room the name lines take under the figure. */
-	static final int WELL = 18, WELL_STEP = 22, NAMES_H = 46;
+	static final int VITAL_ROW = 28, WELL = 18, WELL_STEP = 22, NAMES_H = 46;
 	static final int GOLD_EDGE = 0xFFB89B3F, EDGE_DIM = 0x90B89B3F, POWER = 0xFF4FC3A8;
 	static final int HEALTH = 0xFFC84040, HUNGER = 0xFFB8863C, STAMINA = 0xFFE08A30, ARMOUR = 0xFF8FA3B8, XP = 0xFF80D060, MASTERY = 0xFF6AA8FF,
 		BLOWS = 0xFF6AA8FF;
@@ -93,6 +95,20 @@ public class CharacterScreen extends Screen {
 	/** The page's top-left corner, where the menu's tabs hang. */
 	int[] corner() {
 		return new int[] {left(), top()};
+	}
+
+	/**
+	 * The bars beyond the five every player has: a Z Fighter's ki, and what Jaymo's Kingdoms adds (mana), each
+	 * {label, value, share 0-1, colour}.
+	 */
+	private static List<Object[]> reserves(LocalPlayer player) {
+		List<Object[]> out = new ArrayList<>();
+		if (Powers.has(player, ZFighterPower.INSTANCE)) {
+			ZFighterState ki = ZFighterPower.state(player);
+			out.add(new Object[] {t("ki"), of(ki.ki(), ki.maxKi()), share(ki.ki(), Math.max(1, ki.maxKi())), 0xFF000000 | ZFighterPower.INSTANCE.color()});
+		}
+		out.addAll(MenuTabs.bars());
+		return out;
 	}
 
 	private static Component t(String key, Object... args) {
@@ -276,7 +292,8 @@ public class CharacterScreen extends Screen {
 		int rx = x + figW + GAP * 2, rw = pw - figW - GAP * 2;
 		boolean pair = rw >= 250;
 		List<Row> attributes = attributes(player), resistances = resistances(player), record = record(player);
-		int powerH = 48, vitalsH = 62;
+		List<Object[]> reserves = reserves(player);
+		int powerH = 48, vitalsH = 6 + VITAL_ROW * Mth.ceil((5 + reserves.size()) / 3.0F);
 		int pairH = pair ? Math.max(listHeight(attributes), listHeight(resistances)) : listHeight(attributes) + GAP + listHeight(resistances);
 		int rightH = powerH + GAP + vitalsH + GAP + pairH + GAP + listHeight(record);
 		int total = Math.max(figH, rightH);
@@ -342,6 +359,12 @@ public class CharacterScreen extends Screen {
 			share(stamina.feathers(), stamina.cap()), STAMINA);
 		meter(graphics, rx + 8, ry + 34, colW, t("armour"), num(player.getArmorValue()), share(player.getArmorValue(), 20.0F), ARMOUR);
 		meter(graphics, rx + 8 + colW + 8, ry + 34, colW, t("experience"), t("level", player.experienceLevel), player.experienceProgress, XP);
+		// the reserves a power or magic keeps (ki, mana), after the rest
+		for (int i = 0; i < reserves.size(); i++) {
+			Object[] r = reserves.get(i);
+			int slot = 5 + i;
+			meter(graphics, rx + 8 + slot % 3 * (colW + 8), ry + 6 + slot / 3 * VITAL_ROW, colW, (Component)r[0], (Component)r[1], (Float)r[2], (Integer)r[3]);
+		}
 		ry += vitalsH + GAP;
 		// attributes and resistances, side by side when there is room
 		if (pair) {

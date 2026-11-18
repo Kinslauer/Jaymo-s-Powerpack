@@ -77,7 +77,7 @@ public final class MenuTabs {
 	public static int SIDE;
 	/** The order the tabs come in (Kingdoms' fall between these). */
 	public static final int ORDER_INVENTORY = -10, ORDER_CHARACTER = 0, ORDER_BAUBLES = 4, ORDER_BACKPACK = 6, ORDER_POWERS = 10,
-		ORDER_MAP = 50, ORDER_SOUNDS = 55;
+		ORDER_MAP = 50, ORDER_SOUNDS = 55, ORDER_NOTICES = 70;
 
 	/**
 	 * One tab. {@code owns}: whether a screen is this tab's page (it gets the menu drawn on it); {@code anchor}: the page's
@@ -96,6 +96,8 @@ public final class MenuTabs {
 	private static final Set<String> WIDE = new HashSet<>();
 	/** Extra rows for the Character page, by the panel they belong to (see {@link #characterRows(String, Supplier)}). */
 	private static final Map<String, List<Supplier<List<Component[]>>>> CHARACTER_ROWS = new HashMap<>();
+	/** Extra bars for the Character page's vitals: {label, value, share 0-1, colour} (see {@link #bars(Supplier)}). */
+	private static final List<Supplier<List<Object[]>>> BARS = new ArrayList<>();
 	/** Extra pins for the Map page: a name (its colour the pin's) and a place in the world you stand in. */
 	private static final List<Supplier<List<Map.Entry<Component, BlockPos>>>> PINS = new ArrayList<>();
 	/** Screens the menu is already hooked onto (a resize inits a screen again). */
@@ -152,6 +154,29 @@ public final class MenuTabs {
 	 */
 	public static void characterRows(String panel, Supplier<List<Component[]>> rows) {
 		CHARACTER_ROWS.computeIfAbsent(panel, p -> new ArrayList<>()).add(rows);
+	}
+
+	/**
+	 * Adds bars to the Character page's vitals (mana, say), after the ones every player has: each {@code {Component label,
+	 * Component value, Float share (0-1), Integer colour (ARGB)}}. Called by reflection from Kingdoms.
+	 */
+	public static void bars(Supplier<List<Object[]>> bars) {
+		BARS.add(bars);
+	}
+
+	static List<Object[]> bars() {
+		List<Object[]> out = new ArrayList<>();
+		for (Supplier<List<Object[]>> bars : BARS) {
+			try {
+				List<Object[]> got = bars.get();
+				if (got != null) {
+					out.addAll(got);
+				}
+			} catch (RuntimeException | LinkageError e) {
+				// as for the rows: leave them out rather than close the page
+			}
+		}
+		return out;
 	}
 
 	/** Adds pins to the Map page. Called by reflection from Kingdoms. */
@@ -367,6 +392,10 @@ public final class MenuTabs {
 		register("sounds", ORDER_SOUNDS, () -> new ItemStack(Items.NOTE_BLOCK), Component.translatable("menu.jaymospowers.tab.sounds"),
 			() -> Minecraft.getInstance().gui.setScreen(new SoundBrowserScreen(null)), s -> s instanceof SoundBrowserScreen, s -> new int[] {0, 0},
 			() -> true);
+		register("notices", ORDER_NOTICES, () -> new ItemStack(Items.BELL), Component.translatable("menu.jaymospowers.tab.notices"),
+			() -> Minecraft.getInstance().gui.setScreen(new NoticesScreen()), s -> s instanceof NoticesScreen, s -> ((NoticesScreen)s).corner(), () -> true);
+		group("notices", "notices");
+		NoticeLog.init();
 		group("inventory", "you");
 		group("character", "you");
 		group("baubles", "you");
