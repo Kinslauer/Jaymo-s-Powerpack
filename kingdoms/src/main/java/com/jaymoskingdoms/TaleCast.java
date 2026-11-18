@@ -78,6 +78,10 @@ final class TaleCast {
 	static final int KEEP_WITHIN = 6, BACK_WITHIN = 24;
 	/** A cast member whose place has changed (a switched {@code at}) walks on if the new place is further than this from where they stand (blocks). */
 	static final int MOVE_ON = 10;
+	/** One whose hours are over walks this far off (blocks) before going in, and is out of sight past this far, or behind something. */
+	static final double HOME_WALK = 32.0, SEEN_RANGE = 48.0;
+	/** On a cast member walking home at the end of their hours, and on one gone home (kept with the mob, so it lasts a reload). */
+	static final String GOING_TAG = "jaymoskingdoms.tale_going", AWAY_TAG = "jaymoskingdoms.tale_away";
 	/** Someone who moves to a town is set down within this many blocks of its seat. */
 	static final int SETTLE_SPREAD = 4;
 	/** How far behind an escorted charge those walking {@code with} them fall before they're sent after (blocks). */
@@ -417,8 +421,9 @@ final class TaleCast {
 				Tales.each(player, run, r -> r.vars.put(TaleWays.MET + e.getKey(), "1"));
 			}
 			Cast c = there.getAttached(CAST);
+			boolean gone = away(there) || there.entityTags().contains(GOING_TAG);
 			if (c != null && theirs.get("at") instanceof JsonObject && !run.places.containsKey("@" + e.getKey()) && !c.fight() && !c.yielded()
-				&& !HELD.containsKey(there)) {
+				&& !HELD.containsKey(there) && !gone) {
 				// (where they stand turns on how the tale has gone: when that changes, they walk to the new place)
 				String key = Tale.pickString(theirs, "at", cond -> Tales.holds(player, run, cond), "");
 				BlockPos now = key.isEmpty() ? null : Tales.ground(level, run, tale, key);
@@ -444,15 +449,40 @@ final class TaleCast {
 					}
 				}
 			}
-			if (!hours(player, run, theirs) && c != null && !c.fight() && !c.yielded() && !HELD.containsKey(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE)) {
-				// (their hours are over: they've gone home, their men with them, and are back when the hours are)
-				for (Mob man : men(level, there, c)) {
-					LOADED.remove(man);
-					McaCompat.vanish(man);
+			boolean off = !hours(player, run, theirs);
+			if (c != null && gone) {
+				if (!off) {
+					// (their hours have come round again: back out, and back to their place)
+					String key = Tale.pickString(theirs, "at", cond -> Tales.holds(player, run, cond), "");
+					BlockPos place = key.isEmpty() ? null : Tales.ground(level, run, tale, key);
+					for (Mob m : withMen(level, there, c)) {
+						back(m);
+						if (place != null) {
+							send(m, place);
+						}
+					}
+				} else if (!away(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE) && !seen(player, run, there)) {
+					// (walked off out of sight: gone in)
+					for (Mob m : withMen(level, there, c)) {
+						hide(m);
+					}
 				}
-				LOADED.remove(there);
-				McaCompat.vanish(there);
-				Tales.each(player, run, r -> r.cast.remove(e.getKey()));
+			} else if (off && c != null && !c.fight() && !c.yielded() && !HELD.containsKey(there) && !busy(e.getKey(), who, kind, with)
+				&& nobodyWithin(player, run, there, TaleWays.HOURS_GONE)) {
+				// (their hours are over: they go home, their men with them, out of sight; the same people are back when the hours are)
+				if (seen(player, run, there)) {
+					if (!there.entityTags().contains(GOING_TAG)) {
+						BlockPos homeAt = homeward(level, player, there);
+						for (Mob m : withMen(level, there, c)) {
+							m.addTag(GOING_TAG);
+							send(m, homeAt);
+						}
+					}
+				} else {
+					for (Mob m : withMen(level, there, c)) {
+						hide(m);
+					}
+				}
 			}
 		}
 		JsonObject body = who.isEmpty() || who.equals("giver") ? null : tale.role(who);
@@ -487,6 +517,61 @@ final class TaleCast {
 	private static boolean hours(ServerPlayer player, Tales.Run run, JsonObject body) {
 		String hours = Tale.string(body, "hours", "");
 		return hours.isEmpty() || Tales.holds(player, run, hours);
+	}
+
+	/** Whether {@code mob} of a tale's cast has gone home for the hours that aren't theirs (out of sight, kept). */
+	static boolean away(Entity mob) {
+		return mob.entityTags().contains(AWAY_TAG);
+	}
+
+	/** {@code mob} and the men who follow them. */
+	private static List<Mob> withMen(ServerLevel level, Mob mob, Cast c) {
+		List<Mob> all = new ArrayList<>(men(level, mob, c));
+		all.add(0, mob);
+		return all;
+	}
+
+	/** Whether {@code role} is what the open step is doing (someone being followed or walked somewhere): they keep no hours then. */
+	private static boolean busy(String role, String who, String kind, List<String> with) {
+		return (kind.equals("tail") || kind.equals("escort")) && role.equals(who) || with.contains(role);
+	}
+
+	/** Whether anyone sharing {@code run} can see {@code mob}. */
+	private static boolean seen(ServerPlayer player, Tales.Run run, Mob mob) {
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			if (p.level() == mob.level() && p.distanceToSqr(mob) <= SEEN_RANGE * SEEN_RANGE && mob.hasLineOfSight(p)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Where {@code mob} walks off to at the end of their hours: {@link #HOME_WALK} blocks on, away from {@code player}. */
+	private static BlockPos homeward(ServerLevel level, ServerPlayer player, Mob mob) {
+		Vec3 off = mob.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 way = off.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : off.normalize();
+		BlockPos column = BlockPos.containing(mob.position().add(way.scale(HOME_WALK)));
+		return level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : mob.blockPosition();
+	}
+
+	/** Gone home: out of sight and still, but the same person (their hearts, what they remember, what they were told). */
+	private static void hide(Mob mob) {
+		mob.removeTag(GOING_TAG);
+		mob.addTag(AWAY_TAG);
+		mob.setInvisible(true);
+		mob.setSilent(true);
+		mob.setNoAi(true);
+		mob.getNavigation().stop();
+	}
+
+	/** Back out again, where they went home. */
+	private static void back(Mob mob) {
+		mob.removeTag(AWAY_TAG);
+		mob.removeTag(GOING_TAG);
+		mob.setInvisible(false);
+		mob.setSilent(false);
+		// (one laid out on the ground stays so)
+		mob.setNoAi(mob.getPose() == Pose.SLEEPING);
 	}
 
 	private static boolean nobodyWithin(ServerPlayer player, Tales.Run run, Mob mob, double range) {

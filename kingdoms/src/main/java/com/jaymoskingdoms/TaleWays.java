@@ -788,7 +788,7 @@ final class TaleWays {
 		MutableComponent words = Tales.words(player, run, line, "say");
 		String role = Tale.string(line, "who", "");
 		LivingEntity who = role.isEmpty() ? null : Tales.entity(level, role.equals("giver") ? run.giverId() : Tales.uuid(run.cast.get(role)));
-		if (words != null && who != null) {
+		if (words != null && who != null && !TaleCast.away(who)) {
 			Speech.tell(level, who, player, words, Speech.WHITE);
 		} else if (words != null && role.isEmpty()) {
 			// (what's seen and heard is the player's own to write: the tracker reads it, and the journal keeps it, for

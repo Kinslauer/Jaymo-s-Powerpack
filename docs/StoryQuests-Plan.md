@@ -383,8 +383,14 @@ don't happen.
 
 `"when": "night"` (or `day`, `moon:full`, `moon:new`) on a step: it can only be done then. Someone to speak with says
 their `"not_now"` line outside it (or a stock one), a place only counts by that light, a search finds nothing, a fight
-doesn't begin; the log says "(after dark)". A cast member with `"hours": "night"` (or `day`) is only at their place in
-those hours. A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
+doesn't begin, an escort's walk isn't over; the log says "(after dark)". The steps whose work other code does
+(`slay`, `wait`, `await`, `defend`, `pack`, `build`, `blast`, `stash`, `lamps`, `rescue`, `capture`) don't wait for an
+hour, and the checker refuses `when` on them: put it on a `go` before them. A cast member with `"hours": "night"` (or
+`day`) is only at their place in those hours. When their hours are over and nobody is within 14 blocks, they walk off
+(32 blocks, away from the player) and go in once nobody can see them: kept, out of sight and still, the same person
+(their hearts, what they remember, a lie told to them), and back out and walking to their place when their hours come
+round. Someone being followed or walked somewhere (`tail`, `escort` and its `with`), fighting, or held keeps no hours.
+A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
 
 `"candle": true` on any step: when it opens, a black candle is set burning in a window of the town's tavern (the guild's
 mark that someone has been paid for; lore "What goes on in the shadows"). One black candle is enough for a window: a
@@ -446,8 +452,12 @@ step is done when `count` ripe plants have been cut in it. The Barley Cut uses i
 
 On a foe step: `"weak_to": [ { "know": condition, "item": id or #tag, "share": 0.7, "journal": "why it was easier",
 "bestiary": "the note" } ]`. For each one the player has learned (`know`) and carries (`item`, where asked) when the
-fight begins, the foe's health and blow are cut to that share (never below 35%), the journal says why, and the Greasy
-Bestiary gets a page under the foe's name.
+fight begins, the foe's health and blow are cut to that share (never below 35%) and the journal says why. `"water":
+true` instead (or as well) counts while the foe stands in water or within 2 blocks of water that runs, at the start of
+the fight. The Greasy Bestiary is taught when the thing is learned: as soon as a mark named by an entry's `know` is set
+(by a clue, a reply, a step, a watch's line), its `"bestiary"` line goes in the book, whether or not the thing is ever
+carried. Its page is the foe step's `"bestiary_kind"` ("Blood-drinkers"), else the kind of creature the foe is, else
+the foe's name; a note to a page.
 
 ### companions speak up: `for`, `irks`, `voices`
 
@@ -459,13 +469,21 @@ and those it irked a little further (bond -3), and one says so. Only a bond empt
 
 ### it comes back weeks later: `later`
 
-On an ending: `"later": [ { "days": [10, 40], "if": condition, "letter": { from, lines }, "town": [lines],
-"scene": [["a", "..."], ["b", "..."]], "settles": role, "mark": "..." } ]`. On its day a runner brings the letter, the
-town has its lines to say, two of its folk have the scene where the player can hear, the cast member comes to live in
-the town as an ordinary villager (when the player is next there), the mark is set. Words are filled in when the tale
-ends, so they can use its names. `if` is asked when the tale ends (it can use the tale's rolls); `"still"` is a second
-condition asked on the day itself, with the tale long over (marks, `done:`, standing: `"still": "mark:caught:<lie>"`
-for something that only happens if a lie has come out by then).
+On an ending: `"later": [ { "days": [10, 40], "if": condition, "letter": { from, to, lines }, "town": [lines],
+"scene": [["a", "..."], ["b", "..."]], "settles": role, "as": "guard", "grave": [lines], "leaves": "giver",
+"mark": "..." } ]`. Days are 10 to 40 (the checker holds it: sooner is a `returns`). On its day the town has its lines
+to say, two of its folk have the scene where the player can hear, the cast member comes to live in the town as an
+ordinary villager (when the player is next there; `"as": "guard"`, which a `fighter` may do too, as one of its guards),
+the mark is set. What waits is kept apart until it's done: the letter until a runner or a bird has put it in the
+player's hand (a runner who can't set out or find them comes another day); the `"grave"` (a mound beside the town's
+other graves, or on open ground at its edge, with up to four lines of 15 letters on a board at its head) until the town
+is loaded; `"leaves": "giver"` (the asker packs up and goes, their house left empty; not a child, a ruler or someone's
+sworn companion) until nobody is near enough to see. A tale begun where no town was has its town talk, scenes, graves
+and settlers in the town nearest the player. A `"to"` on a letter is the name on its outside. Words are filled in when
+the tale ends, so they can use its names. `if` is asked when the tale ends (it can use the tale's rolls); `"still"` is
+a second condition asked on the day itself, with the tale long over (marks, `done:`, dress: `"still":
+"mark:caught:<lie>"` for something that only happens if a lie has come out by then; not rolls, clocks, who was met,
+standing or hearts, which the checker refuses).
 
 ### letters you can't read: `tongue`, `mark`, `told`
 
@@ -479,9 +497,11 @@ letter that starts or wakes a tale does nothing until it can be read.
 
 On a reply: `"lie": { "name": "road_took_her", "days": [6, 14], "unless": condition, "town": [lines],
 "reputation": 15, "hearts": 40, "returns": { who, as, say, gift } }`. `lie:<name>` is marked at once. On its day,
-unless the condition holds by then, the lie is out: `caught:<name>` is marked, the one lied to remembers it and loses
-those hearts, the town thinks that much less of the player and has the lines to say, and whoever it `returns` comes to
-the player's door (as a tale's returns do). Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
+unless the condition holds by then (asked as `still` is), the lie is out, on the one day for everyone who heard it:
+`caught:<name>` is marked, the one lied to remembers it and loses those hearts (when they're next about, if they
+aren't then), the town thinks that much less of the player and has the lines to say, and whoever it `returns` comes to
+the player's door (as a tale's returns do). Only a townsperson keeps a grudge: `hearts` on a lie told to one of the
+tale's own people is refused unless they settle in the town. Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
 
 ### notices, and tales that grow
 
