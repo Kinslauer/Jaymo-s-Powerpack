@@ -13,6 +13,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
+- [ ] [[Inbox/wither-model|wither-model]] · for 🔥 Prometheus · open
 
 
 ## Being built
