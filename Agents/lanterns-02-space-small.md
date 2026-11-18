@@ -3,7 +3,7 @@ status: running
 task: lanterns-02-space-small
 branch: claude/lanterns-02-space-small
 with: Claude Code (PC)
-pr: 
+pr: 1753
 mods: powers
 versions: 
 started: 2026-11-18
