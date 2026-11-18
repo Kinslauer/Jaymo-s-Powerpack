@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-18 15:46
+updated: 2026-11-18 18:02
 ---
 # Open PRs
 
-12 open, as of 2026-11-18 15:46. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+19 open, as of 2026-11-18 18:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1687](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1687) Add cooking block textures and model
@@ -63,5 +63,40 @@ Andy merges only on "merge", one at a time.
 
 ## [#1765](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1765) Rig patch 4: flight and falling
 - **Branch:** `claude/rig-beetle-4-flight` · **Updated:** 2026-11-18 (today)
-- **Checks:** ❌ failing: Change notes, libs jars, item models
+- **Checks:** ✅ 5 passed
 - **Agent:** [[rig-beetle-4-flight]]
+
+## [#1766](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1766) Powers: the Hollow black hole; crossing to the Moon on ki (Lanterns 6)
+- **Branch:** `claude/lanterns-06-space-medium` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[lanterns-06-space-medium]]
+
+## [#1767](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1767) Talk through chat; Duplex doubles take spoken orders (Lanterns 7)
+- **Branch:** `claude/lanterns-07-talk-chat` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[lanterns-07-talk-chat]]
+
+## [#1769](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1769) Powers: called in a dream (Lanterns 8)
+- **Branch:** `claude/lanterns-08-dream` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[lanterns-08-dream]]
+
+## [#1770](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1770) Kingdoms: ask a villager anything, with follow-ups (Lanterns 9)
+- **Branch:** `claude/lanterns-09-talk-typed` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[lanterns-09-talk-typed]]
+
+## [#1772](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1772) Powers: the high sky as near space, and orbit (Lanterns 10)
+- **Branch:** `claude/lanterns-10-orbit` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[lanterns-10-orbit]]
+
+## [#1773](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1773) Rig: the Mind talks, flies and keeps watch (Rig patch 5)
+- **Branch:** `claude/rig-beetle-5-mind` · **Updated:** 2026-11-18 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[rig-beetle-5-mind]]
+
+## [#1774](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1774) Rig patch 5: the Mind talks, flies and keeps watch
+- **Branch:** `claude/rig-beetle-5-the-mind` · **Updated:** 2026-11-18 (today)
+- **Checks:** ❌ failing: Build Powers
+- **Agent:** no agent note
