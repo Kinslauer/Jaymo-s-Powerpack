@@ -691,7 +691,7 @@ public final class Formations {
 
 	/** A spot near {@code at}'s height with a floor and room for a body (two blocks clear), or null. */
 	private static @Nullable BlockPos standable(ServerLevel level, BlockPos at) {
-		if (!level.hasChunkAt(at)) {
+		if (!Loaded.made(level, at)) {
 			return null;
 		}
 		for (int dy : HEIGHTS) {

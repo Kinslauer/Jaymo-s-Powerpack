@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Loaded;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.HashSet;
@@ -65,7 +66,7 @@ public final class FusedGround {
 					break;
 				}
 			}
-			if (near && level.hasChunksAt(m.pos().getX() - RADIUS, m.pos().getZ() - RADIUS, m.pos().getX() + RADIUS, m.pos().getZ() + RADIUS)) {
+			if (near && Loaded.made(level, m.pos().getX() - RADIUS, m.pos().getZ() - RADIUS, m.pos().getX() + RADIUS, m.pos().getZ() + RADIUS)) {
 				fuse(level, m.pos(), level.getRandom());
 			}
 		}

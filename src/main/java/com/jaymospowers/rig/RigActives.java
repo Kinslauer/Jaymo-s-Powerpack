@@ -1,5 +1,6 @@
 package com.jaymospowers.rig;
 
+import com.jaymospowers.core.Loaded;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -728,7 +729,7 @@ public final class RigActives {
 				missile.velocity()[0] = missile.velocity()[0].lerp(want, MISSILE_HOMING).normalize().scale(MISSILE_SPEED);
 			}
 			Vec3 to = from.add(missile.velocity()[0]);
-			if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(to))) {
+			if (!Loaded.made(level, net.minecraft.core.BlockPos.containing(to))) {
 				it.remove();
 				continue;
 			}

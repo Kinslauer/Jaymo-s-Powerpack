@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.beasts;
 
+import com.jaymoskingdoms.Loaded;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.serialization.Codec;
@@ -151,7 +152,7 @@ public final class Labyrinths {
 			return false;
 		}
 		for (BoundingBox hall : halls.subList(0, Math.min(HALLS_TRIED, halls.size()))) {
-			if (!level.hasChunksAt(hall.minX(), hall.minZ(), hall.maxX(), hall.maxZ())) {
+			if (!Loaded.made(level, hall.minX(), hall.minZ(), hall.maxX(), hall.maxZ())) {
 				// not all of it is in the world yet: look again when the player is deeper in
 				minotaur.discard();
 				return false;
