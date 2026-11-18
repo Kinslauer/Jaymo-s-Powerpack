@@ -54,6 +54,8 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -88,6 +90,12 @@ final class TaleCast {
 	private static final Identifier AWAY_FIRST = JaymosKingdoms.id("tale_cast_away");
 	/** On a cast member walking home at the end of their hours, and on one gone home (kept with the mob, so it lasts a reload). */
 	static final String GOING_TAG = "jaymoskingdoms.tale_going", AWAY_TAG = "jaymoskingdoms.tale_away";
+	/** On one gone home who stood without AI before (a monster waiting for its fight, one laid out): so they're the same when back. */
+	static final String STILL_TAG = "jaymoskingdoms.tale_still";
+	/** One gone home is put this far under the ground where they went in, at the least and at the most (blocks): out of sight, out of reach. */
+	static final int UNDER_LEAST = 3, UNDER_MOST = 12;
+	/** Someone back out with a player at their place comes out this far off and walks there (blocks), so nobody sees them appear. */
+	static final int COME_LEAST = 18, COME_MOST = 26;
 	/** Someone who moves to a town is set down within this many blocks of its seat. */
 	static final int SETTLE_SPREAD = 4;
 	/** How far behind an escorted charge those walking {@code with} them fall before they're sent after (blocks). */
@@ -199,7 +207,8 @@ final class TaleCast {
 			Mob mob = (Mob)entity;
 			// (a visitor left over from before a restart, or one of a tale that ended while they were away)
 			boolean stray = c.instance().startsWith("visit:") && VISITS.stream().noneMatch(v -> v.mob == mob);
-			if (!c.over() && (stray || Factions.level(level.getServer()).getAttachedOrElse(ENDED, List.of()).contains(c.instance()))) {
+			if (!c.over() && (stray || Factions.level(level.getServer()).getAttachedOrElse(ENDED, List.of()).contains(c.instance())
+				|| away(mob) && replaced(level.getServer(), mob, c))) {
 				mob.setAttached(CAST, c.done(level.getGameTime()));
 			}
 			LOADED.add(mob);
@@ -427,7 +436,7 @@ final class TaleCast {
 			if (there == null || theirs == null) {
 				continue;
 			}
-			if (there.distanceToSqr(player) <= TaleWays.MEET_RANGE * TaleWays.MEET_RANGE && !run.vars.containsKey(TaleWays.MET + e.getKey())) {
+			if (there.distanceToSqr(player) <= TaleWays.MEET_RANGE * TaleWays.MEET_RANGE && !away(there) && !run.vars.containsKey(TaleWays.MET + e.getKey())) {
 				// (stood this near, they've been met: they can be named)
 				Tales.each(player, run, r -> r.vars.put(TaleWays.MET + e.getKey(), "1"));
 			}
@@ -462,16 +471,12 @@ final class TaleCast {
 			}
 			boolean off = !hours(player, run, theirs);
 			if (c != null && gone) {
-				if (!off) {
-					// (their hours have come round again: back out, and back to their place)
+				if (!off || busy(e.getKey(), who, kind, with)) {
+					// (their hours have come round again, or the step needs them now: back out, and back to their place)
+					Long moved = run.places.get("@" + e.getKey());
 					String key = Tale.pickString(theirs, "at", cond -> Tales.holds(player, run, cond), "");
-					BlockPos place = key.isEmpty() ? null : Tales.ground(level, run, tale, key);
-					for (Mob m : withMen(level, there, c)) {
-						back(m);
-						if (place != null) {
-							send(m, place);
-						}
-					}
+					BlockPos place = moved != null ? BlockPos.of(moved) : key.isEmpty() ? null : Tales.ground(level, run, tale, key);
+					comeBack(level, player, run, there, c, place);
 				} else if (!away(there) && nobodyWithin(player, run, there, TaleWays.HOURS_GONE) && !seen(player, run, there)) {
 					// (walked off out of sight: gone in)
 					for (Mob m : withMen(level, there, c)) {
@@ -535,6 +540,21 @@ final class TaleCast {
 		return mob.entityTags().contains(AWAY_TAG);
 	}
 
+	/** Whether a player online has {@code mob}'s run and someone else stands in their part in it now (set out again while they were away). */
+	private static boolean replaced(net.minecraft.server.MinecraftServer server, Mob mob, Cast c) {
+		if (c.role().endsWith("~")) {
+			return false;
+		}
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			Tales.Run run = Tales.run(p, c.instance());
+			if (run != null) {
+				String now = run.cast.get(c.role());
+				return now != null && !now.equals(mob.getUUID().toString());
+			}
+		}
+		return false;
+	}
+
 	/** {@code mob} and the men who follow them. */
 	private static List<Mob> withMen(ServerLevel level, Mob mob, Cast c) {
 		List<Mob> all = new ArrayList<>(men(level, mob, c));
@@ -542,9 +562,9 @@ final class TaleCast {
 		return all;
 	}
 
-	/** Whether {@code role} is what the open step is doing (someone being followed or walked somewhere): they keep no hours then. */
+	/** Whether {@code role} is what the open step is doing (someone being followed, walked somewhere or fought): they keep no hours then. */
 	private static boolean busy(String role, String who, String kind, List<String> with) {
-		return (kind.equals("tail") || kind.equals("escort")) && role.equals(who) || with.contains(role);
+		return (kind.equals("tail") || kind.equals("escort") || kind.equals("foe")) && role.equals(who) || with.contains(role);
 	}
 
 	/** Whether anyone sharing {@code run} can see {@code mob}. */
@@ -565,24 +585,112 @@ final class TaleCast {
 		return level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : mob.blockPosition();
 	}
 
-	/** Gone home: out of sight and still, but the same person (their hearts, what they remember, what they were told). */
+	/**
+	 * Gone home: out of sight and still, but the same person (their hearts, what they remember, what they were told).
+	 * Put under the ground where they went in (they can't be seen, bumped into, clicked or burned by the sun there, and
+	 * they come to no harm, being kept from it as all a tale's people are), with no AI and nothing to say. Kept on the
+	 * mob (tags and flags), so it lasts a reload.
+	 */
 	private static void hide(Mob mob) {
+		if (away(mob)) {
+			return;
+		}
 		mob.removeTag(GOING_TAG);
+		if (mob.isNoAi()) {
+			mob.addTag(STILL_TAG);
+		}
 		mob.addTag(AWAY_TAG);
+		mob.getNavigation().stop();
+		mob.setNoAi(true);
 		mob.setInvisible(true);
 		mob.setSilent(true);
-		mob.setNoAi(true);
-		mob.getNavigation().stop();
+		mob.clearFire();
+		BlockPos under = under(mob);
+		if (under != null) {
+			mob.snapTo(under.getX() + 0.5, under.getY(), under.getZ() + 0.5, mob.getYRot(), 0.0F);
+		}
 	}
 
-	/** Back out again, where they went home. */
+	/** Solid ground two blocks deep a little under {@code mob}, where nothing is built or flows; null if there's none. */
+	private static @Nullable BlockPos under(Mob mob) {
+		Level level = mob.level();
+		BlockPos at = mob.blockPosition();
+		for (int down = UNDER_LEAST; down <= UNDER_MOST; down++) {
+			BlockPos p = at.below(down);
+			if (level.isOutsideBuildHeight(p)) {
+				break;
+			}
+			if (buried(level, p) && buried(level, p.above())) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	private static boolean buried(Level level, BlockPos p) {
+		BlockState state = level.getBlockState(p);
+		return state.isCollisionShapeFullBlock(level, p) && state.getFluidState().isEmpty() && !state.hasBlockEntity();
+	}
+
+	/**
+	 * {@code there} (and their men) back out when their hours come round, at {@code place} if no player of the tale is
+	 * near it, else a little way off from where they walk there; with no place, on the ground above where they went
+	 * in. Waits (stays in) if there's nowhere unseen to come out just now.
+	 */
+	private static void comeBack(ServerLevel level, ServerPlayer player, Tales.Run run, Mob there, Cast c, @Nullable BlockPos place) {
+		if (!away(there)) {
+			// (only set walking off, not yet in: they turn round)
+			for (Mob m : withMen(level, there, c)) {
+				m.removeTag(GOING_TAG);
+				if (place != null) {
+					send(m, place);
+				}
+			}
+			return;
+		}
+		BlockPos out;
+		if (place == null) {
+			out = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, there.blockPosition());
+		} else if (nobodyNear(player, run, place, TaleWays.HOURS_GONE)) {
+			out = place;
+		} else {
+			out = visitSpot(level, player, COME_LEAST, COME_MOST);
+		}
+		if (out == null) {
+			return;
+		}
+		for (Mob m : withMen(level, there, c)) {
+			BlockPos stand = Construction.standable(level, out.offset(level.getRandom().nextInt(3) - 1, 0, level.getRandom().nextInt(3) - 1), 3);
+			m.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, m.getYRot(), 0.0F);
+			back(m);
+			if (place != null) {
+				send(m, place);
+			}
+		}
+	}
+
+	/** Back out again: seen and heard, and with the AI they had before they went in. */
 	private static void back(Mob mob) {
+		boolean wasAway = away(mob);
 		mob.removeTag(AWAY_TAG);
 		mob.removeTag(GOING_TAG);
 		mob.setInvisible(false);
 		mob.setSilent(false);
-		// (one laid out on the ground stays so)
-		mob.setNoAi(mob.getPose() == Pose.SLEEPING);
+		if (wasAway) {
+			// (a monster that stands until its fight, or one laid out on the ground, stays so)
+			mob.setNoAi(mob.entityTags().contains(STILL_TAG) || mob.getPose() == Pose.SLEEPING);
+		}
+		mob.removeTag(STILL_TAG);
+	}
+
+	/** Whether nobody sharing {@code run} is within {@code range} of {@code at}. */
+	private static boolean nobodyNear(ServerPlayer player, Tales.Run run, BlockPos at, double range) {
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			if (p.distanceToSqr(Vec3.atCenterOf(at)) <= range * range) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static boolean nobodyWithin(ServerPlayer player, Tales.Run run, Mob mob, double range) {
@@ -635,7 +743,7 @@ final class TaleCast {
 		long now = level.getGameTime();
 		if (!c.fight() && !c.yielded()) {
 			// (a fight that only comes at its hour, "when", doesn't begin outside it)
-			if (foe.distanceToSqr(player) > 24.0 * 24.0 || !TaleWays.now(player, run, step)) {
+			if (away(foe) || foe.distanceToSqr(player) > 24.0 * 24.0 || !TaleWays.now(player, run, step)) {
 				return;
 			}
 			// (what's been learned of it, and brought against it, tells before the first blow)
@@ -1085,13 +1193,13 @@ final class TaleCast {
 			}
 			if (c.over()) {
 				// (their tale's done: they walk off while watched, and are gone once nobody's looking)
-				if (now - c.since() > LEAVE_TICKS || level.getNearestPlayer(mob, LEAVE_UNSEEN) == null) {
+				if (away(mob) || now - c.since() > LEAVE_TICKS || level.getNearestPlayer(mob, LEAVE_UNSEEN) == null) {
 					LOADED.remove(mob);
 					McaCompat.vanish(mob);
 				}
 				continue;
 			}
-			if (c.instance().startsWith("visit:") || c.fight() || HELD.containsKey(mob)) {
+			if (c.instance().startsWith("visit:") || c.fight() || HELD.containsKey(mob) || away(mob)) {
 				continue;
 			}
 			BlockPos anchor = BlockPos.of(c.anchor());

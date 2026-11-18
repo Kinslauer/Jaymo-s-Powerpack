@@ -1213,6 +1213,10 @@ public final class Tales {
 		if (step == null || !(player.level() instanceof ServerLevel level)) {
 			JaymosKingdoms.LOGGER.warn("Tale {} has no step {}: the run is dropped", run.tale, run.step);
 			state(player).runs.remove(run);
+			if (player.level() instanceof ServerLevel level) {
+				// (its people go their ways, those gone home with them)
+				TaleCast.over(level, run, null);
+			}
 			return;
 		}
 		String kind = Tale.string(step, "do", "");
@@ -1998,9 +2002,10 @@ public final class Tales {
 		Tale tale = Tale.get(run.tale);
 		JsonObject step = tale == null ? null : tale.step(run.step);
 		if (step == null) {
-			// (its file is gone, or changed under it)
+			// (its file is gone, or changed under it: its people go their ways, those gone home with them)
 			Quests.drop(player, run.quest());
 			s.runs.remove(run);
+			TaleCast.over(level, run, null);
 			return;
 		}
 		String kind = Tale.string(step, "do", "");
