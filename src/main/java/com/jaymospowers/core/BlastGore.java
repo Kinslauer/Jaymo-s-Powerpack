@@ -3,6 +3,7 @@ package com.jaymospowers.core;
 import com.jaymospowers.JaymosPowers;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -44,6 +45,22 @@ import org.jspecify.annotations.Nullable;
  * shooter stood ({@link #SHOT_REACH}), all its pellets counting as one hit ({@link #SHOT_TICKS}). Most often it takes a
  * limb, from the living or the dead ({@link #SHOT_LIMB_SCALE}); it blows a body apart only when that one shot killed it
  * from full health ({@link #ONE_SHOT_HEALTH}).
+ * <p>Andy (2026-11-18, a mutant zombie's slams through a pillager camp): "the slams and any attack of that magnitude should
+ * dismember more often and knockback especially if the enemy is downed, theres just simply no place else for that force to
+ * go, so obviously they get gibbed." A <b>crushing blow</b> ({@link #crushing}: a slam's shockwave ({@link #CRUSHING}: the
+ * mutant zombie's and the Hulk Hammer's), or a blow struck by hand or body, not shot or blown, of {@link #CRUSH_DAMAGE} or
+ * more from something at least {@link #CRUSH_BULK} times the body's bulk, or of {@link #CRUSH_ANY} from anyone) tears like a
+ * blast at point-blank:
+ * <ul>
+ * <li>On someone <b>downed</b> it bursts them ({@link #CRUSH_DOWNED_GIB}): the ground takes what the body can't. One knocked
+ * out cold is no safer ({@code Downed}). Rubber-folk lose every limb and stay down to mend, as from a blast.</li>
+ * <li>Killing, or downing, someone standing, it bursts them {@link #CRUSH_GIB} of the time; else the part it lands on comes
+ * off more often than a club's ({@link Dismember#lethalPart}, {@link #CRUSH_SEVER}).</li>
+ * <li>Lived through, it takes an arm or a leg {@link #CRUSH_LIMB} of the time (a second now and then), and throws the body
+ * ({@link #CRUSH_THROW}, {@link #CRUSH_LIFT}), less as it resists being knocked back. A throw is set after the tick's moves,
+ * so the one striking (a mutant's seismic wave nudges what it hits) can't soften it.</li>
+ * </ul>
+ * Only the Stoneborn are never burst, as with blasts.
  */
 public final class BlastGore {
 	/** A blast this big (radius; TNT's is 4) counts in full; a smaller one's closeness is scaled by the root of its share. */
@@ -72,8 +89,23 @@ public final class BlastGore {
 	public static final String STONE_TAG = "jaymoskingdoms_heritage_stoneborn";
 	/** The scoreboard tags Jaymo's Kitchen reads on a body dying of a blast: blown apart, or left whole. */
 	public static final String GIB_TAG = "jaymoskitchen.gib", NO_GIB_TAG = "jaymoskitchen.no_gib";
+	/** Damage that's always a crushing blow ({@link #crushing}): a slam's shockwave. */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.damagesource.DamageType> CRUSHING_TYPES =
+		net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.DAMAGE_TYPE, JaymosPowers.id("crushing"));
+	/** A crushing blow ({@link #crushing}): this much damage from a body at least {@link #CRUSH_BULK} times as bulky, or {@link #CRUSH_ANY} from any. */
+	public static final float CRUSH_DAMAGE = 9.0F, CRUSH_BULK = 3.0F, CRUSH_ANY = 18.0F;
+	/** A crushing blow bursts someone downed this often, and someone it kills (or downs) on their feet this often. */
+	public static final float CRUSH_DOWNED_GIB = 1.0F, CRUSH_GIB = 0.35F;
+	/** A crushing blow that kills or downs without bursting takes the part it landed on this often (a club's is {@link Dismember#LETHAL_BLUNT_SEVER}). */
+	public static final float CRUSH_SEVER = 0.5F;
+	/** Someone living through a crushing blow loses a limb this often (before small bodies, Rubber-folk and Grim Hand). */
+	public static final float CRUSH_LIMB = 0.35F;
+	/** A crushing blow of {@link #CRUSH_DAMAGE} throws the body this fast across (blocks a tick; more for more, up to half again) and up. */
+	public static final double CRUSH_THROW = 1.0, CRUSH_LIFT = 0.45;
 
 	private static final Identifier PHASE = JaymosPowers.id("blast_gib");
+	/** Before anything else hears of a blow (Downed takes a blow on the downed for itself): whether it's crushing. */
+	private static final Identifier CRUSH_PHASE = JaymosPowers.id("crushing_blow");
 	private static final int[] LIMBS = {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG};
 
 	/** A vanilla blast going off ({@link #begin}/{@link #end}, by BlastGoreMixin): its centre and radius, innermost last. */
@@ -85,6 +117,10 @@ public final class BlastGore {
 	private static final Map<LivingEntity, long[]> ROLLED = new WeakHashMap<>();
 	/** A body under a blunderbuss shot: the tick its first pellet landed, its health before it, and whether a limb was rolled. */
 	private static final Map<LivingEntity, long[]> SHOTS = new WeakHashMap<>();
+	/** A body under a crushing blow this tick (game time). */
+	private static final Map<LivingEntity, Long> CRUSHING = new WeakHashMap<>();
+	/** Bodies a crushing blow throws at the end of this tick: the way across (a unit vector) and how fast. */
+	private static final Map<LivingEntity, double[]> THROWS = new WeakHashMap<>();
 	/** A player blown apart → the parts they'd lost before it (all they come back without). */
 	private static final Map<UUID, Integer> BEFORE = new HashMap<>();
 
@@ -96,7 +132,7 @@ public final class BlastGore {
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Event.DEFAULT_PHASE, PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(com.jaymospowers.core.wounds.Downed.lastPhase(), PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(PHASE, (entity, source, amount) -> {
-			if ((blast(source) || blunderShot(source)) && entity.level() instanceof ServerLevel) {
+			if (gore(entity, source) && entity.level() instanceof ServerLevel) {
 				boolean gib = gibs(entity, source, amount);
 				entity.removeTag(gib ? NO_GIB_TAG : GIB_TAG);
 				entity.addTag(gib ? GIB_TAG : NO_GIB_TAG);
@@ -107,9 +143,16 @@ public final class BlastGore {
 			return true;
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if ((blast(source) || blunderShot(source)) && entity.level() instanceof ServerLevel) {
+			if (gore(entity, source) && entity.level() instanceof ServerLevel) {
 				died(entity, source);
 			}
+		});
+		ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(CRUSH_PHASE, Event.DEFAULT_PHASE);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(CRUSH_PHASE, (entity, source, amount) -> {
+			if (crushing(entity, source, amount)) {
+				CRUSHING.put(entity, entity.level().getGameTime());
+			}
+			return true;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (blunderShot(source) && entity.level() instanceof ServerLevel) {
@@ -118,12 +161,18 @@ public final class BlastGore {
 			return true;
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (!blocked && (blast(source) || blunderShot(source)) && entity.isAlive() && entity.level() instanceof ServerLevel) {
+			if (!blocked && gore(entity, source) && entity.isAlive() && entity.level() instanceof ServerLevel) {
 				survived(entity, source, taken);
+			}
+			if (!blocked && crushedNow(entity) && entity.isAlive()) {
+				thrown(entity, source, base);
 			}
 		});
 		// (a blast that threw mid-way leaves nothing behind for the next)
-		ServerTickEvents.END_SERVER_TICK.register(server -> GOING_OFF.clear());
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			GOING_OFF.clear();
+			throwAll();
+		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			newPlayer.removeTag(GIB_TAG);
 			newPlayer.removeTag(NO_GIB_TAG);
@@ -149,6 +198,84 @@ public final class BlastGore {
 
 	public static boolean blast(DamageSource source) {
 		return source.is(DamageTypeTags.IS_EXPLOSION);
+	}
+
+	/** {@code entity} is being torn by a blast, a blunderbuss shot or a crushing blow ({@link #crushedNow}). */
+	static boolean gore(LivingEntity entity, DamageSource source) {
+		return blast(source) || blunderShot(source) || crushedNow(entity);
+	}
+
+	/**
+	 * Whether {@code source}'s blow of {@code amount} on {@code target} is a crushing one: a slam's shockwave
+	 * ({@link #CRUSHING_TYPES}), or struck by a living thing with its own hand or body (a golem's swing; not an arrow, a
+	 * thrown thing or a blast), of {@link #CRUSH_ANY} or more, or of {@link #CRUSH_DAMAGE} or more from something at least
+	 * {@link #CRUSH_BULK} times the body's bulk.
+	 */
+	public static boolean crushing(LivingEntity target, DamageSource source, float amount) {
+		if (!(target.level() instanceof ServerLevel) || blast(source) || blunderShot(source) || source.getEntity() == target) {
+			return false;
+		}
+		if (source.is(CRUSHING_TYPES)) {
+			return true;
+		}
+		if (amount < CRUSH_DAMAGE || !(source.getEntity() instanceof LivingEntity by) || source.getDirectEntity() != by) {
+			return false;
+		}
+		return amount >= CRUSH_ANY || bulk(by) >= CRUSH_BULK * bulk(target);
+	}
+
+	/** Whether {@code target} is under a crushing blow this tick ({@link #crushing}). */
+	public static boolean crushedNow(LivingEntity target) {
+		Long at = CRUSHING.get(target);
+		return at != null && at == target.level().getGameTime();
+	}
+
+	/** How bulky a body is: its box's width across both ways, times its height. */
+	private static double bulk(LivingEntity e) {
+		return (double) e.getBbWidth() * e.getBbWidth() * e.getBbHeight();
+	}
+
+	/** A body that lived through a crushing blow of {@code base} is thrown away from whoever struck it, at the tick's end. */
+	private static void thrown(LivingEntity entity, DamageSource source, float base) {
+		Vec3 from = source.getSourcePosition();
+		if (from == null) {
+			return;
+		}
+		double dx = entity.getX() - from.x, dz = entity.getZ() - from.z;
+		double length = Math.sqrt(dx * dx + dz * dz);
+		if (length < 0.01) {
+			double angle = entity.getRandom().nextDouble() * Math.PI * 2.0;
+			dx = Math.cos(angle);
+			dz = Math.sin(angle);
+			length = 1.0;
+		}
+		double resist = Mth.clamp(entity.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE), 0.0, 1.0);
+		double speed = CRUSH_THROW * Mth.clamp(base / CRUSH_DAMAGE, 1.0F, 1.5F) * (1.0 - resist);
+		// (the way across, how fast, and how much of the lift: what it doesn't resist)
+		if (speed > 0.05) {
+			THROWS.put(entity, new double[] {dx / length, dz / length, speed, 1.0 - resist});
+		}
+	}
+
+	/** Every body a crushing blow threw this tick flies (unless it's already going faster: the blow's own throw, a slam into the ground). */
+	private static void throwAll() {
+		if (THROWS.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<LivingEntity, double[]> e : List.copyOf(THROWS.entrySet())) {
+			LivingEntity body = e.getKey();
+			double[] t = e.getValue();
+			if (body.isRemoved() || !body.isAlive() || body.isPassenger()) {
+				continue;
+			}
+			Vec3 v = body.getDeltaMovement();
+			if (v.lengthSqr() >= t[2] * t[2]) {
+				continue;
+			}
+			body.setDeltaMovement(t[0] * t[2], Math.max(v.y, CRUSH_LIFT * t[3]), t[1] * t[2]);
+			body.needsSync = true;
+		}
+		THROWS.clear();
 	}
 
 	/** A WeaponMod blunderbuss's shot, fired by someone (the closeness is measured from them). */
@@ -223,7 +350,7 @@ public final class BlastGore {
 	 * gibbed die rather than go down; then the death itself). Creative and spectating players never are.
 	 */
 	public static boolean gibs(LivingEntity entity, DamageSource source, float amount) {
-		if (!blast(source) && !blunderShot(source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
+		if (!gore(entity, source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
 			return false;
 		}
 		long now = entity.level().getGameTime();
@@ -231,8 +358,11 @@ public final class BlastGore {
 		if (rolled != null && rolled[0] == now) {
 			return rolled[1] != 0;
 		}
-		float closeness = closeness(entity, source, amount);
-		boolean gib = (!blunderShot(source) || fromFull(entity)) && entity.getRandom().nextFloat() < gibChance(closeness);
+		boolean crush = !blast(source) && !blunderShot(source);
+		// (a crushing blow lands as a blast's centre does)
+		float closeness = crush ? 1.0F : closeness(entity, source, amount);
+		float chance = crush ? com.jaymospowers.core.wounds.Downed.isDowned(entity) ? CRUSH_DOWNED_GIB : CRUSH_GIB : gibChance(closeness);
+		boolean gib = (!blunderShot(source) || fromFull(entity)) && entity.getRandom().nextFloat() < chance;
 		ROLLED.put(entity, new long[] {now, gib ? 1 : 0, Float.floatToIntBits(closeness)});
 		return gib;
 	}
@@ -279,7 +409,7 @@ public final class BlastGore {
 		if (shot && !limbRoll(entity)) {
 			return;
 		}
-		if (entity.getRandom().nextFloat() < (shot ? 1.0F : CORPSE_LIMB) * chance(entity, by, closeness, source)) {
+		if (entity.getRandom().nextFloat() < (shot ? 1.0F : CORPSE_LIMB) * chance(entity, by, limbBase(source, closeness), source)) {
 			loseLimb(entity, by, from);
 		}
 	}
@@ -303,7 +433,7 @@ public final class BlastGore {
 		}
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
 		Vec3 from = centre(source);
-		float chance = chance(entity, by, closeness(entity, source, taken), source);
+		float chance = chance(entity, by, limbBase(source, closeness(entity, source, taken)), source);
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}
@@ -312,9 +442,14 @@ public final class BlastGore {
 		}
 	}
 
-	/** A survivor's (or a corpse's) chance at this closeness, raised for a shot, for Rubber-folk and by Grim Hand, at most certain. */
-	private static float chance(LivingEntity entity, @Nullable LivingEntity by, float closeness, DamageSource source) {
-		float chance = limbChance(closeness);
+	/** A survivor's chance to lose a limb before it's raised: a crushing blow's own, else by how close the blast was. */
+	private static float limbBase(DamageSource source, float closeness) {
+		return blast(source) || blunderShot(source) ? limbChance(closeness) : CRUSH_LIMB;
+	}
+
+	/** A survivor's (or a corpse's) chance from {@code base} ({@link #limbBase}), raised for a shot, for Rubber-folk and by Grim Hand, at most certain. */
+	private static float chance(LivingEntity entity, @Nullable LivingEntity by, float base, DamageSource source) {
+		float chance = base;
 		if (blunderShot(source)) {
 			chance *= SHOT_LIMB_SCALE;
 		}

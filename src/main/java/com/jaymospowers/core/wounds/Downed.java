@@ -252,6 +252,8 @@ public final class Downed {
 	static final Identifier FIRST = JaymosPowers.id("downed_first");
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
+	/** After Downed's verdict: a player dying flat is marked to lie ({@link DownedLie#markPlayer}). */
+	static final Identifier LIE_PHASE = JaymosPowers.id("downed_lie");
 
 	/** (0.20.67) The death event's phase Downed decides in (others that must see its verdict order after it). */
 	public static Identifier lastPhase() {
@@ -370,6 +372,9 @@ public final class Downed {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
 				// ((0.20.26) what downed them is the cause the death is rolled on, Mortality)
 				Mortality.felled(entity, FELLED_BY.get(entity));
+				// (Andy, 2026-11-18: a downed pillager burning to death "pops into the air when it dies because it defaults back
+				// to standing") whatever ends them, the body starts lying where and how they lay
+				DownedLie.markBody(entity);
 				forget(entity);
 				return true;
 			}
@@ -415,9 +420,29 @@ public final class Downed {
 			UndeadFortitude.downed(entity, source);
 			return false;
 		});
+		// (Andy, 2026-11-18) a player who dies lying flat (crawling, crippled, under a low ceiling; the downed are marked as
+		// they're finished) starts their body lying too: after every save, so only a death that goes through is marked
+		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(LAST, LIE_PHASE);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(LIE_PHASE, (entity, source, amount) -> {
+			if (entity instanceof Player player && entity.level() instanceof ServerLevel) {
+				DownedLie.markPlayer(player);
+			}
+			return true;
+		});
+		// (and a mark their body didn't use isn't kept for their next death)
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> DownedLie.clearBody(newPlayer));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && !outCold(entity)
+			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
+			// force to go, so obviously they get gibbed"; knocked out cold or not
+			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);
+			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && (!outCold(entity) || crushed)
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
+				boolean burst = crushed && com.jaymospowers.core.BlastGore.gibs(entity, source, amount);
+				if (burst && Dismember.rubber(entity) && com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
+					// (Rubber-folk: every limb gone but the head kept; they stay down to mend, as from a blast)
+					Dismember.split(entity);
+					return false;
+				}
 				// (0.18.5) three hearts or more on the downed: that's the end of them
 				FELLED_BY.put(entity, source);
 				// (the blow still lands with its thud; the death cry is its own)
@@ -425,8 +450,8 @@ public final class Downed {
 					blowLands(level, entity, source, false);
 				}
 				finish(level, entity);
-				// (Andy, 2026-11-16) the killing hit takes a part off the body
-				if (entity.isDeadOrDying()) {
+				// (Andy, 2026-11-16) the killing hit takes a part off the body (a burst one has none left to take)
+				if (entity.isDeadOrDying() && !burst) {
 					Dismember.lethalBlow(entity, source, null);
 				}
 				return false;
