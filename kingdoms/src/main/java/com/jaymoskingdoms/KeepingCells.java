@@ -44,7 +44,6 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -91,6 +90,8 @@ public final class KeepingCells {
 	static final int REST_REACH = 14, REST_BELOW = 3, REST_ABOVE = 14;
 	/** How near the house a player has to be for its dead to be counted as his household the first time (blocks). */
 	static final double COUNT_NEAR = 24.0;
+	/** How far from the house one of his household who wandered out is still looked for (blocks). */
+	static final double STRAY_REACH = 64.0;
 	/** How far round a villager the keeping light is looked for (blocks, across; up and down one). */
 	static final int LIGHT_REACH = 2;
 	/** How far round the light the cell's bed is looked for, and the way out (blocks). */
@@ -239,7 +240,7 @@ public final class KeepingCells {
 	private static void rest(ServerLevel level, Villager v, BlockPos light, @Nullable LivingEntity but) {
 		String mark = mark(v);
 		boolean rested = v.getAttachedOrElse(LAID, 0) > 0
-			&& level.getEntities(EntityTypeTest.forClass(Zombie.class), z -> z != but && z.isAlive() && z.entityTags().contains(mark)).isEmpty();
+			&& level.getEntitiesOfClass(Zombie.class, house(light).inflate(STRAY_REACH), z -> z != but && z.isAlive() && z.entityTags().contains(mark)).isEmpty();
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			Tales.remark(player, TALE, v, RESTED, rested);
 		}

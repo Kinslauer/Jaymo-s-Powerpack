@@ -112,6 +112,11 @@ final class TaleAfter {
 			|| !(under.is(BlockTags.DIRT) || under.is(BlockTags.SAND) || under.is(Blocks.GRAVEL) || under.is(Blocks.SNOW_BLOCK))) {
 			return false;
 		}
+		if (!level.isLoaded(at.offset(-AROUND, 0, -AROUND)) || !level.isLoaded(at.offset(AROUND, 0, AROUND))
+			|| !level.isLoaded(at.offset(-AROUND, 0, AROUND)) || !level.isLoaded(at.offset(AROUND, 0, -AROUND))) {
+			// (the ground round it isn't all loaded: not read here, so nothing is loaded for it)
+			return false;
+		}
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-AROUND, -1, -AROUND), at.offset(AROUND, 2, AROUND))) {
 			BlockState state = level.getBlockState(p);
 			if (state.isAir()) {
