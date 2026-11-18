@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:23). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,11 +18,11 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · for any · open
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · for any · open
 - [ ] [[Inbox/wither-model|wither-model]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 
 
 ## Being built
 
-- [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · claimed
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · claimed
 
