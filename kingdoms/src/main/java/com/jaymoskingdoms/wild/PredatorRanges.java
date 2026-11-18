@@ -2,14 +2,20 @@ package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.List;
+import java.util.Set;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -26,6 +32,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Brown bears</b> (Naturalist's and Bear Minimum's) in the taiga and the high woods and meadows
  * ({@code has_brown_bear}); <b>black bears</b> (Naturalist's, Bear Minimum's, Cube Animals') in the forests
  * ({@code has_black_bear}).</li>
+ * <li>Cube Animals' <b>lynx</b> in the tundra, the forests and the taiga ({@code has_lynx}) and <b>caracal</b> on the
+ * savannas, deserts and badlands ({@code has_caracal}). Cube Animals never spawned either in the wild (Andy: "spawn them
+ * too"), so they get the ground rules here ({@link #PLACED}). The caracal stalks like the big cats; the lynx stays as it
+ * is, hunting rabbits and leaving people be until it's hurt.</li>
  * </ul>
  * A mod that isn't installed is passed over. The removals run after the mods add theirs and after {@code Encounters}
  * takes out Cube Animals' duplicate tiger; ours go in last.
@@ -43,12 +53,19 @@ public final class PredatorRanges {
 		new Range("bearminimum:brown_bear", "has_brown_bear", 3, 1, 1),
 		new Range("naturalist:black_bear", "has_black_bear", 2, 1, 1),
 		new Range("bearminimum:black_bear", "has_black_bear", 2, 1, 1),
-		new Range("cubeanimals:blackbear", "has_black_bear", 2, 1, 1));
+		new Range("cubeanimals:blackbear", "has_black_bear", 2, 1, 1),
+		new Range("cubeanimals:lynx", "has_lynx", 3, 1, 1),
+		new Range("cubeanimals:caracal", "has_caracal", 3, 1, 1));
+
+	/** Beasts their mod never spawned in the wild, so it gave them no ground rules: they spawn on the ground, by the game's rules. */
+	static final Set<String> PLACED = Set.of("cubeanimals:lynx", "cubeanimals:caracal");
 
 	private PredatorRanges() {
 	}
 
 	public static void register() {
+		// once every mod's beasts are registered, whichever order the mods started in
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> place());
 		BiomeModifications.create(JaymosKingdoms.id("predator_ranges_cleared")).add(ModificationPhase.REPLACEMENTS, BiomeSelectors.all(), context -> {
 			for (Range r : RANGES) {
 				EntityType<?> type = type(r.mob());
@@ -66,6 +83,22 @@ public final class PredatorRanges {
 						context.getMobSpawnSettings().addSpawn(type, r.weight(), r.min(), r.max());
 					}
 				});
+		}
+	}
+
+	/** Ground rules for the beasts in {@link #PLACED}. */
+	@SuppressWarnings("unchecked")
+	private static void place() {
+		for (String id : PLACED) {
+			EntityType<?> type = type(id);
+			if (type != null) {
+				try {
+					SpawnPlacements.register((EntityType<Mob>) type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+						Mob::checkMobSpawnRules);
+				} catch (IllegalStateException already) {
+					// a later Cube Animals that spawns it gave it its own rules
+				}
+			}
 		}
 	}
 

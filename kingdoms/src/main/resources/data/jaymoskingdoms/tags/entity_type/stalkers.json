@@ -7,6 +7,7 @@
 		{"id": "naturalist:bear", "required": false},
 		{"id": "naturalist:black_bear", "required": false},
 		{"id": "cubeanimals:snowleopard", "required": false},
+		{"id": "cubeanimals:caracal", "required": false},
 		{"id": "cubeanimals:tiger", "required": false},
 		{"id": "cubeanimals:blackbear", "required": false},
 		{"id": "bearminimum:brown_bear", "required": false},

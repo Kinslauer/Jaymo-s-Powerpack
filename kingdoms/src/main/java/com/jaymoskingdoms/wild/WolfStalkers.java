@@ -189,9 +189,35 @@ public final class WolfStalkers {
 
 	/** A wolf that may stalk at all: wild, grown, free, awake, armed, not on Peaceful. */
 	static boolean able(Mob wolf) {
-		return wolf.isAlive() && !wolf.isBaby() && !(wolf instanceof TamableAnimal tame && tame.isTame()) && !wolf.isLeashed()
+		return wolf.isAlive() && !wolf.isBaby() && !tamed(wolf) && !wolf.isLeashed()
 			&& !wolf.isPassenger() && !wolf.isVehicle() && wolf.level().getDifficulty() != Difficulty.PEACEFUL && !wolf.isSleeping()
 			&& wolf.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE);
+	}
+
+	/** Cube Animals' cats keep their own taming ({@code isTamed()}, not the game's {@link TamableAnimal}). */
+	private static final ClassValue<java.lang.reflect.@Nullable Method> TAMED = new ClassValue<>() {
+		@Override
+		protected java.lang.reflect.@Nullable Method computeValue(Class<?> type) {
+			try {
+				java.lang.reflect.Method m = type.getMethod("isTamed");
+				return m.getReturnType() == boolean.class ? m : null;
+			} catch (NoSuchMethodException none) {
+				return null;
+			}
+		}
+	};
+
+	/** Whether {@code mob} is someone's pet, by the game's taming or its own mod's. */
+	static boolean tamed(Mob mob) {
+		if (mob instanceof TamableAnimal tame) {
+			return tame.isTame();
+		}
+		java.lang.reflect.Method m = TAMED.get(mob.getClass());
+		try {
+			return m != null && (boolean) m.invoke(mob);
+		} catch (ReflectiveOperationException | RuntimeException failed) {
+			return false;
+		}
 	}
 
 	/** Whether {@code wolf} would stalk {@code player} at all (who and when, not whether it can smell them). */
