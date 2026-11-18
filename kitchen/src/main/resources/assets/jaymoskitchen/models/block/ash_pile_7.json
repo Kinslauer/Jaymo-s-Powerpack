@@ -1,6 +1,7 @@
 {
 	"textures": {
-		"all": "jaymoskitchen:block/ash_pile"
+		"all": "jaymoskitchen:block/ash_pile",
+		"particle": "jaymoskitchen:block/ash_pile"
 	},
 	"elements": [
 		{
