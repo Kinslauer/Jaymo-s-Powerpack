@@ -4,6 +4,7 @@ import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.Captives;
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.Fx;
+import com.jaymoskingdoms.HudBars;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Parties;
 import com.jaymoskingdoms.PowersCompat;
@@ -788,9 +789,7 @@ public final class Lasso {
 			if (tied % 6 == 0) {
 				level.playSound(null, held.getX(), held.getY(), held.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 0.5F, 1.4F + level.getRandom().nextFloat() * 0.3F);
 			}
-			int bar = 10, filled = Math.round(bar * tied / (float)TIE_TICKS);
-			holder.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lasso.tying", held.getDisplayName(),
-				"|".repeat(filled) + ".".repeat(bar - filled)).withStyle(ChatFormatting.GRAY));
+			HudBars.hold(holder, "lasso_tie", tied / (float)TIE_TICKS, HudBars.GREY, Component.translatable("bar.jaymoskingdoms.tying", held.getDisplayName()), true);
 			return;
 		}
 		hold.tying = -1;
@@ -956,9 +955,8 @@ public final class Lasso {
 			}
 			struggle.lastInput = input;
 			if (now % 5 == 0 || struggle.lastPress == now) {
-				int bar = 10, filled = (int)Math.round(bar * struggle.share());
-				player.sendOverlayMessage(Component.translatable(stalled ? "message.jaymoskingdoms.lasso.struggle_stalled" : "message.jaymoskingdoms.lasso.struggle",
-					"|".repeat(filled) + ".".repeat(bar - filled)).withStyle(stalled ? ChatFormatting.RED : ChatFormatting.GRAY));
+				HudBars.hold(player, "lasso_struggle", (float) struggle.share(), stalled ? HudBars.RED : HudBars.GREY,
+					Component.translatable(stalled ? "bar.jaymoskingdoms.dazed" : "bar.jaymoskingdoms.struggle"), true);
 			}
 		} else if (!stalled) {
 			struggle.left -= 1.0;

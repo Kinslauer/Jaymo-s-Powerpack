@@ -231,6 +231,21 @@ public final class Senses {
 		}
 	}
 
+	/**
+	 * Server → player: how far a goblin village's suspicion of their disguise has got ({@code Disguise}), in
+	 * {@link #FILL_STEPS}; the awareness eye fills with it too (Andy: "The eye should fill"). 0: none.
+	 */
+	public record Suspicion(int fill) implements CustomPacketPayload {
+		public static final Type<Suspicion> TYPE = new Type<>(JaymosKingdoms.id("disguise_suspicion"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Suspicion> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeByte(p.fill), buf -> new Suspicion(buf.readByte()));
+
+		@Override
+		public Type<Suspicion> type() {
+			return TYPE;
+		}
+	}
+
 	/** Player → where they were last tick, and whether they moved. */
 	private static final Map<UUID, Vec3> LAST_POS = new HashMap<>();
 	private static final Map<UUID, Boolean> MOVING = new HashMap<>();
@@ -248,6 +263,7 @@ public final class Senses {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Gauge.TYPE, Gauge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Meter.TYPE, Meter.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Suspicion.TYPE, Suspicion.CODEC);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			boolean folk = entity instanceof Folk;
 			if (entity instanceof Mob mob && (minded(mob) && !(mob instanceof Spider) || folk) && !TRACKS.containsKey(mob)) {

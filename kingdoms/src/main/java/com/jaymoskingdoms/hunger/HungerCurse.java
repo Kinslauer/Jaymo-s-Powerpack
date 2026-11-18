@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.hunger;
 
 import com.jaymoskingdoms.Fx;
+import com.jaymoskingdoms.HudBars;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.KitchenCompat;
 import com.mojang.serialization.Codec;
@@ -22,7 +23,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -520,31 +520,24 @@ public final class HungerCurse {
 		}
 	}
 
-	/** The action bar: the meal gauge (red, or gold and shrinking while grown), or the coil (grey), as {@code =} and {@code -} only. */
+	/** The gauge over the hotbar: the meal gauge (red, or gold and shrinking while grown), or the coil (grey); never holds the mouse. */
 	private static void gauge(ServerPlayer player, Moves moves, boolean big, long now) {
-		final int cells = 10;
-		MutableComponent text = null;
 		if (big) {
-			int left = (int)Math.ceil((player.getAttachedOrElse(BIG_UNTIL, 0L) - now) * cells / (double)BIG_TICKS);
-			text = bar(left, cells, ChatFormatting.GOLD);
+			bar(player, (player.getAttachedOrElse(BIG_UNTIL, 0L) - now) / (float)BIG_TICKS, HudBars.GOLD, "grown");
 		} else if (moves.devour > 0) {
-			text = bar(moves.devour * cells / DEVOUR_TICKS, cells, ChatFormatting.DARK_RED);
+			bar(player, moves.devour / (float)DEVOUR_TICKS, HudBars.DARK_RED, "devour");
 		} else if (moves.coil >= 1 && player.isShiftKeyDown()) {
-			text = bar(moves.coil * cells / COIL_MAX, cells, ChatFormatting.GRAY);
+			bar(player, moves.coil / (float)COIL_MAX, HudBars.GREY, "coil");
 		} else {
 			int gauge = player.getAttachedOrElse(GAUGE, 0);
 			if (gauge > 0 && (player.isSprinting() || gauge >= FULL / 2)) {
-				text = bar(gauge * cells / FULL, cells, ChatFormatting.RED);
+				bar(player, gauge / (float)FULL, HudBars.RED, "hunger");
 			}
-		}
-		if (text != null) {
-			player.sendOverlayMessage(text);
 		}
 	}
 
-	private static MutableComponent bar(int filled, int cells, ChatFormatting colour) {
-		int full = Math.max(0, Math.min(cells, filled));
-		return Component.literal("=".repeat(full)).withStyle(colour).append(Component.literal("-".repeat(cells - full)).withStyle(ChatFormatting.DARK_GRAY));
+	private static void bar(ServerPlayer player, float fill, int tint, String what) {
+		HudBars.gauge(player, "hunger_curse", fill, tint, Component.translatable("bar.jaymoskingdoms.hunger." + what), null);
 	}
 
 	// ---- the grown form's gifts ----

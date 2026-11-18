@@ -270,6 +270,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.web.KitchenCompat.registerTemperate();
 		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
 		com.jaymospowers.core.wounds.HeartCrystals.register();
+		// progress bars drawn like the execution bars, not as text on the action bar
+		com.jaymospowers.core.HudBar.register();
 		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
 		com.jaymospowers.bits.ItemShare.register();
 		registerAttachments();

@@ -456,8 +456,7 @@ public final class IllagerTongue {
 			int done = now - s.started();
 			if (done < STUDY_TICKS) {
 				if (done % 20 == 0) {
-					int bars = done * 10 / STUDY_TICKS;
-					player.sendOverlayMessage(Component.literal("▮".repeat(bars) + "▯".repeat(10 - bars)).withStyle(ChatFormatting.GRAY));
+					HudBars.hold(player, "illager_study", done / (float) STUDY_TICKS, HudBars.GREY, Component.translatable("bar.jaymoskingdoms.studying"), false);
 				}
 				continue;
 			}

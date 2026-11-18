@@ -5,6 +5,7 @@ import com.jaymospowers.armory.Lodged;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.FarLand;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
 import com.jaymospowers.power.zfighter.ZFighterRealism;
@@ -143,8 +144,8 @@ public final class Mortality {
 	 * they fell until they hold sneak this long (ticks) to come to by themselves (the wake roll), or someone brings them round.
 	 */
 	static final int COME_TO_TICKS = 40;
-	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks), and the bar's length. */
-	static final int COME_TO_AFTER = 20, COME_TO_BAR = 12;
+	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks). */
+	static final int COME_TO_AFTER = 20;
 	/** (0.21.7) How long one left for dead is held out cold at most while lying (ticks): long enough never to end by itself. */
 	static final int LIE_TICKS = 20 * 60 * 60 * 24;
 	/** (0.21.7) No hostile this near (blocks) the body: safe enough to bring one left for dead round. */
@@ -466,10 +467,11 @@ public final class Mortality {
 			return;
 		}
 		if (!dark && (holding ? wake.held % 2 == 0 : now % 20 == 0)) {
-			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
-			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
 			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
-				: "message.jaymospowers.mortality.come_to", bar).withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				: "message.jaymospowers.mortality.come_to").withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+			if (wake.held > 0) {
+				HudBar.hold(player, "come_to", wake.held / (float) COME_TO_TICKS, HudBar.YELLOW, Component.translatable("bar.jaymospowers.come_to"), true);
+			}
 		}
 	}
 

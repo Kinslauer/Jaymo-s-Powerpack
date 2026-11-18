@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -103,8 +103,7 @@ final class ZFighterLegendNuke {
 			float k = Math.min(1.0F, t / (float)WIND);
 			MagicFx.orb(level, player.position().add(0.0, player.getBbHeight() * 0.5, 0.0), 0.6F + 1.4F * k, ZFighterLegendHeart.GLOW, 6);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F, 0.5F + k);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_legend_heart.nuke_wind", PickKit.gauge(k, 10))
-				.withStyle(ChatFormatting.GREEN));
+			HudBar.hold(player, "nuke_wind", k, HudBar.GREEN, Component.translatable("bar.jaymospowers.nuke_wind"), false);
 		}
 		return true;
 	}
