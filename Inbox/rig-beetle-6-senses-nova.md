@@ -36,3 +36,6 @@ writer: hermes-writer
 - Run 2 patches at a time. Suggested pairs: (1 arm forms + 5 the Mind), (3 back rig + 6 senses and nova), (2 guns + 4 flight).
 - Lore first: read `Lore.md` (the Frostborn rigs, Los Perrito's troopers). Anything needing a new line gets a `(new)` paragraph, quoted in full to Andy for approval.
 - One PR per patch with `changes/powers/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging.
+
+## Notes
+- 2026-11-18 18:45 Text pass: rig.json — added message.jaymospowers.rig.nova_cooldown ("Nova on cooldown: %ss") and RigMind say keys cloak_on, cloak_off, ambush, nova, override for the loyal, dry and grim personalities (no code changed); added changes/powers/rig-beetle-6-senses-nova.md. Pushed branch claude/rig-beetle-6-senses-nova-text; no PR opened.
