@@ -63,6 +63,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Voices.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
+		// (saved or synced, but held by classes nothing loads before a world or a joining player needs them: captains' tempers
+		// were dropped as unknown on every restart, and joining clients didn't know the farmhand family or lesson course)
+		LOGGER.debug("late attachments: {} {} {}", Rivals.TEMPERS, FarmhandHome.FARMHAND_FAMILY, Lessons.COURSE);
 		KingdomEvents.register();
 		// barbarian camps, their raiders and raids (and their attachment)
 		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
