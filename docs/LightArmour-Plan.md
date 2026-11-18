@@ -95,3 +95,7 @@ Rows `wd-mobs`, `wd-brutes`, `wd-folk`, `wd-smith`. Runs after Patch 1.
 
 Order: Patches 1 and 2 together, then 3 and 4 together. One PR each; each gets an independent verifier. Each PR adds its
 change notes (`changes/powers/<branch>.md`, plus kingdoms/kitchen where touched).
+
+## Added to Patch 4 (Andy, 2026-11-18: "Yes do both")
+- Fighting folk never sidestep while wearing plate (`MobCombat.light`: every armour piece in `#jaymoskingdoms:light_armor`).
+- The Huntsman's rangers and ship crewmen (MCA villagers) sidestep a player's blow 12% of the time in leather or mail.
