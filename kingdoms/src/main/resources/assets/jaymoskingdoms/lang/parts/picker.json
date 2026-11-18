@@ -22,7 +22,7 @@
   "gui.jaymoskingdoms.picker.paths_press": "Pick this class, then press one of these.",
   "gui.jaymoskingdoms.picker.paths_patron": "Four blessings, as favour grows.",
   "gui.jaymoskingdoms.picker.spec": "Specialization",
-  "gui.jaymoskingdoms.picker.spec.cost": "Changing your pick after the first costs %s silver and a wait of %s minutes between changes. What the class has earned is kept.",
+  "gui.jaymoskingdoms.picker.spec.cost": "Changing your pick after the first costs %s silver, and a day (%s minutes) must pass between changes. What the class has earned is kept.",
   "gui.jaymoskingdoms.picker.spec.wait": "You can change it again in %s minutes.",
   "gui.jaymoskingdoms.picker.spec.patron": "A patron is sworn at a shrine, not changed here.",
   "gui.jaymoskingdoms.picker.favour": "Favour",

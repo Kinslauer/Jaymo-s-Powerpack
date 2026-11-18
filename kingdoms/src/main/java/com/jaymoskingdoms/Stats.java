@@ -95,7 +95,7 @@ public final class Stats {
 	/** Points a shift-click puts in at once. */
 	public static final int SHIFT_STEP = 5;
 	/** What taking every spent point back costs (emeralds' worth, paid in the coin of the land): the Redistribute button on the Attributes tab. */
-	public static final int REDISTRIBUTE_FEE = 12;
+	public static final int REDISTRIBUTE_FEE = 120;
 	/** Presence: the free points everyone starts with (it is the one attribute no heritage or story gives). */
 	public static final int BASE_PRESENCE = STEP;
 	/**

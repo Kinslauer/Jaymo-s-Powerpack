@@ -66,6 +66,7 @@ public final class MenuCompat {
 		RetakingScreen.register();
 		ClientPlayNetworking.registerGlobalReceiver(TitleChoice.Info.TYPE, (payload, context) -> TitleChoice.info = payload);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TitleChoice.info = null);
+		PapersScreen.register();
 		if (!FabricLoader.getInstance().isModLoaded(POWERS)) {
 			return;
 		}
@@ -120,6 +121,7 @@ public final class MenuCompat {
 				() -> Minecraft.getInstance().gui.setScreen(new TitlesScreen()), s -> s instanceof TitlesScreen, s -> ((TitlesScreen)s).corner());
 			tab(register, "rewards", ORDER_REWARDS, () -> new ItemStack(Items.CHEST), "menu.jaymoskingdoms.tab.rewards",
 				() -> Minecraft.getInstance().gui.setScreen(new RewardsScreen()), s -> s instanceof RewardsScreen, s -> ((RewardsScreen)s).corner());
+			PapersScreen.link(menu);
 			arrange(menu);
 			listen(menu);
 			Supplier<List<Map.Entry<Component, BlockPos>>> pins = MenuCompat::pins;

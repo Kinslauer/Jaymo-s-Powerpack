@@ -15,6 +15,7 @@ import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -52,6 +53,9 @@ public class CharacterScreen extends Screen {
 	}
 
 	private int scroll;
+	/** The links of the Record panel as last drawn: where each is, and what it opens. */
+	private final List<int[]> linkAt = new ArrayList<>();
+	private final List<Runnable> linkOpens = new ArrayList<>();
 
 	/** The H menu's raised window (the Map page's too). */
 	static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
@@ -184,6 +188,18 @@ public class CharacterScreen extends Screen {
 
 	private static int listHeight(List<Row> rows) {
 		return 20 + rows.size() * ROW + 4;
+	}
+
+	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		for (int i = 0; i < linkAt.size(); i++) {
+			int[] r = linkAt.get(i);
+			if (event.x() >= r[0] && event.x() < r[0] + r[2] && event.y() >= r[1] && event.y() < r[1] + r[3] && event.y() >= r[4] && event.y() < r[5]) {
+				linkOpens.get(i).run();
+				return true;
+			}
+		}
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
@@ -378,6 +394,21 @@ public class CharacterScreen extends Screen {
 		}
 		ry += pairH + GAP;
 		list(graphics, rx, ry, rw, t("record"), PowerScreen.COLOR_GOLD, record);
+		// links of other mods' pages (Kingdoms' papers), right of the Record's title
+		linkAt.clear();
+		linkOpens.clear();
+		int lx = rx + rw - 8;
+		for (var link : MenuTabs.characterLinks()) {
+			Component label = link.getKey().get();
+			int lw = this.font.width(label);
+			lx -= lw;
+			boolean over = mouseY >= ry + 4 && mouseY < ry + 16 && mouseX >= lx && mouseX < lx + lw && mouseY >= bodyTop && mouseY < bottom;
+			graphics.text(this.font, label, lx, ry + 6, over ? PowerScreen.COLOR_TEXT : PowerScreen.COLOR_GOLD);
+			graphics.fill(lx, ry + 15, lx + lw, ry + 16, over ? PowerScreen.COLOR_TEXT : PowerScreen.COLOR_GOLD);
+			linkAt.add(new int[] {lx, ry + 4, lw, 12, bodyTop, bottom});
+			linkOpens.add(link.getValue());
+			lx -= 10;
+		}
 		graphics.disableScissor();
 		if (total > view) {
 			UiStyle.scrollbar(graphics, x + pw + 1, bodyTop, view, view, total, this.scroll);

@@ -193,8 +193,8 @@ public final class Classes {
 	 * has earned (its levels, points and perks, the spells you know) is kept. A Cleric's or Warlock's patron is the Patrons' own
 	 * ({@link Patrons}), not changed here.
 	 */
-	public static final int RESPEC_SILVER = 25;
-	public static final long RESPEC_WAIT_TICKS = 20L * 60L * 10L;
+	public static final int RESPEC_SILVER = 250;
+	public static final long RESPEC_WAIT_TICKS = 24000L;
 	/** The game time a player last changed what they picked with their class. Saved, kept through death, synced to its own player (the class screen shows the wait). */
 	public static final AttachmentType<Long> RESPEC_AT = AttachmentRegistry.create(JaymosKingdoms.id("class_respec_at"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath().syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));

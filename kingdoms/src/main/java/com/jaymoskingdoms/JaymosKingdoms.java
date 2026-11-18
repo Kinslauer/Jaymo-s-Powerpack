@@ -679,6 +679,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		DailyTasks.register();
 		TitleChoice.register();
 		Rewards.register();
+		Papers.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news

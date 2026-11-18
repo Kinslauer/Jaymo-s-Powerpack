@@ -98,6 +98,8 @@ public final class MenuTabs {
 	private static final Map<String, List<Supplier<List<Component[]>>>> CHARACTER_ROWS = new HashMap<>();
 	/** Extra bars for the Character page's vitals: {label, value, share 0-1, colour} (see {@link #bars(Supplier)}). */
 	private static final List<Supplier<List<Object[]>>> BARS = new ArrayList<>();
+	/** Links on the Character page's Record panel: a label and what it opens (see {@link #characterLink}). */
+	private static final List<Map.Entry<Supplier<Component>, Runnable>> CHARACTER_LINKS = new ArrayList<>();
 	/** Extra pins for the Map page: a name (its colour the pin's) and a place in the world you stand in. */
 	private static final List<Supplier<List<Map.Entry<Component, BlockPos>>>> PINS = new ArrayList<>();
 	/** Screens the menu is already hooked onto (a resize inits a screen again). */
@@ -177,6 +179,15 @@ public final class MenuTabs {
 			}
 		}
 		return out;
+	}
+
+	/** Adds a link to the Character page's Record panel (Kingdoms' "Show my papers"). Called by reflection from Kingdoms. */
+	public static void characterLink(Supplier<Component> label, Runnable open) {
+		CHARACTER_LINKS.add(Map.entry(label, open));
+	}
+
+	static List<Map.Entry<Supplier<Component>, Runnable>> characterLinks() {
+		return CHARACTER_LINKS;
 	}
 
 	/** Adds pins to the Map page. Called by reflection from Kingdoms. */
