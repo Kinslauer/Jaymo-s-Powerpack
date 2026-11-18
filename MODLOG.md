@@ -6014,3 +6014,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - Fixes: a player joining didn't get the conjoined twin data, or the depth of others' sunk lures, synced to their screen; both are now registered at start-up.
 - Built by CI; not played.
+
+## 0.25.17 (2026-11-18): Chunky picks up again after a restart (#1752)
+
+- Fixes: after every restart the world pre-generation came back stuck (0 chunks a second) until it was paused and continued by hand. `ChunkyCompat` now uses Chunky's API instead of its commands: it is still paused while a player is on and continued once nobody is, but a continue now waits until the paused task has finished stopping (it used to be lost when the pause was slow to drain). With nobody on, a watchdog pauses and continues a task that has run a minute without a progress event, up to three times in a row.
+- Built by CI; checked on the next restart.
