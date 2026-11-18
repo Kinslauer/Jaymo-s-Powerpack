@@ -444,9 +444,15 @@ def packMods = [
 	// out the sets named after other games' characters, and Jaymo's Kingdoms dresses monsters, undead and the Long
 	// Defence's cast in it. Client and server. 1.3 for 26.3. Needs GeckoLib and Cloth Config (above).
 	[dep: "maven.modrinth:fantasy_armor:4VFDvfvz", cf: [1083998, 9332829]],
-	// Knight Armor and Weapons (Pete MC Mods, all rights reserved; linked, never edited or bundled): knight armour, long
-	// sword, spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes and the Smithing Anvil
-	// forges the metal pieces instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
+	// Inferno (by MoriyaShiine; all rights reserved, so shipped as the untouched jar with credit on the pack page): charred
+	// logs, copper and soul fire, burning mobs spreading fire, torches as weapons, a lower fire overlay and smoky fog.
+	// Jaymo's Powers sets its config once per install (core/InfernoPreset: scorched earth off). 26.3-r1. Needs StrawberryLib.
+	[dep: "maven.modrinth:inferno:VP7Dlhrg", cf: [1230123, 8897891]],
+	// StrawberryLib (MoriyaShiine; all rights reserved; shipped untouched with credit; Cardinal Components is inside it): the library Inferno needs. 26.3-r1.
+	[dep: "maven.modrinth:strawberrylib:OoMuF3O2", cf: [1218484, 8895101]],
+	// Knight Armor and Weapons (Pete MC Mods, all rights reserved; linked, never edited or bundled): the long sword,
+	// spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes (its armour stays off: Kingdoms'
+	// heraldry harness is the pack's knight armour) and the Smithing Anvil forges the weapons instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
 	[dep: "maven.modrinth:knight-armor-and-weapons:WqwhtagO", cf: [1563034, 9620320]],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest

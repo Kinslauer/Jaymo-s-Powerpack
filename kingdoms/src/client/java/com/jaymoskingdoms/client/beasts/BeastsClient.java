@@ -74,6 +74,11 @@ public final class BeastsClient {
 		look(Beasts.RUNE_COLOSSUS,
 			new BbMobRenderer.Look("rune_bound_colossus", COLOSSUS_SCALE, 1.0F, "idle", "walk", "run", "death", 0.75F, 1.5F, "head"));
 		look(Beasts.CRYSTAL_BEETLE, new BbMobRenderer.Look("crystal_beetle", BEETLE_SCALE, 0.4F, "idle", "walk", null, null, 0.9F, 1.0F, "head"));
+		// the bombardier beetle and its queen: the crystal beetle's model with the crystals off (the queen drawn larger by her scale attribute)
+		look(com.jaymoskingdoms.beasts.LabyrinthCraft.BOMBARDIER,
+			new BbMobRenderer.Look("bombardier_beetle", BEETLE_SCALE, 0.4F, "idle", "walk", null, null, 0.9F, 1.0F, "head"));
+		look(com.jaymoskingdoms.beasts.LabyrinthCraft.QUEEN,
+			new BbMobRenderer.Look("bombardier_beetle", BEETLE_SCALE, 0.4F, "idle", "walk", null, null, 0.9F, 1.0F, "head"));
 		// the knight's sword is a real item in his fist: drawn on the model's empty sword bone, down its chain of bones
 		EntityRenderers.register(Beasts.LAUGHING_BONES, net.minecraft.client.renderer.entity.SkeletonRenderer::new);
 		EntityRenderers.register(Beasts.RUNNING_SKULL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.0F, false));

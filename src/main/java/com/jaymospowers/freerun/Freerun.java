@@ -718,6 +718,17 @@ public final class Freerun {
 		player.addTag(XP_TAG);
 	}
 
+	/** A hook drags a clinging player off the wall: the grip is gone, and that wall can't be caught again till they land. False if they weren't clinging. */
+	public static boolean dragOff(ServerPlayer player) {
+		Integer move = player.getAttached(MOVE);
+		if (move == null || move / 8 != CLING) {
+			return false;
+		}
+		KICKED.merge(player.getUUID(), 1 << (move % 8 - 1), (a, b) -> a | b);
+		stop(player);
+		return true;
+	}
+
 	private static void stop(ServerPlayer player) {
 		Doing doing = DOING.remove(player.getUUID());
 		if (doing != null && held(doing.kind)) {

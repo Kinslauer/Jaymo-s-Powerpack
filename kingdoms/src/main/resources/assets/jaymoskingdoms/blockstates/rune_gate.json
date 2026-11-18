@@ -1,0 +1,28 @@
+{
+	"variants": {
+		"anthu=false,kesh=false,orrim=false": {
+			"model": "jaymoskingdoms:block/rune_gate_0"
+		},
+		"anthu=false,kesh=false,orrim=true": {
+			"model": "jaymoskingdoms:block/rune_gate_1"
+		},
+		"anthu=false,kesh=true,orrim=false": {
+			"model": "jaymoskingdoms:block/rune_gate_1"
+		},
+		"anthu=false,kesh=true,orrim=true": {
+			"model": "jaymoskingdoms:block/rune_gate_2"
+		},
+		"anthu=true,kesh=false,orrim=false": {
+			"model": "jaymoskingdoms:block/rune_gate_1"
+		},
+		"anthu=true,kesh=false,orrim=true": {
+			"model": "jaymoskingdoms:block/rune_gate_2"
+		},
+		"anthu=true,kesh=true,orrim=false": {
+			"model": "jaymoskingdoms:block/rune_gate_2"
+		},
+		"anthu=true,kesh=true,orrim=true": {
+			"model": "jaymoskingdoms:block/rune_gate_3"
+		}
+	}
+}
