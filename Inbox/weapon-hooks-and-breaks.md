@@ -35,3 +35,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 ## Notes
 - 2026-11-17 8:28 PM ET: Andy approved all four lore paragraphs; they are canon now.
 - 2026-11-17 20:44 Question for Andy: do you want Knight Armor's recipe changed by a datapack that swaps its grid recipes for Tinkers forging (it has a 26.3 Fabric build, 1.1.1, but is all rights reserved and its armour still doubles our knight's harness)? Not added, waiting on you.
+- 2026-11-18 02:14 Knight Armor shipped with forging datapack: PR #1718
