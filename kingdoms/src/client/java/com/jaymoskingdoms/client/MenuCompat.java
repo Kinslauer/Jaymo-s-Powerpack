@@ -75,11 +75,13 @@ public final class MenuCompat {
 				Function.class, BooleanSupplier.class);
 			tab(register, "skills", ORDER_SKILLS, () -> new ItemStack(Items.EXPERIENCE_BOTTLE), "menu.jaymoskingdoms.tab.skills",
 				() -> Minecraft.getInstance().gui.setScreen(new SkillScreen()), s -> s instanceof SkillScreen, s -> ((SkillScreen)s).corner());
-			// (docs/Classes-Plan.md: a creative player switches class from a tab on the H menu)
+			// (docs/Classes-Plan.md: a creative player switches class from a tab on the H menu; anyone with a class can change its
+			// first pick there, for a fee: ClassScreen#respec)
 			register.invoke(null, "class", ORDER_CLASS, (Supplier<ItemStack>)() -> new ItemStack(Items.IRON_SWORD),
 				Component.translatable("menu.jaymoskingdoms.tab.class"), (Runnable)() -> Minecraft.getInstance().gui.setScreen(new ClassScreen(false, true)),
 				(Predicate<Screen>)s -> s instanceof ClassScreen, (Function<Screen, int[]>)s -> ((ClassScreen)s).corner(),
-				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative());
+				(BooleanSupplier)() -> Minecraft.getInstance().player != null
+					&& (Minecraft.getInstance().player.isCreative() || com.jaymoskingdoms.Classes.classOf(Minecraft.getInstance().player) != null));
 			// the belt menu: shown once you know a form or have a Spell Engine spell (its Spells tab)
 			register.invoke(null, "forms", ORDER_FORMS, (Supplier<ItemStack>)() -> new ItemStack(Items.IRON_SWORD),
 				Component.translatable("menu.jaymoskingdoms.tab.forms"),

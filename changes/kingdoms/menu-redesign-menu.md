@@ -4,4 +4,5 @@
 - The Character page takes Kingdoms' rows by panel: heritage, class (and second class) and renown title for the header, the character level, your attributes (Might, Grit...) and the rest (career, skills, tier, patron, realm...) in the Record.
 - Pages leave room for Powers' side list (`MenuCompat.SIDE`, `MenuCompat.centre`) and the skill web keeps the bar. An older Powers without the menu changes still works (each reflective call is its own try).
 - Classes: `MenuCompat`, `FollowersScreen.openAll`, `JournalScreen`, `PartyScreen`, `GrowthScreen`, `FactionScreen`, `RetakingScreen`, `TierScreen`, `ValorScreen`, `BoonScreen`, `BeltScreen`, lang part `menu_redesign.json`.
+- The Class page shows for anyone with a class (it was creative only), so a calling's first pick can be changed there for its fee.
 - Built; not played.
