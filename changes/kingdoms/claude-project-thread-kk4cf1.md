@@ -71,6 +71,9 @@ Classes: `Tales`, `TaleWays`, `TaleCast`, `Tale`, `TaleAfter` (graves, people mo
 `Garlic` (wolfsbane), `StoryHoldScreen` (hints
 193-204), `lang/parts/tales.json`, `tools/tale_check.py`, `docs/StoryQuests-Plan.md`.
 
+Emigration (any household, not only a tale's): a family no longer splits when one of them may not leave (a ruler,
+a town's leader, someone sworn or held, a player's family, one of a running tale's people): then they all stay.
+
 Every row was checked against the pick list by independent readers (tales and engine separately) and their
 findings fixed. Built (full build and the tale checker pass: 79 files, 0 problems). **Not played.** Lore placements are in `Lore.md` as
 `(new)` paragraphs for Andy to approve.
