@@ -53,6 +53,8 @@ public final class EpicTowns {
 	static final int START_SEARCH = 4;
 	/** The most starts that pass those checks to look at the ground under (each loads its chunks) before giving up. */
 	static final int GROUND_LOOKS = 3;
+	/** The most time (ms) the search may take on the server thread: each try lays a whole town out and has its rivers checked. */
+	static final long SEARCH_MS = 2000;
 
 	/** The five towns' ids (vanilla's villages, which Epic Structures redraws). */
 	static final List<String> TOWNS = List.of("minecraft:village_plains", "minecraft:village_desert", "minecraft:village_savanna",
@@ -160,7 +162,11 @@ public final class EpicTowns {
 		StructureStart start = null;
 		ChunkPos origin = null;
 		int looks = 0;
+		long until = System.nanoTime() + SEARCH_MS * 1_000_000L;
 		for (ChunkPos c : around) {
+			if (System.nanoTime() > until) {
+				break;
+			}
 			StructureStart tried = GrandSeats.generate(level, holder.get(), c);
 			if (tried == null) {
 				continue;
