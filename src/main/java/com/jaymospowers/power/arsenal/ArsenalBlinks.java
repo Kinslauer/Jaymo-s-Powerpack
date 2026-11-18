@@ -1,11 +1,11 @@
-package com.jaymospowers.power.blinker;
+package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.AbilityPower;
+import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.PickKit;
-import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,21 +15,27 @@ import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -38,32 +44,30 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Blinker (Andy's Awakening pick: "a new power, or the End-born's gift"). The End's step, the one the endermen take, woken in a
- * person: they are here, and then they are there, and in the instant between nothing can touch them.
+ * The Void Arsenal's blinks: the End's step, the one the endermen take. Every blink goes through a real rift pair, one
+ * torn open where he leaves (facing the way he goes) and one where he comes out (facing back), drawn like his other rifts
+ * ({@link #rifts}; {@code ArsenalBlinkRenderer} on the client). Only for a corrupted Arsenal past its starter
+ * ({@link #voided}):
  * <ul>
- * <li>R, <b>Blink</b>: up to {@link #BLINK_RANGE} blocks along the look, short of any wall, and untouchable for
- * {@link #UNTOUCHABLE} ticks. (The starter, at half the reach.)</li>
- * <li>G, <b>Blink Strike</b>: to the foe you look at, up to {@link #STRIKE_RANGE} blocks off, behind it, and a blow.</li>
- * <li>V, <b>Vanish</b>: a burst of blinding smoke; everyone round you loses you, and you blink a few blocks back unseen.</li>
- * <li>B, <b>Sky Drop</b>: take hold of a foe close by and blink with it {@link #DROP_HEIGHT} blocks straight up; let go, and
- * blink back down while it falls.</li>
- * <li>C (ascended), <b>Flicker</b>: for {@link #FLICKER_TICKS} ticks you flicker from foe to foe round you, a blow every
- * {@link #FLICKER_EVERY} ticks, untouchable throughout.</li>
+ * <li>Sprint + R, <b>Blink</b>: up to {@link #BLINK_RANGE} blocks along the look, short of any wall, and untouchable for
+ * {@link #UNTOUCHABLE} ticks.</li>
+ * <li>Sprint + B, <b>Blink Strike</b>: behind the foe looked at, up to {@link #STRIKE_RANGE} blocks off, and a blow.</li>
+ * <li>Sprint + Z, <b>Vanish</b>: blinding smoke; everyone round loses him, and he blinks a few blocks back unseen.</li>
+ * <li>Sprint + X, <b>Sky Drop</b>: a foe close by and he go {@link #DROP_HEIGHT} blocks straight up; he lets go, and
+ * blinks home while it falls.</li>
+ * <li>Ascended, Sneak + C, <b>Flicker</b>: for {@link #FLICKER_TICKS} ticks he flickers from foe to foe round him, a blow
+ * every {@link #FLICKER_EVERY} ticks, untouchable throughout.</li>
  * </ul>
+ * The heavy hit that blinks a corrupted user away ({@link ArsenalVoid#blink}) opens the same pair.
  */
-public final class BlinkerPower implements Power {
-	public static final BlinkerPower INSTANCE = new BlinkerPower();
-	public static final Identifier ID = JaymosPowers.id("blinker");
-	public static final int COLOR = 0xC07CFF;
-	static final int SMOKE = 0x2B2433, FLASH = 0xF0D8FF;
-
+public final class ArsenalBlinks {
 	// ---- tuning ----
-	private static final String TABLE = "blinker";
+	private static final String TABLE = "arsenal_blinks";
 	private static final int BLINK = 0, STRIKE = 1, VANISH = 2, DROP = 3, FLICKER = 4;
 	/** Blink: reach (blocks), untouchable (ticks), wait. */
 	static final double BLINK_RANGE = 12.0;
 	static final int UNTOUCHABLE = 10, BLINK_COOLDOWN = 30;
-	/** Blink Strike: reach, the blow (a share of the fists, plus), wait. */
+	/** Blink Strike: reach, the blow (a share of his attack damage, plus), wait. */
 	static final double STRIKE_RANGE = 18.0;
 	static final float STRIKE_SHARE = 1.5F, STRIKE_PLUS = 2.0F;
 	static final int STRIKE_COOLDOWN = 80;
@@ -73,10 +77,46 @@ public final class BlinkerPower implements Power {
 	/** Sky Drop: how close a foe, how high, the ticks up there before letting go, wait. */
 	static final double DROP_REACH = 6.0;
 	static final int DROP_HEIGHT = 14, DROP_HANG = 8, DROP_COOLDOWN = 300;
-	/** Flicker: how long, a blow every, how far it looks for foes, the blow's share of the fists, wait. */
+	/** Flicker: how long, a blow every, how far it looks for foes, the blow's share of his attack damage, wait. */
 	static final int FLICKER_TICKS = 40, FLICKER_EVERY = 4, FLICKER_COOLDOWN = 20 * 60;
 	static final double FLICKER_RANGE = 12.0;
 	static final float FLICKER_SHARE = 0.7F;
+	/** How far in front of where he leaves (and behind where he comes out) each rift opens. */
+	static final double RIFT_OFFSET = 0.4;
+	/** The motes at each end: how many (the rift itself is drawn on the client). */
+	static final int MOTES = 2;
+	static final int SMOKE = 0x2B2433, FLASH = 0xF0D8FF;
+
+	/**
+	 * Server → client: one blink's rift pair, where he left ({@code from}, facing {@code fromYaw}) and where he came out
+	 * ({@code to}, facing {@code toYaw}), sized to the body that went through; the End's starfield ({@code voidRift}) or
+	 * the nether-portal swirl, as his own rifts look right now.
+	 */
+	public record Tear(double fx, double fy, double fz, float fromYaw, double tx, double ty, double tz, float toYaw, float width, float height,
+		boolean voidRift) implements CustomPacketPayload {
+		public static final Type<Tear> TYPE = new Type<>(JaymosPowers.id("arsenal_blink"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Tear> CODEC = CustomPacketPayload.codec(
+			(t, buf) -> {
+				buf.writeDouble(t.fx);
+				buf.writeDouble(t.fy);
+				buf.writeDouble(t.fz);
+				buf.writeFloat(t.fromYaw);
+				buf.writeDouble(t.tx);
+				buf.writeDouble(t.ty);
+				buf.writeDouble(t.tz);
+				buf.writeFloat(t.toYaw);
+				buf.writeFloat(t.width);
+				buf.writeFloat(t.height);
+				buf.writeBoolean(t.voidRift);
+			},
+			buf -> new Tear(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readDouble(), buf.readDouble(),
+				buf.readDouble(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readBoolean()));
+
+		@Override
+		public Type<Tear> type() {
+			return TYPE;
+		}
+	}
 
 	/** Untouchable until (game time). */
 	private static final Map<UUID, Long> UNTOUCHED = new HashMap<>();
@@ -91,13 +131,13 @@ public final class BlinkerPower implements Power {
 	/** Flicker running until (game time). */
 	private static final Map<UUID, Long> FLICKERING = new HashMap<>();
 
-	private BlinkerPower() {
+	private ArsenalBlinks() {
 	}
 
-	public static void init() {
-		Powers.register(INSTANCE);
+	static void init() {
+		PayloadTypeRegistry.clientboundPlay().register(Tear.TYPE, Tear.CODEC);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!untouchable(entity) || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || missed(entity, source));
+			!untouchable(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			UNTOUCHED.clear();
@@ -106,103 +146,91 @@ public final class BlinkerPower implements Power {
 		});
 	}
 
-	private static void forget(ServerPlayer player) {
+	/** The power went, he went down, or the void left him: whatever blink was running ends. */
+	static void forget(ServerPlayer player) {
 		UNTOUCHED.remove(player.getUUID());
 		DROPS.remove(player.getUUID());
 		FLICKERING.remove(player.getUUID());
 	}
 
-	/** A blow that found nobody there (counted for the trials): it stays refused. */
-	private static boolean missed(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
-		com.jaymospowers.core.trials.PowerTrials.count(entity, "blinker.untouched", source.getEntity() != null ? 1 : 0);
-		return false;
-	}
-
-	/** In the instant between here and there: nothing touches them. */
-	static boolean untouchable(net.minecraft.world.entity.Entity e) {
+	/** In the instant between here and there: nothing touches him. */
+	static boolean untouchable(Entity e) {
 		Long until = UNTOUCHED.get(e.getUUID());
 		return until != null && e.level().getGameTime() <= until;
 	}
 
-	@Override
-	public Identifier id() {
-		return ID;
+	/** The blinks are the Void Arsenal's, once past its starter (the same test as its other keys). */
+	static boolean voided(ServerPlayer player) {
+		return Fate.isCorrupted(player) && !Mastery.starterOnly(player);
 	}
 
-	@Override
-	public int color() {
-		return COLOR;
+	private static boolean sprinting(ServerPlayer player) {
+		return player.isSprinting() && !player.isShiftKeyDown() && voided(player);
 	}
 
-	@Override
-	public ItemStack icon() {
-		return new ItemStack(Items.ENDER_PEARL);
+	// ---- the keys (each true when the press was a blink's) ----
+
+	/** Sprint + R: Blink; sprint + B: Blink Strike. */
+	static boolean key(ServerPlayer player, PowerKey key) {
+		if (!sprinting(player)) {
+			return false;
+		}
+		switch (key) {
+			case ABILITY_1 -> blink(player);
+			case ABILITY_4 -> strike(player);
+			default -> {
+				return false;
+			}
+		}
+		return true;
 	}
 
-	@Override
-	public PowerKey starterKey() {
-		return PowerKey.ABILITY_1;
+	/** Sprint + Z: Vanish. */
+	static boolean mode(ServerPlayer player) {
+		if (!sprinting(player)) {
+			return false;
+		}
+		vanish(player);
+		return true;
 	}
 
-	@Override
-	public PowerKey[] unlockOrder() {
-		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_3, PowerKey.ABILITY_4};
+	/** Sprint + X: Sky Drop (so the press never starts the Cannon Battery). */
+	static boolean special(ServerPlayer player) {
+		if (!sprinting(player)) {
+			return false;
+		}
+		drop(player);
+		return true;
 	}
 
-	@Override
-	public boolean slotUnlocked(net.minecraft.world.entity.player.Player player, String slot) {
-		return false;
-	}
-
-	@Override
-	public void onLost(ServerPlayer player) {
-		forget(player);
-	}
-
-	@Override
-	public void onDowned(ServerPlayer player) {
-		DROPS.remove(player.getUUID());
-		FLICKERING.remove(player.getUUID());
+	/** Ascended, Sneak + C: Flicker. */
+	static boolean ultimate(ServerPlayer player) {
+		if (!player.isShiftKeyDown() || !Fate.isAscended(player) || !voided(player)) {
+			return false;
+		}
+		if (ready(player, FLICKER)) {
+			PickKit.spend(TABLE, player, FLICKER, FLICKER_COOLDOWN);
+			long until = player.level().getGameTime() + FLICKER_TICKS;
+			FLICKERING.put(player.getUUID(), until);
+			UNTOUCHED.put(player.getUUID(), until);
+		}
+		return true;
 	}
 
 	private static boolean ready(ServerPlayer player, int slot) {
 		if (PickKit.ready(TABLE, player, slot) || player.getAbilities().instabuild) {
 			return true;
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.wait", (PickKit.left(TABLE, player, slot) + 19) / 20)
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_wait", (PickKit.left(TABLE, player, slot) + 19) / 20)
 			.withStyle(ChatFormatting.DARK_PURPLE));
 		return false;
 	}
 
-	@Override
-	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
-		if (!down) {
-			return;
-		}
-		switch (key) {
-			case ABILITY_1 -> blink(player, com.jaymospowers.core.Mastery.starterOnly(player));
-			case ABILITY_2 -> strike(player);
-			case ABILITY_3 -> vanish(player);
-			case ABILITY_4 -> drop(player);
-		}
-	}
-
-	@Override
-	public void onUltimate(ServerPlayer player, boolean down) {
-		if (down && ready(player, FLICKER)) {
-			PickKit.spend(TABLE, player, FLICKER, FLICKER_COOLDOWN);
-			long until = player.level().getGameTime() + FLICKER_TICKS;
-			FLICKERING.put(player.getUUID(), until);
-			UNTOUCHED.put(player.getUUID(), until);
-		}
-	}
-
 	// ---- the step ----
 
-	/** Steps {@code e} to {@code to} (a spot it fits), with the flash at both ends. */
-	static void step(ServerLevel level, LivingEntity e, Vec3 to) {
+	/** Steps {@code e} to {@code to} (a spot it fits) through a rift pair opened by {@code opener}. */
+	static void step(ServerLevel level, ServerPlayer opener, LivingEntity e, Vec3 to) {
 		Vec3 from = e.position();
-		puff(level, from, e.getBbHeight());
 		if (e.isPassenger()) {
 			e.stopRiding();
 		}
@@ -212,13 +240,31 @@ public final class BlinkerPower implements Power {
 			e.teleportTo(to.x, to.y, to.z);
 		}
 		e.resetFallDistance();
-		puff(level, to, e.getBbHeight());
+		rifts(level, e, from, to, ArsenalVoid.isVoid(opener));
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 1.4F);
 	}
 
-	private static void puff(ServerLevel level, Vec3 at, float height) {
-		level.sendParticles(MagicFx.wisp(COLOR, 1.0F), at.x, at.y + height * 0.5, at.z, 14, 0.25, height * 0.35, 0.25, 0.05);
-		level.sendParticles(MagicFx.spark(FLASH, 0.6F), at.x, at.y + height * 0.5, at.z, 4, 0.2, height * 0.3, 0.2, 0.02);
+	/**
+	 * Opens the rift pair for {@code e}'s step from {@code from} to {@code to} on every client near either end: the one
+	 * it left by faces the way it went, the one it came out of faces back. A mote or two drifts off each.
+	 */
+	public static void rifts(ServerLevel level, LivingEntity e, Vec3 from, Vec3 to, boolean voidRift) {
+		Vec3 d = to.subtract(from).multiply(1.0, 0.0, 1.0);
+		boolean vertical = d.lengthSqr() < 1.0E-4;
+		float yaw = vertical ? e.getYRot() : (float)Math.toDegrees(Math.atan2(-d.x, d.z));
+		Vec3 ahead = vertical ? Vec3.ZERO : d.normalize().scale(RIFT_OFFSET);
+		Vec3 out = from.add(ahead);
+		Vec3 in = to.subtract(ahead);
+		Tear tear = new Tear(out.x, out.y, out.z, yaw, in.x, in.y, in.z, yaw + 180.0F, e.getBbWidth(), e.getBbHeight(), voidRift);
+		double view = ArsenalPocket.VIEW_DISTANCE * ArsenalPocket.VIEW_DISTANCE;
+		for (ServerPlayer viewer : level.players()) {
+			if ((viewer.position().distanceToSqr(out) < view || viewer.position().distanceToSqr(in) < view) && ServerPlayNetworking.canSend(viewer, Tear.TYPE)) {
+				ServerPlayNetworking.send(viewer, tear);
+			}
+		}
+		double half = e.getBbHeight() * 0.5;
+		level.sendParticles(MagicFx.VOID, out.x, out.y + half, out.z, MOTES, 0.2, half * 0.5, 0.2, 0.02);
+		level.sendParticles(MagicFx.VOID, in.x, in.y + half, in.z, MOTES, 0.2, half * 0.5, 0.2, 0.02);
 	}
 
 	/** The nearest spot {@code e} fits at {@code at}: there, a little above or below. */
@@ -232,17 +278,16 @@ public final class BlinkerPower implements Power {
 		return null;
 	}
 
-	/** R: along the look, short of any wall, untouchable a moment. */
-	static void blink(ServerPlayer player, boolean starter) {
+	/** Sprint + R: along the look, short of any wall, untouchable a moment. */
+	static void blink(ServerPlayer player) {
 		if (!ready(player, BLINK)) {
 			return;
 		}
 		ServerLevel level = player.level();
-		double range = starter ? BLINK_RANGE * 0.5 : BLINK_RANGE;
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
-		BlockHitResult wall = level.clip(new ClipContext(eye, eye.add(look.scale(range)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-		double reach = wall.getType() == HitResult.Type.MISS ? range : Math.max(0.0, wall.getLocation().distanceTo(eye) - 0.8);
+		BlockHitResult wall = level.clip(new ClipContext(eye, eye.add(look.scale(BLINK_RANGE)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		double reach = wall.getType() == HitResult.Type.MISS ? BLINK_RANGE : Math.max(0.0, wall.getLocation().distanceTo(eye) - 0.8);
 		Vec3 to = null;
 		for (double d = reach; d >= 1.0 && to == null; d -= 0.5) {
 			to = fit(level, player, player.position().add(look.scale(d)));
@@ -253,20 +298,16 @@ public final class BlinkerPower implements Power {
 		PickKit.spend(TABLE, player, BLINK, BLINK_COOLDOWN);
 		UNTOUCHED.put(player.getUUID(), level.getGameTime() + UNTOUCHABLE);
 		Vec3 keep = player.getDeltaMovement();
-		com.jaymospowers.core.trials.PowerTrials.count(level.dimension() == net.minecraft.world.level.Level.END ? player : null, "blinker.end_blink", 1);
-		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.blink", (int)Math.round(player.position().distanceTo(to)));
-		com.jaymospowers.core.trials.PowerTrials.count(player.onGround() ? null : player, "blinker.air", 1);
-		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.blink_long", (int)Math.round(player.position().distanceTo(to)));
-		step(level, player, to);
+		step(level, player, player, to);
 		player.setDeltaMovement(keep.multiply(1.0, 0.0, 1.0));
 		player.syncVelocity = true;
 	}
 
-	/** G: behind the foe looked at, and a blow. */
+	/** Sprint + B: behind the foe looked at, and a blow. */
 	static void strike(ServerPlayer player) {
 		LivingEntity foe = PickKit.aimed(player, STRIKE_RANGE);
 		if (foe == null) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.no_foe").withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_no_foe").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (!ready(player, STRIKE)) {
@@ -280,15 +321,12 @@ public final class BlinkerPower implements Power {
 			to = fit(level, player, foe.position().subtract(behind.scale(foe.getBbWidth() * 0.5 + 0.8)));
 		}
 		if (to == null) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.no_room").withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_no_room").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		PickKit.spend(TABLE, player, STRIKE, STRIKE_COOLDOWN);
-		com.jaymospowers.core.trials.PowerTrials.count(foe.onGround() ? null : player, "blinker.strike_air", 1);
-		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.strike", 1);
-		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.strike_far", (int)player.distanceTo(foe));
 		UNTOUCHED.put(player.getUUID(), level.getGameTime() + UNTOUCHABLE);
-		step(level, player, to);
+		step(level, player, player, to);
 		face(player, foe);
 		hit(level, player, foe, STRIKE_SHARE, STRIKE_PLUS);
 	}
@@ -304,13 +342,13 @@ public final class BlinkerPower implements Power {
 		float harm = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * share + plus;
 		foe.setInvulnerableTime(0);
 		foe.hurtServer(level, player.damageSources().playerAttack(player), harm);
-		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		Vec3 c = foe.getBoundingBox().getCenter();
 		MagicFx.stroke(level, c.add(-0.6, 0.5, 0.0), c.add(0.6, -0.5, 0.0), 0.1F, FLASH);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.9F, 1.4F);
 	}
 
-	/** V: blinding smoke, and gone a few steps back. */
+	/** Sprint + Z: blinding smoke, and gone a few steps back. */
 	static void vanish(ServerPlayer player) {
 		if (!ready(player, VANISH)) {
 			return;
@@ -318,13 +356,12 @@ public final class BlinkerPower implements Power {
 		ServerLevel level = player.level();
 		PickKit.spend(TABLE, player, VANISH, VANISH_COOLDOWN);
 		Vec3 at = player.position();
-		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.vanish_many", level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(VANISH_RADIUS), m -> m.getTarget() == player).size());
-		level.sendParticles(MagicFx.miasma(SMOKE, 2.0F), at.x, at.y + 1.0, at.z, 60, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 1.0, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 0.02);
-		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, VANISH_RADIUS) * 0.6F, SMOKE);
+		double radius = AbilityPower.size(player, VANISH_RADIUS);
+		level.sendParticles(MagicFx.miasma(SMOKE, 2.0F), at.x, at.y + 1.0, at.z, 60, radius * 0.4, 1.0, radius * 0.4, 0.02);
+		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), (float)radius * 0.6F, SMOKE);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.8F);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, VANISH_RADIUS)), e -> e != player && e.isAlive())) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius), e -> e != player && e.isAlive())) {
 			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, VANISH_BLIND, 0), player);
-			com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.vanish", 1);
 			if (e instanceof Mob mob && mob.getTarget() == player) {
 				mob.setTarget(null);
 				mob.getNavigation().stop();
@@ -338,24 +375,21 @@ public final class BlinkerPower implements Power {
 			if (to != null && level.clip(new ClipContext(player.getEyePosition(), to.add(0.0, player.getEyeHeight(), 0.0), ClipContext.Block.COLLIDER,
 				ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS) {
 				UNTOUCHED.put(player.getUUID(), level.getGameTime() + UNTOUCHABLE);
-				step(level, player, to);
+				step(level, player, player, to);
 				break;
 			}
 		}
 	}
 
-	/** B: up with a foe, and let go. */
+	/** Sprint + X: up with a foe, and let go. */
 	static void drop(ServerPlayer player) {
 		LivingEntity foe = PickKit.aimed(player, DROP_REACH);
 		if (foe == null) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.no_foe").withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_no_foe").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (!foe.canUsePortal(false)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.too_much").withStyle(ChatFormatting.GRAY));
-			return;
-		}
-		if (!ready(player, DROP)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_too_much").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		ServerLevel level = player.level();
@@ -364,30 +398,42 @@ public final class BlinkerPower implements Power {
 		apart = apart.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : apart.normalize();
 		Vec3 meUp = foeUp.add(apart.scale(foe.getBbWidth() * 0.5 + 0.8));
 		if (!level.noCollision(foe, foe.getDimensions(foe.getPose()).makeBoundingBox(foeUp))
-			|| !level.noCollision(player, player.getDimensions(player.getPose()).makeBoundingBox(meUp))) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.blinker.no_sky").withStyle(ChatFormatting.GRAY));
+			|| !level.noCollision(player, player.getDimensions(player.getPose()).makeBoundingBox(meUp))
+			|| roofed(level, player, foe.getEyePosition(), foeUp) || roofed(level, player, player.getEyePosition(), meUp)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.blink_no_sky").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (!ready(player, DROP)) {
 			return;
 		}
 		PickKit.spend(TABLE, player, DROP, DROP_COOLDOWN);
-		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.drop", 1);
-		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.drop_big", (int)foe.getMaxHealth());
 		Drop d = new Drop();
 		d.foe = foe;
 		d.home = player.position();
 		d.at = level.getGameTime();
 		DROPS.put(player.getUUID(), d);
 		UNTOUCHED.put(player.getUUID(), level.getGameTime() + DROP_HANG + UNTOUCHABLE);
-		step(level, foe, foeUp);
-		step(level, player, meUp);
+		step(level, player, foe, foeUp);
+		step(level, player, player, meUp);
 		foe.setDeltaMovement(Vec3.ZERO);
 		foe.syncVelocity = true;
 	}
 
-	@Override
-	public void tick(ServerPlayer player) {
+	/** Something solid between {@code from} and the top of the column at {@code up}: a roof. */
+	private static boolean roofed(ServerLevel level, Entity viewer, Vec3 from, Vec3 up) {
+		return level.clip(new ClipContext(from, up.add(0.0, 2.0, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, viewer))
+			.getType() != HitResult.Type.MISS;
+	}
+
+	/** Every tick, for an Arsenal user (from {@link ArsenalPower#tick}). */
+	static void tick(ServerPlayer player) {
+		Drop d = DROPS.get(player.getUUID());
+		Long flicker = FLICKERING.get(player.getUUID());
+		if (d == null && flicker == null) {
+			return;
+		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		Drop d = DROPS.get(player.getUUID());
 		if (d != null) {
 			if (now - d.at < DROP_HANG && d.foe.isAlive()) {
 				// held up there a moment, then let go
@@ -401,11 +447,10 @@ public final class BlinkerPower implements Power {
 				Vec3 home = fit(level, player, d.home);
 				if (home != null && player.isAlive()) {
 					UNTOUCHED.put(player.getUUID(), now + UNTOUCHABLE);
-					step(level, player, home);
+					step(level, player, player, home);
 				}
 			}
 		}
-		Long flicker = FLICKERING.get(player.getUUID());
 		if (flicker != null) {
 			if (now > flicker || !player.isAlive()) {
 				FLICKERING.remove(player.getUUID());
@@ -415,7 +460,7 @@ public final class BlinkerPower implements Power {
 		}
 	}
 
-	/** One flicker: beside a foe round you, and a blow. */
+	/** One flicker: through a rift to beside a foe round him, and a blow. */
 	private static void flick(ServerLevel level, ServerPlayer player) {
 		List<LivingEntity> foes = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(FLICKER_RANGE),
 			e -> PickKit.foe(player, e) && e.distanceTo(player) <= FLICKER_RANGE));
@@ -429,7 +474,7 @@ public final class BlinkerPower implements Power {
 		if (to == null) {
 			return;
 		}
-		step(level, player, to);
+		step(level, player, player, to);
 		face(player, foe);
 		hit(level, player, foe, FLICKER_SHARE, 0.0F);
 	}

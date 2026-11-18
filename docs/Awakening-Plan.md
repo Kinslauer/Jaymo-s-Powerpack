@@ -679,3 +679,33 @@ throws a foe, and a leg cut counts on any foe, not only people.
 
 Checked and sound: the hooks change nothing else, every trial has a hook and its two lines of text, and old saves convert
 once without paying a trial twice.
+
+## Andy's ruling (2026-11-18): the three new powers folded in
+"Looks like lawgiver, blinker, and reactor heart made it in as their own powers ... Thats not my intention." What the
+plan said: all three rows read "For us: a new power"; Reactor and Blinker had no note, and the Rule writer's note was
+"Something should be working on how this works already" (the binding oaths and pacts, PR #1684, committed that morning,
+were what it meant; nothing found it then). So:
+- **Gone as powers**: `power/reactor`, `power/blinker`, `power/rules`, their callings, ladders and lang. An old holder is
+  moved on joining (`core/RetiredPowers`): Reactor Heart to Z Fighter, Blinker to Arsenal, Lawgiver to a fresh fated
+  awakening. The old `rules_written` and `blinks` attachments stay registered so saves load, and are dropped then.
+- **Reactor Heart -> Legendary Z Fighter** (`ZFighterLegendHeart`, `ZFighterLegendMoves`, `ZFighterLegendNuke`): the
+  legendary rage is the heat gauge; full, it surges (no timer). Keys in a legendary form: Sprint + R Cone Burst, Sneak + R
+  tap dial, Sprint + G Blast Dash, Sneak + G Recoil, Sprint + V Shell Beam / Charged Throw, Sprint + B (hold) Drill,
+  Sneak + B Ground Crack; ascended Legend 3 at full heat, Sneak held 5 s: the Nuke. Legend 1 has heat, dial, cone, dash,
+  recoil; Legend 2 the rest. Calls: sprint moves work on foot only (flight cruises on Sprint); the heart's own blasts skip
+  him rather than refusing all self-harm; the moves hit with ki.
+- **Blinker -> Void Arsenal** (`ArsenalBlinks`, client `ArsenalBlinkRenderer`): Sprint + R Blink, Sprint + B Blink
+  Strike, Sprint + Z Vanish, Sprint + X Sky Drop, ascended Sneak + C Flicker. Each blink (and the void's involuntary
+  heavy-hit blink) opens a rift pair drawn with `RiftPortals` in the look his rifts have now (the void's starfield while
+  corrupted; the swirl is wired for any other state). Sky Drop is refused under any roof.
+- **Lawgiver -> the written oath and pact** (Kingdoms `VowBook`, `VowBookScreen`; Andy picked "Written oath and pact"):
+  a Book of Vows given on swearing. The vow's own terms are fixed; up to four more may be sworn (bound by `Vows`), and
+  striking one out breaks it. One rule line plus one per sworn term; the "what" list is the oath's or patron's; strength
+  1 + a step per 5 class levels; one rule at once, three from class level 20; paid in grace (Paladin) or credit (Warlock).
+  Use the book to write, sneak and use to enact. A broken oath or a withholding patron enacts nothing.
+
+Lore (new): the **heart** is the legendary-born's rage made a furnace: the mutation in the Warrior-born blood burns like
+the ruined future's reactors, and only mastery of each step slows it. The **blinks** are the void's own step: the End's
+neighbour that corrupts an Arsenal teaches it to step through its rifts, and the step leaves with the void. The **Book of
+Vows** is where an oath or a pact is set down: the vow's terms, the terms its keeper adds of their own, and the few things
+the god or patron will make true for one who keeps them.
