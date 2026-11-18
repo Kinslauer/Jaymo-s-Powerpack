@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 13:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 14:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,6 +33,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Agents/clouds-bits|clouds-bits]] · 💻 Odysseus · running
 
 
 ## In review
