@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 00:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/Story quest expansion|Story quest expansion]] · 💻 Odysseus · stalled
+- [ ] [[Agents/Story quest expansion|Story quest expansion]] · 💻 Odysseus · #1705 · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 

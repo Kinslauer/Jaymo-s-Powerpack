@@ -2040,7 +2040,7 @@ is on the wall.
 
 (new) **Heirs and bridges.** A lord who holds the bridges on a realm's river holds their tolls, and a realm's heir can be promised in marriage for such rights. When an heir runs from a match, the realm's guard is sent quietly, house by house, to bring them home unharmed and unremarked (tale: The Heir in the Hayloft).
 
-(new) **The Wither's coming** (Claude's placement for the Wither: Reincarnated picks, 2026-11-18). When the Wither is raised the sky goes dark over the whole land and stays dark while it lives. At first it does not hunt the one who raised it: it tears down what people built, houses first, then walls and towers. The dead near it wake with its light in their eyes and follow it; the barrow knights, who keep their own oath, do not. Every living thing that can run, runs. This is what the Dread tier's land remembers.
+(new) **Town graves.** A town's dead are buried together, a mound each beside the others near the seat, with a wooden board at the head giving the name and a line about them. A hanged man laid to rest under the Warden's light, or named innocent at the assize, gets his board like anyone (tale: The Crossroads Gibbet).
 
 (new) **What fire leaves** (Claude's placement for the Inferno picks, 2026-11-18). A big fire chokes the air for a long way round it, and a burning man or beast carries fire to whatever he touches. The charcoal burners go in after a wildfire for the charred trunks still standing, and the Ash Whisperer's people say a fire that bites is a fire nobody watched. Smiths know a metal by the colour it burns: copper burns green. Soul fire, out of the demons' country, burns blue and bites twice as deep.
 
