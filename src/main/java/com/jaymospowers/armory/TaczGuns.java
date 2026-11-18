@@ -122,20 +122,25 @@ public final class TaczGuns {
 		return false;
 	}
 
-	/** (0.10.111) TaCZ's modern guns, ammo and attachments are in no creative tab (JEI lists what the tabs hold). */
+	/**
+	 * (0.10.111) TaCZ's modern guns, ammo and attachments are in no creative tab (JEI lists what the tabs hold). Andy,
+	 * 2026-11-18: "Tacz should not be mentioned anywhere in jei or creative": none of its tabs is shown, and no item of
+	 * its namespace is in any other tab or the search (JEI: {@code client/jei/TaczHiddenJei}).
+	 */
 	public static void hideModern() {
 		if (!LOADED) {
 			return;
 		}
 		CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register((tab, output) -> {
-			if (ZERO_TAB.equals(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab))) {
+			Identifier key = BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab);
+			if (ZERO_TAB.equals(key) || key != null && NAMESPACE.equals(key.getNamespace())) {
 				// an empty category tab isn't shown at all
 				output.getDisplayStacks().clear();
 				output.getSearchTabStacks().clear();
 				return;
 			}
-			output.getDisplayStacks().removeIf(TaczGuns::isModern);
-			output.getSearchTabStacks().removeIf(TaczGuns::isModern);
+			output.getDisplayStacks().removeIf(TaczGuns::hidden);
+			output.getSearchTabStacks().removeIf(TaczGuns::hidden);
 		});
 	}
 
@@ -145,6 +150,14 @@ public final class TaczGuns {
 	 * Functional Blocks, until (0.15.118) it went with our flintlocks.
 	 */
 	static final Identifier ZERO_TAB = Identifier.fromNamespaceAndPath("tacz", "other");
+
+	/** TaCZ's namespace (its items, tabs and JEI pages). */
+	public static final String NAMESPACE = "tacz";
+
+	/** Kept out of the creative tabs: a modern gun, ammo or attachment, or any other TaCZ item. */
+	static boolean hidden(ItemStack stack) {
+		return isModern(stack) || NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace());
+	}
 
 	/** One of TaCZ's own guns ({@code tacz:ak47}) with {@code rounds} in it; empty without TaCZ. */
 	public static ItemStack modernGun(String name, int rounds) {
