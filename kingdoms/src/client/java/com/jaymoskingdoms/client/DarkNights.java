@@ -45,6 +45,8 @@ public final class DarkNights {
 
 	/** The night and moonlight the lightmap last saw. */
 	private static volatile float lastNight, lastMoon = 1.0F;
+	/** A client tick has passed since the lightmap was last worked out ({@link #takeTick}). */
+	private static volatile boolean tickPassed;
 	/** We switched a shader pack off and owe it back. */
 	private static boolean shadersOff;
 	/** Seconds in a row the night has disagreed with the shaders' state. */
@@ -55,6 +57,7 @@ public final class DarkNights {
 
 	/** Each client tick: shader packs off for a dark night, back on when it's over. */
 	public static void tick(Minecraft minecraft) {
+		tickPassed = true;
 		if (minecraft.level == null || minecraft.player == null) {
 			// left the world: give the shaders back
 			if (shadersOff) {
@@ -88,6 +91,15 @@ public final class DarkNights {
 			Iris.set(true);
 			shadersOff = false;
 		}
+	}
+
+	/** Whether the lightmap is due to be worked out again (once a client tick); clears it. */
+	public static boolean takeTick() {
+		if (!tickPassed) {
+			return false;
+		}
+		tickPassed = false;
+		return true;
 	}
 
 	/** Whether a shader pack is drawing the world right now (Iris, by reflection; false without it). */
