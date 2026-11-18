@@ -38,6 +38,8 @@ public final class ModelPoses {
 		com.jaymoskingdoms.client.forms.LassoPose.apply(model, state);
 		GoblinBody.apply(model, state);
 		OcellanBody.apply(model, state);
+		// a leaning player's legs carrying the lean
+		LeanClient.pose(model, state);
 	}
 
 	/** {@code model} posed now from {@code state}, exactly as it will be when drawn. */

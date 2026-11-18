@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Leaning round a corner (Andy's Ragdolls and Cover picks; the idea is Leaning Or Not's, nothing of it copied). Sneaking, the
- * lean keys (Q left, E right by default) tilt the body and the view out sideways about the feet: the eye moves out
+ * lean keys (Q left, E right by default) take the body and the view out sideways, the hips shifting over a bent leg: the eye moves out
  * {@link #REACH} blocks, the feet stay where they are, and what you shoot leaves from where the eye is now.
  * <p>
  * The state is one synced attachment, {@link #DIR} (-1 left, 0 upright, 1 right), set by the client's packet and dropped by
@@ -35,10 +35,13 @@ import net.minecraft.world.phys.Vec3;
  * stands in the way.
  */
 public final class Lean {
-	/** The eye's sideways move at a full lean (blocks): a body about 1.3 blocks tall tilted about 25 degrees at the feet. */
-	public static final double REACH = 0.5;
-	/** The tilt of the body and the roll of the view at a full lean (degrees). */
-	public static final float TILT = 25.0F, ROLL = 7.0F;
+	/**
+	 * The eye's sideways move at a full lean (blocks): the hips slid out and the body above them tilted (client/LeanClient).
+	 * Andy: "crouching giving you the deepest lean out": from Powers' low crouch it reaches further.
+	 */
+	public static final double REACH = 0.5, CROUCH_REACH = 0.7;
+	/** The tilt of the body above the hips (sneaking, crouching) and the roll of the view at a full lean (degrees); the legs carry the rest. */
+	public static final float TILT = 12.0F, CROUCH_TILT = 18.0F, ROLL = 7.0F;
 	/** A shot is only moved if it starts this close to the eye (blocks, squared), so a loaded-from-disk arrow is left alone. */
 	static final double NEAR_EYE_SQR = 2.25;
 	/** A moved shot stops this short of a wall (blocks). */
@@ -82,8 +85,7 @@ public final class Lean {
 	/** Whether {@code player} may lean just now: sneaking on their feet and nothing else going on with the body. */
 	public static boolean can(Player player) {
 		return player.isShiftKeyDown() && player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.isSwimming()
-			&& !player.isFallFlying() && !player.isSleeping() && !player.getAbilities().flying && !Downed.isDowned(player)
-			&& !PowersCompat.lowStance(player);
+			&& !player.isFallFlying() && !player.isSleeping() && !player.getAbilities().flying && !Downed.isDowned(player);
 	}
 
 	/**
@@ -92,13 +94,18 @@ public final class Lean {
 	 */
 	public static Vec3 shift(Entity entity, double height) {
 		int dir = dir(entity);
-		return dir == 0 ? Vec3.ZERO : offset(entity.getYRot(), dir * height);
+		return dir == 0 ? Vec3.ZERO : offset(entity.getYRot(), dir * height * reach(entity));
 	}
 
-	/** The move out to the right of someone facing {@code yawDegrees}, for a lean of {@code signedAmount} (-1 full left, 1 full right). */
-	public static Vec3 offset(double yawDegrees, double signedAmount) {
+	/** How far out {@code entity}'s eye goes at a full lean (blocks): further from the low crouch. */
+	public static double reach(Entity entity) {
+		return entity instanceof Player player && PowersCompat.lowStance(player) ? CROUCH_REACH : REACH;
+	}
+
+	/** The move out to the right of someone facing {@code yawDegrees}, {@code signedBlocks} out (- to the left). */
+	public static Vec3 offset(double yawDegrees, double signedBlocks) {
 		double yaw = Math.toRadians(yawDegrees);
-		return new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw)).scale(REACH * signedAmount);
+		return new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw)).scale(signedBlocks);
 	}
 
 	private static void set(ServerPlayer player, int dir) {
