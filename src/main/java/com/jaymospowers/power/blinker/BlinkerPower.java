@@ -97,7 +97,7 @@ public final class BlinkerPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!untouchable(entity) || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || missed(entity));
+			!untouchable(entity) || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || missed(entity, source));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			UNTOUCHED.clear();
@@ -113,8 +113,8 @@ public final class BlinkerPower implements Power {
 	}
 
 	/** A blow that found nobody there (counted for the trials): it stays refused. */
-	private static boolean missed(LivingEntity entity) {
-		com.jaymospowers.core.trials.PowerTrials.count(entity, "blinker.untouched", 1);
+	private static boolean missed(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
+		com.jaymospowers.core.trials.PowerTrials.count(entity, "blinker.untouched", source.getEntity() != null ? 1 : 0);
 		return false;
 	}
 

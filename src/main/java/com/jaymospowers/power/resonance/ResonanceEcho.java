@@ -60,7 +60,11 @@ final class ResonanceEcho {
 
 	/** V: the ping. */
 	static boolean ping(ServerPlayer player) {
-		listen(player, RANGE, TICKS);
+		List<LivingEntity> heard = around(player, RANGE);
+		send(player, heard, TICKS, ResonanceNet.Sense.ECHO);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.echo", heard.size());
+		com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.echo_deep", player.getY() < 0.0 ? 1 : 0);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.echo_many", heard.size());
 		ServerLevel level = player.level();
 		RIPPLES.add(new Ripple(level, player.position().add(0.0, 0.1, 0.0), RIPPLE_RADIUS, new int[] {0}));
 		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), (float)RIPPLE_RADIUS, ResonancePower.COLOR);
@@ -81,9 +85,6 @@ final class ResonanceEcho {
 
 	static void send(ServerPlayer player, List<LivingEntity> heard, int ticks, int kind) {
 		int[] ids = new int[Math.min(heard.size(), 1024)];
-		com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.echo", kind == ResonanceNet.Sense.ECHO ? heard.size() : 0);
-		com.jaymospowers.core.trials.PowerTrials.count(kind == ResonanceNet.Sense.ECHO && player.getY() < 0.0 ? player : null, "resonance.echo_deep", 1);
-		com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.echo_many", kind == ResonanceNet.Sense.ECHO ? heard.size() : 0);
 		for (int i = 0; i < ids.length; i++) {
 			ids[i] = heard.get(i).getId();
 		}

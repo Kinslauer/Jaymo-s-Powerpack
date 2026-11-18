@@ -137,7 +137,7 @@ public final class SmokeVapour {
 				return true;
 			}
 			if (wholly(player)) {
-				com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.pass", 1);
+				com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.pass", source.getEntity() != null ? 1 : 0);
 				return false;
 			}
 			if (source.is(DamageTypeTags.IS_FALL)) {

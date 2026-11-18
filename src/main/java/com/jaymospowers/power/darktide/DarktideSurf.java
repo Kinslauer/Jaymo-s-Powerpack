@@ -181,13 +181,13 @@ final class DarktideSurf {
 			live.flow = Math.max(0.0F, live.flow - GEYSER_FLOW);
 		}
 		PickKit.spend(TABLE, player, GEYSER, GEYSER_COOLDOWN);
-		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.geyser", 1);
 		ServerLevel level = player.level();
 		float wet = player.isInWaterOrRain() ? DarktideDark.WET_BONUS : 1.0F;
 		LivingEntity foe = PickKit.aimed(player, DarktideFlow.reach(player, GEYSER_REACH));
 		LivingEntity on = foe != null ? foe : player;
 		Vec3 base = on.position();
 		if (foe != null) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.geyser", 1);
 			foe.hurtServer(level, player.damageSources().playerAttack(player), GEYSER_HARM * wet);
 			foe.setDeltaMovement(foe.getDeltaMovement().x, GEYSER_FOE_UP * wet, foe.getDeltaMovement().z);
 			foe.syncVelocity = true;

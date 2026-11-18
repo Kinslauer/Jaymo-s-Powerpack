@@ -595,7 +595,7 @@ Every row below is changed from what the parts above say; where a row asked for 
 
 Patches 1 to 3 and 5 to 7:
 - **`r-aw-planets`**: planets are free to throw: no hunger cost, no food gate. The 12-tick wait between throws stays.
-- **`r-aw-trials` (my pick: every power)**: TRIALS_PLACEHOLDER
+- **`r-aw-trials` (my pick: every power)**: every power now has its own hand-written ladder, `core/trials/TrialLadders` (one block per power: gravity, chrono, web, wind, cryo, smoke, resonance, darktide, arsenal, blinker, reactor, rules, xenoform, zfighter; Ember, Heritage and Blindness have no `Power` class and so no ladder, and Velox is one of Xenoform's aliens). Sixteen trials each at 25 mastery, as before; rungs 1, 4, 7 and 10 still wait for abilities 1 to 4; at most four rungs a power are the old shared ones (go high or deep, take harm and live, the Nether, the End, travel, fell a great foe), and every other rung is a feat of that power alone (hold 3 creatures in one Gravity Well, rewind your own death, swing 500 blocks without touching the ground, Spiral Dive from 30 blocks up, and so on). `PowerTrials` gains the kind `FEAT` and two calls the powers make where the feat happens: `count(entity, key, amount)` adds, `reach(entity, key, value)` keeps the best (for "at once" and "how far" feats). A power with no ladder falls back to the old one (`SHARED`). Trials are saved by ladder position, so a later change replaces a rung and never reorders. **Old saves**: the saved list gains a marker and is converted once; an old rung carries over (finished, swapped away, or open with its progress) only where the new ladder has the same shared rung with the same goal, every other old rung is dropped with its progress, and mastery already paid stays paid. So a holder who finished the old ladder has 12 to 15 new trials open that pay again. **Not built**: Gravity's "fall 60 blocks weightless and land unharmed" (nothing knows a weightless fall's length and its landing; it would need a new tracker for each player), and "throw a planet 40 blocks" became "fall to 10 planets you have thrown". **Not every holder can do every trial** (a swap covers it): Cryo's last needs the capstone Blizzard; a corrupted Arsenal's V and B are other moves, so its Barrage and Rift Chains trials don't count; Xenoform's band-point, Quick Change and reforge trials need those; a Great Ape has no techniques; winding the day needs the others' leave on a server. Xenoform's four ability rungs are "use an alien's Nth move", since the keys are a different move on every alien.
 - **`r-aw-power` (my pick: size)**: Ability Power also widens area moves, +0.2% a point (`AbilityPower.SIZE_PER_POINT`,
   +20% at 100), the effect and its drawn Fx together, across every power's blasts, rings, fields, pools, shockwaves and
   splash (about 150 moves; the K screen's reach figure serves both). Number of targets is not raised. Left alone:
@@ -665,3 +665,17 @@ Sneaking while overclocked slows you to a walk and the blur lasts 8 ticks off sp
 come in the last moments before the wall: this needs a play test. A Tool Forge holding two stacks of plates gives no
 plating. Stepping down from your own size gets you off a horse or out of a boat.
 
+
+#### After the row check of the trials (independent audit of the ladders and their hooks against the code)
+Fixed: the Web swing trials read a distance that is always nothing on the server, so the first and last Web trials could
+never move; they now read what the server last saw the player move. The Blizzard and Cyclone seconds counted on about one
+cast in ten; they count by the storm's own age now. Gravity's "hurl" trial counted rocks and other loose things while its
+text said creatures (a held creature is pushed, not hurled); the text now says rocks. "Turn aside 10 shots" counted every
+shot inside the barrier every tick; it counts a shot only as it is turned. "Let blows pass through you" (Smoke) and "let
+blows find nobody there" (Blinker) counted fire and lava each tick; only a blow from someone counts. The Echolocation
+trials were also fed by a Pulse and the Tuning Fork; only the ping counts. Reactor's Ground Crack and Web's hauling a
+creature up now wait for the ability whose key they use. Flying trials count hovering too. A Geyser counts only when it
+throws a foe, and a leg cut counts on any foe, not only people.
+
+Checked and sound: the hooks change nothing else, every trial has a hook and its two lines of text, and old saves convert
+once without paying a trial twice.

@@ -539,7 +539,7 @@ public final class WebPower implements Power {
 		if (player.onGround() || player.isInWater() || player.isPassenger() || !player.isAlive()) {
 			SWUNG.remove(player.getUUID());
 		} else if (state != null && swinging(state)) {
-			double far = SWUNG.merge(player.getUUID(), Math.hypot(player.getX() - player.xo, player.getZ() - player.zo), Double::sum);
+			double far = SWUNG.merge(player.getUUID(), player.getKnownMovement().horizontalDistance(), Double::sum);
 			if (player.tickCount % 10 == 0) {
 				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_far", (int)far);
 				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_marathon", (int)far);

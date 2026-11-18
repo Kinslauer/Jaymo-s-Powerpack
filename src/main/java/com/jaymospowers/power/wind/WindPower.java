@@ -610,6 +610,7 @@ public final class WindPower implements Power {
 			} else {
 				s.fallProtected = true;
 				s.lastFlightTick = player.tickCount;
+				com.jaymospowers.core.trials.PowerTrials.count(player, "wind.flight", player.tickCount % 20 == 0 ? 1 : 0);
 				// fall damage always applies; like an elytra, a controlled descent (slower than 0.5 b/t) isn't a fall
 				if (player.getY() - player.yo > -GLIDE_SAFE_SINK) {
 					player.fallDistance = Math.min(player.fallDistance, 1.0);
@@ -758,7 +759,7 @@ public final class WindPower implements Power {
 	/** The cloud trail and the whoosh, for everyone but the flyer (whose client draws its own). */
 	private void trail(ServerPlayer player, ServerLevel level, State s, Vec3 moved) {
 		boolean sonic = s.flight == WindFlight.SONIC;
-		com.jaymospowers.core.trials.PowerTrials.count(player, sonic ? "wind.sonic" : "wind.flight", player.tickCount % 20 == 0 ? 1 : 0);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "wind.sonic", sonic && player.tickCount % 20 == 0 ? 1 : 0);
 		int steps = sonic ? 4 : 2;
 		Vec3 back = moved.lengthSqr() > 1.0E-4 ? moved.normalize().scale(-0.8) : Vec3.ZERO;
 		for (int i = 0; i < steps; i++) {
@@ -1002,12 +1003,12 @@ public final class WindPower implements Power {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_DEFLECT_RADIUS));
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area, p -> p.isAlive() && p.getOwner() != player)) {
-			com.jaymospowers.core.trials.PowerTrials.count(player, "wind.deflect", 1);
 			Vec3 velocity = projectile.getDeltaMovement();
 			Vec3 toPlayer = center.subtract(projectile.position());
 			if (velocity.lengthSqr() < 0.01 || velocity.dot(toPlayer) <= 0.0 || toPlayer.lengthSqr() > AbilityPower.size(player, BARRIER_DEFLECT_RADIUS) * AbilityPower.size(player, BARRIER_DEFLECT_RADIUS)) {
 				continue;
 			}
+			com.jaymospowers.core.trials.PowerTrials.count(player, "wind.deflect", 1);
 			projectile.deflect((p, deflector, random, power) -> {
 				// blown back out the way it came, spread a little and lifted
 				Vec3 away = p.position().subtract(center).normalize();
