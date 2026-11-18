@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: lanterns-01-crime-small
 branch: claude/lanterns-01-crime-small
 with: Claude Code (PC)
@@ -27,3 +27,4 @@ owns:
 - No PC build (memory: PC runs only the game); CI is the compile check.
 
 ## Done
+Guards and villagers who see a crime wake the nearest sleeper of their faction, who comes over and remembers it as hearsay. Guards who know of a recent crime you aren't wanted for watch you, and one follows at a distance (a golem does it if no guard is near). CI build passes; not played.
