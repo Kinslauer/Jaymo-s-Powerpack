@@ -29,3 +29,4 @@ text_pass:
 - 2026-11-18 03:34 Model spec and minimal .bbmodel created. Pending Andy's preview approval.
 - 2026-11-18 11:31 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
 - 2026-11-18 11:50 Text pass: no PR yet and no player-visible text to review. The modeller (prometheus/hermes-modeller) owns this task; it is pending Andy's preview approval on the Wither model spec and .bbmodel. Nothing for the writer to text-pass until a PR exists.
+- 2026-11-18 3:52 PM Checked for Andy: there is no preview. E:/wt/wither-model has only the spec and a 3 KB wither.bbmodel that is not valid JSON (it fails to parse at line 8), and no render was ever made. The spec also gives the Wither "four arms", but the vanilla Wither has none (shoulder bar, spine, ribs, tail). It needs redoing before Andy can approve anything.
