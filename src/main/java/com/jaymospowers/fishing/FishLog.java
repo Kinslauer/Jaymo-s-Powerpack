@@ -50,14 +50,15 @@ public final class FishLog {
 	}
 
 	/** An angler's whole journal: every kind, the legends they've landed, and their contests. */
-	public record Log(Map<String, Entry> kinds, List<String> legends, int contests, int won) {
+	public record Log(Map<String, Entry> kinds, List<String> legends, int contests, int won, List<String> notes) {
 		public static final Codec<Log> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.unboundedMap(Codec.STRING, Entry.CODEC).optionalFieldOf("kinds", Map.of()).forGetter(Log::kinds),
 			Codec.STRING.listOf().optionalFieldOf("legends", List.of()).forGetter(Log::legends),
 			Codec.INT.optionalFieldOf("contests", 0).forGetter(Log::contests),
-			Codec.INT.optionalFieldOf("won", 0).forGetter(Log::won)).apply(i, Log::new));
+			Codec.INT.optionalFieldOf("won", 0).forGetter(Log::won),
+			Codec.STRING.listOf().optionalFieldOf("notes", List.of()).forGetter(Log::notes)).apply(i, Log::new));
 
-		public static final Log EMPTY = new Log(Map.of(), List.of(), 0, 0);
+		public static final Log EMPTY = new Log(Map.of(), List.of(), 0, 0, List.of());
 
 		public Entry entry(Species sp) {
 			return kinds.getOrDefault(sp.id, Entry.NONE);
@@ -113,7 +114,7 @@ public final class FishLog {
 			legends = new ArrayList<>(legends);
 			legends.add(legend);
 		}
-		player.setAttached(LOG, new Log(kinds, legends, log.contests, log.won));
+		player.setAttached(LOG, new Log(kinds, legends, log.contests, log.won, log.notes));
 		if (was.caught == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8F, 1.0F);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.fishing.journal_new", Component.translatable(sp.nameKey()))
@@ -129,12 +130,24 @@ public final class FishLog {
 		Entry was = log.entry(sp);
 		Map<String, Entry> kinds = new HashMap<>(log.kinds);
 		kinds.put(sp.id, new Entry(was.caught, was.released + 1, was.best, was.bestDay, was.bestBait, was.bestWater, was.hours));
-		player.setAttached(LOG, new Log(kinds, log.legends, log.contests, log.won));
+		player.setAttached(LOG, new Log(kinds, log.legends, log.contests, log.won, log.notes));
+	}
+
+	/** {@code player} read a torn note about {@code hint}: false if the journal had it already. */
+	static boolean noted(ServerPlayer player, String hint) {
+		Log log = of(player);
+		if (log.notes.contains(hint)) {
+			return false;
+		}
+		List<String> notes = new ArrayList<>(log.notes);
+		notes.add(hint);
+		player.setAttached(LOG, new Log(log.kinds, log.legends, log.contests, log.won, notes));
+		return true;
 	}
 
 	/** {@code player} fished a contest, and maybe won it. */
 	static void contest(ServerPlayer player, boolean won) {
 		Log log = of(player);
-		player.setAttached(LOG, new Log(log.kinds, log.legends, log.contests + 1, log.won + (won ? 1 : 0)));
+		player.setAttached(LOG, new Log(log.kinds, log.legends, log.contests + 1, log.won + (won ? 1 : 0), log.notes));
 	}
 }

@@ -71,6 +71,23 @@ public final class FishingRealClient {
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.fishing.FishingBlocks.ROD_POD_ENTITY, RodPodRenderer::new);
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.fishing.FishingBlocks.TROPHY_PLAQUE_ENTITY,
                 TrophyPlaqueRenderer::new);
+        // the tackle bench's screen, and what is fitted to a rod
+        net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.fishing.TackleBenchMenu.TYPE, TackleBenchScreen::new);
+        ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+            com.jaymospowers.fishing.FishTackle.Fit fit = com.jaymospowers.fishing.FishTackle.fit(stack);
+            int at = Math.min(1, lines.size());
+            if (fit.hook() == com.jaymospowers.fishing.FishTackle.BARBED) {
+                lines.add(at, Component.translatable("tooltip.jaymospowers.fit.barbed").withStyle(ChatFormatting.GRAY));
+            }
+            if (fit.line() != com.jaymospowers.fishing.FishTackle.NO_LINE) {
+                lines.add(at, Component.translatable(fit.line() == com.jaymospowers.fishing.FishTackle.BRAIDED
+                        ? "tooltip.jaymospowers.fit.braided" : "tooltip.jaymospowers.fit.weighted").withStyle(ChatFormatting.GRAY));
+            }
+            net.minecraft.world.item.Item bead = com.jaymospowers.fishing.FishTackle.bead(fit);
+            if (bead != null) {
+                lines.add(at, Component.translatable("tooltip.jaymospowers.fit.float", new ItemStack(bead).getHoverName()).withStyle(ChatFormatting.GRAY));
+            }
+        });
         // (Track D) a fisherman's screen, and the fisher's journal
         ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.fishing.Fishermen.View.TYPE,
                 (payload, context) -> FishermanScreen.receive(context.client(), payload));
