@@ -745,3 +745,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy): NPCs follow the light-armour sidestep rule too: folk never sidestep in plate; rangers and crewmen in leather/mail sidestep (PR #1730).
 - 2026-11-18 (Andy, scrying orb thread): wants a scrying orb (living miniature of a far place, after Frameless Portals' see-through look) and it must work for places too, not just people; plan put on the board as Inbox/scrying-orb.
 - 2026-11-18 (Andy): approved the lore paragraph "The scrying orb" (people and places).
+- 2026-11-18 (Andy, clouds/bits thread): picked 29 of 48 rows from More Cloud Layers (CC0, not shipped: clashes with Cirrus/CloudDecks) and Bits and Balance (ARR, ideas only); plan docs/CloudsBits-Plan.md, 7 patches on claude/project-thread-f0jf19.
