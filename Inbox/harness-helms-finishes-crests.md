@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
 claimed_by: hermes-a
 pr: 1721
 writer: hermes-writer
+text_pass: done
 ---
 
 # Harness 1: new helms, finishes and crests
