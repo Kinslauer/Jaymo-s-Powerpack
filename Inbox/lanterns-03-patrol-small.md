@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
-claimed_by: 
+claimed_by: lanterns-03-patrol-small
 pr: 
 size: S
 suggested_owns:
