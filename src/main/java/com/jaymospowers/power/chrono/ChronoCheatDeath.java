@@ -570,6 +570,7 @@ public final class ChronoCheatDeath {
 		if (held == null) {
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.cheat_death", 1);
 		if (held.wake) {
 			// no waking anywhere: up, and back
 			Mortality.cancelWake(player);

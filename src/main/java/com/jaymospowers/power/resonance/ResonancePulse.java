@@ -83,9 +83,12 @@ public final class ResonancePulse {
 			}
 			boolean deep = ResonanceDamage.sensitive(target);
 			target.hurtServer(level, ResonanceDamage.source(player, deep ? ResonanceDamage.PULSE_DEEP : ResonanceDamage.PULSE), damage);
+			com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.pulse_far", (int)distance);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.pulse", 1);
 			ResonanceDamage.push(target, to, knockback, KNOCKBACK_UP);
 			interrupt(target);
 			painted.add(target);
+			com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.pulse_many", painted.size());
 			// those it leaves in the dark hear where it came from
 			if (target instanceof ServerPlayer hit && com.jaymospowers.power.blindness.Blind.sightless(hit)) {
 				com.jaymospowers.power.blindness.BlindnessEcholocation.ring(hit, eye, 1.0F, com.jaymospowers.power.blindness.BlindnessEcholocation.PULSE);

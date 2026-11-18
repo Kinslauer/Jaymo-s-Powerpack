@@ -489,6 +489,7 @@ public final class WebWhip {
 	/** Brought down hard: damage, a crater, dust, and every screen near it shakes. */
 	private static void slam(ServerPlayer player, Whip whip, Entity target, boolean last) {
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(target instanceof net.minecraft.world.entity.LivingEntity ? player : null, "web.whip", 1);
 		Vec3 ground = ground(level, target.position());
 		boolean chunk = target instanceof BlockCluster;
 		double force;

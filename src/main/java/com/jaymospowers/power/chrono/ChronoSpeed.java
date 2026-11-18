@@ -124,6 +124,7 @@ public final class ChronoSpeed {
 	private static void wallRun(ServerPlayer player, int face) {
 		Direction side = face >= 0 && face < Direction.values().length ? Direction.from3DDataValue(face) : null;
 		if (side != null && side.getAxis().isHorizontal() && overclocked(player) && player.isAlive() && !player.isPassenger()) {
+			com.jaymospowers.core.trials.PowerTrials.count(player.getAttached(WALL_RUN) == null ? player : null, "chrono.wall_run", 1);
 			player.setAttached(WALL_RUN, side.get3DDataValue());
 			player.resetFallDistance();
 		} else if (player.getAttached(WALL_RUN) != null) {
@@ -212,6 +213,7 @@ public final class ChronoSpeed {
 				ChronoFx.particles(level, player, ParticleTypes.SMOKE, player.getX(), player.getY() + 0.1, player.getZ(), 3, 0.3, 0.0, 0.3, 0.02);
 			} else if (player.onGround() && under.is(FluidTags.WATER)) {
 				wake(player, level, was, moved, player.blockPosition().below(), under);
+				com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.water", player.tickCount % 20 == 0 ? 1 : 0);
 			} else if (player.isInWater() || player.onGround() && !under.isEmpty()) {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}

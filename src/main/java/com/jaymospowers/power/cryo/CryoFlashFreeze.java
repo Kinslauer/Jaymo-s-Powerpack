@@ -107,6 +107,8 @@ public final class CryoFlashFreeze {
 			}
 		}
 		SHELLS.add(new Shell(level, target, ice, level.getGameTime() + hold, target.position()));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.flash_freeze", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "cryo.freeze_big", (int)target.getMaxHealth());
 		freeze(player, target);
 		CryoFrostbite.bite(target, player, 2);
 		target.setDeltaMovement(0.0, Math.min(0.0, target.getDeltaMovement().y), 0.0);

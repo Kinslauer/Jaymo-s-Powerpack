@@ -477,6 +477,7 @@ public final class WindMoves {
 				}
 				LivingEntity living = (LivingEntity)e;
 				boolean first = this.hit.add(e.getId());
+				com.jaymospowers.core.trials.PowerTrials.count(first && this.kind == GUST ? owner : null, "wind.gust", 1);
 				if (this.kind == LANCE) {
 					if (first) {
 						this.lanceHit(owner, level, living);

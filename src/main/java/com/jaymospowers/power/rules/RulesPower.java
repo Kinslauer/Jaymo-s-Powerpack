@@ -127,6 +127,7 @@ public final class RulesPower implements Power {
 			kept.add(Rules.pack(Rules.who(r), Rules.what(r), Rules.strength(r), Rules.length(r)));
 		}
 		player.setAttached(Rules.WRITTEN, kept.isEmpty() ? Rules.first() : List.copyOf(kept));
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "rules.book", kept.size());
 		live(player).picked = 0;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8F, 1.0F);
 	}
@@ -238,10 +239,24 @@ public final class RulesPower implements Power {
 			live.ink -= cost;
 		}
 		live.running.add(run);
+		trials(player, live, rule);
 		MagicFx.sigil(level, player.getEyePosition().add(player.getLookAngle().scale(0.8)), player.getLookAngle(), 0.6F, COLOR, 20);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.0F, 0.7F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rules.enacted", sentence(rule)).withStyle(ChatFormatting.GOLD));
 		apply(level, player, run);
+	}
+
+	/** A rule enacted, as the Lawgiver's trials count it: what it is about, how strong, how long, how many run beside it. */
+	private static void trials(ServerPlayer player, Live live, int rule) {
+		com.jaymospowers.core.trials.PowerTrials.count(player, "rules.enact", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(live.picked > 0 ? player : null, "rules.pick", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(Rules.who(rule) == Rules.FOES ? player : null, "rules.foes", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(Rules.who(rule) == Rules.ALLIES ? player : null, "rules.allies", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(Rules.who(rule) == Rules.TARGET ? player : null, "rules.target", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(Rules.what(rule) == Rules.MUTE ? player : null, "rules.mute", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "rules.strength", Rules.strength(rule));
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "rules.long", Rules.SECONDS[Rules.length(rule)]);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "rules.at_once", live.running.size());
 	}
 
 	/** Anyone under the crosshair within {@link #LOOK} (friend or foe). */
@@ -283,6 +298,7 @@ public final class RulesPower implements Power {
 		int s = Rules.strength(run.rule);
 		int what = Rules.what(run.rule);
 		List<LivingEntity> about = who(level, player, run);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "rules.many", about.size());
 		if (what == Rules.MUTE) {
 			// who it no longer covers has their powers back
 			for (Iterator<LivingEntity> it = run.held.iterator(); it.hasNext();) {
@@ -358,6 +374,7 @@ public final class RulesPower implements Power {
 			end(run);
 			if (refund) {
 				float left = Math.max(0.0F, (run.until - now) / (Rules.SECONDS[Rules.length(run.rule)] * 20.0F));
+				com.jaymospowers.core.trials.PowerTrials.count(player, "rules.repeal", 1);
 				live.ink = Math.min(INK_MOST, live.ink + run.paid * left * REPEAL_BACK);
 			}
 		}

@@ -103,7 +103,7 @@ public class TrialsScreen extends Screen {
 		UiStyle.panel(graphics, x, y, W, H, accent);
 		PowerTrials.State s = player == null ? null : PowerTrials.state(player);
 		Component sub = s == null ? Component.translatable("screen.jaymospowers.trials.none")
-			: Component.translatable("screen.jaymospowers.trials.sub", s.doneCount(), PowerTrials.LADDER.size(), s.swaps, PowerTrials.MOST_SWAPS);
+			: Component.translatable("screen.jaymospowers.trials.sub", s.doneCount(), PowerTrials.SIZE, s.swaps, PowerTrials.MOST_SWAPS);
 		UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Items.TARGET), this.title, sub, accent, 0);
 		if (s != null && power != null) {
 			int open = 0;
@@ -114,14 +114,14 @@ public class TrialsScreen extends Screen {
 				}
 				open++;
 				int ry = y + UiStyle.HEADER + i * ROW;
-				PowerTrials.Trial trial = PowerTrials.LADDER.get(index);
+				PowerTrials.Trial trial = PowerTrials.ladder(power).get(index);
 				UiStyle.row(graphics, x + 4, ry, x + W - 4, ry + ROW - 2, i, false);
 				UiStyle.line(graphics, this.font, PowerTrials.describe(power, index), x + 8, ry + 4, W - 16, s.pinned == i ? UiStyle.GOLD : 0xFFE8E0D0);
 				UiStyle.bar(graphics, x + 8, ry + 15, W - 128, 3, s.progress[i] / (float)trial.need(), accent);
 				graphics.text(this.font, Component.literal(s.progress[i] + " / " + trial.need()), x + 8, ry + 24, 0xFF9A9080);
 			}
 			if (open == 0) {
-				UiStyle.line(graphics, this.font, Component.translatable(s.doneCount() >= PowerTrials.LADDER.size() ? "screen.jaymospowers.trials.all"
+				UiStyle.line(graphics, this.font, Component.translatable(s.doneCount() >= PowerTrials.SIZE ? "screen.jaymospowers.trials.all"
 					: "screen.jaymospowers.trials.waiting"), x + 8, y + UiStyle.HEADER + 4, W - 16, 0xFFE8E0D0);
 			}
 		}
@@ -143,7 +143,7 @@ public class TrialsScreen extends Screen {
 			return;
 		}
 		int index = s.open[s.pinned];
-		PowerTrials.Trial trial = PowerTrials.LADDER.get(index);
+		PowerTrials.Trial trial = PowerTrials.ladder(power).get(index);
 		Component line = Component.empty().append(PowerTrials.describe(power, index).copy().withColor(HudStyle.TEXT & 0xFFFFFF))
 			.append(Component.literal("  " + s.progress[s.pinned] + "/" + trial.need()).withColor(HudStyle.GOLD & 0xFFFFFF));
 		int w = minecraft.font.width(line) + PAD * 2, h = LINE + PAD * 2 - 1;

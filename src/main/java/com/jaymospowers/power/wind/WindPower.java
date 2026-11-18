@@ -454,6 +454,7 @@ public final class WindPower implements Power {
 		if (target.distanceTo(player) > 4.0F + speed * 2.0F) {
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "wind.ram", 1);
 		long now = level.getGameTime();
 		Long last = this.rammed.get(target.getId());
 		if (last != null && now - last < RAM_SPACING) {
@@ -757,6 +758,7 @@ public final class WindPower implements Power {
 	/** The cloud trail and the whoosh, for everyone but the flyer (whose client draws its own). */
 	private void trail(ServerPlayer player, ServerLevel level, State s, Vec3 moved) {
 		boolean sonic = s.flight == WindFlight.SONIC;
+		com.jaymospowers.core.trials.PowerTrials.count(player, sonic ? "wind.sonic" : "wind.flight", player.tickCount % 20 == 0 ? 1 : 0);
 		int steps = sonic ? 4 : 2;
 		Vec3 back = moved.lengthSqr() > 1.0E-4 ? moved.normalize().scale(-0.8) : Vec3.ZERO;
 		for (int i = 0; i < steps; i++) {
@@ -850,6 +852,7 @@ public final class WindPower implements Power {
 		float dash = 0.0F;
 		switch (ability) {
 			case TAILWIND -> {
+				com.jaymospowers.core.trials.PowerTrials.count(gust ? null : player, "wind.tailwind", 1);
 				if (gust) {
 					if (stormbound) {
 						WindStorm.strike(player, this.gustImpact(player, f));
@@ -911,6 +914,7 @@ public final class WindPower implements Power {
 				AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, ZEPHYR_RADIUS));
 				for (Player target : level.getEntitiesOfClass(Player.class, area,
 					p -> p.isAlive() && !p.isSpectator() && p.distanceToSqr(player) <= AbilityPower.size(player, ZEPHYR_RADIUS) * AbilityPower.size(player, ZEPHYR_RADIUS))) {
+						com.jaymospowers.core.trials.PowerTrials.count(player, "wind.zephyr", 1);
 					target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, fall, 0), player);
 					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regen, regenAmp), player);
 					com.jaymospowers.core.Fractures.startMend(target, com.jaymospowers.core.Fractures.ZEPHYR_MEND);
@@ -977,6 +981,7 @@ public final class WindPower implements Power {
 		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_PUSH_RADIUS));
 		for (LivingEntity mob : level.getEntitiesOfClass(LivingEntity.class, area,
 			e -> e instanceof Enemy && e.isAlive() && e.distanceToSqr(player) <= AbilityPower.size(player, BARRIER_PUSH_RADIUS) * AbilityPower.size(player, BARRIER_PUSH_RADIUS))) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "wind.barrier_push", 1);
 			Vec3 away = new Vec3(mob.getX() - player.getX(), 0.0, mob.getZ() - player.getZ());
 			if (away.lengthSqr() < 1.0E-4) {
 				away = player.getLookAngle().horizontal();
@@ -997,6 +1002,7 @@ public final class WindPower implements Power {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, BARRIER_DEFLECT_RADIUS));
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area, p -> p.isAlive() && p.getOwner() != player)) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "wind.deflect", 1);
 			Vec3 velocity = projectile.getDeltaMovement();
 			Vec3 toPlayer = center.subtract(projectile.position());
 			if (velocity.lengthSqr() < 0.01 || velocity.dot(toPlayer) <= 0.0 || toPlayer.lengthSqr() > AbilityPower.size(player, BARRIER_DEFLECT_RADIUS) * AbilityPower.size(player, BARRIER_DEFLECT_RADIUS)) {

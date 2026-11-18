@@ -475,6 +475,7 @@ public final class ArsenalStanding {
 	/** Through {@code from} and out of {@code other}: turned to its facing, momentum kept, the fall forgotten. */
 	private static void pass(Entity entity, End from, End other, ServerLevel to) {
 		Vec3 exit = other.pos().add(other.normal().scale(EXIT_DISTANCE));
+		com.jaymospowers.core.trials.PowerTrials.count(entity, "arsenal.portal", 1);
 		// in at the front means moving against its facing; out at the front means moving along the other's
 		double turn = other.yaw() - from.yaw() + 180.0;
 		double rad = Math.toRadians(turn);

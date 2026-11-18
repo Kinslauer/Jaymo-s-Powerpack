@@ -504,6 +504,7 @@ public final class ArsenalPower implements Power {
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, shown));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 0.55F);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.reach", 1);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.15F, 1.8F);
 	}
 
@@ -676,6 +677,7 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		Summoned sent = s;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.return", 1);
 		dissolveWhere(player, x -> x.batch() == sent.batch() && x.owner().equals(sent.owner()), true);
 		if (sent.ownedBy(player.getUUID())) {
 			long now = player.level().getGameTime();

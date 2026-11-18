@@ -151,6 +151,7 @@ public final class ChronoDecoys {
 			return;
 		}
 		boolean army = ChronoMomentum.top(player) >= ChronoGears.GEARS;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.decoys", 1);
 		Copies set = new Copies();
 		int want = count(player);
 		double min = army ? ARMY_RING_MIN : RING_MIN, max = army ? ARMY_RING_MAX : RING_MAX;

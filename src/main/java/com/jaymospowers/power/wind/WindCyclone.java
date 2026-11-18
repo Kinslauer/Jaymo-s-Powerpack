@@ -328,6 +328,7 @@ public final class WindCyclone {
 			// what it draws up from round about (before the douse below sweeps up the flames it would feed on)
 			java.util.List<LivingEntity> held = new java.util.ArrayList<>();
 			for (LivingEntity target : caught(player, level, radius, height)) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "wind.cyclone", player.tickCount % 20 == 0 ? 1 : 0);
 				if (active.orbiting.containsKey(target.getUUID())) {
 					held.add(target);
 				}

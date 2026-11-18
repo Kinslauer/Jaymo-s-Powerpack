@@ -88,6 +88,7 @@ public final class ChronoSlowTime {
 			return;
 		}
 		active = player.getUUID();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.slow_time", 1);
 		stepIn = STEP_EVERY;
 		ticks.setFrozen(true);
 		ServerLevel level = player.level();

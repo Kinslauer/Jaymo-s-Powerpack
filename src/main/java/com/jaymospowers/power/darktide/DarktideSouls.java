@@ -94,6 +94,7 @@ public final class DarktideSouls {
 			return;
 		}
 		shadows.add(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString());
+		com.jaymospowers.core.trials.PowerTrials.count(killer, "darktide.shadow", 1);
 		killer.setAttached(DarktideState.SAVE, DarktideState.save(killer).withShadows(shadows));
 		KILLS.add(new Kill(level, mob.position(), mob.getType(), level.getGameTime() + CORPSE_TICKS));
 		Vec3 from = mob.getBoundingBox().getCenter();

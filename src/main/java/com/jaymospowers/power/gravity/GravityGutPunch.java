@@ -89,6 +89,7 @@ final class GravityGutPunch {
 		PUNCHES.removeIf(p -> p.target.equals(target.getUUID()));
 		PUNCHES.add(new Punch(level.dimension(), target.getUUID(), player.getUUID(), level.getGameTime()));
 		GravityPower.touch(target, player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.inversion", 1);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 1.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 2.0F);
 	}

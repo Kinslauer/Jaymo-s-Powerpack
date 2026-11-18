@@ -102,6 +102,8 @@ public final class CryoWall {
 		com.jaymospowers.core.Mastery.used(player);
 		Vec3 at = Vec3.atCenterOf(base);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 1.2F, 0.5F);
+		com.jaymospowers.core.trials.PowerTrials.count(level.dimension() == net.minecraft.world.level.Level.NETHER ? player : null, "cryo.wall_nether", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.wall", 1);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_CLUSTER_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, at, 8.0, 0.3F);
 	}

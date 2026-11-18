@@ -279,6 +279,7 @@ final class ZFighterBattle {
 		live.lastHit = now;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + ZFighterPower.KI_PER_PUNCH);
 		Mastery.used(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.punch", player.getMainHandItem().isEmpty() ? 1 : 0);
 		if (live.combo % COMBO_FINISHER != 0 || !target.isAlive() || ZFighterCombo.running(player)) {
 			return;
 		}

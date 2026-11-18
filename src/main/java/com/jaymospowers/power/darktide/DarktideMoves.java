@@ -283,6 +283,7 @@ final class DarktideMoves {
 				damage *= EMPOWERED_FACTOR / STRIKE_FACTOR;
 			}
 			hit(player, target, damage);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.strike", 1);
 			Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
 			if (fist) {
 				// a fist: the blow rings off it, wider the longer it was held
@@ -349,8 +350,10 @@ final class DarktideMoves {
 			Dismember.cut(player, target, part, Dismember.KATANA_CHANCE, () -> {
 				if (legs) {
 					hitLegs(player, target, damage);
+					com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.crescent", 1);
 				} else {
 					hit(player, target, damage);
+					com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.crescent", 1);
 				}
 			});
 		}
@@ -425,6 +428,7 @@ final class DarktideMoves {
 		if (spring) {
 			for (LivingEntity near : around(player, player.getBoundingBox().inflate(AbilityPower.size(player, UNDERTOW_DRAG_RADIUS), 1.0, AbilityPower.size(player, UNDERTOW_DRAG_RADIUS)))) {
 				live.undertow.dragged.add(near.getId());
+				com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.undertow", 1);
 				DarktideStatus.stun(near, UNDERTOW_DELAY + 10);
 				DarktideLooks.pool(level, near.position(), DarktideLooks.BODY_POOL * 0.8F, UNDERTOW_DELAY + 12);
 			}
@@ -555,6 +559,7 @@ final class DarktideMoves {
 				target.clearFire();
 				if (wave.hit.add(target.getId())) {
 					hit(wave.owner, target, TIDE_DAMAGE);
+					com.jaymospowers.core.trials.PowerTrials.count(wave.owner, "darktide.tide", 1);
 					target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, TIDE_EFFECT_TICKS, TIDE_SLOW_AMPLIFIER), wave.owner);
 					target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, TIDE_EFFECT_TICKS, 0), wave.owner);
 				}

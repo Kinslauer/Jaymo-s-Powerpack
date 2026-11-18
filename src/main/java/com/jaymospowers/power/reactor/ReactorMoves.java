@@ -122,6 +122,7 @@ final class ReactorMoves {
 				continue;
 			}
 			e.hurtServer(level, player.damageSources().explosion(player, player), CONE_HARM * f);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.cone", 1);
 			e.setDeltaMovement(e.getDeltaMovement().add(look.scale(CONE_PUSH * f)).add(0.0, 0.2, 0.0));
 			e.syncVelocity = true;
 		}
@@ -142,7 +143,7 @@ final class ReactorMoves {
 		PickKit.spend(TABLE, player, DASH, DASH_COOLDOWN);
 		float f = ReactorPower.strength(spent);
 		Vec3 look = player.getLookAngle();
-		ReactorPower.blast(player, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, DASH_RADIUS), DASH_HARM * f, 0.6);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.dash", ReactorPower.blast(player, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, DASH_RADIUS), DASH_HARM * f, 0.6));
 		player.setDeltaMovement(look.scale(DASH_SPEED * Math.min(2.0, f)).add(0.0, 0.2, 0.0));
 		player.syncVelocity = true;
 		player.resetFallDistance();
@@ -160,7 +161,7 @@ final class ReactorMoves {
 		PickKit.spend(TABLE, player, DASH, DASH_COOLDOWN);
 		float f = ReactorPower.strength(spent);
 		Vec3 look = player.getLookAngle();
-		ReactorPower.blast(player, player.getEyePosition().add(look.scale(1.8)), AbilityPower.size(player, DASH_RADIUS) * 1.2, DASH_HARM * 1.5F * f, 1.0);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.recoil", ReactorPower.blast(player, player.getEyePosition().add(look.scale(1.8)), AbilityPower.size(player, DASH_RADIUS) * 1.2, DASH_HARM * 1.5F * f, 1.0));
 		player.setDeltaMovement(look.scale(-DASH_SPEED * Math.min(2.0, f)).add(0.0, 0.3, 0.0));
 		player.syncVelocity = true;
 		player.resetFallDistance();
@@ -192,7 +193,8 @@ final class ReactorMoves {
 		MagicFx.beam(level, eye.add(0.0, -0.2, 0.0), end, 0.25F, ReactorPower.GLOW, 8);
 		MagicFx.beam(level, eye.add(0.0, -0.2, 0.0), end, 0.1F, ReactorPower.CORE, 8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.8F);
-		ReactorPower.blast(player, end, AbilityPower.size(player, BEAM_RADIUS), BEAM_HARM * f, 0.8);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "reactor.beam_far", (int)player.getEyePosition().distanceTo(end));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.beam", ReactorPower.blast(player, end, AbilityPower.size(player, BEAM_RADIUS), BEAM_HARM * f, 0.8));
 	}
 
 	/** Sneak + V: the held item, charged, thrown to burst where it lands. */
@@ -254,6 +256,7 @@ final class ReactorMoves {
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(1.0, 1.5, 1.0), e -> PickKit.foe(player, e))) {
 				if (hit.add(e)) {
 					e.hurtServer(level, player.damageSources().explosion(player, player), CRACK_HARM * f);
+					com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.crack", 1);
 					e.setDeltaMovement(e.getDeltaMovement().add(0.0, CRACK_POP * Math.min(2.0, f), 0.0));
 					e.syncVelocity = true;
 				}
@@ -294,6 +297,7 @@ final class ReactorMoves {
 		}
 		net.minecraft.world.level.block.Block.dropResources(state, level, pos, null, player, new ItemStack(Items.IRON_PICKAXE));
 		level.removeBlock(pos, false);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.drill", 1);
 		Vec3 c = Vec3.atCenterOf(pos);
 		MagicFx.beam(level, eye.add(0.0, -0.3, 0.0), c, 0.08F, ReactorPower.GLOW, 4);
 		level.sendParticles(MagicFx.spark(ReactorPower.CORE, 0.6F), c.x, c.y, c.z, 6, 0.3, 0.3, 0.3, 0.1);
@@ -323,7 +327,7 @@ final class ReactorMoves {
 			Vec3 at = LAST.remove(t.shot());
 			it.remove();
 			if (at != null && !t.owner().isRemoved() && t.owner().level() == t.shot().level()) {
-				ReactorPower.blast(t.owner(), at, AbilityPower.size(t.owner(), TOSS_RADIUS), TOSS_HARM * t.strength(), 0.8);
+				com.jaymospowers.core.trials.PowerTrials.count(t.owner(), "reactor.toss", ReactorPower.blast(t.owner(), at, AbilityPower.size(t.owner(), TOSS_RADIUS), TOSS_HARM * t.strength(), 0.8));
 			}
 		}
 	}

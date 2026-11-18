@@ -184,6 +184,7 @@ public class WebBall extends ThrowableItemProjectile {
 				living.hurtServer(level, this.damageSources().thrown(this, owner), hurt);
 			}
 			int ticks = (int)(slowTicks * strength);
+			com.jaymospowers.core.trials.PowerTrials.count(living != owner ? owner : null, "web.shot", 1);
 			if (living == direct && this.charge >= WebStrength.PIN_CHARGE && living.isAlive()) {
 				// an impact web: pinned to the wall behind it, or the floor
 				WebStrength.pin(level, living, this.getDeltaMovement(), this.charge, dark);

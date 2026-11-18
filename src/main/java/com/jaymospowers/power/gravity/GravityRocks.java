@@ -609,6 +609,7 @@ public final class GravityRocks {
 	/** A rock (or the ball) lands: its damage, and with a bleed tick when it's one of the small ones. */
 	static void hit(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, boolean bleed) {
 		GravityPower.touch(target, player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.rocks", 1);
 		striking = true;
 		try {
 			target.setInvulnerableTime(0);

@@ -284,6 +284,7 @@ public final class WebHanging {
 	/** The catch has reached the ceiling: stuck flat in cobwebs, or left on a line, hanging upright. */
 	private static void arrive(ServerLevel level, ServerPlayer by, Entity target, Haul haul) {
 		boolean dark = WebSymbiote.suitShown(by);
+		com.jaymospowers.core.trials.PowerTrials.count(by, "web.string_up", 1);
 		target.setDeltaMovement(Vec3.ZERO);
 		target.setNoGravity(false);
 		Vec3 anchor = new Vec3(target.getX(), haul.ceilingY(), target.getZ());

@@ -403,6 +403,7 @@ public final class ZFighterTraining {
 		boolean boxing = com.jaymospowers.core.Meditate.shadowboxing(player) && !live.charging && live.waveFrom < 0 && live.barrageFrom < 0;
 		live.meditating = boxing ? live.meditating + 1 : 0;
 		if (live.meditating > 0 && live.meditating % 20 == 0) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.shadowbox", 1);
 			float heavy = heavyGravity(player) ? SHADOWBOX_HEAVY : 1.0F;
 			earn(player, SHADOWBOX_TP * heavy);
 			live.ki += SHADOWBOX_KI;

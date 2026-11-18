@@ -596,6 +596,7 @@ public final class ArsenalWing {
 				}
 				last.put(living.getId(), now);
 				if (living.hurtServer(level, source, damage * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F))) {
+					com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.wing", 1);
 					Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 					if (!anything && away.lengthSqr() > 1.0E-4) {
 						away = away.normalize().scale(0.45);

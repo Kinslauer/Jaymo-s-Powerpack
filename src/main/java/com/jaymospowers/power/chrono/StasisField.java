@@ -195,6 +195,7 @@ final class StasisField {
 			}
 			frozen.holders++;
 			held.add(entity);
+			com.jaymospowers.core.trials.PowerTrials.reach(level.getPlayerByUUID(owner), "chrono.stasis_many", held.size());
 		}
 	}
 

@@ -912,6 +912,7 @@ public final class GravityPower implements Power {
 	/** Lift takes hold of {@code target}. */
 	private static void hold(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = target.getId();
+		com.jaymospowers.core.trials.PowerTrials.count(target instanceof LivingEntity ? player : null, "gravity.lift", 1);
 		state.liftTicks = 0;
 		state.choking = false;
 		state.drawing = false;
@@ -1345,6 +1346,7 @@ public final class GravityPower implements Power {
 		dropLift(player, state, true);
 		// (0.21.8) the arm whips through with it, as a thrown rock's does (RockThrowPose)
 		com.jaymospowers.ground.ThrownRocks.hurled(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.hurl", 1);
 		Vec3 velocity = player.getViewVector(1.0F).scale(THROW_SPEED);
 		entity.setDeltaMovement(velocity);
 		entity.needsSync = true;
@@ -1868,6 +1870,7 @@ public final class GravityPower implements Power {
 				continue;
 			}
 			touch(target, player);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.crush", 1);
 			Vec3 v = target.getDeltaMovement();
 			target.setDeltaMovement(v.x * 0.3, -CRUSH_SLAM * (0.4 + charge), v.z * 0.3);
 			target.needsSync = true;
@@ -2029,6 +2032,7 @@ public final class GravityPower implements Power {
 		GravityCometRam.tick(player);
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
+			com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.weightless", state.weightlessTicks % 20 == 0 ? 1 : 0);
 			// no fall counts while weightless: only what you fall after it ends
 			player.resetFallDistance();
 			if (player.tickCount % HEAVY_AURA_REFRESH == 0) {
@@ -2365,6 +2369,7 @@ public final class GravityPower implements Power {
 		Vec3 at = owner.position();
 		double radius = AbilityPower.size(owner, WELL_RADIUS);
 		if (left % HEAVY_AURA_REFRESH == 0) {
+			com.jaymospowers.core.trials.PowerTrials.reach(owner, "gravity.well_many", level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new AABB(at, at).inflate(radius), e -> e.isAlive() && e.position().distanceToSqr(at) <= radius * radius).size());
 			weighDown(owner, at, radius);
 		}
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius, radius + 2.0, radius),
@@ -2446,6 +2451,7 @@ public final class GravityPower implements Power {
 			return;
 		}
 		countTowardAscension(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.weight_kills", 1);
 	}
 
 	/** A death by weight, or a hard fall survived: one closer to the Event Horizon. */
