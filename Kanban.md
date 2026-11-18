@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 08:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 09:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,6 +33,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · claimed
+- [ ] [[Agents/warrior-born-zombies|warrior-born-zombies]] · 💻 Odysseus · #1725 · running
 
 
 ## In review
