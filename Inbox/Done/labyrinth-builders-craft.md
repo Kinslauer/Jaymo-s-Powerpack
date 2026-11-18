@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
@@ -35,3 +35,4 @@ Then (8:30 PM ET): "not for apollo anymore, ill give it straight to reviewer".
 - 2026-11-17 21:09 PR #1714: geared plates drop from any chest whose structure/loot table name contains 'colonnade'. Nothing in our code is named that (the Deep Mother's sunken colonnades aren't built yet?), so the Labyrinth Compass may be uncraftable until Andy says where the plates should come from.
 - 2026-11-18 06:00 2026-11-18 01:00 AM ET Andy chose (decision card): compass plates come from vanilla ocean ruin and shipwreck chests (minecraft:chests/underwater_ruin_small, underwater_ruin_big, shipwreck_map, shipwreck_supply, shipwreck_treasure), not 'colonnade' chests. Please change #1714 to that before review passes.
 - 2026-11-18 02:11 Andy 2026-11-18: plates come from early dungeon loot. PR #1714 updated (d819c9116): monster rooms, mineshafts, desert and jungle temples, 40% of chests. Lore line updated to match.
+- 2026-11-18 07:32 PR #1714 is merged into master; moved to Inbox/Done.
