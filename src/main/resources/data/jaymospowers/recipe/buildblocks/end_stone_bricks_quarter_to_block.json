@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:end_stone_bricks_quarter",
+    "jaymospowers:end_stone_bricks_quarter",
+    "jaymospowers:end_stone_bricks_quarter",
+    "jaymospowers:end_stone_bricks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:end_stone_bricks"
+  }
+}

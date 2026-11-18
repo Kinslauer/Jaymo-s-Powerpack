@@ -166,6 +166,10 @@ public class JaymosPowers implements ModInitializer {
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.BigVeins.init();
+		// ores in andesite, diorite, granite and tuff, big coal veins, Nether gold and quartz veins
+		com.jaymospowers.stoneores.StoneOres.init();
+		// an empty bottle takes a bottle of cloud out of the cloud and sky; the bottle lays a short-lived puff
+		com.jaymospowers.cloudbottle.CloudBottle.init();
 		// the Verdant World's strange growth: mycotic and pulse forests, the stone garden
 		com.jaymospowers.eden.Eden.init();
 		com.jaymospowers.ground.Panning.init();
@@ -218,6 +222,9 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.baubles.Baubles.init();
 		// arrowheads and fitted arrows, the belt of throwables, shield moves
 		com.jaymospowers.gear.GearPicks.init();
+		// (Clouds and Bits patch 6) pick your arrow by scrolling while drawing; keep some XP on death
+		com.jaymospowers.fighting.ArrowPick.init();
+		com.jaymospowers.fighting.KeepXp.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		com.jaymospowers.compat.ChunkyCompat.init();
@@ -242,6 +249,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.tundra.world.TundraWorld.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
 		com.jaymospowers.layers.Layers.init();
+		// vertical slabs and quarter steps of the same blocks, and slabs of two kinds sharing a block
+		com.jaymospowers.buildblocks.BuildBlocks.init();
 		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures
 		com.jaymospowers.young.Younglings.init();
 		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
@@ -254,6 +263,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.wet.Wet.init();
 		com.jaymospowers.core.wet.Rust.init();
 		com.jaymospowers.core.wet.Scrubbing.init();
+		com.jaymospowers.moving.PullRiders.init();
+		com.jaymospowers.moving.PetSafe.init();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();
@@ -261,6 +272,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.web.KitchenCompat.registerTemperate();
 		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
 		com.jaymospowers.core.wounds.HeartCrystals.register();
+		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
+		com.jaymospowers.bits.ItemShare.register();
 		registerAttachments();
 	}
 
@@ -309,7 +322,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves", "power.rules.Rules", "core.trials.PowerTrials", "bonebond.Boneiron",
-			"alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
+			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};
 		for (String holder : holders) {

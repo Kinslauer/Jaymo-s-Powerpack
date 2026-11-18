@@ -63,6 +63,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
+		com.jaymospowers.client.bits.BiomeTitle.init();
+		com.jaymospowers.client.bits.UseBar.init();
+		com.jaymospowers.client.bits.Mentions.init();
+		com.jaymospowers.client.bits.ItemShareClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
@@ -131,6 +136,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// mixed slabs: the two slabs of one block, drawn by their block entity
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
+			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();
 		com.jaymospowers.client.frost.FrostClient.init();
@@ -263,6 +271,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
 		ProneTransition.init();
 		StanceHud.init();
@@ -289,6 +299,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();
+		com.jaymospowers.client.fighting.ArrowPickClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
 		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
 		com.jaymospowers.client.jewellery.JewelleryClient.init();

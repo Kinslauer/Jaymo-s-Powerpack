@@ -1,0 +1,9 @@
+{
+  "type": "jaymospowers:ore_vein",
+  "target": {
+    "predicate_type": "minecraft:block_match",
+    "block": "minecraft:netherrack"
+  },
+  "ore": "minecraft:nether_quartz_ore",
+  "size": 40
+}

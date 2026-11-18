@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:undershale_vslab",
+    "jaymospowers:undershale_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:undershale"
+  }
+}

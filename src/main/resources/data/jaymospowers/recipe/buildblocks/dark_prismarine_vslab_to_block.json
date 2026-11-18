@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:dark_prismarine_vslab",
+    "jaymospowers:dark_prismarine_vslab"
+  ],
+  "result": {
+    "id": "minecraft:dark_prismarine"
+  }
+}

@@ -18,6 +18,8 @@
 	},
 	"mixins": [
 		"jaymospowers.mixins.json",
+		"jaymospowers.bits.mixins.json",
+		{ "config": "jaymospowers.bits.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.client.mixins.json", "environment": "client" },
 		"jaymospowers.bettercombat.mixins.json",
 		{ "config": "jaymospowers.bettercombat.client.mixins.json", "environment": "client" },
@@ -71,6 +73,7 @@
 		{ "config": "jaymospowers.tundra.client.mixins.json", "environment": "client" },
 		"jaymospowers.icecaves.mixins.json",
 		"jaymospowers.artifacts.mixins.json",
+		"jaymospowers.buildblocks.mixins.json",
 		{ "config": "jaymospowers.artifacts.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.wornpose.client.mixins.json", "environment": "client" }
 	],

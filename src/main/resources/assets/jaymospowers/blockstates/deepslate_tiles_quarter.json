@@ -1,0 +1,84 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "z",
+        "low_neg": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_low_neg"
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "low_neg": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_low_neg",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "low_pos": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_low_pos"
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "low_pos": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_low_pos",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "high_neg": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_high_neg"
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "high_neg": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_high_neg",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "high_pos": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_high_pos"
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "high_pos": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/buildblocks/deepslate_tiles_quarter_high_pos",
+        "y": 90,
+        "uvlock": true
+      }
+    }
+  ]
+}

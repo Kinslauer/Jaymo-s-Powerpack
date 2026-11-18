@@ -4,11 +4,13 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"PlayerInfoNoConnectionMixin",
+		"ArrowPickScrollMixin",
 		"BrokenLegSprintMixin",
 		"HitStopModelFeatureRendererMixin",
 		"DarkPanelsTextureMixin",
 		"DarkPanelsTextMixin",
 		"FaintInputMixin",
+		"AutoWalkInputMixin",
 		"WetCoatTintMixin",
 		"TakeoverFacingMixin",
 		"TakeoverFacingHeadMixin",

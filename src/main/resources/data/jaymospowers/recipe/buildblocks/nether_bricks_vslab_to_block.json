@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:nether_bricks_vslab",
+    "jaymospowers:nether_bricks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:nether_bricks"
+  }
+}

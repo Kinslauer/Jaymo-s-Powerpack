@@ -277,6 +277,8 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, false, false,
 			(target, level) -> this.kind() == Kind.DIAMOND && !this.throne() && target instanceof Enemy));
+		// and a creeper is a thing a golem puts down, for those that fight on foot (GolemHunt)
+		this.targetSelector.addGoal(3, com.jaymoskingdoms.mobs.GolemHunt.creeperGoal(this, () -> this.kind() == Kind.DIAMOND && !this.throne()));
 	}
 
 	public Kind kind() {

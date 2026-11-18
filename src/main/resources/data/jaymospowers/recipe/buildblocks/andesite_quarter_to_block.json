@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:andesite_quarter",
+    "jaymospowers:andesite_quarter",
+    "jaymospowers:andesite_quarter",
+    "jaymospowers:andesite_quarter"
+  ],
+  "result": {
+    "id": "minecraft:andesite"
+  }
+}

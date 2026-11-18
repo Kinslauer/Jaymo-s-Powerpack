@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:mangrove_log_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:mangrove_log_quarter",
+    "count": 2
+  }
+}

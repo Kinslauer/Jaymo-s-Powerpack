@@ -1,6 +1,7 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.NoOneShot;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -350,6 +351,10 @@ public final class BlastGore {
 	 * gibbed die rather than go down; then the death itself). Creative and spectating players never are.
 	 */
 	public static boolean gibs(LivingEntity entity, DamageSource source, float amount) {
+		// (a player at full health goes down instead of dying to the one blow: NoOneShot)
+		if (NoOneShot.spared(entity, source)) {
+			return false;
+		}
 		if (!gore(entity, source) || entity instanceof Player p && (p.isCreative() || p.isSpectator()) || stone(entity)) {
 			return false;
 		}

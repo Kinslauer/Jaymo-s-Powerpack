@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:ore_vein",
+  "target": {
+    "predicate_type": "minecraft:block_match",
+    "block": "minecraft:andesite"
+  },
+  "ore": "jaymospowers:andesite_coal_ore",
+  "size": 30,
+  "rare": "minecraft:coal_block",
+  "rare_chance": 0.03
+}

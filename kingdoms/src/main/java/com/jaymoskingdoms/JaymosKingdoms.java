@@ -200,6 +200,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Retinue.register();
 		Audiences.register();
 		Doorways.register();
+		Knocking.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
@@ -279,6 +280,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// Clouds and Bits mobs: golems hunt creepers, phantoms carry players off
+		com.jaymoskingdoms.mobs.GolemHunt.register();
+		com.jaymoskingdoms.mobs.PhantomCarry.register();
 		CreeperFlight.register();
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();

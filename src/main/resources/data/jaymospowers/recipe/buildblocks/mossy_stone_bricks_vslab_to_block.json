@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_stone_bricks_vslab",
+    "jaymospowers:mossy_stone_bricks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:mossy_stone_bricks"
+  }
+}

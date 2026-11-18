@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:granite_vslab",
+    "jaymospowers:granite_vslab"
+  ],
+  "result": {
+    "id": "minecraft:granite"
+  }
+}
