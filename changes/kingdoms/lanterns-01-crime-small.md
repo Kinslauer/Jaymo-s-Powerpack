@@ -1,0 +1,4 @@
+# Crime: sleepers woken, suspects watched
+- **Sleepers woken and told**: when someone who can speak sees a crime, they wake the nearest sleeper of their village or realm (within 16 blocks), who gets up, comes over to hear it and remembers it as hearsay. A crime at night is now known to more than the one who saw it. Golems can't tell anyone. (`Theft#wakeAndTell`, `ChestNoise#wakeToHear`)
+- **Being watched**: a guard who saw or heard of your crime in the last 3 days, while you aren't wanted for it, now watches you like a suspected vampire or werewolf: turns to look, says a wary word now and then. The nearest free one follows you at a distance (closes in past 8 blocks, stops inside 5). With no such guard about, a golem of the realm whose people suspect you follows instead. Vampire and werewolf suspects are followed the same way now. (`Suspicion#wary`)
+- Compile-checked by CI; not played.

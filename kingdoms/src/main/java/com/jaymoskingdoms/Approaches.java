@@ -339,7 +339,7 @@ public final class Approaches {
 		SUSPECTS.computeIfAbsent(Identities.suspectId(player, faction), k -> new HashMap<>()).put(faction, now);
 	}
 
-	private static boolean suspected(ServerPlayer player, int faction, long now) {
+	static boolean suspected(ServerPlayer player, int faction, long now) {
 		Map<Integer, Long> mine = SUSPECTS.get(Identities.suspectId(player, faction));
 		Long at = mine == null ? null : mine.get(faction);
 		return at != null && now - at < SUSPECT_TICKS;
