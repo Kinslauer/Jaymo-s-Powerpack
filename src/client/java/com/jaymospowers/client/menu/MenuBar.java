@@ -37,6 +37,15 @@ final class MenuBar {
 	private MenuBar() {
 	}
 
+	/** Forgets the open dropdown and the scrolls (on leaving a world). */
+	static void reset() {
+		open = null;
+		pinned = null;
+		dropScroll = 0;
+		sideScroll = 0;
+		scrolledFor = new WeakReference<>(null);
+	}
+
 	/** A group's plate on the bar. */
 	private record Plate(String group, int x, int w) {
 	}
@@ -63,14 +72,23 @@ final class MenuBar {
 		Font font = Minecraft.getInstance().font;
 		List<Plate> plates = new ArrayList<>();
 		int total = 0;
+		int buttonX = screen.width - 4 - BTN_W;
+		List<String> groups = new ArrayList<>();
+		int natural = 0;
 		for (String group : MenuTabs.GROUPS) {
 			if (!MenuTabs.listed(group).isEmpty()) {
-				int w = font.width(groupName(group)) + 2 * PAD + 10;
-				plates.add(new Plate(group, total, w));
-				total += w + GAP;
+				groups.add(group);
+				natural += font.width(groupName(group)) + 2 * PAD + 10;
 			}
 		}
-		int buttonX = screen.width - 4 - BTN_W;
+		// on a narrow screen the plates shrink (and their names are cut) to stay left of the look button
+		int room = buttonX - 8 - GAP * Math.max(0, groups.size() - 1);
+		float fit = natural > room ? Math.max(0, room) / (float)natural : 1.0F;
+		for (String group : groups) {
+			int w = Math.round((font.width(groupName(group)) + 2 * PAD + 10) * fit);
+			plates.add(new Plate(group, total, w));
+			total += w + GAP;
+		}
 		int nameW = font.width(page.label()) + 2 * GAP;
 		boolean name = total + nameW <= buttonX - 8;
 		int width = total + (name ? nameW : 0);
@@ -199,8 +217,9 @@ final class MenuBar {
 			graphics.fill(p.x(), y, p.x() + p.w(), y + h, picked || hot ? GOLD_EDGE : PowerScreen.COLOR_LIGHT);
 			graphics.fill(p.x() + 1, y + 1, p.x() + p.w() - 1, y + h - 1, hot ? PowerScreen.COLOR_WELL_LIGHT : picked ? PowerScreen.COLOR_BODY : PowerScreen.COLOR_TAB);
 			int color = picked ? PowerScreen.COLOR_GOLD : PowerScreen.COLOR_TEXT;
-			graphics.text(font, groupName(p.group()), p.x() + PAD, y + (h - 8) / 2, color, false);
-			triangle(graphics, p.x() + p.w() - PAD - 5, y + (h - 3) / 2, color);
+			int pad = p.w() >= font.width(groupName(p.group())) + 2 * PAD + 10 ? PAD : 3;
+			UiStyle.line(graphics, font, groupName(p.group()), p.x() + pad, y + (h - 8) / 2, p.w() - 2 * pad - 8, color);
+			triangle(graphics, p.x() + p.w() - pad - 5, y + (h - 3) / 2, color);
 		}
 		if (bar.nameX() >= 0) {
 			graphics.text(font, page.label(), bar.nameX() + GAP, MenuTabs.STRIP_Y + (MenuTabs.STRIP_H - 8) / 2, PowerScreen.COLOR_DIM, false);

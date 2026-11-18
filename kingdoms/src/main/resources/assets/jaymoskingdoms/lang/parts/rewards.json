@@ -7,5 +7,5 @@
 	"rewards.jaymoskingdoms.source.bounty": "Bounty",
 	"rewards.jaymoskingdoms.source.wages": "Wages",
 	"rewards.jaymoskingdoms.source.rescue": "Rescue",
-	"message.jaymoskingdoms.rewards.held": "%s from %s waits in your Rewards."
+	"message.jaymoskingdoms.rewards.held": "%s from %s waits in your Rewards (the H menu, or /rewards)."
 }

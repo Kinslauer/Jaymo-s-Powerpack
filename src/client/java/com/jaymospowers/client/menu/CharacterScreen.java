@@ -195,7 +195,11 @@ public class CharacterScreen extends Screen {
 		for (int i = 0; i < linkAt.size(); i++) {
 			int[] r = linkAt.get(i);
 			if (event.x() >= r[0] && event.x() < r[0] + r[2] && event.y() >= r[1] && event.y() < r[1] + r[3] && event.y() >= r[4] && event.y() < r[5]) {
-				linkOpens.get(i).run();
+				try {
+					linkOpens.get(i).run();
+				} catch (RuntimeException | LinkageError e) {
+					// another mod's page failed to open: stay on this one
+				}
 				return true;
 			}
 		}
@@ -399,7 +403,15 @@ public class CharacterScreen extends Screen {
 		linkOpens.clear();
 		int lx = rx + rw - 8;
 		for (var link : MenuTabs.characterLinks()) {
-			Component label = link.getKey().get();
+			Component label;
+			try {
+				label = link.getKey().get();
+			} catch (RuntimeException | LinkageError e) {
+				continue;
+			}
+			if (label == null) {
+				continue;
+			}
 			int lw = this.font.width(label);
 			lx -= lw;
 			boolean over = mouseY >= ry + 4 && mouseY < ry + 16 && mouseX >= lx && mouseX < lx + lw && mouseY >= bodyTop && mouseY < bottom;

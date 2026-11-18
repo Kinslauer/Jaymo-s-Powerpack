@@ -49,9 +49,16 @@ public final class TitleCard {
 
 	/** Timings in ticks (from the title packet). */
 	public static void setTimes(int in, int hold, int out) {
-		fadeIn = in;
-		stay = hold;
-		fadeOut = out;
+		// a negative time keeps the one before, as vanilla's title does
+		if (in >= 0) {
+			fadeIn = in;
+		}
+		if (hold >= 0) {
+			stay = hold;
+		}
+		if (out >= 0) {
+			fadeOut = out;
+		}
 	}
 
 	/** A new title starts the card over. */
@@ -104,8 +111,11 @@ public final class TitleCard {
 		}
 		Font font = minecraft.font;
 		int maxW = Math.round(graphics.guiWidth() * MAX_WIDTH_SHARE);
-		int titleW = Math.min(Math.round(font.width(title) * TITLE_SCALE), maxW);
-		int subW = subtitle == null ? 0 : Math.min(font.width(subtitle), maxW);
+		// a line wider than the plate shrinks to fit it
+		float titleScale = Math.min(TITLE_SCALE, maxW / (float)Math.max(1, font.width(title)));
+		float subScale = subtitle == null ? 1.0F : Math.min(1.0F, maxW / (float)Math.max(1, font.width(subtitle)));
+		int titleW = Math.round(font.width(title) * titleScale);
+		int subW = subtitle == null ? 0 : Math.round(font.width(subtitle) * subScale);
 		int w = Math.max(titleW, subW) + 2 * PAD_X;
 		int titleH = Math.round(font.lineHeight * TITLE_SCALE);
 		int h = PAD_Y + titleH + (subtitle == null ? 0 : GAP + font.lineHeight) + PAD_Y;
@@ -116,12 +126,16 @@ public final class TitleCard {
 		graphics.fill(x, y, x + w, y + 1, gold);
 		graphics.fill(x, y + h - 1, x + w, y + h, gold);
 		graphics.pose().pushMatrix();
-		graphics.pose().translate(graphics.guiWidth() / 2.0F, y + PAD_Y);
-		graphics.pose().scale(TITLE_SCALE, TITLE_SCALE);
+		graphics.pose().translate(graphics.guiWidth() / 2.0F, y + PAD_Y + font.lineHeight * (TITLE_SCALE - titleScale) / 2.0F);
+		graphics.pose().scale(titleScale, titleScale);
 		graphics.centeredText(font, title, 0, 0, alpha << 24 | 0xFFFFFF);
 		graphics.pose().popMatrix();
 		if (subtitle != null) {
-			graphics.centeredText(font, subtitle, graphics.guiWidth() / 2, y + PAD_Y + titleH + GAP, withAlpha(HudStyle.DIM, fade));
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(graphics.guiWidth() / 2.0F, y + PAD_Y + titleH + GAP + font.lineHeight * (1.0F - subScale) / 2.0F);
+			graphics.pose().scale(subScale, subScale);
+			graphics.centeredText(font, subtitle, 0, 0, withAlpha(HudStyle.DIM, fade));
+			graphics.pose().popMatrix();
 		}
 	}
 

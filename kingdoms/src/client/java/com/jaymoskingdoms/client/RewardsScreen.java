@@ -25,6 +25,17 @@ final class RewardsScreen extends Screen {
 		super(Component.translatable("menu.jaymoskingdoms.tab.rewards"));
 	}
 
+	/** {@code /rewards} opens the page, for a player whose client has no H menu to reach it from. */
+	static void register() {
+		net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(
+			net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("rewards").executes(c -> {
+				net.minecraft.client.Minecraft minecraft = c.getSource().getClient();
+				// (once the chat screen has closed)
+				minecraft.execute(() -> minecraft.gui.setScreen(new RewardsScreen()));
+				return 1;
+			})));
+	}
+
 	@Override
 	public boolean isPauseScreen() {
 		return false;

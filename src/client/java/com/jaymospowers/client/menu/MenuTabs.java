@@ -171,8 +171,15 @@ public final class MenuTabs {
 		for (Supplier<List<Object[]>> bars : BARS) {
 			try {
 				List<Object[]> got = bars.get();
-				if (got != null) {
-					out.addAll(got);
+				if (got == null) {
+					continue;
+				}
+				for (Object[] r : got) {
+					// a row of the wrong shape (a Double share, a missing colour) is left out, not thrown on every frame
+					if (r != null && r.length >= 4 && r[0] instanceof Component && r[1] instanceof Component && r[2] instanceof Number share
+						&& r[3] instanceof Number colour) {
+						out.add(new Object[] {r[0], r[1], share.floatValue(), colour.intValue()});
+					}
 				}
 			} catch (RuntimeException | LinkageError e) {
 				// as for the rows: leave them out rather than close the page
@@ -377,6 +384,8 @@ public final class MenuTabs {
 
 	/** Registers Powers' own tabs and hooks the menu onto every page as it opens. */
 	public static void init() {
+		// leaving a world closes the menu bar's dropdown and puts its scrolls back
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> MenuBar.reset());
 		register("inventory", ORDER_INVENTORY, () -> new ItemStack(Items.CHEST), Component.translatable("menu.jaymospowers.tab.inventory"),
 			() -> {
 				if (player() != null) {

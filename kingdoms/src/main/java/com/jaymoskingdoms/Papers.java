@@ -38,17 +38,21 @@ public final class Papers {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Card> CODEC = CustomPacketPayload.codec(Card::write, Card::read);
 
 		private void write(RegistryFriendlyByteBuf buf) {
-			buf.writeUtf(owner, TEXT_MAX);
+			buf.writeUtf(cut(owner), TEXT_MAX);
 			buf.writeBoolean(mine);
 			buf.writeUtf(heritage);
 			buf.writeUtf(cls);
 			buf.writeUtf(second);
-			buf.writeUtf(realm, TEXT_MAX);
+			buf.writeUtf(cut(realm), TEXT_MAX);
 			buf.writeInt(color);
 			buf.writeUtf(rank);
 			buf.writeVarInt(standing);
 			buf.writeVarInt(renown);
 			buf.writeVarInt(level);
+		}
+
+		private static String cut(String s) {
+			return s.length() > TEXT_MAX ? s.substring(0, TEXT_MAX) : s;
 		}
 
 		private static Card read(RegistryFriendlyByteBuf buf) {

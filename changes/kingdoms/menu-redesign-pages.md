@@ -6,3 +6,5 @@
 - **Character page**: a mana bar for the attuned among the vitals.
 - Classes: `Stats` (Redistribute, shift step), `DailyTasks`, `TitleChoice`, `Rewards`, `Renown`/`Careers` (the worn title), `Bounties`/`Careers`/`Deeds` (held pay), `SkillScreen`, `DailyTaskScreen`, `TitlesScreen`, `RewardsScreen`, `MenuCompat`, lang parts `daily_task`, `title_choice`, `rewards`, `stats_redistribute`.
 - Built; not played.
+
+`/rewards` opens the Rewards page without the H menu, and the held-reward message says so.

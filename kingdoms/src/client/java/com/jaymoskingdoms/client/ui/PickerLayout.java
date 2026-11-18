@@ -327,7 +327,7 @@ public final class PickerLayout {
 			}
 			y += 5;
 			if (draw && y + Ui.LINE > clipTop && y < clipBottom) {
-				graphics.text(font, s.label().getString().toUpperCase(Locale.ROOT), x, y, s.color());
+				Ui.line(graphics, font, Component.literal(s.label().getString().toUpperCase(Locale.ROOT)), x, y, w, s.color());
 			}
 			y += Ui.LINE + 2;
 			for (Component line : s.lines()) {
@@ -338,7 +338,7 @@ public final class PickerLayout {
 		if (!info.paths().isEmpty()) {
 			y += 5;
 			if (draw && y + Ui.LINE > clipTop && y < clipBottom) {
-				graphics.text(font, Component.translatable("gui.jaymoskingdoms.picker.paths").getString().toUpperCase(Locale.ROOT), x, y, Ui.DIM);
+				Ui.line(graphics, font, Component.literal(Component.translatable("gui.jaymoskingdoms.picker.paths").getString().toUpperCase(Locale.ROOT)), x, y, w, Ui.DIM);
 			}
 			y += Ui.LINE + 2;
 			if (info.pathsNote() != null) {
@@ -398,6 +398,12 @@ public final class PickerLayout {
 
 	// ---- the wheel -----------------------------------------------------------------------------------------------------
 
+	/** A wheel step in pixels, at least one in its direction (a trackpad's small steps would round to nothing). */
+	private static int wheel(double pixels) {
+		int step = (int)Math.round(pixels);
+		return step == 0 ? (int)Math.signum(pixels) : step;
+	}
+
 	/** Turns the wheel over the list or the info panel; true if it did something. {@code n} is how many entries the list has. */
 	public boolean scrolled(double mouseX, double mouseY, double scrollY, int n) {
 		if (scrollY == 0.0) {
@@ -405,7 +411,7 @@ public final class PickerLayout {
 		}
 		if (mouseX >= this.infoX) {
 			if (this.infoContentH > this.infoViewH) {
-				this.infoScroll = Math.clamp(this.infoScroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.infoContentH - this.infoViewH);
+				this.infoScroll = Math.clamp(this.infoScroll - wheel(scrollY * SCROLL_STEP), 0, this.infoContentH - this.infoViewH);
 			}
 			return true;
 		}

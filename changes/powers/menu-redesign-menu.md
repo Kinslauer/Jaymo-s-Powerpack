@@ -6,3 +6,5 @@
 - **Character page** in the Codex shape: status header (level, who you are, XP bar), you in a tall box with armour, hands, amulet and belt down the sides, a soft glow behind and a shadow under the feet, name and heritage under; beside it power (mastery bar, fate), vitals (health, hunger, stamina, armour, experience), Attributes and Resistances side by side, and a Record (mobs felled, deaths, days played, plus Kingdoms' rows). The body scrolls when the window is small.
 - Classes: `MenuTabs` (groups, `group`, `locked`, `wide`, `characterRows(panel, rows)`, look file, `/menulook`, E closes), new `MenuBar` (draws and clicks both looks), `CharacterScreen`, `PowerScreen`/`MapScreen`/`TrialsScreen` (clear of the side list), lang `menu.json`.
 - Built; not played.
+
+The menu bar's plates shrink to stay left of the look button on a narrow screen, and the bar closes when you leave a world. A long title card line shrinks to fit its plate.
