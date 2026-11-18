@@ -9,10 +9,10 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
+- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 
 
 ## Being built
