@@ -197,6 +197,7 @@ public final class Blows {
 		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
 		EquipmentSlot slot = slot(part);
 		List<ArmourKind> layers = new ArrayList<>();
+		ItemStack outer = ItemStack.EMPTY;
 		String place = place(part);
 		List<ArmourKind> limb = place.equals("torso") ? List.of() : ArmourKind.layers(victim, place);
 		if (place.equals("arms") && !limb.isEmpty()) {
@@ -204,6 +205,9 @@ public final class Blows {
 			layers.addAll(limb);
 		} else {
 			layers.addAll(place.equals("legs") ? limb : List.of());
+			if (layers.isEmpty() && ArmourKind.worn(victim, slot) != ArmourKind.NONE) {
+				outer = victim.getItemBySlot(slot);
+			}
 			layers.add(ArmourKind.worn(victim, slot));
 			if (slot == EquipmentSlot.CHEST) {
 				layers.addAll(ArmourKind.layers(victim, "torso"));
@@ -211,7 +215,7 @@ public final class Blows {
 		}
 		layers.removeIf(k -> k == ArmourKind.NONE);
 		ArmourKind armour = layers.isEmpty() ? ArmourKind.NONE : layers.get(0);
-		float factor = kind.against(armour);
+		float factor = kind.against(armour, outer);
 		for (int i = 1; i < layers.size(); i++) {
 			float under = kind.against(layers.get(i));
 			if (under < factor) {

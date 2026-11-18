@@ -63,6 +63,20 @@ public enum WeaponKind {
 			this.plate = plate;
 		}
 
+		/** A cut's share against studded padding, in place of padding's own. */
+		static final float STUDDED_CUT = 0.95F;
+
+		/**
+		 * The share of its damage this blow does against {@code piece}, a worn piece of {@code armour} kind: mail over padding
+		 * takes the better of the two, studs turn a cut a little.
+		 */
+		public float against(ArmourKind armour, ItemStack piece) {
+			if (armour == ArmourKind.MAIL && ArmourKind.padded(piece)) {
+				return Math.min(mail, cloth);
+			}
+			return this == CUT && armour == ArmourKind.CLOTH && piece.is(ArmourKind.STUDDED_TAG) ? STUDDED_CUT : against(armour);
+		}
+
 		/** The share of its damage this blow does against {@code armour} (1 against none). */
 		public float against(ArmourKind armour) {
 			return switch (armour) {
@@ -100,6 +114,15 @@ public enum WeaponKind {
 		float sum = 0.0F;
 		for (Blow blow : blows) {
 			sum += blow.against(armour);
+		}
+		return sum / blows.length;
+	}
+
+	/** As {@link #against(ArmourKind)}, for the particular worn {@code piece} (empty: a plain one of its kind). */
+	public float against(ArmourKind armour, ItemStack piece) {
+		float sum = 0.0F;
+		for (Blow blow : blows) {
+			sum += blow.against(armour, piece);
 		}
 		return sum / blows.length;
 	}
