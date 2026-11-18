@@ -726,3 +726,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Lore.md (now marked Andy approved, 2026-11-18).
 - **Agent:** [[Agents/Story quest expansion|Story quest expansion]]
 - 2026-11-18 (Andy): "approve all lore": every `(new)` placement in Lore.md is canon (The Huntsman's rangers, Conjoined twin mutation, What a pact holds you to, The bound bloods, What the water keeps). Also: labyrinth compass plates come from early dungeon loot; Knight Armor ships with a datapack that moves its recipes to Tinkers forging; fishing's second half (notes + tackle bench) goes ahead.
+- 2026-11-18 (Andy): Knight Armor ships its weapons only, its armour turned off (PR #1718); Kingdoms' heraldry harness stays the pack's knight armour. More harness pieces and variants go through a pick-list first: https://claude.ai/artifact/GSAKVequm61NJT5Z3mLNoW (picks saved in its db, doc picks/andy).
