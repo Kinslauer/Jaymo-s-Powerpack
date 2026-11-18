@@ -5,6 +5,7 @@ import com.jaymoskingdoms.astronomy.SunMoon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.LightmapRenderState;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.EnvironmentAttributeProbe;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.MoonPhase;
 
@@ -26,8 +27,12 @@ import net.minecraft.world.level.MoonPhase;
 public final class DarkNights {
 	/** Moonlight left in each phase, from full (index 0) round to waxing gibbous (7). */
 	static final float[] MOONLIGHT = {1.0F, 0.7F, 0.45F, 0.2F, 0.0F, 0.2F, 0.45F, 0.7F};
-	/** Vanilla's sky light factor at the dead of night (Timelines.NIGHT_SKY_LIGHT_FACTOR); 1 at noon. */
-	static final float NIGHT_SKY_FACTOR = 0.24F;
+	/**
+	 * The Sun's height (the y of its direction) where vanilla's day timeline starts dimming the sky light (tick 11270),
+	 * and where the night is at its darkest (tick 13140). The night is read off the Sun, not off the sky light factor,
+	 * since rain and thunder lower that factor by day too, and a rainy noon was taken for a moonless night.
+	 */
+	static final float DAY_SUN_Y = 0.4F, NIGHT_SUN_Y = -0.1F;
 
 	/** Past this far into the night (0-1) on a waning moon, shader packs go off (only when {@link ShaderSkyLight} didn't take). */
 	static final float SHADERS_OFF_AT = 0.3F;
@@ -59,6 +64,7 @@ public final class DarkNights {
 			streak = 0;
 			return;
 		}
+		measure(minecraft, 1.0F);
 		if (minecraft.player.tickCount % 20 != 0) {
 			return;
 		}
@@ -125,11 +131,15 @@ public final class DarkNights {
 	/**
 	 * (0.7.164) Moonlight for shader packs. Packs light the world from the block and sky light levels Iris hands them
 	 * (gl_MultiTexCoord1, read straight or through gl_TextureMatrix[1]); the sky level is multiplied by the uniform
-	 * {@code jaymo_SkyLight}, the same factor the vanilla lightmap gets. So under a new moon the open sky lights a pack's
+	 * {@code 1 - jaymo_SkyDark}, the same factor the vanilla lightmap gets. So under a new moon the open sky lights a pack's
 	 * world no more than a cave roof does, whatever pack it is. Wired in by mixin.iris; all of Iris by reflection.
 	 */
 	public static final class ShaderSkyLight {
-		static final String UNIFORM = "jaymo_SkyLight";
+		/**
+		 * How much of the sky light the night takes away (0 by day). Darkness rather than light, so a program the
+		 * uniform never reaches reads 0 and keeps its full sky light: as light, an unset uniform blacked out the day.
+		 */
+		static final String UNIFORM = "jaymo_SkyDark";
 		/** Iris's shaders asked for the sky light, and the uniform is there to scale it. */
 		private static volatile boolean scaled, registered;
 
@@ -148,7 +158,7 @@ public final class DarkNights {
 		/** Iris's stand-in for gl_MultiTexCoord1, with the sky level (y) scaled. */
 		public static String scale(String original, String light) {
 			scaled = true;
-			return "vec4(" + light + " * vec2(1.0, " + UNIFORM + "), 0.0, 1.0)";
+			return "vec4(" + light + " * vec2(1.0, 1.0 - " + UNIFORM + "), 0.0, 1.0)";
 		}
 
 		/** Declares the uniform in a shader Iris has just transformed. */
@@ -174,7 +184,7 @@ public final class DarkNights {
 				Object perFrame = frequencyClass.getField("PER_FRAME").get(null);
 				Class.forName("net.irisshaders.iris.gl.uniform.UniformHolder", false, loader)
 						.getMethod("uniform1f", frequencyClass, String.class, java.util.function.DoubleSupplier.class)
-						.invoke(uniforms, perFrame, UNIFORM, (java.util.function.DoubleSupplier) ShaderSkyLight::factor);
+						.invoke(uniforms, perFrame, UNIFORM, (java.util.function.DoubleSupplier) () -> 1.0 - factor());
 				registered = true;
 			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 				registered = false;
@@ -184,27 +194,47 @@ public final class DarkNights {
 	}
 
 	public static void apply(LightmapRenderState state, float partialTicks) {
-		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.level == null || !minecraft.level.dimensionType().hasSkyLight() || state.skyFactor >= 1.0F) {
-			lastNight = 0.0F;
+		if (!measure(Minecraft.getInstance(), partialTicks) || state.skyFactor >= 1.0F) {
 			return;
 		}
 		if (com.jaymoskingdoms.client.films.LoreFilmClient.night()) {
 			// a lore film's night is its own: bright enough under the moon to read the fight, whatever the real one is
 			state.skyFactor = com.jaymoskingdoms.client.films.LoreFilmClient.MOONLIGHT;
-			lastNight = 0.0F;
 			return;
+		}
+		state.skyFactor *= Mth.lerp(lastNight, 1.0F, lastMoon);
+	}
+
+	/**
+	 * Works out how far into the night it is (0 by day, whatever the weather; 1 once the sky is at its darkest) and how
+	 * much moonlight there is, for the lightmap and the shader packs' uniform. Run by the lightmap and every client tick,
+	 * so a shader pack never keeps a stale night when the lightmap isn't being worked out. False when nothing darkens.
+	 */
+	static boolean measure(Minecraft minecraft, float partialTicks) {
+		if (minecraft.level == null || !minecraft.level.dimensionType().hasSkyLight()) {
+			lastNight = 0.0F;
+			return false;
+		}
+		if (com.jaymoskingdoms.client.films.LoreFilmClient.night()) {
+			// the film sets its own night light (apply); shader packs are left as they are
+			lastNight = 0.0F;
+			return true;
+		}
+		EnvironmentAttributeProbe probe = minecraft.gameRenderer.mainCamera().attributeProbe();
+		float sunY = Mth.cos(probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTicks) * Mth.DEG_TO_RAD);
+		float night = Mth.clamp((DAY_SUN_Y - sunY) / (DAY_SUN_Y - NIGHT_SUN_Y), 0.0F, 1.0F);
+		if (night <= 0.0F) {
+			lastNight = 0.0F;
+			return false;
 		}
 		float moon = MOONLIGHT[0];
 		if (Moons.clientShown == Moons.Moon.NONE) {
-			MoonPhase phase = minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);
+			MoonPhase phase = probe.getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);
 			moon = MOONLIGHT[Math.floorMod(phase.index(), MOONLIGHT.length)];
 		}
-		moon *= SunMoon.moonlight(minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_ANGLE, partialTicks));
-		// how far into the night it is: 0 by day, 1 once the sky is at its darkest
-		float night = Mth.clamp((1.0F - state.skyFactor) / (1.0F - NIGHT_SKY_FACTOR), 0.0F, 1.0F);
+		moon *= SunMoon.moonlight(probe.getValue(EnvironmentAttributes.MOON_ANGLE, partialTicks));
 		lastNight = night;
 		lastMoon = moon;
-		state.skyFactor *= Mth.lerp(night, 1.0F, moon);
+		return true;
 	}
 }
