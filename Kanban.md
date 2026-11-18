@@ -4,16 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-17 21:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-17 21:24). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · for pc-claude · open
 
 
 ## Being built
 
+- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · claimed
 
 
 ## In review
