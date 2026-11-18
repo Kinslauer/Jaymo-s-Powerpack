@@ -1,0 +1,7 @@
+# The Wither's fight: night, ruin, beam, charge, skull rain
+- **Night while it lives**: the sky goes to its darkest, day or night, over the whole land until the Wither dies; zombies' eyes glow while it lasts.
+- **It wrecks what was built first**: it ignores players and throws skulls at the nearest houses, walls and towers (planks, bricks, doors, glass and the like, found round it and round the folk near it) until it has thrown 18, two minutes pass, it is hurt badly, or nothing is left. Only where mobGriefing is on. Guards and fighting folk go for it, villagers run and hide (the brave may stand), animals run.
+- **Then it hunts the nearest player**, circling them rather than hovering over them; in the last third of its health it circles tighter and faster and waits less between moves.
+- **Four moves, each shown first**: a beam (a thin violet line that locks, then a beam that kills anyone in its line of sight, blocked by any solid block); a charge (red tell, then a rush: a raised shield or guard stops it and stuns it for four seconds, a guard raised just then for seven; anyone else is hurt and thrown); a rain of skulls (it climbs, marks spots on the ground with sigils, then skulls fall with big fiery blasts); and blue skulls, which a swing at one close in front of you sends back at the Wither for 45 damage.
+- **The dead rise to it**: zombies, skeletons and draugr within 40 blocks (never barrow knights) follow it and guard it, a cold light round their eyes, and go for anyone near it.
+- Built, not played. The new look and sounds are still to come.
