@@ -45,5 +45,19 @@
   "story.jaymoskingdoms.born.fair.short": "A travelling fair's wagon.",
   "story.jaymoskingdoms.born.den": "A den in the wild lands",
   "story.jaymoskingdoms.born.den.tale": "You were born in a den among the roots and rocks of the wild lands, warm in a heap of your kin, with the whole night to listen to.",
-  "story.jaymoskingdoms.born.den.short": "A den in the wild lands."
+  "story.jaymoskingdoms.born.den.short": "A den in the wild lands.",
+  "story.jaymoskingdoms.born.plains.tag": "wheat and wide sky",
+  "story.jaymoskingdoms.born.mountain.tag": "lantern and pick",
+  "story.jaymoskingdoms.born.coast.tag": "water, old and still",
+  "story.jaymoskingdoms.born.forest.tag": "under old branches",
+  "story.jaymoskingdoms.born.valley.tag": "moss, vine and sun",
+  "story.jaymoskingdoms.born.forge.tag": "heat at the edge",
+  "story.jaymoskingdoms.born.north.tag": "snow and distance",
+  "story.jaymoskingdoms.born.moors.tag": "the nights are yours",
+  "story.jaymoskingdoms.born.warband.tag": "always on the move",
+  "story.jaymoskingdoms.born.scholars.tag": "towers and ink",
+  "story.jaymoskingdoms.born.temple.tag": "first light, high sand",
+  "story.jaymoskingdoms.born.vats.tag": "glass and no mother",
+  "story.jaymoskingdoms.born.fair.tag": "wagons and wonders",
+  "story.jaymoskingdoms.born.den.tag": "the wild raised you"
 }
