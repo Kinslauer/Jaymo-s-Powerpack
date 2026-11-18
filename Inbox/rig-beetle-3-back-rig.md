@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
