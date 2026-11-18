@@ -10,6 +10,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · for ☀️ Apollo · open
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 
 
 ## Being built
