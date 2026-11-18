@@ -22,13 +22,13 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · for any · open
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · claimed
 - [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · claimed
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · claimed
 
 
 ## In review
