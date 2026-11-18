@@ -18,7 +18,7 @@ against the 26.3 sources. New keys default to unbound unless said otherwise (R/G
 - **Lumpy tops** [cl-bumps]: some field cells (a hash of cell x/z) draw 1-3 extra slices above the deck's top, so the
   bright tops rise in mounds. Fewer bumps in fair weather, more as rain gathers.
 - **A different sky each day** [cl-daily]: each deck's height (within +-12 blocks of `DECK_HEIGHT`), drift speed
-  (x0.7-1.4) and slice alpha (x0.8-1.15) are rolled from the world seed and the day number, eased over a minute at dawn
+  (x0.7-1.4) and slice alpha (x0.8-1.15) are rolled from the day number (the client has no seed), eased over a minute at dawn
   so nothing jumps.
 - **Gaps** [cl-thin]: fair weather cuts clear patches (a second low-res mask, rolled per day); storms close them.
 - **High wispy deck** [cl-third]: a third deck at about 236, one or two slices, faint (alpha ~0.18), 1.8x drift, white

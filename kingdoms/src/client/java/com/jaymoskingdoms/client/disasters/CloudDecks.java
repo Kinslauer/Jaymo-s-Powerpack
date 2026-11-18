@@ -139,7 +139,7 @@ public final class CloudDecks {
 				}
 			}
 		}
-		gapMix = Math.min(1.0F, gapMix + EASE);
+		gapMix = Math.min(1.0F, gapMix + EASE / 3.0F); // linear, so the crossfade takes about a minute like the eased rolls
 		float speed = DRIFT + Storms.clientWindSpeed * DRIFT_WIND;
 		for (int d = 0; d < DECKS; d++) {
 			heightOff[d] += (heightTo[d] - heightOff[d]) * EASE;
@@ -261,7 +261,9 @@ public final class CloudDecks {
 
 	/** How much of a square shows (0 cleared, 1 whole) in the gap pattern rolled for a day. */
 	private static float gapFade(int fx, int fz, int deck, int day, float gapChance) {
-		return Mth.clamp((hash(fx + day * 31, fz, 60 + deck) - gapChance) / GAP_SOFT, 0.0F, 1.0F);
+		float fade = Mth.clamp((hash(fx + day * 31, fz, 60 + deck) - gapChance) / GAP_SOFT, 0.0F, 1.0F);
+		// the soft edges close with the gaps, so a full storm leaves no square even partly open
+		return 1.0F - (1.0F - fade) * (gapChance / GAP_FAIR);
 	}
 
 	/** A level quad facing down, since clouds are seen from under. */
