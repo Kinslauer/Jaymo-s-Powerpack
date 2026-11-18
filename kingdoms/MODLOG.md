@@ -14958,3 +14958,7 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 - **Illager names** (Andy: "the pillagers dont have names for each other, we should create a pool of 80 or so"): 80 names (`IllagerTalk.NAMES`, replacing the made-up start+end pairs); every illager gets one as it loads, one no other illager within 48 blocks already has. Their fellows call them by it ("I've got Vorik, cover me!") and their deaths name them (`mixin.IllagerNameMixin` on `Entity.getTypeName`, server side). The name over their head still waits until they tell you (Introductions), and a name tag still wins. Illagers named before keep their old name.
 - **Mutant zombie** (Andy: "many pillagers should have been able to take one"): it gets back up from death once instead of three times (`MutantRampage.LIVES`, set through the mod's own synced data by reflection) and has 25 less health (125, `HEALTH_CUT`): about 156 health to beat in all, down from about 262. Its slams hit much harder instead (Jaymo's Powers crushing blows).
 - Built; not played (Mutant Monsters isn't in the dev runtime).
+
+## 0.10.20 (2026-11-18): Carried in only to a real village (#1733)
+
+- Fixes: "Someone found you and carried you in" could leave you outdoors by a lone castle's bounty board. Now only a village (a bell, an Epic town, or a town its builders put up, with homes round it) carries you in, to a free bed indoors; the nearest one that has one is tried, and with none you wake as you would have.

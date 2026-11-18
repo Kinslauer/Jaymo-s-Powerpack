@@ -5881,3 +5881,7 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
   - Code: `core/BlastGore` (crushing, crushedNow, throws), `Downed` (crushed downed bodies), `Dismember.lethalPart` (CRUSH_SEVER).
 - **Prone deaths** (Andy: a burning pillager on the ground "pops into the air when it dies because it defaults back to standing"): anyone downed who dies of anything else (fire, a fall, a mob) is now marked to lie as they lay, as a finished one already was. Players dying flat (downed, crawling, crippled, under a low ceiling) are marked too: face up if they'd rolled onto their back, else face down. `DownedLie.markPlayer`, `Downed.LIE_PHASE`; an unused mark is cleared on respawn.
 - Built; not played.
+
+## 0.24.82 (2026-11-18): Daylight under the Aether again (#1732)
+
+- Fixes: the Overworld stayed dark by day wherever the Aether lies overhead. ScalableLux is out of the pack (and removed from the CurseForge profile): it replaced the light engine that gives each stacked layer its own sky. Ground lit while it was in stays dark until the world is relit or started anew.
