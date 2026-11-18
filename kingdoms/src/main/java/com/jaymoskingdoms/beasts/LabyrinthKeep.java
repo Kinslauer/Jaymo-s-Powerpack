@@ -119,7 +119,7 @@ final class LabyrinthKeep {
 				entity.setItem(0, new ItemStack(LabyrinthCraft.TABLETS[i]));
 			}
 		}
-		level.setBlock(pedestal, Blocks.CHISELED_COPPER.defaultBlockState(), 2);
+		level.setBlock(pedestal, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), 2);
 		ItemEntity prize = new ItemEntity(level, pedestal.getX() + 0.5, pedestal.getY() + 1.2, pedestal.getZ() + 0.5, new ItemStack(LabyrinthCraft.AFTERBLOW));
 		prize.setNoGravity(true);
 		prize.setDeltaMovement(Vec3.ZERO);

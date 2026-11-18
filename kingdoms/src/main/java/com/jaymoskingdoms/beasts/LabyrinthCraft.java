@@ -92,7 +92,7 @@ public final class LabyrinthCraft {
 		ResourceKey<Block> gate = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("rune_gate"));
 		RUNE_GATE = Registry.register(BuiltInRegistries.BLOCK, gate, new RuneGateBlock(BlockBehaviour.Properties.of().setId(gate)
 			.mapColor(MapColor.COLOR_ORANGE).strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.DEEPSLATE_BRICKS)
-			.pushReaction(PushReaction.BLOCK).lightLevel(RuneGateBlock::light)));
+			.pushReaction(PushReaction.IMMOVEABLE).lightLevel(RuneGateBlock::light)));
 		ResourceKey<Item> gateItem = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("rune_gate"));
 		RUNE_GATE_ITEM = Registry.register(BuiltInRegistries.ITEM, gateItem, new BlockItem(RUNE_GATE, new Item.Properties().setId(gateItem)
 			.useBlockDescriptionPrefix()));
