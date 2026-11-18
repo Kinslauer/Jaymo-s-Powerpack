@@ -521,8 +521,10 @@ public final class Careers {
 		}
 	}
 
+	/** What a smith's orders may also ask for when Powers is there: mail sheets, and a mailed jack or two (1 to 3). */
+	private static final String[] MAILED_GOODS = {"jaymospowers:mail_sheet", "jaymospowers:mailed_jack"};
 	/** Tags Jaymo's Powers reads for a smith's rank (its perfect zone on the hammering bar widens): Journeyman, Master. */
-	static final String[] SMITH_TAGS = {"jaymoskingdoms.smith_rank_1", "jaymoskingdoms.smith_rank_2"};
+	static final String[] SMITH_TAGS ={"jaymoskingdoms.smith_rank_1", "jaymoskingdoms.smith_rank_2"};
 
 	/** (Powers' Smithing Anvil) Keeps {@code player}'s smith-rank tag true to the rank they hold. */
 	private static void smithTags(ServerPlayer player) {
@@ -726,6 +728,14 @@ public final class Careers {
 			kinds.add("give:" + g);
 		}
 		kinds.addAll(job.works);
+		if (job == Job.SMITH) {
+			// (Jaymo's Powers' mailed leather, when it's there) the town's armourers want mail sheets and the odd mailed jack
+			for (String g : MAILED_GOODS) {
+				if (!item(g).equals(Items.AIR)) {
+					kinds.add("give:" + g);
+				}
+			}
+		}
 		kinds.removeIf(k -> open.stream().anyMatch(o -> o.what().equals(k) || k.equals("carry") && o.what().startsWith("carry:")
 			|| k.equals("ferry") && o.what().startsWith("ferry:")));
 		if (job == Job.BUILDER && Storage.loaded(level, f)) {
@@ -742,7 +752,8 @@ public final class Careers {
 			return null;
 		}
 		String what;
-		List<String> gives = kinds.stream().filter(k -> k.startsWith("give:")).toList();
+		// (mail goods are never stocked, so they'd always be "least of": they come up only by the plain draw)
+		List<String> gives = kinds.stream().filter(k -> k.startsWith("give:") && !java.util.Arrays.asList(MAILED_GOODS).contains(k.substring(5))).toList();
 		if (!gives.isEmpty() && Storage.loaded(level, f) && random.nextFloat() < 0.6F) {
 			// the goods the storehouse has least of
 			what = gives.stream().min(Comparator.comparingInt(g -> stock(level, f, g.substring(5)) + random.nextInt(16))).orElse(gives.getFirst());
@@ -783,7 +794,8 @@ public final class Careers {
 			case "fly" -> Mth.nextInt(random, 1, FLY_ORDERS_MOST);
 			default -> {
 				String good = what.substring(5);
-				yield good.startsWith("#") ? Mth.nextInt(random, 24, 48) : job == Job.SMITH ? Mth.nextInt(random, 8, 16)
+				yield good.startsWith("#") ? Mth.nextInt(random, 24, 48) : good.equals(MAILED_GOODS[1]) ? Mth.nextInt(random, 1, 3)
+					: job == Job.SMITH ? Mth.nextInt(random, 8, 16)
 					: good.equals("minecraft:cobblestone") ? Mth.nextInt(random, 48, 64) : Mth.nextInt(random, 10, 24);
 			}
 		};

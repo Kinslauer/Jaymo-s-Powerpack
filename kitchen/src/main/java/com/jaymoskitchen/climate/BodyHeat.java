@@ -477,9 +477,13 @@ public final class BodyHeat {
 		return best;
 	}
 
+	/** Jaymo's Powers' studded leather (optional: an unknown tag matches nothing): all four pieces worn count as one warm piece. */
+	static final TagKey<Item> STUDDED = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("jaymospowers", "studded_armor"));
+
 	/** Warm clothes worn, warm linings sewn into what's worn ({@link Lining}), and llama leather (half a piece each). */
 	static float warmPieces(Player player) {
-		float warm = pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player);
+		float warm = pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player)
+			+ (pieces(player, STUDDED) == 4 ? 1.0F : 0.0F);
 		if (Wetness.soaked(player)) {
 			// wet wool still keeps you warm; soaked leather, linings and the rest keep half
 			int wool = woolPieces(player);
