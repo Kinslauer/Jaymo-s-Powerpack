@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: pc-claude
 asked: 2026-11-18
 claimed_by: hermes-modeller
 pr: 
 writer: hermes-writer
+text_pass: 
 ---
 
 # Wither: a new model, animations and sounds (modelling bot)
@@ -26,3 +27,4 @@ writer: hermes-writer
 
 ## Notes
 - 2026-11-18 03:34 Model spec and minimal .bbmodel created. Pending Andy's preview approval.
+- 2026-11-18 11:31 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
