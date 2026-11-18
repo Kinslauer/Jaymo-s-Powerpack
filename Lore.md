@@ -2285,6 +2285,8 @@ element is not taught but woken, and the master librarians keep the rite. Each g
 whoever was there (the feats), and each calling narrows in time into a path: the thief into assassin, burglar or
 swashbuckler, the mage into a school.
 
+**A calling's first choice can be retaught** (new) (Claude's placement for the menu redesign, 2026-11-18, for Andy to approve). A calling's first pick (a Mage's first spell, a Sorcerer's element, a Paladin's oath, a Ranger's chosen foe) is not fixed for life. The one who taught it will teach another for 25 silver, but not twice in quick succession: a mind needs about ten minutes to let the old way settle. Nothing already learned is lost. A patron is different: a Cleric's or a Warlock's patron is sworn at a shrine, and is changed only the way a faith is turned, never for coin.
+
 **Forged seals and deeds; the gorgon's gaze** (Claude's placement, the row-check fixes, 2026-11-13, Andy approved
 2026-11-17). The Underworld's forgers also turn out a writ under a lord's seal and a deed to a house, and only the fences
 and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
