@@ -4,9 +4,6 @@ import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -31,9 +28,10 @@ import net.minecraft.world.phys.Vec3;
  * once, the first time a Z Fighter of that blood is seen, then saved for good). For him the three bought forms are not
  * Super, Super 2 and Super 3 but {@link ZFighterForms#LEGEND_1}-{@link ZFighterForms#LEGEND_3}: the same road (the
  * breakthrough, TP, hardship and mastery open them in the same order, {@link #chain} maps them back) but a different
- * creature at the end of it. Huge ({@link #SCALE}), green, rage-driven and poor at control: every so often the rage
- * surges and lashes out at everything near him, friend or not ({@link #surge}); the more he masters a form the longer
- * between surges. Heavier on ki and food, and stronger than the Super it replaces. Primal Super (the tamed ape) is not
+ * creature at the end of it. Huge ({@link #SCALE}), green, rage-driven and poor at control: his heart's heat
+ * ({@link ZFighterLegendHeart}) fills as he runs, falls and is hurt, and when it is full the rage surges and lashes out at
+ * everything near him, friend or not ({@link #surge}); the more he masters a form the slower it fills. The same heat feeds
+ * his line's own moves. Heavier on ki and food, and stronger than the Super it replaces. Primal Super (the tamed ape) is not
  * for him: his line ends at Legend 3, and the god form can be lifted from it. The Great Ape ends the form as ever.
  */
 public final class ZFighterLegendary {
@@ -41,8 +39,7 @@ public final class ZFighterLegendary {
 	static final int ODDS = 40;
 	/** Scale added to his size by line step 1-3 (a share of normal height): about 1.35, 1.6 and 1.9 times. */
 	static final double[] SCALE = {0.0, 0.35, 0.6, 0.9};
-	/** The rage surges every {@link #SURGE_MIN} to {@link #SURGE_MIN} + {@link #SURGE_SPREAD} ticks, up to this much longer with full mastery. */
-	static final int SURGE_MIN = 240, SURGE_SPREAD = 200;
+	/** The heart's heat fills up to this many times slower with the step fully mastered (1 + this). */
 	static final float CONTROL_GAIN = 1.5F;
 	/** A surge reaches this far (plus this per step) and hurts this much (plus this per step); it throws everything back. */
 	static final double SURGE_RADIUS = 3.5, SURGE_RADIUS_STEP = 1.5;
@@ -58,21 +55,19 @@ public final class ZFighterLegendary {
 	public static final AttachmentType<Integer> MUTATION = AttachmentRegistry.create(JaymosPowers.id("zfighter_legendary"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
-	/** When each legendary-born's rage next surges. */
-	private static final Map<UUID, Long> SURGES = new HashMap<>();
-
 	private ZFighterLegendary() {
 	}
 
 	static void init() {
+		ZFighterLegendHeart.init();
 	}
 
 	static void clear() {
-		SURGES.clear();
+		ZFighterLegendHeart.clear();
 	}
 
 	static void forget(ServerPlayer player) {
-		SURGES.remove(player.getUUID());
+		ZFighterLegendHeart.forget(player);
 	}
 
 	/** Whether {@code form} is one of the legendary line. */
@@ -141,39 +136,19 @@ public final class ZFighterLegendary {
 		if (!free) {
 			live.ki -= cost;
 		}
-		SURGES.remove(player.getUUID());
 		ZFighterPower.transform(player, live, form);
 	}
 
-	/** Every tick, per Z Fighter: the mutation's roll, and the rage surging in a legendary form. */
+	/** Every tick, per Z Fighter: the mutation's roll, and the heart's heat in a legendary form. */
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
 		if (player.tickCount % 40 == 0) {
 			roll(player);
 		}
-		if (!legend(live.form)) {
-			SURGES.remove(player.getUUID());
-			return;
-		}
-		long now = player.level().getGameTime();
-		Long next = SURGES.get(player.getUUID());
-		if (next == null) {
-			SURGES.put(player.getUUID(), now + interval(player, live));
-			return;
-		}
-		if (now >= next) {
-			SURGES.put(player.getUUID(), now + interval(player, live));
-			surge(player, live);
-		}
+		ZFighterLegendHeart.tick(player, live);
 	}
 
-	/** Ticks to the next surge: longer the more of this step he has mastered. */
-	private static long interval(ServerPlayer player, ZFighterPower.Live live) {
-		float control = ZFighterTraining.mastery(player, live.form);
-		return Math.round((SURGE_MIN + player.getRandom().nextInt(SURGE_SPREAD)) * (1.0F + CONTROL_GAIN * control));
-	}
-
-	/** The rage gets away from him: a shockwave that hurts and throws back everything alive round him, friend or foe. */
-	private static void surge(ServerPlayer player, ZFighterPower.Live live) {
+	/** The rage gets away from him (his heart's heat full): a shockwave that hurts and throws back everything alive round him, friend or foe. */
+	static void surge(ServerPlayer player, ZFighterPower.Live live) {
 		ServerLevel level = player.level();
 		int step = chain(live.form);
 		double radius = AbilityPower.size(player, SURGE_RADIUS) + AbilityPower.size(player, SURGE_RADIUS_STEP) * step;
