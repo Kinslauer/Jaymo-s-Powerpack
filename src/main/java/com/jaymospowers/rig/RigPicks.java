@@ -49,7 +49,7 @@ public final class RigPicks {
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= FAILSAFE;
+		return action >= FIRST && action <= RigNet.EVAC;
 	}
 
 	/** A Rig menu entry from the client. */
@@ -74,6 +74,9 @@ public final class RigPicks {
 			case BANK -> RigBank.toggle(player);
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
+			case RigNet.TALK -> RigTalk.use(player);
+			case RigNet.PILOT -> RigPilot.use(player);
+			case RigNet.EVAC -> RigEvac.use(player);
 			default -> {
 			}
 		}

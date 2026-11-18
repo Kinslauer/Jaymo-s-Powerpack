@@ -128,7 +128,8 @@
 		"FangGauntletsFirstPersonMixin",
 		"FangGauntletsItemInHandLayerMixin",
 		"FangGauntletsModelFeatureRendererMixin",
-		"TitleCardMixin"
+		"TitleCardMixin",
+		"RigTalkChatMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

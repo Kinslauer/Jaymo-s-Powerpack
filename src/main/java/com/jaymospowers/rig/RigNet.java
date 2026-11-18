@@ -27,6 +27,8 @@ public final class RigNet {
 	public static final int SENTRY = 10;
 	/** The Rig prosthetics: the arm's repulsor shot and the leg's thruster kick (no suit needed, just the fitted limb). */
 	public static final int LIMB_SHOT = 11, LIMB_KICK = 12;
+	/** (0.22.x) The Mind's new menu actives: talk to the Mind, autopilot, evacuate the host. */
+	public static final int TALK = 29, PILOT = 30, EVAC = 31;
 	/** The most targets one missile volley marks. */
 	public static final int MAX_MARKS = 6;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
@@ -89,6 +91,17 @@ public final class RigNet {
 
 		@Override
 		public Type<Use> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: plain words the wearer typed at the Mind, so it can answer or act (only the wearer hears it). */
+	public record Chat(String message) implements CustomPacketPayload {
+		public static final Type<Chat> TYPE = new Type<>(JaymosPowers.id("rig_chat"));
+		public static final StreamCodec<ByteBuf, Chat> CODEC = ByteBufCodecs.STRING_UTF8.map(Chat::new, Chat::message);
+
+		@Override
+		public Type<Chat> type() {
 			return TYPE;
 		}
 	}
@@ -192,6 +205,8 @@ public final class RigNet {
 		PayloadTypeRegistry.clientboundPlay().register(Scan.TYPE, Scan.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Use.TYPE, (payload, context) -> RigActives.use(context.player(), payload.action()));
+		PayloadTypeRegistry.serverboundPlay().register(Chat.TYPE, Chat.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Chat.TYPE, (payload, context) -> RigTalk.handle(context.player(), payload.message()));
 		ServerPlayNetworking.registerGlobalReceiver(Lock.TYPE, (payload, context) -> RigActives.lock(context.player(), payload.entity()));
 		ServerPlayNetworking.registerGlobalReceiver(Volley.TYPE, (payload, context) -> RigActives.volley(context.player(), payload.targets()));
 	}
