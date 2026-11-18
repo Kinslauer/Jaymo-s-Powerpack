@@ -15023,3 +15023,10 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - **Rules**: one rule line, and one more for each sworn term (five at most). A rule is a sentence: who (I, my allies near me, the foes near me, the one I look at, everyone near me), what is true of them (the oath or patron decides: Mercy mends, quickens, hardens, slows, lights up; Justice lights up, slows, weakens, takes powers, blinds; Honour strengthens, hardens, quickens, weakens, lights up; each patron its own four or five), strength 1 + a step every 5 class levels (to 5), and 5 to 60 s. Enacting costs grace (Paladin) or credit with the patron (Warlock): 150 most, 1 a second back (2 with none running); one rule at a time, three from class level 20. A broken oath, or a patron withholding over an unpaid debt, enacts nothing; a broken oath or a lost class ends what runs. "Have no powers" puts Jaymo's Powers' ruled tag on whom it's about.
 - Classes: `VowBook` (new), `VowBookScreen` (new); `Vows` (sworn terms bind), `Paladins`/`Warlocks` (book on swearing, cleared on unmaking). Lang part `vow_book.json`.
 - Built; not played.
+
+## 0.10.29 (2026-11-18): drawn progress bars - text bars redrawn like the execution bars (#1747)
+
+- Every text bar on the action bar is now drawn by Jaymo's Powers in the execution bars' look (`HudBars` sends it; without Powers the old kind of line shows): pickpocketing, cutting or untying captives, lasso tying and struggling, tome charge, Illager study, Brute rite stitching and the trial's stone heave are holds under the crosshair with a short caption; the Vow Book's grace/credit, the hunger curse and night forms' time are gauges over the hotbar; the tree chop meter and stake pulls are drawn squares; a Will clash is one gold-against-red bar under the crosshair.
+- Goblin disguise suspicion now fills the awareness eye over the crosshair (Andy: "The eye should fill"), new `Senses.Suspicion` payload; the old "Suspicion" pips are gone.
+- The Vow Book's ink gauge no longer stops your swings (its `|...` text used to).
+- Compiled; not played.

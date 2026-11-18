@@ -2452,3 +2452,8 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 
 - Fixes: an animal by dropped food it couldn't reach (behind a fence, across water) worked out a new path to it every tick for ten seconds, a large share of the server's freezes on fresh land. It now tries once a second, and leaves the food when there is no way to it (`EatGroundFoodGoal`).
 - Built by CI; not played.
+
+## 0.6.48 (2026-11-18): drawn progress bars - corpse lifting and butchering (#1747)
+
+- Lifting, taking hold of and butchering a corpse show three drawn bars under the crosshair with a caption ("Butchering (3 pieces left)") instead of a `||||....` line, drawn by Jaymo's Powers (`HudBars`; without Powers the old kind of line shows). They still stop your swings while you hold.
+- Compiled; not played.
