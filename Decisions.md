@@ -707,6 +707,11 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Andy's note (new feature):** "When players are attacked they get to take an extra hit if the one they take would have downed them". Claude's reading, unconfirmed: the first blow that would down a player leaves them on their last sliver of health instead (with a cue); the grace recharges after about 30 s unhurt; executions, beheadings and gibs ignore it.
 - **Applies to:** Powers, Kingdoms, Kitchen. `thief` and `class-xp` go to draft PR #1698 (its files); the rest on branch claude/project-thread-god01i.
 - **Agent:** [[Agents/Scaling audit|Scaling audit]]
+
+### 2026-11-17: story quest expansion picks (Andy, https://claude.ai/artifact/4iKFTPa4trA4LV6DDrLv1s)
+- **Decided:** all 48 rows picked, no notes, "Build!": 12 changes to how every tale plays (deadlines, day and night hours, who-you-are conditions, persuade/threaten/pay, naming the culprit, beast preparation, companion voices, aftermath weeks later, unreadable letters, lies that come out, notice-board starts, arcs), one addition to each of the 19 tales, and 17 new tales.
+- **Applies to:** Kingdoms (tales, `TaleWays.java`). Inspiration only from The Witcher 3, Baldur's Gate, Blood of the Dawnwalker and Kingdom Come: our own stories, names and people.
+- **Agent:** [[Agents/Story quest expansion|Story quest expansion]]
 - 2026-11-17 4:23 PM ET (Andy, Hermes Training): "Yes add it" — Quill no longer text-passes tasks Claude sessions built (PR #1702); PC steps in Hermes Training handoff.md.
 - 2026-11-17 (Andy): "Merge": scaling audit picks PR #1703 merged. Agent: [[Agents/Scaling audit|Scaling audit]]
 - 4:52 PM, 2026-11-17 (Andy): "Approved lore": the scaling picks' four placements (What Legend gives back, The last hold, The Huntsman's sight, The blood wakes with the ladder) are canon. Agent: [[Agents/Scaling audit|Scaling audit]]

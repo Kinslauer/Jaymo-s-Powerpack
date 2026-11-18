@@ -761,12 +761,16 @@ them apart, spiders are crushed to legs, looters rob them, and kin carry their f
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
 you."
 
-**The last hold** (Andy, 2026-11-17, scaling picks; Andy approved 2026-11-17; Andy's words: "When players are attacked they get to take an extra
-hit if the one they take would have downed them"). A fighter's body does not drop to the first blow that should have
-felled it. It holds, for one breath, on the last of its strength, and only the next blow takes it down. Spent, the hold
-comes back once the fighter has had half a minute unhurt. A blade at the neck, an execution or a blast that tears the
-body apart is past holding.
+<!-- story-quest picks 2026-11-17: dead -->
+(new) *From the story-quest picks (Andy, 2026-11-17, "Build!"); the placements below are Claude's for him to approve.*
 
+(new) **The hanged who walk.** A man hanged at a crossroads gets no candle, by the Sun's law, so now and then one comes down off the beam at night and stands under it until cockcrow. The Lantern Warden's keepers hold that such a one will follow a lantern lit for him, and that the burying ground is the Warden's from the lych gate in: what walks in there of its own will, no law takes out again. The Ash Whisperer's people want their hanged cut down and given to the fire, ash on the wind. A lord's assize hears all comers while it sits, and a hanged road thief is left up till it rides on, then goes to the lime pit (tale: The Crossroads Gibbet).
+
+(new) **The night market.** On the night of the new moon the dead set up stalls in a burying ground and trade for what the living can spare: a voice, sleep, a laugh, a face. They look like anyone. The Lantern Warden's lamp-keepers do not forbid it, they keep its rules: bring no light of your own, pay to the grain, buy nothing you did not come for, be out before first light. The old green stones are still good money there (tale: The Night Market).
+
+(new) **The Hind's men.** A crew drowned with a temple's bell in their hold do not lie quiet in the sea: on the dark of the moon they come up the tide and walk for the burying ground of the town the bell was bound for. They are not that ground's own dead, and they lie down only when they have heard the bell rung there, a stroke a man. The priest who rang it only thinks this, and will not preach it (tale: The Wrong Light).
+
+(new) **The smith's household.** The husks upstairs in an old home were the smith's wife and children. He could not put them down himself, which is why he went under the floor instead. Whoever lays them to rest while he sleeps has done what he owed them, and he knows it when he wakes (tale: The Keeping).
 
 ## The Maw
 
@@ -1296,6 +1300,29 @@ the ground. The ground gave me back. It always will."; "Not by your hand. Tell t
 what you hit it with (fire, shot, blade, spells, beasts) and climbs in rank while it hunts you. There are three kinds:
 the grave-knight with its barrow-host, the dead outlaw warlord with his turncoats ("You made me."), and the
 demon-sworn with its hell-sworn. Each leaves a weapon head when it is ended with its own marks.
+
+<!-- story-quest picks 2026-11-17: dark -->
+(new) *From the story-quest picks (Andy, 2026-11-17, "Build!"); the placements below are Claude's for him to approve.*
+
+(new) **Wolfsbane.** A hooded blue flower of damp woods, found now and then among fern. It is to the wolf's curse what garlic is to the blood: the one who walks at the moon cannot abide it, nor silver. A bookhouse bestiary says so, and says of the plain wolf that an old one burned once fears fire. A household that suspects one of its own bars them in the root cellar on the night of the full moon, and somebody sits the door (tale: The One Who Walks at Moonrise).
+
+(new) **Holding the wolf.** The wolf's curse can be lifted while it is young, by a priest's rite that is half healer's work: wolfsbane burned at night where the cursed one lies, and their own name called. It can also be held: a sprig of wolfsbane under the tongue and someone to say the names of those they love until morning, and what rises is the lean wolf with the person's own mind, not the great beast. Those who learn it by themselves are rare (tale: The Wolf in the Wood).
+
+(new) **A blood-drinker's ground.** Nothing that drinks will hunt another's ground. In the Nightfall years the Night Bleeders came down every valley but the few where an old blood-drinker already sat, and those valleys never hung garlic or saw the plague. Where such a one is killed or driven out, the cloaked ones and their bats find the valley within the month. Some of the old ones ask and pay for what they take, as was once the custom, and keep a servant or two who has always refused them (tale: Guests After Dark).
+
+(new) **Well bargains.** Country people say never to ask a dry well for water out loud. What answers keeps a bargain to the letter and is held by its own words as hard as the asker is; its terms are scratched on lead in the old tongue, and it counts seven nights after the water fails before it comes up to choose for itself. Nobody says what it is (tale: What the Well Was Promised).
+
+(new) **Den custom.** A den lets a stranger in on two knocks and the answer "nobody sent me". A fence throws dice with a new customer before any trade, to see how they lose. Dens keep night hours only, and run a book on the fair melees through a hatch near the horse lines, which the marshals know of and cannot find. When the guild's black candle is set in a tavern window, the tavern leaves it be (tales: Hail Glass, The Lists, A Debt in Potatoes, The Black Candle).
+
+(new) **The test for the grey.** Fen wise-women who sell the grey keep a test with it: pale galls cut from the fen alders by night and steeped a day in strong spirit. A hand that has opened a twist of the grey comes out of the bowl black to the wrist, and the stain takes weeks to wear off (tale: The Fourth Measure).
+
+(new) **The brothers on the hill.** They hold to no patron by name, only the hours, but they keep what they are given to keep. One house keeps the Vigil Lamp, left with them by the last lamp-keeper of a dead house of the Warden; it has never gone out, and the prior carries it out to show the valley each year on the feast of the long night. Their rule for a novice: ring the hours, keep silence from the night bell to the dawn bell, do the work nobody else will. A house with no patron's name over its door is one a blood-drinker can bear to live in, which a house with a shrine is not (tale: The Novice).
+
+(new) **The Tallow Room.** A den in a cellar under a chandlers' row, lit by tallow dips in saucers because its keeper will not pay the chandlers overhead for wax. Its one rule is that nobody dies in the fight pit, since a body cannot be got up the ladder (tale: A Debt in Potatoes).
+
+(new) **How the guild is hired and paid.** A sewn packet goes to a hollow tree by a runner who does not know what it is. A paper with a name on it is left there under a black candle stub, lying open, and whoever takes it up has taken it on: that is the whole of the hiring. The black candle in the tavern window is lit by a townsperson who is sent it with their ordinary goods and paid the price of a candle. The three hands never see each other, which is why nobody can say who pays (tale: The Black Candle).
+
+(new) **What can be done with a paper.** A paper held is safe from other hands until its candle burns down, and then the holder is "noted". Put back under the stub, it is as if it was never taken up, and somebody else will. Burned, it is written out again and a second is written for whoever burned it. A candle goes out three ways: the work is done; whoever paid sends the same purse again, which buys the paper back and brings a white candle to the window; or whoever took the paper up sends it back with their own blood on it, and the guild does not send twice for the same name. No reeve takes a black candle down (tale: The Black Candle).
 
 ## The Nether and the demons
 
@@ -1979,6 +2006,39 @@ is on the wall.
 **Back to back** (same thread). The four fought the long defence in pairs, back to back. Smiths still make paired harness for two who swear it at a shrine: each wears half, and a blow that lands on one is partly borne by the other.
 
 **The everburning mote** (Andy approved, 2026-11-15; Andy: "court wizards have developed a spell that lets a light mote inside a lantern burn indefinitely"). It is a court wizard's working, sold to those who can pay: a mote of their light shut in a lantern, which never needs oil and never gutters. Abandoned places have no one to tend their lamps, which is why the lamps of ruins flicker.
+
+<!-- story-quest picks 2026-11-17: daily -->
+(new) *From the story-quest picks (Andy, 2026-11-17, "Build!"); the placements below are Claude's for him to approve.*
+
+(new) **Tale notices.** Now and then someone with a trouble too private for the work board's clerk nails it up there in their own hand. Whoever pulls it down has taken it on, and the paper goes with them.
+
+(new) **Forest law.** A lord's wood has its own court, which sits on its own day and is not the town's. For a hare it takes two fingers of the bow hand. A poacher taken is bound over at his own door until it sits, and a keeper who has a use for a man who knows where the hares run may speak for him (tale: A Hare for the Pot).
+
+(new) **The tithe.** A lord takes a tenth of the harvest as the Crowned Sun takes it of him, weighed at a tithe barn by the lord's bushel under the sun stamp; what a village comes short is owed double at Candlemas. Every village keeps a porch bushel on a chain that its neighbours cut theirs from, and writes what it carted in the town book (tale: Short Measure).
+
+(new) **The water ordeal.** The Truth's examiners will put an accusation of craft to the water when nobody will speak for or against: the accused is ducked on a stool, counted to forty and drawn out, since the Truth's sworn may not kill. One who sinks is written down clean; one who floats is put out of the town and her hearth raked out. An examiner would sooner hear a cause shown, and posts the day on the board so that anyone may speak before it. A hearth-healer wears a little clay hearth at the neck (tale: The Ducking Stool).
+
+(new) **Hearings at the well.** Where two houses of different patrons share a town, a wrong between them is heard in the street at the well they share, with a priest of each patron to see the weighing. The name is given to the priest of whichever house was wronged first, and the other answers. Each priest pushes for their own, which is why there are two (tale: Salt and Iron).
+
+(new) **The peeled rod.** Hamlets too small for a court settle a boundary by charter if one can be found and read, since most were written in the old letters and kept in a chapel chest. Where none can, the old way stands: a peeled hazel rod sent at first light is a challenge, each side names one champion, and they meet at the stone by day. Whoever is on their feet at the end, the stone stays where their people say, and nobody may speak against it (tale: The Boundary Stone).
+
+(new) **The levy and its coat.** A realm at war musters a levy from its villages, each man given a coat with the realm's badge. A man who leaves the lines in that coat is hunted by a sergeant with a book of doors, who strikes out each house as it is searched; whoever shelters him shares his rope, and the lord who holds the muster field may pardon him under seal if someone of good name stands surety (tale: The Deserter's Coat).
+
+(new) **Writs and bills.** A provost's writ under a muster's seal binds the provost too: the man is to be brought alive and heard. On the south road a thief-taker's bill is quit if the dead man's blood-price is paid into the widow's own hand, and the bearer is bound to carry it to her. The Sun's hanging lists are nailed to the gallows post and name those still to be taken where found (tale: The Cave-In).
+
+(new) **Ransoms and the bride road.** Takers set a day on a ransom. When it passes they send the captive home maimed "for the lateness", so the next household pays on time. When a bride goes missing on the road, the groom's side sends searchers along it within a fortnight; the drovers' tracks through the hills are safe from road men and cost two days (tales: The Asking Price, The Bride Road).
+
+(new) **Fair melees.** At the big fairs knights fight a melee on foot with wooden arms, to the yield, under a marshal whose word is the law of the meadow. Killing a man there is a disgrace that follows the name on the helm (tale: The Lists).
+
+(new) **How a fair travels.** The Rubber-folk's fair never goes straight to its winter ground: it pitches a few days at each halt along its road to earn its bread, puts every fire out twice, and moves on (tale: The Fair Left Behind).
+
+(new) **Cordons.** When the hollow blight takes a hamlet the lord's leech has it shut in: a fence, bowmen, nothing that breathes in or out, bread carried to a trough, and the count of the sick called over the fence each morning. On the leech's day she passes out whoever is clean and the rest is fired. Inside, a herbwife holds the sick back with gilded flesh for as long as there is gold; a grove druid will give the Cure at his stone to any who reach it, but will not come down to a fence (tale: The Cordon).
+
+(new) **Valley runners.** A runner keeps a round of doors and has three rules that are one rule: do not read what you carry, do not ask what it is, do not wait on the step for thanks. A runner who cannot read has a letter said over by its sender and says it back word for word at the door. A letter is paid for by the one who writes it, and nobody is paid to carry word back; at a ferry hamlet a carter takes the letters off the boat and the runners carry them on (tales: The Black Candle, Letters to a Dead Man).
+
+(new) **The Hearthkeeper's feast day.** Each village keeps one in its year. The tables are laid in the open, and by old custom nobody breaks a loaf until the sermon has been said over the bread. The night before, the street drinks the Feast-Eve cup together (tale: The Feast-Day Sermon).
+
+(new) **Heirs and bridges.** A lord who holds the bridges on a realm's river holds their tolls, and a realm's heir can be promised in marriage for such rights. When an heir runs from a match, the realm's guard is sent quietly, house by house, to bring them home unharmed and unremarked (tale: The Heir in the Hayloft).
 
 ## Rules for writing against this
 
