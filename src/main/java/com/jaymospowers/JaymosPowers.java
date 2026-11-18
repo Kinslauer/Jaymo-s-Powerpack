@@ -242,6 +242,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.tundra.world.TundraWorld.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
 		com.jaymospowers.layers.Layers.init();
+		// vertical slabs and quarter steps of the same blocks, and slabs of two kinds sharing a block
+		com.jaymospowers.buildblocks.BuildBlocks.init();
 		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures
 		com.jaymospowers.young.Younglings.init();
 		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in

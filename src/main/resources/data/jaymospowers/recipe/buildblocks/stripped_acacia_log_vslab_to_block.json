@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_acacia_log_vslab",
+    "jaymospowers:stripped_acacia_log_vslab"
+  ],
+  "result": {
+    "id": "minecraft:stripped_acacia_log"
+  }
+}

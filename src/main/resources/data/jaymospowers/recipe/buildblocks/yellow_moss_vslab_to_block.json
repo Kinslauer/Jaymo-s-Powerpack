@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:yellow_moss_vslab",
+    "jaymospowers:yellow_moss_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:yellow_moss"
+  }
+}

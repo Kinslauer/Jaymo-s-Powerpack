@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_bamboo_block_quarter",
+    "jaymospowers:stripped_bamboo_block_quarter",
+    "jaymospowers:stripped_bamboo_block_quarter",
+    "jaymospowers:stripped_bamboo_block_quarter"
+  ],
+  "result": {
+    "id": "minecraft:stripped_bamboo_block"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:dark_prismarine_vslab",
+  "result": {
+    "id": "jaymospowers:dark_prismarine_quarter",
+    "count": 2
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:agiosite",
+  "result": {
+    "id": "jaymospowers:agiosite_quarter",
+    "count": 4
+  }
+}

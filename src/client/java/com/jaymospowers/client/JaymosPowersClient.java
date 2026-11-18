@@ -131,6 +131,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// mixed slabs: the two slabs of one block, drawn by their block entity
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
+			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();
 		com.jaymospowers.client.frost.FrostClient.init();

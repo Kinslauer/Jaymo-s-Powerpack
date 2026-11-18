@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:purpur_block_vslab",
+    "jaymospowers:purpur_block_vslab"
+  ],
+  "result": {
+    "id": "minecraft:purpur_block"
+  }
+}

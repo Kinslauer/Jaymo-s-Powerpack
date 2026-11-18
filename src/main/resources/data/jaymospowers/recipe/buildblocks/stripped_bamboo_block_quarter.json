@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:stripped_bamboo_block_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_bamboo_block_quarter",
+    "count": 2
+  }
+}

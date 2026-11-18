@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:pale_oak_log_quarter",
+    "jaymospowers:pale_oak_log_quarter",
+    "jaymospowers:pale_oak_log_quarter",
+    "jaymospowers:pale_oak_log_quarter"
+  ],
+  "result": {
+    "id": "minecraft:pale_oak_log"
+  }
+}

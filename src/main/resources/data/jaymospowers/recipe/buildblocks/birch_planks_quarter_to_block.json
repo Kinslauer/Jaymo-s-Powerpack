@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:birch_planks_quarter",
+    "jaymospowers:birch_planks_quarter",
+    "jaymospowers:birch_planks_quarter",
+    "jaymospowers:birch_planks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:birch_planks"
+  }
+}
