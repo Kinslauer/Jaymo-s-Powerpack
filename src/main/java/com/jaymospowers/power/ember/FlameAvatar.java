@@ -2,6 +2,7 @@ package com.jaymospowers.power.ember;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.Stacked;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -291,11 +292,11 @@ public final class FlameAvatar {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_DEATH, SoundSource.PLAYERS, 1.5F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.2F, 0.6F);
 		Shakes.around(level, at, 16.0, 6.0F);
-		Flames.area(level, at, BURST_RADIUS, 6, player, e -> true);
+		Flames.area(level, at, AbilityPower.size(player, BURST_RADIUS), 6, player, e -> true);
 		var random = player.getRandom();
 		for (int i = 0; i < BURST_FIRES; i++) {
-			BlockPos pos = player.blockPosition().offset(random.nextInt(BURST_RADIUS * 2 + 1) - BURST_RADIUS, random.nextInt(3) - 1,
-				random.nextInt(BURST_RADIUS * 2 + 1) - BURST_RADIUS);
+			BlockPos pos = player.blockPosition().offset(random.nextInt(AbilityPower.size(player, BURST_RADIUS) * 2 + 1) - AbilityPower.size(player, BURST_RADIUS), random.nextInt(3) - 1,
+				random.nextInt(AbilityPower.size(player, BURST_RADIUS) * 2 + 1) - AbilityPower.size(player, BURST_RADIUS));
 			EmberKindle.ignite(level, pos);
 		}
 		player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 30));

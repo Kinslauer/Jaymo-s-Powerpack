@@ -166,6 +166,8 @@ public final class Formations {
 		if (kind < LINE || kind > POINT || !player.isAlive() || player.isSpectator() || !TreeLocks.check(player, TreeLocks.Lock.ORDERS)) {
 			return;
 		}
+		// (class trees) an order given: the Warlord's
+		ClassTrees.giveEvery(player, Classes.PlayerClass.WARLORD, ClassTrees.XP_ORDER, "order", 100L);
 		ServerLevel level = player.level();
 		Formation f = FORMED.get(player.getUUID());
 		if (kind == POINT) {
@@ -232,7 +234,7 @@ public final class Formations {
 		List<Villager> yours = new ArrayList<>();
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, Followers.ALL_RANGE)),
 			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player))) {
-			if (!Languages.understands(player, v)) {
+			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
 			}
@@ -430,7 +432,13 @@ public final class Formations {
 					keeping.add(v);
 				}
 			}
-			drill(level, keeping, f.shape, f.anchor, f.yaw, false, player.position());
+			// (class trees) a Drilled Warlord's formation: quicker to its places, and steady when shot at
+			drilled = WarExtras.drilled(player);
+			try {
+				drill(level, keeping, f.shape, f.anchor, f.yaw, false, player.position());
+			} finally {
+				drilled = 1.0F;
+			}
 		}
 	}
 
@@ -669,8 +677,12 @@ public final class Formations {
 	}
 
 	/** Whether {@code m} is at blows with {@code target}: it's on them, or one of the two has just struck the other. */
+	/** How many times as fast the formation being drilled right now forms up (1; more under a Drilled Warlord, {@link WarExtras#drilled}). */
+	private static float drilled = 1.0F;
+
 	private static boolean engaged(Mob m, LivingEntity target) {
-		return m.distanceToSqr(target) <= ENGAGE * ENGAGE || m.getLastHurtByMob() == target || m.getLastHurtMob() == target;
+		// (a drilled soldier doesn't leave his place for one who only hit him from afar)
+		return m.distanceToSqr(target) <= ENGAGE * ENGAGE || drilled <= 1.0F && m.getLastHurtByMob() == target || m.getLastHurtMob() == target;
 	}
 
 	/**
@@ -691,7 +703,7 @@ public final class Formations {
 
 	/** A spot near {@code at}'s height with a floor and room for a body (two blocks clear), or null. */
 	private static @Nullable BlockPos standable(ServerLevel level, BlockPos at) {
-		if (!level.hasChunkAt(at)) {
+		if (!Loaded.made(level, at)) {
 			return null;
 		}
 		for (int dy : HEIGHTS) {
@@ -706,7 +718,7 @@ public final class Formations {
 	}
 
 	private static void walk(PathfinderMob m, Vec3 to, boolean steer) {
-		float pace = Comrades.target(m) != null ? RUN : WALK;
+		float pace = (Comrades.target(m) != null ? RUN : WALK) * drilled;
 		if (!steer && m instanceof Villager v) {
 			v.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(to, pace, 0));
 		} else {

@@ -83,6 +83,11 @@ public final class ClassTeachers {
 		if (!(teacher instanceof Villager v)) {
 			return out;
 		}
+		if (Classes.classless(player)) {
+			// (class trees) no class yet: the first one is what they can learn here
+			out.addAll(SecondClass.offers(player, v));
+			return out;
+		}
 		if (Classes.classOf(player) == null) {
 			return out;
 		}
@@ -128,14 +133,19 @@ public final class ClassTeachers {
 	}
 
 	static boolean handles(String kind) {
-		return kind.equals("atone") || kind.startsWith("learn:") || RECIPES.containsKey(kind);
+		return kind.equals("atone") || kind.startsWith("learn:") || kind.startsWith("first:") || RECIPES.containsKey(kind);
 	}
 
 	private static int price(String kind) {
-		return kind.equals("atone") ? Paladins.ATONE_SILVER : kind.startsWith("learn:") ? SecondClass.FEE_SILVER : LESSON_SILVER;
+		return kind.equals("atone") ? Paladins.ATONE_SILVER : kind.startsWith("learn:") ? SecondClass.FEE_SILVER
+			: kind.startsWith("first:") ? SecondClass.FIRST_FEE_SILVER : LESSON_SILVER;
 	}
 
 	static Component line(ServerPlayer player, String kind) {
+		if (kind.startsWith("first:")) {
+			return Component.translatable("talk.jaymoskingdoms.teacher.first", Component.translatable("class.jaymoskingdoms." + kind.substring(6)),
+				Money.text(player, Money.worth(price(kind))));
+		}
 		if (kind.startsWith("learn:")) {
 			return Component.translatable("talk.jaymoskingdoms.teacher.learn", Component.translatable("class.jaymoskingdoms." + kind.substring(6)),
 				Money.text(player, Money.worth(price(kind))));
@@ -188,6 +198,10 @@ public final class ClassTeachers {
 		ServerLevel level = player.level();
 		if (kind.startsWith("learn:")) {
 			SecondClass.accept(player, teacher, kind);
+			return true;
+		}
+		if (kind.startsWith("first:")) {
+			SecondClass.acceptFirst(player, teacher, kind);
 			return true;
 		}
 		if (kind.equals("atone")) {

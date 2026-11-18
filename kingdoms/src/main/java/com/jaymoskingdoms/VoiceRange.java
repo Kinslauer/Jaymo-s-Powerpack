@@ -119,6 +119,7 @@ public final class VoiceRange implements VoicechatPlugin {
 		registration.registerEvent(MicrophonePacketEvent.class, VoiceRange::spoken);
 		registration.registerEvent(PlayerDisconnectedEvent.class, event -> {
 			MICS.remove(event.getPlayerUuid());
+			com.jaymoskingdoms.inhabitants.YouthEars.left(event.getPlayerUuid());
 			OpusDecoder decoder = DECODERS.remove(event.getPlayerUuid());
 			if (decoder != null) {
 				synchronized (decoder) {
@@ -147,7 +148,12 @@ public final class VoiceRange implements VoicechatPlugin {
 	private static void spoken(MicrophonePacketEvent event) {
 		VoicechatConnection from = event.getSenderConnection();
 		MicrophonePacket packet = event.getPacket();
-		if (from == null || packet == null || from.isInGroup()) {
+		if (from == null || packet == null) {
+			return;
+		}
+		if (from.isInGroup()) {
+			// a group call isn't heard in the world, but Youth listens there too for its name (YouthEars)
+			decoded(event.getVoicechat(), from.getPlayer().getUuid(), packet);
 			return;
 		}
 		VoicechatServerApi api = event.getVoicechat();
@@ -207,28 +213,9 @@ public final class VoiceRange implements VoicechatPlugin {
 
 	/** What {@code who} said ({@code packet}), measured against their own normal voice, is a noise mobs hear ({@link Hearing#spoke}). */
 	private static void overheard(VoicechatServerApi api, UUID who, MicrophonePacket packet) {
-		byte[] opus = packet.getOpusEncodedData();
-		if (opus == null || opus.length == 0) {
-			// (the end of what they said: the next words start the decoder afresh)
-			OpusDecoder decoder = DECODERS.get(who);
-			if (decoder != null) {
-				synchronized (decoder) {
-					decoder.resetState();
-				}
-			}
+		short[] pcm = decoded(api, who, packet);
+		if (pcm == null) {
 			return;
-		}
-		OpusDecoder decoder = DECODERS.computeIfAbsent(who, id -> api.createDecoder());
-		if (decoder == null) {
-			return;
-		}
-		short[] pcm;
-		synchronized (decoder) {
-			if (decoder.isClosed()) {
-				DECODERS.remove(who);
-				return;
-			}
-			pcm = decoder.decode(opus);
 		}
 		double db = loudness(pcm);
 		if (db < SILENCE_DB) {
@@ -238,6 +225,39 @@ public final class VoiceRange implements VoicechatPlugin {
 		double scale = MICS.computeIfAbsent(who, id -> new Mic()).scale(db, whisper);
 		int how = whisper ? Hearing.WHISPER : scale >= SHOUT_FROM ? Hearing.SHOUT : Hearing.TALK;
 		Hearing.spoke(who, VOICE_REACH * scale * (whisper ? WHISPER_SHARE : 1.0), how);
+	}
+
+	/** {@code who}'s frame as 16-bit audio (and handed to Youth's ears), or null at the end of what they said. */
+	private static short @org.jspecify.annotations.Nullable [] decoded(VoicechatServerApi api, UUID who, MicrophonePacket packet) {
+		byte[] opus = packet.getOpusEncodedData();
+		if (opus == null || opus.length == 0) {
+			// (the end of what they said: the next words start the decoder afresh)
+			com.jaymoskingdoms.inhabitants.YouthEars.ended(who);
+			OpusDecoder decoder = DECODERS.get(who);
+			if (decoder != null) {
+				synchronized (decoder) {
+					decoder.resetState();
+				}
+			}
+			return null;
+		}
+		OpusDecoder decoder = DECODERS.computeIfAbsent(who, id -> api.createDecoder());
+		if (decoder == null) {
+			return null;
+		}
+		short[] pcm;
+		synchronized (decoder) {
+			if (decoder.isClosed()) {
+				DECODERS.remove(who);
+				return null;
+			}
+			pcm = decoder.decode(opus);
+		}
+		// Youth listens for its name (YouthEars)
+		if (pcm != null) {
+			com.jaymoskingdoms.inhabitants.YouthEars.heard(who, pcm);
+		}
+		return pcm;
 	}
 
 	/** The RMS level of a frame of 16-bit audio, in dBFS (-96 to 0). */

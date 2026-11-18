@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlockCluster;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -97,12 +98,12 @@ final class GravityRockFlight {
 	private static @Nullable BlockCluster tearUp(ServerPlayer player) {
 		ServerLevel level = player.level();
 		BlockPos under = player.blockPosition().below();
-		int r = (int)Math.ceil(CRATER_RADIUS);
+		int r = (int)Math.ceil(AbilityPower.size(player, CRATER_RADIUS));
 		Map<BlockPos, Double> rank = new HashMap<>();
 		for (BlockPos pos : BlockPos.betweenClosed(under.offset(-r, -CRATER_DEPTH, -r), under.offset(r, 0, r))) {
 			int dx = pos.getX() - under.getX(), dy = pos.getY() - under.getY(), dz = pos.getZ() - under.getZ();
 			double d = Math.sqrt(dx * dx + dz * dz + dy * dy * CRATER_DEPTH_WEIGHT * CRATER_DEPTH_WEIGHT) + level.getRandom().nextDouble() * CRATER_RAGGED;
-			if (d <= CRATER_RADIUS) {
+			if (d <= AbilityPower.size(player, CRATER_RADIUS)) {
 				rank.put(pos.immutable(), d);
 			}
 		}
@@ -142,6 +143,7 @@ final class GravityRockFlight {
 		slab.setPos(to);
 		slab.setDeltaMovement(to.subtract(was));
 		player.resetFallDistance();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.board", player.tickCount % 20 == 0 ? 1 : 0);
 		player.causeFoodExhaustion(EXHAUSTION);
 		AABB bounds = BlockCluster.bounds(cluster.pieces());
 		double spread = Math.max(0.8, bounds.getXsize() * 0.35);

@@ -73,6 +73,19 @@ final class Overheard {
 	static final AttachmentType<List<Talk>> TALK = AttachmentRegistry.create(JaymosKingdoms.id("town_talk"),
 		builder -> builder.persistent(Talk.CODEC.listOf()).copyOnDeath());
 
+	/** A scene two of a town owe a player ({@link #owe}): whose town, and its lines. */
+	record Owed(int faction, List<String> lines) {
+		static final Codec<Owed> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.fieldOf("faction").forGetter(Owed::faction),
+				Codec.STRING.listOf().fieldOf("lines").forGetter(Owed::lines))
+			.apply(i, Owed::new));
+	}
+
+	static final AttachmentType<List<Owed>> OWED = AttachmentRegistry.create(JaymosKingdoms.id("town_scenes_owed"),
+		builder -> builder.persistent(Owed.CODEC.listOf()).copyOnDeath());
+	/** At most this many owed scenes are kept. */
+	static final int OWED_MOST = 8;
+
 	private static final class Scene {
 		final Villager a, b;
 		final List<String[]> lines;
@@ -126,9 +139,68 @@ final class Overheard {
 		player.setAttached(TALK, List.copyOf(talk));
 	}
 
+	/**
+	 * (A tale's aftermath, {@link TaleWays#later}) Two of settlement {@code faction} have {@code lines} to say to each
+	 * other where {@code player} can hear, when two of them are next near: each line {@code a|words} or {@code b|words}.
+	 */
+	static void owe(ServerPlayer player, int faction, List<String> lines) {
+		if (lines.isEmpty()) {
+			return;
+		}
+		List<Owed> owed = new ArrayList<>(player.getAttachedOrElse(OWED, List.of()));
+		owed.add(new Owed(faction, lines));
+		while (owed.size() > OWED_MOST) {
+			owed.remove(0);
+		}
+		player.setAttached(OWED, List.copyOf(owed));
+	}
+
 	/** One who's died for good starts over: nobody has anything to say to them. */
 	static void reborn(ServerPlayer player) {
 		player.removeAttached(TALK);
+		player.removeAttached(OWED);
+	}
+
+	/** The first scene owed to {@code player} that two free folk of its town near them can have now: it begins. */
+	private static void owed(ServerLevel level, ServerPlayer player, int tick) {
+		List<Owed> owed = player.getAttachedOrElse(OWED, List.of());
+		if (owed.isEmpty() || SCENES.stream().anyMatch(s -> s.a.distanceToSqr(player) < SCENE_RANGE * SCENE_RANGE * 4.0)) {
+			return;
+		}
+		List<Villager> folk = level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(SCENE_RANGE), v -> free(v) && !v.isBaby());
+		for (Owed o : owed) {
+			List<Villager> theirs = folk.stream().filter(v -> {
+				Faction f = Quests.settlement(level, v);
+				return f != null && f.id() == o.faction();
+			}).toList();
+			for (Villager a : theirs) {
+				for (Villager b : theirs) {
+					if (a == b || a.distanceToSqr(b) > PAIR_RANGE * PAIR_RANGE) {
+						continue;
+					}
+					List<String[]> lines = new ArrayList<>();
+					for (String line : o.lines()) {
+						int bar = line.indexOf('|');
+						if (bar > 0) {
+							lines.add(new String[] {line.substring(0, bar), line.substring(bar + 1)});
+						}
+					}
+					if (!lines.isEmpty()) {
+						SCENES.add(new Scene(a, b, lines, tick));
+						RESTING.put(a.getUUID(), tick);
+						RESTING.put(b.getUUID(), tick);
+					}
+					List<Owed> left = new ArrayList<>(owed);
+					left.remove(o);
+					if (left.isEmpty()) {
+						player.removeAttached(OWED);
+					} else {
+						player.setAttached(OWED, List.copyOf(left));
+					}
+					return;
+				}
+			}
+		}
 	}
 
 	private static boolean free(Villager v) {
@@ -343,6 +415,7 @@ final class Overheard {
 		}
 		for (ServerPlayer player : level.players()) {
 			townTalk(level, player, tick);
+			owed(level, player, tick);
 			if (level.getRandom().nextFloat() < SCENE_CHANCE && !player.isSpectator()
 				&& SCENES.stream().noneMatch(s -> s.a.distanceToSqr(player) < SCENE_RANGE * SCENE_RANGE * 4.0)) {
 				begin(level, player, tick);

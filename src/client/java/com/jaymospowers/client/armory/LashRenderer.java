@@ -221,7 +221,7 @@ public final class LashRenderer {
 		Finishers.Finish finish = Finishers.of(player);
 		if (finish != null && finish.type() == (flail ? Finishers.Kind.FLAIL : Finishers.Kind.WHIP)
 			&& level.getEntity(finish.target()) instanceof LivingEntity body) {
-			double t = time - finish.start();
+			double t = time - finish.start() - finish.held();
 			if (flail) {
 				Vec3 ball = executionBall(player, body.getPosition(partialTick).add(0.0, 0.25, 0.0), t, partialTick);
 				return new Pull(ball, ball == null ? CHAIN_IDLE : Math.max(CHAIN_LENGTH * 0.6, handle.distanceTo(ball) + 0.1), null);

@@ -47,13 +47,13 @@ abstract class ArmourWearLivingMixin {
 		target = "Lnet/minecraft/world/damagesource/CombatRules;getDamageAfterAbsorb(Lnet/minecraft/world/entity/LivingEntity;FLnet/minecraft/world/damagesource/DamageSource;FF)F"),
 		index = 3)
 	private float jaymospowers$armourAbsorbs(float armor) {
-		return armor * ArmourWear.ARMOR_ABSORB;
+		return (Object) this instanceof Player ? armor * ArmourWear.ARMOR_ABSORB : armor;
 	}
 
 	@ModifyArg(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/damagesource/CombatRules;getDamageAfterAbsorb(Lnet/minecraft/world/entity/LivingEntity;FLnet/minecraft/world/damagesource/DamageSource;FF)F"),
 		index = 4)
 	private float jaymospowers$toughnessAbsorbs(float toughness) {
-		return toughness * ArmourWear.TOUGHNESS_ABSORB;
+		return (Object) this instanceof Player ? toughness * ArmourWear.TOUGHNESS_ABSORB : toughness;
 	}
 }

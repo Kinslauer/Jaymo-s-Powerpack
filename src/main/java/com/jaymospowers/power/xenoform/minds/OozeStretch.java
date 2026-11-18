@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.minds;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.xenoform.GreatFoes;
@@ -182,7 +183,7 @@ public final class OozeStretch {
 		ServerLevel level = player.level();
 		Vec3 forward = MindsKit.flat(player);
 		Vec3 at = player.position().add(forward.scale(MALLET_AHEAD));
-		for (LivingEntity e : MindsKit.near(player, at.add(0.0, 0.8, 0.0), MALLET_RADIUS)) {
+		for (LivingEntity e : MindsKit.near(player, at.add(0.0, 0.8, 0.0), AbilityPower.size(player, MALLET_RADIUS))) {
 			e.setInvulnerableTime(0);
 			e.hurtServer(level, player.damageSources().playerAttack(player), MALLET_DAMAGE);
 			MindsKit.shove(e, at, MALLET_OUT, MALLET_UP);
@@ -191,7 +192,7 @@ public final class OozeStretch {
 		MagicFx.orb(level, at.add(side.scale(0.7)).add(0.0, 0.5, 0.0), 0.55F, color, 6);
 		MagicFx.orb(level, at.add(side.scale(-0.7)).add(0.0, 0.5, 0.0), 0.55F, color, 6);
 		MagicFx.blast(level, at.add(0.0, 0.3, 0.0), 1.6F, color);
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)MALLET_RADIUS, color);
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)AbilityPower.size(player, MALLET_RADIUS), color);
 		MindsKit.sound(player, SoundEvents.SLIME_JUMP, 1.5F, 0.4F);
 		MindsKit.sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.9F, 0.7F);
 		Shakes.heavy(player, at, 10.0, 0.7F);

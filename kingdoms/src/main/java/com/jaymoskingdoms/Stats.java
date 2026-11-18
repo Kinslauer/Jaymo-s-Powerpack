@@ -61,6 +61,8 @@ import org.jspecify.annotations.Nullable;
 public final class Stats {
 	/** (0.7.540) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
 	public static final int STEP = 10;
+	/** What a heritage's gift or a story answer's point is worth (a class's is still {@link #STEP}). */
+	public static final int GIFT_STEP = 5;
 	/** (0.7.540) Attribute points per character level (all three pillars at their top: 75 levels, 375 points). */
 	public static final int POINTS_PER_LEVEL = 5;
 	/** An attribute's highest value, free points from heritage and class included. */
@@ -93,6 +95,12 @@ public final class Stats {
 	public static final int SHIFT_STEP = 10;
 	/** Presence: the free points everyone starts with (it is the one attribute no heritage or story gives). */
 	public static final int BASE_PRESENCE = STEP;
+	/**
+	 * (Awakening pick) Ability Power, for those with a Jaymo's Powers power: per point, this share more harm from their
+	 * power's own moves, this share more reach where a move picks its target by aim, and this share longer on what a move
+	 * lays on others (100: +30%, +20%, +25%). Powers reads it by reflection ({@link #abilityShare}).
+	 */
+	public static final double ABILITY_DAMAGE = 0.003, ABILITY_REACH = 0.002, ABILITY_LENGTH = 0.0025;
 	/** The sparks' colour when a trained point of Might lands. */
 	static final int MIGHT_COLOR = 0xC0503A;
 
@@ -104,7 +112,8 @@ public final class Stats {
 		builder -> builder.persistent(Codec.DOUBLE).copyOnDeath().syncWith(ByteBufCodecs.DOUBLE, AttachmentSyncPredicate.targetOnly()));
 
 	public enum Stat {
-		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA, PRESENCE;
+		// (Awakening pick) Ability Power last, so no ordinal moves
+		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA, PRESENCE, POWER;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -172,8 +181,8 @@ public final class Stats {
 	 */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
-		int free = (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player) + LifeStory.freePoints(player);
-		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + TIER_POINTS[tier(player)];
+		int free = WarriorZenkai.points(player) + LifeStory.freePoints(player);
+		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + (kind == null ? 0 : kind.freePoints) * GIFT_STEP + SkillRenown.statPoints(p) + TIER_POINTS[tier(player)];
 	}
 
 	/** (0.7.540) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
@@ -221,12 +230,12 @@ public final class Stats {
 	/** Free points in {@code stat} from {@code player}'s heritage. */
 	public static int fromHeritage(Player player, Stat stat) {
 		Heritage.Kind kind = Heritage.of(player);
-		return kind == null ? 0 : kind.bonus(stat) * STEP;
+		return kind == null ? 0 : kind.bonus(stat) * GIFT_STEP;
 	}
 
 	/** (0.7.216) Free points in {@code stat} from {@code player}'s life story ({@link LifeStory}). */
 	public static int fromStory(Player player, Stat stat) {
-		return LifeStory.points(player, stat) * STEP;
+		return LifeStory.points(player, stat) * GIFT_STEP;
 	}
 
 	/** Might trained in the weights so far, the fraction included (0 for none). */
@@ -260,6 +269,9 @@ public final class Stats {
 		if (stat == Stat.ARCANA && !Mana.hasMana(player)) {
 			return "gui.jaymoskingdoms.stats.blocked.unattuned";
 		}
+		if (stat == Stat.POWER && PowersCompat.power(player) == null) {
+			return "gui.jaymoskingdoms.stats.blocked.powerless";
+		}
 		if (total(player, p, stat) >= cap(player)) {
 			return cap(player) >= MAX ? "gui.jaymoskingdoms.stats.blocked.max" : "gui.jaymoskingdoms.stats.blocked.tier";
 		}
@@ -269,9 +281,29 @@ public final class Stats {
 		return null;
 	}
 
-	/** (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they have mana. */
+	/**
+	 * (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they have mana, (Awakening
+	 * pick) Ability Power only with a Jaymo's Powers power (or points already in it).
+	 */
 	public static boolean shown(Player player, Stat stat) {
+		if (stat == Stat.POWER) {
+			return PowersCompat.power(player) != null || spent(Skills.of(player), Stat.POWER) > 0;
+		}
 		return stat != Stat.ARCANA || Mana.hasMana(player);
+	}
+
+	/**
+	 * (Awakening pick) What {@code player}'s Ability Power gives as a share: {@code "damage"}, {@code "reach"} or
+	 * {@code "length"} (0 for anything else). Jaymo's Powers calls this by reflection; either side.
+	 */
+	public static double abilityShare(Player player, String what) {
+		int v = value(player, Stat.POWER);
+		return switch (what) {
+			case "damage" -> ABILITY_DAMAGE * v;
+			case "reach" -> ABILITY_REACH * v;
+			case "length" -> ABILITY_LENGTH * v;
+			default -> 0.0;
+		};
 	}
 
 	/** What {@code value} points of {@code stat} do (the K screen's line for it). */
@@ -287,6 +319,8 @@ public final class Stats {
 				num(Mana.REGEN_PER_POINT * value));
 			case PRESENCE -> Component.translatable("stat.jaymoskingdoms.presence.now", pct(Presence.TALK_PER_POINT * value),
 				pct(Presence.WARM_PER_POINT * value), pct(Presence.ORDERS_PER_POINT * value));
+			case POWER -> Component.translatable("stat.jaymoskingdoms.power.now", pct(ABILITY_DAMAGE * value), pct(ABILITY_REACH * value),
+				pct(ABILITY_LENGTH * value));
 		};
 	}
 

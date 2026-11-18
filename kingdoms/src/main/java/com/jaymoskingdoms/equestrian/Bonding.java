@@ -330,7 +330,7 @@ public final class Bonding {
 	/** Its nerve, more for its war level. */
 	public static double bravery(AbstractHorse horse, Equine e) {
 		Bond b = horse.getAttached(BOND);
-		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1));
+		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1) + Horsemanship.nerve(horse));
 	}
 
 	/** Its jump, higher for its jumping level. */
@@ -432,11 +432,20 @@ public final class Bonding {
 		if (xp <= 0.0F || kept(horse) && b.hunger() < HUNGRY) {
 			return;
 		}
+		if (d == Discipline.WAR) {
+			// a Cavalier's horse learns war twice as fast
+			xp *= Horsemanship.warSchool(rider);
+		}
 		int before = b.level(d);
 		b = b.withXp(d, b.xp(d) + xp);
 		horse.setAttached(BOND, b);
 		int after = b.level(d);
+		if (d == Discipline.JUMPING) {
+			// (class trees) a jump cleared: the Rider's
+			com.jaymoskingdoms.ClassTrees.giveEvery(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_JUMP, "jump", 20L);
+		}
 		if (after > before) {
+			com.jaymoskingdoms.ClassTrees.give(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_DISCIPLINE);
 			rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.horse_level", name(horse),
 				Component.translatable(d.key()), after), true);
 			level.playSound(null, horse.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6F, 1.4F);
@@ -571,7 +580,8 @@ public final class Bonding {
 		}
 		if (!horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
-			horse.heal(fill / 8.0F);
+			// (class trees) a Farrier's feeding mends their own horse besides
+			horse.heal(fill / 8.0F + Horsemanship.farrierHeal(horse, player));
 		}
 		return true;
 	}
@@ -581,6 +591,7 @@ public final class Bonding {
 		Float fill = FEED.get(stack.getItem());
 		if (fill != null && Equestrian.covered(horse) && kept(horse) && !horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
+			horse.heal(Horsemanship.farrierHeal(horse, player));
 		}
 	}
 
@@ -607,6 +618,10 @@ public final class Bonding {
 	private static void whistle(ServerPlayer player) {
 		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
 			// (Andy's skill-tree locks) the whistle is learned: Horseman (a Rider knows it)
+			return;
+		}
+		if (Horsemanship.swap(player)) {
+			// an Outrider in the saddle: a fresh horse comes to be swapped onto
 			return;
 		}
 		ServerLevel level = player.level();
@@ -928,6 +943,10 @@ public final class Bonding {
 					}
 				} else {
 					float hooves = b.hooves() - (float)blocks / HOOF_WEAR;
+					if (Horsemanship.farriered(horse)) {
+						// (class trees) a Farrier's own horse never wears its hooves down to lameness
+						hooves = Math.max(hooves, Math.min(b.hooves(), LAME));
+					}
 					horse.setAttached(BOND, b.withFeet(hooves, 0.0F));
 					if (b.hooves() >= LAME && hooves < LAME) {
 						rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.lame", name(horse)), true);
@@ -938,6 +957,10 @@ public final class Bonding {
 	}
 
 	static void throwOff(AbstractHorse horse, ServerPlayer rider, String message) {
+		if (Horsemanship.whisperer(rider) || Horsemanship.sureSeat(rider)) {
+			// a Horse Whisperer is never thrown, nor one with a Sure Seat
+			return;
+		}
 		rider.stopRiding();
 		Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-0.4);
 		rider.push(back.x, 0.3, back.z);

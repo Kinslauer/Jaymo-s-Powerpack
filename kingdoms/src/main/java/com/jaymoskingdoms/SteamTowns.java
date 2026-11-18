@@ -232,7 +232,7 @@ public final class SteamTowns {
 	private static boolean open(ServerLevel level, BlockPos at) {
 		MinecraftServer server = level.getServer();
 		if (!level.isPositionEntityTicking(at) || com.jaymoskingdoms.seas.Mohknee.on(level, at)
-			|| !level.hasChunksAt(at.getX() - RADIUS, at.getZ() - RADIUS, at.getX() + RADIUS, at.getZ() + RADIUS)) {
+			|| !Loaded.made(level, at.getX() - RADIUS, at.getZ() - RADIUS, at.getX() + RADIUS, at.getZ() + RADIUS)) {
 			return false;
 		}
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, 0, -RADIUS), at.offset(-RADIUS, 0, RADIUS),

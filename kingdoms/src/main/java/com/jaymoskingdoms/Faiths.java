@@ -101,6 +101,14 @@ public final class Faiths {
 	}
 
 	/** (0.7.509) The patron a player's blood starts with: Dawnborn the Crowned Sun, other humans The Truth, the rest their lean. */
+	/**
+	 * The patron a blood is bound to, or null for one free to grow up praying to any (Andy, 2026-11-17: "All tideborn are
+	 * deep mother, and they and dawnborn are the only heritages with a bound patron"): their life story's faith is that one.
+	 */
+	public static @Nullable Patron bound(Heritage.@Nullable Kind kind) {
+		return kind == Heritage.Kind.TIDEBORN ? Patron.DEEP_MOTHER : kind == Heritage.Kind.DAWNBORN ? Patron.CROWNED_SUN : null;
+	}
+
 	public static Patron startOf(Heritage.Kind kind) {
 		if (kind == Heritage.Kind.DAWNBORN) {
 			return Patron.CROWNED_SUN;

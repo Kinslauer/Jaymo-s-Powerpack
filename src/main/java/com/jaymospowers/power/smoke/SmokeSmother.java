@@ -103,6 +103,7 @@ final class SmokeSmother {
 		}
 		SmokeField.puff(level, target.getEyePosition(), WRAP, player);
 		if (held % 20 == 0) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.smother", 1);
 			target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), player);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), player);
 		}
@@ -117,6 +118,7 @@ final class SmokeSmother {
 			target.setAirSupply(air);
 			if (air <= 0 && held % 20 == 0) {
 				target.hurtServer(level, player.damageSources().source(CHOKE_TYPE, player), CHOKE);
+				com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.choke", 1);
 			}
 		}
 		player.causeFoodExhaustion(0.02F);

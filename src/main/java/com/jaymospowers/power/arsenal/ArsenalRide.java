@@ -158,6 +158,7 @@ public final class ArsenalRide {
 			return;
 		}
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.ride", player.tickCount % 20 == 0 ? 1 : 0);
 		long now = level.getGameTime();
 		if (!player.isAlive() || player.isSpectator()) {
 			player.removeAttached(RIDE);

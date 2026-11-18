@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
@@ -175,7 +176,7 @@ public final class ZFighterLegendary {
 	private static void surge(ServerPlayer player, ZFighterPower.Live live) {
 		ServerLevel level = player.level();
 		int step = chain(live.form);
-		double radius = SURGE_RADIUS + SURGE_RADIUS_STEP * step;
+		double radius = AbilityPower.size(player, SURGE_RADIUS) + AbilityPower.size(player, SURGE_RADIUS_STEP) * step;
 		float damage = SURGE_DAMAGE + SURGE_DAMAGE_STEP * step;
 		Vec3 c = player.position();
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),

@@ -5598,3 +5598,158 @@ Sneak + a scroll down to climb a block, ledge or fence from the crouch now leave
 - `client.compat.TakeASeatPoses` (new, and `TakeASeatPal` behind it); `MeditatePose`, `CrouchPose` and `TendPose`
   stand down while it plays; `Meditate.POSES` is 4; `KeyConflicts` v10.
 - Not built locally (no JDK 25 in the cloud workspace; the PR checks build it). Not played.
+
+## 0.24.52 (2026-11-17): The server starts again with conjoined twins
+
+Fixed the server failing to start after the conjoined twin mutation: the twin riding on a villager's or zombie's shoulder is now placed in a way that works on Minecraft 26.3.
+
+## 0.24.53 (2026-11-17): More time for finisher key prompts
+
+When a finisher asks for a key, it now holds still for up to a second and a half until you press it, then goes on at once, so the prompt is no longer gone in half a second. The bar under the key runs down over the whole time you have.
+
+## 0.24.54 (2026-11-17): The Maw salvager starts with a helm, a pack, a pick and a lantern
+
+- **Salvager at the Maw**: you now wake wearing a Sealed Helm (eight minutes of air, refilled at the pod, so the airless Maw doesn't choke you), with a backpack on your back, an iron pickaxe, a lantern and the deck plates. If the helm or pack slot is already taken, it goes into your inventory instead. (`ZFighterStarts.maw`)
+- Built; not played.
+
+## 0.24.55 (2026-11-17): others fit prosthetics, Creative revives from Limbo, thrown limbs hit
+
+- **Fitting someone else's limb** (Andy: "there needs to be a way that other players or villagers can help you in this condition"): use a wooden, iron or Rig arm or leg on another player who is missing that limb and it is strapped on them, downed or standing (`Prosthetics.fitOther`, a `UseEntityCallback`; Downed's revive hold leaves the click alone). They're told who fitted it.
+- **Got up with your limbs on**: a player who revives you (the kneeling hold) first straps on every prosthetic you carry, or that lies within 6 blocks of you (`Prosthetics.fitFrom`, also called by Kingdoms' tending villagers and field medics).
+- **Creative from Limbo** (Andy: "going into creative mode from limbo should revive your character"): switching to Creative while waiting in Limbo brings the same character back, in Creative, where the body lies: nothing wiped, no gift lost, health, food and wounds made whole, Kitchen's corpse of theirs gone and its hotbar handed back (`Limbo.revive`). With no body left, they get up where the ghost is.
+- **Thrown limbs hit** (Andy: "thrown limbs should deal damage"): a severed head or limb thrown from the hand strikes the first living thing in its path once (head 3, arm 2.5, leg 3.5, times its speed, at most double), with a thud and a spatter, then drops off it (`SeveredPart.strike`). Never the thrower; nothing once it has touched the ground.
+- Built; not played.
+
+## 0.24.56 (2026-11-17): Chrono abilities while downed, Overclock healing, Overclock flurry and weapon swings
+
+- **Every Chrono ability works while downed** (awake, unlocked): Rewind, Stasis Field, Overclock and Time Bloom. A Stasis, Overclock or Bloom running as you fall now runs on (only Time Flow and a wall phase end). Sneak is the rise down there, so the sneak forms (Fast Forward, Calculation's dodge, the decoys) wait till you're up. Overclock's wall run doesn't climb with a downed body.
+- **Time Bloom downed**: every half second your most hurt part mends 1 (a bed's mend), the bleed-out clock holds (adrenaline kept if you still have it), a passed-out Chrono comes round, a rise started under the Bloom takes half as long, and you rise with what the mended parts hold (`Downed.timeMend`).
+- **Rewind downed is "if soon enough"**: the history held at the fall is reached only within 3 s of going down (the sooner, the further back before the fall, so the more health comes back; still at least 30%). Later, R is cheating death's, as when Rewind is on cooldown or an execution is coming (`ChronoCheatDeath.downedOpen`); Rewind no longer races cheat death for the same press.
+- **Overclock heals**: Regeneration II beside the Speed V and Haste II (Haste II was already there; the key text now says so). Downed, where nothing heals, Overclock mends your most hurt part 1 every 25 ticks instead.
+- **Overclock flurry** (`ChronoFlurry`, `ChronoFlurryClient`): hold attack for a quarter second, bare-fisted or in boxing gear and not aimed at a block (mining), while overclocked: ten alternating jabs (one every 2 ticks, each 8% harder) into the nearest creature in front, then an uppercut that throws it, a short breath, and again while held. Jab 0.5 + 0.15 per ability mastered. Not downed or in Time Flow.
+- **Overclock weapon swings** (Andy: "Melee weapons should also swing fast but only deal damage once every 4 ticks"): the same held attack with a melee weapon (anything with attack damage on it, not boxing gear) swings it every 2 ticks, and every 4 ticks a swing lands as a fully charged attack of the weapon (`player.attack`: damage, enchantments, sweep, wear) on the nearest one in front (`ChronoAttackStrengthAccessor`). While it runs, no other melee hit of yours lands.
+- Built; not played.
+
+## 0.24.57 (2026-11-17): faster singleplayer world loading (template cache, Dynamic Waters samplers)
+
+- **Old structure templates are upgraded once, ever**: 9,719 of the pack's 13,599 structure templates are saved in older
+  Minecraft versions, and the game ran each one through the data fixer every session the first time it was placed
+  (about 30% of all CPU while a new world picked its spawn and while the first player joined). The upgraded copy is now
+  kept in `.cache/jaymospowers/templates-v<world version>/` and read straight back next time (`TemplateUpgrades`,
+  `TemplateUpgradeMixin` on `TemplateSource.readStructure`). The folder is cleared when the game version changes; if it
+  can't be written, templates are upgraded as before.
+- **Dynamic Waters (port)**: its height field asked `RandomState.getSampler` for the surface and density functions on
+  every column, and each ask hashed the whole density-function tree (20% of all CPU at first join). The five samplers it
+  uses are now looked up once per world (`WiredRouter.Samplers`, kept on `RandomState`); `CoarseHeightField`,
+  `VanillaRiverFlow` and `BasinTile` use them.
+- Cloud timing, new world, seed 12345, 4 cores: spawn search 175 s -> 163 s with the sampler fix alone, 69 s once the
+  template cache is warm (181 s the very first time, while it fills).
+- Built and timed on a dev server; not played.
+
+## 0.24.58 (2026-11-17): blood stays drawn on MCA bodies (#1694)
+
+- Andy: blood decals "need to stay drawn on the MCA models". MCA draws villagers (and players in an MCA body) with its own skin and clothes layers, so the blood coat laid on the body's own model sat at the depth of MCA's bare skin, under its clothes, so it only showed through their gaps. Now on an MCA body the blood (a corpse's too) and the dirt on skin and clothes are painted over each of MCA's skin and clothes textures and drawn on that layer's own model, one step after MCA's, so they stay on top: bare skin shows its blood, clothes show theirs. Other bodies are drawn as before.
+- `BloodCoatLayer` (`paints`), new `McaBlood` (only loaded with MCA).
+- Built; not played.
+
+## 0.24.59 (2026-11-17): temperament idles come and go (#1697)
+
+- **Temperament looks in spells** (Andy: "none of the idle animations should play 24/7"): a timid or suspicious
+  player's scared hunch and glancing, a hotheaded one's tense arms, a gloomy one's slump and a cheerful one's bounce
+  no longer show all the time. Time is cut into 3 second slots, and each slot is on by chance (45% for a scared player,
+  30% for the rest), so a look shows for a few seconds, sometimes longer, then rests; it still eases in and out
+  (`BodyMotion.inSpell`, knobs `SPELL_SLOT_TICKS`, `SPELL_CHANCE_SCARED`, `SPELL_CHANCE`). The spells come from the
+  player's id and the game time, so everyone in view sees the same.
+- Built; not played.
+
+## 0.24.60 (2026-11-17): Gun handling for the future's guns (TaCZ Additions picks) and blinking while downed
+
+- **Water splash**: a shot that goes into water throws up drops and a ring of ripples where it goes in. A gunner's shot
+  into water stops 2.5 blocks under the surface (players' TaCZ bullets keep TaCZ's own water handling).
+- **Trail on every shot**: shots that aren't tracers leave a thin grey wisp along their line for a moment.
+- **Laser sights**: TaCZ already draws a fitted laser's beam; the End key now switches it off and on (a click), and a
+  switched-on laser puts a dot where it points, for everyone. About 1 in 3 of the future's gunners have one, off until
+  they take aim, so a dot on the wall comes before the shot.
+- **Gun movement, first person**: the gun lags behind when you turn and leans when you step sideways; standing, it
+  rises and falls with your breath (harder after sprinting or under half health). Aiming down sights calms both.
+  Floors and ceilings don't tuck it, so aiming down while prone still fires.
+- **Tuck**: up against a wall the gun comes back to your chest, muzzle up, and won't fire. WeaponMod's musket,
+  blunderbuss and flintlock pistol tuck too and can't be readied while tucked.
+- **Long-gun grips by stance** (Andy's note): musket and blunderbuss sit at the hip standing, the low ready in a plain
+  sneak, a shouldered high ready in the low crouch, and forward and level lying prone. First person only.
+- **Scope sway**: at 4x zoom and up your aim drifts in a slow figure eight (the crosshair with it); prone, kneeling, the low crouch, a sneak or
+  resting the gun on a wall top steadies it.
+- **Scroll zoom**: aiming down a scope, the mouse wheel steps its zoom (TaCZ's zoom key, so either way steps on to the
+  next setting) instead of the hotbar or the stances. Iron sights leave the wheel alone.
+- **Recoil by kind**: pistols, SMGs, rifles, machine guns, shotguns and snipers each kick the view by their own share
+  of TaCZ's recoil, the view stays where the kick left it, and the gun jumps back in your hands.
+- **Downed blinking**: down and awake, your eyes droop shut and open again, slower and longer as you weaken.
+- Classes: armory/GunLasers, client/armory/GunHandling, GunLaserClient, MusketSights, wounds/DownedHud,
+  mixin/tacz/TaczLaserBeamMixin, TaczAttachmentLaserMixin, TaczRecoilMixin; power/chrono/future/GunGear, FutureGuns.
+- Compiled with Gradle and checked against TaCZ 0.8.5's own code by an independent review; not played. Picture-in-picture scopes were left out (not picked).
+
+## 0.24.61 (2026-11-17): Slower prone roll, weighed by armour
+
+- **Prone roll** (double-tap Left or Right while prone; Andy: "Rolling should be slower and look like snake from metal gear, it should be even slower the more weight your gear has. To an upper limit."): each one-block roll now takes 0.6 s instead of 0.25 s, with the arms folded in to the chest (round a weapon) like Snake's instead of stretched past the head. You stay prone after it, as before.
+- **Gear weight**: armour points plus toughness (full netherite = 32, the cap) stretch each roll up to 1.6x as long (about 0.95 s); nothing past the cap slows it more. Knobs: `Crawl.ROLL_TICKS`, `HEAVIEST`, `HEAVY_SLOW`; arms: `CrawlPose.ROLL_ARM_X`, `ROLL_ARM_IN`.
+- The roll's length is synced, so others see a heavy roll at its own pace. Rolling fire out (roll back the other way) and the 2 s one-way limit are unchanged. The Alt dodge is untouched.
+- `Crawl`, `CrawlTaps`, `CrawlPose`. Compile-checked; not played.
+
+## 0.24.62 (2026-11-17): scaling audit picks: armour, power growth, Z Fighter, gear and tiers
+
+Andy's picks from the scaling audit (pick page rows; early game kept weak, late game given room to grow).
+- **Armour**: the armour-wear bonus (ArmourWear) now applies to players only, and is 1.15x armour (was 1.4x; toughness
+  stays 1.25x), so armour no longer hits the 80% cap with Hearth gear. Mobs meet the world-tier armour as written.
+- **Blight elites**: their armour and follow range are now flat per tier (+1.5 armour, +8 blocks), not multiplied
+  (BlightMobs used a total multiplier: tier 3 had 5.5x armour and 25x follow range).
+- **Wind**: Gust damage is capped at 100 after weather, Stormbound and Tempest.
+- **Xenoform**: a player's blows in an alien form hit 10% harder per unlock (x1.4 at full mastery; XenoformDamageMixin).
+- **Resonance**: Pulse grows 5 x (1 + 0.15 per unlock): 6.5 at unlock 2, 8 at full mastery.
+- **Web**: the always-on physique starts at nothing and reaches its full +3 attack at full mastery (was +0.6 on day one).
+- **Symbiote**: every symbiote attack gains up to +50% with bond (x1.5 at bond 100). **Rig**: the palm blast gains 15%
+  per Mind level above the first (x1.6 at level 5). The crash is damage to the pilot, so it was left alone.
+- **Z Fighter**: the punch cap is multiplied by the form's fist bonus (base 9, Super 1 ~10.8, Super 3 ~13.8, God ~16.6),
+  so Super forms now show in punches. Fists start at 2 (was 3) and grow 1 per unlock to 6 at full mastery, as before.
+- **Pacts and Void**: Cinder's toughness 4 -> 2; Arsenal's Void fills the Fate meter 4 per Enderman kill (was 10).
+- **Tinkering**: head attack silver 2.25 -> 3.0, amethyst bronze 1.5 -> 3.0, steel 3.0 -> 4.0, manyullyn 3.5 -> 4.5.
+  Forged-grade Tinkering plate now gets the grade's armour (Poor -1 to Master +1.5) like every other armour.
+- **Legendary grade**: a fifth grade above Master (+2 armour a piece, attack Master's +1.5 more, x1.4 durability). A smith
+  forges it only when they have reached Legend (Kingdoms; KingdomsCompat.legend): a Master result at Legend comes out
+  Legendary half the time. Without Kingdoms it never forges.
+- **Rust** reads the metal: Tinkering plate of copper, bronze, silver or gold no longer rusts, and the Gladiator set is
+  tagged rustproof (new jaymospowers:rustproof tag).
+- **Fishing**: the big-fish glut counts per angler per day across every village (it was per village, so carrying the
+  catch to the next one dodged it). Old per-village glut data is no longer read.
+- Comments fixed in GravityPower (a fresh slam is 0.48 of full) and ZFighterTraining (mastery ticks every 20 s).
+- **The last hold** (Andy's note: "When players are attacked they get to take an extra hit if the one they take would
+  have downed them"): the first attacked blow that would down a player leaves them on half a heart instead, with a heavy
+  heartbeat and a red edge pulse. The next downing blow downs them as usual. The hold comes back after 30 s unhurt, and
+  on a relog. Falls, fire, drowning and other unattacked harm, executions, beheadings, gibs and blows that halve ignore
+  it. It is checked before every other save (Kingdoms' Last Stand, Darktide shade, sparring), so those come after it
+  (LastHold).
+- A landed legend fish also gives a Legend's Fillet (Kitchen's Deep King's Platter).
+- Built; not played.
+
+## 0.24.63 (2026-11-18): Land checks wait for land that is really there
+
+- The rig, tundra lichen and moss, and river currents checked that land was loaded with a test that is also true of land only queued to be made, which could make the server wait on it. They now check for land that is made, like Kingdoms' checks.
+
+## 0.24.64 (2026-11-18): smaller scouter on the face
+
+- **Scouter** (worn): the head layer is smaller so the face shows. The band round the head is one pixel at the brow instead of two, the lens is a 4x3 frame over the left eye (it was 4x5 and ran down to the chin), and the ear cup is 3x3. Redrawn by `tools/gen_scouter.py`; the Excalibur-style pack's copy regraded with `tools/excalibur_style/grade.py --one`.
+- Built art only; not played.
+
+## 0.24.65 (2026-11-18): Awakening picks and class tree hooks
+
+- Building gear at a tool station puts a short-lived tag on the player (`Tinkering.MADE_TAG`); Jaymo's Kingdoms reads it, takes it off and gives the Tinkerer class XP.
+- **Awakening picks, patch 1**: Gravity's **Heft** (hold Z lighter, sneak+hold Z heavier: jump higher and fall softer, or shrug off knockback and sink; lightest is weightless) and **Planet hopping** (sneak+G throws a small planet up to 50 blocks to fall to, no fall damage, keep your speed). Chrono's **Wind the Day** (the day turns once the first time you attune; in Time Flow hold Z to sweep it forward, sneak to wind it back; needs the others' leave like sleeping). Wind and Smoke's **Airless Dome** at master rank (C, or sprint+C when ascended: 12 s of no air, creeper fuses stall, casters can't finish). Ride your own **Cyclone** (Sneak tap). The Unseeing's ritual-keepers fight with rot, blood draws and death's touch.
+- **Awakening picks, patch 2**: fire users build **Heat** with every cast (up to 30% harder, burn your own health to push past it); **Backdraft** (sneak as you start Kindle, or Pyre's sneak+G) draws in the air and every fire for a blast; sneak-release a full Kindle for **Cluster shells**. Cryo: **Frostbite** stacks from every ice hit and freezing fog; sneak+X **Glacier Rampart**; Flash Freeze holds up to 5 s with rank and pins bosses; sprint+V **Ice Javelin**. Darktide and Smoke hit harder in the dark and softer in the light; Darktide's sprint+key moves: **Geyser** (R), **Surf** (G), **Strangling Lift** (V, no powers while choked), **Devouring Pit** (B); water bottles, Kitchen waterskins and buckets carry water for them, and Darktide is 25% stronger wet.
+- **Awakening picks, patch 3**: **Web cartridges** of other kinds (Concussive thumps and throws back, Taser shocks still and jumps to a second foe, Splitter fires the charged shot as three; brewed with gunpowder, copper and redstone, or flint). Pocket Arsenal: **Surface** (sprint+G steps you out at the highest safe spot above you), the Void Arsenal's **Endless Fall** (sprint+V loops a foe through two gates eight times), and from the last rank the **Rift Seal** (hold C to spread a 9-20 block seal nobody can leave and nobody inside has powers in; it drains you). Z Fighter: **Full Counter** (raise the guard with Sneak: blows go back double, arrows to the archer, blasts at half), **Battle fury** (fighting grows you bigger, tougher and harder-hitting; at full, the grab pounds a foe into the ground four times), hits on a foe left **airborne, flat or pinned** land harder (more when another move put it there, up to 15% more for a run), and the Rubber-folk's and Verdant's **stretching grab** (sprint+R: the arm hooks a foe 8 blocks off, round cover, and yanks it to your feet).
+- **Awakening picks, patch 5**: three new powers. **Reactor Heart**: running, landing and being hurt fill a charge that detonates round you when full (you take none of it); a dial sets how much each move spends; Cone Burst, Blast Dash and Recoil, Shell Beam and a Charged Throw of your held item, a Drill that turns stone and dirt into items (never ores or builds) and Ground Crack, and when ascended a slow-charged Nuke with fallout. **Blinker**: Blink (untouchable a moment), Blink Strike up to 18 blocks, Vanish in blinding smoke, Sky Drop a foe from 14 blocks up, and ascended Flicker between foes five blows a second. **Lawgiver**: write up to five one-sentence rules in a rulebook (who, what, how strong, how long) and enact them for ink; one at a time, three at mastery 9. Each has its own calling: live through a big blast, land 16 ender pearls, lay your own signed book on a lectern.
+- **Awakening picks, patch 6**: **the brink** (brought to 4 health and living, the powerless wake a day sooner, once a day, never skipping the wait); **power trials** (the H menu's Trials tab: each power's 16-rung ladder of your own thoughts on pushing your limits, use each ability, fell foes and a great one, go deep, high, to the Nether and the End; each done is mastery, three open at once, pin one to the HUD, swap one away, finishing any quest gives a swap back); **Ability Power** with Jaymo's Kingdoms (your power's moves hit harder, reach further when aimed and last longer on others); **trading powers** (sneak-use Bonding Earrings facing each other, both say yes twice: the powers change hands and start again); the **relic belt** and seven relics (health, stamina feathers, focus, and ones that work only while hale, at the brink, in water or sprinting; merge twins a level up; every boss leaves its own); **boneiron** (a rare deep ore: in a Bonding Vat a fast healer's bones take it, up to five tiers of armour, toughness, attack and knockback kept through death; or plate armour with it, three a piece).
+- **Awakening picks, patch 7**: **who did what** (when a boss you fought falls, a card on screen, top left, names its fighters, most harm first, with each one's share; not chat); the **threat tracker** (sold by the Keeper on the Lookout, 30 silver: its needle turns to the nearest elite or boss within 96 blocks and spins when there's none; held, the action bar says what and how far); **your side gets caught too** (a power's slow, Freezing or frost on an enemy player catches the caster's party or team mates within 8 blocks of them; an enemy in a Stasis Field pulls the Chrono's mates near the field into it). Jaymo's Kingdoms' Cordon enforcers can bind a power for a while (`EightSignCircle.sealFor`).
+- Four hooks for Jaymo's Kingdoms' class trees, all doing nothing without it: `LockOnRegions.sure` (an aimed head shot that can't miss or glance), `Downed.headKnock` (how likely a thrown rock or blunt arrow to the head knocks someone out) and `Bleeding.closing` (how soon someone's wounds close by themselves), and `Fletching.more` (extra arrows a set at the Fletching Station).
+- **Awakening picks, patch 4** (folded into what the pack has): **speedsters** (Chrono's Overclock and Velox's Velocity): the wheel now sets your **top gear** and sprinting carries you up to it a gear at a time; in gear 5 at speed arrows and other shots pass through you (and through a phasing Chrono); running builds **static**, thrown as a bolt with use on an empty hand (it arcs to two more); a blur that runs at a wall opens a **tunnel** that stays 8 s for other players to follow (no block is touched). **Darktide**: what you or your shadows kill gives its shadow up at once; risen shadows wear at your stamina and the newest sinks back (not lost) when you run dry; a shadow that melts is kept, only one that dies is gone; sprint+Z opens the **soul menu** to pick the wave a tap of C raises; Z at a risen shadow **possesses** it (your body stays as a mannequin; move keys steer, sneak returns, sneak with sprint held warps your body to it).
+- After the row check of patch 4: Darktide possession works (the body was swept away as it was made), sprint + Z opens the soul menu only for the corrupted with shadows held, risen shadows always have room to sink back; speedsters' tunnels and Chrono's phase recover after a death, holding jump at a wall in gear 5 runs up it instead of tunnelling, static arcs only to enemies, and speed healing follows the wheel's gear as before.
+- **Andy's rulings on the above** (what these change wins over the lines before): Gravity's planets are free to throw; boneiron **plating is done at the Tool Forge** (a piece of armour and a plate), not by clicking a plate onto armour; a speedster running into a wall always runs up it, and the **tunnel needs Sneak** held as you sprint at the wall in gear 5; a run **starts in gear 3**; Darktide kills bank their shadow corrupted or not; **riding a risen shadow is left out** until it can be done with full control; every boss can leave a **second relic** of any kind one time in four; **Ability Power also widens area moves** (+0.2% a point); new **Speed Prism** (use it to step the colour of your speed lightning, kept through death) and **Energy Bar** (quick food, more filling for a speedster); **every power has its own hand-written trial ladder** (16 trials each, most of them feats of that power alone, such as holding 3 creatures in one Gravity Well or swinging 500 blocks without touching the ground; a holder of the old shared ladder keeps the few trials both have and gets the rest new, mastery already earned stays); a new hook `Bleeding.harm` for Jaymo's Kingdoms (a Blood Sorcerer's Hide halves their own bleeding).
+- Built; not played.

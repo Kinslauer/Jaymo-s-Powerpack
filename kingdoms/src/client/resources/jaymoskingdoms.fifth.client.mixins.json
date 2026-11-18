@@ -9,7 +9,8 @@
 		"DarkvisionMixin",
 		"DruidHidesPlayerMixin",
 		"CameraLeanMixin",
-		"AvatarLeanMixin"
+		"LivingLeanMixin",
+		"LeanKneeMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

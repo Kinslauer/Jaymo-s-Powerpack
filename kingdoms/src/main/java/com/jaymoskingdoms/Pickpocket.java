@@ -153,7 +153,7 @@ public final class Pickpocket {
 	/** Player → the pocket their hand is in. */
 	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
 	/** Mark → game time their pocket fills again. */
-	private static final Map<UUID, Long> PICKED = new HashMap<>();
+	static final Map<UUID, Long> PICKED = new HashMap<>();
 	/** Player → their last try. */
 	private static final Map<UUID, Rest> RESTING = new HashMap<>();
 
@@ -219,7 +219,7 @@ public final class Pickpocket {
 	}
 
 	/** Has pockets worth picking: a grown villager, or a settlement's folk short of its ruler. */
-	private static boolean markable(LivingEntity e) {
+	static boolean markable(LivingEntity e) {
 		// (0.7.141: not a wind dragon in disguise, whose pockets hold nothing a thief could carry)
 		if (!e.isAlive() || e.isBaby() || Downed.isDowned(e) || e.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;
@@ -261,6 +261,11 @@ public final class Pickpocket {
 		// (0.5.52) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers); where they know
 		// you for a Rogue, they keep a hand on their purses (Renown)
 		ticks = Skills.holdTicks(player, ticks);
+		// (class trees) Nimble Fingers; and a mark a Cutpurse King fumbled keeps a hand on their purse
+		ticks *= RogueExtras.fingers(player);
+		if (RogueExtras.wary(mark, level.getGameTime())) {
+			ticks *= RogueExtras.WARY_FACTOR;
+		}
 		if (Renown.knownRogue(player, law(level, mark))) {
 			ticks *= Renown.ROGUE_WARY;
 		}
@@ -365,7 +370,7 @@ public final class Pickpocket {
 	}
 
 	/** Whose law holds over {@code mark} (null: none, or a camp's). */
-	private static @Nullable Faction law(ServerLevel level, LivingEntity mark) {
+	static @Nullable Faction law(ServerLevel level, LivingEntity mark) {
 		Faction f = mark instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : Theft.lawAt(level, mark.blockPosition());
 		return f == null || f.fallen() || f.type() == FactionType.BARBARIAN ? null : f;
 	}
@@ -423,6 +428,10 @@ public final class Pickpocket {
 		if (mark instanceof Mob mob) {
 			mob.getLookControl().setLookAt(player);
 		}
+		// (class trees) a Cutpurse King's fumble only makes the mark wary
+		if (RogueExtras.fumbled(player, level, mark)) {
+			return;
+		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.pickpocket.caught", mark.getDisplayName()).withStyle(ChatFormatting.RED));
 		// (0.7.109) they won't forget the hand in their pocket
 		Recollections.remember(mark, player, Recollections.Kind.ROBBED, Component.empty());
@@ -442,7 +451,7 @@ public final class Pickpocket {
 	}
 
 	/** (0.7.498) A guard or a merchant carries more coin than a farmer. */
-	private static boolean rich(LivingEntity mark) {
+	static boolean rich(LivingEntity mark) {
 		if (Downed.isGuard(mark)) {
 			return true;
 		}

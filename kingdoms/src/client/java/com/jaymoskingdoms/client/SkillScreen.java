@@ -9,6 +9,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Lessons;
 import com.jaymoskingdoms.Lifestyle;
 import com.jaymoskingdoms.Renown;
+import com.jaymoskingdoms.SkillRenown;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.Sparks;
 import com.jaymoskingdoms.StartPerks;
@@ -109,6 +110,8 @@ final class SkillScreen extends Screen {
 	private static boolean stats;
 	/** (0.7.220) Whether the Jobs tab is the one shown. */
 	private static boolean jobs;
+	/** (class trees) Whether the class tab is the one shown ({@link ClassTreeTab}). */
+	private static boolean classTab;
 	/** (0.7.220) The Jobs tab's rows. */
 	static final int JOB_ROW = 12, JOB_ACCENT = 0xFFC8A060;
 	/** (0.7.540) How far the Attributes or Jobs rows are scrolled (pixels). */
@@ -226,7 +229,16 @@ final class SkillScreen extends Screen {
 		var player = this.minecraft.player;
 		int fy = this.height - WEB_FOOTER + 3, x = this.width - 6;
 		x = foot(x, fy, 60, Component.translatable("gui.done"), b -> onClose());
-		if (jobs) {
+		if (classTab) {
+			// with a second class, its tree is a button away
+			if (player != null && Classes.both(player).size() > 1) {
+				com.jaymoskingdoms.Classes.PlayerClass other = Classes.both(player).get(ClassTreeTab.which == 0 ? 1 : 0);
+				x = foot(x, fy, 110, Component.translatable("gui.jaymoskingdoms.classtree.switch", Component.translatable("class.jaymoskingdoms." + other.key())), b -> {
+					ClassTreeTab.flip();
+					rebuildWidgets();
+				});
+			}
+		} else if (jobs) {
 			// Standing's one deed: give your spark to a friend standing near
 			if (player != null && !this.sparkGiven && Sparks.held(player)) {
 				for (Player friend : friends()) {
@@ -262,22 +274,23 @@ final class SkillScreen extends Screen {
 		return right - w - 4;
 	}
 
-	/** The tab shown: 0 the web, 1 Attributes, 2 Jobs & Standing. */
+	/** The tab shown: 0 the web, 1 Attributes, 2 Jobs & Standing, 3 the class's tree. */
 	private static int page() {
-		return jobs ? 2 : stats ? 1 : 0;
+		return classTab ? 3 : jobs ? 2 : stats ? 1 : 0;
 	}
 
 	private void page(int page) {
 		listScroll = 0;
 		stats = page == 1;
 		jobs = page == 2;
+		classTab = page == 3;
 		rebuildWidgets();
 	}
 
 	/** The three tabs at the top bar's right, each as wide as its name: the web, Attributes, Jobs & Standing. */
 	private void tabs(int y) {
 		Component[] names = {Component.translatable("gui.jaymoskingdoms.skills.web.tab"), Component.translatable("gui.jaymoskingdoms.stats.tab"),
-			Component.translatable("gui.jaymoskingdoms.jobs.tab")};
+			Component.translatable("gui.jaymoskingdoms.jobs.tab"), Component.translatable("gui.jaymoskingdoms.classtree.tab")};
 		int[] w = new int[names.length];
 		int total = 4 * (names.length - 1);
 		for (int i = 0; i < names.length; i++) {
@@ -300,7 +313,7 @@ final class SkillScreen extends Screen {
 	private static final Skills.Pillar[] ORDER = {Skills.Pillar.STRENGTH, Skills.Pillar.SURVIVAL, Skills.Pillar.STEALTH};
 
 	private boolean onWeb() {
-		return !stats && !jobs;
+		return !stats && !jobs && !classTab;
 	}
 
 	/** The left panel's width (your pillars and attributes). */
@@ -447,6 +460,13 @@ final class SkillScreen extends Screen {
 			&& !com.jaymoskingdoms.Learnables.classLocked(player, perk));
 	}
 
+	/** Whether a renown point buys a rank of {@code perk} now (when the pillar's points won't): the server checks it again. */
+	private boolean renownLearn(Skills.Progress shown, Skills.Perk perk) {
+		var player = this.minecraft.player;
+		return SkillRenown.available(shown) > 0 && !perk.bridge() && shown.blocked(perk) != null && shown.blocked(perk, true) == null
+			&& (player == null || !com.jaymoskingdoms.Knowledge.lockedPerk(player, perk) && !com.jaymoskingdoms.Learnables.classLocked(player, perk));
+	}
+
 	/** Picks {@code perk} for the right panel, and brings it to the middle if it sits near the edge or is too small to read. */
 	private void select(Skills.Perk perk) {
 		selected = perk;
@@ -465,6 +485,9 @@ final class SkillScreen extends Screen {
 	private void learn(Skills.Perk perk) {
 		if (canLearn(progress(), perk)) {
 			ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
+			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+		} else if (renownLearn(progress(), perk)) {
+			ClientPlayNetworking.send(new SkillRenown.Spend(perk.ordinal()));
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		}
 	}
@@ -780,9 +803,9 @@ final class SkillScreen extends Screen {
 	/** The bar along the foot: what the mouse and keys do; the buttons sit at its right. */
 	private void bottomBar(GuiGraphicsExtractor graphics) {
 		frame(graphics, 0, this.height - WEB_FOOTER, this.width, WEB_FOOTER);
-		if (onWeb()) {
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.web.keys"), 8, this.height - WEB_FOOTER + 7,
-				this.footLeft - 16, Ui.DIM);
+		if (onWeb() || classTab) {
+			Ui.line(graphics, this.font, Component.translatable(classTab ? "gui.jaymoskingdoms.classtree.keys" : "gui.jaymoskingdoms.skills.web.keys"), 8,
+				this.height - WEB_FOOTER + 7, this.footLeft - 16, Ui.DIM);
 		}
 	}
 
@@ -935,8 +958,12 @@ final class SkillScreen extends Screen {
 			Component label = rank >= perk.maxRank ? Component.translatable("gui.jaymoskingdoms.skills.web.learnt")
 				: rank > 0 ? Component.translatable("gui.jaymoskingdoms.skills.web.raise", rank + 1, perk.maxRank)
 				: Component.translatable("gui.jaymoskingdoms.skills.web.learn");
+			boolean renown = !canLearn(shown, perk) && renownLearn(shown, perk);
+			if (renown) {
+				label = Component.translatable("gui.jaymoskingdoms.renown.web.spend", SkillRenown.available(shown));
+			}
 			Ui.button(graphics, this.font, box[0], box[1], box[2], box[3], label, accent, Ui.over(mouseX, mouseY, box[0], box[1], box[2], box[3]),
-				canLearn(shown, perk));
+				renown || canLearn(shown, perk));
 		}
 	}
 
@@ -985,6 +1012,13 @@ final class SkillScreen extends Screen {
 		}
 		if (shown.ranks().containsKey(com.jaymoskingdoms.Learnables.taughtKey(perk))) {
 			text.add(Component.translatable("gui.jaymoskingdoms.skills.taught").withColor(Ui.GOOD));
+		}
+		if (SkillRenown.earned(shown) > 0 || SkillRenown.available(shown) > 0) {
+			text.add(Component.translatable("gui.jaymoskingdoms.renown.have", SkillRenown.available(shown), SkillRenown.earned(shown)).withColor(Ui.GOLD));
+		}
+		if (blocked != null && renownLearn(shown, perk)) {
+			text.add(Component.translatable("gui.jaymoskingdoms.renown.learn").withColor(Ui.GOLD));
+			return;
 		}
 		text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD)
 			: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
@@ -1089,6 +1123,12 @@ final class SkillScreen extends Screen {
 		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", level), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.points", points), x + 9, y + 19, w / 2 - 12, points > 0 ? Ui.GOOD : Ui.DIM);
+		// renown: shown beside the level; with one to spend, a press on it buys attribute points (mouseClicked)
+		int renown = SkillRenown.available(shown);
+		if (SkillRenown.earned(shown) > 0) {
+			Ui.lineRight(graphics, this.font, Component.translatable(renown > 0 ? "gui.jaymoskingdoms.renown.stat" : "gui.jaymoskingdoms.renown.count", renown, SkillRenown.STAT_POINTS),
+				x + w / 2 - 6, y + 8, w / 4, renown > 0 ? Ui.GOLD : Ui.DIM);
+		}
 		Heritage.Kind kind = player == null ? null : Heritage.of(player);
 		Classes.PlayerClass cls = player == null ? null : Classes.classOf(player);
 		Ui.lineRight(graphics, this.font, kind == null ? Component.translatable("gui.jaymoskingdoms.stats.heritage.none")
@@ -1394,6 +1434,13 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (stats && SkillRenown.available(progress()) > 0
+			&& Ui.over((int)event.x(), (int)event.y(), contentX() + contentW() / 2 - 6 - contentW() / 4, WEB_HEADER + 6, contentW() / 4, 12)) {
+			// renown: five attribute points
+			ClientPlayNetworking.send(new SkillRenown.Spend(-1));
+			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			return true;
+		}
 		Stats.Stat stat = statAt(event.x(), event.y());
 		if (stat != null) {
 			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
@@ -1405,6 +1452,9 @@ final class SkillScreen extends Screen {
 		}
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
+		}
+		if (classTab && this.minecraft.player != null) {
+			return ClassTreeTab.click(this.minecraft.player, event.x(), event.y(), 0, WEB_HEADER, this.width, this.height - WEB_FOOTER);
 		}
 		if (onWeb()) {
 			int mx = (int)event.x(), my = (int)event.y();
@@ -1484,6 +1534,10 @@ final class SkillScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		if (classTab && (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER)) {
+			ClassTreeTab.learnSelected();
+			return true;
+		}
 		if (onWeb() && selected != null && (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER)) {
 			learn(selected);
 			return true;
@@ -1507,6 +1561,10 @@ final class SkillScreen extends Screen {
 			targetY += uy * (before - targetZoom);
 			return true;
 		}
+		if (classTab && scrollY != 0.0 && this.minecraft.player != null) {
+			ClassTreeTab.scroll(this.minecraft.player, scrollY, this.height - WEB_FOOTER - WEB_HEADER);
+			return true;
+		}
 		if (jobs && scrollY != 0.0 && mouseX < standW()) {
 			// Standing's lines, a line a notch
 			standScroll = Math.max(0, standScroll - (int)Math.signum(scrollY) * STAND_LINE);
@@ -1523,6 +1581,16 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
+		if (classTab && this.minecraft.player != null) {
+			sky(graphics);
+			com.jaymoskingdoms.Classes.PlayerClass cls = ClassTreeTab.shown(this.minecraft.player);
+			topBar(graphics, cls == null ? Component.translatable("gui.jaymoskingdoms.classtree.none")
+				: Component.translatable("gui.jaymoskingdoms.classtree.title", Component.translatable("class.jaymoskingdoms." + cls.key())), this.width / 2);
+			bottomBar(graphics);
+			ClassTreeTab.render(graphics, this.font, this.minecraft.player, 0, WEB_HEADER, this.width, this.height - WEB_FOOTER, mouseX, mouseY);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
+		}
 		if (jobs || stats) {
 			sky(graphics);
 			topBar(graphics, Component.translatable(jobs ? "gui.jaymoskingdoms.jobs.tab" : "gui.jaymoskingdoms.stats.tab"), (mainL() + mainR()) / 2);

@@ -229,7 +229,7 @@ public final class RangedTactics {
 		}
 		s.nextDuck = now + DUCK_COOLDOWN;
 		BlockPos here = shooter.blockPosition();
-		BlockPos spot = Cover.works(level, shooter, target, Vec3.atBottomCenterOf(here)) ? here : null;
+		BlockPos spot = Cover.shelters(level, shooter, target, Vec3.atBottomCenterOf(here)) ? here : null;
 		if (spot == null && !(shooter instanceof Folk folk && WallArchers.posted(level, folk))) {
 			spot = coverSpot(level, shooter, target, s, now);
 			if (spot != null) {
@@ -248,7 +248,7 @@ public final class RangedTactics {
 	/** Cover for {@code shooter} from {@code target}: the one found last, while it still works against a foe that has not gone far, else a new one. */
 	private static @Nullable BlockPos coverSpot(ServerLevel level, Mob shooter, LivingEntity target, State s, long now) {
 		if (s.coverAt != null && s.coverFoe != null && now - s.coverTick < COVER_KEPT && target.position().distanceToSqr(s.coverFoe) < COVER_MOVED * COVER_MOVED
-			&& Cover.works(level, shooter, target, Vec3.atBottomCenterOf(s.coverAt))) {
+			&& Cover.shelters(level, shooter, target, Vec3.atBottomCenterOf(s.coverAt))) {
 			return s.coverAt;
 		}
 		s.coverAt = Cover.spot(level, shooter, target, COVER_REACH, SAMPLES);
@@ -566,11 +566,18 @@ public final class RangedTactics {
 		s.blocked = 0;
 	}
 
-	/** Ends a plan; a shooter that was crouching behind cover stands up (leans out). */
+	/**
+	 * Ends a plan; a shooter that was crouching behind cover stands up (leans out). At a wall's corner it leans out past it
+	 * sideways ({@link Lean#lean}), the side the corner opens to.
+	 */
 	private static void finish(Mob mob, State s) {
 		if (s.ducking) {
 			s.ducking = false;
 			mob.setShiftKeyDown(false);
+			LivingEntity target = mob.getTarget();
+			if (target != null && mob.level() instanceof ServerLevel level) {
+				Lean.lean(mob, Cover.corner(level, mob, target, mob.position()));
+			}
 		}
 		end(s);
 	}
@@ -602,6 +609,8 @@ public final class RangedTactics {
 				if (s.plan == Plan.TAKE_COVER) {
 					mob.setShiftKeyDown(true);
 					s.ducking = true;
+					// back in behind the corner
+					Lean.lean(mob, 0);
 				}
 				if (now >= s.holdUntil) {
 					finish(mob, s);

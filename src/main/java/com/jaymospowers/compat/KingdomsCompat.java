@@ -33,7 +33,44 @@ public final class KingdomsCompat {
 	private static Method seesGhosts;
 	private static boolean seesGhostsLooked;
 
+	private static Method maxGrade;
+	private static boolean maxGradeLooked;
+
 	private KingdomsCompat() {
+	}
+
+	/** Kingdoms' static methods looked up by {@link #call}, by class, name and argument types (null: not there). */
+	private static final java.util.Map<String, java.util.Optional<Method>> CALLS = new java.util.HashMap<>();
+
+	/**
+	 * Calls Kingdoms' public static {@code cls.method(args)} (types as given), or answers {@code otherwise} without Kingdoms, if it
+	 * has no such method, or if the call throws. Used by the Awakening picks, so each needs no lookup of its own.
+	 */
+	public static @Nullable Object call(String cls, String method, Class<?>[] types, @Nullable Object otherwise, Object... args) {
+		if (!LOADED) {
+			return otherwise;
+		}
+		String key = cls + "#" + method + java.util.Arrays.toString(types);
+		java.util.Optional<Method> m = CALLS.computeIfAbsent(key, k -> {
+			try {
+				return java.util.Optional.of(Class.forName("com.jaymoskingdoms." + cls).getMethod(method, types));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				return java.util.Optional.empty();
+			}
+		});
+		if (m.isEmpty()) {
+			return otherwise;
+		}
+		try {
+			return m.get().invoke(null, args);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return otherwise;
+		}
+	}
+
+	/** Lays {@code stacks} of the Ash's rot (Kingdoms' {@code AshRot.rot}) on {@code target}; false without Kingdoms. */
+	public static boolean rot(LivingEntity target, @Nullable LivingEntity by, int stacks) {
+		return call("AshRot", "rot", new Class<?>[] {LivingEntity.class, LivingEntity.class, int.class}, Boolean.FALSE, target, by, stacks) == null;
 	}
 
 	/**
@@ -86,6 +123,32 @@ public final class KingdomsCompat {
 				return true;
 			}
 			return formsPerk != null && Boolean.TRUE.equals(formsPerk.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** The grade ordinal Legendary has in Powers' {@code Grade} (what Kingdoms' {@code TierGate.maxGrade} reaches at Legend). */
+	private static final int LEGENDARY_GRADE = 5;
+
+	/**
+	 * Whether {@code smith}'s world tier is Legend (Kingdoms' {@code TierGate.maxGrade} reaches Legendary; server side), the
+	 * only time a Legendary grade can be forged. False without Kingdoms (or if it can't be read): then Legendary never forges.
+	 */
+	public static boolean legend(Player smith) {
+		if (!LOADED || smith == null) {
+			return false;
+		}
+		if (!maxGradeLooked) {
+			maxGradeLooked = true;
+			try {
+				maxGrade = Class.forName("com.jaymoskingdoms.TierGate").getMethod("maxGrade", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				maxGrade = null;
+			}
+		}
+		try {
+			return maxGrade != null && maxGrade.invoke(null, smith) instanceof Integer grade && grade >= LEGENDARY_GRADE;
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return false;
 		}

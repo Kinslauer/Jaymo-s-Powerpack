@@ -74,6 +74,13 @@ import com.jaymoskingdoms.money.Money;
  * {@code /kingdom class get <player>}.
  */
 public final class Classes {
+	/**
+	 * (class trees, Andy's page note) The class saved for a player who chose to start with no class yet: they learn one later
+	 * from a class's teacher ({@link SecondClass#offers}). {@link #classOf} is null for them, but they are not unmade.
+	 */
+	public static final String NONE_KEY = "none";
+	/** The class choice that means "no class yet". */
+	public static final int NONE_CHOICE = -1;
 	/** The share of a class's perks, pools and numbers its holder has when it is their second class. */
 	public static final float SECOND_SHARE = 0.5F;
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
@@ -334,6 +341,16 @@ public final class Classes {
 		return of(player).playerClass();
 	}
 
+	/** Whether {@code player} started with no class yet and hasn't learned one. */
+	public static boolean classless(Player player) {
+		return NONE_KEY.equals(of(player).cls());
+	}
+
+	/** Whether {@code player} has made the class step of their character: a class, or no class yet. */
+	public static boolean decided(Player player) {
+		return !of(player).cls().isEmpty();
+	}
+
 	/** Whether {@code player} holds {@code cls}, as their first class or the second they learned. */
 	public static boolean is(Player player, PlayerClass cls) {
 		return classOf(player) == cls || second(player) == cls;
@@ -385,7 +402,7 @@ public final class Classes {
 	 * so the screen is up for them), or MCA's destiny screen still to finish.
 	 */
 	public static boolean unmade(ServerPlayer player) {
-		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE) || Heritage.of(player) == null && Heritage.canAsk(player);
+		return !decided(player) && ServerPlayNetworking.canSend(player, Open.TYPE) || Heritage.of(player) == null && Heritage.canAsk(player);
 	}
 
 	/** (0.7.45) MCA's destiny screen was just finished: (0.7.57) the heritage screen is next, then the class screen; neither can be shut without picking. */
@@ -406,7 +423,7 @@ public final class Classes {
 			LifeStory.ask(player, true);
 		} else if (Heritage.of(player) == null && Heritage.canAsk(player)) {
 			Heritage.ask(player, true);
-		} else if (classOf(player) == null) {
+		} else if (!decided(player)) {
 			ask(player, true);
 		}
 	}
@@ -420,8 +437,15 @@ public final class Classes {
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
+		if (choose.cls() == NONE_CHOICE && !choose.second()) {
+			// (class trees) no class yet: one is learned later from a teacher
+			if (!decided(player)) {
+				setNone(player);
+			}
+			return;
+		}
 		// (a creative player may switch, from the H menu's class tab)
-		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null && !player.isCreative()) {
+		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && decided(player) && !player.isCreative()) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
@@ -430,13 +454,25 @@ public final class Classes {
 			return;
 		}
 		if (choose.second()) {
+			// (a Cleric taken as a second class picks its patron freely: Andy, "or they multi class into it")
 			SecondClass.chosen(player, cls, option);
 			return;
+		}
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one
+		String raised = clericPatron(player, cls);
+		if (raised != null) {
+			option = raised;
 		}
 		if (classOf(player) != null) {
 			clear(player);
 		}
 		set(player, cls, option);
+	}
+
+	/** The patron a first-class Cleric must serve: the one their life story says they grew up praying to; null for any other class or no faith. */
+	public static @Nullable String clericPatron(Player player, PlayerClass cls) {
+		String faith = player.getAttached(LifeStory.FAITH);
+		return cls == PlayerClass.CLERIC && faith != null && cls.options.contains(faith) ? faith : null;
 	}
 
 	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */
@@ -470,6 +506,13 @@ public final class Classes {
 			.withStyle(ChatFormatting.GOLD));
 	}
 
+	/** (class trees, Andy's page note) {@code player} starts with no class yet: any class's teacher can teach them one later. */
+	static void setNone(ServerPlayer player) {
+		player.setAttached(CLASS, new Chosen(NONE_KEY, "", List.of(), 0));
+		refresh(player);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.none").withStyle(ChatFormatting.GRAY));
+	}
+
 	/** The classes' own beginnings: a patron sworn, an oath taken, a foe and land to pick, a first style of fighting. */
 	static void begin(ServerPlayer player, PlayerClass cls, String option) {
 		switch (cls) {
@@ -500,6 +543,8 @@ public final class Classes {
 	 * paths and the feats too (a Writ of Rebirth remakes the whole character).
 	 */
 	static void clear(ServerPlayer player) {
+		// (class trees) the classes' levels go with them, and every rank paid from them
+		ClassTrees.unmake(player, both(player));
 		Druids.unmake(player);
 		Paladins.unmake(player);
 		Warlocks.unmake(player);
@@ -583,7 +628,7 @@ public final class Classes {
 			if (!(player instanceof ServerPlayer sp)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (classOf(sp) == null) {
+			if (!decided(sp)) {
 				next(sp);
 				return InteractionResult.SUCCESS;
 			}

@@ -92,7 +92,9 @@ public final class Kitchen {
 
 	/** Opens the cooking screen at a station and starts a dish there straight away (from the cooking table). */
 	public static void startAt(ServerPlayer player, BlockPos pos, Station station, Dish dish) {
-		ServerPlayNetworking.send(player, new com.jaymoskitchen.net.Payloads.OpenKitchen(pos, station.ordinal(), stocked(player, pos, station)));
+		if (!com.jaymoskitchen.cooking.hands.HandsOn.takesOver(player.level(), dish)) {
+			ServerPlayNetworking.send(player, new com.jaymoskitchen.net.Payloads.OpenKitchen(pos, station.ordinal(), stocked(player, pos, station)));
+		}
 		start(player, pos, dish.ordinal(), station.ordinal());
 	}
 
@@ -112,6 +114,16 @@ public final class Kitchen {
 		}
 		if (!station.allows(dish)) {
 			reject(player, dishIndex, "message.jaymoskitchen.wrong_station");
+			return;
+		}
+		// done by hand at the block: no screen (the screen only picked the dish)
+		boolean[] refused = {false};
+		if (com.jaymoskitchen.cooking.hands.HandsOn.fromScreen(player, pos, dish, refused)) {
+			if (refused[0]) {
+				reject(player, dishIndex, "message.jaymoskitchen.station_busy");
+			} else {
+				ServerPlayNetworking.send(player, new CookUpdate(dishIndex, 0, 0, CookUpdate.STATUS_HANDS, 0, 0, 0));
+			}
 			return;
 		}
 		if (level.getBlockEntity(pos) instanceof OvenBlockEntity oven && !player.hasInfiniteMaterials()
@@ -233,7 +245,7 @@ public final class Kitchen {
 		}
 	}
 
-	static void award(ServerPlayer player, Dish dish, BlockPos pos, Quality quality) {
+	public static void award(ServerPlayer player, Dish dish, BlockPos pos, Quality quality) {
 		if (ExplodingPot.blowsUp(player, pos, quality)) {
 			return;
 		}
@@ -346,7 +358,7 @@ public final class Kitchen {
 		}
 	}
 
-	static boolean inReach(ServerPlayer player, BlockPos pos) {
+	public static boolean inReach(ServerPlayer player, BlockPos pos) {
 		return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= MAX_DISTANCE_SQ;
 	}
 
@@ -430,7 +442,7 @@ public final class Kitchen {
 	}
 
 	/** Removes the ingredients (pockets first, then the kitchen) and hands back their leftovers. */
-	static void takeIngredients(ServerPlayer player, BlockPos pos, Map<Step, Integer> ingredients) {
+	public static void takeIngredients(ServerPlayer player, BlockPos pos, Map<Step, Integer> ingredients) {
 		KitchenPool pool = sources(player, pos);
 		for (Map.Entry<Step, Integer> need : pickiestFirst(ingredients)) {
 			Step step = need.getKey();
@@ -448,7 +460,7 @@ public final class Kitchen {
 		}
 	}
 
-	static void give(ServerPlayer player, ItemStack stack) {
+	public static void give(ServerPlayer player, ItemStack stack) {
 		if (!player.getInventory().add(stack)) {
 			player.drop(stack, false, Prediction.SERVER_ONLY);
 		}

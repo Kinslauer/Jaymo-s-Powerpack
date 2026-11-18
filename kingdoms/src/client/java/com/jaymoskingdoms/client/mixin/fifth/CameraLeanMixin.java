@@ -55,7 +55,7 @@ abstract class CameraLeanMixin {
 			return;
 		}
 		Vec3 at = this.position();
-		Vec3 out = Lean.offset(player.getViewYRot(partialTicks), amount);
+		Vec3 out = Lean.offset(player.getViewYRot(partialTicks), amount * LeanClient.reach(player, partialTicks));
 		var hit = player.level().clip(new ClipContext(at, at.add(out), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		if (hit.getType() == HitResult.Type.BLOCK) {
 			out = hit.getLocation().subtract(at).subtract(out.normalize().scale(LeanClient.CAMERA_GAP));

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -221,7 +222,7 @@ public final class Tolling extends XenoUltimate {
 				live.burrowTo = null;
 				player.teleportTo(level, to.x, to.y, to.z, Set.of(), player.getYRot(), player.getXRot(), false);
 				player.resetFallDistance();
-				for (LivingEntity living : around(player, UNDERTOW_RADIUS)) {
+				for (LivingEntity living : around(player, AbilityPower.size(player, UNDERTOW_RADIUS))) {
 					if (living.hurtServer(level, level.damageSources().playerAttack(player), UNDERTOW_DAMAGE)) {
 						double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 						shove(living, to, 0.4 * resist, UNDERTOW_THROW * resist);
@@ -229,7 +230,7 @@ public final class Tolling extends XenoUltimate {
 				}
 				sound(player, SoundEvents.WARDEN_EMERGE, 1.5F, 0.8F);
 				level.sendParticles(dust, to.x, to.y + 0.5, to.z, 60, 1.2, 0.6, 1.2, 0.12);
-				ring(level, ParticleTypes.SCULK_CHARGE_POP, to.add(0.0, 0.2, 0.0), UNDERTOW_RADIUS, 20);
+				ring(level, ParticleTypes.SCULK_CHARGE_POP, to.add(0.0, 0.2, 0.0), AbilityPower.size(player, UNDERTOW_RADIUS), 20);
 				Shakes.heavy(player, to, UNDERTOW_SHAKE_RANGE, UNDERTOW_SHAKE);
 			}
 		}
@@ -263,7 +264,7 @@ public final class Tolling extends XenoUltimate {
 		if (now % TOLL_EVERY == 0 && now != live.lastToll) {
 			live.lastToll = now;
 			live.tolls--;
-			for (LivingEntity living : around(player, TOLL_RADIUS)) {
+			for (LivingEntity living : around(player, AbilityPower.size(player, TOLL_RADIUS))) {
 				if (living.hurtServer(level, level.damageSources().sonicBoom(player), TOLL_DAMAGE)) {
 					double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 					shove(living, player.position(), TOLL_KNOCKBACK * resist, 0.4 * resist);
@@ -273,12 +274,12 @@ public final class Tolling extends XenoUltimate {
 				}
 			}
 			Vec3 at = player.position().add(0.0, 1.2, 0.0);
-			ring(level, ParticleTypes.SONIC_BOOM, at, TOLL_RADIUS * 0.35, 8);
-			ring(level, ParticleTypes.SONIC_BOOM, at, TOLL_RADIUS * 0.7, 14);
-			ring(level, ParticleTypes.SCULK_CHARGE_POP, at, TOLL_RADIUS, 28);
+			ring(level, ParticleTypes.SONIC_BOOM, at, AbilityPower.size(player, TOLL_RADIUS) * 0.35, 8);
+			ring(level, ParticleTypes.SONIC_BOOM, at, AbilityPower.size(player, TOLL_RADIUS) * 0.7, 14);
+			ring(level, ParticleTypes.SCULK_CHARGE_POP, at, AbilityPower.size(player, TOLL_RADIUS), 28);
 			sound(player, SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 0.5F);
 			sound(player, SoundEvents.BELL_BLOCK, 3.0F, 0.4F);
-			Shakes.heavy(player, at, TOLL_RADIUS * 2.0, TOLL_SHAKE);
+			Shakes.heavy(player, at, AbilityPower.size(player, TOLL_RADIUS) * 2.0, TOLL_SHAKE);
 			if (live.tolls <= 0) {
 				live.tolls = 0;
 				ANCHOR.remove(player.getUUID());
@@ -324,7 +325,7 @@ public final class Tolling extends XenoUltimate {
 
 	private static void shriek(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SHRIEK_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SHRIEK_RADIUS))) {
 			if (!living.hurtServer(level, player.damageSources().playerAttack(player), SHRIEK_DAMAGE) && living instanceof net.minecraft.world.entity.player.Player) {
 				continue; // (0.20.21) a player the shriek could not hurt (pvp off, blocked) is not blinded or slowed either
 			}
@@ -332,12 +333,12 @@ public final class Tolling extends XenoUltimate {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHRIEK_SLOW_TICKS, 1));
 		}
 		Vec3 at = player.position().add(0.0, 1.8, 0.0);
-		ring(level, ParticleTypes.SCULK_CHARGE_POP, at, SHRIEK_RADIUS * 0.4, 20);
-		ring(level, ParticleTypes.SCULK_SOUL, at, SHRIEK_RADIUS * 0.8, 40);
+		ring(level, ParticleTypes.SCULK_CHARGE_POP, at, AbilityPower.size(player, SHRIEK_RADIUS) * 0.4, 20);
+		ring(level, ParticleTypes.SCULK_SOUL, at, AbilityPower.size(player, SHRIEK_RADIUS) * 0.8, 40);
 		level.sendParticles(new net.minecraft.core.particles.ShriekParticleOption(0), at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		sound(player, SoundEvents.WARDEN_ROAR, 3.0F, 0.8F);
 		sound(player, SoundEvents.SCULK_SHRIEKER_SHRIEK, 2.0F, 0.6F);
-		Shakes.heavy(player, at, SHRIEK_RADIUS * 1.5, 1.8F);
+		Shakes.heavy(player, at, AbilityPower.size(player, SHRIEK_RADIUS) * 1.5, 1.8F);
 	}
 
 	// ---- B: Undertow ----

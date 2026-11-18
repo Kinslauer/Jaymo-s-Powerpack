@@ -3,9 +3,11 @@ package com.jaymoskingdoms;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -38,7 +40,7 @@ import org.jspecify.annotations.Nullable;
 public final class Warlocks {
 	public static Item SEAL;
 	/** Slots, how much harder the magic hits (a share of a scroll's). */
-	static final int SLOTS = 2;
+	static final int SLOTS = 1;
 	static final float POWER = 1.5F;
 	/** Casts between debts, the casts allowed while one is open, the days it is due in. */
 	static final int CAST_PER_DEBT = 5, GRACE_CASTS = 3, DEBT_DAYS = 3;
@@ -52,13 +54,19 @@ public final class Warlocks {
 	static final String[] REAPER_KINDS = {"blood", "death"};
 
 	/** Casts since the last debt (or the open one's), the open debt's kind ("" for none) and the day it is due. */
-	record Pact(int casts, String kind, long due) {
+	record Pact(int casts, String kind, long due, boolean reneged) {
 		static final Pact NONE = new Pact(0, "", -1L);
 		static final Codec<Pact> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("casts", 0).forGetter(Pact::casts),
 			Codec.STRING.optionalFieldOf("kind", "").forGetter(Pact::kind),
-			Codec.LONG.optionalFieldOf("due", -1L).forGetter(Pact::due)
+			Codec.LONG.optionalFieldOf("due", -1L).forGetter(Pact::due),
+			// (class trees) Renege: the ask was swapped once already
+			Codec.BOOL.optionalFieldOf("reneged", false).forGetter(Pact::reneged)
 		).apply(i, Pact::new));
+
+		Pact(int casts, String kind, long due) {
+			this(casts, kind, due, false);
+		}
 
 		boolean owing() {
 			return !kind.isEmpty();
@@ -94,7 +102,7 @@ public final class Warlocks {
 	/** A new Warlock swears to the patron they picked. */
 	/** The pact slots {@code player} has (the second class has a share; the Tome path one more). */
 	static int slots(ServerPlayer player) {
-		return Classes.scaled(player, PlayerClass.WARLOCK, SLOTS) + Paths.extraSlots(player);
+		return Classes.scaled(player, PlayerClass.WARLOCK, SLOTS) + Paths.extraSlots(player) + PactArts.slots(player);
 	}
 
 	static void begin(ServerPlayer player, String option) {
@@ -133,36 +141,74 @@ public final class Warlocks {
 	/** A cast was made: a slot is spent and the patron's account grows. */
 	static void pay(ServerPlayer player, String spell) {
 		Rests.spend(player, Rests.PACT, 1, slots(player));
+		ClassTrees.give(player, PlayerClass.WARLOCK, ClassTrees.XP_PACT);
 		Pact pact = pact(player);
 		int casts = pact.casts() + 1;
 		if (pact.owing()) {
-			player.setAttached(PACT, new Pact(casts, pact.kind(), pact.due()));
+			player.setAttached(PACT, new Pact(casts, pact.kind(), pact.due(), pact.reneged()));
 			return;
 		}
-		if (casts < CAST_PER_DEBT) {
+		// (class trees) under Usury the next debt comes a fifth sooner
+		if (casts < ArcaneExtras.castsPerDebt(player, CAST_PER_DEBT)) {
 			player.setAttached(PACT, new Pact(casts, "", -1L));
 			return;
 		}
 		long today = Patrons.today(player.level().getServer());
 		String[] kinds = Reaper.pact(player) ? REAPER_KINDS : KINDS;
 		String kind = kinds[(int) Math.floorMod(today + player.getRandom().nextInt(kinds.length), kinds.length)];
-		int days = Paths.debtDays(player, DEBT_DAYS);
+		int days = Paths.debtDays(player, PactArts.days(player, DEBT_DAYS));
 		player.setAttached(PACT, new Pact(0, kind, today + days));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 
-	static Component debtName(String kind) {
+	/**
+	 * (class trees) Borrowed Time: the blow that would have put {@code player} down goes on the account. An open debt
+	 * falls due sooner and eats into the grace; with none open, one is opened now.
+	 */
+	static void borrowed(ServerPlayer player) {
+		Pact pact = pact(player);
+		long today = Patrons.today(player.level().getServer());
+		if (pact.owing()) {
+			player.setAttached(PACT, new Pact(pact.casts() + ArcaneExtras.BORROWED_CASTS, pact.kind(), Math.max(today, pact.due() - ArcaneExtras.BORROWED_DAYS), pact.reneged()));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.borrowed_more", debtName(pact.kind())).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+			return;
+		}
+		String[] kinds = Reaper.pact(player) ? REAPER_KINDS : KINDS;
+		String kind = kinds[(int) Math.floorMod(today + player.getRandom().nextInt(kinds.length), kinds.length)];
+		int days = Paths.debtDays(player, PactArts.days(player, DEBT_DAYS));
+		player.setAttached(PACT, new Pact(0, kind, today + days));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.extras.borrowed", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+	}
+
+	public static Component debtName(String kind) {
 		return Component.translatable("message.jaymoskingdoms.warlock.kind." + kind, kind.equals("coin") ? COIN_SILVER : kind.equals("blood") ? (int) BLOOD : FAVOUR_COST);
 	}
 
 	/** The class key: settle the debt (favour, blood or coin); with nothing owed, or with sneak held, say how things stand. */
 	static void key(ServerPlayer player, boolean sneak) {
 		Pact pact = pact(player);
+		// (class trees) Renege: sneak and the key while owing opens the menu to pick another ask, once a debt
+		if (pact.owing() && sneak) {
+			List<String> swaps = PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS);
+			if (!swaps.isEmpty() && ServerPlayNetworking.canSend(player, PactArts.Offer.TYPE)) {
+				ServerPlayNetworking.send(player, new PactArts.Offer(pact.kind(), swaps));
+				return;
+			}
+		}
+		// (class trees) Eldritch Bolt with nothing owed
+		if (!pact.owing() && !sneak && PactArts.bolt(player)) {
+			return;
+		}
 		if (!pact.owing() || sneak) {
 			long days = pact.owing() ? Math.max(0L, pact.due() - Patrons.today(player.level().getServer())) : 0L;
 			player.sendOverlayMessage(pact.owing() ? Component.translatable("message.jaymoskingdoms.warlock.owing", debtName(pact.kind()), days)
 				: Component.translatable("message.jaymoskingdoms.warlock.clear", Rests.left(player, Rests.PACT, slots(player))));
+			return;
+		}
+		// (class trees) In Kind: the patron's own offerings settle it
+		if (PactArts.inKind(player)) {
+			settled(player);
 			return;
 		}
 		boolean paid = switch (pact.kind()) {
@@ -201,8 +247,22 @@ public final class Warlocks {
 		}
 	}
 
-	private static void settled(ServerPlayer player) {
+	/** (class trees) Renege: the ask is swapped for {@code kind}, picked on the menu ({@link PactArts.Pick}); once a debt. */
+	static void renege(ServerPlayer player, String kind) {
+		Pact pact = pact(player);
+		if (!pact.owing() || !PactArts.renege(player, pact, Reaper.pact(player) ? REAPER_KINDS : KINDS).contains(kind)) {
+			return;
+		}
+		player.setAttached(PACT, new Pact(pact.casts(), kind, pact.due(), true));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.reneged", debtName(kind)).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.6F, 0.8F);
+	}
+
+	static void settled(ServerPlayer player) {
 		player.setAttached(PACT, Pact.NONE);
+		// (class trees) the Hand of the Patron opens at the next rest
+		ArcaneExtras.settled(player);
+		ClassTrees.give(player, PlayerClass.WARLOCK, ClassTrees.XP_DEBT);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.settled"));
 		if (player.level() instanceof ServerLevel level) {
 			Fx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), 0x8A4FD0, 1.0F, 18, 0.4, 0.7, 0.4);

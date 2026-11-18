@@ -132,6 +132,11 @@ public final class CastPose {
 				set(other, -0.25F, 0.3F * side, 0.0F, w);
 				m.head.xRot += 0.15F * w;
 			}
+			case SPIN -> {
+				// (class trees: Speed Load) the gun hand out low and flicked round, twice, the other hand still
+				float turn = ease(age / (Casting.TICKS - OUT)) * Mth.TWO_PI * 2.0F;
+				set(lead, -0.6F + Mth.sin(turn) * 0.5F, -0.1F * side, (0.25F + Mth.cos(turn) * 0.2F) * side, w);
+			}
 			case DRAW -> {
 				// out at what is taken, then clawed back in to the chest
 				float in = ease((age - 2.0F) / 7.0F);
@@ -189,6 +194,12 @@ public final class CastPose {
 			case GIVE -> {
 				poseStack.translate(-side * FIRST * 0.8F * w, FIRST * 0.2F * w, -FIRST * 0.8F * w);
 				poseStack.mulPose(new Matrix4f().rotation(Axis.ZP.rotationDegrees(-side * 55.0F * w)));
+			}
+			case SPIN -> {
+				// (class trees: Speed Load) the gun spun twice round in the hand, about the grip
+				float turn = ease(age / (Casting.TICKS - OUT)) * 720.0F;
+				poseStack.translate(0.0F, FIRST * 0.3F * w, -FIRST * 0.3F * w);
+				poseStack.mulPose(new Matrix4f().rotation(Axis.XP.rotationDegrees(-turn)));
 			}
 			case DRAW -> {
 				float in = ease((age - 2.0F) / 7.0F);

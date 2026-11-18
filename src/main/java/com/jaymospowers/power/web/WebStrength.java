@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
  * A cocoon holds a creature where it is (and a player all but still) for a few seconds.
  */
 public final class WebStrength {
-	/** Spider physique at every ability unlocked (scaled down before: a fresh awakening has a fifth of it). */
+	/** Spider physique at every ability unlocked (none at awakening, scaling up with every ability unlocked). */
 	public static final double PHYSIQUE_DAMAGE = 3.0;
 	public static final double PHYSIQUE_SPEED = 0.15;
 	public static final double PHYSIQUE_JUMP = 0.25;
@@ -156,7 +157,7 @@ public final class WebStrength {
 
 	/** Puts the physique on (or brings it up to date with what's unlocked); called every second from the power's tick. */
 	static void physique(ServerPlayer player) {
-		double share = (Mastery.unlocked(player) + 1) / (double)(Mastery.ALL + 1);
+		double share = Mastery.unlocked(player) / (double)Mastery.ALL;
 		modifier(player, Attributes.ATTACK_DAMAGE, DAMAGE_ID, PHYSIQUE_DAMAGE * share, AttributeModifier.Operation.ADD_VALUE);
 		modifier(player, Attributes.MOVEMENT_SPEED, SPEED_ID, PHYSIQUE_SPEED * share, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		modifier(player, Attributes.JUMP_STRENGTH, JUMP_ID, PHYSIQUE_JUMP * share, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -416,15 +417,15 @@ public final class WebStrength {
 
 	/** A web bomb burst at {@code center}: everything around it is cocooned. */
 	static void bomb(ServerLevel level, Vec3 center, @org.jspecify.annotations.Nullable Entity owner, boolean dark) {
-		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(center, center).inflate(BOMB_RADIUS);
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(center, center).inflate(AbilityPower.size(owner, BOMB_RADIUS));
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && !e.isSpectator() && e != owner)) {
-			if (living.distanceToSqr(center) <= BOMB_RADIUS * BOMB_RADIUS) {
+			if (living.distanceToSqr(center) <= AbilityPower.size(owner, BOMB_RADIUS) * AbilityPower.size(owner, BOMB_RADIUS)) {
 				cocoon(level, living, BOMB_COCOON_TICKS, dark);
 			}
 		}
-		WebTraps.scatter(level, center, BOMB_RADIUS, 10, dark);
-		level.sendParticles(dark ? WebSymbiote.dust(1.6F) : ParticleTypes.ITEM_COBWEB, center.x, center.y, center.z, 80, BOMB_RADIUS * 0.4, 0.6, BOMB_RADIUS * 0.4, 0.15);
-		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y, center.z, 20, BOMB_RADIUS * 0.3, 0.3, BOMB_RADIUS * 0.3, 0.08);
+		WebTraps.scatter(level, center, AbilityPower.size(owner, BOMB_RADIUS), 10, dark);
+		level.sendParticles(dark ? WebSymbiote.dust(1.6F) : ParticleTypes.ITEM_COBWEB, center.x, center.y, center.z, 80, AbilityPower.size(owner, BOMB_RADIUS) * 0.4, 0.6, AbilityPower.size(owner, BOMB_RADIUS) * 0.4, 0.15);
+		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y, center.z, 20, AbilityPower.size(owner, BOMB_RADIUS) * 0.3, 0.3, AbilityPower.size(owner, BOMB_RADIUS) * 0.3, 0.08);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.6F);
 		com.jaymospowers.core.Shakes.around(level, center, 10.0, 0.5F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.2F, 0.6F);

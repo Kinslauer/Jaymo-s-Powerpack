@@ -72,6 +72,17 @@ public final class Bleeding {
 	public static final int BLEED_TICKS = 80, BLEED_STOP_TICKS = 600;
 	/** How long a severed stump bleeds before it crusts over by itself (ticks): 90 s at {@link #STUMP_BLEED}, about 22 health. */
 	public static final int STUMP_CRUST_TICKS = 1800;
+	/**
+	 * How long {@code body}'s wounds take to close by themselves, against anyone else's (1): {@link #BLEED_STOP_TICKS} and
+	 * {@link #STUMP_CRUST_TICKS} are multiplied by it. Jaymo's Kingdoms sets this at server start (its {@code PowersCompat}, a
+	 * Brute's Scar Tissue); without Kingdoms everyone's is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> closing = body -> 1.0;
+	/**
+	 * What each bleed tick's harm to {@code body} is multiplied by, against anyone else's (1). Jaymo's Kingdoms sets this at
+	 * server start (a blood Sorcerer's Element's Hide); without Kingdoms everyone's is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> harm = body -> 1.0;
 	/** (0.14.4) An open cut's part heals no further than this fraction (stitching or a bandage closes it). */
 	public static final float CUT_CAP = 0.5F;
 	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
@@ -578,6 +589,13 @@ public final class Bleeding {
 		}
 		long[] since = CUT_SINCE.computeIfAbsent(body, e -> new long[PARTS]);
 		BodyPlan plan = BodyPlan.of(body);
+		// (Jaymo's Kingdoms: a Brute's Scar Tissue closes sooner)
+		double closes;
+		try {
+			closes = closing.applyAsDouble(body);
+		} catch (RuntimeException e) {
+			closes = 1.0;
+		}
 		for (BodyPart part : BodyPart.values()) {
 			int bit = Breaks.bit(part);
 			if ((mask & bit) == 0) {
@@ -592,8 +610,8 @@ public final class Bleeding {
 			if (since[i] == 0L) {
 				since[i] = now;
 			}
-			boolean crusted = stump && !held(body, part) && now - since[i] >= STUMP_CRUST_TICKS;
-			if (!stump && now - since[i] >= BLEED_STOP_TICKS || crusted) {
+			boolean crusted = stump && !held(body, part) && now - since[i] >= STUMP_CRUST_TICKS * closes;
+			if (!stump && now - since[i] >= BLEED_STOP_TICKS * closes || crusted) {
 				// it has closed by itself (a stump crusts over, much later)
 				mask &= ~bit;
 				since[i] = 0L;
@@ -605,11 +623,17 @@ public final class Bleeding {
 		if (body instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return;
 		}
+		float harmed;
+		try {
+			harmed = (float) harm.applyAsDouble(body);
+		} catch (RuntimeException e) {
+			harmed = 1.0F;
+		}
 		for (BodyPart part : BodyPart.values()) {
 			if ((mask & Breaks.bit(part)) == 0 || !body.isAlive() || Downed.isDowned(body)) {
 				continue;
 			}
-			Wounds.hurtPart(body, part, Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE, null, BLEEDING_DAMAGE);
+			Wounds.hurtPart(body, part, (Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE) * harmed, null, BLEEDING_DAMAGE);
 		}
 	}
 

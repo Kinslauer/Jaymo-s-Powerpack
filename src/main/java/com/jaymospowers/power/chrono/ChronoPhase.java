@@ -32,7 +32,8 @@ import net.minecraft.world.phys.Vec3;
  * through a wall up to four blocks thick. A shaking gold crackle marks it; the meter shows under the gear chip.
  *
  * <p>The collision itself is {@code ChronoHeldPhaseMixin}, which asks {@link #phasing}; written so another held phase
- * (any power) could ask the same thing of one attachment.
+ * (any power) could ask the same thing of one attachment. A player standing in a speed tunnel ({@link ChronoTunnel}) is
+ * let through the same way.
  */
 public final class ChronoPhase {
 	// ---- tuning ----
@@ -58,7 +59,7 @@ public final class ChronoPhase {
 	}
 
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
-	private static final Map<UUID, Integer> READY = new HashMap<>();
+	private static final Map<UUID, Long> READY = new HashMap<>();
 
 	private ChronoPhase() {
 	}
@@ -71,7 +72,7 @@ public final class ChronoPhase {
 
 	/** Whether {@code player} is phasing right now and the collision should let it through (either side). */
 	public static boolean phasing(Player player) {
-		return !ASKING.get() && player.getAttached(PHASING) != null;
+		return !ASKING.get() && (player.getAttached(PHASING) != null || player.getAttached(ChronoTunnel.CARRIED) != null);
 	}
 
 	/** Stasis Field winds the cooldown back too. */
@@ -82,7 +83,7 @@ public final class ChronoPhase {
 	/** V at a wall: start holding the phase. True if it started. */
 	static boolean start(ServerPlayer player) {
 		ServerLevel level = player.level();
-		if (RUNS.containsKey(player.getUUID()) || READY.getOrDefault(player.getUUID(), 0) > player.tickCount || player.isPassenger()) {
+		if (RUNS.containsKey(player.getUUID()) || READY.getOrDefault(player.getUUID(), 0L) > player.level().getGameTime() || player.isPassenger()) {
 			return false;
 		}
 		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
@@ -105,6 +106,7 @@ public final class ChronoPhase {
 		run.free = player.position();
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(PHASING, true);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.phase", 1);
 		Vec3 at = player.position();
 		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), 1.2F, 0xFFD070);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 2.0F);
@@ -145,7 +147,8 @@ public final class ChronoPhase {
 		}
 	}
 
-	private static boolean clear(ServerLevel level, ServerPlayer player, Vec3 at) {
+	/** Whether {@code player}'s body fits at {@code at}, asked of the true world (the phase set aside). */
+	static boolean clear(ServerLevel level, ServerPlayer player, Vec3 at) {
 		ASKING.set(true);
 		try {
 			return level.noCollision(player, player.getBoundingBox().move(at.subtract(player.position())));
@@ -162,7 +165,7 @@ public final class ChronoPhase {
 		ServerLevel level = player.level();
 		player.removeAttached(PHASING);
 		ChronoMeters.set(player, ChronoMeters.PHASE, -1.0F);
-		READY.put(player.getUUID(), player.tickCount + COOLDOWN + Math.round(run.ticks * COOLDOWN_SHARE));
+		READY.put(player.getUUID(), player.level().getGameTime() + COOLDOWN + Math.round(run.ticks * COOLDOWN_SHARE));
 		if (!clear(level, player, player.position())) {
 			Vec3 out = nearestClear(level, player);
 			if (out == null) {

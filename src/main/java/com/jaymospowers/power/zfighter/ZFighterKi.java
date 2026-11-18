@@ -548,6 +548,8 @@ public final class ZFighterKi {
 			}
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source(owner), bolt.damage);
+			com.jaymospowers.core.trials.PowerTrials.count(owner, "zfighter.blast_hit", 1);
+			com.jaymospowers.core.trials.PowerTrials.reach(owner, "zfighter.blast_far", (int)owner.distanceTo(target));
 			push(target, bolt.velocity, 0.6, 0.2);
 			pop(level, hit.getLocation(), dust);
 			return false;
@@ -668,6 +670,7 @@ public final class ZFighterKi {
 			bolt.struck.add(target.getId());
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source(owner), bolt.damage);
+			com.jaymospowers.core.trials.PowerTrials.count(owner, "zfighter.blast_hit", 1);
 			push(target, bolt.velocity, 0.6, 0.2);
 			pop(level, at.orElse(from), dust);
 		}
@@ -1314,6 +1317,7 @@ public final class ZFighterKi {
 		level.sendParticles(ParticleTypes.POOF, start.x, start.y + 1.0, start.z, 6, 0.2, 0.4, 0.2, 0.02);
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.7F, 1.8F);
 		live.stepUntil = level.getGameTime() + 10;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.step_at", locked != null || aimed != null ? 1 : 0);
 		player.teleportTo(level, dest.x, dest.y, dest.z, Set.of(), yaw, pitch, false);
 		player.resetFallDistance();
 		level.sendParticles(ParticleTypes.CLOUD, dest.x, dest.y + 0.5, dest.z, 6, 0.2, 0.2, 0.2, 0.02);

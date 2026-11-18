@@ -155,7 +155,8 @@ public final class ShyDeer {
 			return;
 		}
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator()) {
+			// (class trees) nor from a Druid who has studied them and speaks their tongue (Beast Tongue)
+			if (player.isSpectator() || FaithExtras.studied(player, DEER.getPath()) && ClassTrees.has(player, FaithExtras.TONGUE) > 0) {
 				continue;
 			}
 			double range = player.isShiftKeyDown() ? SNEAK_RANGE : FLEE_RANGE;

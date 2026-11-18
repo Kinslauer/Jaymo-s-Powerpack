@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -288,7 +289,7 @@ public final class ZFighterAerialCharge {
 			foe.syncVelocity = true;
 		} else if (state.dive) {
 			// no one caught on the way down: the slam is round the spot
-			double radius = Math.min(SLAM_RADIUS_CAP, SLAM_RADIUS + state.height * SLAM_RADIUS_PER_BLOCK);
+			double radius = Math.min(AbilityPower.size(player, SLAM_RADIUS_CAP), AbilityPower.size(player, SLAM_RADIUS) + state.height * AbilityPower.size(player, SLAM_RADIUS_PER_BLOCK));
 			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius), e -> ZFighterArts.valid(player, e))) {
 				near.setInvulnerableTime(0);
 				near.hurtServer(level, source, force * SLAM_SHARE * power);

@@ -278,7 +278,7 @@ public final class Downed {
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it dies unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 	/** Those being finished off just now (their death let through as it comes). */
-	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
+	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	/** A downed player → how long they've held sneak to give up (ticks). */
 	private static final Map<UUID, Integer> GIVING_UP = new HashMap<>();
 
@@ -351,6 +351,10 @@ public final class Downed {
 	private static final Set<UUID> MASH_HELD = new java.util.HashSet<>();
 	/** Knocked-out player → how long their knock-out was in all (ticks), for the presses it takes and the bar. Not saved. */
 	private static final Map<UUID, Integer> MASH_LENGTH = new HashMap<>();
+	/** Downed players whose own time runs fast (Chrono's Time Bloom, {@link #timeMend}): the game time they last were. */
+	private static final Map<UUID, Long> HASTENED = new HashMap<>();
+	/** Downed players whose parts time has mended: they rise with what those parts hold, as from a rest in bed. */
+	private static final Set<UUID> TIME_MENDED = new java.util.HashSet<>();
 
 	private Downed() {
 	}
@@ -609,6 +613,38 @@ public final class Downed {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-17): "bloom will wake them faster as they heal". A downed player's own time run fast, this tick (Chrono's
+	 * Time Bloom, and Overclock's quicker mending): their most hurt part mends {@code amount} (a bed's mend, {@link
+	 * DownedStruggle}) and the bleed-out clock holds; with {@code hasten} (the Bloom) a passed-out one comes round and a
+	 * rise started now takes half as long. They rise with what the mended parts hold. Server side; nothing for one who isn't down.
+	 */
+	public static void timeMend(ServerPlayer player, float amount, boolean hasten) {
+		if (!isDowned(player) || player.hasAttached(KNOCKED)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (hasten && passedOut(player)) {
+			wake(player, false);
+		}
+		if (now - since(player) > ADRENALINE_TICKS) {
+			// (held past the rush only: one still on adrenaline keeps it)
+			holdClock(player, now);
+		}
+		if (amount > 0.0F && DownedStruggle.mendWorst(player, amount)) {
+			TIME_MENDED.add(player.getUUID());
+		}
+		if (hasten) {
+			HASTENED.put(player.getUUID(), now);
+		}
+	}
+
+	/** Whether {@code player}'s time ran fast last tick or this one ({@link #timeMend}). */
+	private static boolean hastened(ServerPlayer player, long now) {
+		Long at = HASTENED.get(player.getUUID());
+		return at != null && now - at <= 1L;
+	}
+
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
@@ -707,7 +743,7 @@ public final class Downed {
 	 * Whether this blow leaves anything to get up: not one that ignores invulnerability, nor a beheading (or a body already
 	 * headless). And a totem in hand is left to do its work (this event comes before it).
 	 */
-	private static boolean spared(LivingEntity entity, DamageSource source) {
+	static boolean spared(LivingEntity entity, DamageSource source) {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
 			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
@@ -792,6 +828,8 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
+			HASTENED.remove(player.getUUID());
+			TIME_MENDED.remove(player.getUUID());
 			if (player instanceof ServerPlayer server) {
 				DownedStruggle.forget(server);
 			}
@@ -905,6 +943,22 @@ public final class Downed {
 		// (0.15.82) up, but battered
 		Battered.gotUp(entity);
 		return true;
+	}
+
+	/**
+	 * How likely a blow to the head is to knock {@code victim} out cold, against anyone else (1): a thrown rock's and a blunt
+	 * arrow's chance is multiplied by it. Jaymo's Kingdoms sets this at server start (its {@code PowersCompat}, a Brute's
+	 * Thick Skull); without Kingdoms every skull is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> headKnock = victim -> 1.0;
+
+	/** {@link #headKnock} for {@code victim}, safely. */
+	public static float headKnock(LivingEntity victim) {
+		try {
+			return (float) headKnock.applyAsDouble(victim);
+		} catch (RuntimeException e) {
+			return 1.0F;
+		}
 	}
 
 	/**
@@ -1360,6 +1414,10 @@ public final class Downed {
 		}
 		if (r.ticks++ == 0) {
 			r.length = tooHurt(player) ? Math.round(RISE_TICKS * WALL_RISE_SLOW) : RISE_TICKS;
+			if (hastened(player, now)) {
+				// (Andy, 2026-11-17) their own time running fast under a Time Bloom: up in half the time
+				r.length = Math.max(1, r.length / 2);
+			}
 			if (r.length != RISE_TICKS) {
 				player.setAttached(RISE_LENGTH, r.length);
 			} else if (player.hasAttached(RISE_LENGTH)) {
@@ -1382,7 +1440,7 @@ public final class Downed {
 		}
 		RISES.remove(player.getUUID());
 		// (0.21.49) what a rest in bed mended, they rise with
-		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
+		float rested = DownedStruggle.resting(player) || TIME_MENDED.contains(player.getUUID()) ? Wounds.restedHealth(player) : 0.0F;
 		// (asked before the getting up: a cane picked up after doesn't change what they did)
 		String risen = feet(player, "message.jaymospowers.downed.risen");
 		getUp(level, player);
@@ -1518,6 +1576,10 @@ public final class Downed {
 		}
 		if (Treatment.claimsDowned(player, hand, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
 			// (0.14.4) medicine in hand: Treatment's, not a revive
+			return InteractionResult.PASS;
+		}
+		if (com.jaymospowers.core.Prosthetics.fitsOn(player.getMainHandItem(), entity) != 0) {
+			// a limb in hand that they lack: it's fitted to them (Prosthetics), not a revive
 			return InteractionResult.PASS;
 		}
 		// (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking,
@@ -1663,6 +1725,10 @@ public final class Downed {
 					eaten = stack.getHoverName();
 					stack.consume(1, player);
 					player.getInventory().setChanged();
+				}
+				if (body instanceof ServerPlayer patient) {
+					// (Andy, 2026-11-17) the limbs they carry, or that lie by them, are strapped on as they're got up
+					com.jaymospowers.core.Prosthetics.fitFrom(patient, player);
 				}
 				String revived = feet(body, "message.jaymospowers.downed.revived");
 				getUp(level, body);

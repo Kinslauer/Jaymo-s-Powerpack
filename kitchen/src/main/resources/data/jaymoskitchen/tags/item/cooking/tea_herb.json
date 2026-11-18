@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:fern",
+    "minecraft:large_fern",
+    "minecraft:dandelion",
+    "minecraft:azure_bluet",
+    "minecraft:oxeye_daisy",
+    "minecraft:cornflower",
+    "minecraft:sweet_berries"
+  ]
+}

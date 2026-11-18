@@ -2404,3 +2404,27 @@ inventory icon.
 - **Fix**: an arm that comes off a corpse (torn away lifting a rotten body, struck off, a skeleton falling to pieces)
   lets go of what its hand held: it drops loose beside the body. It used to stay on the body, drawn hanging in the air
   where the hand had been (a pirate lobber's TNT).
+
+## 0.6.41 (2026-11-17): Legend feasts: Skyfall Roast, Giant's Marrow Broth, Deep King's Platter
+
+Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-age ingredients, each giving its buff for
+3 minutes, and only when cooked to Perfect:
+- **Skyfall Roast** (campfire roast: wind-dragon meat, potato, carrot): Strength II.
+- **Giant's Marrow Broth** (pot: bowl, giant's marrow, carrot, potato): Resistance II.
+- **Deep King's Platter** (campfire grill: a legend's fillet, dried kelp, flip, flip): Strength II.
+- The ingredients come from Kingdoms (wind dragons, the Aether's Giants) and Powers (landed legend fish), looked up by id
+  (OptionalItems), so Kitchen still loads without them; the recipes load only when they're present.
+- Built; not played.
+
+## 0.6.42 (2026-11-18): hands-on cooking: at the block
+
+- **Cooking at the block, no screen** (game rule `jaymoskitchen:hands_on_cooking`, on by default; off brings the cooking screens back as they were). Sneak and right-click a station with an ingredient to put it on; the station reads what is on it and says (in the HUD plate and the action bar) what it would make; sneak and scroll chooses between dishes that match; the dish's tool starts it.
+- **One dish at a station, shared**: anyone with the right tool can step in; it is judged once, with the same judging as the screen games, and as left if the last cook is more than 8 blocks away or logs out.
+- New tools: Wooden Spoon, Kitchen Tongs, Smoker's Fan, Baker's Peel (the knife is the Kitchen's own).
+- Built; not played. Cooking methods move to the block one patch at a time; those not yet moved keep their screens.
+- **Chopping, stirring, dough and joints by hand**: swing the knife to chop on the board, point the spoon round the pot to stir, hold use to pour water and oil then knead for dough, and grind, sprinkle and roll a joint at the worktop. Several cooks can work the same dish; it is judged by the same rules as the screens.
+- **The fire, by hand**: turn the spit with an empty hand, flip the grill with the tongs, pull oven dishes with the peel, press the tongs when the marker is in the gold to sear, and hold use with the fan to keep the smoker's heat in the green. Same judging as the screens.
+- **Step recipes at the block, no screens**: stews and the like are done step by step where they cook (empty hand for ingredients, spoon to stir, sneak and spoon to simmer, tongs to flip, peel to bake). With the game rule on, sneaking empty-handed at a station says what is on it and what it would make instead of opening a screen.
+- **Sandwiches on the board**: sneak and put bread, fillings and bread on a cutting board in order, then cut it with the knife; the sandwich is as filling as its layers.
+- **New stations, all by hand**: Brewing Keg (a cask's drinks in one sitting), Tea Kettle (over a lit fire; new Cup of Tea from herbs) and Sushi Mat (rice rolls and the like), poured and rolled like dough. New recipes for each.
+- **Andy's rulings on the above** (what these change wins over the lines before): a step recipe uses nothing up when it starts; each ingredient goes in with **a right-click holding it**, and the wrong ingredient is a mistake; the **sear marker is a bar in the world** above the pan, for everyone near; a **sandwich's cut is timed** like a chop, and a missed cut gives a squashed sandwich. Fixed: the last step of a step recipe, and serving a grill, oven or roast, could crash the server.

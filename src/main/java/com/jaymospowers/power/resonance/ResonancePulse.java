@@ -2,6 +2,7 @@ package com.jaymospowers.power.resonance;
 
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,8 @@ public final class ResonancePulse {
 	/** How long what a Pulse hit stays outlined for its caster (ticks), and every how many blocks a ring of sound stands in the cone. */
 	static final int PAINT_TICKS = 100, RING_EVERY = 3;
 	static final float DAMAGE = 5.0F;
+	/** Each unlocked ability adds this share to the Pulse's damage (6.5 at two, 8 at full mastery). */
+	static final float DAMAGE_PER_UNLOCK = 0.15F;
 	static final double KNOCKBACK = 1.5;
 	static final double KNOCKBACK_UP = 0.35;
 	/** Tuned high: damage +25% per step (+50% at the top). */
@@ -64,7 +67,7 @@ public final class ResonancePulse {
 		ServerLevel level = player.level();
 		double range = range(player);
 		int tune = ResonancePower.tune(player);
-		float damage = DAMAGE * (1.0F + HIGH_DAMAGE_PER_STEP * Math.max(0, tune));
+		float damage = DAMAGE * (1.0F + DAMAGE_PER_UNLOCK * Mastery.unlocked(player)) * (1.0F + HIGH_DAMAGE_PER_STEP * Math.max(0, tune));
 		double knockback = KNOCKBACK * (1.0 + LOW_KNOCKBACK_PER_STEP * Math.max(0, -tune));
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
@@ -80,9 +83,12 @@ public final class ResonancePulse {
 			}
 			boolean deep = ResonanceDamage.sensitive(target);
 			target.hurtServer(level, ResonanceDamage.source(player, deep ? ResonanceDamage.PULSE_DEEP : ResonanceDamage.PULSE), damage);
+			com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.pulse_far", (int)distance);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.pulse", 1);
 			ResonanceDamage.push(target, to, knockback, KNOCKBACK_UP);
 			interrupt(target);
 			painted.add(target);
+			com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.pulse_many", painted.size());
 			// those it leaves in the dark hear where it came from
 			if (target instanceof ServerPlayer hit && com.jaymospowers.power.blindness.Blind.sightless(hit)) {
 				com.jaymospowers.power.blindness.BlindnessEcholocation.ring(hit, eye, 1.0F, com.jaymospowers.power.blindness.BlindnessEcholocation.PULSE);

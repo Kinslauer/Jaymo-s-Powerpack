@@ -18,7 +18,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * for sworn". What medicine (Jaymo's Powers' medieval kit, {@code MedicineItems}) each life-story start wakes with,
  * fitting how it came:
  * <ul>
- * <li>Sworn: a realm's issue, a healer's satchel packed full ({@link #MEDKIT}).</li>
+ * <li>Sworn: a realm's issue, a healer's satchel with the basics ({@link #MEDKIT}).</li>
  * <li>Nothing for those stripped of everything (rock bottom, a captive, chained among captives), an android (oil and
  * ingots mend them, not bandages) or the afterlife's Divine-born.</li>
  * <li>Everyone else a little, by their road: rags for the poor, linen where there was a home or a ship's stores, the
@@ -35,10 +35,9 @@ final class StoryMeds {
 		SALVE = "jaymospowers:burn_salve", GARLIC = "jaymospowers:garlic_poultice", WILLOW = "jaymospowers:willow_bark_tea",
 		POPPY = "jaymospowers:poppy_syrup", SATCHEL = "jaymospowers:healers_satchel";
 
-	/** What a sworn guard's satchel holds (id, count): the whole kit. */
-	static final List<Need> MEDKIT = List.of(new Need(BANDAGE, 4), new Need(CLEAN_RAG, 2), new Need(SPLINT, 2), new Need(NEEDLE, 1),
-		new Need(SALTS, 1), new Need(YARROW, 2), new Need(KNITBONE, 2), new Need(SALVE, 1), new Need(GARLIC, 1), new Need(WILLOW, 2),
-		new Need(POPPY, 1));
+	/** What a sworn guard's satchel holds (id, count): the basics, six items. */
+	static final List<Need> MEDKIT = List.of(new Need(BANDAGE, 2), new Need(CLEAN_RAG, 1), new Need(SPLINT, 1), new Need(NEEDLE, 1),
+		new Need(YARROW, 1));
 
 	/** Grass dressings a Survivalist weaves before they set out. */
 	static final int SURVIVALIST_GRASS = 2;

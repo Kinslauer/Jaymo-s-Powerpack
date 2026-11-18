@@ -162,6 +162,10 @@ public final class Heritage {
 	/** Nightborn: blows and speed in the dark (shares), blows in the sun (a share off). Dark: night, or light this low. */
 	static final double NIGHT_DAMAGE = 0.1, NIGHT_SPEED = 0.05, SUN_WEAK = 0.1;
 	static final int DARK_LIGHT = 7;
+	/** Each Knowledge level adds this share to a player's heritage's percentage gifts (twice as strong at Knowledge 5, as Tough grows); flat gifts stay. */
+	static final double GROWTH_PER_LEVEL = 0.2;
+	/** A hunger or damage factor a gift lowers never grows below this. */
+	static final float GROWN_FACTOR_FLOOR = 0.25F;
 	/**
 	 * Warrior-born: below {@code WOUNDED} of their health their blows land harder, from {@code FURY} there up to
 	 * {@code FURY_MAX} at {@code DESPERATE} of their health (shares), and they're knocked back less, up to
@@ -195,7 +199,7 @@ public final class Heritage {
 	 */
 	static final double DAWN_SUN_DAMAGE = 0.15, DAWN_DARK_WEAK = 0.1;
 	static final float DAWN_UNDEAD = 0.3F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
-	static final int DAWN_HEAL_EVERY = 60, DAWN_UNDEAD_BURN = 4;
+	static final int DAWN_HEAL_EVERY = 160, DAWN_UNDEAD_BURN = 4;
 	/**
 	 * (0.7.106) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
 	 * they can again (ticks); water and rain hurt this much this often (ticks).
@@ -339,12 +343,12 @@ public final class Heritage {
 		public List<Component> card(HeritageVariants.@Nullable Variant variant) {
 			List<Component> out = new ArrayList<>();
 			if (this.freePoints > 0) {
-				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints * Stats.STEP));
+				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints * Stats.GIFT_STEP));
 			}
 			for (Stats.Stat stat : Stats.Stat.values()) {
 				int n = bonus(stat);
 				if (n > 0) {
-					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n * Stats.STEP, Component.translatable("stat.jaymoskingdoms." + stat.key())));
+					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n * Stats.GIFT_STEP, Component.translatable("stat.jaymoskingdoms." + stat.key())));
 				}
 			}
 			// (0.7.490) a Rimewyrm takes no halving from fire (dealt), so its card leaves that out
@@ -480,6 +484,14 @@ public final class Heritage {
 		return of(player) == kind;
 	}
 
+	/**
+	 * (Awakening pick) Whether {@code player}'s body mends fast enough to take metal into the bone (Jaymo's Powers' Bonding Vat
+	 * asks by reflection): the Verdant, and vampires and werewolves.
+	 */
+	public static boolean healsFast(Player player) {
+		return is(player, Kind.VERDANT) || Kinship.monster(player);
+	}
+
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
@@ -507,7 +519,7 @@ public final class Heritage {
 		set(player, kind);
 		HeritageVariants.choose(player, kind, variant);
 		// (character creation: the class comes next)
-		if (Classes.classOf(player) == null) {
+		if (!Classes.decided(player)) {
 			Classes.ask(player, true);
 		}
 	}
@@ -568,6 +580,21 @@ public final class Heritage {
 
 	// ---- effects -----------------------------------------------------------------------------------------------
 
+	/** How much a percentage gift of {@code entity}'s heritage has grown: 1 and a fifth more for each Knowledge level (players only). */
+	static double grow(LivingEntity entity) {
+		return entity instanceof Player player ? 1.0 + GROWTH_PER_LEVEL * Knowledge.level(player) : 1.0;
+	}
+
+	/** A factor that lowers something (0.8: a fifth less) with the share it lowers by grown, down to {@link #GROWN_FACTOR_FLOOR}. */
+	static float saving(LivingEntity entity, float factor) {
+		return Math.max(GROWN_FACTOR_FLOOR, (float) (1.0 - (1.0 - factor) * grow(entity)));
+	}
+
+	/** A factor above 1 that raises something (1.1: a tenth more) with the share it raises by grown. */
+	static float boost(LivingEntity entity, float factor) {
+		return 1.0F + (float) ((factor - 1.0F) * grow(entity));
+	}
+
 	/** Puts {@code player}'s heritage on them as they stand (the attributes that don't change with the light). */
 	static void attributes(ServerPlayer player) {
 		Kind kind = of(player);
@@ -579,7 +606,7 @@ public final class Heritage {
 			// (the green isn't kept through death on its own)
 			look(player, null, kind);
 		}
-		Skills.modifier(player, Attributes.BLOCK_BREAK_SPEED, "heritage_mining", kind == Kind.STONEBORN ? STONE_MINING : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		Skills.modifier(player, Attributes.BLOCK_BREAK_SPEED, "heritage_mining", kind == Kind.STONEBORN ? STONE_MINING * grow(player) : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_slow", kind == Kind.STONEBORN ? -STONE_SLOW : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		Skills.modifier(player, Attributes.OXYGEN_BONUS, "heritage_breath", kind == Kind.TIDEBORN ? TIDE_OXYGEN : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.WATER_MOVEMENT_EFFICIENCY, "heritage_swim", kind == Kind.TIDEBORN ? TIDE_SWIM : 0.0, AttributeModifier.Operation.ADD_VALUE);
@@ -644,8 +671,8 @@ public final class Heritage {
 				if (dark(player)) {
 					// (0.7.88) a Nightborn vampire's grows under a Blood Moon
 					double bonus = NightbornBlood.darkBonus(player);
-					damage = NIGHT_DAMAGE * bonus;
-					speed = NIGHT_SPEED * bonus;
+					damage = NIGHT_DAMAGE * bonus * grow(player);
+					speed = NIGHT_SPEED * bonus * grow(player);
 				} else if (inSun(player)) {
 					damage = -SUN_WEAK;
 				}
@@ -654,8 +681,8 @@ public final class Heritage {
 			} else if (kind == Kind.WARRIORBORN) {
 				// the worse they're hurt, the harder they fight
 				float rage = rage(player);
-				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", fury(rage), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-				Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_fury", WARRIOR_FURY_KNOCKBACK * rage, AttributeModifier.Operation.ADD_VALUE);
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", fury(rage) * grow(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_fury", WARRIOR_FURY_KNOCKBACK * rage * grow(player), AttributeModifier.Operation.ADD_VALUE);
 				green(player, kind);
 			} else if (kind == Kind.EMBERBORN) {
 				// flame won't take on them; the cold saps them, freezing worst of all
@@ -678,12 +705,12 @@ public final class Heritage {
 				player.setTicksFrozen(0);
 			} else if (kind == Kind.STORMBORN) {
 				// quicker under the open sky, sluggish deep underground
-				double speed = openSky(player) ? STORM_SKY_SPEED : deep(player) ? -STORM_DEEP_SLOW : 0.0;
+				double speed = openSky(player) ? STORM_SKY_SPEED * grow(player) : deep(player) ? -STORM_DEEP_SLOW : 0.0;
 				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_sky", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.DAWNBORN) {
 				// the sun strengthens and mends them; the dark dulls them
 				boolean sun = inSun(player);
-				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", sun ? DAWN_SUN_DAMAGE : dark(player) ? -DAWN_DARK_WEAK : 0.0,
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", sun ? DAWN_SUN_DAMAGE * grow(player) : dark(player) ? -DAWN_DARK_WEAK : 0.0,
 					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 				if (sun && server.getTickCount() % DAWN_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
 					player.heal(DAWN_HEAL);
@@ -717,7 +744,7 @@ public final class Heritage {
 			int left = player.isInWaterOrRain() ? TIDE_WET_TICKS : Math.max(0, player.getAttachedOrElse(WET, 0) - TICK_EVERY);
 			player.setAttached(WET, left);
 			boolean wet = left > 0;
-			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", wet ? TIDE_WET_DAMAGE : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", wet ? TIDE_WET_DAMAGE * grow(player) : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			look = wet ? LOOK_WET : 0;
 			// (Powers' Motion patch 2) the faster kick: only Tideborn (and Jaymo's Powers' swimming Xeno forms)
 			// swim with a dolphin's grace (Andy: "only tideborn or swimming xeno get the boost")
@@ -796,10 +823,10 @@ public final class Heritage {
 		// (0.7.490) times the kit's (the Canine's ravenous, the risen's small appetite)
 		return HeritageKits.hunger(player) * switch (kind) {
 			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
-			case VERDANT -> inSun(player) ? (spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
-			case EMBERBORN -> hot(player) ? THRIVE_HUNGER
+			case VERDANT -> inSun(player) ? saving(player, spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
+			case EMBERBORN -> hot(player) ? saving(player, THRIVE_HUNGER)
 				: chilled(player) ? 1.0F + (WILT_HUNGER - 1.0F) * (float) (1.0 - WoolClothes.warmth(player)) : 1.0F;
-			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
+			case FROSTBORN -> cold(player) ? saving(player, THRIVE_HUNGER) : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
 			case DAWNBORN -> dark(player) ? DAWN_DARK_HUNGER : 1.0F;
 			default -> 1.0F;
@@ -853,7 +880,7 @@ public final class Heritage {
 
 	/** Earthling: the factor on skill experience. */
 	static float xpFactor(Player player) {
-		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
+		return is(player, Kind.EARTHLING) ? 1.0F + (float) ((EARTHLING_XP - 1.0F) * grow(player)) : 1.0F;
 	}
 
 	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
@@ -861,6 +888,10 @@ public final class Heritage {
 		Kind kind = of(player);
 		// one who stayed at the Judge: Alight when there are feathers to bring back, else their own heritage's key
 		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
+			return;
+		}
+		// (Awakening pick) a Rubber-folk or a Verdant, sprinting: the stretching grab (Jaymo's Powers)
+		if ((kind == Kind.RUBBERFOLK || kind == Kind.VERDANT) && player.isSprinting() && !player.isShiftKeyDown() && PowersCompat.reel(player)) {
 			return;
 		}
 		if (kind == Kind.WARRIORBORN) {
@@ -897,7 +928,7 @@ public final class Heritage {
 
 	/** Sylvan: the share off how far sneaking is seen. */
 	static double sneak(Player player) {
-		return is(player, Kind.SYLVAN) ? SYLVAN_SNEAK : 0.0;
+		return is(player, Kind.SYLVAN) ? SYLVAN_SNEAK * grow(player) : 0.0;
 	}
 
 	// ---- (0.7.106) the new bloods -----------------------------------------------------------------------------------
@@ -926,7 +957,7 @@ public final class Heritage {
 				gold += stack.getCount() * 9.0;
 			}
 		}
-		return gold <= 0.0 ? -DRAGON_POOR : DRAGON_HOARD_MAX * Math.min(1.0, gold / DRAGON_HOARD_FULL);
+		return gold <= 0.0 ? -DRAGON_POOR : DRAGON_HOARD_MAX * grow(player) * Math.min(1.0, gold / DRAGON_HOARD_FULL);
 	}
 
 	/** An Endborn shot at or hit by something thrown: now and then they blink aside, and it misses (true). */
@@ -937,7 +968,7 @@ public final class Heritage {
 		}
 		long now = player.level().getGameTime();
 		Long ready = BLINK_READY.get(player.getUUID());
-		if (ready != null && now < ready || player.getRandom().nextFloat() >= END_BLINK_CHANCE) {
+		if (ready != null && now < ready || player.getRandom().nextFloat() >= Math.min(0.9, END_BLINK_CHANCE * grow(player))) {
 			return false;
 		}
 		for (int tries = 0; tries < 16; tries++) {
@@ -970,7 +1001,7 @@ public final class Heritage {
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		Kind mine = VillagerHeritage.of(target);
 		if (mine == Kind.DRAGONBLOOD && HeritageVariants.of(target) != HeritageVariants.Variant.RIMEWYRM && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
-			amount *= DRAGON_FIRE_TAKEN;
+			amount *= saving(target, DRAGON_FIRE_TAKEN);
 		} else if (mine == Kind.BIOBUILT && (source.is(DamageTypeTags.IS_LIGHTNING) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
 			// (0.7.262) a made body is brittle to lightning and magic
 			amount *= BioBuilt.BRITTLE;
@@ -989,7 +1020,7 @@ public final class Heritage {
 		}
 		Kind kind = VillagerHeritage.of(attacker);
 		if (kind == Kind.DAWNBORN && target.is(EntityTypeTags.UNDEAD)) {
-			amount *= 1.0F + DAWN_UNDEAD;
+			amount *= 1.0F + (float) (DAWN_UNDEAD * grow(attacker));
 			// (0.7.154) by day the sun in their blows sets the dead alight
 			if (target.level().isBrightOutside()) {
 				target.igniteForSeconds(DAWN_UNDEAD_BURN);

@@ -447,14 +447,17 @@ public final class Patrons {
 		}
 	}
 
-	/** (0.7.513) Favour down by {@code n} (not below nothing), the tier following. {@code lastFavourDay} is unchanged. */
+	/** Favour down by {@code n}, the tier following; it stops at the first tier's favour unless the faith is strict or a trial runs. {@code lastFavourDay} is unchanged. */
 	static void lose(ServerPlayer sp, int n) {
 		State s = state(sp);
 		Patron p = s.patronOf();
 		if (p == null || n <= 0) {
 			return;
 		}
-		retier(sp, s.withFavour(Math.max(0, s.favour - n), s.tier, s.lastFavourDay, s.decayDay), p);
+		// (the same floor as the decay's: a sin takes one no lower than the first tier unless the faith is strict or a trial runs)
+		int floor = Turning.anyTrial(sp) || PatronWrath.strict(sp) ? 0 : TIER_AT[0];
+		int favour = s.favour < floor ? s.favour : Math.max(floor, s.favour - n);
+		retier(sp, s.withFavour(favour, s.tier, s.lastFavourDay, s.decayDay), p);
 	}
 
 	/** (0.7.513) Turned to {@code p}: sworn with {@code favour}, the marks in {@code marks}, the old patron's timed boons ended. */
@@ -661,6 +664,10 @@ public final class Patrons {
 		// (gb-faith) the patron they grew up praying to, from the story's faith page: sworn to it from the start (more
 		// favour for a devout upbringing), which they may later keep or leave (Turning)
 		Patron raised = LifeStory.faithOf(sp);
+		// (Andy, 2026-11-17) a bound blood is its patron's, whatever its story says (Faiths.bound)
+		if (Faiths.bound(kind) != null) {
+			raised = Faiths.bound(kind);
+		}
 		if (raised != null) {
 			mine = raised;
 			if (!state(sp).sworn()) {

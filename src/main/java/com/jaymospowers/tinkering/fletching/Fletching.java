@@ -43,6 +43,11 @@ import org.jspecify.annotations.Nullable;
 public final class Fletching {
 	/** Arrows one set of head, shaft and fletching makes. */
 	public static final int ARROWS_PER_SET = 4;
+	/**
+	 * The share of a set's arrows a fletcher gets over and above it (0: none). Jaymo's Kingdoms sets this for its class trees'
+	 * Fletcher; by itself, nobody gets more.
+	 */
+	public static java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> more = player -> 0.0;
 	/** Plain arrows one lingering potion dips. */
 	public static final int ARROWS_PER_POTION = 8;
 

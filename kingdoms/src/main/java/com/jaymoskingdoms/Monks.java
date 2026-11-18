@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
@@ -53,7 +54,6 @@ public final class Monks {
 	static final String CAUGHT = "jaymoskingdoms_caught";
 	/** The wall: how far a hand reaches (blocks), the fall speed it slows to, and how fast a long fall is forgiven. */
 	static final double WALL_REACH = 0.3, SLOW_FALL = -0.14;
-	static final float WALL_FALL_KEPT = 0.25F;
 
 	private static final Map<UUID, Long> READY = new HashMap<>();
 	private static final Map<UUID, long[]> CATCHING = new HashMap<>();
@@ -82,7 +82,7 @@ public final class Monks {
 
 	/** How much ki {@code player} has in all. */
 	public static int ki(ServerPlayer player) {
-		return Classes.scaled(player, PlayerClass.MONK, KI_BASE + Stats.value(player, Stats.Stat.GRIT) / GRIT_PER_KI);
+		return Classes.scaled(player, PlayerClass.MONK, KI_BASE + Stats.value(player, Stats.Stat.GRIT) / GRIT_PER_KI) + KiArts.breath(player);
 	}
 
 	// ---- the key ---------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,10 @@ public final class Monks {
 			return;
 		}
 		if (sneak) {
-			throwBack(player, level);
+			// (class trees) Empty Body in the air; with nothing caught to throw, a Flurry readied
+			if (!KiArts.emptyBody(player) && !throwBack(player, level)) {
+				KiArts.readyFlurry(player);
+			}
 			return;
 		}
 		long now = level.getGameTime();
@@ -101,11 +104,17 @@ public final class Monks {
 			return;
 		}
 		if (arrowComing(player, level) != null) {
-			CATCHING.put(player.getUUID(), new long[] {now + CATCH_WINDOW, now + CATCH_WINDOW + CATCH_COOLDOWN});
+			// practice: the catching window widens with the Monk's level
+			long window = Math.round(CATCH_WINDOW * ClassTrees.practice(player, PlayerClass.MONK));
+			CATCHING.put(player.getUUID(), new long[] {now + window, now + window + CATCH_COOLDOWN});
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.8F);
 			return;
 		}
-		if (!fists(player.getMainHandItem())) {
+		// (class trees) Step of the Wind in the air; a set Quivering Palm ended
+		if (KiArts.leap(player) || KiArts.endPalm(player)) {
+			return;
+		}
+		if (!fists(player.getMainHandItem()) || !ClassTrees.check(player, KiArts.STUN)) {
 			return;
 		}
 		READY.put(player.getUUID(), now + READY_TICKS);
@@ -166,13 +175,21 @@ public final class Monks {
 			CompoundTag tag = new CompoundTag();
 			tag.putBoolean(CAUGHT, true);
 			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+			Entity shooter = arrow.getOwner();
 			arrow.discard();
+			ClassTrees.give(player, PlayerClass.MONK, ClassTrees.XP_CATCH);
+			CATCHING.remove(player.getUUID());
+			if (player.isShiftKeyDown() && KiArts.has(player, KiArts.DEFLECT)) {
+				// (class trees) Deflect: caught with sneak held, it goes straight back at whoever loosed it
+				stack.remove(DataComponents.CUSTOM_DATA);
+				throwArrow(player, level, stack, shooter);
+				return;
+			}
 			if (player.getMainHandItem().isEmpty()) {
 				player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
 			} else {
 				player.getInventory().placeItemBackInInventory(stack, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
-			CATCHING.remove(player.getUUID());
 			level.sendParticles(ParticleTypes.CRIT, arrow.getX(), arrow.getY(), arrow.getZ(), 10, 0.2, 0.2, 0.2, 0.2);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.8F, 1.8F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.6F, 1.4F);
@@ -180,8 +197,8 @@ public final class Monks {
 		}
 	}
 
-	/** Throws back the arrow caught last: the real arrow, taken from the pack. */
-	private static void throwBack(ServerPlayer player, ServerLevel level) {
+	/** Throws back the arrow caught last: the real arrow, taken from the pack. False with none caught. */
+	private static boolean throwBack(ServerPlayer player, ServerLevel level) {
 		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
 			ItemStack stack = player.getInventory().getItem(i);
 			if (stack.isEmpty() || !isCaught(stack)) {
@@ -189,16 +206,27 @@ public final class Monks {
 			}
 			ItemStack arrowItem = stack.copyWithCount(1);
 			arrowItem.remove(DataComponents.CUSTOM_DATA);
-			Arrow arrow = new Arrow(level, player, arrowItem, null);
-			arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, THROW_SPEED, 0.5F);
-			arrow.setCritArrow(true);
-			arrow.setBaseDamage(BASE_ARROW + THROW_DAMAGE);
-			level.addFreshEntity(arrow);
 			stack.shrink(1);
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.4F);
-			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			return;
+			throwArrow(player, level, arrowItem, null);
+			return true;
 		}
+		return false;
+	}
+
+	/** The real arrow thrown: along the look, or (Deflect) at {@code at}. */
+	private static void throwArrow(ServerPlayer player, ServerLevel level, ItemStack arrowItem, @org.jspecify.annotations.Nullable Entity at) {
+		Arrow arrow = new Arrow(level, player, arrowItem, null);
+		if (at != null && at.isAlive() && at.level() == level && at != player) {
+			Vec3 to = at.getBoundingBox().getCenter().subtract(player.getEyePosition());
+			arrow.shoot(to.x, to.y, to.z, THROW_SPEED, 0.5F);
+		} else {
+			arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, THROW_SPEED, 0.5F);
+		}
+		arrow.setCritArrow(true);
+		arrow.setBaseDamage(BASE_ARROW + THROW_DAMAGE);
+		level.addFreshEntity(arrow);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.4F);
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 	}
 
 	private static boolean isCaught(ItemStack stack) {
@@ -213,6 +241,8 @@ public final class Monks {
 		if (!fists(held)) {
 			return amount;
 		}
+		// (class trees) a readied Flurry follows the blow
+		KiArts.struck(monk, target, amount);
 		Long until = READY.get(monk.getUUID());
 		if (until == null || until <= monk.level().getGameTime()) {
 			return amount;
@@ -223,6 +253,7 @@ public final class Monks {
 			return amount;
 		}
 		READY.remove(monk.getUUID());
+		ClassTrees.give(monk, PlayerClass.MONK, ClassTrees.XP_STUN);
 		if (monk.level() instanceof ServerLevel level) {
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.4, 0.3, 0.3);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4F, 1.8F);
@@ -230,13 +261,17 @@ public final class Monks {
 			if (HeldFast.afflict(target, STUN_TICKS)) {
 				level.sendParticles(ParticleTypes.ENCHANTED_HIT, target.getX(), target.getY(1.0), target.getZ(), 12, 0.3, 0.3, 0.3, 0.2);
 			}
+			// (class trees) Quivering Palm: the touch is set
+			KiArts.stunned(monk, target);
 		}
 		return amount;
 	}
 
 	/** Falling beside a wall: the hands drag down it. */
 	private static void cling(ServerPlayer player, ServerLevel level) {
-		if (player.onGround() || player.isInWater() || player.isFallFlying() || player.getAbilities().flying || player.isPassenger()) {
+		if (player.onGround() || player.isInWater() || player.isFallFlying() || player.getAbilities().flying || player.isPassenger()
+			|| !KiArts.wallSlide(player)) {
+			// (class trees) the wall slide is Step of the Wind's
 			return;
 		}
 		Vec3 v = player.getDeltaMovement();
@@ -245,7 +280,8 @@ public final class Monks {
 		}
 		player.setDeltaMovement(v.x, Math.max(v.y, SLOW_FALL), v.z);
 		player.syncVelocity = true;
-		player.fallDistance = Math.min(player.fallDistance, 2.0F) * WALL_FALL_KEPT;
+		// (class trees) Step of the Wind: the slide does no harm
+		player.fallDistance = 0.0F;
 		if (player.tickCount % 4 == 0) {
 			level.sendParticles(ParticleTypes.CRIT, player.getX(), player.getY(0.8), player.getZ(), 2, 0.3, 0.1, 0.3, 0.02);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.STONE_STEP, SoundSource.PLAYERS, 0.4F, 1.4F);

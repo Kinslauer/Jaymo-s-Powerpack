@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
@@ -435,19 +436,19 @@ public final class Ironpour extends XenoUltimate {
 	private static void land(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 feet = player.position();
-		for (LivingEntity e : around(player, SLAM_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			if (!harmable(player, e)) {
 				continue;
 			}
 			e.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
 			shove(e, feet, SLAM_OUT, SLAM_FLING_UP);
 		}
-		for (double r = 1.5; r <= SLAM_RADIUS + 1.0E-6; r += 1.75) {
+		for (double r = 1.5; r <= AbilityPower.size(player, SLAM_RADIUS) + 1.0E-6; r += 1.75) {
 			ring(level, ParticleTypes.LAVA, feet, r, 14 + (int)(r * 4.0));
 			ring(level, MagicFx.CRACKLE, feet, r, 14 + (int)(r * 4.0));
 		}
 		BlockPos under = player.blockPosition().below();
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(under)), feet.x, feet.y, feet.z, 40, SLAM_RADIUS * 0.3, 0.1, SLAM_RADIUS * 0.3, 0.2);
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(under)), feet.x, feet.y, feet.z, 40, AbilityPower.size(player, SLAM_RADIUS) * 0.3, 0.1, AbilityPower.size(player, SLAM_RADIUS) * 0.3, 0.2);
 		sound(player, SoundEvents.ANVIL_LAND, 1.6F, 0.5F);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.8F);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.2F, 0.5F);

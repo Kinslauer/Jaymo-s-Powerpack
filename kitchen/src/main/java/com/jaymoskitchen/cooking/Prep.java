@@ -161,6 +161,11 @@ public final class Prep {
 			reject(player, "message.jaymoskitchen.station_gone");
 			return;
 		}
+		boolean[] refused = {false};
+		if (com.jaymoskitchen.cooking.hands.HandsOn.fromPrep(player, pos, recipe, refused)) {
+			ServerPlayNetworking.send(player, new PrepUpdate(refused[0] ? PrepUpdate.STATUS_REJECTED : PrepUpdate.STATUS_HANDS, 0, 0.0F, 0.0F));
+			return;
+		}
 		if (!player.hasInfiniteMaterials()) {
 			if (!Kitchen.hasIngredients(Kitchen.sources(player, pos), ingredients(recipe))) {
 				reject(player, "message.jaymoskitchen.missing_ingredients");

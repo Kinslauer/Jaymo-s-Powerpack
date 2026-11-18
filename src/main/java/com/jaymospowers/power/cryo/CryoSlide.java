@@ -117,6 +117,7 @@ public final class CryoSlide {
 			return;
 		}
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, level.getBlockState(player.blockPosition().below()).is(Blocks.FROSTED_ICE) ? "cryo.slide_water" : "cryo.slide", player.tickCount % 20 == 0 ? 1 : 0);
 		UUID id = player.getUUID();
 		Vec3 now = player.position();
 		Vec3 last = LAST.put(id, now);

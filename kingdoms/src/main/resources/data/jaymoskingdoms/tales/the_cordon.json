@@ -1,0 +1,1377 @@
+{
+  "title": "The Cordon",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "shepherd",
+      "baker",
+      "butcher",
+      "cleric",
+      "none"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "sister": [
+      "sick",
+      "well"
+    ],
+    "sentry": [
+      "greedy",
+      "kin"
+    ]
+  },
+  "cast": {
+    "captain": {
+      "name": [
+        "Captain Orrin Vetch",
+        "Captain Hugh Vetch",
+        "Captain Aldred Vetch"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "gate",
+      "health": 80,
+      "damage": 8,
+      "armor": 12,
+      "hand": "minecraft:iron_sword",
+      "chest": "minecraft:iron_chestplate",
+      "men": 2
+    },
+    "sentry": {
+      "name": [
+        "Dob Wynter",
+        "Hal Wynter",
+        "Jem Wynter"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "gap",
+      "hours": "night",
+      "health": 50,
+      "damage": 6,
+      "armor": 6,
+      "hand": "minecraft:bow",
+      "chest": "minecraft:leather_chestplate"
+    },
+    "carrier": {
+      "name": [
+        "Tam Reddle",
+        "Wilkin Reddle",
+        "Garth Reddle"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "gate"
+    },
+    "healer": {
+      "name": [
+        "Marget Thorne",
+        "Ibb Thorne",
+        "Sela Thorne"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": true,
+      "at": "hamlet"
+    },
+    "sister": {
+      "name": [
+        "Nan",
+        "Elsy",
+        "Ruth"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "hamlet"
+    },
+    "walker_hobb": {
+      "name": "Old Hobb",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "hamlet",
+      "late": true
+    },
+    "walker_two": {
+      "name": ["Ibb Carter", "Wat Sallow", "Jem Rudge"],
+      "female": false,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true
+    },
+    "walker_three": {
+      "name": ["Marget Sallow", "Joan Pyke", "Cis Rudge"],
+      "female": true,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "!mark:cordon_walk_two"
+    },
+    "walker_four": {
+      "name": ["Young Dob", "Perkin Pyke", "Hal Carter"],
+      "female": false,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "mark:cordon_walk_five"
+    },
+    "walker_five": {
+      "name": ["Widow Ash", "Old Tib", "Goody Marl"],
+      "female": true,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "mark:cordon_walk_five"
+    }
+  },
+  "places": {
+    "hamlet": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        180,
+        300
+      ],
+      "name": "Hatherlow"
+    },
+    "gate": {
+      "at": "near",
+      "from": "hamlet",
+      "dist": [
+        45,
+        60
+      ],
+      "name": "the cordon's gate on the Hatherlow road"
+    },
+    "gap": {
+      "at": "near",
+      "from": "hamlet",
+      "dist": [
+        45,
+        60
+      ],
+      "name": "the gap by the osier beds"
+    },
+    "stone": {
+      "at": "near",
+      "from": "hamlet",
+      "dist": [
+        110,
+        150
+      ],
+      "name": "the grove stone above Hatherlow"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "first": 2,
+        "second": 4,
+        "burn": 6
+      },
+      "say": [
+        "You'll not have come by Hatherlow lately. Nobody has. There's a fence round it, and the lord's bowmen on the fence, and my sister {sister} on the wrong side of it.",
+        "It's the hollow blight. You know how that goes. They shut a place in and they wait, and on the leech's day they burn whatever's left that she won't pass. The leech comes {in:burn}.",
+        "I sold the cow and bought this off a grove druid. The Hollow's Cure. One flask. It was all the cow would fetch. The captain won't let me within a bowshot of the fence, and he knows my face now. He doesn't know yours.",
+        "Get it to {sister}. That's all I'm asking. How you get it past them I'll not ask, and I'll not tell."
+      ],
+      "replies": [
+        {
+          "say": "Give me the flask.",
+          "then": "cordon_go",
+          "journal": "Hatherlow is shut in for the hollow blight, and the lord's leech comes to burn what she will not pass. {giver} sold a cow for one flask of the Hollow's Cure and asked me to get it past the cordon to {sister}."
+        },
+        {
+          "say": "What do you know of the cordon?",
+          "then": "ask_more"
+        },
+        {
+          "say": "That fence is there for a reason. No.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "ask_more": {
+      "do": "talk",
+      "who": "giver",
+      "say": [
+        "There's a gate on the road, and a captain at it called Vetch who can't be talked round. Not by me, anyhow. There's a gap down by the osier beds where they've only the one man at night. And old {carrier} carries the bread in at dusk, so he must go in by some way.",
+        "The herbwife in there, {healer}, calls the count over the fence each morning. It was nine with the grey, the last I heard. It'll be fewer for every day you're on the road. So don't be long on it."
+      ],
+      "replies": [
+        {
+          "say": "Give me the flask.",
+          "then": "cordon_go",
+          "journal": "Hatherlow is shut in for the hollow blight, and the lord's leech comes to burn what she will not pass. {giver} sold a cow for one flask of the Hollow's Cure and asked me to get it past the cordon to {sister}. There is a captain at the gate, one man at the osier gap by night, and a carrier who takes the bread in at dusk."
+        },
+        {
+          "say": "That fence is there for a reason. No.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "cordon_go": {
+      "do": "go",
+      "to": "gate",
+      "radius": 24,
+      "goal": "Go to {place:gate}",
+      "give": [
+        {
+          "item": "jaymoskingdoms:hollows_cure",
+          "count": 1,
+          "name": "The Hatherlow Flask",
+          "lore": [
+            "Hollow's Cure, from the grove.",
+            "One flask is one life."
+          ]
+        }
+      ],
+      "then": "captain",
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "captain": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Hear what {captain} has to say at the gate",
+      "say": [
+        "That's near enough. Say your business from there.",
+        "Hatherlow is shut for the hollow blight by the word of the lord's leech, and I hold the fence. Nothing that breathes crosses it, in or out. Bread and water go in at dusk on old {carrier}'s back as far as the trough, and he comes out again having touched nobody.",
+        "If you've kin in there, I'm sorry for it. I've said that to forty people this week and meant it each time. It changes nothing."
+      ],
+      "journal": "{captain} holds the cordon round Hatherlow. Nothing that breathes crosses it. The carrier takes bread in at dusk.",
+      "replies": [
+        {
+          "say": "It's one flask of the Hollow's Cure. A flask doesn't breathe.",
+          "needs_item": {
+            "item": "jaymoskingdoms:hollows_cure",
+            "count": 1
+          },
+          "then": "sent_in",
+          "mark": "cordon_flask_sent",
+          "for": [
+            "law"
+          ],
+          "journal": "I gave the flask to {captain} to send into Hatherlow by the carrier.",
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "reputation>=30",
+              "patron:lantern_warden"
+            ],
+            "fail": "captain_no"
+          }
+        },
+        {
+          "say": "You look short of men.",
+          "then": "hold_offer"
+        },
+        {
+          "say": "Then I'll not waste your day.",
+          "then": "gap_go"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "captain_no": {
+      "do": "talk",
+      "who": "captain",
+      "say": "And if it's ditch water in a pretty bottle, and she doses a child with it and calls him safe? I've seen that done, too. I don't know you. No.",
+      "replies": [
+        {
+          "say": "You look short of men.",
+          "then": "hold_offer"
+        },
+        {
+          "say": "Then I'll not waste your day.",
+          "then": "gap_go"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "sent_in": {
+      "do": "talk",
+      "who": "captain",
+      "say": [
+        "Let me see the seal on it. That's a grove seal. All right.",
+        "It goes in at dusk on {carrier}'s back, into the herbwife's own hand, with no name on it. She'll put it where it does most good. That's more than my orders allow, and it's the best you'll get from me."
+      ],
+      "replies": [
+        {
+          "say": "That's all I came to ask.",
+          "then": "tell"
+        },
+        {
+          "say": "And I'll stand your fence tonight, if you're short.",
+          "then": "hold_offer"
+        }
+      ]
+    },
+    "hold_offer": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Hear {captain}'s offer",
+      "late": "end:burned",
+      "say": {
+        "?late:second": [
+          "You want to know what sort of man does this. Fair enough.",
+          "Eleven years back, at Marrow Ford, a sergeant of mine let one girl through a fence to her mother. It was a kindness. We burned Marrow Ford after, and Sele, and half of Withy. I lit some of that with my own hand.",
+          "So now I count. Four in there with the grey this morning, on the herbwife's own word. It was nine. The leech comes with the torches {in:burn}. Whoever she passes clean walks out. Until then nothing crosses.",
+          "My man at the osier gap is soft or bought, I don't know which, and I've nobody to set beside him. Stand it with him tonight. {coins:14} for the night, and you'll have done more for the towns down this road than any of them will thank you for."
+        ],
+        "?late:first": [
+          "You want to know what sort of man does this. Fair enough.",
+          "Eleven years back, at Marrow Ford, a sergeant of mine let one girl through a fence to her mother. It was a kindness. We burned Marrow Ford after, and Sele, and half of Withy. I lit some of that with my own hand.",
+          "So now I count. Six in there with the grey this morning, on the herbwife's own word. It was nine. The leech comes with the torches {in:burn}. Whoever she passes clean walks out. Until then nothing crosses.",
+          "My man at the osier gap is soft or bought, I don't know which, and I've nobody to set beside him. Stand it with him tonight. {coins:14} for the night, and you'll have done more for the towns down this road than any of them will thank you for."
+        ],
+        "?": [
+          "You want to know what sort of man does this. Fair enough.",
+          "Eleven years back, at Marrow Ford, a sergeant of mine let one girl through a fence to her mother. It was a kindness. We burned Marrow Ford after, and Sele, and half of Withy. I lit some of that with my own hand.",
+          "So now I count. Nine in there with the grey, on the herbwife's own word, called over the fence each morning. The leech comes with the torches {in:burn}. Whoever she passes clean walks out. Until then nothing crosses.",
+          "My man at the osier gap is soft or bought, I don't know which, and I've nobody to set beside him. Stand it with him tonight. {coins:14} for the night, and you'll have done more for the towns down this road than any of them will thank you for."
+        ]
+      },
+      "voices": {
+        "law": "He is right, and you know he is right. That is the trouble with him.",
+        "mercy": "There are children behind that fence, and he has stopped counting them as children."
+      },
+      "replies": [
+        {
+          "say": "I'll stand it.",
+          "then": "hold_watch",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "I took {captain}'s pay to stand the osier gap for a night and see that nobody crosses."
+        },
+        {
+          "if": "!mark:cordon_flask_sent",
+          "say": "No. Find someone else.",
+          "then": "gap_go"
+        },
+        {
+          "if": "mark:cordon_flask_sent",
+          "say": "No. I've done what I came for.",
+          "then": "tell"
+        }
+      ],
+      "within": "burn",
+      "until": "before the leech comes with the torches"
+    },
+    "hold_watch": {
+      "do": "vigil",
+      "at": "gap",
+      "when": "night",
+      "gap": 10,
+      "goal": "Stand the night at {place:gap}",
+      "lines": [
+        {
+          "who": "sentry",
+          "say": "The captain's put you here to watch me. Well. Watch."
+        },
+        {
+          "say": "A lantern comes down the lane from the hamlet and stops ten paces short of the fence, as it has been taught to.",
+          "sound": "minecraft:block.lantern.place"
+        },
+        {
+          "say": "A woman holds a child up over the rail to show that his hands are clean. She says nothing. She holds him there until her arms shake.",
+          "sound": "minecraft:entity.villager.ambient"
+        },
+        {
+          "who": "sentry",
+          "say": {
+            "?sentry=kin": "That's my brother's wife. Don't look at me. Look at the fence.",
+            "?": "She offered me her ring, night before last. I'd have had it, too, if you weren't stood there."
+          }
+        },
+        {
+          "say": "Further down, something comes at the fence that carries no lantern and does not stop at ten paces. The sentry puts two arrows in it. It was wearing an apron.",
+          "sound": "minecraft:entity.arrow.shoot"
+        },
+        {
+          "say": "Towards morning the woman lowers the child and carries him back up the lane. Nobody has crossed.",
+          "sound": "minecraft:block.grass.step"
+        }
+      ],
+      "journal": "I stood the osier gap for the captain from dark until first light. Nobody crossed.",
+      "then": "hold_pay"
+    },
+    "hold_pay": {
+      "do": "talk",
+      "who": "captain",
+      "goal": "Report to {captain} at the gate",
+      "pay": 14,
+      "say": "Nobody crossed. I had it from the far post before you were up the bank. Here's what I owe you. You'll not sleep well on it. I never have, and I'd do the same again tomorrow.",
+      "replies": [
+        {
+          "if": "!mark:cordon_flask_sent",
+          "say": "There's a flask of the Hollow's Cure in my pack. It was meant for in there. Send it in.",
+          "needs_item": {
+            "item": "jaymoskingdoms:hollows_cure",
+            "count": 1
+          },
+          "then": "hold_flask",
+          "mark": "cordon_flask_sent",
+          "for": [
+            "mercy"
+          ],
+          "journal": "I gave the flask to {captain} to send into Hatherlow by the carrier."
+        },
+        {
+          "say": "Then we're done.",
+          "then": "end:held"
+        }
+      ]
+    },
+    "hold_flask": {
+      "do": "talk",
+      "who": "captain",
+      "say": "You stood my fence all night with that in your pack. Give it here. It goes in at dusk on {carrier}'s back, into the herbwife's own hand, with no name on it. A flask doesn't breathe. That much I can do.",
+      "then": "end:held"
+    },
+    "gap_go": {
+      "do": "go",
+      "to": "gap",
+      "when": "night",
+      "radius": 12,
+      "goal": "Go to {place:gap} after dark",
+      "then": "sentry",
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "sentry": {
+      "do": "talk",
+      "who": "sentry",
+      "when": "night",
+      "goal": "Deal with the man at the osier gap",
+      "not_now": "Clear off. I'm not on till dark.",
+      "say": {
+        "?mark:cordon_sentry_heard": "You again. I've an arrow on the string and I've not changed my mind.",
+        "?sentry=kin": [
+          "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
+          "And don't tell me you've kin in there. My brother's in there. Edric. I've stood this gap every night looking at his roof, and I've not crossed either."
+        ],
+        "?coins>=15": [
+          "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
+          "Mind, the captain's word doesn't keep a man in boots. And that is a full purse I can hear on you. I only say it."
+        ],
+        "?": [
+          "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
+          "Mind, the captain's word doesn't keep a man in boots. I only say it."
+        ]
+      },
+      "voices": {
+        "honour": "Use the captain's name at his own fence and it will come back to your door. It always does.",
+        "gain": "A man on night watch in wet osiers has a price. Find it."
+      },
+      "replies": [
+        {
+          "say": "{price} says you were looking the other way.",
+          "then": "in_walk",
+          "mark": "cordon_sentry_squared",
+          "journal": "I paid the man at the osier gap to look the other way.",
+          "try": {
+            "how": "bribe",
+            "coins": 15,
+            "helps": [
+              "sentry=greedy"
+            ],
+            "hurts": [
+              "sentry=kin"
+            ],
+            "fail": "sentry_no",
+            "refuse": "Put that away. You think I'd sell that fence with my own kin behind it?"
+          }
+        },
+        {
+          "say": "It's one flask of the Hollow's Cure, for one of them. Let it through.",
+          "then": "in_walk",
+          "mark": "cordon_sentry_squared",
+          "for": [
+            "mercy"
+          ],
+          "journal": "I told the man at the osier gap what I carried, and he let me through.",
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "sentry=kin",
+              "dress:armoured",
+              "reputation>=30"
+            ],
+            "hurts": [
+              "sentry=greedy"
+            ],
+            "fail": "sentry_no",
+            "refuse": "One flask. And what do I get, when the captain counts one too many going in? Back off the fence."
+          }
+        },
+        {
+          "if": "!mark:lie:cordon_captain_sent",
+          "say": "The captain sent me. I'm to count them for the leech.",
+          "then": "in_walk",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "honour",
+            "law"
+          ],
+          "journal": "I told the man at the osier gap that the captain had sent me in to count the sick. He had not.",
+          "lie": {
+            "name": "cordon_captain_sent",
+            "days": [
+              1,
+              2
+            ],
+            "reputation": 10,
+            "town": [
+              "{player} walked through a blight cordon on the captain's name, and the captain never gave it. That's what his own bowmen are saying.",
+              "They say {player} lied a way into Hatherlow. Past a blight fence. I'd not stand too near, myself."
+            ],
+            "returns": {
+              "who": "captain",
+              "as": "warning",
+              "say": "You used my name at my own fence. My man believed you, and he's had a flogging for it that was rightly yours. If I find you within a mile of a cordon of mine again, I'll not ask your business first."
+            }
+          }
+        },
+        {
+          "if": "!mark:cordon_tail_spent",
+          "say": "Then I'll find my own way in.",
+          "then": "tail_in",
+          "mark": "cordon_sentry_heard"
+        },
+        {
+          "say": "Then I'll go and see what your captain pays.",
+          "then": "hold_offer",
+          "mark": "cordon_sentry_heard"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "sentry_no": {
+      "do": "talk",
+      "who": "sentry",
+      "when": "night",
+      "mark": "cordon_sentry_heard",
+      "say": "No. And that's the last word you get before I shout for the far post. Back off the fence.",
+      "replies": [
+        {
+          "if": "!mark:cordon_tail_spent",
+          "say": "Then I'll find my own way in.",
+          "then": "tail_in"
+        },
+        {
+          "say": "I'll go and see what your captain pays.",
+          "then": "hold_offer"
+        },
+        {
+          "say": "I'm going home.",
+          "then": "end:turned_back"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "tail_in": {
+      "do": "tail",
+      "who": "carrier",
+      "to": "hamlet",
+      "when": "night",
+      "near": 6,
+      "far": 28,
+      "goal": "After dark, follow {carrier} in from the gate without his seeing you",
+      "seen": "carrier_seen",
+      "lost": "caught_fence",
+      "mark": "cordon_came_carrier",
+      "journal": "I followed the cordon's carrier in by his own path, and he never knew I was behind him.",
+      "then": "healer_meet",
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "carrier_seen": {
+      "do": "talk",
+      "who": "carrier",
+      "mark": "cordon_tail_spent",
+      "goal": "Answer {carrier}",
+      "say": [
+        "I'm old. I'm not deaf. I've had forty years of folk creeping up behind me for the bread. Come out where I can see you.",
+        "I carry to the trough and I come back. They ask me things through the fence and I don't answer, because the captain says not, and because I've nothing to tell them that they'd want to hear."
+      ],
+      "replies": [
+        {
+          "say": "It's the Hollow's Cure, for one of them. Walk on, and don't look round.",
+          "then": "in_walk",
+          "for": [
+            "mercy"
+          ],
+          "journal": "The carrier saw me on his path. I told him what I carried, and he walked on and did not look round.",
+          "try": {
+            "how": "persuade",
+            "odds": 1,
+            "helps": [
+              "reputation>=30"
+            ],
+            "fail": "caught_fence",
+            "refuse": "No. I've a pension off that captain and a grandson on that fence. HO! THE GATE!"
+          }
+        },
+        {
+          "say": "{price} for your trouble, and you saw nobody.",
+          "then": "in_walk",
+          "journal": "The carrier saw me on his path. I paid him to have seen nobody.",
+          "try": {
+            "how": "bribe",
+            "coins": 8,
+            "fail": "caught_fence",
+            "refuse": "I'll not be bought on a blight fence. HO! THE GATE!"
+          }
+        },
+        {
+          "say": "I'll go back the way I came.",
+          "then": "gap_go"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "caught_fence": {
+      "do": "talk",
+      "who": "captain",
+      "mark": "cordon_tail_spent",
+      "goal": "Answer to {captain} at the gate",
+      "say": [
+        "You were heard on the carrier's path. Don't tell me you were cutting osiers.",
+        "I could put you in irons. I've no irons to spare, and no men to watch them. You've two legs and a sword arm. Stand my gap tonight, where I can see you, or get off my road."
+      ],
+      "replies": [
+        {
+          "say": "I'll stand it.",
+          "then": "hold_watch",
+          "for": [
+            "law"
+          ],
+          "journal": "I was caught on the carrier's path. {captain} gave me the choice of standing his fence or leaving his road, and I stood the fence."
+        },
+        {
+          "say": "I'll get off your road.",
+          "then": "end:turned_back"
+        }
+      ]
+    },
+    "in_walk": {
+      "do": "go",
+      "to": "hamlet",
+      "radius": 14,
+      "goal": "Go in to {place:hamlet}",
+      "then": "healer_meet",
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "healer_meet": {
+      "do": "talk",
+      "who": "healer",
+      "goal": "Find the herbwife in {place:hamlet}",
+      "say": {
+        "?late:second": [
+          "You're not one of mine, and you're not coughing. So you came through the fence. More fool you. Keep your gloves on and touch nothing you don't have to.",
+          "Nine had the grey when the fence was shut, not counting the ones who went too quick to help. It's four now. The gold ran out, and druid's meat with no gold in it is only meat. I have had to put five of my own neighbours down with a hatchet, and I knew every one of them from the cradle.",
+          "Well? Nobody walks through a blight fence empty handed. What's in the pack?"
+        ],
+        "?late:first": [
+          "You're not one of mine, and you're not coughing. So you came through the fence. More fool you. Keep your gloves on and touch nothing you don't have to.",
+          "Nine had the grey when the fence was shut, not counting the ones who went too quick to help. It's six now. The gold ran out, and druid's meat with no gold in it is only meat. I have had to put three of my own neighbours down with a hatchet since.",
+          "Well? Nobody walks through a blight fence empty handed. What's in the pack?"
+        ],
+        "?": [
+          "You're not one of mine, and you're not coughing. So you came through the fence. More fool you. Keep your gloves on and touch nothing you don't have to.",
+          "Nine had the grey when the fence was shut, not counting the ones who went too quick to help. It's nine still. Every grain of gold in Hatherlow has gone into dead meat to keep it at nine, and I am down to the miller's wedding ring.",
+          "Well? Nobody walks through a blight fence empty handed. What's in the pack?"
+        ]
+      },
+      "journal": "I am inside the cordon. The herbwife, {healer}, has been holding the blight back with the old druid remedy, and the gold for it is running out.",
+      "replies": [
+        {
+          "say": "The Hollow's Cure. One flask. It was sent for {sister}.",
+          "then": "see_sister"
+        },
+        {
+          "say": "One flask of the Hollow's Cure. Who should have it?",
+          "then": "healer_pick"
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "healer_pick": {
+      "do": "talk",
+      "who": "healer",
+      "say": [
+        "You're asking me. Pip Tolley. He's eight, he's grey to the elbow, and he'll not see the leech come.",
+        "But it was bought for {sister}, and she knows it's coming. Somebody shouted it over the fence days ago. I'll not take it out of her mouth myself. She's in the end byre. Go and say it to her face, whichever you mean to do."
+      ],
+      "then": "see_sister",
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "see_sister": {
+      "do": "talk",
+      "who": "sister",
+      "goal": "Find {sister} in the end byre",
+      "say": {
+        "?sister=well": [
+          "From home? With that? Oh, the daft, dear fool. Look at my hands. Go on, look. Pink as a pig. I never had it.",
+          "I was on the wrong side of the green when the fence went up, that's all, and I've been boiling rags for {healer} since. There was no way to send word out. They shoot at paper.",
+          "That flask goes to Pip Tolley. He's eight, and he's grey to the elbow. Don't stand there. Give it to him."
+        ],
+        "?": [
+          "From home? Is that it? Let me see it. No. Don't give it me yet.",
+          "Look. Grey to the wrist. I can still feel my fingers. Pip Tolley can't feel his arm, and he's eight. {healer} will have told you about him. She tells everybody.",
+          "I want it. I'm not going to say I don't. I only wanted somebody to know I thought about him first."
+        ]
+      },
+      "voices": {
+        "mercy": "The boy is eight.",
+        "honour": "It was bought for her, with somebody's cow. That is a promise you are carrying, not a flask."
+      },
+      "replies": [
+        {
+          "if": "sister=sick",
+          "say": "It was bought for you. Drink it.",
+          "needs_item": {
+            "item": "jaymoskingdoms:hollows_cure",
+            "count": 1
+          },
+          "then": "drunk_sister",
+          "mark": "cordon_cured_sister",
+          "for": [
+            "honour"
+          ],
+          "journal": "I gave the flask to {sister}, as I was asked to."
+        },
+        {
+          "if": "sister=sick",
+          "say": "Then it goes to the boy.",
+          "needs_item": {
+            "item": "jaymoskingdoms:hollows_cure",
+            "count": 1
+          },
+          "then": "drunk_boy",
+          "mark": "cordon_cured_boy",
+          "for": [
+            "mercy"
+          ],
+          "irks": [
+            "honour"
+          ],
+          "journal": "I gave the flask to Pip Tolley, who is eight, and not to {sister}."
+        },
+        {
+          "if": "sister=well",
+          "say": "To the boy, then.",
+          "needs_item": {
+            "item": "jaymoskingdoms:hollows_cure",
+            "count": 1
+          },
+          "then": "drunk_boy",
+          "mark": "cordon_cured_boy",
+          "journal": "{sister} never had the blight. At her word the flask went to Pip Tolley, who is eight."
+        },
+        {
+          "say": "I've no flask to give you. I'm sorry.",
+          "then": "healer_plan",
+          "mark": "cordon_flask_lost",
+          "journal": "I gave Hatherlow no flask."
+        }
+      ],
+      "within": "burn",
+      "late": "end:burned",
+      "until": "before the leech comes with the torches"
+    },
+    "drunk_sister": {
+      "do": "talk",
+      "who": "sister",
+      "say": [
+        "Oh. Oh, it burns. It's like swallowing a coal.",
+        "Look at that. Look at my hand. It's going. You can see it going.",
+        "Tell them at home the cow was worth it. Now go and look {healer} in the eye for me, because I can't."
+      ],
+      "then": "healer_plan"
+    },
+    "drunk_boy": {
+      "do": "talk",
+      "who": "healer",
+      "say": {
+        "?sister=well": "He kept it down. The colour's coming back into his fingers already. That's one I'll not have to do with the hatchet. Tell whoever sold their cow that it bought a Tolley.",
+        "?": "He kept it down. The colour's coming back into his fingers already. {sister} held the cup for him. I'd not have had the stomach for that, in her place."
+      },
+      "then": "healer_plan"
+    },
+    "healer_plan": {
+      "do": "talk",
+      "who": "healer",
+      "goal": "Hear what {healer} asks",
+      "within": "burn",
+      "late": "tell",
+      "until": "before the leech comes with the torches",
+      "say": {
+        "?mark:cordon_gold_given": "Well? The druid's meat buys the ones in their beds a day or two. It does nothing for the ones who could walk tonight.",
+        "?late:second": [
+          "Sit. I'm going to ask you for something worse than a flask.",
+          "There's an old druid keeps Carrow grove, over the rise. He brews the Cure, and he gives it for the asking to any that come to his stone. He'll not come down to a fence with bowmen on it, and I don't blame him. And the captain won't let a soul of us walk as far as the rise.",
+          "Two of mine can still walk that far. Both have the cough by now, so they go by the fields and they breathe on nobody. A week ago I'd not have asked it. Now it's that or the torches. Take them out by the osiers tonight. {sister} knows the path."
+        ],
+        "?late:first": [
+          "Sit. I'm going to ask you for something worse than a flask.",
+          "There's an old druid keeps Carrow grove, over the rise. He brews the Cure, and he gives it for the asking to any that come to his stone. He'll not come down to a fence with bowmen on it, and I don't blame him. And the captain won't let a soul of us walk as far as the rise.",
+          "Three of mine can still walk that far. The rest I stay with. Take the three out by the osiers tonight and put them on the grove path. {sister} knows it."
+        ],
+        "?": [
+          "Sit. I'm going to ask you for something worse than a flask.",
+          "There's an old druid keeps Carrow grove, over the rise. He brews the Cure, and he gives it for the asking to any that come to his stone. He'll not come down to a fence with bowmen on it, and I don't blame him. And the captain won't let a soul of us walk as far as the rise.",
+          "Five of mine can still walk that far. The rest I stay with. Take the five out by the osiers tonight and put them on the grove path. {sister} knows it."
+        ]
+      },
+      "voices": {
+        "law": "That fence is all that stands between the grey and every town on this road.",
+        "mercy": "They can walk. It is not far to walk, for your life.",
+        "courage": "The captain will know by the morning count. Do it anyway, or don't, but not because of him."
+      },
+      "replies": [
+        {
+          "if": "!late:first",
+          "say": "I'll take them through tonight.",
+          "then": "out_walk",
+          "mark": "cordon_walk_five",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "{healer} asked me to take the five who can still walk out past the cordon by night, to the druid's stone. I said I would."
+        },
+        {
+          "if": "late:first & !late:second",
+          "say": "I'll take them through tonight.",
+          "then": "out_walk",
+          "mark": "cordon_walk_three",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "{healer} asked me to take the three who can still walk out past the cordon by night, to the druid's stone. I said I would."
+        },
+        {
+          "if": "late:second",
+          "say": "I'll take them through tonight.",
+          "then": "out_walk",
+          "mark": "cordon_walk_two",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "irks": [
+            "law"
+          ],
+          "journal": "{healer} asked me to take the two who can still walk out past the cordon by night, to the druid's stone. Both have the cough. I said I would."
+        },
+        {
+          "if": "!mark:cordon_gold_given",
+          "say": "Here. Seared flesh, worked through with gold. For the ones who can't walk.",
+          "needs_item": {
+            "item": "jaymoskingdoms:gilded_flesh",
+            "count": 3
+          },
+          "then": "gold_given",
+          "mark": "cordon_gold_given",
+          "journal": "I gave {healer} gilded flesh, the old druid remedy, to hold back the ones who cannot walk."
+        },
+        {
+          "say": "No. I'll not be the one who walked it out past the fence.",
+          "then": "tell",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        }
+      ]
+    },
+    "gold_given": {
+      "do": "talk",
+      "who": "healer",
+      "say": "Druid's meat. My mother would have crossed the road sooner than look at it. Give it here. That's a day apiece for three of them, and maybe two. I stopped sneering at it the first week.",
+      "then": "healer_plan"
+    },
+    "out_walk": {
+      "do": "escort",
+      "who": "sister",
+      "with": [
+        "walker_hobb",
+        "walker_two",
+        "walker_three",
+        "walker_four",
+        "walker_five"
+      ],
+      "to": "stone",
+      "when": "night",
+      "goal": "After dark, walk {sister} and the others out to {place:stone}",
+      "failed": "end:fell",
+      "journal": "I walked them out through the osiers after dark and over the rise to the druid's stone.",
+      "then": "stone_talk"
+    },
+    "stone_talk": {
+      "do": "talk",
+      "who": "sister",
+      "goal": "Speak with {sister} at the stone",
+      "say": {
+        "?mark:cordon_walk_two": [
+          "That's the stone. There's a light up in the trees. He's seen us.",
+          "Two of us, and me. I counted at every stile. Old Hobb coughed the whole way and held his sleeve over his mouth the whole way, and I never loved a man more.",
+          "Go home. Go on. Tell them I'm on the right side of the fence now, whichever side that is."
+        ],
+        "?mark:cordon_walk_three": [
+          "That's the stone. There's a light up in the trees. He's seen us.",
+          "Three of us, and me. I counted at every stile.",
+          "Go home. Go on. Tell them I'm on the right side of the fence now, whichever side that is."
+        ],
+        "?": [
+          "That's the stone. There's a light up in the trees. He's seen us.",
+          "Five of us, and me. I counted at every stile.",
+          "Go home. Go on. Tell them I'm on the right side of the fence now, whichever side that is."
+        ]
+      },
+      "then": "tell_out"
+    },
+    "tell": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} how it went",
+      "say": {
+        "?mark:cordon_flask_sent": [
+          "You gave it to the captain. To the captain.",
+          "And it went in to the herbwife with no name on it. So I've a sister or I haven't, and I'll know on the leech's day along with everybody else. I sold the cow for that flask. I'd thought it would buy more than not knowing."
+        ],
+        "?mark:cordon_cured_sister": [
+          "She drank it? You saw her drink it? You saw the grey go?",
+          "Tell me what she said. Every word of it. No. Tell me after. I have to sit down.",
+          "The cow was worth it. I'd sell the other one tomorrow."
+        ],
+        "?sister=well & mark:cordon_cured_boy": [
+          "Never had it. Boiling rags. That's {sister} all over. That is exactly where she'd be.",
+          "And she gave my flask to the Tolley boy. Well. Of course she did.",
+          "So I sold a cow to cure a child I've never set eyes on. There are worse things to have done with a cow."
+        ],
+        "?mark:cordon_cured_boy": [
+          "The boy. You gave my flask to the Tolley boy.",
+          "She told you to. Aye. She would. That's {sister} all over. And you did it.",
+          "I'm not going to shout. He's eight, you say. I'll be glad of it some day. Not today. Go home."
+        ],
+        "?": [
+          "You got in. You stood in front of her. And the flask?",
+          "Gone. Gone where? No. Don't tell me. I sold the cow for that.",
+          "Get out of my sight."
+        ]
+      },
+      "then": {
+        "?mark:cordon_flask_sent & sister=sick": "end:other",
+        "?mark:cordon_flask_sent": "end:cured",
+        "?mark:cordon_cured_sister": "end:cured",
+        "?sister=well & mark:cordon_cured_boy": "end:cured",
+        "?mark:cordon_cured_boy": "end:other",
+        "?": "end:turned_back"
+      }
+    },
+    "tell_out": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Tell {giver} how it went",
+      "say": {
+        "?mark:cordon_cured_sister": [
+          "Out? You took them out? Past the fence?",
+          "And {sister} went with them. Cured, and free to sit and wait for the leech, and she went to show them the path. Aye. That's her.",
+          "The captain will have somebody's hide for this. I hope it isn't yours. I'd do it again, mind. I'd sell the other cow."
+        ],
+        "?sister=well": [
+          "Out? You took them out? Past the fence?",
+          "And {sister} was never sick. She was boiling rags, and then she was walking the sick over the rise in the dark. Aye. That's her.",
+          "The captain will have somebody's hide for this. I hope it isn't yours."
+        ],
+        "?": [
+          "Out? You took them out? Past the fence?",
+          "So she's gone up to a druid's stone in the dark with the grey still on her. If he's there, she lives. If.",
+          "You'd best hope he was there. So had I."
+        ]
+      },
+      "then": "end:brought_out"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I would not carry a flask past a blight cordon.",
+      "reward": {
+        "hearts": -5
+      }
+    },
+    "cured": {
+      "text": {
+        "?mark:cordon_flask_sent": "The captain sent the flask into Hatherlow by his own carrier, into the herbwife's hand, with no name on it. I never crossed the cordon, and I do not know who drank it.",
+        "?mark:cordon_cured_sister": "I got the Hollow's Cure past the cordon and saw {sister} drink it. The grey went out of her hands while I watched.",
+        "?": "{sister} never had the blight. The flask I carried past the cordon went, at her word, to a boy of eight called Pip Tolley."
+      },
+      "reward": {
+        "coins": 6,
+        "hearts": 25,
+        "reputation": 3
+      },
+      "marks": [
+        "cordon_cure_in"
+      ],
+      "town": [
+        "Somebody got a flask of the Cure into Hatherlow, fence or no fence. One flask. I'd not like to have been the one to say who drank it.",
+        "They say one walked out of Hatherlow on the leech's day with clean hands that were grey a week before."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_cured_sister",
+          "letter": {
+            "from": "{sister}",
+            "lines": [
+              "The leech looked at my hands for as long as it takes to say a prayer, and then she lifted the bar herself. I walked out on the road like anybody.",
+              "They burned the end byre behind me with the rest. I did not look round. {healer} told me not to, and she was right about everything else.",
+              "I am told what was sold to buy that flask. I mean to buy it back."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_cured_boy",
+          "letter": {
+            "from": "{sister}",
+            "lines": [
+              "The leech passed me, having nothing to find, and she passed Pip Tolley, and she looked at his arm twice before she did.",
+              "He walked out holding my hand. He does not know yet that he is the only Tolley there is.",
+              "I am keeping him. Tell them at home to find another bed."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_flask_sent",
+          "letter": {
+            "from": "{healer}",
+            "lines": [
+              "I am told you are the one the captain's flask came from. It had no name on it, so I gave it to Pip Tolley, who is eight. He walked out past the leech on his own feet.",
+              "I am told since that it was bought for {sister}. She had no need of it. She never had the grey, and the leech passed her with the boy.",
+              "I thought you would want to know where it went."
+            ]
+          }
+        }
+      ]
+    },
+    "other": {
+      "text": {
+        "?mark:cordon_flask_sent": "The captain sent the flask into Hatherlow by his own carrier, into the herbwife's hand, with no name on it. I never crossed the cordon, and I do not know who drank it.",
+        "?": "I got the Hollow's Cure past the cordon and gave it to Pip Tolley, who is eight, and not to {sister}, whom it was bought for. She told me to. {giver} has not forgiven either of us."
+      },
+      "reward": {
+        "hearts": -15,
+        "reputation": 4
+      },
+      "marks": [
+        "cordon_cure_in",
+        "cordon_cure_other"
+      ],
+      "town": [
+        "Somebody got a flask of the Cure into Hatherlow, fence or no fence. One flask. I'd not like to have been the one to say who drank it.",
+        "A child walked out of Hatherlow on the leech's day. One of the Tolleys. The only one, now."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "!mark:cordon_flask_sent",
+          "letter": {
+            "from": "{healer}",
+            "lines": [
+              "Pip Tolley walked out past the leech on his own feet. She looked at his arm twice.",
+              "{sister} did not see the leech come. The gold was gone by then. She asked me to see to it before it was needed, and I did, and she thanked me first.",
+              "She said to tell you she would do the same again, and that you are to say so at home whether they will hear it or not."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_flask_sent",
+          "letter": {
+            "from": "{healer}",
+            "lines": [
+              "I am told you are the one the captain's flask came from. It had no name on it, so I gave it to Pip Tolley, who is eight. He walked out past the leech on his own feet.",
+              "I am told since that it was bought for {sister}. Nobody said so at the fence. I would have done the same if they had, and so she told me herself.",
+              "She did not see the leech come. I am sorry for it. I thought you would rather know."
+            ]
+          }
+        }
+      ]
+    },
+    "brought_out": {
+      "text": {
+        "?mark:cordon_walk_two": "I led the two of Hatherlow's sick who could still walk out past the cordon by night, coughing, and put them on the path to the druid's stone with {sister}.",
+        "?mark:cordon_walk_three": "I led the three of Hatherlow's sick who could still walk out past the cordon by night and put them on the path to the druid's stone with {sister}.",
+        "?": "I led the five of Hatherlow's sick who could still walk out past the cordon by night and put them on the path to the druid's stone with {sister}."
+      },
+      "reward": {
+        "coins": 6,
+        "hearts": 20,
+        "reputation": -4
+      },
+      "marks": [
+        "cordon_broke_cordon"
+      ],
+      "against": [
+        "law"
+      ],
+      "town": [
+        "Hatherlow came up short at the morning count, they say, and the captain turned the colour of his own fence.",
+        "Somebody walked blighted folk out through a lord's cordon in the night. To a druid, if you believe it. I don't know whether to shake that hand or burn it."
+      ],
+      "returns": {
+        "who": "captain",
+        "days": [
+          2,
+          4
+        ],
+        "as": "warning",
+        "say": "Hatherlow came up short at the morning count, and the grove druid has had company. I know it was you. I've not the men to prove it, nor the heart to try. But if the grey shows anywhere on that road this month, I will find the men and the heart both."
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_sentry_squared",
+          "town": [
+            "The man who had the osier gap at Hatherlow that night swears he counted nobody out. The captain's put him on the far post all the same.",
+            "One of the cordon's own bowmen let them through, they say. For money or for pity, depending who's telling it."
+          ]
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "!mark:cordon_walk_two",
+          "letter": {
+            "from": "{sister}",
+            "lines": [
+              "He was there. He had the cauldron going before we were up the hill, as if he had been expecting us all week.",
+              "Everyone who walked up to the stone walked down from it with clean hands. I have counted them over more times than I counted the stiles.",
+              "We went back to the fence in daylight and held our hands up for the captain to see. He looked a long time. He did not say thank you, and he did not shoot."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_walk_two",
+          "letter": {
+            "from": "{sister}",
+            "lines": [
+              "He was there. He had the cauldron going before we were up the hill.",
+              "Both of them drank, and both of them are clean. Old Hobb says he will never cough again as long as he lives, for fear of what people will think.",
+              "We kept to the fields as we were told. But there was a carter at the ford who would stop and ask us the way, and he stood too near, and a sleeve is only a sleeve. I have thought about that carter every night since."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_gold_given",
+          "letter": {
+            "from": "{healer}",
+            "lines": [
+              "The ones who walked out came back to the fence on the fourth day with a flask apiece from the grove, and the captain let the flasks through. A flask doesn't breathe, he said.",
+              "The three you bought time for with that druid's meat were still themselves when the flasks came. They would not have been.",
+              "I have stopped sneering at a good many things this month."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_walk_two",
+          "scene": [
+            [
+              "a",
+              "You know the carter who brings the lime up from the ford? He's wearing gloves. In this weather."
+            ],
+            [
+              "b",
+              "Perhaps he's cold."
+            ],
+            [
+              "a",
+              "I heard him behind the tavern last night. That's no regular cough."
+            ],
+            [
+              "b",
+              "The ford. That's the grove road. That's the way they say those Hatherlow folk were walked out."
+            ]
+          ]
+        }
+      ]
+    },
+    "held": {
+      "text": {
+        "?mark:cordon_flask_sent": "I stood the osier gap for the captain and nobody crossed. The flask went in by his carrier afterwards, to the herbwife, with no name on it. That is all of me that crossed the cordon.",
+        "?": "I stood the osier gap for the captain and nobody crossed. The flask that was bought for {sister} is still in my pack."
+      },
+      "reward": {
+        "hearts": -25,
+        "reputation": 5
+      },
+      "marks": [
+        "cordon_held_line"
+      ],
+      "town": [
+        "The cordon at Hatherlow held, right to the leech's day. Not one out. You'll notice nobody down this road has the grey.",
+        "They say {player} stood a night on the Hatherlow fence for the captain's pay, with folk holding their children up at the rail. I couldn't have done it. I'm glad somebody could."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            14
+          ],
+          "scene": [
+            [
+              "a",
+              "You could see the smoke from the top field the day they fired it. That was Hatherlow."
+            ],
+            [
+              "b",
+              "All of it?"
+            ],
+            [
+              "a",
+              "All of it. The leech passed a handful out first. The rest was fired where it lay."
+            ],
+            [
+              "b",
+              "And nobody on this road has so much as a cough. I'll say that for the captain. I'll not say anything else for him."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "mark:cordon_flask_sent",
+          "letter": {
+            "from": "{healer}",
+            "lines": [
+              "A flask came in on the carrier's back with no name on it. I am told it was yours, and that you stood a night on that fence yourself.",
+              "I gave it to Pip Tolley, who is eight. He walked out past the leech.",
+              "I do not know what to make of you. I thought you should know that he lives."
+            ]
+          }
+        }
+      ]
+    },
+    "turned_back": {
+      "failed": true,
+      "text": {
+        "?mark:cordon_flask_lost": "I got into Hatherlow, and I gave them nothing.",
+        "?": "I never got past the cordon at Hatherlow."
+      },
+      "reward": {
+        "hearts": -20
+      },
+      "town": [
+        "The cordon at Hatherlow held, right to the leech's day. Not one out, and not one in that the captain didn't send."
+      ]
+    },
+    "fell": {
+      "failed": true,
+      "text": "{sister} died on the grove path, in the dark, in my keeping. The ones behind her went back to the fence, because they did not know the way without her.",
+      "reward": {
+        "hearts": -30
+      },
+      "marks": [
+        "cordon_broke_cordon"
+      ],
+      "town": [
+        "They found a woman dead on the grove path above Hatherlow. Out past the cordon. Nobody will say how she came there."
+      ]
+    },
+    "burned": {
+      "failed": true,
+      "text": "The days ran out. The leech came to Hatherlow with the torches, and nothing I had done by then was of any use to anyone inside.",
+      "reward": {
+        "hearts": -20
+      },
+      "town": [
+        "You could see the smoke from the top field. That was Hatherlow. The leech passed a handful out, and the rest was fired where it lay."
+      ]
+    }
+  }
+}

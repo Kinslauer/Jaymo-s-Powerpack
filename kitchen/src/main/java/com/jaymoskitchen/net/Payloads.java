@@ -96,6 +96,8 @@ public final class Payloads {
 		public static final int STATUS_COOKING = 0;
 		public static final int STATUS_FINISHED = 1;
 		public static final int STATUS_REJECTED = 2;
+		/** The dish went on at the block, done by hand: close the screen. */
+		public static final int STATUS_HANDS = 3;
 
 		public static final Type<CookUpdate> TYPE = new Type<>(JaymosKitchen.id("cook_update"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, CookUpdate> CODEC = CustomPacketPayload.codec(
@@ -243,6 +245,8 @@ public final class Payloads {
 		public static final int STATUS_STARTED = 0;
 		public static final int STATUS_FINISHED = 1;
 		public static final int STATUS_REJECTED = 2;
+		/** It went on at the board, done by hand: close the screen. */
+		public static final int STATUS_HANDS = 3;
 
 		public static final Type<PrepUpdate> TYPE = new Type<>(JaymosKitchen.id("prep_update"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, PrepUpdate> CODEC = CustomPacketPayload.codec(
@@ -461,7 +465,120 @@ public final class Payloads {
 		}
 	}
 
+	/**
+	 * Server to client: what is on the station at {@code pos}, and how its dish is going. {@code phase} is one of the PHASE_
+	 * constants; {@code kind} a {@code Pick.Kind} ordinal; {@code pick} of {@code picks} the dish chosen from those the
+	 * placed things make ({@code dish} its ordinal, -1 for none); {@code quality} a Quality ordinal once it is judged
+	 * (else -1). {@code ints} and {@code floats} are the readout of the running kind (see each Run's fill).
+	 */
+	public record HandsSync(BlockPos pos, int phase, int kind, int dish, int pick, int picks, int quality, int cooks,
+		java.util.List<ItemStack> placed, int[] ints, float[] floats) implements CustomPacketPayload {
+		public static final int PHASE_GONE = 0, PHASE_STAGING = 1, PHASE_RUNNING = 2, PHASE_JUDGED = 3;
+
+		public static final Type<HandsSync> TYPE = new Type<>(JaymosKitchen.id("hands_sync"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HandsSync> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeBlockPos(p.pos);
+				buf.writeVarInt(p.phase);
+				buf.writeVarInt(p.kind);
+				buf.writeVarInt(p.dish + 1);
+				buf.writeVarInt(p.pick);
+				buf.writeVarInt(p.picks);
+				buf.writeVarInt(p.quality + 1);
+				buf.writeVarInt(p.cooks);
+				buf.writeVarInt(p.placed.size());
+				for (ItemStack stack : p.placed) {
+					ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+				}
+				buf.writeVarInt(p.ints.length);
+				for (int value : p.ints) {
+					buf.writeVarInt(value);
+				}
+				buf.writeVarInt(p.floats.length);
+				for (float value : p.floats) {
+					buf.writeFloat(value);
+				}
+			},
+			buf -> {
+				BlockPos pos = buf.readBlockPos();
+				int phase = buf.readVarInt();
+				int kind = buf.readVarInt();
+				int dish = buf.readVarInt() - 1;
+				int pick = buf.readVarInt();
+				int picks = buf.readVarInt();
+				int quality = buf.readVarInt() - 1;
+				int cooks = buf.readVarInt();
+				java.util.List<ItemStack> placed = new java.util.ArrayList<>();
+				for (int i = buf.readVarInt(); i > 0; i--) {
+					placed.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+				}
+				int[] ints = new int[buf.readVarInt()];
+				for (int i = 0; i < ints.length; i++) {
+					ints[i] = buf.readVarInt();
+				}
+				float[] floats = new float[buf.readVarInt()];
+				for (int i = 0; i < floats.length; i++) {
+					floats[i] = buf.readFloat();
+				}
+				return new HandsSync(pos, phase, kind, dish, pick, picks, quality, cooks, placed, ints, floats);
+			});
+
+		@Override
+		public Type<HandsSync> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client to server: a cook's input at the station at {@code pos} (what {@code what} means is in {@code Run#input}). */
+	public record HandsInput(BlockPos pos, int what, float value) implements CustomPacketPayload {
+		public static final Type<HandsInput> TYPE = new Type<>(JaymosKitchen.id("hands_input"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HandsInput> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeBlockPos(p.pos);
+				buf.writeVarInt(p.what);
+				buf.writeFloat(p.value);
+			},
+			buf -> new HandsInput(buf.readBlockPos(), buf.readVarInt(), buf.readFloat()));
+
+		@Override
+		public Type<HandsInput> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client to server: sneak and scroll over a station: choose the next ({@code delta} 1) or previous (-1) dish it could make. */
+	public record HandsPick(BlockPos pos, int delta) implements CustomPacketPayload {
+		public static final Type<HandsPick> TYPE = new Type<>(JaymosKitchen.id("hands_pick"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HandsPick> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeBlockPos(p.pos);
+				buf.writeVarInt(p.delta);
+			},
+			buf -> new HandsPick(buf.readBlockPos(), buf.readVarInt()));
+
+		@Override
+		public Type<HandsPick> type() {
+			return TYPE;
+		}
+	}
+
+	/** Server to client: whether cooking is done by hand at the stations (the game rule), so the client knows what its clicks mean. */
+	public record HandsMode(boolean on) implements CustomPacketPayload {
+		public static final Type<HandsMode> TYPE = new Type<>(JaymosKitchen.id("hands_mode"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HandsMode> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.on), buf -> new HandsMode(buf.readBoolean()));
+
+		@Override
+		public Type<HandsMode> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(HandsSync.TYPE, HandsSync.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HandsInput.TYPE, HandsInput.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HandsPick.TYPE, HandsPick.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(HandsMode.TYPE, HandsMode.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Sip.TYPE, Sip.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenHearth.TYPE, OpenHearth.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FeedHearth.TYPE, FeedHearth.CODEC);

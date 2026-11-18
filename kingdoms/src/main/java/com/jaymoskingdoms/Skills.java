@@ -534,7 +534,8 @@ public final class Skills {
 			for (Perk perk : Perk.values()) {
 				n += rank(perk);
 			}
-			return n;
+			// (class trees) and the trees' own perks
+			return n + ClassTrees.spent(this);
 		}
 
 		/** Points left to spend in {@code pillar}: one per level, less what its perks cost. */
@@ -546,9 +547,11 @@ public final class Skills {
 					if (perk.in(pillar)) {
 						spent += ranks.getOrDefault(perk.paidKey(pillar), 0) * perk.cost;
 					}
-				} else if (perk.pillar == pillar) {
+				} else if (perk.pillar == pillar && ClassTrees.moved(perk) == null) {
+					// (class trees) an old class page's ranks are paid from its class's points now
 					// (0.7.516) a rank a trainer taught costs nothing (Learnables)
-					spent += (rank(perk) - ranks.getOrDefault(Learnables.taughtKey(perk), 0)) * perk.cost;
+					// (and a rank bought with renown, SkillRenown, costs none either)
+					spent += (rank(perk) - ranks.getOrDefault(Learnables.taughtKey(perk), 0) - SkillRenown.ranksOf(this, perk)) * perk.cost;
 				}
 			}
 			// (0.7.464) and a bonus point at every milestone level
@@ -557,8 +560,17 @@ public final class Skills {
 
 		/** Why {@code perk} can't take another rank now (a translation key), or null if it can. */
 		public @Nullable String blocked(Perk perk) {
+			return blocked(perk, false);
+		}
+
+		/** As {@link #blocked(Perk)}; {@code free}: the rank is bought with renown, so the pillar's points aren't asked for. */
+		public @Nullable String blocked(Perk perk, boolean free) {
 			if (!perk.pillar.open) {
 				return "gui.jaymoskingdoms.skills.blocked.later";
+			}
+			if (ClassTrees.moved(perk) != null) {
+				// (class trees) learned on the class tab now
+				return "gui.jaymoskingdoms.classtree.blocked.moved";
 			}
 			if (perk == Perk.MAKE_DO && !OmniCrossbows.LOADED) {
 				return "gui.jaymoskingdoms.skills.blocked.omni";
@@ -581,7 +593,7 @@ public final class Skills {
 					return "gui.jaymoskingdoms.skills.blocked.requires";
 				}
 			}
-			if (points(perk.pillar) < perk.cost) {
+			if (!free && points(perk.pillar) < perk.cost) {
 				return "gui.jaymoskingdoms.skills.blocked.points";
 			}
 			return null;
@@ -698,6 +710,7 @@ public final class Skills {
 		SurvivalSkill.register();
 		StrengthSkill.register();
 		Stats.register();
+		SkillRenown.register();
 		CombatArts.register();
 		// (0.7.342) Strength's Will pages
 		Will.register();
@@ -772,6 +785,7 @@ public final class Skills {
 			} else if (perk.pillar == pillar && !ranks.containsKey(Learnables.taughtKey(perk))) {
 				// (0.7.516) what a trainer taught stays
 				ranks.remove(perk.key());
+				ranks.remove(SkillRenown.rankKey(perk));
 			}
 		}
 	}
@@ -902,7 +916,7 @@ public final class Skills {
 		Progress p = of(player);
 		int before = p.xp(pillar);
 		// (in longs: an endless blow's experience must fill the pillar, not wrap round below nothing)
-		int after = (int)Math.min(total(pillar.maxLevel), (long)before + amount);
+		int after = (int)Math.min(SkillRenown.xpCap(pillar), (long)before + amount);
 		if (after == before) {
 			return;
 		}
@@ -911,6 +925,15 @@ public final class Skills {
 		xp.put(PACE_KEY, PACE);
 		player.setAttached(PROGRESS, new Progress(Map.copyOf(xp), p.ranks()));
 		int was = level(before, pillar.maxLevel), now = level(after, pillar.maxLevel);
+		if (pillar.web() && after > total(pillar.maxLevel)) {
+			// past the top: every 3,000 more is a renown point to spend on K (SkillRenown)
+			int over = Math.max(0, before - total(pillar.maxLevel));
+			if ((after - total(pillar.maxLevel)) / SkillRenown.XP_PER_POINT > over / SkillRenown.XP_PER_POINT
+				&& SkillRenown.earned(of(player)) <= SkillRenown.MOST) {
+				Fanfare.burst(player, pillar.color, Fanfare.MINOR);
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.renown.earned", SkillRenown.available(of(player))).withStyle(ChatFormatting.GOLD));
+			}
+		}
 		if (now > was) {
 			refresh(player);
 			// (0.7.464) the pack's milestone fanfare: small for a level, big every fifth (with its bonus point), grand at the top
@@ -988,10 +1011,11 @@ public final class Skills {
 		int amount = Math.max(1, Math.round(xp));
 		// (0.7.509) a clean pickpocket pleases the Ash Whisperer
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "pickpocket");
-		if (of(player).xp(Pillar.STEALTH) >= total(Pillar.STEALTH.maxLevel)) {
+		if (of(player).xp(Pillar.STEALTH) >= SkillRenown.xpCap(Pillar.STEALTH)) {
 			return 0;
 		}
 		grant(player, Pillar.STEALTH, amount);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_POCKET);
 		return amount;
 	}
 
@@ -1004,6 +1028,7 @@ public final class Skills {
 		// (0.7.509) a theft nobody saw pleases the Ash Whisperer
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "unseen_theft");
 		grant(player, Pillar.STEALTH, XP_THEFT);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_THEFT);
 	}
 
 	/** (0.7.102) A freerun move: a little experience, at most every {@link #FREERUN_XP_TICKS}. */
@@ -1022,6 +1047,7 @@ public final class Skills {
 		}
 		NEXT_SNEAK_XP.put(player.getUUID(), now + SNEAK_XP_TICKS);
 		grant(player, Pillar.STEALTH, XP_SNEAK_ATTACK);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_SNEAK);
 	}
 
 	/** (0.7.136) Sneaking past monsters unseen for a while ({@link Senses}): a little experience. */
@@ -1041,6 +1067,7 @@ public final class Skills {
 	/** (0.7.111) An assassination (an unaware hidden blade stab): more experience, every time. */
 	static void assassination(ServerPlayer player) {
 		grant(player, Pillar.STEALTH, XP_ASSASSINATION);
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_SNEAK * 2);
 	}
 
 	/** How long {@code player}'s hand must stay in a pocket, from {@code ticks}: shorter with practice and Light Fingers. */

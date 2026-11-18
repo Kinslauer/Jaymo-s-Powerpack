@@ -20,8 +20,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * What a runner sees while Overclock (or Velox's Velocity) is on: five gears, shifted with the mouse wheel while sprinting
- * at speed. A higher gear runs faster ({@link #SPEED_SCALE}), turns wider (client side, {@link #TURN_SHED}), burns more
+ * What a runner sees while Overclock (or Velox's Velocity) is on: five gears. The mouse wheel, while sprinting at speed,
+ * sets the top gear; a run starts in gear 3 and momentum carries the gear up to a higher top gear ({@link ChronoMomentum}). A higher gear runs faster ({@link #SPEED_SCALE}), turns wider (client side, {@link #TURN_SHED}), burns more
  * hunger ({@link #EXHAUSTION}), leaves a longer streak (the streak follows real speed) and closes wounds faster
  * ({@link #HEAL_PER_SECOND}) for a steep hunger price ({@link #HEAL_COST}). Gear 3 is the speed Overclock always had.
  * The gear shows on a chip bottom right, beside the clocks (or the Xenoform chip).
@@ -76,10 +76,11 @@ public final class ChronoGears {
 		if (delta == 0 || !ChronoSpeed.overclocked(player) || !player.isAlive()) {
 			return;
 		}
-		int now = gear(player);
+		// the wheel sets the top gear; a run starts in gear 3 and momentum carries the gear up to a higher top (ChronoMomentum)
+		int now = ChronoMomentum.top(player);
 		int to = Mth.clamp(now + (delta > 0 ? 1 : -1), 1, GEARS);
 		if (to != now) {
-			player.setAttached(GEAR, to);
+			ChronoMomentum.top(player, to);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
 				0.6F, 0.6F + to * 0.25F);
 		}
@@ -96,6 +97,7 @@ public final class ChronoGears {
 			clear(player);
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "chrono.gear", player.tickCount % 20 == 0 ? gear(player) : 0);
 		if (player.getAttached(GEAR) == null) {
 			player.setAttached(GEAR, DEFAULT_GEAR);
 		}
@@ -103,7 +105,8 @@ public final class ChronoGears {
 		if (player.isSprinting() && !player.isCreative()) {
 			player.causeFoodExhaustion(EXHAUSTION[gear - 1]);
 		}
-		float heal = HEAL_PER_SECOND[gear - 1];
+		// speed healing follows the gear the wheel is set to, as it always did: it doesn't fade when the runner stands to fight
+		float heal = HEAL_PER_SECOND[ChronoMomentum.top(player) - 1];
 		if (heal > 0.0F && player.tickCount % 10 == 0 && player.getHealth() < player.getMaxHealth()
 			&& (player.isCreative() || player.getFoodData().getFoodLevel() >= HEAL_MIN_FOOD)) {
 			float took = Mending.mend(player, heal / 2.0F);

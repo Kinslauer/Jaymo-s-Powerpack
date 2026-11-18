@@ -60,7 +60,6 @@
 			"at": "tavern"
 		},
 		"steward": {
-			"if": "betrayer=steward",
 			"name": [
 				"Jory Fenn",
 				"Hob Carrick",
@@ -107,6 +106,15 @@
 				300
 			],
 			"name": "the charcoal burners' hut"
+		},
+		"kiln": {
+			"at": "near",
+			"from": "home",
+			"dist": [
+				70,
+				120
+			],
+			"name": "the old lime kiln"
 		}
 	},
 	"first": "ask",
@@ -116,7 +124,7 @@
 			"who": "giver",
 			"say": [
 				"{taken} went to market four days ago and didn't come home. This morning there was a note pushed under my door.",
-				"It says {coins:30} at {place:oak}, three nights from now, and I'll have her back. I haven't got {coins:30}. I haven't got half of it."
+				"It says {coins:30} at {place:oak}, four nights from now, and I'll have her back. Miss the night, it says, and she comes home the worse for every day after. I haven't got {coins:30}. I haven't got half of it."
 			],
 			"replies": [
 				{
@@ -154,32 +162,53 @@
 					"then": "wait_drop",
 					"journal": "The note knew {taken} would be on the road alone. I'm going to watch {place:oak}."
 				}
-			]
+			],
+			"clock": {
+				"ransom": 4
+			},
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"who_knew": {
 			"do": "talk",
 			"who": "giver",
 			"say": {
 				"?betrayer=steward": "Us. And {steward}, who drove the cart as far as the ford and came back without her. He says she wanted to walk the last of it. She does like to walk.",
-				"?": "Half the market, I suppose. She sells there every week. Ask at the tavern. Whoever does this drinks somewhere."
+				"?": [
+					"Half the market, I suppose. She sells there every week. Ask at the tavern. Whoever does this drinks somewhere.",
+					"And {steward}, who drives her as far as the ford every week and brings the cart home. He has not sat down to a meal in this house since. I don't know what to make of that."
+				]
 			},
 			"then": "to_tavern",
 			"journal": {
 				"?betrayer=steward": "Only {giver}'s household knew {taken} would be on the road, and {steward}, who drove her as far as the ford.",
-				"?": "Anyone at market could have known {taken}'s road. Someone at the tavern may know who takes people."
-			}
+				"?": "Anyone at market could have known {taken}'s road. Someone at the tavern may know who takes people. {steward} drove her as far as the ford, as he does every week."
+			},
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"paying": {
 			"do": "talk",
 			"who": "giver",
 			"say": "You'd do that? For us? Then go, and bring her back, and I'll pay you back if it takes me ten years.",
-			"then": "wait_drop"
+			"then": "wait_drop",
+			"clock": {
+				"ransom": 4
+			},
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"to_tavern": {
 			"do": "go",
 			"to": "tavern",
 			"goal": "Ask around at {place:tavern}",
-			"then": "gossip"
+			"then": "gossip",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"gossip": {
 			"do": "talk",
@@ -199,14 +228,319 @@
 				{
 					"say": "Then I'll watch the drop.",
 					"then": "wait_drop"
+				},
+				{
+					"say": "{giver}'s man {steward} drove her as far as the ford. Does he drink here?",
+					"then": "moll_steward"
+				}
+			],
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
+		},
+		"moll_steward": {
+			"do": "talk",
+			"who": "moll",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"{steward}? He doesn't drink here, nor anywhere. But I'll tell you what I see from this bench of an evening, and it costs you nothing, because I don't like it.",
+				"He goes out along {giver}'s yard wall after the lamps are out. Three nights this week. Down toward {place:kiln}, with a lantern under his coat. A man on an honest errand carries his lantern where it can light his feet."
+			],
+			"replies": [
+				{
+					"say": "Then tonight I'll be behind him.",
+					"then": "tail_steward",
+					"journal": "{moll} has seen {steward} go out along the yard wall after the lamps are out, three nights this week, toward {place:kiln} with a lantern under his coat. Tonight I mean to follow him."
+				},
+				{
+					"say": "Where's their camp?",
+					"needs_coins": 3,
+					"then": "told_camp",
+					"journal": "{moll} at the tavern told me where the takers camp, for a few coins."
+				},
+				{
+					"say": "Then I'll watch the drop.",
+					"then": "wait_drop"
 				}
 			]
+		},
+		"tail_steward": {
+			"do": "tail",
+			"who": "steward",
+			"to": "kiln",
+			"when": "night",
+			"near": 6,
+			"far": 28,
+			"goal": "After dark, follow {steward} from {place:yard} without his seeing you",
+			"seen": {
+				"?betrayer=steward": "steward_seen",
+				"?": "steward_wronged"
+			},
+			"lost": "to_kiln",
+			"journal": "After the lamps were out {steward} went along the yard wall with a lantern under his coat. I kept behind him as far as {place:kiln}, and he never looked round.",
+			"then": "kiln_watch",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
+		},
+		"steward_seen": {
+			"do": "talk",
+			"who": "steward",
+			"goal": "Answer {steward}",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"Who's that? Come out from the wall where I can see you.",
+				"You. The one who's been asking about the girl. I'm going down to the kiln. There's lime wants turning before the frost, and I'd sooner turn it than lie awake."
+			],
+			"replies": [
+				{
+					"say": "Lime, at this hour, with your lantern under your coat. Who is waiting for you at the kiln?",
+					"try": {
+						"how": "threaten",
+						"odds": 0,
+						"helps": [
+							"reputation>=20"
+						],
+						"refuse": "Nobody is waiting. And if you say otherwise to {giver}, I'll ask what you were doing under that wall in the dark.",
+						"fail": "steward_bluffs"
+					},
+					"then": "steward_breaks"
+				},
+				{
+					"say": "Then I'll not keep you from your lime.",
+					"then": "steward_bluffs"
+				}
+			]
+		},
+		"steward_bluffs": {
+			"do": "talk",
+			"who": "steward",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": "Good night to you, then. And mind how you go along that wall. It's an easy place to turn an ankle, walking behind people.",
+			"mark": "ap_steward_warned",
+			"journal": "{steward} saw me behind him on the yard wall. He says he was going to turn lime at {place:kiln}, at night, with his lantern hidden. I don't believe him, and he knows that I don't. Whoever he meant to meet will keep away now.",
+			"then": "moll_again"
+		},
+		"steward_breaks": {
+			"do": "talk",
+			"who": "steward",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"Two of them. They'll have seen you by now and gone. They don't wait about.",
+				"It was only to be the money. {giver} pays, she comes home, and I buy a strip of ground of my own. I said she wasn't to be tied.",
+				"{place:camp}, out past {place:oak}, where the smoke goes up. {way:camp}. Get her out before their day. After that you can do what you like with me. I'll be at the kiln. I've nowhere else to be."
+			],
+			"mark": "ap_steward_broke",
+			"journal": "{steward} saw me following him, and when I pressed him he broke. He sold {taken} to the takers for a share of the ransom. He told me where they keep her: {way:camp}.",
+			"then": "to_camp"
+		},
+		"steward_wronged": {
+			"do": "talk",
+			"who": "steward",
+			"goal": "Answer {steward}",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"Who's that? Come out from the wall.",
+				"So it's you, walking behind me in the dark. Say it, then. You think I sold her."
+			],
+			"replies": [
+				{
+					"say": "I think you go out at night with a lantern under your coat. Where?",
+					"then": "steward_smoke",
+					"mark": "ap_wronged_steward",
+					"journal": "{steward} caught me following him along the yard wall. I asked him to his face where he goes at night."
+				},
+				{
+					"say": "I did think it. I'm sorry for it.",
+					"then": "steward_smoke",
+					"for": [
+						"mercy"
+					],
+					"journal": "{steward} caught me following him along the yard wall. I told him I was sorry for what I had thought."
+				}
+			]
+		},
+		"steward_smoke": {
+			"do": "talk",
+			"who": "steward",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"To the kiln. I put a light in the kiln mouth every night, so she has something to walk to if she gets loose. The coat is for the wind. Come and look, if my word's no good to you.",
+				"And since you're one for walking in the dark, here is a better use for it. From the kiln top there's smoke to be seen past {place:oak}, out in the wild, where nobody burns charcoal now. {way:camp}.",
+				"I told {giver}, and was told the note wants no stirring, and to leave it be. I am not a brave man. I set her down at that ford, and all I have to show for it is a lantern."
+			],
+			"journal": "{steward} goes out at night to set a lantern in {place:kiln} for {taken} to walk to. He did not sell her. From the kiln he has seen smoke where nobody should be burning: {way:camp}.",
+			"then": "to_camp"
+		},
+		"to_kiln": {
+			"do": "go",
+			"to": "kiln",
+			"goal": "Look for {steward}'s light at {place:kiln}",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"then": "kiln_watch",
+			"mark": "ap_lost_him",
+			"journal": "I lost {steward} in the dark along the yard wall and went on to {place:kiln} by myself."
+		},
+		"kiln_watch": {
+			"do": "vigil",
+			"at": "kiln",
+			"goal": "Watch what {steward} does at {place:kiln}",
+			"when": "night",
+			"gap": 12,
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"lines": {
+				"?betrayer=steward & mark:ap_lost_him": [
+					{
+						"say": "There is a light at the kiln after all, shut down to a crack. I have come on it late.",
+						"sound": "minecraft:block.lantern.place"
+					},
+					{
+						"say": "Two men are already walking away from the kiln mouth, toward {place:oak}. One of them drags a foot.",
+						"sound": "minecraft:block.gravel.step"
+					},
+					{
+						"who": "steward",
+						"say": "Not tied. I said she wasn't to be tied."
+					},
+					{
+						"say": "He says it to nobody. Then he sits down in the kiln mouth with his lantern shut, and does not go home."
+					}
+				],
+				"?betrayer=steward": [
+					{
+						"say": "{steward} stops at the kiln mouth and opens his lantern a finger's width. Two men step out of the dark to meet him. One of them drags a foot.",
+						"sound": "minecraft:block.gravel.step"
+					},
+					{
+						"who": "steward",
+						"say": "My share. Now, before the night of the oak. I'll not wait on your word for it."
+					},
+					{
+						"say": "The lame one laughs. A share is paid when the house pays, he says, and not before."
+					},
+					{
+						"who": "steward",
+						"say": "She wasn't to be tied. I said so at the ford. She was not to be tied."
+					},
+					{
+						"say": "Nobody answers him. The lame one tells him where to send word if {giver} goes to the watch: {place:camp}, out past {place:oak}, where the smoke goes up.",
+						"mark": "ap_saw_steward"
+					},
+					{
+						"say": "The two go off toward the wild. {steward} sits down in the kiln mouth with his lantern shut, and does not go home."
+					}
+				],
+				"?": [
+					{
+						"say": "{steward} sets his lantern in the kiln mouth and opens it wide, facing the hills.",
+						"sound": "minecraft:block.lantern.place"
+					},
+					{
+						"say": "He lays a loaf and a folded blanket inside the arch, out of the wet. Yesterday's loaf he puts in his coat."
+					},
+					{
+						"who": "steward",
+						"say": "{taken}! It's the kiln light, girl. Walk to the light."
+					},
+					{
+						"say": "Nobody comes. He sits down with his back to the warm side of the kiln and watches the road.",
+						"mark": "ap_saw_lantern"
+					}
+				]
+			},
+			"left": "moll_again",
+			"journal": {
+				"?betrayer=steward & mark:ap_lost_him": "I came to {place:kiln} too late to hear what was said. Two men were leaving {steward} there, one of them dragging a foot, and they went off toward {place:oak}. He is in it. I cannot swear to a word of it.",
+				"?betrayer=steward": "I followed {steward} to {place:kiln} after dark and watched him meet two of the takers and ask for his share. He sold {taken}, and he does not know that I know. They named their camp to him: {way:camp}.",
+				"?": "{steward} met nobody at {place:kiln}. He set a lantern in the kiln mouth for {taken} to walk to, left bread and a blanket, and sat down to watch the road. Whoever sold her, it was not him."
+			},
+			"then": {
+				"?betrayer=steward & mark:ap_lost_him": "to_oak",
+				"?betrayer=steward": "to_camp",
+				"?": "steward_lantern"
+			},
+			"radius": 16
+		},
+		"steward_lantern": {
+			"do": "talk",
+			"who": "steward",
+			"goal": "Step out and speak with {steward}",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"Mercy! You came up quiet. How long have you stood there? No, don't tell me. I can guess why.",
+				"It's for her. A light she can see from the hill, and bread, in case she gets loose and comes down in the dark. I set her down at the ford and let her walk the last of it. I'll keep it lit till she's home, or till I'm told there's no use.",
+				"You can see a long way from the kiln top. There's smoke past {place:oak}, out in the wild, where nobody burns charcoal now. {way:camp}. I told {giver}, and was told to leave it be. I am not a brave man. You look as if you might be."
+			],
+			"replies": [
+				{
+					"say": "Keep it lit. I'll bring her down to it.",
+					"then": "to_camp",
+					"journal": "From {place:kiln} {steward} has seen smoke where nobody should be burning: {way:camp}. He asked me to go, because he dare not."
+				}
+			]
+		},
+		"moll_again": {
+			"do": "talk",
+			"who": "moll",
+			"goal": "Go back to {moll}",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out",
+			"say": [
+				"Back, and with a face like a wet week. Whatever you went looking for along that wall, you came away without it.",
+				"Then it's as I told you the first time. The band past the hills. Their day runs out {in:ransom}, and they keep their days."
+			],
+			"replies": [
+				{
+					"say": "Where's their camp?",
+					"needs_coins": 3,
+					"then": "told_camp",
+					"journal": "{moll} at the tavern told me where the takers camp, for a few coins."
+				},
+				{
+					"say": "Then I'll be at the oak.",
+					"then": "wait_drop_late"
+				}
+			]
+		},
+		"wait_drop_late": {
+			"do": "wait",
+			"days": [
+				1,
+				1
+			],
+			"wake": "none",
+			"then": "to_oak",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"told_camp": {
 			"do": "talk",
 			"who": "moll",
 			"say": "Past {place:oak}, out in the wild, where the smoke goes up and nobody goes to look. {way:camp}. Don't tell them it was Moll.",
-			"then": "to_camp"
+			"then": "to_camp",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"wait_drop": {
 			"do": "wait",
@@ -215,13 +549,37 @@
 				3
 			],
 			"wake": "none",
-			"then": "to_oak"
+			"then": "to_oak",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
+		},
+		"ransom_passed": {
+			"do": "talk",
+			"who": "giver",
+			"goal": "Hear what came in the night",
+			"say": {
+				"?mark:ap_paid": [
+					"They kept their day, if they kept nothing else. A carter found her on the market road at first light, set down by the ford like a parcel. Alive.",
+					"They had cut off her hair, and two fingers of her left hand. 'For the rest,' the note said. It asked for nothing more. They had your coin and wanted as much again, and I suppose this is how the next house learns to pay in full.",
+					"She's in the back room. She hasn't spoken yet. I don't blame you. You put your own purse under that oak. I want to blame somebody, and I can't find where to start."
+				],
+				"?": [
+					"They kept their day, if they kept nothing else. A carter found her on the market road at first light, set down by the ford like a parcel. Alive.",
+					"They had cut off her hair, and two fingers of her left hand. 'For the lateness,' the note said. It asked for nothing more. They've had what they wanted of us, I suppose, which was for the next house to hear of it.",
+					"She's in the back room. She hasn't spoken yet. I don't blame you. I want to, and I can't find where to start."
+				]
+			},
+			"then": "end:day_passed"
 		},
 		"to_oak": {
 			"do": "go",
 			"to": "oak",
 			"goal": "Watch {place:oak}",
-			"then": "search_oak"
+			"then": "search_oak",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"search_oak": {
 			"do": "search",
@@ -267,13 +625,19 @@
 					"if": "betrayer=steward"
 				}
 			],
-			"then": "to_camp"
+			"then": "to_camp",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"to_camp": {
 			"do": "go",
 			"to": "camp",
 			"goal": "Find the outlaws' camp",
-			"then": "free_her"
+			"then": "free_her",
+			"within": "ransom",
+			"late": "ransom_passed",
+			"until": "before the takers' patience runs out"
 		},
 		"free_her": {
 			"do": "rescue",
@@ -329,10 +693,20 @@
 			"do": "talk",
 			"who": "steward",
 			"goal": "Speak with {steward}",
-			"say": [
-				"She told you. Of course she did.",
-				"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked another man's ground."
-			],
+			"say": {
+				"?mark:ap_steward_broke": [
+					"She's home, then. I told you true about the camp. I want that remembered, and I know it won't be.",
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
+				],
+				"?mark:ap_steward_warned": [
+					"I knew at the wall. Nobody walks behind a man in the dark to wish him good night. I have sat out here since, waiting to see whether it would be you or them that came.",
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
+				],
+				"?": [
+					"She told you. Of course she did.",
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
+				]
+			},
 			"replies": [
 				{
 					"say": "Where's {ringleader}?",
@@ -344,6 +718,38 @@
 					"then": "steward_tells",
 					"mark": "ap_exposed",
 					"journal": "{steward} sold {taken} to the takers. {giver} will know it."
+				},
+				{
+					"say": "I was at the kiln. I heard you ask for your share before she was paid for.",
+					"if": "mark:ap_saw_steward",
+					"then": "steward_caught",
+					"journal": "{steward} sold {taken} to the takers for a share of the ransom. I told him I had watched him ask for it."
+				}
+			]
+		},
+		"steward_caught": {
+			"do": "talk",
+			"who": "steward",
+			"say": [
+				"You were at the kiln. Then you heard all of it. You heard me ask, like a dog at a table.",
+				"And you heard the other thing. I said she wasn't to be tied. I said it twice. I know what that's worth. It's worth nothing. But I did say it."
+			],
+			"replies": [
+				{
+					"say": "Say it to the court. Stand up and name {ringleader}, the kiln and the camp, and I'll swear to what else I heard you say.",
+					"then": "steward_tells",
+					"mark": "ap_turned",
+					"for": [
+						"law",
+						"mercy"
+					],
+					"journal": "I told {steward} that if he stands up in court and names {ringleader}, I will swear he said she was not to be tied. He said he would."
+				},
+				{
+					"say": "You'll answer to {giver}, and I'll tell the court what I saw.",
+					"then": "steward_tells",
+					"mark": "ap_exposed",
+					"journal": "{steward} sold {taken} to the takers. I saw him at it, and {giver} and the court will know."
 				}
 			]
 		},
@@ -396,6 +802,7 @@
 			"who": "giver",
 			"goal": "Speak with {giver}",
 			"say": {
+				"?mark:ap_turned": "{steward} stood up in the court and named the kiln, the camp and the man, with {ringleader} three feet from him. They gave him a year on the roads for it instead of the rope, because of what you swore he had said about the tying. I don't forgive him. But {taken} asked that he not hang, and I found I had nothing to say against her.",
 				"?mark:ap_exposed": "I told the court about {steward} too. They took him with the other one. He didn't look at me. Twelve years.",
 				"?": "{steward} is gone. Packed his bag in the night and walked. I let him. I couldn't have stood to look at him in a court."
 			},
@@ -431,6 +838,36 @@
 				"They say {giver}'s girl didn't come back. They say someone went for her and it wasn't enough."
 			]
 		},
+		"day_passed": {
+			"text": {
+				"?mark:ap_paid": "The takers had my {coins:30} and wanted as much again. Their day passed before anyone reached {taken}, and they sent her home alive, short of her hair and two fingers, so that the next house would pay in full.",
+				"?": "The ransom day passed before anyone reached {taken}. The takers sent her home alive, short of her hair and two fingers, so that the next house would pay on time."
+			},
+			"failed": true,
+			"marks": [
+				"ap_day_passed"
+			],
+			"town": [
+				"{giver}'s girl is home. What they left of her. They do that when the day goes by, so the next one pays quicker.",
+				"Somebody said they'd go up for her. I don't know what kept them."
+			],
+			"later": [
+				{
+					"days": [
+						12,
+						25
+					],
+					"letter": {
+						"from": "{taken}",
+						"lines": [
+							"I am writing this with my right hand, which they left me. They said at home I should not write to you. I said I would write to whom I liked.",
+							"I went to market today with a glove on. Nobody looked, and everybody looked. I sold all the eggs.",
+							"I do not know what kept you. I have decided not to need to know. The one who leads them is still up there with the next note in his pocket. If you ever go after him, I would like to hear of it."
+						]
+					}
+				}
+			]
+		},
 		"home_only": {
 			"text": "{taken} is home. {ringleader} is still out there with the next note in his pocket.",
 			"reward": {
@@ -441,6 +878,30 @@
 			"town": [
 				"{giver}'s girl came home. Somebody went up and fetched her out of the takers' camp.",
 				"They still take people on the market road. Nobody's gone after the one in charge."
+			],
+			"later": [
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_wronged_steward",
+					"town": [
+						"{steward} has left {giver}'s house. Twelve years there, and he went with one bag.",
+						"He said he'd not stay where a man gets walked behind like a thief. His lantern's still in the old kiln. Nobody lights it."
+					]
+				},
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_saw_lantern",
+					"town": [
+						"{steward} still sets a light in the old kiln of a night, though the girl's home.",
+						"He says it's for whoever is next on that road. {giver} gives him the oil for it."
+					]
+				}
 			]
 		},
 		"justice": {
@@ -469,7 +930,46 @@
 					"minecraft:bread*6",
 					"minecraft:emerald*4"
 				]
-			}
+			},
+			"later": [
+				{
+					"days": [
+						20,
+						40
+					],
+					"if": "mark:ap_turned",
+					"letter": {
+						"from": "{steward}",
+						"lines": [
+							"They have me breaking stone on the realm's road, a year of it, with a chain at night. It is somebody else's ground again. I have stopped minding whose.",
+							"{ringleader} looked at me the whole time I spoke. I named the kiln, the camp and him, and I did not look away. It is the one thing in the business I can say that of.",
+							"I ask {giver} for nothing. I ask you to tell {taken} that I said it twice. She will know what."
+						]
+					}
+				},
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_wronged_steward",
+					"town": [
+						"{steward} has left {giver}'s house. Twelve years there, and he went with one bag.",
+						"He said he'd not stay where a man gets walked behind like a thief. His lantern's still in the old kiln. Nobody lights it."
+					]
+				},
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_saw_lantern",
+					"town": [
+						"{steward} still sets a light in the old kiln of a night, though the girl's home.",
+						"He says it's for whoever is next on that road. {giver} gives him the oil for it."
+					]
+				}
+			]
 		},
 		"ringleader_dead": {
 			"text": "{taken} is home. {ringleader} is dead, and the court wanted him alive to answer. Nobody heard what he'd have said.",
@@ -480,6 +980,30 @@
 			},
 			"town": [
 				"{ringleader}'s dead. Good riddance, but the court's sour about it. They wanted him for the crossroads."
+			],
+			"later": [
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_wronged_steward",
+					"town": [
+						"{steward} has left {giver}'s house. Twelve years there, and he went with one bag.",
+						"He said he'd not stay where a man gets walked behind like a thief. His lantern's still in the old kiln. Nobody lights it."
+					]
+				},
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_saw_lantern",
+					"town": [
+						"{steward} still sets a light in the old kiln of a night, though the girl's home.",
+						"He says it's for whoever is next on that road. {giver} gives him the oil for it."
+					]
+				}
 			]
 		},
 		"let_go": {
@@ -493,6 +1017,30 @@
 			],
 			"town": [
 				"They say whoever brought {giver}'s girl home had the taker himself and let him walk. I don't understand people."
+			],
+			"later": [
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_wronged_steward",
+					"town": [
+						"{steward} has left {giver}'s house. Twelve years there, and he went with one bag.",
+						"He said he'd not stay where a man gets walked behind like a thief. His lantern's still in the old kiln. Nobody lights it."
+					]
+				},
+				{
+					"days": [
+						10,
+						15
+					],
+					"if": "mark:ap_saw_lantern",
+					"town": [
+						"{steward} still sets a light in the old kiln of a night, though the girl's home.",
+						"He says it's for whoever is next on that road. {giver} gives him the oil for it."
+					]
+				}
 			]
 		}
 	}

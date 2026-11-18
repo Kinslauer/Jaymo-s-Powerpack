@@ -38,8 +38,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Three Sorcerer spells that fill gaps in the elements, each cast three ways: as a scroll or staff spell
- * ({@link Arcana#cast}, which a Mage learns and a tome holds), on the {@code J} key of a Sorcerer of its element with no
- * blade in hand (the way the lightning Sorcerer's Storm Ring is cast, a higher art), and on the Spell Engine skill bar
+ * ({@link Arcana#cast}, which a Mage learns and a tome holds), on sneak and the {@code J} key held by a Sorcerer of its
+ * element (the way the lightning Sorcerer's Storm Ring is cast, a higher art), and on the Spell Engine skill bar
  * (see {@code forms/FormSkills}). Nothing new is bound.
  * <ul>
  * <li><b>Bulwark</b> ({@link #BULWARK}, earth): a dome of packed earth round you for {@link #BULWARK_TICKS} ticks. It
@@ -168,8 +168,8 @@ public final class SorceryPicks {
 	}
 
 	/**
-	 * {@code J} for a Sorcerer of earth, water or air with no blade in hand: their element's spell. Always handles the key
-	 * for those elements (so the "hold a blade" word is for the rest); false for the other elements.
+	 * Sneak and {@code J} held for a Sorcerer of earth, water or air: their element's spell. Always handles the key
+	 * for those elements; false for the other elements.
 	 */
 	static boolean key(ServerPlayer player, ServerLevel level, String element) {
 		String spell = spellOf(element);

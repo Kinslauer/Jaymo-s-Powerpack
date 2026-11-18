@@ -1,6 +1,7 @@
 package com.jaymospowers.power.ember;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -267,9 +268,9 @@ public final class EmberSoak {
 		if (!hit) {
 			return false;
 		}
-		MagicFx.blast(level, end, (float)BOLT_RADIUS, COLOR);
+		MagicFx.blast(level, end, (float)AbilityPower.size(bolt.owner, BOLT_RADIUS), COLOR);
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.3F);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(end, end).inflate(BOLT_RADIUS), e -> FireKit.foe(bolt.owner, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(end, end).inflate(AbilityPower.size(bolt.owner, BOLT_RADIUS)), e -> FireKit.foe(bolt.owner, e))) {
 			FireKit.hurt(bolt.owner, living, bolt.damage);
 			Flames.touch(level, living, BOLT_BURN, bolt.owner);
 		}

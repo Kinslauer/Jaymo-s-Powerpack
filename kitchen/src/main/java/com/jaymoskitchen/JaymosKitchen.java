@@ -43,6 +43,7 @@ public class JaymosKitchen implements ModInitializer {
 		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
+		com.jaymoskitchen.cooking.hands.HandsOn.register();
 		com.jaymoskitchen.ragdoll.RagdollNet.register();
 		// (0.5.1) living players going limp (its LIMP attachment is class-loaded here, on both sides)
 		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
@@ -193,6 +194,16 @@ public class JaymosKitchen implements ModInitializer {
 					serverPlayer.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cookware_cold"));
 				}
 				return InteractionResult.SUCCESS;
+			}
+			// cooking by hand: no screen; sneaking empty-handed says what is on the station and what it would make
+			if (com.jaymoskitchen.cooking.hands.HandsOn.on(level)) {
+				if (sneakingEmptyHanded && (station != null || Prep.isPrepSurface(level, pos, state, hit.getDirection()))) {
+					if (player instanceof ServerPlayer serverPlayer) {
+						com.jaymoskitchen.cooking.hands.HandsOn.hintAt(serverPlayer, pos);
+					}
+					return InteractionResult.SUCCESS;
+				}
+				return InteractionResult.PASS;
 			}
 			// a cutting board opens the prep screen below, which has the chopping on it
 			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {

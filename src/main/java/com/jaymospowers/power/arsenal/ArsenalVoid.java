@@ -51,7 +51,7 @@ public final class ArsenalVoid {
 	/** You hit an Enderman, or one hits you. */
 	public static final int CORRUPT_HIT = 4;
 	/** You kill an Enderman. */
-	public static final int CORRUPT_KILL = 10;
+	public static final int CORRUPT_KILL = 4;
 	/** The meter whispers as it crosses these. */
 	public static final int[] WHISPER_AT = {25, 50, 75};
 

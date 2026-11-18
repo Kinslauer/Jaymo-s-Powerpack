@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
@@ -215,7 +216,7 @@ public final class AvatarMoves {
 			if (held.g >= 0 && now - held.g >= HOLD_TICKS && ready(player, PILLAR)) {
 				Vec3 spot = cursor(player);
 				if (spot != null) {
-					markRing(player, spot, PILLAR_RADIUS);
+					markRing(player, spot, AbilityPower.size(player, PILLAR_RADIUS));
 				}
 			}
 			if (held.b >= 0 && now - held.b >= HOLD_TICKS && ready(player, SWITCH)) {
@@ -239,6 +240,7 @@ public final class AvatarMoves {
 		next[move] = player.level().getGameTime() + ticks;
 		next[move + 3] = ticks;
 		player.setAttached(COOLDOWNS, next);
+		EmberHeat.cast(player);
 	}
 
 	/** The spot under the cursor out to {@link #PILLAR_RANGE}: the block looked at, or the ground below the end of the look. */
@@ -330,26 +332,26 @@ public final class AvatarMoves {
 		ServerLevel level = ball.level;
 		ServerPlayer owner = ball.owner;
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 140, FIST_RADIUS * 0.45, FIST_RADIUS * 0.35, FIST_RADIUS * 0.45, 0.12);
-		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 24, FIST_RADIUS * 0.3, FIST_RADIUS * 0.3, FIST_RADIUS * 0.3, 0.0);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0, at.z, 40, FIST_RADIUS * 0.4, FIST_RADIUS * 0.4, FIST_RADIUS * 0.4, 0.04);
+		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 140, AbilityPower.size(owner, FIST_RADIUS) * 0.45, AbilityPower.size(owner, FIST_RADIUS) * 0.35, AbilityPower.size(owner, FIST_RADIUS) * 0.45, 0.12);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 24, AbilityPower.size(owner, FIST_RADIUS) * 0.3, AbilityPower.size(owner, FIST_RADIUS) * 0.3, AbilityPower.size(owner, FIST_RADIUS) * 0.3, 0.0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0, at.z, 40, AbilityPower.size(owner, FIST_RADIUS) * 0.4, AbilityPower.size(owner, FIST_RADIUS) * 0.4, AbilityPower.size(owner, FIST_RADIUS) * 0.4, 0.04);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.5F, 0.4F);
-		Shakes.around(level, at, FIST_RADIUS * 4.0, 4.0F);
-		Flames.area(level, at, FIST_RADIUS, FIST_BURN, owner, e -> true);
-		SmokeField.thaw(level, at, FIST_RADIUS + 0.5);
-		double r2 = FIST_RADIUS * FIST_RADIUS;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(FIST_RADIUS),
+		Shakes.around(level, at, AbilityPower.size(owner, FIST_RADIUS) * 4.0, 4.0F);
+		Flames.area(level, at, AbilityPower.size(owner, FIST_RADIUS), FIST_BURN, owner, e -> true);
+		SmokeField.thaw(level, at, AbilityPower.size(owner, FIST_RADIUS) + 0.5);
+		double r2 = AbilityPower.size(owner, FIST_RADIUS) * AbilityPower.size(owner, FIST_RADIUS);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, FIST_RADIUS)),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && e.getBoundingBox().distanceToSqr(at) <= r2)) {
 			double dist = Math.sqrt(living.getBoundingBox().distanceToSqr(at));
-			double share = 1.0 - 0.5 * dist / FIST_RADIUS;
+			double share = 1.0 - 0.5 * dist / AbilityPower.size(owner, FIST_RADIUS);
 			living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, owner), EmberKindle.seasonal(owner, (float)(FIST_DAMAGE * share)));
 			throwFrom(living, at, FIST_PUSH * share, 0.4 * share);
 		}
 		if (block != null) {
 			EmberKindle.touch(level, block, owner);
 		}
-		setFires(level, BlockPos.containing(at), (int)Math.ceil(FIST_RADIUS), FIST_FIRES);
+		setFires(level, BlockPos.containing(at), (int)Math.ceil(AbilityPower.size(owner, FIST_RADIUS)), FIST_FIRES);
 	}
 
 	// ---- G: Flaming Pillar ---------------------------------------------------------------------------------------------
@@ -365,10 +367,10 @@ public final class AvatarMoves {
 			if (at == null) {
 				return;
 			}
-			radius = PILLAR_RADIUS;
+			radius = AbilityPower.size(player, PILLAR_RADIUS);
 		} else {
 			at = player.position();
-			radius = PILLAR_SELF_RADIUS;
+			radius = AbilityPower.size(player, PILLAR_SELF_RADIUS);
 		}
 		cool(player, PILLAR, PILLAR_COOLDOWN);
 		ServerLevel level = player.level();
@@ -556,7 +558,7 @@ public final class AvatarMoves {
 				break;
 			}
 			// one blast per spot: fires side by side would stack
-			if (out.stream().noneMatch(o -> o.distanceToSqr(at) < BLAST_RADIUS * BLAST_RADIUS)) {
+			if (out.stream().noneMatch(o -> o.distanceToSqr(at) < AbilityPower.size(player, BLAST_RADIUS) * AbilityPower.size(player, BLAST_RADIUS))) {
 				out.add(at);
 			}
 		}
@@ -569,8 +571,8 @@ public final class AvatarMoves {
 		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 20, 0.5, 0.5, 0.5, 0.08);
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 8, 0.4, 0.4, 0.4, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8F, 1.3F);
-		double r2 = BLAST_RADIUS * BLAST_RADIUS;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BLAST_RADIUS),
+		double r2 = AbilityPower.size(player, BLAST_RADIUS) * AbilityPower.size(player, BLAST_RADIUS);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, BLAST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.getBoundingBox().distanceToSqr(at) <= r2)) {
 			living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, player), EmberKindle.seasonal(player, BLAST_DAMAGE));
 			throwFrom(living, at, 0.5, 0.3);

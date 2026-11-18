@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.chrono.ChronoSpeed;
@@ -235,7 +236,7 @@ public final class Velox extends XenoForm {
 	private static void cyclone(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		live.cyclone = CYCLONE_TICKS;
-		for (LivingEntity living : around(player, CYCLONE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, CYCLONE_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), CYCLONE_DAMAGE);
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -248,7 +249,7 @@ public final class Velox extends XenoForm {
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
 		boolean lifting = live.cyclone > CYCLONE_TICKS / 2;
-		for (LivingEntity living : around(player, CYCLONE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, CYCLONE_RADIUS))) {
 			Vec3 rel = living.position().subtract(centre).horizontal();
 			double d = rel.length();
 			Vec3 tangent = d < 0.5 ? new Vec3(1.0, 0.0, 0.0) : new Vec3(-rel.z / d, 0.0, rel.x / d);
@@ -263,7 +264,7 @@ public final class Velox extends XenoForm {
 		double t = (CYCLONE_TICKS - live.cyclone) / (double)CYCLONE_TICKS;
 		for (int arm = 0; arm < 3; arm++) {
 			double a = (CYCLONE_TICKS - live.cyclone) * 0.7 + arm * Math.PI * 2.0 / 3.0;
-			double r = 1.0 + t * (CYCLONE_RADIUS - 1.5);
+			double r = 1.0 + t * (AbilityPower.size(player, CYCLONE_RADIUS) - 1.5);
 			level.sendParticles(ParticleTypes.CLOUD, centre.x + Math.cos(a) * r, centre.y + 0.3 + t * CYCLONE_MAX_RISE, centre.z + Math.sin(a) * r, 1, 0.1,
 				0.1, 0.1, 0.0);
 		}

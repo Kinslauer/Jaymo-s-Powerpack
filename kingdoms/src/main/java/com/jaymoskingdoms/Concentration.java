@@ -72,6 +72,10 @@ public final class Concentration {
 		if (amount < SHAKEN || !HELD.containsKey(target.getUUID()) || target.level().isClientSide()) {
 			return amount;
 		}
+		// (class trees) a Cleric's Steady Hands: the hit doesn't break the prayer
+		if (FaithExtras.steady(target)) {
+			return amount;
+		}
 		if (amount >= SURE_BREAK || !Saves.resist(target, Saves.Kind.FOCUS)) {
 			drop(target);
 		}

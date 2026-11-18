@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Fate;
@@ -105,7 +106,7 @@ final class GravityOrbit {
 			BlockPos pos = ring.struggle.pos();
 			long held = now - ring.struggle.since();
 			BlockState state = level.getBlockState(pos);
-			if (!BlockCluster.takeable(level, pos, 50.0F, null) || pos.distToCenterSqr(player.position()) > (TEAR_RADIUS + 2.0) * (TEAR_RADIUS + 2.0)) {
+			if (!BlockCluster.takeable(level, pos, 50.0F, null) || pos.distToCenterSqr(player.position()) > (AbilityPower.size(player, TEAR_RADIUS) + 2.0) * (AbilityPower.size(player, TEAR_RADIUS) + 2.0)) {
 				level.destroyBlockProgress(crackId(player), pos, -1);
 				ring.struggle = null;
 			} else if (held >= STRUGGLE_TICKS) {
@@ -128,7 +129,7 @@ final class GravityOrbit {
 		} else if (now % TEAR_EVERY == 0 && ring.orbiting.size() + ring.drifting.size() < MAX_ORBIT && random.nextFloat() < TEAR_CHANCE) {
 			BlockPos pos = player.blockPosition().offset(random.nextInt(11) - 5, random.nextInt(6) - 2, random.nextInt(11) - 5);
 			BlockState state = level.getBlockState(pos);
-			if (pos.distToCenterSqr(player.position()) <= TEAR_RADIUS * TEAR_RADIUS && BlockCluster.takeable(level, pos, 50.0F, null)
+			if (pos.distToCenterSqr(player.position()) <= AbilityPower.size(player, TEAR_RADIUS) * AbilityPower.size(player, TEAR_RADIUS) && BlockCluster.takeable(level, pos, 50.0F, null)
 				&& (!heavy(level, pos, state) || random.nextFloat() < HEAVY_SHARE)
 				&& !pos.equals(player.blockPosition().below())) {
 				ring.struggle = new Struggle(pos.immutable(), now);
@@ -149,7 +150,7 @@ final class GravityOrbit {
 				ring.orbiting.add(block.getId());
 				continue;
 			}
-			double speed = Math.min(DRIFT_MAX, DRIFT + 2.0 / Math.max(1.0, d * d) + DRIFT * (TEAR_RADIUS - Math.min(d, TEAR_RADIUS)));
+			double speed = Math.min(DRIFT_MAX, DRIFT + 2.0 / Math.max(1.0, d * d) + DRIFT * (AbilityPower.size(player, TEAR_RADIUS) - Math.min(d, AbilityPower.size(player, TEAR_RADIUS))));
 			move(block, block.position().add(to.scale(speed / d)));
 		}
 		// the ring (or, Crush charging, a swarm over its target)

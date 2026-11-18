@@ -113,19 +113,19 @@ public enum TinkerMaterial {
 		/** (GTNH picks) Bronze: harder than copper, short of iron in everything. */
 		static final Stats BRONZE = new Stats(230, 5.5F, 1.5F, Tier.IRON, 0.0F, 0.05F, 0.05F, 0.0F);
 		static final Stats IRON = new Stats(250, 6.0F, 2.0F, Tier.IRON, 0.1F, 0.0F, 0.0F, 0.0F);
-		static final Stats SILVER = new Stats(300, 5.5F, 2.25F, Tier.IRON, -0.1F, 0.05F, 0.0F, 0.1F);
+		static final Stats SILVER = new Stats(300, 5.5F, 3.0F, Tier.IRON, -0.1F, 0.05F, 0.0F, 0.1F);
 		static final Stats SEARED_STONE = new Stats(225, 6.5F, 1.5F, Tier.IRON, -0.15F, 0.1F, 0.05F, 0.0F);
 		static final Stats ROSE_GOLD = new Stats(175, 9.0F, 1.0F, Tier.WOOD, -0.3F, 0.1F, 0.0F, 0.1F);
-		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 1.5F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);
+		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 3.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
 
 		/** Knife metals: cobalt, manyullyn, queen's slime and hepatizon - their knives carry their own mark on a hit. */
 		static final Stats COBALT = new Stats(450, 6.5F, 2.5F, Tier.IRON, 0.0F, 0.0F, 0.05F, 0.0F);
-		static final Stats MANYULLYN = new Stats(750, 7.0F, 3.5F, Tier.DIAMOND, 0.0F, -0.05F, 0.10F, 0.0F);
+		static final Stats MANYULLYN = new Stats(750, 7.0F, 4.5F, Tier.DIAMOND, 0.0F, -0.05F, 0.10F, 0.0F);
 		static final Stats QUEEN_SLIME = new Stats(520, 6.0F, 2.0F, Tier.IRON, 0.10F, 0.05F, 0.0F, 0.0F);
 		static final Stats HEPATIZON = new Stats(600, 7.0F, 2.5F, Tier.DIAMOND, -0.10F, 0.10F, 0.05F, 0.05F);
-		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
+		static final Stats STEEL = new Stats(1500, 7.0F, 4.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
 		/** (0.18.56) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
 		static final Stats STAR_METAL = new Stats(640, 7.5F, 2.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.1F);
 		/** (0.18.102) Bog iron: iron-tier, more durable and harder hitting than iron, slower in the hand. */

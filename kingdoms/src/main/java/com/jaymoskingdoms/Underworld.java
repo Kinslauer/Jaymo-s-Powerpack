@@ -1122,6 +1122,10 @@ public final class Underworld {
 		if (!(v.level() instanceof ServerLevel level) || !(v.getTradingPlayer() instanceof ServerPlayer player)) {
 			return;
 		}
+		// (class trees) Fence's Friend: a den's fence pays a friend more for what he buys of them
+		if (v.entityTags().contains(FENCE_TAG)) {
+			RogueExtras.fencePaid(level, player, v, offer.getResult());
+		}
 		if (!contraband(offer.getResult()) && !contraband(offer.getCostA()) && !contraband(offer.getCostB())) {
 			return;
 		}

@@ -1,0 +1,810 @@
+{
+  "title": "The Night Market",
+  "start": {
+    "by": "rumour",
+    "weight": 1,
+    "rumour": "There's a widow out {way:cottage} who says her girl sold something at a market in the burying ground, by no light at all, on the dark of the moon. Something you'd not think could be put on a stall. And the girl came home without it, that much is true, I've seen her. I'm only telling you what the mother tells the well."
+  },
+  "roll": {
+    "sold": [
+      "voice",
+      "sleep",
+      "laugh"
+    ]
+  },
+  "cast": {
+    "mother": {
+      "name": [
+        "Joan Arden",
+        "Marian Arden",
+        "Edith Arden"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": true,
+      "at": "cottage"
+    },
+    "girl": {
+      "name": [
+        "Elsy Arden",
+        "Maud Arden",
+        "Pim Arden"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "cottage"
+    },
+    "keeper": {
+      "name": [
+        "Benet Lowe",
+        "Osric Lowe",
+        "Aldous Lowe"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "lodge"
+    },
+    "weigher": {
+      "name": [
+        "Marget Vane",
+        "Hesper Vane",
+        "Annot Vane"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "burying",
+      "hours": "night",
+      "if": "moon:new"
+    },
+    "hawker": {
+      "name": [
+        "Jory Sallow",
+        "Wat Sallow",
+        "Piers Sallow"
+      ],
+      "body": "villager",
+      "job": "nitwit",
+      "female": false,
+      "at": "rows",
+      "hours": "night",
+      "if": "moon:new"
+    },
+    "father": {
+      "name": [
+        "Tam Arden",
+        "Rafe Arden",
+        "Colm Arden"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "yew",
+      "hours": "night",
+      "if": "moon:new"
+    }
+  },
+  "places": {
+    "cottage": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        140,
+        240
+      ],
+      "name": "the Arden cottage"
+    },
+    "burying": {
+      "at": "near",
+      "from": "cottage",
+      "dist": [
+        60,
+        110
+      ],
+      "name": "the burying ground"
+    },
+    "lodge": {
+      "at": "near",
+      "from": "burying",
+      "dist": [
+        14,
+        26
+      ],
+      "name": "the lamp-keeper's lodge by the lych gate"
+    },
+    "rows": {
+      "at": "near",
+      "from": "burying",
+      "dist": [
+        5,
+        9
+      ],
+      "name": "the second row of stalls"
+    },
+    "yew": {
+      "at": "near",
+      "from": "burying",
+      "dist": [
+        9,
+        15
+      ],
+      "name": "the yew in the burying ground"
+    }
+  },
+  "first": "find",
+  "steps": {
+    "find": {
+      "do": "go",
+      "to": "cottage",
+      "hidden": true,
+      "journal": {
+        "?sold=voice": "I followed a rumour to a cottage. A girl sat on the step and watched me come the whole way up the path, and did not say good day.",
+        "?sold=sleep": "I followed a rumour to a cottage. A girl sat on the step with her eyes wide open and dark under them, as if she had been sitting there all night.",
+        "?": "I followed a rumour to a cottage. A girl sat on the step with a kid goat trying to eat her sleeve, and looked at it as if it were a stone."
+      },
+      "then": "meet"
+    },
+    "meet": {
+      "do": "talk",
+      "who": "mother",
+      "goal": "Speak with the widow at {place:cottage}",
+      "say": {
+        "?sold=voice": [
+          "You'll have heard it at the well, I suppose. I tell it to anyone who'll stand still. I've nobody else to tell, now.",
+          "{girl} went out on the dark of the moon and came back before light with her eyes like plates, and she has not spoken a word since. Not one. She opens her mouth and there's nothing in it. She wrote it for me in the hearth ash. She sold it. At the market in {place:burying}, to a woman with a pair of scales.",
+          "There's no market in a burying ground. But her father has been in that ground since the winter, and she came home knowing a thing only he could have told her. I can't go myself. They'll not deal twice with the one house. It needs a stranger."
+        ],
+        "?sold=sleep": [
+          "You'll have heard it at the well, I suppose. I tell it to anyone who'll stand still. I've nobody else to tell, now.",
+          "{girl} went out on the dark of the moon and came back before light, and she has not slept since. Not an hour. She lies down and shuts her eyes, and she says there's nothing there to fall into. She told me straight. She sold it. At the market in {place:burying}, to a woman with a pair of scales.",
+          "There's no market in a burying ground. But her father has been in that ground since the winter, and she came home knowing a thing only he could have told her. I can't go myself. They'll not deal twice with the one house. It needs a stranger."
+        ],
+        "?": [
+          "You'll have heard it at the well, I suppose. I tell it to anyone who'll stand still. I've nobody else to tell, now.",
+          "{girl} went out on the dark of the moon and came back before light, and she has not laughed since. You'd not think that a great thing. You never knew her. She laughed at the goat, at the rain, at me. Now she says she can see a thing is funny, and there's nothing there to do it with. She told me straight. She sold it. At the market in {place:burying}, to a woman with a pair of scales.",
+          "There's no market in a burying ground. But her father has been in that ground since the winter, and she came home knowing a thing only he could have told her. I can't go myself. They'll not deal twice with the one house. It needs a stranger."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I'll hear it from her.",
+          "then": "see_girl",
+          "journal": "{mother}'s daughter {girl} went to a market in the burying ground on the dark of the moon and sold her {sold} there, to a woman with a pair of scales. The mother wants it bought back, and says the market will not deal twice with one house."
+        },
+        {
+          "say": "What did she buy with it?",
+          "then": "meet_more"
+        },
+        {
+          "say": "Sold is sold. I'm sorry for it.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "meet_more": {
+      "do": "talk",
+      "who": "mother",
+      "say": "An evening with her father. One evening of him, sat on his own mound as plain as you are, she says. He dropped between one furrow and the next at the plough, and she never got to say a thing to him. I'd have sold more than that for it, and I'm his wife. I don't blame her. I want it back for her all the same.",
+      "replies": [
+        {
+          "say": "I'll hear it from her.",
+          "then": "see_girl",
+          "journal": "{mother}'s daughter {girl} went to a market in the burying ground on the dark of the moon and sold her {sold} there, for one evening with her dead father. The mother wants it bought back, and says the market will not deal twice with one house."
+        },
+        {
+          "say": "Then she had what she paid for. Sold is sold.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_girl": {
+      "do": "talk",
+      "who": {
+        "?sold=voice": "mother",
+        "?": "girl"
+      },
+      "goal": "Hear from {girl} what she sold",
+      "say": {
+        "?sold=voice": [
+          "She's writing it for you in the ash. Wait. 'A woman with scales, on the yew side. She put it in the pan and it weighed something. Father was sitting by the yew.'",
+          "And this, underneath. 'Buy nothing but what you went for. They all want you to buy something else.' That's all she'll put. She keeps rubbing out the last of it and writing it again."
+        ],
+        "?sold=sleep": [
+          "You needn't be gentle with me. I'm not ill. I'm only here, all the time, and there is a great deal more of the night than I knew.",
+          "It was a woman with a pair of scales, on the yew side. She put it in the pan and it weighed something. I didn't think it would. Father was sitting by the yew. I had my evening with him, and I'd do it again, so you needn't look at me like that.",
+          "If you go in, buy nothing but what you went for. They all want you to buy something else."
+        ],
+        "?": [
+          "You needn't be gentle with me. I'm not ill. I'm only flat. Mother fell in the duck pond yesterday, and I stood there knowing it was funny.",
+          "It was a woman with a pair of scales, on the yew side. She put it in the pan and it weighed something. I didn't think it would. Father was sitting by the yew. I had my evening with him, and I'd do it again, so you needn't look at me like that.",
+          "If you go in, buy nothing but what you went for. They all want you to buy something else."
+        ]
+      },
+      "journal": "{girl} sold her {sold} to a woman with scales on the yew side of the burying ground, and her father was sitting by the yew. She says to buy nothing there but what I came for.",
+      "then": "keeper"
+    },
+    "keeper": {
+      "do": "talk",
+      "who": "keeper",
+      "goal": "Ask the lamp-keeper at {place:lodge} about the market",
+      "say": [
+        "The Arden girl. Yes. I saw her go in at the lych gate. I don't stop them. It isn't mine to stop.",
+        "The Warden's lamp burns over that ground every night of the year but one. On the dark of the moon I turn it to the wall, and I shut my door, and I count till cockcrow. That was the rule when the lamp was given me, and I was told not to ask whose rule. The dead that walk are his to put down. On that one night they don't walk. They sit, and they trade, and he looks the other way.",
+        "If you mean to go in, carry no light of your own. They'll not show themselves to it. Pay what you agree, to the grain. Buy nothing you didn't come for. And be out of the gate before first light, because I turn the lamp back then, and whatever you have not finished waits a whole moon for you."
+      ],
+      "replies": [
+        {
+          "say": "What do they take in payment?",
+          "then": "keeper_more"
+        },
+        {
+          "say": "I'll go in on the dark of the moon.",
+          "then": "go_market",
+          "journal": "{keeper} keeps the Warden's lamp over the burying ground. On the dark of the moon he turns it to the wall, and the dead sit and trade. His rules: no light of my own, pay to the grain, buy nothing I did not come for, and be out before first light."
+        }
+      ]
+    },
+    "keeper_more": {
+      "do": "talk",
+      "who": "keeper",
+      "mark": "market_keeper_told",
+      "say": {
+        "?patron:lantern_warden": [
+          "What they haven't got. They've no use for bread. Some will take coin, a great weight of it, for the pleasure of the weight. Some want the green stones that were money when they were alive. Most want a thing off the living that the living never thought could be sold. That's what the girl found out.",
+          "You keep the Warden yourself, by that token you carry. Then say so at the scales. They mind him, even on their one night."
+        ],
+        "?": "What they haven't got. They've no use for bread. Some will take coin, a great weight of it, for the pleasure of the weight. Some want the green stones that were money when they were alive. Most want a thing off the living that the living never thought could be sold. That's what the girl found out."
+      },
+      "journal": "{keeper} keeps the Warden's lamp over the burying ground. On the dark of the moon he turns it to the wall, and the dead sit and trade. His rules: no light of my own, pay to the grain, buy nothing I did not come for, and be out before first light. They take coin by weight, the old green stones, or things the living do not think can be sold.",
+      "then": "go_market"
+    },
+    "go_market": {
+      "do": "go",
+      "to": "burying",
+      "radius": 12,
+      "goal": "Go to {place:burying} on the dark of the moon",
+      "then": "stall",
+      "when": "moon:new"
+    },
+    "stall": {
+      "do": "talk",
+      "who": "weigher",
+      "goal": "Find the woman with the scales, after dark",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "say": [
+        "You're living. Mind where you put your feet. Some of us are sat on our own.",
+        "The Arden girl's. Yes. It's here in the jar, and it's the best thing on my board. I gave fair weight for it, and she had her evening. I'll sell it back. I'm a trader, not a thief. But it has a price now, and the price is not what I paid.",
+        "Walk the rows first. Everybody does. Then come back and tell me how you'll pay."
+      ],
+      "journal": "The woman with the scales is {weigher}. She has {girl}'s {sold} in a jar on her board, and will sell it back at her own price.",
+      "then": "rows_walk",
+      "when": "moon:new"
+    },
+    "rows_walk": {
+      "do": "vigil",
+      "at": "burying",
+      "radius": 16,
+      "gap": 9,
+      "goal": "Walk the rows of the market",
+      "lines": [
+        {
+          "say": "Boards stand on trestles between the mounds. Nothing is burning anywhere, and every face is plain to see all the same.",
+          "sound": "minecraft:block.wood.step"
+        },
+        {
+          "say": "A man weighs out something that is not there. The buyer nods and pays him with a button.",
+          "sound": "minecraft:block.stone.hit"
+        },
+        {
+          "say": "Two old women are haggling over a jar of somebody's good eyesight. Neither of them has any use for it. They are enjoying themselves."
+        },
+        {
+          "who": "hawker",
+          "say": "You! The one with a pulse! Come here. I've a thing on this board you didn't know you wanted."
+        },
+        {
+          "say": "Over by the yew a man sits on a mound with his cap in his hands. He is watching the lych gate as if somebody were late.",
+          "mark": "market_saw_father"
+        }
+      ],
+      "then": "hawker",
+      "when": "moon:new"
+    },
+    "hawker": {
+      "do": "talk",
+      "who": "hawker",
+      "goal": "Hear the hawker in {place:rows}",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "say": [
+        "A lantern that wants no oil. Look at it. Eighty years it burned in a crypt and never asked for a thing. You'll walk a good many dark roads, by the look of you.",
+        "I'll not take coin. What would I do with it? I'll take your mother's face. Only the remembering of it. You'd still know you had a mother. Come, that's nothing. You hardly use it."
+      ],
+      "voices": {
+        "faith": "A light that the Warden didn't light. Leave it on his board.",
+        "gain": "A lamp that never wants oil. I've paid more for less."
+      },
+      "replies": [
+        {
+          "say": "No. I came for one thing.",
+          "then": "stall_pay",
+          "mark": "market_kept_rule",
+          "for": [
+            "faith"
+          ]
+        },
+        {
+          "say": "Done. Take it.",
+          "then": "lamp_given",
+          "mark": "market_sold_face",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "faith"
+          ]
+        }
+      ],
+      "when": "moon:new"
+    },
+    "lamp_given": {
+      "do": "talk",
+      "who": "hawker",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "give": [
+        {
+          "item": "minecraft:soul_lantern",
+          "count": 1,
+          "name": "A Lantern That Wants No Oil",
+          "lore": [
+            "It burns blue, and it is not warm.",
+            "Bought at a board in a burying ground, on the dark of the moon."
+          ]
+        }
+      ],
+      "say": "There. A pleasure. No, don't try to think of her now, you'll only upset yourself. It burns blue. Don't mind that.",
+      "journal": "I bought a lantern that wants no oil from a dead man, and paid with the memory of my mother's face. I know that I had a mother. I cannot see her.",
+      "then": "stall_pay",
+      "when": "moon:new"
+    },
+    "stall_pay": {
+      "do": "talk",
+      "who": "weigher",
+      "goal": "Settle with {weigher} at the scales",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "say": [
+        "You've walked the rows. Good. Now. The girl's {sold}, in the jar. It weighed a good deal when I bought it, and it has weighed more every night since. They do that when they're missed.",
+        "I'll have coin for it, if you've the weight. Or the green stones we used when I had hands worth the name. Or the same of your own, for a season: laid in the pan here, and it finds its own way home to you after. Or you can go and ask the man by the yew what he thinks his evening was worth."
+      ],
+      "voices": {
+        "mercy": "She's a child who wanted her father. Whatever it costs, it's cheap.",
+        "faith": "The Warden lets them trade one night. He never said they could keep a girl's own self on a board.",
+        "gain": "A season is a long time to be without a thing. Pay in coin, if it must be paid."
+      },
+      "replies": [
+        {
+          "say": "Coin, then. {coins:30}. Weigh it.",
+          "needs_coins": 30,
+          "then": "paid_jar",
+          "mark": "market_paid_coin"
+        },
+        {
+          "say": "Six of the old green stones.",
+          "needs_item": {
+            "item": "minecraft:emerald",
+            "count": 6
+          },
+          "then": "paid_jar",
+          "mark": "market_paid_stones"
+        },
+        {
+          "say": "Take the same of mine, for a season.",
+          "then": "paid_jar",
+          "mark": "market_gave_own",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "irks": [
+            "gain"
+          ]
+        },
+        {
+          "say": "She was a child, and grieving. That was no fair bargain, and you know it.",
+          "then": "given_jar",
+          "mark": "market_shamed_weigher",
+          "for": [
+            "mercy",
+            "law"
+          ],
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "patron:lantern_warden",
+              "mark:market_keeper_told",
+              "mark:market_kept_rule"
+            ],
+            "hurts": [
+              "mark:market_sold_face"
+            ],
+            "fail": "stall_no",
+            "refuse": "Fair? I gave her what she asked for, and she'd give it again tomorrow. Ask her. You'll not talk me off my own board on my one night."
+          }
+        },
+        {
+          "say": "I'll ask the man by the yew.",
+          "then": "see_father"
+        }
+      ],
+      "when": "moon:new"
+    },
+    "stall_no": {
+      "do": "talk",
+      "who": "weigher",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "say": "No. Pay me, or go and bother Arden. The night isn't getting any longer.",
+      "then": "stall_pay",
+      "when": "moon:new"
+    },
+    "paid_jar": {
+      "do": "talk",
+      "who": "weigher",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "give": [
+        {
+          "item": "minecraft:glass_bottle",
+          "count": 1,
+          "name": "A Stoppered Jar",
+          "lore": [
+            "It is warm.",
+            "Something in it turns over when anyone speaks near it."
+          ]
+        }
+      ],
+      "say": {
+        "?mark:market_gave_own": "In the pan with it, then. There. You'll not miss it till you reach for it. It will come home when it has had its season. They nearly always do. Here is the jar. Keep the stopper in till you're under her roof, and don't speak near it.",
+        "?mark:market_paid_stones": "Ah. I had forgotten the green of them. Yes. Here is the jar. Keep the stopper in till you're under her roof, and don't speak near it.",
+        "?": "Good weight. I do like the weight. Here is the jar. Keep the stopper in till you're under her roof, and don't speak near it."
+      },
+      "journal": {
+        "?mark:market_gave_own": "I laid the same of my own in {weigher}'s scales, for a season, and she gave me the jar. I do not feel any different yet.",
+        "?mark:market_paid_stones": "I paid {weigher} in the old green stones, and she gave me the jar.",
+        "?": "I paid {weigher} in coin, by weight, and she gave me the jar."
+      },
+      "then": "home",
+      "when": "moon:new"
+    },
+    "given_jar": {
+      "do": "talk",
+      "who": "weigher",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "give": [
+        {
+          "item": "minecraft:glass_bottle",
+          "count": 1,
+          "name": "A Stoppered Jar",
+          "lore": [
+            "It is warm.",
+            "Something in it turns over when anyone speaks near it."
+          ]
+        }
+      ],
+      "say": "Hm. You talk like the one with the lamp. Take it, then. Take it. I'll say I lost it in the weighing. But tell her this from me: the next thing she wants off a dead woman, she can want.",
+      "journal": "I told {weigher} a bargain with a grieving child was no bargain. She gave me the jar for nothing, and did not thank me for it.",
+      "then": "home",
+      "when": "moon:new"
+    },
+    "see_father": {
+      "do": "talk",
+      "who": "father",
+      "goal": "Speak with the man by the yew",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "say": [
+        "You've come from the cottage. I can smell the hearth on you. Is she well? Are they both well?",
+        "She sold what for it? No. No, I never knew that. She sat down by me and said she had bought an evening, and I didn't ask with what. I was that glad to see her.",
+        "I told her where the seed money is, and that I never minded about the grey mare, and that it was nobody's fault, not the plough's and not hers. That's all an evening is. If I could hand it back, I would. Can I? Ask {weigher}. Tell her Arden says to unpick it."
+      ],
+      "voices": {
+        "mercy": "Don't take his evening off him. It's the only one he'll get.",
+        "honour": "It's his to give back. He has asked you to carry the word. Carry it."
+      },
+      "replies": [
+        {
+          "say": "I'll tell her to unpick it. The girl has her own back, and the evening never was.",
+          "then": "undo",
+          "mark": "market_undone",
+          "for": [
+            "honour"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "No. She paid for that evening. I'll pay for the rest.",
+          "then": "stall_pay",
+          "for": [
+            "mercy"
+          ]
+        }
+      ],
+      "when": "moon:new"
+    },
+    "undo": {
+      "do": "talk",
+      "who": "weigher",
+      "goal": "Tell {weigher} that Arden says to unpick it",
+      "not_now": "Not tonight. Come when there's no moon to see us by.",
+      "give": [
+        {
+          "item": "minecraft:glass_bottle",
+          "count": 1,
+          "name": "A Stoppered Jar",
+          "lore": [
+            "It is warm.",
+            "Something in it turns over when anyone speaks near it."
+          ]
+        }
+      ],
+      "say": "Unpick it. Well, it's his to hand back. It was sold to him. Done. He has had no evening and she has had none, and here is the jar. She'll not remember what he told her. She'll remember that she went, and not what for. That's how it's done. Don't look at me. I only keep the scales.",
+      "journal": "{father} asked for the bargain to be unpicked, and {weigher} unpicked it. I have the jar. {girl} will have her {sold} back, and will not remember her evening with him.",
+      "then": "home",
+      "when": "moon:new"
+    },
+    "home": {
+      "do": "talk",
+      "who": {
+        "?sold=voice": "mother",
+        "?": "girl"
+      },
+      "goal": "Take the jar home to {place:cottage}",
+      "say": {
+        "?sold=voice": "Is that it? Give it here. No. Give it to her. {girl}, love. Take it up to bed with you, and take the stopper out there, in case it's a shock.",
+        "?": "Is that it? It's warm. I'd forgotten it was warm. Mother says I'm to take the stopper out in bed, in case it's a shock."
+      },
+      "journal": "I left the jar with the Ardens.",
+      "then": "wait_settle"
+    },
+    "wait_settle": {
+      "do": "wait",
+      "days": [
+        1,
+        2
+      ],
+      "wake": "none",
+      "journal": "{mother} said to give it a night or two to settle.",
+      "then": "after"
+    },
+    "after": {
+      "do": "talk",
+      "who": "girl",
+      "goal": "See how {girl} is",
+      "say": {
+        "?mark:market_undone": "It's back. I woke and it was simply there, like a tooth you'd stopped noticing was missing. But mother says I went to the burying ground on the dark of the moon, and I say what for, and she won't tell me. Do you know what for? No. You've the same face on you that she has. Very well. I'll not ask again.",
+        "?sold=voice": "Hello. That's the first thing I've ever said to you, isn't it? Hello. It's hoarse. It has been kept in a jar. Father said the seed money is under the third flag in the dairy, and I have been wanting to say that out loud for nine days.",
+        "?sold=sleep": "I slept. A whole night and half a day. Mother sat and watched me do it as if I were a loaf rising. I dreamed about the grey mare, and father said in the dream that he never minded about her. Only he said that awake, too. I've still got that.",
+        "?": "The goat ate mother's cap this morning and I had to sit down in the yard. I thought I'd be sick. I'd forgotten how much room it takes up. Father would have laughed too. He told me so himself, near enough."
+      },
+      "then": {
+        "?mark:market_undone": "end:unpicked",
+        "?mark:market_gave_own": "end:traded",
+        "?mark:market_shamed_weigher": "end:given",
+        "?": "end:bought"
+      }
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "A girl sold something of hers at a market in a burying ground. Sold is sold. I left the Ardens to it."
+    },
+    "bought": {
+      "text": {
+        "?mark:market_paid_stones": "I went into the burying ground on the dark of the moon and bought back {girl}'s {sold} from the woman with the scales, in the old green stones. {girl} kept her evening with her father.",
+        "?": "I went into the burying ground on the dark of the moon and bought back {girl}'s {sold} from the woman with the scales, in coin, by weight. {girl} kept her evening with her father."
+      },
+      "reward": {
+        "reputation": 12,
+        "items": [
+          "minecraft:honey_bottle*2",
+          "minecraft:bread*3"
+        ]
+      },
+      "marks": [
+        "market_bought_back"
+      ],
+      "town": [
+        "The Arden girl is herself again. The widow says a stranger went and fetched it back for her, whatever it was. From where, she'll not say.",
+        "I don't hold with it. If the dead want to keep a stall, that's the lamp-keeper's business and nobody else's. Still. The girl's herself."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            22
+          ],
+          "letter": {
+            "from": "{mother}",
+            "lines": [
+              "We found the seed money where he told her it was, and there is barley in the long field for the first time since he went.",
+              "{girl} goes up to the burying ground of a Sunday and sits by the yew. In the daylight, with the lamp lit. She says she has said what she wanted, and now she only keeps him company.",
+              "I have nothing to send you but what the bees made. You will have had it by now."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "mark:market_sold_face",
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "There is a blue light going about the roads that I did not light, and the Warden did not either. I know where it was bought. I told you to buy nothing you did not come for.",
+              "I will not have it through my lych gate lit. Bring it to me dark and I will bury it for you, deep, and say what is proper over it.",
+              "That is the most I can do. I cannot get back what you paid."
+            ]
+          }
+        }
+      ]
+    },
+    "traded": {
+      "text": "I went into the burying ground on the dark of the moon and laid the same of my own in the scales, for a season, to buy back {girl}'s {sold}. She has hers and she kept her evening with her father. Mine is on a dead woman's board until it finds its way home.",
+      "reward": {
+        "reputation": 16,
+        "items": [
+          "minecraft:honey_bottle*2",
+          "minecraft:bread*3"
+        ]
+      },
+      "marks": [
+        "market_bought_back",
+        "market_owes_season"
+      ],
+      "town": [
+        "The Arden girl is herself again. They say {player} paid for it with something of their own, and came out of that lych gate walking very carefully.",
+        "The widow would give {player} the cottage if they asked for it. I'd not ask what it cost. I'd not want to know."
+      ],
+      "later": [
+        {
+          "days": [
+            18,
+            28
+          ],
+          "mark": "market_season_done",
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "What you left in the scales was on my step this morning, wrapped in a dock leaf with the dew on it.",
+              "I do not know what it is. It is warm. I have sent it on with the runner, and told him not to talk near it.",
+              "Open it indoors. And do not go back to thank her. She would take that for an offer."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "mark:market_sold_face",
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "There is a blue light going about the roads that I did not light, and the Warden did not either. I know where it was bought. I told you to buy nothing you did not come for.",
+              "I will not have it through my lych gate lit. Bring it to me dark and I will bury it for you, deep, and say what is proper over it.",
+              "That is the most I can do. I cannot get back what you paid."
+            ]
+          }
+        }
+      ]
+    },
+    "given": {
+      "text": "I went into the burying ground on the dark of the moon and told the woman with the scales that a bargain with a grieving child was no bargain. She gave me {girl}'s {sold} for nothing. {girl} has it back, and kept her evening with her father.",
+      "reward": {
+        "reputation": 14,
+        "items": [
+          "minecraft:honey_bottle*2",
+          "minecraft:bread*3"
+        ]
+      },
+      "marks": [
+        "market_bought_back",
+        "market_shamed_the_dead"
+      ],
+      "town": [
+        "The Arden girl is herself again, and nobody paid a thing for it. The lamp-keeper says somebody went in there and argued. With them. And won.",
+        "You don't want to make a habit of winning arguments in a burying ground. That's all I'll say."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            17
+          ],
+          "scene": [
+            [
+              "a",
+              "The lamp-keeper says there was a board short on the yew side, this last dark of the moon."
+            ],
+            [
+              "b",
+              "He goes in and counts them?"
+            ],
+            [
+              "a",
+              "He counts the marks the trestles leave in the grass, next morning. One short. The one with the scales."
+            ],
+            [
+              "b",
+              "Ashamed to show her face, then. Good. If she's got one."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "mark:market_sold_face",
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "There is a blue light going about the roads that I did not light, and the Warden did not either. I know where it was bought. I told you to buy nothing you did not come for.",
+              "I will not have it through my lych gate lit. Bring it to me dark and I will bury it for you, deep, and say what is proper over it.",
+              "That is the most I can do. I cannot get back what you paid."
+            ]
+          }
+        }
+      ]
+    },
+    "unpicked": {
+      "text": "I went into the burying ground on the dark of the moon. {girl}'s father asked for the bargain to be unpicked, and it was. She has her {sold} back. She does not remember her evening with him, or anything he told her.",
+      "reward": {
+        "reputation": 8,
+        "items": [
+          "minecraft:bread*3"
+        ]
+      },
+      "marks": [
+        "market_bought_back",
+        "market_unpicked"
+      ],
+      "town": [
+        "The Arden girl is herself again. But she keeps asking her mother what she went up to the burying ground for, and her mother keeps not saying.",
+        "Whatever the widow wanted fetched back, it came back with a piece missing. You can see it in the pair of them."
+      ],
+      "later": [
+        {
+          "days": [
+            12,
+            22
+          ],
+          "letter": {
+            "from": "{mother}",
+            "lines": [
+              "She is well. She sleeps and she talks and she laughs at the goat, all three, and I thank you for it.",
+              "She asks me what she went to the burying ground for. I have not told her. If I told her, she would go again.",
+              "The seed money is still wherever he put it. She knew for nine days, and now she doesn't. We shall manage. We managed before."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            16
+          ],
+          "if": "mark:market_sold_face",
+          "letter": {
+            "from": "{keeper}",
+            "lines": [
+              "There is a blue light going about the roads that I did not light, and the Warden did not either. I know where it was bought. I told you to buy nothing you did not come for.",
+              "I will not have it through my lych gate lit. Bring it to me dark and I will bury it for you, deep, and say what is proper over it.",
+              "That is the most I can do. I cannot get back what you paid."
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

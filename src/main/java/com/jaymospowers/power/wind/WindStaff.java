@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
 import java.lang.invoke.MethodHandle;
@@ -232,19 +233,19 @@ public final class WindStaff {
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		for (int i = 0; i < 16; i++) {
 			double a = Math.PI * 2.0 * i / 16.0;
-			double r = VORTEX_RADIUS * 0.7;
+			double r = AbilityPower.size(player, VORTEX_RADIUS) * 0.7;
 			// clouds on a ring, drifting round and in
 			level.sendParticles(ParticleTypes.CLOUD, center.x + Math.cos(a) * r, center.y - 0.5, center.z + Math.sin(a) * r, 0,
 				-Math.sin(a) - Math.cos(a) * 0.6, 0.05, Math.cos(a) - Math.sin(a) * 0.6, 0.3);
 		}
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 1.0F, 0.9F);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(VORTEX_RADIUS), e -> foe(player, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, VORTEX_RADIUS)), e -> foe(player, e))) {
 			Vec3 in = player.position().subtract(e.position()).horizontal();
 			double distance = in.length();
-			if (distance > VORTEX_RADIUS || distance < 1.5) {
+			if (distance > AbilityPower.size(player, VORTEX_RADIUS) || distance < 1.5) {
 				continue; // too far, or already at the staff
 			}
-			double strength = VORTEX_PULL * bonus * Math.min(1.0, distance / VORTEX_RADIUS + 0.3);
+			double strength = VORTEX_PULL * bonus * Math.min(1.0, distance / AbilityPower.size(player, VORTEX_RADIUS) + 0.3);
 			push(e, in.normalize().scale(strength), 0.15);
 		}
 	}
@@ -262,17 +263,17 @@ public final class WindStaff {
 		ServerLevel level = player.level();
 		Vec3 center = player.position();
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y + 0.3, center.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.1, center.z, 30, DOWNDRAFT_RADIUS * 0.4, 0.1, DOWNDRAFT_RADIUS * 0.4, 0.15);
+		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.1, center.z, 30, AbilityPower.size(player, DOWNDRAFT_RADIUS) * 0.4, 0.1, AbilityPower.size(player, DOWNDRAFT_RADIUS) * 0.4, 0.15);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.3F, 0.7F);
-		com.jaymospowers.core.Shakes.heavy(player, center, DOWNDRAFT_RADIUS * 2.0, 1.0F);
+		com.jaymospowers.core.Shakes.heavy(player, center, AbilityPower.size(player, DOWNDRAFT_RADIUS) * 2.0, 1.0F);
 		float damage = (float)(player.getAttributeValue(Attributes.ATTACK_DAMAGE) * DOWNDRAFT_DAMAGE * bonus);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(DOWNDRAFT_RADIUS), e -> foe(player, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, DOWNDRAFT_RADIUS)), e -> foe(player, e))) {
 			Vec3 away = e.position().subtract(center).horizontal();
 			double distance = away.length();
-			if (distance > DOWNDRAFT_RADIUS) {
+			if (distance > AbilityPower.size(player, DOWNDRAFT_RADIUS)) {
 				continue;
 			}
-			double share = 1.0 - distance / (DOWNDRAFT_RADIUS + 1.0);
+			double share = 1.0 - distance / (AbilityPower.size(player, DOWNDRAFT_RADIUS) + 1.0);
 			e.setInvulnerableTime(0);
 			e.hurtServer(level, player.damageSources().playerAttack(player), damage);
 			Vec3 out = distance > 1.0E-3 ? away.scale(1.0 / distance) : Vec3.ZERO;

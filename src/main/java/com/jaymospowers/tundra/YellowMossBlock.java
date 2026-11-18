@@ -1,5 +1,6 @@
 package com.jaymospowers.tundra;
 
+import com.jaymospowers.core.Loaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -71,7 +72,7 @@ public class YellowMossBlock extends Block {
 	 */
 	static int count(ServerLevel level, BlockPos pos, int range, TagKey<Block> tag, int enough) {
 		BlockPos low = pos.offset(-range, -range, -range), high = pos.offset(range, range, range);
-		if (!level.hasChunksAt(low, high)) {
+		if (!Loaded.made(level, low, high)) {
 			return -1;
 		}
 		int found = 0;

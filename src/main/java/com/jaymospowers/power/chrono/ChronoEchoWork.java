@@ -358,7 +358,7 @@ final class ChronoEchoWork {
 		boolean knows = owner == null || Mastery.isUnlocked(owner, PowerKey.ABILITY_4);
 		if (knows && !fighting() && --this.bloomIn <= 0 && this.echo.onGround()) {
 			this.echo.swingForAttack(InteractionHand.MAIN_HAND);
-			this.bloom = new TimeBloom(level, this.echo.blockPosition(), ChronoFx.style(owner));
+			this.bloom = new TimeBloom(level, this.echo.blockPosition(), ChronoFx.style(owner), owner);
 			this.bloom.start();
 		}
 	}

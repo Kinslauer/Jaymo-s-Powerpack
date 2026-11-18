@@ -87,7 +87,8 @@ import org.jspecify.annotations.Nullable;
  * thrown as a barrage of small blasts of the element, hands taking turns, as the blood barrage. Each hurts and carries
  * a touch of the element; one in {@link #ELEMENT_ONE_IN} bursts with it in full ({@link Spellcraft#strike}).
  * Restoration's blasts heal the living they hit instead and sear only monsters and the undead.</li>
- * <li>A <b>tap</b> of J is still the Imbue (or Restoration's Mend, or lightning's Storm Ring), and sneak and J the keys.</li>
+ * <li>A <b>tap</b> of J is the sigil (class trees, {@link Sigils}; or Restoration's Mend), a hold
+ * with a blade in hand and nothing to draw from the Imbue, and sneak and J the keys (held, the element's own working).</li>
  * </ul>
  */
 public final class Absorption {
@@ -111,6 +112,14 @@ public final class Absorption {
 	/** The most lava blocks a pulse draws heat from. */
 	static final int LAVA_MOST = 2;
 
+	/** (Carry your water) What a waterskin's sip, a bottle and a bucket pour into a Water Sorcerer's reserve. */
+	static final float CANTEEN = 3.0F, FLASK = 5.0F, RESERVOIR = 20.0F;
+	/** The moisture in the air: a pulse's draw, more where it's warm and wet (from this base temperature up). */
+	static final float MOISTURE = 0.15F, MOISTURE_DAMP = 0.3F, WARM_DAMP = 0.8F;
+	/** Looking this steeply down (the look's height) is looking into your cupped hands. */
+	static final double CUPPED = -0.8;
+	/** Water poured out of a vessel and not yet in the reserve. Not saved. */
+	private static final Map<UUID, Float> POURED = new HashMap<>();
 	/** The trickle a Sorcerer takes a second standing in their element (earth's slower: there's always ground). */
 	static final float TRICKLE = 0.25F, EARTH_TRICKLE = 0.1F;
 	/** Death: what a death near a Death Sorcerer gives, and how near. */
@@ -185,6 +194,8 @@ public final class Absorption {
 	private static final List<Blast> BLASTS = new ArrayList<>();
 	/** An empty hand's tap, by player: when it was let go (its Imbue waits to see if a second press makes it a double tap). */
 	private static final Map<UUID, Long> TAPPED = new HashMap<>();
+	/** (class trees) A plain press of a Sorcerer who doesn't absorb, by player: when it went down. */
+	private static final Map<UUID, Long> PRESSED = new HashMap<>();
 
 	private Absorption() {
 	}
@@ -197,6 +208,7 @@ public final class Absorption {
 			HOLDING.clear();
 			BLASTS.clear();
 			TAPPED.clear();
+			PRESSED.clear();
 		});
 		// death: every soul let go near a Death Sorcerer goes to them
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -275,19 +287,28 @@ public final class Absorption {
 	private static void hold(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
 		if (down) {
-			if (absorber(player) && player.isAlive() && !TreeLocks.check(player, TreeLocks.Lock.SORCERY)) {
-				// (Andy's skill-tree locks) absorbing is learned: Sorcery
-				return;
-			}
-			if (absorber(player) && player.isAlive()) {
+			if (absorber(player) && player.isAlive() && TreeLocks.has(player, TreeLocks.Lock.SORCERY)) {
+				// (Andy's skill-tree locks) absorbing is learned: Absorbing (the old Sorcery perk)
 				Long tapped = TAPPED.remove(player.getUUID());
 				boolean quick = tapped != null && now - tapped <= DOUBLE_TAP && player.getMainHandItem().isEmpty();
 				if (tapped != null && !quick) {
 					Spellcraft.imbue(player, false);
 				}
 				HOLDING.put(player.getUUID(), new Holding(now, quick));
+			} else if (Classes.is(player, PlayerClass.SORCERER) && player.isAlive()) {
+				// (class trees) a Sorcerer who can't absorb (not learned, or the wild bloodline): a tap is the sigil, a hold the Imbue
+				PRESSED.put(player.getUUID(), now);
 			} else {
 				Spellcraft.imbue(player, false);
+			}
+			return;
+		}
+		Long pressed = PRESSED.remove(player.getUUID());
+		if (pressed != null) {
+			if (now - pressed < TAP_TICKS) {
+				Spellcraft.imbue(player, false);
+			} else {
+				Spellcraft.holdImbue(player);
 			}
 			return;
 		}
@@ -364,6 +385,10 @@ public final class Absorption {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), gatherSound(element), SoundSource.PLAYERS, 0.6F, 0.8F);
 			}
 			if (!h.gathering && !player.getMainHandItem().isEmpty()) {
+				// (class trees) a blade in hand and nothing to draw from: the hold is the Imbue
+				if (Spellcraft.blade(player.getMainHandItem())) {
+					Spellcraft.holdImbue(player);
+				}
 				return;
 			}
 		}
@@ -621,6 +646,16 @@ public final class Absorption {
 				return 0.75F;
 			}
 		}
+		// (Carry your water) a Water Sorcerer looking down into their cupped hands: what they carry, else the air's moisture
+		if (element.equals("water") && look.y <= CUPPED) {
+			float got = carried(level, player, hands);
+			if (got <= 0.0F) {
+				got = moisture(level, player, hands, mote);
+			}
+			if (got > 0.0F) {
+				return got;
+			}
+		}
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(look.scale(GATHER_RANGE)), ClipContext.Block.OUTLINE,
 			element.equals("water") ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, player));
@@ -759,7 +794,78 @@ public final class Absorption {
 		};
 	}
 
+	/**
+	 * (Andy's Awakening pick, "Carry your water": "water sorcerers too") A Water Sorcerer looking at nothing pours from what
+	 * they carry: a sip of a Kitchen waterskin, a bottle of water (left a glass bottle) or a water bucket (left a bucket).
+	 */
+	private static float carried(ServerLevel level, ServerPlayer player, Vec3 hands) {
+		// what a vessel poured that a pulse couldn't hold waits in the hands for the next
+		float poured = POURED.getOrDefault(player.getUUID(), 0.0F);
+		if (poured <= 0.0F) {
+			poured = pour(level, player, hands);
+		}
+		float got = Math.min(GATHER_MOST, poured);
+		POURED.put(player.getUUID(), poured - got);
+		if (got > 0.0F) {
+			stream(level, hands.add(0.0, -0.4, 0.0), hands, Spellcraft.particle("water"), 0.0);
+		}
+		return got;
+	}
+
+	private static float pour(ServerLevel level, ServerPlayer player, Vec3 hands) {
+		net.minecraft.world.entity.player.Inventory inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			net.minecraft.world.item.ItemStack stack = inv.getItem(i);
+			float got = 0.0F;
+			if (KitchenCompat.sipWaterskin(stack)) {
+				got = CANTEEN;
+			} else if (stack.is(net.minecraft.world.item.Items.POTION) && stack.getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS,
+				net.minecraft.world.item.alchemy.PotionContents.EMPTY).is(net.minecraft.world.item.alchemy.Potions.WATER)) {
+				stack.shrink(1);
+				net.minecraft.world.item.ItemStack bottle = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE);
+				if (!inv.add(bottle)) {
+					player.drop(bottle, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				got = FLASK;
+			} else if (stack.is(net.minecraft.world.item.Items.WATER_BUCKET)) {
+				inv.setItem(i, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
+				got = RESERVOIR;
+			}
+			if (got > 0.0F) {
+				level.sendParticles(ParticleTypes.SPLASH, hands.x, hands.y, hands.z, 12, 0.15, 0.1, 0.15, 0.1);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.6F, 1.3F);
+				return got;
+			}
+		}
+		return 0.0F;
+	}
+
+	/**
+	 * (Andy: water sorcerers "can draw it from the moisture in the air") Looking at nothing with nothing carried, a Water
+	 * Sorcerer wrings a little water out of the air: nothing where it never rains (a desert, the Nether), more in a wet land.
+	 */
+	private static float moisture(ServerLevel level, ServerPlayer player, Vec3 hands, ParticleOptions mote) {
+		BlockPos at = player.blockPosition();
+		var biome = level.getBiome(at).value();
+		if (!biome.hasPrecipitation()) {
+			return 0.0F;
+		}
+		float got = biome.getBaseTemperature() >= WARM_DAMP ? MOISTURE_DAMP : MOISTURE;
+		RandomSource random = level.getRandom();
+		for (int i = 0; i < 4; i++) {
+			Vec3 p = hands.add((random.nextDouble() - 0.5) * 3.0, (random.nextDouble() - 0.3) * 2.0, (random.nextDouble() - 0.5) * 3.0);
+			Vec3 in = hands.subtract(p).normalize();
+			level.sendParticles(mote, p.x, p.y, p.z, 0, in.x, in.y, in.z, 0.2);
+		}
+		return got;
+	}
+
 	/** The trickle a second for a Sorcerer standing in their element, not holding J. */
+	/** Whether {@code player} stands in {@code element}: where it trickles into them by itself (class trees: a Sorcerer's Wellspring). */
+	static boolean inElement(ServerLevel level, ServerPlayer player, String element) {
+		return trickle(level, player, element) > 0.0F;
+	}
+
 	private static float trickle(ServerLevel level, ServerPlayer player, String element) {
 		BlockPos at = player.blockPosition();
 		return switch (element) {

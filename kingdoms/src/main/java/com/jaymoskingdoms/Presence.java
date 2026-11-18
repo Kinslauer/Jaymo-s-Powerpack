@@ -62,6 +62,6 @@ public final class Presence {
 
 	/** {@code base} blocks, stretched by {@code player}'s Presence: how far their orders carry. */
 	public static double reach(Player player, double base) {
-		return base * (1.0 + ORDERS_PER_POINT * Stats.value(player, Stats.Stat.PRESENCE)) * Paths.orders(player);
+		return base * (1.0 + ORDERS_PER_POINT * Stats.value(player, Stats.Stat.PRESENCE)) * Paths.orders(player) * Discipline.orderReach(player);
 	}
 }

@@ -776,6 +776,64 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ZFighterReel.reel(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle reel;
+	private static boolean lookedForReel;
+
+	/**
+	 * (Awakening pick) A Rubber-folk's or a Verdant's stretching grab: the arm shoots out to the foe they look toward and yanks it
+	 * to their feet (Jaymo's Powers does the stretch). True if the key was spent on it; false without Powers.
+	 */
+	public static boolean reel(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForReel) {
+			lookedForReel = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					reel = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterReel"),
+						"reel", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stretching grab (older Powers?)", e);
+				}
+			}
+		}
+		if (reel == null) {
+			return false;
+		}
+		try {
+			return (boolean) reel.invokeExact(player);
+		} catch (Throwable e) {
+			reel = null;
+			return false;
+		}
+	}
+
+	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle questDone;
+	private static boolean lookedForQuestDone;
+
+	/** (Awakening pick) A quest finished: Jaymo's Powers gives back one of its power trials' swaps. Nothing without Powers. */
+	public static void questDone(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForQuestDone) {
+			lookedForQuestDone = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					questDone = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.trials.PowerTrials"),
+						"questDone", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' power trials (older Powers?)", e);
+				}
+			}
+		}
+		if (questDone == null) {
+			return;
+		}
+		try {
+			questDone.invokeExact(player);
+		} catch (Throwable e) {
+			questDone = null;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;
@@ -1072,6 +1130,55 @@ public final class PowersCompat {
 		}
 		try {
 			return (boolean)sealed.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (Awakening pick) Powers' {@code EightSignCircle.sealFor(Entity, int)} and {@code Blind.sightless(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle sealFor, sightless;
+	private static boolean lookedForSealFor, lookedForSightless;
+
+	/** (Awakening pick) Seals {@code entity}'s power (and forms) for {@code ticks}, as an Eight-Sign Circle does; nothing without Powers. */
+	public static void seal(net.minecraft.world.entity.Entity entity, int ticks) {
+		if (!lookedForSealFor) {
+			lookedForSealFor = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sealFor = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.divine.EightSignCircle"),
+						"sealFor", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Entity.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' seal (older Powers?)", e);
+				}
+			}
+		}
+		if (sealFor != null) {
+			try {
+				sealFor.invoke(entity, ticks);
+			} catch (Throwable e) {
+				// no seal, then
+			}
+		}
+	}
+
+	/** (Awakening pick) Whether {@code entity} can't see now (both eyes gone, or a blindfold on: Powers' Blind); false without Powers. */
+	public static boolean sightless(LivingEntity entity) {
+		if (!lookedForSightless) {
+			lookedForSightless = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sightless = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.blindness.Blind"),
+						"sightless", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blindness (older Powers?)", e);
+				}
+			}
+		}
+		if (sightless == null) {
+			return false;
+		}
+		try {
+			return (boolean)sightless.invoke(entity);
 		} catch (Throwable e) {
 			return false;
 		}
@@ -2711,6 +2818,23 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * Tells {@code carrier} of everything one of Powers' Tool Stations makes from a forged head (the head, and what is made
+	 * of it), by adding it to Powers' {@code Grades.CARRIERS}. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void onAssembled(java.util.function.BiConsumer<net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack> carrier) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.tinkering.smithing.Grades").getField("CARRIERS").get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack>>)list).add(carrier);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Tool Station carriers (older Powers?)", e);
+		}
+	}
+
+	/**
 	 * (0.7.616) Tells {@code listener} of every parry on the server (the player and whom they parried, null for an arrow), by
 	 * listening on Powers' {@code Guard.PARRIED} event. Nothing happens without Powers (or an older one).
 	 */
@@ -2937,6 +3061,32 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle fitProsthetics;
+	private static boolean fitProstheticsLooked;
+
+	/**
+	 * {@code helper} straps on the prosthetics downed {@code patient} carries or that lie near them (Powers'
+	 * {@code Prosthetics.fitFrom}). How many went on; 0 without Powers.
+	 */
+	public static int fitProsthetics(net.minecraft.server.level.ServerPlayer patient, LivingEntity helper) {
+		if (!fitProstheticsLooked) {
+			fitProstheticsLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					fitProsthetics = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Prosthetics"),
+						"fitFrom", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics.fitFrom (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return fitProsthetics == null ? 0 : (int)fitProsthetics.invoke(patient, helper);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle carried;
 	private static boolean carriedLooked;
 
@@ -3031,6 +3181,32 @@ public final class PowersCompat {
 			field.set(null, share);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the Finesse stat (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * Class trees patch 8: hands Jaymo's Powers what three tree perks need of it. A Ranger's Heartseeker says which aimed
+	 * shots can't miss or glance ({@code LockOnRegions.sure}); a Brute's Thick Skull how likely a blow to the head is to knock
+	 * them out ({@code Downed.headKnock}); a Brute's Scar Tissue how soon their wounds close ({@code Bleeding.closing}).
+	 */
+	public static void shareExtras() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.util.function.BiPredicate<net.minecraft.world.entity.LivingEntity, net.minecraft.world.damagesource.DamageSource> sure = RogueExtras::sure;
+			Class.forName("com.jaymospowers.core.LockOnRegions").getField("sure").set(null, sure);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> skull = WarExtras::headKnock;
+			Class.forName("com.jaymospowers.core.wounds.Downed").getField("headKnock").set(null, skull);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> closing = WarExtras::closing;
+			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("closing").set(null, closing);
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> fletch = RogueExtras::fletchShare;
+			Class.forName("com.jaymospowers.tinkering.fletching.Fletching").getField("more").set(null, fletch);
+			// (last: a Powers without it keeps the ones above) a blood Sorcerer's Hide turns half their own bleeding
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> bleed = ArcaneExtras::bleedHarm;
+			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("harm").set(null, bleed);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
 		}
 	}
 

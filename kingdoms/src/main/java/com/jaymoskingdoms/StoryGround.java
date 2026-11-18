@@ -45,7 +45,6 @@ import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
@@ -72,8 +71,6 @@ public final class StoryGround {
 	 * found (30 chunks out).
 	 */
 	static final int CAPITAL_VILLAGE_SEARCH = 40;
-	/** (0.7.350) Time the capital's village search may take each tick (ms), so the server keeps ticking meanwhile. */
-	static final int VILLAGE_SEARCH_MS = 15;
 	/** A new barbarian camp: this far from spawn. */
 	static final int CAMP_MIN = 200, CAMP_MAX = 360;
 	/** A new monolith: this far from spawn, and the spots tried. */
@@ -177,6 +174,9 @@ public final class StoryGround {
 		ServerTickEvents.END_SERVER_TICK.register(StoryGround::holds);
 		PayloadTypeRegistry.clientboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			if (capital != null && capital.search != null) {
+				capital.search.cancel();
+			}
 			capital = null;
 			HARBOURS.clear();
 			ROADWAYS.clear();
@@ -259,8 +259,12 @@ public final class StoryGround {
 
 	/**
 	 * (0.7.350) Where the first capital's village might be: every village's possible starts within
-	 * {@link #CAPITAL_VILLAGE_SEARCH} chunks of spawn, nearest first, looked at for a few ms a tick. What vanilla's
-	 * findNearestMapStructure does, but bounded in chunks and spread over ticks.
+	 * {@link #CAPITAL_VILLAGE_SEARCH} chunks of spawn, nearest first. What vanilla's findNearestMapStructure does, but
+	 * bounded in chunks. Whether a village could start at each spot is worked out on a background thread, from the
+	 * Overworld's own ground ({@link Stacked#overworldGround}): that check lays out the whole town, loading (and on the
+	 * first look in a session, upgrading) every building's template and reading the land and rivers under it, which on the
+	 * server thread stalled a newcomer's first seconds for 10-20 s. The server thread only follows its answers in order and
+	 * makes the chunk of the first likely one, to see if its village really starts there.
 	 */
 	private static final class VillageSearch {
 		record Spot(Structure structure, StructurePlacement placement, ChunkPos chunk, int distance) {
@@ -271,6 +275,10 @@ public final class StoryGround {
 
 		final BlockPos spawn;
 		final List<Spot> spots = new ArrayList<>();
+		/** The background's answer for each spot looked at so far (true: a village could start there), and how many it has. */
+		private boolean[] could = new boolean[0];
+		private volatile int answered;
+		private volatile boolean cancelled;
 		int next;
 		@Nullable BlockPos found;
 		/** The spot whose chunk is being made, to see if its village really starts, and when that's done (null: none). */
@@ -288,7 +296,8 @@ public final class StoryGround {
 				return;
 			}
 			// (a One Dimension world's Overworld band's own placements: the stacked level's has none, "0 of 0 places looked at")
-			ChunkGeneratorStructureState state = Stacked.overworldGround(level).structures();
+			Stacked.Ground ground = Stacked.overworldGround(level);
+			ChunkGeneratorStructureState state = ground.structures();
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
 			for (Holder<Structure> village : villages.get()) {
@@ -314,10 +323,45 @@ public final class StoryGround {
 				}
 			}
 			this.spots.sort(Comparator.comparingInt(Spot::distance));
+			this.could = new boolean[this.spots.size()];
+			if (!this.spots.isEmpty()) {
+				lookAhead(level.registryAccess(), level.getServer().getStructureTemplateManager(), ground, state.getLevelSeed());
+			}
 		}
 
-		/** Looks at spots till {@code budgetNanos} is used up; true once it's over (found, or none left). */
-		boolean step(ServerLevel level, long budgetNanos) {
+		/** Asks, on a background thread and nearest first, whether a village could start at each spot, till cancelled. */
+		private void lookAhead(net.minecraft.core.RegistryAccess registries, net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager templates,
+			Stacked.Ground ground, long seed) {
+			List<Spot> spots = List.copyOf(this.spots);
+			boolean[] could = this.could;
+			CompletableFuture.runAsync(() -> {
+				// (this thread's own: a climate sampler's caches aren't shared between threads)
+				net.minecraft.world.level.biome.Climate.Sampler climate = ground.randomState().createClimateSampler(
+					net.minecraft.world.level.levelgen.densityfunction.SamplerContext.builder().enableCaches().build());
+				for (int i = 0; i < spots.size() && !this.cancelled; i++) {
+					Spot spot = spots.get(i);
+					boolean can = false;
+					try {
+						can = spot.placement().applyAdditionalChunkRestrictions(spot.chunk().x(), spot.chunk().z(), seed)
+							&& spot.structure().findValidGenerationPoint(new Structure.GenerationContext(registries, ground.generator(),
+								ground.generator().getBiomeSource(), climate, ground.randomState(), templates, seed, spot.chunk(), ground.heights(),
+								spot.structure().biomes()::contains)).isPresent();
+					} catch (RuntimeException e) {
+						JaymosKingdoms.LOGGER.debug("The capital's village search couldn't look at {}", spot.chunk(), e);
+					}
+					could[i] = can;
+					this.answered = i + 1;
+				}
+			}, net.minecraft.util.Util.backgroundExecutor());
+		}
+
+		/** Stops the background looking (the search is over, or the server is stopping). */
+		void cancel() {
+			this.cancelled = true;
+		}
+
+		/** Follows the background's answers as far as it has got; true once it's over (found, or none left). */
+		boolean step(ServerLevel level) {
 			if (this.making != null) {
 				if (!this.made.isDone()) {
 					return false;
@@ -330,30 +374,22 @@ public final class StoryGround {
 					return true;
 				}
 			}
-			long until = System.nanoTime() + budgetNanos;
-			while (this.next < this.spots.size()) {
-				Spot spot = this.spots.get(this.next++);
-				StructureCheckResult result = Stacked.searchingOverworld(level,
-					() -> level.structureManager().checkStructurePresence(spot.chunk(), spot.structure(), spot.placement(), false));
-				if (result == StructureCheckResult.START_PRESENT) {
-					this.found = spot.placement().getLocatePos(spot.chunk());
-					return true;
-				}
-				if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
-					// vanilla's check says a village starts here: its chunk is made off the server thread and looked at once
-					// it's there (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
+			int answered = this.answered;
+			while (this.next < answered) {
+				int i = this.next++;
+				Spot spot = this.spots.get(i);
+				if (this.could[i]) {
+					// a village could start here: its chunk is made off the server thread and looked at once it's there
+					// (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
 					this.making = spot;
 					this.made = level.getChunkSource().addTicketAndLoadWithRadius(MAKING, spot.chunk(), 0);
 					return false;
 				}
-				if (System.nanoTime() >= until) {
-					return false;
-				}
 			}
-			return true;
+			return this.next >= this.spots.size();
 		}
 
-		/** Whether the village vanilla's check foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
+		/** Whether the village the background foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
 		private static @Nullable BlockPos started(ServerLevel level, Spot spot) {
 			LevelChunk chunk = level.getChunkSource().getChunkNow(spot.chunk().x(), spot.chunk().z());
 			StructureStart start = chunk == null ? null : level.structureManager().getStartForStructure(spot.structure(), chunk);
@@ -361,7 +397,7 @@ public final class StoryGround {
 		}
 	}
 
-	/** (0.7.350) Each tick: a few ms more of the capital's village search, and the capital set going once it's over. */
+	/** Each tick: the capital's village search followed on, and the capital set going once it's over. */
 	private static void searchVillages(MinecraftServer server) {
 		Job job = capital;
 		if (job == null || job.search == null) {
@@ -371,7 +407,7 @@ public final class StoryGround {
 		ServerLevel level = Factions.level(server);
 		boolean over;
 		try {
-			over = search.step(level, VILLAGE_SEARCH_MS * 1_000_000L);
+			over = search.step(level);
 		} catch (RuntimeException e) {
 			JaymosKingdoms.LOGGER.warn("The first capital's village search failed; raising it at spawn", e);
 			search.found = null;
@@ -381,6 +417,7 @@ public final class StoryGround {
 			return;
 		}
 		job.search = null;
+		search.cancel();
 		if (search.found != null) {
 			job.at = search.found;
 		}

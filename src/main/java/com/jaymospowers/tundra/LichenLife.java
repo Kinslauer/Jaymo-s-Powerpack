@@ -1,5 +1,6 @@
 package com.jaymospowers.tundra;
 
+import com.jaymospowers.core.Loaded;
 import com.jaymospowers.compat.KingdomsCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -104,7 +105,7 @@ public final class LichenLife {
 	 */
 	private static void seed(ServerLevel level, BlockPos pos, RandomSource random) {
 		BlockPos low = pos.offset(-SPREAD_RANGE, -SPREAD_RANGE, -SPREAD_RANGE), high = pos.offset(SPREAD_RANGE, SPREAD_RANGE, SPREAD_RANGE);
-		if (!level.hasChunksAt(low, high)) {
+		if (!Loaded.made(level, low, high)) {
 			return;
 		}
 		int lichen = 0, spots = 0;

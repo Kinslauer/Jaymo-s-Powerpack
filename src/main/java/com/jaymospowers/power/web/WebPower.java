@@ -346,6 +346,7 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 			WebBrute.forget(handler.player);
 			WebSymbioteCollect.forget(handler.player);
+			SWUNG.remove(handler.player.getUUID());
 		});
 		WebSymbiote.register();
 		WebSymbioteInfection.register();
@@ -527,6 +528,25 @@ public final class WebPower implements Power {
 		return state.swinging[WebNet.MAIN] || state.swinging[WebNet.OFF];
 	}
 
+	/** (Power trials) How far each slinger has come on their webs since they last touched the ground. */
+	private static final java.util.Map<java.util.UUID, Double> SWUNG = new java.util.HashMap<>();
+
+	/** Counts a swing's run of ground covered, and the time spent hanging, for the trials. */
+	private static void swingTrial(ServerPlayer player, @org.jspecify.annotations.Nullable State state) {
+		if (player.tickCount % 20 == 0 && WebHanging.hanging(player)) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "web.hang", 1);
+		}
+		if (player.onGround() || player.isInWater() || player.isPassenger() || !player.isAlive()) {
+			SWUNG.remove(player.getUUID());
+		} else if (state != null && swinging(state)) {
+			double far = SWUNG.merge(player.getUUID(), player.getKnownMovement().horizontalDistance(), Double::sum);
+			if (player.tickCount % 10 == 0) {
+				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_far", (int)far);
+				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_marathon", (int)far);
+			}
+		}
+	}
+
 	/** The synced line for a hand's web. */
 	public static AttachmentType<WebLine> line(int hand) {
 		return hand == WebNet.OFF ? LINE_OFF : LINE;
@@ -596,6 +616,7 @@ public final class WebPower implements Power {
 			WebStrength.physique(player);
 		}
 		State state = player.getAttached(STATE);
+		swingTrial(player, state);
 		WebSymbiote.tick(player);
 		WebTendrils.tick(player);
 		WebImpacts.tick(player);
@@ -1137,6 +1158,7 @@ public final class WebPower implements Power {
 			fwip(player);
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "web.bridge", 1);
 		WebCooldowns cooldowns = cooldowns(player);
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(),
 			player.level().getGameTime() + (mastered(player) ? 0 : WebBridges.COOLDOWN)));
@@ -1441,6 +1463,8 @@ public final class WebPower implements Power {
 		}
 		// everything but the suit's mass leaves a web shooter, one web a shot (the wrists may have run dry while it charged)
 		int wrist = dark ? -1 : WebShooters.shotHand(player);
+		// (Web cartridges) the kind of web in that wrist's cartridge
+		int kind = dark ? WebKinds.STICKY : WebShooters.kind(player, wrist);
 		if (!dark) {
 			if (wrist < 0) {
 				dryShot(player);
@@ -1458,7 +1482,7 @@ public final class WebPower implements Power {
 		}
 		if (pellet) {
 			// a tap: a quick webshooter pellet, one per tap (no V cooldown, just the floor)
-			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet().kind(kind), level,
 				new ItemStack(WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
 			state.pelletReady = now + PELLET_COOLDOWN;
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.6F, 1.9F);
@@ -1473,8 +1497,18 @@ public final class WebPower implements Power {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, 1.6F);
 			return;
 		}
-		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,
-			new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		if (kind == WebKinds.SPLITTER) {
+			// a Splitter cartridge: the shot leaves the nozzle as three, fanned
+			for (int i = 0; i < WebKinds.SPLIT; i++) {
+				WebBall ball = new WebBall(level, player, new ItemStack(WEB_BALL_ITEM)).charged(charge);
+				ball.shootFromRotation(player, player.getXRot(), player.getYRot() + (i - (WebKinds.SPLIT - 1) / 2.0F) * WebKinds.SPLIT_SPREAD, 0.0F,
+					SHOT_SPEED, 0.5F);
+				Projectile.spawnProjectile(ball, level, new ItemStack(WEB_BALL_ITEM));
+			}
+		} else {
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge).kind(kind), level,
+				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		}
 		int cooldown = Mth.lerpInt(charge, SHOT_COOLDOWN, SHOT_COOLDOWN_MAX);
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + cooldown, cooldowns.yank()));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
@@ -1562,6 +1596,7 @@ public final class WebPower implements Power {
 			state.tetherLoad = load;
 			state.tetherSince = now;
 			state.tetherId = target.getId();
+			com.jaymospowers.core.trials.PowerTrials.count(target instanceof LivingEntity ? player : null, "web.yank", 1);
 			state.tetherWasSwinging = target instanceof LivingEntity living && living.isSwinging();
 			player.setAttached(TETHER, target.getId());
 			target.setAttached(HELD, true);

@@ -96,6 +96,7 @@ public final class WebHitches {
 	/** Ties {@code entity} to the point {@code anchor} on {@code block}, at the line's current length. */
 	static void hitch(ServerLevel level, net.minecraft.server.level.ServerPlayer owner, Entity entity, Vec3 anchor, BlockPos block,
 		net.minecraft.core.Direction face) {
+			com.jaymospowers.core.trials.PowerTrials.count(entity instanceof net.minecraft.world.entity.LivingEntity ? owner : null, "web.hitch", 1);
 		// one line out (five once mastered): the oldest comes loose to make room
 		int cap = com.jaymospowers.core.Mastery.unlocked(owner) >= com.jaymospowers.core.Mastery.ALL ? MASTERED_LINES : LINES;
 		List<Hitch> mine = HITCHES.stream().filter(h -> h.owner().equals(owner.getUUID())).toList();

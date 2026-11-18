@@ -14552,3 +14552,293 @@ The sneak attack (a heavy blow on a monster that hasn't noticed you) now needs t
 - pb-punch heavy impact: Spirit Punch's ring and dust wave now start at the target's feet (position + 0.1) instead of body centre, with the impact tuning (1.5F ring, 0xFFFFFF, 5.0 wave, 0xD0D0D0, 10 ticks) as static final constants.
 - pb-barrage clash: while two flurries meet, blurred fists paint in front of each side and sparks fly between them (Fx.stroke added to Kingdoms' Fx door to Powers; SpiritBarrage imports Fx again).
 - Built: sh ./gradlew build in kingdoms/ BUILD SUCCESSFUL; python tools/pr_checks.py passed. Not tested in game.
+
+## 0.9.90 (2026-11-17): The Maw salvager's wake text names their new kit
+
+- The Salvager at the Maw wake text now mentions the sealed helm, pack, pick and lantern you start with (`story-road.json`).
+- Built; not played.
+
+## 0.9.91 (2026-11-17): villagers strap on a downed player's prosthetics
+
+- A villager tending a downed player, or a field medic getting one up, first straps on every prosthetic the player carries or that lies within 6 blocks (Powers' `Prosthetics.fitFrom`, through `PowersCompat.fitProsthetics`), so a quadruple amputee lying by a wooden arm gets it on.
+- Built; not played.
+
+## 0.9.92 (2026-11-17): capital village search and ford keep site off the server thread
+
+- **Capital village search**: right after the first player joined, the search for the capital's village placed
+  structures on the server thread (about 8 s of loading and upgrading templates, then more), so the game froze with
+  "can't keep up" warnings. The spot checks now run on a background thread in order, using the worldgen-safe
+  `Structure.findValidGenerationPoint` path, and the server only follows their answers each tick (`StoryGround.VillageSearch`).
+  Same spots, same order, same village picked.
+- **Keep above the ford**: its site search (about 4 s) runs on a background thread too (`Ford.planning`), then sets the
+  plan or gives up as before.
+- Built and timed on a dev server; not played.
+
+## 0.9.93 (2026-11-17): Faith page: whole champions as apparitions, a swaying tail, and no faith
+
+- The life story's faith page draws each patron's champion at a man's height in the preview, so its head is no longer cut off at the top.
+- The champions there are apparitions: see-through, glowing, and tinted faintly with their patron's colour.
+- The Truth's ghost (and fate's ki ghost) now has a tapering tail where its legs were. The tail wavers while the pointer is still and streams out the other way when you move it, the tip following last.
+- New last answer on the faith page: "No one at all". You start sworn to no patron, and no sigil or champion is shown.
+
+## 0.9.94 (2026-11-17): Youth thinks out loud, "youth, look!" (#1692)
+
+- **Youth** looks busy while an answer is coming, so nobody takes it for frozen (Andy). From the moment you ask (or
+  Hermes calls it with `/youth summon`) until the answer arrives, it wanders between four new thinking animations: chin
+  in hand with a swinging foot, pacing the air with its hands behind its back, scratching its head, and rolling over to
+  hang upside down with its arms folded. Only a short hover between them, never the same one twice running. Three dots
+  of light wink on over its head in turn ("..."). The answer stops all of it.
+- Saying only its name ("YOUTH!") doesn't start it thinking; a question does.
+- Classes: `inhabitants/YouthWisp` (`THINKING` synced, `THINKS`, `nextIdle`, the dots in `tick`). Animations:
+  `kingdoms/tools/gen_youth_wisp.py` (ponder, pace, scratch, upside), regenerated `kingdoms/art/youth_wisp.bbmodel` and
+  `youth_wisp.animation.json` (model and texture unchanged).
+- Built (compileJava); poses checked in a rough render; not played.
+- **"youth, look!"** (Andy): the wisp flies to whatever your crosshair is on (a mob or a block, up to 48 blocks off),
+  circles over it and asks "This?". Say yes (yes, yeah, yep, that one, mhm...) or just ask a question, and the ask goes
+  to Hermes with what it is: `[youth-ask] <name> <question> (pointing at: <id> "<name>" at x y z)` ("what is this?"
+  when you only said yes, or what you said after "look"). It thinks there until the answer comes, then flies back. Say
+  no and it looks again at wherever you point now. Pointing at nothing: "Look at what? Point me at it!". With no answer
+  in 30 seconds it comes back.
+- Classes: `inhabitants/YouthWisp` (`looked`, `show`, `hoverShown`, `Shown`). Lang: `youth_wisp.look.*`, `look_miss`.
+- **Youth leaves sooner** (Andy): with nothing to do it goes home after 15 seconds (was 2 minutes). Waiting on an
+  answer it still waits up to 2 minutes, then says "be right back". After "youth, look!" it waits 15 seconds for a yes.
+- **Send it off** anytime: "go away", "bye", "thanks", "leave", "go home", "nevermind"... (with its name, or alone while
+  it's beside you). It says goodbye ("Off I go! Call if you need me.") and goes.
+- **Say "youth" aloud** (Andy): on the dedicated server, Youth hears its name in Simple Voice Chat and comes ("I heard
+  you! Type your question in chat."). Only the name; questions are still typed. It uses Vosk (Apache 2.0), an offline
+  recogniser listening for that one word: on the server's first start it fetches Vosk, JNA and Vosk's small English
+  model (about 70 MB, hash-checked) into `config/jaymoskingdoms/youth-ears/`; nothing is added to the mod jar or
+  clients. An empty file `config/jaymoskingdoms/youth-ears/off` turns it off. If anything fails it logs why once and
+  Youth just doesn't hear voices. Logged as `[youth-call] <name> voice`.
+- Classes: `inhabitants/YouthEars` (new), `inhabitants/YouthWisp` (`calledByVoice`, `BYE`, `ANSWER_TIMEOUT`), `VoiceRange`
+  (feeds it the decoded voice). Lang: `youth_wisp.bye.*`, `youth_wisp.voice.*`.
+- The voice part is compiled only; it hasn't run (Vosk not loaded or tried on speech here).
+- **Can Youth hear you?** (Andy): while you talk in voice chat, Youth's face shows in voice chat's own player row (the
+  group heads, top left by default; it follows that row's position, size and direction settings, after any group heads),
+  framed in leaf-green when it can hear you and grey when it can't (ears off or failed, or singleplayer). It fades a
+  moment after you stop. `YouthEars.Hearing`, drawn in `client/inhabitants/YouthWispRenderer` (`drawHearing`,
+  `voiceRow`); icon `textures/gui/youth_icon.png` from `kingdoms/tools/gen_youth_icon.py` (the wisp's own face).
+  Youth listens in voice chat group calls too (Andy), so its face sits after the group's heads there.
+
+## 0.9.95 (2026-11-17): scaling audit picks: stealth, skills, faith, gear tiers, guns, money and land
+
+Andy's picks from the scaling audit (early game kept weak, late game given room to grow).
+- **Stealth**: a crippled stab goes through the unaware-blow boss cap (15% of a boss's health), and a leap no longer
+  cripples a boss-bar mob.
+- **Skills**: Strength XP per blow comes only from foes (Enemy, or a mob fighting you), not cows or friends. **Renown**:
+  past a pillar's top level, every 3,000 more XP earns a renown point (up to 30), spent in the skill screen on a perk rank
+  or 5 attribute points (SkillRenown).
+- **Day one**: heritage and story attribute gifts are 5 points, not 10 (existing characters' gifts shrink too). The Sworn
+  start is an iron helmet, chainmail, iron sword and shield, and a 6-item medkit. Dawnborn heal 1 HP every 8 s in sun.
+- **Heritage gifts grow**: every percentage gift (Heritage, heritage kits, Bio-built) grows a fifth per Knowledge level,
+  x2 at Knowledge 5.
+- **Faith**: sins stop at favour 10 like the daily decay, unless the faith is strict or you're on trial. The Green
+  Huntsman's tier 2 gift: the prints of the beast you strike glow for you for 30 s (Hunter's Trail).
+- **Curses**: a new vampire's night Strength comes only once bloodbound; a werewolf's beast has no Strength until feral
+  stage 2. Silver hurts player vampires x2 and torches x1.5.
+- **Patron champions**: armour 16 -> 10, toughness 8 -> 4, +35% health per extra player (was +60%).
+- **Tiers**: cobalt and queen slime Wildlands; manyullyn and hepatizon Dread; dragon bones Legend. Merchants offer the
+  Legendary grade at Legend, and armourers and weaponsmiths there sell one Legendary piece for about 200 to 400 emeralds.
+- **Guns**: shot damage follows the gun's forging grade (Poor 0.85 to Master 1.4, Legendary 1.5); the Dread musket hits
+  for 18 (was 9).
+- **Mobs**: a mob's world tier falls back to its nearest player's after 10 minutes with no player of its tier within 40;
+  wild beasts and wind dragons take the tier while hunting a player. A king's champion quest foe's armour follows the
+  taker's tier (8 at Hearth to 20 at Dread).
+- **Money**: hagglers pay an emerald per 256 junk (was 32) and no longer take cobblestone, dirt or gravel. Fiefs cost
+  their overlord 1 a day per 4 folk. War-bred horses at the stablehand from Dread (300) and Legend (450). An estate
+  charter (1,000, from a realm's cartographer, Dread and reputation 400) makes a patch of that realm's land your
+  homestead and you a householder there.
+- **Treasury**: /kingdom withdraw is gone; lords withdraw from the Faction tab, up to a tenth of the treasury a day.
+- **Legend larder**: wind dragons drop Wind-Dragon Meat and the Aether's Giants drop Giant's Marrow (for Kitchen's Legend
+  feasts; LegendLarder).
+- Built; not played.
+
+## 0.9.96 (2026-11-18): Land checks wait for land that is really there
+
+- Kingdoms checked that land was loaded before founding, building, raising sites, starfall, smith keepings and the like with a test that is also true of land the game has only queued to make. Reading it then made the server wait for it, and on the Deck that ran into the 60 s watchdog (the smith keeping, 2026-11-17 7:18 AM). All 22 of those checks now wait for land that is made.
+
+## 0.9.97 (2026-11-18): villagers' scouters sit close to the face
+
+- **FrostTechLayer**: a villager's or patrolman's scouter is drawn 0.6 off the head (just past the hat layer and MCA's hair) instead of a helmet's 1.0, so it hugs the face. With Powers' smaller scouter art it no longer covers half the face.
+- Not built in the cloud (no Fabric Maven) or played; a one-constant change.
+
+## 0.9.98 (2026-11-18): Villagers stop re-pathing every tick to places they can't reach
+
+- Many of Kingdoms' errands (guards at their post, workers, pedlars, drivers and the rest) ask for a new path whenever the last walk is done. A walk to a spot they can't reach is done at once, so such a villager pathed again every tick. A camp of guards with an unreachable post held the server half a minute behind when a player came near (2026-11-16). A mob that just failed to reach a block now waits a second before trying for that same block again.
+
+## 0.9.99 (2026-11-18): Daylight no longer goes black under shaders or in rain
+
+- **DarkNights**: how far into the night it is now comes from the Sun's height, not from the sky light factor. Rain and thunder lower that factor by day too, so a rainy or stormy day was taken for night, and with the Moon set (as it is by day, most of the month) the open sky lost most of its light while torches lit as normal.
+- **Shader packs**: the uniform our Iris hook adds is now the darkness the night takes away (`jaymo_SkyDark`, 0 by day) instead of the light left (`jaymo_SkyLight`). A shader program the uniform never reached read 0 and drew the open sky with no light at all, so the day was pitch black under Complementary while torches and lanterns still lit; now such a program keeps its full sky light. The night is also worked out every client tick, so the shaders never keep a stale one when the vanilla lightmap isn't being updated.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.
+
+## 0.10.0 (2026-11-18): class trees and Awakening picks
+
+- **Class levels**: each class you hold now has its own level (up to 25) and XP, earned by doing that class's work: Thieves picking pockets, locks and unseen thefts; Mages casting and learning scrolls; Sorcerers striking with their element; Rangers hitting with arrows, favoured foes and reading trails; Marksmen shooting and crafting guns and shot; Tinkerers building tools and gadgets and studying mimics; Warlords blocking, parrying and giving orders; Brutes raging and bludgeon or axe kills; Riders riding, jumping and training horses; Monks fighting bare-handed, stunning and catching arrows; Paladins smiting, laying on hands and keeping the oath; Clerics turning and blessing; Druids studying and shaping; Warlocks paying pacts and settling debts. A level takes 30 + 15 x level XP. Each level gives a class point; every fifth level is a milestone with a fanfare.
+- **Class tree tab**: the K screen has a fourth tab, Class, showing your class's tree (a grid of ranks with requirement ties and crossroads ties), level, XP bar and points. Click a rank once to look, again to buy. A second class has its own tree (button at the foot), levels at the second-class share and its ranks work at that share.
+- **Old class pages moved**: Rogue's Arts, Spellcraft, Sorcery and Forbidden Arts, Archery and Warfare left the pillar webs and now live in the class trees (Thief, Mage, Sorcerer, Ranger, Warlord and Brute). Existing characters are migrated on join: ranks a held class owns are paid from that class (its level is raised to cover them), ranks no held class owns are refunded as pillar points, taught ranks stay free. Mortal Strike sits in both the Warlord and Brute trees; Throw Net and Bear Trap are shared with the Ranger.
+- **No class yet**: the life story has a new youth answer, "Drifted from one thing to the next", and the class screen a "No class yet" button. A classless player has no class tree (the tab says how to find a teacher) and can learn a first class later from any villager of that class's trade for 10 silver. The Writ wipes a class's level and ranks; a respec gives the points back and keeps the level.
+- Classes: `ClassTrees`, `trees/*`, `ClassTreeTab`, `ClassCraftMixin`, `Classes`, `SecondClass`, `ClassTeachers`, `LifeStory`, `Skills`, `SkillScreen`, `SkillWeb`, `ClassScreen`, `RpgSeriesGate` and the XP hooks in the class systems.
+- **Sorcerer tree**: a tap of J now throws the **sigil**, a glyph that flies off your blade and bursts with your element (fire, ice, lightning, earth, air, water), its damage growing with your Sorcerer level; it replaces sneak+J's bolt. Holding J imbues the blade (the **Imbue**, learned at level 5). New perks: Sigilcraft (3 ranks), Ward Sigil or Twin Imbue (10), Elemental Burst or Lingering Imbue (15), Etched Blade (20). The old Sorcery perk is now **Absorbing** (absorbing, the barrage and your element's own spells), with Forbidden Arts after it. Sorcerers who had Sorcery keep the Imbue.
+- **Crossroads for the Thief, Mage and Ranger** (level 10): Assassin (far harder sneak attacks on the unaware) or Acrobat (faster climbing, a vault up a block at a run, safer falls); Evoker (blasting spells hit harder and spare friends) or Warder (wards last longer and soak more); Hunter (more harm to the favoured foe, its trail read further) or Beast Master (bond a beast you tamed with sneak+J; it grows with your Ranger level).
+- **The Workshop** (Marksman and Tinkerer share it): a Marksman reloads a little faster each level and gets Steady Aim (3 ranks, crouched and still), Speed Load (every third gun kill, an instant reload with a spin of the gun), Called Shot or Quick Shot (10) and Precision (20). The bench, for both: Gunsmith (only a gunsmith makes guns and shot now; weaponsmiths sell them to everyone else), Gun Upgrades (Muffled, Long Barrel, Choke, Bayonet; one per rank), Trick Shot bolts (grapple, oil, water, shrapnel) and Field Kit. A Tinkerer's level opens the world tiers' gear early (Borderlands at 5, Wildlands 10, Dread 15, Legend 20; monsters stay at your real tier), and they study abilities faster with their level; their column has Spare Hands (more infusions, plus Muffled boots, a Warded chest and a Keen blade), Contraption (5; Educated Guess), Dismantle (10), the Iron Pup (12) that becomes an Iron Defender or Iron Hound (18), and Imitation (22).
+- **Warlord and Brute** get mirrored trees. The Warlord builds **Composure** (a bar left of the hotbar) with full-strength blows, blocks and parries and loses some to clean hits; at full they hit harder. The Brute's Rage now grows with their level, and while raging they can't block, drink or eat. Discipline: Measured Strikes, Riposte, Sword and Board or Two-Handed Master (10), Read the Foe (15), Commander or Duelist (20), Perfect Form (24, on J). Fury: Blood Up, Pain Feeds, Reckless or Juggernaut (10), Shrug It Off (15), Blackout or Bloodlust (20), Rampage (24, on J).
+- **The Rider** gets a tree. **Spur** is new on J: at the gallop, a short burst that costs no stamina (its wait shortens with your Rider level). Then Long Wind (3 ranks), Horse Whisperer (3), Lancer or Horse Archer (5), Stay in the Saddle (8), Trick Riding (10: J off the gallop hangs you down the horse's side, out of the arrows; at the gallop you scoop up items and downed friends), Cavalier or Outrider (15: barding, harder charges and war training; or a faster trot and canter, no falls, and the whistle swaps you onto a fresh horse on the move), Herd Master (18: wheel orders go to all your horses), Banner Bearer (20: a banner on your tack steadies and strengthens friends near you) and Bonded or Beast of Legend (24).
+- **Monk and Paladin trees.** The Monk starts with Catch an Arrow (its window widens with your Monk level); the stunning blow (3) and the wall slide (now Step of the Wind, 8) move into the tree, kept by Monks who already had them. New: Deep Breath (3 ranks of ki), Deflect, Flurry (sneak+J), Step of the Wind's leap (J in the air), Open Hand or Iron Body (10), Still Mind (15), Quivering Palm or Empty Body (20). The Paladin starts with Lay on Hands (its pool grows with your level); Smite (3) and the Aura (8) move into the tree, kept by those who had them. New: Deep Wells, Shield of Faith (sneak+J on a friend), the oath's own gift (10: Spare the Fallen, Judgment or Challenge), Divine Sense (12), Aura of Courage or Warding (15), and the Vigil (20: pray at a shrine by night).
+- **Cleric, Druid and Warlock trees.** The Cleric starts with Turn the Undead (stronger as you rise); the blessing moves to level 3 (kept by Clerics who had it). New: Devout, Sanctify (sneak+J), Last Rites (J on a body: it never rises with the Unburied, and the village thinks better of you; village priests read the rites over their dead too), Healer or War Priest (10), a gift from your patron (15), Destroy Undead (20). The Druid starts with one shape, the first beast studied (shapes last longer as you rise); More Shapes, Long Shape, Fox and Stag (the fox and the deer), Moon or Land (10), Pack Leader (12), Barkskin (15) and the Elder Shape (20: a treant or a great wind elemental, once a day). The Warlock starts with one pact slot (Warlocks who had two keep them), casts harder as they rise; Pact Slots, Patient Creditor, Eldritch Bolt, In Kind, Renege, the Blade, the Chain or the Tome (10), and the Arcanum (20).
+- **Awakening picks, patch 1**: the **Warding Hush** (blows and shots stop short of you for a feather of stamina a point; explosions get through), from the Lantern Warden's third tier or a Scroll of the Warding Hush for staff casters. The Ash Whisperer's **rot**: every sworn blow lays Decay (no cap, 0.5 harm a second a stack, gone 8 s after the last), and a new Rot key (End) for Grip, Spread, Rush, Breach (tunnels that close again) and Collapse (a crater that grows back).
+- **Awakening picks, patch 2**: Water Sorcerers pour carried water into their reserve (look down while holding J: a waterskin's sip, a bottle, a bucket) or draw it from the moisture in the air; a caster choked by Darktide's Strangling Lift can't cast.
+- **Awakening picks, patch 3**: Rubber-folk and Verdants: the heritage key while sprinting is the **stretching grab** (with Jaymo's Powers): the arm hooks a foe up to 8 blocks off, round cover, and yanks it to your feet. Casters inside a Pocket Arsenal's Rift Seal can't cast.
+- **Awakening picks, patch 5**: a caster a Jaymo's Powers Lawgiver's rule says has no powers can't cast.
+- **Awakening picks, patch 6**: a ninth attribute, **Ability Power**, for those with a Jaymo's Powers power (its moves hit harder, reach further and last longer on others); **combat mode** (F4): in stance the number keys fire the belt's Weapon Forms at once; finishing a quest gives back a Powers trial swap; the Verdant, vampires and werewolves heal fast enough for Powers' Bonding Vat.
+- **Awakening picks, patch 7**: **the Cordon**, a sect of the Ash Whisperer's faithful who hunt the awakened (anyone with a Jaymo's Powers power but a blind Resonance holder, and anyone working sanctioned magic; blood and death magic are theirs): patrols out in the wild, bigger with the world tier (sentinels; a stalker unseen till close whose knife rots; an enforcer whose blows bind your power; an Overseer who rallies them and carries a summons). The summons, read, becomes a map to the **Court of Judgment**, raised when you come near, where **the Arbiter** sits: a boss that learns the kind of harm you deal it and takes less and less of it, until what it has soaked overloads it (a burst, a stagger, double harm, and it forgets). **Awakened strangers**: now and then a gifted wanderer with a title (Adept or Master of their power) comes to test themselves on a player with a power, fights with it, and yields when beaten.
+- **Class tree extras** (45 more perks, every tree now holds 30 points or more): second crossroads for nine classes (Thief: Cutpurse King or Shadow Blade; Ranger: Stalker or Warden; Druid: Thick Hide or Swift Paws; Warlock: Tithe or Usury; Cleric: Shepherd or Exorcist; Paladin: Avenger or Redeemer; Marksman: Sharpshooter or Gunslinger; Mage: Scholar or Battlemage; Tinkerer: Clockmaker or Scrapper) and new perks all round: Nimble Fingers, Case the Mark (two pips under the crosshair), Fence's Friend (pocket loot is now marked Stolen and a speakeasy's fence buys it), Second Storey, Ghost; Keen Eye, Field Dressing, Fletcher, Heartseeker; Element's Hide, Quick Glyph, Sigil Chain, Blade Memory, Wellspring; Beast Tongue, Green Thumb, Wild Heart; Dark Sight, Borrowed Time, Hand of the Patron; Steady Hands, Candle Bearer, Intercession; Light Step, Iron Palm, The Fast; Steadfast, Beacon; Drilled, Shield Wall, Far Command; Thick Skull, Scar Tissue; Dry Powder; Farrier, Sure Seat. Changes for everyone that the perks needed: a landing from 2.5 blocks or more and climbing are now heard by mobs, and a spell learned for good from a scroll is studied for three seconds (held use). `RogueExtras`, `ArcaneExtras`, `FaithExtras`, `WarExtras`, `CaseMarkClient`, mixins `BeastTongueMixin`, `FletcherCraftMixin`, `IronPalmMixin`, `LightStepMixin`; details and gaps in docs/ClassTrees-Plan.md (Patch 8).
+- **Scaling audit picks** (the three that touch the class trees): **the Thief's opener stacks less**: a Thief's sneak burst (the blow x1.5 + 2, an Assassin's x2.5 + 4) no longer multiplies with the Sneak Attack perk's blow on the same hit; the bigger of the two is dealt, and the class backstab still applies on top. The burst is also held to 15% of a boss's health, like any other unaware blow. **Class experience and pillar experience from one action**: class experience earned in the same moment as pillar experience counts half (the odd half point carries over to the next). **A Marksman's guns keep up**: a Marksman's shot from a gun deals 2% more for each Marksman level (half again at level 25); crossbows are unchanged.
+- **Awakening picks, patch 4** (folded into what the pack has): four **art keys** (numpad 1-4: Soul, Claw, Wild, Sun; tap, sneak+tap, sprint+tap, hold, sneak+hold). **Reaper**: kills bank souls for good, a tier from 5 hearts and half damage to 20 hearts and six times the damage at 1000; homing wisps, a brand that jumps on death, a draining chain, a drift through walls, and the Soul Scythe at 500 souls. **Vampires**: healing that never stops, claws that bleed foes and heal you, Rake, Rend (kills at a quarter health), Pounce and pin, a Roar of frenzy. **Druids**: Greenwarden and Bloom and Root (ivy, giving and draining vines, a vine grapple, a sunflower patch, a root cocoon; daylight heals, fire hurts more), Seven Sizes worn on the wild shape (ride bigger creatures small; stomp, grab and throw big), Wax and Wane (a ray that shrinks or grows others, and a jar for a shrunk creature). **The Sun's arts** for every Dawnborn, learned by Clerics and Paladins: stronger the higher the sun, four steps of ascension (a fifth with the Zenith Axe, forged from a nether star), sun orbs, sunfire pillars, pin and pummel, a sun of your own. New tree perks take the Druid, Cleric and Paladin trees past 30 points.
+- After the row check of patch 4: the soul tier and the Sun's blows are worked out before the caps (a spar still stops short, bosses keep their 15% cap); the Soul Scythe is one at a time and the brand pays only on your own kill; claws that did nothing open no wound; Rend never executes players or bosses; the ray and the jar refuse bosses, rulers, settlement folk and other Druids' shapes; riding small goes unnoticed at targeting. A Marksman's gun share reads the bullet, not the hand; a Thief's burst with a hidden blade stab is unchanged.
+- **Andy's rulings on the above** (what these change wins over the lines before). Class trees: the Druid's four folded perks cost 1 a rank and the Sun's Arts 2 (Druid 36 points, Cleric and Paladin 32); every Sorcerer's tap throws the sigil and the old open-hand workings are on **sneak and hold**; **anyone can make guns** (a Gunsmith gets half again the bullets and shot, and guns built on a barrel they forged wear a quarter less); Barkskin also on sneak and hold, out of a shape too; **Renegotiate opens a menu** to choose the debt; no landing or climbing noise (Second Storey halves how far your footsteps carry); scrolls are learned at once again and a **Scholar keeps one in four**; **no Stolen mark** (the fence buys no pocket loot; Fence's Friend is a quarter more on his own trades); a wild Sorcerer's Wellspring and Hide answer only to their last working's element; a Blood Sorcerer's Wellspring also fills while they bleed or are at half health, and the Hide halves their bleeding; **armour resists Shadow Blade**; the Fletcher's arrow comes back by chance; wary marks are saved; class XP and pillar XP are both paid in full again; a Marksman's guns gain 3% a level; a Thief's burst and Sneak Attack on one blow deal the bigger plus a quarter of the other. Awakening: the **art keys default to the arrow keys**, and combat mode puts them on 6 to 9; a soulless Reaper keeper has 10 hearts and full damage; **forging the Soul Scythe spends its 500 souls**; a **Druid changes size out of a shape** too (hold the Wild key at no creature to shrink, sneak and hold to grow); only the Druid who shrank a creature can jar it; the sunflower patch plants **real sunflowers** that wither with it; **only the Crowned Sun's sworn can learn or use the Sun's arts** (Dawnborn keep them by blood); a Cordon court whose ground was built on moves and hands out a new map; rot holes a crash left open close when the server starts.
+- Built; not played.
+
+## 0.10.1 (2026-11-18): Youth knows who has met whom
+
+- **Youth** (the wood-wisp): `/youth status` now also gives each player's own MCA character name and which online
+  players they've been introduced to, so Hermes calls a player's character by name only to those who've met it
+  (Andy: "Desto, Kinslauer, or whatever my MCA character's name is if the requesting player has been introduced").
+  Players see no change from the mod itself.
+- Built; not played.
+
+## 0.10.2 (2026-11-18): Youth flies off to think, and comes back with the answer (#1711)
+
+- **Youth's wisp** (`YouthWisp`): asked a question, it no longer waits beside you thinking. It swoops off, out and up
+  (10 blocks out, 7 up), and fades into the trees there in a puff of light, keeping its place by you while it thinks.
+  When the answer comes it shows itself again where it went, flies back (slowing as it nears) and says it once it's
+  beside you; lines that arrive while it is on its way are held and said on arrival. A fast answer turns it round
+  mid-flight. "Youth, look!" questions do the same, coming back to you rather than to the thing. A wisp that is off
+  thinking can't carry you home for "help". `/youth say` and `/youth sayall` go through the same path (`YouthCommand`).
+- Built; not played on the server.
+
+## 0.10.3 (2026-11-18): lean on the legs (#1710)
+
+- **Leaning** (Q/E while sneaking) no longer tips the whole body over at the feet. Andy: "the character currently bends at the torso instead of using the leg to support that far of a bend". Like a shooter's corner peek, the hips slide out and sink, the lean-side foot steps out with its knee bent under the weight, the far leg stays straight from where its foot was, and only the body above the hips tilts (12 degrees, was 25). The head stays nearer level. The eye still ends up the same half block out, so the camera, cover and shots are unchanged.
+- **Leaning from the low crouch** (Powers' stance wheel), which was blocked before. Andy: "there needs to be animations from sneaking and crouching, crouching giving you the deepest lean out". From the crouch the hips go further out (7.5 px against 5) and the body tilts 18 degrees, so the eye reaches 0.7 blocks out against 0.5 from a sneak. The crouch's own bent knees and kneel are kept, with the legs swung out sideways from them. The camera, cover and shots use the deeper reach (`Lean.reach`), and moving between sneak and crouch eases.
+- `LeanClient` (rotate, pose, bendKnee, legs), `LeanKneeMixin`, `ModelPoses`; the knee uses Jaymo's Powers' `KneeBend` (straight leg without Powers). Front-view preview: `art-overhaul/lean-legs/lean-front-before-after.png`.
+- Built; not played.
+
+## 0.10.4 (2026-11-18): NPC shooters lean round corners (#1712)
+
+- **NPC shooters lean** (Andy: "do MCA and humanoids like illagers do it too?" "yes"). MCA villagers, illagers, skeletons and the other ranged NPCs that take cover can now use a wall's corner as well as low cover. They duck in behind the corner to reload or after being shot at, then lean out past it to shoot instead of stepping round. The pose is the same legs-carry-it lean players have: hips out, near knee bent, a 12 degree tilt.
+- While leaning, an NPC sees and shoots from its leaned-out head, and cover counts only the leaned-out part of its body. It straightens up when it moves off, loses its foe or goes down.
+- `Cover.corner` / `Cover.shelters`, `Lean.lean` (the NPC lean, cleared in Lean's tick), `RangedTactics` (finish leans out at a corner, ducking leans back in), `LeanSightMixin` (line of sight from the leaned eye), `LivingLeanMixin` (was AvatarLeanMixin: every living renderer), `LeanClient` (NPC leans eased, legs found by part name).
+- Built; not played.
+
+## 0.10.5 (2026-11-18): story quests: 12 engine changes, 19 additions to the old tales, 17 new tales
+
+All 48 rows Andy picked from the story-quest list (2026-11-17, "Build!"). Tales are still data files
+(`data/jaymoskingdoms/tales/`), format in `docs/StoryQuests-Plan.md`, checked by `tools/tale_check.py`.
+
+**What tales can now do (the 12 engine rows)**
+- **Time doesn't wait**: a step can have its days (`within`, or a named `clock` shared by several steps) and a `late`
+  way on. The tale goes on without you; a step left that way writes no journal, mark or pay. The journal and the asker
+  say the time left in words (`{left:}`, `{in:}`). Used by The Asking Price, The Night Bell, The Fair Left Behind, The
+  Bride Road and most of the new tales.
+- **Day and night**: `when` on a step (a night escort only arrives after dark; a moon means that moon's night),
+  `hours` on a cast member, `night`/`day`/`moon:` conditions, a `not_now` line. Off their hours a tale's people walk
+  off out of sight and go in, and come back out when their hours come round: the same person, so hearts, what they
+  remember and what they were told last.
+- **Who you are matters**: conditions on heritage, patron, town reputation, hearts with the speaker, coin carried,
+  dress (fine, plain, ragged, armoured, bloodied), being cursed or human.
+- **Persuade, threaten or pay**: a `try` on a reply, odds said in words from the listener's temper, hearts, reputation
+  and deeds; bribes priced by greed and paid in real coin; a failed try always has its own way on. Also a throw of dice.
+- **Naming who did it**: a `name` step listing everyone met, weighed by the clues found; a wrong name has its own ending.
+- **Know the beast**: `weak_to` on foe steps (fire, silver, the Warden's light, garlic, wolfsbane, and running water:
+  a blood-drinker fought by a stream). The bestiary writes the note as soon as you learn it, on the page for that kind
+  of beast, one page a note.
+- **Companions speak up**: `voices` before and after a choice by Convictions belief, with `for`/`irks` moving the bond.
+- **It comes back weeks later**: an ending's `later` list at 10 to 40 days: a letter (brought again another day if
+  the runner can't find you), a scene, town talk, someone who settles in the town (a spared thief-taker can come back
+  as one of its guards), a new grave with a board giving the name, or a household that packs up and goes;
+  with a `still` condition asked on the day.
+- **Letters you can't read**: a `tongue` on letters, clues and things; a priest or librarian reads it aloud for a coin
+  and then knows what it says.
+- **Lies come out**: a `lie` on a reply, remembered, checked later (one day for the whole party); it can change an
+  ending or bring someone back, and the one lied to loses hearts when next you're near them.
+- **Tales from the board and the inn**: `by: notice` (the work board shows a tale notice now and then) and more rumours.
+- **Tales that grow into a story**: `arc`, and starts that need an earlier tale's marks and a number of days since it. A villager holding a later part
+  offers it to the player it's meant for, and gives anyone else a tale of their own.
+
+Smaller pieces the tales needed: a `vigil` step (a night kept somewhere, lines and sounds by the hour), a `tail` step
+(follow someone unseen: too near and they see you, too far and they're lost), a `reap` step (a field is sown ripe and you
+cut it), cast who walk to a new place when the day changes, cast who lie down while you watch, a black candle (and a
+white one) stood on a tavern window sill, `await` remarks, letters addressed to someone else, and **Wolfsbane** (a new
+item, now and then from cut fern; only the wolf tales use it so far). In The Keeping, the husks upstairs can be laid to
+rest before the smith wakes (`KeepingCells`).
+
+**Added to the 19 old tales**: The Empty Fold (a real wolf hunt: tracks by day, the pack at night, the old grey and
+fire), The Lantern That Went Out (the barrow vigil, the ward's letter), Salt and Iron (the hearing at the well before
+both priests), The Night Bell (the raid comes on its night; what you readied changes the defence), The Fair Left Behind
+(the fair moves on by the day; catch it or follow the ruts), Hail Glass (the den, the fence's dice, the clerk's eyes),
+The Cave-In (his air runs out in a day; the hunter's writ may be unreadable), The One Who Walks at Moonrise (tracks,
+the bestiary, wolfsbane and silver, the night behind the cellar door), The Bride Road (scout the ambush or take the
+long road; the lie can come out), The Asking Price (the ransom day; following the steward at night), The Stone That
+Hums (still nights, two hearers, a sign weeks later), A Debt in Potatoes (the Tallow Room, the black candle, the
+sister's letters), The Wrong Light (the drowned lie down in the burying ground as the bell is rung), The Fourth Measure
+(galls gathered by night, the test for the grey, the sister's bargain), The Cold Hearth (camp nights and the village's
+names), What Was Owed (how much to own up to, line by line; the widow's secret), The Brother Who Stayed (the harvest
+letter and a new short tale, The Barley Cut), The Name She Left (the search party on the same hills), The Keeping.
+
+**New tales**: The Crossroads Gibbet, Short Measure, The Ducking Stool, The Novice, Guests After Dark, The Deserter's
+Coat, The Boundary Stone, The Wolf in the Wood, What the Well Was Promised, A Hare for the Pot, The Lists, The Night
+Market, The Cordon, The Feast-Day Sermon, Letters to a Dead Man, The Heir in the Hayloft, and The Black Candle in three
+parts (The Runner's Round, A Candle in the Window, Nobody Sent You).
+
+**Not as the row reads** (named, not cut quietly): The Cave-In's "dig him out" is the blast step under a one-day
+deadline, not digging by hand. The Fourth Measure's galls and the finished test are tale things; only the spirit is a
+real Kitchen item, and that path is offered only where Kitchen is installed. The barley is wheat (the pack has no
+barley) and the companion isn't standing in the field. The bestiary lookup in Moonrise is offered, not forced. The
+Lists is fought on foot. The Night Market's stalls, The Cordon's fence and count of the sick, and The Boundary Stone's
+fence, barn and cow are people and words, not blocks. Parts two and three of The Black Candle can be offered in a
+different town from part one. People who go home off their hours walk to a spot out of sight, not to their own bed
+or the tavern.
+
+Classes: `Tales`, `TaleWays`, `TaleCast`, `Tale`, `TaleAfter` (graves, people moving away), `KeepingCells`, `QuestJobs`, `TownNotices`, `Bestiary`,
+`Garlic` (wolfsbane), `StoryHoldScreen` (hints
+193-204), `lang/parts/tales.json`, `tools/tale_check.py`, `docs/StoryQuests-Plan.md`.
+
+Emigration (any household, not only a tale's): a family no longer splits when one of them may not leave (a ruler,
+a town's leader, someone sworn or held, a player's family, one of a running tale's people): then they all stay.
+
+Every row was checked against the pick list by independent readers (tales and engine separately) and their
+findings fixed. Built (full build and the tale checker pass: 79 files, 0 problems). **Not played.** Lore placements are in `Lore.md` as
+`(new)` paragraphs for Andy to approve.
+
+## 0.10.6 (2026-11-18): bound bloods and the Cleric's patron
+
+- Andy: "All tideborn are deep mother, and they and dawnborn are the only heritages with a bound patron. Clerics also
+  only choose if they have no patron at the life story, or they multi class into it."
+- **Bound bloods:** the life story's faith page offers a Tideborn only the Deep Mother and a Dawnborn only the Crowned
+  Sun, and both start sworn to theirs. Every other blood still picks any patron, its usual one listed first.
+- **Clerics:** a first-class Cleric serves the patron their life story raised them to: the class screen and the story's
+  option chips hold to it. Only a Cleric whose story names no faith picks one, and so does anyone who takes Cleric as a
+  second class.
+- `Faiths.bound`, `Classes.clericPatron`; the server holds both in `LifeStory`, `Patrons.storyStart` and
+  `Classes.choose`. Characters already made keep the faith and patron they have.
+- Not built locally; not played.
+
+## 0.10.7 (2026-11-18): the Huntsman's rangers in the forests
+
+- Andy: "Ranger MCA can be found in the forests hunting and will teach you or scold you and bring you to justice hogtied
+  if you poach (kill too many animals)".
+- **Poaching:** every wild beast you kill out in the wilds counts for a day, a young one twice. Wild means not tame,
+  leashed or named, and not where a realm's law holds or on a homestead, so farm slaughter doesn't count. 4 in a day
+  and a ranger scolds you; 7 and you're a poacher.
+- **Rangers:** walking a forest, taiga or jungle outside any realm, you now and then meet one of the Green Huntsman's
+  rangers (an MCA villager with a bow). It hunts: it shoots an adult wild beast now and then, but only where it can see
+  more than three, so it never thins the wood. It wanders off after half a day with nobody near.
+- **Talking to one:** with no calling, it offers to teach you the Ranger's (pick the foe you'll hunt). Anyone else gets
+  a hunter's lesson, and anyone over the scolding mark gets scolded.
+- **Poachers:** a ranger comes for a poacher straight away, walks them down and hogties them. Three seconds later it
+  carries them to the nearest realm's seat and hands them to its guards, who sentence them for poaching like any other
+  crime. With no guard there, the realm hears of it and its guards come.
+- `ForestRangers` (new); `Busts.sentence` is package-visible. Lang part `forest-rangers.json`. Nothing is saved: tallies
+  and rangers are forgotten when the server stops.
+- Not built locally; not played.
