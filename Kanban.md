@@ -9,7 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
@@ -18,6 +17,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · claimed
 
 
 ## In review
