@@ -294,6 +294,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();
+		com.jaymospowers.client.fighting.ArrowPickClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
 		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
 		com.jaymospowers.client.jewellery.JewelleryClient.init();

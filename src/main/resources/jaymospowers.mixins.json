@@ -109,7 +109,11 @@
 		"StructureStateLockMixin",
 		"BaublesQuickEquipMixin",
 		"BlockFxMixin",
-		"ShieldHookMixin"
+		"ShieldHookMixin",
+		"SnowballStingMixin",
+		"LivingEntityHitKindsMixin",
+		"PlayerArrowPickMixin",
+		"AbstractArrowTippedMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -222,6 +222,9 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.baubles.Baubles.init();
 		// arrowheads and fitted arrows, the belt of throwables, shield moves
 		com.jaymospowers.gear.GearPicks.init();
+		// (Clouds and Bits patch 6) pick your arrow by scrolling while drawing; keep some XP on death
+		com.jaymospowers.fighting.ArrowPick.init();
+		com.jaymospowers.fighting.KeepXp.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		com.jaymospowers.compat.ChunkyCompat.init();
