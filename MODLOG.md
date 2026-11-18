@@ -5780,3 +5780,10 @@ Andy's four weapon picks from the Knight Armor list, in our own code. A scythe, 
 - **Torn notes**: the wet fishers' scraps. About 3 in 10 crates and 1 in 4 shipwreck chests hold one; each hints where one rare fish bites (cavefish, olm, ember tilapia, cinder pupfish). Use it to read it: it is copied into the Fisher's Journal and used up, and the fish's page (a `*` marks it on the list while the fish is still unknown) shows the hint. Hints only, no chat text, kept through death with the rest of the journal. `TornNote`, `FishLog.noted`; client `JournalScreen`.
 - Art by `tools/gen_tackle.py`.
 - Built; not played.
+
+## 0.24.70 (2026-11-18): Knight Armor and Weapons, weapons forged
+
+- **Knight Armor and Weapons** (Pete MC Mods, all rights reserved) joins the pack as its own jar, untouched, for its weapons only. A datapack (`data/knightarmorweapons/recipe`) switches off its grid recipes for the long sword (and its blade and handle), the spiked mace, the hand scythe and the throwing axe, and the Smithing Anvil forges them instead (`KnightArmorForging`), from iron, with the usual blueprints and grades: long sword 6 ingots, mace 6, scythe 3, throwing axe 2.
+- Its knight armour is turned off, because Jaymo's Kingdoms' heraldry harness is the pack's knight armour: the four grid recipes are disabled and the anvil does not forge it. The mod has no loot, trades or mob gear for it in data; the pieces still show in its creative tab (that is in the mod's code).
+- The broken throwing axe is still mended in the grid with three iron nuggets.
+- Built; not played.
