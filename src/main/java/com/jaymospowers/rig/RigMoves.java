@@ -30,7 +30,17 @@ public final class RigMoves {
 	/** The take-off's crouch (ticks before the thrusters fire) and its whole length; the gestures' lengths. */
 	/** A thruster dash, a bare-fisted punch with the Arms, and the artillery barrage. */
 	public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
-	/** Their lengths (ticks); the dash's wind-up before the burst, and the barrage's before the pods empty. */
+	/** Arm forms (blade, mace, pile, drill, lance, lash, mimic). */
+	public static final int ARM_BLADE = 13, ARM_MACE = 14, ARM_PILE = 15, ARM_DRILL = 16, ARM_LANCE = 17, ARM_LASH = 18,
+		ARM_MIMIC = 19;
+	/** Their lengths (ticks); the wind-up before the effect fires. */
+	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
+	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
+	public static final int ARM_PILE_TICKS = 8, ARM_PILE_FIRE = 2;
+	public static final int ARM_DRILL_TICKS = 40, ARM_DRILL_FIRE = 0;
+	public static final int ARM_LANCE_TICKS = 10, ARM_LANCE_FIRE = 2;
+	public static final int ARM_LASH_TICKS = 10, ARM_LASH_FIRE = 2;
+	public static final int ARM_MIMIC_TICKS = 10, ARM_MIMIC_FIRE = 2;
 	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
 	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
 	/** {@link #THRUST} values. */
@@ -67,6 +77,13 @@ public final class RigMoves {
 			case DASH -> DASH_TICKS;
 			case PUNCH -> PUNCH_TICKS;
 			case BARRAGE -> BARRAGE_TICKS;
+			case ARM_BLADE -> ARM_BLADE_TICKS;
+			case ARM_MACE -> ARM_MACE_TICKS;
+			case ARM_PILE -> ARM_PILE_TICKS;
+			case ARM_DRILL -> ARM_DRILL_TICKS;
+			case ARM_LANCE -> ARM_LANCE_TICKS;
+			case ARM_LASH -> ARM_LASH_TICKS;
+			case ARM_MIMIC -> ARM_MIMIC_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
 			default -> 0;
 		};
