@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: fishing-fire-and-crates
 branch: claude/fishing-fire-and-crates
 with: pc-claude (subagent)
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 PR 1715, CI green (Powers, Kingdoms, Kitchen builds, change-note checks, pack start). A player sees: a Tinkering rod forged with a heat-proof limb and hook (tooltip says so) floats its hook on Nether lava and draws ash molly, cinder pupfish and ember tilapia that drift along the lava's shore; any other rod's hook burns up in lava. Landed fish sometimes bring up a River, Sea, Swamp or Lava crate that opens for that water's loot. Cavefish and olm live in dark pools 30+ blocks under sea level and bite slowly. Not played or run: the lava fish's hand-made drift, hook floating on lava, and spawn rates are untested. Left for a second PR: torn notes into the Fisher's Journal, and the tackle bench.
+- 2026-11-18 05:56 No sign of work for 30 min: marked stalled (whoever ran it stopped).

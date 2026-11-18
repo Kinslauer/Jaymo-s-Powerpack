@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Embellish the 19 tales and add 17 new ones, with a real medieval feel (Andy's 48 picks, "Build!")
 branch: claude/project-thread-kk4cf1
 with: cloud
@@ -41,3 +41,4 @@ https://claude.ai/artifact/4iKFTPa4trA4LV6DDrLv1s : all 48 rows picked, "Build!"
 - Build, `tools/tale_check.py` and `tools/pr_checks.py` pass. Not played. Three rounds of independent checks (tales, engine, fixes), all findings fixed or named in the PR. PR ready 2026-11-18.
 - 32 `(new)` lore paragraphs in `Lore.md` wait for Andy.
 - 2026-11-17 23:56 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-18 05:56 PR #1705 is merged into master; moved to Agents/Done.
