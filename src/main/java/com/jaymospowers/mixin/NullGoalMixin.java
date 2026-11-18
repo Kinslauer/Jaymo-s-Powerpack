@@ -16,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(Mob.class)
 abstract class NullGoalMixin {
-	private static boolean jaymospowers$warned;
+	/** The kinds of creature already reported, so a cause that keeps coming back still shows once for each. */
+	private static final java.util.Set<net.minecraft.world.entity.EntityType<?>> jaymospowers$warned = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
 	@WrapOperation(method = "serverAiStep", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;tick()V"))
@@ -43,10 +44,11 @@ abstract class NullGoalMixin {
 		if (!message.contains("WrappedGoal")) {
 			throw e;
 		}
-		if (!jaymospowers$warned) {
-			jaymospowers$warned = true;
-			JaymosPowers.LOGGER.warn("A {} had a null goal; its goals skip this tick (further ones are not logged)",
-				((Mob)(Object)this).getType(), e);
+		// (the throw left the selector's profiler section open)
+		net.minecraft.util.profiling.Profiler.get().pop();
+		net.minecraft.world.entity.EntityType<?> type = ((Mob)(Object)this).getType();
+		if (jaymospowers$warned.add(type)) {
+			JaymosPowers.LOGGER.warn("A {} had a null goal; its goals skip this tick (further ones of this kind are not logged)", type, e);
 		}
 	}
 }
