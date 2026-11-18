@@ -3,7 +3,7 @@ status: running
 task: lanterns-09-talk-typed
 branch: claude/lanterns-09-talk-typed
 with: Claude Code (PC)
-pr: 
+pr: 1770
 mods: kingdoms
 versions: 
 started: 2026-11-18
