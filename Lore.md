@@ -284,6 +284,13 @@ the slow and leaving the young. They'll teach their trade to a stranger with non
 else. The Huntsman's law is theirs to keep where no realm's law reaches: one who kills more than the wood can spare is
 scolded, and one who keeps at it is run down, hogtied and carried to the nearest realm's guards as a poacher.
 
+**Jacks and studded hides** (new, Andy 2026-11-18; Claude's placement for him to approve). Plate belongs to knights and to
+those who can pay for it. Everyone else who fights for a living goes in leather: the Huntsman's rangers, scouts and
+outriders, outlaw bands, ship crews. A smith who keeps the Anvil-Father's faith will sew mail into a leather coat and
+call it a jack, or hammer iron studs through a hide, and both are made at the bench, not the smithing table. Whoever
+wears them stays quick enough to climb, swim and step back from a blow that a knight in plate must take on his shield.
+In the bastions the piglin brutes stud their own hides with scrap.
+
 **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
 those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
 **Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
