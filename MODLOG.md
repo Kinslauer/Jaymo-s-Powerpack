@@ -5983,3 +5983,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 - Kingdoms and Kitchen send their bars here through Fabric Loader's object share (`jaymos:hud_bar`).
 - `PickKit.gauge` removed (nothing used it any more).
 - Compiled (all three mods); not played.
+
+## 0.25.11 (2026-11-18): A null goal no longer stops the server (#1748)
+
+- `NullGoalMixin` (on `Mob.serverAiStep`): if a goal selector's tick throws the NullPointerException from a null goal, that creature's goals skip the tick and a warning naming the creature type is logged once. Any other exception still propagates.
+- Not built or played; CI compiles.
