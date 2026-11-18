@@ -151,7 +151,7 @@ final class TaleAfter {
 			return false;
 		}
 		if (!(e instanceof Villager v) || !v.isAlive() || v.isBaby() || Bonds.lordOf(v) != null || Captives.bound(v) || KeepingCells.kept(v)
-			|| McaCompat.playerFamily(v) || leads(level, id)) {
+			|| McaCompat.playerFamily(v) || Emigrants.leads(level, id)) {
 			return true;
 		}
 		if (TaleCast.cast(v) != null || Tales.inTale(level.getServer(), id)) {
@@ -160,13 +160,4 @@ final class TaleAfter {
 		return Emigrants.hardship(level, v);
 	}
 
-	/** Whether {@code id} leads any town or realm. */
-	private static boolean leads(ServerLevel level, UUID id) {
-		for (Faction f : Factions.all(level.getServer())) {
-			if (f.leader().filter(id::equals).isPresent()) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

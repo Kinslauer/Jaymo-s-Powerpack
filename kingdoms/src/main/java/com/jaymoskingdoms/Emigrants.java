@@ -443,7 +443,7 @@ public final class Emigrants {
 
 	/** Whether {@code v} has had enough, and if so, off they go (with their household). */
 	private static void decide(ServerLevel level, Villager v) {
-		if (v.isBaby() || Rulers.is(v) || Visitors.is(v) || v.hasAttached(Elders.JOURNEY) || McaCompat.following(v) != null || Downed.isDowned(v) || v.isSleeping()) {
+		if (v.isBaby() || v.hasAttached(Elders.JOURNEY) || staysPut(level, v) || v.isSleeping()) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -513,7 +513,7 @@ public final class Emigrants {
 		long now = level.getGameTime();
 		RandomSource random = v.getRandom();
 		List<Villager> household = household(level, v);
-		Place to = destination(level, v, f, reason);
+		Place to = household == null ? null : destination(level, v, f, reason);
 		if (to == null) {
 			return false;
 		}
@@ -544,7 +544,8 @@ public final class Emigrants {
 	 * family, one following anyone, one already on the road); false to try again another day.
 	 */
 	static boolean hardship(ServerLevel level, Villager v) {
-		if (v.hasAttached(MOVE) || v.hasAttached(Elders.JOURNEY)) {
+		if (v.hasAttached(MOVE) || v.hasAttached(Elders.JOURNEY) || v.hasAttached(STORY)) {
+			// (already gone, or already moved here from somewhere: once is enough)
 			return true;
 		}
 		if (v.isBaby() || Rulers.is(v) || Visitors.is(v) || McaCompat.following(v) != null || McaCompat.playerFamily(v)) {
@@ -582,18 +583,44 @@ public final class Emigrants {
 	}
 
 	/** {@code v} and their partner and children about. */
-	private static List<Villager> household(ServerLevel level, Villager v) {
+	/**
+	 * {@code v} and the partner and small children who go with them; null if one of those may not go (a ruler, sworn,
+	 * held, in a tale, someone's family...): then nobody goes, rather than part of a family.
+	 */
+	private static @Nullable List<Villager> household(ServerLevel level, Villager v) {
 		List<Villager> out = new ArrayList<>();
 		out.add(v);
 		for (Villager x : level.getEntitiesOfClass(Villager.class, v.getBoundingBox().inflate(HOUSEHOLD), x -> x != v && x.isAlive())) {
 			int kin = McaCompat.kin(v, x);
-			if ((kin == McaCompat.PARTNER || kin == McaCompat.KIN && x.isBaby()) && !x.hasAttached(MOVE) && !x.hasAttached(Elders.JOURNEY)
-				&& McaCompat.following(x) == null && !Rulers.is(x)
-				&& !McaCompat.playerFamily(x)) {
+			if ((kin == McaCompat.PARTNER || kin == McaCompat.KIN && x.isBaby()) && !x.hasAttached(MOVE) && !x.hasAttached(Elders.JOURNEY)) {
+				if (staysPut(level, x)) {
+					return null;
+				}
 				out.add(x);
 			}
 		}
 		return out;
+	}
+
+	/**
+	 * Whether {@code v} is someone who never packs up and goes: a ruler or a town's leader, a visitor, anyone's
+	 * companion or sworn, held or downed, a player's family, the smith asleep under his keeping, or one of a running
+	 * tale's people (its asker or its cast).
+	 */
+	static boolean staysPut(ServerLevel level, Villager v) {
+		return Rulers.is(v) || Visitors.is(v) || McaCompat.following(v) != null || McaCompat.playerFamily(v) || Bonds.lordOf(v) != null
+			|| Captives.bound(v) || Downed.isDowned(v) || KeepingCells.kept(v) || TaleCast.cast(v) != null
+			|| Tales.inTale(level.getServer(), v.getUUID()) || leads(level, v.getUUID());
+	}
+
+	/** Whether {@code id} leads any town or realm. */
+	static boolean leads(ServerLevel level, UUID id) {
+		for (Faction f : Factions.all(level.getServer())) {
+			if (f.leader().filter(id::equals).isPresent()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	static @Nullable Faction ruler(MinecraftServer server, @Nullable Faction f) {

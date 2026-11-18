@@ -272,6 +272,12 @@ public final class Tales {
 	static final AttachmentType<List<String>> GONE = AttachmentRegistry.create(JaymosKingdoms.id("tale_givers_gone"),
 		builder -> builder.persistent(Codec.STRING.listOf()));
 	static final int GONE_MAX = 200;
+	/**
+	 * On the overworld: the askers of tales still running, as {@code instance/asker UUID}, offline players' too (so
+	 * nobody whose tale is still being told packs up and goes).
+	 */
+	static final AttachmentType<List<String>> ASKING = AttachmentRegistry.create(JaymosKingdoms.id("tale_givers_asking"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
 	/** On someone who has asked a tale of a player (an entity tag). */
 	static final String GIVER_TAG = "jaymoskingdoms_tale_giver";
 
@@ -926,6 +932,9 @@ public final class Tales {
 			giver == null ? "" : giver.getName().getString(), giver == null ? "" : job(giver), faction, home.asLong(), -1L, false, vars, Map.of(), names,
 			Map.of(), Map.of(), List.of());
 		state(player).runs.add(run);
+		if (giver != null) {
+			asking(level, run, true);
+		}
 		enter(player, run, speaker);
 		Quests.sync(player, true);
 		return run;
@@ -1107,10 +1116,27 @@ public final class Tales {
 
 	// ---- steps -----------------------------------------------------------------------------------------------------------------
 
-	/** Everyone who's in {@code run} with {@code player} and at the same step: them, and their party's members online. */
-	/** Whether {@code id} asks a tale of a player online, or is one of a running tale's people. */
+	/** {@code run}'s asker is noted as asking a tale still running ({@link #ASKING}), or no longer. */
+	private static void asking(ServerLevel level, Run run, boolean asks) {
+		if (run.giver.isEmpty()) {
+			return;
+		}
+		ServerLevel world = Factions.level(level.getServer());
+		List<String> all = new ArrayList<>(world.getAttachedOrElse(ASKING, List.of()));
+		String key = run.instance + "/" + run.giver;
+		if (asks ? !all.contains(key) && all.add(key) : all.remove(key)) {
+			world.setAttached(ASKING, List.copyOf(all));
+		}
+	}
+
+	/** Whether {@code id} asks a tale still running (of anyone, online or not), or is one of a running tale's people. */
 	static boolean inTale(MinecraftServer server, UUID id) {
 		String key = id.toString();
+		for (String asks : Factions.level(server).getAttachedOrElse(ASKING, List.of())) {
+			if (asks.endsWith("/" + key)) {
+				return true;
+			}
+		}
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			State s = stateOrNull(p);
 			if (s == null) {
@@ -1125,6 +1151,7 @@ public final class Tales {
 		return false;
 	}
 
+	/** Everyone who's in {@code run} with {@code player} and at the same step: them, and their party's members online. */
 	static List<ServerPlayer> sharers(ServerPlayer player, Run run) {
 		List<ServerPlayer> out = new ArrayList<>();
 		out.add(player);
@@ -1231,6 +1258,7 @@ public final class Tales {
 			JaymosKingdoms.LOGGER.warn("Tale {} has no step {}: the run is dropped", run.tale, run.step);
 			state(player).runs.remove(run);
 			if (player.level() instanceof ServerLevel level) {
+				asking(level, run, false);
 				// (its people go their ways, those gone home with them)
 				TaleCast.over(level, run, null);
 			}
@@ -1265,6 +1293,9 @@ public final class Tales {
 	/** (gb-haggle) Asked for more, {@code giver} took offence: the tale they were putting to {@code player} is off. */
 	private static void refused(ServerPlayer player, Run run, LivingEntity giver) {
 		state(player).runs.remove(run);
+		if (player.level() instanceof ServerLevel level) {
+			asking(level, run, false);
+		}
 		Quests.withdraw(giver, QUEST);
 		Quests.sync(player, true);
 	}
@@ -2022,6 +2053,7 @@ public final class Tales {
 			// (its file is gone, or changed under it: its people go their ways, those gone home with them)
 			Quests.drop(player, run.quest());
 			s.runs.remove(run);
+			asking(level, run, false);
 			TaleCast.over(level, run, null);
 			return;
 		}
@@ -2214,6 +2246,7 @@ public final class Tales {
 				long born = parse(run.vars.getOrDefault("~day", "0"), 0);
 				if (!run.taken && today > born + (tale != null && tale.by().equals("rumour") ? RUMOUR_DAYS : UNTAKEN_DAYS)) {
 					s.runs.remove(run);
+					asking(level, run, false);
 					TaleCast.over(level, run, null);
 				} else if (run.taken && !run.giver.isEmpty() && Factions.level(level.getServer()).getAttachedOrElse(GONE, List.of()).contains(run.giver)) {
 					// (the one who asked died while this player was away)
@@ -2295,6 +2328,7 @@ public final class Tales {
 		if (!run.taken) {
 			// (turned down before it began: nothing's kept, and the asker has no more to say of it)
 			state(player).runs.remove(run);
+			asking(level, run, false);
 			TaleCast.over(level, run, null);
 			LivingEntity giver = entity(level, run.giverId());
 			if (giver != null) {
@@ -2407,6 +2441,9 @@ public final class Tales {
 		State s = state(player);
 		if (!s.runs.remove(run)) {
 			return;
+		}
+		if (player.level() instanceof ServerLevel here) {
+			asking(here, run, false);
 		}
 		Quest q = Quests.quest(player, run.quest());
 		if (q != null && q.kind() >= Quest.PACK && player.level() instanceof ServerLevel level) {
