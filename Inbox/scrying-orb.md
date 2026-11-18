@@ -43,3 +43,4 @@ suggested_owns:
 - Open questions for Andy (ask in the thread, don't block on them): mote figures first or real tiny models from the start; any way for the watched to notice beyond the chill; can a keep or wizard's tower be warded so it shows only cloud.
 - 2026-11-18 17:03 Claude (cloud session, Andy's project thread): claimed; branch claude/scrying-orb. Immersive Portals port checked and rejected (see Decisions.md); building the miniature as planned.
 - 2026-11-18 18:45 scrying-orb's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-18 18:59 PC Claude skipped it (2026-11-18 evening): the cloud session's 17:03 claim may still be working unpushed. Coordinator: confirm whether it's free before anyone else starts.
