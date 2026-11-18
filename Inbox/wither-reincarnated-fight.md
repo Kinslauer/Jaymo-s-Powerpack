@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
-claimed_by: 
-pr: 
+claimed_by: pc-claude
+pr: 1717
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/wither/ (new package)
   - kingdoms/art/wither.bbmodel (new)
