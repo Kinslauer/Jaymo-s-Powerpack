@@ -14962,3 +14962,7 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 ## 0.10.20 (2026-11-18): Carried in only to a real village (#1733)
 
 - Fixes: "Someone found you and carried you in" could leave you outdoors by a lone castle's bounty board. Now only a village (a bell, an Epic town, or a town its builders put up, with homes round it) carries you in, to a free bed indoors; the nearest one that has one is tried, and with none you wake as you would have.
+
+## 0.10.21 (2026-11-18): New kingdoms rise in real towns again (#1735)
+
+- Fixes: since the 15th every kingdom raised from nothing came out as a lone castle (Ardenmoor, Gwynshire, Eldwold), because its town was only ever tried on one spot and the river and sea checks threw it out. The town is now looked for over the ground round it, nearest first, as villages are.
