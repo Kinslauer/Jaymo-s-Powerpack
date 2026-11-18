@@ -18,6 +18,8 @@
 	},
 	"mixins": [
 		"jaymospowers.mixins.json",
+		"jaymospowers.bits.mixins.json",
+		{ "config": "jaymospowers.bits.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.client.mixins.json", "environment": "client" },
 		"jaymospowers.bettercombat.mixins.json",
 		{ "config": "jaymospowers.bettercombat.client.mixins.json", "environment": "client" },

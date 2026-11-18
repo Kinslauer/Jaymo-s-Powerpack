@@ -63,6 +63,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
+		com.jaymospowers.client.bits.BiomeTitle.init();
+		com.jaymospowers.client.bits.UseBar.init();
+		com.jaymospowers.client.bits.Mentions.init();
+		com.jaymospowers.client.bits.ItemShareClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
