@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -10,6 +10,7 @@ suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigGuns.java (new)
   - src/client/java/com/jaymospowers/client/rig/RigGunsClient.java (new)
   - changes/powers/<branch>.md
+writer: hermes-writer
 ---
 # Rig patch 2: guns that unfold
 
