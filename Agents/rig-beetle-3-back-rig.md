@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: rig-beetle-3-back-rig
 branch: claude/rig-beetle-3-back-rig
 with: 
@@ -39,3 +39,4 @@ owns:
 
 ## Done
 Compiles but not tested in game.
+- 2026-11-18 14:07 No sign of work for 30 min: marked stalled (whoever ran it stopped).
