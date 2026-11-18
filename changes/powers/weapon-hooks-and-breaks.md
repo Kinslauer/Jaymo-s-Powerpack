@@ -1,2 +1,0 @@
-# Hooks, mace stagger, thrown axes break
-Andy's four weapon picks from the Knight Armor list, in our own code. A scythe, bill or gutting hook drags a foe off a wall it is climbing (a Freerun cling, a ladder or vine) and reaches round a raised shield, so half of the blow gets through. Every mace blow slows what it hits for a moment. A thrown Tinkering throwing axe may break on a hit (about one in seven): the broken axe can't be thrown until it is mended at an anvil with three iron nuggets.
