@@ -68,7 +68,7 @@ public final class EpicTowns {
 	 */
 	static final int FAR_RINGS = 6;
 	/** A far town's land is made in the background, up to this many chunks round its start, for at most this long (ticks) before it is passed over. */
-	static final int FAR_LAND = 8, FAR_WAIT_TICKS = 1200;
+	static final int FAR_LAND = 10, FAR_WAIT_TICKS = 1200;
 	/** Keeps a far town's chunks loaded (made, not run) while it waits; lapses on its own if the search is dropped. */
 	private static final TicketType FAR = new TicketType(300L, TicketType.FLAG_LOADING);
 	/** The start chunks (packed) found to hold no town, or no use, so not looked at again; and the spots a town was already tried to be raised at. */
@@ -326,10 +326,13 @@ public final class EpicTowns {
 			return pass(looking, "no town started there");
 		}
 		BoundingBox box = start.getBoundingBox();
+		BlockPos middle = box.getCenter();
+		if (Factions.realmNear(level.getServer(), middle, KingdomEvents.CAPITAL_SPACING) != null) {
+			return pass(looking, "too near another kingdom's capital");
+		}
 		if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 			return null;
 		}
-		BlockPos middle = box.getCenter();
 		if (Factions.near(level.getServer(), middle, KingdomEvents.TOWN_RADIUS) != null) {
 			return pass(looking, "another faction holds it");
 		}
