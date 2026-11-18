@@ -515,9 +515,8 @@ def packModsNoCf = [
 	// ModernFix-mVUS (LGPL-3.0-only, Coredex): a ModernFix fork with a 26.3 build: faster launch, less memory. Client and
 	// server. 5.27.20-build.2 for 26.3.
 	[dep: "maven.modrinth:modernfix-mvus:pa9cAfYg", cf: null],
-	// ScalableLux (LGPL-3.0-only, ishland): faster light updates (Starlight's way). Alpha. Client and server.
-	// 0.3.0-alpha.0.6+26.3 for 26.3.
-	[dep: "maven.modrinth:scalablelux:g4eqNSKd", cf: null],
+	// Not ScalableLux: it replaces the vanilla light engine that CustomChunks patches to give each stacked band its own
+	// sky, so the Overworld under the Aether got no sky light and stayed dark by day (Andy, 2026-11-18).
 	// Resourceful Config (MIT, epic_oreo): the config library Structure Layout Optimizer needs. Client and server. 6.0.2
 	// for 26.3.
 	[dep: "maven.modrinth:resourceful-config:t3odHyFJ", cf: null],
@@ -900,7 +899,7 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
 def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
-	"vanilla-outsider-better-dogs", "dasik-library"]
+	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
