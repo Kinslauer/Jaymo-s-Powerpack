@@ -106,6 +106,7 @@ public final class ChronoWindDay {
 		}
 		int rate = (int)Math.min(MAX_RATE, START_RATE * Math.pow(1.0 + SPEED_UP, held));
 		wind(player, player.isShiftKeyDown() ? -rate : rate);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.wind_day", held % 20 == 0 ? 1 : 0);
 		if (held % 10 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F,
 				player.isShiftKeyDown() ? 0.6F : 1.6F);
