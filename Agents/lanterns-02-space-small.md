@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: lanterns-02-space-small
 branch: claude/lanterns-02-space-small
 with: Claude Code (PC)
@@ -25,3 +25,4 @@ owns:
 - Andy allowed a PC build for this task (2026-11-18).
 
 ## Done
+Visited worlds wear a gold pin on the star map, and their cards show landings, the last landing spot and your bed there. From the Overworld at night, the Verdant chart's light is the blue giant with its ring. Compiled on the PC, CI passes; not played.
