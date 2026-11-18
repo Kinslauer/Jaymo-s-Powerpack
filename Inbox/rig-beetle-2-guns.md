@@ -1,15 +1,17 @@
 ---
-status: open
+status: in-review
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
-claimed_by: 
-pr: 
+claimed_by: hermes-a
+pr: 1749
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigGuns.java (new)
   - src/client/java/com/jaymospowers/client/rig/RigGunsClient.java (new)
   - changes/powers/<branch>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Rig patch 2: guns that unfold
 
@@ -35,3 +37,6 @@ suggested_owns:
 - Run 2 patches at a time. Suggested pairs: (1 arm forms + 5 the Mind), (3 back rig + 6 senses and nova), (2 guns + 4 flight).
 - Lore first: read `Lore.md` (the Frostborn rigs, Los Perrito's troopers). Anything needing a new line gets a `(new)` paragraph, quoted in full to Andy for approval.
 - One PR per patch with `changes/powers/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging.
+
+## Notes
+- 2026-11-18 13:49 Text pass: player-facing rewrite of changes/powers/rig-beetle-2-guns.md (dropped internal ability IDs gn-* and code names BeamScars, RigMoves/RigPose, MagicFx); rig.json gun menu names (Palm Charge, Gatling Arm, Railgun, Sonic Cannon, Twin Beam, Siege Mode) and all message keys referenced by the new Java code verified, no changes needed there; no code changed.

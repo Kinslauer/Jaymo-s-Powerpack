@@ -1,15 +1,17 @@
 ---
-status: open
+status: in-review
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
-claimed_by: 
-pr: 
+claimed_by: hermes-b
+pr: 1746
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigForms.java (new)
   - src/client/java/com/jaymospowers/client/rig/RigFormsClient.java (new)
   - changes/powers/<branch>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Rig patch 1: arm forms
 
@@ -36,3 +38,6 @@ suggested_owns:
 - Run 2 patches at a time. Suggested pairs: (1 arm forms + 5 the Mind), (3 back rig + 6 senses and nova), (2 guns + 4 flight).
 - Lore first: read `Lore.md` (the Frostborn rigs, Los Perrito's troopers). Anything needing a new line gets a `(new)` paragraph, quoted in full to Andy for approval.
 - One PR per patch with `changes/powers/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging.
+
+## Notes
+- 2026-11-18 13:02 Text pass: reviewed changes/powers/rig-beetle-1-arm-forms.md (already player-facing, 'Built; not played in game.') and the lang/parts/rig.json additions (seven arm-form menu entries: Arm Blade, Mace Arm, Pile Bunker, Drill Breaker, Thruster Lance, Energy Lash, Weapon Mimic; messages needs_arms, form_wait, study_none, mimic_ready). All strings plain, brief and consistent with existing rig message style; every key the new code references exists. No rewrites needed.
