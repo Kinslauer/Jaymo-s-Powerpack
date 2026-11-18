@@ -2,6 +2,8 @@ package com.jaymospowers.core;
 
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * What the kind of armour a body wears ({@link ArmourKind}, by the four slots) does for how it moves, how long Slowness
@@ -62,6 +64,37 @@ public final class ArmourEase {
 			};
 		}
 		return factor;
+	}
+
+	/** Whether every piece {@code body} wears, in its slots and in Jaymo's Kingdoms' harness layers, is padding, mail or nothing: no plate anywhere. */
+	public static boolean light(LivingEntity body) {
+		for (EquipmentSlot slot : SLOTS) {
+			if (ArmourKind.worn(body, slot) == ArmourKind.PLATE) {
+				return false;
+			}
+		}
+		return !ArmourKind.layers(body, "all").contains(ArmourKind.PLATE);
+	}
+
+	/**
+	 * Whether {@code body} wears the whole {@code set} (head, chest, legs, feet, in that order). Each of the four slots
+	 * holds its piece of the set (not broken), or, for head, legs and feet only, is covered by a harness layer of kind
+	 * {@code layer} ({@link ArmourKind#harness}: mail for the mailed set, padding for the studded) when the chest slot
+	 * holds the set's chest piece. So a mailed jack over a gambeson and a mail hauberk, in a surcoat, still counts as a
+	 * mailed set; a harness alone, without the set's chest piece, does not.
+	 */
+	public static boolean fullSet(LivingEntity body, Item[] set, ArmourKind layer) {
+		if (!has(body, EquipmentSlot.CHEST, set[1])) {
+			return false;
+		}
+		boolean layered = ArmourKind.layers(body, "all").contains(layer);
+		return (layered || has(body, EquipmentSlot.HEAD, set[0])) && (layered || has(body, EquipmentSlot.LEGS, set[2]))
+			&& (layered || has(body, EquipmentSlot.FEET, set[3]));
+	}
+
+	private static boolean has(LivingEntity body, EquipmentSlot slot, Item piece) {
+		ItemStack stack = body.getItemBySlot(slot);
+		return stack.is(piece) && !ArmourWear.broken(stack);
 	}
 
 	private static float slotShare(EquipmentSlot slot) {

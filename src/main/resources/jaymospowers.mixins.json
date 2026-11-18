@@ -25,6 +25,8 @@
 		"ArmourWearEnchantMixin",
 		"ArmourWearRepairMixin",
 		"LightArmourSnowMixin",
+		"StuddedFireMixin",
+		"StuddedFrostMixin",
 		"ArmourWearMendingMixin",
 		"ArmourWearSlotMixin",
 		"GrindstoneMenuAccessor",
