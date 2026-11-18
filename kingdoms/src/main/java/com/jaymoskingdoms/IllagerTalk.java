@@ -118,10 +118,21 @@ public final class IllagerTalk {
 	static final int HEAD_COLOR = 0xB8C4A0;
 	/** A conversation lapses this long after it opened (ticks). */
 	static final int TALK_TICKS = 20 * 90;
-	/** Their names: a start and an end. */
-	static final String[] NAME_START = {"Vor", "Grek", "Mal", "Thask", "Ozr", "Kel", "Durn", "Hask", "Zev", "Brak", "Orl", "Sev", "Varn", "Ruk",
-		"Ezk", "Mord", "Ulv", "Garth", "Isk", "Rov"};
-	static final String[] NAME_END = {"ik", "ath", "osk", "un", "eth", "ar", "ix", "ulm", "esh", "or", "ak", "ev", "ugh", "ard"};
+	/**
+	 * Their names (Andy, 2026-11-18: "the pillagers dont have names for each other, we should create a pool of 80 or so and
+	 * have them tagged with a random one"). Each illager draws one when it's first seen ({@link #self}), one no other illager
+	 * near it already goes by if it can ({@link #NAME_APART}), and its fellows call it by it ({@code mixin.IllagerNameMixin}).
+	 */
+	static final String[] NAMES = {"Vorik", "Grekath", "Malosk", "Thaskun", "Ozreth", "Kelar", "Durnix", "Haskulm", "Zevesh", "Brakor",
+		"Orlak", "Sevrin", "Varnugh", "Rukard", "Ezkar", "Mordath", "Ulvik", "Garthun", "Iskor", "Rovesh",
+		"Vashka", "Krell", "Dorvak", "Sorrek", "Bazgul", "Hrothik", "Tarvesk", "Morrow", "Grisk", "Velkar",
+		"Ashkor", "Drogan", "Kazrik", "Nethor", "Skarn", "Vulmar", "Yorick", "Zarnak", "Bruneth", "Corvak",
+		"Dagrin", "Fenrik", "Gorvash", "Hulmar", "Jorvik", "Kragan", "Lothar", "Murdo", "Narvek", "Osgar",
+		"Pelgrim", "Raskel", "Sturn", "Tolvar", "Ugrik", "Varga", "Wulfric", "Yarrow", "Zarkul", "Branok",
+		"Cragmar", "Dresk", "Elvar", "Forgrim", "Gavrek", "Harrok", "Ivor", "Jaskin", "Korvin", "Lusk",
+		"Marrek", "Noggar", "Oskar", "Prask", "Quillan", "Ragnor", "Sorvik", "Thorne", "Vesk", "Grimmet"};
+	/** An illager's name is one no other illager within this many blocks goes by, if there's one left (blocks). */
+	static final double NAME_APART = 48.0;
 	/** Lines per kind of line (lang {@code illager_talk.jaymoskingdoms.line.<kind>.<n>}). */
 	static final int LINES = 3;
 	/** How often a friendly chat turns to their dead walking. */
@@ -243,6 +254,12 @@ public final class IllagerTalk {
 			return InteractionResult.SUCCESS;
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> struck(victim, source));
+		// every illager has its name from the start, so its fellows can call it by it
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof AbstractIllager illager) {
+				self(illager);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(IllagerTalk::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			TALKS.clear();
@@ -263,12 +280,35 @@ public final class IllagerTalk {
 		Self s = illager.getAttached(SELF);
 		if (s == null) {
 			RandomSource random = illager.getRandom();
-			String name = NAME_START[random.nextInt(NAME_START.length)] + NAME_END[random.nextInt(NAME_END.length)];
+			String name = freshName(illager, random);
 			String nature = NATURES.get(random.nextInt(NATURES.size()));
 			s = new Self(name, nature, random.nextInt(11) - 5, "", 0L, Map.of(), Map.of(), Map.of(), List.of());
 			illager.setAttached(SELF, s);
 		}
 		return s;
+	}
+
+	/** A name from {@link #NAMES} that no illager near {@code illager} already has (any, if they're all taken). */
+	private static String freshName(AbstractIllager illager, RandomSource random) {
+		java.util.Set<String> taken = new java.util.HashSet<>();
+		for (AbstractIllager other : illager.level().getEntitiesOfClass(AbstractIllager.class, illager.getBoundingBox().inflate(NAME_APART),
+			o -> o != illager)) {
+			Self s = other.getAttached(SELF);
+			if (s != null) {
+				taken.add(s.name());
+			}
+		}
+		String name = NAMES[random.nextInt(NAMES.length)];
+		for (int tries = 0; tries < NAMES.length && taken.contains(name); tries++) {
+			name = NAMES[random.nextInt(NAMES.length)];
+		}
+		return name;
+	}
+
+	/** {@code e}'s own name, if it's an illager that has one (server side; clients don't know it till it's told). */
+	public static @Nullable String nameOf(Entity e) {
+		Self s = e instanceof AbstractIllager ? e.getAttached(SELF) : null;
+		return s == null ? null : s.name();
 	}
 
 	private static Self put(AbstractIllager illager, Self s) {

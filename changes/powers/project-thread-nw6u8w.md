@@ -1,0 +1,8 @@
+# crushing blows - slams throw, tear and burst the downed; prone deaths lie
+- **Crushing blows** (Andy: "the slams and any attack of that magnitude should dismember more often and knockback especially if the enemy is downed... so obviously they get gibbed"): a slam's shockwave (the mutant zombie's and the Hulk Hammer's, damage type tag `jaymospowers:crushing`), any blow of 9+ by hand or body from something 3x the target's bulk or more (mutants, golems, ravagers), and any blow of 18+ from anyone.
+  - On someone **downed** it always bursts them (Stoneborn excepted), knocked out cold or not. Rubber-folk lose every limb and stay down to mend, as from a blast.
+  - Killing or downing someone standing, it bursts them 35% of the time; else the part it lands on comes off 50% of the time (a club's is 5%).
+  - Lived through, it takes an arm or a leg 35% of the time (a second now and then) and throws the body 1-1.5 blocks a tick across and up, less as it resists knockback. The throw is set after the tick's moves so a mutant's own weak shockwave nudge can't soften it.
+  - Code: `core/BlastGore` (crushing, crushedNow, throws), `Downed` (crushed downed bodies), `Dismember.lethalPart` (CRUSH_SEVER).
+- **Prone deaths** (Andy: a burning pillager on the ground "pops into the air when it dies because it defaults back to standing"): anyone downed who dies of anything else (fire, a fall, a mob) is now marked to lie as they lay, as a finished one already was. Players dying flat (downed, crawling, crippled, under a low ceiling) are marked too: face up if they'd rolled onto their back, else face down. `DownedLie.markPlayer`, `Downed.LIE_PHASE`; an unused mark is cleared on respawn.
+- Built; not played.
