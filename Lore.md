@@ -284,6 +284,13 @@ the slow and leaving the young. They'll teach their trade to a stranger with non
 else. The Huntsman's law is theirs to keep where no realm's law reaches: one who kills more than the wood can spare is
 scolded, and one who keeps at it is run down, hogtied and carried to the nearest realm's guards as a poacher.
 
+**Jacks and studded hides** (Andy approved, 2026-11-18; Claude's placement). Plate belongs to knights and to
+those who can pay for it. Everyone else who fights for a living goes in leather: the Huntsman's rangers, scouts and
+outriders, outlaw bands, ship crews. A smith who keeps the Anvil-Father's faith will sew mail into a leather coat and
+call it a jack, or hammer iron studs through a hide, and both are made at the bench, not the smithing table. Whoever
+wears them stays quick enough to climb, swim and step back from a blow that a knight in plate must take on his shield.
+In the bastions the piglin brutes stud their own hides with scrap.
+
 **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
 those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
 **Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
@@ -677,6 +684,17 @@ Overworld in the old age, before they were stopped. A powerful Frostborn Z Fight
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
 
+**The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
+zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
+have a similar but higher chance to turn giant"; the rest Claude's placement, approved by Andy 2026-11-18). Not every raider who died on the
+Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
+them, dragging tails rotted and mangled the way the future's dead drag theirs, or only a stump where one was cut. A
+Warrior-born villager who dies and turns keeps their blood too, and the tail kept wrapped in life comes loose and hangs.
+The dead still answer the moon: under a full moon or a blood moon, one with its tail still on it may swell into the
+wild Great Ape, its fur gone grey with the grave, until dawn, or until a blade takes the tail. The Verdant are fed by
+the sun in life and lose it in death, and the dead among them turn to the moon instead: an undead Verdant out under it
+swells into a giant more readily than a dead Warrior-born turns ape, and shrinks back by dawn.
+
 **The Other World.** A Z Fighter who dies wakes in the Other World: a pale hall on an island of holystone high in
 the sky, with a halo over their head. It is the Aether's, as the afterlife is, and there is no portal there either. The
 **Judge** reads their fights out of his book and sends them down the road: "Death is a door, not a wall." The **Master
@@ -1055,6 +1073,10 @@ are his shame.
 things that burn or hide. She loves quick hands, a shut mouth, and fire that does not bite. The Sun's men hang her
 followers when they catch them.
 
+**No priests of the Ash Whisperer** (Andy approved, 2026-11-18; Clerics never pledge to her).
+She keeps no clerics and answers no prayer for healing. Her favour goes only to the dark arts, death and blood and the
+other forbidden sorceries, and whoever wants it strikes a Warlock's pact with her, never a priest's vow.
+
 **What a pact holds you to** (Andy, 2026-11-17: pacts and oaths bind; the terms Claude's, after 5e, agreed by Andy;
 placement for him to approve). A Warlock's patron gives, and asks two things back: the debts, and terms that are never
 lifted. The hand that would break one stops of itself, and only a deliberate second try gets through, and then the
@@ -1397,6 +1419,16 @@ through, that should be how they make their entrance to the overworld in the lon
 rifts in the air, like an Arsenal user's, and fly through them. That is how they came up to the sorcerer's battle in
 *The Long Defence*. These are tears, not gates: nothing stands open after they pass, so there is still no portal to the
 demons' country beyond the Nether's own.
+
+**The lit country** (new; Infernal Expansion Redux picks, 2026-11-18; Claude's placement, for Andy to approve). Above the
+demons' Gloam, where glowstone hangs thickest from the Nether's roof, lies a canyon of pale glittering sand, and the light
+there is food. Lampflies drink it out of the stone until a lump goes dim and then dull; blind gulpers sit in the sand and
+swallow any lit thing that moves, lampfly or traveller. Where the gulpers are left alone the canyon stays bright; where
+they are hunted out the lampflies drink it dark and then starve, and the stone slowly takes its light back. The Crowned
+Sun's priests take glowstone in tribute and pay well for bright stone, nothing for dull. Ember moths, magma voles and
+blink beetles are the Nether's own animals, like the strider: nobody made them. Among the canyon's spikes stand a few
+broken frames of glowstone. Cold air comes off them and frost forms on the stone nearby, and nothing goes through. The
+wicked dead who wake down here walk toward them first; none of them is the way up.
 
 **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
