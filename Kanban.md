@@ -19,9 +19,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
-- [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · #1716 · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · #1717 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -36,14 +34,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
+- [x] [[Inbox/Done/inferno-fire|inferno-fire]]
 - [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 - [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
 - [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 
 
 %% kanban:settings
