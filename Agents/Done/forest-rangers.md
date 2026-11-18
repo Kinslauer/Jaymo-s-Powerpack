@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: The Green Huntsman's rangers in the forests (hunt, teach, scold, hogtie poachers)
 branch: claude/forest-rangers
 with: Claude (cloud, Powerpack project thread)
@@ -22,3 +22,4 @@ to justice hogtied if you poach (kill too many animals)".
 
 ## Done
 Built; not played.
+- 2026-11-18 16:32 PR #1701 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Paladin oaths and Warlock pacts bind (refused acts, deliberate breaks), with patron terms after 5e
 branch: claude/binding-vows
 with: Claude (cloud, Powerpack project thread)
@@ -24,3 +24,4 @@ pact" (oaths and pacts only); pact terms after 5e, agreed 2026-11-17 (Decisions.
 - Lore: (new) paragraph "What a pact holds you to" under the Ash Whisperer, for Andy to approve.
 
 ## Done
+- 2026-11-18 16:32 PR #1684 is merged into master; moved to Agents/Done.
