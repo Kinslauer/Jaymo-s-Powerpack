@@ -2428,3 +2428,8 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 - **Sandwiches on the board**: sneak and put bread, fillings and bread on a cutting board in order, then cut it with the knife; the sandwich is as filling as its layers.
 - **New stations, all by hand**: Brewing Keg (a cask's drinks in one sitting), Tea Kettle (over a lit fire; new Cup of Tea from herbs) and Sushi Mat (rice rolls and the like), poured and rolled like dough. New recipes for each.
 - **Andy's rulings on the above** (what these change wins over the lines before): a step recipe uses nothing up when it starts; each ingredient goes in with **a right-click holding it**, and the wrong ingredient is a mistake; the **sear marker is a bar in the world** above the pan, for everyone near; a **sandwich's cut is timed** like a chop, and a missed cut gives a squashed sandwich. Fixed: the last step of a step recipe, and serving a grill, oven or roast, could crash the server.
+
+## 0.6.43 (2026-11-18): shared screen style: pills and the gold frame (#1722)
+
+- `KitchenUi` (generated from `tools/ui_style`) gains `pill`, `pillWidth`, `frame` and `panelFramed`, the same as the other mods' copies. No Kitchen screen uses them yet.
+- Built; not played.

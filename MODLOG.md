@@ -5787,3 +5787,37 @@ Andy's four weapon picks from the Knight Armor list, in our own code. A scythe, 
 - Its knight armour is turned off, because Jaymo's Kingdoms' heraldry harness is the pack's knight armour: the four grid recipes are disabled and the anvil does not forge it. The mod has no loot, trades or mob gear for it in data; the pieces still show in its creative tab (that is in the mod's code).
 - The broken throwing axe is still mended in the grid with three iron nuggets.
 - Built; not played.
+
+## 0.24.71 (2026-11-18): menu redesign: title cards, dread vignette, scouter card, colour picker (#1722)
+
+- **Title cards** (`TitleCard`, beside the tip card): every title the game sends (a milestone's big title and the line under it, a heritage chosen, a realm sworn to, a rival chief felled, a command's `/title`) is drawn as one centred card instead of vanilla's big text: a thin plate with gold rules, the title at double size, one line under it, fading in and out on the packet's own timings. It waits while your own ultimate film runs or the HUD is hidden, and shows after. A mixin on `Hud` (`TitleCardMixin`) hands the title, subtitle, timings and clear to it.
+- **Dread vignette** (`DreadVignette`): the edges of the screen darken when a hostile with at least 80 max health and 4 times yours is within 40 blocks (a great foe, an ogre, a boss), stronger as it nears (full at 10 blocks), easing in and out. Hidden while a film hides the HUD.
+- **Scouter reading** (Z Fighter): the readout is now a small card: the name, a tag for what kind of thing it is (Fighter, Foe, Beast, Folk), the power level, and a bar of the number against the scouter's cap. It reads any living thing, as before: a fighter's level from his ki and training, anyone else's from max health x 10 plus attack damage x 50 (`ZFighterScouter.HEALTH_WEIGHT`, `ATTACK_WEIGHT`).
+- **Colour picker** (`ColourPickerScreen`): preset swatches, the colours picked lately, a hue strip (light to dark down it), a hex box, the old colour beside the new, Apply, Reset and Cancel, and a live try-on as you pick. The Z Fighter technique maker has a "+" swatch after its eight colours that opens it, so a made technique can be any colour.
+- **Character page link**: `MenuTabs.characterLink(label, action)` puts a link on the Record panel (Kingdoms' "Show my papers").
+- Classes: `TitleCard`, `TitleCardMixin`, `DreadVignette`, `ColourPickerScreen`, `ZFighterScouterClient`, `ZFighterCreatorScreen`, `MenuTabs`, `CharacterScreen` (link only), lang part `cards.json`.
+- Built; not played.
+
+## 0.24.72 (2026-11-18): the H menu holds everything: inventory, dropdown bar or side list, new Character page (#1722)
+
+- **Inventory is a page**: the survival inventory is the first page of the menu (E opens it as before). The menu is drawn over it and clicks on the menu go to the menu. On any page, E or Esc closes the menu; Q no longer turns pages (it drops items). The wheel over the bar still turns pages; H opens the page you had open last. Creative's inventory stays vanilla.
+- **Dropdown bar** (default): one plate per group (You, Powers, World, People, Notices; an empty group is left out) with a small arrow; hover or click opens its list of pages (icon and name), the open page's name sits after the plates. A page not open to you yet shows greyed with a hint on hover (Backpack: wear one).
+- **Side list**: a slim column down the left with every page and small group headings, scrolling with the wheel. Switch with the button on the bar or list, or `/menulook bar|side` (kept in `config/jaymospowers-menulook.properties`). Pages leave room for it (`MenuTabs.SIDE`; `MenuTabs.ROOM` is 0 with the list). Full-width pages (Kingdoms' skill web) keep the bar.
+- **Everything**: new pages Inventory, Baubles, Backpack, Sound browser besides Character, Powers, Trials and Map. Their own keys still work.
+- **Character page** in the Codex shape: status header (level, who you are, XP bar), you in a tall box with armour, hands, amulet and belt down the sides, a soft glow behind and a shadow under the feet, name and heritage under; beside it power (mastery bar, fate), vitals (health, hunger, stamina, armour, experience), Attributes and Resistances side by side, and a Record (mobs felled, deaths, days played, plus Kingdoms' rows). The body scrolls when the window is small.
+- Classes: `MenuTabs` (groups, `group`, `locked`, `wide`, `characterRows(panel, rows)`, look file, `/menulook`, E closes), new `MenuBar` (draws and clicks both looks), `CharacterScreen`, `PowerScreen`/`MapScreen`/`TrialsScreen` (clear of the side list), lang `menu.json`.
+- Built; not played.
+
+The menu bar's plates shrink to stay left of the look button on a narrow screen, and the bar closes when you leave a world. A long title card line shrinks to fit its plate.
+
+## 0.24.73 (2026-11-18): the H menu's Notices page, and ki and mana on the Character page (#1722)
+
+- **Notices page** (Notices group): the last 50 notices, newest first, each with the time it came, wrapped in full and scrolled with the wheel. It keeps what the server said in chat or over the hotbar (rewards, level ups, Jaymo's Kingdoms' word and tidings) and every tip card, so a line you missed can be read again. Kept on your client only, and cleared when you leave the world.
+- **Character page vitals**: a Z Fighter's ki now has a bar beside health, hunger and stamina, and Jaymo's Kingdoms adds a mana bar for the attuned (`MenuTabs.bars`, by reflection). The panel grows a row when there are more than six.
+- Classes: `NoticeLog`, `NoticesScreen`, `MenuTabs` (`bars`, the Notices tab), `CharacterScreen`, `TipCard`, lang `menu.json`.
+- Built; not played.
+
+## 0.24.74 (2026-11-18): shared screen style: pills and the gold frame (#1722)
+
+- `UiStyle` (generated from `tools/ui_style`) gains `pill(graphics, font, x, y, label, value, color)` (a small rimmed tag, returns its width), `pillWidth`, `frame` (a thin gold frame with small diamonds at the corners and a short accent tick over the title) and `panelFramed` (the panel fill plus that frame). No screen of Powers uses them yet.
+- Built; not played.
