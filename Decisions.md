@@ -732,3 +732,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy): picked all 35 harness rows, no notes; sent to Apollo as five Inbox tasks in order (harness-helms-finishes-crests, harness-body-pieces, harness-creeds-and-lands, harness-barding, harness-upkeep). Placement paragraph "The armourers' wider makes" added to Lore.md as (new). Also "merge everything else": PRs #1713-#1717 and #1719 merged; #1718 merged after its build.gradle conflict with #1716 was resolved.
 - 2:38 AM, 2026-11-18 (Andy, decision card): compass plates stay in early dungeon chests (as merged in #1714); the sea-chest PR #1720 is closed.
 - 2026-11-18 (Andy): "approve all lore": "The armourers' wider makes" (harness picks) is canon.
+- 2026-11-18 (Andy): "yes send it to prometheus": the Wither's new model, animations and sounds (wr_look) sent as Inbox task wither-model, previews to Andy before it's built in.
