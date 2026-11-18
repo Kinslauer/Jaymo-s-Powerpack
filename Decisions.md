@@ -720,3 +720,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 8:28 PM, 2026-11-17 (Andy): "approved": the Fire and Wither picks' four lore placements (The Wither's coming, What fire leaves, Fishing the fire, The labyrinth-builders' craft) are canon.
 - 8:40 PM, 2026-11-17 (Andy): "run them as parallel tracks, two at a time": the five Fire and Wither tasks were taken from Apollo by pc-claude. Round 1 weapon-hooks-and-breaks + labyrinth-builders-craft; then fishing-fire-and-crates + wither-reincarnated-fight (behaviour first); then inferno-fire. Wither model/sounds after Andy sees previews.
 - 1:00 AM, 2026-11-18 (Andy, decision card): labyrinth compass plates are found in ocean ruin and shipwreck chests (#1714).
+
+### 2026-11-18: story-quest lore approved
+- **Decided:** Andy: "Yes to all, merge" for the 32 lore placements of the story-quest picks (the hanged who walk, the night market, wolfsbane, the guild's black candle, the tithe, the water ordeal, valley runners, town graves and the rest). PR #1705 merged the same night.
+- **Applies to:** Lore.md (now marked Andy approved, 2026-11-18).
+- **Agent:** [[Agents/Story quest expansion|Story quest expansion]]
