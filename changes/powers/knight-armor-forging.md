@@ -1,4 +1,5 @@
-# Knight Armor and Weapons, forged
-- **Knight Armor and Weapons** (Pete MC Mods, all rights reserved) joins the pack as its own jar, untouched. A datapack (`data/knightarmorweapons/recipe`) switches off its grid recipes for the knight helmet, chestplate, leggings and boots, the long sword (and its blade and handle), the spiked mace, the hand scythe and the throwing axe. The Smithing Anvil forges them instead (`KnightArmorForging`), from iron, with the usual blueprints and grades. Armour takes 7, 9, 8 and 6 ingots (the grid wanted an iron piece and 5 to 7 more ingots, more than one anvil holds; the leather is no longer needed), the long sword 6, the mace 6, the scythe 3, and a throwing axe 2.
-- The broken throwing axe is still mended in the grid with three iron nuggets, which is not forging a metal piece.
+# Knight Armor and Weapons, weapons forged
+- **Knight Armor and Weapons** (Pete MC Mods, all rights reserved) joins the pack as its own jar, untouched, for its weapons only. A datapack (`data/knightarmorweapons/recipe`) switches off its grid recipes for the long sword (and its blade and handle), the spiked mace, the hand scythe and the throwing axe, and the Smithing Anvil forges them instead (`KnightArmorForging`), from iron, with the usual blueprints and grades: long sword 6 ingots, mace 6, scythe 3, throwing axe 2.
+- Its knight armour is turned off, because Jaymo's Kingdoms' heraldry harness is the pack's knight armour: the four grid recipes are disabled and the anvil does not forge it. The mod has no loot, trades or mob gear for it in data; the pieces still show in its creative tab (that is in the mod's code).
+- The broken throwing axe is still mended in the grid with three iron nuggets.
 - Built; not played.

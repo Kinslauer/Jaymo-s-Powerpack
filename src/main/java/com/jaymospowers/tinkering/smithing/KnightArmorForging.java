@@ -11,14 +11,14 @@ import net.minecraft.world.item.ItemStack;
 /**
  * (Smithing) Knight Armor and Weapons' metal pieces, hammered out here when it is in (its pieces are found by id;
  * without it there is nothing to forge). Its grid recipes are switched off in data (data/knightarmorweapons/recipe).
- * The armour grid wanted an iron piece and 5 to 7 more ingots, more than one anvil holds, so the pieces take what an
- * anvil can hold; the leather is no longer needed.
+ * Its armour is turned off (the grid recipes in data; Jaymo's Kingdoms' heraldry harness is the pack's knight armour), so only
+ * the weapons are forged.
  */
 public final class KnightArmorForging {
-	/** Item ids (in the mod's namespace) and the iron ingots each takes: helmet, chestplate, leggings, boots, then the weapons. */
-	private static final String[] PIECES = {"knight_helmet", "knight_chestplate", "knight_leggings", "knight_boots", "knight_long_sword",
+	/** Item ids (in the mod's namespace) and the iron ingots each takes: the weapons. */
+	private static final String[] PIECES = {"knight_long_sword",
 		"knight_spiked_mace", "knight_war_sickle", "knight_throwing_axe"};
-	private static final int[] INGOTS = {7, 9, 8, 6, 6, 6, 3, 2};
+	private static final int[] INGOTS = {6, 6, 3, 2};
 	private static final String PREFIX = "knight/";
 
 	private KnightArmorForging() {
