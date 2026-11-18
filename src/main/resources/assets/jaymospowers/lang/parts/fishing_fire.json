@@ -1,0 +1,10 @@
+{
+  "message.jaymospowers.fishing.lava_burns": "The hook burns up in the lava. Only a heat-proof rod can fish it.",
+  "message.jaymospowers.fishing.crate_up": "Something heavy came up with the line!",
+  "message.jaymospowers.fishing.crate_opened": "The wet slats give way.",
+  "tooltip.jaymospowers.fishing.rod_heatproof": "Heat-proof: fishes lava",
+  "item.jaymospowers.river_crate": "River Crate",
+  "item.jaymospowers.sea_crate": "Sea Crate",
+  "item.jaymospowers.swamp_crate": "Swamp Crate",
+  "item.jaymospowers.lava_crate": "Lava Crate"
+}

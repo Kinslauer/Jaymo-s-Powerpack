@@ -41,7 +41,7 @@ public abstract class FishingHookMixin {
         if (hook.level().isClientSide()) {
             return;
         }
-        if (hook.tickCount <= RNG_TICKS * 5 || !hook.isInWater()) {
+        if (hook.tickCount <= RNG_TICKS * 5 || !hook.isInWater() && !com.jaymospowers.fishing.LavaFishing.holds(hook)) {
             return;
         }
         Entity owner = hook.getOwner();
@@ -73,6 +73,7 @@ public abstract class FishingHookMixin {
         }
         com.jaymospowers.fishing.IceFishing.tick(hook);
         com.jaymospowers.fishing.LureDepth.tick(hook);
+        com.jaymospowers.fishing.LavaFishing.tick(hook);
     }
 
     /** While a fish is on the line, don't retrieve the hook or drop vanilla loot. */
