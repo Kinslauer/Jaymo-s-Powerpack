@@ -29,23 +29,25 @@ public final class RigNet {
 	public static final int LIMB_SHOT = 11, LIMB_KICK = 12;
 	/** The most targets one missile volley marks. */
 	public static final int MAX_MARKS = 6;
+	/** (0.11.112) The Rig's gun actives ({@link RigGuns}). */
+	public static final int PALM_CHARGE = 13, GATLING = 14, RAILGUN = 15, SONIC = 16, TWIN = 17, SIEGE = 18;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
-	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL};
+	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL, PALM_CHARGE, GATLING, RAILGUN, SONIC, TWIN, SIEGE};
 	/** The first three of {@link #CYCLE} need no level. */
 	public static final int ACTIVES = 3;
 
 	/** {@link Status} warning bits (the Mind's, see {@link RigMind}). */
 	public static final int WARN_LOW_CHARGE = 1, WARN_LOW_HEALTH = 2, WARN_PROJECTILE = 4, WARN_EXPLOSION = 8, WARN_LAVA = 16,
-		WARN_VOID = 32, WARN_BEHIND = 64;
+	WARN_VOID = 32, WARN_BEHIND = 64;
 
 	/** Server → client: open the Rig Forge's screen for the Forge at {@code pos}. */
 	public record ForgeOpen(net.minecraft.core.BlockPos pos) implements CustomPacketPayload {
-		public static final Type<ForgeOpen> TYPE = new Type<>(JaymosPowers.id("rig_forge_open"));
-		public static final StreamCodec<ByteBuf, ForgeOpen> CODEC = net.minecraft.core.BlockPos.STREAM_CODEC.map(ForgeOpen::new, ForgeOpen::pos);
+	public static final Type<ForgeOpen> TYPE = new Type<>(JaymosPowers.id("rig_forge_open"));
+	public static final StreamCodec<ByteBuf, ForgeOpen> CODEC = net.minecraft.core.BlockPos.STREAM_CODEC.map(ForgeOpen::new, ForgeOpen::pos);
 
 		@Override
 		public Type<ForgeOpen> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
@@ -55,25 +57,25 @@ public final class RigNet {
 	 */
 	/** The Forge screen's finish pick ({@link RigFinish}), for the suit worn. */
 	public record Finish(net.minecraft.core.BlockPos pos, int finish) implements CustomPacketPayload {
-		public static final Type<Finish> TYPE = new Type<>(JaymosPowers.id("rig_finish"));
-		public static final StreamCodec<ByteBuf, Finish> CODEC = StreamCodec.composite(net.minecraft.core.BlockPos.STREAM_CODEC, Finish::pos,
-			ByteBufCodecs.VAR_INT, Finish::finish, Finish::new);
+	public static final Type<Finish> TYPE = new Type<>(JaymosPowers.id("rig_finish"));
+	public static final StreamCodec<ByteBuf, Finish> CODEC = StreamCodec.composite(net.minecraft.core.BlockPos.STREAM_CODEC, Finish::pos,
+	ByteBufCodecs.VAR_INT, Finish::finish, Finish::new);
 
 		@Override
 		public Type<Finish> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
 	public record ForgeSet(net.minecraft.core.BlockPos pos, int selection, int frame, int plates, int trim, boolean build) implements CustomPacketPayload {
-		public static final Type<ForgeSet> TYPE = new Type<>(JaymosPowers.id("rig_forge_set"));
-		public static final StreamCodec<ByteBuf, ForgeSet> CODEC = StreamCodec.composite(
-			net.minecraft.core.BlockPos.STREAM_CODEC, ForgeSet::pos, ByteBufCodecs.VAR_INT, ForgeSet::selection, ByteBufCodecs.VAR_INT, ForgeSet::frame,
-			ByteBufCodecs.INT, ForgeSet::plates, ByteBufCodecs.INT, ForgeSet::trim, ByteBufCodecs.BOOL, ForgeSet::build, ForgeSet::new);
+	public static final Type<ForgeSet> TYPE = new Type<>(JaymosPowers.id("rig_forge_set"));
+	public static final StreamCodec<ByteBuf, ForgeSet> CODEC = StreamCodec.composite(
+	net.minecraft.core.BlockPos.STREAM_CODEC, ForgeSet::pos, ByteBufCodecs.VAR_INT, ForgeSet::selection, ByteBufCodecs.VAR_INT, ForgeSet::frame,
+	ByteBufCodecs.INT, ForgeSet::plates, ByteBufCodecs.INT, ForgeSet::trim, ByteBufCodecs.BOOL, ForgeSet::build, ForgeSet::new);
 
 		@Override
 		public Type<ForgeSet> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
@@ -84,34 +86,34 @@ public final class RigNet {
 
 	/** Client → server: a Rig key was pressed ({@link #HOVER}, {@link #PALM}, ... {@link #FLIGHT}). */
 	public record Use(int action) implements CustomPacketPayload {
-		public static final Type<Use> TYPE = new Type<>(JaymosPowers.id("rig_use"));
-		public static final StreamCodec<ByteBuf, Use> CODEC = ByteBufCodecs.VAR_INT.map(Use::new, Use::action);
+	public static final Type<Use> TYPE = new Type<>(JaymosPowers.id("rig_use"));
+	public static final StreamCodec<ByteBuf, Use> CODEC = ByteBufCodecs.VAR_INT.map(Use::new, Use::action);
 
 		@Override
 		public Type<Use> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
 	/** (0.11.87) Client → server: lock on to this entity (by id), or let go (-1). */
 	public record Lock(int entity) implements CustomPacketPayload {
-		public static final Type<Lock> TYPE = new Type<>(JaymosPowers.id("rig_lock"));
-		public static final StreamCodec<ByteBuf, Lock> CODEC = ByteBufCodecs.VAR_INT.map(Lock::new, Lock::entity);
+	public static final Type<Lock> TYPE = new Type<>(JaymosPowers.id("rig_lock"));
+	public static final StreamCodec<ByteBuf, Lock> CODEC = ByteBufCodecs.VAR_INT.map(Lock::new, Lock::entity);
 
 		@Override
 		public Type<Lock> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
 	/** Client → server: the targets marked by sweeping the view (entity ids, up to {@link #MAX_MARKS}): each gets a missile. */
 	public record Volley(List<Integer> targets) implements CustomPacketPayload {
-		public static final Type<Volley> TYPE = new Type<>(JaymosPowers.id("rig_volley"));
-		public static final StreamCodec<ByteBuf, Volley> CODEC = ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(MAX_MARKS)).map(Volley::new, Volley::targets);
+	public static final Type<Volley> TYPE = new Type<>(JaymosPowers.id("rig_volley"));
+	public static final StreamCodec<ByteBuf, Volley> CODEC = ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(MAX_MARKS)).map(Volley::new, Volley::targets);
 
 		@Override
 		public Type<Volley> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
@@ -122,28 +124,28 @@ public final class RigNet {
 	 */
 	public record Status(boolean hovering, boolean flying, int warnings, int palmCooldown, int launcherCooldown, int scanCooldown, int lock,
 		int takeoverSeconds, int unibeamCooldown, int overcharge) implements CustomPacketPayload {
-		public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0, 0);
-		public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
-		public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
-			buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0));
-			ByteBufCodecs.VAR_INT.encode(buf, s.warnings);
-			ByteBufCodecs.VAR_INT.encode(buf, s.palmCooldown);
-			ByteBufCodecs.VAR_INT.encode(buf, s.launcherCooldown);
-			ByteBufCodecs.VAR_INT.encode(buf, s.scanCooldown);
-			ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
-			ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
-			ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
-			ByteBufCodecs.VAR_INT.encode(buf, s.overcharge);
+	public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0, 0);
+	public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
+	public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
+	buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0));
+	ByteBufCodecs.VAR_INT.encode(buf, s.warnings);
+	ByteBufCodecs.VAR_INT.encode(buf, s.palmCooldown);
+	ByteBufCodecs.VAR_INT.encode(buf, s.launcherCooldown);
+	ByteBufCodecs.VAR_INT.encode(buf, s.scanCooldown);
+	ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
+	ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
+	ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
+	ByteBufCodecs.VAR_INT.encode(buf, s.overcharge);
 		}, buf -> {
-			int flags = buf.readByte();
-			return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
+	int flags = buf.readByte();
+	return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf) - 1,
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
 		});
 
 		@Override
 		public Type<Status> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
@@ -152,27 +154,27 @@ public final class RigNet {
 	 * positions) are marked on the HUD; {@code kinds} holds a {@code FOUND_} kind for each, entities first.
 	 */
 	public record Scan(List<Integer> entities, List<Long> blocks, List<Integer> kinds) implements CustomPacketPayload {
-		public static final Type<Scan> TYPE = new Type<>(JaymosPowers.id("rig_scan"));
-		public static final StreamCodec<ByteBuf, Scan> CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Scan::entities,
-			ByteBufCodecs.LONG.apply(ByteBufCodecs.list()), Scan::blocks,
-			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Scan::kinds,
-			Scan::new);
+	public static final Type<Scan> TYPE = new Type<>(JaymosPowers.id("rig_scan"));
+	public static final StreamCodec<ByteBuf, Scan> CODEC = StreamCodec.composite(
+	ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Scan::entities,
+	ByteBufCodecs.LONG.apply(ByteBufCodecs.list()), Scan::blocks,
+	ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Scan::kinds,
+	Scan::new);
 
 		@Override
 		public Type<Scan> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
 	/** (0.11.87) Server → client: the Mind has taken over, thrusting away from {@code threat}. */
 	public record Takeover(Vec3 threat) implements CustomPacketPayload {
-		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("rig_takeover"));
-		public static final StreamCodec<ByteBuf, Takeover> CODEC = Vec3.STREAM_CODEC.map(Takeover::new, Takeover::threat);
+	public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("rig_takeover"));
+	public static final StreamCodec<ByteBuf, Takeover> CODEC = Vec3.STREAM_CODEC.map(Takeover::new, Takeover::threat);
 
 		@Override
 		public Type<Takeover> type() {
-			return TYPE;
+	return TYPE;
 		}
 	}
 
