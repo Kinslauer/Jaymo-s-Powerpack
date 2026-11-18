@@ -3,14 +3,14 @@ status: stalled
 task: harness-creeds-and-lands
 branch: claude/harness-creeds-and-lands
 with:
-pr:
+pr: 1728
 mods: kingdoms
 versions:
 started: 2026-11-18
 owns:
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/HeraldryArmour.java
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/HeraldryWear.java
-  - kingdoms/src/main/java/com/jaymospowers/kingdoms/heraldry/Harness.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryArmour.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryWear.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Harness.java
   - kingdoms/tools/gen_heraldry_armour.py
 ---
 
