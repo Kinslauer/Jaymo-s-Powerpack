@@ -9,11 +9,11 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for ☀️ Apollo · open
 - [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · for pc-claude · open
 - [ ] [[Inbox/inferno-fire|inferno-fire]] · for pc-claude · open
 - [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · for pc-claude · open
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · for pc-claude · open
+- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · for pc-claude · open
 
 
 ## Being built
