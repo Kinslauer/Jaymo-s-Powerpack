@@ -14810,3 +14810,35 @@ a town's leader, someone sworn or held, a player's family, one of a running tale
 Every row was checked against the pick list by independent readers (tales and engine separately) and their
 findings fixed. Built (full build and the tale checker pass: 79 files, 0 problems). **Not played.** Lore placements are in `Lore.md` as
 `(new)` paragraphs for Andy to approve.
+
+## 0.10.6 (2026-11-18): bound bloods and the Cleric's patron
+
+- Andy: "All tideborn are deep mother, and they and dawnborn are the only heritages with a bound patron. Clerics also
+  only choose if they have no patron at the life story, or they multi class into it."
+- **Bound bloods:** the life story's faith page offers a Tideborn only the Deep Mother and a Dawnborn only the Crowned
+  Sun, and both start sworn to theirs. Every other blood still picks any patron, its usual one listed first.
+- **Clerics:** a first-class Cleric serves the patron their life story raised them to: the class screen and the story's
+  option chips hold to it. Only a Cleric whose story names no faith picks one, and so does anyone who takes Cleric as a
+  second class.
+- `Faiths.bound`, `Classes.clericPatron`; the server holds both in `LifeStory`, `Patrons.storyStart` and
+  `Classes.choose`. Characters already made keep the faith and patron they have.
+- Not built locally; not played.
+
+## 0.10.7 (2026-11-18): the Huntsman's rangers in the forests
+
+- Andy: "Ranger MCA can be found in the forests hunting and will teach you or scold you and bring you to justice hogtied
+  if you poach (kill too many animals)".
+- **Poaching:** every wild beast you kill out in the wilds counts for a day, a young one twice. Wild means not tame,
+  leashed or named, and not where a realm's law holds or on a homestead, so farm slaughter doesn't count. 4 in a day
+  and a ranger scolds you; 7 and you're a poacher.
+- **Rangers:** walking a forest, taiga or jungle outside any realm, you now and then meet one of the Green Huntsman's
+  rangers (an MCA villager with a bow). It hunts: it shoots an adult wild beast now and then, but only where it can see
+  more than three, so it never thins the wood. It wanders off after half a day with nobody near.
+- **Talking to one:** with no calling, it offers to teach you the Ranger's (pick the foe you'll hunt). Anyone else gets
+  a hunter's lesson, and anyone over the scolding mark gets scolded.
+- **Poachers:** a ranger comes for a poacher straight away, walks them down and hogties them. Three seconds later it
+  carries them to the nearest realm's seat and hands them to its guards, who sentence them for poaching like any other
+  crime. With no guard there, the realm hears of it and its guards come.
+- `ForestRangers` (new); `Busts.sentence` is package-visible. Lang part `forest-rangers.json`. Nothing is saved: tallies
+  and rangers are forgotten when the server stops.
+- Not built locally; not played.
