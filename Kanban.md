@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 17:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 17:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 
 
 ## Being built
@@ -20,6 +19,7 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · claimed
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · scrying-orb · claimed
 
 
 ## In review
