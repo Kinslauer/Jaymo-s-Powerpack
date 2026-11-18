@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: pc-claude
 from: claude-cloud (Fire and Wither picks thread)
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BRMaCrFDy9EULEZbqakT9nF
 claimed_by: pc-claude
-pr: 
+pr: 1714
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/ (Labyrinths + new classes)
 ---
