@@ -17,6 +17,7 @@ import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -58,7 +59,7 @@ public final class HeraldryWear {
 	static final int USES = 3, XP = 5;
 	static final float PRICE_MULT = 0.05F;
 	/** The lands whose realms field knights in the harness (the others keep their own land's gear). */
-	static final Set<Climate> KNIGHT_LANDS = EnumSet.of(Climate.PLAINS, Climate.TAIGA, Climate.SWAMP);
+		static final Set<Climate> KNIGHT_LANDS = EnumSet.of(Climate.PLAINS, Climate.TAIGA, Climate.SWAMP, Climate.SNOWY, Climate.DESERT, Climate.JUNGLE, Climate.SAVANNA, Climate.CHERRY, Climate.BADLANDS);
 	/** (medieval picks) The chance a realm knight a player slays leaves a captured pattern of his helm or war arm. */
 	static final float KNIGHT_PATTERN_CHANCE = 0.2F;
 
@@ -131,36 +132,216 @@ public final class HeraldryWear {
 	}
 
 	private static String finish(Faction f) {
-		return Math.floorMod(hash(realm(f)) >>> 24, (long)BLACKENED_REALMS) == 0 ? HeraldryArmour.BLACKENED : "";
-	}
+			return Math.floorMod(hash(realm(f)) >>> 24, (long)BLACKENED_REALMS) == 0 ? HeraldryArmour.BLACKENED : "";
+		}
+
+		/** The creed-specific finish for {@code f}'s knights, or empty for the default (bright/blackened). */
+		private static String creedFinish(@Nullable MinecraftServer server, Faction f) {
+			if (server == null) {
+				return "";
+			}
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			return switch (creed) {
+				case FAITH -> HeraldryArmour.ETCHED;
+				case CHIVALRY -> "";
+				case CONQUEST -> HeraldryArmour.BLACKENED;
+				case COIN -> HeraldryArmour.ETCHED;
+				case CROWN -> HeraldryArmour.GILT_BANDED;
+				case BLOOD -> HeraldryArmour.BLACKENED;
+				default -> "";
+			};
+		}
+
+		/** The land-specific finish for {@code f}'s knights, or empty for the default. */
+		private static String landFinish(Faction f, Climate climate) {
+			return switch (climate) {
+				case SNOWY -> HeraldryArmour.FUR_LINED;
+				case DESERT -> HeraldryArmour.QUILTED;
+				case JUNGLE -> HeraldryArmour.BRINE_SOAKED;
+				case SAVANNA -> HeraldryArmour.HIDE;
+				case CHERRY -> HeraldryArmour.LAMELLAR;
+				case BADLANDS -> HeraldryArmour.BRONZE;
+				default -> "";
+			};
+		}
 
 	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm; the cuirass carries the realm's cape), or empty for the other slots. */
-	private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
-		String finish = finish(f);
-		String tag = server == null ? null : realmTag(server, f);
-		String arm = arm(realm(f));
-		return switch (slot) {
-			case HEAD -> {
-				ItemStack helm = HeraldryArmour.stack(helm(realm(f)), finish);
-				yield tag == null ? helm : PowersCompat.realmMarked(helm, tag);
+		private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
+			Climate climate = server == null ? Climate.PLAINS : Climate.at(server.getLevel(Level.OVERWORLD), f.seat());
+			String baseFinish = finish(f);
+			String cFinish = creedFinish(server, f);
+			String lFinish = landFinish(f, climate);
+			String tag = server == null ? null : realmTag(server, f);
+			String arm = arm(realm(f));
+		
+			// Determine the effective finish: creed > land > base
+			String effectiveFinish = !cFinish.isEmpty() ? cFinish : (!lFinish.isEmpty() ? lFinish : baseFinish);
+		
+			// Determine creed/land-specific piece names
+			String helmName = helmName(f, climate, server);
+			String cuirassName = cuirassName(f, climate, server);
+		
+			return switch (slot) {
+				case HEAD -> {
+					ItemStack helm = HeraldryArmour.stack(helmName, effectiveFinish);
+					yield tag == null ? helm : PowersCompat.realmMarked(helm, tag);
+				}
+				case MAINHAND -> tag == null || arm == null ? ItemStack.EMPTY : PowersCompat.realmArm(arm, tag);
+				// (gb-capes) a knight's cuirass carries the realm's cape
+				case CHEST -> server == null ? HeraldryArmour.stack(cuirassName, effectiveFinish)
+					: Capes.cape(HeraldryArmour.stack(cuirassName, effectiveFinish), Outfits.heraldry(f, server));
+				case FEET -> HeraldryArmour.stack("plate_sabatons", effectiveFinish);
+				default -> ItemStack.EMPTY;
+			};
+		}
+	
+		/** The helm name for {@code f}'s knights based on creed and climate. */
+		private static String helmName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (server == null) {
+				return helm(realm(f));
 			}
-			case MAINHAND -> tag == null || arm == null ? ItemStack.EMPTY : PowersCompat.realmArm(arm, tag);
-			// (gb-capes) a knight's cuirass carries the realm's cape
-			case CHEST -> server == null ? HeraldryArmour.stack("plate_cuirass", finish)
-				: Capes.cape(HeraldryArmour.stack("plate_cuirass", finish), Outfits.heraldry(f, server));
-			case FEET -> HeraldryArmour.stack("plate_sabatons", finish);
-			default -> ItemStack.EMPTY;
-		};
-	}
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			// Creed-specific helms
+			if (creed == GreatWars.Creed.COIN) {
+				return "barbute"; // Coin realms hire men-at-arms in barbutes
+			}
+			if (creed == GreatWars.Creed.CONQUEST) {
+				return "veiled_helm"; // Conquest champions wear grotesque visors
+			}
+			// Land-specific helms
+			if (climate == Climate.DESERT) {
+				return "veiled_helm"; // Spiked helm with mail veil
+			}
+			return helm(realm(f));
+		}
+	
+		/** The cuirass name for {@code f}'s knights based on creed and climate. */
+		private static String cuirassName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (server == null) {
+				return "plate_cuirass";
+			}
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			// Creed-specific cuirasses
+			if (creed == GreatWars.Creed.FAITH) {
+				return "faith_cuirass";
+			}
+			if (creed == GreatWars.Creed.COIN) {
+				return "etched_cuirass";
+			}
+			if (creed == GreatWars.Creed.CROWN) {
+				return "gilt_banded_cuirass";
+			}
+			// Land-specific cuirasses
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_cuirass";
+			}
+			if (climate == Climate.JUNGLE) {
+				return "quilted_cotton_armor";
+			}
+			if (climate == Climate.SAVANNA) {
+				return "hide_armor";
+			}
+			if (climate == Climate.CHERRY) {
+				return "laced_lamellar";
+			}
+			if (climate == Climate.BADLANDS) {
+				return "bronze_armor";
+			}
+			return "plate_cuirass";
+		}
 
 	/** The harness under and round a knight of {@code f}'s plate. */
-	private static void harness(Mob mob, Faction f) {
-		String finish = finish(f);
-		Harness.dress(mob, dyed(HeraldryArmour.stack("arming_doublet"), Outfits.rgb(Outfits.heraldry(f, mob.level().getServer()).field())),
-			HeraldryArmour.stack("mail_haubergeon"), HeraldryArmour.stack(pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16), finish),
-			HeraldryArmour.stack("plate_arm_harness", finish), HeraldryArmour.stack("plate_gauntlets", finish),
-			HeraldryArmour.stack("plate_cuisses", finish), HeraldryArmour.stack("plate_greaves", finish));
-	}
+		private static void harness(Mob mob, Faction f) {
+			MinecraftServer server = mob.level().getServer();
+			Climate climate = server == null ? Climate.PLAINS : Climate.at(server.getLevel(Level.OVERWORLD), f.seat());
+			String baseFinish = finish(f);
+			String cFinish = creedFinish(server, f);
+			String lFinish = landFinish(f, climate);
+			String effectiveFinish = !cFinish.isEmpty() ? cFinish : (!lFinish.isEmpty() ? lFinish : baseFinish);
+		
+			// Determine creed/land-specific harness pieces
+			String spauldersName = spauldersName(f, climate, server);
+			String armHarnessName = armHarnessName(f, climate, server);
+			String gauntletsName = gauntletsName(f, climate, server);
+			String cuissesName = cuissesName(f, climate, server);
+			String greavesName = greavesName(f, climate, server);
+			String doubletName = doubletName(f, climate, server);
+		
+			Harness.dress(mob, 
+				dyed(HeraldryArmour.stack(doubletName), Outfits.rgb(Outfits.heraldry(f, server).field())),
+				HeraldryArmour.stack("mail_haubergeon"),
+				HeraldryArmour.stack(spauldersName, effectiveFinish),
+				HeraldryArmour.stack(armHarnessName, effectiveFinish),
+				HeraldryArmour.stack(gauntletsName, effectiveFinish),
+				HeraldryArmour.stack(cuissesName, effectiveFinish),
+				HeraldryArmour.stack(greavesName, effectiveFinish)
+			);
+		}
+	
+		/** The spaulders name for {@code f}'s knights based on creed and climate. */
+		private static String spauldersName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (server == null) {
+				return pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16);
+			}
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			if (creed == GreatWars.Creed.CONQUEST) {
+				return "spiked_spaulders";
+			}
+			if (creed == GreatWars.Creed.CROWN) {
+				return "gilt_banded_spaulders";
+			}
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_spaulders";
+			}
+			return pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16);
+		}
+	
+		/** The arm harness name for {@code f}'s knights based on creed and climate. */
+		private static String armHarnessName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (server == null) {
+				return "plate_arm_harness";
+			}
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			if (creed == GreatWars.Creed.CHIVALRY) {
+				return "oath_sleeves";
+			}
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_arm_harness";
+			}
+			return "plate_arm_harness";
+		}
+	
+		/** The gauntlets name for {@code f}'s knights based on creed and climate. */
+		private static String gauntletsName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_gauntlets";
+			}
+			return "plate_gauntlets";
+		}
+	
+		/** The cuisses name for {@code f}'s knights based on creed and climate. */
+		private static String cuissesName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_cuisses";
+			}
+			return "plate_cuisses";
+		}
+	
+		/** The greaves name for {@code f}'s knights based on creed and climate. */
+		private static String greavesName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (climate == Climate.SNOWY) {
+				return "fur_lined_greaves";
+			}
+			return "plate_greaves";
+		}
+	
+		/** The doublet name for {@code f}'s knights based on creed and climate. */
+		private static String doubletName(Faction f, Climate climate, @Nullable MinecraftServer server) {
+			if (climate == Climate.DESERT) {
+				return "quilted_coat";
+			}
+			return "arming_doublet";
+		}
 
 	/** From {@link Folk#setup} and its restyle, after the realm's own gear and {@link FrontierWear}'s: its knights, and its rulers' crests. */
 	static void folk(Folk folk, Faction faction, Climate climate) {
@@ -200,11 +381,22 @@ public final class HeraldryWear {
 	}
 
 	/** {@code mob} rules {@code faction} (a king, a lord; from {@link Rulers#fit} too): the realm's crest, and gilded spaulders. */
-	static void ruler(Mob mob, Faction faction) {
-		Harness.dress(mob, crest(mob.level().getServer(), faction), HeraldryArmour.stack("plate_spaulders", HeraldryArmour.GILDED));
-		// (gb-capes) and the realm's cape on whatever chest piece they wear
-		Capes.ensure(mob, faction, true);
-	}
+		static void ruler(Mob mob, Faction faction) {
+			MinecraftServer server = mob.level().getServer();
+			if (server != null && GreatWars.creed(server, faction) == GreatWars.Creed.CROWN) {
+				// King's Guard livery for Crown creed
+				Harness.dress(mob, 
+					crest(server, faction), 
+					HeraldryArmour.stack("gilt_banded_spaulders", HeraldryArmour.GILT_BANDED),
+					HeraldryArmour.stack("tabard")
+				);
+				Capes.ensure(mob, faction, true);
+			} else {
+				Harness.dress(mob, crest(mob.level().getServer(), faction), HeraldryArmour.stack("plate_spaulders", HeraldryArmour.GILDED));
+				// (gb-capes) and the realm's cape on whatever chest piece they wear
+				Capes.ensure(mob, faction, true);
+			}
+		}
 
 	/** Off the throne ({@link Rulers#unfit}): the crest and the gilt go. */
 	static void unfit(Mob mob) {

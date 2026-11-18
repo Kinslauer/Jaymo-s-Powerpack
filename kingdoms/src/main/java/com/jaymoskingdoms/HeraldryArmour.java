@@ -46,7 +46,10 @@ public final class HeraldryArmour {
 	static final int PLATE_DURABILITY = 30, HELM_ARMOUR = 2, CUIRASS_ARMOUR = 5, SABATON_ARMOUR = 1, PLATE_ENCHANT = 10;
 	static final float PLATE_TOUGHNESS = 1.0F, PLATE_KNOCKBACK = 0.05F;
 	/** The finishes a plate piece can have besides bright (no component). */
-	public static final String BLACKENED = "blackened", GILDED = "gilded";
+		public static final String BLACKENED = "blackened", GILDED = "gilded";
+		/** Creed/land variant finishes. */
+		public static final String ETCHED = "etched", SPIKED = "spiked", GILT_BANDED = "gilt_banded", FUR_LINED = "fur_lined",
+			QUILTED = "quilted", BRINE_SOAKED = "brine_soaked", HIDE = "hide", BRONZE = "bronze", LAMELLAR = "lamellar";
 	/** A plate piece's finish ({@link #BLACKENED} or {@link #GILDED}; bright has none). */
 	public static final DataComponentType<String> FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("finish"),
 		DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
@@ -76,11 +79,11 @@ public final class HeraldryArmour {
 	public static final Map<String, Piece> PIECES = new LinkedHashMap<>();
 	private static final Map<Item, Piece> BY_ITEM = new java.util.HashMap<>();
 	/** The eight helms, the eight crest beasts and the three makes of spaulders, by name. */
-	public static final List<String> HELMS = List.of("frogmouth_helm", "houndskull_bascinet", "armet", "close_helm", "savoyard_helm", "sallet",
-		"kettle_hat", "morion");
-	public static final List<String> BEASTS = List.of("crest_dragon", "crest_lion", "crest_stag", "crest_boar", "crest_eagle", "crest_pegasus",
-		"crest_unicorn", "crest_snake");
-	public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders");
+		public static final List<String> HELMS = List.of("frogmouth_helm", "houndskull_bascinet", "armet", "close_helm", "savoyard_helm", "sallet",
+			"kettle_hat", "morion", "veiled_helm", "barbute");
+		public static final List<String> BEASTS = List.of("crest_dragon", "crest_lion", "crest_stag", "crest_boar", "crest_eagle", "crest_pegasus",
+			"crest_unicorn", "crest_snake");
+		public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders", "spiked_spaulders", "gilt_banded_spaulders", "fur_lined_spaulders");
 
 	private HeraldryArmour() {
 	}
@@ -96,7 +99,9 @@ public final class HeraldryArmour {
 		helm("sallet", Face.VISORED, 0.34F, 0.5F);
 		helm("kettle_hat", Face.OPEN, 1.0F, 0.6F);
 		helm("morion", Face.OPEN, 1.0F, 2.5F);
-		worn("plate_cuirass", ArmorType.CHESTPLATE);
+				helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+				helm("barbute", Face.OPEN, 1.0F, 0.8F);
+				worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
 		part("arming_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.LEATHER, null);
@@ -119,8 +124,30 @@ public final class HeraldryArmour {
 			part(beast, Harness.Slot.CREST, 0, 0.0F, 0, false, null, beast);
 		}
 		part("crest_horns", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_horns");
-		part("crest_wings", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_wings");
-		List<Item> all = new ArrayList<>();
+				part("crest_wings", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_wings");
+				// creed variants
+				worn("faith_cuirass", ArmorType.CHESTPLATE);
+				part("oath_sleeves", Harness.Slot.ARMS, 1, 0.0F, 240, true, null, "oath_sleeves");
+				part("spiked_spaulders", Harness.Slot.SHOULDERS, 1, 0.5F, 260, true, null, "spiked_spaulders");
+				worn("etched_cuirass", ArmorType.CHESTPLATE);
+				worn("gilt_banded_cuirass", ArmorType.CHESTPLATE);
+				part("gilt_banded_spaulders", Harness.Slot.SHOULDERS, 1, 0.5F, 260, true, null, "gilt_banded_spaulders");
+				part("tabard", Harness.Slot.OVER, 0, 0.0F, 0, false, null, "tabard");
+				// land variants
+				worn("fur_lined_cuirass", ArmorType.CHESTPLATE);
+				part("fur_lined_spaulders", Harness.Slot.SHOULDERS, 1, 0.5F, 260, true, null, "fur_lined_spaulders");
+				part("fur_lined_arm_harness", Harness.Slot.ARMS, 1, 0.5F, 300, true, null, "fur_lined_arm_harness");
+				part("fur_lined_gauntlets", Harness.Slot.HANDS, 1, 0.0F, 240, true, null, "fur_lined_gauntlets");
+				part("fur_lined_cuisses", Harness.Slot.THIGHS, 2, 1.0F, 340, true, null, "fur_lined_cuisses");
+				part("fur_lined_greaves", Harness.Slot.SHINS, 1, 0.5F, 300, true, null, "fur_lined_greaves");
+				helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+				helm("barbute", Face.OPEN, 1.0F, 0.8F);
+				part("quilted_coat", Harness.Slot.MAIL, 2, 0.0F, 220, false, Items.IRON_INGOT, "quilted_coat");
+				worn("quilted_cotton_armor", ArmorType.CHESTPLATE);
+				worn("hide_armor", ArmorType.CHESTPLATE);
+				worn("bronze_armor", ArmorType.CHESTPLATE);
+				worn("laced_lamellar", ArmorType.CHESTPLATE);
+				List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
