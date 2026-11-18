@@ -245,7 +245,7 @@ public final class GrimSites {
 			return;
 		}
 		// out of sight, and all of it loaded (so its buildings can be read)
-		if (Raids.playerNear(level, center, HIDE_RANGE) || !level.hasChunksAt(area.minX(), area.minZ(), area.maxX(), area.maxZ())) {
+		if (Raids.playerNear(level, center, HIDE_RANGE) || !Loaded.made(level, area.minX(), area.minZ(), area.maxX(), area.maxZ())) {
 			return;
 		}
 		Faction taken = hold ? foundFief(level, start, path, kingdom) : foundCamp(level, start, path, kingdom);

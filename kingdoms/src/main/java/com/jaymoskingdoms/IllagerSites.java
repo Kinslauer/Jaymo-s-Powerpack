@@ -504,7 +504,7 @@ final class IllagerSites {
 		BoundingBox box = start.getBoundingBox();
 		BlockPos center = box.getCenter();
 		double hide = HIDE_RANGE + Math.max(box.getXSpan(), box.getZSpan()) / 2.0;
-		if (Raids.playerNear(level, center, hide) || !level.hasChunksAt(box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+		if (Raids.playerNear(level, center, hide) || !Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 			return;
 		}
 		boolean open = false;

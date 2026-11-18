@@ -249,7 +249,7 @@ final class Seats {
 	/** Its rooms, if {@code b} is a building with a floor under a roof (and all its chunks are loaded); null if not. */
 	static @Nullable Room room(ServerLevel level, Building b, BlockPos toward) {
 		BoundingBox box = b.box();
-		if (!level.hasChunksAt(box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+		if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 			return null;
 		}
 		Map<Integer, List<BlockPos>> byFloor = new HashMap<>();

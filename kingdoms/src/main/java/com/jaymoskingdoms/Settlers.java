@@ -93,7 +93,7 @@ public final class Settlers {
 		// ((0.7.490) never load or make chunks to look for ground: the whole search square must be in already)
 		int seek = ShutIn.SEEK;
 		BlockPos c = spot.center();
-		if (!level.hasChunksAt(c.getX() - seek, c.getZ() - seek, c.getX() + seek, c.getZ() + seek)) {
+		if (!Loaded.made(level, c.getX() - seek, c.getZ() - seek, c.getX() + seek, c.getZ() + seek)) {
 			return;
 		}
 		BlockPos at = ShutIn.openGround(level, spot.center());
