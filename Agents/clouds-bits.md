@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Build Andy's 29 picks from More Cloud Layers and Bits and Balance
 branch: claude/project-thread-f0jf19
 with: 
-pr: 
+pr: 1740
 mods: powers, kingdoms
 versions: 
 started: 2026-11-18
@@ -23,3 +23,4 @@ owns:
 - Lore (new): "Bottled cloud", "Phantoms that carry", awaiting Andy.
 
 ## Done
+All 7 patches built and compiled; PR #1740. Not played. Left out: hanging blocks under slabs.
