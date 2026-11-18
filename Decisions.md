@@ -749,3 +749,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy): no lone-castle kingdoms at all, not even as a free lord's hold: when a kingdom is needed and none is near, keep doing the low-cost far search until a proper Epic-village kingdom is found.
 - 2026-11-18 (Andy): "They can still spawn and be spawned": player- and operator-made castle kingdoms stay (paid crowning incl. Homesteads, Deck of Fates throne and deed, /kingdom found castle, a rebel fief winning). Only the world's own founding is Epic-towns-only.
 - 2026-11-18 (Andy): approved the lore paragraph "Only the great towns are crowned".
+- 2026-11-18 (Andy, scrying orb thread): wants a scrying orb (living miniature of a far place, after Frameless Portals' see-through look) and it must work for places too, not just people; plan put on the board as Inbox/scrying-orb.
+- 2026-11-18 (Andy): approved the lore paragraph "The scrying orb" (people and places).
+- 2026-11-18 (Andy, clouds/bits thread): picked 29 of 48 rows from More Cloud Layers (CC0, not shipped: clashes with Cirrus/CloudDecks) and Bits and Balance (ARR, ideas only); plan docs/CloudsBits-Plan.md, 7 patches on claude/project-thread-f0jf19.
+- 2026-11-18 (Andy): approved the lore paragraphs "Bottled cloud" and "Phantoms that carry" (clouds/bits, PR #1740).

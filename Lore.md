@@ -533,6 +533,16 @@ into and too deep to push up through. Here and there a **well** stands open in i
 the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
 whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
 
+**Bottled cloud** (Andy approved, 2026-11-18; Clouds and Bits picks, Claude's placement). The sky folk say the overcast can be
+carried. A bottle held open in the Cloud Sea, or pressed into any soft cloud, fills with a little of it, and poured out it
+billows into a puff that holds a body for a breath before it thins away. Skiff crews keep one at the belt for the step
+off an edge. Ground folk who come by one take it for a trick bottle that is empty.
+
+**Phantoms that carry** (Andy approved, 2026-11-18; same picks). The phantoms that hunt the sleepless from the night sky do not only bite.
+Now and then one closes its claws on the one it dives at and climbs, and lets go when it tires or is hurt. Whoever is
+carried can strike at its soft belly, where it feels it most. Shepherds who have lost a lamb to one say the cure is to
+sleep.
+
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces are the **monoliths** and
 their **Giants**: a broken pillar with a heart floating in it, and one Giant for each highland's element (Highfield,
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
@@ -2035,7 +2045,7 @@ is on the wall.
 
 **The everburning mote** (Andy approved, 2026-11-15; Andy: "court wizards have developed a spell that lets a light mote inside a lantern burn indefinitely"). It is a court wizard's working, sold to those who can pay: a mote of their light shut in a lantern, which never needs oil and never gutters. Abandoned places have no one to tend their lamps, which is why the lamps of ruins flicker.
 
-**The scrying orb** *(new, 2026-11-18; Claude's placement for Andy to approve)*. Any caster can see far off in a bowl of water with a lock of someone's hair, but the bowl shows only a flat picture that clouds when the spell is let go. The court wizards keep that same sight in glass: a sphere ground with amethyst dust and set on a stand. When an attuned hand wakes it with a lock of hair, the place around the one whose hair it was rises inside the orb as a small living picture. Their roofs, their trees and the folk moving about them are all there, for as long as the sight is held. Only the attuned can wake an orb, but anyone in the room can look in. A court wizard keeps one in the tower, and a realm without one pays a wizard who has one to do its watching. The one being watched feels a chill and nothing more.
+**The scrying orb** (Andy approved, 2026-11-18; Claude's placement). Any caster can see far off in a bowl of water with a lock of someone's hair, but the bowl shows only a flat picture that clouds when the spell is let go. The court wizards keep that same sight in glass: a sphere ground with amethyst dust and set on a stand. An attuned hand wakes it with a lock of someone's hair, or with an amethyst shard that was pressed to the ground somewhere, since amethyst remembers where it has lain. Then the place around that person, or that spot, rises inside the orb as a small living picture. Its roofs, its trees and the folk moving about are all there, for as long as the sight is held. Only the attuned can wake an orb, but anyone in the room can look in. A court wizard keeps one in the tower, and a realm without one pays a wizard who has one to do its watching. Someone being watched feels a chill and nothing more; a place feels nothing.
 
 **Tale notices** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). Now and then someone with a trouble too private for the work board's clerk nails it up there in their own hand. Whoever pulls it down has taken it on, and the paper goes with them.
 
