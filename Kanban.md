@@ -4,11 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:35). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · for ☀️ Apollo · open
 
 
 ## Being built
