@@ -1,0 +1,22 @@
+{
+	"gui.jaymoskingdoms.papers.title": "The papers of %s",
+	"gui.jaymoskingdoms.papers.link": "Show my papers",
+	"gui.jaymoskingdoms.papers.close": "Close",
+	"message.jaymoskingdoms.papers.shown": "You show your papers to %s.",
+	"message.jaymoskingdoms.papers.shown_you": "%s shows you their papers.",
+	"message.jaymoskingdoms.heritage.title": "Your blood is named.",
+	"message.jaymoskingdoms.pledged.title": "You are sworn to this realm.",
+	"message.jaymoskingdoms.captain.king_title": "%s has fallen",
+	"message.jaymoskingdoms.captain.king_felled": "The king of the %s ladder is dead by your hand.",
+	"menu.jaymoskingdoms.party.health": "Health",
+	"menu.jaymoskingdoms.party.hunger": "Food",
+	"menu.jaymoskingdoms.party.leader": "Leader",
+	"gui.jaymoskingdoms.followers.away": "Away",
+	"gui.jaymoskingdoms.followers.in_earshot": "Within earshot",
+	"gui.jaymoskingdoms.followers.orders": "Orders",
+	"gui.jaymoskingdoms.belt.add": "ADD",
+	"gui.jaymoskingdoms.belt.remove": "REMOVE",
+	"gui.jaymoskingdoms.belt.cooldown": "Cooldown",
+	"gui.jaymoskingdoms.belt.hunger": "Hunger",
+	"gui.jaymoskingdoms.belt.empty_slot": "Empty. Pick it, then ADD a form."
+}

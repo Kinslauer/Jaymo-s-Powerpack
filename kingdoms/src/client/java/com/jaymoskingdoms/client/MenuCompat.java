@@ -63,6 +63,7 @@ public final class MenuCompat {
 		ClientPlayNetworking.registerGlobalReceiver(MenuNet.Info.TYPE, (payload, context) -> FactionScreen.info = payload);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> FactionScreen.info = null);
 		RetakingScreen.register();
+		PapersScreen.register();
 		if (!FabricLoader.getInstance().isModLoaded(POWERS)) {
 			return;
 		}
@@ -108,6 +109,7 @@ public final class MenuCompat {
 				s -> s instanceof MagicScreen || s instanceof MagicPageScreen, s -> new int[] {0, 0});
 			tab(register, "followers", ORDER_FOLLOWERS, () -> new ItemStack(Items.LEAD), "menu.jaymoskingdoms.tab.followers",
 				FollowersScreen::openAll, s -> s instanceof FollowersScreen, s -> new int[] {0, 0});
+			PapersScreen.link(menu);
 			arrange(menu);
 			listen(menu);
 			Supplier<List<Map.Entry<Component, BlockPos>>> pins = MenuCompat::pins;

@@ -1634,6 +1634,10 @@ public final class Captains {
 				player.setAttached(SWORN, List.copyOf(more));
 			}
 			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.fallen", c.name(), Rivals.name(c.tribe()), player.getDisplayName()));
+			if (c.chief()) {
+				// a ladder's king: the one who felled him is told across the screen
+				Fanfare.title(player, Component.translatable("message.jaymoskingdoms.captain.king_title", c.name()), Component.translatable("message.jaymoskingdoms.captain.king_felled", Rivals.name(c.tribe())));
+			}
 			avenge(level, c, player);
 		}
 	}

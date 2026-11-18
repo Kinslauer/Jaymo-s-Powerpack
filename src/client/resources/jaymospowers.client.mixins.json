@@ -124,7 +124,8 @@
 		"FangGauntletsAvatarRendererMixin",
 		"FangGauntletsFirstPersonMixin",
 		"FangGauntletsItemInHandLayerMixin",
-		"FangGauntletsModelFeatureRendererMixin"
+		"FangGauntletsModelFeatureRendererMixin",
+		"TitleCardMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }
