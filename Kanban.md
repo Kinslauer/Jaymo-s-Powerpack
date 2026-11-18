@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 03:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 08:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,16 +22,16 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · #1721 · in-review
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -47,14 +47,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
 - [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
-- [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
-- [x] [[Inbox/Done/inferno-fire|inferno-fire]]
-- [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings
