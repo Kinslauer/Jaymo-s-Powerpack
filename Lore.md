@@ -679,7 +679,7 @@ still, in horned helm, mail and fur, and they never leave it.
 
 **The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
 zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
-have a similar but higher chance to turn giant"; the rest Claude's placement). Not every raider who died on the
+have a similar but higher chance to turn giant"; the rest Claude's placement, approved by Andy 2026-11-18). Not every raider who died on the
 Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
 them, dragging tails rotted and mangled the way the future's dead drag theirs, or only a stump where one was cut. A
 Warrior-born villager who dies and turns keeps their blood too, and the tail kept wrapped in life comes loose and hangs.
