@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 18:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 18:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,7 +16,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · scrying-orb · claimed
 
 
@@ -41,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
+- [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · #1776 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
