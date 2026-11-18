@@ -5988,3 +5988,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - `NullGoalMixin` (on `Mob.serverAiStep`): if a goal selector's tick throws the NullPointerException from a null goal, that creature's goals skip the tick and a warning naming the creature type is logged once. Any other exception still propagates.
 - Not built or played; CI compiles.
+
+## 0.25.12 (2026-11-18): TaCZ out of JEI and the creative menu (#1757)
+
+- Changes: nothing of TaCZ shows in JEI (no items, no painting, no gun smith table pages, no recipes) or in the creative menu (none of its tabs, none of its items in other tabs or the search). Its guns stay in the game for the future's gunners (`TaczGuns.hideModern`, `TaczHiddenJei`).
+- Built by CI; not played.
