@@ -13,6 +13,8 @@
 		"TemplateUpgradeMixin",
 		"BandSpawnNearPlayersMixin",
 		"DirtyAttributesMixin",
+		"StructureStartPieceIndexMixin",
+		"StructurePieceAtMixin",
 		"SkyfallStopMixin",
 		"ArmourWearStackMixin",
 		"CollideMoveMixin",
