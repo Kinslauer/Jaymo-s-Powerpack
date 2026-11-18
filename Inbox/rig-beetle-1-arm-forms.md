@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
 claimed_by: hermes-b
-pr: 
+pr: 1746
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigForms.java (new)
   - src/client/java/com/jaymospowers/client/rig/RigFormsClient.java (new)
