@@ -81,7 +81,7 @@ final class RigHud {
 		int warnings = status.warnings();
 		int level = Rig.level(player);
 		boolean second = level >= Rig.SCAN_LEVEL;
-		int lines = 2 + (second ? 1 : 0) + (target != null ? 1 : 0) + (warnings != 0 ? 1 : 0);
+		int lines = 2 + (second ? 1 : 0) + (target != null ? 1 : 0) + (warnings != 0 ? 1 : 0) + RigLogClient.lines();
 		// (HUD rework) the top row of the right dock, over the power's chips and any mount bar (it sat in the corner, over the wounds doll)
 		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_RIGHT, "jaymospowers:rig", 50, WIDTH,
 			lines * LINE + 4);
@@ -213,7 +213,11 @@ final class RigHud {
 				graphics.text(font, word, wx, row, blink || i >= 5 ? LOW : 0xFFFFB0A0);
 				wx += w + 4;
 			}
+			row += LINE;
 		}
+
+		// the combat log and the body's state, folded out while blows are flying
+		RigLogClient.draw(graphics, font, player, x, row, WIDTH, LINE);
 	}
 
 	/** One active's cell: lit (on), picked (the Rig key's), its cooldown shading. */
@@ -234,7 +238,7 @@ final class RigHud {
 		return s.length() > 3 ? s.substring(0, 3) : s;
 	}
 
-	private static String cut(Font font, String s, int width) {
+	static String cut(Font font, String s, int width) {
 		if (font.width(s) <= width) {
 			return s;
 		}

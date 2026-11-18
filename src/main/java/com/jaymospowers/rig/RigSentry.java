@@ -144,7 +144,9 @@ public final class RigSentry {
 			if (id == null || player.isSpectator() || player.tickCount % LOOK_EVERY != 0) {
 				continue;
 			}
-			if (!(server.overworld().getEntityInAnyDimension(id) instanceof ArmorStand stand) || stand.level() != player.level()) {
+			if (!(server.overworld().getEntityInAnyDimension(id) instanceof ArmorStand stand) || stand.level() != player.level()
+				|| stand.entityTags().contains(RigEvac.WRECK_TAG)) {
+				// (a suit slumped where its host was thrown clear doesn't guard: RigEvac)
 				continue;
 			}
 			guard(player, stand);
