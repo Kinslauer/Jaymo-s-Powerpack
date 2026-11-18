@@ -315,7 +315,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
-		com.jaymospowers.client.power.rules.RuleBookScreen.register();
 		// (Awakening picks) the power trials page and the pinned trial
 		com.jaymospowers.client.trials.TrialsScreen.register();
 		com.jaymospowers.client.boss.BossShareCard.register();
