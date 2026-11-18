@@ -339,6 +339,16 @@ final class TownNotices {
 	 * about and the player's log has room), news is a piece of paper, and so is a tale's notice (with its tale, if it's one
 	 * for them). False if it stays up.
 	 */
+	/** Whether {@code player} already carries a copy of {@code paper}. */
+	private static boolean holds(ServerPlayer player, ItemStack paper) {
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (ItemStack.isSameItemSameComponents(player.getInventory().getItem(i), paper)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static boolean pull(ServerLevel level, ServerPlayer player, String key) {
 		N n = notice(key);
 		if (n == null) {
@@ -376,8 +386,11 @@ final class TownNotices {
 			// paper, the trouble on it in the asker's own hand, and the notice stays up for whoever it is for)
 			boolean theirs = Tales.pulled(level, player, n.key().substring(5), giver, f);
 			ItemStack paper = item(level, key);
-			if (!player.getInventory().add(paper)) {
-				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			// (one copy is enough for someone it isn't for: the paper stays up for whoever it is for)
+			if (theirs || !holds(player, paper)) {
+				if (!player.getInventory().add(paper)) {
+					player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
 			}
 			return theirs;
 		}

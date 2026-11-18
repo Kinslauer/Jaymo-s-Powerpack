@@ -104,7 +104,7 @@ final class TaleAfter {
 	/**
 	 * Open ground at {@code at}: earth, sand, gravel or snow under it, room above (grass, flowers or snow are cleared),
 	 * the sky over it, and nothing round it but the land itself and other graves: no block a player placed, nothing
-	 * built, no block entity but a grave's board.
+	 * built, nothing standing beside it above the ground, no block entity but a grave's board.
 	 */
 	private static boolean open(ServerLevel level, BlockPos at) {
 		BlockState under = level.getBlockState(at.below());
@@ -126,6 +126,10 @@ final class TaleAfter {
 				continue;
 			}
 			if (state.hasBlockEntity() || !state.getFluidState().isEmpty() || !(Lairs.natural(state) || state.is(BlockTags.FLOWERS) || state.canBeReplaced())) {
+				return false;
+			}
+			if (p.getY() >= at.getY() && !state.canBeReplaced() && !state.is(BlockTags.FLOWERS)) {
+				// (nothing standing beside it at all, of stone or sandstone or clay: that's a wall, a house's or a ruin's)
 				return false;
 			}
 		}

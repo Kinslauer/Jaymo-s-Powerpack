@@ -388,9 +388,10 @@ doesn't begin, an escort's walk isn't over; the log says "(after dark)". The ste
 hour, and the checker refuses `when` on them: put it on a `go` before them. A cast member with `"hours": "night"` (or
 `day`) is only at their place in those hours. When their hours are over and nobody is within 14 blocks, they walk off
 (32 blocks, away from the player) and go in once nobody can see them: kept, out of sight and still (a few blocks under
-the ground where they went in), the same person (their hearts, what they remember, a lie told to them), and back out
-when their hours come round: at their place if nobody is near it, else out of sight 18 to 26 blocks off and walking
-there. Someone being followed or walked somewhere (`tail`, `escort` and its `with`), fighting a `foe` step, or held
+the ground where they went in; where there's no solid ground under them they walk on further first), the same person
+(their hearts, what they remember, a lie told to them), and back out when their hours come round and their place can be
+read: at their place if nobody of the tale is near it or can see it, else somewhere out of sight 18 to 26 blocks off,
+walking there (if nowhere is out of sight they wait, unless the open step needs them now). Someone being followed or walked somewhere (`tail`, `escort` and its `with`), fighting a `foe` step, or held
 keeps no hours. When the tale ends, anyone still in goes for good.
 A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
 
