@@ -251,6 +251,11 @@ public final class HeritageVariants {
 			return name().toLowerCase(Locale.ROOT);
 		}
 
+		/** The other heritage this look leans toward, or null. */
+		public Heritage.@Nullable Kind hybrid() {
+			return this.hybrid;
+		}
+
 		/** 1 or more: which of its heritage's looks this is (0 is the first). */
 		public int index() {
 			return of(this.heritage).indexOf(this) + 1;
