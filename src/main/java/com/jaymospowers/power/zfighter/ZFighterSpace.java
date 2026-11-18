@@ -302,6 +302,7 @@ public final class ZFighterSpace {
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
+		ZFighterAtlas.noteBed(player);
 		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod), readCharts(player)));
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
 	}
@@ -616,6 +617,9 @@ public final class ZFighterSpace {
 		NEXT_LAUNCH.put(player.getUUID(), player.level().getGameTime() + COOLDOWN_TICKS);
 		ZFighterSpaceMissions.arrived(player);
 		ZFighterPatrol.arrived(player, dest);
+		if (dest != null) {
+			ZFighterAtlas.landed(player, dest);
+		}
 	}
 
 	// ---------------------------------------------------------------- the landing pad
