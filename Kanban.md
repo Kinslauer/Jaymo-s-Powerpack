@@ -19,6 +19,7 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
 - [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · for any · open
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · for any · open
+- [ ] [[Inbox/wither-model|wither-model]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -48,7 +49,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · blocked
-- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Agents/fishing-fire-and-crates|fishing-fire-and-crates]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
