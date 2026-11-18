@@ -1,0 +1,4 @@
+# survivors wake 500-1000 blocks from where they fell
+- **Wakes**: a survivor left for dead on the Overworld's land (any cause but a fall, and not one carried in, captured, lair-bound or berthed) now wakes about 500 to 1000 blocks from where they fell. A boss-spared one keeps its own range, moved out to 500-800. A drowned one no longer washes up near the spot; the far ring replaces the shore search there. The Nether, the End and ceilinged worlds keep the near wake.
+- **FarLand** (`core/FarLand.java`): picks the spot without making a chunk. Up to 48 random columns in the ring are scored from the generator alone (ground height above the sea, biome not ocean or river, the lie of the land on four sides), the gentlest is taken, and only that one chunk is loaded and checked as before; the rest of the chunk is tried before a try is spent.
+- Built by CI; not played.
