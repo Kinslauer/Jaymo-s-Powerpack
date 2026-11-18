@@ -146,3 +146,10 @@ let the owed village start run, close the game when needed. Long loading screens
 - 3:48 AM: every login failed. StrawberryLib (Inferno) calls isSpectator -> getPlayerInfo while the LocalPlayer is made, before Minecraft.getConnection() exists. Fix #1723 (PlayerInfoNoConnectionMixin, client) merged; the fixed Powers was copied into Andy's game. Friends need a rebuilt zip. First capital (Eldwold) founded at 3:49 AM, 26 s lag, profile stall-034859.jfr.
 - #1726 merged: CharacterNames gives no random name while MCA's creator is pending (Andy saw Yu-Fang before picking Jek). Ships with the next deploy.
 - 2026-11-18 8:05 AM: pbdr (same world), built on the Deck: Powers 0.24.77, Kingdoms 0.10.17, Kitchen 0.6.44. Andy's game got the 3 jars (sha256 match). Chunky continued at 76%. Friends' zip: ~/jaymos-src/modpack/Jaymos-Powers-Modpack-0.24.77.zip on the Deck (includes the login fix).
+
+## 2026-11-18 10:05 AM: new world, 0.25.1
+- Dark days: ScalableLux (Starlight fork) bypassed CustomChunks' per-band skies; Overworld under the Aether saved with no sky light. Removed (#1732, also from CurseForge profiles). New world's chunks checked: Overworld band sky light 15 at the surface.
+- Shelter: carried in only to a real village/kingdom/fief bed indoors (#1733). Rods cast again (#1731).
+- Epic towns rise again (#1735: 9x9 start search, 2 s cap); no lone-castle kingdoms, far Scout search for Epic towns (#1739); respawns 500-1000 from the last death via FarLand (#1738). Powers 0.25.0 bump (#1737).
+- pbdr NEW WORLD: Powers 0.25.1, Kingdoms 0.10.24, Kitchen 0.6.46; old world world-old-20261118-100510; Chunky radius 5000 started. Andy's client jars swapped, ScalableLux retired (.old).
+- Open for Andy: player/operator castle kingdoms (Crowns.found, Deck of Fates throne/deed, /kingdom found castle, GreatWars rebel fief) left alone. Lore paragraph "Only the great towns are crowned" (new) awaits approval.

@@ -1685,6 +1685,8 @@ stores are its lord's, not a dungeon's. Far from any realm it is a kingdom's sea
 kingdom's fiefdom, its lord sworn to the crown; where a kingdom already has its fiefs it is a village allied to it.
 Its builders grow it outward like any other town.
 
+**Only the great towns are crowned** (Andy approved, 2026-11-18; "they only get to be called kingdoms if they are of that magnitude now. a single castle no longer counts and can only ever be a fief or an accompanying part of a kingdom when the builders expand to make it so"). A crown is only ever worn in one of the great towns. A castle, even one with its first town laid round it, is never a kingdom: castle towns rise only within a kingdom's reach, as its fiefdoms or the villages allied to it, and a lone lord's castle far from any realm is not raised at all. Where a new realm is wanted and no great town stands near, the land is searched further out until one is found. A castle town is crowned only if its builders grow it to the size of the great towns. A lord who takes a crown for himself is another matter: one who buys it, wins it in a rebellion or is handed it by fate may still sit a lone castle as a king (Andy, 2026-11-18: "they can still spawn and be spawned"). This replaces "Far from any realm it is a kingdom's seat" in the castle towns above.
+
 **Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
 elders and foremen, its court wizard and sometimes a court necromancer, and its guards, archers and King's Guard. A
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
