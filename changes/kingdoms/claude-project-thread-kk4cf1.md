@@ -8,21 +8,30 @@ All 48 rows Andy picked from the story-quest list (2026-11-17, "Build!"). Tales 
   way on. The tale goes on without you; a step left that way writes no journal, mark or pay. The journal and the asker
   say the time left in words (`{left:}`, `{in:}`). Used by The Asking Price, The Night Bell, The Fair Left Behind, The
   Bride Road and most of the new tales.
-- **Day and night**: `when` on a step, `hours` on a cast member, `night`/`day`/`moon:` conditions, a `not_now` line.
+- **Day and night**: `when` on a step (a night escort only arrives after dark; a moon means that moon's night),
+  `hours` on a cast member, `night`/`day`/`moon:` conditions, a `not_now` line. Off their hours a tale's people walk
+  off out of sight and go in, and come back out when their hours come round: the same person, so hearts, what they
+  remember and what they were told last.
 - **Who you are matters**: conditions on heritage, patron, town reputation, hearts with the speaker, coin carried,
   dress (fine, plain, ragged, armoured, bloodied), being cursed or human.
 - **Persuade, threaten or pay**: a `try` on a reply, odds said in words from the listener's temper, hearts, reputation
   and deeds; bribes priced by greed and paid in real coin; a failed try always has its own way on. Also a throw of dice.
 - **Naming who did it**: a `name` step listing everyone met, weighed by the clues found; a wrong name has its own ending.
-- **Know the beast**: `weak_to` on foe steps, learned from clues and the bestiary, which keeps the note.
+- **Know the beast**: `weak_to` on foe steps (fire, silver, the Warden's light, garlic, wolfsbane, and running water:
+  a blood-drinker fought by a stream). The bestiary writes the note as soon as you learn it, on the page for that kind
+  of beast, one page a note.
 - **Companions speak up**: `voices` before and after a choice by Convictions belief, with `for`/`irks` moving the bond.
-- **It comes back weeks later**: an ending's `later` list (letter, scene, town talk, someone moved) at 10 to 40 days,
+- **It comes back weeks later**: an ending's `later` list at 10 to 40 days: a letter (brought again another day if
+  the runner can't find you), a scene, town talk, someone who settles in the town (a spared thief-taker can come back
+  as one of its guards), a new grave with a board giving the name, or a household that shuts up its house and goes;
   with a `still` condition asked on the day.
 - **Letters you can't read**: a `tongue` on letters, clues and things; a priest or librarian reads it aloud for a coin
   and then knows what it says.
-- **Lies come out**: a `lie` on a reply, remembered, checked later; it can change an ending or bring someone back.
+- **Lies come out**: a `lie` on a reply, remembered, checked later (one day for the whole party); it can change an
+  ending or bring someone back, and the one lied to loses hearts when next you're near them.
 - **Tales from the board and the inn**: `by: notice` (the work board shows a tale notice now and then) and more rumours.
-- **Tales that grow into a story**: `arc`, and starts that need an earlier tale's marks and a number of days since it.
+- **Tales that grow into a story**: `arc`, and starts that need an earlier tale's marks and a number of days since it. A villager holding a later part
+  offers it to the player it's meant for, and gives anyone else a tale of their own.
 
 Smaller pieces the tales needed: a `vigil` step (a night kept somewhere, lines and sounds by the hour), a `tail` step
 (follow someone unseen: too near and they see you, too far and they're lost), a `reap` step (a field is sown ripe and you
@@ -55,10 +64,13 @@ real Kitchen item, and that path is offered only where Kitchen is installed. The
 barley) and the companion isn't standing in the field. The bestiary lookup in Moonrise is offered, not forced. The
 Lists is fought on foot. The Night Market's stalls, The Cordon's fence and count of the sick, and The Boundary Stone's
 fence, barn and cow are people and words, not blocks. Parts two and three of The Black Candle can be offered in a
-different town from part one.
+different town from part one. People who go home off their hours walk to a spot out of sight, not to their own bed
+or the tavern. A household that moves away leaves no note on its door.
 
-Classes: `Tales`, `TaleWays`, `TaleCast`, `Tale`, `KeepingCells`, `Garlic` (wolfsbane), `StoryHoldScreen` (hints
+Classes: `Tales`, `TaleWays`, `TaleCast`, `Tale`, `TaleAfter` (graves, people moving away), `KeepingCells`, `QuestJobs`, `TownNotices`, `Bestiary`,
+`Garlic` (wolfsbane), `StoryHoldScreen` (hints
 193-204), `lang/parts/tales.json`, `tools/tale_check.py`, `docs/StoryQuests-Plan.md`.
 
-Built (full build and the tale checker pass: 79 files, 0 problems). **Not played.** Lore placements are in `Lore.md` as
+Every row was checked against the pick list by independent readers (tales and engine separately) and their
+findings fixed. Built (full build and the tale checker pass: 79 files, 0 problems). **Not played.** Lore placements are in `Lore.md` as
 `(new)` paragraphs for Andy to approve.
