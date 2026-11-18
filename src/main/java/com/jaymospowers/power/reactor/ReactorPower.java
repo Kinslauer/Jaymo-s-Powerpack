@@ -172,6 +172,7 @@ public final class ReactorPower implements Power {
 		}
 		want = Math.min(want, live.charge);
 		live.charge -= want;
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "reactor.full", Math.round(want));
 		return want;
 	}
 
@@ -184,18 +185,20 @@ public final class ReactorPower implements Power {
 		live.charge = 0.0F;
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		blast(player, at, AbilityPower.size(player, OVERLOAD_RADIUS), OVERLOAD_HARM, 1.2);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "reactor.overload", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "reactor.overload_many", blast(player, at, AbilityPower.size(player, OVERLOAD_RADIUS), OVERLOAD_HARM, 1.2));
 		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), (float)AbilityPower.size(player, OVERLOAD_RADIUS), GLOW);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.reactor.overload").withStyle(ChatFormatting.GREEN));
 	}
 
 	/**
 	 * A blast of the heart's at {@code at}: everything within {@code radius} but its maker takes up to {@code harm} (less
-	 * further out) and is thrown {@code push} away. No block is broken.
+	 * further out) and is thrown {@code push} away. No block is broken. Returns how many it caught.
 	 */
-	static void blast(ServerPlayer player, Vec3 at, double radius, float harm, double push) {
+	static int blast(ServerPlayer player, Vec3 at, double radius, float harm, double push) {
 		ServerLevel level = player.level();
 		DamageSource source = player.damageSources().explosion(player, player);
+		int caught = 0;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius), e -> e != player && PickKit.foe(player, e))) {
 			double d = e.getBoundingBox().getCenter().distanceTo(at);
 			if (d > radius) {
@@ -203,6 +206,7 @@ public final class ReactorPower implements Power {
 			}
 			float near = (float)(1.0 - d / (radius + 1.0));
 			e.hurtServer(level, source, harm * near);
+			caught++;
 			Vec3 away = e.position().subtract(at);
 			away = away.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 1.0, 0.0) : away.normalize();
 			e.setDeltaMovement(e.getDeltaMovement().add(away.scale(push * near)).add(0.0, 0.25 * near, 0.0));
@@ -212,6 +216,7 @@ public final class ReactorPower implements Power {
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1 + (int)(radius / 3), radius * 0.2, radius * 0.2, radius * 0.2, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, (float)Math.min(4.0, 0.6 + radius * 0.2), 1.2F);
 		com.jaymospowers.core.Shakes.around(level, at, radius * 3.0, (float)Math.min(2.0, radius * 0.25));
+		return caught;
 	}
 
 	// ---- keys ----
@@ -288,6 +293,7 @@ public final class ReactorPower implements Power {
 		if (player.onGround() || player.isInWater()) {
 			if (live.fallen >= LAND_FROM && player.onGround()) {
 				add(player, (float)(live.fallen * LAND_GAIN));
+				com.jaymospowers.core.trials.PowerTrials.reach(player, "reactor.land", (int)live.fallen);
 			}
 			live.fallen = 0.0;
 		}

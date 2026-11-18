@@ -134,6 +134,7 @@ public final class CryoBreath {
 				continue;
 			}
 			chill(player, living, snow, strength);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.breath", held % 20 == 0 ? 1 : 0);
 		}
 		// water freezes over, and smoke turns to freezing fog, all along it
 		if (held % ICE_EVERY == 0) {
@@ -147,6 +148,7 @@ public final class CryoBreath {
 					BlockPos at = BlockPos.containing(p);
 					for (int down = 0; down <= 2; down++) {
 						if (CryoIce.place(level, at.below(down), Blocks.ICE.defaultBlockState(), (int)(ICE_TICKS * strength), CryoIce.Mode.WATER)) {
+							com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.freeze_water", 1);
 							break;
 						}
 					}

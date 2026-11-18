@@ -143,6 +143,7 @@ final class GravityRockFlight {
 		slab.setPos(to);
 		slab.setDeltaMovement(to.subtract(was));
 		player.resetFallDistance();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.board", player.tickCount % 20 == 0 ? 1 : 0);
 		player.causeFoodExhaustion(EXHAUSTION);
 		AABB bounds = BlockCluster.bounds(cluster.pieces());
 		double spread = Math.max(0.8, bounds.getXsize() * 0.35);

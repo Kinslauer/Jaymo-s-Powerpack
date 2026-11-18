@@ -104,9 +104,11 @@ final class SmokeBomb {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, at, 10.0, 0.4F);
 		boolean choke = owner != null && com.jaymospowers.core.Fate.isCorrupted(owner);
+		com.jaymospowers.core.trials.PowerTrials.reach(owner, "smoke.bomb_many", level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new AABB(at, at).inflate(AbilityPower.size(owner, BLIND_RADIUS))).size());
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, BLIND_RADIUS)),
 			e -> e.isAlive() && e != owner)) {
 			living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIND_TICKS, 0), owner);
+			com.jaymospowers.core.trials.PowerTrials.count(owner, "smoke.bomb", 1);
 			if (choke) {
 				// Choke Bomb (smog): poisoned, and they cough out smog of their own
 				living.addEffect(new MobEffectInstance(MobEffects.POISON, CHOKE_POISON_TICKS, 0), owner);

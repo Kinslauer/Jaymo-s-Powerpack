@@ -247,6 +247,7 @@ public final class WindSpiralDive {
 		ServerLevel level = player.level();
 		WindMoves.unpose(player, WindMoves.DIVE);
 		double dropped = Math.max(0.0, dive.startY() - player.getY());
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "wind.dive", (int)dropped);
 		float power = (float)Mth.clamp(dropped / FULL_DROP, 0.0, 1.0);
 		double radius = Mth.lerp(power, AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX));
 		float damage = Mth.lerp(power, DAMAGE_MIN, DAMAGE_MAX) * WindModes.abilityScale(player);

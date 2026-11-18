@@ -101,6 +101,7 @@ public final class ZFighterImpact {
 
 	/** It hits: the block it met bursts into debris, a ring of dust goes out, everyone near feels it. */
 	private static void slam(ServerLevel level, LivingEntity entity, Flight flight, Vec3 into) {
+		com.jaymospowers.core.trials.PowerTrials.count(flight.by, "zfighter.slam", 1);
 		Vec3 centre = entity.getBoundingBox().getCenter();
 		Vec3 at = into.y < 0.0 ? entity.position() : centre.add(into.scale(entity.getBbWidth() * 0.5));
 		BlockState state = struck(level, at, into);

@@ -346,6 +346,7 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 			WebBrute.forget(handler.player);
 			WebSymbioteCollect.forget(handler.player);
+			SWUNG.remove(handler.player.getUUID());
 		});
 		WebSymbiote.register();
 		WebSymbioteInfection.register();
@@ -527,6 +528,25 @@ public final class WebPower implements Power {
 		return state.swinging[WebNet.MAIN] || state.swinging[WebNet.OFF];
 	}
 
+	/** (Power trials) How far each slinger has come on their webs since they last touched the ground. */
+	private static final java.util.Map<java.util.UUID, Double> SWUNG = new java.util.HashMap<>();
+
+	/** Counts a swing's run of ground covered, and the time spent hanging, for the trials. */
+	private static void swingTrial(ServerPlayer player, @org.jspecify.annotations.Nullable State state) {
+		if (player.tickCount % 20 == 0 && WebHanging.hanging(player)) {
+			com.jaymospowers.core.trials.PowerTrials.count(player, "web.hang", 1);
+		}
+		if (player.onGround() || player.isInWater() || player.isPassenger() || !player.isAlive()) {
+			SWUNG.remove(player.getUUID());
+		} else if (state != null && swinging(state)) {
+			double far = SWUNG.merge(player.getUUID(), Math.hypot(player.getX() - player.xo, player.getZ() - player.zo), Double::sum);
+			if (player.tickCount % 10 == 0) {
+				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_far", (int)far);
+				com.jaymospowers.core.trials.PowerTrials.reach(player, "web.swing_marathon", (int)far);
+			}
+		}
+	}
+
 	/** The synced line for a hand's web. */
 	public static AttachmentType<WebLine> line(int hand) {
 		return hand == WebNet.OFF ? LINE_OFF : LINE;
@@ -596,6 +616,7 @@ public final class WebPower implements Power {
 			WebStrength.physique(player);
 		}
 		State state = player.getAttached(STATE);
+		swingTrial(player, state);
 		WebSymbiote.tick(player);
 		WebTendrils.tick(player);
 		WebImpacts.tick(player);
@@ -1137,6 +1158,7 @@ public final class WebPower implements Power {
 			fwip(player);
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "web.bridge", 1);
 		WebCooldowns cooldowns = cooldowns(player);
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(),
 			player.level().getGameTime() + (mastered(player) ? 0 : WebBridges.COOLDOWN)));
@@ -1574,6 +1596,7 @@ public final class WebPower implements Power {
 			state.tetherLoad = load;
 			state.tetherSince = now;
 			state.tetherId = target.getId();
+			com.jaymospowers.core.trials.PowerTrials.count(target instanceof LivingEntity ? player : null, "web.yank", 1);
 			state.tetherWasSwinging = target instanceof LivingEntity living && living.isSwinging();
 			player.setAttached(TETHER, target.getId());
 			target.setAttached(HELD, true);

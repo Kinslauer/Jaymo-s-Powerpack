@@ -106,6 +106,7 @@ public final class ChronoPhase {
 		run.free = player.position();
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(PHASING, true);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.phase", 1);
 		Vec3 at = player.position();
 		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), 1.2F, 0xFFD070);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 2.0F);

@@ -134,6 +134,7 @@ final class ResonanceVoice {
 		long until = level.getGameTime() + LURE_TICKS;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(spot, spot).inflate(AbilityPower.size(player, LURE_RADIUS)),
 			m -> m.isAlive() && m.getTarget() == null && !m.isNoAi() && m.distanceToSqr(spot) <= AbilityPower.size(player, LURE_RADIUS) * AbilityPower.size(player, LURE_RADIUS))) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.lure", 1);
 			LURES.removeIf(lure -> lure.mob == mob);
 			LURES.add(new Lure(mob, spot, until));
 			mob.getNavigation().moveTo(spot.x, spot.y, spot.z, LURE_SPEED);

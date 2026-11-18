@@ -89,6 +89,7 @@ final class DarktideSurf {
 		if (!SURFING.contains(player.getUUID())) {
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.surf", player.tickCount % 20 == 0 ? 1 : 0);
 		if (!player.isAlive() || player.isShiftKeyDown() || player.isPassenger() || player.getAbilities().flying) {
 			SURFING.remove(player.getUUID());
 			return;
@@ -180,6 +181,7 @@ final class DarktideSurf {
 			live.flow = Math.max(0.0F, live.flow - GEYSER_FLOW);
 		}
 		PickKit.spend(TABLE, player, GEYSER, GEYSER_COOLDOWN);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "darktide.geyser", 1);
 		ServerLevel level = player.level();
 		float wet = player.isInWaterOrRain() ? DarktideDark.WET_BONUS : 1.0F;
 		LivingEntity foe = PickKit.aimed(player, DarktideFlow.reach(player, GEYSER_REACH));

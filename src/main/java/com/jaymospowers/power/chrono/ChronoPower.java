@@ -760,6 +760,7 @@ public final class ChronoPower implements Power {
 		level.playSound(null, target.x, target.y, target.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8F, 1.4F);
 
 		ChronoMemory.of(player).stoppedTime += chosen; // time undone counts as time outside time
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.rewind", Math.max(1, chosen / 20));
 		state.clearHistory(); // the jump itself shouldn't be part of the next rewind
 		state.trail = new RewindTrail(level, path, ChronoFx.style(player));
 		return true;
@@ -846,6 +847,7 @@ public final class ChronoPower implements Power {
 				&& e.distanceToSqr(player) <= AbilityPower.size(player, BLOOM_HEAL_RADIUS) * AbilityPower.size(player, BLOOM_HEAL_RADIUS)
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.heal(BLOOM_HEAL);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.bloom_heal", 1);
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.4, 0.3, 0.0);
 		}
 	}

@@ -81,6 +81,9 @@ final class ResonanceEcho {
 
 	static void send(ServerPlayer player, List<LivingEntity> heard, int ticks, int kind) {
 		int[] ids = new int[Math.min(heard.size(), 1024)];
+		com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.echo", kind == ResonanceNet.Sense.ECHO ? heard.size() : 0);
+		com.jaymospowers.core.trials.PowerTrials.count(kind == ResonanceNet.Sense.ECHO && player.getY() < 0.0 ? player : null, "resonance.echo_deep", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "resonance.echo_many", kind == ResonanceNet.Sense.ECHO ? heard.size() : 0);
 		for (int i = 0; i < ids.length; i++) {
 			ids[i] = heard.get(i).getId();
 		}

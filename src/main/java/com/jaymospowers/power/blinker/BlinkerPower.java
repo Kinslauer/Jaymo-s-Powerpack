@@ -97,7 +97,7 @@ public final class BlinkerPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!untouchable(entity) || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY));
+			!untouchable(entity) || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || missed(entity));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			UNTOUCHED.clear();
@@ -110,6 +110,12 @@ public final class BlinkerPower implements Power {
 		UNTOUCHED.remove(player.getUUID());
 		DROPS.remove(player.getUUID());
 		FLICKERING.remove(player.getUUID());
+	}
+
+	/** A blow that found nobody there (counted for the trials): it stays refused. */
+	private static boolean missed(LivingEntity entity) {
+		com.jaymospowers.core.trials.PowerTrials.count(entity, "blinker.untouched", 1);
+		return false;
 	}
 
 	/** In the instant between here and there: nothing touches them. */
@@ -247,6 +253,10 @@ public final class BlinkerPower implements Power {
 		PickKit.spend(TABLE, player, BLINK, BLINK_COOLDOWN);
 		UNTOUCHED.put(player.getUUID(), level.getGameTime() + UNTOUCHABLE);
 		Vec3 keep = player.getDeltaMovement();
+		com.jaymospowers.core.trials.PowerTrials.count(level.dimension() == net.minecraft.world.level.Level.END ? player : null, "blinker.end_blink", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.blink", (int)Math.round(player.position().distanceTo(to)));
+		com.jaymospowers.core.trials.PowerTrials.count(player.onGround() ? null : player, "blinker.air", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.blink_long", (int)Math.round(player.position().distanceTo(to)));
 		step(level, player, to);
 		player.setDeltaMovement(keep.multiply(1.0, 0.0, 1.0));
 		player.syncVelocity = true;
@@ -274,6 +284,9 @@ public final class BlinkerPower implements Power {
 			return;
 		}
 		PickKit.spend(TABLE, player, STRIKE, STRIKE_COOLDOWN);
+		com.jaymospowers.core.trials.PowerTrials.count(foe.onGround() ? null : player, "blinker.strike_air", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.strike", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.strike_far", (int)player.distanceTo(foe));
 		UNTOUCHED.put(player.getUUID(), level.getGameTime() + UNTOUCHABLE);
 		step(level, player, to);
 		face(player, foe);
@@ -305,11 +318,13 @@ public final class BlinkerPower implements Power {
 		ServerLevel level = player.level();
 		PickKit.spend(TABLE, player, VANISH, VANISH_COOLDOWN);
 		Vec3 at = player.position();
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.vanish_many", level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(VANISH_RADIUS), m -> m.getTarget() == player).size());
 		level.sendParticles(MagicFx.miasma(SMOKE, 2.0F), at.x, at.y + 1.0, at.z, 60, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 1.0, AbilityPower.size(player, VANISH_RADIUS) * 0.4, 0.02);
 		MagicFx.blast(level, at.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, VANISH_RADIUS) * 0.6F, SMOKE);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(player, VANISH_RADIUS)), e -> e != player && e.isAlive())) {
 			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, VANISH_BLIND, 0), player);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.vanish", 1);
 			if (e instanceof Mob mob && mob.getTarget() == player) {
 				mob.setTarget(null);
 				mob.getNavigation().stop();
@@ -354,6 +369,8 @@ public final class BlinkerPower implements Power {
 			return;
 		}
 		PickKit.spend(TABLE, player, DROP, DROP_COOLDOWN);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "blinker.drop", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "blinker.drop_big", (int)foe.getMaxHealth());
 		Drop d = new Drop();
 		d.foe = foe;
 		d.home = player.position();

@@ -96,6 +96,7 @@ public final class ResonanceHush {
 		ACTIVE.removeIf(active -> active.owner.equals(caster.getUUID()));
 		ACTIVE.add(new Active(level, caster.getUUID(), dome));
 		caster.setAttached(DOME, dome);
+		com.jaymospowers.core.trials.PowerTrials.reach(caster, "resonance.hush_many", level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(dome.center(), dome.center()).inflate(dome.radius()), m -> dome.contains(m.position())).size());
 		ResonanceEcho.ripple(level, dome.center().add(0.0, 0.1, 0.0), dome.radius());
 		for (ServerPlayer other : level.players()) {
 			if (other != caster && dome.contains(other.position()) && Powers.of(other) != null) {

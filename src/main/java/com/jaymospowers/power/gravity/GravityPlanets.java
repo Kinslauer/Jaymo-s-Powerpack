@@ -87,6 +87,7 @@ final class GravityPlanets {
 		if (distance <= ARRIVE) {
 			// caught: the planet pops and lets you go, most of your speed taken off
 			PLANETS.remove(player.getUUID());
+			com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.planet", 1);
 			player.setDeltaMovement(player.getDeltaMovement().scale(CATCH_KEEPS));
 			player.syncVelocity = true;
 			MagicFx.blast(level, planet.at(), 0.8F, CORE);

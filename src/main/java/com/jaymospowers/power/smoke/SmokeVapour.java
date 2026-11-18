@@ -137,6 +137,7 @@ public final class SmokeVapour {
 				return true;
 			}
 			if (wholly(player)) {
+				com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.pass", 1);
 				return false;
 			}
 			if (source.is(DamageTypeTags.IS_FALL)) {
@@ -157,6 +158,7 @@ public final class SmokeVapour {
 	/** A fall that would have hurt: a second of smoke legs (SmokeMoves.LAND) and a spill of smoke round the feet. */
 	private static void softLanding(ServerPlayer player) {
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.soft_landing", 1);
 		Vec3 at = player.position().add(0.0, 0.3, 0.0);
 		if (!active(player)) {
 			SmokeMoves.begin(player, SmokeMoves.LAND);
@@ -250,6 +252,8 @@ public final class SmokeVapour {
 			return;
 		}
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.vapour", player.tickCount % 20 == 0 ? 1 : 0);
+		com.jaymospowers.core.trials.PowerTrials.count(wholly(player) ? player : null, "smoke.whole", player.tickCount % 20 == 0 ? 1 : 0);
 		UUID id = player.getUUID();
 		long since = level.getGameTime() - SmokePower.state(player).vapourFrom();
 		int grounded = player.onGround() && since > TAKEOFF_GRACE ? GROUNDED.getOrDefault(id, 0) + 1 : 0;

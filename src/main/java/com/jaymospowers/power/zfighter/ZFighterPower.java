@@ -687,6 +687,7 @@ public final class ZFighterPower implements Power {
 		// a Z Fighter eats like three men, and every bite comes back as ki
 		if (live.lastFood >= 0 && food > live.lastFood) {
 			live.ki += (food - live.lastFood) * KI_PER_FOOD;
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.eat", food - live.lastFood);
 		}
 		live.lastFood = food;
 		if (!creative) {
@@ -704,6 +705,7 @@ public final class ZFighterPower implements Power {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_starving").withStyle(ChatFormatting.RED));
 			} else {
 				live.ki += Mastery.starterOnly(player) ? STARTER_CHARGE_RATE : CHARGE_RATE;
+				com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.charge", player.tickCount % 20 == 0 ? 1 : 0);
 				if (!creative) {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
 				}
@@ -711,6 +713,7 @@ public final class ZFighterPower implements Power {
 				chargeFx(player, live, now);
 				if (startKi < max && live.ki >= max && now - live.lastFullBurst >= FULL_BURST_GAP) {
 					fullBurst(player, live, now);
+					com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.full", 1);
 				}
 				if (Soundscape.due(player, "ki.power_up", 12, 20)) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
@@ -738,6 +741,7 @@ public final class ZFighterPower implements Power {
 					* ZFighterDivineGrace.flight(player);
 			}
 			player.resetFallDistance();
+			com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.flight", player.tickCount % 20 == 0 ? 1 : 0);
 			if (now % 4 == 0) {
 				level.sendParticles(dust(live), true, false, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
 			}

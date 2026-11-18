@@ -140,6 +140,7 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 			}
 			float share = (float) (1.0 - d / AbilityPower.size(player, BURST_RADIUS));
 			victim.hurtServer(level, source, this.damage * (0.4F + 0.6F * share));
+			com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.cannons", 1);
 			if (this.isVoid()) {
 				ArsenalVoid.voidHit(victim, player, false);
 			}

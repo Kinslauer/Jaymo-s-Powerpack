@@ -195,6 +195,7 @@ final class DarktidePit {
 			}
 			// swallowed: held at its heart in the dark
 			if (pit.swallowed.add(e)) {
+				com.jaymospowers.core.trials.PowerTrials.count(pit.owner, "darktide.pit", 1);
 				level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.SCULK_VEIN_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
 			}
 			if (e instanceof Player) {

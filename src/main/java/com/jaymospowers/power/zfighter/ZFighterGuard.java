@@ -152,6 +152,7 @@ public final class ZFighterGuard {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		live.parryReadyAt = now + PARRY_COOLDOWN;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.parry", 1);
 		live.counterUntil = now + COUNTER_TICKS;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + PARRY_KI);
 		Mastery.used(player);

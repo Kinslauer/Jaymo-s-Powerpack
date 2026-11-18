@@ -97,6 +97,7 @@ public final class ChronoGears {
 			clear(player);
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.reach(player, "chrono.gear", player.tickCount % 20 == 0 ? gear(player) : 0);
 		if (player.getAttached(GEAR) == null) {
 			player.setAttached(GEAR, DEFAULT_GEAR);
 		}

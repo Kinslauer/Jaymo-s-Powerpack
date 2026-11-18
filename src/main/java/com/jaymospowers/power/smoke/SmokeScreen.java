@@ -81,6 +81,7 @@ final class SmokeScreen {
 			stop(player, true);
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.screen", held % 20 == 0 ? 1 : 0);
 		// it pours from the chest, and a little ahead when you move, so it trails behind you
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
 		SmokeField.puff(level, at, POUR, player);
