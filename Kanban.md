@@ -4,14 +4,14 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 07:49). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
-- [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 
 
@@ -44,9 +44,9 @@ kanban-plugin: board
 - [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
 - [x] [[Inbox/Done/inferno-fire|inferno-fire]]
 - [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings
