@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * A mob sent to the same block it just failed to reach (no path, or a path that stops short) isn't pathed there again
+ * A mob sent to the same block it just failed to reach (no path, or one that stops where it stands) isn't pathed there again
  * for {@link #COOLDOWN} ticks: the answer is the same. Dozens of Kingdoms' errands re-path "every second, or whenever
  * the walk is done", and a walk that can't reach is done at once, so a guard whose post was out of reach pathed every
  * tick; a camp's worth of them held the Deck server half a minute behind as a player joined (2026-11-16, 39% of the
@@ -29,6 +30,9 @@ abstract class RepathCooldownMixin {
 	@Shadow
 	@Final
 	protected Level level;
+	@Shadow
+	@Final
+	protected Mob mob;
 	@Shadow
 	protected @Nullable Path path;
 
@@ -65,10 +69,16 @@ abstract class RepathCooldownMixin {
 		}
 	}
 
+	/**
+	 * Notes {@code x, y, z} as failed when there was no path, or one that stops short where the mob already stands (it can
+	 * get no nearer). A partial path that still goes somewhere counts as moving, as in vanilla.
+	 */
 	@Unique
 	private void jaymoskingdoms$note(double x, double y, double z, boolean moving) {
 		Path now = this.path;
-		if (!moving || now == null || !now.canReach()) {
+		boolean stuck = now != null && !now.canReach() && now.getEndNode() != null
+			&& now.getEndNode().asBlockPos().distManhattan(this.mob.blockPosition()) <= 1;
+		if (!moving || now == null || stuck) {
 			this.jaymoskingdoms$failedAt = BlockPos.containing(x, y, z);
 			this.jaymoskingdoms$failedTime = this.level.getGameTime();
 		} else {
