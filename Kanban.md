@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 15:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · claimed
 - [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · claimed
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · 🪶 Quill · #1765 · writing
 
 
 ## In review
@@ -40,7 +41,6 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-01-crime-small|lanterns-01-crime-small]] · lanterns-01-crime-small · #1751 · in-review
 - [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · #1753 · in-review
 - [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · #1754 · in-review
-- [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · #1765 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
