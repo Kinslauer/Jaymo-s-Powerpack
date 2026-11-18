@@ -15,6 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link #DECOY} the decoy ({@link RigDecoy}).</li>
  * <li>{@link #FIELD} the storing field ({@link RigField}).</li>
  * <li>{@link #BANK} bank shot ({@link RigBank}).</li>
+ * <li>{@link #PULLUP} pull-up warning ({@link RigActives}).</li>
+ * <li>{@link #HYPER} hyper thrust ({@link RigActives}).</li>
+ * <li>{@link #BANK_TURN} banking turns ({@link RigActives}).</li>
+ * <li>{@link #METEOR} meteor dive ({@link RigDive}).</li>
+ * <li>{@link #SMOOTH} smooth other flyers ({@link RigActives}).</li>
  * </ul>
  * These actions share {@link RigNet.Use} with the Rig's own, numbered from {@link #FIRST}.
  */
@@ -25,31 +30,34 @@ public final class RigPicks {
 	public static final int DASH = 26, BARRAGE = 27;
 	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
 	public static final int FAILSAFE = 28;
+	/** (0.12.x) Flight actives: pull-up, hyper thrust, banking, meteor dive, smooth others. */
+	public static final int PULLUP = 29, HYPER = 30, BANK_TURN = 31, METEOR = 32, SMOOTH = 33;
 
 	private RigPicks() {
 	}
 
 	/** Called from {@code Rig.init}. */
-	public static void init() {
-		RigTable.init();
-		RigStudy.init();
-		RigDrones.init();
-		RigDecoy.init();
-		RigField.init();
-		RigBank.init();
-		RigStrikes.init();
-		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-				RigDrones.tick(player);
-				RigField.tick(player);
-				RigStrikes.tick(player);
-			}
-		});
-	}
+		public static void init() {
+			RigTable.init();
+			RigStudy.init();
+			RigDrones.init();
+			RigDecoy.init();
+			RigField.init();
+			RigBank.init();
+			RigStrikes.init();
+			RigDive.init();
+			ServerTickEvents.END_SERVER_TICK.register(server -> {
+				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+					RigDrones.tick(player);
+					RigField.tick(player);
+					RigStrikes.tick(player);
+				}
+			});
+		}
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= FAILSAFE;
+		return action >= FIRST && action <= SMOOTH;
 	}
 
 	/** A Rig menu entry from the client. */
@@ -74,6 +82,11 @@ public final class RigPicks {
 			case BANK -> RigBank.toggle(player);
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
+			case PULLUP -> RigActives.pullUp(player);
+			case HYPER -> RigActives.hyperThrust(player);
+			case BANK_TURN -> RigActives.toggleBanking(player);
+			case METEOR -> RigDive.meteorDive(player);
+			case SMOOTH -> RigActives.toggleSmoothOthers(player);
 			default -> {
 			}
 		}

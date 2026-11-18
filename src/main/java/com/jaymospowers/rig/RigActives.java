@@ -102,12 +102,23 @@ public final class RigActives {
 	static final double FLAME_LENGTH = 0.45, FLAME_STRETCH = 2.2, FLAME_FLICKER = 0.15;
 	static final float FLAME_WIDTH = 0.07F;
 	/** The crack as full flight breaks into sprint speed: the horizontal speed it comes at (b/t, times the frame's air speed), its ring, its shake, and the least ticks between two. */
-	static final double SONIC_SPEED = 0.95;
-	static final float CRACK_RING = 2.6F, CRACK_SHAKE = 1.1F;
-	static final int CRACK_GAP = 60;
-	/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
-	static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
-	static final double SPUTTER_KICK = 0.12;
+		static final double SONIC_SPEED = 0.95;
+		static final float CRACK_RING = 2.6F, CRACK_SHAKE = 1.1F;
+		static final int CRACK_GAP = 60;
+		/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
+		static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
+		static final double SPUTTER_KICK = 0.12;
+		/** (0.12.x) Pull-up: time-to-impact threshold (ticks), charge cost, cooldown. */
+		static final int PULLUP_TTI = 60, PULLUP_COST = 30, PULLUP_COOLDOWN = 100;
+		/** (0.12.x) Hyper thrust: extra speed multiplier, charge cost per tick, cooldown. */
+		static final double HYPER_SPEED = 2.0, HYPER_DRAIN = 8.0;
+		static final int HYPER_COST = 15, HYPER_COOLDOWN = 120;
+		/** (0.12.x) Banking: max roll angle (radians), eased by speed share. */
+		static final float BANK_MAX_ROLL = 0.6F;
+		/** (0.12.x) Meteor dive: charge cost, cooldown, upward speed, downward speed, impact radius. */
+		static final int METEOR_COST = 200, METEOR_COOLDOWN = 300;
+		static final double METEOR_UP = 1.5, METEOR_DOWN = 2.5, METEOR_RADIUS = 4.0;
+		/** (0.12.x) Smooth others: client-only toggle, no server cost. */
 
 	/** The Mind's level as a damage factor: 1 + {@link #DAMAGE_PER_LEVEL} per level above the first. */
 	static float levelDamage(Player player) {
@@ -118,36 +129,41 @@ public final class RigActives {
 	private static final List<Missile> MISSILES_IN_FLIGHT = new ArrayList<>();
 
 	static final class State {
-		boolean hovering;
-		int hoverTicks;
-		int palmCooldown;
-		int launcherCooldown;
-		/** The last status sent, to send a change at once. */
-		boolean sentHovering;
-		boolean wasWearing;
-		/** (0.11.87) Full flight (only while hovering). */
-		boolean flying;
-		boolean sentFlying;
-		/** The locked target's entity id, -1 for none. */
-		int lock = -1;
-		int sentLock = -1;
-		int scanCooldown;
-		/** Game time a hover starts by itself (the takeover save's catch), 0: none. */
-		long hoverAt;
-		/** Full flight's last position and horizontal speed (b/t), for crashes. */
-		@Nullable Vec3 lastPos;
-		double lastSpeed;
-		/** (0.11.107) Ticks into the Unibeam (-1: none), and its cooldown. */
-		int unibeam = -1;
-		int unibeamCooldown;
-		/** Game time the Core's overcharge (a lightning strike's) ends; 0 or past: none. */
-		long overUntil;
-		/** Game time the next sonic crack may come. */
-		long crackAt;
-		/** The jets' last position and facing, for flames that swing with the steering. */
-		@Nullable Vec3 jetPos;
-		float jetYaw;
-	}
+			boolean hovering;
+			int hoverTicks;
+			int palmCooldown;
+			int launcherCooldown;
+			/** The last status sent, to send a change at once. */
+			boolean sentHovering;
+			boolean wasWearing;
+			/** (0.11.87) Full flight (only while hovering). */
+			boolean flying;
+			boolean sentFlying;
+			/** The locked target's entity id, -1 for none. */
+			int lock = -1;
+			int sentLock = -1;
+			int scanCooldown;
+			/** Game time a hover starts by itself (the takeover save's catch), 0: none. */
+			long hoverAt;
+			/** Full flight's last position and horizontal speed (b/t), for crashes. */
+			@Nullable Vec3 lastPos;
+			double lastSpeed;
+			/** (0.11.107) Ticks into the Unibeam (-1: none), and its cooldown. */
+			int unibeam = -1;
+			int unibeamCooldown;
+			/** Game time the Core's overcharge (a lightning strike's) ends; 0 or past: none. */
+			long overUntil;
+			/** Game time the next sonic crack may come. */
+			long crackAt;
+			/** The jets' last position and facing, for flames that swing with the steering. */
+			@Nullable Vec3 jetPos;
+			float jetYaw;
+			/** (0.12.x) Flight actives: pull-up warning, hyper thrust, banking, smooth others. */
+			boolean pullup;
+			boolean hyper;
+			boolean banking;
+			boolean smoothOthers;
+		}
 
 	/** Something that happens a few ticks after its key: a shot at the end of its wind-up, a lift-off after its crouch. */
 	private record Deferred(ServerPlayer player, long at, Runnable run) {
@@ -809,15 +825,67 @@ public final class RigActives {
 	}
 
 	static void sendStatus(ServerPlayer player, State state) {
-		state.sentHovering = state.hovering;
-		state.sentFlying = state.flying;
-		state.sentLock = state.lock;
-		ServerPlayNetworking.send(player, new RigNet.Status(state.hovering, state.hovering && state.flying, RigMind.warnings(player), state.palmCooldown,
-			state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player), state.unibeamCooldown,
-			(int)Math.max(0L, state.overUntil - player.level().getGameTime())));
-	}
+			state.sentHovering = state.hovering;
+			state.sentFlying = state.flying;
+			state.sentLock = state.lock;
+			ServerPlayNetworking.send(player, new RigNet.Status(state.hovering, state.hovering && state.flying, RigMind.warnings(player), state.palmCooldown,
+				state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player), state.unibeamCooldown,
+				(int)Math.max(0L, state.overUntil - player.level().getGameTime()), state.pullup, state.hyper, state.banking, state.smoothOthers));
+		}
 
 	static State stateOf(ServerPlayer player) {
-		return state(player);
+			return state(player);
+		}
+
+		// ---- flight actives ----------------------------------------------------------------------------------------------
+
+		/** (0.12.x) Pull-up: toggles the time-to-impact warning on the Helm and the Mind's shout. */
+		static void pullUp(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !Rig.spend(player, PULLUP_COST)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.pullup = !state.pullup;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.pullup ? 1.4F : 1.0F);
+			if (state.pullup) {
+				RigMind.sayAlways(player, "pullup", 1.4F);
+			}
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Hyper thrust: a burst of speed while in full flight, double-tap sprint. */
+		static void hyperThrust(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !RigActives.flying(player) || !Rig.spend(player, HYPER_COST)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.hyper = !state.hyper;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, state.hyper ? 1.6F : 1.2F);
+			if (state.hyper) {
+				RigMind.sayAlways(player, "hyper", 1.6F);
+			}
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Banking: toggles smooth roll into turns for everyone to see. */
+		static void toggleBanking(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !Rig.spend(player, 10)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.banking = !state.banking;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.banking ? 1.2F : 1.0F);
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Smooth others: client-only toggle for smoothing other players' flight. */
+		static void toggleSmoothOthers(ServerPlayer player) {
+			State state = state(player);
+			state.smoothOthers = !state.smoothOthers;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.smoothOthers ? 1.2F : 1.0F);
+			sendStatus(player, state);
+		}
 	}
-}

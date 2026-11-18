@@ -41,15 +41,17 @@ public final class RigFlightFeel {
 	static final double CAMERA_DROP = 0.7, CAMERA_BACK = 1.6;
 	static final float CAMERA_EASE = 0.08F;
 	/** Sprint flight: the share of top speed the streaks and the tremble start at, the tremble (degrees), streaks a tick. */
-	static final float SONIC_FROM = 0.88F, SONIC_TREMBLE = 0.35F;
-	static final int STREAKS = 3;
-	/** Where the streaks start: this far ahead, within this far of the line of flight. */
-	static final double STREAK_AHEAD = 7.0, STREAK_SPREAD = 2.6;
-	/** The Rig menu's take-off switch, kept in the client's settings. */
-	static final String KEY_JET_START = "rig.jet_start";
+		static final float SONIC_FROM = 0.88F, SONIC_TREMBLE = 0.35F;
+		static final int STREAKS = 3;
+		/** Where the streaks start: this far ahead, within this far of the line of flight. */
+		static final double STREAK_AHEAD = 7.0, STREAK_SPREAD = 2.6;
+		/** (0.12.x) Hyper thrust: extra speed multiplier, how fast it builds. */
+		static final double HYPER_SPEED = 2.0, HYPER_ACCEL = 0.25;
+		/** The Rig menu's take-off switch, kept in the client's settings. */
+		static final String KEY_JET_START = "rig.jet_start";
 
-	private static float fov, camera, lastCamera, speedShare;
-	private static boolean thrusting, flying;
+		private static float fov, camera, lastCamera, speedShare;
+			static boolean thrusting, flying, hyper;
 
 	private RigFlightFeel() {
 	}
@@ -64,55 +66,56 @@ public final class RigFlightFeel {
 	}
 
 	/** Every client tick, after the flight has moved the player. */
-	static void tick(Minecraft minecraft, LocalPlayer player) {
-		thrusting = RigClient.status.hovering() && Rig.fullSet(player) && !player.onGround();
-		flying = thrusting && RigClient.status.flying();
-		double top = RigClient.FLIGHT_SPEED * RigClient.FLIGHT_SPRINT * Rig.frame(player).airSpeed;
-		speedShare = thrusting ? (float)Mth.clamp(player.getDeltaMovement().length() / top, 0.0, 1.0) : 0.0F;
-		fov += ((flying ? speedShare : 0.0F) - fov) * FOV_EASE;
-		lastCamera = camera;
-		camera += ((flying && RigPose.cruising(player) ? 1.0F : 0.0F) - camera) * CAMERA_EASE;
-		if (!thrusting) {
-			return;
+		static void tick(Minecraft minecraft, LocalPlayer player) {
+			thrusting = RigClient.status.hovering() && Rig.fullSet(player) && !player.onGround();
+			flying = thrusting && RigClient.status.flying();
+			hyper = flying && RigClient.hyper();
+			double top = RigClient.FLIGHT_SPEED * RigClient.FLIGHT_SPRINT * Rig.frame(player).airSpeed * (hyper ? HYPER_SPEED : 1.0);
+			speedShare = thrusting ? (float)Mth.clamp(player.getDeltaMovement().length() / top, 0.0, 1.0) : 0.0F;
+			fov += ((flying ? speedShare : 0.0F) - fov) * FOV_EASE;
+			lastCamera = camera;
+			camera += ((flying && RigPose.cruising(player) ? 1.0F : 0.0F) - camera) * CAMERA_EASE;
+			if (!thrusting) {
+				return;
+			}
+			PowerLoop.keep("rig.hum", SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, player, () -> thrusting, new PowerLoop.Mix() {
+				@Override
+				public float volume() {
+					return Mth.lerp(speedShare, HUM_VOLUME, HUM_VOLUME_FAST);
+				}
+
+				@Override
+				public float pitch() {
+					return Mth.lerp(speedShare, HUM_PITCH, HUM_PITCH_FAST);
+				}
+			});
+			PowerLoop.keep("rig.roar", SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, player, () -> flying, new PowerLoop.Mix() {
+				@Override
+				public float volume() {
+					return ROAR_VOLUME * (0.35F + 0.65F * speedShare);
+				}
+
+				@Override
+				public float pitch() {
+					return Mth.lerp(speedShare, ROAR_PITCH, ROAR_PITCH_FAST);
+				}
+			});
+			PowerLoop.keep("rig.wind", SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, player, () -> flying, new PowerLoop.Mix() {
+				@Override
+				public float volume() {
+					return WIND_VOLUME * Mth.clamp((speedShare - WIND_FROM) / (1.0F - WIND_FROM), 0.0F, 1.0F);
+				}
+
+				@Override
+				public float pitch() {
+					return Mth.lerp(speedShare, WIND_PITCH, WIND_PITCH_FAST);
+				}
+			});
+			if (flying && speedShare >= SONIC_FROM && !minecraft.isPaused()) {
+				ScreenShake.add(SONIC_TREMBLE, 3, null);
+				streaks(player);
+			}
 		}
-		PowerLoop.keep("rig.hum", SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, player, () -> thrusting, new PowerLoop.Mix() {
-			@Override
-			public float volume() {
-				return Mth.lerp(speedShare, HUM_VOLUME, HUM_VOLUME_FAST);
-			}
-
-			@Override
-			public float pitch() {
-				return Mth.lerp(speedShare, HUM_PITCH, HUM_PITCH_FAST);
-			}
-		});
-		PowerLoop.keep("rig.roar", SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, player, () -> flying, new PowerLoop.Mix() {
-			@Override
-			public float volume() {
-				return ROAR_VOLUME * (0.35F + 0.65F * speedShare);
-			}
-
-			@Override
-			public float pitch() {
-				return Mth.lerp(speedShare, ROAR_PITCH, ROAR_PITCH_FAST);
-			}
-		});
-		PowerLoop.keep("rig.wind", SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, player, () -> flying, new PowerLoop.Mix() {
-			@Override
-			public float volume() {
-				return WIND_VOLUME * Mth.clamp((speedShare - WIND_FROM) / (1.0F - WIND_FROM), 0.0F, 1.0F);
-			}
-
-			@Override
-			public float pitch() {
-				return Mth.lerp(speedShare, WIND_PITCH, WIND_PITCH_FAST);
-			}
-		});
-		if (flying && speedShare >= SONIC_FROM && !minecraft.isPaused()) {
-			ScreenShake.add(SONIC_TREMBLE, 3, null);
-			streaks(player);
-		}
-	}
 
 	/** Thin streaks of light coming at the visor along the line of flight. */
 	private static void streaks(LocalPlayer player) {
