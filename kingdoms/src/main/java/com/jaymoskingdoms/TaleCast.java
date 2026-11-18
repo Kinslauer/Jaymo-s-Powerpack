@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.minecraft.world.InteractionResult;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -80,6 +84,8 @@ final class TaleCast {
 	static final int MOVE_ON = 10;
 	/** One whose hours are over walks this far off (blocks) before going in, and is out of sight past this far, or behind something. */
 	static final double HOME_WALK = 32.0, SEEN_RANGE = 48.0;
+	/** The phase that turns away using or striking one gone home, before anything else sees it. */
+	private static final Identifier AWAY_FIRST = JaymosKingdoms.id("tale_cast_away");
 	/** On a cast member walking home at the end of their hours, and on one gone home (kept with the mob, so it lasts a reload). */
 	static final String GOING_TAG = "jaymoskingdoms.tale_going", AWAY_TAG = "jaymoskingdoms.tale_away";
 	/** Someone who moves to a town is set down within this many blocks of its seat. */
@@ -178,6 +184,11 @@ final class TaleCast {
 	}
 
 	static void register() {
+		// (one gone home isn't there: nothing can be done to them until they're back)
+		UseEntityCallback.EVENT.addPhaseOrdering(AWAY_FIRST, Event.DEFAULT_PHASE);
+		UseEntityCallback.EVENT.register(AWAY_FIRST, (player, world, hand, entity, hit) -> away(entity) ? InteractionResult.FAIL : InteractionResult.PASS);
+		AttackEntityCallback.EVENT.addPhaseOrdering(AWAY_FIRST, Event.DEFAULT_PHASE);
+		AttackEntityCallback.EVENT.register(AWAY_FIRST, (player, world, hand, entity, hit) -> away(entity) ? InteractionResult.FAIL : InteractionResult.PASS);
 		ServerTickEvents.END_SERVER_TICK.register(TaleCast::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(TaleCast::died);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
