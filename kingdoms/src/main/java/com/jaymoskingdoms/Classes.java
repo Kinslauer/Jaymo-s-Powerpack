@@ -187,6 +187,18 @@ public final class Classes {
 	/** The second class a player learned from a master ({@link SecondClass}); same shape as the first. Saved, kept through death, synced to its own player. */
 	public static final AttachmentType<Chosen> SECOND = AttachmentRegistry.create(JaymosKingdoms.id("second_class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * Specialization: changing what you picked with your class (a Mage's spell, a Sorcerer's element, a Paladin's oath, a Ranger's foe)
+	 * after the first pick costs this much silver and a wait of this many ticks since the last change (ten minutes). What the class
+	 * has earned (its levels, points and perks, the spells you know) is kept. A Cleric's or Warlock's patron is the Patrons' own
+	 * ({@link Patrons}), not changed here.
+	 */
+	public static final int RESPEC_SILVER = 250;
+	public static final long RESPEC_WAIT_TICKS = 24000L;
+	/** The game time a player last changed what they picked with their class. Saved, kept through death, synced to its own player (the class screen shows the wait). */
+	public static final AttachmentType<Long> RESPEC_AT = AttachmentRegistry.create(JaymosKingdoms.id("class_respec_at"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath().syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));
+
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
@@ -444,6 +456,11 @@ public final class Classes {
 			}
 			return;
 		}
+		// (specialization) the class you hold, a different pick under it: it costs silver and a wait
+		if (!choose.second() && decided(player) && !player.isCreative() && choose.cls() >= 0 && choose.cls() < all.length && all[choose.cls()] == classOf(player)) {
+			respec(player, all[choose.cls()], choose.option());
+			return;
+		}
 		// (a creative player may switch, from the H menu's class tab)
 		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && decided(player) && !player.isCreative()) {
 			return;
@@ -467,6 +484,54 @@ public final class Classes {
 			clear(player);
 		}
 		set(player, cls, option);
+	}
+
+	/** Whether {@code cls}'s pick can be changed after the first pick (a patron can't: it is the Patrons' own). */
+	public static boolean respecable(PlayerClass cls) {
+		return !cls.options.isEmpty() && cls != PlayerClass.CLERIC && cls != PlayerClass.WARLOCK;
+	}
+
+	/** Ticks until {@code player} may change their pick again (0: now). Only the client's synced copy is needed for the screen. */
+	public static long respecWait(Player player, long now) {
+		Long at = player.getAttached(RESPEC_AT);
+		return at == null ? 0L : Math.max(0L, at + RESPEC_WAIT_TICKS - now);
+	}
+
+	/**
+	 * (specialization) {@code player}, who holds {@code cls}, picks another of its options: pays {@link #RESPEC_SILVER} and waits
+	 * {@link #RESPEC_WAIT_TICKS} before the next change. Their levels, points, perks and spells are kept.
+	 */
+	private static void respec(ServerPlayer player, PlayerClass cls, int index) {
+		String option = index >= 0 && index < cls.options.size() ? cls.options.get(index) : "";
+		Chosen old = of(player);
+		if (!respecable(cls) || option.isEmpty() || option.equals(old.option())) {
+			return;
+		}
+		long now = player.level().getGameTime(), wait = respecWait(player, now);
+		if (wait > 0L) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.wait", (wait + 1199L) / 1200L).withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (!Money.canPay(player, Money.worth(RESPEC_SILVER))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.poor", RESPEC_SILVER).withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		Money.charge(player, Money.worth(RESPEC_SILVER));
+		List<String> spells = new java.util.ArrayList<>(old.spells());
+		for (String spell : startingSpells(cls, option)) {
+			if (!spells.contains(spell)) {
+				spells.add(spell);
+			}
+		}
+		player.setAttached(CLASS, new Chosen(cls.key(), option, List.copyOf(spells), old.selected()));
+		player.setAttached(RESPEC_AT, now);
+		refresh(player);
+		if (cls == PlayerClass.PALADIN) {
+			Paladins.begin(player, option);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.2F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.done", Component.translatable("class.jaymoskingdoms." + cls.key()),
+			Component.translatable("class.jaymoskingdoms.option." + option)).withStyle(ChatFormatting.GOLD));
 	}
 
 	/** The patron a first-class Cleric must serve: the one their life story says they grew up praying to; null for any other class or no faith. */

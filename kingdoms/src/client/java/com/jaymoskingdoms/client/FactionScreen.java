@@ -71,11 +71,11 @@ final class FactionScreen extends Screen {
 	}
 
 	private int panelW() {
-		return Math.min(PANEL_W, this.width - 40);
+		return Math.min(PANEL_W, this.width - 40 - MenuCompat.SIDE);
 	}
 
 	private int left() {
-		return (this.width - panelW()) / 2;
+		return MenuCompat.centre(this.width, panelW());
 	}
 
 	private int top() {

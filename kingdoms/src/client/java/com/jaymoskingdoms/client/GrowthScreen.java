@@ -48,7 +48,7 @@ final class GrowthScreen extends Screen {
 	}
 
 	private int panelW() {
-		return Math.min(W, this.width - 12);
+		return Math.min(W, this.width - 12 - MenuCompat.SIDE);
 	}
 
 	private int panelH() {
@@ -56,7 +56,7 @@ final class GrowthScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - panelW()) / 2;
+		return MenuCompat.centre(this.width, panelW());
 	}
 
 	private int top() {

@@ -249,6 +249,37 @@ final class StoryFigure {
 		return JOBS.getOrDefault(scene.substring(scene.indexOf('.') + 1), "none");
 	}
 
+	/**
+	 * A class's figure on its picker: the class's gear (armour on its slots, the first weapon or tool in the main hand, a shield
+	 * in the other) worn and held while it stands looking about.
+	 */
+	static Scene classScene(List<ItemStack> kit) {
+		Item[] gear = new Item[6];
+		for (ItemStack stack : kit) {
+			if (stack.isEmpty()) {
+				continue;
+			}
+			net.minecraft.world.item.equipment.Equippable equippable = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			int slot = equippable == null ? -1 : switch (equippable.slot()) {
+				case HEAD -> 0;
+				case CHEST -> 1;
+				case LEGS -> 2;
+				case FEET -> 3;
+				default -> -1;
+			};
+			if (slot >= 0) {
+				if (gear[slot] == null) {
+					gear[slot] = stack.getItem();
+				}
+			} else if (stack.getItem() == Items.SHIELD) {
+				gear[5] = stack.getItem();
+			} else if (gear[4] == null && held(stack.getItem()) != null) {
+				gear[4] = stack.getItem();
+			}
+		}
+		return new Scene(Act.STAND, gear[0], gear[1], gear[2], gear[3], gear[4], gear[5]);
+	}
+
 	/** {@code scene}'s scene: a birthplace walks in plain clothes, an answer without its own stands holding its picture. */
 	static Scene of(String scene, ItemStack icon) {
 		Scene found = SCENES.get(scene);
@@ -315,7 +346,16 @@ final class StoryFigure {
 	 */
 	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender) {
-		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, gender, false);
+		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, gender, false, null);
+	}
+
+	/**
+	 * A picker screen's figure: you as heritage {@code kind}'s look {@code look} (null: as you are), dressed and acting as
+	 * {@code scene} says (null: plain clothes, walking). The same lending of heritage, gear and arm as the story's pages.
+	 */
+	static void drawAs(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, @Nullable Scene scene,
+		int x0, int y0, int x1, int y1) {
+		draw(graphics, player, kind, look, List.of(), ItemStack.EMPTY, x0, y0, x1, y1, -1, false, scene);
 	}
 
 	/**
@@ -343,12 +383,12 @@ final class StoryFigure {
 	 */
 	static void drawYou(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1) {
-		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, -1, true);
+		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, -1, true, null);
 	}
 
 	private static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
-		int x0, int y0, int x1, int y1, int gender, boolean you) {
-		Scene sc = compose(scenes, icon);
+		int x0, int y0, int x1, int y1, int gender, boolean you, @Nullable Scene override) {
+		Scene sc = override != null ? override : compose(scenes, icon);
 		// (0.7.364) a different cut of the trade's clothes for each upbringing and trade, so the last page differs life to life
 		StringBuilder life = new StringBuilder();
 		for (String scene : scenes) {
