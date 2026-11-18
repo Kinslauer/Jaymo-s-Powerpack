@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -11,6 +11,7 @@ suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigOverride.java (new)
   - src/main/java/com/jaymospowers/rig/RigNova.java (new)
   - changes/powers/<branch>.md
+writer: hermes-writer
 ---
 # Rig patch 6: senses, tech override and nova
 
