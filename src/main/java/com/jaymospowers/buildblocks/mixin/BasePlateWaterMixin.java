@@ -51,4 +51,18 @@ public abstract class BasePlateWaterMixin extends Block implements SimpleWaterlo
 	public boolean canPlaceLiquid(LivingEntity user, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid) {
 		return Waterlogging.canPlace(state, fluid);
 	}
+
+	/** A mod's subclass that builds its own state list has no water property: buckets then leave it alone. */
+	@Override
+	public net.minecraft.world.item.ItemStack pickupBlock(net.minecraft.world.entity.@org.jspecify.annotations.Nullable LivingEntity user,
+		net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+		return state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+			? SimpleWaterloggedBlock.super.pickupBlock(user, level, pos, state) : net.minecraft.world.item.ItemStack.EMPTY;
+	}
+
+	@Override
+	public boolean placeLiquid(net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state, FluidState fluid) {
+		return state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+			&& SimpleWaterloggedBlock.super.placeLiquid(level, pos, state, fluid);
+	}
 }
