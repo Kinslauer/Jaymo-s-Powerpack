@@ -26,7 +26,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · claimed
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · claimed
 
 
@@ -42,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
 - [ ] [[Inbox/lanterns-01-crime-small|lanterns-01-crime-small]] · lanterns-01-crime-small · #1751 · in-review
 - [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · #1753 · in-review
+- [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · #1754 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
