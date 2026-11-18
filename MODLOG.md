@@ -5867,3 +5867,7 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
 - **Weathered**: a full studded leather set shortens burning by 40% (`Entity.igniteForTicks`) and slows freezing by 40% (a rise in frozen ticks: powder snow, the Freezing effect, a power's chill; fractions rounded by chance, thawing untouched). Each Fire Protection level (burning) or Frost Walker level (freezing) worn adds 10%, at most 60%. No immunity. Kitchen's body heat counts the full set as one warm piece (it reads the `jaymospowers:studded_armor` tag, nothing needed from Powers).
 - **Full sets with harness**: `ArmourEase.fullSet(body, set, layer)`: head and feet must be the set's own pieces (not broken); the chest counts if it is the set's piece or a harness layer of the set's kind (mail for mailed, padding for studded) is worn under it, so a hauberk under a surcoat makes a mailed chest; the legs count the same way with a layer over the leggings. Only plain arrows are knocked aside, not tridents or thrown blades. In Kitchen's cold the studded set counts as one warm piece; the 40% slower freezing applies to Powers' frost and vanilla powder snow.
 - Built; not played.
+
+## 0.24.80 (2026-11-18): Tinkered and metal fishing rods cast again (#1731)
+
+- Fixes: casting a metal or tinkered fishing rod threw nothing (the server looked the bobber up by a name 26.3 doesn't use).
