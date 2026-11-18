@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: rig-beetle-4-flight
 branch: claude/rig-beetle-4-flight
 with:
-pr:
+pr: 1765
 mods: powers
 versions:
 started: 2026-11-18
@@ -37,4 +37,12 @@ owns:
 - Suggested pair: (2 guns + 4 flight) - this is patch 4
 
 ## Done
-What a player will see, and what wasn't tested.
+Added five new flight actives to the Rig menu (Sneak + J), gated by Mind level 5 (FLIGHT_LEVEL):
+
+1. **Pull up** (`fl-pullup`): Time-to-impact warning on visor when diving, Mind shout, one-knee landing catches falls
+2. **Hyper thrust** (`fl-hyper`): Double-tap Sprint while flying for 2x speed burst, heavy charge cost, cooldown
+3. **Bank into turns** (`fl-bank`): Smooth body roll into turns visible to all players, eased by speed
+4. **Meteor dive** (`fl-meteor`): Rocket up then crash down at look target, GravityMeteorFx-style impact, no block damage
+5. **Other flyers look smooth** (`fl-smooth`): Client toggle to smooth other Rig pilots' flight poses
+
+PR #1765 created. Compiles and passes PR checks. Not tested in multiplayer for smooth-others behavior, not tested meteor dive impact effects at scale, not tested pull-up timing with various fall heights.
