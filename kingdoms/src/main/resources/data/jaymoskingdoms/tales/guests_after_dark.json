@@ -653,6 +653,7 @@
     "fight_night": {
       "do": "foe",
       "who": "lord",
+      "bestiary_kind": "Blood-drinkers",
       "when": "night",
       "goal": "Put down {lord} in his hall",
       "taunt": "I did ask what you would do. Thank you for telling me plainly.",
@@ -845,6 +846,7 @@
     "fight_rest": {
       "do": "foe",
       "who": "resting",
+      "bestiary_kind": "Blood-drinkers",
       "when": "day",
       "goal": "Deal with {lord} where he lies",
       "taunt": "By day. Yes. That is how I would have done it.",

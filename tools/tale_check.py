@@ -573,10 +573,9 @@ def check_tale(path):
                 if "lie" in r:
                     check_lie(c, rw + ".lie", r["lie"], tale)
                     if isinstance(r["lie"], dict) and r["lie"].get("hearts"):
-                        settled = {l.get("settles") for e in tale.get("endings", {}).values() for l in e.get("later", [])}
                         for w in branches(step["who"]):
-                            if w != "giver" and w not in settled:
-                                c.err(rw + ".lie", f"'{w}' is gone by the time the lie is out: hearts are lost only with a townsperson (the asker), or one who settles")
+                            if w != "giver":
+                                c.err(rw + ".lie", f"'{w}' is gone by the time the lie is out: hearts are lost only with a townsperson (the asker)")
                 if "journal" in r:
                     check_text(c, rw + ".journal", r["journal"], tale)
                 check_then(c, rw, r["then"], tale, edges)

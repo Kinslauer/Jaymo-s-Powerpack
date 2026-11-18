@@ -1137,6 +1137,8 @@ final class TaleWays {
 		}
 		JsonObject kept = new JsonObject();
 		kept.addProperty("mark", mark);
+		// (whose tale it is: read later, it's known to the whole party still at it)
+		kept.addProperty("instance", run.instance);
 		MutableComponent told = Tales.words(player, run, spec, "told");
 		if (told != null) {
 			kept.addProperty("told", told.getString());
@@ -1205,12 +1207,21 @@ final class TaleWays {
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		String mark = Tale.string(kept, "mark", "");
 		if (!mark.isEmpty()) {
-			Tales.state(player).marks.add(mark);
+			// (the reader, and everyone of their party still at the tale it came from: what it says is the party's clue)
+			String instance = Tale.string(kept, "instance", "");
+			List<ServerPlayer> knowing = new ArrayList<>();
+			knowing.add(player);
+			for (ServerPlayer p : Parties.members(player)) {
+				if (p != player && !instance.isEmpty() && Tales.run(p, instance) != null) {
+					knowing.add(p);
+				}
+			}
+			for (ServerPlayer p : knowing) {
+				Tales.state(p).marks.add(mark);
+				learnt(p, mark);
+			}
 			if (!how.isEmpty()) {
 				Tales.state(player).marks.add(mark + how);
-			}
-			learnt(player, mark);
-			if (!how.isEmpty()) {
 				learnt(player, mark + how);
 			}
 		}
@@ -1363,6 +1374,7 @@ final class TaleWays {
 		kept.addProperty("hearts", Tale.number(lie, "hearts", 0));
 		// (the one it was told to: one of the tale's own people is gone by then, and only the town's folk remember)
 		kept.addProperty("to", who.getUUID().toString());
+		kept.addProperty("cast", TaleCast.cast(who) != null);
 		// (who it brings to the liar's door when it's out)
 		JsonObject back = Tale.object(lie, "returns");
 		Tale tale = Tale.get(run.tale);
@@ -1591,8 +1603,8 @@ final class TaleWays {
 			if (Tale.number(lie, "hearts", 0) != 0) {
 				McaCompat.hearts(to, player, -Math.abs(Tale.number(lie, "hearts", 0)));
 			}
-		} else if (!Tale.string(lie, "to", "").isEmpty()) {
-			// (not about just now: it's owed them, for when they are)
+		} else if (!Tale.string(lie, "to", "").isEmpty() && !Tale.flag(lie, "cast")) {
+			// (not about just now: it's owed them, for when they are; one of the tale's own people is gone with it)
 			JsonObject owed = new JsonObject();
 			owed.addProperty("rest", "owed");
 			owed.addProperty("owed", Tale.string(lie, "to", ""));

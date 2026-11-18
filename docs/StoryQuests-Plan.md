@@ -387,9 +387,11 @@ doesn't begin, an escort's walk isn't over; the log says "(after dark)". The ste
 (`slay`, `wait`, `await`, `defend`, `pack`, `build`, `blast`, `stash`, `lamps`, `rescue`, `capture`) don't wait for an
 hour, and the checker refuses `when` on them: put it on a `go` before them. A cast member with `"hours": "night"` (or
 `day`) is only at their place in those hours. When their hours are over and nobody is within 14 blocks, they walk off
-(32 blocks, away from the player) and go in once nobody can see them: kept, out of sight and still, the same person
-(their hearts, what they remember, a lie told to them), and back out and walking to their place when their hours come
-round. Someone being followed or walked somewhere (`tail`, `escort` and its `with`), fighting, or held keeps no hours.
+(32 blocks, away from the player) and go in once nobody can see them: kept, out of sight and still (a few blocks under
+the ground where they went in), the same person (their hearts, what they remember, a lie told to them), and back out
+when their hours come round: at their place if nobody is near it, else out of sight 18 to 26 blocks off and walking
+there. Someone being followed or walked somewhere (`tail`, `escort` and its `with`), fighting a `foe` step, or held
+keeps no hours. When the tale ends, anyone still in goes for good.
 A place can be `"at": "tavern"`: the town's tavern (its seat if it has none).
 
 `"candle": true` on any step: when it opens, a black candle is set burning in a window of the town's tavern (the guild's
@@ -474,11 +476,14 @@ On an ending: `"later": [ { "days": [10, 40], "if": condition, "letter": { from,
 "mark": "..." } ]`. Days are 10 to 40 (the checker holds it: sooner is a `returns`). On its day the town has its lines
 to say, two of its folk have the scene where the player can hear, the cast member comes to live in the town as an
 ordinary villager (when the player is next there; `"as": "guard"`, which a `fighter` may do too, as one of its guards),
-the mark is set. What waits is kept apart until it's done: the letter until a runner or a bird has put it in the
-player's hand (a runner who can't set out or find them comes another day); the `"grave"` (a mound beside the town's
-other graves, or on open ground at its edge, with up to four lines of 15 letters on a board at its head) until the town
-is loaded; `"leaves": "giver"` (the asker packs up and goes, their house left empty; not a child, a ruler or someone's
-sworn companion) until nobody is near enough to see. A tale begun where no town was has its town talk, scenes, graves
+the mark is set; for a whole party, a settler, a grave or a leaving happens once. What waits is kept apart until it's
+done: the letter until a runner or a bird has put it in the player's hand (a runner who can't set out or find them comes
+another day); the `"grave"` (a mound beside the town's other graves, or on open ground at its edge, with up to four
+lines of 15 letters on a board at its head facing it; only on natural ground of dirt, sand, gravel or snow, with nothing
+built, placed or holding water within two blocks) until the town is loaded and a spot will do; `"leaves": "giver"` (the
+asker's household packs up and goes, as a household that has had enough does, their house left empty) until the asker
+is loaded, awake and in nobody's tale. Some never leave: a child, a ruler or a town's leader, someone's sworn
+companion, a captive, a player's family, a visitor, one following anyone. A tale begun where no town was has its town talk, scenes, graves
 and settlers in the town nearest the player. A `"to"` on a letter is the name on its outside. Words are filled in when
 the tale ends, so they can use its names. `if` is asked when the tale ends (it can use the tale's rolls); `"still"` is
 a second condition asked on the day itself, with the tale long over (marks, `done:`, dress: `"still":
@@ -501,7 +506,7 @@ unless the condition holds by then (asked as `still` is), the lie is out, on the
 `caught:<name>` is marked, the one lied to remembers it and loses those hearts (when they're next about, if they
 aren't then), the town thinks that much less of the player and has the lines to say, and whoever it `returns` comes to
 the player's door (as a tale's returns do). Only a townsperson keeps a grudge: `hearts` on a lie told to one of the
-tale's own people is refused unless they settle in the town. Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
+tale's own people is refused (they are gone by then, and a settler is someone new). Later tales can ask `mark:lie:<name>` and `mark:caught:<name>`.
 
 ### notices, and tales that grow
 

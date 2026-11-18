@@ -23,7 +23,7 @@ All 48 rows Andy picked from the story-quest list (2026-11-17, "Build!"). Tales 
 - **Companions speak up**: `voices` before and after a choice by Convictions belief, with `for`/`irks` moving the bond.
 - **It comes back weeks later**: an ending's `later` list at 10 to 40 days: a letter (brought again another day if
   the runner can't find you), a scene, town talk, someone who settles in the town (a spared thief-taker can come back
-  as one of its guards), a new grave with a board giving the name, or a household that shuts up its house and goes;
+  as one of its guards), a new grave with a board giving the name, or a household that packs up and goes;
   with a `still` condition asked on the day.
 - **Letters you can't read**: a `tongue` on letters, clues and things; a priest or librarian reads it aloud for a coin
   and then knows what it says.
@@ -65,7 +65,7 @@ barley) and the companion isn't standing in the field. The bestiary lookup in Mo
 Lists is fought on foot. The Night Market's stalls, The Cordon's fence and count of the sick, and The Boundary Stone's
 fence, barn and cow are people and words, not blocks. Parts two and three of The Black Candle can be offered in a
 different town from part one. People who go home off their hours walk to a spot out of sight, not to their own bed
-or the tavern. A household that moves away leaves no note on its door.
+or the tavern.
 
 Classes: `Tales`, `TaleWays`, `TaleCast`, `Tale`, `TaleAfter` (graves, people moving away), `KeepingCells`, `QuestJobs`, `TownNotices`, `Bestiary`,
 `Garlic` (wolfsbane), `StoryHoldScreen` (hints
