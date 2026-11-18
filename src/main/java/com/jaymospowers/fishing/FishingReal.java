@@ -124,6 +124,7 @@ public final class FishingReal {
         Tackle.init();
         FishingGear.init();
         Crates.init();
+        FishTackle.init();
         // Track C: every new species, the waters they keep, and the old giants of each water
         FishSpecies.init();
         FishLegends.init();
@@ -194,7 +195,7 @@ public final class FishingReal {
         float tension = state.tension();
         float progress = state.progress();
         boolean metalRod = isMetalRod(player);
-        float breakLimit = metalRod ? LINE_BREAK_METAL : LINE_BREAK;
+        float breakLimit = (metalRod ? LINE_BREAK_METAL : LINE_BREAK) * FishTackle.strain(player);
         float tooTense = metalRod ? TOO_TENSE_METAL : TOO_TENSE;
         // (Track A) the fish surges in runs, left or right, now and then jumping (FishRun)
         int run = FishRun.tick(player, fish, state, now);
@@ -212,11 +213,11 @@ public final class FishingReal {
         } else if (run != 0) {
             // easing off in a run: the fish still pulls and takes line
             tension += state.strength() * FishRun.RUN_PULL;
-            progress -= state.strength() * FishRun.RUN_LINE_OUT;
+            progress -= state.strength() * FishRun.RUN_LINE_OUT * FishTackle.lineBack(player);
         } else {
             // easing off: tension falls, fish takes line back
             tension = Math.max(0.0F, tension - TENSION_EASE);
-            progress -= state.strength() * PROGRESS_FISH_BACK;
+            progress -= state.strength() * PROGRESS_FISH_BACK * FishTackle.lineBack(player);
         }
 
         // (Track A) the rod's drag lets line slip past its setting instead of the line taking the strain
