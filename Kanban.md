@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 06:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,11 +20,11 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/epic-fight-animation-research|epic-fight-animation-research]] · 🍇 Bacchus · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
+- [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · #1713 · in-review
 - [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · #1715 · in-review
 - [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · #1716 · in-review
-- [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · #1713 · in-review
-- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · #1717 · in-review
 - [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · #1714 · in-review
+- [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · #1717 · in-review
 - [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/forest-rangers|forest-rangers]] · 💻 Odysseus · #1701 · in-review
@@ -40,14 +40,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
+- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
+- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
+- [x] [[Inbox/Done/punch-barrage-effects|punch-barrage-effects]]
+- [x] [[Inbox/Done/future-gun-gear|future-gun-gear]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
+- [x] [[Inbox/Done/dialogue-letterbox-pov|dialogue-letterbox-pov]]
 
 
 %% kanban:settings
