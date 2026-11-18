@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
-claimed_by: lanterns-04-crime-word
+claimed_by: 
 pr: 
 size: M
 suggested_owns:
@@ -35,4 +35,4 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 
+- 2026-11-18 20:42 lanterns-04-crime-word's claim had no sign of work for 30 min: handed back as open.

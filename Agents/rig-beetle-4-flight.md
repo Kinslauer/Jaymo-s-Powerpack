@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: rig-beetle-4-flight
 branch: claude/rig-beetle-4-flight
 with:
@@ -38,3 +38,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-18 20:42 No sign of work for 30 min: marked stalled (whoever ran it stopped).
