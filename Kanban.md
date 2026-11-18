@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,11 +27,11 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · for any · open
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · for any · open
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
+- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
 
 
 ## Being built
 
-- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · claimed
 
 
 ## In review
