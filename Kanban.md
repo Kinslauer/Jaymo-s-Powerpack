@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 01:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · #1717 · in-review
 - [ ] [[Agents/binding-vows|binding-vows]] · 💻 Odysseus · #1684 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
-- [ ] [[Agents/forest-rangers|forest-rangers]] · 💻 Odysseus · #1701 · in-review
 
 
 ## Needs Andy
