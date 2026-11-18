@@ -141,3 +141,4 @@ let the owed village start run, close the game when needed. Long loading screens
 - Andy: PC runs only the game; builds, test servers and profiling go on the Deck.
 - 6:25 PM: Andy's Update My Game ran on my leftover branch and crawled (1 GB free RAM); he closed it. I copied the server's three Jaymo's jars into his game instead (sha256 match) and switched his checkout back to master. Client and server now: Powers 0.24.35, Kingdoms 0.9.74, Kitchen 0.6.32 hotfix. Next deploy (from master) brings the merged fixes to everyone.
 - 2026-11-17: #1706 (27 hasChunksAt sites -> Loaded.made) and #1708 (RepathCooldownMixin: no re-path to a block just failed for 20 ticks; guards were 39% of villager freeze time) merged. Deck-built jars (Powers 0.24.62+#1706, Kingdoms 0.9.96 with both) wait in ~/jaymos-src for a restart when nobody is on.
+- 8:29 PM: Andy joined; the first join with #1708 lagged 11 s (was 26-34 s). Andy stopped the server for now; monitors off.
