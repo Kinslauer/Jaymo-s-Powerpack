@@ -24,4 +24,4 @@ pact" (oaths and pacts only); pact terms after 5e, agreed 2026-11-17 (Decisions.
 - Lore: (new) paragraph "What a pact holds you to" under the Ash Whisperer, for Andy to approve.
 
 ## Done
-- 2026-11-18 07:37 PR #1684 is merged into master; moved to Agents/Done.
+- 2026-11-18 16:32 PR #1684 is merged into master; moved to Agents/Done.

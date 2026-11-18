@@ -22,4 +22,4 @@ to justice hogtied if you poach (kill too many animals)".
 
 ## Done
 Built; not played.
-- 2026-11-18 07:37 PR #1701 is merged into master; moved to Agents/Done.
+- 2026-11-18 16:32 PR #1701 is merged into master; moved to Agents/Done.
