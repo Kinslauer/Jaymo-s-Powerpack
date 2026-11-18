@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-17 20:46
+updated: 2026-11-17 21:02
 ---
 # Open PRs
 
-6 open, as of 2026-11-17 20:46. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+7 open, as of 2026-11-17 21:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1684](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1684) Oaths and pacts bind: forbidden acts are refused unless broken on purpose
@@ -35,3 +35,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/weapon-hooks-and-breaks` · **Updated:** 2026-11-18 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[weapon-hooks-and-breaks]]
+
+## [#1714](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1714) Labyrinth-builders' craft: rune gates, compass, bombardier beetles, living braziers, the Afterblow
+- **Branch:** `claude/labyrinth-builders-craft` · **Updated:** 2026-11-18 (today)
+- **Checks:** ❌ failing: Build Kingdoms
+- **Agent:** no agent note
