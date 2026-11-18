@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.endertech",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"WorldLoadedMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
