@@ -14716,3 +14716,10 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
   mid-flight. "Youth, look!" questions do the same, coming back to you rather than to the thing. A wisp that is off
   thinking can't carry you home for "help". `/youth say` and `/youth sayall` go through the same path (`YouthCommand`).
 - Built; not played on the server.
+
+## 0.10.3 (2026-11-18): lean on the legs (#1710)
+
+- **Leaning** (Q/E while sneaking) no longer tips the whole body over at the feet. Andy: "the character currently bends at the torso instead of using the leg to support that far of a bend". Like a shooter's corner peek, the hips slide out and sink, the lean-side foot steps out with its knee bent under the weight, the far leg stays straight from where its foot was, and only the body above the hips tilts (12 degrees, was 25). The head stays nearer level. The eye still ends up the same half block out, so the camera, cover and shots are unchanged.
+- **Leaning from the low crouch** (Powers' stance wheel), which was blocked before. Andy: "there needs to be animations from sneaking and crouching, crouching giving you the deepest lean out". From the crouch the hips go further out (7.5 px against 5) and the body tilts 18 degrees, so the eye reaches 0.7 blocks out against 0.5 from a sneak. The crouch's own bent knees and kneel are kept, with the legs swung out sideways from them. The camera, cover and shots use the deeper reach (`Lean.reach`), and moving between sneak and crouch eases.
+- `LeanClient` (rotate, pose, bendKnee, legs), `LeanKneeMixin`, `ModelPoses`; the knee uses Jaymo's Powers' `KneeBend` (straight leg without Powers). Front-view preview: `art-overhaul/lean-legs/lean-front-before-after.png`.
+- Built; not played.
