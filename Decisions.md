@@ -710,3 +710,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-17 4:23 PM ET (Andy, Hermes Training): "Yes add it" — Quill no longer text-passes tasks Claude sessions built (PR #1702); PC steps in Hermes Training handoff.md.
 - 2026-11-17 (Andy): "Merge": scaling audit picks PR #1703 merged. Agent: [[Agents/Scaling audit|Scaling audit]]
 - 4:52 PM, 2026-11-17 (Andy): "Approved lore": the scaling picks' four placements (What Legend gives back, The last hold, The Huntsman's sight, The blood wakes with the ladder) are canon. Agent: [[Agents/Scaling audit|Scaling audit]]
+- 6:43 PM, 2026-11-17 (Andy, Hermes Training): "youth should refer to me from now on in game as Desto, Kinslauer, or whatever my MCA character's name is if the requesting player has been introduced." Done in E:/hermes (mcbot.py prompt + SOUL.md; backups 2026-11-17-names); mod side PR #1704 (`/youth status` gives `character` and `knows`).
