@@ -705,12 +705,14 @@ public final class Freerun {
 
 	/** The ticks {@code player}'s grip lasts on a wall (Climber's rank, 0 for anyone), before they start to slip. */
 	public static int grip(Player player) {
-		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
+		int ticks = GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
+		return ticks == UNLIMITED_GRIP ? ticks : Math.round(ticks * com.jaymospowers.core.LightArmour.plateEase(player, com.jaymospowers.core.LightArmour.PLATE_CLIMB));
 	}
 
 	/** {@code player}'s climbing speed up a wall (blocks/tick), by Climber's rank (0 for anyone), and their Agility. */
 	public static double climbSpeed(Player player) {
-		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)] * com.jaymospowers.core.Agility.factor(player);
+		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)] * com.jaymospowers.core.Agility.factor(player)
+			* com.jaymospowers.core.LightArmour.plateEase(player, com.jaymospowers.core.LightArmour.PLATE_CLIMB);
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */

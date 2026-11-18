@@ -242,7 +242,8 @@ public final class FreerunClient {
 		if (height <= 0.0) {
 			return false;
 		}
-		double forward = Math.max(Freerun.VAULT_FORWARD, player.getDeltaMovement().horizontal().length());
+		double forward = Math.max(Freerun.VAULT_FORWARD, player.getDeltaMovement().horizontal().length())
+			* com.jaymospowers.core.LightArmour.plateEase(player, com.jaymospowers.core.LightArmour.PLATE_VAULT);
 		player.setDeltaMovement(dir.scale(forward).add(0.0, height > 1.0 ? Freerun.VAULT_UP_HIGH : Freerun.VAULT_UP_LOW, 0.0));
 		start(player, Freerun.VAULT, null, BlockPos.ZERO);
 		cooldown = Freerun.VAULT_COOLDOWN;

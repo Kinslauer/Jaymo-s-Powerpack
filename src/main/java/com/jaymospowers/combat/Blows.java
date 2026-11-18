@@ -75,6 +75,8 @@ public final class Blows {
 	static final float DULL = 0.9F;
 	/** Armour that lets this many times the damage through has failed (a crunch); this share or less, it turned the blow (a clank). */
 	static final float BITES = 1.2F, TURNED = 0.8F;
+	/** An arrow whose head has no way of its own with armour does this share of its damage against mail. */
+	static final float ARROW_VS_MAIL = 0.75F;
 	// ================================================================================================================
 
 	/**
@@ -229,7 +231,8 @@ public final class Blows {
 		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
 			return WeaponKind.Blow.THRUST.against(armour);
 		}
-		return HeadFx.againstArmour(missile, armour);
+		float head = HeadFx.againstArmour(missile, armour);
+		return armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
 	}
 
 	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */
