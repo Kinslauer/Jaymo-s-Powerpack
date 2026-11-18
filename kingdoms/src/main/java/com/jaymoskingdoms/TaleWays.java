@@ -1274,7 +1274,9 @@ final class TaleWays {
 	 * {@code mark}) is put by for its day, its words filled in now while the tale still knows its names.
 	 */
 	static void schedule(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject ending) {
+		int index = -1;
 		for (JsonObject l : Tale.objects(ending.get("later"))) {
+			index++;
 			String cond = Tale.string(l, "if", "");
 			if (!cond.isEmpty() && !Tales.holds(player, run, cond)) {
 				continue;
@@ -1325,6 +1327,10 @@ final class TaleWays {
 			}
 			if (l.has("mark")) {
 				what.addProperty("mark", Tale.string(l, "mark", ""));
+			}
+			if (what.has("settles") || what.has("grave") || what.has("leaves")) {
+				// (done to the town once, however many shared the tale: each of them has this entry)
+				what.addProperty("once", run.instance + "/" + index);
 			}
 			if (!what.isEmpty() && l.has("still")) {
 				// (asked again on its day, when the tale itself is long over: marks, standing, what else has ended)
@@ -1448,7 +1454,9 @@ final class TaleWays {
 				Overheard.townTalk(player, f.id(), literal(what.get("town")), false);
 				Overheard.owe(player, f.id(), Tale.strings(what.get("scene")));
 			}
-			if (!settles.isEmpty()) {
+			String once = Tale.string(what, "once", "");
+			if (!settles.isEmpty() && !TaleCast.happened(level, once)) {
+				TaleCast.record(level, once);
 				TaleCast.settle(level, Tale.object(settles, "body"), Tale.string(settles, "name", ""), f.seat(), Tale.string(settles, "as", "").equals("guard"));
 			}
 			for (String part : WAITS) {
@@ -1456,6 +1464,9 @@ final class TaleWays {
 					JsonObject wait = new JsonObject();
 					wait.addProperty("rest", part);
 					wait.add(part, what.get(part));
+					if (!part.equals("letter")) {
+						wait.addProperty("once", once);
+					}
 					s.later.add(new Later(l.day(), town, wait.toString()));
 				}
 			}
@@ -1505,7 +1516,12 @@ final class TaleWays {
 					// (dug while somebody is near enough the town for it to be there)
 					return false;
 				}
-				if (TaleAfter.grave(world, town, Tale.strings(what.get("grave")))) {
+				String once = Tale.string(what, "once", "");
+				if (TaleCast.happened(world, once)) {
+					// (dug already for another who shared the tale)
+					s.later.remove(l);
+				} else if (TaleAfter.grave(world, town, Tale.strings(what.get("grave")))) {
+					TaleCast.record(world, once);
 					s.later.remove(l);
 				} else {
 					again(s, l, what, today);
@@ -1513,7 +1529,9 @@ final class TaleWays {
 			}
 			case "leaves" -> {
 				UUID id = Tales.uuid(Tale.string(what, "leaves", ""));
-				if (id == null || TaleAfter.leave(world, id)) {
+				String once = Tale.string(what, "once", "");
+				if (id == null || TaleCast.happened(world, once) || TaleAfter.leave(world, id)) {
+					TaleCast.record(world, once);
 					s.later.remove(l);
 				}
 			}

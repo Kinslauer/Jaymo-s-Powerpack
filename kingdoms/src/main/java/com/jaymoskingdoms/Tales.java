@@ -1108,6 +1108,23 @@ public final class Tales {
 	// ---- steps -----------------------------------------------------------------------------------------------------------------
 
 	/** Everyone who's in {@code run} with {@code player} and at the same step: them, and their party's members online. */
+	/** Whether {@code id} asks a tale of a player online, or is one of a running tale's people. */
+	static boolean inTale(MinecraftServer server, UUID id) {
+		String key = id.toString();
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			State s = stateOrNull(p);
+			if (s == null) {
+				continue;
+			}
+			for (Run run : s.runs) {
+				if (run.giver.equals(key) || run.cast.containsValue(key)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	static List<ServerPlayer> sharers(ServerPlayer player, Run run) {
 		List<ServerPlayer> out = new ArrayList<>();
 		out.add(player);

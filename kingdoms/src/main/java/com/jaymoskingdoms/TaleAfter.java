@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
@@ -30,8 +31,8 @@ final class TaleAfter {
 	static final int GRAVES_REACH = 40, FIRST_LEAST = 16, FIRST_MOST = 32;
 	/** How many spots are tried for a first grave, and how far beside an old one a new one goes (blocks). */
 	static final int GRAVE_TRIES = 40, BESIDE = 2;
-	/** Someone moving away goes only with no player this near (blocks): nobody sees them vanish. */
-	static final double LEAVE_UNSEEN = 32.0;
+	/** How far round a grave nothing may be built or placed (blocks). */
+	static final int AROUND = 2;
 	/** The most lines a grave's board holds. */
 	static final int BOARD_LINES = 4;
 
@@ -40,8 +41,9 @@ final class TaleAfter {
 
 	/**
 	 * A grave for whoever {@code lines} name, dug among the town's other graves if it has any (so they gather into a
-	 * burying ground), else on open ground at the town's edge: a mound, and a board at its head facing the seat. Only on
-	 * natural ground under the sky, never on anything built. False if nowhere would do just now.
+	 * burying ground), else on open ground at the town's edge: a mound, and a board at its head (on the seat's side), its
+	 * words facing the grave. Only on natural ground under the sky, never on or beside anything built or placed by a
+	 * player. False if nowhere would do just now.
 	 */
 	static boolean grave(ServerLevel level, Faction f, List<String> lines) {
 		BlockPos seat = f.seat();
@@ -57,10 +59,12 @@ final class TaleAfter {
 				if (!level.isLoaded(column)) {
 					continue;
 				}
+				// (a mound is too low to stop the heightmap: it's the block the map gives, or the one under it)
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-				if (level.getBlockState(top.below()).is(Graves.GRAVE)) {
+				BlockPos mound = level.getBlockState(top).is(Graves.GRAVE) ? top : level.getBlockState(top.below()).is(Graves.GRAVE) ? top.below() : null;
+				if (mound != null) {
 					for (Direction d : Direction.Plane.HORIZONTAL) {
-						spots.add(top.below().relative(d, BESIDE));
+						spots.add(mound.relative(d, BESIDE));
 					}
 				}
 			}
@@ -97,37 +101,72 @@ final class TaleAfter {
 		return false;
 	}
 
-	/** Open ground at {@code at}: earth under it, nothing built on it or beside it, two blocks of air, the sky above. */
+	/**
+	 * Open ground at {@code at}: earth, sand, gravel or snow under it, room above (grass, flowers or snow are cleared),
+	 * the sky over it, and nothing round it but the land itself and other graves: no block a player placed, nothing
+	 * built, no block entity but a grave's board.
+	 */
 	private static boolean open(ServerLevel level, BlockPos at) {
-		if (!level.getBlockState(at).isAir() || !level.getBlockState(at.above()).isAir() || !level.canSeeSky(at)
-			|| !level.getBlockState(at.below()).is(BlockTags.DIRT)) {
+		BlockState under = level.getBlockState(at.below());
+		if (!room(level, at) || !room(level, at.above()) || !level.canSeeSky(at)
+			|| !(under.is(BlockTags.DIRT) || under.is(BlockTags.SAND) || under.is(Blocks.GRAVEL) || under.is(Blocks.SNOW_BLOCK))) {
 			return false;
 		}
-		for (BlockPos p : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 1, 1))) {
-			if (level.getBlockState(p).hasBlockEntity()) {
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-AROUND, -1, -AROUND), at.offset(AROUND, 2, AROUND))) {
+			BlockState state = level.getBlockState(p);
+			if (state.isAir()) {
+				continue;
+			}
+			if (Placed.any(level, p)) {
+				return false;
+			}
+			if (state.is(Graves.GRAVE) || state.is(Blocks.SPRUCE_SIGN) && level.getBlockState(p.below()).isFaceSturdy(level, p.below(), Direction.UP)
+				&& Direction.Plane.HORIZONTAL.stream().anyMatch(d -> level.getBlockState(p.relative(d)).is(Graves.GRAVE))) {
+				// (the town's other graves, and their boards)
+				continue;
+			}
+			if (state.hasBlockEntity() || !state.getFluidState().isEmpty() || !(Lairs.natural(state) || state.is(BlockTags.FLOWERS) || state.canBeReplaced())) {
 				return false;
 			}
 		}
 		return true;
 	}
 
+	/** Air, or a plant or snow a grave can be dug through. */
+	private static boolean room(ServerLevel level, BlockPos p) {
+		BlockState state = level.getBlockState(p);
+		return state.isAir() || state.canBeReplaced() && state.getFluidState().isEmpty() && !state.hasBlockEntity();
+	}
+
 	/**
-	 * Whoever {@code id} is has packed up and left the town: gone from the world while nobody is near enough to see
-	 * (their house is left as it was, empty). Only a grown villager who is nobody's sworn companion and not on a throne.
-	 * True once they're gone, or if they never can be (dead, or one who stays); false to try again another time.
+	 * Whoever {@code id} is packs up and leaves the town with their household, the way any household that has had enough
+	 * does ({@link Emigrants#hardship}): their house is left as it was. Never one who leads a town, a player's family, a
+	 * child, someone's sworn companion, a captive, one asleep under a keeping, or one still in a tale of anyone's.
+	 * True once they've set off, or if they never may; false to try again another day (not loaded here just now, or in
+	 * someone's tale for now).
 	 */
 	static boolean leave(ServerLevel level, UUID id) {
-		if (!(level.getEntity(id) instanceof Villager v) || !v.isAlive()) {
-			// (not loaded here just now: asked again another day, until the entry is too old to keep)
-			return level.getEntity(id) != null;
-		}
-		if (v.isBaby() || Rulers.is(v) || Bonds.lordOf(v) != null) {
-			return true;
-		}
-		if (level.getNearestPlayer(v, LEAVE_UNSEEN) != null) {
+		Entity e = level.getEntity(id);
+		if (e == null) {
 			return false;
 		}
-		McaCompat.vanish(v);
-		return true;
+		if (!(e instanceof Villager v) || !v.isAlive() || v.isBaby() || Bonds.lordOf(v) != null || Captives.bound(v) || KeepingCells.kept(v)
+			|| McaCompat.playerFamily(v) || leads(level, id)) {
+			return true;
+		}
+		if (TaleCast.cast(v) != null || Tales.inTale(level.getServer(), id)) {
+			return false;
+		}
+		return Emigrants.hardship(level, v);
+	}
+
+	/** Whether {@code id} leads any town or realm. */
+	private static boolean leads(ServerLevel level, UUID id) {
+		for (Faction f : Factions.all(level.getServer())) {
+			if (f.leader().filter(id::equals).isPresent()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

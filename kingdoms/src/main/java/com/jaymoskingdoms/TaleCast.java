@@ -116,7 +116,7 @@ final class TaleCast {
 	/** How often (ticks) visitors and held talkers are looked at, and the tale's people kept in place. */
 	static final int TICKS = 10, KEEP_TICKS = 100;
 	/** How many ended tales are remembered (so their people leave when their chunks next load). */
-	static final int ENDED_MAX = 300;
+	static final int ENDED_MAX = 300, ONCE_MAX = 600;
 
 	/**
 	 * On one of a tale's people: the tale's run ({@code instance}), their {@code role} in it (one of a foe's men: the
@@ -150,6 +150,10 @@ final class TaleCast {
 	static final AttachmentType<Cast> CAST = AttachmentRegistry.create(JaymosKingdoms.id("tale_cast"), builder -> builder.persistent(Cast.CODEC));
 	/** On the overworld: the runs that are over (their people leave when next seen). */
 	static final AttachmentType<List<String>> ENDED = AttachmentRegistry.create(JaymosKingdoms.id("tales_ended"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
+
+	/** What a tale's ending did to a town once for a whole party (a grave dug, someone settled or gone: instance/entry), so it isn't done again for each of them. */
+	static final AttachmentType<List<String>> ONCE = AttachmentRegistry.create(JaymosKingdoms.id("tales_once"),
 		builder -> builder.persistent(Codec.STRING.listOf()));
 
 	/** Tale people who've joined someone (instance/role), so a party's ending takes them only once. */
@@ -845,6 +849,25 @@ final class TaleCast {
 				calm(mob);
 			}
 		}
+	}
+
+	/** Whether {@code key} (see {@link #ONCE}) has been done already. */
+	static boolean happened(ServerLevel level, String key) {
+		return !key.isEmpty() && Factions.level(level.getServer()).getAttachedOrElse(ONCE, List.of()).contains(key);
+	}
+
+	/** {@code key} (see {@link #ONCE}) is done, for everyone. */
+	static void record(ServerLevel level, String key) {
+		if (key.isEmpty()) {
+			return;
+		}
+		ServerLevel world = Factions.level(level.getServer());
+		List<String> once = new ArrayList<>(world.getAttachedOrElse(ONCE, List.of()));
+		once.add(key);
+		while (once.size() > ONCE_MAX) {
+			once.remove(0);
+		}
+		world.setAttached(ONCE, List.copyOf(once));
 	}
 
 	/** ({@link QuestJobs}) {@code instance} is set out again (a tale's later job can share an earlier one's id): it isn't over. */
